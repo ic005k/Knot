@@ -1,0 +1,12 @@
+#!/bin/bash
+# 获取 AppImage 解包后的根目录绝对路径
+HERE="$(dirname "$(readlink -f "$0")")"
+
+# 设置关键环境变量
+export QT_PLUGIN_PATH="$HERE/plugins"        # 指向 plugins 目录
+export LD_LIBRARY_PATH="$HERE/lib:$LD_LIBRARY_PATH"  # 指向 lib 目录
+export QT_IM_MODULE=fcitx                        # 输入法模块
+export XMODIFIERS=@im=fcitx                      # X11 输入法协议
+
+# 启动应用程序
+exec "$HERE/Knot" "$@"

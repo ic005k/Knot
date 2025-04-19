@@ -1,0 +1,120 @@
+
+body {
+	padding: 0%;
+	margin-top: 0%;
+	margin-bottom: 0%;
+	margin-left: 1%;
+	margin-right: 1%;
+	text-align: justify;
+	
+}
+
+div {
+	margin:0px;
+	padding:0px;
+	text-align: justify;
+	
+}
+
+p {
+	text-align: justify;
+	text-indent: 40px;
+	line-height:35px;
+	
+}
+
+img {
+        margin:0px;
+	padding:0px;
+	line-height:35px;
+	border-radius: 5px;
+	width: 100%;
+        height: auto;
+	text-align:center
+    
+}
+
+.cover {
+	width:100%;
+	padding:0px;
+}
+
+.center {
+	text-align: center;
+	margin-left: 0%;
+	margin-right: 0%;
+}
+
+.left {
+	text-align: center;
+	margin-left: 0%;
+	margin-right: 0%;
+}
+
+.right {
+	text-align: right;
+	margin-left: 0%;
+	margin-right: 0%;
+}
+
+.quote {
+	margin-top: 0%;
+	margin-bottom: 0%;
+	margin-left: 1em;
+	margin-right: 1em;
+	text-align: justify;
+	
+}
+
+h1 {
+	line-height:130%;
+	text-align: center;
+	font-weight:bold;
+	font-size:xx-large;
+}
+
+h2 {
+	line-height:130%;
+	text-align: center;
+	font-weight:bold;
+	font-size:x-large;
+}
+
+h4 {
+	line-height:130%;
+	text-align: center;
+	font-weight:bold;
+	font-size:medium;
+}
+
+h5 {
+	line-height:130%;
+	text-align: center;
+	font-weight:bold;
+	font-size:small;
+}
+
+h6 {
+	line-height:130%;
+	text-align: center;
+	font-weight:bold;
+	font-size:x-small;
+}
+
+.xf {
+	margin:5% 0 5% 0;
+	padding:0.5em;
+	text-align:left;
+	border:1px red dotted;
+    
+}
+
+.dsx {
+	font-size: 1.1em;
+	margin:-0.45em;
+	padding:0.15em;
+	color:white;
+	text-align:center;
+	background-color:#9fc000;
+    
+    }

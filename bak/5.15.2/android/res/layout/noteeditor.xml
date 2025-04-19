@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#F3F3F3"
+    android:layout_weight="1"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="top"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_cancel"
+            android:textAllCaps="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#3498DB"
+            android:textColor="#FFFFFF"
+            android:layout_weight="1"
+            android:text="Close"
+        />
+
+        <Button
+            android:id="@+id/btnFind"
+            android:textAllCaps="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#3498DB"
+            android:textColor="#FFFFFF"
+            android:layout_weight="1"
+            android:text="Find"
+        />
+
+        <Button
+            android:id="@+id/btnUndo"
+            android:textAllCaps="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#3498DB"
+            android:textColor="#FFFFFF"
+            android:layout_weight="1"
+            android:text="Undo" />
+
+        <Button
+            android:id="@+id/btnRedo"
+            android:textAllCaps="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#3498DB"
+            android:textColor="#FFFFFF"
+            android:layout_weight="1"
+            android:text="Redo" />
+
+        <View
+            android:id="@+id/preview_selected_color"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:background="@android:color/darker_gray"
+        />
+
+        <Button
+            android:id="@+id/btnMenu"
+            android:textAllCaps="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#3498DB"
+            android:textColor="#FFFFFF"
+            android:layout_weight="1"
+            android:text="Menu" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="top"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnPrev"
+            android:textAllCaps="false"
+            android:layout_width="55dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="1dp"
+            android:background="#3498DB"
+            android:textColor="#FFFFFF"
+            android:layout_weight="1"
+            android:text="Prev"
+        />
+
+        <EditText
+            android:id="@+id/editFind"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:text=""
+            android:imeOptions="actionGo"
+            android:textColor="#000000"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="true"
+            android:singleLine="true"
+            android:layout_weight="1"
+        />
+
+        <ImageButton
+            android:id="@+id/btnStartFind"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:background="@drawable/shape_blue_button"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/find_l"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+        />
+
+        <TextView
+            android:id="@+id/lblResult"
+            android:layout_width="65dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:text=""
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="true"
+            android:inputType="textMultiLine"
+            android:layout_weight="1"
+        />
+
+
+        <Button
+            android:id="@+id/btnNext"
+            android:textAllCaps="false"
+            android:layout_width="55dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="1dp"
+            android:background="#3498DB"
+            android:textColor="#FFFFFF"
+            android:layout_weight="1"
+            android:text="Next"
+        />
+
+
+    </LinearLayout>
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:scrollbars="vertical"
+        android:fadeScrollbars="true"
+    >
+
+        <com.x.LineNumberedEditText
+            android:id="@+id/editNote"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="0dp"
+            android:text="TextView"
+            android:textColor="#000000"
+            android:inputType="textMultiLine"
+            android:layout_weight="1"
+        />
+
+
+    </ScrollView>
+
+
+</LinearLayout>

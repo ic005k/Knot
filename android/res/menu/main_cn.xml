@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+>
+
+    <item
+        android:id="@+id/format"
+        android:title="格式化" />
+
+    <item android:id="@+id/image"
+        android:title="图片文件" />
+
+    <item android:id="@+id/shooting"
+        android:title="拍摄照片" />
+
+    <item android:id="@+id/table"
+        android:title="表格" />
+
+    <item android:id="@+id/h1"
+        android:title="h1 标题" />
+
+    <item android:id="@+id/h2"
+        android:title="h2 标题" />
+
+    <item android:id="@+id/h3"
+        android:title="h3 标题" />
+
+    <item android:id="@+id/h4"
+        android:title="h4 标题" />
+
+    <item android:id="@+id/h5"
+        android:title="h5 标题" />
+
+    <item android:id="@+id/fontcolor"
+        android:title="分隔线" />
+
+    <item android:id="@+id/bold"
+        android:title="粗体" />
+
+    <item android:id="@+id/italic"
+        android:title="斜体" />
+
+    <item android:id="@+id/s1"
+        android:title="删除线" />
+
+    <item android:id="@+id/s2"
+        android:title="下划线" />
+
+    <item android:id="@+id/date"
+        android:title="日期" />
+
+    <item android:id="@+id/time"
+        android:title="时间" />
+
+    <item android:id="@+id/link"
+        android:title="链接" />
+
+
+</menu>

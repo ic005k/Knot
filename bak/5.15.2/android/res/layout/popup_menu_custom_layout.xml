@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/format"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:text="Format"
+        android:textColor="#000000"
+        android:textAppearance="?android:textAppearanceMedium" />
+    <TextView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:text="Image"
+        android:textColor="#000000"
+        android:textAppearance="?android:textAppearanceMedium" />
+    <TextView
+        android:id="@+id/table"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Table"
+        android:textColor="#000000"
+        android:textAppearance="?android:textAppearanceMedium" />
+    <TextView
+        android:id="@+id/h1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="h1"
+        android:textColor="#000000"
+        android:textAppearance="?android:textAppearanceMedium" />
+
+
+    <TextView
+        android:id="@+id/fontColor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:text="Font Color"
+        android:textColor="#000000"
+        android:textAppearance="?android:textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/h2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="h2"
+        android:textColor="#000000"
+        android:textAppearance="?android:textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/h3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="h3"
+        android:textColor="#000000"
+        android:textAppearance="?android:textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/h4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="h4"
+        android:textColor="#000000"
+        android:textAppearance="?android:textAppearanceMedium" />
+
+</LinearLayout>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   t="1716721340067"
+   class="icon"
+   viewBox="0 0 1024 1024"
+   version="1.1"
+   p-id="148616"
+   width="32"
+   height="32"
+   id="svg1"
+   sodipodi:docname="edit_l.svg"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="18.46875"
+     inkscape:cx="15.972927"
+     inkscape:cy="16"
+     inkscape:window-width="1440"
+     inkscape:window-height="829"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <path
+     d="M 838.4,240.88276 732.8,139.32874 c -51.2,-49.238319 -134.4,-49.238319 -185.6,0 L 182.4,493.22912 c -19.2,18.46437 -28.8,40.00613 -28.8,64.62529 v 160.02452 c 0,49.23831 32,80.01226 83.2,80.01226 h 169.6 c 25.6,0 51.2,-9.23219 67.2,-27.69655 L 835.2,419.37165 c 25.6,-24.61916 38.4,-55.39311 38.4,-89.24445 3.2,-30.77394 -9.6,-64.62528 -35.2,-89.24444 z M 236.8,736.3433 c -16,0 -19.2,-3.0774 -19.2,-18.46437 V 588.62835 L 371.2,736.3433 Z M 441.6,714.80153 243.2,524.00307 496,277.81149 694.4,468.60996 Z M 793.6,376.28812 742.4,425.52644 544,234.72797 595.2,185.48966 c 12.8,-12.30958 32,-18.46437 48,-18.46437 16,0 35.2,6.15479 48,18.46437 l 105.6,101.55402 c 12.8,12.30958 19.2,27.69655 19.2,46.16092 -3.2,15.38697 -9.6,30.77394 -22.4,43.08352 z m -48,467.76399 h -560 c -19.2,0 -32,12.30958 -32,30.77394 0,18.46437 12.8,30.77395 32,30.77395 h 556.8 c 19.2,0 32,-12.30958 32,-30.77395 0,-18.46436 -12.8,-30.77394 -28.8,-30.77394 z"
+     p-id="148617"
+     fill="#ffffff"
+     id="path1"
+     style="stroke-width:0.980656" />
+</svg>

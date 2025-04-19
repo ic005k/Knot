@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 设置出现，消失动画 -->
+<resources>
+    <style name="WindowAnim" parent="android:Animation" mce_bogus="1">
+        <item name="android:windowEnterAnimation">@anim/enter_anim</item>
+        <item name="android:windowExitAnimation">@anim/exit_anim</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="textAllCaps">false</item>
+    </style>
+
+    <style name="popup_menu_style" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:itemBackground">@color/gray</item>
+
+    </style>
+
+    <style name="popup_menu_style_dark" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:itemBackground">@color/dark</item>
+
+    </style>
+
+
+    <style name="MyEditText" parent="Theme.AppCompat.Light">
+        <item name="colorControlNormal">@color/gray</item>
+        <item name="colorControlActivated">@color/green</item>
+
+    </style>
+
+    <style name="AppThemeprice" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/green</item>
+        <item name="windowActionBar">true</item>
+    </style>
+
+    <style name="GeeksforGeeks" parent="Theme.AppCompat.Light">
+        <item name="colorPrimary">@color/green</item>
+        <item name="windowActionBar">true</item>
+    </style>
+   
+
+</resources>

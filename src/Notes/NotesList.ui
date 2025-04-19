@@ -1,0 +1,497 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>NotesList</class>
+ <widget class="QDialog" name="NotesList">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>565</width>
+    <height>759</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Notes List</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QDialog{	
+	/*background-color: rgb(255, 25, 25);*/	
+	/*border-image:url(:/res/b.png);	*/
+
+	/*border-style:solid;						
+	border-width:2px;						
+	border-color:rgb(251, 51, 51); */		
+
+}</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_3">
+   <item>
+    <widget class="QFrame" name="frame0">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+       <number>9</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QToolButton" name="btnNewNoteBook">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Ctrl + B</string>
+          </property>
+          <property name="text">
+           <string>New Notebook</string>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+B</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="editBook">
+          <property name="text">
+           <string>Notebook</string>
+          </property>
+          <property name="clearButtonEnabled">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QToolButton" name="btnNewNote">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Ctrl + N</string>
+          </property>
+          <property name="text">
+           <string>New Note</string>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+N</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="editNote">
+          <property name="text">
+           <string>Note</string>
+          </property>
+          <property name="clearButtonEnabled">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <property name="spacing">
+         <number>5</number>
+        </property>
+        <item>
+         <widget class="QTextEdit" name="editName">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>65</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>65</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QToolButton" name="btnFind">
+          <property name="toolTip">
+           <string>Ctrl + F</string>
+          </property>
+          <property name="text">
+           <string>Find</string>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+F</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="editFind">
+          <property name="clearButtonEnabled">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lblCount">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTreeWidget" name="treeWidget">
+        <column>
+         <property name="text">
+          <string notr="true">1</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>2</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <property name="spacing">
+         <number>9</number>
+        </property>
+        <item>
+         <widget class="QToolButton" name="btnRename">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Ctrl + R</string>
+          </property>
+          <property name="text">
+           <string>Rename</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../res.qrc">
+            <normaloff>:/res/rename.png</normaloff>:/res/rename.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>28</width>
+            <height>28</height>
+           </size>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+R</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="btnImport">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Import</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="btnExport">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Export</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="btnUp">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Up</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../res.qrc">
+            <normaloff>:/res/up.png</normaloff>:/res/up.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>28</width>
+            <height>28</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="btnDown">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Down</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../res.qrc">
+            <normaloff>:/res/down.png</normaloff>:/res/down.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>28</width>
+            <height>28</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="btnMoveTo">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>MoveTo</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../res.qrc">
+            <normaloff>:/res/moveto.png</normaloff>:/res/moveto.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>28</width>
+            <height>28</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="spacing">
+         <number>9</number>
+        </property>
+        <item>
+         <widget class="QToolButton" name="btnClose">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Close</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../res.qrc">
+            <normaloff>:/res/back_l.png</normaloff>:/res/back_l.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>28</width>
+            <height>28</height>
+           </size>
+          </property>
+          <property name="shortcut">
+           <string>Esc</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="btnDel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Delete</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../res.qrc">
+            <normaloff>:/res/del.png</normaloff>:/res/del.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>28</width>
+            <height>28</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="btnRecycle">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Recycle</string>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>28</width>
+            <height>28</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="frame1">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="spacing">
+       <number>9</number>
+      </property>
+      <item>
+       <widget class="QTreeWidget" name="treeWidgetRecycle">
+        <column>
+         <property name="text">
+          <string>1</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>2</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <property name="spacing">
+         <number>9</number>
+        </property>
+        <item>
+         <widget class="QToolButton" name="btnBack">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Back</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../res.qrc">
+            <normaloff>:/res/back_l.png</normaloff>:/res/back_l.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>28</width>
+            <height>28</height>
+           </size>
+          </property>
+          <property name="shortcut">
+           <string>Esc</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="btnRestore">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>RestoreTo</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../res.qrc">
+            <normaloff>:/res/moveto.png</normaloff>:/res/moveto.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>28</width>
+            <height>28</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="btnDel_Recycle">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Delete</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../res.qrc">
+            <normaloff>:/res/del.png</normaloff>:/res/del.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>28</width>
+            <height>28</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../../res.qrc"/>
+ </resources>
+ <connections/>
+</ui>

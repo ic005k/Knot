@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   t="1713397935766"
+   class="icon"
+   viewBox="0 0 1024 1024"
+   version="1.1"
+   p-id="5882"
+   width="128"
+   height="128"
+   id="svg2"
+   sodipodi:docname="todo1.svg"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="namedview2"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="5.8984375"
+     inkscape:cx="63.915232"
+     inkscape:cy="64"
+     inkscape:window-width="1920"
+     inkscape:window-height="992"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <path
+     d="M 914.02152,94.551881 H 738.12701 V 35.256634 a 35.534245,35.256635 0 0 0 -71.06849,0 V 94.551881 H 357.02224 V 35.256634 a 35.534245,35.256635 0 0 0 -71.06849,0 V 94.551881 H 109.99464 A 110.1077,109.24749 0 0 0 0.064608,203.63911 V 906.86472 A 110.1077,109.24749 0 0 0 110.04309,1015.984 H 914.02152 A 110.1077,109.24749 0 0 0 1024,906.86472 V 203.63911 A 110.1077,109.24749 0 0 0 914.02152,94.551881 Z m 38.90999,812.328859 a 38.958453,38.654091 0 0 1 -38.90999,38.60602 H 109.99464 A 38.958453,38.654091 0 0 1 71.133096,906.86472 V 203.63911 A 38.958453,38.654091 0 0 1 110.04309,165.0331 h 803.97843 a 38.958453,38.654091 0 0 1 38.90999,38.60601 z"
+     fill="#d4237a"
+     p-id="5883"
+     id="path1"
+     style="stroke-width:0.996086" />
+  <path
+     d="M744.167829 410.129783l-250.193382 245.250891-137.388309-137.388308a35.534244 35.534244 0 0 0-50.248651 50.248651l139.972617 139.972617a67.595823 67.595823 0 0 0 94.795672 0.468406l252.809994-247.786744a35.534244 35.534244 0 1 0-49.747941-50.749361z"
+     fill="#d4237a"
+     p-id="5884"
+     id="path2" />
+</svg>

@@ -1,0 +1,15 @@
+
+android/.DS_Store
+.DS_Store
+Knot.pro.user
+bin/release/
+.directory
+Knot.pro.user.56d248e
+Knot.pro.user.bd08410
+bin/debug/Knot.exe
+bin/debug/Knot.ilk
+bin/debug/Knot.pdb
+build/
+android/.vscode/
+android/.gradle/
+src/CloudBackup.cpp

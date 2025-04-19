@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Knot
+Exec=Knot
+Icon=icon
+Comment=Knot
+Categories=Application;
+Terminal=true

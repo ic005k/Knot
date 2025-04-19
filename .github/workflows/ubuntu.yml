@@ -1,0 +1,124 @@
+name: Linux
+
+# Qt官方没有linux平台的x86包
+on: 
+  push:
+    paths:
+      - '*.pro'
+      - '**'
+      - '.github/workflows/ubuntu.yml'
+  pull_request:
+    paths:
+      - '*.pro'
+      - '**'
+      - '.github/workflows/ubuntu.yml' 
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        #os: [ubuntu-18.04,ubuntu-20.04]
+        # qt_ver: [5.9.9,5.12.10,5.15.2]
+        
+        os: [ubuntu-22.04]
+        qt_ver: [5.15.2]
+        
+        qt_arch: [gcc_64]
+        
+    env:
+        targetName: Knot
+        VERSION: Linux
+        orgName: Knot
+      
+    steps:
+      
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ matrix.qt_ver }}
+          #host: linux
+          cached: 'false'
+          
+          modules: qtcharts qtwebengine
+      
+      - name: ubuntu install GL library
+        run: |
+         sudo apt-get install -y libglew-dev libglfw3-dev libxcb*
+         
+         sudo apt-get install libxkbcommon-x11-0
+         
+         sudo add-apt-repository universe
+         sudo apt install libfuse2
+         sudo apt-get install libsecret-1-dev
+       
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: build ubuntu
+        run: |
+          qmake
+          make
+          
+      - name: install linuxdeployqt 
+        run: |
+          wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+          chmod a+x linuxdeployqt-continuous-x86_64.AppImage            
+          
+      # 打包
+      - name: package
+        run: |
+         cp res/icon.png bin/release/icon.png
+         cp res/default.desktop bin/release/default.desktop
+         cp ExtBin/AppRun bin/release/AppRun
+         chmod +x bin/release/AppRun
+         
+         cp -r qml bin/release/qml
+         cp ExtBin/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot/Qt/5.15.2/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         chmod 755 /home/runner/work/Knot/Qt/5.15.2/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+
+         mkdir bin/release/lib/
+         cp -r ExtBin/nss/* bin/release/lib/
+
+         cp ExtBin/libcrypto.so.1.1 bin/release/lib/libcrypto.so.1.1
+         cp ExtBin/libssl.so.1.1 bin/release/lib/libssl.so.1.1
+                                             
+         #cp -r devDatabase bin/release/devDatabase
+         #chmod +x bin/release/devDatabase/linux/macserial
+         #chmod +x bin/release/devDatabase/linux/ocvalidate
+         #chmod +x bin/release/devDatabase/linux/ocpasswordgen
+         
+         export VERSION # linuxdeployqt uses this for naming the file
+         ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} -unsupported-allow-new-glibc -appimage -extra-plugins=webview
+         #chmod +x ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
+
+
+
+      # 上传artifacts          
+      - uses: actions/upload-artifact@v4
+        with:
+          
+          name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.AppImage
+          path: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
+          
+          #name: ${{ env.orgName }}-${{ matrix.os }}-${{ matrix.qt_ver }}-${{ env.VERSION }}-x86_64.AppImage
+          #path: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
+          
+     # tag 上传Release
+      - name: uploadRelease
+        if: startsWith(github.event.ref, 'refs/tags/')
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          
+          file: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
+          asset_name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.AppImage
+          
+          #file: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
+          #asset_name: ${{ env.orgName }}-${{ matrix.os }}-${{ matrix.qt_ver }}-${{ env.VERSION }}-x86_64.AppImage
+          
+          tag: ${{ github.ref }}
+          overwrite: true     
+          
+          
+    

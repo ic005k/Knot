@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 设置出现，消失动画 -->
+<resources>
+    <style name="WindowAnim" parent="android:Animation" mce_bogus="1">
+        <item name="android:windowEnterAnimation">@anim/enter_anim</item>
+        <item name="android:windowExitAnimation">@anim/exit_anim</item>
+        <item name="android:windowFullscreen">true</item>
+
+    </style>
+</resources>
+

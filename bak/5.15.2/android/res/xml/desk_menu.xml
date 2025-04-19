@@ -1,0 +1,60 @@
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <shortcut
+    android:shortcutId="addRecord"
+    android:enabled="false"
+    android:icon="@drawable/addrecord"
+    android:shortcutShortLabel="@string/addRecord_shortcut_short_label">
+
+    <intent
+      android:action="android.intent.action.VIEW"
+      android:targetPackage="com.x"
+      android:targetClass="com.x.AddRecord" />
+
+    <categories android:name="android.shortcut.conversation" />
+  </shortcut>
+
+  <shortcut
+    android:shortcutId="newTodo"
+    android:enabled="false"
+    android:icon="@drawable/newtodo"
+    android:shortcutShortLabel="@string/newTodo_shortcut_short_label">
+
+    <intent
+      android:action="android.intent.action.VIEW"
+      android:targetPackage="com.x"
+      android:targetClass="com.x.NewTodo" />
+
+    <categories android:name="android.shortcut.conversation" />
+  </shortcut>
+
+  <shortcut
+    android:shortcutId="newNote"
+    android:enabled="false"
+    android:icon="@drawable/newnote"
+    android:shortcutShortLabel="@string/newNote_shortcut_short_label">
+
+    <intent
+      android:action="android.intent.action.VIEW"
+      android:targetPackage="com.x"
+      android:targetClass="com.x.NewNote" />
+
+    <categories android:name="android.shortcut.conversation" />
+  </shortcut>
+
+  <shortcut
+    android:shortcutId="continueReading"
+    android:enabled="false"
+    android:icon="@drawable/continuereading"
+    android:shortcutShortLabel="@string/continueReading_shortcut_short_label">
+
+    <intent
+      android:action="android.intent.action.VIEW"
+      android:targetPackage="com.x"
+      android:targetClass="com.x.ContinueReading" />
+
+    <categories android:name="android.shortcut.conversation" />
+  </shortcut>
+
+  <!-- Specify more shortcuts here. -->
+</shortcuts>

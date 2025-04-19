@@ -1,0 +1,42 @@
+<RCC>
+    <qresource prefix="/">
+        <file>src/onedrive/log.qml</file>
+        <file>src/onedrive/web.qml</file>
+        <file>src/qmlsrc/todo.qml</file>
+        <file>src/qmlsrc/TodoModel.qml</file>
+        <file>src/qmlsrc/main.qml</file>
+        <file>src/qmlsrc/MainModel.qml</file>
+        <file>src/qmlsrc/todorecycle.qml</file>
+        <file>src/qmlsrc/report.qml</file>
+        <file>src/qmlsrc/details.qml</file>
+        <file>src/qmlsrc/notes.qml</file>
+        <file>src/qmlsrc/reader.qml</file>
+        <file>src/qmlsrc/imgview.qml</file>
+        <file>src/qmlsrc/pdf.qml</file>
+        <file>src/qmlsrc/search.qml</file>
+        <file>src/qmlsrc/baklist.qml</file>
+        <file>src/qmlsrc/viewcate.qml</file>
+        <file>src/qmlsrc/tabrecycle.qml</file>
+        <file>src/qmlsrc/notelist.qml</file>
+        <file>src/qmlsrc/noterecycle.qml</file>
+        <file>src/qmlsrc/notebook.qml</file>
+        <file>src/qmlsrc/maindate.qml</file>
+        <file>src/qmlsrc/mainevent.qml</file>
+        <file>src/qmlsrc/type.qml</file>
+        <file>src/qmlsrc/seltab.qml</file>
+        <file>src/qmlsrc/booklist.qml</file>
+        <file>src/qmlsrc/maintab.qml</file>
+        <file>src/qmlsrc/steps.qml</file>
+        <file>src/qmlsrc/tree_main.qml</file>
+        <file>src/qmlsrc/TreeWidget.qml</file>
+        <file>src/qmlsrc/TreeItem.js</file>
+        <file>src/qmlsrc/epub_cata.qml</file>
+        <file>src/qmlsrc/bookmark.qml</file>
+        <file>src/qmlsrc/noteeditor.qml</file>
+        <file>src/qmlsrc/gps_list.qml</file>
+        <file>src/qmlsrc/map.qml</file>
+        <file>src/qmlsrc/bookview.qml</file>
+        <file>src/qmlsrc/notes_search_result.qml</file>
+        <file>src/qmlsrc/SearchResults.qml</file>
+    </qresource>
+</RCC>

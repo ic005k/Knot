@@ -1,0 +1,125 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  QT_VERSION: 5.15.2
+  ANDROID_API_LEVEL: 34
+  BUILD_TOOLS_VERSION: 31.0.0
+  NDK_VERSION: 21.4.7075529
+  QT_ARCH: android_arm64_v8a 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: 17
+        distribution: 'temurin'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Install Android components
+      run: |
+        yes | sdkmanager --licenses
+        sdkmanager "platforms;android-${{ env.ANDROID_API_LEVEL }}" \
+          "build-tools;${{ env.BUILD_TOOLS_VERSION }}" \
+          "ndk;${{ env.NDK_VERSION }}" \
+          "cmdline-tools;latest"
+
+    # 设置 Python 环境
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    # 安装 aqtinstall 并配置 PATH
+    - name: Install aqtinstall
+      run: |
+        pip install aqtinstall
+        echo "$HOME/.local/bin" >> $GITHUB_PATH  # 关键：确保后续步骤能找到 aqt
+
+    
+    #- name: Install Qt
+    #  uses: jurplel/install-qt-action@v4
+    #  with:
+     #   cached: 'false'
+      #  version: ${{ env.QT_VERSION }}
+       # host: linux     # 宿主平台
+        #target: android # 目标平台
+        #arch: ${{ env.QT_ARCH }}
+        #tools: auto     # 自动安装android sdk
+        #install-deps: true  # 自动安装系统依赖
+        # modules: qtcharts qtwebengine
+       # archives: qtbase qtsvg qtlocation
+
+     # 使用 aqtinstall 安装 Qt（含安卓模块）
+    - name: Install Qt for Android
+      run: |
+        # 先安装基础组件
+          aqt install-qt \
+            linux android \
+            $QT_VERSION \
+            android_arm64_v8a \
+            --mirror https://mirrors.tencent.com/qt/ \
+            --archives qtbase qtsvg
+
+          # 尝试安装可选模块（若存在）
+          aqt install-qt \
+            linux android \
+            $QT_VERSION \
+            android_arm64_v8a \
+            --modules qtcharts qtlocation \
+            || echo "Optional modules not found, skipping..."
+        
+    - name: Setup Android environment variables
+      shell: bash
+      run: |
+        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+        echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+        echo "QT_DIR=${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/android_arm64_v8a" >> $GITHUB_ENV
+
+    - name: Prepare signing
+      run: |
+        mkdir -p android/app
+        echo "${{ secrets.SIGNING_KEY }}" > android/app/my-release-key.keystore.base64
+        base64 -d android/app/my-release-key.keystore.base64 > android/app/my-release-key.keystore
+
+    - name: Build APK
+      run: |
+        mkdir build && cd build
+        $QT_DIR/bin/qmake .. CONFIG+=release ANDROID_ABIS=arm64-v8a
+        make -j$(nproc)
+        make apk
+
+    - name: Sign APK
+      run: |
+        jarsigner -verbose \
+          -sigalg SHA256withRSA \
+          -digestalg SHA-256 \
+          -keystore android/app/my-release-key.keystore \
+          -storepass ${{ secrets.KEY_STORE_PASSWORD }} \
+          -keypass ${{ secrets.KEY_PASSWORD }} \
+          build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk \
+          ${{ secrets.KEY_ALIAS }}
+
+        $ANDROID_SDK_ROOT/build-tools/${{ env.BUILD_TOOLS_VERSION }}/zipalign -v 4 \
+          build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk \
+          MyApp-release.apk
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4  # 更新到v4版本
+      with:
+        name: Android-APK
+        path: MyApp-release.apk

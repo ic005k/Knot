@@ -1,0 +1,16 @@
+<resources>
+    <string name="welcome_message">Hello, %s!</string>
+    <string name="addRecord_shortcut_short_label">"Add Record"</string>
+    <string name="newTodo_shortcut_short_label">"New Todo"</string>
+    <string name="newNote_shortcut_short_label">"New Note"</string>
+    <string name="continueReading_shortcut_short_label">"Continue Reading"</string>
+
+    <string name="addRecord_shortcut_short_label_zh">"增加记录"</string>
+    <string name="newTodo_shortcut_short_label_zh">"新建待办"</string>
+    <string name="newNote_shortcut_short_label_zh">"新建笔记"</string>
+    <string name="continueReading_shortcut_short_label_zh">"继续阅读"</string>
+    
+    <string name="strTip_zh">"Knot没有开启，正在开启中，请稍等..."</string>
+    <string name="strTip">"The Knot is not open, it will be opened for you at this time, please wait..."</string>
+</resources>
+

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+>
+
+    <item
+        android:id="@+id/format"
+        android:title="Format" />
+
+    <item android:id="@+id/image"
+        android:title="Image File" />
+
+    <item android:id="@+id/shooting"
+        android:title="Photo Shooting" />
+
+    <item android:id="@+id/table"
+        android:title="Table" />
+
+    <item android:id="@+id/h1"
+        android:title="h1" />
+
+    <item android:id="@+id/h2"
+        android:title="h2" />
+
+    <item android:id="@+id/h3"
+        android:title="h3" />
+
+    <item android:id="@+id/h4"
+        android:title="h4" />
+
+    <item android:id="@+id/h5"
+        android:title="h5" />
+
+    <item android:id="@+id/fontcolor"
+        android:title="Separator" />
+
+    <item android:id="@+id/bold"
+        android:title="Bold" />
+
+    <item android:id="@+id/italic"
+        android:title="Italic" />
+
+    <item android:id="@+id/s1"
+        android:title="Strickout" />
+
+    <item android:id="@+id/s2"
+        android:title="Underline" />
+
+    <item android:id="@+id/date"
+        android:title="Date" />
+
+    <item android:id="@+id/time"
+        android:title="Time" />
+
+    <item android:id="@+id/link"
+        android:title="Link" />
+
+
+</menu>

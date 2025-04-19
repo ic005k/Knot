@@ -1,0 +1,143 @@
+name: MacOS
+on: 
+  push:
+    paths:
+      - '*.pro'
+      - '**'
+      - '.github/workflows/macos.yml'
+  pull_request:
+    paths:
+      - '*.pro'
+      - '**'
+      - '.github/workflows/macos.yml' 
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macOS-latest]
+        # os: [macos-11.0]
+        # qt_ver: [5.9.9,5.12.10,5.15.2]
+        qt_ver: [5.15.2]
+        #qt_ver: [6.6.2]
+        qt_arch: [clang_64]
+        
+    env:
+      targetName: Knot
+      VERSION: Mac
+      orgName: Knot
+
+      QT_DIR: ${{ github.workspace }}/Qt/5.15.2/clang_64  # 自定义路径
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+     
+        with:
+          version: ${{ matrix.qt_ver }}
+          cached: 'false'
+          host: mac
+          target: desktop
+          arch: clang_64 
+          modules: qtcharts qtwebengine
+          install-deps: true
+          source: false
+          dir: ${{ env.QT_DIR }}  # 关键：指定安装到正确路径
+
+      - name: 克隆 Qt 源码
+        run: |
+          git clone --depth 1 --branch v5.15.2 https://code.qt.io/qt/qt5.git
+          cd qt5
+          git submodule update --init qtmacextras
+
+      - name: 编译 qtmacextras
+        run: |
+          cd qt5/qtmacextras
+          qmake -o Makefile qtmacextras.pro
+          make -j4
+          sudo make install INSTALL_ROOT=${{ env.QT_DIR }}
+
+      - name: Install Homebrew (x86_64)
+        run: |
+         # 卸载已存在的 arm64 Homebrew（如有）
+         if [ -d "/opt/homebrew" ]; then
+          sudo rm -rf /opt/homebrew
+         fi
+
+         # 安装 x86_64 版 Homebrew
+         arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+         echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bash_profile
+         source ~/.bash_profile
+       
+      - name: Install OpenSSL via Homebrew (x86_64)
+        run: |
+         brew update
+         brew install openssl
+         brew link openssl --force
+                    
+      #- uses: actions/checkout@v4
+       # with:
+        #  fetch-depth: 1
+          
+      - name: build macos
+        run: |
+          #QT_INSTALL_PATH="/Users/runner/Qt/5.15.2/clang_64"
+          # 设置私有头文件路径和宏
+          # export CPLUS_INCLUDE_PATH="${QT_INSTALL_PATH}/include/QtGui/5.15.2/QtGui/private:${QT_INSTALL_PATH}/include"
+    
+          # 添加 qmake 参数
+          #qmake "INCLUDEPATH += ${QT_INSTALL_PATH}/include/QtGui/5.15.2/QtGui/private" \
+          #"DEFINES += QT_PRIVATE_HEADERS" \
+          #"LIBS += -lQt5Gui -framework Cocoa"
+          #make -j$(sysctl -n hw.ncpu)
+
+          # 编译项目
+          qmake
+          make
+          
+      # 打包
+      - name: package
+        run: |
+          # 拷贝依赖
+         
+          #cp -r devDatabase bin/release/${targetName}.app/Contents/MacOS/devDatabase
+          #chmod +x bin/release/${targetName}.app/Contents/MacOS/devDatabase/mac/macserial
+          #chmod +x bin/release/${targetName}.app/Contents/MacOS/devDatabase/mac/ocvalidate
+          #chmod +x bin/release/${targetName}.app/Contents/MacOS/devDatabase/mac/ocpasswordgen
+          
+          #chmod +x bin/release/${targetName}.app/Contents/MacOS/devDatabase/mac/CreateVault/create_vault.sh
+          #chmod +x bin/release/${targetName}.app/Contents/MacOS/devDatabase/mac/CreateVault/RsaTool
+          #chmod +x bin/release/${targetName}.app/Contents/MacOS/devDatabase/mac/CreateVault/sign.command
+          
+          cp -f Info.plist bin/release/${targetName}.app/Contents/Info.plist
+                    
+          # macdeployqt bin/release/${targetName}.app -qmldir=. -verbose=1 -dmg
+          
+          cp -R -p -f bin/release/${targetName}.app ${targetName}.app
+          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg
+          cp ${targetName}.dmg bin/release/${targetName}.dmg 
+          
+      # 上传artifacts          
+      - uses: actions/upload-artifact@v4
+        with:
+          #name: ${{ env.targetName }}_${{ matrix.os }}_${{matrix.qt_ver}} # .zip
+          name: ${{ env.orgName }}-${{ env.VERSION }}
+          path: bin/release/${{ env.targetName }}.dmg
+          
+      # tag 上传Release
+      - name: uploadRelease
+        if: startsWith(github.event.ref, 'refs/tags/')
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: bin/release/${{ env.targetName }}.dmg
+          
+          #asset_name: ${{ env.targetName }}_${{ matrix.os }}_${{ matrix.qt_ver }}.dmg
+          asset_name: ${{ env.orgName }}-${{ env.VERSION }}.dmg
+          
+          tag: ${{ github.ref }}
+          overwrite: true

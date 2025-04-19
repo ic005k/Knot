@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F3F3F3"
+    android:orientation="vertical">
+
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="top"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btn_clear"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:background="@drawable/shape_blue_button"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/find_l"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+        />
+
+
+        <EditText
+            android:id="@+id/editFind"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="0dp"
+            android:text=""
+            android:imeOptions="actionGo"
+            android:textColor="#000000"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="true"
+            android:singleLine="true"
+            android:layout_weight="0.22"
+        />
+
+        <TextView
+            android:id="@+id/lblResult"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginLeft="0dp"
+            android:text="0"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_weight="0.8"
+        />
+
+        <Button
+            android:id="@+id/btnFind"
+            android:textAllCaps="false"
+            android:layout_width="50dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="1dp"
+            android:background="#3498DB"
+            android:textColor="#FFFFFF"
+            android:layout_weight="1"
+            android:text="Find"
+        />
+    </LinearLayout>
+
+
+    <ProgressBar
+        android:id="@+id/progBar"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="245dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+    />
+
+
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="0dp"
+        android:textColor="#000000"
+        android:choiceMode="multipleChoice"
+        android:drawSelectorOnTop="true"
+    />
+
+
+</LinearLayout>

@@ -1,0 +1,147 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+
+buildscript {
+    ext.kotlin_version = '1.8.20'
+
+    repositories {
+        google()
+        jcenter()
+        mavenCentral()
+
+    }
+
+
+    dependencies {
+        // https://developer.android.google.cn/build/releases/gradle-plugin
+        classpath 'com.android.tools.build:gradle:7.4.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+
+     }
+}
+
+
+repositories {
+    google()
+    jcenter()
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    implementation 'androidx.core:core:1.10.1'
+    implementation 'com.android.support:appcompat-v7:29.0.0'
+
+    // read and write inifile
+   implementation 'org.ini4j:ini4j:0.5.4'
+   // implementation "com.github.skydoves:powermenu:2.2.4"
+
+   implementation 'androidx.recyclerview:recyclerview:1.1.0'
+   implementation 'com.android.support:recyclerview-v7:29+'
+   implementation 'com.github.barteksc:pdfium-android:1.9.0'
+
+}
+
+
+android {
+    /*******************************************************
+     * The following variables:
+     * - androidBuildToolsVersion,
+     * - androidCompileSdkVersion
+     * - qtAndroidDir - holds the path to qt android files
+     *                   needed to build any Qt application
+     *                   on Android.
+     *
+     * are defined in gradle.properties file. This file is
+     * updated by QtCreator and androiddeployqt tools.
+     * Changing them manually might break the compilation!
+     *******************************************************/
+
+
+    useLibrary 'org.apache.http.legacy'
+
+    //qt6.7
+    //buildToolsVersion androidBuildToolsVersion
+    //ndkVersion androidNdkVersion
+
+    compileSdkVersion androidCompileSdkVersion.toInteger()
+
+    // Extract native libraries from the APK
+    // packagingOptions.jniLibs.useLegacyPackaging true
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = [qt5AndroidDir + '/src', 'src', 'java']
+            aidl.srcDirs = [qt5AndroidDir + '/src', 'src', 'aidl']
+            res.srcDirs = [qt5AndroidDir + '/res', 'res']
+            resources.srcDirs = ['resources']
+            renderscript.srcDirs = ['src']
+            assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['libs']
+       }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.incremental = true
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    // Do not compress Qt binary resources file
+    aaptOptions {
+        noCompress 'rcc'
+    }
+
+    defaultConfig {
+        resConfig "en"
+        minSdkVersion qtMinSdkVersion
+        targetSdkVersion qtTargetSdkVersion
+
+        //qt6.7
+        //ndk.abiFilters = qtTargetAbiList.split(",")
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    //compileOptions {
+    //    sourceCompatibility JavaVersion.VERSION_1_8
+    //    targetCompatibility JavaVersion.VERSION_1_8
+    //}
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+        kotlinOptions {
+        jvmTarget = '17'
+    }
+
+
+    buildTypes {
+        release {
+          ndk{
+
+                // abiFilters "arm64-v8a" , "x86_64"
+                abiFilters "arm64-v8a"
+            }
+        }
+
+    }
+
+    // 显示所有已过时的警告详细信息
+    /*allprojects {
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+        }
+    }
+    }*/
+}
+

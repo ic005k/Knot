@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PageIndicator</class>
+ <widget class="QDialog" name="PageIndicator">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>484</width>
+    <height>240</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">/*
+dlgFloatFun{	
+	background-color: rgb(255, 255, 255);	
+	border-radius: 10px;					
+	border-style:solid;						
+	border-width:1px;						
+	border-color:rgb(21, 21, 21);		
+}*/
+
+
+
+/*dlgFloatFun{	
+	background-color: rgb(255, 255, 255);	
+		
+	border-style:solid;						
+	border-width:1px;						
+	border-color:rgb(51, 51, 51);		
+}*/
+
+</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="lblPageNumber">
+       <property name="font">
+        <font>
+         <pointsize>78</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>123456</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
