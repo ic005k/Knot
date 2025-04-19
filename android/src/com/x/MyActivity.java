@@ -149,8 +149,8 @@ import java.util.concurrent.Executors;
 import android.os.SystemClock;
 import android.os.Vibrator;
 
-//Qt5
-import org.qtproject.qt5.android.bindings.QtActivity;
+//Qt6
+import org.qtproject.qt.android.bindings.QtActivity;
 
 public class MyActivity
     extends QtActivity

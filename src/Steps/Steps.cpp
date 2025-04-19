@@ -26,8 +26,8 @@ QVector<GPSCoordinate> detectAndCorrectOutliers(
     const QVector<GPSCoordinate>& data, double threshold);
 
 #ifdef Q_OS_ANDROID
-QAndroidJniObject listenerWrapper;
-QAndroidJniObject m_activity;
+QJniObject listenerWrapper;
+QJniObject m_activity;
 #endif
 
 Steps::Steps(QWidget* parent) : QDialog(parent) {
@@ -424,7 +424,7 @@ void Steps::startRecordMotion() {
 
 #ifdef Q_OS_ANDROID
 
-  m_activity = QtAndroid::androidActivity();
+  m_activity = QJniObject(QNativeInterface::QAndroidApplication::context());
 
   if (m_activity.isValid()) {
     if (nGpsMethod == 1) {
@@ -437,9 +437,9 @@ void Steps::startRecordMotion() {
     }
 
     if (nGpsMethod == 2) {
-      listenerWrapper = QAndroidJniObject("com/x/LocationListenerWrapper",
-                                          "(Landroid/content/Context;)V",
-                                          m_activity.object<jobject>());
+      listenerWrapper = QJniObject("com/x/LocationListenerWrapper",
+                                   "(Landroid/content/Context;)V",
+                                   m_activity.object<jobject>());
       if (listenerWrapper.isValid()) {
         if (listenerWrapper.callMethod<jdouble>("startGpsUpdates", "()D") ==
             0) {
@@ -532,7 +532,7 @@ void Steps::updateGetGps() {
     longitude = QString::number(longitude, 'f', 6).toDouble();
   }
 
-  QAndroidJniObject jstrGpsStatus;
+  QJniObject jstrGpsStatus;
   if (nGpsMethod == 1)
     jstrGpsStatus = m_activity.callObjectMethod<jstring>("getGpsStatus");
   else
@@ -771,27 +771,6 @@ void Steps::stopRecordMotion() {
 
   // ShowMessage* msg = new ShowMessage(this);
   // msg->showMsg("Knot", mw_one->ui->lblGpsInfo->text(), 1);
-}
-
-bool Steps::requestLocationPermissions() {
-#ifdef Q_OS_ANDROID
-  const QStringList permissions = {"android.permission.ACCESS_FINE_LOCATION",
-                                   "android.permission.ACCESS_COARSE_LOCATION"};
-
-  for (const QString& permission : permissions) {
-    auto result = QtAndroid::checkPermission(permission);
-    if (result == QtAndroid::PermissionResult::Denied) {
-      auto resultHash =
-          QtAndroid::requestPermissionsSync(QStringList() << permission);
-      if (resultHash[permission] != QtAndroid::PermissionResult::Granted) {
-        qDebug() << "Permission" << permission << "denied";
-        return false;
-      }
-    }
-  }
-  return true;
-#endif
-  return false;
 }
 
 void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,

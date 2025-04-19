@@ -79,6 +79,8 @@ dependencies {
     kapt "io.noties:prism4j-bundler:2.0.0"  // 关键：使用 kapt 处理注解
     //annotationProcessor "io.noties:prism4j-bundler:2.0.0" // 确保使用 annotationProcessor
 
+    //implementation 'org.qtproject.qt.android:qt6.7.3-android-core:6.7.3'
+
 }
 
 
@@ -113,8 +115,8 @@ android {
     useLibrary 'org.apache.http.legacy'
 
     //qt6.7
-    //buildToolsVersion androidBuildToolsVersion
-    //ndkVersion androidNdkVersion
+     buildToolsVersion androidBuildToolsVersion
+     ndkVersion androidNdkVersion
 
     compileSdkVersion androidCompileSdkVersion.toInteger()
 
@@ -123,14 +125,14 @@ android {
 
     sourceSets {
         main {
-            manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = [qt5AndroidDir + '/src', 'src', 'java']
-            aidl.srcDirs = [qt5AndroidDir + '/src', 'src', 'aidl']
-            res.srcDirs = [qt5AndroidDir + '/res', 'res']
-            resources.srcDirs = ['resources']
-            renderscript.srcDirs = ['src']
-            assets.srcDirs = ['assets']
-            jniLibs.srcDirs = ['libs']
+                manifest.srcFile 'AndroidManifest.xml'
+                java.srcDirs = [qtAndroidDir + '/src', 'src', 'java']
+                aidl.srcDirs = [qtAndroidDir + '/src', 'src', 'aidl']
+                res.srcDirs = [qtAndroidDir + '/res', 'res']
+                resources.srcDirs = ['resources']
+                renderscript.srcDirs = ['src']
+                assets.srcDirs = ['assets']
+                jniLibs.srcDirs = ['libs']
        }
     }
 

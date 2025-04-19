@@ -20,6 +20,10 @@
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- Android 10+ 需要 -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- 必须声明硬件加速 -->
+    <uses-feature android:name="android.hardware.vulkan" android:required="false"/>
+    <uses-feature android:name="android.hardware.opengles" android:required="true"/>
+
     <uses-feature android:name="android.hardware.sensor.stepcounter" android:required="true" />
     <uses-feature android:name="android.hardware.sensor.stepdetector" android:required="true" />
 
@@ -33,7 +37,7 @@
 
     <supports-screens android:anyDensity="true" android:largeScreens="true"
         android:normalScreens="true" android:smallScreens="true" />
-    <application android:name="org.qtproject.qt5.android.bindings.QtApplication"
+    <application android:name="org.qtproject.qt.android.bindings.QtApplication"
         android:extractNativeLibs="true" android:hardwareAccelerated="true"
         android:icon="@drawable/icon" android:label="Knot"
         tools:replace="android:appComponentFactory" android:requestLegacyExternalStorage="true"

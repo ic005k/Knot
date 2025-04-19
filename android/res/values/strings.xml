@@ -15,4 +15,7 @@
     <string name="strTip_zh">"Knot没有开启，正在开启中，请稍等..."</string>
     <string name="strTip">"The Knot is not open, it will be opened for you at this time, please
         wait..."</string>
+
+    
+
 </resources>

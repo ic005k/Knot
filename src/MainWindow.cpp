@@ -4280,7 +4280,8 @@ static void JavaNotify_4() {
     }
 
     bool isBackMain = false;
-    QAndroidJniObject activity = QtAndroid::androidActivity();
+    QJniObject activity =
+        QJniObject(QNativeInterface::QAndroidApplication::context());
     if (activity.isValid()) {
       jboolean result = activity.callMethod<jboolean>("getIsBackMainUI");
       activity.callMethod<void>("setIsBackMainUI", "(Z)V", false);

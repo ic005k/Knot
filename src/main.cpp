@@ -48,34 +48,29 @@ int main(int argc, char* argv[]) {
 
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
-  {
 #ifdef Q_OS_ANDROID
-    isAndroid = true;
+  isAndroid = true;
 
-    qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
-    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
-        Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
-    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+  // 强制使用软件渲染（兼容旧设备）
+  qputenv("QT_OPENGL", "angle");  // 或 "software"
 
-    QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 4, 0))
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
-#endif
+  // 高 DPI 自动缩放
+  qputenv("QT_ENABLE_HIGHDPI_SCALING", "1");
+
+  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 
 #else
-    qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
-    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
-        Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
-    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+  qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
+  QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
+      Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+  QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
-    QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 4, 0))
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
-#endif
+  QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
-#endif
-  }
+  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
+
+  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+
 #endif
 
 #ifdef Q_OS_LINUX

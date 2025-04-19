@@ -862,6 +862,12 @@ win32:{
 
 ANDROID_EXTRA_LIBS = $$PWD/android-openssl/libcrypto_1_1.so $$PWD/android-openssl/libssl_1_1.so
 
+contains(ANDROID_TARGET_ARCH,arm64-v8a) {
+    ANDROID_EXTRA_LIBS = \
+    $$PWD/android-openssl/ssl_3/libcrypto_3.so \
+    $$PWD/android-openssl/ssl_3/libssl_3.so
+}
+
 
 
 

@@ -1298,13 +1298,13 @@ void Notes::setOpenSearchResultForAndroid(bool isValue, QString strSearchText) {
   Q_UNUSED(strSearchText);
 #ifdef Q_OS_ANDROID
 
-  QAndroidJniObject activity =
-      QtAndroid::androidActivity();  // 获取当前Activity
+  QJniObject activity = QJniObject(
+      QNativeInterface::QAndroidApplication::context());  // 获取当前Activity
   if (activity.isValid()) {
     // 调用Java方法，注意方法签名(Z)V
     activity.callMethod<void>("setOpenSearchResult", "(Z)V", isValue);
 
-    QAndroidJniObject jFile = QAndroidJniObject::fromString(strSearchText);
+    QJniObject jFile = QJniObject::fromString(strSearchText);
     activity.callMethod<void>("setSearchText", "(Ljava/lang/String;)V",
                               jFile.object<jstring>());
   }
@@ -1502,7 +1502,8 @@ void Notes::javaNoteToQMLNote() {
   }
 
 #ifdef Q_OS_ANDROID
-  QAndroidJniObject m_activity = QtAndroid::androidActivity();
+  QJniObject m_activity =
+      QJniObject(QNativeInterface::QAndroidApplication::context());
   if (m_activity.callMethod<jdouble>("getEditStatus", "()D") == 1) {
     mw_one->ui->btnOpenNote->click();
   }

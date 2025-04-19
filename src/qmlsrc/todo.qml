@@ -1,9 +1,12 @@
 import QtQuick 2.15
 import QtQuick.Window 2.15
-import QtQml 2.3
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.1
+import QtQml 2.15
+// 统一版本
+import QtQuick.Controls 6.7
+// 使用 Qt6 的 Controls 2
+import QtQuick.Layouts 6.0
 
+// Qt6 必须用 6.x 版本号
 Rectangle {
     id: root
 
@@ -143,7 +146,8 @@ Rectangle {
 
         ScrollBar.vertical: ScrollBar {
             width: 8
-            policy: ScrollBar.AsNeeded
+            //policy: ScrollBar.AsNeeded
+            active: true // 替代旧版 policy
         }
 
         delegate: Flickable {
@@ -218,6 +222,7 @@ Rectangle {
                     Layout.fillWidth: true
 
                     ColumnLayout {
+                        id: m_col
                         height: parent.height
                         width: parent.width - flagColor.width - donebtn.width - 4
                         spacing: 2
@@ -261,10 +266,11 @@ Rectangle {
 
                                 visible: row1.showImg()
                             }
-                            TextArea {
+                            Text {
                                 id: text1
                                 width: text1Img.visible ? parent.width - text1Img.width
                                                           - 5 : parent.width
+                                Layout.preferredWidth: rectan.width
                                 color: view.currentIndex === index ? "black" : getText1FontColor()
                                 font.pointSize: FontSize - 2
                                                 > maxFontSize ? maxFontSize : FontSize - 2
@@ -325,10 +331,11 @@ Rectangle {
                                 visible: row3.showImg3()
                             }
 
-                            TextArea {
+                            Text {
                                 id: text3
                                 width: text3Img.visible ? parent.width - text3Img.width
                                                           - 5 : parent.width
+                                Layout.preferredWidth: rectan.width - 20
                                 font.pointSize: FontSize
                                 wrapMode: Text.Wrap
                                 color: view.currentIndex === index ? "black" : getFontColor()

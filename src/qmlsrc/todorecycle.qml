@@ -1,7 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Window 2.15
 import QtQml 2.3
-import QtQuick.Controls 2.5
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.1
 
 Rectangle {
@@ -101,26 +101,23 @@ Rectangle {
     }
 
     function getColor() {
-           var strColor
+        var strColor
 
-           if (isDark)
-               strColor = "#455364"
-           else
-               strColor = "#ffffff"
+        if (isDark)
+            strColor = "#455364"
+        else
+            strColor = "#ffffff"
 
-           return strColor
-       }
+        return strColor
+    }
 
-       function getFontColor() {
+    function getFontColor() {
 
-           if (isDark)
-               return "white"
-           else
-               return "black"
-       }
-
-
-
+        if (isDark)
+            return "white"
+        else
+            return "black"
+    }
 
     Component {
         id: dragDelegate
@@ -130,7 +127,6 @@ Rectangle {
             width: ListView.view.width
             height: getItemHeight()
             color: ListView.isCurrentItem ? "lightblue" : getColor()
-
             border.width: isDark ? 0 : 1
             border.color: "lightgray"
 
@@ -186,6 +182,7 @@ Rectangle {
                 }
 
                 ColumnLayout {
+                    id: m_col
                     height: parent.height
                     width: parent.width - 6
                     spacing: 2
@@ -193,14 +190,14 @@ Rectangle {
                     anchors.leftMargin: 0
                     anchors.rightMargin: 0
 
-                    TextArea {
+                    Text {
                         id: text1
                         color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
                         font.pointSize: FontSize - 2
                         font.bold: true
                         width: parent.width
+                        Layout.preferredWidth: listItem.width
                         wrapMode: Text.Wrap
-                        readOnly: true
                         text: time
                     }
 
@@ -212,13 +209,12 @@ Rectangle {
                         text: type
                     }
 
-                    TextArea {
+                    Text {
                         id: text3
                         font.pointSize: FontSize
                         width: parent.width
+                        Layout.preferredWidth: listItem.width
                         wrapMode: Text.Wrap
-                        //background: Qt.rgba(0,0,0,0)
-                        readOnly: true
                         color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
                         text: dototext
                     }
@@ -238,85 +234,12 @@ Rectangle {
                 property point clickPos: "0,0"
 
                 anchors.fill: parent
-                onPressed: {
-                    clickPos = Qt.point(mouse.x, mouse.y)
-                }
-                onReleased: {
-                    var delta = Qt.point(mouse.x - clickPos.x,
-                                         mouse.y - clickPos.y)
-                    console.debug("delta.x: " + delta.x)
-                    if ((delta.x < 0) && (aBtnShow.running === false)
-                            && (delBtn.width == 0)) {
-                        aBtnShow.start()
-                    } else if (aBtnHide.running === false
-                               && (delBtn.width > 0)) {
-                        aBtnHide.start()
-                    }
-                }
 
                 onClicked: {
 
                     view.currentIndex = index //实现item切换
                     console.log("ItemHeight=" + text1.contentHeight + text3.contentHeight)
                 }
-
-                onDoubleClicked: {
-                    m_Todo.reeditText()
-                    var data = view.model.get(view.currentIndex)
-                    console.log(data.time + "," + data.dototext + ", count=" + view.count)
-                }
-            }
-
-            Rectangle {
-                color: "#AAAAAA"
-                height: 0
-                width: parent.width
-                anchors.bottom: parent.bottom
-            }
-
-            Rectangle {
-                id: delBtn
-                visible: false
-                height: parent.height
-                width: 0
-                color: "#FF0000"
-
-                anchors.right: parent.right
-                anchors.rightMargin: -30
-                radius: 0
-
-                Text {
-                    width: 56
-                    anchors.centerIn: parent
-
-                    text: qsTr("Done")
-                    color: "#ffffff"
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        m_Todo.addToRecycle()
-                        view.model.remove(index)
-                    }
-                }
-            }
-
-            PropertyAnimation {
-                id: aBtnShow
-                target: delBtn
-                property: "width"
-                duration: 100
-                from: 0
-                to: 80
-            }
-            PropertyAnimation {
-                id: aBtnHide
-                target: delBtn
-                property: "width"
-                duration: 100
-                from: 80
-                to: 0
             }
         }
     }

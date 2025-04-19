@@ -25,7 +25,7 @@ class Steps : public QDialog {
 
   QString btnRoundStyle =
       "QToolButton {"
-      "   border-radius: 40px;"  // 设置圆角半径为按钮宽度的一半
+      "   border-radius: 40px;"        // 设置圆角半径为按钮宽度的一半
       "   background-color: #00AF50;"  // 设置背景颜色
       "   color: white;"               // 设置文字颜色
       "   min-width: 80px;"            // 设置最小宽度
@@ -40,7 +40,7 @@ class Steps : public QDialog {
 
   QString btnRoundStyleRed =
       "QToolButton {"
-      "   border-radius: 40px;"  // 设置圆角半径为按钮宽度的一半
+      "   border-radius: 40px;"        // 设置圆角半径为按钮宽度的一半
       "   background-color: #FF0000;"  // 设置背景颜色
       "   color: white;"               // 设置文字颜色
       "   min-width: 80px;"            // 设置最小宽度
@@ -101,7 +101,6 @@ class Steps : public QDialog {
   void startRecordMotion();
   void stopRecordMotion();
 
-  bool requestLocationPermissions();
   void loadGpsList(int nYear, int nMonth);
   int getGpsListCount();
   void selGpsListYearMonth();
