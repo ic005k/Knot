@@ -1,3 +1,8 @@
 module Qt.labs.qmlmodels
-plugin labsmodelsplugin
+linktarget Qt6::labsmodelsplugin
+optional plugin labsmodelsplugin
 classname QtQmlLabsModelsPlugin
+typeinfo plugins.qmltypes
+depends QtQml.Models auto
+prefer :/qt-project.org/imports/Qt/labs/qmlmodels/
+
