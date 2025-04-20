@@ -1,8 +1,8 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Window 2.15
-import QtLocation 5.15
-import QtPositioning 5.15
+import QtLocation 6.5
+import QtPositioning 6.5
 
 Rectangle {
     visible: true
@@ -12,6 +12,16 @@ Rectangle {
     // 变量定义
     property double gpsx: 59.91032691205
     property double gpsy: 10.75763249129
+
+    // 全局初始化
+    Component.onCompleted: {
+        console.log("=== Application Started ===")
+        console.log("Available plugins:", QtLocation.plugins())
+        console.log("OSM plugin status:",
+                    osmPlugin.available ? "OK" : "Not Available")
+        console.log("Supported map types:", map.supportedMapTypes)
+        positionSource.active = true // 启动位置服务
+    }
 
     function updateInfoText(strDistance, strSpeed) {
         infoText1.text = qsTr("Distance") + ": " + strDistance
@@ -57,6 +67,31 @@ Rectangle {
         name: "osm"
 
         PluginParameter {
+            name: "osm.mapping.providersrepository.address"
+            value: "https://maps-redirect.qt.io/osm/5.15/"
+        }
+
+        // 必须指定渲染类型
+        PluginParameter {
+            name: "osm.mapping.providersrepository.disabled"
+            value: "false"
+        }
+        PluginParameter {
+            name: "osm.mapping.providersrepository.address"
+            value: "http://maps-redirect.qt.io/osm/5.8/"
+        }
+
+        // 明确使用矢量渲染
+        PluginParameter {
+            name: "osm.mapping.highdpi_tiles"
+            value: true
+        }
+        PluginParameter {
+            name: "osm.mapping.offline.directory"
+            value: "./cache"
+        }
+
+        PluginParameter {
             name: "osm.mapping.highdpi_tiles"
             value: true
         }
@@ -70,6 +105,8 @@ Rectangle {
         zoomLevel: 13
 
         activeMapType: supportedMapTypes[1] // Cycle map provided by Thunderforest
+
+
 
         MapPolyline {
             id: polyline
@@ -88,6 +125,10 @@ Rectangle {
                 width: 32
                 height: 32
             }
+        }
+
+        MouseArea {
+            anchors.fill: parent
         }
     }
 

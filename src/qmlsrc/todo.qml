@@ -179,13 +179,6 @@ Rectangle {
             background: null // 彻底消除背景容器
         }
 
-        // 自动隐藏触发器（关键）
-        Timer {
-            running: !view.isScrolling && vbar.opacity > 0
-            interval: 800
-            onTriggered: vbar.opacity = 0
-        }
-
         delegate: Flickable {
             id: flack
             property int myw: m_width - 18

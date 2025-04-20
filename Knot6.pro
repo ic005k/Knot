@@ -1,6 +1,6 @@
 QT += core gui network printsupport core-private
 QT += charts sensors sql
-QT += qml quick quickwidgets webview positioning location
+QT += qml quick quickwidgets webview positioning location quickcontrols2
 QT += xml svg
 
 win32 {
@@ -853,19 +853,17 @@ macx {
 ###########################################################################
 #Linux
 unix:!macx: {
-    android: include(/home/zh/文档/android_openssl-master/openssl.pri)
+
 }
 
 win32:{
-    android: include(C:/Users/Administrator/Documents/android_openssl-master/openssl.pri)
+
 }
 
-ANDROID_EXTRA_LIBS = $$PWD/android-openssl/libcrypto_1_1.so $$PWD/android-openssl/libssl_1_1.so
-
-contains(ANDROID_TARGET_ARCH,arm64-v8a) {
+contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
     ANDROID_EXTRA_LIBS = \
-    $$PWD/android-openssl/ssl_3/libcrypto_3.so \
-    $$PWD/android-openssl/ssl_3/libssl_3.so
+    $$PWD/../../android_openssl-master/ssl_3/armeabi-v7a/libcrypto_3.so \
+    $$PWD/../../android_openssl-master/ssl_3/armeabi-v7a/libssl_3.so
 }
 
 

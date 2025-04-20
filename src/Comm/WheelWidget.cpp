@@ -70,20 +70,41 @@ void WheelWidget::mousePressEvent(QMouseEvent* event) {
   m_velocity = 0;
   m_dragTimer.start();
   m_inertiaTimer.stop();
-  QWidget::mousePressEvent(event);
+
+  // 之前Qt5正常实现
+  //  QWidget::mousePressEvent(event);
+
+  event->accept();  // 明确接受事件
 }
 
 void WheelWidget::mouseReleaseEvent(QMouseEvent* event) {
-  // 计算惯性速度（像素/毫秒）
+  // 计算惯性速度（像素/毫秒） 之前Qt5正常实现
+  /*
   qreal elapsed = m_dragTimer.elapsed();
-  m_velocity = (elapsed > 0) ? (m_offset - m_baseOffset) / elapsed : 0;
+    m_velocity = (elapsed > 0) ? (m_offset - m_baseOffset) / elapsed : 0;
+
+    if (qAbs(m_velocity) > 0.5) {
+      m_inertiaTimer.start();
+    } else {
+      updateIndex();
+    }
+    QWidget::mouseReleaseEvent(event);
+  */
+
+  // 计算实际拖拽距离（未经循环调整）
+  const int actualDelta = m_offset - m_baseOffset;
+  qreal elapsed = m_dragTimer.elapsed();
+  m_velocity = (elapsed > 0) ? actualDelta / elapsed : 0;
+
+  m_dragTimer.invalidate();  // 重置计时器
 
   if (qAbs(m_velocity) > 0.5) {
     m_inertiaTimer.start();
   } else {
-    updateIndex();
+    updateIndex();  // 直接同步状态
   }
-  QWidget::mouseReleaseEvent(event);
+
+  event->accept();  // 明确接受事件
 }
 
 void WheelWidget::mouseMoveEvent(QMouseEvent* event) {
@@ -206,11 +227,24 @@ void WheelWidget::animateInertia() {
     }
   }
 
+  // 之前Qt5正常实现
+  /*
   if (qAbs(m_velocity) < 5) {  // 更低停止阈值
     m_inertiaTimer.stop();
     updateIndex();
   }
   update();
+ */
+
+  // 更精确的停止条件
+  if (qAbs(m_velocity) < 1.0 &&
+      qAbs(m_offset - m_currentIndex * m_itemHeight) < 1.0) {
+    m_inertiaTimer.stop();
+    m_offset = m_currentIndex * m_itemHeight;  // 强制对齐
+    update();
+  } else {
+    update();
+  }
 }
 
 qreal WheelWidget::calculateOvershoot() {

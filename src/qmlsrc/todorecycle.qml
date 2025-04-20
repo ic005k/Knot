@@ -252,6 +252,7 @@ Rectangle {
 
     ListView {
         id: view
+        boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
 
         anchors {
             fill: parent
@@ -297,13 +298,6 @@ Rectangle {
                 radius: 3
             }
             background: null // 彻底消除背景容器
-        }
-
-        // 自动隐藏触发器（关键）
-        Timer {
-            running: !view.isScrolling && vbar.opacity > 0
-            interval: 800
-            onTriggered: vbar.opacity = 0
         }
     }
 

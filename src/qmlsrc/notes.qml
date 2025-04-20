@@ -1,7 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtWebChannel 1.0
-import QtWebEngine 1.10
+import QtWebEngine 6.0
 import Qt.labs.settings 1.1
 import MyModel2 1.0
 
@@ -136,9 +136,9 @@ Item {
         }
 
         // 恢复滚动位置
-        onLoadingChanged: {
-            if (loadRequest.status === WebEngineLoadRequest.LoadSucceededStatus) {
-                // 延迟 500ms 确保内容渲染完成
+        onLoadingChanged: function (request) {
+            if (request.status === WebEngineView.LoadSucceededStatus) {
+
                 timer.restart()
             }
         }
