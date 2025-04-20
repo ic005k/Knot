@@ -13,3 +13,4 @@ build/
 android/.vscode/
 android/.gradle/
 src/CloudBackup.cpp
+Knot6.pro.user

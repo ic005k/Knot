@@ -46,8 +46,6 @@ QSplashScreen* splash;
 int main(int argc, char* argv[]) {
   QtWebView::initialize();
 
-  QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
 #ifdef Q_OS_ANDROID
   isAndroid = true;
 
@@ -125,8 +123,8 @@ int main(int argc, char* argv[]) {
     splash->show();
   }
 
-  QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-  QTextCodec::setCodecForLocale(codec);
+  // QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+  // QTextCodec::setCodecForLocale(codec);
 
   // 禁用文本选择（针对所有的可输入的编辑框）
   qputenv("QT_QPA_NO_TEXT_HANDLES", "1");

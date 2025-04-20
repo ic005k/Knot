@@ -1,12 +1,10 @@
-import QtQuick 2.15
+import QtQuick 6.7
+import QtQuick.Controls 6.7
+import QtQuick.Layouts 6.7
+
 import QtQuick.Window 2.15
 import QtQml 2.15
-// 统一版本
-import QtQuick.Controls 6.7
-// 使用 Qt6 的 Controls 2
-import QtQuick.Layouts 6.0
 
-// Qt6 必须用 6.x 版本号
 Rectangle {
     id: root
 
@@ -141,13 +139,50 @@ Rectangle {
             margins: 0
         }
         spacing: 4
+        anchors.rightMargin: 0 // 确保右侧无留白
         cacheBuffer: 50
         model: TodoModel {}
 
+        // 核心配置：绑定滚动状态
+        property bool isScrolling: false
+        onMovementStarted: isScrolling = true
+        onMovementEnded: isScrolling = false
+
         ScrollBar.vertical: ScrollBar {
-            width: 8
-            //policy: ScrollBar.AsNeeded
-            active: true // 替代旧版 policy
+            id: vbar
+            policy: ScrollBar.AsNeeded
+            interactive: false // 关键！禁止拖动操作
+            width: 4
+
+            // 动态显隐控制
+            visible: opacity > 0
+            opacity: view.isScrolling ? 1 : 0
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 300
+                }
+            }
+
+            // 极简样式
+            contentItem: Rectangle {
+                color: isDark ? "#606060" : "#3498db" // 暗色模式用深灰，亮色模式用现代蓝
+                opacity: scrollBar.active ? (isDark ? 0.8 : 0.7) : 0
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 200 // 更流畅的动画
+                        easing.type: Easing.OutQuad
+                    }
+                }
+                radius: 3
+            }
+            background: null // 彻底消除背景容器
+        }
+
+        // 自动隐藏触发器（关键）
+        Timer {
+            running: !view.isScrolling && vbar.opacity > 0
+            interval: 800
+            onTriggered: vbar.opacity = 0
         }
 
         delegate: Flickable {
@@ -158,6 +193,7 @@ Rectangle {
             contentWidth: myw + donebtn.width + flagColor.width
             contentHeight: rectan.getItemHeight()
             boundsBehavior: Flickable.StopAtBounds //该属性设置过后，边界不会被拉出
+            interactive: true
 
             Rectangle {
                 id: rectan

@@ -80,6 +80,7 @@ dependencies {
     //annotationProcessor "io.noties:prism4j-bundler:2.0.0" // 确保使用 annotationProcessor
 
     //implementation 'org.qtproject.qt.android:qt6.7.3-android-core:6.7.3'
+    implementation 'androidx.multidex:multidex:2.0.1'
 
 }
 
@@ -149,13 +150,19 @@ android {
         noCompress 'rcc'
     }
 
+    compileSdkVersion 34          // 必须 ≥31
+    ndkVersion "25.2.9519653"     // 指定 NDK 版本
+
     defaultConfig {
         resConfig "en"
-        minSdkVersion qtMinSdkVersion
-        targetSdkVersion qtTargetSdkVersion
+        minSdkVersion 23
+        targetSdkVersion 34
+        multiDexEnabled true
 
-        //qt6.7
-        //ndk.abiFilters = qtTargetAbiList.split(",")
+    }
+
+    packagingOptions {
+        pickFirst '​**​/libc++_shared.so'
     }
 
     buildFeatures {
@@ -178,6 +185,9 @@ android {
                 // abiFilters "arm64-v8a" , "x86_64"
                 abiFilters "arm64-v8a"
             }
+
+            minifyEnabled false
+            shrinkResources false
         }
 
     }
