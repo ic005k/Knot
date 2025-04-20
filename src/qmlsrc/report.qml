@@ -108,16 +108,46 @@ Rectangle {
         clip: true
         boundsBehavior: Flickable.OvershootBounds
 
+        // 核心配置：绑定滚动状态
+        property bool isScrolling: false
+        onMovementStarted: isScrolling = true
+        onMovementEnded: isScrolling = false
+
         ScrollBar.vertical: ScrollBar {
             id: vbar
-            anchors.right: parent.right
-            anchors.rightMargin: 0
             policy: ScrollBar.AsNeeded
-            width: 8
-            visible: tableModel.rowCount > 5
-            background: Rectangle {
-                color: isDark ? "#455364" : "#666666"
+            interactive: false // 关键！禁止拖动操作
+            width: 4
+
+            // 动态显隐控制
+            visible: opacity > 0
+            opacity: tableView.isScrolling ? 1 : 0
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 300
+                }
             }
+
+            // 极简样式
+            contentItem: Rectangle {
+                color: isDark ? "#3498db" : "#606060"
+                opacity: scrollBar.active ? (isDark ? 0.8 : 0.7) : 0
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 200 // 更流畅的动画
+                        easing.type: Easing.OutQuad
+                    }
+                }
+                radius: 3
+            }
+            background: null // 彻底消除背景容器
+        }
+
+        // 自动隐藏触发器（关键）
+        Timer {
+            running: !tableView.isScrolling && vbar.opacity > 0
+            interval: 800
+            onTriggered: vbar.opacity = 0
         }
 
         model: TableModel {

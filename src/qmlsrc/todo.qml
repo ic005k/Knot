@@ -133,6 +133,7 @@ Rectangle {
         id: view
         width: parent.width
         height: parent.height
+        boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
 
         anchors {
             fill: parent
@@ -165,7 +166,7 @@ Rectangle {
 
             // 极简样式
             contentItem: Rectangle {
-                color: isDark ? "#606060" : "#3498db" // 暗色模式用深灰，亮色模式用现代蓝
+                color: isDark ? "#3498db" : "#606060"
                 opacity: scrollBar.active ? (isDark ? 0.8 : 0.7) : 0
                 Behavior on opacity {
                     NumberAnimation {
@@ -306,7 +307,7 @@ Rectangle {
                                 id: text1
                                 width: text1Img.visible ? parent.width - text1Img.width
                                                           - 5 : parent.width
-                                Layout.preferredWidth: rectan.width
+                                Layout.preferredWidth: rectan.width - flagColor.width
                                 color: view.currentIndex === index ? "black" : getText1FontColor()
                                 font.pointSize: FontSize - 2
                                                 > maxFontSize ? maxFontSize : FontSize - 2
@@ -316,6 +317,9 @@ Rectangle {
                                 verticalAlignment: Text.AlignVCenter
                                 text: time
                                 visible: true
+
+                                leftPadding: 10
+                                rightPadding: 10
                             }
                         }
 
@@ -371,15 +375,18 @@ Rectangle {
                                 id: text3
                                 width: text3Img.visible ? parent.width - text3Img.width
                                                           - 5 : parent.width
-                                Layout.preferredWidth: rectan.width - 20
+                                Layout.preferredWidth: rectan.width - 52
                                 font.pointSize: FontSize
-                                wrapMode: Text.Wrap
+                                wrapMode: TextArea.WordWrap
                                 color: view.currentIndex === index ? "black" : getFontColor()
                                 horizontalAlignment: Text.AlignLeft
                                 verticalAlignment: Text.AlignVCenter
                                 text: dototext
 
                                 visible: true
+
+                                leftPadding: 10
+                                rightPadding: 10
                             }
                         }
 

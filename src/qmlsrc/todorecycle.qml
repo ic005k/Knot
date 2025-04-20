@@ -199,6 +199,9 @@ Rectangle {
                         Layout.preferredWidth: listItem.width
                         wrapMode: Text.Wrap
                         text: time
+
+                        leftPadding: 10
+                        rightPadding: 10
                     }
 
                     Text {
@@ -213,10 +216,13 @@ Rectangle {
                         id: text3
                         font.pointSize: FontSize
                         width: parent.width
-                        Layout.preferredWidth: listItem.width
+                        Layout.preferredWidth: listItem.width + 8
                         wrapMode: Text.Wrap
                         color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
                         text: dototext
+
+                        leftPadding: 10
+                        rightPadding: 10
                     }
 
                     Text {
@@ -280,7 +286,7 @@ Rectangle {
 
             // 极简样式
             contentItem: Rectangle {
-                color: isDark ? "#606060" : "#3498db" // 暗色模式用深灰，亮色模式用现代蓝
+                color: isDark ? "#3498db" : "#606060"
                 opacity: scrollBar.active ? (isDark ? 0.8 : 0.7) : 0
                 Behavior on opacity {
                     NumberAnimation {
@@ -299,7 +305,6 @@ Rectangle {
             interval: 800
             onTriggered: vbar.opacity = 0
         }
-
     }
 
     function getListEleHeadColor(ntype) {
