@@ -185,7 +185,9 @@ Rectangle {
             width: myw
             height: rectan.getItemHeight()
             contentWidth: myw + donebtn.width + flagColor.width
+
             contentHeight: rectan.getItemHeight()
+
             boundsBehavior: Flickable.StopAtBounds //该属性设置过后，边界不会被拉出
             interactive: true
 
@@ -194,7 +196,9 @@ Rectangle {
 
                 anchors.fill: parent
                 width: parent.width
+
                 height: getItemHeight()
+
                 border.width: isDark ? 0 : 1
                 border.color: "lightgray"
                 radius: 0

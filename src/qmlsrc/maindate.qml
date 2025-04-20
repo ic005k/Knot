@@ -406,26 +406,7 @@ Rectangle {
             }
 
             MouseArea {
-
-                property point clickPos: "0,0"
-
                 anchors.fill: parent
-                onPressed: {
-                    clickPos = Qt.point(mouse.x, mouse.y)
-                }
-                onReleased: {
-                    var delta = Qt.point(mouse.x - clickPos.x,
-                                         mouse.y - clickPos.y)
-
-                    //console.debug("delta.x: " + delta.x)
-                    if ((delta.x < 0) && (aBtnShow.running === false)
-                            && (delBtn.width == 0)) {
-                        aBtnShow.start()
-                    } else if (aBtnHide.running === false
-                               && (delBtn.width > 0)) {
-                        aBtnHide.start()
-                    }
-                }
 
                 onClicked: {
 
@@ -434,66 +415,6 @@ Rectangle {
                     m_Method.clickMainDate()
                     m_Method.clickMainDateData()
                 }
-
-                onPressAndHold: {
-
-                }
-
-                onDoubleClicked: {
-
-                }
-            }
-
-            Rectangle {
-                color: "#AAAAAA"
-                height: 0
-                width: parent.width
-                anchors.bottom: parent.bottom
-            }
-
-            Rectangle {
-                id: delBtn
-                visible: false
-                height: parent.height
-                width: 0
-                color: "#FF0000"
-
-                anchors.right: parent.right
-                anchors.rightMargin: -30
-                radius: 0
-
-                Text {
-                    width: 56
-                    anchors.centerIn: parent
-
-                    text: qsTr("Done")
-                    color: "#ffffff"
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        m_Todo.addToRecycle()
-                        view.model.remove(index)
-                    }
-                }
-            }
-
-            PropertyAnimation {
-                id: aBtnShow
-                target: delBtn
-                property: "width"
-                duration: 100
-                from: 0
-                to: 80
-            }
-            PropertyAnimation {
-                id: aBtnHide
-                target: delBtn
-                property: "width"
-                duration: 100
-                from: 80
-                to: 0
             }
 
             PropertyAnimation on x {

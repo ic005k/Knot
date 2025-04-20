@@ -1,8 +1,8 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Window 2.15
-import QtLocation 6.5
-import QtPositioning 6.5
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Window
+import QtLocation
+import QtPositioning
 
 Rectangle {
     visible: true
@@ -103,10 +103,17 @@ Rectangle {
         plugin: osmPlugin
         center: QtPositioning.coordinate(gpsx, gpsy) // 初始中心坐标（奥斯陆）
         zoomLevel: 13
+        focus: true
 
         activeMapType: supportedMapTypes[1] // Cycle map provided by Thunderforest
 
-
+        // Qt6 推荐事件处理器
+        TapHandler {
+            onDoubleTapped: eventPoint => map.zoomLevel += 1
+        }
+        DragHandler {
+            target: null // 允许地图处理拖拽
+        }
 
         MapPolyline {
             id: polyline
@@ -125,10 +132,6 @@ Rectangle {
                 width: 32
                 height: 32
             }
-        }
-
-        MouseArea {
-            anchors.fill: parent
         }
     }
 

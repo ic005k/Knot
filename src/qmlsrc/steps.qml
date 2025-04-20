@@ -61,7 +61,14 @@ Rectangle {
     }
 
     function getText1(itemIndex) {
+
+        // var data = view.model.get(itemIndex)
+        //  return data.text1
+        if (itemIndex < 0 || itemIndex >= view.count)
+            return "" // ✅ 边界检查
         var data = view.model.get(itemIndex)
+        if (!data)
+            return ""
         return data.text1
     }
 
@@ -396,27 +403,9 @@ Rectangle {
 
             MouseArea {
 
-                property point clickPos: "0,0"
-
-                anchors.fill: parent
-                onPressed: {
-                    clickPos = Qt.point(mouse.x, mouse.y)
-                }
-                onReleased: {
-
-                }
-
                 onClicked: {
 
                     view.currentIndex = index //实现item切换
-                }
-
-                onPressAndHold: {
-
-                }
-
-                onDoubleClicked: {
-
                 }
             }
         }

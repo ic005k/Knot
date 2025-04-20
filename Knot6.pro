@@ -866,6 +866,11 @@ contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
     $$PWD/../../android_openssl-master/ssl_3/armeabi-v7a/libssl_3.so
 }
 
+contains(ANDROID_TARGET_ARCH,arm64-v8a) {
+    ANDROID_EXTRA_LIBS = \
+        C:/Users/Administrator/Documents/GitHub/Knot6/android-openssl/ssl_3/libcrypto_3.so \
+        C:/Users/Administrator/Documents/GitHub/Knot6/android-openssl/ssl_3/libssl_3.so
 
+}
 
-
+# android: include(C:/Users/Administrator/Documents/android_openssl-master/openssl.pri)
