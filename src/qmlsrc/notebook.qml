@@ -146,12 +146,12 @@ Rectangle {
     }
 
     function setVPos(vpos) {
-        vscrollbar.position = vpos
+        vbar.position = vpos
         console.log("qwNoteBook:set " + vpos)
     }
 
     function getVPos() {
-        var vpos = vscrollbar.position
+        var vpos = vbar.position
         console.log("qwNoteBook:get " + vpos)
         return vpos
     }
@@ -508,12 +508,7 @@ Rectangle {
             background: null // 彻底消除背景容器
         }
 
-        // 自动隐藏触发器（关键）
-        Timer {
-            running: !view.isScrolling && vbar.opacity > 0
-            interval: 800
-            onTriggered: vbar.opacity = 0
-        }
+
     }
 
     function getListEleHeadColor(ntype) {

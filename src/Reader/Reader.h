@@ -14,9 +14,10 @@
 #include <QQuickView>
 #include <QQuickWidget>
 #include <QString>
+#include <QStringConverter>
+#include <QStringDecoder>
 #include <QTextBlock>
 #include <QTextBrowser>
-#include <QTextCodec>
 #include <QVBoxLayout>
 #include <QXmlStreamReader>
 

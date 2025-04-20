@@ -1434,6 +1434,12 @@ void Todo::openTodo() {
               isTodoFile = true;
               QString localFile = privateDir + "KnotData/todo.ini.zip";
               QDateTime localModi = QFileInfo(localFile).lastModified();
+
+              // 先设置时区
+              localModi.setTimeZone(QTimeZone::systemTimeZone());
+              // 再统一时区
+              localModi = localModi.toTimeZone(QTimeZone::utc());
+
               if (mtime > localModi || !QFile::exists(localFile)) {
                 // 初始化下载器
                 WebDavDownloader* downloader = new WebDavDownloader(

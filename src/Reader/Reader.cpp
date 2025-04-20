@@ -1081,14 +1081,21 @@ QStringList Reader::readText(QString textFile) {
 }
 
 QString Reader::GetCorrectUnicode(const QByteArray &text) {
-  QTextCodec::ConverterState state;
-  QTextCodec *codec = QTextCodec::codecForName("UTF-8");
-  QString strtext = codec->toUnicode(text.constData(), text.size(), &state);
-  if (state.invalidChars > 0) {
-    strtext = QTextCodec::codecForName("GBK")->toUnicode(text);
-  } else {
-    strtext = text;
+  // 尝试 UTF-8 解码
+  QStringDecoder utf8Decoder(QStringDecoder::Utf8);
+  QString strtext = utf8Decoder.decode(text);
+
+  // 如果 UTF-8 解码失败，尝试系统本地编码（如 GBK）
+  if (utf8Decoder.hasError()) {
+    QStringDecoder localDecoder(QStringConverter::System);
+    strtext = localDecoder.decode(text);
+
+    // 如果本地编码也失败，则直接按原始数据构造 QString（可能乱码）
+    if (localDecoder.hasError()) {
+      strtext = QString::fromLatin1(text);
+    }
   }
+
   return strtext;
 }
 

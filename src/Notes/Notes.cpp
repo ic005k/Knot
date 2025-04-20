@@ -1975,6 +1975,12 @@ void Notes::openNotes() {
               QString local_file = privateDir + or_file;
 
               QDateTime local_datetime = QFileInfo(local_file).lastModified();
+
+              // 先设置时区
+              local_datetime.setTimeZone(QTimeZone::systemTimeZone());
+              // 再统一时区
+              local_datetime = local_datetime.toTimeZone(QTimeZone::utc());
+
               if (or_datetime > local_datetime || !QFile::exists(local_file)) {
                 remoteFiles.append(or_file);
               }

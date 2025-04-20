@@ -8,7 +8,7 @@
 #include <QJsonObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QSettings>
 
 #include "qtonedriveauthorizationdialog.h"
