@@ -49,7 +49,7 @@ jobs:
           # target: ${{ matrix.qt_target }}
           arch: ${{ matrix.qt_arch }}
           cached: 'false'
-          modules: qtcharts qtwebengine qtsensors qtwebview qtlocation qtwebchannel qt5compat
+          modules: qtcharts qtwebengine qtsensors qtwebview qtlocation qtwebchannel qt5compat positioning
           
       # 拉取代码
       - uses: actions/checkout@v2
