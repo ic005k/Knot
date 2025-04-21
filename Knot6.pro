@@ -1,7 +1,7 @@
 QT += core gui network printsupport core-private
 QT += charts sensors sql
 QT += qml quick quickwidgets webview positioning location quickcontrols2
-QT += xml svg
+QT += xml svg concurrent
 
 win32 {
     QMAKE_CFLAGS += /utf-8
@@ -15,9 +15,6 @@ win32 {
 # Qt > 5 (Qt6)
 greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat #statemachine
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
-# 添加concurrent模块支持
-QT += concurrent
 
 CONFIG += c++17
 CONFIG+=sdk_no_version_check
