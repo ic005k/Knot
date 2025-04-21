@@ -74,8 +74,26 @@ jobs:
          chmod +x bin/release/AppRun
          
          cp -r qml bin/release/qml
-         cp ExtBin/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
-         chmod 755 /home/runner/work/Knot/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+
+         #cp ExtBin/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         #chmod 755 /home/runner/work/Knot/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+
+         # 获取 Qt6 插件目录
+         QT6_PLUGINS_DIR="${{ env.Qt6_DIR }}/../../plugins/platforminputcontexts"
+
+         # 检查插件文件是否存在
+         if [ ! -f "ExtBin/libfcitx5platforminputcontextplugin.so" ]; then
+         echo "Error: Plugin file not found in ExtBin/"
+         exit 1
+         fi
+
+         # 拷贝并设置权限
+         mkdir -p "$QT6_PLUGINS_DIR"
+         cp ExtBin/libfcitx5platforminputcontextplugin.so "$QT6_PLUGINS_DIR/"
+         chmod 755 "$QT6_PLUGINS_DIR/libfcitx5platforminputcontextplugin.so"
+
+         echo "Copied to: $QT6_PLUGINS_DIR"
+         ls -l "$QT6_PLUGINS_DIR"
 
          mkdir bin/release/lib/
          cp -r ExtBin/nss/* bin/release/lib/

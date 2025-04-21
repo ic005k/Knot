@@ -27,7 +27,7 @@ jobs:
       VERSION: Mac
       orgName: Knot
 
-      QT_DIR: ${{ github.workspace }}/Qt/5.15.2/clang_64  # 自定义路径
+      QT_DIR: ${{ github.workspace }}/Qt/6.6.0/clang_64  # 自定义路径
       
     steps:
       - name: Checkout code
