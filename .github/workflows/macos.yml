@@ -16,8 +16,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # os: [macOS-latest]
-        os: [macos-11.0]
+        os: [macOS-latest]
+        # os: [macos-11.0]
         # qt_ver: [5.9.9,5.12.10,5.15.2]
         qt_ver: [6.6.0]
         qt_arch: [clang_64]
@@ -78,10 +78,7 @@ jobs:
          arch -x86_64 brew install openssl
          arch -x86_64 brew link openssl --force
                     
-      #- uses: actions/checkout@v4
-       # with:
-        #  fetch-depth: 1
-          
+
       - name: build macos
         run: |
           #QT_INSTALL_PATH="/Users/runner/Qt/5.15.2/clang_64"
@@ -93,6 +90,11 @@ jobs:
           #"DEFINES += QT_PRIVATE_HEADERS" \
           #"LIBS += -lQt5Gui -framework Cocoa"
           #make -j$(sysctl -n hw.ncpu)
+
+          # 确保所有命令在 Rosetta 2 下运行
+          arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bash_profile
+          source ~/.bash_profile
 
           export ARCHFLAGS="-arch x86_64"
           export CFLAGS="-arch x86_64"
