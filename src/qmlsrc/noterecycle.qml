@@ -387,7 +387,7 @@ Rectangle {
             // 极简样式
             contentItem: Rectangle {
                 color: isDark ? "#3498db" : "#606060"
-                opacity: scrollBar.active ? (isDark ? 0.8 : 0.7) : 0
+                opacity: vbar.active ? (isDark ? 0.8 : 0.7) : 0
                 Behavior on opacity {
                     NumberAnimation {
                         duration: 200 // 更流畅的动画

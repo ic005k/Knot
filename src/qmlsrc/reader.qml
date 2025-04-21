@@ -114,8 +114,7 @@ Rectangle {
         return txt
     }
 
-    function setTextAreaCursorPos(nCursorPos)
-    {
+    function setTextAreaCursorPos(nCursorPos) {
         textArea.cursorPosition = nCursorPos
     }
 
@@ -129,7 +128,6 @@ Rectangle {
 
         onLoaded: {
             textArea.text = text
-            //updateText(text)
         }
         onError: {
             errorDialog.text = message
@@ -162,7 +160,11 @@ Rectangle {
         id: flickable
         flickableDirection: Flickable.VerticalFlick
         anchors.fill: parent
+
         boundsBehavior: Flickable.StopAtBounds
+        maximumFlickVelocity: 1500 // 降低滚动速度更顺滑
+
+        ScrollBar.vertical: ScrollBar {}
 
         states: State {
             name: "autoscroll"
@@ -183,7 +185,10 @@ Rectangle {
             font.family: FontName
             font.weight: FontWeight
             font.letterSpacing: 2
-            renderType: Text.NativeRendering
+
+            //renderType: Text.NativeRendering
+            renderType: Text.QtRendering // 在Qt6下，效果和性能要好很多
+
             font.hintingPreference: Font.PreferVerticalHinting
             textFormat: Qt.AutoText
             cursorPosition: 0
@@ -196,6 +201,13 @@ Rectangle {
             smooth: true
             color: myTextColor
             text: strText
+
+            onTextChanged: {
+                Qt.callLater(() => {
+                                 flickable.contentY = 0
+                                 flickable.contentHeight = contentHeight + 20 // 加边距
+                             })
+            }
 
             onLinkActivated: {
 
@@ -259,25 +271,6 @@ Rectangle {
                 PauseAnimation {
                     duration: 0
                 } //暂停400ms
-            }
-        }
-
-        ScrollBar.vertical: ScrollBar {
-            id: vbar
-            position: 0.2
-            policy: ScrollBar.AsNeeded
-            width: 15
-            hoverEnabled: true
-            active: hovered || pressed
-            orientation: Qt.Vertical
-            size: 0.3
-            anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            visible: textArea.contentHeight > myH ? true : false
-
-            contentItem: Rectangle {
-                color: "#1E90FF"
             }
         }
 

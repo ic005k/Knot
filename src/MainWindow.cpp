@@ -3437,6 +3437,7 @@ void MainWindow::init_Theme() {
   ui->qwOneDriver->rootContext()->setContextProperty("isDark", isDark);
   ui->qwCata->rootContext()->setContextProperty("isDark", isDark);
   ui->qwBookmark->rootContext()->setContextProperty("isDark", isDark);
+  ui->qwReader->rootContext()->setContextProperty("isDark", isDark);
 
   if (!isDark) {
     ui->f_Menu->setStyleSheet("background-color: rgb(243,243,243);");
