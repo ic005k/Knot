@@ -67,11 +67,31 @@ jobs:
           wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
           chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 
-      - name: Remove unused SQL drivers
-        run: |
-          # 只保留 SQLite 驱动，删除其他插件
-          find "${{ env.QT_DIR }}/../../plugins/sqldrivers" -name "libqsql*.so" ! -name "*sqlite*" -delete
-          ls "${{ env.QT_DIR }}/../../plugins/sqldrivers"  # 验证
+      - name: Remove unused SQL drivers (SAFE MODE)
+          run: |
+            # 确保 qmake 可用
+            export PATH="${{ env.QT_DIR }}/bin:$PATH"
+
+            # 获取插件目录
+            QT_PLUGINS_DIR=$(qmake -query QT_INSTALL_PLUGINS)
+
+            # 创建备份目录（以防万一）
+            mkdir -p /tmp/qt-drivers-backup
+            cp "$QT_PLUGINS_DIR/sqldrivers/"* /tmp/qt-drivers-backup/
+            echo "已备份驱动到: /tmp/qt-drivers-backup"
+
+            # 安全删除非SQLite驱动
+            find "$QT_PLUGINS_DIR/sqldrivers" \
+              -name "libqsql*.so" \
+              ! -name "*sqlite*" \
+              ! -name "*SQLite*" \
+              -delete
+
+            # 最终验证
+            echo "当前SQL驱动:"
+            ls -l "$QT_PLUGINS_DIR/sqldrivers"
+            echo "SQLite驱动状态:"
+            ldd "$QT_PLUGINS_DIR/sqldrivers/libqsqlite.so" || true
           
       # 打包
       - name: package
