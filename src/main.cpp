@@ -49,26 +49,25 @@ int main(int argc, char* argv[]) {
 #ifdef Q_OS_ANDROID
   isAndroid = true;
 
-  // 强制使用软件渲染（兼容旧设备）
-  qputenv("QT_OPENGL", "angle");  // 或 "software"
-
-  // 高 DPI 自动缩放
+  // 启用高 DPI 缩放
   qputenv("QT_ENABLE_HIGHDPI_SCALING", "1");
 
-  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+  // 使用 ANGLE 或软件渲染回退
+  qputenv("QT_OPENGL", "angle");  // 或 "software" 如果 angle 仍失败
+
+  // 设置图形后端（RHI 抽象层）
+  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
+  // 或显式指定 Vulkan
+  // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
 
 #else
+  // 桌面端配置
   qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
   QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
       Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
   QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-
   QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
-
   QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
-
-  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
-
 #endif
 
 #ifdef Q_OS_LINUX
