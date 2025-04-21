@@ -68,7 +68,7 @@ jobs:
           chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 
       - name: Remove unused SQL drivers (SAFE MODE)
-          run: |
+        run: |
             # 确保 qmake 可用
             export PATH="${{ env.QT_DIR }}/bin:$PATH"
 
