@@ -47,18 +47,18 @@ jobs:
           source: false
           dir: ${{ env.QT_DIR }}  # 关键：指定安装到正确路径
 
-      - name: 克隆 Qt 源码
-        run: |
-          git clone --depth 1 --branch v5.15.2 https://code.qt.io/qt/qt5.git
-          cd qt5
-          git submodule update --init qtmacextras
+      #- name: 克隆 Qt 源码
+      #  run: |
+      #    git clone --depth 1 --branch v5.15.2 https://code.qt.io/qt/qt5.git
+      #    cd qt5
+      #    git submodule update --init qtmacextras
 
-      - name: 编译 qtmacextras
-        run: |
-          cd qt5/qtmacextras
-          qmake -o Makefile qtmacextras.pro
-          make -j4
-          sudo make install INSTALL_ROOT=${{ env.QT_DIR }}
+      #- name: 编译 qtmacextras
+      #  run: |
+      #    cd qt5/qtmacextras
+      #    qmake -o Makefile qtmacextras.pro
+      #    make -j4
+      #    sudo make install INSTALL_ROOT=${{ env.QT_DIR }}
 
       - name: Install Homebrew (x86_64)
         run: |
