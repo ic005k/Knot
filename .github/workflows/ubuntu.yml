@@ -22,7 +22,7 @@ jobs:
         # qt_ver: [5.9.9,5.12.10,5.15.2]
         
         os: [ubuntu-22.04]
-        qt_ver: [5.15.2]
+        qt_ver: [6.6.0]
         
         qt_arch: [gcc_64]
         
@@ -40,7 +40,7 @@ jobs:
           #host: linux
           cached: 'false'
           
-          modules: qtcharts qtwebengine
+          modules: qtcharts qtwebengine qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning
       
       - name: ubuntu install GL library
         run: |
