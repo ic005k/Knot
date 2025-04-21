@@ -44,8 +44,6 @@ QSplashScreen* splash;
 #define Cross_Origin
 
 int main(int argc, char* argv[]) {
-  QtWebView::initialize();
-
 #ifdef Q_OS_ANDROID
   isAndroid = true;
 
@@ -62,6 +60,8 @@ int main(int argc, char* argv[]) {
 
 #else
   // 桌面端配置
+  QtWebView::initialize();
+
   qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
   QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
       Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
