@@ -26,7 +26,7 @@ jobs:
       targetName: Knot
       VERSION: Mac
       orgName: Knot
-
+      ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
       QT_DIR: ${{ github.workspace }}/Qt/6.6.0/clang_64  # 自定义路径
       
     steps:
@@ -74,9 +74,9 @@ jobs:
        
       - name: Install OpenSSL via Homebrew (x86_64)
         run: |
-         brew update
-         brew install openssl
-         brew link openssl --force
+         arch -x86_64 brew update
+         arch -x86_64 brew install openssl
+         arch -x86_64 brew link openssl --force
                     
       #- uses: actions/checkout@v4
        # with:
@@ -94,9 +94,18 @@ jobs:
           #"LIBS += -lQt5Gui -framework Cocoa"
           #make -j$(sysctl -n hw.ncpu)
 
+          export ARCHFLAGS="-arch x86_64"
+          export CFLAGS="-arch x86_64"
+          export CXXFLAGS="-arch x86_64"
+          export LDFLAGS="-arch x86_64"
+
           # 编译项目
-          qmake
-          make
+          #qmake
+          #make
+
+          arch -x86_64 qmake
+          arch -x86_64 make -j$(sysctl -n hw.ncpu)
+
           
       # 打包
       - name: package

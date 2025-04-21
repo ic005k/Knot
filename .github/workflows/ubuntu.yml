@@ -30,6 +30,7 @@ jobs:
         targetName: Knot
         VERSION: Linux
         orgName: Knot
+        ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
       
     steps:
       
@@ -51,6 +52,7 @@ jobs:
          sudo add-apt-repository universe
          sudo apt install libfuse2
          sudo apt-get install libsecret-1-dev
+         sudo apt-get install -y libmimerapi-dev
        
       - uses: actions/checkout@v2
         with:
@@ -98,14 +100,10 @@ jobs:
          mkdir bin/release/lib/
          cp -r ExtBin/nss/* bin/release/lib/
 
-         cp ExtBin/libcrypto.so.1.1 bin/release/lib/libcrypto.so.1.1
-         cp ExtBin/libssl.so.1.1 bin/release/lib/libssl.so.1.1
-                                             
-         #cp -r devDatabase bin/release/devDatabase
-         #chmod +x bin/release/devDatabase/linux/macserial
-         #chmod +x bin/release/devDatabase/linux/ocvalidate
-         #chmod +x bin/release/devDatabase/linux/ocpasswordgen
-         
+         #cp ExtBin/libcrypto.so.1.1 bin/release/lib/libcrypto.so.1.1
+         #cp ExtBin/libssl.so.1.1 bin/release/lib/libssl.so.1.1
+
+
          export VERSION # linuxdeployqt uses this for naming the file
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} -unsupported-allow-new-glibc -appimage -extra-plugins=webview
          #chmod +x ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
