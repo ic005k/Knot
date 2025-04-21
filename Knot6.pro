@@ -1,6 +1,6 @@
 QT += core gui network printsupport core-private
 QT += charts sensors sql
-QT += qml quick quickwidgets webview positioning location quickcontrols2
+QT += qml quick quickwidgets webview location quickcontrols2 #positioning
 QT += xml svg concurrent
 
 win32 {
