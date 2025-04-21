@@ -52,7 +52,7 @@ jobs:
          sudo add-apt-repository universe
          sudo apt install libfuse2
          sudo apt-get install libsecret-1-dev
-         sudo apt-get install -y libmimerapi-dev
+
        
       - uses: actions/checkout@v2
         with:
@@ -65,7 +65,13 @@ jobs:
       - name: install linuxdeployqt 
         run: |
           wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-          chmod a+x linuxdeployqt-continuous-x86_64.AppImage            
+          chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+
+      - name: Remove unused SQL drivers
+        run: |
+          # 只保留 SQLite 驱动，删除其他插件
+          find "${{ env.QT_DIR }}/../../plugins/sqldrivers" -name "libqsql*.so" ! -name "*sqlite*" -delete
+          ls "${{ env.QT_DIR }}/../../plugins/sqldrivers"  # 验证
           
       # 打包
       - name: package
