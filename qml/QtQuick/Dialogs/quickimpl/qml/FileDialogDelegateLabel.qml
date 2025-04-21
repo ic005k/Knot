@@ -50,12 +50,7 @@ Item {
             implicitHeight: childrenRect.height
 
             Label {
-                text: {
-                    const fileSize = root.delegate.fileSize;
-                    return fileSize > Number.MAX_SAFE_INTEGER
-                        ? ('>' + locale.formattedDataSize(Number.MAX_SAFE_INTEGER))
-                        : locale.formattedDataSize(fileSize);
-                }
+                text: locale.formattedDataSize(root.delegate.fileSize)
                 font.pixelSize: root.delegate.font.pixelSize * 0.75
                 color: root.fileDetailRowTextColor
             }

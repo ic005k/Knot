@@ -116,7 +116,6 @@ T.ComboBox {
         topMargin: 6
         bottomMargin: 6
         padding: 1
-        palette: control.palette
 
         contentItem: ListView {
             clip: true

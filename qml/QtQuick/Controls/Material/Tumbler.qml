@@ -14,8 +14,6 @@ T.Tumbler {
     implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
                              implicitContentHeight + topPadding + bottomPadding)
 
-    readonly property real __delegateHeight: availableHeight / visibleItemCount
-
     delegate: Text {
         text: modelData
         color: control.Material.foreground
@@ -35,11 +33,13 @@ T.Tumbler {
         delegate: control.delegate
         path: Path {
             startX: control.contentItem.width / 2
-            startY: -control.__delegateHeight / 2
+            startY: -control.contentItem.delegateHeight / 2
             PathLine {
                 x: control.contentItem.width / 2
-                y: (control.visibleItemCount + 1) * control.__delegateHeight - control.__delegateHeight / 2
+                y: (control.visibleItemCount + 1) * control.contentItem.delegateHeight - control.contentItem.delegateHeight / 2
             }
         }
+
+        property real delegateHeight: control.availableHeight / control.visibleItemCount
     }
 }

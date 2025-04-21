@@ -14,12 +14,7 @@ Module {
             name: "ColorDialogOptions"
             alias: "ColorDialogOption"
             isFlag: true
-            values: [
-                "ShowAlphaChannel",
-                "NoButtons",
-                "DontUseNativeDialog",
-                "NoEyeDropperButton"
-            ]
+            values: ["ShowAlphaChannel", "NoButtons", "DontUseNativeDialog"]
         }
     }
     Component {
@@ -1425,9 +1420,7 @@ Module {
                 "AppDataLocation",
                 "AppConfigLocation",
                 "PublicShareLocation",
-                "TemplatesLocation",
-                "StateLocation",
-                "GenericStateLocation"
+                "TemplatesLocation"
             ]
         }
         Enum {

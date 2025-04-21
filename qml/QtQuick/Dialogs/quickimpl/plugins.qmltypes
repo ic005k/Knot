@@ -289,12 +289,9 @@ Module {
         accessSemantics: "reference"
         prototype: "QQuickControl"
         deferredNames: ["background", "contentItem", "handle"]
-        exports: [
-            "QtQuick.Dialogs.quickimpl/AbstractColorPicker 6.4",
-            "QtQuick.Dialogs.quickimpl/AbstractColorPicker 6.7"
-        ]
+        exports: ["QtQuick.Dialogs.quickimpl/AbstractColorPicker 6.4"]
         isCreatable: false
-        exportMetaObjectRevisions: [1540, 1543]
+        exportMetaObjectRevisions: [1540]
         Property {
             name: "color"
             type: "QColor"
@@ -564,10 +561,9 @@ Module {
         prototype: "QQuickItem"
         exports: [
             "QtQuick.Dialogs.quickimpl/ColorInputsImpl 6.0",
-            "QtQuick.Dialogs.quickimpl/ColorInputsImpl 6.3",
-            "QtQuick.Dialogs.quickimpl/ColorInputsImpl 6.7"
+            "QtQuick.Dialogs.quickimpl/ColorInputsImpl 6.3"
         ]
-        exportMetaObjectRevisions: [1536, 1539, 1543]
+        exportMetaObjectRevisions: [1536, 1539]
         Property {
             name: "color"
             type: "QColor"
@@ -1108,8 +1104,9 @@ Module {
         Signal { name: "bottomPaddingChanged" }
         Signal { name: "spacingChanged" }
         Signal { name: "localeChanged" }
-        Signal { name: "focusReasonChanged" }
         Signal { name: "mirroredChanged" }
+        Signal { name: "focusPolicyChanged" }
+        Signal { name: "focusReasonChanged" }
         Signal { name: "visualFocusChanged" }
         Signal { name: "hoveredChanged" }
         Signal { name: "hoverEnabledChanged" }
@@ -1264,10 +1261,9 @@ Module {
         prototype: "QQuickItemDelegate"
         exports: [
             "QtQuick.Dialogs.quickimpl/FileDialogDelegate 6.2",
-            "QtQuick.Dialogs.quickimpl/FileDialogDelegate 6.3",
-            "QtQuick.Dialogs.quickimpl/FileDialogDelegate 6.7"
+            "QtQuick.Dialogs.quickimpl/FileDialogDelegate 6.3"
         ]
-        exportMetaObjectRevisions: [1538, 1539, 1543]
+        exportMetaObjectRevisions: [1538, 1539]
         Property {
             name: "dialog"
             type: "QQuickDialog"
@@ -1518,10 +1514,9 @@ Module {
         prototype: "QQuickContainer"
         exports: [
             "QtQuick.Dialogs.quickimpl/FolderBreadcrumbBar 6.2",
-            "QtQuick.Dialogs.quickimpl/FolderBreadcrumbBar 6.3",
-            "QtQuick.Dialogs.quickimpl/FolderBreadcrumbBar 6.7"
+            "QtQuick.Dialogs.quickimpl/FolderBreadcrumbBar 6.3"
         ]
-        exportMetaObjectRevisions: [1538, 1539, 1543]
+        exportMetaObjectRevisions: [1538, 1539]
         Property {
             name: "dialog"
             type: "QQuickDialog"
@@ -2582,9 +2577,8 @@ Module {
         exports: [
             "QtQuick.Dialogs.quickimpl/SaturationLightnessPickerImpl 6.0",
             "QtQuick.Dialogs.quickimpl/SaturationLightnessPickerImpl 6.3",
-            "QtQuick.Dialogs.quickimpl/SaturationLightnessPickerImpl 6.4",
-            "QtQuick.Dialogs.quickimpl/SaturationLightnessPickerImpl 6.7"
+            "QtQuick.Dialogs.quickimpl/SaturationLightnessPickerImpl 6.4"
         ]
-        exportMetaObjectRevisions: [1536, 1539, 1540, 1543]
+        exportMetaObjectRevisions: [1536, 1539, 1540]
     }
 }

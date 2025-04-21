@@ -17,17 +17,14 @@ T.Frame {
     padding: 12
     verticalPadding: Material.frameVerticalPadding
 
-    Material.roundedScale: Material.ExtraSmallScale
-
     background: Rectangle {
-        radius: control.Material.roundedScale
+        radius: 2
         color: control.Material.elevation > 0 ? control.Material.backgroundColor : "transparent"
         border.color: control.Material.frameColor
 
         layer.enabled: control.enabled && control.Material.elevation > 0
-        layer.effect: RoundedElevationEffect {
+        layer.effect: ElevationEffect {
             elevation: control.Material.elevation
-            roundedScale: control.background.radius
         }
     }
 }

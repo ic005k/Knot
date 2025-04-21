@@ -37,8 +37,7 @@ Module {
             "QtWebView/WebView 2.11",
             "QtWebView/WebView 6.0",
             "QtWebView/WebView 6.3",
-            "QtWebView/WebView 6.5",
-            "QtWebView/WebView 6.7"
+            "QtWebView/WebView 6.5"
         ]
         exportMetaObjectRevisions: [
             256,
@@ -51,8 +50,7 @@ Module {
             523,
             1536,
             1539,
-            1541,
-            1543
+            1541
         ]
         Enum {
             name: "LoadStatus"

@@ -12,5 +12,4 @@ Member {
     property bool isPointer: false
     property bool isJavaScriptFunction: false
     property bool isCloned: false
-    property bool isConstant: false
 }

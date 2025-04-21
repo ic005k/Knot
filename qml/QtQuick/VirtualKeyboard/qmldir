@@ -9,6 +9,7 @@ depends QtQuick auto
 depends QtQuick.Window auto
 depends QtQuick.Layouts auto
 depends Qt.labs.folderlistmodel auto
+depends QtQuick.VirtualKeyboard.Settings auto
 depends QtQuick.VirtualKeyboard.Styles auto
 depends QtQuick.VirtualKeyboard.Plugins auto
 prefer :/qt-project.org/imports/QtQuick/VirtualKeyboard/

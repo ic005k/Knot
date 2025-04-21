@@ -20,10 +20,9 @@ Module {
             "QtQuick.Controls.Universal.impl/BusyIndicatorImpl 2.7",
             "QtQuick.Controls.Universal.impl/BusyIndicatorImpl 2.11",
             "QtQuick.Controls.Universal.impl/BusyIndicatorImpl 6.0",
-            "QtQuick.Controls.Universal.impl/BusyIndicatorImpl 6.3",
-            "QtQuick.Controls.Universal.impl/BusyIndicatorImpl 6.7"
+            "QtQuick.Controls.Universal.impl/BusyIndicatorImpl 6.3"
         ]
-        exportMetaObjectRevisions: [512, 513, 516, 519, 523, 1536, 1539, 1543]
+        exportMetaObjectRevisions: [512, 513, 516, 519, 523, 1536, 1539]
         Property { name: "count"; type: "int"; read: "count"; write: "setCount"; index: 0; isFinal: true }
         Property { name: "color"; type: "QColor"; read: "color"; write: "setColor"; index: 1; isFinal: true }
     }
@@ -39,10 +38,9 @@ Module {
             "QtQuick.Controls.Universal.impl/FocusRectangle 2.7",
             "QtQuick.Controls.Universal.impl/FocusRectangle 2.11",
             "QtQuick.Controls.Universal.impl/FocusRectangle 6.0",
-            "QtQuick.Controls.Universal.impl/FocusRectangle 6.3",
-            "QtQuick.Controls.Universal.impl/FocusRectangle 6.7"
+            "QtQuick.Controls.Universal.impl/FocusRectangle 6.3"
         ]
-        exportMetaObjectRevisions: [512, 513, 516, 519, 523, 1536, 1539, 1543]
+        exportMetaObjectRevisions: [512, 513, 516, 519, 523, 1536, 1539]
     }
     Component {
         file: "private/qquickuniversalprogressbar_p.h"
@@ -58,10 +56,9 @@ Module {
             "QtQuick.Controls.Universal.impl/ProgressBarImpl 2.7",
             "QtQuick.Controls.Universal.impl/ProgressBarImpl 2.11",
             "QtQuick.Controls.Universal.impl/ProgressBarImpl 6.0",
-            "QtQuick.Controls.Universal.impl/ProgressBarImpl 6.3",
-            "QtQuick.Controls.Universal.impl/ProgressBarImpl 6.7"
+            "QtQuick.Controls.Universal.impl/ProgressBarImpl 6.3"
         ]
-        exportMetaObjectRevisions: [512, 513, 516, 519, 523, 1536, 1539, 1543]
+        exportMetaObjectRevisions: [512, 513, 516, 519, 523, 1536, 1539]
         Property { name: "color"; type: "QColor"; read: "color"; write: "setColor"; index: 0; isFinal: true }
         Property {
             name: "progress"

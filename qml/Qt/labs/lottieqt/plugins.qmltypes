@@ -19,20 +19,9 @@ Module {
             "Qt.labs.lottieqt/LottieAnimation 2.7",
             "Qt.labs.lottieqt/LottieAnimation 2.11",
             "Qt.labs.lottieqt/LottieAnimation 6.0",
-            "Qt.labs.lottieqt/LottieAnimation 6.3",
-            "Qt.labs.lottieqt/LottieAnimation 6.7"
+            "Qt.labs.lottieqt/LottieAnimation 6.3"
         ]
-        exportMetaObjectRevisions: [
-            256,
-            512,
-            513,
-            516,
-            519,
-            523,
-            1536,
-            1539,
-            1543
-        ]
+        exportMetaObjectRevisions: [256, 512, 513, 516, 519, 523, 1536, 1539]
         Enum {
             name: "Status"
             values: ["Null", "Loading", "Ready", "Error"]

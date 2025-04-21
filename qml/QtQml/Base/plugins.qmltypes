@@ -7,12 +7,6 @@ import QtQuick.tooling 1.2
 
 Module {
     Component {
-        file: "private/qqmllocale_p.h"
-        name: "QList<QQmlLocale::DayOfWeek>"
-        accessSemantics: "sequence"
-        valueType: "QQmlLocale::DayOfWeek"
-    }
-    Component {
         file: "private/qv4sequenceobject_p.h"
         name: "std::vector<bool>"
         accessSemantics: "sequence"
@@ -37,366 +31,9 @@ Module {
         valueType: "int"
     }
     Component {
-        file: "private/qqmlglobal_p.h"
-        name: "QQmlApplication"
-        accessSemantics: "reference"
-        prototype: "QObject"
-        Property {
-            name: "arguments"
-            type: "QStringList"
-            read: "args"
-            index: 0
-            isReadonly: true
-            isConstant: true
-        }
-        Property {
-            name: "name"
-            type: "QString"
-            read: "name"
-            write: "setName"
-            notify: "nameChanged"
-            index: 1
-        }
-        Property {
-            name: "version"
-            type: "QString"
-            read: "version"
-            write: "setVersion"
-            notify: "versionChanged"
-            index: 2
-        }
-        Property {
-            name: "organization"
-            type: "QString"
-            read: "organization"
-            write: "setOrganization"
-            notify: "organizationChanged"
-            index: 3
-        }
-        Property {
-            name: "domain"
-            type: "QString"
-            read: "domain"
-            write: "setDomain"
-            notify: "domainChanged"
-            index: 4
-        }
-        Signal { name: "aboutToQuit" }
-        Signal { name: "nameChanged" }
-        Signal { name: "versionChanged" }
-        Signal { name: "organizationChanged" }
-        Signal { name: "domainChanged" }
-        Method {
-            name: "setName"
-            Parameter { name: "arg"; type: "QString" }
-        }
-        Method {
-            name: "setVersion"
-            Parameter { name: "arg"; type: "QString" }
-        }
-        Method {
-            name: "setOrganization"
-            Parameter { name: "arg"; type: "QString" }
-        }
-        Method {
-            name: "setDomain"
-            Parameter { name: "arg"; type: "QString" }
-        }
-    }
-    Component {
-        file: "private/qqmlbind_p.h"
-        name: "QQmlBind"
-        accessSemantics: "reference"
-        prototype: "QObject"
-        interfaces: ["QQmlParserStatus", "QQmlPropertyValueSource"]
-        immediateNames: [
-            "objectName",
-            "target",
-            "property",
-            "value",
-            "when",
-            "delayed",
-            "restoreMode"
-        ]
-        exports: [
-            "QtQml.Base/Binding 2.0",
-            "QtQml.Base/Binding 2.8",
-            "QtQml.Base/Binding 2.14",
-            "QtQml.Base/Binding 6.0"
-        ]
-        exportMetaObjectRevisions: [512, 520, 526, 1536]
-        Enum {
-            name: "RestorationMode"
-            values: [
-                "RestoreNone",
-                "RestoreBinding",
-                "RestoreValue",
-                "RestoreBindingOrValue"
-            ]
-        }
-        Property {
-            name: "target"
-            type: "QObject"
-            isPointer: true
-            read: "object"
-            write: "setObject"
-            index: 0
-        }
-        Property { name: "property"; type: "QString"; read: "property"; write: "setProperty"; index: 1 }
-        Property { name: "value"; type: "QVariant"; read: "value"; write: "setValue"; index: 2 }
-        Property { name: "when"; type: "bool"; read: "when"; write: "setWhen"; index: 3 }
-        Property {
-            name: "delayed"
-            revision: 520
-            type: "bool"
-            read: "delayed"
-            write: "setDelayed"
-            index: 4
-        }
-        Property {
-            name: "restoreMode"
-            revision: 526
-            type: "RestorationMode"
-            read: "restoreMode"
-            write: "setRestoreMode"
-            notify: "restoreModeChanged"
-            index: 5
-        }
-        Signal { name: "restoreModeChanged" }
-        Method { name: "targetValueChanged" }
-    }
-    Component {
-        file: "private/qqmlconnections_p.h"
-        name: "QQmlConnections"
-        accessSemantics: "reference"
-        prototype: "QObject"
-        interfaces: ["QQmlParserStatus"]
-        exports: [
-            "QtQml.Base/Connections 2.0",
-            "QtQml.Base/Connections 2.3",
-            "QtQml.Base/Connections 6.0"
-        ]
-        hasCustomParser: true
-        exportMetaObjectRevisions: [512, 515, 1536]
-        Property {
-            name: "target"
-            type: "QObject"
-            isPointer: true
-            read: "target"
-            write: "setTarget"
-            notify: "targetChanged"
-            index: 0
-        }
-        Property {
-            name: "enabled"
-            revision: 515
-            type: "bool"
-            read: "isEnabled"
-            write: "setEnabled"
-            notify: "enabledChanged"
-            index: 1
-        }
-        Property {
-            name: "ignoreUnknownSignals"
-            type: "bool"
-            read: "ignoreUnknownSignals"
-            write: "setIgnoreUnknownSignals"
-            index: 2
-        }
-        Signal { name: "targetChanged" }
-        Signal { name: "enabledChanged"; revision: 515 }
-    }
-    Component {
-        file: "private/qqmlvaluetype_p.h"
-        name: "QQmlEasingEnums"
-        accessSemantics: "none"
-        exports: ["QtQml.Base/Easing 2.0", "QtQml.Base/Easing 6.0"]
-        isCreatable: false
-        exportMetaObjectRevisions: [512, 1536]
-        Enum {
-            name: "Type"
-            values: [
-                "Linear",
-                "InQuad",
-                "OutQuad",
-                "InOutQuad",
-                "OutInQuad",
-                "InCubic",
-                "OutCubic",
-                "InOutCubic",
-                "OutInCubic",
-                "InQuart",
-                "OutQuart",
-                "InOutQuart",
-                "OutInQuart",
-                "InQuint",
-                "OutQuint",
-                "InOutQuint",
-                "OutInQuint",
-                "InSine",
-                "OutSine",
-                "InOutSine",
-                "OutInSine",
-                "InExpo",
-                "OutExpo",
-                "InOutExpo",
-                "OutInExpo",
-                "InCirc",
-                "OutCirc",
-                "InOutCirc",
-                "OutInCirc",
-                "InElastic",
-                "OutElastic",
-                "InOutElastic",
-                "OutInElastic",
-                "InBack",
-                "OutBack",
-                "InOutBack",
-                "OutInBack",
-                "InBounce",
-                "OutBounce",
-                "InOutBounce",
-                "OutInBounce",
-                "InCurve",
-                "OutCurve",
-                "SineCurve",
-                "CosineCurve",
-                "BezierSpline",
-                "Bezier"
-            ]
-        }
-    }
-    Component {
-        file: "private/qqmlvaluetype_p.h"
-        name: "QEasingCurve"
-        accessSemantics: "value"
-        extension: "QQmlEasingValueType"
-        Enum {
-            name: "Type"
-            values: [
-                "Linear",
-                "InQuad",
-                "OutQuad",
-                "InOutQuad",
-                "OutInQuad",
-                "InCubic",
-                "OutCubic",
-                "InOutCubic",
-                "OutInCubic",
-                "InQuart",
-                "OutQuart",
-                "InOutQuart",
-                "OutInQuart",
-                "InQuint",
-                "OutQuint",
-                "InOutQuint",
-                "OutInQuint",
-                "InSine",
-                "OutSine",
-                "InOutSine",
-                "OutInSine",
-                "InExpo",
-                "OutExpo",
-                "InOutExpo",
-                "OutInExpo",
-                "InCirc",
-                "OutCirc",
-                "InOutCirc",
-                "OutInCirc",
-                "InElastic",
-                "OutElastic",
-                "InOutElastic",
-                "OutInElastic",
-                "InBack",
-                "OutBack",
-                "InOutBack",
-                "OutInBack",
-                "InBounce",
-                "OutBounce",
-                "InOutBounce",
-                "OutInBounce",
-                "InCurve",
-                "OutCurve",
-                "SineCurve",
-                "CosineCurve",
-                "BezierSpline",
-                "TCBSpline",
-                "Custom",
-                "NCurveTypes"
-            ]
-        }
-    }
-    Component {
-        file: "private/qqmlvaluetype_p.h"
-        name: "QQmlEasingValueType"
-        accessSemantics: "value"
-        Property {
-            name: "type"
-            type: "QQmlEasingEnums::Type"
-            read: "type"
-            write: "setType"
-            index: 0
-            isFinal: true
-        }
-        Property {
-            name: "amplitude"
-            type: "double"
-            read: "amplitude"
-            write: "setAmplitude"
-            index: 1
-            isFinal: true
-        }
-        Property {
-            name: "overshoot"
-            type: "double"
-            read: "overshoot"
-            write: "setOvershoot"
-            index: 2
-            isFinal: true
-        }
-        Property {
-            name: "period"
-            type: "double"
-            read: "period"
-            write: "setPeriod"
-            index: 3
-            isFinal: true
-        }
-        Property {
-            name: "bezierCurve"
-            type: "QVariantList"
-            read: "bezierCurve"
-            write: "setBezierCurve"
-            index: 4
-            isFinal: true
-        }
-    }
-    Component {
-        file: "private/qqmllocale_p.h"
-        name: "QQmlLocale"
-        accessSemantics: "none"
-        extension: "QLocale"
-        exports: ["QtQml.Base/Locale 2.2", "QtQml.Base/Locale 6.0"]
-        isCreatable: false
-        exportMetaObjectRevisions: [514, 1536]
-        Enum {
-            name: "DayOfWeek"
-            values: [
-                "Sunday",
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday"
-            ]
-        }
-    }
-    Component {
-        file: "private/qqmllocale_p.h"
+        file: "qlocale.h"
         name: "QLocale"
         accessSemantics: "value"
-        extension: "QQmlLocaleValueType"
         Enum {
             name: "Language"
             type: "ushort"
@@ -745,7 +382,6 @@ Module {
                 "Anii",
                 "Kangri",
                 "Venetian",
-                "Kuvi",
                 "Afan",
                 "Bengali",
                 "Bhutani",
@@ -1245,11 +881,6 @@ Module {
             ]
         }
         Enum {
-            name: "TagSeparator"
-            type: "char"
-            values: ["Dash", "Underscore"]
-        }
-        Enum {
             name: "CurrencySymbolFormat"
             values: [
                 "CurrencyIsoCode",
@@ -1292,295 +923,359 @@ Module {
         }
     }
     Component {
-        file: "private/qqmllocale_p.h"
-        name: "QQmlLocaleValueType"
-        accessSemantics: "value"
+        file: "private/qqmlglobal_p.h"
+        name: "QQmlApplication"
+        accessSemantics: "reference"
+        prototype: "QObject"
         Property {
-            name: "firstDayOfWeek"
-            type: "QQmlLocale::DayOfWeek"
-            read: "firstDayOfWeek"
+            name: "arguments"
+            type: "QStringList"
+            read: "args"
             index: 0
             isReadonly: true
             isConstant: true
         }
         Property {
-            name: "measurementSystem"
-            type: "QLocale::MeasurementSystem"
-            read: "measurementSystem"
+            name: "name"
+            type: "QString"
+            read: "name"
+            write: "setName"
+            notify: "nameChanged"
             index: 1
-            isReadonly: true
-            isConstant: true
         }
         Property {
-            name: "textDirection"
-            type: "Qt::LayoutDirection"
-            read: "textDirection"
+            name: "version"
+            type: "QString"
+            read: "version"
+            write: "setVersion"
+            notify: "versionChanged"
             index: 2
-            isReadonly: true
-            isConstant: true
         }
         Property {
-            name: "weekDays"
-            type: "QQmlLocale::DayOfWeek"
-            isList: true
-            read: "weekDays"
+            name: "organization"
+            type: "QString"
+            read: "organization"
+            write: "setOrganization"
+            notify: "organizationChanged"
             index: 3
-            isReadonly: true
-            isConstant: true
         }
         Property {
-            name: "uiLanguages"
-            type: "QStringList"
-            read: "uiLanguages"
+            name: "domain"
+            type: "QString"
+            read: "domain"
+            write: "setDomain"
+            notify: "domainChanged"
             index: 4
-            isReadonly: true
-            isConstant: true
         }
-        Property { name: "name"; type: "QString"; read: "name"; index: 5; isReadonly: true; isConstant: true }
-        Property {
-            name: "nativeLanguageName"
-            type: "QString"
-            read: "nativeLanguageName"
-            index: 6
-            isReadonly: true
-            isConstant: true
+        Signal { name: "aboutToQuit" }
+        Signal { name: "nameChanged" }
+        Signal { name: "versionChanged" }
+        Signal { name: "organizationChanged" }
+        Signal { name: "domainChanged" }
+        Method {
+            name: "setName"
+            Parameter { name: "arg"; type: "QString" }
         }
-        Property {
-            name: "nativeCountryName"
-            type: "QString"
-            read: "nativeCountryName"
-            index: 7
-            isReadonly: true
-            isConstant: true
+        Method {
+            name: "setVersion"
+            Parameter { name: "arg"; type: "QString" }
         }
-        Property {
-            name: "nativeTerritoryName"
-            type: "QString"
-            read: "nativeTerritoryName"
-            index: 8
-            isReadonly: true
-            isConstant: true
+        Method {
+            name: "setOrganization"
+            Parameter { name: "arg"; type: "QString" }
         }
-        Property {
-            name: "decimalPoint"
-            type: "QString"
-            read: "decimalPoint"
-            index: 9
-            isReadonly: true
-            isConstant: true
+        Method {
+            name: "setDomain"
+            Parameter { name: "arg"; type: "QString" }
         }
-        Property {
-            name: "groupSeparator"
-            type: "QString"
-            read: "groupSeparator"
-            index: 10
-            isReadonly: true
-            isConstant: true
-        }
-        Property {
-            name: "percent"
-            type: "QString"
-            read: "percent"
-            index: 11
-            isReadonly: true
-            isConstant: true
-        }
-        Property {
-            name: "zeroDigit"
-            type: "QString"
-            read: "zeroDigit"
-            index: 12
-            isReadonly: true
-            isConstant: true
+    }
+    Component {
+        file: "private/qqmlbind_p.h"
+        name: "QQmlBind"
+        accessSemantics: "reference"
+        prototype: "QObject"
+        interfaces: ["QQmlParserStatus", "QQmlPropertyValueSource"]
+        immediateNames: [
+            "objectName",
+            "target",
+            "property",
+            "value",
+            "when",
+            "delayed",
+            "restoreMode"
+        ]
+        exports: [
+            "QtQml.Base/Binding 2.0",
+            "QtQml.Base/Binding 2.8",
+            "QtQml.Base/Binding 2.14",
+            "QtQml.Base/Binding 6.0"
+        ]
+        exportMetaObjectRevisions: [512, 520, 526, 1536]
+        Enum {
+            name: "RestorationMode"
+            values: [
+                "RestoreNone",
+                "RestoreBinding",
+                "RestoreValue",
+                "RestoreBindingOrValue"
+            ]
         }
         Property {
-            name: "negativeSign"
-            type: "QString"
-            read: "negativeSign"
-            index: 13
-            isReadonly: true
-            isConstant: true
+            name: "target"
+            type: "QObject"
+            isPointer: true
+            read: "object"
+            write: "setObject"
+            index: 0
+        }
+        Property { name: "property"; type: "QString"; read: "property"; write: "setProperty"; index: 1 }
+        Property { name: "value"; type: "QVariant"; read: "value"; write: "setValue"; index: 2 }
+        Property { name: "when"; type: "bool"; read: "when"; write: "setWhen"; index: 3 }
+        Property {
+            name: "delayed"
+            revision: 520
+            type: "bool"
+            read: "delayed"
+            write: "setDelayed"
+            index: 4
         }
         Property {
-            name: "positiveSign"
-            type: "QString"
-            read: "positiveSign"
-            index: 14
-            isReadonly: true
-            isConstant: true
+            name: "restoreMode"
+            revision: 526
+            type: "RestorationMode"
+            read: "restoreMode"
+            write: "setRestoreMode"
+            notify: "restoreModeChanged"
+            index: 5
+        }
+        Signal { name: "restoreModeChanged" }
+        Method { name: "targetValueChanged" }
+    }
+    Component {
+        file: "private/qqmlconnections_p.h"
+        name: "QQmlConnections"
+        accessSemantics: "reference"
+        prototype: "QObject"
+        interfaces: ["QQmlParserStatus"]
+        exports: [
+            "QtQml.Base/Connections 2.0",
+            "QtQml.Base/Connections 2.3",
+            "QtQml.Base/Connections 6.0"
+        ]
+        hasCustomParser: true
+        exportMetaObjectRevisions: [512, 515, 1536]
+        Property {
+            name: "target"
+            type: "QObject"
+            isPointer: true
+            read: "target"
+            write: "setTarget"
+            notify: "targetChanged"
+            index: 0
         }
         Property {
-            name: "exponential"
-            type: "QString"
-            read: "exponential"
-            index: 15
-            isReadonly: true
-            isConstant: true
+            name: "enabled"
+            revision: 515
+            type: "bool"
+            read: "isEnabled"
+            write: "setEnabled"
+            notify: "enabledChanged"
+            index: 1
         }
         Property {
-            name: "amText"
-            type: "QString"
-            read: "amText"
-            index: 16
-            isReadonly: true
-            isConstant: true
+            name: "ignoreUnknownSignals"
+            type: "bool"
+            read: "ignoreUnknownSignals"
+            write: "setIgnoreUnknownSignals"
+            index: 2
+        }
+        Signal { name: "targetChanged" }
+        Signal { name: "enabledChanged"; revision: 515 }
+    }
+    Component {
+        file: "private/qqmlvaluetype_p.h"
+        name: "QQmlEasingEnums"
+        accessSemantics: "none"
+        exports: ["QtQml.Base/Easing 2.0", "QtQml.Base/Easing 6.0"]
+        isCreatable: false
+        exportMetaObjectRevisions: [512, 1536]
+        Enum {
+            name: "Type"
+            values: [
+                "Linear",
+                "InQuad",
+                "OutQuad",
+                "InOutQuad",
+                "OutInQuad",
+                "InCubic",
+                "OutCubic",
+                "InOutCubic",
+                "OutInCubic",
+                "InQuart",
+                "OutQuart",
+                "InOutQuart",
+                "OutInQuart",
+                "InQuint",
+                "OutQuint",
+                "InOutQuint",
+                "OutInQuint",
+                "InSine",
+                "OutSine",
+                "InOutSine",
+                "OutInSine",
+                "InExpo",
+                "OutExpo",
+                "InOutExpo",
+                "OutInExpo",
+                "InCirc",
+                "OutCirc",
+                "InOutCirc",
+                "OutInCirc",
+                "InElastic",
+                "OutElastic",
+                "InOutElastic",
+                "OutInElastic",
+                "InBack",
+                "OutBack",
+                "InOutBack",
+                "OutInBack",
+                "InBounce",
+                "OutBounce",
+                "InOutBounce",
+                "OutInBounce",
+                "InCurve",
+                "OutCurve",
+                "SineCurve",
+                "CosineCurve",
+                "BezierSpline",
+                "Bezier"
+            ]
+        }
+    }
+    Component {
+        file: "private/qqmlvaluetype_p.h"
+        name: "QEasingCurve"
+        accessSemantics: "value"
+        extension: "QQmlEasingValueType"
+        Enum {
+            name: "Type"
+            values: [
+                "Linear",
+                "InQuad",
+                "OutQuad",
+                "InOutQuad",
+                "OutInQuad",
+                "InCubic",
+                "OutCubic",
+                "InOutCubic",
+                "OutInCubic",
+                "InQuart",
+                "OutQuart",
+                "InOutQuart",
+                "OutInQuart",
+                "InQuint",
+                "OutQuint",
+                "InOutQuint",
+                "OutInQuint",
+                "InSine",
+                "OutSine",
+                "InOutSine",
+                "OutInSine",
+                "InExpo",
+                "OutExpo",
+                "InOutExpo",
+                "OutInExpo",
+                "InCirc",
+                "OutCirc",
+                "InOutCirc",
+                "OutInCirc",
+                "InElastic",
+                "OutElastic",
+                "InOutElastic",
+                "OutInElastic",
+                "InBack",
+                "OutBack",
+                "InOutBack",
+                "OutInBack",
+                "InBounce",
+                "OutBounce",
+                "InOutBounce",
+                "OutInBounce",
+                "InCurve",
+                "OutCurve",
+                "SineCurve",
+                "CosineCurve",
+                "BezierSpline",
+                "TCBSpline",
+                "Custom",
+                "NCurveTypes"
+            ]
+        }
+    }
+    Component {
+        file: "private/qqmlvaluetype_p.h"
+        name: "QQmlEasingValueType"
+        accessSemantics: "value"
+        Property {
+            name: "type"
+            type: "QQmlEasingEnums::Type"
+            read: "type"
+            write: "setType"
+            index: 0
+            isFinal: true
         }
         Property {
-            name: "pmText"
-            type: "QString"
-            read: "pmText"
-            index: 17
-            isReadonly: true
-            isConstant: true
+            name: "amplitude"
+            type: "double"
+            read: "amplitude"
+            write: "setAmplitude"
+            index: 1
+            isFinal: true
         }
         Property {
-            name: "numberOptions"
-            type: "QLocale::NumberOptions"
-            read: "numberOptions"
-            write: "setNumberOptions"
-            index: 18
+            name: "overshoot"
+            type: "double"
+            read: "overshoot"
+            write: "setOvershoot"
+            index: 2
+            isFinal: true
         }
-        Method {
-            name: "currencySymbol"
-            type: "QString"
-            Parameter { name: "format"; type: "QLocale::CurrencySymbolFormat" }
+        Property {
+            name: "period"
+            type: "double"
+            read: "period"
+            write: "setPeriod"
+            index: 3
+            isFinal: true
         }
-        Method { name: "currencySymbol"; type: "QString"; isCloned: true }
-        Method {
-            name: "dateTimeFormat"
-            type: "QString"
-            Parameter { name: "format"; type: "QLocale::FormatType" }
+        Property {
+            name: "bezierCurve"
+            type: "QVariantList"
+            read: "bezierCurve"
+            write: "setBezierCurve"
+            index: 4
+            isFinal: true
         }
-        Method { name: "dateTimeFormat"; type: "QString"; isCloned: true }
-        Method {
-            name: "timeFormat"
-            type: "QString"
-            Parameter { name: "format"; type: "QLocale::FormatType" }
-        }
-        Method { name: "timeFormat"; type: "QString"; isCloned: true }
-        Method {
-            name: "dateFormat"
-            type: "QString"
-            Parameter { name: "format"; type: "QLocale::FormatType" }
-        }
-        Method { name: "dateFormat"; type: "QString"; isCloned: true }
-        Method {
-            name: "monthName"
-            type: "QString"
-            Parameter { name: "index"; type: "int" }
-            Parameter { name: "format"; type: "QLocale::FormatType" }
-        }
-        Method {
-            name: "monthName"
-            type: "QString"
-            isCloned: true
-            Parameter { name: "index"; type: "int" }
-        }
-        Method {
-            name: "standaloneMonthName"
-            type: "QString"
-            Parameter { name: "index"; type: "int" }
-            Parameter { name: "format"; type: "QLocale::FormatType" }
-        }
-        Method {
-            name: "standaloneMonthName"
-            type: "QString"
-            isCloned: true
-            Parameter { name: "index"; type: "int" }
-        }
-        Method {
-            name: "dayName"
-            type: "QString"
-            Parameter { name: "index"; type: "int" }
-            Parameter { name: "format"; type: "QLocale::FormatType" }
-        }
-        Method {
-            name: "dayName"
-            type: "QString"
-            isCloned: true
-            Parameter { name: "index"; type: "int" }
-        }
-        Method {
-            name: "standaloneDayName"
-            type: "QString"
-            Parameter { name: "index"; type: "int" }
-            Parameter { name: "format"; type: "QLocale::FormatType" }
-        }
-        Method {
-            name: "standaloneDayName"
-            type: "QString"
-            isCloned: true
-            Parameter { name: "index"; type: "int" }
-        }
-        Method { name: "formattedDataSize"; isJavaScriptFunction: true }
-        Method {
-            name: "formattedDataSize"
-            type: "QString"
-            Parameter { name: "bytes"; type: "double" }
-            Parameter { name: "precision"; type: "int" }
-            Parameter { name: "format"; type: "QLocale::DataSizeFormats" }
-        }
-        Method {
-            name: "formattedDataSize"
-            type: "QString"
-            isCloned: true
-            Parameter { name: "bytes"; type: "double" }
-            Parameter { name: "precision"; type: "int" }
-        }
-        Method {
-            name: "formattedDataSize"
-            type: "QString"
-            isCloned: true
-            Parameter { name: "bytes"; type: "double" }
-        }
-        Method { name: "toString"; isJavaScriptFunction: true }
-        Method { name: "toString"; type: "QString" }
-        Method {
-            name: "toString"
-            type: "QString"
-            Parameter { name: "i"; type: "int" }
-        }
-        Method {
-            name: "toString"
-            type: "QString"
-            Parameter { name: "f"; type: "double" }
-        }
-        Method {
-            name: "toString"
-            type: "QString"
-            Parameter { name: "f"; type: "double" }
-            Parameter { name: "format"; type: "QString" }
-            Parameter { name: "precision"; type: "int" }
-        }
-        Method {
-            name: "toString"
-            type: "QString"
-            isCloned: true
-            Parameter { name: "f"; type: "double" }
-            Parameter { name: "format"; type: "QString" }
-        }
-        Method {
-            name: "toString"
-            type: "QString"
-            Parameter { name: "dateTime"; type: "QDateTime" }
-            Parameter { name: "format"; type: "QString" }
-        }
-        Method {
-            name: "toString"
-            type: "QString"
-            Parameter { name: "dateTime"; type: "QDateTime" }
-            Parameter { name: "format"; type: "QLocale::FormatType" }
-        }
-        Method {
-            name: "toString"
-            type: "QString"
-            isCloned: true
-            Parameter { name: "dateTime"; type: "QDateTime" }
-        }
-        Method {
-            name: "QQmlLocaleValueType"
-            isConstructor: true
-            Parameter { name: "name"; type: "QString" }
+    }
+    Component {
+        file: "private/qqmllocale_p.h"
+        name: "QQmlLocale"
+        accessSemantics: "none"
+        extension: "QLocale"
+        exports: ["QtQml.Base/Locale 2.2", "QtQml.Base/Locale 6.0"]
+        isCreatable: false
+        exportMetaObjectRevisions: [514, 1536]
+        Enum {
+            name: "DayOfWeek"
+            values: [
+                "Sunday",
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday"
+            ]
         }
     }
     Component {
@@ -1630,7 +1325,6 @@ Module {
         accessSemantics: "value"
         extension: "QQmlPointFValueType"
         exports: ["QtQml.Base/point 2.0", "QtQml.Base/point 6.0"]
-        isStructured: true
         exportMetaObjectRevisions: [512, 1536]
     }
     Component {
@@ -1695,7 +1389,6 @@ Module {
         accessSemantics: "value"
         extension: "QQmlRectFValueType"
         exports: ["QtQml.Base/rect 2.0", "QtQml.Base/rect 6.0"]
-        isStructured: true
         exportMetaObjectRevisions: [512, 1536]
     }
     Component {
@@ -1749,13 +1442,13 @@ Module {
             Parameter { name: "rect"; type: "QRectF" }
         }
     }
+    Component { file: "qqmlscriptstring.h"; name: "QQmlScriptString"; accessSemantics: "value" }
     Component {
         file: "private/qqmlvaluetype_p.h"
         name: "QSizeF"
         accessSemantics: "value"
         extension: "QQmlSizeFValueType"
         exports: ["QtQml.Base/size 2.0", "QtQml.Base/size 6.0"]
-        isStructured: true
         exportMetaObjectRevisions: [512, 1536]
     }
     Component {
@@ -2303,7 +1996,6 @@ Module {
         Enum {
             name: "ApplicationAttribute"
             values: [
-                "AA_QtQuickUseDefaultSizePolicy",
                 "AA_DontShowIconsInMenus",
                 "AA_NativeWindows",
                 "AA_DontCreateNativeWidgetSiblings",
@@ -2459,7 +2151,6 @@ Module {
                 "Key_twosuperior",
                 "Key_threesuperior",
                 "Key_acute",
-                "Key_micro",
                 "Key_mu",
                 "Key_paragraph",
                 "Key_periodcentered",

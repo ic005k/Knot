@@ -24,6 +24,8 @@ T.TabButton {
 
     z: checked
 
+    topInset: control.checked || control.TabBar.position !== T.TabBar.Header ? 0 : 2
+
     contentItem: IconLabel {
         spacing: control.spacing
         mirrored: control.mirrored
@@ -37,9 +39,13 @@ T.TabButton {
 
 
     background: Rectangle {
-        y: control.checked || control.TabBar.position !== T.TabBar.Header ? 0 : 2
-        implicitHeight: 21
-        height: control.height - (control.checked ? 0 : 2)
+        implicitHeight: 19
+
+        // TODO: Find out why the following binding fails to update the first tab button
+        // See QTBUG-108807
+        // y: control.checked || control.TabBar.position !== T.TabBar.Header ? 0 : 2
+        // implicitHeight: 21
+        // height: control.height - (control.checked ? 0 : 2)
 
         border.color: Qt.lighter(Fusion.outline(control.palette), 1.1)
 

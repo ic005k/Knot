@@ -549,11 +549,8 @@ Module {
         name: "QQuickPdfPageImage"
         accessSemantics: "reference"
         prototype: "QQuickImage"
-        exports: [
-            "QtQuick.Pdf/PdfPageImage 6.4",
-            "QtQuick.Pdf/PdfPageImage 6.7"
-        ]
-        exportMetaObjectRevisions: [1540, 1543]
+        exports: ["QtQuick.Pdf/PdfPageImage 6.4"]
+        exportMetaObjectRevisions: [1540]
         Property {
             name: "document"
             type: "QQuickPdfDocument"
@@ -671,10 +668,9 @@ Module {
         exports: [
             "QtQuick.Pdf/PdfSelection 5.15",
             "QtQuick.Pdf/PdfSelection 6.0",
-            "QtQuick.Pdf/PdfSelection 6.3",
-            "QtQuick.Pdf/PdfSelection 6.7"
+            "QtQuick.Pdf/PdfSelection 6.3"
         ]
-        exportMetaObjectRevisions: [1295, 1536, 1539, 1543]
+        exportMetaObjectRevisions: [1295, 1536, 1539]
         Property {
             name: "document"
             type: "QQuickPdfDocument"

@@ -21,8 +21,7 @@ Module {
             "QtQuick.Layouts/ColumnLayout 2.11",
             "QtQuick.Layouts/ColumnLayout 6.0",
             "QtQuick.Layouts/ColumnLayout 6.3",
-            "QtQuick.Layouts/ColumnLayout 6.6",
-            "QtQuick.Layouts/ColumnLayout 6.7"
+            "QtQuick.Layouts/ColumnLayout 6.6"
         ]
         exportMetaObjectRevisions: [
             256,
@@ -34,8 +33,7 @@ Module {
             523,
             1536,
             1539,
-            1542,
-            1543
+            1542
         ]
     }
     Component {
@@ -53,8 +51,7 @@ Module {
             "QtQuick.Layouts/GridLayout 2.11",
             "QtQuick.Layouts/GridLayout 6.0",
             "QtQuick.Layouts/GridLayout 6.3",
-            "QtQuick.Layouts/GridLayout 6.6",
-            "QtQuick.Layouts/GridLayout 6.7"
+            "QtQuick.Layouts/GridLayout 6.6"
         ]
         exportMetaObjectRevisions: [
             256,
@@ -66,8 +63,7 @@ Module {
             523,
             1536,
             1539,
-            1542,
-            1543
+            1542
         ]
         Enum {
             name: "Flow"
@@ -80,6 +76,7 @@ Module {
             write: "setColumnSpacing"
             notify: "columnSpacingChanged"
             index: 0
+            isFinal: true
         }
         Property {
             name: "rowSpacing"
@@ -88,6 +85,7 @@ Module {
             write: "setRowSpacing"
             notify: "rowSpacingChanged"
             index: 1
+            isFinal: true
         }
         Property {
             name: "columns"
@@ -96,6 +94,7 @@ Module {
             write: "setColumns"
             notify: "columnsChanged"
             index: 2
+            isFinal: true
         }
         Property {
             name: "rows"
@@ -104,6 +103,7 @@ Module {
             write: "setRows"
             notify: "rowsChanged"
             index: 3
+            isFinal: true
         }
         Property {
             name: "flow"
@@ -112,6 +112,7 @@ Module {
             write: "setFlow"
             notify: "flowChanged"
             index: 4
+            isFinal: true
         }
         Property {
             name: "uniformCellWidths"
@@ -154,6 +155,7 @@ Module {
             write: "setLayoutDirection"
             notify: "layoutDirectionChanged"
             index: 0
+            isFinal: true
         }
         Signal { name: "layoutDirectionChanged"; revision: 257 }
     }
@@ -172,21 +174,10 @@ Module {
             "QtQuick.Layouts/Layout 2.7",
             "QtQuick.Layouts/Layout 2.11",
             "QtQuick.Layouts/Layout 6.0",
-            "QtQuick.Layouts/Layout 6.3",
-            "QtQuick.Layouts/Layout 6.7"
+            "QtQuick.Layouts/Layout 6.3"
         ]
         isCreatable: false
-        exportMetaObjectRevisions: [
-            256,
-            512,
-            513,
-            516,
-            519,
-            523,
-            1536,
-            1539,
-            1543
-        ]
+        exportMetaObjectRevisions: [256, 512, 513, 516, 519, 523, 1536, 1539]
         attachedType: "QQuickLayoutAttached"
         Method { name: "invalidateSenderItem" }
         Method { name: "_q_dumpLayoutTree" }
@@ -408,11 +399,8 @@ Module {
         defaultProperty: "data"
         parentProperty: "parent"
         prototype: "QQuickItem"
-        exports: [
-            "QtQuick.Layouts/LayoutItemProxy 6.6",
-            "QtQuick.Layouts/LayoutItemProxy 6.7"
-        ]
-        exportMetaObjectRevisions: [1542, 1543]
+        exports: ["QtQuick.Layouts/LayoutItemProxy 6.6"]
+        exportMetaObjectRevisions: [1542]
         Property {
             name: "target"
             type: "QQuickItem"
@@ -505,6 +493,7 @@ Module {
             write: "setSpacing"
             notify: "spacingChanged"
             index: 0
+            isFinal: true
         }
         Property {
             name: "uniformCellSizes"
@@ -534,8 +523,7 @@ Module {
             "QtQuick.Layouts/RowLayout 2.11",
             "QtQuick.Layouts/RowLayout 6.0",
             "QtQuick.Layouts/RowLayout 6.3",
-            "QtQuick.Layouts/RowLayout 6.6",
-            "QtQuick.Layouts/RowLayout 6.7"
+            "QtQuick.Layouts/RowLayout 6.6"
         ]
         exportMetaObjectRevisions: [
             256,
@@ -547,8 +535,7 @@ Module {
             523,
             1536,
             1539,
-            1542,
-            1543
+            1542
         ]
     }
     Component {
@@ -564,20 +551,9 @@ Module {
             "QtQuick.Layouts/StackLayout 2.7",
             "QtQuick.Layouts/StackLayout 2.11",
             "QtQuick.Layouts/StackLayout 6.0",
-            "QtQuick.Layouts/StackLayout 6.3",
-            "QtQuick.Layouts/StackLayout 6.7"
+            "QtQuick.Layouts/StackLayout 6.3"
         ]
-        exportMetaObjectRevisions: [
-            259,
-            512,
-            513,
-            516,
-            519,
-            523,
-            1536,
-            1539,
-            1543
-        ]
+        exportMetaObjectRevisions: [259, 512, 513, 516, 519, 523, 1536, 1539]
         attachedType: "QQuickStackLayoutAttached"
         Property {
             name: "count"
@@ -586,6 +562,7 @@ Module {
             notify: "countChanged"
             index: 0
             isReadonly: true
+            isFinal: true
         }
         Property {
             name: "currentIndex"
@@ -594,6 +571,7 @@ Module {
             write: "setCurrentIndex"
             notify: "currentIndexChanged"
             index: 1
+            isFinal: true
         }
         Signal { name: "currentIndexChanged" }
         Signal { name: "countChanged" }

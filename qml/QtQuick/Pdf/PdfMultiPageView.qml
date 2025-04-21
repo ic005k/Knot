@@ -1,8 +1,5 @@
 // Copyright (C) 2022 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
-
-pragma ComponentBehavior: Bound
-
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Pdf
@@ -59,8 +56,8 @@ Item {
     */
     function selectAll() {
         const currentItem = tableView.itemAtCell(tableView.cellAtPos(root.width / 2, root.height / 2))
-        const pdfSelection = currentItem?.selection as PdfSelection
-        pdfSelection?.selectAll()
+        if (currentItem)
+            currentItem.selection.selectAll()
     }
 
     /*!
@@ -73,9 +70,9 @@ Item {
     */
     function copySelectionToClipboard() {
         const currentItem = tableView.itemAtCell(tableView.cellAtPos(root.width / 2, root.height / 2))
-        const pdfSelection = currentItem?.selection as PdfSelection
-        console.log(lcMPV, "currentItem", currentItem, "sel", pdfSelection?.text)
-        pdfSelection?.copyToClipboard()
+        console.log(lcMPV, "currentItem", currentItem, "sel", currentItem.selection.text)
+        if (currentItem)
+            currentItem.selection.copyToClipboard()
     }
 
     // --------------------------------
@@ -315,10 +312,10 @@ Item {
         onRot90Changed: forceLayout()
         onHeightChanged: forceLayout()
         onWidthChanged: forceLayout()
-        property size firstPagePointSize: root.document?.status === PdfDocument.Ready ? root.document.pagePointSize(0) : Qt.size(1, 1)
-        property real pageHolderWidth: Math.max(root.width, ((rot90 ? root.document?.maxPageHeight : root.document?.maxPageWidth) ?? 0) * root.renderScale)
-        columnWidthProvider: function(col) { return root.document ? pageHolderWidth + vscroll.width + 2 : 0 }
-        rowHeightProvider: function(row) { return (rot90 ? root.document.pagePointSize(row).width : root.document.pagePointSize(row).height) * root.renderScale }
+        property size firstPagePointSize: document?.status === PdfDocument.Ready ? document.pagePointSize(0) : Qt.size(1, 1)
+        property real pageHolderWidth: Math.max(root.width, ((rot90 ? document?.maxPageHeight : document?.maxPageWidth) ?? 0) * root.renderScale)
+        columnWidthProvider: function(col) { return document ? pageHolderWidth + vscroll.width + 2 : 0 }
+        rowHeightProvider: function(row) { return (rot90 ? document.pagePointSize(row).width : document.pagePointSize(row).height) * root.renderScale }
 
         // delayed-jump feature in case the user called goToPage() or goToLocation() too early
         property int pendingRow: -1
@@ -336,7 +333,6 @@ Item {
 
         delegate: Rectangle {
             id: pageHolder
-            required property int index
             color: tableView.debug ? "beige" : "transparent"
             Text {
                 visible: tableView.debug
@@ -351,12 +347,12 @@ Item {
                 height: image.height
                 rotation: root.pageRotation
                 anchors.centerIn: pinch.active ? undefined : parent
-                property size pagePointSize: root.document.pagePointSize(pageHolder.index)
+                property size pagePointSize: document.pagePointSize(index)
                 property real pageScale: image.paintedWidth / pagePointSize.width
                 PdfPageImage {
                     id: image
                     document: root.document
-                    currentFrame: pageHolder.index
+                    currentFrame: index
                     asynchronous: true
                     fillMode: Image.PreserveAspectFit
                     width: paper.pagePointSize.width * root.renderScale
@@ -370,7 +366,7 @@ Item {
                         searchHighlights.update()
                     }
                     onStatusChanged: {
-                        if (pageHolder.index === pageNavigator.currentPage)
+                        if (index === pageNavigator.currentPage)
                             root.currentPageRenderingStatus = status
                     }
                 }
@@ -386,7 +382,7 @@ Item {
                             id: searchHighlights
                             function update() {
                                 // paths could be a binding, but we need to be able to "kick" it sometimes
-                                paths = searchModel.boundingPolygonsOnPage(pageHolder.index)
+                                paths = searchModel.boundingPolygonsOnPage(index)
                             }
                         }
                     }
@@ -407,7 +403,7 @@ Item {
                 }
                 Shape {
                     anchors.fill: parent
-                    visible: image.status === Image.Ready && searchModel.currentPage === pageHolder.index
+                    visible: image.status === Image.Ready && searchModel.currentPage === index
                     ShapePath {
                         strokeWidth: style.currentSearchResultStrokeWidth
                         strokeColor: style.currentSearchResultStrokeColor
@@ -434,7 +430,7 @@ Item {
                             const centroidInFlickable = tableView.mapFromItem(paper, pinch.centroid.position.x, pinch.centroid.position.y)
                             const newSourceWidth = image.sourceSize.width * paper.scale
                             const ratio = newSourceWidth / image.sourceSize.width
-                            console.log(lcMPV, "pinch ended on page", pageHolder.index,
+                            console.log(lcMPV, "pinch ended on page", index,
                                         "with scale", paper.scale.toFixed(3), "ratio", ratio.toFixed(3),
                                         "centroid", pinch.centroid.position, centroidInPoints,
                                         "wrt flickable", centroidInFlickable,
