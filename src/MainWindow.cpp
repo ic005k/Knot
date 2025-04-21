@@ -3311,6 +3311,11 @@ void MainWindow::initQW() {
   ui->qwGpsList->rootContext()->setContextProperty("myW", this->width());
   ui->qwGpsList->rootContext()->setContextProperty("m_Steps", m_Steps);
 
+  ui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
+  ui->qwMap->setFocusPolicy(Qt::StrongFocus);  // 关键设置
+  ui->qwMap->setClearColor(Qt::transparent);   // 避免渲染冲突
+  ui->qwMap->setAttribute(Qt::WA_AcceptTouchEvents, true);
+  ui->qwMap->setAttribute(Qt::WA_TouchPadAcceptSingleTouchEvents, true);
   ui->qwMap->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/map.qml")));
 
   ui->qwReport->rootContext()->setContextProperty("m_Report", m_Report);
