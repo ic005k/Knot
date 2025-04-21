@@ -1003,21 +1003,6 @@ public class MyActivity
     super.onStop();
   }
 
-  /*
-   * @Override
-   * public boolean onKeyDown(int keyCode, KeyEvent event) {
-   * if (keyCode == KeyEvent.KEYCODE_BACK) {
-   * Log.e(TAG, "onBackPressed  2 : 按下了返回键");
-   * CallJavaNotify_9();
-   *
-   * return true;
-   * } else {
-   * Log.e(TAG, "onBackPressed  2 : " + keyCode + "  " + event);
-   * return super.onKeyDown(keyCode, event);
-   * }
-   * }
-   */
-
   @Override
   protected void onDestroy() {
     Log.i(TAG, "Main onDestroy...");
