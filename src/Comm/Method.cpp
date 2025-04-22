@@ -733,18 +733,12 @@ QDialog *Method::getProgBar() {
 
 void Method::saveRecycleTabName(QString keyStr, QString tabName) {
   QSettings Reg(iniDir + "del_tabname.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   Reg.setValue(keyStr, tabName);
 }
 
 QString Method::getRecycleTabName(QString keyStr) {
   QSettings Reg(iniDir + "del_tabname.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   QString tabName = Reg.value(keyStr).toString();
   if (tabName.trimmed().length() == 0) tabName = "None";
@@ -853,19 +847,10 @@ void Method::setDark(QString strDark) {
   Q_UNUSED(strDark);
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject javaDark = QAndroidJniObject::fromString(strDark);
-  QAndroidJniObject jo = QAndroidJniObject::fromString("dark");
-  jo.callMethod<void>("com.x/MyActivity", "setDark", "(Ljava/lang/String;)V",
-                      javaDark.object<jstring>());
-
-#else
   QJniObject javaDark = QJniObject::fromString(strDark);
   QJniObject jo = QJniObject::fromString("dark");
   jo.callMethod<void>("com.x/MyActivity", "setDark", "(Ljava/lang/String;)V",
                       javaDark.object<jstring>());
-
-#endif
 
 #endif
 }
@@ -992,27 +977,18 @@ QString Method::ColorToString(QColor v_color) {
 
 QString Method::getKeyType() {
   QSettings Reg("/storage/emulated/0/.Knot/shortcut.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   return Reg.value("/desk/keyType", "todo").toString();
 }
 
 QString Method::getExecDone() {
   QSettings Reg("/storage/emulated/0/.Knot/shortcut.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   return Reg.value("/desk/execDone", "true").toString();
 }
 
 void Method::setExecDone(QString execDone) {
   QSettings Reg("/storage/emulated/0/.Knot/shortcut.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   Reg.setValue("/desk/execDone", execDone);
 }
@@ -1033,17 +1009,10 @@ void Method::showToastMessage(QString msg) {
   Q_UNUSED(msg);
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject msgObject = QAndroidJniObject::fromString(msg);
-  QAndroidJniObject m_activity = QtAndroid::androidActivity();
-  m_activity.callMethod<void>("showToastMessage", "(Ljava/lang/String;)V",
-                              msgObject.object<jstring>());
-#else
   QJniObject msgObject = QJniObject::fromString(msg);
   QJniObject m_activity = QJniObject::fromString("showToastMessage");
   m_activity.callMethod<void>("showToastMessage", "(Ljava/lang/String;)V",
                               msgObject.object<jstring>());
-#endif
 
 #endif
 }
@@ -1051,13 +1020,8 @@ void Method::showToastMessage(QString msg) {
 void Method::openFilePicker() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("openFilePicker", "()V");
-#else
   QJniObject activity = QJniObject::fromString("openNoteEditor");
   activity.callMethod<void>("openFilePicker", "()V");
-#endif
 
 #endif
 }
@@ -1065,13 +1029,8 @@ void Method::openFilePicker() {
 void Method::closeFilePicker() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("closeFilePicker", "()V");
-#else
   QJniObject activity = QJniObject::fromString("openNoteEditor");
   activity.callMethod<void>("closeFilePicker", "()V");
-#endif
 
 #endif
 }
@@ -1083,20 +1042,11 @@ void Method::setAndroidProgressInfo(QString info) {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject strInfo = QAndroidJniObject::fromString(info);
-  QAndroidJniObject m_activity =
-      QAndroidJniObject::fromString("setProgressInfo");
-  m_activity.callStaticMethod<void>("com.x/MyProgBar", "setProgressInfo",
-                                    "(Ljava/lang/String;)V",
-                                    strInfo.object<jstring>());
-#else
   QJniObject strInfo = QJniObject::fromString(info);
   QJniObject m_activity = QJniObject::fromString("setProgressInfo");
   m_activity.callStaticMethod<void>("com.x/MyProgBar", "setProgressInfo",
                                     "(Ljava/lang/String;)V",
                                     strInfo.object<jstring>());
-#endif
 
 #endif
 }
@@ -1104,13 +1054,8 @@ void Method::setAndroidProgressInfo(QString info) {
 void Method::showTempActivity() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("showTempActivity", "()V");
-#else
   QJniObject activity = QJniObject::fromString("showTempActivity");
   activity.callMethod<void>("showTempActivity", "()V");
-#endif
 
 #endif
 }
@@ -1120,13 +1065,8 @@ void Method::showAndroidProgressBar() {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("showAndroidProgressBar", "()V");
-#else
   QJniObject activity = QJniObject::fromString("showAndroidProgressBar");
   activity.callMethod<void>("showAndroidProgressBar", "()V");
-#endif
 
 #endif
 }
@@ -1136,16 +1076,9 @@ void Method::closeAndroidProgressBar() {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject activity =
-      QAndroidJniObject::fromString("closeAndroidProgressBar");
-  activity.callStaticMethod<void>("com.x/MyProgBar", "closeAndroidProgressBar",
-                                  "()V");
-#else
   QJniObject activity = QJniObject::fromString("closeAndroidProgressBar");
   activity.callStaticMethod<void>("com.x/MyProgBar", "closeAndroidProgressBar",
                                   "()V");
-#endif
 
 #endif
 }
@@ -1164,14 +1097,6 @@ void Method::playMyText(QString text) {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jText = QAndroidJniObject::fromString(text);
-  QAndroidJniObject activity = QAndroidJniObject::fromString("playMyText");
-  activity.callStaticMethod<void>("com.x/MyActivity", "playMyText",
-                                  "(Ljava/lang/String;)V",
-                                  jText.object<jstring>());
-
-#else
   QJniObject jText = QJniObject::fromString(text);
   QJniObject activity = QJniObject::fromString("playMyText");
   activity.callStaticMethod<void>("com.x/MyActivity", "playMyText",
@@ -1179,24 +1104,13 @@ void Method::playMyText(QString text) {
                                   jText.object<jstring>());
 
 #endif
-
-#endif
 }
 
 void Method::stopPlayMyText() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-
-  QAndroidJniObject activity = QAndroidJniObject::fromString("stopPlayMyText");
-  activity.callStaticMethod<void>("com.x/MyActivity", "stopPlayMyText", "()V");
-
-#else
-
   QJniObject activity = QJniObject::fromString("stopPlayMyText");
   activity.callStaticMethod<void>("com.x/MyActivity", "stopPlayMyText", "()V");
-
-#endif
 
 #endif
 }
@@ -1205,20 +1119,10 @@ int Method::checkRecordAudio() {
 #ifdef Q_OS_ANDROID
   bool isOk;
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-
-  QAndroidJniObject activity =
-      QAndroidJniObject::fromString("checkRecordAudio");
-  isOk = activity.callStaticMethod<int>("com.x/MyActivity", "checkRecordAudio",
-                                        "()I");
-
-#else
-
   QJniObject activity = QJniObject::fromString("checkRecordAudio");
   isOk = activity.callStaticMethod<int>("com.x/MyActivity", "checkRecordAudio",
                                         "()I");
 
-#endif
   return isOk;
 
 #else
@@ -1232,13 +1136,6 @@ void Method::startRecord(QString file) {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jFile = QAndroidJniObject::fromString(file);
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("startRecord", "(Ljava/lang/String;)V",
-                            jFile.object<jstring>());
-
-#else
   QJniObject jFile = QJniObject::fromString(file);
   QJniObject activity =
       QJniObject(QCoreApplication::instance()
@@ -1248,27 +1145,16 @@ void Method::startRecord(QString file) {
                             jFile.object<jstring>());
 
 #endif
-
-#endif
 }
 
 void Method::stopRecord() {
 #ifdef Q_OS_ANDROID
-
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("stopRecord", "()V");
-
-#else
 
   QJniObject activity =
       QJniObject(QCoreApplication::instance()
                      ->nativeInterface<QNativeInterface::QAndroidApplication>()
                      ->context());
   activity.callMethod<void>("stopRecord", "()V");
-
-#endif
 
 #endif
 }
@@ -1278,13 +1164,6 @@ void Method::playRecord(QString file) {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jFile = QAndroidJniObject::fromString(file);
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("playRecord", "(Ljava/lang/String;)V",
-                            jFile.object<jstring>());
-
-#else
   QJniObject jFile = QJniObject::fromString(file);
   QJniObject activity =
       QJniObject(QCoreApplication::instance()
@@ -1294,27 +1173,16 @@ void Method::playRecord(QString file) {
                             jFile.object<jstring>());
 
 #endif
-
-#endif
 }
 
 void Method::startPlay() {
 #ifdef Q_OS_ANDROID
-
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("startPlay", "()V");
-
-#else
 
   QJniObject activity =
       QJniObject(QCoreApplication::instance()
                      ->nativeInterface<QNativeInterface::QAndroidApplication>()
                      ->context());
   activity.callMethod<void>("startPlay", "()V");
-
-#endif
 
 #endif
 }
@@ -1322,20 +1190,11 @@ void Method::startPlay() {
 void Method::pausePlay() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("pausePlay", "()V");
-
-#else
-
   QJniObject activity =
       QJniObject(QCoreApplication::instance()
                      ->nativeInterface<QNativeInterface::QAndroidApplication>()
                      ->context());
   activity.callMethod<void>("pausePlay", "()V");
-
-#endif
 
 #endif
 }
@@ -1343,20 +1202,11 @@ void Method::pausePlay() {
 void Method::stopPlayRecord() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("stopPlayRecord", "()V");
-
-#else
-
   QJniObject activity =
       QJniObject(QCoreApplication::instance()
                      ->nativeInterface<QNativeInterface::QAndroidApplication>()
                      ->context());
   activity.callMethod<void>("stopPlayRecord", "()V");
-
-#endif
 
 #endif
 }
@@ -1381,13 +1231,8 @@ QString Method::FormatHHMMSS(qint32 total) {
 void Method::openDateTimePicker() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("openDateTimePicker", "()V");
-#else
   QJniObject activity = QJniObject::fromString("openNoteEditor");
   activity.callMethod<void>("openDateTimePicker", "()V");
-#endif
 
 #endif
 }
@@ -1395,9 +1240,7 @@ void Method::openDateTimePicker() {
 void Method::setDateTimePickerFlag(QString flag, int y, int m, int d, int h,
                                    int mm, QString dateFlag) {
   QSettings Reg(privateDir + "datetime.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   if (flag == "ymd") {
     Reg.setValue("/DateTime/flag", "ymd");
   }
@@ -1428,9 +1271,7 @@ void Method::setDateTimePickerFlag(QString flag, int y, int m, int d, int h,
 QStringList Method::getDateTimePickerValue() {
   QStringList list;
   QSettings Reg(privateDir + "datetime.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   list.append(Reg.value("/DateTime/y", 2022).toString());
   list.append(Reg.value("/DateTime/m", 3).toString());
   list.append(Reg.value("/DateTime/d", 3).toString());
@@ -1441,9 +1282,7 @@ QStringList Method::getDateTimePickerValue() {
 
 QString Method::getDateTimeFlag() {
   QSettings Reg(privateDir + "datetime.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   return Reg.value("/DateTime/dateFlag", "").toString();
 }
 
@@ -1452,16 +1291,11 @@ double Method::updateMicStatus() {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jo = QtAndroid::androidActivity();
-  a = jo.callMethod<double>("updateMicStatus", "()D");
-#else
   QJniObject jo =
       QJniObject(QCoreApplication::instance()
                      ->nativeInterface<QNativeInterface::QAndroidApplication>()
                      ->context());
   a = jo.callMethod<double>("updateMicStatus", "()D");
-#endif
 
 #endif
   return a;
@@ -1472,16 +1306,11 @@ int Method::getPlayDuration() {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jo = QtAndroid::androidActivity();
-  a = jo.callMethod<int>("getPlayDuration", "()I");
-#else
   QJniObject jo =
       QJniObject(QCoreApplication::instance()
                      ->nativeInterface<QNativeInterface::QAndroidApplication>()
                      ->context());
   a = jo.callMethod<int>("getPlayDuration", "()I");
-#endif
 
 #endif
   return a;
@@ -1492,16 +1321,11 @@ int Method::getPlayPosition() {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jo = QtAndroid::androidActivity();
-  a = jo.callMethod<int>("getPlayPosition", "()I");
-#else
   QJniObject jo =
       QJniObject(QCoreApplication::instance()
                      ->nativeInterface<QNativeInterface::QAndroidApplication>()
                      ->context());
   a = jo.callMethod<int>("getPlayPosition", "()I");
-#endif
 
 #endif
   return a;
@@ -1512,16 +1336,11 @@ bool Method::getPlaying() {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jo = QtAndroid::androidActivity();
-  a = jo.callMethod<int>("isPlaying", "()I");
-#else
   QJniObject jo =
       QJniObject(QCoreApplication::instance()
                      ->nativeInterface<QNativeInterface::QAndroidApplication>()
                      ->context());
   a = jo.callMethod<int>("isPlaying", "()I");
-#endif
 
 #endif
   return a;
@@ -1532,13 +1351,6 @@ void Method::seekTo(QString strPos) {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jFile = QAndroidJniObject::fromString(strPos);
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("seekTo", "(Ljava/lang/String;)V",
-                            jFile.object<jstring>());
-
-#else
   QJniObject jFile = QJniObject::fromString(strPos);
   QJniObject activity =
       QJniObject(QCoreApplication::instance()
@@ -1548,8 +1360,6 @@ void Method::seekTo(QString strPos) {
                             jFile.object<jstring>());
 
 #endif
-
-#endif
 }
 
 void Method::setMDTitle(QString strTitle) {
@@ -1557,13 +1367,6 @@ void Method::setMDTitle(QString strTitle) {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jFile = QAndroidJniObject::fromString(strTitle);
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("setMDTitle", "(Ljava/lang/String;)V",
-                            jFile.object<jstring>());
-
-#else
   QJniObject jFile = QJniObject::fromString(strTitle);
   QJniObject activity =
       QJniObject(QCoreApplication::instance()
@@ -1573,8 +1376,6 @@ void Method::setMDTitle(QString strTitle) {
                             jFile.object<jstring>());
 
 #endif
-
-#endif
 }
 
 void Method::setMDFile(QString strMDFile) {
@@ -1582,13 +1383,6 @@ void Method::setMDFile(QString strMDFile) {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jFile = QAndroidJniObject::fromString(strMDFile);
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("setMDFile", "(Ljava/lang/String;)V",
-                            jFile.object<jstring>());
-
-#else
   QJniObject jFile = QJniObject::fromString(strMDFile);
   QJniObject activity =
       QJniObject(QCoreApplication::instance()
@@ -1596,8 +1390,6 @@ void Method::setMDFile(QString strMDFile) {
                      ->context());
   activity.callMethod<void>("setMDFile", "(Ljava/lang/String;)V",
                             jFile.object<jstring>());
-
-#endif
 
 #endif
 }
@@ -2594,21 +2386,12 @@ bool Method::androidCopyFile(QString src, QString des) {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject srcObj = QAndroidJniObject::fromString(src);
-  QAndroidJniObject desObj = QAndroidJniObject::fromString(des);
-  QAndroidJniObject m_activity = QAndroidJniObject::fromString("copyFile");
-  result = m_activity.callStaticMethod<int>(
-      "com.x/MyActivity", "copyFile", "(Ljava/lang/String;Ljava/lang/String;)I",
-      srcObj.object<jstring>(), desObj.object<jstring>());
-#else
   QJniObject srcObj = QJniObject::fromString(src);
   QJniObject desObj = QJniObject::fromString(des);
   QJniObject m_activity = QJniObject::fromString("copyFile");
   result = m_activity.callStaticMethod<int>(
       "com.x/MyActivity", "copyFile", "(Ljava/lang/String;Ljava/lang/String;)I",
       srcObj.object<jstring>(), desObj.object<jstring>());
-#endif
 
 #endif
   qDebug() << "copyFile " << src << des;

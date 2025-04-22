@@ -11,14 +11,8 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-#include <QCharRef>
-#else
-
 #ifdef Q_OS_ANDROID
 #include <QtCore/private/qandroidextras_p.h>
-#endif
-
 #endif
 
 #include <QColorDialog>

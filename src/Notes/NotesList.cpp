@@ -204,9 +204,6 @@ void NotesList::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column) {
     }
 
     QSettings Reg(iniDir + "curmd.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-    Reg.setIniCodec("utf-8");
-#endif
 
     QString curmd = item->text(1);
     Reg.setValue("/MainNotes/currentItem", curmd);
@@ -219,9 +216,6 @@ void NotesList::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column) {
 
 QString NotesList::getCurrentMDFile() {
   QSettings Reg(iniDir + "curmd.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   QString curmd = Reg.value("/MainNotes/currentItem", "memo/xxx.md").toString();
   mw_one->ui->lblNoteName->setText(
@@ -681,9 +675,7 @@ void NotesList::resetQML_Recycle() {
 
 void NotesList::initRecentOpen() {
   QSettings iniFile(iniDir + "recentopen.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  iniFile.setIniCodec("utf-8");
-#endif
+
   listRecentOpen.clear();
   int count = iniFile.value("/RecentOpen/count", 0).toInt();
   for (int i = 0; i < count; i++) {
@@ -700,9 +692,6 @@ void NotesList::initRecentOpen() {
 
 void NotesList::saveRecentOpen() {
   QSettings iniFile(iniDir + "recentopen.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  iniFile.setIniCodec("utf-8");
-#endif
 
   iniFile.setValue("/RecentOpen/count", listRecentOpen.count());
   for (int i = 0; i < listRecentOpen.count(); i++) {
@@ -713,9 +702,6 @@ void NotesList::saveRecentOpen() {
 
 void NotesList::saveCurrentNoteInfo() {
   QSettings Reg(iniDir + "curmd.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   QString str = currentMDFile;
   QString iniName = str.replace(iniDir, "");
@@ -738,9 +724,6 @@ void NotesList::setNoteBookVPos() {
 
 void NotesList::saveNotesList() {
   QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  iniNotes.setIniCodec("utf-8");
-#endif
 
   mw_one->isNeedAutoBackup = true;
   mw_one->strLatestModify = tr("Modi Notes List");
@@ -795,18 +778,12 @@ void NotesList::saveNotesList() {
 
   // Save Note Name
   QSettings Reg1(iniDir + "curmd.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg1.setIniCodec("utf-8");
-#endif
 
   Reg1.setValue("/MainNotes/NoteName", mw_one->ui->lblNoteName->text());
 }
 
 void NotesList::saveRecycle() {
   QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  iniNotes.setIniCodec("utf-8");
-#endif
 
   mw_one->isNeedAutoBackup = true;
   mw_one->strLatestModify = tr("Modi Notes Recycle");
@@ -835,9 +812,6 @@ void NotesList::initNotesList() {
 
   QSettings *iniNotes =
       new QSettings(iniDir + "mainnotes.ini", QSettings::IniFormat, NULL);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  iniNotes->setIniCodec("utf-8");
-#endif
 
   int topCount = iniNotes->value("/MainNotes/topItemCount").toInt();
   int nNoteBook = topCount;
@@ -932,9 +906,6 @@ void NotesList::initRecycle() {
   twrb->clear();
 
   QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  iniNotes.setIniCodec("utf-8");
-#endif
 
   int i = 0;
   QTreeWidgetItem *topItem = new QTreeWidgetItem;

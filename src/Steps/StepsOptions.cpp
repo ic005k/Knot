@@ -50,9 +50,7 @@ void StepsOptions::init() {
 
 void StepsOptions::on_btnBack_clicked() {
   QSettings Reg(iniDir + "steps.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   Reg.setValue("/Steps/Length",
                mw_one->m_StepsOptions->ui->editStepLength->text().trimmed());
   Reg.setValue(

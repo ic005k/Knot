@@ -541,9 +541,7 @@ void TodoAlarm::on_btnTestSpeech_clicked() {
 void TodoAlarm::on_chkSpeech_clicked() {
   QString ini_file = "/data/data/com.x/files/msg.ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   if (ui->chkSpeech->isChecked())
     Reg.setValue("voice", "true");
   else
@@ -553,9 +551,6 @@ void TodoAlarm::on_chkSpeech_clicked() {
 void TodoAlarm::getChkVoice() {
   QString ini_file = "/data/data/com.x/files/msg.ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   QString strVoice = Reg.value("voice").toString();
   qDebug() << "strVoice" << strVoice;

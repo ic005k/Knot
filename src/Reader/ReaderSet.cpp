@@ -17,11 +17,9 @@ extern QFont::Weight readerFontWeight;
 
 ReaderSet::ReaderSet(QWidget *parent) : QDialog(parent) {
   QPalette pal = palette();
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  pal.setColor(QPalette::Background, QColor(10, 10, 10, 200));
-#else
+
   pal.setColor(QPalette::Window, QColor(10, 10, 10, 200));
-#endif
+
   setPalette(pal);
 
   setModal(true);
@@ -58,9 +56,7 @@ ReaderSet::ReaderSet(QWidget *parent) : QDialog(parent) {
   mw_one->ui->editForegroundColor->setFont(f);
   QString color_0, color_1;
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   color_0 = Reg.value("/Reader/BackgroundColor", "#FFFFFF").toString();
   color_1 = Reg.value("/Reader/ForegroundColor", "#000000").toString();
   mw_one->ui->editBackgroundColor->setText(color_0);
@@ -149,9 +145,7 @@ void ReaderSet::updateProgress() {
 
 void ReaderSet::on_btnStyle1_clicked() {
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   Reg.setValue("/Reader/Style", "1");
   mw_one->m_Reader->readerStyle = "1";
   mw_one->m_Reader->setReaderStyle();
@@ -160,9 +154,7 @@ void ReaderSet::on_btnStyle1_clicked() {
 
 void ReaderSet::on_btnStyle2_clicked() {
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   Reg.setValue("/Reader/Style", "2");
   mw_one->m_Reader->readerStyle = "2";
   mw_one->m_Reader->setReaderStyle();
@@ -176,9 +168,7 @@ void ReaderSet::on_btnStyle2_clicked() {
 
 void ReaderSet::on_btnStyle3_clicked() {
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   Reg.setValue("/Reader/Style", "3");
   mw_one->m_Reader->readerStyle = "3";
   mw_one->m_Reader->setReaderStyle();
@@ -235,9 +225,7 @@ void ReaderSet::on_btnBackgroundColor_clicked() {
   QString color_1 = mw_one->ui->editForegroundColor->text();
 
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   Reg.setValue("/Reader/BackgroundColor",
                mw_one->ui->editBackgroundColor->text());
   Reg.setValue("/Reader/ForegroundColor",
@@ -264,9 +252,7 @@ void ReaderSet::on_btnForegroundColor_clicked() {
   QString color_0 = mw_one->ui->editBackgroundColor->text();
 
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   Reg.setValue("/Reader/BackgroundColor",
                mw_one->ui->editBackgroundColor->text());
   Reg.setValue("/Reader/ForegroundColor",
@@ -329,9 +315,7 @@ void ReaderSet::on_btnAdd_clicked() {
 
 void ReaderSet::saveScrollValue() {
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   Reg.setValue("/Reader/ScrollValue", mw_one->m_Reader->scrollValue);
 }
 

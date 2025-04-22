@@ -83,9 +83,6 @@ void Todo::saveTodo() {
 
   QString todoFile = iniDir + "todo.ini";
   iniTodo = new QSettings(todoFile, QSettings::IniFormat, this);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  iniTodo->setIniCodec("utf-8");
-#endif
 
   iniTodo->setValue("/Todo/Count", count_items);
   for (int i = 0; i < count_items; i++) {
@@ -521,16 +518,6 @@ void Todo::startTimerAlarm(QString text) {
   Q_UNUSED(text);
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jo = QAndroidJniObject::fromString(text);
-  // jo.callStaticMethod<int>("com.x/MyService", "startTimerAlarm", "()I");
-
-  jo.callStaticMethod<int>("com.x/MyActivity", "startAlarm",
-                           "(Ljava/lang/String;)I", jo.object<jstring>());
-
-  jo.callStaticMethod<int>("com.x/ClockActivity", "setInfoText",
-                           "(Ljava/lang/String;)I", jo.object<jstring>());
-#else
   QJniObject jo = QJniObject::fromString(text);
 
   jo.callStaticMethod<int>("com.x/MyActivity", "startAlarm",
@@ -538,7 +525,6 @@ void Todo::startTimerAlarm(QString text) {
 
   jo.callStaticMethod<int>("com.x/ClockActivity", "setInfoText",
                            "(Ljava/lang/String;)I", jo.object<jstring>());
-#endif
 
 #endif
 }
@@ -546,16 +532,9 @@ void Todo::startTimerAlarm(QString text) {
 void Todo::stopTimerAlarm() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jo = QAndroidJniObject::fromString("stopTimerAlarm");
-  // jo.callStaticMethod<int>("com.x/MyService", "stopTimerAlarm", "()I");
-
-  jo.callStaticMethod<int>("com.x/MyActivity", "stopAlarm", "()I");
-#else
   QJniObject jo = QJniObject::fromString("stopTimerAlarm");
 
   jo.callStaticMethod<int>("com.x/MyActivity", "stopAlarm", "()I");
-#endif
 
 #endif
 }
@@ -564,20 +543,13 @@ void Todo::sendMsgAlarm(QString text) {
   Q_UNUSED(text);
 #ifdef Q_OS_ANDROID
   QString strNotify = tr("Todo") + " : " + text;
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject javaNotification = QAndroidJniObject::fromString(strNotify);
-  QAndroidJniObject::callStaticMethod<void>(
-      "com/x/MyService", "notifyTodoAlarm",
-      "(Landroid/content/Context;Ljava/lang/String;)V",
-      QtAndroid::androidContext().object(), javaNotification.object<jstring>());
-#else
+
   QJniObject javaNotification = QJniObject::fromString(strNotify);
   QJniObject::callStaticMethod<void>(
       "com/x/MyService", "notifyTodoAlarm",
       "(Landroid/content/Context;Ljava/lang/String;)V",
       QNativeInterface::QAndroidApplication::context(),
       javaNotification.object<jstring>());
-#endif
 
 #endif
 }
@@ -648,9 +620,6 @@ void Todo::refreshTableListsFromIni() {
   tableLists.clear();
 
   iniTodo = new QSettings(iniDir + "todo.ini", QSettings::IniFormat, this);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  iniTodo->setIniCodec("utf-8");
-#endif
 
   int count_items = iniTodo->value("/Todo/Count", 0).toInt();
 
@@ -689,9 +658,6 @@ void Todo::refreshAlarm() {
 
   QString ini_file = "/data/data/com.x/files/msg.ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   QStringList listAlarm;
   QList<qlonglong> listTotalS;

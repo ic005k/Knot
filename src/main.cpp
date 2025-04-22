@@ -261,9 +261,7 @@ int main(int argc, char* argv[]) {
 
   iniPreferences =
       new QSettings(privateDir + "options.ini", QSettings::IniFormat, NULL);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  iniPreferences->setIniCodec("utf-8");
-#endif
+
   fontSize =
       iniPreferences->value("/Options/FontSize", defaultFontSize).toInt();
   bool isOverUIFont =
@@ -467,10 +465,6 @@ QString loadText(QString textFile) {
 
     } else {
       QTextStream in(&file);
-
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-      in.setCodec("UTF-8");
-#endif
 
       QString text = in.readAll();
       return text;

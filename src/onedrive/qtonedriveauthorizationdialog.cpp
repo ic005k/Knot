@@ -3,11 +3,6 @@
 #include <QAction>
 #include <QApplication>
 #include <QBoxLayout>
-
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-#include <QDesktopWidget>
-#endif
-
 #include <QQmlContext>
 #include <QTimer>
 #include <QtWebView/QtWebView>

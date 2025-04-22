@@ -41,25 +41,19 @@ bool ReceiveShare::eventFilter(QObject* watch, QEvent* evn) {
 
 void ReceiveShare::setShareDone(QString strDone) {
   QSettings Reg("/storage/emulated/0/.Knot/myshare.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   Reg.setValue("/share/shareDone", strDone);
 }
 
 QString ReceiveShare::getShareDone() {
   QSettings Reg("/storage/emulated/0/.Knot/myshare.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   return Reg.value("/share/shareDone", "true").toString();
 }
 
 QString ReceiveShare::getShareType() {
   QSettings Reg("/storage/emulated/0/.Knot/myshare.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   return Reg.value("/share/shareType", "text/plain").toString();
 }
 
@@ -70,36 +64,28 @@ QString ReceiveShare::getShareString() {
 
 QString ReceiveShare::getShareMethod() {
   QSettings Reg("/storage/emulated/0/.Knot/myshare.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   QString method = Reg.value("/share/method", "").toString();
   return method;
 }
 
 int ReceiveShare::getImgCount() {
   QSettings Reg("/storage/emulated/0/.Knot/myshare.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   return Reg.value("/share/imgCount", 0).toInt();
 }
 
 int ReceiveShare::getCursorPos() {
   QSettings Reg("/storage/emulated/0/.Knot/note_text.ini",
                 QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   return Reg.value("/cpos/" + QFileInfo(currentMDFile).baseName(), "").toInt();
 }
 
 void ReceiveShare::setCursorPos(int pos) {
   QSettings Reg("/storage/emulated/0/.Knot/note_text.ini",
                 QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   Reg.setValue("/cpos/" + QFileInfo(currentMDFile).baseName(), pos);
 }
 
@@ -131,9 +117,7 @@ QString ReceiveShare::addToNote_Java() {
   StringToFile(strData, privateDir + "share_text.txt");
 
   QSettings Reg("/storage/emulated/0/.Knot/myshare.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   if (isInsertToNote)
     Reg.setValue("/share/on_create", "insert");
   else
@@ -376,19 +360,6 @@ void ReceiveShare::shareString(const QString& title, const QString& content) {
   Q_UNUSED(content);
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jTitle = QAndroidJniObject::fromString(title);
-  QAndroidJniObject jPath = QAndroidJniObject::fromString(content);
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  QAndroidJniObject m_activity = QAndroidJniObject::fromString("shareString");
-  activity.callMethod<void>(
-      "shareString",
-      "(Ljava/lang/String;Ljava/lang/String;Lorg/qtproject/qt5/android/"
-      "bindings/QtActivity;)V",
-      jTitle.object<jstring>(), jPath.object<jstring>(),
-      activity.object<jobject>());
-
-#else
   QJniObject jTitle = QJniObject::fromString(title);
   QJniObject jPath = QJniObject::fromString(content);
   QJniObject activity = QJniObject::fromString("shareString");
@@ -400,8 +371,6 @@ void ReceiveShare::shareString(const QString& title, const QString& content) {
       activity.object<jobject>());
 
 #endif
-
-#endif
 }
 
 void ReceiveShare::shareImage(const QString& title, const QString& path,
@@ -411,19 +380,6 @@ void ReceiveShare::shareImage(const QString& title, const QString& path,
   Q_UNUSED(fileType);
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jTitle = QAndroidJniObject::fromString(title);
-  QAndroidJniObject jPath = QAndroidJniObject::fromString(path);
-  QAndroidJniObject jType = QAndroidJniObject::fromString(fileType);
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("shareImage",
-                            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/"
-                            "String;Lorg/qtproject/qt5/android/"
-                            "bindings/QtActivity;)V",
-                            jTitle.object<jstring>(), jPath.object<jstring>(),
-                            jType.object<jstring>(),
-                            activity.object<jobject>());
-#else
   QJniObject jTitle = QJniObject::fromString(title);
   QJniObject jPath = QJniObject::fromString(path);
   QJniObject jType = QJniObject::fromString(fileType);
@@ -435,8 +391,6 @@ void ReceiveShare::shareImage(const QString& title, const QString& path,
                             jTitle.object<jstring>(), jPath.object<jstring>(),
                             jType.object<jstring>(),
                             activity.object<jobject>());
-
-#endif
 
 #endif
 }
@@ -453,17 +407,6 @@ void ReceiveShare::shareImages(const QString& title,
   }
   imagesPath = imagesPath.remove(imagesPath.size() - 1, 1).trimmed();
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jTitle = QAndroidJniObject::fromString(title);
-  QAndroidJniObject jPathList = QAndroidJniObject::fromString(imagesPath);
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  QAndroidJniObject::callStaticMethod<void>(
-      "com.x/MyActivity", "shareImages",
-      "(Ljava/lang/String;Ljava/lang/String;Lorg/qtproject/qt5/android/"
-      "bindings/QtActivity;)V",
-      jTitle.object<jstring>(), jPathList.object<jstring>(),
-      activity.object<jobject>());
-#else
   QJniObject jTitle = QJniObject::fromString(title);
   QJniObject jPathList = QJniObject::fromString(imagesPath);
   QJniObject activity = QJniObject::fromString("shareImages");
@@ -475,22 +418,13 @@ void ReceiveShare::shareImages(const QString& title,
       activity.object<jobject>());
 
 #endif
-
-#endif
 }
 
 void ReceiveShare::moveTaskToFront() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-
-  QAndroidJniObject m_activity =
-      QAndroidJniObject::fromString("com.x/MyActivity");
-  m_activity.callStaticMethod<void>("com.x/MyActivity", "setMax", "()V");
-#else
   QJniObject m_activity = QJniObject::fromString("com.x/MyActivity");
   m_activity.callStaticMethod<void>("com.x/MyActivity", "setMax", "()V");
-#endif
 
 #endif
 }

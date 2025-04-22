@@ -353,13 +353,8 @@ void Preferences::on_btnReStart_clicked() {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<int>("setReOpen", "()I");
-#else
   QJniObject activity = QJniObject::fromString("setReOpen");
   activity.callMethod<int>("setReOpen", "()I");
-#endif
 
 #else
   QProcess::startDetached(qApp->applicationFilePath(), QStringList());
@@ -371,27 +366,18 @@ void Preferences::on_btnReStart_clicked() {
 
 void Preferences::setBakStatus(bool status) {
   QSettings Reg(privateDir + iniBakFiles, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   Reg.setValue("/BakFiles/BakStatus", status);
 }
 
 bool Preferences::getBakStatus() {
   QSettings Reg(privateDir + iniBakFiles, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   return Reg.value("/BakFiles/BakStatus", 0).toBool();
 }
 
 void Preferences::setLatestAction(QString action) {
   QSettings Reg(privateDir + iniBakFiles, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   Reg.setValue("/BakFiles/BakAction", action);
 
@@ -400,9 +386,6 @@ void Preferences::setLatestAction(QString action) {
 
 void Preferences::appendBakFile(QString action, QString bakfile) {
   QSettings Reg(privateDir + iniBakFiles, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   int count = Reg.value("/BakFiles/BakCount", 0).toInt();
   count++;
@@ -413,9 +396,6 @@ void Preferences::appendBakFile(QString action, QString bakfile) {
 
 QStringList Preferences::getBakFilesList() {
   QSettings Reg(privateDir + iniBakFiles, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   QStringList fileList;
   QString action, bakfile;

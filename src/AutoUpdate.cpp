@@ -59,25 +59,14 @@ void AutoUpdate::doProcessFinished() {
   m_Method->closeGrayWindows();
   if (isCancel) return;
 
-    // install apk
+  // install apk
 #ifdef Q_OS_ANDROID
-    // "/storage/emulated/0/KnotBak/"
+  // "/storage/emulated/0/KnotBak/"
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jo = QAndroidJniObject::fromString(tarFile);
-  // jo.callStaticMethod<void>("com.x/MyActivity", "setAPKFile",
-  //                          "(Ljava/lang/String;)V", jo.object<jstring>());
-
-  QAndroidJniObject m_activity = QtAndroid::androidActivity();
-  // m_activity.callMethod<void>("installApk");
-  m_activity.callMethod<void>("installApk", "(Ljava/lang/String;)V",
-                              jo.object<jstring>());
-#else
   QJniObject jo = QJniObject::fromString(tarFile);
   QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
   m_activity.callMethod<void>("installApk", "(Ljava/lang/String;)V",
                               jo.object<jstring>());
-#endif
 
 #endif
 }
@@ -105,11 +94,9 @@ void AutoUpdate::startDownload(QString strLink) {
   QNetworkRequest request;
   request.setUrl(QUrl(strLink));
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
   // github redirects the request, so this attribute must be set to true,
   // otherwise returns nothing from qt5.6
-  request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
-#endif
+  // request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
 
   reply = manager->get(request);  // 发送请求
   connect(reply, &QNetworkReply::readyRead, this,

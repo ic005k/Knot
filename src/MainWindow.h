@@ -14,15 +14,9 @@
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-#include <QAndroidJniEnvironment>
-#include <QAndroidJniObject>
-#include <QtAndroid>
-#else
 #include <QCoreApplication>
 #include <QJniEnvironment>
 #include <QJniObject>
-#endif
 
 #endif
 
@@ -35,11 +29,6 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QDesktopServices>
-
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-#include <QDesktopWidget>
-#endif
-
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFileDialog>
@@ -127,10 +116,6 @@ class UpdateGpsMapThread;
 class SliderButton;
 
 #include <QMetaType>
-
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-QT_CHARTS_USE_NAMESPACE
-#endif
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

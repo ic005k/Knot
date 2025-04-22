@@ -315,15 +315,6 @@ void Reader::openFile(QString openfile) {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-        QAndroidJniObject javaZipFile = QAndroidJniObject::fromString(temp);
-        QAndroidJniObject javaZipDir = QAndroidJniObject::fromString(dirpath);
-        QAndroidJniObject m_activity = QAndroidJniObject::fromString("Unzip");
-        m_activity.callStaticMethod<void>(
-            "com.x/MyActivity", "Unzip",
-            "(Ljava/lang/String;Ljava/lang/String;)V",
-            javaZipFile.object<jstring>(), javaZipDir.object<jstring>());
-#else
         QJniObject javaZipFile = QJniObject::fromString(temp);
         QJniObject javaZipDir = QJniObject::fromString(dirpath);
         QJniObject m_activity = QJniObject::fromString("Unzip");
@@ -331,7 +322,6 @@ void Reader::openFile(QString openfile) {
             "com.x/MyActivity", "Unzip",
             "(Ljava/lang/String;Ljava/lang/String;)V",
             javaZipFile.object<jstring>(), javaZipDir.object<jstring>());
-#endif
 
 #endif
       }
@@ -573,9 +563,6 @@ void Reader::saveReader(QString BookmarkText, bool isSetBookmark) {
 
   QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
                 QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   QString bookmarkSn;
   if (isSetBookmark) {
@@ -620,9 +607,6 @@ void Reader::saveReader(QString BookmarkText, bool isSetBookmark) {
   } else {
     // book list
     QSettings Reg1(privateDir + "reader.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-    Reg1.setIniCodec("utf-8");
-#endif
 
     Reg1.setValue("/Reader/FileName", fileName);
     Reg1.setValue("/Reader/FontSize", readerFontSize);
@@ -635,9 +619,6 @@ void Reader::saveReader(QString BookmarkText, bool isSetBookmark) {
 
 void Reader::initReader() {
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   readerStyle = Reg.value("/Reader/Style", "1").toString();
   scrollValue = Reg.value("/Reader/ScrollValue", "1").toReal();
@@ -678,9 +659,7 @@ void Reader::initReader() {
 
 void Reader::getBookList() {
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   // book list
   int count = Reg.value("/Reader/BookCount", 0).toInt();
   bookList.clear();
@@ -1111,9 +1090,6 @@ void Reader::goBookReadPosition() {
   if (isOpen) {
     QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
                   QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-    Reg.setIniCodec("utf-8");
-#endif
 
     if (isText) {
       iPage = Reg.value("/Reader/iPage", 0).toULongLong();
@@ -1177,9 +1153,7 @@ void Reader::PlainTextEditToFile(QPlainTextEdit *txtEdit, QString fileName) {
 void Reader::savePageVPos() {
   QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
                 QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   QFileInfo fiHtml(currentHtmlFile);
   textPos = getVPos();
   if (isEpub) {
@@ -1203,9 +1177,7 @@ void Reader::savePageVPos() {
 void Reader::setPageVPos() {
   QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
                 QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   QFileInfo fiHtml(currentHtmlFile);
   if (isEpub) {
     if (mw_one->ui->qwCata->isVisible()) {
@@ -1493,19 +1465,11 @@ QString Reader::getUriRealPath(QString uripath) {
 #ifdef Q_OS_ANDROID
   QString realpath;
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject javaUriPath = QAndroidJniObject::fromString(uripath);
-  QAndroidJniObject m_activity = QtAndroid::androidActivity();
-  QAndroidJniObject s = m_activity.callObjectMethod(
-      "getUriPath", "(Ljava/lang/String;)Ljava/lang/String;",
-      javaUriPath.object<jstring>());
-#else
   QJniObject javaUriPath = QJniObject::fromString(uripath);
   QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
   QJniObject s = m_activity.callObjectMethod(
       "getUriPath", "(Ljava/lang/String;)Ljava/lang/String;",
       javaUriPath.object<jstring>());
-#endif
 
   realpath = s.toString();
   qDebug() << "RealPath" << realpath;
@@ -2171,15 +2135,8 @@ void Reader::readBookDone() {
 void Reader::setStatusBarHide() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject m_activity = QtAndroid::androidActivity();
-  m_activity.callMethod<void>("setStatusBarHide");
-
-#else
   QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callMethod<void>("setStatusBarHide");
-
-#endif
+  m_activity.callMethod<void>("setStatusBarHide", "()V");
 
 #endif
   isStatusBarShow = false;
@@ -2188,15 +2145,8 @@ void Reader::setStatusBarHide() {
 void Reader::setStatusBarShow() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject m_activity = QtAndroid::androidActivity();
-  m_activity.callMethod<void>("setStatusBarShow");
-
-#else
   QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callMethod<void>("setStatusBarShow");
-
-#endif
+  m_activity.callMethod<void>("setStatusBarShow", "()V");
 
 #endif
   isStatusBarShow = true;
@@ -2280,9 +2230,7 @@ QStringList Reader::getCurrentBookmarkList() {
   QStringList list;
   QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
                 QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   int count = Reg.value("/Bookmark/count", 0).toInt();
   for (int i = 0; i < count; i++) {
     QString txt = Reg.value("/Bookmark/Name" + QString::number(i)).toString();
@@ -2296,9 +2244,7 @@ void Reader::clickBookmarkList(int i) {
   int index = count - 1 - i;
   QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
                 QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   if (isText) {
     iPage = Reg.value("/Bookmark/iPage" + QString::number(index)).toInt();
     on_btnPageNext_clicked();
@@ -2346,17 +2292,10 @@ void Reader::openMyPDF(QString uri) {
   Q_UNUSED(uri);
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jPath = QAndroidJniObject::fromString(uri);
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("openMyPDF", "(Ljava/lang/String;)V",
-                            jPath.object<jstring>());
-#else
   QJniObject jPath = QJniObject::fromString(uri);
   QJniObject activity = QJniObject::fromString("openMyPDF");
   activity.callMethod<void>("openMyPDF", "(Ljava/lang/String;)V",
                             jPath.object<jstring>());
-#endif
 
 #endif
 }
@@ -2364,15 +2303,9 @@ void Reader::openMyPDF(QString uri) {
 void Reader::closeMyPDF() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject activity = QAndroidJniObject::fromString("closeMyPDF");
-  activity.callStaticMethod<void>("com.xhh.pdfui/PDFActivity", "closeMyPDF",
-                                  "()V");
-#else
   QJniObject activity = QJniObject::fromString("closeMyPDF");
   activity.callStaticMethod<void>("com.xhh.pdfui/PDFActivity", "closeMyPDF",
                                   "()V");
-#endif
 
 #endif
 }
@@ -2549,9 +2482,6 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
 
 bool Reader::getDefaultOpen() {
   QSettings Reg(privateDir + "choice_book.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   QString type = Reg.value("book/type", "filepicker").toString();
   if (type == "defaultopen")
@@ -2562,9 +2492,6 @@ bool Reader::getDefaultOpen() {
 
 void Reader::setDefaultOpen(QString value) {
   QSettings Reg(privateDir + "choice_book.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   Reg.setValue("book/type", value);
 }

@@ -120,9 +120,6 @@ void Steps::on_btnReset_clicked() {
 
 void Steps::saveSteps() {
   QSettings Reg(iniDir + "steps.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   if (getCount() > maxCount) {
     delItem(0);
@@ -138,9 +135,7 @@ void Steps::saveSteps() {
   }
 
   QSettings Reg1(iniDir + "initsteps.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg1.setIniCodec("utf-8");
-#endif
+
   Reg1.setValue("TodaySteps", getCurrentSteps());
 }
 
@@ -150,9 +145,6 @@ void Steps::init_Steps() {
   QString ini_file;
   ini_file = iniDir + "steps.ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   mw_one->m_StepsOptions->ui->editStepLength->setText(
       Reg.value("/Steps/Length", "35").toString());
@@ -242,9 +234,7 @@ void Steps::setTableSteps(qlonglong steps) {
   // int count = getCount();
 
   QSettings Reg(iniDir + "steps.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   int count = Reg.value("/Steps/Count", 0).toInt();
 
   if (count > 0) {
@@ -286,25 +276,19 @@ void Steps::setTableSteps(qlonglong steps) {
 
 void Steps::releaseWakeLock() {
 #ifdef Q_OS_ANDROID
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jo = QAndroidJniObject::fromString("releaseWakeLock");
-  jo.callStaticMethod<void>("com.x/MyActivity", "releaseWakeLock", "()V");
-#else
+
   QJniObject jo = QJniObject::fromString("releaseWakeLock");
   jo.callStaticMethod<void>("com.x/MyActivity", "releaseWakeLock", "()V");
-#endif
+
 #endif
 }
 
 void Steps::acquireWakeLock() {
 #ifdef Q_OS_ANDROID
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject m_activity = QtAndroid::androidActivity();
-  m_activity.callMethod<void>("acquireWakeLock");
-#else
+
   QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callMethod<void>("acquireWakeLock");
-#endif
+  m_activity.callMethod<void>("acquireWakeLock", "()V");
+
 #endif
 }
 
@@ -401,9 +385,7 @@ void Steps::setScrollBarPos(double pos) {
 
 void Steps::startRecordMotion() {
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   m_TotalDistance = Reg.value("/GPS/TotalDistance", 0).toDouble();
 
 #ifdef Q_OS_ANDROID
@@ -666,9 +648,7 @@ void Steps::stopRecordMotion() {
   mw_one->ui->btnGPS->setStyleSheet(btnRoundStyle);
 
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   Reg.setValue("/GPS/TotalDistance", m_TotalDistance);
 
   strEndTime = QTime::currentTime().toString();
@@ -702,9 +682,7 @@ void Steps::stopRecordMotion() {
     insertGpsList(0, t0, t1, t2, t3, t4, t5);
 
     QSettings Reg1(iniDir + stry + "-gpslist.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-    Reg1.setIniCodec("utf-8");
-#endif
+
     int count = getGpsListCount();
     QString strYearMonth = stry + "-" + strm;
     Reg1.setValue("/" + strYearMonth + "/Count", count);
@@ -809,9 +787,6 @@ void Steps::loadGpsList(int nYear, int nMonth) {
 
   QSettings Reg(iniDir + QString::number(nYear) + "-gpslist.ini",
                 QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   QString strYearMonth = QString::number(nYear) + "-" + QString::number(nMonth);
   int count = Reg.value("/" + strYearMonth + "/Count", 0).toInt();
@@ -885,9 +860,6 @@ void Steps::allGpsTotal() {
   strm = strm.trimmed();
 
   QSettings Reg(iniDir + stry + "-gpslist.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   // cm = Current Month
   double cmTotal, cmTotal_Cycling, cmTotal_Hiking, cmTotal_Running;
@@ -970,9 +942,7 @@ void Steps::allGpsTotal() {
   }
 
   QSettings Reg1(iniDir + "gpslist.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg1.setIniCodec("utf-8");
-#endif
+
   double m_td = Reg1.value("/GPS/TotalDistance", 0).toDouble();
   Q_UNUSED(m_td);
 
@@ -1040,9 +1010,7 @@ void Steps::writeGpsPos(double lat, double lon, int i, int count) {
   lon = QString::number(lon, 'f', 6).toDouble();
 
   QSettings Reg(iniDir + s0 + "-gps-" + s1 + ".ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   Reg.setValue("/" + QString::number(i) + "/lat", lat);
   Reg.setValue("/" + QString::number(i) + "/lon", lon);
   Reg.setValue("/count", count);
@@ -1252,9 +1220,6 @@ QVector<GPSCoordinate> detectAndCorrectOutliers(
 
 void Steps::saveMovementType() {
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   Reg.setValue("/GPS/isCycling", isCycling);
   Reg.setValue("/GPS/isHiking", isHiking);
@@ -1264,15 +1229,8 @@ void Steps::saveMovementType() {
 void Steps::setVibrate() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jo = QAndroidJniObject::fromString("Vibrate");
-  m_activity.callMethod<void>("setVibrate", "()V");
-
-#else
   QJniObject jo = QJniObject::fromString("Vibrate");
   jo.callMethod<void>("com.x/MyActivity", "setVibrate", "()V");
-
-#endif
 
 #endif
 }

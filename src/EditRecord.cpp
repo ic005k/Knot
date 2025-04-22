@@ -229,9 +229,7 @@ void EditRecord::on_btnCustom_clicked() {
 
 void EditRecord::saveMyClassification() {
   QSettings Reg(iniDir + "desc.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   int count = m_CategoryList->ui->listWidget->count();
 
   c_list.clear();
@@ -284,9 +282,6 @@ void EditRecord::init_MyCategory() {
 
   ini_file = iniDir + "desc.ini";
   QSettings RegDesc(ini_file, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  RegDesc.setIniCodec("utf-8");
-#endif
 
   m_Method->clearAllBakList(mw_one->ui->qwCategory);
 
@@ -417,9 +412,6 @@ void EditRecord::saveAdded() {
 
   QString ini_file = iniDir + iniName + ".ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   qDebug() << "save added: ini_file=" << ini_file;
 
@@ -487,9 +479,6 @@ void EditRecord::saveModified() {
 
   QString ini_file = iniDir + iniName + ".ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   qDebug() << "save modified: ini_file=" << ini_file;
 
@@ -554,9 +543,6 @@ void EditRecord::saveModified() {
 void EditRecord::saveCurrentValue() {
   QString ini_file = privateDir + "editrecord_value.ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   Reg.setValue("value1", mw_one->ui->editCategory->text());
   Reg.setValue("value2", mw_one->ui->editDetails->toPlainText());
@@ -566,9 +552,6 @@ void EditRecord::saveCurrentValue() {
 void EditRecord::setCurrentValue() {
   QString ini_file = privateDir + "editrecord_value.ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   mw_one->ui->editCategory->setText(Reg.value("value1").toString());
   mw_one->ui->editDetails->setText(Reg.value("value2").toString());

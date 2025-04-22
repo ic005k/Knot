@@ -569,16 +569,6 @@ void Notes::zipMemo() {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject javaZipFile =
-      QAndroidJniObject::fromString(iniDir + "memo.zip");
-  QAndroidJniObject javaZipDir = QAndroidJniObject::fromString(iniDir + "memo");
-  QAndroidJniObject m_activity = QAndroidJniObject::fromString("zip");
-  m_activity.callStaticMethod<void>("com.x/MyActivity", "compressFileToZip",
-                                    "(Ljava/lang/String;Ljava/lang/String;)V",
-                                    javaZipDir.object<jstring>(),
-                                    javaZipFile.object<jstring>());
-#else
   QJniObject javaZipFile = QJniObject::fromString(iniDir + "memo.zip");
   QJniObject javaZipDir = QJniObject::fromString(iniDir + "memo");
   QJniObject m_activity = QJniObject::fromString("zip");
@@ -586,7 +576,6 @@ void Notes::zipMemo() {
                                     "(Ljava/lang/String;Ljava/lang/String;)V",
                                     javaZipDir.object<jstring>(),
                                     javaZipFile.object<jstring>());
-#endif
 
 #endif
 }
@@ -630,21 +619,12 @@ void Notes::unzip(QString zipfile) {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject javaZipFile = QAndroidJniObject::fromString(zipfile);
-  QAndroidJniObject javaZipDir = QAndroidJniObject::fromString(iniDir);
-  QAndroidJniObject m_activity = QAndroidJniObject::fromString("Unzip");
-  m_activity.callStaticMethod<void>(
-      "com.x/MyActivity", "Unzip", "(Ljava/lang/String;Ljava/lang/String;)V",
-      javaZipFile.object<jstring>(), javaZipDir.object<jstring>());
-#else
   QJniObject javaZipFile = QJniObject::fromString(zipfile);
   QJniObject javaZipDir = QJniObject::fromString(iniDir);
   QJniObject m_activity = QJniObject::fromString("Unzip");
   m_activity.callStaticMethod<void>(
       "com.x/MyActivity", "Unzip", "(Ljava/lang/String;Ljava/lang/String;)V",
       javaZipFile.object<jstring>(), javaZipDir.object<jstring>());
-#endif
 
 #endif
 }
@@ -741,9 +721,6 @@ void Notes::loadNoteToQML() {
 
 void Notes::refreshQMLVPos(qreal newPos) {
   QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   if (QFile(currentMDFile).exists()) {
     Reg.setValue("/MainNotes/SlidePos" + currentMDFile, newPos);
@@ -752,9 +729,6 @@ void Notes::refreshQMLVPos(qreal newPos) {
 
 void Notes::saveQMLVPos() {
   QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   QString strTag = currentMDFile;
   strTag.replace(iniDir, "");
@@ -772,9 +746,6 @@ void Notes::saveQMLVPos() {
 
 void Notes::setVPos() {
   QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   sliderPos = Reg.value("/MainNotes/SlidePos" + currentMDFile).toReal();
   qreal m_pos = sliderPos;
@@ -1279,9 +1250,7 @@ void Notes::on_editNote() {
 
 void Notes::setEditorVPos() {
   QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   qreal pos = 0;
   if (QFile(currentMDFile).exists()) {
     pos = Reg.value("/MainNotes/Editor" + currentMDFile, 0).toReal();
@@ -1318,13 +1287,8 @@ void Notes::openAndroidNoteEditor() {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("openNoteEditor", "()V");
-#else
   QJniObject activity = QJniObject::fromString("openNoteEditor");
   activity.callMethod<void>("openNoteEditor", "()V");
-#endif
 
 #endif
 
@@ -1334,13 +1298,8 @@ void Notes::openAndroidNoteEditor() {
 void Notes::openMDWindow() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  activity.callMethod<void>("openMDWindow", "()V");
-#else
   QJniObject activity = QJniObject::fromString("openMDWindow");
   activity.callMethod<void>("openMDWindow", "()V");
-#endif
 
 #endif
 }
@@ -1349,21 +1308,11 @@ void Notes::appendNote(QString str) {
   Q_UNUSED(str);
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jTitle = QAndroidJniObject::fromString(str);
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  QAndroidJniObject m_activity =
-      QAndroidJniObject::fromString("com.x/NoteEditor");
-  m_activity.callStaticMethod<void>("com.x/NoteEditor", "appendNote",
-                                    "(Ljava/lang/String;)V",
-                                    jTitle.object<jstring>());
-#else
   QJniObject jTitle = QJniObject::fromString(str);
   QJniObject m_activity = QJniObject::fromString("com.x/NoteEditor");
   m_activity.callStaticMethod<void>("com.x/NoteEditor", "appendNote",
                                     "(Ljava/lang/String;)V",
                                     jTitle.object<jstring>());
-#endif
 
 #endif
 }
@@ -1372,39 +1321,24 @@ void Notes::insertNote(QString str) {
   Q_UNUSED(str);
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jTitle = QAndroidJniObject::fromString(str);
-  QAndroidJniObject activity = QtAndroid::androidActivity();
-  QAndroidJniObject m_activity =
-      QAndroidJniObject::fromString("com.x/NoteEditor");
-  m_activity.callStaticMethod<void>("com.x/NoteEditor", "insertNote",
-                                    "(Ljava/lang/String;)V",
-                                    jTitle.object<jstring>());
-#else
   QJniObject jTitle = QJniObject::fromString(str);
   QJniObject m_activity = QJniObject::fromString("com.x/NoteEditor");
   m_activity.callStaticMethod<void>("com.x/NoteEditor", "insertNote",
                                     "(Ljava/lang/String;)V",
                                     jTitle.object<jstring>());
-#endif
 
 #endif
 }
 
 auto Notes::getAndroidNoteConfig(QString key) {
   QSettings Reg(privateDir + "note_text.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   auto value = Reg.value(key);
   return value;
 }
 
 void Notes::setAndroidNoteConfig(QString key, QString value) {
   QSettings Reg(privateDir + "note_text.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   QString mdFileName = QFileInfo(currentMDFile).baseName();
   if (Reg.value("/cpos/" + mdFileName).toString() == "")
@@ -1876,9 +1810,6 @@ void Notes::openEditUI() {
 
   QSettings *iniNotes =
       new QSettings(privateDir + "notes.ini", QSettings::IniFormat, NULL);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  iniNotes->setIniCodec("utf-8");
-#endif
 
   int vpos = iniNotes->value("/MainNotes/editVPos" + a).toInt();
   int cpos = iniNotes->value("/MainNotes/editCPos" + a).toInt();

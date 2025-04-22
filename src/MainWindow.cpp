@@ -436,15 +436,9 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::initHardStepSensor() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jo = QAndroidJniObject::fromString("CheckSensorWin");
-  isHardStepSensor =
-      jo.callStaticMethod<int>("com.x/MyActivity", "getHardStepCounter", "()I");
-#else
   QJniObject jo = QJniObject::fromString("CheckSensorWin");
   isHardStepSensor =
       jo.callStaticMethod<int>("com.x/MyActivity", "getHardStepCounter", "()I");
-#endif
 
   if (isHardStepSensor == 0) {
     ui->btnStepsOptions->setHidden(true);
@@ -467,22 +461,15 @@ void MainWindow::initTodayInitSteps() {
 
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jo = QAndroidJniObject::fromString("getSteps");
-  a = jo.callStaticMethod<float>("com.x/MyActivity", "getSteps", "()F");
-#else
   QJniObject jo = QJniObject::fromString("getSteps");
   a = jo.callStaticMethod<float>("com.x/MyActivity", "getSteps", "()F");
-#endif
 
 #endif
 
   tc = a;
 
   QSettings Reg(iniDir + "initsteps.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   QString str = QDate::currentDate().toString("ddd MM dd yyyy");
 
   if (!Reg.allKeys().contains(str)) {
@@ -526,20 +513,12 @@ void MainWindow::sendMsg(int CurTableCount) {
   QString strNotify = tr("Today") + " : " + QString::number(CurTableCount) +
                       "  ( " + QString::number(gl) + " " + tr("km") + " )";
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject javaNotification = QAndroidJniObject::fromString(strNotify);
-  QAndroidJniObject::callStaticMethod<void>(
-      "com/x/MyService", "notify",
-      "(Landroid/content/Context;Ljava/lang/String;)V",
-      QtAndroid::androidContext().object(), javaNotification.object<jstring>());
-#else
   QJniObject javaNotification = QJniObject::fromString(strNotify);
   QJniObject::callStaticMethod<void>(
       "com/x/MyService", "notify",
       "(Landroid/content/Context;Ljava/lang/String;)V",
       QNativeInterface::QAndroidApplication::context(),
       javaNotification.object<jstring>());
-#endif
 
 #endif
 }
@@ -557,9 +536,7 @@ void MainWindow::init_Options() {
   macIniDir = iniPreferences->value("/Options/macIniDir", "").toString();
 
   QSettings Reg2(iniDir + "ymd.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg2.setIniCodec("utf-8");
-#endif
+
   btnYText = Reg2.value("/YMD/btnYText", 2022).toString();
 
   btnMText = Reg2.value("/YMD/btnMText", tr("Month")).toString();
@@ -592,9 +569,7 @@ void MainWindow::init_Options() {
 
   // time machine
   QSettings RegTime(privateDir + "timemachine.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  RegTime.setIniCodec("utf-8");
-#endif
+
   int countTime = RegTime.value("/TimeLines/Count", 0).toInt();
   for (int i = 0; i < countTime; i++)
     timeLines.append(
@@ -735,9 +710,6 @@ void MainWindow::init_TotalData() {
 
   ini_file = iniDir + "tab.ini";
   QSettings RegTab(ini_file, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  RegTab.setIniCodec("utf-8");
-#endif
 
   int TabCount = RegTab.value("TabCount", 0).toInt();
 
@@ -1210,9 +1182,7 @@ QObjectList MainWindow::getAllUIControls(QObject *parent) {
 void MainWindow::saveTab() {
   // Tab
   QSettings Reg(iniDir + "tab.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   int TabCount = tabData->tabBar()->count();
   Reg.setValue("TabCount", TabCount);
   int CurrentIndex = tabData->currentIndex();
@@ -1232,9 +1202,6 @@ void MainWindow::saveData(QTreeWidget *tw, int tabIndex) {
   QString name = tw->objectName();
   QString ini_file = iniDir + name + ".ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   if (!QFile::exists(ini_file)) {
     Reg.setValue("/" + name + "/" + "CreatedTime",
@@ -1400,9 +1367,6 @@ void MainWindow::readData(QTreeWidget *tw) {
 
     if (QFile::exists(ini_file)) {
       QSettings Reg(ini_file, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-      Reg.setIniCodec("utf-8");
-#endif
 
       QString group = Reg.childGroups().at(0);
 
@@ -1576,9 +1540,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   }
 #else
   QSettings Reg(privateDir + "winpos.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   Reg.setValue("x", this->geometry().x());
   Reg.setValue("y", this->geometry().y());
   Reg.setValue("w", this->geometry().width());
@@ -1591,24 +1553,15 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 void MainWindow::setMini() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jo = QAndroidJniObject::fromString("MiniWin");
-  jo.callStaticMethod<void>("com.x/MyActivity", "setMini", "()V");
-
-#else
   QJniObject jo = QJniObject::fromString("MiniWin");
   jo.callStaticMethod<void>("com.x/MyActivity", "setMini", "()V");
-
-#endif
 
 #endif
 }
 
 void MainWindow::resetWinPos() {
   QSettings Reg(privateDir + "winpos.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   int x, y, w, h;
   x = Reg.value("x").toInt();
   y = Reg.value("y").toInt();
@@ -1906,9 +1859,7 @@ QTreeWidget *MainWindow::init_TreeWidget(QString name) {
   QString ini_file = iniDir + name + ".ini";
   if (!QFile::exists(ini_file)) {
     QSettings RegTab(ini_file, QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-    RegTab.setIniCodec("utf-8");
-#endif
+
     RegTab.setValue("/" + name + "/" + "CreatedTime",
                     QDateTime::currentDateTime().toString());
   }
@@ -2203,10 +2154,6 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 
   if (!loading) {
     QSettings Reg(iniDir + "tab.ini", QSettings::IniFormat);
-
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-    Reg.setIniCodec("utf-8");
-#endif
 
     Reg.setValue("CurrentIndex", index);
   }
@@ -3132,9 +3079,7 @@ void MainWindow::on_btnSteps_clicked() {
 
   if (ui->lblGpsInfo->text() == tr("GPS Info")) {
     QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-    Reg.setIniCodec("utf-8");
-#endif
+
     double m_td = Reg.value("/GPS/TotalDistance", 0).toDouble();
     ui->lblTotalDistance->setText(QString::number(m_td) + " km");
   }
@@ -3212,19 +3157,11 @@ void MainWindow::updateHardSensorSteps() {
   qlonglong steps = 0;
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject m_activity = QtAndroid::androidActivity();
-  m_activity.callMethod<void>("initStepSensor");
-
-  QAndroidJniObject jo = QAndroidJniObject::fromString("getSteps");
-  tc = jo.callStaticMethod<float>("com.x/MyActivity", "getSteps", "()F");
-#else
   QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callMethod<void>("initStepSensor");
+  m_activity.callMethod<void>("initStepSensor", "()V");
 
   QJniObject jo = QJniObject::fromString("getSteps");
   tc = jo.callStaticMethod<float>("com.x/MyActivity", "getSteps", "()F");
-#endif
 
 #endif
   steps = tc - initTodaySteps;
@@ -3783,9 +3720,7 @@ void MainWindow::init_UIWidget() {
   ui->rbHiking->setStyleSheet(rbStyle);
   ui->rbRunning->setStyleSheet(rbStyle);
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
+
   ui->rbCycling->setChecked(Reg.value("/GPS/isCycling", 0).toBool());
   ui->rbHiking->setChecked(Reg.value("/GPS/isHiking", 0).toBool());
   ui->rbRunning->setChecked(Reg.value("/GPS/isRunning", 0).toBool());
@@ -4042,13 +3977,8 @@ void MainWindow::init_Menu(QMenu *mainMenu) {
 void MainWindow::on_openKnotBakDir() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject m_activity = QtAndroid::androidActivity();
-  m_activity.callMethod<void>("openKnotBakDir");
-#else
   QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callMethod<void>("openKnotBakDir");
-#endif
+  m_activity.callMethod<void>("openKnotBakDir", "()V");
 
 #endif
 }
@@ -4224,13 +4154,8 @@ void MainWindow::on_btnMenu_clicked() {
 void MainWindow::stopJavaTimer() {
 #ifdef Q_OS_ANDROID
 
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QAndroidJniObject jo = QAndroidJniObject::fromString("StopWin");
-  jo.callStaticMethod<int>("com.x/MyService", "stopTimer", "()I");
-#else
   QJniObject jo = QJniObject::fromString("StopWin");
   jo.callStaticMethod<int>("com.x/MyService", "stopTimer", "()I");
-#endif
 
 #endif
   accel_pedometer->stop();
@@ -4274,9 +4199,7 @@ static void JavaNotify_4() {
       mw_one->m_ReceiveShare->closeAllChildWindows();
 
     QSettings Reg("/storage/emulated/0/.Knot/alarm.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-    Reg.setIniCodec("utf-8");
-#endif
+
     QString backMain = Reg.value("/action/backMain", "false").toString();
     Reg.setValue("/action/backMain", "false");
     if (backMain == "false") {
@@ -4327,9 +4250,6 @@ static void JavaNotify_8() {
 
 static void JavaNotify_9() {
   QSettings Reg(privateDir + "choice_book.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  Reg.setIniCodec("utf-8");
-#endif
 
   QString file = Reg.value("book/file", "").toString();
   QString type = Reg.value("book/type", "filepicker").toString();
@@ -4399,27 +4319,6 @@ static const JNINativeMethod gMethods[] = {
 };
 
 void RegJni(const char *myClassName) {
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  QtAndroid::runOnAndroidThreadSync([=]() {
-    QAndroidJniEnvironment Environment;
-    const char *mClassName = myClassName;  //"com/x/MyService";
-    jclass j_class;
-    j_class = Environment->FindClass(mClassName);
-    if (j_class == nullptr) {
-      qDebug() << "erro clazz";
-      return;
-    }
-    jint mj = Environment->RegisterNatives(
-        j_class, gMethods, sizeof(gMethods) / sizeof(gMethods[0]));
-    if (mj != JNI_OK) {
-      qDebug() << "register native method failed!";
-      return;
-    } else {
-      qDebug() << "RegisterNatives success!";
-    }
-  });
-  qDebug() << "++++++++++++++++++++++++";
-#else
   QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
     QJniEnvironment Environment;
     const char *mClassName = myClassName;  //"com/x/MyService";
@@ -4439,7 +4338,6 @@ void RegJni(const char *myClassName) {
     }
   });
   qDebug() << "++++++++++++++++++++++++";
-#endif
 }
 
 #endif
