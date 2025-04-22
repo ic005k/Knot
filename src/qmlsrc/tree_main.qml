@@ -1,14 +1,11 @@
-import QtQuick 2.15
-import QtQuick.Window 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
-import QtQuick.Controls 1.4
+import QtQuick
+import QtQuick.Window
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Item {
     id: window
     visible: true
-
-
 
     function addTopItem(strItem) {
         var topItem1 = tree.createItem(strItem, "/res/nb.png")
@@ -46,7 +43,6 @@ Item {
             iconSize = (Qt.size(25, 25))
             font.pointSize = fontSize
 
-
             var topItem1 = createItem("Item 1", "/res/nb.png")
             topItem1.setSelectionFlag(selectionCurrent)
             addTopLevelItem(topItem1)
@@ -58,8 +54,6 @@ Item {
             addTopItem("Item 2")
             addTopItem("Item 3")
             addTopItem("Item 4")
-
-
         }
 
         onCurrentItemChanged: {
@@ -127,8 +121,7 @@ Item {
                     menuAdd.popup()
                 }
 
-
-                Menu{
+                Menu {
                     id: menuAdd
                     title: "Add Node"
 

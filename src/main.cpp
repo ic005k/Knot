@@ -52,6 +52,7 @@ int main(int argc, char* argv[]) {
 
   // 使用 ANGLE 或软件渲染回退
   qputenv("QT_OPENGL", "angle");  // 或 "software" 如果 angle 仍失败
+                                  // qputenv("QT_OPENGL", "software");
 
   // 设置图形后端（RHI 抽象层）
   QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);

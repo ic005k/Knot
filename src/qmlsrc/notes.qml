@@ -3,6 +3,8 @@ import QtQuick.Controls
 import QtWebChannel
 import QtWebEngine
 import Qt.labs.settings
+import QtQuick.Controls.Fusion
+import QtCore
 
 import MyModel2 1.0
 

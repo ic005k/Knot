@@ -1664,17 +1664,17 @@ QString markdownToHtmlWithMath(const QString &md) {
         <script>
             MathJax = {
                 tex: {
-                    inlineMath: [['$', '$'], ['\\(', '\\)']],  // 支持 $...$ 和 \(...\)
+                    inlineMath: [['$', '$'], ['\\(', '\\)']],
                     displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                    processEscapes: true,                      // 允许反斜杠转义
+                    processEscapes: true,
                     packages: {'[+]': ['base', 'ams', 'newcommand']}
                 },
                 options: {
-                    ignoreHtmlClass: 'tex-ignore',            // 跳过包含此类的元素
-                    processHtmlClass: 'tex-process'           // 指定需要处理的元素
+                    ignoreHtmlClass: 'tex-ignore',
+                    processHtmlClass: 'tex-process'
                 },
                 startup: {
-                    typeset: false                            // 稍后手动触发渲染
+                    typeset: false
                 }
             };
         </script>

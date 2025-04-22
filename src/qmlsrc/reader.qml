@@ -210,7 +210,7 @@ Rectangle {
                              })
             }
 
-            onLinkActivated: {
+            onLinkActivated: function (link){
 
                 console.log("reader htmlPath=" + htmlPath)
                 console.log("reader Link=" + link)
