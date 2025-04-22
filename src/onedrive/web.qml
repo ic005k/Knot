@@ -1,6 +1,7 @@
-import QtQuick 2.2
-import QtQuick.Controls 1.1
-import QtWebView 1.1
+import QtQuick
+import QtQuick.Controls
+import QtWebView
+import QtQuick.Controls.Fusion
 
 import MyModel1 1.0
 
@@ -33,7 +34,7 @@ Item {
 
             console.log(m_prog)
 
-            if (webViewOne.loadProgress == 100) {
+            if (webViewOne.loadProgress === 100) {
                 console.log("loadProgress=100%")
                 console.log("CurrentUrl=" + webViewOne.url)
                 file.webEnd = webViewOne.url.toString()

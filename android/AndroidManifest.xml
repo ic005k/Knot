@@ -2,9 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http:// schemas.android.com/ tools" package="com.x" android:installLocation="auto"
     android:versionCode="1" android:versionName="1.2.36">
+
     <!-- The following comment will be replaced upon deployment with default permissions based on
     the dependencies of the application.
          Remove the comment if you do not require these default permissions. -->
+         
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -56,31 +58,15 @@
             <!-- Application arguments -->
             <!-- meta-data android:name="android.app.arguments" android:value="arg1 arg2 arg3"/ -->
             <!-- Application arguments -->
+
             <meta-data android:name="android.app.lib_name" android:value="Knot" />
-            <!-- meta-data android:name="android.app.qt_sources_resource_id"
-            android:resource="@array/qt_sources"/ -->
-            <meta-data android:name="android.app.repository" android:value="default" />
-            <meta-data android:name="android.app.qt_libs_resource_id"
-                android:resource="@array/qt_libs" />
-            <meta-data android:name="android.app.bundled_libs_resource_id"
-                android:resource="@array/bundled_libs" />
-            <!-- Deploy Qt libs as part of package -->
-            <meta-data android:name="android.app.bundle_local_qt_libs" android:value="1" />
-            <!-- Run with local libs -->
-            <meta-data android:name="android.app.use_local_qt_libs" android:value="1" />
-            <meta-data android:name="android.app.libs_prefix" android:value="/data/local/tmp/qt/" />
-            <meta-data android:name="android.app.load_local_libs_resource_id"
-                android:resource="@array/load_local_libs" />
-            <meta-data android:name="android.app.load_local_jars" android:value="jar/QtAndroid.jar" />
-            <meta-data android:name="android.app.static_init_classes" android:value="" />
-            <!-- Used to specify custom system library path to run with local system libs -->
-            <!-- <meta-data android:name="android.app.system_libs_prefix"
-            android:value="/system/lib/"/> -->
+             
             <!--  Messages maps -->
             <meta-data android:name="android.app.fatal_error_msg"
                 android:value="@string/fatal_error_msg" />
             <meta-data android:name="android.app.unsupported_android_version"
                 android:value="@string/unsupported_android_version" />
+
             <!--  Messages maps -->
             <!-- Background running -->
             <!-- Warning: changing this value to true may cause unexpected crashes if the
@@ -317,11 +303,11 @@
             android:authorities="com.x"
             android:exported="false"
             android:grantUriPermissions="true">
-            <!-- meta-data android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" / -->
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
 
-            <meta-data android:name="androidx.core.content.FileProvider.paths" 
-                android:resource="@xml/file_paths"/>    
+            <!-- meta-data android:name="androidx.core.content.FileProvider.paths" 
+                android:resource="@xml/file_paths"/ -->    
         </provider>
 
     </application>

@@ -600,10 +600,10 @@ public class MyActivity
     verifyStoragePermissions(this);
 
     // File Watch FileWatcher
-    if (null == mFileWatcher) {
-      mFileWatcher = new FileWatcher("/storage/emulated/0/KnotData/");
-      mFileWatcher.startWatching(); // 开始监听
-    }
+    // if (null == mFileWatcher) {
+    // mFileWatcher = new FileWatcher("/storage/emulated/0/KnotData/");
+    // mFileWatcher.startWatching(); // 开始监听
+    // }
 
     if (m_instance != null) {
       Log.d(TAG, "App is already running... this won't work");

@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Window
-import QtQml
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Controls.Fusion

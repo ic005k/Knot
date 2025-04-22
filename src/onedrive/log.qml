@@ -1,9 +1,9 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Window 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Window
+import QtQuick.Layouts
 import MyModel2 1.0
-import QtQuick.Layouts 1.1
+import QtQuick.Controls.Fusion
 
 Item {
     id: textitem
