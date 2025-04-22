@@ -1,8 +1,9 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtWebChannel 1.0
-import QtWebEngine 6.0
-import Qt.labs.settings 1.1
+import QtQuick
+import QtQuick.Controls
+import QtWebChannel
+import QtWebEngine
+import Qt.labs.settings
+
 import MyModel2 1.0
 
 Item {

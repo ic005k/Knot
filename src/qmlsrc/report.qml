@@ -1,6 +1,7 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import Qt.labs.qmlmodels 1.0
+import QtQuick
+import QtQuick.Controls
+import Qt.labs.qmlmodels
+import QtQuick.Controls.Fusion
 
 Rectangle {
 
@@ -117,7 +118,7 @@ Rectangle {
             id: vbar
             policy: ScrollBar.AsNeeded
             interactive: false // 关键！禁止拖动操作
-            width: 4
+            width: 8
 
             // 动态显隐控制
             visible: opacity > 0
@@ -141,13 +142,6 @@ Rectangle {
                 radius: 3
             }
             background: null // 彻底消除背景容器
-        }
-
-        // 自动隐藏触发器（关键）
-        Timer {
-            running: !tableView.isScrolling && vbar.opacity > 0
-            interval: 800
-            onTriggered: vbar.opacity = 0
         }
 
         model: TableModel {

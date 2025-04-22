@@ -1,9 +1,9 @@
-import QtQuick 6.7
-import QtQuick.Controls 6.7
-import QtQuick.Layouts 6.7
-
-import QtQuick.Window 2.15
-import QtQml 2.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Controls.Fusion
+import QtQuick.Window
+import QtQml
 
 Rectangle {
     id: root
@@ -153,7 +153,7 @@ Rectangle {
             id: vbar
             policy: ScrollBar.AsNeeded
             interactive: false // 关键！禁止拖动操作
-            width: 4
+            width: 8
 
             // 动态显隐控制
             visible: opacity > 0

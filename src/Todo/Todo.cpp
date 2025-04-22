@@ -114,9 +114,6 @@ void Todo::init_Todo() {
   clearAll();
 
   iniTodo = new QSettings(iniDir + "todo.ini", QSettings::IniFormat, this);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-  iniTodo->setIniCodec("utf-8");
-#endif
 
   int count = iniTodo->value("/Todo/Count").toInt();
   for (int i = 0; i < count; i++) {

@@ -1,8 +1,9 @@
-import QtQuick 2.15
-import QtQuick.Window 2.15
-import QtQml 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Window
+import QtQml
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Controls.Fusion
 
 Rectangle {
     id: root
@@ -286,14 +287,8 @@ Rectangle {
                 onReleased: {
                     var delta = Qt.point(mouse.x - clickPos.x,
                                          mouse.y - clickPos.y)
-                    console.debug("delta.x: " + delta.x)
-                    if ((delta.x < 0) && (aBtnShow.running === false)
-                            && (delBtn.width == 0)) {
-                        aBtnShow.start()
-                    } else if (aBtnHide.running === false
-                               && (delBtn.width > 0)) {
-                        aBtnHide.start()
-                    }
+
+                    //console.debug("delta.x: " + delta.x)
                 }
 
                 onClicked: {
@@ -321,65 +316,13 @@ Rectangle {
                     //console.log(data.text0 + "," + data.type + ", count=" + view.count)
                 }
             }
-
-            Rectangle {
-                color: "#AAAAAA"
-                height: 0
-                width: parent.width
-                anchors.bottom: parent.bottom
-            }
-
-            Rectangle {
-                id: delBtn
-                visible: false
-                height: parent.height
-                width: 0
-                color: "#FF0000"
-
-                anchors.right: parent.right
-                anchors.rightMargin: -30
-                radius: 0
-
-                Text {
-                    width: 56
-                    anchors.centerIn: parent
-
-                    text: qsTr("Done")
-                    color: "#ffffff"
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        m_Todo.addToRecycle()
-                        view.model.remove(index)
-                    }
-                }
-            }
-
-            PropertyAnimation {
-                id: aBtnShow
-                target: delBtn
-                property: "width"
-                duration: 100
-                from: 0
-                to: 80
-            }
-            PropertyAnimation {
-                id: aBtnHide
-                target: delBtn
-                property: "width"
-                duration: 100
-                from: 80
-                to: 0
-            }
         }
     }
 
     ListView {
         id: view
-        boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
 
+        boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
         anchors {
             fill: parent
             margins: 4
@@ -413,7 +356,7 @@ Rectangle {
             id: vbar
             policy: ScrollBar.AsNeeded
             interactive: false // 关键！禁止拖动操作
-            width: 4
+            width: 8
 
             // 动态显隐控制
             visible: opacity > 0
@@ -438,8 +381,6 @@ Rectangle {
             }
             background: null // 彻底消除背景容器
         }
-
-
     }
 
     function getListEleHeadColor(ntype) {

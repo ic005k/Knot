@@ -1,7 +1,9 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Window 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Window
+import QtQuick.Layouts
+import QtQuick.Controls.Fusion
+
 import MyModel2 1.0
 
 Rectangle {
@@ -20,7 +22,6 @@ Rectangle {
 
     function updateText(str) {
         stringList = str.split('</html>')
-        //idContentListView.positionViewAtEnd()
     }
 
     function getText() {
@@ -126,7 +127,7 @@ Rectangle {
         selectionStart: textArea.selectionStart
         selectionEnd: textArea.selectionEnd
 
-        onLoaded: {
+        onLoaded: function (text) {
             textArea.text = text
         }
         onError: {
@@ -164,8 +165,8 @@ Rectangle {
         boundsBehavior: Flickable.StopAtBounds
         maximumFlickVelocity: 1500 // 降低滚动速度更顺滑
 
-        ScrollBar.vertical: ScrollBar {}
-
+        // 自带的默认的滚动条，外观一般，不可定制
+        // ScrollBar.vertical: ScrollBar {}
         states: State {
             name: "autoscroll"
             PropertyChanges {
@@ -274,8 +275,42 @@ Rectangle {
             }
         }
 
-        Component.onCompleted: {
+        ScrollBar.vertical: ScrollBar {
+            id: vbar
+            policy: ScrollBar.AsNeeded
+            interactive: false // 关键！禁止拖动操作
+            width: 10
 
+            // 关键：size 绑定到可视区域比例
+            size: flickable.visibleArea.heightRatio
+            // 可选：设置滑块最小尺寸（避免过小）
+            minimumSize: 0.1
+
+            // 动态显隐控制
+            visible: opacity > 0
+
+            //用于某个view中，如果没有则忽略
+            //opacity: view.isScrolling ? 1 : 0
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 300
+                }
+            }
+
+            // 极简样式
+            contentItem: Rectangle {
+                color: isDark ? "#3498db" : "#606060"
+                opacity: vbar.active ? (isDark ? 0.8 : 0.7) : 0
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 200 // 更流畅的动画
+                        easing.type: Easing.OutQuad
+                    }
+                }
+                radius: 3
+            }
+
+            background: null // 彻底消除背景容器
         }
     }
 

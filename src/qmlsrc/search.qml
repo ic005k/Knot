@@ -1,8 +1,9 @@
-import QtQuick 2.15
-import QtQuick.Window 2.15
-import QtQml 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Window
+import QtQml
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Controls.Fusion
 
 Rectangle {
     id: root
@@ -422,7 +423,7 @@ Rectangle {
             id: vbar
             policy: ScrollBar.AsNeeded
             interactive: false // 关键！禁止拖动操作
-            width: 4
+            width: 8
 
             // 动态显隐控制
             visible: opacity > 0
@@ -448,12 +449,7 @@ Rectangle {
             background: null // 彻底消除背景容器
         }
 
-        // 自动隐藏触发器（关键）
-        Timer {
-            running: !view.isScrolling && vbar.opacity > 0
-            interval: 800
-            onTriggered: vbar.opacity = 0
-        }
+
     }
 
     function getListEleHeadColor(ntype) {
