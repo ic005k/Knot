@@ -361,7 +361,7 @@ Rectangle {
                 property point clickPos: "0,0"
 
                 anchors.fill: parent
-                onPressed: {
+                onPressed: function(mouse){
                     clickPos = Qt.point(mouse.x, mouse.y)
                 }
                 onReleased: {

@@ -1638,7 +1638,8 @@ QString markdownToHtmlWithMath(const QString &md) {
 
   // --- 新增：定义 Mermaid 脚本 ---
   QString mermaid_js = R"(
-      <script src="https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.min.js"></script>
+      <script
+  src="https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.min.js"></script>
       <script>
           document.addEventListener('DOMContentLoaded', function() {
               mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
@@ -1682,8 +1683,10 @@ QString markdownToHtmlWithMath(const QString &md) {
     )";
 
   QString highlight_js = R"(
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/vs.min.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/vs.min.css">
+        <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', (event) => {
                 document.querySelectorAll('pre code').forEach((el) => {

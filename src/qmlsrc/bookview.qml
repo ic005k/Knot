@@ -117,19 +117,19 @@ Window {
             property real startY: 0  // 新增Y坐标记录
             property real minSwipe: 50
 
-            onPressed: {
+            onPressed: function(mouse){
                 startX = mouse.x
                 startY = mouse.y  // 初始化Y坐标
             }
 
-            onPositionChanged: {
+            onPositionChanged: function(mouse){
                 if (isAnimating) return;
                 const deltaX = mouse.x - startX;
                 rotation.angle = Math.max(-180, Math.min(180,
                     (deltaX / width) * 180 * (deltaX > 0 ? 1 : -1)));
             }
 
-            onReleased: {
+            onReleased:function(mouse) {
                 if (isAnimating) return;
                 const deltaX = mouse.x - startX;
                 const deltaY = mouse.y - startY;  // 使用已定义的startY
