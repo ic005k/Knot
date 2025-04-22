@@ -349,14 +349,12 @@ SOURCES += \
     src/MainWindow.cpp \
     src/Notes/ColorDialog.cpp \
     src/Notes/LineNumberArea.cpp \
-    src/Notes/MarkdownHighlighter.cpp \
     src/Notes/MoveTo.cpp \
     src/Notes/NewNoteBook.cpp \
     src/Notes/Notes.cpp \
     src/Notes/NotesList.cpp \
     src/Notes/NotesSearchEngine.cpp \
     src/Notes/PrintPDF.cpp \
-    src/Notes/QOwnLanguageData.cpp \
     src/Notes/QTextEditHighlighter.cpp \
     src/Notes/SearchResultModel.cpp \
     src/Notes/TextSelector.cpp \
@@ -587,14 +585,12 @@ HEADERS += \
     src/MainWindow.h \
     src/Notes/ColorDialog.h \
     src/Notes/LineNumberArea.h \
-    src/Notes/MarkdownHighlighter.h \
     src/Notes/MoveTo.h \
     src/Notes/NewNoteBook.h \
     src/Notes/Notes.h \
     src/Notes/NotesList.h \
     src/Notes/NotesSearchEngine.h \
     src/Notes/PrintPDF.h \
-    src/Notes/QOwnLanguageData.h \
     src/Notes/QTextEditHighlighter.h \
     src/Notes/SearchResultModel.h \
     src/Notes/TextSelector.h \

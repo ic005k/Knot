@@ -72,7 +72,6 @@
 #include "src/Comm/ShowMessage.h"
 #include "src/EditRecord.h"
 #include "src/LoadPic.h"
-#include "src/Notes/MarkdownHighlighter.h"
 #include "src/Notes/Notes.h"
 #include "src/Notes/NotesList.h"
 #include "src/Notes/NotesSearchEngine.h"

@@ -386,7 +386,7 @@ void ReceiveShare::shareImage(const QString& title, const QString& path,
   QJniObject activity = QJniObject::fromString("shareImage");
   activity.callMethod<void>("shareImage",
                             "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/"
-                            "String;Lorg/qtproject/qt5/android/"
+                            "String;Lorg/qtproject/qt/android/"
                             "bindings/QtActivity;)V",
                             jTitle.object<jstring>(), jPath.object<jstring>(),
                             jType.object<jstring>(),
