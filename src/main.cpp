@@ -44,6 +44,8 @@ QSplashScreen* splash;
 #define Cross_Origin
 
 int main(int argc, char* argv[]) {
+  QtWebView::initialize();
+
 #ifdef Q_OS_ANDROID
   isAndroid = true;
 
@@ -51,18 +53,14 @@ int main(int argc, char* argv[]) {
   qputenv("QT_ENABLE_HIGHDPI_SCALING", "1");
 
   // 使用 ANGLE 或软件渲染回退
-  // qputenv("QT_OPENGL", "angle");  // 或 "software" 如果 angle 仍失败
-  qputenv("QT_OPENGL", "software");
+  qputenv("QT_OPENGL", "angle");  // 或 "software" 如果 angle 仍失败
+                                  // qputenv("QT_OPENGL", "software");
 
   // 设置图形后端（RHI 抽象层）
-  // QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
-  // 或显式指定 Vulkan
-  // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
+  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
 
 #else
   // 桌面端配置
-  QtWebView::initialize();
-
   qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
   QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
       Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);

@@ -6,13 +6,11 @@ apply plugin:'kotlin-kapt'                       // 启用 kapt
 configurations.all {
     resolutionStrategy {
         force 'org.jetbrains:annotations:17.0.0' // Use the version you need
-
-        //force 'com.google.guava:guava:30.1-android' // 使用较新的 Guava 版本
-        force 'com.google.guava:guava:33.2.0-android'
+        force 'com.google.guava:guava:30.1-android' // 使用较新的 Guava 版本
     }
 
     exclude group: 'org.jetbrains', module: 'annotations-java5'
-    // exclude group: 'com.google.guava', module: 'listenablefuture'
+    exclude group: 'com.google.guava', module: 'listenablefuture'
 }
 
 buildscript {
@@ -28,9 +26,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
-        //classpath 'com.android.tools.build:gradle:7.4.0'
-        //classpath 'com.android.tools.build:gradle:8.2.0'  // 使用最新稳定版
+        classpath 'com.android.tools.build:gradle:7.4.1'
 
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
      }
@@ -47,11 +43,8 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-
     implementation 'androidx.core:core:1.13.1'
-    //implementation 'androidx.core:core:1.10.1'
 
-    //JetBrains 提供的一个 Java 注解库
     //implementation 'org.jetbrains:annotations-java5:17.0.0'
 
     // 改为AndroidX版本：
@@ -105,35 +98,45 @@ android {
 
     namespace 'com.x'
 
-    //compileSdkVersion androidCompileSdkVersion
-    //buildToolsVersion androidBuildToolsVersion
-    //ndkVersion androidNdkVersion
-
-    compileSdkVersion androidCompileSdkVersion.toInteger()
-
     // 启用增量编译选项
     compileOptions {
       incremental true
     }
 
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
+
     useLibrary 'org.apache.http.legacy'
 
+    //qt6.7
+    //buildToolsVersion androidBuildToolsVersion
+    //ndkVersion androidNdkVersion
+
+    compileSdkVersion androidCompileSdkVersion.toInteger()
+
     // Extract native libraries from the APK
-    packagingOptions.jniLibs.useLegacyPackaging true
+    // packagingOptions.jniLibs.useLegacyPackaging true
 
     sourceSets {
         main {
-                manifest.srcFile 'AndroidManifest.xml'
-                java.srcDirs = [qtAndroidDir + '/src', 'src', 'java']
-                aidl.srcDirs = [qtAndroidDir + '/src', 'src', 'aidl']
-                res.srcDirs = [qtAndroidDir + '/res', 'res']
-                resources.srcDirs = ['resources']
-                renderscript.srcDirs = ['src']
-                assets.srcDirs = ['assets']
-                jniLibs.srcDirs = ['libs']
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = [qtAndroidDir + '/src', 'src', 'java']
+            aidl.srcDirs = [qtAndroidDir + '/src', 'src', 'aidl']
+            res.srcDirs = [qtAndroidDir + '/res', 'res']
+            resources.srcDirs = ['resources']
+            renderscript.srcDirs = ['src']
+            assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['libs']
        }
     }
 
+    tasks.withType(JavaCompile) {
+        options.incremental = true
+    }
 
     lintOptions {
         abortOnError false
@@ -144,9 +147,14 @@ android {
         noCompress 'rcc'
     }
 
-   // packagingOptions {
-   //     pickFirst '​**​/libc++_shared.so'
-   // }
+    defaultConfig {
+        resConfig "en"
+        minSdkVersion qtMinSdkVersion
+        targetSdkVersion qtTargetSdkVersion
+
+        //qt6.7
+        //ndk.abiFilters = qtTargetAbiList.split(",")
+    }
 
     buildFeatures {
         viewBinding true
@@ -163,37 +171,22 @@ android {
 
     buildTypes {
         release {
-            // minifyEnabled true   // 启用 R8 代码优化
-            // shrinkResources true // 删除无用资源
-            //proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+          ndk{
 
-            ndk{
                 // abiFilters "arm64-v8a" , "x86_64"
                 abiFilters "arm64-v8a"
             }
-
         }
 
     }
 
-    defaultConfig {
-        resConfig "en"
-
-        minSdkVersion 23
-        //targetSdkVersion qtTargetSdkVersion
-        //ndk.abiFilters = qtTargetAbiList.split(",")
-    }
-
-
     // 显示所有已过时的警告详细信息
-    /*
-    allprojects {
+    /*allprojects {
     gradle.projectsEvaluated {
         tasks.withType(JavaCompile) {
             options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
         }
     }
-    }
-    */
+    }*/
 }
 

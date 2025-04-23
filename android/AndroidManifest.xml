@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http:// schemas.android.com/ tools" package="com.x" android:installLocation="auto"
     android:versionCode="1" android:versionName="1.2.36">
-
+   
     <!-- The following comment will be replaced upon deployment with default permissions based on
     the dependencies of the application.
          Remove the comment if you do not require these default permissions. -->
@@ -21,11 +21,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- Android 10+ 需要 -->
     <uses-permission android:name="android.permission.VIBRATE" />
-
-    <!-- 必须声明硬件加速 -->
-    <!-- uses-feature android:name="android.hardware.vulkan" android:required="false"/>
-    <uses-feature android:name="android.hardware.opengles" android:required="true"/ -->
-
+   
     <uses-feature android:name="android.hardware.sensor.stepcounter" android:required="true" />
     <uses-feature android:name="android.hardware.sensor.stepdetector" android:required="true" />
 
@@ -60,7 +56,7 @@
             <!-- Application arguments -->
 
             <meta-data android:name="android.app.lib_name" android:value="Knot" />
-             
+                          
             <!--  Messages maps -->
             <meta-data android:name="android.app.fatal_error_msg"
                 android:value="@string/fatal_error_msg" />
