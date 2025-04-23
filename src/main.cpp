@@ -46,33 +46,24 @@ QSplashScreen* splash;
 int main(int argc, char* argv[]) {
   QtWebView::initialize();
 
-#ifdef Q_OS_ANDROID
-  isAndroid = true;
-
-  // 启用高 DPI 缩放
-  qputenv("QT_ENABLE_HIGHDPI_SCALING", "1");
-
-  // 使用 ANGLE 或软件渲染回退
-  qputenv("QT_OPENGL", "angle");  // 或 "software" 如果 angle 仍失败
-                                  // qputenv("QT_OPENGL", "software");
-
-  // 设置图形后端（RHI 抽象层）
-  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
-
-#else
-  // 桌面端配置
   QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
       Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 
-  // 动态图形后端选择
-#if defined(Q_OS_MACOS)
-  QQuickWindow::setGraphicsApi(QSGRendererInterface::MetalRhi);
-  qputenv("QT_ENABLE_HIGHDPI_SCALING", "1");  // macOS 专用缩放标记
-#elif defined(Q_OS_WIN)
-  QQuickWindow::setGraphicsApi(QSGRendererInterface::Direct3D11Rhi);
+#ifdef Q_OS_ANDROID
+  isAndroid = true;
+
 #else
-  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
-#endif
+  // 桌面端配置
+
+  // 动态图形后端选择
+  /*#if defined(Q_OS_MACOS)
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::MetalRhi);
+    qputenv("QT_ENABLE_HIGHDPI_SCALING", "1");  // macOS 专用缩放标记
+  #elif defined(Q_OS_WIN)
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::Direct3D11Rhi);
+  #else
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
+  #endif*/
 
 #endif
 

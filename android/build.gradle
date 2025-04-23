@@ -10,7 +10,7 @@ configurations.all {
     }
 
     exclude group: 'org.jetbrains', module: 'annotations-java5'
-    exclude group: 'com.google.guava', module: 'listenablefuture'
+    //exclude group: 'com.google.guava', module: 'listenablefuture'
 }
 
 buildscript {
@@ -43,13 +43,17 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-    implementation 'androidx.core:core:1.13.1'
 
     //implementation 'org.jetbrains:annotations-java5:17.0.0'
 
     // 改为AndroidX版本：
+    implementation 'androidx.core:core:1.10.1'
+    implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.recyclerview:recyclerview:1.3.1'
+
+    // 必需并发库
+    implementation "androidx.concurrent:concurrent-futures:1.1.0"
 
     // read and write inifile
     implementation 'org.ini4j:ini4j:0.5.4'
@@ -149,7 +153,7 @@ android {
 
     defaultConfig {
         resConfig "en"
-        minSdkVersion 23
+        minSdkVersion 21
         targetSdkVersion qtTargetSdkVersion
 
         //qt6.7
@@ -174,7 +178,8 @@ android {
           ndk{
 
                 // abiFilters "arm64-v8a" , "x86_64"
-                abiFilters "arm64-v8a"
+                // abiFilters "arm64-v8a"
+                // abiFilters "armeabi-v7a"
             }
         }
 

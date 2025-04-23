@@ -826,7 +826,7 @@ win32 {
 
 android: {
     INCLUDEPATH += $$PWD/android-openssl/include
-    LIBS += -L$$PWD/android-openssl/ \
+    LIBS += -L$$PWD/android-openssl/ssl_3/v8a \
                 -lssl -lcrypto
 }
 
@@ -853,18 +853,5 @@ win32:{
 
 }
 
-contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
-    ANDROID_EXTRA_LIBS = \
-    $$PWD/../../android_openssl-master/ssl_3/armeabi-v7a/libcrypto_3.so \
-    $$PWD/../../android_openssl-master/ssl_3/armeabi-v7a/libssl_3.so
-}
-
-contains(ANDROID_TARGET_ARCH,arm64-v8a) {
-    ANDROID_EXTRA_LIBS = \
-        C:/Users/Administrator/Documents/GitHub/Knot6/android-openssl/ssl_3/libcrypto_3.so \
-        C:/Users/Administrator/Documents/GitHub/Knot6/android-openssl/ssl_3/libssl_3.so
-
-}
-
-# android: include(C:/Users/Administrator/Documents/android_openssl-master/openssl.pri)
-android: include(/home/zh/文档/android_openssl-master/openssl.pri)
+android: include(C:/Users/Administrator/Documents/android_openssl-master/openssl.pri)
+#android: include(/home/zh/文档/android_openssl-master/openssl.pri)
