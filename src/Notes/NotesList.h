@@ -254,7 +254,6 @@ class NotesList : public QDialog {
   bool m_isIndexing = false;  // 标记索引状态
   QString generatePreviewText(const SearchResult &result);
   void clearInvalidMDFile();
-
   SearchModel m_searchModel;
 };
 

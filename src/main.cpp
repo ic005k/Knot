@@ -52,6 +52,16 @@ int main(int argc, char* argv[]) {
 #ifdef Q_OS_ANDROID
   isAndroid = true;
 
+  // qputenv("QT_OPENGL", "software");     // 强制软件渲染
+  // qputenv("QSG_RENDER_LOOP", "basic");  // 禁用线程化渲染循环
+
+  // 在创建 QApplication 前设置全局 Surface 格式
+  QSurfaceFormat format;
+  format.setRenderableType(QSurfaceFormat::OpenGLES);    // 强制 OpenGL ES
+  format.setVersion(2, 0);                               // 指定 OpenGL ES 2.0
+  format.setSwapBehavior(QSurfaceFormat::SingleBuffer);  // 单缓冲减少资源占用
+  QSurfaceFormat::setDefaultFormat(format);
+
 #else
   // 桌面端配置
 

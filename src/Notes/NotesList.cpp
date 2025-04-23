@@ -100,10 +100,12 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
   m_searchEngine->loadIndex(privateDir + "MyNotesIndex");
 
   m_dbManager.initDatabase(privateDir + "md_database_v3.db");
-  mw_one->ui->qwNotesSearchResult->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/SearchResults.qml")));
+
   mw_one->ui->qwNotesSearchResult->rootContext()->setContextProperty(
       "searchModel", &m_searchModel);
+  mw_one->ui->qwNotesSearchResult->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/SearchResults.qml")));
+
   m_dbManager.updateFilesIndex(iniDir + "memo");
 }
 
