@@ -5,8 +5,6 @@
 #include <QQuickWindow>
 #include <QSplashScreen>
 #include <QTranslator>
-#include <QWebEngineProfile>
-#include <QWebEngineSettings>
 #include <QWidget>
 #include <QtWebView/QtWebView>
 
@@ -63,12 +61,19 @@ int main(int argc, char* argv[]) {
 
 #else
   // 桌面端配置
-  qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
   QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
       Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
-  QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-  QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+
+  // 动态图形后端选择
+#if defined(Q_OS_MACOS)
+  QQuickWindow::setGraphicsApi(QSGRendererInterface::MetalRhi);
+  qputenv("QT_ENABLE_HIGHDPI_SCALING", "1");  // macOS 专用缩放标记
+#elif defined(Q_OS_WIN)
+  QQuickWindow::setGraphicsApi(QSGRendererInterface::Direct3D11Rhi);
+#else
   QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
+#endif
+
 #endif
 
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
