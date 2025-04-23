@@ -867,3 +867,4 @@ contains(ANDROID_TARGET_ARCH,arm64-v8a) {
 }
 
 # android: include(C:/Users/Administrator/Documents/android_openssl-master/openssl.pri)
+android: include(/home/zh/文档/android_openssl-master/openssl.pri)

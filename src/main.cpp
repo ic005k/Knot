@@ -5,6 +5,8 @@
 #include <QQuickWindow>
 #include <QSplashScreen>
 #include <QTranslator>
+#include <QWebEngineProfile>
+#include <QWebEngineSettings>
 #include <QWidget>
 #include <QtWebView/QtWebView>
 
@@ -71,7 +73,6 @@ int main(int argc, char* argv[]) {
 
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
   // Fixed an issue where QtWebView in Linux could not display web pages.
-
   char ARG_DISABLE_WEB_SECURITY[] = "--disable-web-security";
   char ARG_DISABLE_SECCOMP_SECURITY[] = "--disable-seccomp-filter-sandbox";
 
