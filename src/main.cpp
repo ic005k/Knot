@@ -45,6 +45,8 @@ QSplashScreen* splash;
 
 int main(int argc, char* argv[]) {
   QtWebView::initialize();
+  // 强制单进程,回归Qt5的模式
+  qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--single-process");
 
   QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
       Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);

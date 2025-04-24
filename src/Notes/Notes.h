@@ -279,6 +279,7 @@ class Notes : public QDialog {
   QsciLexerMarkdown *markdownLexer;
   void initMarkdownLexer();
   QString imageToBase64(const QString &path);
+  QString addImagePathToHtml(QString strhtml);
 };
 
 class LimitedTextEdit : public QTextEdit {

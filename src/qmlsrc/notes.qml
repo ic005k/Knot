@@ -119,17 +119,30 @@ Item {
 
     WebEngineView {
         id: webView
-
+        visible: true
         anchors.fill: parent
         url: initialized ? "file:///C:/Users/Administrator/.Knot/memo.html" : "about:blank"
 
+        onRenderProcessTerminated: {
+            // 自动恢复策略
+            if (terminationStatus === WebEngineView.NormalTerminationStatus)
+                return
+
+            console.log("渲染进程异常终止，代码:", terminationStatus)
+            Qt.callLater(() => {
+                             webView.reload() // 立即重载
+                             webView.enabled = false
+                             webView.enabled = true // 强制重置 GPU 上下文
+                         })
+        }
+
+        // windows默认缓存路径：%LOCALAPPDATA%\<AppName>\QtWebEngine\Default\Cache
+        // Mac: ~/Library/Caches/<AppName>/QtWebEngine/Default/Cache
+        // Linux: ~/.cache/<AppName>/QtWebEngine/Default/Cache
+
         // 显式声明初始化顺序
         Component.onCompleted: {
-            // windows默认缓存路径：%LOCALAPPDATA%\<AppName>\QtWebEngine\Default\Cache
-            // Mac: ~/Library/Caches/<AppName>/QtWebEngine/Default/Cache
-            // Linux: ~/.cache/<AppName>/QtWebEngine/Default/Cache
             settings.localContentCanAccessRemoteUrls = true // 允许本地文件访问远程 URL，并开启缓存（关键！）
-
             settings.javascriptEnabled = true
             settings.localStorageEnabled = true
             settings.allowRunningInsecureContent = true // 允许 HTTPS 页面加载 HTTP 资源

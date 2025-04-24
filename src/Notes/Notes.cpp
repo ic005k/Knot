@@ -148,7 +148,7 @@ void Notes::MD2Html(QString mdFile) {
 
   QString htmlString;
   htmlString = markdownToHtmlWithMath(strmd);
-  StringToFile(htmlString, htmlFileName);
+  addImagePathToHtml(htmlString);
 }
 
 QString Notes::imageToBase64(const QString &path) {
@@ -628,16 +628,11 @@ void Notes::unzip(QString zipfile) {
 #endif
 }
 
-void Notes::loadNoteToQML() {
+QString Notes::addImagePathToHtml(QString strhtml) {
   QString htmlFileName = privateDir + "memo.html";
-
-  if (isAndroid) {
-    return;
-  }
 
   QTextEdit *edit = new QTextEdit;
   QPlainTextEdit *edit1 = new QPlainTextEdit;
-  QString strhtml = loadText(htmlFileName);
   strhtml = strhtml.replace("><", ">\n<");
   edit->setPlainText(strhtml);
   QString str, str_2, str_3;
@@ -682,37 +677,28 @@ void Notes::loadNoteToQML() {
   }
 
   QString strEnd = edit1->toPlainText();
-  QString mathjax =
-      R"(<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>)";
-  // strEnd = strEnd.replace("<head>", "<head>\n" + mathjax + "\n");
-  QString hljs1 =
-      R"( <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/default.min.css">)";
-  // strEnd = strEnd.replace("<head>", "<head>\n" + hljs1 + "\n");
-  QString hljs2 = R"(
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
-
-    <script>
-
-        document.addEventListener('DOMContentLoaded', function() {
-            hljs.highlightAll();
-        });
-    </script>)";
-  // strEnd = strEnd.replace("</body>", "\n" + hljs2 + "\n</body>\n");
-
   edit1->clear();
   edit1->setPlainText(strEnd);
 
   mw_one->m_Reader->PlainTextEditToFile(edit1, htmlFileName);
 
+  return strEnd;
+}
+
+void Notes::loadNoteToQML() {
+  if (isAndroid) {
+    return;
+  }
+
+  QString htmlFileName = privateDir + "memo.html";
+
   // QQuickItem *root = mw_one->ui->qwNotes->rootObject();
-  //   QMetaObject::invokeMethod((QObject *)root, "loadHtml",
-  //                             Q_ARG(QVariant, htmlFileName));
+  //    QMetaObject::invokeMethod((QObject *)root, "loadHtml",
+  //                              Q_ARG(QVariant, htmlFileName));
 
   // old method
-  // htmlBuffer = edit1->toPlainText();
   // QMetaObject::invokeMethod((QObject *)root, "loadHtmlBuffer",
-  //                          Q_ARG(QVariant, htmlBuffer));
+  //                          Q_ARG(QVariant, strEnd));
 
   // new method
   setWebViewFile(htmlFileName);
