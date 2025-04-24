@@ -120,12 +120,11 @@ Item {
 
         // 关键配置
         settings {
+            localContentCanAccessRemoteUrls: true // 允许本地文件访问远程 URL（关键！）
             javascriptEnabled: true
             localStorageEnabled: true
             allowRunningInsecureContent: true // 允许 HTTPS 页面加载 HTTP 资源
             allowWindowActivationFromJavaScript: true
-            localContentCanAccessRemoteUrls: true // 允许本地文件访问远程 URL（关键！）
-            //webSecurity: false // ⚠️ 禁用 Web 安全策略（仅限测试环境
         }
 
         // 处理导航请求

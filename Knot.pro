@@ -13,7 +13,8 @@ win32 {
 }
 
 android: {
-    ANDROID_EXTRA_LIBS += $$system('find $$ANDROID_NDK_ROOT -name libGLESv2.so')
+    lessThan(QT_MAJOR_VERSION, 6):QT += androidextras
+
 }
 
 # Qt > 5 (Qt6)
@@ -32,13 +33,6 @@ TRANSLATIONS += src/cn.ts \
 
 ICON = res/icon.icns
 RC_FILE +=win.rc
-
-
-
-android: {
-    lessThan(QT_MAJOR_VERSION, 6):QT += androidextras
-
-}
 
 ####################### Qsci ##############################################
 
@@ -857,5 +851,10 @@ win32:{
 
 }
 
-android: include(C:/Users/Administrator/Documents/android_openssl-master/openssl.pri)
 #android: include(/home/zh/文档/android_openssl-master/openssl.pri)
+
+contains(ANDROID_TARGET_ARCH,arm64-v8a) {
+    ANDROID_EXTRA_LIBS = \
+        $$PWD/android-openssl/ssl_3/v8a/libcrypto_3.so \
+        $$PWD/android-openssl/ssl_3/v8a/libssl_3.so
+}

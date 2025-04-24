@@ -24,7 +24,7 @@
    
     <uses-feature android:name="android.hardware.sensor.stepcounter" android:required="true" />
     <uses-feature android:name="android.hardware.sensor.stepdetector" android:required="true" />
-    
+       
     <uses-permission android:name="android.permission.DEVICE_POWER" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
@@ -37,6 +37,7 @@
         android:normalScreens="true" android:smallScreens="true" />
     <application android:name="org.qtproject.qt.android.bindings.QtApplication"
         android:extractNativeLibs="true" android:hardwareAccelerated="true"
+        
         android:icon="@drawable/icon" android:label="Knot"
         tools:replace="android:appComponentFactory" android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true">
