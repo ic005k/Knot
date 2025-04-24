@@ -13,6 +13,7 @@ Item {
     visible: true
 
     property string strMDFileName: ""
+    property bool initialized: false
 
     function loadHtml(htmlfile) {
         document.load("file://" + htmlfile)
@@ -67,7 +68,10 @@ Item {
     }
 
     function setWebViewFile(htmlfile, currentMDFile) {
-        webView.url = Qt.resolvedUrl("file:///" + htmlfile)
+        if (initialized == true)
+            webView.url = Qt.resolvedUrl("file:///" + htmlfile)
+        else
+            webView.url = "about:blank"
 
         strMDFileName = getFileNameWithoutExtension(currentMDFile)
         console.log("strMDFileName=" + strMDFileName)
@@ -115,16 +119,23 @@ Item {
 
     WebEngineView {
         id: webView
-        anchors.fill: parent
-        url: "file:///C:/Users/Administrator/.Knot/memo.html"
 
-        // 关键配置
-        settings {
-            localContentCanAccessRemoteUrls: true // 允许本地文件访问远程 URL（关键！）
-            javascriptEnabled: true
-            localStorageEnabled: true
-            allowRunningInsecureContent: true // 允许 HTTPS 页面加载 HTTP 资源
-            allowWindowActivationFromJavaScript: true
+        anchors.fill: parent
+        url: initialized ? "file:///C:/Users/Administrator/.Knot/memo.html" : "about:blank"
+
+        // 显式声明初始化顺序
+        Component.onCompleted: {
+            // windows默认缓存路径：%LOCALAPPDATA%\<AppName>\QtWebEngine\Default\Cache
+            // Mac: ~/Library/Caches/<AppName>/QtWebEngine/Default/Cache
+            // Linux: ~/.cache/<AppName>/QtWebEngine/Default/Cache
+            settings.localContentCanAccessRemoteUrls = true // 允许本地文件访问远程 URL，并开启缓存（关键！）
+
+            settings.javascriptEnabled = true
+            settings.localStorageEnabled = true
+            settings.allowRunningInsecureContent = true // 允许 HTTPS 页面加载 HTTP 资源
+            settings.allowWindowActivationFromJavaScript = true
+
+            initialized = true
         }
 
         // 处理导航请求
