@@ -60,6 +60,16 @@ jobs:
 
          sudo apt-get install -y libqt6serialport6
 
+         sudo apt-get install -y \
+            fcitx5 \
+            fcitx5-dev \
+            libfcitx5core-dev \
+            libfcitx5utils-dev \
+            qt6-base-dev \
+            cmake \
+            extra-cmake-modules \
+            ninja-build
+
       - uses: actions/checkout@v2
         with:
                   fetch-depth: 1
@@ -68,6 +78,24 @@ jobs:
         run: |
                   qmake
                   make
+
+      - name: Configure and Build
+        run: |
+          mkdir build && cd build
+          cmake .. \
+            -DCMAKE_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmate/Qt6 \
+            -DENABLE_QT6=ON \
+            -DCMAKE_INSTALL_PREFIX=/usr/local \
+            -GNinja
+          cmake --build . --parallel
+
+      - name: Verify Output
+        run: |
+          ls -l build/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+          mkdir -p bin/release/plugins/platforminputcontexts/
+
+          cp build/platforminputcontexts/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+          chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
 
       - name: install linuxdeployqt 
         run: |
@@ -114,10 +142,10 @@ jobs:
          #cp ExtBin/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot6/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
          #chmod 755 /home/runner/work/Knot/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
 
-         mkdir -p bin/release/plugins/platforminputcontexts/
+         #mkdir -p bin/release/plugins/platforminputcontexts/
 
-         cp ExtBin/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
-         chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         #cp ExtBin/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         #chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
 
          # 获取 Qt6 插件目录
          # QT6_PLUGINS_DIR="${{ env.Qt6_DIR }}/../../plugins/platforminputcontexts"
