@@ -9,7 +9,7 @@
 
 #ifdef Q_OS_ANDROID
 #else
-#include "qtonedrivewebview.h"
+// #include "qtonedrivewebview.h"
 #endif
 
 #include "src/MainWindow.h"
@@ -26,7 +26,7 @@ QtOneDriveAuthorizationDialog::QtOneDriveAuthorizationDialog(const QUrl &url,
     : QDialog(parent), url_(url) {
   isExists_ = true;
 
-#ifdef Q_OS_ANDROID
+  // #ifdef Q_OS_ANDROID
   mw_one->ui->f_OneFun->hide();
   mw_one->ui->f_FunWeb->show();
 
@@ -34,29 +34,29 @@ QtOneDriveAuthorizationDialog::QtOneDriveAuthorizationDialog(const QUrl &url,
       QUrl(QStringLiteral("qrc:/src/onedrive/web.qml")));
   mw_one->ui->qwOneDriver->rootContext()->setContextProperty("initialUrl", url);
 
-#else
+  /*#else
 
-  setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
-  setAttribute(Qt::WA_DeleteOnClose);
-  setWindowTitle(tr("OneDrive Authorization"));
-  int x, y, w, h;
-  x = mw_one->geometry().x();
-  y = mw_one->geometry().y();
-  w = mw_one->geometry().width();
-  h = mw_one->geometry().height();
-  setMinimumSize(QSize(w, h));
-  resize(QSize(w, h));
-  setGeometry(x, y, w, h);
-  webView_ = new QtOneDriveWebView(this);
-  QVBoxLayout *layout = new QVBoxLayout(this);
-  layout->setContentsMargins(5, 5, 5, 5);
-  this->setLayout(layout);
-  layout->addWidget(webView_);
-  webView_->load(url);
-  connect(webView_, SIGNAL(loadFinished(bool)), this,
-          SLOT(on_webView_loadFinished(bool)));
-  show();
-#endif
+    setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setAttribute(Qt::WA_DeleteOnClose);
+    setWindowTitle(tr("OneDrive Authorization"));
+    int x, y, w, h;
+    x = mw_one->geometry().x();
+    y = mw_one->geometry().y();
+    w = mw_one->geometry().width();
+    h = mw_one->geometry().height();
+    setMinimumSize(QSize(w, h));
+    resize(QSize(w, h));
+    setGeometry(x, y, w, h);
+    webView_ = new QtOneDriveWebView(this);
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->setContentsMargins(5, 5, 5, 5);
+    this->setLayout(layout);
+    layout->addWidget(webView_);
+    webView_->load(url);
+    connect(webView_, SIGNAL(loadFinished(bool)), this,
+            SLOT(on_webView_loadFinished(bool)));
+    show();
+  #endif*/
 
   timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), this, SLOT(on_timer()));
@@ -81,11 +81,11 @@ void QtOneDriveAuthorizationDialog::on_timer() {
 }
 
 void QtOneDriveAuthorizationDialog::on_webView_loadFinished(bool arg1) {
-#ifdef Q_OS_ANDROID
+  // #ifdef Q_OS_ANDROID
   QUrl url;
-#else
-  QUrl url = webView_->url();
-#endif
+  // #else
+  //   QUrl url = webView_->url();
+  // #endif
 
   if (arg1)
     emit success(url);

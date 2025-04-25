@@ -4,6 +4,7 @@
 
 #ifdef Q_OS_ANDROID
 #else
+
 #include <QWebEngineView>
 
 class QtOneDriveWebView : public QWebEngineView {
@@ -15,6 +16,7 @@ class QtOneDriveWebView : public QWebEngineView {
 
  public slots:
 };
+
 #endif
 
 #endif  // QTONEDRIVEWEBVIEW_H

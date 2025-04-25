@@ -9,7 +9,7 @@ win32 {
 }
 
 !android: {
-    QT += webenginewidgets
+    # QT += webenginewidgets
 }
 
 android {
@@ -411,7 +411,6 @@ SOURCES += \
     lib/md4c/md4c.c \
     src/onedrive/qtonedrive.cpp \
     src/onedrive/qtonedriveauthorizationdialog.cpp \
-    src/onedrive/qtonedrivewebview.cpp \
     lib/quazip/JlCompress.cpp \
     lib/quazip/qioapi.cpp \
     lib/quazip/quaadler32.cpp \
@@ -613,7 +612,6 @@ HEADERS += \
     src/onedrive/qtonedrive.h \
     src/onedrive/qtonedriveauthorizationdialog.h \
     src/onedrive/qtonedrivelib_global.h \
-    src/onedrive/qtonedrivewebview.h \
     lib/quazip/JlCompress.h \
     lib/quazip/ioapi.h \
     lib/quazip/minizip_crypt.h \

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtWebChannel
-import QtWebEngine
+//import QtWebEngine
 import Qt.labs.settings
 import QtQuick.Controls.Fusion
 import QtCore
@@ -117,7 +117,8 @@ Item {
         category: "WebViewScroll"
     }
 
-    WebEngineView {
+
+    /*WebEngineView {
         id: webView
         visible: true
         anchors.fill: parent
@@ -188,8 +189,7 @@ Item {
                             "window.scrollTo(0, " + savedPosition + ");")
             }
         }
-    }
-
+    }*/
     Flickable {
         id: flickable
         flickableDirection: Flickable.VerticalFlick
