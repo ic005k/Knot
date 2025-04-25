@@ -7,8 +7,6 @@
 #include <QSplashScreen>
 #include <QTranslator>
 #include <QWidget>
-#include <QtHttpServer/QHttpServerResponder>
-#include <QtHttpServer/QtHttpServer>
 #include <QtWebView/QtWebView>
 
 #include "MainWindow.h"
