@@ -10,6 +10,8 @@
 #include <QUrl>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QtDBus/QDBusConnection>
+#include <QtDBus/QDBusMessage>
 
 #ifdef Q_OS_ANDROID
 #include <QtCore/private/qandroidextras_p.h>
@@ -170,6 +172,8 @@ class Notes : public QDialog {
   void updateMDFileToSyncLists(QString currentMDFile);
 
   void initEditor();
+
+  void openBrowserOnce(const QString &htmlPath);
 
  protected:
   void keyReleaseEvent(QKeyEvent *event) override;

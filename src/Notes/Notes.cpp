@@ -2304,3 +2304,7 @@ int Notes::getSearchMatchCount(const QString &text) {
 
   return count;
 }
+
+void Notes::openBrowserOnce(const QString &htmlPath) {
+  QDesktopServices::openUrl(QUrl::fromLocalFile(htmlPath));
+}

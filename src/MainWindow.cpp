@@ -5891,9 +5891,12 @@ void MainWindow::on_btnOpenNote_clicked() {
     return;
   } else {
     m_Notes->MD2Html(currentMDFile);
-    m_Notes->loadNoteToQML();
-    ui->frameNoteList->hide();
-    ui->frameNotes->show();
+    m_Notes->openBrowserOnce(privateDir + "memo.html");
+
+    // m_Notes->loadNoteToQML();
+    // ui->frameNoteList->hide();
+    // ui->frameNotes->show();
+
     m_NotesList->setCurrentItemFromMDFile(currentMDFile);
   }
 }
