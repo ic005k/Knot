@@ -68,11 +68,11 @@ Item {
     }
 
     function setWebViewFile(htmlfile, currentMDFile) {
-        if (initialized == true)
-            webView.url = Qt.resolvedUrl("file:///" + htmlfile)
-        else
-            webView.url = "about:blank"
 
+        //if (initialized == true)
+        //webView.url = Qt.resolvedUrl("file:///" + htmlfile)
+        //else
+        //webView.url = "about:blank"
         strMDFileName = getFileNameWithoutExtension(currentMDFile)
         console.log("strMDFileName=" + strMDFileName)
         console.log("url=" + webView.url)

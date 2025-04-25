@@ -9,7 +9,8 @@ win32 {
 }
 
 !android: {
-    # QT += webenginewidgets
+    # webenginewidgets
+
 }
 
 android {

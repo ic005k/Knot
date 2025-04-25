@@ -45,8 +45,8 @@ jobs:
           version: ${{ matrix.qt_ver }}
           #host: linux
           cached: 'false'
-          
-          modules: qtcharts qtwebengine qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning
+          # qtwebengine
+          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning
       
       - name: ubuntu install GL library
         run: |

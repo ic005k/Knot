@@ -7,6 +7,8 @@
 #include <QSplashScreen>
 #include <QTranslator>
 #include <QWidget>
+#include <QtHttpServer/QHttpServerResponder>
+#include <QtHttpServer/QtHttpServer>
 #include <QtWebView/QtWebView>
 
 #include "MainWindow.h"
@@ -327,6 +329,12 @@ int main(int argc, char* argv[]) {
 
   m_font.setPointSize(fontSize);
   app.setFont(m_font);
+
+#ifdef Q_OS_ANDROID
+
+#else
+
+#endif
 
   MainWindow w;
   w.show();
