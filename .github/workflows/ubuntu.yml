@@ -35,7 +35,7 @@ jobs:
         QT_ARCH: gcc_64
         QT_INSTALL_DIR: /opt/qt/6.6.3/gcc_64  
         QT_INSTALL_QML: /opt/qt/6.6.3/gcc_64/qml  
-        QML2_IMPORT_PATH: ${{ github.workspace }}/qml:${{ env.QT_INSTALL_QML }}
+        QML2_IMPORT_PATH: ${{ github.workspace }}/qml:/opt/qt/6.6.3/gcc_64/qml
       
     steps:
       
