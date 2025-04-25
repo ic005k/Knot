@@ -1,4 +1,4 @@
-QT += core gui network printsupport #core-private
+QT += core gui network printsupport
 QT += charts sensors sql
 QT += qml quick quickwidgets webview location #quickcontrols2 #positioning
 QT += xml svg concurrent
