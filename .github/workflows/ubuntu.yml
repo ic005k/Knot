@@ -31,6 +31,7 @@ jobs:
         VERSION: Linux
         orgName: Knot
         ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
+
         QT_VERSION: 6.6.3
         QT_ARCH: gcc_64
         QT_INSTALL_DIR: /opt/qt/6.6.3/gcc_64  
@@ -62,7 +63,6 @@ jobs:
 
          sudo apt-get install -y \
             fcitx5 \
-            fcitx5-dev \
             libfcitx5core-dev \
             libfcitx5utils-dev \
             qt6-base-dev \
@@ -79,7 +79,7 @@ jobs:
                   qmake
                   make
 
-      - name: Configure and Build
+      - name: Configure and Build Fcitx5 Qt Plugin
         run: |
           mkdir build && cd build
           cmake .. \
@@ -89,7 +89,7 @@ jobs:
             -GNinja
           cmake --build . --parallel
 
-      - name: Verify Output
+      - name: Verify Output Fcitx5 Qt Plugin
         run: |
           ls -l build/platforminputcontexts/libfcitx5platforminputcontextplugin.so
           mkdir -p bin/release/plugins/platforminputcontexts/
