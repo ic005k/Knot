@@ -66,7 +66,8 @@ jobs:
           
       - name: install linuxdeployqt 
         run: |
-          wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+          # wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+          wget -c -nv "https://github.com/linuxdeploy/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
           chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 
       - name: Remove unused SQL drivers (SAFE MODE)
@@ -133,8 +134,19 @@ jobs:
 
 
          export VERSION # linuxdeployqt uses this for naming the file
-         ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} -unsupported-allow-new-glibc -appimage -extra-plugins=webview
+         #./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} -unsupported-allow-new-glibc -appimage -extra-plugins=webview
          #chmod +x ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
+
+         # 执行深度打包
+         ./linuxdeployqt-continuous-x86_64.AppImage \
+         bin/release/${targetName} \
+         -unsupported-allow-new-glibc \
+         -qmldir=${{ env.QT_INSTALL_QML }} \
+         -qml-import=${PWD}/qml \
+         -extra-plugins=webengine,webview \
+         -bundle-non-qt-libs \
+         -appimage \
+         -verbose=3
 
 
 
