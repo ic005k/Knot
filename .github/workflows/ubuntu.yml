@@ -108,7 +108,7 @@ jobs:
          cp ExtBin/AppRun bin/release/AppRun
          chmod +x bin/release/AppRun
          
-         #cp -r ExtBin/linux/qml bin/release/qml
+         cp -r ExtBin/linux/qml bin/release/qml
 
          #cp ExtBin/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot6/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
          #chmod 755 /home/runner/work/Knot/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
@@ -143,19 +143,19 @@ jobs:
 
 
          export VERSION # linuxdeployqt uses this for naming the file
-         #./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} -unsupported-allow-new-glibc -appimage -extra-plugins=webview
+         ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} -unsupported-allow-new-glibc -appimage -extra-plugins=webview
          #chmod +x ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
 
          # 执行深度打包
          #-extra-plugins=webengine,webview \
 
-         ./linuxdeployqt-continuous-x86_64.AppImage \
-         bin/release/${targetName} \
-         -unsupported-allow-new-glibc \
-         -extra-plugins=webview \
-         -bundle-non-qt-libs \
-         -appimage \
-         -verbose=3
+         #./linuxdeployqt-continuous-x86_64.AppImage \
+         #bin/release/${targetName} \
+         #-unsupported-allow-new-glibc \
+         #-extra-plugins=webview \
+         #-bundle-non-qt-libs \
+         #-appimage \
+         #-verbose=3
 
 
 

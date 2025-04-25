@@ -1,7 +1,10 @@
-QT += core gui network printsupport core-private
+QT += core gui network printsupport #core-private
 QT += charts sensors sql
 QT += qml quick quickwidgets webview location #quickcontrols2 #positioning
 QT += xml svg concurrent
+
+# 在发布构建时禁用调试支持
+DEFINES += QT_NO_DEBUG QML_DISABLE_PROFILER
 
 win32 {
     QMAKE_CFLAGS += /utf-8

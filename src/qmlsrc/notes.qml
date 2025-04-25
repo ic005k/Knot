@@ -73,9 +73,9 @@ Item {
         //webView.url = Qt.resolvedUrl("file:///" + htmlfile)
         //else
         //webView.url = "about:blank"
-        strMDFileName = getFileNameWithoutExtension(currentMDFile)
-        console.log("strMDFileName=" + strMDFileName)
-        console.log("url=" + webView.url)
+        //strMDFileName = getFileNameWithoutExtension(currentMDFile)
+        //console.log("strMDFileName=" + strMDFileName)
+        //console.log("url=" + webView.url)
     }
 
     function goBack() {
