@@ -146,8 +146,8 @@ jobs:
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
                   -unsupported-allow-new-glibc \
                   -qmldir=/home/runner/work/Knot6/Knot6/src/qmlsrc \
-                  -appimage \
-                  -extra-plugins=webview
+                  -appimage
+                  #-extra-plugins=webview
 
 
          #chmod +x ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
