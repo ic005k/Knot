@@ -62,6 +62,7 @@ int main(int argc, char* argv[]) {
 #endif
 
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+
   // Fixed an issue where QtWebView in Linux could not display web pages.
   char ARG_DISABLE_WEB_SECURITY[] = "--disable-web-security";
   char ARG_DISABLE_SECCOMP_SECURITY[] = "--disable-seccomp-filter-sandbox";

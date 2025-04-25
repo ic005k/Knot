@@ -110,8 +110,11 @@ jobs:
          
          cp -r ExtBin/linux/qml bin/release/qml
 
-         cp ExtBin/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot6/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
-         chmod 755 /home/runner/work/Knot/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         #cp ExtBin/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot6/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         #chmod 755 /home/runner/work/Knot/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+
+         cp ExtBin/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
 
          # 获取 Qt6 插件目录
          # QT6_PLUGINS_DIR="${{ env.Qt6_DIR }}/../../plugins/platforminputcontexts"
