@@ -31,6 +31,11 @@ jobs:
         VERSION: Linux
         orgName: Knot
         ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
+        QT_VERSION: 6.6.3
+        QT_ARCH: gcc_64
+        QT_INSTALL_DIR: /opt/qt/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}  # 核心路径定义
+        QT_INSTALL_QML: ${{ env.QT_INSTALL_DIR }}/qml  # 关键环境变量
+        QML2_IMPORT_PATH: ${{ github.workspace }}/qml:${{ env.QT_INSTALL_QML }}
       
     steps:
       
@@ -55,15 +60,76 @@ jobs:
 
          sudo apt-get install -y libqt6serialport6
 
-       
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
-      - name: build ubuntu
-        run: |
-          qmake
-          make
-          
+         - uses: actions/checkout@v2
+         with:
+                  fetch-depth: 1
+         - name: build ubuntu
+           run: |
+                  qmake
+                  make
+
+       - name: Setup QML Paths
+         run: |
+          # 验证路径存在性
+          echo "Qt安装路径: ${{ env.QT_INSTALL_DIR }}"
+          ls -l ${{ env.QT_INSTALL_DIR }}/qml/QtQuick
+
+          # 创建项目QML目录
+          mkdir -p ${{ github.workspace }}/qml
+
+       - name: Scan QML Dependencies
+         run: |
+          # 安装依赖工具
+          sudo apt-get install -y jq
+
+          # 使用qmlimportscanner生成依赖清单
+          ${{ env.QT_INSTALL_DIR }}/bin/qmlimportscanner \
+            -importPath ${{ env.QT_INSTALL_QML }} \
+            -importPath ${{ github.workspace }}/qml \
+            -rootPath ${{ github.workspace }} \
+            -jsoutput qml_deps.json
+
+          # 解析JSON输出
+          jq -r '.[] | select(.type == "module") | .path' qml_deps.json > qml_paths.txt
+
+       - name: Deploy QML Modules
+         run: |
+          OUTPUT_QML_DIR=${{ github.workspace }}/bin/release/qml
+          mkdir -p $OUTPUT_QML_DIR
+
+          # 拷贝项目自定义QML
+          if grep -q "${{ github.workspace }}" qml_paths.txt; then
+            grep "${{ github.workspace }}" qml_paths.txt | while read -r path; do
+              rel_path=${path#${{ github.workspace }}"/"}
+              mkdir -p "$OUTPUT_QML_DIR/$(dirname "$rel_path")"
+              cp -r "$path" "$OUTPUT_QML_DIR/$rel_path"
+            done
+          fi
+
+          # 拷贝Qt官方QML
+          grep "${{ env.QT_INSTALL_QML }}" qml_paths.txt | while read -r path; do
+            rel_path=${path#${{ env.QT_INSTALL_QML }}"/"}
+            mkdir -p "$OUTPUT_QML_DIR/$rel_path"
+            cp -r "$path"/* "$OUTPUT_QML_DIR/$rel_path/"
+          done
+
+          # 强制包含必要模块（即使未被引用）
+          cp -r ${{ env.QT_INSTALL_QML }}/QtQml/WorkerScript $OUTPUT_QML_DIR/QtQml/
+          cp -r ${{ env.QT_INSTALL_QML }}/QtQuick/Controls $OUTPUT_QML_DIR/QtQuick/
+
+       - name: Deploy WebEngine
+         run: |
+          # 处理WebEngine特殊依赖
+          mkdir -p ${{ github.workspace }}/bin/release/libexec
+          cp -r ${{ env.QT_INSTALL_DIR }}/libexec/QtWebEngineProcess ${{ github.workspace }}/bin/release/libexec/
+
+          # 拷贝WebEngine资源文件
+          RESOURCE_DIR="${{ env.QT_INSTALL_DIR }}/resources"
+          mkdir -p ${{ github.workspace }}/bin/release/resources
+          cp -r $RESOURCE_DIR/qtwebengine* ${{ github.workspace }}/bin/release/resources/
+
+
+
       - name: install linuxdeployqt 
         run: |
           # wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
