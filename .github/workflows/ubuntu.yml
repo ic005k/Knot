@@ -51,6 +51,7 @@ jobs:
       
       - name: ubuntu install GL library
         run: |
+         sudo apt-get update
          sudo apt-get install -y libglew-dev libglfw3-dev libxcb*
          
          sudo apt-get install libxkbcommon-dev
@@ -81,20 +82,25 @@ jobs:
 
       - name: Configure and Build Fcitx5 Qt Plugin
         run: |
+          git clone --depth 1 https://github.com/fcitx/fcitx5-qt.git
+          cd fcitx5-qt && git submodule update --init
+
+          cd fcitx5-qt
           mkdir build && cd build
           cmake .. \
-            -DCMAKE_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmate/Qt6 \
+            -DCMAKE_PREFIX_PATH=$QT_INSTALL_DIR/lib/cmake/Qt6 \  # 使用你的 Qt 路径
             -DENABLE_QT6=ON \
-            -DCMAKE_INSTALL_PREFIX=/usr/local \
+            -DCMAKE_INSTALL_PREFIX=./output \  # 输出到本地目录
             -GNinja
-          cmake --build . --parallel
+          cmake --build . --target install --parallel
 
       - name: Verify Output Fcitx5 Qt Plugin
         run: |
-          ls -l build/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+          ls -l fcitx5-qt/build/output/lib/qt6/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+
           mkdir -p bin/release/plugins/platforminputcontexts/
 
-          cp build/platforminputcontexts/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+          cp fcitx5-qt/build/output/lib/qt6/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
           chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
 
       - name: install linuxdeployqt 
