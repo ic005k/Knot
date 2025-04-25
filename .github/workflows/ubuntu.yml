@@ -145,8 +145,6 @@ jobs:
          ./linuxdeployqt-continuous-x86_64.AppImage \
          bin/release/${targetName} \
          -unsupported-allow-new-glibc \
-         -qmldir=${{ env.QT_INSTALL_QML }} \
-         -qml-import=${PWD}/qml \
          -extra-plugins=webengine,webview \
          -bundle-non-qt-libs \
          -appimage \
