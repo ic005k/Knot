@@ -68,8 +68,8 @@ jobs:
                   qmake
                   make
 
-       - name: Setup QML Paths
-         run: |
+         - name: Setup QML Paths
+           run: |
           # 验证路径存在性
           echo "Qt安装路径: ${{ env.QT_INSTALL_DIR }}"
           ls -l ${{ env.QT_INSTALL_DIR }}/qml/QtQuick
@@ -77,8 +77,8 @@ jobs:
           # 创建项目QML目录
           mkdir -p ${{ github.workspace }}/qml
 
-       - name: Scan QML Dependencies
-         run: |
+          - name: Scan QML Dependencies
+            run: |
           # 安装依赖工具
           sudo apt-get install -y jq
 
@@ -92,8 +92,8 @@ jobs:
           # 解析JSON输出
           jq -r '.[] | select(.type == "module") | .path' qml_deps.json > qml_paths.txt
 
-       - name: Deploy QML Modules
-         run: |
+          - name: Deploy QML Modules
+            run: |
           OUTPUT_QML_DIR=${{ github.workspace }}/bin/release/qml
           mkdir -p $OUTPUT_QML_DIR
 
@@ -117,8 +117,8 @@ jobs:
           cp -r ${{ env.QT_INSTALL_QML }}/QtQml/WorkerScript $OUTPUT_QML_DIR/QtQml/
           cp -r ${{ env.QT_INSTALL_QML }}/QtQuick/Controls $OUTPUT_QML_DIR/QtQuick/
 
-       - name: Deploy WebEngine
-         run: |
+          - name: Deploy WebEngine
+            run: |
           # 处理WebEngine特殊依赖
           mkdir -p ${{ github.workspace }}/bin/release/libexec
           cp -r ${{ env.QT_INSTALL_DIR }}/libexec/QtWebEngineProcess ${{ github.workspace }}/bin/release/libexec/
@@ -132,8 +132,8 @@ jobs:
 
       - name: install linuxdeployqt 
         run: |
-          # wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-          wget -c -nv "https://github.com/linuxdeploy/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+          wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+          # wget -c -nv "https://github.com/linuxdeploy/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
           chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 
       - name: Remove unused SQL drivers (SAFE MODE)
