@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtWebChannel
 //import QtWebEngine
+import QtWebView
 import Qt.labs.settings
 import QtQuick.Controls.Fusion
 import QtCore
@@ -69,11 +70,11 @@ Item {
 
     function setWebViewFile(htmlfile, currentMDFile) {
 
-        //if (initialized == true)
-        //webView.url = Qt.resolvedUrl("file:///" + htmlfile)
-        //else
-        //webView.url = "about:blank"
-        //strMDFileName = getFileNameWithoutExtension(currentMDFile)
+        if (initialized == true)
+        webView.url = Qt.resolvedUrl("file:///" + htmlfile)
+        else
+        webView.url = "about:blank"
+        strMDFileName = getFileNameWithoutExtension(currentMDFile)
         //console.log("strMDFileName=" + strMDFileName)
         //console.log("url=" + webView.url)
     }
@@ -118,13 +119,13 @@ Item {
     }
 
 
-    /*WebEngineView {
+    WebView {
         id: webView
         visible: true
         anchors.fill: parent
         url: initialized ? "file:///C:/Users/Administrator/.Knot/memo.html" : "about:blank"
 
-        onRenderProcessTerminated: {
+       /* onRenderProcessTerminated: {
             // 自动恢复策略
             if (terminationStatus === WebEngineView.NormalTerminationStatus)
                 return
@@ -135,7 +136,7 @@ Item {
                              webView.enabled = false
                              webView.enabled = true // 强制重置 GPU 上下文
                          })
-        }
+        }*/
 
         // windows默认缓存路径：%LOCALAPPDATA%\<AppName>\QtWebEngine\Default\Cache
         // Mac: ~/Library/Caches/<AppName>/QtWebEngine/Default/Cache
@@ -153,7 +154,7 @@ Item {
         }
 
         // 处理导航请求
-        onNavigationRequested: function (request) {
+        /*onNavigationRequested: function (request) {
             // 判断是否为用户点击链接
             if (request.navigationType === WebEngineNavigationRequest.LinkClickedNavigation) {
                 console.log("拦截链接:", request.url)
@@ -170,7 +171,7 @@ Item {
                 // 允许其他导航（如页面加载、表单提交等）
                 request.action = WebEngineNavigationRequest.AcceptRequest
             }
-        }
+        }*/
 
         // 恢复滚动位置
         onLoadingChanged: function (request) {
@@ -189,7 +190,7 @@ Item {
                             "window.scrollTo(0, " + savedPosition + ");")
             }
         }
-    }*/
+    }
     Flickable {
         id: flickable
         flickableDirection: Flickable.VerticalFlick
