@@ -85,6 +85,7 @@ jobs:
           git clone --depth 1 https://github.com/fcitx/fcitx5-qt.git
           cd fcitx5-qt && git submodule update --init
 
+          cd fcitx5
           mkdir build && cd build
           cmake .. \
             -DCMAKE_PREFIX_PATH=$QT_INSTALL_DIR/lib/cmake/Qt6 \  # 使用你的 Qt 路径
