@@ -270,8 +270,8 @@ int main(int argc, char* argv[]) {
 
 #endif
 
-#ifdef Q_OS_LINUX
-  defaultFontFamily = "Sans";
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+  defaultFontFamily = "Noto Sans CJK SC";  //"Sans";
 
 #endif
 
