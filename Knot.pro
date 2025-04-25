@@ -12,8 +12,7 @@ win32 {
     QT += webenginewidgets
 }
 
-android: {
-    lessThan(QT_MAJOR_VERSION, 6):QT += androidextras
+android {
 
 }
 

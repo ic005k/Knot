@@ -1,3 +1,4 @@
+
 #include <QApplication>
 #include <QDir>
 #include <QObject>
@@ -45,7 +46,8 @@ QSplashScreen* splash;
 
 int main(int argc, char* argv[]) {
   QtWebView::initialize();
-  // 强制单进程,回归Qt5的模式
+
+  // 对于WebEngine 强制单进程,回归Qt5的模式
   qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--single-process");
 
   QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
@@ -56,16 +58,6 @@ int main(int argc, char* argv[]) {
 
 #else
   // 桌面端配置
-
-  // 动态图形后端选择
-  /*#if defined(Q_OS_MACOS)
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::MetalRhi);
-    qputenv("QT_ENABLE_HIGHDPI_SCALING", "1");  // macOS 专用缩放标记
-  #elif defined(Q_OS_WIN)
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::Direct3D11Rhi);
-  #else
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
-  #endif*/
 
 #endif
 

@@ -21,13 +21,13 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- Android 10+ 需要 -->
     <uses-permission android:name="android.permission.VIBRATE" />
-   
+      
     <uses-feature android:name="android.hardware.sensor.stepcounter" android:required="true" />
     <uses-feature android:name="android.hardware.sensor.stepdetector" android:required="true" />
        
     <uses-permission android:name="android.permission.DEVICE_POWER" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-
+    
     <!-- The following comment will be replaced upon deployment with default features based on the
     dependencies of the application.
          Remove the comment if you do not require these default features. -->
@@ -58,7 +58,7 @@
             <!-- Application arguments -->
 
             <meta-data android:name="android.app.lib_name" android:value="Knot" />
-                          
+                                       
             <!--  Messages maps -->
             <meta-data android:name="android.app.fatal_error_msg"
                 android:value="@string/fatal_error_msg" />
