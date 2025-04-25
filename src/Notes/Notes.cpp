@@ -2307,4 +2307,7 @@ int Notes::getSearchMatchCount(const QString &text) {
 
 void Notes::openBrowserOnce(const QString &htmlPath) {
   QDesktopServices::openUrl(QUrl::fromLocalFile(htmlPath));
+
+  // QUrl url("http://localhost:8000/memo.html");
+  // QDesktopServices::openUrl(url);
 }
