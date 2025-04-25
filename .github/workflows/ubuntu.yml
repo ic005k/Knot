@@ -109,6 +109,7 @@ jobs:
          chmod +x bin/release/AppRun
          
          #cp -r ExtBin/linux/qml bin/release/qml
+         cp -r ExtBin/linux/resources bin/release/resources
 
          #cp ExtBin/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot6/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
          #chmod 755 /home/runner/work/Knot/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
