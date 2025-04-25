@@ -60,16 +60,17 @@ jobs:
 
          sudo apt-get install -y libqt6serialport6
 
-         - uses: actions/checkout@v2
-         with:
+      - uses: actions/checkout@v2
+        with:
                   fetch-depth: 1
-         - name: build ubuntu
-           run: |
+                  
+      - name: build ubuntu
+        run: |
                   qmake
                   make
 
-         - name: Setup QML Paths
-           run: |
+      - name: Setup QML Paths
+        run: |
           # 验证路径存在性
           echo "Qt安装路径: ${{ env.QT_INSTALL_DIR }}"
           ls -l ${{ env.QT_INSTALL_DIR }}/qml/QtQuick
