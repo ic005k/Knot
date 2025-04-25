@@ -33,8 +33,8 @@ jobs:
         ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
         QT_VERSION: 6.6.3
         QT_ARCH: gcc_64
-        QT_INSTALL_DIR: /opt/qt/${{ QT_VERSION }}/${{ env.QT_ARCH }}  
-        QT_INSTALL_QML: ${{ QT_INSTALL_DIR }}/qml  
+        QT_INSTALL_DIR: /opt/qt/6.6.3/gcc_64  
+        QT_INSTALL_QML: ${{ env.QT_INSTALL_DIR }}/qml  
         QML2_IMPORT_PATH: ${{ github.workspace }}/qml:${{ env.QT_INSTALL_QML }}
       
     steps:
