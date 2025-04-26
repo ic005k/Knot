@@ -159,29 +159,13 @@ QString CloudBackup::getWebDAVArgument() {
 
 void CloudBackup::on_pushButton_storageInfo_clicked() {}
 
-void CloudBackup::on_btnBack_clicked() {
-  if (ui->frameOne->isHidden()) {
-    ui->frameOne->show();
-
-  } else {
-    const QSize size(ui->frameQuick->width(), ui->frameQuick->height());
-    quickWidget->resize(size);
-    quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    close();
-  }
-}
+void CloudBackup::on_btnBack_clicked() {}
 
 void CloudBackup::loadLogQML() {}
 
 void CloudBackup::loadText(QString str) {}
 
-void CloudBackup::initQuick() {
-  quickWidget = new QQuickWidget(ui->frameQuick);
-  ui->gl->addWidget(quickWidget);
-  const QSize size(400, 400);
-  quickWidget->resize(size);
-  quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-}
+void CloudBackup::initQuick() {}
 
 int CloudBackup::getProg() { return 0; }
 

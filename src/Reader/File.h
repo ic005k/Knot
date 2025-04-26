@@ -21,8 +21,6 @@ class File : public QObject {
                  textHeightChanged)
   Q_PROPERTY(qreal curX READ curX WRITE setCurX NOTIFY curXChanged)
 
-  Q_PROPERTY(
-      QString webEnd READ webEnd WRITE setWebEnd NOTIFY loadWebEndChanged)
   Q_PROPERTY(QString prog READ prog WRITE setProg NOTIFY loadWebEndChanged)
 
   QString source() const;
@@ -38,7 +36,6 @@ class File : public QObject {
   void setTextHeight(qreal &textHeight);
   void setCurX(qreal &curX);
 
-  void setWebEnd(QString &strUri);
   QString webEnd();
 
   QString prog() const;

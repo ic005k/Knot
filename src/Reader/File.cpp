@@ -96,8 +96,6 @@ void File::setCurX(qreal &curX) { m_curX = curX; }
 
 QString File::webEnd() { return m_strUri; }
 
-void File::setWebEnd(QString &strUri) {}
-
 QString File::prog() const { return m_prog; }
 
 void File::setProg(const QString &prog) {

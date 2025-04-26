@@ -17,10 +17,10 @@
    <item>
     <widget class="QFrame" name="frameOne">
      <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
+      <enum>QFrame::Shape::NoFrame</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
@@ -154,10 +154,10 @@
       <item>
        <widget class="QFrame" name="frame">
         <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+         <enum>QFrame::Shape::StyledPanel</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
+         <enum>QFrame::Shadow::Raised</enum>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
@@ -206,7 +206,7 @@ in skydrive folder</string>
               <string>Enter File/Folder ID:</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
              </property>
             </widget>
            </item>
@@ -264,7 +264,7 @@ in skydrive folder</string>
             </size>
            </property>
            <property name="lineWrapMode">
-            <enum>QTextEdit::WidgetWidth</enum>
+            <enum>QTextEdit::LineWrapMode::WidgetWidth</enum>
            </property>
            <property name="acceptRichText">
             <bool>false</bool>
@@ -281,39 +281,18 @@ in skydrive folder</string>
     </widget>
    </item>
    <item>
-    <widget class="QFrame" name="frameQuick">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>200</height>
-      </size>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <layout class="QGridLayout" name="gl"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
     <widget class="QProgressBar" name="progressBar">
      <property name="value">
       <number>0</number>
      </property>
      <property name="alignment">
-      <set>Qt::AlignCenter</set>
+      <set>Qt::AlignmentFlag::AlignCenter</set>
      </property>
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="textDirection">
-      <enum>QProgressBar::TopToBottom</enum>
+      <enum>QProgressBar::Direction::TopToBottom</enum>
      </property>
     </widget>
    </item>
