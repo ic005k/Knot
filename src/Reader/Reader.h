@@ -105,14 +105,9 @@ class Reader : public QDialog {
 
   void setAni();
   void loadQMLText(QString str);
-  void setPdfViewVisible(bool vv);
-  int getPdfCurrentPage();
-  void setPdfPage(int page);
-  void setHideShowTopBar();
+
   static bool copyDirectoryFiles(const QString &fromDir, const QString &toDir,
                                  bool coverFileIfExist);
-  qreal getScale();
-  void setPdfScale(qreal scale);
 
   void clearAllReaderRecords();
   void on_hSlider_sliderReleased(int position);
@@ -123,9 +118,6 @@ class Reader : public QDialog {
   void setStatusBarHide();
   void setStatusBarShow();
   bool isStatusBarShow;
-  void rotatePdfPage();
-  int getLoadProgress();
-  void goWebViewBack();
 
   void closeSelText();
 

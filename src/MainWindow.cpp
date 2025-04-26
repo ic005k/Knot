@@ -2582,11 +2582,6 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
     }
   }
 
-  if (watch == ui->qwPdf) {
-    if (event->type() == QEvent::MouseButtonPress) {
-    }
-  }
-
   return QWidget::eventFilter(watch, evn);
 }
 
@@ -3333,11 +3328,6 @@ void MainWindow::initQW() {
   ui->qwBookList->rootContext()->setContextProperty("m_Reader", m_Reader);
   ui->qwBookList->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/booklist.qml")));
-
-  ui->qwPdf->engine()->addImportPath("qrc:/");
-  ui->qwPdf->engine()->addImportPath(":/");
-  ui->qwPdf->rootContext()->setContextProperty("mw_one", mw_one);
-  ui->qwPdf->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/pdf.qml")));
 }
 
 void MainWindow::init_Theme() {
@@ -3523,7 +3513,7 @@ void MainWindow::init_UIWidget() {
   ui->frameReport->hide();
   ui->frameSearch->hide();
   ui->frameBakList->hide();
-  ui->qwPdf->hide();
+
   ui->frameViewCate->hide();
   ui->frameTabRecycle->hide();
   ui->frameNoteList->hide();
@@ -3579,7 +3569,7 @@ void MainWindow::init_UIWidget() {
   ui->textBrowser->viewport()->installEventFilter(this);
   ui->textBrowser->viewport()->setMouseTracking(true);
   ui->qwReader->installEventFilter(this);
-  ui->qwPdf->installEventFilter(this);
+
   ui->tabWidget->tabBar()->installEventFilter(this);
   ui->tabWidget->installEventFilter(this);
   ui->tabWidget->setMouseTracking(true);
@@ -3764,7 +3754,7 @@ void MainWindow::init_ButtonStyle() {
   ui->btnBackReader->setStyleSheet("border:none; background-color:#3498DB;");
   ui->btnCatalogue->setStyleSheet("border:none; background-color:#3498DB;");
   ui->btnBackDir->setStyleSheet("border:none; background-color:#3498DB;");
-  ui->btnGoBack->setStyleSheet("border:none; background-color:#3498DB;");
+
   ui->btnReadList->setStyleSheet("border:none; background-color:#3498DB;");
   ui->btnShowBookmark->setStyleSheet("border:none; background-color:#3498DB;");
   ui->btnPages->setStyleSheet("border:none; background-color:#3498DB;");
@@ -4385,7 +4375,6 @@ void MainWindow::on_btnBackReader_clicked() {
   ui->btnAutoStop->click();
 
   m_ReaderSet->close();
-  m_Reader->setPdfViewVisible(false);
 
   if (m_Reader->isSelText) on_btnSelText_clicked();
 
@@ -5475,7 +5464,6 @@ void MainWindow::on_btnBackBookList_clicked() {
       else
         m_Reader->isOpenBookListClick = false;
     } else {
-      m_Reader->setPdfViewVisible(true);
       ui->frameBookList->hide();
       ui->frameReader->show();
     }
@@ -5658,8 +5646,6 @@ void MainWindow::on_btnCatalogue_clicked() {
 }
 
 void MainWindow::on_btnRemoveBookList_clicked() { m_Reader->removeBookList(); }
-
-void MainWindow::on_btnGoBack_clicked() { m_Reader->goWebViewBack(); }
 
 void MainWindow::on_btnShowBookmark_clicked() {
   ui->btnAutoStop->click();

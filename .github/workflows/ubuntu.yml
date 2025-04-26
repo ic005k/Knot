@@ -47,7 +47,7 @@ jobs:
           #host: linux
           cached: 'false'
           # qtwebengine
-          modules: qtcharts qtwebengine qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning
+          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning
       
       - name: ubuntu install GL library
         run: |
@@ -80,45 +80,6 @@ jobs:
                   qmake
                   make
 
-      - name: Configure and Build Fcitx5 Qt Plugin
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-                  git cmake build-essential gettext \
-                  qt6-base-dev ninja-build
-
-          # 编译 Fcitx5 核心库
-          git clone --recursive https://github.com/fcitx/fcitx5.git
-          cd fcitx5
-          mkdir build && cd build
-          cmake .. \
-            -DCMAKE_INSTALL_PREFIX=/usr/local \
-            -DENABLE_LIBRARY=true
-          make -j$(nproc)
-          sudo make install
-          sudo ldconfig
-
-          # 编译输入法插件
-          git clone --depth 1 https://github.com/fcitx/fcitx5-qt.git
-          cd fcitx5-qt && git submodule update --init
-
-          cd fcitx5
-          mkdir build && cd build
-          cmake .. \
-            -DCMAKE_PREFIX_PATH=$QT_INSTALL_DIR/lib/cmake/Qt6 \  # 使用你的 Qt 路径
-            -DENABLE_QT6=ON \
-            -DCMAKE_INSTALL_PREFIX=./output \  # 输出到本地目录
-            -GNinja
-          cmake --build . --target install --parallel
-
-      - name: Verify Output Fcitx5 Qt Plugin
-        run: |
-          ls -l fcitx5-qt/build/output/lib/qt6/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
-
-          mkdir -p bin/release/plugins/platforminputcontexts/
-
-          cp fcitx5-qt/build/output/lib/qt6/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
-          chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
 
       - name: install linuxdeployqt 
         run: |
@@ -167,8 +128,8 @@ jobs:
 
          #mkdir -p bin/release/plugins/platforminputcontexts/
 
-         #cp ExtBin/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
-         #chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         cp ExtBin/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
 
          # 获取 Qt6 插件目录
          # QT6_PLUGINS_DIR="${{ env.Qt6_DIR }}/../../plugins/platforminputcontexts"

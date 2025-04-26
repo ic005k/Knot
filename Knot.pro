@@ -1,6 +1,6 @@
 QT += core gui network printsupport
 QT += charts sensors sql
-QT += qml quick quickwidgets webview location #quickcontrols2 #positioning
+QT += qml quick quickwidgets location
 QT += xml svg concurrent
 
 # 在发布构建时禁用调试支持
@@ -13,10 +13,10 @@ win32 {
 
 !android: {
     # QT += webenginewidgets
-
 }
 
 android {
+    QT += webview
 
 }
 
@@ -413,6 +413,7 @@ SOURCES += \
     lib/md4c/entity.c \
     lib/md4c/md4c-html.c \
     lib/md4c/md4c.c \
+    src/onedrive/authserver.cpp \
     src/onedrive/qtonedrive.cpp \
     src/onedrive/qtonedriveauthorizationdialog.cpp \
     lib/quazip/JlCompress.cpp \
@@ -613,6 +614,7 @@ HEADERS += \
     lib/md4c/entity.h \
     lib/md4c/md4c-html.h \
     lib/md4c/md4c.h \
+    src/onedrive/authserver.h \
     src/onedrive/qtonedrive.h \
     src/onedrive/qtonedriveauthorizationdialog.h \
     src/onedrive/qtonedrivelib_global.h \
@@ -735,7 +737,6 @@ DISTFILES += \
     src/qmlsrc/noterecycle.qml \
     src/qmlsrc/notes.qml \
     src/qmlsrc/notes_search_result.qml \
-    src/qmlsrc/pdf.qml \
     src/qmlsrc/reader.qml \
     src/qmlsrc/report.qml \
     src/qmlsrc/search.qml \

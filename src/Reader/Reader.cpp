@@ -45,7 +45,7 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
   if (!isAndroid) mw_one->ui->btnShareBook->hide();
 
   mw_one->ui->btnAutoStop->hide();
-  mw_one->ui->btnGoBack->hide();
+
   mw_one->ui->btnBackDir->hide();
   mw_one->ui->lblTitle->hide();
   mw_one->ui->f_ReaderFun2->hide();
@@ -595,14 +595,6 @@ void Reader::saveReader(QString BookmarkText, bool isSetBookmark) {
     }
   }
 
-  if (isPDF) {
-    if (isSetBookmark) {
-    } else {
-      Reg.setValue("/Reader/PdfPage", getPdfCurrentPage());
-      Reg.setValue("/Reader/PdfScale", getScale());
-    }
-  }
-
   if (isSetBookmark) {
   } else {
     // book list
@@ -1113,14 +1105,6 @@ void Reader::goBookReadPosition() {
       qreal pos = getVPos();
       setVPos(pos + 0.01);
     }
-
-    if (isPDF) {
-      int page = Reg.value("/Reader/PdfPage", 1).toInt();
-      setPdfPage(page);
-
-      qreal scale = Reg.value("/Reader/PdfScale", 1).toReal();
-      setPdfScale(scale);
-    }
   }
 }
 
@@ -1223,19 +1207,6 @@ qreal Reader::getVPos() {
                             Q_RETURN_ARG(QVariant, itemCount));
   textPos = itemCount.toDouble();
   return textPos;
-}
-
-int Reader::getLoadProgress() {
-  QVariant nProgress;
-  QQuickItem *root = mw_one->ui->qwPdf->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "getLoadProgress",
-                            Q_RETURN_ARG(QVariant, nProgress));
-  return nProgress.toInt();
-}
-
-void Reader::goWebViewBack() {
-  QQuickItem *root = mw_one->ui->qwPdf->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "goWebViewBack");
 }
 
 QString Reader::getBookmarkText() {
@@ -1600,50 +1571,6 @@ QString Reader::getCoverPicFile(QString htmlFile) {
     }
   }
   return "";
-}
-
-void Reader::setPdfViewVisible(bool vv) {
-  QQuickItem *root = mw_one->ui->qwPdf->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "setViewVisible",
-                            Q_ARG(QVariant, vv));
-}
-
-void Reader::rotatePdfPage() {
-  QQuickItem *root = mw_one->ui->qwPdf->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "rotatePage");
-}
-
-int Reader::getPdfCurrentPage() {
-  QVariant itemCount;
-  QQuickItem *root = mw_one->ui->qwPdf->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "getCurrentPage",
-                            Q_RETURN_ARG(QVariant, itemCount));
-  return itemCount.toInt();
-}
-
-qreal Reader::getScale() {
-  QVariant itemCount;
-  QQuickItem *root = mw_one->ui->qwPdf->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "getScale",
-                            Q_RETURN_ARG(QVariant, itemCount));
-  return itemCount.toReal();
-}
-
-void Reader::setPdfPage(int page) {
-  QQuickItem *root = mw_one->ui->qwPdf->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "setPdfPage",
-                            Q_ARG(QVariant, page));
-}
-
-void Reader::setPdfScale(qreal scale) {
-  QQuickItem *root = mw_one->ui->qwPdf->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "setPdfScale",
-                            Q_ARG(QVariant, scale));
-}
-
-void Reader::setHideShowTopBar() {
-  QQuickItem *root = mw_one->ui->qwPdf->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "setHideShowTopBar");
 }
 
 // 拷贝文件夹：
@@ -2023,8 +1950,6 @@ void Reader::readBookDone() {
   if (isText || isEpub) {
     strShowMsg = "Read  EBook End...";
 
-    mw_one->ui->btnGoBack->hide();
-    mw_one->ui->qwPdf->hide();
     mw_one->ui->qwReader->show();
     mw_one->ui->f_ReaderFun->show();
     mw_one->ui->progReader->show();
@@ -2077,7 +2002,6 @@ void Reader::readBookDone() {
     mw_one->ui->f_ReaderFun->show();
     mw_one->ui->btnPages->hide();
     mw_one->ui->btnCatalogue->hide();
-    mw_one->ui->btnGoBack->show();
 
 #ifdef Q_OS_ANDROID
     // "/android_assets/" = "/data/user/0/com.x/files/"
@@ -2086,20 +2010,6 @@ void Reader::readBookDone() {
     mw_one->ui->frameMain->show();
     if (!mw_one->initMain) openMyPDF(fileName);
 #else
-
-    mw_one->ui->qwPdf->show();
-
-    QString PDFJS, str;
-
-    PDFJS = "file:///" + privateDir + "pdfjs/web/viewer.html";
-    str = PDFJS + "?file=file:///" + fileName;
-
-    QUrl url;
-    url.setUrl(str);
-
-    QQuickItem *root = mw_one->ui->qwPdf->rootObject();
-    QMetaObject::invokeMethod((QObject *)root, "setPdfPath",
-                              Q_ARG(QVariant, url));
 
 #endif
   }

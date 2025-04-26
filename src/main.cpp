@@ -45,8 +45,6 @@ QSplashScreen* splash;
 #define Cross_Origin
 
 int main(int argc, char* argv[]) {
-  QtWebView::initialize();
-
   // 对于WebEngine 强制单进程,回归Qt5的模式
   // qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--single-process");
 
@@ -54,6 +52,8 @@ int main(int argc, char* argv[]) {
       Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 
 #ifdef Q_OS_ANDROID
+  QtWebView::initialize();
+
   isAndroid = true;
 
 #else
@@ -112,9 +112,6 @@ int main(int argc, char* argv[]) {
 
     splash->show();
   }
-
-  // QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-  // QTextCodec::setCodecForLocale(codec);
 
   // 禁用文本选择（针对所有的可输入的编辑框）
   qputenv("QT_QPA_NO_TEXT_HANDLES", "1");
@@ -192,57 +189,6 @@ int main(int argc, char* argv[]) {
   jieba = std::make_unique<cppjieba::Jieba>(strJBDict1.toStdString(),
                                             strJBDict2.toStdString(),
                                             strJBDict3.toStdString());
-
-  QString pdfjsDir;
-#ifdef Q_OS_ANDROID
-  pdfjsDir = "/data/user/0/com.x/files/";
-
-#else
-  pdfjsDir = privateDir;
-#endif
-  pdfjsDir = privateDir;
-  QString resFile = ":/res/pdf/pdfjs.zip";
-  if (QFile::exists(resFile) && !isAndroid) {
-    deleteDirfile(privateDir + "pdfjs");
-    QString zipFile = pdfjsDir + "pdfjs.zip";
-    QFile::remove(zipFile);
-    QFile::copy(resFile, zipFile);
-
-    m_Method->decompressWithPassword(zipFile, pdfjsDir, "");
-
-    QFile::copy(":/res/pdf/pdf.viewer.bridge.js",
-                pdfjsDir + "pdfjs/web/pdf.viewer.bridge.js");
-    QFile::copy(":/res/pdf/qwebchannel.js",
-                pdfjsDir + "pdfjs/web/qwebchannel.js");
-
-    QTextEdit* text_edit = new QTextEdit();
-    QString view_html = pdfjsDir + "pdfjs/web/viewer.html";
-    text_edit->setPlainText(loadText(view_html));
-    for (int i = 0; i < text_edit->document()->lineCount(); i++) {
-      QString str = getTextEditLineText(text_edit, i);
-      str = str.trimmed();
-      if (str.contains("</head>")) {
-        QString s1, s2;
-        s1 = "<script type=\"text/javascript\" "
-             "src=\"qwebchannel.js\"></script>\n";
-        s2 = "<script src=\"pdf.viewer.bridge.js\"></script>\n";
-        text_edit->insertPlainText(s1);
-        text_edit->insertPlainText(s2);
-        break;
-      }
-    }
-    TextEditToFile(text_edit, view_html);
-
-    QString v_js = pdfjsDir + "pdfjs/web/viewer.js";
-    QString v_jsBuffers = loadText(v_js);
-    v_jsBuffers.replace("value: \"compressed.tracemonkey-pldi-09.pdf\",",
-                        "value: \"\",");
-    v_jsBuffers.replace("loadingErrorMessage = _this7.l10n.get",
-                        "// loadingErrorMessage = _this7.l10n.get");
-    v_jsBuffers.replace("scale = pageWidthScale",
-                        "scale = pageWidthScale * 1.05");
-    StringToFile(v_jsBuffers, v_js);
-  }
 
   iniFile = iniDir + appName + ".ini";
 

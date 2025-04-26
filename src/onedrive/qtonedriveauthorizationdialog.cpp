@@ -26,7 +26,7 @@ QtOneDriveAuthorizationDialog::QtOneDriveAuthorizationDialog(const QUrl &url,
     : QDialog(parent), url_(url) {
   isExists_ = true;
 
-  // #ifdef Q_OS_ANDROID
+#ifdef Q_OS_ANDROID
   mw_one->ui->f_OneFun->hide();
   mw_one->ui->f_FunWeb->show();
 
@@ -34,29 +34,40 @@ QtOneDriveAuthorizationDialog::QtOneDriveAuthorizationDialog(const QUrl &url,
       QUrl(QStringLiteral("qrc:/src/onedrive/web.qml")));
   mw_one->ui->qwOneDriver->rootContext()->setContextProperty("initialUrl", url);
 
-  /*#else
+#else
+  // 初始化认证服务器
+  m_authServer = new AuthServer(this);
+  connect(m_authServer, &AuthServer::authCodeReceived, this,
+          &QtOneDriveAuthorizationDialog::handleAuthCode);
+  m_authServer->start();
 
-    setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    setAttribute(Qt::WA_DeleteOnClose);
-    setWindowTitle(tr("OneDrive Authorization"));
-    int x, y, w, h;
-    x = mw_one->geometry().x();
-    y = mw_one->geometry().y();
-    w = mw_one->geometry().width();
-    h = mw_one->geometry().height();
-    setMinimumSize(QSize(w, h));
-    resize(QSize(w, h));
-    setGeometry(x, y, w, h);
-    webView_ = new QtOneDriveWebView(this);
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(5, 5, 5, 5);
-    this->setLayout(layout);
-    layout->addWidget(webView_);
-    webView_->load(url);
-    connect(webView_, SIGNAL(loadFinished(bool)), this,
-            SLOT(on_webView_loadFinished(bool)));
-    show();
-  #endif*/
+  QDesktopServices::openUrl(QUrl(url));
+  mw_one->ui->f_OneFun->hide();
+  mw_one->ui->f_FunWeb->show();
+
+  /*
+      setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+      setAttribute(Qt::WA_DeleteOnClose);
+      setWindowTitle(tr("OneDrive Authorization"));
+      int x, y, w, h;
+      x = mw_one->geometry().x();
+      y = mw_one->geometry().y();
+      w = mw_one->geometry().width();
+      h = mw_one->geometry().height();
+      setMinimumSize(QSize(w, h));
+      resize(QSize(w, h));
+      setGeometry(x, y, w, h);
+      webView_ = new QtOneDriveWebView(this);
+      QVBoxLayout *layout = new QVBoxLayout(this);
+      layout->setContentsMargins(5, 5, 5, 5);
+      this->setLayout(layout);
+      layout->addWidget(webView_);
+      webView_->load(url);
+      connect(webView_, SIGNAL(loadFinished(bool)), this,
+              SLOT(on_webView_loadFinished(bool)));
+      show();
+      */
+#endif
 
   timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), this, SLOT(on_timer()));
@@ -97,4 +108,14 @@ void QtOneDriveAuthorizationDialog::sendMsg(QString strUri) {
   QUrl url(strUri);
   emit success(url);
   qDebug() << "emit success...";
+}
+
+void QtOneDriveAuthorizationDialog::handleAuthCode(const QString &code,
+                                                   const QString &codeVerifier,
+                                                   const QString &url) {
+  qDebug() << "完整认证URL:"
+           << url;  // 输出示例: "http://localhost:8080/?code=xxxxx"
+
+  // 后续处理逻辑（你的代码）
+  // 可以直接使用 url 字符串，或单独使用 code/codeVerifier
 }

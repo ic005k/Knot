@@ -237,7 +237,6 @@ void AboutThis::show_download() {
 void AboutThis::on_btnCheckUpdate_clicked() { CheckUpdate(); }
 
 void AboutThis::on_btnDownloadUP_clicked() {
-  mw_one->m_Reader->setPdfViewVisible(false);
   if (s_link == "") return;
 
 #ifdef Q_OS_ANDROID

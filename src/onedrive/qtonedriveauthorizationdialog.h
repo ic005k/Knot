@@ -5,6 +5,8 @@
 #include <QQuickWidget>
 #include <QUrl>
 
+#include "authserver.h"
+
 class QWebEngineView;
 
 class QtOneDriveAuthorizationDialog : public QDialog {
@@ -23,6 +25,9 @@ class QtOneDriveAuthorizationDialog : public QDialog {
   void on_timer();
   void on_webView_loadFinished(bool arg1);
 
+  void handleAuthCode(const QString &code, const QString &codeVerifier,
+                      const QString &url);
+
  signals:
   void success(const QUrl &url);
   void error(const QUrl &url);
@@ -32,6 +37,9 @@ class QtOneDriveAuthorizationDialog : public QDialog {
   bool isNeedToClose_ = false;
   QUrl url_;
   QTimer *timer;
+
+  AuthServer *m_authServer;
+  QString m_codeVerifier;  // 保存 PKCE 的 code_verifier
 };
 
 #endif  // ONEDRIVEAUTHORIZATIONDIALOG_H

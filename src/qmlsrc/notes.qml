@@ -71,9 +71,9 @@ Item {
     function setWebViewFile(htmlfile, currentMDFile) {
 
         if (initialized == true)
-        webView.url = Qt.resolvedUrl("file:///" + htmlfile)
+            webView.url = Qt.resolvedUrl("file:///" + htmlfile)
         else
-        webView.url = "about:blank"
+            webView.url = "about:blank"
         strMDFileName = getFileNameWithoutExtension(currentMDFile)
         //console.log("strMDFileName=" + strMDFileName)
         //console.log("url=" + webView.url)
@@ -118,14 +118,14 @@ Item {
         category: "WebViewScroll"
     }
 
-
     WebView {
         id: webView
         visible: true
         anchors.fill: parent
         url: initialized ? "file:///C:/Users/Administrator/.Knot/memo.html" : "about:blank"
 
-       /* onRenderProcessTerminated: {
+
+        /* onRenderProcessTerminated: {
             // 自动恢复策略
             if (terminationStatus === WebEngineView.NormalTerminationStatus)
                 return
@@ -154,6 +154,7 @@ Item {
         }
 
         // 处理导航请求
+
         /*onNavigationRequested: function (request) {
             // 判断是否为用户点击链接
             if (request.navigationType === WebEngineNavigationRequest.LinkClickedNavigation) {
@@ -174,13 +175,13 @@ Item {
         }*/
 
         // 恢复滚动位置
-        onLoadingChanged: function (request) {
+
+        /* onLoadingChanged: function (request) {
             if (request.status === WebEngineView.LoadSucceededStatus) {
 
                 timer.restart()
             }
-        }
-
+        }*/
         Timer {
             id: timer
             interval: 200

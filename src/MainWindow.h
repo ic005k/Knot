@@ -743,8 +743,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnRemoveBookList_clicked();
 
-  void on_btnGoBack_clicked();
-
   void on_ReceiveShare();
 
   void on_btnShareImage_clicked();
