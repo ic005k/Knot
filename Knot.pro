@@ -3,6 +3,8 @@ QT += charts sensors sql
 QT += qml quick quickwidgets location
 QT += xml svg concurrent
 
+QT += webview
+
 # 在发布构建时禁用调试支持
 DEFINES += QT_NO_DEBUG QML_DISABLE_PROFILER
 
@@ -16,7 +18,7 @@ win32 {
 }
 
 android {
-    QT += webview
+
 
 }
 

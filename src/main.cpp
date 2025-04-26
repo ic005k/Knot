@@ -45,6 +45,8 @@ QSplashScreen* splash;
 #define Cross_Origin
 
 int main(int argc, char* argv[]) {
+  QtWebView::initialize();
+
   // 对于WebEngine 强制单进程,回归Qt5的模式
   // qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--single-process");
 
@@ -52,7 +54,6 @@ int main(int argc, char* argv[]) {
       Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 
 #ifdef Q_OS_ANDROID
-  QtWebView::initialize();
 
   isAndroid = true;
 

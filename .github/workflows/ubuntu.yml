@@ -51,7 +51,6 @@ jobs:
       
       - name: ubuntu install GL library
         run: |
-         sudo apt-get update
          sudo apt-get install -y libglew-dev libglfw3-dev libxcb*
          
          sudo apt-get install libxkbcommon-dev
@@ -61,15 +60,6 @@ jobs:
          sudo apt-get install libsecret-1-dev
 
          sudo apt-get install -y libqt6serialport6
-
-         sudo apt-get install -y \
-            fcitx5 \
-            libfcitx5core-dev \
-            libfcitx5utils-dev \
-            qt6-base-dev \
-            cmake \
-            extra-cmake-modules \
-            ninja-build
 
       - uses: actions/checkout@v2
         with:
