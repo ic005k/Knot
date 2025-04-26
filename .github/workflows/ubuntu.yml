@@ -82,11 +82,23 @@ jobs:
 
       - name: Configure and Build Fcitx5 Qt Plugin
         run: |
-          sudo add-apt-repository ppa:fcitx-team/nightly -y
           sudo apt-get update
           sudo apt-get install -y \
-                  libfcitx5utils-dev=5.0.16-1~ppa1~jammy
+                  git cmake build-essential gettext \
+                  qt6-base-dev ninja-build
 
+          # 编译 Fcitx5 核心库
+          git clone --recursive https://github.com/fcitx/fcitx5.git
+          cd fcitx5
+          mkdir build && cd build
+          cmake .. \
+            -DCMAKE_INSTALL_PREFIX=/usr/local \
+            -DENABLE_LIBRARY=true
+          make -j$(nproc)
+          sudo make install
+          sudo ldconfig
+
+          # 编译输入法插件
           git clone --depth 1 https://github.com/fcitx/fcitx5-qt.git
           cd fcitx5-qt && git submodule update --init
 
