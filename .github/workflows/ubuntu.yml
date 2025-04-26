@@ -82,6 +82,11 @@ jobs:
 
       - name: Configure and Build Fcitx5 Qt Plugin
         run: |
+          sudo add-apt-repository ppa:fcitx-team/nightly -y
+          sudo apt-get update
+          sudo apt-get install -y \
+                  libfcitx5utils-dev=5.0.16-1~ppa1~jammy
+
           git clone --depth 1 https://github.com/fcitx/fcitx5-qt.git
           cd fcitx5-qt && git submodule update --init
 
