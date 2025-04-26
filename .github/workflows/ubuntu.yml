@@ -116,8 +116,7 @@ jobs:
          #cp ExtBin/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot6/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
          #chmod 755 /home/runner/work/Knot/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
 
-         #mkdir -p bin/release/plugins/platforminputcontexts/
-
+         mkdir -p bin/release/plugins/platforminputcontexts/
          cp ExtBin/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
          chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
 
