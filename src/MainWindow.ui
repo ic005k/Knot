@@ -2640,19 +2640,6 @@ QTabBar::scroller {width:0}
                </widget>
               </item>
               <item>
-               <widget class="QQuickWidget" name="qwOneDriver">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="resizeMode">
-                 <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="QFrame" name="f_FunWeb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -3114,25 +3101,6 @@ QTabBar::scroller {width:0}
           </widget>
          </item>
         </layout>
-       </item>
-       <item>
-        <widget class="QQuickWidget" name="qwNotes">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>20</height>
-          </size>
-         </property>
-         <property name="resizeMode">
-          <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
-         </property>
-        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_9">

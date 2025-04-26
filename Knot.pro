@@ -3,7 +3,7 @@ QT += charts sensors sql
 QT += qml quick quickwidgets location
 QT += xml svg concurrent
 
-QT += webview
+
 
 # 在发布构建时禁用调试支持
 DEFINES += QT_NO_DEBUG QML_DISABLE_PROFILER
@@ -18,7 +18,7 @@ win32 {
 }
 
 android {
-
+    #QT += webview
 
 }
 
@@ -415,9 +415,6 @@ SOURCES += \
     lib/md4c/entity.c \
     lib/md4c/md4c-html.c \
     lib/md4c/md4c.c \
-    src/onedrive/authserver.cpp \
-    src/onedrive/qtonedrive.cpp \
-    src/onedrive/qtonedriveauthorizationdialog.cpp \
     lib/quazip/JlCompress.cpp \
     lib/quazip/qioapi.cpp \
     lib/quazip/quaadler32.cpp \
@@ -616,9 +613,6 @@ HEADERS += \
     lib/md4c/entity.h \
     lib/md4c/md4c-html.h \
     lib/md4c/md4c.h \
-    src/onedrive/authserver.h \
-    src/onedrive/qtonedrive.h \
-    src/onedrive/qtonedriveauthorizationdialog.h \
     src/onedrive/qtonedrivelib_global.h \
     lib/quazip/JlCompress.h \
     lib/quazip/ioapi.h \
@@ -712,7 +706,6 @@ DISTFILES += \
     src/cn.ts \
     src/imgview.qml \
     src/memo.qml \
-    src/onedrive/log.qml \
     src/onedrive/web.qml \
     src/qmlsrc/MainModel.qml \
     src/qmlsrc/SearchResults.qml \
@@ -737,7 +730,6 @@ DISTFILES += \
     src/qmlsrc/noteeditor.qml \
     src/qmlsrc/notelist.qml \
     src/qmlsrc/noterecycle.qml \
-    src/qmlsrc/notes.qml \
     src/qmlsrc/notes_search_result.qml \
     src/qmlsrc/reader.qml \
     src/qmlsrc/report.qml \

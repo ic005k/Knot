@@ -692,14 +692,6 @@ void Notes::loadNoteToQML() {
 
   QString htmlFileName = privateDir + "memo.html";
 
-  // QQuickItem *root = mw_one->ui->qwNotes->rootObject();
-  //    QMetaObject::invokeMethod((QObject *)root, "loadHtml",
-  //                              Q_ARG(QVariant, htmlFileName));
-
-  // old method
-  // QMetaObject::invokeMethod((QObject *)root, "loadHtmlBuffer",
-  //                          Q_ARG(QVariant, strEnd));
-
   // new method
   setWebViewFile(htmlFileName);
 }
@@ -737,31 +729,11 @@ void Notes::setVPos() {
 
   qreal textHeight = getVHeight();
   qDebug() << "textHeight=" << textHeight << "m_pos=" << m_pos;
-
-  if (textHeight < mw_one->ui->qwNotes->height()) m_pos = 0;
-
-  QQuickItem *root = mw_one->ui->qwNotes->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "setVPos", Q_ARG(QVariant, m_pos));
 }
 
-qreal Notes::getVPos() {
-  QVariant itemCount;
-  QQuickItem *root = mw_one->ui->qwNotes->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "getVPos",
-                            Q_RETURN_ARG(QVariant, itemCount));
-  sliderPos = itemCount.toReal();
+qreal Notes::getVPos() { return sliderPos; }
 
-  return sliderPos;
-}
-
-qreal Notes::getVHeight() {
-  QVariant h;
-  QQuickItem *root = mw_one->ui->qwNotes->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "getVHeight",
-                            Q_RETURN_ARG(QVariant, h));
-  textHeight = h.toReal();
-  return textHeight;
-}
+qreal Notes::getVHeight() { return textHeight; }
 
 void Notes::on_btnInsertTable_clicked() {
   QString table1 = "|Title1|Title2|\n";
@@ -850,32 +822,6 @@ void Notes::on_btnPaste_clicked() {
 }
 
 bool Notes::eventFilterQwNote(QObject *watch, QEvent *event) {
-  if (watch == mw_one->ui->qwNotes) {
-    if (event->type() == QEvent::MouseButtonPress) {
-      isMousePress = true;
-      isMouseMove = false;
-
-      if (!isMouseMove) {
-        // timerEditNote->start(1600);
-      }
-    }
-
-    if (event->type() == QEvent::MouseMove) {
-      if (isMousePress) isMouseMove = true;
-    }
-
-    if (event->type() == QEvent::MouseButtonRelease) {
-      isMousePress = false;
-      isMouseMove = false;
-
-      timerEditNote->stop();
-    }
-
-    if (event->type() == QEvent::MouseButtonDblClick) {
-      // mw_one->on_btnEdit_clicked();
-    }
-  }
-
   return QWidget::eventFilter(watch, event);
 }
 
@@ -1477,19 +1423,9 @@ void Notes::loadEmptyNote() {
   mw_one->ui->lblNoteName->setText("");
 }
 
-void Notes::setWebViewFile(QString htmlfile) {
-  QQuickItem *root;
-  root = mw_one->ui->qwNotes->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "setWebViewFile",
-                            Q_ARG(QVariant, htmlfile),
-                            Q_ARG(QVariant, currentMDFile));
-}
+void Notes::setWebViewFile(QString htmlfile) {}
 
-void Notes::saveWebScrollPos(QString mdfilename) {
-  QQuickItem *root = mw_one->ui->qwNotes->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "saveWebScrollPos",
-                            Q_ARG(QVariant, mdfilename));
-}
+void Notes::saveWebScrollPos(QString mdfilename) {}
 
 QString markdownToHtml(const QString &markdown, int options) {
   // 处理空输入

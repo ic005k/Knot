@@ -70,9 +70,7 @@
 ```mermaid
 graph LR
     A[Local Device] -->|AES-256 Encryption| B(WebDAV Server)
-    A -->|SSL Transmission| C(OneDrive)
     B --> D[Multi-device Decryption Sync]
-    C --> D
 ```
 
 ---
@@ -83,8 +81,6 @@ All dependencies are preserved in original format for maintenance and upgrades:
 ### Document Processing Components
 | Project Name | Functionality | Repository Link |
 |--------------|---------------|-----------------|
-| **qt-pdf-viewer-library** | PDF rendering core | [develtar/qt-pdf-viewer-library](https://github.com/develtar/qt-pdf-viewer-library) |
-| **pdf.js** | Cross-platform PDF parsing | [mozilla/pdf.js](https://github.com/mozilla/pdf.js) |
 | **md4c** | Markdown parser | [mity/md4c](https://github.com/mity/md4c) |
 | **cmark-gfm** | GitHub-flavored Markdown extension | [github/cmark-gfm](https://github.com/github/cmark-gfm) |
 
@@ -95,7 +91,6 @@ All dependencies are preserved in original format for maintenance and upgrades:
 | **quazip** | Compression/archive support | [stachenov/quazip](https://github.com/stachenov/quazip) |
 | **ini4j** | Configuration file management | [ini4j](https://ini4j.sourceforge.net/) |
 | **zlib** | Data compression algorithm | [zlib.net](https://zlib.net/) |
-| **QtOneDrive** | OneDrive sync engine | [AndreyMacritskiy/QtOneDrive](https://github.com/AndreyMacritskiy/QtOneDrive) |
 
 ### UI & Auxiliary Tools
 | Project Name | Functionality | Repository Link |

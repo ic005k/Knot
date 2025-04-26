@@ -5,14 +5,11 @@
 #include <QFile>
 
 #include "src/MainWindow.h"
-#include "src/onedrive/qtonedrive.h"
-#include "src/onedrive/qtonedriveauthorizationdialog.h"
 #include "ui_CloudBackup.h"
 #include "ui_MainWindow.h"
 
 extern MainWindow *mw_one;
 extern Method *m_Method;
-extern QtOneDriveAuthorizationDialog *dialog_;
 
 File::File() { connect(this, SIGNAL(sourceChanged()), this, SLOT(readFile())); }
 
@@ -99,17 +96,7 @@ void File::setCurX(qreal &curX) { m_curX = curX; }
 
 QString File::webEnd() { return m_strUri; }
 
-void File::setWebEnd(QString &strUri) {
-  m_strUri = strUri;
-  mw_one->strRefreshUrl = m_strUri;
-
-  if (m_strUri.contains("?code=")) dialog_->sendMsg(m_strUri);
-
-  QClipboard *clipboard = QApplication::clipboard();
-  clipboard->setText(m_strUri);
-
-  qDebug() << "web end uri = " << m_strUri;
-}
+void File::setWebEnd(QString &strUri) {}
 
 QString File::prog() const { return m_prog; }
 

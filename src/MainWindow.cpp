@@ -1,6 +1,5 @@
 ﻿#include "MainWindow.h"
 
-#include "src/onedrive/qtonedriveauthorizationdialog.h"
 #include "ui_MainWindow.h"
 
 QString ver = "1.2.36";
@@ -47,7 +46,7 @@ extern QString btnYearText, btnMonthText, strPage, ebookFile, strTitle,
 extern int iPage, sPos, totallines, baseLines, htmlIndex, s_y1, s_m1, s_d1,
     s_y2, s_m2, s_d2;
 extern QStringList readTextList, htmlFiles, listCategory;
-extern QtOneDriveAuthorizationDialog *dialog_;
+
 extern CategoryList *m_CategoryList;
 extern ReaderSet *m_ReaderSet;
 extern TextSelector *m_TextSelector;
@@ -3215,11 +3214,6 @@ void MainWindow::initQW() {
   ui->qw_Img->rootContext()->setContextProperty("myW", this->width());
   ui->qw_Img->rootContext()->setContextProperty("myH", this->height());
 
-  ui->qwNotes->rootContext()->setContextProperty("m_Notes", m_Notes);
-  ui->qwNotes->rootContext()->setContextProperty("FontSize", fontSize);
-  ui->qwNotes->rootContext()->setContextProperty("strText", "");
-  ui->qwNotes->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/notes.qml")));
-
   ui->qwTodo->rootContext()->setContextProperty("maxFontSize", f_size);
   ui->qwTodo->rootContext()->setContextProperty("isBtnVisible", false);
   ui->qwTodo->rootContext()->setContextProperty("m_Todo", m_Todo);
@@ -3254,9 +3248,6 @@ void MainWindow::initQW() {
   ui->qwReport->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/report.qml")));
   ui->qwReportSub->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/details.qml")));
-
-  ui->qwOneDriver->rootContext()->setContextProperty("m_CloudBackup",
-                                                     m_CloudBackup);
 
   ui->qwSearch->rootContext()->setContextProperty("m_Method", m_Method);
   ui->qwSearch->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/search.qml")));
@@ -3345,7 +3336,7 @@ void MainWindow::init_Theme() {
   ui->qwRecycle->rootContext()->setContextProperty("isDark", isDark);
   ui->qwNoteBook->rootContext()->setContextProperty("isDark", isDark);
   ui->qwNoteList->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwNotes->rootContext()->setContextProperty("isDark", isDark);
+
   ui->qwNotesSearchResult->rootContext()->setContextProperty("isDark", isDark);
   ui->qwSearch->rootContext()->setContextProperty("isDark", isDark);
   ui->qwBakList->rootContext()->setContextProperty("isDark", isDark);
@@ -3359,7 +3350,7 @@ void MainWindow::init_Theme() {
   ui->qwSteps->rootContext()->setContextProperty("isDark", isDark);
   ui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
   ui->qwReport->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwOneDriver->rootContext()->setContextProperty("isDark", isDark);
+
   ui->qwCata->rootContext()->setContextProperty("isDark", isDark);
   ui->qwBookmark->rootContext()->setContextProperty("isDark", isDark);
   ui->qwReader->rootContext()->setContextProperty("isDark", isDark);
@@ -3560,6 +3551,8 @@ void MainWindow::init_UIWidget() {
   ui->chkWebDAV->setStyleSheet(m_Preferences->chkStyle);
   ui->chkAutoSync->setStyleSheet(m_Preferences->chkStyle);
   ui->twCloudBackup->setCurrentIndex(1);
+  ui->twCloudBackup->setTabVisible(0, false);
+  ui->chkWebDAV->hide();
 
   ui->editWebDAVPassword->setEchoMode(QLineEdit::EchoMode::Password);
 
@@ -3576,7 +3569,7 @@ void MainWindow::init_UIWidget() {
   ui->lblStats->installEventFilter(this);
   ui->editSearchText->installEventFilter(this);
   ui->editFindNote->installEventFilter(this);
-  ui->qwNotes->installEventFilter(this);
+
   ui->lblTitleEditRecord->installEventFilter(this);
   ui->lblNoteName->installEventFilter(this);
 
@@ -3999,9 +3992,10 @@ void MainWindow::on_actionOneDriveBackupData() {
   ui->frameMain->hide();
   ui->frameReader->hide();
   ui->frameOne->show();
-  delete m_CloudBackup;
-  m_CloudBackup = new CloudBackup;
-  m_CloudBackup->loadLogQML();
+
+  // delete m_CloudBackup;
+  // m_CloudBackup = new CloudBackup;
+  // m_CloudBackup->loadLogQML();
 }
 
 void MainWindow::on_actionTabRecycle() {
@@ -4560,10 +4554,7 @@ void MainWindow::on_btnStorageInfo_clicked() {
   m_CloudBackup->on_pushButton_storageInfo_clicked();
 }
 
-void MainWindow::on_btnRefreshWeb_clicked() {
-  ui->qwOneDriver->rootContext()->setContextProperty("initialUrl",
-                                                     strRefreshUrl);
-}
+void MainWindow::on_btnRefreshWeb_clicked() {}
 
 void MainWindow::on_btnUserInfo_clicked() {
   // 获取openssl相关信息并自行编译安装 Qt6.4(1.1.1.m版本的openssl）
@@ -4589,12 +4580,7 @@ void MainWindow::on_btnSetKey_clicked() {}
 
 void MainWindow::on_btnEdit_clicked() { m_Notes->openEditUI(); }
 
-void MainWindow::on_btnCode_clicked() {
-  QString str = ui->editCode->toPlainText().trimmed();
-  if (str != "" && str.contains("?code=")) {
-    dialog_->sendMsg(str);
-  }
-}
+void MainWindow::on_btnCode_clicked() {}
 
 void MainWindow::clearSelectBox() {
   QString tempFile = iniDir + "memo/texteditor.html";
@@ -4618,17 +4604,6 @@ void MainWindow::clearSelectBox() {
   }
 
   if (!mw_one->ui->frameNotes->isHidden()) {
-    m_Notes->getVPos();
-    int pos = m_Notes->sliderPos;
-    QQuickItem *root = mw_one->ui->qwNotes->rootObject();
-    QMetaObject::invokeMethod((QObject *)root, "loadHtml",
-                              Q_ARG(QVariant, tempFile));
-
-    // QMetaObject::invokeMethod((QObject*)root, "loadHtml",
-    //                           Q_ARG(QVariant, file));
-    QMetaObject::invokeMethod((QObject *)root, "loadHtmlBuffer",
-                              Q_ARG(QVariant, m_Notes->htmlBuffer));
-    QMetaObject::invokeMethod((QObject *)root, "setVPos", Q_ARG(QVariant, pos));
   }
 }
 
@@ -5899,10 +5874,7 @@ void MainWindow::on_btnToPDF_clicked() {
 
 void MainWindow::on_btnRecentOpen0_clicked() { on_btnRecentOpen_clicked(); }
 
-void MainWindow::on_btnWebBack_clicked() {
-  QQuickItem *root = mw_one->ui->qwNotes->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "goBack");
-}
+void MainWindow::on_btnWebBack_clicked() {}
 
 void MainWindow::on_btnWebDAVBackup_clicked() {
   if (!ui->btnReader->isEnabled()) return;

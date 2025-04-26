@@ -7,7 +7,7 @@
 #include <QSplashScreen>
 #include <QTranslator>
 #include <QWidget>
-#include <QtWebView/QtWebView>
+// #include <QtWebView/QtWebView>
 
 #include "MainWindow.h"
 #include "lib/cppjieba/Jieba.hpp"
@@ -45,11 +45,6 @@ QSplashScreen* splash;
 #define Cross_Origin
 
 int main(int argc, char* argv[]) {
-  QtWebView::initialize();
-
-  // 对于WebEngine 强制单进程,回归Qt5的模式
-  // qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--single-process");
-
   QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
       Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 
@@ -62,26 +57,7 @@ int main(int argc, char* argv[]) {
 
 #endif
 
-#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-
-  // Fixed an issue where QtWebView in Linux could not display web pages.
-  char ARG_DISABLE_WEB_SECURITY[] = "--disable-web-security";
-  char ARG_DISABLE_SECCOMP_SECURITY[] = "--disable-seccomp-filter-sandbox";
-
-  // ARG_DISABLE_WEB_SECURITY + ARG_DISABLE_SECCOMP_SECURITY + nullptr
-  int newArgc = argc + 1 + 1 + 1;
-  char** newArgv = new char*[newArgc];
-  for (int i = 0; i < argc; i++) {
-    newArgv[i] = argv[i];
-  }
-  newArgv[argc] = ARG_DISABLE_WEB_SECURITY;
-  newArgv[argc + 1] = ARG_DISABLE_SECCOMP_SECURITY;
-  newArgv[argc + 2] = nullptr;
-
-  QApplication app(newArgc, newArgv);
-#else
   QApplication app(argc, argv);
-#endif
 
   loadLocal();
 
