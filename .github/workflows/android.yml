@@ -63,7 +63,7 @@ jobs:
            windows ^
            desktop ^
            %QT_VERSION% ^
-           win64 ^  # Windows 桌面版架构固定为 win64
+           win64 ^
            --outputdir "%GITHUB_WORKSPACE%\Qt" ^
            --modules qtcharts qtsensors qtlocation qt5compat qtpositioning
 
