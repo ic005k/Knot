@@ -59,6 +59,8 @@ jobs:
     - name: Install Qt for Desktop
       shell: cmd  # 强制使用 CMD 解释器
       run: |
+        aqt list-qt windows desktop --modules 6.6.3 win64_msvc2019_64
+
          aqt install-qt ^
            windows ^
            desktop ^
