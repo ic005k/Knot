@@ -104,23 +104,22 @@ jobs:
       shell: powershell
       run: |
 
-          # 创建构建目录
-          New-Item -Path build -ItemType Directory -Force
-          Set-Location build
+          # 设置UTF-8编码避免中文乱码
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-          # 生成Makefile
+          # 强制创建构建目录
+          mkdir build -Force > $null
+          cd build
+
+          # 直接调用qmake生成Makefile（假设QT_DIR已正确设置）
           & "$env:QT_DIR\bin\qmake.exe" .. CONFIG+=release ANDROID_ABIS=arm64-v8a
 
-          # 兼容性构建
-              if (Get-Command jom -ErrorAction SilentlyContinue) {
-                  & jom -j4
-                  if (-not $?) { & make -j4 }
-              } else {
-                  & make -j4
-              }
+          # 强制使用make并行构建（忽略jom兼容性检查）
+          make -j4
 
           # 生成APK
-              & make apk
+          make apk
 
     - name: Sign APK
       run: |
