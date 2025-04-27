@@ -55,11 +55,12 @@ jobs:
     - name: Install Qt for Android
       run: |
         # 安装主机工具（Linux 桌面版，包含 qmake）
-          aqt install-qt \
-               linux \
-               desktop \
-               $QT_VERSION \
-               --outputdir ${{ github.workspace }}/Qt
+          #aqt install-qt \
+          #     linux \
+          #     desktop \
+          #     $QT_VERSION \
+          #     --outputdir ${{ github.workspace }}/Qt
+          aqt install-qt linux desktop $QT_VERSION $QT_ARCH --outputdir /Qt --modules qtcharts qtsvg qtsensors qtlocation qt5compat qtpositioning
 
         # 安装安卓基础组件
           aqt install-qt \
@@ -67,19 +68,8 @@ jobs:
             android \
             $QT_VERSION \
             android_arm64_v8a \
-            --outputdir ${{ github.workspace }}/Qt \  # 指定输出目录
-            --archives qtbase qtsvg qtdeclarative qtandroidextras
+            --outputdir ${{ github.workspace }}/Qt   # 指定输出目录
 
-          # 尝试安装可选模块（若存在）
-          aqt install-qt \
-            linux \
-            android \
-            $QT_VERSION \
-            android_arm64_v8a \
-            --outputdir ${{ github.workspace }}/Qt \
-            --archives qtbase \  # 必须指定至少一个基础组件
-            --modules qtcharts qtsensors qtlocation qt5compat qtpositioning \
-            || echo "Optional modules not found, skipping..."
         
     - name: Setup Android environment variables
       shell: bash
