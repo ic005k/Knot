@@ -92,6 +92,11 @@ jobs:
 
     - name: Build APK
       run: |
+        sudo apt update
+        sudo apt install -y build-essential libc6-dev gcc-multilib g++-multilib
+        sudo ln -s /usr/include/x86_64-linux-gnu/bits /usr/include/bits
+        sudo ln -s /usr/include/x86_64-linux-gnu/sys /usr/include/sys
+
         # 确保 qmake 可用
         export PATH="${{ env.QT_DIR }}/bin:$PATH"
         mkdir build && cd build
