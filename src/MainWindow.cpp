@@ -2,7 +2,7 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "1.2.36";
+QString ver = "2.0.0";
 QString appName = "Knot";
 
 QList<QPointF> PointList;
@@ -2693,7 +2693,8 @@ bool MainWindow::importBakData(QString fileName) {
 
     while (result == false && isPasswordError == false)
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-  }
+  } else
+    dec_file = zipPath;
 
   // mw_one->m_Notes->unzip(zipPath);
 

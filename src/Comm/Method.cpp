@@ -1416,7 +1416,7 @@ bool Method::decompressWithPassword(const QString &zipPath,
                                     const QString &password) {
   QuaZip zip(zipPath);
   if (!zip.open(QuaZip::mdUnzip)) {
-    qWarning() << "[ERROR] Failed to open zip:" << zip.getZipError();
+    qWarning() << "[ERROR] Failed to open zip:" << zip.getZipError() << zipPath;
     isPasswordError = true;
     return false;
   }

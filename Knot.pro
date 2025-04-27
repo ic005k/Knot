@@ -820,8 +820,18 @@ win32 {
 
 android: {
     INCLUDEPATH += $$PWD/android-openssl/include
-    LIBS += -L$$PWD/android-openssl/ssl_3/x86_64 \
+
+    contains(ANDROID_TARGET_ARCH, x86_64) {
+        LIBS += -L$$PWD/android-openssl/ssl_3/x86_64 \
                 -lssl -lcrypto
+    }
+
+    contains(ANDROID_TARGET_ARCH, arm64-v8a) {
+        LIBS += -L$$PWD/android-openssl/ssl_3/v8a \
+                -lssl -lcrypto
+    }
+
+
 }
 
 unix:!macx {
