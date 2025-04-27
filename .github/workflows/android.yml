@@ -62,7 +62,7 @@ jobs:
                   ${{ env.QT_VERSION }} \
                   ${{ env.QT_DESKTOP_ARCH }} \
                   --outputdir ${{ github.workspace }}/Qt \
-                  --modules qtcharts qtsvg qtsensors qtlocation qt5compat qtpositioning  # 安装指定模块
+                  --modules qtcharts qtsensors qtlocation qt5compat qtpositioning  # 安装指定模块
 
           #aqt install-qt linux desktop $QT_VERSION $QT_ARCH --outputdir /Qt --modules qtcharts qtsvg qtsensors qtlocation qt5compat qtpositioning
 
