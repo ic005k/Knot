@@ -71,7 +71,7 @@ jobs:
 
 
     # 安装Qt安卓模块
-    - name: Install Qt for Android
+    - name: Install Qt Android
       shell: cmd  # 强制使用 CMD 解释器
       run: |
 
@@ -92,11 +92,11 @@ jobs:
         echo "QT_DIR=${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/android_arm64_v8a" >> $GITHUB_ENV
         echo "PATH=$QT_DIR/bin:$PATH" >> $GITHUB_ENV  # 将qmake加入PATH
 
-    - name: Prepare signing
-      run: |
-        mkdir -p android/app
-        echo "${{ secrets.SIGNING_KEY }}" > android/app/my-release-key.keystore.base64
-        base64 -d android/app/my-release-key.keystore.base64 > android/app/my-release-key.keystore
+    #- name: Prepare signing
+    #  run: |
+    #    mkdir -p android/app
+    #    echo "${{ secrets.SIGNING_KEY }}" > android/app/my-release-key.keystore.base64
+    #    base64 -d android/app/my-release-key.keystore.base64 > android/app/my-release-key.keystore
 
     - name: Build APK
       run: |
