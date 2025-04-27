@@ -74,6 +74,8 @@ jobs:
     - name: Install Qt for Android
       shell: cmd  # 强制使用 CMD 解释器
       run: |
+        aqt list-qt windows android --modules 6.6.3 win64_msvc2019_64
+
         aqt install-qt ^
             windows ^
             android ^
