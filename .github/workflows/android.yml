@@ -56,26 +56,26 @@ jobs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH  # 关键：确保后续步骤能找到 aqt
 
      # 使用 aqtinstall 安装 Qt（含安卓模块）
-    - name: Install Qt for Android
-      run: |
-        # 安装主机工具（Linux 桌面版，包含 qmake）
-        aqt install-qt \
-                  windows \
-                  desktop \
-                  ${{ env.QT_VERSION }} \
-                  ${{ env.QT_DESKTOP_ARCH }} \
-                  --outputdir ${{ github.workspace }}/Qt \
-                  --modules qtcharts qtsensors qtlocation qt5compat qtpositioning  # 安装指定模块
+     - name: Install Qt for Android
+       shell: cmd  # 强制使用 CMD 解释器
+       run: |
+         aqt install-qt ^
+           windows ^
+           desktop ^
+           %QT_VERSION% ^
+           win64 ^  # Windows 桌面版架构固定为 win64
+           --outputdir "%GITHUB_WORKSPACE%\Qt" ^
+           --modules qtcharts qtsensors qtlocation qt5compat qtpositioning
 
           #aqt install-qt linux desktop $QT_VERSION $QT_ARCH --outputdir /Qt --modules qtcharts qtsvg qtsensors qtlocation qt5compat qtpositioning
 
         # 安装安卓基础组件
-          aqt install-qt \
-            windows \
-            android \
-            $QT_VERSION \
-            android_arm64_v8a \
-            --outputdir ${{ github.workspace }}/Qt \
+          aqt install-qt ^
+            windows ^
+            android ^
+            %QT_VERSION% ^
+            win64 ^
+            --outputdir "%GITHUB_WORKSPACE%\Qt" ^
             --modules qtcharts qtsensors qtlocation qt5compat qtpositioning
 
         
