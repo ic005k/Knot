@@ -81,7 +81,7 @@ jobs:
             windows ^
             android ^
             %QT_VERSION% ^
-            win64_msvc2019_64 ^
+            android_arm64_v8a ^
             --outputdir "%GITHUB_WORKSPACE%\Qt" ^
         
     - name: Setup Android environment variables
