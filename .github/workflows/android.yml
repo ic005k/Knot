@@ -99,16 +99,6 @@ jobs:
     #    echo "${{ secrets.SIGNING_KEY }}" > android/app/my-release-key.keystore.base64
     #    base64 -d android/app/my-release-key.keystore.base64 > android/app/my-release-key.keystore
 
-    - name: Verify Qt Installation
-      shell: powershell
-      run: |
-        # 检查qmake是否存在
-        if (-not (Test-Path "C:\Qt\6.6.3\android_arm64_v8a\bin\qmake.exe")) {
-          Write-Error "Qt Android组件未正确安装"
-          exit 1
-        }
-        # 输出qmake版本验证安装完整性
-        & "C:\Qt\6.6.3\android_arm64_v8a\bin\qmake.exe" -v
 
     - name: Build APK
       shell: powershell
