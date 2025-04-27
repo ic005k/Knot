@@ -56,9 +56,10 @@ jobs:
       run: |
         # 先安装基础组件
           aqt install-qt \
-            linux android \
+            android \
             $QT_VERSION \
             android_arm64_v8a \
+            --outputdir ${{ github.workspace }}/Qt  # 指定输出目录
             --archives qtbase qtsvg
 
           # 尝试安装可选模块（若存在）
@@ -66,7 +67,7 @@ jobs:
             linux android \
             $QT_VERSION \
             android_arm64_v8a \
-            --modules qtcharts qtlocation \
+            --modules qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning \
             || echo "Optional modules not found, skipping..."
         
     - name: Setup Android environment variables
@@ -75,6 +76,7 @@ jobs:
         echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
         echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
         echo "QT_DIR=${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/android_arm64_v8a" >> $GITHUB_ENV
+        echo "PATH=$QT_DIR/bin:$PATH" >> $GITHUB_ENV  # 将qmake加入PATH
 
     - name: Prepare signing
       run: |
