@@ -83,14 +83,15 @@ jobs:
             %QT_VERSION% ^
             android_arm64_v8a ^
             --outputdir "C:\Qt" ^
+            --modules qtcharts qtsensors qtlocation qtpositioning qt5compat
         
     - name: Setup Android environment variables
-      shell: bash
+      shell: powershell  # 保持与编译步骤相同的shell类型
       run: |
-        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-        echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
-        echo "QT_DIR=${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/android_arm64_v8a" >> $GITHUB_ENV
-        echo "PATH=$QT_DIR/bin:$PATH" >> $GITHUB_ENV  # 将qmake加入PATH
+        $QT_DIR = "C:\Qt\6.6.3\android_arm64_v8a"
+        [Environment]::SetEnvironmentVariable("PATH", "$QT_DIR\bin;$env:PATH", "Machine")
+        [Environment]::SetEnvironmentVariable("ANDROID_NDK_ROOT", "$env:ANDROID_SDK_ROOT\ndk\$env:NDK_VERSION", "Machine")
+        Write-Output "::set-env name=PATH::$($env:PATH)"
 
     #- name: Prepare signing
     #  run: |
@@ -101,20 +102,12 @@ jobs:
     - name: Build APK
       shell: powershell
       run: |
-        # 配置Qt环境变量
-        $env:QT_DIR = "C:\Qt\6.6.3\android_arm64_v8a"
-        $env:PATH = "$env:QT_DIR\bin;$env:PATH"
-
-        # 创建构建目录
-        New-Item -Path build -ItemType Directory -Force
-        cd build
-
-        # 执行qmake生成Makefile[3,6](@ref)
-        & "C:\Qt\6.6.3\android_arm64_v8a\bin\qmake.exe" .. CONFIG+=release ANDROID_ABIS=arm64-v8a
-
-        # 编译并生成APK
-        jom -j 4  # 或使用nmake/mingw32-make
-        make apk
+              & "$env:QT_DIR\bin\qmake.exe" -v  # 验证qmake版本
+              mkdir build -Force
+              cd build
+              & "$env:QT_DIR\bin\qmake.exe" .. CONFIG+=release ANDROID_ABIS=arm64-v8a
+              jom -j4
+              make apk
 
     - name: Sign APK
       run: |
