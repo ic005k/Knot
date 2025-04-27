@@ -108,8 +108,17 @@ jobs:
           mkdir build -Force
           cd build
           & "C:\Qt\6.6.3\android_arm64_v8a\bin\qmake.exe" .. CONFIG+=release ANDROID_ABIS=arm64-v8a
-          jom -j4 || make -j4  # 兼容不同构建工具
-          make apk
+
+          # 兼容性构建
+              if (Get-Command jom -ErrorAction SilentlyContinue) {
+                  & jom -j4
+                  if (-not $?) { & make -j4 }
+              } else {
+                  & make -j4
+              }
+
+          # 生成APK
+              & make apk
 
     - name: Sign APK
       run: |
