@@ -7,15 +7,16 @@ on:
     branches: [ main ]
 
 env:
-  QT_VERSION: 5.15.2
+  QT_VERSION: 6.6.3
   ANDROID_API_LEVEL: 34
-  BUILD_TOOLS_VERSION: 31.0.0
-  NDK_VERSION: 21.4.7075529
+  BUILD_TOOLS_VERSION: 34.0.0
+  NDK_VERSION: 25.1.8937393
   QT_ARCH: android_arm64_v8a 
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    #os: [ubuntu-22.04]
+    runs-on: ubuntu-22.04 #ubuntu-latest
 
     steps:
     - name: Checkout code
@@ -50,20 +51,6 @@ jobs:
         pip install aqtinstall
         echo "$HOME/.local/bin" >> $GITHUB_PATH  # 关键：确保后续步骤能找到 aqt
 
-    
-    #- name: Install Qt
-    #  uses: jurplel/install-qt-action@v4
-    #  with:
-     #   cached: 'false'
-      #  version: ${{ env.QT_VERSION }}
-       # host: linux     # 宿主平台
-        #target: android # 目标平台
-        #arch: ${{ env.QT_ARCH }}
-        #tools: auto     # 自动安装android sdk
-        #install-deps: true  # 自动安装系统依赖
-        # modules: qtcharts qtwebengine
-       # archives: qtbase qtsvg qtlocation
-
      # 使用 aqtinstall 安装 Qt（含安卓模块）
     - name: Install Qt for Android
       run: |
@@ -72,7 +59,6 @@ jobs:
             linux android \
             $QT_VERSION \
             android_arm64_v8a \
-            --mirror https://mirrors.tencent.com/qt/ \
             --archives qtbase qtsvg
 
           # 尝试安装可选模块（若存在）
