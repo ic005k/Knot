@@ -103,11 +103,6 @@ jobs:
     - name: Build APK
       shell: powershell
       run: |
-          # 验证Qt路径
-          if (-not (Test-Path "$env:QT_DIR\bin\qmake.exe")) {
-              Write-Error "Qt路径配置错误"
-              exit 1
-          }
 
           # 创建构建目录
           New-Item -Path build -ItemType Directory -Force
