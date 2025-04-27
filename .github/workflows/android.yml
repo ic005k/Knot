@@ -56,7 +56,7 @@ jobs:
       run: |
         # 先安装基础组件
           aqt install-qt \
-            android \
+            linux android \
             $QT_VERSION \
             android_arm64_v8a \
             --outputdir ${{ github.workspace }}/Qt  # 指定输出目录
