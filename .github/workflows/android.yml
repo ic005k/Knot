@@ -61,7 +61,7 @@ jobs:
             $QT_VERSION \
             android_arm64_v8a \
             --outputdir ${{ github.workspace }}/Qt  # 指定输出目录
-            --archives qtbase qtsvg
+            #--archives qtbase qtsvg
 
           # 尝试安装可选模块（若存在）
           aqt install-qt \
