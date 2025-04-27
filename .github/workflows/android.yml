@@ -76,6 +76,7 @@ jobs:
             android \
             $QT_VERSION \
             android_arm64_v8a \
+            --outputdir ${{ github.workspace }}/Qt \
             --modules qtcharts qtsensors qtlocation qt5compat qtpositioning \
             || echo "Optional modules not found, skipping..."
         
