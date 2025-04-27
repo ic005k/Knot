@@ -103,11 +103,18 @@ jobs:
     - name: Build APK
       shell: powershell
       run: |
-          # 使用绝对路径调用qmake
-          & "C:\Qt\6.6.3\android_arm64_v8a\bin\qmake.exe" -v
-          mkdir build -Force
-          cd build
-          & "C:\Qt\6.6.3\android_arm64_v8a\bin\qmake.exe" .. CONFIG+=release ANDROID_ABIS=arm64-v8a
+          # 验证Qt路径
+          if (-not (Test-Path "$env:QT_DIR\bin\qmake.exe")) {
+              Write-Error "Qt路径配置错误"
+              exit 1
+          }
+
+          # 创建构建目录
+          New-Item -Path build -ItemType Directory -Force
+          Set-Location build
+
+          # 生成Makefile
+          & "$env:QT_DIR\bin\qmake.exe" .. CONFIG+=release ANDROID_ABIS=arm64-v8a
 
           # 兼容性构建
               if (Get-Command jom -ErrorAction SilentlyContinue) {
