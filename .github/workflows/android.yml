@@ -67,15 +67,8 @@ jobs:
            %QT_VERSION% ^
            win64_msvc2019_64 ^
            --outputdir "%GITHUB_WORKSPACE%\Qt" ^
-           --modules charts sensors location positioning
+           --modules qtcharts qtsensors qtlocation qtpositioning qt5compat
 
-    - name: Install Qt5Compat
-      run: |
-        aqt install-tool ^
-        windows ^
-        tools_ifw ^
-        4.3.0 ^
-        --outputdir "%GITHUB_WORKSPACE%\Qt"
 
     # 安装安卓基础组件
     - name: Install Qt for Android
