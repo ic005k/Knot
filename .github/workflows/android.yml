@@ -88,6 +88,8 @@ jobs:
 
     - name: Build APK
       run: |
+        # 确保 qmake 可用
+        export PATH="${{ env.QT_DIR }}/bin:$PATH"
         mkdir build && cd build
         $QT_DIR/bin/qmake .. CONFIG+=release ANDROID_ABIS=arm64-v8a
         make -j$(nproc)
