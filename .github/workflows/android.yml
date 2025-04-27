@@ -98,23 +98,23 @@ jobs:
     #    echo "${{ secrets.SIGNING_KEY }}" > android/app/my-release-key.keystore.base64
     #    base64 -d android/app/my-release-key.keystore.base64 > android/app/my-release-key.keystore
 
-- name: Build APK
-  shell: powershell
-  run: |
-    # 配置Qt环境变量
-    $env:QT_DIR = "C:\Qt\6.6.3\android_arm64_v8a"
-    $env:PATH = "$env:QT_DIR\bin;$env:PATH"
+    - name: Build APK
+      shell: powershell
+      run: |
+        # 配置Qt环境变量
+        $env:QT_DIR = "C:\Qt\6.6.3\android_arm64_v8a"
+        $env:PATH = "$env:QT_DIR\bin;$env:PATH"
 
-    # 创建构建目录
-    New-Item -Path build -ItemType Directory -Force
-    cd build
+        # 创建构建目录
+        New-Item -Path build -ItemType Directory -Force
+        cd build
 
-    # 执行qmake生成Makefile[3,6](@ref)
-    & "$env:QT_DIR\bin\qmake.exe" .. CONFIG+=release ANDROID_ABIS=arm64-v8a
+        # 执行qmake生成Makefile[3,6](@ref)
+        & "$env:QT_DIR\bin\qmake.exe" .. CONFIG+=release ANDROID_ABIS=arm64-v8a
 
-    # 编译并生成APK
-    jom -j 4  # 或使用nmake/mingw32-make
-    make apk
+        # 编译并生成APK
+        jom -j 4  # 或使用nmake/mingw32-make
+        make apk
 
     - name: Sign APK
       run: |
