@@ -54,6 +54,13 @@ jobs:
      # 使用 aqtinstall 安装 Qt（含安卓模块）
     - name: Install Qt for Android
       run: |
+        # 安装主机工具（Linux 桌面版，包含 qmake）
+          aqt install-qt \
+               linux \
+               desktop \
+               $QT_VERSION \
+               --outputdir ${{ github.workspace }}/Qt
+
         # 先安装基础组件
           aqt install-qt \
             linux \
