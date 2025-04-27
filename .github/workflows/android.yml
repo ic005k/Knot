@@ -56,9 +56,9 @@ jobs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH  # 关键：确保后续步骤能找到 aqt
 
      # 使用 aqtinstall 安装 Qt（含安卓模块）
-     - name: Install Qt for Android
-       shell: cmd  # 强制使用 CMD 解释器
-       run: |
+    - name: Install Qt for Android
+      shell: cmd  # 强制使用 CMD 解释器
+      run: |
          aqt install-qt ^
            windows ^
            desktop ^
