@@ -99,16 +99,23 @@ jobs:
     #    base64 -d android/app/my-release-key.keystore.base64 > android/app/my-release-key.keystore
 
     - name: Build APK
+      shell: powershell  # 显式指定使用PowerShell
       run: |
+        # 设置Qt路径(示例路径，需替换实际值)
+        $QT_DIR = "C:\Qt\6.6.3\android_arm64_v8a"
 
-        # 确保 qmake 可用
-        export PATH="${{ env.QT_DIR }}/bin:$PATH"
-        mkdir build && cd build
+        # 配置环境变量
+        $env:PATH = "$QT_DIR\bin;" + $env:PATH
+        $env:ANDROID_NDK_ROOT = "C:\Android\android-ndk-r21d"  # 需替换实际NDK路径[2](@ref)
 
-        $QT_DIR/bin/qmake .. CONFIG+=release ANDROID_ABIS=arm64-v8a
-        make -j$(nproc)
+        # 创建构建目录
+        New-Item -ItemType Directory -Path build -Force
+        cd build
+
+        # 执行qmake和编译
+        & "$QT_DIR\bin\qmake.exe" .. CONFIG+=release ANDROID_ABIS=arm64-v8a
+        make -j$(Get-CimInstance Win32_ComputerSystem | Select-Object -ExpandProperty NumberOfLogicalProcessors)
         make apk
-
 
     - name: Sign APK
       run: |
