@@ -65,7 +65,7 @@ jobs:
            %QT_VERSION% ^
            win64 ^
            --outputdir "%GITHUB_WORKSPACE%\Qt" ^
-           --modules qtcharts qtsensors qtlocation qt5compat qtpositioning
+           --modules charts sensors location qt5compat positioning
 
     # 安装安卓基础组件
     - name: Install Qt for Android
