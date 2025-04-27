@@ -88,10 +88,13 @@ jobs:
     - name: Setup Android environment variables
       shell: powershell  # 保持与编译步骤相同的shell类型
       run: |
-        $QT_DIR = "C:\Qt\6.6.3\android_arm64_v8a"
-        [Environment]::SetEnvironmentVariable("PATH", "$QT_DIR\bin;$env:PATH", "Machine")
-        [Environment]::SetEnvironmentVariable("ANDROID_NDK_ROOT", "$env:ANDROID_SDK_ROOT\ndk\$env:NDK_VERSION", "Machine")
-        Write-Output "::set-env name=PATH::$($env:PATH)"
+        # 更新PATH变量
+         $QT_DIR = "C:\Qt\6.6.3\android_arm64_v8a"
+         $newPath = "$QT_DIR\bin;" + $env:PATH
+         echo "PATH=$newPath" >> $env:GITHUB_ENV  # 使用环境文件语法[1,6](@ref)
+
+         # 设置其他环境变量
+         echo "ANDROID_NDK_ROOT=$env:ANDROID_SDK_ROOT\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
 
     #- name: Prepare signing
     #  run: |
