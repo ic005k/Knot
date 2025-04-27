@@ -105,18 +105,10 @@ jobs:
         export PATH="${{ env.QT_DIR }}/bin:$PATH"
         mkdir build && cd build
 
-        #$QT_DIR/bin/qmake .. CONFIG+=release ANDROID_ABIS=arm64-v8a
-        #make -j$(nproc)
-        #make apk
+        $QT_DIR/bin/qmake .. CONFIG+=release ANDROID_ABIS=arm64-v8a
+        make -j$(nproc)
+        make apk
 
-
-        $QT_DIR/bin/qmake .. \
-          ANDROID_ABIS=arm64-v8a \
-          ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
-          ANDROID_NDK_PLATFORM=android-$ANDROID_API_LEVEL \
-          QMAKE_CFLAGS+="-target aarch64-none-linux-android -isystem $ANDROID_NDK_ROOT/sysroot/usr/include" \
-          QMAKE_CXXFLAGS+="-target aarch64-none-linux-android -isystem $ANDROID_NDK_ROOT/sysroot/usr/include"
-          make -j$(nproc)
 
     - name: Sign APK
       run: |
