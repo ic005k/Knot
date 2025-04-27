@@ -159,6 +159,8 @@ void MainWindow::importDataDone() {
     m_Steps->loadGpsList(QDate::currentDate().year(),
                          QDate::currentDate().month());
     m_Steps->allGpsTotal();
+
+    m_NotesList->m_dbManager.updateFilesIndex(iniDir + "memo");
   }
 
   closeProgress();
@@ -2682,10 +2684,6 @@ bool MainWindow::importBakData(QString fileName) {
     QFile::remove(zipPath);
     QFile::copy(fileName, zipPath);
   }
-
-  // dec data
-  // QString dec_file = m_Method->useDec(zipPath);
-  // if (dec_file != "") zipPath = dec_file;
 
   QString dec_file;
   if (isEncrypt) {

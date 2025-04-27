@@ -148,6 +148,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import android.os.SystemClock;
 import android.os.Vibrator;
+import android.content.SharedPreferences;
 
 //Qt6
 import org.qtproject.qt.android.bindings.QtActivity;
@@ -155,6 +156,10 @@ import org.qtproject.qt.android.bindings.QtActivity;
 public class MyActivity
     extends QtActivity
     implements Application.ActivityLifecycleCallbacks {
+
+  // 安卓版本>=11时存储授权
+  private static final String PREFS_NAME = "app_prefs";
+  private static final String KEY_SHOULD_REQUEST = "should_request_storage";
 
   public static boolean isOpenSearchResult = false;
   public static String strSearchText = "";
@@ -596,8 +601,13 @@ public class MyActivity
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    // 在onCreate方法这里调用来动态获取存储权限
-    verifyStoragePermissions(this);
+    // 安卓11及以上的存储权限
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      checkStoragePermission();
+    } else {
+      // 安卓11以下的存储授权
+      verifyStoragePermissions(this);
+    }
 
     // File Watch FileWatcher
     // if (null == mFileWatcher) {
@@ -628,9 +638,6 @@ public class MyActivity
     Log.d(TAG, "Android activity created");
 
     isZh(m_instance);
-
-    // 唤醒锁（手机上不推荐使用，其它插电安卓系统可考虑，比如广告机等）
-    // acquireWakeLock();
 
     mySerivece = new PersistService();
     mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -669,10 +676,6 @@ public class MyActivity
     // 设置状态栏全透明
     // this.setStatusBarFullTransparent();
 
-    // 控制状态栏显示，在setContentView之前设置全屏的flag
-    // getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-    // WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
     Application application = this.getApplication();
     application.registerActivityLifecycleCallbacks(this);
 
@@ -695,18 +698,20 @@ public class MyActivity
     alarmCount = 0;
     alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
     intent = new Intent(MyActivity.this, ClockActivity.class);
-    pi = PendingIntent.getActivity(MyActivity.this, 0, intent, 0);
+    // 在 Android 12（API 31）及更高版本中，系统强制要求所有 PendingIntent 必须明确声明可变性标志​（FLAG_IMMUTABLE
+    // 或 FLAG_MUTABLE）
+    // pi = PendingIntent.getActivity(MyActivity.this, 0, intent, 0);
+    // 使用 FLAG_IMMUTABLE（推荐）
+    pi = PendingIntent.getActivity(
+        MyActivity.this,
+        0,
+        intent,
+        PendingIntent.FLAG_IMMUTABLE);
 
     // HomeKey
     registerReceiver(
         mHomeKeyEvent,
         new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-
-    // 解除对file域访问的限制
-    if (Build.VERSION.SDK_INT >= 24) {
-      // Builder builder = new Builder();
-      // StrictMode.setVmPolicy(builder.build());
-    }
 
     addDeskShortcuts();
 
@@ -1286,6 +1291,21 @@ public class MyActivity
   }
 
   // ==============================================================================================
+  private void checkStoragePermission() {
+    SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+    boolean shouldRequest = prefs.getBoolean(KEY_SHOULD_REQUEST, true);
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      if (!Environment.isExternalStorageManager() && shouldRequest) {
+        // 更新标记，避免重复跳转
+        prefs.edit().putBoolean(KEY_SHOULD_REQUEST, false).apply();
+
+        Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+        startActivity(intent);
+      }
+    }
+  }
+
   // 动态获取权限需要添加的常量
   private static final int REQUEST_EXTERNAL_STORAGE = 1;
   private static String[] PERMISSIONS_STORAGE = {

@@ -21,6 +21,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- Android 10+ 需要 -->
     <uses-permission android:name="android.permission.VIBRATE" />
+
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
       
     <uses-feature android:name="android.hardware.sensor.stepcounter" android:required="true" />
     <uses-feature android:name="android.hardware.sensor.stepdetector" android:required="true" />

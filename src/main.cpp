@@ -1,13 +1,18 @@
 
 #include <QApplication>
 #include <QDir>
+
+#ifdef Q_OS_ANDROID
+#include <QJniEnvironment>  // Qt JNI 环境
+#include <QJniObject>       // Qt JNI 对象封装
+#endif
+
 #include <QObject>
 #include <QProgressBar>
 #include <QQuickWindow>
 #include <QSplashScreen>
 #include <QTranslator>
 #include <QWidget>
-// #include <QtWebView/QtWebView>
 
 #include "MainWindow.h"
 #include "lib/cppjieba/Jieba.hpp"
@@ -32,6 +37,13 @@ QString loadText(QString textFile);
 QString getTextEditLineText(QTextEdit* txtEdit, int i);
 void TextEditToFile(QTextEdit* txtEdit, QString fileName);
 void StringToFile(QString buffers, QString fileName);
+
+#ifdef Q_OS_ANDROID
+QString getPrivateKnotPath();
+QString getPublicKnotDataPath();
+int getAndroidSdkVersion();
+void migrateOldDataIfNeeded();
+#endif
 
 QString strJBDict1 = "";
 QString strJBDict2 = "";
@@ -128,6 +140,10 @@ int main(int argc, char* argv[]) {
 
   iniDir = "/storage/emulated/0/KnotData/";
   privateDir = "/storage/emulated/0/.Knot/";
+
+  // 使用app的专属沙盒存储数据
+  // iniDir = getPublicKnotDataPath();
+  // privateDir = getPrivateKnotPath();
 
 #else
   defaultFontSize = QApplication::font().pointSize();
@@ -428,3 +444,57 @@ void StringToFile(QString buffers, QString fileName) {
   } else
     qDebug() << "Write failure!" << fileName;
 }
+
+#ifdef Q_OS_ANDROID
+
+QString getPrivateKnotPath() {
+  QString path =
+      QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+      "/.Knot/";
+  QDir().mkpath(path);
+  return path;
+}
+
+QString getPublicKnotDataPath() {
+  QString path;
+#if defined(Q_OS_ANDROID)
+  if (getAndroidSdkVersion() >= 29) {
+    // Android 10+：使用系统文档目录
+    path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) +
+           "/KnotData/";
+  } else {
+    // Android 9-：直接访问外部存储（需权限）
+    path = "/storage/emulated/0/KnotData/";
+  }
+#else
+  path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) +
+         "/KnotData/";
+#endif
+  QDir().mkpath(path);
+  return path;
+}
+
+int getAndroidSdkVersion() {
+  // 正确方式：直接获取静态 int 字段
+  return QJniObject::getStaticField<jint>("android/os/Build$VERSION",  // 类名
+                                          "SDK_INT"                    // 字段名
+  );
+}
+
+// 旧版本已使用硬编码路径，升级时需将数据迁移到新路径
+void migrateOldDataIfNeeded() {
+#if defined(Q_OS_ANDROID)
+  QString oldPublicPath = "/storage/emulated/0/KnotData/";
+  QString newPublicPath = getPublicKnotDataPath();
+
+  QDir oldDir(oldPublicPath);
+  if (oldDir.exists() && (oldPublicPath != newPublicPath)) {
+    // 复制旧数据到新路径
+    // copyDirectory(oldPublicPath, newPublicPath);
+    // 删除旧目录（谨慎操作！）
+    oldDir.removeRecursively();
+  }
+#endif
+}
+
+#endif

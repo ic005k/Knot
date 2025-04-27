@@ -13,3 +13,4 @@ build/
 android/.vscode/
 android/.gradle/
 Knot6.pro.user
+/bin/debug

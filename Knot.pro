@@ -820,7 +820,7 @@ win32 {
 
 android: {
     INCLUDEPATH += $$PWD/android-openssl/include
-    LIBS += -L$$PWD/android-openssl/ssl_3/v8a \
+    LIBS += -L$$PWD/android-openssl/ssl_3/x86_64 \
                 -lssl -lcrypto
 }
 
