@@ -17,7 +17,7 @@ env:
 jobs:
   build:
     #os: [ubuntu-22.04]
-    runs-on: ubuntu-22.04 #ubuntu-latest
+    runs-on: windows-latest #ubuntu-latest
 
     steps:
     - name: Checkout code
@@ -57,7 +57,7 @@ jobs:
       run: |
         # 安装主机工具（Linux 桌面版，包含 qmake）
         aqt install-qt \
-                  linux \
+                  windows \
                   desktop \
                   ${{ env.QT_VERSION }} \
                   ${{ env.QT_DESKTOP_ARCH }} \
@@ -68,7 +68,7 @@ jobs:
 
         # 安装安卓基础组件
           aqt install-qt \
-            linux \
+            windows \
             android \
             $QT_VERSION \
             android_arm64_v8a \
@@ -92,14 +92,6 @@ jobs:
 
     - name: Build APK
       run: |
-        sudo apt update
-        sudo apt install -y build-essential libc6-dev gcc-multilib g++-multilib
-        sudo ln -s /usr/include/x86_64-linux-gnu/bits /usr/include/bits
-        sudo ln -s /usr/include/x86_64-linux-gnu/sys /usr/include/sys
-
-        echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/$NDK_VERSION" >> $GITHUB_ENV
-        echo "TOOLCHAIN=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64" >> $GITHUB_ENV
-        echo "PATH=$TOOLCHAIN/bin:$PATH" >> $GITHUB_ENV
 
         # 确保 qmake 可用
         export PATH="${{ env.QT_DIR }}/bin:$PATH"
