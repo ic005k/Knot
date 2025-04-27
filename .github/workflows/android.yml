@@ -110,7 +110,7 @@ jobs:
         cd build
 
         # 执行qmake生成Makefile[3,6](@ref)
-        & "$env:QT_DIR\bin\qmake.exe" .. CONFIG+=release ANDROID_ABIS=arm64-v8a
+        & "C:\Qt\6.6.3\android_arm64_v8a\bin\qmake.exe" .. CONFIG+=release ANDROID_ABIS=arm64-v8a
 
         # 编译并生成APK
         jom -j 4  # 或使用nmake/mingw32-make
