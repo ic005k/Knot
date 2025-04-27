@@ -68,7 +68,7 @@ jobs:
             $QT_VERSION \
             android_arm64_v8a \
             --outputdir ${{ github.workspace }}/Qt \  # 指定输出目录
-            #--archives qtbase qtsvg qtdeclarative qtandroidextras
+            --archives qtbase qtsvg qtdeclarative qtandroidextras
 
           # 尝试安装可选模块（若存在）
           aqt install-qt \
@@ -77,6 +77,7 @@ jobs:
             $QT_VERSION \
             android_arm64_v8a \
             --outputdir ${{ github.workspace }}/Qt \
+            --archives qtbase \  # 必须指定至少一个基础组件
             --modules qtcharts qtsensors qtlocation qt5compat qtpositioning \
             || echo "Optional modules not found, skipping..."
         
