@@ -57,7 +57,6 @@ jobs:
       run: |
         pip install aqtinstall
         echo "$HOME/.local/bin" >> $GITHUB_PATH  # 关键：确保后续步骤能找到 aqt
-        aqt list-qt windows android --modules 6.6.3 <arch>
 
      # 使用 aqtinstall 安装 Qt
     #- name: Install Qt for Desktop
