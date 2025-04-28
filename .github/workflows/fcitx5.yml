@@ -1,70 +1,82 @@
-name: Fcitx5 Build
+name: Standalone Fcitx5 Builder
 
-on: [push]
+on:
+  repository_dispatch:  # 通过API触发
+    types: [build-request]
+  workflow_dispatch:    # 手动触发
 
 jobs:
-  build:
+  build-fcitx5:
     runs-on: ubuntu-22.04
     env:
-      QT_VER: 6.6.3
-      SRC_DIR: ${{ github.workspace }}/fcitx5-qt
+      BUILD_ROOT: /opt/fcitx5-build  # 独立构建目录
+      QT_VERSION: 6.6.3
 
     steps:
-    # ================= 环境准备 =================
-    - name: Check workspace
+    # ================= 初始化隔离环境 =================
+    - name: Create isolated environment
       run: |
-        echo "Workspace path: ${{ github.workspace }}"
-        ls -la ${{ github.workspace }}
+        sudo mkdir -p $BUILD_ROOT
+        sudo chown -R runner:runner $BUILD_ROOT
+        echo "BUILD_DIR=$BUILD_ROOT" >> $GITHUB_ENV
 
-    # ================= 安装 Qt =================
-    - name: Install Qt via aqt
+    # ================= 安装系统依赖 =================
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          git cmake ninja-build gcc g++ \
+          libxcb1-dev libxkbcommon-x11-dev \
+          libgl1-mesa-dev libfontconfig1-dev
+
+    # ================= 安装指定版本Qt =================
+    - name: Install Qt
+      working-directory: $BUILD_DIR
       run: |
         pip install aqtinstall
-        aqt install-qt linux desktop $QT_VER \
-          --outputdir ~/Qt
-        echo "QT_PATH=~/Qt/$QT_VER/gcc_64" >> $GITHUB_ENV
+        aqt install-qt linux desktop $QT_VERSION \
+          --outputdir qt
+        echo "QT_PATH=$BUILD_DIR/qt/$QT_VERSION/gcc_64" >> $GITHUB_ENV
 
-    # ================= 获取源码 =================
-    - name: Clone repository
+    # ================= 获取Fcitx5源码 =================
+    - name: Clone Fcitx5
+      working-directory: $BUILD_DIR
       run: |
         git clone --depth 1 --branch 5.1.0 \
-          https://github.com/fcitx/fcitx5-qt.git \
-          $SRC_DIR
-        
-        # 验证源码结构
-        ls -l $SRC_DIR/CMakeLists.txt
-        ls -l $SRC_DIR/platforminputcontext/CMakeLists.txt
+          https://github.com/fcitx/fcitx5-qt.git src
+        ls -la src/platforminputcontext  # 验证源码结构
 
-    # ================= 构建配置 =================
+    # ================= 配置独立构建 =================
     - name: Configure build
-      working-directory: ${{ env.SRC_DIR }}/platforminputcontext
+      working-directory: $BUILD_DIR/src/platforminputcontext
       run: |
         mkdir build && cd build
         cmake .. \
-          -DCMAKE_PREFIX_PATH="${{ env.QT_PATH }}" \
+          -DCMAKE_PREFIX_PATH="$QT_PATH" \
+          -DCMAKE_INSTALL_PREFIX=../../output \
           -DCMAKE_BUILD_TYPE=Release \
           -DENABLE_QT6=ON \
           -Wno-dev
-        
-        # 生成构建树可视化
-        cmake --graphviz=graph.dot .
-        dot -Tpng graph.dot -o build-graph.png
 
-    # ================= 编译验证 =================
-    - name: Build and verify
-      working-directory: ${{ env.SRC_DIR }}/platforminputcontext/build
+    # ================= 执行编译 =================
+    - name: Build plugin
+      working-directory: $BUILD_DIR/src/platforminputcontext/build
       run: |
         cmake --build . --target fcitx5platforminputcontextplugin -- -j$(nproc)
-        
-        # 二进制文件验证
-        file libfcitx5platforminputcontextplugin.so
-        nm -D libfcitx5platforminputcontextplugin.so | grep -i qt6
+        # 验证输出文件
+        [ -f libfcitx5platforminputcontextplugin.so ] || exit 1
 
-    # ================= 产物处理 =================
-    - name: Archive output
+    # ================= 打包产物 =================
+    - name: Package artifact
+      working-directory: $BUILD_DIR
+      run: |
+        mkdir -p artifact
+        cp src/platforminputcontext/build/libfcitx5platforminputcontextplugin.so artifact/
+        strip --strip-unneeded artifact/*.so
+
+    - name: Upload binary
       uses: actions/upload-artifact@v4
       with:
-        name: fcitx5-qt6-artifacts
-        path: |
-          ${{ env.SRC_DIR }}/platforminputcontext/build/libfcitx5platforminputcontextplugin.so
-          ${{ env.SRC_DIR }}/platforminputcontext/build/build-graph.png
+        name: fcitx5-qt6-plugin
+        path: $BUILD_DIR/artifact/*.so
+        retention-days: 7
