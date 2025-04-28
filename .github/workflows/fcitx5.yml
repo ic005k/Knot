@@ -1,4 +1,4 @@
-name: Fixed Fcitx5 Build
+name: Fcitx5 Build
 
 on: [push]
 
