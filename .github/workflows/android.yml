@@ -103,12 +103,7 @@ jobs:
                 version: 6.6.3             # 指定 Qt 版本
                 target: android            # 关键参数：必须指定 Android 目标
                 arch: android_arm64_v8a   # Android ARM64 架构
-                modules: |                # 仅包含 Android 支持的模块
-                  qtcharts
-                  qtsensors
-                  qtlocation
-                  qtpositioning
-                  qt5compat
+                modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
                 cached: 'false'
 
 
