@@ -96,7 +96,7 @@ jobs:
           target: android
           arch: arm64_v8a
           modules: qtcharts qtsensors qtlocation qt5compat qtpositioning
-        
+
     - name: Setup Android environment variables
       shell: powershell  # 保持与编译步骤相同的shell类型
       run: |
