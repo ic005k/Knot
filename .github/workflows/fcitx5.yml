@@ -1,80 +1,69 @@
-name: Standalone Fcitx5 Builder
+name: Fcitx5 Qt6 Standalone Builder
 
-on: [push]
-
+on:
+  workflow_dispatch:  # 仅手动触发
 
 jobs:
-  build-fcitx5:
+  build:
     runs-on: ubuntu-22.04
     env:
-      BUILD_ROOT: /opt/fcitx5-build  # 独立构建目录
+      BUILD_ROOT: /opt/fcitx5  # 完全独立路径
       QT_VERSION: 6.6.3
 
     steps:
     # ================= 初始化隔离环境 =================
-    - name: Create isolated environment
+    - name: Prepare isolated environment
       run: |
         sudo mkdir -p $BUILD_ROOT
         sudo chown -R runner:runner $BUILD_ROOT
-        echo "BUILD_DIR=$BUILD_ROOT" >> $GITHUB_ENV
+        cd $BUILD_ROOT  # 关键：立即切换工作目录
 
-    # ================= 安装系统依赖 =================
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          git cmake ninja-build gcc g++ \
-          libxcb1-dev libxkbcommon-x11-dev \
-          libgl1-mesa-dev libfontconfig1-dev
-
-    # ================= 安装指定版本Qt =================
+    # ================= 安装Qt（优化版） =================
     - name: Install Qt
-      working-directory: $BUILD_DIR
+      working-directory: ${{ env.BUILD_ROOT }}  # 显式指定绝对路径
       run: |
-        pip install aqtinstall
-        aqt install-qt linux desktop $QT_VERSION \
+        pip install aqtinstall --user
+        python -m aqt install-qt linux desktop $QT_VERSION \
           --outputdir qt
-        echo "QT_PATH=$BUILD_DIR/qt/$QT_VERSION/gcc_64" >> $GITHUB_ENV
+        echo "QT_PATH=$BUILD_ROOT/qt/$QT_VERSION/gcc_64" >> $GITHUB_ENV
 
-    # ================= 获取Fcitx5源码 =================
-    - name: Clone Fcitx5
-      working-directory: $BUILD_DIR
+    # ================= 获取Fcitx源码（绕过git） =================
+    - name: Download Fcitx5 source
+      working-directory: ${{ env.BUILD_ROOT }}
       run: |
-        git clone --depth 1 --branch 5.1.0 \
-          https://github.com/fcitx/fcitx5-qt.git src
-        ls -la src/platforminputcontext  # 验证源码结构
+        FCITX_VERSION=5.1.0
+        wget https://github.com/fcitx/fcitx5-qt/archive/refs/tags/$FCITX_VERSION.tar.gz
+        tar -xzf $FCITX_VERSION.tar.gz
+        mv fcitx5-qt-$FCITX_VERSION src
 
-    # ================= 配置独立构建 =================
+    # ================= 构建配置（增强验证） =================
     - name: Configure build
-      working-directory: $BUILD_DIR/src/platforminputcontext
+      working-directory: ${{ env.BUILD_ROOT }}/src/platforminputcontext
       run: |
+        # 严格验证源码结构
+        [ -f CMakeLists.txt ] || (echo "CMakeLists.txt missing!" && exit 1)
+
         mkdir build && cd build
         cmake .. \
-          -DCMAKE_PREFIX_PATH="$QT_PATH" \
-          -DCMAKE_INSTALL_PREFIX=../../output \
+          -DCMAKE_PREFIX_PATH="${{ env.QT_PATH }}" \
+          -DCMAKE_INSTALL_PREFIX=../../dist \
           -DCMAKE_BUILD_TYPE=Release \
           -DENABLE_QT6=ON \
           -Wno-dev
 
-    # ================= 执行编译 =================
-    - name: Build plugin
-      working-directory: $BUILD_DIR/src/platforminputcontext/build
+    # ================= 编译与验证 =================
+    - name: Build and verify
+      working-directory: ${{ env.BUILD_ROOT }}/src/platforminputcontext/build
       run: |
         cmake --build . --target fcitx5platforminputcontextplugin -- -j$(nproc)
-        # 验证输出文件
+
+        # 严格验证产物
         [ -f libfcitx5platforminputcontextplugin.so ] || exit 1
+        ldd libfcitx5platforminputcontextplugin.so | grep -i qt6
 
-    # ================= 打包产物 =================
-    - name: Package artifact
-      working-directory: $BUILD_DIR
-      run: |
-        mkdir -p artifact
-        cp src/platforminputcontext/build/libfcitx5platforminputcontextplugin.so artifact/
-        strip --strip-unneeded artifact/*.so
-
-    - name: Upload binary
+    # ================= 上传产物 =================
+    - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: fcitx5-qt6-plugin
-        path: $BUILD_DIR/artifact/*.so
-        retention-days: 7
+        path: ${{ env.BUILD_ROOT }}/src/platforminputcontext/build/libfcitx5platforminputcontextplugin.so
