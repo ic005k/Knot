@@ -121,6 +121,10 @@ jobs:
     #    echo "${{ secrets.SIGNING_KEY }}" > android/app/my-release-key.keystore.base64
     #    base64 -d android/app/my-release-key.keystore.base64 > android/app/my-release-key.keystore
 
+    - name: Set NDK Path
+      shell: cmd
+      run: echo "ANDROID_NDK_ROOT=${{ github.workspace }}\android-ndk" >> $env:GITHUB_ENV
+
 
     - name: Build APK
       shell: cmd
