@@ -34,11 +34,11 @@ jobs:
         wget https://github.com/fcitx/fcitx5-qt/archive/5.1.0.tar.gz
         tar -xzf 5.1.0.tar.gz
         mv fcitx5-qt-5.1.0 src
-        ls src/platforminputcontext/CMakeLists.txt  # 严格验证
+        ls src/qt6/platforminputcontext/CMakeLists.txt  # 严格验证
 
     # ================= 构建配置（路径修复） =================
     - name: Configure build
-      working-directory: ${{ env.BUILD_ROOT }}/src/platforminputcontext  # 完整路径
+      working-directory: ${{ env.BUILD_ROOT }}/src/qt6/platforminputcontext  # 完整路径
       run: |
         mkdir -p build
         cd build
@@ -49,7 +49,7 @@ jobs:
 
     # ================= 编译与验证 =================
     - name: Build plugin
-      working-directory: ${{ env.BUILD_ROOT }}/src/platforminputcontext/build
+      working-directory: ${{ env.BUILD_ROOT }}/src/qt6/platforminputcontext/build
       run: |
         cmake --build . --target fcitx5platforminputcontextplugin -- -j$(nproc)
         [ -f libfcitx5platforminputcontextplugin.so ] || exit 1
@@ -59,4 +59,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: fcitx5-qt6-plugin
-        path: ${{ env.BUILD_ROOT }}/src/platforminputcontext/build/libfcitx5platforminputcontextplugin.so
+        path: ${{ env.BUILD_ROOT }}/src/qt6/platforminputcontext/build/libfcitx5platforminputcontextplugin.so
