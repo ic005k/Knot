@@ -127,8 +127,8 @@ jobs:
       env:
           ANDROID_NDK_ROOT: C:\Android\ndk\25.1.8937393
       run: |
-            set PATH=%PATH%;C:\Qt\6.6.3\android_arm64_v8a\bin
-            qmake.exe Knot.pro -spec android-clang CONFIG+=release
+            set PATH=%PATH%;D:\a\Knot6\Qt\6.6.3\android_arm64_v8a\bin\
+            qmake.bat Knot.pro -spec android-clang CONFIG+=release
             jom -j4 || make -j4
             make apk
 
