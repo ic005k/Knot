@@ -28,6 +28,14 @@ jobs:
           libxkbcommon-dev \
           libdbus-1-dev
 
+# ================= 验证 ECM 路径 =================
+    - name: Verify ECM installation
+      run: |
+        echo "ECM 配置文件路径："
+        ls -l /usr/share/ECM/cmake/ECMConfig.cmake
+        echo "KDE 模块路径："
+        ls -l /usr/share/kf5
+
     # ================= 安装 Qt =================
     - name: Install Qt
       working-directory: ${{ env.BUILD_ROOT }}
@@ -53,9 +61,14 @@ jobs:
       run: |
         mkdir -p build && cd build
         cmake .. \
-          -DCMAKE_PREFIX_PATH="$QT_PATH;$ECM_DIR" \
-          -DQT_QMAKE_EXECUTABLE="$QT_PATH/bin/qmake" \
-          -DCMAKE_BUILD_TYPE=Release
+                  -DCMAKE_PREFIX_PATH="$QT_PATH" \
+                  -DCMAKE_MODULE_PATH="$ECM_DIR;$KF5_DIR" \
+                  -DECM_DIR="$ECM_DIR" \
+                  -DQT_QMAKE_EXECUTABLE="$QT_PATH/bin/qmake" \
+                  -Wno-dev
+
+        # 显示 ECM 配置状态
+        grep ECM_FOUND CMakeCache.txt
 
     # ================= 编译与验证 =================
     - name: Build plugin
