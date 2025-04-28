@@ -1,16 +1,25 @@
 name: Build Fcitx5 Qt6 Plugin
 
-on: [push]
+on: [repository_dispatch]  # 可通过API触发
 
 jobs:
   build:
     runs-on: ubuntu-22.04
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - name: Setup Qt 6.6.3
+      run: |
+        # 安装Qt6.6.3
+        QT_INSTALLER_URL="https://download.qt.io/official_releases/qt/6.6/6.6.3/qt-unified-linux-x64-6.6.3-online.run"
+        wget -O qt-installer.run "$QT_INSTALLER_URL"
+        chmod +x qt-installer.run
+        echo "yes" | ./qt-installer.run \
+          --accept-license \
+          --skip-components *x11* *web* *quick* *3d* *tools* *translations* \
+          --components qt.base,qt.qt6.6.3.qtbase,qt.qt6.6.3.qttools \
+          --install-dir $HOME/Qt/6.6.3/gcc_64
 
-    - name: Install system dependencies
+    - name: Install system deps
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -23,47 +32,30 @@ jobs:
           libxcb-xinerama0-dev \
           libxcb-util-dev \
           libgl1-mesa-dev \
-          qtbase5-dev \
-          qttools5-dev-tools
+          libfontconfig1-dev \
+          libfreetype6-dev
 
-    - name: Install Qt 6.6.3
+    - name: Clone Fcitx5 source
       run: |
-        QT_INSTALLER_URL="https://download.qt.io/official_releases/qt/6.6/6.6.3/qt-unified-linux-x64-6.6.3-online.run"
-        wget -O qt-installer.run "$QT_INSTALLER_URL"
-        chmod +x qt-installer.run
-        echo "yes" | ./qt-installer.run \
-          --accept-license \
-          --skip-components x11extras,webengine,webview,webchannel,quick3d,quickcontrols2,quicktimedesigner,qtcanvas3d,qtconnectivity,qtdatavis3d,qtgamepad,qtlocation,qttools,qttranslations \
-          --components qt.base,qt.qt6.6.3.qtbase,qt.qt6.6.3.qttools \
-          --install-dir $HOME/Qt/6.6.3/gcc_64
-
-    - name: Setup environment variables
-      run: |
-        echo "export PATH=\"$HOME/Qt/6.6.3/gcc_64/bin:\$PATH\"" >> $GITHUB_ENV
-        echo "export QT_SELECT=6"
+        git clone https://code.qt.io/fcitx5/fcitx5.git
+        cd fcitx5
+        git checkout 6a6b3d3  # 2023-03-15的稳定提交
 
     - name: Configure build
-      working-directory: build
-      run: cmake .. \
-        -DCMAKE_PREFIX_PATH="$HOME/Qt/6.6.3/gcc_64" \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DBUILD_TESTING=OFF \
-        -DCMAKE_INSTALL_PREFIX=./install
-
-    - name: Build plugin
-      working-directory: build
-      run: cmake --build . --target fcitx5platforminputcontextplugin
-
-    - name: Verify artifact exists
+      working-directory: fcitx5/plugins/platforminputcontext
       run: |
-        ls -l build/install/lib/libfcitx5platforminputcontextplugin.so
-        if [ ! -f build/install/lib/libfcitx5platforminputcontextplugin.so ]; then
-          echo "ERROR: Artifact not found!"
-          exit 1
-        fi
+        mkdir build && cd build
+        cmake .. \
+          -DCMAKE_PREFIX_PATH="$HOME/Qt/6.6.3/gcc_64" \
+          -DCMAKE_INSTALL_PREFIX=./install \
+          -DCMAKE_BUILD_TYPE=Release
+
+    - name: Compile plugin
+      working-directory: fcitx5/plugins/platforminputcontext/build
+      run: cmake --build . --target fcitx5platforminputcontextplugin
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: fcitx5-plugin
-        path: build/install/lib/libfcitx5platforminputcontextplugin.so
+        path: fcitx5/plugins/platforminputcontext/build/install/lib/libfcitx5platforminputcontextplugin.so
