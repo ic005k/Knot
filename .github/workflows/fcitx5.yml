@@ -27,6 +27,13 @@ jobs:
           build-essential \
           ninja-build
 
+    - name: Install ECM
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          extra-cmake-modules \
+          libkf5coreaddons-dev
+
     # ================= 安装Qt（绕过版本问题） =================
     - name: Install Qt
       working-directory: ${{ env.BUILD_ROOT }}
