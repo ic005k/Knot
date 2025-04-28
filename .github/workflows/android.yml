@@ -31,7 +31,7 @@ jobs:
         java-version: 17
         distribution: 'temurin'
 
-    # 安装 Android SDK/NDK（关键修正点）
+    # 安装 Android SDK/NDK
     - name: Setup Android SDK and NDK
       uses: android-actions/setup-android@v3
       with:
@@ -45,7 +45,7 @@ jobs:
         echo ANDROID_NDK_ROOT=C:\Android\android-sdk\ndk\$env:NDK_VERSION >> %GITHUB_ENV%
         echo ANDROID_SDK_ROOT=C:\Android\android-sdk >> %GITHUB_ENV%
 
-    - name: Install Qt Desktop (必需)
+    - name: Install Qt Desktop
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
@@ -53,7 +53,7 @@ jobs:
         arch: ${{ env.QT_DESKTOP_ARCH }}
         modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
 
-    - name: Install Qt Android (关键修正点)
+    - name: Install Qt Android
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
@@ -69,11 +69,11 @@ jobs:
         echo D:\a\Knot6\Qt\6.6.3\android_arm64_v8a\bin >> %GITHUB_PATH%
         echo D:\a\Knot6\Qt\Tools\jom >> %GITHUB_PATH%
 
-    - name: Build APK (关键修正点)
+    - name: Build APK
       shell: cmd
       run: |
         :: 生成 Makefile（显式指定 NDK 路径）
-        qmake.exe Knot.pro ^
+        qmake.bat Knot.pro ^
           -spec android-clang ^
           "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
           CONFIG+=release ^
