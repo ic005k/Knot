@@ -8,7 +8,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Install system dependencies
       run: |
@@ -54,8 +54,16 @@ jobs:
       working-directory: build
       run: cmake --build . --target fcitx5platforminputcontextplugin
 
+    - name: Verify artifact exists
+      run: |
+        ls -l build/install/lib/libfcitx5platforminputcontextplugin.so
+        if [ ! -f build/install/lib/libfcitx5platforminputcontextplugin.so ]; then
+          echo "ERROR: Artifact not found!"
+          exit 1
+        fi
+
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: fcitx5platforminputcontextplugin
+        name: fcitx5-plugin
         path: build/install/lib/libfcitx5platforminputcontextplugin.so
