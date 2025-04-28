@@ -2,6 +2,7 @@ name: Standalone Fcitx5 Builder
 
 on: [push]
 
+
 jobs:
   build-fcitx5:
     runs-on: ubuntu-22.04
