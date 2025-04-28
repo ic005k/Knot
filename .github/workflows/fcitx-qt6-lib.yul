@@ -1,6 +1,10 @@
 name: Build Fcitx5 Qt6 Plugin
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
