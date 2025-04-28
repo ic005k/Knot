@@ -1,38 +1,70 @@
-name: Optimized Qt6 Build
+name: Fixed Fcitx5 Build
 
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-22.04
-    timeout-minutes: 15
+    env:
+      QT_VER: 6.6.3
+      SRC_DIR: ${{ github.workspace }}/fcitx5-qt
 
     steps:
+    # ================= 环境准备 =================
+    - name: Check workspace
+      run: |
+        echo "Workspace path: ${{ github.workspace }}"
+        ls -la ${{ github.workspace }}
+
+    # ================= 安装 Qt =================
     - name: Install Qt via aqt
       run: |
-        sudo apt-get update
-        sudo apt-get install -y python3-pip
         pip install aqtinstall
-        aqt install-qt linux desktop 6.6.3 --outputdir ~/Qt
-        echo "QT_PATH=~/Qt/6.6.3/gcc_64" >> $GITHUB_ENV
+        aqt install-qt linux desktop $QT_VER \
+          --outputdir ~/Qt
+        echo "QT_PATH=~/Qt/$QT_VER/gcc_64" >> $GITHUB_ENV
 
-    - name: Build Fcitx5
+    # ================= 获取源码 =================
+    - name: Clone repository
       run: |
         git clone --depth 1 --branch 5.1.0 \
           https://github.com/fcitx/fcitx5-qt.git \
-          fcitx5-qt
+          $SRC_DIR
+        
+        # 验证源码结构
+        ls -l $SRC_DIR/CMakeLists.txt
+        ls -l $SRC_DIR/platforminputcontext/CMakeLists.txt
+
+    # ================= 构建配置 =================
+    - name: Configure build
+      working-directory: ${{ env.SRC_DIR }}/platforminputcontext
+      run: |
         mkdir build && cd build
         cmake .. \
           -DCMAKE_PREFIX_PATH="${{ env.QT_PATH }}" \
-          -DCMAKE_INSTALL_PREFIX=./output \
           -DCMAKE_BUILD_TYPE=Release \
-          -DENABLE_QT4=OFF \
-          -DENABLE_QT6=ON
-        cmake --build . --target fcitx5platforminputcontextplugin -- -j$(nproc)
-        objdump -T libfcitx5platforminputcontextplugin.so | grep Qt6Core  # 验证链接
+          -DENABLE_QT6=ON \
+          -Wno-dev
+        
+        # 生成构建树可视化
+        cmake --graphviz=graph.dot .
+        dot -Tpng graph.dot -o build-graph.png
 
-    - name: Upload Artifact
+    # ================= 编译验证 =================
+    - name: Build and verify
+      working-directory: ${{ env.SRC_DIR }}/platforminputcontext/build
+      run: |
+        cmake --build . --target fcitx5platforminputcontextplugin -- -j$(nproc)
+        
+        # 二进制文件验证
+        file libfcitx5platforminputcontextplugin.so
+        nm -D libfcitx5platforminputcontextplugin.so | grep -i qt6
+
+    # ================= 产物处理 =================
+    - name: Archive output
       uses: actions/upload-artifact@v4
       with:
-        name: fcitx5-plugin
-        path: fcitx5/plugins/platforminputcontext/build/*.so
+        name: fcitx5-qt6-artifacts
+        path: |
+          ${{ env.SRC_DIR }}/platforminputcontext/build/libfcitx5platforminputcontextplugin.so
+          ${{ env.SRC_DIR }}/platforminputcontext/build/build-graph.png
