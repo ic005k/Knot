@@ -91,11 +91,16 @@ jobs:
     - name: Install Qt Android
       uses: jurplel/install-qt-action@v3
       with:
-          version: 6.6.3
-          host: windows
-          target: android
-          arch: arm64_v8a
-          modules: qtcharts qtsensors qtlocation qt5compat qtpositioning
+                version: 6.6.3             # 指定 Qt 版本
+                target: android            # 关键参数：必须指定 Android 目标
+                arch: android_arm64_v8a   # Android ARM64 架构
+                modules: |                # 仅包含 Android 支持的模块
+                  qtcharts
+                  qtsensors
+                  qtlocation
+                  qtpositioning
+                  qt5compat
+                cached: 'false'
 
     - name: Setup Android environment variables
       shell: powershell  # 保持与编译步骤相同的shell类型
