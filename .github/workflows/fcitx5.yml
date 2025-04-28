@@ -1,4 +1,4 @@
-name: Fcitx5 Qt6 Isolation Build
+name: Fcitx5 Qt6 Build (Stable)
 
 on:
   workflow_dispatch:
@@ -12,59 +12,69 @@ jobs:
       QT_VERSION: 6.6.3
 
     steps:
-    # ================= 初始化隔离环境 =================
+    # ================= 环境初始化 =================
     - name: Prepare environment
       run: |
         sudo mkdir -p $BUILD_ROOT
         sudo chown -R runner:runner $BUILD_ROOT
-        echo "BUILD_DIR=$BUILD_ROOT" >> $GITHUB_ENV
 
-    # ================= 安装Qt（修复路径） =================
+    # ================= 安装系统CMake =================
+    - name: Install system tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          cmake \
+          build-essential \
+          ninja-build
+
+    # ================= 安装Qt（绕过版本问题） =================
     - name: Install Qt
-      working-directory: ${{ env.BUILD_ROOT }}  # 确保在此目录执行
+      working-directory: ${{ env.BUILD_ROOT }}
       run: |
         pip install aqtinstall
         python -m aqt install-qt linux desktop $QT_VERSION \
           --outputdir qt
-        echo "QT_PATH=$BUILD_ROOT/qt/$QT_VERSION/gcc_64" >> $GITHUB_ENV
 
-    # ================= 获取源码（精确路径控制） =================
-    - name: Download and extract source
+        # 验证Qt安装
+        [ -f "qt/$QT_VERSION/gcc_64/bin/qmake" ] || exit 1
+
+    # ================= 获取源码 =================
+    - name: Get source code
       working-directory: ${{ env.BUILD_ROOT }}
       run: |
-        wget https://github.com/fcitx/fcitx5-qt/archive/5.1.0.tar.gz
-        tar -xzf 5.1.0.tar.gz
-        mv fcitx5-qt-5.1.0 src
-        ls src/qt6/platforminputcontext/CMakeLists.txt  # 严格验证
+        wget https://github.com/fcitx/fcitx5-qt/archive/refs/tags/$FCITX_VERSION.tar.gz
+        tar -xzf $FCITX_VERSION.tar.gz
+        mv fcitx5-qt-$FCITX_VERSION src
 
-    # ================= 构建配置=================
+    # ================= 构建配置（关键修复） =================
     - name: Configure build
       working-directory: ${{ env.BUILD_ROOT }}/src/qt6/platforminputcontext
+      env:
+        Qt6_DIR: ${{ env.BUILD_ROOT }}/qt/$QT_VERSION/gcc_64/lib/cmake/Qt6
       run: |
-        # 安装最新 CMake
-        wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc | sudo gpg --dearmor -o /usr/share/keyrings/kitware.gpg
-        echo "deb [signed-by=/usr/share/keyrings/kitware.gpg] https://apt.kitware.com/ubuntu/ jammy main" | sudo tee /etc/apt/sources.list.d/kitware.list
-        sudo apt-get update && sudo apt-get install -y cmake=3.28.1-0kitware1ubuntu22.04.1
+        mkdir -p build
+        cd build
 
-        mkdir -p build && cd build
-
-        # 强制设置 CMake 策略
+        # 使用系统CMake + 路径修正
         cmake .. \
-          -DCMAKE_POLICY_DEFAULT_CMP0045=NEW \
-          -DCMAKE_MINIMUM_REQUIRED_VERSION=3.21 \
-          -DCMAKE_PREFIX_PATH="${{ env.QT_PATH }}/lib/cmake/Qt6" \
-          -DQT_QMAKE_EXECUTABLE="${{ env.QT_PATH }}/bin/qmake" \
-          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_PREFIX_PATH="$Qt6_DIR" \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DQT_QMAKE_EXECUTABLE="${{ env.BUILD_ROOT }}/qt/$QT_VERSION/gcc_64/bin/qmake" \
+          -Wno-dev
 
-        # 生成编译数据库
-        cmake --build . --target help | grep fcitx5
+        # 生成构建信息
+        cmake --version
+        cat CMakeCache.txt | grep Qt6
 
     # ================= 编译与验证 =================
     - name: Build plugin
       working-directory: ${{ env.BUILD_ROOT }}/src/qt6/platforminputcontext/build
       run: |
-          export PATH="${{ env.QT_PATH }}/bin:$PATH"
-          cmake --build . --target fcitx5platforminputcontextplugin -- VERBOSE=1
+        cmake --build . --target fcitx5platforminputcontextplugin -- -j$(nproc)
+
+        # 二进制验证
+        file libfcitx5platforminputcontextplugin.so
+        ldd libfcitx5platforminputcontextplugin.so | grep -i qt6
 
     # ================= 上传产物 =================
     - name: Upload artifact
