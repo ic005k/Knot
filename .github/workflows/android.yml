@@ -65,9 +65,9 @@ jobs:
       shell: cmd
       run: |
         :: 添加 Qt 和 MinGW 工具链到 PATH
-        echo C:\Qt\Tools\mingw1120_64\bin >> %GITHUB_PATH%
-        echo C:\Qt\6.6.3\android_arm64_v8a\bin >> %GITHUB_PATH%
-        echo C:\Qt\Tools\jom >> %GITHUB_PATH%
+        echo D:\a\Knot6\Qt\Tools\mingw1120_64\bin >> %GITHUB_PATH%
+        echo D:\a\Knot6\Qt\6.6.3\android_arm64_v8a\bin >> %GITHUB_PATH%
+        echo D:\a\Knot6\Qt\Tools\jom >> %GITHUB_PATH%
 
     - name: Build APK (关键修正点)
       shell: cmd
