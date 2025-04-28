@@ -13,7 +13,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y python3-pip
         pip install aqtinstall
-        aqt install-qt linux desktop 6.6.3 -m qtbase qttools --outputdir ~/Qt
+        aqt install-qt linux desktop 6.6.3 --outputdir ~/Qt
         echo "QT_PATH=~/Qt/6.6.3/gcc_64" >> $GITHUB_ENV
 
     - name: Build Fcitx5
