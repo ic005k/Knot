@@ -1,95 +1,31 @@
-name: AutoBuild Fcitx5 Qt6 Plugin
+name: Optimized Qt6 Build
 
 on: [push]
 
 jobs:
-  standalone-build:
+  build:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
+    timeout-minutes: 15
 
     steps:
-    # ================= 初始化阶段 =================
-    - name: Initialize workspace
+    - name: Install Qt via aqt
       run: |
-        mkdir -p ~/build-area
-        echo "Workspace initialized at $(date)" >> ~/build-area/build.log
+        sudo apt-get update
+        sudo apt-get install -y python3-pip
+        pip install aqtinstall
+        aqt install-qt linux desktop 6.6.3 -m qtbase qttools --outputdir ~/Qt
+        echo "QT_PATH=~/Qt/6.6.3/gcc_64" >> $GITHUB_ENV
 
-    # ================= 核心依赖安装 =================
-    - name: Install base dependencies
+    - name: Build Fcitx5
       run: |
-        sudo apt-get update -yq
-        sudo apt-get install -y --no-install-recommends \
-          ca-certificates \
-          gnupg \
-          software-properties-common \
-          build-essential \
-          ninja-build \
-          libgl1-mesa-dev \
-          libxkbcommon-x11-dev
+        git clone --depth 1 https://code.qt.io/fcitx5/fcitx5.git
+        cd fcitx5/plugins/platforminputcontext
+        mkdir build && cd build
+        cmake .. -DCMAKE_PREFIX_PATH="$QT_PATH" -DCMAKE_BUILD_TYPE=Release
+        cmake --build . --target fcitx5platforminputcontextplugin
 
-    # ================= Qt6 便携式安装 =================
-    - name: Install Qt6 (Portable Mode)
-      env:
-        QT_VERSION: 6.6.3
-        QT_PREFIX: ~/Qt
-      run: |
-        INSTALLER="qt-unified-linux-x64-${QT_VERSION}-online.run"
-        wget -q "https://download.qt.io/official_releases/qt/${QT_VERSION%.*}/${QT_VERSION}/$INSTALLER" -O /tmp/$INSTALLER
-        chmod +x /tmp/$INSTALLER
-        
-        # 静默安装到用户目录
-        /tmp/$INSTALLER \
-          --accept-licenses \
-          --confirm-command \
-          install \
-          --default-answer \
-          --root "$QT_PREFIX" \
-          qt.qt6.${QT_VERSION//./_}.gcc_64 \
-          > /dev/null
-        
-        # 验证安装
-        [ -f "$QT_PREFIX/${QT_VERSION}/gcc_64/bin/qmake" ] || exit 1
-
-    # ================= 源码获取与准备 =================
-    - name: Prepare Fcitx5 source
-      run: |
-        git clone --depth 1 --branch 5.1.0 \
-          https://github.com/fcitx/fcitx5-qt.git \
-          ~/build-area/fcitx5-qt
-        
-        # 创建专用构建目录
-        mkdir -p ~/build-area/fcitx5-qt/build
-
-    # ================= 构建配置 =================
-    - name: Configure build
-      working-directory: ~/build-area/fcitx5-qt/build
-      env:
-        QT_PATH: ~/Qt/6.6.3/gcc_64
-      run: |
-        cmake .. \
-          -DCMAKE_PREFIX_PATH="$QT_PATH" \
-          -DCMAKE_INSTALL_PREFIX=./output \
-          -DCMAKE_BUILD_TYPE=MinSizeRel \
-          -DENABLE_TESTING=OFF \
-          -DFORCE_ENABLED=ON
-
-    # ================= 并行编译 =================
-    - name: Build plugin
-      working-directory: ~/build-area/fcitx5-qt/build
-      run: |
-        cmake --build . --target fcitx5platforminputcontextplugin -- -j$(($(nproc) + 1))
-
-    # ================= 产物处理 =================
-    - name: Package artifact
-      run: |
-        mkdir -p ~/build-artifacts
-        cp ~/build-area/fcitx5-qt/build/platforminputcontext/libfcitx5platforminputcontextplugin.so \
-          ~/build-artifacts/
-        strip --strip-unneeded ~/build-artifacts/*.so
-
-    - name: Upload binary
+    - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: fcitx5-qt6-plugin
-        path: ~/build-artifacts/*.so
-        retention-days: 7
+        name: fcitx5-plugin
+        path: fcitx5/plugins/platforminputcontext/build/*.so
