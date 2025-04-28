@@ -89,7 +89,7 @@ jobs:
     #        --modules qtcharts qtsensors qtlocation qtpositioning qt5compat
 
     - name: Install Qt Android
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v3
       with:
           version: 6.6.3
           host: windows
