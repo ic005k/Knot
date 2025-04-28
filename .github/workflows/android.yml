@@ -101,6 +101,7 @@ jobs:
                   qtpositioning
                   qt5compat
                 cached: 'false'
+        aqt list-qt windows android --modules 6.6.3 <arch>
 
     - name: Setup Android environment variables
       shell: powershell  # 保持与编译步骤相同的shell类型
