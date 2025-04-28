@@ -51,7 +51,7 @@ jobs:
         git clone --depth 1 https://github.com/fcitx/fcitx5-qt.git src
 
         # 修复 CMakeLists.txt
-        sed -i '1i cmake_minimum_required(VERSION 3.16 FATAL_ERROR)\nfind_package(ECM REQUIRED)\ninclude(ECM)\ninclude(ECMSetupVersion)\nset(PROJECT_VERSION "5.1.0")\necm_setup_version(PROJECT\n  VARIABLE_PREFIX FCITX5\n  VERSION ${PROJECT_VERSION}\n  SOVERSION 5\n)' src/qt6/platforminputcontext/CMakeLists.txt
+        # sed -i '1i cmake_minimum_required(VERSION 3.16 FATAL_ERROR)\nfind_package(ECM REQUIRED)\ninclude(ECM)\ninclude(ECMSetupVersion)\nset(PROJECT_VERSION "5.1.0")\necm_setup_version(PROJECT\n  VARIABLE_PREFIX FCITX5\n  VERSION ${PROJECT_VERSION}\n  SOVERSION 5\n)' src/qt6/platforminputcontext/CMakeLists.txt
 
     # ================= 配置构建 =================
     - name: Configure build
