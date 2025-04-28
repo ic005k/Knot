@@ -47,24 +47,24 @@ jobs:
         mv fcitx5-qt-$FCITX_VERSION src
 
     # ================= 构建配置（关键修复） =================
-    - name: Configure build
+    - name: Configure build (Final Fix)
       working-directory: ${{ env.BUILD_ROOT }}/src/qt6/platforminputcontext
       env:
-        Qt6_DIR: ${{ env.BUILD_ROOT }}/qt/$QT_VERSION/gcc_64/lib/cmake/Qt6
+        QMAKE_PATH: ${{ env.BUILD_ROOT }}/qt/6.6.3/gcc_64/bin
       run: |
-        mkdir -p build
-        cd build
+        # 验证 qmake 可执行性
+        ls -l $QMAKE_PATH/qmake
+        $QMAKE_PATH/qmake --version
 
-        # 使用系统CMake + 路径修正
+        # 配置构建参数
         cmake .. \
-          -DCMAKE_PREFIX_PATH="$Qt6_DIR" \
+          -DCMAKE_PREFIX_PATH="${{ env.BUILD_ROOT }}/qt/6.6.3/gcc_64" \
+          -DQT_QMAKE_EXECUTABLE="$QMAKE_PATH/qmake" \
           -DCMAKE_BUILD_TYPE=Release \
-          -DQT_QMAKE_EXECUTABLE="${{ env.BUILD_ROOT }}/qt/$QT_VERSION/gcc_64/bin/qmake" \
-          -Wno-dev
+          -DENABLE_QT6=ON
 
-        # 生成构建信息
-        cmake --version
-        cat CMakeCache.txt | grep Qt6
+        # 显示 Qt 配置信息
+        grep Qt6_DIR CMakeCache.txt
 
     # ================= 编译与验证 =================
     - name: Build plugin
