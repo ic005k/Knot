@@ -125,7 +125,8 @@ jobs:
     - name: Build APK
       shell: cmd
       env:
-          ANDROID_NDK_ROOT: C:\Android\ndk\25.1.8937393
+          ANDROID_NDK_ROOT: C:\Android\android-sdk\ndk\25.1.8937393
+          ANDROID_SDK_ROOT: C:\Android\android-sdk
       run: |
             set PATH=%PATH%;D:\a\Knot6\Qt\6.6.3\android_arm64_v8a\bin\
             qmake.bat Knot.pro -spec android-clang CONFIG+=release
