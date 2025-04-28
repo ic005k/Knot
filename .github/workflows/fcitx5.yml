@@ -18,7 +18,9 @@ jobs:
 
     - name: Build Fcitx5
       run: |
-        git clone --depth 1 https://code.qt.io/fcitx5/fcitx5.git
+        git clone --depth 1 --branch 5.1.0 \
+          https://github.com/fcitx/fcitx5-qt.git \
+          fcitx5-qt
         cd fcitx5/plugins/platforminputcontext
         mkdir build && cd build
         cmake .. -DCMAKE_PREFIX_PATH="$QT_PATH" -DCMAKE_BUILD_TYPE=Release
