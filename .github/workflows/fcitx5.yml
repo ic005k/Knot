@@ -21,10 +21,15 @@ jobs:
         git clone --depth 1 --branch 5.1.0 \
           https://github.com/fcitx/fcitx5-qt.git \
           fcitx5-qt
-        cd fcitx5/plugins/platforminputcontext
         mkdir build && cd build
-        cmake .. -DCMAKE_PREFIX_PATH="$QT_PATH" -DCMAKE_BUILD_TYPE=Release
-        cmake --build . --target fcitx5platforminputcontextplugin
+        cmake .. \
+          -DCMAKE_PREFIX_PATH="${{ env.QT_PATH }}" \
+          -DCMAKE_INSTALL_PREFIX=./output \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DENABLE_QT4=OFF \
+          -DENABLE_QT6=ON
+        cmake --build . --target fcitx5platforminputcontextplugin -- -j$(nproc)
+        objdump -T libfcitx5platforminputcontextplugin.so | grep Qt6Core  # 验证链接
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
