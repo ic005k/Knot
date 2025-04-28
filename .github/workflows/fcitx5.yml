@@ -1,9 +1,6 @@
 name: Standalone Fcitx5 Builder
 
-on:
-  repository_dispatch:  # 通过API触发
-    types: [build-request]
-  workflow_dispatch:    # 手动触发
+on: [push]
 
 jobs:
   build-fcitx5:
