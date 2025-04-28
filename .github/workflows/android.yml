@@ -121,6 +121,12 @@ jobs:
     #    echo "${{ secrets.SIGNING_KEY }}" > android/app/my-release-key.keystore.base64
     #    base64 -d android/app/my-release-key.keystore.base64 > android/app/my-release-key.keystore
 
+    - name: Install Android NDK
+      uses: android-actions/setup-android@v3
+      with:
+          ndk-version: 25.1.8937393
+          sdk-version: 34
+
     - name: Set NDK Path
       shell: cmd
       run: echo "ANDROID_NDK_ROOT=${{ github.workspace }}\android-ndk" >> $env:GITHUB_ENV
