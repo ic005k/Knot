@@ -59,11 +59,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         target: android
         arch: ${{ env.QT_ARCH }}
-        modules: |
-          qtcharts.android_arm64_v8a
-          qtsensors.android_arm64_v8a
-          qtlocation.android_arm64_v8a
-          qtpositioning.android_arm64_v8a
+        modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
 
     - name: Setup Toolchain Paths
       shell: cmd
