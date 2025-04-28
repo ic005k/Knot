@@ -112,8 +112,8 @@ jobs:
           C:\Qt\6.6.3\android_arm64_v8a\bin\qmake.bat D:\a\Knot6\Knot6\Knot.pro ^
                 -spec android-clang ^
                 CONFIG+=release ^
-                "ANDROID_ABIS=arm64-v8a" ^
-                "ANDROID_NDK_ROOT=C:\Android\android-sdk\ndk\25.1.8937393"
+                ANDROID_ABIS=arm64-v8a ^
+                ANDROID_NDK_ROOT=C:\Android\android-sdk\ndk\25.1.8937393
 
           :: Step 2 - 多线程编译
           C:\Qt\Tools\jom\jom.exe -j4 || C:\Qt\Tools\mingw1120_64\bin\mingw32-make.exe -j4
