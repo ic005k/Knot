@@ -1,4 +1,4 @@
-name: Fcitx5 Qt6 Build (Stable)
+name: Fcitx5 Qt6 Fixed Build
 
 on:
   workflow_dispatch:
@@ -8,79 +8,60 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       BUILD_ROOT: /opt/fcitx5
-      FCITX_VERSION: 5.1.0
       QT_VERSION: 6.6.3
 
     steps:
-    # ================= 环境初始化 =================
-    - name: Prepare environment
+    # ================= 初始化环境 =================
+    - name: Setup environment
       run: |
         sudo mkdir -p $BUILD_ROOT
         sudo chown -R runner:runner $BUILD_ROOT
 
-    # ================= 安装系统CMake =================
-    - name: Install system tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y --no-install-recommends \
-          cmake \
-          build-essential \
-          ninja-build
-
-    - name: Install ECM
+    # ================= 安装核心依赖 =================
+    - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
+          git cmake ninja-build \
           extra-cmake-modules \
-          libkf5coreaddons-dev
+          libkf5coreaddons-dev \
+          libxkbcommon-dev \
+          libdbus-1-dev
 
-    # ================= 安装Qt（绕过版本问题） =================
+    # ================= 安装 Qt =================
     - name: Install Qt
       working-directory: ${{ env.BUILD_ROOT }}
       run: |
         pip install aqtinstall
-        python -m aqt install-qt linux desktop $QT_VERSION \
-          --outputdir qt
+        aqt install-qt linux desktop $QT_VERSION --outputdir qt
+        echo "QT_PATH=$BUILD_ROOT/qt/$QT_VERSION/gcc_64" >> $GITHUB_ENV
 
-        # 验证Qt安装
-        [ -f "qt/$QT_VERSION/gcc_64/bin/qmake" ] || exit 1
-
-    # ================= 获取源码 =================
-    - name: Get source code
+    # ================= 获取源码并修复 =================
+    - name: Clone and patch source
       working-directory: ${{ env.BUILD_ROOT }}
       run: |
-        wget https://github.com/fcitx/fcitx5-qt/archive/refs/tags/$FCITX_VERSION.tar.gz
-        tar -xzf $FCITX_VERSION.tar.gz
-        mv fcitx5-qt-$FCITX_VERSION src
+        git clone --depth 1 https://github.com/fcitx/fcitx5-qt.git src
 
-    # ================= 构建配置（关键修复） =================
-    - name: Configure build (Final Fix)
+        # 修复 CMakeLists.txt
+        sed -i '1i cmake_minimum_required(VERSION 3.16 FATAL_ERROR)\nfind_package(ECM REQUIRED)\ninclude(ECM)\ninclude(ECMSetupVersion)\nset(PROJECT_VERSION "5.1.0")\necm_setup_version(PROJECT\n  VARIABLE_PREFIX FCITX5\n  VERSION ${PROJECT_VERSION}\n  SOVERSION 5\n)' src/qt6/platforminputcontext/CMakeLists.txt
+
+    # ================= 配置构建 =================
+    - name: Configure build
       working-directory: ${{ env.BUILD_ROOT }}/src/qt6/platforminputcontext
       env:
-        QMAKE_PATH: ${{ env.BUILD_ROOT }}/qt/6.6.3/gcc_64/bin
+        ECM_DIR: /usr/share/ECM/cmake
       run: |
-        # 验证 qmake 可执行性
-        ls -l $QMAKE_PATH/qmake
-        $QMAKE_PATH/qmake --version
-
-        # 配置构建参数
+        mkdir -p build && cd build
         cmake .. \
-          -DCMAKE_PREFIX_PATH="${{ env.BUILD_ROOT }}/qt/6.6.3/gcc_64" \
-          -DQT_QMAKE_EXECUTABLE="$QMAKE_PATH/qmake" \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DENABLE_QT6=ON
-
-        # 显示 Qt 配置信息
-        grep Qt6_DIR CMakeCache.txt
+          -DCMAKE_PREFIX_PATH="$QT_PATH;$ECM_DIR" \
+          -DQT_QMAKE_EXECUTABLE="$QT_PATH/bin/qmake" \
+          -DCMAKE_BUILD_TYPE=Release
 
     # ================= 编译与验证 =================
     - name: Build plugin
       working-directory: ${{ env.BUILD_ROOT }}/src/qt6/platforminputcontext/build
       run: |
         cmake --build . --target fcitx5platforminputcontextplugin -- -j$(nproc)
-
-        # 二进制验证
-        file libfcitx5platforminputcontextplugin.so
         ldd libfcitx5platforminputcontextplugin.so | grep -i qt6
 
     # ================= 上传产物 =================
