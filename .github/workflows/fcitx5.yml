@@ -37,16 +37,27 @@ jobs:
         mv fcitx5-qt-5.1.0 src
         ls src/qt6/platforminputcontext/CMakeLists.txt  # 严格验证
 
-    # ================= 构建配置（路径修复） =================
+    # ================= 构建配置=================
     - name: Configure build
-      working-directory: ${{ env.BUILD_ROOT }}/src/qt6/platforminputcontext  # 完整路径
+      working-directory: ${{ env.BUILD_ROOT }}/src/qt6/platforminputcontext
       run: |
-        mkdir -p build
-        cd build
+        # 安装最新 CMake
+        wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc | sudo gpg --dearmor -o /usr/share/keyrings/kitware.gpg
+        echo "deb [signed-by=/usr/share/keyrings/kitware.gpg] https://apt.kitware.com/ubuntu/ jammy main" | sudo tee /etc/apt/sources.list.d/kitware.list
+        sudo apt-get update && sudo apt-get install -y cmake=3.28.1-0kitware1ubuntu22.04.1
+
+        mkdir -p build && cd build
+
+        # 强制设置 CMake 策略
         cmake .. \
-          -DCMAKE_PREFIX_PATH="${{ env.QT_PATH }}" \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DENABLE_QT6=ON
+          -DCMAKE_POLICY_DEFAULT_CMP0045=NEW \
+          -DCMAKE_MINIMUM_REQUIRED_VERSION=3.21 \
+          -DCMAKE_PREFIX_PATH="${{ env.QT_PATH }}/lib/cmake/Qt6" \
+          -DQT_QMAKE_EXECUTABLE="${{ env.QT_PATH }}/bin/qmake" \
+          -DCMAKE_BUILD_TYPE=Release
+
+        # 生成编译数据库
+        cmake --build . --target help | grep fcitx5
 
     # ================= 编译与验证 =================
     - name: Build plugin
