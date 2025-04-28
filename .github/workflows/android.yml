@@ -112,11 +112,11 @@ jobs:
     #    base64 -d android/app/my-release-key.keystore.base64 > android/app/my-release-key.keystore
 
 
-      - name: Build APK
-        shell: cmd
-        env:
+    - name: Build APK
+      shell: cmd
+      env:
           ANDROID_NDK_ROOT: C:\Android\ndk\25.1.8937393
-          run: |
+      run: |
             set PATH=%PATH%;C:\Qt\6.6.3\android_arm64_v8a\bin
             qmake.exe Knot.pro -spec android-clang CONFIG+=release
             jom -j4 || make -j4
