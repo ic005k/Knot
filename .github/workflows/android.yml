@@ -109,6 +109,7 @@ jobs:
           :: Step 1 - 生成Makefile
           cd "D:\a\Knot6\Knot6"
           dir
+          qmake "Knot.pro"
 
           #"C:\Qt\6.6.3\android_arm64_v8a\bin\qmake.bat" "Knot.pro" ^
           #  -spec android-clang ^
