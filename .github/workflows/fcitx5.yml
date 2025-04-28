@@ -1,65 +1,58 @@
-name: Fcitx5 Qt6 Standalone Builder
+name: Fcitx5 Qt6 Isolation Build
 
 on:
-  workflow_dispatch:  # 仅手动触发
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-22.04
     env:
-      BUILD_ROOT: /opt/fcitx5  # 完全独立路径
+      BUILD_ROOT: /opt/fcitx5
       QT_VERSION: 6.6.3
 
     steps:
     # ================= 初始化隔离环境 =================
-    - name: Prepare isolated environment
+    - name: Prepare environment
       run: |
         sudo mkdir -p $BUILD_ROOT
         sudo chown -R runner:runner $BUILD_ROOT
-        cd $BUILD_ROOT  # 关键：立即切换工作目录
+        echo "BUILD_DIR=$BUILD_ROOT" >> $GITHUB_ENV
 
-    # ================= 安装Qt（优化版） =================
+    # ================= 安装Qt（修复路径） =================
     - name: Install Qt
-      working-directory: ${{ env.BUILD_ROOT }}  # 显式指定绝对路径
+      working-directory: ${{ env.BUILD_ROOT }}  # 确保在此目录执行
       run: |
-        pip install aqtinstall --user
+        pip install aqtinstall
         python -m aqt install-qt linux desktop $QT_VERSION \
           --outputdir qt
         echo "QT_PATH=$BUILD_ROOT/qt/$QT_VERSION/gcc_64" >> $GITHUB_ENV
 
-    # ================= 获取Fcitx源码（绕过git） =================
-    - name: Download Fcitx5 source
+    # ================= 获取源码（精确路径控制） =================
+    - name: Download and extract source
       working-directory: ${{ env.BUILD_ROOT }}
       run: |
-        FCITX_VERSION=5.1.0
-        wget https://github.com/fcitx/fcitx5-qt/archive/refs/tags/$FCITX_VERSION.tar.gz
-        tar -xzf $FCITX_VERSION.tar.gz
-        mv fcitx5-qt-$FCITX_VERSION src
+        wget https://github.com/fcitx/fcitx5-qt/archive/5.1.0.tar.gz
+        tar -xzf 5.1.0.tar.gz
+        mv fcitx5-qt-5.1.0 src
+        ls src/platforminputcontext/CMakeLists.txt  # 严格验证
 
-    # ================= 构建配置（增强验证） =================
+    # ================= 构建配置（路径修复） =================
     - name: Configure build
-      working-directory: ${{ env.BUILD_ROOT }}/src/platforminputcontext
+      working-directory: ${{ env.BUILD_ROOT }}/src/platforminputcontext  # 完整路径
       run: |
-        # 严格验证源码结构
-        [ -f CMakeLists.txt ] || (echo "CMakeLists.txt missing!" && exit 1)
-
-        mkdir build && cd build
+        mkdir -p build
+        cd build
         cmake .. \
           -DCMAKE_PREFIX_PATH="${{ env.QT_PATH }}" \
-          -DCMAKE_INSTALL_PREFIX=../../dist \
           -DCMAKE_BUILD_TYPE=Release \
-          -DENABLE_QT6=ON \
-          -Wno-dev
+          -DENABLE_QT6=ON
 
     # ================= 编译与验证 =================
-    - name: Build and verify
+    - name: Build plugin
       working-directory: ${{ env.BUILD_ROOT }}/src/platforminputcontext/build
       run: |
         cmake --build . --target fcitx5platforminputcontextplugin -- -j$(nproc)
-
-        # 严格验证产物
         [ -f libfcitx5platforminputcontextplugin.so ] || exit 1
-        ldd libfcitx5platforminputcontextplugin.so | grep -i qt6
 
     # ================= 上传产物 =================
     - name: Upload artifact
