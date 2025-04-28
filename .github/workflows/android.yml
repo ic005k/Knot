@@ -107,8 +107,8 @@ jobs:
       shell: cmd  # 改为CMD解释器
       run: |
           :: Step 1 - 生成Makefile
-          set GITHUB_WORKSPACE=D:\a\Knot6
-          "C:\Qt\6.6.3\android_arm64_v8a\bin\qmake.bat" "%GITHUB_WORKSPACE%\Knot.pro" ^
+          cd "D:\a\Knot6\Knot6"
+          "C:\Qt\6.6.3\android_arm64_v8a\bin\qmake.bat" "Knot.pro" ^
             -spec android-clang ^
             CONFIG+=release ^
             ANDROID_ABIS=arm64-v8a ^
