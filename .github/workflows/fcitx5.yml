@@ -1,6 +1,6 @@
 name: Build Fcitx5 Qt6 Plugin
 
-on: [repository_dispatch]  # 可通过API触发
+on: [push]  # 可通过API触发
 
 jobs:
   build:
