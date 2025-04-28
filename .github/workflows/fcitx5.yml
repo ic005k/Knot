@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       BUILD_ROOT: /opt/fcitx5
+      FCITX_VERSION: 5.1.0
       QT_VERSION: 6.6.3
 
     steps:
@@ -51,8 +52,8 @@ jobs:
     - name: Build plugin
       working-directory: ${{ env.BUILD_ROOT }}/src/qt6/platforminputcontext/build
       run: |
-        cmake --build . --target fcitx5platforminputcontextplugin -- -j$(nproc)
-        [ -f libfcitx5platforminputcontextplugin.so ] || exit 1
+          export PATH="${{ env.QT_PATH }}/bin:$PATH"
+          cmake --build . --target fcitx5platforminputcontextplugin -- VERBOSE=1
 
     # ================= 上传产物 =================
     - name: Upload artifact
