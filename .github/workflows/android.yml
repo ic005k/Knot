@@ -51,7 +51,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         target: desktop
         arch: ${{ env.QT_DESKTOP_ARCH }}
-        modules: qtbase qttools qt5compat
+        modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
 
     - name: Install Qt Android (关键修正点)
       uses: jurplel/install-qt-action@v3
