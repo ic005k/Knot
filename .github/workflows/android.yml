@@ -57,6 +57,7 @@ jobs:
       run: |
         pip install aqtinstall
         echo "$HOME/.local/bin" >> $GITHUB_PATH  # 关键：确保后续步骤能找到 aqt
+        aqt list-qt windows android --modules 6.6.3 <arch>
 
      # 使用 aqtinstall 安装 Qt
     #- name: Install Qt for Desktop
@@ -88,6 +89,15 @@ jobs:
     #        --outputdir "C:\Qt" ^
     #        --modules qtcharts qtsensors qtlocation qtpositioning qt5compat
 
+    - name: Install Qt Desktop (必选)
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: 6.6.3
+        target: desktop
+        arch: win64_mingw  # 或win64_msvc2019_64
+        modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
+
+
     - name: Install Qt Android
       uses: jurplel/install-qt-action@v3
       with:
@@ -101,7 +111,7 @@ jobs:
                   qtpositioning
                   qt5compat
                 cached: 'false'
-        aqt list-qt windows android --modules 6.6.3 <arch>
+
 
     - name: Setup Android environment variables
       shell: powershell  # 保持与编译步骤相同的shell类型
