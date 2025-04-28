@@ -103,7 +103,7 @@ jobs:
     - name: Build APK
       shell: cmd  # 改为CMD解释器
       run: |
-          "%QT_DIR%\bin\qmake.bat" .. CONFIG+=release ANDROID_ABIS=arm64-v8a
+          "C:\Qt\6.6.3\android_arm64_v8a\bin\qmake.bat" .. CONFIG+=release ANDROID_ABIS=arm64-v8a
           jom -j4 || make -j4
           make apk
 
