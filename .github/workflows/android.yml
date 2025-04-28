@@ -59,34 +59,43 @@ jobs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH  # 关键：确保后续步骤能找到 aqt
 
      # 使用 aqtinstall 安装 Qt
-    - name: Install Qt for Desktop
-      shell: cmd  # 强制使用 CMD 解释器
-      run: |
-        aqt list-qt windows desktop --modules 6.6.3 win64_msvc2019_64
+    #- name: Install Qt for Desktop
+    #  shell: cmd  # 强制使用 CMD 解释器
+    #  run: |
+    #    aqt list-qt windows desktop --modules 6.6.3 win64_msvc2019_64
 
-         aqt install-qt ^
-           windows ^
-           desktop ^
-           %QT_VERSION% ^
-           win64_msvc2019_64 ^
-           --outputdir "C:\Qt" ^
-           --modules qtcharts qtsensors qtlocation qtpositioning qt5compat
+    #     aqt install-qt ^
+    #       windows ^
+    #       desktop ^
+    #       %QT_VERSION% ^
+    #       win64_msvc2019_64 ^
+    #       --outputdir "C:\Qt" ^
+    #       --modules qtcharts qtsensors qtlocation qtpositioning qt5compat
 
 
     # 安装Qt安卓模块
+    #- name: Install Qt Android
+    #  shell: cmd  # 强制使用 CMD 解释器
+    #  run: |
+
+    #    aqt list-qt windows android --arch 6.6.3
+
+    #    aqt install-qt ^
+    #        windows ^
+    #        android ^
+    #        %QT_VERSION% ^
+    #        android_arm64_v8a ^
+    #        --outputdir "C:\Qt" ^
+    #        --modules qtcharts qtsensors qtlocation qtpositioning qt5compat
+
     - name: Install Qt Android
-      shell: cmd  # 强制使用 CMD 解释器
-      run: |
-
-        aqt list-qt windows android --arch 6.6.3
-
-        aqt install-qt ^
-            windows ^
-            android ^
-            %QT_VERSION% ^
-            android_arm64_v8a ^
-            --outputdir "C:\Qt" ^
-            --modules qtcharts qtsensors qtlocation qtpositioning qt5compat
+      uses: jurplel/install-qt-action@v2
+      with:
+          version: 6.6.3
+          host: windows
+          target: android
+          arch: arm64_v8a
+          modules: qtcharts qtsensors qtlocation qt5compat qtpositioning
         
     - name: Setup Android environment variables
       shell: powershell  # 保持与编译步骤相同的shell类型
@@ -103,28 +112,15 @@ jobs:
     #    base64 -d android/app/my-release-key.keystore.base64 > android/app/my-release-key.keystore
 
 
-    - name: Build APK
-      shell: cmd  # 改为CMD解释器
-      run: |
-          :: Step 1 - 生成Makefile
-          ANDROID_NDK_ROOT: C:\Android\android-sdk\ndk\25.1.8937393
-          ANDROID_SDK_ROOT: C:\Android\android-sdk
-          QT_DIR: C:\Qt\6.6.3\android_arm64_v8a
-
-          cd D:\a\Knot6\Knot6
-          dir
-
-          C:\Qt\6.6.3\android_arm64_v8a\bin\qmake D:\a\Knot6\Knot6\Knot.pro ^
-                -spec android-clang ^
-                CONFIG+=release ^
-                ANDROID_ABIS=arm64-v8a ^
-                ANDROID_NDK_ROOT=C:\Android\android-sdk\ndk\25.1.8937393
-
-          :: Step 2 - 多线程编译
-          C:\Qt\Tools\jom\jom.exe -j4 || C:\Qt\Tools\mingw1120_64\bin\mingw32-make.exe -j4
-
-          :: Step 3 - 生成APK
-          C:\Qt\Tools\mingw1120_64\bin\mingw32-make.exe apk
+      - name: Build APK
+        shell: cmd
+        env:
+          ANDROID_NDK_ROOT: C:\Android\ndk\25.1.8937393
+          run: |
+            set PATH=%PATH%;C:\Qt\6.6.3\android_arm64_v8a\bin
+            qmake.exe Knot.pro -spec android-clang CONFIG+=release
+            jom -j4 || make -j4
+            make apk
 
     - name: Sign APK
       run: |
