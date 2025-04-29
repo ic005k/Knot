@@ -127,9 +127,9 @@ jobs:
          #cd bin/release/plugins/platforminputcontexts
          #ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1
          # 进入目标目录，执行操作，完成后自动回到当前目录
-         (cd bin/release/plugins/platforminputcontexts && \
-          ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
-          ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.5)
+         #(cd bin/release/plugins/platforminputcontexts && \
+         # ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
+         # ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.5)
 
          #cp ExtBin/linux/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
          #chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
@@ -163,6 +163,7 @@ jobs:
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
                   -unsupported-allow-new-glibc \
                   -qmldir=/home/runner/work/Knot6/Knot6/src/qmlsrc \
+                  -exclude-library libfcitx5platforminputcontextplugin.so \
                   -appimage
                   #-extra-plugins=webview
 
