@@ -119,8 +119,8 @@ jobs:
          cp ExtBin/linux/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
          chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
 
-         cp ExtBin/linux/libFcitx5Qt6DBusAddons.so bin/release/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so
-         chmod 755 bin/release/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so
+         cp ExtBin/linux/libFcitx5Qt6DBusAddons.so.5.1.9 bin/release/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
+         chmod 755 bin/release/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
 
 
          # 获取 Qt6 插件目录
