@@ -1918,25 +1918,28 @@ void Notes::openNotes() {
                         kFile = kFile.replace(".zip", "");
                         qDebug() << "file=" << file;
                         qDebug() << "pFile=" << pFile;
-                        qDebug() << "kFile" << kFile;
+                        qDebug() << "kFile=" << kFile;
+                        qDebug() << "zFile=" << zFile;
 
                         QString dec_file = m_Method->useDec(zFile);
                         if (dec_file != "") zFile = dec_file;
 
-                        if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
-                          mw_one->closeProgress();
-                          errorInfo =
-                              tr("Decompression failed. Please check in "
-                                 "Preferences that the passwords are "
-                                 "consistent across all platforms.");
+                        if (QFile::exists(zFile)) {
+                          if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
+                            mw_one->closeProgress();
+                            errorInfo =
+                                tr("Decompression failed. Please check in "
+                                   "Preferences that the passwords are "
+                                   "consistent across all platforms.");
 
-                          ShowMessage *msg = new ShowMessage();
-                          msg->showMsg("Knot", errorInfo, 1);
-                          isPasswordError = true;
-                          QFile::remove(zFile);
-                          QFile::remove(privateDir +
-                                        "KnotData/mainnotes.ini.zip");
-                          return;
+                            ShowMessage *msg = new ShowMessage();
+                            msg->showMsg("Knot", errorInfo, 1);
+                            isPasswordError = true;
+                            QFile::remove(zFile);
+                            QFile::remove(privateDir +
+                                          "KnotData/mainnotes.ini.zip");
+                            return;
+                          }
                         }
 
                         // m_Method->decompressWithPassword(

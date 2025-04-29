@@ -2030,12 +2030,12 @@ bool Method::decryptFile(const QString &inputPath, const QString &outputPath,
 
   // 1. 检查文件打开状态（添加详细错误日志）
   if (!inFile.open(QIODevice::ReadOnly)) {
-    qDebug() << "无法打开输入文件：" << inFile.errorString();
+    qDebug() << "无法打开输入文件：" << inputPath << inFile.errorString();
     return false;
   }
 
   if (!outFile.open(QIODevice::WriteOnly)) {
-    qDebug() << "无法打开输出文件：" << outFile.errorString();
+    qDebug() << "无法打开输出文件：" << outputPath << outFile.errorString();
     inFile.close();
     return false;
   }
