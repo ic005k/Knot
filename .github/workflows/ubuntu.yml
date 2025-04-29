@@ -123,8 +123,12 @@ jobs:
          mkdir -p bin/release/plugins/platforminputcontexts/
          cp -R ExtBin/linux/fcitx5/* bin/release/plugins/platforminputcontexts/
          chmod -R 755 bin/release/plugins/platforminputcontexts/
-         cd bin/release/plugins/platforminputcontexts
-         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1
+
+         #cd bin/release/plugins/platforminputcontexts
+         #ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1
+         # 进入目标目录，执行操作，完成后自动回到当前目录
+         (cd bin/release/plugins/platforminputcontexts && \
+          ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1)
 
          #cp ExtBin/linux/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
          #chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
