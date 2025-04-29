@@ -113,14 +113,17 @@ jobs:
                   
          #cp -r ExtBin/linux/resources bin/release/resources
 
-         cp ExtBin/linux/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot6/Qt/6.6.3/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
-         chmod 755 /home/runner/work/Knot/Qt/6.6.3/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         #cp ExtBin/linux/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot6/Qt/6.6.3/gcc_64/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         #chmod 755 /home/runner/work/Knot/Qt/6.6.3/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
 
-         cp ExtBin/linux/libFcitx5Qt6DBusAddons.so.5.1.9 /home/runner/work/Knot6/Qt/6.6.3/gcc_64/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
-         chmod 755 /home/runner/work/Knot/Qt/6.6.3/gcc_64/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
+         #cp ExtBin/linux/libFcitx5Qt6DBusAddons.so.5.1.9 /home/runner/work/Knot6/Qt/6.6.3/gcc_64/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
+         #chmod 755 /home/runner/work/Knot/Qt/6.6.3/gcc_64/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
 
 
-         #mkdir -p bin/release/plugins/platforminputcontexts/
+         mkdir -p bin/release/plugins/platforminputcontexts/
+         cp -R ExtBin/linux/fcitx5/* bin/release/plugins/platforminputcontexts/
+         chmod -R 755 bin/release/plugins/platforminputcontexts/
+
          #cp ExtBin/linux/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
          #chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
 
