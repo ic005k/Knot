@@ -61,7 +61,7 @@ jobs:
 
          sudo apt-get install -y libqt6serialport6
 
-         sudo apt-get install -y libfcitx5-qt6-dbusaddons1
+         sudo apt-get install -y libfcitx5-qt6-dbusaddons
 
       - uses: actions/checkout@v2
         with:
