@@ -61,7 +61,6 @@ jobs:
 
          sudo apt-get install -y libqt6serialport6
 
-         sudo apt-get install -y libfcitx5-qt6-dbusaddons
 
       - uses: actions/checkout@v2
         with:
@@ -114,15 +113,19 @@ jobs:
                   
          #cp -r ExtBin/linux/resources bin/release/resources
 
-         #cp ExtBin/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot6/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
-         #chmod 755 /home/runner/work/Knot/Qt/6.6.0/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         cp ExtBin/linux/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot6/Qt/6.6.3/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         chmod 755 /home/runner/work/Knot/Qt/6.6.3/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
 
-         mkdir -p bin/release/plugins/platforminputcontexts/
-         cp ExtBin/linux/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
-         chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         cp ExtBin/linux/libFcitx5Qt6DBusAddons.so.5.1.9 /home/runner/work/Knot6/Qt/6.6.3/gcc_64/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
+         chmod 755 /home/runner/work/Knot/Qt/6.6.3/gcc_64/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
 
-         cp ExtBin/linux/libFcitx5Qt6DBusAddons.so.1 bin/release/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.1
-         chmod 755 bin/release/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.1
+
+         #mkdir -p bin/release/plugins/platforminputcontexts/
+         #cp ExtBin/linux/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         #chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+
+         #cp ExtBin/linux/libFcitx5Qt6DBusAddons.so.5.1.9 bin/release/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
+         #chmod 755 bin/release/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
 
 
          # 获取 Qt6 插件目录
