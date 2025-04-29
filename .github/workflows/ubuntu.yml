@@ -163,7 +163,7 @@ jobs:
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
                   -unsupported-allow-new-glibc \
                   -qmldir=/home/runner/work/Knot6/Knot6/src/qmlsrc \
-                  -exclude-library libfcitx5platforminputcontextplugin.so \
+                  -no-strip \  # 禁止裁剪库文件
                   -appimage
                   #-extra-plugins=webview
 
