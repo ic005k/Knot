@@ -1,0 +1,84 @@
+name: MacOS-ARM
+on: 
+  push:
+    paths:
+      - '*.pro'
+      - '​**​'
+      - '.github/workflows/macos.yml'
+  pull_request:
+    paths:
+      - '*.pro'
+      - '​**​'
+      - '.github/workflows/macos.yml' 
+jobs:
+  build:
+    name: Build-ARM
+    runs-on: macos-latest  # GitHub 现已原生支持 Apple Silicon runner
+    env:
+      targetName: Knot
+      VERSION: Mac-ARM
+      orgName: Knot
+      ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
+      QT_DIR: ${{ github.workspace }}/Qt/6.6.3/clang_arm64  # ARM 专用路径
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Qt (ARM)
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: 6.6.3
+          host: mac
+          target: desktop
+          arch: clang_arm64  # ARM 架构指定
+          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning
+          install-deps: true
+          dir: ${{ env.QT_DIR }}
+
+      - name: Setup Homebrew (ARM)
+        run: |
+          # 使用原生 ARM 版 Homebrew
+          echo "Homebrew path: /opt/homebrew/bin"
+          echo '/opt/homebrew/bin' >> $GITHUB_PATH
+
+      - name: Install OpenSSL via Homebrew (ARM)
+        run: |
+          brew update
+          brew install openssl@3
+          echo "OPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@3" >> $GITHUB_ENV
+
+      - name: Build Project (ARM)
+        run: |
+          # 设置 Qt 环境变量
+          export PATH="${{ env.QT_DIR }}/bin:$PATH"
+          export PKG_CONFIG_PATH="/opt/homebrew/opt/openssl@3/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+          # 针对 ARM 架构的编译参数
+          qmake "CONFIG += release" "QMAKE_APPLE_DEVICE_ARCHS=arm64" "LIBS += -L/opt/homebrew/opt/openssl@3/lib"
+          make -j$(sysctl -n hw.ncpu)
+
+      - name: Package Application
+        run: |
+          export PATH="${{ env.QT_DIR }}/bin:$PATH"
+          cp -f Info.plist bin/release/${targetName}.app/Contents/Info.plist
+          cp -R -p -f bin/release/${targetName}.app ${targetName}.app
+
+          # 使用 ARM 版 macdeployqt
+          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg
+          cp ${targetName}.dmg bin/release/${targetName}.dmg 
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.orgName }}-${{ env.VERSION }}-ARM
+          path: bin/release/${{ env.targetName }}.dmg
+
+      - name: Upload Release (ARM)
+        if: startsWith(github.event.ref, 'refs/tags/')
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: bin/release/${{ env.targetName }}.dmg
+          asset_name: ${{ env.orgName }}-${{ env.VERSION }}-ARM.dmg
+          tag: ${{ github.ref }}
+          overwrite: true
