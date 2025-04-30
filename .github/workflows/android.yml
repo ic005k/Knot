@@ -63,7 +63,7 @@ jobs:
         # 添加显式输出路径定义
         id: qt-android
         outputs:
-         qt-dir: ${{ steps.qt-android.outputs.install-dir }}
+        qt-dir: ${{ steps.qt-android.outputs.install-dir }}
 
     - name: Setup Toolchain Paths
       shell: cmd
