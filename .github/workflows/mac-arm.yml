@@ -32,22 +32,13 @@ jobs:
             python -m pip install aqtinstall
             echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-            # 验证可用架构
-            aqt list-qt mac desktop --arch ${{ env.QT_VERSION }}
 
-            # 验证模块可用性
-            aqt list-qt mac desktop --modules ${{ env.QT_VERSION }} ${{ env.QT_ARCH }}
-
-      - name: Install Qt (ARM)
-        uses: jurplel/install-qt-action@v3
-        with:
-          version: 6.6.3
-          host: mac
-          target: desktop
-          arch: clang_arm64  # ARM 架构指定
-          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning
-          install-deps: true
-          dir: ${{ env.QT_DIR }}
+      - name: Install Qt 6.6.3 ARM
+        shell: bash -l {0}
+        run: |
+          aqt install-qt mac desktop 6.6.3 mac_arm64 \
+            --outputdir Qt \
+            --modules qtcharts qtsensors qtlocation qtpositioning qt5compat
 
       - name: Setup Homebrew (ARM)
         run: |
