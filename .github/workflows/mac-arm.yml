@@ -30,7 +30,7 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ env.QT_VERSION }}
-          host: macos
+          host: mac
           target: desktop
           arch: ${{ env.QT_ARCH }}  # 官方参数应为 mac_arm64
           modules: qtcharts qt5compat qtsensors
