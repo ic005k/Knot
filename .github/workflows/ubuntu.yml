@@ -163,6 +163,7 @@ jobs:
          mkdir bin/release/lib/
          cp -r ExtBin/nss/* bin/release/lib/
 
+         export LD_LIBRARY_PATH="/home/runner/work/Knot6/Qt/6.6.3/gcc_64/plugins/platforminputcontexts:$LD_LIBRARY_PATH"
 
          export VERSION # linuxdeployqt uses this for naming the file
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
