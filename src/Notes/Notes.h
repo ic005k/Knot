@@ -235,6 +235,8 @@ class Notes : public QDialog {
 
   void on_editFind_textChanged(const QString &arg1);
 
+  void on_btnView_clicked();
+
  private:
   bool m_initialized = false;
 

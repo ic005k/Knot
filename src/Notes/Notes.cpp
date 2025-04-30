@@ -2250,3 +2250,5 @@ void Notes::openBrowserOnce(const QString &htmlPath) {
   // QUrl url("http://localhost:8000/memo.html");
   // QDesktopServices::openUrl(url);
 }
+
+void Notes::on_btnView_clicked() { mw_one->ui->btnOpenNote->click(); }
