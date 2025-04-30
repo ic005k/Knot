@@ -44,8 +44,8 @@ jobs:
             qtlocation
             qtpositioning
             qt5compat
-        install-deps: true
-        dir: ${{ env.QT_DIR }}
+          install-deps: true
+          dir: ${{ env.QT_DIR }}
 
       - name: Setup Homebrew (ARM)
         run: |
