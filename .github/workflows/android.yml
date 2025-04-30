@@ -72,21 +72,7 @@ jobs:
         echo ${{ steps.qt-android.outputs.install-dir }}/bin >> %GITHUB_PATH%
         echo ${{ steps.qt-desktop.outputs.install-dir }}/Tools/jom >> %GITHUB_PATH%
 
-    - name: Validate Paths
-      shell: cmd
-      run: |
-          :: 使用短路径格式解决超长问题
-          #set QT_DIR=${{ steps.qt-android.outputs.install-dir }}
-          #echo Qt安装路径: %QT_DIR%
 
-          :: 转换为8.3短路径格式
-          #for /f "usebackq tokens=*" %%i in (`cygpath -w -s "%QT_DIR%"`) do set QT_SHORT=%%i
-          #dir "%QT_SHORT%\mkspecs\android-clang"
-
-          :: 检查NDK路径
-          #set NDK_ROOT=%ANDROID_NDK_ROOT%
-          #echo NDK路径: %NDK_ROOT%
-          #dir "%NDK_ROOT%"
 
     - name: Build APK
       shell: cmd
