@@ -11,7 +11,7 @@ env:
   ANDROID_API_LEVEL: 34
   BUILD_TOOLS_VERSION: 34.0.0
   NDK_VERSION: 25.1.8937393
-  QT_DESKTOP_ARCH: win64_mingw  # 修正为 mingw 架构
+  QT_DESKTOP_ARCH: win64_mingw
   QT_ARCH: android_arm64_v8a
 
 jobs:
@@ -21,9 +21,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        path: .  # 直接检出到工作目录根路径
-        fetch-depth: 0
 
     - name: Set up JDK 17
       uses: actions/setup-java@v3
@@ -31,9 +28,9 @@ jobs:
         java-version: 17
         distribution: 'temurin'
 
-    # 安装 Android SDK/NDK
     - name: Setup Android SDK and NDK
       uses: android-actions/setup-android@v3
+      id: android-setup
       with:
         ndk-version: ${{ env.NDK_VERSION }}
         sdk-version: ${{ env.ANDROID_API_LEVEL }}
@@ -41,11 +38,12 @@ jobs:
     - name: Set Android Environment Variables
       shell: cmd
       run: |
-          echo ANDROID_NDK_ROOT=${{ steps.android-setup.outputs.ndk-path }} >> %GITHUB_ENV%
-          echo ANDROID_SDK_ROOT=${{ steps.android-setup.outputs.sdk-path }} >> %GITHUB_ENV%
+        echo ANDROID_NDK_ROOT=${{ steps.android-setup.outputs.ndk-path }} >> %GITHUB_ENV%
+        echo ANDROID_SDK_ROOT=${{ steps.android-setup.outputs.sdk-path }} >> %GITHUB_ENV%
 
     - name: Install Qt Desktop
       uses: jurplel/install-qt-action@v3
+      id: qt-desktop
       with:
         version: ${{ env.QT_VERSION }}
         target: desktop
@@ -54,39 +52,40 @@ jobs:
 
     - name: Install Qt Android
       uses: jurplel/install-qt-action@v3
+      id: qt-android
       with:
         version: ${{ env.QT_VERSION }}
         target: android
         arch: ${{ env.QT_ARCH }}
         modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
 
-        # 添加显式输出路径定义
-        id: qt-android
-        outputs:
-        qt-dir: ${{ steps.qt-android.outputs.install-dir }}
-
     - name: Setup Toolchain Paths
       shell: cmd
       run: |
-          echo ${{ steps.qt-desktop.outputs.qt-path }}\Tools\mingw1120_64\bin >> %GITHUB_PATH%
-          echo ${{ steps.qt-android.outputs.qt-path }}\bin >> %GITHUB_PATH%
-          echo ${{ steps.qt-desktop.outputs.qt-path }}\Tools\jom >> %GITHUB_PATH%
+        echo ${{ steps.qt-desktop.outputs.install-dir }}/Tools/mingw1120_64/bin >> %GITHUB_PATH%
+        echo ${{ steps.qt-android.outputs.install-dir }}/bin >> %GITHUB_PATH%
+        echo ${{ steps.qt-desktop.outputs.install-dir }}/Tools/jom >> %GITHUB_PATH%
+
+    - name: Validate Paths
+      shell: cmd
+      run: |
+        echo Qt Android Path: ${{ steps.qt-android.outputs.install-dir }}
+        dir "${{ steps.qt-android.outputs.install-dir }}/mkspecs/android-clang"
+        echo ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%
+        dir "%ANDROID_NDK_ROOT%"
 
     - name: Build APK
       shell: cmd
       run: |
-          :: 确认实际 Qt Android 安装路径
-          echo Qt Android Path: ${{ steps.qt-android.outputs.qt-dir }}
+        qmake.bat Knot.pro ^
+          -spec "${{ steps.qt-android.outputs.install-dir }}/mkspecs/android-clang" ^
+          "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
+          CONFIG+=release ^
+          ANDROID_ABIS=arm64-v8a
 
-          :: 修正 mkspecs 路径格式（Windows 需双反斜杠）
-          qmake.bat Knot.pro ^
-            -spec "${{ steps.qt-android.outputs.qt-dir }}\\mkspecs\\android-clang" ^
-            "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
-            CONFIG+=release ^
-            ANDROID_ABIS=arm64-v8a
+        jom -j4 || make -j4
+        make apk ANDROID_APK_DIR=%CD%\build
 
-          jom -j4 || make -j4
-          make apk ANDROID_APK_DIR=%CD%\build
 
     - name: Sign APK
       shell: cmd
