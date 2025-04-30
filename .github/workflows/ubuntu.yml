@@ -153,6 +153,10 @@ jobs:
          cp ExtBin/linux/fcitx5/* "$QT6_PLUGINS_DIR/"
          chmod 755 "$QT6_PLUGINS_DIR/"
 
+         (cd "$QT6_PLUGINS_DIR/" && \
+         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
+         ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
+
          echo "Copied to: $QT6_PLUGINS_DIR"
          ls -l "$QT6_PLUGINS_DIR"
 
