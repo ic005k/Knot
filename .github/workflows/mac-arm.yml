@@ -21,7 +21,7 @@ jobs:
       ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
       QT_DIR: ${{ github.workspace }}/Qt/6.6.3/clang_arm64  # ARM 专用路径
       QT_VERSION: 6.6.3
-      QT_ARCH: clang_arm64
+      QT_ARCH: mac_arm64
 
     steps:
       - name: Checkout code
@@ -33,12 +33,19 @@ jobs:
             echo "$HOME/.local/bin" >> $GITHUB_PATH
 
 
-      - name: Install Qt 6.6.3 ARM
-        shell: bash -l {0}
-        run: |
-          aqt install-qt mac desktop 6.6.3 mac_arm64 \
-            --outputdir Qt \
-            --modules qtcharts qtsensors qtlocation qtpositioning qt5compat
+      - name: Install Qt (ARM)
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: 6.6.3
+          arch: mac_arm64  # 使用验证后的架构名
+          modules: |
+            qtcharts
+            qtsensors
+            qtlocation
+            qtpositioning
+            qt5compat
+        install-deps: true
+        dir: ${{ env.QT_DIR }}
 
       - name: Setup Homebrew (ARM)
         run: |
