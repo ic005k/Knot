@@ -31,7 +31,7 @@ jobs:
         run: |
             python -m pip install aqtinstall
             echo "$HOME/.local/bin" >> $GITHUB_PATH
-            aqt list-qt mac desktop --modules 6.6.3 <arch>
+            aqt list-qt mac desktop --modules 6.6.3 mac_arm64
 
 
       - name: Install Qt (ARM)
