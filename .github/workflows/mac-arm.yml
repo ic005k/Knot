@@ -29,6 +29,9 @@ jobs:
 
       - name: Setup Qt Environment
         run: |
+            python -m pip install aqtinstall
+            echo "$HOME/.local/bin" >> $GITHUB_PATH
+
             # 验证可用架构
             aqt list-qt mac desktop --arch ${{ env.QT_VERSION }}
 
