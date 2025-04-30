@@ -20,10 +20,20 @@ jobs:
       orgName: Knot
       ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
       QT_DIR: ${{ github.workspace }}/Qt/6.6.3/clang_arm64  # ARM 专用路径
+      QT_VERSION: 6.6.3
+      QT_ARCH: clang_arm64
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup Qt Environment
+        run: |
+            # 验证可用架构
+            aqt list-qt mac desktop --arch ${{ env.QT_VERSION }}
+
+            # 验证模块可用性
+            aqt list-qt mac desktop --modules ${{ env.QT_VERSION }} ${{ env.QT_ARCH }}
 
       - name: Install Qt (ARM)
         uses: jurplel/install-qt-action@v3
