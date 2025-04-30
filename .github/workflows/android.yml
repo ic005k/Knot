@@ -41,9 +41,8 @@ jobs:
     - name: Set Android Environment Variables
       shell: cmd
       run: |
-        :: 硬编码 NDK 路径避免拼接错误
-        echo ANDROID_NDK_ROOT=C:\Android\android-sdk\ndk\$env:NDK_VERSION >> %GITHUB_ENV%
-        echo ANDROID_SDK_ROOT=C:\Android\android-sdk >> %GITHUB_ENV%
+          echo ANDROID_NDK_ROOT=${{ steps.android-setup.outputs.ndk-path }} >> %GITHUB_ENV%
+          echo ANDROID_SDK_ROOT=${{ steps.android-setup.outputs.sdk-path }} >> %GITHUB_ENV%
 
     - name: Install Qt Desktop
       uses: jurplel/install-qt-action@v3
@@ -64,26 +63,21 @@ jobs:
     - name: Setup Toolchain Paths
       shell: cmd
       run: |
-        :: 添加 Qt 和 MinGW 工具链到 PATH
-        echo D:\a\Knot6\Qt\Tools\mingw1120_64\bin >> %GITHUB_PATH%
-        echo D:\a\Knot6\Qt\6.6.3\android_arm64_v8a\bin >> %GITHUB_PATH%
-        echo D:\a\Knot6\Qt\Tools\jom >> %GITHUB_PATH%
+          echo ${{ steps.qt-desktop.outputs.qt-path }}\Tools\mingw1120_64\bin >> %GITHUB_PATH%
+          echo ${{ steps.qt-android.outputs.qt-path }}\bin >> %GITHUB_PATH%
+          echo ${{ steps.qt-desktop.outputs.qt-path }}\Tools\jom >> %GITHUB_PATH%
 
     - name: Build APK
       shell: cmd
       run: |
-        :: 生成 Makefile（显式指定 NDK 路径）
-        qmake.bat Knot.pro ^
-          -spec android-clang ^
-          "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
-          CONFIG+=release ^
-          ANDROID_ABIS=arm64-v8a
+          qmake.bat Knot.pro ^
+                -spec ${{ steps.qt-android.outputs.qt-path }}\mkspecs\android-clang ^
+                "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
+                CONFIG+=release ^
+                ANDROID_ABIS=arm64-v8a
 
-        :: 并行编译
-        jom -j4 || make -j4
-
-        :: 生成 APK（指定输出目录）
-        make apk ANDROID_APK_DIR=%CD%\build
+          jom -j4 || make -j4
+          make apk ANDROID_APK_DIR=%CD%\build
 
     - name: Sign APK
       shell: cmd
