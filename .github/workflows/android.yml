@@ -38,9 +38,13 @@ jobs:
     - name: Set Android Environment Variables
       shell: cmd
       run: |
-          echo ANDROID_NDK_ROOT=${{ steps.android-setup.outputs.ndk-path }} >> %GITHUB_ENV%
-          echo ANDROID_SDK_ROOT=${{ steps.android-setup.outputs.sdk-path }} >> %GITHUB_ENV%
-          echo ANDROID_HOME=${{ steps.android-setup.outputs.sdk-path }} >> %GITHUB_ENV%
+          :: 使用短路径格式设置
+          for /f "usebackq tokens=*" %%i in (`cygpath -w -s "${{ steps.android-setup.outputs.ndk-path }}"`) do set NDK_SHORT=%%i
+          echo ANDROID_NDK_ROOT=%NDK_SHORT% >> %GITHUB_ENV%
+
+          for /f "usebackq tokens=*" %%i in (`cygpath -w -s "${{ steps.android-setup.outputs.sdk-path }}"`) do set SDK_SHORT=%%i
+          echo ANDROID_SDK_ROOT=%SDK_SHORT% >> %GITHUB_ENV%
+          echo ANDROID_HOME=%SDK_SHORT% >> %GITHUB_ENV%
 
     - name: Install Qt Desktop
       uses: jurplel/install-qt-action@v3
@@ -59,6 +63,7 @@ jobs:
         target: android
         arch: ${{ env.QT_ARCH }}
         modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
+        install-dir: ${{ github.workspace }}/Qt
 
     - name: Setup Toolchain Paths
       shell: cmd
@@ -70,38 +75,33 @@ jobs:
     - name: Validate Paths
       shell: cmd
       run: |
-          :: 必须使用Windows原生路径分隔符（反斜杠）
-          echo Qt Android安装目录: ${{ steps.qt-android.outputs.install-dir }}
-          dir "${{ steps.qt-android.outputs.install-dir }}\mkspecs\android-clang"
+          :: 使用短路径格式解决超长问题
+          set QT_DIR=${{ steps.qt-android.outputs.install-dir }}
+          echo Qt安装路径: %QT_DIR%
 
-          :: 检查NDK路径有效性
-          echo NDK根目录: %ANDROID_NDK_ROOT%
-          dir "%ANDROID_NDK_ROOT%"
+          :: 转换为8.3短路径格式
+          for /f "usebackq tokens=*" %%i in (`cygpath -w -s "%QT_DIR%"`) do set QT_SHORT=%%i
+          dir "%QT_SHORT%\mkspecs\android-clang"
+
+          :: 检查NDK路径
+          set NDK_ROOT=%ANDROID_NDK_ROOT%
+          echo NDK路径: %NDK_ROOT%
+          dir "%NDK_ROOT%"
 
     - name: Build APK
       shell: cmd
       run: |
-          :: 使用完整路径替换变量
-          set QT_ANDROID_DIR=${{ steps.qt-android.outputs.install-dir }}
-          set QMAKE_SPEC="%QT_ANDROID_DIR%\mkspecs\android-clang"
+          :: 使用短路径变量
+          set QT_DIR=${{ steps.qt-android.outputs.install-dir }}
+          for /f "usebackq tokens=*" %%i in (`cygpath -w -s "%QT_DIR%"`) do set QT_SHORT=%%i
 
-          :: 检查路径有效性
-          if not exist %QMAKE_SPEC% (
-            echo [ERROR] mkspecs路径不存在: %QMAKE_SPEC%
-            exit /b 1
-          )
-
-          :: 生成构建文件
           qmake.bat Knot.pro ^
-            -spec %QMAKE_SPEC% ^
+            -spec "%QT_SHORT%\mkspecs\android-clang" ^
             "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
             CONFIG+=release ^
             ANDROID_ABIS=arm64-v8a
 
-          :: 并行编译
           jom -j4 || make -j4
-
-          :: 生成APK
           make apk ANDROID_APK_DIR=%CD%\build
 
 
