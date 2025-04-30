@@ -60,6 +60,11 @@ jobs:
         arch: ${{ env.QT_ARCH }}
         modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
 
+        # 添加显式输出路径定义
+        id: qt-android
+        outputs:
+         qt-dir: ${{ steps.qt-android.outputs.install-dir }}
+
     - name: Setup Toolchain Paths
       shell: cmd
       run: |
@@ -70,11 +75,15 @@ jobs:
     - name: Build APK
       shell: cmd
       run: |
+          :: 确认实际 Qt Android 安装路径
+          echo Qt Android Path: ${{ steps.qt-android.outputs.qt-dir }}
+
+          :: 修正 mkspecs 路径格式（Windows 需双反斜杠）
           qmake.bat Knot.pro ^
-                -spec ${{ steps.qt-android.outputs.qt-path }}\mkspecs\android-clang ^
-                "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
-                CONFIG+=release ^
-                ANDROID_ABIS=arm64-v8a
+            -spec "${{ steps.qt-android.outputs.qt-dir }}\\mkspecs\\android-clang" ^
+            "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
+            CONFIG+=release ^
+            ANDROID_ABIS=arm64-v8a
 
           jom -j4 || make -j4
           make apk ANDROID_APK_DIR=%CD%\build
