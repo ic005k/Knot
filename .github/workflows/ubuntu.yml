@@ -164,19 +164,16 @@ jobs:
          cp -r ExtBin/linux/nss/* bin/release/lib/
 
          #cp ExtBin/linux/openssl3/* bin/release/lib/
+         cp -P /usr/lib/x86_64-linux-gnu/libssl.so.3* bin/release/lib/
 
          # 在运行 linuxdeployqt 前，将 Qt 插件目录添加到库搜索路径
          export LD_LIBRARY_PATH="/home/runner/work/Knot6/Qt/6.6.3/gcc_64/plugins/platforminputcontexts:$LD_LIBRARY_PATH"
-
-         # 指定库文件所在路径
-         #仅针对特定库需要时临时设置
-         export LD_LIBRARY_PATH_BAK=$LD_LIBRARY_PATH
-         export LD_LIBRARY_PATH="/home/runner/work/Knot6/Qt/6.6.3/gcc_64/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
 
          export VERSION # linuxdeployqt uses this for naming the file
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
                   -unsupported-allow-new-glibc \
                   -qmldir=/home/runner/work/Knot6/Knot6/src/qmlsrc \
+                  -qmake=/home/runner/work/Knot6/Qt/6.6.3/gcc_64/bin/qmake \
                   -appimage
                   #-extra-plugins=webview
 
