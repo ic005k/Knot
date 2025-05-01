@@ -38,13 +38,8 @@ jobs:
     - name: Set Android Environment Variables
       shell: cmd
       run: |
-          :: 使用短路径格式设置
-          for /f "usebackq tokens=*" %%i in (`cygpath -w -s "${{ steps.android-setup.outputs.ndk-path }}"`) do set NDK_SHORT=%%i
-          echo ANDROID_NDK_ROOT=%NDK_SHORT% >> %GITHUB_ENV%
-
-          for /f "usebackq tokens=*" %%i in (`cygpath -w -s "${{ steps.android-setup.outputs.sdk-path }}"`) do set SDK_SHORT=%%i
-          echo ANDROID_SDK_ROOT=%SDK_SHORT% >> %GITHUB_ENV%
-          echo ANDROID_HOME=%SDK_SHORT% >> %GITHUB_ENV%
+          echo ANDROID_NDK_ROOT=C:\Android\android-sdk\ndk\25.1.8937393 >> %GITHUB_ENV%
+          echo NDK_MAKE=C:\Android\android-sdk\ndk\25.1.8937393\prebuilt\windows-x86_64\bin\make.exe >> %GITHUB_ENV%
 
     - name: Install Qt Desktop
       uses: jurplel/install-qt-action@v3
