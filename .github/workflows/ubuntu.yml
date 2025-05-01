@@ -108,7 +108,7 @@ jobs:
         run: |
          cp res/icon.png bin/release/icon.png
          cp res/default.desktop bin/release/default.desktop
-         cp ExtBin/AppRun bin/release/AppRun
+         cp ExtBin/linux/AppRun bin/release/AppRun
          chmod +x bin/release/AppRun
                   
          #cp -r ExtBin/linux/resources bin/release/resources
@@ -161,7 +161,9 @@ jobs:
          ls -l "$QT6_PLUGINS_DIR"
 
          mkdir bin/release/lib/
-         cp -r ExtBin/nss/* bin/release/lib/
+         cp -r ExtBin/linux/nss/* bin/release/lib/
+
+         cp ExtBin/linux/openssl3/* bin/release/lib/
 
          export LD_LIBRARY_PATH="/home/runner/work/Knot6/Qt/6.6.3/gcc_64/plugins/platforminputcontexts:$LD_LIBRARY_PATH"
 
