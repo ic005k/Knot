@@ -83,6 +83,10 @@ jobs:
           echo QT_PLUGIN_PATH=D:\a\Knot6\Qt\6.6.3\android_arm64_v8a\plugins >> %GITHUB_ENV%
           echo QML2_IMPORT_PATH=D:\a\Knot6\Qt\6.6.3\android_arm64_v8a\qml >> %GITHUB_ENV%
 
+          echo Qt6_DIR=D:\a\Knot6\Qt\6.6.3\android_arm64_v8a >> %GITHUB_ENV%
+          echo PATH=D:\a\Knot6\Qt\6.6.3\android_arm64_v8a\bin;%PATH% >> %GITHUB_ENV%
+          echo QMAKESPEC=android-clang >> %GITHUB_ENV%
+
           :: 切换到硬编码根目录
           cd /d %REPO_ROOT%
 
@@ -95,10 +99,11 @@ jobs:
 
           :: 生成Makefile
           qmake.exe "Knot.pro" ^
-            -spec android-clang ^
-            "CONFIG += thread release" ^
-            "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
-            ANDROID_ABIS=arm64-v8a
+                -spec android-clang ^
+                "CONFIG += thread c++17 release" ^  # 同时启用 C++17
+                "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
+                "QT_INSTALL_PREFIX=D:\a\Knot6\Qt\6.6.3\android_arm64_v8a" ^
+                ANDROID_ABIS=arm64-v8a
 
     - name: Build APK
       shell: cmd
