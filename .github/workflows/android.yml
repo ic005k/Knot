@@ -74,18 +74,33 @@ jobs:
     - name: Generate Makefile
       shell: cmd
       env:
-          ANDROID_NDK_ROOT: C:\Android\android-sdk\ndk\25.1.8937393
+        ANDROID_NDK_ROOT: C:\Android\android-sdk\ndk\25.1.8937393
       run: |
-          :: 关键修改点
-          qmake.exe D:\a\Knot6\Knot6\Knot.pro ^
-            -spec android-clang ^
-            "CONFIG += thread release" ^          # 强制启用线程
-            "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^  # 显式传递 NDK 路径
-            #"ANDROID_ABIS=arm64-v8a"
+        :: 进入项目根目录（关键修正）
+        cd /d %GITHUB_WORKSPACE%
 
-          :: 验证生成的 Makefile 是否包含线程标志
-          findstr "pthread" Makefile
+        :: 显式检查 .pro 文件存在性
+        if not exist "Knot.pro" (
+          echo ##[error]Knot.pro 文件未找到！
+          dir /b *.pro
+        exit 1
+        )
 
+        :: 修正参数传递格式（Windows CMD 特殊字符处理）
+        qmake.exe "Knot.pro" ^
+          -spec android-clang ^
+          "CONFIG += thread release" ^
+          "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
+          ANDROID_ABIS=arm64-v8a  # 移除非必要引号
+
+        :: 验证 Makefile 生成
+        if not exist "Makefile" (
+          echo ##[error]Makefile 生成失败！
+          exit 1
+        )
+
+        :: 使用短路径格式避免空格问题
+        findstr /C:"-lpthread" Makefile
 
     - name: Build APK
       shell: cmd
