@@ -76,10 +76,15 @@ jobs:
       env:
           ANDROID_NDK_ROOT: C:\Android\android-sdk\ndk\25.1.8937393
       run: |
+          :: 关键修改点
           qmake.exe Knot.pro ^
             -spec android-clang ^
-            "CONFIG += release" ^
+            "CONFIG += thread release" ^          # 强制启用线程
+            "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^  # 显式传递 NDK 路径
             "ANDROID_ABIS=arm64-v8a"
+
+          :: 验证生成的 Makefile 是否包含线程标志
+          findstr "pthread" Makefile
 
 
     - name: Build APK
