@@ -166,7 +166,7 @@ jobs:
          cp ExtBin/linux/openssl3/* bin/release/lib/
 
          export LD_LIBRARY_PATH="/home/runner/work/Knot6/Qt/6.6.3/gcc_64/plugins/platforminputcontexts:$LD_LIBRARY_PATH"
-         export LD_LIBRARY_PATH="bin/release/lib:$LD_LIBRARY_PATH"
+         export LD_LIBRARY_PATH="/home/runner/work/Knot6/Knot6/bin/release/lib:$LD_LIBRARY_PATH"
 
          export VERSION # linuxdeployqt uses this for naming the file
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
