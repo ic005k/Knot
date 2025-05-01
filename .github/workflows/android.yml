@@ -62,7 +62,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         target: android
         arch: ${{ env.QT_ARCH }}
-        modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
+        modules: qtcharts qtsensors qtlocation qtpositioning qt5compat qtbase.android_arm64_v8a
         install-dir: ${{ github.workspace }}/Qt
 
     - name: Clean Desktop Qt Path
