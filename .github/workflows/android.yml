@@ -97,7 +97,7 @@ jobs:
           )
 
           :: 生成Makefile
-          qmake.exe -d -r "Knot.pro" ^
+          qmake.exe "Knot.pro" ^
                 -spec android-clang ^
                 "CONFIG += thread c++17 release" ^  # 同时启用 C++17
                 "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
