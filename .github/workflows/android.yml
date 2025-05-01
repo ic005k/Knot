@@ -65,31 +65,26 @@ jobs:
         modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
         install-dir: ${{ github.workspace }}/Qt
 
-    - name: Setup Toolchain Paths
+    - name: Setup Paths
       shell: cmd
       run: |
-        echo ${{ steps.qt-desktop.outputs.install-dir }}/Tools/mingw1120_64/bin >> %GITHUB_PATH%
-        echo ${{ steps.qt-android.outputs.install-dir }}/bin >> %GITHUB_PATH%
-        echo ${{ steps.qt-desktop.outputs.install-dir }}/Tools/jom >> %GITHUB_PATH%
+        :: 设置与本地一致的 NDK 路径
+        echo ANDROID_NDK_ROOT=C:\Android\android-sdk\ndk\${{ env.NDK_VERSION }} >> %GITHUB_ENV%
+        echo NDK_MAKE=%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe >> %GITHUB_ENV%
 
+    - name: Generate Makefile
+      shell: cmd
+      run: |
+        :: 使用与本地相同的 qmake 参数
+        qmake.exe Knot.pro -spec android-clang CONFIG+=release
 
 
     - name: Build APK
       shell: cmd
       run: |
-          :: 使用短路径变量
-          set QT_DIR=${{ steps.qt-android.outputs.install-dir }}
-          for /f "usebackq tokens=*" %%i in (`cygpath -w -s "%QT_DIR%"`) do set QT_SHORT=%%i
-
-          qmake.bat Knot.pro ^
-            -spec "%QT_SHORT%\mkspecs\android-clang" ^
-            "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
-            CONFIG+=release ^
-            ANDROID_ABIS=arm64-v8a
-
-          jom -j4 || make -j4
-          make apk ANDROID_APK_DIR=%CD%\build
-
+        :: 完全复用本地构建命令
+        "%NDK_MAKE%" -j8
+        "%NDK_MAKE%" apk
 
     - name: Sign APK
       shell: cmd
