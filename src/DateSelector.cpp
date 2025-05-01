@@ -4,6 +4,8 @@
 #include "ui_DateSelector.h"
 #include "ui_MainWindow.h"
 
+QStringList ymdList;
+
 extern MainWindow *mw_one;
 extern Method *m_Method;
 extern bool isAndroid;
@@ -116,34 +118,46 @@ void DateSelector::on_btnOk_clicked() {
   if (m.length() == 1) m = "0" + m;
   if (d.length() == 1) d = "0" + d;
 
-  if (dateFlag == 1 || dateFlag == 2) {
-    mw_one->ui->btnYear->setText(y);
+  ymdList.clear();
+  ymdList.append(y);
+  ymdList.append(m);
+  ymdList.append(d);
 
-    int value = m.toInt();
-    if (value == 13)
-      mw_one->ui->btnMonth->setText(tr("Year-Round"));
-    else {
-      mw_one->ui->btnMonth->setText(m);
+  if (!mw_one->ui->frameReport->isHidden()) {
+    if (dateFlag == 1 || dateFlag == 2) {
+      mw_one->ui->btnYear->setText(y);
+
+      int value = m.toInt();
+      if (value == 13)
+        mw_one->ui->btnMonth->setText(tr("Year-Round"));
+      else {
+        mw_one->ui->btnMonth->setText(m);
+      }
     }
+
+    QString strYear, strMonth;
+    strYear = mw_one->ui->btnYear->text();
+    strMonth = mw_one->ui->btnMonth->text();
+    if (dateFlag == 1 || dateFlag == 2)
+      mw_one->m_Report->startReport1(strYear, strMonth);
+
+    if (dateFlag == 3) {
+      mw_one->ui->btnStartDate->setText(y + "  " + m + "  " + d);
+    }
+
+    if (dateFlag == 4) {
+      mw_one->ui->btnEndDate->setText(y + "  " + m + "  " + d);
+    }
+
+    if (dateFlag == 3 || dateFlag == 4) mw_one->m_Report->startReport2();
+
+    mw_one->m_Report->saveYMD();
   }
 
-  QString strYear, strMonth;
-  strYear = mw_one->ui->btnYear->text();
-  strMonth = mw_one->ui->btnMonth->text();
-  if (dateFlag == 1 || dateFlag == 2)
-    mw_one->m_Report->startReport1(strYear, strMonth);
-
-  if (dateFlag == 3) {
-    mw_one->ui->btnStartDate->setText(y + "  " + m + "  " + d);
+  if (!mw_one->ui->frameSteps->isHidden()) {
+    mw_one->m_Steps->getGpsListDataFromYearMonth();
   }
 
-  if (dateFlag == 4) {
-    mw_one->ui->btnEndDate->setText(y + "  " + m + "  " + d);
-  }
-
-  if (dateFlag == 3 || dateFlag == 4) mw_one->m_Report->startReport2();
-
-  mw_one->m_Report->saveYMD();
   close();
 }
 
