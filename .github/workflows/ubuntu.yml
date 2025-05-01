@@ -165,8 +165,11 @@ jobs:
 
          #cp ExtBin/linux/openssl3/* bin/release/lib/
 
+         # 在运行 linuxdeployqt 前，将 Qt 插件目录添加到库搜索路径
          export LD_LIBRARY_PATH="/home/runner/work/Knot6/Qt/6.6.3/gcc_64/plugins/platforminputcontexts:$LD_LIBRARY_PATH"
-         #export LD_LIBRARY_PATH="/home/runner/work/Knot6/Knot6/bin/release/lib:$LD_LIBRARY_PATH"
+
+         # 指定库文件所在路径
+         export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
 
          export VERSION # linuxdeployqt uses this for naming the file
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
@@ -177,19 +180,6 @@ jobs:
 
 
          #chmod +x ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
-
-         # 执行深度打包
-         #-extra-plugins=webengine,webview \
-
-         #./linuxdeployqt-continuous-x86_64.AppImage \
-         #bin/release/${targetName} \
-         #-unsupported-allow-new-glibc \
-         #-extra-plugins=webview \
-         #-bundle-non-qt-libs \
-         #-appimage \
-         #-verbose=3
-
-
 
       # 上传artifacts          
       - uses: actions/upload-artifact@v4
