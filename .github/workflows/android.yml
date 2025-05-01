@@ -83,6 +83,9 @@ jobs:
           echo QT_PLUGIN_PATH=D:\a\Knot6\Qt\6.6.3\android_arm64_v8a\plugins >> %GITHUB_ENV%
           echo QML2_IMPORT_PATH=D:\a\Knot6\Qt\6.6.3\android_arm64_v8a\qml >> %GITHUB_ENV%
 
+          :: 清理干扰路径（关键！）
+          set PATH=C:\Windows\system32;D:\a\Knot6\Qt\6.6.3\android_arm64_v8a\bin
+
           :: 切换到硬编码根目录
           cd /d %REPO_ROOT%
 
@@ -94,7 +97,7 @@ jobs:
           )
 
           :: 生成Makefile
-          qmake.exe "Knot.pro" ^
+          qmake.exe -d -r "Knot.pro" ^
                 -spec android-clang ^
                 "CONFIG += thread c++17 release" ^  # 同时启用 C++17
                 "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
