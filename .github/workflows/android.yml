@@ -65,6 +65,10 @@ jobs:
         modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
         install-dir: ${{ github.workspace }}/Qt
 
+    - name: Clean Desktop Qt Path
+      shell: cmd
+      run: set PATH=%PATH:C:\Qt\6.6.3\mingw_64\bin;=%
+
     - name: Setup Paths
       shell: cmd
       run: |
@@ -75,8 +79,11 @@ jobs:
     - name: Generate Makefile
       shell: cmd
       run: |
-        :: 使用与本地相同的 qmake 参数
-        qmake.exe Knot.pro -spec android-clang CONFIG+=release
+        qmake.exe Knot.pro ^
+            -spec android-clang ^
+            "CONFIG += thread release" ^
+            "ANDROID_NDK_ROOT=C:\Android\android-sdk\ndk\25.1.8937393" ^
+            "QT_INSTALL_PREFIX=C:\Qt\6.6.3\android_arm64_v8a"
 
 
     - name: Build APK
