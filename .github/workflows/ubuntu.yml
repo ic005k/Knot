@@ -169,7 +169,9 @@ jobs:
          export LD_LIBRARY_PATH="/home/runner/work/Knot6/Qt/6.6.3/gcc_64/plugins/platforminputcontexts:$LD_LIBRARY_PATH"
 
          # 指定库文件所在路径
-         export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+         #仅针对特定库需要时临时设置
+         export LD_LIBRARY_PATH_BAK=$LD_LIBRARY_PATH
+         export LD_LIBRARY_PATH="/home/runner/work/Knot6/Qt/6.6.3/gcc_64/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
 
          export VERSION # linuxdeployqt uses this for naming the file
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
