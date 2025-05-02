@@ -254,7 +254,7 @@ int main(int argc, char* argv[]) {
     }
 
     qssAll = qssAll.replace("QToolButton", "QToolButton_1");
-    app.setStyleSheet(qssAll);
+    // app.setStyleSheet(qssAll);
   }
 
   // Set Font

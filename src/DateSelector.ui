@@ -14,11 +14,11 @@
    <string>Date Selector</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">#DateSelector{
+   <string notr="true">/*#DateSelector{
 
 background-color:white; border: 1px solid rgb(125,125,125);
 
-}</string>
+}*/</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
@@ -57,7 +57,7 @@ background-color:white; border: 1px solid rgb(125,125,125);
       <string/>
      </property>
      <property name="alignment">
-      <set>Qt::AlignCenter</set>
+      <set>Qt::AlignmentFlag::AlignCenter</set>
      </property>
      <layout class="QGridLayout" name="gridLayout_3"/>
     </widget>
@@ -98,7 +98,7 @@ background-color:white; border: 1px solid rgb(125,125,125);
       <string/>
      </property>
      <property name="alignment">
-      <set>Qt::AlignCenter</set>
+      <set>Qt::AlignmentFlag::AlignCenter</set>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
@@ -118,7 +118,7 @@ background-color:white; border: 1px solid rgb(125,125,125);
          <string>Year-Month</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <set>Qt::AlignmentFlag::AlignCenter</set>
         </property>
        </widget>
       </item>

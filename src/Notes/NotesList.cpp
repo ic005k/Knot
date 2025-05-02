@@ -8,7 +8,7 @@
 extern MainWindow *mw_one;
 extern Method *m_Method;
 extern QString iniDir, privateDir, currentMDFile, appName, errorInfo;
-extern bool isAndroid, isDark;
+extern bool isAndroid;
 extern int fontSize;
 
 extern QString loadText(QString textFile);

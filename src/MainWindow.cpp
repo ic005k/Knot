@@ -2818,7 +2818,6 @@ void MainWindow::on_actionAbout() {
   int x, y;
   if (!isAndroid) {
     m_AboutThis->setMaximumWidth(320);
-    m_AboutThis->setFixedHeight(650);
 
     x = this->geometry().x() +
         (this->geometry().width() - m_AboutThis->width()) / 2;

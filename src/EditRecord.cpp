@@ -9,8 +9,7 @@ extern Method *m_Method;
 extern QTabWidget *tabData;
 extern QString iniFile, iniDir, privateDir, btnYearText, btnMonthText;
 extern QRegularExpression regxNumber;
-extern bool isBreak, isDark, isReport, isWholeMonth, isDateSection, isDark,
-    isAdd;
+extern bool isBreak, isReport, isWholeMonth, isDateSection, isDark, isAdd;
 extern int fontSize;
 extern TextSelector *m_TextSelector;
 

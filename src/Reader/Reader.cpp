@@ -10,7 +10,7 @@ extern Method *m_Method;
 extern ReaderSet *m_ReaderSet;
 
 extern QString iniFile, iniDir, privateDir;
-extern bool zh_cn, isAndroid, isIOS, isEBook, isReadEBookEnd, isReport, isDark;
+extern bool zh_cn, isAndroid, isIOS, isEBook, isReadEBookEnd, isReport;
 extern int fontSize;
 
 extern int deleteDirfile(QString dirName);
