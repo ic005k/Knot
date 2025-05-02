@@ -43,7 +43,10 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
 
   initEditor();
   m_EditSource->setUtf8(true);
-  initMarkdownLexer();
+  if (isDark)
+    initMarkdownLexerDark();
+  else
+    initMarkdownLexer();
   initMarkdownEditor(m_EditSource);
 
   QString path = iniDir + "memo/";
@@ -2028,16 +2031,10 @@ void Notes::initMarkdownLexer() {
   markdownLexer = new QsciLexerMarkdown(m_EditSource);
   m_EditSource->setLexer(markdownLexer);
 
-  // 样式配置（自定义的范例）
-  // markdownLexer->setColor(QColor(0, 0, 255),
-  //                        QsciLexerMarkdown::Header1);  // 蓝色标题
-  // markdownLexer->setColor(QColor(0, 128, 0),
-  //                        QsciLexerMarkdown::Header2);  // 绿色标题
-  // markdownLexer->setPaper(QColor(255, 255, 224),
-  //                       QsciLexerMarkdown::CodeBlock);  // 浅黄背景
-
   markdownLexer->setFont(QFont("Consolas", 12), QsciLexerMarkdown::CodeBlock);
 
+  m_EditSource->SendScintilla(
+      QsciScintilla::SCI_STYLERESETDEFAULT);  // Scintilla 重置
   m_EditSource->SendScintilla(QsciScintilla::SCI_STYLERESETDEFAULT);
   m_EditSource->recolor();
 
@@ -2060,6 +2057,57 @@ void Notes::initMarkdownLexer() {
 
   qDebug() << "Header1 颜色："
            << markdownLexer->color(QsciLexerMarkdown::Header1);
+}
+
+void Notes::initMarkdownLexerDark() {
+  // 0. 创建前确保清空原有 Lexer
+  m_EditSource->setLexer(nullptr);
+
+  // 1. 创建深色模式基础配置
+  markdownLexer = new QsciLexerMarkdown(m_EditSource);
+
+  // 2. 设置全局默认颜色（必须首先配置）
+  markdownLexer->setDefaultPaper(QColor("#1E1E1E"));  // 全局背景色
+  markdownLexer->setDefaultColor(QColor("#D4D4D4"));  // 全局默认文本颜色
+
+  // 3. 按样式类型逐个配置（覆盖所有 Markdown 元素）
+  markdownLexer->setColor(QColor("#569CD6"),
+                          QsciLexerMarkdown::Header1);  // H1 蓝色
+  markdownLexer->setColor(QColor("#4EC9B0"),
+                          QsciLexerMarkdown::Header2);  // H2 青蓝色
+  markdownLexer->setColor(QColor("#C586C0"),
+                          QsciLexerMarkdown::Header3);  // H3 粉紫色
+  markdownLexer->setColor(QColor("#9CDCFE"),
+                          QsciLexerMarkdown::Link);  // 链接 浅蓝
+  markdownLexer->setColor(QColor("#CE9178"),
+                          QsciLexerMarkdown::CodeBlock);  // 代码块文字
+  markdownLexer->setPaper(QColor("#2D2D2D"),
+                          QsciLexerMarkdown::CodeBlock);  // 代码块背景
+
+  markdownLexer->setColor(QColor("#D7BA7D"),
+                          QsciLexerMarkdown::BlockQuote);  // 引用块
+
+  // 4. 设置字体（继承默认字体避免冲突）
+  QFont defaultFont = QFont("Consolas", 12);
+  markdownLexer->setFont(defaultFont, -1);  // -1 表示所有样式使用该字体
+  markdownLexer->setFont(defaultFont, QsciLexerMarkdown::CodeBlock);
+
+  // 5. 应用 Lexer
+  m_EditSource->setLexer(markdownLexer);
+
+  // 6. 禁止自动恢复默认样式（关键！）
+  // m_EditSource->SendScintilla(QsciScintilla::SCI_STYLERESETDEFAULT); //
+  // 不要调用这个！
+
+  // 7. 附加视觉优化
+  m_EditSource->setCaretLineBackgroundColor(QColor("#2D2D30"));  // 当前行高亮
+  m_EditSource->setCaretForegroundColor(QColor("#FFFFFF"));      // 光标颜色
+  m_EditSource->setMarginsBackgroundColor(QColor("#1E1E1E"));    // 行号栏背景
+  m_EditSource->setMarginsForegroundColor(QColor("#858585"));    // 行号颜色
+  m_EditSource->setWrapMode(QsciScintilla::WrapWord);            // 自动换行
+
+  // 8. 强制刷新颜色
+  m_EditSource->recolor();
 }
 
 void Notes::initMarkdownEditor(QsciScintilla *editor) {
@@ -2104,7 +2152,11 @@ void Notes::initMarkdownEditor(QsciScintilla *editor) {
 
   // 高亮当前行
   editor->setCaretLineVisible(true);
-  editor->setCaretLineBackgroundColor(QColor("#FFF8DC"));
+  if (isDark) {
+    editor->setCaretLineBackgroundColor(QColor(45, 45, 48, 60));  // 半透明
+    editor->setCaretWidth(2);                                     // 光标宽度
+  } else
+    editor->setCaretLineBackgroundColor(QColor(255, 248, 220, 255));
 
   // 显示代码折叠
   editor->SendScintilla(QsciScintilla::SCI_SETPROPERTY, "fold", "1");
