@@ -2125,30 +2125,54 @@ void Notes::initMarkdownEditor(QsciScintilla *editor) {
   // 显示行号
   editor->setMarginLineNumbers(1, true);
 
-  // 行号区背景色
-  editor->setMarginsBackgroundColor(QColor("#E0E0E0"));
-
-  // 单独设置边距字体（非粗体）
-  QFont marginFont("Courier New", 10);
-  marginFont.setBold(false);
-  editor->setMarginsFont(marginFont);
-
   // 配置行号边距（Margin 0）
-  editor->setMarginType(0, QsciScintilla::NumberMargin);  // 必须首先生效
-  editor->setMarginWidth(0, 50);                          //
-                                                          // 固定宽度或动态计算
-  editor->SendScintilla(QsciScintilla::SCI_STYLESETFORE,
+  editor->setMarginType(0, QsciScintilla::NumberMargin);  // 声明行号边距类型
+
+  // 设置行号字体
+  editor->SendScintilla(QsciScintilla::SCI_STYLESETFONT,
                         QsciScintilla::STYLE_LINENUMBER,
-                        QColor("#000000").rgba());
+                        QFontInfo(QFont("Consolas", 10)).family().toUtf8());
+
+  // 获取当前字体（需与行号字体一致）
+  QFont font("Consolas", 10);  // 或使用编辑器当前字体：m_EditSource->font()
+
+  // 创建字体度量对象
+  QFontMetrics metrics(font);
+
+  // 计算最大行号文本宽度（例如 " 9999 "）
+  int maxLineNumber = 10000;  // 预估最大行号
+  int textWidth = metrics.horizontalAdvance(QString(" %1 ").arg(maxLineNumber));
+
+  // 设置行号边距宽度
+  editor->setMarginWidth(0, textWidth + 4);  // +4 像素作为边距缓冲
+
+  if (isDark) {
+    // === 暗黑主题配色 ===
+    editor->setMarginsBackgroundColor(
+        QColor(0x1E, 0x1E, 0x1E));  // 边距背景色 #1E1E1E
+    editor->setMarginsForegroundColor(
+        QColor(0x7F, 0x7F, 0x7F));  // 行号文字色 #7F7F7F
+
+  } else {
+    // ===== 亮色模式配置 =====
+    // 行号边距背景色（浅灰白，RGB(240,240,240)）
+    editor->setMarginsBackgroundColor(QColor(240, 240, 240));
+
+    // 行号文字颜色（中灰色，RGB(96,96,96)）
+    editor->setMarginsForegroundColor(QColor(96, 96, 96));
+  }
 
   // 配置符号边距（Margin 1）
   editor->setMarginType(1, QsciScintilla::SymbolMargin);
-  editor->setMarginWidth(1, 20);
+  editor->setMarginWidth(1, 5);
 
   // 边距2：断点符号边距
   editor->setMarginType(2, QsciScintilla::SymbolMargin);
-  editor->setMarginWidth(2, 20);
+  editor->setMarginWidth(2, 5);
   editor->setMarginBackgroundColor(2, QColor("#FFE4E1"));
+
+  // editor->setMarginWidth(1, 0);  // Margin 1 不可见
+  // editor->setMarginWidth(2, 0);  // Margin 2 不可见
 
   // 高亮当前行
   editor->setCaretLineVisible(true);
