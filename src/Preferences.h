@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QFontDatabase>
+#include <QStyleHints>
 #include <QToolButton>
 
 namespace Ui {

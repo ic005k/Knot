@@ -517,7 +517,7 @@ void Method::clickMainDate() {
   if (mw_one->isDelItem || mw_one->isEditItem)
     isAniEffects = false;
   else
-    isAniEffects = mw_one->m_Preferences->ui->chkAniEffects->isChecked();
+    isAniEffects = true;
   mw_one->isDelItem = false;
   mw_one->isEditItem = false;
 

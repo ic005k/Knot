@@ -24,7 +24,7 @@ Preferences::Preferences(QWidget* parent)
   QFont font0 = m_Method->getNewFont(20);
   ui->btnCustomFont->setFont(font0);
   ui->chkUIFont->setFont(font0);
-  ui->chkAutoTime->setFont(font0);
+
   ui->chkZip->setFont(font0);
   ui->btnReStart->setFont(font0);
 
@@ -47,21 +47,20 @@ Preferences::Preferences(QWidget* parent)
   this->installEventFilter(this);
   ui->lblFontSize->installEventFilter(this);
 
-  ui->chkAutoTime->hide();
-  ui->chkAniEffects->hide();
   ui->lblZipTip->hide();
+  ui->gboxAdditional->hide();
+  ui->lblAdditional->hide();
 
   ui->lblFontSize->setText(tr("Font Size") + " : " + QString::number(fontSize));
   isFontChange = false;
 
-  chkStyle = ui->chkAutoTime->styleSheet();
-  ui->chkDark->setStyleSheet(chkStyle);
+  chkStyle = ui->chkDark->styleSheet();
   ui->chkZip->setStyleSheet(chkStyle);
   ui->chkUIFont->setStyleSheet(chkStyle);
   ui->lblFontSize->setFixedHeight(40);
 
   QString lbl_style = ui->lbl1->styleSheet();
-  ui->lbl2->setStyleSheet(lbl_style);
+  ui->lblAdditional->setStyleSheet(lbl_style);
   ui->lbl3->setStyleSheet(lbl_style);
 
   ui->btnCustomFont->adjustSize();
@@ -107,11 +106,8 @@ void Preferences::on_btnBack_clicked() { close(); }
 void Preferences::saveOptions() {
   iniPreferences->setValue("/Options/FontSize", ui->sliderFontSize->value());
   iniPreferences->setValue("/Options/Dark", ui->chkDark->isChecked());
-  iniPreferences->setValue("/Options/AutoTimeY", ui->chkAutoTime->isChecked());
   iniPreferences->setValue("/Options/Zip", ui->chkZip->isChecked());
   iniPreferences->setValue("/Options/chkUIFont", ui->chkUIFont->isChecked());
-  iniPreferences->setValue("/Options/chkAniEffects",
-                           ui->chkAniEffects->isChecked());
 
   QString password = ui->editPassword->text().trimmed();
   QString aesStr = m_CloudBackup->aesEncrypt(password, aes_key, aes_iv);
@@ -278,11 +274,16 @@ void Preferences::initOptions() {
   ui->chkUIFont->setChecked(chkUIFont);
   ui->chkDark->setChecked(
       iniPreferences->value("/Options/Dark", false).toBool());
-  isDark = ui->chkDark->isChecked();
-  ui->chkAutoTime->setChecked(
-      iniPreferences->value("/Options/AutoTimeY", true).toBool());
-  ui->chkAniEffects->setChecked(
-      iniPreferences->value("/Options/chkAniEffects", true).toBool());
+
+#ifdef Q_OS_WIN
+
+#else
+
+#endif
+
+#ifdef Q_OS_ANDROID
+
+#endif
 
   QString aesStr = iniPreferences->value("/zip/password").toString();
   QString password = m_CloudBackup->aesDecrypt(aesStr, aes_key, aes_iv);
@@ -317,8 +318,6 @@ void Preferences::initOptions() {
     mw_one->ui->qwMainTab->hide();
     mw_one->ui->btnSelTab->hide();
     mw_one->ui->lblStats->hide();
-
-    ui->chkAniEffects->hide();
 
     int s = 120;
     int qs = s - 40;

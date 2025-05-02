@@ -171,7 +171,7 @@ class MainWindow : public QMainWindow {
   int days = 45;
   int newHeight;
   QInputMethod *pAndroidKeyboard = QApplication::inputMethod();
-  QString androidIniDir, macIniDir;
+
   bool isMemoVisible;
   bool isReaderVisible;
   QString treeStyle = "QTreeWidget::item {height: 28;}";

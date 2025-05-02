@@ -525,17 +525,6 @@ void MainWindow::sendMsg(int CurTableCount) {
 }
 
 void MainWindow::init_Options() {
-#ifdef Q_OS_UNIX
-  iniPreferences->setValue("/Options/macIniDir", iniDir);
-#endif
-
-#ifdef Q_OS_ANDROID
-  iniPreferences->setValue("/Options/androidIniDir", iniDir);
-#endif
-  androidIniDir =
-      iniPreferences->value("/Options/androidIniDir", "").toString();
-  macIniDir = iniPreferences->value("/Options/macIniDir", "").toString();
-
   QSettings Reg2(iniDir + "ymd.ini", QSettings::IniFormat);
 
   btnYText = Reg2.value("/YMD/btnYText", 2022).toString();
@@ -1613,7 +1602,7 @@ void MainWindow::initChartMonth() {
     if (PointList.at(i).y() != 1) isOne = false;
   }
 
-  if (isOne && m_Preferences->ui->chkAutoTime->isChecked()) {
+  if (isOne) {
     series->clear();
     m_scatterSeries->clear();
     QList<QPointF> tempPointList;
@@ -1683,7 +1672,7 @@ void MainWindow::initChartMonth() {
   axisX->append(categories);
   axisY->setRange(0, yMaxMonth);
 
-  if (isOne && m_Preferences->ui->chkAutoTime->isChecked()) {
+  if (isOne) {
     axisY->setRange(0, 24);
     chartMonth->setTitle(CurrentYear + "  Y:" + tr("Time") +
                          "    X:" + tr("Days"));
@@ -3291,8 +3280,7 @@ void MainWindow::initQW() {
   ui->qwMainTab->rootContext()->setContextProperty("mw_one", mw_one);
   ui->qwMainTab->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/maintab.qml")));
 
-  ui->qwMainDate->rootContext()->setContextProperty(
-      "isAniEffects", m_Preferences->ui->chkAniEffects->isChecked());
+  ui->qwMainDate->rootContext()->setContextProperty("isAniEffects", true);
   ui->qwMainDate->rootContext()->setContextProperty("maindateWidth",
                                                     ui->qwMainDate->width());
   ui->qwMainDate->rootContext()->setContextProperty("m_Method", m_Method);
@@ -3300,8 +3288,7 @@ void MainWindow::initQW() {
       QUrl(QStringLiteral("qrc:/src/qmlsrc/maindate.qml")));
 
   ui->qwMainEvent->rootContext()->setContextProperty("fontSize", fontSize);
-  ui->qwMainEvent->rootContext()->setContextProperty(
-      "isAniEffects", m_Preferences->ui->chkAniEffects->isChecked());
+  ui->qwMainEvent->rootContext()->setContextProperty("isAniEffects", true);
   ui->qwMainEvent->rootContext()->setContextProperty("maineventWidth",
                                                      ui->qwMainEvent->width());
   ui->qwMainEvent->rootContext()->setContextProperty("m_Method", m_Method);
@@ -4897,7 +4884,7 @@ void MainWindow::reloadMain() {
   if (isDelItem || isEditItem)
     isAniEffects = false;
   else
-    isAniEffects = m_Preferences->ui->chkAniEffects->isChecked();
+    isAniEffects = true;
 
   ui->qwMainDate->rootContext()->setContextProperty("isAniEffects",
                                                     isAniEffects);

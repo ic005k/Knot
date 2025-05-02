@@ -197,7 +197,10 @@ int main(int argc, char* argv[]) {
       iniPreferences->value("/Options/chkUIFont", false).toBool();
   QString customFontPath =
       iniPreferences->value("/Options/CustomFont").toString();
-  isDark = iniPreferences->value("/Options/Dark", false).toBool();
+
+  // Qt>=6.5.0
+  isDark =
+      QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
 
 #ifdef Q_OS_WIN
   defaultFontFamily = "Microsoft YaHei UI";
