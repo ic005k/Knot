@@ -11,6 +11,7 @@
 #include <QProgressBar>
 #include <QQuickWindow>
 #include <QSplashScreen>
+#include <QStyleFactory>
 #include <QTranslator>
 #include <QWidget>
 
@@ -59,6 +60,8 @@ QSplashScreen* splash;
 int main(int argc, char* argv[]) {
   QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
       Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+
+  QApplication::setStyle(QStyleFactory::create("Fusion"));
 
 #ifdef Q_OS_ANDROID
 
