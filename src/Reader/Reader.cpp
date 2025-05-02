@@ -317,8 +317,8 @@ void Reader::openFile(QString openfile) {
 
         QJniObject javaZipFile = QJniObject::fromString(temp);
         QJniObject javaZipDir = QJniObject::fromString(dirpath);
-        QJniObject m_activity = QJniObject::fromString("Unzip");
-        m_activity.callStaticMethod<void>(
+        QJniObject activity = QNativeInterface::QAndroidApplication::context();
+        activity.callStaticMethod<void>(
             "com.x/MyActivity", "Unzip",
             "(Ljava/lang/String;Ljava/lang/String;)V",
             javaZipFile.object<jstring>(), javaZipDir.object<jstring>());
@@ -2203,7 +2203,7 @@ void Reader::openMyPDF(QString uri) {
 #ifdef Q_OS_ANDROID
 
   QJniObject jPath = QJniObject::fromString(uri);
-  QJniObject activity = QJniObject::fromString("openMyPDF");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("openMyPDF", "(Ljava/lang/String;)V",
                             jPath.object<jstring>());
 
@@ -2213,7 +2213,7 @@ void Reader::openMyPDF(QString uri) {
 void Reader::closeMyPDF() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject activity = QJniObject::fromString("closeMyPDF");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callStaticMethod<void>("com.xhh.pdfui/PDFActivity", "closeMyPDF",
                                   "()V");
 

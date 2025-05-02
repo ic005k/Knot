@@ -518,7 +518,7 @@ void Todo::startTimerAlarm(QString text) {
   Q_UNUSED(text);
 #ifdef Q_OS_ANDROID
 
-  QJniObject jo = QJniObject::fromString(text);
+  QJniObject jo = QNativeInterface::QAndroidApplication::context();
 
   jo.callStaticMethod<int>("com.x/MyActivity", "startAlarm",
                            "(Ljava/lang/String;)I", jo.object<jstring>());
@@ -532,9 +532,9 @@ void Todo::startTimerAlarm(QString text) {
 void Todo::stopTimerAlarm() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject jo = QJniObject::fromString("stopTimerAlarm");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
 
-  jo.callStaticMethod<int>("com.x/MyActivity", "stopAlarm", "()I");
+  activity.callStaticMethod<int>("com.x/MyActivity", "stopAlarm", "()I");
 
 #endif
 }

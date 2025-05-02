@@ -261,8 +261,9 @@ int AboutThis::getAndroidVer() {
 
 #ifdef Q_OS_ANDROID
 
-  QJniObject jo = QJniObject::fromString("ver");
-  a = jo.callStaticMethod<int>("com.x/MyActivity", "getAndroidVer", "()I");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  a = activity.callStaticMethod<int>("com.x/MyActivity", "getAndroidVer",
+                                     "()I");
 
 #endif
   return a;

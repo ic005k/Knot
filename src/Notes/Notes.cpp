@@ -573,7 +573,7 @@ void Notes::zipMemo() {
 
   QJniObject javaZipFile = QJniObject::fromString(iniDir + "memo.zip");
   QJniObject javaZipDir = QJniObject::fromString(iniDir + "memo");
-  QJniObject m_activity = QJniObject::fromString("zip");
+  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
   m_activity.callStaticMethod<void>("com.x/MyActivity", "compressFileToZip",
                                     "(Ljava/lang/String;Ljava/lang/String;)V",
                                     javaZipDir.object<jstring>(),
@@ -623,7 +623,7 @@ void Notes::unzip(QString zipfile) {
 
   QJniObject javaZipFile = QJniObject::fromString(zipfile);
   QJniObject javaZipDir = QJniObject::fromString(iniDir);
-  QJniObject m_activity = QJniObject::fromString("Unzip");
+  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
   m_activity.callStaticMethod<void>(
       "com.x/MyActivity", "Unzip", "(Ljava/lang/String;Ljava/lang/String;)V",
       javaZipFile.object<jstring>(), javaZipDir.object<jstring>());
@@ -1201,8 +1201,7 @@ void Notes::setOpenSearchResultForAndroid(bool isValue, QString strSearchText) {
   Q_UNUSED(strSearchText);
 #ifdef Q_OS_ANDROID
 
-  QJniObject activity = QJniObject(
-      QNativeInterface::QAndroidApplication::context());  // 获取当前Activity
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   if (activity.isValid()) {
     // 调用Java方法，注意方法签名(Z)V
     activity.callMethod<void>("setOpenSearchResult", "(Z)V", isValue);
@@ -1221,7 +1220,8 @@ void Notes::openAndroidNoteEditor() {
 
 #ifdef Q_OS_ANDROID
 
-  QJniObject activity = QJniObject::fromString("openNoteEditor");
+  // Qt6 实现：通过 Native Interface 获取 Activity
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("openNoteEditor", "()V");
 
 #endif
@@ -1232,7 +1232,7 @@ void Notes::openAndroidNoteEditor() {
 void Notes::openMDWindow() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject activity = QJniObject::fromString("openMDWindow");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("openMDWindow", "()V");
 
 #endif
@@ -1243,7 +1243,7 @@ void Notes::appendNote(QString str) {
 #ifdef Q_OS_ANDROID
 
   QJniObject jTitle = QJniObject::fromString(str);
-  QJniObject m_activity = QJniObject::fromString("com.x/NoteEditor");
+  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
   m_activity.callStaticMethod<void>("com.x/NoteEditor", "appendNote",
                                     "(Ljava/lang/String;)V",
                                     jTitle.object<jstring>());
@@ -1256,7 +1256,7 @@ void Notes::insertNote(QString str) {
 #ifdef Q_OS_ANDROID
 
   QJniObject jTitle = QJniObject::fromString(str);
-  QJniObject m_activity = QJniObject::fromString("com.x/NoteEditor");
+  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
   m_activity.callStaticMethod<void>("com.x/NoteEditor", "insertNote",
                                     "(Ljava/lang/String;)V",
                                     jTitle.object<jstring>());

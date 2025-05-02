@@ -437,7 +437,7 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::initHardStepSensor() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject jo = QJniObject::fromString("CheckSensorWin");
+  QJniObject jo = QNativeInterface::QAndroidApplication::context();
   isHardStepSensor =
       jo.callStaticMethod<int>("com.x/MyActivity", "getHardStepCounter", "()I");
 
@@ -462,7 +462,7 @@ void MainWindow::initTodayInitSteps() {
 
 #ifdef Q_OS_ANDROID
 
-  QJniObject jo = QJniObject::fromString("getSteps");
+  QJniObject jo = QNativeInterface::QAndroidApplication::context();
   a = jo.callStaticMethod<float>("com.x/MyActivity", "getSteps", "()F");
 
 #endif
@@ -1554,7 +1554,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 void MainWindow::setMini() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject jo = QJniObject::fromString("MiniWin");
+  QJniObject jo = QNativeInterface::QAndroidApplication::context();
   jo.callStaticMethod<void>("com.x/MyActivity", "setMini", "()V");
 
 #endif
@@ -3153,7 +3153,7 @@ void MainWindow::updateHardSensorSteps() {
   QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
   m_activity.callMethod<void>("initStepSensor", "()V");
 
-  QJniObject jo = QJniObject::fromString("getSteps");
+  QJniObject jo = QNativeInterface::QAndroidApplication::context();
   tc = jo.callStaticMethod<float>("com.x/MyActivity", "getSteps", "()F");
 
 #endif
@@ -4137,7 +4137,7 @@ void MainWindow::on_btnMenu_clicked() {
 void MainWindow::stopJavaTimer() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject jo = QJniObject::fromString("StopWin");
+  QJniObject jo = QNativeInterface::QAndroidApplication::context();
   jo.callStaticMethod<int>("com.x/MyService", "stopTimer", "()I");
 
 #endif

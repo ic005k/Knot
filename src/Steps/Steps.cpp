@@ -279,8 +279,8 @@ void Steps::setTableSteps(qlonglong steps) {
 void Steps::releaseWakeLock() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject jo = QJniObject::fromString("releaseWakeLock");
-  jo.callStaticMethod<void>("com.x/MyActivity", "releaseWakeLock", "()V");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  activity.callStaticMethod<void>("com.x/MyActivity", "releaseWakeLock", "()V");
 
 #endif
 }
@@ -1246,8 +1246,8 @@ void Steps::saveMovementType() {
 void Steps::setVibrate() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject jo = QJniObject::fromString("Vibrate");
-  jo.callMethod<void>("com.x/MyActivity", "setVibrate", "()V");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  activity.callMethod<void>("com.x/MyActivity", "setVibrate", "()V");
 
 #endif
 }

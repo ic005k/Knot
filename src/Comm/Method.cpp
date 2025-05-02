@@ -848,9 +848,10 @@ void Method::setDark(QString strDark) {
 #ifdef Q_OS_ANDROID
 
   QJniObject javaDark = QJniObject::fromString(strDark);
-  QJniObject jo = QJniObject::fromString("dark");
-  jo.callMethod<void>("com.x/MyActivity", "setDark", "(Ljava/lang/String;)V",
-                      javaDark.object<jstring>());
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  activity.callMethod<void>("com.x/MyActivity", "setDark",
+                            "(Ljava/lang/String;)V",
+                            javaDark.object<jstring>());
 
 #endif
 }
@@ -1010,9 +1011,9 @@ void Method::showToastMessage(QString msg) {
 #ifdef Q_OS_ANDROID
 
   QJniObject msgObject = QJniObject::fromString(msg);
-  QJniObject m_activity = QJniObject::fromString("showToastMessage");
-  m_activity.callMethod<void>("showToastMessage", "(Ljava/lang/String;)V",
-                              msgObject.object<jstring>());
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  activity.callMethod<void>("showToastMessage", "(Ljava/lang/String;)V",
+                            msgObject.object<jstring>());
 
 #endif
 }
@@ -1020,7 +1021,7 @@ void Method::showToastMessage(QString msg) {
 void Method::openFilePicker() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject activity = QJniObject::fromString("openNoteEditor");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("openFilePicker", "()V");
 
 #endif
@@ -1029,7 +1030,7 @@ void Method::openFilePicker() {
 void Method::closeFilePicker() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject activity = QJniObject::fromString("openNoteEditor");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("closeFilePicker", "()V");
 
 #endif
@@ -1043,10 +1044,10 @@ void Method::setAndroidProgressInfo(QString info) {
 #ifdef Q_OS_ANDROID
 
   QJniObject strInfo = QJniObject::fromString(info);
-  QJniObject m_activity = QJniObject::fromString("setProgressInfo");
-  m_activity.callStaticMethod<void>("com.x/MyProgBar", "setProgressInfo",
-                                    "(Ljava/lang/String;)V",
-                                    strInfo.object<jstring>());
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  activity.callStaticMethod<void>("com.x/MyProgBar", "setProgressInfo",
+                                  "(Ljava/lang/String;)V",
+                                  strInfo.object<jstring>());
 
 #endif
 }
@@ -1054,7 +1055,7 @@ void Method::setAndroidProgressInfo(QString info) {
 void Method::showTempActivity() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject activity = QJniObject::fromString("showTempActivity");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("showTempActivity", "()V");
 
 #endif
@@ -1065,7 +1066,7 @@ void Method::showAndroidProgressBar() {
 
 #ifdef Q_OS_ANDROID
 
-  QJniObject activity = QJniObject::fromString("showAndroidProgressBar");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("showAndroidProgressBar", "()V");
 
 #endif
@@ -1076,7 +1077,7 @@ void Method::closeAndroidProgressBar() {
 
 #ifdef Q_OS_ANDROID
 
-  QJniObject activity = QJniObject::fromString("closeAndroidProgressBar");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callStaticMethod<void>("com.x/MyProgBar", "closeAndroidProgressBar",
                                   "()V");
 
@@ -1098,7 +1099,7 @@ void Method::playMyText(QString text) {
 #ifdef Q_OS_ANDROID
 
   QJniObject jText = QJniObject::fromString(text);
-  QJniObject activity = QJniObject::fromString("playMyText");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callStaticMethod<void>("com.x/MyActivity", "playMyText",
                                   "(Ljava/lang/String;)V",
                                   jText.object<jstring>());
@@ -1109,7 +1110,7 @@ void Method::playMyText(QString text) {
 void Method::stopPlayMyText() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject activity = QJniObject::fromString("stopPlayMyText");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callStaticMethod<void>("com.x/MyActivity", "stopPlayMyText", "()V");
 
 #endif
@@ -1119,7 +1120,7 @@ int Method::checkRecordAudio() {
 #ifdef Q_OS_ANDROID
   bool isOk;
 
-  QJniObject activity = QJniObject::fromString("checkRecordAudio");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   isOk = activity.callStaticMethod<int>("com.x/MyActivity", "checkRecordAudio",
                                         "()I");
 
@@ -1137,10 +1138,7 @@ void Method::startRecord(QString file) {
 #ifdef Q_OS_ANDROID
 
   QJniObject jFile = QJniObject::fromString(file);
-  QJniObject activity =
-      QJniObject(QCoreApplication::instance()
-                     ->nativeInterface<QNativeInterface::QAndroidApplication>()
-                     ->context());
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("startRecord", "(Ljava/lang/String;)V",
                             jFile.object<jstring>());
 
@@ -1165,10 +1163,7 @@ void Method::playRecord(QString file) {
 #ifdef Q_OS_ANDROID
 
   QJniObject jFile = QJniObject::fromString(file);
-  QJniObject activity =
-      QJniObject(QCoreApplication::instance()
-                     ->nativeInterface<QNativeInterface::QAndroidApplication>()
-                     ->context());
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("playRecord", "(Ljava/lang/String;)V",
                             jFile.object<jstring>());
 
@@ -1231,7 +1226,7 @@ QString Method::FormatHHMMSS(qint32 total) {
 void Method::openDateTimePicker() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject activity = QJniObject::fromString("openNoteEditor");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("openDateTimePicker", "()V");
 
 #endif
@@ -1352,10 +1347,7 @@ void Method::seekTo(QString strPos) {
 #ifdef Q_OS_ANDROID
 
   QJniObject jFile = QJniObject::fromString(strPos);
-  QJniObject activity =
-      QJniObject(QCoreApplication::instance()
-                     ->nativeInterface<QNativeInterface::QAndroidApplication>()
-                     ->context());
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("seekTo", "(Ljava/lang/String;)V",
                             jFile.object<jstring>());
 
@@ -1368,10 +1360,7 @@ void Method::setMDTitle(QString strTitle) {
 #ifdef Q_OS_ANDROID
 
   QJniObject jFile = QJniObject::fromString(strTitle);
-  QJniObject activity =
-      QJniObject(QCoreApplication::instance()
-                     ->nativeInterface<QNativeInterface::QAndroidApplication>()
-                     ->context());
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("setMDTitle", "(Ljava/lang/String;)V",
                             jFile.object<jstring>());
 
@@ -1384,10 +1373,7 @@ void Method::setMDFile(QString strMDFile) {
 #ifdef Q_OS_ANDROID
 
   QJniObject jFile = QJniObject::fromString(strMDFile);
-  QJniObject activity =
-      QJniObject(QCoreApplication::instance()
-                     ->nativeInterface<QNativeInterface::QAndroidApplication>()
-                     ->context());
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("setMDFile", "(Ljava/lang/String;)V",
                             jFile.object<jstring>());
 
@@ -2388,7 +2374,7 @@ bool Method::androidCopyFile(QString src, QString des) {
 
   QJniObject srcObj = QJniObject::fromString(src);
   QJniObject desObj = QJniObject::fromString(des);
-  QJniObject m_activity = QJniObject::fromString("copyFile");
+  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
   result = m_activity.callStaticMethod<int>(
       "com.x/MyActivity", "copyFile", "(Ljava/lang/String;Ljava/lang/String;)I",
       srcObj.object<jstring>(), desObj.object<jstring>());

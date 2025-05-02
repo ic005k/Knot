@@ -353,7 +353,7 @@ void Preferences::on_btnReStart_clicked() {
 
 #ifdef Q_OS_ANDROID
 
-  QJniObject activity = QJniObject::fromString("setReOpen");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<int>("setReOpen", "()I");
 
 #else

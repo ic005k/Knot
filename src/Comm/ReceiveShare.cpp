@@ -362,7 +362,7 @@ void ReceiveShare::shareString(const QString& title, const QString& content) {
 
   QJniObject jTitle = QJniObject::fromString(title);
   QJniObject jPath = QJniObject::fromString(content);
-  QJniObject activity = QJniObject::fromString("shareString");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>(
       "shareString",
       "(Ljava/lang/String;Ljava/lang/String;Lorg/qtproject/qt/android/"
@@ -383,7 +383,7 @@ void ReceiveShare::shareImage(const QString& title, const QString& path,
   QJniObject jTitle = QJniObject::fromString(title);
   QJniObject jPath = QJniObject::fromString(path);
   QJniObject jType = QJniObject::fromString(fileType);
-  QJniObject activity = QJniObject::fromString("shareImage");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("shareImage",
                             "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/"
                             "String;Lorg/qtproject/qt/android/"
@@ -409,7 +409,7 @@ void ReceiveShare::shareImages(const QString& title,
 
   QJniObject jTitle = QJniObject::fromString(title);
   QJniObject jPathList = QJniObject::fromString(imagesPath);
-  QJniObject activity = QJniObject::fromString("shareImages");
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
   QJniObject::callStaticMethod<void>(
       "com.x/MyActivity", "shareImages",
       "(Ljava/lang/String;Ljava/lang/String;Lorg/qtproject/qt/android/"
@@ -423,7 +423,7 @@ void ReceiveShare::shareImages(const QString& title,
 void ReceiveShare::moveTaskToFront() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject m_activity = QJniObject::fromString("com.x/MyActivity");
+  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
   m_activity.callStaticMethod<void>("com.x/MyActivity", "setMax", "()V");
 
 #endif
