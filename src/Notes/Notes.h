@@ -173,7 +173,8 @@ class Notes : public QDialog {
 
   void openBrowserOnce(const QString &htmlPath);
 
- protected:
+  void init_md();
+  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
   bool eventFilter(QObject *obj, QEvent *event) override;

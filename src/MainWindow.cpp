@@ -3443,6 +3443,9 @@ void MainWindow::init_Theme() {
   // Android
   m_Method->setDark(isDark);
 
+  // Notes Editor
+  m_Notes->init_md();
+
   // Chart
   QFont font1;
 #ifdef Q_OS_ANDROID

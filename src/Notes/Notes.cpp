@@ -43,11 +43,7 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
 
   initEditor();
   m_EditSource->setUtf8(true);
-  if (isDark)
-    initMarkdownLexerDark();
-  else
-    initMarkdownLexer();
-  initMarkdownEditor(m_EditSource);
+  init_md();
 
   QString path = iniDir + "memo/";
   QDir dir(path);
@@ -106,8 +102,12 @@ void Notes::showEvent(QShowEvent *event) {
     int btn_h = ui->btnNext->height();
     ui->btnDone->setFixedHeight(btn_h);
     ui->btnDone->setFixedWidth(btn_h);
-    btn_h = btn_h * 0.8;
-    ui->btnDone->setIconSize(QSize(btn_h, btn_h));
+    int m_size = btn_h * 0.8;
+    ui->btnDone->setIconSize(QSize(m_size, m_size));
+
+    ui->btnView->setFixedHeight(btn_h);
+    ui->btnView->setFixedWidth(btn_h);
+    ui->btnView->setIconSize(QSize(m_size, m_size));
 
     QFont font = mw_one->font();
     m_EditSource->setFont(font);
@@ -2031,11 +2031,10 @@ void Notes::initMarkdownLexer() {
   markdownLexer = new QsciLexerMarkdown(m_EditSource);
   m_EditSource->setLexer(markdownLexer);
 
-  markdownLexer->setFont(QFont("Consolas", 12), QsciLexerMarkdown::CodeBlock);
-
   m_EditSource->SendScintilla(
       QsciScintilla::SCI_STYLERESETDEFAULT);  // Scintilla 重置
   m_EditSource->SendScintilla(QsciScintilla::SCI_STYLERESETDEFAULT);
+  m_EditSource->setCaretForegroundColor(QColor(0, 0, 0));  // 光标颜色
   m_EditSource->recolor();
 
   // 验证 Lexer
@@ -2060,17 +2059,17 @@ void Notes::initMarkdownLexer() {
 }
 
 void Notes::initMarkdownLexerDark() {
-  // 0. 创建前确保清空原有 Lexer
+  //  创建前确保清空原有 Lexer
   m_EditSource->setLexer(nullptr);
 
-  // 1. 创建深色模式基础配置
+  //  创建深色模式基础配置
   markdownLexer = new QsciLexerMarkdown(m_EditSource);
 
-  // 2. 设置全局默认颜色（必须首先配置）
+  //  设置全局默认颜色（必须首先配置）
   markdownLexer->setDefaultPaper(QColor("#1E1E1E"));  // 全局背景色
   markdownLexer->setDefaultColor(QColor("#D4D4D4"));  // 全局默认文本颜色
 
-  // 3. 按样式类型逐个配置（覆盖所有 Markdown 元素）
+  //  按样式类型逐个配置（覆盖所有 Markdown 元素）
   markdownLexer->setColor(QColor("#569CD6"),
                           QsciLexerMarkdown::Header1);  // H1 蓝色
   markdownLexer->setColor(QColor("#4EC9B0"),
@@ -2087,32 +2086,32 @@ void Notes::initMarkdownLexerDark() {
   markdownLexer->setColor(QColor("#D7BA7D"),
                           QsciLexerMarkdown::BlockQuote);  // 引用块
 
-  // 4. 设置字体（继承默认字体避免冲突）
-  QFont defaultFont = QFont("Consolas", 12);
-  markdownLexer->setFont(defaultFont, -1);  // -1 表示所有样式使用该字体
-  markdownLexer->setFont(defaultFont, QsciLexerMarkdown::CodeBlock);
-
-  // 5. 应用 Lexer
+  // 应用 Lexer
   m_EditSource->setLexer(markdownLexer);
 
-  // 6. 禁止自动恢复默认样式（关键！）
+  // 禁止自动恢复默认样式（关键！）
   // m_EditSource->SendScintilla(QsciScintilla::SCI_STYLERESETDEFAULT); //
   // 不要调用这个！
 
-  // 7. 附加视觉优化
+  // 附加视觉优化
   m_EditSource->setCaretLineBackgroundColor(QColor("#2D2D30"));  // 当前行高亮
   m_EditSource->setCaretForegroundColor(QColor("#FFFFFF"));      // 光标颜色
   m_EditSource->setMarginsBackgroundColor(QColor("#1E1E1E"));    // 行号栏背景
   m_EditSource->setMarginsForegroundColor(QColor("#858585"));    // 行号颜色
   m_EditSource->setWrapMode(QsciScintilla::WrapWord);            // 自动换行
 
-  // 8. 强制刷新颜色
+  // 强制刷新颜色
   m_EditSource->recolor();
 }
 
 void Notes::initMarkdownEditor(QsciScintilla *editor) {
   // 强制编码和默认样式
   // editor->setUtf8(true);
+
+  // 设置字体（继承默认字体避免冲突）
+  QFont defaultFont = QFont(this->font().family(), fontSize);
+  markdownLexer->setFont(defaultFont, -1);  // -1 表示所有样式使用该字体
+  markdownLexer->setFont(defaultFont, QsciLexerMarkdown::CodeBlock);
 
   editor->setFolding(QsciScintilla::BoxedTreeFoldStyle);
 
@@ -2175,10 +2174,10 @@ void Notes::initMarkdownEditor(QsciScintilla *editor) {
   // editor->setMarginWidth(2, 0);  // Margin 2 不可见
 
   // 高亮当前行
+  editor->setCaretWidth(2);  // 光标宽度
   editor->setCaretLineVisible(true);
   if (isDark) {
     editor->setCaretLineBackgroundColor(QColor(45, 45, 48, 60));  // 半透明
-    editor->setCaretWidth(2);                                     // 光标宽度
   } else
     editor->setCaretLineBackgroundColor(QColor(255, 248, 220, 255));
 
@@ -2328,3 +2327,11 @@ void Notes::openBrowserOnce(const QString &htmlPath) {
 }
 
 void Notes::on_btnView_clicked() { mw_one->ui->btnOpenNote->click(); }
+
+void Notes::init_md() {
+  if (isDark)
+    initMarkdownLexerDark();
+  else
+    initMarkdownLexer();
+  initMarkdownEditor(m_EditSource);
+}
