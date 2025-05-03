@@ -1840,7 +1840,15 @@ void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
 
 void NotesList::on_actionAdd_Note_triggered() {
   int notebookIndex = getNoteBookCurrentIndex();
-  if (notebookIndex < 0) return;
+
+  if (notebookIndex < 0) {
+    ShowMessage *msg = new ShowMessage();
+    msg->showMsg(
+        "Knot",
+        tr("Please create a new notebook first, and then create new notes."),
+        1);
+    return;
+  }
 
   QString text = "";
 

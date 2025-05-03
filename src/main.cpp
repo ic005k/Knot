@@ -333,21 +333,21 @@ void loadLocal() {
     }
 
     bool tr1 = false;
-    tr1 = translator1.load(":/tr/qt_zh_CN.qm");
+    tr1 = translator1.load(":/res/tr/qt_zh_CN.qm");
     if (tr1) {
       qApp->installTranslator(&translator1);
       zh_cn = true;
     }
 
     bool tr2 = false;
-    tr2 = translator2.load(":/tr/qtbase_zh_CN.qm");
+    tr2 = translator2.load(":/res/tr/qtbase_zh_CN.qm");
     if (tr2) {
       qApp->installTranslator(&translator2);
       zh_cn = true;
     }
 
     bool tr3 = false;
-    tr3 = translator3.load(":/tr/qtlocation_zh_CN.qm");
+    tr3 = translator3.load(":/res/tr/qtlocation_zh_CN.qm");
     if (tr3) {
       qApp->installTranslator(&translator3);
       zh_cn = true;

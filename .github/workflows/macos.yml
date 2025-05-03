@@ -118,7 +118,7 @@ jobs:
          
           #cp -r devDatabase bin/release/${targetName}.app/Contents/MacOS/devDatabase
 
-          cp -f Info.plist bin/release/${targetName}.app/Contents/Info.plist
+          cp -f ExtBin/mac/Info.plist bin/release/${targetName}.app/Contents/Info.plist
 
           cp -R -p -f bin/release/${targetName}.app ${targetName}.app
 

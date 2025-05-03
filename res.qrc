@@ -43,7 +43,7 @@
         <file>res/color.png</file>
         <file>res/apk.png</file>
         <file>res/icon.ico</file>
-        <file>tr/qt_zh_CN.qm</file>
+        <file>res/tr/qt_zh_CN.qm</file>
         <file>res/paste.png</file>
         <file>res/cleft.png</file>
         <file>res/cright.png</file>
@@ -160,8 +160,8 @@
         <file>res/jbdict/dict.zip</file>
         <file>res/view_l.svg</file>
         <file>res/splash.png</file>
-        <file>tr/qtbase_zh_CN.qm</file>
-        <file>tr/qtlocation_zh_CN.qm</file>
+        <file>res/tr/qtbase_zh_CN.qm</file>
+        <file>res/tr/qtlocation_zh_CN.qm</file>
         <file>res/theme/darkstyle.qss</file>
         <file>res/theme/lightstyle.qss</file>
     </qresource>

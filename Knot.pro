@@ -37,7 +37,7 @@ TRANSLATIONS += src/cn.ts \
     lib/qsci/qscintilla_pt_br.ts
 
 ICON = res/icon.icns
-RC_FILE +=win.rc
+RC_FILE += win.rc
 
 ####################### Qsci ##############################################
 
