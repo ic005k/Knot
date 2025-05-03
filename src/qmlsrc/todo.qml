@@ -139,8 +139,11 @@ Rectangle {
             fill: parent
             margins: 0
         }
+
+        // 条目和条目之间的间隔
         spacing: 4
         anchors.rightMargin: 0 // 确保右侧无留白
+
         cacheBuffer: 50
         model: TodoModel {}
 
@@ -185,19 +188,65 @@ Rectangle {
             width: myw
             height: rectan.getItemHeight()
             contentWidth: myw + donebtn.width + flagColor.width
-
             contentHeight: rectan.getItemHeight()
 
-            boundsBehavior: Flickable.StopAtBounds //该属性设置过后，边界不会被拉出
+            //boundsBehavior: Flickable.StopAtBounds //该属性设置过后，边界不会被拉出
             interactive: true
 
+            // 新增：启用水平滑动和边界限制
+            flickableDirection: Flickable.HorizontalFlick
+            boundsBehavior: Flickable.StopAtBounds
+
+            // 新增：弹性动画
+            SpringAnimation {
+                id: springAnimation
+                target: flack
+                property: "contentX"
+                spring: 4 // 增强弹性强度
+                damping: 0.3 // 增加阻尼系数
+                epsilon: 0.5 // 放宽停止阈值
+            }
+            // 增加状态标记
+            property bool autoAnimation: false
+            // 增加速度跟踪支持
+            flickDeceleration: 1500 // 增加滑动减速度
+            maximumFlickVelocity: 2000 // 限制最大滑动速度
+
+            // 新增：滑动结束处理
+            onMovementEnded: {
+                autoAnimation = true
+                const speedThreshold = 100
+                const posThreshold = donebtn.width * 0.3
+
+                // 使用正确的速度获取方式
+                const currentVelocity = flack.horizontalVelocity
+                console.log("当前速度:", currentVelocity) // 调试用
+
+                if (contentX > posThreshold || Math.abs(
+                            currentVelocity) > speedThreshold) {
+                    springAnimation.to = currentVelocity > 0 ? donebtn.width : 0
+                } else {
+                    springAnimation.to = 0
+                }
+                springAnimation.start()
+            }
+
+            // 增加动画完成回调
+            Component.onCompleted: {
+                springAnimation.onStopped.connect(() => {
+                                                      if (autoAnimation) {
+                                                          contentX = springAnimation.to
+                                                          autoAnimation = false
+                                                      }
+                                                  })
+            }
+
             Rectangle {
+
                 id: rectan
 
                 anchors.fill: parent
                 width: parent.width
-
-                height: getItemHeight()
 
                 border.width: isDark ? 0 : 1
                 border.color: "lightgray"
@@ -205,34 +254,33 @@ Rectangle {
                 //选中颜色设置
                 color: view.currentIndex === index ? "lightblue" : getColor()
 
-                //color: view.currentIndex === index ? "#DCDCDC" : "#ffffff"
                 function getItemHeight() {
                     var item0H
                     var item1H
                     var item2H
                     var item3H
 
-                    if (text1.visible == false)
+                    if (text1.visible === false)
                         item0H = 0
                     else
                         item0H = text1.contentHeight
 
-                    if (text2.visible == false)
+                    if (text2.visible === false)
                         item1H = 0
                     else
                         item1H = text2.contentHeight
 
-                    if (text3.visible == false)
+                    if (text3.visible === false)
                         item2H = 0
                     else
                         item2H = text3.contentHeight
 
-                    if (text4.visible == false)
+                    if (text4.visible === false)
                         item3H = 0
                     else
                         item3H = text4.contentHeight
 
-                    return item0H + item1H + item2H + item3H + text2.height + 5
+                    return item0H + item1H + item2H + item3H + 5
                 }
 
                 Rectangle {
@@ -250,16 +298,16 @@ Rectangle {
 
                 RowLayout {
                     id: idlistElemnet
-                    height: parent.height
+
                     width: parent.width
-                    spacing: 2
+                    spacing: 3
                     Layout.fillWidth: true
 
                     ColumnLayout {
                         id: m_col
-                        height: parent.height
+
                         width: parent.width - flagColor.width - donebtn.width - 4
-                        spacing: 2
+                        spacing: 3
                         Layout.fillWidth: false
                         anchors.leftMargin: 0
                         anchors.rightMargin: 0
@@ -302,6 +350,7 @@ Rectangle {
                             }
                             Text {
                                 id: text1
+
                                 width: text1Img.visible ? parent.width - text1Img.width
                                                           - 5 : parent.width
                                 Layout.preferredWidth: rectan.width - flagColor.width
@@ -332,8 +381,6 @@ Rectangle {
                         RowLayout {
 
                             id: row3
-                            height: text3.contentHeight
-                            width: parent.width
 
                             function showImg3() {
 
@@ -370,6 +417,7 @@ Rectangle {
 
                             Text {
                                 id: text3
+                                height: text3.contentHeight
                                 width: text3Img.visible ? parent.width - text3Img.width
                                                           - 5 : parent.width
                                 Layout.preferredWidth: rectan.width - 52
@@ -379,6 +427,7 @@ Rectangle {
                                 horizontalAlignment: Text.AlignLeft
                                 verticalAlignment: Text.AlignVCenter
                                 text: dototext
+                                textFormat: Text.PlainText
 
                                 visible: true
 
@@ -423,7 +472,17 @@ Rectangle {
                     width: 55
                     color: "red"
                     anchors.right: parent.right
-                    visible: isBtnVisible
+
+                    //visible: isBtnVisible
+
+                    // 修改：使用透明度动画替代直接显示/隐藏
+                    opacity: flack.contentX !== 0 ? 1 : 0
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: 200
+                        }
+                    }
+                    visible: opacity > 0
 
                     Image {
                         id: doneImg
