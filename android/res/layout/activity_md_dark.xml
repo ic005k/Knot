@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="@color/light_gray">  <!-- 左侧文本 -->
+        android:background="#1F1F1F"> <!-- 左侧文本 -->
         <TextView
             android:id="@+id/title"
             android:layout_width="wrap_content"

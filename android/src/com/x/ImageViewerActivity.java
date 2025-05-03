@@ -181,7 +181,16 @@ public class ImageViewerActivity extends Activity
         // 去除title(App Name)
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        setContentView(R.layout.activity_image_viewer);
+        if (MyActivity.isDark) {
+            this.setStatusBarColor("#19232D"); // 深色
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            setContentView(R.layout.activity_image_viewer_dark);
+        } else {
+            this.setStatusBarColor("#F3F3F3"); // 灰
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            setContentView(R.layout.activity_image_viewer);
+        }
+
         imageView = findViewById(R.id.image_view);
         filePathTextView = findViewById(R.id.file_path_text_view);
         shareButton = findViewById(R.id.share_button);
@@ -362,5 +371,13 @@ public class ImageViewerActivity extends Activity
         System.out.println("path=" + path + "  pathUri=" + photoUri);
         share.putExtra(Intent.EXTRA_STREAM, photoUri);
         MyActivity.context.startActivity(Intent.createChooser(share, "Note Image"));
+    }
+
+    private void setStatusBarColor(String color) {
+        // 需要安卓版本大于5.0以上
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            getWindow().setStatusBarColor(Color.parseColor(color));
+        }
     }
 }
