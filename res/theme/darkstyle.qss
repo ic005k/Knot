@@ -1,0 +1,18 @@
+/* darkstyle.qss */
+QMenu::item:disabled {
+    color: #A0A0A0;
+    background-color: rgba(30, 30, 30, 255); /* 完全消除背景透明度 */
+    opacity: 1; /* 禁用全局透明度叠加 */
+    font-weight: 500; /* 中等字重避免模糊 */
+}
+
+/* 修复菜单项边框重影 */
+QMenu {
+    padding: 0;
+    border: 1px solid #404040; /* 明确边框颜色 */
+}
+
+QMenu::item {
+    padding: 5px 25px 5px 20px; /* 增加间距减少文本挤压 */
+    margin: 2px; /* 防止重叠 */
+}

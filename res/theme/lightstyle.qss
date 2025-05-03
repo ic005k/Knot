@@ -1,0 +1,11 @@
+/* lightstyle.qss */
+[color-scheme="light"] {
+    --disabled-text: #808080;
+}
+
+QMenu::item:disabled {
+    color: var(--disabled-text, #808080);
+    font: normal;
+    background-color: transparent;
+    opacity: 0.7;
+}

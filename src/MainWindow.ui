@@ -6996,7 +6996,7 @@ QRadioButton::indicator:checked {
          <item>
           <widget class="QTextEdit" name="editDetails">
            <property name="styleSheet">
-            <string notr="true">/*QTextEdit {border:1px solid #4169E1;}*/</string>
+            <string notr="true"/>
            </property>
           </widget>
          </item>
@@ -7070,15 +7070,7 @@ QRadioButton::indicator:checked {
             </size>
            </property>
            <property name="styleSheet">
-            <string notr="true">/*QLineEdit
-{
-border: 0px solid gray;
-border-radius: 0px;
-padding: 0 8px;
-background-color:qlineargradient(spread:pad,x1:1,y1:0,x2:0,y2:0,stop:0 #FFAEB9,stop:1 #87CEFF);  
-color:black;
-selection-background-color: lightblue;
-}*/</string>
+            <string notr="true"/>
            </property>
            <property name="text">
             <string/>

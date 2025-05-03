@@ -90,6 +90,8 @@ class Todo : public QDialog {
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
  public:
+  void changeTodoIcon(bool isToday);
+
   bool isRecordVoice = false;
   QString currentTodoItem;
   void on_SetAlarm();
@@ -138,7 +140,7 @@ class Todo : public QDialog {
   void closeTodo();
   void openTodoUI();
   void openTodo();
-  private slots:
+ private slots:
   void on_ShowRecordTime();
 
   void on_ShowPlayProgress();
@@ -154,7 +156,7 @@ class Todo : public QDialog {
   bool isModi = false;
   bool isWeekValid(QString lblDateTime, QString strDate);
   bool isTomorrow = false;
-  void changeTodoIcon(bool isToday);
+
   QSettings *iniTodo;
   void delVoiceFile(int row);
   QString editStyle;

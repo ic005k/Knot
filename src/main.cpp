@@ -31,6 +31,7 @@ extern MainWindow* mw_one;
 extern QSettings* iniPreferences;
 extern Method* m_Method;
 
+void loadTheme(bool isDark);
 void loadLocal();
 bool unzipToDir(const QString& zipPath, const QString& destDir);
 int deleteDirfile(QString dirName);
@@ -254,7 +255,7 @@ int main(int argc, char* argv[]) {
     }
 
     qssAll = qssAll.replace("QToolButton", "QToolButton_1");
-    app.setStyleSheet(qssAll);
+    // app.setStyleSheet(qssAll);
   }
 
   // Set Font
@@ -279,9 +280,38 @@ int main(int argc, char* argv[]) {
 #endif
 
   MainWindow w;
+  QObject::connect(QGuiApplication::styleHints(),
+                   &QStyleHints::colorSchemeChanged, &w,
+                   [](Qt::ColorScheme scheme) {
+                     isDark = (scheme == Qt::ColorScheme::Dark);
+
+                     loadTheme(isDark);
+                   });
+  loadTheme(isDark);
   w.show();
 
   return app.exec();
+}
+
+void loadTheme(bool isDark) {
+  QString themePath =
+      isDark ? ":/res/theme/darkstyle.qss" : ":/res/theme/lightstyle.qss";
+
+  QFile f(themePath);
+  if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    QString styleSheet = QTextStream(&f).readAll();
+
+    // 动态添加颜色方案标识
+    styleSheet.prepend(
+        QString("[color-scheme=\"%1\"] ").arg(isDark ? "dark" : "light"));
+
+    qApp->setStyleSheet(styleSheet);
+    mw_one->init_Theme();
+
+    // 强制窗口重绘
+    QEvent updateEvent(QEvent::UpdateRequest);
+    QApplication::sendEvent(mw_one, &updateEvent);
+  }
 }
 
 void loadLocal() {

@@ -162,5 +162,7 @@
         <file>res/splash.png</file>
         <file>tr/qtbase_zh_CN.qm</file>
         <file>tr/qtlocation_zh_CN.qm</file>
+        <file>res/theme/darkstyle.qss</file>
+        <file>res/theme/lightstyle.qss</file>
     </qresource>
 </RCC>

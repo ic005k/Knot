@@ -3369,6 +3369,16 @@ void MainWindow::init_Theme() {
     ui->btnDel->setIcon(QIcon(":/res/delitem.svg"));
     ui->btnSync->setIcon(QIcon(":/res/upload.svg"));
 
+    ui->editTodo->setStyleSheet(
+        "QTextEdit{background-color: #FFFFFF; color: black; border:1px solid "
+        "#4169E1;}");
+    QPalette palette = ui->editTodo->palette();
+    palette.setColor(QPalette::Normal, QPalette::PlaceholderText,
+                     QColor(255, 255, 255, 255));
+    ui->editTodo->setPalette(palette);
+
+    ui->editDetails->setStyleSheet(ui->editTodo->styleSheet());
+
   } else {
     ui->f_Menu->setStyleSheet("background-color: #19232D;");
     ui->f_Btn->setStyleSheet("background-color: #19232D;");
@@ -3405,7 +3415,30 @@ void MainWindow::init_Theme() {
     palette.setColor(QPalette::Normal, QPalette::PlaceholderText,
                      QColor(255, 255, 255, 255));
     ui->editTodo->setPalette(palette);
+
+    ui->editDetails->setStyleSheet(ui->editTodo->styleSheet());
   }
+
+  // Edit Record UI
+  int nH = mw_one->ui->editCategory->height();
+  if (isDark) {
+    m_Method->setQLabelImage(mw_one->ui->lblCategory, nH, nH, ":/res/fl_l.svg");
+    m_Method->setQLabelImage(mw_one->ui->lblDetailsType, nH, nH,
+                             ":/res/xq_l.svg");
+    m_Method->setQLabelImage(mw_one->ui->lblAmount, nH, nH, ":/res/je_l.svg");
+  } else {
+    m_Method->setQLabelImage(mw_one->ui->lblCategory, nH, nH, ":/res/fl.svg");
+    m_Method->setQLabelImage(mw_one->ui->lblDetailsType, nH, nH,
+                             ":/res/xq.svg");
+    m_Method->setQLabelImage(mw_one->ui->lblAmount, nH, nH, ":/res/je.svg");
+  }
+
+  m_EditRecord->on_editAmount_textChanged(ui->editAmount->text());
+  m_EditRecord->on_editCategory_textChanged(ui->editCategory->text());
+  m_EditRecord->on_editDetails_textChanged();
+
+  // Todo
+  m_Todo->changeTodoIcon(m_Todo->isToday);
 
   // Chart
   QFont font1;

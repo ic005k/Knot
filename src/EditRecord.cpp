@@ -29,17 +29,6 @@ EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {
   mw_one->ui->editCategory->setFocus();
 
   nH = mw_one->ui->editCategory->height();
-  if (isDark) {
-    m_Method->setQLabelImage(mw_one->ui->lblCategory, nH, nH, ":/res/fl_l.svg");
-    m_Method->setQLabelImage(mw_one->ui->lblDetailsType, nH, nH,
-                             ":/res/xq_l.svg");
-    m_Method->setQLabelImage(mw_one->ui->lblAmount, nH, nH, ":/res/je_l.svg");
-  } else {
-    m_Method->setQLabelImage(mw_one->ui->lblCategory, nH, nH, ":/res/fl.svg");
-    m_Method->setQLabelImage(mw_one->ui->lblDetailsType, nH, nH,
-                             ":/res/xq.svg");
-    m_Method->setQLabelImage(mw_one->ui->lblAmount, nH, nH, ":/res/je.svg");
-  }
 
   QFont font;
   font.setPointSize(23);
