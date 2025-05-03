@@ -286,24 +286,9 @@ public class MyActivity
 
   // ------------------------------------------------------------------------
 
-  public void setDark(String strDark) {
-    if (strDark.equals("dark_yes"))
-      isDark = true;
-    if (strDark.equals("dark_no"))
-      isDark = false;
-    if (isDark) {
-      this.setStatusBarColor("#19232D"); // 深色
-      getWindow()
-          .getDecorView()
-          .setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE); // 白色文字
-    } else {
-      this.setStatusBarColor("#F3F3F3"); // 灰
-      getWindow()
-          .getDecorView()
-          .setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR); // 黑色文字
-    }
+  public void setDark(boolean dark) {
+    isDark = dark;
 
-    System.out.println("strDark=" + strDark + "    isDark=" + isDark);
   }
 
   public static int startAlarm(String str) {

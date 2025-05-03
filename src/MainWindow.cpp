@@ -3440,6 +3440,9 @@ void MainWindow::init_Theme() {
   // Todo
   m_Todo->changeTodoIcon(m_Todo->isToday);
 
+  // Android
+  m_Method->setDark(isDark);
+
   // Chart
   QFont font1;
 #ifdef Q_OS_ANDROID

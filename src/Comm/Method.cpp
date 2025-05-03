@@ -843,15 +843,15 @@ QFont Method::getNewFont(int maxSize) {
   return font0;
 }
 
-void Method::setDark(QString strDark) {
-  Q_UNUSED(strDark);
+void Method::setDark(bool dark) {
+  Q_UNUSED(dark);
 #ifdef Q_OS_ANDROID
 
-  QJniObject javaDark = QJniObject::fromString(strDark);
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  activity.callMethod<void>("com.x/MyActivity", "setDark",
-                            "(Ljava/lang/String;)V",
-                            javaDark.object<jstring>());
+  activity.callMethod<void>("setDark",  // 方法名
+                            "(Z)V",     // 参数类型为boolean，返回void
+                            dark        // 传入bool参数，Qt自动转换为jboolean
+  );
 
 #endif
 }

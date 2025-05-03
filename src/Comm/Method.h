@@ -228,8 +228,6 @@ class Method : public QDialog {
   QInputDialog *inputDialog(QString windowsTitle, QString lblEdit,
                             QString defaultValue);
 
-  void setDark(QString strDark);
-
   void showGrayWindows();
   void closeGrayWindows();
 
@@ -335,6 +333,8 @@ class Method : public QDialog {
                          const QString &password);
 
   void setOSFlag();
+
+  void setDark(bool dark);
 
  protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
