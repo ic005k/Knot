@@ -1722,8 +1722,9 @@ void Notes::openEditUI() {
   init();
 
   QString mdString = loadText(currentMDFile);
+  m_EditSource->setWrapMode(QsciScintilla::WrapNone);
   m_EditSource->setText(mdString);
-  // new MarkdownHighlighter(m_EditSource->document());
+  m_EditSource->setWrapMode(QsciScintilla::WrapWord);  // 按单词换行
 
   show();
 
@@ -2187,7 +2188,6 @@ void Notes::initMarkdownEditor(QsciScintilla *editor) {
                         16);  // 带边框的折叠图标
 
   // 自动换行配置
-  editor->setWrapMode(QsciScintilla::WrapWord);               // 按单词换行
   editor->setWrapVisualFlags(QsciScintilla::WrapFlagByText);  // 视觉标记
   editor->setWrapIndentMode(QsciScintilla::WrapIndentSame);   // 缩进对齐
 

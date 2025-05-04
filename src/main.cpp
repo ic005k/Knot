@@ -7,6 +7,7 @@
 #include <QJniObject>       // Qt JNI 对象封装
 #endif
 
+#include <QFuture>
 #include <QObject>
 #include <QProgressBar>
 #include <QQuickWindow>
@@ -14,6 +15,7 @@
 #include <QStyleFactory>
 #include <QTranslator>
 #include <QWidget>
+#include <QtConcurrent>
 
 #include "MainWindow.h"
 #include "lib/cppjieba/Jieba.hpp"
@@ -89,13 +91,13 @@ int main(int argc, char* argv[]) {
                            Qt::SmoothTransformation);
 
     // 直接绘制文本（自动适配 DPI）
-    QPainter painter(&pixmap);
-    painter.setPen(Qt::white);
-    QRect textRect(10 * dpr, (pixmap.height() - 30 * dpr),
-                   (pixmap.width() - 20 * dpr), 20 * dpr);
-    painter.drawText(textRect, Qt::AlignCenter,
-                     QObject::tr("Loading, please wait..."));
-    painter.end();
+    // QPainter painter(&pixmap);
+    // painter.setPen(Qt::white);
+    // QRect textRect(10 * dpr, (pixmap.height() - 30 * dpr),
+    //               (pixmap.width() - 20 * dpr), 20 * dpr);
+    // painter.drawText(textRect, Qt::AlignCenter,
+    //                  QObject::tr("Loading, please wait..."));
+    // painter.end();
 
     // 设置设备像素比
     pixmap.setDevicePixelRatio(dpr);
@@ -288,6 +290,7 @@ int main(int argc, char* argv[]) {
                      loadTheme(isDark);
                    });
   loadTheme(isDark);
+
   w.show();
 
   return app.exec();
