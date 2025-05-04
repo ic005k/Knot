@@ -280,7 +280,7 @@ Rectangle {
                     else
                         item3H = text4.contentHeight
 
-                    return item0H + item1H + item2H + item3H + 5
+                    return item0H + item1H + item2H + item3H + 20
                 }
 
                 Rectangle {
@@ -300,14 +300,14 @@ Rectangle {
                     id: idlistElemnet
 
                     width: parent.width
-                    spacing: 3
+                    spacing: 0
                     Layout.fillWidth: true
 
                     ColumnLayout {
                         id: m_col
 
                         width: parent.width - flagColor.width - donebtn.width - 4
-                        spacing: 3
+                        spacing: 0
                         Layout.fillWidth: false
                         anchors.leftMargin: 0
                         anchors.rightMargin: 0
@@ -366,6 +366,8 @@ Rectangle {
 
                                 leftPadding: 10
                                 rightPadding: 10
+                                topPadding: 5
+                                bottomPadding: 5
                             }
                         }
 
@@ -433,6 +435,8 @@ Rectangle {
 
                                 leftPadding: 10
                                 rightPadding: 10
+                                topPadding: 5
+                                bottomPadding: 5
                             }
                         }
 
