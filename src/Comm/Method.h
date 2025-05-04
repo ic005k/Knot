@@ -121,25 +121,55 @@ class Method : public QDialog {
       const QString &pressedColor = "#2D3E50",       // 按下颜色
       const QString &pressedTextColor = "#B8C6D1");  // 按下文字颜色
 
-  QString vsbarStyle =
-      "QScrollBar:vertical{"  // 垂直滑块整体
-      "width:30px;"
-      "background:#FFFFFF;"                 // 背景色
-      "padding-top:25px;"                   // 上预留位置（放置向上箭头）
-      "padding-bottom:25px;"                // 下预留位置（放置向下箭头）
-      "padding-left:3px;"                   // 左预留位置（美观）
-      "padding-right:3px;"                  // 右预留位置（美观）
-      "border-left:1px solid #d7d7d7;}"     // 左分割线
-      "QScrollBar::handle:vertical{"        // 滑块样式
-      "background:#dbdbdb;"                 // 滑块颜色
-      "border-radius:6px;"                  // 边角圆润
-      "min-height:60px;}"                   // 滑块最小高度
-      "QScrollBar::handle:vertical:hover{"  // 鼠标触及滑块样式
-      "background:#d0d0d0;}"                // 滑块颜色
-      "QScrollBar::add-line:vertical{"      // 向下箭头样式
-      "background:url(:/src/down.png) bottom no-repeat;}"
-      "QScrollBar::sub-line:vertical{"  // 向上箭头样式
-      "background:url(:/src/up.png) top no-repeat;}";
+  QString lightScrollbarStyle =
+      "/* Light Vertical Scrollbar */"
+      "QScrollBar:vertical {"
+      "    background: #F5F5F5;"
+      "    width: 10px;"
+      "    margin: 2px;"
+      "}"
+      "QScrollBar::handle:vertical {"
+      "    background: #C0C0C0;"
+      "    border-radius: 4px;"
+      "    border: 1px solid #D0D0D0;"
+      "    min-height: 30px;"
+      "}"
+      "QScrollBar::handle:vertical:hover {"
+      "    background: #A8A8A8;"
+      "}"
+      "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {"
+      "    background: transparent;"
+      "    border: none;"
+      "    height: 0px;"
+      "}"
+      "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
+      "    background: transparent;"
+      "}";
+
+  QString darkScrollbarStyle =
+      "/* Dark Vertical Scrollbar */"
+      "QScrollBar:vertical {"
+      "    background: #2D2D2D;"
+      "    width: 10px;"
+      "    margin: 2px;"
+      "}"
+      "QScrollBar::handle:vertical {"
+      "    background: #606060;"
+      "    border-radius: 4px;"
+      "    border: 1px solid #404040;"
+      "    min-height: 30px;"
+      "}"
+      "QScrollBar::handle:vertical:hover {"
+      "    background: #707070;"
+      "}"
+      "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {"
+      "    background: transparent;"
+      "    border: none;"
+      "    height: 0px;"
+      "}"
+      "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
+      "    background: transparent;"
+      "}";
 
   QString vsbarStyleSmall =
       "QScrollBar:vertical{"  // 垂直滑块整体

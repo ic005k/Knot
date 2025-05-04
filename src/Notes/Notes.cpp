@@ -2329,9 +2329,14 @@ void Notes::openBrowserOnce(const QString &htmlPath) {
 void Notes::on_btnView_clicked() { mw_one->ui->btnOpenNote->click(); }
 
 void Notes::init_md() {
-  if (isDark)
+  if (isDark) {
     initMarkdownLexerDark();
-  else
+    m_EditSource->verticalScrollBar()->setStyleSheet(
+        m_Method->darkScrollbarStyle);
+  } else {
     initMarkdownLexer();
+    m_EditSource->verticalScrollBar()->setStyleSheet(
+        m_Method->lightScrollbarStyle);
+  }
   initMarkdownEditor(m_EditSource);
 }
