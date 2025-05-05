@@ -68,8 +68,6 @@
         <file>res/plus_l.svg</file>
         <file>res/clear.svg</file>
         <file>res/coin.svg</file>
-        <file>theme/dark/darkstyle.qss</file>
-        <file>theme/light/lightstyle.qss</file>
         <file>res/find_l.png</file>
         <file>res/back_l.png</file>
         <file>res/books_l.png</file>

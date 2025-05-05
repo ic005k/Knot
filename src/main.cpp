@@ -235,31 +235,6 @@ int main(int argc, char* argv[]) {
   } else
     customFontFamily = defaultFontFamily;
 
-  // Set Theme
-  QString fileTheme;
-  if (isDark)
-    fileTheme = ":/theme/dark/darkstyle.qss";
-  else
-    fileTheme = ":/theme/light/lightstyle.qss";
-  QFile f_theme(fileTheme);
-  if (!f_theme.exists()) {
-    qDebug() << "Unable to set stylesheet, file not found";
-  } else {
-    f_theme.open(QFile::ReadOnly | QFile::Text);
-    QTextStream ts(&f_theme);
-    QString qssAll = ts.readAll();
-    qssAll = qssAll.replace("QSlider", "CancelQSlider");
-
-    if (isAndroid) {
-      qssAll = qssAll.replace("width: 16px;", "width: 8px;");
-      qssAll = qssAll.replace("margin: 16px 2px 16px 2px;",
-                              "margin: 1px 2px 1px 2px;");
-    }
-
-    qssAll = qssAll.replace("QToolButton", "QToolButton_1");
-    // app.setStyleSheet(qssAll);
-  }
-
   // Set Font
   QFont m_font;
   if (isOverUIFont) {

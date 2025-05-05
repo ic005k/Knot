@@ -3379,6 +3379,11 @@ void MainWindow::init_Theme() {
 
     ui->editDetails->setStyleSheet(ui->editTodo->styleSheet());
 
+    ui->editTodo->verticalScrollBar()->setStyleSheet(
+        m_Method->lightScrollbarStyle);
+    ui->editDetails->verticalScrollBar()->setStyleSheet(
+        m_Method->lightScrollbarStyle);
+
   } else {
     ui->f_Menu->setStyleSheet("background-color: #19232D;");
     ui->f_Btn->setStyleSheet("background-color: #19232D;");
@@ -3417,6 +3422,11 @@ void MainWindow::init_Theme() {
     ui->editTodo->setPalette(palette);
 
     ui->editDetails->setStyleSheet(ui->editTodo->styleSheet());
+
+    ui->editTodo->verticalScrollBar()->setStyleSheet(
+        m_Method->darkScrollbarStyle);
+    ui->editDetails->verticalScrollBar()->setStyleSheet(
+        m_Method->darkScrollbarStyle);
   }
 
   // Edit Record UI

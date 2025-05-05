@@ -96,7 +96,6 @@ All dependencies are preserved in original format for maintenance and upgrades:
 | Project Name | Functionality | Repository Link |
 |--------------|---------------|-----------------|
 | **QScintilla** | Desktop note editor | [QScintilla](https://riverbankcomputing.com/software/qscintilla/download) |
-| **QDarkStyleSheet** | Dark theme support | [ColinDuquesnoy/QDarkStyleSheet](https://github.com/ColinDuquesnoy/QDarkStyleSheet) |
 
 ### Android-specific Components
 | Project Name | Functionality | Repository Link |
