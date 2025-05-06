@@ -77,11 +77,12 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
 void Notes::initEditor() {
   m_EditSource = new QsciScintilla(this);
 
-  m_EditSource->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+  m_EditSource->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   m_EditSource->installEventFilter(this);
   m_EditSource->viewport()->installEventFilter(this);
   m_EditSource->setContentsMargins(1, 1, 1, 1);
   m_EditSource->setStyleSheet("border:none");
+
   connect(m_EditSource->verticalScrollBar(), SIGNAL(valueChanged(int)), this,
           SLOT(editVSBarValueChanged()));
   connect(m_EditSource, &QsciScintilla::textChanged, this,

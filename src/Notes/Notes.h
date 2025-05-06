@@ -48,6 +48,7 @@
 
 class LimitedTextEdit;
 class NoteIndexManager;
+class MiniMap;
 
 namespace Ui {
 class Notes;
@@ -174,7 +175,8 @@ class Notes : public QDialog {
   void openBrowserOnce(const QString &htmlPath);
 
   void init_md();
-  protected:
+
+ protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
   bool eventFilter(QObject *obj, QEvent *event) override;
@@ -286,6 +288,8 @@ class Notes : public QDialog {
   QString imageToBase64(const QString &path);
   QString addImagePathToHtml(QString strhtml);
   void initMarkdownLexerDark();
+
+  void initEditorScrollBars();
 };
 
 class LimitedTextEdit : public QTextEdit {
