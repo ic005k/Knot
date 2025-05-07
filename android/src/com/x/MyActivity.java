@@ -150,8 +150,8 @@ import android.os.SystemClock;
 import android.os.Vibrator;
 import android.content.SharedPreferences;
 
-//Qt6
-import org.qtproject.qt.android.bindings.QtActivity;
+//Qt5
+import org.qtproject.qt5.android.bindings.QtActivity;
 
 public class MyActivity
     extends QtActivity
@@ -1118,7 +1118,7 @@ public class MyActivity
         if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
           // 表示按了home键,程序直接进入到后台
           System.out.println("MyActivity HOME键被按下...");
-          CallJavaNotify_1();
+
         } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
           // 表示长按home键,显示最近使用的程序
           System.out.println("MyActivity 长按HOME键...");
@@ -1766,6 +1766,7 @@ public class MyActivity
 
   public void openNoteEditor() {
     Intent i = new Intent(context, NoteEditor.class);
+    i.putExtra("MD_FILE_PATH", strMDFile);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     context.startActivity(i);
   }

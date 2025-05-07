@@ -127,28 +127,31 @@ public class LineNumberedEditText extends EditText {
 
         int baseline;
         int lineCount = getLineCount();
-        int lineNumber = 1;
 
-        for (int i = 0; i < lineCount; ++i) {
-            baseline = getLineBounds(i, null);
-            if (i == 0) {
-                canvas.drawText("" + lineNumber, rect.left, baseline, paint);
-                ++lineNumber;
-            } else if (getText().charAt(getLayout().getLineStart(i) - 1) == '\n') {
-                canvas.drawText("" + lineNumber, rect.left, baseline, paint);
-                ++lineNumber;
+        if (lineCount <= 2000) {
+            int lineNumber = 1;
+
+            for (int i = 0; i < lineCount; ++i) {
+                baseline = getLineBounds(i, null);
+                if (i == 0) {
+                    canvas.drawText("" + lineNumber, rect.left, baseline, paint);
+                    ++lineNumber;
+                } else if (getText().charAt(getLayout().getLineStart(i) - 1) == '\n') {
+                    canvas.drawText("" + lineNumber, rect.left, baseline, paint);
+                    ++lineNumber;
+                }
             }
-        }
 
-        // for setting edittext start padding
-        if (lineCount < 100) {
-            setPadding(40, getPaddingTop(), getPaddingRight(), getPaddingBottom());
-        } else if (lineCount > 99 && lineCount < 1000) {
-            setPadding(60, getPaddingTop(), getPaddingRight(), getPaddingBottom());
-        } else if (lineCount > 999 && lineCount < 10000) {
-            setPadding(80, getPaddingTop(), getPaddingRight(), getPaddingBottom());
-        } else if (lineCount > 9999 && lineCount < 100000) {
-            setPadding(100, getPaddingTop(), getPaddingRight(), getPaddingBottom());
+            // for setting edittext start padding
+            if (lineCount < 100) {
+                setPadding(40, getPaddingTop(), getPaddingRight(), getPaddingBottom());
+            } else if (lineCount > 99 && lineCount < 1000) {
+                setPadding(60, getPaddingTop(), getPaddingRight(), getPaddingBottom());
+            } else if (lineCount > 999 && lineCount < 10000) {
+                setPadding(80, getPaddingTop(), getPaddingRight(), getPaddingBottom());
+            } else if (lineCount > 9999 && lineCount < 100000) {
+                setPadding(100, getPaddingTop(), getPaddingRight(), getPaddingBottom());
+            }
         }
 
         super.onDraw(canvas);

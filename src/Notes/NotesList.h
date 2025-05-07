@@ -255,6 +255,7 @@ class NotesList : public QDialog {
   QString generatePreviewText(const SearchResult &result);
   void clearInvalidMDFile();
   SearchModel m_searchModel;
+  void startBackgroundTaskUpdateFilesIndex();
 };
 
 class SearchMapper {

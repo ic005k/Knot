@@ -73,6 +73,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.io.IOException;
 import java.io.File;
@@ -101,6 +102,7 @@ import android.widget.Toast;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.sql.Time;
 import android.text.SpannableStringBuilder;
 import android.text.style.BackgroundColorSpan;
@@ -125,6 +127,7 @@ import androidx.core.content.FileProvider;
 import android.widget.PopupMenu;
 import android.widget.ImageButton;
 import android.util.TypedValue;
+import android.widget.ProgressBar;
 
 public class NoteEditor extends Activity implements View.OnClickListener, Application.ActivityLifecycleCallbacks {
 
@@ -146,7 +149,8 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
     private Button btnNext;
     private ImageButton btnStartFind;
 
-    public static LineNumberedEditText editNote;
+    // public static LineNumberedEditText editNote;
+    public static EditText editNote;
     public static EditText editFind;
     public static TextView lblResult;
     private ArrayList<Integer> arrayFindResult = new ArrayList<Integer>();
@@ -228,23 +232,25 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         return 1;
     }
 
-    private void bindViews(String str) {
-        editNote = (LineNumberedEditText) findViewById(R.id.editNote);
+    private void bindViews() {
+
+        // editNote = (LineNumberedEditText) findViewById(R.id.editNote);
+        editNote = (EditText) findViewById(R.id.editNote);
         editNote.setTextSize(TypedValue.COMPLEX_UNIT_SP, MyActivity.myFontSize);
 
-        editNote.setText(str);
-
-        // 初始化 Markwon
-        final Markwon markwon = Markwon.create(this);
-
-        // 初始化 MarkwonEditor
-        final MarkwonEditor editor = MarkwonEditor.create(markwon);
-
-        // 添加 MarkwonEditorTextWatcher 到 EditText
-        editNote.addTextChangedListener(MarkwonEditorTextWatcher.withPreRender(
-                editor,
-                Executors.newCachedThreadPool(),
-                editNote));
+        String str_file = MyActivity.strMDFile;
+        File file = new File(str_file);
+        if (getFileSizeInKB(file) < 200) {
+            // 初始化 Markwon
+            final Markwon markwon = Markwon.create(context);
+            // 初始化 MarkwonEditor
+            final MarkwonEditor editor = MarkwonEditor.create(markwon);
+            // 添加 MarkwonEditorTextWatcher 到 EditText
+            editNote.addTextChangedListener(MarkwonEditorTextWatcher.withPreRender(
+                    editor,
+                    Executors.newCachedThreadPool(),
+                    editNote));
+        }
 
         btn_cancel = (Button) findViewById(R.id.btn_cancel);
         btnFind = (Button) findViewById(R.id.btnFind);
@@ -301,8 +307,6 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         lblResult.setVisibility(View.GONE);
 
         btn_cancel.setOnClickListener(this);
-        btnUndo.setOnClickListener(this);
-        btnRedo.setOnClickListener(this);
         btnMenu.setOnClickListener(this);
 
         btnFind.setOnClickListener(this);
@@ -353,7 +357,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
                 break;
 
             case R.id.btnFind:
-                btnRedo.setBackgroundColor(getResources().getColor(R.color.red));
+                btnFind.setBackgroundColor(getResources().getColor(R.color.red));
                 if (btnPrev.getVisibility() == View.VISIBLE) {
                     editFind.setVisibility(View.GONE);
                     btnPrev.setVisibility(View.GONE);
@@ -369,7 +373,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
                     lblResult.setVisibility(View.VISIBLE);
                     editFind.requestFocus();
                 }
-                btnRedo.setBackgroundColor(getResources().getColor(R.color.normal));
+                btnFind.setBackgroundColor(getResources().getColor(R.color.normal));
 
                 break;
 
@@ -439,9 +443,6 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         // 去除title(App Name)
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        String filename = MyActivity.strMDFile;// "/storage/emulated/0/.Knot/mymd.txt";
-        strInfo = readTextFile(filename);
-
         if (MyActivity.isDark) {
             this.setStatusBarColor("#19232D"); // 深色
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
@@ -452,10 +453,46 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
             setContentView(R.layout.noteeditor);
         }
 
-        bindViews(strInfo);
+        final String mdfile = MyActivity.strMDFile; // getIntent().getStringExtra("MD_FILE_PATH");
 
+        bindViews();
+
+        // 启动子线程执行耗时操作
+        Handler mHandler = new Handler(Looper.getMainLooper());
+
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                // 子线程读取文件
+                final String data = readTextFile(mdfile);
+
+                // 文件读取完成后，通过 Handler 发送消息到主线程
+                mHandler.post(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        editNote.setText(data);
+
+                        setCursorPos();
+                        openSearchResult();
+
+                        isTextChanged = false;
+                        initRedoUndo();
+                        initEditTextChangedListener();
+
+                        init_all();
+
+                    }
+                });
+            }
+        }).start();
+
+    }
+
+    private void setCursorPos() {
         // set cursor pos
-        filename = "/storage/emulated/0/.Knot/note_text.ini";
+        String filename = "/storage/emulated/0/.Knot/note_text.ini";
         if (fileIsExists(filename)) {
             String s_cpos = "";
 
@@ -482,20 +519,28 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
             editNote.setSelection(cpos);
         }
 
-        initColorValue();
-        initTextFormat();
-        openSearchResult();
+    }
 
+    private void initRedoUndo() {
         // pass edittext object to TextViewUndoRedo class
         helper = new TextViewUndoRedo(editNote);
+        btnUndo.setOnClickListener(this);
+        btnRedo.setOnClickListener(this);
 
-        isTextChanged = false;
-        initEditTextChangedListener();
+    }
+
+    private void init_all() {
+
+        initColorValue();
+
         writeReceiveData();
 
         // HomeKey
         registerReceiver(mHomeKeyEvent, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
         initMenuTitle();
+
+        // CallJavaNotify_1();
+
     }
 
     private BroadcastReceiver mHomeKeyEvent = new BroadcastReceiver() {
@@ -725,22 +770,54 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
 
     }
 
+    /*
+     * public String readTextFile(String filename) {
+     * try {
+     * File file = new File(filename);
+     * StringBuffer strBuf = new StringBuffer();
+     * BufferedReader bufferedReader = new BufferedReader(
+     * new InputStreamReader(new FileInputStream(file), "UTF-8"));
+     * int tempchar;
+     * while ((tempchar = bufferedReader.read()) != -1) {
+     * strBuf.append((char) tempchar);
+     * }
+     * bufferedReader.close();
+     * return strBuf.toString();
+     * } catch (Exception ex) {
+     * ex.printStackTrace();
+     * }
+     * return "";
+     * }
+     */
+
     public String readTextFile(String filename) {
+        BufferedReader reader = null;
         try {
             File file = new File(filename);
-            StringBuffer strBuf = new StringBuffer();
-            BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(file), "UTF-8"));
-            int tempchar;
-            while ((tempchar = bufferedReader.read()) != -1) {
-                strBuf.append((char) tempchar);
+            reader = new BufferedReader(
+                    new InputStreamReader(
+                            new FileInputStream(file),
+                            Charset.defaultCharset() // ✅ 自动适配系统编码
+                    ));
+
+            char[] buffer = new char[8192]; // 8KB 缓冲区
+            StringBuilder sb = new StringBuilder();
+            int charsRead;
+            while ((charsRead = reader.read(buffer)) != -1) {
+                sb.append(buffer, 0, charsRead);
             }
-            bufferedReader.close();
-            return strBuf.toString();
+            return sb.toString();
         } catch (Exception ex) {
             ex.printStackTrace();
+            return "";
+        } finally {
+            try {
+                if (reader != null)
+                    reader.close(); // ✅ 确保关闭
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        return "";
     }
 
     public void writeTextFile(String content, String filename) {
@@ -2161,6 +2238,25 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
             }
         }
         MyActivity.isOpenSearchResult = false;
+    }
+
+    public void showAndroidProgressBar() {
+        Context context = NoteEditor.this;
+        Intent i = new Intent(context, MyProgBar.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(i);
+    }
+
+    public void closeAndroidProgressBar() {
+        if (MyProgBar.m_MyProgBar != null)
+            MyProgBar.m_MyProgBar.finish();
+    }
+
+    // 获取文件大小（单位：KB）
+    public static long getFileSizeInKB(File file) {
+        if (file == null || !file.exists())
+            return 0;
+        return file.length() / 1024; // 转换为 KB
     }
 
 }

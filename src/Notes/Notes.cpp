@@ -904,7 +904,7 @@ void Notes::timerSlot() {
 
 void Notes::closeEvent(QCloseEvent *event) {
   Q_UNUSED(event);
-  saveQMLVPos();
+  saveEditorState(currentMDFile);
 
   strNoteText = m_EditSource->text().trimmed();
 
@@ -1731,20 +1731,7 @@ void Notes::openEditUI() {
 
   m_Method->Sleep(100);
 
-  QString a = currentMDFile;
-  a.replace(iniDir, "");
-
-  QSettings *iniNotes =
-      new QSettings(privateDir + "notes.ini", QSettings::IniFormat, NULL);
-
-  int vpos = iniNotes->value("/MainNotes/editVPos" + a).toInt();
-  int cpos = iniNotes->value("/MainNotes/editCPos" + a).toInt();
-
-  m_EditSource->verticalScrollBar()->setValue(vpos);
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETANCHOR, cpos);  // 起始位置
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETCURRENTPOS,
-                              cpos);  // 结束位置
-
+  restoreEditorState(currentMDFile);
   m_EditSource->setFocus();
 
   m_Method->Sleep(200);
@@ -2340,4 +2327,44 @@ void Notes::init_md() {
         m_Method->lightScrollbarStyle);
   }
   initMarkdownEditor(m_EditSource);
+}
+
+#include <QSettings>
+
+void Notes::saveEditorState(const QString &filePath) {
+  // 指定 INI 格式和文件路径
+  QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);
+
+  // 使用文件路径作为分组名（需处理特殊字符）
+  QString groupName = "Documents/" + QFileInfo(filePath).canonicalFilePath();
+  groupName.replace("/", "_");  // 避免 / 导致分组层级问题
+  settings.beginGroup(groupName);
+
+  // 保存光标位置
+  int line, index;
+  m_EditSource->getCursorPosition(&line, &index);
+  settings.setValue("cursorLine", line);
+  settings.setValue("cursorIndex", index);
+  settings.setValue("vsbar",
+                    m_EditSource->verticalScrollBar()->sliderPosition());
+
+  settings.endGroup();
+}
+
+void Notes::restoreEditorState(const QString &filePath) {
+  QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);
+
+  QString groupName = "Documents/" + QFileInfo(filePath).canonicalFilePath();
+  groupName.replace("/", "_");
+  settings.beginGroup(groupName);
+
+  // 恢复光标
+  int line = settings.value("cursorLine", 0).toInt();
+  int index = settings.value("cursorIndex", 0).toInt();
+  int vsbar = settings.value("vsbar", 0).toInt();
+
+  m_EditSource->verticalScrollBar()->setSliderPosition(vsbar);
+  m_EditSource->setCursorPosition(line, index);
+
+  settings.endGroup();
 }

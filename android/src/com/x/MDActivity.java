@@ -169,6 +169,7 @@ import android.view.KeyEvent;
 import android.widget.TextView.OnEditorActionListener;
 import android.view.inputmethod.InputMethodManager;
 import java.util.regex.*;
+import android.widget.ProgressBar;
 
 import android.widget.LinearLayout;
 import android.view.LayoutInflater;
@@ -283,7 +284,7 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
         markdownView = findViewById(R.id.markdownView);
         markdownView.setTextSize(TypedValue.COMPLEX_UNIT_SP, MyActivity.myFontSize);
 
-        markdownView.setText("Hello");
+        markdownView.setText("Loading, please wait...");
 
         titleView = findViewById(R.id.title);
         titleView.setText(MyActivity.strMDTitle);
@@ -325,46 +326,63 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
                 .usePlugin(HtmlPlugin.create())
                 .build();
 
-        StringBuilder markdownContent = new StringBuilder();
-        try {
-            // "/storage/emulated/0/.Knot/mymd.md"
-            File file = new File(MyActivity.strMDFile);
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                markdownContent.append(line).append("\n");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // 1. 执行耗时操作（如下载、计算等）
+                StringBuilder markdownContent = new StringBuilder();
+                try {
+                    // "/storage/emulated/0/.Knot/mymd.md"
+                    File file = new File(MyActivity.strMDFile);
+                    BufferedReader reader = new BufferedReader(new FileReader(file));
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        markdownContent.append(line).append("\n");
+                    }
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                // 2. 完成后切换回主线程更新 UI
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // 在主线程执行后续操作
+                        String strMD = markdownContent.toString();
+                        strMD = strMD.replace("images/", "/storage/emulated/0/KnotData/memo/images/");
+                        markwon.setMarkdown(markdownView, strMD);
+
+                        markdownView.getViewTreeObserver()
+                                .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+
+                                    public boolean onPreDraw() {
+                                        // 确保只执行一次
+                                        markdownView.getViewTreeObserver().removeOnPreDrawListener(this);
+
+                                        // 恢复滚动条位置
+                                        SharedPreferences sharedPreferences = getSharedPreferences(
+                                                strmdFileName + "scroll_position",
+                                                MODE_PRIVATE);
+                                        int savedScrollX = sharedPreferences.getInt("scrollX", 0);
+                                        int savedScrollY = sharedPreferences.getInt("scrollY", 0);
+                                        scrollView.scrollTo(savedScrollX, savedScrollY);
+                                        // Toast.makeText(MDActivity.this, savedScrollX + " " + savedScrollY,
+                                        // Toast.LENGTH_LONG).show();
+
+                                        return true; // 返回 true 表示继续绘制
+                                    }
+                                });
+
+                    }
+                });
             }
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String strMD = markdownContent.toString();
-        strMD = strMD.replace("images/", "/storage/emulated/0/KnotData/memo/images/");
-        markwon.setMarkdown(markdownView, strMD);
+        }).start();
 
         // HomeKey
         registerReceiver(mHomeKeyEvent, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 
         MyActivity.isEdit = false;
-
-        markdownView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-
-            public boolean onPreDraw() {
-                // 确保只执行一次
-                markdownView.getViewTreeObserver().removeOnPreDrawListener(this);
-
-                // 恢复滚动条位置
-                SharedPreferences sharedPreferences = getSharedPreferences(strmdFileName + "scroll_position",
-                        MODE_PRIVATE);
-                int savedScrollX = sharedPreferences.getInt("scrollX", 0);
-                int savedScrollY = sharedPreferences.getInt("scrollY", 0);
-                scrollView.scrollTo(savedScrollX, savedScrollY);
-                // Toast.makeText(MDActivity.this, savedScrollX + " " + savedScrollY,
-                // Toast.LENGTH_LONG).show();
-
-                return true; // 返回 true 表示继续绘制
-            }
-        });
 
     }
 

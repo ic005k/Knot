@@ -290,6 +290,8 @@ class Notes : public QDialog {
   void initMarkdownLexerDark();
 
   void initEditorScrollBars();
+  void saveEditorState(const QString &filePath);
+  void restoreEditorState(const QString &filePath);
 };
 
 class LimitedTextEdit : public QTextEdit {

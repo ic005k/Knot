@@ -106,10 +106,26 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
   mw_one->ui->qwNotesSearchResult->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/SearchResults.qml")));
 
-  m_dbManager.updateFilesIndex(iniDir + "memo");
+  startBackgroundTaskUpdateFilesIndex();
 }
 
 NotesList::~NotesList() { delete ui; }
+
+void NotesList::startBackgroundTaskUpdateFilesIndex() {
+  QString fullPath = iniDir + "memo";  // 先构造完整路径
+
+  QFuture<void> future = QtConcurrent::run([=]() {
+    m_dbManager.updateFilesIndex(fullPath);  // 值捕获保证线程安全
+  });
+
+  // 可选：使用 QFutureWatcher 监控进度
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, [=]() {
+    qDebug() << "Database update completed";
+    watcher->deleteLater();
+  });
+  watcher->setFuture(future);
+}
 
 void NotesList::set_memo_dir() {
   QString path = iniDir + "memo/";

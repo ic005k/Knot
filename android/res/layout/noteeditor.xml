@@ -152,8 +152,7 @@
 
 
     </LinearLayout>
-
-
+    
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -169,7 +168,7 @@
             android:layout_marginTop="5dp"
             android:layout_marginRight="10dp"
             android:layout_marginLeft="0dp"
-            android:text="TextView"
+            android:text="Loading, please wait..."
             android:textColor="#000000"
             android:inputType="textMultiLine"
             android:layout_weight="1"
@@ -177,6 +176,5 @@
 
 
     </ScrollView>
-
-
+      
 </LinearLayout>
