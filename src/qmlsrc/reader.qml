@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import QtQuick.Controls.Fusion
 
 import MyModel2 1.0
+import EBook.Models 1.0
 
 Rectangle {
     id: textitem
@@ -18,22 +19,16 @@ Rectangle {
     property bool isPDF: false
     property bool isEPUBText: false
 
-    property variant stringList: null
-
-    function updateText(str) {
-        stringList = str.split('</html>')
-    }
-
     function getText() {
-        return textArea.text
+        return m_text.text
     }
 
     function setText(str) {
-        textArea.text = str
+        textModel.splitContent(str) // 调用C++处理
     }
 
     function loadText(str) {
-        strText = str
+        textModel.splitContent(str) // 调用C++处理
         isPDF = false
         isEPUBText = true
     }
@@ -50,7 +45,8 @@ Rectangle {
 
     function loadHtmlStr(str) {
 
-        strText = str
+        textModel.splitContent(str) // 调用C++处理
+
         isPDF = false
         isEPUBText = true
     }
@@ -64,23 +60,22 @@ Rectangle {
 
     function loadHtmlBuffer(strhtml) {
 
-        document.loadBuffer(strhtml)
+        //document.loadBuffer(strhtml)
+        textModel.splitContent(strhtml) // 调用C++处理
         isEPUBText = true
     }
 
+    // 修改为基于 ListView 的滚动控制
     function setVPos(vpos) {
-        flickable.contentY = vpos
-        // console.log(vpos)
+        contentListView.contentY = vpos
     }
 
     function getVPos() {
-
-        return flickable.contentY
+        return contentListView.contentY
     }
 
     function getVHeight() {
-
-        return textArea.contentHeight
+        return contentListView.contentHeight
     }
 
     function getSelectedText() {
@@ -99,36 +94,40 @@ Rectangle {
     }
 
     function getBookmarkText() {
-        var x = 0
-        var y = flickable.contentY
+        // 基于当前可视区域的首个可见项计算
+        let firstVisibleIndex = contentListView.indexAt(
+                0, contentListView.contentY)
+        if (firstVisibleIndex === -1)
+            return "Bookmark"
 
-        var start = textArea.positionAt(x, y + FontSize)
-        var end = textArea.positionAt(x + textArea.width, y + FontSize * 6)
-        var txt = textArea.getText(start, end)
+        let delegateItem = contentListView.itemAtIndex(firstVisibleIndex)
+        if (!delegateItem)
+            return "Bookmark"
 
-        if (txt === "") {
-            txt = "Bookmark"
-        }
-
-        console.log("bookmark txt=" + txt + "  x=" + x + "  start=" + start + "  end=" + end)
-
-        return txt
+        // 获取该段落中坐标对应的字符位置
+        let relY = contentListView.contentY - delegateItem.y
+        let pos = delegateItem.positionAt(0, relY)
+        return delegateItem.text.substring(pos, pos + 100) // 取前100字符
     }
 
     function setTextAreaCursorPos(nCursorPos) {
         textArea.cursorPosition = nCursorPos
     }
 
+    function handleLinkClicked(link) {
+        console.log("Clicked link:", link)
+        document.setBackDir(link)
+        document.parsingLink(link, "reader")
+        // 如果需要保持滚动位置，可在此处记录位置
+    }
+
     DocumentHandler {
         id: document
         objectName: "dochandler"
-        document: textArea.textDocument
-        cursorPosition: textArea.cursorPosition
-        selectionStart: textArea.selectionStart
-        selectionEnd: textArea.selectionEnd
 
-        onLoaded: function (text) {
-            textArea.text = text
+        onLoaded: {
+
+            textModel.splitContent(text) // 调用C++处理
         }
         onError: {
             errorDialog.text = message
@@ -157,100 +156,34 @@ Rectangle {
         visible: backImgFile === "" ? true : false
     }
 
-    Flickable {
-        id: flickable
-        flickableDirection: Flickable.VerticalFlick
+    ListView {
+        id: contentListView
+        width: parent.width
         anchors.fill: parent
+        spacing: 5 // 段落间距
+        cacheBuffer: 500 // 预加载区域
 
-        boundsBehavior: Flickable.StopAtBounds
-        maximumFlickVelocity: 1500 // 降低滚动速度更顺滑
-
-        // 自带的默认的滚动条，外观一般，不可定制
-        // ScrollBar.vertical: ScrollBar {}
-        states: State {
-            name: "autoscroll"
-            PropertyChanges {
-                target: flickable
-            }
+        // 声明 C++ 模型
+        model: TextChunkModel {
+            id: textModel
         }
 
-        onMovementEnded: {
-            state = "autoscroll"
-        }
-
-        TextArea.flickable: TextArea {
-            id: textArea
-
-            visible: isEPUBText
+        clip: true
+        delegate: Text {
+            id: m_text
+            width: m_Rect.width - 10 // 留出滚动条空间
+            leftPadding: 10
+            textFormat: Text.RichText // 必须启用富文本
+            text: model.text
+            wrapMode: Text.Wrap
             font.pixelSize: FontSize
             font.family: FontName
-            font.weight: FontWeight
-            font.letterSpacing: 2
-
-            //renderType: Text.NativeRendering
-            renderType: Text.QtRendering // 在Qt6下，效果和性能要好很多
-
-            font.hintingPreference: Font.PreferVerticalHinting
-            textFormat: Qt.AutoText
-            cursorPosition: 0
-
-            wrapMode: TextArea.Wrap
-            readOnly: true
-            focus: true
-            persistentSelection: isSelText
-            selectByMouse: isSelText
-            smooth: true
             color: myTextColor
-            text: strText
 
-            onTextChanged: {
-                Qt.callLater(() => {
-                                 flickable.contentY = 0
-                                 flickable.contentHeight = contentHeight + 20 // 加边距
-                             })
-            }
+            renderType: Text.NativeRendering // 使用原生渲染引擎
 
-            onLinkActivated: function (link){
+            onLinkActivated: handleLinkClicked(link) // 处理链接点击
 
-                console.log("reader htmlPath=" + htmlPath)
-                console.log("reader Link=" + link)
-                document.setBackDir(link)
-                document.parsingLink(link, "reader")
-            }
-
-
-            /*MouseArea {
-                id: mouse_area
-                anchors.fill: parent
-                hoverEnabled: true
-                acceptedButtons: Qt.LeftButton
-                propagateComposedEvents: true // 是否将事件传递给父元素
-
-                onClicked: {
-
-                    var my = mouseY - flickable.contentY
-                    console.log("clicked..." + mouseY + " " + my + myH)
-
-                    if (my < myH / 3) {
-                        m_Reader.setPageScroll0()
-                    }
-
-                    if (my > myH / 3 && my < (myH * 2) / 3) {
-                        m_Reader.setPanelVisible()
-                    }
-
-                    if (my > (myH * 2) / 3) {
-                        m_Reader.setPageScroll1()
-                    }
-                }
-                onDoubleClicked: {
-                    console.log("double...")
-                    m_Reader.selectText()
-                }
-                onPressAndHold: {
-                    console.log("press and hold...")
-                }
-            }*/
             PropertyAnimation on x {
                 easing.type: Easing.Linear
                 running: isAni
@@ -259,22 +192,14 @@ Rectangle {
                 duration: 200
                 loops: 1
             }
-
-            SequentialAnimation on opacity {
-                //应用于透明度上的序列动画
-                running: false
-                loops: 1 //Animation.Infinite //无限循环
-                NumberAnimation {
-                    from: 0
-                    to: 1
-                    duration: 1000
-                } //淡出效果
-                PauseAnimation {
-                    duration: 0
-                } //暂停400ms
-            }
         }
 
+
+        /*ScrollBar.vertical: ScrollBar {
+            width: 10
+            policy: contentListView.contentHeight
+                    > contentListView.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+        }*/
         ScrollBar.vertical: ScrollBar {
             id: vbar
             policy: ScrollBar.AsNeeded
@@ -282,7 +207,7 @@ Rectangle {
             width: 10
 
             // 关键：size 绑定到可视区域比例
-            size: flickable.visibleArea.heightRatio
+            size: contentListView.visibleArea.heightRatio
             // 可选：设置滑块最小尺寸（避免过小）
             minimumSize: 0.1
 
@@ -312,35 +237,5 @@ Rectangle {
 
             background: null // 彻底消除背景容器
         }
-    }
-
-    ListView {
-        id: idContentListView
-        model: stringList
-        visible: false
-
-        anchors {
-            fill: parent
-            margins: 2
-        }
-        delegate: Text {
-
-            anchors {
-                left: parent.left
-                right: parent.right
-            }
-
-            Layout.preferredWidth: parent.width
-            textFormat: Qt.AutoText //Text.PlainText
-            wrapMode: Text.Wrap
-            font.pixelSize: FontSize
-            font.family: FontName
-            font.weight: FontWeight
-            font.letterSpacing: 2
-            color: myTextColor
-
-            text: model.modelData
-        }
-        ScrollBar.vertical: ScrollBar {}
     }
 }

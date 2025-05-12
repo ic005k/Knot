@@ -1,11 +1,13 @@
 #ifndef READER_H
 #define READER_H
 
+#include <QAbstractListModel>
 #include <QDialog>
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomNamedNodeMap>
 #include <QEvent>
+#include <QFile>
 #include <QFontDialog>
 #include <QPlainTextEdit>
 #include <QProcess>
@@ -13,16 +15,19 @@
 #include <QQmlEngine>
 #include <QQuickView>
 #include <QQuickWidget>
+#include <QSaveFile>
 #include <QString>
-#include <QStringConverter>
-#include <QStringDecoder>
+#include <QStringList>
 #include <QTextBlock>
 #include <QTextBrowser>
+#include <QTextCodec>
 #include <QVBoxLayout>
 #include <QXmlStreamReader>
 
 #include "src/Reader/DocumentHandler.h"
 #include "src/Reader/File.h"
+
+class TextChunkModel;
 
 namespace Ui {
 class Reader;
@@ -177,6 +182,38 @@ class Reader : public QDialog {
   QString strFind;
   void gotoCataList(QString htmlFile);
   int currentCataIndex = 0;
+};
+
+class TextChunkModel : public QAbstractListModel {
+  Q_OBJECT
+ public:
+  explicit TextChunkModel(QObject *parent = nullptr);
+
+  // 定义角色枚举
+  enum CustomRoles {
+    TextRole = Qt::UserRole + 1  // 从UserRole开始分配自定义角色
+  };
+
+  // 必须实现的接口
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  QVariant data(const QModelIndex &index, int role) const override;
+  QHash<int, QByteArray> roleNames() const override;
+
+  // 业务方法
+  Q_INVOKABLE void splitContent(const QString &fullText);
+  Q_INVOKABLE void appendChunks(const QStringList &chunks);
+  Q_INVOKABLE void clear();
+  Q_INVOKABLE QVariantMap get(int index) const;
+
+  Q_INVOKABLE void splitContent1(const QString &fullText);
+ signals:
+  void chunksChanged(const QVector<QString> &chunks);
+
+ private:
+  QHash<int, QByteArray> m_roleNames;  // 存储角色定义
+  QStringList m_chunks;                // 存储分割后的文本块
+  void handleComplexStructure(QString &text, int &currentPos);
+  bool isValidNesting(const QString &htmlBlock);
 };
 
 #endif  // READER_H

@@ -6,6 +6,7 @@
 
     <item
         android:id="@+id/format"
+        android:visible="false"
         android:title="格式化" />
 
     <item android:id="@+id/image"

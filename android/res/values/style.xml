@@ -37,6 +37,19 @@
         <item name="colorPrimary">@color/green</item>
         <item name="windowActionBar">true</item>
     </style>
+
+    <style name="CircularProgressStyle" parent="Theme.AppCompat">
+        <item name="colorControlActivated">#2196F3</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:minWidth">0dp</item>
+    </style>
+
+    <style name="TransparentTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <!-- 关键：禁用默认窗口蒙层 -->
+        <item name="android:windowIsFloating">false</item>
+    </style>
    
 
 </resources>

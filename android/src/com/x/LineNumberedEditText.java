@@ -94,6 +94,7 @@ public class LineNumberedEditText extends EditText {
     private final Context context;
     private Rect rect;
     private Paint paint;
+    private int totalLines = 2000;
 
     public LineNumberedEditText(Context context) {
         super(context);
@@ -114,21 +115,25 @@ public class LineNumberedEditText extends EditText {
     }
 
     private void init() {
-        rect = new Rect();
-        paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(Color.GRAY);
-        paint.setTextSize(32);
-        paint.setTypeface(Typeface.MONOSPACE);
+        int lineCount = getLineCount();
+
+        if (lineCount <= totalLines) {
+            rect = new Rect();
+            paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(Color.GRAY);
+            paint.setTextSize(32);
+            paint.setTypeface(Typeface.MONOSPACE);
+        }
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
 
-        int baseline;
         int lineCount = getLineCount();
 
-        if (lineCount <= 2000) {
+        if (lineCount <= totalLines) {
+            int baseline;
             int lineNumber = 1;
 
             for (int i = 0; i < lineCount; ++i) {
@@ -153,7 +158,6 @@ public class LineNumberedEditText extends EditText {
                 setPadding(100, getPaddingTop(), getPaddingRight(), getPaddingBottom());
             }
         }
-
         super.onDraw(canvas);
 
     }

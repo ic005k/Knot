@@ -390,7 +390,8 @@ MainWindow::MainWindow(QWidget *parent)
   init_Sensors();
   init_TotalData();
 
-  m_Reader->initReader();
+  // 延时执行
+  QTimer::singleShot(100, this, [this]() { m_Reader->initReader(); });
 
   loading = false;
 

@@ -231,13 +231,13 @@ public class ImageViewerActivity extends Activity
                     // 表示按了home键,程序直接进入到后台
                     System.out.println("NoteEditor HOME键被按下...");
 
-                    onBackPressed();
+                    // onBackPressed();
 
                 } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
                     // 表示长按home键,显示最近使用的程序
                     System.out.println("NoteEditor 长按HOME键...");
 
-                    onBackPressed();
+                    // onBackPressed();
 
                 }
             }
@@ -283,10 +283,7 @@ public class ImageViewerActivity extends Activity
     @Override
     protected void onDestroy() {
         unregisterReceiver(mHomeKeyEvent);
-
-        Intent i = new Intent(this, MDActivity.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        this.startActivity(i);
+        getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
 
         super.onDestroy();
 

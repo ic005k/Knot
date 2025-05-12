@@ -36,17 +36,18 @@
         />
     </LinearLayout>
     <!-- 下部分 -->
-    <ScrollView
-        android:id="@+id/scroll_view"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="0dp">
+        android:layout_marginTop="0dp"/>
         <!--"?android:attr/actionBarSize" -->
-        <TextView
+        
+        <!--TextView
             android:id="@+id/markdownView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="1dp"
-        />
-    </ScrollView>
+        /-->
+    
 </LinearLayout>

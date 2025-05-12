@@ -42,6 +42,7 @@ import android.content.BroadcastReceiver;
 import android.app.PendingIntent;
 import android.text.TextUtils;
 import java.lang.CharSequence;
+
 import android.app.Service;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -75,6 +76,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.io.IOException;
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -214,6 +216,8 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
     public native static void CallJavaNotify_14();
 
     private static boolean isGoBackKnot = false;
+
+    private ProgressBar progressBar;
 
     public static boolean isZh(Context context) {
         Locale locale = context.getResources().getConfiguration().locale;
@@ -453,34 +457,41 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
             setContentView(R.layout.noteeditor);
         }
 
-        final String mdfile = MyActivity.strMDFile; // getIntent().getStringExtra("MD_FILE_PATH");
+        progressBar = findViewById(R.id.progressBar);
 
         bindViews();
 
+        // 监听 UI 绘制完成
+        findViewById(android.R.id.content).post(() -> {
+
+            // 启动异步任务
+            loadMDFileChunks();
+        });
+    }
+
+    private void loadMDFile() {
+        final String mdfile = MyActivity.strMDFile; // getIntent().getStringExtra("MD_FILE_PATH");
         // 启动子线程执行耗时操作
         Handler mHandler = new Handler(Looper.getMainLooper());
 
         new Thread(new Runnable() {
-
             @Override
             public void run() {
+
                 // 子线程读取文件
                 final String data = readTextFile(mdfile);
 
                 // 文件读取完成后，通过 Handler 发送消息到主线程
                 mHandler.post(new Runnable() {
-
                     @Override
                     public void run() {
                         editNote.setText(data);
-
                         setCursorPos();
                         openSearchResult();
 
                         isTextChanged = false;
                         initRedoUndo();
                         initEditTextChangedListener();
-
                         init_all();
 
                     }
@@ -488,6 +499,84 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
             }
         }).start();
 
+    }
+
+    private void loadMDFileChunks() {
+        final String mdfile = MyActivity.strMDFile;
+        // final Handler mHandler = new Handler(Looper.getMainLooper());
+
+        // showAndroidProgressBar();
+        // progressBar.setVisibility(View.VISIBLE);
+        findViewById(R.id.progressContainer).setVisibility(View.VISIBLE);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // 1. 子线程读取文件
+                final String data = readTextFile(mdfile);
+
+                // 2. 将数据分块
+                final int totalChunks = 50; // 分块数量（根据数据量调整）
+                final int chunkSize = data.length() / totalChunks;
+                final AtomicInteger currentChunk = new AtomicInteger(0);
+
+                // 3. 分批次更新UI
+                for (int i = 0; i < totalChunks; i++) {
+                    final int start = i * chunkSize;
+                    final int end = (i == totalChunks - 1) ? data.length() : start + chunkSize;
+                    final String chunk = data.substring(start, end);
+
+                    // 主线程追加文本并更新进度
+                    // mHandler.post(new Runnable() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (currentChunk.get() == 0) {
+                                editNote.setText(chunk); // 首次设置文本
+                            } else {
+                                editNote.append(chunk); // 后续追加文本
+                            }
+                            currentChunk.incrementAndGet();
+
+                            // 更新进度条（假设进度条支持进度百分比）
+                            // int progress = (int) ((currentChunk.get() / (float) totalChunks) * 100);
+                            // updateProgressBar(progress);
+                        }
+                    });
+
+                    // 控制速度（避免主线程过载）
+                    try {
+                        int m_sleep = 50;
+                        String str_file = MyActivity.strMDFile;
+                        File file = new File(str_file);
+                        if (getFileSizeInKB(file) < 200)
+                            m_sleep = 2;
+                        else
+                            m_sleep = 50;
+                        Thread.sleep(m_sleep); // 调整此值以平衡流畅性与速度
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                // 4. 最终关闭进度条并执行其他操作
+                // mHandler.post(new Runnable() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setCursorPos();
+                        openSearchResult();
+                        isTextChanged = false;
+                        initRedoUndo();
+                        initEditTextChangedListener();
+                        init_all();
+                        // closeAndroidProgressBar();
+                        // progressBar.setVisibility(View.GONE);
+                        findViewById(R.id.progressContainer).setVisibility(View.GONE);
+                    }
+                });
+            }
+        }).start();
     }
 
     private void setCursorPos() {
@@ -535,38 +624,9 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
 
         writeReceiveData();
 
-        // HomeKey
-        registerReceiver(mHomeKeyEvent, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
         initMenuTitle();
 
-        // CallJavaNotify_1();
-
     }
-
-    private BroadcastReceiver mHomeKeyEvent = new BroadcastReceiver() {
-        String SYSTEM_REASON = "reason";
-        String SYSTEM_HOME_KEY = "homekey";
-        String SYSTEM_HOME_KEY_LONG = "recentapps";
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
-                String reason = intent.getStringExtra(SYSTEM_REASON);
-                if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
-                    // 表示按了home键,程序直接进入到后台
-                    System.out.println("NoteEditor HOME键被按下...");
-
-                    onBackPressed();
-                } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
-                    // 表示长按home键,显示最近使用的程序
-                    System.out.println("NoteEditor 长按HOME键...");
-
-                    onBackPressed();
-                }
-            }
-        }
-    };
 
     @Override
     public void onPause() {
@@ -589,7 +649,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
             showNormalDialog();
         else {
             super.onBackPressed();
-            AnimationWhenClosed();
+            // AnimationWhenClosed();
         }
 
     }
@@ -625,14 +685,13 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
 
         } else {
             if (MyActivity.isEdit) {
-                Intent i = new Intent(this, MDActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                this.startActivity(i);
+
             }
         }
 
-        unregisterReceiver(mHomeKeyEvent);
         MyService.clearNotify();
+
+        getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
 
         super.onDestroy();
 
@@ -890,14 +949,41 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
     }
 
     private void saveNote() {
+        final String mContent = editNote.getText().toString();
+        final String filename = MyActivity.strMDFile;
 
-        // save current text
-        String mContent = editNote.getText().toString();
-        // String mPath = "/storage/emulated/0/.Knot/";
-        String filename = MyActivity.strMDFile; // mPath + "note_text.txt";
-        writeTextFile(mContent, filename);
+        // showAndroidProgressBar();
+        // progressBar.setVisibility(View.VISIBLE); // 显示进度条
+        findViewById(R.id.progressContainer).setVisibility(View.VISIBLE);
 
-        CallJavaNotify_6();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    writeTextFile(mContent, filename);
+
+                    CallJavaNotify_6();
+
+                } finally {
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // closeAndroidProgressBar();
+                            // progressBar.setVisibility(View.GONE);
+                            findViewById(R.id.progressContainer).setVisibility(View.GONE);
+
+                            if (MyActivity.isEdit) {
+                                setResult(MDActivity.RESULT_SAVE);
+                            }
+                            finish();
+
+                        }
+                    });
+
+                }
+            }
+        }).start();
     }
 
     private void openFilePicker() {
@@ -1152,14 +1238,6 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
     }
 
     private void showNormalDialog() {
-        /*
-         * @setIcon 设置对话框图标
-         * 
-         * @setTitle 设置对话框标题
-         * 
-         * @setMessage 设置对话框消息提示
-         * setXXX方法返回Dialog对象，因此可以链式设置属性
-         */
         final AlertDialog.Builder normalDialog = new AlertDialog.Builder(NoteEditor.this);
         normalDialog.setIcon(R.drawable.alarm);
         normalDialog.setTitle("Knot");
@@ -1179,7 +1257,6 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
                     public void onClick(DialogInterface dialog, int which) {
                         // ...To-do
                         saveNote();
-                        finish();
 
                     }
                 });
@@ -1189,6 +1266,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // ...To-do
+
                         finish();
                     }
                 });

@@ -35,11 +35,13 @@ int maxBytes = 400000;
 int unzipMethod = 3; /* 1 system  2 QZipReader 3 ziplib */
 int zlibMethod = 1;
 int readerFontSize = 18;
-int epubFileMethod = 1;
+int epubFileMethod = 2;
 
 QByteArray bookFileData;
 
 Reader::Reader(QWidget *parent) : QDialog(parent) {
+  qmlRegisterType<TextChunkModel>("EBook.Models", 1, 0, "TextChunkModel");
+
   this->installEventFilter(this);
 
   if (!isAndroid) mw_one->ui->btnShareBook->hide();
@@ -435,10 +437,14 @@ void Reader::openFile(QString openfile) {
 
         strShowMsg = "Del temp ...";
         deleteDirfile(dirpath1);
-        strShowMsg = "Copy temp0 to temp ...";
-        copyDirectoryFiles(dirpath, dirpath1, true);
-        strShowMsg = "Del temp0 ...";
-        deleteDirfile(dirpath);
+        // strShowMsg = "Copy temp0 to temp ...";
+        // copyDirectoryFiles(dirpath, dirpath1, true);
+        // strShowMsg = "Del temp0 ...";
+        // deleteDirfile(dirpath);
+        strShowMsg = "Rename temp0 to temp...";
+        QDir dir;
+        dir.rename(dirpath, dirpath1);
+
         htmlFiles.clear();
 
         strOpfPath.replace(dirpath, dirpath1);
@@ -2421,4 +2427,178 @@ void Reader::setTextAreaCursorPos(int nCursorPos) {
   root = mw_one->ui->qwReader->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "setTextAreaCursorPos",
                             Q_ARG(QVariant, nCursorPos));
+}
+
+//===============================================================================================
+// TextChunkModel
+//===============================================================================================
+
+// 2：正确的分割逻辑
+void TextChunkModel::splitContent1(const QString &fullText) {
+  beginResetModel();  // 开始重置模型
+
+  m_chunks.clear();
+
+  // 使用完整段落匹配（含闭合标签）
+  static QRegularExpression regex(
+      R"(<p\b[^>]*>(.*?)<\/p>)",
+      QRegularExpression::CaseInsensitiveOption |
+          QRegularExpression::DotMatchesEverythingOption);
+
+  QRegularExpressionMatchIterator i = regex.globalMatch(fullText);
+  while (i.hasNext()) {
+    QRegularExpressionMatch match = i.next();
+    QString paragraph = match.captured(1);
+    // 清理HTML标签（简单示例）
+    paragraph.remove(QRegularExpression("<[^>]*>"));
+    m_chunks.append(paragraph);
+  }
+
+  endResetModel();  // 结束重置，触发视图更新
+}
+
+// 1：正确初始化
+TextChunkModel::TextChunkModel(QObject *parent) : QAbstractListModel(parent) {
+  // 初始化角色名
+  m_roleNames[TextRole] = "text";
+}
+
+void TextChunkModel::splitContent(const QString &fullText) {
+  beginResetModel();
+  m_chunks.clear();
+  m_chunks.append(fullText);
+  endResetModel();
+
+  return;
+
+  // 扩展正则表达式匹配范围
+  static QRegularExpression regex(
+      R"((</?([a-zA-Z]+)[^>]*>)(.*?)(?=</?\2[^>]*>|$))",  // 匹配完整标签结构
+      QRegularExpression::CaseInsensitiveOption |
+          QRegularExpression::DotMatchesEverythingOption |
+          QRegularExpression::UseUnicodePropertiesOption);
+
+  // 分阶段处理策略
+  QString remainingText = fullText;
+  int lastPos = 0;
+
+  // 第一阶段：匹配完整标签块
+  QRegularExpressionMatchIterator it = regex.globalMatch(remainingText);
+  while (it.hasNext()) {
+    QRegularExpressionMatch match = it.next();
+    QString fullTagBlock = match.captured(0);
+
+    // 验证嵌套层级
+    if (isValidNesting(fullTagBlock)) {
+      m_chunks.append(fullTagBlock);
+      lastPos = match.capturedEnd();
+    } else {
+      // 处理异常情况
+      handleComplexStructure(remainingText, lastPos);
+    }
+  }
+
+  // 第二阶段：处理剩余文本
+  if (lastPos < remainingText.length()) {
+    QString remaining = remainingText.mid(lastPos);
+    if (!remaining.trimmed().isEmpty()) {
+      m_chunks.append(remaining);
+    }
+  }
+
+  endResetModel();
+}
+
+// 辅助方法：验证标签嵌套有效性
+bool TextChunkModel::isValidNesting(const QString &htmlBlock) {
+  QStack<QString> tagStack;
+  QRegularExpression tagRegex(R"(<(/?)([a-zA-Z]+)[^>]*>)");
+
+  QRegularExpressionMatchIterator it = tagRegex.globalMatch(htmlBlock);
+  while (it.hasNext()) {
+    QRegularExpressionMatch match = it.next();
+    QString tagName = match.captured(2).toLower();
+    if (match.captured(1).isEmpty()) {  // 开始标签
+      tagStack.push(tagName);
+    } else {  // 结束标签
+      if (tagStack.isEmpty() || tagStack.pop() != tagName) {
+        return false;
+      }
+    }
+  }
+  return tagStack.isEmpty();
+}
+
+// 处理复杂结构（递归实现）
+void TextChunkModel::handleComplexStructure(QString &text, int &currentPos) {
+  QRegularExpression deepRegex(R"(<(div|section|article)\b[^>]*>)",
+                               QRegularExpression::CaseInsensitiveOption);
+  QRegularExpressionMatch match = deepRegex.match(text, currentPos);
+
+  if (match.hasMatch()) {
+    QString containerTag = match.captured(1);
+    QString endTag = QString("</%1>").arg(containerTag);
+
+    int start = match.capturedStart();
+    int end = text.indexOf(endTag, match.capturedEnd());
+
+    if (end != -1) {
+      m_chunks.append(text.mid(start, end - start + endTag.length()));
+      currentPos = end + endTag.length();
+    }
+  }
+}
+
+// 3：完善角色定义
+QHash<int, QByteArray> TextChunkModel::roleNames() const {
+  return {
+      {TextRole, "text"},           // 自定义角色
+      {Qt::DisplayRole, "display"}  // 保留默认角色
+  };
+}
+
+// 4：正确实现数据访问
+QVariant TextChunkModel::data(const QModelIndex &index, int role) const {
+  if (!index.isValid() || index.row() >= m_chunks.size()) return QVariant();
+
+  if (role == TextRole || role == Qt::DisplayRole)
+    return m_chunks.at(index.row());
+
+  return QVariant();
+}
+
+// 5：正确清空数据
+void TextChunkModel::clear() {
+  beginResetModel();
+  m_chunks.clear();
+  endResetModel();
+}
+
+// 6：正确实现追加方法
+void TextChunkModel::appendChunks(const QStringList &chunks) {
+  if (chunks.isEmpty()) return;
+
+  beginInsertRows(QModelIndex(), m_chunks.size(),
+                  m_chunks.size() + chunks.size() - 1);
+  m_chunks.append(chunks);
+  endInsertRows();
+}
+
+int TextChunkModel::rowCount(const QModelIndex &parent) const {
+  return parent.isValid() ? 0 : m_chunks.size();
+}
+
+QVariantMap TextChunkModel::get(int index) const {
+  QVariantMap result;
+
+  // 检查索引是否有效
+  if (index < 0 || index >= m_chunks.size()) {
+    qWarning() << "Invalid index:" << index;
+    return result;  // 返回空对象
+  }
+
+  // 通过角色名填充数据（需与 roleNames() 中的定义一致）
+  result["text"] = m_chunks.at(index);  // 文本数据存储在 m_chunks
+
+  return result;
 }

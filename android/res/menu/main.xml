@@ -6,6 +6,7 @@
 
     <item
         android:id="@+id/format"
+        android:visible="false"
         android:title="Format" />
 
     <item android:id="@+id/image"

@@ -171,7 +171,7 @@ public class MyActivity
   public static boolean isBackMainUI = false;
 
   public static boolean isDark = false;
-  private static MyActivity m_instance = null;
+  public static MyActivity m_instance = null;
   private static SensorManager mSensorManager;
   public static int isStepCounter = -1;
   public static float stepCounts;
@@ -693,11 +693,6 @@ public class MyActivity
         intent,
         PendingIntent.FLAG_IMMUTABLE);
 
-    // HomeKey
-    registerReceiver(
-        mHomeKeyEvent,
-        new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-
     addDeskShortcuts();
 
     mytts = TTSUtils.getInstance(this);
@@ -1001,21 +996,16 @@ public class MyActivity
     if (null != mFileWatcher)
       mFileWatcher.stopWatching(); // 停止监听
 
-    // 让系统自行处理，否则退出时有可能出现崩溃
-    // if(mHomeKeyEvent!=null)
-    // unregisterReceiver(mHomeKeyEvent);
-
-    // if(mScreenStatusReceiver!=null)
-    // unregisterReceiver(mScreenStatusReceiver);
-
     if (ReOpen) {
       openAppFromPackageName("com.x");
       Log.i(TAG, "reopen = done...");
     }
 
     android.os.Process.killProcess(android.os.Process.myPid());
+    getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
 
     super.onDestroy();
+    m_instance = null;
   }
 
   @Override
@@ -1028,10 +1018,12 @@ public class MyActivity
 
   @Override
   public void onActivityResumed(Activity activity) {
+
   }
 
   @Override
   public void onActivityPaused(Activity activity) {
+
   }
 
   @Override
@@ -1104,28 +1096,6 @@ public class MyActivity
 
     return str;
   }
-
-  private BroadcastReceiver mHomeKeyEvent = new BroadcastReceiver() {
-    String SYSTEM_REASON = "reason";
-    String SYSTEM_HOME_KEY = "homekey";
-    String SYSTEM_HOME_KEY_LONG = "recentapps";
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-      String action = intent.getAction();
-      if (action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
-        String reason = intent.getStringExtra(SYSTEM_REASON);
-        if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
-          // 表示按了home键,程序直接进入到后台
-          System.out.println("MyActivity HOME键被按下...");
-
-        } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
-          // 表示长按home键,显示最近使用的程序
-          System.out.println("MyActivity 长按HOME键...");
-        }
-      }
-    }
-  };
 
   // ---------------------------------------------------------------------------------------------
   public static int copyFile(String srcPath, String FileName) {
@@ -1771,7 +1741,7 @@ public class MyActivity
     context.startActivity(i);
   }
 
-  public void openMDWindow() {
+  public static void openMDWindow() {
     Intent i = new Intent(context, MDActivity.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     context.startActivity(i);
@@ -1948,13 +1918,13 @@ public class MyActivity
     m_handler.sendMessage(m_handler.obtainMessage(1, msg));
   }
 
-  public void showAndroidProgressBar() {
+  public static void showAndroidProgressBar() {
     Intent i = new Intent(context, MyProgBar.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     context.startActivity(i);
   }
 
-  public void closeAndroidProgressBar() {
+  public static void closeAndroidProgressBar() {
     if (MyProgBar.m_MyProgBar != null)
       MyProgBar.m_MyProgBar.finish();
   }

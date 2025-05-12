@@ -3,6 +3,7 @@ package com.x;
 import com.x.MyActivity;
 import com.x.NoteEditor;
 import com.x.ImageViewerActivity;
+import com.x.MDActivity.MarkdownAdapter;
 import com.x.DefaultGrammars;
 
 import android.os.Bundle;
@@ -70,6 +71,7 @@ import org.commonmark.node.*;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 import java.util.Iterator;
 import java.util.List;
@@ -219,13 +221,25 @@ import io.noties.markwon.html.HtmlTag;
 import io.noties.markwon.html.tag.SimpleTagHandler;
 import io.noties.markwon.MarkwonConfiguration;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 public class MDActivity extends Activity implements View.OnClickListener, Application.ActivityLifecycleCallbacks {
 
     private TextView markdownView;
     private TextView titleView;
     private Button btnEdit;
-    private ScrollView scrollView;
+
     private String strmdFileName;
+    private static Markwon markwon;
+
+    private RecyclerView recyclerView;
+    private MarkdownAdapter adapter;
+    private List<String> chunks = new ArrayList<>();
+    private static final int CHUNK_SIZE = 100; // 每100行作为一个块
+
+    private static final int REQUEST_EDIT = 1; // 可以是任意整数（建议从 1 开始）
+    public static final int RESULT_SAVE = 1001;
 
     public native static void CallJavaNotify_0();
 
@@ -281,10 +295,9 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
             setContentView(R.layout.activity_md);
         }
 
-        markdownView = findViewById(R.id.markdownView);
-        markdownView.setTextSize(TypedValue.COMPLEX_UNIT_SP, MyActivity.myFontSize);
+        initMarkdwon();
 
-        markdownView.setText("Loading, please wait...");
+        initRecyclerView();
 
         titleView = findViewById(R.id.title);
         titleView.setText(MyActivity.strMDTitle);
@@ -296,21 +309,33 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
             btnEdit.setText("Edit");
         btnEdit.setOnClickListener(this);
 
-        scrollView = findViewById(R.id.scroll_view);
+        loadMD();
 
+        MyActivity.isEdit = false;
+
+    }
+
+    private void initMarkdwon() {
+        float fixedTextSize = 16; // 单位：sp
+
+        // 将 sp 转换为像素（JLatexMathPlugin 需要像素值）
+        float textSizeInPx = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_SP,
+                fixedTextSize,
+                getResources().getDisplayMetrics());
         final Prism4j prism4j = new Prism4j(new MyGrammarLocator());
 
         // 初始化 Markwon
-        // .usePlugin(ImagesPlugin.create())
-        final Markwon markwon = Markwon.builder(this)
+        Context appContext = getApplicationContext();
+        markwon = Markwon.builder(appContext)
                 .usePlugin(StrikethroughPlugin.create())
-                .usePlugin(TablePlugin.create(this))
-                .usePlugin(TaskListPlugin.create(this))
+                .usePlugin(TablePlugin.create(appContext))
+                .usePlugin(TaskListPlugin.create(appContext))
                 .usePlugin(LinkifyPlugin.create())
                 .usePlugin(SimpleExtPlugin.create())
-                .usePlugin(GlideImagesPlugin.create(this))
+                .usePlugin(GlideImagesPlugin.create(appContext))
                 .usePlugin(MarkwonInlineParserPlugin.create())
-                .usePlugin(JLatexMathPlugin.create(markdownView.getTextSize(), builder -> {
+                .usePlugin(JLatexMathPlugin.create(textSizeInPx, builder -> {
                     builder.inlinesEnabled(true); // 启用行内公式
                 }))
                 .usePlugin(new AbstractMarkwonPlugin() {
@@ -325,93 +350,7 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
                 .usePlugin(SyntaxHighlightPlugin.create(prism4j, Prism4jThemeDarkula.create()))
                 .usePlugin(HtmlPlugin.create())
                 .build();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // 1. 执行耗时操作（如下载、计算等）
-                StringBuilder markdownContent = new StringBuilder();
-                try {
-                    // "/storage/emulated/0/.Knot/mymd.md"
-                    File file = new File(MyActivity.strMDFile);
-                    BufferedReader reader = new BufferedReader(new FileReader(file));
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        markdownContent.append(line).append("\n");
-                    }
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                // 2. 完成后切换回主线程更新 UI
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // 在主线程执行后续操作
-                        String strMD = markdownContent.toString();
-                        strMD = strMD.replace("images/", "/storage/emulated/0/KnotData/memo/images/");
-                        markwon.setMarkdown(markdownView, strMD);
-
-                        markdownView.getViewTreeObserver()
-                                .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-
-                                    public boolean onPreDraw() {
-                                        // 确保只执行一次
-                                        markdownView.getViewTreeObserver().removeOnPreDrawListener(this);
-
-                                        // 恢复滚动条位置
-                                        SharedPreferences sharedPreferences = getSharedPreferences(
-                                                strmdFileName + "scroll_position",
-                                                MODE_PRIVATE);
-                                        int savedScrollX = sharedPreferences.getInt("scrollX", 0);
-                                        int savedScrollY = sharedPreferences.getInt("scrollY", 0);
-                                        scrollView.scrollTo(savedScrollX, savedScrollY);
-                                        // Toast.makeText(MDActivity.this, savedScrollX + " " + savedScrollY,
-                                        // Toast.LENGTH_LONG).show();
-
-                                        return true; // 返回 true 表示继续绘制
-                                    }
-                                });
-
-                    }
-                });
-            }
-        }).start();
-
-        // HomeKey
-        registerReceiver(mHomeKeyEvent, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-
-        MyActivity.isEdit = false;
-
     }
-
-    private BroadcastReceiver mHomeKeyEvent = new BroadcastReceiver() {
-        String SYSTEM_REASON = "reason";
-        String SYSTEM_HOME_KEY = "homekey";
-        String SYSTEM_HOME_KEY_LONG = "recentapps";
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
-                String reason = intent.getStringExtra(SYSTEM_REASON);
-                if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
-                    // 表示按了home键,程序直接进入到后台
-                    System.out.println("NoteEditor HOME键被按下...");
-
-                    onBackPressed();
-
-                } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
-                    // 表示长按home键,显示最近使用的程序
-                    System.out.println("NoteEditor 长按HOME键...");
-
-                    onBackPressed();
-
-                }
-            }
-        }
-    };
 
     @Override
     public void onClick(View v) {
@@ -420,10 +359,24 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
 
                 MyActivity.isEdit = true;
                 Intent i = new Intent(this, NoteEditor.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                this.startActivity(i);
-                onBackPressed();
+                // i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                // this.startActivity(i);
+                startActivityForResult(i, REQUEST_EDIT);
+
                 break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_EDIT && resultCode == RESULT_SAVE) {
+            // 1. 关闭当前
+            finish();
+
+            // 2. 启动新的实例
+            MyActivity.openMDWindow();
+
         }
     }
 
@@ -439,6 +392,23 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
         System.out.println("NoteEditor onPause...");
         super.onPause();
 
+        int position = ((LinearLayoutManager) recyclerView.getLayoutManager())
+                .findFirstVisibleItemPosition();
+        View view = recyclerView.getChildAt(0);
+        int offset = (view != null) ? view.getTop() : 0;
+
+        getSharedPreferences(strmdFileName + "scroll_position", MODE_PRIVATE)
+                .edit()
+                .putInt("scrollPosition", position)
+                .putInt("scrollOffset", offset)
+                .apply();
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
     }
 
     @Override
@@ -451,17 +421,7 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
 
     @Override
     public void onBackPressed() {
-        // 保存滚动条位置
-        int scrollX = scrollView.getScrollX();
-        int scrollY = scrollView.getScrollY();
-        // 可以将scrollX和scrollY存储起来，例如保存在SharedPreferences中
-        SharedPreferences sharedPreferences = getSharedPreferences(strmdFileName + "scroll_position",
-                MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt("scrollX", scrollX);
-        editor.putInt("scrollY", scrollY);
-        editor.apply();
-
+        MyActivity.closeAndroidProgressBar();
         super.onBackPressed();
         // AnimationWhenClosed();
 
@@ -469,7 +429,7 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(mHomeKeyEvent);
+        getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
 
         super.onDestroy();
 
@@ -513,16 +473,13 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt("scrollY", scrollView.getScrollY());
+
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null) {
-            int scrollY = savedInstanceState.getInt("scrollY");
-            scrollView.post(() -> scrollView.scrollTo(0, scrollY));
-        }
+
     }
 
     private void AnimationWhenClosed() {
@@ -554,8 +511,6 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
 
             callImageView(link);
             // callThirdPartyImageViewer(link);
-
-            onBackPressed();
 
         }
     }
@@ -598,6 +553,102 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             getWindow().setStatusBarColor(Color.parseColor(color));
         }
+    }
+
+    private void initRecyclerView() {
+        recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setItemAnimator(null); // 禁用动画提升性能
+        recyclerView.setHasFixedSize(true); // 如果所有item高度固定可设置
+    }
+
+    // 滚动位置恢复/保存
+    private void restoreScrollPosition() {
+        SharedPreferences prefs = getSharedPreferences(strmdFileName + "scroll_position", MODE_PRIVATE);
+        recyclerView.post(() -> {
+            int position = prefs.getInt("scrollPosition", 0);
+            int offset = prefs.getInt("scrollOffset", 0);
+            ((LinearLayoutManager) recyclerView.getLayoutManager())
+                    .scrollToPositionWithOffset(position, offset);
+        });
+    }
+
+    // ViewHolder 类
+    static class MarkdownViewHolder extends RecyclerView.ViewHolder {
+        TextView textView;
+
+        public MarkdownViewHolder(View itemView) {
+            super(itemView);
+            textView = itemView.findViewById(R.id.markdown_view);
+        }
+    }
+
+    // 自定义 RecyclerView 适配器
+    class MarkdownAdapter extends RecyclerView.Adapter<MarkdownViewHolder> {
+        private final List<String> chunks;
+        private final float textSize; // 单位：sp
+
+        public MarkdownAdapter(List<String> chunks, float textSize) {
+            this.chunks = chunks;
+            this.textSize = textSize;
+        }
+
+        @Override
+        public MarkdownViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_markdown, parent, false);
+            return new MarkdownViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(MarkdownViewHolder holder, int position) {
+            // 应用固定字体大小
+            holder.textView.setTextSize(textSize);
+
+            // Markwon markwon= Markwon.create(MDActivity.this);
+
+            markwon.setMarkdown(holder.textView, chunks.get(position));
+        }
+
+        @Override
+        public int getItemCount() {
+            return chunks.size();
+        }
+    }
+
+    private void loadMD() {
+        recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(new FileReader(MyActivity.strMDFile))) {
+                List<String> tempChunks = new ArrayList<>();
+                StringBuilder chunk = new StringBuilder();
+                int lineCount = 0;
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    chunk.append(line.replace("images/", "/storage/emulated/0/KnotData/memo/images/"))
+                            .append("\n");
+                    if (++lineCount % CHUNK_SIZE == 0) {
+                        tempChunks.add(chunk.toString());
+                        chunk.setLength(0);
+                    }
+                }
+                if (chunk.length() > 0) {
+                    tempChunks.add(chunk.toString());
+                }
+
+                runOnUiThread(() -> {
+                    float fixedTextSize = 16; // 单位：sp
+                    adapter = new MarkdownAdapter(tempChunks, fixedTextSize);
+                    recyclerView.setAdapter(adapter);
+                    restoreScrollPosition();
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
 }

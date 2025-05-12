@@ -152,29 +152,65 @@
 
 
     </LinearLayout>
-    
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:scrollbars="vertical"
-        android:fadeScrollbars="true"
-    >
 
-        <com.x.LineNumberedEditText
-            android:id="@+id/editNote"
+    <!-- 内容区域：用 FrameLayout 包裹 ScrollView 和进度条 -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!--android:layout_weight="1"-->
+
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="5dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginLeft="0dp"
-            android:text="Loading, please wait..."
-            android:textColor="#000000"
-            android:inputType="textMultiLine"
-            android:layout_weight="1"
-        />
+            android:orientation="vertical"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="true"
+        >
 
+            <com.x.LineNumberedEditText
+                android:id="@+id/editNote"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginLeft="0dp"
+                android:text="Loading, please wait..."
+                android:textColor="#000000"
+                android:inputType="textMultiLine"
+                android:layout_weight="1"
+            />
 
-    </ScrollView>
-      
+        </ScrollView>
+
+        <!-- 覆盖在内容上的进度条 -->
+        <!--ProgressBar
+         android:id="@+id/progressBar"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_gravity="center"
+         android:visibility="gone"/-->
+
+        <!-- 带背景的进度容器 -->
+        <FrameLayout
+            android:id="@+id/progressContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/progress_card_bg"
+            android:elevation="8dp"
+            android:visibility="gone"
+            android:padding="24dp">
+
+            <!-- 放大后的圆圈进度 -->
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:indeterminateTint="#FF4081"
+                android:theme="@style/CircularProgressStyle" />
+
+        </FrameLayout>
+    </FrameLayout>
+
 </LinearLayout>

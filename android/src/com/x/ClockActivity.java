@@ -346,13 +346,13 @@ public class ClockActivity
         if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
           // 表示按了home键,程序直接进入到后台
           isHomeKey = true;
-          MyActivity.closeAllAlarmWindows();
+          // MyActivity.closeAllAlarmWindows();
           System.out.println("ClockActivity HOME键被按下...");
 
         } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
           // 表示长按home键,显示最近使用的程序
           isHomeKey = true;
-          MyActivity.closeAllAlarmWindows();
+          // MyActivity.closeAllAlarmWindows();
           System.out.println("ClockActivity 长按HOME键...");
 
         }
