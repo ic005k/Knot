@@ -223,8 +223,8 @@ public class MyService extends Service {
                     .setSmallIcon(R.drawable.icon)
                     .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon))
                     .setContentTitle("Knot")
-                    .setContentText(strRun)
-                    .setContentIntent(pendingIntent).build();
+                    .setContentText(strRun).build();
+            // .setContentIntent(pendingIntent).build(); //禁用通知栏点击
 
             startForeground(1337, notification);
         }

@@ -2,11 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http:// schemas.android.com/ tools" package="com.x" android:installLocation="auto"
     android:versionCode="1" android:versionName="2.0.0">
-   
+
     <!-- The following comment will be replaced upon deployment with default permissions based on
     the dependencies of the application.
          Remove the comment if you do not require these default permissions. -->
-         
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -19,17 +19,18 @@
     <uses-permission android:name="android.permission.REORDER_TASKS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- Android 10+ 需要 -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- Android 10+
+    需要 -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
-      
+
     <uses-feature android:name="android.hardware.sensor.stepcounter" android:required="true" />
     <uses-feature android:name="android.hardware.sensor.stepdetector" android:required="true" />
-       
+
     <uses-permission android:name="android.permission.DEVICE_POWER" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    
+
     <!-- The following comment will be replaced upon deployment with default features based on the
     dependencies of the application.
          Remove the comment if you do not require these default features. -->
@@ -39,14 +40,17 @@
         android:normalScreens="true" android:smallScreens="true" />
     <application android:name="org.qtproject.qt.android.bindings.QtApplication"
         android:extractNativeLibs="true" android:hardwareAccelerated="true"
-        
         android:icon="@drawable/icon" android:label="Knot"
         tools:replace="android:appComponentFactory" android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true">
+
         <!-- android:windowSoftInputMode="adjustResize" -->
+
+        <!-- singleTop singleTask standard -->
         <activity android:name="com.x.MyActivity"
             android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density"
-            android:exported="true" android:label="Knot" android:launchMode="standard"
+            android:exported="true" android:label="Knot"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" android:theme="@style/splashScreenTheme"
             android:windowSoftInputMode="stateUnspecified">
 
@@ -60,7 +64,7 @@
             <!-- Application arguments -->
 
             <meta-data android:name="android.app.lib_name" android:value="Knot" />
-                                       
+
             <!--  Messages maps -->
             <meta-data android:name="android.app.fatal_error_msg"
                 android:value="@string/fatal_error_msg" />
@@ -94,7 +98,7 @@
             <meta-data android:name="android.app.extract_android_style" android:value="default" />
 
             <!-- extract android style -->
-            
+
             <meta-data android:name="android.app.splash_screen_drawable"
                 android:resource="@drawable/splashscreen" />
             <meta-data android:name="android.app.splash_screen_drawable_portrait"
@@ -113,6 +117,7 @@
         </service>
 
         <activity android:name="com.x.ClockActivity" android:label="Knot"
+            android:launchMode="standard"
             android:screenOrientation="portrait" android:theme="@style/splashScreenTheme">
             <meta-data android:name="android.app.splash_screen_drawable"
                 android:resource="@drawable/splashscreen" />
@@ -124,14 +129,17 @@
         </activity>
 
         <activity android:name="com.x.NoteEditor" android:label="Knot"
+            android:launchMode="standard"
             android:screenOrientation="portrait">
         </activity>
 
         <activity android:name="com.x.MDActivity" android:label="Knot"
+            android:launchMode="standard"
             android:screenOrientation="portrait">
         </activity>
 
         <activity android:name="com.x.ImageViewerActivity" android:label="Knot"
+            android:launchMode="standard"
             android:screenOrientation="portrait">
         </activity>
 
@@ -254,7 +262,7 @@
         </activity>
 
         <activity android:name="com.x.ContinueReading" android:exported="true"
-            android:label="ContinueReading" 
+            android:label="ContinueReading"
             android:theme="@style/splashScreenTheme">
             <meta-data android:name="android.app.splash_screen_drawable"
                 android:resource="@drawable/splashscreen" />
@@ -276,28 +284,37 @@
         </activity>
 
         <activity android:name="com.x.FilePicker" android:exported="true" android:label="FilePicker"
+            android:launchMode="standard"
             android:screenOrientation="portrait">
         </activity>
 
-        <activity android:name="com.x.MyProgBar" android:exported="true" android:label="MyProgBar">
+        <activity android:name="com.x.MyProgBar" android:exported="true"
+            android:launchMode="standard"
+            android:label="MyProgBar">
+
         </activity>
 
         <activity android:name="com.x.TempActivity" android:exported="true"
             android:label="TempActivity">
         </activity>
 
-        <activity android:name="com.x.MyPDF" android:exported="true" android:label="MyPDF">
+        <activity android:name="com.x.MyPDF" android:exported="true"
+            android:launchMode="standard"
+            android:label="MyPDF">
         </activity>
 
         <activity android:name="com.xhh.pdfui.PDFActivity" android:exported="true"
+            android:launchMode="standard"
             android:label="PDFActivity">
         </activity>
 
         <activity android:name="com.xhh.pdfui.PDFPreviewActivity" android:exported="true"
+            android:launchMode="standard"
             android:label="PDFPreviewActivity">
         </activity>
 
         <activity android:name="com.xhh.pdfui.PDFCatelogueActivity" android:exported="true"
+            android:launchMode="standard"
             android:label="PDFCatelogueActivity">
         </activity>
 
@@ -314,7 +331,7 @@
                 android:resource="@xml/file_paths" />
 
             <!-- meta-data android:name="androidx.core.content.FileProvider.paths" 
-                android:resource="@xml/file_paths"/ -->    
+                android:resource="@xml/file_paths"/ -->
         </provider>
 
     </application>

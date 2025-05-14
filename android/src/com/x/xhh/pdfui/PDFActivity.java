@@ -139,12 +139,10 @@ public class PDFActivity extends AppCompatActivity implements
                     // 表示按了home键,程序直接进入到后台
                     System.out.println("NoteEditor HOME键被按下...");
 
-                    onBackPressed();
                 } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
                     // 表示长按home键,显示最近使用的程序
                     System.out.println("NoteEditor 长按HOME键...");
 
-                    onBackPressed();
                 }
             }
         }

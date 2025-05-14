@@ -751,8 +751,7 @@ public class MyActivity
             while (it.hasNext()) {
               GpsSatellite satellite = it.next();
               satelliteCount++;
-              statusText.append("卫星 ").append(satelliteCount).append(" 强度: ")
-                  .append(satellite.getSnr()).append("\n");
+              statusText.append("卫星 ").append(satelliteCount).append(" 强度: ").append(satellite.getSnr()).append("\n");
             }
             statusText.insert(0, "可见卫星数量: ").append(satelliteCount).append("\n");
             strGpsStatus = statusText.toString();
@@ -1788,43 +1787,54 @@ public class MyActivity
 
   private void addDeskShortcuts() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+      SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+      if (prefs.getBoolean("shortcuts_initialized", false)) {
+        return; // 已初始化则跳过
+      }
+
       // 获取ShortcutManager对象
       shortcutManager = getSystemService(ShortcutManager.class);
 
-      String lblAddRecoed = null;
+      String lblAddRecord = null;
       String lblNewTodo = null;
       String lblNewNote = null;
       String lblContinueReading = null;
       String lblExercise = null;
       if (MyService.zh_cn) {
-        lblAddRecoed = getString(R.string.addRecord_shortcut_short_label_zh);
+        lblAddRecord = getString(R.string.addRecord_shortcut_short_label_zh);
         lblNewTodo = getString(R.string.newTodo_shortcut_short_label_zh);
         lblNewNote = getString(R.string.newNote_shortcut_short_label_zh);
         lblContinueReading = getString(R.string.continueReading_shortcut_short_label_zh);
         lblExercise = getString(R.string.exercise_shortcut_short_label_zh);
       } else {
-        lblAddRecoed = getString(R.string.addRecord_shortcut_short_label);
+        lblAddRecord = getString(R.string.addRecord_shortcut_short_label);
         lblNewTodo = getString(R.string.newTodo_shortcut_short_label);
         lblNewNote = getString(R.string.newNote_shortcut_short_label);
         lblContinueReading = getString(R.string.continueReading_shortcut_short_label);
         lblExercise = getString(R.string.exercise_shortcut_short_label);
       }
 
-      // ShortcutInfo.Builder构建快捷方式
+      // 正确构造Intent(换一种不同的方式)
+      Intent addRecordIntent = new Intent(this, AddRecord.class);
+      addRecordIntent.setAction(Intent.ACTION_MAIN);
+      addRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       ShortcutInfo shortcut0 = new ShortcutInfo.Builder(this, "Add_Record")
-          .setShortLabel(lblAddRecoed)
+          .setShortLabel(lblAddRecord)
           .setIcon(Icon.createWithResource(this, R.drawable.addrecord))
-          .setIntent(new Intent(Intent.ACTION_MAIN, null, this, AddRecord.class))
+          .setIntent(addRecordIntent)
           .build();
+
+      /*
+       * ShortcutInfo shortcut0 = new ShortcutInfo.Builder(this, "Add_Record")
+       * .setShortLabel(lblAddRecord)
+       * .setIcon(Icon.createWithResource(this, R.drawable.addrecord))
+       * .setIntent(new Intent(Intent.ACTION_MAIN, null, this, AddRecord.class))
+       * .build();
+       */
 
       ShortcutInfo shortcut1 = new ShortcutInfo.Builder(this, "New_Todo")
           .setShortLabel(lblNewTodo)
           .setIcon(Icon.createWithResource(this, R.drawable.newtodo))
-          // 跳转到某个网页
-          // .setIntent(new Intent(Intent.ACTION_VIEW,
-          // Uri.parse("https://www.baidu.com/")))
-
-          // 跳转的目标，定义Activity
           .setIntent(new Intent(Intent.ACTION_MAIN, null, this, NewTodo.class))
           .build();
 
@@ -1834,24 +1844,26 @@ public class MyActivity
           .setIntent(new Intent(Intent.ACTION_MAIN, null, this, NewNote.class))
           .build();
 
-      ShortcutInfo shortcut3 = new ShortcutInfo.Builder(
-          this,
-          "Continue_Reading")
-          .setShortLabel(lblContinueReading)
-          .setIcon(Icon.createWithResource(this, R.drawable.continuereading))
-          .setIntent(
-              new Intent(Intent.ACTION_MAIN, null, this, ContinueReading.class))
-          .build();
-
-      ShortcutInfo shortcut4 = new ShortcutInfo.Builder(this, "New_Exercise")
+      ShortcutInfo shortcut3 = new ShortcutInfo.Builder(this, "New_Exercise")
           .setShortLabel(lblExercise)
           .setIcon(Icon.createWithResource(this, R.drawable.exercise))
           .setIntent(new Intent(Intent.ACTION_MAIN, null, this, Desk_Exercise.class))
           .build();
 
-      // setDynamicShortcuts()方法来设置快捷方式
-      shortcutManager.setDynamicShortcuts(
-          Arrays.asList(shortcut0, shortcut1, shortcut2, shortcut4, shortcut3));
+      /*
+       * ShortcutInfo shortcut4 = new ShortcutInfo.Builder(
+       * this,
+       * "Continue_Reading")
+       * .setShortLabel(lblContinueReading)
+       * .setIcon(Icon.createWithResource(this, R.drawable.continuereading))
+       * .setIntent(
+       * new Intent(Intent.ACTION_MAIN, null, this, ContinueReading.class))
+       * .build();
+       */
+
+      // 设置动态快捷方式（仅首次）
+      shortcutManager.setDynamicShortcuts(Arrays.asList(shortcut0, shortcut1, shortcut2, shortcut3));
+      prefs.edit().putBoolean("shortcuts_initialized", true).apply();
       // Toast.makeText(MyActivity.this, "已添加", Toast.LENGTH_SHORT).show();
     }
   }

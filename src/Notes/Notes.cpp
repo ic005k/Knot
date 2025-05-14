@@ -1027,9 +1027,15 @@ void Notes::on_btnFind_clicked() {
   show_findText();
 }
 
-void Notes::on_btnPrev_clicked() { searchPrevious(); }
+void Notes::on_btnPrev_clicked() {
+  ui->editFind->setFocus();
+  searchPrevious();
+}
 
-void Notes::on_btnNext_clicked() { searchNext(); }
+void Notes::on_btnNext_clicked() {
+  ui->editFind->setFocus();
+  searchNext();
+}
 
 void Notes::on_editFind_returnPressed() { searchNext(); }
 
@@ -1713,10 +1719,6 @@ void Notes::openEditUI() {
     openAndroidNoteEditor();
     return;
   }
-
-  m_TextSelector->close();
-  delete m_TextSelector;
-  m_TextSelector = new TextSelector(mw_one->m_Notes);
 
   mw_one->mainHeight = mw_one->height();
 
