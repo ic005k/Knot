@@ -1,10 +1,10 @@
 <resources>
     <string name="welcome_message">Hello, %s!</string>
-    <string name="addRecord_shortcut_short_label">"Add Record"</string>
-    <string name="newTodo_shortcut_short_label">"Open Todo"</string>
-    <string name="newNote_shortcut_short_label">"Open Note"</string>
-    <string name="continueReading_shortcut_short_label">"Continue Reading"</string>
-    <string name="exercise_shortcut_short_label">"Open Exercise"</string>
+    <string name="addRecord_shortcut_short_label">"Add"</string>
+    <string name="newTodo_shortcut_short_label">"Todo"</string>
+    <string name="newNote_shortcut_short_label">"Note"</string>
+    <string name="continueReading_shortcut_short_label">"Reading"</string>
+    <string name="exercise_shortcut_short_label">"Exercise"</string>
 
     <string name="addRecord_shortcut_short_label_zh">"增加记录"</string>
     <string name="newTodo_shortcut_short_label_zh">"打开待办"</string>

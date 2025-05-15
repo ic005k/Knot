@@ -79,7 +79,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
 import com.x.FilePicker;
-import com.x.MyActivity.FileWatcher;
 import com.x.MyService;
 import com.x.ShareReceiveActivity;
 import com.x.TTSUtils;
@@ -189,7 +188,6 @@ public class MyActivity
 
   private static final String TAG = "QtKnot";
   public static Context context;
-  private FileWatcher mFileWatcher;
   private ShortcutManager shortcutManager;
   private static TTSUtils mytts;
 
@@ -581,7 +579,6 @@ public class MyActivity
     return intent.getDataString();
   }
 
-  // -----------------------------------------------------------------------
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -593,12 +590,6 @@ public class MyActivity
       // 安卓11以下的存储授权
       verifyStoragePermissions(this);
     }
-
-    // File Watch FileWatcher
-    // if (null == mFileWatcher) {
-    // mFileWatcher = new FileWatcher("/storage/emulated/0/KnotData/");
-    // mFileWatcher.startWatching(); // 开始监听
-    // }
 
     if (m_instance != null) {
       Log.d(TAG, "App is already running... this won't work");
@@ -632,7 +623,7 @@ public class MyActivity
     registSreenStatusReceiver();
 
     // 状态栏
-    context = MyActivity.this;// getApplicationContext(); // 获取程序句柄
+    context = MyActivity.this;
     // 设置状态栏颜色,需要安卓版本大于5.0
     String filename = "/storage/emulated/0/.Knot/options.ini";
     internalConfigure = new InternalConfigure(this);
@@ -657,9 +648,6 @@ public class MyActivity
           .getDecorView()
           .setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR); // 黑色文字
     }
-
-    // 设置状态栏全透明
-    // this.setStatusBarFullTransparent();
 
     Application application = this.getApplication();
     application.registerActivityLifecycleCallbacks(this);
@@ -992,8 +980,6 @@ public class MyActivity
     Log.i(TAG, "Main onDestroy...");
 
     releaseWakeLock();
-    if (null != mFileWatcher)
-      mFileWatcher.stopWatching(); // 停止监听
 
     if (ReOpen) {
       openAppFromPackageName("com.x");
@@ -1400,283 +1386,6 @@ public class MyActivity
     }
   }
 
-  // ==============================================================================================
-
-  public class FileWatcher extends FileObserver {
-    static final String TAG = "FileWatcher";
-    ArrayList<FileObserver> mObservers;
-    String mPath;
-    int mMask;
-
-    String mThreadName = FileWatcher.class.getSimpleName();
-    HandlerThread mThread;
-    Handler mThreadHandler;
-
-    private Context mContext;
-
-    public FileWatcher(Context context, String path) {
-      this(path, ALL_EVENTS);
-      mContext = context;
-    }
-
-    public FileWatcher(String path) {
-      this(path, ALL_EVENTS);
-    }
-
-    public FileWatcher(String path, int mask) {
-      super(path, mask);
-      mPath = path;
-      mMask = mask;
-    }
-
-    @Override
-    public void startWatching() {
-      mThreadName = FileWatcher.class.getSimpleName();
-      if (mThread == null || !mThread.isAlive()) {
-        mThread = new HandlerThread(mThreadName, Process.THREAD_PRIORITY_BACKGROUND);
-        mThread.start();
-
-        mThreadHandler = new Handler(mThread.getLooper());
-        mThreadHandler.post(new startRunnable());
-      }
-    }
-
-    @Override
-    public void stopWatching() {
-      if (null != mThreadHandler && null != mThread && mThread.isAlive()) {
-        mThreadHandler.post(new stopRunnable());
-      }
-      mThreadHandler = null;
-      mThread.quit();
-      mThread = null;
-    }
-
-    @Override
-    public void onEvent(int event, String path) {
-      event = event & FileObserver.ALL_EVENTS;
-      final String tmpPath = path;
-      switch (event) {
-        case FileObserver.ACCESS:
-          // Log.i("FileWatcher", "ACCESS: " + path);
-          if (path.contains("/storage/emulated/0/KnotData//todo.ini") ||
-              path.contains("/storage/emulated/0/KnotData//mainnotes.ini"))
-            CallJavaNotify_0();
-          break;
-        case FileObserver.ATTRIB:
-          // Log.i("FileWatcher", "ATTRIB: " + path);
-          break;
-        case FileObserver.CLOSE_NOWRITE:
-          // Log.i("FileWatcher", "CLOSE_NOWRITE: " + path);
-          break;
-        case FileObserver.CLOSE_WRITE:
-          // Log.i("FileWatcher", "CLOSE_WRITE: " + path);
-          // 文件写入完毕后会回调，可以在这对新写入的文件做操作
-
-          mThreadHandler.post(
-              new Runnable() {
-
-                @Override
-                public void run() {
-                  //
-                }
-              });
-          break;
-        case FileObserver.CREATE:
-          // Log.i(TAG, "CREATE: " + path);
-
-          mThreadHandler.post(
-              new Runnable() {
-
-                @Override
-                public void run() {
-                  doCreate(tmpPath);
-                }
-              });
-          break;
-        case FileObserver.DELETE:
-          // Log.i(TAG, "DELETE: " + path);
-          mThreadHandler.post(
-              new Runnable() {
-
-                @Override
-                public void run() {
-                  doDelete(tmpPath);
-                }
-              });
-          break;
-        case FileObserver.DELETE_SELF:
-          // Log.i("FileWatcher", "DELETE_SELF: " + path);
-          break;
-        case FileObserver.MODIFY:
-          // Log.i("FileWatcher", "MODIFY: " + path);
-
-          break;
-        case FileObserver.MOVE_SELF:
-          // Log.i("FileWatcher", "MOVE_SELF: " + path);
-          break;
-        case FileObserver.MOVED_FROM:
-          // Log.i("FileWatcher", "MOVED_FROM: " + path);
-          break;
-        case FileObserver.MOVED_TO:
-          // Log.i("FileWatcher", "MOVED_TO: " + path);
-          break;
-        case FileObserver.OPEN:
-          // Log.i("FileWatcher", "OPEN: " + path);
-          break;
-        default:
-          // Log.i(TAG, "DEFAULT(" + event + ";) : " + path);
-
-          break;
-      }
-    }
-
-    private void doCreate(String path) {
-      synchronized (FileWatcher.this) {
-        File file = new File(path);
-        if (!file.exists()) {
-          return;
-        }
-
-        if (file.isDirectory()) {
-          // 新建文件夹，对该文件夹及子目录添加监听
-          Stack<String> stack = new Stack<String>();
-          stack.push(path);
-
-          while (!stack.isEmpty()) {
-            String parent = stack.pop();
-            SingleFileObserver observer = new SingleFileObserver(parent, mMask);
-            observer.startWatching();
-
-            mObservers.add(observer);
-            Log.d(TAG, "add observer " + parent);
-            File parentFile = new File(parent);
-            File[] files = parentFile.listFiles();
-            if (null == files) {
-              continue;
-            }
-
-            for (File f : files) {
-              if (f.isDirectory() &&
-                  !f.getName().equals(".") &&
-                  !f.getName().equals("..")) {
-                stack.push(f.getPath());
-              }
-            }
-          }
-
-          stack.clear();
-          stack = null;
-        } else {
-          // 新建文件
-        }
-      }
-    }
-
-    private void doDelete(String path) {
-      synchronized (FileWatcher.this) {
-        Iterator<FileObserver> it = mObservers.iterator();
-        while (it.hasNext()) {
-          SingleFileObserver sfo = (SingleFileObserver) it.next();
-          // 如果删除的是文件夹移除对该文件夹及子目录的监听
-          if (sfo.mPath != null &&
-              (sfo.mPath.equals(path) || sfo.mPath.startsWith(path + "/"))) {
-            Log.d(TAG, "stop observer " + sfo.mPath);
-            sfo.stopWatching();
-            it.remove();
-            sfo = null;
-          }
-        }
-      }
-    }
-
-    /**
-     * Monitor single directory and dispatch all events to its parent, with full
-     * path.
-     */
-    class SingleFileObserver extends FileObserver {
-      String mPath;
-
-      public SingleFileObserver(String path) {
-        this(path, ALL_EVENTS);
-        mPath = path;
-      }
-
-      public SingleFileObserver(String path, int mask) {
-        super(path, mask);
-        mPath = path;
-      }
-
-      @Override
-      public void onEvent(int event, String path) {
-        if (path == null) {
-          return;
-        }
-        String newPath = mPath + "/" + path;
-        FileWatcher.this.onEvent(event, newPath);
-      }
-    }
-
-    class startRunnable implements Runnable {
-
-      @Override
-      public void run() {
-        synchronized (FileWatcher.this) {
-          if (mObservers != null) {
-            return;
-          }
-
-          mObservers = new ArrayList<FileObserver>();
-          Stack<String> stack = new Stack<String>();
-          stack.push(mPath);
-
-          while (!stack.isEmpty()) {
-            String parent = String.valueOf(stack.pop());
-            mObservers.add(new SingleFileObserver(parent, mMask));
-            File path = new File(parent);
-            File[] files = path.listFiles();
-            if (null == files) {
-              continue;
-            }
-
-            for (File f : files) {
-              if (f.isDirectory() &&
-                  !f.getName().equals(".") &&
-                  !f.getName().equals("..")) {
-                stack.push(f.getPath());
-              }
-            }
-          }
-
-          Iterator<FileObserver> it = mObservers.iterator();
-          while (it.hasNext()) {
-            SingleFileObserver sfo = (SingleFileObserver) it.next();
-            sfo.startWatching();
-          }
-        }
-      }
-    }
-
-    class stopRunnable implements Runnable {
-
-      @Override
-      public void run() {
-        synchronized (FileWatcher.this) {
-          if (mObservers == null) {
-            return;
-          }
-
-          Iterator<FileObserver> it = mObservers.iterator();
-          while (it.hasNext()) {
-            FileObserver sfo = it.next();
-            sfo.stopWatching();
-          }
-          mObservers.clear();
-          mObservers = null;
-        }
-      }
-    }
-  }
-
   // ----------------------------------------------------------------------------------------------
 
   public void shareString(String title, String content, QtActivity activity) {
@@ -1814,23 +1523,11 @@ public class MyActivity
         lblExercise = getString(R.string.exercise_shortcut_short_label);
       }
 
-      // 正确构造Intent(换一种不同的方式)
-      Intent addRecordIntent = new Intent(this, AddRecord.class);
-      addRecordIntent.setAction(Intent.ACTION_MAIN);
-      addRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       ShortcutInfo shortcut0 = new ShortcutInfo.Builder(this, "Add_Record")
           .setShortLabel(lblAddRecord)
           .setIcon(Icon.createWithResource(this, R.drawable.addrecord))
-          .setIntent(addRecordIntent)
+          .setIntent(new Intent(Intent.ACTION_MAIN, null, this, AddRecord.class))
           .build();
-
-      /*
-       * ShortcutInfo shortcut0 = new ShortcutInfo.Builder(this, "Add_Record")
-       * .setShortLabel(lblAddRecord)
-       * .setIcon(Icon.createWithResource(this, R.drawable.addrecord))
-       * .setIntent(new Intent(Intent.ACTION_MAIN, null, this, AddRecord.class))
-       * .build();
-       */
 
       ShortcutInfo shortcut1 = new ShortcutInfo.Builder(this, "New_Todo")
           .setShortLabel(lblNewTodo)
@@ -1850,63 +1547,20 @@ public class MyActivity
           .setIntent(new Intent(Intent.ACTION_MAIN, null, this, Desk_Exercise.class))
           .build();
 
-      /*
-       * ShortcutInfo shortcut4 = new ShortcutInfo.Builder(
-       * this,
-       * "Continue_Reading")
-       * .setShortLabel(lblContinueReading)
-       * .setIcon(Icon.createWithResource(this, R.drawable.continuereading))
-       * .setIntent(
-       * new Intent(Intent.ACTION_MAIN, null, this, ContinueReading.class))
-       * .build();
-       */
+      ShortcutInfo shortcut4 = new ShortcutInfo.Builder(
+          this,
+          "Continue_Reading")
+          .setShortLabel(lblContinueReading)
+          .setIcon(Icon.createWithResource(this, R.drawable.continuereading))
+          .setIntent(
+              new Intent(Intent.ACTION_MAIN, null, this, ContinueReading.class))
+          .build();
 
       // 设置动态快捷方式（仅首次）
-      shortcutManager.setDynamicShortcuts(Arrays.asList(shortcut0, shortcut1, shortcut2, shortcut3));
+      shortcutManager.setDynamicShortcuts(Arrays.asList(shortcut0, shortcut1,
+          shortcut2, shortcut3));
       prefs.edit().putBoolean("shortcuts_initialized", true).apply();
-      // Toast.makeText(MyActivity.this, "已添加", Toast.LENGTH_SHORT).show();
-    }
-  }
 
-  private void updateDeskShortcuts() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-      Intent intent2 = new Intent();
-      intent2.setAction("android.intent.action.MAIN");
-      intent2.setClassName(
-          getPackageName(),
-          getPackageName() + ".MainActivity.java");
-
-      /**
-       * 构建ShortcutInfo时指定相同的id，根据id去找到要更新的快捷方式
-       *
-       * 注意：唯一的id标识不可传入一个静态快捷方式的id
-       * 否则会抛出异常 应用会抛出错误：Manifest shortcut ID=XX may not be manipulated via APIs
-       */
-      ShortcutInfo info = new ShortcutInfo.Builder(this, "test_add")
-          .setIntent(intent2)
-          .setLongLabel("动态更新的长名")
-          .setShortLabel("动态更新的短名")
-          .build();
-      shortcutManager = getSystemService(ShortcutManager.class);
-      List<ShortcutInfo> dynamicShortcuts = shortcutManager.getDynamicShortcuts();
-
-      // updateShortcuts(List<ShortcutInfo> shortcutInfoList)方法更新现有的快捷方式
-      shortcutManager.updateShortcuts(Arrays.asList(info));
-
-      Toast.makeText(MyActivity.this, "已更新", Toast.LENGTH_SHORT).show();
-    }
-  }
-
-  private void removeDeskShortcuts() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-      /**
-       * removeDynamicShortcuts(List<String> shortcutIds)方法可以删除动态快捷方式
-       *
-       * 同理，在唯一标识id和动态更新处理一样，需传入动态快捷方式的id，要不然会报同样的错误
-       */
-      shortcutManager.removeDynamicShortcuts(Arrays.asList("test_add")); // 唯一的id标识
-
-      Toast.makeText(MyActivity.this, "已移除", Toast.LENGTH_SHORT).show();
     }
   }
 

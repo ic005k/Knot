@@ -59,6 +59,50 @@
 | Camera           | Note photography             | Attachment menu in note editor |
 | GPS              | Exercise trajectory recording| Activated in fitness module |
 
+---
+
+# Background Permissions Setup Guide
+
+## 1. Why Enable These Permissions?
+
+Enabling the following permissions ensures core app functionality works properly:
+- ​**Instant Task Reminders**: Prevents the system from closing the app during sleep mode to avoid missing critical alerts
+- ​**Continuous Activity Tracking**: Allows GPS to record workout routes in the background (e.g., running, cycling)
+- ​**Feature Integration**: Enables interaction with other apps/services (e.g., adding tasks from calendar)
+
+> ⚠️ Potential issues if disabled:  
+> • Delayed or missed reminders  
+> • Interrupted workout tracking  
+> • Some integration features unavailable
+
+## 2. How to Configure? (Universal Steps)
+
+Follow these steps (menu names may vary slightly across devices):
+1. ​**Open System Settings**​  
+   `Settings` → `Apps` / `Application Manager`
+
+2. ​**Locate This App**​  
+   Select the app from the list (use search bar if available)
+
+3. ​**Enable Required Permissions**​  
+   Activate these options as needed:  
+   ✅ `Auto-start`  
+   ✅ `Associated startup`  
+   ✅ `Allow background activity`  
+   ✅ Disable `Battery optimization`/`Power saving restrictions`
+
+4. ​**Brand-Specific Settings Paths**​  
+   | Brand       | Additional Configuration Path          |
+   |-------------|-----------------------------------------|
+   | Xiaomi      | Security Center → Permissions           |
+   | Huawei      | Battery Optimization → All Apps List    |
+   | OPPO        | Battery → High Power Consumption Protection |
+   | vivo        | Background Power Management → Allow Background |
+   | Samsung     | Settings → Battery → Background Usage Limits |
+   | Google (Pixel) | Settings → Apps → [App Name] → Battery → Unrestricted |
+
+---
+
 ## 📥 Download & Installation
 **Latest Version Acquisition:**
 - Scan QR code (Recommended for Android)  

@@ -2,7 +2,7 @@
 
   <shortcut
     android:shortcutId="addRecord"
-    android:enabled="false"
+    android:enabled="true"
     android:icon="@drawable/addrecord"
     android:shortcutShortLabel="@string/addRecord_shortcut_short_label">
 
@@ -16,7 +16,7 @@
 
   <shortcut
     android:shortcutId="newTodo"
-    android:enabled="false"
+    android:enabled="true"
     android:icon="@drawable/newtodo"
     android:shortcutShortLabel="@string/newTodo_shortcut_short_label">
 
@@ -30,7 +30,7 @@
 
   <shortcut
     android:shortcutId="newNote"
-    android:enabled="false"
+    android:enabled="true"
     android:icon="@drawable/newnote"
     android:shortcutShortLabel="@string/newNote_shortcut_short_label">
 
@@ -44,7 +44,7 @@
 
   <shortcut
     android:shortcutId="continueReading"
-    android:enabled="false"
+    android:enabled="true"
     android:icon="@drawable/continuereading"
     android:shortcutShortLabel="@string/continueReading_shortcut_short_label">
 
