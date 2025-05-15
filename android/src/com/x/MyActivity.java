@@ -149,8 +149,8 @@ import android.os.SystemClock;
 import android.os.Vibrator;
 import android.content.SharedPreferences;
 
-//Qt5
-import org.qtproject.qt5.android.bindings.QtActivity;
+//Qt6
+import org.qtproject.qt.android.bindings.QtActivity;
 
 public class MyActivity
     extends QtActivity

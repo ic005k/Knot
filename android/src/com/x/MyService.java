@@ -218,13 +218,13 @@ public class MyService extends Service {
             Intent notificationIntent = new Intent(this, MyActivity.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
                     notificationIntent, 0);
-
             Notification notification = new NotificationCompat.Builder(this)
                     .setSmallIcon(R.drawable.icon)
                     .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon))
                     .setContentTitle("Knot")
-                    .setContentText(strRun).build();
-            // .setContentIntent(pendingIntent).build(); //禁用通知栏点击
+                    .setContentText(strRun)
+                    .setContentIntent(pendingIntent) // 通知栏点击
+                    .build();
 
             startForeground(1337, notification);
         }
@@ -243,16 +243,50 @@ public class MyService extends Service {
 
     @TargetApi(26)
     private void setForeground() {
-        Context context;
+        // 创建点击意图
+        Intent notificationIntent = new Intent(this, MyActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        // 适配不同版本的PendingIntent标志
+        int pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            pendingIntentFlags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                notificationIntent,
+                pendingIntentFlags);
+
+        // 创建通知渠道 (Android 8.0+)
+        String channelId = ID;
+        String channelName = "Knot Service";
+        NotificationChannel channel = new NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_LOW);
+        channel.setShowBadge(false);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        NotificationChannel channel = new NotificationChannel(ID, NAME, NotificationManager.IMPORTANCE_LOW);
-        manager.createNotificationChannel(channel);
-        Notification notification = new Notification.Builder(this, ID)
+        if (manager != null) {
+            manager.createNotificationChannel(channel);
+        }
+
+        // 构建通知
+        Notification notification = new Notification.Builder(this, channelId)
                 .setContentTitle(strStatus)
                 .setContentText(strRun)
                 .setSmallIcon(R.drawable.icon)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon))
+                .setContentIntent(pendingIntent) // 关键：添加点击意图
+                .setAutoCancel(true) // 点击后自动清除
+                .setOnlyAlertOnce(true) // 避免重复提示
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .build();
+
+        // 启动前台服务
         startForeground(1337, notification);
     }
 

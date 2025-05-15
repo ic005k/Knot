@@ -1240,7 +1240,7 @@ void Notes::openMDWindow() {
 #ifdef Q_OS_ANDROID
 
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  activity.callMethod<void>("openMDWindow", "()V");
+  activity.callStaticMethod<void>("com.x/MyActivity", "openMDWindow", "()V");
 
 #endif
 }

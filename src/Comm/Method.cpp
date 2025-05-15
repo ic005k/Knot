@@ -1067,7 +1067,8 @@ void Method::showAndroidProgressBar() {
 #ifdef Q_OS_ANDROID
 
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  activity.callMethod<void>("showAndroidProgressBar", "()V");
+  activity.callStaticMethod<void>("com.x/MyActivity", "showAndroidProgressBar",
+                                  "()V");
 
 #endif
 }
@@ -1078,7 +1079,7 @@ void Method::closeAndroidProgressBar() {
 #ifdef Q_OS_ANDROID
 
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  activity.callStaticMethod<void>("com.x/MyProgBar", "closeAndroidProgressBar",
+  activity.callStaticMethod<void>("com.x/MyActivity", "closeAndroidProgressBar",
                                   "()V");
 
 #endif
