@@ -10,13 +10,13 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:minHeight="48dp"> <!-- 添加最小高度确保空间 -->
-        
+
         <TextView
             android:id="@+id/file_path_text_view"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:textSize="10sp" 
+            android:textSize="10sp"
             android:gravity="center_vertical"
             android:textColor="#3498DB"
             android:text="Note Image" />
@@ -33,6 +33,7 @@
     </LinearLayout>
 
     <com.x.ZoomableImageView
+        android:background="#2F2F2F"
         android:id="@+id/image_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"

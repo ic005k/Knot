@@ -327,29 +327,56 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
 
         // 初始化 Markwon
         Context appContext = getApplicationContext();
-        markwon = Markwon.builder(appContext)
-                .usePlugin(StrikethroughPlugin.create())
-                .usePlugin(TablePlugin.create(appContext))
-                .usePlugin(TaskListPlugin.create(appContext))
-                .usePlugin(LinkifyPlugin.create())
-                .usePlugin(SimpleExtPlugin.create())
-                .usePlugin(GlideImagesPlugin.create(appContext))
-                .usePlugin(MarkwonInlineParserPlugin.create())
-                .usePlugin(JLatexMathPlugin.create(textSizeInPx, builder -> {
-                    builder.inlinesEnabled(true); // 启用行内公式
-                }))
-                .usePlugin(new AbstractMarkwonPlugin() {
-                    @Override
-                    public void configureSpansFactory(MarkwonSpansFactory.Builder builder) {
-                        builder.appendFactory(Image.class, (configuration, props) -> {
-                            String url = ImageProps.DESTINATION.require(props);
-                            return new LinkSpan(configuration.theme(), url, new ImageLinkResolver());
-                        });
-                    }
-                })
-                .usePlugin(SyntaxHighlightPlugin.create(prism4j, Prism4jThemeDarkula.create()))
-                .usePlugin(HtmlPlugin.create())
-                .build();
+        if (!MyActivity.isDark) {
+            markwon = Markwon.builder(appContext)
+                    .usePlugin(StrikethroughPlugin.create())
+                    .usePlugin(TablePlugin.create(appContext))
+                    .usePlugin(TaskListPlugin.create(appContext))
+                    .usePlugin(LinkifyPlugin.create())
+                    .usePlugin(SimpleExtPlugin.create())
+                    .usePlugin(GlideImagesPlugin.create(appContext))
+                    .usePlugin(MarkwonInlineParserPlugin.create())
+                    .usePlugin(JLatexMathPlugin.create(textSizeInPx, builder -> {
+                        builder.inlinesEnabled(true); // 启用行内公式
+                    }))
+                    .usePlugin(new AbstractMarkwonPlugin() {
+                        @Override
+                        public void configureSpansFactory(MarkwonSpansFactory.Builder builder) {
+                            builder.appendFactory(Image.class, (configuration, props) -> {
+                                String url = ImageProps.DESTINATION.require(props);
+                                return new LinkSpan(configuration.theme(), url, new ImageLinkResolver());
+                            });
+                        }
+                    })
+                    .usePlugin(SyntaxHighlightPlugin.create(prism4j, Prism4jThemeDefault.create()))
+                    .usePlugin(HtmlPlugin.create())
+                    .build();
+        } else {
+            markwon = Markwon.builder(appContext)
+                    .usePlugin(StrikethroughPlugin.create())
+                    .usePlugin(TablePlugin.create(appContext))
+                    .usePlugin(TaskListPlugin.create(appContext))
+                    .usePlugin(LinkifyPlugin.create())
+                    .usePlugin(SimpleExtPlugin.create())
+                    .usePlugin(GlideImagesPlugin.create(appContext))
+                    .usePlugin(MarkwonInlineParserPlugin.create())
+                    .usePlugin(JLatexMathPlugin.create(textSizeInPx, builder -> {
+                        builder.inlinesEnabled(true); // 启用行内公式
+                    }))
+                    .usePlugin(new AbstractMarkwonPlugin() {
+                        @Override
+                        public void configureSpansFactory(MarkwonSpansFactory.Builder builder) {
+                            builder.appendFactory(Image.class, (configuration, props) -> {
+                                String url = ImageProps.DESTINATION.require(props);
+                                return new LinkSpan(configuration.theme(), url, new ImageLinkResolver());
+                            });
+                        }
+                    })
+                    .usePlugin(SyntaxHighlightPlugin.create(prism4j, Prism4jThemeDarkula.create()))
+                    .usePlugin(HtmlPlugin.create())
+                    .build();
+
+        }
     }
 
     @Override
@@ -579,7 +606,10 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
 
         public MarkdownViewHolder(View itemView) {
             super(itemView);
-            textView = itemView.findViewById(R.id.markdown_view);
+            if (!MyActivity.isDark)
+                textView = itemView.findViewById(R.id.markdown_view);
+            else
+                textView = itemView.findViewById(R.id.markdown_view_dark);
         }
     }
 
@@ -595,8 +625,14 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
 
         @Override
         public MarkdownViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_markdown, parent, false);
+            View view;
+            if (!MyActivity.isDark)
+                view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_markdown, parent, false);
+            else
+                view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_markdown_dark, parent, false);
+
             return new MarkdownViewHolder(view);
         }
 

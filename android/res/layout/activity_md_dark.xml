@@ -40,14 +40,14 @@
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="0dp"/>
-        <!--"?android:attr/actionBarSize" -->
+        android:layout_marginTop="0dp" />
+    <!--"?android:attr/actionBarSize" -->
 
-        <!--TextView
+    <!--TextView
             android:id="@+id/markdownView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="1dp"
         /-->
-    
+
 </LinearLayout>
