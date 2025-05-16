@@ -72,6 +72,13 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->editFind->setMinimumWidth(65);
 
   mw_one->set_ToolButtonStyle(this);
+
+  // 创建快捷键：绑定 Ctrl+F
+  QShortcut *shortcut = new QShortcut(QKeySequence("Ctrl+F"), this);
+  connect(shortcut, &QShortcut::activated, this, [this]() {
+    ui->editFind->setFocus();
+    ui->editFind->selectAll();
+  });
 }
 
 void Notes::initEditor() {
@@ -315,32 +322,15 @@ void Notes::getEditPanel(QTextEdit *textEdit, QEvent *evn) {
 }
 
 bool Notes::eventFilter(QObject *obj, QEvent *evn) {
-  if (obj == m_EditSource->viewport()) {
-    // getEditPanel(m_EditSource, evn);
-  }
-
   QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
   if (evn->type() == QEvent::KeyRelease) {
     if (keyEvent->key() == Qt::Key_Back) {
-      if (!m_TextSelector->isHidden()) {
-        m_TextSelector->close();
-        return true;
-      }
+    }
 
-      if (pAndroidKeyboard->isVisible()) {
-        pAndroidKeyboard->hide();
-        setGeometry(mw_one->geometry().x(), mw_one->geometry().y(), width(),
-                    mw_one->mainHeight);
-        return true;
-      }
-
-      close();
-
-      return true;
+    if (evn->type() == QEvent::KeyPress) {
     }
   }
 
-  // Keyboard
   if (obj == m_EditSource) {
     if (evn->type() == QEvent::KeyPress) {
       if (keyEvent->key() != Qt::Key_Back) {
@@ -348,21 +338,10 @@ bool Notes::eventFilter(QObject *obj, QEvent *evn) {
     }
   }
 
-  // Mouse
   if (obj == m_EditSource->viewport()) {
     if (evn->type() == QEvent::MouseButtonPress) {
     }
   }
-
-#ifdef Q_OS_ANDROID
-  if (obj == m_EditSource->viewport()) {
-    if (evn->type() == QEvent::MouseButtonDblClick) {
-      y1 = 2;
-      isMousePress = true;
-      on_showEditPanel();
-    }
-  }
-#endif
 
   return QWidget::eventFilter(obj, evn);
 }

@@ -103,8 +103,6 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
 
   mw_one->ui->qwNotesSearchResult->rootContext()->setContextProperty(
       "searchModel", &m_searchModel);
-  mw_one->ui->qwNotesSearchResult->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/SearchResults.qml")));
 
   startBackgroundTaskUpdateFilesIndex();
 }

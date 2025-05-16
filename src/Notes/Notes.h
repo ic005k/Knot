@@ -6,6 +6,7 @@
 #include <QClipboard>
 #include <QMimeData>
 #include <QObject>
+#include <QShortcut>
 #include <QTextEdit>
 #include <QUrl>
 #include <QVBoxLayout>

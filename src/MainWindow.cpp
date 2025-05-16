@@ -3269,6 +3269,8 @@ void MainWindow::initQW() {
   ui->qwNotesSearchResult->rootContext()->setContextProperty("m_NotesList",
                                                              m_NotesList);
   ui->qwNotesSearchResult->rootContext()->setContextProperty("mw_one", mw_one);
+  ui->qwNotesSearchResult->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/SearchResults.qml")));
 
   ui->qwNoteRecycle->rootContext()->setContextProperty("m_Method", m_Method);
   ui->qwNoteRecycle->setSource(

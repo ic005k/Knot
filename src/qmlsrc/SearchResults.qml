@@ -73,7 +73,7 @@ ListView {
 
         background: Rectangle {
             anchors.fill: parent
-            color: isCurrent ? "#757575" : "transparent" // 中灰色背景
+            color: isCurrent ? isDark ? "#111111" : "#757575" : "transparent" // 中灰色背景
             radius: 6
 
             // 添加边框效果
