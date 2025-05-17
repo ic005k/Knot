@@ -176,7 +176,7 @@
                 android:textColor="#FFFFFF"
                 android:text="Loading, please wait..."
                 android:theme="@style/MyEditText"
-                android:textColorHighlight="#0000EE"
+                android:textColorHighlight="#FF2222"
                 android:inputType="textMultiLine"
                 android:layout_weight="1"
             />
@@ -184,7 +184,7 @@
 
         </ScrollView>
 
-        <!-- 覆盖在内容上的进度条 -->
+        <!-- 覆盖在内容上的最普通的没有任何其它效果的进度条 -->
         <!--ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
