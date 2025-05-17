@@ -104,18 +104,10 @@ void EditRecord::on_btnOk_clicked() {
         tr("Modify Item") + " ( " + mw_one->getTabText() + " ) ";
 
   } else {
-    if (mw_one->isTesting) {
-      for (int i = 0; i < 500; i++)
-        mw_one->add_Data(mw_one->get_tw(mw_one->ui->tabWidget->currentIndex()),
-                         mw_one->ui->lblTime->text(),
-                         mw_one->ui->editAmount->text().trimmed(),
-                         mw_one->ui->editCategory->text().trimmed());
-    } else
-
-      mw_one->add_Data(mw_one->get_tw(mw_one->ui->tabWidget->currentIndex()),
-                       mw_one->ui->lblTime->text(),
-                       mw_one->ui->editAmount->text().trimmed(),
-                       mw_one->ui->editCategory->text().trimmed());
+    mw_one->add_Data(mw_one->get_tw(mw_one->ui->tabWidget->currentIndex()),
+                     mw_one->ui->lblTime->text(),
+                     mw_one->ui->editAmount->text().trimmed(),
+                     mw_one->ui->editCategory->text().trimmed());
 
     mw_one->isNeedAutoBackup = true;
     mw_one->strLatestModify =

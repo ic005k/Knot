@@ -329,7 +329,9 @@ void MainWindow::SaveFile(QString SaveType) {
       EditRecord::saveAdded();
     else
       EditRecord::saveModified();
+
     saveTab();
+
     if (!isDelData)
       EditRecord::saveMyClassification();
     else
@@ -342,7 +344,9 @@ void MainWindow::SaveFile(QString SaveType) {
 
       QTreeWidget *tw = (QTreeWidget *)tabData->widget(i);
       QString name = tw->objectName();
-      QString ini_file = iniDir + name + ".ini";
+      QString iniName =
+          QString::number(QDate::currentDate().year()) + "-" + name;
+      QString ini_file = iniDir + iniName + ".ini";
       if (QFile(ini_file).exists()) QFile(ini_file).remove();
 
       saveData(tw, i);
@@ -1191,7 +1195,9 @@ void MainWindow::saveData(QTreeWidget *tw, int tabIndex) {
   Q_UNUSED(tabIndex);
 
   QString name = tw->objectName();
-  QString ini_file = iniDir + name + ".ini";
+  QString strYear = QString::number(QDate::currentDate().year());
+  QString iniName = strYear + "-" + name;
+  QString ini_file = iniDir + iniName + ".ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
 
   if (!QFile::exists(ini_file)) {
@@ -1201,6 +1207,7 @@ void MainWindow::saveData(QTreeWidget *tw, int tabIndex) {
 
   int count = tw->topLevelItemCount();
   int abc = count;
+  int m_sn = 0;
 
   QString flag;
   QString group = Reg.childGroups().at(0);
@@ -1212,37 +1219,39 @@ void MainWindow::saveData(QTreeWidget *tw, int tabIndex) {
   for (int i = 0; i < count; i++) {
     if (isBreak) break;
     int childCount = tw->topLevelItem(i)->childCount();
-
-    if (childCount > 0) {
-      Reg.setValue(flag + QString::number(i + 1) + "-topDate",
+    QString topText3 = tw->topLevelItem(i)->text(3);
+    if (childCount > 0 && topText3 == strYear) {
+      Reg.setValue(flag + QString::number(m_sn + 1) + "-topDate",
                    tw->topLevelItem(i)->text(0));
-      Reg.setValue(flag + QString::number(i + 1) + "-topYear",
-                   tw->topLevelItem(i)->text(3));
-      Reg.setValue(flag + QString::number(i + 1) + "-topFreq",
+      Reg.setValue(flag + QString::number(m_sn + 1) + "-topYear", topText3);
+      Reg.setValue(flag + QString::number(m_sn + 1) + "-topFreq",
                    tw->topLevelItem(i)->text(1));
-      Reg.setValue(flag + QString::number(i + 1) + "-topAmount",
+      Reg.setValue(flag + QString::number(m_sn + 1) + "-topAmount",
                    tw->topLevelItem(i)->text(2));
 
-      Reg.setValue(flag + QString::number(i + 1) + "-childCount", childCount);
+      Reg.setValue(flag + QString::number(m_sn + 1) + "-childCount",
+                   childCount);
       for (int j = 0; j < childCount; j++) {
         if (isBreak) return;
-        Reg.setValue(
-            flag + QString::number(i + 1) + "-childTime" + QString::number(j),
-            tw->topLevelItem(i)->child(j)->text(0));
-        Reg.setValue(
-            flag + QString::number(i + 1) + "-childAmount" + QString::number(j),
-            tw->topLevelItem(i)->child(j)->text(1));
-        Reg.setValue(
-            flag + QString::number(i + 1) + "-childDesc" + QString::number(j),
-            tw->topLevelItem(i)->child(j)->text(2));
-        Reg.setValue(flag + QString::number(i + 1) + "-childDetails" +
+        Reg.setValue(flag + QString::number(m_sn + 1) + "-childTime" +
+                         QString::number(j),
+                     tw->topLevelItem(i)->child(j)->text(0));
+        Reg.setValue(flag + QString::number(m_sn + 1) + "-childAmount" +
+                         QString::number(j),
+                     tw->topLevelItem(i)->child(j)->text(1));
+        Reg.setValue(flag + QString::number(m_sn + 1) + "-childDesc" +
+                         QString::number(j),
+                     tw->topLevelItem(i)->child(j)->text(2));
+        Reg.setValue(flag + QString::number(m_sn + 1) + "-childDetails" +
                          QString::number(j),
                      tw->topLevelItem(i)->child(j)->text(3));
       }
+
+      m_sn++;
     } else
       abc--;
 
-    Reg.setValue(flag + "TopCount", abc);
+    Reg.setValue(flag + "TopCount", m_sn);
   }
 }
 
@@ -3526,7 +3535,7 @@ void MainWindow::init_UIWidget() {
   ui->tabWidget->setFixedHeight(ui->tabWidget->tabBar()->height() + 0);
   if (nHeight <= 36) nHeight = 36;
   ui->qwMainTab->setFixedHeight(nHeight);
-  tabData->hide();
+  ui->tabWidget->hide();
 
   loginTime = QDateTime::currentDateTime().toString();
   strDate = QDate::currentDate().toString("ddd MM dd yyyy");

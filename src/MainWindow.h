@@ -126,7 +126,6 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
-  bool isTesting = false;
   MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
   Ui::MainWindow *ui;

@@ -3,10 +3,15 @@
 #include "MainWindow.h"
 #include "ui_CategoryList.h"
 #include "ui_MainWindow.h"
+
 extern MainWindow* mw_one;
 extern Method* m_Method;
 extern int fontSize, red;
 extern QTabWidget *tabData, *tabChart;
+extern QString iniDir;
+
+extern QString loadText(QString textFile);
+extern void StringToFile(QString buffers, QString fileName);
 
 CategoryList::CategoryList(QWidget* parent)
     : QDialog(parent), ui(new Ui::CategoryList) {
@@ -126,6 +131,8 @@ void CategoryList::on_btnRename_clicked() {
   int row = m_Method->getCurrentIndexFromQW(mw_one->ui->qwCategory);
   ui->listWidget->setCurrentRow(row);
 
+  oldName = ui->listWidget->currentItem()->text().trimmed();
+
   QString text = ui->editRename->text().trimmed();
   QString str = ui->listWidget->currentItem()->text();
   if (!text.isEmpty() && text != str) {
@@ -162,11 +169,41 @@ void CategoryList::on_btnRename_clicked() {
         }
       }
     }
-    mw_one->startSave("alltab");
+
+    renameAll();
 
     mw_one->ui->editCategory->setText(ui->editRename->text().trimmed());
 
     mw_one->reloadMain();
+  }
+}
+
+void CategoryList::renameAll() {
+  QDir dir(iniDir);
+
+  // 设置过滤器：只要.ini文件且排除目录
+  QStringList filters;
+  filters << "*.ini";
+  dir.setNameFilters(filters);
+  dir.setFilter(QDir::Files | QDir::NoDotAndDotDot);  // 只获取文件，排除.和..
+
+  // 获取文件信息列表
+  QFileInfoList fileList = dir.entryInfoList();
+
+  for (int i = 0; i < fileList.count(); i++) {
+    QString file = fileList.at(i).absoluteFilePath();
+    QString str = loadText(file);
+
+    QString strNew = str;
+
+    QString newName = ui->editRename->text().trimmed();
+    if (strNew.contains("childDesc")) strNew = strNew.replace(oldName, newName);
+
+    if (str != strNew) {
+      StringToFile(strNew, file);
+      qDebug() << oldName << " --> " << newName;
+      qDebug() << "Rename: " + file;
+    }
   }
 }
 
