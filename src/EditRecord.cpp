@@ -408,43 +408,61 @@ void EditRecord::saveAdded() {
   int count = tw->topLevelItemCount();
   if (count == 0) return;
 
-  count = Reg.value(flag + "TopCount", 0).toInt();
-  Reg.setValue(flag + "TopCount", count + 1);
+  bool isExist = false;
 
   QTreeWidgetItem *item = tw->currentItem();
-  int i = 0;
+  int index = 0;
   if (item->parent() == NULL)
-    i = tw->indexOfTopLevelItem(item);
+    index = tw->indexOfTopLevelItem(item);
   else
-    i = tw->indexOfTopLevelItem(item->parent());
-  int Sn = count + 1;
+    index = tw->indexOfTopLevelItem(item->parent());
 
-  Reg.setValue(flag + QString::number(Sn) + "-topDate",
-               tw->topLevelItem(i)->text(0));
-  Reg.setValue(flag + QString::number(Sn) + "-topYear",
-               tw->topLevelItem(i)->text(3));
-  Reg.setValue(flag + QString::number(Sn) + "-topFreq",
-               tw->topLevelItem(i)->text(1));
-  Reg.setValue(flag + QString::number(Sn) + "-topAmount",
-               tw->topLevelItem(i)->text(2));
+  count = Reg.value(flag + "TopCount", 0).toInt();
 
-  int childCount = tw->topLevelItem(i)->childCount();
+  QTreeWidgetItem *topItem = tw->topLevelItem(index);
+  QString twText0, twText3, text0, text3;
+  twText0 = topItem->text(0);
+  twText3 = topItem->text(3);
+  text0 = Reg.value(flag + QString::number(count) + "-topDate").toString();
+  text3 = Reg.value(flag + QString::number(count) + "-topYear").toString();
+
+  static const QRegularExpression regexRemovePrefix("^\\S+\\s*");
+  twText0 = twText0.remove(regexRemovePrefix);  // 移除星期
+  text0 = text0.remove(regexRemovePrefix);
+
+  if ((twText0 == text0) && (twText3 == text3)) {
+    isExist = true;
+  }
+
+  int Sn = count;
+
+  if (!isExist) {
+    Reg.setValue(flag + "TopCount", count + 1);
+    Sn = count + 1;
+  }
+
+  Reg.setValue(flag + QString::number(Sn) + "-topDate", topItem->text(0));
+  Reg.setValue(flag + QString::number(Sn) + "-topYear", topItem->text(3));
+  Reg.setValue(flag + QString::number(Sn) + "-topFreq", topItem->text(1));
+  Reg.setValue(flag + QString::number(Sn) + "-topAmount", topItem->text(2));
+
+  int childCount = topItem->childCount();
 
   if (childCount > 0) {
     for (int j = 0; j < childCount; j++) {
       if (isBreak) return;
       Reg.setValue(
           flag + QString::number(Sn) + "-childTime" + QString::number(j),
-          tw->topLevelItem(i)->child(j)->text(0));
+          topItem->child(j)->text(0));
       Reg.setValue(
           flag + QString::number(Sn) + "-childAmount" + QString::number(j),
-          tw->topLevelItem(i)->child(j)->text(1));
+          topItem->child(j)->text(1));
       Reg.setValue(
           flag + QString::number(Sn) + "-childDesc" + QString::number(j),
-          tw->topLevelItem(i)->child(j)->text(2));
+          topItem->child(j)->text(2));
       Reg.setValue(
           flag + QString::number(Sn) + "-childDetails" + QString::number(j),
-          tw->topLevelItem(i)->child(j)->text(3));
+          topItem->child(j)->text(3));
     }
   }
 
