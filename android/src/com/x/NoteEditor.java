@@ -1,5 +1,6 @@
 package com.x;
 
+import com.x.LargeTextEditor;
 import com.x.MyActivity;
 import com.x.MDActivity;
 import com.x.TextViewUndoRedo;
@@ -64,13 +65,19 @@ import android.text.Editable;
 import android.net.Uri;
 import java.io.OutputStreamWriter;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -130,6 +137,11 @@ import android.widget.PopupMenu;
 import android.widget.ImageButton;
 import android.util.TypedValue;
 import android.widget.ProgressBar;
+import android.content.SharedPreferences;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import android.widget.ScrollView;
 
 public class NoteEditor extends Activity implements View.OnClickListener, Application.ActivityLifecycleCallbacks {
 
@@ -151,9 +163,13 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
     private Button btnNext;
     private ImageButton btnStartFind;
 
-    // public static LineNumberedEditText editNote;
+    private int myMethod = 1; /* 操控文件的方法 1.传统方法 2.新方法 */
+    private LargeTextEditor largeTextEditor;
+    private RecyclerView recyclerView;
+
     public static EditText editNote;
     public static EditText editFind;
+    private EditText replaceEditText;
     public static TextView lblResult;
     private ArrayList<Integer> arrayFindResult = new ArrayList<Integer>();
     private int curIndexForResult = 0;
@@ -237,10 +253,19 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
     }
 
     private void bindViews() {
+        ScrollView scrollView = findViewById(R.id.scrollView);
+        recyclerView = findViewById(R.id.recyclerView);
 
-        // editNote = (LineNumberedEditText) findViewById(R.id.editNote);
         editNote = (EditText) findViewById(R.id.editNote);
         editNote.setTextSize(TypedValue.COMPLEX_UNIT_SP, MyActivity.myFontSize);
+
+        if (myMethod == 2) {
+            scrollView.setVisibility(View.GONE);
+            editNote.setVisibility(View.GONE);
+        }
+
+        if (myMethod == 1)
+            recyclerView.setVisibility(View.GONE);
 
         String str_file = MyActivity.strMDFile;
         File file = new File(str_file);
@@ -294,7 +319,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
             btnNext.setText(">");
         } else {
             btn_cancel.setText("Close");
-            btnUndo.setText("Find");
+            btnFind.setText("Find");
             btnUndo.setText("Undo");
             btnRedo.setText("Redo");
             btnMenu.setText("Menu");
@@ -454,7 +479,11 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         } else {
             this.setStatusBarColor("#F3F3F3"); // 灰
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+
+            // if (myMethod == 1)
             setContentView(R.layout.noteeditor);
+            // if (myMethod == 2)
+            // setContentView(R.layout.noteeditor_large);
         }
 
         progressBar = findViewById(R.id.progressBar);
@@ -465,8 +494,26 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         findViewById(android.R.id.content).post(() -> {
 
             // 启动异步任务
-            loadMDFileChunks();
+            if (myMethod == 1)
+                loadMDFileChunks();
+
+            if (myMethod == 2) {
+                openFile();
+
+            }
         });
+    }
+
+    private void openFile() {
+        currentMDFile = MyActivity.strMDFile;
+
+        // largeTextEditor = new LargeTextEditor(this, editNote);
+
+        largeTextEditor = new LargeTextEditor(this, recyclerView);
+
+        File currentFile = new File(currentMDFile);
+        largeTextEditor.loadFile(currentFile);
+
     }
 
     private void loadMDFile() {
@@ -576,6 +623,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
                     }
                 });
             }
+
         }).start();
     }
 
@@ -694,6 +742,10 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
 
         super.onDestroy();
+
+        if (myMethod == 2) {
+
+        }
 
         System.out.println("NoteEditor onDestroy...");
 

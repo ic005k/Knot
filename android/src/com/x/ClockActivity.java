@@ -189,8 +189,8 @@ public class ClockActivity
     super.onCreate(savedInstanceState);
 
     // 先关闭笔记编辑器和文件选择器
-    NoteEditor.closeNoteEditorView();
-    FilePicker.closeFilePickerView();
+    // NoteEditor.closeNoteEditorView();
+    // FilePicker.closeFilePickerView();
 
     context = getApplicationContext();
     // this.getWindow().setWindowAnimations(R.style.WindowAnim);
@@ -216,13 +216,16 @@ public class ClockActivity
     // 去除title(App Name)
     requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-    this.setStatusBarColor("#F3F3F3"); // 灰
-    getWindow()
-        .getDecorView()
-        .setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+    if (MyActivity.isDark) {
+      this.setStatusBarColor("#19232D"); // 深色
+      getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+      setContentView(R.layout.activity_clock_dark);
+    } else {
+      this.setStatusBarColor("#F3F3F3"); // 灰
+      getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+      setContentView(R.layout.activity_clock);
+    }
 
-    // SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss
-    // z");
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     Date date = new Date(System.currentTimeMillis());
     String strCurDT0 = formatter.format(date);
@@ -285,7 +288,6 @@ public class ClockActivity
     else
       strTodo = "Todo: \n";
 
-    setContentView(R.layout.activity_clock);
     bindViews(str1, str2 + "\n\n\n" + strCurDT + "\n");
 
     if (isRefreshAlarm) {

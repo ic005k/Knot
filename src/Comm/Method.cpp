@@ -676,23 +676,20 @@ QDialog *Method::getProgBar() {
   dlg = new QDialog(this);
   dlg->setWindowFlag(Qt::FramelessWindowHint);
   dlg->setModal(true);
-  dlg->setFixedHeight(200);
-  if (isAndroid)
-    dlg->setFixedWidth(mw_one->geometry().width() - 50);
-  else
-    dlg->setFixedWidth(320);
+  dlg->setFixedHeight(100);
+  dlg->setFixedWidth(130);
   QVBoxLayout *vbox = new QVBoxLayout;
   dlg->setLayout(vbox);
 
   QLabel *lbl = new QLabel();
-  if (isDark)
+  if (isDark) {
+    dlg->setStyleSheet("background-color: rgb(30, 30, 30);");
     lbl->setStyleSheet("color:#ffffff;");
-  else
+  } else
     lbl->setStyleSheet("color:#000000;");
   QFont font = this->font();
-  int size = font.pointSize();
   font.setBold(true);
-  font.setPointSize(size + 2);
+  font.setPointSize(9);
   lbl->setFont(font);
   lbl->setText(tr("Reading, please wait..."));
   lbl->setAlignment(Qt::AlignHCenter);  // | Qt::AlignVCenter);

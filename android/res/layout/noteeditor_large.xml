@@ -3,10 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#000000"
+    android:background="#F3F3F3"
     android:layout_weight="1"
     android:orientation="vertical">
 
+    <!-- 顶部按钮栏保持不变 -->
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -22,7 +23,7 @@
             android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:text="Close"
-        />
+            />
 
         <Button
             android:id="@+id/btnFind"
@@ -33,7 +34,7 @@
             android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:text="Find"
-        />
+            />
 
         <Button
             android:id="@+id/btnUndo"
@@ -61,7 +62,7 @@
             android:layout_height="48dp"
             android:layout_gravity="center"
             android:background="@android:color/darker_gray"
-        />
+            />
 
         <Button
             android:id="@+id/btnMenu"
@@ -75,6 +76,7 @@
 
     </LinearLayout>
 
+    <!-- 查找框区域保持不变 -->
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -91,7 +93,7 @@
             android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:text="Prev"
-        />
+            />
 
         <EditText
             android:id="@+id/editFind"
@@ -102,13 +104,12 @@
             android:layout_marginLeft="10dp"
             android:text=""
             android:imeOptions="actionGo"
-            android:theme="@style/MyEditText"
-            android:textColor="#FFFFFF"
+            android:textColor="#000000"
             android:scrollbars="vertical"
             android:fadeScrollbars="true"
             android:singleLine="true"
             android:layout_weight="1"
-        />
+            />
 
         <ImageButton
             android:id="@+id/btnStartFind"
@@ -119,7 +120,7 @@
             android:src="@drawable/find_l"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
-        />
+            />
 
         <TextView
             android:id="@+id/lblResult"
@@ -131,12 +132,12 @@
             android:text=""
             android:textSize="12sp"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"
+            android:textColor="#000000"
             android:scrollbars="vertical"
             android:fadeScrollbars="true"
             android:inputType="textMultiLine"
             android:layout_weight="1"
-        />
+            />
 
 
         <Button
@@ -149,15 +150,17 @@
             android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:text="Next"
-        />
+            />
 
 
     </LinearLayout>
 
+    <!-- 内容区域：用 FrameLayout 包裹 RecyclerView 和进度条 -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <!-- 替换原来的ScrollView和LineNumberedEditText为RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
@@ -168,44 +171,9 @@
             android:layout_marginTop="5dp"
             android:layout_marginRight="16dp"
             android:layout_marginLeft="0dp"
-        />
-
-        <ScrollView
-            android:id="@+id/scrollView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:scrollbars="vertical"
-            android:fadeScrollbars="true"
-        >
-
-            <com.x.LineNumberedEditText
-                android:id="@+id/editNote"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="5dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginLeft="0dp"
-                android:textColor="#FFFFFF"
-                android:text="Loading, please wait..."
-                android:theme="@style/MyEditText"
-                android:textColorHighlight="#FF2222"
-                android:inputType="textMultiLine"
-                android:layout_weight="1"
             />
 
-
-        </ScrollView>
-
-        <!-- 覆盖在内容上的最普通的没有任何其它效果的进度条 -->
-        <!--ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone"/-->
-
-        <!-- 带背景的进度容器 -->
+        <!-- 进度条保持不变 -->
         <FrameLayout
             android:id="@+id/progressContainer"
             android:layout_width="wrap_content"
@@ -216,7 +184,6 @@
             android:visibility="gone"
             android:padding="24dp">
 
-            <!-- 放大后的圆圈进度 -->
             <ProgressBar
                 android:id="@+id/progressBar"
                 android:layout_width="80dp"
@@ -225,10 +192,6 @@
                 android:theme="@style/CircularProgressStyle" />
 
         </FrameLayout>
-
     </FrameLayout>
 
-
 </LinearLayout>
-
-<!-- android:textCursorDrawable="@drawable/shape_edit_cursor"-->
