@@ -1686,7 +1686,7 @@ void Notes::openEditUI() {
                  tr("The current note does not exist. Please select another "
                     "note or create a new note."),
                  0);
-    mw_one->on_btnNotesList_clicked();
+
     return;
   }
 

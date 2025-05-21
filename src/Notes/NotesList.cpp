@@ -2271,6 +2271,7 @@ void NotesList::clickNoteBook() {
   setNotesListCurrentIndex(noteslistIndex);
   setNoteLabel();
   clickNoteList();
+  setNotesListCurrentIndex(-1);
 }
 
 void NotesList::clickNoteList() {
@@ -2383,6 +2384,8 @@ void NotesList::genRecentOpenMenu() {
 }
 
 void NotesList::setCurrentItemFromMDFile(QString mdFile) {
+  if (!QFile::exists(mdFile)) return;
+
   int count = getNoteBookCount();
   bool isBreak = false;
   for (int i = 0; i < count; i++) {

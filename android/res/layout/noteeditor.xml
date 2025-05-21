@@ -128,7 +128,7 @@
             android:layout_marginRight="10dp"
             android:layout_marginLeft="10dp"
             android:text=""
-            android:textSize="12sp"
+            android:textSize="10sp"
             android:textStyle="bold"
             android:textColor="#000000"
             android:scrollbars="vertical"
