@@ -834,7 +834,7 @@ public class MyActivity
 
         // 添加GPS状态侦听
         if (locationManager != null) {
-          locationManager.addGpsStatusListener(gpsStatusListener);
+          // locationManager.addGpsStatusListener(gpsStatusListener);
         }
 
         return 1;
@@ -877,7 +877,7 @@ public class MyActivity
 
         // 停止GPS状态侦听
         if (locationManager != null) {
-          locationManager.removeGpsStatusListener(gpsStatusListener);
+          // locationManager.removeGpsStatusListener(gpsStatusListener);
         }
       } catch (SecurityException e) {
         e.printStackTrace();
