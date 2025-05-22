@@ -150,7 +150,7 @@ import android.os.Vibrator;
 import android.content.SharedPreferences;
 
 //Qt5
-import org.qtproject.qt5.android.bindings.QtActivity;
+import org.qtproject.qt.android.bindings.QtActivity;
 
 public class MyActivity
     extends QtActivity
@@ -305,6 +305,7 @@ public class MyActivity
     int ts = Integer.parseInt(strTotalS);
     c.add(Calendar.SECOND, ts);
 
+    // 设置闹钟
     alarmManager.setExactAndAllowWhileIdle(
         AlarmManager.RTC_WAKEUP,
         c.getTimeInMillis(),
@@ -668,13 +669,17 @@ public class MyActivity
     // MyService.notify(getApplicationContext(), "Hello!");
 
     // 定时闹钟
+    // 检查并请求权限
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !hasExactAlarmPermission(context)) {
+      // 引导用户到设置页面授予权限
+      requestExactAlarmPermission((Activity) context);
+      return;
+    }
+
     alarmCount = 0;
     alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
     intent = new Intent(MyActivity.this, ClockActivity.class);
-    // 在 Android 12（API 31）及更高版本中，系统强制要求所有 PendingIntent 必须明确声明可变性标志​（FLAG_IMMUTABLE
-    // 或 FLAG_MUTABLE）
-    // pi = PendingIntent.getActivity(MyActivity.this, 0, intent, 0);
-    // 使用 FLAG_IMMUTABLE（推荐）
+
     pi = PendingIntent.getActivity(
         MyActivity.this,
         0,
@@ -1835,6 +1840,28 @@ public class MyActivity
 
   public void setIsBackMainUI(boolean value) {
     isBackMainUI = value;
+  }
+
+  // 检查是否有设置精确闹钟的权限
+  private boolean hasExactAlarmPermission(Context context) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+      return true; // API 31 以下不需要此权限
+    }
+
+    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+    return alarmManager.canScheduleExactAlarms();
+  }
+
+  // 请求精确闹钟权限
+  private void requestExactAlarmPermission(Activity activity) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+      return; // API 31 以下不需要此权限
+    }
+
+    Intent intent = new Intent();
+    intent.setAction(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+    intent.setData(Uri.parse("package:" + activity.getPackageName()));
+    activity.startActivityForResult(intent, 1001); // 1001 是请求码，可自定义
   }
 
 }

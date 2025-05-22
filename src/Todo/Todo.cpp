@@ -517,14 +517,14 @@ void Todo::on_DelAlarm() {
 void Todo::startTimerAlarm(QString text) {
   Q_UNUSED(text);
 #ifdef Q_OS_ANDROID
-
+  QJniObject javaText = QJniObject::fromString(text);
   QJniObject jo = QNativeInterface::QAndroidApplication::context();
 
   jo.callStaticMethod<int>("com.x/MyActivity", "startAlarm",
-                           "(Ljava/lang/String;)I", jo.object<jstring>());
+                           "(Ljava/lang/String;)I", javaText.object<jstring>());
 
   jo.callStaticMethod<int>("com.x/ClockActivity", "setInfoText",
-                           "(Ljava/lang/String;)I", jo.object<jstring>());
+                           "(Ljava/lang/String;)I", javaText.object<jstring>());
 
 #endif
 }
