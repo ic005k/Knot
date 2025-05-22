@@ -14,7 +14,7 @@ extern Method* m_Method;
 extern QRegularExpression regxNumber;
 extern QList<float> rlistX, rlistY, rlistZ, glistX, glistY, glistZ;
 extern unsigned int num_steps_walk, num_steps_run, num_steps_hop;
-extern bool loading, isAndroid;
+extern bool loading, isAndroid, zh_cn;
 extern QString iniFile, iniDir;
 extern void setTableNoItemFlags(QTableWidget* t, int row);
 
@@ -200,6 +200,7 @@ void Steps::addRecord(QString date, qlonglong steps, QString km) {
     QDate::fromString(strD0, "ddd MMM d yyyy").toString("ddd MM dd yyyy");
   } else
     str0 = strD0;
+
   date = str0;
   QString str1 = QString::number(QDate::currentDate().year());
   date.replace(str1, "");
@@ -447,7 +448,13 @@ void Steps::startRecordMotion() {
   m_time.setHMS(0, 0, 0, 0);
 
   strStartTime = QTime::currentTime().toString();
-  t0 = QDate::currentDate().toString();
+
+  if (zh_cn) {
+    QLocale chineseLocale(QLocale::Chinese, QLocale::China);
+    t0 = chineseLocale.toString(QDate::currentDate(), "ddd MM月 dd yyyy");
+  } else
+    t0 = QDate::currentDate().toString();
+
   mw_one->ui->lblGpsDateTime->setText(t0 + " " + strStartTime);
   startDT = QDateTime::currentDateTime();
 

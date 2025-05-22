@@ -878,7 +878,11 @@ void MainWindow::add_Data(QTreeWidget *tw, QString strTime, QString strAmount,
                           QString strDesc) {
   bool isYes = false;
 
-  strDate = QDate::currentDate().toString("ddd MM dd yyyy");
+  if (zh_cn) {
+    QLocale chineseLocale(QLocale::Chinese, QLocale::China);
+    strDate = chineseLocale.toString(QDate::currentDate(), "ddd MM dd yyyy");
+  } else
+    strDate = QDate::currentDate().toString("ddd MM dd yyyy");
 
   int topc = tw->topLevelItemCount();
   for (int i = 0; i < topc; i++) {

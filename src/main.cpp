@@ -293,7 +293,7 @@ void loadTheme(bool isDark) {
 }
 
 void loadLocal() {
-  static QTranslator translator;
+  static QTranslator translator0;
   static QTranslator translator1;
   static QTranslator translator2;
   static QTranslator translator3;
@@ -304,9 +304,9 @@ void loadLocal() {
 
   } else if (locale.language() == QLocale::Chinese) {
     bool tr = false;
-    tr = translator.load(":/src/cn.qm");
+    tr = translator0.load(":/src/cn.qm");
     if (tr) {
-      qApp->installTranslator(&translator);
+      qApp->installTranslator(&translator0);
       zh_cn = true;
     }
 

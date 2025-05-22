@@ -5,24 +5,12 @@
 #include "src/MainWindow.h"
 #include "ui_MainWindow.h"
 
-// 工具函数：将 Qt 路径转换为 minizip-ng 兼容的路径格式
-std::string toNormalizedPath(const QString &qtPath) {
-  // 直接保留原始路径格式（使用正斜杠）
-  QString normalized = qtPath;
-
-  // 调试输出验证路径
-  qDebug() << "Raw path:" << normalized;
-  qDebug() << "UTF-8 bytes:" << normalized.toUtf8().toHex();
-
-  return normalized.toUtf8().constData();
-}
-
 extern MainWindow *mw_one;
 extern QTabWidget *tabData;
 extern QString iniDir, searchStr, currentMDFile, privateDir, encPassword,
     errorInfo;
 extern CategoryList *m_CategoryList;
-extern bool isEpub, isText, isPDF, loading, isDark, isAndroid, isEncrypt;
+extern bool isEpub, isText, isPDF, loading, isDark, isAndroid, isEncrypt, zh_cn;
 extern int iPage, sPos, totallines, baseLines, htmlIndex, s_y1, s_m1, s_d1,
     s_y2, s_m2, s_d2, fontSize;
 extern QStringList readTextList, htmlFiles, listCategory;
@@ -508,7 +496,14 @@ void Method::setCellText(int row, int column, QString str,
 QString Method::getLastModified(QString file) {
   QFileInfo info(file);
   QDateTime lastModified = info.lastModified();
-  QString item1 = lastModified.toString();
+  QString item1;
+  if (zh_cn) {
+    // 使用中文区域设置格式化日期
+    QLocale chineseLocale(QLocale::Chinese, QLocale::China);
+    item1 = chineseLocale.toString(lastModified, "ddd MM月dd日 hh:mm:ss yyyy");
+  } else
+    item1 = lastModified.toString();
+
   return item1;
 }
 

@@ -2335,6 +2335,7 @@ int NotesList::getSavedNotesListIndex(int notebookIndex) {
   int count = m_Method->getCountFromQW(mw_one->ui->qwNoteList);
   if (count > 0) {
     if (index < 0) index = 0;
+    if (index > count - 1) index = count - 1;
   } else {
     index = -1;
   }
