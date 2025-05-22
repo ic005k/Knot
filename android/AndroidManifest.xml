@@ -33,6 +33,7 @@
 
     <!-- Android 12+ 设置精确闹钟所需权限 -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- The following comment will be replaced upon deployment with default features based on the
     dependencies of the application.

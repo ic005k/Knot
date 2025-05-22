@@ -148,6 +148,7 @@ import java.util.concurrent.Executors;
 import android.os.SystemClock;
 import android.os.Vibrator;
 import android.content.SharedPreferences;
+import android.Manifest;
 
 //Qt5
 import org.qtproject.qt.android.bindings.QtActivity;
@@ -584,13 +585,7 @@ public class MyActivity
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    // 安卓11及以上的存储权限
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-      checkStoragePermission();
-    } else {
-      // 安卓11以下的存储授权
-      verifyStoragePermissions(this);
-    }
+    requestPermission();
 
     if (m_instance != null) {
       Log.d(TAG, "App is already running... this won't work");
@@ -1862,6 +1857,31 @@ public class MyActivity
     intent.setAction(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
     intent.setData(Uri.parse("package:" + activity.getPackageName()));
     activity.startActivityForResult(intent, 1001); // 1001 是请求码，可自定义
+  }
+
+  private void requestPermission() {
+
+    // 安卓11及以上的存储权限
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      checkStoragePermission();
+    } else {
+      // 安卓11以下的存储授权
+      verifyStoragePermissions(this);
+    }
+
+    // 请求通知权限 Android 12+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      // 定义权限请求的 Request Code（需唯一）
+      int REQUEST_CODE_POST_NOTIFICATIONS = 100;
+      if (ContextCompat.checkSelfPermission(this,
+          Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+        // 请求权限
+        requestPermissions(
+            new String[] { Manifest.permission.POST_NOTIFICATIONS },
+            REQUEST_CODE_POST_NOTIFICATIONS);
+      }
+    }
+
   }
 
 }
