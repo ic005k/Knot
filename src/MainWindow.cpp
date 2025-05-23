@@ -44,7 +44,7 @@ extern bool isAndroid, isIOS, zh_cn, isEpub, isEpubError, isText, isPDF,
 extern QString btnYearText, btnMonthText, strPage, ebookFile, strTitle,
     fileName, strOpfPath, catalogueFile, strShowMsg;
 extern int iPage, sPos, totallines, baseLines, htmlIndex, s_y1, s_m1, s_d1,
-    s_y2, s_m2, s_d2;
+    s_y2, s_m2, s_d2, totalPages, currentPage;
 extern QStringList readTextList, htmlFiles, listCategory;
 
 extern CategoryList *m_CategoryList;
@@ -4488,9 +4488,9 @@ void MainWindow::on_btnPages_clicked() {
 void MainWindow::on_hSlider_sliderMoved(int position) {
   if (isText) {
     ui->btnPages->setText(QString::number(position) + "\n" +
-                          QString::number(totallines / baseLines));
+                          QString::number(totalPages));
     ui->progReader->setMinimum(1);
-    ui->progReader->setMaximum(totallines / baseLines);
+    ui->progReader->setMaximum(totalPages);
     ui->progReader->setValue(position);
   }
 

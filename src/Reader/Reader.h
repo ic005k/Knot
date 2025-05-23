@@ -182,6 +182,8 @@ class Reader : public QDialog {
   QString strFind;
   void gotoCataList(QString htmlFile);
   int currentCataIndex = 0;
+
+  QString updateContent();
 };
 
 class TextChunkModel : public QAbstractListModel {

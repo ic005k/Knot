@@ -27,7 +27,7 @@ QStringList readTextList, htmlFiles, tempHtmlList, ncxList;
 QString strOpfPath, oldOpfPath, fileName, ebookFile, strTitle, catalogueFile,
     strShowMsg, strEpubTitle, strPercent;
 
-int iPage, sPos, totallines;
+int sPos, totallines, totalPages, currentPage;
 int baseLines = 50;
 int htmlIndex = 0;
 int minBytes = 200000;
@@ -483,10 +483,11 @@ void Reader::openFile(QString openfile) {
       isText = true;
       isEpub = false;
       isPDF = false;
-      iPage = 0;
       sPos = 0;
 
       totallines = readTextList.count();
+      totalPages = (totallines + baseLines - 1) / baseLines;
+      currentPage = 0;
     }
 
     fileName = openfile;
@@ -580,12 +581,12 @@ void Reader::saveReader(QString BookmarkText, bool isSetBookmark) {
 
   if (isText) {
     if (isSetBookmark) {
-      Reg.setValue("/Bookmark/iPage" + bookmarkSn, iPage - baseLines);
+      Reg.setValue("/Bookmark/currentPage" + bookmarkSn, currentPage - 1);
       Reg.setValue("/Bookmark/Name" + bookmarkSn, BookmarkText);
       Reg.setValue("/Bookmark/VPos" + bookmarkSn, getVPos());
 
     } else {
-      Reg.setValue("/Reader/iPage", iPage - baseLines);
+      Reg.setValue("/Reader/currentPage", currentPage - 1);
     }
   }
 
@@ -713,17 +714,12 @@ void Reader::on_btnPageUp_clicked() {
   isPageNext = false;
 
   savePageVPos();
-  if (isText) {
-    int count = iPage - baseLines;
-    if (count <= 0) return;
-    textPos = 0;
-    QString txt1;
 
-    for (int i = count - baseLines; i < count; i++) {
-      iPage--;
-      QString str = readTextList.at(i);
-      if (str.trimmed() != "")
-        txt1 = txt1 + readTextList.at(i) + "\n" + strSpace;
+  if (isText) {
+    QString txt1;
+    if (currentPage > 0) {
+      currentPage--;
+      txt1 = updateContent();
     }
 
     setQMLText(txt1);
@@ -747,26 +743,13 @@ void Reader::on_btnPageNext_clicked() {
 
   isPageNext = true;
 
-  if (iPage > 1 || htmlFiles.count() > 1) savePageVPos();
+  if (currentPage > 0 || htmlFiles.count() > 1) savePageVPos();
 
   if (isText) {
     QString txt1;
-    if (totallines > baseLines) {
-      int count = iPage + baseLines;
-      if (count > totallines) return;
-      textPos = 0;
-
-      for (int i = iPage; i < count; i++) {
-        iPage++;
-        QString str = readTextList.at(i);
-
-        if (str.trimmed() != "") txt1 = txt1 + str + "\n" + strSpace;
-      }
-    } else {
-      for (int i = 0; i < totallines; i++) {
-        QString str = readTextList.at(i);
-        if (str.trimmed() != "") txt1 = txt1 + str + "\n" + strSpace;
-      }
+    if (currentPage < totalPages - 1) {
+      currentPage++;
+      txt1 = updateContent();
     }
 
     setQMLText(txt1);
@@ -781,6 +764,16 @@ void Reader::on_btnPageNext_clicked() {
   }
   setPageVPos();
   showInfo();
+}
+
+QString Reader::updateContent() {
+  int start = currentPage * baseLines;
+  int end = qMin(start + baseLines, totallines);
+  QString content;
+  for (int i = start; i < end; ++i) {
+    content += readTextList.at(i) + "\n";
+  }
+  return content;
 }
 
 void Reader::gotoCataList(QString htmlFile) {
@@ -1090,7 +1083,7 @@ void Reader::goBookReadPosition() {
                   QSettings::IniFormat);
 
     if (isText) {
-      iPage = Reg.value("/Reader/iPage", 0).toULongLong();
+      currentPage = Reg.value("/Reader/currentPage", -1).toULongLong();
       on_btnPageNext_clicked();
       showInfo();
     }
@@ -1158,7 +1151,7 @@ void Reader::savePageVPos() {
   }
 
   if (isText) {
-    Reg.setValue("/Reader/vpos" + QString::number(iPage), textPos);
+    Reg.setValue("/Reader/vpos" + QString::number(currentPage), textPos);
   }
 
   qDebug() << "savePageVPos:" << textPos;
@@ -1182,7 +1175,8 @@ void Reader::setPageVPos() {
   }
 
   if (isText) {
-    textPos = Reg.value("/Reader/vpos" + QString::number(iPage), 0).toReal();
+    textPos =
+        Reg.value("/Reader/vpos" + QString::number(currentPage), 0).toReal();
   }
 
   setVPos(textPos);
@@ -1240,14 +1234,10 @@ qreal Reader::getNewVPos(qreal pos1, qreal h1, qreal h2) {
 
 void Reader::showInfo() {
   if (isText) {
-    int nCurrentPage = iPage / baseLines;
-    int nPages = totallines / baseLines;
-    if (nCurrentPage <= 0) nCurrentPage = 1;
-    if (nPages <= 0) nPages = 1;
-    mw_one->ui->btnPages->setText(QString::number(nCurrentPage) + "\n" +
-                                  QString::number(nPages));
-    mw_one->ui->progReader->setMaximum(nPages);
-    mw_one->ui->progReader->setValue(nCurrentPage);
+    mw_one->ui->btnPages->setText(QString::number(currentPage + 1) + "\n" +
+                                  QString::number(totalPages));
+    mw_one->ui->progReader->setMaximum(totalPages);
+    mw_one->ui->progReader->setValue(currentPage + 1);
   }
 
   if (isEpub) {
@@ -1616,7 +1606,7 @@ void Reader::on_hSlider_sliderReleased(int position) {
   mw_one->ui->lblTitle->hide();
 
   int max = 0;
-  if (isText) max = totallines / baseLines;
+  if (isText) max = totalPages;
   if (isEpub) max = htmlFiles.count();
   if (position >= max) position = max;
   sPos = position;
@@ -1630,21 +1620,13 @@ void Reader::getLines() {
   mw_one->ui->hSlider->setMinimum(1);
 
   if (isText) {
-    mw_one->ui->hSlider->setMaximum(totallines / baseLines);
-    mw_one->ui->btnPages->setText(
-        QString::number(mw_one->ui->hSlider->value()) + "\n" +
-        QString::number(totallines / baseLines));
-    iPage = (mw_one->ui->hSlider->value() - 1) * baseLines;
-    qDebug() << "iPage" << iPage << mw_one->ui->hSlider->value();
+    mw_one->ui->hSlider->setMaximum(totalPages);
+    currentPage = mw_one->ui->hSlider->value() - 1;
+    mw_one->ui->btnPages->setText(QString::number(currentPage + 1) + "\n" +
+                                  QString::number(totalPages));
 
-    int count = iPage + baseLines;
     QString txt1;
-    for (int i = iPage; i < count; i++) {
-      iPage++;
-      QString str = readTextList.at(i);
-      if (str.trimmed() != "")
-        txt1 = txt1 + readTextList.at(i).trimmed() + "\n" + strSpace;
-    }
+    txt1 = updateContent();
 
     qsShow =
         "<p style='line-height:32px; width:100% ; white-space: pre-wrap; "
@@ -2162,7 +2144,8 @@ void Reader::clickBookmarkList(int i) {
                 QSettings::IniFormat);
 
   if (isText) {
-    iPage = Reg.value("/Bookmark/iPage" + QString::number(index)).toInt();
+    currentPage =
+        Reg.value("/Bookmark/currentPage" + QString::number(index)).toInt();
     on_btnPageNext_clicked();
     textPos = Reg.value("/Bookmark/VPos" + QString::number(index)).toReal();
   }
@@ -2328,7 +2311,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       // Right Slide
       if ((relea_x - press_x) > length && qAbs(relea_y - press_y) < 35) {
         if (isText) {
-          if (iPage - baseLines <= 0) {
+          if (currentPage == 0) {
             if (isText || isEpub) {
               QMetaObject::invokeMethod((QObject *)root, "setX",
                                         Q_ARG(QVariant, 0));
@@ -2353,7 +2336,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       // Left Slide
       if ((press_x - relea_x) > length && qAbs(relea_y - press_y) < 35) {
         if (isText) {
-          if (iPage + baseLines > totallines) {
+          if (currentPage == totalPages - 1) {
             if (isText || isEpub) {
               QMetaObject::invokeMethod((QObject *)root, "setX",
                                         Q_ARG(QVariant, 0));
