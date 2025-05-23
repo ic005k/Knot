@@ -33,7 +33,9 @@
 
     <!-- Android 12+ 设置精确闹钟所需权限 -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- Android 13+ 需要 -->
 
     <!-- The following comment will be replaced upon deployment with default features based on the
     dependencies of the application.
@@ -305,7 +307,16 @@
             android:label="PDFCatelogueActivity">
         </activity>
 
-        <receiver android:name="com.x.AlarmReceiver" />
+
+        <receiver
+            android:name="com.x.AlarmReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.x.Knot.TODO_ALARM" />
+            </intent-filter>
+        </receiver>
+
 
         <!-- android:name="androidx.core.content.FileProvider" -->
         <!-- android:name="android.support.v4.content.FileProvider"-->

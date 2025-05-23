@@ -294,7 +294,7 @@ public class ClockActivity
       CallJavaNotify_3();
     }
 
-    MyService.notifyTodoAlarm(context, str2);
+    // MyService.notifyTodoAlarm(context, str2);
 
     String mystr = str2;
     boolean isVoice = false;

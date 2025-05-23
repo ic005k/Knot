@@ -82,6 +82,7 @@ import com.x.FilePicker;
 import com.x.MyService;
 import com.x.ShareReceiveActivity;
 import com.x.TTSUtils;
+import com.x.AlarmReceiver;
 
 import com.xhh.pdfui.PDFActivity;
 
@@ -157,6 +158,8 @@ public class MyActivity
     extends QtActivity
     implements Application.ActivityLifecycleCallbacks {
 
+  public static final String ACTION_TODO_ALARM = "com.x.Knot.TODO_ALARM";
+
   // 安卓版本>=11时存储授权
   private static final String PREFS_NAME = "app_prefs";
   private static final String KEY_SHOULD_REQUEST = "should_request_storage";
@@ -181,7 +184,8 @@ public class MyActivity
 
   private static AlarmManager alarmManager;
   private static PendingIntent pi;
-  private static Intent intent;
+  private static PendingIntent pendingIntent;
+
   public static String strAlarmInfo;
   public static int alarmCount;
   public static boolean isScreenOff = false;
@@ -200,6 +204,8 @@ public class MyActivity
   private MediaRecorder recorder;
   private MediaPlayer player;
   public static ArrayList<Activity> alarmWindows = new ArrayList<Activity>();
+
+  private AlarmReceiver mAlarmReceiver;
 
   public static native void CallJavaNotify_0();
 
@@ -306,27 +312,63 @@ public class MyActivity
     int ts = Integer.parseInt(strTotalS);
     c.add(Calendar.SECOND, ts);
 
+    // 使用应用上下文，避免Activity引用导致的内存泄漏
+    Context appContext = context.getApplicationContext();
+
+    int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      flags |= PendingIntent.FLAG_IMMUTABLE;
+    }
+
+    Intent intent = new Intent(appContext, ClockActivity.class);
+    pi = PendingIntent.getActivity(
+        appContext,
+        0,
+        intent,
+        flags);
+
+    // 创建定时触发的 BroadcastReceiver Intent
+    Intent receiverIntent = new Intent(appContext, AlarmReceiver.class);
+    receiverIntent.setAction(ACTION_TODO_ALARM); // 显式设置 Action
+    receiverIntent.putExtra("alarmMessage", strText);
+
+    // 唯一请求码（不考虑 PendingIntent 复用，业务逻辑：新定时覆盖旧定时）
+    int requestCode = 0;
+
+    pendingIntent = PendingIntent.getBroadcast(
+        appContext,
+        requestCode,
+        receiverIntent,
+        flags);
+
     // 设置闹钟
     alarmManager.setExactAndAllowWhileIdle(
         AlarmManager.RTC_WAKEUP,
         c.getTimeInMillis(),
-        pi);
-
-    // 定时精度不够
-    // alarmManager.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pi);
+        pendingIntent);
 
     Log.e("Alarm Manager", c.getTimeInMillis() + "");
     Log.e("Alarm Manager", str);
 
     System.out.println(ts);
     System.out.println("startAlarm+++++++++++++++++++++++");
+
+    // 设置闹钟后发送测试广播
+    try {
+      Log.d("AlarmManager", "Sending test broadcast...");
+      pendingIntent.send();
+      Log.d("AlarmManager", "Test broadcast sent successfully");
+    } catch (PendingIntent.CanceledException e) {
+      Log.e("AlarmManager", "Test broadcast failed: " + e.getMessage());
+    }
+
     return 1;
   }
 
   public static int stopAlarm() {
     if (alarmManager != null) {
-      if (pi != null) {
-        alarmManager.cancel(pi);
+      if (pendingIntent != null) {
+        alarmManager.cancel(pendingIntent);
       }
 
       System.out.println("stopAlarm+++++++++++++++++++++++" + alarmCount);
@@ -408,6 +450,15 @@ public class MyActivity
 
   public static float getSteps() {
     return stepCounts;
+  }
+
+  private void registAlarmReceiver() {
+    // 动态注册 AlarmReceiver
+    mAlarmReceiver = new AlarmReceiver();
+    IntentFilter filter = new IntentFilter();
+    filter.addAction(ACTION_TODO_ALARM); // 定义要监听的广播 Action
+    registerReceiver(mAlarmReceiver, filter); // 注册接收器
+
   }
 
   // 屏幕唤醒相关
@@ -617,9 +668,10 @@ public class MyActivity
     initStepSensor();
 
     registSreenStatusReceiver();
+    // registAlarmReceiver();
 
-    // 状态栏
     context = MyActivity.this;
+
     // 设置状态栏颜色,需要安卓版本大于5.0
     String filename = "/storage/emulated/0/.Knot/options.ini";
     internalConfigure = new InternalConfigure(this);
@@ -673,13 +725,6 @@ public class MyActivity
 
     alarmCount = 0;
     alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-    intent = new Intent(MyActivity.this, ClockActivity.class);
-
-    pi = PendingIntent.getActivity(
-        MyActivity.this,
-        0,
-        intent,
-        PendingIntent.FLAG_IMMUTABLE);
 
     addDeskShortcuts();
 
@@ -988,6 +1033,16 @@ public class MyActivity
 
     android.os.Process.killProcess(android.os.Process.myPid());
     getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
+
+    if (mScreenStatusReceiver != null) {
+      unregisterReceiver(mScreenStatusReceiver);
+      mScreenStatusReceiver = null;
+    }
+
+    if (mAlarmReceiver != null) {
+      unregisterReceiver(mAlarmReceiver);
+      mAlarmReceiver = null;
+    }
 
     super.onDestroy();
     m_instance = null;

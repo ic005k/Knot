@@ -24,7 +24,6 @@ import android.app.NotificationManager;
 import android.graphics.Color;
 import android.app.NotificationChannel;
 
-//import android.support.v4.app.NotificationCompat;
 import androidx.core.app.NotificationCompat;
 
 import android.annotation.TargetApi;
@@ -77,13 +76,8 @@ public class MyService extends Service {
 
     public native static void CallJavaNotify_14();
 
-    // private static SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd
-    // HH:mm:ss");
     private static SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
-    public static Timer timer;
-    public static Timer timerAlarm;
-    public static Handler handler;
-    public static int sleep = 0;
+
     public static String strRun;
     public static String strStatus;
     public static String strPedometer;
@@ -120,76 +114,6 @@ public class MyService extends Service {
 
         }
     };
-
-    public static int startTimerAlarm() {
-        stopTimerAlarm();
-
-        handler = new Handler(Looper.getMainLooper());
-        handler.post(runnable);// 立即调用
-        System.out.println("startTimerAlarm+++++++++++++++++++++++");
-        return 1;
-    }
-
-    public static int stopTimerAlarm() {
-        if (handler != null) {
-            handler.removeCallbacks(runnable);
-
-        }
-
-        System.out.println("stopTimerAlarm+++++++++++++++++++++++");
-        return 1;
-    }
-
-    public static int startTimer() {
-        System.out.println("startTimer+++++++++++++++++++++++");
-
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (MyActivity.isStepCounter == 0)
-                    CallJavaNotify_1();
-                if (MyActivity.isStepCounter == 1) {
-
-                }
-
-            }
-        }, 0, sleep);
-        return 1;
-    }
-
-    public static int stopTimer() {
-        if (timer != null) {
-            timer.cancel();
-            timer.purge();
-            System.out.println("stopTimer+++++++++++++++++++++++");
-        }
-        return 1;
-    }
-
-    public static int setSleep1() {
-        sleep = 200;
-        stopTimer();
-        startTimer();
-        System.out.println("setSleep1+++++++++++++++++++++++");
-        return 1;
-    }
-
-    public static int setSleep2() {
-        sleep = 10;
-        stopTimer();
-        startTimer();
-        System.out.println("setSleep2+++++++++++++++++++++++");
-        return 1;
-    }
-
-    public static int setSleep3() {
-        sleep = 5000;
-        stopTimer();
-        startTimer();
-        System.out.println("setSleep3+++++++++++++++++++++++");
-        return 1;
-    }
 
     @Override
     public IBinder onBind(Intent arg0) {
@@ -330,31 +254,94 @@ public class MyService extends Service {
     private static NotificationManager m_notificationManagerAlarm;
     private static Notification.Builder m_builderAlarm;
 
+    /*
+     * public static void notifyTodoAlarm(Context context, String message) {
+     * try {
+     * m_notificationManagerAlarm = (NotificationManager)
+     * context.getSystemService(Context.NOTIFICATION_SERVICE);
+     * 
+     * if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+     * int importance = NotificationManager.IMPORTANCE_DEFAULT;
+     * NotificationChannel notificationChannel = new
+     * NotificationChannel("Knot Alarm", "Knot Notifier Alarm",
+     * importance);
+     * m_notificationManagerAlarm.createNotificationChannel(notificationChannel);
+     * m_builderAlarm = new Notification.Builder(context,
+     * notificationChannel.getId());
+     * 
+     * } else {
+     * m_builderAlarm = new Notification.Builder(context);
+     * }
+     * 
+     * m_builderAlarm.setContentTitle(strTodo)
+     * .setContentText(message)
+     * .setSmallIcon(R.drawable.alarm)
+     * .setColor(Color.GREEN)
+     * .setAutoCancel(true)
+     * .setDefaults(Notification.DEFAULT_ALL);
+     * 
+     * Notification notification = m_builderAlarm.build();
+     * 
+     * m_notificationManagerAlarm.notify(strTodo, 10, notification);
+     * 
+     * } catch (Exception e) {
+     * e.printStackTrace();
+     * }
+     * }
+     */
+
+    // 待办事项定时任务通知（使用 Full-Screen Intent）
     public static void notifyTodoAlarm(Context context, String message) {
         try {
             m_notificationManagerAlarm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                int importance = NotificationManager.IMPORTANCE_DEFAULT;
-                NotificationChannel notificationChannel = new NotificationChannel("Knot Alarm", "Knot Notifier Alarm",
-                        importance);
-                m_notificationManagerAlarm.createNotificationChannel(notificationChannel);
-                m_builderAlarm = new Notification.Builder(context, notificationChannel.getId());
+            // 创建跳转 Activity 的 Intent
+            Intent activityIntent = new Intent(context, ClockActivity.class);
+            activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
+            // 构建 PendingIntent（适配 Android 12+ 不可变性）
+            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flags |= PendingIntent.FLAG_IMMUTABLE;
+            }
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    context, 0, activityIntent, flags);
+
+            // 创建通知渠道（Android 8.0+）
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                String channelId = "knot_alarm_channel";
+                String channelName = "Knot Alarm";
+                int importance = NotificationManager.IMPORTANCE_HIGH; // 必须为 HIGH 才能触发全屏
+                NotificationChannel channel = new NotificationChannel(
+                        channelId, channelName, importance);
+                channel.setDescription("Alarm notifications");
+                channel.enableLights(true);
+                channel.setLightColor(Color.RED);
+                m_notificationManagerAlarm.createNotificationChannel(channel);
+
+                // 构建通知（Android 8.0+）
+                m_builderAlarm = new Notification.Builder(context, channelId)
+                        .setContentTitle(strTodo)
+                        .setContentText(message)
+                        .setSmallIcon(R.drawable.alarm)
+                        .setColor(Color.GREEN)
+                        .setAutoCancel(true)
+                        .setFullScreenIntent(pendingIntent, true) // 关键：启用全屏 Intent
+                        .setPriority(Notification.PRIORITY_MAX); // 最高优先级
             } else {
-                m_builderAlarm = new Notification.Builder(context);
+                // Android 7.1 及以下
+                m_builderAlarm = new Notification.Builder(context)
+                        .setContentTitle(strTodo)
+                        .setContentText(message)
+                        .setSmallIcon(R.drawable.alarm)
+                        .setColor(Color.GREEN)
+                        .setAutoCancel(true)
+                        .setFullScreenIntent(pendingIntent, true)
+                        .setPriority(Notification.PRIORITY_MAX);
             }
 
-            m_builderAlarm.setContentTitle(strTodo)
-                    .setContentText(message)
-                    .setSmallIcon(R.drawable.alarm)
-                    .setColor(Color.GREEN)
-                    .setAutoCancel(true)
-                    .setDefaults(Notification.DEFAULT_ALL);
-
-            Notification notification = m_builderAlarm.build();
-
-            m_notificationManagerAlarm.notify(strTodo, 10, notification);
+            // 发送通知
+            m_notificationManagerAlarm.notify("knot_alarm_tag", 10, m_builderAlarm.build());
 
         } catch (Exception e) {
             e.printStackTrace();
