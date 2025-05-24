@@ -353,15 +353,6 @@ public class MyActivity
     System.out.println(ts);
     System.out.println("startAlarm+++++++++++++++++++++++");
 
-    // 设置闹钟后发送测试广播
-    try {
-      Log.d("AlarmManager", "Sending test broadcast...");
-      pendingIntent.send();
-      Log.d("AlarmManager", "Test broadcast sent successfully");
-    } catch (PendingIntent.CanceledException e) {
-      Log.e("AlarmManager", "Test broadcast failed: " + e.getMessage());
-    }
-
     return 1;
   }
 
