@@ -478,6 +478,8 @@ void Steps::startRecordMotion() {
   mw_one->ui->lblCurrentDistance->setStyleSheet(lblStartStyle);
   mw_one->ui->lblGpsInfo->setStyleSheet(lblStartStyle);
   mw_one->ui->btnGPS->setStyleSheet(btnRoundStyleRed);
+  mw_one->ui->gboxMotionType->setEnabled(false);
+  mw_one->ui->btnSelGpsDate->setEnabled(false);
 }
 
 void Steps::positionUpdated(const QGeoPositionInfo& info) {
@@ -640,6 +642,10 @@ void Steps::updateGetGps() {
                    QString::number(latitude) + "\n" + strGpsStatus;
   mw_one->ui->lblGpsInfo->setText(strGpsInfoShow);
   emit timeChanged();
+
+  if (m_time.second() % 5 == 0) {
+    refreshMotionData();
+  }
 }
 
 void Steps::stopRecordMotion() {
@@ -656,18 +662,36 @@ void Steps::stopRecordMotion() {
   mw_one->ui->lblGpsInfo->setStyleSheet(lblStyle);
   mw_one->ui->btnGPS->setStyleSheet(btnRoundStyle);
 
-  QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
+  refreshMotionData();
 
+#ifdef Q_OS_ANDROID
+  if (nGpsMethod == 1)
+    m_distance = m_activity.callMethod<jdouble>("stopGpsUpdates", "()D");
+  else
+    m_distance = listenerWrapper.callMethod<jdouble>("stopGpsUpdates", "()D");
+#else
+  if (m_positionSource) {
+    m_positionSource->stopUpdates();
+  }
+  delete m_positionSource;
+#endif
+
+  mw_one->ui->gboxMotionType->setEnabled(true);
+  mw_one->ui->btnSelGpsDate->setEnabled(true);
+}
+
+void Steps::refreshMotionData() {
+  QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
   Reg.setValue("/GPS/TotalDistance", m_TotalDistance);
 
   strEndTime = QTime::currentTime().toString();
 
-  QString t1, t2, t3, t4, t5, str_type;
+  QString t00, t1, t2, t3, t4, t5, str_type;
 
   if (mw_one->ui->rbCycling->isChecked()) str_type = tr("Cycling");
   if (mw_one->ui->rbHiking->isChecked()) str_type = tr("Hiking");
   if (mw_one->ui->rbRunning->isChecked()) str_type = tr("Running");
-  t0 = str_type + " " + t0;
+  t00 = str_type + " " + t0;
 
   t1 = tr("Time") + ": " + strStartTime + " - " + strEndTime;
   t2 = tr("Distance") + ": " + str1;
@@ -688,16 +712,28 @@ void Steps::stopRecordMotion() {
       mw_one->ui->btnSelGpsDate->setText(strTitle);
     }
 
-    insertGpsList(0, t0, t1, t2, t3, t4, t5);
+    QString text0, text1, startTime1, startTime2;
+    text0 = m_Method->getText0(mw_one->ui->qwGpsList, 0);
+    text1 = m_Method->getText1(mw_one->ui->qwGpsList, 0);
+    startTime1 = text1.split("-").at(0);
+    startTime2 = t1.split("-").at(0);
+
+    if (text0 == t00 && startTime1 == startTime2) {
+      m_Method->delItemFromQW(mw_one->ui->qwGpsList, 0);
+    }
+
+    insertGpsList(0, t00, t1, t2, t3, t4, t5);
 
     QSettings Reg1(iniDir + stry + "-gpslist.ini", QSettings::IniFormat);
-
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+    Reg1.setIniCodec("utf-8");
+#endif
     int count = getGpsListCount();
     QString strYearMonth = stry + "-" + strm;
     Reg1.setValue("/" + strYearMonth + "/Count", count);
     Reg1.setValue(
         "/" + strYearMonth + "/" + QString::number(count),
-        t0 + "-=-" + t1 + "-=-" + t2 + "-=-" + t3 + "-=-" + t4 + "-=-" + t5);
+        t00 + "-=-" + t1 + "-=-" + t2 + "-=-" + t3 + "-=-" + t4 + "-=-" + t5);
 
     double dMonthTotal = 0;  // 里程月总计
     double dCycling = 0;
@@ -743,21 +779,6 @@ void Steps::stopRecordMotion() {
 
     allGpsTotal();
   }
-
-#ifdef Q_OS_ANDROID
-  if (nGpsMethod == 1)
-    m_distance = m_activity.callMethod<jdouble>("stopGpsUpdates", "()D");
-  else
-    m_distance = listenerWrapper.callMethod<jdouble>("stopGpsUpdates", "()D");
-#else
-  if (m_positionSource) {
-    m_positionSource->stopUpdates();
-  }
-  delete m_positionSource;
-#endif
-
-  // ShowMessage* msg = new ShowMessage(this);
-  // msg->showMsg("Knot", mw_one->ui->lblGpsInfo->text(), 1);
 }
 
 void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
