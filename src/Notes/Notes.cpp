@@ -74,8 +74,8 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   mw_one->set_ToolButtonStyle(this);
 
   // 创建快捷键：绑定 Ctrl+F
-  QShortcut *shortcut = new QShortcut(QKeySequence("Ctrl+F"), this);
-  connect(shortcut, &QShortcut::activated, this, [this]() {
+  QShortcut *shortcut1 = new QShortcut(QKeySequence("Ctrl+F"), this);
+  connect(shortcut1, &QShortcut::activated, this, [this]() {
     ui->editFind->setFocus();
     ui->editFind->selectAll();
   });
@@ -328,6 +328,13 @@ bool Notes::eventFilter(QObject *obj, QEvent *evn) {
     }
 
     if (evn->type() == QEvent::KeyPress) {
+    }
+  }
+
+  if (evn->type() == QEvent::KeyPress) {
+    if (keyEvent->key() == Qt::Key_Escape) {
+      close();
+      evn->accept();  // 表明这个事件已经被处理
     }
   }
 
