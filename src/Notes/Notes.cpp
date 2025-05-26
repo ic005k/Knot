@@ -908,10 +908,8 @@ void Notes::closeEvent(QCloseEvent *event) {
   }
 
   if (isSetNewNoteTitle()) {
-    if (strNoteText.length() > 20)
-      new_title = strNoteText.mid(0, 20).trimmed() + "...";
-    else
-      new_title = strNoteText;
+    TitleGenerator generator;
+    new_title = generator.genNewTitle(strNoteText);
     mw_one->ui->btnRename->click();
   }
 }
@@ -928,7 +926,7 @@ void Notes::syncToWebDAV() {
 
 bool Notes::isSetNewNoteTitle() {
   QString title = mw_one->ui->lblNoteName->text();
-  if (title.trimmed() == "") {
+  if (title.trimmed() == "无标题笔记" || title.trimmed() == "Untitled Note") {
     return true;
   }
 
@@ -1354,11 +1352,8 @@ void Notes::delLink(QString link) {
 
 void Notes::javaNoteToQMLNote() {
   if (isSetNewNoteTitle()) {
-    QString mdString = loadText(currentMDFile).trimmed();
-    if (mdString.length() > 20)
-      new_title = mdString.mid(0, 20).trimmed() + "...";
-    else
-      new_title = mdString;
+    TitleGenerator generator;
+    new_title = generator.genNewTitle(strNoteText);
     mw_one->ui->btnRename->click();
   }
 

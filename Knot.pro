@@ -363,6 +363,7 @@ SOURCES += \
     src/Notes/TextSelector.cpp \
     src/Notes/database_manager.cpp \
     src/Notes/search_model.cpp \
+    src/Notes/titlegenerator.cpp \
     src/Preferences.cpp \
     src/Reader/DocumentHandler.cpp \
     src/Reader/File.cpp \
@@ -596,6 +597,7 @@ HEADERS += \
     src/Notes/TextSelector.h \
     src/Notes/database_manager.h \
     src/Notes/search_model.h \
+    src/Notes/titlegenerator.h \
     src/Preferences.h \
     src/Reader/DocumentHandler.h \
     src/Reader/File.h \

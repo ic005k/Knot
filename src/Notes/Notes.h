@@ -44,6 +44,7 @@
 #include "src/Notes/PrintPDF.h"
 #include "src/Notes/QTextEditHighlighter.h"
 #include "src/Notes/TextSelector.h"
+#include "titlegenerator.h"
 #include "ui_PrintPDF.h"
 #include "ui_TextSelector.h"
 
