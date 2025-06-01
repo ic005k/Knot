@@ -32,7 +32,7 @@ int baseLines = 50;
 int htmlIndex = 0;
 int minBytes = 200000;
 int maxBytes = 400000;
-int unzipMethod = 3; /* 1 system  2 QZipReader 3 ziplib */
+int unzipMethod = 3; /* 1 system  2 QZipReader 3 quazip */
 int zlibMethod = 1;
 int readerFontSize = 18;
 int epubFileMethod = 2;
@@ -233,15 +233,18 @@ void Reader::startOpenFile(QString openfile) {
 
     QString bookName;
 
-#ifdef Q_OS_ANDROID
-    QString name;
-    name = getUriRealPath(openfile);
-    QStringList lista = name.split("/");
-    bookName = lista.at(lista.count() - 1);
-#else
+    /*#ifdef Q_OS_ANDROID
+        QString name;
+        name = getUriRealPath(openfile);
+        QStringList lista = name.split("/");
+        bookName = lista.at(lista.count() - 1);
+    #else
+        QFileInfo fi(openfile);
+        bookName = fi.fileName();
+    #endif*/
+
     QFileInfo fi(openfile);
     bookName = fi.fileName();
-#endif
 
     ebookFile = openfile;
     strTitle =
@@ -250,11 +253,12 @@ void Reader::startOpenFile(QString openfile) {
     mw_one->m_ReadTWThread->quit();
     mw_one->m_ReadTWThread->wait();
 
-    if (isAndroid)
-      m_Method->showAndroidProgressBar();
-    else
-      mw_one->showProgress();
-    tmeShowEpubMsg->start(100);
+    // if (isAndroid)
+    //   m_Method->showAndroidProgressBar();
+    // else
+    // mw_one->showProgress();
+
+    // tmeShowEpubMsg->start(100);
 
     mw_one->myReadEBookThread->start();
 
@@ -632,7 +636,8 @@ void Reader::initReader() {
   font.setLetterSpacing(QFont::AbsoluteSpacing, 2);  // 字间距
 
   fileName = Reg.value("/Reader/FileName").toString();
-  if (!QFile(fileName).exists() && zh_cn) fileName = ":/res/test.txt";
+  // if (!QFile(fileName).exists() && zh_cn) fileName = ":/res/test.txt";
+
   isInitReader = true;
 
   if (isAndroid) {
@@ -1029,25 +1034,122 @@ QStringList Reader::readText(QString textFile) {
       qDebug() << tr("Cannot read file %1:\n%2.")
                       .arg(QDir::toNativeSeparators(textFile),
                            file.errorString());
+      return list1;
+    }
 
+    QByteArray data = file.readAll();
+    file.close();
+
+    QString text;
+
+    // 首先检查BOM
+    if (data.startsWith("\xEF\xBB\xBF")) {
+      text = QString::fromUtf8(data.mid(3));  // 跳过BOM
+    } else if (data.startsWith("\xFF\xFE") || data.startsWith("\xFE\xFF")) {
+      // UTF-16 BOM
+      QTextCodec *codec = QTextCodec::codecForName("UTF-16");
+      text = codec->toUnicode(data);
     } else {
-      QString text;
-      QByteArray buff = file.readAll();
-      text = GetCorrectUnicode(buff);
+      // 使用更健壮的编码检测
+      if (isUtf8(data)) {
+        text = QString::fromUtf8(data);
+      } else {
+        // 尝试常见编码
+        QTextCodec *codec = nullptr;
 
-      text.replace(">", ">\n");
-      text.replace("<", "\n<");
-      list = text.split("\n");
-      for (int i = 0; i < list.count(); i++) {
-        QString str = list.at(i);
-        str = str.trimmed();
-        if (str != "") list1.append(str);
+        // 尝试GBK/GB2312 (中文)
+        codec = QTextCodec::codecForName("GBK");
+        QString gbkText = codec->toUnicode(data);
+        if (isValidText(gbkText)) {
+          text = gbkText;
+        } else {
+          // 尝试ISO 8859-1 (Latin-1)
+          codec = QTextCodec::codecForName("ISO 8859-1");
+          text = codec->toUnicode(data);
+        }
       }
     }
-    file.close();
+
+    text.replace(">", ">\n");
+    text.replace("<", "\n<");
+    list = text.split("\n");
+
+    // 使用索引遍历避免detach
+    for (int i = 0; i < list.size(); ++i) {
+      QString trimmed = list.at(i).trimmed();
+      if (!trimmed.isEmpty()) {
+        list1.append(trimmed);
+      }
+    }
   }
 
   return list1;
+}
+
+// 改进的UTF-8检测函数
+bool Reader::isUtf8(const QByteArray &data) {
+  int i = 0;
+  int length = data.length();
+  int utf8Chars = 0;
+  int invalidBytes = 0;
+
+  while (i < length) {
+    unsigned char c = static_cast<unsigned char>(data[i]);
+    int bytes;
+
+    // 判断UTF-8字符的字节数
+    if ((c & 0x80) == 0) {
+      bytes = 1;  // 0xxxxxxx
+    } else if ((c & 0xE0) == 0xC0) {
+      bytes = 2;  // 110xxxxx
+    } else if ((c & 0xF0) == 0xE0) {
+      bytes = 3;  // 1110xxxx
+    } else if ((c & 0xF8) == 0xF0) {
+      bytes = 4;  // 11110xxx
+    } else {
+      invalidBytes++;
+      bytes = 1;
+    }
+
+    // 检查后续字节是否符合UTF-8格式
+    if (i + bytes > length) {
+      invalidBytes++;
+      break;
+    }
+
+    for (int j = 1; j < bytes; j++) {
+      unsigned char follow = static_cast<unsigned char>(data[i + j]);
+      if ((follow & 0xC0) != 0x80) {
+        invalidBytes++;
+        break;
+      }
+    }
+
+    if (bytes > 1) utf8Chars++;
+    i += bytes;
+  }
+
+  // 如果没有发现UTF-8多字节字符，或者无效字节太多，认为不是UTF-8
+  if (utf8Chars == 0) return false;
+  double validRatio = 1.0 - (double)invalidBytes / length;
+  return validRatio > 0.9;  // 至少90%的字节有效
+}
+
+// 辅助函数：检查文本是否包含足够的有效字符
+bool Reader::isValidText(const QString &text) {
+  int validChars = 0;
+  int totalChars = text.length();
+
+  if (totalChars == 0) return false;
+
+  for (QChar c : text) {
+    if (c.isPrint() || c.isSpace()) {
+      validChars++;
+    }
+  }
+
+  // 要求至少70%的字符是可打印的或空格
+  return (double)validChars / totalChars > 0.7;
 }
 
 QString Reader::GetCorrectUnicode(const QByteArray &text) {
@@ -1909,6 +2011,7 @@ void Reader::readBookDone() {
 
   if (isEpubError) {
     tmeShowEpubMsg->stop();
+
     mw_one->ui->lblEpubInfo->hide();
     mw_one->ui->pEpubProg->hide();
     mw_one->ui->btnReader->setEnabled(true);
@@ -1945,8 +2048,6 @@ void Reader::readBookDone() {
     mw_one->ui->btnShowBookmark->show();
     mw_one->ui->btnAutoRun->show();
 
-    mw_one->ui->qwReader->rootContext()->setContextProperty("isWebViewShow",
-                                                            false);
     mw_one->ui->qwReader->rootContext()->setContextProperty("strText", "");
     mw_one->ui->qwReader->rootContext()->setContextProperty("isSelText",
                                                             isSelText);

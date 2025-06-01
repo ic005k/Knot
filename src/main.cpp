@@ -70,6 +70,12 @@ int main(int argc, char* argv[]) {
 
   isAndroid = true;
 
+  // 强制使用OpenGL ES 2.0
+  QSurfaceFormat format;
+  format.setVersion(2, 0);
+  format.setProfile(QSurfaceFormat::CoreProfile);
+  QSurfaceFormat::setDefaultFormat(format);
+
 #else
   // 桌面端配置
 
@@ -264,7 +270,6 @@ int main(int argc, char* argv[]) {
 
                      loadTheme(isDark);
                    });
-  loadTheme(isDark);
 
   w.show();
 

@@ -3,7 +3,6 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Controls.Fusion
 import QtQuick.Window
-import QtQml
 
 Rectangle {
     id: root
@@ -11,7 +10,7 @@ Rectangle {
     width: 400
     height: 500
 
-    color: isDark ? "#19232D" : "white"
+    color: isDark ? "#1E1E1E" : "white"
 
     property int iconW: 12
     property int itemCount: 0
@@ -106,7 +105,7 @@ Rectangle {
         var strColor
 
         if (isDark)
-            strColor = "#455364"
+            strColor = "#333333"
         else
             strColor = "#ffffff"
 

@@ -175,7 +175,7 @@ class MainWindow : public QMainWindow {
   bool isReaderVisible;
   QString treeStyle = "QTreeWidget::item {height: 28;}";
   int mainHeight = 0;
-  bool floatfun = true;
+
   int alertWindowsCount = 0;
   QString strText;
   QString strRefreshUrl;

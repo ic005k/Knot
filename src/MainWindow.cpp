@@ -395,7 +395,7 @@ MainWindow::MainWindow(QWidget *parent)
   init_TotalData();
 
   // 延时执行
-  QTimer::singleShot(100, this, [this]() { m_Reader->initReader(); });
+  // QTimer::singleShot(100, this, [this]() { m_Reader->initReader(); });
 
   loading = false;
 
@@ -467,8 +467,9 @@ void MainWindow::initTodayInitSteps() {
 
 #ifdef Q_OS_ANDROID
 
-  QJniObject jo = QNativeInterface::QAndroidApplication::context();
-  a = jo.callStaticMethod<float>("com.x/MyActivity", "getSteps", "()F");
+  // QJniObject jo = QNativeInterface::QAndroidApplication::context();
+  a = QJniObject::callStaticMethod<float>("com.x/MyActivity", "getSteps",
+                                          "()F");
 
 #endif
 
@@ -1412,6 +1413,17 @@ void MainWindow::readData(QTreeWidget *tw) {
           topItem->setText(2, Reg.value("/" + group + "/" +
                                         QString::number(i + 1) + "-topAmount")
                                   .toString());
+
+          // 移除异项（时间相同，但频次处于累加的异常情况）
+          int lastTopIndex = tw->topLevelItemCount() - 1;
+          if (lastTopIndex >= 0) {
+            QTreeWidgetItem *lastTopItem = tw->topLevelItem(lastTopIndex);
+            // 时间相同但频次不同
+            if ((lastTopItem->text(0) == topItem->text(0)) &&
+                (lastTopItem->text(1) != topItem->text(1))) {
+              tw->takeTopLevelItem(lastTopIndex);
+            }
+          }
 
           QString topStr = QString("%1|%2|%3|%4")
                                .arg(topItem->text(0), topItem->text(1),
@@ -2981,9 +2993,9 @@ void MainWindow::on_rbAmount_clicked() {
 
 void MainWindow::paintEvent(QPaintEvent *event) {
   Q_UNUSED(event);
-  if (floatfun && !initMain) {
-    floatfun = false;
-  }
+
+  /*
+
   // 获取背景色
   QPalette pal = ui->btnFind->palette();
   QBrush brush = pal.window();
@@ -3000,7 +3012,7 @@ void MainWindow::paintEvent(QPaintEvent *event) {
       chartMonth->setTheme(QChart::ChartThemeLight);
       chartDay->setTheme(QChart::ChartThemeLight);
     }
-  }
+  }*/
 }
 
 void MainWindow::on_actionReport_triggered() {
@@ -3156,8 +3168,9 @@ void MainWindow::updateHardSensorSteps() {
   QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
   m_activity.callMethod<void>("initStepSensor", "()V");
 
-  QJniObject jo = QNativeInterface::QAndroidApplication::context();
-  tc = jo.callStaticMethod<float>("com.x/MyActivity", "getSteps", "()F");
+  // QJniObject jo = QNativeInterface::QAndroidApplication::context();
+  tc = QJniObject::callStaticMethod<float>("com.x/MyActivity", "getSteps",
+                                           "()F");
 
 #endif
   steps = tc - initTodaySteps;
@@ -3386,20 +3399,15 @@ void MainWindow::init_Theme() {
     ui->btnDel->setIcon(QIcon(":/res/delitem.svg"));
     ui->btnSync->setIcon(QIcon(":/res/upload.svg"));
 
-    ui->editTodo->setStyleSheet(
-        "QTextEdit{background-color: #FFFFFF; color: black; border:1px solid "
-        "#4169E1;}");
-    QPalette palette = ui->editTodo->palette();
-    palette.setColor(QPalette::Normal, QPalette::PlaceholderText,
-                     QColor(255, 255, 255, 255));
-    ui->editTodo->setPalette(palette);
-
     ui->editDetails->setStyleSheet(ui->editTodo->styleSheet());
 
     ui->editTodo->verticalScrollBar()->setStyleSheet(
         m_Method->lightScrollbarStyle);
     ui->editDetails->verticalScrollBar()->setStyleSheet(
         m_Method->lightScrollbarStyle);
+
+    chartMonth->setTheme(QChart::ChartThemeLight);
+    chartDay->setTheme(QChart::ChartThemeLight);
 
   } else {
     ui->f_Menu->setStyleSheet("background-color: #19232D;");
@@ -3430,20 +3438,15 @@ void MainWindow::init_Theme() {
     ui->btnDel->setIcon(QIcon(":/res/delitem_l.svg"));
     ui->btnSync->setIcon(QIcon(":/res/upload_l.svg"));
 
-    ui->editTodo->setStyleSheet(
-        "QTextEdit{background-color: #455364; color: white; border:1px solid "
-        "#4169E1;}");
-    QPalette palette = ui->editTodo->palette();
-    palette.setColor(QPalette::Normal, QPalette::PlaceholderText,
-                     QColor(255, 255, 255, 255));
-    ui->editTodo->setPalette(palette);
-
     ui->editDetails->setStyleSheet(ui->editTodo->styleSheet());
 
     ui->editTodo->verticalScrollBar()->setStyleSheet(
         m_Method->darkScrollbarStyle);
     ui->editDetails->verticalScrollBar()->setStyleSheet(
         m_Method->darkScrollbarStyle);
+
+    chartMonth->setTheme(QChart::ChartThemeDark);
+    chartDay->setTheme(QChart::ChartThemeDark);
   }
 
   // Edit Record UI
@@ -4038,8 +4041,6 @@ void MainWindow::init_CloudBacup() {
 }
 
 void MainWindow::on_actionOneDriveBackupData() {
-  floatfun = false;
-
   ui->frameMain->hide();
   ui->frameReader->hide();
   ui->frameOne->show();
@@ -4394,21 +4395,24 @@ void MainWindow::on_btnReader_clicked() {
     }
   }
 
-  floatfun = false;
+  ui->frameMain->hide();
+  ui->frameReader->show();
+  ui->f_ReaderFun->show();
 
   isReaderVisible = true;
   isMemoVisible = false;
 
   if (!isOne) {
+    m_Reader->initReader();
+
+    while (!ui->btnReader->isEnabled())
+      QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+
     mwh = this->height();
     setFixedHeight(mwh);
     ui->qwReader->rootContext()->setContextProperty("myW", this->width());
     ui->qwReader->rootContext()->setContextProperty("myH", mwh);
   }
-
-  ui->frameMain->hide();
-  ui->frameReader->show();
-  ui->f_ReaderFun->show();
 
   if (!isOne) {
     isOne = true;
@@ -5761,12 +5765,12 @@ void MainWindow::on_DelayCloseProgressBar() {
 }
 
 void MainWindow::on_CloseProgressBar() {
-  if (isAndroid) {
-    m_Method->closeAndroidProgressBar();
-    qDebug() << "close android progressbar...";
-  } else {
-    mw_one->closeProgress();
-  }
+  // if (isAndroid) {
+  //   m_Method->closeAndroidProgressBar();
+  //   qDebug() << "close android progressbar...";
+  // } else {
+  mw_one->closeProgress();
+  //}
 
   mw_one->ui->btnReader->setEnabled(true);
   mw_one->ui->f_ReaderFun->setEnabled(true);

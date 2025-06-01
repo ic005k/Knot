@@ -1358,11 +1358,11 @@ void Notes::javaNoteToQMLNote() {
   }
 
 #ifdef Q_OS_ANDROID
-  QJniObject m_activity =
-      QJniObject(QNativeInterface::QAndroidApplication::context());
-  if (m_activity.callMethod<jdouble>("getEditStatus", "()D") == 1) {
-    mw_one->ui->btnOpenNote->click();
-  }
+  // QJniObject m_activity =
+  //     QJniObject(QNativeInterface::QAndroidApplication::context());
+  // if (m_activity.callMethod<jdouble>("getEditStatus", "()D") == 1) {
+  //   mw_one->ui->btnOpenNote->click();
+  // }
 #endif
 
   QString zipMD = privateDir + "KnotData/memo/" +

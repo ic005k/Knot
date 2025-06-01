@@ -150,8 +150,9 @@ import android.os.SystemClock;
 import android.os.Vibrator;
 import android.content.SharedPreferences;
 import android.Manifest;
+import android.view.WindowInsetsController;
 
-//Qt5
+//Qt
 import org.qtproject.qt.android.bindings.QtActivity;
 
 public class MyActivity
@@ -628,6 +629,7 @@ public class MyActivity
     super.onCreate(savedInstanceState);
 
     requestPermission();
+    requestSensorPermission();
 
     if (m_instance != null) {
       Log.d(TAG, "App is already running... this won't work");
@@ -676,18 +678,6 @@ public class MyActivity
     isDark = Boolean.parseBoolean(strDark);
     System.out.println("strDark=" + strDark + "    isDark=" + isDark);
 
-    if (isDark) {
-      this.setStatusBarColor("#19232D"); // 深色
-      getWindow()
-          .getDecorView()
-          .setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE); // 白色文字
-    } else {
-      this.setStatusBarColor("#F3F3F3"); // 灰
-      getWindow()
-          .getDecorView()
-          .setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR); // 黑色文字
-    }
-
     Application application = this.getApplication();
     application.registerActivityLifecycleCallbacks(this);
 
@@ -720,6 +710,9 @@ public class MyActivity
     addDeskShortcuts();
 
     mytts = TTSUtils.getInstance(this);
+
+    // 延迟设置状态栏颜色，确保Qt初始化完成
+    new Handler(Looper.getMainLooper()).postDelayed(this::updateStatusBarColor, 1000);
 
   }
 
@@ -1003,6 +996,12 @@ public class MyActivity
   public void onPause() {
     System.out.println("onPause...");
     super.onPause();
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+    updateStatusBarColor();
   }
 
   @Override
@@ -1928,6 +1927,51 @@ public class MyActivity
       }
     }
 
+  }
+
+  private void requestSensorPermission() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      if (ContextCompat.checkSelfPermission(this,
+          Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
+
+        ActivityCompat.requestPermissions(
+            this,
+            new String[] { Manifest.permission.ACTIVITY_RECOGNITION },
+            1997);
+      }
+    }
+  }
+
+  private void updateStatusBarColor() {
+    Window window = getWindow();
+    WindowInsetsController insetsController = window.getInsetsController();
+
+    // 设置状态栏颜色
+    if (isDark) {
+      window.setStatusBarColor(Color.parseColor("#19232D")); // 深色背景
+
+      // 设置状态栏文本和图标为白色（亮色）
+      if (insetsController != null) {
+        insetsController.setSystemBarsAppearance(0, WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
+      } else {
+        window.getDecorView().setSystemUiVisibility(
+            window.getDecorView().getSystemUiVisibility() &
+                ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+      }
+    } else {
+      window.setStatusBarColor(Color.parseColor("#F3F3F3")); // 浅色背景
+
+      // 设置状态栏文本和图标为黑色（暗色）
+      if (insetsController != null) {
+        insetsController.setSystemBarsAppearance(
+            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
+      } else {
+        window.getDecorView().setSystemUiVisibility(
+            window.getDecorView().getSystemUiVisibility() |
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+      }
+    }
   }
 
 }

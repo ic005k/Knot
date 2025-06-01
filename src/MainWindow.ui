@@ -3864,9 +3864,7 @@ QTabBar::scroller {width:0}
               <string>Ctrl + Enter</string>
              </property>
              <property name="styleSheet">
-              <string notr="true">QTextEdit {
-border:1px solid #4169E1
-}</string>
+              <string notr="true"/>
              </property>
              <property name="placeholderText">
               <string>Enter the to-do list text</string>

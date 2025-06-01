@@ -153,7 +153,7 @@ Rectangle {
         var strColor
 
         if (isDark)
-            strColor = "#455364"
+            strColor = "#1E1E1E"
         else
             strColor = "#ffffff"
 
@@ -179,7 +179,7 @@ Rectangle {
             //选中颜色设置 #94caf7
             color: ListView.isCurrentItem ? "lightblue" : getColor()
 
-            border.width: isDark ? 0 : 1
+            border.width: isDark ? 1 : 1
             border.color: "lightgray" //"lightsteelblue"
 
             radius: 6
@@ -190,22 +190,22 @@ Rectangle {
                 var item2H
                 var item3H
 
-                if (item0.text.length == 0)
+                if (item0.text.length === 0)
                     item0H = 0
                 else
                     item0H = item0.contentHeight
 
-                if (item1.text.length == 0)
+                if (item1.text.length === 0)
                     item1H = 0
                 else
                     item1H = item1.contentHeight
 
-                if (item2.text.length == 0)
+                if (item2.text.length === 0)
                     item2H = 0
                 else
                     item2H = item2.contentHeight
 
-                if (item3.text.length == 0)
+                if (item3.text.length === 0)
                     item3H = 0
                 else
                     item3H = item3.contentHeight

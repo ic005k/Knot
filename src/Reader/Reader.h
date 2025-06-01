@@ -184,6 +184,8 @@ class Reader : public QDialog {
   int currentCataIndex = 0;
 
   QString updateContent();
+  static bool isUtf8(const QByteArray &data);
+  static bool isValidText(const QString &text);
 };
 
 class TextChunkModel : public QAbstractListModel {

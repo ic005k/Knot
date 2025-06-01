@@ -161,7 +161,7 @@ Rectangle {
         var strColor
 
         if (isDark)
-            strColor = "#455364"
+            strColor = "#1E1E1E" // "#455364"
         else
             strColor = "#ffffff"
 
@@ -185,7 +185,7 @@ Rectangle {
             height: item0.contentHeight + item2.contentHeight + 16
             color: ListView.isCurrentItem ? "lightblue" : getColor()
 
-            border.width: isDark ? 0 : 1
+            border.width: isDark ? 1 : 1
             border.color: "lightgray" //"lightsteelblue"
 
             radius: 0
@@ -352,103 +352,36 @@ Rectangle {
                 property point clickPos: "0,0"
 
                 anchors.fill: parent
-                onPressed: function(mouse){
+                onPressed: function (mouse) {
                     clickPos = Qt.point(mouse.x, mouse.y)
                 }
-                onReleased: function(mouse){
+                onReleased: function (mouse) {
                     var delta = Qt.point(mouse.x - clickPos.x,
                                          mouse.y - clickPos.y)
-
-                    if ((delta.x < 0) && (aBtnShow.running === false)
-                            && (delBtn.width == 0)) {
-                        aBtnShow.start()
-                    } else if (aBtnHide.running === false
-                               && (delBtn.width > 0)) {
-                        aBtnHide.start()
-                    }
                 }
 
                 onClicked: {
 
                     view.currentIndex = index //实现item切换
 
-
-                    /*for (i = 0; i < view.count; i++) {
-                        view.model.setProperty(i, "text2", "")
-                    }
-                    view.model.setProperty(index, "text2", "ShowRect")*/
                     m_NotesList.clickNoteBook()
                 }
 
                 onPressAndHold: {
 
-                    //m_Method.showNoteBookMenu(mouse.x, mouse.y)
                 }
 
                 onDoubleClicked: {
 
-                    //mw_one.reeditData()
-                    //var data = view.model.get(view.currentIndex)
-                    //console.log(data.text0 + "," + data.type + ", count=" + view.count)
                 }
-            }
-
-            Rectangle {
-                color: "#AAAAAA"
-                height: 0
-                width: parent.width
-                anchors.bottom: parent.bottom
-            }
-
-            Rectangle {
-                id: delBtn
-                visible: false
-                height: parent.height
-                width: 0
-                color: "#FF0000"
-
-                anchors.right: parent.right
-                anchors.rightMargin: -30
-                radius: 0
-
-                Text {
-                    width: 56
-                    anchors.centerIn: parent
-
-                    text: qsTr("Done")
-                    color: "#ffffff"
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        m_Todo.addToRecycle()
-                        view.model.remove(index)
-                    }
-                }
-            }
-
-            PropertyAnimation {
-                id: aBtnShow
-                target: delBtn
-                property: "width"
-                duration: 100
-                from: 0
-                to: 80
-            }
-            PropertyAnimation {
-                id: aBtnHide
-                target: delBtn
-                property: "width"
-                duration: 100
-                from: 80
-                to: 0
             }
         }
     }
 
     ListView {
         id: view
+
+        boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
 
         anchors {
             fill: parent
