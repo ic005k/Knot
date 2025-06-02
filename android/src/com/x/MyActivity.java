@@ -712,8 +712,8 @@ public class MyActivity
     mytts = TTSUtils.getInstance(this);
 
     // 延迟设置状态栏颜色，确保Qt初始化完成
-    new Handler(Looper.getMainLooper()).postDelayed(this::updateStatusBarColor, 1000);
-
+    new Handler(Looper.getMainLooper()).postDelayed(this::updateStatusBarColor,
+        1000);
   }
 
   // 使用LocationListenerCompat定义位置监听器

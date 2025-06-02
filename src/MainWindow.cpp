@@ -477,7 +477,12 @@ void MainWindow::initTodayInitSteps() {
 
   QSettings Reg(iniDir + "initsteps.ini", QSettings::IniFormat);
 
-  QString str = QDate::currentDate().toString("ddd MM dd yyyy");
+  QString str;
+  if (zh_cn) {
+    QLocale chineseLocale(QLocale::Chinese, QLocale::China);
+    str = chineseLocale.toString(QDate::currentDate(), "ddd MM dd yyyy");
+  } else
+    str = QDate::currentDate().toString("ddd MM dd yyyy");
 
   if (!Reg.allKeys().contains(str)) {
     Reg.setValue(str, a);
@@ -3157,9 +3162,16 @@ void MainWindow::updateHardSensorSteps() {
 
   timeTest = timeTest + 1;
 
-  if (strDate != QDate::currentDate().toString("ddd MM dd yyyy")) {
+  QString c_date;
+  if (zh_cn) {
+    QLocale chineseLocale(QLocale::Chinese, QLocale::China);
+    c_date = chineseLocale.toString(QDate::currentDate(), "ddd MM dd yyyy");
+  } else
+    c_date = QDate::currentDate().toString("ddd MM dd yyyy");
+
+  if (strDate != c_date) {
     initTodayInitSteps();
-    strDate = QDate::currentDate().toString("ddd MM dd yyyy");
+    strDate = c_date;
   }
 
   qlonglong steps = 0;
@@ -3399,6 +3411,8 @@ void MainWindow::init_Theme() {
     ui->btnDel->setIcon(QIcon(":/res/delitem.svg"));
     ui->btnSync->setIcon(QIcon(":/res/upload.svg"));
 
+    m_Method->setEditLightMode(ui->editTodo);
+
     ui->editDetails->setStyleSheet(ui->editTodo->styleSheet());
 
     ui->editTodo->verticalScrollBar()->setStyleSheet(
@@ -3437,6 +3451,8 @@ void MainWindow::init_Theme() {
     ui->btnAdd->setIcon(QIcon(":/res/additem_l.svg"));
     ui->btnDel->setIcon(QIcon(":/res/delitem_l.svg"));
     ui->btnSync->setIcon(QIcon(":/res/upload_l.svg"));
+
+    m_Method->setEditDarkMode(ui->editTodo);
 
     ui->editDetails->setStyleSheet(ui->editTodo->styleSheet());
 
@@ -5765,12 +5781,12 @@ void MainWindow::on_DelayCloseProgressBar() {
 }
 
 void MainWindow::on_CloseProgressBar() {
-  // if (isAndroid) {
-  //   m_Method->closeAndroidProgressBar();
-  //   qDebug() << "close android progressbar...";
-  // } else {
-  mw_one->closeProgress();
-  //}
+  if (isAndroid) {
+    m_Method->closeAndroidProgressBar();
+    qDebug() << "close android progressbar...";
+  } else {
+    mw_one->closeProgress();
+  }
 
   mw_one->ui->btnReader->setEnabled(true);
   mw_one->ui->f_ReaderFun->setEnabled(true);

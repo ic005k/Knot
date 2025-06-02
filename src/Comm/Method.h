@@ -28,6 +28,7 @@
 #include <QStandardPaths>
 #include <QString>
 #include <QTableWidget>
+#include <QTextEdit>
 #include <QTimer>
 #include <QWidget>
 
@@ -365,6 +366,9 @@ class Method : public QDialog {
   void setOSFlag();
 
   void setDark(bool dark);
+
+  void setEditLightMode(QTextEdit *textEdit);
+  void setEditDarkMode(QTextEdit *textEdit);
 
  protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;

@@ -253,10 +253,10 @@ void Reader::startOpenFile(QString openfile) {
     mw_one->m_ReadTWThread->quit();
     mw_one->m_ReadTWThread->wait();
 
-    // if (isAndroid)
-    //   m_Method->showAndroidProgressBar();
-    // else
-    // mw_one->showProgress();
+    if (isAndroid)
+      m_Method->showAndroidProgressBar();
+    else
+      mw_one->showProgress();
 
     // tmeShowEpubMsg->start(100);
 

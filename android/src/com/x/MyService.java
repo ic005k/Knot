@@ -254,42 +254,6 @@ public class MyService extends Service {
     private static NotificationManager m_notificationManagerAlarm;
     private static Notification.Builder m_builderAlarm;
 
-    /*
-     * public static void notifyTodoAlarm(Context context, String message) {
-     * try {
-     * m_notificationManagerAlarm = (NotificationManager)
-     * context.getSystemService(Context.NOTIFICATION_SERVICE);
-     * 
-     * if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-     * int importance = NotificationManager.IMPORTANCE_DEFAULT;
-     * NotificationChannel notificationChannel = new
-     * NotificationChannel("Knot Alarm", "Knot Notifier Alarm",
-     * importance);
-     * m_notificationManagerAlarm.createNotificationChannel(notificationChannel);
-     * m_builderAlarm = new Notification.Builder(context,
-     * notificationChannel.getId());
-     * 
-     * } else {
-     * m_builderAlarm = new Notification.Builder(context);
-     * }
-     * 
-     * m_builderAlarm.setContentTitle(strTodo)
-     * .setContentText(message)
-     * .setSmallIcon(R.drawable.alarm)
-     * .setColor(Color.GREEN)
-     * .setAutoCancel(true)
-     * .setDefaults(Notification.DEFAULT_ALL);
-     * 
-     * Notification notification = m_builderAlarm.build();
-     * 
-     * m_notificationManagerAlarm.notify(strTodo, 10, notification);
-     * 
-     * } catch (Exception e) {
-     * e.printStackTrace();
-     * }
-     * }
-     */
-
     // 待办事项定时任务通知（使用 Full-Screen Intent）
     public static void notifyTodoAlarm(Context context, String message) {
         try {
@@ -350,7 +314,8 @@ public class MyService extends Service {
 
     public static void clearNotify() {
         if (m_notificationManagerAlarm != null) {
-            m_notificationManagerAlarm.cancel(strTodo, 10);
+            // 使用和发送通知时相同的标签 "knot_alarm_tag"
+            m_notificationManagerAlarm.cancel("knot_alarm_tag", 10);
             System.out.println("MyService Clear Notiry...");
         }
     }

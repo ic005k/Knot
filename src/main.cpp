@@ -70,11 +70,20 @@ int main(int argc, char* argv[]) {
 
   isAndroid = true;
 
-  // 强制使用OpenGL ES 2.0
   QSurfaceFormat format;
-  format.setVersion(2, 0);
+  format.setRenderableType(QSurfaceFormat::OpenGLES);
+  format.setVersion(3, 1);  // Android 12 需要至少 OpenGL ES 3.0
   format.setProfile(QSurfaceFormat::CoreProfile);
+  format.setOption(QSurfaceFormat::DeprecatedFunctions, false);
+  format.setDepthBufferSize(24);
+  format.setStencilBufferSize(8);
   QSurfaceFormat::setDefaultFormat(format);
+
+  // 设置 QML 渲染后端
+  qputenv("QSG_RHI_BACKEND", "opengl");
+
+  qputenv("QT_DEBUG_PLUGINS", "1");
+  qputenv("QT_QPA_EGLFS_DEBUG", "1");
 
 #else
   // 桌面端配置

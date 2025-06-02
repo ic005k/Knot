@@ -2384,3 +2384,23 @@ void Method::setOSFlag() {
   else
     Reg.setValue("os", "desktop");
 }
+
+// 设置明亮模式
+void Method::setEditLightMode(QTextEdit *textEdit) {
+  textEdit->setStyleSheet(
+      "QTextEdit {"
+      "    background-color: #FFFFFF;"  // 白色背景
+      "    color: #000000;"             // 黑色文字
+      "    border: 1px solid #CCCCCC;"  // 浅灰色边框
+      "}");
+}
+
+// 设置暗黑模式
+void Method::setEditDarkMode(QTextEdit *textEdit) {
+  textEdit->setStyleSheet(
+      "QTextEdit {"
+      "    background-color: #2D2D30;"  // 深灰色背景
+      "    color: #F1F1F1;"             // 白色文字
+      "    border: 1px solid #555555;"  // 深灰色边框
+      "}");
+}

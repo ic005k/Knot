@@ -745,7 +745,7 @@ void Steps::refreshMotionData() {
     for (int i = 0; i < count; i++) {
       QString strType = getGpsListText0(i).split(" ").at(0);
       QString str = getGpsListText2(i);
-      double jl;
+      double jl = 0.00;
       QStringList list = str.split(" ");
       if (list.count() == 3) {
         QString str1 = list.at(1);
