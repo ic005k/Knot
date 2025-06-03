@@ -67,6 +67,8 @@ int main(int argc, char* argv[]) {
   QApplication::setStyle(QStyleFactory::create("Fusion"));
 
 #ifdef Q_OS_ANDROID
+  // 启用旧版输入事件处理模式（Android 专用）
+  qputenv("QT_ANDROID_ENABLE_OLD_INPUT", "1");
 
   isAndroid = true;
 

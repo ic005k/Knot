@@ -144,7 +144,7 @@ Rectangle {
         var strColor
 
         if (isDark)
-            strColor = "#1E1E1E"
+            strColor = "#333333"
         else
             strColor = "#ffffff"
 
@@ -177,7 +177,7 @@ Rectangle {
             //color: ListView.isCurrentItem ? "lightblue" : (getText1(index) >= nStepsThreshold ? "#FFC1C1" : getColor())
             color: getText1(index) >= nStepsThreshold ? "#FFC1C1" : getColor()
 
-            border.width: isDark ? 1 : 1
+            border.width: isDark ? 0 : 1
             border.color: "lightgray" //"lightsteelblue"
 
             radius: 0

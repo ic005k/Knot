@@ -4217,7 +4217,7 @@ QSlider::handle:horizontal:disabled {
           <enum>QTabWidget::TabPosition::South</enum>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_Steps">
           <attribute name="title">
@@ -4284,6 +4284,9 @@ QSlider::handle:horizontal:disabled {
                  <width>16777215</width>
                  <height>16777215</height>
                 </size>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::Shape::NoFrame</enum>
                </property>
                <property name="smallDecimalPoint">
                 <bool>false</bool>

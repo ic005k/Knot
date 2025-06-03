@@ -104,8 +104,8 @@ class Reader : public QDialog {
   qreal getNewVPos(qreal pos1, qreal h1, qreal h2);
   static QString processHtml(QString htmlFile, bool isWriteFile);
 
-  void on_btnPageNext_clicked();
-  void on_btnPageUp_clicked();
+  void goNextPage();
+  void goUpPage();
   void on_btnOpen_clicked();
 
   void setAni();
@@ -209,7 +209,6 @@ class TextChunkModel : public QAbstractListModel {
   Q_INVOKABLE void clear();
   Q_INVOKABLE QVariantMap get(int index) const;
 
-  Q_INVOKABLE void splitContent1(const QString &fullText);
  signals:
   void chunksChanged(const QVector<QString> &chunks);
 

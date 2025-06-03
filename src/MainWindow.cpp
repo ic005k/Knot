@@ -213,6 +213,8 @@ void ReadEBookThread::run() {
     mw_one->m_Report->getMonthData();
   }
 
+  m_Method->Sleep(100);
+
   emit isDone();
 }
 
@@ -4471,11 +4473,9 @@ void MainWindow::on_btnOpen_clicked() {
   m_Reader->on_btnOpen_clicked();
 }
 
-void MainWindow::on_btnPageUp_clicked() { m_Reader->on_btnPageUp_clicked(); }
+void MainWindow::on_btnPageUp_clicked() { m_Reader->goUpPage(); }
 
-void MainWindow::on_btnPageNext_clicked() {
-  m_Reader->on_btnPageNext_clicked();
-}
+void MainWindow::on_btnPageNext_clicked() { m_Reader->goNextPage(); }
 
 void MainWindow::on_btnPages_clicked() {
   ui->btnAutoStop->click();
@@ -5781,12 +5781,12 @@ void MainWindow::on_DelayCloseProgressBar() {
 }
 
 void MainWindow::on_CloseProgressBar() {
-  if (isAndroid) {
-    m_Method->closeAndroidProgressBar();
-    qDebug() << "close android progressbar...";
-  } else {
-    mw_one->closeProgress();
-  }
+  // if (isAndroid) {
+  //   m_Method->closeAndroidProgressBar();
+  //   qDebug() << "close android progressbar...";
+  // } else {
+  mw_one->closeProgress();
+  // }
 
   mw_one->ui->btnReader->setEnabled(true);
   mw_one->ui->f_ReaderFun->setEnabled(true);

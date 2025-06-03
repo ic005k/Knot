@@ -177,7 +177,7 @@ void Steps::init_Steps() {
 
   for (int i = start; i < count; i++) {
     QString date = getDate(i);
-    if (QDate::currentDate().toString("ddd MM dd ") == date) {
+    if (getCurrentDate() == date) {
       toDayInitSteps = getSteps(i);
       break;
     }
@@ -228,9 +228,19 @@ qlonglong Steps::getCurrentSteps() {
   if (count == 0) return 0;
 
   QString str = getDate(count - 1);
-  if (str == QDate::currentDate().toString("ddd MM dd "))
-    return getSteps(count - 1);
+  if (str == getCurrentDate()) return getSteps(count - 1);
   return 0;
+}
+
+QString Steps::getCurrentDate() {
+  QString c_date;
+  if (zh_cn) {
+    QLocale chineseLocale(QLocale::Chinese, QLocale::China);
+    c_date = chineseLocale.toString(QDate::currentDate(), "ddd MM dd ");
+  } else
+    c_date = QDate::currentDate().toString("ddd MM dd ");
+
+  return c_date;
 }
 
 void Steps::setTableSteps(qlonglong steps) {
@@ -246,7 +256,7 @@ void Steps::setTableSteps(qlonglong steps) {
     date = Reg.value("/Steps/Table-" + QString::number(count - 1) + "-0")
                .toString();
 
-    if (date == QDate::currentDate().toString("ddd MM dd ")) {
+    if (date == getCurrentDate()) {
       double km = mw_one->m_StepsOptions->ui->editStepLength->text()
                       .trimmed()
                       .toDouble() *
@@ -260,7 +270,7 @@ void Steps::setTableSteps(qlonglong steps) {
     } else {
       count = count + 1;
       Reg.setValue("/Steps/Table-" + QString::number(count - 1) + "-0",
-                   QDate::currentDate().toString("ddd MM dd "));
+                   getCurrentDate());
       Reg.setValue("/Steps/Table-" + QString::number(count - 1) + "-1", 0);
       Reg.setValue("/Steps/Table-" + QString::number(count - 1) + "-2", "0");
 
@@ -269,7 +279,7 @@ void Steps::setTableSteps(qlonglong steps) {
   } else {
     count = count + 1;
     Reg.setValue("/Steps/Table-" + QString::number(count - 1) + "-0",
-                 QDate::currentDate().toString("ddd MM dd "));
+                 getCurrentDate());
     Reg.setValue("/Steps/Table-" + QString::number(count - 1) + "-1", 0);
     Reg.setValue("/Steps/Table-" + QString::number(count - 1) + "-2", "0");
 

@@ -119,7 +119,8 @@ class Steps : public QDialog {
 
   void appendToCSV(const QString &filePath, const QStringList &data);
   void updateInfoText(QString strDistance, QString strSpeed);
- public slots:
+  QString getCurrentDate();
+  public slots:
   void clearAllGpsList();
   void getGpsTrack();
  private slots:

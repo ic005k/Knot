@@ -10,7 +10,7 @@ extern Method *m_Method;
 extern ReaderSet *m_ReaderSet;
 
 extern QString iniFile, iniDir, privateDir;
-extern bool zh_cn, isAndroid, isIOS, isEBook, isReadEBookEnd, isReport;
+extern bool zh_cn, isAndroid, isIOS, isEBook, isReport;
 extern int fontSize;
 
 extern int deleteDirfile(QString dirName);
@@ -32,7 +32,7 @@ int baseLines = 50;
 int htmlIndex = 0;
 int minBytes = 200000;
 int maxBytes = 400000;
-int unzipMethod = 3; /* 1 system  2 QZipReader 3 quazip */
+
 int zlibMethod = 1;
 int readerFontSize = 18;
 int epubFileMethod = 2;
@@ -253,12 +253,12 @@ void Reader::startOpenFile(QString openfile) {
     mw_one->m_ReadTWThread->quit();
     mw_one->m_ReadTWThread->wait();
 
-    if (isAndroid)
-      m_Method->showAndroidProgressBar();
-    else
-      mw_one->showProgress();
+    // if (isAndroid)
+    //   m_Method->showAndroidProgressBar();
+    // else
+    mw_one->showProgress();
 
-    // tmeShowEpubMsg->start(100);
+    tmeShowEpubMsg->start(100);
 
     mw_one->myReadEBookThread->start();
 
@@ -293,48 +293,7 @@ void Reader::openFile(QString openfile) {
       QDir dir;
       dir.mkdir(dirpath);
 
-#ifdef Q_OS_WIN
-      unzipMethod = 3;
-#endif
-
-      if (unzipMethod == 1) {
-#ifdef Q_OS_MACOS
-        QProcess *pro = new QProcess;
-        pro->execute("unzip", QStringList() << "-o" << temp << "-d" << dirpath);
-        pro->waitForFinished();
-#endif
-
-#ifdef Q_OS_LINUX
-        QProcess *pro = new QProcess;
-        pro->execute("unzip", QStringList() << "-o" << temp << "-d" << dirpath);
-        pro->waitForFinished();
-
-#endif
-
-#ifdef Q_OS_WIN
-        QString fileName = privateDir + "unbook.bat";
-        QProcess *pro = new QProcess;
-        pro->execute("cmd.exe", QStringList() << "/c" << fileName);
-        pro->waitForFinished();
-
-#endif
-
-#ifdef Q_OS_ANDROID
-
-        QJniObject javaZipFile = QJniObject::fromString(temp);
-        QJniObject javaZipDir = QJniObject::fromString(dirpath);
-        QJniObject activity = QNativeInterface::QAndroidApplication::context();
-        activity.callStaticMethod<void>(
-            "com.x/MyActivity", "Unzip",
-            "(Ljava/lang/String;Ljava/lang/String;)V",
-            javaZipFile.object<jstring>(), javaZipDir.object<jstring>());
-
-#endif
-      }
-
-      if (unzipMethod == 3) {
-        m_Method->decompressWithPassword(temp, dirpath, "");
-      }
+      m_Method->decompressWithPassword(temp, dirpath, "");
 
       qDebug() << "openFile:" << openfile << "dirpath=" << dirpath;
 
@@ -690,7 +649,12 @@ void Reader::setQMLText(QString txt1) {
 
   qsShow = str1 + qsShow + strEndFlag + str2;
   currentTxt = qsShow;
-  loadQMLText(currentTxt);
+
+  // loadQMLText(currentTxt);
+
+  QQuickItem *root = mw_one->ui->qwReader->rootObject();
+  QMetaObject::invokeMethod((QObject *)root, "loadHtmlBuffer",
+                            Q_ARG(QVariant, currentTxt));
 
   setAni();
 }
@@ -712,7 +676,7 @@ QString Reader::getQMLText() {
   return str.toString();
 }
 
-void Reader::on_btnPageUp_clicked() {
+void Reader::goUpPage() {
   if (isSelText) return;
   mw_one->ui->lblTitle->hide();
 
@@ -742,7 +706,7 @@ void Reader::on_btnPageUp_clicked() {
   showInfo();
 }
 
-void Reader::on_btnPageNext_clicked() {
+void Reader::goNextPage() {
   if (isSelText) return;
   mw_one->ui->lblTitle->hide();
 
@@ -1186,7 +1150,7 @@ void Reader::goBookReadPosition() {
 
     if (isText) {
       currentPage = Reg.value("/Reader/currentPage", -1).toULongLong();
-      on_btnPageNext_clicked();
+      goNextPage();
       showInfo();
     }
 
@@ -1632,12 +1596,12 @@ void Reader::backDir() {
   setEpubPagePosition(mainDirIndex, "");
   qDebug() << "mainDirIndex: " << mainDirIndex;
   if (mainDirIndex == 0) {
-    on_btnPageNext_clicked();
-    on_btnPageUp_clicked();
+    goNextPage();
+    goUpPage();
 
   } else {
-    on_btnPageUp_clicked();
-    on_btnPageNext_clicked();
+    goUpPage();
+    goNextPage();
   }
 }
 
@@ -2017,7 +1981,7 @@ void Reader::readBookDone() {
     mw_one->ui->btnReader->setEnabled(true);
     mw_one->ui->f_ReaderFun->setEnabled(true);
     mw_one->closeProgress();
-    isReadEBookEnd = true;
+
     ShowMessage *msg = new ShowMessage(mw_one);
     msg->showMsg("Knot", tr("The EPUB file was opened with an error."), 1);
 
@@ -2247,7 +2211,7 @@ void Reader::clickBookmarkList(int i) {
   if (isText) {
     currentPage =
         Reg.value("/Bookmark/currentPage" + QString::number(index)).toInt();
-    on_btnPageNext_clicked();
+    goNextPage();
     textPos = Reg.value("/Bookmark/VPos" + QString::number(index)).toReal();
   }
 
@@ -2370,8 +2334,8 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
     if (event->type() == QEvent::MouseButtonPress) {
       mw_one->isMousePress = true;
 
-      press_x = event->globalX();
-      press_y = event->globalY();
+      press_x = event->globalPosition().x();
+      press_y = event->globalPosition().y();
       x = 0;
       y = 0;
       w = mw_one->ui->qwReader->width();
@@ -2384,7 +2348,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       }
 
       int h3 = mw_one->ui->qwReader->height() / 3;
-      int mY = event->globalY();
+      int mY = event->globalPosition().y();
       int qwY = mw_one->ui->qwReader->y();
 
       if ((mY > qwY + h3) && (mY < qwY + h3 * 2)) {
@@ -2401,8 +2365,9 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
     }
 
     if (event->type() == QEvent::MouseButtonRelease) {
-      relea_x = event->globalX();
-      relea_y = event->globalY();
+      QPointF globalPos = event->globalPosition();
+      relea_x = globalPos.x();  // 提取 x 坐标（整数或浮点数，根据需求转换）
+      relea_y = globalPos.y();  // 提取 y 坐标
       mw_one->ui->lblTitle->hide();
       QQuickItem *root = mw_one->ui->qwReader->rootObject();
 
@@ -2466,8 +2431,9 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
     }
 
     if (event->type() == QEvent::MouseMove) {
-      relea_x = event->globalX();
-      relea_y = event->globalY();
+      QPointF globalPos = event->globalPosition();
+      relea_x = globalPos.x();  // 提取 x 坐标（整数或浮点数，根据需求转换）
+      relea_y = globalPos.y();  // 提取 y 坐标
       if (mw_one->isMousePress && qAbs(relea_x - press_x) > 20 &&
           qAbs(relea_y - press_y) < 20) {
         mw_one->isMouseMove = true;
@@ -2516,30 +2482,6 @@ void Reader::setTextAreaCursorPos(int nCursorPos) {
 //===============================================================================================
 // TextChunkModel
 //===============================================================================================
-
-// 2：正确的分割逻辑
-void TextChunkModel::splitContent1(const QString &fullText) {
-  beginResetModel();  // 开始重置模型
-
-  m_chunks.clear();
-
-  // 使用完整段落匹配（含闭合标签）
-  static QRegularExpression regex(
-      R"(<p\b[^>]*>(.*?)<\/p>)",
-      QRegularExpression::CaseInsensitiveOption |
-          QRegularExpression::DotMatchesEverythingOption);
-
-  QRegularExpressionMatchIterator i = regex.globalMatch(fullText);
-  while (i.hasNext()) {
-    QRegularExpressionMatch match = i.next();
-    QString paragraph = match.captured(1);
-    // 清理HTML标签（简单示例）
-    paragraph.remove(QRegularExpression("<[^>]*>"));
-    m_chunks.append(paragraph);
-  }
-
-  endResetModel();  // 结束重置，触发视图更新
-}
 
 // 1：正确初始化
 TextChunkModel::TextChunkModel(QObject *parent) : QAbstractListModel(parent) {
