@@ -1,11 +1,23 @@
-/* lightstyle.qss */
-[color-scheme="light"] {
-    --disabled-text: #808080;
+/* lightstyle.qss */
+[color-scheme="light"] {
+    --disabled-text: #808080;
+}
+
+QMenu::item:disabled {
+    color: var(--disabled-text, #808080);
+    font: normal;
+    background-color: transparent;
+    opacity: 0.7;
 }
 
-QMenu::item:disabled {
-    color: var(--disabled-text, #808080);
-    font: normal;
-    background-color: transparent;
-    opacity: 0.7;
+/* 明亮主题选中项样式 */
+QListWidget::item:selected {
+    background-color: #4FC3F7;   /* 浅蓝-适合亮背景 */
+    color: #212121;             /* 深灰文字提高可读性 */
+    border-radius: 4px;
+}
+
+/* 窗口非活动状态 */
+QListView::item:selected:!active {
+    background-color: #B3E5FC;  /* 更浅的非活动蓝 */
 }

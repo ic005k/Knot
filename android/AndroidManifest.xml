@@ -38,6 +38,9 @@
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- Android 13+ 需要 -->
 
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
     <!-- The following comment will be replaced upon deployment with default features based on the
     dependencies of the application.
          Remove the comment if you do not require these default features. -->
@@ -105,6 +108,13 @@
             <meta-data android:name="android.app.lib_name"
                 android:value="-- %%INSERT_APP_LIB_NAME%% --" />
         </service>
+
+        <!-- 声明 TTS 服务 -->
+        <service 
+        android:name=".TTSForegroundService"
+        android:enabled="true"
+        android:exported="false"
+        android:foregroundServiceType="mediaPlayback"/>
 
         <activity android:name="com.x.ClockActivity" android:label="Knot"
             android:launchMode="standard"

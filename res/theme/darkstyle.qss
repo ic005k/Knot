@@ -1,40 +1,52 @@
-/* darkstyle.qss */
-QMenu {
-    padding: 2px 0px;          /* 修正菜单项边缘裁剪 */
-    border: 1px solid #404040;
-    background: #1E1E1E;       /* 强制背景覆盖 */
-    color: #D0D0D0;            /* 全局文字颜色 */
+/* darkstyle.qss */
+QMenu {
+    padding: 2px 0px;          /* 修正菜单项边缘裁剪 */
+    border: 1px solid #404040;
+    background: #1E1E1E;       /* 强制背景覆盖 */
+    color: #D0D0D0;            /* 全局文字颜色 */
+}
+
+QMenu::item {
+    padding: 5px 25px 5px 20px;
+    margin: 0px 2px;           /* 横向留边避免悬停溢出 */
+    background-color: transparent;
+    border: 1px solid transparent;  /* 防止布局抖动 */
+}
+
+QMenu::item:selected,          /* 关键：合并选中和悬停状态 */
+QMenu::item:hover {
+    background-color: #404040;
+    color: #FFFFFF;
+    border: 1px solid #505050; /* 增加悬浮边框提升层次感 */
+}
+
+QMenu::item:disabled {
+    color: #606060;
+    background-color: transparent;
+}
+
+/* 强制子菜单箭头对齐 */
+QMenu::indicator {
+    width: 8px;
+    height: 8px;
+    margin-right: 5px;
+}
+
+/* Windows平台专用覆盖 */
+QMenu::separator {
+    height: 1px;
+    background: #404040;
+    margin: 3px 10px;
 }
 
-QMenu::item {
-    padding: 5px 25px 5px 20px;
-    margin: 0px 2px;           /* 横向留边避免悬停溢出 */
-    background-color: transparent;
-    border: 1px solid transparent;  /* 防止布局抖动 */
+/* 暗黑主题选中项样式 */
+QListWidget::item:selected {
+    background-color: #2A82DA;  /* 深蓝-适合暗背景 */
+    color: white;
+    border-radius: 4px;
 }
 
-QMenu::item:selected,          /* 关键：合并选中和悬停状态 */
-QMenu::item:hover {
-    background-color: #404040;
-    color: #FFFFFF;
-    border: 1px solid #505050; /* 增加悬浮边框提升层次感 */
-}
-
-QMenu::item:disabled {
-    color: #606060;
-    background-color: transparent;
-}
-
-/* 强制子菜单箭头对齐 */
-QMenu::indicator {
-    width: 8px;
-    height: 8px;
-    margin-right: 5px;
-}
-
-/* Windows平台专用覆盖 */
-QMenu::separator {
-    height: 1px;
-    background: #404040;
-    margin: 3px 10px;
+/* 窗口非活动状态 */
+QListView::item:selected:!active {
+    background-color: #1A5276;  /* 更深的非活动蓝 */
 }

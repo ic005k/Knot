@@ -710,7 +710,26 @@ public class MyActivity
     addDeskShortcuts();
 
     mytts = TTSUtils.getInstance(this);
+     // 初始化TTS
+     mytts.initialize(new TTSUtils.InitCallback() {
+      @Override
+      public void onSuccess() {
+          // 使用系统默认语言
+          mytts.speak("TTS initialized successfully");
+          
+          // 使用特定语言
+          mytts.speak("Bonjour", Locale.FRENCH);
+      }
 
+      @Override
+      public void onError(String error) {
+          // 使用正确的context显示错误
+          Toast.makeText(MyActivity.this, 
+                         "TTS init failed: " + error, 
+                         Toast.LENGTH_SHORT).show();
+      }
+  });
+    
     // 延迟设置状态栏颜色，确保Qt初始化完成
     new Handler(Looper.getMainLooper()).postDelayed(this::updateStatusBarColor,
         1000);
@@ -1036,6 +1055,7 @@ public class MyActivity
 
     super.onDestroy();
     m_instance = null;
+    mytts.shutdown();
   }
 
   @Override
@@ -1647,11 +1667,28 @@ public class MyActivity
   }
 
   public static void playMyText(String text) {
-    mytts.playText(text);
+    mytts.speak(text);
+
   }
 
   public static void stopPlayMyText() {
-    mytts.stopSpeak();
+    mytts.stop();
+
+  }
+
+  public void speakText(String text) {
+    // 简短播报直接使用
+    TTSUtils.getInstance(this).speak(text);
+
+    // 长时间播报使用前台服务
+    Intent serviceIntent = new Intent(this, TTSForegroundService.class);
+    serviceIntent.putExtra("tts_text", text);
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      startForegroundService(serviceIntent);
+    } else {
+      startService(serviceIntent);
+    }
   }
 
   private void createAudioRecord() {

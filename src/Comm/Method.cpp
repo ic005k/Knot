@@ -1092,10 +1092,10 @@ void Method::playMyText(QString text) {
 #ifdef Q_OS_ANDROID
 
   QJniObject jText = QJniObject::fromString(text);
-  QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  activity.callStaticMethod<void>("com.x/MyActivity", "playMyText",
-                                  "(Ljava/lang/String;)V",
-                                  jText.object<jstring>());
+  // QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  QJniObject::callStaticMethod<void>("com.x/MyActivity", "playMyText",
+                                     "(Ljava/lang/String;)V",
+                                     jText.object<jstring>());
 
 #endif
 }
@@ -1103,8 +1103,9 @@ void Method::playMyText(QString text) {
 void Method::stopPlayMyText() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  activity.callStaticMethod<void>("com.x/MyActivity", "stopPlayMyText", "()V");
+  // QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  QJniObject::callStaticMethod<void>("com.x/MyActivity", "stopPlayMyText",
+                                     "()V");
 
 #endif
 }

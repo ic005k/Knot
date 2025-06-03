@@ -30,11 +30,14 @@ EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {
 
   nH = mw_one->ui->editCategory->height();
 
-  QFont font;
+  QFont font = this->font();
+  font.setPointSize(22);
+  mw_one->ui->editCategory->setFont(font);
   font.setPointSize(23);
   font.setBold(true);
 
   mw_one->ui->editAmount->setFont(font);
+
   mw_one->ui->btn0->setFont(font);
   mw_one->ui->btn1->setFont(font);
   mw_one->ui->btn2->setFont(font);
@@ -60,7 +63,7 @@ EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {
   mw_one->ui->editAmount->setReadOnly(true);
 
   mw_one->ui->editCategory->setPlaceholderText(tr("Please enter a category"));
-  mw_one->ui->editCategory->setFixedHeight(m_Method->getFontHeight() + 8);
+  // mw_one->ui->editCategory->setFixedHeight(m_Method->getFontHeight() + 8);
 
   lblStyle = mw_one->ui->lblCategory->styleSheet();
 

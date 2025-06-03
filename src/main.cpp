@@ -41,6 +41,7 @@ QString loadText(QString textFile);
 QString getTextEditLineText(QTextEdit* txtEdit, int i);
 void TextEditToFile(QTextEdit* txtEdit, QString fileName);
 void StringToFile(QString buffers, QString fileName);
+QPalette createDarkPalette();
 
 #ifdef Q_OS_ANDROID
 QString getPrivateKnotPath();
@@ -281,6 +282,7 @@ int main(int argc, char* argv[]) {
 
                      loadTheme(isDark);
                    });
+  loadTheme(isDark);
 
   w.show();
 
@@ -288,6 +290,8 @@ int main(int argc, char* argv[]) {
 }
 
 void loadTheme(bool isDark) {
+  if (isDark) qApp->setPalette(createDarkPalette());
+
   QString themePath =
       isDark ? ":/res/theme/darkstyle.qss" : ":/res/theme/lightstyle.qss";
 
@@ -306,6 +310,26 @@ void loadTheme(bool isDark) {
     QEvent updateEvent(QEvent::UpdateRequest);
     QApplication::sendEvent(mw_one, &updateEvent);
   }
+}
+
+QPalette createDarkPalette() {
+  QPalette darkPalette;
+
+  // 基础颜色设置
+  darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
+  darkPalette.setColor(QPalette::WindowText, Qt::white);
+  darkPalette.setColor(QPalette::Base, QColor(25, 25, 25));
+
+  // 统一选中项颜色 (关键)
+  darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));  // 统一蓝色
+  darkPalette.setColor(QPalette::HighlightedText, Qt::white);
+
+  // 其他必要颜色配置
+  darkPalette.setColor(QPalette::Button, QColor(53, 53, 53));
+  darkPalette.setColor(QPalette::Text, Qt::white);
+  darkPalette.setColor(QPalette::ButtonText, Qt::white);
+
+  return darkPalette;
 }
 
 void loadLocal() {
