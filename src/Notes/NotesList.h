@@ -52,6 +52,8 @@ class NotesList : public QDialog {
   ~NotesList();
   Ui::NotesList *ui;
 
+  void saveNotesListIndex();
+
   DatabaseManager m_dbManager;
 
   QStringList needDelWebDAVFiles;
@@ -215,6 +217,8 @@ class NotesList : public QDialog {
  private:
   QStringList validMDFiles;
 
+  QStringList mIndexList;
+
   NotesSearchEngine *m_searchEngine;
   SearchResultModel *m_searchResultModel;
 
@@ -256,8 +260,10 @@ class NotesList : public QDialog {
   void clearInvalidMDFile();
   SearchModel m_searchModel;
   void startBackgroundTaskUpdateFilesIndex();
-  void saveNotesListIndex(int noteslistIndex);
+
   int getSavedNotesListIndex(int notebookIndex);
+  bool safeWriteFile(const QString &filePath, const QString &content);
+  void loadNotesListIndex();
 };
 
 class SearchMapper {

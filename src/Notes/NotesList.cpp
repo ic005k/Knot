@@ -105,6 +105,8 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
       "searchModel", &m_searchModel);
 
   startBackgroundTaskUpdateFilesIndex();
+
+  loadNotesListIndex();
 }
 
 NotesList::~NotesList() { delete ui; }
@@ -2279,8 +2281,6 @@ void NotesList::clickNoteBook() {
 }
 
 void NotesList::clickNoteList() {
-  mw_one->m_Notes->saveQMLVPos();
-
   int index = m_Method->getCurrentIndexFromQW(mw_one->ui->qwNoteList);
   if (index < 0) {
     currentMDFile = "";
@@ -2306,8 +2306,6 @@ void NotesList::clickNoteList() {
 
   tw->setCurrentItem(pNoteItems.at(index));
 
-  saveCurrentNoteInfo();
-
   for (int i = 0; i < listRecentOpen.count(); i++) {
     QString item = listRecentOpen.at(i);
     if (item.contains(strMD)) {
@@ -2321,21 +2319,65 @@ void NotesList::clickNoteList() {
   if (count > 15) {
     listRecentOpen.removeAt(count - 1);
   }
-  saveRecentOpen();
-  genCursorText();
-  saveNotesListIndex(index);
+
+  // genCursorText();
+
+  int indexNoteBook = m_Method->getCurrentIndexFromQW(mw_one->ui->qwNoteBook);
+  QString s_tr = QString::number(indexNoteBook) + "=" + QString::number(index);
+  int count2 = mIndexList.count();
+  int i = 0;
+  for (i = 0; i < count2; i++) {
+    QString str = mIndexList.at(i);
+    if (str.split("=").at(0).toInt() == indexNoteBook) {
+      mIndexList.removeOne(str);
+      break;
+    }
+  }
+  mIndexList.append(s_tr);
 }
 
-void NotesList::saveNotesListIndex(int noteslistIndex) {
+void NotesList::saveNotesListIndex() {
   QSettings Reg(privateDir + "noteslistindex.ini", QSettings::IniFormat);
-  int index = m_Method->getCurrentIndexFromQW(mw_one->ui->qwNoteBook);
-  if (index < 0) index = 0;
-  Reg.setValue(QString::number(index), QString::number(noteslistIndex));
+  for (int i = 0; i < mIndexList.count(); i++) {
+    QString str = mIndexList.at(i);
+    int indexNoteBook = str.split("=").at(0).toInt();
+    if (indexNoteBook < 0) indexNoteBook = 0;
+    int indexNoteList = str.split("=").at(1).toInt();
+    if (indexNoteList < 0) indexNoteList = 0;
+
+    Reg.setValue(QString::number(indexNoteBook),
+                 QString::number(indexNoteList));
+  }
+
+  Reg.setValue("count", QString::number(mIndexList.count()));
+}
+
+void NotesList::loadNotesListIndex() {
+  QSettings Reg(privateDir + "noteslistindex.ini", QSettings::IniFormat);
+  int count = Reg.value("count", 0).toInt();
+  mIndexList.clear();
+  for (int i = 0; i < count; i++) {
+    int indexNoteList;
+    indexNoteList = Reg.value(QString::number(i), 0).toInt();
+    QString str = QString::number(i) + "=" + QString::number(indexNoteList);
+    mIndexList.append(str);
+  }
 }
 
 int NotesList::getSavedNotesListIndex(int notebookIndex) {
-  QSettings Reg(privateDir + "noteslistindex.ini", QSettings::IniFormat);
-  int index = Reg.value(QString::number(notebookIndex), 0).toInt();
+  int index = 0;
+  int in0, in1;
+  for (int i = 0; i < mIndexList.count(); i++) {
+    QString str = mIndexList.at(i);
+    in0 = str.split("=").at(0).toInt();
+    in1 = str.split("=").at(1).toInt();
+
+    if (notebookIndex == in0) {
+      index = in1;
+      break;
+    }
+  }
+
   int count = m_Method->getCountFromQW(mw_one->ui->qwNoteList);
   if (count > 0) {
     if (index < 0) index = 0;
@@ -2343,6 +2385,7 @@ int NotesList::getSavedNotesListIndex(int notebookIndex) {
   } else {
     index = -1;
   }
+
   return index;
 }
 
@@ -2415,33 +2458,44 @@ QString NotesList::getCurrentNoteNameFromMDFile(QString mdFile) {
 }
 
 void NotesList::genCursorText() {
-  QTextEdit *edit = new QTextEdit;
+  // 直接从文件读取内容（避免创建临时UI组件）
   QString strBuffer = loadText(currentMDFile);
-  edit->setPlainText(strBuffer);
+  if (strBuffer.isEmpty()) {
+    qWarning() << "Loaded text is empty for file:" << currentMDFile;
+    return;
+  }
+
   int curPos = mw_one->m_ReceiveShare->getCursorPos();
-  if (curPos < 0) curPos = 0;
-  if (curPos > strBuffer.length()) curPos = strBuffer.length();
-  QTextCursor tmpCursor = edit->textCursor();
+  curPos = qBound(0, curPos, strBuffer.length());
 
-  int start = curPos - 5;
-  int end = curPos;
-  if (start < 0) start = 0;
-  tmpCursor.setPosition(start, QTextCursor::MoveAnchor);
-  tmpCursor.setPosition(end, QTextCursor::KeepAnchor);
-  QString str0 = tmpCursor.selectedText();
-
-  start = curPos;
-  end = curPos + 5;
-  int nLength = strBuffer.length();
-  if (end > nLength) end = nLength;
-  tmpCursor.setPosition(start, QTextCursor::MoveAnchor);
-  tmpCursor.setPosition(end, QTextCursor::KeepAnchor);
-  QString str1 = tmpCursor.selectedText();
+  // 使用QString方法替代QTextCursor操作
+  QString str0 = strBuffer.mid(qMax(0, curPos - 5), 5);
+  QString str1 = strBuffer.mid(curPos, 5);
 
   QString curText =
       QString::number(curPos) + "  (\"" + str0 + "|" + str1 + "\"" + ")";
-  StringToFile(curText, privateDir + "cursor_text.txt");
-  qDebug() << "cursor_text=" << curText;
+  QString filePath = privateDir + "cursor_text.txt";
+
+  // 使用Qt的原子写入函数
+  if (!safeWriteFile(filePath, curText)) {
+    qCritical() << "Failed to write cursor_text file:" << filePath;
+  } else {
+    qDebug() << "cursor_text saved:" << curText;
+  }
+}
+
+// 安全的文件写入函数
+bool NotesList::safeWriteFile(const QString &filePath, const QString &content) {
+  QTemporaryFile tempFile;
+  if (tempFile.open()) {
+    QTextStream stream(&tempFile);
+    stream << content;
+    tempFile.close();
+
+    // 原子操作：替换原文件
+    return QFile::rename(tempFile.fileName(), filePath);
+  }
+  return false;
 }
 
 QStringList NotesList::extractLocalImagesFromMarkdown(const QString &filePath) {

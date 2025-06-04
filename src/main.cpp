@@ -11,8 +11,10 @@
 #include <QObject>
 #include <QProgressBar>
 #include <QQuickWindow>
+#include <QSGRendererInterface>
 #include <QSplashScreen>
 #include <QStyleFactory>
+#include <QSurfaceFormat>
 #include <QTranslator>
 #include <QWidget>
 #include <QtConcurrent>
@@ -73,20 +75,21 @@ int main(int argc, char* argv[]) {
 
   isAndroid = true;
 
+  // 核心优化：强制使用OpenGL ES 3.0（避免低端设备Vulkan问题）
+  qputenv("QSG_RHI_BACKEND", "opengl");  // 强制OpenGL
+
+  // 优化OpenGL配置
   QSurfaceFormat format;
   format.setRenderableType(QSurfaceFormat::OpenGLES);
-  format.setVersion(3, 1);  // Android 12 需要至少 OpenGL ES 3.0
-  format.setProfile(QSurfaceFormat::CoreProfile);
-  format.setOption(QSurfaceFormat::DeprecatedFunctions, false);
-  format.setDepthBufferSize(24);
-  format.setStencilBufferSize(8);
+  format.setVersion(3, 0);  // ES 3.0是安卓最佳平衡点
+  format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);  // 双缓冲减少闪烁
+  format.setSwapInterval(1);                             // 开启垂直同步
   QSurfaceFormat::setDefaultFormat(format);
 
-  // 设置 QML 渲染后端
-  qputenv("QSG_RHI_BACKEND", "opengl");
-
-  qputenv("QT_DEBUG_PLUGINS", "1");
-  qputenv("QT_QPA_EGLFS_DEBUG", "1");
+  // 关键稳定性设置
+  qputenv("QSG_RENDER_LOOP", "threaded");        // 必须使用多线程渲染
+  qputenv("QT_ANDROID_DISABLE_GPU_DEBUG", "1");  // 关闭调试层
+  qputenv("QML_DISABLE_DISK_CACHE", "1");        // 避免缓存问题
 
 #else
   // 桌面端配置

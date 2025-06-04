@@ -112,7 +112,7 @@ public class TTSUtils {
                 });
                 
                 // 等待初始化完成
-                latch.await(15, TimeUnit.SECONDS);
+                latch.await(5, TimeUnit.SECONDS);
                 
                 if (!initSuccess[0] && callback != null) {
                     mainHandler.post(() -> callback.onError("TTS initialization timed out"));

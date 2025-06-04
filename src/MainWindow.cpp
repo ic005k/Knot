@@ -5306,6 +5306,8 @@ void MainWindow::on_btnBackNoteList_clicked() {
   ui->frameNoteList->hide();
   ui->frameMain->show();
   m_NotesList->saveNoteBookVPos();
+  m_NotesList->saveCurrentNoteInfo();
+  m_NotesList->saveNotesListIndex();
   m_Notes->updateMainnotesIniToSyncLists();
 
   isNeedSync = true;
@@ -5920,6 +5922,8 @@ void MainWindow::on_btnOpenNote_clicked() {
                                   QFileInfo(currentMDFile).baseName());
     m_NotesList->setCurrentItemFromMDFile(currentMDFile);
 
+    m_NotesList->saveRecentOpen();
+
     return;
   } else {
     m_Notes->MD2Html(currentMDFile);
@@ -5930,6 +5934,8 @@ void MainWindow::on_btnOpenNote_clicked() {
     // ui->frameNotes->show();
 
     m_NotesList->setCurrentItemFromMDFile(currentMDFile);
+
+    m_NotesList->saveRecentOpen();
   }
 }
 

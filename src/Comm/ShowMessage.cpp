@@ -19,13 +19,13 @@ ShowMessage::ShowMessage(QWidget* parent)
   setWindowFlag(Qt::FramelessWindowHint);
   setAttribute(Qt::WA_TranslucentBackground);
   if (isAndroid)
-    ui->widget->setStyleSheet("background-color:rgba(0, 0, 0, 35%);");
+    ui->widget->setStyleSheet("background-color:rgba(0, 0, 0, 50%);");
   else
     ui->widget->setStyleSheet("background-color:rgba(0, 0, 0, 0%);");
 
   if (isDark)
     ui->frame->setStyleSheet(
-        "QFrame{background-color: #455364;color: #FFFFFF;border-radius:10px; "
+        "QFrame{background-color: #222222;color: #FFFFFF;border-radius:10px; "
         "border:0px solid gray;}");
   else
     ui->frame->setStyleSheet(
