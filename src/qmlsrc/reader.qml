@@ -59,7 +59,6 @@ Rectangle {
     }
 
     function loadHtmlBuffer(strhtml) {
-
         //document.loadBuffer(strhtml)
         textModel.splitContent(strhtml) // 调用C++处理
         isEPUBText = true
@@ -180,7 +179,8 @@ Rectangle {
             font.family: FontName
             color: myTextColor
 
-            renderType: Text.NativeRendering // 使用原生渲染引擎
+            //renderType: Text.NativeRendering // 使用原生渲染引擎,在Qt6.6.3的安卓上表现迟钝，非常容易导致崩溃
+            renderType: Text.QtRendering // 比NativeRendering更轻量
 
             onLinkActivated: handleLinkClicked(link) // 处理链接点击
 
@@ -194,12 +194,6 @@ Rectangle {
             }
         }
 
-
-        /*ScrollBar.vertical: ScrollBar {
-            width: 10
-            policy: contentListView.contentHeight
-                    > contentListView.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
-        }*/
         ScrollBar.vertical: ScrollBar {
             id: vbar
             policy: ScrollBar.AsNeeded

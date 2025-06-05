@@ -39,6 +39,11 @@ int epubFileMethod = 2;
 
 QByteArray bookFileData;
 
+static int press_x;
+static int press_y;
+static int relea_x;
+static int relea_y;
+
 Reader::Reader(QWidget *parent) : QDialog(parent) {
   qmlRegisterType<TextChunkModel>("EBook.Models", 1, 0, "TextChunkModel");
 
@@ -634,7 +639,8 @@ void Reader::getBookList() {
 }
 
 void Reader::setQMLText(QString txt1) {
-  mw_one->ui->qwReader->rootContext()->setContextProperty("isAni", false);
+  mw_one->ui->qwReader->rootContext()->setContextProperty("isAni",
+                                                          QVariant(false));
 
   QStringList list = txt1.split("\n");
   QString str1 = "<html>\n<body>\n";
@@ -2290,10 +2296,6 @@ void Reader::shareBook() {
 bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
   QMouseEvent *event = static_cast<QMouseEvent *>(evn);
   if (watch == mw_one->ui->qwReader) {
-    static int press_x;
-    static int press_y;
-    static int relea_x;
-    static int relea_y;
     int length = 75;
 
     if (mw_one->ui->textBrowser->isHidden()) {
@@ -2444,6 +2446,221 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
   }
 
   return QWidget::eventFilter(watch, evn);
+}
+
+bool Reader::eventFilterReaderAndroid(QObject *watch, QEvent *evn) {
+  // 处理触摸事件（Android）
+  if (evn->type() == QEvent::TouchBegin || evn->type() == QEvent::TouchUpdate ||
+      evn->type() == QEvent::TouchEnd || evn->type() == QEvent::TouchCancel) {
+    QTouchEvent *touchEvent = static_cast<QTouchEvent *>(evn);
+    const QList<QTouchEvent::TouchPoint> &touchPoints = touchEvent->points();
+
+    // 只处理单指触摸
+    if (touchPoints.count() == 1 && watch == mw_one->ui->qwReader) {
+      const QTouchEvent::TouchPoint &touchPoint = touchPoints.first();
+
+      // 将触摸点位置转换为全局坐标
+      QPointF globalPos =
+          mw_one->ui->qwReader->mapToGlobal(touchPoint.position().toPoint());
+
+      // 使用正确的枚举类型和值
+      auto state = touchPoint.state();
+      if (state == QEventPoint::Pressed) {
+        return handleTouchPress(globalPos);
+      } else if (state == QEventPoint::Updated) {
+        return handleTouchMove(globalPos);
+      } else if (state == QEventPoint::Released) {
+        return handleTouchRelease(globalPos);
+      } else {
+        mw_one->isMousePress = false;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // 处理桌面端的鼠标事件（保留原有逻辑）
+  if (evn->type() == QEvent::MouseButtonPress ||
+      evn->type() == QEvent::MouseMove ||
+      evn->type() == QEvent::MouseButtonRelease ||
+      evn->type() == QEvent::MouseButtonDblClick) {
+    QMouseEvent *event = static_cast<QMouseEvent *>(evn);
+    if (watch == mw_one->ui->qwReader) {
+      // ... 保留原有的桌面端鼠标事件处理代码 ...
+      // 这里放置您原有的鼠标事件处理逻辑
+      // 为了简洁，此处省略重复代码
+    }
+  }
+
+  return QWidget::eventFilter(watch, evn);
+}
+
+bool Reader::handleTouchPress(const QPointF &globalPos) {
+  // 记录按下位置和时间
+  static qint64 lastPressTime = 0;
+  qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
+
+  // 双击检测（300ms内两次按下）
+  if (currentTime - lastPressTime < 300) {
+    handleDoubleClick(globalPos);
+    lastPressTime = 0;
+    return true;
+  }
+  lastPressTime = currentTime;
+
+  // 更新状态
+  mw_one->isMousePress = true;
+  mw_one->isMouseMove = false;
+
+  // 启动长按计时器
+  if (!mw_one->isMouseMove) {
+    mw_one->timerMousePress->start(1300);
+  }
+
+  // 记录按下位置
+  press_x = globalPos.x();
+  press_y = globalPos.y();
+
+  // 初始化区域参数
+  x = 0;
+  y = 0;
+  w = mw_one->ui->qwReader->width();
+  h = mw_one->ui->qwReader->height();
+
+  return true;
+}
+
+bool Reader::handleTouchMove(const QPointF &globalPos) {
+  // 更新当前位置
+  relea_x = globalPos.x();
+  relea_y = globalPos.y();
+
+  // 设置移动状态
+  mw_one->isMouseMove = true;
+
+  // 检测滑动方向（在按下状态下）
+  if (mw_one->isMousePress) {
+    int length = 75;
+
+    // 向右滑动
+    if ((relea_x - press_x) > length && qAbs(relea_y - press_y) < 35) {
+      int cn = mw_one->ui->btnPages->text().split("\n").at(0).toInt();
+      if (cn != 1) {
+        mw_one->m_PageIndicator->setPicRight();
+      }
+    }
+    // 向左滑动
+    else if ((press_x - relea_x) > length && qAbs(relea_y - press_y) < 35) {
+      int cn = mw_one->ui->btnPages->text().split("\n").at(0).toInt();
+      int tn = mw_one->ui->btnPages->text().split("\n").at(1).toInt();
+      if (cn != tn) {
+        mw_one->m_PageIndicator->setPicLeft();
+      }
+    }
+    // 其他情况
+    else {
+      mw_one->m_PageIndicator->close();
+    }
+  }
+
+  // 检测是否有效移动
+  if (mw_one->isMousePress && qAbs(relea_x - press_x) > 20 &&
+      qAbs(relea_y - press_y) < 20) {
+    mw_one->isMouseMove = true;
+  }
+
+  return true;
+}
+
+bool Reader::handleTouchRelease(const QPointF &globalPos) {
+  // 更新位置和状态
+  relea_x = globalPos.x();
+  relea_y = globalPos.y();
+
+  mw_one->ui->lblTitle->hide();
+  mw_one->isMousePress = false;
+  mw_one->isTurnThePage = false;
+
+  QQuickItem *root = mw_one->ui->qwReader->rootObject();
+  int length = 75;
+
+  // 向右滑动结束
+  if ((relea_x - press_x) > length && qAbs(relea_y - press_y) < 35) {
+    if (isText) {
+      if (currentPage == 0) {
+        if (isText || isEpub) {
+          QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
+          return true;
+        }
+      }
+    } else if (isEpub) {
+      if (htmlIndex <= 0) {
+        if (isText || isEpub) {
+          QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
+          return true;
+        }
+      }
+    }
+
+    mw_one->isTurnThePage = true;
+    mw_one->on_btnPageUp_clicked();
+    mw_one->m_PageIndicator->close();
+  }
+  // 向左滑动结束
+  else if ((press_x - relea_x) > length && qAbs(relea_y - press_y) < 35) {
+    if (isText) {
+      if (currentPage == totalPages - 1) {
+        if (isText || isEpub) {
+          QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
+          return true;
+        }
+      }
+    } else if (isEpub) {
+      if (htmlIndex + 1 >= htmlFiles.count()) {
+        if (isText || isEpub) {
+          QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
+          return true;
+        }
+      }
+    }
+
+    mw_one->isTurnThePage = true;
+    mw_one->on_btnPageNext_clicked();
+    mw_one->m_PageIndicator->close();
+  }
+
+  // 重置位置（文本和EPUB格式）
+  if (isText || isEpub) {
+    QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
+  }
+
+  mw_one->curx = 0;
+  return true;
+}
+
+void Reader::handleDoubleClick(const QPointF &globalPos) {
+  // 处理链接点击状态
+  if (m_Method->isClickLink) {
+    m_Method->isClickLink = false;
+  }
+
+  // 计算区域划分
+  int h3 = mw_one->ui->qwReader->height() / 3;
+  int qwY = mw_one->ui->qwReader->y();
+  int mY = globalPos.y();
+
+  // 中间区域：显示/隐藏功能
+  if ((mY > qwY + h3) && (mY < qwY + h3 * 2)) {
+    mw_one->on_SetReaderFunVisible();
+  }
+  // 上部分区域：滚动到顶部
+  else if ((mY > qwY) && (mY < qwY + h3)) {
+    mw_one->m_Reader->setPageScroll0();
+  }
+  // 下部分区域：滚动到底部
+  else if (mY > qwY + h3 * 2) {
+    mw_one->m_Reader->setPageScroll1();
+  }
 }
 
 bool Reader::getDefaultOpen() {

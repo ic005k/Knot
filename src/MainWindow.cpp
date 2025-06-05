@@ -397,7 +397,7 @@ MainWindow::MainWindow(QWidget *parent)
   init_TotalData();
 
   // 延时执行
-  // QTimer::singleShot(100, this, [this]() { m_Reader->initReader(); });
+  QTimer::singleShot(100, this, [this]() { m_Reader->initReader(); });
 
   loading = false;
 
@@ -2246,7 +2246,10 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
     }
   }
 
-  m_Reader->eventFilterReader(watch, evn);
+  if (isAndroid)
+    m_Reader->eventFilterReaderAndroid(watch, evn);
+  else
+    m_Reader->eventFilterReader(watch, evn);
   m_Notes->eventFilterEditTodo(watch, evn);
   m_Notes->eventFilterEditRecord(watch, evn);
   m_Notes->eventFilterQwNote(watch, evn);
@@ -4421,7 +4424,7 @@ void MainWindow::on_btnReader_clicked() {
   isMemoVisible = false;
 
   if (!isOne) {
-    m_Reader->initReader();
+    // m_Reader->initReader();
 
     while (!ui->btnReader->isEnabled())
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);

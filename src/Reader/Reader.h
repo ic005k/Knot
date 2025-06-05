@@ -141,6 +141,7 @@ class Reader : public QDialog {
 
   void setDefaultOpen(QString value);
   void setTextAreaCursorPos(int nCursorPos);
+  bool eventFilterReaderAndroid(QObject *watch, QEvent *evn);
  public slots:
   void setPageScroll0();
   void setPageScroll1();
@@ -186,6 +187,10 @@ class Reader : public QDialog {
   QString updateContent();
   static bool isUtf8(const QByteArray &data);
   static bool isValidText(const QString &text);
+  void handleDoubleClick(const QPointF &globalPos);
+  bool handleTouchRelease(const QPointF &globalPos);
+  bool handleTouchMove(const QPointF &globalPos);
+  bool handleTouchPress(const QPointF &globalPos);
 };
 
 class TextChunkModel : public QAbstractListModel {
