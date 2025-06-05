@@ -409,12 +409,6 @@ QStringList Preferences::getBakFilesList() {
     }
   }
 
-  Reg.setValue("/BakFiles/BakCount", 0);
-  for (int i = 0; i < fileList.count(); i++) {
-    QString str = fileList.at(i);
-    appendBakFile(str.split("-===-").at(0), str.split("-===-").at(1));
-  }
-
   QStringList uniqueList;
   QSet<QString> seen;
 

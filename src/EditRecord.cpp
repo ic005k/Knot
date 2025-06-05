@@ -63,7 +63,6 @@ EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {
   mw_one->ui->editAmount->setReadOnly(true);
 
   mw_one->ui->editCategory->setPlaceholderText(tr("Please enter a category"));
-  // mw_one->ui->editCategory->setFixedHeight(m_Method->getFontHeight() + 8);
 
   lblStyle = mw_one->ui->lblCategory->styleSheet();
 
@@ -316,7 +315,7 @@ void EditRecord::on_btnClearDesc_clicked() {
 
 void EditRecord::on_editAmount_textChanged(const QString &arg1) {
   int count = 0;
-  for (int i = 0; i < arg1.count(); i++) {
+  for (int i = 0; i < arg1.length(); i++) {
     if (arg1.mid(i, 1) == ".") count++;
     if (count == 2) {
       QString str0 = arg1;

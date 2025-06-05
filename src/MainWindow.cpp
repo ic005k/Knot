@@ -107,7 +107,8 @@ void MainWindow::bakDataDone() {
     if (QFile(zipfile).exists()) {
       m_Preferences->appendBakFile(
           QDateTime::currentDateTime().toString("yyyy-M-d HH:mm:ss") + "\n" +
-              tr("Manual Backup") + "\n" + strLatestModify,
+              strLatestModify + "\n" +
+              m_Method->getFileSize(QFile(zipfile).size(), 2),
           zipfile);
 
       ShowMessage *m_ShowMsg = new ShowMessage(this);
@@ -1425,9 +1426,10 @@ void MainWindow::readData(QTreeWidget *tw) {
           int lastTopIndex = tw->topLevelItemCount() - 1;
           if (lastTopIndex >= 0) {
             QTreeWidgetItem *lastTopItem = tw->topLevelItem(lastTopIndex);
-            // 时间相同但频次不同
+            // 时间相同但频次或金额不同
             if ((lastTopItem->text(0) == topItem->text(0)) &&
-                (lastTopItem->text(1) != topItem->text(1))) {
+                (lastTopItem->text(2) != topItem->text(2) ||
+                 lastTopItem->text(1) != topItem->text(1))) {
               tw->takeTopLevelItem(lastTopIndex);
             }
           }
@@ -2635,9 +2637,6 @@ bool MainWindow::bakData() {
     zipfile = bakfileDir + "memo.zip";
     QFile::remove(zipfile);
   }
-
-  // old method
-  //  mw_one->m_Notes->zipMemo();
 
   bool isZipResult = false;
   isZipResult = m_Method->compressDirectory(zipfile, iniDir, encPassword);
@@ -4179,11 +4178,7 @@ void MainWindow::on_actionBakFileList() {
     QString str = bakFileList.at(bakCount - 1 - i);
     action = str.split("-===-").at(0);
     bakfile = str.split("-===-").at(1);
-
-    QString item =
-        action + "\n" + m_Method->getFileSize(QFile(bakfile).size(), 2);
-
-    m_Method->addItemToQW(ui->qwBakList, item, "", "", bakfile, 0);
+    m_Method->addItemToQW(ui->qwBakList, action, "", "", bakfile, 0);
   }
 
   if (m_Method->getCountFromQW(ui->qwBakList) > 0)
