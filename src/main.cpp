@@ -44,6 +44,7 @@ QString getTextEditLineText(QTextEdit* txtEdit, int i);
 void TextEditToFile(QTextEdit* txtEdit, QString fileName);
 void StringToFile(QString buffers, QString fileName);
 QPalette createDarkPalette();
+QPalette createLightPalette();
 
 #ifdef Q_OS_ANDROID
 QString getPrivateKnotPath();
@@ -293,7 +294,12 @@ int main(int argc, char* argv[]) {
 }
 
 void loadTheme(bool isDark) {
-  if (isDark) qApp->setPalette(createDarkPalette());
+  // 设置调色板
+  if (isDark) {
+    qApp->setPalette(createDarkPalette());
+  } else {
+    qApp->setPalette(createLightPalette());
+  }
 
   QString themePath =
       isDark ? ":/res/theme/darkstyle.qss" : ":/res/theme/lightstyle.qss";
@@ -313,6 +319,10 @@ void loadTheme(bool isDark) {
     QEvent updateEvent(QEvent::UpdateRequest);
     QApplication::sendEvent(mw_one, &updateEvent);
   }
+
+  QFont font = qApp->font();
+  font.setPointSize(fontSize);
+  qApp->setFont(font);
 }
 
 QPalette createDarkPalette() {
@@ -333,6 +343,27 @@ QPalette createDarkPalette() {
   darkPalette.setColor(QPalette::ButtonText, Qt::white);
 
   return darkPalette;
+}
+
+// 创建亮色调色板
+QPalette createLightPalette() {
+  QPalette lightPalette;
+
+  // 使用系统默认的亮色调色板作为基础
+  lightPalette = QApplication::style()->standardPalette();
+
+  // 自定义亮色主题颜色（可选）
+  lightPalette.setColor(QPalette::Highlight,
+                        QColor(42, 130, 218));  // 保持与暗模式相同的高亮色
+  lightPalette.setColor(QPalette::HighlightedText, Qt::white);
+
+  // 确保禁用状态颜色合适
+  lightPalette.setColor(QPalette::Disabled, QPalette::Text,
+                        QColor(150, 150, 150));
+  lightPalette.setColor(QPalette::Disabled, QPalette::ButtonText,
+                        QColor(150, 150, 150));
+
+  return lightPalette;
 }
 
 void loadLocal() {

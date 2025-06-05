@@ -3003,8 +3003,6 @@ void MainWindow::on_rbAmount_clicked() {
 void MainWindow::paintEvent(QPaintEvent *event) {
   Q_UNUSED(event);
 
-  /*
-
   // 获取背景色
   QPalette pal = ui->btnFind->palette();
   QBrush brush = pal.window();
@@ -3021,7 +3019,7 @@ void MainWindow::paintEvent(QPaintEvent *event) {
       chartMonth->setTheme(QChart::ChartThemeLight);
       chartDay->setTheme(QChart::ChartThemeLight);
     }
-  }*/
+  }
 }
 
 void MainWindow::on_actionReport_triggered() {
