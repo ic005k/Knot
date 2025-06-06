@@ -74,6 +74,8 @@ public class ClockActivity
   private static ClockActivity m_instance;
   private boolean isHomeKey = false;
 
+  public static String strPlayText;
+
   public static Context getContext() {
     return context;
   }
@@ -322,7 +324,22 @@ public class ClockActivity
         String strVoice = internalConfigure.getIniKey("voice");
         String strValue = "true";
         if (strVoice != null && strVoice.equals(strValue)) {
-          MyActivity.playMyText(str2);
+          // MyActivity.playMyText(str2);
+
+          // 长时间播报使用前台服务
+          if (!MyActivity.isTTSService) {
+            Intent serviceIntent = new Intent(this, TTSForegroundService.class);
+            serviceIntent.putExtra("tts_text", str2);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+              startForegroundService(serviceIntent);
+            } else {
+              startService(serviceIntent);
+            }
+            
+          } else {
+            TTSForegroundService.requestSpeak(str2);
+          }
         }
       }
     }

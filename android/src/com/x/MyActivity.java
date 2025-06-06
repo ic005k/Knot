@@ -161,6 +161,8 @@ public class MyActivity
 
   public static final String ACTION_TODO_ALARM = "com.x.Knot.TODO_ALARM";
 
+  public static boolean isTTSService = false;
+
   // 安卓版本>=11时存储授权
   private static final String PREFS_NAME = "app_prefs";
   private static final String KEY_SHOULD_REQUEST = "should_request_storage";
@@ -195,7 +197,7 @@ public class MyActivity
   private static final String TAG = "QtKnot";
   public static Context context;
   private ShortcutManager shortcutManager;
-  private static TTSUtils mytts;
+  public static TTSUtils mytts;
 
   private AudioRecord audioRecord = null;
   private int recordBufsize = 0;
@@ -1681,7 +1683,7 @@ public class MyActivity
 
   public void speakText(String text) {
     // 简短播报直接使用
-    TTSUtils.getInstance(this).speak(text);
+    // TTSUtils.getInstance(this).speak(text);
 
     // 长时间播报使用前台服务
     Intent serviceIntent = new Intent(this, TTSForegroundService.class);

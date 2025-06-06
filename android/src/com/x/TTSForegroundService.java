@@ -12,13 +12,13 @@ import androidx.core.app.NotificationCompat;
 public class TTSForegroundService extends Service {
     private static final String CHANNEL_ID = "tts_foreground_service_channel";
     private static final int NOTIFICATION_ID = 1234;
-    
-    private TTSUtils ttsUtils;
+
+    private static TTSUtils ttsUtils;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        ttsUtils = TTSUtils.getInstance(this);
+        ttsUtils = TTSUtils.getInstance(getApplicationContext());
         createNotificationChannel();
     }
 
@@ -26,12 +26,15 @@ public class TTSForegroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && intent.hasExtra("tts_text")) {
             String text = intent.getStringExtra("tts_text");
-            
+
             // 启动前台服务
             startForeground(NOTIFICATION_ID, createNotification());
-            
-            if (ttsUtils != null) {
-                ttsUtils.speak(text);
+
+            if (!MyActivity.isTTSService) {
+                if (ttsUtils != null) {
+                    ttsUtils.speak(text);
+                }
+                MyActivity.isTTSService = true;
             }
         }
         return START_STICKY;
@@ -44,8 +47,8 @@ public class TTSForegroundService extends Service {
 
     private Notification createNotification() {
         return new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("语音播报服务")
-                .setContentText("正在播报中...")
+                .setContentTitle("Voice Broadcast Service")
+                .setContentText("Running...")
                 .setSmallIcon(android.R.drawable.ic_lock_silent_mode_off) // 使用系统图标或替换为应用图标
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .build();
@@ -55,9 +58,8 @@ public class TTSForegroundService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel serviceChannel = new NotificationChannel(
                     CHANNEL_ID,
-                    "语音播报服务",
-                    NotificationManager.IMPORTANCE_LOW
-            );
+                    "Voice Broadcast Service",
+                    NotificationManager.IMPORTANCE_LOW);
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) {
                 manager.createNotificationChannel(serviceChannel);
@@ -72,4 +74,11 @@ public class TTSForegroundService extends Service {
             ttsUtils.shutdown();
         }
     }
+
+    public static void requestSpeak(String text) {
+        if (ttsUtils != null) {
+            ttsUtils.speak(text);
+        }
+    }
+
 }
