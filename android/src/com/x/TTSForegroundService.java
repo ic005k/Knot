@@ -1,5 +1,7 @@
 package com.x;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -8,16 +10,25 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import androidx.core.app.NotificationCompat;
+import android.util.Log;
 
 public class TTSForegroundService extends Service {
+    private static final String TAG = "TTSForegroundService";
     private static final String CHANNEL_ID = "tts_foreground_service_channel";
     private static final int NOTIFICATION_ID = 1234;
 
     private static TTSUtils ttsUtils;
+    // 单例实例
+    private static TTSForegroundService runningInstance;
+    private Handler handler;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // 保存当前运行实例
+        runningInstance = this;
+        handler = new Handler(Looper.getMainLooper());
         ttsUtils = TTSUtils.getInstance(getApplicationContext());
         createNotificationChannel();
     }
@@ -26,15 +37,10 @@ public class TTSForegroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && intent.hasExtra("tts_text")) {
             String text = intent.getStringExtra("tts_text");
-
             // 启动前台服务
             startForeground(NOTIFICATION_ID, createNotification());
-
-            if (!MyActivity.isTTSService) {
-                if (ttsUtils != null) {
-                    ttsUtils.speak(text);
-                }
-                MyActivity.isTTSService = true;
+            if (ttsUtils != null) {
+                ttsUtils.speak(text);
             }
         }
         return START_STICKY;
@@ -71,13 +77,26 @@ public class TTSForegroundService extends Service {
     public void onDestroy() {
         super.onDestroy();
         if (ttsUtils != null) {
-            ttsUtils.shutdown();
+            ttsUtils.stop();
         }
+        runningInstance = null; // 清除实例引用
+    }
+
+    public void speak(String text) {
+        handler.post(() -> {
+            if (ttsUtils != null) {
+                Log.d(TAG, "Requesting speech: " + text);
+                ttsUtils.speak(text);
+            } else {
+                Log.w(TAG, "TTSUtils not available for speech");
+            }
+        });
     }
 
     public static void requestSpeak(String text) {
-        if (ttsUtils != null) {
-            ttsUtils.speak(text);
+        if (runningInstance != null) {
+            Log.d(TAG, "Using existing service instance");
+            runningInstance.speak(text);
         }
     }
 

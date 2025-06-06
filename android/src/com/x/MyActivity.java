@@ -161,8 +161,6 @@ public class MyActivity
 
   public static final String ACTION_TODO_ALARM = "com.x.Knot.TODO_ALARM";
 
-  public static boolean isTTSService = false;
-
   // 安卓版本>=11时存储授权
   private static final String PREFS_NAME = "app_prefs";
   private static final String KEY_SHOULD_REQUEST = "should_request_storage";

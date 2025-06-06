@@ -25,6 +25,7 @@ public class TTSUtils {
     private AudioManager audioManager;
     private final Handler mainHandler;
     private boolean isInitialized = false;
+    private boolean audioFocusRestoreNeeded = false;
 
     // 单例模式
     public static synchronized TTSUtils getInstance(Context context) {
@@ -217,23 +218,18 @@ public class TTSUtils {
             }
         }
 
+        // 如果之前丢失了焦点，先尝试重新获取
+        if (audioFocusRestoreNeeded) {
+            Log.d(TAG, "Restoring lost audio focus");
+            releaseAudioFocus();
+            if (requestAudioFocus() != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                Log.w(TAG, "Failed to restore audio focus");
+                return;
+            }
+        }
+
         // 请求音频焦点
-        int focusResult = audioManager.requestAudioFocus(
-                focusChange -> {
-                    switch (focusChange) {
-                        case AudioManager.AUDIOFOCUS_LOSS:
-                            stop();
-                            break;
-                        case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                        case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                            if (textToSpeech != null && textToSpeech.isSpeaking()) {
-                                textToSpeech.stop();
-                            }
-                            break;
-                    }
-                },
-                AudioManager.STREAM_MUSIC,
-                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+        int focusResult = requestAudioFocus();
 
         if (focusResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             Log.d(TAG, "Speaking: " + text);
@@ -269,13 +265,62 @@ public class TTSUtils {
         releaseAudioFocus();
     }
 
-    private void releaseAudioFocus() {
-        audioManager.abandonAudioFocus(null);
-    }
-
     public interface InitCallback {
         void onSuccess();
 
         void onError(String error);
     }
+
+    private int requestAudioFocus() {
+        if (audioManager == null) {
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        }
+
+        return audioManager.requestAudioFocus(
+                audioFocusListener,
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+    }
+
+    private void releaseAudioFocus() {
+        if (audioManager != null) {
+            audioManager.abandonAudioFocus(audioFocusListener);
+            audioFocusRestoreNeeded = false;
+            Log.d(TAG, "Audio focus released");
+        }
+    }
+
+    private AudioManager.OnAudioFocusChangeListener audioFocusListener = focusChange -> {
+        Log.d(TAG, "Audio focus change: " + focusChange);
+
+        switch (focusChange) {
+            case AudioManager.AUDIOFOCUS_LOSS:
+                Log.w(TAG, "Permanent audio focus loss");
+                stop();
+                releaseAudioFocus();
+                break;
+
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                Log.w(TAG, "Temporary audio focus loss");
+                stop();
+                // 重要：在这里标记焦点丢失状态
+                audioFocusRestoreNeeded = true;
+                break;
+
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                Log.w(TAG, "Temporary loss with ducking request");
+                // 对于TTS，我们选择停止而不是降低音量
+                stop();
+                // 重要：在这里标记焦点丢失状态
+                audioFocusRestoreNeeded = true;
+                break;
+
+            case AudioManager.AUDIOFOCUS_GAIN:
+                Log.d(TAG, "Audio focus regained");
+                // 重置状态，准备下次播放
+                audioFocusRestoreNeeded = false;
+                break;
+        }
+    };
+
 }
