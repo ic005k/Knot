@@ -64,8 +64,6 @@ class Preferences : public QDialog {
 
   void on_chkDark_clicked(bool checked);
 
-  void on_chkAniEffects_clicked(bool checked);
-
   void on_chkZip_clicked();
 
   void on_editPassword_textChanged(const QString &arg1);

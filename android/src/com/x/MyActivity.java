@@ -710,26 +710,29 @@ public class MyActivity
     addDeskShortcuts();
 
     mytts = TTSUtils.getInstance(this);
-     // 初始化TTS
-     mytts.initialize(new TTSUtils.InitCallback() {
+    // 初始化TTS
+    mytts.initialize(new TTSUtils.InitCallback() {
       @Override
       public void onSuccess() {
-          // 使用系统默认语言
-          mytts.speak("TTS initialized successfully");
-          
-          // 使用特定语言
-          mytts.speak("Bonjour", Locale.FRENCH);
+        // 使用系统默认语言
+        // mytts.speak("TTS initialized successfully");
+
+        // 使用特定语言
+        // mytts.speak("Bonjour", Locale.FRENCH);
+
+        Log.w("TTS", "TTS initialized successfully");
       }
 
       @Override
       public void onError(String error) {
-          // 使用正确的context显示错误
-          Toast.makeText(MyActivity.this, 
-                         "TTS init failed: " + error, 
-                         Toast.LENGTH_SHORT).show();
+        // 使用正确的context显示错误
+        // Toast.makeText(MyActivity.this,
+        // "TTS init failed: " + error,
+        // Toast.LENGTH_SHORT).show();
+        Log.w("TTS", "TTS init failed: " + error);
       }
-  });
-    
+    });
+
     // 延迟设置状态栏颜色，确保Qt初始化完成
     new Handler(Looper.getMainLooper()).postDelayed(this::updateStatusBarColor,
         1000);

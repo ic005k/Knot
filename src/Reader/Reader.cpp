@@ -261,7 +261,7 @@ void Reader::startOpenFile(QString openfile) {
     // if (isAndroid)
     //   m_Method->showAndroidProgressBar();
     // else
-    mw_one->showProgress();
+    if (!mw_one->initMain) mw_one->showProgress();
 
     tmeShowEpubMsg->start(100);
 
@@ -1502,17 +1502,31 @@ void Reader::proceImg() {
 
 QString Reader::getUriRealPath(QString uripath) {
 #ifdef Q_OS_ANDROID
-  QString realpath;
+  // 获取当前Activity实例
+  QJniObject activity =
+      QJniObject(QNativeInterface::QAndroidApplication::context());
 
-  QJniObject javaUriPath = QJniObject::fromString(uripath);
-  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  QJniObject s = m_activity.callObjectMethod(
-      "getUriPath", "(Ljava/lang/String;)Ljava/lang/String;",
-      javaUriPath.object<jstring>());
+  if (activity.isValid()) {
+    // 将QString转换为jstring
+    QJniObject javaUriPath = QJniObject::fromString(uripath);
 
-  realpath = s.toString();
-  qDebug() << "RealPath" << realpath;
-  return realpath;
+    // 调用Java方法
+    QJniObject result = activity.callMethod<jstring>(
+        "getUriPath",                              // 方法名
+        "(Ljava/lang/String;)Ljava/lang/String;",  // 方法签名
+        javaUriPath.object<jstring>()              // 参数
+    );
+
+    if (result.isValid()) {
+      QString realPath = result.toString();
+      qDebug() << "RealPath:" << realPath;
+      return realPath;
+    } else {
+      qWarning() << "JNI call returned invalid object";
+    }
+  } else {
+    qWarning() << "Failed to get Android activity";
+  }
 #endif
 
   return uripath;

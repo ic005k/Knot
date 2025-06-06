@@ -398,7 +398,8 @@ MainWindow::MainWindow(QWidget *parent)
   init_TotalData();
 
   // 延时执行
-  QTimer::singleShot(100, this, [this]() { m_Reader->initReader(); });
+  // QTimer::singleShot(100, this, [this]() { m_Reader->initReader(); });
+  m_Reader->initReader();
 
   loading = false;
 
@@ -410,7 +411,6 @@ MainWindow::MainWindow(QWidget *parent)
   initHardStepSensor();
 
   resetWinPos();
-  initMain = false;
 
   m_Todo->refreshTableListsFromIni();
   m_Todo->refreshAlarm();
@@ -440,6 +440,8 @@ MainWindow::MainWindow(QWidget *parent)
   }
 
   if (!isAndroid) splash->close();
+
+  initMain = false;
 }
 
 void MainWindow::initHardStepSensor() {

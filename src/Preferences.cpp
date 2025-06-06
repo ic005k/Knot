@@ -140,7 +140,7 @@ void Preferences::on_btnCustomFont_clicked() {
   if (fileName == "") return;
 
 #ifdef Q_OS_ANDROID
-  fileName = m_Method->getRealPathFile(fileName);
+  // fileName = m_Method->getRealPathFile(fileName);
 #endif
 
   setFontDemoUI(fileName, ui->btnCustomFont, ui->sliderFontSize->value());
@@ -457,8 +457,6 @@ void Preferences::getCheckStatusChange() {
   else
     ui->btnReStart->hide();
 }
-
-void Preferences::on_chkAniEffects_clicked(bool checked) { Q_UNUSED(checked); }
 
 void Preferences::on_chkZip_clicked() {
   if (ui->editPassword->text().trimmed() == "" ||
