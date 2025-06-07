@@ -166,7 +166,6 @@ QLabel {
   bool isEditItem = false;
   bool isDelItem = false;
 
-  bool isNeedAutoBackup = false;
   QString strLatestModify = tr("None");
 
   QDialog *dlgProg = nullptr;

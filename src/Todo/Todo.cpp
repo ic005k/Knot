@@ -74,7 +74,6 @@ void Todo::saveTodo() {
 
   isNeedSave = false;
 
-  mw_one->isNeedAutoBackup = true;
   mw_one->strLatestModify = tr("Modi Todo");
 
   highCount = 0;
@@ -185,14 +184,13 @@ void Todo::closeTodo() {
 
   refreshTableLists();
   refreshAlarm();
-  mw_one->ui->qwTodo->rootContext()->setContextProperty("isBtnVisible", false);
+  mw_one->ui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
+                                                        QVariant(false));
 
   if (isNeedSync && mw_one->ui->chkAutoSync->isChecked() &&
       mw_one->ui->chkWebDAV->isChecked()) {
     QString todoFile = iniDir + "todo.ini";
     QString todoZipFile = privateDir + "KnotData/todo.ini.zip";
-
-    // if (!m_Method->compressFile(todoZipFile, todoFile, encPassword)) {
 
     if (!m_Method->compressFileWithZlib(todoFile, todoZipFile,
                                         Z_DEFAULT_COMPRESSION)) {

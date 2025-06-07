@@ -170,10 +170,7 @@ QString Notes::imageToBase64(const QString &path) {
 }
 
 void Notes::saveMainNotes() {
-  mw_one->isNeedAutoBackup = true;
   mw_one->strLatestModify = tr("Modi Notes");
-
-  saveQMLVPos();
 
   if (isTextChange) {
     QString text = m_EditSource->text();
@@ -194,8 +191,6 @@ void Notes::saveMainNotes() {
 void Notes::updateMDFileToSyncLists(QString currentMDFile) {
   QString zipMD = privateDir + "KnotData/memo/" +
                   QFileInfo(currentMDFile).fileName() + ".zip";
-
-  // m_Method->compressFile(zipMD, currentMDFile, encPassword);
 
   if (!m_Method->compressFileWithZlib(currentMDFile, zipMD,
                                       Z_DEFAULT_COMPRESSION)) {
@@ -1628,7 +1623,7 @@ void Notes::openNotesUI() {
 
   mw_one->closeProgress();
 
-  mainnotesLastModi = QFileInfo(iniDir + "mainnotes.ini").lastModified();
+  isSaveNoteTree = false;
 }
 
 bool NoteIndexManager::loadIndex(const QString &indexPath) {
@@ -1974,13 +1969,10 @@ void Notes::openNotes() {
 }
 
 void Notes::updateMainnotesIniToSyncLists() {
-  QDateTime cDT = QFileInfo(iniDir + "mainnotes.ini").lastModified();
-  qDebug() << "cDT=" << cDT << "mainnotesLastModi=" << mainnotesLastModi;
-  if (cDT > mainnotesLastModi) {
-    QString zipMainnotes = privateDir + "KnotData/mainnotes.ini.zip";
+  qDebug() << "isSaveNoteTree=" << isSaveNoteTree;
 
-    // m_Method->compressFile(zipMainnotes, iniDir + "mainnotes.ini",
-    // encPassword);
+  if (isSaveNoteTree) {
+    QString zipMainnotes = privateDir + "KnotData/mainnotes.ini.zip";
 
     if (!m_Method->compressFileWithZlib(iniDir + "mainnotes.ini", zipMainnotes,
                                         Z_DEFAULT_COMPRESSION)) {

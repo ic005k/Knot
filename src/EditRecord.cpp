@@ -101,7 +101,6 @@ void EditRecord::on_btnOk_clicked() {
   if (!isAdd) {
     mw_one->modify_Data();
 
-    mw_one->isNeedAutoBackup = true;
     mw_one->strLatestModify =
         tr("Modify Item") + " ( " + mw_one->getTabText() + " ) ";
 
@@ -111,7 +110,6 @@ void EditRecord::on_btnOk_clicked() {
                      mw_one->ui->editAmount->text().trimmed(),
                      mw_one->ui->editCategory->text().trimmed());
 
-    mw_one->isNeedAutoBackup = true;
     mw_one->strLatestModify =
         tr("Add Item") + " ( " + mw_one->getTabText() + " ) ";
   }

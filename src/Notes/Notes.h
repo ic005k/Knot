@@ -168,7 +168,8 @@ class Notes : public QDialog {
   void openNotes();
 
   void updateMainnotesIniToSyncLists();
-  QDateTime mainnotesLastModi;
+
+  bool isSaveNoteTree = false;
 
   void updateMDFileToSyncLists(QString currentMDFile);
 

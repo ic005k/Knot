@@ -1031,7 +1031,6 @@ bool MainWindow::del_Data(QTreeWidget *tw) {
         ShowMessage *m_ShowMsg = new ShowMessage(this);
         if (!m_ShowMsg->showMsg(str, strTip + "\n\n" + str1, 2)) return false;
 
-        isNeedAutoBackup = true;
         strLatestModify = tr("Del Item") + " ( " + getTabText() + " ) ";
 
         topItem->removeChild(topItem->child(childCount - 1));
@@ -1784,7 +1783,6 @@ void MainWindow::on_actionRename_triggered() {
     saveTab();
   }
 
-  isNeedAutoBackup = true;
   strLatestModify = tr("Rename Tab");
 }
 
@@ -1814,7 +1812,6 @@ void MainWindow::on_actionAdd_Tab_triggered() {
 
   saveTab();
 
-  isNeedAutoBackup = true;
   strLatestModify = tr("Add Tab") + " ( " + getTabText() + " ) ";
 }
 
@@ -1830,7 +1827,6 @@ void MainWindow::on_actionDel_Tab_triggered() {
                           tr("Whether to remove") + "  " + tab_name + " ? ", 2))
     return;
 
-  isNeedAutoBackup = true;
   strLatestModify = tr("Del Tab") + " ( " + tab_name + " ) ";
 
   QString date_time = m_Notes->getDateTimeStr();
@@ -5272,7 +5268,6 @@ void MainWindow::on_btnRestoreTab_clicked() {
 
   tabData->setCurrentIndex(count);
 
-  isNeedAutoBackup = true;
   strLatestModify = tr("Restore Tab") + "(" + tab_name + ")";
 }
 

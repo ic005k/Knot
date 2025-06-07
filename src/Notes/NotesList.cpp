@@ -318,18 +318,20 @@ void NotesList::on_btnRename_clicked() {
 
   vbox->addLayout(hbox, 0);
 
-  connect(btnCancel, &QToolButton::clicked, [=]() mutable { dlg->close(); });
-  connect(dlg, &QDialog::rejected,
+  connect(btnCancel, &QToolButton::clicked, dlg,
+          [=]() mutable { dlg->close(); });
+  connect(dlg, &QDialog::rejected, dlg,
           [=]() mutable { m_Method->closeGrayWindows(); });
-  connect(dlg, &QDialog::accepted,
+  connect(dlg, &QDialog::accepted, dlg,
           [=]() mutable { m_Method->closeGrayWindows(); });
-  connect(btnPaste, &QToolButton::clicked, [=]() mutable { edit->paste(); });
-  connect(btnCopy, &QToolButton::clicked, [=]() mutable {
+  connect(btnPaste, &QToolButton::clicked, dlg,
+          [=]() mutable { edit->paste(); });
+  connect(btnCopy, &QToolButton::clicked, dlg, [=]() mutable {
     edit->selectAll();
     edit->copy();
     dlg->close();
   });
-  connect(btnOk, &QToolButton::clicked, [=]() mutable {
+  connect(btnOk, &QToolButton::clicked, dlg, [=]() mutable {
     renameCurrentItem(edit->toPlainText().trimmed());
 
     saveNotesList();
@@ -534,14 +536,16 @@ bool NotesList::on_btnImport_clicked() {
     QString strInfo;
     isMD = fileName.contains(".md");
     strInfo = fileName;
+
 #ifdef Q_OS_ANDROID
-    QString fileAndroid = mw_one->m_Reader->getUriRealPath(fileName);
+
+    /*QString fileAndroid = mw_one->m_Reader->getUriRealPath(fileName);
     isMD = fileAndroid.contains(".md");
 
     QStringList list = fileAndroid.split("/");
     QString str = list.at(list.count() - 1);
     if (str.toInt() > 0) isMD = true;
-    strInfo = fileAndroid;
+    strInfo = fileAndroid;*/
 
 #endif
 
@@ -744,7 +748,6 @@ void NotesList::setNoteBookVPos() {
 void NotesList::saveNotesList() {
   QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
 
-  mw_one->isNeedAutoBackup = true;
   mw_one->strLatestModify = tr("Modi Notes List");
 
   int count = tw->topLevelItemCount();
@@ -799,12 +802,13 @@ void NotesList::saveNotesList() {
   QSettings Reg1(iniDir + "curmd.ini", QSettings::IniFormat);
 
   Reg1.setValue("/MainNotes/NoteName", mw_one->ui->lblNoteName->text());
+
+  mw_one->m_Notes->isSaveNoteTree = true;
 }
 
 void NotesList::saveRecycle() {
   QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
 
-  mw_one->isNeedAutoBackup = true;
   mw_one->strLatestModify = tr("Modi Notes Recycle");
 
   int i = 0;
@@ -824,6 +828,8 @@ void NotesList::saveRecycle() {
         "/MainNotes/rbchildItem1" + QString::number(i) + QString::number(j),
         strChild1);
   }
+
+  mw_one->m_Notes->isSaveNoteTree = true;
 }
 
 void NotesList::initNotesList() {
@@ -1963,6 +1969,7 @@ void NotesList::on_actionImport_Note_triggered() {
     clickNoteBook();
     setNotesListCurrentIndex(getNotesListCount() - 1);
     clickNoteList();
+    saveNotesList();
 
     mw_one->m_Notes->updateMDFileToSyncLists(currentMDFile);
   }
