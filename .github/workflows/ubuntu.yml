@@ -16,6 +16,10 @@ jobs:
   build:
     name: Build
     runs-on: ${{ matrix.os }}
+    # 添加权限声明
+    permissions:
+          contents: write   # 允许上传构建产物（已有）
+          releases: write   # 新增：允许创建/修改Release
     strategy:
       matrix:
         #os: [ubuntu-18.04,ubuntu-20.04]
