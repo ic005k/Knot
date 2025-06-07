@@ -70,6 +70,7 @@ class Method : public QDialog {
       "0px;background-color:qlineargradient(spread:pad,x1:1,y1:0,x2:0,y2:0,"
       "stop:0 #FFAEB9,stop:1 #87CEFF);color:black;selection-background-color: "
       "lightblue;}";
+
   QString lblStyle0 =
       "QLabel{border: 0px solid gray;border-radius: "
       "0px;background-color:#3498DB;color:white;selection-background-color: "

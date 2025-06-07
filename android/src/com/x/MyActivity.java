@@ -1639,9 +1639,6 @@ public class MyActivity
       switch (msg.what) {
         case 1:
           Toast toast = Toast.makeText(m_instance, (String) msg.obj, Toast.LENGTH_LONG);
-          TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
-          // v.setTextColor(Color.RED);
-          // v.setTextSize(20);
           toast.show();
           break;
       }

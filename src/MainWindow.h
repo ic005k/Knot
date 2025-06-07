@@ -130,11 +130,17 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
   Ui::MainWindow *ui;
 
-  QString labelNormalStyleSheet =
-      "QLabel { "
-      "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, "
-      "stop:0 rgba(230, 230, 230, 255), stop:1 rgba(210, 210, 210, 255)); "
-      "color: black; }";
+  QString labelNormalStyleSheet = R"(/* 动态适配明暗模式 */
+QLabel {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 palette(light),  /* 明色端 */
+        stop:1 palette(mid)     /* 过渡色 */
+    );
+    color: palette(window-text); /* 跟随系统文本色 */
+    padding: 5px;
+    border-radius: 4px;         /* 可选：增加圆角提升质感 */
+})";
 
   QString labelEnSyncStyleSheet =
       "background-color:qlineargradient(spread:pad,x1:1,y1:0,x2:0,y2:0,stop:0 "

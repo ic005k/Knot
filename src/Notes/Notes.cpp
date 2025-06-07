@@ -231,8 +231,8 @@ void Notes::getEditPanel(QTextEdit *textEdit, QEvent *evn) {
         m_TextSelector->on_btnClose_clicked();
       }
 
-      px = event->globalX();
-      py = event->globalY();
+      px = event->globalPosition().x();
+      py = event->globalPosition().y();
 
       int a = 100;
       int hy = py - a - m_TextSelector->height();
@@ -255,7 +255,7 @@ void Notes::getEditPanel(QTextEdit *textEdit, QEvent *evn) {
 
 #endif
 
-      textEdit->cursor().setPos(event->globalPos());
+      textEdit->cursor().setPos(event->globalPosition().toPoint());
 
       if (m_TextSelector->isHidden()) {
         if (isAndroid) {
@@ -292,10 +292,10 @@ void Notes::getEditPanel(QTextEdit *textEdit, QEvent *evn) {
   if (event->type() == QEvent::MouseMove) {
     isMouseMove = true;
     if (isMousePress) {
-      textEdit->cursor().setPos(event->globalPos());
+      textEdit->cursor().setPos(event->globalPosition().toPoint());
 
-      mx = event->globalX();
-      my = event->globalY();
+      mx = event->globalPosition().x();
+      my = event->globalPosition().y();
 
       if (mx <= px) {
         m_TextSelector->on_btnClose_clicked();

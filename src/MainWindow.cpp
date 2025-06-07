@@ -3629,6 +3629,8 @@ void MainWindow::init_UIWidget() {
   ui->chkWebDAV->hide();
 
   ui->editWebDAVPassword->setEchoMode(QLineEdit::EchoMode::Password);
+  ui->lblWebDAV->setStyleSheet(labelNormalStyleSheet);
+  ui->lblTitleEditRecord->setStyleSheet(labelNormalStyleSheet);
 
   this->installEventFilter(this);
   ui->textBrowser->installEventFilter(this);

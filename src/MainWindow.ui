@@ -2342,7 +2342,7 @@ QTabBar::scroller {width:0}
        <item>
         <widget class="QTabWidget" name="twCloudBackup">
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tab_3">
           <attribute name="title">
@@ -2806,7 +2806,7 @@ QTabBar::scroller {width:0}
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_72">
                 <item>
-                 <widget class="QLabel" name="label_3">
+                 <widget class="QLabel" name="lblWebDAV">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -4316,7 +4316,7 @@ QSlider::handle:horizontal:disabled {
               <enum>QFrame::Shape::StyledPanel</enum>
              </property>
              <property name="frameShadow">
-              <enum>QFrame::Shadow::Plain</enum>
+              <enum>QFrame::Shadow::Raised</enum>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_16">
               <item>
@@ -6800,11 +6800,7 @@ QRadioButton::indicator:checked {
           </font>
          </property>
          <property name="styleSheet">
-          <string notr="true">QLabel {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #e0e0e0, stop:1 #f0f0f0);
-    color: black;
-    padding: 5px;
-}</string>
+          <string notr="true"/>
          </property>
          <property name="text">
           <string>Add</string>
