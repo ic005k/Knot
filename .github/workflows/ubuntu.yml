@@ -181,7 +181,7 @@ jobs:
          #chmod +x ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
 
       # 上传artifacts          
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v3
         with:
           
           name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.AppImage
