@@ -1068,14 +1068,14 @@ class SliderButton : public QWidget {
       QRect sliderRect(m_sliderPosition, 0, sliderWidth, height());
       if (sliderRect.contains(event->pos())) {
         m_isDragging = true;
-        m_dragStartX = event->x();
+        m_dragStartX = static_cast<int>(event->position().x());
       }
     }
   }
 
   void mouseMoveEvent(QMouseEvent *event) override {
     if (m_isDragging) {
-      int deltaX = event->x() - m_dragStartX;
+      int deltaX = static_cast<int>(event->position().x()) - m_dragStartX;
       int newPosition = m_sliderPosition + deltaX;
       int maxPosition = width() - height();
       if (newPosition < 0) {
@@ -1084,7 +1084,7 @@ class SliderButton : public QWidget {
         newPosition = maxPosition;
       }
       setSliderPosition(newPosition);
-      m_dragStartX = event->x();
+      m_dragStartX = static_cast<int>(event->position().x());
 
       if (m_sliderPosition == maxPosition) {
         if (!isOne) {

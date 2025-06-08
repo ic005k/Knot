@@ -651,6 +651,7 @@ void WebDavDownloader::downloadFiles(const QList<QString> &remotePaths,
 
 void WebDavDownloader::handleAuthentication(QNetworkReply *reply,
                                             QAuthenticator *auth) {
+  Q_UNUSED(reply);
   auth->setUser(m_username);
   auth->setPassword(m_password);
 }

@@ -338,14 +338,6 @@ class Method : public QDialog {
   bool compressFile(const QString &zipPath, const QString &filePath,
                     const QString &password);
 
-  bool compressDirectoryNG(const QString &zipPath, const QString &sourceDir,
-                           const QString &password);
-  bool compressFileNG(const QString &zipPath, const QString &filePath,
-                      const QString &password);
-  bool decompressWithPasswordNG(const QString &zipPath,
-                                const QString &extractDir,
-                                const QString &password);
-
   bool encryptFile(const QString &inputPath, const QString &outputPath,
                    const QString &password);
   bool decryptFile(const QString &inputPath, const QString &outputPath,

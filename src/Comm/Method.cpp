@@ -1276,7 +1276,7 @@ QString Method::getDateTimeFlag() {
 }
 
 double Method::updateMicStatus() {
-  double a;
+  double a = 0.0;
 
 #ifdef Q_OS_ANDROID
 
@@ -1291,7 +1291,7 @@ double Method::updateMicStatus() {
 }
 
 int Method::getPlayDuration() {
-  int a;
+  int a = 0;
 
 #ifdef Q_OS_ANDROID
 
@@ -1306,7 +1306,7 @@ int Method::getPlayDuration() {
 }
 
 int Method::getPlayPosition() {
-  int a;
+  int a = 0;
 
 #ifdef Q_OS_ANDROID
 
@@ -1321,7 +1321,7 @@ int Method::getPlayPosition() {
 }
 
 bool Method::getPlaying() {
-  bool a;
+  bool a = false;
 
 #ifdef Q_OS_ANDROID
 
@@ -1381,6 +1381,7 @@ void Method::delay_MSec(unsigned int msec) {
 }
 
 void Method::setAndroidFontSize(int nSize) {
+  Q_UNUSED(nSize);
 #ifdef Q_OS_ANDROID
   QJniObject activity =
       QJniObject(QNativeInterface::QAndroidApplication::context());
@@ -2149,29 +2150,6 @@ QString Method::useEnc(QString m_file) {
   }
 
   return "";
-}
-
-/////////////////////////////////////////////////////////////////////////////////////
-
-bool Method::compressDirectoryNG(const QString &zipPath,
-                                 const QString &sourceDir,
-                                 const QString &password) {
-  return true;
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-
-bool Method::compressFileNG(const QString &zipPath, const QString &filePath,
-                            const QString &password) {
-  return 0;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-
-bool Method::decompressWithPasswordNG(const QString &zipPath,
-                                      const QString &extractDir,
-                                      const QString &password) {
-  return 0;
 }
 
 bool Method::compressFileWithZlib(const QString &sourcePath,
