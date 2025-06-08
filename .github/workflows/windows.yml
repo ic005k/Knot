@@ -17,6 +17,9 @@ jobs:
     # 运行平台， windows-latest目前是windows server 2019 
     # 参考文档 https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
     runs-on: windows-2019
+    # 添加权限声明
+    permissions:
+      contents: write
     strategy:
       # 矩阵配置
       matrix:
