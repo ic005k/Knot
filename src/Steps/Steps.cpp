@@ -735,9 +735,7 @@ void Steps::refreshMotionData() {
     insertGpsList(0, t00, t1, t2, t3, t4, t5);
 
     QSettings Reg1(iniDir + stry + "-gpslist.ini", QSettings::IniFormat);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-    Reg1.setIniCodec("utf-8");
-#endif
+
     int count = getGpsListCount();
     QString strYearMonth = stry + "-" + strm;
     Reg1.setValue("/" + strYearMonth + "/Count", count);
@@ -916,7 +914,6 @@ void Steps::allGpsTotal() {
 
   QSettings Reg(iniDir + stry + "-gpslist.ini", QSettings::IniFormat);
 
-  // cm = Current Month
   double cmTotal, cmTotal_Cycling, cmTotal_Hiking, cmTotal_Running;
   int cmCount, cmCount_Cycling, cmCount_Hiking, cmCount_Running;
 

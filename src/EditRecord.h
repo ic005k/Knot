@@ -35,6 +35,7 @@ class EditRecord : public QDialog {
 
   static void saveAdded();
   static void saveModified();
+  static void saveDeleted();
 
  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
@@ -78,8 +79,6 @@ class EditRecord : public QDialog {
   void setCurrentValue();
 
   void monthSum();
-
-  void writeToLog(QString str);
 
  private:
   void set_Amount(QString Number);

@@ -2,7 +2,7 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "2.0.0";
+QString ver = "2.0.1";
 QString appName = "Knot";
 
 QList<QPointF> PointList;
@@ -11,7 +11,8 @@ QList<double> doubleList;
 QGridLayout *gl1;
 QTreeWidgetItem *parentItem;
 bool isrbFreq = true;
-bool isEBook, isReport, isUpData, isZipOK, isMenuImport, isDownData, isEncrypt;
+bool isEBook, isReport, isUpData, isZipOK, isMenuImport, isDownData, isEncrypt,
+    isRemovedTopItem;
 bool isAdd = false;
 
 QString iniFile, iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
@@ -328,17 +329,21 @@ void MainWindow::saveDone() {
 
 void MainWindow::SaveFile(QString SaveType) {
   if (SaveType == "tab") {
-    if (isAdd)
-      EditRecord::saveAdded();
-    else
-      EditRecord::saveModified();
+    if (isDelData) {
+      EditRecord::saveDeleted();
+    } else {
+      if (isAdd)
+        EditRecord::saveAdded();
+      else
+        EditRecord::saveModified();
+    }
 
     saveTab();
 
-    if (!isDelData)
-      EditRecord::saveMyClassification();
-    else
-      isDelData = false;
+    EditRecord::saveMyClassification();
+
+    isAdd = false;
+    isDelData = false;
   }
 
   if (SaveType == "alltab") {
@@ -1003,13 +1008,15 @@ int MainWindow::calcStringPixelHeight(QFont font, int n_font_size) {
 bool MainWindow::del_Data(QTreeWidget *tw) {
   if (tw->topLevelItemCount() == 0) return false;
 
-  bool isNo = true;
+  bool isTodayData = false;
+  isRemovedTopItem = false;
+
   strDate = QDate::currentDate().toString("ddd MM dd yyyy");
   for (int i = 0; i < tw->topLevelItemCount(); i++) {
     QString str =
         tw->topLevelItem(i)->text(0) + " " + tw->topLevelItem(i)->text(3);
     if (getYMD(str) == getYMD(strDate)) {
-      isNo = false;
+      isTodayData = true;
       QTreeWidgetItem *topItem = tw->topLevelItem(i);
       int childCount = topItem->childCount();
       if (childCount > 0) {
@@ -1047,19 +1054,20 @@ bool MainWindow::del_Data(QTreeWidget *tw) {
         topItem->setText(1, QString::number(childCount - 1));
         topItem->setText(2, str_amount);
 
-        if (topItem->childCount() == 0)
+        if (topItem->childCount() == 0) {
           tw->takeTopLevelItem(tw->topLevelItemCount() - 1);
+          isRemovedTopItem = true;
+        }
 
         isDelItem = true;
         reloadMain();
-        m_EditRecord->writeToLog(strLatestModify);
 
         break;
       }
     }
   }
 
-  if (isNo) {
+  if (!isTodayData) {
     QString str = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
     QString strTip;
@@ -4795,7 +4803,8 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
   Q_UNUSED(event);
   ui->qwReader->rootContext()->setContextProperty("myW", this->width());
   ui->qwReader->rootContext()->setContextProperty("myH", this->height());
-  ui->qwTodo->rootContext()->setContextProperty("isBtnVisible", false);
+  ui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
+                                                QVariant(false));
   ui->qwSteps->rootContext()->setContextProperty("myW", this->width());
 
 #ifdef Q_OS_ANDROID

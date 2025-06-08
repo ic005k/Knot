@@ -9,7 +9,8 @@ extern Method *m_Method;
 extern QTabWidget *tabData;
 extern QString iniFile, iniDir, privateDir, btnYearText, btnMonthText;
 extern QRegularExpression regxNumber;
-extern bool isBreak, isReport, isWholeMonth, isDateSection, isDark, isAdd;
+extern bool isBreak, isReport, isWholeMonth, isDateSection, isDark, isAdd,
+    isRemovedTopItem;
 extern int fontSize;
 extern TextSelector *m_TextSelector;
 
@@ -132,8 +133,6 @@ void EditRecord::on_btnOk_clicked() {
     m_CategoryList->ui->listWidget->insertItem(0, item);
   }
 
-  writeToLog(mw_one->strLatestModify);
-
   mw_one->startSave("tab");
 }
 
@@ -217,8 +216,7 @@ void EditRecord::saveMyClassification() {
     if (isBreak) break;
     c_list.append(m_CategoryList->ui->listWidget->item(i)->text().trimmed());
   }
-  // list = QSet<QString>(list.begin(), list.end()).values();
-  // //IOS无法编译通过
+
   removeDuplicates(&c_list);
 
   for (int i = 0; i < c_list.count(); i++) {
@@ -257,7 +255,6 @@ int EditRecord::removeDuplicates(QStringList *that) {
 }
 
 void EditRecord::init_MyCategory() {
-  // Custom Desc
   QString ini_file;
 
   ini_file = iniDir + "desc.ini";
@@ -469,6 +466,50 @@ void EditRecord::saveAdded() {
   Reg.setValue(flag + QString::number(Sn) + "-childCount", childCount);
 }
 
+void EditRecord::saveDeleted() {
+  QTreeWidget *tw = (QTreeWidget *)tabData->currentWidget();
+
+  QString name = tw->objectName();
+  QString iniName = QString::number(QDate::currentDate().year()) + "-" + name;
+
+  QString ini_file = iniDir + iniName + ".ini";
+  QSettings Reg(ini_file, QSettings::IniFormat);
+
+  qDebug() << "save deleted: ini_file=" << ini_file;
+
+  QString flag;
+  if (QFile::exists(ini_file)) {
+    QString group = Reg.childGroups().at(0);
+    if (group.trimmed().length() == 0)
+      flag = "/" + name + "/";
+    else
+      flag = "/" + group + "/";
+  } else
+    flag = "/" + name + "/";
+
+  int count = tw->topLevelItemCount();
+  if (count == 0) return;
+
+  int m_count = Reg.value(flag + "TopCount", 0).toInt();
+  int Sn = m_count;
+
+  if (isRemovedTopItem) {
+    Reg.setValue(flag + "TopCount", m_count - 1);
+    return;
+  }
+
+  QTreeWidgetItem *topItem = tw->topLevelItem(count - 1);
+  int childCount = topItem->childCount();
+  if (childCount > 0) {
+    Reg.setValue(flag + QString::number(Sn) + "-topDate", topItem->text(0));
+    Reg.setValue(flag + QString::number(Sn) + "-topYear", topItem->text(3));
+    Reg.setValue(flag + QString::number(Sn) + "-topFreq", topItem->text(1));
+    Reg.setValue(flag + QString::number(Sn) + "-topAmount", topItem->text(2));
+
+    Reg.setValue(flag + QString::number(Sn) + "-childCount", childCount);
+  }
+}
+
 void EditRecord::saveModified() {
   QTreeWidget *tw = (QTreeWidget *)tabData->currentWidget();
 
@@ -579,19 +620,4 @@ void EditRecord::monthSum() {
   btnMonthText = str2;
   isWholeMonth = b1;
   isDateSection = b2;
-}
-
-void EditRecord::writeToLog(QString str) {
-  QString logfile = privateDir + "log.txt";
-  QStringList list = mw_one->m_Reader->readText(logfile);
-  if (list.count() > 99) {
-    list.removeAt(list.count() - 1);
-  }
-  list.insert(0, QDateTime::currentDateTime().toString() + "  " + str);
-  QTextEdit *edit = new QTextEdit();
-  for (int i = 0; i < list.count(); i++) {
-    edit->append(list.at(i));
-  }
-
-  TextEditToFile(edit, logfile);
 }
