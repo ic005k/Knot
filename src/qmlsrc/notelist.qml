@@ -150,7 +150,7 @@ Rectangle {
     function getFontColor() {
 
         if (isDark)
-            return "white"
+            return "#EEEEEE"
         else
             return "black"
     }
@@ -161,7 +161,8 @@ Rectangle {
         Rectangle {
             id: listItem
             width: ListView.view.width
-            height: item0.contentHeight + item1.contentHeight + 16
+
+            height: colLayout.implicitHeight + 0
             color: ListView.isCurrentItem ? "lightblue" : getColor()
 
             border.width: isDark ? 0 : 1
@@ -172,7 +173,7 @@ Rectangle {
             RowLayout {
 
                 id: idlistElemnet
-                height: parent.height
+
                 width: parent.width
                 spacing: 2
                 Layout.fillWidth: true
@@ -190,7 +191,7 @@ Rectangle {
                 }
 
                 ColumnLayout {
-                    id: idlistElemnet4
+                    id: colLayout
                     height: parent.height
                     width: parent.width
                     spacing: 2
@@ -281,10 +282,10 @@ Rectangle {
                 property point clickPos: "0,0"
 
                 anchors.fill: parent
-                onPressed:function(mouse) {
+                onPressed: function (mouse) {
                     clickPos = Qt.point(mouse.x, mouse.y)
                 }
-                onReleased: function(mouse){
+                onReleased: function (mouse) {
                     var delta = Qt.point(mouse.x - clickPos.x,
                                          mouse.y - clickPos.y)
 

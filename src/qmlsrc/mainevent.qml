@@ -163,7 +163,7 @@ Rectangle {
     function getFontColor() {
 
         if (isDark)
-            return "white"
+            return "#EEEEEE"
         else
             return "black"
     }
@@ -183,7 +183,6 @@ Rectangle {
             id: listItem
             width: ListView.view.width
 
-            //height: getItemHeight() + 25
             // ✅ 关键修改：绑定到 ColumnLayout 的 implicitHeight
             height: colLayout.implicitHeight + 0 // 10 为上下边距（可根据需求调整）
 
@@ -226,7 +225,7 @@ Rectangle {
             RowLayout {
 
                 id: contentLayout
-                //height: parent.height
+
                 width: parent.width
                 spacing: 2
                 Layout.fillWidth: true

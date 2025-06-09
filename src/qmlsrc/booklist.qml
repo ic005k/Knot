@@ -144,7 +144,7 @@ Rectangle {
     function getFontColor() {
 
         if (isDark)
-            return "white"
+            return "#EEEEEE"
         else
             return "black"
     }
@@ -163,7 +163,8 @@ Rectangle {
         Rectangle {
             id: listItem
             width: ListView.view.width
-            height: getItemHeight() + 8
+
+            height: colLayout.implicitHeight + 0
             color: ListView.isCurrentItem ? "lightblue" : getColor()
 
             border.width: isDark ? 0 : 1
@@ -171,67 +172,38 @@ Rectangle {
 
             radius: 0
 
-            function getItemHeight() {
-                var item0H
-                var item1H
-                var item2H
-                var item3H
-
-                if (item0.text.length == 0 || item0.visible == false)
-                    item0H = 0
-                else
-                    item0H = item0.contentHeight
-
-                if (item1.text.length == 0 || item0.visible == false)
-                    item1H = 0
-                else
-                    item1H = item1.contentHeight
-
-                if (item2.text.length == 0 || item0.visible == false)
-                    item2H = 0
-                else
-                    item2H = item2.contentHeight
-
-                if (item3.text.length == 0 || item0.visible == false)
-                    item3H = 0
-                else
-                    item3H = item3.contentHeight
-
-                return item0H + item1H + item2H + item3H
-            }
-
             function getListPic() {
-                if (item3.text == "txt")
+                if (item3.text === "txt")
                     return "/res/txt.svg"
 
-                if (item3.text == "epub")
+                if (item3.text === "epub")
                     return "/res/epub.svg"
 
-                if (item3.text == "pdf")
+                if (item3.text === "pdf")
                     return "/res/pdf.svg"
 
-                if (item3.text == "none")
+                if (item3.text === "none")
                     return "/res/none.svg"
             }
 
             function getListColor() {
-                if (item3.text == "txt")
+                if (item3.text === "txt")
                     return "#1E90FF"
 
-                if (item3.text == "epub")
+                if (item3.text === "epub")
                     return "#00CD66"
 
-                if (item3.text == "pdf")
+                if (item3.text === "pdf")
                     return "red"
 
-                if (item3.text == "none")
+                if (item3.text === "none")
                     return "#FFD700"
             }
 
             RowLayout {
 
                 id: idlistElemnet
-                height: parent.height
+
                 width: parent.width
                 spacing: 2
                 Layout.fillWidth: true
@@ -360,7 +332,7 @@ Rectangle {
                 property point clickPos: "0,0"
 
                 anchors.fill: parent
-                onPressed: function(mouse){
+                onPressed: function (mouse) {
                     clickPos = Qt.point(mouse.x, mouse.y)
                 }
                 onReleased: {

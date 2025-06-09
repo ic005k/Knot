@@ -171,7 +171,7 @@ Rectangle {
     function getFontColor() {
 
         if (isDark)
-            return "white"
+            return "#EEEEEE"
         else
             return "black"
     }
@@ -182,7 +182,8 @@ Rectangle {
         Rectangle {
             id: listItem
             width: ListView.view.width
-            height: item0.contentHeight + item2.contentHeight + 16
+            //height: item0.contentHeight + item2.contentHeight + 16
+            height: colLayout.implicitHeight + 0
             color: ListView.isCurrentItem ? "lightblue" : getColor()
 
             border.width: isDark ? 0 : 1
@@ -193,13 +194,14 @@ Rectangle {
             RowLayout {
 
                 id: idlistElemnet
-                height: parent.height
+
                 width: parent.width
                 spacing: 2
                 Layout.fillWidth: true
 
                 Rectangle {
-                    height: parent.height - 2
+
+                    height: colLayout.implicitHeight - 2
                     width: 6
                     radius: 2
                     anchors.leftMargin: 1
@@ -211,7 +213,7 @@ Rectangle {
                 }
 
                 ColumnLayout {
-                    id: idlistElemnet4
+                    id: colLayout
                     height: parent.height
                     width: parent.width
                     spacing: 2

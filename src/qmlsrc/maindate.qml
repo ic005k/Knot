@@ -163,7 +163,7 @@ Rectangle {
     function getFontColor() {
 
         if (isDark)
-            return "white"
+            return "#EEEEEE"
         else
             return "black"
     }
@@ -174,7 +174,8 @@ Rectangle {
         Rectangle {
             id: listItem
             width: ListView.view.width
-            height: getItemHeight() + 20
+
+            height: listCol.implicitHeight + 0
 
             //选中颜色设置 #94caf7
             color: ListView.isCurrentItem ? "lightblue" : getColor()
@@ -184,39 +185,10 @@ Rectangle {
 
             radius: 6
 
-            function getItemHeight() {
-                var item0H
-                var item1H
-                var item2H
-                var item3H
-
-                if (item0.text.length === 0)
-                    item0H = 0
-                else
-                    item0H = item0.contentHeight
-
-                if (item1.text.length === 0)
-                    item1H = 0
-                else
-                    item1H = item1.contentHeight
-
-                if (item2.text.length === 0)
-                    item2H = 0
-                else
-                    item2H = item2.contentHeight
-
-                if (item3.text.length === 0)
-                    item3H = 0
-                else
-                    item3H = item3.contentHeight
-
-                return item0H + item1H + item2H + item3H
-            }
-
             RowLayout {
 
                 id: idlistElemnet
-                height: parent.height
+
                 width: parent.width
                 spacing: 2
                 Layout.fillWidth: true

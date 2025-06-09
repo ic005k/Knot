@@ -433,7 +433,6 @@ MainWindow::MainWindow(QWidget *parent)
     }
   }
 
-  init_ButtonStyle();
   m_Method->setAndroidFontSize(fontSize);
 
   init_CloudBacup();
@@ -3561,6 +3560,8 @@ void MainWindow::init_Theme() {
   axisY2->setTickCount(yScale);
 
   ui->lblNoteName->setStyleSheet("QLabel{background:lightyellow;color:black;}");
+
+  init_ButtonStyle();
 }
 
 void MainWindow::init_Instance() {
@@ -3878,6 +3879,13 @@ void MainWindow::init_ButtonStyle() {
     ui->btnPages->setStyleSheet("border:none; background-color:#2874AC;");
     ui->btnAutoRun->setStyleSheet("border:none; background-color:#2874AC;");
     ui->btnAutoStop->setStyleSheet("border:none; background-color:#2874AC;");
+
+    mw_one->ui->btnPages->setStyleSheet(
+        "color: rgb(255, 255, 255);background-color: #2874AC; "
+        "border: "
+        "0px solid "
+        "rgb(255,0,0);border-radius: 0px;"
+        "font-weight: bold;");
   } else {
     ui->f_ReaderFun->setStyleSheet("QFrame{background-color: #3498DB;}");
     ui->btnOpen->setStyleSheet("border:none; background-color:#3498DB;");
@@ -3891,15 +3899,14 @@ void MainWindow::init_ButtonStyle() {
     ui->btnPages->setStyleSheet("border:none; background-color:#3498DB;");
     ui->btnAutoRun->setStyleSheet("border:none; background-color:#3498DB;");
     ui->btnAutoStop->setStyleSheet("border:none; background-color:#3498DB;");
-  }
 
-  // Reset Style
-  mw_one->ui->btnPages->setStyleSheet(
-      "color: rgb(255, 255, 255);background-color: #3498DB; "
-      "border: "
-      "0px solid "
-      "rgb(255,0,0);border-radius: 0px;"
-      "font-weight: bold;");
+    mw_one->ui->btnPages->setStyleSheet(
+        "color: rgb(255, 255, 255);background-color: #3498DB; "
+        "border: "
+        "0px solid "
+        "rgb(255,0,0);border-radius: 0px;"
+        "font-weight: bold;");
+  }
 
   QString style =
       "QToolButton {background-color: rgb(255, 0, 0); color: "
