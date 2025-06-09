@@ -37,18 +37,6 @@
 #include <QTreeWidgetItem>
 #include <QWidget>
 
-/*
-#define MZ_ZIP_USE_CRYPTO  // 启用 AES 加密支持
-#define MZ_ZIP_USE_UTF8    // 强制使用 UTF-8 编码
-#include "mz.h"
-#include "mz_os.h"
-#include "mz_strm.h"
-#include "mz_strm_os.h"
-#include "mz_strm_zlib.h"
-#include "mz_zip.h"
-#include "mz_zip_rw.h"
-*/
-
 namespace Ui {
 class Method;
 }
@@ -373,7 +361,8 @@ class Method : public QDialog {
   static void loadTreeFromDB(QTreeWidget *tree, const QString &dbFileName);
 
   void setToolButtonStyle(QToolButton *btn, bool isDark);
-  protected:
+
+ protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
  public slots:

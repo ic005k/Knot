@@ -757,61 +757,6 @@ ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 # 排除扩展语法文件
 SOURCES -= $$PWD/lib/scintilla/src/ExternalLexer.cpp
 
-######################### minizip-ng ######################################
-
-#INCLUDEPATH += $$PWD/lib/zlib-ng
-#INCLUDEPATH += $$PWD/lib/minizip-ng
-
-# 关闭不需要的功能
-#DEFINES += MZ_ZLIB=1 \
-#           ZLIB_COMPAT=1 \
-#           MZ_OPENSSL=1 \
-#           MZ_BZIP2=0 \
-#           MZ_LZMA=0 \
-#           MZ_ZSTD=0 \
-#           MZ_PKCRYPT=0
-
-# 包含路径
-#INCLUDEPATH += $$PWD/lib/minizip-ng
-
-# 源文件（核心功能）
-#SOURCES += \
-#    $$PWD/lib/minizip-ng/mz_crypt.c \
-#    $$PWD/lib/minizip-ng/mz_crypt_openssl.c \
-#    $$PWD/lib/minizip-ng/mz_os.c \
-#    $$PWD/lib/minizip-ng/mz_zip.c \
-#    $$PWD/lib/minizip-ng/mz_strm.c \
-#    $$PWD/lib/minizip-ng/mz_strm_mem.c \
-#    $$PWD/lib/minizip-ng/mz_strm_buf.c \
-#    $$PWD/lib/minizip-ng/mz_strm_split.c \
-#    $$PWD/lib/minizip-ng/mz_strm_zlib.c \
-#    $$PWD/lib/minizip-ng/mz_zip_rw.c
-
-#win32 {
-#SOURCES += \
-#    $$PWD/lib/minizip-ng/mz_os_win32.c \
-#    $$PWD/lib/minizip-ng/mz_strm_os_win32.c
-
-#    LIBS += -lShell32  # 确保路径创建支持宽字符
-#    DEFINES += MZ_USE_WIN32_API=ON
-#    DEFINES += UNICODE _UNICODE  # 强制启用 Unicode API
-#    LIBS += -lkernel32 -luser32 -lole32  # 基础 Windows API 库
-#}
-
-#!win32 {
-#SOURCES += \
-#    $$PWD/lib/minizip-ng/mz_os_posix.c \
-#    $$PWD/lib/minizip-ng/mz_strm_os_posix.c
-#}
-
-#unix:!macx {
-#    DEFINES += MZ_USE_POSIX_API=ON
-#}
-
-#macx {
-#    DEFINES += MZ_USE_POSIX_API=ON
-#}
-
 ######################### OpenSSL ########################################
 
 # 链接 OpenSSL 库（根据平台配置）
