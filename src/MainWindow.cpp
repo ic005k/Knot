@@ -2,7 +2,7 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "2.0.1";
+QString ver = "2.0.2";
 QString appName = "Knot";
 
 QList<QPointF> PointList;
@@ -1129,9 +1129,14 @@ void MainWindow::set_ToolButtonStyle(QObject *parent) {
     QToolButton *btn = (QToolButton *)btnList.at(i);
 
     if (btn != ui->btnStyle1 && btn != ui->btnStyle2 && btn != ui->btnStyle3 &&
-        btn != ui->btnGPS)
-      m_Method->setToolButtonQss(btn, 5, 3, "#3498DB", "#FFFFFF", "#3498DB",
-                                 "#FFFFFF", "#FF0000", "#FFFFFF");
+        btn != ui->btnGPS) {
+      if (isDark)
+        m_Method->setToolButtonQss(btn, 5, 3, "#2874AC", "#FFFFFF", "#2874AC",
+                                   "#FFFFFF", "#FF0000", "#FFFFFF");
+      else
+        m_Method->setToolButtonQss(btn, 5, 3, "#3498DB", "#FFFFFF", "#3498DB",
+                                   "#FFFFFF", "#FF0000", "#FFFFFF");
+    }
   }
 }
 
@@ -1446,6 +1451,44 @@ void MainWindow::readData(QTreeWidget *tw) {
           QString topStr = QString("%1|%2|%3|%4")
                                .arg(topItem->text(0), topItem->text(1),
                                     topItem->text(2), topItem->text(3));
+
+          if (myTopStrList.contains(topStr)) {
+            for (int x = 0; x < tw->topLevelItemCount(); x++) {
+              QString top, top0, top1, top2, top3;
+              top0 = tw->topLevelItem(x)->text(0);
+              top1 = tw->topLevelItem(x)->text(1);
+              top2 = tw->topLevelItem(x)->text(2);
+              top3 = tw->topLevelItem(x)->text(3);
+              top = QString("%1|%2|%3|%4").arg(top0, top1, top2, top3);
+              if (top == topStr) {
+                tw->takeTopLevelItem(x);
+                tw->insertTopLevelItem(x, topItem);
+                for (int j = 0; j < childCount; j++) {
+                  QTreeWidgetItem *item11 = new QTreeWidgetItem(topItem);
+                  item11->setText(
+                      0, Reg.value("/" + group + "/" + QString::number(i + 1) +
+                                   "-childTime" + QString::number(j))
+                             .toString());
+                  item11->setText(
+                      1, Reg.value("/" + group + "/" + QString::number(i + 1) +
+                                   "-childAmount" + QString::number(j))
+                             .toString());
+                  item11->setText(
+                      2, Reg.value("/" + group + "/" + QString::number(i + 1) +
+                                   "-childDesc" + QString::number(j))
+                             .toString());
+                  item11->setText(
+                      3, Reg.value("/" + group + "/" + QString::number(i + 1) +
+                                   "-childDetails" + QString::number(j))
+                             .toString());
+
+                  item11->setTextAlignment(1,
+                                           Qt::AlignRight | Qt::AlignVCenter);
+                }
+                break;
+              }
+            }
+          }
 
           if (!myTopStrList.contains(topStr)) {
             tw->addTopLevelItem(topItem);
@@ -2276,10 +2319,10 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
       } else {
         int y1;
         int a = 30;
-        if (event->globalY() - a - mydlgSetText->height() >= 0)
-          y1 = event->globalY() - a - mydlgSetText->height();
+        if (event->globalPosition().y() - a - mydlgSetText->height() >= 0)
+          y1 = event->globalPosition().y() - a - mydlgSetText->height();
         else
-          y1 = event->globalY() + a;
+          y1 = event->globalPosition().y() + a;
 
         mydlgSetText->setFixedWidth(mw_one->width() - 4);
         mydlgSetText->init(
@@ -2294,10 +2337,10 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
         if (str != "") {
           int y1;
           int a = 30;
-          if (event->globalY() - a - mydlgSetText->height() >= 0)
-            y1 = event->globalY() - a - mydlgSetText->height();
+          if (event->globalPosition().y() - a - mydlgSetText->height() >= 0)
+            y1 = event->globalPosition().y() - a - mydlgSetText->height();
           else
-            y1 = event->globalY() + a;
+            y1 = event->globalPosition().y() + a;
 
           mydlgSetText->setFixedWidth(mw_one->width() - 4);
           mydlgSetText->init(
@@ -2351,8 +2394,8 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
     int count = ui->tabWidget->tabBar()->count();
 
     if (event->type() == QEvent::MouseButtonPress) {
-      press_x = event->globalX();
-      press_y = event->globalY();
+      press_x = event->globalPosition().x();
+      press_y = event->globalPosition().y();
       x = 0;
       y = 0;
       w = tw->width();
@@ -2360,8 +2403,8 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
     }
 
     if (event->type() == QEvent::MouseButtonRelease) {
-      relea_x = event->globalX();
-      relea_y = event->globalY();
+      relea_x = event->globalPosition().x();
+      relea_y = event->globalPosition().y();
     }
 
     // Right
@@ -3822,17 +3865,33 @@ void MainWindow::init_ButtonStyle() {
   ui->btnReport->setStyleSheet("border:none");
   ui->btnSelTab->setStyleSheet("border:none");
 
-  ui->f_ReaderFun->setStyleSheet("QFrame{background-color: #3498DB;}");
-  ui->btnOpen->setStyleSheet("border:none; background-color:#3498DB;");
-  ui->btnBackReader->setStyleSheet("border:none; background-color:#3498DB;");
-  ui->btnCatalogue->setStyleSheet("border:none; background-color:#3498DB;");
-  ui->btnBackDir->setStyleSheet("border:none; background-color:#3498DB;");
+  if (isDark) {
+    ui->f_ReaderFun->setStyleSheet("QFrame{background-color: #2874AC;}");
+    ui->btnOpen->setStyleSheet("border:none; background-color:#2874AC;");
+    ui->btnBackReader->setStyleSheet("border:none; background-color:#2874AC;");
+    ui->btnCatalogue->setStyleSheet("border:none; background-color:#2874AC;");
+    ui->btnBackDir->setStyleSheet("border:none; background-color:#2874AC;");
 
-  ui->btnReadList->setStyleSheet("border:none; background-color:#3498DB;");
-  ui->btnShowBookmark->setStyleSheet("border:none; background-color:#3498DB;");
-  ui->btnPages->setStyleSheet("border:none; background-color:#3498DB;");
-  ui->btnAutoRun->setStyleSheet("border:none; background-color:#3498DB;");
-  ui->btnAutoStop->setStyleSheet("border:none; background-color:#3498DB;");
+    ui->btnReadList->setStyleSheet("border:none; background-color:#2874AC;");
+    ui->btnShowBookmark->setStyleSheet(
+        "border:none; background-color:#2874AC;");
+    ui->btnPages->setStyleSheet("border:none; background-color:#2874AC;");
+    ui->btnAutoRun->setStyleSheet("border:none; background-color:#2874AC;");
+    ui->btnAutoStop->setStyleSheet("border:none; background-color:#2874AC;");
+  } else {
+    ui->f_ReaderFun->setStyleSheet("QFrame{background-color: #3498DB;}");
+    ui->btnOpen->setStyleSheet("border:none; background-color:#3498DB;");
+    ui->btnBackReader->setStyleSheet("border:none; background-color:#3498DB;");
+    ui->btnCatalogue->setStyleSheet("border:none; background-color:#3498DB;");
+    ui->btnBackDir->setStyleSheet("border:none; background-color:#3498DB;");
+
+    ui->btnReadList->setStyleSheet("border:none; background-color:#3498DB;");
+    ui->btnShowBookmark->setStyleSheet(
+        "border:none; background-color:#3498DB;");
+    ui->btnPages->setStyleSheet("border:none; background-color:#3498DB;");
+    ui->btnAutoRun->setStyleSheet("border:none; background-color:#3498DB;");
+    ui->btnAutoStop->setStyleSheet("border:none; background-color:#3498DB;");
+  }
 
   // Reset Style
   mw_one->ui->btnPages->setStyleSheet(

@@ -25,11 +25,16 @@
 #include <QPainter>
 #include <QPropertyAnimation>
 #include <QQuickWidget>
+#include <QSqlDatabase>
+#include <QSqlError>
+#include <QSqlQuery>
 #include <QStandardPaths>
 #include <QString>
 #include <QTableWidget>
 #include <QTextEdit>
 #include <QTimer>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 #include <QWidget>
 
 /*
@@ -363,7 +368,12 @@ class Method : public QDialog {
   void setEditLightMode(QTextEdit *textEdit);
   void setEditDarkMode(QTextEdit *textEdit);
 
- protected:
+  bool createDatabase(const QString &dbFileName);
+  static void saveTreeToDB(QTreeWidget *tree, const QString &dbFileName);
+  static void loadTreeFromDB(QTreeWidget *tree, const QString &dbFileName);
+
+  void setToolButtonStyle(QToolButton *btn, bool isDark);
+  protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
  public slots:

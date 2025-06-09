@@ -2383,3 +2383,188 @@ void Method::setEditDarkMode(QTextEdit *textEdit) {
       "    border: 1px solid #555555;"  // 深灰色边框
       "}");
 }
+
+// 初始化数据库
+bool Method::createDatabase(const QString &dbFileName) {
+  // 使用唯一连接名称（基于数据库文件名）
+  QString connectionName =
+      QString("db_connection_%1").arg(QDateTime::currentMSecsSinceEpoch());
+  QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
+  db.setDatabaseName(dbFileName);
+
+  if (!db.open()) {
+    qDebug() << "Database error:" << db.lastError().text();
+    QSqlDatabase::removeDatabase(connectionName);
+    return false;
+  }
+
+  bool success = true;
+
+  // 启用外键支持
+  QSqlQuery pragmaQuery(db);
+  if (!pragmaQuery.exec("PRAGMA foreign_keys = ON;")) {
+    qDebug() << "Failed to enable foreign keys:"
+             << pragmaQuery.lastError().text();
+    success = false;
+  }
+
+  // 创建表（如果不存在）
+  QSqlQuery topQuery(db);
+  if (!topQuery.exec("CREATE TABLE IF NOT EXISTS top_items ("
+                     "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                     "col0 TEXT, col1 TEXT, col2 TEXT, col3 TEXT)")) {
+    qDebug() << "Create top_items error:" << topQuery.lastError().text();
+    success = false;
+  }
+
+  QSqlQuery childQuery(db);
+  if (!childQuery.exec("CREATE TABLE IF NOT EXISTS child_items ("
+                       "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                       "parent_id INTEGER, "
+                       "time TEXT, amount TEXT, "
+                       "category TEXT, detail TEXT, "
+                       "FOREIGN KEY(parent_id) REFERENCES top_items(id) ON "
+                       "DELETE CASCADE)")) {
+    qDebug() << "Create child_items error:" << childQuery.lastError().text();
+    success = false;
+  }
+
+  // 关闭并移除连接
+  db.close();
+  QSqlDatabase::removeDatabase(connectionName);
+
+  return success;
+}
+
+void Method::saveTreeToDB(QTreeWidget *tree, const QString &dbFileName) {
+  // 创建临时数据库连接
+  QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "save_connection");
+  db.setDatabaseName(dbFileName);
+
+  if (!db.open()) {
+    qDebug() << "Database error:" << db.lastError().text();
+    QSqlDatabase::removeDatabase("save_connection");
+    return;
+  }
+
+  // 启用外键支持（如果需要）
+  QSqlQuery pragmaQuery(db);
+  pragmaQuery.exec("PRAGMA foreign_keys = ON;");
+
+  // 开始事务（使用当前连接）
+  db.transaction();
+
+  // 清空原有数据
+  QSqlQuery deleteChildQuery(db);
+  if (!deleteChildQuery.exec("DELETE FROM child_items")) {
+    qDebug() << "Delete child_items error:"
+             << deleteChildQuery.lastError().text();
+  }
+
+  QSqlQuery deleteTopQuery(db);
+  if (!deleteTopQuery.exec("DELETE FROM top_items")) {
+    qDebug() << "Delete top_items error:" << deleteTopQuery.lastError().text();
+  }
+
+  // 保存顶层项
+  for (int i = 0; i < tree->topLevelItemCount(); ++i) {
+    QTreeWidgetItem *topItem = tree->topLevelItem(i);
+
+    QSqlQuery q(db);  // 关键：传入db连接
+    q.prepare(
+        "INSERT INTO top_items (col0, col1, col2, col3) VALUES (?, ?, ?, ?)");
+    for (int col = 0; col < 4; ++col) {
+      q.addBindValue(topItem->text(col));
+    }
+
+    if (!q.exec()) {
+      qDebug() << "Insert top item error:" << q.lastError().text();
+      continue;  // 继续处理其他项
+    }
+
+    // 获取刚插入的顶层项ID
+    const qint64 topId = q.lastInsertId().toLongLong();
+
+    // 保存子项
+    for (int ch = 0; ch < topItem->childCount(); ++ch) {
+      QTreeWidgetItem *child = topItem->child(ch);
+
+      QSqlQuery qc(db);  // 关键：传入db连接
+      qc.prepare(
+          "INSERT INTO child_items "
+          "(parent_id, time, amount, category, detail) "
+          "VALUES (?, ?, ?, ?, ?)");
+      qc.addBindValue(topId);
+      qc.addBindValue(child->text(0));  // 时间
+      qc.addBindValue(child->text(1));  // 金额（作为TEXT存储）
+      qc.addBindValue(child->text(2));  // 分类
+      qc.addBindValue(child->text(3));  // 详情
+
+      if (!qc.exec()) {
+        qDebug() << "Insert child item error:" << qc.lastError().text();
+      }
+    }
+  }
+
+  // 提交事务
+  if (!db.commit()) {
+    qDebug() << "Commit error:" << db.lastError().text();
+    db.rollback();
+  }
+
+  // 关闭并移除连接
+  db.close();
+  QSqlDatabase::removeDatabase("save_connection");
+}
+
+// 从数据库加载数据到TreeWidget
+void Method::loadTreeFromDB(QTreeWidget *tree, const QString &dbFileName) {
+  tree->clear();
+
+  // 创建临时数据库连接（避免影响全局连接）
+  QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "temp_connection");
+  db.setDatabaseName(dbFileName);
+
+  if (!db.open()) {
+    qDebug() << "Database error:" << db.lastError().text();
+    QSqlDatabase::removeDatabase("temp_connection");
+    return;
+  }
+
+  // 启用外键支持
+  QSqlQuery("PRAGMA foreign_keys = ON;", db);
+
+  // 查询顶层项
+  QSqlQuery topQuery("SELECT id, col0, col1, col2, col3 FROM top_items", db);
+  QMap<qint64, QTreeWidgetItem *> topItems;
+
+  while (topQuery.next()) {
+    auto item = new QTreeWidgetItem(tree);
+    for (int i = 0; i < 4; ++i) {
+      item->setText(i, topQuery.value(i + 1).toString());
+    }
+    topItems.insert(topQuery.value(0).toLongLong(), item);
+    tree->addTopLevelItem(item);
+  }
+
+  // 查询子项
+  QSqlQuery childQuery(
+      "SELECT parent_id, time, amount, category, detail "
+      "FROM child_items",
+      db);
+
+  while (childQuery.next()) {
+    qint64 parentId = childQuery.value(0).toLongLong();
+    if (auto parent = topItems.value(parentId)) {
+      auto child = new QTreeWidgetItem(parent);
+      child->setText(0, childQuery.value(1).toString());  // 时间
+      child->setText(1, childQuery.value(2).toString());  // 金额
+      child->setText(2, childQuery.value(3).toString());  // 分类
+      child->setText(3, childQuery.value(4).toString());  // 详情
+    }
+  }
+
+  // 关闭并移除临时连接
+  db.close();
+  QSqlDatabase::removeDatabase("temp_connection");
+}
