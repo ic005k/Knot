@@ -1402,7 +1402,7 @@ bool Method::decompressWithPassword(const QString &zipPath,
     return false;
   }
 
-  ///////
+  zip.setFileNameCodec("UTF-8");
 
   // 预检查密码：找到第一个加密文件并验证密码有效性
   isPasswordError = false;
