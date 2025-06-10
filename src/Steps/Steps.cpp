@@ -15,7 +15,7 @@ extern QRegularExpression regxNumber;
 extern QList<float> rlistX, rlistY, rlistZ, glistX, glistY, glistZ;
 extern unsigned int num_steps_walk, num_steps_run, num_steps_hop;
 extern bool loading, isAndroid, zh_cn;
-extern QString iniFile, iniDir;
+extern QString iniFile, iniDir, strDate;
 extern void setTableNoItemFlags(QTableWidget* t, int row);
 
 struct GPSCoordinate {
@@ -59,11 +59,6 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mw_one->ui->lblKM->setFont(font1);
   mw_one->ui->lblSingle->setFont(font1);
 
-#ifdef Q_OS_ANDROID
-#else
-
-#endif
-
   lblStyle = mw_one->ui->lblCurrentDistance->styleSheet();
   mw_one->ui->lblCurrentDistance->setStyleSheet(lblStyle);
   mw_one->ui->lblRunTime->setStyleSheet(lblStyle);
@@ -80,6 +75,8 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   QDir gpsdir;
   QString gpspath = iniDir + "/memo/gps/";
   if (!gpsdir.exists(gpspath)) gpsdir.mkpath(gpspath);
+
+  initHardStepSensor();
 }
 
 Steps::~Steps() {}
@@ -106,12 +103,10 @@ void Steps::on_btnBack_clicked() {
 }
 
 void Steps::on_btnReset_clicked() {
-  mw_one->accel_pedometer->resetStepCount();
-
-  mw_one->CurrentSteps = 0;
+  CurrentSteps = 0;
   mw_one->ui->lblSingle->setText("0");
   toDayInitSteps = getCurrentSteps();
-  if (mw_one->isHardStepSensor == 1) mw_one->resetSteps = mw_one->tc;
+  if (isHardStepSensor == 1) resetSteps = tc;
 
   QString date = QString::number(QDate::currentDate().month()) + "-" +
                  QString::number(QDate::currentDate().day());
@@ -153,17 +148,21 @@ void Steps::init_Steps() {
   mw_one->m_StepsOptions->ui->editStepsThreshold->setText(
       Reg.value("/Steps/Threshold", "10000").toString());
 
+  mw_one->ui->qwSteps->rootContext()->setContextProperty(
+      "nStepsThreshold",
+      mw_one->m_StepsOptions->ui->editStepsThreshold->text().toInt());
+
   int count = Reg.value("/Steps/Count").toInt();
   int start = 0;
   if (count > maxCount) start = 1;
 
   for (int i = start; i < count; i++) {
     QString str0 =
-        Reg.value("/Steps/Table-" + QString::number(i) + "-0").toString();
+        Reg.value("/Steps/Table-" + QString::number(i) + "-0", "").toString();
     qlonglong steps =
-        Reg.value("/Steps/Table-" + QString::number(i) + "-1").toLongLong();
+        Reg.value("/Steps/Table-" + QString::number(i) + "-1", 0).toLongLong();
     QString str2 =
-        Reg.value("/Steps/Table-" + QString::number(i) + "-2").toString();
+        Reg.value("/Steps/Table-" + QString::number(i) + "-2", "").toString();
     if (str2 == "") {
       double km = mw_one->m_StepsOptions->ui->editStepLength->text()
                       .trimmed()
@@ -172,7 +171,8 @@ void Steps::init_Steps() {
       str2 = QString("%1").arg(km, 0, 'f', 2);
     }
 
-    addRecord(str0, steps, str2);
+    if (str0 != "" && steps >= 0 && !str2.isNull())
+      addRecord(str0, steps, str2);
   }
 
   for (int i = start; i < count; i++) {
@@ -184,43 +184,42 @@ void Steps::init_Steps() {
   }
 }
 
-void Steps::on_editTangentLineIntercept_textChanged(const QString& arg1) {
-  mw_one->accel_pedometer->setTangentLineIntercept(arg1.toFloat());
-}
+void Steps::openStepsUI() {
+  mw_one->ui->frameMain->hide();
+  mw_one->ui->frameSteps->show();
 
-void Steps::on_editTangentLineSlope_textChanged(const QString& arg1) {
-  mw_one->accel_pedometer->setTangentLineSlope(arg1.toFloat());
+  updateHardSensorSteps();
+
+  init_Steps();
+  m_Method->setCurrentIndexFromQW(mw_one->ui->qwSteps, getCount() - 1);
+  m_Method->setScrollBarPos(mw_one->ui->qwSteps, 1.0);
+
+  QString date = QString::number(QDate::currentDate().month()) + "-" +
+                 QString::number(QDate::currentDate().day());
+  mw_one->ui->lblNow->setText(date + " " + QTime::currentTime().toString());
+  double d_km =
+      mw_one->m_StepsOptions->ui->editStepLength->text().trimmed().toDouble() *
+      mw_one->ui->lblSingle->text().toInt() / 100 / 1000;
+  QString km = QString("%1").arg(d_km, 0, 'f', 2) + "  " + tr("KM");
+  mw_one->ui->lblKM->setText(km);
+
+  if (mw_one->ui->lblGpsInfo->text() == tr("GPS Info")) {
+    QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
+
+    double m_td = Reg.value("/GPS/TotalDistance", 0).toDouble();
+    mw_one->ui->lblTotalDistance->setText(QString::number(m_td) + " km");
+  }
+
+  if (getGpsListCount() == 0) {
+    int nYear = QDate::currentDate().year();
+    int nMonth = QDate::currentDate().month();
+    loadGpsList(nYear, nMonth);
+    allGpsTotal();
+  }
 }
 
 void Steps::addRecord(QString date, qlonglong steps, QString km) {
-  QString str0;
-  QString strD0 = date;
-  int m = strD0.split(" ").at(1).toInt();
-  if (m == 0) {
-    QDate::fromString(strD0, "ddd MMM d yyyy").toString("ddd MM dd yyyy");
-  } else
-    str0 = strD0;
-
-  date = str0;
-  QString str1 = QString::number(QDate::currentDate().year());
-  date.replace(str1, "");
-
-  bool isYes = false;
-
-  int count = getCount();
-  for (int i = 0; i < count; i++) {
-    QString str = getDate(i);
-    if (mw_one->getYMD(str) == mw_one->getYMD(date)) {
-      appendSteps(date, steps, km);
-
-      isYes = true;
-      break;
-    }
-  }
-
-  if (!isYes) {
-    appendSteps(date, steps, km);
-  }
+  appendSteps(date, steps, km);
 }
 
 qlonglong Steps::getCurrentSteps() {
@@ -234,18 +233,12 @@ qlonglong Steps::getCurrentSteps() {
 
 QString Steps::getCurrentDate() {
   QString c_date;
-  if (zh_cn) {
-    QLocale chineseLocale(QLocale::Chinese, QLocale::China);
-    c_date = chineseLocale.toString(QDate::currentDate(), "ddd MM dd ");
-  } else
-    c_date = QDate::currentDate().toString("ddd MM dd ");
+  c_date = QDate::currentDate().toString("yyyy-M-d");
 
   return c_date;
 }
 
 void Steps::setTableSteps(qlonglong steps) {
-  // int count = getCount();
-
   QSettings Reg(iniDir + "steps.ini", QSettings::IniFormat);
 
   int count = Reg.value("/Steps/Count", 0).toInt();
@@ -253,7 +246,7 @@ void Steps::setTableSteps(qlonglong steps) {
   if (count > 0) {
     QString date;
 
-    date = Reg.value("/Steps/Table-" + QString::number(count - 1) + "-0")
+    date = Reg.value("/Steps/Table-" + QString::number(count - 1) + "-0", "")
                .toString();
 
     if (date == getCurrentDate()) {
@@ -276,7 +269,7 @@ void Steps::setTableSteps(qlonglong steps) {
 
       Reg.setValue("/Steps/Count", count);
     }
-  } else {
+  } else {  // count==0
     count = count + 1;
     Reg.setValue("/Steps/Table-" + QString::number(count - 1) + "-0",
                  getCurrentDate());
@@ -1315,4 +1308,106 @@ void Steps::appendToCSV(const QString& filePath, const QStringList& data) {
   out << data.join(",") << "\n";
 
   file.close();
+}
+
+void Steps::updateHardSensorSteps() {
+  if (isHardStepSensor != 1) return;
+
+  qDebug() << "Started updating the hardware sensor steps...";
+
+  strDate = m_Method->setCurrentDateValue();
+  initTodayInitSteps();
+
+  qlonglong steps = 0;
+#ifdef Q_OS_ANDROID
+
+  tc = QJniObject::callStaticMethod<float>("com.x/MyActivity", "getSteps",
+                                           "()F");
+
+#endif
+  steps = tc - initTodaySteps;
+
+  if (steps < 0) return;
+  if (steps > 100000000) return;
+  CurrentSteps = tc - resetSteps;
+  mw_one->ui->lcdNumber->display(QString::number(steps));
+  mw_one->ui->lblSingle->setText(QString::number(CurrentSteps));
+  setTableSteps(steps);
+
+  sendMsg(steps);
+}
+
+void Steps::initTodayInitSteps() {
+  qlonglong a = 0;
+  qlonglong b = 0;
+
+#ifdef Q_OS_ANDROID
+
+  a = QJniObject::callStaticMethod<float>("com.x/MyActivity", "getSteps",
+                                          "()F");
+
+#endif
+
+  tc = a;
+
+  QSettings Reg(iniDir + "initsteps.ini", QSettings::IniFormat);
+
+  QString str;
+  str = getCurrentDate();
+
+  if (!Reg.allKeys().contains(str)) {
+    Reg.setValue(str, a);
+    initTodaySteps = a;
+  } else {
+    b = Reg.value(str).toLongLong();
+    if (a < b) {
+      initTodaySteps = 0 - Reg.value("TodaySteps", 0).toLongLong();
+      Reg.setValue(str, initTodaySteps);
+    } else
+      initTodaySteps = b;
+  }
+}
+
+void Steps::initHardStepSensor() {
+#ifdef Q_OS_ANDROID
+
+  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
+  m_activity.callMethod<void>("initStepSensor", "()V");
+
+  isHardStepSensor = QJniObject::callStaticMethod<int>(
+      "com.x/MyActivity", "getHardStepCounter", "()I");
+
+  if (isHardStepSensor == 0) {
+    mw_one->ui->btnStepsOptions->setHidden(true);
+    mw_one->ui->btnReset->setHidden(true);
+    mw_one->ui->tabMotion->setTabEnabled(0, false);
+    mw_one->ui->tabMotion->setCurrentIndex(1);
+  }
+  if (isHardStepSensor == 1) {
+    mw_one->ui->lblSteps->hide();
+
+    initTodayInitSteps();
+    resetSteps = tc;
+  }
+#endif
+}
+
+void Steps::sendMsg(int CurTableCount) {
+  Q_UNUSED(CurTableCount);
+#ifdef Q_OS_ANDROID
+  double sl = mw_one->m_StepsOptions->ui->editStepLength->text().toDouble();
+  double d0 = sl / 100;
+  double x = CurTableCount * d0;
+  double gl = x / 1000;
+  QString strNotify = tr("Today") + " : " + QString::number(CurTableCount) +
+                      "  ( " + QString::number(gl) + " " + tr("km") + " )";
+
+  QJniObject javaNotification = QJniObject::fromString(strNotify);
+  QJniObject::callStaticMethod<void>(
+      "com/x/MyService", "notify",
+      "(Landroid/content/Context;Ljava/lang/String;)V",
+      QNativeInterface::QAndroidApplication::context(),
+      javaNotification.object<jstring>());
+
+#endif
 }

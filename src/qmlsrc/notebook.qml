@@ -189,7 +189,7 @@ Rectangle {
             border.width: isDark ? 0 : 1
             border.color: "lightgray" //"lightsteelblue"
 
-            radius: 0
+            radius: 2
 
             RowLayout {
 
@@ -201,7 +201,7 @@ Rectangle {
 
                 Rectangle {
 
-                    height: colLayout.implicitHeight - 2
+                    height: colLayout.implicitHeight - 0
                     width: 6
                     radius: 2
                     anchors.leftMargin: 1

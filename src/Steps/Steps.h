@@ -92,10 +92,6 @@ class Steps : public QDialog {
 
   void on_btnReset_clicked();
 
-  void on_editTangentLineIntercept_textChanged(const QString &arg1);
-
-  void on_editTangentLineSlope_textChanged(const QString &arg1);
-
   void setTableData(int index, QString date, int steps, QString km);
 
   void startRecordMotion();
@@ -120,6 +116,10 @@ class Steps : public QDialog {
   void appendToCSV(const QString &filePath, const QStringList &data);
   void updateInfoText(QString strDistance, QString strSpeed);
   QString getCurrentDate();
+  void updateHardSensorSteps();
+  void initTodayInitSteps();
+  void initHardStepSensor();
+  void openStepsUI();
   public slots:
   void clearAllGpsList();
   void getGpsTrack();
@@ -129,6 +129,12 @@ class Steps : public QDialog {
   void updateGetGps();
 
  private:
+  int isHardStepSensor = -1;
+
+  qlonglong initTodaySteps, resetSteps, tc;
+
+  qlonglong CurrentSteps = 0;
+
   QDateTime startDT;
   QDateTime endDT;
   QString strCSVFile;
@@ -181,7 +187,8 @@ class Steps : public QDialog {
 
   QString getGpsListText0(int index);
   void refreshMotionData();
-  signals:
+  void sendMsg(int CurTableCount);
+ signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();

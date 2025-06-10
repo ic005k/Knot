@@ -116,10 +116,10 @@ TodoAlarm::~TodoAlarm() { delete ui; }
 void TodoAlarm::initDlg() {
   QString str = ui->dateTimeEdit->text();
   QStringList list = str.split(" ");
-  QString strDate = list.at(0);
+  QString strdate = list.at(0);
   QString strTime = list.at(1);
   QStringList list1, list2;
-  list1 = strDate.split("-");
+  list1 = strdate.split("-");
   y = list1.at(0);
   m = list1.at(1);
   d = list1.at(2);
@@ -259,8 +259,8 @@ void TodoAlarm::addBtn(int start, int total, int col, QString flag, bool week) {
         QString strWeek;
         QString sy = ui->btnYear->text().split("\n").at(0);
         QString sm = ui->btnMonth->text().split("\n").at(0);
-        QString strDate = sy + "-" + sm + "-" + str;
-        QDate date = QDate::fromString(strDate, "yyyy-M-d");
+        QString strdate = sy + "-" + sm + "-" + str;
+        QDate date = QDate::fromString(strdate, "yyyy-M-d");
         int we = date.dayOfWeek();
         if (we == 1) strWeek = tr("Mon");
         if (we == 2) strWeek = tr("Tue");
@@ -303,8 +303,8 @@ void TodoAlarm::addBtn(int start, int total, int col, QString flag, bool week) {
       QString strWeek;
       QString sy = ui->btnYear->text().split("\n").at(0);
       QString sm = ui->btnMonth->text().split("\n").at(0);
-      QString strDate = sy + "-" + sm + "-" + str;
-      QDate date = QDate::fromString(strDate, "yyyy-M-d");
+      QString strdate = sy + "-" + sm + "-" + str;
+      QDate date = QDate::fromString(strdate, "yyyy-M-d");
       int we = date.dayOfWeek();
       if (we == 1) strWeek = tr("Mon");
       if (we == 2) strWeek = tr("Tue");

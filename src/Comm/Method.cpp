@@ -2568,3 +2568,14 @@ void Method::loadTreeFromDB(QTreeWidget *tree, const QString &dbFileName) {
   db.close();
   QSqlDatabase::removeDatabase("temp_connection");
 }
+
+QString Method::setCurrentDateValue() {
+  QString strdate;
+  if (zh_cn) {
+    QLocale chineseLocale(QLocale::Chinese, QLocale::China);
+    strdate = chineseLocale.toString(QDate::currentDate(), "ddd MM dd yyyy");
+  } else
+    strdate = QDate::currentDate().toString("ddd MM dd yyyy");
+
+  return strdate;
+}

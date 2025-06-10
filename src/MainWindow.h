@@ -198,8 +198,7 @@ QLabel {
 
   int mwh;
   bool isOne = false;
-  int isHardStepSensor = -1;
-  qlonglong initTodaySteps, resetSteps, tc;
+
   QString listStyle =
       "QListWidget{item-background: "
       "rgb(244,23,24); item-color:rgb(255,255,255); "
@@ -210,7 +209,7 @@ QLabel {
   int testCount1 = 0;
   int testCount = 0;
   int smallCount = 0;
-  ulong timeTest = 0;
+
   ulong timeCount = 0;
   QChartView *chartview;
   QChartView *chartview1;
@@ -219,10 +218,9 @@ QLabel {
   QValueAxis *axisY;
   QValueAxis *axisX2;
   QValueAxis *axisY2;
-  qlonglong CurrentSteps = 0;
+
   qlonglong CurTableCount = 0;
-  SpecialAccelerometerPedometer *accel_pedometer;
-  QGyroscope *gyroscope;
+
   QChart *chartMonth;
   QChart *chartDay;
   QBarSeries *barSeries;
@@ -271,7 +269,7 @@ QLabel {
   int findPos = 0;
 
   QTimer *timer;
-  QTimer *timerStep;
+
   QTimer *timerMousePress;
   QTimer *timerSyncData;
   QTimer *tmeStartRecordAudio;
@@ -311,9 +309,6 @@ QLabel {
 
   QString secondsToTime(ulong ulSeconds);
   void stopJavaTimer();
-  void pausePedometer();
-  void sendMsg(int);
-  void initTodayInitSteps();
 
   QString getYMD(QString date);
   bool bakData();
@@ -385,9 +380,7 @@ QLabel {
   void on_hSlider_sliderMoved(int position);
   void clickMainTab();
   void on_SetReaderFunVisible();
-  void updateSteps();
 
-  void updateHardSensorSteps();
   void on_btnTodo_clicked();
   void readEBookDone();
   void on_btnPageUp_clicked();
@@ -871,11 +864,9 @@ QLabel {
 
   void on_btnHideKey_clicked();
   void init_ChartWidget();
-  void init_Sensors();
+
   void init_UIWidget();
   void init_Menu(QMenu *);
-
-  void initHardStepSensor();
 
   void resetWinPos();
 

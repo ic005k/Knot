@@ -399,7 +399,6 @@ MainWindow::MainWindow(QWidget *parent)
   init_Theme();
   initQW();
 
-  init_Sensors();
   init_TotalData();
 
   // 延时执行
@@ -412,8 +411,6 @@ MainWindow::MainWindow(QWidget *parent)
   startRead(strDate);
   get_Today(tw);
   init_Stats(tw);
-
-  initHardStepSensor();
 
   resetWinPos();
 
@@ -446,102 +443,6 @@ MainWindow::MainWindow(QWidget *parent)
   if (!isAndroid) splash->close();
 
   initMain = false;
-}
-
-void MainWindow::initHardStepSensor() {
-#ifdef Q_OS_ANDROID
-
-  QJniObject jo = QNativeInterface::QAndroidApplication::context();
-  isHardStepSensor =
-      jo.callStaticMethod<int>("com.x/MyActivity", "getHardStepCounter", "()I");
-
-  if (isHardStepSensor == 0) {
-    ui->btnStepsOptions->setHidden(true);
-    ui->btnReset->setHidden(true);
-    ui->tabMotion->setTabEnabled(0, false);
-    ui->tabMotion->setCurrentIndex(1);
-  }
-  if (isHardStepSensor == 1) {
-    ui->lblSteps->hide();
-
-    initTodayInitSteps();
-    resetSteps = tc;
-  }
-#endif
-}
-
-void MainWindow::initTodayInitSteps() {
-  qlonglong a = 0;
-  qlonglong b = 0;
-
-#ifdef Q_OS_ANDROID
-
-  // QJniObject jo = QNativeInterface::QAndroidApplication::context();
-  a = QJniObject::callStaticMethod<float>("com.x/MyActivity", "getSteps",
-                                          "()F");
-
-#endif
-
-  tc = a;
-
-  QSettings Reg(iniDir + "initsteps.ini", QSettings::IniFormat);
-
-  QString str;
-  if (zh_cn) {
-    QLocale chineseLocale(QLocale::Chinese, QLocale::China);
-    str = chineseLocale.toString(QDate::currentDate(), "ddd MM dd yyyy");
-  } else
-    str = QDate::currentDate().toString("ddd MM dd yyyy");
-
-  if (!Reg.allKeys().contains(str)) {
-    Reg.setValue(str, a);
-    initTodaySteps = a;
-  } else {
-    b = Reg.value(str).toLongLong();
-    if (a < b) {
-      initTodaySteps = 0 - Reg.value("TodaySteps", 0).toLongLong();
-      Reg.setValue(str, initTodaySteps);
-    } else
-      initTodaySteps = b;
-  }
-}
-
-void MainWindow::pausePedometer() {}
-
-void MainWindow::updateSteps() {
-  // CurrentSteps = accel_pedometer->stepCount();
-
-  CurrentSteps++;
-  CurTableCount = m_Steps->getCurrentSteps();
-  CurTableCount++;
-  m_Steps->toDayInitSteps++;
-
-  ui->lcdNumber->display(QString::number(CurTableCount));
-  ui->lblSingle->setText(QString::number(CurrentSteps));
-  m_Steps->setTableSteps(CurTableCount);
-
-  if (CurrentSteps == 0) return;
-  sendMsg(CurTableCount);
-}
-
-void MainWindow::sendMsg(int CurTableCount) {
-  Q_UNUSED(CurTableCount);
-#ifdef Q_OS_ANDROID
-  double sl = m_StepsOptions->ui->editStepLength->text().toDouble();
-  double d0 = sl / 100;
-  double x = CurTableCount * d0;
-  double gl = x / 1000;
-  QString strNotify = tr("Today") + " : " + QString::number(CurTableCount) +
-                      "  ( " + QString::number(gl) + " " + tr("km") + " )";
-
-  QJniObject javaNotification = QJniObject::fromString(strNotify);
-  QJniObject::callStaticMethod<void>(
-      "com/x/MyService", "notify",
-      "(Landroid/content/Context;Ljava/lang/String;)V",
-      QNativeInterface::QAndroidApplication::context(),
-      javaNotification.object<jstring>());
-
-#endif
 }
 
 void MainWindow::init_Options() {
@@ -754,9 +655,6 @@ void MainWindow::init_TotalData() {
 
   m_EditRecord->init_MyCategory();
 
-  m_Steps->init_Steps();
-  m_Steps->saveSteps();
-
   currentTabIndex = RegTab.value("CurrentIndex").toInt();
   ui->tabWidget->setCurrentIndex(currentTabIndex);
   setCurrentIndex(currentTabIndex);
@@ -893,11 +791,7 @@ void MainWindow::add_Data(QTreeWidget *tw, QString strTime, QString strAmount,
                           QString strDesc) {
   bool isYes = false;
 
-  if (zh_cn) {
-    QLocale chineseLocale(QLocale::Chinese, QLocale::China);
-    strDate = chineseLocale.toString(QDate::currentDate(), "ddd MM dd yyyy");
-  } else
-    strDate = QDate::currentDate().toString("ddd MM dd yyyy");
+  strDate = m_Method->setCurrentDateValue();
 
   int topc = tw->topLevelItemCount();
   for (int i = 0; i < topc; i++) {
@@ -1010,7 +904,7 @@ bool MainWindow::del_Data(QTreeWidget *tw) {
   bool isTodayData = false;
   isRemovedTopItem = false;
 
-  strDate = QDate::currentDate().toString("ddd MM dd yyyy");
+  strDate = m_Method->setCurrentDateValue();
   for (int i = 0; i < tw->topLevelItemCount(); i++) {
     QString str =
         tw->topLevelItem(i)->text(0) + " " + tw->topLevelItem(i)->text(3);
@@ -3115,45 +3009,7 @@ void MainWindow::on_tabCharts_currentChanged(int index) {
   m_Method->clickMainDateData();
 }
 
-void MainWindow::on_btnSteps_clicked() {
-  ui->qwSteps->rootContext()->setContextProperty(
-      "nStepsThreshold",
-      m_StepsOptions->ui->editStepsThreshold->text().toInt());
-  m_Steps->setGeometry(this->geometry().x(), this->geometry().y(),
-                       this->width(), this->height());
-
-  ui->frameMain->hide();
-  ui->frameSteps->show();
-
-  if (isHardStepSensor == 1) updateHardSensorSteps();
-
-  m_Steps->init_Steps();
-  m_Method->setCurrentIndexFromQW(ui->qwSteps, m_Steps->getCount() - 1);
-  m_Method->setScrollBarPos(ui->qwSteps, 1.0);
-
-  QString date = QString::number(QDate::currentDate().month()) + "-" +
-                 QString::number(QDate::currentDate().day());
-  ui->lblNow->setText(date + " " + QTime::currentTime().toString());
-  double d_km =
-      mw_one->m_StepsOptions->ui->editStepLength->text().trimmed().toDouble() *
-      ui->lblSingle->text().toInt() / 100 / 1000;
-  QString km = QString("%1").arg(d_km, 0, 'f', 2) + "  " + tr("KM");
-  ui->lblKM->setText(km);
-
-  if (ui->lblGpsInfo->text() == tr("GPS Info")) {
-    QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
-
-    double m_td = Reg.value("/GPS/TotalDistance", 0).toDouble();
-    ui->lblTotalDistance->setText(QString::number(m_td) + " km");
-  }
-
-  if (m_Steps->getGpsListCount() == 0) {
-    int nYear = QDate::currentDate().year();
-    int nMonth = QDate::currentDate().month();
-    m_Steps->loadGpsList(nYear, nMonth);
-    m_Steps->allGpsTotal();
-  }
-}
+void MainWindow::on_btnSteps_clicked() { m_Steps->openStepsUI(); }
 
 void MainWindow::changeEvent(QEvent *event) {
   if (event->type() == QEvent::WindowStateChange) {
@@ -3207,60 +3063,7 @@ QString MainWindow::secondsToTime(ulong totalTime) {
   return hou + ":" + min + ":" + sec;
 }
 
-void MainWindow::updateHardSensorSteps() {
-  qDebug() << "Started updating the hardware sensor steps...";
-
-  timeTest = timeTest + 1;
-
-  QString c_date;
-  if (zh_cn) {
-    QLocale chineseLocale(QLocale::Chinese, QLocale::China);
-    c_date = chineseLocale.toString(QDate::currentDate(), "ddd MM dd yyyy");
-  } else
-    c_date = QDate::currentDate().toString("ddd MM dd yyyy");
-
-  if (strDate != c_date) {
-    initTodayInitSteps();
-    strDate = c_date;
-  }
-
-  qlonglong steps = 0;
-#ifdef Q_OS_ANDROID
-
-  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callMethod<void>("initStepSensor", "()V");
-
-  // QJniObject jo = QNativeInterface::QAndroidApplication::context();
-  tc = QJniObject::callStaticMethod<float>("com.x/MyActivity", "getSteps",
-                                           "()F");
-
-#endif
-  steps = tc - initTodaySteps;
-
-  if (steps < 0) return;
-  if (steps > 100000000) return;
-  CurrentSteps = tc - resetSteps;
-  ui->lcdNumber->display(QString::number(steps));
-  ui->lblSingle->setText(QString::number(CurrentSteps));
-  m_Steps->setTableSteps(steps);
-
-  sendMsg(steps);
-}
-
 void MainWindow::on_btnNotes_clicked() { m_Notes->openNotes(); }
-
-void MainWindow::init_Sensors() {
-  accel_pedometer = new SpecialAccelerometerPedometer(this);
-
-  connect(accel_pedometer, SIGNAL(stepCountChanged()), this,
-          SLOT(updateSteps()));
-
-  accel_pedometer->setDataRate(100);
-  accel_pedometer->setAccelerationMode(QAccelerometer::User);
-  accel_pedometer->setAlwaysOn(true);
-
-  gyroscope = new QGyroscope(this);
-}
 
 void MainWindow::initQW() {
   qmlRegisterType<File>("MyModel1", 1, 0, "File");
@@ -3614,7 +3417,7 @@ void MainWindow::init_UIWidget() {
   ui->tabWidget->hide();
 
   loginTime = QDateTime::currentDateTime().toString();
-  strDate = QDate::currentDate().toString("ddd MM dd yyyy");
+  strDate = m_Method->setCurrentDateValue();
   isReadEnd = true;
 
   ui->menubar->hide();
@@ -3707,8 +3510,7 @@ void MainWindow::init_UIWidget() {
 
   timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
-  timerStep = new QTimer(this);
-  connect(timerStep, SIGNAL(timeout()), this, SLOT(updateHardSensorSteps()));
+
   timerSyncData = new QTimer(this);
   connect(timerSyncData, SIGNAL(timeout()), this, SLOT(on_timerSyncData()));
   timerMousePress = new QTimer(this);
@@ -4282,10 +4084,6 @@ void MainWindow::stopJavaTimer() {
   jo.callStaticMethod<int>("com.x/MyService", "stopTimer", "()I");
 
 #endif
-  accel_pedometer->stop();
-  accel_pedometer->setActive(false);
-  gyroscope->stop();
-  gyroscope->setActive(false);
 }
 
 #ifdef Q_OS_ANDROID
@@ -4303,7 +4101,7 @@ static void JavaNotify_1() {
 
 static void JavaNotify_2() {
   // When the screen lights up.
-  mw_one->updateHardSensorSteps();
+  mw_one->m_Steps->updateHardSensorSteps();
 
   qDebug() << "C++ JavaNotify_2";
 }
@@ -4319,22 +4117,14 @@ static void JavaNotify_4() {
   mw_one->alertWindowsCount--;
 
   if (mw_one->alertWindowsCount == 0) {
-    if (mw_one->ui->frameMain->isHidden())
-      mw_one->m_ReceiveShare->closeAllChildWindows();
-
-    QSettings Reg("/storage/emulated/0/.Knot/alarm.ini", QSettings::IniFormat);
-
-    QString backMain = Reg.value("/action/backMain", "false").toString();
-    Reg.setValue("/action/backMain", "false");
-    if (backMain == "false") {
-      // mw_one->setMini();
-    }
+    // if (mw_one->ui->frameMain->isHidden())
+    //   mw_one->m_ReceiveShare->closeAllChildWindows();
 
     bool isBackMain = false;
     QJniObject activity =
         QJniObject(QNativeInterface::QAndroidApplication::context());
     if (activity.isValid()) {
-      jboolean result = activity.callMethod<jboolean>("getIsBackMainUI");
+      jboolean result = activity.callMethod<jboolean>("getIsBackMainUI", "()Z");
       activity.callMethod<void>("setIsBackMainUI", "(Z)V", false);
       isBackMain = result;
     }
@@ -5175,8 +4965,8 @@ void MainWindow::on_btnPasteTodo_clicked() { ui->editTodo->paste(); }
 int MainWindow::getMaxDay(QString sy, QString sm) {
   int maxDay = 0;
   for (int i = 0; i < 50; i++) {
-    QString strDate = sy + "-" + sm + "-" + QString::number(i + 1);
-    QDate date = QDate::fromString(strDate, "yyyy-M-d");
+    QString strdate = sy + "-" + sm + "-" + QString::number(i + 1);
+    QDate date = QDate::fromString(strdate, "yyyy-M-d");
     if (date.dayOfWeek() == 0) {
       maxDay = i;
       break;

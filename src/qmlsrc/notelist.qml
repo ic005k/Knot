@@ -168,7 +168,7 @@ Rectangle {
             border.width: isDark ? 0 : 1
             border.color: "lightgray" //"lightsteelblue"
 
-            radius: 0
+            radius: 2
 
             RowLayout {
 

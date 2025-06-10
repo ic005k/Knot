@@ -684,17 +684,17 @@ void Todo::refreshAlarm() {
           listTotalS.append(totals);
 
           // set time marks
-          QString strDate = str.split(" ").at(0);
+          QString strdate = str.split(" ").at(0);
           QString strToday = QDate::currentDate().toString("yyyy-M-d");
           QDateTime ctime = QDateTime::currentDateTime();
           QString strTmo = ctime.addDays(+1).toString("yyyy-M-d");
-          if (strDate.contains("-")) {
-            if (strDate == strToday) {
+          if (strdate.contains("-")) {
+            if (strdate == strToday) {
               modifyType(i, 1);
               isToday = true;
             }
 
-            if (strTmo == strDate) {
+            if (strTmo == strdate) {
               modifyType(i, 2);
             }
           } else {

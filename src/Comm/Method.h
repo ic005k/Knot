@@ -362,6 +362,8 @@ class Method : public QDialog {
 
   void setToolButtonStyle(QToolButton *btn, bool isDark);
 
+  QString setCurrentDateValue();
+
  protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
