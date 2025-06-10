@@ -14,8 +14,8 @@ on:
 jobs:
   build:
     name: Build
-    # 运行平台， windows-latest目前是windows server 2019 
-    # 参考文档 https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
+    # 运行平台， windows-latest目前是windows server 2022 
+    # 参考文档 https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
     runs-on: windows-2022
     # 添加权限声明
     permissions:
@@ -29,9 +29,9 @@ jobs:
           # 5.15.2 参考 https://mirrors.cloud.tencent.com/qt/online/qtsdkrepository/windows_x86/desktop/qt5_5152/
          
           - qt_ver: 6.6.3
-            qt_arch: win64_msvc2019_64
+            qt_arch: win64_msvc2022_64
             msvc_arch: x64
-            qt_arch_install: msvc2019_64          
+            qt_arch_install: msvc2022_64          
           
     env:
       targetName: Knot.exe
@@ -64,7 +64,7 @@ jobs:
         id: build
         shell: cmd
         run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" ${{ matrix.msvc_arch }}
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" ${{ matrix.msvc_arch }}
           qmake
           nmake
           echo winSdkDir=%WindowsSdkDir% >> %GITHUB_ENV%
