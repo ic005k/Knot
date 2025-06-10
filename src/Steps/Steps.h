@@ -120,7 +120,7 @@ class Steps : public QDialog {
   void initTodayInitSteps();
   void initHardStepSensor();
   void openStepsUI();
-  public slots:
+ public slots:
   void clearAllGpsList();
   void getGpsTrack();
  private slots:
@@ -131,7 +131,7 @@ class Steps : public QDialog {
  private:
   int isHardStepSensor = -1;
 
-  qlonglong initTodaySteps, resetSteps, tc;
+  qlonglong initTodaySteps, resetSteps;
 
   qlonglong CurrentSteps = 0;
 
@@ -188,6 +188,7 @@ class Steps : public QDialog {
   QString getGpsListText0(int index);
   void refreshMotionData();
   void sendMsg(int CurTableCount);
+  qlonglong getAndroidSteps();
  signals:
   void distanceChanged(double distance);
   void timeChanged();

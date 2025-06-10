@@ -106,7 +106,7 @@ void Steps::on_btnReset_clicked() {
   CurrentSteps = 0;
   mw_one->ui->lblSingle->setText("0");
   toDayInitSteps = getCurrentSteps();
-  if (isHardStepSensor == 1) resetSteps = tc;
+  if (isHardStepSensor == 1) resetSteps = getAndroidSteps();
 
   QString date = QString::number(QDate::currentDate().month()) + "-" +
                  QString::number(QDate::currentDate().day());
@@ -130,10 +130,6 @@ void Steps::saveSteps() {
     Reg.setValue("/Steps/Table-" + QString::number(i) + "-1", getSteps(i));
     Reg.setValue("/Steps/Table-" + QString::number(i) + "-2", getKM(i));
   }
-
-  QSettings Reg1(iniDir + "initsteps.ini", QSettings::IniFormat);
-
-  Reg1.setValue("TodaySteps", getCurrentSteps());
 }
 
 void Steps::init_Steps() {
@@ -1317,19 +1313,12 @@ void Steps::updateHardSensorSteps() {
 
   strDate = m_Method->setCurrentDateValue();
   initTodayInitSteps();
-
   qlonglong steps = 0;
-#ifdef Q_OS_ANDROID
-
-  tc = QJniObject::callStaticMethod<float>("com.x/MyActivity", "getSteps",
-                                           "()F");
-
-#endif
-  steps = tc - initTodaySteps;
-
+  qlonglong ts = getAndroidSteps();
+  steps = ts - initTodaySteps;
   if (steps < 0) return;
   if (steps > 100000000) return;
-  CurrentSteps = tc - resetSteps;
+  CurrentSteps = ts - resetSteps;
   mw_one->ui->lcdNumber->display(QString::number(steps));
   mw_one->ui->lblSingle->setText(QString::number(CurrentSteps));
   setTableSteps(steps);
@@ -1337,34 +1326,30 @@ void Steps::updateHardSensorSteps() {
   sendMsg(steps);
 }
 
-void Steps::initTodayInitSteps() {
+qlonglong Steps::getAndroidSteps() {
   qlonglong a = 0;
-  qlonglong b = 0;
-
 #ifdef Q_OS_ANDROID
 
   a = QJniObject::callStaticMethod<float>("com.x/MyActivity", "getSteps",
                                           "()F");
 
 #endif
+  return a;
+}
 
-  tc = a;
+void Steps::initTodayInitSteps() {
+  qlonglong a = getAndroidSteps();
 
   QSettings Reg(iniDir + "initsteps.ini", QSettings::IniFormat);
+  QString date = Reg.value("Date", "").toString();
+  QString c_date = getCurrentDate();
 
-  QString str;
-  str = getCurrentDate();
-
-  if (!Reg.allKeys().contains(str)) {
-    Reg.setValue(str, a);
+  if (date != c_date) {
+    Reg.setValue("Date", c_date);
+    Reg.setValue("InitValue", a);
     initTodaySteps = a;
   } else {
-    b = Reg.value(str).toLongLong();
-    if (a < b) {
-      initTodaySteps = 0 - Reg.value("TodaySteps", 0).toLongLong();
-      Reg.setValue(str, initTodaySteps);
-    } else
-      initTodaySteps = b;
+    initTodaySteps = Reg.value("InitValue", 0).toLongLong();
   }
 }
 
@@ -1385,9 +1370,7 @@ void Steps::initHardStepSensor() {
   }
   if (isHardStepSensor == 1) {
     mw_one->ui->lblSteps->hide();
-
-    initTodayInitSteps();
-    resetSteps = tc;
+    resetSteps = getAndroidSteps();
   }
 #endif
 }
