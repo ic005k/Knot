@@ -1371,6 +1371,7 @@ void Steps::initHardStepSensor() {
   if (isHardStepSensor == 1) {
     mw_one->ui->lblSteps->hide();
     resetSteps = getAndroidSteps();
+    initTodayInitSteps();
   }
 #endif
 }
