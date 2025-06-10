@@ -118,7 +118,7 @@ class Steps : public QDialog {
   QString getCurrentDate();
   void updateHardSensorSteps();
   void initTodayInitSteps();
-  void initHardStepSensor();
+  void getHardStepSensor();
   void openStepsUI();
  public slots:
   void clearAllGpsList();

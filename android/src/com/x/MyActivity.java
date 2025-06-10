@@ -177,10 +177,9 @@ public class MyActivity
   public static boolean isDark = false;
   public static MyActivity m_instance = null;
   private static SensorManager mSensorManager;
-  public static int isStepCounter = -1;
-  public static float stepCounts;
+
   private static WakeLock mWakeLock = null;
-  private static PersistService mySerivece;
+
   private static final int DELAY = SensorManager.SENSOR_DELAY_NORMAL;
 
   private static AlarmManager alarmManager;
@@ -420,30 +419,6 @@ public class MyActivity
 
   // ----------------------------------------------------------------------
 
-  private Sensor countSensor;
-
-  public void initStepSensor() {
-    if (countSensor != null) {
-      if (mSensorManager != null) {
-        mSensorManager.unregisterListener(mySerivece);
-        mSensorManager.registerListener(
-            mySerivece,
-            mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER),
-            SensorManager.SENSOR_DELAY_NORMAL);
-      }
-      isStepCounter = 1;
-    } else
-      isStepCounter = 0;
-  }
-
-  public static int getHardStepCounter() {
-    return isStepCounter;
-  }
-
-  public static float getSteps() {
-    return stepCounts;
-  }
-
   private void registAlarmReceiver() {
     // 动态注册 AlarmReceiver
     mAlarmReceiver = new AlarmReceiver();
@@ -471,49 +446,15 @@ public class MyActivity
     @Override
     public void onReceive(Context context, Intent intent) {
       if (SCREEN_ON.equals(intent.getAction())) {
-        if (isStepCounter == 1) {
-        }
+
         isScreenOff = false;
         CallJavaNotify_2();
         Log.w("Knot", "屏幕亮了");
       } else if (SCREEN_OFF.equals(intent.getAction())) {
-        if (isStepCounter == 1) {
-          if (mySerivece != null) {
-            mSensorManager.unregisterListener(mySerivece);
-          }
-        }
+
         isScreenOff = true;
         Log.w("Knot", "屏幕熄了");
       }
-    }
-  }
-
-  // ----------------------------------------------------------------------
-  public void acquireWakeLock() {
-    mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-    mySerivece = new PersistService();
-    PowerManager manager = (PowerManager) getSystemService(
-        Context.POWER_SERVICE);
-    mWakeLock = manager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG); // CPU保存运行
-    IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON); // 屏幕熄掉后依然运行
-    filter.addAction(Intent.ACTION_SCREEN_OFF);
-    registerReceiver(mySerivece.mReceiver, filter);
-
-    mWakeLock.acquire(); // 屏幕熄后，CPU继续运行
-    mSensorManager.registerListener(
-        mySerivece,
-        mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-        DELAY);
-
-    Log.i(TAG, "call acquireWakeLock");
-  }
-
-  public static void releaseWakeLock() {
-    if (mWakeLock != null && mWakeLock.isHeld()) {
-      mSensorManager.unregisterListener(mySerivece);
-      mWakeLock.release();
-      mWakeLock = null;
-      Log.i(TAG, "call releaseWakeLock");
     }
   }
 
@@ -654,11 +595,6 @@ public class MyActivity
     Log.d(TAG, "Android activity created");
 
     isZh(m_instance);
-
-    mySerivece = new PersistService();
-    mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-    countSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-    initStepSensor();
 
     registSreenStatusReceiver();
     // registAlarmReceiver();
@@ -1036,8 +972,6 @@ public class MyActivity
   protected void onDestroy() {
     Log.i(TAG, "Main onDestroy...");
 
-    releaseWakeLock();
-
     if (ReOpen) {
       openAppFromPackageName("com.x");
       Log.i(TAG, "reopen = done...");
@@ -1091,41 +1025,6 @@ public class MyActivity
 
   @Override
   public void onActivityDestroyed(Activity activity) {
-  }
-
-  // ---------------------------------------------------------------------------
-  class PersistService extends Service implements SensorEventListener {
-    public BroadcastReceiver mReceiver = new BroadcastReceiver() {
-
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        if (mSensorManager != null) { // 取消监听后重写监听，以保持后台运行
-          mSensorManager.unregisterListener(PersistService.this);
-          mSensorManager.registerListener(PersistService.this,
-              mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER), SensorManager.SENSOR_DELAY_NORMAL);
-        }
-      }
-    };
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-      Log.i(TAG, "PersistService.onAccuracyChanged().");
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-      // 做个判断传感器类型很重要，这可以过滤掉杂音（比如可能来自其它传感器的值）
-      if (sensorEvent.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
-        // float[] values = sensorEvent.values;
-        stepCounts = (long) sensorEvent.values[0];
-      }
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-      // Auto-generated method stub
-      return null;
-    }
   }
 
   // ----------------------------------------------------------------------------------------------

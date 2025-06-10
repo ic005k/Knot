@@ -46,6 +46,8 @@ public class MyService extends Service {
     private static final String ID = "channel_1";
     private static final String NAME = "F_SERVICE";
 
+    private static PersistService mySensorSerivece;
+
     public native static void CallJavaNotify_0();
 
     public native static void CallJavaNotify_1();
@@ -127,6 +129,12 @@ public class MyService extends Service {
         super.onCreate();
         Log.i(TAG, "Service on create");// 服务被创建
 
+        // 计步器
+        mySensorSerivece = new PersistService();
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        countSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        initStepSensor();
+
     }
 
     // 服务在每次启动的时候调用的方法 如果某些行为在服务已启动的时候就执行，可以把处理逻辑写在这个方法里面
@@ -162,6 +170,12 @@ public class MyService extends Service {
         Log.d("MyService", "onDestroy()-------");
 
         super.onDestroy();
+
+        if (isStepCounter == 1) {
+            if (mySensorSerivece != null) {
+                mSensorManager.unregisterListener(mySensorSerivece);
+            }
+        }
 
     }
 
@@ -319,4 +333,71 @@ public class MyService extends Service {
             System.out.println("MyService Clear Notiry...");
         }
     }
+
+    /////////////////////// Steps Sensor /////////////////////////////////////
+
+    class PersistService extends Service implements SensorEventListener {
+        public BroadcastReceiver mReceiver = new BroadcastReceiver() {
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (mSensorManager != null) { // 取消监听后重写监听，以保持后台运行
+                    mSensorManager.unregisterListener(PersistService.this);
+                    mSensorManager.registerListener(PersistService.this,
+                            mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER),
+                            SensorManager.SENSOR_DELAY_NORMAL);
+                }
+            }
+        };
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            Log.i(TAG, "PersistService.onAccuracyChanged().");
+        }
+
+        @Override
+        public void onSensorChanged(SensorEvent sensorEvent) {
+            // 做个判断传感器类型很重要，这可以过滤掉杂音（比如可能来自其它传感器的值）
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
+                // float[] values = sensorEvent.values;
+                stepCounts = (long) sensorEvent.values[0];
+            }
+        }
+
+        @Override
+        public IBinder onBind(Intent intent) {
+            // Auto-generated method stub
+            return null;
+        }
+    }
+
+    private Sensor countSensor;
+    public static int isStepCounter = -1;
+    public static float stepCounts;
+    private static SensorManager mSensorManager;
+
+    public void initStepSensor() {
+        if (countSensor != null) {
+            if (mSensorManager != null) {
+                mSensorManager.unregisterListener(mySensorSerivece);
+                mSensorManager.registerListener(
+                        mySensorSerivece,
+                        mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER),
+                        SensorManager.SENSOR_DELAY_NORMAL);
+            }
+            isStepCounter = 1;
+        } else
+            isStepCounter = 0;
+    }
+
+    public static int getHardStepCounter() {
+        return isStepCounter;
+    }
+
+    public static float getSteps() {
+        return stepCounts;
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////
+
 }

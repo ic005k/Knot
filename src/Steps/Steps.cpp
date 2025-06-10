@@ -76,7 +76,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   QString gpspath = iniDir + "/memo/gps/";
   if (!gpsdir.exists(gpspath)) gpsdir.mkpath(gpspath);
 
-  initHardStepSensor();
+  getHardStepSensor();
 }
 
 Steps::~Steps() {}
@@ -1330,8 +1330,7 @@ qlonglong Steps::getAndroidSteps() {
   qlonglong a = 0;
 #ifdef Q_OS_ANDROID
 
-  a = QJniObject::callStaticMethod<float>("com.x/MyActivity", "getSteps",
-                                          "()F");
+  a = QJniObject::callStaticMethod<float>("com.x/MyService", "getSteps", "()F");
 
 #endif
   return a;
@@ -1353,14 +1352,14 @@ void Steps::initTodayInitSteps() {
   }
 }
 
-void Steps::initHardStepSensor() {
+void Steps::getHardStepSensor() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callMethod<void>("initStepSensor", "()V");
+  // QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
+  // m_activity.callMethod<void>("initStepSensor", "()V");
 
   isHardStepSensor = QJniObject::callStaticMethod<int>(
-      "com.x/MyActivity", "getHardStepCounter", "()I");
+      "com.x/MyService", "getHardStepCounter", "()I");
 
   if (isHardStepSensor == 0) {
     mw_one->ui->btnStepsOptions->setHidden(true);
