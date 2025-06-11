@@ -82,7 +82,6 @@
 #include "src/Reader/ReaderSet.h"
 #include "src/Reader/SetReaderText.h"
 #include "src/Report.h"
-#include "src/Steps/SpecialAccelerometerPedometer.h"
 #include "src/Steps/Steps.h"
 #include "src/Steps/StepsOptions.h"
 #include "src/SyncInfo.h"

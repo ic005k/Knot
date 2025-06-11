@@ -105,7 +105,7 @@ void Steps::on_btnBack_clicked() {
 void Steps::on_btnReset_clicked() {
   CurrentSteps = 0;
   mw_one->ui->lblSingle->setText("0");
-  toDayInitSteps = getCurrentSteps();
+
   if (isHardStepSensor == 1) resetSteps = getAndroidSteps();
 
   QString date = QString::number(QDate::currentDate().month()) + "-" +
@@ -132,7 +132,7 @@ void Steps::saveSteps() {
   }
 }
 
-void Steps::init_Steps() {
+void Steps::loadStepsToTable() {
   clearAll();
 
   QString ini_file;
@@ -170,14 +170,6 @@ void Steps::init_Steps() {
     if (str0 != "" && steps >= 0 && !str2.isNull())
       addRecord(str0, steps, str2);
   }
-
-  for (int i = start; i < count; i++) {
-    QString date = getDate(i);
-    if (getCurrentDate() == date) {
-      toDayInitSteps = getSteps(i);
-      break;
-    }
-  }
 }
 
 void Steps::openStepsUI() {
@@ -186,7 +178,8 @@ void Steps::openStepsUI() {
 
   updateHardSensorSteps();
 
-  init_Steps();
+  loadStepsToTable();
+
   m_Method->setCurrentIndexFromQW(mw_one->ui->qwSteps, getCount() - 1);
   m_Method->setScrollBarPos(mw_one->ui->qwSteps, 1.0);
 
@@ -234,18 +227,30 @@ QString Steps::getCurrentDate() {
   return c_date;
 }
 
+QString Steps::getFullDate() {
+  QString date;
+  if (zh_cn) {
+    QLocale chineseLocale(QLocale::Chinese, QLocale::China);
+    date = chineseLocale.toString(QDate::currentDate(), "yyyy-M-d ddd");
+  } else
+    date = QDate::currentDate().toString("yyyy-M-d ddd");
+
+  return date;
+}
+
 void Steps::setTableSteps(qlonglong steps) {
   QSettings Reg(iniDir + "steps.ini", QSettings::IniFormat);
 
   int count = Reg.value("/Steps/Count", 0).toInt();
-
+  QString date, c_date, full_date;
+  full_date = getFullDate();
+  c_date = getCurrentDate();
   if (count > 0) {
-    QString date;
-
     date = Reg.value("/Steps/Table-" + QString::number(count - 1) + "-0", "")
                .toString();
+    QString mdate = date.split(" ").at(0).trimmed();
 
-    if (date == getCurrentDate()) {
+    if (mdate == c_date) {
       double km = mw_one->m_StepsOptions->ui->editStepLength->text()
                       .trimmed()
                       .toDouble() *
@@ -259,7 +264,7 @@ void Steps::setTableSteps(qlonglong steps) {
     } else {
       count = count + 1;
       Reg.setValue("/Steps/Table-" + QString::number(count - 1) + "-0",
-                   getCurrentDate());
+                   full_date);
       Reg.setValue("/Steps/Table-" + QString::number(count - 1) + "-1", 0);
       Reg.setValue("/Steps/Table-" + QString::number(count - 1) + "-2", "0");
 
@@ -268,7 +273,7 @@ void Steps::setTableSteps(qlonglong steps) {
   } else {  // count==0
     count = count + 1;
     Reg.setValue("/Steps/Table-" + QString::number(count - 1) + "-0",
-                 getCurrentDate());
+                 full_date);
     Reg.setValue("/Steps/Table-" + QString::number(count - 1) + "-1", 0);
     Reg.setValue("/Steps/Table-" + QString::number(count - 1) + "-2", "0");
 
@@ -1303,6 +1308,7 @@ void Steps::updateHardSensorSteps() {
   CurrentSteps = ts - resetSteps;
   mw_one->ui->lcdNumber->display(QString::number(steps));
   mw_one->ui->lblSingle->setText(QString::number(CurrentSteps));
+
   setTableSteps(steps);
 
   sendMsg(steps);

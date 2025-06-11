@@ -372,7 +372,6 @@ SOURCES += \
     src/Reader/ReaderSet.cpp \
     src/Reader/SetReaderText.cpp \
     src/Report.cpp \
-    src/Steps/SpecialAccelerometerPedometer.cpp \
     src/Steps/Steps.cpp \
     src/Steps/StepsOptions.cpp \
     src/SyncInfo.cpp \
@@ -606,7 +605,6 @@ HEADERS += \
     src/Reader/ReaderSet.h \
     src/Reader/SetReaderText.h \
     src/Report.h \
-    src/Steps/SpecialAccelerometerPedometer.h \
     src/Steps/Steps.h \
     src/Steps/StepsOptions.h \
     src/SyncInfo.h \

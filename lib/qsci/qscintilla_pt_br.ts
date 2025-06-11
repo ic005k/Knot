@@ -1668,12 +1668,12 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.h" line="169"/>
+        <location filename="../../src/MainWindow.h" line="168"/>
         <source>None</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.h" line="195"/>
+        <location filename="../../src/MainWindow.h" line="194"/>
         <source>Latest Time</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7117,7 +7117,7 @@ in skydrive folder</source>
 <context>
     <name>SliderButton</name>
     <message>
-        <location filename="../../src/MainWindow.h" line="1017"/>
+        <location filename="../../src/MainWindow.h" line="1016"/>
         <source>Slide Right to Start.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7127,7 +7127,7 @@ in skydrive folder</source>
     <message>
         <location filename="../../src/Steps/Steps.cpp" line="115"/>
         <location filename="../../src/Steps/Steps.cpp" line="199"/>
-        <location filename="../../src/Steps/Steps.cpp" line="324"/>
+        <location filename="../../src/Steps/Steps.cpp" line="325"/>
         <source>KM</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7137,83 +7137,118 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Steps/Steps.cpp" line="319"/>
+        <location filename="../../src/Steps/Steps.cpp" line="246"/>
+        <source>Mon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Steps/Steps.cpp" line="246"/>
+        <source>Tue</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Steps/Steps.cpp" line="246"/>
+        <source>Wed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Steps/Steps.cpp" line="247"/>
+        <source>Thu</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Steps/Steps.cpp" line="247"/>
+        <source>Fri</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Steps/Steps.cpp" line="247"/>
+        <source>Sat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Steps/Steps.cpp" line="247"/>
+        <source>Sun</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Steps/Steps.cpp" line="320"/>
         <source>Calorie</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Steps/Steps.cpp" line="403"/>
+        <location filename="../../src/Steps/Steps.cpp" line="404"/>
         <source>No GPS signal...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Steps/Steps.cpp" line="404"/>
-        <location filename="../../src/Steps/Steps.cpp" line="418"/>
-        <location filename="../../src/Steps/Steps.cpp" line="432"/>
+        <location filename="../../src/Steps/Steps.cpp" line="405"/>
+        <location filename="../../src/Steps/Steps.cpp" line="419"/>
+        <location filename="../../src/Steps/Steps.cpp" line="433"/>
         <source>Start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Steps/Steps.cpp" line="472"/>
+        <location filename="../../src/Steps/Steps.cpp" line="473"/>
         <source>Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Steps/Steps.cpp" line="637"/>
+        <location filename="../../src/Steps/Steps.cpp" line="638"/>
         <source>Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Steps/Steps.cpp" line="690"/>
-        <location filename="../../src/Steps/Steps.cpp" line="753"/>
-        <location filename="../../src/Steps/Steps.cpp" line="993"/>
-        <location filename="../../src/Steps/Steps.cpp" line="1003"/>
+        <location filename="../../src/Steps/Steps.cpp" line="691"/>
+        <location filename="../../src/Steps/Steps.cpp" line="754"/>
+        <location filename="../../src/Steps/Steps.cpp" line="994"/>
+        <location filename="../../src/Steps/Steps.cpp" line="1004"/>
         <source>Cycling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Steps/Steps.cpp" line="691"/>
-        <location filename="../../src/Steps/Steps.cpp" line="758"/>
-        <location filename="../../src/Steps/Steps.cpp" line="995"/>
-        <location filename="../../src/Steps/Steps.cpp" line="1005"/>
+        <location filename="../../src/Steps/Steps.cpp" line="692"/>
+        <location filename="../../src/Steps/Steps.cpp" line="759"/>
+        <location filename="../../src/Steps/Steps.cpp" line="996"/>
+        <location filename="../../src/Steps/Steps.cpp" line="1006"/>
         <source>Hiking</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Steps/Steps.cpp" line="692"/>
-        <location filename="../../src/Steps/Steps.cpp" line="763"/>
-        <location filename="../../src/Steps/Steps.cpp" line="997"/>
-        <location filename="../../src/Steps/Steps.cpp" line="1007"/>
+        <location filename="../../src/Steps/Steps.cpp" line="693"/>
+        <location filename="../../src/Steps/Steps.cpp" line="764"/>
+        <location filename="../../src/Steps/Steps.cpp" line="998"/>
+        <location filename="../../src/Steps/Steps.cpp" line="1008"/>
         <source>Running</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Steps/Steps.cpp" line="695"/>
+        <location filename="../../src/Steps/Steps.cpp" line="696"/>
         <source>Time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Steps/Steps.cpp" line="696"/>
+        <location filename="../../src/Steps/Steps.cpp" line="697"/>
         <source>Distance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Steps/Steps.cpp" line="697"/>
+        <location filename="../../src/Steps/Steps.cpp" line="698"/>
         <source>Exercise Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Steps/Steps.cpp" line="698"/>
+        <location filename="../../src/Steps/Steps.cpp" line="699"/>
         <source>Average Speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Steps/Steps.cpp" line="991"/>
+        <location filename="../../src/Steps/Steps.cpp" line="992"/>
         <source>Month</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Steps/Steps.cpp" line="1001"/>
+        <location filename="../../src/Steps/Steps.cpp" line="1002"/>
         <source>Year</source>
         <translation type="unfinished"></translation>
     </message>

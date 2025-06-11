@@ -53,11 +53,10 @@ class Steps : public QDialog {
       "   background-color: #3d8b40;"  // 设置按钮按下时的背景颜色
       "}";
 
-  int toDayInitSteps = 0;
   double dleInter = 5;
   double dleSlope = 5;
   void saveSteps();
-  void init_Steps();
+  void loadStepsToTable();
   QString lblStyleLight = "background-color: rgb(25, 239, 21);color:black";
 
   void addRecord(QString, qlonglong, QString);
@@ -186,6 +185,8 @@ class Steps : public QDialog {
   void refreshMotionData();
   void sendMsg(int CurTableCount);
   qlonglong getAndroidSteps();
+
+  QString getFullDate();
  signals:
   void distanceChanged(double distance);
   void timeChanged();

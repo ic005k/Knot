@@ -2186,12 +2186,12 @@ in skydrive folder</source>
         <translation type="vanished">跳</translation>
     </message>
     <message>
-        <location filename="MainWindow.h" line="169"/>
+        <location filename="MainWindow.h" line="168"/>
         <source>None</source>
         <translation>无</translation>
     </message>
     <message>
-        <location filename="MainWindow.h" line="195"/>
+        <location filename="MainWindow.h" line="194"/>
         <source>Latest Time</source>
         <translation>最新的时间</translation>
     </message>
@@ -8037,7 +8037,7 @@ in skydrive folder</source>
 <context>
     <name>SliderButton</name>
     <message>
-        <location filename="MainWindow.h" line="1017"/>
+        <location filename="MainWindow.h" line="1016"/>
         <source>Slide Right to Start.</source>
         <translation>滑动到右边启动</translation>
     </message>
@@ -8049,9 +8049,9 @@ in skydrive folder</source>
         <translation type="vanished">暂停</translation>
     </message>
     <message>
-        <location filename="Steps/Steps.cpp" line="404"/>
-        <location filename="Steps/Steps.cpp" line="418"/>
-        <location filename="Steps/Steps.cpp" line="432"/>
+        <location filename="Steps/Steps.cpp" line="405"/>
+        <location filename="Steps/Steps.cpp" line="419"/>
+        <location filename="Steps/Steps.cpp" line="433"/>
         <source>Start</source>
         <translation>启动</translation>
     </message>
@@ -8060,57 +8060,57 @@ in skydrive folder</source>
         <translation type="vanished">步数</translation>
     </message>
     <message>
-        <location filename="Steps/Steps.cpp" line="319"/>
+        <location filename="Steps/Steps.cpp" line="320"/>
         <source>Calorie</source>
         <translation>卡路里</translation>
     </message>
     <message>
-        <location filename="Steps/Steps.cpp" line="403"/>
+        <location filename="Steps/Steps.cpp" line="404"/>
         <source>No GPS signal...</source>
         <oldsource>Search the GPS...</oldsource>
         <translation>没有GPS信号...</translation>
     </message>
     <message>
-        <location filename="Steps/Steps.cpp" line="690"/>
-        <location filename="Steps/Steps.cpp" line="753"/>
-        <location filename="Steps/Steps.cpp" line="993"/>
-        <location filename="Steps/Steps.cpp" line="1003"/>
+        <location filename="Steps/Steps.cpp" line="691"/>
+        <location filename="Steps/Steps.cpp" line="754"/>
+        <location filename="Steps/Steps.cpp" line="994"/>
+        <location filename="Steps/Steps.cpp" line="1004"/>
         <source>Cycling</source>
         <translation>骑行</translation>
     </message>
     <message>
-        <location filename="Steps/Steps.cpp" line="691"/>
-        <location filename="Steps/Steps.cpp" line="758"/>
-        <location filename="Steps/Steps.cpp" line="995"/>
-        <location filename="Steps/Steps.cpp" line="1005"/>
+        <location filename="Steps/Steps.cpp" line="692"/>
+        <location filename="Steps/Steps.cpp" line="759"/>
+        <location filename="Steps/Steps.cpp" line="996"/>
+        <location filename="Steps/Steps.cpp" line="1006"/>
         <source>Hiking</source>
         <translation>徒步</translation>
     </message>
     <message>
-        <location filename="Steps/Steps.cpp" line="692"/>
-        <location filename="Steps/Steps.cpp" line="763"/>
-        <location filename="Steps/Steps.cpp" line="997"/>
-        <location filename="Steps/Steps.cpp" line="1007"/>
+        <location filename="Steps/Steps.cpp" line="693"/>
+        <location filename="Steps/Steps.cpp" line="764"/>
+        <location filename="Steps/Steps.cpp" line="998"/>
+        <location filename="Steps/Steps.cpp" line="1008"/>
         <source>Running</source>
         <translation>跑步</translation>
     </message>
     <message>
-        <location filename="Steps/Steps.cpp" line="697"/>
+        <location filename="Steps/Steps.cpp" line="698"/>
         <source>Exercise Duration</source>
         <translation>运动时长</translation>
     </message>
     <message>
-        <location filename="Steps/Steps.cpp" line="698"/>
+        <location filename="Steps/Steps.cpp" line="699"/>
         <source>Average Speed</source>
         <translation>平均速度</translation>
     </message>
     <message>
-        <location filename="Steps/Steps.cpp" line="991"/>
+        <location filename="Steps/Steps.cpp" line="992"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
     <message>
-        <location filename="Steps/Steps.cpp" line="1001"/>
+        <location filename="Steps/Steps.cpp" line="1002"/>
         <source>Year</source>
         <translation>年</translation>
     </message>
@@ -8137,12 +8137,12 @@ in skydrive folder</source>
         <translation type="vanished">总距离</translation>
     </message>
     <message>
-        <location filename="Steps/Steps.cpp" line="696"/>
+        <location filename="Steps/Steps.cpp" line="697"/>
         <source>Distance</source>
         <translation>距离</translation>
     </message>
     <message>
-        <location filename="Steps/Steps.cpp" line="637"/>
+        <location filename="Steps/Steps.cpp" line="638"/>
         <source>Duration</source>
         <translation>持续时间</translation>
     </message>
@@ -8152,7 +8152,42 @@ in skydrive folder</source>
         <translation>GPS信息</translation>
     </message>
     <message>
-        <location filename="Steps/Steps.cpp" line="472"/>
+        <location filename="Steps/Steps.cpp" line="246"/>
+        <source>Mon</source>
+        <translation>周一</translation>
+    </message>
+    <message>
+        <location filename="Steps/Steps.cpp" line="246"/>
+        <source>Tue</source>
+        <translation>周二</translation>
+    </message>
+    <message>
+        <location filename="Steps/Steps.cpp" line="246"/>
+        <source>Wed</source>
+        <translation>周三</translation>
+    </message>
+    <message>
+        <location filename="Steps/Steps.cpp" line="247"/>
+        <source>Thu</source>
+        <translation>周四</translation>
+    </message>
+    <message>
+        <location filename="Steps/Steps.cpp" line="247"/>
+        <source>Fri</source>
+        <translation>周五</translation>
+    </message>
+    <message>
+        <location filename="Steps/Steps.cpp" line="247"/>
+        <source>Sat</source>
+        <translation>周六</translation>
+    </message>
+    <message>
+        <location filename="Steps/Steps.cpp" line="247"/>
+        <source>Sun</source>
+        <translation>周日</translation>
+    </message>
+    <message>
+        <location filename="Steps/Steps.cpp" line="473"/>
         <source>Stop</source>
         <translation>停止</translation>
     </message>
@@ -8161,14 +8196,14 @@ in skydrive folder</source>
         <translation type="vanished">速度</translation>
     </message>
     <message>
-        <location filename="Steps/Steps.cpp" line="695"/>
+        <location filename="Steps/Steps.cpp" line="696"/>
         <source>Time</source>
         <translation>时间</translation>
     </message>
     <message>
         <location filename="Steps/Steps.cpp" line="115"/>
         <location filename="Steps/Steps.cpp" line="199"/>
-        <location filename="Steps/Steps.cpp" line="324"/>
+        <location filename="Steps/Steps.cpp" line="325"/>
         <source>KM</source>
         <translation>公里</translation>
     </message>
