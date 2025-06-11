@@ -66,9 +66,6 @@ class Steps : public QDialog {
 
   void setTableSteps(qlonglong steps);
 
-  void releaseWakeLock();
-  void acquireWakeLock();
-
   void setMaxMark();
 
   void appendSteps(QString date, int steps, QString km);

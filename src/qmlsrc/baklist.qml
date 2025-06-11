@@ -149,7 +149,7 @@ Rectangle {
         Rectangle {
             id: listItem
             width: ListView.view.width
-            height: getItemHeight() + 16
+            height: listCol.implicitHeight + 0
 
             color: ListView.isCurrentItem ? "lightblue" : getColor()
             border.width: isDark ? 0 : 1
@@ -157,45 +157,16 @@ Rectangle {
 
             radius: 0
 
-            function getItemHeight() {
-                var item0H
-                var item1H
-                var item2H
-                var item3H
-
-                if (item0.text.length === 0)
-                    item0H = 0
-                else
-                    item0H = item0.contentHeight
-
-                if (item1.text.length === 0)
-                    item1H = 0
-                else
-                    item1H = item1.contentHeight
-
-                if (item2.text.length === 0)
-                    item2H = 0
-                else
-                    item2H = item2.contentHeight
-
-                if (item3.text.length === 0)
-                    item3H = 0
-                else
-                    item3H = item3.contentHeight
-
-                return item0H + item1H + item2H + item3H
-            }
-
             RowLayout {
 
                 id: idlistElemnet
-                height: parent.height
+
                 width: parent.width
                 spacing: 2
                 Layout.fillWidth: true
 
                 ColumnLayout {
-                    id: idlistElemnet4
+                    id: listCol
                     height: parent.height
                     width: parent.width
                     spacing: 2
@@ -312,6 +283,8 @@ Rectangle {
             margins: 4
         }
 
+        boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
+
         model: ListModel {
             id: listmain
 
@@ -364,21 +337,6 @@ Rectangle {
                 radius: 3
             }
             background: null // 彻底消除背景容器
-        }
-    }
-
-    function getListEleHeadColor(ntype) {
-        switch (ntype) {
-        case 0:
-            return "lightgray"
-        case 1:
-            return "red"
-        case 2:
-            return "yellow"
-        case 3:
-            return "lightblue"
-        default:
-            return "black"
         }
     }
 }

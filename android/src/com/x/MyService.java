@@ -2,6 +2,7 @@ package com.x;
 
 import com.x.MyActivity;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -19,17 +20,18 @@ import android.os.Looper;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.graphics.BitmapFactory;
-
+import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.graphics.Color;
 import android.app.NotificationChannel;
-
+import android.net.Uri;
 import androidx.core.app.NotificationCompat;
-
+import android.provider.Settings;
 import android.annotation.TargetApi;
 
 import java.sql.Time;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
@@ -85,6 +87,7 @@ public class MyService extends Service {
     public static String strPedometer;
     public static String strTodo;
     public static boolean zh_cn;
+    public static Context context;
 
     public static boolean isZh(Context context) {
         Locale locale = context.getResources().getConfiguration().locale;
@@ -129,11 +132,23 @@ public class MyService extends Service {
         super.onCreate();
         Log.i(TAG, "Service on create");// 服务被创建
 
+        context = MyActivity.context;
+
         // 计步器
         mySensorSerivece = new PersistService();
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         countSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         initStepSensor();
+
+        // 定时闹钟
+        // 检查并请求权限
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !hasExactAlarmPermission(context)) {
+            // 引导用户到设置页面授予权限
+            requestExactAlarmPermission((Activity) context);
+            return;
+        }
+
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
     }
 
@@ -398,6 +413,107 @@ public class MyService extends Service {
         return stepCounts;
     }
 
-    //////////////////////////////////////////////////////////////////////////////////
+    ////////////////// Todo Alarm ////// ////////////////////////////////
+
+    public static final String ACTION_TODO_ALARM = "com.x.Knot.TODO_ALARM";
+    private static AlarmManager alarmManager;
+    // private static PendingIntent pi;
+    private static PendingIntent pendingIntentAlarm;
+
+    public static int startAlarm(String str) {
+        // 特殊转义字符，必须加"\\"（“.”和“|”都是转义字符）
+        String[] array = str.split("\\|");
+        for (int i = 0; i < array.length; i++)
+            System.out.println(array[i]);
+
+        String strTime = array[0];
+        String strText = array[1];
+        String strTotalS = array[2];
+
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(System.currentTimeMillis());
+
+        int ts = Integer.parseInt(strTotalS);
+        c.add(Calendar.SECOND, ts);
+
+        // 使用应用上下文，避免Activity引用导致的内存泄漏
+        Context appContext = context.getApplicationContext();
+
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            flags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+
+        // Intent intent = new Intent(appContext, ClockActivity.class);
+        // pi = PendingIntent.getActivity(
+        // appContext,
+        // 0,
+        // intent,
+        // flags);
+
+        // 创建定时触发的 BroadcastReceiver Intent
+        Intent receiverIntent = new Intent(appContext, AlarmReceiver.class);
+        receiverIntent.setAction(ACTION_TODO_ALARM); // 显式设置 Action
+        receiverIntent.putExtra("alarmMessage", strText);
+
+        // 唯一请求码（不考虑 PendingIntent 复用，业务逻辑：新定时覆盖旧定时）
+        int requestCode = 0;
+
+        pendingIntentAlarm = PendingIntent.getBroadcast(
+                appContext,
+                requestCode,
+                receiverIntent,
+                flags);
+
+        // 设置闹钟
+        alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                c.getTimeInMillis(),
+                pendingIntentAlarm);
+
+        Log.e("Alarm Manager", c.getTimeInMillis() + "");
+        Log.e("Alarm Manager", str);
+
+        System.out.println(ts);
+        System.out.println("startAlarm+++++++++++++++++++++++");
+
+        return 1;
+    }
+
+    public static int stopAlarm() {
+        if (alarmManager != null) {
+            if (pendingIntentAlarm != null) {
+                alarmManager.cancel(pendingIntentAlarm);
+            }
+
+            System.out.println("stopAlarm+++++++++++++++++++++++");
+        }
+
+        return 1;
+    }
+
+    // 检查是否有设置精确闹钟的权限
+    private boolean hasExactAlarmPermission(Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return true; // API 31 以下不需要此权限
+        }
+
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        return alarmManager.canScheduleExactAlarms();
+    }
+
+    // 请求精确闹钟权限
+    private void requestExactAlarmPermission(Activity activity) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return; // API 31 以下不需要此权限
+        }
+
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+        intent.setData(Uri.parse("package:" + activity.getPackageName()));
+        activity.startActivityForResult(intent, 1001); // 1001 是请求码，可自定义
+    }
+
+    //////////////////////////////////////////////////////////////////////
 
 }

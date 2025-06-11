@@ -276,24 +276,6 @@ void Steps::setTableSteps(qlonglong steps) {
   }
 }
 
-void Steps::releaseWakeLock() {
-#ifdef Q_OS_ANDROID
-
-  QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  activity.callStaticMethod<void>("com.x/MyActivity", "releaseWakeLock", "()V");
-
-#endif
-}
-
-void Steps::acquireWakeLock() {
-#ifdef Q_OS_ANDROID
-
-  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callMethod<void>("acquireWakeLock", "()V");
-
-#endif
-}
-
 void Steps::setMaxMark() {
   if (getCount() > 1) {
     QList<int> list;
