@@ -184,6 +184,7 @@ Rectangle {
                         verticalAlignment: Text.AlignVCenter
                         wrapMode: TextArea.WordWrap
                         font.bold: true
+                        font.italic: false
                         text: text0
 
                         color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
@@ -203,6 +204,7 @@ Rectangle {
                         wrapMode: TextArea.WordWrap
                         color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
                         font.bold: false
+                        font.italic: false
                         text: text1
 
                         leftPadding: 5
@@ -221,6 +223,7 @@ Rectangle {
                         width: parent.width
                         wrapMode: TextArea.WordWrap
                         font.bold: false
+                        font.italic: false
                         text: text2
 
                         color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
@@ -236,9 +239,9 @@ Rectangle {
                         width: parent.width
                         wrapMode: Text.WrapAnywhere
                         elide: Text.ElideRight
-                        //Layout.maximumWidth: listItem.width
                         Layout.preferredWidth: listItem.width
                         font.bold: false
+                        font.italic: true
                         text: text3
 
                         color: listItem.ListView.isCurrentItem ? "black" : getFontColor()

@@ -160,10 +160,6 @@ Rectangle {
 
     function setScrollBarPos(pos) {
         view.ScrollBar.vertical.position = 1.0 - view.ScrollBar.vertical.size
-
-        //if (view.contentHeight > view.height)
-        //    view.contentY = view.contentHeight - view.height
-        //console.log("contentH=" + view.contentHeight + "  h=" + view.height)
     }
 
     Component {
@@ -174,11 +170,10 @@ Rectangle {
             width: ListView.view.width
             height: colLayout.implicitHeight + 0
 
-            //color: ListView.isCurrentItem ? "lightblue" : (getText1(index) >= nStepsThreshold ? "#FFC1C1" : getColor())
             color: getText1(index) >= nStepsThreshold ? "#FFC1C1" : getColor()
 
             border.width: isDark ? 0 : 1
-            border.color: "lightgray" //"lightsteelblue"
+            border.color: "lightgray"
 
             radius: 0
 
@@ -222,16 +217,15 @@ Rectangle {
 
                         Text {
                             id: item0
-
                             width: parent.width
                             Layout.preferredWidth: listItem.width
                             Layout.alignment: Qt.AlignHCenter
-                            horizontalAlignment: Text.AlignLeft
+                            horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
                             wrapMode: TextArea.WordWrap
                             font.bold: true
                             text: text0
-                            //color: listItem.ListView.isCurrentItem ? "black" : (getText1(index) >= nStepsThreshold ? "black" : getFontColor())
+
                             color: getText1(
                                        index) >= nStepsThreshold ? "black" : getFontColor()
 
@@ -318,7 +312,7 @@ Rectangle {
                             wrapMode: TextArea.WordWrap
                             font.bold: false
                             text: text2
-                            // color: listItem.ListView.isCurrentItem ? "black" : (getText1(index) >= nStepsThreshold ? "black" : getFontColor())
+
                             color: getText1(
                                        index) >= nStepsThreshold ? "black" : getFontColor()
                             leftPadding: 5
@@ -360,7 +354,7 @@ Rectangle {
                             Layout.preferredWidth: listItem.width
                             font.bold: false
                             text: text3
-                            // color: listItem.ListView.isCurrentItem ? "black" : (getText1(index) >= nStepsThreshold ? "black" : getFontColor())
+
                             color: getText1(
                                        index) >= nStepsThreshold ? "black" : getFontColor()
                             leftPadding: 5
@@ -396,8 +390,6 @@ Rectangle {
             id: listmain
 
             // debug
-
-
             /*ListElement {
                 text0: '<span style="background-color: #ff6600;">Hello</span>'
                 text1: "123456  <b>Hello</b> <i>World!</i>  123456"

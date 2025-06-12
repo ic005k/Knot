@@ -709,6 +709,7 @@ DISTFILES += \
     src/onedrive/web.qml \
     src/qmlsrc/MainModel.qml \
     src/qmlsrc/SearchResults.qml \
+    src/qmlsrc/Speedometer.qml \
     src/qmlsrc/TodoModel.qml \
     src/qmlsrc/TreeItem.js \
     src/qmlsrc/TreeWidget.qml \

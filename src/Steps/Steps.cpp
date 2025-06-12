@@ -68,6 +68,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mw_one->ui->lblYearTotal->setStyleSheet(
       mw_one->ui->lblMonthTotal->styleSheet());
   mw_one->ui->btnGetGpsListData->hide();
+  mw_one->ui->qwSpeed->setFixedHeight(90);
 
   timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, &Steps::updateGetGps);
@@ -527,6 +528,9 @@ void Steps::updateGetGps() {
       mw_one->ui->lblCurrentDistance->setText(str1);
       mw_one->ui->lblRunTime->setText(str2);
       mw_one->ui->lblAverageSpeed->setText(str3);
+
+      setCurrentGpsSpeed(mySpeed);
+
       str4 = list.at(3);
       str5 = list.at(4);
       str6 = list.at(5);
@@ -1381,4 +1385,11 @@ void Steps::sendMsg(int CurTableCount) {
       javaNotification.object<jstring>());
 
 #endif
+}
+
+void Steps::setCurrentGpsSpeed(double speed) {
+  QObject* rootObject = mw_one->ui->qwSpeed->rootObject();
+  if (rootObject) {
+    rootObject->setProperty("currentSpeed", speed);
+  }
 }

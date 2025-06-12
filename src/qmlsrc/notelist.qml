@@ -166,7 +166,7 @@ Rectangle {
             color: ListView.isCurrentItem ? "lightblue" : getColor()
 
             border.width: isDark ? 0 : 1
-            border.color: "lightgray" //"lightsteelblue"
+            border.color: "lightgray"
 
             radius: 2
 
@@ -184,7 +184,7 @@ Rectangle {
                     radius: 2
                     anchors.leftMargin: 1
                     color: "red"
-                    visible: false // item2.text.length ? true : false
+                    visible: false
                     Text {
                         anchors.centerIn: parent
                     }
@@ -228,6 +228,7 @@ Rectangle {
                         wrapMode: TextArea.WordWrap
                         color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
                         font.bold: false
+                        font.italic: true
                         font.pointSize: noteTimeFontSize
                         text: text1
 
@@ -253,7 +254,7 @@ Rectangle {
                         leftPadding: 5
                         rightPadding: 5
 
-                        visible: false // item2.text.length ? true : false
+                        visible: false
                     }
 
                     Text {
@@ -262,7 +263,6 @@ Rectangle {
                         width: parent.width
                         wrapMode: Text.WordWrap
                         elide: Text.ElideRight
-                        //Layout.maximumWidth: listItem.width
                         Layout.preferredWidth: listItem.width
                         font.bold: false
                         font.pointSize: 12
@@ -272,7 +272,7 @@ Rectangle {
                         leftPadding: 5
                         rightPadding: 5
 
-                        visible: false // item3.text.length ? true : false
+                        visible: false
                     }
                 }
             }
@@ -288,8 +288,6 @@ Rectangle {
                 onReleased: function (mouse) {
                     var delta = Qt.point(mouse.x - clickPos.x,
                                          mouse.y - clickPos.y)
-
-                    //console.debug("delta.x: " + delta.x)
                 }
 
                 onClicked: {
@@ -306,15 +304,11 @@ Rectangle {
 
                 onPressAndHold: {
 
-                    //m_Method.showNotsListMenu(mouse.x, mouse.y)
                 }
 
                 onDoubleClicked: {
 
                     mw_one.on_btnOpenNote_clicked()
-                    //mw_one.reeditData()
-                    //var data = view.model.get(view.currentIndex)
-                    //console.log(data.text0 + "," + data.type + ", count=" + view.count)
                 }
             }
         }

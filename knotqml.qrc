@@ -31,5 +31,6 @@
         <file>src/qmlsrc/gps_list.qml</file>
         <file>src/qmlsrc/map.qml</file>
         <file>src/qmlsrc/SearchResults.qml</file>
+        <file>src/qmlsrc/Speedometer.qml</file>
     </qresource>
 </RCC>

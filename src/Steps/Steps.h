@@ -116,7 +116,8 @@ class Steps : public QDialog {
   void initTodayInitSteps();
   void getHardStepSensor();
   void openStepsUI();
- public slots:
+  void setCurrentGpsSpeed(double speed);
+  public slots:
   void clearAllGpsList();
   void getGpsTrack();
  private slots:

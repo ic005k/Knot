@@ -168,7 +168,7 @@ Rectangle {
             color: ListView.isCurrentItem ? "lightblue" : getColor()
 
             border.width: isDark ? 0 : 1
-            border.color: "lightgray" //"lightsteelblue"
+            border.color: "lightgray"
 
             radius: 0
 
@@ -280,6 +280,7 @@ Rectangle {
                         wrapMode: TextArea.WrapAnywhere
                         color: listItem.ListView.isCurrentItem ? "#4F4F4F" : getFontColorGray()
                         font.bold: false
+                        font.italic: true
                         font.pointSize: fontSize * 0.85
                         text: text1
 
@@ -313,7 +314,6 @@ Rectangle {
                         width: parent.width
                         wrapMode: Text.WordWrap
                         elide: Text.ElideRight
-                        //Layout.maximumWidth: listItem.width
                         Layout.preferredWidth: listItem.width
                         font.bold: false
                         text: text3
@@ -322,7 +322,7 @@ Rectangle {
                         leftPadding: 5
                         rightPadding: 5
 
-                        visible: false // item3.text.length ? true : false
+                        visible: false
                     }
                 }
             }
@@ -374,7 +374,6 @@ Rectangle {
             id: listmain
 
             // debug
-
 
             /*ListElement {
                 text0: '<span style="background-color: #ff6600;">Hello</span>'

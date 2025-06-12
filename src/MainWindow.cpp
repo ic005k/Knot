@@ -3095,7 +3095,8 @@ void MainWindow::initQW() {
   ui->qw_Img->rootContext()->setContextProperty("myH", this->height());
 
   ui->qwTodo->rootContext()->setContextProperty("maxFontSize", f_size);
-  ui->qwTodo->rootContext()->setContextProperty("isBtnVisible", false);
+  ui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
+                                                QVariant(false));
   ui->qwTodo->rootContext()->setContextProperty("m_Todo", m_Todo);
   ui->qwTodo->rootContext()->setContextProperty("FontSize", fontSize);
   ui->qwTodo->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/todo.qml")));
@@ -3111,6 +3112,10 @@ void MainWindow::initQW() {
   ui->qwSteps->rootContext()->setContextProperty("text1", "");
   ui->qwSteps->rootContext()->setContextProperty("text2", "");
   ui->qwSteps->rootContext()->setContextProperty("text3", "");
+
+  ui->qwSpeed->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/Speedometer.qml")));
+  m_Steps->setCurrentGpsSpeed(55.89);
 
   ui->qwGpsList->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/gps_list.qml")));
