@@ -3115,7 +3115,7 @@ void MainWindow::initQW() {
 
   ui->qwSpeed->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/Speedometer.qml")));
-  m_Steps->setCurrentGpsSpeed(55.89);
+  m_Steps->setCurrentGpsSpeed(0.00);
 
   ui->qwGpsList->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/gps_list.qml")));

@@ -1390,6 +1390,7 @@ void Steps::sendMsg(int CurTableCount) {
 void Steps::setCurrentGpsSpeed(double speed) {
   QObject* rootObject = mw_one->ui->qwSpeed->rootObject();
   if (rootObject) {
-    rootObject->setProperty("currentSpeed", speed);
+    rootObject->setProperty("currentSpeed",
+                            QString::number(speed, 'f', 2).toDouble());
   }
 }

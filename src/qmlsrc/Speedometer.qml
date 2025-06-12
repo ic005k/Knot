@@ -11,7 +11,7 @@ Rectangle {
     color: "transparent"
 
     // 速度表属性
-    property int maxSpeed: 50 // 适合骑行的最大速度
+    property int maxSpeed: currentSpeed >= 50 ? currentSpeed : 50 // 适合骑行的最大速度
     property double currentSpeed: 0
     property int minSpeed: 0
     property color backgroundColor: "#222222"
@@ -27,7 +27,7 @@ Rectangle {
         id: background
         width: parent.width
         height: parent.height
-        radius: 10
+        radius: 0
         color: backgroundColor
         border.color: foregroundColor
         border.width: 2
@@ -37,7 +37,7 @@ Rectangle {
             id: speedText
             text: currentSpeed + " km/h"
             color: foregroundColor
-            font.pixelSize: 28
+            font.pixelSize: 40
             font.bold: true
             width: parent.width
 
@@ -50,9 +50,9 @@ Rectangle {
         // 进度条
         Rectangle {
             id: progressBar
-            width: background.width * progress
+            width: (background.width -20 ) * progress
             height: 20
-            radius: 5
+            radius: 2
             color: accentColor
             anchors.left: parent.left
             anchors.bottom: parent.bottom
@@ -113,13 +113,13 @@ Rectangle {
 
                     // 特殊处理：如果是最后一个刻度，确保它不会被右侧边界遮挡
                     if (index === 10) {
-                        return Math.max(10, pos - textWidth / 2 - 5)
+                        return Math.max(10, pos - textWidth / 2 - 0)
                     }
 
                     // 特殊处理：如果是第一个刻度，确保它不会被左侧边界遮挡
                     if (index === 0) {
                         return Math.min(parent.width - 10 - textWidth,
-                                        pos - textWidth / 2)
+                                        pos - textWidth / 2 + 0)
                     }
 
                     // 确保文本不会超出边界
