@@ -4512,11 +4512,7 @@ void MainWindow::on_btnBackNotes_clicked() {
   ui->frameNoteList->show();
 }
 
-void MainWindow::on_btnSetKey_clicked() {}
-
 void MainWindow::on_btnEdit_clicked() { m_Notes->openEditUI(); }
-
-void MainWindow::on_btnCode_clicked() {}
 
 void MainWindow::clearSelectBox() {
   QString tempFile = iniDir + "memo/texteditor.html";
@@ -5776,9 +5772,12 @@ void MainWindow::on_rbRunning_clicked() {
 
 void MainWindow::on_btnOpenNote_clicked() {
   if (!QFile::exists(currentMDFile)) return;
+  QString title = ui->lblNoteName->text();
+  m_NotesList->refreshRecentOpen(title);
+  m_NotesList->saveRecentOpen();
 
   if (isAndroid) {
-    m_Method->setMDTitle(ui->lblNoteName->text());
+    m_Method->setMDTitle(title);
 
     m_Method->setMDFile(currentMDFile);
     m_Notes->openMDWindow();
@@ -5786,8 +5785,6 @@ void MainWindow::on_btnOpenNote_clicked() {
     m_Notes->setAndroidNoteConfig("/cpos/currentMDFile",
                                   QFileInfo(currentMDFile).baseName());
     m_NotesList->setCurrentItemFromMDFile(currentMDFile);
-
-    m_NotesList->saveRecentOpen();
 
     return;
   } else {
@@ -5799,8 +5796,6 @@ void MainWindow::on_btnOpenNote_clicked() {
     // ui->frameNotes->show();
 
     m_NotesList->setCurrentItemFromMDFile(currentMDFile);
-
-    m_NotesList->saveRecentOpen();
   }
 }
 

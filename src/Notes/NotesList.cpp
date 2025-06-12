@@ -723,6 +723,26 @@ void NotesList::saveRecentOpen() {
   }
 }
 
+void NotesList::refreshRecentOpen(QString name) {
+  QString strmd = currentMDFile;
+  strmd = strmd.replace(iniDir, "").trimmed();
+  for (int i = 0; i < listRecentOpen.count(); i++) {
+    QString item = listRecentOpen.at(i);
+
+    if (item.contains(strmd)) {
+      listRecentOpen.removeOne(item);
+      break;
+    }
+  }
+
+  listRecentOpen.insert(0, name + "===" + strmd);
+
+  int count = listRecentOpen.count();
+  if (count > 15) {
+    listRecentOpen.removeAt(count - 1);
+  }
+}
+
 void NotesList::saveCurrentNoteInfo() {
   QSettings Reg(iniDir + "curmd.ini", QSettings::IniFormat);
 
@@ -2313,22 +2333,6 @@ void NotesList::clickNoteList() {
 
   tw->setCurrentItem(pNoteItems.at(index));
 
-  for (int i = 0; i < listRecentOpen.count(); i++) {
-    QString item = listRecentOpen.at(i);
-    if (item.contains(strMD)) {
-      listRecentOpen.removeAt(i);
-      break;
-    }
-  }
-  listRecentOpen.insert(0, noteName + "===" + strMD);
-
-  int count = listRecentOpen.count();
-  if (count > 15) {
-    listRecentOpen.removeAt(count - 1);
-  }
-
-  // genCursorText();
-
   int indexNoteBook = m_Method->getCurrentIndexFromQW(mw_one->ui->qwNoteBook);
   QString s_tr = QString::number(indexNoteBook) + "=" + QString::number(index);
   int count2 = mIndexList.count();
@@ -2410,8 +2414,9 @@ void NotesList::genRecentOpenMenu() {
     if (QFile::exists(file)) {
       QFontMetrics fm(mw_one->font());
       QString txt = QString::number(i + 1) + " . " + name;
-      QString qsLine = fm.elidedText(txt, Qt::ElideRight, mw_one->width() - 30);
-      QAction *act = new QAction(qsLine);
+      QString menuTitle =
+          fm.elidedText(txt, Qt::ElideRight, mw_one->width() - 30);
+      QAction *act = new QAction(menuTitle);
       menuRecentOpen->addAction(act);
 
       connect(act, &QAction::triggered, this, [=]() {
@@ -2419,14 +2424,13 @@ void NotesList::genRecentOpenMenu() {
 
         mw_one->ui->lblNoteName->setText(name);
 
+#ifdef Q_OS_ANDROID
         mw_one->on_btnOpenNote_clicked();
+#else
+        mw_one->on_btnEditNote_clicked();
+#endif
 
-        listRecentOpen.removeAt(i);
-        listRecentOpen.insert(0, item);
-        saveRecentOpen();
         saveCurrentNoteInfo();
-
-        setCurrentItemFromMDFile(currentMDFile);
       });
     }
   }

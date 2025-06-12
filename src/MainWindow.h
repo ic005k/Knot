@@ -488,11 +488,7 @@ QLabel {
 
   void on_btnBackNotes_clicked();
 
-  void on_btnSetKey_clicked();
-
   void on_btnEdit_clicked();
-
-  void on_btnCode_clicked();
 
   void on_btnNotes_clicked();
 

@@ -158,7 +158,8 @@ class NotesList : public QDialog {
 
   QStringList getValidMDFiles();
 
- protected:
+  void refreshRecentOpen(QString name);
+  protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
   void closeEvent(QCloseEvent *event) override;

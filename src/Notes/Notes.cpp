@@ -1687,6 +1687,9 @@ void Notes::openEditUI() {
     return;
   }
 
+  mw_one->m_NotesList->refreshRecentOpen(mw_one->ui->lblNoteName->text());
+  mw_one->m_NotesList->saveRecentOpen();
+
   if (isAndroid) {
     m_Method->setMDFile(currentMDFile);
     setAndroidNoteConfig("/cpos/currentMDFile",
