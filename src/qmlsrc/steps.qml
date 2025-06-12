@@ -62,8 +62,6 @@ Rectangle {
 
     function getText1(itemIndex) {
 
-        // var data = view.model.get(itemIndex)
-        //  return data.text1
         if (itemIndex < 0 || itemIndex >= view.count)
             return "" // ✅ 边界检查
         var data = view.model.get(itemIndex)
@@ -390,6 +388,7 @@ Rectangle {
             id: listmain
 
             // debug
+
             /*ListElement {
                 text0: '<span style="background-color: #ff6600;">Hello</span>'
                 text1: "123456  <b>Hello</b> <i>World!</i>  123456"

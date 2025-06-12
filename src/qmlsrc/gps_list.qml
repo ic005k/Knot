@@ -100,17 +100,6 @@ Rectangle {
 
     function insertItem(curIndex, t0, t1, t2, t3, t4, t5, height) {
 
-
-        /*strTitleColor = "lightgray"
-        if (t0.indexOf(qsTr("Cycling")))
-            strTitleColor = "red"
-        else
-        if (t0.indexOf(qsTr("Hiking")))
-            strTitleColor = "green"
-        else
-        if (t0.indexOf(qsTr("Running")))
-            strTitleColor = "blue"
-        console.debug("t0="+t0 + "  " + strTitleColor)*/
         view.model.insert(curIndex, {
                               "text0": t0,
                               "text1": t1,
@@ -171,68 +160,25 @@ Rectangle {
         Rectangle {
             id: listItem
             width: ListView.view.width
-            height: getItemHeight() + 16 + btnViewGpsTrack.height
 
-            // color: ListView.isCurrentItem ? "lightblue" : getColor()
-            // border.width: isDark ? 0 : 1
-            // border.color: "lightgray" //"lightsteelblue"
+            height: colLayout.implicitHeight + 5
+
             color: index % 2 === 0 ? "#f0f0f0" : "#e0e0e0"
             border.color: "#ccc"
             border.width: 1
 
             radius: 3
 
-            function getItemHeight() {
-                var item0H
-                var item1H
-                var item2H
-                var item3H
-                var item4H
-                var item5H
-
-                if (item0.text.length == 0)
-                    item0H = 0
-                else
-                    item0H = item0.contentHeight
-
-                if (item1.text.length == 0)
-                    item1H = 0
-                else
-                    item1H = item1.contentHeight
-
-                if (item2.text.length == 0)
-                    item2H = 0
-                else
-                    item2H = item2.contentHeight
-
-                if (item3.text.length == 0)
-                    item3H = 0
-                else
-                    item3H = item3.contentHeight
-
-                if (item4.text.length == 0)
-                    item4H = 0
-                else
-                    item4H = item4.contentHeight
-
-                if (item5.text.length == 0)
-                    item5H = 0
-                else
-                    item5H = item5.contentHeight
-
-                return item0H + item1H + item2H + item3H + item4H + item5H
-            }
-
             RowLayout {
 
                 id: idlistElemnet
-                height: parent.height
+
                 width: parent.width
                 spacing: 2
                 Layout.fillWidth: true
 
                 ColumnLayout {
-                    id: idlistElemnet4
+                    id: colLayout
                     height: parent.height
                     width: parent.width
                     spacing: 2
@@ -253,13 +199,12 @@ Rectangle {
                             width: parent.width
                             Layout.preferredWidth: listItem.width
                             Layout.alignment: Qt.AlignHCenter
-                            horizontalAlignment: Text.AlignLeft
+                            horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
                             wrapMode: TextArea.NoWrap
                             font.bold: true
                             text: text0
 
-                            //color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
                             leftPadding: 5
                             rightPadding: 5
                         }
@@ -275,7 +220,7 @@ Rectangle {
 
                         width: parent.width
                         wrapMode: TextArea.WordWrap
-                        // color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+
                         font.bold: false
                         text: text1
 
@@ -288,7 +233,7 @@ Rectangle {
                     Rectangle {
                         width: parent.width
                         height: item2.contentHeight
-                        color: "lightgray" // 设置背景色为浅灰色
+                        color: "lightgray"
                         Text {
                             id: item2
                             anchors.rightMargin: 0
@@ -302,7 +247,6 @@ Rectangle {
                             text: text2
                             color: "red"
 
-                            //color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
                             leftPadding: 5
                             rightPadding: 5
 
@@ -316,12 +260,11 @@ Rectangle {
                         width: parent.width
                         wrapMode: Text.WrapAnywhere
                         elide: Text.ElideRight
-                        //Layout.maximumWidth: listItem.width
+
                         Layout.preferredWidth: listItem.width
                         font.bold: false
                         text: text3
 
-                        //color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
                         leftPadding: 5
                         rightPadding: 5
 
@@ -331,21 +274,20 @@ Rectangle {
                     Rectangle {
                         width: parent.width
                         height: item4.contentHeight
-                        color: "lightgray" // 设置背景色为浅灰色
+                        color: "lightgray"
                         Text {
                             id: item4
                             anchors.rightMargin: 0
                             width: parent.width
                             wrapMode: Text.WrapAnywhere
                             elide: Text.ElideRight
-                            //Layout.maximumWidth: listItem.width
+
                             Layout.preferredWidth: listItem.width
                             font.bold: false
                             text: text4
 
                             color: "blue"
 
-                            // color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
                             leftPadding: 5
                             rightPadding: 5
 
@@ -470,21 +412,6 @@ Rectangle {
                 radius: 3
             }
             background: null // 彻底消除背景容器
-        }
-    }
-
-    function getListEleHeadColor(ntype) {
-        switch (ntype) {
-        case 0:
-            return "lightgray"
-        case 1:
-            return "red"
-        case 2:
-            return "yellow"
-        case 3:
-            return "lightblue"
-        default:
-            return "black"
         }
     }
 }
