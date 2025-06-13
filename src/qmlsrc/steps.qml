@@ -195,6 +195,7 @@ Rectangle {
                     RowLayout {
 
                         id: row0
+                        Layout.fillWidth: true // 确保行占据全部宽度
 
                         Image {
                             id: item0Img
@@ -213,22 +214,24 @@ Rectangle {
                             visible: false
                         }
 
-                        Text {
-                            id: item0
-                            width: parent.width
+                        Rectangle {
+                            id: item0Background
                             Layout.preferredWidth: listItem.width
-                            Layout.alignment: Qt.AlignHCenter
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            wrapMode: TextArea.WordWrap
-                            font.bold: true
-                            text: text0
+                            Layout.preferredHeight: item0.implicitHeight + 10
+                            color: isDark ? "#424242" : "#DCDCDC"
+                            radius: 0
 
-                            color: getText1(
-                                       index) >= nStepsThreshold ? "black" : getFontColor()
-
-                            leftPadding: 5
-                            rightPadding: 5
+                            Text {
+                                id: item0
+                                anchors.fill: parent
+                                anchors.margins: 5
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                                wrapMode: Text.WordWrap
+                                font.bold: true
+                                text: text0
+                                color: isDark ? "white" : "black"
+                            }
                         }
                     }
 
@@ -388,6 +391,7 @@ Rectangle {
             id: listmain
 
             // debug
+
 
             /*ListElement {
                 text0: '<span style="background-color: #ff6600;">Hello</span>'

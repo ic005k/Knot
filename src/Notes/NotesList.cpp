@@ -2688,25 +2688,6 @@ QString NotesList::generatePreviewText(const SearchResult &result) {
   QString preview;
   preview = content.left(200);  // 截取前200字符
 
-  // QList<KeywordPosition> sortedPositions = result.highlightPos;
-
-  // 按起始位置反向排序（避免插入标签导致偏移错乱）
-  // std::sort(sortedPositions.begin(), sortedPositions.end(),
-  //          [](const KeywordPosition &a, const KeywordPosition &b) {
-  //           return a.charStart > b.charStart;
-  //         });
-
-  // 插入高亮标签
-  // for (const KeywordPosition &pos : sortedPositions) {
-  // int start = pos.charStart;
-  // int end = pos.charEnd;
-  // if (start < preview.length() && end <= preview.length()) {
-  //     preview.insert(end, "</span>");
-  //    preview.insert(start, "<span style='color: #e74c3c; font-weight:
-  //    500;'>");
-  // }
-  //}
-
   return preview;
 }
 

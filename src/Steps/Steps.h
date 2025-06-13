@@ -116,8 +116,8 @@ class Steps : public QDialog {
   void initTodayInitSteps();
   void getHardStepSensor();
   void openStepsUI();
-  void setCurrentGpsSpeed(double speed);
-  public slots:
+  void setCurrentGpsSpeed(double speed, double maxSpeed);
+ public slots:
   void clearAllGpsList();
   void getGpsTrack();
  private slots:
@@ -126,6 +126,8 @@ class Steps : public QDialog {
   void updateGetGps();
 
  private:
+  double maxSpeed = 0.00;
+
   int isHardStepSensor = -1;
 
   qlonglong initTodaySteps, resetSteps;

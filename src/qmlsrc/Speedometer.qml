@@ -11,7 +11,8 @@ Rectangle {
     color: "transparent"
 
     // 速度表属性
-    property int maxSpeed: currentSpeed >= 50 ? currentSpeed : 50 // 适合骑行的最大速度
+    property double myMaxSpeed: 0
+    property int maxSpeed: myMaxSpeed <= 10 ? 10 : myMaxSpeed // 适合骑行的最大速度
     property double currentSpeed: 0
     property int minSpeed: 0
     property color backgroundColor: "#222222"
@@ -50,7 +51,7 @@ Rectangle {
         // 进度条
         Rectangle {
             id: progressBar
-            width: (background.width -20 ) * progress
+            width: (background.width - 20) * progress
             height: 20
             radius: 2
             color: accentColor

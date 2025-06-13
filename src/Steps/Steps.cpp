@@ -529,7 +529,7 @@ void Steps::updateGetGps() {
       mw_one->ui->lblRunTime->setText(str2);
       mw_one->ui->lblAverageSpeed->setText(str3);
 
-      setCurrentGpsSpeed(mySpeed);
+      setCurrentGpsSpeed(mySpeed, maxSpeed);
 
       str4 = list.at(3);
       str5 = list.at(4);
@@ -541,10 +541,13 @@ void Steps::updateGetGps() {
     if (m_time.second() % 3 == 0) {
       if (!isGpsTest) {
         jdouble m_speed;
-        if (nGpsMethod == 1)
+        if (nGpsMethod == 1) {
           m_speed = m_activity.callMethod<jdouble>("getMySpeed", "()D");
-        else
+          maxSpeed = m_activity.callMethod<jdouble>("getMaxSpeed", "()D");
+        } else {
           m_speed = listenerWrapper.callMethod<jdouble>("getMySpeed", "()D");
+          maxSpeed = listenerWrapper.callMethod<jdouble>("getMaxSpeed", "()D");
+        }
 
         mySpeed = m_speed;
         if (m_distance > 0 & mySpeed > 0) {
@@ -1375,7 +1378,8 @@ void Steps::sendMsg(int CurTableCount) {
   double x = CurTableCount * d0;
   double gl = x / 1000;
   QString strNotify = tr("Today") + " : " + QString::number(CurTableCount) +
-                      "  ( " + QString::number(gl) + " " + tr("km") + " )";
+                      "  ( " + QString::number(gl, 'f', 2) + " " + tr("km") +
+                      " )";
 
   QJniObject javaNotification = QJniObject::fromString(strNotify);
   QJniObject::callStaticMethod<void>(
@@ -1387,10 +1391,11 @@ void Steps::sendMsg(int CurTableCount) {
 #endif
 }
 
-void Steps::setCurrentGpsSpeed(double speed) {
+void Steps::setCurrentGpsSpeed(double speed, double maxSpeed) {
   QObject* rootObject = mw_one->ui->qwSpeed->rootObject();
   if (rootObject) {
     rootObject->setProperty("currentSpeed",
                             QString::number(speed, 'f', 2).toDouble());
+    rootObject->setProperty("myMaxSpeed", maxSpeed);
   }
 }

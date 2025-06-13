@@ -749,6 +749,12 @@ public class MyActivity
 
   }
 
+  public double getMaxSpeed() {
+
+    return maxSpeed;
+
+  }
+
   public double getLatitude() {
 
     return latitude;
