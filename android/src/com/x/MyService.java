@@ -533,7 +533,7 @@ public class MyService extends Service {
         Context appContext = context.getApplicationContext();
 
         // 1. 使用 setAlarmClock() 提高优先级
-        Intent showIntent = new Intent(appContext, ClockActivity.class);
+        Intent showIntent = new Intent(appContext, MyActivity.class);
         PendingIntent showPending = PendingIntent.getActivity(
                 appContext, 0, showIntent, PendingIntent.FLAG_IMMUTABLE);
 

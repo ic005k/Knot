@@ -242,6 +242,7 @@ Rectangle {
                         Layout.preferredWidth: listItem.width
                         font.bold: false
                         font.italic: true
+                        font.pointSize: item0.font.pointSize * 0.85
                         text: text3
 
                         color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
