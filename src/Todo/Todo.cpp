@@ -518,7 +518,11 @@ void Todo::startTimerAlarm(QString text) {
   QJniObject javaText = QJniObject::fromString(text);
   QJniObject jo = QNativeInterface::QAndroidApplication::context();
 
-  jo.callStaticMethod<int>("com.x/MyService", "startAlarm",
+  // jo.callStaticMethod<int>("com.x/MyService", "startAlarm",
+  //                          "(Ljava/lang/String;)I",
+  //                          javaText.object<jstring>());
+
+  jo.callStaticMethod<int>("com.x/MyService", "startPreciseAlarm",
                            "(Ljava/lang/String;)I", javaText.object<jstring>());
 
   jo.callStaticMethod<int>("com.x/ClockActivity", "setInfoText",

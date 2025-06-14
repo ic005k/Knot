@@ -514,6 +514,50 @@ public class MyService extends Service {
         activity.startActivityForResult(intent, 1001); // 1001 是请求码，可自定义
     }
 
+    public static int startPreciseAlarm(String str) {
+        String[] array = str.split("\\|");
+        for (int i = 0; i < array.length; i++)
+            System.out.println(array[i]);
+
+        String strTime = array[0];
+        String strText = array[1];
+        String strTotalS = array[2];
+
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(System.currentTimeMillis());
+
+        int ts = Integer.parseInt(strTotalS);
+        c.add(Calendar.SECOND, ts);
+
+        // 使用应用上下文，避免Activity引用导致的内存泄漏
+        Context appContext = context.getApplicationContext();
+
+        // 1. 使用 setAlarmClock() 提高优先级
+        Intent showIntent = new Intent(appContext, ClockActivity.class);
+        PendingIntent showPending = PendingIntent.getActivity(
+                appContext, 0, showIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        AlarmManager.AlarmClockInfo clockInfo = new AlarmManager.AlarmClockInfo(c.getTimeInMillis(), showPending);
+
+        // 2. 创建精确触发的广播Intent
+        Intent receiverIntent = new Intent(appContext, AlarmReceiver.class);
+        receiverIntent.setAction(ACTION_TODO_ALARM);
+        receiverIntent.putExtra("alarmMessage", strText);
+
+        int requestCode = 0;
+        PendingIntent pending = PendingIntent.getBroadcast(
+                appContext,
+                requestCode,
+                receiverIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        // 3. 设置闹钟
+        alarmManager.setAlarmClock(clockInfo, pending);
+
+        return 1;
+
+    }
+
     //////////////////////////////////////////////////////////////////////
 
 }
