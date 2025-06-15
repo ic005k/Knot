@@ -134,6 +134,10 @@ public class MyService extends Service {
 
         context = MyActivity.context;
 
+        // 注册闹钟接收器
+        IntentFilter filter = new IntentFilter(ACTION_TODO_ALARM);
+        registerReceiver(myalarmReceiver, filter);
+
         // 计步器
         mySensorSerivece = new PersistService();
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -185,6 +189,9 @@ public class MyService extends Service {
         Log.d("MyService", "onDestroy()-------");
 
         super.onDestroy();
+
+        // 取消注册接收器
+        unregisterReceiver(myalarmReceiver);
 
         if (isStepCounter == 1) {
             if (mySensorSerivece != null) {
@@ -545,18 +552,75 @@ public class MyService extends Service {
         receiverIntent.putExtra("alarmMessage", strText);
 
         int requestCode = 0;
-        PendingIntent pending = PendingIntent.getBroadcast(
+        pendingIntentAlarm = PendingIntent.getBroadcast(
                 appContext,
                 requestCode,
                 receiverIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         // 3. 设置闹钟
-        alarmManager.setAlarmClock(clockInfo, pending);
+        alarmManager.setAlarmClock(clockInfo, pendingIntentAlarm);
 
         return 1;
 
     }
+
+    public static int startPreciseAlarmInMyService(String str) {
+        String[] array = str.split("\\|");
+        String strText = array[1];
+        String strTotalS = array[2];
+
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.SECOND, Integer.parseInt(strTotalS));
+
+        Context appContext = context.getApplicationContext();
+
+        // 1：创建广播 Intent（不是服务 Intent）
+        Intent alarmIntent = new Intent(ACTION_TODO_ALARM);
+        alarmIntent.setPackage(appContext.getPackageName()); // 关键：设置包名
+        alarmIntent.putExtra("alarmMessage", strText);
+
+        // 2：使用 PendingIntent.getBroadcast
+        pendingIntentAlarm = PendingIntent.getBroadcast(
+                appContext,
+                (int) System.currentTimeMillis(), // 唯一值
+                alarmIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        // 使用系统级高优先级API
+        Intent showIntent = new Intent(appContext, MyActivity.class);
+        PendingIntent showPending = PendingIntent.getActivity(
+                appContext, 0, showIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        AlarmManager.AlarmClockInfo clockInfo = new AlarmManager.AlarmClockInfo(
+                c.getTimeInMillis(),
+                showPending);
+
+        alarmManager.setAlarmClock(clockInfo, pendingIntentAlarm);
+
+        // 添加详细日志
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        Log.d("AlarmManager", "闹钟设置成功: " + sdf.format(c.getTime()) +
+                " | 消息: " + strText);
+
+        return 1;
+    }
+
+    // 自定义闹钟接收器（作为内部成员）
+    private final BroadcastReceiver myalarmReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ACTION_TODO_ALARM.equals(intent.getAction())) {
+                String message = intent.getStringExtra("alarmMessage");
+                Log.d("MyAlarmReceiver", "Alarm received: " + message);
+
+                // 直接在前台服务中处理闹钟事件
+                notifyTodoAlarm(context, message);
+
+            }
+        }
+    };
 
     //////////////////////////////////////////////////////////////////////
 

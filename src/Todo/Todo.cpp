@@ -522,7 +522,11 @@ void Todo::startTimerAlarm(QString text) {
   //                          "(Ljava/lang/String;)I",
   //                          javaText.object<jstring>());
 
-  jo.callStaticMethod<int>("com.x/MyService", "startPreciseAlarm",
+  // jo.callStaticMethod<int>("com.x/MyService", "startPreciseAlarm",
+  //                          "(Ljava/lang/String;)I",
+  //                          javaText.object<jstring>());
+
+  jo.callStaticMethod<int>("com.x/MyService", "startPreciseAlarmInMyService",
                            "(Ljava/lang/String;)I", javaText.object<jstring>());
 
   jo.callStaticMethod<int>("com.x/ClockActivity", "setInfoText",

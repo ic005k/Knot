@@ -41,18 +41,18 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
-    <uses-permission android:name="android.permission.BIND_TTS"/>
+    <uses-permission android:name="android.permission.BIND_TTS" />
     <!-- 特殊MIUI权限 -->
-    <uses-permission android:name="miui.permission.BIND_TTS_SERVICE"/>
+    <uses-permission android:name="miui.permission.BIND_TTS_SERVICE" />
 
     <!-- 查询所有TTS服务 -->
     <queries>
         <intent>
-            <action android:name="android.intent.action.TTS_SERVICE"/>
+            <action android:name="android.intent.action.TTS_SERVICE" />
         </intent>
-        <package android:name="com.android.speech.services"/>
-        <package android:name="com.google.android.tts"/>
-        <package android:name="com.xiaomi.mibrain.speech"/>
+        <package android:name="com.android.speech.services" />
+        <package android:name="com.google.android.tts" />
+        <package android:name="com.xiaomi.mibrain.speech" />
     </queries>
 
     <!-- The following comment will be replaced upon deployment with default features based on the
@@ -124,11 +124,11 @@
         </service>
 
         <!-- 声明 TTS 服务 -->
-        <service 
-        android:name=".TTSForegroundService"
-        android:enabled="true"
-        android:exported="false"
-        android:foregroundServiceType="mediaPlayback"/>
+        <service
+            android:name=".TTSForegroundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
 
         <activity android:name="com.x.ClockActivity" android:label="Knot"
             android:launchMode="standard"
@@ -333,6 +333,7 @@
         </activity>
 
 
+        <!--
         <receiver
             android:name="com.x.AlarmReceiver"
             android:enabled="true"
@@ -341,7 +342,7 @@
                 <action android:name="com.x.Knot.TODO_ALARM" />
             </intent-filter>
         </receiver>
-
+        -->
 
         <!-- android:name="androidx.core.content.FileProvider" -->
         <!-- android:name="android.support.v4.content.FileProvider"-->
