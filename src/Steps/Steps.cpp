@@ -831,16 +831,16 @@ void Steps::loadGpsList(int nYear, int nMonth) {
 }
 
 void Steps::selGpsListYearMonth() {
-  // if (isAndroid) {
-  // int y, m;
-  // QString str = mw_one->ui->btnSelGpsDate->text();
-  //  QStringList list = str.split("-");
-  //  y = list.at(0).toInt();
-  //  m = list.at(1).toInt();
-  //  m_Method->setDateTimePickerFlag("ym", y, m, 0, 0, 0, "gpslist");
-  //  m_Method->openDateTimePicker();
-  //  return;
-  //}
+  /*if (isAndroid) {
+    int y, m;
+    QString str = mw_one->ui->btnSelGpsDate->text();
+    QStringList list = str.split("-");
+    y = list.at(0).toInt();
+    m = list.at(1).toInt();
+    m_Method->setDateTimePickerFlag("ym", y, m, 0, 0, 0, "gpslist");
+    m_Method->openDateTimePicker();
+    return;
+  }*/
 
   QStringList list = mw_one->ui->btnSelGpsDate->text().split("-");
   int y = 2025;

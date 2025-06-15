@@ -181,9 +181,9 @@ void DateSelector::initStartEndDate(QString flag) {
 
   // if (isAndroid) {
   //   m_Method->setDateTimePickerFlag("ymd", y, m, d, 0, 0, flag);
-  //   m_Method->openDateTimePicker();
-  //   return;
-  // }
+  //  m_Method->openDateTimePicker();
+  //  return;
+  //}
 
   ui->gboxYear->hide();
   ui->gboxMonth->setHidden(false);

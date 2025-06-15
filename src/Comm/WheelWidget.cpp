@@ -9,11 +9,12 @@
 extern bool isDark;
 
 WheelWidget::WheelWidget(QWidget* parent) : QWidget(parent) {
-  m_itemHeight = 40;
-  setFixedHeight(40 * 3);
+  m_itemHeight = 45;
+  setFixedHeight(45 * 3);
 
   // 惯性动画定时器（60FPS）
   m_inertiaTimer.setInterval(16);
+
   connect(&m_inertiaTimer, &QTimer::timeout, this,
           &WheelWidget::animateInertia);
 }
@@ -33,23 +34,32 @@ void WheelWidget::paintEvent(QPaintEvent* event) {
   painter.setRenderHint(QPainter::Antialiasing);
   const int centerY = height() / 2;
 
+  // 计算当前中心位置的浮点索引
+  qreal centerIndex =
+      m_currentIndex + static_cast<qreal>(m_offset) / m_itemHeight;
+
   // 动态计算需要绘制的项数（覆盖两倍屏幕高度）
   const int visibleItemCount = qCeil(height() / (qreal)m_itemHeight) * 2 + 3;
-  for (int i = -visibleItemCount; i <= visibleItemCount; ++i) {
+
+  // 计算绘制的起始和结束索引
+  int startIndex = qFloor(centerIndex) - visibleItemCount;
+  int endIndex = qCeil(centerIndex) + visibleItemCount;
+
+  for (int k = startIndex; k <= endIndex; ++k) {
     // 循环核心算法：虚拟索引计算
-    int virtualIndex =
-        (m_currentIndex + i + m_items.size() * 10) % m_items.size();
+    int virtualIndex = (k + m_items.size() * 10) % m_items.size();
 
-    // 项位置计算（包含循环偏移）
-    qreal itemOffset = qreal(m_offset) / m_itemHeight;
-    qreal yPos = centerY + (i - itemOffset) * m_itemHeight;
+    // 项位置计算：基于浮点中心索引
+    qreal yPos = centerY + (k - centerIndex) * m_itemHeight;
 
-    // 自动跳过完全不可见的项（优化性能）
+    // 放宽可见性判断条件（确保部分可见的项不会被跳过）
     if (yPos < -m_itemHeight || yPos > height() + m_itemHeight) continue;
 
     // 动态样式计算（保持iOS风格）
     qreal distance = qAbs(yPos - centerY) / m_itemHeight;
+
     qreal opacity = qBound(0.2, 1.0 - distance * 0.4, 1.0);
+
     int fontSize = qBound(14, 24 - static_cast<int>(distance * 8), 24);
 
     painter.setOpacity(opacity);
