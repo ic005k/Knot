@@ -644,9 +644,6 @@ void Steps::updateGetGps() {
 void Steps::stopRecordMotion() {
   timer->stop();
 
-  m_TotalDistance = m_TotalDistance + m_distance;
-  strTotalDistance = QString::number(m_TotalDistance) + " km";
-  mw_one->ui->lblTotalDistance->setText(strTotalDistance);
   mw_one->ui->lblGpsInfo->setText(strGpsInfoShow);
 
   mw_one->ui->lblRunTime->setStyleSheet(lblStyle);
@@ -674,6 +671,9 @@ void Steps::stopRecordMotion() {
 }
 
 void Steps::refreshMotionData() {
+  m_TotalDistance = m_TotalDistance + m_distance;
+  strTotalDistance = QString::number(m_TotalDistance) + " km";
+  mw_one->ui->lblTotalDistance->setText(strTotalDistance);
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
   Reg.setValue("/GPS/TotalDistance", m_TotalDistance);
 

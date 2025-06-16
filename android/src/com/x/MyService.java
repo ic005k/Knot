@@ -304,8 +304,10 @@ public class MyService extends Service {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 flags |= PendingIntent.FLAG_IMMUTABLE;
             }
+            // 为每个通知创建唯一请求码
+            int requestCode = (int) System.currentTimeMillis();
             PendingIntent pendingIntent = PendingIntent.getActivity(
-                    context, 0, activityIntent, flags);
+                    context, requestCode, activityIntent, flags);
 
             // 创建通知渠道（Android 8.0+）
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -425,7 +427,7 @@ public class MyService extends Service {
     public static final String ACTION_TODO_ALARM = "com.x.Knot.TODO_ALARM";
     private static AlarmManager alarmManager;
     // private static PendingIntent pi;
-    private static PendingIntent pendingIntentAlarm;
+    private static PendingIntent pendingIntentAlarm = null;
 
     public static int startAlarm(String str) {
         // 特殊转义字符，必须加"\\"（“.”和“|”都是转义字符）
@@ -491,6 +493,7 @@ public class MyService extends Service {
         if (alarmManager != null) {
             if (pendingIntentAlarm != null) {
                 alarmManager.cancel(pendingIntentAlarm);
+                pendingIntentAlarm = null;
             }
 
             System.out.println("stopAlarm+++++++++++++++++++++++");
@@ -583,7 +586,7 @@ public class MyService extends Service {
         // 2：使用 PendingIntent.getBroadcast
         pendingIntentAlarm = PendingIntent.getBroadcast(
                 appContext,
-                (int) System.currentTimeMillis(), // 唯一值
+                0, // 用新的定时覆盖旧的定时
                 alarmIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
