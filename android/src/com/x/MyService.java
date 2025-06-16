@@ -48,6 +48,8 @@ public class MyService extends Service {
     private static final String ID = "channel_1";
     private static final String NAME = "F_SERVICE";
 
+    public static volatile boolean isReady = false;
+
     private static PersistService mySensorSerivece;
 
     public native static void CallJavaNotify_0();
@@ -154,6 +156,8 @@ public class MyService extends Service {
 
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
+        isReady = true;
+
     }
 
     // 服务在每次启动的时候调用的方法 如果某些行为在服务已启动的时候就执行，可以把处理逻辑写在这个方法里面
@@ -186,6 +190,8 @@ public class MyService extends Service {
     // 服务销毁的时候调用的方法 可以回收部分不再使用的资源
     @Override
     public void onDestroy() {
+        isReady = false;
+
         Log.d("MyService", "onDestroy()-------");
 
         super.onDestroy();

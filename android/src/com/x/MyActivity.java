@@ -351,8 +351,9 @@ public class MyActivity
 
   }
 
-  // 屏幕唤醒相关
+  ///////////////// 屏幕唤醒相关 ////////////////////////////
   private ScreenStatusReceiver mScreenStatusReceiver = null;
+  private Handler mHandler = new Handler(Looper.getMainLooper());
 
   private void registSreenStatusReceiver() {
     mScreenStatusReceiver = new ScreenStatusReceiver();
@@ -369,9 +370,18 @@ public class MyActivity
     @Override
     public void onReceive(Context context, Intent intent) {
       if (SCREEN_ON.equals(intent.getAction())) {
-
         isScreenOff = false;
-        CallJavaNotify_2();
+
+        // 延迟调用确保服务已初始化
+        mHandler.postDelayed(() -> {
+          if (MyService.isReady) {
+            CallJavaNotify_2();
+            Log.w("Knot", "成功获取步数");
+          } else {
+            Log.e("Knot", "服务未准备好，无法获取步数");
+          }
+        }, 500); // 延迟 500 毫秒
+
         Log.w("Knot", "屏幕亮了");
       } else if (SCREEN_OFF.equals(intent.getAction())) {
 
