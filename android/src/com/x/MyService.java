@@ -297,15 +297,17 @@ public class MyService extends Service {
 
             // 创建跳转 Activity 的 Intent
             Intent activityIntent = new Intent(context, ClockActivity.class);
-            activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+            // 修改启动标志 (Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
             // 构建 PendingIntent（适配 Android 12+ 不可变性）
             int flags = PendingIntent.FLAG_UPDATE_CURRENT;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 flags |= PendingIntent.FLAG_IMMUTABLE;
             }
-            // 为每个通知创建唯一请求码
-            int requestCode = (int) System.currentTimeMillis();
+            // 为通知创建请求码
+            int requestCode = (int) System.currentTimeMillis(); // 100;
             PendingIntent pendingIntent = PendingIntent.getActivity(
                     context, requestCode, activityIntent, flags);
 
@@ -328,6 +330,7 @@ public class MyService extends Service {
                         .setSmallIcon(R.drawable.alarm)
                         .setColor(Color.GREEN)
                         .setAutoCancel(true)
+                        .setContentIntent(pendingIntent) // 添加内容点击
                         .setFullScreenIntent(pendingIntent, true) // 关键：启用全屏 Intent
                         .setPriority(Notification.PRIORITY_MAX); // 最高优先级
             } else {
@@ -338,6 +341,7 @@ public class MyService extends Service {
                         .setSmallIcon(R.drawable.alarm)
                         .setColor(Color.GREEN)
                         .setAutoCancel(true)
+                        .setContentIntent(pendingIntent) // 添加内容点击
                         .setFullScreenIntent(pendingIntent, true)
                         .setPriority(Notification.PRIORITY_MAX);
             }

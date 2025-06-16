@@ -370,10 +370,13 @@ Rectangle {
             margins: 4
         }
 
+        boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
+
         model: ListModel {
             id: listmain
 
             // debug
+
 
             /*ListElement {
                 text0: '<span style="background-color: #ff6600;">Hello</span>'

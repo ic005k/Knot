@@ -335,6 +335,7 @@ public class ClockActivity
     registerReceiver(
         mHomeKeyEvent,
         new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+
   }
 
   private BroadcastReceiver mHomeKeyEvent = new BroadcastReceiver() {
@@ -399,6 +400,7 @@ public class ClockActivity
     }
 
     unregisterReceiver(mHomeKeyEvent);
+
     MyService.clearNotify();
 
     if (!isRefreshAlarm) {
