@@ -87,6 +87,8 @@ int main(int argc, char* argv[]) {
   format.setSwapInterval(1);                             // 开启垂直同步
   QSurfaceFormat::setDefaultFormat(format);
 
+  QQuickWindow::setSceneGraphBackend("opengl");
+
   // 关键稳定性设置
   qputenv("QSG_RENDER_LOOP", "threaded");        // 必须使用多线程渲染
   qputenv("QT_ANDROID_DISABLE_GPU_DEBUG", "1");  // 关闭调试层

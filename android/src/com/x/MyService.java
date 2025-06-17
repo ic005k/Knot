@@ -631,6 +631,20 @@ public class MyService extends Service {
                 // 直接在前台服务中处理闹钟事件
                 notifyTodoAlarm(context, message);
 
+                if (ClockActivity.isReady) {
+                    String oldTxt = ClockActivity.text_info.getText().toString();
+
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Date date = new Date(System.currentTimeMillis());
+                    String strCurDT0 = formatter.format(date);
+                    String strCurDT = " ( " + strCurDT0 + " ) ";
+
+                    String newTxt = message + "\n" + strCurDT + "\n\n" + oldTxt;
+                    ClockActivity.text_info.setText(newTxt);
+
+                    CallJavaNotify_3();
+                }
+
             }
         }
     };

@@ -4192,6 +4192,7 @@ static void JavaNotify_10() {
 static void JavaNotify_11() {
   // Books List
   mw_one->ui->btnReadList->click();
+
   qDebug() << "C++ JavaNotify_11";
 }
 
@@ -4413,9 +4414,8 @@ void MainWindow::on_btnReadList_clicked() {
   if (ui->frameMain->isVisible()) ui->frameMain->hide();
   ui->frameReader->hide();
   ui->frameBookList->show();
-  m_Reader->getReadList();
 
-  if (isAndroid) m_Method->closeAndroidProgressBar();
+  m_Reader->getReadList();
 }
 
 void MainWindow::on_btnBackDir_clicked() { m_Reader->backDir(); }

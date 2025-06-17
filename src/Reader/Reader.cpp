@@ -1551,11 +1551,11 @@ void Reader::getReadList() {
     QString bookName = listBooks.at(0);
     QString bookPath = listBooks.at(1);
     QString suffix;
-    if (bookName.toLower().contains(".txt")) {
+    if (bookName.contains(".txt", Qt::CaseInsensitive)) {
       suffix = "txt";
-    } else if (bookName.toLower().contains(".epub")) {
+    } else if (bookName.contains(".epub", Qt::CaseInsensitive)) {
       suffix = "epub";
-    } else if (bookName.toLower().contains(".pdf")) {
+    } else if (bookName.contains(".pdf", Qt::CaseInsensitive)) {
       suffix = "pdf";
     } else
       suffix = "none";
@@ -2287,9 +2287,9 @@ void Reader::openMyPDF(QString uri) {
 void Reader::closeMyPDF() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  activity.callStaticMethod<void>("com.xhh.pdfui/PDFActivity", "closeMyPDF",
-                                  "()V");
+  // QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  QJniObject::callStaticMethod<void>("com.xhh.pdfui/PDFActivity", "closeMyPDF",
+                                     "()V");
 
 #endif
 }

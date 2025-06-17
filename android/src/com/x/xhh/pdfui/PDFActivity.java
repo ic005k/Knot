@@ -229,7 +229,6 @@ public class PDFActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 PDFActivity.this.finish();
                 CallJavaNotify_11();
-
             }
         });
 

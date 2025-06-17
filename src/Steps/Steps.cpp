@@ -377,6 +377,7 @@ void Steps::startRecordMotion() {
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
 
   m_TotalDistance = Reg.value("/GPS/TotalDistance", 0).toDouble();
+  oldTotalDistance = m_TotalDistance;
 
 #ifdef Q_OS_ANDROID
 #else
@@ -670,12 +671,16 @@ void Steps::stopRecordMotion() {
   mw_one->ui->btnSelGpsDate->setEnabled(true);
 }
 
-void Steps::refreshMotionData() {
-  m_TotalDistance = m_TotalDistance + m_distance;
+void Steps::refreshTotalDistance() {
+  m_TotalDistance = oldTotalDistance + m_distance;
   strTotalDistance = QString::number(m_TotalDistance) + " km";
   mw_one->ui->lblTotalDistance->setText(strTotalDistance);
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
   Reg.setValue("/GPS/TotalDistance", m_TotalDistance);
+}
+
+void Steps::refreshMotionData() {
+  refreshTotalDistance();
 
   strEndTime = QTime::currentTime().toString();
 

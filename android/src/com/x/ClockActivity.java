@@ -54,6 +54,7 @@ import android.content.res.TypedArray;
 public class ClockActivity
     extends Activity
     implements View.OnClickListener, Application.ActivityLifecycleCallbacks {
+
   private MediaPlayer mediaPlayer;
   private MediaPlayer player;
   private static int curVol;
@@ -66,7 +67,7 @@ public class ClockActivity
 
   private Button btn_cancel;
   private Button btn_play_voice;
-  private TextView text_info, text_title;
+  public static TextView text_info, text_title;
   private static boolean zh_cn;
   private String voiceFile;
 
@@ -77,6 +78,8 @@ public class ClockActivity
   public static Context getContext() {
     return context;
   }
+
+  public static volatile boolean isReady = false;
 
   public static native void CallJavaNotify_0();
 
@@ -188,10 +191,6 @@ public class ClockActivity
 
     super.onCreate(savedInstanceState);
 
-    // 先关闭笔记编辑器和文件选择器
-    // NoteEditor.closeNoteEditorView();
-    // FilePicker.closeFilePickerView();
-
     context = getApplicationContext();
     // this.getWindow().setWindowAnimations(R.style.WindowAnim);
     isZh(context);
@@ -288,7 +287,7 @@ public class ClockActivity
     else
       strTodo = "Todo: \n";
 
-    bindViews(str1, str2 + "\n\n\n" + strCurDT + "\n");
+    bindViews(str1, str2 + "\n" + strCurDT + "\n");
 
     if (isRefreshAlarm) {
       CallJavaNotify_3();
@@ -335,6 +334,9 @@ public class ClockActivity
     registerReceiver(
         mHomeKeyEvent,
         new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+
+    isReady = true;
+    MyActivity.isBackMainUI = false;
 
   }
 
@@ -385,10 +387,16 @@ public class ClockActivity
     if (player != null)
       player.stop();
     AnimationWhenClosed();
+
+    if (!MyActivity.isBackMainUI) {
+      MyActivity.setMini();
+    }
   }
 
   @Override
   protected void onDestroy() {
+    isReady = false;
+
     if (!isHomeKey)
       MyActivity.alarmWindows.remove(context);
 
