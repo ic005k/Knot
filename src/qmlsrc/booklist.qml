@@ -194,7 +194,7 @@ Rectangle {
                     return "#00CD66"
 
                 if (item3.text === "pdf")
-                    return "red"
+                    return "#FF0000"
 
                 if (item3.text === "none")
                     return "#FFD700"
@@ -228,7 +228,8 @@ Rectangle {
                     }
                 }
 
-                Image {
+
+                /*Image {
                     id: myimg
                     width: 32
                     height: parent.height - 2
@@ -240,8 +241,7 @@ Rectangle {
                     sourceSize.height: 32
                     sourceSize.width: 32
                     source: listItem.getListPic()
-                }
-
+                }*/
                 ColumnLayout {
                     id: colLayout
                     height: parent.height
@@ -270,12 +270,12 @@ Rectangle {
 
                     Text {
                         id: item1
+
                         Layout.preferredWidth: listItem.width - myRect.width - mySpace.width - 2
 
                         Layout.alignment: Qt.AlignHCenter
                         horizontalAlignment: Text.AlignLeft
                         verticalAlignment: Text.AlignVCenter
-
                         width: parent.width
                         wrapMode: TextArea.WrapAnywhere
                         color: listItem.ListView.isCurrentItem ? "#4F4F4F" : getFontColorGray()
@@ -370,19 +370,17 @@ Rectangle {
             margins: 4
         }
 
-        boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
+        //boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
 
         model: ListModel {
             id: listmain
 
             // debug
-
-
             /*ListElement {
-                text0: '<span style="background-color: #ff6600;">Hello</span>'
-                text1: "123456  <b>Hello</b> <i>World!</i>  123456"
-                text2: '123456 <font color="red"><b>TEST</b></font>  123456'
-                text3: "str3 1234567890 1234567890  1234567890 1234567890"
+                text0: "1111"
+                text1: "2222"
+                text2: "3333"
+                text3: "4444"
                 myh: 0
             }*/
         }

@@ -228,7 +228,7 @@ public class PDFActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 PDFActivity.this.finish();
-                CallJavaNotify_11();
+                //CallJavaNotify_11();
             }
         });
 

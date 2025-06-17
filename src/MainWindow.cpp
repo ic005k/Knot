@@ -4274,6 +4274,11 @@ QString MainWindow::getYMD(QString date) {
 void MainWindow::on_btnReader_clicked() {
   if (isPDF) {
     if (isAndroid) {
+      ui->frameMain->hide();
+      ui->frameBookList->show();
+
+      m_Reader->getReadList();
+
       m_Reader->openMyPDF(fileName);
       return;
     }
@@ -4287,8 +4292,6 @@ void MainWindow::on_btnReader_clicked() {
   isMemoVisible = false;
 
   if (!isOne) {
-    // m_Reader->initReader();
-
     while (!ui->btnReader->isEnabled())
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
@@ -5368,13 +5371,6 @@ void MainWindow::on_btnBackBookList_clicked() {
     if (isAndroid) {
       ui->frameBookList->hide();
       ui->frameMain->show();
-      if (!m_Reader->isOpenBookListClick)
-        m_Reader->openMyPDF(fileName);
-      else
-        m_Reader->isOpenBookListClick = false;
-    } else {
-      ui->frameBookList->hide();
-      ui->frameReader->show();
     }
   } else {
     ui->frameBookList->hide();

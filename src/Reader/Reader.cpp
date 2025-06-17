@@ -1561,7 +1561,7 @@ void Reader::getReadList() {
       suffix = "none";
 
     m_Method->addItemToQW(mw_one->ui->qwBookList, bookName, bookPath, "",
-                          suffix, 0);
+                          suffix, 50);
   }
 
   for (int i = 0; i < bookList.count(); i++) {
@@ -1599,12 +1599,6 @@ void Reader::openBookListItem() {
   QString bookfile = listBooks.at(1);
   if (bookfile != fileName) {
     startOpenFile(bookfile);
-  } else {
-    if (isPDF) {
-      if (isAndroid) {
-        openMyPDF(fileName);
-      }
-    }
   }
 
   isOpenBookListClick = true;
@@ -2032,6 +2026,11 @@ void Reader::readBookDone() {
     mw_one->ui->btnShowBookmark->show();
     mw_one->ui->btnAutoRun->show();
 
+    if (mw_one->ui->frameBookList->isVisible()) {
+      mw_one->ui->frameBookList->hide();
+      mw_one->ui->frameReader->show();
+    }
+
     mw_one->ui->qwReader->rootContext()->setContextProperty("strText", "");
     mw_one->ui->qwReader->rootContext()->setContextProperty("isSelText",
                                                             isSelText);
@@ -2077,11 +2076,18 @@ void Reader::readBookDone() {
     mw_one->ui->btnCatalogue->hide();
 
 #ifdef Q_OS_ANDROID
-    // "/android_assets/" = "/data/user/0/com.x/files/"
 
-    mw_one->ui->frameReader->hide();
-    mw_one->ui->frameMain->show();
-    if (!mw_one->initMain) openMyPDF(fileName);
+    if (!mw_one->initMain) {
+      if (mw_one->ui->frameMain->isVisible()) {
+        mw_one->ui->frameMain->hide();
+        mw_one->ui->frameBookList->show();
+      }
+      if (mw_one->ui->frameReader->isVisible()) {
+        mw_one->ui->frameReader->hide();
+        mw_one->ui->frameBookList->show();
+      }
+      openMyPDF(fileName);
+    }
 #else
 
 #endif
