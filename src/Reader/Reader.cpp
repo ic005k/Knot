@@ -2064,6 +2064,15 @@ void Reader::readBookDone() {
   mw_one->ui->lblEpubInfo->hide();
   mw_one->ui->pEpubProg->hide();
 
+  for (int i = 0; i < bookList.count(); i++) {
+    QString str = bookList.at(i);
+    if (str.contains(fileName)) {
+      bookList.removeAt(i);
+      break;
+    }
+  }
+  bookList.insert(0, strTitle + "|" + fileName);
+
   if (isPDF) {
     qDebug() << "===Read Pdf... ..." << fileName;
 
@@ -2086,6 +2095,7 @@ void Reader::readBookDone() {
         mw_one->ui->frameReader->hide();
         mw_one->ui->frameBookList->show();
       }
+      getReadList();
       openMyPDF(fileName);
     }
 #else
@@ -2094,15 +2104,6 @@ void Reader::readBookDone() {
   }
 
   goBookReadPosition();
-
-  for (int i = 0; i < bookList.count(); i++) {
-    QString str = bookList.at(i);
-    if (str.contains(fileName)) {
-      bookList.removeAt(i);
-      break;
-    }
-  }
-  bookList.insert(0, strTitle + "|" + fileName);
 
   saveReader("", false);
 
