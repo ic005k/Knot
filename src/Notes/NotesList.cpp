@@ -2462,6 +2462,8 @@ void NotesList::setCurrentItemFromMDFile(QString mdFile) {
 
     if (isBreak) break;
   }
+
+  clickNoteList();
 }
 
 QString NotesList::getCurrentNoteNameFromMDFile(QString mdFile) {

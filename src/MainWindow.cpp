@@ -2,7 +2,7 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "2.0.3";
+QString ver = "2.0.4";
 QString appName = "Knot";
 
 QList<QPointF> PointList;
@@ -5796,7 +5796,7 @@ void MainWindow::on_btnOpenNote_clicked() {
 }
 
 void MainWindow::on_btnEditNote_clicked() {
-  ui->btnEdit->click();
+  m_Notes->openEditUI();
   m_NotesList->setCurrentItemFromMDFile(currentMDFile);
 }
 
