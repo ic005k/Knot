@@ -327,8 +327,13 @@
             android:label="MyPDF">
         </activity>
 
-        <activity android:name="com.xhh.pdfui.PDFActivity" android:exported="true"
+        <activity
+            android:name="com.xhh.pdfui.PDFActivity"
+            android:exported="true"
             android:launchMode="standard"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize"
+            
             android:label="PDFActivity">
         </activity>
 
