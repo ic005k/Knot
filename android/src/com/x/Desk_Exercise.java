@@ -215,7 +215,7 @@ public class Desk_Exercise extends Activity {
     }
 
     public boolean isAppRun(String pName) {
-        Context context = MyActivity.context;
+        Context context = MyActivity.mycontext;
 
         boolean isRun = false;
         int uid = getPackageUid(context, pName);

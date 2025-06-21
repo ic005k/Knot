@@ -556,7 +556,7 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
         Uri photoUri;
         if (Build.VERSION.SDK_INT >= 24) {
             photoUri = FileProvider.getUriForFile(
-                    MyActivity.context,
+                    MyActivity.mycontext,
                     "com.x",
                     new File(link));
         } else {

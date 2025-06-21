@@ -178,17 +178,13 @@ public class MyActivity
   public static MyActivity m_instance = null;
   private static SensorManager mSensorManager;
 
-  private static WakeLock mWakeLock = null;
-
   private static final int DELAY = SensorManager.SENSOR_DELAY_NORMAL;
-
-  // public static String strAlarmInfo;
 
   public static boolean isScreenOff = false;
   public static int keyBoardHeight;
 
   private static final String TAG = "QtKnot";
-  public static Context context;
+  public static Context mycontext;
   private ShortcutManager shortcutManager;
   public static TTSUtils mytts;
 
@@ -274,14 +270,7 @@ public class MyActivity
   }
 
   public void setVibrate() {
-    // 方法1：
-    // 让设备震动100毫秒
-    // Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-    // if (vibrator != null && vibrator.hasVibrator()) {
-    // vibrator.vibrate(100);
-    // }
 
-    // 方法2：
     VibrateUtils.vibrate(this, 50);
   }
 
@@ -298,8 +287,8 @@ public class MyActivity
   }
 
   public static void setMax() {
-    context.startActivity(
-        new Intent(context, MyActivity.class)
+    mycontext.startActivity(
+        new Intent(mycontext, MyActivity.class)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
   }
 
@@ -307,7 +296,7 @@ public class MyActivity
 
   // 全局获取Context
   public static Context getContext() {
-    return context;
+    return mycontext;
   }
 
   // 全透状态栏
@@ -532,7 +521,7 @@ public class MyActivity
     registSreenStatusReceiver();
     // registAlarmReceiver();
 
-    context = MyActivity.this;
+    mycontext = MyActivity.this;
 
     // 设置状态栏颜色,需要安卓版本大于5.0
     String filename = "/storage/emulated/0/.Knot/options.ini";
@@ -718,13 +707,7 @@ public class MyActivity
       if (ActivityCompat.checkSelfPermission(this,
           "android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED) {
 
-        // locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-        // 3000, // 更新间隔时间（毫秒）
-        // 1, // 最小距离变化（米）
-        // locationListener);
-
         // 创建 LocationRequestCompat 对象
-        // .setPriority(LocationRequestCompat.PRIORITY_HIGH_ACCURACY) // 高精度模式
         LocationRequestCompat locationRequest = new LocationRequestCompat.Builder(2000L) // 最小时间间隔
             .setMinUpdateDistanceMeters(1.0f) // 最小距离间隔
             .build();
@@ -782,13 +765,7 @@ public class MyActivity
     setVibrate();
     if (locationManager != null && locationListener1 != null) {
       try {
-        // locationManager.removeUpdates(locationListener1);
         LocationManagerCompat.removeUpdates(locationManager, locationListener1);
-
-        // 停止GPS状态侦听
-        if (locationManager != null) {
-          // locationManager.removeGpsStatusListener(gpsStatusListener);
-        }
       } catch (SecurityException e) {
         e.printStackTrace();
       }
@@ -918,9 +895,15 @@ public class MyActivity
       mAlarmReceiver = null;
     }
 
+    if (mCon != null) {
+      unbindService(mCon); // 解绑服务
+      mCon = null;
+    }
+
     super.onDestroy();
     m_instance = null;
     mytts.shutdown();
+    alarmWindows.remove(this); // 防止 Activity 泄漏
   }
 
   @Override
@@ -1056,15 +1039,15 @@ public class MyActivity
     Uri uri;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
       uri = FileProvider.getUriForFile(
-          context,
-          context.getPackageName(),
+          mycontext,
+          mycontext.getPackageName(),
           newApkFile);
       intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
     } else {
       uri = Uri.fromFile(newApkFile);
     }
     intent.setDataAndType(uri, type);
-    context.startActivity(intent);
+    mycontext.startActivity(intent);
   }
 
   private boolean ReOpen = false;
@@ -1305,8 +1288,8 @@ public class MyActivity
     Uri photoUri;
     if (Build.VERSION.SDK_INT >= 24) {
       photoUri = FileProvider.getUriForFile(
-          context,
-          context.getPackageName(),
+          mycontext,
+          mycontext.getPackageName(),
           new File(path));
     } else {
       photoUri = Uri.fromFile(new File(path));
@@ -1338,39 +1321,39 @@ public class MyActivity
   }
 
   public void openNoteEditor() {
-    Intent i = new Intent(context, NoteEditor.class);
+    Intent i = new Intent(mycontext, NoteEditor.class);
     i.putExtra("MD_FILE_PATH", strMDFile);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    context.startActivity(i);
+    mycontext.startActivity(i);
   }
 
   public static void openMDWindow() {
-    Intent i = new Intent(context, MDActivity.class);
+    Intent i = new Intent(mycontext, MDActivity.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    context.startActivity(i);
+    mycontext.startActivity(i);
   }
 
   public void openDateTimePicker() {
-    Intent i = new Intent(context, DateTimePicker.class);
+    Intent i = new Intent(mycontext, DateTimePicker.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    context.startActivity(i);
+    mycontext.startActivity(i);
   }
 
   public void openMyPDF(String path) {
     Uri fileUri;
     if (Build.VERSION.SDK_INT >= 24) {
       fileUri = FileProvider.getUriForFile(
-          context,
-          context.getPackageName(),
+          mycontext,
+          mycontext.getPackageName(),
           new File(path));
     } else {
       fileUri = Uri.fromFile(new File(path));
     }
 
-    Intent i = new Intent(context, PDFActivity.class);
+    Intent i = new Intent(mycontext, PDFActivity.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     i.setData(fileUri);
-    context.startActivity(i);
+    mycontext.startActivity(i);
   }
 
   public void closeMyPDF() {
@@ -1379,9 +1362,9 @@ public class MyActivity
   }
 
   public void openFilePicker() {
-    Intent i = new Intent(context, FilePicker.class);
+    Intent i = new Intent(mycontext, FilePicker.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    context.startActivity(i);
+    mycontext.startActivity(i);
   }
 
   public void closeFilePicker() {
@@ -1477,9 +1460,9 @@ public class MyActivity
   }
 
   public static void showAndroidProgressBar() {
-    Intent i = new Intent(context, MyProgBar.class);
+    Intent i = new Intent(mycontext, MyProgBar.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    context.startActivity(i);
+    mycontext.startActivity(i);
   }
 
   public static void closeAndroidProgressBar() {
@@ -1488,9 +1471,9 @@ public class MyActivity
   }
 
   public void showTempActivity() {
-    Intent i = new Intent(context, TempActivity.class);
+    Intent i = new Intent(mycontext, TempActivity.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    context.startActivity(i);
+    mycontext.startActivity(i);
   }
 
   public static void playMyText(String text) {
@@ -1620,8 +1603,14 @@ public class MyActivity
 
   public void stopRecord() {
     if (recorder != null) {
-      recorder.stop();
-      Log.i("audioRecord", "停止录音");
+      try {
+        recorder.stop();
+        recorder.release(); // 释放资源
+      } catch (Exception e) {
+        Log.e(TAG, "stopRecord error", e);
+      } finally {
+        recorder = null;
+      }
     }
   }
 
@@ -1654,7 +1643,14 @@ public class MyActivity
 
   public void stopPlayRecord() {
     if (player != null) {
-      player.stop();
+      try {
+        player.stop();
+        player.release(); // 释放资源
+      } catch (Exception e) {
+        Log.e(TAG, "stopPlayRecord error", e);
+      } finally {
+        player = null;
+      }
     }
   }
 
