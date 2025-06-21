@@ -536,9 +536,6 @@ public class MyActivity
     Application application = this.getApplication();
     application.registerActivityLifecycleCallbacks(this);
 
-    // 获取系统语言
-    MyService.isZh(this);
-
     // 服务
     Intent bindIntent = new Intent(MyActivity.this, MyService.class);
     if (Build.VERSION.SDK_INT >= 26) {
@@ -547,9 +544,6 @@ public class MyActivity
       bindService(bindIntent, mCon, Context.BIND_AUTO_CREATE);
       startService(new Intent(bindIntent));
     }
-
-    // debug
-    // MyService.notify(getApplicationContext(), "Hello!");
 
     addDeskShortcuts();
 
@@ -569,10 +563,6 @@ public class MyActivity
 
       @Override
       public void onError(String error) {
-        // 使用正确的context显示错误
-        // Toast.makeText(MyActivity.this,
-        // "TTS init failed: " + error,
-        // Toast.LENGTH_SHORT).show();
         Log.w("TTS", "TTS init failed: " + error);
       }
     });
@@ -1384,7 +1374,7 @@ public class MyActivity
       String lblNewNote = null;
       String lblContinueReading = null;
       String lblExercise = null;
-      if (MyService.zh_cn) {
+      if (zh_cn) {
         lblAddRecord = getString(R.string.addRecord_shortcut_short_label_zh);
         lblNewTodo = getString(R.string.newTodo_shortcut_short_label_zh);
         lblNewNote = getString(R.string.newNote_shortcut_short_label_zh);

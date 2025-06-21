@@ -88,32 +88,6 @@ public class MyService extends Service {
     public static String strStatus;
     public static String strPedometer;
     public static String strTodo;
-    public static boolean zh_cn;
-    public static Context context;
-
-    public static boolean isZh(Context context) {
-        Locale locale = context.getResources().getConfiguration().locale;
-        String language = locale.getLanguage();
-        if (language.endsWith("zh"))
-            zh_cn = true;
-        else
-            zh_cn = false;
-
-        if (zh_cn) {
-            strRun = "运行中...";
-            strStatus = "状态";
-            strTodo = "待办事项";
-            strPedometer = "计步器";
-
-        } else {
-            strRun = "Running...";
-            strStatus = "Status";
-            strTodo = "Todo";
-            strPedometer = "Pedometer";
-        }
-
-        return zh_cn;
-    }
 
     public static Runnable runnable = new Runnable() {
         @Override
@@ -134,7 +108,20 @@ public class MyService extends Service {
         super.onCreate();
         Log.i(TAG, "Service on create");// 服务被创建
 
-        context = MyActivity.getMyAppContext();
+        Context context = MyActivity.getMyAppContext();
+
+        if (MyActivity.zh_cn) {
+            strRun = "运行中...";
+            strStatus = "状态";
+            strTodo = "待办事项";
+            strPedometer = "计步器";
+
+        } else {
+            strRun = "Running...";
+            strStatus = "Status";
+            strTodo = "Todo";
+            strPedometer = "Pedometer";
+        }
 
         // 注册闹钟接收器
         IntentFilter filter = new IntentFilter(ACTION_TODO_ALARM);
@@ -436,7 +423,7 @@ public class MyService extends Service {
 
     public static final String ACTION_TODO_ALARM = "com.x.Knot.TODO_ALARM";
     private static AlarmManager alarmManager;
-    // private static PendingIntent pi;
+
     private static PendingIntent pendingIntentAlarm = null;
 
     public static int startAlarm(String str) {
@@ -456,19 +443,12 @@ public class MyService extends Service {
         c.add(Calendar.SECOND, ts);
 
         // 使用应用上下文，避免Activity引用导致的内存泄漏
-        Context appContext = context.getApplicationContext();
+        Context appContext = MyActivity.getMyAppContext();
 
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             flags |= PendingIntent.FLAG_IMMUTABLE;
         }
-
-        // Intent intent = new Intent(appContext, ClockActivity.class);
-        // pi = PendingIntent.getActivity(
-        // appContext,
-        // 0,
-        // intent,
-        // flags);
 
         // 创建定时触发的 BroadcastReceiver Intent
         Intent receiverIntent = new Intent(appContext, AlarmReceiver.class);
@@ -550,7 +530,7 @@ public class MyService extends Service {
         c.add(Calendar.SECOND, ts);
 
         // 使用应用上下文，避免Activity引用导致的内存泄漏
-        Context appContext = context.getApplicationContext();
+        Context appContext = MyActivity.getMyAppContext();
 
         // 1. 使用 setAlarmClock() 提高优先级
         Intent showIntent = new Intent(appContext, MyActivity.class);
@@ -586,7 +566,7 @@ public class MyService extends Service {
         Calendar c = Calendar.getInstance();
         c.add(Calendar.SECOND, Integer.parseInt(strTotalS));
 
-        Context appContext = context.getApplicationContext();
+        Context appContext = MyActivity.getMyAppContext();
 
         // 1：创建广播 Intent（不是服务 Intent）
         Intent alarmIntent = new Intent(ACTION_TODO_ALARM);

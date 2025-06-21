@@ -94,7 +94,7 @@ public class PDFCatelogueActivity extends AppCompatActivity implements TreeAdapt
         recyclerView = findViewById(R.id.rv_tree);
 
         lblTitle = findViewById(R.id.lblTitle);
-        if (MyService.zh_cn)
+        if (MyActivity.zh_cn)
             lblTitle.setText("目录");
         else
             lblTitle.setText("Catalogue");

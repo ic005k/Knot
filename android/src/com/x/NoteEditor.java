@@ -176,7 +176,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
     private View mColorPreview;
 
     private boolean isAddImage = false;
-    public static boolean zh_cn;
+
     private String currentMDFile;
     private static Context context;
     public static NoteEditor m_instance;
@@ -234,17 +234,6 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
     private static boolean isGoBackKnot = false;
 
     private ProgressBar progressBar;
-
-    public static boolean isZh(Context context) {
-        Locale locale = context.getResources().getConfiguration().locale;
-        String language = locale.getLanguage();
-        if (language.endsWith("zh"))
-            zh_cn = true;
-        else
-            zh_cn = false;
-
-        return zh_cn;
-    }
 
     public static int setInfoText(String str) {
         strInfo = str;
@@ -308,7 +297,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         btnNext = (Button) findViewById(R.id.btnNext);
         btnStartFind = (ImageButton) findViewById(R.id.btnStartFind);
 
-        if (zh_cn) {
+        if (MyActivity.zh_cn) {
             btn_cancel.setText("关闭");
             btnFind.setText("查找");
             btnUndo.setText("撤销");
@@ -463,7 +452,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         super.onCreate(savedInstanceState);
 
         context = NoteEditor.this;
-        isZh(context);
+
         m_instance = this;
 
         Application application = this.getApplication();
@@ -1237,7 +1226,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
 
                 int undoCount = helper.getUndoCount();
                 int redoCount = helper.getRedoCount();
-                if (zh_cn) {
+                if (MyActivity.zh_cn) {
                     btnUndo.setText("撤销-" + String.valueOf(undoCount));
                     btnRedo.setText("恢复-" + String.valueOf(redoCount));
                 } else {
@@ -1294,7 +1283,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         normalDialog.setIcon(R.drawable.alarm);
         normalDialog.setTitle("Knot");
         String strYes, strNo;
-        if (!zh_cn) {
+        if (!MyActivity.zh_cn) {
             normalDialog.setMessage("The text has been modified. Do you want to save?");
             strYes = "Yes";
             strNo = "No";
@@ -1415,7 +1404,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         PopupMenu popupMenu = new PopupMenu(wrapper, view);
 
         // menu布局
-        if (zh_cn)
+        if (MyActivity.zh_cn)
             popupMenu.getMenuInflater().inflate(R.menu.main_cn, popupMenu.getMenu());
         else
             popupMenu.getMenuInflater().inflate(R.menu.main, popupMenu.getMenu());
@@ -1475,7 +1464,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         if (strTitle.equals(listMenuTitle.get(2))) {
             if (!MyActivity.checkCamera()) {
                 String strInfo = "";
-                if (zh_cn)
+                if (MyActivity.zh_cn)
                     strInfo = "请开启摄像头权限！";
                 else
                     strInfo = "Please enable camera permissions!";
@@ -1572,7 +1561,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
             String strChoose = "Choose Color";
             String strOk = "Ok";
             String strCancel = "Cancel";
-            if (zh_cn) {
+            if (MyActivity.zh_cn) {
                 strOk = "确定";
                 strCancel = "取消";
                 strChoose = "选择颜色";
@@ -1716,7 +1705,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
 
     private ArrayList<String> initMenuTitle() {
         listMenuTitle.clear();
-        if (zh_cn) {
+        if (MyActivity.zh_cn) {
             listMenuTitle.add("格式化");
             listMenuTitle.add("图片文件");
             listMenuTitle.add("拍摄照片");

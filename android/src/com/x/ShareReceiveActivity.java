@@ -128,7 +128,7 @@ public class ShareReceiveActivity extends Activity
 
     private String type;
     private String action;
-    private static boolean zh_cn;
+
     private String cursorText;
     private String strUri = "";
 
@@ -136,7 +136,6 @@ public class ShareReceiveActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getApplicationContext();
-        zh_cn = isZh(context);
 
         // 去除title(App Name)
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -150,7 +149,7 @@ public class ShareReceiveActivity extends Activity
         btnInsertNote = (Button) findViewById(R.id.btnInsertNote);
         btnFreePaste = (Button) findViewById(R.id.btnFreePaste);
 
-        if (zh_cn) {
+        if (MyActivity.zh_cn) {
             btnAddToTodo.setText("增加到待办事项");
             btnAppendNote.setText("追加到当前笔记");
             btnInsertNote.setText("插入到当前笔记");
@@ -379,7 +378,7 @@ public class ShareReceiveActivity extends Activity
         if (!isRun) {
             saveReceiveShare("text/plain", strData, "false");
 
-            if (isZh(this))
+            if (MyActivity.zh_cn)
                 Toast.makeText(this, getString(R.string.strTip_zh), Toast.LENGTH_LONG).show();
             else
                 Toast.makeText(this, getString(R.string.strTip), Toast.LENGTH_LONG).show();
@@ -400,7 +399,7 @@ public class ShareReceiveActivity extends Activity
         if (!isRun) {
             saveReceiveShare("image/*", "", "false");
 
-            if (isZh(this))
+            if (MyActivity.zh_cn)
                 Toast.makeText(this, getString(R.string.strTip_zh), Toast.LENGTH_LONG).show();
             else
                 Toast.makeText(this, getString(R.string.strTip), Toast.LENGTH_LONG).show();
@@ -742,17 +741,6 @@ public class ShareReceiveActivity extends Activity
             btnInsertNote.setEnabled(true);
 
         }
-    }
-
-    public static boolean isZh(Context context) {
-        Locale locale = context.getResources().getConfiguration().locale;
-        String language = locale.getLanguage();
-        if (language.endsWith("zh"))
-            zh_cn = true;
-        else
-            zh_cn = false;
-
-        return zh_cn;
     }
 
     public String readTextFile(String filename) {

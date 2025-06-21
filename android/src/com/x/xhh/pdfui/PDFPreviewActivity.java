@@ -99,7 +99,7 @@ public class PDFPreviewActivity extends AppCompatActivity implements GridAdapter
         recyclerView = findViewById(R.id.rv_grid);
 
         lblTitle = findViewById(R.id.lblTitle);
-        if (MyService.zh_cn)
+        if (MyActivity.zh_cn)
             lblTitle.setText("缩略图");
         else
             lblTitle.setText("Thumbnails");
