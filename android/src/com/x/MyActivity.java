@@ -184,7 +184,11 @@ public class MyActivity
   public static int keyBoardHeight;
 
   private static final String TAG = "QtKnot";
-  public static Context mycontext;
+
+  public static Context getMyAppContext() {
+    return m_instance != null ? m_instance.getApplicationContext() : null;
+  }
+
   private ShortcutManager shortcutManager;
   public static TTSUtils mytts;
 
@@ -287,17 +291,12 @@ public class MyActivity
   }
 
   public static void setMax() {
-    mycontext.startActivity(
-        new Intent(mycontext, MyActivity.class)
+    getMyAppContext().startActivity(
+        new Intent(getMyAppContext(), MyActivity.class)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
   }
 
   // ------------------------------------------------------------------------
-
-  // 全局获取Context
-  public static Context getContext() {
-    return mycontext;
-  }
 
   // 全透状态栏
   private void setStatusBarFullTransparent() {
@@ -520,8 +519,6 @@ public class MyActivity
 
     registSreenStatusReceiver();
     // registAlarmReceiver();
-
-    mycontext = MyActivity.this;
 
     // 设置状态栏颜色,需要安卓版本大于5.0
     String filename = "/storage/emulated/0/.Knot/options.ini";
@@ -1039,15 +1036,15 @@ public class MyActivity
     Uri uri;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
       uri = FileProvider.getUriForFile(
-          mycontext,
-          mycontext.getPackageName(),
+          getMyAppContext(),
+          getMyAppContext().getPackageName(),
           newApkFile);
       intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
     } else {
       uri = Uri.fromFile(newApkFile);
     }
     intent.setDataAndType(uri, type);
-    mycontext.startActivity(intent);
+    getMyAppContext().startActivity(intent);
   }
 
   private boolean ReOpen = false;
@@ -1288,8 +1285,8 @@ public class MyActivity
     Uri photoUri;
     if (Build.VERSION.SDK_INT >= 24) {
       photoUri = FileProvider.getUriForFile(
-          mycontext,
-          mycontext.getPackageName(),
+          getMyAppContext(),
+          getMyAppContext().getPackageName(),
           new File(path));
     } else {
       photoUri = Uri.fromFile(new File(path));
@@ -1321,39 +1318,39 @@ public class MyActivity
   }
 
   public void openNoteEditor() {
-    Intent i = new Intent(mycontext, NoteEditor.class);
+    Intent i = new Intent(getMyAppContext(), NoteEditor.class);
     i.putExtra("MD_FILE_PATH", strMDFile);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    mycontext.startActivity(i);
+    getMyAppContext().startActivity(i);
   }
 
   public static void openMDWindow() {
-    Intent i = new Intent(mycontext, MDActivity.class);
+    Intent i = new Intent(getMyAppContext(), MDActivity.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    mycontext.startActivity(i);
+    getMyAppContext().startActivity(i);
   }
 
   public void openDateTimePicker() {
-    Intent i = new Intent(mycontext, DateTimePicker.class);
+    Intent i = new Intent(getMyAppContext(), DateTimePicker.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    mycontext.startActivity(i);
+    getMyAppContext().startActivity(i);
   }
 
   public void openMyPDF(String path) {
     Uri fileUri;
     if (Build.VERSION.SDK_INT >= 24) {
       fileUri = FileProvider.getUriForFile(
-          mycontext,
-          mycontext.getPackageName(),
+          getMyAppContext(),
+          getMyAppContext().getPackageName(),
           new File(path));
     } else {
       fileUri = Uri.fromFile(new File(path));
     }
 
-    Intent i = new Intent(mycontext, PDFActivity.class);
+    Intent i = new Intent(getMyAppContext(), PDFActivity.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     i.setData(fileUri);
-    mycontext.startActivity(i);
+    getMyAppContext().startActivity(i);
   }
 
   public void closeMyPDF() {
@@ -1362,9 +1359,9 @@ public class MyActivity
   }
 
   public void openFilePicker() {
-    Intent i = new Intent(mycontext, FilePicker.class);
+    Intent i = new Intent(getMyAppContext(), FilePicker.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    mycontext.startActivity(i);
+    getMyAppContext().startActivity(i);
   }
 
   public void closeFilePicker() {
@@ -1460,9 +1457,9 @@ public class MyActivity
   }
 
   public static void showAndroidProgressBar() {
-    Intent i = new Intent(mycontext, MyProgBar.class);
+    Intent i = new Intent(getMyAppContext(), MyProgBar.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    mycontext.startActivity(i);
+    getMyAppContext().startActivity(i);
   }
 
   public static void closeAndroidProgressBar() {
@@ -1471,9 +1468,9 @@ public class MyActivity
   }
 
   public void showTempActivity() {
-    Intent i = new Intent(mycontext, TempActivity.class);
+    Intent i = new Intent(getMyAppContext(), TempActivity.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    mycontext.startActivity(i);
+    getMyAppContext().startActivity(i);
   }
 
   public static void playMyText(String text) {

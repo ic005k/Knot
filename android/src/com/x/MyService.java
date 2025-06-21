@@ -134,7 +134,7 @@ public class MyService extends Service {
         super.onCreate();
         Log.i(TAG, "Service on create");// 服务被创建
 
-        context = MyActivity.mycontext;
+        context = MyActivity.getMyAppContext();
 
         // 注册闹钟接收器
         IntentFilter filter = new IntentFilter(ACTION_TODO_ALARM);

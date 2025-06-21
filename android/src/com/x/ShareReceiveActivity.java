@@ -589,7 +589,7 @@ public class ShareReceiveActivity extends Activity
     }
 
     public boolean isAppRun(String pName) {
-        Context context = MyActivity.mycontext;
+        Context context = MyActivity.getMyAppContext();
 
         boolean isRun = false;
         int uid = getPackageUid(context, pName);
