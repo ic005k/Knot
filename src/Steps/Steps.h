@@ -182,7 +182,6 @@ class Steps : public QDialog {
   bool isGpsMapTrackFile;
   double lastLat, lastLon;
   bool isGpsTest = false;
-  int nGpsMethod = 1; /* 1：主类中 2:单独的类中 */
 
   QString getGpsListText0(int index);
   void refreshMotionData();
@@ -191,7 +190,7 @@ class Steps : public QDialog {
 
   QString getFullDate();
   void refreshTotalDistance();
-  signals:
+ signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();

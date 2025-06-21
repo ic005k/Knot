@@ -28,7 +28,7 @@ QVector<GPSCoordinate> detectAndCorrectOutliers(
     const QVector<GPSCoordinate>& data, double threshold);
 
 #ifdef Q_OS_ANDROID
-QJniObject listenerWrapper;
+
 QJniObject m_activity;
 #endif
 
@@ -400,28 +400,11 @@ void Steps::startRecordMotion() {
   m_activity = QJniObject(QNativeInterface::QAndroidApplication::context());
 
   if (m_activity.isValid()) {
-    if (nGpsMethod == 1) {
-      if (m_activity.callMethod<jdouble>("startGpsUpdates", "()D") == 0) {
-        qWarning() << "LocationManager is null";
-        mw_one->ui->lblGpsInfo->setText("LocationManager is null...");
-        mw_one->ui->btnGPS->setText(tr("Start"));
-        return;
-      }
-    }
-
-    if (nGpsMethod == 2) {
-      listenerWrapper = QJniObject("com/x/LocationListenerWrapper",
-                                   "(Landroid/content/Context;)V",
-                                   m_activity.object<jobject>());
-      if (listenerWrapper.isValid()) {
-        if (listenerWrapper.callMethod<jdouble>("startGpsUpdates", "()D") ==
-            0) {
-          qWarning() << "LocationManager is null";
-          mw_one->ui->lblGpsInfo->setText("LocationManager is null...");
-          mw_one->ui->btnGPS->setText(tr("Start"));
-          return;
-        }
-      }
+    if (m_activity.callMethod<jdouble>("startGpsUpdates", "()D") == 0) {
+      qWarning() << "LocationManager is null";
+      mw_one->ui->lblGpsInfo->setText("LocationManager is null...");
+      mw_one->ui->btnGPS->setText(tr("Start"));
+      return;
     }
   }
 
@@ -492,32 +475,23 @@ void Steps::updateGetGps() {
 
   // 获取当前运动距离
   jdouble distance;
-  if (nGpsMethod == 1)
-    distance = m_activity.callMethod<jdouble>("getTotalDistance", "()D");
-  else
-    distance = listenerWrapper.callMethod<jdouble>("getTotalDistance", "()D");
+
+  distance = m_activity.callMethod<jdouble>("getTotalDistance", "()D");
 
   QString str_distance = QString::number(distance, 'f', 2);
   m_distance = str_distance.toDouble();
 
   if (!isGpsTest) {
-    if (nGpsMethod == 1) {
-      latitude = m_activity.callMethod<jdouble>("getLatitude", "()D");
-      longitude = m_activity.callMethod<jdouble>("getLongitude", "()D");
-    } else {
-      latitude = listenerWrapper.callMethod<jdouble>("getLatitude", "()D");
-      longitude = listenerWrapper.callMethod<jdouble>("getLongitude", "()D");
-    }
+    latitude = m_activity.callMethod<jdouble>("getLatitude", "()D");
+    longitude = m_activity.callMethod<jdouble>("getLongitude", "()D");
 
     latitude = QString::number(latitude, 'f', 6).toDouble();
     longitude = QString::number(longitude, 'f', 6).toDouble();
   }
 
   QJniObject jstrGpsStatus;
-  if (nGpsMethod == 1)
-    jstrGpsStatus = m_activity.callObjectMethod<jstring>("getGpsStatus");
-  else
-    jstrGpsStatus = listenerWrapper.callObjectMethod<jstring>("getGpsStatus");
+
+  jstrGpsStatus = m_activity.callObjectMethod<jstring>("getGpsStatus");
 
   if (jstrGpsStatus.isValid()) {
     strGpsStatus = jstrGpsStatus.toString();
@@ -542,13 +516,9 @@ void Steps::updateGetGps() {
     if (m_time.second() % 3 == 0) {
       if (!isGpsTest) {
         jdouble m_speed;
-        if (nGpsMethod == 1) {
-          m_speed = m_activity.callMethod<jdouble>("getMySpeed", "()D");
-          maxSpeed = m_activity.callMethod<jdouble>("getMaxSpeed", "()D");
-        } else {
-          m_speed = listenerWrapper.callMethod<jdouble>("getMySpeed", "()D");
-          maxSpeed = listenerWrapper.callMethod<jdouble>("getMaxSpeed", "()D");
-        }
+
+        m_speed = m_activity.callMethod<jdouble>("getMySpeed", "()D");
+        maxSpeed = m_activity.callMethod<jdouble>("getMaxSpeed", "()D");
 
         mySpeed = m_speed;
         if (m_distance > 0 & mySpeed > 0) {
@@ -656,10 +626,9 @@ void Steps::stopRecordMotion() {
   refreshMotionData();
 
 #ifdef Q_OS_ANDROID
-  if (nGpsMethod == 1)
-    m_distance = m_activity.callMethod<jdouble>("stopGpsUpdates", "()D");
-  else
-    m_distance = listenerWrapper.callMethod<jdouble>("stopGpsUpdates", "()D");
+
+  m_distance = m_activity.callMethod<jdouble>("stopGpsUpdates", "()D");
+
 #else
   if (m_positionSource) {
     m_positionSource->stopUpdates();
