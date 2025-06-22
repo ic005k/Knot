@@ -45,7 +45,7 @@ class Todo : public QDialog {
       "#listWidget::item:hover {background-color: #4e5465;}"
       "#listWidget::item:selected {border-left: 5px solid #009688;}";
 
-  void startTimerAlarm(QString text);
+  void startTimerAlarm(QString text, qlonglong minValue);
   void stopTimerAlarm();
 
   void sendMsgAlarm(QString text);

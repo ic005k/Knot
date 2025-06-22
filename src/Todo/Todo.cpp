@@ -512,19 +512,13 @@ void Todo::on_DelAlarm() {
   goCurrentTodoItem(currentTodoItem);
 }
 
-void Todo::startTimerAlarm(QString text) {
+void Todo::startTimerAlarm(QString text, qlonglong minValue) {
+  if (minValue < 5) return;
+
   Q_UNUSED(text);
 #ifdef Q_OS_ANDROID
   QJniObject javaText = QJniObject::fromString(text);
   QJniObject jo = QNativeInterface::QAndroidApplication::context();
-
-  // jo.callStaticMethod<int>("com.x/MyService", "startAlarm",
-  //                          "(Ljava/lang/String;)I",
-  //                          javaText.object<jstring>());
-
-  // jo.callStaticMethod<int>("com.x/MyService", "startPreciseAlarm",
-  //                          "(Ljava/lang/String;)I",
-  //                          javaText.object<jstring>());
 
   jo.callStaticMethod<int>("com.x/MyService", "startPreciseAlarmInMyService",
                            "(Ljava/lang/String;)I", javaText.object<jstring>());
@@ -769,7 +763,7 @@ void Todo::refreshAlarm() {
     for (int i = 0; i < listTotalS.count(); i++) {
       if (minValue == listTotalS.at(i)) {
         QString str1 = listAlarm.at(i);
-        startTimerAlarm(str1);
+        startTimerAlarm(str1, minValue);
         Reg.setValue("msg", str1);
 
         // isToDay?

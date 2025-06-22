@@ -4106,6 +4106,7 @@ static void JavaNotify_1() {
 
 static void JavaNotify_2() {
   // When the screen lights up.
+  mw_one->m_Todo->refreshAlarm();
   mw_one->m_Steps->updateHardSensorSteps();
 
   qDebug() << "C++ JavaNotify_2";

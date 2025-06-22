@@ -68,7 +68,6 @@ public class ClockActivity
   private Button btn_cancel;
   private Button btn_play_voice;
   public static TextView text_info, text_title;
-  private static boolean zh_cn;
   private String voiceFile;
 
   private static Context context;
@@ -111,17 +110,6 @@ public class ClockActivity
 
   public native static void CallJavaNotify_14();
 
-  public static boolean isZh(Context context) {
-    Locale locale = context.getResources().getConfiguration().locale;
-    String language = locale.getLanguage();
-    if (language.endsWith("zh"))
-      zh_cn = true;
-    else
-      zh_cn = false;
-
-    return zh_cn;
-  }
-
   public static int setInfoText(String str) {
     strInfo = str;
     System.out.println("InfoText" + strInfo);
@@ -136,14 +124,14 @@ public class ClockActivity
     text_info.setText(str);
 
     btn_cancel = (Button) findViewById(R.id.btn_cancel);
-    if (zh_cn)
+    if (MyActivity.zh_cn)
       btn_cancel.setText("关闭");
     else
       btn_cancel.setText("Close");
     btn_cancel.setOnClickListener(this);
 
     btn_play_voice = (Button) findViewById(R.id.btn_play_voice);
-    if (zh_cn)
+    if (MyActivity.zh_cn)
       btn_play_voice.setText("播放语音");
     else
       btn_play_voice.setText(
@@ -188,12 +176,10 @@ public class ClockActivity
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
-
     super.onCreate(savedInstanceState);
 
     context = getApplicationContext();
-    // this.getWindow().setWindowAnimations(R.style.WindowAnim);
-    isZh(context);
+
     m_instance = this;
 
     MyActivity.alarmWindows.add(m_instance);
@@ -282,7 +268,7 @@ public class ClockActivity
     String str2 = array[1];
     String str3 = array[3];
     String strTodo;
-    if (zh_cn)
+    if (MyActivity.zh_cn)
       strTodo = "待办事项：\n";
     else
       strTodo = "Todo: \n";
@@ -292,8 +278,6 @@ public class ClockActivity
     if (isRefreshAlarm) {
       CallJavaNotify_3();
     }
-
-    // MyService.notifyTodoAlarm(context, str2);
 
     String mystr = str2;
     boolean isVoice = false;
@@ -353,13 +337,13 @@ public class ClockActivity
         if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
           // 表示按了home键,程序直接进入到后台
           isHomeKey = true;
-          // MyActivity.closeAllAlarmWindows();
+
           System.out.println("ClockActivity HOME键被按下...");
 
         } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
           // 表示长按home键,显示最近使用的程序
           isHomeKey = true;
-          // MyActivity.closeAllAlarmWindows();
+
           System.out.println("ClockActivity 长按HOME键...");
 
         }
@@ -462,7 +446,7 @@ public class ClockActivity
     public void readFrom(String filename) throws Exception {
       properties = new Properties();
 
-      FileInputStream fileInputStream; // = context.openFileInput(filename);
+      FileInputStream fileInputStream;
 
       File file = new File(filename);
       fileInputStream = new FileInputStream(file);
@@ -471,10 +455,6 @@ public class ClockActivity
           fileInputStream,
           "UTF-8");
       BufferedReader br = new BufferedReader(reader);
-      // String line;
-      // while ((line = br.readLine()) != null) {
-      // System.out.println(line);
-      // }
 
       properties.load(br);
 

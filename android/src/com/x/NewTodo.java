@@ -119,8 +119,6 @@ public class NewTodo extends Activity {
 
     public native static void CallJavaNotify_14();
 
-    private static boolean zh_cn;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -294,55 +292,6 @@ public class NewTodo extends Activity {
         return false;
     }
 
-    public static boolean isZh(Context context) {
-        Locale locale = context.getResources().getConfiguration().locale;
-        String language = locale.getLanguage();
-        if (language.endsWith("zh"))
-            zh_cn = true;
-        else
-            zh_cn = false;
-
-        return zh_cn;
-    }
-
-    public String readTextFile(String filename) {
-        try {
-            File file = new File(filename);
-            StringBuffer strBuf = new StringBuffer();
-            BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(file), "UTF-8"));
-            int tempchar;
-            while ((tempchar = bufferedReader.read()) != -1) {
-                strBuf.append((char) tempchar);
-            }
-            bufferedReader.close();
-            return strBuf.toString();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
-
-    public void writeTextFile(String content, String filename) {
-        try {
-            File file = new File(filename);
-
-            if (file.exists()) {
-                file.delete();
-            }
-            file.createNewFile();
-            // 获取该文件的缓冲输出流
-            BufferedWriter bufferedWriter = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
-            // 写入信息
-            bufferedWriter.write(content);
-            bufferedWriter.flush();// 清空缓冲区
-            bufferedWriter.close();// 关闭输出流
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
     private void goNewTodo() {
         boolean isRun = isAppRun("com.x");
 
@@ -361,7 +310,7 @@ public class NewTodo extends Activity {
                 e.printStackTrace();
             }
 
-            if (isZh(this))
+            if (MyActivity.zh_cn)
                 Toast.makeText(this, getString(R.string.strTip_zh), Toast.LENGTH_LONG).show();
             else
                 Toast.makeText(this, getString(R.string.strTip), Toast.LENGTH_LONG).show();
