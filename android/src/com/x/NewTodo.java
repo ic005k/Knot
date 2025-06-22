@@ -13,7 +13,7 @@ import android.content.pm.ResolveInfo;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
+
 import android.net.Uri;
 import android.os.FileObserver;
 
@@ -65,7 +65,6 @@ import java.util.Date;
 
 import android.os.Handler;
 import android.media.AudioManager;
-import android.widget.TextView;
 
 import java.util.Locale;
 
@@ -119,12 +118,13 @@ public class NewTodo extends Activity {
 
     public native static void CallJavaNotify_14();
 
+    private boolean isRun;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        NewTodo.this.finish();
-
+        finish();
     }
 
     @Override
@@ -136,9 +136,8 @@ public class NewTodo extends Activity {
     @Override
     protected void onDestroy() {
         System.out.println("onDestroy...");
-
-        super.onDestroy();
         goNewTodo();
+        super.onDestroy();
 
     }
 
@@ -148,78 +147,13 @@ public class NewTodo extends Activity {
         startActivity(it);
     }
 
-    private void doStartApplicationWithPackageName(String packagename) {
-        System.out.println("自启动开始...");
-        // 通过包名获取此APP详细信息，包括Activities、services、versioncode、name等等
-        PackageInfo packageinfo = null;
-        try {
-            packageinfo = getPackageManager().getPackageInfo(packagename, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        if (packageinfo == null) {
-            return;
-        }
-
-        // 创建一个类别为CATEGORY_LAUNCHER的该包名的Intent
-        Intent resolveIntent = new Intent(Intent.ACTION_MAIN, null);
-        resolveIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        resolveIntent.setPackage(packageinfo.packageName);
-
-        // 通过getPackageManager()的queryIntentActivities方法遍历
-        List<ResolveInfo> resolveinfoList = getPackageManager()
-                .queryIntentActivities(resolveIntent, 0);
-
-        ResolveInfo resolveinfo = resolveinfoList.iterator().next();
-        if (resolveinfo != null) {
-            // packagename = 参数packname
-            String packageName = resolveinfo.activityInfo.packageName;
-            // 这个就是我们要找的该APP的LAUNCHER的Activity[组织形式：packagename.mainActivityname]
-            String className = resolveinfo.activityInfo.name;
-            // LAUNCHER Intent
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_LAUNCHER);
-
-            // 设置ComponentName参数1:packagename参数2:MainActivity路径
-            ComponentName cn = new ComponentName(packageName, className);
-
-            intent.setComponent(cn);
-            startActivity(intent);
-
-            System.out.println("启动自己已完成...");
-        }
-
-        System.out.println("过程完成...");
-    }
-
-    private void startLocalApp(String packageNameTarget) {
-        Log.i("Wmx logs::", "-----------------------开始启动第三方 APP=" + packageNameTarget);
-
-        PackageManager packageManager = getPackageManager();
-        Intent intent = packageManager.getLaunchIntentForPackage(packageNameTarget);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        intent.setFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED | Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        /**
-         * android.intent.action.MAIN：打开另一程序
-         */
-        intent.setAction("android.intent.action.MAIN");
-        /**
-         * FLAG_ACTIVITY_SINGLE_TOP:
-         * 如果当前栈顶的activity就是要启动的activity,则不会再启动一个新的activity
-         */
-        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(intent);
-
-    }
-
     public boolean isAppRun(String pName) {
         Context context = MyActivity.getMyAppContext();
 
         boolean isRun = false;
         int uid = getPackageUid(context, pName);
         if (uid > 0) {
-            boolean rstA = isAppRunning(context, pName);
+            boolean rstA = isAppRunning();// context, pName);
             boolean rstB = isProcessRunning(context, uid);
             // if (rstA || rstB) {
             if (rstB) {
@@ -235,14 +169,6 @@ public class NewTodo extends Activity {
         return isRun;
     }
 
-    /**
-     * 方法描述：判断某一应用是否正在运行
-     * Created by cafeting on 2017/2/4.
-     *
-     * @param context     上下文
-     * @param packageName 应用的包名
-     * @return true 表示正在运行，false 表示没有运行
-     */
     public static boolean isAppRunning(Context context, String packageName) {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningTaskInfo> list = am.getRunningTasks(100);
@@ -253,6 +179,15 @@ public class NewTodo extends Activity {
             if (info.baseActivity.getPackageName().equals(packageName)) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    private boolean isAppRunning() {
+        ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        for (ActivityManager.RunningAppProcessInfo proc : am.getRunningAppProcesses()) {
+            if ("com.x".equals(proc.processName))
+                return true;
         }
         return false;
     }
@@ -271,14 +206,6 @@ public class NewTodo extends Activity {
         return -1;
     }
 
-    /**
-     * 判断某一 uid 的程序是否有正在运行的进程，即是否存活
-     * Created by cafeting on 2017/2/4.
-     *
-     * @param context 上下文
-     * @param uid     已安装应用的 uid
-     * @return true 表示正在运行，false 表示没有运行
-     */
     public static boolean isProcessRunning(Context context, int uid) {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningServiceInfo> runningServiceInfos = am.getRunningServices(200);
@@ -310,8 +237,9 @@ public class NewTodo extends Activity {
                 e.printStackTrace();
             }
 
-            if (MyActivity.zh_cn)
-                Toast.makeText(this, getString(R.string.strTip_zh), Toast.LENGTH_LONG).show();
+            if (isZh())
+                Toast.makeText(this, getString(R.string.strTip_zh),
+                        Toast.LENGTH_LONG).show();
             else
                 Toast.makeText(this, getString(R.string.strTip), Toast.LENGTH_LONG).show();
 
@@ -335,6 +263,15 @@ public class NewTodo extends Activity {
 
             CallJavaNotify_8();
         }
+    }
+
+    public boolean isZh() {
+        Locale locale = this.getResources().getConfiguration().locale;
+        String language = locale.getLanguage();
+        if (language.endsWith("zh"))
+            return true;
+        else
+            return false;
     }
 
 }
