@@ -139,10 +139,6 @@ void Preferences::on_btnCustomFont_clicked() {
                                           tr("Font Files (*.*)"));
   if (fileName == "") return;
 
-#ifdef Q_OS_ANDROID
-  // fileName = m_Method->getRealPathFile(fileName);
-#endif
-
   setFontDemoUI(fileName, ui->btnCustomFont, ui->sliderFontSize->value());
   isFontChange = true;
 
@@ -153,84 +149,49 @@ void Preferences::on_btnCustomFont_clicked() {
 
 QString Preferences::setFontDemoUI(QString customFontPath, QToolButton* btn,
                                    int fontSize) {
-  QString fontName;
-  int loadedFontID;
-  QStringList loadedFontFamilies;
-  QFont f;
-  QString style;
+  // 0. 安全校验
+  if (customFontPath.isEmpty() || !btn) return "";
 
-  if (!mw_one->initMain) fontDatabaseUI.removeAllApplicationFonts();
-  loadedFontID = fontDatabaseUI.addApplicationFont(customFontPath);
-  loadedFontFamilies = fontDatabaseUI.applicationFontFamilies(loadedFontID);
+  QString fontName;
+  int loadedFontID = -1;
+
+  // 1. 移除旧字体 (安全方式)
+  if (!mw_one->initMain && uiFontID != -1) {
+    QFontDatabase::removeApplicationFont(uiFontID);
+    uiFontID = -1;
+  }
+
+  // 2. 加载新字体 (同步操作，无需Sleep)
+  loadedFontID = QFontDatabase::addApplicationFont(customFontPath);
+  if (loadedFontID == -1) return "";
+
+  // 3. 获取字体族
+  QStringList loadedFontFamilies =
+      QFontDatabase::applicationFontFamilies(loadedFontID);
+  if (loadedFontFamilies.isEmpty()) {
+    QFontDatabase::removeApplicationFont(loadedFontID);
+    return "";
+  }
+  fontName = loadedFontFamilies.at(0);
   uiFontID = loadedFontID;
 
-  if (!loadedFontFamilies.empty()) {
-    fontName = loadedFontFamilies.at(0);
+  // 4. 安全获取字体样式
+  QStringList styles = QFontDatabase::styles(fontName);
+  QString style = styles.isEmpty() ? "Normal" : styles.at(0);
 
-    QStringList styles = fontDatabaseUI.styles(fontName);
-    style = styles.at(0);
-    uiFontWeight = (QFont::Weight)fontDatabaseUI.weight(fontName, style);
-
-    f.setWeight(uiFontWeight);
-    f.setFamily(fontName);
-    f.setPointSize(fontSize);
-
-    btn->setFont(f);
-
-    QString str = customFontPath;
-#ifdef Q_OS_ANDROID
-    str = mw_one->m_Reader->getUriRealPath(customFontPath);
-#endif
-
-    QStringList list = str.split("/");
-    QString str1 = list.at(list.count() - 1);
-    btn->setText(tr("Custom Font") + "\n" + fontName + "\n" + str1);
-  }
-
-  return fontName;
-}
-
-QString Preferences::setFontDemo(QString customFontPath, QToolButton* btn,
-                                 int fontSize) {
-  QString fontName;
-  int loadedFontID;
-  QStringList loadedFontFamilies;
+  // 5. 设置字体
   QFont f;
-  QString style;
+  uiFontWeight =
+      static_cast<QFont::Weight>(QFontDatabase::weight(fontName, style));
+  f.setFamily(fontName);
+  f.setWeight(uiFontWeight);
+  f.setPointSize(fontSize);
+  btn->setFont(f);
 
-  if (!mw_one->initMain) {
-    if (ui->chkUIFont->isChecked() && customFontFamily.length() > 0)
-      fontDatabase.removeApplicationFont(readerFontID);
-  }
-  loadedFontID = fontDatabase.addApplicationFont(customFontPath);
-  loadedFontFamilies = fontDatabase.applicationFontFamilies(loadedFontID);
-  readerFontID = loadedFontID;
-
-  if (!loadedFontFamilies.empty()) {
-    fontName = loadedFontFamilies.at(0);
-
-    QStringList styles = fontDatabase.styles(fontName);
-    style = styles.at(0);
-    readerFontWeight = (QFont::Weight)fontDatabase.weight(fontName, style);
-
-    qDebug() << "readerFontWeight=" << readerFontWeight << loadedFontFamilies
-             << loadedFontID << style;
-
-    f.setWeight(readerFontWeight);
-    f.setFamily(fontName);
-    f.setPointSize(fontSize);
-
-    btn->setFont(f);
-
-    QString str = customFontPath;
-#ifdef Q_OS_ANDROID
-    str = mw_one->m_Reader->getUriRealPath(customFontPath);
-#endif
-
-    QStringList list = str.split("/");
-    QString str1 = list.at(list.count() - 1);
-    btn->setText(tr("Custom Font") + "\n" + fontName + "\n" + str1);
-  }
+  // 6. 跨平台路径显示
+  QFileInfo fi(customFontPath);
+  QString displayName = fi.fileName();
+  btn->setText(tr("Custom Font") + "\n" + fontName + "\n" + displayName);
 
   return fontName;
 }
@@ -338,7 +299,7 @@ void Preferences::initOptions() {
       iniPreferences->value("/Options/ReaderFont").toString();
   QString readerFont;
   if (QFile::exists(readerFontFile))
-    readerFont = setFontDemo(readerFontFile, mw_one->ui->btnFont, fontSize);
+    readerFont = setFontDemoUI(readerFontFile, mw_one->ui->btnFont, fontSize);
   else
     readerFont = defaultFontFamily;
   mw_one->ui->qwReader->rootContext()->setContextProperty("FontName",

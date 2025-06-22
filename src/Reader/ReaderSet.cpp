@@ -181,11 +181,7 @@ void ReaderSet::on_btnFont_clicked() {
                                           tr("Font Files (*.*)"));
   if (fileName == "") return;
 
-#ifdef Q_OS_ANDROID
-  // fileName = m_Method->getRealPathFile(fileName);
-#endif
-
-  QString readerFont = mw_one->m_Preferences->setFontDemo(
+  QString readerFont = mw_one->m_Preferences->setFontDemoUI(
       fileName, mw_one->ui->btnFont, this->font().pointSize());
   iniPreferences->setValue("/Options/ReaderFont", fileName);
 
