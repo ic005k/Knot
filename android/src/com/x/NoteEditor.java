@@ -16,15 +16,6 @@ import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
-/* 
-import com.skydoves.powermenu.CustomPowerMenu;
-import com.skydoves.powermenu.OnDismissedListener;
-import com.skydoves.powermenu.OnMenuItemClickListener;
-import com.skydoves.powermenu.PowerMenu;
-import com.skydoves.powermenu.PowerMenuItem;
-import com.skydoves.powermenu.MenuAnimation;
-*/
-
 import io.noties.markwon.Markwon;
 import io.noties.markwon.editor.MarkwonEditor;
 import io.noties.markwon.editor.MarkwonEditorTextWatcher;
@@ -1746,50 +1737,6 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         return listMenuTitle;
 
     }
-
-    /*
-     * // PowerMenu插件，目前暂停使用，不是很轻量，但根据需要可随时启用
-     * private void showPowerMenu(View view) {
-     * 
-     * ArrayList<PowerMenuItem> list = new ArrayList<>();
-     * int count = listMenuTitle.size();
-     * for (int i = 0; i < count; i++) {
-     * String strTitle = listMenuTitle.get(i);
-     * list.add(new PowerMenuItem(strTitle));
-     * }
-     * 
-     * powerMenu = new PowerMenu.Builder(context)
-     * .addItemList(list) // list has "Novel", "Poetry", "Art"
-     * .setAnimation(MenuAnimation.SHOWUP_TOP_RIGHT) // Animation start point (TOP |
-     * LEFT).
-     * .setMenuRadius(10f) // sets the corner radius.
-     * .setMenuShadow(10f) // sets the shadow.
-     * .setTextColor(ContextCompat.getColor(context, R.color.md_grey_700))
-     * .setTextGravity(Gravity.CENTER)
-     * .setTextTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD))
-     * .setSelectedTextColor(Color.WHITE)
-     * .setMenuColor(Color.WHITE)
-     * .setSelectedMenuColor(ContextCompat.getColor(context, R.color.colorPrimary))
-     * .setOnMenuItemClickListener(onMenuItemClickListener)
-     * .build();
-     * 
-     * powerMenu.showAsDropDown(view); // view is an anchor
-     * 
-     * }
-     * 
-     * private PowerMenu powerMenu;
-     * private OnMenuItemClickListener<PowerMenuItem> onMenuItemClickListener = new
-     * OnMenuItemClickListener<PowerMenuItem>() {
-     * 
-     * @Override
-     * public void onItemClick(int position, PowerMenuItem item) {
-     * onClickMenuTitle(item.title);
-     * // Toast.makeText(getBaseContext(), item.title, Toast.LENGTH_SHORT).show();
-     * powerMenu.setSelectedPosition(position); // change selected item
-     * powerMenu.dismiss();
-     * }
-     * };
-     */
 
     public boolean readFileFromUriToLocal(Uri uri, String localfile) {
 

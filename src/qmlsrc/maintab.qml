@@ -1,6 +1,5 @@
 ﻿import QtQuick
 import QtQuick.Window
-import QtQml
 import QtQuick.Controls
 import QtQuick.Layouts
 
@@ -170,22 +169,22 @@ Rectangle {
                 var item2H
                 var item3H
 
-                if (item0.text.length == 0)
+                if (item0.text.length === 0)
                     item0H = 0
                 else
                     item0H = item0.contentHeight
 
-                if (item1.text.length == 0)
+                if (item1.text.length === 0)
                     item1H = 0
                 else
                     item1H = item1.contentHeight
 
-                if (item2.text.length == 0)
+                if (item2.text.length === 0)
                     item2H = 0
                 else
                     item2H = item2.contentHeight
 
-                if (item3.text.length == 0)
+                if (item3.text.length === 0)
                     item3H = 0
                 else
                     item3H = item3.contentHeight
@@ -368,21 +367,6 @@ Rectangle {
         ScrollBar.vertical: ScrollBar {
             width: 8
             policy: ScrollBar.AsNeeded
-        }
-    }
-
-    function getListEleHeadColor(ntype) {
-        switch (ntype) {
-        case 0:
-            return "lightgray"
-        case 1:
-            return "red"
-        case 2:
-            return "yellow"
-        case 3:
-            return "lightblue"
-        default:
-            return "black"
         }
     }
 }

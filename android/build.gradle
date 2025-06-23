@@ -58,9 +58,6 @@ dependencies {
     // read and write inifile
     implementation 'org.ini4j:ini4j:0.5.4'
 
-    // powermenu
-    // implementation "com.github.skydoves:powermenu:2.2.4"
-
     // PDF
     implementation 'com.github.barteksc:pdfium-android:1.9.0'
 

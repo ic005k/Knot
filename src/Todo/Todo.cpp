@@ -526,7 +526,7 @@ void Todo::startTimerAlarm(QString text, qlonglong minValue) {
   jo.callStaticMethod<int>("com.x/ClockActivity", "setInfoText",
                            "(Ljava/lang/String;)I", javaText.object<jstring>());
 
-  sendTodoAlarmMsg(minValue);
+  // sendTodoAlarmMsg(minValue);
 
 #endif
 }
