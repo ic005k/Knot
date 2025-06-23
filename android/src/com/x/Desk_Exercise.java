@@ -223,46 +223,8 @@ public class Desk_Exercise extends Activity {
         return zh_cn;
     }
 
-    public String readTextFile(String filename) {
-        try {
-            File file = new File(filename);
-            StringBuffer strBuf = new StringBuffer();
-            BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(file), "UTF-8"));
-            int tempchar;
-            while ((tempchar = bufferedReader.read()) != -1) {
-                strBuf.append((char) tempchar);
-            }
-            bufferedReader.close();
-            return strBuf.toString();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
-
-    public void writeTextFile(String content, String filename) {
-        try {
-            File file = new File(filename);
-
-            if (file.exists()) {
-                file.delete();
-            }
-            file.createNewFile();
-            // 获取该文件的缓冲输出流
-            BufferedWriter bufferedWriter = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
-            // 写入信息
-            bufferedWriter.write(content);
-            bufferedWriter.flush();// 清空缓冲区
-            bufferedWriter.close();// 关闭输出流
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
     private void goExercise() {
-        boolean isRun = isAppRun("com.x");
+        boolean isRun = MyService.isReady;// isAppRun("com.x");
 
         if (!isRun) {
             try {

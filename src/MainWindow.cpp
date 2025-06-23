@@ -4123,9 +4123,6 @@ static void JavaNotify_4() {
   mw_one->alertWindowsCount--;
 
   if (mw_one->alertWindowsCount == 0) {
-    // if (mw_one->ui->frameMain->isHidden())
-    //   mw_one->m_ReceiveShare->closeAllChildWindows();
-
     bool isBackMain = false;
     QJniObject activity =
         QJniObject(QNativeInterface::QAndroidApplication::context());

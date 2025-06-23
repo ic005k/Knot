@@ -185,14 +185,6 @@ public class DefaultOpen extends Activity {
         return isRun;
     }
 
-    /**
-     * 方法描述：判断某一应用是否正在运行
-     * Created by cafeting on 2017/2/4.
-     *
-     * @param context     上下文
-     * @param packageName 应用的包名
-     * @return true 表示正在运行，false 表示没有运行
-     */
     public static boolean isAppRunning(Context context, String packageName) {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningTaskInfo> list = am.getRunningTasks(100);
@@ -221,14 +213,6 @@ public class DefaultOpen extends Activity {
         return -1;
     }
 
-    /**
-     * 判断某一 uid 的程序是否有正在运行的进程，即是否存活
-     * Created by cafeting on 2017/2/4.
-     *
-     * @param context 上下文
-     * @param uid     已安装应用的 uid
-     * @return true 表示正在运行，false 表示没有运行
-     */
     public static boolean isProcessRunning(Context context, int uid) {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningServiceInfo> runningServiceInfos = am.getRunningServices(200);
@@ -253,44 +237,6 @@ public class DefaultOpen extends Activity {
         return zh_cn;
     }
 
-    public String readTextFile(String filename) {
-        try {
-            File file = new File(filename);
-            StringBuffer strBuf = new StringBuffer();
-            BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(file), "UTF-8"));
-            int tempchar;
-            while ((tempchar = bufferedReader.read()) != -1) {
-                strBuf.append((char) tempchar);
-            }
-            bufferedReader.close();
-            return strBuf.toString();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
-
-    public void writeTextFile(String content, String filename) {
-        try {
-            File file = new File(filename);
-
-            if (file.exists()) {
-                file.delete();
-            }
-            file.createNewFile();
-            // 获取该文件的缓冲输出流
-            BufferedWriter bufferedWriter = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
-            // 写入信息
-            bufferedWriter.write(content);
-            bufferedWriter.flush();// 清空缓冲区
-            bufferedWriter.close();// 关闭输出流
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
     private void goDefaultOpen() {
         Intent intent = getIntent();
         uri = intent.getData();
@@ -298,11 +244,17 @@ public class DefaultOpen extends Activity {
         if (uri != null) {
             String filePath = "";
             String strUri = Uri.decode(uri.toString());
-            if (strUri.contains("file://"))
+
+            // 关键修改：添加MIUI文件管理器的特殊处理
+            if ("content".equals(uri.getScheme()) &&
+                    "com.mi.android.globalFileexplorer.myprovider".equals(uri.getAuthority())) {
+                // 处理MIUI文件管理器的特殊URI
+                filePath = handleMiuiFileManagerUri(uri);
+            } else if (strUri.contains("file://")) {
                 filePath = strUri;
-            else
-                // filePath = getFileFromContentUri(context, uri);
+            } else {
                 filePath = GetRealPath.getFilePathFromContentUri(context, uri);
+            }
 
             filePath = filePath.replace("file://", "");
 
@@ -331,7 +283,7 @@ public class DefaultOpen extends Activity {
         } else
             DefaultOpen.this.finish();
 
-        boolean isRun = isAppRun("com.x");
+        boolean isRun = MyService.isReady; // isAppRun("com.x");
 
         if (!isRun) {
             try {
@@ -353,7 +305,6 @@ public class DefaultOpen extends Activity {
             else
                 Toast.makeText(this, getString(R.string.strTip), Toast.LENGTH_LONG).show();
 
-            // reopen app
             openAppFromPackageName("com.x");
 
         } else {
@@ -404,8 +355,6 @@ public class DefaultOpen extends Activity {
         }
         String filePath;
         String[] filePathColumn = { MediaStore.MediaColumns.DATA, MediaStore.MediaColumns.DISPLAY_NAME };
-        // String[] filePathColumn = { MediaStore.DownloadColumns.DATA,
-        // MediaStore.DownloadColumns.DISPLAY_NAME };
         ContentResolver contentResolver = context.getContentResolver();
         Cursor cursor = contentResolver.query(uri, filePathColumn, null,
                 null, null);
@@ -420,6 +369,17 @@ public class DefaultOpen extends Activity {
             }
         }
         return "";
+    }
+
+    // 新增方法：专门处理MIUI文件管理器的URI
+    private String handleMiuiFileManagerUri(Uri uri) {
+        List<String> segments = uri.getPathSegments();
+        if (segments.size() > 1 && "external".equals(segments.get(0))) {
+            // 构建真实路径: /storage/emulated/0/ + 剩余路径部分
+            return Environment.getExternalStorageDirectory() + "/" +
+                    TextUtils.join("/", segments.subList(1, segments.size()));
+        }
+        return uri.getPath(); // 回退到普通处理
     }
 
 }

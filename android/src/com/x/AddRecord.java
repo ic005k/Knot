@@ -220,7 +220,7 @@ public class AddRecord extends Activity {
     }
 
     private void goAddRecord() {
-        boolean isRun = isAppRun("com.x");
+        boolean isRun = MyService.isReady;// isAppRun("com.x");
 
         if (!isRun) {
             try {

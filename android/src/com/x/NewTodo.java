@@ -124,6 +124,7 @@ public class NewTodo extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         finish();
     }
 
@@ -137,6 +138,7 @@ public class NewTodo extends Activity {
     protected void onDestroy() {
         System.out.println("onDestroy...");
         goNewTodo();
+
         super.onDestroy();
 
     }
@@ -220,7 +222,7 @@ public class NewTodo extends Activity {
     }
 
     private void goNewTodo() {
-        boolean isRun = isAppRun("com.x");
+        boolean isRun = MyService.isReady;// isAppRun("com.x");
 
         if (!isRun) {
             try {

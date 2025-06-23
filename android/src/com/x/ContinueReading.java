@@ -240,7 +240,7 @@ public class ContinueReading extends Activity {
     }
 
     private void goContinueReading() {
-        boolean isRun = isAppRun("com.x");
+        boolean isRun = MyService.isReady;// isAppRun("com.x");
 
         if (!isRun) {
             try {

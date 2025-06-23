@@ -211,7 +211,7 @@ public class NewNote extends Activity {
     }
 
     private void goNewNote() {
-        boolean isRun = isAppRun("com.x");
+        boolean isRun = MyService.isReady;// isAppRun("com.x");
 
         if (!isRun) {
             try {
