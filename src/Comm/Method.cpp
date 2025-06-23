@@ -2579,3 +2579,19 @@ QString Method::setCurrentDateValue() {
 
   return strdate;
 }
+
+QString Method::formatSecondsToHMS(qlonglong seconds) {
+  qlonglong totalSecs = qAbs(seconds);  // 先处理绝对值
+  qlonglong hours = totalSecs / 3600;
+  qlonglong minutes = (totalSecs % 3600) / 60;
+  qlonglong secs = totalSecs % 60;
+
+  // 构建格式化字符串
+  QString result =
+      QString("%1:%2:%3")
+          .arg(hours)                       // 小时部分直接转换，允许超过两位
+          .arg(minutes, 2, 10, QChar('0'))  // 分钟保持两位，不足补0
+          .arg(secs, 2, 10, QChar('0'));    // 秒保持两位，不足补0
+
+  return seconds < 0 ? "-" + result : result;  // 添上负号（如果需要）
+}

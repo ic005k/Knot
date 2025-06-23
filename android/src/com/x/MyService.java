@@ -114,13 +114,13 @@ public class MyService extends Service {
             strRun = "运行中...";
             strStatus = "状态";
             strTodo = "待办事项";
-            strPedometer = "计步器";
+            strPedometer = "倒计时";
 
         } else {
             strRun = "Running...";
             strStatus = "Status";
             strTodo = "Todo";
-            strPedometer = "Pedometer";
+            strPedometer = "Countdown";
         }
 
         // 注册闹钟接收器

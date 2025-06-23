@@ -1292,7 +1292,7 @@ void Steps::updateHardSensorSteps() {
 
   setTableSteps(steps);
 
-  sendMsg(steps);
+  // sendMsg(steps);
 }
 
 qlonglong Steps::getAndroidSteps() {

@@ -167,5 +167,6 @@ class Todo : public QDialog {
 
   int nRecordSec = 0;
   int nMSec = 0;
+  void sendTodoAlarmMsg(qlonglong minValue);
 };
 #endif  // TODO_H

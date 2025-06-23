@@ -364,7 +364,8 @@ class Method : public QDialog {
 
   QString setCurrentDateValue();
 
- protected:
+  QString formatSecondsToHMS(qlonglong seconds);
+  protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
  public slots:
