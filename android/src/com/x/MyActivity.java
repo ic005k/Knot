@@ -282,6 +282,7 @@ public class MyActivity
 
   public void setDark(boolean dark) {
     isDark = dark;
+    updateStatusBarColor();
 
   }
 
@@ -520,19 +521,6 @@ public class MyActivity
     registSreenStatusReceiver();
     // registAlarmReceiver();
 
-    // 设置状态栏颜色,需要安卓版本大于5.0
-    String filename = "/storage/emulated/0/.Knot/options.ini";
-    internalConfigure = new InternalConfigure(this);
-    try {
-      internalConfigure.readFrom(filename);
-    } catch (Exception e) {
-      System.err.println("Error : reading options.ini");
-      e.printStackTrace();
-    }
-    String strDark = internalConfigure.getIniKey("Dark");
-    isDark = Boolean.parseBoolean(strDark);
-    System.out.println("strDark=" + strDark + "    isDark=" + isDark);
-
     Application application = this.getApplication();
     application.registerActivityLifecycleCallbacks(this);
 
@@ -567,9 +555,6 @@ public class MyActivity
       }
     });
 
-    // 延迟设置状态栏颜色，确保Qt初始化完成
-    new Handler(Looper.getMainLooper()).postDelayed(this::updateStatusBarColor,
-        1000);
   }
 
   // 使用LocationListenerCompat定义位置监听器

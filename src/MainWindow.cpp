@@ -440,7 +440,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_Notes->loadNoteToQML();
   }
 
-  // if (!isAndroid)
   splash->close();
 
   initMain = false;

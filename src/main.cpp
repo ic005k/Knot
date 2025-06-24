@@ -103,75 +103,48 @@ int main(int argc, char* argv[]) {
 
   loadLocal();
 
-  if (!isAndroid) {
-    QPixmap pixmap(":/res/icon.png");
-
-    //  按屏幕实际像素需求缩放
-    qreal dpr = qApp->devicePixelRatio();
-    QSize targetSize(220 * dpr, 220 * dpr);  // 适配高 DPI
-
-    // 使用高质量缩放算法
-    pixmap = pixmap.scaled(targetSize, Qt::KeepAspectRatio,
-                           Qt::SmoothTransformation);
-
-    // 直接绘制文本（自动适配 DPI）
-    // QPainter painter(&pixmap);
-    // painter.setPen(Qt::white);
-    // QRect textRect(10 * dpr, (pixmap.height() - 30 * dpr),
-    //               (pixmap.width() - 20 * dpr), 20 * dpr);
-    // painter.drawText(textRect, Qt::AlignCenter,
-    //                  QObject::tr("Loading, please wait..."));
-    // painter.end();
-
-    // 设置设备像素比
-    pixmap.setDevicePixelRatio(dpr);
-
-    splash = new QSplashScreen(pixmap);
-    splash->setFixedSize(targetSize / dpr);
-
-    splash->show();
+  // 获取屏幕尺寸并创建全屏画布
+  QSize targetSize;
+  qreal dpr = qApp->devicePixelRatio();
+  if (isAndroid) {
+    QScreen* screen = QGuiApplication::primaryScreen();
+    QRect screenGeometry = screen->geometry();
+    targetSize = screenGeometry.size() * dpr;
   } else {
-    // 按屏幕实际像素需求创建空画布
-    qreal dpr = qApp->devicePixelRatio();
-    QSize targetSize(400 * dpr, 100 * dpr);  // 适配高 DPI
-
-    // 创建透明画布
-    QPixmap pixmap(targetSize);
-    pixmap.fill(Qt::transparent);
-
-    // 在透明背景上直接绘制文本
-    QPainter painter(&pixmap);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::TextAntialiasing);
-
-    // 设置文字样式
-    QFont font = painter.font();
-    font.setPointSizeF(16 * dpr);  // 根据设备DPI缩放文字大小
-    font.setBold(true);
-    painter.setFont(font);
-
-    painter.setPen(Qt::blue);  // 设置文字颜色为白色
-
-    // 计算文字位置（居中显示）
-    QFontMetrics metrics(font);
-    QRect textRect = metrics.boundingRect(
-        pixmap.rect(), Qt::AlignCenter, QObject::tr("Loading, please wait..."));
-    textRect.moveCenter(pixmap.rect().center());
-
-    // 绘制文字
-    painter.drawText(textRect, Qt::AlignCenter,
-                     QObject::tr("Loading, please wait..."));
-    painter.end();
-
-    // 设置设备像素比
-    pixmap.setDevicePixelRatio(dpr);
-
-    splash = new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint);
-    splash->setFixedSize(targetSize / dpr);
-    splash->setAttribute(Qt::WA_TranslucentBackground);  // 设置为透明背景
-
-    splash->show();
+    targetSize = QSize(300 * dpr, 100 * dpr);
   }
+
+  // 创建透明画布
+  QPixmap pixmap(targetSize);
+  // 使用中度中性灰背景 (RGB: 100,100,100)
+  QColor bgColor(100, 100, 100);
+  pixmap.fill(bgColor);  // 设置中性背景色
+  // 在透明背景上直接绘制文本
+  QPainter painter(&pixmap);
+  painter.setRenderHint(QPainter::Antialiasing);
+  painter.setRenderHint(QPainter::TextAntialiasing);
+  // 设置文字样式
+  QFont font = painter.font();
+  font.setPointSizeF(16 * dpr);  // 根据设备DPI缩放文字大小
+  font.setBold(true);
+  painter.setFont(font);
+  painter.setPen(QColor(135, 206, 250));  // 设置文字颜色
+  // 计算文字位置（居中显示）
+  QFontMetrics metrics(font);
+  QRect textRect = metrics.boundingRect(pixmap.rect(), Qt::AlignCenter,
+                                        QObject::tr("Loading, please wait..."));
+  textRect.moveCenter(pixmap.rect().center());
+  // 绘制文字
+  painter.drawText(textRect, Qt::AlignCenter,
+                   QObject::tr("Loading, please wait..."));
+  painter.end();
+  // 设置设备像素比
+  pixmap.setDevicePixelRatio(dpr);
+
+  splash = new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint);
+  splash->setFixedSize(targetSize / dpr);
+  splash->setAttribute(Qt::WA_TranslucentBackground);  // 设置为透明背景
+  splash->show();
 
   // 禁用文本选择（针对所有的可输入的编辑框）
   qputenv("QT_QPA_NO_TEXT_HANDLES", "1");
