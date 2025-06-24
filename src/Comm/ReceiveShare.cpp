@@ -478,6 +478,5 @@ void ReceiveShare::goReceiveShare() {
 
     closeAllChildWindows();
     mw_one->ui->btnNotes->click();
-    mw_one->ui->btnNotesList->click();
   }
 }

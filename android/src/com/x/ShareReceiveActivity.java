@@ -373,7 +373,7 @@ public class ShareReceiveActivity extends Activity
     void goReceiveString() {
         System.out.println("strData=" + strData);
 
-        boolean isRun = isAppRun("com.x");
+        boolean isRun = MyService.isReady;// isAppRun("com.x");
 
         if (!isRun) {
             saveReceiveShare("text/plain", strData, "false");
@@ -394,7 +394,7 @@ public class ShareReceiveActivity extends Activity
     }
 
     void goReceiveImage() {
-        boolean isRun = isAppRun("com.x");
+        boolean isRun = MyService.isReady;// isAppRun("com.x");
 
         if (!isRun) {
             saveReceiveShare("image/*", "", "false");
@@ -609,14 +609,6 @@ public class ShareReceiveActivity extends Activity
         return isRun;
     }
 
-    /**
-     * 方法描述：判断某一应用是否正在运行
-     * Created by cafeting on 2017/2/4.
-     *
-     * @param context     上下文
-     * @param packageName 应用的包名
-     * @return true 表示正在运行，false 表示没有运行
-     */
     public static boolean isAppRunning(Context context, String packageName) {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningTaskInfo> list = am.getRunningTasks(100);
@@ -645,14 +637,6 @@ public class ShareReceiveActivity extends Activity
         return -1;
     }
 
-    /**
-     * 判断某一 uid 的程序是否有正在运行的进程，即是否存活
-     * Created by cafeting on 2017/2/4.
-     *
-     * @param context 上下文
-     * @param uid     已安装应用的 uid
-     * @return true 表示正在运行，false 表示没有运行
-     */
     public static boolean isProcessRunning(Context context, int uid) {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningServiceInfo> runningServiceInfos = am.getRunningServices(200);
