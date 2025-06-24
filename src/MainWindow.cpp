@@ -401,8 +401,6 @@ MainWindow::MainWindow(QWidget *parent)
 
   init_TotalData();
 
-  // 延时执行
-  // QTimer::singleShot(100, this, [this]() { m_Reader->initReader(); });
   m_Reader->initReader();
 
   loading = false;
@@ -417,8 +415,10 @@ MainWindow::MainWindow(QWidget *parent)
   m_Todo->refreshTableListsFromIni();
   m_Todo->refreshAlarm();
 
-  reloadMain();
-  clickData();
+  QTimer::singleShot(10, this, [this]() {
+    reloadMain();
+    clickData();
+  });
 
   currentMDFile = m_NotesList->getCurrentMDFile();
   if (isAndroid) {
@@ -440,7 +440,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_Notes->loadNoteToQML();
   }
 
-  if (!isAndroid) splash->close();
+  // if (!isAndroid)
+  splash->close();
 
   initMain = false;
 }

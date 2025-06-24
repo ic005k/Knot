@@ -436,7 +436,7 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
     w = img.width();
     h = img.height();
 
-    int w0 = mw_one->width();
+    int w0 = 1024;
     double r = (double)w / h;
     if (w > w0 - nLeftMargin) {
       new_w = w0 - nLeftMargin;

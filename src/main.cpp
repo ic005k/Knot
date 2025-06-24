@@ -9,6 +9,7 @@
 
 #include <QFuture>
 #include <QObject>
+#include <QOpenGLContext>
 #include <QProgressBar>
 #include <QQuickWindow>
 #include <QSGRendererInterface>
@@ -71,8 +72,6 @@ int main(int argc, char* argv[]) {
   QApplication::setStyle(QStyleFactory::create("Fusion"));
 
 #ifdef Q_OS_ANDROID
-  // 启用旧版输入事件处理模式（Android 专用）
-  // qputenv("QT_ANDROID_ENABLE_OLD_INPUT", "1");
 
   isAndroid = true;
 
@@ -90,7 +89,8 @@ int main(int argc, char* argv[]) {
   QQuickWindow::setSceneGraphBackend("opengl");
 
   // 关键稳定性设置
-  qputenv("QSG_RENDER_LOOP", "threaded");        // 必须使用多线程渲染
+  // qputenv("QSG_RENDER_LOOP", "threaded");        // 使用多线程渲染
+  qputenv("QSG_RENDER_LOOP", "basic");
   qputenv("QT_ANDROID_DISABLE_GPU_DEBUG", "1");  // 关闭调试层
   qputenv("QML_DISABLE_DISK_CACHE", "1");        // 避免缓存问题
 
@@ -128,6 +128,47 @@ int main(int argc, char* argv[]) {
 
     splash = new QSplashScreen(pixmap);
     splash->setFixedSize(targetSize / dpr);
+
+    splash->show();
+  } else {
+    // 按屏幕实际像素需求创建空画布
+    qreal dpr = qApp->devicePixelRatio();
+    QSize targetSize(400 * dpr, 100 * dpr);  // 适配高 DPI
+
+    // 创建透明画布
+    QPixmap pixmap(targetSize);
+    pixmap.fill(Qt::transparent);
+
+    // 在透明背景上直接绘制文本
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::TextAntialiasing);
+
+    // 设置文字样式
+    QFont font = painter.font();
+    font.setPointSizeF(16 * dpr);  // 根据设备DPI缩放文字大小
+    font.setBold(true);
+    painter.setFont(font);
+
+    painter.setPen(Qt::blue);  // 设置文字颜色为白色
+
+    // 计算文字位置（居中显示）
+    QFontMetrics metrics(font);
+    QRect textRect = metrics.boundingRect(
+        pixmap.rect(), Qt::AlignCenter, QObject::tr("Loading, please wait..."));
+    textRect.moveCenter(pixmap.rect().center());
+
+    // 绘制文字
+    painter.drawText(textRect, Qt::AlignCenter,
+                     QObject::tr("Loading, please wait..."));
+    painter.end();
+
+    // 设置设备像素比
+    pixmap.setDevicePixelRatio(dpr);
+
+    splash = new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint);
+    splash->setFixedSize(targetSize / dpr);
+    splash->setAttribute(Qt::WA_TranslucentBackground);  // 设置为透明背景
 
     splash->show();
   }
