@@ -272,6 +272,12 @@
                 android:resource="@drawable/splashscreen_port" />
             <meta-data android:name="android.app.splash_screen_drawable_landscape"
                 android:resource="@drawable/splashscreen_land" />
+
+            <!-- 添加 Intent Filter 支持自定义 Action -->
+            <intent-filter>
+                <action android:name="com.x.action.NEW_TODO" /> <!-- 匹配快捷方式 -->
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <activity android:name="com.x.NewNote" android:exported="true" android:label="NewNote"
@@ -333,7 +339,6 @@
             android:launchMode="standard"
             android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize"
-            
             android:label="PDFActivity">
         </activity>
 

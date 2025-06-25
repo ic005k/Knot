@@ -1382,7 +1382,7 @@ public class MyActivity
       ShortcutInfo shortcut1 = new ShortcutInfo.Builder(this, "New_Todo")
           .setShortLabel(lblNewTodo)
           .setIcon(Icon.createWithResource(this, R.drawable.newtodo))
-          .setIntent(new Intent(Intent.ACTION_MAIN, null, this, NewTodo.class))
+          .setIntent(new Intent("com.x.action.NEW_TODO", null, this, NewTodo.class))
           .build();
 
       ShortcutInfo shortcut2 = new ShortcutInfo.Builder(this, "New_Note")

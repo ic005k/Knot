@@ -45,7 +45,9 @@ import android.view.WindowManager;
 import android.view.Window;
 
 import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
 import java.net.URI;
+import java.nio.channels.FileLock;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -138,7 +140,6 @@ public class NewTodo extends Activity {
     protected void onDestroy() {
         System.out.println("onDestroy...");
         goNewTodo();
-
         super.onDestroy();
 
     }
@@ -249,6 +250,7 @@ public class NewTodo extends Activity {
             openAppFromPackageName("com.x");
 
         } else {
+
             try {
                 File file = new File(shortcut_ini);
                 if (!file.exists())
