@@ -10,6 +10,8 @@ ListView {
     spacing: 12
     model: searchModel
 
+    boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
+
     property string mdFile: ""
 
     function getQmlCurrentMDFile() {

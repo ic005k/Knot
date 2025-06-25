@@ -2593,3 +2593,17 @@ QString Method::formatSecondsToHMS(qlonglong seconds) {
 
   return seconds < 0 ? "-" + result : result;  // 添上负号（如果需要）
 }
+
+QStringList Method::removeDuplicatesFromQStringList(const QStringList &list) {
+  QSet<QString> seen;
+  QStringList result;
+  result.reserve(list.size());
+
+  for (const QString &str : list) {
+    if (seen.contains(str)) continue;
+    seen.insert(str);
+    result.append(str);
+  }
+
+  return result;
+}

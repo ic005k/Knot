@@ -365,6 +365,7 @@ class Method : public QDialog {
   QString setCurrentDateValue();
 
   QString formatSecondsToHMS(qlonglong seconds);
+  QStringList removeDuplicatesFromQStringList(const QStringList &list);
   protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 

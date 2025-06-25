@@ -726,16 +726,9 @@ void NotesList::saveRecentOpen() {
 void NotesList::refreshRecentOpen(QString name) {
   QString strmd = currentMDFile;
   strmd = strmd.replace(iniDir, "").trimmed();
-  for (int i = 0; i < listRecentOpen.count(); i++) {
-    QString item = listRecentOpen.at(i);
-
-    if (item.contains(strmd)) {
-      listRecentOpen.removeOne(item);
-      break;
-    }
-  }
 
   listRecentOpen.insert(0, name + "===" + strmd);
+  listRecentOpen = m_Method->removeDuplicatesFromQStringList(listRecentOpen);
 
   int count = listRecentOpen.count();
   if (count > 15) {
