@@ -215,7 +215,9 @@ void Reader::setReaderStyle() {
 void Reader::startOpenFile(QString openfile) {
   if (isReport) return;
 
-  if (isAndroid) closeMyPDF();
+  if (isAndroid) {
+    closeMyPDF();
+  }
 
   isEpubError = false;
   strShowMsg = "";

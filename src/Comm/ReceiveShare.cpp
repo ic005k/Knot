@@ -424,7 +424,7 @@ void ReceiveShare::moveTaskToFront() {
 #ifdef Q_OS_ANDROID
 
   QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callStaticMethod<void>("com.x/MyActivity", "setMax", "()V");
+  m_activity.callStaticMethod<void>("com.x/MyActivity", "bringToFront", "()V");
 
 #endif
 }

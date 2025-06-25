@@ -4173,6 +4173,7 @@ static void JavaNotify_9() {
   if (QFile::exists(file)) {
     if (type == "defaultopen") {
       mw_one->m_ReceiveShare->closeAllChildWindows();
+      mw_one->m_ReceiveShare->moveTaskToFront();
     }
     mw_one->m_Reader->startOpenFile(file);
   }

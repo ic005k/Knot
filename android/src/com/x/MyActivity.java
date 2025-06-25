@@ -291,10 +291,11 @@ public class MyActivity
     m_instance.moveTaskToBack(true);
   }
 
-  public static void setMax() {
-    getMyAppContext().startActivity(
-        new Intent(getMyAppContext(), MyActivity.class)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+  public static void bringToFront() {
+    Intent intent = new Intent(getMyAppContext(), MyActivity.class);
+    // 关键标志组合
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+    getMyAppContext().startActivity(intent);
   }
 
   // ------------------------------------------------------------------------
