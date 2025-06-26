@@ -236,8 +236,9 @@ QString NotesList::getCurrentMDFile() {
   QSettings Reg(iniDir + "curmd.ini", QSettings::IniFormat);
 
   QString curmd = Reg.value("/MainNotes/currentItem", "memo/xxx.md").toString();
-  mw_one->ui->lblNoteName->setText(
-      Reg.value("/MainNotes/NoteName", tr("Note Name")).toString());
+  QString title = Reg.value("/MainNotes/NoteName", tr("Note Name")).toString();
+  mw_one->ui->lblNoteName->setText(title);
+  noteTitle = title;
 
   return iniDir + curmd;
 }
@@ -394,6 +395,7 @@ void NotesList::setNoteName(QString name) {
   mw_one->ui->lblNoteName->setWordWrap(true);
   mw_one->ui->lblNoteName->setText(name);
   mw_one->ui->lblNoteName->setToolTip(name);
+  noteTitle = name;
 }
 
 void NotesList::on_btnDel_clicked() {
@@ -743,7 +745,7 @@ void NotesList::saveCurrentNoteInfo() {
   QString iniName = str.replace(iniDir, "");
 
   Reg.setValue("/MainNotes/currentItem", iniName);
-  Reg.setValue("/MainNotes/NoteName", mw_one->ui->lblNoteName->text());
+  Reg.setValue("/MainNotes/NoteName", noteTitle);
 }
 
 void NotesList::saveNoteBookVPos() {
@@ -814,7 +816,7 @@ void NotesList::saveNotesList() {
   // Save Note Name
   QSettings Reg1(iniDir + "curmd.ini", QSettings::IniFormat);
 
-  Reg1.setValue("/MainNotes/NoteName", mw_one->ui->lblNoteName->text());
+  Reg1.setValue("/MainNotes/NoteName", noteTitle);
 
   mw_one->m_Notes->isSaveNoteTree = true;
 }
@@ -2323,6 +2325,7 @@ void NotesList::clickNoteList() {
   QString noteName = m_Method->getText0(mw_one->ui->qwNoteList, index);
 
   mw_one->ui->lblNoteName->setText(noteName);
+  noteTitle = noteName;
 
   tw->setCurrentItem(pNoteItems.at(index));
 
@@ -2414,8 +2417,6 @@ void NotesList::genRecentOpenMenu() {
 
       connect(act, &QAction::triggered, this, [=]() {
         currentMDFile = file;
-
-        mw_one->ui->lblNoteName->setText(name);
 
 #ifdef Q_OS_ANDROID
         mw_one->on_btnOpenNote_clicked();

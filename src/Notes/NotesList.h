@@ -52,6 +52,8 @@ class NotesList : public QDialog {
   ~NotesList();
   Ui::NotesList *ui;
 
+  QString noteTitle;
+
   void saveNotesListIndex();
 
   DatabaseManager m_dbManager;
@@ -159,7 +161,8 @@ class NotesList : public QDialog {
   QStringList getValidMDFiles();
 
   void refreshRecentOpen(QString name);
-  protected:
+
+ protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
   void closeEvent(QCloseEvent *event) override;

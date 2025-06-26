@@ -920,7 +920,7 @@ void Notes::syncToWebDAV() {
 }
 
 bool Notes::isSetNewNoteTitle() {
-  QString title = mw_one->ui->lblNoteName->text();
+  QString title = mw_one->m_NotesList->noteTitle;
   if (title.trimmed() == "无标题笔记" || title.trimmed() == "Untitled Note") {
     return true;
   }
@@ -1095,14 +1095,14 @@ bool Notes::selectPDFFormat(QPrinter *printer) {
 
 #ifdef Q_OS_ANDROID
   pdfFileName = "/storage/emulated/0/KnotBak/" +
-                mw_one->ui->lblNoteName->text() + QStringLiteral(".pdf");
+                mw_one->m_NotesList->noteTitle + QStringLiteral(".pdf");
 #else
   QFileDialog dialog(NULL, QStringLiteral("NotePDFExport"));
   dialog.setFileMode(QFileDialog::AnyFile);
   dialog.setAcceptMode(QFileDialog::AcceptSave);
   dialog.setNameFilter(tr("PDF files") + QStringLiteral(" (*.pdf)"));
   dialog.setWindowTitle(tr("Export current note as PDF"));
-  dialog.selectFile(mw_one->ui->lblNoteName->text() + QStringLiteral(".pdf"));
+  dialog.selectFile(mw_one->m_NotesList->noteTitle + QStringLiteral(".pdf"));
   int ret = dialog.exec();
 
   if (ret != QDialog::Accepted) {
@@ -1407,6 +1407,7 @@ void Notes::loadEmptyNote() {
   MD2Html(currentMDFile);
 
   mw_one->ui->lblNoteName->setText("");
+  mw_one->m_NotesList->noteTitle = "";
 }
 
 void Notes::setWebViewFile(QString htmlfile) {}
@@ -1687,7 +1688,7 @@ void Notes::openEditUI() {
     return;
   }
 
-  mw_one->m_NotesList->refreshRecentOpen(mw_one->ui->lblNoteName->text());
+  mw_one->m_NotesList->refreshRecentOpen(mw_one->m_NotesList->noteTitle);
   mw_one->m_NotesList->saveRecentOpen();
 
   if (isAndroid) {

@@ -2,7 +2,7 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "2.0.4";
+QString ver = "2.0.5";
 QString appName = "Knot";
 
 QList<QPointF> PointList;
@@ -5767,7 +5767,10 @@ void MainWindow::on_rbRunning_clicked() {
 
 void MainWindow::on_btnOpenNote_clicked() {
   if (!QFile::exists(currentMDFile)) return;
-  QString title = ui->lblNoteName->text();
+
+  m_NotesList->setCurrentItemFromMDFile(currentMDFile);
+
+  QString title = m_NotesList->noteTitle;
   m_NotesList->refreshRecentOpen(title);
   m_NotesList->saveRecentOpen();
 
@@ -5779,7 +5782,6 @@ void MainWindow::on_btnOpenNote_clicked() {
 
     m_Notes->setAndroidNoteConfig("/cpos/currentMDFile",
                                   QFileInfo(currentMDFile).baseName());
-    m_NotesList->setCurrentItemFromMDFile(currentMDFile);
 
     return;
   } else {
@@ -5789,14 +5791,12 @@ void MainWindow::on_btnOpenNote_clicked() {
     // m_Notes->loadNoteToQML();
     // ui->frameNoteList->hide();
     // ui->frameNotes->show();
-
-    m_NotesList->setCurrentItemFromMDFile(currentMDFile);
   }
 }
 
 void MainWindow::on_btnEditNote_clicked() {
-  m_Notes->openEditUI();
   m_NotesList->setCurrentItemFromMDFile(currentMDFile);
+  m_Notes->openEditUI();
 }
 
 void MainWindow::on_btnToPDF_clicked() {
