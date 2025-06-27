@@ -374,7 +374,7 @@ Rectangle {
                 }
 
                 onDoubleClicked: {
-
+                    mw_one.on_btnRename_clicked()
                 }
             }
         }
@@ -442,21 +442,6 @@ Rectangle {
                 radius: 3
             }
             background: null // 彻底消除背景容器
-        }
-    }
-
-    function getListEleHeadColor(ntype) {
-        switch (ntype) {
-        case 0:
-            return "lightgray"
-        case 1:
-            return "red"
-        case 2:
-            return "yellow"
-        case 3:
-            return "lightblue"
-        default:
-            return "black"
         }
     }
 }

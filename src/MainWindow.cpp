@@ -3149,6 +3149,7 @@ void MainWindow::initQW() {
       QUrl(QStringLiteral("qrc:/src/qmlsrc/tabrecycle.qml")));
 
   ui->qwNoteBook->rootContext()->setContextProperty("m_NotesList", m_NotesList);
+  ui->qwNoteBook->rootContext()->setContextProperty("mw_one", mw_one);
   ui->qwNoteBook->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/notebook.qml")));
 

@@ -503,6 +503,8 @@ QLabel {
   void clickData();
 
  public slots:
+  void on_btnRename_clicked();
+
   void on_btnOpenSearchResult_clicked();
 
   void on_btnEditNote_clicked();
@@ -720,8 +722,6 @@ QLabel {
   void on_btnMoveTo_clicked();
 
   void on_btnBack_Tree_clicked();
-
-  void on_btnRename_clicked();
 
   void on_btnHideFind_clicked();
 

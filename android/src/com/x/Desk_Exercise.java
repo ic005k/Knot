@@ -46,6 +46,7 @@ import android.view.Window;
 
 import java.io.OutputStreamWriter;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -125,7 +126,12 @@ public class Desk_Exercise extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        Desk_Exercise.this.finish();
+        getWindow().setBackgroundDrawable(null);
+
+        // 直接处理业务逻辑
+        processShortcutOperation();
+
+        finish();
 
     }
 
@@ -138,7 +144,7 @@ public class Desk_Exercise extends Activity {
     @Override
     protected void onDestroy() {
         System.out.println("onDestroy...");
-        goExercise();
+        // goExercise();
         super.onDestroy();
 
     }
@@ -266,6 +272,67 @@ public class Desk_Exercise extends Activity {
 
             CallJavaNotify_8();
         }
+    }
+
+    private void processShortcutOperation() {
+        // 后台执行耗时操作
+        new Thread(() -> {
+            boolean isServiceRunning = checkServiceRunning();
+            updateConfigFile(isServiceRunning);
+
+            runOnUiThread(() -> {
+                if (!isServiceRunning) {
+                    showLaunchPrompt();
+                } else {
+                    executeServiceAction();
+                }
+            });
+        }).start();
+    }
+
+    private boolean checkServiceRunning() {
+        return MyService.isReady; // 或其他服务检测逻辑
+    }
+
+    private void updateConfigFile(boolean serviceRunning) {
+        try {
+            File iniFile = new File(shortcut_ini);
+            File parentDir = iniFile.getParentFile();
+
+            // 确保目录存在
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+
+            // 使用 try-with-resources 确保文件关闭
+            try (FileOutputStream fos = new FileOutputStream(iniFile)) {
+                String config = String.format(
+                        "[desk]\nkeyType=exercise\nexecDone=%s\n",
+                        serviceRunning);
+                fos.write(config.getBytes(StandardCharsets.UTF_8));
+            }
+        } catch (IOException e) {
+            Log.e("Config", "Update failed", e);
+        }
+    }
+
+    private void showLaunchPrompt() {
+        // 显示国家化提示
+        int resId = isZh(this) ? R.string.strTip_zh : R.string.strTip;
+        String message = getString(resId);
+
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+
+        // 延迟启动应用（确保Toast显示）
+        new Handler().postDelayed(() -> {
+            startActivity(new Intent(this, MyActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }, 500);
+    }
+
+    private void executeServiceAction() {
+        // 执行服务相关操作
+        CallJavaNotify_8();
     }
 
 }
