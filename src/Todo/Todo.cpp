@@ -149,7 +149,7 @@ void Todo::addToList(QString str) {
     }
   }
 
-  QString strTime = QDateTime::currentDateTime().toString();
+  QString strTime = m_Method->setCurrentDateTimeValue();
   insertItem(strTime, 0, str, 0);
 
   setCurrentIndex(0);

@@ -2578,6 +2578,18 @@ QString Method::setCurrentDateValue() {
   return strdate;
 }
 
+QString Method::setCurrentDateTimeValue() {
+  QString strdate;
+  if (zh_cn) {
+    QLocale chineseLocale(QLocale::Chinese, QLocale::China);
+    strdate = chineseLocale.toString(QDateTime::currentDateTime(),
+                                     "ddd MM dd HH:mm:ss yyyy");
+  } else
+    strdate = QDateTime::currentDateTime().toString("ddd MM dd HH:mm:ss yyyy");
+
+  return strdate;
+}
+
 QString Method::formatSecondsToHMS(qlonglong seconds) {
   qlonglong totalSecs = qAbs(seconds);  // 先处理绝对值
   qlonglong hours = totalSecs / 3600;
