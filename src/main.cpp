@@ -38,6 +38,7 @@ extern Method* m_Method;
 
 void loadTheme(bool isDark);
 void loadLocal();
+void showSplash();
 bool unzipToDir(const QString& zipPath, const QString& destDir);
 int deleteDirfile(QString dirName);
 QString loadText(QString textFile);
@@ -102,48 +103,7 @@ int main(int argc, char* argv[]) {
 
   loadLocal();
 
-  // 获取屏幕尺寸并创建全屏画布
-  QSize targetSize;
-  qreal dpr = qApp->devicePixelRatio();
-  if (isAndroid) {
-    QScreen* screen = QGuiApplication::primaryScreen();
-    QRect screenGeometry = screen->geometry();
-    targetSize = screenGeometry.size() * dpr;
-  } else {
-    targetSize = QSize(300 * dpr, 100 * dpr);
-  }
-
-  // 创建透明画布
-  QPixmap pixmap(targetSize);
-  // 使用中度中性灰背景 (RGB: 100,100,100)
-  QColor bgColor(100, 100, 100);
-  pixmap.fill(bgColor);  // 设置中性背景色
-  // 在透明背景上直接绘制文本
-  QPainter painter(&pixmap);
-  painter.setRenderHint(QPainter::Antialiasing);
-  painter.setRenderHint(QPainter::TextAntialiasing);
-  // 设置文字样式
-  QFont font = painter.font();
-  font.setPointSizeF(16 * dpr);  // 根据设备DPI缩放文字大小
-  font.setBold(true);
-  painter.setFont(font);
-  painter.setPen(QColor(135, 206, 250));  // 设置文字颜色
-  // 计算文字位置（居中显示）
-  QFontMetrics metrics(font);
-  QRect textRect = metrics.boundingRect(pixmap.rect(), Qt::AlignCenter,
-                                        QObject::tr("Loading, please wait..."));
-  textRect.moveCenter(pixmap.rect().center());
-  // 绘制文字
-  painter.drawText(textRect, Qt::AlignCenter,
-                   QObject::tr("Loading, please wait..."));
-  painter.end();
-  // 设置设备像素比
-  pixmap.setDevicePixelRatio(dpr);
-
-  splash = new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint);
-  splash->setFixedSize(targetSize / dpr);
-  splash->setAttribute(Qt::WA_TranslucentBackground);  // 设置为透明背景
-  splash->show();
+  showSplash();
 
   // 禁用文本选择（针对所有的可输入的编辑框）
   qputenv("QT_QPA_NO_TEXT_HANDLES", "1");
@@ -608,3 +568,84 @@ void migrateOldDataIfNeeded() {
 }
 
 #endif
+
+void showSplash() {
+  // 获取屏幕尺寸并创建全屏画布
+  QSize targetSize;
+  qreal dpr = qApp->devicePixelRatio();
+  if (isAndroid) {
+    QScreen* screen = QGuiApplication::primaryScreen();
+    QRect screenGeometry = screen->geometry();
+    targetSize = screenGeometry.size() * dpr;
+  } else {
+    targetSize = QSize(300 * dpr, 100 * dpr);
+  }
+
+  // 创建透明画布
+  QPixmap pixmap(targetSize);
+  // 使用中度中性灰背景 (RGB: 100,100,100)
+  QColor bgColor(100, 100, 100);
+  pixmap.fill(bgColor);  // 设置中性背景色
+  // 在透明背景上直接绘制文本
+  QPainter painter(&pixmap);
+  painter.setRenderHint(QPainter::Antialiasing);
+  painter.setRenderHint(QPainter::TextAntialiasing);
+
+  // 编织网状背景 - 呼应Knot主题
+  const int step = 12 * dpr;      // 网格步长
+  const int thickness = 1 * dpr;  // 线条粗细
+
+  // 水平编织带
+  for (int y = 0; y < pixmap.height(); y += step * 2) {
+    QLinearGradient gradient(0, y, pixmap.width(), y);
+    gradient.setColorAt(0, QColor(0, 0, 0, 0));
+    gradient.setColorAt(0.5, QColor(255, 255, 255, 80));
+    gradient.setColorAt(1, QColor(0, 0, 0, 0));
+
+    painter.setPen(QPen(gradient, thickness));
+    painter.drawLine(0, y, pixmap.width(), y);
+
+    painter.setPen(QPen(QColor(0, 0, 0, 20), thickness));
+    painter.drawLine(0, y + thickness, pixmap.width(), y + thickness);
+  }
+
+  // 垂直编织带
+  for (int x = 0; x < pixmap.width(); x += step * 2) {
+    QLinearGradient gradient(x, 0, x, pixmap.height());
+    gradient.setColorAt(0, QColor(0, 0, 0, 0));
+    gradient.setColorAt(0.5, QColor(255, 255, 255, 60));
+    gradient.setColorAt(1, QColor(0, 0, 0, 0));
+
+    painter.setPen(QPen(gradient, thickness));
+    painter.drawLine(x, 0, x, pixmap.height());
+
+    painter.setPen(QPen(QColor(0, 0, 0, 15), thickness));
+    painter.drawLine(x + thickness, 0, x + thickness, pixmap.height());
+  }
+
+  // 设置文字样式
+  QFont font = painter.font();
+  if (isAndroid)
+    font.setPointSizeF(16 * dpr);  // 根据设备DPI缩放文字大小
+  else
+    font.setPointSizeF(10 * dpr);
+  font.setBold(true);
+  painter.setFont(font);
+  painter.setPen(QColor(135, 206, 250));  // 设置文字颜色
+  // 计算文字位置（居中显示）
+  QFontMetrics metrics(font);
+  QRect textRect = metrics.boundingRect(pixmap.rect(), Qt::AlignCenter,
+                                        QObject::tr("Loading, please wait..."));
+  textRect.moveCenter(pixmap.rect().center());
+  // 绘制文字
+  painter.drawText(textRect, Qt::AlignCenter,
+                   QObject::tr("Loading, please wait..."));
+  painter.end();
+  // 设置设备像素比
+  pixmap.setDevicePixelRatio(dpr);
+
+  splash = new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint);
+  splash->setFixedSize(targetSize / dpr);
+  splash->setAttribute(Qt::WA_TranslucentBackground);  // 设置为透明背景
+  splash->show();
+}
