@@ -30,7 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Edit"
-            android:background="#3498DB"
+            android:background="@drawable/button_feedback"
             android:textColor="#FFFFFF"
             android:textSize="13sp"
         />

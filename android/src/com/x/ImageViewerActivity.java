@@ -359,15 +359,15 @@ public class ImageViewerActivity extends Activity
         Uri photoUri;
         if (Build.VERSION.SDK_INT >= 24) {
             photoUri = FileProvider.getUriForFile(
-                    MyActivity.getMyAppContext(),
-                    MyActivity.getMyAppContext().getPackageName(),
+                    this,
+                    this.getPackageName(),
                     new File(path));
         } else {
             photoUri = Uri.fromFile(new File(path));
         }
         System.out.println("path=" + path + "  pathUri=" + photoUri);
         share.putExtra(Intent.EXTRA_STREAM, photoUri);
-        MyActivity.getMyAppContext().startActivity(Intent.createChooser(share, "Note Image"));
+        this.startActivity(Intent.createChooser(share, "Note Image"));
     }
 
     private void setStatusBarColor(String color) {

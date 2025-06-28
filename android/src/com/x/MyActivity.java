@@ -233,6 +233,9 @@ public class MyActivity
 
   public native static void CallJavaNotify_14();
 
+  // 添加服务绑定状态标记
+  private boolean mServiceBound = false;
+
   private InternalConfigure internalConfigure;
   public static boolean isReadShareData = false;
   public static boolean zh_cn;
@@ -529,9 +532,11 @@ public class MyActivity
     Intent bindIntent = new Intent(MyActivity.this, MyService.class);
     if (Build.VERSION.SDK_INT >= 26) {
       startForegroundService(bindIntent);
+      mServiceBound = false; // 注意：这是启动服务而非绑定
     } else {
       bindService(bindIntent, mCon, Context.BIND_AUTO_CREATE);
       startService(new Intent(bindIntent));
+      mServiceBound = true;
     }
 
     addDeskShortcuts();
@@ -855,7 +860,6 @@ public class MyActivity
       Log.i(TAG, "reopen = done...");
     }
 
-    android.os.Process.killProcess(android.os.Process.myPid());
     getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
 
     if (mScreenStatusReceiver != null) {
@@ -868,8 +872,9 @@ public class MyActivity
       mAlarmReceiver = null;
     }
 
-    if (mCon != null) {
+    if (mServiceBound && mCon != null) {
       unbindService(mCon); // 解绑服务
+      mServiceBound = false;
       mCon = null;
     }
 
