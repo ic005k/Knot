@@ -289,16 +289,8 @@ public class ClockActivity
       }
 
       if (isVoice) {
-        String strNumber = "";
-        for (int i = 0; i < mystr.length(); i++) {
-          String subStr = mystr.substring(i, i + 1);
-          if (subStr != null && !subStr.equals(" ")) {
-            if (isNumer(subStr)) {
-              strNumber = strNumber + subStr;
-            }
-          }
-        }
-        voiceFile = "/storage/emulated/0/KnotData/memo/voice/" + strNumber + ".aac";
+        String[] _splic = mystr.split("\n");
+        voiceFile = "/storage/emulated/0/KnotData/memo/voice/" + _splic[1];
         playRecord(voiceFile);
         btn_play_voice.setVisibility(View.VISIBLE);
       } else {

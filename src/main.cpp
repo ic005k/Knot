@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
   isAndroid = true;
 
   // 核心优化：强制使用OpenGL ES 3.0（避免低端设备Vulkan问题）
-  qputenv("QSG_RHI_BACKEND", "opengl");  // 强制OpenGL
+  /*qputenv("QSG_RHI_BACKEND", "opengl");  // 强制OpenGL
 
   // 优化OpenGL配置
   QSurfaceFormat format;
@@ -89,10 +89,9 @@ int main(int argc, char* argv[]) {
   QQuickWindow::setSceneGraphBackend("opengl");
 
   // 关键稳定性设置
-  // qputenv("QSG_RENDER_LOOP", "threaded");        // 使用多线程渲染
-  qputenv("QSG_RENDER_LOOP", "basic");
+  qputenv("QSG_RENDER_LOOP", "threaded");  // 使用多线程渲染
   qputenv("QT_ANDROID_DISABLE_GPU_DEBUG", "1");  // 关闭调试层
-  qputenv("QML_DISABLE_DISK_CACHE", "1");        // 避免缓存问题
+  qputenv("QML_DISABLE_DISK_CACHE", "1");        // 避免缓存问题*/
 
 #else
   // 桌面端配置

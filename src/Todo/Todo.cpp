@@ -1066,8 +1066,7 @@ void Todo::reeditText() {
   if (list0.count() > 0) {
     QString str = list0.at(0);
     if (str == tr("Voice")) {
-      m_Method->playRecord(iniDir + "memo/voice/" + getNumber(strItem) +
-                           ".aac");
+      m_Method->playRecord(getVoiceFile(row));
       mw_one->ui->progAudioBar->setStyleSheet(
           "QProgressBar{background:white;} "
           "QProgressBar::chunk{background:#1E90FF}");
@@ -1254,8 +1253,9 @@ void Todo::on_ShowRecordTime() {
     nRecordSec = nRecordSec + 1;
     nMSec = 0;
   }
+  strVoiceTime = m_Method->FormatHHMMSS(nRecordSec);
   mw_one->ui->editTodo->setText(tr("Recording audio in progress...") + " " +
-                                m_Method->FormatHHMMSS(nRecordSec));
+                                strVoiceTime);
 }
 
 void Todo::stopRecordVoice() {
@@ -1268,7 +1268,8 @@ void Todo::stopRecordVoice() {
     QFile file(audioFilePath);
     if (file.exists()) {
       if (file.size() > 0) {
-        mw_one->ui->editTodo->setText(audioFileName);
+        mw_one->ui->editTodo->setText(tr("Voice") + " " + strVoiceTime + "\n" +
+                                      QFileInfo(audioFilePath).fileName());
         mw_one->on_btnAddTodo_clicked();
       } else {
         file.remove();
@@ -1313,7 +1314,7 @@ QString Todo::getVoiceFile(int row) {
   if (list0.count() > 0) {
     QString str = list0.at(0);
     if (str == tr("Voice")) {
-      QString voiceFile = iniDir + "memo/voice/" + getNumber(strItem) + ".aac";
+      QString voiceFile = iniDir + "memo/voice/" + strItem.split("\n").at(1);
       if (QFile::exists(voiceFile)) return voiceFile;
     }
   }
@@ -1326,7 +1327,7 @@ void Todo::delVoiceFile(int row) {
   if (list0.count() > 0) {
     QString str = list0.at(0);
     if (str == tr("Voice")) {
-      QString voiceFile = iniDir + "memo/voice/" + getNumber(strItem) + ".aac";
+      QString voiceFile = iniDir + "memo/voice/" + strItem.split("\n").at(1);
       if (QFile::exists(voiceFile)) QFile::remove(voiceFile);
     }
   }
