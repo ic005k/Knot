@@ -596,8 +596,7 @@ void Todo::on_btnRestore_clicked() {
   if (getCountRecycle() == 0) return;
 
   int row = getCurrentIndexRecycle();
-  QString strTime = QDate::currentDate().toString("ddd MM dd yyyy") + "  " +
-                    QTime::currentTime().toString();
+  QString strTime = m_Method->setCurrentDateTimeValue();
   QString strText = getItemTodoTextRecycle(row);
   addItem(strTime, 0, strText);
 
@@ -1203,8 +1202,7 @@ void Todo::reeditText() {
 void Todo::addToRecycle() {
   int row = getCurrentIndex();
   QString strTodoText = getItemTodoText(row);
-  QString doneTime =
-      QDateTime::currentDateTime().toString() + "  " + tr("Done");
+  QString doneTime = m_Method->setCurrentDateTimeValue() + "  " + tr("Done");
 
   insertRecycle(doneTime, 0, strTodoText, 0);
 

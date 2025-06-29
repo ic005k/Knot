@@ -476,8 +476,6 @@ Rectangle {
                     color: "red"
                     anchors.right: parent.right
 
-                    //visible: isBtnVisible
-
                     // 修改：使用透明度动画替代直接显示/隐藏
                     opacity: flack.contentX !== 0 ? 1 : 0
                     Behavior on opacity {
@@ -508,7 +506,7 @@ Rectangle {
 
                     Text {
                         anchors.centerIn: parent
-                        //text: qsTr("Done")
+
                         color: "#ffffff"
                     }
                     MouseArea {

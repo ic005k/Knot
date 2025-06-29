@@ -372,9 +372,9 @@ SOURCES += \
     src/Reader/ReaderSet.cpp \
     src/Reader/SetReaderText.cpp \
     src/Report.cpp \
-    src/Steps/Speedometer.cpp \
-    src/Steps/Steps.cpp \
-    src/Steps/StepsOptions.cpp \
+    src/Exercise/Speedometer.cpp \
+    src/Exercise/Steps.cpp \
+    src/Exercise/StepsOptions.cpp \
     src/SyncInfo.cpp \
     src/Todo/Todo.cpp \
     src/Todo/TodoAlarm.cpp \
@@ -606,9 +606,9 @@ HEADERS += \
     src/Reader/ReaderSet.h \
     src/Reader/SetReaderText.h \
     src/Report.h \
-    src/Steps/Speedometer.h \
-    src/Steps/Steps.h \
-    src/Steps/StepsOptions.h \
+    src/Exercise/Speedometer.h \
+    src/Exercise/Steps.h \
+    src/Exercise/StepsOptions.h \
     src/SyncInfo.h \
     src/Todo/Todo.h \
     src/Todo/TodoAlarm.h \
@@ -652,7 +652,7 @@ FORMS += \
     src/Preferences.ui \
     src/Reader/PageIndicator.ui \
     src/Reader/SetReaderText.ui \
-    src/Steps/StepsOptions.ui \
+    src/Exercise/StepsOptions.ui \
     src/SyncInfo.ui \
     src/Todo/Todo.ui \
     src/Todo/TodoAlarm.ui

@@ -5411,11 +5411,6 @@ void MainWindow::on_btnChartDay_clicked() {
                              "#455364", "#FFFFFF", "#555364", "#FFFFFF");
 }
 
-// void MainWindow::on_editStepsThreshold_textChanged(const QString &arg1) {
-//   ui->qwSteps->rootContext()->setContextProperty("nStepsThreshold",
-//                                                arg1.toInt());
-//}
-
 void MainWindow::on_btnTabMoveUp_clicked() {
   if (tabData->count() == 0) return;
   int curIndex = tabData->currentIndex();

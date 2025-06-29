@@ -131,7 +131,7 @@ void Steps::saveSteps() {
   QSettings Reg(iniDir + "steps.ini", QSettings::IniFormat);
 
   if (getCount() > maxCount) {
-    delItem(0);
+    m_Method->delItemFromQW(mw_one->ui->qwSteps, 0);
   }
   int count = getCount();
   if (count > 0) {
@@ -360,11 +360,6 @@ QString Steps::getKM(int row) {
   return item.toString();
 }
 
-void Steps::delItem(int index) {
-  QQuickItem* root = mw_one->ui->qwSteps->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "delItem", Q_ARG(QVariant, index));
-}
-
 void Steps::setTableData(int index, QString date, int steps, QString km) {
   QQuickItem* root = mw_one->ui->qwSteps->rootObject();
   QMetaObject::invokeMethod((QObject*)root, "modifyItem",
@@ -375,7 +370,8 @@ void Steps::setTableData(int index, QString date, int steps, QString km) {
 
 void Steps::clearAll() {
   int count = getCount();
-  for (int i = 0; i < count; i++) delItem(0);
+  for (int i = 0; i < count; i++)
+    m_Method->delItemFromQW(mw_one->ui->qwSteps, 0);
 }
 
 void Steps::setScrollBarPos(double pos) {

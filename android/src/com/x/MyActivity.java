@@ -1219,10 +1219,6 @@ public class MyActivity
           fileInputStream,
           "UTF-8");
       BufferedReader br = new BufferedReader(reader);
-      // String line;
-      // while ((line = br.readLine()) != null) {
-      // System.out.println(line);
-      // }
 
       properties.load(br);
 

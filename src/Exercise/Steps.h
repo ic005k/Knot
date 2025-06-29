@@ -10,7 +10,7 @@
 #include <iostream>
 
 #include "Speedometer.h"
-#include "src/Steps/StepsOptions.h"
+#include "src/Exercise/StepsOptions.h"
 
 namespace Ui {
 class Steps;
@@ -75,7 +75,6 @@ class Steps : public QDialog {
   QString getDate(int row);
   int getSteps(int row);
 
-  void delItem(int index);
   QString getKM(int row);
   void clearAll();
 
