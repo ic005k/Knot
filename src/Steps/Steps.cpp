@@ -69,6 +69,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
       mw_one->ui->lblMonthTotal->styleSheet());
   mw_one->ui->btnGetGpsListData->hide();
   mw_one->ui->qwSpeed->setFixedHeight(90);
+  mw_one->ui->qwSpeed->hide();
 
   timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, &Steps::updateGetGps);
@@ -78,6 +79,16 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   if (!gpsdir.exists(gpspath)) gpsdir.mkpath(gpspath);
 
   getHardStepSensor();
+
+  m_speedometer = new Speedometer(this);
+  mw_one->ui->f_speed->setFixedHeight(130);
+  m_speedometer->setMaxSpeed(10.00);  // 最高时速(km/h)
+  m_speedometer->setMinSpeed(0);      // 最低时速(km/h)
+  m_speedometer->setCurrentSpeed(0.0);
+  m_speedometer->setBackgroundColor(QColor(30, 30, 30));  // 背景色
+  mw_one->ui->f_speed->layout()->setSpacing(0);
+  mw_one->ui->f_speed->layout()->setContentsMargins(0, 0, 0, 0);
+  mw_one->ui->f_speed->layout()->addWidget(m_speedometer);
 }
 
 Steps::~Steps() {}
@@ -1366,6 +1377,10 @@ void Steps::sendMsg(int CurTableCount) {
 }
 
 void Steps::setCurrentGpsSpeed(double speed, double maxSpeed) {
+  m_speedometer->setCurrentSpeed(speed);
+  m_speedometer->setMaxSpeed(maxSpeed);
+  return;
+
   QObject* rootObject = mw_one->ui->qwSpeed->rootObject();
   if (rootObject) {
     rootObject->setProperty("currentSpeed",

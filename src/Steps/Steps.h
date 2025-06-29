@@ -9,6 +9,7 @@
 #include <iomanip>  // 包含 std::setprecision
 #include <iostream>
 
+#include "Speedometer.h"
 #include "src/Steps/StepsOptions.h"
 
 namespace Ui {
@@ -22,6 +23,8 @@ class Steps : public QDialog {
   explicit Steps(QWidget *parent = nullptr);
   ~Steps();
   Ui::Steps *ui;
+
+  Speedometer *m_speedometer;
 
   QString btnRoundStyle =
       "QToolButton {"

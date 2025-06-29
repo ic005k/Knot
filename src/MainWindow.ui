@@ -4708,6 +4708,27 @@ QSlider::handle:horizontal:disabled {
             </spacer>
            </item>
            <item>
+            <widget class="QFrame" name="f_speed">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>150</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::Shape::StyledPanel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Shadow::Raised</enum>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_54">
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_53"/>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
             <widget class="QQuickWidget" name="qwSpeed">
              <property name="minimumSize">
               <size>
