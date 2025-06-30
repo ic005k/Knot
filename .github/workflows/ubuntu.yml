@@ -36,11 +36,11 @@ jobs:
         orgName: Knot
         ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
 
-        QT_VERSION: 6.6.3
+        QT_VERSION: 6.8.3
         QT_ARCH: gcc_64
-        QT_INSTALL_DIR: /opt/qt/6.6.3/gcc_64  
-        QT_INSTALL_QML: /opt/qt/6.6.3/gcc_64/qml  
-        QML2_IMPORT_PATH: ${{ github.workspace }}/qml:/opt/qt/6.6.3/gcc_64/qml
+        QT_INSTALL_DIR: /opt/qt/QT_VERSION/gcc_64
+        QT_INSTALL_QML: /opt/qt/QT_VERSION/gcc_64/qml
+        QML2_IMPORT_PATH: ${{ github.workspace }}/qml:/opt/qt/QT_VERSION/gcc_64/qml
       
     steps:
       
@@ -117,11 +117,11 @@ jobs:
                   
          #cp -r ExtBin/linux/resources bin/release/resources
 
-         #cp ExtBin/linux/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot/Qt/6.6.3/gcc_64/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
-         #chmod 755 /home/runner/work/Knot/Qt/6.6.3/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         #cp ExtBin/linux/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot/Qt/QT_VERSION/gcc_64/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         #chmod 755 /home/runner/work/Knot/Qt/QT_VERSION/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
 
-         #cp ExtBin/linux/libFcitx5Qt6DBusAddons.so.5.1.9 /home/runner/work/Knot/Qt/6.6.3/gcc_64/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
-         #chmod 755 /home/runner/work/Knot/Qt/6.6.3/gcc_64/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
+         #cp ExtBin/linux/libFcitx5Qt6DBusAddons.so.5.1.9 /home/runner/work/Knot/Qt/QT_VERSION/gcc_64/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
+         #chmod 755 /home/runner/work/Knot/Qt/QT_VERSION/gcc_64/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
 
 
          #mkdir -p bin/release/plugins/platforminputcontexts/
@@ -144,7 +144,7 @@ jobs:
 
          # 获取 Qt6 插件目录
           #QT6_PLUGINS_DIR="${{ env.Qt6_DIR }}/../../plugins/platforminputcontexts"
-          QT6_PLUGINS_DIR="/home/runner/work/Knot/Qt/6.6.3/gcc_64/plugins/platforminputcontexts"
+          QT6_PLUGINS_DIR="/home/runner/work/Knot/Qt/QT_VERSION/gcc_64/plugins/platforminputcontexts"
 
          # 检查插件文件是否存在
          #if [ ! -f "ExtBin/libfcitx5platforminputcontextplugin.so" ]; then
@@ -171,13 +171,13 @@ jobs:
          cp -P /usr/lib/x86_64-linux-gnu/libssl.so.3* bin/release/lib/
 
          # 在运行 linuxdeployqt 前，将 Qt 插件目录添加到库搜索路径
-         export LD_LIBRARY_PATH="/home/runner/work/Knot/Qt/6.6.3/gcc_64/plugins/platforminputcontexts:$LD_LIBRARY_PATH"
+         export LD_LIBRARY_PATH="/home/runner/work/Knot/Qt/QT_VERSION/gcc_64/plugins/platforminputcontexts:$LD_LIBRARY_PATH"
 
          export VERSION # linuxdeployqt uses this for naming the file
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
                   -unsupported-allow-new-glibc \
                   -qmldir=/home/runner/work/Knot/Knot/src/qmlsrc \
-                  -qmake=/home/runner/work/Knot/Qt/6.6.3/gcc_64/bin/qmake \
+                  -qmake=/home/runner/work/Knot/Qt/QT_VERSION/gcc_64/bin/qmake \
                   -appimage
                   #-extra-plugins=webview
 
