@@ -16,6 +16,8 @@
     <string name="strTip">"The Knot is not open, it will be opened for you at this time, please
         wait..."</string>
 
-    
+    <!-- string name="unsupported_android_version">
+        Unsupported Android version. This app requires Android 6.0 or higher.
+    </string-->
 
 </resources>
