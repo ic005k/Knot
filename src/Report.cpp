@@ -41,8 +41,6 @@ Report::Report(QWidget* parent) : QDialog(parent) {
   mw_one->ui->btnEndDate->hide();
   mw_one->ui->lblTo->hide();
 
-  m_DateSelector = new DateSelector(this);
-
   twOut2Img = new QTreeWidget;
   twOut2Img->setColumnCount(3);
 
@@ -147,7 +145,7 @@ void Report::on_btnBack_clicked() {
 void Report::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }
 
 void Report::on_btnYear_clicked() {
-  m_DateSelector->dateFlag = 1;
+  mw_one->m_DateSelector->dateFlag = 1;
 
   /*if (isAndroid) {
     int y, m;
@@ -162,16 +160,16 @@ void Report::on_btnYear_clicked() {
 
   QDate date(mw_one->ui->btnYear->text().toInt(),
              mw_one->ui->btnMonth->text().toInt(), 1);
-  m_DateSelector->m_datePickerYM->setDate(date);
+  mw_one->m_DateSelector->m_datePickerYM->setDate(date);
 
-  m_DateSelector->init();
+  mw_one->m_DateSelector->init();
 }
 
 void Report::on_btnMonth_clicked() {
-  m_DateSelector->dateFlag = 2;
+  mw_one->m_DateSelector->dateFlag = 2;
   mw_one->ui->lblDetails->setText(tr("Details"));
 
-  m_DateSelector->init();
+  mw_one->m_DateSelector->init();
 }
 
 void Report::startReport1(QString year, QString month) {

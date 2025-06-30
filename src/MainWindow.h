@@ -252,7 +252,7 @@ QLabel {
   Steps *m_Steps;
   Reader *m_Reader;
   TodoAlarm *m_TodoAlarm;
-
+  DateSelector *m_DateSelector;
   PageIndicator *m_PageIndicator;
 
   dlgSetText *mydlgSetText;

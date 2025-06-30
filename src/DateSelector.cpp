@@ -14,14 +14,12 @@ DateSelector::DateSelector(QWidget *parent)
     : QDialog(parent), ui(new Ui::DateSelector) {
   ui->setupUi(this);
   this->installEventFilter(this);
-
   setModal(true);
 
-  m_datePickerYM = new DatePicker(false, ui->gboxYear);
-  m_datePickerYMD = new DatePicker(true, ui->gboxMonth);
-
-  ui->gboxYear->layout()->addWidget(m_datePickerYM);
-  ui->gboxMonth->layout()->addWidget(m_datePickerYMD);
+  m_datePickerYM = new DatePicker(false, this);
+  m_datePickerYMD = new DatePicker(true, this);
+  ui->vLayout->addWidget(m_datePickerYM);
+  ui->vLayout->addWidget(m_datePickerYMD);
 }
 
 DateSelector::~DateSelector() { delete ui; }
@@ -45,41 +43,26 @@ void DateSelector::closeEvent(QCloseEvent *event) {
 
 void DateSelector::init() {
   if (dateFlag == 1) {
-    ui->gboxMonth->hide();
+    m_datePickerYMD->hide();
+    m_datePickerYM->show();
 
-    ui->gboxYear->setHidden(false);
-    ui->gboxMonth->hide();
-
-    ui->lblYear->setHidden(false);
-
-    ui->lblFlag->hide();
-
-    setMinimumHeight(300);
+    ui->lblFlag->setText(tr("Year-Month"));
   }
 
   if (dateFlag == 2) {
-    ui->gboxYear->hide();
-
-    ui->gboxMonth->setHidden(false);
-
-    ui->lblYear->hide();
-
-    ui->lblFlag->hide();
-
-    setMinimumHeight(300);
   }
 
   if (dateFlag == 3 || dateFlag == 4) {
-    ui->lblYear->setHidden(false);
+    m_datePickerYM->hide();
+    m_datePickerYMD->show();
 
     if (dateFlag == 3) ui->lblFlag->setText(tr("Start Date"));
     if (dateFlag == 4) ui->lblFlag->setText(tr("End Date"));
-    ui->lblFlag->setHidden(false);
-
-    setMinimumHeight(300);
   }
 
+  setFixedHeight(320);
   setFixedWidth(mw_one->width() - 10);
+
   int x, y, w, h;
   x = mw_one->geometry().x() + 5;
   y = mw_one->geometry().y() + (mw_one->height() - height()) / 2;
@@ -88,6 +71,7 @@ void DateSelector::init() {
   setGeometry(x, y, w, h);
 
   m_Method->showGrayWindows();
+
   show();
 }
 
@@ -101,14 +85,14 @@ void DateSelector::on_btnOk_clicked() {
   //   d = list.at(2);
   // }
 
-  if (!ui->gboxYear->isHidden()) {
+  if (!m_datePickerYM->isHidden()) {
     QDate date = m_datePickerYM->date();
     y = QString::number(date.year());
     m = QString::number(date.month());
     d = QString::number(date.day());
   }
 
-  if (!ui->gboxMonth->isHidden()) {
+  if (!m_datePickerYMD->isHidden()) {
     QDate date = m_datePickerYMD->date();
     y = QString::number(date.year());
     m = QString::number(date.month());
@@ -185,8 +169,8 @@ void DateSelector::initStartEndDate(QString flag) {
   //  return;
   //}
 
-  ui->gboxYear->hide();
-  ui->gboxMonth->setHidden(false);
+  m_datePickerYM->hide();
+  m_datePickerYMD->show();
 
   m_datePickerYMD->setDate(QDate(y, m, d));
 

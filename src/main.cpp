@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
   QQuickWindow::setSceneGraphBackend("opengl");
 
   // 关键稳定性设置
-  qputenv("QSG_RENDER_LOOP", "threaded");  // 使用多线程渲染
+  qputenv("QSG_RENDER_LOOP", "threaded");        // 使用多线程渲染
   qputenv("QT_ANDROID_DISABLE_GPU_DEBUG", "1");  // 关闭调试层
   qputenv("QML_DISABLE_DISK_CACHE", "1");        // 避免缓存问题*/
 

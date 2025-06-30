@@ -385,10 +385,12 @@ public class PDFView extends RelativeLayout {
     public void setNightMode(boolean nightMode) {
         this.nightMode = nightMode;
         if (nightMode) {
+            // 将偏移量从 255 降低到一个较小的值（例如 180 或 200）
+            // 这样反色后的颜色不会完全达到白色，从而保留更多的暗部细节。
             ColorMatrix colorMatrixInverted = new ColorMatrix(new float[] {
-                    -1, 0, 0, 0, 255,
-                    0, -1, 0, 0, 255,
-                    0, 0, -1, 0, 255,
+                    -1, 0, 0, 0, 200,
+                    0, -1, 0, 0, 200,
+                    0, 0, -1, 0, 200,
                     0, 0, 0, 1, 0 });
 
             ColorMatrixColorFilter filter = new ColorMatrixColorFilter(colorMatrixInverted);

@@ -237,21 +237,19 @@ void WheelWidget::animateInertia() {
     }
   }
 
-  // 之前Qt5正常实现
-  /*
-  if (qAbs(m_velocity) < 5) {  // 更低停止阈值
-    m_inertiaTimer.stop();
-    updateIndex();
-  }
-  update();
- */
+  // 精确停止条件增强
+  const bool shouldStop =
+      (qAbs(m_velocity) < 0.5) ||
+      (qAbs(m_velocity) < 5.0 &&
+       qAbs(m_offset - (m_currentIndex * m_itemHeight)) < 1.0);
 
-  // 更精确的停止条件
-  if (qAbs(m_velocity) < 1.0 &&
-      qAbs(m_offset - m_currentIndex * m_itemHeight) < 1.0) {
+  if (shouldStop) {
     m_inertiaTimer.stop();
-    m_offset = m_currentIndex * m_itemHeight;  // 强制对齐
-    update();
+    m_offset = m_currentIndex * m_itemHeight;
+    // 精确对齐
+    update();  // 额外调用确保重绘
+    QMetaObject::invokeMethod(this, &WheelWidget::updateIndex,
+                              Qt::QueuedConnection);
   } else {
     update();
   }

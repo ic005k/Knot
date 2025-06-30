@@ -831,10 +831,10 @@ void Steps::selGpsListYearMonth() {
     m = list.at(1).toInt();
   }
   QDate date(y, m, 1);
-  mw_one->m_Report->m_DateSelector->m_datePickerYM->setDate(date);
+  mw_one->m_DateSelector->m_datePickerYM->setDate(date);
 
-  mw_one->m_Report->m_DateSelector->dateFlag = 1;
-  mw_one->m_Report->m_DateSelector->init();
+  mw_one->m_DateSelector->dateFlag = 1;
+  mw_one->m_DateSelector->init();
 }
 
 void Steps::getGpsListDataFromYearMonth() {

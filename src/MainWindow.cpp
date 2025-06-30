@@ -703,7 +703,9 @@ void MainWindow::on_ExecShortcut() {
   ;
   if (keyType == "reader") m_Reader->ContinueReading();
   if (keyType == "add") ui->btnAdd->click();
-  if (keyType == "exercise") ui->btnSteps->click();
+  if (keyType == "exercise") {
+    ui->btnSteps->click();
+  }
   if (keyType == "defaultopen") {
 #ifdef Q_OS_ANDROID
 
@@ -3115,7 +3117,6 @@ void MainWindow::initQW() {
 
   ui->qwSpeed->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/Speedometer.qml")));
-  // m_Steps->setCurrentGpsSpeed(0.00, 10.00);
 
   ui->qwGpsList->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/gps_list.qml")));
@@ -3396,6 +3397,7 @@ void MainWindow::init_Instance() {
   m_Steps = new Steps(this);
   m_Reader = new Reader(this);
   m_TodoAlarm = new TodoAlarm(this);
+  m_DateSelector = new DateSelector(this);
   m_CloudBackup = new CloudBackup;
   m_PageIndicator = new PageIndicator(this);
   m_PageIndicator->close();
@@ -4214,7 +4216,7 @@ static void JavaNotify_14() {
   } else if (m_Method->getDateTimeFlag() == "gpslist") {
     mw_one->ui->btnGetGpsListData->click();
   } else {
-    mw_one->m_Report->m_DateSelector->ui->btnOk->click();
+    mw_one->m_DateSelector->ui->btnOk->click();
   }
   qDebug() << "C++ JavaNotify_14";
 }
@@ -4981,11 +4983,11 @@ int MainWindow::getMaxDay(QString sy, QString sm) {
 }
 
 void MainWindow::on_btnStartDate_clicked() {
-  m_Report->m_DateSelector->initStartEndDate("start");
+  m_DateSelector->initStartEndDate("start");
 }
 
 void MainWindow::on_btnEndDate_clicked() {
-  m_Report->m_DateSelector->initStartEndDate("end");
+  m_DateSelector->initStartEndDate("end");
 }
 
 void MainWindow::on_btnBackSearch_clicked() {
