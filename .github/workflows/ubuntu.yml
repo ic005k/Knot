@@ -177,7 +177,7 @@ jobs:
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
                   -unsupported-allow-new-glibc \
                   -qmldir=/home/runner/work/Knot/Knot/src/qmlsrc \
-                  -qmake=/home/runner/work/Knot/Qt/QT_VERSION/gcc_64/bin/qmake \
+                  -qmake=/home/runner/work/Knot/Qt/6.8.3/gcc_64/bin/qmake \
                   -appimage
                   #-extra-plugins=webview
 
