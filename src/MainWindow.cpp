@@ -704,7 +704,7 @@ void MainWindow::on_ExecShortcut() {
   if (keyType == "reader") m_Reader->ContinueReading();
   if (keyType == "add") ui->btnAdd->click();
   if (keyType == "exercise") {
-    ui->btnSteps->click();
+    QTimer::singleShot(100, this, [this]() { ui->btnSteps->click(); });
   }
   if (keyType == "defaultopen") {
 #ifdef Q_OS_ANDROID
@@ -1128,7 +1128,6 @@ void MainWindow::saveData(QTreeWidget *tw, int tabIndex) {
   }
 
   int count = tw->topLevelItemCount();
-  int abc = count;
   int m_sn = 0;
 
   QString flag;
@@ -1170,8 +1169,7 @@ void MainWindow::saveData(QTreeWidget *tw, int tabIndex) {
       }
 
       m_sn++;
-    } else
-      abc--;
+    }
 
     Reg.setValue(flag + "TopCount", m_sn);
   }
@@ -4863,7 +4861,6 @@ void MainWindow::reloadMain() {
   else
     a = 0;
 
-  int nullrows = 0;
   QString text0, text1, text2, text3, topitem;
   for (int i = a; i < total; i++) {
     QTreeWidgetItem *topItem = tw->topLevelItem(i);
@@ -4871,17 +4868,6 @@ void MainWindow::reloadMain() {
     text0 = topItem->text(0) + "  " + topItem->text(3);
     text1 = topItem->text(1);
     text2 = topItem->text(2);
-
-    nullrows = 1;
-    if (text1.length() > 0) {
-      // text1 = tr("Freq") + " : " + text1;
-      nullrows++;
-    }
-
-    if (text2.length() > 0) {
-      // text2 = tr("Amount") + " : " + text2;
-      nullrows++;
-    }
 
     topitem = text0;
 
