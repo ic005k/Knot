@@ -2,7 +2,7 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "2.0.5";
+QString ver = "2.0.6";
 QString appName = "Knot";
 
 QList<QPointF> PointList;
@@ -35,7 +35,7 @@ bool isBreak = false;
 bool isDark = false;
 bool isDelData = false;
 
-QRegularExpression regxNumber("^-?\[0-9.]*$");
+QRegularExpression regxNumber("^-?[0-9.]*$");
 
 QSettings *iniPreferences;
 CloudBackup *m_CloudBackup;

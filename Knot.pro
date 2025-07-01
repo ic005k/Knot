@@ -706,49 +706,7 @@ DISTFILES += \
     lib/scintilla/src/SciTE.properties \
     src/cn.qm \
     src/cn.ts \
-    src/imgview.qml \
-    src/memo.qml \
-    src/onedrive/web.qml \
-    src/qmlsrc/MainModel.qml \
-    src/qmlsrc/SearchResults.qml \
-    src/qmlsrc/Speedometer.qml \
-    src/qmlsrc/TodoModel.qml \
-    src/qmlsrc/TreeItem.js \
-    src/qmlsrc/TreeWidget.qml \
-    src/qmlsrc/baklist.qml \
-    src/qmlsrc/booklist.qml \
-    src/qmlsrc/bookmark.qml \
-    src/qmlsrc/bookview.qml \
-    src/qmlsrc/details.qml \
-    src/qmlsrc/epub_cata.qml \
-    src/qmlsrc/gps_list.qml \
-    src/qmlsrc/imgview.qml \
-    src/qmlsrc/main.qml \
-    src/qmlsrc/maindate.qml \
-    src/qmlsrc/mainevent.qml \
-    src/qmlsrc/maintab.qml \
-    src/qmlsrc/map.qml \
-    src/qmlsrc/memo.qml \
-    src/qmlsrc/notebook.qml \
-    src/qmlsrc/noteeditor.qml \
-    src/qmlsrc/notelist.qml \
-    src/qmlsrc/noterecycle.qml \
-    src/qmlsrc/notes_search_result.qml \
-    src/qmlsrc/reader.qml \
-    src/qmlsrc/report.qml \
-    src/qmlsrc/search.qml \
-    src/qmlsrc/seltab.qml \
-    src/qmlsrc/steps.qml \
-    src/qmlsrc/tabrecycle.qml \
-    src/qmlsrc/todo.qml \
-    src/qmlsrc/todorecycle.qml \
-    src/qmlsrc/tree_main.qml \
-    src/qmlsrc/type.qml \
-    src/qmlsrc/viewcate.qml \
-    lib/quazip/quazip.pc.cmakein \
-    src/reader.qml \
-    src/steps.qml
-
+    lib/quazip/quazip.pc.cmakein
 
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android

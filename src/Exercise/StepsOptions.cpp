@@ -6,6 +6,7 @@
 extern MainWindow *mw_one;
 extern Method *m_Method;
 extern QString iniDir;
+extern QRegularExpression regxNumber;
 
 StepsOptions::StepsOptions(QWidget *parent)
     : QDialog(parent), ui(new Ui::StepsOptions) {
@@ -13,6 +14,14 @@ StepsOptions::StepsOptions(QWidget *parent)
   this->installEventFilter(this);
   mw_one->set_ToolButtonStyle(this);
   setModal(true);
+
+  QValidator *validator1 =
+      new QRegularExpressionValidator(regxNumber, ui->editStepLength);
+  ui->editStepLength->setValidator(validator1);
+
+  QValidator *validator2 =
+      new QRegularExpressionValidator(regxNumber, ui->editStepsThreshold);
+  ui->editStepsThreshold->setValidator(validator2);
 }
 
 StepsOptions::~StepsOptions() { delete ui; }

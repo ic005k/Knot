@@ -25,7 +25,6 @@
         <file>res/test.txt</file>
         <file>res/up.png</file>
         <file>res/msg.mp3</file>
-        <file>src/cn.qm</file>
         <file>res/clear.png</file>
         <file>res/choice0.png</file>
         <file>res/choice1.png</file>
@@ -162,5 +161,6 @@
         <file>res/tr/qtlocation_zh_CN.qm</file>
         <file>res/theme/darkstyle.qss</file>
         <file>res/theme/lightstyle.qss</file>
+        <file>src/cn.qm</file>
     </qresource>
 </RCC>
