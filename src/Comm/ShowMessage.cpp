@@ -15,21 +15,15 @@ ShowMessage::ShowMessage(QWidget* parent)
   this->installEventFilter(this);
   ui->editMsg->viewport()->installEventFilter(this);
 
-  this->layout()->setContentsMargins(0, 0, 0, 0);
   setWindowFlag(Qt::FramelessWindowHint);
-  setAttribute(Qt::WA_TranslucentBackground);
-  if (isAndroid)
-    ui->widget->setStyleSheet("background-color:rgba(0, 0, 0, 50%);");
-  else
-    ui->widget->setStyleSheet("background-color:rgba(0, 0, 0, 0%);");
 
   if (isDark)
     ui->frame->setStyleSheet(
-        "QFrame{background-color: #222222;color: #FFFFFF;border-radius:10px; "
+        "QFrame{background-color: #222222;color: #FFFFFF;border-radius:0px; "
         "border:0px solid gray;}");
   else
     ui->frame->setStyleSheet(
-        "QFrame{background-color: #F5F5F5;border-radius:10px; "
+        "QFrame{background-color: #F5F5F5;border-radius:0px; "
         "border:0px solid gray;}");
 
   setModal(true);
@@ -51,8 +45,6 @@ ShowMessage::ShowMessage(QWidget* parent)
         "QFrame{background:rgb(0,205,205);min-height:2px}");
   else
     ui->hframe->setStyleSheet("QFrame{background:red;min-height:2px}");
-
-  // mw_one->set_ToolButtonStyle(this);
 
   QString strBtnStyle = ui->btnOk->styleSheet();
   ui->btnCancel->setStyleSheet(strBtnStyle);
@@ -90,10 +82,6 @@ bool ShowMessage::eventFilter(QObject* watch, QEvent* evn) {
 
 void ShowMessage::init() {
   isValue = false;
-  setFixedHeight(mw_one->height());
-  setFixedWidth(mw_one->width());
-  setGeometry(mw_one->geometry().x(), mw_one->geometry().y(), width(),
-              height());
 
   if (!m_Method->m_widget->isHidden()) {
     m_Method->m_widget->close();
@@ -104,7 +92,7 @@ void ShowMessage::init() {
   int x, y, w, h;
 
 #ifdef Q_OS_ANDROID
-  w = this->width();
+  w = mw_one->geometry().width();
 
 #else
   w = 360;
@@ -114,7 +102,7 @@ void ShowMessage::init() {
 
 #endif
 
-  ui->frame->setFixedWidth(w - 20);
+  setFixedWidth(w - 20);
 
   int nEditH = mw_one->m_Todo->getEditTextHeight(ui->editMsg);
   int nH = 0;
@@ -122,11 +110,15 @@ void ShowMessage::init() {
        ui->hframe->height() + 70;
 
   if (nH > mw_one->height()) nH = mw_one->height() - 10;
-  ui->frame->setFixedHeight(nH);
-  h = ui->widget->height();
-  x = mw_one->geometry().x() + (mw_one->width() - w) / 2;
-  y = mw_one->geometry().y() + (mw_one->height() - h) / 2;
-  ui->frame->setGeometry(x, y, w, h);
+
+  setFixedHeight(nH);
+
+  w = width();
+  h = nH;
+  x = mw_one->geometry().x() + (mw_one->geometry().width() - w) / 2;
+  y = mw_one->geometry().y() + (mw_one->geometry().height() - h) / 2;
+  setGeometry(x, y, w, h);
+
   if (isAndroid) show();
 }
 

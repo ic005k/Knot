@@ -42,7 +42,6 @@ Rectangle {
 
     function setCurrentItem(currentIndex) {
         view.currentIndex = currentIndex
-        // view.positionViewAtIndex(currentIndex, ListView.Beginning)
     }
 
     function getCurrentIndex() {
@@ -181,7 +180,7 @@ Rectangle {
             color: ListView.isCurrentItem ? "lightblue" : getColor()
 
             border.width: isDark ? 0 : 1
-            border.color: "lightgray" //"lightsteelblue"
+            border.color: "lightgray"
 
             radius: 6
 
@@ -199,7 +198,7 @@ Rectangle {
                     radius: 2
                     anchors.leftMargin: 1
                     color: "red"
-                    visible: false // item2.text.length ? true : false
+                    visible: false
                     Text {
                         anchors.centerIn: parent
                     }
@@ -302,7 +301,7 @@ Rectangle {
                             leftPadding: 5
                             rightPadding: 5
 
-                            visible: item1.text.length ? true : false
+                            visible: text.length > 0
                         }
                     }
 
@@ -335,7 +334,7 @@ Rectangle {
                             radius: 0
                             anchors.leftMargin: 1
                             color: "red"
-                            visible: false // item2.text.length ? true : false
+                            visible: false
                         }
 
                         Text {
@@ -354,7 +353,7 @@ Rectangle {
                             leftPadding: 5
                             rightPadding: 5
 
-                            visible: item2.text.length ? true : false
+                            visible: text.length > 0
                         }
                     }
 
@@ -364,7 +363,7 @@ Rectangle {
                         width: parent.width
                         wrapMode: Text.WordWrap
                         elide: Text.ElideRight
-                        //Layout.maximumWidth: listItem.width
+
                         Layout.preferredWidth: listItem.width
                         font.bold: false
                         text: text3
@@ -372,7 +371,7 @@ Rectangle {
                         leftPadding: 5
                         rightPadding: 5
 
-                        visible: item3.text.length ? true : false
+                        visible: text.length > 0
                     }
                 }
             }
@@ -382,7 +381,7 @@ Rectangle {
 
                 onClicked: {
 
-                    view.currentIndex = index //实现item切换
+                    view.currentIndex = index
 
                     m_Method.clickMainDate()
                     m_Method.clickMainDateData()
