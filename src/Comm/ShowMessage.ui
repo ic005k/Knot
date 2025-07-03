@@ -31,32 +31,8 @@
    </property>
    <item>
     <widget class="QWidget" name="widget" native="true">
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="2" column="0">
-       <widget class="QFrame" name="frame">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Shape::StyledPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Shadow::Raised</enum>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <property name="bottomMargin">
-          <number>15</number>
-         </property>
-         <item>
-          <widget class="QTextEdit" name="editMsg"/>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
        <widget class="QLabel" name="lblTitle">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -69,7 +45,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item>
        <widget class="QFrame" name="hframe">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -91,8 +67,14 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item>
+       <widget class="QTextEdit" name="editMsg"/>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="topMargin">
+         <number>9</number>
+        </property>
         <item>
          <widget class="QToolButton" name="btnCancel">
           <property name="sizePolicy">

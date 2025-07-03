@@ -114,7 +114,7 @@ void MainWindow::bakDataDone() {
 
       ShowMessage *m_ShowMsg = new ShowMessage(this);
       m_ShowMsg->showMsg("Knot",
-                         tr("The data was exported successfully.") + +"\n\n" +
+                         tr("The data was exported successfully.") + "\n\n" +
                              zipfile + "\n\n" +
                              m_Method->getFileSize(QFile(zipfile).size(), 2),
                          1);
@@ -972,6 +972,7 @@ bool MainWindow::del_Data(QTreeWidget *tw) {
       strTip = tr("Only the current day's records can be deleted.");
     ShowMessage *m_ShowMsg = new ShowMessage(this);
     m_ShowMsg->showMsg(str, strTip, 1);
+
     return false;
   }
 

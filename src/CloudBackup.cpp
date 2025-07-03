@@ -60,8 +60,8 @@ QString CloudBackup::initUserInfo(QString info) {
       str = str.replace("{", "");
       str = str.replace("\"", "");
 
-      if (str.toLower().contains("remaining") || str.contains("total") ||
-          str.contains("used")) {
+      if (str.contains("remaining", Qt::CaseInsensitive) ||
+          str.contains("total") || str.contains("used")) {
         QStringList list = str.split(":");
         QString s_size = list.at(1);
         qint64 size = s_size.toLongLong();

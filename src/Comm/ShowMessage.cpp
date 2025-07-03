@@ -17,15 +17,6 @@ ShowMessage::ShowMessage(QWidget* parent)
 
   setWindowFlag(Qt::FramelessWindowHint);
 
-  if (isDark)
-    ui->frame->setStyleSheet(
-        "QFrame{background-color: #222222;color: #FFFFFF;border-radius:0px; "
-        "border:0px solid gray;}");
-  else
-    ui->frame->setStyleSheet(
-        "QFrame{background-color: #F5F5F5;border-radius:0px; "
-        "border:0px solid gray;}");
-
   setModal(true);
 
   QFont font = this->font();
@@ -40,11 +31,6 @@ ShowMessage::ShowMessage(QWidget* parent)
   m_Method->setSCrollPro(ui->editMsg);
 
   ui->hframe->setFrameShape(QFrame::HLine);
-  if (isDark)
-    ui->hframe->setStyleSheet(
-        "QFrame{background:rgb(0,205,205);min-height:2px}");
-  else
-    ui->hframe->setStyleSheet("QFrame{background:red;min-height:2px}");
 
   QString strBtnStyle = ui->btnOk->styleSheet();
   ui->btnCancel->setStyleSheet(strBtnStyle);
@@ -86,6 +72,8 @@ void ShowMessage::init() {
   if (!m_Method->m_widget->isHidden()) {
     m_Method->m_widget->close();
   }
+
+  m_Method->showGrayWindows();
 
   if (!isAndroid) show();
 
