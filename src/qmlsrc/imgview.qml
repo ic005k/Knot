@@ -73,7 +73,7 @@ Item {
             }
 
             //使用鼠标滚轮缩放
-            onWheel: {
+            onWheel: function (wheel) {
                 //每次滚动都是120的倍数
                 var datla = wheel.angleDelta.y / 120
                 if (datla > 0) {

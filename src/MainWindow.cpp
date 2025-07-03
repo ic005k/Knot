@@ -2429,15 +2429,8 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
       }
 
       if (!ui->frameImgView->isHidden()) {
-        if (isReaderVisible) {
-          ui->frameImgView->hide();
-          ui->frameReader->show();
-          return true;
-        } else if (isMemoVisible) {
-          ui->frameImgView->hide();
-          ui->frameNotes->show();
-          return true;
-        }
+        on_btnBackImg_clicked();
+        return true;
       }
 
       if (!ui->frameMain->isHidden()) {

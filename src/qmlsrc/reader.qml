@@ -182,7 +182,10 @@ Rectangle {
             //renderType: Text.NativeRendering // 使用原生渲染引擎,在Qt6.6.3的安卓上表现迟钝，非常容易导致崩溃
             renderType: Text.QtRendering // 比NativeRendering更轻量
 
-            onLinkActivated: handleLinkClicked(link) // 处理链接点击
+            // 处理链接点击
+            onLinkActivated: function (link) {
+                handleLinkClicked(link)
+            }
 
             PropertyAnimation on x {
                 easing.type: Easing.Linear
