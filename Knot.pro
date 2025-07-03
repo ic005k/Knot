@@ -356,10 +356,8 @@ SOURCES += \
     src/Notes/NewNoteBook.cpp \
     src/Notes/Notes.cpp \
     src/Notes/NotesList.cpp \
-    src/Notes/NotesSearchEngine.cpp \
     src/Notes/PrintPDF.cpp \
     src/Notes/QTextEditHighlighter.cpp \
-    src/Notes/SearchResultModel.cpp \
     src/Notes/TextSelector.cpp \
     src/Notes/database_manager.cpp \
     src/Notes/search_model.cpp \
@@ -590,10 +588,8 @@ HEADERS += \
     src/Notes/NewNoteBook.h \
     src/Notes/Notes.h \
     src/Notes/NotesList.h \
-    src/Notes/NotesSearchEngine.h \
     src/Notes/PrintPDF.h \
     src/Notes/QTextEditHighlighter.h \
-    src/Notes/SearchResultModel.h \
     src/Notes/TextSelector.h \
     src/Notes/database_manager.h \
     src/Notes/search_model.h \

@@ -19,8 +19,6 @@
 #include <QTreeWidgetItem>
 #include <QtConcurrent/QtConcurrent>
 
-#include "NotesSearchEngine.h"
-#include "SearchResultModel.h"
 #include "database_manager.h"
 #include "search_model.h"
 #include "src/Notes/MoveTo.h"
@@ -215,16 +213,12 @@ class NotesList : public QDialog {
 
   void onSearchFinished();
 
-  void onSearchIndexReady();
   void onSearchTextChanged(const QString &text);
 
  private:
   QStringList validMDFiles;
 
   QStringList mIndexList;
-
-  NotesSearchEngine *m_searchEngine;
-  SearchResultModel *m_searchResultModel;
 
   QInputMethod *pAndroidKeyboard = QApplication::inputMethod();
 
@@ -254,13 +248,13 @@ class NotesList : public QDialog {
   bool moveItem(QTreeWidget *tw);
 
   QFutureWatcher<ResultsMap> *watcher;
-  QList<QString> findUnindexedFiles(const QList<QString> &allPaths);
+
   QDateTime m_lastIndexTime;  // 记录最后一次索引构建时间
   QMutex m_indexTimeMutex;    // 互斥锁
   void saveIndexTimestamp();
   void loadIndexTimestamp();
   bool m_isIndexing = false;  // 标记索引状态
-  QString generatePreviewText(const SearchResult &result);
+
   void clearInvalidMDFile();
   SearchModel m_searchModel;
   void startBackgroundTaskUpdateFilesIndex();

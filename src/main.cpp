@@ -58,6 +58,8 @@ void migrateOldDataIfNeeded();
 QString strJBDict1 = "";
 QString strJBDict2 = "";
 QString strJBDict3 = "";
+QString strJBDict4 = "";
+QString strJBDict5 = "";
 
 bool zh_cn = false;
 bool isAndroid, isIOS;
@@ -172,6 +174,8 @@ int main(int argc, char* argv[]) {
   strJBDict1 = privateDir + "dict/jieba.dict.utf8";
   strJBDict2 = privateDir + "dict/hmm_model.utf8";
   strJBDict3 = privateDir + "dict/user.dict.utf8";
+  strJBDict4 = privateDir + "dict/stop_words.utf8";
+  strJBDict5 = privateDir + "dict/idf.utf8";
 
   if (!QFile::exists(strJBDict1) || !QFile::exists(strJBDict2) ||
       !QFile::exists(strJBDict3)) {

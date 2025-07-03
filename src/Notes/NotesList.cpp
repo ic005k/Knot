@@ -24,11 +24,6 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
 
   strNoteNameIndexFile = privateDir + "MyNoteNameIndex";
 
-  // 注册模型到 QML
-  qmlRegisterType<SearchResultModel>("com.example", 1, 0, "SearchResultModel");
-  qRegisterMetaType<KeywordPosition>("KeywordPosition");
-  qRegisterMetaType<QList<KeywordPosition>>("QList<KeywordPosition>");
-
   connect(pAndroidKeyboard, &QInputMethod::visibleChanged, this,
           &NotesList::on_KVChanged);
 
@@ -85,19 +80,11 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
   initNotesList();
   initRecycle();
 
-  m_searchResultModel = new SearchResultModel(this);
-  mw_one->ui->qwNotesSearchResult->rootContext()->setContextProperty(
-      "searchResultModel", m_searchResultModel);
-  m_searchEngine = new NotesSearchEngine(this);
-  connect(m_searchEngine, &NotesSearchEngine::indexBuildFinished, this,
-          &NotesList::onSearchIndexReady);
-
   // 连接搜索框
   connect(mw_one->ui->editNotesSearch, &QLineEdit::textChanged, this,
           &NotesList::onSearchTextChanged);
 
   loadIndexTimestamp();
-  m_searchEngine->loadIndex(privateDir + "MyNotesIndex");
 
   m_dbManager.initDatabase(privateDir + "md_database_v3.db");
 
@@ -2544,116 +2531,15 @@ QStringList NotesList::extractLocalImagesFromMarkdown(const QString &filePath) {
   return images;
 }
 
-void NotesList::onSearchIndexReady() {
-  qDebug() << "索引构建完成，共索引文档：" << m_searchEngine->documentCount();
-
-  // 更新最后索引时间,如果 m_lastIndexTime 在多个线程中被访问，需添加互斥锁
-  QMutexLocker locker(&m_indexTimeMutex);
-  m_lastIndexTime = QDateTime::currentDateTime();
-  saveIndexTimestamp();
-
-  m_searchEngine->saveIndex(privateDir + "MyNotesIndex");
-
-  m_isIndexing = false;
-}
-
 void NotesList::onSearchTextChanged(const QString &text) {
   QTimer::singleShot(300, [this, text]() {  // 防抖处理
     auto results =
         m_dbManager.searchDocuments(text, mw_one->m_Notes->m_NoteIndexManager);
     m_searchModel.setResults(results);
   });
-
-  ////////
-  return;
-  ///////
-
-  QList<SearchResult> results = m_searchEngine->search(text);
-
-  // 打印调试信息
-  qDebug() << "===== 搜索开始 =====";
-  qDebug() << "查询内容:" << text;
-  qDebug() << "共找到" << results.size() << "个匹配文件";
-
-  for (const SearchResult &result : results) {
-    qDebug() << "----------------------------------------";
-    qDebug() << result;  // 直接调用定义好的 operator<<
-  }
-
-  qDebug() << "===== 搜索结束 =====";
-
-  // 生成模型数据
-  QList<SearchResult> modelData;
-  for (const SearchResult &result : results) {
-    SearchResult item;
-    QString file = result.filePath;
-    item.filePath = file;
-    item.previewText = generatePreviewText(result);
-    item.highlightPos = result.highlightPos;  // 直接使用已处理的位置
-
-    QString title = mw_one->m_Notes->m_NoteIndexManager->getNoteTitle(file);
-    if (title.length() > 0)
-      item.fileTitle = title;
-    else {
-      QFileInfo fi(file);
-      item.fileTitle = fi.baseName();
-    }
-    modelData.append(item);
-  }
-
-  // 更新成员变量模型
-  m_searchResultModel->updateResults(modelData);
-
-  // 调试输出
-  qDebug() << "搜索结果已更新，数量：" << modelData.size();
-  mw_one->ui->lblNoteTitle->setText("");
-  mw_one->ui->lblNoteSearchResult->setText(tr("Note Search Results:") + " " +
-                                           QString::number(modelData.size()));
 }
 
-void NotesList::openSearch() {
-  return;
-
-  if (m_isIndexing) return;
-  m_isIndexing = true;
-
-  // 启动异步索引构建
-  QList<QString> notePaths =
-      findMarkdownFiles(iniDir + "memo/");  // 需要实现文件遍历逻辑
-
-  QSet<QString> set2(recycleNotesList.begin(), recycleNotesList.end());
-  QStringList result;
-  for (const QString &str : notePaths) {
-    if (!set2.contains(str)) {
-      result.append(str);
-    }
-  }
-
-  notePaths = result;
-
-  QStringList newPaths = findUnindexedFiles(notePaths);
-  if (!QFile::exists(privateDir + "MyNotesIndex"))
-    m_searchEngine->buildIndexAsync(notePaths, true);
-  else
-    m_searchEngine->buildIndexAsync(newPaths, false);
-}
-
-// 增量索引更新
-QList<QString> NotesList::findUnindexedFiles(const QList<QString> &allPaths) {
-  QList<QString> newPaths;
-  for (const QString &path : allPaths) {
-    QFileInfo fileInfo(path);
-
-    // 检查文件最后修改时间是否晚于索引保存时间
-    if (!m_searchEngine->hasDocument(path) &&
-        fileInfo.lastModified() > m_lastIndexTime) {
-      newPaths.append(path);
-    }
-  }
-
-  qDebug() << "newPaths=" << newPaths;
-  return newPaths;
-}
+void NotesList::openSearch() { return; }
 
 // 保存到 QSettings
 void NotesList::saveIndexTimestamp() {
@@ -2665,26 +2551,6 @@ void NotesList::saveIndexTimestamp() {
 void NotesList::loadIndexTimestamp() {
   QSettings settings;
   m_lastIndexTime = settings.value("KnotNotes_LastIndexTime", 0).toDateTime();
-}
-
-QString NotesList::generatePreviewText(const SearchResult &result) {
-  // 1. 获取文档原始内容（假设已存储）
-  QString content = m_searchEngine->getDocumentContent(result.filePath);
-
-  // 2. 如果没有原始内容，尝试从文件读取
-  if (content.isEmpty()) {
-    QFile file(result.filePath);
-    if (file.open(QIODevice::ReadOnly)) {
-      content = QString::fromUtf8(file.readAll());
-      file.close();
-    }
-  }
-
-  // 3. 生成带高亮的预览文本
-  QString preview;
-  preview = content.left(200);  // 截取前200字符
-
-  return preview;
 }
 
 QString NotesList::getSearchResultQmlFile() {
