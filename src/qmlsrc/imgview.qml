@@ -45,51 +45,74 @@ Item {
             asynchronous: true
         }
 
-        MouseArea {
-            id: mapDragArea
-            anchors.fill: parent
-            drag.target: mapImg
-
-            onDoubleClicked: {
-                zoomin()
-                zoomin()
-                zoomin()
-            }
-
-            //这里使图片不管是比显示框大还是比显示框小都不会被拖拽出显示区域
-
-
-            /*drag.minimumX: (mapImg.width > mapItemArea.width) ? (mapItemArea.width
-                                                                 - mapImg.width) : 0
-            drag.minimumY: (mapImg.height
-                            > mapItemArea.height) ? (mapItemArea.height - mapImg.height) : 0
-            drag.maximumX: (mapImg.width
-                            > mapItemArea.width) ? 0 : (mapItemArea.width - mapImg.width)
-            drag.maximumY: (mapImg.height
-                            > mapItemArea.height) ? 0 : (mapItemArea.height - mapImg.height)*/
-            onClicked: {
-
-                // console.log(mouse.x + "  " + mouse.y)
-            }
-
-            //使用鼠标滚轮缩放
-            onWheel: function (wheel) {
-                //每次滚动都是120的倍数
-                var datla = wheel.angleDelta.y / 120
-                if (datla > 0) {
-                    mapImg.scale = mapImg.scale / 0.9
-                } else {
-                    mapImg.scale = mapImg.scale * 0.9
-                }
-            }
-        }
-
         PinchArea {
             anchors.fill: parent
             pinch.target: mapImg
             pinch.maximumScale: 1000
             pinch.minimumScale: 0.00001
             pinch.dragAxis: Pinch.XAndYAxis
+
+            // 添加 MouseArea 处理单指拖动
+            MouseArea {
+                id: dragArea
+                anchors.fill: parent
+                enabled: true
+
+                // 拖动目标设置为图像
+                drag.target: mapImg
+                drag.axis: Drag.XAndYAxis
+
+                // 动态计算拖动边界
+                drag.minimumX: -mapImg.width * (mapImg.scale - 1) / 2
+                drag.maximumX: parent.width - mapImg.width * (mapImg.scale + 1) / 2
+                drag.minimumY: -mapImg.height * (mapImg.scale - 1) / 2
+                drag.maximumY: parent.height - mapImg.height * (mapImg.scale + 1) / 2
+
+                // 防止误触发点击事件
+                onClicked: {
+
+                }
+
+                // 拖动时更新边界
+                onPositionChanged: {
+                    dragArea.drag.minimumX = -mapImg.width * (mapImg.scale - 1) / 2
+                    dragArea.drag.maximumX = parent.width - mapImg.width * (mapImg.scale + 1) / 2
+                    dragArea.drag.minimumY = -mapImg.height * (mapImg.scale - 1) / 2
+                    dragArea.drag.maximumY = parent.height - mapImg.height * (mapImg.scale + 1) / 2
+                }
+
+                onDoubleClicked: {
+                    zoomin()
+                    zoomin()
+                    zoomin()
+                }
+
+                //使用鼠标滚轮缩放
+                onWheel: function (wheel) {
+                    //每次滚动都是120的倍数
+                    var datla = wheel.angleDelta.y / 120
+                    if (datla > 0) {
+                        mapImg.scale = mapImg.scale / 0.9
+                    } else {
+                        mapImg.scale = mapImg.scale * 0.9
+                    }
+                }
+            }
+        }
+    }
+    // 状态显示
+    Rectangle {
+        anchors.bottom: parent.bottom
+        width: parent.width
+        height: 30
+        color: "#80000000"
+
+        Text {
+            anchors.centerIn: parent
+            color: "white"
+            text: qsTr("Scale") + ": " + mapImg.scale.toFixed(2) + " | " + qsTr(
+                      "Pos") + ": (" + mapImg.x.toFixed(0) + ", " + mapImg.y.toFixed(
+                      0) + ")"
         }
     }
 }
