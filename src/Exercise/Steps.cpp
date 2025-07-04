@@ -812,17 +812,6 @@ void Steps::loadGpsList(int nYear, int nMonth) {
 }
 
 void Steps::selGpsListYearMonth() {
-  /*if (isAndroid) {
-    int y, m;
-    QString str = mw_one->ui->btnSelGpsDate->text();
-    QStringList list = str.split("-");
-    y = list.at(0).toInt();
-    m = list.at(1).toInt();
-    m_Method->setDateTimePickerFlag("ym", y, m, 0, 0, 0, "gpslist");
-    m_Method->openDateTimePicker();
-    return;
-  }*/
-
   QStringList list = mw_one->ui->btnSelGpsDate->text().split("-");
   int y = 2025;
   int m = 2;
@@ -830,11 +819,17 @@ void Steps::selGpsListYearMonth() {
     y = list.at(0).toInt();
     m = list.at(1).toInt();
   }
-  QDate date(y, m, 1);
-  if (mw_one->m_DateSelector != nullptr) {
-    delete mw_one->m_DateSelector;
+
+  if (isAndroid) {
+    m_Method->setDateTimePickerFlag("ym", y, m, 0, 0, 0, "gpslist");
+    m_Method->openDateTimePicker();
+    return;
   }
-  mw_one->m_DateSelector = new DateSelector(this);
+
+  ////////////////////////////////////////////////////////////
+
+  QDate date(y, m, 1);
+
   mw_one->m_DateSelector->m_datePickerYM->setDate(date);
 
   mw_one->m_DateSelector->dateFlag = 1;
@@ -845,8 +840,12 @@ void Steps::getGpsListDataFromYearMonth() {
   clearAllGpsList();
 
   QStringList list;
-  // list = m_Method->getDateTimePickerValue();
-  list = ymdList;
+
+  if (isAndroid)
+    list = m_Method->getDateTimePickerValue();
+  else
+    list = ymdList;
+
   int y = list.at(0).toInt();
   int m = list.at(1).toInt();
 

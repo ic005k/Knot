@@ -79,25 +79,25 @@ void DateSelector::init() {
 void DateSelector::on_btnOk_clicked() {
   QString y, m, d;
 
-  // if (isAndroid) {
-  //   QStringList list = m_Method->getDateTimePickerValue();
-  //   y = list.at(0);
-  //   m = list.at(1);
-  //   d = list.at(2);
-  // }
+  if (isAndroid) {
+    QStringList list = m_Method->getDateTimePickerValue();
+    y = list.at(0);
+    m = list.at(1);
+    d = list.at(2);
+  } else {
+    if (!m_datePickerYM->isHidden()) {
+      QDate date = m_datePickerYM->date();
+      y = QString::number(date.year());
+      m = QString::number(date.month());
+      d = QString::number(date.day());
+    }
 
-  if (!m_datePickerYM->isHidden()) {
-    QDate date = m_datePickerYM->date();
-    y = QString::number(date.year());
-    m = QString::number(date.month());
-    d = QString::number(date.day());
-  }
-
-  if (!m_datePickerYMD->isHidden()) {
-    QDate date = m_datePickerYMD->date();
-    y = QString::number(date.year());
-    m = QString::number(date.month());
-    d = QString::number(date.day());
+    if (!m_datePickerYMD->isHidden()) {
+      QDate date = m_datePickerYMD->date();
+      y = QString::number(date.year());
+      m = QString::number(date.month());
+      d = QString::number(date.day());
+    }
   }
 
   if (m.length() == 1) m = "0" + m;
@@ -164,11 +164,13 @@ void DateSelector::initStartEndDate(QString flag) {
   m = list.at(1).toInt();
   d = list.at(2).toInt();
 
-  // if (isAndroid) {
-  //   m_Method->setDateTimePickerFlag("ymd", y, m, d, 0, 0, flag);
-  //  m_Method->openDateTimePicker();
-  //  return;
-  //}
+  if (isAndroid) {
+    m_Method->setDateTimePickerFlag("ymd", y, m, d, 0, 0, flag);
+    m_Method->openDateTimePicker();
+    return;
+  }
+
+  ////////////////////////////////////////////////////////////
 
   m_datePickerYM->hide();
   m_datePickerYMD->show();

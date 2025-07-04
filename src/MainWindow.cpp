@@ -4963,18 +4963,10 @@ int MainWindow::getMaxDay(QString sy, QString sm) {
 }
 
 void MainWindow::on_btnStartDate_clicked() {
-  if (m_DateSelector != nullptr) {
-    delete m_DateSelector;
-  }
-  m_DateSelector = new DateSelector(this);
   m_DateSelector->initStartEndDate("start");
 }
 
 void MainWindow::on_btnEndDate_clicked() {
-  if (m_DateSelector != nullptr) {
-    delete m_DateSelector;
-  }
-  m_DateSelector = new DateSelector(this);
   m_DateSelector->initStartEndDate("end");
 }
 
