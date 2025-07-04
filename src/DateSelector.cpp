@@ -15,7 +15,8 @@ DateSelector::DateSelector(QWidget *parent)
   ui->setupUi(this);
   this->installEventFilter(this);
   setModal(true);
-
+  if (m_datePickerYM != nullptr) delete m_datePickerYM;
+  if (m_datePickerYMD != nullptr) delete m_datePickerYMD;
   m_datePickerYM = new DatePicker(false, this);
   m_datePickerYMD = new DatePicker(true, this);
   ui->vLayout->addWidget(m_datePickerYM);

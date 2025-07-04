@@ -831,6 +831,10 @@ void Steps::selGpsListYearMonth() {
     m = list.at(1).toInt();
   }
   QDate date(y, m, 1);
+  if (mw_one->m_DateSelector != nullptr) {
+    delete mw_one->m_DateSelector;
+  }
+  mw_one->m_DateSelector = new DateSelector(this);
   mw_one->m_DateSelector->m_datePickerYM->setDate(date);
 
   mw_one->m_DateSelector->dateFlag = 1;

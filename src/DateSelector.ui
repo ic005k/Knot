@@ -35,6 +35,31 @@ background-color:white; border: 1px solid rgb(125,125,125);
        <height>42</height>
       </size>
      </property>
+     <property name="styleSheet">
+      <string notr="true">
+    QToolButton {
+        background-color: #2196F3;  /* 默认背景色 */
+        border: none;               /* 无边框 */
+        border-radius: 4px;         /* 圆角半径 */
+        color: white;               /* 文字颜色 */
+        padding: 8px 16px;          /* 内边距 */
+       
+    }
+
+    QToolButton:hover {
+        background-color: #1E88E5;  /* 悬停颜色 */
+    }
+
+    QToolButton:pressed {
+        background-color: #1976D2;  /* 按下颜色 */
+    }
+
+    QToolButton:disabled {
+        background-color: #BDBDBD;  /* 禁用背景色 */
+        color: #616161;             /* 禁用文字颜色 */
+    }
+</string>
+     </property>
      <property name="text">
       <string>Ok</string>
      </property>

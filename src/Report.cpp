@@ -145,6 +145,11 @@ void Report::on_btnBack_clicked() {
 void Report::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }
 
 void Report::on_btnYear_clicked() {
+  if (mw_one->m_DateSelector != nullptr) {
+    delete mw_one->m_DateSelector;
+  }
+  mw_one->m_DateSelector = new DateSelector(this);
+
   mw_one->m_DateSelector->dateFlag = 1;
 
   /*if (isAndroid) {
@@ -166,6 +171,10 @@ void Report::on_btnYear_clicked() {
 }
 
 void Report::on_btnMonth_clicked() {
+  if (mw_one->m_DateSelector != nullptr) {
+    delete mw_one->m_DateSelector;
+  }
+  mw_one->m_DateSelector = new DateSelector(this);
   mw_one->m_DateSelector->dateFlag = 2;
   mw_one->ui->lblDetails->setText(tr("Details"));
 

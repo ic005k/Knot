@@ -18,9 +18,9 @@ class DateSelector : public QDialog {
   ~DateSelector();
   Ui::DateSelector *ui;
 
-  DatePicker *m_datePickerYM;
+  DatePicker *m_datePickerYM = nullptr;
 
-  DatePicker *m_datePickerYMD;
+  DatePicker *m_datePickerYMD = nullptr;
 
   int dateFlag = 0; /*1=btnYeat 2=btnMonth 3=btnStartDate 4=btnEnDate*/
 
