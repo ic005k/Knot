@@ -379,9 +379,14 @@ public class MyActivity
       } else if (SCREEN_OFF.equals(intent.getAction())) {
 
         isScreenOff = true;
+
         Log.w("Knot", "屏幕熄了");
       }
     }
+  }
+
+  public static boolean getLockScreenStatus() {
+    return isScreenOff;
   }
 
   // --------------------------------------------------------------------------------------------------
@@ -836,13 +841,19 @@ public class MyActivity
   @Override
   public void onPause() {
     System.out.println("onPause...");
+    if (MyService.isReady)
+      CallJavaNotify_1();
     super.onPause();
+
   }
 
   @Override
   protected void onResume() {
+    System.out.println("onResume...");
     super.onResume();
     updateStatusBarColor();
+    if (MyService.isReady)
+      CallJavaNotify_0();
   }
 
   @Override

@@ -21,6 +21,11 @@
 #include <QFileInfo>
 #include <QFileInfoList>
 #include <QInputDialog>
+
+#ifdef Q_OS_ANDROID
+#include <QJniObject>
+#endif
+
 #include <QLabel>
 #include <QPainter>
 #include <QPropertyAnimation>
@@ -367,7 +372,9 @@ class Method : public QDialog {
   QString formatSecondsToHMS(qlonglong seconds);
   QStringList removeDuplicatesFromQStringList(const QStringList &list);
   QString setCurrentDateTimeValue();
-  protected:
+  bool getLockScreenStatus();
+
+ protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
  public slots:

@@ -24,6 +24,8 @@ class Steps : public QDialog {
   ~Steps();
   Ui::Steps *ui;
 
+  bool isNeedRestoreUI = false;
+
   Speedometer *m_speedometer;
 
   QString btnRoundStyle =

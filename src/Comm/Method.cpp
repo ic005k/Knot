@@ -2619,3 +2619,16 @@ QStringList Method::removeDuplicatesFromQStringList(const QStringList &list) {
 
   return result;
 }
+
+bool Method::getLockScreenStatus() {
+#ifdef Q_OS_ANDROID
+  jboolean locked =
+      QJniObject::callStaticMethod<jboolean>("com/x/MyActivity",  // Java类全名
+                                             "getLockScreenStatus",  // 方法名
+                                             "()Z"  // JNI签名（boolean无参数）
+      );
+
+  return static_cast<bool>(locked);
+#endif
+  return false;
+}

@@ -4088,13 +4088,28 @@ void MainWindow::stopJavaTimer() {
 
 #ifdef Q_OS_ANDROID
 static void JavaNotify_0() {
-  mw_one->m_SyncInfo->runSync("");
+  // onResume
 
-  // qDebug() << "C++ JavaNotify_0";
+  if (mw_one->initMain) return;
+
+  if (mw_one->m_Steps->isNeedRestoreUI) {
+    mw_one->ui->btnSteps->click();
+    mw_one->m_Steps->isNeedRestoreUI = false;
+  }
+
+  qDebug() << "C++ JavaNotify_0";
 }
 
 static void JavaNotify_1() {
-  // Press the Home button
+  // Lock screen or onPause
+
+  if (mw_one->initMain) return;
+
+  if (!mw_one->ui->frameSteps->isHidden()) {
+    mw_one->ui->btnBackSteps->click();
+    mw_one->m_Steps->isNeedRestoreUI = true;
+  } else
+    mw_one->m_Steps->isNeedRestoreUI = false;
 
   qDebug() << "C++ JavaNotify_1";
 }

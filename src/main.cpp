@@ -55,6 +55,8 @@ int getAndroidSdkVersion();
 void migrateOldDataIfNeeded();
 #endif
 
+void initAndroidGPU();
+
 QString strJBDict1 = "";
 QString strJBDict2 = "";
 QString strJBDict3 = "";
@@ -77,22 +79,6 @@ int main(int argc, char* argv[]) {
 #ifdef Q_OS_ANDROID
 
   isAndroid = true;
-
-  // 核心配置：启用基础硬件加速 + 兼容模式
-  qputenv("QT_QUICK_BACKEND", "opengl");  // 强制OpenGL ES后端（最佳兼容）
-  qputenv("QSG_RENDER_LOOP", "basic");    // 使用基本渲染循环（避免线程问题）
-  qputenv("QT_OPENGL_ES_ANGLE", "0");     // 禁用ANGLE中间层（直接使用系统驱动）
-  QCoreApplication::setAttribute(
-      Qt::AA_ShareOpenGLContexts);  // 共享OpenGL上下文
-
-  // 设置保守的OpenGL配置
-  QSurfaceFormat format;
-  format.setDepthBufferSize(16);                       // 深度缓冲（最低需求）
-  format.setStencilBufferSize(8);                      // 模板缓冲（最低需求）
-  format.setRenderableType(QSurfaceFormat::OpenGLES);  // 强制GLES模式
-  format.setVersion(2, 0);                       // 仅使用OpenGL ES 2.0核心功能
-  format.setProfile(QSurfaceFormat::NoProfile);  // 不使用核心模式
-  QSurfaceFormat::setDefaultFormat(format);
 
 #else
   // 桌面端配置
@@ -650,4 +636,22 @@ void showSplash() {
   splash->setFixedSize(targetSize / dpr);
   splash->setAttribute(Qt::WA_TranslucentBackground);  // 设置为透明背景
   splash->show();
+}
+
+void initAndroidGPU() {
+  // 核心配置：启用基础硬件加速 + 兼容模式
+  qputenv("QT_QUICK_BACKEND", "opengl");  // 强制OpenGL ES后端（最佳兼容）
+  qputenv("QSG_RENDER_LOOP", "basic");    // 使用基本渲染循环（避免线程问题）
+  qputenv("QT_OPENGL_ES_ANGLE", "0");     // 禁用ANGLE中间层（直接使用系统驱动）
+  QCoreApplication::setAttribute(
+      Qt::AA_ShareOpenGLContexts);  // 共享OpenGL上下文
+
+  // 设置保守的OpenGL配置
+  QSurfaceFormat format;
+  format.setDepthBufferSize(16);                       // 深度缓冲（最低需求）
+  format.setStencilBufferSize(8);                      // 模板缓冲（最低需求）
+  format.setRenderableType(QSurfaceFormat::OpenGLES);  // 强制GLES模式
+  format.setVersion(2, 0);                       // 仅使用OpenGL ES 2.0核心功能
+  format.setProfile(QSurfaceFormat::NoProfile);  // 不使用核心模式
+  QSurfaceFormat::setDefaultFormat(format);
 }
