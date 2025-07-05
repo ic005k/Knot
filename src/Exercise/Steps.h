@@ -110,7 +110,7 @@ class Steps : public QDialog {
   void updateMapTrackUi(double lat, double lon);
   void saveMovementType();
   void setVibrate();
-  bool isCycling, isHiking, isRunning;
+
   void writeCSV(const QString &filePath, const QList<QStringList> &data);
 
   void appendToCSV(const QString &filePath, const QStringList &data);

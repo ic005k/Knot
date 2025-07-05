@@ -5734,29 +5734,11 @@ void MainWindow::on_btnGetGpsListData_clicked() {
   m_Steps->getGpsListDataFromYearMonth();
 }
 
-void MainWindow::on_rbCycling_clicked() {
-  ui->rbHiking->setChecked(false);
-  ui->rbRunning->setChecked(false);
-  m_Steps->isCycling = true;
-  m_Steps->isHiking = false;
-  m_Steps->isRunning = false;
-}
+void MainWindow::on_rbCycling_clicked() {}
 
-void MainWindow::on_rbHiking_clicked() {
-  ui->rbCycling->setChecked(false);
-  ui->rbRunning->setChecked(false);
-  m_Steps->isCycling = false;
-  m_Steps->isHiking = true;
-  m_Steps->isRunning = false;
-}
+void MainWindow::on_rbHiking_clicked() {}
 
-void MainWindow::on_rbRunning_clicked() {
-  ui->rbHiking->setChecked(false);
-  ui->rbCycling->setChecked(false);
-  m_Steps->isCycling = false;
-  m_Steps->isHiking = false;
-  m_Steps->isRunning = true;
-}
+void MainWindow::on_rbRunning_clicked() {}
 
 void MainWindow::on_btnOpenNote_clicked() {
   if (!QFile::exists(currentMDFile)) return;

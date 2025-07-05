@@ -498,7 +498,8 @@ void Steps::updateGetGps() {
 
   QJniObject jstrGpsStatus;
 
-  jstrGpsStatus = m_activity.callObjectMethod<jstring>("getGpsStatus");
+  jstrGpsStatus =
+      m_activity.callMethod<jstring>("getGpsStatus", "()Ljava/lang/String;");
 
   if (jstrGpsStatus.isValid()) {
     strGpsStatus = jstrGpsStatus.toString();
@@ -1240,9 +1241,9 @@ QVector<GPSCoordinate> detectAndCorrectOutliers(
 void Steps::saveMovementType() {
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
 
-  Reg.setValue("/GPS/isCycling", isCycling);
-  Reg.setValue("/GPS/isHiking", isHiking);
-  Reg.setValue("/GPS/isRunning", isRunning);
+  Reg.setValue("/GPS/isCycling", mw_one->ui->rbCycling->isChecked());
+  Reg.setValue("/GPS/isHiking", mw_one->ui->rbHiking->isChecked());
+  Reg.setValue("/GPS/isRunning", mw_one->ui->rbRunning->isChecked());
 }
 
 void Steps::setVibrate() {
