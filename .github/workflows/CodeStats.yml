@@ -5,14 +5,14 @@ jobs:
   stats:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/git@v4
+      - uses: actions/checkout@v4  # 修正：使用正确的 checkout Action
       - name: Install cloc
         run: sudo apt-get install cloc
       - name: Count lines
         run: |
           cloc . --out=stats.txt
           cat stats.txt
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4  # 也建议升级到 v4
         with:
           name: code-stats
           path: stats.txt
