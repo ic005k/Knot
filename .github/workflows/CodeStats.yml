@@ -12,7 +12,7 @@ jobs:
         run: |
           cloc . --out=stats.txt
           cat stats.txt
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: code-stats
           path: stats.txt
