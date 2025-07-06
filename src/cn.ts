@@ -13,38 +13,42 @@
         <translation type="vanished">粘贴</translation>
     </message>
     <message>
-        <location filename="AboutThis.ui" line="50"/>
         <source>(Double click to copy the download link)</source>
-        <translation>（双击拷贝下载链接）</translation>
+        <translation type="vanished">（双击拷贝下载链接）</translation>
     </message>
     <message>
-        <location filename="AboutThis.ui" line="87"/>
+        <location filename="AboutThis.ui" line="56"/>
+        <source>Copy the Download Link</source>
+        <translation>拷贝下载链接</translation>
+    </message>
+    <message>
+        <location filename="AboutThis.ui" line="90"/>
         <source>Logo</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AboutThis.ui" line="131"/>
+        <location filename="AboutThis.ui" line="134"/>
         <source>Show App Info</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AboutThis.ui" line="147"/>
+        <location filename="AboutThis.ui" line="150"/>
         <source>Reporting Issues</source>
         <translation>报告问题</translation>
     </message>
     <message>
-        <location filename="AboutThis.ui" line="160"/>
+        <location filename="AboutThis.ui" line="163"/>
         <source>Download the latest version</source>
         <translation>下载最新版</translation>
     </message>
     <message>
-        <location filename="AboutThis.ui" line="173"/>
-        <location filename="AboutThis.cpp" line="197"/>
+        <location filename="AboutThis.ui" line="176"/>
+        <location filename="AboutThis.cpp" line="193"/>
         <source>Upgrade Check</source>
         <translation>检查更新</translation>
     </message>
     <message>
-        <location filename="AboutThis.ui" line="208"/>
+        <location filename="AboutThis.ui" line="211"/>
         <source>Back</source>
         <translation>返回</translation>
     </message>
@@ -53,37 +57,38 @@
         <translation type="vanished">修改备注</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="58"/>
+        <location filename="AboutThis.cpp" line="54"/>
+        <location filename="AboutThis.cpp" line="266"/>
         <source>Download link copied.</source>
         <translation>下载链接已拷贝</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="134"/>
+        <location filename="AboutThis.cpp" line="130"/>
         <source>Network error!</source>
         <translation>网络错误！</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="170"/>
+        <location filename="AboutThis.cpp" line="166"/>
         <source>New version detected!</source>
         <translation>有新版本！</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="171"/>
+        <location filename="AboutThis.cpp" line="167"/>
         <source>Version: </source>
         <translation>版本：</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="172"/>
+        <location filename="AboutThis.cpp" line="168"/>
         <source>Published at: </source>
         <translation>发布时间：</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="173"/>
+        <location filename="AboutThis.cpp" line="169"/>
         <source>Release Notes: </source>
         <translation>发布说明：</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="198"/>
+        <location filename="AboutThis.cpp" line="194"/>
         <source>You are currently using the latest version!</source>
         <translation>目前使用的是最新版！</translation>
     </message>
@@ -96,8 +101,8 @@
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="29"/>
-        <location filename="AutoUpdate.cpp" line="78"/>
+        <location filename="AutoUpdate.cpp" line="20"/>
+        <location filename="AutoUpdate.cpp" line="69"/>
         <source>Download Progress</source>
         <translation>下载进度</translation>
     </message>
@@ -325,7 +330,7 @@ in skydrive folder</source>
         <translation>日期选择</translation>
     </message>
     <message>
-        <location filename="DateSelector.cpp" line="49"/>
+        <location filename="DateSelector.cpp" line="50"/>
         <source>Year-Month</source>
         <translation>年-月</translation>
     </message>
@@ -338,7 +343,7 @@ in skydrive folder</source>
         <translation type="vanished">年</translation>
     </message>
     <message>
-        <location filename="DateSelector.ui" line="58"/>
+        <location filename="DateSelector.ui" line="83"/>
         <source>Flag</source>
         <translation></translation>
     </message>
@@ -347,24 +352,24 @@ in skydrive folder</source>
         <translation type="vanished">月</translation>
     </message>
     <message>
-        <location filename="DateSelector.ui" line="39"/>
+        <location filename="DateSelector.ui" line="64"/>
         <source>Ok</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="DateSelector.cpp" line="59"/>
+        <location filename="DateSelector.cpp" line="60"/>
         <source>Start Date</source>
         <oldsource>Start</oldsource>
         <translation>起始日期</translation>
     </message>
     <message>
-        <location filename="DateSelector.cpp" line="60"/>
+        <location filename="DateSelector.cpp" line="61"/>
         <source>End Date</source>
         <oldsource>End</oldsource>
         <translation>结束日期</translation>
     </message>
     <message>
-        <location filename="DateSelector.cpp" line="116"/>
+        <location filename="DateSelector.cpp" line="117"/>
         <source>Year-Round</source>
         <translation>全年</translation>
     </message>
@@ -1048,7 +1053,7 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="MainWindow.ui" line="332"/>
-        <location filename="MainWindow.cpp" line="5710"/>
+        <location filename="MainWindow.cpp" line="5725"/>
         <source>Stop</source>
         <translation>停止</translation>
     </message>
@@ -1352,13 +1357,13 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="MainWindow.ui" line="5991"/>
-        <location filename="MainWindow.cpp" line="4603"/>
+        <location filename="MainWindow.cpp" line="4618"/>
         <source>Note Book</source>
         <translation>笔记本</translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="6053"/>
-        <location filename="MainWindow.cpp" line="4604"/>
+        <location filename="MainWindow.cpp" line="4619"/>
         <source>Note List</source>
         <translation>笔记列表</translation>
     </message>
@@ -1729,8 +1734,8 @@ in skydrive folder</source>
         <location filename="MainWindow.cpp" line="3813"/>
         <location filename="MainWindow.cpp" line="4025"/>
         <location filename="MainWindow.cpp" line="4062"/>
-        <location filename="MainWindow.cpp" line="5060"/>
-        <location filename="MainWindow.cpp" line="5147"/>
+        <location filename="MainWindow.cpp" line="5075"/>
+        <location filename="MainWindow.cpp" line="5162"/>
         <source>Total</source>
         <translation>总计</translation>
     </message>
@@ -1768,8 +1773,8 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="MainWindow.cpp" line="1772"/>
-        <location filename="MainWindow.cpp" line="5040"/>
-        <location filename="MainWindow.cpp" line="5134"/>
+        <location filename="MainWindow.cpp" line="5055"/>
+        <location filename="MainWindow.cpp" line="5149"/>
         <source>Whether to remove</source>
         <translation>是否删除</translation>
     </message>
@@ -1824,8 +1829,8 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="MainWindow.ui" line="4850"/>
-        <location filename="MainWindow.cpp" line="5707"/>
-        <location filename="MainWindow.cpp" line="5712"/>
+        <location filename="MainWindow.cpp" line="5722"/>
+        <location filename="MainWindow.cpp" line="5727"/>
         <source>Start</source>
         <translation>启动</translation>
     </message>
@@ -1964,7 +1969,7 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="MainWindow.cpp" line="2621"/>
-        <location filename="MainWindow.cpp" line="5007"/>
+        <location filename="MainWindow.cpp" line="5022"/>
         <source>Import this data?</source>
         <translation>是否导入这个数据？</translation>
     </message>
@@ -1983,12 +1988,12 @@ in skydrive folder</source>
         <translation>云备份与恢复数据</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="5804"/>
+        <location filename="MainWindow.cpp" line="5801"/>
         <source>Downloading data?</source>
         <translation>下载数据？</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="5805"/>
+        <location filename="MainWindow.cpp" line="5802"/>
         <source>This action overwrites local files with files in the cloud.</source>
         <translation>此操作将会用云端的文件覆盖本地文件</translation>
     </message>
@@ -2003,13 +2008,13 @@ in skydrive folder</source>
         <translation>分享文件</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="5670"/>
+        <location filename="MainWindow.cpp" line="5685"/>
         <source>Please enable permission to record audio!</source>
         <translation>请开启录音权限！</translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="636"/>
-        <location filename="MainWindow.cpp" line="4360"/>
+        <location filename="MainWindow.cpp" line="4375"/>
         <source>Reading Progress</source>
         <translation>阅读进度</translation>
     </message>
@@ -2019,7 +2024,7 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="MainWindow.cpp" line="2600"/>
-        <location filename="MainWindow.cpp" line="5557"/>
+        <location filename="MainWindow.cpp" line="5572"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
@@ -2031,7 +2036,7 @@ in skydrive folder</source>
         <location filename="MainWindow.ui" line="5440"/>
         <location filename="MainWindow.cpp" line="3838"/>
         <location filename="MainWindow.cpp" line="4062"/>
-        <location filename="MainWindow.cpp" line="5147"/>
+        <location filename="MainWindow.cpp" line="5162"/>
         <source>Backup File List</source>
         <translation>备份文件列表</translation>
     </message>
@@ -2039,12 +2044,12 @@ in skydrive folder</source>
         <location filename="MainWindow.ui" line="5687"/>
         <location filename="MainWindow.cpp" line="3839"/>
         <location filename="MainWindow.cpp" line="4025"/>
-        <location filename="MainWindow.cpp" line="5060"/>
+        <location filename="MainWindow.cpp" line="5075"/>
         <source>Tab Recycle</source>
         <translation>标签页回收箱</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="5122"/>
+        <location filename="MainWindow.cpp" line="5137"/>
         <source>Restore Tab</source>
         <translation>恢复标签页</translation>
     </message>
@@ -3241,55 +3246,55 @@ in skydrive folder</source>
 <context>
     <name>QInstaller</name>
     <message>
-        <location filename="AutoUpdate.cpp" line="243"/>
+        <location filename="AutoUpdate.cpp" line="234"/>
         <location filename="Comm/Method.cpp" line="2320"/>
         <source>bytes</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="244"/>
+        <location filename="AutoUpdate.cpp" line="235"/>
         <location filename="Comm/Method.cpp" line="2321"/>
         <source>KiB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="245"/>
+        <location filename="AutoUpdate.cpp" line="236"/>
         <location filename="Comm/Method.cpp" line="2322"/>
         <source>MiB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="246"/>
+        <location filename="AutoUpdate.cpp" line="237"/>
         <location filename="Comm/Method.cpp" line="2323"/>
         <source>GiB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="247"/>
+        <location filename="AutoUpdate.cpp" line="238"/>
         <location filename="Comm/Method.cpp" line="2324"/>
         <source>TiB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="248"/>
+        <location filename="AutoUpdate.cpp" line="239"/>
         <location filename="Comm/Method.cpp" line="2325"/>
         <source>PiB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="249"/>
+        <location filename="AutoUpdate.cpp" line="240"/>
         <location filename="Comm/Method.cpp" line="2326"/>
         <source>EiB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="250"/>
+        <location filename="AutoUpdate.cpp" line="241"/>
         <location filename="Comm/Method.cpp" line="2327"/>
         <source>ZiB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="251"/>
+        <location filename="AutoUpdate.cpp" line="242"/>
         <location filename="Comm/Method.cpp" line="2328"/>
         <source>YiB</source>
         <translation></translation>
@@ -3359,8 +3364,8 @@ in skydrive folder</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="main.cpp" line="642"/>
-        <location filename="main.cpp" line="646"/>
+        <location filename="main.cpp" line="626"/>
+        <location filename="main.cpp" line="630"/>
         <source>Loading, please wait...</source>
         <translation>加载中，请稍候...</translation>
     </message>
@@ -8004,32 +8009,32 @@ in skydrive folder</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Comm/ShowMessage.ui" line="44"/>
+        <location filename="Comm/ShowMessage.ui" line="96"/>
         <source>Title</source>
         <translation>标题</translation>
     </message>
     <message>
-        <location filename="Comm/ShowMessage.ui" line="93"/>
+        <location filename="Comm/ShowMessage.ui" line="148"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="Comm/ShowMessage.ui" line="115"/>
+        <location filename="Comm/ShowMessage.ui" line="170"/>
         <source>Copy</source>
         <translation>拷贝</translation>
     </message>
     <message>
-        <location filename="Comm/ShowMessage.ui" line="137"/>
+        <location filename="Comm/ShowMessage.ui" line="192"/>
         <source>Del</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="Comm/ShowMessage.ui" line="181"/>
+        <location filename="Comm/ShowMessage.ui" line="236"/>
         <source>Ok</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="Comm/ShowMessage.cpp" line="189"/>
+        <location filename="Comm/ShowMessage.cpp" line="190"/>
         <source>Delete this link?</source>
         <translation>删除这个链接？</translation>
     </message>
@@ -8070,56 +8075,56 @@ in skydrive folder</source>
         <translation>没有GPS信号...</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="665"/>
-        <location filename="Exercise/Steps.cpp" line="728"/>
-        <location filename="Exercise/Steps.cpp" line="968"/>
-        <location filename="Exercise/Steps.cpp" line="978"/>
+        <location filename="Exercise/Steps.cpp" line="666"/>
+        <location filename="Exercise/Steps.cpp" line="729"/>
+        <location filename="Exercise/Steps.cpp" line="972"/>
+        <location filename="Exercise/Steps.cpp" line="982"/>
         <source>Cycling</source>
         <translation>骑行</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="666"/>
-        <location filename="Exercise/Steps.cpp" line="733"/>
-        <location filename="Exercise/Steps.cpp" line="970"/>
-        <location filename="Exercise/Steps.cpp" line="980"/>
+        <location filename="Exercise/Steps.cpp" line="667"/>
+        <location filename="Exercise/Steps.cpp" line="734"/>
+        <location filename="Exercise/Steps.cpp" line="974"/>
+        <location filename="Exercise/Steps.cpp" line="984"/>
         <source>Hiking</source>
         <translation>徒步</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="667"/>
-        <location filename="Exercise/Steps.cpp" line="738"/>
-        <location filename="Exercise/Steps.cpp" line="972"/>
-        <location filename="Exercise/Steps.cpp" line="982"/>
+        <location filename="Exercise/Steps.cpp" line="668"/>
+        <location filename="Exercise/Steps.cpp" line="739"/>
+        <location filename="Exercise/Steps.cpp" line="976"/>
+        <location filename="Exercise/Steps.cpp" line="986"/>
         <source>Running</source>
         <translation>跑步</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="672"/>
+        <location filename="Exercise/Steps.cpp" line="673"/>
         <source>Exercise Duration</source>
         <translation>运动时长</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="673"/>
+        <location filename="Exercise/Steps.cpp" line="674"/>
         <source>Average Speed</source>
         <translation>平均速度</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="966"/>
+        <location filename="Exercise/Steps.cpp" line="970"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="976"/>
+        <location filename="Exercise/Steps.cpp" line="980"/>
         <source>Year</source>
         <translation>年</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1361"/>
+        <location filename="Exercise/Steps.cpp" line="1365"/>
         <source>Today</source>
         <translation>今天</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1362"/>
+        <location filename="Exercise/Steps.cpp" line="1366"/>
         <source>km</source>
         <translation>公里</translation>
     </message>
@@ -8136,12 +8141,12 @@ in skydrive folder</source>
         <translation type="vanished">总距离</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="671"/>
+        <location filename="Exercise/Steps.cpp" line="672"/>
         <source>Distance</source>
         <translation>距离</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="609"/>
+        <location filename="Exercise/Steps.cpp" line="610"/>
         <source>Duration</source>
         <translation>持续时间</translation>
     </message>
@@ -8188,7 +8193,7 @@ in skydrive folder</source>
         <translation type="vanished">速度</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="670"/>
+        <location filename="Exercise/Steps.cpp" line="671"/>
         <source>Time</source>
         <translation>时间</translation>
     </message>

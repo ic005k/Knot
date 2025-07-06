@@ -52,6 +52,8 @@ class AboutThis : public QDialog {
 
   void on_btnDownloadUP_clicked();
 
+  void on_btnCopyDownLoadLink_clicked();
+
  private:
   QString getUrl(QVariantList list);
   QString s_link;

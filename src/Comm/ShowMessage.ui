@@ -40,8 +40,63 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {
+    /* 基础样式 */
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: bold;
+    qproperty-alignment: 'AlignCenter';
+    
+    /* 默认亮色主题渐变 */
+    background-color: qlineargradient(
+        spread:pad, 
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0   #a0a0a0,
+        stop:0.5 #ffffff,
+        stop:1   #a0a0a0
+    );
+    color: #333333;
+}
+
+/* 暗黑主题适配 */
+QLabel[darkMode=&quot;true&quot;] {
+    background-color: qlineargradient(
+        spread:pad, 
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0   #505050,
+        stop:0.5 #202020,
+        stop:1   #505050
+    );
+    color: #f0f0f0;
+}
+
+/* 添加立体边框增强效果 */
+QLabel {
+    border: 1px solid qlineargradient(
+        spread:pad, 
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0   rgba(0,0,0,0.2),
+        stop:0.5 rgba(255,255,255,0.5),
+        stop:1   rgba(0,0,0,0.2)
+    );
+}
+
+QLabel[darkMode=&quot;true&quot;] {
+    border: 1px solid qlineargradient(
+        spread:pad, 
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0   rgba(255,255,255,0.1),
+        stop:0.5 rgba(0,0,0,0.3),
+        stop:1   rgba(255,255,255,0.1)
+    );
+}</string>
+        </property>
         <property name="text">
          <string>Title</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
         </property>
        </widget>
       </item>

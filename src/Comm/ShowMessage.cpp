@@ -14,6 +14,7 @@ ShowMessage::ShowMessage(QWidget* parent)
 
   this->installEventFilter(this);
   ui->editMsg->viewport()->installEventFilter(this);
+  ui->hframe->hide();
 
   setWindowFlag(Qt::FramelessWindowHint);
 

@@ -2,7 +2,7 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "2.0.6";
+QString ver = "2.0.7";
 QString appName = "Knot";
 
 QList<QPointF> PointList;
@@ -3416,7 +3416,7 @@ void MainWindow::init_UIWidget() {
   ui->qwMainTab->setFixedHeight(nHeight);
   ui->tabWidget->hide();
 
-  loginTime = QDateTime::currentDateTime().toString();
+  loginTime = m_Method->setCurrentDateTimeValue();
   strDate = m_Method->setCurrentDateValue();
   isReadEnd = true;
 

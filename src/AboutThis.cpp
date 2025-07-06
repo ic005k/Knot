@@ -17,17 +17,13 @@ AboutThis::AboutThis(QWidget *parent) : QDialog(parent), ui(new Ui::AboutThis) {
 
   mw_one->set_ToolButtonStyle(this);
 
-  QFont font = this->font();
-  font.setPointSize(13);
-  ui->lblTip->setFont(font);
-
   setModal(true);
 
   this->installEventFilter(this);
   ui->lblLogo->installEventFilter(this);
 
   ui->btnDownloadUP->hide();
-  ui->lblTip->hide();
+  ui->btnCopyDownLoadLink->hide();
 
   ui->lblAbout->adjustSize();
   ui->lblAbout->setWordWrap(true);
@@ -160,7 +156,7 @@ int AboutThis::parse_UpdateJSON(QString str) {
 
     qDebug() << "s_link = " << s_link << Url;
     ui->btnDownloadUP->show();
-    ui->lblTip->show();
+    ui->btnCopyDownLoadLink->show();
 
     QString Verison = root_Obj.value("tag_name").toString();
     QString UpdateTime = root_Obj.value("published_at").toString();
@@ -261,3 +257,11 @@ int AboutThis::getAndroidVer() {
 }
 
 void AboutThis::on_btnBack_About_clicked() { close(); }
+
+void AboutThis::on_btnCopyDownLoadLink_clicked() {
+  if (s_link == "") return;
+  QClipboard *pClip = QApplication::clipboard();
+  pClip->setText(s_link);
+  ShowMessage *msg = new ShowMessage(this);
+  msg->showMsg("Knot", tr("Download link copied.") + "\n\n" + s_link, 1);
+}

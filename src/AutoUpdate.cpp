@@ -13,15 +13,6 @@ AutoUpdate::AutoUpdate(QWidget* parent)
   ui->setupUi(this);
 
   setWindowFlag(Qt::FramelessWindowHint);
-  setAttribute(Qt::WA_TranslucentBackground);
-  if (isDark)
-    ui->frame->setStyleSheet(
-        "#frame{background-color: #19232D; border-radius:10px; "
-        "border:1px solid gray;}");
-  else
-    ui->frame->setStyleSheet(
-        "#frame{background-color: rgb(250, 250, 250); border-radius:10px; "
-        "border:1px solid gray;}");
 
   mw_one->set_ToolButtonStyle(this);
   setModal(true);
