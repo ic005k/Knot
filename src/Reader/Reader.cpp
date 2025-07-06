@@ -2509,8 +2509,9 @@ bool Reader::eventFilterReaderAndroid(QObject *watch, QEvent *evn) {
       evn->type() == QEvent::MouseButtonDblClick) {
     QMouseEvent *event = static_cast<QMouseEvent *>(evn);
     if (watch == mw_one->ui->qwReader) {
+      Q_UNUSED(event);
       // ... 保留原有的桌面端鼠标事件处理代码 ...
-      // 这里放置您原有的鼠标事件处理逻辑
+      // 这里放置原有的鼠标事件处理逻辑
       // 为了简洁，此处省略重复代码
     }
   }

@@ -687,6 +687,9 @@ void WebDavDownloader::startNextDownload() {
           [this, reply]() { onDownloadFinished(reply); });
   connect(reply, &QNetworkReply::downloadProgress, this,
           [this, reply](qint64 bytesReceived, qint64 bytesTotal) {
+            // 下面未使用的两个变量用来计算下载进度（目前未实现）
+            Q_UNUSED(bytesReceived);
+            Q_UNUSED(bytesTotal);
             emit progressChanged(completedFiles, totalFiles,
                                  activeDownloads[reply]);
           });

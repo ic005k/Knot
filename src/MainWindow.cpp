@@ -3478,6 +3478,7 @@ void MainWindow::init_UIWidget() {
   ui->twCloudBackup->setCurrentIndex(1);
   ui->twCloudBackup->setTabVisible(0, false);
   ui->chkWebDAV->hide();
+  ui->lblWebDAV->hide();
 
   ui->editWebDAVPassword->setEchoMode(QLineEdit::EchoMode::Password);
   ui->lblWebDAV->setStyleSheet(labelNormalStyleSheet);

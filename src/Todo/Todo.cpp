@@ -1400,7 +1400,7 @@ void Todo::openTodo() {
     // 连接信号
     QObject::connect(
         helper, &WebDavHelper::listCompleted,
-        [](const QList<QPair<QString, QDateTime>>& files) {
+        [this](const QList<QPair<QString, QDateTime>>& files) {
           qDebug() << "获取到文件列表:";
           qDebug() << "共找到" << files.size() << "个文件:";
 
@@ -1432,7 +1432,7 @@ void Todo::openTodo() {
 
                 // 连接信号
                 QObject::connect(downloader, &WebDavDownloader::progressChanged,
-                                 [](int current, int total, QString file) {
+                                 [this](int current, int total, QString file) {
                                    qDebug()
                                        << QString("进度: %1/%2  当前文件: %3")
                                               .arg(current)
@@ -1442,7 +1442,7 @@ void Todo::openTodo() {
 
                 QObject::connect(
                     downloader, &WebDavDownloader::downloadFinished,
-                    [](bool success, QString error) {
+                    [this](bool success, QString error) {
                       qDebug() << (success ? "下载成功" : "下载失败: " + error);
                       QString zFile = privateDir + "KnotData/todo.ini.zip";
 

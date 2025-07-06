@@ -39,6 +39,29 @@ TRANSLATIONS += src/cn.ts \
 ICON = res/icon.icns
 RC_FILE += win.rc
 
+##################### 隔离第三方库的编译警告 ################################
+# 1. 为第三方库创建单独的变量
+THIRD_PARTY_PATH = $$PWD/lib
+THIRD_PARTY_INCLUDE = $$THIRD_PARTY_PATH/cppjieba \
+                      $$THIRD_PARTY_PATH/qsci \
+                      $$THIRD_PARTY_PATH/qsci/Qsci \
+                      $$THIRD_PARTY_PATH/md4c \
+                      $$THIRD_PARTY_PATH/quazip \
+                      $$THIRD_PARTY_PATH/zlib \
+                      $$THIRD_PARTY_PATH/cmark-gfm/include \
+                      $$THIRD_PARTY_PATH/scintilla/include
+
+# 2. 根据不同编译器设置隔离选项
+win32 {
+    # MSVC - 使用外部包含指令
+    QMAKE_CXXFLAGS += -external:anglebrackets -external:W0
+    INCLUDEPATH += $$THIRD_PARTY_INCLUDE
+}
+clang|gcc {
+    # GCC/Clang - 使用 -isystem
+    # QMAKE_CXXFLAGS += -isystem $$THIRD_PARTY_INCLUDE
+}
+
 ####################### Qsci ##############################################
 
 # 确保启用 Markdown 支持
@@ -611,7 +634,6 @@ HEADERS += \
     lib/md4c/entity.h \
     lib/md4c/md4c-html.h \
     lib/md4c/md4c.h \
-    src/onedrive/qtonedrivelib_global.h \
     lib/quazip/JlCompress.h \
     lib/quazip/ioapi.h \
     lib/quazip/minizip_crypt.h \

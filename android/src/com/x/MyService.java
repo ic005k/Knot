@@ -112,13 +112,13 @@ public class MyService extends Service {
 
         if (MyActivity.zh_cn) {
             strRun = "运行中...";
-            strStatus = "状态";
+            strStatus = "Knot";
             strTodo = "待办事项";
             strPedometer = "倒计时";
 
         } else {
             strRun = "Running...";
-            strStatus = "Status";
+            strStatus = "Knot";
             strTodo = "Todo";
             strPedometer = "Countdown";
         }

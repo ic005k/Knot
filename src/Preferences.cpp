@@ -404,9 +404,11 @@ void Preferences::initCheckStatus() {
 
 void Preferences::getCheckStatusChange() {
   bool isChanged = false;
-  if (ui->chkUIFont->isChecked() != listCheckStatus.at(0)) isChanged = true;
+  if (ui->chkUIFont->isChecked() != static_cast<bool>(listCheckStatus.at(0)))
+    isChanged = true;
 
-  if (ui->chkDark->isChecked() != listCheckStatus.at(1)) isChanged = true;
+  if (ui->chkDark->isChecked() != static_cast<bool>(listCheckStatus.at(1)))
+    isChanged = true;
 
   if (ui->sliderFontSize->value() != listCheckStatus.at(2)) isChanged = true;
 
