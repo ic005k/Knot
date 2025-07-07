@@ -41,7 +41,7 @@ QSettings *iniPreferences;
 CloudBackup *m_CloudBackup;
 
 extern bool isAndroid, isIOS, zh_cn, isEpub, isEpubError, isText, isPDF,
-    isWholeMonth, isDateSection, isNeedSync, isPasswordError;
+    isWholeMonth, isDateSection, isPasswordError;
 extern QString btnYearText, btnMonthText, strPage, ebookFile, strTitle,
     fileName, strOpfPath, catalogueFile, strShowMsg;
 extern int iPage, sPos, totallines, baseLines, htmlIndex, s_y1, s_m1, s_d1,
@@ -5170,7 +5170,6 @@ void MainWindow::on_btnBackNoteList_clicked() {
   m_NotesList->saveNotesListIndex();
   m_Notes->updateMainnotesIniToSyncLists();
 
-  isNeedSync = true;
   m_Notes->syncToWebDAV();
 }
 

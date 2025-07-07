@@ -12,7 +12,7 @@ extern MainWindow *mw_one;
 extern Method *m_Method;
 extern QString iniFile, iniDir, privateDir, currentMDFile, imgFileName, appName,
     encPassword, errorInfo;
-extern bool isAndroid, isIOS, isDark, isNeedSync, isPasswordError;
+extern bool isAndroid, isIOS, isDark, isPasswordError;
 extern int fontSize;
 extern QRegularExpression regxNumber;
 
@@ -184,7 +184,6 @@ void Notes::saveMainNotes() {
   }
 
   isTextChange = false;
-  isNeedSync = true;
 }
 
 void Notes::updateMDFileToSyncLists(QString currentMDFile) {
@@ -909,12 +908,11 @@ void Notes::closeEvent(QCloseEvent *event) {
 }
 
 void Notes::syncToWebDAV() {
-  if (isNeedSync && mw_one->ui->chkAutoSync->isChecked() &&
+  if (mw_one->ui->chkAutoSync->isChecked() &&
       mw_one->ui->chkWebDAV->isChecked()) {
     if (notes_sync_files.count() > 0) {
       m_CloudBackup->uploadFilesToWebDAV(notes_sync_files);
     }
-    isNeedSync = false;
   }
 }
 
@@ -1739,7 +1737,6 @@ void Notes::openEditUI() {
 }
 
 void Notes::openNotes() {
-  notes_sync_files.clear();
   mw_one->m_NotesList->needDelWebDAVFiles.clear();
   isPasswordError = false;
 

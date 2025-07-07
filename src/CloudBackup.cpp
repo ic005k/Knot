@@ -85,7 +85,12 @@ void CloudBackup::init() {
   this->setModal(true);
 }
 
-CloudBackup::~CloudBackup() { delete ui; }
+CloudBackup::~CloudBackup() {
+  delete ui;
+  if (m_manager) {
+    m_manager->deleteLater();  // 释放成员变量m_manager
+  }
+}
 
 bool CloudBackup::eventFilter(QObject *obj, QEvent *evn) {
   if (evn->type() == QEvent::KeyRelease) {
@@ -284,6 +289,7 @@ void CloudBackup::createDirectory(QString webdavUrl, QString remoteDirPath) {
   }
 
   delete reply;
+  m_manager->deleteLater();
 }
 
 void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
@@ -430,7 +436,7 @@ QString CloudBackup::aesDecrypt(QString cipherText, QByteArray key,
   return QString::fromUtf8(decrypted);
 }
 
-void CloudBackup::uploadFilesToWebDAV(QStringList files) {
+void CloudBackup::uploadFilesToWebDAV_test(QStringList files) {
   QNetworkAccessManager *manager = new QNetworkAccessManager();
   QString url = getWebDAVArgument();
 
@@ -454,7 +460,11 @@ void CloudBackup::uploadFilesToWebDAV(QStringList files) {
 
     QNetworkRequest request;
     request.setUrl(QUrl(remoteUrl));
-    QString auth = QString("%1:%2").arg(USERNAME).arg(APP_PASSWORD);
+
+    // QString auth = QString("%1:%2").arg(USERNAME).arg(APP_PASSWORD);
+    //  使用多参数arg()版本（更高效）
+    QString auth = QString("%1:%2").arg(USERNAME, APP_PASSWORD);
+
     request.setRawHeader("Authorization",
                          "Basic " + auth.toLocal8Bit().toBase64());
 
@@ -469,13 +479,75 @@ void CloudBackup::uploadFilesToWebDAV(QStringList files) {
                      });
 
     // 处理完成/错误
-    QObject::connect(reply, &QNetworkReply::finished, [=]() {
+    QObject::connect(reply, &QNetworkReply::finished, this, [=]() {
       if (reply->error() == QNetworkReply::NoError) {
         qDebug() << "Upload succeeded:" << m_file;
+        mw_one->m_Notes->notes_sync_files.removeOne(m_file);
       } else {
         qDebug() << "Error uploading" << m_file << ":" << reply->errorString();
       }
       reply->deleteLater();
+    });
+  }
+}
+
+void CloudBackup::uploadFilesToWebDAV(QStringList files) {
+  QNetworkAccessManager *manager = new QNetworkAccessManager();
+  QString url = getWebDAVArgument();
+
+  // 记录活跃的reply数量（用于判断是否所有任务都已完成）
+  int *activeReplyCount = new int(files.size());  // 初始值为文件总数
+
+  foreach (QString m_file, files) {
+    QString localFile = m_file;
+    QString remoteFile = m_file;
+    remoteFile = remoteFile.replace(privateDir, "");
+    QString remoteUrl = url + remoteFile;
+    QString remotePath = "KnotData/";
+
+    QFile *file = new QFile(localFile);
+    if (!file->open(QIODevice::ReadOnly)) {
+      qDebug() << "Failed to open file:" << localFile;
+      delete file;
+      // 减少计数器（当前文件上传失败，视为完成）
+      if (--(*activeReplyCount) == 0) {
+        manager->deleteLater();
+        delete activeReplyCount;
+      }
+      continue;
+    }
+
+    QNetworkRequest request;
+    request.setUrl(QUrl(remoteUrl));
+    QString auth = QString("%1:%2").arg(USERNAME, APP_PASSWORD);
+    request.setRawHeader("Authorization",
+                         "Basic " + auth.toLocal8Bit().toBase64());
+
+    QNetworkReply *reply = manager->put(request, file);
+    file->setParent(reply);  // 文件随reply释放
+
+    // 上传进度跟踪（可选）
+    QObject::connect(reply, &QNetworkReply::uploadProgress,
+                     [=](qint64 bytesSent, qint64 bytesTotal) {
+                       qDebug() << "Uploading" << m_file << bytesSent << "/"
+                                << bytesTotal;
+                     });
+
+    // 处理完成/错误（核心：管理计数器和manager释放）
+    QObject::connect(reply, &QNetworkReply::finished, this, [=]() {
+      if (reply->error() == QNetworkReply::NoError) {
+        qDebug() << "Upload succeeded:" << m_file;
+        mw_one->m_Notes->notes_sync_files.removeOne(m_file);
+      } else {
+        qDebug() << "Error uploading" << m_file << ":" << reply->errorString();
+      }
+      reply->deleteLater();  // 释放reply
+
+      // 计数器减1，判断是否所有任务都已完成
+      if (--(*activeReplyCount) == 0) {
+        manager->deleteLater();   // 所有任务完成，释放manager
+        delete activeReplyCount;  // 释放计数器
+      }
     });
   }
 }
