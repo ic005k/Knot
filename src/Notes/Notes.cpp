@@ -1624,6 +1624,11 @@ void Notes::openNotesUI() {
   mw_one->closeProgress();
 
   isSaveNoteTree = false;
+
+  if (isRequestOpenNoteEditor) {
+    isRequestOpenNoteEditor = false;
+    mw_one->ui->btnEdit->click();
+  }
 }
 
 bool NoteIndexManager::loadIndex(const QString &indexPath) {
@@ -1777,7 +1782,7 @@ void Notes::openNotes() {
 
     // 连接信号
     QObject::connect(
-        helper, &WebDavHelper::listCompleted,
+        helper, &WebDavHelper::listCompleted, this,
         [=](const QList<QPair<QString, QDateTime>> &files) {
           qDebug() << "获取到文件列表:";
           qDebug() << "共找到" << files.size() << "个文件:";

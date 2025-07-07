@@ -64,6 +64,8 @@ class Notes : public QDialog {
   ~Notes();
   Ui::Notes *ui;
 
+  bool isRequestOpenNoteEditor = false;
+
   NoteIndexManager *m_NoteIndexManager;
 
   QString new_title;

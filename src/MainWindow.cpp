@@ -4624,8 +4624,6 @@ void MainWindow::on_btnNotesList_clicked() {
   m_NotesList->loadAllNoteBook();
   m_NotesList->localNotesItem();
   m_NotesList->setNoteLabel();
-
-  // m_NotesList->setNoteBookVPos();
 }
 
 void MainWindow::on_btnBackImg_clicked() {

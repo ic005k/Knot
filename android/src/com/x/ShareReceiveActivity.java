@@ -149,7 +149,7 @@ public class ShareReceiveActivity extends Activity
         btnInsertNote = (Button) findViewById(R.id.btnInsertNote);
         btnFreePaste = (Button) findViewById(R.id.btnFreePaste);
 
-        if (MyActivity.zh_cn) {
+        if (isZh()) {
             btnAddToTodo.setText("增加到待办事项");
             btnAppendNote.setText("追加到当前笔记");
             btnInsertNote.setText("插入到当前笔记");
@@ -254,7 +254,7 @@ public class ShareReceiveActivity extends Activity
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnAddToTodo:
-                btnAddToTodo.setBackgroundColor(getResources().getColor(R.color.red));
+
                 NoteEditor.closeNoteEditorView();
                 try {
                     File file = new File(share_ini);
@@ -275,7 +275,7 @@ public class ShareReceiveActivity extends Activity
                 break;
 
             case R.id.btnAppendNote:
-                btnAppendNote.setBackgroundColor(getResources().getColor(R.color.red));
+
                 NoteEditor.closeNoteEditorView();
                 try {
                     File file = new File(share_ini);
@@ -300,7 +300,7 @@ public class ShareReceiveActivity extends Activity
                 break;
 
             case R.id.btnInsertNote:
-                btnInsertNote.setBackgroundColor(getResources().getColor(R.color.red));
+
                 NoteEditor.closeNoteEditorView();
                 try {
                     File file = new File(share_ini);
@@ -325,7 +325,7 @@ public class ShareReceiveActivity extends Activity
                 break;
 
             case R.id.btnFreePaste:
-                btnFreePaste.setBackgroundColor(getResources().getColor(R.color.red));
+
                 NoteEditor.closeNoteEditorView();
                 try {
                     File file = new File(share_ini);
@@ -378,7 +378,7 @@ public class ShareReceiveActivity extends Activity
         if (!isRun) {
             saveReceiveShare("text/plain", strData, "false");
 
-            if (MyActivity.zh_cn)
+            if (isZh())
                 Toast.makeText(this, getString(R.string.strTip_zh), Toast.LENGTH_LONG).show();
             else
                 Toast.makeText(this, getString(R.string.strTip), Toast.LENGTH_LONG).show();
@@ -399,7 +399,7 @@ public class ShareReceiveActivity extends Activity
         if (!isRun) {
             saveReceiveShare("image/*", "", "false");
 
-            if (MyActivity.zh_cn)
+            if (isZh())
                 Toast.makeText(this, getString(R.string.strTip_zh), Toast.LENGTH_LONG).show();
             else
                 Toast.makeText(this, getString(R.string.strTip), Toast.LENGTH_LONG).show();
@@ -789,6 +789,16 @@ public class ShareReceiveActivity extends Activity
 
             tv.setText(style);
         }
+    }
+
+    public boolean isZh() {
+        Locale locale = this.getResources().getConfiguration().locale;
+        String language = locale.getLanguage();
+        if (language.endsWith("zh"))
+            return true;
+        else
+            return false;
+
     }
 
 }

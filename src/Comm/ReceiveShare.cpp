@@ -174,18 +174,14 @@ void ReceiveShare::on_btnAppendToNote_clicked() {
     isInsertToNote = false;
     addToNote(isInsertToNote);
 
-    closeAllChildWindows();
-    mw_one->ui->btnNotes->click();
-    mw_one->ui->btnEdit->click();
+    openNoteEditor();
   }
 
   if (nMethod == 2) {
     isInsertToNote = false;
     addToNote_Java();
 
-    closeAllChildWindows();
-    mw_one->ui->btnNotes->click();
-    mw_one->ui->btnEdit->click();
+    openNoteEditor();
   }
 }
 
@@ -194,19 +190,21 @@ void ReceiveShare::on_btnInsertToNote_clicked() {
     isInsertToNote = true;
     addToNote(isInsertToNote);
 
-    closeAllChildWindows();
-    mw_one->ui->btnNotes->click();
-    mw_one->ui->btnEdit->click();
+    openNoteEditor();
   }
 
   if (nMethod == 2) {
     isInsertToNote = true;
     addToNote_Java();
 
-    closeAllChildWindows();
-    mw_one->ui->btnNotes->click();
-    mw_one->ui->btnEdit->click();
+    openNoteEditor();
   }
+}
+
+void ReceiveShare::openNoteEditor() {
+  closeAllChildWindows();
+  mw_one->m_Notes->isRequestOpenNoteEditor = true;
+  mw_one->ui->btnNotes->click();
 }
 
 QObjectList ReceiveShare::getAllFrame(QObjectList lstUIControls) {

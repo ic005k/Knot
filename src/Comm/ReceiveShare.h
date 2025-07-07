@@ -67,6 +67,7 @@ class ReceiveShare : public QDialog {
   bool isInsertToNote;
   QString addToNote_Java();
   int getImgCount();
+  void openNoteEditor();
 };
 
 #endif  // RECEIVESHARE_H
