@@ -240,16 +240,6 @@ void Reader::startOpenFile(QString openfile) {
 
     QString bookName;
 
-    /*#ifdef Q_OS_ANDROID
-        QString name;
-        name = getUriRealPath(openfile);
-        QStringList lista = name.split("/");
-        bookName = lista.at(lista.count() - 1);
-    #else
-        QFileInfo fi(openfile);
-        bookName = fi.fileName();
-    #endif*/
-
     QFileInfo fi(openfile);
     bookName = fi.fileName();
 
@@ -260,10 +250,9 @@ void Reader::startOpenFile(QString openfile) {
     mw_one->m_ReadTWThread->quit();
     mw_one->m_ReadTWThread->wait();
 
-    // if (isAndroid)
-    //   m_Method->showAndroidProgressBar();
-    // else
-    if (!mw_one->initMain) mw_one->showProgress();
+    if (!mw_one->initMain) {
+      QTimer::singleShot(100, this, []() { mw_one->showProgress(); });
+    }
 
     tmeShowEpubMsg->start(100);
 

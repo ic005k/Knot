@@ -1,12 +1,14 @@
 name: Linux
 
 # Qt官方没有linux平台的x86包
-on: 
+on:
   push:
+    branches: [main]
     paths:
       - '*.pro'
       - '**'
       - '.github/workflows/ubuntu.yml'
+    if: github.actor != 'github-actions[bot]'
   pull_request:
     paths:
       - '*.pro'

@@ -1,10 +1,12 @@
 name: MacOS
-on: 
+on:
   push:
+    branches: [main]
     paths:
       - '*.pro'
       - '**'
       - '.github/workflows/macos.yml'
+    if: github.actor != 'github-actions[bot]'
   pull_request:
     paths:
       - '*.pro'

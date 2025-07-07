@@ -1,11 +1,12 @@
 name: Windows
-on: 
-  # push代码时触发workflow
+on:
   push:
+    branches: [main]
     paths:
       - '*.pro'
       - '**'
       - '.github/workflows/windows.yml'
+    if: github.actor != 'github-actions[bot]'
   pull_request:
     paths:
       - '*.pro'
