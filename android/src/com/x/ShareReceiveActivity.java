@@ -83,6 +83,11 @@ import android.text.style.ForegroundColorSpan;
 import android.text.Spannable;
 import android.text.Spanned;
 
+import android.graphics.Bitmap;
+import android.media.ExifInterface;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+
 public class ShareReceiveActivity extends Activity
         implements View.OnClickListener {
     private TextView tv;
@@ -684,6 +689,9 @@ public class ShareReceiveActivity extends Activity
                     inputStream.close();
                     fos.close();
 
+                    // 新增：校正图片方向
+                    correctImageOrientation(filename);
+
                 } catch (IOException e) {
                     e.printStackTrace();
                     return false;
@@ -799,6 +807,74 @@ public class ShareReceiveActivity extends Activity
         else
             return false;
 
+    }
+
+    // 新增方法：校正图片方向
+    private void correctImageOrientation(String imagePath) {
+        try {
+            ExifInterface exif = new ExifInterface(imagePath);
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+
+            // 根据方向信息旋转图片
+            Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+            Bitmap rotatedBitmap = rotateBitmap(bitmap, orientation);
+
+            // 保存校正后的图片
+            saveBitmapToFile(rotatedBitmap, imagePath);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 旋转位图的方法
+    private Bitmap rotateBitmap(Bitmap bitmap, int orientation) {
+        Matrix matrix = new Matrix();
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                matrix.postRotate(90);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                matrix.postRotate(180);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                matrix.postRotate(270);
+                break;
+            case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
+                matrix.postScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_FLIP_VERTICAL:
+                matrix.postScale(1, -1);
+                break;
+            case ExifInterface.ORIENTATION_TRANSPOSE:
+                matrix.postRotate(90);
+                matrix.postScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_TRANSVERSE:
+                matrix.postRotate(270);
+                matrix.postScale(-1, 1);
+                break;
+            default:
+                return bitmap;
+        }
+
+        try {
+            return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            return bitmap;
+        }
+    }
+
+    // 保存位图到文件
+    private void saveBitmapToFile(Bitmap bitmap, String filePath) {
+        try (FileOutputStream out = new FileOutputStream(filePath)) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            bitmap.recycle();
+        }
     }
 
 }

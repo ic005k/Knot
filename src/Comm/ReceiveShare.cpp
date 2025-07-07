@@ -109,7 +109,7 @@ QString ReceiveShare::addToNote_Java() {
       QString imgFile =
           "/storage/emulated/0/.Knot/img" + QString::number(i) + ".png";
       QString strImg = mw_one->m_Notes->insertImage(imgFile, false);
-      strData = strData + "\n\n" + strImg;
+      strData = strData + strImg;
     }
   }
 
