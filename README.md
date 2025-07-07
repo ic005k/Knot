@@ -14,6 +14,10 @@
 
 *Etymology*: Just as ancient civilizations recorded important events with physical knots, we continue this simple yet efficient concept through digital "knots".
 
+<!-- 新增代码状态按钮 -->
+[![Code Stats](https://img.shields.io/badge/Code-Stats-blue.svg)](https://github.com/ic005k/Knot/blob/main/stats.txt)  
+*Click to view code lines statistics (updated automatically)*
+
 ## 📱 Core Features
 
 ### Multi-modal Recording System
@@ -131,7 +135,6 @@ All dependencies are preserved in original format for maintenance and upgrades:
 ### Document Processing Components
 | Project Name | Functionality | Repository Link |
 |--------------|---------------|-----------------|
-| **md4c** | Markdown parser | [mity/md4c](https://github.com/mity/md4c) |
 | **cmark-gfm** | GitHub-flavored Markdown extension | [github/cmark-gfm](https://github.com/github/cmark-gfm) |
 
 ### Security & Utility Libraries

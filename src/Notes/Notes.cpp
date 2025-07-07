@@ -2,7 +2,6 @@
 
 #include "cmark-gfm-core-extensions.h"
 #include "cmark_wrapper.h"
-#include "lib/md4c/md4c-html.h"
 #include "src/MainWindow.h"
 #include "subscript.h"
 #include "superscript.h"

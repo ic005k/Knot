@@ -45,7 +45,6 @@ THIRD_PARTY_PATH = $$PWD/lib
 THIRD_PARTY_INCLUDE = $$THIRD_PARTY_PATH/cppjieba \
                       $$THIRD_PARTY_PATH/qsci \
                       $$THIRD_PARTY_PATH/qsci/Qsci \
-                      $$THIRD_PARTY_PATH/md4c \
                       $$THIRD_PARTY_PATH/quazip \
                       $$THIRD_PARTY_PATH/zlib \
                       $$THIRD_PARTY_PATH/cmark-gfm/include \
@@ -434,9 +433,6 @@ SOURCES += \
     lib/cmark-gfm/src/utf8.c \
     lib/cmark-gfm/src/xml.c \
     src/main.cpp \
-    lib/md4c/entity.c \
-    lib/md4c/md4c-html.c \
-    lib/md4c/md4c.c \
     lib/quazip/JlCompress.cpp \
     lib/quazip/qioapi.cpp \
     lib/quazip/quaadler32.cpp \
@@ -631,9 +627,6 @@ HEADERS += \
     src/SyncInfo.h \
     src/Todo/Todo.h \
     src/Todo/TodoAlarm.h \
-    lib/md4c/entity.h \
-    lib/md4c/md4c-html.h \
-    lib/md4c/md4c.h \
     lib/quazip/JlCompress.h \
     lib/quazip/ioapi.h \
     lib/quazip/minizip_crypt.h \
