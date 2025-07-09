@@ -5,6 +5,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QVersionNumber>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>

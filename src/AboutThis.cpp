@@ -1,4 +1,4 @@
-﻿#include "src/AboutThis.h".h "
+﻿#include "src/AboutThis.h"
 
 #include "MainWindow.h"
 #include "ui_AboutThis.h"
@@ -158,24 +158,24 @@ int AboutThis::parse_UpdateJSON(QString str) {
     ui->btnDownloadUP->show();
     ui->btnCopyDownLoadLink->show();
 
-    QString Verison = root_Obj.value("tag_name").toString();
+    QString Version = root_Obj.value("tag_name").toString();
     QString UpdateTime = root_Obj.value("published_at").toString();
     QString ReleaseNote = root_Obj.value("body").toString();
+    QVersionNumber ver1 = QVersionNumber::fromString(Version);
+    QVersionNumber ver2 = QVersionNumber::fromString(ver);
+    qDebug() << "Version" << Version << ver << ver1 << ver2;
 
-    if (Verison > ver && Url != "") {
+    if (ver1 > ver2 && Url != "") {
       QString warningStr = tr("New version detected!") + "\n" +
-                           tr("Version: ") + "V" + Verison + "\n" +
+                           tr("Version: ") + "V" + Version + "\n" +
                            tr("Published at: ") + UpdateTime + "\n" +
                            tr("Release Notes: ") + "\n" + ReleaseNote;
 
-      // int ret = QMessageBox::warning(this, "", warningStr, tr("Download"),
-      //                                tr("Cancel"));
-      // for Android ret = 3 Mac ret = 0 or 1(Cancel)
-
       ShowMessage *m_ShowMsg = new ShowMessage(this);
-      int ret = m_ShowMsg->showMsg("Knot", warningStr, 1);
+      m_ShowMsg->ui->btnOk->setText(tr("Download"));
+      bool ret = m_ShowMsg->showMsg("Knot", warningStr, 2);
 
-      if (ret >= 0) {
+      if (ret) {
 #ifdef Q_OS_ANDROID
         show_download();
 #else
