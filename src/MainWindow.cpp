@@ -21,7 +21,7 @@ QString iniFile, iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
     imgFileName, defaultFontFamily, customFontFamily, encPassword;
 QStringList listM;
 
-int curPos, today, fontSize, red, currentTabIndex;
+int today, fontSize, red, currentTabIndex;
 int chartMax = 5;
 
 double yMaxMonth, yMaxDay;

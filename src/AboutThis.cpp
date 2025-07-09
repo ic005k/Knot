@@ -8,7 +8,6 @@ extern MainWindow *mw_one;
 extern Method *m_Method;
 extern bool loading, zh_cn;
 extern QString noteText, appName, ver;
-extern int curPos;
 
 AboutThis::AboutThis(QWidget *parent) : QDialog(parent), ui(new Ui::AboutThis) {
   ui->setupUi(this);
