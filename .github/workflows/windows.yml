@@ -6,9 +6,9 @@ on:
       - '*.pro'
       - '**'
       - '.github/workflows/windows.yml'
+      - '!stats.txt'  # 排除根目录下的 stats.txt
     #if: github.actor != 'github-actions[bot]'
-    paths-ignore:  # 排除这些路径的变更触发
-      - 'stats.txt'  # 根目录下的 stats.txt 文件
+
   pull_request:
     paths:
       - '*.pro'
