@@ -16,7 +16,7 @@ on:
       - '.github/workflows/macos.yml' 
 
   release:
-    types: [created, published, prereleased] # 监听发布、预发布事件
+    types: [created] # 监听发布、预发布事件
 
 jobs:
   build:
