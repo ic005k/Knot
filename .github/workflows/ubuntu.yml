@@ -15,7 +15,11 @@ on:
     paths:
       - '*.pro'
       - '**'
-      - '.github/workflows/ubuntu.yml' 
+      - '.github/workflows/ubuntu.yml'
+
+  release:
+    types: [created, published, prereleased] # 监听发布、预发布事件
+
 jobs:
   build:
     name: Build
