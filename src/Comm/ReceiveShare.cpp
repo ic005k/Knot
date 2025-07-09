@@ -433,16 +433,15 @@ void ReceiveShare::goReceiveShare() {
   if (method == "todo") {
     strReceiveShareData = getShareString();
 
+    mw_one->m_Todo->isNeedAddToTodoList = true;
+    mw_one->m_Todo->strNeedAddToTodoText = strReceiveShareData;
+
     if (mw_one->ui->frameTodo->isHidden() && mw_one->ui->frameMain->isHidden())
       closeAllChildWindows();
 
     if (mw_one->ui->frameTodo->isHidden()) {
       mw_one->ui->btnTodo->click();
     }
-
-    m_Method->delay_MSec(500);
-    mw_one->m_Todo->addToList(strReceiveShareData);
-    mw_one->m_Todo->isNeedSave = true;
   }
 
   if (method == "appendNote") {

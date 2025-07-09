@@ -21,6 +21,7 @@
 #include <QFileInfo>
 #include <QFileInfoList>
 #include <QInputDialog>
+#include <QInputMethod>
 
 #ifdef Q_OS_ANDROID
 #include <QJniObject>

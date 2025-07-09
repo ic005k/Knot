@@ -23,6 +23,8 @@ class Todo : public QDialog {
   Ui::Todo *ui;
   ~Todo();
 
+  bool isNeedAddToTodoList = false;
+  QString strNeedAddToTodoText;
   int nInterval = 500;
   QTimer *tmePlayProgress;
   bool isNeedSave = false;

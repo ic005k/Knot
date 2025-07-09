@@ -1378,6 +1378,12 @@ void Todo::openTodoUI() {
   stopPlayVoice();
 
   mw_one->closeProgress();
+
+  if (isNeedAddToTodoList) {
+    isNeedAddToTodoList = false;
+    mw_one->ui->editTodo->setText(strNeedAddToTodoText);
+    mw_one->ui->btnAddTodo->click();
+  }
 }
 
 void Todo::openTodo() {

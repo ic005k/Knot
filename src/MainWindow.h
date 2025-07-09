@@ -845,7 +845,6 @@ QLabel {
   bool isShowDetails = false;
   QString strShowDetails;
   bool isTabChanged = false;
-  bool isAndroidKeyShow = false;
 
   int frameChartHeight;
   int yScale = 3;

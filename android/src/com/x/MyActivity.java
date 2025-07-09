@@ -151,6 +151,7 @@ import android.os.Vibrator;
 import android.content.SharedPreferences;
 import android.Manifest;
 import android.view.WindowInsetsController;
+import android.view.inputmethod.InputMethodManager;
 
 //Qt
 import org.qtproject.qt.android.bindings.QtActivity;

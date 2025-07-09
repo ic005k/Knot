@@ -2870,6 +2870,11 @@ QTabBar::scroller {width:0}
               </item>
               <item>
                <widget class="QLabel" name="label_6">
+                <property name="font">
+                 <font>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
                  <string>WebDAV Url:</string>
                 </property>
@@ -2897,6 +2902,11 @@ QTabBar::scroller {width:0}
               </item>
               <item>
                <widget class="QLabel" name="label_7">
+                <property name="font">
+                 <font>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
                  <string>UserName:</string>
                 </property>
@@ -2920,6 +2930,11 @@ QTabBar::scroller {width:0}
               </item>
               <item>
                <widget class="QLabel" name="label_8">
+                <property name="font">
+                 <font>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
                  <string>Password:</string>
                 </property>
