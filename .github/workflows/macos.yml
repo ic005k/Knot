@@ -3,19 +3,15 @@ on:
   push:
     branches: [main]
     paths:
-      - '*.pro'
       - '**'
-      - '.github/workflows/macos.yml'
-      #- '!stats.txt'  # 排除根目录下的 stats.txt
+      - '!stats.txt'  # 排除根目录下的 stats.txt
 
   pull_request:
     paths:
-      - '*.pro'
       - '**'
-      - '.github/workflows/macos.yml' 
 
-  #release:
-  #  types: [created] # 监听发布、预发布事件
+  release:
+    types: [published] # 监听发布事件
 
 jobs:
   build:
