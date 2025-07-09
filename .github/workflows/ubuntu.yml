@@ -201,7 +201,7 @@ jobs:
       - name: uploadRelease
         #if: startsWith(github.event.ref, 'refs/tags/')
         if: github.event_name == 'release'
-        uses: svenstaro/upload-release-action@v4
+        uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           
