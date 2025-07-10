@@ -199,6 +199,12 @@ Rectangle {
                     anchors.leftMargin: 0
                     anchors.rightMargin: 0
 
+                    Rectangle {
+                        width: view.width
+                        height: 5 // 空白高度
+                        color: "transparent"
+                    }
+
                     Text {
                         id: item0
 
@@ -274,6 +280,12 @@ Rectangle {
 
                         visible: false
                     }
+
+                    Rectangle {
+                        width: view.width
+                        height: 5 // 空白高度
+                        color: "transparent"
+                    }
                 }
             }
 
@@ -316,7 +328,7 @@ Rectangle {
 
     ListView {
         id: view
-
+        spacing: 4
         boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
         anchors {
             fill: parent
@@ -339,7 +351,6 @@ Rectangle {
         }
         delegate: dragDelegate
 
-        spacing: 4
         cacheBuffer: 50
 
         // 核心配置：绑定滚动状态

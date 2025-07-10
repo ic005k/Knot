@@ -221,6 +221,12 @@ Rectangle {
                     anchors.leftMargin: 0
                     anchors.rightMargin: 0
 
+                    Rectangle {
+                        width: view.width
+                        height: 1 // 空白高度
+                        color: "transparent"
+                    }
+
                     RowLayout {
 
                         id: row0
@@ -345,6 +351,12 @@ Rectangle {
 
                             visible: item3.text.length ? true : false
                         }
+                    }
+
+                    Rectangle {
+                        width: view.width
+                        height: 1 // 空白高度
+                        color: "transparent"
                     }
                 }
             }

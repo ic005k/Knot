@@ -174,6 +174,12 @@ Rectangle {
                     anchors.leftMargin: 0
                     anchors.rightMargin: 0
 
+                    Rectangle {
+                        width: view.width
+                        height: 5 // 空白高度
+                        color: "transparent"
+                    }
+
                     Text {
                         id: item0
 
@@ -250,6 +256,12 @@ Rectangle {
                         rightPadding: 5
 
                         visible: item3.text.length ? true : false
+                    }
+
+                    Rectangle {
+                        width: view.width
+                        height: 5 // 空白高度
+                        color: "transparent"
                     }
                 }
             }

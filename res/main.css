@@ -6,6 +6,7 @@ body {
 	margin-left: 1%;
 	margin-right: 1%;
 	text-align: justify;
+	letter-spacing: 1px; /* 添加1像素字间距 */
 	
 }
 

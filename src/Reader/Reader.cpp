@@ -949,15 +949,12 @@ void Reader::setQMLHtml(QString htmlFile, QString htmlBuffer, QString skipID) {
   htmlBuffer.append(strEndFlag);
   currentTxt = htmlBuffer;
 
-  mw_one->ui->qwReader->rootContext()->setContextProperty("isAni", false);
+  mw_one->ui->qwReader->rootContext()->setContextProperty("isAni",
+                                                          QVariant(false));
   QQuickItem *root = mw_one->ui->qwReader->rootObject();
 
   QMetaObject::invokeMethod((QObject *)root, "loadHtmlBuffer",
                             Q_ARG(QVariant, htmlBuffer));
-
-  //  QMetaObject::invokeMethod((QObject*)root, "loadHtml",
-  //                          Q_ARG(QVariant, htmlFile), Q_ARG(QVariant,
-  //                          skipID));
 
   QFileInfo fi(htmlFile);
   mw_one->ui->lblInfo->setText(

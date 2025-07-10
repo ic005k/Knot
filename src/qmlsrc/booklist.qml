@@ -251,6 +251,12 @@ Rectangle {
                     anchors.leftMargin: 0
                     anchors.rightMargin: 0
 
+                    Rectangle {
+                        width: view.width
+                        height: 4 // 空白高度
+                        color: "transparent"
+                    }
+
                     Text {
                         id: item0
 
@@ -324,6 +330,12 @@ Rectangle {
 
                         visible: false
                     }
+
+                    Rectangle {
+                        width: view.width
+                        height: 4 // 空白高度
+                        color: "transparent"
+                    }
                 }
             }
 
@@ -376,6 +388,7 @@ Rectangle {
             id: listmain
 
             // debug
+
 
             /*ListElement {
                 text0: "1111"
