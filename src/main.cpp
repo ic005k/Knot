@@ -65,6 +65,8 @@ QString strJBDict5 = "";
 
 bool zh_cn = false;
 bool isAndroid, isIOS;
+bool isInitThemeEnd;
+bool isNeedExecDeskShortcut = false;
 
 QSplashScreen* splash;
 
@@ -257,6 +259,7 @@ int main(int argc, char* argv[]) {
 }
 
 void loadTheme(bool isDark) {
+  isInitThemeEnd = false;
   // 设置调色板
   if (isDark) {
     qApp->setPalette(createDarkPalette());
@@ -286,6 +289,13 @@ void loadTheme(bool isDark) {
   QFont font = qApp->font();
   font.setPointSize(fontSize);
   qApp->setFont(font);
+
+  isInitThemeEnd = true;
+
+  if (isNeedExecDeskShortcut) {
+    isNeedExecDeskShortcut = false;
+    mw_one->execDeskShortcut();
+  }
 }
 
 QPalette createDarkPalette() {

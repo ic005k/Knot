@@ -41,7 +41,8 @@ QSettings *iniPreferences;
 CloudBackup *m_CloudBackup;
 
 extern bool isAndroid, isIOS, zh_cn, isEpub, isEpubError, isText, isPDF,
-    isWholeMonth, isDateSection, isPasswordError;
+    isWholeMonth, isDateSection, isPasswordError, isInitThemeEnd,
+    isNeedExecDeskShortcut;
 extern QString btnYearText, btnMonthText, strPage, ebookFile, strTitle,
     fileName, strOpfPath, catalogueFile, strShowMsg;
 extern int iPage, sPos, totallines, baseLines, htmlIndex, s_y1, s_m1, s_d1,
@@ -4171,7 +4172,11 @@ static void JavaNotify_7() {
 }
 
 static void JavaNotify_8() {
-  mw_one->execDeskShortcut();
+  if (isInitThemeEnd) {
+    mw_one->execDeskShortcut();
+  } else {
+    isNeedExecDeskShortcut = true;
+  }
 
   qDebug() << "C++ JavaNotify_8";
 }
