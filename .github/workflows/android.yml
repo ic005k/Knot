@@ -11,17 +11,17 @@ on:
     branches: [ main ]
 
 env:
-  QT_VERSION: 6.5.3
+  QT_VERSION: 6.6.3  # 使用最新稳定版本
   ANDROID_API_LEVEL: 34
   BUILD_TOOLS_VERSION: 34.0.0
-  NDK_VERSION: 25.1.8937393  # 6.5.3官方推荐的NDK版本
+  NDK_VERSION: 26.1.10909125  # 匹配最新NDK
   QT_ARCH: android_arm64_v8a
   REPO_ROOT: ${{ github.workspace }}
-  QT_INSTALL_DIR: ${{ github.workspace }}\QtAndroid
+  QT_INSTALL_DIR: ${{ github.workspace }}/QtAndroid  # 使用Unix风格路径（兼容Windows）
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest  # 切换到Ubuntu（更适合Android编译）
 
     steps:
     - name: Checkout code
@@ -32,6 +32,7 @@ jobs:
       with:
         java-version: 17
         distribution: 'temurin'
+        cache: 'gradle'
 
     - name: Setup Android SDK and NDK
       uses: android-actions/setup-android@v3
@@ -40,107 +41,75 @@ jobs:
         ndk-version: ${{ env.NDK_VERSION }}
         sdk-version: ${{ env.ANDROID_API_LEVEL }}
 
-    - name: 确保安装目录存在
-      shell: cmd
-      run: |
-        if not exist "${{ env.QT_INSTALL_DIR }}" (
-          mkdir "${{ env.QT_INSTALL_DIR }}"
-          echo "创建Qt安装目录成功"
-        )
-
-    - name: Install Qt Android（修复参数）
+    - name: Install Qt for Android
       uses: jurplel/install-qt-action@v4
-      id: qt-android
       with:
         version: ${{ env.QT_VERSION }}
         target: android
         arch: ${{ env.QT_ARCH }}
-        modules: qtcharts qtsensors qtlocation qtpositioning
-        install-dir: ${{ env.QT_INSTALL_DIR }}
+        modules: qtcharts qtsensors qtlocation qtpositioning qtwebview
         install-deps: true
-        logging: true
-        android: true  # 明确指定为Android构建
-        # 移除错误的 tools: qttools 参数
+        mirror: https://mirrors.tuna.tsinghua.edu.cn/qt/  # 使用国内镜像加速
 
-    - name: 验证Qt安装目录内容
-      shell: cmd
+    - name: Debug Qt Installation
       run: |
-        echo "Qt安装目录内容："
-        dir "${{ env.QT_INSTALL_DIR }}\${{ env.QT_VERSION }}" /s /b
+        echo "Qt安装目录内容:"
+        ls -la ${{ env.QT_INSTALL_DIR }}/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}
+        echo "查找qmake位置:"
+        find ${{ env.QT_INSTALL_DIR }} -name qmake
 
-    - name: 手动设置Qt路径（Android专用）
-      shell: cmd
+    - name: Configure Qt environment
       run: |
-        rem 注意：Android版本的qmake路径格式不同
-        set QT_ROOT=${{ env.QT_INSTALL_DIR }}\${{ env.QT_VERSION }}\${{ env.QT_ARCH }}
-        echo QT_ROOT=%QT_ROOT% >> %GITHUB_ENV%
-        echo Qt6_DIR=%QT_ROOT% >> %GITHUB_ENV%
-        echo PATH=%QT_ROOT%\bin;%PATH% >> %GITHUB_ENV%  # 尝试添加默认路径
+        echo "QT_DIR=${{ env.QT_INSTALL_DIR }}/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}" >> $GITHUB_ENV
+        echo "PATH=${{ env.QT_INSTALL_DIR }}/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}/bin:$PATH" >> $GITHUB_ENV
+        echo "ANDROID_NDK_ROOT=${{ steps.android-setup.outputs.ndk-path }}" >> $GITHUB_ENV
 
-        rem 对于Android，还需要设置工具链路径
-        set ANDROID_TOOLCHAIN=%ANDROID_NDK_ROOT%\toolchains\llvm\prebuilt\windows-x86_64\bin
-        echo ANDROID_TOOLCHAIN=%ANDROID_TOOLCHAIN% >> %GITHUB_ENV%
-        echo PATH=%ANDROID_TOOLCHAIN%;%PATH% >> %GITHUB_ENV%
-
-    - name: 查找并验证qmake（Android专用）
-      shell: cmd
+    - name: Verify Qt and NDK
       run: |
-        echo "查找qmake位置..."
-        where qmake.exe || echo "未在PATH中找到qmake，尝试直接定位"
+        echo "Qt版本:"
+        qmake --version
+        echo "NDK路径:"
+        echo $ANDROID_NDK_ROOT
+        echo "NDK工具链测试:"
+        $ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --version
 
-        rem 尝试直接定位qmake（Android版本可能在不同位置）
-        set QMAKE_PATH=${{ env.QT_INSTALL_DIR }}\${{ env.QT_VERSION }}\${{ env.QT_ARCH }}\bin\qmake.exe
-        if exist "%QMAKE_PATH%" (
-          echo "找到qmake：%QMAKE_PATH%"
-          "%QMAKE_PATH%" --version
-          echo "QMAKE=%QMAKE_PATH%" >> %GITHUB_ENV%  # 保存qmake路径供后续使用
-        ) else (
-          echo "##[error]未找到qmake！检查Qt安装是否完整"
+    - name: Generate Makefile
+      run: |
+        cd $REPO_ROOT
+        if [ ! -f "Knot.pro" ]; then
+          echo "Knot.pro 文件未找到!"
           exit 1
-        )
+        fi
 
-    - name: Generate Makefile（使用绝对路径调用qmake）
-      shell: cmd
-      run: |
-        cd /d %REPO_ROOT%
+        # 使用完整路径调用qmake，避免路径问题
+        $QT_DIR/bin/qmake "Knot.pro" \
+          -spec android-clang \
+          "CONFIG += thread c++17 release" \
+          "ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT" \
+          "ANDROID_API_LEVEL=${{ env.ANDROID_API_LEVEL }}" \
+          ANDROID_ABIS=arm64-v8a
 
-        if not exist "Knot.pro" (
-          echo "##[error]Knot.pro 文件未找到！"
-          dir /b *.pro
-          exit 1
-        )
-
-        rem 使用保存的QMAKE路径（避免PATH问题）
-        "%QMAKE%" "Knot.pro" ^
-              -spec android-clang ^
-              "CONFIG += thread c++17 release" ^
-              "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
-              ANDROID_ABIS=arm64-v8a
-
-    # 后续步骤保持不变...
     - name: Build APK
-      shell: cmd
       run: |
-        "%NDK_MAKE%" -j8
-        "%NDK_MAKE%" apk
+        make -j$(nproc)
+        make apk
 
     - name: Sign APK
-      shell: cmd
       run: |
-        jarsigner -verbose ^
-          -sigalg SHA256withRSA ^
-          -digestalg SHA-256 ^
-          -keystore android/app/my-release-key.keystore ^
-          -storepass ${{ secrets.KEY_STORE_PASSWORD }} ^
-          -keypass ${{ secrets.KEY_PASSWORD }} ^
-          build\android-build-release-unsigned.apk ^
+        jarsigner -verbose \
+          -sigalg SHA256withRSA \
+          -digestalg SHA-256 \
+          -keystore android/app/my-release-key.keystore \
+          -storepass ${{ secrets.KEY_STORE_PASSWORD }} \
+          -keypass ${{ secrets.KEY_PASSWORD }} \
+          build/android-build-release-unsigned.apk \
           ${{ secrets.KEY_ALIAS }}
 
-        "%ANDROID_SDK_ROOT%\build-tools\%BUILD_TOOLS_VERSION%\zipalign" -v 4 ^
-          build\android-build-release-unsigned.apk ^
+        $ANDROID_SDK_ROOT/build-tools/${{ env.BUILD_TOOLS_VERSION }}/zipalign -v 4 \
+          build/android-build-release-unsigned.apk \
           Knot6-release.apk
 
-    - name: Upload artifact
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: Android-APK
