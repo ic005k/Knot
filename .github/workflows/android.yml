@@ -11,13 +11,13 @@ on:
     branches: [ main ]
 
 env:
-  QT_VERSION: 6.5.3  # 确认存在的稳定版本
+  QT_VERSION: 6.5.3
   ANDROID_API_LEVEL: 34
   BUILD_TOOLS_VERSION: 34.0.0
-  NDK_VERSION: 26.1.10909125
+  NDK_VERSION: 25.1.8937393  # 6.5.3官方推荐的NDK版本
   QT_ARCH: android_arm64_v8a
   REPO_ROOT: ${{ github.workspace }}
-  QT_INSTALL_DIR: ${{ github.workspace }}\QtAndroid  # Windows路径格式
+  QT_INSTALL_DIR: ${{ github.workspace }}\QtAndroid
 
 jobs:
   build:
@@ -40,17 +40,15 @@ jobs:
         ndk-version: ${{ env.NDK_VERSION }}
         sdk-version: ${{ env.ANDROID_API_LEVEL }}
 
-    - name: 手动创建Qt安装目录（避免权限问题）
+    - name: 确保安装目录存在
       shell: cmd
       run: |
         if not exist "${{ env.QT_INSTALL_DIR }}" (
           mkdir "${{ env.QT_INSTALL_DIR }}"
-          echo "已创建Qt安装目录: ${{ env.QT_INSTALL_DIR }}"
-        ) else (
-          echo "Qt安装目录已存在"
+          echo "创建Qt安装目录成功"
         )
 
-    - name: Install Qt Android（强制指定镜像源）
+    - name: Install Qt Android（Android专用配置）
       uses: jurplel/install-qt-action@v4
       id: qt-android
       with:
@@ -61,75 +59,66 @@ jobs:
         install-dir: ${{ env.QT_INSTALL_DIR }}
         install-deps: true
         logging: true
-        # 强制使用国内镜像（解决官方源下载失败问题）
-        mirror: https://mirrors.tuna.tsinghua.edu.cn/qt/
+        # Android版本需要额外配置
+        tools: qttools
+        android: true  # 明确指定为Android构建
 
-    - name: 验证Qt安装目录是否存在
+    - name: 验证Qt安装目录内容
       shell: cmd
       run: |
-        echo "Qt指定安装目录: ${{ env.QT_INSTALL_DIR }}"
-        if exist "${{ env.QT_INSTALL_DIR }}" (
-          echo "Qt安装目录存在，列出内容："
-          dir "${{ env.QT_INSTALL_DIR }}"
-        ) else (
-          echo "##[error]Qt安装目录不存在！安装失败！"
-          echo "请查看Install Qt Android步骤的详细日志，确认是否有404或下载失败"
-          exit 1
-        )
+        echo "Qt安装目录内容："
+        dir "${{ env.QT_INSTALL_DIR }}\${{ env.QT_VERSION }}" /s /b
 
-    - name: 手动设置Qt路径（修复cmd注释语法）
+    - name: 手动设置Qt路径（Android专用）
       shell: cmd
       run: |
-        rem 手动拼接路径（使用反斜杠，注意：cmd中用rem注释，不能用#）
+        rem 注意：Android版本的qmake路径格式不同
         set QT_ROOT=${{ env.QT_INSTALL_DIR }}\${{ env.QT_VERSION }}\${{ env.QT_ARCH }}
         echo QT_ROOT=%QT_ROOT% >> %GITHUB_ENV%
         echo Qt6_DIR=%QT_ROOT% >> %GITHUB_ENV%
-        echo QT_PLUGIN_PATH=%QT_ROOT%\plugins >> %GITHUB_ENV%
-        echo QML2_IMPORT_PATH=%QT_ROOT%\qml >> %GITHUB_ENV%
-        echo PATH=%QT_ROOT%\bin;%PATH% >> %GITHUB_ENV%
+        echo PATH=%QT_ROOT%\bin;%PATH% >> %GITHUB_ENV%  # 尝试添加默认路径
 
-    - name: 再次验证Qt安装
+        rem 对于Android，还需要设置工具链路径
+        set ANDROID_TOOLCHAIN=%ANDROID_NDK_ROOT%\toolchains\llvm\prebuilt\windows-x86_64\bin
+        echo ANDROID_TOOLCHAIN=%ANDROID_TOOLCHAIN% >> %GITHUB_ENV%
+        echo PATH=%ANDROID_TOOLCHAIN%;%PATH% >> %GITHUB_ENV%
+
+    - name: 查找并验证qmake（Android专用）
       shell: cmd
       run: |
-        echo "当前Qt根目录: %QT_ROOT%"
-        echo "PATH: %PATH%"
+        echo "查找qmake位置..."
+        where qmake.exe || echo "未在PATH中找到qmake，尝试直接定位"
 
-        echo "检查bin目录是否存在："
-        if exist "%QT_ROOT%\bin" (
-          echo "bin目录存在，列出文件："
-          dir "%QT_ROOT%\bin"
+        rem 尝试直接定位qmake（Android版本可能在不同位置）
+        set QMAKE_PATH=${{ env.QT_INSTALL_DIR }}\${{ env.QT_VERSION }}\${{ env.QT_ARCH }}\bin\qmake.exe
+        if exist "%QMAKE_PATH%" (
+          echo "找到qmake：%QMAKE_PATH%"
+          "%QMAKE_PATH%" --version
+          echo "QMAKE=%QMAKE_PATH%" >> %GITHUB_ENV%  # 保存qmake路径供后续使用
         ) else (
-          echo "##[error]Qt的bin目录不存在！安装失败！"
+          echo "##[error]未找到qmake！检查Qt安装是否完整"
           exit 1
         )
 
-        echo "检查qmake是否存在："
-        if exist "%QT_ROOT%\bin\qmake.exe" (
-          echo "qmake存在，版本信息："
-          "%QT_ROOT%\bin\qmake.exe" --version
-        ) else (
-          echo "##[error]qmake.exe不存在！"
-          exit 1
-        )
-
-    # 后续步骤保持不变...
-    - name: Generate Makefile
+    - name: Generate Makefile（使用绝对路径调用qmake）
       shell: cmd
       run: |
         cd /d %REPO_ROOT%
 
         if not exist "Knot.pro" (
-          echo ##[error]Knot.pro 文件未找到！
+          echo "##[error]Knot.pro 文件未找到！"
           dir /b *.pro
           exit 1
         )
 
-        qmake "Knot.pro" ^
+        rem 使用保存的QMAKE路径（避免PATH问题）
+        "%QMAKE%" "Knot.pro" ^
               -spec android-clang ^
               "CONFIG += thread c++17 release" ^
               "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
               ANDROID_ABIS=arm64-v8a
 
+    # 后续步骤保持不变...
     - name: Build APK
       shell: cmd
       run: |
