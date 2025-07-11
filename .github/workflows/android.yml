@@ -5,9 +5,8 @@ on:
     branches: [ main ]
     paths:
       - '**'
-      - '!stats.txt'  # 排除根目录下的 stats.txt
+      - '!stats.txt'
       - '!README.md'
-
   pull_request:
     branches: [ main ]
 
@@ -17,7 +16,9 @@ env:
   BUILD_TOOLS_VERSION: 34.0.0
   NDK_VERSION: 26.1.10909125
   QT_ARCH: android_arm64_v8a
-  REPO_ROOT: ${{ github.workspace }}  # 使用 GitHub Actions 提供的工作区路径
+  REPO_ROOT: ${{ github.workspace }}
+  # 手动指定Qt安装目录（避免工具默认路径不可控）
+  QT_INSTALL_DIR: ${{ github.workspace }}/QtAndroid
 
 jobs:
   build:
@@ -40,49 +41,65 @@ jobs:
         ndk-version: ${{ env.NDK_VERSION }}
         sdk-version: ${{ env.ANDROID_API_LEVEL }}
 
-    - name: Install Qt Android
+    - name: Install Qt Android (带详细日志)
       uses: jurplel/install-qt-action@v3
       id: qt-android
       with:
         version: ${{ env.QT_VERSION }}
         target: android
         arch: ${{ env.QT_ARCH }}
-        modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
-        install-deps: true  # 确保安装所有依赖
+        # 先简化模块（只保留必要的，避免模块不存在导致安装失败）
+        modules: qtbase qtcharts
+        install-dir: ${{ env.QT_INSTALL_DIR }}  # 强制安装到指定目录
+        install-deps: true
+        # 输出详细日志，方便排查安装失败原因
+        logging: true
 
-    - name: Setup Paths
+    - name: 验证Qt安装目录是否存在
       shell: cmd
       run: |
-        echo ANDROID_NDK_ROOT=${{ steps.android-setup.outputs.ndk-path }} >> %GITHUB_ENV%
-        echo NDK_MAKE=%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe >> %GITHUB_ENV%
-        echo Qt6_DIR=${{ steps.qt-android.outputs.Qt6_DIR }} >> %GITHUB_ENV%
-        echo QT_PLUGIN_PATH=${{ steps.qt-android.outputs.Qt6_DIR }}\plugins >> %GITHUB_ENV%
-        echo QML2_IMPORT_PATH=${{ steps.qt-android.outputs.Qt6_DIR }}\qml >> %GITHUB_ENV%
-        echo PATH=${{ steps.qt-android.outputs.Qt6_DIR }}\bin;%PATH% >> %GITHUB_ENV%  # 将Qt路径放在最前面
-
-    - name: Verify Qt Installation
-      shell: cmd
-      run: |
-        echo "验证Qt安装:"
-        echo "Qt6_DIR: %Qt6_DIR%"
-        echo "PATH: %PATH%"
-
-        echo "检查qmake位置:"
-        where qmake.exe || echo "qmake未找到!"
-
-        echo "检查Qt目录内容:"
-        if exist "%Qt6_DIR%\bin" (
-          echo "%Qt6_DIR%\bin 目录存在"
-          dir "%Qt6_DIR%\bin"
+        echo "Qt指定安装目录: ${{ env.QT_INSTALL_DIR }}"
+        if exist "${{ env.QT_INSTALL_DIR }}" (
+          echo "Qt安装目录存在，列出内容："
+          dir "${{ env.QT_INSTALL_DIR }}"
         ) else (
-          echo "%Qt6_DIR%\bin 目录不存在!"
+          echo "##[error]Qt安装目录不存在！安装失败！"
+          exit 1
         )
 
-        echo "尝试执行qmake:"
-        if exist "%Qt6_DIR%\bin\qmake.exe" (
-          "%Qt6_DIR%\bin\qmake.exe" --version
+    - name: 手动设置Qt路径（不依赖工具输出）
+      shell: cmd
+      run: |
+        # 手动拼接Qt安装路径（Qt的目录结构通常是：安装目录/版本/架构）
+        set QT_ROOT=${{ env.QT_INSTALL_DIR }}\${{ env.QT_VERSION }}\${{ env.QT_ARCH }}
+        echo QT_ROOT=%QT_ROOT% >> %GITHUB_ENV%
+        echo Qt6_DIR=%QT_ROOT% >> %GITHUB_ENV%
+        echo QT_PLUGIN_PATH=%QT_ROOT%\plugins >> %GITHUB_ENV%
+        echo QML2_IMPORT_PATH=%QT_ROOT%\qml >> %GITHUB_ENV%
+        echo PATH=%QT_ROOT%\bin;%PATH% >> %GITHUB_ENV%
+
+    - name: 再次验证Qt安装
+      shell: cmd
+      run: |
+        echo "当前Qt根目录: %QT_ROOT%"
+        echo "PATH: %PATH%"
+
+        echo "检查bin目录是否存在："
+        if exist "%QT_ROOT%\bin" (
+          echo "bin目录存在，列出文件："
+          dir "%QT_ROOT%\bin"
         ) else (
-          echo "qmake.exe不存在!"
+          echo "##[error]Qt的bin目录不存在！安装失败！"
+          exit 1
+        )
+
+        echo "检查qmake是否存在："
+        if exist "%QT_ROOT%\bin\qmake.exe" (
+          echo "qmake存在，版本信息："
+          "%QT_ROOT%\bin\qmake.exe" --version
+        ) else (
+          echo "##[error]qmake.exe不存在！"
+          exit 1
         )
 
     - name: Generate Makefile
@@ -102,6 +119,7 @@ jobs:
               "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
               ANDROID_ABIS=arm64-v8a
 
+    # 后续步骤（Build APK、Sign APK等）保持不变
     - name: Build APK
       shell: cmd
       run: |
