@@ -442,6 +442,7 @@ MainWindow::MainWindow(QWidget *parent)
   }
 
   splash->close();
+  delete splash;
 
   initMain = false;
 }
@@ -748,6 +749,8 @@ MainWindow::~MainWindow() {
 
   myReadEBookThread->quit();
   myReadEBookThread->wait();
+
+  delete iniPreferences;
 }
 
 void MainWindow::startSave(QString str_type) {

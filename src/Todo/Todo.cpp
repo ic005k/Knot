@@ -1405,7 +1405,7 @@ void Todo::openTodo() {
 
     // 连接信号
     QObject::connect(
-        helper, &WebDavHelper::listCompleted,
+        helper, &WebDavHelper::listCompleted, this,
         [this](const QList<QPair<QString, QDateTime>>& files) {
           qDebug() << "获取到文件列表:";
           qDebug() << "共找到" << files.size() << "个文件:";
@@ -1437,18 +1437,18 @@ void Todo::openTodo() {
                     m_CloudBackup->USERNAME, m_CloudBackup->APP_PASSWORD);
 
                 // 连接信号
-                QObject::connect(downloader, &WebDavDownloader::progressChanged,
-                                 [this](int current, int total, QString file) {
-                                   qDebug()
-                                       << QString("进度: %1/%2  当前文件: %3")
-                                              .arg(current)
-                                              .arg(total)
-                                              .arg(file);
-                                 });
+                QObject::connect(
+                    downloader, &WebDavDownloader::progressChanged, this,
+                    [](int current, int total, QString file) {
+                      qDebug() << QString("进度: %1/%2  当前文件: %3")
+                                      .arg(current)
+                                      .arg(total)
+                                      .arg(file);
+                    });
 
                 QObject::connect(
-                    downloader, &WebDavDownloader::downloadFinished,
-                    [this](bool success, QString error) {
+                    downloader, &WebDavDownloader::downloadFinished, this,
+                    [](bool success, QString error) {
                       qDebug() << (success ? "下载成功" : "下载失败: " + error);
                       QString zFile = privateDir + "KnotData/todo.ini.zip";
 

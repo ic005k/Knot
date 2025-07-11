@@ -38,7 +38,14 @@ extern Method* m_Method;
 
 void loadTheme(bool isDark);
 void loadLocal();
+
 void showSplash();
+namespace Shapes {
+enum ShapeType { Triangle, Rectangle, Square, Circle, Ellipse };
+}
+constexpr int ShapeTypeCount = 5;  // 显式定义枚举数量
+Shapes::ShapeType safeConvertShapeType(int value);
+
 bool unzipToDir(const QString& zipPath, const QString& destDir);
 int deleteDirfile(QString dirName);
 QString loadText(QString textFile);
@@ -494,9 +501,11 @@ void TextEditToFile(QTextEdit* txtEdit, QString fileName) {
     QTextStream out(file);
     out << txtEdit->toPlainText();
     file->close();
-    delete file;
+
   } else
     qDebug() << "Write failure!" << fileName;
+
+  delete file;
 }
 
 void StringToFile(QString buffers, QString fileName) {
@@ -508,9 +517,11 @@ void StringToFile(QString buffers, QString fileName) {
     QTextStream out(file);
     out << buffers;
     file->close();
-    delete file;
+
   } else
     qDebug() << "Write failure!" << fileName;
+
+  delete file;
 }
 
 #ifdef Q_OS_ANDROID
@@ -589,36 +600,73 @@ void showSplash() {
   painter.setRenderHint(QPainter::Antialiasing);
   painter.setRenderHint(QPainter::TextAntialiasing);
 
-  // 编织网状背景 - 呼应Knot主题
-  const int step = 12 * dpr;      // 网格步长
-  const int thickness = 1 * dpr;  // 线条粗细
+  // 设置不规则形状的密度和大小范围
+  const int shapeCount = 100;  // 形状数量
+  const int minSize = 4 * dpr;
+  const int maxSize = 25 * dpr;
 
-  // 水平编织带
-  for (int y = 0; y < pixmap.height(); y += step * 2) {
-    QLinearGradient gradient(0, y, pixmap.width(), y);
-    gradient.setColorAt(0, QColor(0, 0, 0, 0));
-    gradient.setColorAt(0.5, QColor(255, 255, 255, 80));
-    gradient.setColorAt(1, QColor(0, 0, 0, 0));
+  // 定义形状类型和半透明颜色调色板
 
-    painter.setPen(QPen(gradient, thickness));
-    painter.drawLine(0, y, pixmap.width(), y);
+  QVector<QColor> colors = {
+      QColor(220, 220, 220, 70),  // 浅灰白
+      QColor(180, 180, 200, 60),  // 灰蓝色
+      QColor(200, 200, 220, 80),  // 淡紫灰
+      QColor(170, 190, 210, 50)   // 灰青色
+  };
 
-    painter.setPen(QPen(QColor(0, 0, 0, 20), thickness));
-    painter.drawLine(0, y + thickness, pixmap.width(), y + thickness);
-  }
+  // 使用随机数引擎
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<int> sizeDist(minSize, maxSize);
+  std::uniform_int_distribution<int> typeDist(
+      0, ShapeTypeCount - 1);  // 使用枚举数量
+  std::uniform_int_distribution<int> colorDist(0, colors.size() - 1);
+  std::uniform_int_distribution<int> posXDist(0, pixmap.width());
+  std::uniform_int_distribution<int> posYDist(0, pixmap.height());
 
-  // 垂直编织带
-  for (int x = 0; x < pixmap.width(); x += step * 2) {
-    QLinearGradient gradient(x, 0, x, pixmap.height());
-    gradient.setColorAt(0, QColor(0, 0, 0, 0));
-    gradient.setColorAt(0.5, QColor(255, 255, 255, 60));
-    gradient.setColorAt(1, QColor(0, 0, 0, 0));
+  // 绘制随机不规则形状
+  for (int i = 0; i < shapeCount; ++i) {
+    int x = posXDist(gen);
+    int y = posYDist(gen);
+    int size1 = sizeDist(gen);
+    int size2 = sizeDist(gen);
+    QColor color = colors[colorDist(gen)];
 
-    painter.setPen(QPen(gradient, thickness));
-    painter.drawLine(x, 0, x, pixmap.height());
+    painter.setBrush(QBrush(color));
+    painter.setPen(Qt::NoPen);
 
-    painter.setPen(QPen(QColor(0, 0, 0, 15), thickness));
-    painter.drawLine(x + thickness, 0, x + thickness, pixmap.height());
+    // 使用安全转换
+    switch (safeConvertShapeType(typeDist(gen))) {
+      case Shapes::ShapeType::Triangle:
+        // 随机三角形
+        {
+          QPolygon triangle;
+          triangle << QPoint(x, y) << QPoint(x + size1, y - size2 / 2)
+                   << QPoint(x + size1 / 2, y - size1);
+          painter.drawPolygon(triangle);
+        }
+        break;
+
+      case Shapes::ShapeType::Rectangle:
+        // 随机矩形
+        painter.drawRect(x, y, size1, size2);
+        break;
+
+      case Shapes::ShapeType::Square:
+        // 正方形 (尺寸相同)
+        painter.drawRect(x, y, size1, size1);
+        break;
+
+      case Shapes::ShapeType::Circle:
+        // 正圆
+        painter.drawEllipse(x, y, size1, size1);
+        break;
+
+      case Shapes::ShapeType::Ellipse:
+        // 椭圆
+        painter.drawEllipse(x, y, size1, size2);
+        break;
+    }
   }
 
   // 设置文字样式
@@ -646,6 +694,16 @@ void showSplash() {
   splash->setFixedSize(targetSize / dpr);
   splash->setAttribute(Qt::WA_TranslucentBackground);  // 设置为透明背景
   splash->show();
+}
+
+// 安全转换函数
+Shapes::ShapeType safeConvertShapeType(int value) {
+  if (value >= 0 && value < ShapeTypeCount) {
+    return static_cast<Shapes::ShapeType>(value);
+  }
+  // 默认返回第一个枚举值或根据需求调整
+  qWarning() << "Invalid ShapeType value:" << value;
+  return Shapes::ShapeType::Triangle;
 }
 
 void initAndroidGPU() {
