@@ -11,15 +11,13 @@ on:
     branches: [ main ]
 
 env:
-  # 改用经过验证的稳定版本（6.5.3对Android支持更完善）
-  QT_VERSION: 6.5.3
+  QT_VERSION: 6.5.3  # 确认存在的稳定版本
   ANDROID_API_LEVEL: 34
   BUILD_TOOLS_VERSION: 34.0.0
   NDK_VERSION: 26.1.10909125
   QT_ARCH: android_arm64_v8a
   REPO_ROOT: ${{ github.workspace }}
-  # 使用Windows兼容的路径分隔符（反斜杠\）
-  QT_INSTALL_DIR: ${{ github.workspace }}\QtAndroid
+  QT_INSTALL_DIR: ${{ github.workspace }}\QtAndroid  # Windows路径格式
 
 jobs:
   build:
@@ -42,18 +40,29 @@ jobs:
         ndk-version: ${{ env.NDK_VERSION }}
         sdk-version: ${{ env.ANDROID_API_LEVEL }}
 
-    - name: Install Qt Android (修复路径+稳定版本)
-      uses: jurplel/install-qt-action@v4  # 升级到v4，修复对新Qt的支持
+    - name: 手动创建Qt安装目录（避免权限问题）
+      shell: cmd
+      run: |
+        if not exist "${{ env.QT_INSTALL_DIR }}" (
+          mkdir "${{ env.QT_INSTALL_DIR }}"
+          echo "已创建Qt安装目录: ${{ env.QT_INSTALL_DIR }}"
+        ) else (
+          echo "Qt安装目录已存在"
+        )
+
+    - name: Install Qt Android（强制指定镜像源）
+      uses: jurplel/install-qt-action@v4
       id: qt-android
       with:
-        version: ${{ env.QT_VERSION }}  # 改用6.5.3
+        version: ${{ env.QT_VERSION }}
         target: android
         arch: ${{ env.QT_ARCH }}
-        # 只保留确认存在的模块（6.5.3的Android版本中这些模块可用）
         modules: qtcharts qtsensors qtlocation qtpositioning
-        install-dir: ${{ env.QT_INSTALL_DIR }}  # 使用反斜杠路径
+        install-dir: ${{ env.QT_INSTALL_DIR }}
         install-deps: true
-        logging: true  # 保留日志以便排查
+        logging: true
+        # 强制使用国内镜像（解决官方源下载失败问题）
+        mirror: https://mirrors.tuna.tsinghua.edu.cn/qt/
 
     - name: 验证Qt安装目录是否存在
       shell: cmd
@@ -64,15 +73,14 @@ jobs:
           dir "${{ env.QT_INSTALL_DIR }}"
         ) else (
           echo "##[error]Qt安装目录不存在！安装失败！"
-          # 输出install-qt-action的日志路径，方便手动查看失败原因
           echo "请查看Install Qt Android步骤的详细日志，确认是否有404或下载失败"
           exit 1
         )
 
-    - name: 手动设置Qt路径（Windows格式）
+    - name: 手动设置Qt路径（修复cmd注释语法）
       shell: cmd
       run: |
-        # 手动拼接路径（使用反斜杠）
+        rem 手动拼接路径（使用反斜杠，注意：cmd中用rem注释，不能用#）
         set QT_ROOT=${{ env.QT_INSTALL_DIR }}\${{ env.QT_VERSION }}\${{ env.QT_ARCH }}
         echo QT_ROOT=%QT_ROOT% >> %GITHUB_ENV%
         echo Qt6_DIR=%QT_ROOT% >> %GITHUB_ENV%
