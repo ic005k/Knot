@@ -48,6 +48,7 @@ jobs:
         target: android
         arch: ${{ env.QT_ARCH }}
         modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
+        install-deps: true  # 确保安装所有依赖
 
     - name: Setup Paths
       shell: cmd
@@ -57,16 +58,32 @@ jobs:
         echo Qt6_DIR=${{ steps.qt-android.outputs.Qt6_DIR }} >> %GITHUB_ENV%
         echo QT_PLUGIN_PATH=${{ steps.qt-android.outputs.Qt6_DIR }}\plugins >> %GITHUB_ENV%
         echo QML2_IMPORT_PATH=${{ steps.qt-android.outputs.Qt6_DIR }}\qml >> %GITHUB_ENV%
-        echo PATH=%PATH%;${{ steps.qt-android.outputs.Qt6_DIR }}\bin >> %GITHUB_ENV%
+        echo PATH=${{ steps.qt-android.outputs.Qt6_DIR }}\bin;%PATH% >> %GITHUB_ENV%  # 将Qt路径放在最前面
 
     - name: Verify Qt Installation
       shell: cmd
       run: |
-        echo "Qt Paths:"
-        echo %Qt6_DIR%
-        echo %PATH%
-        where qmake.exe
-        qmake --version
+        echo "验证Qt安装:"
+        echo "Qt6_DIR: %Qt6_DIR%"
+        echo "PATH: %PATH%"
+
+        echo "检查qmake位置:"
+        where qmake.exe || echo "qmake未找到!"
+
+        echo "检查Qt目录内容:"
+        if exist "%Qt6_DIR%\bin" (
+          echo "%Qt6_DIR%\bin 目录存在"
+          dir "%Qt6_DIR%\bin"
+        ) else (
+          echo "%Qt6_DIR%\bin 目录不存在!"
+        )
+
+        echo "尝试执行qmake:"
+        if exist "%Qt6_DIR%\bin\qmake.exe" (
+          "%Qt6_DIR%\bin\qmake.exe" --version
+        ) else (
+          echo "qmake.exe不存在!"
+        )
 
     - name: Generate Makefile
       shell: cmd
