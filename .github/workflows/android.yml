@@ -49,7 +49,7 @@ jobs:
         target: android
         arch: ${{ env.QT_ARCH }}
         # 先简化模块（只保留必要的，避免模块不存在导致安装失败）
-        modules: qtbase qtcharts
+        modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
         install-dir: ${{ env.QT_INSTALL_DIR }}  # 强制安装到指定目录
         install-deps: true
         # 输出详细日志，方便排查安装失败原因
