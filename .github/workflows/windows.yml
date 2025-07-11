@@ -5,6 +5,7 @@ on:
     paths:
       - '**'
       - '!stats.txt'  # 排除根目录下的 stats.txt
+      - '!README.md'
 
 
   pull_request:
