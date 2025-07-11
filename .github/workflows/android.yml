@@ -48,7 +48,7 @@ jobs:
           echo "创建Qt安装目录成功"
         )
 
-    - name: Install Qt Android（Android专用配置）
+    - name: Install Qt Android（修复参数）
       uses: jurplel/install-qt-action@v4
       id: qt-android
       with:
@@ -59,9 +59,8 @@ jobs:
         install-dir: ${{ env.QT_INSTALL_DIR }}
         install-deps: true
         logging: true
-        # Android版本需要额外配置
-        tools: qttools
         android: true  # 明确指定为Android构建
+        # 移除错误的 tools: qttools 参数
 
     - name: 验证Qt安装目录内容
       shell: cmd
