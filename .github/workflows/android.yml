@@ -11,14 +11,15 @@ on:
     branches: [ main ]
 
 env:
-  QT_VERSION: 6.6.3
+  # 改用经过验证的稳定版本（6.5.3对Android支持更完善）
+  QT_VERSION: 6.5.3
   ANDROID_API_LEVEL: 34
   BUILD_TOOLS_VERSION: 34.0.0
   NDK_VERSION: 26.1.10909125
   QT_ARCH: android_arm64_v8a
   REPO_ROOT: ${{ github.workspace }}
-  # 手动指定Qt安装目录（避免工具默认路径不可控）
-  QT_INSTALL_DIR: ${{ github.workspace }}/QtAndroid
+  # 使用Windows兼容的路径分隔符（反斜杠\）
+  QT_INSTALL_DIR: ${{ github.workspace }}\QtAndroid
 
 jobs:
   build:
@@ -41,19 +42,18 @@ jobs:
         ndk-version: ${{ env.NDK_VERSION }}
         sdk-version: ${{ env.ANDROID_API_LEVEL }}
 
-    - name: Install Qt Android (带详细日志)
-      uses: jurplel/install-qt-action@v3
+    - name: Install Qt Android (修复路径+稳定版本)
+      uses: jurplel/install-qt-action@v4  # 升级到v4，修复对新Qt的支持
       id: qt-android
       with:
-        version: ${{ env.QT_VERSION }}
+        version: ${{ env.QT_VERSION }}  # 改用6.5.3
         target: android
         arch: ${{ env.QT_ARCH }}
-        # 先简化模块（只保留必要的，避免模块不存在导致安装失败）
-        modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
-        install-dir: ${{ env.QT_INSTALL_DIR }}  # 强制安装到指定目录
+        # 只保留确认存在的模块（6.5.3的Android版本中这些模块可用）
+        modules: qtcharts qtsensors qtlocation qtpositioning
+        install-dir: ${{ env.QT_INSTALL_DIR }}  # 使用反斜杠路径
         install-deps: true
-        # 输出详细日志，方便排查安装失败原因
-        logging: true
+        logging: true  # 保留日志以便排查
 
     - name: 验证Qt安装目录是否存在
       shell: cmd
@@ -64,13 +64,15 @@ jobs:
           dir "${{ env.QT_INSTALL_DIR }}"
         ) else (
           echo "##[error]Qt安装目录不存在！安装失败！"
+          # 输出install-qt-action的日志路径，方便手动查看失败原因
+          echo "请查看Install Qt Android步骤的详细日志，确认是否有404或下载失败"
           exit 1
         )
 
-    - name: 手动设置Qt路径（不依赖工具输出）
+    - name: 手动设置Qt路径（Windows格式）
       shell: cmd
       run: |
-        # 手动拼接Qt安装路径（Qt的目录结构通常是：安装目录/版本/架构）
+        # 手动拼接路径（使用反斜杠）
         set QT_ROOT=${{ env.QT_INSTALL_DIR }}\${{ env.QT_VERSION }}\${{ env.QT_ARCH }}
         echo QT_ROOT=%QT_ROOT% >> %GITHUB_ENV%
         echo Qt6_DIR=%QT_ROOT% >> %GITHUB_ENV%
@@ -102,6 +104,7 @@ jobs:
           exit 1
         )
 
+    # 后续步骤保持不变...
     - name: Generate Makefile
       shell: cmd
       run: |
@@ -119,7 +122,6 @@ jobs:
               "ANDROID_NDK_ROOT=%ANDROID_NDK_ROOT%" ^
               ANDROID_ABIS=arm64-v8a
 
-    # 后续步骤（Build APK、Sign APK等）保持不变
     - name: Build APK
       shell: cmd
       run: |
