@@ -1345,22 +1345,15 @@ void Notes::delLink(QString link) {
 void Notes::javaNoteToQMLNote() {
   if (isSetNewNoteTitle()) {
     TitleGenerator generator;
+    if (isAndroid) {
+      strNoteText = loadText(currentMDFile);
+    }
     new_title = generator.genNewTitle(strNoteText);
     mw_one->ui->btnRename->click();
   }
 
-#ifdef Q_OS_ANDROID
-  // QJniObject m_activity =
-  //     QJniObject(QNativeInterface::QAndroidApplication::context());
-  // if (m_activity.callMethod<jdouble>("getEditStatus", "()D") == 1) {
-  //   mw_one->ui->btnOpenNote->click();
-  // }
-#endif
-
   QString zipMD = privateDir + "KnotData/memo/" +
                   QFileInfo(currentMDFile).fileName() + ".zip";
-
-  // m_Method->compressFile(zipMD, currentMDFile, encPassword);
 
   if (!m_Method->compressFileWithZlib(currentMDFile, zipMD,
                                       Z_DEFAULT_COMPRESSION)) {

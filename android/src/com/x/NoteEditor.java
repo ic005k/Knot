@@ -988,8 +988,6 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         final String mContent = editNote.getText().toString();
         final String filename = MyActivity.strMDFile;
 
-        // showAndroidProgressBar();
-        // progressBar.setVisibility(View.VISIBLE); // 显示进度条
         findViewById(R.id.progressContainer).setVisibility(View.VISIBLE);
 
         new Thread(new Runnable() {
@@ -1005,8 +1003,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            // closeAndroidProgressBar();
-                            // progressBar.setVisibility(View.GONE);
+
                             findViewById(R.id.progressContainer).setVisibility(View.GONE);
 
                             if (MyActivity.isEdit) {

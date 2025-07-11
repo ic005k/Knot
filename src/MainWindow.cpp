@@ -4096,7 +4096,6 @@ static void JavaNotify_0() {
 
   if (mw_one->m_Steps->isNeedRestoreUI) {
     mw_one->ui->btnSteps->click();
-    mw_one->m_Steps->isNeedRestoreUI = false;
   }
 
   qDebug() << "C++ JavaNotify_0";
@@ -4110,8 +4109,7 @@ static void JavaNotify_1() {
   if (!mw_one->ui->frameSteps->isHidden()) {
     mw_one->ui->btnBackSteps->click();
     mw_one->m_Steps->isNeedRestoreUI = true;
-  } else
-    mw_one->m_Steps->isNeedRestoreUI = false;
+  }
 
   qDebug() << "C++ JavaNotify_1";
 }
@@ -4173,7 +4171,12 @@ static void JavaNotify_7() {
 
 static void JavaNotify_8() {
   if (isInitThemeEnd) {
-    mw_one->execDeskShortcut();
+    if (mw_one->m_Steps->isNeedRestoreUI) {
+      QTimer::singleShot(1000, nullptr, []() { mw_one->execDeskShortcut(); });
+
+    } else
+      mw_one->execDeskShortcut();
+
   } else {
     isNeedExecDeskShortcut = true;
   }
