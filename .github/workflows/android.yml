@@ -1,8 +1,8 @@
-name: Qt6 Android Build
+name: Qt6 Android CI (Windows Optimized)
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -10,14 +10,13 @@ jobs:
     runs-on: windows-latest
     env:
       QT_VERSION: "6.6.3"
-      QT_ARCH: "android_arm64_v8a"
-      NDK_VERSION: "26.1.10909125"  # 保持与本地一致
+      NDK_VERSION: "26.1.10909125"  # 严格匹配您本地的NDK小版本
       ANDROID_API_LEVEL: "34"
 
     steps:
       - uses: actions/checkout@v4
 
-      # 1. 安装NDK（与本地版本严格一致）
+      # 1. 安装NDK（精确版本）
       - name: Install NDK
         run: |
           $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
@@ -26,7 +25,7 @@ jobs:
           Rename-Item "$env:GITHUB_WORKSPACE\android-sdk\ndk\android-ndk-r26b" "$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION"
           echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
 
-      # 2. 安装Qt（关键修改：显式添加qmake到PATH）
+      # 2. 安装Qt（仅指定必要模块）
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
@@ -34,36 +33,40 @@ jobs:
           host: windows
           target: android
           arch: ${{ env.QT_ARCH }}
-          modules: qt5compat
-        id: qt_install
+          modules: qt5compat  # 只添加非核心模块
+          setup-python: false
 
-      # 3. 配置环境变量（修复qmake找不到的问题）
-      - name: Setup Qt Environment
+      # 3. 自动配置Qt环境（关键修复）
+      - name: Auto-set Qt Path
         run: |
-          $qtPath = "$env:QT_PATH"
+          # 自动探测Qt安装路径
+          $qtPath = (Get-ChildItem -Path "C:\Qt" -Filter "${{ env.QT_VERSION }}" -Recurse -Directory |
+                    Where-Object { $_.FullName -match "msvc2019_64" } |
+                    Select-Object -First 1).FullName
           if (-not $qtPath) {
-              $qtPath = "C:\Qt\${{ env.QT_VERSION }}\msvc2019_64"  # 默认路径
+              $qtPath = "C:\Qt\${{ env.QT_VERSION }}\msvc2019_64"
           }
-          echo "Qt Path: $qtPath"
-          echo "::add-path::$qtPath\bin"
-          echo "::add-path::$qtPath\mingw_64\bin"  # 兼容MinGW版本
+          echo "Using Qt Path: $qtPath"
+          echo "$qtPath\bin" >> $env:GITHUB_PATH
 
-      # 4. 验证qmake是否可用
-      - name: Check qmake
+      # 4. 验证环境
+      - name: Verify Environment
         run: |
           qmake --version
-          where qmake
+          jom --version
+          ls "$env:ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/aarch64-linux-android"
 
       # 5. 构建项目
-      - name: Build project
+      - name: Build
         shell: cmd
         run: |
           qmake Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
-          jom.exe -j %NUMBER_OF_PROCESSORS%
-          jom.exe apk INSTALL_ROOT=build
+          jom -j %NUMBER_OF_PROCESSORS%
+          jom apk INSTALL_ROOT=build
 
+      # 6. 上传产物
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Android-APK
-          path: build\android-build\build\outputs\apk\release\android-build-release-unsigned.apk
+          name: Knot-APK
+          path: build\android-build\build\outputs\apk\release\*.apk
