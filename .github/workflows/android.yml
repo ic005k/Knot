@@ -34,7 +34,7 @@ jobs:
           host: windows
           target: android
           arch: ${{ env.QT_ARCH }}
-          modules: qtbase qt5compat
+          modules: qt5compat
         id: qt_install
 
       # 3. 配置环境变量（修复qmake找不到的问题）
