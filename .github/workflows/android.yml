@@ -46,7 +46,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         target: android
         arch: ${{ env.QT_ARCH }}
-        modules: qtbase qtsvg qtdeclarative qt5compat qtcharts qtsensors qtlocation qtpositioning qtwebview
+        modules: qt5compat qtcharts qtsensors qtlocation qtpositioning qtwebview
         install-deps: true
         # 关键设置 - 确保正确处理路径
         aqt-installer-option: "--outputdir /home/runner/Qt"
