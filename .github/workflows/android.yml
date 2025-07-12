@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build and Sign Android APK
 
 on:
   push:
@@ -10,65 +10,45 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  QT_VERSION: "6.6.3"
+  QT_ARCH: "android_arm64_v8a"
+  ANDROID_API_LEVEL: "34"
+  NDK_VERSION: "26.3.11579264"
+  BUILD_TOOLS_VERSION: "34.0.0"
+  ANDROID_SDK_ROOT: "/usr/local/lib/android/sdk"
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      QT_VERSION: "6.6.3"
-      QT_ARCH: "android_arm64_v8a"
-      ANDROID_API_LEVEL: "34"
-      NDK_VERSION: "26.3.11579264"  # 与本地一致的版本
-      BUILD_TOOLS_VERSION: "34.0.0"
-      # 手动指定 NDK 安装路径（模拟本地）
-      NDK_INSTALL_PATH: "/usr/local/lib/android/sdk/ndk"
-      ANDROID_SDK_ROOT: "/usr/local/lib/android/sdk"
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install system dependencies
+      # 安装基础依赖
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libgl1-mesa-dev unzip  # 增加 unzip 用于解压 NDK
+          sudo apt-get install -y build-essential libgl1-mesa-dev unzip
 
+      # 设置 Java 环境
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle'
 
-      # 关键修改：手动下载并安装 NDK（避免 CI 工具的自动裁剪）
-      - name: 手动安装完整 NDK（与本地一致）
-        run: |
-          # 创建 NDK 安装目录
-          mkdir -p ${{ env.NDK_INSTALL_PATH }}
-          # 下载与本地完全一致的 NDK 包（使用 Google 官方源）
-          wget https://dl.google.com/android/repository/android-ndk-r26b-linux.zip -O ndk.zip
-          # 解压到指定目录
-          unzip -q ndk.zip -d ${{ env.NDK_INSTALL_PATH }}
-          # 重命名为版本号目录（确保路径与本地一致）
-          mv ${{ env.NDK_INSTALL_PATH }}/android-ndk-r26b ${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }}
-          # 验证 NDK 完整性（关键步骤）
-          echo "NDK 安装路径：${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }}"
-          ls -la ${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/
-
-      # 安装 Android SDK 基础组件（仅保留必要部分）
-      - name: 安装 Android SDK 工具
+      # 安装 Android 环境
+      - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
+          ndk-version: ${{ env.NDK_VERSION }}
           sdk-version: ${{ env.ANDROID_API_LEVEL }}
           build-tools: ${{ env.BUILD_TOOLS_VERSION }}
 
-      # 调试：确认 NDK 头文件是否存在（与本地对比）
-      - name: 验证 NDK 头文件
-        run: |
-          echo "搜索 libc-header-start.h 是否存在..."
-          find ${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }} -name "libc-header-start.h"
-          # 输出路径供对比本地
-          echo "本地请执行：find /path/to/your/local/ndk/${{ env.NDK_VERSION }} -name 'libc-header-start.h'"
-
-      - name: Install Qt for Android
+      # 安装 Qt
+      - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
@@ -76,109 +56,56 @@ jobs:
           arch: ${{ env.QT_ARCH }}
           modules: qt5compat qtcharts qtsensors qtlocation qtpositioning qtwebview
           install-deps: true
-          archive-folder-restructure: "yes"
-          mirror: "https://mirrors.tuna.tsinghua.edu.cn/qt/"
 
-      - name: 验证 Qt 安装
+      # 配置环境变量
+      - name: Setup environment
         run: |
-          echo "查找 Android 版 Qt 目录..."
-          find /home/runner/work/Knot/Qt -name "android_arm64_v8a" -type d || echo "未找到 Android 版 Qt"
-          # 验证 Android 版 qmake
-          ANDROID_QT_DIR=$(find /home/runner/work/Knot/Qt -name "android_arm64_v8a" -type d | grep "${{ env.QT_VERSION }}" | head -n 1)
-          if [ -n "$ANDROID_QT_DIR" ]; then
-            echo "Android 版 qmake 版本:"
-            $ANDROID_QT_DIR/bin/qmake --version || true
-          fi
-
-      - name: 设置环境变量
-        run: |
-          # 强制指定 NDK 路径
-          echo "ANDROID_NDK_ROOT=${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=${{ env.ANDROID_SDK_ROOT }}/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
           echo "ANDROID_SDK_ROOT=${{ env.ANDROID_SDK_ROOT }}" >> $GITHUB_ENV
 
-          # 查找 Android 版 Qt 路径（必须是 android_arm64_v8a）
-          QT_DIR=$(find /home/runner/work/Knot/Qt -name "android_arm64_v8a" -type d | grep "${{ env.QT_VERSION }}" | head -n 1)
-          if [ -z "$QT_DIR" ]; then
-            echo "❌ 未找到 Android 版 Qt 目录！"
-            find /home/runner/work/Knot/Qt -type d || true
-            exit 1
-          fi
+          QT_DIR=$(find /opt/qt -name "android_arm64_v8a" -type d | head -n 1)
+          [ -z "$QT_DIR" ] && QT_DIR=$(find /home/runner -name "android_arm64_v8a" -type d | head -n 1)
           echo "QT_DIR=$QT_DIR" >> $GITHUB_ENV
           echo "$QT_DIR/bin" >> $GITHUB_PATH
 
-          # Android 构建参数
-          echo "ANDROID_MIN_SDK_VERSION=${{ env.ANDROID_API_LEVEL }}" >> $GITHUB_ENV
-          echo "ANDROID_TARGET_SDK_VERSION=${{ env.ANDROID_API_LEVEL }}" >> $GITHUB_ENV
-          echo "ANDROID_BUILD_TOOLS_VERSION=${{ env.BUILD_TOOLS_VERSION }}" >> $GITHUB_ENV
-
-
-
-      - name: Configure project
+      # 构建 APK
+      - name: Build APK
         run: |
-          cd ${{ github.workspace }}
-
-          ANDROID_NDK_ROOT="${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }}"
-          TOOLCHAIN_PATH="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64"
-          SYSROOT="$TOOLCHAIN_PATH/sysroot"
-
-          echo "使用 NDK: $ANDROID_NDK_ROOT"
-          echo "使用 sysroot: $SYSROOT"
-
-          # 验证 sysroot 是否存在
-          if [ ! -d "$SYSROOT/usr/include" ]; then
-            echo "❌ sysroot 路径不存在！"
-            ls -la "$TOOLCHAIN_PATH" || true
-            exit 1
-          fi
-
-          # 使用正确的语法传递编译器选项
-          qmake Knot.pro \
-            -spec android-clang \
-            "CONFIG+=release" \
-            "ANDROID_ABIS=arm64-v8a" \
-            "ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT" \
-            "QMAKE_CC=$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang" \
-            "QMAKE_CXX=$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang++" \
-            "QMAKE_LINK=$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang++" \
-            "QMAKE_CFLAGS=-nostdinc -isystem $SYSROOT/usr/include" \  # 用引号包裹，避免 += 解析问题
-            "QMAKE_CXXFLAGS=-nostdinc++ -isystem $SYSROOT/usr/include -isystem $SYSROOT/usr/include/c++/v1" \
-            "QMAKE_LIBS=-L$SYSROOT/usr/lib/aarch64-linux-android/$ANDROID_API_LEVEL" \
-            "ANDROID_MIN_SDK_VERSION=$ANDROID_API_LEVEL" \
-            "ANDROID_TARGET_SDK_VERSION=$ANDROID_API_LEVEL"
-
-      - name: Build Android APK
-        run: |
+          qmake Knot.pro -spec android-clang CONFIG+=release
           make -j$(nproc)
           make apk INSTALL_ROOT=build
-          mkdir -p ${{ github.workspace }}/output
-          mv build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk \
-             ${{ github.workspace }}/output/app-release-unsigned.apk
 
+      # 签名准备
+      - name: Prepare signing
+        run: |
+          mkdir -p signing
+          echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 -d > signing/app.keystore
+          echo "storePassword=${{ secrets.KEY_STORE_PASSWORD }}" > signing/keystore.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> signing/keystore.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> signing/keystore.properties
+          echo "storeFile=../app.keystore" >> signing/keystore.properties
+
+      # APK 签名
       - name: Sign APK
         run: |
-          if [ -z "$KEY_STORE_PASSWORD" ] || [ -z "$KEY_PASSWORD" ] || [ -z "$KEY_ALIAS" ]; then
-            echo "::warning::Signing secrets not configured. Skipping signing."
-            exit 0
-          fi
+          cd signing
           jarsigner -verbose \
             -sigalg SHA256withRSA \
             -digestalg SHA-256 \
-            -keystore android/app/my-release-key.keystore \
+            -keystore app.keystore \
             -storepass "${{ secrets.KEY_STORE_PASSWORD }}" \
             -keypass "${{ secrets.KEY_PASSWORD }}" \
-            ${{ github.workspace }}/output/app-release-unsigned.apk \
+            ../build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk \
             "${{ secrets.KEY_ALIAS }}"
-          $ANDROID_SDK_ROOT/build-tools/$ANDROID_BUILD_TOOLS_VERSION/zipalign -v 4 \
-            ${{ github.workspace }}/output/app-release-unsigned.apk \
-            ${{ github.workspace }}/output/app-release.apk
-        env:
-          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
-      - name: Upload APK artifact
+          $ANDROID_SDK_ROOT/build-tools/$BUILD_TOOLS_VERSION/zipalign -v 4 \
+            ../build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk \
+            ../app-release.apk
+
+      # 上传产物
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Android-APK
-          path: ${{ github.workspace }}/output/*
+          name: Signed-APK
+          path: app-release.apk
           if-no-files-found: error
