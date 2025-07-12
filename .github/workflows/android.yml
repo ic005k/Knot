@@ -1,4 +1,4 @@
-name: Qt6 Android CI (Fixed)
+name: Qt6 Android CI
 
 on:
   push:
@@ -43,52 +43,69 @@ jobs:
         run: |
           python -m pip install aqtinstall
           aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH -m qt5compat --outputdir "$env:GITHUB_WORKSPACE\Qt"
+          # 验证安装文件结构
+          tree /F "$env:GITHUB_WORKSPACE\Qt" || echo "tree命令不可用，继续执行"
 
       # 4. 验证安装
       - name: Verify Installation
         run: |
           echo "=== Qt 安装验证 ==="
           $qtBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
+
+          # 列出所有qmake相关文件
           dir "$qtBin" | findstr "qmake"
 
-          if (!(Test-Path "$qtBin\qmake.exe")) {
-              echo "::error::qmake.exe 未找到!"
+          # 检查qmake可执行文件（可能是.bat或无扩展名）
+          if (!(Test-Path "$qtBin\qmake.bat") -and !(Test-Path "$qtBin\qmake")) {
+              echo "::error::未找到任何qmake可执行文件!"
+              echo "当前目录内容:"
+              dir "$qtBin"
               exit 1
           }
+          echo "qmake验证通过"
 
       # 5. 构建项目
       - name: Build
         shell: cmd
         run: |
-          echo "=== 当前工作目录 ==="
-          cd
-          dir
-
-          echo "=== 设置环境 ==="
+          echo "=== 设置环境变量 ==="
           set QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%
           set PATH=%QT_ROOT%\bin;%PATH%
 
-          echo "=== 查找 qmake ==="
-          where qmake
+          echo "=== 查找qmake ==="
+          where qmake || where qmake.bat || (
+              echo "::error::无法定位qmake!"
+              exit 1
+          )
 
-          echo "=== 执行 qmake ==="
-          qmake Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
+          echo "=== 执行qmake ==="
+          qmake Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a || (
+              echo "::error::qmake执行失败!"
+              exit 1
+          )
 
-          echo "=== 检查 Makefile ==="
+          echo "=== 检查Makefile ==="
           if not exist Makefile (
-              echo "::error::Makefile 未生成!"
+              echo "::error::Makefile未生成!"
               dir
               exit 1
           )
 
           echo "=== 开始编译 ==="
-          make -j %NUMBER_OF_PROCESSORS%
+          make -j %NUMBER_OF_PROCESSORS% || (
+              echo "::error::编译失败!"
+              exit 1
+          )
 
-          echo "=== 打包 APK ==="
-          make apk INSTALL_ROOT=build
+          echo "=== 打包APK ==="
+          make apk INSTALL_ROOT=build || (
+              echo "::error::APK打包失败!"
+              exit 1
+          )
 
       # 6. 上传产物
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: Knot-APK
