@@ -1,4 +1,4 @@
-name: Qt6 Android CI (Path Fixed)
+name: Qt6 Android CI (Fixed)
 
 on:
   push:
@@ -19,67 +19,77 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          path: 'src'  # 强制统一代码目录
+          path: 'src'
 
-      # 1. 安装工具链
-      - name: Setup Environment
-        shell: powershell
+      # 1. 安装 JDK
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      # 2. 安装 NDK
+      - name: Install NDK
         run: |
-          # 安装JDK
-          & actions\setup-java@v3 --distribution zulu --java-version $env:JAVA_VERSION
-
-          # 安装NDK
           $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
           Invoke-WebRequest -Uri $ndkUrl -OutFile "ndk.zip"
           Expand-Archive -Path "ndk.zip" -DestinationPath "android-sdk\ndk"
           Rename-Item "android-sdk\ndk\android-ndk-r26b" "android-sdk\ndk\$env:NDK_VERSION"
-          echo "ANDROID_NDK_ROOT=$pwd\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
-          echo "$pwd\android-sdk\ndk\$env:NDK_VERSION\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
+          echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
+          echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-          # 安装Qt（使用绝对路径工作目录）
+      # 3. 安装 Qt
+      - name: Install Qt
+        run: |
           python -m pip install aqtinstall
-          aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH -m qt5compat --outputdir "$pwd\Qt"
+          aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH -m qt5compat --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
-      # 2. 路径验证
-      - name: Verify Paths
-        shell: powershell
+      # 4. 验证安装
+      - name: Verify Installation
         run: |
-          $qtBin = "$pwd\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
+          echo "=== Qt 安装验证 ==="
+          $qtBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
+          dir "$qtBin" | findstr "qmake"
 
-          # 物理验证文件系统
-          echo "=== 物理路径验证 ==="
-          dir "$qtBin" -Force
-          (Get-ChildItem "$qtBin\qmake*").FullName
-          [System.IO.File]::Exists("$qtBin\qmake.exe")
+          if (!(Test-Path "$qtBin\qmake.exe")) {
+              echo "::error::qmake.exe 未找到!"
+              exit 1
+          }
 
-          # 环境验证
-          echo "=== 环境验证 ==="
-          where.exe qmake
-          Get-Command qmake | Select-Object -Property Path, Source
-
-      # 3. 构建项目
+      # 5. 构建项目
       - name: Build
-        shell: powershell
+        shell: cmd
         run: |
-          # 切换到项目目录
-          Set-Location "$pwd\src"
+          echo "=== 当前工作目录 ==="
+          cd
+          dir
 
-          # 使用完整物理路径调用qmake
-          $qmakePath = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin\qmake"
-          & "$qmakePath" Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a 2>&1 | Tee-Object -FilePath qmake.log
+          echo "=== 设置环境 ==="
+          set QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%
+          set PATH=%QT_ROOT%\bin;%PATH%
 
-          # 验证Makefile编码
-          [System.IO.File]::ReadAllText("Makefile", [System.Text.Encoding]::UTF8).Substring(0, 200)
+          echo "=== 查找 qmake ==="
+          where qmake
 
-          # 构建
-          make -j $env:NUMBER_OF_PROCESSORS
+          echo "=== 执行 qmake ==="
+          qmake Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
+
+          echo "=== 检查 Makefile ==="
+          if not exist Makefile (
+              echo "::error::Makefile 未生成!"
+              dir
+              exit 1
+          )
+
+          echo "=== 开始编译 ==="
+          make -j %NUMBER_OF_PROCESSORS%
+
+          echo "=== 打包 APK ==="
           make apk INSTALL_ROOT=build
 
-      # 4. 上传结果
-      - name: Upload Artifacts
+      # 6. 上传产物
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Build-Output
-          path: |
-            src\build\android-build\build\outputs\apk\**\*.apk
-            src\qmake.log
+          name: Knot-APK
+          path: build\android-build\build\outputs\apk\release\*.apk
