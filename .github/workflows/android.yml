@@ -7,7 +7,7 @@ on:
 
 env:
   QT_VERSION: "6.6.3"
-  QT_ARCH: "android_arm64_v8a"  # 明确指定架构
+  QT_ARCH: "android_arm64_v8a"
   NDK_VERSION: "26.1.10909125"  # NDK r26b
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
@@ -26,7 +26,7 @@ jobs:
           distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
 
-      # 2. 安装 Android NDK (精确版本)
+      # 2. 安装 Android NDK
       - name: Install NDK
         run: |
           $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
@@ -36,7 +36,7 @@ jobs:
           echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
           echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-      # 3. 使用 jurplel/install-qt-action 安装 Qt 和模块
+      # 3. 安装 Qt 和模块（使用绝对路径，避免符号问题）
       - name: Install Qt Android
         uses: jurplel/install-qt-action@v3
         id: qt-android
@@ -44,37 +44,42 @@ jobs:
           version: ${{ env.QT_VERSION }}
           target: android
           arch: ${{ env.QT_ARCH }}
-          modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
-          install-dir: ${{ github.workspace }}/Qt
+          modules: qt5compat qtcharts qtsensors
+          install-dir: ${{ github.workspace }}\Qt  # 强制使用反斜杠
 
-      # 4. 配置环境变量
-      - name: Setup Environment
+      # 4. 显式设置 Qt 路径（统一用 Windows 格式）
+      - name: Setup Qt Path
         run: |
-          echo "QT_PATH=${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}" >> $env:GITHUB_ENV
-          echo "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}/bin" >> $env:GITHUB_PATH
+          $qtPath = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH"
+          echo "QT_ROOT=$qtPath" >> $env:GITHUB_ENV
+          echo "$qtPath\bin" >> $env:GITHUB_PATH
+          echo "Qt6_DIR=$qtPath" >> $env:GITHUB_ENV
 
-          # 生成 gradle.properties 解决兼容性警告
-          echo "android.suppressUnsupportedCompileSdk=${{ env.ANDROID_API_LEVEL }}" > gradle.properties
+      # 5. 生成 gradle.properties
+      - name: Configure Gradle
+        run: |
+          echo "android.suppressUnsupportedCompileSdk=$env:ANDROID_API_LEVEL" > gradle.properties
 
-      # 5. 验证工具链
+      # 6. 验证工具链
       - name: Verify Tools
         run: |
+          where qmake
+          where make
           qmake --version
           make --version
-          java --version
 
-      # 6. 构建项目
+      # 7. 构建项目（显式指定 qmake 路径）
       - name: Build
         shell: cmd
         env:
           ANDROID_NDK_ROOT: ${{ github.workspace }}\android-sdk\ndk\${{ env.NDK_VERSION }}
           ANDROID_SDK_ROOT: ${{ github.workspace }}\android-sdk
         run: |
-          qmake Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
+          "$env:QT_ROOT\bin\qmake" Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
           make -j %NUMBER_OF_PROCESSORS%
           make apk INSTALL_ROOT=build
 
-      # 7. 上传APK产物
+      # 8. 上传 APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
