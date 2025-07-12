@@ -72,16 +72,6 @@ jobs:
           make -j$(nproc)
           make apk INSTALL_ROOT=build
 
-      - name: Prepare signing
-        if: ${{ secrets.KEY_STORE_PASSWORD != '' }}
-        run: |
-          mkdir -p signing
-          echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 -d > signing/app.keystore
-          echo "storePassword=${{ secrets.KEY_STORE_PASSWORD }}" > signing/keystore.properties
-          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> signing/keystore.properties
-          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> signing/keystore.properties
-
-
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
