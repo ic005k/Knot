@@ -19,6 +19,8 @@ jobs:
       ANDROID_API_LEVEL: "34"
       NDK_VERSION: "26.1.10909125"
       BUILD_TOOLS_VERSION: "34.0.0"
+      # 预定义NDK路径格式
+      NDK_BASE_PATH: "/usr/local/lib/android/sdk/ndk"
 
     steps:
     - name: Checkout code
@@ -39,6 +41,24 @@ jobs:
         ndk-version: ${{ env.NDK_VERSION }}
         sdk-version: ${{ env.ANDROID_API_LEVEL }}
 
+    # 输出Android SDK和NDK信息用于调试
+    - name: Debug Android SDK and NDK setup
+      run: |
+        echo "Android SDK path: $ANDROID_SDK_ROOT"
+        echo "NDK version requested: ${{ env.NDK_VERSION }}"
+        echo "NDK path from action: ${{ steps.android-sdk.outputs.ndk-path }}"
+
+        # 列出所有可用的NDK版本
+        echo "Available NDK versions:"
+        ls -la ${{ env.NDK_BASE_PATH }}
+
+        # 检查请求的NDK版本是否存在
+        if [ -d "${{ env.NDK_BASE_PATH }}/${{ env.NDK_VERSION }}" ]; then
+          echo "Requested NDK version found"
+        else
+          echo "ERROR: Requested NDK version not found"
+        fi
+
     # 成功的Qt安装方法 - 使用稳定配置
     - name: Install Qt for Android
       uses: jurplel/install-qt-action@v4
@@ -57,9 +77,16 @@ jobs:
     # 成功案例中的环境配置 - 调整顺序
     - name: Set up environment variables
       run: |
-        # 使用从action中获取的实际路径
+        # 使用从action中获取的实际路径或预定义路径
+        if [ -n "${{ steps.android-sdk.outputs.ndk-path }}" ]; then
+          echo "Using NDK path from action: ${{ steps.android-sdk.outputs.ndk-path }}"
+          echo "ANDROID_NDK_ROOT=${{ steps.android-sdk.outputs.ndk-path }}" >> $GITHUB_ENV
+        else
+          echo "Using predefined NDK path format"
+          echo "ANDROID_NDK_ROOT=${{ env.NDK_BASE_PATH }}/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+        fi
+
         echo "QT_DIR=/home/runner/Qt/$QT_VERSION/android_arm64_v8a" >> $GITHUB_ENV
-        echo "ANDROID_NDK_ROOT=${{ steps.android-sdk.outputs.ndk-path }}" >> $GITHUB_ENV
         echo "ANDROID_SDK_ROOT=${{ steps.android-sdk.outputs.sdk-path }}" >> $GITHUB_ENV
 
         # 配置PATH
@@ -83,8 +110,13 @@ jobs:
         # 验证NDK是否存在
         if [ -d "$ANDROID_NDK_ROOT" ]; then
           echo "NDK found at $ANDROID_NDK_ROOT"
+          # 显示NDK目录内容
+          ls -la $ANDROID_NDK_ROOT
         else
           echo "ERROR: NDK not found at $ANDROID_NDK_ROOT"
+          # 显示所有可用的NDK版本
+          echo "Available NDK versions:"
+          ls -la ${{ env.NDK_BASE_PATH }}
           exit 1
         fi
 
