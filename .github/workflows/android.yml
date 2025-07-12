@@ -17,9 +17,11 @@ jobs:
       QT_VERSION: "6.6.3"
       QT_ARCH: "android_arm64_v8a"
       ANDROID_API_LEVEL: "34"
-      NDK_VERSION: "26.1.10909125"
+      # 关键修改：使用系统中已存在的NDK版本（26系列最新版）
+      NDK_VERSION: "26.3.11579264"
       BUILD_TOOLS_VERSION: "34.0.0"
-      # 预定义NDK路径格式
+      # Android SDK在GitHub Actions中的默认路径
+      ANDROID_SDK_DEFAULT_PATH: "/usr/local/lib/android/sdk"
       NDK_BASE_PATH: "/usr/local/lib/android/sdk/ndk"
 
     steps:
@@ -33,33 +35,24 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # 推荐的Android SDK设置
+    # 配置Android SDK和NDK（使用存在的NDK版本）
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       id: android-sdk
       with:
-        ndk-version: ${{ env.NDK_VERSION }}
+        ndk-version: ${{ env.NDK_VERSION }}  # 现在使用存在的版本
         sdk-version: ${{ env.ANDROID_API_LEVEL }}
 
-    # 输出Android SDK和NDK信息用于调试
-    - name: Debug Android SDK and NDK setup
+    # 调试：确认NDK和SDK安装状态
+    - name: Debug Android environment
       run: |
-        echo "Android SDK path: $ANDROID_SDK_ROOT"
-        echo "NDK version requested: ${{ env.NDK_VERSION }}"
+        echo "Requested NDK version: ${{ env.NDK_VERSION }}"
         echo "NDK path from action: ${{ steps.android-sdk.outputs.ndk-path }}"
-
-        # 列出所有可用的NDK版本
+        echo "SDK path from action: ${{ steps.android-sdk.outputs.sdk-path }}"
         echo "Available NDK versions:"
         ls -la ${{ env.NDK_BASE_PATH }}
 
-        # 检查请求的NDK版本是否存在
-        if [ -d "${{ env.NDK_BASE_PATH }}/${{ env.NDK_VERSION }}" ]; then
-          echo "Requested NDK version found"
-        else
-          echo "ERROR: Requested NDK version not found"
-        fi
-
-    # 成功的Qt安装方法 - 使用稳定配置
+    # 安装Qt for Android
     - name: Install Qt for Android
       uses: jurplel/install-qt-action@v4
       with:
@@ -68,38 +61,35 @@ jobs:
         arch: ${{ env.QT_ARCH }}
         modules: qt5compat qtcharts qtsensors qtlocation qtpositioning qtwebview
         install-deps: true
-        # 关键设置 - 确保正确处理路径
         aqt-installer-option: "--outputdir /home/runner/Qt"
         archive-folder-restructure: "yes"
-        # 使用国内镜像加速下载
         mirror: "https://mirrors.tuna.tsinghua.edu.cn/qt/"
 
-    # 成功案例中的环境配置 - 调整顺序
+    # 设置环境变量（优先使用action输出，否则用默认路径）
     - name: Set up environment variables
       run: |
-        # 使用从action中获取的实际路径或预定义路径
-        if [ -n "${{ steps.android-sdk.outputs.ndk-path }}" ]; then
-          echo "Using NDK path from action: ${{ steps.android-sdk.outputs.ndk-path }}"
-          echo "ANDROID_NDK_ROOT=${{ steps.android-sdk.outputs.ndk-path }}" >> $GITHUB_ENV
+        # 配置NDK路径（使用存在的版本）
+        echo "ANDROID_NDK_ROOT=${{ steps.android-sdk.outputs.ndk-path || env.NDK_BASE_PATH }}/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+
+        # 配置SDK路径（优先用action输出，否则用默认路径）
+        if [ -n "${{ steps.android-sdk.outputs.sdk-path }}" ]; then
+          echo "ANDROID_SDK_ROOT=${{ steps.android-sdk.outputs.sdk-path }}" >> $GITHUB_ENV
         else
-          echo "Using predefined NDK path format"
-          echo "ANDROID_NDK_ROOT=${{ env.NDK_BASE_PATH }}/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=${{ env.ANDROID_SDK_DEFAULT_PATH }}" >> $GITHUB_ENV
         fi
 
+        # 配置Qt路径
         echo "QT_DIR=/home/runner/Qt/$QT_VERSION/android_arm64_v8a" >> $GITHUB_ENV
-        echo "ANDROID_SDK_ROOT=${{ steps.android-sdk.outputs.sdk-path }}" >> $GITHUB_ENV
-
-        # 配置PATH
         echo "$QT_DIR/bin" >> $GITHUB_PATH
 
-        # 关键：设置Qt配置需要的环境变量
+        # 配置Android构建参数
         echo "ANDROID_MIN_SDK_VERSION=${{ env.ANDROID_API_LEVEL }}" >> $GITHUB_ENV
         echo "ANDROID_TARGET_SDK_VERSION=${{ env.ANDROID_API_LEVEL }}" >> $GITHUB_ENV
         echo "ANDROID_NDK_VERSION=${{ env.NDK_VERSION }}" >> $GITHUB_ENV
         echo "ANDROID_BUILD_TOOLS_VERSION=${{ env.BUILD_TOOLS_VERSION }}" >> $GITHUB_ENV
 
-    # 验证安装 - 修改为使用环境变量
-    - name: Verify Qt and Android tools
+    # 验证关键路径是否存在
+    - name: Verify environment
       run: |
         echo "Qt version:"
         qmake --version
@@ -107,33 +97,34 @@ jobs:
         echo "Android NDK path: $ANDROID_NDK_ROOT"
         echo "Android SDK path: $ANDROID_SDK_ROOT"
 
-        # 验证NDK是否存在
+        # 验证NDK存在
         if [ -d "$ANDROID_NDK_ROOT" ]; then
-          echo "NDK found at $ANDROID_NDK_ROOT"
-          # 显示NDK目录内容
-          ls -la $ANDROID_NDK_ROOT
+          echo "✅ NDK found at $ANDROID_NDK_ROOT"
         else
-          echo "ERROR: NDK not found at $ANDROID_NDK_ROOT"
-          # 显示所有可用的NDK版本
-          echo "Available NDK versions:"
-          ls -la ${{ env.NDK_BASE_PATH }}
+          echo "❌ NDK not found at $ANDROID_NDK_ROOT"
           exit 1
         fi
 
-        # 验证Qt配置文件是否存在
+        # 验证SDK存在
+        if [ -d "$ANDROID_SDK_ROOT" ]; then
+          echo "✅ SDK found at $ANDROID_SDK_ROOT"
+        else
+          echo "❌ SDK not found at $ANDROID_SDK_ROOT"
+          exit 1
+        fi
+
+        # 验证Qt配置文件存在
         if [ -f "$QT_DIR/mkspecs/android-clang/qmake.conf" ]; then
-          echo "Qt Android mkspec found"
+          echo "✅ Qt Android mkspec found"
         else
-          echo "ERROR: Qt Android mkspec not found at $QT_DIR/mkspecs/android-clang/qmake.conf"
+          echo "❌ Qt Android mkspec not found"
           exit 1
         fi
 
-    # 成功的编译配置 - 修改为使用环境变量
+    # 配置项目
     - name: Configure project
       run: |
         cd ${{ github.workspace }}
-
-        # 使用更可靠的项目配置方式
         qmake Knot.pro \
           -spec android-clang \
           "CONFIG+=release" \
@@ -143,27 +134,22 @@ jobs:
           "ANDROID_BUILD_TOOLS_VERSION=$ANDROID_BUILD_TOOLS_VERSION" \
           "ANDROID_NDK_VERSION=$ANDROID_NDK_VERSION"
 
-    # 并行构建
+    # 构建APK
     - name: Build Android APK
       run: |
         make -j$(nproc)
         make apk INSTALL_ROOT=build
-
-        # 移动到标准位置
         mkdir -p ${{ github.workspace }}/output
         mv build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk \
            ${{ github.workspace }}/output/app-release-unsigned.apk
 
-    # 签名APK（如果提供密钥）
+    # 签名APK（如配置了密钥）
     - name: Sign APK
       run: |
-        # 检查所有必要secret是否存在
         if [ -z "$KEY_STORE_PASSWORD" ] || [ -z "$KEY_PASSWORD" ] || [ -z "$KEY_ALIAS" ]; then
-          echo "::warning::Signing secrets not fully configured. Skipping APK signing."
+          echo "::warning::Signing secrets not configured. Skipping signing."
           exit 0
         fi
-
-        # 继续签名步骤
         jarsigner -verbose \
           -sigalg SHA256withRSA \
           -digestalg SHA-256 \
@@ -172,7 +158,6 @@ jobs:
           -keypass "${{ secrets.KEY_PASSWORD }}" \
           ${{ github.workspace }}/output/app-release-unsigned.apk \
           "${{ secrets.KEY_ALIAS }}"
-
         $ANDROID_SDK_ROOT/build-tools/$ANDROID_BUILD_TOOLS_VERSION/zipalign -v 4 \
           ${{ github.workspace }}/output/app-release-unsigned.apk \
           ${{ github.workspace }}/output/app-release.apk
