@@ -78,27 +78,38 @@ jobs:
           install-deps: true
           archive-folder-restructure: "yes"
           mirror: "https://mirrors.tuna.tsinghua.edu.cn/qt/"
+          install-directory: /opt/Qt  # 显式指定安装路径
+
+      - name: 验证 Qt 安装
+        run: |
+          echo "查找 Qt 安装目录..."
+          find /opt/Qt -type d -print || echo "未找到 Qt 相关目录"
+
+          # 检查 qmake 是否可用
+          echo "验证 qmake 命令:"
+          /opt/Qt/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}/bin/qmake --version || true
+
 
       - name: 设置环境变量
         run: |
-            # 强制指定 NDK 路径（与本地一致）
-            echo "ANDROID_NDK_ROOT=${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
-            echo "ANDROID_SDK_ROOT=${{ env.ANDROID_SDK_ROOT }}" >> $GITHUB_ENV
+                  # 强制指定 NDK 路径（与本地一致）
+                  echo "ANDROID_NDK_ROOT=${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+                  echo "ANDROID_SDK_ROOT=${{ env.ANDROID_SDK_ROOT }}" >> $GITHUB_ENV
 
-            # 设置 Qt 路径（改用更通用的查找方式）
-            QT_DIR=$(find /opt -name "android_arm64_v8a" | grep "${{ env.QT_VERSION }}" | head -n 1)
-            if [ -z "$QT_DIR" ]; then
-              echo "❌ 未找到 Qt 安装目录！"
-              find /opt -name "qt*" -type d || true  # 尝试列出所有 Qt 相关目录
-              exit 1
-            fi
-            echo "QT_DIR=$QT_DIR" >> $GITHUB_ENV
-            echo "$QT_DIR/bin" >> $GITHUB_PATH
+                  # 设置 Qt 路径（使用固定路径）
+                  QT_DIR="/opt/Qt/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}"
+                  if [ ! -d "$QT_DIR" ]; then
+                    echo "❌ Qt 目录不存在: $QT_DIR"
+                    find /opt -name "qt*" -type d || true  # 尝试列出所有 Qt 相关目录
+                    exit 1
+                  fi
+                  echo "QT_DIR=$QT_DIR" >> $GITHUB_ENV
+                  echo "$QT_DIR/bin" >> $GITHUB_PATH
 
-            # Android 构建参数
-            echo "ANDROID_MIN_SDK_VERSION=${{ env.ANDROID_API_LEVEL }}" >> $GITHUB_ENV
-            echo "ANDROID_TARGET_SDK_VERSION=${{ env.ANDROID_API_LEVEL }}" >> $GITHUB_ENV
-            echo "ANDROID_BUILD_TOOLS_VERSION=${{ env.BUILD_TOOLS_VERSION }}" >> $GITHUB_ENV
+                  # Android 构建参数
+                  echo "ANDROID_MIN_SDK_VERSION=${{ env.ANDROID_API_LEVEL }}" >> $GITHUB_ENV
+                  echo "ANDROID_TARGET_SDK_VERSION=${{ env.ANDROID_API_LEVEL }}" >> $GITHUB_ENV
+                  echo "ANDROID_BUILD_TOOLS_VERSION=${{ env.BUILD_TOOLS_VERSION }}" >> $GITHUB_ENV
 
       - name: Configure project
         run: |
