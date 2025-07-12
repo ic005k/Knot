@@ -17,10 +17,11 @@ jobs:
       QT_VERSION: "6.6.3"
       QT_ARCH: "android_arm64_v8a"
       ANDROID_API_LEVEL: "34"
-      NDK_VERSION: "26.3.11579264"
+      NDK_VERSION: "26.3.11579264"  # 与本地一致的版本
       BUILD_TOOLS_VERSION: "34.0.0"
-      ANDROID_SDK_DEFAULT_PATH: "/usr/local/lib/android/sdk"
-      NDK_BASE_PATH: "/usr/local/lib/android/sdk/ndk"
+      # 手动指定 NDK 安装路径（模拟本地）
+      NDK_INSTALL_PATH: "/usr/local/lib/android/sdk/ndk"
+      ANDROID_SDK_ROOT: "/usr/local/lib/android/sdk"
 
     steps:
       - name: Checkout code
@@ -29,7 +30,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libgl1-mesa-dev
+          sudo apt-get install -y build-essential libgl1-mesa-dev unzip  # 增加 unzip 用于解压 NDK
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -37,23 +38,36 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        id: android-sdk
-        with:
-          ndk-version: ${{ env.NDK_VERSION }}
-          sdk-version: ${{ env.ANDROID_API_LEVEL }}
-
-      # 调试：确认Qt安装路径
-      - name: Debug Qt installation
+      # 关键修改：手动下载并安装 NDK（避免 CI 工具的自动裁剪）
+      - name: 手动安装完整 NDK（与本地一致）
         run: |
-          echo "Qt installation path options:"
-          echo "/home/runner/Qt/$QT_VERSION/$QT_ARCH:"
-          ls -la "/home/runner/Qt/$QT_VERSION/$QT_ARCH" || true
-          echo "/home/runner/work/Knot/Qt/$QT_VERSION/$QT_ARCH:"
-          ls -la "/home/runner/work/Knot/Qt/$QT_VERSION/$QT_ARCH" || true
+          # 创建 NDK 安装目录
+          mkdir -p ${{ env.NDK_INSTALL_PATH }}
+          # 下载与本地完全一致的 NDK 包（使用 Google 官方源）
+          wget https://dl.google.com/android/repository/android-ndk-r26b-linux.zip -O ndk.zip
+          # 解压到指定目录
+          unzip -q ndk.zip -d ${{ env.NDK_INSTALL_PATH }}
+          # 重命名为版本号目录（确保路径与本地一致）
+          mv ${{ env.NDK_INSTALL_PATH }}/android-ndk-r26b ${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }}
+          # 验证 NDK 完整性（关键步骤）
+          echo "NDK 安装路径：${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }}"
+          ls -la ${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/
 
-      # 调整Qt安装参数
+      # 安装 Android SDK 基础组件（仅保留必要部分）
+      - name: 安装 Android SDK 工具
+        uses: android-actions/setup-android@v3
+        with:
+          sdk-version: ${{ env.ANDROID_API_LEVEL }}
+          build-tools: ${{ env.BUILD_TOOLS_VERSION }}
+
+      # 调试：确认 NDK 头文件是否存在（与本地对比）
+      - name: 验证 NDK 头文件
+        run: |
+          echo "搜索 libc-header-start.h 是否存在..."
+          find ${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }} -name "libc-header-start.h"
+          # 输出路径供对比本地
+          echo "本地请执行：find /path/to/your/local/ndk/${{ env.NDK_VERSION }} -name 'libc-header-start.h'"
+
       - name: Install Qt for Android
         uses: jurplel/install-qt-action@v4
         with:
@@ -62,109 +76,38 @@ jobs:
           arch: ${{ env.QT_ARCH }}
           modules: qt5compat qtcharts qtsensors qtlocation qtpositioning qtwebview
           install-deps: true
-          # 移除自定义输出路径，使用默认路径
-          # aqt-installer-option: "--outputdir /home/runner/Qt"
           archive-folder-restructure: "yes"
           mirror: "https://mirrors.tuna.tsinghua.edu.cn/qt/"
 
-      - name: Set up environment variables
+      - name: 设置环境变量
         run: |
-          echo "ANDROID_NDK_ROOT=${{ steps.android-sdk.outputs.ndk-path || env.NDK_BASE_PATH }}/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=${{ steps.android-sdk.outputs.sdk-path || env.ANDROID_SDK_DEFAULT_PATH }}" >> $GITHUB_ENV
+          # 强制指定 NDK 路径（与本地一致）
+          echo "ANDROID_NDK_ROOT=${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=${{ env.ANDROID_SDK_ROOT }}" >> $GITHUB_ENV
 
-          # 尝试两种可能的Qt路径
-          if [ -d "/home/runner/Qt/$QT_VERSION/$QT_ARCH" ]; then
-            echo "Using default Qt installation path"
-            echo "QT_DIR=/home/runner/Qt/$QT_VERSION/$QT_ARCH" >> $GITHUB_ENV
-          else
-            echo "Using alternative Qt installation path"
-            echo "QT_DIR=/home/runner/work/Knot/Qt/$QT_VERSION/$QT_ARCH" >> $GITHUB_ENV
-          fi
-
+          # 设置 Qt 路径
+          QT_DIR=$(find /home/runner/Qt -name "android_arm64_v8a" | grep "${{ env.QT_VERSION }}" | head -n 1)
+          echo "QT_DIR=$QT_DIR" >> $GITHUB_ENV
           echo "$QT_DIR/bin" >> $GITHUB_PATH
+
+          # Android 构建参数
           echo "ANDROID_MIN_SDK_VERSION=${{ env.ANDROID_API_LEVEL }}" >> $GITHUB_ENV
           echo "ANDROID_TARGET_SDK_VERSION=${{ env.ANDROID_API_LEVEL }}" >> $GITHUB_ENV
-          echo "ANDROID_NDK_VERSION=${{ env.NDK_VERSION }}" >> $GITHUB_ENV
           echo "ANDROID_BUILD_TOOLS_VERSION=${{ env.BUILD_TOOLS_VERSION }}" >> $GITHUB_ENV
-
-      # 增强验证：检查Qt目录内容
-      - name: Verify environment
-        run: |
-          echo "Qt version:"
-          qmake --version
-
-          echo "Android NDK path: $ANDROID_NDK_ROOT"
-          echo "Android SDK path: $ANDROID_SDK_ROOT"
-          echo "Qt directory: $QT_DIR"
-
-          # 验证NDK存在
-          if [ -d "$ANDROID_NDK_ROOT" ]; then
-            echo "✅ NDK found at $ANDROID_NDK_ROOT"
-          else
-            echo "❌ NDK not found at $ANDROID_NDK_ROOT"
-            exit 1
-          fi
-
-          # 验证SDK存在
-          if [ -d "$ANDROID_SDK_ROOT" ]; then
-            echo "✅ SDK found at $ANDROID_SDK_ROOT"
-          else
-            echo "❌ SDK not found at $ANDROID_SDK_ROOT"
-            exit 1
-          fi
-
-          # 验证Qt目录存在
-          if [ -d "$QT_DIR" ]; then
-            echo "✅ Qt directory found at $QT_DIR"
-            echo "Qt directory contents:"
-            ls -la "$QT_DIR"
-
-            # 检查关键文件是否存在
-            if [ -f "$QT_DIR/mkspecs/android-clang/qmake.conf" ]; then
-              echo "✅ Qt Android mkspec found"
-            else
-              echo "❌ Qt Android mkspec not found"
-              echo "Available mkspecs:"
-              ls -la "$QT_DIR/mkspecs" || echo "No mkspecs found"
-              exit 1
-            fi
-          else
-            echo "❌ Qt directory not found at $QT_DIR"
-            exit 1
-          fi
 
       - name: Configure project
         run: |
           cd ${{ github.workspace }}
 
-          # 明确设置 NDK 路径和工具链
-          export ANDROID_NDK_ROOT="${{ steps.android-sdk.outputs.ndk-path || env.NDK_BASE_PATH }}/${{ env.NDK_VERSION }}"
+          # 明确 NDK 工具链和 sysroot（与本地编译路径一致）
+          ANDROID_NDK_ROOT="${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }}"
           TOOLCHAIN_PATH="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64"
-          SYSROOT="$TOOLCHAIN_PATH/sysroot"
+          SYSROOT="$TOOLCHAIN_PATH/sysroot"  # 本地环境中此路径应存在头文件
 
-          echo "Using NDK: $ANDROID_NDK_ROOT"
-          echo "Using toolchain: $TOOLCHAIN_PATH"
+          echo "使用 NDK: $ANDROID_NDK_ROOT"
+          echo "使用 sysroot: $SYSROOT"
 
-          # 验证关键文件是否存在
-          if [ ! -d "$TOOLCHAIN_PATH" ]; then
-            echo "❌ Toolchain directory not found!"
-            ls -la "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/" || true
-            exit 1
-          fi
-
-          if [ ! -f "$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang" ]; then
-            echo "❌ Clang compiler not found!"
-            ls -la "$TOOLCHAIN_PATH/bin/" || true
-            exit 1
-          fi
-
-          if [ ! -f "$SYSROOT/usr/include/bits/libc-header-start.h" ]; then
-            echo "❌ libc-header-start.h not found in sysroot!"
-            find "$SYSROOT" -name "libc-header-start.h" || true
-            exit 1
-          fi
-
-          # 执行 qmake，强制指定所有编译参数
+          # 执行 qmake，强制编译器使用 NDK 头文件（屏蔽系统目录）
           qmake Knot.pro \
             -spec android-clang \
             "CONFIG+=release" \
@@ -173,15 +116,12 @@ jobs:
             "QMAKE_CC=$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang" \
             "QMAKE_CXX=$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang++" \
             "QMAKE_LINK=$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang++" \
-            "QMAKE_INCDIR=$SYSROOT/usr/include" \
-            "QMAKE_INCDIR_SYS=$SYSROOT/usr/include" \
-            "QMAKE_CFLAGS+=-isystem $SYSROOT/usr/include" \
-            "QMAKE_CXXFLAGS+=-isystem $SYSROOT/usr/include" \
+            # 关键：强制不使用系统头文件，只从 NDK 读取
+            "QMAKE_CFLAGS+=-nostdinc -isystem $SYSROOT/usr/include" \
+            "QMAKE_CXXFLAGS+=-nostdinc++ -isystem $SYSROOT/usr/include -isystem $SYSROOT/usr/include/c++/v1" \
             "QMAKE_LIBS+=-L$SYSROOT/usr/lib/aarch64-linux-android/$ANDROID_API_LEVEL" \
-            "ANDROID_MIN_SDK_VERSION=$ANDROID_MIN_SDK_VERSION" \
-            "ANDROID_TARGET_SDK_VERSION=$ANDROID_TARGET_SDK_VERSION" \
-            "ANDROID_BUILD_TOOLS_VERSION=$ANDROID_BUILD_TOOLS_VERSION" \
-            "ANDROID_NDK_VERSION=$ANDROID_NDK_VERSION"
+            "ANDROID_MIN_SDK_VERSION=$ANDROID_API_LEVEL" \
+            "ANDROID_TARGET_SDK_VERSION=$ANDROID_API_LEVEL"
 
       - name: Build Android APK
         run: |
