@@ -10,7 +10,7 @@ env:
   QT_VERSION: "6.6.3"
   QT_ARCH: "android_arm64_v8a"
   ANDROID_API_LEVEL: "34"
-  NDK_VERSION: "26.3.11579264"  # 或者尝试 "25.2.9519653"
+  NDK_VERSION: "25.2.9519653"  # 使用更稳定的NDK 25
   BUILD_TOOLS_VERSION: "34.0.0"
 
 jobs:
@@ -31,23 +31,18 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 关键修改：使用完整NDK安装方法
       - name: Install Android NDK
         run: |
           mkdir -p android-sdk/ndk
-          wget https://dl.google.com/android/repository/android-ndk-r26b-linux.zip
-          unzip -q android-ndk-r26b-linux.zip -d android-sdk/ndk/
-          mv android-sdk/ndk/android-ndk-r26b android-sdk/ndk/${{ env.NDK_VERSION }}
+          wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
+          unzip -q android-ndk-r25b-linux.zip -d android-sdk/ndk/
+          mv android-sdk/ndk/android-ndk-r25b android-sdk/ndk/${{ env.NDK_VERSION }}
           echo "ANDROID_NDK_ROOT=$GITHUB_WORKSPACE/android-sdk/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
-          echo "NDK_HOME=$GITHUB_WORKSPACE/android-sdk/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
 
-      # 验证NDK安装
-      - name: Verify NDK installation
+      - name: Verify NDK
         run: |
           echo "NDK路径: $ANDROID_NDK_ROOT"
-          echo "Sysroot路径: $ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
-          echo "检查头文件是否存在:"
-          find $ANDROID_NDK_ROOT -name "libc-header-start.h" || echo "未找到头文件"
+          ls -la $ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android/bits/
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -57,20 +52,19 @@ jobs:
           arch: ${{ env.QT_ARCH }}
           modules: qt5compat qtcharts qtsensors qtlocation qtpositioning qtwebview
 
-      # 关键修改：添加显式sysroot配置
       - name: Configure project
         run: |
           TOOLCHAIN_PATH="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64"
-          SYSROOT="$TOOLCHAIN_PATH/sysroot"
 
+          # 使用更简单的参数配置
           qmake Knot.pro \
             -spec android-clang \
             CONFIG+=release \
             ANDROID_ABIS=arm64-v8a \
             ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
             ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT \
-            QMAKE_CFLAGS="-target aarch64-linux-android$ANDROID_API_LEVEL -isystem $SYSROOT/usr/include/aarch64-linux-android" \
-            QMAKE_CXXFLAGS="-target aarch64-linux-android$ANDROID_API_LEVEL -isystem $SYSROOT/usr/include/c++/v1 -isystem $SYSROOT/usr/include/aarch64-linux-android" \
+            QMAKE_CC=$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang \
+            QMAKE_CXX=$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang++ \
             ANDROID_MIN_SDK_VERSION=$ANDROID_API_LEVEL
 
       - name: Build project
