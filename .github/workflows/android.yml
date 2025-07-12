@@ -8,7 +8,7 @@ on:
 env:
   QT_VERSION: "6.6.3"
   QT_ARCH: "android_arm64_v8a"
-  NDK_VERSION: "26.1.10909125"  # NDK r26b
+  NDK_VERSION: "26.1.10909125"
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
 
@@ -18,15 +18,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: 'Knot'  # 明确设置检出目录
 
-      # 1. 安装 JDK 17
+      # 1. 安装 JDK
       - name: Setup JDK
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
 
-      # 2. 安装 Android NDK
+      # 2. 安装 NDK
       - name: Install NDK
         run: |
           $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
@@ -36,7 +38,7 @@ jobs:
           echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
           echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-      # 3. 安装 Qt
+      # 3. 安装 Qt（严格匹配日志路径）
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         id: qt-install
@@ -45,30 +47,31 @@ jobs:
           target: android
           arch: ${{ env.QT_ARCH }}
           modules: qt5compat
-          install-dir: '${{ github.workspace }}/Qt'
+          install-dir: 'D:\a\Knot\Qt'  # 硬编码匹配日志路径
 
-      # 4. 配置环境变量
+      # 4. 环境配置（使用绝对路径）
       - name: Setup Environment
         run: |
-          # 使用GitHub工作空间的标准路径
-          $qtRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH"
+          # 硬编码Qt路径（与安装日志完全一致）
+          $qtRoot = "D:\a\Knot\Qt\$env:QT_VERSION\$env:QT_ARCH"
           echo "QT_ROOT=$qtRoot" >> $env:GITHUB_ENV
           echo "$qtRoot\bin" >> $env:GITHUB_PATH
 
-          # 验证Qt安装
+          # 详细验证Qt安装
           echo "=== Qt安装验证 ==="
-          dir "$qtRoot\bin" | findstr "qmake"
-          if (!(Test-Path "$qtRoot\bin\qmake.exe")) {
-              echo "::error::qmake.exe not found!"
-              exit 1
-          }
+          echo "检查目录: $qtRoot"
+          dir "$qtRoot"
+          echo "检查bin目录:"
+          dir "$qtRoot\bin" || echo "::error::bin目录不存在!"
+          echo "qmake是否存在:"
+          Test-Path "$qtRoot\bin\qmake.exe" || echo "::error::qmake.exe不存在!"
 
       # 5. 构建项目
       - name: Build
         shell: cmd
         env:
-          ANDROID_NDK_ROOT: ${{ github.workspace }}\android-sdk\ndk\${{ env.NDK_VERSION }}
-          ANDROID_SDK_ROOT: ${{ github.workspace }}\android-sdk
+          ANDROID_NDK_ROOT: D:\a\Knot\android-sdk\ndk\${{ env.NDK_VERSION }}
+          ANDROID_SDK_ROOT: D:\a\Knot\android-sdk
         run: |
           echo "=== 当前工作目录 ==="
           cd
@@ -76,13 +79,17 @@ jobs:
 
           echo "=== 查找qmake ==="
           where qmake
-          where make
+          dir "D:\a\Knot\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
 
           echo "=== 执行qmake ==="
-          "$env:QT_ROOT\bin\qmake" Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
+          "D:\a\Knot\Qt\%QT_VERSION%\%QT_ARCH%\bin\qmake" Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
 
           echo "=== 生成的Makefile ==="
-          type Makefile || echo "::error::Makefile not generated!"
+          type Makefile || (
+            echo "::error::Makefile未生成!"
+            dir
+            exit 1
+          )
 
           echo "=== 开始编译 ==="
           make -j %NUMBER_OF_PROCESSORS%
