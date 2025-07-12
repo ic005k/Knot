@@ -111,10 +111,7 @@ jobs:
           echo "ANDROID_TARGET_SDK_VERSION=${{ env.ANDROID_API_LEVEL }}" >> $GITHUB_ENV
           echo "ANDROID_BUILD_TOOLS_VERSION=${{ env.BUILD_TOOLS_VERSION }}" >> $GITHUB_ENV
 
-      - name: 验证 Qt 特性
-        run: |
-          echo "检查 thread 特性是否存在:"
-          $QT_DIR/bin/qmake -query QT_FEATURE_thread
+
 
       - name: Configure project
         run: |
