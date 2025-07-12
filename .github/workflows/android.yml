@@ -10,7 +10,7 @@ env:
   QT_VERSION: "6.6.3"
   QT_ARCH: "android_arm64_v8a"
   ANDROID_API_LEVEL: "34"
-  NDK_VERSION: "25.2.9519653"  # 使用更稳定的NDK 25
+  NDK_VERSION: "25.2.9519653"
   BUILD_TOOLS_VERSION: "34.0.0"
 
 jobs:
@@ -31,18 +31,43 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      # 关键修改：确保完整下载和解压NDK
       - name: Install Android NDK
         run: |
           mkdir -p android-sdk/ndk
-          wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
-          unzip -q android-ndk-r25b-linux.zip -d android-sdk/ndk/
+          # 使用curl替代wget以获得更好的进度显示
+          curl -L https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -o ndk.zip
+          # 使用bsdtar确保完整解压(比unzip更可靠)
+          sudo apt-get install -y libarchive-tools
+          bsdtar -xvf ndk.zip -C android-sdk/ndk/
           mv android-sdk/ndk/android-ndk-r25b android-sdk/ndk/${{ env.NDK_VERSION }}
-          echo "ANDROID_NDK_ROOT=$GITHUB_WORKSPACE/android-sdk/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
 
-      - name: Verify NDK
+          # 验证解压是否完整
+          if [ ! -d "android-sdk/ndk/${{ env.NDK_VERSION }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android" ]; then
+            echo "::error::NDK解压不完整，缺少关键头文件目录"
+            exit 1
+          fi
+
+          echo "ANDROID_NDK_ROOT=$GITHUB_WORKSPACE/android-sdk/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+          echo "NDK_HOME=$GITHUB_WORKSPACE/android-sdk/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+
+      # 详细验证NDK结构
+      - name: Verify NDK structure
         run: |
-          echo "NDK路径: $ANDROID_NDK_ROOT"
-          ls -la $ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android/bits/
+          echo "完整NDK路径: $ANDROID_NDK_ROOT"
+          echo "关键头文件路径: $ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android"
+
+          # 列出关键目录结构
+          echo "NDK目录结构:"
+          tree -L 3 $ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/
+
+          # 检查特定头文件
+          if [ -f "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android/bits/libc-header-start.h" ]; then
+            echo "::notice::找到libc-header-start.h"
+          else
+            echo "::error::缺少libc-header-start.h头文件"
+            exit 1
+          fi
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -52,11 +77,14 @@ jobs:
           arch: ${{ env.QT_ARCH }}
           modules: qt5compat qtcharts qtsensors qtlocation qtpositioning qtwebview
 
+      # 关键修改：使用更可靠的配置方式
       - name: Configure project
         run: |
+          # 设置工具链路径
           TOOLCHAIN_PATH="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64"
+          SYSROOT="$TOOLCHAIN_PATH/sysroot"
 
-          # 使用更简单的参数配置
+          # 使用更简单的配置方式
           qmake Knot.pro \
             -spec android-clang \
             CONFIG+=release \
@@ -67,9 +95,15 @@ jobs:
             QMAKE_CXX=$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang++ \
             ANDROID_MIN_SDK_VERSION=$ANDROID_API_LEVEL
 
+          # 验证Makefile是否正确生成
+          if [ ! -f "Makefile" ]; then
+            echo "::error::Makefile未生成，qmake配置失败"
+            exit 1
+          fi
+
       - name: Build project
         run: |
-          make -j$(nproc)
+          make -j$(nproc) || (echo "::error::编译失败" && exit 1)
           make apk INSTALL_ROOT=build
 
       - name: Upload artifact
