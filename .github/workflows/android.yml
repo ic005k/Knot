@@ -81,19 +81,24 @@ jobs:
 
       - name: 设置环境变量
         run: |
-          # 强制指定 NDK 路径（与本地一致）
-          echo "ANDROID_NDK_ROOT=${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=${{ env.ANDROID_SDK_ROOT }}" >> $GITHUB_ENV
+            # 强制指定 NDK 路径（与本地一致）
+            echo "ANDROID_NDK_ROOT=${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+            echo "ANDROID_SDK_ROOT=${{ env.ANDROID_SDK_ROOT }}" >> $GITHUB_ENV
 
-          # 设置 Qt 路径
-          QT_DIR=$(find /home/runner/Qt -name "android_arm64_v8a" | grep "${{ env.QT_VERSION }}" | head -n 1)
-          echo "QT_DIR=$QT_DIR" >> $GITHUB_ENV
-          echo "$QT_DIR/bin" >> $GITHUB_PATH
+            # 设置 Qt 路径（改用更通用的查找方式）
+            QT_DIR=$(find /opt -name "android_arm64_v8a" | grep "${{ env.QT_VERSION }}" | head -n 1)
+            if [ -z "$QT_DIR" ]; then
+              echo "❌ 未找到 Qt 安装目录！"
+              find /opt -name "qt*" -type d || true  # 尝试列出所有 Qt 相关目录
+              exit 1
+            fi
+            echo "QT_DIR=$QT_DIR" >> $GITHUB_ENV
+            echo "$QT_DIR/bin" >> $GITHUB_PATH
 
-          # Android 构建参数
-          echo "ANDROID_MIN_SDK_VERSION=${{ env.ANDROID_API_LEVEL }}" >> $GITHUB_ENV
-          echo "ANDROID_TARGET_SDK_VERSION=${{ env.ANDROID_API_LEVEL }}" >> $GITHUB_ENV
-          echo "ANDROID_BUILD_TOOLS_VERSION=${{ env.BUILD_TOOLS_VERSION }}" >> $GITHUB_ENV
+            # Android 构建参数
+            echo "ANDROID_MIN_SDK_VERSION=${{ env.ANDROID_API_LEVEL }}" >> $GITHUB_ENV
+            echo "ANDROID_TARGET_SDK_VERSION=${{ env.ANDROID_API_LEVEL }}" >> $GITHUB_ENV
+            echo "ANDROID_BUILD_TOOLS_VERSION=${{ env.BUILD_TOOLS_VERSION }}" >> $GITHUB_ENV
 
       - name: Configure project
         run: |
@@ -113,7 +118,7 @@ jobs:
               exit 1
             fi
 
-            # 关键：修复续行格式，反斜杠后无任何字符，参数对齐
+            # 使用正确的语法传递编译器选项
             qmake Knot.pro \
               -spec android-clang \
               "CONFIG+=release" \
@@ -122,8 +127,11 @@ jobs:
               "QMAKE_CC=$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang" \
               "QMAKE_CXX=$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang++" \
               "QMAKE_LINK=$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang++" \
-              "QMAKE_CFLAGS+=-nostdinc -isystem $SYSROOT/usr/include" \
-              "QMAKE_CXXFLAGS+=-nostdinc++ -isystem $SYSROOT/usr/include -isystem $SYSROOT/usr/include/c++/v1" \
+              "QMAKE_CFLAGS+=-nostdinc" \
+              "QMAKE_CFLAGS+=-isystem $SYSROOT/usr/include" \
+              "QMAKE_CXXFLAGS+=-nostdinc++" \
+              "QMAKE_CXXFLAGS+=-isystem $SYSROOT/usr/include" \
+              "QMAKE_CXXFLAGS+=-isystem $SYSROOT/usr/include/c++/v1" \
               "QMAKE_LIBS+=-L$SYSROOT/usr/lib/aarch64-linux-android/$ANDROID_API_LEVEL" \
               "ANDROID_MIN_SDK_VERSION=$ANDROID_API_LEVEL" \
               "ANDROID_TARGET_SDK_VERSION=$ANDROID_API_LEVEL"
