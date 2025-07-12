@@ -31,7 +31,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 关键修改：完整安装NDK
       - name: Install Android NDK
         run: |
           mkdir -p android-sdk/ndk
@@ -57,7 +56,6 @@ jobs:
 
       - name: Configure project
         run: |
-          # 设置工具链路径
           TOOLCHAIN_PATH="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64"
 
           qmake Knot.pro \
@@ -75,21 +73,31 @@ jobs:
           make -j$(nproc)
           make apk INSTALL_ROOT=build
 
-      - name: Sign APK
-        if: ${{ secrets.KEY_STORE_PASSWORD }}
+      - name: Prepare signing
         run: |
+          mkdir -p signing
+          echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 -d > signing/app.keystore
+          echo "storePassword=${{ secrets.KEY_STORE_PASSWORD }}" > signing/keystore.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> signing/keystore.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> signing/keystore.properties
+          echo "storeFile=../app.keystore" >> signing/keystore.properties
+
+      - name: Sign APK
+        if: ${{ secrets.KEY_STORE_PASSWORD != '' }}
+        run: |
+          cd signing
           jarsigner -verbose \
             -sigalg SHA256withRSA \
             -digestalg SHA-256 \
-            -keystore android/app/my-release-key.keystore \
+            -keystore app.keystore \
             -storepass "${{ secrets.KEY_STORE_PASSWORD }}" \
             -keypass "${{ secrets.KEY_PASSWORD }}" \
-            build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk \
+            ../build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk \
             "${{ secrets.KEY_ALIAS }}"
 
           $ANDROID_SDK_ROOT/build-tools/$BUILD_TOOLS_VERSION/zipalign -v 4 \
-            build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk \
-            app-release.apk
+            ../build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk \
+            ../app-release.apk
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
