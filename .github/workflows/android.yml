@@ -77,11 +77,11 @@ jobs:
         echo "Qt version:"
         qmake --version
 
-        echo "Android NDK version:"
-        $ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --version
+        #echo "Android NDK version:"
+        #$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --version
 
-        echo "Android SDK tools:"
-        $ANDROID_SDK_ROOT/tools/bin/sdkmanager --list | head -n 15
+        #echo "Android SDK tools:"
+        #$ANDROID_SDK_ROOT/tools/bin/sdkmanager --list | head -n 15
 
     # 成功的编译配置
     - name: Configure project
