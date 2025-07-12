@@ -78,16 +78,16 @@ jobs:
           install-deps: true
           archive-folder-restructure: "yes"
           mirror: "https://mirrors.tuna.tsinghua.edu.cn/qt/"
-          install-directory: /opt/Qt  # 显式指定安装路径
+
 
       - name: 验证 Qt 安装
         run: |
-          echo "查找 Qt 安装目录..."
-          find /opt/Qt -type d -print || echo "未找到 Qt 相关目录"
+                  echo "查找 Qt 安装目录..."
+                  find /home/runner/work/Knot/Qt -type d -print || echo "未找到 Qt 相关目录"
 
-          # 检查 qmake 是否可用
-          echo "验证 qmake 命令:"
-          /opt/Qt/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}/bin/qmake --version || true
+                  # 检查 qmake 是否可用
+                  echo "验证 qmake 命令:"
+                  /home/runner/work/Knot/Qt/${{ env.QT_VERSION }}/gcc_64/bin/qmake --version || true
 
 
       - name: 设置环境变量
@@ -96,11 +96,11 @@ jobs:
                   echo "ANDROID_NDK_ROOT=${{ env.NDK_INSTALL_PATH }}/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
                   echo "ANDROID_SDK_ROOT=${{ env.ANDROID_SDK_ROOT }}" >> $GITHUB_ENV
 
-                  # 设置 Qt 路径（使用固定路径）
-                  QT_DIR="/opt/Qt/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}"
+                  # 设置 Qt 路径（使用实际安装路径）
+                  QT_DIR="/home/runner/work/Knot/Qt/${{ env.QT_VERSION }}/gcc_64"
                   if [ ! -d "$QT_DIR" ]; then
                     echo "❌ Qt 目录不存在: $QT_DIR"
-                    find /opt -name "qt*" -type d || true  # 尝试列出所有 Qt 相关目录
+                    find /home/runner/work/Knot/Qt -name "android_arm64_v8a" -type d || true  # 尝试查找 Android 架构目录
                     exit 1
                   fi
                   echo "QT_DIR=$QT_DIR" >> $GITHUB_ENV
