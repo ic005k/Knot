@@ -787,4 +787,4 @@ contains(ANDROID_TARGET_ARCH,arm64-v8a) {
         $$PWD/android-openssl/ssl_3/v8a/libcrypto_3.so \
         $$PWD/android-openssl/ssl_3/v8a/libssl_3.so
 }
-android: include(C:/Users/Administrator/Documents/android_openssl-master/openssl.pri)
+#android: include(C:/Users/Administrator/Documents/android_openssl-master/openssl.pri)
