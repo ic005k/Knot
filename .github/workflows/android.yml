@@ -1,4 +1,4 @@
-name: Qt6 Android Build (NDK26 Fix)
+name: Qt6 Android Build
 
 on:
   push:
@@ -8,17 +8,17 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
     env:
       QT_VERSION: "6.6.3"
-      NDK_VERSION: "26.1.10909125"  # 使用与本地一致的版本
+      QT_ARCH: "android_arm64_v8a"
+      NDK_VERSION: "26.1.10909125"  # 保持与本地一致
       ANDROID_API_LEVEL: "34"
 
     steps:
       - uses: actions/checkout@v4
 
-      # 安装指定版本的NDK（与本地一致）
-      - name: Install NDK 26.1.10909125
+      # 1. 安装NDK（与本地版本严格一致）
+      - name: Install NDK
         run: |
           $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
           Invoke-WebRequest -Uri $ndkUrl -OutFile "ndk.zip"
@@ -26,28 +26,39 @@ jobs:
           Rename-Item "$env:GITHUB_WORKSPACE\android-sdk\ndk\android-ndk-r26b" "$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION"
           echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
 
-      # 验证实际路径结构
-      - name: Check NDK structure
+      # 2. 安装Qt（关键修改：显式添加qmake到PATH）
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: windows
+          target: android
+          arch: ${{ env.QT_ARCH }}
+          modules: qtbase qt5compat
+        id: qt_install
+
+      # 3. 配置环境变量（修复qmake找不到的问题）
+      - name: Setup Qt Environment
         run: |
-          ls "$env:ANDROID_NDK_ROOT\toolchains\llvm\prebuilt\windows-x86_64\sysroot\usr\include\aarch64-linux-android"
+          $qtPath = "$env:QT_PATH"
+          if (-not $qtPath) {
+              $qtPath = "C:\Qt\${{ env.QT_VERSION }}\msvc2019_64"  # 默认路径
+          }
+          echo "Qt Path: $qtPath"
+          echo "::add-path::$qtPath\bin"
+          echo "::add-path::$qtPath\mingw_64\bin"  # 兼容MinGW版本
 
-      # 修复qmake配置
-      - name: Configure project
-        shell: cmd
+      # 4. 验证qmake是否可用
+      - name: Check qmake
         run: |
-          set ANDROID_NDK_ROOT=%GITHUB_WORKSPACE%\android-sdk\ndk\%NDK_VERSION%
-          set TOOLCHAIN_PATH=%ANDROID_NDK_ROOT%\toolchains\llvm\prebuilt\windows-x86_64
+          qmake --version
+          where qmake
 
-          qmake Knot.pro ^
-            -spec android-clang ^
-            CONFIG+=release ^
-            ANDROID_ABIS=arm64-v8a ^
-            QMAKE_CFLAGS="-I%TOOLCHAIN_PATH%\sysroot\usr\include\aarch64-linux-android" ^
-            QMAKE_CXXFLAGS="-I%TOOLCHAIN_PATH%\sysroot\usr\include\aarch64-linux-android\asm"
-
+      # 5. 构建项目
       - name: Build project
         shell: cmd
         run: |
+          qmake Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
           jom.exe -j %NUMBER_OF_PROCESSORS%
           jom.exe apk INSTALL_ROOT=build
 
