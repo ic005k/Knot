@@ -41,7 +41,7 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   m_TextSelector = new TextSelector(this);
 
   initEditor();
-  m_EditSource->setUtf8(true);
+
   init_md();
 
   QString path = iniDir + "memo/";
@@ -81,8 +81,10 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
 }
 
 void Notes::initEditor() {
-  m_EditSource = new QsciScintilla(this);
+#ifndef Q_OS_ANDROID
 
+  m_EditSource = new QsciScintilla(this);
+  m_EditSource->setUtf8(true);
   m_EditSource->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   m_EditSource->installEventFilter(this);
   m_EditSource->viewport()->installEventFilter(this);
@@ -95,17 +97,13 @@ void Notes::initEditor() {
           &Notes::on_editSource_textChanged);
   ui->frameEdit->layout()->addWidget(m_EditSource);
   m_EditSource->setFocus();
+
+#endif
 }
 
 void Notes::showEvent(QShowEvent *event) {
   QWidget::showEvent(event);
   if (!m_initialized) {
-    // 调试输出
-    qDebug() << "当前字体是否有效："
-             << m_EditSource->lexer()
-                    ->font(QsciLexerMarkdown::CodeBlock)
-                    .exactMatch();
-
     int btn_h = ui->btnNext->height();
     ui->btnDone->setFixedHeight(btn_h);
     ui->btnDone->setFixedWidth(btn_h);
@@ -117,8 +115,11 @@ void Notes::showEvent(QShowEvent *event) {
     ui->btnView->setIconSize(QSize(m_size, m_size));
 
     QFont font = mw_one->font();
+
+#ifndef Q_OS_ANDROID
     m_EditSource->setFont(font);
     markdownLexer->setFont(font);
+#endif
 
     m_initialized = true;
   }
@@ -150,7 +151,7 @@ void Notes::on_btnDone_clicked() {
 }
 
 void Notes::MD2Html(QString mdFile) {
-  QString htmlFileName = privateDir + "memo.html";
+  // QString htmlFileName = privateDir + "memo.html";
 
   QString strmd = loadText(mdFile);
 
@@ -169,6 +170,8 @@ QString Notes::imageToBase64(const QString &path) {
 }
 
 void Notes::saveMainNotes() {
+#ifndef Q_OS_ANDROID
+
   mw_one->strLatestModify = tr("Modi Notes");
 
   if (isTextChange) {
@@ -184,6 +187,8 @@ void Notes::saveMainNotes() {
   }
 
   isTextChange = false;
+
+#endif
 }
 
 void Notes::updateMDFileToSyncLists(QString currentMDFile) {
@@ -331,6 +336,7 @@ bool Notes::eventFilter(QObject *obj, QEvent *evn) {
     }
   }
 
+#ifndef Q_OS_ANDROID
   if (obj == m_EditSource) {
     if (evn->type() == QEvent::KeyPress) {
       if (keyEvent->key() != Qt::Key_Back) {
@@ -342,6 +348,7 @@ bool Notes::eventFilter(QObject *obj, QEvent *evn) {
     if (evn->type() == QEvent::MouseButtonPress) {
     }
   }
+#endif
 
   return QWidget::eventFilter(obj, evn);
 }
@@ -468,7 +475,9 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
     strImage = "\n\n![image](" + strTar + ")\n\n";
 
     if (!isAndroid) {
+#ifndef Q_OS_ANDROID
       m_EditSource->insert(strImage);
+#endif
     } else {
       if (isToAndroidView) insertNote(strImage);
     }
@@ -688,6 +697,8 @@ void Notes::refreshQMLVPos(qreal newPos) {
 }
 
 void Notes::saveQMLVPos() {
+#ifndef Q_OS_ANDROID
+
   QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);
 
   QString strTag = currentMDFile;
@@ -702,6 +713,8 @@ void Notes::saveQMLVPos() {
     sliderPos = getVPos();
     Reg.setValue("/MainNotes/SlidePos" + currentMDFile, sliderPos);
   }
+
+#endif
 }
 
 void Notes::setVPos() {
@@ -719,31 +732,45 @@ qreal Notes::getVPos() { return sliderPos; }
 qreal Notes::getVHeight() { return textHeight; }
 
 void Notes::on_btnInsertTable_clicked() {
+#ifndef Q_OS_ANDROID
+
   QString table1 = "|Title1|Title2|\n";
   QString table2 = "|------|------|\n";
   QString table = table1 + table2;
   m_EditSource->insert(table);
+
+#endif
 }
 
 void Notes::on_btnS1_clicked() {
+#ifndef Q_OS_ANDROID
+
   QString str = m_EditSource->selectedText();
   if (str == "") str = tr("Bold Italic");
   if (!m_EditSource->hasSelectedText())
     m_EditSource->insert("_**" + str + "**_");
   else
     m_EditSource->replaceSelectedText("_**" + str + "**_");
+
+#endif
 }
 
 void Notes::on_btnS2_clicked() {
+#ifndef Q_OS_ANDROID
+
   QString str = m_EditSource->selectedText();
   if (str == "") str = tr("Italic");
   if (!m_EditSource->hasSelectedText())
     m_EditSource->insert("_" + str + "_");
   else
     m_EditSource->replaceSelectedText("_" + str + "_");
+
+#endif
 }
 
 void Notes::on_btnS3_clicked() {
+#ifndef Q_OS_ANDROID
+
   QString str = m_EditSource->selectedText();
   if (str == "") str = tr("Underline");
 
@@ -751,9 +778,13 @@ void Notes::on_btnS3_clicked() {
     m_EditSource->insert("<u>" + str + "</u>");
   else
     m_EditSource->replaceSelectedText("<u>" + str + "</u>");
+
+#endif
 }
 
 void Notes::on_btnS4_clicked() {
+#ifndef Q_OS_ANDROID
+
   QString str = m_EditSource->selectedText();
   if (str == "") str = tr("Strickout");
 
@@ -761,15 +792,21 @@ void Notes::on_btnS4_clicked() {
     m_EditSource->insert("~~" + str + "~~");
   else
     m_EditSource->replaceSelectedText("~~" + str + "~~");
+
+#endif
 }
 
 void Notes::on_btnColor_clicked() {
+#ifndef Q_OS_ANDROID
+
   QString strColor = m_Method->getCustomColor();
   if (strColor.isEmpty()) return;
 
   QString str = m_EditSource->selectedText();
   if (str == "") str = tr("Color");
   m_EditSource->insert("<font color=" + strColor + ">" + str + "</font>");
+
+#endif
 }
 
 QColor Notes::StringToColor(QString mRgbStr) {
@@ -778,15 +815,21 @@ QColor Notes::StringToColor(QString mRgbStr) {
 }
 
 void Notes::on_btnS5_clicked() {
+#ifndef Q_OS_ANDROID
+
   QString str = m_EditSource->selectedText();
   if (str == "") str = tr("Bold");
   if (!m_EditSource->hasSelectedText())
     m_EditSource->insert("**" + str + "**");
   else
     m_EditSource->replaceSelectedText("**" + str + "**");
+
+#endif
 }
 
 void Notes::on_btnPaste_clicked() {
+#ifndef Q_OS_ANDROID
+
   const QClipboard *clipboard = QApplication::clipboard();
   const QMimeData *mimeData = clipboard->mimeData();
   if (mimeData->hasImage()) {
@@ -802,6 +845,8 @@ void Notes::on_btnPaste_clicked() {
     }
   } else
     m_EditSource->paste();
+
+#endif
 }
 
 bool Notes::eventFilterQwNote(QObject *watch, QEvent *event) {
@@ -885,7 +930,9 @@ void Notes::closeEvent(QCloseEvent *event) {
   Q_UNUSED(event);
   saveEditorState(currentMDFile);
 
+#ifndef Q_OS_ANDROID
   strNoteText = m_EditSource->text().trimmed();
+#endif
 
   if (!m_TextSelector->isHidden()) {
     m_TextSelector->close();
@@ -928,6 +975,8 @@ bool Notes::isSetNewNoteTitle() {
 void Notes::on_editSource_textChanged() { isTextChange = true; }
 
 void Notes::show_findText() {
+#ifndef Q_OS_ANDROID
+
   QString findtext = ui->editFind->text().trimmed().toLower();
   if (findtext == "") return;
   // 获得对话框的内容
@@ -945,6 +994,8 @@ void Notes::show_findText() {
     m_ShowMsg->showMsg("Knot", tr("The end of the document has been reached."),
                        0);
   }
+
+#endif
 }
 
 void Notes::show_findTextBack() {
@@ -1695,6 +1746,8 @@ void Notes::openEditUI() {
     return;
   }
 
+#ifndef Q_OS_ANDROID
+
   mw_one->mainHeight = mw_one->height();
 
   init();
@@ -1727,6 +1780,8 @@ void Notes::openEditUI() {
   }
 
   mw_one->isOpenSearchResult = false;
+
+#endif
 }
 
 void Notes::openNotes() {
@@ -1989,6 +2044,8 @@ void Notes::updateMainnotesIniToSyncLists() {
 }
 
 void Notes::initMarkdownLexer() {
+#ifndef Q_OS_ANDROID
+
   // 创建 Lexer
   markdownLexer = new QsciLexerMarkdown(m_EditSource);
   m_EditSource->setLexer(markdownLexer);
@@ -2018,9 +2075,13 @@ void Notes::initMarkdownLexer() {
 
   qDebug() << "Header1 颜色："
            << markdownLexer->color(QsciLexerMarkdown::Header1);
+
+#endif
 }
 
 void Notes::initMarkdownLexerDark() {
+#ifndef Q_OS_ANDROID
+
   //  创建前确保清空原有 Lexer
   m_EditSource->setLexer(nullptr);
 
@@ -2064,8 +2125,11 @@ void Notes::initMarkdownLexerDark() {
 
   // 强制刷新颜色
   m_EditSource->recolor();
+
+#endif
 }
 
+#ifndef Q_OS_ANDROID
 void Notes::initMarkdownEditor(QsciScintilla *editor) {
   // 强制编码和默认样式
   // editor->setUtf8(true);
@@ -2174,8 +2238,12 @@ void Notes::initMarkdownEditor(QsciScintilla *editor) {
                         true);  // 在文字下方绘制
 }
 
+#endif
+
 // 查找关键词
 void Notes::searchText(const QString &text, bool forward) {
+#ifndef Q_OS_ANDROID
+
   m_lastSearchText = text;
 
   // 调整光标起始位置，避免重复匹配
@@ -2199,6 +2267,8 @@ void Notes::searchText(const QString &text, bool forward) {
     // QMessageBox::information(this, "搜索",
     //                          forward ? "已到达文档末尾" : "已到达文档开头");
   }
+
+#endif
 }
 
 // 查找下一个
@@ -2216,6 +2286,8 @@ void Notes::searchPrevious() {
 }
 
 void Notes::jumpToNextMatch() {
+#ifndef Q_OS_ANDROID
+
   if (m_matchPositions.isEmpty()) return;
 
   m_currentMatchIndex = (m_currentMatchIndex + 1) % m_matchPositions.size();
@@ -2229,9 +2301,13 @@ void Notes::jumpToNextMatch() {
   int line = m_EditSource->SendScintilla(QsciScintilla::SCI_LINEFROMPOSITION,
                                          pos.first);
   m_EditSource->ensureLineVisible(line);
+
+#endif
 }
 
 void Notes::jumpToPrevMatch() {
+#ifndef Q_OS_ANDROID
+
   if (m_matchPositions.isEmpty()) return;
 
   m_currentMatchIndex = (m_currentMatchIndex - 1 + m_matchPositions.size()) %
@@ -2246,11 +2322,15 @@ void Notes::jumpToPrevMatch() {
   int line = m_EditSource->SendScintilla(QsciScintilla::SCI_LINEFROMPOSITION,
                                          pos.first);
   m_EditSource->ensureLineVisible(line);
+
+#endif
 }
 
 // 获取搜索结果的匹配总数
 int Notes::getSearchMatchCount(const QString &text) {
   if (text.isEmpty()) return 0;
+
+#ifndef Q_OS_ANDROID
 
   // 保存当前编辑状态
   int originalPos =
@@ -2278,6 +2358,8 @@ int Notes::getSearchMatchCount(const QString &text) {
   m_EditSource->SendScintilla(QsciScintilla::SCI_SETANCHOR, originalAnchor);
 
   return count;
+
+#endif
 }
 
 void Notes::openBrowserOnce(const QString &htmlPath) {
@@ -2290,6 +2372,7 @@ void Notes::openBrowserOnce(const QString &htmlPath) {
 void Notes::on_btnView_clicked() { mw_one->ui->btnOpenNote->click(); }
 
 void Notes::init_md() {
+#ifndef Q_OS_ANDROID
   if (isDark) {
     initMarkdownLexerDark();
     m_EditSource->verticalScrollBar()->setStyleSheet(
@@ -2299,12 +2382,16 @@ void Notes::init_md() {
     m_EditSource->verticalScrollBar()->setStyleSheet(
         m_Method->lightScrollbarStyle);
   }
+
   initMarkdownEditor(m_EditSource);
+#endif
 }
 
 #include <QSettings>
 
 void Notes::saveEditorState(const QString &filePath) {
+#ifndef Q_OS_ANDROID
+
   // 指定 INI 格式和文件路径
   QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);
 
@@ -2322,9 +2409,13 @@ void Notes::saveEditorState(const QString &filePath) {
                     m_EditSource->verticalScrollBar()->sliderPosition());
 
   settings.endGroup();
+
+#endif
 }
 
 void Notes::restoreEditorState(const QString &filePath) {
+#ifndef Q_OS_ANDROID
+
   QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);
 
   QString groupName = "Documents/" + QFileInfo(filePath).canonicalFilePath();
@@ -2340,4 +2431,6 @@ void Notes::restoreEditorState(const QString &filePath) {
   m_EditSource->setCursorPosition(line, index);
 
   settings.endGroup();
+
+#endif
 }

@@ -35,9 +35,12 @@
 #include <QTextDocument>
 #include <QTextDocumentFragment>
 
+#ifndef Q_OS_ANDROID
 #include "lib/qsci/Qsci/qscilexercpp.h"
 #include "lib/qsci/Qsci/qscilexermarkdown.h"
 #include "lib/qsci/Qsci/qsciscintilla.h"
+#endif
+
 #include "src/Comm/ShowMessage.h"
 #include "src/Notes/ColorDialog.h"
 #include "src/Notes/LineNumberArea.h"
@@ -70,7 +73,10 @@ class Notes : public QDialog {
 
   QString new_title;
 
+#ifndef Q_OS_ANDROID
   QsciScintilla *m_EditSource = nullptr;
+#endif
+
   QTextEditHighlighter *m_EditSource1;
 
   QTimer *timerEditNote;
@@ -277,7 +283,11 @@ class Notes : public QDialog {
   QColor StringToColor(QString mRgbStr);
 
   void setOpenSearchResultForAndroid(bool isValue, QString strSearchText);
+
+#ifndef Q_OS_ANDROID
   void initMarkdownEditor(QsciScintilla *editor);
+#endif
+
   void searchText(const QString &text, bool forward);
   void searchNext();
   void searchPrevious();
@@ -288,7 +298,11 @@ class Notes : public QDialog {
   int m_currentMatchIndex = -1;
   void jumpToNextMatch();
   void jumpToPrevMatch();
+
+#ifndef Q_OS_ANDROID
   QsciLexerMarkdown *markdownLexer;
+#endif
+
   void initMarkdownLexer();
   QString imageToBase64(const QString &path);
   QString addImagePathToHtml(QString strhtml);
