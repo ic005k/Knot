@@ -1,4 +1,4 @@
-name: Qt6 Android CI (Fixed Paths)
+name: Qt6 Android CI (Path Fixed)
 
 on:
   push:
@@ -19,87 +19,67 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          path: 'Knot'  # 明确设置检出目录
+          path: 'src'  # 强制统一代码目录
 
-      # 1. 安装 JDK
-      - name: Setup JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: ${{ env.JAVA_VERSION }}
-
-      # 2. 安装 NDK
-      - name: Install NDK
-        run: |
-          $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
-          Invoke-WebRequest -Uri $ndkUrl -OutFile "$env:GITHUB_WORKSPACE\ndk.zip"
-          Expand-Archive -Path "$env:GITHUB_WORKSPACE\ndk.zip" -DestinationPath "$env:GITHUB_WORKSPACE\android-sdk\ndk"
-          Rename-Item "$env:GITHUB_WORKSPACE\android-sdk\ndk\android-ndk-r26b" "$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION"
-          echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
-          echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
-
-      # 3. 安装 Qt（严格匹配日志路径）
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v3
-        id: qt-install
-        with:
-          version: ${{ env.QT_VERSION }}
-          target: android
-          arch: ${{ env.QT_ARCH }}
-          modules: qt5compat
-          install-dir: 'D:\a\Knot\Qt'  # 硬编码匹配日志路径
-
-      # 4. 环境配置（使用绝对路径）
+      # 1. 安装工具链
       - name: Setup Environment
+        shell: powershell
         run: |
-          # 硬编码Qt路径（与安装日志完全一致）
-          $qtRoot = "D:\a\Knot\Qt\$env:QT_VERSION\$env:QT_ARCH"
-          echo "QT_ROOT=$qtRoot" >> $env:GITHUB_ENV
-          echo "$qtRoot\bin" >> $env:GITHUB_PATH
+          # 安装JDK
+          & actions\setup-java@v3 --distribution zulu --java-version $env:JAVA_VERSION
 
-          # 详细验证Qt安装
-          echo "=== Qt安装验证 ==="
-          echo "检查目录: $qtRoot"
-          dir "$qtRoot"
-          echo "检查bin目录:"
-          dir "$qtRoot\bin" || echo "::error::bin目录不存在!"
-          echo "qmake是否存在:"
-          Test-Path "$qtRoot\bin\qmake.exe" || echo "::error::qmake.exe不存在!"
+          # 安装NDK
+          $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
+          Invoke-WebRequest -Uri $ndkUrl -OutFile "ndk.zip"
+          Expand-Archive -Path "ndk.zip" -DestinationPath "android-sdk\ndk"
+          Rename-Item "android-sdk\ndk\android-ndk-r26b" "android-sdk\ndk\$env:NDK_VERSION"
+          echo "ANDROID_NDK_ROOT=$pwd\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
+          echo "$pwd\android-sdk\ndk\$env:NDK_VERSION\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-      # 5. 构建项目
+          # 安装Qt（使用绝对路径工作目录）
+          python -m pip install aqtinstall
+          aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH -m qt5compat --outputdir "$pwd\Qt"
+
+      # 2. 路径验证
+      - name: Verify Paths
+        shell: powershell
+        run: |
+          $qtBin = "$pwd\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
+
+          # 物理验证文件系统
+          echo "=== 物理路径验证 ==="
+          dir "$qtBin" -Force
+          (Get-ChildItem "$qtBin\qmake*").FullName
+          [System.IO.File]::Exists("$qtBin\qmake.exe")
+
+          # 环境验证
+          echo "=== 环境验证 ==="
+          where.exe qmake
+          Get-Command qmake | Select-Object -Property Path, Source
+
+      # 3. 构建项目
       - name: Build
-        shell: cmd
-        env:
-          ANDROID_NDK_ROOT: D:\a\Knot\android-sdk\ndk\${{ env.NDK_VERSION }}
-          ANDROID_SDK_ROOT: D:\a\Knot\android-sdk
+        shell: powershell
         run: |
-          echo "=== 当前工作目录 ==="
-          cd
-          dir
+          # 切换到项目目录
+          Set-Location "$pwd\src"
 
-          echo "=== 查找qmake ==="
-          where qmake
-          dir "D:\a\Knot\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
+          # 使用完整物理路径调用qmake
+          $qmakePath = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin\qmake"
+          & "$qmakePath" Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a 2>&1 | Tee-Object -FilePath qmake.log
 
-          echo "=== 执行qmake ==="
-          "D:\a\Knot\Qt\%QT_VERSION%\%QT_ARCH%\bin\qmake" Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
+          # 验证Makefile编码
+          [System.IO.File]::ReadAllText("Makefile", [System.Text.Encoding]::UTF8).Substring(0, 200)
 
-          echo "=== 生成的Makefile ==="
-          type Makefile || (
-            echo "::error::Makefile未生成!"
-            dir
-            exit 1
-          )
-
-          echo "=== 开始编译 ==="
-          make -j %NUMBER_OF_PROCESSORS%
-
-          echo "=== 打包APK ==="
+          # 构建
+          make -j $env:NUMBER_OF_PROCESSORS
           make apk INSTALL_ROOT=build
 
-      # 6. 上传产物
-      - name: Upload APK
+      # 4. 上传结果
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Knot-APK
-          path: build\android-build\build\outputs\apk\release\*.apk
+          name: Build-Output
+          path: |
+            src\build\android-build\build\outputs\apk\**\*.apk
+            src\qmake.log
