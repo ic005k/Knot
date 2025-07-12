@@ -74,7 +74,7 @@ jobs:
           version: ${{ env.QT_VERSION }}
           target: android
           arch: ${{ env.QT_ARCH }}
-          modules: qt5compat qtcharts qtsensors qtlocation qtpositioning qtwebview core gui
+          modules: qt5compat qtcharts qtsensors qtlocation qtpositioning qtwebview
           install-deps: true
           archive-folder-restructure: "yes"
           mirror: "https://mirrors.tuna.tsinghua.edu.cn/qt/"
