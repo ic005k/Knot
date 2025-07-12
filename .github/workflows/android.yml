@@ -11,7 +11,7 @@ on:
     branches: [ main ]
 
 env:
-  QT_VERSION: 6.6.3  # 使用最新稳定版本
+  QT_VERSION: 6_6_3  # 使用最新稳定版本
   ANDROID_API_LEVEL: 34
   BUILD_TOOLS_VERSION: 34.0.0
   NDK_VERSION: 26.1.10909125  # 匹配最新NDK
@@ -48,20 +48,41 @@ jobs:
         target: android
         arch: ${{ env.QT_ARCH }}
         modules: qtcharts qtsensors qtlocation qtpositioning qtwebview
+        # 添加安装路径重映射
+        archive-folder-restructure: "yes"
         install-deps: true
         mirror: https://mirrors.tuna.tsinghua.edu.cn/qt/  # 使用国内镜像加速
 
     - name: Debug Qt Installation
       run: |
-        echo "Qt安装目录内容:"
-        ls -la ${{ env.QT_INSTALL_DIR }}/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}
-        echo "查找qmake位置:"
-        find ${{ env.QT_INSTALL_DIR }} -name qmake
+        # 列出所有可能的安装路径
+        echo "Qt根目录内容:"
+        ls -la ${{ env.QT_INSTALL_DIR }}
+
+        echo "尝试不同版本格式:"
+        ls -la ${{ env.QT_INSTALL_DIR }}/${{ env.QT_VERSION }} || true
+        ls -la ${{ env.QT_INSTALL_DIR }}/${{ env.QT_VERSION_DIR }} || true
+
+        echo "查找实际安装位置:"
+        find ${{ env.QT_INSTALL_DIR }} -name 'android_arm64_v8a' -type d
+
+        echo "验证qmake位置:"
+        find ${{ env.QT_INSTALL_DIR }} -name qmake -type f
 
     - name: Configure Qt environment
+      id: set-qt-env
       run: |
-        echo "QT_DIR=$QT_INSTALL_DIR/$QT_VERSION/$QT_ARCH" >> $GITHUB_ENV
-        echo "PATH=$QT_DIR/bin:$PATH" >> $GITHUB_ENV
+        # 自动检测 Android 目录
+        QT_ANDROID_DIR=$(find ${{ env.QT_INSTALL_DIR }} -path "*/${{ env.QT_ARCH }}" -type d -print -quit)
+        if [ -z "$QT_ANDROID_DIR" ]; then
+            echo "::error::Android Qt目录未找到!"
+            exit 1
+        fi
+
+        # 输出环境变量供后续步骤使用
+        echo "QT_ANDROID_DIR=${QT_ANDROID_DIR}" >> $GITHUB_ENV
+        echo "PATH=${QT_ANDROID_DIR}/bin:$PATH" >> $GITHUB_ENV
+        echo "检测到的Qt路径: ${QT_ANDROID_DIR}"
 
     - name: Verify Qt and NDK
       run: |
@@ -75,18 +96,12 @@ jobs:
     - name: Generate Makefile
       run: |
         cd $REPO_ROOT
-        if [ ! -f "Knot.pro" ]; then
-          echo "Knot.pro 文件未找到!"
-          exit 1
-        fi
-
-        # 使用完整路径调用qmake，避免路径问题
-        $QT_DIR/bin/qmake "Knot.pro" \
-          -spec android-clang \
-          "CONFIG += thread c++17 release" \
-          "ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT" \
-          "ANDROID_API_LEVEL=${{ env.ANDROID_API_LEVEL }}" \
-          ANDROID_ABIS=arm64-v8a
+        ${{ env.QT_ANDROID_DIR }}/bin/qmake "Knot.pro" \
+                -spec android-clang \
+                "CONFIG += thread c++17 release" \
+                "ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT" \
+                "ANDROID_API_LEVEL=${{ env.ANDROID_API_LEVEL }}" \
+                ANDROID_ABIS=arm64-v8a
 
     - name: Build APK
       run: |
