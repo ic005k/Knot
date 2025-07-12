@@ -44,7 +44,7 @@ jobs:
           python -m pip install aqtinstall
           aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH -m qt5compat --outputdir "$env:GITHUB_WORKSPACE\Qt"
           # 验证安装文件结构
-          tree /F "$env:GITHUB_WORKSPACE\Qt" || echo "tree命令不可用，继续执行"
+          dir "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
 
       # 4. 验证安装
       - name: Verify Installation
@@ -52,17 +52,14 @@ jobs:
           echo "=== Qt 安装验证 ==="
           $qtBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
 
-          # 列出所有qmake相关文件
-          dir "$qtBin" | findstr "qmake"
-
-          # 检查qmake可执行文件（可能是.bat或无扩展名）
-          if (!(Test-Path "$qtBin\qmake.bat") -and !(Test-Path "$qtBin\qmake")) {
-              echo "::error::未找到任何qmake可执行文件!"
+          # 检查qmake可执行文件
+          if (!(Test-Path "$qtBin\qmake.bat")) {
+              echo "::error::未找到qmake.bat!"
               echo "当前目录内容:"
               dir "$qtBin"
               exit 1
           }
-          echo "qmake验证通过"
+          echo "qmake.bat验证通过"
 
       # 5. 构建项目
       - name: Build
@@ -73,14 +70,18 @@ jobs:
           set PATH=%QT_ROOT%\bin;%PATH%
 
           echo "=== 查找qmake ==="
-          where qmake || where qmake.bat || (
-              echo "::error::无法定位qmake!"
+          where qmake.bat || (
+              echo "::error::无法定位qmake.bat!"
               exit 1
           )
 
           echo "=== 执行qmake ==="
-          qmake Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a || (
+          "%QT_ROOT%\bin\qmake.bat" Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a || (
               echo "::error::qmake执行失败!"
+              echo "当前工作目录:"
+              cd
+              echo "PATH内容:"
+              echo %PATH%
               exit 1
           )
 
