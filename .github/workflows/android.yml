@@ -1,9 +1,17 @@
 name: Qt6 Android Build (Linux Fix)
 
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # 允许手动触发
+
 env:
   QT_VERSION: "6.6.3"
   NDK_VERSION: "26.3.11579264"
   ANDROID_API_LEVEL: "34"
+  BUILD_TOOLS_VERSION: "34.0.0"
 
 jobs:
   build:
@@ -11,38 +19,71 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 安装 NDK 26（官方原版）
-      - name: Install NDK 26
-        uses: android-actions/setup-android@v3
-        with:
-          ndk-version: ${{ env.NDK_VERSION }}
+      # 安装基础依赖
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libgl1-mesa-dev unzip tree
 
-      # 关键步骤：修复 Linux 的头文件路径
+      # 设置JDK
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 安装NDK 26（官方版本）
+      - name: Install Android NDK
+        run: |
+          mkdir -p android-sdk/ndk
+          wget https://dl.google.com/android/repository/android-ndk-r26b-linux.zip
+          unzip android-ndk-r26b-linux.zip -d android-sdk/ndk/
+          mv android-sdk/ndk/android-ndk-r26b android-sdk/ndk/${{ env.NDK_VERSION }}
+          echo "ANDROID_NDK_ROOT=$GITHUB_WORKSPACE/android-sdk/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+          echo "NDK_HOME=$GITHUB_WORKSPACE/android-sdk/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+
+      # 修复Linux头文件路径
       - name: Fix NDK headers for Linux
         run: |
-          NDK_SYSROOT=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot
-          # 确保目标目录存在
-          mkdir -p $NDK_SYSROOT/usr/include/bits
-          # 复制所有必要头文件
-          cp -r $NDK_SYSROOT/usr/include/aarch64-linux-android/bits/* $NDK_SYSROOT/usr/include/bits/
+          SYSROOT="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+          mkdir -p $SYSROOT/usr/include/bits
+          cp $SYSROOT/usr/include/aarch64-linux-android/bits/* $SYSROOT/usr/include/bits/
+          tree -L 3 $SYSROOT/usr/include
 
-      # 验证修复是否成功
-      - name: Check headers
-        run: |
-          ls -la $ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/libc-header-start.h
-          if [ ! -f "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/libc-header-start.h" ]; then
-            echo "::error::头文件修复失败！"
-            exit 1
-          fi
+      # 安装Qt
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          target: android
+          arch: ${{ env.QT_ARCH }}
+          modules: qt5compat qtcharts qtsensors qtlocation qtpositioning qtwebview
 
-      # 构建时显式指定路径
-      - name: Build with fixed paths
+      # 配置项目（关键修复）
+      - name: Configure project
         run: |
+          TOOLCHAIN_PATH="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64"
+          SYSROOT="$TOOLCHAIN_PATH/sysroot"
+
           qmake Knot.pro \
             -spec android-clang \
             CONFIG+=release \
             ANDROID_ABIS=arm64-v8a \
-            QMAKE_CFLAGS="-I$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android" \
-            QMAKE_CXXFLAGS="$QMAKE_CFLAGS"
+            ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
+            ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT \
+            QMAKE_CFLAGS="-I$SYSROOT/usr/include/aarch64-linux-android -I$SYSROOT/usr/include" \
+            QMAKE_CXXFLAGS="$QMAKE_CFLAGS" \
+            ANDROID_MIN_SDK_VERSION=$ANDROID_API_LEVEL
 
-          make -j$(nproc) && make apk
+      # 构建项目
+      - name: Build project
+        run: |
+          make -j$(nproc)
+          make apk INSTALL_ROOT=build
+
+      # 上传产物
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android-APK
+          path: build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk
