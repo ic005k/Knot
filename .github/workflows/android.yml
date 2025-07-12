@@ -110,7 +110,7 @@ jobs:
 
     # 签名APK（如果提供密钥）
     - name: Sign APK
-      if: ${{ secrets.KEY_STORE_PASSWORD != '' && secrets.KEY_PASSWORD != '' && secrets.KEY_ALIAS != '' }}
+      if: ${{ secrets.KEY_STORE_PASSWORD != null && secrets.KEY_PASSWORD != null && secrets.KEY_ALIAS != null }}
       run: |
         jarsigner -verbose \
           -sigalg SHA256withRSA \
