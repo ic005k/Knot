@@ -1,4 +1,4 @@
-name: Build and Sign Android APK
+name: Build Android APK
 
 on:
   push:
@@ -10,7 +10,7 @@ env:
   QT_VERSION: "6.6.3"
   QT_ARCH: "android_arm64_v8a"
   ANDROID_API_LEVEL: "34"
-  NDK_VERSION: "26.3.11579264"
+  NDK_VERSION: "26.3.11579264"  # 或者尝试 "25.2.9519653"
   BUILD_TOOLS_VERSION: "34.0.0"
 
 jobs:
@@ -31,18 +31,23 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 关键修改：使用官方推荐的NDK安装方式
+      # 关键修改：使用完整NDK安装方法
       - name: Install Android NDK
-        uses: android-actions/setup-android@v3
-        with:
-          ndk-version: ${{ env.NDK_VERSION }}
-          ndk-path: ${{ github.workspace }}/android-sdk/ndk/${{ env.NDK_VERSION }}
+        run: |
+          mkdir -p android-sdk/ndk
+          wget https://dl.google.com/android/repository/android-ndk-r26b-linux.zip
+          unzip -q android-ndk-r26b-linux.zip -d android-sdk/ndk/
+          mv android-sdk/ndk/android-ndk-r26b android-sdk/ndk/${{ env.NDK_VERSION }}
+          echo "ANDROID_NDK_ROOT=$GITHUB_WORKSPACE/android-sdk/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+          echo "NDK_HOME=$GITHUB_WORKSPACE/android-sdk/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
 
+      # 验证NDK安装
       - name: Verify NDK installation
         run: |
-          echo "NDK path: ${{ github.workspace }}/android-sdk/ndk/${{ env.NDK_VERSION }}"
-          echo "Sysroot path: ${{ github.workspace }}/android-sdk/ndk/${{ env.NDK_VERSION }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
-          ls -la ${{ github.workspace }}/android-sdk/ndk/${{ env.NDK_VERSION }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/
+          echo "NDK路径: $ANDROID_NDK_ROOT"
+          echo "Sysroot路径: $ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+          echo "检查头文件是否存在:"
+          find $ANDROID_NDK_ROOT -name "libc-header-start.h" || echo "未找到头文件"
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -52,19 +57,20 @@ jobs:
           arch: ${{ env.QT_ARCH }}
           modules: qt5compat qtcharts qtsensors qtlocation qtpositioning qtwebview
 
+      # 关键修改：添加显式sysroot配置
       - name: Configure project
         run: |
-          # 设置环境变量
-          echo "ANDROID_NDK_ROOT=${{ github.workspace }}/android-sdk/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=${{ github.workspace }}/android-sdk" >> $GITHUB_ENV
+          TOOLCHAIN_PATH="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64"
+          SYSROOT="$TOOLCHAIN_PATH/sysroot"
 
-          # 使用Qt自动配置的工具链
           qmake Knot.pro \
             -spec android-clang \
             CONFIG+=release \
             ANDROID_ABIS=arm64-v8a \
             ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
             ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT \
+            QMAKE_CFLAGS="-target aarch64-linux-android$ANDROID_API_LEVEL -isystem $SYSROOT/usr/include/aarch64-linux-android" \
+            QMAKE_CXXFLAGS="-target aarch64-linux-android$ANDROID_API_LEVEL -isystem $SYSROOT/usr/include/c++/v1 -isystem $SYSROOT/usr/include/aarch64-linux-android" \
             ANDROID_MIN_SDK_VERSION=$ANDROID_API_LEVEL
 
       - name: Build project
@@ -72,11 +78,8 @@ jobs:
           make -j$(nproc)
           make apk INSTALL_ROOT=build
 
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: Android-APK
-          path: |
-            app-release.apk
-            build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk
+          path: build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk
