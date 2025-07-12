@@ -17,7 +17,7 @@ env:
   NDK_VERSION: 26.1.10909125  # 匹配最新NDK
   QT_ARCH: android_arm64_v8a
   REPO_ROOT: ${{ github.workspace }}
-  QT_INSTALL_DIR: ${{ github.workspace }}/QtAndroid  # 使用Unix风格路径（兼容Windows）
+  QT_INSTALL_DIR: /usr/local/Qt  # 使用插件默认路径
 
 jobs:
   build:
@@ -60,9 +60,8 @@ jobs:
 
     - name: Configure Qt environment
       run: |
-        echo "QT_DIR=${{ env.QT_INSTALL_DIR }}/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}" >> $GITHUB_ENV
-        echo "PATH=${{ env.QT_INSTALL_DIR }}/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}/bin:$PATH" >> $GITHUB_ENV
-        echo "ANDROID_NDK_ROOT=${{ steps.android-setup.outputs.ndk-path }}" >> $GITHUB_ENV
+        echo "QT_DIR=$QT_INSTALL_DIR/$QT_VERSION/$QT_ARCH" >> $GITHUB_ENV
+        echo "PATH=$QT_DIR/bin:$PATH" >> $GITHUB_ENV
 
     - name: Verify Qt and NDK
       run: |
