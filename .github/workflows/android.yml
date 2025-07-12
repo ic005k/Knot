@@ -1,89 +1,56 @@
-name: Qt6 Android Build (Linux Fix)
+name: Qt6 Android Build (Windows)
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:  # 允许手动触发
-
-env:
-  QT_VERSION: "6.6.3"
-  NDK_VERSION: "26.3.11579264"
-  ANDROID_API_LEVEL: "34"
-  BUILD_TOOLS_VERSION: "34.0.0"
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest  # 关键修改：使用Windows环境
+
+    env:
+      QT_VERSION: "6.6.3"
+      NDK_VERSION: "26.3.11579264"
+      ANDROID_API_LEVEL: "34"
+
     steps:
       - uses: actions/checkout@v4
 
-      # 安装基础依赖
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential libgl1-mesa-dev unzip tree
-
-      # 设置JDK
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      # 安装NDK 26（官方版本）
+      # 安装NDK（Windows版）
       - name: Install Android NDK
         run: |
-          mkdir -p android-sdk/ndk
-          wget https://dl.google.com/android/repository/android-ndk-r26b-linux.zip
-          unzip android-ndk-r26b-linux.zip -d android-sdk/ndk/
-          mv android-sdk/ndk/android-ndk-r26b android-sdk/ndk/${{ env.NDK_VERSION }}
-          echo "ANDROID_NDK_ROOT=$GITHUB_WORKSPACE/android-sdk/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
-          echo "NDK_HOME=$GITHUB_WORKSPACE/android-sdk/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+          Invoke-WebRequest -Uri "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip" -OutFile "ndk.zip"
+          Expand-Archive -Path "ndk.zip" -DestinationPath "$env:GITHUB_WORKSPACE\android-sdk\ndk"
+          Rename-Item "$env:GITHUB_WORKSPACE\android-sdk\ndk\android-ndk-r26b" "$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION"
+          echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
 
-      # 修复Linux头文件路径
-      - name: Fix NDK headers for Linux
+      # 验证NDK安装
+      - name: Check NDK installation
         run: |
-          SYSROOT="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
-          mkdir -p $SYSROOT/usr/include/bits
-          cp $SYSROOT/usr/include/aarch64-linux-android/bits/* $SYSROOT/usr/include/bits/
-          tree -L 3 $SYSROOT/usr/include
+          ls "$env:ANDROID_NDK_ROOT\toolchains\llvm\prebuilt\windows-x86_64\sysroot\usr\include\aarch64-linux-android\bits"
 
-      # 安装Qt
+      # 安装Qt（Windows版）
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
+          host: windows
           target: android
           arch: ${{ env.QT_ARCH }}
-          modules: qt5compat qtcharts qtsensors qtlocation qtpositioning qtwebview
+          modules: qt5compat qtcharts qtsensors
 
-      # 配置项目（关键修复）
-      - name: Configure project
+      # Windows环境构建
+      - name: Build with qmake
+        shell: cmd
         run: |
-          TOOLCHAIN_PATH="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64"
-          SYSROOT="$TOOLCHAIN_PATH/sysroot"
+          set ANDROID_NDK_ROOT=%GITHUB_WORKSPACE%\android-sdk\ndk\%NDK_VERSION%
+          qmake Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
+          jom.exe -j %NUMBER_OF_PROCESSORS%
+          jom.exe apk INSTALL_ROOT=build
 
-          qmake Knot.pro \
-            -spec android-clang \
-            CONFIG+=release \
-            ANDROID_ABIS=arm64-v8a \
-            ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
-            ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT \
-            QMAKE_CFLAGS="-I$SYSROOT/usr/include/aarch64-linux-android -I$SYSROOT/usr/include" \
-            QMAKE_CXXFLAGS="$QMAKE_CFLAGS" \
-            ANDROID_MIN_SDK_VERSION=$ANDROID_API_LEVEL
-
-      # 构建项目
-      - name: Build project
-        run: |
-          make -j$(nproc)
-          make apk INSTALL_ROOT=build
-
-      # 上传产物
-      - name: Upload artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Android-APK
-          path: build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk
+          path: build\android-build\build\outputs\apk\release\android-build-release-unsigned.apk
