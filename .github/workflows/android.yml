@@ -110,20 +110,30 @@ jobs:
 
     # 签名APK（如果提供密钥）
     - name: Sign APK
-      if: ${{ secrets.KEY_STORE_PASSWORD != null && secrets.KEY_PASSWORD != null && secrets.KEY_ALIAS != null }}
       run: |
+        # 检查所有必要secret是否存在
+        if [ -z "$KEY_STORE_PASSWORD" ] || [ -z "$KEY_PASSWORD" ] || [ -z "$KEY_ALIAS" ]; then
+          echo "::warning::Signing secrets not fully configured. Skipping APK signing."
+          exit 0
+        fi
+
+        # 继续签名步骤
         jarsigner -verbose \
           -sigalg SHA256withRSA \
           -digestalg SHA-256 \
-          -keystore android/release-key.keystore \
-          -storepass ${{ secrets.KEY_STORE_PASSWORD }} \
-          -keypass ${{ secrets.KEY_PASSWORD }} \
+          -keystore android/app/my-release-key.keystore \
+          -storepass "${{ secrets.KEY_STORE_PASSWORD }}" \
+          -keypass "${{ secrets.KEY_PASSWORD }}" \
           ${{ github.workspace }}/app-release-unsigned.apk \
-          ${{ secrets.KEY_ALIAS }}
+          "${{ secrets.KEY_ALIAS }}"
 
         $ANDROID_SDK_ROOT/build-tools/$ANDROID_BUILD_TOOLS_VERSION/zipalign -v 4 \
           ${{ github.workspace }}/app-release-unsigned.apk \
           ${{ github.workspace }}/app-release.apk
+      env:
+        KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
     # 上传APK
     - name: Upload APK artifact
