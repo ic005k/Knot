@@ -11,7 +11,7 @@ on:
     branches: [ main ]
 
 env:
-  QT_VERSION: 6_6_3  # 使用最新稳定版本
+  QT_VERSION: 6.6.3  # 使用最新稳定版本
   ANDROID_API_LEVEL: 34
   BUILD_TOOLS_VERSION: 34.0.0
   NDK_VERSION: 26.1.10909125  # 匹配最新NDK
