@@ -10,7 +10,7 @@ jobs:
     runs-on: windows-latest
     env:
       QT_VERSION: "6.6.3"
-      NDK_VERSION: "26.1.10909125"  # 严格匹配您本地的NDK小版本
+      NDK_VERSION: "26.1.10909125"
       ANDROID_API_LEVEL: "34"
 
     steps:
@@ -25,29 +25,24 @@ jobs:
           Rename-Item "$env:GITHUB_WORKSPACE\android-sdk\ndk\android-ndk-r26b" "$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION"
           echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
 
-      # 2. 安装Qt（仅指定必要模块）
+      # 2. 安装Qt（关键修改：直接使用install-qt-action提供的路径）
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
+        id: qt_install  # 添加id用于后续引用
         with:
           version: ${{ env.QT_VERSION }}
           host: windows
           target: android
           arch: ${{ env.QT_ARCH }}
-          modules: qt5compat  # 只添加非核心模块
+          modules: qt5compat
           setup-python: false
 
-      # 3. 自动配置Qt环境（关键修复）
-      - name: Auto-set Qt Path
+      # 3. 直接使用action输出的Qt路径（不再递归搜索）
+      - name: Setup Qt Path
         run: |
-          # 自动探测Qt安装路径
-          $qtPath = (Get-ChildItem -Path "C:\Qt" -Filter "${{ env.QT_VERSION }}" -Recurse -Directory |
-                    Where-Object { $_.FullName -match "msvc2019_64" } |
-                    Select-Object -First 1).FullName
-          if (-not $qtPath) {
-              $qtPath = "C:\Qt\${{ env.QT_VERSION }}\msvc2019_64"
-          }
-          echo "Using Qt Path: $qtPath"
-          echo "$qtPath\bin" >> $env:GITHUB_PATH
+          echo "Using Qt Path from action: ${{ steps.qt_install.outputs.qt_path }}"
+          echo "${{ steps.qt_install.outputs.qt_path }}\bin" >> $env:GITHUB_PATH
+          echo "QT_DIR=${{ steps.qt_install.outputs.qt_path }}" >> $env:GITHUB_ENV
 
       # 4. 验证环境
       - name: Verify Environment
