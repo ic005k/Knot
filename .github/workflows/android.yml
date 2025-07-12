@@ -5,18 +5,27 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  QT_VERSION: "6.6.3"
+  NDK_VERSION: "26.1.10909125"  # NDK r26b
+  ANDROID_API_LEVEL: "34"
+  JAVA_VERSION: "17"            # 匹配 Qt 6.6 要求的 JDK 17
+
 jobs:
   build:
     runs-on: windows-latest
-    env:
-      QT_VERSION: "6.6.3"
-      NDK_VERSION: "26.1.10909125"
-      ANDROID_API_LEVEL: "34"
 
     steps:
       - uses: actions/checkout@v4
 
-      # 1. 安装NDK（精确版本）
+      # 1. 安装 JDK 17 (必须匹配 Qt 6.6 要求)
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      # 2. 安装 Android NDK (精确版本)
       - name: Install NDK
         run: |
           $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
@@ -24,72 +33,53 @@ jobs:
           Expand-Archive -Path "ndk.zip" -DestinationPath "$env:GITHUB_WORKSPACE\android-sdk\ndk"
           Rename-Item "$env:GITHUB_WORKSPACE\android-sdk\ndk\android-ndk-r26b" "$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION"
           echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
+          echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-      # 2. 智能安装Qt和构建工具
-      - name: Setup Build Environment
+      # 3. 安装 Qt 和必要模块
+      - name: Install Qt
         run: |
-          # 安装aqtinstall
           python -m pip install aqtinstall
+          # 列出可用模块确认名称
+          aqt list-qt windows android --modules ${{ env.QT_VERSION }}
+          # 安装Qt主程序 + 常用Android模块
+          aqt install-qt windows android ${{ env.QT_VERSION }} --archives all
+          # 额外安装qt5compat（如果名称不同需调整）
+          aqt install-tool windows android tools_qt5compat
 
-          # 安装Qt主程序
-          aqt install-qt windows android ${{ env.QT_VERSION }} ${{ env.QT_ARCH }} -m qt5compat
-
-          # 尝试从三个可能位置寻找jom
-          $jomPaths = @(
-              "C:\Qt\Tools\QtCreator\bin\jom.exe",
-              "C:\Qt\Tools\jom\jom.exe",
-              "$env:GITHUB_WORKSPACE\jom\jom.exe"
-          )
-
-          # 如果找不到则下载jom
-          $jomFound = $false
-          foreach ($path in $jomPaths) {
-              if (Test-Path $path) {
-                  echo "Found jom at: $path"
-                  echo "JOM_PATH=$(Split-Path $path -Parent)" >> $env:GITHUB_ENV
-                  $jomFound = $true
-                  break
-              }
-          }
-
-          if (-not $jomFound) {
-              echo "Downloading jom..."
-              Invoke-WebRequest -Uri "https://download.qt.io/official_releases/jom/jom.zip" -OutFile "jom.zip"
-              Expand-Archive -Path "jom.zip" -DestinationPath "$env:GITHUB_WORKSPACE\jom"
-              echo "JOM_PATH=$env:GITHUB_WORKSPACE\jom" >> $env:GITHUB_ENV
-          }
-
-          # 设置PATH
+      # 4. 配置环境变量
+      - name: Setup Environment
+        run: |
+          # 查找Qt安装路径
           $qtPath = (Get-ChildItem "C:\Qt" -Filter "${{ env.QT_VERSION }}" -Recurse -Directory | Where-Object { $_.FullName -match "android" } | Select-Object -First 1).FullName
-          echo "$qtPath\bin;$env:JOM_PATH" >> $env:GITHUB_PATH
+          echo "QT_PATH=$qtPath" >> $env:GITHUB_ENV
+          echo "$qtPath\bin" >> $env:GITHUB_PATH
 
-      # 3. 验证环境
+          # 生成 gradle.properties 解决兼容性警告
+          echo "android.suppressUnsupportedCompileSdk=${{ env.ANDROID_API_LEVEL }}" > gradle.properties
+
+      # 5. 验证工具链
       - name: Verify Tools
         run: |
-          where qmake
-          where jom
           qmake --version
-          jom --version || echo "::warning::jom not found, falling back to nmake"
+          make --version
+          java --version
 
-      # 4. 智能构建系统选择
+      # 6. 构建项目
       - name: Build
         shell: cmd
+        env:
+          ANDROID_NDK_ROOT: ${{ github.workspace }}\android-sdk\ndk\${{ env.NDK_VERSION }}
+          ANDROID_SDK_ROOT: ${{ github.workspace }}\android-sdk
         run: |
           qmake Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
+          make -j %NUMBER_OF_PROCESSORS%
+          make apk INSTALL_ROOT=build
 
-          if exist "%JOM_PATH%\jom.exe" (
-              echo "Using jom from %JOM_PATH%"
-              "%JOM_PATH%\jom.exe" -j %NUMBER_OF_PROCESSORS%
-              "%JOM_PATH%\jom.exe" apk INSTALL_ROOT=build
-          ) else (
-              echo "Using nmake as fallback"
-              nmake
-              nmake apk INSTALL_ROOT=build
-          )
-
-      # 5. 上传产物
+      # 7. 上传APK产物
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Knot-APK
-          path: build\android-build\build\outputs\apk\release\*.apk
+          path: |
+            build\android-build\build\outputs\apk\release\*.apk
+            build\android-build\build\outputs\apk\debug\*.apk
