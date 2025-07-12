@@ -126,6 +126,7 @@ INCLUDEPATH += $$PWD/lib/cmark-gfm/include
 #DEFINES += QT_DEPRECATED_WARNINGS \
 #           QT_ANGLE_PLATFORM
 
+!android {
 SOURCES += \
     lib/qsci/InputMethod.cpp \
     lib/qsci/ListBoxQt.cpp \
@@ -340,7 +341,10 @@ SOURCES += \
     lib/scintilla/src/Style.cpp \
     lib/scintilla/src/UniConversion.cpp \
     lib/scintilla/src/ViewStyle.cpp \
-    lib/scintilla/src/XPM.cpp \
+    lib/scintilla/src/XPM.cpp
+}
+
+SOURCES += \
     lib/zlib/adler32.c \
     lib/zlib/compress.c \
     lib/zlib/crc32.c \
@@ -448,7 +452,7 @@ SOURCES += \
     lib/quazip/unzip.c \
     lib/quazip/zip.c \
 
-
+!android {
 HEADERS += \
     lib/qsci/ListBoxQt.h \
     lib/qsci/Qsci/qsciabstractapis.h \
@@ -573,7 +577,10 @@ HEADERS += \
     lib/scintilla/src/UniConversion.h \
     lib/scintilla/src/UniqueString.h \
     lib/scintilla/src/ViewStyle.h \
-    lib/scintilla/src/XPM.h \
+    lib/scintilla/src/XPM.h
+}
+
+HEADERS += \
     lib/zlib/crc32.h \
     lib/zlib/deflate.h \
     lib/zlib/gzguts.h \
