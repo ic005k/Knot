@@ -34,7 +34,7 @@ jobs:
           $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
           Invoke-WebRequest -Uri $ndkUrl -OutFile "ndk.zip"
           Expand-Archive -Path "ndk.zip" -DestinationPath "android-sdk\ndk"
-          Rename-Item "android-sdk\ndk\android-ndk-r26b" "android-sdk\ndk\$env:NDK_VERSION"
+          Rename-Item -Path "android-sdk\ndk\android-ndk-r26b" -NewName $env:NDK_VERSION
           echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
           echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
