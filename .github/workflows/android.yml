@@ -7,9 +7,10 @@ on:
 
 env:
   QT_VERSION: "6.6.3"
+  QT_ARCH: "android_arm64_v8a"  # 明确指定架构
   NDK_VERSION: "26.1.10909125"  # NDK r26b
   ANDROID_API_LEVEL: "34"
-  JAVA_VERSION: "17"            # 匹配 Qt 6.6 要求的 JDK 17
+  JAVA_VERSION: "17"
 
 jobs:
   build:
@@ -18,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1. 安装 JDK 17 (必须匹配 Qt 6.6 要求)
+      # 1. 安装 JDK 17
       - name: Setup JDK
         uses: actions/setup-java@v3
         with:
@@ -35,24 +36,22 @@ jobs:
           echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
           echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-      # 3. 安装 Qt 和必要模块
-      - name: Install Qt
-        run: |
-          python -m pip install aqtinstall
-          # 列出可用模块确认名称
-          aqt list-qt windows android --modules ${{ env.QT_VERSION }}
-          # 安装Qt主程序 + 常用Android模块
-          aqt install-qt windows android ${{ env.QT_VERSION }} --archives all
-          # 额外安装qt5compat（如果名称不同需调整）
-          aqt install-tool windows android tools_qt5compat
+      # 3. 使用 jurplel/install-qt-action 安装 Qt 和模块
+      - name: Install Qt Android
+        uses: jurplel/install-qt-action@v3
+        id: qt-android
+        with:
+          version: ${{ env.QT_VERSION }}
+          target: android
+          arch: ${{ env.QT_ARCH }}
+          modules: qtcharts qtsensors qtlocation qtpositioning qt5compat
+          install-dir: ${{ github.workspace }}/Qt
 
       # 4. 配置环境变量
       - name: Setup Environment
         run: |
-          # 查找Qt安装路径
-          $qtPath = (Get-ChildItem "C:\Qt" -Filter "${{ env.QT_VERSION }}" -Recurse -Directory | Where-Object { $_.FullName -match "android" } | Select-Object -First 1).FullName
-          echo "QT_PATH=$qtPath" >> $env:GITHUB_ENV
-          echo "$qtPath\bin" >> $env:GITHUB_PATH
+          echo "QT_PATH=${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}" >> $env:GITHUB_ENV
+          echo "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}/bin" >> $env:GITHUB_PATH
 
           # 生成 gradle.properties 解决兼容性警告
           echo "android.suppressUnsupportedCompileSdk=${{ env.ANDROID_API_LEVEL }}" > gradle.properties
