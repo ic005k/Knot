@@ -140,12 +140,9 @@ jobs:
             "QMAKE_CC=$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang" \
             "QMAKE_CXX=$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang++" \
             "QMAKE_LINK=$TOOLCHAIN_PATH/bin/aarch64-linux-android$ANDROID_API_LEVEL-clang++" \
-            "QMAKE_CFLAGS+=-nostdinc" \
-            "QMAKE_CFLAGS+=-isystem $SYSROOT/usr/include" \
-            "QMAKE_CXXFLAGS+=-nostdinc++" \
-            "QMAKE_CXXFLAGS+=-isystem $SYSROOT/usr/include" \
-            "QMAKE_CXXFLAGS+=-isystem $SYSROOT/usr/include/c++/v1" \
-            "QMAKE_LIBS+=-L$SYSROOT/usr/lib/aarch64-linux-android/$ANDROID_API_LEVEL" \
+            "QMAKE_CFLAGS=-nostdinc -isystem $SYSROOT/usr/include" \  # 用引号包裹，避免 += 解析问题
+            "QMAKE_CXXFLAGS=-nostdinc++ -isystem $SYSROOT/usr/include -isystem $SYSROOT/usr/include/c++/v1" \
+            "QMAKE_LIBS=-L$SYSROOT/usr/lib/aarch64-linux-android/$ANDROID_API_LEVEL" \
             "ANDROID_MIN_SDK_VERSION=$ANDROID_API_LEVEL" \
             "ANDROID_TARGET_SDK_VERSION=$ANDROID_API_LEVEL"
 
