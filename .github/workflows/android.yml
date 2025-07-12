@@ -1,4 +1,4 @@
-name: Qt6 Android CI (Windows Stable)
+name: Qt6 Android CI (Universal)
 
 on:
   push:
@@ -25,40 +25,66 @@ jobs:
           Rename-Item "$env:GITHUB_WORKSPACE\android-sdk\ndk\android-ndk-r26b" "$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION"
           echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
 
-      # 2. 安装Qt（关键修改：显式安装jom）
-      - name: Install Qt with jom
+      # 2. 智能安装Qt和构建工具
+      - name: Setup Build Environment
         run: |
-          # 先安装aqt工具
+          # 安装aqtinstall
           python -m pip install aqtinstall
-          # 安装Qt时强制包含jom
-          aqt install-qt windows android ${{ env.QT_VERSION }} ${{ env.QT_ARCH }} -m qt5compat --tools ifw jom
-          # 获取实际安装路径
-          $qtPath = (Get-ChildItem "C:\Qt" -Filter "${{ env.QT_VERSION }}" -Recurse -Directory | Where-Object { $_.FullName -match "android" } | Select-Object -First 1).FullName
-          echo "QT_PATH=$qtPath" >> $env:GITHUB_ENV
-          echo "$qtPath\bin;C:\Qt\Tools\jom" >> $env:GITHUB_PATH
 
-      # 3. 验证工具链
+          # 安装Qt主程序
+          aqt install-qt windows android ${{ env.QT_VERSION }} ${{ env.QT_ARCH }} -m qt5compat
+
+          # 尝试从三个可能位置寻找jom
+          $jomPaths = @(
+              "C:\Qt\Tools\QtCreator\bin\jom.exe",
+              "C:\Qt\Tools\jom\jom.exe",
+              "$env:GITHUB_WORKSPACE\jom\jom.exe"
+          )
+
+          # 如果找不到则下载jom
+          $jomFound = $false
+          foreach ($path in $jomPaths) {
+              if (Test-Path $path) {
+                  echo "Found jom at: $path"
+                  echo "JOM_PATH=$(Split-Path $path -Parent)" >> $env:GITHUB_ENV
+                  $jomFound = $true
+                  break
+              }
+          }
+
+          if (-not $jomFound) {
+              echo "Downloading jom..."
+              Invoke-WebRequest -Uri "https://download.qt.io/official_releases/jom/jom.zip" -OutFile "jom.zip"
+              Expand-Archive -Path "jom.zip" -DestinationPath "$env:GITHUB_WORKSPACE\jom"
+              echo "JOM_PATH=$env:GITHUB_WORKSPACE\jom" >> $env:GITHUB_ENV
+          }
+
+          # 设置PATH
+          $qtPath = (Get-ChildItem "C:\Qt" -Filter "${{ env.QT_VERSION }}" -Recurse -Directory | Where-Object { $_.FullName -match "android" } | Select-Object -First 1).FullName
+          echo "$qtPath\bin;$env:JOM_PATH" >> $env:GITHUB_PATH
+
+      # 3. 验证环境
       - name: Verify Tools
         run: |
           where qmake
           where jom
           qmake --version
-          jom --version || echo "::warning::jom not found, will use nmake"
+          jom --version || echo "::warning::jom not found, falling back to nmake"
 
-      # 4. 智能构建（自动选择jom或nmake）
+      # 4. 智能构建系统选择
       - name: Build
         shell: cmd
         run: |
           qmake Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
 
-          if exist "C:\Qt\Tools\jom\jom.exe" (
-            echo "Using jom..."
-            C:\Qt\Tools\jom\jom.exe -j %NUMBER_OF_PROCESSORS%
-            C:\Qt\Tools\jom\jom.exe apk INSTALL_ROOT=build
+          if exist "%JOM_PATH%\jom.exe" (
+              echo "Using jom from %JOM_PATH%"
+              "%JOM_PATH%\jom.exe" -j %NUMBER_OF_PROCESSORS%
+              "%JOM_PATH%\jom.exe" apk INSTALL_ROOT=build
           ) else (
-            echo "Using nmake..."
-            nmake
-            nmake apk INSTALL_ROOT=build
+              echo "Using nmake as fallback"
+              nmake
+              nmake apk INSTALL_ROOT=build
           )
 
       # 5. 上传产物
