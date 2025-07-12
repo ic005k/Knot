@@ -1,4 +1,4 @@
-name: Qt6 Android CI (Windows Optimized)
+name: Qt6 Android CI (Windows Stable)
 
 on:
   push:
@@ -25,56 +25,43 @@ jobs:
           Rename-Item "$env:GITHUB_WORKSPACE\android-sdk\ndk\android-ndk-r26b" "$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION"
           echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
 
-      # 2. 安装Qt（包含jom工具）
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
-        id: qt_install
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: windows
-          target: android
-          arch: ${{ env.QT_ARCH }}
-          modules: qt5compat
-          setup-python: false
-          aqtinstall_args: "--tools ifw jom"  # 关键修改：强制安装jom
-
-      # 3. 配置环境路径（包含jom路径）
-      - name: Setup Environment
+      # 2. 安装Qt（关键修改：显式安装jom）
+      - name: Install Qt with jom
         run: |
-          # 设置Qt路径
-          echo "${{ steps.qt_install.outputs.qt_path }}\bin" >> $env:GITHUB_PATH
+          # 先安装aqt工具
+          python -m pip install aqtinstall
+          # 安装Qt时强制包含jom
+          aqt install-qt windows android ${{ env.QT_VERSION }} ${{ env.QT_ARCH }} -m qt5compat --tools ifw jom
+          # 获取实际安装路径
+          $qtPath = (Get-ChildItem "C:\Qt" -Filter "${{ env.QT_VERSION }}" -Recurse -Directory | Where-Object { $_.FullName -match "android" } | Select-Object -First 1).FullName
+          echo "QT_PATH=$qtPath" >> $env:GITHUB_ENV
+          echo "$qtPath\bin;C:\Qt\Tools\jom" >> $env:GITHUB_PATH
 
-          # 设置jom路径（通常在Qt Tools目录）
-          echo "C:\Qt\Tools\jom" >> $env:GITHUB_PATH
-          echo "QT_DIR=${{ steps.qt_install.outputs.qt_path }}" >> $env:GITHUB_ENV
-
-          # 验证工具可用性
+      # 3. 验证工具链
+      - name: Verify Tools
+        run: |
           where qmake
           where jom
-
-      # 4. 验证环境
-      - name: Verify Environment
-        run: |
           qmake --version
-          jom --version
-          ls "$env:ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/aarch64-linux-android"
+          jom --version || echo "::warning::jom not found, will use nmake"
 
-      # 5. 构建项目（使用nmake作为备用方案）
+      # 4. 智能构建（自动选择jom或nmake）
       - name: Build
         shell: cmd
         run: |
           qmake Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
 
-          # 尝试使用jom，失败时自动回退到nmake
-          jom -j %NUMBER_OF_PROCESSORS% || (
-            echo "::warning::jom not found, falling back to nmake"
+          if exist "C:\Qt\Tools\jom\jom.exe" (
+            echo "Using jom..."
+            C:\Qt\Tools\jom\jom.exe -j %NUMBER_OF_PROCESSORS%
+            C:\Qt\Tools\jom\jom.exe apk INSTALL_ROOT=build
+          ) else (
+            echo "Using nmake..."
             nmake
             nmake apk INSTALL_ROOT=build
-          ) && (
-            jom apk INSTALL_ROOT=build
           )
 
-      # 6. 上传产物
+      # 5. 上传产物
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
