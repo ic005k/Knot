@@ -82,22 +82,7 @@ jobs:
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> signing/keystore.properties
           echo "storeFile=../app.keystore" >> signing/keystore.properties
 
-      - name: Sign APK
-        if: ${{ secrets.KEY_STORE_PASSWORD != '' }}
-        run: |
-          cd signing
-          jarsigner -verbose \
-            -sigalg SHA256withRSA \
-            -digestalg SHA-256 \
-            -keystore app.keystore \
-            -storepass "${{ secrets.KEY_STORE_PASSWORD }}" \
-            -keypass "${{ secrets.KEY_PASSWORD }}" \
-            ../build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk \
-            "${{ secrets.KEY_ALIAS }}"
 
-          $ANDROID_SDK_ROOT/build-tools/$BUILD_TOOLS_VERSION/zipalign -v 4 \
-            ../build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk \
-            ../app-release.apk
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
