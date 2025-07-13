@@ -8,7 +8,7 @@ on:
 env:
   QT_VERSION: "6.6.3"
   QT_ARCH: "android_arm64_v8a"
-  DESKTOP_ARCH: "win64_mingw"  # 桌面版依赖
+  DESKTOP_ARCH: "win64_mingw"
   NDK_VERSION: "26.1.10909125"
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
@@ -54,90 +54,119 @@ jobs:
             -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning `
             --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
-      # 5. 构建项目（完全依赖Qt默认脚本）
+      # 5. 构建项目
       - name: Build
         shell: cmd
         run: |
-            echo "=== 初始化环境 ==="
-            set "QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%"
-            set "DESKTOP_QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%"
-            set "NDK_TOOLCHAIN=%ANDROID_NDK_ROOT%\toolchains\llvm\prebuilt\windows-x86_64\bin"
+          echo "=== 初始化环境 ==="
+          set "QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%"
+          set "DESKTOP_QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%"
+          set "NDK_TOOLCHAIN=%ANDROID_NDK_ROOT%\toolchains\llvm\prebuilt\windows-x86_64\bin"
+          set "PATH=%QT_ROOT%\bin;%DESKTOP_QT_ROOT%\bin;%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin;%NDK_TOOLCHAIN%;%PATH%"
 
-            REM 确保PATH只添加一次，避免重复和冲突
-            set "PATH=%QT_ROOT%\bin;%DESKTOP_QT_ROOT%\bin;%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin;%NDK_TOOLCHAIN%;%PATH%"
+          echo "=== 验证基本命令 ==="
+          where cd
+          where echo
+          where set
 
-            echo "=== 验证基本命令 ==="
-            where cd
-            where echo
-            where set
+          echo "=== 验证src目录 ==="
+          if exist "%GITHUB_WORKSPACE%\src" (
+            echo "src目录存在，尝试进入..."
+            cd "%GITHUB_WORKSPACE%\src" || (echo "::error::无法进入src目录！" & exit 1)
+          ) else (
+            echo "::error::src目录不存在！"
+            dir "%GITHUB_WORKSPACE%"
+            exit 1
+          )
 
-            echo "=== 验证src目录 ==="
-            if exist "%GITHUB_WORKSPACE%\src" (
-              echo "src目录存在，尝试进入..."
-              cd "%GITHUB_WORKSPACE%\src" || (echo "::error::无法进入src目录！" & exit 1)
-            ) else (
-              echo "::error::src目录不存在！"
-              dir "%GITHUB_WORKSPACE%"
-              exit 1
-            )
+          echo "=== 环境变量 ==="
+          set
 
-            echo "=== 环境变量 ==="
-            set
+          echo "=== 验证NDK工具链 ==="
+          where make.exe
+          if errorlevel 1 (
+            echo "::error::make.exe不在PATH中！"
+            dir "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin"
+            exit 1
+          )
+          make --version
 
-            echo "=== 验证NDK工具链 ==="
-            where make.exe
-            if errorlevel 1 (
-              echo "::error::make.exe不在PATH中！"
-              dir "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin"
-              exit 1
-            )
-            make --version
+          echo "=== 验证编译器 ==="
+          where clang++
+          if errorlevel 1 (
+            echo "::error::clang++不在PATH中！"
+            dir "%NDK_TOOLCHAIN%"
+            exit 1
+          )
+          clang++ --version
 
-            echo "=== 验证编译器 ==="
-            where clang++
-            if errorlevel 1 (
-              echo "::error::clang++不在PATH中！"
-              dir "%NDK_TOOLCHAIN%"
-              exit 1
-            )
-            clang++ --version
+          echo "=== 生成Makefile ==="
+          call qmake.bat Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
+          if errorlevel 1 (
+            echo "::error::qmake失败！"
+            exit 1
+          )
 
-            echo "=== 生成Makefile ==="
-            call qmake.bat Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
-            if errorlevel 1 (
-                  echo "::error::qmake失败！"
-                  exit 1
-                )
+          echo "=== 检查Makefile中的源文件 ==="
+          type Makefile | findstr /C:"SOURCES ="
+          type Makefile | findstr /C:"OBJECTS ="
 
-            echo "=== 检查Makefile中的源文件 ==="
-            type Makefile | findstr /C:"SOURCES ="  # 确认是否包含你的.cpp文件
-            type Makefile | findstr /C:"OBJECTS ="  # 确认是否生成对应的.o目标文件
+          echo "=== 执行make（带详细日志） ==="
+          "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" -j8 V=1
+          if errorlevel 1 (
+            echo "::error::编译失败！"
+            type make_output.log
+            exit 1
+          )
 
-            echo "=== 执行make（带详细日志） ==="
-            #"%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" -j8 V=1 > make_output.log 2>&1
-            "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" -j1 V=1  # 单线程执行，便于查看输出
-            if errorlevel 1 (
-              echo "::error::编译失败！"
-              type make_full.log
-              exit 1
-            )
+          echo "=== 检查编译产物 ==="
+          dir /s *.so
 
-            echo "=== 检查编译产物 ==="
-            dir /s *.so
+      # 6. 生成APK
+      - name: Generate APK
+        shell: cmd
+        run: |
+          echo "=== 初始化APK生成环境 ==="
+          set "QT_ANDROID_BIN=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\android_arm64_v8a\bin"
+          set "PATH=%QT_ANDROID_BIN%;%PATH%"
 
-            echo "=== 生成APK ==="
-            androiddeployqt.exe ^
-              --input android-libKnot.so-deployment-settings.json ^
-              --output build/android-build ^
-              --android-platform android-%ANDROID_API_LEVEL% ^
-              --jdk "%JAVA_HOME%" ^
-              --gradle --release
-            if errorlevel 1 exit 1
+          cd "%GITHUB_WORKSPACE%\src"
 
-      # 6. 上传产物
+          echo "=== 验证部署配置文件 ==="
+          if exist "android-libKnot.so-deployment-settings.json" (
+            echo "部署配置文件存在"
+          ) else (
+            echo "::error::部署配置文件缺失！"
+            dir
+            exit 1
+          )
+
+          echo "=== 调用androiddeployqt（触发Gradle打包） ==="
+          androiddeployqt.exe ^
+            --input android-libKnot.so-deployment-settings.json ^
+            --output build/android-build ^
+            --android-platform android-%ANDROID_API_LEVEL% ^
+            --jdk "%JAVA_HOME%" ^
+            --gradle --release
+          if errorlevel 1 (
+            echo "::error::APK生成失败！"
+            exit 1
+          )
+
+          echo "=== 检查APK产物 ==="
+          set APK_PATH=build\android-build\build\outputs\apk\release\*.apk
+          if exist "%APK_PATH%" (
+            echo "APK生成成功:"
+            dir "%APK_PATH%"
+          ) else (
+            echo "::error::APK未生成！"
+            exit 1
+          )
+
+      # 7. 上传产物
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: Knot-APK
-          path: build\android-build\build\outputs\apk\release\*.apk
+          path: src\build\android-build\build\outputs\apk\release\*.apk
