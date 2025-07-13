@@ -224,60 +224,76 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo "=== 准备签名环境 ==="
-          cd "%GITHUB_WORKSPACE%\src"
+            echo "=== 准备签名环境 ==="
+            cd "%GITHUB_WORKSPACE%\src"
 
-          REM 创建临时目录并进入
-          mkdir signing
-          cd signing
-          echo "当前目录：%cd%"  # 确认是否在 signing 目录下
+            REM 创建临时目录并进入
+            mkdir signing
+            cd signing
+            echo "当前目录：%cd%"
 
-          REM 关键：用 PowerShell 解密 Base64（避免换行和截断）
-          echo "=== 解密密钥库文件 ==="
-          PowerShell -Command "$base64 = $env:KEYSTORE_BASE64; [System.Convert]::FromBase64String($base64) | Set-Content -Path 'release.keystore' -Encoding Byte"
+            REM 解密密钥库文件（保持不变）
+            echo "=== 解密密钥库文件 ==="
+            PowerShell -Command "$base64 = $env:KEYSTORE_BASE64; [System.Convert]::FromBase64String($base64) | Set-Content -Path 'release.keystore' -Encoding Byte"
 
-          REM 验证密钥文件（保留）
-          if not exist "release.keystore" (
-            echo "::error::密钥文件解密失败，文件不存在！"
-            dir  # 列出当前目录内容，方便排查
-            exit 1
-          )
+            REM 验证密钥文件（保持不变）
+            if not exist "release.keystore" (
+              echo "::error::密钥文件解密失败，文件不存在！"
+              dir
+              exit 1
+            )
+            for %%I in (release.keystore) do set "FILE_SIZE=%%~zI"
+            echo "密钥文件大小：%FILE_SIZE% 字节"
+            if %FILE_SIZE% lss 100 (
+              echo "::error::密钥文件过小，可能解密不完整！"
+              exit 1
+            )
 
-          REM 可选：验证文件大小（确保解密完整）
-          for %%I in (release.keystore) do set "FILE_SIZE=%%~zI"
-          echo "密钥文件大小：%FILE_SIZE% 字节"
-          if %FILE_SIZE% lss 100 (
-            echo "::error::密钥文件过小，可能解密不完整！"
-            exit 1
-          )
+            REM 关键修改：获取未签名APK的具体名称
+            echo "=== 查找未签名APK ==="
+            set "APK_DIR=..\build\android-build\build\outputs\apk\release"
+            REM 列出目录中的APK文件（通常是 android-build-release-unsigned.apk）
+            dir "%APK_DIR%\*.apk"
+            REM 将找到的第一个APK文件名赋值给变量
+            for /f "delims=" %%f in ('dir /b "%APK_DIR%\*.apk"') do (
+              set "UNSIGNED_APK=%APK_DIR%\%%f"
+              goto :found_apk  # 只取第一个APK
+            )
+            :found_apk
+            REM 验证APK是否存在
+            if not defined UNSIGNED_APK (
+              echo "::error::未找到未签名APK！"
+              dir "%APK_DIR%"
+              exit 1
+            )
+            echo "找到未签名APK：%UNSIGNED_APK%"
 
-          REM 设置APK路径
-          set UNSIGNED_APK=..\build\android-build\build\outputs\apk\release\*.apk
-          set SIGNED_APK=..\build\android-build\build\outputs\apk\release\Knot-signed.apk
+            REM 设置签名后APK的路径
+            set "SIGNED_APK=%APK_DIR%\Knot-signed.apk"
 
-          REM 使用apksigner进行签名（Android SDK自带工具）
-          echo "=== 使用apksigner签名APK ==="
-          "%JAVA_HOME%\bin\jarsigner" -verbose -sigalg SHA256withRSA -digestalg SHA-256 ^
-            -keystore release.keystore ^
-            -storepass "%KEYSTORE_PASSWORD%" ^
-            -keypass "%KEY_PASSWORD%" ^
-            "%UNSIGNED_APK%" ^
-            "%KEY_ALIAS%"
+            REM 使用jarsigner签名（使用具体APK路径）
+            echo "=== 使用jarsigner签名APK ==="
+            "%JAVA_HOME%\bin\jarsigner" -verbose -sigalg SHA256withRSA -digestalg SHA-256 ^
+              -keystore release.keystore ^
+              -storepass "%KEYSTORE_PASSWORD%" ^
+              -keypass "%KEY_PASSWORD%" ^
+              "%UNSIGNED_APK%" ^
+              "%KEY_ALIAS%"
 
-          if errorlevel 1 (
-            echo "::error::APK签名失败！"
-            exit 1
-          )
+            if errorlevel 1 (
+              echo "::error::APK签名失败！"
+              exit 1
+            )
 
-          REM 验证签名
-          echo "=== 验证APK签名 ==="
-          "%JAVA_HOME%\bin\jarsigner" -verify -verbose "%UNSIGNED_APK%"
+            REM 验证签名
+            echo "=== 验证APK签名 ==="
+            "%JAVA_HOME%\bin\jarsigner" -verify -verbose "%UNSIGNED_APK%"
 
-          REM 重命名为带签名标识的APK
-          move "%UNSIGNED_APK%" "%SIGNED_APK%"
+            REM 重命名为带签名标识的APK
+            move "%UNSIGNED_APK%" "%SIGNED_APK%"
 
-          echo "=== 签名APK完成 ==="
-          dir "%SIGNED_APK%"
+            echo "=== 签名APK完成 ==="
+            dir "%SIGNED_APK%"
 
       # 8. 上传签名后的产物
       - name: Upload signed APK
