@@ -66,7 +66,7 @@ jobs:
                   cd src
 
                   echo "=== 生成Makefile（同本地qmake命令） ==="
-                  qmake.bat ..\Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
+                  qmake.bat Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
                   if errorlevel 1 exit 1
 
                   echo "=== 编译（使用NDK中的make，同本地） ==="
