@@ -126,64 +126,75 @@ jobs:
       - name: Generate APK
         shell: cmd
         run: |
-          echo "=== 初始化APK生成环境（匹配本地配置） ==="
+            echo "=== 初始化APK生成环境（匹配本地配置） ==="
 
-          REM 硬编码使用mingw_64目录（与本地一致）
-          set "QT_MINGW_BIN=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\mingw_64\bin"
+            REM 硬编码使用mingw_64目录（与本地一致）
+            set "QT_MINGW_BIN=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\mingw_64\bin"
 
-          REM 验证路径是否存在
-          if not exist "%QT_MINGW_BIN%" (
-            echo "::error::Qt mingw目录不存在！路径：%QT_MINGW_BIN%"
-            exit 1
-          )
+            REM 验证路径是否存在
+            if not exist "%QT_MINGW_BIN%" (
+              echo "::error::Qt mingw目录不存在！路径：%QT_MINGW_BIN%"
+              exit 1
+            )
 
-          REM 验证androiddeployqt是否存在
-          set "ANDROID_DEPLOY_QT=%QT_MINGW_BIN%\androiddeployqt.exe"
-          if not exist "%ANDROID_DEPLOY_QT%" (
-            echo "::error::androiddeployqt不存在！路径：%ANDROID_DEPLOY_QT%"
-            exit 1
-          )
+            REM 验证androiddeployqt是否存在
+            set "ANDROID_DEPLOY_QT=%QT_MINGW_BIN%\androiddeployqt.exe"
+            if not exist "%ANDROID_DEPLOY_QT%" (
+              echo "::error::androiddeployqt不存在！路径：%ANDROID_DEPLOY_QT%"
+              exit 1
+            )
 
-          REM 将路径添加到环境变量
-          set "PATH=%QT_MINGW_BIN%;%PATH%"
+            REM 将路径添加到环境变量
+            set "PATH=%QT_MINGW_BIN%;%PATH%"
 
-          cd "%GITHUB_WORKSPACE%\src"
+            cd "%GITHUB_WORKSPACE%\src"
 
-          echo "=== 验证部署配置文件 ==="
-          if exist "android-Knot-deployment-settings.json" (
-            echo "部署配置文件存在：android-Knot-deployment-settings.json"
-          ) else (
-            echo "::error::部署配置文件缺失！"
-            dir
-            exit 1
-          )
+            echo "=== 验证部署配置文件 ==="
+            if exist "android-Knot-deployment-settings.json" (
+              echo "部署配置文件存在：android-Knot-deployment-settings.json"
 
-          REM 定义输出路径变量，确保路径格式正确
-          set "ANDROID_BUILD_DIR=build\android-build"
+              REM 修复配置文件中的路径为Windows风格（替换/为\）
+              python -c "import json; f=open('android-Knot-deployment-settings.json', 'r+'); data=json.load(f); f.seek(0); data['application-binary']=data['application-binary'].replace('/', '\\'); json.dump(data, f, indent=2); f.truncate(); f.close()"
+            ) else (
+              echo "::error::部署配置文件缺失！"
+              dir
+              exit 1
+            )
 
-          echo "=== 调用androiddeployqt（触发Gradle打包） ==="
-          "%ANDROID_DEPLOY_QT%" ^
-            --input android-Knot-deployment-settings.json ^
-            --output "%ANDROID_BUILD_DIR%" ^  # 使用变量确保路径格式一致
-            --android-platform android-%ANDROID_API_LEVEL% ^
-            --jdk "%JAVA_HOME%" ^
-            --gradle --release ^
-            --verbose  # 添加详细输出，帮助调试
+            REM 定义输出路径（强制Windows反斜杠）
+            set "ANDROID_BUILD_DIR=build\android-build"
 
-          if errorlevel 1 (
-            echo "::error::APK生成失败！"
-            exit 1
-          )
+            REM 验证应用二进制文件是否存在（提前检查，避免后续失败）
+            set "APP_BINARY=%ANDROID_BUILD_DIR%\libs\arm64-v8a\libKnot_arm64-v8a.so"
+            if not exist "%APP_BINARY%" (
+              echo "::error::应用二进制文件不存在！路径：%APP_BINARY%"
+              dir "%ANDROID_BUILD_DIR%\libs\arm64-v8a\"  # 列出实际存在的文件
+              exit 1
+            )
 
-          echo "=== 检查APK产物 ==="
-          set APK_PATH=%ANDROID_BUILD_DIR%\build\outputs\apk\release\*.apk
-          if exist "%APK_PATH%" (
-            echo "APK生成成功:"
-            dir "%APK_PATH%"
-          ) else (
-            echo "::error::APK未生成！"
-            exit 1
-          )
+            echo "=== 调用androiddeployqt（修正命令格式） ==="
+            "%ANDROID_DEPLOY_QT%" ^
+              --input android-Knot-deployment-settings.json ^
+              --output "%ANDROID_BUILD_DIR%" ^
+              --android-platform android-%ANDROID_API_LEVEL% ^
+              --jdk "%JAVA_HOME%" ^
+              --gradle --release ^
+              --verbose
+
+            if errorlevel 1 (
+              echo "::error::APK生成失败！"
+              exit 1
+            )
+
+            echo "=== 检查APK产物 ==="
+            set "APK_PATH=%ANDROID_BUILD_DIR%\build\outputs\apk\release\*.apk"
+            if exist "%APK_PATH%" (
+              echo "APK生成成功:"
+              dir "%APK_PATH%"
+            ) else (
+              echo "::error::APK未生成！"
+              exit 1
+            )
 
       # 7. 签名APK
       - name: Sign APK
