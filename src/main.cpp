@@ -45,6 +45,7 @@ enum ShapeType { Triangle, Rectangle, Square, Circle, Ellipse };
 }
 constexpr int ShapeTypeCount = 5;  // 显式定义枚举数量
 Shapes::ShapeType safeConvertShapeType(int value);
+QSplashScreen* splash;
 
 bool unzipToDir(const QString& zipPath, const QString& destDir);
 int deleteDirfile(QString dirName);
@@ -74,8 +75,6 @@ bool zh_cn = false;
 bool isAndroid, isIOS;
 bool isInitThemeEnd;
 bool isNeedExecDeskShortcut = false;
-
-QSplashScreen* splash;
 
 #define Cross_Origin
 

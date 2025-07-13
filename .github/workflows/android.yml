@@ -70,7 +70,8 @@ jobs:
                   if errorlevel 1 exit 1
 
                   echo "=== 编译（使用NDK中的make，同本地） ==="
-                  make -j %NUMBER_OF_PROCESSORS%  # 本地日志中明确使用NDK的make.exe
+                  #make -j %NUMBER_OF_PROCESSORS%  # 本地日志中明确使用NDK的make.exe
+                  "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" -j %NUMBER_OF_PROCESSORS%
                   if errorlevel 1 exit 1
 
                   echo "=== 安装到临时目录（匹配本地INSTALL_ROOT） ==="
