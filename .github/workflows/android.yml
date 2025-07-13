@@ -51,7 +51,7 @@ jobs:
       - name: Install Android Qt
         run: |
           aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
-            -m qt5compat androidextras `
+            -m qt5compat `
             --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
       # 5. 构建项目（完全依赖Qt默认脚本）
