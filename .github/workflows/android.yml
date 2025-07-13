@@ -126,42 +126,46 @@ jobs:
       - name: Generate APK
         shell: cmd
         run: |
-          echo "=== 初始化APK生成环境 ==="
-          set "QT_ANDROID_BIN=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\android_arm64_v8a\bin"
-          set "PATH=%QT_ANDROID_BIN%;%PATH%"
+            echo "=== 初始化APK生成环境（匹配本地配置） ==="
+            # 1. 使用与本地一致的androiddeployqt路径（桌面版mingw）
+            set "QT_MINGW_BIN=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%\bin"
+            set "PATH=%QT_MINGW_BIN%;%PATH%"
 
-          cd "%GITHUB_WORKSPACE%\src"
+            cd "%GITHUB_WORKSPACE%\src"
 
-          echo "=== 验证部署配置文件 ==="
-          if exist "android-libKnot.so-deployment-settings.json" (
-            echo "部署配置文件存在"
-          ) else (
-            echo "::error::部署配置文件缺失！"
-            dir
-            exit 1
-          )
+            # 2. 验证部署配置文件（使用实际存在的文件名）
+            echo "=== 验证部署配置文件 ==="
+            if exist "android-Knot-deployment-settings.json" (
+              echo "部署配置文件存在：android-Knot-deployment-settings.json"
+            ) else (
+              echo "::error::部署配置文件缺失！"
+              dir
+              exit 1
+            )
 
-          echo "=== 调用androiddeployqt（触发Gradle打包） ==="
-          androiddeployqt.exe ^
-            --input android-libKnot.so-deployment-settings.json ^
-            --output build/android-build ^
-            --android-platform android-%ANDROID_API_LEVEL% ^
-            --jdk "%JAVA_HOME%" ^
-            --gradle --release
-          if errorlevel 1 (
-            echo "::error::APK生成失败！"
-            exit 1
-          )
+            # 3. 调用androiddeployqt（参数与本地一致）
+            echo "=== 调用androiddeployqt（触发Gradle打包） ==="
+            androiddeployqt.exe ^
+              --input android-Knot-deployment-settings.json ^
+              --output build/android-build ^
+              --android-platform android-%ANDROID_API_LEVEL% ^
+              --jdk "%JAVA_HOME%" ^
+              --gradle --release
+            if errorlevel 1 (
+              echo "::error::APK生成失败！"
+              exit 1
+            )
 
-          echo "=== 检查APK产物 ==="
-          set APK_PATH=build\android-build\build\outputs\apk\release\*.apk
-          if exist "%APK_PATH%" (
-            echo "APK生成成功:"
-            dir "%APK_PATH%"
-          ) else (
-            echo "::error::APK未生成！"
-            exit 1
-          )
+            # 4. 检查APK产物
+            echo "=== 检查APK产物 ==="
+            set APK_PATH=build\android-build\build\outputs\apk\release\*.apk
+            if exist "%APK_PATH%" (
+              echo "APK生成成功:"
+              dir "%APK_PATH%"
+            ) else (
+              echo "::error::APK未生成！"
+              exit 1
+            )
 
       # 7. 上传产物
       - name: Upload APK
