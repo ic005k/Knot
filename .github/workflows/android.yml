@@ -45,7 +45,7 @@ jobs:
           python -m pip install --upgrade aqtinstall
           # 安装桌面版Qt（MinGW 64位），包含核心工具链
           aqt install-qt windows desktop $env:QT_VERSION $env:DESKTOP_ARCH `
-            -m qt5compat qtbase qttools `
+            -m qt5compat `
             --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
           # 验证桌面版安装
@@ -66,7 +66,7 @@ jobs:
 
           # 安装Android版Qt，使用正确的模块名称（Qt 6中简化为androidextras等）
           aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
-            -m qt5compat qtbase androidextras qttools `  # 修正模块名：qtandroidextras → androidextras
+            -m qt5compat `  # 修正模块名：qtandroidextras → androidextras
             --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
           # 验证Android版安装目录
