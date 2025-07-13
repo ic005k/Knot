@@ -44,14 +44,14 @@ jobs:
         run: |
           python -m pip install --upgrade aqtinstall
           aqt install-qt windows desktop $env:QT_VERSION $env:DESKTOP_ARCH `
-            -m qt5compat `
+            -m qt5compat qtcharts qtsensors qtlocation `
             --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
       # 4. 安装Android版Qt（使用默认配置）
       - name: Install Android Qt
         run: |
           aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
-            -m qt5compat `
+            -m qt5compat qtcharts qtsensors qtlocation `
             --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
       # 5. 构建项目（完全依赖Qt默认脚本）
