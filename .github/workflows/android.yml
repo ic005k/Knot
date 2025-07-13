@@ -38,37 +38,85 @@ jobs:
           echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
           echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-      # 3. 安装 Qt
+      # 3. 安装 Qt (修改：增加关键模块并验证qmake6.exe)
       - name: Install Qt
         run: |
           python -m pip install aqtinstall
-          aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH -m qt5compat --outputdir "$env:GITHUB_WORKSPACE\Qt"
-          # 验证安装文件结构
+          # 明确指定需要的所有模块，确保qmake6.exe被正确安装
+          aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
+            -m qt5compat qtbase qtandroidextras qttools `
+            --archives qtbase androidtools qttools `
+            --outputdir "$env:GITHUB_WORKSPACE\Qt" `
+            --verbose
+
+          # 验证安装结果
+          echo "=== Qt安装目录内容 ==="
           dir "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
 
-      # 4. 验证安装
+          # 检查qmake6.exe是否存在
+          $qmakeExePath = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin\qmake6.exe"
+          if (!(Test-Path $qmakeExePath)) {
+              echo "::error::未找到qmake6.exe，安装不完整！"
+              exit 1
+          } else {
+              echo "qmake6.exe存在，大小: $(Get-Item $qmakeExePath | Select-Object -ExpandProperty Length) 字节"
+          }
+
+      # 4. 修正qmake.bat路径 (新增步骤)
+      - name: 修正qmake.bat路径
+        run: |
+          $qtDir = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
+          $qmakeBatPath = "$qtDir\qmake.bat"
+
+          # 创建正确的批处理脚本
+          @"
+          @echo off
+          "%~dp0qmake6.exe" -qtconf "%~dp0target_qt.conf" %*
+          "@ | Out-File -FilePath $qmakeBatPath -Encoding ASCII
+
+          # 验证脚本内容
+          echo "=== 修正后的qmake.bat内容 ==="
+          Get-Content $qmakeBatPath
+
+      # 5. 验证安装 (修改：验证qmake6.exe并使用正确路径)
       - name: Verify Installation
         run: |
           echo "=== Qt 安装验证 ==="
           $qtBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
 
+          # 检查qmake6.exe是否存在
+          if (!(Test-Path "$qtBin\qmake6.exe")) {
+              echo "::error::未找到qmake6.exe!"
+              dir "$qtBin"
+              exit 1
+          }
+
+          # 检查qmake.bat是否存在
           if (!(Test-Path "$qtBin\qmake.bat")) {
               echo "::error::未找到qmake.bat!"
               dir "$qtBin"
               exit 1
           }
 
-          # 额外检查：显示qmake文件属性
-          echo "qmake文件属性:"
+          # 显示qmake6.exe文件属性
+          echo "qmake6.exe文件属性:"
+          Get-Item "$qtBin\qmake6.exe"
+
+          # 显示qmake.bat文件属性
+          echo "qmake.bat文件属性:"
           Get-Item "$qtBin\qmake.bat"
 
-          # 额外检查：尝试执行qmake并显示版本
-          echo "尝试执行qmake --version:"
+          # 尝试执行qmake6.exe并显示版本
+          echo "尝试执行qmake6.exe --version:"
+          & "$qtBin\qmake6.exe" --version
+
+          # 尝试执行qmake.bat并显示版本
+          echo "尝试执行qmake.bat --version:"
           & "$qtBin\qmake.bat" --version
 
-          echo "qmake.bat验证通过"
+          echo "qmake验证通过"
 
-      # 5. 构建项目
+      # 6. 构建项目 (修改：使用qmake6.exe替代qmake.bat)
       - name: Build
         shell: cmd
         run: |
@@ -83,25 +131,25 @@ jobs:
           echo "QT_ROOT: %QT_ROOT%"
           echo "PATH: %PATH%"
 
-          echo "=== 查找qmake ==="
-          where qmake.bat || (
-              echo "::error::无法定位qmake.bat!"
+          echo "=== 查找qmake6.exe ==="
+          where qmake6.exe || (
+              echo "::error::无法定位qmake6.exe!"
               exit 1
           )
 
-          echo "=== 执行qmake ==="
+          echo "=== 执行qmake6.exe ==="
           cd src
 
           echo "当前目录内容:"
           dir
 
-          echo "尝试使用完整路径执行qmake:"
-          "%QT_ROOT%\bin\qmake.bat" --version
+          echo "尝试使用完整路径执行qmake6.exe:"
+          "%QT_ROOT%\bin\qmake6.exe" --version
 
           echo "执行实际的qmake命令:"
-          "%QT_ROOT%\bin\qmake.bat" Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
+          "%QT_ROOT%\bin\qmake6.exe" Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a -qtconf "%QT_ROOT%\bin\target_qt.conf"
           if errorlevel 1 (
-              echo "::error::qmake执行失败!"
+              echo "::error::qmake6.exe执行失败!"
               echo "错误代码: %errorlevel%"
               exit 1
           )
@@ -127,7 +175,7 @@ jobs:
               exit 1
           )
 
-      # 6. 上传产物
+      # 7. 上传产物
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4
