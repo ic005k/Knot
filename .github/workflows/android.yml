@@ -8,7 +8,7 @@ on:
 env:
   QT_VERSION: "6.6.3"
   QT_ARCH: "android_arm64_v8a"
-  DESKTOP_ARCH: "win64_mingw"  # 桌面版架构（MinGW 64位）
+  DESKTOP_ARCH: "win64_mingw"  # 桌面版依赖
   NDK_VERSION: "26.1.10909125"
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
@@ -22,14 +22,14 @@ jobs:
         with:
           path: 'src'
 
-      # 1. 安装 JDK
+      # 1. 安装JDK
       - name: Setup JDK
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
 
-      # 2. 安装 NDK
+      # 2. 安装NDK
       - name: Install NDK
         run: |
           $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
@@ -39,123 +39,41 @@ jobs:
           echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
           echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-      # 3. 先安装桌面版Qt（解决依赖）
+      # 3. 安装桌面版Qt（满足Android构建依赖）
       - name: Install Desktop Qt
         run: |
           python -m pip install --upgrade aqtinstall
-          # 安装桌面版Qt（MinGW 64位），包含核心工具链
           aqt install-qt windows desktop $env:QT_VERSION $env:DESKTOP_ARCH `
             -m qt5compat `
             --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
-          # 验证桌面版安装
-          $desktopBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:DESKTOP_ARCH\bin"
-
-
-      # 4. 安装Android版Qt（修正模块名称）
+      # 4. 安装Android版Qt（使用默认配置）
       - name: Install Android Qt
         run: |
-          # 列出Android版可用模块（调试用，可确认模块名称）
-          echo "=== Android版Qt可用模块 ==="
-          aqt list-qt windows android --modules $env:QT_VERSION $env:QT_ARCH
-
-          # 安装Android版Qt，使用正确的模块名称（Qt 6中简化为androidextras等）
           aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
-            -m qt5compat `  # 修正模块名：qtandroidextras → androidextras
+            -m qt5compat androidextras `
             --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
-          # 验证Android版安装目录
-          $androidRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH"
-          if (!(Test-Path $androidRoot)) {
-              echo "::error::Android版Qt目录不存在：$androidRoot"
-              dir "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION"
-              exit 1
-          }
-
-          # 验证qmake6.exe存在
-          $androidBin = "$androidRoot\bin"
-          echo "=== Android版Qt bin目录内容 ==="
-          dir "$androidBin"
-
-
-
-      # 5. 修正qmake.bat路径（指向Android版qmake6.exe）
-      - name: 修正qmake.bat路径
-        run: |
-          $androidBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
-          $qmakeBatPath = "$androidBin\qmake.bat"
-
-          @"
-          @echo off
-          "%~dp0qmake.exe" -qtconf "%~dp0target_qt.conf" %*
-          "@ | Out-File -FilePath $qmakeBatPath -Encoding ASCII
-
-          echo "=== 修正后的qmake.bat内容 ==="
-          Get-Content $qmakeBatPath
-
-      # 6. 验证安装
-      - name: Verify Installation
-        run: |
-          $androidBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
-          $desktopBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:DESKTOP_ARCH\bin"
-
-          # 验证桌面版工具
-          echo "桌面版qmake6.exe版本："
-          & "$desktopBin\qmake6.exe" --version
-
-          # 验证Android版工具
-          echo "Android版qmake6.exe版本："
-          & "$androidBin\qmake6.exe" --version
-
-          echo "qmake验证通过"
-
-      # 7. 构建项目
+      # 5. 构建项目（完全依赖Qt默认脚本）
       - name: Build
         shell: cmd
         run: |
           set QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%
           set DESKTOP_QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%
-          set PATH=%QT_ROOT%\bin;%DESKTOP_QT_ROOT%\bin;%PATH%  # 同时加入桌面版路径
+          set PATH=%QT_ROOT%\bin;%DESKTOP_QT_ROOT%\bin;%PATH%
 
-          echo "当前路径: %CD%"
-          echo "QT_ROOT: %QT_ROOT%"
-
-          echo "=== 查找qmake6.exe ==="
-          where qmake6.exe || (
-              echo "::error::无法定位qmake6.exe!"
-              exit 1
-          )
-
-          echo "=== 执行qmake6.exe ==="
           cd src
-          "%QT_ROOT%\bin\qmake6.exe" Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a -qtconf "%QT_ROOT%\bin\target_qt.conf"
-          if errorlevel 1 (
-              echo "::error::qmake执行失败!"
-              exit 1
-          )
+          :: 使用Qt默认的qmake.bat（不手动修改）
+          qmake.bat Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
+          if errorlevel 1 exit 1
 
-          echo "=== 检查Makefile ==="
-          if not exist Makefile (
-              echo "::error::Makefile未生成!"
-              dir
-              exit 1
-          )
-
-          echo "=== 开始编译 ==="
           make -j %NUMBER_OF_PROCESSORS%
-          if errorlevel 1 (
-              echo "::error::编译失败!"
-              exit 1
-          )
+          if errorlevel 1 exit 1
 
-          echo "=== 打包APK ==="
           make apk INSTALL_ROOT=build
-          if errorlevel 1 (
-              echo "::error::APK打包失败!"
-              exit 1
-          )
+          if errorlevel 1 exit 1
 
-      # 8. 上传产物
+      # 6. 上传产物
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4
