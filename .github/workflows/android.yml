@@ -126,6 +126,12 @@ jobs:
       - name: Generate APK
         shell: cmd
         run: |
+            REM 创建目标目录
+            mkdir build\android-build\libs\arm64-v8a
+
+            REM 复制.so文件到正确位置
+            copy "bin\release\libKnot_arm64-v8a.so" "build\android-build\libs\arm64-v8a\" || (echo "::error::复制.so文件失败！" & exit 1)
+
             echo "=== 初始化APK生成环境（匹配本地配置） ==="
 
             REM 硬编码使用mingw_64目录（与本地一致）
