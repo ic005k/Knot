@@ -106,6 +106,10 @@ jobs:
             qmake.bat Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
             if errorlevel 1 exit 1
 
+            echo "=== 检查Makefile中的源文件 ==="
+            type Makefile | findstr /C:"SOURCES ="  # 确认是否包含你的.cpp文件
+            type Makefile | findstr /C:"OBJECTS ="  # 确认是否生成对应的.o目标文件
+
             echo "=== 执行make（带详细日志） ==="
             "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" -j8 V=1 > make_output.log 2>&1
             if errorlevel 1 (
