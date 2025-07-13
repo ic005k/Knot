@@ -128,8 +128,8 @@ jobs:
         run: |
             echo "=== 初始化APK生成环境（匹配本地配置） ==="
 
-            REM 设置桌面版Qt的mingw目录路径（与本地一致）
-            set "QT_MINGW_BIN=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%\bin"
+            REM 硬编码使用mingw_64目录（与本地一致）
+            set "QT_MINGW_BIN=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\mingw_64\bin"
 
             REM 验证路径是否存在
             if not exist "%QT_MINGW_BIN%" (
@@ -159,8 +159,6 @@ jobs:
             )
 
             echo "=== 调用androiddeployqt（触发Gradle打包） ==="
-
-            REM 使用完整路径调用androiddeployqt，确保不会因PATH问题失败
             "%ANDROID_DEPLOY_QT%" ^
               --input android-Knot-deployment-settings.json ^
               --output build/android-build ^
