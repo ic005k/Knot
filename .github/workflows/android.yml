@@ -158,13 +158,17 @@ jobs:
               exit 1
             )
 
+            REM 定义输出路径变量，确保路径格式正确
+            set "ANDROID_BUILD_DIR=build\android-build"
+
             echo "=== 调用androiddeployqt（触发Gradle打包） ==="
             "%ANDROID_DEPLOY_QT%" ^
               --input android-Knot-deployment-settings.json ^
-              --output build/android-build ^
+              --output "%ANDROID_BUILD_DIR%" ^  # 使用变量确保路径格式一致
               --android-platform android-%ANDROID_API_LEVEL% ^
               --jdk "%JAVA_HOME%" ^
-              --gradle --release
+              --gradle --release ^
+              --verbose  # 添加详细输出，帮助调试
 
             if errorlevel 1 (
               echo "::error::APK生成失败！"
@@ -172,7 +176,7 @@ jobs:
             )
 
             echo "=== 检查APK产物 ==="
-            set APK_PATH=build\android-build\build\outputs\apk\release\*.apk
+            set APK_PATH=%ANDROID_BUILD_DIR%\build\outputs\apk\release\*.apk
             if exist "%APK_PATH%" (
               echo "APK生成成功:"
               dir "%APK_PATH%"
