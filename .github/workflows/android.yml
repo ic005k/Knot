@@ -45,7 +45,6 @@ jobs:
           # 明确指定需要的所有模块，确保qmake6.exe被正确安装
           aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
             -m qt5compat qtbase qtandroidextras qttools `
-            --archives qtbase androidtools qttools `
             --outputdir "$env:GITHUB_WORKSPACE\Qt" `
             --verbose
 
