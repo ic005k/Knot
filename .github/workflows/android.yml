@@ -126,93 +126,93 @@ jobs:
       - name: Generate APK
         shell: cmd
         run: |
-            echo "=== 初始化APK生成环境（匹配本地配置） ==="
+          echo "=== 初始化APK生成环境（匹配本地配置） ==="
 
-            REM 硬编码使用mingw_64目录（与本地一致）
-            set "QT_MINGW_BIN=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\mingw_64\bin"
+          REM 硬编码使用mingw_64目录（与本地一致）
+          set "QT_MINGW_BIN=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\mingw_64\bin"
 
-            REM 验证路径是否存在
-            if not exist "%QT_MINGW_BIN%" (
-              echo "::error::Qt mingw目录不存在！路径：%QT_MINGW_BIN%"
-              exit 1
-            )
+          REM 验证路径是否存在
+          if not exist "%QT_MINGW_BIN%" (
+            echo "::error::Qt mingw目录不存在！路径：%QT_MINGW_BIN%"
+            exit 1
+          )
 
-            REM 验证androiddeployqt是否存在
-            set "ANDROID_DEPLOY_QT=%QT_MINGW_BIN%\androiddeployqt.exe"
-            if not exist "%ANDROID_DEPLOY_QT%" (
-              echo "::error::androiddeployqt不存在！路径：%ANDROID_DEPLOY_QT%"
-              exit 1
-            )
+          REM 验证androiddeployqt是否存在
+          set "ANDROID_DEPLOY_QT=%QT_MINGW_BIN%\androiddeployqt.exe"
+          if not exist "%ANDROID_DEPLOY_QT%" (
+            echo "::error::androiddeployqt不存在！路径：%ANDROID_DEPLOY_QT%"
+            exit 1
+          )
 
-            REM 将路径添加到环境变量
-            set "PATH=%QT_MINGW_BIN%;%PATH%"
+          REM 将路径添加到环境变量
+          set "PATH=%QT_MINGW_BIN%;%PATH%"
 
-            cd "%GITHUB_WORKSPACE%\src"
+          cd "%GITHUB_WORKSPACE%\src"
 
-            echo "=== 验证部署配置文件 ==="
-            if exist "android-Knot-deployment-settings.json" (
-              echo "部署配置文件存在：android-Knot-deployment-settings.json"
-            ) else (
-              echo "::error::部署配置文件缺失！"
-              dir
-              exit 1
-            )
+          echo "=== 验证部署配置文件 ==="
+          if exist "android-Knot-deployment-settings.json" (
+            echo "部署配置文件存在：android-Knot-deployment-settings.json"
+          ) else (
+            echo "::error::部署配置文件缺失！"
+            dir
+            exit 1
+          )
 
-            REM 手动复制.so文件到androiddeployqt期望的路径
-            echo "=== 手动复制.so文件到目标目录 ==="
-            set "SOURCE_SO=bin\release\libKnot_arm64-v8a.so"
-            set "TARGET_DIR=build\android-build\libs\arm64-v8a"
+          REM 手动复制.so文件到androiddeployqt期望的路径
+          echo "=== 手动复制.so文件到目标目录 ==="
+          set "SOURCE_SO=bin\release\libKnot_arm64-v8a.so"
+          set "TARGET_DIR=build\android-build\libs\arm64-v8a"
 
-            REM 检查源文件是否存在
-            if not exist "%SOURCE_SO%" (
-              echo "::error::源.so文件不存在！路径：%SOURCE_SO%"
-              dir bin\release\  # 列出release目录内容
-              exit 1
-            )
+          REM 检查源文件是否存在
+          if not exist "%SOURCE_SO%" (
+            echo "::error::源.so文件不存在！路径：%SOURCE_SO%"
+            dir bin\release\  # 列出release目录内容
+            exit 1
+          )
 
-            REM 创建目标目录（如果不存在）
-            if not exist "%TARGET_DIR%" (
-              mkdir "%TARGET_DIR%" || (echo "::error::创建目标目录失败！" & exit 1)
-            )
+          REM 创建目标目录（如果不存在）
+          if not exist "%TARGET_DIR%" (
+            mkdir "%TARGET_DIR%" || (echo "::error::创建目标目录失败！" & exit 1)
+          )
 
-            REM 执行复制
-            copy "%SOURCE_SO%" "%TARGET_DIR%\" || (echo "::error::复制.so文件失败！" & exit 1)
+          REM 执行复制
+          copy "%SOURCE_SO%" "%TARGET_DIR%\" || (echo "::error::复制.so文件失败！" & exit 1)
 
-            REM 验证复制结果
-            set "TARGET_SO=%TARGET_DIR%\libKnot_arm64-v8a.so"
-            if not exist "%TARGET_SO%" (
-              echo "::error::目标.so文件不存在！路径：%TARGET_SO%"
-              dir "%TARGET_DIR%\"  # 列出目标目录内容
-              exit 1
-            )
-            echo ".so文件复制成功：%TARGET_SO%"
+          REM 验证复制结果
+          set "TARGET_SO=%TARGET_DIR%\libKnot_arm64-v8a.so"
+          if not exist "%TARGET_SO%" (
+            echo "::error::目标.so文件不存在！路径：%TARGET_SO%"
+            dir "%TARGET_DIR%\"  # 列出目标目录内容
+            exit 1
+          )
+          echo ".so文件复制成功：%TARGET_SO%"
 
-            REM 定义输出路径变量
-            set "ANDROID_BUILD_DIR=build\android-build"
+          REM 定义输出路径变量
+          set "ANDROID_BUILD_DIR=build\android-build"
 
-            echo "=== 调用androiddeployqt（触发Gradle打包） ==="
-            "%ANDROID_DEPLOY_QT%" ^
-              --input android-Knot-deployment-settings.json ^
-              --output "%ANDROID_BUILD_DIR%" ^
-              --android-platform android-%ANDROID_API_LEVEL% ^
-              --jdk "%JAVA_HOME%" ^
-              --gradle --release ^
-              --verbose
+          echo "=== 调用androiddeployqt（触发Gradle打包） ==="
+          "%ANDROID_DEPLOY_QT%" ^
+            --input android-Knot-deployment-settings.json ^
+            --output "%ANDROID_BUILD_DIR%" ^
+            --android-platform android-%ANDROID_API_LEVEL% ^
+            --jdk "%JAVA_HOME%" ^
+            --gradle --release ^
+            --verbose
 
-            if errorlevel 1 (
-              echo "::error::APK生成失败！"
-              exit 1
-            )
+          if errorlevel 1 (
+            echo "::error::APK生成失败！"
+            exit 1
+          )
 
-            echo "=== 检查APK产物 ==="
-            set "APK_PATH=%ANDROID_BUILD_DIR%\build\outputs\apk\release\*.apk"
-            if exist "%APK_PATH%" (
-              echo "APK生成成功:"
-              dir "%APK_PATH%"
-            ) else (
-              echo "::error::APK未生成！"
-              exit 1
-            )
+          echo "=== 检查APK产物 ==="
+          set "APK_PATH=%ANDROID_BUILD_DIR%\build\outputs\apk\release\*.apk"
+          if exist "%APK_PATH%" (
+            echo "APK生成成功:"
+            dir "%APK_PATH%"
+          ) else (
+            echo "::error::APK未生成！"
+            exit 1
+          )
 
       # 7. 签名APK
       - name: Sign APK
@@ -227,16 +227,27 @@ jobs:
           echo "=== 准备签名环境 ==="
           cd "%GITHUB_WORKSPACE%\src"
 
-          REM 创建临时目录
+          REM 创建临时目录并进入
           mkdir signing
           cd signing
+          echo "当前目录：%cd%"  # 确认是否在 signing 目录下
 
-          REM 从Base64编码的密钥存储在GitHub Secrets中恢复密钥文件
-          echo "%KEYSTORE_BASE64%" | base64 -d > release.keystore
+          REM 关键：用 PowerShell 解密 Base64（避免换行和截断）
+          echo "=== 解密密钥库文件 ==="
+          PowerShell -Command "$base64 = $env:KEYSTORE_BASE64; [System.Convert]::FromBase64String($base64) | Set-Content -Path 'release.keystore' -Encoding Byte"
 
-          REM 验证密钥文件
+          REM 验证密钥文件（保留）
           if not exist "release.keystore" (
-            echo "::error::密钥文件不存在！"
+            echo "::error::密钥文件解密失败，文件不存在！"
+            dir  # 列出当前目录内容，方便排查
+            exit 1
+          )
+
+          REM 可选：验证文件大小（确保解密完整）
+          for %%I in (release.keystore) do set "FILE_SIZE=%%~zI"
+          echo "密钥文件大小：%FILE_SIZE% 字节"
+          if %FILE_SIZE% lss 100 (
+            echo "::error::密钥文件过小，可能解密不完整！"
             exit 1
           )
 
@@ -267,7 +278,6 @@ jobs:
 
           echo "=== 签名APK完成 ==="
           dir "%SIGNED_APK%"
-
 
       # 8. 上传签名后的产物
       - name: Upload signed APK
