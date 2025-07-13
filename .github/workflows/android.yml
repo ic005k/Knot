@@ -60,6 +60,8 @@ jobs:
         run: |
           set QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%
           set DESKTOP_QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%
+          # 显式添加NDK编译器路径（关键）
+          set NDK_TOOLCHAIN=%ANDROID_NDK_ROOT%\toolchains\llvm\prebuilt\windows-x86_64\bin
           set PATH=%QT_ROOT%\bin;%DESKTOP_QT_ROOT%\bin;%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin;%PATH%
 
           echo "=== 进入代码目录 ==="
