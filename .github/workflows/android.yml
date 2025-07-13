@@ -8,6 +8,7 @@ on:
 env:
   QT_VERSION: "6.6.3"
   QT_ARCH: "android_arm64_v8a"
+  DESKTOP_ARCH: "win64_mingw"  # 桌面版架构（MinGW 64位）
   NDK_VERSION: "26.1.10909125"
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
@@ -38,45 +39,60 @@ jobs:
           echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
           echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-      # 3. 安装 Qt (修复：移除--verbose，升级aqtinstall，验证目录存在性)
-      - name: Install Qt
+      # 3. 先安装桌面版Qt（解决依赖）
+      - name: Install Desktop Qt
         run: |
-          # 升级aqtinstall到最新版本，避免参数兼容问题
           python -m pip install --upgrade aqtinstall
-
-          # 移除--verbose，兼容所有版本；确保模块正确
-          aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
-            -m qt5compat qtbase qtandroidextras qttools `
+          # 安装桌面版Qt（MinGW 64位），包含核心工具链
+          aqt install-qt windows desktop $env:QT_VERSION $env:DESKTOP_ARCH `
+            -m qt5compat qtbase qttools `
             --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
-          # 先验证Qt根目录是否存在（核心检查，避免后续无效步骤）
-          $qtRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH"
-          if (!(Test-Path $qtRoot)) {
-              echo "::error::Qt安装失败，目录不存在：$qtRoot"
-              # 输出Qt安装根目录内容，排查是否有其他版本或路径错误
+          # 验证桌面版安装
+          $desktopBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:DESKTOP_ARCH\bin"
+          if (!(Test-Path "$desktopBin\qmake6.exe")) {
+              echo "::error::桌面版qmake6.exe缺失！"
+              dir "$desktopBin"
+              exit 1
+          }
+          echo "桌面版Qt安装成功"
+
+      # 4. 安装Android版Qt（修正模块名称）
+      - name: Install Android Qt
+        run: |
+          # 列出Android版可用模块（调试用，可确认模块名称）
+          echo "=== Android版Qt可用模块 ==="
+          aqt list-qt windows android --modules $env:QT_VERSION $env:QT_ARCH
+
+          # 安装Android版Qt，使用正确的模块名称（Qt 6中简化为androidextras等）
+          aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
+            -m qt5compat qtbase androidextras qttools `  # 修正模块名：qtandroidextras → androidextras
+            --outputdir "$env:GITHUB_WORKSPACE\Qt"
+
+          # 验证Android版安装目录
+          $androidRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH"
+          if (!(Test-Path $androidRoot)) {
+              echo "::error::Android版Qt目录不存在：$androidRoot"
               dir "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION"
               exit 1
           }
 
-          # 再验证bin目录和qmake6.exe
-          $qtBin = "$qtRoot\bin"
-          echo "=== Qt bin目录内容 ==="
-          dir "$qtBin"
+          # 验证qmake6.exe存在
+          $androidBin = "$androidRoot\bin"
+          echo "=== Android版Qt bin目录内容 ==="
+          dir "$androidBin"
 
-          $qmakeExePath = "$qtBin\qmake6.exe"
-          if (!(Test-Path $qmakeExePath)) {
-              echo "::error::未找到qmake6.exe，安装不完整！"
+          if (!(Test-Path "$androidBin\qmake6.exe")) {
+              echo "::error::Android版qmake6.exe缺失！"
               exit 1
-          } else {
-              $size = (Get-Item $qmakeExePath).Length
-              echo "qmake6.exe存在（大小：$size字节）"
           }
+          echo "Android版Qt安装成功"
 
-      # 4. 修正qmake.bat路径
+      # 5. 修正qmake.bat路径（指向Android版qmake6.exe）
       - name: 修正qmake.bat路径
         run: |
-          $qtBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
-          $qmakeBatPath = "$qtBin\qmake.bat"
+          $androidBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
+          $qmakeBatPath = "$androidBin\qmake.bat"
 
           @"
           @echo off
@@ -86,42 +102,29 @@ jobs:
           echo "=== 修正后的qmake.bat内容 ==="
           Get-Content $qmakeBatPath
 
-      # 5. 验证安装
+      # 6. 验证安装
       - name: Verify Installation
         run: |
-          $qtBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
+          $androidBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
+          $desktopBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:DESKTOP_ARCH\bin"
 
-          if (!(Test-Path "$qtBin\qmake6.exe")) {
-              echo "::error::未找到qmake6.exe!"
-              exit 1
-          }
-          if (!(Test-Path "$qtBin\qmake.bat")) {
-              echo "::error::未找到qmake.bat!"
-              exit 1
-          }
+          # 验证桌面版工具
+          echo "桌面版qmake6.exe版本："
+          & "$desktopBin\qmake6.exe" --version
 
-          echo "尝试执行qmake6.exe --version:"
-          & "$qtBin\qmake6.exe" --version
-          if ($LASTEXITCODE -ne 0) {
-              echo "::error::qmake6.exe执行失败!"
-              exit 1
-          }
-
-          echo "尝试执行qmake.bat --version:"
-          & "$qtBin\qmake.bat" --version
-          if ($LASTEXITCODE -ne 0) {
-              echo "::error::qmake.bat执行失败!"
-              exit 1
-          }
+          # 验证Android版工具
+          echo "Android版qmake6.exe版本："
+          & "$androidBin\qmake6.exe" --version
 
           echo "qmake验证通过"
 
-      # 6. 构建项目
+      # 7. 构建项目
       - name: Build
         shell: cmd
         run: |
           set QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%
-          set PATH=%QT_ROOT%\bin;%PATH%
+          set DESKTOP_QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%
+          set PATH=%QT_ROOT%\bin;%DESKTOP_QT_ROOT%\bin;%PATH%  # 同时加入桌面版路径
 
           echo "当前路径: %CD%"
           echo "QT_ROOT: %QT_ROOT%"
@@ -161,7 +164,7 @@ jobs:
               exit 1
           )
 
-      # 7. 上传产物
+      # 8. 上传产物
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4
