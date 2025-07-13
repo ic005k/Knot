@@ -300,7 +300,7 @@ void loadTheme(bool isDark) {
 
   if (isNeedExecDeskShortcut) {
     isNeedExecDeskShortcut = false;
-    mw_one->execDeskShortcut();
+    QTimer::singleShot(1000, nullptr, []() { mw_one->execDeskShortcut(); });
   }
 }
 

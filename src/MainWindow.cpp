@@ -2,7 +2,7 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "2.0.15";
+QString ver = "2.0.16";
 QString appName = "Knot";
 
 QList<QPointF> PointList;
