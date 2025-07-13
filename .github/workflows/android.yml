@@ -38,97 +38,93 @@ jobs:
           echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
           echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-      # 3. 安装 Qt (修改：增加关键模块并验证qmake6.exe)
+      # 3. 安装 Qt (修复：移除--verbose，升级aqtinstall，验证目录存在性)
       - name: Install Qt
         run: |
-          python -m pip install aqtinstall
-          # 明确指定需要的所有模块，确保qmake6.exe被正确安装
+          # 升级aqtinstall到最新版本，避免参数兼容问题
+          python -m pip install --upgrade aqtinstall
+
+          # 移除--verbose，兼容所有版本；确保模块正确
           aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
             -m qt5compat qtbase qtandroidextras qttools `
-            --outputdir "$env:GITHUB_WORKSPACE\Qt" `
-            --verbose
+            --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
-          # 验证安装结果
-          echo "=== Qt安装目录内容 ==="
-          dir "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
+          # 先验证Qt根目录是否存在（核心检查，避免后续无效步骤）
+          $qtRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH"
+          if (!(Test-Path $qtRoot)) {
+              echo "::error::Qt安装失败，目录不存在：$qtRoot"
+              # 输出Qt安装根目录内容，排查是否有其他版本或路径错误
+              dir "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION"
+              exit 1
+          }
 
-          # 检查qmake6.exe是否存在
-          $qmakeExePath = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin\qmake6.exe"
+          # 再验证bin目录和qmake6.exe
+          $qtBin = "$qtRoot\bin"
+          echo "=== Qt bin目录内容 ==="
+          dir "$qtBin"
+
+          $qmakeExePath = "$qtBin\qmake6.exe"
           if (!(Test-Path $qmakeExePath)) {
               echo "::error::未找到qmake6.exe，安装不完整！"
               exit 1
           } else {
-              echo "qmake6.exe存在，大小: $(Get-Item $qmakeExePath | Select-Object -ExpandProperty Length) 字节"
+              $size = (Get-Item $qmakeExePath).Length
+              echo "qmake6.exe存在（大小：$size字节）"
           }
 
-      # 4. 修正qmake.bat路径 (新增步骤)
+      # 4. 修正qmake.bat路径
       - name: 修正qmake.bat路径
         run: |
-          $qtDir = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
-          $qmakeBatPath = "$qtDir\qmake.bat"
+          $qtBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
+          $qmakeBatPath = "$qtBin\qmake.bat"
 
-          # 创建正确的批处理脚本
           @"
           @echo off
           "%~dp0qmake6.exe" -qtconf "%~dp0target_qt.conf" %*
           "@ | Out-File -FilePath $qmakeBatPath -Encoding ASCII
 
-          # 验证脚本内容
           echo "=== 修正后的qmake.bat内容 ==="
           Get-Content $qmakeBatPath
 
-      # 5. 验证安装 (修改：验证qmake6.exe并使用正确路径)
+      # 5. 验证安装
       - name: Verify Installation
         run: |
-          echo "=== Qt 安装验证 ==="
           $qtBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH\bin"
 
-          # 检查qmake6.exe是否存在
           if (!(Test-Path "$qtBin\qmake6.exe")) {
               echo "::error::未找到qmake6.exe!"
-              dir "$qtBin"
               exit 1
           }
-
-          # 检查qmake.bat是否存在
           if (!(Test-Path "$qtBin\qmake.bat")) {
               echo "::error::未找到qmake.bat!"
-              dir "$qtBin"
               exit 1
           }
 
-          # 显示qmake6.exe文件属性
-          echo "qmake6.exe文件属性:"
-          Get-Item "$qtBin\qmake6.exe"
-
-          # 显示qmake.bat文件属性
-          echo "qmake.bat文件属性:"
-          Get-Item "$qtBin\qmake.bat"
-
-          # 尝试执行qmake6.exe并显示版本
           echo "尝试执行qmake6.exe --version:"
           & "$qtBin\qmake6.exe" --version
+          if ($LASTEXITCODE -ne 0) {
+              echo "::error::qmake6.exe执行失败!"
+              exit 1
+          }
 
-          # 尝试执行qmake.bat并显示版本
           echo "尝试执行qmake.bat --version:"
           & "$qtBin\qmake.bat" --version
+          if ($LASTEXITCODE -ne 0) {
+              echo "::error::qmake.bat执行失败!"
+              exit 1
+          }
 
           echo "qmake验证通过"
 
-      # 6. 构建项目 (修改：使用qmake6.exe替代qmake.bat)
+      # 6. 构建项目
       - name: Build
         shell: cmd
         run: |
-          echo "=== 设置环境变量 ==="
           set QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%
           set PATH=%QT_ROOT%\bin;%PATH%
 
-          echo "=== 显示完整环境变量 ==="
-          set
-
           echo "当前路径: %CD%"
           echo "QT_ROOT: %QT_ROOT%"
-          echo "PATH: %PATH%"
 
           echo "=== 查找qmake6.exe ==="
           where qmake6.exe || (
@@ -138,18 +134,9 @@ jobs:
 
           echo "=== 执行qmake6.exe ==="
           cd src
-
-          echo "当前目录内容:"
-          dir
-
-          echo "尝试使用完整路径执行qmake6.exe:"
-          "%QT_ROOT%\bin\qmake6.exe" --version
-
-          echo "执行实际的qmake命令:"
           "%QT_ROOT%\bin\qmake6.exe" Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a -qtconf "%QT_ROOT%\bin\target_qt.conf"
           if errorlevel 1 (
-              echo "::error::qmake6.exe执行失败!"
-              echo "错误代码: %errorlevel%"
+              echo "::error::qmake执行失败!"
               exit 1
           )
 
