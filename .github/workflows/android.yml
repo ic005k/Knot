@@ -58,43 +58,58 @@ jobs:
       - name: Build
         shell: cmd
         run: |
-                  set QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%
-                  set DESKTOP_QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%
-                  set PATH=%QT_ROOT%\bin;%DESKTOP_QT_ROOT%\bin;%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin;%PATH%
+          set QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%
+          set DESKTOP_QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%
+          set PATH=%QT_ROOT%\bin;%DESKTOP_QT_ROOT%\bin;%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin;%PATH%
 
-                  echo "=== 进入代码目录 ==="
-                  cd src
+          echo "=== 进入代码目录 ==="
+          cd src
 
-                  echo "=== 环境准备 ==="
-                  set ANDROID_NDK_ROOT=C:\Android\Sdk\ndk\26.1.10909125
-                  set PATH=%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin;%PATH%
+          echo "=== 环境准备 ==="
+          set QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%
+          set PATH=%QT_ROOT%\bin;%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin;%ANDROID_NDK_ROOT%\toolchains\llvm\prebuilt\windows-x86_64\bin;%PATH%
 
-                  echo "=== 环境变量 ==="
-                  set
+          echo "=== 环境变量 ==="
+          set
 
-                  echo "=== 创建详细日志脚本 ==="
-                  echo "@echo off" > debug_make.bat
-                  echo "echo 开始编译: %date% %time%" >> debug_make.bat
-                  echo "echo 执行命令: \"%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe\" -j8 V=1 -d" >> debug_make.bat
-                  echo "\"%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe\" -j8 V=1 -d > make_full.log 2>&1" >> debug_make.bat
-                  echo "echo 编译结束: %date% %time%" >> debug_make.bat
-                  echo "echo 检查输出文件:" >> debug_make.bat
-                  echo "dir /s *.so" >> debug_make.bat
-                  echo "echo 编译日志内容:" >> debug_make.bat
-                  echo "type make_full.log" >> debug_make.bat
+          echo "=== 验证NDK工具链 ==="
+          if exist "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" (
+            echo "make.exe存在"
+            "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" --version
+          ) else (
+            echo "::error::make.exe不存在！"
+            dir "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin"
+            exit 1
+          )
 
-                  echo "=== 执行详细日志脚本 ==="
-                  debug_make.bat
-                  if errorlevel 1 exit 1
+          echo "=== 验证编译器 ==="
+          if exist "%ANDROID_NDK_ROOT%\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++" (
+            echo "clang++存在"
+            "%ANDROID_NDK_ROOT%\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++" --version
+          ) else (
+            echo "::error::clang++不存在！"
+            exit 1
+          )
 
-                  echo "=== 生成APK（使用Qt的androiddeployqt，同本地） ==="
-                  androiddeployqt.exe ^
-                    --input %GITHUB_WORKSPACE%\src\android-Knot-deployment-settings.json ^
-                    --output %GITHUB_WORKSPACE%\src\build\android-build ^
-                    --android-platform android-%ANDROID_API_LEVEL% ^
-                    --jdk %JAVA_HOME% ^
-                    --gradle --release  # 本地日志中使用--gradle打包
-                  if errorlevel 1 exit 1
+          echo "=== 执行make（带详细日志） ==="
+          "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" -j8 V=1 -d > make_full.log 2>&1
+          if errorlevel 1 (
+            echo "::error::编译失败！"
+            type make_full.log
+            exit 1
+          )
+
+          echo "=== 检查编译产物 ==="
+          dir /s *.so
+
+          echo "=== 生成APK（使用Qt的androiddeployqt，同本地） ==="
+          androiddeployqt.exe ^
+            --input %GITHUB_WORKSPACE%\src\android-Knot-deployment-settings.json ^
+            --output %GITHUB_WORKSPACE%\src\build\android-build ^
+            --android-platform android-%ANDROID_API_LEVEL% ^
+            --jdk %JAVA_HOME% ^
+            --gradle --release  # 本地日志中使用--gradle打包
+          if errorlevel 1 exit 1
 
       # 6. 上传产物
       - name: Upload APK
