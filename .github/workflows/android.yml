@@ -58,20 +58,25 @@ jobs:
       - name: Build
         shell: cmd
         run: |
-          set QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%
-          set DESKTOP_QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%
-          set PATH=%QT_ROOT%\bin;%DESKTOP_QT_ROOT%\bin;%PATH%
+            set QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%
+            set DESKTOP_QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%
+            set PATH=%QT_ROOT%\bin;%DESKTOP_QT_ROOT%\bin;%PATH%
 
-          cd src
-          :: 使用Qt默认的qmake.bat（不手动修改）
-          qmake.bat Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
-          if errorlevel 1 exit 1
+            cd src
 
-          make -j %NUMBER_OF_PROCESSORS%
-          if errorlevel 1 exit 1
+            echo "=== 验证编译工具 ==="
+            where mingw32-make  # 确认工具存在
+            mingw32-make --version  # 显示版本信息
 
-          make apk INSTALL_ROOT=build
-          if errorlevel 1 exit 1
+            qmake.bat Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
+            if errorlevel 1 exit 1
+
+            echo "=== 开始编译 ==="
+            mingw32-make -j %NUMBER_OF_PROCESSORS%
+            if errorlevel 1 exit 1
+
+            mingw32-make apk INSTALL_ROOT=build
+            if errorlevel 1 exit 1
 
       # 6. 上传产物
       - name: Upload APK
