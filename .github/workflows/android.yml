@@ -65,17 +65,26 @@ jobs:
                   echo "=== 进入代码目录 ==="
                   cd src
 
-                  echo "=== 生成Makefile（同本地qmake命令） ==="
-                  qmake.bat Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
-                  if errorlevel 1 exit 1
+                  echo "=== 环境准备 ==="
+                  set ANDROID_NDK_ROOT=C:\Android\Sdk\ndk\26.1.10909125
+                  set PATH=%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin;%PATH%
 
-                  echo "=== 编译（使用NDK中的make，同本地） ==="
-                  #make -j %NUMBER_OF_PROCESSORS%  # 本地日志中明确使用NDK的make.exe
-                  "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" -j8 # %NUMBER_OF_PROCESSORS%
-                  if errorlevel 1 exit 1
+                  echo "=== 环境变量 ==="
+                  set
 
-                  echo "=== 安装到临时目录（匹配本地INSTALL_ROOT） ==="
-                  make install INSTALL_ROOT=build
+                  echo "=== 创建详细日志脚本 ==="
+                  echo "@echo off" > debug_make.bat
+                  echo "echo 开始编译: %date% %time%" >> debug_make.bat
+                  echo "echo 执行命令: \"%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe\" -j8 V=1 -d" >> debug_make.bat
+                  echo "\"%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe\" -j8 V=1 -d > make_full.log 2>&1" >> debug_make.bat
+                  echo "echo 编译结束: %date% %time%" >> debug_make.bat
+                  echo "echo 检查输出文件:" >> debug_make.bat
+                  echo "dir /s *.so" >> debug_make.bat
+                  echo "echo 编译日志内容:" >> debug_make.bat
+                  echo "type make_full.log" >> debug_make.bat
+
+                  echo "=== 执行详细日志脚本 ==="
+                  debug_make.bat
                   if errorlevel 1 exit 1
 
                   echo "=== 生成APK（使用Qt的androiddeployqt，同本地） ==="
