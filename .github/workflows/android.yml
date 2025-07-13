@@ -126,12 +126,6 @@ jobs:
       - name: Generate APK
         shell: cmd
         run: |
-            REM 创建目标目录
-            mkdir build\android-build\libs\arm64-v8a
-
-            REM 复制.so文件到正确位置
-            copy "bin\release\libKnot_arm64-v8a.so" "build\android-build\libs\arm64-v8a\" || (echo "::error::复制.so文件失败！" & exit 1)
-
             echo "=== 初始化APK生成环境（匹配本地配置） ==="
 
             REM 硬编码使用mingw_64目录（与本地一致）
@@ -158,27 +152,45 @@ jobs:
             echo "=== 验证部署配置文件 ==="
             if exist "android-Knot-deployment-settings.json" (
               echo "部署配置文件存在：android-Knot-deployment-settings.json"
-
-              REM 修复配置文件中的路径为Windows风格（替换/为\）
-              python -c "import json; f=open('android-Knot-deployment-settings.json', 'r+'); data=json.load(f); f.seek(0); data['application-binary']=data['application-binary'].replace('/', '\\'); json.dump(data, f, indent=2); f.truncate(); f.close()"
             ) else (
               echo "::error::部署配置文件缺失！"
               dir
               exit 1
             )
 
-            REM 定义输出路径（强制Windows反斜杠）
-            set "ANDROID_BUILD_DIR=build\android-build"
+            REM 手动复制.so文件到androiddeployqt期望的路径
+            echo "=== 手动复制.so文件到目标目录 ==="
+            set "SOURCE_SO=bin\release\libKnot_arm64-v8a.so"
+            set "TARGET_DIR=build\android-build\libs\arm64-v8a"
 
-            REM 验证应用二进制文件是否存在（提前检查，避免后续失败）
-            set "APP_BINARY=%ANDROID_BUILD_DIR%\libs\arm64-v8a\libKnot_arm64-v8a.so"
-            if not exist "%APP_BINARY%" (
-              echo "::error::应用二进制文件不存在！路径：%APP_BINARY%"
-              dir "%ANDROID_BUILD_DIR%\libs\arm64-v8a\"  # 列出实际存在的文件
+            REM 检查源文件是否存在
+            if not exist "%SOURCE_SO%" (
+              echo "::error::源.so文件不存在！路径：%SOURCE_SO%"
+              dir bin\release\  # 列出release目录内容
               exit 1
             )
 
-            echo "=== 调用androiddeployqt（修正命令格式） ==="
+            REM 创建目标目录（如果不存在）
+            if not exist "%TARGET_DIR%" (
+              mkdir "%TARGET_DIR%" || (echo "::error::创建目标目录失败！" & exit 1)
+            )
+
+            REM 执行复制
+            copy "%SOURCE_SO%" "%TARGET_DIR%\" || (echo "::error::复制.so文件失败！" & exit 1)
+
+            REM 验证复制结果
+            set "TARGET_SO=%TARGET_DIR%\libKnot_arm64-v8a.so"
+            if not exist "%TARGET_SO%" (
+              echo "::error::目标.so文件不存在！路径：%TARGET_SO%"
+              dir "%TARGET_DIR%\"  # 列出目标目录内容
+              exit 1
+            )
+            echo ".so文件复制成功：%TARGET_SO%"
+
+            REM 定义输出路径变量
+            set "ANDROID_BUILD_DIR=build\android-build"
+
+            echo "=== 调用androiddeployqt（触发Gradle打包） ==="
             "%ANDROID_DEPLOY_QT%" ^
               --input android-Knot-deployment-settings.json ^
               --output "%ANDROID_BUILD_DIR%" ^
