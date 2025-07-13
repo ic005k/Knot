@@ -107,7 +107,7 @@ jobs:
             if errorlevel 1 exit 1
 
             echo "=== 执行make（带详细日志） ==="
-            make -j8 V=1 -d > make_full.log 2>&1
+            "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" -j8 V=1 > make_output.log 2>&1
             if errorlevel 1 (
               echo "::error::编译失败！"
               type make_full.log
