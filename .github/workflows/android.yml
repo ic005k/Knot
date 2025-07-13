@@ -50,8 +50,8 @@ jobs:
 
           # 验证桌面版安装
           $desktopBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:DESKTOP_ARCH\bin"
-          if (!(Test-Path "$desktopBin\qmake6.exe")) {
-              echo "::error::桌面版qmake6.exe缺失！"
+          if (!(Test-Path "$desktopBin\qmake.exe")) {
+              echo "::error::桌面版qmake.exe缺失！"
               dir "$desktopBin"
               exit 1
           }
