@@ -57,6 +57,15 @@ jobs:
               dir "$qtBin"
               exit 1
           }
+
+          # 额外检查：显示qmake文件属性
+          echo "qmake文件属性:"
+          Get-Item "$qtBin\qmake.bat"
+
+          # 额外检查：尝试执行qmake并显示版本
+          echo "尝试执行qmake --version:"
+          & "$qtBin\qmake.bat" --version
+
           echo "qmake.bat验证通过"
 
       # 5. 构建项目
@@ -66,6 +75,9 @@ jobs:
           echo "=== 设置环境变量 ==="
           set QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%
           set PATH=%QT_ROOT%\bin;%PATH%
+
+          echo "=== 显示完整环境变量 ==="
+          set
 
           echo "当前路径: %CD%"
           echo "QT_ROOT: %QT_ROOT%"
@@ -79,6 +91,14 @@ jobs:
 
           echo "=== 执行qmake ==="
           cd src
+
+          echo "当前目录内容:"
+          dir
+
+          echo "尝试使用完整路径执行qmake:"
+          "%QT_ROOT%\bin\qmake.bat" --version
+
+          echo "执行实际的qmake命令:"
           "%QT_ROOT%\bin\qmake.bat" Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
           if errorlevel 1 (
               echo "::error::qmake执行失败!"
