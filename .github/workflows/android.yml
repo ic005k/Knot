@@ -132,9 +132,15 @@ jobs:
         echo "=== 检查编译产物 ==="
         dir /s *.so
 
-    # 6. 生成APK
-    - name: Generate APK
+    # 6. 生成并签名APK（合并原步骤6和步骤7）
+    - name: Generate and Sign APK
       shell: cmd
+      env:
+        # 从GitHub Secrets获取密钥信息
+        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       run: |
         echo "=== 初始化APK生成环境（匹配本地配置） ==="
 
@@ -200,53 +206,15 @@ jobs:
         REM 定义输出路径变量
         set "ANDROID_BUILD_DIR=build\android-build"
 
-        echo "=== 调用androiddeployqt（触发Gradle打包） ==="
-        "%ANDROID_DEPLOY_QT%" ^
-          --input android-Knot-deployment-settings.json ^
-          --output "%ANDROID_BUILD_DIR%" ^
-          --android-platform android-%ANDROID_API_LEVEL% ^
-          --jdk "%JAVA_HOME%" ^
-          --gradle --release ^
-          --verbose
-
-        if errorlevel 1 (
-          echo "::error::APK生成失败！"
-          exit 1
-        )
-
-        echo "=== 检查APK产物 ==="
-        set "APK_PATH=%ANDROID_BUILD_DIR%\build\outputs\apk\release\*.apk"
-        if exist "%APK_PATH%" (
-          echo "APK生成成功:"
-          dir "%APK_PATH%"
-        ) else (
-          echo "::error::APK未生成！"
-          exit 1
-        )
-
-    # 7. 签名APK
-    - name: Sign APK
-      shell: cmd
-      env:
-        # 从GitHub Secrets获取密钥信息
-        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-      run: |
-        echo "=== 准备签名环境 ==="
-        cd "%GITHUB_WORKSPACE%\src"
-
-        REM 创建临时目录并进入
+        REM 创建临时目录存放密钥库
         mkdir signing
         cd signing
-        echo "当前目录：%cd%"
 
-        REM 解密密钥库文件（保持不变）
+        REM 解密密钥库文件
         echo "=== 解密密钥库文件 ==="
         PowerShell -Command "$base64 = $env:KEYSTORE_BASE64; [System.Convert]::FromBase64String($base64) | Set-Content -Path 'release.keystore' -Encoding Byte"
 
-        REM 验证密钥文件（保持不变）
+        REM 验证密钥文件
         if not exist "release.keystore" (
           echo "::error::密钥文件解密失败，文件不存在！"
           dir
@@ -259,52 +227,37 @@ jobs:
           exit 1
         )
 
-        REM 关键修改：获取未签名APK的具体名称
-        echo "=== 查找未签名APK ==="
-        set "APK_DIR=..\build\android-build\build\outputs\apk\release"
-        REM 列出目录中的APK文件（通常是 android-build-release-unsigned.apk）
-        dir "%APK_DIR%\*.apk"
-        REM 将找到的第一个APK文件名赋值给变量
-        for /f "delims=" %%f in ('dir /b "%APK_DIR%\*.apk"') do (
-          set "UNSIGNED_APK=%APK_DIR%\%%f"
-          goto :found_apk  # 只取第一个APK
-        )
-        :found_apk
-        REM 验证APK是否存在
-        if not defined UNSIGNED_APK (
-          echo "::error::未找到未签名APK！"
-          dir "%APK_DIR%"
-          exit 1
-        )
-        echo "找到未签名APK：%UNSIGNED_APK%"
+        REM 设置密钥库路径
+        set "KEYSTORE_PATH=%cd%\release.keystore"
+        cd ..
 
-        REM 设置签名后APK的路径
-        REM set "SIGNED_APK=%APK_DIR%\Knot-signed.apk"
-        set "SIGNED_APK=%APK_DIR%\android-build-release-signed.apk"
-
-        REM 使用jarsigner签名（使用具体APK路径）
-        echo "=== 使用jarsigner签名APK ==="
-        "%JAVA_HOME%\bin\jarsigner" -verbose -sigalg SHA256withRSA -digestalg SHA-256 ^
-          -keystore release.keystore ^
-          -storepass "%KEYSTORE_PASSWORD%" ^
-          -keypass "%KEY_PASSWORD%" ^
-          "%UNSIGNED_APK%" ^
-          "%KEY_ALIAS%"
+        echo "=== 调用androiddeployqt生成并签名APK ==="
+        "%ANDROID_DEPLOY_QT%" ^
+          --input android-Knot-deployment-settings.json ^
+          --output "%ANDROID_BUILD_DIR%" ^
+          --android-platform android-%ANDROID_API_LEVEL% ^
+          --jdk "%JAVA_HOME%" ^
+          --gradle --release ^
+          --sign "%KEYSTORE_PATH%" ^
+          "%KEY_ALIAS%" ^
+          --storepass "%KEYSTORE_PASSWORD%" ^
+          --keypass "%KEY_PASSWORD%" ^
+          --verbose
 
         if errorlevel 1 (
-          echo "::error::APK签名失败！"
+          echo "::error::APK生成或签名失败！"
           exit 1
         )
 
-        REM 验证签名
-        echo "=== 验证APK签名 ==="
-        "%JAVA_HOME%\bin\jarsigner" -verify -verbose "%UNSIGNED_APK%"
-
-        REM 重命名为带签名标识的APK
-        move "%UNSIGNED_APK%" "%SIGNED_APK%"
-
-        echo "=== 签名APK完成 ==="
-        dir "%SIGNED_APK%"
+        echo "=== 检查APK产物 ==="
+        set "APK_PATH=%ANDROID_BUILD_DIR%\build\outputs\apk\release\*.apk"
+        if exist "%APK_PATH%" (
+          echo "APK生成成功:"
+          dir "%APK_PATH%"
+        ) else (
+          echo "::error::APK未生成！"
+          exit 1
+        )
 
     # 8. 上传签名后的产物
     - name: Upload signed APK
@@ -324,4 +277,4 @@ jobs:
         asset_name: android-build-release-signed.apk # 保持与自动更新逻辑一致的文件名
         tag: ${{ github.ref }}
         overwrite: true # 覆盖同名文件（方便更新）
-        body: "Android 平台自动更新专用 APK，版本：${{ github.ref_name }}" # 可选：添加版本说明    
+        body: "Android 平台自动更新专用 APK，版本：${{ github.ref_name }}" # 可选：添加版本说明
