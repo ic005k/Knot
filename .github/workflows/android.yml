@@ -67,6 +67,10 @@ jobs:
           set QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%
           set PATH=%QT_ROOT%\bin;%PATH%
 
+          echo "当前路径: %CD%"
+          echo "QT_ROOT: %QT_ROOT%"
+          echo "PATH: %PATH%"
+
           echo "=== 查找qmake ==="
           where qmake.bat || (
               echo "::error::无法定位qmake.bat!"
