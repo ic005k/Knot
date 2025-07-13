@@ -127,13 +127,28 @@ jobs:
         shell: cmd
         run: |
             echo "=== 初始化APK生成环境（匹配本地配置） ==="
-            # 1. 使用与本地一致的androiddeployqt路径（桌面版mingw）
+
+            REM 设置桌面版Qt的mingw目录路径（与本地一致）
             set "QT_MINGW_BIN=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%\bin"
+
+            REM 验证路径是否存在
+            if not exist "%QT_MINGW_BIN%" (
+              echo "::error::Qt mingw目录不存在！路径：%QT_MINGW_BIN%"
+              exit 1
+            )
+
+            REM 验证androiddeployqt是否存在
+            set "ANDROID_DEPLOY_QT=%QT_MINGW_BIN%\androiddeployqt.exe"
+            if not exist "%ANDROID_DEPLOY_QT%" (
+              echo "::error::androiddeployqt不存在！路径：%ANDROID_DEPLOY_QT%"
+              exit 1
+            )
+
+            REM 将路径添加到环境变量
             set "PATH=%QT_MINGW_BIN%;%PATH%"
 
             cd "%GITHUB_WORKSPACE%\src"
 
-            # 2. 验证部署配置文件（使用实际存在的文件名）
             echo "=== 验证部署配置文件 ==="
             if exist "android-Knot-deployment-settings.json" (
               echo "部署配置文件存在：android-Knot-deployment-settings.json"
@@ -143,20 +158,21 @@ jobs:
               exit 1
             )
 
-            # 3. 调用androiddeployqt（参数与本地一致）
             echo "=== 调用androiddeployqt（触发Gradle打包） ==="
-            androiddeployqt.exe ^
+
+            REM 使用完整路径调用androiddeployqt，确保不会因PATH问题失败
+            "%ANDROID_DEPLOY_QT%" ^
               --input android-Knot-deployment-settings.json ^
               --output build/android-build ^
               --android-platform android-%ANDROID_API_LEVEL% ^
               --jdk "%JAVA_HOME%" ^
               --gradle --release
+
             if errorlevel 1 (
               echo "::error::APK生成失败！"
               exit 1
             )
 
-            # 4. 检查APK产物
             echo "=== 检查APK产物 ==="
             set APK_PATH=build\android-build\build\outputs\apk\release\*.apk
             if exist "%APK_PATH%" (
