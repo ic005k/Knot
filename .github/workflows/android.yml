@@ -2,8 +2,15 @@ name: Qt6 Android CI
 
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
+    branches: [ main ]
+    paths:
+    - '**'
+    - '!stats.txt' # 排除根目录下的 stats.txt
+    - '!README.md'
+
+  pull_request:
+    paths:
+    - '**'
 
 env:
   QT_VERSION: "6.6.3"
@@ -18,287 +25,287 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          path: 'src'
+    - uses: actions/checkout@v4
+      with:
+        path: 'src'
 
-      # 1. 安装JDK
-      - name: Setup JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: ${{ env.JAVA_VERSION }}
+    # 1. 安装JDK
+    - name: Setup JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: ${{ env.JAVA_VERSION }}
 
-      # 2. 安装NDK
-      - name: Install NDK
-        run: |
-          $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
-          Invoke-WebRequest -Uri $ndkUrl -OutFile "ndk.zip"
-          Expand-Archive -Path "ndk.zip" -DestinationPath "android-sdk\ndk"
-          Rename-Item -Path "android-sdk\ndk\android-ndk-r26b" -NewName $env:NDK_VERSION
-          echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
-          echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
+    # 2. 安装NDK
+    - name: Install NDK
+      run: |
+        $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
+        Invoke-WebRequest -Uri $ndkUrl -OutFile "ndk.zip"
+        Expand-Archive -Path "ndk.zip" -DestinationPath "android-sdk\ndk"
+        Rename-Item -Path "android-sdk\ndk\android-ndk-r26b" -NewName $env:NDK_VERSION
+        echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
+        echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-      # 3. 安装桌面版Qt（满足Android构建依赖）
-      - name: Install Desktop Qt
-        run: |
-          python -m pip install --upgrade aqtinstall
-          aqt install-qt windows desktop $env:QT_VERSION $env:DESKTOP_ARCH `
-            -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning `
-            --outputdir "$env:GITHUB_WORKSPACE\Qt"
+    # 3. 安装桌面版Qt（满足Android构建依赖）
+    - name: Install Desktop Qt
+      run: |
+        python -m pip install --upgrade aqtinstall
+        aqt install-qt windows desktop $env:QT_VERSION $env:DESKTOP_ARCH `
+          -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning `
+          --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
-      # 4. 安装Android版Qt（使用默认配置）
-      - name: Install Android Qt
-        run: |
-          aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
-            -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning `
-            --outputdir "$env:GITHUB_WORKSPACE\Qt"
+    # 4. 安装Android版Qt（使用默认配置）
+    - name: Install Android Qt
+      run: |
+        aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
+          -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning `
+          --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
-      # 5. 构建项目
-      - name: Build
-        shell: cmd
-        run: |
-          echo "=== 初始化环境 ==="
-          set "QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%"
-          set "DESKTOP_QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%"
-          set "NDK_TOOLCHAIN=%ANDROID_NDK_ROOT%\toolchains\llvm\prebuilt\windows-x86_64\bin"
-          set "PATH=%QT_ROOT%\bin;%DESKTOP_QT_ROOT%\bin;%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin;%NDK_TOOLCHAIN%;%PATH%"
+    # 5. 构建项目
+    - name: Build
+      shell: cmd
+      run: |
+        echo "=== 初始化环境 ==="
+        set "QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%"
+        set "DESKTOP_QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%"
+        set "NDK_TOOLCHAIN=%ANDROID_NDK_ROOT%\toolchains\llvm\prebuilt\windows-x86_64\bin"
+        set "PATH=%QT_ROOT%\bin;%DESKTOP_QT_ROOT%\bin;%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin;%NDK_TOOLCHAIN%;%PATH%"
 
-          echo "=== 验证基本命令 ==="
-          where cd
-          where echo
-          where set
+        echo "=== 验证基本命令 ==="
+        where cd
+        where echo
+        where set
 
-          echo "=== 验证src目录 ==="
-          if exist "%GITHUB_WORKSPACE%\src" (
-            echo "src目录存在，尝试进入..."
-            cd "%GITHUB_WORKSPACE%\src" || (echo "::error::无法进入src目录！" & exit 1)
-          ) else (
-            echo "::error::src目录不存在！"
-            dir "%GITHUB_WORKSPACE%"
-            exit 1
-          )
+        echo "=== 验证src目录 ==="
+        if exist "%GITHUB_WORKSPACE%\src" (
+          echo "src目录存在，尝试进入..."
+          cd "%GITHUB_WORKSPACE%\src" || (echo "::error::无法进入src目录！" & exit 1)
+        ) else (
+          echo "::error::src目录不存在！"
+          dir "%GITHUB_WORKSPACE%"
+          exit 1
+        )
 
-          echo "=== 环境变量 ==="
-          set
+        echo "=== 环境变量 ==="
+        set
 
-          echo "=== 验证NDK工具链 ==="
-          where make.exe
-          if errorlevel 1 (
-            echo "::error::make.exe不在PATH中！"
-            dir "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin"
-            exit 1
-          )
-          make --version
+        echo "=== 验证NDK工具链 ==="
+        where make.exe
+        if errorlevel 1 (
+          echo "::error::make.exe不在PATH中！"
+          dir "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin"
+          exit 1
+        )
+        make --version
 
-          echo "=== 验证编译器 ==="
-          where clang++
-          if errorlevel 1 (
-            echo "::error::clang++不在PATH中！"
-            dir "%NDK_TOOLCHAIN%"
-            exit 1
-          )
-          clang++ --version
+        echo "=== 验证编译器 ==="
+        where clang++
+        if errorlevel 1 (
+          echo "::error::clang++不在PATH中！"
+          dir "%NDK_TOOLCHAIN%"
+          exit 1
+        )
+        clang++ --version
 
-          echo "=== 生成Makefile ==="
-          call qmake.bat Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
-          if errorlevel 1 (
-            echo "::error::qmake失败！"
-            exit 1
-          )
+        echo "=== 生成Makefile ==="
+        call qmake.bat Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
+        if errorlevel 1 (
+          echo "::error::qmake失败！"
+          exit 1
+        )
 
-          echo "=== 检查Makefile中的源文件 ==="
-          type Makefile | findstr /C:"SOURCES ="
-          type Makefile | findstr /C:"OBJECTS ="
+        echo "=== 检查Makefile中的源文件 ==="
+        type Makefile | findstr /C:"SOURCES ="
+        type Makefile | findstr /C:"OBJECTS ="
 
-          echo "=== 执行make（带详细日志） ==="
-          "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" -j8 V=1
-          if errorlevel 1 (
-            echo "::error::编译失败！"
-            type make_output.log
-            exit 1
-          )
+        echo "=== 执行make（带详细日志） ==="
+        "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" -j8 V=1
+        if errorlevel 1 (
+          echo "::error::编译失败！"
+          type make_output.log
+          exit 1
+        )
 
-          echo "=== 检查编译产物 ==="
-          dir /s *.so
+        echo "=== 检查编译产物 ==="
+        dir /s *.so
 
-      # 6. 生成APK
-      - name: Generate APK
-        shell: cmd
-        run: |
-          echo "=== 初始化APK生成环境（匹配本地配置） ==="
+    # 6. 生成APK
+    - name: Generate APK
+      shell: cmd
+      run: |
+        echo "=== 初始化APK生成环境（匹配本地配置） ==="
 
-          REM 硬编码使用mingw_64目录（与本地一致）
-          set "QT_MINGW_BIN=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\mingw_64\bin"
+        REM 硬编码使用mingw_64目录（与本地一致）
+        set "QT_MINGW_BIN=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\mingw_64\bin"
 
-          REM 验证路径是否存在
-          if not exist "%QT_MINGW_BIN%" (
-            echo "::error::Qt mingw目录不存在！路径：%QT_MINGW_BIN%"
-            exit 1
-          )
+        REM 验证路径是否存在
+        if not exist "%QT_MINGW_BIN%" (
+          echo "::error::Qt mingw目录不存在！路径：%QT_MINGW_BIN%"
+          exit 1
+        )
 
-          REM 验证androiddeployqt是否存在
-          set "ANDROID_DEPLOY_QT=%QT_MINGW_BIN%\androiddeployqt.exe"
-          if not exist "%ANDROID_DEPLOY_QT%" (
-            echo "::error::androiddeployqt不存在！路径：%ANDROID_DEPLOY_QT%"
-            exit 1
-          )
+        REM 验证androiddeployqt是否存在
+        set "ANDROID_DEPLOY_QT=%QT_MINGW_BIN%\androiddeployqt.exe"
+        if not exist "%ANDROID_DEPLOY_QT%" (
+          echo "::error::androiddeployqt不存在！路径：%ANDROID_DEPLOY_QT%"
+          exit 1
+        )
 
-          REM 将路径添加到环境变量
-          set "PATH=%QT_MINGW_BIN%;%PATH%"
+        REM 将路径添加到环境变量
+        set "PATH=%QT_MINGW_BIN%;%PATH%"
 
-          cd "%GITHUB_WORKSPACE%\src"
+        cd "%GITHUB_WORKSPACE%\src"
 
-          echo "=== 验证部署配置文件 ==="
-          if exist "android-Knot-deployment-settings.json" (
-            echo "部署配置文件存在：android-Knot-deployment-settings.json"
-          ) else (
-            echo "::error::部署配置文件缺失！"
-            dir
-            exit 1
-          )
+        echo "=== 验证部署配置文件 ==="
+        if exist "android-Knot-deployment-settings.json" (
+          echo "部署配置文件存在：android-Knot-deployment-settings.json"
+        ) else (
+          echo "::error::部署配置文件缺失！"
+          dir
+          exit 1
+        )
 
-          REM 手动复制.so文件到androiddeployqt期望的路径
-          echo "=== 手动复制.so文件到目标目录 ==="
-          set "SOURCE_SO=bin\release\libKnot_arm64-v8a.so"
-          set "TARGET_DIR=build\android-build\libs\arm64-v8a"
+        REM 手动复制.so文件到androiddeployqt期望的路径
+        echo "=== 手动复制.so文件到目标目录 ==="
+        set "SOURCE_SO=bin\release\libKnot_arm64-v8a.so"
+        set "TARGET_DIR=build\android-build\libs\arm64-v8a"
 
-          REM 检查源文件是否存在
-          if not exist "%SOURCE_SO%" (
-            echo "::error::源.so文件不存在！路径：%SOURCE_SO%"
-            dir bin\release\  # 列出release目录内容
-            exit 1
-          )
+        REM 检查源文件是否存在
+        if not exist "%SOURCE_SO%" (
+          echo "::error::源.so文件不存在！路径：%SOURCE_SO%"
+          dir bin\release\  # 列出release目录内容
+          exit 1
+        )
 
-          REM 创建目标目录（如果不存在）
-          if not exist "%TARGET_DIR%" (
-            mkdir "%TARGET_DIR%" || (echo "::error::创建目标目录失败！" & exit 1)
-          )
+        REM 创建目标目录（如果不存在）
+        if not exist "%TARGET_DIR%" (
+          mkdir "%TARGET_DIR%" || (echo "::error::创建目标目录失败！" & exit 1)
+        )
 
-          REM 执行复制
-          copy "%SOURCE_SO%" "%TARGET_DIR%\" || (echo "::error::复制.so文件失败！" & exit 1)
+        REM 执行复制
+        copy "%SOURCE_SO%" "%TARGET_DIR%\" || (echo "::error::复制.so文件失败！" & exit 1)
 
-          REM 验证复制结果
-          set "TARGET_SO=%TARGET_DIR%\libKnot_arm64-v8a.so"
-          if not exist "%TARGET_SO%" (
-            echo "::error::目标.so文件不存在！路径：%TARGET_SO%"
-            dir "%TARGET_DIR%\"  # 列出目标目录内容
-            exit 1
-          )
-          echo ".so文件复制成功：%TARGET_SO%"
+        REM 验证复制结果
+        set "TARGET_SO=%TARGET_DIR%\libKnot_arm64-v8a.so"
+        if not exist "%TARGET_SO%" (
+          echo "::error::目标.so文件不存在！路径：%TARGET_SO%"
+          dir "%TARGET_DIR%\"  # 列出目标目录内容
+          exit 1
+        )
+        echo ".so文件复制成功：%TARGET_SO%"
 
-          REM 定义输出路径变量
-          set "ANDROID_BUILD_DIR=build\android-build"
+        REM 定义输出路径变量
+        set "ANDROID_BUILD_DIR=build\android-build"
 
-          echo "=== 调用androiddeployqt（触发Gradle打包） ==="
-          "%ANDROID_DEPLOY_QT%" ^
-            --input android-Knot-deployment-settings.json ^
-            --output "%ANDROID_BUILD_DIR%" ^
-            --android-platform android-%ANDROID_API_LEVEL% ^
-            --jdk "%JAVA_HOME%" ^
-            --gradle --release ^
-            --verbose
+        echo "=== 调用androiddeployqt（触发Gradle打包） ==="
+        "%ANDROID_DEPLOY_QT%" ^
+          --input android-Knot-deployment-settings.json ^
+          --output "%ANDROID_BUILD_DIR%" ^
+          --android-platform android-%ANDROID_API_LEVEL% ^
+          --jdk "%JAVA_HOME%" ^
+          --gradle --release ^
+          --verbose
 
-          if errorlevel 1 (
-            echo "::error::APK生成失败！"
-            exit 1
-          )
+        if errorlevel 1 (
+          echo "::error::APK生成失败！"
+          exit 1
+        )
 
-          echo "=== 检查APK产物 ==="
-          set "APK_PATH=%ANDROID_BUILD_DIR%\build\outputs\apk\release\*.apk"
-          if exist "%APK_PATH%" (
-            echo "APK生成成功:"
-            dir "%APK_PATH%"
-          ) else (
-            echo "::error::APK未生成！"
-            exit 1
-          )
+        echo "=== 检查APK产物 ==="
+        set "APK_PATH=%ANDROID_BUILD_DIR%\build\outputs\apk\release\*.apk"
+        if exist "%APK_PATH%" (
+          echo "APK生成成功:"
+          dir "%APK_PATH%"
+        ) else (
+          echo "::error::APK未生成！"
+          exit 1
+        )
 
-      # 7. 签名APK
-      - name: Sign APK
-        shell: cmd
-        env:
-          # 从GitHub Secrets获取密钥信息
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-            echo "=== 准备签名环境 ==="
-            cd "%GITHUB_WORKSPACE%\src"
+    # 7. 签名APK
+    - name: Sign APK
+      shell: cmd
+      env:
+        # 从GitHub Secrets获取密钥信息
+        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: |
+        echo "=== 准备签名环境 ==="
+        cd "%GITHUB_WORKSPACE%\src"
 
-            REM 创建临时目录并进入
-            mkdir signing
-            cd signing
-            echo "当前目录：%cd%"
+        REM 创建临时目录并进入
+        mkdir signing
+        cd signing
+        echo "当前目录：%cd%"
 
-            REM 解密密钥库文件（保持不变）
-            echo "=== 解密密钥库文件 ==="
-            PowerShell -Command "$base64 = $env:KEYSTORE_BASE64; [System.Convert]::FromBase64String($base64) | Set-Content -Path 'release.keystore' -Encoding Byte"
+        REM 解密密钥库文件（保持不变）
+        echo "=== 解密密钥库文件 ==="
+        PowerShell -Command "$base64 = $env:KEYSTORE_BASE64; [System.Convert]::FromBase64String($base64) | Set-Content -Path 'release.keystore' -Encoding Byte"
 
-            REM 验证密钥文件（保持不变）
-            if not exist "release.keystore" (
-              echo "::error::密钥文件解密失败，文件不存在！"
-              dir
-              exit 1
-            )
-            for %%I in (release.keystore) do set "FILE_SIZE=%%~zI"
-            echo "密钥文件大小：%FILE_SIZE% 字节"
-            if %FILE_SIZE% lss 100 (
-              echo "::error::密钥文件过小，可能解密不完整！"
-              exit 1
-            )
+        REM 验证密钥文件（保持不变）
+        if not exist "release.keystore" (
+          echo "::error::密钥文件解密失败，文件不存在！"
+          dir
+          exit 1
+        )
+        for %%I in (release.keystore) do set "FILE_SIZE=%%~zI"
+        echo "密钥文件大小：%FILE_SIZE% 字节"
+        if %FILE_SIZE% lss 100 (
+          echo "::error::密钥文件过小，可能解密不完整！"
+          exit 1
+        )
 
-            REM 关键修改：获取未签名APK的具体名称
-            echo "=== 查找未签名APK ==="
-            set "APK_DIR=..\build\android-build\build\outputs\apk\release"
-            REM 列出目录中的APK文件（通常是 android-build-release-unsigned.apk）
-            dir "%APK_DIR%\*.apk"
-            REM 将找到的第一个APK文件名赋值给变量
-            for /f "delims=" %%f in ('dir /b "%APK_DIR%\*.apk"') do (
-              set "UNSIGNED_APK=%APK_DIR%\%%f"
-              goto :found_apk  # 只取第一个APK
-            )
-            :found_apk
-            REM 验证APK是否存在
-            if not defined UNSIGNED_APK (
-              echo "::error::未找到未签名APK！"
-              dir "%APK_DIR%"
-              exit 1
-            )
-            echo "找到未签名APK：%UNSIGNED_APK%"
+        REM 关键修改：获取未签名APK的具体名称
+        echo "=== 查找未签名APK ==="
+        set "APK_DIR=..\build\android-build\build\outputs\apk\release"
+        REM 列出目录中的APK文件（通常是 android-build-release-unsigned.apk）
+        dir "%APK_DIR%\*.apk"
+        REM 将找到的第一个APK文件名赋值给变量
+        for /f "delims=" %%f in ('dir /b "%APK_DIR%\*.apk"') do (
+          set "UNSIGNED_APK=%APK_DIR%\%%f"
+          goto :found_apk  # 只取第一个APK
+        )
+        :found_apk
+        REM 验证APK是否存在
+        if not defined UNSIGNED_APK (
+          echo "::error::未找到未签名APK！"
+          dir "%APK_DIR%"
+          exit 1
+        )
+        echo "找到未签名APK：%UNSIGNED_APK%"
 
-            REM 设置签名后APK的路径
-            set "SIGNED_APK=%APK_DIR%\Knot-signed.apk"
+        REM 设置签名后APK的路径
+        set "SIGNED_APK=%APK_DIR%\Knot-signed.apk"
 
-            REM 使用jarsigner签名（使用具体APK路径）
-            echo "=== 使用jarsigner签名APK ==="
-            "%JAVA_HOME%\bin\jarsigner" -verbose -sigalg SHA256withRSA -digestalg SHA-256 ^
-              -keystore release.keystore ^
-              -storepass "%KEYSTORE_PASSWORD%" ^
-              -keypass "%KEY_PASSWORD%" ^
-              "%UNSIGNED_APK%" ^
-              "%KEY_ALIAS%"
+        REM 使用jarsigner签名（使用具体APK路径）
+        echo "=== 使用jarsigner签名APK ==="
+        "%JAVA_HOME%\bin\jarsigner" -verbose -sigalg SHA256withRSA -digestalg SHA-256 ^
+          -keystore release.keystore ^
+          -storepass "%KEYSTORE_PASSWORD%" ^
+          -keypass "%KEY_PASSWORD%" ^
+          "%UNSIGNED_APK%" ^
+          "%KEY_ALIAS%"
 
-            if errorlevel 1 (
-              echo "::error::APK签名失败！"
-              exit 1
-            )
+        if errorlevel 1 (
+          echo "::error::APK签名失败！"
+          exit 1
+        )
 
-            REM 验证签名
-            echo "=== 验证APK签名 ==="
-            "%JAVA_HOME%\bin\jarsigner" -verify -verbose "%UNSIGNED_APK%"
+        REM 验证签名
+        echo "=== 验证APK签名 ==="
+        "%JAVA_HOME%\bin\jarsigner" -verify -verbose "%UNSIGNED_APK%"
 
-            REM 重命名为带签名标识的APK
-            move "%UNSIGNED_APK%" "%SIGNED_APK%"
+        REM 重命名为带签名标识的APK
+        move "%UNSIGNED_APK%" "%SIGNED_APK%"
 
-            echo "=== 签名APK完成 ==="
-            dir "%SIGNED_APK%"
+        echo "=== 签名APK完成 ==="
+        dir "%SIGNED_APK%"
 
-      # 8. 上传签名后的产物
-      - name: Upload signed APK
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Knot-APK-signed
-          path: src\build\android-build\build\outputs\apk\release\Knot-signed.apk
+    # 8. 上传签名后的产物
+    - name: Upload signed APK
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Knot-APK-signed
+        path: src\build\android-build\build\outputs\apk\release\Knot-signed.apk
