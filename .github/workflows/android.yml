@@ -114,7 +114,8 @@ jobs:
             type Makefile | findstr /C:"OBJECTS ="  # 确认是否生成对应的.o目标文件
 
             echo "=== 执行make（带详细日志） ==="
-            "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" -j8 V=1 > make_output.log 2>&1
+            #"%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" -j8 V=1 > make_output.log 2>&1
+            "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" -j1 V=1  # 单线程执行，便于查看输出
             if errorlevel 1 (
               echo "::error::编译失败！"
               type make_full.log
