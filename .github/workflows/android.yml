@@ -12,6 +12,9 @@ on:
     paths:
     - '**'
 
+  release:
+    types: [ published ] # 监听发布事件
+
 env:
   QT_VERSION: "6.6.3"
   QT_ARCH: "android_arm64_v8a"
@@ -276,7 +279,8 @@ jobs:
         echo "找到未签名APK：%UNSIGNED_APK%"
 
         REM 设置签名后APK的路径
-        set "SIGNED_APK=%APK_DIR%\Knot-signed.apk"
+        REM set "SIGNED_APK=%APK_DIR%\Knot-signed.apk"
+        set "SIGNED_APK=%APK_DIR%\android-build-release-signed.apk"
 
         REM 使用jarsigner签名（使用具体APK路径）
         echo "=== 使用jarsigner签名APK ==="
@@ -308,4 +312,16 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Knot-APK-signed
-        path: src\build\android-build\build\outputs\apk\release\Knot-signed.apk
+        path: src\build\android-build\build\outputs\apk\release\android-build-release-signed.apk
+
+    # 9. 上传到 GitHub Release
+    - name: Upload to GitHub Release
+    if: github.event_name == 'release' # 仅在创建Release时执行
+    uses: svenstaro/upload-release-action@v2
+    with:
+      repo_token: ${{ secrets.GITHUB_TOKEN }}
+      file: src\build\android-build\build\outputs\apk\release\android-build-release-signed.apk # 固定路径+文件名
+      asset_name: android-build-release-signed.apk # 保持与自动更新逻辑一致的文件名
+      tag: ${{ github.ref }}
+      overwrite: true # 覆盖同名文件（方便更新）
+      body: "Android 平台自动更新专用 APK，版本：${{ github.ref_name }}" # 可选：添加版本说明    
