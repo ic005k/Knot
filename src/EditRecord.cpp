@@ -12,7 +12,6 @@ extern QRegularExpression regxNumber;
 extern bool isBreak, isReport, isWholeMonth, isDateSection, isDark, isAdd,
     isRemovedTopItem;
 extern int fontSize;
-extern TextSelector *m_TextSelector;
 
 extern QString loadText(QString textFile);
 extern void TextEditToFile(QTextEdit *txtEdit, QString fileName);
@@ -77,9 +76,6 @@ EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {
 }
 
 void EditRecord::init() {
-  m_TextSelector->close();
-  m_TextSelector = new TextSelector(mw_one);
-
   setModal(true);
   setGeometry(mw_one->geometry().x(), mw_one->geometry().y(), mw_one->width(),
               mw_one->height());

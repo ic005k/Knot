@@ -14,7 +14,6 @@ extern bool isEpub, isText, isPDF, loading, isDark, isAndroid, isEncrypt, zh_cn;
 extern int iPage, sPos, totallines, baseLines, htmlIndex, s_y1, s_m1, s_d1,
     s_y2, s_m2, s_d2, fontSize;
 extern QStringList readTextList, htmlFiles, listCategory;
-extern TextSelector *m_TextSelector;
 
 QStringList resultsList;
 
@@ -109,10 +108,6 @@ QInputDialog *Method::inputDialog(QString windowsTitle, QString lblEdit,
 void Method::closeKeyboard() {
   if (mw_one->pAndroidKeyboard->isVisible()) {
     mw_one->pAndroidKeyboard->hide();
-  }
-
-  if (!m_TextSelector->isHidden()) {
-    m_TextSelector->on_btnClose_clicked();
   }
 }
 

@@ -9,7 +9,7 @@ int highCount;
 QString orgLblStyle;
 
 extern MainWindow* mw_one;
-extern TextSelector* m_TextSelector;
+
 extern Method* m_Method;
 extern QString iniFile, iniDir, privateDir, encPassword, errorInfo;
 extern bool loading, isBreak, zh_cn, isDark, isAndroid, isPasswordError,
@@ -1387,8 +1387,6 @@ void Todo::openTodoUI() {
 }
 
 void Todo::openTodo() {
-  // m_TextSelector->close();
-  // m_TextSelector = new TextSelector(mw_one);
   isPasswordError = false;
 
   if (mw_one->ui->chkAutoSync->isChecked() &&

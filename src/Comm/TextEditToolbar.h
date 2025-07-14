@@ -26,6 +26,8 @@ class TextEditToolbar : public QWidget {
     setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
     setAttribute(Qt::WA_TranslucentBackground);
 
+    installEventFilter(this);
+
     // 设置为接收焦点的策略
     setFocusPolicy(Qt::StrongFocus);
 
@@ -180,6 +182,24 @@ class TextEditToolbar : public QWidget {
   void showEvent(QShowEvent *event) override {
     QWidget::showEvent(event);
     setFocus();  // 获取焦点以便接收按键事件
+  }
+
+  // 重写事件过滤器，强制接收返回键事件
+  bool eventFilter(QObject *obj, QEvent *event) override {
+    // 仅处理自身的事件
+    if (obj == this) {
+      // 捕获返回键（KeyPress 和 KeyRelease 都处理，确保不遗漏）
+      if (event->type() == QEvent::KeyPress ||
+          event->type() == QEvent::KeyRelease) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if (keyEvent->key() == Qt::Key_Back) {
+          hide();       // 关闭工具栏
+          return true;  // 拦截事件，避免传递
+        }
+      }
+    }
+    // 其他事件交给基类处理
+    return QWidget::eventFilter(obj, event);
   }
 
  private:
@@ -376,13 +396,15 @@ class EditEventFilter : public QObject {
       return false;  // 放行输入法事件
     }
 
-    // 处理返回键
-    if (event->type() == QEvent::KeyRelease) {
+    // 处理返回键（无论目标控件是谁，只要工具栏可见就关闭）
+    if (event->type() == QEvent::KeyPress ||
+        event->type() == QEvent::KeyRelease) {
       QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-      if (keyEvent->key() == Qt::Key_Back && m_toolbar &&
-          m_toolbar->isVisible()) {
-        m_toolbar->hide();
-        return true;
+      if (keyEvent->key() == Qt::Key_Back) {
+        if (m_toolbar && m_toolbar->isVisible()) {
+          m_toolbar->hide();
+          return true;  // 拦截事件，避免重复处理
+        }
       }
     }
 

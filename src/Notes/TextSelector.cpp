@@ -157,7 +157,6 @@ void TextSelector::on_btnLeft1_clicked() {
   mw_one->m_Notes->start--;
   if (mw_one->m_Notes->start < 0) mw_one->m_Notes->start = 0;
 
-  mw_one->m_Notes->selectText(mw_one->m_Notes->start, mw_one->m_Notes->end);
   ui->lineEdit->setCursorPosition(0);
 }
 
@@ -166,18 +165,14 @@ void TextSelector::on_btnLeft0_clicked() {
   if (mw_one->m_Notes->start >= mw_one->m_Notes->end)
     mw_one->m_Notes->start = mw_one->m_Notes->end - 1;
 
-  mw_one->m_Notes->selectText(mw_one->m_Notes->start, mw_one->m_Notes->end);
   ui->lineEdit->setCursorPosition(0);
 }
 
 void TextSelector::on_btnRight1_clicked() {
   mw_one->m_Notes->end++;
 
-  mw_one->m_Notes->selectText(mw_one->m_Notes->start, mw_one->m_Notes->end);
-
   if (ui->lineEdit->text().trimmed() == "") {
     mw_one->m_Notes->end--;
-    mw_one->m_Notes->selectText(mw_one->m_Notes->start, mw_one->m_Notes->end);
   }
 }
 
@@ -185,8 +180,6 @@ void TextSelector::on_btnRight0_clicked() {
   mw_one->m_Notes->end--;
   if (mw_one->m_Notes->end <= mw_one->m_Notes->start)
     mw_one->m_Notes->end = mw_one->m_Notes->start + 1;
-
-  mw_one->m_Notes->selectText(mw_one->m_Notes->start, mw_one->m_Notes->end);
 }
 
 void TextSelector::on_btnBing_clicked() {

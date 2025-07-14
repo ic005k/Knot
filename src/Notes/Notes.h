@@ -109,10 +109,6 @@ class Notes : public QDialog {
   QStringList getImgFileFromHtml(QString htmlfile);
   void zipMemo();
 
-  void selectText(int start, int end);
-
-  void getEditPanel(QTextEdit *textEdit, QEvent *evn);
-
   qreal getVHeight();
 
   QString getDateTimeStr();
@@ -129,10 +125,6 @@ class Notes : public QDialog {
 
   bool selectPDFFormat(QPrinter *printer);
   void on_btnPDF_clicked();
-
-  bool eventFilterEditTodo(QObject *watch, QEvent *evn);
-
-  bool eventFilterEditRecord(QObject *watch, QEvent *evn);
 
   QString insertImage(QString fileName, bool isToAndroidView);
 
@@ -203,8 +195,6 @@ class Notes : public QDialog {
   void editVSBarValueChanged();
 
   void timerSlot();
-
-  void on_showEditPanel();
 
   void on_btnDone_clicked();
 

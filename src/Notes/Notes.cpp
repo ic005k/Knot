@@ -29,7 +29,6 @@ extern CloudBackup *m_CloudBackup;
 
 QString markdownToHtml(const QString &markdown, int options);
 QString markdownToHtmlWithMath(const QString &md);
-TextSelector *m_TextSelector = nullptr;
 
 NoteIndexManager::NoteIndexManager(QObject *parent) : QObject{parent} {}
 
@@ -37,8 +36,6 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->setupUi(this);
   m_NoteIndexManager = new NoteIndexManager();
   m_EditSource1 = new QTextEditHighlighter();
-
-  m_TextSelector = new TextSelector(this);
 
   initEditor();
 
@@ -209,116 +206,6 @@ void Notes::updateMDFileToSyncLists(QString currentMDFile) {
   notes_sync_files.append(zipMD);
 }
 
-void Notes::getEditPanel(QTextEdit *textEdit, QEvent *evn) {
-  QMouseEvent *event = static_cast<QMouseEvent *>(evn);
-  byTextEdit = textEdit;
-
-  QPalette pt = palette();
-  pt.setBrush(QPalette::Text, Qt::black);
-  pt.setBrush(QPalette::Base, QColor(255, 255, 255));
-  pt.setBrush(QPalette::Highlight, QColor(90, 90, 255));
-  pt.setBrush(QPalette::HighlightedText, Qt::white);
-  textEdit->setPalette(pt);
-
-  if (event->type() == QEvent::MouseButtonPress) {
-    if (event->button() == Qt::LeftButton) {
-      isMousePress = true;
-      isMouseMove = false;
-
-      if (!isAndroid) {
-        m_TextSelector->on_btnClose_clicked();
-      }
-
-      px = event->globalPosition().x();
-      py = event->globalPosition().y();
-
-      int a = 100;
-      int hy = py - a - m_TextSelector->height();
-      if (hy >= 0)
-        y1 = hy;
-      else
-        y1 = py + a;
-
-#ifdef Q_OS_ANDROID
-      m_TextSelector->setFixedWidth(mw_one->width() - 6);
-
-      if (textEdit == mw_one->ui->editTodo)
-        y1 = mw_one->geometry().y() + mw_one->ui->editTodo->y() +
-             mw_one->ui->editTodo->height() + 2;
-
-      if (textEdit == mw_one->ui->editDetails)
-        y1 = mw_one->geometry().y() + mw_one->ui->editDetails->y() +
-             mw_one->ui->editDetails->height() + 2;
-#else
-
-#endif
-
-      textEdit->cursor().setPos(event->globalPosition().toPoint());
-
-      if (m_TextSelector->isHidden()) {
-        if (isAndroid) {
-          if (!pAndroidKeyboard->isVisible()) {
-            pAndroidKeyboard->setVisible(true);
-          }
-          timerEditPanel->start(1000);
-        }
-      }
-    }
-  }
-
-  if (event->type() == QEvent::MouseButtonRelease) {
-    isMouseRelease = true;
-    isMousePress = false;
-    isMouseMove = false;
-
-    if (m_TextSelector->ui->lineEdit->text() != "") {
-      m_TextSelector->show();
-      if (isFunShow) {
-        isFunShow = false;
-
-        m_TextSelector->init(y1);
-        textEdit->setFocus();
-
-        QTextCursor cursor = textEdit->textCursor();
-        cursor.setPosition(start);
-        cursor.setPosition(end, QTextCursor::KeepAnchor);
-        textEdit->setTextCursor(cursor);
-      }
-    }
-  }
-
-  if (event->type() == QEvent::MouseMove) {
-    isMouseMove = true;
-    if (isMousePress) {
-      textEdit->cursor().setPos(event->globalPosition().toPoint());
-
-      mx = event->globalPosition().x();
-      my = event->globalPosition().y();
-
-      if (mx <= px) {
-        m_TextSelector->on_btnClose_clicked();
-        return;
-      }
-
-      QString str = textEdit->textCursor().selectedText().trimmed();
-
-      end = textEdit->textCursor().position();
-      start = end - textEdit->textCursor().selectedText().length();
-
-      QTextCursor cursor;
-      cursor = byTextEdit->textCursor();
-      cursor.setPosition(start);
-      cursor.setPosition(end, QTextCursor::KeepAnchor);
-      byTextEdit->setTextCursor(cursor);
-
-      m_TextSelector->ui->lineEdit->setText(str);
-      if (str != "") {
-        m_TextSelector->init(y1);
-      }
-    }
-  }
-}
-
 bool Notes::eventFilter(QObject *obj, QEvent *evn) {
   QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
   if (evn->type() == QEvent::KeyRelease) {
@@ -361,12 +248,6 @@ void Notes::on_KVChanged() {
     if (newHeight > 0) {
       this->setGeometry(mw_one->geometry().x(), mw_one->geometry().y(),
                         mw_one->width(), newHeight);
-
-      if (!m_TextSelector->isHidden()) {
-        m_TextSelector->setGeometry(m_TextSelector->geometry().x(), 10,
-                                    m_TextSelector->width(),
-                                    m_TextSelector->height());
-      }
     }
   }
 }
@@ -853,64 +734,6 @@ bool Notes::eventFilterQwNote(QObject *watch, QEvent *event) {
   return QWidget::eventFilter(watch, event);
 }
 
-bool Notes::eventFilterEditTodo(QObject *watch, QEvent *evn) {
-  if (watch == mw_one->ui->editTodo->viewport()) {
-    getEditPanel(mw_one->ui->editTodo, evn);
-
-    if (evn->type() == QEvent::MouseButtonDblClick) {
-      y1 = mw_one->geometry().y() + mw_one->ui->editTodo->y() +
-           mw_one->ui->editTodo->height() + 2;
-      isMousePress = true;
-      on_showEditPanel();
-    }
-  }
-
-  return QWidget::eventFilter(watch, evn);
-}
-
-bool Notes::eventFilterEditRecord(QObject *watch, QEvent *evn) {
-  if (watch == mw_one->ui->editDetails->viewport()) {
-    mw_one->m_Notes->getEditPanel(mw_one->ui->editDetails, evn);
-
-    if (evn->type() == QEvent::MouseButtonDblClick) {
-      y1 = mw_one->geometry().y() + mw_one->ui->editDetails->y() +
-           mw_one->ui->editDetails->height() + 2;
-      isMousePress = true;
-      on_showEditPanel();
-    }
-  }
-
-  return QWidget::eventFilter(watch, evn);
-}
-
-void Notes::on_showEditPanel() {
-  timerEditPanel->stop();
-  if (isMousePress) {
-    isFunShow = true;
-
-    QTextCursor cursor;
-    start = byTextEdit->textCursor().position();
-    end = start + 2;
-    cursor = byTextEdit->textCursor();
-    cursor.setPosition(start);
-    cursor.setPosition(end, QTextCursor::KeepAnchor);
-    byTextEdit->setTextCursor(cursor);
-
-    m_TextSelector->ui->lineEdit->setText(cursor.selectedText());
-
-    m_TextSelector->init(y1);
-  }
-}
-
-void Notes::selectText(int start, int end) {
-  QTextCursor cursor;
-  cursor = byTextEdit->textCursor();
-  cursor.setPosition(start);
-  cursor.setPosition(end, QTextCursor::KeepAnchor);
-  byTextEdit->setTextCursor(cursor);
-  m_TextSelector->ui->lineEdit->setText(cursor.selectedText());
-}
-
 void Notes::paintEvent(QPaintEvent *event) {
   Q_UNUSED(event);
   return;
@@ -933,10 +756,6 @@ void Notes::closeEvent(QCloseEvent *event) {
 #ifndef Q_OS_ANDROID
   strNoteText = m_EditSource->text().trimmed();
 #endif
-
-  if (!m_TextSelector->isHidden()) {
-    m_TextSelector->close();
-  }
 
   m_Method->Sleep(100);
 
@@ -1225,10 +1044,7 @@ void Notes::setEditorVPos() {
   }
 }
 
-void Notes::showTextSelector() {
-  m_TextSelector->setGeometry(mw_one->geometry().x(), mw_one->geometry().y(),
-                              mw_one->width(), m_TextSelector->height());
-}
+void Notes::showTextSelector() {}
 
 void Notes::setOpenSearchResultForAndroid(bool isValue, QString strSearchText) {
   Q_UNUSED(isValue);

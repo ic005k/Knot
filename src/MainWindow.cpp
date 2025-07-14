@@ -51,7 +51,6 @@ extern QStringList readTextList, htmlFiles, listCategory;
 
 extern CategoryList *m_CategoryList;
 extern ReaderSet *m_ReaderSet;
-extern TextSelector *m_TextSelector;
 
 extern void setTableNoItemFlags(QTableWidget *t, int row);
 extern int deleteDirfile(QString dirName);
@@ -2147,9 +2146,6 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 }
 
 void MainWindow::on_btnModifyRecord_clicked() {
-  m_TextSelector->close();
-  m_TextSelector = new TextSelector(mw_one);
-
   m_Method->reeditMainEventData();
 }
 
@@ -2199,8 +2195,7 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
     m_Reader->eventFilterReaderAndroid(watch, evn);
   else
     m_Reader->eventFilterReader(watch, evn);
-  // m_Notes->eventFilterEditTodo(watch, evn);
-  // m_Notes->eventFilterEditRecord(watch, evn);
+
   m_Notes->eventFilterQwNote(watch, evn);
 
   if (watch == ui->textBrowser->viewport()) {
@@ -2474,13 +2469,8 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
       }
 
       if (!ui->frameTodo->isHidden()) {
-        if (!m_TextSelector->isHidden()) {
-          m_TextSelector->close();
-          return true;
-        } else {
-          on_btnBackTodo_clicked();
-          return true;
-        }
+        on_btnBackTodo_clicked();
+        return true;
       }
 
       if (!ui->frameTodoRecycle->isHidden()) {
@@ -2530,13 +2520,8 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
       }
 
       if (!ui->frameEditRecord->isHidden()) {
-        if (!m_TextSelector->isHidden()) {
-          m_TextSelector->close();
-          return true;
-        } else {
-          on_btnBackEditRecord_clicked();
-          return true;
-        }
+        on_btnBackEditRecord_clicked();
+        return true;
       }
 
       if (!ui->frameBookList->isHidden()) {
@@ -3426,18 +3411,23 @@ void MainWindow::init_UIWidget() {
 
   this->installEventFilter(this);
 
-  textToolbar = new TextEditToolbar(this);
-  EditEventFilter *editFilter = new EditEventFilter(textToolbar, this);
-  ui->editCategory->installEventFilter(editFilter);
-  ui->editDetails->installEventFilter(editFilter);
-  ui->editTodo->installEventFilter(editFilter);
-  ui->editDetails->viewport()->installEventFilter(editFilter);
-  ui->editTodo->viewport()->installEventFilter(editFilter);
-  ui->editWebDAV->installEventFilter(editFilter);
-  ui->editWebDAVPassword->installEventFilter(editFilter);
-  ui->editWebDAVUsername->installEventFilter(editFilter);
-  m_Preferences->ui->editPassword->installEventFilter(editFilter);
-  m_Preferences->ui->editValidate->installEventFilter(editFilter);
+  if (isAndroid) {
+    TextEditToolbar *textToolbar = new TextEditToolbar(this);
+    EditEventFilter *editFilter = new EditEventFilter(textToolbar, this);
+    ui->editCategory->installEventFilter(editFilter);
+    ui->editDetails->installEventFilter(editFilter);
+    ui->editTodo->installEventFilter(editFilter);
+    ui->editDetails->viewport()->installEventFilter(editFilter);
+    ui->editTodo->viewport()->installEventFilter(editFilter);
+    ui->editWebDAV->installEventFilter(editFilter);
+    ui->editWebDAVPassword->installEventFilter(editFilter);
+    ui->editWebDAVUsername->installEventFilter(editFilter);
+    ui->editFindNote->installEventFilter(editFilter);
+    ui->editNotesSearch->installEventFilter(editFilter);
+    ui->editSearchText->installEventFilter(editFilter);
+    m_Preferences->ui->editPassword->installEventFilter(editFilter);
+    m_Preferences->ui->editValidate->installEventFilter(editFilter);
+  }
 
   ui->menubar->hide();
   ui->statusbar->hide();
@@ -4679,9 +4669,6 @@ void MainWindow::on_btnPasteCode_clicked() {
 }
 
 void MainWindow::on_btnAdd_clicked() {
-  // m_TextSelector->close();
-  // m_TextSelector = new TextSelector(mw_one);
-
   m_EditRecord->monthSum();
 
   on_AddRecord();
@@ -5319,11 +5306,6 @@ void MainWindow::on_btnBackSetTab_clicked() {
 
 void MainWindow::on_btnBackEditRecord_clicked() {
   m_Method->closeKeyboard();
-
-  if (textToolbar->isVisible()) {
-    textToolbar->hide();
-    return;
-  }
 
   ui->frameEditRecord->hide();
   ui->frameMain->show();
