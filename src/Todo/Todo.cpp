@@ -27,7 +27,7 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
   ui->setupUi(this);
 
   this->installEventFilter(this);
-  mw_one->ui->editTodo->viewport()->installEventFilter(mw_one);
+  // mw_one->ui->editTodo->viewport()->installEventFilter(mw_one);
 
   this->setModal(true);
 
@@ -1387,8 +1387,8 @@ void Todo::openTodoUI() {
 }
 
 void Todo::openTodo() {
-  m_TextSelector->close();
-  m_TextSelector = new TextSelector(mw_one);
+  // m_TextSelector->close();
+  // m_TextSelector = new TextSelector(mw_one);
   isPasswordError = false;
 
   if (mw_one->ui->chkAutoSync->isChecked() &&

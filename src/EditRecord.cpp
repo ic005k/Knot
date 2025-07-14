@@ -25,8 +25,8 @@ EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {
   m_CategoryList = new CategoryList(this);
 
   this->installEventFilter(this);
-  mw_one->ui->editCategory->installEventFilter(this);
-  mw_one->ui->editDetails->viewport()->installEventFilter(mw_one);
+  // mw_one->ui->editCategory->installEventFilter(this);
+  // mw_one->ui->editDetails->viewport()->installEventFilter(mw_one);
   mw_one->ui->editCategory->setFocus();
 
   nH = mw_one->ui->editCategory->height();

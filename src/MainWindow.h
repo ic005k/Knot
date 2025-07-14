@@ -70,6 +70,7 @@
 #include "src/Comm/Method.h"
 #include "src/Comm/ReceiveShare.h"
 #include "src/Comm/ShowMessage.h"
+#include "src/Comm/TextEditToolbar.h"
 #include "src/EditRecord.h"
 #include "src/Exercise/Steps.h"
 #include "src/Exercise/StepsOptions.h"
@@ -127,6 +128,8 @@ class MainWindow : public QMainWindow {
   MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
   Ui::MainWindow *ui;
+
+  TextEditToolbar *textToolbar;
 
   QString labelNormalStyleSheet = R"(/* 动态适配明暗模式 */
 QLabel {

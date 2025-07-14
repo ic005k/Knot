@@ -1,4 +1,4 @@
-name: Qt6 Android CI
+name: Android CI
 
 on:
   push:

@@ -2199,8 +2199,8 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
     m_Reader->eventFilterReaderAndroid(watch, evn);
   else
     m_Reader->eventFilterReader(watch, evn);
-  m_Notes->eventFilterEditTodo(watch, evn);
-  m_Notes->eventFilterEditRecord(watch, evn);
+  // m_Notes->eventFilterEditTodo(watch, evn);
+  // m_Notes->eventFilterEditRecord(watch, evn);
   m_Notes->eventFilterQwNote(watch, evn);
 
   if (watch == ui->textBrowser->viewport()) {
@@ -3424,6 +3424,21 @@ void MainWindow::init_UIWidget() {
   strDate = m_Method->setCurrentDateValue();
   isReadEnd = true;
 
+  this->installEventFilter(this);
+
+  textToolbar = new TextEditToolbar(this);
+  EditEventFilter *editFilter = new EditEventFilter(textToolbar, this);
+  ui->editCategory->installEventFilter(editFilter);
+  ui->editDetails->installEventFilter(editFilter);
+  ui->editTodo->installEventFilter(editFilter);
+  ui->editDetails->viewport()->installEventFilter(editFilter);
+  ui->editTodo->viewport()->installEventFilter(editFilter);
+  ui->editWebDAV->installEventFilter(editFilter);
+  ui->editWebDAVPassword->installEventFilter(editFilter);
+  ui->editWebDAVUsername->installEventFilter(editFilter);
+  m_Preferences->ui->editPassword->installEventFilter(editFilter);
+  m_Preferences->ui->editValidate->installEventFilter(editFilter);
+
   ui->menubar->hide();
   ui->statusbar->hide();
   ui->frameReader->hide();
@@ -3488,7 +3503,6 @@ void MainWindow::init_UIWidget() {
   ui->lblWebDAV->setStyleSheet(labelNormalStyleSheet);
   ui->lblTitleEditRecord->setStyleSheet(labelNormalStyleSheet);
 
-  this->installEventFilter(this);
   ui->textBrowser->installEventFilter(this);
   ui->textBrowser->setMouseTracking(true);
   ui->textBrowser->viewport()->installEventFilter(this);
@@ -4665,8 +4679,8 @@ void MainWindow::on_btnPasteCode_clicked() {
 }
 
 void MainWindow::on_btnAdd_clicked() {
-  m_TextSelector->close();
-  m_TextSelector = new TextSelector(mw_one);
+  // m_TextSelector->close();
+  // m_TextSelector = new TextSelector(mw_one);
 
   m_EditRecord->monthSum();
 
@@ -5305,6 +5319,11 @@ void MainWindow::on_btnBackSetTab_clicked() {
 
 void MainWindow::on_btnBackEditRecord_clicked() {
   m_Method->closeKeyboard();
+
+  if (textToolbar->isVisible()) {
+    textToolbar->hide();
+    return;
+  }
 
   ui->frameEditRecord->hide();
   ui->frameMain->show();

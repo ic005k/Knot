@@ -601,6 +601,7 @@ HEADERS += \
     src/Comm/Method.h \
     src/Comm/ReceiveShare.h \
     src/Comm/ShowMessage.h \
+    src/Comm/TextEditToolbar.h \
     src/Comm/Time24Picker.h \
     src/Comm/WheelWidget.h \
     src/Comm/qaesencryption.h \
