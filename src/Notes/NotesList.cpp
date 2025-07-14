@@ -238,7 +238,7 @@ void NotesList::on_btnRename_clicked() {
   QVBoxLayout *vbox0 = new QVBoxLayout;
   dlg->setLayout(vbox0);
   vbox0->setContentsMargins(5, 5, 5, 5);
-  dlg->setModal(true);
+  if (!isAndroid) dlg->setModal(true);
   dlg->setWindowFlag(Qt::FramelessWindowHint);
 
   QFrame *frame = new QFrame(this);
@@ -263,6 +263,12 @@ void NotesList::on_btnRename_clicked() {
   hframe->hide();
 
   QTextEdit *edit = new QTextEdit(this);
+  if (isAndroid) {
+    TextEditToolbar *textToolbar = new TextEditToolbar(dlg);  // 父窗口为QDialog
+    EditEventFilter *editFilter = new EditEventFilter(textToolbar, dlg);
+    edit->installEventFilter(editFilter);
+    edit->viewport()->installEventFilter(editFilter);
+  }
   vbox->addWidget(edit);
   edit->setPlainText(item->text(0));
   QScroller::grabGesture(edit, QScroller::LeftMouseButtonGesture);
@@ -342,7 +348,7 @@ void NotesList::on_btnRename_clicked() {
 
   x = mw_one->geometry().x() + (mw_one->width() - w) / 2;
   dlg->setGeometry(x, y, w, h);
-  dlg->setModal(true);
+
   mw_one->set_ToolButtonStyle(dlg);
 
   m_Method->m_widget = new QWidget(mw_one);

@@ -3425,8 +3425,6 @@ void MainWindow::init_UIWidget() {
     ui->editFindNote->installEventFilter(editFilter);
     ui->editNotesSearch->installEventFilter(editFilter);
     ui->editSearchText->installEventFilter(editFilter);
-    m_Preferences->ui->editPassword->installEventFilter(editFilter);
-    m_Preferences->ui->editValidate->installEventFilter(editFilter);
   }
 
   ui->menubar->hide();

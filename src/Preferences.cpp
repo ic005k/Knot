@@ -9,7 +9,7 @@ extern QString iniFile, iniDir, privateDir, defaultFontFamily, customFontFamily,
     encPassword;
 extern MainWindow* mw_one;
 extern Method* m_Method;
-extern bool isBreak, isDark, isEncrypt;
+extern bool isBreak, isDark, isEncrypt, isAndroid;
 extern int fontSize;
 extern QSettings* iniPreferences;
 extern ReaderSet* m_ReaderSet;
@@ -46,6 +46,13 @@ Preferences::Preferences(QWidget* parent)
 
   this->installEventFilter(this);
   ui->lblFontSize->installEventFilter(this);
+
+  if (isAndroid) {
+    TextEditToolbar* textToolbar = new TextEditToolbar(this);
+    EditEventFilter* editFilter = new EditEventFilter(textToolbar, this);
+    ui->editPassword->installEventFilter(editFilter);
+    ui->editValidate->installEventFilter(editFilter);
+  }
 
   ui->lblZipTip->hide();
   ui->gboxAdditional->hide();

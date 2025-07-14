@@ -1082,7 +1082,7 @@ void Todo::reeditText() {
   QVBoxLayout* vbox0 = new QVBoxLayout;
   dlg->setLayout(vbox0);
   vbox0->setContentsMargins(5, 5, 5, 5);
-  dlg->setModal(true);
+  if (!isAndroid) dlg->setModal(true);
   dlg->setWindowFlag(Qt::FramelessWindowHint);
 
   QFrame* frame = new QFrame(this);
@@ -1108,6 +1108,12 @@ void Todo::reeditText() {
   hframe->hide();
 
   QTextEdit* edit = new QTextEdit(this);
+  if (isAndroid) {
+    TextEditToolbar* textToolbar = new TextEditToolbar(dlg);  // 父窗口为QDialog
+    EditEventFilter* editFilter = new EditEventFilter(textToolbar, dlg);
+    edit->installEventFilter(editFilter);
+    edit->viewport()->installEventFilter(editFilter);
+  }
   vbox->addWidget(edit);
   edit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
   edit->setPlainText(strItem);
@@ -1152,23 +1158,24 @@ void Todo::reeditText() {
   btnShare->hide();
 #endif
 
-  connect(btnCancel, &QToolButton::clicked, [=]() mutable { dlg->close(); });
-  connect(dlg, &QDialog::rejected,
+  connect(btnCancel, &QToolButton::clicked, dlg,
+          [=]() mutable { dlg->close(); });
+  connect(dlg, &QDialog::rejected, dlg,
           [=]() mutable { m_Method->closeGrayWindows(); });
-  connect(dlg, &QDialog::accepted,
+  connect(dlg, &QDialog::accepted, dlg,
           [=]() mutable { m_Method->closeGrayWindows(); });
-  connect(btnCopy, &QToolButton::clicked, [=]() mutable {
+  connect(btnCopy, &QToolButton::clicked, dlg, [=]() mutable {
     edit->selectAll();
     edit->copy();
     dlg->close();
   });
-  connect(btnShare, &QToolButton::clicked, [=]() mutable {
+  connect(btnShare, &QToolButton::clicked, dlg, [=]() mutable {
     QString txt = edit->toPlainText().trimmed();
     if (txt.length() > 0) {
       mw_one->m_ReceiveShare->shareString(tr("Share to"), txt);
     }
   });
-  connect(btnOk, &QToolButton::clicked, [=]() mutable {
+  connect(btnOk, &QToolButton::clicked, dlg, [=]() mutable {
     QString strTime = getItemTime(row);
     int type = getItemType(row);
     delItem(row);
@@ -1193,7 +1200,7 @@ void Todo::reeditText() {
   x = mw_one->geometry().x() + (mw_one->width() - w) / 2;
 
   dlg->setGeometry(x, y, w, h);
-  dlg->setModal(true);
+
   m_Method->showGrayWindows();
   mw_one->set_ToolButtonStyle(dlg);
   dlg->show();
