@@ -11,6 +11,7 @@
 #include <QGeoServiceProviderFactory>
 #include <QInputMethod>
 #include <QSplashScreen>
+#include <QtConcurrent/QtConcurrentRun>
 
 #ifdef Q_OS_ANDROID
 
@@ -839,6 +840,8 @@ QLabel {
   void on_btnTools_clicked();
 
  private:
+  QStringList bakFileList;
+
   bool isMoveEntry;
   QTimer *tmeFlash;
   int nFlashCount = 0;
@@ -876,6 +879,7 @@ QLabel {
   QByteArray aes_key = "MySuperSecretKey1234567890";  // 长度不足32会自动处理
   QByteArray aes_iv = "InitializationVe";             // 16字节
   void init_CloudBacup();
+  void startBackgroundTaskUpdateBakFileList();
 };
 
 class SaveThread : public QThread {

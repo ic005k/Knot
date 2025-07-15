@@ -2,7 +2,7 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "2.0.16";
+QString ver = "2.0.17";
 QString appName = "Knot";
 
 QList<QPointF> PointList;
@@ -4034,40 +4034,53 @@ void MainWindow::on_actionTabRecycle() {
 }
 
 void MainWindow::on_actionBakFileList() {
+  startBackgroundTaskUpdateBakFileList();
+}
+
+void MainWindow::startBackgroundTaskUpdateBakFileList() {
   ui->frameMain->hide();
   ui->frameBakList->show();
 
-  m_Method->clearAllBakList(ui->qwBakList);
+  QFuture<void> future = QtConcurrent::run([=]() {
+    bakFileList = m_Preferences->getBakFilesList();
+    int bakCount = bakFileList.count();
 
-  QStringList bakFileList = m_Preferences->getBakFilesList();
-  int bakCount = bakFileList.count();
-
-  if (bakCount > 15) {
-    int count_a = bakCount - 15;
-    for (int j = 0; j < count_a; j++) {
-      QString str = bakFileList.at(0);
-      QString fn = str.split("-===-").at(1);
-      QFile file(fn);
-      file.remove();
-      bakFileList.removeAt(0);
+    if (bakCount > 15) {
+      int count_a = bakCount - 15;
+      for (int j = 0; j < count_a; j++) {
+        QString str = bakFileList.at(0);
+        QString fn = str.split("-===-").at(1);
+        QFile file(fn);
+        file.remove();
+        bakFileList.removeAt(0);
+      }
     }
-    bakCount = bakFileList.count();
-  }
+  });
 
-  for (int i = 0; i < bakCount; i++) {
-    QString action, bakfile;
-    QString str = bakFileList.at(bakCount - 1 - i);
-    action = str.split("-===-").at(0);
-    bakfile = str.split("-===-").at(1);
-    m_Method->addItemToQW(ui->qwBakList, action, "", "", bakfile, 0);
-  }
+  // 可选：使用 QFutureWatcher 监控进度
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, [=]() {
+    m_Method->clearAllBakList(ui->qwBakList);
+    int bakCount = bakFileList.count();
+    for (int i = 0; i < bakCount; i++) {
+      QString action, bakfile;
+      QString str = bakFileList.at(bakCount - 1 - i);
+      action = str.split("-===-").at(0);
+      bakfile = str.split("-===-").at(1);
+      m_Method->addItemToQW(ui->qwBakList, action, "", "", bakfile, 0);
+    }
 
-  if (m_Method->getCountFromQW(ui->qwBakList) > 0)
-    m_Method->setCurrentIndexFromQW(ui->qwBakList, 0);
+    if (m_Method->getCountFromQW(ui->qwBakList) > 0)
+      m_Method->setCurrentIndexFromQW(ui->qwBakList, 0);
 
-  ui->lblBakListTitle->setText(
-      tr("Backup File List") + "    " + tr("Total") + " : " +
-      QString::number(m_Method->getCountFromQW(ui->qwBakList)));
+    ui->lblBakListTitle->setText(
+        tr("Backup File List") + "    " + tr("Total") + " : " +
+        QString::number(m_Method->getCountFromQW(ui->qwBakList)));
+
+    qDebug() << "BakFileList update completed";
+    watcher->deleteLater();
+  });
+  watcher->setFuture(future);
 }
 
 void MainWindow::on_btnMenu_clicked() {

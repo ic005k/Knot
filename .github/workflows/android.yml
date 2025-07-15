@@ -26,6 +26,9 @@ env:
 jobs:
   build:
     runs-on: windows-latest
+    # 新增：声明权限
+    permissions:
+      contents: write  # 允许读写仓库内容（包括Releases、标签等）
 
     steps:
     - uses: actions/checkout@v4

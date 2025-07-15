@@ -18,6 +18,7 @@
 #include <QTextStream>
 #include <QTreeWidgetItem>
 #include <QtConcurrent/QtConcurrent>
+#include <QtConcurrent/QtConcurrentRun>
 
 #include "database_manager.h"
 #include "search_model.h"
