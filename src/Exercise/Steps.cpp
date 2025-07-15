@@ -252,6 +252,25 @@ QString Steps::getFullDate() {
   return date;
 }
 
+qlonglong Steps::getTodaySteps() {
+  QSettings Reg(iniDir + "steps.ini", QSettings::IniFormat);
+  int count = Reg.value("/Steps/Count", 0).toInt();
+  QString date, c_date;
+  c_date = getCurrentDate();
+  if (count > 0) {
+    date = Reg.value("/Steps/Table-" + QString::number(count - 1) + "-0", "")
+               .toString();
+    QString mdate = date.split(" ").at(0).trimmed();
+
+    if (mdate == c_date) {
+      return Reg.value("/Steps/Table-" + QString::number(count - 1) + "-1", 0)
+          .toLongLong();
+    }
+  }
+
+  return 0;
+}
+
 void Steps::setTableSteps(qlonglong steps) {
   QSettings Reg(iniDir + "steps.ini", QSettings::IniFormat);
 
@@ -1331,6 +1350,12 @@ void Steps::initTodayInitSteps() {
     initTodaySteps = a;
   } else {
     initTodaySteps = Reg.value("InitValue", 0).toLongLong();
+
+    if (a - initTodaySteps < 0) {
+      qlonglong b = 0 - getTodaySteps();
+      Reg.setValue("InitValue", b);
+      initTodaySteps = b;
+    }
   }
 }
 
