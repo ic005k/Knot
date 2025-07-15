@@ -1318,7 +1318,7 @@ void Steps::updateHardSensorSteps() {
   steps = ts - initTodaySteps;
   if (steps < 0) return;
   if (steps > 100000000) return;
-  CurrentSteps = ts - resetSteps;
+  CurrentSteps = ts - resetSteps + getOldSteps();
   mw_one->ui->lcdNumber->display(QString::number(steps));
   mw_one->ui->lblSingle->setText(QString::number(CurrentSteps));
 
@@ -1347,23 +1347,26 @@ void Steps::initTodayInitSteps() {
   if (date != c_date) {
     Reg.setValue("Date", c_date);
     Reg.setValue("InitValue", a);
+    Reg.setValue("oldSteps", 0);
     initTodaySteps = a;
   } else {
     initTodaySteps = Reg.value("InitValue", 0).toLongLong();
 
-    if (a - initTodaySteps < 0) {
-      qlonglong b = 0 - getTodaySteps();
-      Reg.setValue("InitValue", b);
-      initTodaySteps = b;
+    if (a - initTodaySteps <= 0) {
+      Reg.setValue("InitValue", a);
+      Reg.setValue("oldSteps", getTodaySteps());
+      initTodaySteps = a;
     }
   }
 }
 
+qlonglong Steps::getOldSteps() {
+  QSettings Reg(iniDir + "initsteps.ini", QSettings::IniFormat);
+  return Reg.value("oldSteps", 0).toLongLong();
+}
+
 void Steps::getHardStepSensor() {
 #ifdef Q_OS_ANDROID
-
-  // QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  // m_activity.callMethod<void>("initStepSensor", "()V");
 
   isHardStepSensor = QJniObject::callStaticMethod<int>(
       "com.x/MyService", "getHardStepCounter", "()I");
