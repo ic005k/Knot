@@ -125,9 +125,7 @@ jobs:
 
          # 复制fcitx5依赖库到AppImage的lib目录（关键！）
          cp ExtBin/linux/fcitx5/libFcitx5Qt6DBusAddons.so.5.1.9 "$APP_LIB_DIR/"
-
-         # 复制其他可能的fcitx5依赖（如libfcitx5utils.so等）
-         cp -P /usr/lib/x86_64-linux-gnu/libfcitx5*.so* "$APP_LIB_DIR/" || true
+         cp ExtBin/linux/fcitx5/libfcitx5platforminputcontextplugin.so "$APP_LIB_DIR/"
 
          # 创建库的符号链接（在lib目录中）
          (cd "$APP_LIB_DIR" && \
@@ -157,13 +155,15 @@ jobs:
          echo "Copied to: $QT6_PLUGINS_DIR"
          ls -l "$QT6_PLUGINS_DIR"
 
+         # nss
          mkdir bin/release/lib/
          cp -r ExtBin/linux/nss/* bin/release/lib/
 
+         # openssl3
          #cp ExtBin/linux/openssl3/* bin/release/lib/
          cp -P /usr/lib/x86_64-linux-gnu/libssl.so.3* bin/release/lib/
 
-         # 复制fcitx5插件到应用自身的plugins目录（关键！）
+         # 复制fcitx5插件到应用自身的plugins目录
          APP_PLUGINS_DIR="bin/release/plugins/platforminputcontexts"
          mkdir -p "$APP_PLUGINS_DIR"
          cp ExtBin/linux/fcitx5/* "$APP_PLUGINS_DIR/"  # 从ExtBin复制插件
