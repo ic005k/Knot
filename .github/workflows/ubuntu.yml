@@ -148,7 +148,7 @@ jobs:
 
          # 获取 Qt6 插件目录
           #QT6_PLUGINS_DIR="${{ env.Qt6_DIR }}/../../plugins/platforminputcontexts"
-          QT6_PLUGINS_DIR="/home/runner/work/Knot/Qt/QT_VERSION/gcc_64/plugins/platforminputcontexts"
+          QT6_PLUGINS_DIR="/home/runner/work/Knot/Qt/$QT_VERSION/gcc_64/plugins/platforminputcontexts"
 
          # 检查插件文件是否存在
          #if [ ! -f "ExtBin/libfcitx5platforminputcontextplugin.so" ]; then
@@ -185,8 +185,6 @@ jobs:
                   -appimage \
                   -extra-plugins=platforminputcontexts \  # 强制包含platforminputcontexts插件
                   -plugin-dir="$QT6_PLUGINS_DIR"
-
-
          #chmod +x ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
 
       # 上传artifacts          
