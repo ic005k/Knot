@@ -168,7 +168,7 @@ jobs:
          ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
 
          # 在运行 linuxdeployqt 前，将 Qt 插件目录添加到库搜索路径
-         export LD_LIBRARY_PATH="/home/runner/work/Knot/$Qt/QT_VERSION/gcc_64/plugins/platforminputcontexts:$LD_LIBRARY_PATH"
+         export LD_LIBRARY_PATH="/home/runner/work/Knot/Qt/$QT_VERSION/gcc_64/plugins/platforminputcontexts:$LD_LIBRARY_PATH"
 
          export VERSION # linuxdeployqt uses this for naming the file
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
