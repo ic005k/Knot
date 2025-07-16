@@ -118,32 +118,21 @@ jobs:
          cp res/default.desktop bin/release/default.desktop
          cp ExtBin/linux/AppRun bin/release/AppRun
          chmod +x bin/release/AppRun
-                  
-         #cp -r ExtBin/linux/resources bin/release/resources
 
-         #cp ExtBin/linux/libfcitx5platforminputcontextplugin.so /home/runner/work/Knot/Qt/QT_VERSION/gcc_64/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
-         #chmod 755 /home/runner/work/Knot/Qt/QT_VERSION/gcc_64/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+         # 创建AppImage的lib目录（用于存放依赖库）
+         APP_LIB_DIR="bin/release/lib"
+         mkdir -p "$APP_LIB_DIR"
 
-         #cp ExtBin/linux/libFcitx5Qt6DBusAddons.so.5.1.9 /home/runner/work/Knot/Qt/QT_VERSION/gcc_64/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
-         #chmod 755 /home/runner/work/Knot/Qt/QT_VERSION/gcc_64/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
+         # 复制fcitx5依赖库到AppImage的lib目录（关键！）
+         cp ExtBin/linux/fcitx5/libFcitx5Qt6DBusAddons.so.5.1.9 "$APP_LIB_DIR/"
 
+         # 复制其他可能的fcitx5依赖（如libfcitx5utils.so等）
+         cp -P /usr/lib/x86_64-linux-gnu/libfcitx5*.so* "$APP_LIB_DIR/" || true
 
-         #mkdir -p bin/release/plugins/platforminputcontexts/
-         #cp -R ExtBin/linux/fcitx5/* bin/release/plugins/platforminputcontexts/
-         #chmod -R 755 bin/release/plugins/platforminputcontexts/
-
-         #cd bin/release/plugins/platforminputcontexts
-         #ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1
-         # 进入目标目录，执行操作，完成后自动回到当前目录
-         #(cd bin/release/plugins/platforminputcontexts && \
-         # ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
-         # ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.5)
-
-         #cp ExtBin/linux/libfcitx5platforminputcontextplugin.so bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
-         #chmod 755 bin/release/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
-
-         #cp ExtBin/linux/libFcitx5Qt6DBusAddons.so.5.1.9 bin/release/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
-         #chmod 755 bin/release/plugins/platforminputcontexts/libFcitx5Qt6DBusAddons.so.5.1.9
+         # 创建库的符号链接（在lib目录中）
+         (cd "$APP_LIB_DIR" && \
+         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
+         ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
 
 
          # 获取 Qt6 插件目录
