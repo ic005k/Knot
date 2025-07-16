@@ -137,12 +137,6 @@ jobs:
           #QT6_PLUGINS_DIR="${{ env.Qt6_DIR }}/../../plugins/platforminputcontexts"
           QT6_PLUGINS_DIR="/home/runner/work/Knot/Qt/$QT_VERSION/gcc_64/plugins/platforminputcontexts"
 
-         # 检查插件文件是否存在
-         #if [ ! -f "ExtBin/libfcitx5platforminputcontextplugin.so" ]; then
-         #echo "Error: Plugin file not found in ExtBin/"
-         #exit 1
-         #fi
-
          # 拷贝并设置权限
          mkdir -p "$QT6_PLUGINS_DIR"
          cp ExtBin/linux/fcitx5/* "$QT6_PLUGINS_DIR/"
@@ -156,7 +150,7 @@ jobs:
          ls -l "$QT6_PLUGINS_DIR"
 
          # nss
-         mkdir bin/release/lib/
+         #mkdir bin/release/lib/
          cp -r ExtBin/linux/nss/* bin/release/lib/
 
          # openssl3
