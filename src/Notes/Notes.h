@@ -113,7 +113,6 @@ class Notes : public QDialog {
 
   QString getDateTimeStr();
   void MD2Html(QString mdFile);
-  void saveQMLVPos();
 
   qreal getVPos();
   void unzip(QString zipfile);
@@ -189,8 +188,6 @@ class Notes : public QDialog {
 
  public slots:
   void on_btnNext_clicked();
-
-  void setVPos();
 
   void editVSBarValueChanged();
 

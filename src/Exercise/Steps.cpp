@@ -1348,6 +1348,8 @@ void Steps::initTodayInitSteps() {
     Reg.setValue("Date", c_date);
     Reg.setValue("InitValue", a);
     Reg.setValue("oldSteps", 0);
+    Reg.sync();
+
     initTodaySteps = a;
   } else {
     initTodaySteps = Reg.value("InitValue", 0).toLongLong();
@@ -1355,6 +1357,8 @@ void Steps::initTodayInitSteps() {
     if (a - initTodaySteps <= 0) {
       Reg.setValue("InitValue", a);
       Reg.setValue("oldSteps", getTodaySteps());
+      Reg.sync();
+
       initTodaySteps = a;
     }
   }

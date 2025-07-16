@@ -4542,8 +4542,6 @@ void MainWindow::on_btnUserInfo_clicked() {
 }
 
 void MainWindow::on_btnBackNotes_clicked() {
-  m_Notes->saveQMLVPos();
-
   QFileInfo fi(currentMDFile);
   m_Notes->saveWebScrollPos(fi.baseName());
 

@@ -577,37 +577,6 @@ void Notes::refreshQMLVPos(qreal newPos) {
   }
 }
 
-void Notes::saveQMLVPos() {
-#ifndef Q_OS_ANDROID
-
-  QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);
-
-  QString strTag = currentMDFile;
-  strTag.replace(iniDir, "");
-
-  Reg.setValue("/MainNotes/editVPos" + strTag,
-               m_EditSource->verticalScrollBar()->value());
-  int cursorPos = m_EditSource->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS);
-  Reg.setValue("/MainNotes/editCPos" + strTag, cursorPos);
-
-  if (QFile(currentMDFile).exists()) {
-    sliderPos = getVPos();
-    Reg.setValue("/MainNotes/SlidePos" + currentMDFile, sliderPos);
-  }
-
-#endif
-}
-
-void Notes::setVPos() {
-  QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);
-
-  sliderPos = Reg.value("/MainNotes/SlidePos" + currentMDFile).toReal();
-  qreal m_pos = sliderPos;
-
-  qreal textHeight = getVHeight();
-  qDebug() << "textHeight=" << textHeight << "m_pos=" << m_pos;
-}
-
 qreal Notes::getVPos() { return sliderPos; }
 
 qreal Notes::getVHeight() { return textHeight; }
@@ -1255,8 +1224,6 @@ void Notes::init_all_notes() {
   } else {
     loadEmptyNote();
   }
-
-  setVPos();
 }
 
 void Notes::loadEmptyNote() {
@@ -1475,7 +1442,6 @@ void Notes::openNotesUI() {
 
   mw_one->ui->frameMain->hide();
   mw_one->ui->frameNotes->show();
-  setVPos();
 
   mw_one->ui->btnNotesList->click();
 
@@ -1696,7 +1662,7 @@ void Notes::openNotes() {
                                });
 
               QObject::connect(
-                  downloader, &WebDavDownloader::downloadFinished,
+                  downloader, &WebDavDownloader::downloadFinished, this,
                   [=](bool success, QString error) {
                     qDebug() << (success ? "下载成功" : "下载失败: " + error);
 
@@ -1733,12 +1699,11 @@ void Notes::openNotes() {
                           return;
                         }
 
-                        // m_Method->decompressWithPassword(
-                        //     zFile, pDir, encPassword);
-
                         if (isPasswordError == false) {
-                          if (QFileInfo(pFile).lastModified() >
-                              QFileInfo(kFile).lastModified()) {
+                          QFileInfo pFileInfo(pFile);
+                          QFileInfo kFileInfo(kFile);
+                          if (pFileInfo.lastModified() >
+                              kFileInfo.lastModified()) {
                             QFile::remove(kFile);
                             if (QFile::copy(pFile, kFile)) {
                               qDebug() << "kFile:" << kFile
@@ -1781,12 +1746,11 @@ void Notes::openNotes() {
                           }
                         }
 
-                        // m_Method->decompressWithPassword(
-                        //     zFile, pDir, encPassword);
-
                         if (isPasswordError == false) {
-                          if (QFileInfo(pFile).lastModified() >
-                              QFileInfo(kFile).lastModified()) {
+                          QFileInfo pFileInfo(pFile);
+                          QFileInfo kFileInfo(kFile);
+                          if (pFileInfo.lastModified() >
+                              kFileInfo.lastModified()) {
                             QFile::remove(kFile);
                             QFile::copy(pFile, kFile);
                             mw_one->m_NotesList->m_dbManager.updateFileIndex(
@@ -1805,8 +1769,10 @@ void Notes::openNotes() {
                         qDebug() << "pFile=" << pFile;
                         qDebug() << "kFile" << kFile;
 
-                        if (QFileInfo(pFile).lastModified() >
-                            QFileInfo(kFile).lastModified()) {
+                        QFileInfo pFileInfo(pFile);
+                        QFileInfo kFileInfo(kFile);
+                        if (pFileInfo.lastModified() >
+                            kFileInfo.lastModified()) {
                           QFile::remove(kFile);
                           QFile::copy(pFile, kFile);
                         }
@@ -1827,7 +1793,7 @@ void Notes::openNotes() {
           }
         });
 
-    QObject::connect(helper, &WebDavHelper::errorOccurred,
+    QObject::connect(helper, &WebDavHelper::errorOccurred, this,
                      [=](const QString &error) {
                        qDebug() << "操作失败:" << error;
                        mw_one->m_Notes->openNotesUI();
