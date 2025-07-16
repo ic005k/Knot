@@ -185,11 +185,9 @@ Rectangle {
             id: flack
             property int myw: m_width - 18
             width: myw
-            height: rectan.getItemHeight()
+            height: m_col.implicitHeight + 0
             contentWidth: myw + donebtn.width + flagColor.width
-            contentHeight: rectan.getItemHeight()
 
-            //boundsBehavior: Flickable.StopAtBounds //该属性设置过后，边界不会被拉出
             interactive: true
 
             // 新增：启用水平滑动和边界限制
@@ -253,38 +251,9 @@ Rectangle {
                 //选中颜色设置
                 color: view.currentIndex === index ? "lightblue" : getColor()
 
-                function getItemHeight() {
-                    var item0H
-                    var item1H
-                    var item2H
-                    var item3H
-
-                    if (text1.visible === false)
-                        item0H = 0
-                    else
-                        item0H = text1.contentHeight
-
-                    if (text2.visible === false)
-                        item1H = 0
-                    else
-                        item1H = text2.contentHeight
-
-                    if (text3.visible === false)
-                        item2H = 0
-                    else
-                        item2H = text3.contentHeight
-
-                    if (text4.visible === false)
-                        item3H = 0
-                    else
-                        item3H = text4.contentHeight
-
-                    return item0H + item1H + item2H + item3H + 20
-                }
-
                 Rectangle {
                     id: flagColor
-                    height: rectan.getItemHeight() - 0
+                    height: parent.height
                     width: 6
                     radius: 2
                     anchors.leftMargin: 1
@@ -310,6 +279,12 @@ Rectangle {
                         Layout.fillWidth: false
                         anchors.leftMargin: 0
                         anchors.rightMargin: 0
+
+                        Rectangle {
+                            width: view.width
+                            height: 5 // 空白高度
+                            color: "transparent"
+                        }
 
                         RowLayout {
 
@@ -446,6 +421,12 @@ Rectangle {
                             text: itemheight
 
                             visible: false
+                        }
+
+                        Rectangle {
+                            width: view.width
+                            height: 5 // 空白高度
+                            color: "transparent"
                         }
                     }
                 }

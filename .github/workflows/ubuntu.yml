@@ -183,7 +183,8 @@ jobs:
                   -qmldir=/home/runner/work/Knot/Knot/src/qmlsrc \
                   -qmake=/home/runner/work/Knot/Qt/6.6.3/gcc_64/bin/qmake \
                   -appimage
-                  #-extra-plugins=webview
+                  -extra-plugins=platforminputcontexts \  # 强制包含platforminputcontexts插件
+                  -plugin-dir="$QT6_PLUGINS_DIR"
 
 
          #chmod +x ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
