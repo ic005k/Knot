@@ -183,8 +183,8 @@ jobs:
                   -qmldir=/home/runner/work/Knot/Knot/src/qmlsrc \
                   -qmake=/home/runner/work/Knot/Qt/6.6.3/gcc_64/bin/qmake \
                   -appimage \
-                  -extra-plugins=platforminputcontexts \
-                  -plugin-dir=/home/runner/work/Knot/Qt/6.6.3/gcc_64/plugins/platforminputcontexts
+                  -extra-plugins=platforminputcontexts
+                  #-plugin-dir=/home/runner/work/Knot/Qt/6.6.3/gcc_64/plugins/platforminputcontexts
          #chmod +x ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
 
       # 上传artifacts          
