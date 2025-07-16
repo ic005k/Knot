@@ -184,7 +184,7 @@ jobs:
                   -qmake=/home/runner/work/Knot/Qt/6.6.3/gcc_64/bin/qmake \
                   -appimage \
                   -extra-plugins=platforminputcontexts \  # 强制包含platforminputcontexts插件
-                  -plugin-dir="$QT6_PLUGINS_DIR"
+                  -plugin-dir=/home/runner/work/Knot/Qt/6.6.3/gcc_64/plugins/platforminputcontexts
          #chmod +x ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
 
       # 上传artifacts          
