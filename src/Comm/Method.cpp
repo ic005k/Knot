@@ -927,7 +927,8 @@ QString Method::getCustomColor() {
   showGrayWindows();
 
   ColorDialog *colorDlg = new ColorDialog(this);
-  connect(colorDlg, &QDialog::rejected, [=]() mutable { closeGrayWindows(); });
+  connect(colorDlg, &QDialog::rejected, this,
+          [=]() mutable { closeGrayWindows(); });
   int x, y, w, h;
   x = mw_one->geometry().x();
   y = mw_one->geometry().y();

@@ -150,6 +150,7 @@ void NotesList::on_btnClose_clicked() { this->close(); }
 void NotesList::on_btnNewNoteBook_clicked() {
   QTreeWidgetItem *item = new QTreeWidgetItem();
   item->setText(0, ui->editBook->text().trimmed());
+  item->setText(2, "#FF0000");
   item->setForeground(0, Qt::red);
   item->setIcon(0, QIcon(":/res/nb.png"));
 
@@ -553,10 +554,10 @@ bool NotesList::on_btnImport_clicked() {
 
     if (QFile(fileName).exists() && isMD) {
       QTreeWidgetItem *item1;
-      QFileInfo fi(strInfo);
-      QString name = fi.fileName();
-      QString suffix = fi.suffix();
-      name.replace("." + suffix, "");
+
+      TitleGenerator generator;
+      QString strNoteText = loadText(fileName);
+      QString name = generator.genNewTitle(strNoteText);
 
       item1 = new QTreeWidgetItem(item);
       item1->setText(0, name);
@@ -2584,7 +2585,7 @@ QStringList NotesList::extractLocalImagesFromMarkdown(const QString &filePath) {
 }
 
 void NotesList::onSearchTextChanged(const QString &text) {
-  QTimer::singleShot(300, [this, text]() {  // 防抖处理
+  QTimer::singleShot(300, this, [this, text]() {  // 防抖处理
     auto results =
         m_dbManager.searchDocuments(text, mw_one->m_Notes->m_NoteIndexManager);
     m_searchModel.setResults(results);
