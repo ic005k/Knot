@@ -763,7 +763,10 @@ void NotesList::saveNotesList() {
   for (int i = 0; i < count; i++) {
     QTreeWidgetItem *topItem = tw->topLevelItem(i);
     QString strtop = topItem->text(0);
+    QString strtopcolorflag = topItem->text(2);
     iniNotes.setValue("/MainNotes/strTopItem" + QString::number(i), strtop);
+    iniNotes.setValue("/MainNotes/strTopColorFlag" + QString::number(i),
+                      strtopcolorflag);
 
     int childCount = topItem->childCount();
     iniNotes.setValue("/MainNotes/childCount" + QString::number(i), childCount);
@@ -855,12 +858,18 @@ void NotesList::initNotesList() {
     QString strTop =
         iniNotes->value("/MainNotes/strTopItem" + QString::number(i))
             .toString();
+    QString strTopColorFlag =
+        iniNotes
+            ->value("/MainNotes/strTopColorFlag" + QString::number(i),
+                    "#FF0000")
+            .toString();
     int childCount =
         iniNotes->value("/MainNotes/childCount" + QString::number(i)).toInt();
     notesTotal = notesTotal + childCount;
 
     QTreeWidgetItem *topItem = new QTreeWidgetItem;
     topItem->setText(0, strTop);
+    topItem->setText(2, strTopColorFlag);
     topItem->setForeground(0, Qt::red);
     QFont font = this->font();
     font.setBold(true);
@@ -1808,6 +1817,7 @@ void NotesList::loadAllNoteBook() {
   for (int i = 0; i < count; i++) {
     QTreeWidgetItem *topItem = tw->topLevelItem(i);
     QString str = topItem->text(0);
+    QString strtopcolorflag = topItem->text(2);
 
     int sum = topItem->childCount();
     int child_count = sum;
@@ -1816,23 +1826,39 @@ void NotesList::loadAllNoteBook() {
     }
 
     QString strSum = QString::number(sum);
-    m_Method->addItemToQW(mw_one->ui->qwNoteBook, str, QString::number(i), "",
-                          strSum, fontSize);
+    addItemToQW(mw_one->ui->qwNoteBook, str, QString::number(i), "", strSum,
+                strtopcolorflag, fontSize);
     pNoteBookItems.append(topItem);
 
     int childCount = topItem->childCount();
     for (int j = 0; j < childCount; j++) {
       QTreeWidgetItem *childItem = topItem->child(j);
       if (childItem->text(1).isEmpty()) {
-        m_Method->addItemToQW(
-            mw_one->ui->qwNoteBook, childItem->text(0),
-            QString::number(i) + "===" + QString::number(j), "isNoteBook",
-            QString::number(childItem->childCount()), fontSize - 1);
+        addItemToQW(mw_one->ui->qwNoteBook, childItem->text(0),
+                    QString::number(i) + "===" + QString::number(j),
+                    "isNoteBook", QString::number(childItem->childCount()), "",
+                    fontSize - 1);
 
         pNoteBookItems.append(childItem);
       }
     }
   }
+}
+
+void NotesList::addItemToQW(QQuickWidget *qw, QString text0, QString text1,
+                            QString text2, QString text3, QString text4,
+                            int itemH) {
+  QQuickItem *root = qw->rootObject();
+  QMetaObject::invokeMethod((QObject *)root, "addItem", Q_ARG(QVariant, text0),
+                            Q_ARG(QVariant, text1), Q_ARG(QVariant, text2),
+                            Q_ARG(QVariant, text3), Q_ARG(QVariant, text4),
+                            Q_ARG(QVariant, itemH));
+}
+
+void NotesList::setColorFlag(QString strColor) {
+  QQuickItem *root = mw_one->ui->qwNoteBook->rootObject();
+  QMetaObject::invokeMethod((QObject *)root, "setColorFlag",
+                            Q_ARG(QVariant, strColor));
 }
 
 void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
@@ -1841,6 +1867,7 @@ void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
   QAction *actRename = new QAction(tr("Rename NoteBook"));
   QAction *actMoveUp = new QAction(tr("Move Up"));
   QAction *actMoveDown = new QAction(tr("Move Down"));
+  QAction *actSetColorFlag = new QAction(tr("Set Color Marker"));
 
   connect(actNew, &QAction::triggered, this,
           &NotesList::on_actionAdd_NoteBook_triggered);
@@ -1853,6 +1880,8 @@ void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
           &NotesList::on_actionMoveUp_NoteBook_triggered);
   connect(actMoveDown, &QAction::triggered, this,
           &NotesList::on_actionMoveDown_NoteBook_triggered);
+  connect(actSetColorFlag, &QAction::triggered, this,
+          &NotesList::on_actionSetColorFlag);
 
   mainMenu->addAction(actNew);
   mainMenu->addAction(actRename);
@@ -1861,12 +1890,29 @@ void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
   mainMenu->addAction(actMoveUp);
   mainMenu->addAction(actMoveDown);
 
+  mainMenu->addAction(actSetColorFlag);
+
   actRename->setVisible(false);
   actDel->setVisible(false);
   actMoveUp->setVisible(false);
   actMoveDown->setVisible(false);
 
   mainMenu->setStyleSheet(m_Method->qssMenu);
+}
+
+void NotesList::on_actionSetColorFlag() {
+  QString color_0;
+  color_0 = m_Method->getCustomColor();
+  if (color_0.isNull()) return;
+
+  QTreeWidgetItem *itemTop;
+  QTreeWidgetItem *item = tw->currentItem();
+  if (item->parent() == nullptr) itemTop = item;
+  if (item->parent() != nullptr) itemTop = item->parent();
+  if (item->parent()->parent() != nullptr) itemTop = item->parent()->parent();
+  itemTop->setText(2, color_0);
+  setColorFlag(color_0);
+  saveNotesList();
 }
 
 void NotesList::on_actionAdd_Note_triggered() {

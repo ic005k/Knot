@@ -216,7 +216,8 @@ class NotesList : public QDialog {
 
   void onSearchTextChanged(const QString &text);
 
- private:
+  void on_actionSetColorFlag();
+  private:
   QStringList validMDFiles;
 
   QStringList mIndexList;
@@ -263,6 +264,8 @@ class NotesList : public QDialog {
   int getSavedNotesListIndex(int notebookIndex);
   bool safeWriteFile(const QString &filePath, const QString &content);
   void loadNotesListIndex();
+  void addItemToQW(QQuickWidget *qw, QString text0, QString text1, QString text2, QString text3, QString text4, int itemH);
+  void setColorFlag(QString strColor);
 };
 
 class SearchMapper {

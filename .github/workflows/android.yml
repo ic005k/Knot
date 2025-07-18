@@ -280,4 +280,10 @@ jobs:
         asset_name: android-build-release-signed.apk # 保持与自动更新逻辑一致的文件名
         tag: ${{ github.ref }}
         overwrite: true # 覆盖同名文件（方便更新）
-        body: "Android 平台自动更新专用 APK，版本：${{ github.ref_name }}" # 可选：添加版本说明
+        #body: "Android 平台自动更新专用 APK，版本：${{ github.ref_name }}" # 可选：添加版本说明
+        body: |
+              **Cross-Platform App Release**
+
+              This release includes:
+              - Performance optimizations
+              - Bug fixes and stability improvements

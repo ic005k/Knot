@@ -91,12 +91,13 @@ Rectangle {
         return data.type
     }
 
-    function addItem(t0, t1, t2, t3, f_size) {
+    function addItem(t0, t1, t2, t3, t4, f_size) {
         view.model.append({
                               "text0": t0,
                               "text1": t1,
                               "text2": t2,
                               "text3": t3,
+                              "text4": t4,
                               "font_size": f_size
                           })
     }
@@ -176,36 +177,43 @@ Rectangle {
             return "black"
     }
 
+    function setColorFlag(strColor) {
+        var currentIndex = view.currentIndex
+        if (currentIndex >= 0) {
+            view.model.setProperty(currentIndex, "text4", strColor)
+        }
+    }
+
     Component {
         id: dragDelegate
 
         Rectangle {
             id: listItem
             width: ListView.view.width
-            //height: item0.contentHeight + item2.contentHeight + 16
+
             height: colLayout.implicitHeight + 0
             color: ListView.isCurrentItem ? "lightblue" : getColor()
 
             border.width: isDark ? 0 : 1
-            border.color: "lightgray" //"lightsteelblue"
+            border.color: "lightgray"
 
             radius: 2
 
             RowLayout {
 
-                id: idlistElemnet
+                id: idlistRow
 
                 width: parent.width
                 spacing: 2
                 Layout.fillWidth: true
 
                 Rectangle {
-
+                    id: idrectColorFlag
                     height: colLayout.implicitHeight - 0
                     width: 6
                     radius: 2
                     anchors.leftMargin: 1
-                    color: "red"
+                    color: item4.text
                     visible: item2.text.length ? false : true
                     Text {
                         anchors.centerIn: parent
@@ -283,7 +291,7 @@ Rectangle {
                         leftPadding: 5
                         rightPadding: 5
 
-                        visible: false // item1.text.length ? true : false
+                        visible: false
                     }
 
                     Text {
@@ -302,7 +310,7 @@ Rectangle {
                         leftPadding: 5
                         rightPadding: 5
 
-                        visible: false // item2.text.length ? true : false
+                        visible: false
                     }
 
                     RowLayout {
@@ -338,7 +346,6 @@ Rectangle {
                             horizontalAlignment: Text.AlignLeft
                             verticalAlignment: Text.AlignVCenter
 
-                            //Layout.maximumWidth: listItem.width
                             Layout.preferredWidth: listItem.width
 
                             font.bold: false
@@ -351,6 +358,26 @@ Rectangle {
 
                             visible: item3.text.length ? true : false
                         }
+                    }
+
+                    // top color flag value
+                    Text {
+                        id: item4
+                        anchors.rightMargin: 0
+                        Layout.preferredWidth: listItem.width
+                        Layout.alignment: Qt.AlignHCenter
+
+                        horizontalAlignment: Text.AlignLeft
+                        width: parent.width
+                        wrapMode: TextArea.WordWrap
+                        font.bold: false
+                        text: text4
+                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+
+                        leftPadding: 5
+                        rightPadding: 5
+
+                        visible: false
                     }
 
                     Rectangle {
