@@ -108,7 +108,11 @@ bool Preferences::eventFilter(QObject* watch, QEvent* evn) {
   return QWidget::eventFilter(watch, evn);
 }
 
-void Preferences::on_btnBack_clicked() { close(); }
+void Preferences::on_btnBack_clicked() {
+  ui->editPassword->clearFocus();
+  ui->editValidate->clearFocus();
+  QTimer::singleShot(10, this, [this]() { close(); });
+}
 
 void Preferences::saveOptions() {
   iniPreferences->setValue("/Options/FontSize", ui->sliderFontSize->value());

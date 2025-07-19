@@ -2,7 +2,7 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "2.0.18";
+QString ver = "2.0.19";
 QString appName = "Knot";
 
 QList<QPointF> PointList;
@@ -4494,6 +4494,10 @@ void MainWindow::on_btnDownload_clicked() {
 }
 
 void MainWindow::on_btnBack_One_clicked() {
+  ui->editWebDAV->clearFocus();
+  ui->editWebDAVPassword->clearFocus();
+  ui->editWebDAVUsername->clearFocus();
+
   if (!ui->frameOne->isHidden()) {
     if (ui->f_OneFun->isHidden()) {
       ui->f_OneFun->show();
@@ -5006,6 +5010,7 @@ void MainWindow::on_btnEndDate_clicked() {
 }
 
 void MainWindow::on_btnBackSearch_clicked() {
+  ui->editSearchText->clearFocus();
   ui->frameSearch->hide();
   ui->frameMain->show();
 }
@@ -5184,6 +5189,7 @@ void MainWindow::on_btnDelBakFile_clicked() {
 }
 
 void MainWindow::on_btnBackNoteList_clicked() {
+  ui->editFindNote->clearFocus();
   ui->frameNoteList->hide();
   ui->frameMain->show();
   m_NotesList->saveNoteBookVPos();
@@ -5314,6 +5320,8 @@ void MainWindow::on_btnBackSetTab_clicked() {
 }
 
 void MainWindow::on_btnBackEditRecord_clicked() {
+  ui->editCategory->clearFocus();
+  ui->editDetails->clearFocus();
   m_Method->closeKeyboard();
 
   ui->frameEditRecord->hide();
@@ -5843,6 +5851,7 @@ void MainWindow::on_chkOneDrive_clicked() {
 }
 
 void MainWindow::on_btnBack_NotesSearchResult_clicked() {
+  ui->editNotesSearch->clearFocus();
   ui->frameNotesSearchResult->hide();
   ui->frameNoteList->show();
   isOpenSearchResult = false;

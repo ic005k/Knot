@@ -99,8 +99,10 @@ QInputDialog *Method::inputDialog(QString windowsTitle, QString lblEdit,
       mw_one->geometry().x() + (mw_one->geometry().width() - idlg->width()) / 2,
       mw_one->geometry().y(), idlg->width(), idlg->height());
 
-  connect(idlg, &QDialog::rejected, [=]() mutable { closeGrayWindows(); });
-  connect(idlg, &QDialog::accepted, [=]() mutable { closeGrayWindows(); });
+  connect(idlg, &QDialog::rejected, this,
+          [=]() mutable { closeGrayWindows(); });
+  connect(idlg, &QDialog::accepted, this,
+          [=]() mutable { closeGrayWindows(); });
 
   return idlg;
 }
