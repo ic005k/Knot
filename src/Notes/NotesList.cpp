@@ -1869,6 +1869,7 @@ void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
   QAction *actMoveUp = new QAction(tr("Move Up"));
   QAction *actMoveDown = new QAction(tr("Move Down"));
   QAction *actSetColorFlag = new QAction(tr("Set Color Marker"));
+  actSetColorFlag->setEnabled(isActColorFlagStatus);
 
   connect(actNew, &QAction::triggered, this,
           &NotesList::on_actionAdd_NoteBook_triggered);
@@ -2290,12 +2291,14 @@ void NotesList::initQmlTree() {
 
 void NotesList::clickNoteBook() {
   pNoteItems.clear();
+  bool isStatus;
 
   m_Method->clearAllBakList(mw_one->ui->qwNoteList);
   int index = m_Method->getCurrentIndexFromQW(mw_one->ui->qwNoteBook);
   QString text1 = m_Method->getText1(mw_one->ui->qwNoteBook, index);
   QString text2 = m_Method->getText2(mw_one->ui->qwNoteBook, index);
   if (text2.isEmpty()) {
+    isStatus = true;
     int index_top = text1.toInt();
     QTreeWidgetItem *topItem = mw_one->m_NotesList->tw->topLevelItem(index_top);
     int child_count = topItem->childCount();
@@ -2312,6 +2315,7 @@ void NotesList::clickNoteBook() {
       }
     }
   } else {
+    isStatus = false;
     QStringList list = text1.split("===");
     int indexMain, indexChild;
     if (list.count() == 2) {
@@ -2340,6 +2344,8 @@ void NotesList::clickNoteBook() {
   setNoteLabel();
   clickNoteList();
   setNotesListCurrentIndex(-1);
+
+  isActColorFlagStatus = isStatus;
 }
 
 void NotesList::clickNoteList() {
@@ -2348,6 +2354,8 @@ void NotesList::clickNoteList() {
     currentMDFile = "";
     return;
   }
+
+  isActColorFlagStatus = false;
 
   QString strMD = m_Method->getText3(mw_one->ui->qwNoteList, index);
   currentMDFile = iniDir + strMD;
