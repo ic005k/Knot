@@ -840,6 +840,12 @@ public class MyActivity
   };
 
   @Override
+  public void onBackPressed() {
+    
+    super.onBackPressed();
+  }
+
+  @Override
   public void onPause() {
     System.out.println("onPause...");
     if (MyService.isReady)

@@ -2393,11 +2393,6 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
     }
 
     if (keyEvent->key() == Qt::Key_Back) {
-      if (pAndroidKeyboard->isVisible()) {
-        pAndroidKeyboard->hide();
-        return true;
-      }
-
       if (ui->f_ReaderSet->isVisible()) {
         on_btnBackReaderSet_clicked();
         return true;
@@ -2537,6 +2532,12 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
   }
 
   return QWidget::eventFilter(watch, evn);
+}
+
+void MainWindow::clearWidgetFocus() {
+  if (QWidget *focused = focusWidget()) {
+    focused->clearFocus();
+  }
 }
 
 void MainWindow::hideEvent(QHideEvent *event) { QWidget::hideEvent(event); }
@@ -4496,9 +4497,7 @@ void MainWindow::on_btnDownload_clicked() {
 }
 
 void MainWindow::on_btnBack_One_clicked() {
-  ui->editWebDAV->clearFocus();
-  ui->editWebDAVPassword->clearFocus();
-  ui->editWebDAVUsername->clearFocus();
+  clearWidgetFocus();
 
   if (!ui->frameOne->isHidden()) {
     if (ui->f_OneFun->isHidden()) {
@@ -5000,7 +4999,7 @@ void MainWindow::on_btnEndDate_clicked() {
 }
 
 void MainWindow::on_btnBackSearch_clicked() {
-  ui->editSearchText->clearFocus();
+  clearWidgetFocus();
   ui->frameSearch->hide();
   ui->frameMain->show();
 }
@@ -5179,7 +5178,7 @@ void MainWindow::on_btnDelBakFile_clicked() {
 }
 
 void MainWindow::on_btnBackNoteList_clicked() {
-  ui->editFindNote->clearFocus();
+  clearWidgetFocus();
   ui->frameNoteList->hide();
   ui->frameMain->show();
   m_NotesList->saveNoteBookVPos();
@@ -5310,9 +5309,7 @@ void MainWindow::on_btnBackSetTab_clicked() {
 }
 
 void MainWindow::on_btnBackEditRecord_clicked() {
-  ui->editAmount->clearFocus();
-  ui->editCategory->clearFocus();
-  ui->editDetails->clearFocus();
+  clearWidgetFocus();
 
   ui->frameEditRecord->hide();
   ui->frameMain->show();
@@ -5834,7 +5831,7 @@ void MainWindow::on_chkOneDrive_clicked() {
 }
 
 void MainWindow::on_btnBack_NotesSearchResult_clicked() {
-  ui->editNotesSearch->clearFocus();
+  clearWidgetFocus();
   ui->frameNotesSearchResult->hide();
   ui->frameNoteList->show();
   isOpenSearchResult = false;

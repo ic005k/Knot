@@ -306,9 +306,6 @@ void Method::startSearch() {
   resultsList.clear();
   int tabCount = tabData->count();
 
-  // QString a0("<span style=\"color: white;background: red;\">");
-  // QString a1("</span>");
-
   QString a0 = "<font color=\" red \"><b>";
   QString a1 = "</b></font>";
 
@@ -457,7 +454,6 @@ void Method::initSearchResults() {
 void Method::generateData(int count) {
   QFontMetrics fontMetrics(font());
   int nFontHeight = fontMetrics.height();
-  int line_count;
 
   for (int i = 0; i < count; i++) {
     QStringList list = resultsList.at(count - 1 - i).split("=|=");
@@ -468,19 +464,15 @@ void Method::generateData(int count) {
     str2 = list.at(3);
     str3 = list.at(4);
 
-    line_count = 4;
     QString text1, text2, text3;
     if (str1.trimmed().length() > 0) {
       text1 = tr("Amount") + " : " + str1;
-      line_count++;
     }
     if (str2.trimmed().length() > 0) {
       text2 = tr("Category") + " : " + str2;
-      line_count++;
     }
     if (str3.trimmed().length() > 0) {
       text3 = tr("Details") + " : " + str3;
-      line_count++;
     }
 
     addItem(str_tab, str0, text1, text2, text3, nFontHeight * (0));

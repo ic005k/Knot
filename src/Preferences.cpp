@@ -109,8 +109,7 @@ bool Preferences::eventFilter(QObject* watch, QEvent* evn) {
 }
 
 void Preferences::on_btnBack_clicked() {
-  ui->editPassword->clearFocus();
-  ui->editValidate->clearFocus();
+  mw_one->clearWidgetFocus();
   QTimer::singleShot(10, this, [this]() { close(); });
 }
 

@@ -208,6 +208,8 @@ void CategoryList::renameAll() {
 }
 
 void CategoryList::on_btnCancel_clicked() {
+  mw_one->clearWidgetFocus();
+
   mw_one->ui->frameCategory->hide();
   mw_one->ui->frameEditRecord->show();
 }

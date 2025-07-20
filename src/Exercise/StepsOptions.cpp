@@ -58,8 +58,7 @@ void StepsOptions::init() {
 }
 
 void StepsOptions::on_btnBack_clicked() {
-  ui->editStepLength->clearFocus();
-  ui->editStepsThreshold->clearFocus();
+  mw_one->clearWidgetFocus();
 
   QSettings Reg(iniDir + "steps.ini", QSettings::IniFormat);
 

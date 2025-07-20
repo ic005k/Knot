@@ -176,7 +176,7 @@ int Todo::getEditTextHeight(QTextEdit* edit) {
 void Todo::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }
 
 void Todo::closeTodo() {
-  mw_one->ui->editTodo->clearFocus();
+  mw_one->clearWidgetFocus();
 
   stopPlayVoice();
   saveTodo();
