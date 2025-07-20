@@ -86,7 +86,7 @@ bool TextSelector::eventFilter(QObject *watch, QEvent *evn) {
 
     if (isMousePress) {
       if (watch == this || watch == ui->lineEdit) {
-        int y = event->globalY();
+        int y = event->globalPosition().y();
         if (y <= 0) y = 0;
         if (y >= mw_one->height() - height()) y = mw_one->height() - height();
         this->setGeometry(geometry().x(), y, width(), height());
@@ -201,7 +201,6 @@ void TextSelector::on_btnShareTxt_clicked() {
   QString txt = ui->lineEdit->text();
   txt = txt.trimmed();
   if (txt != "") {
-    m_Method->closeKeyboard();
     mw_one->m_ReceiveShare->shareString(tr("Share to"), txt);
   }
 }

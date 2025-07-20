@@ -1798,4 +1798,95 @@ public class MyActivity
     }
   }
 
+  public static void hideSoftInput() {
+    Log.d(TAG, "===== 开始执行hideSoftInput =====");
+
+    // 1. 检查m_instance是否有效
+    if (m_instance == null) {
+      Log.e(TAG, "hideSoftInput失败：m_instance（当前Activity）为空！");
+      return;
+    }
+    Log.d(TAG, "当前Activity有效：" + m_instance.getClass().getSimpleName());
+
+    // 2. 获取InputMethodManager（安卓输入法管理器）
+    InputMethodManager imm = (InputMethodManager) m_instance.getSystemService(Context.INPUT_METHOD_SERVICE);
+    if (imm == null) {
+      Log.e(TAG, "hideSoftInput失败：无法获取InputMethodManager！");
+      return;
+    }
+    Log.d(TAG, "成功获取InputMethodManager");
+
+    // 3. 获取当前聚焦的View（输入法依附的输入框）
+    View currentFocus = m_instance.getCurrentFocus();
+    if (currentFocus == null) {
+      Log.w(TAG, "当前没有聚焦的View（可能输入法已关闭或无输入框聚焦）");
+      return;
+    }
+    Log.d(TAG, "当前聚焦的View：" + currentFocus.getClass().getSimpleName() + "（窗口令牌：" + currentFocus.getWindowToken() + "）");
+
+    // 4. 调用原生方法关闭输入法
+    boolean result = imm.hideSoftInputFromWindow(
+        currentFocus.getWindowToken(),
+        InputMethodManager.HIDE_NOT_ALWAYS);
+    if (result) {
+      Log.d(TAG, "hideSoftInput成功：输入法已关闭");
+    } else {
+      Log.e(TAG, "hideSoftInput失败：调用系统方法返回false（可能输入法未打开或窗口令牌无效）");
+    }
+
+    Log.d(TAG, "===== 结束执行hideSoftInput =====");
+  }
+
+  // 在InputMethodUtils类中添加
+  public static void forceDisconnectInputMethod() {
+    Log.d(TAG, "强制断开输入法连接...");
+    if (m_instance == null)
+      return;
+
+    m_instance.runOnUiThread(() -> {
+      try {
+        InputMethodManager imm = (InputMethodManager) m_instance.getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        // 1. 关闭当前输入法
+        View currentFocus = m_instance.getCurrentFocus();
+        if (currentFocus != null) {
+          imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+        }
+
+        // 2. 根据API级别使用不同方法断开连接
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+          // Android 11+ 推荐方法
+          try {
+            java.lang.reflect.Method method = imm.getClass().getMethod(
+                "dispose", boolean.class);
+            method.invoke(imm, true);
+            Log.d(TAG, "已通过dispose方法断开输入法连接");
+          } catch (Exception e) {
+            Log.w(TAG, "无法使用dispose方法: " + e.getMessage());
+          }
+        } else {
+          // Android 11以下尝试finishInputLocked
+          try {
+            java.lang.reflect.Method method = imm.getClass().getMethod(
+                "finishInputLocked", android.view.inputmethod.InputConnection.class);
+            method.invoke(imm, (Object) null);
+            Log.d(TAG, "已通过finishInputLocked方法断开输入法连接");
+          } catch (Exception e) {
+            Log.w(TAG, "无法使用finishInputLocked方法: " + e.getMessage());
+          }
+        }
+
+        // 3. 最后清除焦点（双重保险）
+        View decorView = m_instance.getWindow().getDecorView();
+        if (decorView != null) {
+          decorView.clearFocus();
+        }
+
+        Log.d(TAG, "输入法连接已完全断开");
+      } catch (Exception e) {
+        Log.e(TAG, "断开输入法连接异常: " + e.getMessage());
+      }
+    });
+  }
+
 }

@@ -376,7 +376,8 @@ QLabel {
   void changeEvent(QEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
 
- public slots:
+  void hideEvent(QHideEvent *event);
+  public slots:
   void on_hSlider_sliderMoved(int position);
   void clickMainTab();
   void on_SetReaderFunVisible();

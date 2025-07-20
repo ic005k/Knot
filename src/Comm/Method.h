@@ -253,7 +253,7 @@ class Method : public QDialog {
 
   int getFontHeight();
 
-  void closeKeyboard();
+  void closeQtKeyboard();
 
   void modifyItemText3(QQuickWidget *qw, int index, QString strText);
   QInputDialog *inputDialog(QString windowsTitle, QString lblEdit,
@@ -375,7 +375,10 @@ class Method : public QDialog {
   QString setCurrentDateTimeValue();
   bool getLockScreenStatus();
 
- protected:
+  void closeAndroidKeyboard();
+
+  void callJavaForceDisconnectInputMethod();
+  protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
  public slots:
