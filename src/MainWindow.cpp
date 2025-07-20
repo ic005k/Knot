@@ -84,6 +84,7 @@ static void JavaNotify_11();
 static void JavaNotify_12();
 static void JavaNotify_13();
 static void JavaNotify_14();
+static void JavaNotify_15();
 #endif
 
 BakDataThread::BakDataThread(QObject *parent) : QThread{parent} {}
@@ -2391,152 +2392,15 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
       if (ui->frameReader->isVisible()) on_btnBackReader_clicked();
       return true;
     }
-
-    if (keyEvent->key() == Qt::Key_Back) {
-      if (ui->f_ReaderSet->isVisible()) {
-        on_btnBackReaderSet_clicked();
-        return true;
-      }
-
-      if (!ui->frameReader->isHidden()) {
-        if (ui->qwCata->isVisible()) {
-          m_Reader->showCatalogue();
-          return true;
-
-        } else if (ui->qwBookmark->isVisible()) {
-          on_btnShowBookmark_clicked();
-          return true;
-
-        } else if (!mydlgSetText->isHidden()) {
-          mydlgSetText->close();
-          return true;
-
-        } else if (!ui->textBrowser->isHidden()) {
-          on_btnSelText_clicked();
-          return true;
-        }
-
-        else {
-          on_btnBackReader_clicked();
-          return true;
-        }
-      }
-
-      if (!ui->frameImgView->isHidden()) {
-        on_btnBackImg_clicked();
-        return true;
-      }
-
-      if (!ui->frameMain->isHidden()) {
-        if (!ui->f_charts->isHidden()) {
-          on_btnChart_clicked();
-          return true;
-        }
-
-        setMini();
-
-        return true;
-      }
-
-      if (!ui->frameOne->isHidden()) {
-        on_btnBack_One_clicked();
-        return true;
-      }
-
-      if (!ui->frameNoteRecycle->isHidden()) {
-        on_btnBackNoteRecycle_clicked();
-        return true;
-      }
-
-      if (!ui->frameNotesSearchResult->isHidden()) {
-        on_btnBack_NotesSearchResult_clicked();
-        return true;
-      }
-
-      if (!ui->frameNoteList->isHidden()) {
-        on_btnBackNoteList_clicked();
-        return true;
-      }
-
-      if (!ui->frameNotes->isHidden()) {
-        on_btnBackNotes_clicked();
-        return true;
-      }
-
-      if (!ui->frameTodo->isHidden()) {
-        on_btnBackTodo_clicked();
-        return true;
-      }
-
-      if (!ui->frameTodoRecycle->isHidden()) {
-        on_btnReturnRecycle_clicked();
-        return true;
-      }
-
-      if (!ui->frameTabRecycle->isHidden()) {
-        on_btnBackTabRecycle_clicked();
-        return true;
-      }
-
-      if (!ui->frameSteps->isHidden()) {
-        on_btnBackSteps_clicked();
-        return true;
-      }
-
-      if (!ui->frameViewCate->isHidden()) {
-        ui->frameViewCate->hide();
-        ui->frameReport->show();
-        return true;
-      }
-
-      if (!ui->frameReport->isHidden()) {
-        on_btnBack_Report_clicked();
-        return true;
-      }
-
-      if (!ui->frameSearch->isHidden()) {
-        on_btnBackSearch_clicked();
-        return true;
-      }
-
-      if (!ui->frameBakList->isHidden()) {
-        on_btnBackBakList_clicked();
-        return true;
-      }
-
-      if (!ui->frameCategory->isHidden()) {
-        on_btnCancelType_clicked();
-        return true;
-      }
-
-      if (!ui->frameSetTab->isHidden()) {
-        on_btnBackSetTab_clicked();
-        return true;
-      }
-
-      if (!ui->frameEditRecord->isHidden()) {
-        on_btnBackEditRecord_clicked();
-        return true;
-      }
-
-      if (!ui->frameBookList->isHidden()) {
-        on_btnBackBookList_clicked();
-        return true;
-      }
-
-      if (!ui->frameNotesTree->isHidden()) {
-        on_btnBack_Tree_clicked();
-        return true;
-      }
-    }
   }
 
   return QWidget::eventFilter(watch, evn);
 }
 
 void MainWindow::clearWidgetFocus() {
+  // InputMethodReset::instance().fullReset();
   if (QWidget *focused = focusWidget()) {
-    focused->clearFocus();
+    // focused->clearFocus();
   }
 }
 
@@ -4258,6 +4122,169 @@ static void JavaNotify_14() {
   qDebug() << "C++ JavaNotify_14";
 }
 
+static void JavaNotify_15() {
+  if (mw_one->ui->f_ReaderSet->isVisible()) {
+    mw_one->ui->btnBackReaderSet->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameReader->isHidden()) {
+    if (mw_one->ui->qwCata->isVisible()) {
+      // mw_one->m_Reader->showCatalogue();
+      mw_one->ui->btnCatalogue->click();
+      return;
+
+    } else if (mw_one->ui->qwBookmark->isVisible()) {
+      mw_one->ui->btnShowBookmark->click();
+      return;
+
+    } else if (!mw_one->mydlgSetText->isHidden()) {
+      mw_one->mydlgSetText->close();
+      return;
+
+    } else if (!mw_one->ui->textBrowser->isHidden()) {
+      // mw_one->on_btnSelText_clicked();
+      mw_one->ui->btnSelText->click();
+      return;
+    }
+
+    else {
+      // mw_one->on_btnBackReader_clicked();
+      mw_one->ui->btnBackReader->click();
+      return;
+    }
+  }
+
+  if (!mw_one->ui->frameImgView->isHidden()) {
+    // mw_one->on_btnBackImg_clicked();
+    mw_one->ui->btnBackImg->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameMain->isHidden()) {
+    if (!mw_one->ui->f_charts->isHidden()) {
+      // mw_one->on_btnChart_clicked();
+      mw_one->ui->btnChart->click();
+      return;
+    }
+
+    mw_one->setMini();
+
+    return;
+  }
+
+  if (!mw_one->ui->frameOne->isHidden()) {
+    // mw_one->on_btnBack_One_clicked();
+    mw_one->ui->btnBack_One->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameNoteRecycle->isHidden()) {
+    // mw_one->on_btnBackNoteRecycle_clicked();
+    mw_one->ui->btnBackNoteRecycle->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameNotesSearchResult->isHidden()) {
+    // mw_one->on_btnBack_NotesSearchResult_clicked();
+    mw_one->ui->btnBack_NotesSearchResult->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameNoteList->isHidden()) {
+    // mw_one->on_btnBackNoteList_clicked();
+    mw_one->ui->btnBackNoteList->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameNotes->isHidden()) {
+    // mw_one->on_btnBackNotes_clicked();
+    mw_one->ui->btnBackNotes->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameTodo->isHidden()) {
+    // mw_one->on_btnBackTodo_clicked();
+    mw_one->ui->btnBackTodo->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameTodoRecycle->isHidden()) {
+    // mw_one->on_btnReturnRecycle_clicked();
+    mw_one->ui->btnReturnRecycle->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameTabRecycle->isHidden()) {
+    // mw_one->on_btnBackTabRecycle_clicked();
+    mw_one->ui->btnBackTabRecycle->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameSteps->isHidden()) {
+    // mw_one->on_btnBackSteps_clicked();
+    mw_one->ui->btnBackSteps->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameViewCate->isHidden()) {
+    mw_one->ui->frameViewCate->hide();
+    mw_one->ui->frameReport->show();
+    return;
+  }
+
+  if (!mw_one->ui->frameReport->isHidden()) {
+    // mw_one->on_btnBack_Report_clicked();
+    mw_one->ui->btnBack_Report->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameSearch->isHidden()) {
+    // mw_one->on_btnBackSearch_clicked();
+    mw_one->ui->btnBackSearch->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameBakList->isHidden()) {
+    // mw_one->on_btnBackBakList_clicked();
+    mw_one->ui->btnBackBakList->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameCategory->isHidden()) {
+    // mw_one->on_btnCancelType_clicked();
+    mw_one->ui->btnCancelType->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameSetTab->isHidden()) {
+    // mw_one->on_btnBackSetTab_clicked();
+    mw_one->ui->btnBackSetTab->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameEditRecord->isHidden()) {
+    // mw_one->on_btnBackEditRecord_clicked();
+    mw_one->ui->btnBackEditRecord->click();
+
+    return;
+  }
+
+  if (!mw_one->ui->frameBookList->isHidden()) {
+    // mw_one->on_btnBackBookList_clicked();
+    mw_one->ui->btnBackBookList->click();
+    return;
+  }
+
+  if (!mw_one->ui->frameNotesTree->isHidden()) {
+    // mw_one->on_btnBack_Tree_clicked();
+    mw_one->ui->btnBack_Tree->click();
+    return;
+  }
+
+  qDebug() << "C++ JavaNotify_15";
+}
+
 static const JNINativeMethod gMethods[] = {
     {"CallJavaNotify_0", "()V", (void *)JavaNotify_0},
     {"CallJavaNotify_1", "()V", (void *)JavaNotify_1},
@@ -4277,10 +4304,13 @@ static const JNINativeMethod gMethods[] = {
 
 };
 
+static const JNINativeMethod gMethods15[] = {
+    {"CallJavaNotify_15", "()V", (void *)JavaNotify_15}};
+
 void RegJni(const char *myClassName) {
   QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
     QJniEnvironment Environment;
-    const char *mClassName = myClassName;  //"com/x/MyService";
+    const char *mClassName = myClassName;
     jclass j_class;
     j_class = Environment->FindClass(mClassName);
     if (j_class == nullptr) {
@@ -4294,6 +4324,28 @@ void RegJni(const char *myClassName) {
       return;
     } else {
       qDebug() << "RegisterNatives success!";
+    }
+  });
+  qDebug() << "++++++++++++++++++++++++";
+}
+
+void RegJni15(const char *myClassName) {
+  QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
+    QJniEnvironment Environment;
+    const char *mClassName = myClassName;
+    jclass j_class;
+    j_class = Environment->FindClass(mClassName);
+    if (j_class == nullptr) {
+      qDebug() << "erro clazz";
+      return;
+    }
+    jint mj = Environment->RegisterNatives(
+        j_class, gMethods15, sizeof(gMethods15) / sizeof(gMethods15[0]));
+    if (mj != JNI_OK) {
+      qDebug() << "register native method failed!";
+      return;
+    } else {
+      qDebug() << "RegisterNatives15 success!";
     }
   });
   qDebug() << "++++++++++++++++++++++++";

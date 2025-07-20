@@ -72,6 +72,7 @@
 #include "src/Comm/ReceiveShare.h"
 #include "src/Comm/ShowMessage.h"
 #include "src/Comm/TextEditToolbar.h"
+#include "src/Comm/inputmethodreset.h"
 #include "src/EditRecord.h"
 #include "src/Exercise/Steps.h"
 #include "src/Exercise/StepsOptions.h"
@@ -507,7 +508,9 @@ QLabel {
   void clickData();
 
  public slots:
+  void on_btnChart_clicked();
   void on_btnRename_clicked();
+  void on_btnBack_NotesSearchResult_clicked();
 
   void on_btnOpenSearchResult_clicked();
 
@@ -593,6 +596,19 @@ QLabel {
   void stopTimerForPdf();
 
   void updateGpsMapDone();
+
+  void on_btnBackTabRecycle_clicked();
+
+  void on_btnBackSearch_clicked();
+
+  void on_btnBackBakList_clicked();
+
+  void on_btnBackSetTab_clicked();
+
+  void on_btnBack_Tree_clicked();
+
+  void on_btnCancelType_clicked();
+
  private slots:
 
   void on_btnSync_clicked();
@@ -603,19 +619,13 @@ QLabel {
 
   void on_actionTabRecycle();
 
-  void on_btnBackSearch_clicked();
-
   void on_btnClearSearchText_clicked();
 
   void on_btnStartSearch_clicked();
 
-  void on_btnBackBakList_clicked();
-
   void on_btnImportBakList_clicked();
 
   void on_btnOkViewCate_clicked();
-
-  void on_btnBackTabRecycle_clicked();
 
   void on_btnDelTabRecycle_clicked();
 
@@ -641,15 +651,11 @@ QLabel {
 
   void on_btnNoteMenu_clicked();
 
-  void on_btnCancelType_clicked();
-
   void on_btnOkType_clicked();
 
   void on_btnDelType_clicked();
 
   void on_btnRenameType_clicked();
-
-  void on_btnBackSetTab_clicked();
 
   void on_btnType_clicked();
 
@@ -713,8 +719,6 @@ QLabel {
 
   void on_btnTabMoveDown_clicked();
 
-  void on_btnChart_clicked();
-
   void on_btnManagement_clicked();
 
   void on_btnUpMove_clicked();
@@ -724,8 +728,6 @@ QLabel {
   void on_btnDelNote_NoteBook_clicked();
 
   void on_btnMoveTo_clicked();
-
-  void on_btnBack_Tree_clicked();
 
   void on_btnHideFind_clicked();
 
@@ -829,8 +831,6 @@ QLabel {
   void on_chkWebDAV_clicked();
 
   void on_chkOneDrive_clicked();
-
-  void on_btnBack_NotesSearchResult_clicked();
 
   void on_editFindNote_returnPressed();
 

@@ -31,6 +31,8 @@ extern QString iniFile, txtFile, appName, iniDir, privateDir, bakfileDir,
     customFontFamily, defaultFontFamily;
 extern int fontSize;
 extern void RegJni(const char* myClassName);
+extern void RegJni15(const char* myClassName);
+
 extern bool isDark;
 extern MainWindow* mw_one;
 extern QSettings* iniPreferences;
@@ -119,6 +121,7 @@ int main(int argc, char* argv[]) {
 
   RegJni("com/x/MyService");
   RegJni("com/x/MyActivity");
+  RegJni15("com/x/MyActivity");
   RegJni("com/x/ClockActivity");
   RegJni("com/x/ShareReceiveActivity");
   RegJni("com/x/NoteEditor");

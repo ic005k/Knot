@@ -371,6 +371,7 @@ SOURCES += \
     src/Comm/ShowMessage.cpp \
     src/Comm/Time24Picker.cpp \
     src/Comm/WheelWidget.cpp \
+    src/Comm/inputmethodreset.cpp \
     src/Comm/qaesencryption.cpp \
     src/DateSelector.cpp \
     src/EditRecord.cpp \
@@ -604,6 +605,7 @@ HEADERS += \
     src/Comm/TextEditToolbar.h \
     src/Comm/Time24Picker.h \
     src/Comm/WheelWidget.h \
+    src/Comm/inputmethodreset.h \
     src/Comm/qaesencryption.h \
     src/DateSelector.h \
     src/EditRecord.h \

@@ -234,6 +234,8 @@ public class MyActivity
 
   public native static void CallJavaNotify_14();
 
+  public native static void CallJavaNotify_15();
+
   // 添加服务绑定状态标记
   private boolean mServiceBound = false;
 
@@ -840,8 +842,18 @@ public class MyActivity
   };
 
   @Override
+  public boolean onKeyDown(int keyCode, KeyEvent event) {
+    if (keyCode == KeyEvent.KEYCODE_BACK) {
+      // 直接处理返回键
+      CallJavaNotify_15();
+      return true; // 事件已处理
+    }
+    return super.onKeyDown(keyCode, event);
+  }
+
+  @Override
   public void onBackPressed() {
-    
+
     super.onBackPressed();
   }
 
