@@ -1079,12 +1079,14 @@ void Todo::reeditText() {
     }
   }
 
-  QDialog* dlg = new QDialog(this);
+  if (m_ReeditTodo != nullptr) delete m_ReeditTodo;
+
+  m_ReeditTodo = new QDialog(this);
   QVBoxLayout* vbox0 = new QVBoxLayout;
-  dlg->setLayout(vbox0);
+  m_ReeditTodo->setLayout(vbox0);
   vbox0->setContentsMargins(5, 5, 5, 5);
-  if (!isAndroid) dlg->setModal(true);
-  dlg->setWindowFlag(Qt::FramelessWindowHint);
+  if (!isAndroid) m_ReeditTodo->setModal(true);
+  m_ReeditTodo->setWindowFlag(Qt::FramelessWindowHint);
 
   QFrame* frame = new QFrame(this);
   vbox0->addWidget(frame);
@@ -1110,8 +1112,11 @@ void Todo::reeditText() {
 
   QTextEdit* edit = new QTextEdit(this);
   if (isAndroid) {
-    TextEditToolbar* textToolbar = new TextEditToolbar(dlg);  // 父窗口为QDialog
-    EditEventFilter* editFilter = new EditEventFilter(textToolbar, dlg);
+    if (textToolbarReeditTodo != nullptr) delete textToolbarReeditTodo;
+    textToolbarReeditTodo =
+        new TextEditToolbar(m_ReeditTodo);  // 父窗口为QDialog
+    EditEventFilter* editFilter =
+        new EditEventFilter(textToolbarReeditTodo, m_ReeditTodo);
     edit->installEventFilter(editFilter);
     edit->viewport()->installEventFilter(editFilter);
   }
@@ -1159,24 +1164,24 @@ void Todo::reeditText() {
   btnShare->hide();
 #endif
 
-  connect(btnCancel, &QToolButton::clicked, dlg,
-          [=]() mutable { dlg->close(); });
-  connect(dlg, &QDialog::rejected, dlg,
+  connect(btnCancel, &QToolButton::clicked, m_ReeditTodo,
+          [=]() mutable { m_ReeditTodo->close(); });
+  connect(m_ReeditTodo, &QDialog::rejected, m_ReeditTodo,
           [=]() mutable { m_Method->closeGrayWindows(); });
-  connect(dlg, &QDialog::accepted, dlg,
+  connect(m_ReeditTodo, &QDialog::accepted, m_ReeditTodo,
           [=]() mutable { m_Method->closeGrayWindows(); });
-  connect(btnCopy, &QToolButton::clicked, dlg, [=]() mutable {
+  connect(btnCopy, &QToolButton::clicked, m_ReeditTodo, [=]() mutable {
     edit->selectAll();
     edit->copy();
-    dlg->close();
+    m_ReeditTodo->close();
   });
-  connect(btnShare, &QToolButton::clicked, dlg, [=]() mutable {
+  connect(btnShare, &QToolButton::clicked, m_ReeditTodo, [=]() mutable {
     QString txt = edit->toPlainText().trimmed();
     if (txt.length() > 0) {
       mw_one->m_ReceiveShare->shareString(tr("Share to"), txt);
     }
   });
-  connect(btnOk, &QToolButton::clicked, dlg, [=]() mutable {
+  connect(btnOk, &QToolButton::clicked, m_ReeditTodo, [=]() mutable {
     QString strTime = getItemTime(row);
     int type = getItemType(row);
     delItem(row);
@@ -1184,7 +1189,7 @@ void Todo::reeditText() {
     setCurrentIndex(row);
     isNeedSave = true;
     saveTodo();
-    dlg->close();
+    m_ReeditTodo->close();
   });
 
   int x, y, w, h;
@@ -1194,17 +1199,17 @@ void Todo::reeditText() {
     y = mw_one->geometry().y();
   } else {
     w = mw_one->width() / 2;
-    if (w < dlg->width()) w = dlg->width();
+    if (w < m_ReeditTodo->width()) w = m_ReeditTodo->width();
 
     y = mw_one->geometry().y() + (mw_one->height() - h) / 2;
   }
   x = mw_one->geometry().x() + (mw_one->width() - w) / 2;
 
-  dlg->setGeometry(x, y, w, h);
+  m_ReeditTodo->setGeometry(x, y, w, h);
 
   m_Method->showGrayWindows();
-  mw_one->set_ToolButtonStyle(dlg);
-  dlg->show();
+  mw_one->set_ToolButtonStyle(m_ReeditTodo);
+  m_ReeditTodo->show();
 }
 
 void Todo::addToRecycle() {

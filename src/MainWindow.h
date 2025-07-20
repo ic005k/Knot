@@ -131,6 +131,10 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
   Ui::MainWindow *ui;
 
+  TextEditToolbar *textToolbar;
+
+  QInputDialog *m_RenameDlg = nullptr;
+
   QString labelNormalStyleSheet = R"(/* 动态适配明暗模式 */
 QLabel {
     background-color: qlineargradient(

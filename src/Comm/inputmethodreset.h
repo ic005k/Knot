@@ -6,7 +6,11 @@
 
 #include <QGuiApplication>
 #include <QInputMethod>
+
+#ifdef Q_OS_ANDROID
 #include <QJniObject>
+#endif
+
 #include <QObject>
 #include <QWindow>
 

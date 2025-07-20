@@ -22,6 +22,7 @@
 
 #include "database_manager.h"
 #include "search_model.h"
+#include "src/Comm/TextEditToolbar.h"
 #include "src/Notes/MoveTo.h"
 #include "src/Notes/NewNoteBook.h"
 #include "ui_MoveTo.h"
@@ -50,6 +51,9 @@ class NotesList : public QDialog {
   explicit NotesList(QWidget *parent = nullptr);
   ~NotesList();
   Ui::NotesList *ui;
+
+  QDialog *m_RenameNotes = nullptr;
+  TextEditToolbar *textToolbarRenameNotes = nullptr;
 
   QString noteTitle;
 

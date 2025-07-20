@@ -11,6 +11,8 @@
 #include <QTimer>
 #include <QToolButton>
 
+#include "src/Comm/TextEditToolbar.h"
+
 namespace Ui {
 class Todo;
 }
@@ -22,6 +24,10 @@ class Todo : public QDialog {
   explicit Todo(QWidget *parent = nullptr);
   Ui::Todo *ui;
   ~Todo();
+
+  QDialog *m_ReeditTodo = nullptr;
+
+  TextEditToolbar *textToolbarReeditTodo = nullptr;
 
   bool isNeedAddToTodoList = false;
   QString strNeedAddToTodoText;

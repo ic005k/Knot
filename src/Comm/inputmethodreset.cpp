@@ -5,8 +5,12 @@
 #include <QGuiApplication>
 #include <QInputMethod>
 #include <QInputMethodEvent>
+
+#ifdef Q_OS_ANDROID
 #include <QJniEnvironment>
 #include <QJniObject>
+#endif
+
 #include <QWindow>
 
 InputMethodReset &InputMethodReset::instance() {
@@ -54,6 +58,8 @@ void InputMethodReset::resetQtContext() {
 }
 
 void InputMethodReset::resetAndroidContext() {
+#ifdef Q_OS_ANDROID
+
   // 获取 Android Activity
   QJniObject activity = QJniObject::callStaticObjectMethod(
       "org/qtproject/qt/android/QtNative", "activity",
@@ -68,12 +74,16 @@ void InputMethodReset::resetAndroidContext() {
   QJniObject::callStaticMethod<void>(
       "com/x/InputMethodHelper", "deepResetInputMethod",
       "(Landroid/app/Activity;)V", activity.object());
+
+#endif
 }
 
 void InputMethodReset::resetNativeBridge() {
+#ifdef Q_OS_ANDROID
   // 重置 JNI 引用
   QJniObject::callStaticMethod<void>("com/x/InputMethodHelper",
                                      "resetNativeReferences");
+#endif
 }
 
 void InputMethodReset::resetWindowSystem() {

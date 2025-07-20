@@ -235,12 +235,14 @@ void NotesList::on_btnRename_clicked() {
   QTreeWidgetItem *item = ui->treeWidget->currentItem();
   if (item == NULL) return;
 
-  QDialog *dlg = new QDialog(this);
+  if (m_RenameNotes != nullptr) delete m_RenameNotes;
+
+  m_RenameNotes = new QDialog(this);
   QVBoxLayout *vbox0 = new QVBoxLayout;
-  dlg->setLayout(vbox0);
+  m_RenameNotes->setLayout(vbox0);
   vbox0->setContentsMargins(5, 5, 5, 5);
-  if (!isAndroid) dlg->setModal(true);
-  dlg->setWindowFlag(Qt::FramelessWindowHint);
+  if (!isAndroid) m_RenameNotes->setModal(true);
+  m_RenameNotes->setWindowFlag(Qt::FramelessWindowHint);
 
   QFrame *frame = new QFrame(this);
   vbox0->addWidget(frame);
@@ -265,8 +267,11 @@ void NotesList::on_btnRename_clicked() {
 
   QTextEdit *edit = new QTextEdit(this);
   if (isAndroid) {
-    TextEditToolbar *textToolbar = new TextEditToolbar(dlg);  // 父窗口为QDialog
-    EditEventFilter *editFilter = new EditEventFilter(textToolbar, dlg);
+    if (textToolbarRenameNotes != nullptr) delete textToolbarRenameNotes;
+    textToolbarRenameNotes =
+        new TextEditToolbar(m_RenameNotes);  // 父窗口为QDialog
+    EditEventFilter *editFilter =
+        new EditEventFilter(textToolbarRenameNotes, m_RenameNotes);
     edit->installEventFilter(editFilter);
     edit->viewport()->installEventFilter(editFilter);
   }
@@ -313,24 +318,24 @@ void NotesList::on_btnRename_clicked() {
 
   vbox->addLayout(hbox, 0);
 
-  connect(btnCancel, &QToolButton::clicked, dlg,
-          [=]() mutable { dlg->close(); });
-  connect(dlg, &QDialog::rejected, dlg,
+  connect(btnCancel, &QToolButton::clicked, m_RenameNotes,
+          [=]() mutable { m_RenameNotes->close(); });
+  connect(m_RenameNotes, &QDialog::rejected, m_RenameNotes,
           [=]() mutable { m_Method->closeGrayWindows(); });
-  connect(dlg, &QDialog::accepted, dlg,
+  connect(m_RenameNotes, &QDialog::accepted, m_RenameNotes,
           [=]() mutable { m_Method->closeGrayWindows(); });
-  connect(btnPaste, &QToolButton::clicked, dlg,
+  connect(btnPaste, &QToolButton::clicked, m_RenameNotes,
           [=]() mutable { edit->paste(); });
-  connect(btnCopy, &QToolButton::clicked, dlg, [=]() mutable {
+  connect(btnCopy, &QToolButton::clicked, m_RenameNotes, [=]() mutable {
     edit->selectAll();
     edit->copy();
-    dlg->close();
+    m_RenameNotes->close();
   });
-  connect(btnOk, &QToolButton::clicked, dlg, [=]() mutable {
+  connect(btnOk, &QToolButton::clicked, m_RenameNotes, [=]() mutable {
     renameCurrentItem(edit->toPlainText().trimmed());
 
     saveNotesList();
-    dlg->close();
+    m_RenameNotes->close();
   });
 
   int x, y, w, h;
@@ -348,14 +353,14 @@ void NotesList::on_btnRename_clicked() {
   }
 
   x = mw_one->geometry().x() + (mw_one->width() - w) / 2;
-  dlg->setGeometry(x, y, w, h);
+  m_RenameNotes->setGeometry(x, y, w, h);
 
-  mw_one->set_ToolButtonStyle(dlg);
+  mw_one->set_ToolButtonStyle(m_RenameNotes);
 
   m_Method->m_widget = new QWidget(mw_one);
   m_Method->showGrayWindows();
 
-  dlg->show();
+  m_RenameNotes->show();
 }
 
 void NotesList::renameCurrentItem(QString title) {

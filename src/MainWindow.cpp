@@ -1709,16 +1709,18 @@ void MainWindow::on_actionRename_triggered() {
 
   QString text;
 
-  QInputDialog *idlg =
+  if (m_RenameDlg != nullptr) delete m_RenameDlg;
+
+  m_RenameDlg =
       m_Method->inputDialog(tr("Rename tab name : "), tr("Tab name : "),
                             ui->tabWidget->tabText(index));
 
-  if (QDialog::Accepted == idlg->exec()) {
+  if (QDialog::Accepted == m_RenameDlg->exec()) {
     ok = true;
-    text = idlg->textValue();
-    idlg->close();
+    text = m_RenameDlg->textValue();
+    m_RenameDlg->close();
   } else {
-    idlg->close();
+    m_RenameDlg->close();
     return;
   }
 
@@ -2400,7 +2402,7 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
 void MainWindow::clearWidgetFocus() {
   // InputMethodReset::instance().fullReset();
   if (QWidget *focused = focusWidget()) {
-    // focused->clearFocus();
+    focused->clearFocus();
   }
 }
 
@@ -3279,7 +3281,7 @@ void MainWindow::init_UIWidget() {
   this->installEventFilter(this);
 
   if (isAndroid) {
-    TextEditToolbar *textToolbar = new TextEditToolbar(this);
+    textToolbar = new TextEditToolbar(this);
     EditEventFilter *editFilter = new EditEventFilter(textToolbar, this);
     ui->editCategory->installEventFilter(editFilter);
     ui->editDetails->installEventFilter(editFilter);
@@ -4123,6 +4125,58 @@ static void JavaNotify_14() {
 }
 
 static void JavaNotify_15() {
+  if (mw_one->textToolbar != nullptr) {
+    if (mw_one->textToolbar->isVisible()) {
+      mw_one->textToolbar->hide();
+      return;
+    }
+  }
+
+  if (mw_one->m_RenameDlg != nullptr) {
+    if (mw_one->m_RenameDlg->isVisible()) {
+      mw_one->m_RenameDlg->close();
+      return;
+    }
+  }
+
+  if (mw_one->m_Todo->textToolbarReeditTodo != nullptr) {
+    if (mw_one->m_Todo->textToolbarReeditTodo->isVisible()) {
+      mw_one->m_Todo->textToolbarReeditTodo->hide();
+      return;
+    }
+  }
+
+  if (mw_one->m_Todo->m_ReeditTodo != nullptr) {
+    if (mw_one->m_Todo->m_ReeditTodo->isVisible()) {
+      mw_one->m_Todo->m_ReeditTodo->close();
+      return;
+    }
+  }
+
+  if (mw_one->m_NotesList->textToolbarRenameNotes != nullptr) {
+    if (mw_one->m_NotesList->textToolbarRenameNotes->isVisible()) {
+      mw_one->m_NotesList->textToolbarRenameNotes->hide();
+      return;
+    }
+  }
+
+  if (mw_one->m_NotesList->m_RenameNotes != nullptr) {
+    if (mw_one->m_NotesList->m_RenameNotes->isVisible()) {
+      mw_one->m_NotesList->m_RenameNotes->close();
+      return;
+    }
+  }
+
+  if (mw_one->m_Preferences->isVisible()) {
+    mw_one->m_Preferences->ui->btnBack->click();
+    return;
+  }
+
+  if (mw_one->m_StepsOptions->isVisible()) {
+    mw_one->m_StepsOptions->ui->btnBack->click();
+    return;
+  }
+
   if (mw_one->ui->f_ReaderSet->isVisible()) {
     mw_one->ui->btnBackReaderSet->click();
     return;
