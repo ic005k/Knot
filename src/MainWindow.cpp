@@ -3392,6 +3392,7 @@ void MainWindow::init_UIWidget() {
   connect(timerSyncData, SIGNAL(timeout()), this, SLOT(on_timerSyncData()));
   timerMousePress = new QTimer(this);
   connect(timerMousePress, SIGNAL(timeout()), this, SLOT(on_timerMousePress()));
+  timerMousePress->setSingleShot(true);
   tmeFlash = new QTimer(this);
   connect(tmeFlash, SIGNAL(timeout()), this, SLOT(on_tmeFlash()));
   tmeStartRecordAudio = new QTimer(this);
@@ -4187,6 +4188,11 @@ static void JavaNotify_15() {
     return;
   }
 
+  if (mw_one->m_AboutThis->isVisible()) {
+    mw_one->m_AboutThis->ui->btnBack_About->click();
+    return;
+  }
+
   if (mw_one->m_StepsOptions->isVisible()) {
     mw_one->m_StepsOptions->ui->btnBack->click();
     return;
@@ -4212,27 +4218,23 @@ static void JavaNotify_15() {
       return;
 
     } else if (!mw_one->ui->textBrowser->isHidden()) {
-      // mw_one->on_btnSelText_clicked();
       mw_one->ui->btnSelText->click();
       return;
     }
 
     else {
-      // mw_one->on_btnBackReader_clicked();
       mw_one->ui->btnBackReader->click();
       return;
     }
   }
 
   if (!mw_one->ui->frameImgView->isHidden()) {
-    // mw_one->on_btnBackImg_clicked();
     mw_one->ui->btnBackImg->click();
     return;
   }
 
   if (!mw_one->ui->frameMain->isHidden()) {
     if (!mw_one->ui->f_charts->isHidden()) {
-      // mw_one->on_btnChart_clicked();
       mw_one->ui->btnChart->click();
       return;
     }
@@ -4243,55 +4245,46 @@ static void JavaNotify_15() {
   }
 
   if (!mw_one->ui->frameOne->isHidden()) {
-    // mw_one->on_btnBack_One_clicked();
     mw_one->ui->btnBack_One->click();
     return;
   }
 
   if (!mw_one->ui->frameNoteRecycle->isHidden()) {
-    // mw_one->on_btnBackNoteRecycle_clicked();
     mw_one->ui->btnBackNoteRecycle->click();
     return;
   }
 
   if (!mw_one->ui->frameNotesSearchResult->isHidden()) {
-    // mw_one->on_btnBack_NotesSearchResult_clicked();
     mw_one->ui->btnBack_NotesSearchResult->click();
     return;
   }
 
   if (!mw_one->ui->frameNoteList->isHidden()) {
-    // mw_one->on_btnBackNoteList_clicked();
     mw_one->ui->btnBackNoteList->click();
     return;
   }
 
   if (!mw_one->ui->frameNotes->isHidden()) {
-    // mw_one->on_btnBackNotes_clicked();
     mw_one->ui->btnBackNotes->click();
     return;
   }
 
   if (!mw_one->ui->frameTodo->isHidden()) {
-    // mw_one->on_btnBackTodo_clicked();
     mw_one->ui->btnBackTodo->click();
     return;
   }
 
   if (!mw_one->ui->frameTodoRecycle->isHidden()) {
-    // mw_one->on_btnReturnRecycle_clicked();
     mw_one->ui->btnReturnRecycle->click();
     return;
   }
 
   if (!mw_one->ui->frameTabRecycle->isHidden()) {
-    // mw_one->on_btnBackTabRecycle_clicked();
     mw_one->ui->btnBackTabRecycle->click();
     return;
   }
 
   if (!mw_one->ui->frameSteps->isHidden()) {
-    // mw_one->on_btnBackSteps_clicked();
     mw_one->ui->btnBackSteps->click();
     return;
   }
@@ -4303,50 +4296,42 @@ static void JavaNotify_15() {
   }
 
   if (!mw_one->ui->frameReport->isHidden()) {
-    // mw_one->on_btnBack_Report_clicked();
     mw_one->ui->btnBack_Report->click();
     return;
   }
 
   if (!mw_one->ui->frameSearch->isHidden()) {
-    // mw_one->on_btnBackSearch_clicked();
     mw_one->ui->btnBackSearch->click();
     return;
   }
 
   if (!mw_one->ui->frameBakList->isHidden()) {
-    // mw_one->on_btnBackBakList_clicked();
     mw_one->ui->btnBackBakList->click();
     return;
   }
 
   if (!mw_one->ui->frameCategory->isHidden()) {
-    // mw_one->on_btnCancelType_clicked();
     mw_one->ui->btnCancelType->click();
     return;
   }
 
   if (!mw_one->ui->frameSetTab->isHidden()) {
-    // mw_one->on_btnBackSetTab_clicked();
     mw_one->ui->btnBackSetTab->click();
     return;
   }
 
   if (!mw_one->ui->frameEditRecord->isHidden()) {
-    // mw_one->on_btnBackEditRecord_clicked();
     mw_one->ui->btnBackEditRecord->click();
 
     return;
   }
 
   if (!mw_one->ui->frameBookList->isHidden()) {
-    // mw_one->on_btnBackBookList_clicked();
     mw_one->ui->btnBackBookList->click();
     return;
   }
 
   if (!mw_one->ui->frameNotesTree->isHidden()) {
-    // mw_one->on_btnBack_Tree_clicked();
     mw_one->ui->btnBack_Tree->click();
     return;
   }
@@ -4756,7 +4741,6 @@ void MainWindow::on_SetReaderFunVisible() {
 }
 
 void MainWindow::on_timerMousePress() {
-  timerMousePress->stop();
   if (!isMouseMove && isMousePress) on_btnSelText_clicked();
 }
 
