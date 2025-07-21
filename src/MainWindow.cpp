@@ -3524,7 +3524,7 @@ void MainWindow::init_UIWidget() {
   sliderButton->setTipText(tr("Slide Right to Start or Stop."));
   layout->addWidget(sliderButton);
 
-  QObject::connect(sliderButton, &SliderButton::sliderMovedToEnd,
+  QObject::connect(sliderButton, &SliderButton::sliderMovedToEnd, this,
                    [&]() { ui->btnGPS->click(); });
   ui->frame_btnGps->layout()->addWidget(centralWidget);
 }
@@ -3632,69 +3632,6 @@ void MainWindow::on_btnSelTab_clicked() {
   ui->frameMain->hide();
   ui->frameSetTab->show();
   getMainTabs();
-
-  return;
-
-  QDialog *dlg = new QDialog(this);
-  QVBoxLayout *vbox0 = new QVBoxLayout;
-  dlg->setLayout(vbox0);
-
-  dlg->setModal(true);
-  dlg->setWindowFlag(Qt::FramelessWindowHint);
-  dlg->setAttribute(Qt::WA_TranslucentBackground);
-
-  QFrame *frame = new QFrame(this);
-  vbox0->addWidget(frame);
-  frame->setStyleSheet(
-      "QFrame{background-color: rgb(255, 255, "
-      "255);border-radius:10px;border:1px solid gray;}");
-
-  QVBoxLayout *vbox = new QVBoxLayout;
-  frame->setLayout(vbox);
-  vbox->setContentsMargins(1, 1, 1, 1);
-
-  QListWidget *list = new QListWidget(this);
-  vbox->addWidget(list);
-  list->setSpacing(8);
-  list->setAlternatingRowColors(false);
-  list->setViewMode(QListView::IconMode);
-  list->setMovement(QListView::Static);
-  list->setStyleSheet(m_Method->listStyleMain);
-  list->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleSmall);
-  list->setVerticalScrollMode(QListWidget::ScrollPerPixel);
-  QScroller::grabGesture(list, QScroller::LeftMouseButtonGesture);
-  m_Method->setSCrollPro(list);
-  QFont font;
-  font.setPointSize(fontSize + 3);
-  list->setFont(font);
-
-  QLabel *lblTotal = new QLabel;
-  vbox->addWidget(lblTotal);
-
-  int count = tabData->tabBar()->count();
-  for (int i = 0; i < count; i++) {
-    QListWidgetItem *item = new QListWidgetItem;
-    item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    item->setText(tabData->tabText(i));
-    list->addItem(item);
-  }
-  connect(list, &QListWidget::itemClicked, [=]() {
-    dlg->close();
-    tabData->setCurrentIndex(list->currentRow());
-  });
-  connect(dlg, &QDialog::rejected, [=]() { dlg->close(); });
-
-  int h = geometry().height() * 3 / 4;
-  int w = geometry().width() - 10;
-  int y = geometry().y() + (this->height() - h) / 2;
-  int x = geometry().x() + (this->width() - w) / 2;
-  dlg->setGeometry(x, y, w, h);
-  list->setCurrentRow(tabData->currentIndex());
-  lblTotal->setText(tr("Total") + " : " + QString::number(list->count()) +
-                    " ( " + QString::number(list->currentRow() + 1) + " ) ");
-
-  dlg->show();
-  list->setFocus();
 }
 
 void MainWindow::init_Menu(QMenu *mainMenu) {
@@ -3818,10 +3755,6 @@ void MainWindow::on_actionOneDriveBackupData() {
   ui->frameMain->hide();
   ui->frameReader->hide();
   ui->frameOne->show();
-
-  // delete m_CloudBackup;
-  // m_CloudBackup = new CloudBackup;
-  // m_CloudBackup->loadLogQML();
 }
 
 void MainWindow::on_actionTabRecycle() {
@@ -3932,7 +3865,7 @@ void MainWindow::startBackgroundTaskUpdateBakFileList() {
 
   // 可选：使用 QFutureWatcher 监控进度
   QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, [=]() {
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     m_Method->clearAllBakList(ui->qwBakList);
     int bakCount = bakFileList.count();
     for (int i = 0; i < bakCount; i++) {
@@ -4263,7 +4196,6 @@ static void JavaNotify_15() {
 
   if (!mw_one->ui->frameReader->isHidden()) {
     if (mw_one->ui->qwCata->isVisible()) {
-      // mw_one->m_Reader->showCatalogue();
       mw_one->ui->btnCatalogue->click();
       return;
 
@@ -4324,6 +4256,11 @@ static void JavaNotify_15() {
 
   if (!mw_one->ui->frameNotes->isHidden()) {
     mw_one->ui->btnBackNotes->click();
+    return;
+  }
+
+  if (mw_one->m_TodoAlarm->isVisible()) {
+    mw_one->m_TodoAlarm->ui->btnBack->click();
     return;
   }
 
@@ -4701,8 +4638,6 @@ void MainWindow::on_btnStorageInfo_clicked() {
 void MainWindow::on_btnRefreshWeb_clicked() {}
 
 void MainWindow::on_btnUserInfo_clicked() {
-  // 获取openssl相关信息并自行编译安装 Qt6.4(1.1.1.m版本的openssl）
-  // openssl下载网址：https://www.openssl.org/source/old/
   QNetworkAccessManager *manager = new QNetworkAccessManager(this);
   qDebug() << manager->supportedSchemes();
   qDebug() << QSslSocket::sslLibraryBuildVersionString();
@@ -4766,12 +4701,6 @@ void MainWindow::on_btnSearch_clicked() {
   if (str == "") return;
 
   QString strurl;
-  /*if (zh_cn)
-    strurl =
-        "https://wap.baidu.com/"
-        "s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=" +
-        str;
-  else*/
   strurl = "https://bing.com/search?q=" + str;
 
   QUrl url(strurl);
@@ -5802,12 +5731,7 @@ void MainWindow::on_DelayCloseProgressBar() {
 }
 
 void MainWindow::on_CloseProgressBar() {
-  // if (isAndroid) {
-  //   m_Method->closeAndroidProgressBar();
-  //   qDebug() << "close android progressbar...";
-  // } else {
   mw_one->closeProgress();
-  // }
 
   mw_one->ui->btnReader->setEnabled(true);
   mw_one->ui->f_ReaderFun->setEnabled(true);
