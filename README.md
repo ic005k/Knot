@@ -120,6 +120,16 @@ Follow these steps (menu names may vary slightly across devices):
 - [GitHub Releases](https://github.com/ic005k/Knot/releases)
 - [API](https://api.github.com/repos/ic005k/Knot/releases/latest)
 
+## Download Statistics
+
+| Platform   | Release File                      | Downloads                                                                 |
+|------------|-----------------------------------|--------------------------------------------------------------------------|
+| Android    | `android-build-release-signed.apk` | ![Android Downloads](https://img.shields.io/github/downloads/ic005k/Knot/latest/android-build-release-signed.apk?label=Downloads&color=green) |
+| Linux      | `Knot-Linux-x86_64.AppImage`      | ![Linux Downloads](https://img.shields.io/github/downloads/ic005k/Knot/latest/Knot-Linux-x86_64.AppImage?label=Downloads&color=orange)   |
+| macOS      | `Knot-Mac.dmg`                    | ![macOS Downloads](https://img.shields.io/github/downloads/ic005k/Knot/latest/Knot-Mac.dmg?label=Downloads&color=blue)                 |
+| Windows    | `Knot-Win64.zip`                  | ![Windows Downloads](https://img.shields.io/github/downloads/ic005k/Knot/latest/Knot-Win64.zip?label=Downloads&color=red)             |
+| **Total**  | -                                 | ![Total Downloads](https://img.shields.io/github/downloads/ic005k/Knot/total?label=Total-Downloads&color=purple&style=flat)           |
+
 ## 🔒 Data Security Architecture
 ```mermaid
 graph LR
