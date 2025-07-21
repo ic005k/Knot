@@ -19,6 +19,8 @@ QStringList resultsList;
 
 bool isPasswordError = false;
 
+ColorDialog *colorDlg = nullptr;
+
 Method::Method(QWidget *parent) : QDialog(parent) {
   mw_one->set_ToolButtonStyle(this);
 
@@ -628,19 +630,19 @@ void Method::reeditMainEventData() {
 }
 
 void Method::showNoteBookMenu(int x, int y) {
-  QMenu *mainMenu = new QMenu(this);
-  mw_one->m_NotesList->init_NoteBookMenu(mainMenu);
+  menuNoteBook = new QMenu(this);
+  mw_one->m_NotesList->init_NoteBookMenu(menuNoteBook);
 
   QPoint pos(mw_one->geometry().x() + x, mw_one->geometry().y() + y);
-  mainMenu->exec(pos);
+  menuNoteBook->exec(pos);
 }
 
 void Method::showNotsListMenu(int x, int y) {
-  QMenu *mainMenu = new QMenu(this);
-  mw_one->m_NotesList->init_NotesListMenu(mainMenu);
+  menuNoteList = new QMenu(this);
+  mw_one->m_NotesList->init_NotesListMenu(menuNoteList);
 
   QPoint pos(mw_one->geometry().x() + x, mw_one->geometry().y() + y);
-  mainMenu->exec(pos);
+  menuNoteList->exec(pos);
 }
 
 void Method::setTypeRenameText() {
@@ -934,7 +936,7 @@ QString Method::getCustomColor() {
   m_widget = new QWidget(this);
   showGrayWindows();
 
-  ColorDialog *colorDlg = new ColorDialog(this);
+  colorDlg = new ColorDialog(this);
   connect(colorDlg, &QDialog::rejected, this,
           [=]() mutable { closeGrayWindows(); });
   int x, y, w, h;

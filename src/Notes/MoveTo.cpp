@@ -54,7 +54,6 @@ MoveTo::MoveTo(QWidget* parent) : QDialog(parent), ui(new Ui::MoveTo) {
   ui->lblItem->setText(item->text(0));
   ui->lblItem->adjustSize();
   ui->lblItem->setWordWrap(true);
-  showDialog();
 }
 
 MoveTo::~MoveTo() { delete ui; }
@@ -101,7 +100,8 @@ void MoveTo::showDialog() {
 
   show();
 
-  while (!isHidden()) QCoreApplication::processEvents();
+  exec();
+  // while (!isHidden()) QCoreApplication::processEvents();
 }
 
 void MoveTo::closeEvent(QCloseEvent* event) {
@@ -114,6 +114,7 @@ void MoveTo::on_btnCancel_clicked() {
   strCurrentItem = "";
   currentItem = NULL;
   close();
+  reject();
 }
 
 void MoveTo::on_btnOk_clicked() {
@@ -123,6 +124,7 @@ void MoveTo::on_btnOk_clicked() {
   if (isNote) currentItem = listItems.at(ui->listWidget->currentRow());
 
   close();
+  accept();
 }
 
 void MoveTo::initTopNoteBook() {

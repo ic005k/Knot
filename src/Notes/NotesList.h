@@ -54,6 +54,9 @@ class NotesList : public QDialog {
 
   QDialog *m_RenameNotes = nullptr;
   TextEditToolbar *textToolbarRenameNotes = nullptr;
+  QMenu *menuRecentOpen = nullptr;
+  MoveTo *m_MoveTo = nullptr;
+  NewNoteBook *m_NewNoteBook = nullptr;
 
   QString noteTitle;
 

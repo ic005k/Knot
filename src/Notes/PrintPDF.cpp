@@ -8,11 +8,15 @@ extern Method* m_Method;
 extern int fontSize;
 extern bool isAndroid;
 
+PrintPDF* m_PrintPDF = nullptr;
+
 PrintPDF::PrintPDF(QWidget* parent) : QDialog(parent), ui(new Ui::PrintPDF) {
   ui->setupUi(this);
   setWindowFlag(Qt::FramelessWindowHint);
   QString style = "QDialog{border-radius:0px;border:0px solid darkred;}";
   this->setStyleSheet(style);
+
+  m_PrintPDF = this;
 
   QFont font = this->font();
   font.setPointSize(fontSize);

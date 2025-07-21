@@ -55,6 +55,9 @@ class Method : public QDialog {
   ~Method();
   Ui::Method *ui;
 
+  QMenu *menuNoteBook = nullptr;
+  QMenu *menuNoteList = nullptr;
+
   bool androidCopyFile(QString src, QString des);
 
   static QString getFileSize(const qint64 &size, int precision);
@@ -378,7 +381,8 @@ class Method : public QDialog {
   void closeAndroidKeyboard();
 
   void callJavaForceDisconnectInputMethod();
-  protected:
+
+ protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
  public slots:

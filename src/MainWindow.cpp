@@ -66,6 +66,8 @@ extern WebDavHelper *listWebDavFiles(const QString &url,
 
 extern QSplashScreen *splash;
 extern ShowMessage *m_ShowMessage;
+extern ColorDialog *colorDlg;
+extern PrintPDF *m_PrintPDF;
 
 void RegJni(const char *myClassName);
 
@@ -3955,7 +3957,7 @@ void MainWindow::startBackgroundTaskUpdateBakFileList() {
 }
 
 void MainWindow::on_btnMenu_clicked() {
-  QMenu *mainMenu = new QMenu(this);
+  mainMenu = new QMenu(this);
   init_Menu(mainMenu);
   int x = 0;
 #ifdef Q_OS_ANDROID
@@ -4127,6 +4129,62 @@ static void JavaNotify_14() {
 }
 
 static void JavaNotify_15() {
+  if (colorDlg != nullptr) {
+    if (colorDlg->isVisible()) {
+      colorDlg->close();
+      return;
+    }
+  }
+
+  if (m_PrintPDF != nullptr) {
+    if (m_PrintPDF->isVisible()) {
+      m_PrintPDF->close();
+      return;
+    }
+  }
+
+  if (mw_one->mainMenu != nullptr) {
+    if (mw_one->mainMenu->isVisible()) {
+      mw_one->mainMenu->close();
+      return;
+    }
+  }
+
+  if (m_Method->menuNoteBook != nullptr) {
+    if (m_Method->menuNoteBook->isVisible()) {
+      m_Method->menuNoteBook->close();
+      return;
+    }
+  }
+
+  if (m_Method->menuNoteList != nullptr) {
+    if (m_Method->menuNoteList->isVisible()) {
+      m_Method->menuNoteList->close();
+      return;
+    }
+  }
+
+  if (mw_one->m_NotesList->menuRecentOpen != nullptr) {
+    if (mw_one->m_NotesList->menuRecentOpen->isVisible()) {
+      mw_one->m_NotesList->menuRecentOpen->close();
+      return;
+    }
+  }
+
+  if (mw_one->m_NotesList->m_MoveTo != nullptr) {
+    if (mw_one->m_NotesList->m_MoveTo->isVisible()) {
+      mw_one->m_NotesList->m_MoveTo->ui->btnCancel->click();
+      return;
+    }
+  }
+
+  if (mw_one->m_NotesList->m_NewNoteBook != nullptr) {
+    if (mw_one->m_NotesList->m_NewNoteBook->isVisible()) {
+      mw_one->m_NotesList->m_NewNoteBook->ui->btnCancel->click();
+      return;
+    }
+  }
+
   if (mw_one->textToolbar != nullptr) {
     if (mw_one->textToolbar->isVisible()) {
       mw_one->textToolbar->hide();

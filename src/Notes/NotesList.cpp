@@ -1671,10 +1671,11 @@ void NotesList::setNoteBookCurrentItem() {
 void NotesList::on_actionAdd_NoteBook_triggered() {
   QString text;
 
-  NewNoteBook *m_new = new NewNoteBook(mw_one);
-  text = m_new->notebookName;
-  if (m_new->isOk && !text.isEmpty()) {
-    rootIndex = m_new->rootIndex;
+  m_NewNoteBook = new NewNoteBook(mw_one);
+  m_NewNoteBook->showDialog();
+  text = m_NewNoteBook->notebookName;
+  if (m_NewNoteBook->isOk && !text.isEmpty()) {
+    rootIndex = m_NewNoteBook->rootIndex;
     ui->editBook->setText(text);
     on_btnNewNoteBook_clicked();
 
@@ -2134,7 +2135,8 @@ bool NotesList::moveItem(QTreeWidget *twMain) {
   QTreeWidgetItem *item = twMain->currentItem();
   if (item == NULL) return false;
 
-  MoveTo *m_MoveTo = new MoveTo(this);
+  m_MoveTo = new MoveTo(this);
+  m_MoveTo->showDialog();
   if (!m_MoveTo->isOk) return false;
 
   // NoteBook
@@ -2448,7 +2450,7 @@ int NotesList::getSavedNotesListIndex(int notebookIndex) {
 }
 
 void NotesList::genRecentOpenMenu() {
-  QMenu *menuRecentOpen = new QMenu(this);
+  menuRecentOpen = new QMenu(this);
   menuRecentOpen->setMaximumWidth(mw_one->width());
   int count = listRecentOpen.count();
   for (int i = 0; i < count; i++) {

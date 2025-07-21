@@ -26,7 +26,11 @@ NewNoteBook::NewNoteBook(QWidget* parent)
   }
   ui->listWidget->addItems(list);
   ui->listWidget->setCurrentRow(0);
+}
 
+NewNoteBook::~NewNoteBook() { delete ui; }
+
+void NewNoteBook::showDialog() {
   int x, y, w, h;
   w = mw_one->width() - 20;
   h = mw_one->height() - 50;
@@ -40,8 +44,6 @@ NewNoteBook::NewNoteBook(QWidget* parent)
   show();
   while (!isHidden()) QCoreApplication::processEvents();
 }
-
-NewNoteBook::~NewNoteBook() { delete ui; }
 
 bool NewNoteBook::eventFilter(QObject* watch, QEvent* evn) {
   if (evn->type() == QEvent::KeyPress) {

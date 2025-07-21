@@ -131,6 +131,8 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
   Ui::MainWindow *ui;
 
+  QMenu *mainMenu = nullptr;
+
   TextEditToolbar *textToolbar;
 
   QInputDialog *m_RenameDlg = nullptr;

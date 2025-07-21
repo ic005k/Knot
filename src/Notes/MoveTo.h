@@ -21,6 +21,7 @@ class MoveTo : public QDialog {
 
   void initTopNoteBook();
   void initAllNoteBook();
+  void showDialog();
 
  protected:
   void closeEvent(QCloseEvent *event) override;
@@ -32,7 +33,7 @@ class MoveTo : public QDialog {
 
  private:
   QList<QTreeWidgetItem *> listItems;
-  void showDialog();
+
   QWidget *m_widget;
   bool isNoteBook = false;
   bool isNote = false;

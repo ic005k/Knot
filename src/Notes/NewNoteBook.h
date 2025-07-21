@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QKeyEvent>
 
+#include "ui_NewNoteBook.h"
+
 namespace Ui {
 class NewNoteBook;
 }
@@ -21,7 +23,8 @@ class NewNoteBook : public QDialog {
   bool isOk = false;
   int rootIndex;
 
- protected:
+  void showDialog();
+  protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
   void closeEvent(QCloseEvent *event) override;
