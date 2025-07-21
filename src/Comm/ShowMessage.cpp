@@ -8,9 +8,13 @@ extern Method* m_Method;
 extern QString copyText;
 extern bool isDark, isAndroid;
 
+ShowMessage* m_ShowMessage = nullptr;
+
 ShowMessage::ShowMessage(QWidget* parent)
     : QDialog(parent), ui(new Ui::ShowMessage) {
   ui->setupUi(this);
+
+  m_ShowMessage = this;
 
   this->installEventFilter(this);
   ui->editMsg->viewport()->installEventFilter(this);

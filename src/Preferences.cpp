@@ -48,8 +48,9 @@ Preferences::Preferences(QWidget* parent)
   ui->lblFontSize->installEventFilter(this);
 
   if (isAndroid) {
-    TextEditToolbar* textToolbar = new TextEditToolbar(this);
-    EditEventFilter* editFilter = new EditEventFilter(textToolbar, this);
+    textToolbarPreferences = new TextEditToolbar(this);
+    EditEventFilter* editFilter =
+        new EditEventFilter(textToolbarPreferences, this);
     ui->editPassword->installEventFilter(editFilter);
     ui->editValidate->installEventFilter(editFilter);
   }

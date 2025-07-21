@@ -6,6 +6,8 @@
 #include <QStyleHints>
 #include <QToolButton>
 
+#include "src/Comm/TextEditToolbar.h"
+
 namespace Ui {
 class Preferences;
 }
@@ -18,6 +20,7 @@ class Preferences : public QDialog {
   ~Preferences();
   Ui::Preferences *ui;
 
+  TextEditToolbar *textToolbarPreferences;
   bool devMode = false;
   QString chkStyle;
   bool isFontChange = false;

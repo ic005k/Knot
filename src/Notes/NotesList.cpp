@@ -235,8 +235,6 @@ void NotesList::on_btnRename_clicked() {
   QTreeWidgetItem *item = ui->treeWidget->currentItem();
   if (item == NULL) return;
 
-  if (m_RenameNotes != nullptr) delete m_RenameNotes;
-
   m_RenameNotes = new QDialog(this);
   QVBoxLayout *vbox0 = new QVBoxLayout;
   m_RenameNotes->setLayout(vbox0);

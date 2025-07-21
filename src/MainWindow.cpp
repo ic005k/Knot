@@ -65,6 +65,7 @@ extern WebDavHelper *listWebDavFiles(const QString &url,
                                      const QString &password);
 
 extern QSplashScreen *splash;
+extern ShowMessage *m_ShowMessage;
 
 void RegJni(const char *myClassName);
 
@@ -4128,6 +4129,20 @@ static void JavaNotify_15() {
   if (mw_one->textToolbar != nullptr) {
     if (mw_one->textToolbar->isVisible()) {
       mw_one->textToolbar->hide();
+      return;
+    }
+  }
+
+  if (mw_one->m_Preferences->textToolbarPreferences != nullptr) {
+    if (mw_one->m_Preferences->textToolbarPreferences->isVisible()) {
+      mw_one->m_Preferences->textToolbarPreferences->hide();
+      return;
+    }
+  }
+
+  if (m_ShowMessage != nullptr) {
+    if (m_ShowMessage->isVisible()) {
+      m_ShowMessage->close();
       return;
     }
   }
