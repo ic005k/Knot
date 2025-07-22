@@ -441,7 +441,6 @@ MainWindow::MainWindow(QWidget *parent)
 
   if (QFile::exists(currentMDFile)) {
     m_Notes->MD2Html(currentMDFile);
-    m_Notes->loadNoteToQML();
   }
 
   splash->close();
@@ -4568,9 +4567,6 @@ void MainWindow::on_btnUserInfo_clicked() {
 }
 
 void MainWindow::on_btnBackNotes_clicked() {
-  QFileInfo fi(currentMDFile);
-  m_Notes->saveWebScrollPos(fi.baseName());
-
   ui->frameNotes->hide();
   ui->frameNoteList->show();
 }
@@ -5778,10 +5774,6 @@ void MainWindow::on_btnOpenNote_clicked() {
   } else {
     m_Notes->MD2Html(currentMDFile);
     m_Notes->openBrowserOnce(privateDir + "memo.html");
-
-    // m_Notes->loadNoteToQML();
-    // ui->frameNoteList->hide();
-    // ui->frameNotes->show();
   }
 }
 

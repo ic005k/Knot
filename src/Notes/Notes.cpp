@@ -142,7 +142,6 @@ void Notes::on_btnDone_clicked() {
 
   if (!mw_one->ui->frameNotes->isHidden()) {
     MD2Html(currentMDFile);
-    loadNoteToQML();
   }
 }
 
@@ -557,17 +556,6 @@ QString Notes::addImagePathToHtml(QString strhtml) {
   return strEnd;
 }
 
-void Notes::loadNoteToQML() {
-  if (isAndroid) {
-    return;
-  }
-
-  QString htmlFileName = privateDir + "memo.html";
-
-  // new method
-  setWebViewFile(htmlFileName);
-}
-
 void Notes::refreshQMLVPos(qreal newPos) {
   QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);
 
@@ -938,17 +926,6 @@ void Notes::on_editNote() {
   mw_one->on_btnEdit_clicked();
 }
 
-void Notes::setEditorVPos() {
-  QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);
-
-  qreal pos = 0;
-  if (QFile(currentMDFile).exists()) {
-    pos = Reg.value("/MainNotes/Editor" + currentMDFile, 0).toReal();
-  }
-}
-
-void Notes::showTextSelector() {}
-
 void Notes::setOpenSearchResultForAndroid(bool isValue, QString strSearchText) {
   Q_UNUSED(isValue);
   Q_UNUSED(strSearchText);
@@ -1167,10 +1144,6 @@ void Notes::loadEmptyNote() {
   mw_one->ui->lblNoteName->setText("");
   mw_one->m_NotesList->noteTitle = "";
 }
-
-void Notes::setWebViewFile(QString htmlfile) {}
-
-void Notes::saveWebScrollPos(QString mdfilename) {}
 
 QString markdownToHtml(const QString &markdown, int options) {
   // 处理空输入

@@ -538,30 +538,13 @@ void Method::clickMainDate() {
   QTreeWidgetItem *topItem = tw->topLevelItem(topIndex);
   int childCount = topItem->childCount();
   QString text0, text1, text2, text3;
-  int nullrows;
+
   for (int j = 0; j < childCount; j++) {
     QTreeWidgetItem *childItem = topItem->child(j);
     text0 = childItem->text(0);
     text1 = childItem->text(1);
     text2 = childItem->text(2);
     text3 = childItem->text(3);
-
-    nullrows = 1;
-
-    if (text1.length() > 0) {
-      // text1 = tr("Amount") + " : " + text1;
-      nullrows++;
-    }
-
-    if (text2.length() > 0) {
-      // text2 = tr("Category") + " : " + text2;
-      nullrows++;
-    }
-
-    if (text3.length() > 0) {
-      // text3 = tr("Details") + " : " + text3;
-      nullrows++;
-    }
 
     addItemToQW(mw_one->ui->qwMainEvent, text0, text1, text2, text3, 0);
   }

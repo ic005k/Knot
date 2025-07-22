@@ -46,7 +46,6 @@
 #include "src/Notes/PrintPDF.h"
 #include "titlegenerator.h"
 #include "ui_PrintPDF.h"
-#include "ui_TextSelector.h"
 
 class LimitedTextEdit;
 class NoteIndexManager;
@@ -95,7 +94,6 @@ class Notes : public QDialog {
 
   qlonglong curPos;
   qreal sliderPos;
-  void loadNoteToQML();
 
   QString Deciphering(const QString &fileName);
 
@@ -124,8 +122,6 @@ class Notes : public QDialog {
 
   bool eventFilterQwNote(QObject *watch, QEvent *event);
 
-  void setEditorVPos();
-
   void openAndroidNoteEditor();
 
   void appendNote(QString str);
@@ -143,13 +139,9 @@ class Notes : public QDialog {
 
   void refreshQMLVPos(qreal newPos);
 
-  void setWebViewFile(QString htmlfile);
-
   void openMDWindow();
 
   bool isSetNewNoteTitle();
-
-  void saveWebScrollPos(QString mdfilename);
 
   void openNotesUI();
 
@@ -214,7 +206,6 @@ class Notes : public QDialog {
   void showNoteList();
   void on_editNote();
 
-  void showTextSelector();
   void delLink(QString link);
  signals:
   void sendUpdate();

@@ -98,8 +98,6 @@
 #include "ui_SetReaderText.h"
 #include "ui_ShowMessage.h"
 #include "ui_StepsOptions.h"
-#include "ui_SyncInfo.h"
-#include "ui_TextSelector.h"
 #include "ui_Todo.h"
 #include "ui_TodoAlarm.h"
 
