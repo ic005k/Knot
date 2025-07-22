@@ -17,6 +17,7 @@ import android.widget.ImageButton;
 
 import com.github.barteksc.pdfviewer.PDFView;
 import com.github.barteksc.pdfviewer.PDFView.Configurator;
+import com.github.barteksc.pdfviewer.listener.Callbacks;
 import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
 import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
 import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
@@ -61,7 +62,7 @@ public class PDFActivity extends AppCompatActivity implements
     // PDF控件
     PDFView pdfView;
     // 按钮控件：返回、目录、缩略图
-    static ImageButton btn_back, btn_dark, btn_catalogue, btn_preview, btn_open, btn_books;
+    private ImageButton btn_back, btn_dark, btn_catalogue, btn_preview, btn_open, btn_books;
 
     // 页码
     Integer pageNumber = 0;
@@ -72,6 +73,12 @@ public class PDFActivity extends AppCompatActivity implements
     String assetsFileName;
     // pdf文件uri
     Uri uri;
+
+    // 垂直滚动位置
+    private float verticalPosition = 0;
+    private float horizontalPosition = 0;
+    private boolean isPdfLoaded = false;
+    private static PDFActivity instance;
 
     public native static void CallJavaNotify_0();
 
@@ -111,10 +118,14 @@ public class PDFActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppThemeprice);
         super.onCreate(savedInstanceState);
+
+        instance = this;
+
         // UIUtils.initWindowStyle(getWindow(), getSupportActionBar());//设置沉浸式
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         mPdfActivity = this;
         context = PDFActivity.this;
+
         setContentView(R.layout.activity_pdf);
 
         initView();// 初始化view
@@ -123,6 +134,7 @@ public class PDFActivity extends AppCompatActivity implements
 
         // HomeKey
         registerReceiver(mHomeKeyEvent, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+
     }
 
     private BroadcastReceiver mHomeKeyEvent = new BroadcastReceiver() {
@@ -152,6 +164,42 @@ public class PDFActivity extends AppCompatActivity implements
     public void onBackPressed() {
         super.onBackPressed();
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // 锁屏前最后保存一次位置
+        if (pdfView != null) {
+            verticalPosition = pdfView.getCurrentYOffset(); // 根据PDFView的API获取当前垂直位置
+            horizontalPosition = pdfView.getCurrentXOffset();
+            f_zoom = pdfView.getZoom();
+            // 可以将这些值存入SharedPreferences，避免内存中变量被回收
+            savePDFInfo();
+        }
+    }
+
+    /**
+     * 在屏幕熄灭前，最后保存一次位置
+     */
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        // 屏幕熄灭时（失去焦点），最后保存一次位置
+        if (!hasFocus && isPdfLoaded && pdfView != null) {
+            verticalPosition = pdfView.getCurrentYOffset();
+            horizontalPosition = pdfView.getCurrentXOffset();
+        }
+        // 屏幕亮起时（获取焦点）恢复位置
+        else if (hasFocus && isPdfLoaded && pdfView != null) {
+            pdfView.moveTo(horizontalPosition, verticalPosition);
+        }
     }
 
     /**
@@ -191,6 +239,7 @@ public class PDFActivity extends AppCompatActivity implements
 
                 savePDFInfo();
                 PDFActivity.this.finish();
+
                 CallJavaNotify_13();
 
             }
@@ -228,7 +277,7 @@ public class PDFActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 PDFActivity.this.finish();
-                //CallJavaNotify_11();
+                // CallJavaNotify_11();
             }
         });
 
@@ -260,6 +309,8 @@ public class PDFActivity extends AppCompatActivity implements
                             String strPage = ini.get("pdf", name);
                             String strZoom = ini.get("zoom", name);
                             String strNight = ini.get("night", name);
+                            String strVertical = ini.get("positionY", name); // 获取垂直位置
+                            String strHorizontal = ini.get("positionX", name); // 获取水平位置
                             System.out.print("strPage:" + strPage);
 
                             if (strPage != null)
@@ -271,6 +322,18 @@ public class PDFActivity extends AppCompatActivity implements
                                 f_zoom = Float.parseFloat(strZoom);
                             else
                                 f_zoom = 1.0f;
+
+                            // 解析水平位置
+                            if (strHorizontal != null)
+                                horizontalPosition = Float.parseFloat(strHorizontal);
+                            else
+                                horizontalPosition = 0; // 默认水平位置（左对齐）
+
+                            // 解析垂直位置
+                            if (strVertical != null)
+                                verticalPosition = Float.parseFloat(strVertical);
+                            else
+                                verticalPosition = 0; // 默认垂直位置（顶部）
 
                             boolean isNight;
                             if (strNight != null)
@@ -307,6 +370,7 @@ public class PDFActivity extends AppCompatActivity implements
                 .onPageError(this)
                 .pageFitPolicy(FitPolicy.BOTH)
                 .load();
+
     }
 
     /**
@@ -344,6 +408,18 @@ public class PDFActivity extends AppCompatActivity implements
         }
         // 将bookmark转为目录数据集合
         bookmarkToCatelogues(catelogues, bookmarks, 1);
+
+        // 标记PDF已加载完成
+        isPdfLoaded = true;
+
+        // 加载完成后恢复缩放和垂直位置
+        pdfView.zoomTo(f_zoom);
+
+        // 延迟50ms恢复垂直位置（等待defaultPage跳转完成）
+        pdfView.postDelayed(() -> {
+            pdfView.moveTo(horizontalPosition, verticalPosition);
+        }, 50); // 延迟时间可根据实际测试调整（一般50ms足够）
+
     }
 
     /**
@@ -393,6 +469,9 @@ public class PDFActivity extends AppCompatActivity implements
             if (pageNum > 0) {
                 pdfView.jumpTo(pageNum);
             }
+
+            verticalPosition = pdfView.getCurrentYOffset(); // 根据PDFView的API获取当前垂直位置
+            horizontalPosition = pdfView.getCurrentXOffset();
         }
     }
 
@@ -407,6 +486,9 @@ public class PDFActivity extends AppCompatActivity implements
         if (pdfView != null) {
             pdfView.recycle();
         }
+
+        if (instance == this)
+            instance = null;
     }
 
     public static void closeMyPDF() {
@@ -414,7 +496,16 @@ public class PDFActivity extends AppCompatActivity implements
             mPdfActivity.finish();
     }
 
-    public static void hideOrShowToolBar() {
+    public static void staticHideOrShowToolBar() {
+        if (instance != null) {
+            instance.hideOrShowToolBar();
+        }
+    }
+
+    public void hideOrShowToolBar() {
+        float currentX = pdfView.getCurrentXOffset();
+        float currentY = pdfView.getCurrentYOffset();
+
         if (btn_back.getVisibility() == View.VISIBLE) {
             btn_back.setVisibility(View.GONE);
             btn_dark.setVisibility(View.GONE);
@@ -430,6 +521,10 @@ public class PDFActivity extends AppCompatActivity implements
             btn_catalogue.setVisibility(View.VISIBLE);
             btn_preview.setVisibility(View.VISIBLE);
         }
+
+        pdfView.postDelayed(() -> {
+            pdfView.moveTo(currentX, currentY);
+        }, 100);
     }
 
     private void savePDFInfo() {
@@ -446,6 +541,10 @@ public class PDFActivity extends AppCompatActivity implements
             ini.put("pdf", name, String.valueOf(pageNumber));
             ini.put("zoom", name, String.valueOf(pdfView.getZoom()));
             ini.put("night", name, String.valueOf(pdfView.nightMode));
+            // 保存垂直位置
+            ini.put("positionY", name, String.valueOf(pdfView.getCurrentYOffset()));
+            // 保存水平位置
+            ini.put("positionX", name, String.valueOf(pdfView.getCurrentXOffset()));
             ini.store();
         } catch (IOException e) {
             e.printStackTrace();
