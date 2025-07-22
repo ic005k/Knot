@@ -11,7 +11,7 @@ NewNoteBook::NewNoteBook(QWidget* parent)
   ui->setupUi(this);
   setWindowFlag(Qt::FramelessWindowHint);
   ui->editName->installEventFilter(this);
-  mw_one->set_ToolButtonStyle(this);
+  m_Method->set_ToolButtonStyle(this);
 
   QScroller::grabGesture(ui->listWidget, QScroller::LeftMouseButtonGesture);
   m_Method->setSCrollPro(ui->listWidget);

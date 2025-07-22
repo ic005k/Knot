@@ -22,15 +22,8 @@ MoveTo::MoveTo(QWidget* parent) : QDialog(parent), ui(new Ui::MoveTo) {
   ui->listWidget->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleSmall);
   ui->listWidget->setVerticalScrollMode(QListWidget::ScrollPerPixel);
   QScroller::grabGesture(ui->listWidget, QScroller::LeftMouseButtonGesture);
-  if (!isDark) {
-#ifdef Q_OS_ANDROID
-    ui->listWidget->setStyleSheet("selection-background-color: lightblue");
-#else
 
-#endif
-  }
-
-  mw_one->set_ToolButtonStyle(this);
+  m_Method->set_ToolButtonStyle(this);
 
   QTreeWidgetItem* item = NULL;
   if (!mw_one->m_NotesList->ui->frame0->isHidden() ||

@@ -42,7 +42,7 @@ Preferences::Preferences(QWidget* parent)
   ui->lblZipTip->setFont(font0);
 #endif
 
-  mw_one->set_ToolButtonStyle(this);
+  m_Method->set_ToolButtonStyle(this);
 
   this->installEventFilter(this);
   ui->lblFontSize->installEventFilter(this);

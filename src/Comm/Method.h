@@ -382,7 +382,13 @@ class Method : public QDialog {
 
   void callJavaForceDisconnectInputMethod();
 
- protected:
+  void set_ToolButtonStyle(QObject *parent);
+  void set_PushButtonStyle(QObject *parent);
+  QObjectList getAllToolButton(QObjectList lstUIControls);
+  QObjectList getAllPushButton(QObjectList lstUIControls);
+  QObjectList getAllTreeWidget(QObjectList lstUIControls);
+  QObjectList getAllUIControls(QObject *parent);
+  protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
  public slots:

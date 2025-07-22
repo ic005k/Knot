@@ -14,7 +14,7 @@ AboutThis::AboutThis(QWidget *parent) : QDialog(parent), ui(new Ui::AboutThis) {
 
   this->layout()->setContentsMargins(5, 5, 5, 5);
 
-  mw_one->set_ToolButtonStyle(this);
+  m_Method->set_ToolButtonStyle(this);
 
   setModal(true);
 

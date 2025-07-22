@@ -35,7 +35,6 @@ NoteIndexManager::NoteIndexManager(QObject *parent) : QObject{parent} {}
 Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->setupUi(this);
   m_NoteIndexManager = new NoteIndexManager();
-  m_EditSource1 = new QTextEditHighlighter();
 
   initEditor();
 
@@ -67,7 +66,7 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->btnFind->hide();
   ui->editFind->setMinimumWidth(65);
 
-  mw_one->set_ToolButtonStyle(this);
+  m_Method->set_ToolButtonStyle(this);
 
   // 创建快捷键：绑定 Ctrl+F
   QShortcut *shortcut1 = new QShortcut(QKeySequence("Ctrl+F"), this);
@@ -765,77 +764,12 @@ void Notes::on_editSource_textChanged() { isTextChange = true; }
 void Notes::show_findText() {
 #ifndef Q_OS_ANDROID
 
-  QString findtext = ui->editFind->text().trimmed().toLower();
-  if (findtext == "") return;
-  // 获得对话框的内容
-  if (m_EditSource1->find(findtext, QTextDocument::FindCaseSensitively))
-  // 查找后一个
-  {
-    // 查找到后高亮显示
-    QPalette palette = m_EditSource->palette();
-    palette.setColor(QPalette::Highlight,
-                     palette.color(QPalette::Active, QPalette::Highlight));
-    m_EditSource1->setPalette(palette);
-  } else {
-    m_Method->m_widget = new QWidget(this);
-    ShowMessage *m_ShowMsg = new ShowMessage(this);
-    m_ShowMsg->showMsg("Knot", tr("The end of the document has been reached."),
-                       0);
-  }
-
 #endif
 }
 
-void Notes::show_findTextBack() {
-  QString findtext = ui->editFind->text().trimmed().toLower();
-  if (findtext == "") return;
-  // 获得对话框的内容
-  if (m_EditSource1->find(findtext, QTextDocument::FindBackward))
-  // 查找后一个
-  {
-    // 查找到后高亮显示
-    QPalette palette = m_EditSource1->palette();
-    palette.setColor(QPalette::Highlight,
-                     palette.color(QPalette::Active, QPalette::Highlight));
-    m_EditSource1->setPalette(palette);
-  } else {
-    m_Method->m_widget = new QWidget(this);
-    ShowMessage *m_ShowMsg = new ShowMessage(this);
-    m_ShowMsg->showMsg(
-        "Knot", tr("The beginning of the document has been reached."), 0);
-  }
-}
+void Notes::show_findTextBack() {}
 
-void Notes::findText() {
-  QString search_text = ui->editFind->text().trimmed().toLower();
-  if (search_text.trimmed().isEmpty()) {
-    return;
-  } else {
-    QTextDocument *document = m_EditSource1->document();
-    bool found = false;
-    QTextCursor highlight_cursor(document);
-    QTextCursor cursor(document);
-    // 开始
-    cursor.beginEditBlock();
-    QTextCharFormat color_format(highlight_cursor.charFormat());
-    color_format.setForeground(Qt::red);
-    while (!highlight_cursor.isNull() && !highlight_cursor.atEnd()) {
-      // 查找指定的文本，匹配整个单词
-      highlight_cursor = document->find(search_text, highlight_cursor,
-                                        QTextDocument::FindCaseSensitively);
-      if (!highlight_cursor.isNull()) {
-        if (!found) found = true;
-        highlight_cursor.mergeCharFormat(color_format);
-      }
-    }
-    cursor.endEditBlock();
-    // 结束
-    if (found == false) {
-      QMessageBox::information(this, tr("Word not found"),
-                               tr("Sorry,the word cannot be found."));
-    }
-  }
-}
+void Notes::findText() {}
 
 void Notes::on_btnFind_clicked() {
   if (ui->editFind->text().trimmed() == "") return;

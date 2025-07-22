@@ -365,7 +365,6 @@ SOURCES += \
     src/CategoryList.cpp \
     src/CloudBackup.cpp \
     src/Comm/DatePicker.cpp \
-    src/Comm/FileSystemWatcher.cpp \
     src/Comm/Method.cpp \
     src/Comm/ReceiveShare.cpp \
     src/Comm/ShowMessage.cpp \
@@ -378,14 +377,11 @@ SOURCES += \
     src/LoadPic.cpp \
     src/MainWindow.cpp \
     src/Notes/ColorDialog.cpp \
-    src/Notes/LineNumberArea.cpp \
     src/Notes/MoveTo.cpp \
     src/Notes/NewNoteBook.cpp \
     src/Notes/Notes.cpp \
     src/Notes/NotesList.cpp \
     src/Notes/PrintPDF.cpp \
-    src/Notes/QTextEditHighlighter.cpp \
-    src/Notes/TextSelector.cpp \
     src/Notes/database_manager.cpp \
     src/Notes/search_model.cpp \
     src/Notes/titlegenerator.cpp \
@@ -400,7 +396,6 @@ SOURCES += \
     src/Exercise/Speedometer.cpp \
     src/Exercise/Steps.cpp \
     src/Exercise/StepsOptions.cpp \
-    src/SyncInfo.cpp \
     src/Todo/Todo.cpp \
     src/Todo/TodoAlarm.cpp \
     lib/cmark-gfm/extensions/autolink.c \
@@ -598,7 +593,6 @@ HEADERS += \
     src/CategoryList.h \
     src/CloudBackup.h \
     src/Comm/DatePicker.h \
-    src/Comm/FileSystemWatcher.h \
     src/Comm/Method.h \
     src/Comm/ReceiveShare.h \
     src/Comm/ShowMessage.h \
@@ -612,14 +606,11 @@ HEADERS += \
     src/LoadPic.h \
     src/MainWindow.h \
     src/Notes/ColorDialog.h \
-    src/Notes/LineNumberArea.h \
     src/Notes/MoveTo.h \
     src/Notes/NewNoteBook.h \
     src/Notes/Notes.h \
     src/Notes/NotesList.h \
     src/Notes/PrintPDF.h \
-    src/Notes/QTextEditHighlighter.h \
-    src/Notes/TextSelector.h \
     src/Notes/database_manager.h \
     src/Notes/search_model.h \
     src/Notes/titlegenerator.h \
@@ -634,7 +625,6 @@ HEADERS += \
     src/Exercise/Speedometer.h \
     src/Exercise/Steps.h \
     src/Exercise/StepsOptions.h \
-    src/SyncInfo.h \
     src/Todo/Todo.h \
     src/Todo/TodoAlarm.h \
     lib/quazip/JlCompress.h \
@@ -669,12 +659,10 @@ FORMS += \
     src/Notes/Notes.ui \
     src/Notes/NotesList.ui \
     src/Notes/PrintPDF.ui \
-    src/Notes/TextSelector.ui \
     src/Preferences.ui \
     src/Reader/PageIndicator.ui \
     src/Reader/SetReaderText.ui \
     src/Exercise/StepsOptions.ui \
-    src/SyncInfo.ui \
     src/Todo/Todo.ui \
     src/Todo/TodoAlarm.ui
 

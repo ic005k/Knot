@@ -25,7 +25,7 @@ PrintPDF::PrintPDF(QWidget* parent) : QDialog(parent), ui(new Ui::PrintPDF) {
   QScroller::grabGesture(ui->listWidget, QScroller::LeftMouseButtonGesture);
   m_Method->setSCrollPro(ui->listWidget);
 
-  mw_one->set_ToolButtonStyle(this);
+  m_Method->set_ToolButtonStyle(this);
 }
 
 PrintPDF::~PrintPDF() { delete ui; }

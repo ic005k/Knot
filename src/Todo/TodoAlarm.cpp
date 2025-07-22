@@ -66,7 +66,7 @@ TodoAlarm::TodoAlarm(QWidget* parent) : QDialog(parent), ui(new Ui::TodoAlarm) {
   ui->frameDaily->setContentsMargins(10, 1, 10, 1);
   ui->lblSelByWeek->setStyleSheet(ui->lblTodoText->styleSheet());
 
-  mw_one->set_ToolButtonStyle(this);
+  m_Method->set_ToolButtonStyle(this);
 
   if (!isAndroid) {
     ui->chkSpeech->hide();
@@ -217,7 +217,7 @@ void TodoAlarm::addBtn(int start, int total, int col, QString flag, bool week) {
   return;
 
   QObjectList lstOfChildren0 =
-      mw_one->getAllToolButton(mw_one->getAllUIControls(ui->frameDT));
+      m_Method->getAllToolButton(m_Method->getAllUIControls(ui->frameDT));
   for (int i = 0; i < lstOfChildren0.count(); i++) {
     QToolButton* w = (QToolButton*)lstOfChildren0.at(i);
     if (isDark)
@@ -329,7 +329,7 @@ void TodoAlarm::addBtn(int start, int total, int col, QString flag, bool week) {
   }
 
   QObjectList lstOfChildren =
-      mw_one->getAllToolButton(mw_one->getAllUIControls(ui->frameSel));
+      m_Method->getAllToolButton(m_Method->getAllUIControls(ui->frameSel));
   for (int i = 0; i < lstOfChildren.count(); i++) {
     QToolButton* w = (QToolButton*)lstOfChildren.at(i);
 
@@ -367,7 +367,7 @@ void TodoAlarm::addBtn(int start, int total, int col, QString flag, bool week) {
 
 void TodoAlarm::onBtnClick(QToolButton* btn, QString flag) {
   QObjectList lstOfChildren =
-      mw_one->getAllToolButton(mw_one->getAllUIControls(ui->frameSel));
+      m_Method->getAllToolButton(m_Method->getAllUIControls(ui->frameSel));
   for (int i = 0; i < lstOfChildren.count(); i++) {
     QToolButton* w = (QToolButton*)lstOfChildren.at(i);
 
@@ -417,7 +417,7 @@ void TodoAlarm::addDial(int min, int max, QString flag) {
   return;
 
   QObjectList lstOfChildren0 =
-      mw_one->getAllToolButton(mw_one->getAllUIControls(ui->frameDT));
+      m_Method->getAllToolButton(m_Method->getAllUIControls(ui->frameDT));
   for (int i = 0; i < lstOfChildren0.count(); i++) {
     QToolButton* w = (QToolButton*)lstOfChildren0.at(i);
     if (isDark)

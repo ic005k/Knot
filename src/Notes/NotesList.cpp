@@ -353,7 +353,7 @@ void NotesList::on_btnRename_clicked() {
   x = mw_one->geometry().x() + (mw_one->width() - w) / 2;
   m_RenameNotes->setGeometry(x, y, w, h);
 
-  mw_one->set_ToolButtonStyle(m_RenameNotes);
+  m_Method->set_ToolButtonStyle(m_RenameNotes);
 
   m_Method->m_widget = new QWidget(mw_one);
   m_Method->showGrayWindows();

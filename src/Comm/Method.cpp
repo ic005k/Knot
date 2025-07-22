@@ -22,7 +22,7 @@ bool isPasswordError = false;
 ColorDialog *colorDlg = nullptr;
 
 Method::Method(QWidget *parent) : QDialog(parent) {
-  mw_one->set_ToolButtonStyle(this);
+  set_ToolButtonStyle(this);
 
   this->installEventFilter(this);
 
@@ -90,7 +90,7 @@ QInputDialog *Method::inputDialog(QString windowsTitle, QString lblEdit,
   idlg->setWindowTitle(windowsTitle);
   idlg->setTextValue(defaultValue);
   idlg->setLabelText(lblEdit);
-  mw_one->set_PushButtonStyle(idlg);
+  set_PushButtonStyle(idlg);
 
   m_widget = new QWidget(mw_one);
   showGrayWindows();
@@ -854,8 +854,7 @@ void Method::setDark(bool dark) {
 }
 
 void Method::set_ToolButtonStyle2(QObject *parent) {
-  QObjectList btnList =
-      mw_one->getAllToolButton(mw_one->getAllUIControls(parent));
+  QObjectList btnList = getAllToolButton(getAllUIControls(parent));
   for (int i = 0; i < btnList.count(); i++) {
     QToolButton *btn = (QToolButton *)btnList.at(i);
     setToolButtonQss(btn, 5, 3, "#009999", "#FFFFFF", "#009999", "#FFFFFF",
@@ -2637,4 +2636,82 @@ bool Method::getLockScreenStatus() {
   return static_cast<bool>(locked);
 #endif
   return false;
+}
+
+void Method::set_ToolButtonStyle(QObject *parent) {
+  QObjectList btnList = getAllToolButton(getAllUIControls(parent));
+  for (int i = 0; i < btnList.count(); i++) {
+    QToolButton *btn = (QToolButton *)btnList.at(i);
+
+    if (btn != mw_one->ui->btnStyle1 && btn != mw_one->ui->btnStyle2 &&
+        btn != mw_one->ui->btnStyle3 && btn != mw_one->ui->btnGPS) {
+      if (isDark)
+        setToolButtonQss(btn, 5, 3, "#2874AC", "#FFFFFF", "#2874AC", "#FFFFFF",
+                         "#FF0000", "#FFFFFF");
+      else
+        setToolButtonQss(btn, 5, 3, "#3498DB", "#FFFFFF", "#3498DB", "#FFFFFF",
+                         "#FF0000", "#FFFFFF");
+    }
+  }
+}
+
+void Method::set_PushButtonStyle(QObject *parent) {
+  QObjectList btnList = getAllPushButton(getAllUIControls(parent));
+  for (int i = 0; i < btnList.count(); i++) {
+    QPushButton *btn = (QPushButton *)btnList.at(i);
+
+    setPushButtonQss(btn, 5, 3, "#3498DB", "#FFFFFF", "#3498DB", "#FFFFFF",
+                     "#2483C7", "#A0DAFB");
+  }
+}
+
+QObjectList Method::getAllToolButton(QObjectList lstUIControls) {
+  QObjectList lst;
+  foreach (QObject *obj, lstUIControls) {
+    if (obj->metaObject()->className() == QStringLiteral("QToolButton")) {
+      lst.append(obj);
+    }
+  }
+  return lst;
+}
+
+QObjectList Method::getAllPushButton(QObjectList lstUIControls) {
+  QObjectList lst;
+  foreach (QObject *obj, lstUIControls) {
+    if (obj->metaObject()->className() == QStringLiteral("QPushButton")) {
+      lst.append(obj);
+    }
+  }
+  return lst;
+}
+
+QObjectList Method::getAllTreeWidget(QObjectList lstUIControls) {
+  QObjectList lst;
+  foreach (QObject *obj, lstUIControls) {
+    if (obj->metaObject()->className() == QStringLiteral("QTreeWidget")) {
+      lst.append(obj);
+    }
+  }
+  return lst;
+}
+
+QObjectList Method::getAllUIControls(QObject *parent) {
+  QObjectList lstOfChildren, lstTemp;
+  if (parent) {
+    lstOfChildren = parent->children();
+  }
+  if (lstOfChildren.isEmpty()) {
+    return lstOfChildren;
+  }
+
+  lstTemp = lstOfChildren;
+
+  foreach (QObject *obj, lstTemp) {
+    QObjectList lst = getAllUIControls(obj);
+    if (!lst.isEmpty()) {
+      lstOfChildren.append(lst);
+    }
+  }
+
+  return lstOfChildren;
 }

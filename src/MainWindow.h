@@ -67,7 +67,6 @@
 #include "src/AboutThis.h"
 #include "src/CategoryList.h"
 #include "src/CloudBackup.h"
-#include "src/Comm/FileSystemWatcher.h"
 #include "src/Comm/Method.h"
 #include "src/Comm/ReceiveShare.h"
 #include "src/Comm/ShowMessage.h"
@@ -86,7 +85,6 @@
 #include "src/Reader/ReaderSet.h"
 #include "src/Reader/SetReaderText.h"
 #include "src/Report.h"
-#include "src/SyncInfo.h"
 #include "src/Todo/Todo.h"
 #include "src/Todo/TodoAlarm.h"
 #include "ui_AboutThis.h"
@@ -198,7 +196,7 @@ QLabel {
   bool isTurnThePage = false;
 
   bool initMain = false;
-  QObjectList getAllUIControls(QObject *parent);
+
   QString LatestTime = tr("Latest Time");
   QStringList timeLines;
   QString loginTime;
@@ -265,7 +263,7 @@ QLabel {
 
   dlgSetText *mydlgSetText;
   NotesList *m_NotesList;
-  SyncInfo *m_SyncInfo;
+
   StepsOptions *m_StepsOptions;
   ReceiveShare *m_ReceiveShare;
 
@@ -323,15 +321,12 @@ QLabel {
 
   QString getTabText();
 
-  QObjectList getAllToolButton(QObjectList lstUIControls);
-
   void refreshMainUI();
 
   void clearSelectBox();
 
   QString getSelectedText();
 
-  void set_ToolButtonStyle(QObject *parent);
   int calcStringPixelWidth(QString s_str, QFont font, int n_font_size);
   int calcStringPixelHeight(QFont font, int n_font_size);
 
@@ -367,8 +362,6 @@ QLabel {
 
   void addItem(QString text0, QString text1, QString text2, QString text3,
                int itemH);
-
-  void set_PushButtonStyle(QObject *parent);
 
   void execDeskShortcut();
 
@@ -866,7 +859,6 @@ QLabel {
   int countOne = 0;
   int max_day = 31;
   QTreeWidget *init_TreeWidget(QString);
-  QObjectList getAllTreeWidget(QObjectList lstUIControls);
 
   void on_btnHideKey_clicked();
   void init_ChartWidget();
@@ -881,7 +873,7 @@ QLabel {
   void init_Instance();
   void updateMainTab();
   void getMainTabs();
-  QObjectList getAllPushButton(QObjectList lstUIControls);
+
   void init_ButtonStyle();
   QString strTime, strAmount, strCategory, strDetails;
 

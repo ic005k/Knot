@@ -314,7 +314,7 @@ void ReceiveShare::closeAllActiveWindows() {
   if (mw_one->ui->frameMain->isVisible()) return;
 
   QObjectList frameList;
-  frameList = getAllFrame(mw_one->getAllUIControls(mw_one));
+  frameList = getAllFrame(m_Method->getAllUIControls(mw_one));
   for (int i = 0; i < frameList.count(); i++) {
     QFrame* frame = (QFrame*)frameList.at(i);
     if (frame->parent() == mw_one->ui->centralwidget &&
@@ -340,7 +340,7 @@ void ReceiveShare::closeAllActiveWindowsKeep(QString frameName) {
   }
 
   QObjectList frameList;
-  frameList = getAllFrame(mw_one->getAllUIControls(mw_one));
+  frameList = getAllFrame(m_Method->getAllUIControls(mw_one));
   for (int i = 0; i < frameList.count(); i++) {
     QFrame* frame = (QFrame*)frameList.at(i);
     if (frame->parent() == mw_one->ui->centralwidget &&

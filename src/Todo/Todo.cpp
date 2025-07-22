@@ -1206,7 +1206,7 @@ void Todo::reeditText() {
   m_ReeditTodo->setGeometry(x, y, w, h);
 
   m_Method->showGrayWindows();
-  mw_one->set_ToolButtonStyle(m_ReeditTodo);
+  m_Method->set_ToolButtonStyle(m_ReeditTodo);
   m_ReeditTodo->show();
 }
 

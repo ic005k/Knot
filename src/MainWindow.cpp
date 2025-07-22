@@ -2,7 +2,7 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "2.0.19";
+QString ver = "2.0.20";
 QString appName = "Knot";
 
 QList<QPointF> PointList;
@@ -1024,84 +1024,6 @@ void MainWindow::on_tmeFlash() {
     tmeFlash->stop();
     nFlashCount = 0;
   }
-}
-
-void MainWindow::set_ToolButtonStyle(QObject *parent) {
-  QObjectList btnList = getAllToolButton(getAllUIControls(parent));
-  for (int i = 0; i < btnList.count(); i++) {
-    QToolButton *btn = (QToolButton *)btnList.at(i);
-
-    if (btn != ui->btnStyle1 && btn != ui->btnStyle2 && btn != ui->btnStyle3 &&
-        btn != ui->btnGPS) {
-      if (isDark)
-        m_Method->setToolButtonQss(btn, 5, 3, "#2874AC", "#FFFFFF", "#2874AC",
-                                   "#FFFFFF", "#FF0000", "#FFFFFF");
-      else
-        m_Method->setToolButtonQss(btn, 5, 3, "#3498DB", "#FFFFFF", "#3498DB",
-                                   "#FFFFFF", "#FF0000", "#FFFFFF");
-    }
-  }
-}
-
-void MainWindow::set_PushButtonStyle(QObject *parent) {
-  QObjectList btnList = getAllPushButton(getAllUIControls(parent));
-  for (int i = 0; i < btnList.count(); i++) {
-    QPushButton *btn = (QPushButton *)btnList.at(i);
-
-    m_Method->setPushButtonQss(btn, 5, 3, "#3498DB", "#FFFFFF", "#3498DB",
-                               "#FFFFFF", "#2483C7", "#A0DAFB");
-  }
-}
-
-QObjectList MainWindow::getAllTreeWidget(QObjectList lstUIControls) {
-  QObjectList lst;
-  foreach (QObject *obj, lstUIControls) {
-    if (obj->metaObject()->className() == QStringLiteral("QTreeWidget")) {
-      lst.append(obj);
-    }
-  }
-  return lst;
-}
-
-QObjectList MainWindow::getAllToolButton(QObjectList lstUIControls) {
-  QObjectList lst;
-  foreach (QObject *obj, lstUIControls) {
-    if (obj->metaObject()->className() == QStringLiteral("QToolButton")) {
-      lst.append(obj);
-    }
-  }
-  return lst;
-}
-
-QObjectList MainWindow::getAllPushButton(QObjectList lstUIControls) {
-  QObjectList lst;
-  foreach (QObject *obj, lstUIControls) {
-    if (obj->metaObject()->className() == QStringLiteral("QPushButton")) {
-      lst.append(obj);
-    }
-  }
-  return lst;
-}
-
-QObjectList MainWindow::getAllUIControls(QObject *parent) {
-  QObjectList lstOfChildren, lstTemp;
-  if (parent) {
-    lstOfChildren = parent->children();
-  }
-  if (lstOfChildren.isEmpty()) {
-    return lstOfChildren;
-  }
-
-  lstTemp = lstOfChildren;
-
-  foreach (QObject *obj, lstTemp) {
-    QObjectList lst = getAllUIControls(obj);
-    if (!lst.isEmpty()) {
-      lstOfChildren.append(lst);
-    }
-  }
-
-  return lstOfChildren;
 }
 
 void MainWindow::saveTab() {
@@ -3257,7 +3179,7 @@ void MainWindow::init_Instance() {
   m_ReaderSet = new ReaderSet(this);
   mydlgSetText = new dlgSetText(this);
   m_NotesList = new NotesList(this);
-  m_SyncInfo = new SyncInfo(this);
+
   m_ReceiveShare = new ReceiveShare(this);
 
   if (m_Preferences->getDefaultFont() == "None")
@@ -3530,7 +3452,7 @@ void MainWindow::init_UIWidget() {
 }
 
 void MainWindow::init_ButtonStyle() {
-  set_ToolButtonStyle(this);
+  m_Method->set_ToolButtonStyle(this);
   ui->btnMenu->setStyleSheet("border:none");
   ui->btnModifyRecord->setStyleSheet("border:none");
   ui->btnMove->setStyleSheet("border:none");

@@ -43,10 +43,7 @@
 
 #include "src/Comm/ShowMessage.h"
 #include "src/Notes/ColorDialog.h"
-#include "src/Notes/LineNumberArea.h"
 #include "src/Notes/PrintPDF.h"
-#include "src/Notes/QTextEditHighlighter.h"
-#include "src/Notes/TextSelector.h"
 #include "titlegenerator.h"
 #include "ui_PrintPDF.h"
 #include "ui_TextSelector.h"
@@ -76,8 +73,6 @@ class Notes : public QDialog {
 #ifndef Q_OS_ANDROID
   QsciScintilla *m_EditSource = nullptr;
 #endif
-
-  QTextEditHighlighter *m_EditSource1;
 
   QTimer *timerEditNote;
   int px, py, mx, my;

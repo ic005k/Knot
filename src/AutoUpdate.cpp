@@ -14,7 +14,7 @@ AutoUpdate::AutoUpdate(QWidget* parent)
 
   setWindowFlag(Qt::FramelessWindowHint);
 
-  mw_one->set_ToolButtonStyle(this);
+  m_Method->set_ToolButtonStyle(this);
   setModal(true);
   ui->lblTxt->adjustSize();
   ui->lblTxt->setText(tr("Download Progress") + " : \n" + "");

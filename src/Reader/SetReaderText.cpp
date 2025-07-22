@@ -10,7 +10,7 @@ dlgSetText::dlgSetText(QWidget *parent)
     : QDialog(parent), ui(new Ui::dlgSetText) {
   ui->setupUi(this);
 
-  mw_one->set_ToolButtonStyle(this);
+  m_Method->set_ToolButtonStyle(this);
 
   ui->lineEdit->setReadOnly(true);
 

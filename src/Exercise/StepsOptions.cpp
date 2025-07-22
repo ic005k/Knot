@@ -12,7 +12,7 @@ StepsOptions::StepsOptions(QWidget *parent)
     : QDialog(parent), ui(new Ui::StepsOptions) {
   ui->setupUi(this);
   this->installEventFilter(this);
-  mw_one->set_ToolButtonStyle(this);
+  m_Method->set_ToolButtonStyle(this);
   setModal(true);
 
   QValidator *validator1 =
