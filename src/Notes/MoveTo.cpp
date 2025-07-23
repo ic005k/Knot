@@ -6,6 +6,7 @@
 #include "ui_MoveTo.h"
 
 extern MainWindow* mw_one;
+extern Ui::MainWindow* mui;
 extern Method* m_Method;
 extern bool isDark, isAndroid;
 
@@ -27,11 +28,11 @@ MoveTo::MoveTo(QWidget* parent) : QDialog(parent), ui(new Ui::MoveTo) {
 
   QTreeWidgetItem* item = NULL;
   if (!mw_one->m_NotesList->ui->frame0->isHidden() ||
-      !mw_one->ui->frameNoteList->isHidden())
+      !mui->frameNoteList->isHidden())
     item = mw_one->m_NotesList->tw->currentItem();
 
   if (!mw_one->m_NotesList->ui->frame1->isHidden() ||
-      !mw_one->ui->frameNoteRecycle->isHidden())
+      !mui->frameNoteRecycle->isHidden())
     item = mw_one->m_NotesList->twrb->currentItem();
 
   if (item == NULL) close();

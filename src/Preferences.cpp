@@ -5,9 +5,11 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include "ui_Preferences.h"
+
 extern QString iniFile, iniDir, privateDir, defaultFontFamily, customFontFamily,
     encPassword;
 extern MainWindow* mw_one;
+extern Ui::MainWindow* mui;
 extern Method* m_Method;
 extern bool isBreak, isDark, isEncrypt, isAndroid;
 extern int fontSize;
@@ -275,30 +277,30 @@ void Preferences::initOptions() {
 #else
 
   if (!devMode) {
-    mw_one->ui->f_charts->hide();
-    mw_one->ui->qwMainDate->hide();
-    mw_one->ui->qwMainEvent->hide();
-    mw_one->ui->btnSteps->hide();
-    mw_one->ui->btnChart->hide();
-    mw_one->ui->btnReader->hide();
-    mw_one->ui->btnAdd->hide();
-    mw_one->ui->btnDel->hide();
-    mw_one->ui->btnFind->hide();
-    mw_one->ui->btnModifyRecord->hide();
-    mw_one->ui->btnReport->hide();
-    mw_one->ui->f_cw->hide();
-    mw_one->ui->qwMainTab->hide();
-    mw_one->ui->btnSelTab->hide();
-    mw_one->ui->lblStats->hide();
+    mui->f_charts->hide();
+    mui->qwMainDate->hide();
+    mui->qwMainEvent->hide();
+    mui->btnSteps->hide();
+    mui->btnChart->hide();
+    mui->btnReader->hide();
+    mui->btnAdd->hide();
+    mui->btnDel->hide();
+    mui->btnFind->hide();
+    mui->btnModifyRecord->hide();
+    mui->btnReport->hide();
+    mui->f_cw->hide();
+    mui->qwMainTab->hide();
+    mui->btnSelTab->hide();
+    mui->lblStats->hide();
 
     int s = 120;
     int qs = s - 40;
-    mw_one->ui->btnTodo->setFixedHeight(s);
-    mw_one->ui->btnTodo->setFixedWidth(s);
-    mw_one->ui->btnTodo->setIconSize(QSize(qs, qs));
-    mw_one->ui->btnNotes->setFixedHeight(s);
-    mw_one->ui->btnNotes->setFixedWidth(s);
-    mw_one->ui->btnNotes->setIconSize(QSize(qs, qs));
+    mui->btnTodo->setFixedHeight(s);
+    mui->btnTodo->setFixedWidth(s);
+    mui->btnTodo->setIconSize(QSize(qs, qs));
+    mui->btnNotes->setFixedHeight(s);
+    mui->btnNotes->setFixedWidth(s);
+    mui->btnNotes->setIconSize(QSize(qs, qs));
   }
 #endif
 
@@ -310,13 +312,12 @@ void Preferences::initOptions() {
       iniPreferences->value("/Options/ReaderFont").toString();
   QString readerFont;
   if (QFile::exists(readerFontFile))
-    readerFont = setFontDemoUI(readerFontFile, mw_one->ui->btnFont, fontSize);
+    readerFont = setFontDemoUI(readerFontFile, mui->btnFont, fontSize);
   else
     readerFont = defaultFontFamily;
-  mw_one->ui->qwReader->rootContext()->setContextProperty("FontName",
-                                                          readerFont);
-  mw_one->ui->qwReader->rootContext()->setContextProperty("FontWeight",
-                                                          readerFontWeight);
+  mui->qwReader->rootContext()->setContextProperty("FontName", readerFont);
+  mui->qwReader->rootContext()->setContextProperty("FontWeight",
+                                                   readerFontWeight);
 }
 
 void Preferences::on_btnReStart_clicked() {

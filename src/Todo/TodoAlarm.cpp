@@ -5,6 +5,7 @@
 #include "ui_TodoAlarm.h"
 
 extern MainWindow* mw_one;
+extern Ui::MainWindow* mui;
 extern Method* m_Method;
 extern int fontSize;
 extern bool isDark, isAndroid;
@@ -39,7 +40,7 @@ TodoAlarm::TodoAlarm(QWidget* parent) : QDialog(parent), ui(new Ui::TodoAlarm) {
 
   ui->dateTimeEdit->hide();
   ui->dateTimeEdit->setReadOnly(true);
-  ui->lblTodoText->setStyleSheet(mw_one->ui->lblTitleEditRecord->styleSheet());
+  ui->lblTodoText->setStyleSheet(mui->lblTitleEditRecord->styleSheet());
   QFont font = this->font();
   font.setBold(true);
   ui->btnYear->setFont(font);

@@ -71,6 +71,8 @@ extern PrintPDF *m_PrintPDF;
 
 void RegJni(const char *myClassName);
 
+Ui::MainWindow *mui;
+
 #ifdef Q_OS_ANDROID
 static void JavaNotify_0();
 static void JavaNotify_1();
@@ -232,10 +234,10 @@ void MainWindow::readEBookDone() {
 
   if (isReport) {
     m_Report->updateTable();
-    ui->lblTitle->setText(tabData->tabText(tabData->currentIndex()));
+    mui->lblTitle->setText(tabData->tabText(tabData->currentIndex()));
 
-    ui->btnCategory->hide();
-    if (listCategory.count() > 0) ui->btnCategory->setHidden(false);
+    mui->btnCategory->hide();
+    if (listCategory.count() > 0) mui->btnCategory->setHidden(false);
 
     isReport = false;
     closeProgress();
@@ -257,14 +259,14 @@ void MainWindow::readTWDone() {
     tw->setCurrentItem(tw->topLevelItem(tw->topLevelItemCount() - 1));
   }
 
-  ui->actionImport_Data->setEnabled(true);
-  ui->actionExport_Data->setEnabled(true);
-  ui->actionDel_Tab->setEnabled(true);
-  ui->actionAdd_Tab->setEnabled(true);
-  ui->actionView_App_Data->setEnabled(true);
+  mui->actionImport_Data->setEnabled(true);
+  mui->actionExport_Data->setEnabled(true);
+  mui->actionDel_Tab->setEnabled(true);
+  mui->actionAdd_Tab->setEnabled(true);
+  mui->actionView_App_Data->setEnabled(true);
   isReadTWEnd = true;
 
-  ui->progBar->setMaximum(100);
+  mui->progBar->setMaximum(100);
 }
 
 ReadThread::ReadThread(QObject *parent) : QThread{parent} {}
@@ -305,9 +307,9 @@ void MainWindow::readChartDone() {
   }
 
   if (isShowDetails)
-    ui->lblStats->setText(strShowDetails);
+    mui->lblStats->setText(strShowDetails);
   else
-    ui->lblStats->setText(strStats);
+    mui->lblStats->setText(strStats);
   isReadEnd = true;
 }
 
@@ -326,7 +328,7 @@ void MainWindow::saveDone() {
 
   isSaveEnd = true;
 
-  ui->progBar->setMaximum(100);
+  mui->progBar->setMaximum(100);
 
   if (SaveType == "tab" || SaveType == "alltab") startRead(strDate);
 }
@@ -376,8 +378,9 @@ void MainWindow::SaveFile(QString SaveType) {
 }
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow) {
-  ui->setupUi(this);
+    : QMainWindow(parent) {  //, mui(new Ui::MainWindow) {
+  mui = new Ui::MainWindow;
+  mui->setupUi(this);
 
   initMain = true;
 
@@ -459,9 +462,9 @@ void MainWindow::init_Options() {
   btnDText = Reg2.value("/YMD/btnDText", 1).toString();
 
   btnYearText = Reg2.value("/YMD/btnYearText", "2022").toString();
-  ui->btnYear->setText(btnYearText);
+  mui->btnYear->setText(btnYearText);
   btnMonthText = Reg2.value("/YMD/btnMonthText", "01").toString();
-  ui->btnMonth->setText(btnMonthText);
+  mui->btnMonth->setText(btnMonthText);
 
   s_y1 = Reg2.value("/YMD/Y1", 2022).toInt();
   s_y2 = Reg2.value("/YMD/Y2", 2022).toInt();
@@ -470,14 +473,14 @@ void MainWindow::init_Options() {
   s_d1 = Reg2.value("/YMD/D1", 1).toInt();
   s_d2 = Reg2.value("/YMD/D2", 1).toInt();
 
-  ui->btnStartDate->setText(QString::number(s_y1) + "  " +
-                            QString("%1").arg(s_m1, 2, 10, QLatin1Char('0')) +
-                            "  " +
-                            QString("%1").arg(s_d1, 2, 10, QLatin1Char('0')));
-  ui->btnEndDate->setText(QString::number(s_y2) + "  " +
-                          QString("%1").arg(s_m2, 2, 10, QLatin1Char('0')) +
-                          "  " +
-                          QString("%1").arg(s_d2, 2, 10, QLatin1Char('0')));
+  mui->btnStartDate->setText(QString::number(s_y1) + "  " +
+                             QString("%1").arg(s_m1, 2, 10, QLatin1Char('0')) +
+                             "  " +
+                             QString("%1").arg(s_d1, 2, 10, QLatin1Char('0')));
+  mui->btnEndDate->setText(QString::number(s_y2) + "  " +
+                           QString("%1").arg(s_m2, 2, 10, QLatin1Char('0')) +
+                           "  " +
+                           QString("%1").arg(s_d2, 2, 10, QLatin1Char('0')));
 
   isWholeMonth = Reg2.value("/YMD/isWholeMonth", 1).toBool();
   isDateSection = Reg2.value("/YMD/isDateSection", 0).toBool();
@@ -495,27 +498,27 @@ void MainWindow::init_Options() {
 }
 
 void MainWindow::init_ChartWidget() {
-  ui->centralwidget->layout()->setContentsMargins(1, 0, 1, 2);
-  ui->centralwidget->layout()->setSpacing(1);
-  ui->f_charts->setContentsMargins(0, 0, 0, 0);
+  mui->centralwidget->layout()->setContentsMargins(1, 0, 1, 2);
+  mui->centralwidget->layout()->setSpacing(1);
+  mui->f_charts->setContentsMargins(0, 0, 0, 0);
 
-  ui->f_charts->layout()->setContentsMargins(0, 0, 0, 0);
-  ui->f_charts->layout()->setSpacing(0);
+  mui->f_charts->layout()->setContentsMargins(0, 0, 0, 0);
+  mui->f_charts->layout()->setSpacing(0);
   frameChartHeight = 105;
-  ui->f_charts->setFixedHeight(frameChartHeight);
+  mui->f_charts->setFixedHeight(frameChartHeight);
   tabChart->setCurrentIndex(0);
 
-  ui->glMonth->layout()->setContentsMargins(0, 0, 0, 0);
-  ui->glMonth->layout()->setSpacing(0);
-  ui->glDay->layout()->setContentsMargins(0, 0, 0, 0);
-  ui->glDay->layout()->setSpacing(0);
+  mui->glMonth->layout()->setContentsMargins(0, 0, 0, 0);
+  mui->glMonth->layout()->setSpacing(0);
+  mui->glDay->layout()->setContentsMargins(0, 0, 0, 0);
+  mui->glDay->layout()->setSpacing(0);
 
-  ui->f_charts->hide();
-  ui->btnChartDay->hide();
-  ui->btnChartMonth->hide();
-  ui->rbAmount->hide();
-  ui->rbFreq->hide();
-  ui->rbSteps->hide();
+  mui->f_charts->hide();
+  mui->btnChartDay->hide();
+  mui->btnChartMonth->hide();
+  mui->rbAmount->hide();
+  mui->rbFreq->hide();
+  mui->rbSteps->hide();
 
   int a0 = 0;
   int a1 = -2;
@@ -523,7 +526,7 @@ void MainWindow::init_ChartWidget() {
   chartMonth = new QChart();
   chartview = new QChartView(chartMonth);
   chartview->installEventFilter(this);
-  ui->glMonth->addWidget(chartview);
+  mui->glMonth->addWidget(chartview);
   chartview->setRenderHint(QPainter::Antialiasing);
   chartMonth->legend()->hide();
   chartMonth->setMargins(QMargins(a0, a0, a0, a0));
@@ -544,7 +547,7 @@ void MainWindow::init_ChartWidget() {
   chartDay = new QChart();
   chartview1 = new QChartView(chartDay);
   chartview1->installEventFilter(this);
-  ui->glDay->addWidget(chartview1);
+  mui->glDay->addWidget(chartview1);
   chartview1->setRenderHint(QPainter::Antialiasing);
   chartDay->legend()->hide();
   chartDay->setMargins(QMargins(a0, a0, a0, a0));
@@ -617,9 +620,9 @@ void MainWindow::slotPointHoverd(const QPointF &point, bool state) {
 }
 
 void MainWindow::init_TotalData() {
-  int count = ui->tabWidget->tabBar()->count();
+  int count = mui->tabWidget->tabBar()->count();
   for (int i = 0; i < count; i++) {
-    ui->tabWidget->removeTab(0);
+    mui->tabWidget->removeTab(0);
   }
   QString ini_file;
 
@@ -640,7 +643,7 @@ void MainWindow::init_TotalData() {
                           .value("TabName" + QString::number(i),
                                  tr("Tab") + QString::number(i + 1))
                           .toString();
-    ui->tabWidget->addTab(tw, tabText);
+    mui->tabWidget->addTab(tw, tabText);
 
     addItem(tabText, "", "", "", 0);
 
@@ -651,28 +654,28 @@ void MainWindow::init_TotalData() {
     QTreeWidget *tw = init_TreeWidget("20220303_101010_1");
 
     QString tabText = tr("Tab") + " " + QString::number(1);
-    ui->tabWidget->addTab(tw, tabText);
+    mui->tabWidget->addTab(tw, tabText);
     addItem(tabText, "", "", "", 0);
 
-    ui->tabWidget->setTabToolTip(0, "");
+    mui->tabWidget->setTabToolTip(0, "");
   }
 
   m_EditRecord->init_MyCategory();
 
   currentTabIndex = RegTab.value("CurrentIndex").toInt();
-  ui->tabWidget->setCurrentIndex(currentTabIndex);
+  mui->tabWidget->setCurrentIndex(currentTabIndex);
   setCurrentIndex(currentTabIndex);
   QTreeWidget *twCur = (QTreeWidget *)tabData->currentWidget();
   readData(twCur);
-  ui->actionImport_Data->setEnabled(false);
-  ui->actionExport_Data->setEnabled(false);
-  ui->actionDel_Tab->setEnabled(false);
-  ui->actionAdd_Tab->setEnabled(false);
-  ui->actionView_App_Data->setEnabled(false);
+  mui->actionImport_Data->setEnabled(false);
+  mui->actionExport_Data->setEnabled(false);
+  mui->actionDel_Tab->setEnabled(false);
+  mui->actionAdd_Tab->setEnabled(false);
+  mui->actionView_App_Data->setEnabled(false);
 
   if (!initMain) {
-    ui->progBar->setHidden(false);
-    ui->progBar->setMaximum(0);
+    mui->progBar->setHidden(false);
+    mui->progBar->setMaximum(0);
   }
 
   m_ReadTWThread->start();
@@ -703,12 +706,12 @@ void MainWindow::execDeskShortcut() {
 void MainWindow::on_ExecShortcut() {
   keyType = m_Method->getKeyType();
   if (keyType == "todo") m_Todo->NewTodo();
-  if (keyType == "note") ui->btnNotes->click();
+  if (keyType == "note") mui->btnNotes->click();
   ;
   if (keyType == "reader") m_Reader->ContinueReading();
-  if (keyType == "add") ui->btnAdd->click();
+  if (keyType == "add") mui->btnAdd->click();
   if (keyType == "exercise") {
-    QTimer::singleShot(100, this, [this]() { ui->btnSteps->click(); });
+    QTimer::singleShot(100, this, [this]() { mui->btnSteps->click(); });
   }
   if (keyType == "defaultopen") {
 #ifdef Q_OS_ANDROID
@@ -739,7 +742,7 @@ void MainWindow::startSyncData() {
 }
 
 MainWindow::~MainWindow() {
-  delete ui;
+  delete mui;
   mySaveThread->quit();
   mySaveThread->wait();
 
@@ -768,8 +771,8 @@ void MainWindow::startSave(QString str_type) {
     isBreak = false;
     SaveType = str_type;
 
-    ui->progBar->setHidden(false);
-    ui->progBar->setMaximum(0);
+    mui->progBar->setHidden(false);
+    mui->progBar->setMaximum(0);
 
     mySaveThread->start();
   }
@@ -791,7 +794,7 @@ void MainWindow::startRead(QString Date) {
   if (isReadEnd) {
     isBreak = false;
     myReadThread->start();
-    if (ui->rbSteps->isChecked()) ui->rbFreq->click();
+    if (mui->rbSteps->isChecked()) mui->rbFreq->click();
   }
 }
 
@@ -817,7 +820,7 @@ void MainWindow::add_Data(QTreeWidget *tw, QString strTime, QString strAmount,
         item11->setText(1, QString("%1").arg(strAmount.toDouble(), 0, 'f', 2));
 
       item11->setText(2, strDesc);
-      item11->setText(3, ui->editDetails->toPlainText().trimmed());
+      item11->setText(3, mui->editDetails->toPlainText().trimmed());
 
       int childCount = topItem->childCount();
 
@@ -861,7 +864,7 @@ void MainWindow::add_Data(QTreeWidget *tw, QString strTime, QString strAmount,
     else
       item11->setText(1, QString("%1").arg(strAmount.toDouble(), 0, 'f', 2));
     item11->setText(2, strDesc);
-    item11->setText(3, ui->editDetails->toPlainText().trimmed());
+    item11->setText(3, mui->editDetails->toPlainText().trimmed());
 
     topItem->setTextAlignment(1, Qt::AlignHCenter | Qt::AlignVCenter);
     topItem->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
@@ -921,7 +924,7 @@ bool MainWindow::del_Data(QTreeWidget *tw) {
       QTreeWidgetItem *topItem = tw->topLevelItem(i);
       int childCount = topItem->childCount();
       if (childCount > 0) {
-        QString str = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+        QString str = mui->tabWidget->tabText(mui->tabWidget->currentIndex());
         strTime = topItem->child(childCount - 1)->text(0);
         strAmount = topItem->child(childCount - 1)->text(1);
         strCategory = topItem->child(childCount - 1)->text(2);
@@ -969,7 +972,7 @@ bool MainWindow::del_Data(QTreeWidget *tw) {
   }
 
   if (!isTodayData) {
-    QString str = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+    QString str = mui->tabWidget->tabText(mui->tabWidget->currentIndex());
 
     QString strTip;
     if (isMoveEntry)
@@ -996,19 +999,19 @@ bool MainWindow::del_Data(QTreeWidget *tw) {
 void MainWindow::on_AddRecord() {
   isAdd = true;
 
-  ui->lblTitleEditRecord->setText(tr("Add") + "  : " +
-                                  tabData->tabText(tabData->currentIndex()));
+  mui->lblTitleEditRecord->setText(tr("Add") + "  : " +
+                                   tabData->tabText(tabData->currentIndex()));
 
-  ui->hsH->setValue(QTime::currentTime().hour());
-  ui->hsM->setValue(QTime::currentTime().minute());
-  m_EditRecord->getTime(ui->hsH->value(), ui->hsM->value());
+  mui->hsH->setValue(QTime::currentTime().hour());
+  mui->hsM->setValue(QTime::currentTime().minute());
+  m_EditRecord->getTime(mui->hsH->value(), mui->hsM->value());
 
-  ui->editDetails->clear();
-  ui->editCategory->setText("");
-  ui->editAmount->setText("");
+  mui->editDetails->clear();
+  mui->editCategory->setText("");
+  mui->editAmount->setText("");
 
-  ui->frameMain->hide();
-  ui->frameEditRecord->show();
+  mui->frameMain->hide();
+  mui->frameEditRecord->show();
 
   // tmeFlash->start(300);
 }
@@ -1016,9 +1019,9 @@ void MainWindow::on_AddRecord() {
 void MainWindow::on_tmeFlash() {
   nFlashCount = nFlashCount + 1;
   if (nFlashCount % 2 == 0)
-    ui->lblTitleEditRecord->setStyleSheet(m_Method->lblStyle0);
+    mui->lblTitleEditRecord->setStyleSheet(m_Method->lblStyle0);
   else
-    ui->lblTitleEditRecord->setStyleSheet(m_Method->lblStyle);
+    mui->lblTitleEditRecord->setStyleSheet(m_Method->lblStyle);
   if (nFlashCount == 3) {
     tmeFlash->stop();
     nFlashCount = 0;
@@ -1360,73 +1363,73 @@ void MainWindow::get_Today(QTreeWidget *tw) {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-  if (ui->qwCata->isVisible()) {
+  if (mui->qwCata->isVisible()) {
     on_btnCatalogue_clicked();
     event->ignore();
     return;
   }
 
-  if (ui->qwBookList->isVisible()) {
+  if (mui->qwBookList->isVisible()) {
     on_btnBackBookList_clicked();
     event->ignore();
     return;
   }
 
-  if (ui->frameReader->isVisible()) {
+  if (mui->frameReader->isVisible()) {
     on_btnBackReader_clicked();
     event->ignore();
     return;
   }
 
-  if (!ui->frameImgView->isHidden()) {
+  if (!mui->frameImgView->isHidden()) {
     on_btnBackImg_clicked();
     event->ignore();
     return;
   }
 
-  if (!ui->frameNoteRecycle->isHidden()) {
+  if (!mui->frameNoteRecycle->isHidden()) {
     on_btnBackNoteRecycle_clicked();
     event->ignore();
     return;
   }
 
-  if (!ui->frameNotesSearchResult->isHidden()) {
+  if (!mui->frameNotesSearchResult->isHidden()) {
     on_btnBack_NotesSearchResult_clicked();
     event->ignore();
     return;
   }
 
-  if (!ui->frameNoteList->isHidden()) {
+  if (!mui->frameNoteList->isHidden()) {
     on_btnBackNoteList_clicked();
     event->ignore();
     return;
   }
 
-  if (!ui->frameNotes->isHidden()) {
+  if (!mui->frameNotes->isHidden()) {
     on_btnBackNotes_clicked();
     event->ignore();
     return;
   }
 
-  if (!ui->frameTodoRecycle->isHidden()) {
+  if (!mui->frameTodoRecycle->isHidden()) {
     on_btnReturnRecycle_clicked();
     event->ignore();
     return;
   }
 
-  if (!ui->frameTodo->isHidden()) {
+  if (!mui->frameTodo->isHidden()) {
     on_btnBackTodo_clicked();
     event->ignore();
     return;
   }
 
-  if (!ui->frameBakList->isHidden()) {
+  if (!mui->frameBakList->isHidden()) {
     on_btnBackBakList_clicked();
     event->ignore();
     return;
   }
 
-  if (!ui->frameOne->isHidden()) {
+  if (!mui->frameOne->isHidden()) {
     on_btnBack_One_clicked();
     event->ignore();
     return;
@@ -1588,11 +1591,11 @@ void MainWindow::initChartMonth() {
                          "    X:" + tr("Days"));
   } else {
     axisY->setRange(0, yMaxMonth);
-    if (ui->rbFreq->isChecked())
+    if (mui->rbFreq->isChecked())
       chartMonth->setTitle(CurrentYear + "  Y:" + tr("Freq") +
                            "    X:" + tr("Days"));
 
-    if (ui->rbAmount->isChecked())
+    if (mui->rbAmount->isChecked())
       chartMonth->setTitle(CurrentYear + "  Y:" + tr("Amount") +
                            "    X:" + tr("Days"));
   }
@@ -1618,17 +1621,17 @@ void MainWindow::initChartDay() {
 
   axisY2->setRange(0, yMaxDay + 1);
 
-  if (ui->rbFreq->isChecked())
+  if (mui->rbFreq->isChecked())
     chartDay->setTitle(CurrentYear + "  Y:" + tr("Freq") +
                        "    X:" + tr("Time"));
 
-  if (ui->rbAmount->isChecked())
+  if (mui->rbAmount->isChecked())
     chartDay->setTitle(CurrentYear + "  Y:" + tr("Amount") +
                        "    X:" + tr("Time"));
 }
 
 void MainWindow::on_actionRename_triggered() {
-  int index = ui->tabWidget->currentIndex();
+  int index = mui->tabWidget->currentIndex();
   bool ok = false;
 
   QString text;
@@ -1637,7 +1640,7 @@ void MainWindow::on_actionRename_triggered() {
 
   m_RenameDlg =
       m_Method->inputDialog(tr("Rename tab name : "), tr("Tab name : "),
-                            ui->tabWidget->tabText(index));
+                            mui->tabWidget->tabText(index));
 
   if (QDialog::Accepted == m_RenameDlg->exec()) {
     ok = true;
@@ -1649,9 +1652,9 @@ void MainWindow::on_actionRename_triggered() {
   }
 
   if (ok && !text.isEmpty()) {
-    ui->tabWidget->setTabText(index, text);
+    mui->tabWidget->setTabText(index, text);
 
-    m_Method->modifyItemText0(mw_one->ui->qwMainTab, index, text);
+    m_Method->modifyItemText0(mui->qwMainTab, index, text);
 
     updateMainTab();
 
@@ -1662,7 +1665,7 @@ void MainWindow::on_actionRename_triggered() {
 }
 
 void MainWindow::on_actionAdd_Tab_triggered() {
-  int count = ui->tabWidget->tabBar()->count();
+  int count = mui->tabWidget->tabBar()->count();
   QString twName = m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
   QString ini_file = iniDir + twName + ".ini";
   if (QFile(ini_file).exists()) QFile(ini_file).remove();
@@ -1670,17 +1673,17 @@ void MainWindow::on_actionAdd_Tab_triggered() {
   QTreeWidget *tw = init_TreeWidget(twName);
 
   QString tabText = tr("Tab") + " " + QString::number(count + 1);
-  ui->tabWidget->addTab(tw, tabText);
-  ui->tabWidget->setCurrentIndex(count);
+  mui->tabWidget->addTab(tw, tabText);
+  mui->tabWidget->setCurrentIndex(count);
 
   addItem(tabText, "", "", "", 0);
   setCurrentIndex(count);
 
-  ui->tabCharts->setTabText(0, tr("Month"));
-  ui->tabCharts->setTabText(1, tr("Day"));
+  mui->tabCharts->setTabText(0, tr("Month"));
+  mui->tabCharts->setTabText(1, tr("Day"));
 
-  ui->btnChartMonth->setText(tabChart->tabText(0));
-  ui->btnChartDay->setText(tabChart->tabText(1));
+  mui->btnChartMonth->setText(tabChart->tabText(0));
+  mui->btnChartDay->setText(tabChart->tabText(1));
 
   on_actionRename_triggered();
   reloadMain();
@@ -1691,10 +1694,10 @@ void MainWindow::on_actionAdd_Tab_triggered() {
 }
 
 void MainWindow::on_actionDel_Tab_triggered() {
-  int index = ui->tabWidget->currentIndex();
+  int index = mui->tabWidget->currentIndex();
   if (index < 0) return;
 
-  QString tab_name = ui->tabWidget->tabText(index);
+  QString tab_name = mui->tabWidget->tabText(index);
 
   m_Method->m_widget = new QWidget(mw_one);
   ShowMessage *m_ShowMsg = new ShowMessage(this);
@@ -1728,21 +1731,21 @@ void MainWindow::on_actionDel_Tab_triggered() {
     }
   }
 
-  int TabCount = ui->tabWidget->tabBar()->count();
+  int TabCount = mui->tabWidget->tabBar()->count();
   if (TabCount > 1) {
-    ui->tabWidget->removeTab(index);
+    mui->tabWidget->removeTab(index);
     delItem(index);
   }
 
   if (TabCount == 1) {
-    QTreeWidget *tw = (QTreeWidget *)ui->tabWidget->currentWidget();
+    QTreeWidget *tw = (QTreeWidget *)mui->tabWidget->currentWidget();
     tw->clear();
     tabData->setTabText(0, tr("Tab") + " 1");
 
     clearAll();
     addItem(tabData->tabText(0), "", "", "", 0);
 
-    ui->tabWidget->setTabToolTip(0, "");
+    mui->tabWidget->setTabToolTip(0, "");
 
     reloadMain();
   }
@@ -1804,7 +1807,7 @@ QTreeWidget *MainWindow::init_TreeWidget(QString name) {
 }
 
 void MainWindow::on_twItemClicked() {
-  QTreeWidget *tw = (QTreeWidget *)ui->tabWidget->currentWidget();
+  QTreeWidget *tw = (QTreeWidget *)mui->tabWidget->currentWidget();
   if (!tw->currentIndex().isValid()) return;
 
   QTreeWidgetItem *item = tw->currentItem();
@@ -1821,11 +1824,11 @@ void MainWindow::on_twItemClicked() {
     stra = item->parent()->text(0);
   }
   tw->headerItem()->setText(0, "" + tr("Date") + "  " + CurrentYear);
-  ui->tabCharts->setTabText(0, stra.split(" ").at(1));
-  ui->tabCharts->setTabText(1, stra.split(" ").at(2));
+  mui->tabCharts->setTabText(0, stra.split(" ").at(1));
+  mui->tabCharts->setTabText(1, stra.split(" ").at(2));
 
-  ui->btnChartMonth->setText(tabChart->tabText(0));
-  ui->btnChartDay->setText(tabChart->tabText(1));
+  mui->btnChartMonth->setText(tabChart->tabText(0));
+  mui->btnChartDay->setText(tabChart->tabText(1));
 
   // top item
   if (item->childCount() > 0) {
@@ -1836,7 +1839,7 @@ void MainWindow::on_twItemClicked() {
 
     isShowDetails = false;
 
-    ui->lblStats->setText(strStats);
+    mui->lblStats->setText(strStats);
   }
 
   // child items
@@ -1870,19 +1873,19 @@ void MainWindow::on_twItemClicked() {
 }
 
 void MainWindow::modify_Data() {
-  QTreeWidget *tw = (QTreeWidget *)ui->tabWidget->currentWidget();
+  QTreeWidget *tw = (QTreeWidget *)mui->tabWidget->currentWidget();
   QTreeWidgetItem *item = tw->currentItem();
   QTreeWidgetItem *topItem = item->parent();
-  QString newtime = ui->lblTime->text().trimmed();
+  QString newtime = mui->lblTime->text().trimmed();
   if (item->childCount() == 0 && item->parent()->childCount() > 0) {
     item->setText(0, newtime);
-    QString sa = ui->editAmount->text().trimmed();
+    QString sa = mui->editAmount->text().trimmed();
     if (sa == "")
       item->setText(1, "");
     else
       item->setText(1, QString("%1").arg(sa.toDouble(), 0, 'f', 2));
-    item->setText(2, ui->editCategory->text().trimmed());
-    item->setText(3, ui->editDetails->toPlainText().trimmed());
+    item->setText(2, mui->editCategory->text().trimmed());
+    item->setText(3, mui->editDetails->toPlainText().trimmed());
     // Amount
     int child = item->parent()->childCount();
     double amount = 0;
@@ -1915,20 +1918,20 @@ void MainWindow::modify_Data() {
     }
 
     int newrow;
-    int row = m_Method->getCurrentIndexFromQW(ui->qwMainEvent);
+    int row = m_Method->getCurrentIndexFromQW(mui->qwMainEvent);
     if (childRow0 - childRow1 == 0) newrow = row;
     if (childRow0 - childRow1 < 0) newrow = row + childRow1 - childRow0;
     if (childRow0 - childRow1 > 0) newrow = row - (childRow0 - childRow1);
 
-    int maindateIndex = m_Method->getCurrentIndexFromQW(ui->qwMainDate);
+    int maindateIndex = m_Method->getCurrentIndexFromQW(mui->qwMainDate);
 
     isEditItem = true;
     reloadMain();
 
-    m_Method->setCurrentIndexFromQW(ui->qwMainDate, maindateIndex);
+    m_Method->setCurrentIndexFromQW(mui->qwMainDate, maindateIndex);
     isEditItem = true;
     m_Method->clickMainDate();
-    m_Method->setCurrentIndexFromQW(ui->qwMainEvent, newrow);
+    m_Method->setCurrentIndexFromQW(mui->qwMainEvent, newrow);
   }
 }
 
@@ -1987,7 +1990,7 @@ void MainWindow::sort_childItem(QTreeWidgetItem *item) {
 void MainWindow::on_twItemDoubleClicked() {
   m_EditRecord->monthSum();
 
-  QTreeWidget *tw = (QTreeWidget *)ui->tabWidget->currentWidget();
+  QTreeWidget *tw = (QTreeWidget *)mui->tabWidget->currentWidget();
   QTreeWidgetItem *item = tw->currentItem();
   if (item->childCount() == 0 && item->parent()->childCount() > 0) {
     if (item->parent()->text(3).toInt() != QDate::currentDate().year()) {
@@ -2007,27 +2010,27 @@ void MainWindow::on_twItemDoubleClicked() {
       sm = list.at(1);
       ss = list.at(2);
     }
-    ui->lblTitleEditRecord->setText(tr("Modify") + "  : " +
-                                    tabData->tabText(tabData->currentIndex()));
+    mui->lblTitleEditRecord->setText(tr("Modify") + "  : " +
+                                     tabData->tabText(tabData->currentIndex()));
 
-    ui->hsH->setValue(sh.toInt());
-    ui->hsM->setValue(sm.toInt());
+    mui->hsH->setValue(sh.toInt());
+    mui->hsM->setValue(sm.toInt());
 
-    ui->lblTime->setText(t.trimmed());
+    mui->lblTime->setText(t.trimmed());
 
     QString str = item->text(1);
     if (str == "0.00")
-      ui->editAmount->setText("");
+      mui->editAmount->setText("");
     else
-      ui->editAmount->setText(str);
+      mui->editAmount->setText(str);
 
-    ui->editCategory->setText(item->text(2));
-    ui->editDetails->setText(item->text(3));
-    ui->f_Number->setFocus();
+    mui->editCategory->setText(item->text(2));
+    mui->editDetails->setText(item->text(3));
+    mui->f_Number->setFocus();
 
     isAdd = false;
-    ui->frameMain->hide();
-    ui->frameEditRecord->show();
+    mui->frameMain->hide();
+    mui->frameEditRecord->show();
   }
 
   if (item == tw->topLevelItem(tw->topLevelItemCount() - 1)) {
@@ -2042,7 +2045,7 @@ void MainWindow::clickMainTab() {
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index) {
-  int count = ui->tabWidget->tabBar()->count();
+  int count = mui->tabWidget->tabBar()->count();
 
   if (isSlide || loading || count <= 0) {
     return;
@@ -2080,7 +2083,7 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
   if (loading) return QWidget::eventFilter(watch, evn);
 
   QMouseEvent *event = static_cast<QMouseEvent *>(evn);  // 将之转换为鼠标事件
-  QTreeWidget *tw = (QTreeWidget *)ui->tabWidget->currentWidget();
+  QTreeWidget *tw = (QTreeWidget *)mui->tabWidget->currentWidget();
 
   if (evn->type() == QEvent::ToolTip) {
     QToolTip::hideText();
@@ -2088,21 +2091,21 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
     return true;
   }
 
-  if (watch == ui->lblStats) {
+  if (watch == mui->lblStats) {
     if (event->type() == QEvent::MouseButtonDblClick) {
       on_btnSelTab_clicked();
       return true;
     }
   }
 
-  if (watch == ui->lblTitleEditRecord) {
+  if (watch == mui->lblTitleEditRecord) {
     if (event->type() == QEvent::MouseButtonPress) {
-      QString title = ui->lblTitleEditRecord->text();
+      QString title = mui->lblTitleEditRecord->text();
       title = title.mid(0, 4);
       if (!title.contains(tr("Add"))) return true;
 
-      ui->btnTabMoveDown->hide();
-      ui->btnTabMoveUp->hide();
+      mui->btnTabMoveDown->hide();
+      mui->btnTabMoveUp->hide();
 
       m_EditRecord->saveCurrentValue();
       on_btnBackEditRecord_clicked();
@@ -2111,7 +2114,7 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
     }
   }
 
-  if (watch == ui->lblNoteName) {
+  if (watch == mui->lblNoteName) {
     if (event->type() == QEvent::MouseButtonPress) {
       on_btnNotesList_clicked();
       return true;
@@ -2125,7 +2128,7 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
 
   m_Notes->eventFilterQwNote(watch, evn);
 
-  if (watch == ui->textBrowser->viewport()) {
+  if (watch == mui->textBrowser->viewport()) {
     if (event->type() == QEvent::MouseButtonPress) {
       isMousePress = true;
     }
@@ -2133,7 +2136,7 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
     if (event->type() == QEvent::MouseButtonRelease) {
       isMousePress = false;
 
-      QString str = ui->textBrowser->textCursor().selectedText().trimmed();
+      QString str = mui->textBrowser->textCursor().selectedText().trimmed();
       if (str == "") {
         mydlgSetText->close();
       } else {
@@ -2153,7 +2156,7 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
 
     if (event->type() == QEvent::MouseMove) {
       if (isMousePress) {
-        QString str = ui->textBrowser->textCursor().selectedText().trimmed();
+        QString str = mui->textBrowser->textCursor().selectedText().trimmed();
         if (str != "") {
           int y1;
           int a = 30;
@@ -2171,9 +2174,9 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
     }
 
     if (event->type() == QEvent::MouseButtonDblClick) {
-      QTextCursor cursor = ui->textBrowser->textCursor();
+      QTextCursor cursor = mui->textBrowser->textCursor();
       cursor.setPosition(cursor.anchor());
-      ui->textBrowser->setTextCursor(cursor);
+      mui->textBrowser->setTextCursor(cursor);
 
       return true;
     }
@@ -2185,14 +2188,14 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
     }
   }
 
-  if (watch == ui->tabWidget->tabBar()) {
+  if (watch == mui->tabWidget->tabBar()) {
     if (!isReadTWEnd) return QWidget::eventFilter(watch, evn);
     if (event->type() == QEvent::MouseButtonPress) {
     }
     if (event->type() == QEvent::MouseButtonRelease) {
       bool move = false;
-      for (int i = 0; i < ui->tabWidget->tabBar()->count(); i++) {
-        QTreeWidget *tw = (QTreeWidget *)ui->tabWidget->widget(i);
+      for (int i = 0; i < mui->tabWidget->tabBar()->count(); i++) {
+        QTreeWidget *tw = (QTreeWidget *)mui->tabWidget->widget(i);
         QString name = tw->objectName();
         if (name != "tab" + QString::number(i + 1)) {
           move = true;
@@ -2205,13 +2208,13 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
     }
   }
 
-  if (watch == ui->lblStats) {
+  if (watch == mui->lblStats) {
     static int press_x;
     static int press_y;
     static int relea_x;
     static int relea_y;
-    int index = ui->tabWidget->currentIndex();
-    int count = ui->tabWidget->tabBar()->count();
+    int index = mui->tabWidget->currentIndex();
+    int count = mui->tabWidget->tabBar()->count();
 
     if (event->type() == QEvent::MouseButtonPress) {
       press_x = event->globalPosition().x();
@@ -2231,21 +2234,21 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
     if ((relea_x - press_x) > 75 &&
         event->type() == QEvent::MouseButtonRelease &&
         qAbs(relea_y - press_y) < 35) {
-      int current_page = ui->tabWidget->currentIndex();
+      int current_page = mui->tabWidget->currentIndex();
       if (current_page < count - 1) {
         isSlide = true;
 
         QPropertyAnimation *animation1 =
 
-            new QPropertyAnimation(ui->tabWidget->currentWidget(), "geometry");
+            new QPropertyAnimation(mui->tabWidget->currentWidget(), "geometry");
         animation1->setDuration(350);
         animation1->setStartValue(QRect(x, y, w, h));
         animation1->setEndValue(QRect(w * 2, y, w, h));
 
-        ui->tabWidget->setCurrentIndex(current_page + 1);
+        mui->tabWidget->setCurrentIndex(current_page + 1);
 
         QPropertyAnimation *animation2 =
-            new QPropertyAnimation(ui->tabWidget->currentWidget(), "geometry");
+            new QPropertyAnimation(mui->tabWidget->currentWidget(), "geometry");
         animation2->setDuration(350);
         animation2->setStartValue(QRect(-w * 2, y, w, h));
         animation2->setEndValue(QRect(x, y, w, h));
@@ -2270,21 +2273,21 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
     if ((press_x - relea_x) > 75 &&
         event->type() == QEvent::MouseButtonRelease &&
         qAbs(relea_y - press_y) < 35 && index > 0) {
-      int current_page = ui->tabWidget->currentIndex();
+      int current_page = mui->tabWidget->currentIndex();
       if (current_page >= 0) {
         isSlide = true;
 
         QPropertyAnimation *animation1 =
 
-            new QPropertyAnimation(ui->tabWidget->currentWidget(), "geometry");
+            new QPropertyAnimation(mui->tabWidget->currentWidget(), "geometry");
         animation1->setDuration(350);
         animation1->setStartValue(QRect(x, y, w, h));
         animation1->setEndValue(QRect(-w, y, w, h));
 
-        ui->tabWidget->setCurrentIndex(current_page - 1);
+        mui->tabWidget->setCurrentIndex(current_page - 1);
 
         QPropertyAnimation *animation2 =
-            new QPropertyAnimation(ui->tabWidget->currentWidget(), "geometry");
+            new QPropertyAnimation(mui->tabWidget->currentWidget(), "geometry");
         animation2->setDuration(350);
         animation2->setStartValue(QRect(w * 2, y, w, h));
         animation2->setEndValue(QRect(x, y, w, h));
@@ -2309,13 +2312,13 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
   if (evn->type() == QEvent::KeyPress) {
     QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
 
-    if (watch == ui->editSearchText && keyEvent->key() == Qt::Key_Return) {
+    if (watch == mui->editSearchText && keyEvent->key() == Qt::Key_Return) {
       on_btnStartSearch_clicked();
       return true;
     }
 
     if (keyEvent->key() == Qt::Key_Escape) {
-      if (ui->frameReader->isVisible()) on_btnBackReader_clicked();
+      if (mui->frameReader->isVisible()) on_btnBackReader_clicked();
       return true;
     }
   }
@@ -2589,10 +2592,10 @@ void MainWindow::on_actionAbout() {
 }
 
 void MainWindow::on_btnFind_clicked() {
-  ui->frameMain->hide();
-  ui->frameSearch->show();
-  ui->editSearchText->setFocus();
-  ui->btnClearSearchText->setFixedHeight(ui->btnStartSearch->height());
+  mui->frameMain->hide();
+  mui->frameSearch->show();
+  mui->editSearchText->setFocus();
+  mui->btnClearSearchText->setFixedHeight(mui->btnStartSearch->height());
 }
 
 QStringList MainWindow::get_MonthList(QString strY, QString strM) {
@@ -2722,7 +2725,7 @@ void MainWindow::paintEvent(QPaintEvent *event) {
   Q_UNUSED(event);
 
   // 获取背景色
-  QPalette pal = ui->btnFind->palette();
+  QPalette pal = mui->btnFind->palette();
   QBrush brush = pal.window();
   int c_red = brush.color().red();
 
@@ -2773,14 +2776,14 @@ void MainWindow::on_actionPreferences_triggered() {
 
   m_Preferences->setGeometry(x, y, m_Preferences->width(), height());
   m_Preferences->setModal(true);
-  m_Preferences->ui->sliderFontSize->setStyleSheet(ui->hsM->styleSheet());
+  m_Preferences->ui->sliderFontSize->setStyleSheet(mui->hsM->styleSheet());
   m_Preferences->ui->sliderFontSize->setValue(fontSize);
   m_Preferences->show();
   m_Preferences->initCheckStatus();
 }
 
 void MainWindow::on_tabCharts_currentChanged(int index) {
-  if (ui->rbSteps->isChecked() || loading || index < 0) return;
+  if (mui->rbSteps->isChecked() || loading || index < 0) return;
 
   m_Method->clickMainDateData();
 }
@@ -2847,138 +2850,142 @@ void MainWindow::initQW() {
 
   int f_size = 19;
   if (fontSize <= f_size) f_size = fontSize;
-  ui->qwReport->rootContext()->setContextProperty("maxFontSize", f_size);
-  ui->qwReportSub->rootContext()->setContextProperty("maxFontSize", f_size);
+  mui->qwReport->rootContext()->setContextProperty("maxFontSize", f_size);
+  mui->qwReportSub->rootContext()->setContextProperty("maxFontSize", f_size);
 
-  ui->qwNotesTree->rootContext()->setContextProperty("fontSize", fontSize);
-  ui->qwNotesTree->setSource(
+  mui->qwNotesTree->rootContext()->setContextProperty("fontSize", fontSize);
+  mui->qwNotesTree->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/tree_main.qml")));
 
-  ui->qwReader->rootContext()->setContextProperty("myW", this->width());
-  ui->qwReader->rootContext()->setContextProperty("myH", this->height());
-  ui->qwReader->rootContext()->setContextProperty("m_Reader", m_Reader);
-  ui->qwReader->rootContext()->setContextProperty("myBackgroundColor",
-                                                  "#FFFFFF");
+  mui->qwReader->rootContext()->setContextProperty("myW", this->width());
+  mui->qwReader->rootContext()->setContextProperty("myH", this->height());
+  mui->qwReader->rootContext()->setContextProperty("m_Reader", m_Reader);
+  mui->qwReader->rootContext()->setContextProperty("myBackgroundColor",
+                                                   "#FFFFFF");
 
-  ui->qwCata->rootContext()->setContextProperty("m_Reader", m_Reader);
-  ui->qwCata->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/epub_cata.qml")));
+  mui->qwCata->rootContext()->setContextProperty("m_Reader", m_Reader);
+  mui->qwCata->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/epub_cata.qml")));
 
-  ui->qwBookmark->rootContext()->setContextProperty("m_Reader", m_Reader);
-  ui->qwBookmark->setSource(
+  mui->qwBookmark->rootContext()->setContextProperty("m_Reader", m_Reader);
+  mui->qwBookmark->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/bookmark.qml")));
 
-  ui->qw_Img->rootContext()->setContextProperty("myW", this->width());
-  ui->qw_Img->rootContext()->setContextProperty("myH", this->height());
+  mui->qw_Img->rootContext()->setContextProperty("myW", this->width());
+  mui->qw_Img->rootContext()->setContextProperty("myH", this->height());
 
-  ui->qwTodo->rootContext()->setContextProperty("maxFontSize", f_size);
-  ui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
-                                                QVariant(false));
-  ui->qwTodo->rootContext()->setContextProperty("m_Todo", m_Todo);
-  ui->qwTodo->rootContext()->setContextProperty("FontSize", fontSize);
-  ui->qwTodo->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/todo.qml")));
+  mui->qwTodo->rootContext()->setContextProperty("maxFontSize", f_size);
+  mui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
+                                                 QVariant(false));
+  mui->qwTodo->rootContext()->setContextProperty("m_Todo", m_Todo);
+  mui->qwTodo->rootContext()->setContextProperty("FontSize", fontSize);
+  mui->qwTodo->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/todo.qml")));
 
-  ui->qwRecycle->rootContext()->setContextProperty("FontSize", fontSize);
-  ui->qwRecycle->setSource(
+  mui->qwRecycle->rootContext()->setContextProperty("FontSize", fontSize);
+  mui->qwRecycle->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/todorecycle.qml")));
 
-  ui->qwSteps->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/steps.qml")));
-  ui->qwSteps->rootContext()->setContextProperty("maxFontSize", f_size);
-  ui->qwSteps->rootContext()->setContextProperty("myW", this->width());
-  ui->qwSteps->rootContext()->setContextProperty("text0", "");
-  ui->qwSteps->rootContext()->setContextProperty("text1", "");
-  ui->qwSteps->rootContext()->setContextProperty("text2", "");
-  ui->qwSteps->rootContext()->setContextProperty("text3", "");
+  mui->qwSteps->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/steps.qml")));
+  mui->qwSteps->rootContext()->setContextProperty("maxFontSize", f_size);
+  mui->qwSteps->rootContext()->setContextProperty("myW", this->width());
+  mui->qwSteps->rootContext()->setContextProperty("text0", "");
+  mui->qwSteps->rootContext()->setContextProperty("text1", "");
+  mui->qwSteps->rootContext()->setContextProperty("text2", "");
+  mui->qwSteps->rootContext()->setContextProperty("text3", "");
 
-  ui->qwSpeed->setSource(
+  mui->qwSpeed->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/Speedometer.qml")));
 
-  ui->qwGpsList->setSource(
+  mui->qwGpsList->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/gps_list.qml")));
-  ui->qwGpsList->rootContext()->setContextProperty("myW", this->width());
-  ui->qwGpsList->rootContext()->setContextProperty("m_Steps", m_Steps);
+  mui->qwGpsList->rootContext()->setContextProperty("myW", this->width());
+  mui->qwGpsList->rootContext()->setContextProperty("m_Steps", m_Steps);
 
-  ui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
-  ui->qwMap->setFocusPolicy(Qt::StrongFocus);  // 关键设置
-  ui->qwMap->setClearColor(Qt::transparent);   // 避免渲染冲突
-  ui->qwMap->setAttribute(Qt::WA_AcceptTouchEvents, true);
-  ui->qwMap->setAttribute(Qt::WA_TouchPadAcceptSingleTouchEvents, true);
-  ui->qwMap->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/map.qml")));
+  mui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
+  mui->qwMap->setFocusPolicy(Qt::StrongFocus);  // 关键设置
+  mui->qwMap->setClearColor(Qt::transparent);   // 避免渲染冲突
+  mui->qwMap->setAttribute(Qt::WA_AcceptTouchEvents, true);
+  mui->qwMap->setAttribute(Qt::WA_TouchPadAcceptSingleTouchEvents, true);
+  mui->qwMap->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/map.qml")));
 
-  ui->qwReport->rootContext()->setContextProperty("m_Report", m_Report);
-  ui->qwReport->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/report.qml")));
-  ui->qwReportSub->setSource(
+  mui->qwReport->rootContext()->setContextProperty("m_Report", m_Report);
+  mui->qwReport->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/report.qml")));
+  mui->qwReportSub->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/details.qml")));
 
-  ui->qwSearch->rootContext()->setContextProperty("m_Method", m_Method);
-  ui->qwSearch->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/search.qml")));
+  mui->qwSearch->rootContext()->setContextProperty("m_Method", m_Method);
+  mui->qwSearch->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/search.qml")));
 
-  ui->qwBakList->rootContext()->setContextProperty("m_Method", m_Method);
-  ui->qwBakList->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/baklist.qml")));
+  mui->qwBakList->rootContext()->setContextProperty("m_Method", m_Method);
+  mui->qwBakList->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/baklist.qml")));
 
-  ui->qwViewCate->rootContext()->setContextProperty("m_Report", m_Report);
-  ui->qwViewCate->setSource(
+  mui->qwViewCate->rootContext()->setContextProperty("m_Report", m_Report);
+  mui->qwViewCate->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/viewcate.qml")));
 
-  ui->qwTabRecycle->rootContext()->setContextProperty("m_Report", m_Report);
-  ui->qwTabRecycle->setSource(
+  mui->qwTabRecycle->rootContext()->setContextProperty("m_Report", m_Report);
+  mui->qwTabRecycle->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/tabrecycle.qml")));
 
-  ui->qwNoteBook->rootContext()->setContextProperty("m_NotesList", m_NotesList);
-  ui->qwNoteBook->rootContext()->setContextProperty("mw_one", mw_one);
-  ui->qwNoteBook->setSource(
+  mui->qwNoteBook->rootContext()->setContextProperty("m_NotesList",
+                                                     m_NotesList);
+  mui->qwNoteBook->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwNoteBook->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/notebook.qml")));
 
   if (isAndroid)
-    ui->qwNoteList->rootContext()->setContextProperty("noteTimeFontSize", 12);
+    mui->qwNoteList->rootContext()->setContextProperty("noteTimeFontSize", 12);
   else
-    ui->qwNoteList->rootContext()->setContextProperty("noteTimeFontSize", 8);
-  ui->qwNoteList->rootContext()->setContextProperty("m_NotesList", m_NotesList);
-  ui->qwNoteList->rootContext()->setContextProperty("mw_one", mw_one);
-  ui->qwNoteList->setSource(
+    mui->qwNoteList->rootContext()->setContextProperty("noteTimeFontSize", 8);
+  mui->qwNoteList->rootContext()->setContextProperty("m_NotesList",
+                                                     m_NotesList);
+  mui->qwNoteList->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwNoteList->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/notelist.qml")));
 
-  ui->qwNotesSearchResult->rootContext()->setContextProperty("fontSize",
-                                                             fontSize);
-  ui->qwNotesSearchResult->rootContext()->setContextProperty("m_NotesList",
-                                                             m_NotesList);
-  ui->qwNotesSearchResult->rootContext()->setContextProperty("mw_one", mw_one);
-  ui->qwNotesSearchResult->setSource(
+  mui->qwNotesSearchResult->rootContext()->setContextProperty("fontSize",
+                                                              fontSize);
+  mui->qwNotesSearchResult->rootContext()->setContextProperty("m_NotesList",
+                                                              m_NotesList);
+  mui->qwNotesSearchResult->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwNotesSearchResult->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/SearchResults.qml")));
 
-  ui->qwNoteRecycle->rootContext()->setContextProperty("m_Method", m_Method);
-  ui->qwNoteRecycle->setSource(
+  mui->qwNoteRecycle->rootContext()->setContextProperty("m_Method", m_Method);
+  mui->qwNoteRecycle->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/noterecycle.qml")));
 
-  ui->qwMainTab->setFixedHeight(50);
-  ui->qwMainTab->rootContext()->setContextProperty("maintabHeight",
-                                                   ui->qwMainTab->height());
-  ui->qwMainTab->rootContext()->setContextProperty("mw_one", mw_one);
-  ui->qwMainTab->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/maintab.qml")));
+  mui->qwMainTab->setFixedHeight(50);
+  mui->qwMainTab->rootContext()->setContextProperty("maintabHeight",
+                                                    mui->qwMainTab->height());
+  mui->qwMainTab->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwMainTab->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/maintab.qml")));
 
-  ui->qwMainDate->rootContext()->setContextProperty("isAniEffects", true);
-  ui->qwMainDate->rootContext()->setContextProperty("maindateWidth",
-                                                    ui->qwMainDate->width());
-  ui->qwMainDate->rootContext()->setContextProperty("m_Method", m_Method);
-  ui->qwMainDate->setSource(
+  mui->qwMainDate->rootContext()->setContextProperty("isAniEffects", true);
+  mui->qwMainDate->rootContext()->setContextProperty("maindateWidth",
+                                                     mui->qwMainDate->width());
+  mui->qwMainDate->rootContext()->setContextProperty("m_Method", m_Method);
+  mui->qwMainDate->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/maindate.qml")));
 
-  ui->qwMainEvent->rootContext()->setContextProperty("fontSize", fontSize);
-  ui->qwMainEvent->rootContext()->setContextProperty("isAniEffects", true);
-  ui->qwMainEvent->rootContext()->setContextProperty("maineventWidth",
-                                                     ui->qwMainEvent->width());
-  ui->qwMainEvent->rootContext()->setContextProperty("m_Method", m_Method);
-  ui->qwMainEvent->setSource(
+  mui->qwMainEvent->rootContext()->setContextProperty("fontSize", fontSize);
+  mui->qwMainEvent->rootContext()->setContextProperty("isAniEffects", true);
+  mui->qwMainEvent->rootContext()->setContextProperty(
+      "maineventWidth", mui->qwMainEvent->width());
+  mui->qwMainEvent->rootContext()->setContextProperty("m_Method", m_Method);
+  mui->qwMainEvent->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/mainevent.qml")));
 
-  ui->qwCategory->rootContext()->setContextProperty("m_Method", m_Method);
-  ui->qwCategory->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/type.qml")));
+  mui->qwCategory->rootContext()->setContextProperty("m_Method", m_Method);
+  mui->qwCategory->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/type.qml")));
 
-  ui->qwSelTab->rootContext()->setContextProperty("mw_one", mw_one);
-  ui->qwSelTab->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/seltab.qml")));
+  mui->qwSelTab->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwSelTab->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/seltab.qml")));
 
-  ui->qwBookList->rootContext()->setContextProperty("fontSize", fontSize);
-  ui->qwBookList->rootContext()->setContextProperty("m_Reader", m_Reader);
-  ui->qwBookList->setSource(
+  mui->qwBookList->rootContext()->setContextProperty("fontSize", fontSize);
+  mui->qwBookList->rootContext()->setContextProperty("m_Reader", m_Reader);
+  mui->qwBookList->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/booklist.qml")));
 }
 
@@ -2990,109 +2997,109 @@ void MainWindow::init_Theme() {
 
   qDebug() << "red=" << red;
 
-  ui->qwMainTab->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwMainDate->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwMainEvent->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwTodo->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwRecycle->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwNoteBook->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwNoteList->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwMainTab->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwMainDate->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwMainEvent->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwTodo->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwRecycle->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwNoteBook->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwNoteList->rootContext()->setContextProperty("isDark", isDark);
 
-  ui->qwNotesSearchResult->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwSearch->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwBakList->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwViewCate->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwTabRecycle->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwNoteRecycle->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwCategory->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwSelTab->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwBookList->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwReportSub->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwSteps->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwReport->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwNotesSearchResult->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwSearch->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwBakList->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwViewCate->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwTabRecycle->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwNoteRecycle->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwCategory->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwSelTab->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwBookList->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwReportSub->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwSteps->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwReport->rootContext()->setContextProperty("isDark", isDark);
 
-  ui->qwCata->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwBookmark->rootContext()->setContextProperty("isDark", isDark);
-  ui->qwReader->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwCata->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwBookmark->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwReader->rootContext()->setContextProperty("isDark", isDark);
 
   if (!isDark) {
-    ui->f_Menu->setStyleSheet("background-color: rgb(243,243,243);");
-    ui->f_Btn->setStyleSheet("background-color: rgb(243,243,243);");
-    ui->f_cw->setStyleSheet("background-color: rgb(243,243,243);");
-    ui->f_charts->setStyleSheet("background-color: rgb(243,243,243);");
+    mui->f_Menu->setStyleSheet("background-color: rgb(243,243,243);");
+    mui->f_Btn->setStyleSheet("background-color: rgb(243,243,243);");
+    mui->f_cw->setStyleSheet("background-color: rgb(243,243,243);");
+    mui->f_charts->setStyleSheet("background-color: rgb(243,243,243);");
 
     chartMonth->setTheme(QChart::ChartThemeLight);
     chartDay->setTheme(QChart::ChartThemeLight);
 
-    ui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
-    ui->btnClear->setIcon(QIcon(":/res/clear.png"));
+    mui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
+    mui->btnClear->setIcon(QIcon(":/res/clear.png"));
 
-    ui->btnModifyRecord->setIcon(QIcon(":/res/edit.svg"));
-    ui->btnMove->setIcon(QIcon(":/res/move.svg"));
+    mui->btnModifyRecord->setIcon(QIcon(":/res/edit.svg"));
+    mui->btnMove->setIcon(QIcon(":/res/move.svg"));
 
-    ui->btnReader->setIcon(QIcon(":/res/reader.svg"));
-    ui->btnTodo->setIcon(QIcon(":/res/todo.svg"));
-    ui->btnSteps->setIcon(QIcon(":/res/steps.svg"));
-    ui->btnNotes->setIcon(QIcon(":/res/note.svg"));
-    ui->btnChart->setIcon(QIcon(":/res/chart.svg"));
-    ui->btnFind->setIcon(QIcon(":/res/find.png"));
-    ui->btnReport->setIcon(QIcon(":/res/report.svg"));
-    ui->btnSelTab->setIcon(QIcon(":/res/tab.svg"));
+    mui->btnReader->setIcon(QIcon(":/res/reader.svg"));
+    mui->btnTodo->setIcon(QIcon(":/res/todo.svg"));
+    mui->btnSteps->setIcon(QIcon(":/res/steps.svg"));
+    mui->btnNotes->setIcon(QIcon(":/res/note.svg"));
+    mui->btnChart->setIcon(QIcon(":/res/chart.svg"));
+    mui->btnFind->setIcon(QIcon(":/res/find.png"));
+    mui->btnReport->setIcon(QIcon(":/res/report.svg"));
+    mui->btnSelTab->setIcon(QIcon(":/res/tab.svg"));
 
-    ui->btnMenu->setIcon(QIcon(":/res/mainmenu.svg"));
-    ui->btnAdd->setIcon(QIcon(":/res/additem.svg"));
-    ui->btnDel->setIcon(QIcon(":/res/delitem.svg"));
-    ui->btnSync->setIcon(QIcon(":/res/upload.svg"));
+    mui->btnMenu->setIcon(QIcon(":/res/mainmenu.svg"));
+    mui->btnAdd->setIcon(QIcon(":/res/additem.svg"));
+    mui->btnDel->setIcon(QIcon(":/res/delitem.svg"));
+    mui->btnSync->setIcon(QIcon(":/res/upload.svg"));
 
-    m_Method->setEditLightMode(ui->editTodo);
+    m_Method->setEditLightMode(mui->editTodo);
 
-    ui->editDetails->setStyleSheet(ui->editTodo->styleSheet());
+    mui->editDetails->setStyleSheet(mui->editTodo->styleSheet());
 
-    ui->editTodo->verticalScrollBar()->setStyleSheet(
+    mui->editTodo->verticalScrollBar()->setStyleSheet(
         m_Method->lightScrollbarStyle);
-    ui->editDetails->verticalScrollBar()->setStyleSheet(
+    mui->editDetails->verticalScrollBar()->setStyleSheet(
         m_Method->lightScrollbarStyle);
 
     chartMonth->setTheme(QChart::ChartThemeLight);
     chartDay->setTheme(QChart::ChartThemeLight);
 
   } else {
-    ui->f_Menu->setStyleSheet("background-color: #19232D;");
-    ui->f_Btn->setStyleSheet("background-color: #19232D;");
-    ui->f_cw->setStyleSheet("background-color: #19232D;");
-    ui->f_charts->setStyleSheet("background-color: #19232D;");
+    mui->f_Menu->setStyleSheet("background-color: #19232D;");
+    mui->f_Btn->setStyleSheet("background-color: #19232D;");
+    mui->f_cw->setStyleSheet("background-color: #19232D;");
+    mui->f_charts->setStyleSheet("background-color: #19232D;");
 
     chartMonth->setTheme(QChart::ChartThemeDark);
     chartDay->setTheme(QChart::ChartThemeDark);
 
-    ui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
-    ui->btnClear->setIcon(QIcon(":/res/clear.png"));
+    mui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
+    mui->btnClear->setIcon(QIcon(":/res/clear.png"));
 
-    ui->btnReport->setIcon(QIcon(":/res/report_l.svg"));
-    ui->btnFind->setIcon(QIcon(":/res/find_l.png"));
-    ui->btnModifyRecord->setIcon(QIcon(":/res/edit_l.svg"));
-    ui->btnMove->setIcon(QIcon(":/res/move_l.svg"));
+    mui->btnReport->setIcon(QIcon(":/res/report_l.svg"));
+    mui->btnFind->setIcon(QIcon(":/res/find_l.png"));
+    mui->btnModifyRecord->setIcon(QIcon(":/res/edit_l.svg"));
+    mui->btnMove->setIcon(QIcon(":/res/move_l.svg"));
 
-    ui->btnReader->setIcon(QIcon(":/res/reader_l.svg"));
-    ui->btnTodo->setIcon(QIcon(":/res/todo_l.png"));
-    ui->btnSteps->setIcon(QIcon(":/res/steps_l.svg"));
-    ui->btnNotes->setIcon(QIcon(":/res/note_l.svg"));
-    ui->btnChart->setIcon(QIcon(":/res/chart_l.svg"));
-    ui->btnSelTab->setIcon(QIcon(":/res/tab_l.svg"));
+    mui->btnReader->setIcon(QIcon(":/res/reader_l.svg"));
+    mui->btnTodo->setIcon(QIcon(":/res/todo_l.png"));
+    mui->btnSteps->setIcon(QIcon(":/res/steps_l.svg"));
+    mui->btnNotes->setIcon(QIcon(":/res/note_l.svg"));
+    mui->btnChart->setIcon(QIcon(":/res/chart_l.svg"));
+    mui->btnSelTab->setIcon(QIcon(":/res/tab_l.svg"));
 
-    ui->btnMenu->setIcon(QIcon(":/res/mainmenu_l.svg"));
-    ui->btnAdd->setIcon(QIcon(":/res/additem_l.svg"));
-    ui->btnDel->setIcon(QIcon(":/res/delitem_l.svg"));
-    ui->btnSync->setIcon(QIcon(":/res/upload_l.svg"));
+    mui->btnMenu->setIcon(QIcon(":/res/mainmenu_l.svg"));
+    mui->btnAdd->setIcon(QIcon(":/res/additem_l.svg"));
+    mui->btnDel->setIcon(QIcon(":/res/delitem_l.svg"));
+    mui->btnSync->setIcon(QIcon(":/res/upload_l.svg"));
 
-    m_Method->setEditDarkMode(ui->editTodo);
+    m_Method->setEditDarkMode(mui->editTodo);
 
-    ui->editDetails->setStyleSheet(ui->editTodo->styleSheet());
+    mui->editDetails->setStyleSheet(mui->editTodo->styleSheet());
 
-    ui->editTodo->verticalScrollBar()->setStyleSheet(
+    mui->editTodo->verticalScrollBar()->setStyleSheet(
         m_Method->darkScrollbarStyle);
-    ui->editDetails->verticalScrollBar()->setStyleSheet(
+    mui->editDetails->verticalScrollBar()->setStyleSheet(
         m_Method->darkScrollbarStyle);
 
     chartMonth->setTheme(QChart::ChartThemeDark);
@@ -3100,21 +3107,19 @@ void MainWindow::init_Theme() {
   }
 
   // Edit Record UI
-  int nH = mw_one->ui->editCategory->height();
+  int nH = mui->editCategory->height();
   if (isDark) {
-    m_Method->setQLabelImage(mw_one->ui->lblCategory, nH, nH, ":/res/fl_l.svg");
-    m_Method->setQLabelImage(mw_one->ui->lblDetailsType, nH, nH,
-                             ":/res/xq_l.svg");
-    m_Method->setQLabelImage(mw_one->ui->lblAmount, nH, nH, ":/res/je_l.svg");
+    m_Method->setQLabelImage(mui->lblCategory, nH, nH, ":/res/fl_l.svg");
+    m_Method->setQLabelImage(mui->lblDetailsType, nH, nH, ":/res/xq_l.svg");
+    m_Method->setQLabelImage(mui->lblAmount, nH, nH, ":/res/je_l.svg");
   } else {
-    m_Method->setQLabelImage(mw_one->ui->lblCategory, nH, nH, ":/res/fl.svg");
-    m_Method->setQLabelImage(mw_one->ui->lblDetailsType, nH, nH,
-                             ":/res/xq.svg");
-    m_Method->setQLabelImage(mw_one->ui->lblAmount, nH, nH, ":/res/je.svg");
+    m_Method->setQLabelImage(mui->lblCategory, nH, nH, ":/res/fl.svg");
+    m_Method->setQLabelImage(mui->lblDetailsType, nH, nH, ":/res/xq.svg");
+    m_Method->setQLabelImage(mui->lblAmount, nH, nH, ":/res/je.svg");
   }
 
-  m_EditRecord->on_editAmount_textChanged(ui->editAmount->text());
-  m_EditRecord->on_editCategory_textChanged(ui->editCategory->text());
+  m_EditRecord->on_editAmount_textChanged(mui->editAmount->text());
+  m_EditRecord->on_editCategory_textChanged(mui->editCategory->text());
   m_EditRecord->on_editDetails_textChanged();
 
   // Todo
@@ -3143,7 +3148,8 @@ void MainWindow::init_Theme() {
   axisY2->setLabelsFont(font1);
   axisY2->setTickCount(yScale);
 
-  ui->lblNoteName->setStyleSheet("QLabel{background:lightyellow;color:black;}");
+  mui->lblNoteName->setStyleSheet(
+      "QLabel{background:lightyellow;color:black;}");
 
   init_ButtonStyle();
 }
@@ -3154,10 +3160,10 @@ void MainWindow::init_Instance() {
   if (defaultFontFamily == "") defaultFontFamily = this->font().family();
 
   tabData = new QTabWidget;
-  tabData = ui->tabWidget;
+  tabData = mui->tabWidget;
 
   tabChart = new QTabWidget;
-  tabChart = ui->tabCharts;
+  tabChart = mui->tabCharts;
 
   m_Method = new Method(this);
   myfile = new File();
@@ -3191,12 +3197,12 @@ void MainWindow::init_UIWidget() {
   QFontMetrics fontMetrics(font());
   int nFontHeight = fontMetrics.height();
   int nHeight = nFontHeight * 1.5;
-  ui->tabWidget->tabBar()->setFixedHeight(nHeight);
-  ui->tabWidget->setStyleSheet(ui->tabCharts->styleSheet());
-  ui->tabWidget->setFixedHeight(ui->tabWidget->tabBar()->height() + 0);
+  mui->tabWidget->tabBar()->setFixedHeight(nHeight);
+  mui->tabWidget->setStyleSheet(mui->tabCharts->styleSheet());
+  mui->tabWidget->setFixedHeight(mui->tabWidget->tabBar()->height() + 0);
   if (nHeight <= 36) nHeight = 36;
-  ui->qwMainTab->setFixedHeight(nHeight);
-  ui->tabWidget->hide();
+  mui->qwMainTab->setFixedHeight(nHeight);
+  mui->tabWidget->hide();
 
   loginTime = m_Method->setCurrentDateTimeValue();
   strDate = m_Method->setCurrentDateValue();
@@ -3207,106 +3213,106 @@ void MainWindow::init_UIWidget() {
   if (isAndroid) {
     textToolbar = new TextEditToolbar(this);
     EditEventFilter *editFilter = new EditEventFilter(textToolbar, this);
-    ui->editCategory->installEventFilter(editFilter);
-    ui->editDetails->installEventFilter(editFilter);
-    ui->editTodo->installEventFilter(editFilter);
-    ui->editDetails->viewport()->installEventFilter(editFilter);
-    ui->editTodo->viewport()->installEventFilter(editFilter);
-    ui->editWebDAV->installEventFilter(editFilter);
-    ui->editWebDAVPassword->installEventFilter(editFilter);
-    ui->editWebDAVUsername->installEventFilter(editFilter);
-    ui->editFindNote->installEventFilter(editFilter);
-    ui->editNotesSearch->installEventFilter(editFilter);
-    ui->editSearchText->installEventFilter(editFilter);
+    mui->editCategory->installEventFilter(editFilter);
+    mui->editDetails->installEventFilter(editFilter);
+    mui->editTodo->installEventFilter(editFilter);
+    mui->editDetails->viewport()->installEventFilter(editFilter);
+    mui->editTodo->viewport()->installEventFilter(editFilter);
+    mui->editWebDAV->installEventFilter(editFilter);
+    mui->editWebDAVPassword->installEventFilter(editFilter);
+    mui->editWebDAVUsername->installEventFilter(editFilter);
+    mui->editFindNote->installEventFilter(editFilter);
+    mui->editNotesSearch->installEventFilter(editFilter);
+    mui->editSearchText->installEventFilter(editFilter);
   }
 
-  ui->menubar->hide();
-  ui->statusbar->hide();
-  ui->frameReader->hide();
-  ui->frameTodo->hide();
-  ui->frameTodoRecycle->hide();
-  ui->frameSteps->hide();
-  ui->frameReport->hide();
-  ui->frameSearch->hide();
-  ui->frameBakList->hide();
+  mui->menubar->hide();
+  mui->statusbar->hide();
+  mui->frameReader->hide();
+  mui->frameTodo->hide();
+  mui->frameTodoRecycle->hide();
+  mui->frameSteps->hide();
+  mui->frameReport->hide();
+  mui->frameSearch->hide();
+  mui->frameBakList->hide();
 
-  ui->frameViewCate->hide();
-  ui->frameTabRecycle->hide();
-  ui->frameNoteList->hide();
-  ui->frameNotesSearchResult->hide();
-  ui->frameNoteRecycle->hide();
-  ui->f_FindNotes->hide();
-  ui->btnFindNextNote->setEnabled(false);
-  ui->btnFindPreviousNote->setEnabled(false);
-  ui->frameNotesTree->hide();
-  ui->qwCata->hide();
-  ui->qwBookmark->hide();
+  mui->frameViewCate->hide();
+  mui->frameTabRecycle->hide();
+  mui->frameNoteList->hide();
+  mui->frameNotesSearchResult->hide();
+  mui->frameNoteRecycle->hide();
+  mui->f_FindNotes->hide();
+  mui->btnFindNextNote->setEnabled(false);
+  mui->btnFindPreviousNote->setEnabled(false);
+  mui->frameNotesTree->hide();
+  mui->qwCata->hide();
+  mui->qwBookmark->hide();
 
-  ui->frameCategory->hide();
-  ui->frameSetTab->hide();
-  ui->frameEditRecord->hide();
-  ui->frameBookList->hide();
-  ui->f_ReaderSet->hide();
+  mui->frameCategory->hide();
+  mui->frameSetTab->hide();
+  mui->frameEditRecord->hide();
+  mui->frameBookList->hide();
+  mui->f_ReaderSet->hide();
 
-  ui->frameReader->layout()->setContentsMargins(0, 0, 0, 1);
-  ui->frameReader->setContentsMargins(0, 0, 0, 1);
-  ui->frameReader->layout()->setSpacing(1);
-  ui->frameImgView->hide();
+  mui->frameReader->layout()->setContentsMargins(0, 0, 0, 1);
+  mui->frameReader->setContentsMargins(0, 0, 0, 1);
+  mui->frameReader->layout()->setSpacing(1);
+  mui->frameImgView->hide();
 
-  ui->frameMain->layout()->setContentsMargins(1, 0, 1, 0);
-  ui->frameMain->setContentsMargins(1, 0, 1, 0);
-  ui->frameMain->layout()->setSpacing(1);
+  mui->frameMain->layout()->setContentsMargins(1, 0, 1, 0);
+  mui->frameMain->setContentsMargins(1, 0, 1, 0);
+  mui->frameMain->layout()->setSpacing(1);
 
-  ui->frameOne->hide();
-  ui->f_FunWeb->hide();
-  ui->btnStorageInfo->hide();
-  ui->editCode->setLineWrapMode(QTextEdit::NoWrap);
-  ui->lblEpubInfo->hide();
-  ui->pEpubProg->hide();
+  mui->frameOne->hide();
+  mui->f_FunWeb->hide();
+  mui->btnStorageInfo->hide();
+  mui->editCode->setLineWrapMode(QTextEdit::NoWrap);
+  mui->lblEpubInfo->hide();
+  mui->pEpubProg->hide();
 
-  ui->frameNotes->hide();
-  ui->frameNotes->layout()->setContentsMargins(1, 1, 1, 1);
+  mui->frameNotes->hide();
+  mui->frameNotes->layout()->setContentsMargins(1, 1, 1, 1);
 
-  ui->btnSetKey->hide();
-  ui->btnNotesList->hide();
-  ui->btnWebBack->hide();
-  ui->btnRecentOpen0->hide();
+  mui->btnSetKey->hide();
+  mui->btnNotesList->hide();
+  mui->btnWebBack->hide();
+  mui->btnRecentOpen0->hide();
 
-  ui->chkOneDrive->setStyleSheet(m_Preferences->chkStyle);
-  ui->chkWebDAV->setStyleSheet(m_Preferences->chkStyle);
-  ui->chkAutoSync->setStyleSheet(m_Preferences->chkStyle);
-  ui->twCloudBackup->setCurrentIndex(1);
-  ui->twCloudBackup->setTabVisible(0, false);
-  ui->chkWebDAV->hide();
-  ui->lblWebDAV->hide();
+  mui->chkOneDrive->setStyleSheet(m_Preferences->chkStyle);
+  mui->chkWebDAV->setStyleSheet(m_Preferences->chkStyle);
+  mui->chkAutoSync->setStyleSheet(m_Preferences->chkStyle);
+  mui->twCloudBackup->setCurrentIndex(1);
+  mui->twCloudBackup->setTabVisible(0, false);
+  mui->chkWebDAV->hide();
+  mui->lblWebDAV->hide();
 
-  ui->editWebDAVPassword->setEchoMode(QLineEdit::EchoMode::Password);
-  ui->lblWebDAV->setStyleSheet(labelNormalStyleSheet);
-  ui->lblTitleEditRecord->setStyleSheet(labelNormalStyleSheet);
+  mui->editWebDAVPassword->setEchoMode(QLineEdit::EchoMode::Password);
+  mui->lblWebDAV->setStyleSheet(labelNormalStyleSheet);
+  mui->lblTitleEditRecord->setStyleSheet(labelNormalStyleSheet);
 
-  ui->textBrowser->installEventFilter(this);
-  ui->textBrowser->setMouseTracking(true);
-  ui->textBrowser->viewport()->installEventFilter(this);
-  ui->textBrowser->viewport()->setMouseTracking(true);
-  ui->qwReader->installEventFilter(this);
+  mui->textBrowser->installEventFilter(this);
+  mui->textBrowser->setMouseTracking(true);
+  mui->textBrowser->viewport()->installEventFilter(this);
+  mui->textBrowser->viewport()->setMouseTracking(true);
+  mui->qwReader->installEventFilter(this);
 
-  ui->tabWidget->tabBar()->installEventFilter(this);
-  ui->tabWidget->installEventFilter(this);
-  ui->tabWidget->setMouseTracking(true);
-  ui->lblStats->installEventFilter(this);
-  ui->editSearchText->installEventFilter(this);
-  ui->editFindNote->installEventFilter(this);
+  mui->tabWidget->tabBar()->installEventFilter(this);
+  mui->tabWidget->installEventFilter(this);
+  mui->tabWidget->setMouseTracking(true);
+  mui->lblStats->installEventFilter(this);
+  mui->editSearchText->installEventFilter(this);
+  mui->editFindNote->installEventFilter(this);
 
-  ui->lblTitleEditRecord->installEventFilter(this);
-  ui->lblNoteName->installEventFilter(this);
+  mui->lblTitleEditRecord->installEventFilter(this);
+  mui->lblNoteName->installEventFilter(this);
 
-  ui->lblStats->adjustSize();
-  ui->lblStats->setWordWrap(true);
+  mui->lblStats->adjustSize();
+  mui->lblStats->setWordWrap(true);
 
-  ui->lblNoteTitle->adjustSize();
-  ui->lblNoteTitle->setWordWrap(true);
-  ui->lblNoteTitle->hide();
-  ui->f_Tools->hide();
+  mui->lblNoteTitle->adjustSize();
+  mui->lblNoteTitle->setWordWrap(true);
+  mui->lblNoteTitle->hide();
+  mui->f_Tools->hide();
 
   timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
@@ -3353,9 +3359,9 @@ void MainWindow::init_UIWidget() {
   connect(pAndroidKeyboard, &QInputMethod::visibleChanged, this,
           &MainWindow::on_KVChanged);
 
-  ui->progBar->setMaximumHeight(4);
-  ui->progBar->hide();
-  ui->progBar->setStyleSheet(
+  mui->progBar->setMaximumHeight(4);
+  mui->progBar->hide();
+  mui->progBar->setStyleSheet(
       "QProgressBar{border:0px solid #FFFFFF;"
       "height:30;"
       "background:rgba(25,255,25,0);"
@@ -3367,8 +3373,8 @@ void MainWindow::init_UIWidget() {
       "border-radius:0px;"
       "background-color:rgba(18,150,219,255);"
       "}");
-  ui->progReader->setStyleSheet(ui->progBar->styleSheet());
-  ui->progReader->setFixedHeight(4);
+  mui->progReader->setStyleSheet(mui->progBar->styleSheet());
+  mui->progReader->setFixedHeight(4);
 
   if (isIOS) {
   }
@@ -3378,12 +3384,12 @@ void MainWindow::init_UIWidget() {
 
 #endif
 
-  // ui->tabCharts->setCornerWidget(ui->frame_cw);
+  // mui->tabCharts->setCornerWidget(mui->frame_cw);
 
-  ui->tabCharts->tabBar()->hide();
-  m_Method->setToolButtonQss(ui->btnChartMonth, 5, 3, "#FF0000", "#FFFFFF",
+  mui->tabCharts->tabBar()->hide();
+  m_Method->setToolButtonQss(mui->btnChartMonth, 5, 3, "#FF0000", "#FFFFFF",
                              "#FF0000", "#FFFFFF", "#FF5555", "#FFFFFF");
-  m_Method->setToolButtonQss(ui->btnChartDay, 5, 3, "#455364", "#FFFFFF",
+  m_Method->setToolButtonQss(mui->btnChartDay, 5, 3, "#455364", "#FFFFFF",
                              "#455364", "#FFFFFF", "#555364", "#FFFFFF");
 
   int nIConFontSize;
@@ -3394,50 +3400,50 @@ void MainWindow::init_UIWidget() {
 #endif
   QFont f = this->font();
   f.setPointSize(nIConFontSize);
-  ui->btnTodo->setFont(f);
-  ui->btnSteps->setFont(f);
-  ui->btnChart->setFont(f);
-  ui->btnReader->setFont(f);
-  ui->btnNotes->setFont(f);
-  ui->btnSelTab->setFont(f);
+  mui->btnTodo->setFont(f);
+  mui->btnSteps->setFont(f);
+  mui->btnChart->setFont(f);
+  mui->btnReader->setFont(f);
+  mui->btnNotes->setFont(f);
+  mui->btnSelTab->setFont(f);
 
   f.setPointSize(nIConFontSize + 0);
-  ui->btnMenu->setFont(f);
-  ui->btnAdd->setFont(f);
-  ui->btnDel->setFont(f);
-  ui->btnSync->setFont(f);
+  mui->btnMenu->setFont(f);
+  mui->btnAdd->setFont(f);
+  mui->btnDel->setFont(f);
+  mui->btnSync->setFont(f);
 
-  ui->btnReport->setFont(f);
-  ui->btnFind->setFont(f);
-  ui->btnModifyRecord->setFont(f);
-  ui->btnMove->setFont(f);
+  mui->btnReport->setFont(f);
+  mui->btnFind->setFont(f);
+  mui->btnModifyRecord->setFont(f);
+  mui->btnMove->setFont(f);
 
   f.setBold(true);
-  ui->lblSyncNote->setFont(f);
-  ui->lblShowLineSn->setFont(f);
-  ui->lblShowLineSn->setWordWrap(true);
-  ui->lblShowLineSn->adjustSize();
+  mui->lblSyncNote->setFont(f);
+  mui->lblShowLineSn->setFont(f);
+  mui->lblShowLineSn->setWordWrap(true);
+  mui->lblShowLineSn->adjustSize();
 
-  QString lblStyle = ui->lblTitleEditRecord->styleSheet();
-  ui->lblTotal->setStyleSheet(lblStyle);
-  ui->lblDetails->setStyleSheet(lblStyle);
-  ui->lblTitle->setStyleSheet(lblStyle);
-  ui->lblTitle_Report->setStyleSheet(lblStyle);
+  QString lblStyle = mui->lblTitleEditRecord->styleSheet();
+  mui->lblTotal->setStyleSheet(lblStyle);
+  mui->lblDetails->setStyleSheet(lblStyle);
+  mui->lblTitle->setStyleSheet(lblStyle);
+  mui->lblTitle_Report->setStyleSheet(lblStyle);
 
-  ui->tabMotion->setCornerWidget(ui->btnBackSteps, Qt::TopRightCorner);
-  ui->tabMotion->setCurrentIndex(1);
-  QString rbStyle = ui->rbCycling->styleSheet();
-  ui->rbHiking->setStyleSheet(rbStyle);
-  ui->rbRunning->setStyleSheet(rbStyle);
+  mui->tabMotion->setCornerWidget(mui->btnBackSteps, Qt::TopRightCorner);
+  mui->tabMotion->setCurrentIndex(1);
+  QString rbStyle = mui->rbCycling->styleSheet();
+  mui->rbHiking->setStyleSheet(rbStyle);
+  mui->rbRunning->setStyleSheet(rbStyle);
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
 
-  ui->rbCycling->setChecked(Reg.value("/GPS/isCycling", 0).toBool());
-  ui->rbHiking->setChecked(Reg.value("/GPS/isHiking", 0).toBool());
-  ui->rbRunning->setChecked(Reg.value("/GPS/isRunning", 0).toBool());
+  mui->rbCycling->setChecked(Reg.value("/GPS/isCycling", 0).toBool());
+  mui->rbHiking->setChecked(Reg.value("/GPS/isHiking", 0).toBool());
+  mui->rbRunning->setChecked(Reg.value("/GPS/isRunning", 0).toBool());
 
-  ui->btnGPS->setStyleSheet(m_Steps->btnRoundStyle);
-  ui->btnGPS->hide();
-  ui->frame_btnGps->setFixedHeight(80);
+  mui->btnGPS->setStyleSheet(m_Steps->btnRoundStyle);
+  mui->btnGPS->hide();
+  mui->frame_btnGps->setFixedHeight(80);
   QWidget *centralWidget = new QWidget(this);
   QVBoxLayout *layout = new QVBoxLayout(centralWidget);
 
@@ -3446,64 +3452,64 @@ void MainWindow::init_UIWidget() {
   layout->addWidget(sliderButton);
 
   QObject::connect(sliderButton, &SliderButton::sliderMovedToEnd, this,
-                   [&]() { ui->btnGPS->click(); });
-  ui->frame_btnGps->layout()->addWidget(centralWidget);
+                   [&]() { mui->btnGPS->click(); });
+  mui->frame_btnGps->layout()->addWidget(centralWidget);
 }
 
 void MainWindow::init_ButtonStyle() {
   m_Method->set_ToolButtonStyle(this);
-  ui->btnMenu->setStyleSheet("border:none");
-  ui->btnModifyRecord->setStyleSheet("border:none");
-  ui->btnMove->setStyleSheet("border:none");
+  mui->btnMenu->setStyleSheet("border:none");
+  mui->btnModifyRecord->setStyleSheet("border:none");
+  mui->btnMove->setStyleSheet("border:none");
 
-  ui->btnTodo->setStyleSheet("border:none");
-  ui->btnSteps->setStyleSheet("border:none");
-  ui->btnChart->setStyleSheet("border:none");
-  ui->btnReader->setStyleSheet("border:none");
-  ui->btnNotes->setStyleSheet("border:none");
-  ui->btnAdd->setStyleSheet("border:none");
-  ui->btnDel->setStyleSheet("border:none");
-  ui->btnPasteTodo->setStyleSheet("border:none");
-  ui->btnSync->setStyleSheet("border:none");
-  ui->btnFind->setStyleSheet("border:none");
-  ui->btnReport->setStyleSheet("border:none");
-  ui->btnSelTab->setStyleSheet("border:none");
+  mui->btnTodo->setStyleSheet("border:none");
+  mui->btnSteps->setStyleSheet("border:none");
+  mui->btnChart->setStyleSheet("border:none");
+  mui->btnReader->setStyleSheet("border:none");
+  mui->btnNotes->setStyleSheet("border:none");
+  mui->btnAdd->setStyleSheet("border:none");
+  mui->btnDel->setStyleSheet("border:none");
+  mui->btnPasteTodo->setStyleSheet("border:none");
+  mui->btnSync->setStyleSheet("border:none");
+  mui->btnFind->setStyleSheet("border:none");
+  mui->btnReport->setStyleSheet("border:none");
+  mui->btnSelTab->setStyleSheet("border:none");
 
   if (isDark) {
-    ui->f_ReaderFun->setStyleSheet("QFrame{background-color: #2874AC;}");
-    ui->btnOpen->setStyleSheet("border:none; background-color:#2874AC;");
-    ui->btnBackReader->setStyleSheet("border:none; background-color:#2874AC;");
-    ui->btnCatalogue->setStyleSheet("border:none; background-color:#2874AC;");
-    ui->btnBackDir->setStyleSheet("border:none; background-color:#2874AC;");
+    mui->f_ReaderFun->setStyleSheet("QFrame{background-color: #2874AC;}");
+    mui->btnOpen->setStyleSheet("border:none; background-color:#2874AC;");
+    mui->btnBackReader->setStyleSheet("border:none; background-color:#2874AC;");
+    mui->btnCatalogue->setStyleSheet("border:none; background-color:#2874AC;");
+    mui->btnBackDir->setStyleSheet("border:none; background-color:#2874AC;");
 
-    ui->btnReadList->setStyleSheet("border:none; background-color:#2874AC;");
-    ui->btnShowBookmark->setStyleSheet(
+    mui->btnReadList->setStyleSheet("border:none; background-color:#2874AC;");
+    mui->btnShowBookmark->setStyleSheet(
         "border:none; background-color:#2874AC;");
-    ui->btnPages->setStyleSheet("border:none; background-color:#2874AC;");
-    ui->btnAutoRun->setStyleSheet("border:none; background-color:#2874AC;");
-    ui->btnAutoStop->setStyleSheet("border:none; background-color:#2874AC;");
+    mui->btnPages->setStyleSheet("border:none; background-color:#2874AC;");
+    mui->btnAutoRun->setStyleSheet("border:none; background-color:#2874AC;");
+    mui->btnAutoStop->setStyleSheet("border:none; background-color:#2874AC;");
 
-    mw_one->ui->btnPages->setStyleSheet(
+    mui->btnPages->setStyleSheet(
         "color: rgb(255, 255, 255);background-color: #2874AC; "
         "border: "
         "0px solid "
         "rgb(255,0,0);border-radius: 0px;"
         "font-weight: bold;");
   } else {
-    ui->f_ReaderFun->setStyleSheet("QFrame{background-color: #3498DB;}");
-    ui->btnOpen->setStyleSheet("border:none; background-color:#3498DB;");
-    ui->btnBackReader->setStyleSheet("border:none; background-color:#3498DB;");
-    ui->btnCatalogue->setStyleSheet("border:none; background-color:#3498DB;");
-    ui->btnBackDir->setStyleSheet("border:none; background-color:#3498DB;");
+    mui->f_ReaderFun->setStyleSheet("QFrame{background-color: #3498DB;}");
+    mui->btnOpen->setStyleSheet("border:none; background-color:#3498DB;");
+    mui->btnBackReader->setStyleSheet("border:none; background-color:#3498DB;");
+    mui->btnCatalogue->setStyleSheet("border:none; background-color:#3498DB;");
+    mui->btnBackDir->setStyleSheet("border:none; background-color:#3498DB;");
 
-    ui->btnReadList->setStyleSheet("border:none; background-color:#3498DB;");
-    ui->btnShowBookmark->setStyleSheet(
+    mui->btnReadList->setStyleSheet("border:none; background-color:#3498DB;");
+    mui->btnShowBookmark->setStyleSheet(
         "border:none; background-color:#3498DB;");
-    ui->btnPages->setStyleSheet("border:none; background-color:#3498DB;");
-    ui->btnAutoRun->setStyleSheet("border:none; background-color:#3498DB;");
-    ui->btnAutoStop->setStyleSheet("border:none; background-color:#3498DB;");
+    mui->btnPages->setStyleSheet("border:none; background-color:#3498DB;");
+    mui->btnAutoRun->setStyleSheet("border:none; background-color:#3498DB;");
+    mui->btnAutoStop->setStyleSheet("border:none; background-color:#3498DB;");
 
-    mw_one->ui->btnPages->setStyleSheet(
+    mui->btnPages->setStyleSheet(
         "color: rgb(255, 255, 255);background-color: #3498DB; "
         "border: "
         "0px solid "
@@ -3521,37 +3527,37 @@ void MainWindow::init_ButtonStyle() {
 }
 
 void MainWindow::selTab() {
-  int index = m_Method->getCurrentIndexFromQW(ui->qwSelTab);
+  int index = m_Method->getCurrentIndexFromQW(mui->qwSelTab);
   tabData->setCurrentIndex(index);
   on_btnBackSetTab_clicked();
-  m_Method->clearAllBakList(ui->qwSelTab);
+  m_Method->clearAllBakList(mui->qwSelTab);
 
-  if (ui->btnTabMoveDown->isHidden()) {
-    ui->btnTabMoveDown->show();
-    ui->btnTabMoveUp->show();
+  if (mui->btnTabMoveDown->isHidden()) {
+    mui->btnTabMoveDown->show();
+    mui->btnTabMoveUp->show();
     on_btnAdd_clicked();
     m_EditRecord->setCurrentValue();
   }
 }
 
 void MainWindow::getMainTabs() {
-  m_Method->clearAllBakList(ui->qwSelTab);
+  m_Method->clearAllBakList(mui->qwSelTab);
   int tab_count = tabData->tabBar()->count();
   for (int i = 0; i < tab_count; i++) {
     QString text0 = tabData->tabText(i);
-    m_Method->addItemToQW(ui->qwSelTab, text0, "", "", "", 0);
+    m_Method->addItemToQW(mui->qwSelTab, text0, "", "", "", 0);
   }
 
-  int index = ui->tabWidget->currentIndex();
-  m_Method->setCurrentIndexFromQW(ui->qwSelTab, index);
+  int index = mui->tabWidget->currentIndex();
+  m_Method->setCurrentIndexFromQW(mui->qwSelTab, index);
 
-  ui->lblSelTabInfo->setText(tr("Total") + " : " + QString::number(tab_count) +
-                             " ( " + QString::number(index + 1) + " ) ");
+  mui->lblSelTabInfo->setText(tr("Total") + " : " + QString::number(tab_count) +
+                              " ( " + QString::number(index + 1) + " ) ");
 }
 
 void MainWindow::on_btnSelTab_clicked() {
-  ui->frameMain->hide();
-  ui->frameSetTab->show();
+  mui->frameMain->hide();
+  mui->frameSetTab->show();
   getMainTabs();
 }
 
@@ -3653,36 +3659,36 @@ void MainWindow::on_openKnotBakDir() {
 }
 
 void MainWindow::init_CloudBacup() {
-  ui->editWebDAV->setText(
+  mui->editWebDAV->setText(
       iniPreferences->value("/webdav/url", "https://dav.jianguoyun.com/dav/")
           .toString());
 
-  ui->editWebDAVUsername->setText(
+  mui->editWebDAVUsername->setText(
       iniPreferences->value("/webdav/username").toString());
 
   QString aesStr = iniPreferences->value("/webdav/password").toString();
   QString password = m_CloudBackup->aesDecrypt(aesStr, aes_key, aes_iv);
-  ui->editWebDAVPassword->setText(password);
+  mui->editWebDAVPassword->setText(password);
 
-  ui->chkOneDrive->setChecked(
+  mui->chkOneDrive->setChecked(
       iniPreferences->value("/cloudbak/onedrive", 0).toBool());
-  ui->chkWebDAV->setChecked(
+  mui->chkWebDAV->setChecked(
       iniPreferences->value("/cloudbak/webdav", 1).toBool());
-  ui->chkAutoSync->setChecked(
+  mui->chkAutoSync->setChecked(
       iniPreferences->value("/cloudbak/autosync", 0).toBool());
 }
 
 void MainWindow::on_actionOneDriveBackupData() {
-  ui->frameMain->hide();
-  ui->frameReader->hide();
-  ui->frameOne->show();
+  mui->frameMain->hide();
+  mui->frameReader->hide();
+  mui->frameOne->show();
 }
 
 void MainWindow::on_actionTabRecycle() {
-  ui->frameMain->hide();
-  ui->frameTabRecycle->show();
+  mui->frameMain->hide();
+  mui->frameTabRecycle->show();
 
-  m_Method->clearAllBakList(ui->qwTabRecycle);
+  m_Method->clearAllBakList(mui->qwTabRecycle);
 
   QString tab_name, tab_time;
   QStringList iniFiles;
@@ -3747,17 +3753,17 @@ void MainWindow::on_actionTabRecycle() {
     tab_name = str.split("-=-").at(0);
     tab_time = str.split("-=-").at(1);
     iniTotal = str.split("-=-").at(2);
-    m_Method->addItemToQW(ui->qwTabRecycle, tab_name, tab_time, "", iniTotal,
+    m_Method->addItemToQW(mui->qwTabRecycle, tab_name, tab_time, "", iniTotal,
                           0);
   }
 
-  int t_count = m_Method->getCountFromQW(ui->qwTabRecycle);
+  int t_count = m_Method->getCountFromQW(mui->qwTabRecycle);
   if (t_count > 0) {
-    m_Method->setCurrentIndexFromQW(ui->qwTabRecycle, 0);
+    m_Method->setCurrentIndexFromQW(mui->qwTabRecycle, 0);
   }
 
-  ui->lblTitleTabRecycle->setText(tr("Tab Recycle") + "    " + tr("Total") +
-                                  " : " + QString::number(t_count));
+  mui->lblTitleTabRecycle->setText(tr("Tab Recycle") + "    " + tr("Total") +
+                                   " : " + QString::number(t_count));
 }
 
 void MainWindow::on_actionBakFileList() {
@@ -3765,8 +3771,8 @@ void MainWindow::on_actionBakFileList() {
 }
 
 void MainWindow::startBackgroundTaskUpdateBakFileList() {
-  ui->frameMain->hide();
-  ui->frameBakList->show();
+  mui->frameMain->hide();
+  mui->frameBakList->show();
 
   QFuture<void> future = QtConcurrent::run([=]() {
     bakFileList = m_Preferences->getBakFilesList();
@@ -3787,22 +3793,22 @@ void MainWindow::startBackgroundTaskUpdateBakFileList() {
   // 可选：使用 QFutureWatcher 监控进度
   QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    m_Method->clearAllBakList(ui->qwBakList);
+    m_Method->clearAllBakList(mui->qwBakList);
     int bakCount = bakFileList.count();
     for (int i = 0; i < bakCount; i++) {
       QString action, bakfile;
       QString str = bakFileList.at(bakCount - 1 - i);
       action = str.split("-===-").at(0);
       bakfile = str.split("-===-").at(1);
-      m_Method->addItemToQW(ui->qwBakList, action, "", "", bakfile, 0);
+      m_Method->addItemToQW(mui->qwBakList, action, "", "", bakfile, 0);
     }
 
-    if (m_Method->getCountFromQW(ui->qwBakList) > 0)
-      m_Method->setCurrentIndexFromQW(ui->qwBakList, 0);
+    if (m_Method->getCountFromQW(mui->qwBakList) > 0)
+      m_Method->setCurrentIndexFromQW(mui->qwBakList, 0);
 
-    ui->lblBakListTitle->setText(
+    mui->lblBakListTitle->setText(
         tr("Backup File List") + "    " + tr("Total") + " : " +
-        QString::number(m_Method->getCountFromQW(ui->qwBakList)));
+        QString::number(m_Method->getCountFromQW(mui->qwBakList)));
 
     qDebug() << "BakFileList update completed";
     watcher->deleteLater();
@@ -3817,9 +3823,9 @@ void MainWindow::on_btnMenu_clicked() {
 #ifdef Q_OS_ANDROID
   x = mw_one->geometry().x() + 2;
 #else
-  x = mw_one->geometry().x() + ui->btnMenu->x();
+  x = mw_one->geometry().x() + mui->btnMenu->x();
 #endif
-  int y = geometry().y() + ui->f_Menu->height() + 2;
+  int y = geometry().y() + mui->f_Menu->height() + 2;
   QPoint pos(x, y);
   mainMenu->exec(pos);
 }
@@ -3840,7 +3846,7 @@ static void JavaNotify_0() {
   if (mw_one->initMain) return;
 
   if (mw_one->m_Steps->isNeedRestoreUI) {
-    mw_one->ui->btnSteps->click();
+    mui->btnSteps->click();
   }
 
   qDebug() << "C++ JavaNotify_0";
@@ -3851,8 +3857,8 @@ static void JavaNotify_1() {
 
   if (mw_one->initMain) return;
 
-  if (!mw_one->ui->frameSteps->isHidden()) {
-    mw_one->ui->btnBackSteps->click();
+  if (!mui->frameSteps->isHidden()) {
+    mui->btnBackSteps->click();
     mw_one->m_Steps->isNeedRestoreUI = true;
   }
 
@@ -3954,7 +3960,7 @@ static void JavaNotify_10() {
 
 static void JavaNotify_11() {
   // Books List
-  mw_one->ui->btnReadList->click();
+  mui->btnReadList->click();
 
   qDebug() << "C++ JavaNotify_11";
 }
@@ -3975,7 +3981,7 @@ static void JavaNotify_14() {
   if (m_Method->getDateTimeFlag() == "todo") {
     mw_one->m_TodoAlarm->setDateTime();
   } else if (m_Method->getDateTimeFlag() == "gpslist") {
-    mw_one->ui->btnGetGpsListData->click();
+    mui->btnGetGpsListData->click();
   } else {
     mw_one->m_DateSelector->ui->btnOk->click();
   }
@@ -4110,43 +4116,43 @@ static void JavaNotify_15() {
     return;
   }
 
-  if (mw_one->ui->f_ReaderSet->isVisible()) {
-    mw_one->ui->btnBackReaderSet->click();
+  if (mui->f_ReaderSet->isVisible()) {
+    mui->btnBackReaderSet->click();
     return;
   }
 
-  if (!mw_one->ui->frameReader->isHidden()) {
-    if (mw_one->ui->qwCata->isVisible()) {
-      mw_one->ui->btnCatalogue->click();
+  if (!mui->frameReader->isHidden()) {
+    if (mui->qwCata->isVisible()) {
+      mui->btnCatalogue->click();
       return;
 
-    } else if (mw_one->ui->qwBookmark->isVisible()) {
-      mw_one->ui->btnShowBookmark->click();
+    } else if (mui->qwBookmark->isVisible()) {
+      mui->btnShowBookmark->click();
       return;
 
     } else if (!mw_one->mydlgSetText->isHidden()) {
       mw_one->mydlgSetText->close();
       return;
 
-    } else if (!mw_one->ui->textBrowser->isHidden()) {
-      mw_one->ui->btnSelText->click();
+    } else if (!mui->textBrowser->isHidden()) {
+      mui->btnSelText->click();
       return;
     }
 
     else {
-      mw_one->ui->btnBackReader->click();
+      mui->btnBackReader->click();
       return;
     }
   }
 
-  if (!mw_one->ui->frameImgView->isHidden()) {
-    mw_one->ui->btnBackImg->click();
+  if (!mui->frameImgView->isHidden()) {
+    mui->btnBackImg->click();
     return;
   }
 
-  if (!mw_one->ui->frameMain->isHidden()) {
-    if (!mw_one->ui->f_charts->isHidden()) {
-      mw_one->ui->btnChart->click();
+  if (!mui->frameMain->isHidden()) {
+    if (!mui->f_charts->isHidden()) {
+      mui->btnChart->click();
       return;
     }
 
@@ -4155,28 +4161,28 @@ static void JavaNotify_15() {
     return;
   }
 
-  if (!mw_one->ui->frameOne->isHidden()) {
-    mw_one->ui->btnBack_One->click();
+  if (!mui->frameOne->isHidden()) {
+    mui->btnBack_One->click();
     return;
   }
 
-  if (!mw_one->ui->frameNoteRecycle->isHidden()) {
-    mw_one->ui->btnBackNoteRecycle->click();
+  if (!mui->frameNoteRecycle->isHidden()) {
+    mui->btnBackNoteRecycle->click();
     return;
   }
 
-  if (!mw_one->ui->frameNotesSearchResult->isHidden()) {
-    mw_one->ui->btnBack_NotesSearchResult->click();
+  if (!mui->frameNotesSearchResult->isHidden()) {
+    mui->btnBack_NotesSearchResult->click();
     return;
   }
 
-  if (!mw_one->ui->frameNoteList->isHidden()) {
-    mw_one->ui->btnBackNoteList->click();
+  if (!mui->frameNoteList->isHidden()) {
+    mui->btnBackNoteList->click();
     return;
   }
 
-  if (!mw_one->ui->frameNotes->isHidden()) {
-    mw_one->ui->btnBackNotes->click();
+  if (!mui->frameNotes->isHidden()) {
+    mui->btnBackNotes->click();
     return;
   }
 
@@ -4185,70 +4191,70 @@ static void JavaNotify_15() {
     return;
   }
 
-  if (!mw_one->ui->frameTodo->isHidden()) {
-    mw_one->ui->btnBackTodo->click();
+  if (!mui->frameTodo->isHidden()) {
+    mui->btnBackTodo->click();
     return;
   }
 
-  if (!mw_one->ui->frameTodoRecycle->isHidden()) {
-    mw_one->ui->btnReturnRecycle->click();
+  if (!mui->frameTodoRecycle->isHidden()) {
+    mui->btnReturnRecycle->click();
     return;
   }
 
-  if (!mw_one->ui->frameTabRecycle->isHidden()) {
-    mw_one->ui->btnBackTabRecycle->click();
+  if (!mui->frameTabRecycle->isHidden()) {
+    mui->btnBackTabRecycle->click();
     return;
   }
 
-  if (!mw_one->ui->frameSteps->isHidden()) {
-    mw_one->ui->btnBackSteps->click();
+  if (!mui->frameSteps->isHidden()) {
+    mui->btnBackSteps->click();
     return;
   }
 
-  if (!mw_one->ui->frameViewCate->isHidden()) {
-    mw_one->ui->frameViewCate->hide();
-    mw_one->ui->frameReport->show();
+  if (!mui->frameViewCate->isHidden()) {
+    mui->frameViewCate->hide();
+    mui->frameReport->show();
     return;
   }
 
-  if (!mw_one->ui->frameReport->isHidden()) {
-    mw_one->ui->btnBack_Report->click();
+  if (!mui->frameReport->isHidden()) {
+    mui->btnBack_Report->click();
     return;
   }
 
-  if (!mw_one->ui->frameSearch->isHidden()) {
-    mw_one->ui->btnBackSearch->click();
+  if (!mui->frameSearch->isHidden()) {
+    mui->btnBackSearch->click();
     return;
   }
 
-  if (!mw_one->ui->frameBakList->isHidden()) {
-    mw_one->ui->btnBackBakList->click();
+  if (!mui->frameBakList->isHidden()) {
+    mui->btnBackBakList->click();
     return;
   }
 
-  if (!mw_one->ui->frameCategory->isHidden()) {
-    mw_one->ui->btnCancelType->click();
+  if (!mui->frameCategory->isHidden()) {
+    mui->btnCancelType->click();
     return;
   }
 
-  if (!mw_one->ui->frameSetTab->isHidden()) {
-    mw_one->ui->btnBackSetTab->click();
+  if (!mui->frameSetTab->isHidden()) {
+    mui->btnBackSetTab->click();
     return;
   }
 
-  if (!mw_one->ui->frameEditRecord->isHidden()) {
-    mw_one->ui->btnBackEditRecord->click();
+  if (!mui->frameEditRecord->isHidden()) {
+    mui->btnBackEditRecord->click();
 
     return;
   }
 
-  if (!mw_one->ui->frameBookList->isHidden()) {
-    mw_one->ui->btnBackBookList->click();
+  if (!mui->frameBookList->isHidden()) {
+    mui->btnBackBookList->click();
     return;
   }
 
-  if (!mw_one->ui->frameNotesTree->isHidden()) {
-    mw_one->ui->btnBack_Tree->click();
+  if (!mui->frameNotesTree->isHidden()) {
+    mui->btnBack_Tree->click();
     return;
   }
 
@@ -4335,8 +4341,8 @@ QString MainWindow::getYMD(QString date) {
 void MainWindow::on_btnReader_clicked() {
   if (isPDF) {
     if (isAndroid) {
-      ui->frameMain->hide();
-      ui->frameBookList->show();
+      mui->frameMain->hide();
+      mui->frameBookList->show();
 
       m_Reader->getReadList();
 
@@ -4345,21 +4351,21 @@ void MainWindow::on_btnReader_clicked() {
     }
   }
 
-  ui->frameMain->hide();
-  ui->frameReader->show();
-  ui->f_ReaderFun->show();
+  mui->frameMain->hide();
+  mui->frameReader->show();
+  mui->f_ReaderFun->show();
 
   isReaderVisible = true;
   isMemoVisible = false;
 
   if (!isOne) {
-    while (!ui->btnReader->isEnabled())
+    while (!mui->btnReader->isEnabled())
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
     mwh = this->height();
     setFixedHeight(mwh);
-    ui->qwReader->rootContext()->setContextProperty("myW", this->width());
-    ui->qwReader->rootContext()->setContextProperty("myH", mwh);
+    mui->qwReader->rootContext()->setContextProperty("myW", this->width());
+    mui->qwReader->rootContext()->setContextProperty("myH", mwh);
   }
 
   if (!isOne) {
@@ -4369,33 +4375,33 @@ void MainWindow::on_btnReader_clicked() {
 }
 
 void MainWindow::on_btnBackReader_clicked() {
-  ui->btnAutoStop->click();
+  mui->btnAutoStop->click();
 
   m_ReaderSet->close();
 
   if (m_Reader->isSelText) on_btnSelText_clicked();
 
-  if (ui->f_ReaderSet->isVisible()) {
+  if (mui->f_ReaderSet->isVisible()) {
     on_btnBackReaderSet_clicked();
   }
 
   m_Reader->saveReader("", false);
   m_Reader->savePageVPos();
 
-  ui->frameReader->hide();
-  ui->frameMain->show();
+  mui->frameReader->hide();
+  mui->frameMain->show();
 }
 
 void MainWindow::on_btnOpen_clicked() {
-  ui->btnAutoStop->click();
+  mui->btnAutoStop->click();
 
   m_Reader->saveReader("", false);
   m_Reader->savePageVPos();
 
-  if (ui->f_ReaderSet->isVisible()) {
+  if (mui->f_ReaderSet->isVisible()) {
     on_btnBackReaderSet_clicked();
   }
-  if (ui->qwBookmark->isVisible()) {
+  if (mui->qwBookmark->isVisible()) {
     on_btnShowBookmark_clicked();
   }
   m_ReaderSet->close();
@@ -4408,28 +4414,28 @@ void MainWindow::on_btnPageUp_clicked() { m_Reader->goUpPage(); }
 void MainWindow::on_btnPageNext_clicked() { m_Reader->goNextPage(); }
 
 void MainWindow::on_btnPages_clicked() {
-  ui->btnAutoStop->click();
+  mui->btnAutoStop->click();
 
-  if (ui->qwCata->isVisible()) return;
+  if (mui->qwCata->isVisible()) return;
 
-  if (ui->f_ReaderSet->isHidden()) {
-    ui->f_ReaderSet->show();
+  if (mui->f_ReaderSet->isHidden()) {
+    mui->f_ReaderSet->show();
 
     m_Reader->closeSelText();
-    if (ui->qwBookmark->isVisible()) {
+    if (mui->qwBookmark->isVisible()) {
       on_btnShowBookmark_clicked();
     }
 
-    QStringList list = ui->btnPages->text().split("\n");
+    QStringList list = mui->btnPages->text().split("\n");
     if (list.count() == 2) {
       QString cur = list.at(0);
       QString total = list.at(1);
-      ui->lblProg->setText(tr("Reading Progress") + " : " + cur + " -> " +
-                           total);
+      mui->lblProg->setText(tr("Reading Progress") + " : " + cur + " -> " +
+                            total);
 
-      ui->hSlider->setMaximum(total.toInt());
-      ui->hSlider->setMinimum(1);
-      ui->hSlider->setValue(cur.toInt());
+      mui->hSlider->setMaximum(total.toInt());
+      mui->hSlider->setMinimum(1);
+      mui->hSlider->setValue(cur.toInt());
     }
   } else
     on_btnBackReaderSet_clicked();
@@ -4437,47 +4443,47 @@ void MainWindow::on_btnPages_clicked() {
 
 void MainWindow::on_hSlider_sliderMoved(int position) {
   if (isText) {
-    ui->btnPages->setText(QString::number(position) + "\n" +
-                          QString::number(totalPages));
-    ui->progReader->setMinimum(1);
-    ui->progReader->setMaximum(totalPages);
-    ui->progReader->setValue(position);
+    mui->btnPages->setText(QString::number(position) + "\n" +
+                           QString::number(totalPages));
+    mui->progReader->setMinimum(1);
+    mui->progReader->setMaximum(totalPages);
+    mui->progReader->setValue(position);
   }
 
   if (isEpub) {
-    ui->btnPages->setText(QString::number(position) + "\n" +
-                          QString::number(htmlFiles.count()));
-    ui->progReader->setMinimum(1);
-    ui->progReader->setMaximum(htmlFiles.count());
+    mui->btnPages->setText(QString::number(position) + "\n" +
+                           QString::number(htmlFiles.count()));
+    mui->progReader->setMinimum(1);
+    mui->progReader->setMaximum(htmlFiles.count());
     if (position == 0) position = 1;
-    ui->progReader->setValue(position);
+    mui->progReader->setValue(position);
   }
 
   m_ReaderSet->updateProgress();
 }
 
 void MainWindow::on_btnReadList_clicked() {
-  ui->btnAutoStop->click();
+  mui->btnAutoStop->click();
 
   m_Reader->saveReader("", false);
   m_Reader->savePageVPos();
 
   if (isAndroid) m_Reader->closeMyPDF();
 
-  if (ui->f_ReaderSet->isVisible()) {
+  if (mui->f_ReaderSet->isVisible()) {
     on_btnBackReaderSet_clicked();
   }
 
-  if (mw_one->ui->qwBookmark->isVisible()) {
+  if (mui->qwBookmark->isVisible()) {
     mw_one->on_btnShowBookmark_clicked();
   }
 
   m_ReaderSet->close();
   m_Reader->closeSelText();
 
-  if (ui->frameMain->isVisible()) ui->frameMain->hide();
-  ui->frameReader->hide();
-  ui->frameBookList->show();
+  if (mui->frameMain->isVisible()) mui->frameMain->hide();
+  mui->frameReader->hide();
+  mui->frameBookList->show();
 
   m_Reader->getReadList();
 }
@@ -4495,7 +4501,7 @@ void MainWindow::refreshMainUI() {
 }
 
 void MainWindow::on_btnSelText_clicked() {
-  if (ui->f_ReaderSet->isVisible()) {
+  if (mui->f_ReaderSet->isVisible()) {
     on_btnBackReaderSet_clicked();
   }
   m_Reader->selectText();
@@ -4510,7 +4516,7 @@ void MainWindow::on_btnSignOut_clicked() {
 }
 
 void MainWindow::on_btnUpload_clicked() {
-  if (!ui->btnReader->isEnabled()) return;
+  if (!mui->btnReader->isEnabled()) return;
   m_CloudBackup->startBakData();
 }
 
@@ -4521,29 +4527,29 @@ void MainWindow::on_btnDownload_clicked() {
 void MainWindow::on_btnBack_One_clicked() {
   clearWidgetFocus();
 
-  if (!ui->frameOne->isHidden()) {
-    if (ui->f_OneFun->isHidden()) {
-      ui->f_OneFun->show();
-      ui->f_FunWeb->hide();
+  if (!mui->frameOne->isHidden()) {
+    if (mui->f_OneFun->isHidden()) {
+      mui->f_OneFun->show();
+      mui->f_FunWeb->hide();
 
       m_CloudBackup->loadLogQML();
     } else {
-      ui->frameOne->hide();
-      ui->frameMain->show();
+      mui->frameOne->hide();
+      mui->frameMain->show();
     }
   }
 
-  iniPreferences->setValue("/webdav/url", ui->editWebDAV->text().trimmed());
+  iniPreferences->setValue("/webdav/url", mui->editWebDAV->text().trimmed());
 
   iniPreferences->setValue("/webdav/username",
-                           ui->editWebDAVUsername->text().trimmed());
-  QString password = ui->editWebDAVPassword->text().trimmed();
+                           mui->editWebDAVUsername->text().trimmed());
+  QString password = mui->editWebDAVPassword->text().trimmed();
   QString aesStr = m_CloudBackup->aesEncrypt(password, aes_key, aes_iv);
   iniPreferences->setValue("/webdav/password", aesStr);
 
-  iniPreferences->setValue("/cloudbak/onedrive", ui->chkOneDrive->isChecked());
-  iniPreferences->setValue("/cloudbak/webdav", ui->chkWebDAV->isChecked());
-  iniPreferences->setValue("/cloudbak/autosync", ui->chkAutoSync->isChecked());
+  iniPreferences->setValue("/cloudbak/onedrive", mui->chkOneDrive->isChecked());
+  iniPreferences->setValue("/cloudbak/webdav", mui->chkWebDAV->isChecked());
+  iniPreferences->setValue("/cloudbak/autosync", mui->chkAutoSync->isChecked());
 
   setEncSyncStatusTip();
 }
@@ -4567,19 +4573,19 @@ void MainWindow::on_btnUserInfo_clicked() {
 }
 
 void MainWindow::on_btnBackNotes_clicked() {
-  ui->frameNotes->hide();
-  ui->frameNoteList->show();
+  mui->frameNotes->hide();
+  mui->frameNoteList->show();
 }
 
 void MainWindow::on_btnEdit_clicked() { m_Notes->openEditUI(); }
 
 void MainWindow::clearSelectBox() {
   QString tempFile = iniDir + "memo/texteditor.html";
-  if (!mw_one->ui->frameReader->isHidden()) {
+  if (!mui->frameReader->isHidden()) {
     mw_one->m_Reader->savePageVPos();
     bool isAni = false;
-    mw_one->ui->qwReader->rootContext()->setContextProperty("isAni", isAni);
-    QQuickItem *root = mw_one->ui->qwReader->rootObject();
+    mui->qwReader->rootContext()->setContextProperty("isAni", isAni);
+    QQuickItem *root = mui->qwReader->rootObject();
     QMetaObject::invokeMethod((QObject *)root, "loadHtml",
                               Q_ARG(QVariant, tempFile));
     m_Method->Sleep(50);
@@ -4588,13 +4594,13 @@ void MainWindow::clearSelectBox() {
           (QObject *)root, "loadHtml",
           Q_ARG(QVariant, mw_one->m_Reader->currentHtmlFile));
     } else {
-      ui->qwReader->rootContext()->setContextProperty("strText",
-                                                      m_Reader->currentTxt);
+      mui->qwReader->rootContext()->setContextProperty("strText",
+                                                       m_Reader->currentTxt);
     }
     mw_one->m_Reader->setPageVPos();
   }
 
-  if (!mw_one->ui->frameNotes->isHidden()) {
+  if (!mui->frameNotes->isHidden()) {
   }
 }
 
@@ -4607,7 +4613,7 @@ void MainWindow::on_btnCopy_clicked() {
 QString MainWindow::getSelectedText() {
   QString str;
   QVariant returnedValue;
-  QQuickItem *root = ui->qwReader->rootObject();
+  QQuickItem *root = mui->qwReader->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "getSelectedText",
                             Q_RETURN_ARG(QVariant, returnedValue));
   str = returnedValue.toString();
@@ -4626,20 +4632,20 @@ void MainWindow::on_btnSearch_clicked() {
   on_btnCancelSel_clicked();
 }
 
-void MainWindow::on_btnCancelSel_clicked() { ui->btnSelText->click(); }
+void MainWindow::on_btnCancelSel_clicked() { mui->btnSelText->click(); }
 
 void MainWindow::on_textBrowser_selectionChanged() {
-  QString str = ui->textBrowser->textCursor().selectedText().trimmed();
-  ui->editSetText->setText(str);
+  QString str = mui->textBrowser->textCursor().selectedText().trimmed();
+  mui->editSetText->setText(str);
   mydlgSetText->ui->lineEdit->setText(str);
 }
 
 void MainWindow::on_SetReaderFunVisible() {
   if (!isTurnThePage) {
-    if (ui->f_ReaderFun->isHidden())
-      ui->f_ReaderFun->show();
+    if (mui->f_ReaderFun->isHidden())
+      mui->f_ReaderFun->show();
     else {
-      ui->f_ReaderFun->hide();
+      mui->f_ReaderFun->hide();
       m_ReaderSet->hide();
     }
   }
@@ -4650,13 +4656,13 @@ void MainWindow::on_timerMousePress() {
 }
 
 void MainWindow::on_btnNotesList_clicked() {
-  ui->frameNotes->hide();
-  ui->frameNoteList->show();
+  mui->frameNotes->hide();
+  mui->frameNoteList->show();
   m_NotesList->set_memo_dir();
 
   if (m_NotesList->tw->topLevelItemCount() == 0) {
-    ui->lblNoteBook->setText(tr("Note Book"));
-    ui->lblNoteList->setText(tr("Note List"));
+    mui->lblNoteBook->setText(tr("Note Book"));
+    mui->lblNoteList->setText(tr("Note List"));
     return;
   }
 
@@ -4666,30 +4672,30 @@ void MainWindow::on_btnNotesList_clicked() {
 }
 
 void MainWindow::on_btnBackImg_clicked() {
-  ui->frameImgView->hide();
-  if (isReaderVisible) ui->frameReader->show();
-  if (isMemoVisible) ui->frameNotes->show();
+  mui->frameImgView->hide();
+  if (isReaderVisible) mui->frameReader->show();
+  if (isMemoVisible) mui->frameNotes->show();
 }
 
 void MainWindow::on_btnZoomIn_clicked() {
-  QQuickItem *root = ui->qw_Img->rootObject();
+  QQuickItem *root = mui->qw_Img->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "zoomin");
 }
 
 void MainWindow::on_btnZoomOut_clicked() {
-  QQuickItem *root = ui->qw_Img->rootObject();
+  QQuickItem *root = mui->qw_Img->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "zoomout");
 }
 
 void MainWindow::on_btnReport_clicked() {
   on_actionReport_triggered();
-  ui->btnYear->setFixedHeight(ui->btnMonth->height());
+  mui->btnYear->setFixedHeight(mui->btnMonth->height());
 }
 
 void MainWindow::on_btnPasteCode_clicked() {
   QClipboard *clipboard = QApplication::clipboard();
   QString originalText = clipboard->text();
-  ui->editCode->setPlainText(originalText);
+  mui->editCode->setPlainText(originalText);
 }
 
 void MainWindow::on_btnAdd_clicked() {
@@ -4700,22 +4706,22 @@ void MainWindow::on_btnAdd_clicked() {
 
 void MainWindow::on_btnDel_clicked() {
   isMoveEntry = false;
-  del_Data((QTreeWidget *)ui->tabWidget->currentWidget());
+  del_Data((QTreeWidget *)mui->tabWidget->currentWidget());
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
   Q_UNUSED(event);
-  ui->qwReader->rootContext()->setContextProperty("myW", this->width());
-  ui->qwReader->rootContext()->setContextProperty("myH", this->height());
-  ui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
-                                                QVariant(false));
-  ui->qwSteps->rootContext()->setContextProperty("myW", this->width());
+  mui->qwReader->rootContext()->setContextProperty("myW", this->width());
+  mui->qwReader->rootContext()->setContextProperty("myH", this->height());
+  mui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
+                                                 QVariant(false));
+  mui->qwSteps->rootContext()->setContextProperty("myW", this->width());
 
 #ifdef Q_OS_ANDROID
 
 #else
-  if (!ui->frameTodo->isHidden()) {
-    ui->qwTodo->rootContext()->setContextProperty("m_width", mw_one->width());
+  if (!mui->frameTodo->isHidden()) {
+    mui->qwTodo->rootContext()->setContextProperty("m_width", mw_one->width());
     m_Todo->init_Todo();
   }
 #endif
@@ -4752,21 +4758,21 @@ void MainWindow::on_editTodo_textChanged() {
 }
 
 void MainWindow::setItemHeight(int h) {
-  QQuickItem *root = mw_one->ui->qwMainTab->rootObject();
+  QQuickItem *root = mui->qwMainTab->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "setItemHeight",
                             Q_ARG(QVariant, h));
 }
 
 void MainWindow::addItem(QString text0, QString text1, QString text2,
                          QString text3, int itemH) {
-  QQuickItem *root = mw_one->ui->qwMainTab->rootObject();
+  QQuickItem *root = mui->qwMainTab->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "addItem", Q_ARG(QVariant, text0),
                             Q_ARG(QVariant, text1), Q_ARG(QVariant, text2),
                             Q_ARG(QVariant, text3), Q_ARG(QVariant, itemH));
 }
 
 QString MainWindow::getTop(int index) {
-  QQuickItem *root = mw_one->ui->qwMainTab->rootObject();
+  QQuickItem *root = mui->qwMainTab->rootObject();
   QVariant itemTime;
   QMetaObject::invokeMethod((QObject *)root, "getTop",
                             Q_RETURN_ARG(QVariant, itemTime),
@@ -4775,7 +4781,7 @@ QString MainWindow::getTop(int index) {
 }
 
 QString MainWindow::getText0(int index) {
-  QQuickItem *root = mw_one->ui->qwMainTab->rootObject();
+  QQuickItem *root = mui->qwMainTab->rootObject();
   QVariant item;
   QMetaObject::invokeMethod((QObject *)root, "getText0",
                             Q_RETURN_ARG(QVariant, item),
@@ -4784,7 +4790,7 @@ QString MainWindow::getText0(int index) {
 }
 
 QString MainWindow::getText1(int index) {
-  QQuickItem *root = mw_one->ui->qwMainTab->rootObject();
+  QQuickItem *root = mui->qwMainTab->rootObject();
   QVariant item;
   QMetaObject::invokeMethod((QObject *)root, "getText1",
                             Q_RETURN_ARG(QVariant, item),
@@ -4793,7 +4799,7 @@ QString MainWindow::getText1(int index) {
 }
 
 QString MainWindow::getText2(int index) {
-  QQuickItem *root = mw_one->ui->qwMainTab->rootObject();
+  QQuickItem *root = mui->qwMainTab->rootObject();
   QVariant item;
   QMetaObject::invokeMethod((QObject *)root, "getText2",
                             Q_RETURN_ARG(QVariant, item),
@@ -4802,7 +4808,7 @@ QString MainWindow::getText2(int index) {
 }
 
 int MainWindow::getItemType(int index) {
-  QQuickItem *root = mw_one->ui->qwMainTab->rootObject();
+  QQuickItem *root = mui->qwMainTab->rootObject();
   QVariant itemType;
   QMetaObject::invokeMethod((QObject *)root, "getType",
                             Q_RETURN_ARG(QVariant, itemType),
@@ -4811,12 +4817,12 @@ int MainWindow::getItemType(int index) {
 }
 
 void MainWindow::delItem(int index) {
-  QQuickItem *root = mw_one->ui->qwMainTab->rootObject();
+  QQuickItem *root = mui->qwMainTab->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "delItem", Q_ARG(QVariant, index));
 }
 
 int MainWindow::getCount() {
-  QQuickItem *root = mw_one->ui->qwMainTab->rootObject();
+  QQuickItem *root = mui->qwMainTab->rootObject();
   QVariant itemCount;
   QMetaObject::invokeMethod((QObject *)root, "getItemCount",
                             Q_RETURN_ARG(QVariant, itemCount));
@@ -4831,24 +4837,24 @@ void MainWindow::clearAll() {
 }
 
 void MainWindow::setCurrentIndex(int index) {
-  QQuickItem *root = mw_one->ui->qwMainTab->rootObject();
+  QQuickItem *root = mui->qwMainTab->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "setCurrentItem",
                             Q_ARG(QVariant, index));
 }
 
 void MainWindow::gotoEnd() {
-  QQuickItem *root = mw_one->ui->qwMainTab->rootObject();
+  QQuickItem *root = mui->qwMainTab->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "gotoEnd");
 }
 
 void MainWindow::gotoIndex(int index) {
-  QQuickItem *root = mw_one->ui->qwMainTab->rootObject();
+  QQuickItem *root = mui->qwMainTab->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "gotoIndex",
                             Q_ARG(QVariant, index));
 }
 
 int MainWindow::getCurrentIndex() {
-  QQuickItem *root = mw_one->ui->qwMainTab->rootObject();
+  QQuickItem *root = mui->qwMainTab->rootObject();
   QVariant itemIndex;
   QMetaObject::invokeMethod((QObject *)root, "getCurrentIndex",
                             Q_RETURN_ARG(QVariant, itemIndex));
@@ -4856,7 +4862,7 @@ int MainWindow::getCurrentIndex() {
 }
 
 void MainWindow::setScrollBarPos(double pos) {
-  QQuickItem *root = mw_one->ui->qwMainTab->rootObject();
+  QQuickItem *root = mui->qwMainTab->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "setScrollBarPos",
                             Q_ARG(QVariant, pos));
 }
@@ -4868,11 +4874,11 @@ void MainWindow::reloadMain() {
   else
     isAniEffects = true;
 
-  ui->qwMainDate->rootContext()->setContextProperty("isAniEffects",
-                                                    isAniEffects);
-  ui->qwMainDate->rootContext()->setContextProperty("maindateWidth",
-                                                    ui->qwMainDate->width());
-  m_Method->clearAllBakList(ui->qwMainDate);
+  mui->qwMainDate->rootContext()->setContextProperty("isAniEffects",
+                                                     isAniEffects);
+  mui->qwMainDate->rootContext()->setContextProperty("maindateWidth",
+                                                     mui->qwMainDate->width());
+  m_Method->clearAllBakList(mui->qwMainDate);
 
   // QFontMetrics fontMetrics(font());
   // int nFontHeight = fontMetrics.height();
@@ -4882,7 +4888,7 @@ void MainWindow::reloadMain() {
   int total = tw->topLevelItemCount();
 
   if (total == 0) {
-    m_Method->clearAllBakList(ui->qwMainEvent);
+    m_Method->clearAllBakList(mui->qwMainEvent);
     return;
   }
 
@@ -4903,13 +4909,13 @@ void MainWindow::reloadMain() {
 
     topitem = text0;
 
-    m_Method->addItemToQW(ui->qwMainDate, text0, text1, text2, text3, 0);
+    m_Method->addItemToQW(mui->qwMainDate, text0, text1, text2, text3, 0);
   }
 
-  m_Method->gotoEnd(ui->qwMainDate);
-  int count = m_Method->getCountFromQW(ui->qwMainDate);
-  m_Method->setCurrentIndexFromQW(ui->qwMainDate, count - 1);
-  m_Method->setScrollBarPos(ui->qwMainDate, 1.0);
+  m_Method->gotoEnd(mui->qwMainDate);
+  int count = m_Method->getCountFromQW(mui->qwMainDate);
+  m_Method->setCurrentIndexFromQW(mui->qwMainDate, count - 1);
+  m_Method->setScrollBarPos(mui->qwMainDate, 1.0);
 
   m_Method->clickMainDate();
 }
@@ -4984,7 +4990,7 @@ void MainWindow::on_btnSync_clicked() { on_btnUpload_clicked(); }
 
 void MainWindow::on_btnPDF_clicked() { m_Notes->on_btnPDF_clicked(); }
 
-void MainWindow::on_btnPasteTodo_clicked() { ui->editTodo->paste(); }
+void MainWindow::on_btnPasteTodo_clicked() { mui->editTodo->paste(); }
 
 int MainWindow::getMaxDay(QString sy, QString sm) {
   int maxDay = 0;
@@ -5010,17 +5016,17 @@ void MainWindow::on_btnEndDate_clicked() {
 
 void MainWindow::on_btnBackSearch_clicked() {
   clearWidgetFocus();
-  ui->frameSearch->hide();
-  ui->frameMain->show();
+  mui->frameSearch->hide();
+  mui->frameMain->show();
 }
 
 void MainWindow::on_btnClearSearchText_clicked() {
-  ui->editSearchText->setText("");
-  ui->editSearchText->setFocus();
+  mui->editSearchText->setText("");
+  mui->editSearchText->setFocus();
 }
 
 void MainWindow::on_btnStartSearch_clicked() {
-  searchStr = ui->editSearchText->text().trimmed();
+  searchStr = mui->editSearchText->text().trimmed();
   if (searchStr.length() == 0) return;
 
   showProgress();
@@ -5028,15 +5034,15 @@ void MainWindow::on_btnStartSearch_clicked() {
 }
 
 void MainWindow::on_btnBackBakList_clicked() {
-  ui->frameBakList->hide();
-  ui->frameMain->show();
+  mui->frameBakList->hide();
+  mui->frameMain->show();
 }
 
 void MainWindow::on_btnImportBakList_clicked() {
-  if (m_Method->getCountFromQW(ui->qwBakList) == 0) return;
+  if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
 
-  int cur_index = m_Method->getCurrentIndexFromQW(ui->qwBakList);
-  QString str = m_Method->getText3(ui->qwBakList, cur_index);
+  int cur_index = m_Method->getCurrentIndexFromQW(mui->qwBakList);
+  QString str = m_Method->getText3(mui->qwBakList, cur_index);
   zipfile = str.trimmed();
 
   if (!zipfile.isNull()) {
@@ -5052,7 +5058,7 @@ void MainWindow::on_btnImportBakList_clicked() {
   }
 
   isZipOK = true;
-  ui->btnBackBakList->click();
+  mui->btnBackBakList->click();
   showProgress();
 
   isMenuImport = true;
@@ -5064,14 +5070,14 @@ void MainWindow::on_btnImportBakList_clicked() {
 void MainWindow::on_btnOkViewCate_clicked() { m_Report->on_CateOk(); }
 
 void MainWindow::on_btnBackTabRecycle_clicked() {
-  ui->frameTabRecycle->hide();
-  ui->frameMain->show();
+  mui->frameTabRecycle->hide();
+  mui->frameMain->show();
 }
 
 void MainWindow::on_btnDelTabRecycle_clicked() {
-  if (m_Method->getCountFromQW(ui->qwTabRecycle) == 0) return;
-  int index = m_Method->getCurrentIndexFromQW(ui->qwTabRecycle);
-  QString tab_file = m_Method->getText3(ui->qwTabRecycle, index);
+  if (m_Method->getCountFromQW(mui->qwTabRecycle) == 0) return;
+  int index = m_Method->getCurrentIndexFromQW(mui->qwTabRecycle);
+  QString tab_file = m_Method->getText3(mui->qwTabRecycle, index);
 
   m_Method->m_widget = new QWidget(mw_one);
   ShowMessage *m_ShowMsg = new ShowMessage(this);
@@ -5093,24 +5099,24 @@ void MainWindow::on_btnDelTabRecycle_clicked() {
     file.remove();
   }
 
-  m_Method->delItemFromQW(ui->qwTabRecycle, index);
+  m_Method->delItemFromQW(mui->qwTabRecycle, index);
 
-  ui->lblTitleTabRecycle->setText(
+  mui->lblTitleTabRecycle->setText(
       tr("Tab Recycle") + "    " + tr("Total") + " : " +
-      QString::number(m_Method->getCountFromQW(ui->qwTabRecycle)));
+      QString::number(m_Method->getCountFromQW(mui->qwTabRecycle)));
 }
 
 void MainWindow::on_btnRestoreTab_clicked() {
-  if (m_Method->getCountFromQW(ui->qwTabRecycle) == 0) return;
+  if (m_Method->getCountFromQW(mui->qwTabRecycle) == 0) return;
 
-  int count = ui->tabWidget->tabBar()->count();
+  int count = mui->tabWidget->tabBar()->count();
   QString twName = m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
 
   int c_year = QDate::currentDate().year();
   int iniFileCount = c_year - 2025 + 1 + 1;
 
-  int index = m_Method->getCurrentIndexFromQW(ui->qwTabRecycle);
-  QString recycle = m_Method->getText3(ui->qwTabRecycle, index);
+  int index = m_Method->getCurrentIndexFromQW(mui->qwTabRecycle);
+  QString recycle = m_Method->getText3(mui->qwTabRecycle, index);
   QStringList recycleList = recycle.split("\n");
 
   QString ini_file;
@@ -5130,9 +5136,9 @@ void MainWindow::on_btnRestoreTab_clicked() {
     QFile::copy(recFile, ini_file);
   }
 
-  QString tab_name = m_Method->getText0(ui->qwTabRecycle, index);
+  QString tab_name = m_Method->getText0(mui->qwTabRecycle, index);
   QTreeWidget *tw = init_TreeWidget(twName);
-  ui->tabWidget->addTab(tw, tab_name);
+  mui->tabWidget->addTab(tw, tab_name);
 
   addItem(tab_name, "", "", "", 0);
   setCurrentIndex(count);
@@ -5162,10 +5168,10 @@ void MainWindow::on_btnRestoreTab_clicked() {
 }
 
 void MainWindow::on_btnDelBakFile_clicked() {
-  if (m_Method->getCountFromQW(ui->qwBakList) == 0) return;
+  if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
 
-  int index = m_Method->getCurrentIndexFromQW(ui->qwBakList);
-  QString bak_file = m_Method->getText3(ui->qwBakList, index);
+  int index = m_Method->getCurrentIndexFromQW(mui->qwBakList);
+  QString bak_file = m_Method->getText3(mui->qwBakList, index);
 
   m_Method->m_widget = new QWidget(mw_one);
   ShowMessage *m_ShowMsg = new ShowMessage(this);
@@ -5175,22 +5181,22 @@ void MainWindow::on_btnDelBakFile_clicked() {
 
   QFile file(bak_file);
   file.remove();
-  m_Method->delItemFromQW(ui->qwBakList, index);
+  m_Method->delItemFromQW(mui->qwBakList, index);
 
   int newIndex = index - 1;
   if (newIndex < 0) newIndex = 0;
 
-  m_Method->setCurrentIndexFromQW(ui->qwBakList, newIndex);
+  m_Method->setCurrentIndexFromQW(mui->qwBakList, newIndex);
 
-  ui->lblBakListTitle->setText(
+  mui->lblBakListTitle->setText(
       tr("Backup File List") + "    " + tr("Total") + " : " +
-      QString::number(m_Method->getCountFromQW(ui->qwBakList)));
+      QString::number(m_Method->getCountFromQW(mui->qwBakList)));
 }
 
 void MainWindow::on_btnBackNoteList_clicked() {
   clearWidgetFocus();
-  ui->frameNoteList->hide();
-  ui->frameMain->show();
+  mui->frameNoteList->hide();
+  mui->frameMain->show();
   m_NotesList->saveNoteBookVPos();
   m_NotesList->saveCurrentNoteInfo();
   m_NotesList->saveNotesListIndex();
@@ -5200,10 +5206,10 @@ void MainWindow::on_btnBackNoteList_clicked() {
 }
 
 void MainWindow::on_btnBackNoteRecycle_clicked() {
-  ui->frameNoteRecycle->hide();
-  ui->frameNoteList->show();
+  mui->frameNoteRecycle->hide();
+  mui->frameNoteList->show();
 
-  if (ui->chkAutoSync->isChecked() && ui->chkWebDAV->isChecked()) {
+  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     int count = m_NotesList->needDelWebDAVFiles.count();
     if (count > 0) {
       QStringList files;
@@ -5218,17 +5224,17 @@ void MainWindow::on_btnBackNoteRecycle_clicked() {
 }
 
 void MainWindow::on_btnNoteRecycle_clicked() {
-  ui->frameNoteList->hide();
-  ui->frameNoteRecycle->show();
+  mui->frameNoteList->hide();
+  mui->frameNoteRecycle->show();
 
   m_NotesList->loadAllRecycle();
 }
 
 void MainWindow::on_btnDelNoteRecycle_clicked() {
-  int count = m_Method->getCountFromQW(ui->qwNoteRecycle);
+  int count = m_Method->getCountFromQW(mui->qwNoteRecycle);
   if (count == 0) return;
 
-  int index = m_Method->getCurrentIndexFromQW(ui->qwNoteRecycle);
+  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
   if (index < 0) return;
 
   m_NotesList->setTWRBCurrentItem();
@@ -5236,10 +5242,10 @@ void MainWindow::on_btnDelNoteRecycle_clicked() {
 }
 
 void MainWindow::on_btnRestoreNoteRecycle_clicked() {
-  int count = m_Method->getCountFromQW(ui->qwNoteRecycle);
+  int count = m_Method->getCountFromQW(mui->qwNoteRecycle);
   if (count == 0) return;
 
-  int index = m_Method->getCurrentIndexFromQW(ui->qwNoteRecycle);
+  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
   if (index < 0) return;
 
   if (m_NotesList->getNoteBookCount() == 0) return;
@@ -5250,7 +5256,7 @@ void MainWindow::on_btnRestoreNoteRecycle_clicked() {
 
 void MainWindow::on_btnFindNotes_clicked() {
   showProgress();
-  m_NotesList->startFind(ui->editFindNote->text().trimmed());
+  m_NotesList->startFind(mui->editFindNote->text().trimmed());
 }
 
 void MainWindow::on_btnFindPreviousNote_clicked() { m_NotesList->goPrevious(); }
@@ -5258,11 +5264,11 @@ void MainWindow::on_btnFindPreviousNote_clicked() { m_NotesList->goPrevious(); }
 void MainWindow::on_btnFindNextNote_clicked() { m_NotesList->goNext(); }
 
 void MainWindow::on_btnClearNoteFindText_clicked() {
-  ui->editFindNote->setText("");
-  ui->lblFindNoteCount->setText("0");
-  ui->btnFindNextNote->setEnabled(false);
-  ui->btnFindPreviousNote->setEnabled(false);
-  ui->lblShowLineSn->setText("0");
+  mui->editFindNote->setText("");
+  mui->lblFindNoteCount->setText("0");
+  mui->btnFindNextNote->setEnabled(false);
+  mui->btnFindPreviousNote->setEnabled(false);
+  mui->lblShowLineSn->setText("0");
 }
 
 void MainWindow::on_btnShowFindNotes_clicked() {
@@ -5276,19 +5282,19 @@ void MainWindow::on_btnShowFindNotes_clicked() {
   }
   qDebug() << "recycle notes = " << m_NotesList->recycleNotesList;
 
-  ui->frameNoteList->hide();
-  ui->frameNotesSearchResult->show();
-  ui->editNotesSearch->setFocus();
+  mui->frameNoteList->hide();
+  mui->frameNotesSearchResult->show();
+  mui->editNotesSearch->setFocus();
 
   m_NotesList->openSearch();
 }
 
 void MainWindow::on_btnNoteBookMenu_clicked() {
-  m_Method->showNoteBookMenu(ui->qwNoteBook->x(), ui->qwNoteBook->y());
+  m_Method->showNoteBookMenu(mui->qwNoteBook->x(), mui->qwNoteBook->y());
 }
 
 void MainWindow::on_btnNoteMenu_clicked() {
-  m_Method->showNotsListMenu(ui->qwNoteList->x(), ui->qwNoteList->y());
+  m_Method->showNotsListMenu(mui->qwNoteList->x(), mui->qwNoteList->y());
 }
 
 void MainWindow::on_btnCancelType_clicked() {
@@ -5302,17 +5308,18 @@ void MainWindow::on_btnDelType_clicked() {
 }
 
 void MainWindow::on_btnRenameType_clicked() {
-  m_CategoryList->ui->editRename->setText(ui->editRenameType->text().trimmed());
+  m_CategoryList->ui->editRename->setText(
+      mui->editRenameType->text().trimmed());
   m_CategoryList->on_btnRename_clicked();
 }
 
 void MainWindow::on_btnBackSetTab_clicked() {
-  ui->frameSetTab->hide();
-  ui->frameMain->show();
+  mui->frameSetTab->hide();
+  mui->frameMain->show();
 
-  if (ui->btnTabMoveDown->isHidden()) {
-    ui->btnTabMoveDown->show();
-    ui->btnTabMoveUp->show();
+  if (mui->btnTabMoveDown->isHidden()) {
+    mui->btnTabMoveDown->show();
+    mui->btnTabMoveUp->show();
     on_btnAdd_clicked();
     m_EditRecord->setCurrentValue();
   }
@@ -5321,8 +5328,8 @@ void MainWindow::on_btnBackSetTab_clicked() {
 void MainWindow::on_btnBackEditRecord_clicked() {
   clearWidgetFocus();
 
-  ui->frameEditRecord->hide();
-  ui->frameMain->show();
+  mui->frameEditRecord->hide();
+  mui->frameMain->show();
 }
 
 void MainWindow::on_btnType_clicked() { m_EditRecord->on_btnCustom_clicked(); }
@@ -5331,11 +5338,11 @@ void MainWindow::on_btnOkEditRecord_clicked() {
   m_EditRecord->on_btnOk_clicked();
 }
 
-void MainWindow::on_btnClearType_clicked() { ui->editCategory->setText(""); }
+void MainWindow::on_btnClearType_clicked() { mui->editCategory->setText(""); }
 
-void MainWindow::on_btnClearDetails_clicked() { ui->editDetails->setText(""); }
+void MainWindow::on_btnClearDetails_clicked() { mui->editDetails->setText(""); }
 
-void MainWindow::on_btnClearAmount_clicked() { ui->editAmount->setText(""); }
+void MainWindow::on_btnClearAmount_clicked() { mui->editAmount->setText(""); }
 
 void MainWindow::on_editAmount_textChanged(const QString &arg1) {
   m_EditRecord->on_editAmount_textChanged(arg1);
@@ -5386,12 +5393,12 @@ void MainWindow::on_btnDel_Number_clicked() {
 void MainWindow::on_btnBackBookList_clicked() {
   if (isPDF) {
     if (isAndroid) {
-      ui->frameBookList->hide();
-      ui->frameMain->show();
+      mui->frameBookList->hide();
+      mui->frameMain->show();
     }
   } else {
-    ui->frameBookList->hide();
-    ui->frameReader->show();
+    mui->frameBookList->hide();
+    mui->frameReader->show();
   }
 }
 
@@ -5401,27 +5408,27 @@ void MainWindow::on_btnClearAllRecords_clicked() {
   m_Reader->clearAllReaderRecords();
 }
 
-void MainWindow::on_btnAnd_clicked() { ui->editSearchText->insert("&"); }
+void MainWindow::on_btnAnd_clicked() { mui->editSearchText->insert("&"); }
 
-void MainWindow::on_btnClear_clicked() { ui->editTodo->clear(); }
+void MainWindow::on_btnClear_clicked() { mui->editTodo->clear(); }
 
 void MainWindow::on_btnModify_clicked() { m_Todo->reeditText(); }
 
 void MainWindow::on_btnChartMonth_clicked() {
   isTabChanged = true;
   tabChart->setCurrentIndex(0);
-  m_Method->setToolButtonQss(ui->btnChartMonth, 5, 3, "#FF0000", "#FFFFFF",
+  m_Method->setToolButtonQss(mui->btnChartMonth, 5, 3, "#FF0000", "#FFFFFF",
                              "#FF0000", "#FFFFFF", "#FF5555", "#FFFFFF");
-  m_Method->setToolButtonQss(ui->btnChartDay, 5, 3, "#455364", "#FFFFFF",
+  m_Method->setToolButtonQss(mui->btnChartDay, 5, 3, "#455364", "#FFFFFF",
                              "#455364", "#FFFFFF", "#555364", "#FFFFFF");
 }
 
 void MainWindow::on_btnChartDay_clicked() {
   isTabChanged = true;
   tabChart->setCurrentIndex(1);
-  m_Method->setToolButtonQss(ui->btnChartDay, 5, 3, "#FF0000", "#FFFFFF",
+  m_Method->setToolButtonQss(mui->btnChartDay, 5, 3, "#FF0000", "#FFFFFF",
                              "#FF0000", "#FFFFFF", "#FF5555", "#FFFFFF");
-  m_Method->setToolButtonQss(ui->btnChartMonth, 5, 3, "#455364", "#FFFFFF",
+  m_Method->setToolButtonQss(mui->btnChartMonth, 5, 3, "#455364", "#FFFFFF",
                              "#455364", "#FFFFFF", "#555364", "#FFFFFF");
 }
 
@@ -5460,38 +5467,38 @@ void MainWindow::on_btnChart_clicked() {
   axisY->setTickCount(7);
   axisY2->setTickCount(7);
 
-  if (ui->f_charts->isHidden()) {
-    ui->qwMainDate->hide();
-    ui->qwMainEvent->hide();
+  if (mui->f_charts->isHidden()) {
+    mui->qwMainDate->hide();
+    mui->qwMainEvent->hide();
 
-    ui->f_charts->setMaximumHeight(this->height());
-    ui->f_charts->show();
-    ui->btnChartDay->show();
-    ui->btnChartMonth->show();
-    ui->rbAmount->show();
-    ui->rbFreq->show();
-    ui->rbSteps->show();
-    ui->f_cw->show();
+    mui->f_charts->setMaximumHeight(this->height());
+    mui->f_charts->show();
+    mui->btnChartDay->show();
+    mui->btnChartMonth->show();
+    mui->rbAmount->show();
+    mui->rbFreq->show();
+    mui->rbSteps->show();
+    mui->f_cw->show();
 
-    ui->btnReport->hide();
-    ui->btnFind->hide();
-    ui->btnModifyRecord->hide();
-    ui->btnMove->hide();
+    mui->btnReport->hide();
+    mui->btnFind->hide();
+    mui->btnModifyRecord->hide();
+    mui->btnMove->hide();
   } else {
-    ui->f_charts->setMaximumHeight(0);
-    ui->f_charts->hide();
-    ui->rbAmount->hide();
-    ui->rbFreq->hide();
-    ui->rbSteps->hide();
-    ui->btnChartDay->hide();
-    ui->btnChartMonth->hide();
+    mui->f_charts->setMaximumHeight(0);
+    mui->f_charts->hide();
+    mui->rbAmount->hide();
+    mui->rbFreq->hide();
+    mui->rbSteps->hide();
+    mui->btnChartDay->hide();
+    mui->btnChartMonth->hide();
 
-    ui->qwMainDate->show();
-    ui->qwMainEvent->show();
-    ui->btnReport->show();
-    ui->btnFind->show();
-    ui->btnModifyRecord->show();
-    ui->btnMove->show();
+    mui->qwMainDate->show();
+    mui->qwMainEvent->show();
+    mui->btnReport->show();
+    mui->btnFind->show();
+    mui->btnModifyRecord->show();
+    mui->btnMove->show();
   }
 }
 
@@ -5527,8 +5534,8 @@ void MainWindow::on_btnMoveTo_clicked() {
 }
 
 void MainWindow::on_btnBack_Tree_clicked() {
-  ui->frameNotesTree->hide();
-  ui->frameNoteList->show();
+  mui->frameNotesTree->hide();
+  mui->frameNoteList->show();
 }
 
 void MainWindow::on_btnRename_clicked() {
@@ -5538,7 +5545,7 @@ void MainWindow::on_btnRename_clicked() {
   m_NotesList->on_btnRename_clicked();
 }
 
-void MainWindow::on_btnHideFind_clicked() { ui->f_FindNotes->hide(); }
+void MainWindow::on_btnHideFind_clicked() { mui->f_FindNotes->hide(); }
 
 void MainWindow::on_btnStepsOptions_clicked() {
   mw_one->m_StepsOptions->init();
@@ -5551,9 +5558,9 @@ void MainWindow::on_btnRecentOpen_clicked() {
 void MainWindow::on_btnMenuReport_clicked() { m_Report->genReportMenu(); }
 
 void MainWindow::on_btnCatalogue_clicked() {
-  ui->btnAutoStop->click();
+  mui->btnAutoStop->click();
 
-  if (ui->f_ReaderSet->isVisible()) {
+  if (mui->f_ReaderSet->isVisible()) {
     on_btnBackReaderSet_clicked();
   }
   m_Reader->showCatalogue();
@@ -5562,27 +5569,27 @@ void MainWindow::on_btnCatalogue_clicked() {
 void MainWindow::on_btnRemoveBookList_clicked() { m_Reader->removeBookList(); }
 
 void MainWindow::on_btnShowBookmark_clicked() {
-  ui->btnAutoStop->click();
+  mui->btnAutoStop->click();
 
-  if (ui->f_ReaderSet->isVisible()) {
+  if (mui->f_ReaderSet->isVisible()) {
     on_btnBackReaderSet_clicked();
   }
-  if (ui->qwBookmark->isHidden()) {
-    ui->qwReader->hide();
-    ui->qwBookmark->show();
+  if (mui->qwBookmark->isHidden()) {
+    mui->qwReader->hide();
+    mui->qwBookmark->show();
     m_Reader->showBookmarkList();
-    ui->btnCatalogue->setEnabled(false);
+    mui->btnCatalogue->setEnabled(false);
   } else {
-    ui->qwBookmark->hide();
-    ui->qwReader->show();
-    ui->btnCatalogue->setEnabled(true);
+    mui->qwBookmark->hide();
+    mui->qwReader->show();
+    mui->btnCatalogue->setEnabled(true);
   }
 }
 
 void MainWindow::stopTimerForPdf() {
   m_Reader->tmeShowEpubMsg->stop();
-  ui->pEpubProg->hide();
-  ui->lblEpubInfo->hide();
+  mui->pEpubProg->hide();
+  mui->lblEpubInfo->hide();
 }
 
 void MainWindow::on_btnShareImage_clicked() {
@@ -5594,7 +5601,7 @@ void MainWindow::on_btnHideKey_clicked() { pAndroidKeyboard->hide(); }
 void MainWindow::on_btnDelImage_clicked() { m_Notes->delImage(); }
 
 void MainWindow::on_btnBackReaderSet_clicked() {
-  ui->f_ReaderSet->hide();
+  mui->f_ReaderSet->hide();
   qreal pos = m_Reader->getVPos();
   m_Reader->setVPos(pos + 0.01);
 }
@@ -5651,22 +5658,22 @@ void MainWindow::on_DelayCloseProgressBar() {
 void MainWindow::on_CloseProgressBar() {
   mw_one->closeProgress();
 
-  mw_one->ui->btnReader->setEnabled(true);
-  mw_one->ui->f_ReaderFun->setEnabled(true);
+  mui->btnReader->setEnabled(true);
+  mui->f_ReaderFun->setEnabled(true);
 }
 
 void MainWindow::on_btnShareBook_clicked() { m_Reader->shareBook(); }
 
 void MainWindow::on_btnAutoRun_clicked() {
   m_Reader->tmeAutoRun->start(50);
-  ui->btnAutoRun->hide();
-  ui->btnAutoStop->show();
+  mui->btnAutoRun->hide();
+  mui->btnAutoStop->show();
 }
 
 void MainWindow::on_btnAutoStop_clicked() {
   m_Reader->tmeAutoRun->stop();
-  ui->btnAutoStop->hide();
-  ui->btnAutoRun->show();
+  mui->btnAutoStop->hide();
+  mui->btnAutoRun->show();
 }
 
 void MainWindow::on_btnLessen_clicked() { m_ReaderSet->on_btnLessen_clicked(); }
@@ -5706,7 +5713,7 @@ void MainWindow::on_sliderPlayAudio_sliderPressed() {
 }
 
 void MainWindow::on_sliderPlayAudio_sliderReleased() {
-  QString strPos = QString::number(ui->sliderPlayAudio->value());
+  QString strPos = QString::number(mui->sliderPlayAudio->value());
   m_Method->seekTo(strPos);
   m_Method->startPlay();
   m_Todo->tmePlayProgress->start(m_Todo->nInterval);
@@ -5714,29 +5721,29 @@ void MainWindow::on_sliderPlayAudio_sliderReleased() {
 
 void MainWindow::on_btnMove_clicked() {
   isMoveEntry = true;
-  if (del_Data((QTreeWidget *)ui->tabWidget->currentWidget())) {
-    ui->btnTabMoveDown->hide();
-    ui->btnTabMoveUp->hide();
+  if (del_Data((QTreeWidget *)mui->tabWidget->currentWidget())) {
+    mui->btnTabMoveDown->hide();
+    mui->btnTabMoveUp->hide();
     on_btnSelTab_clicked();
 
-    while (ui->frameEditRecord->isHidden())
+    while (mui->frameEditRecord->isHidden())
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
-    ui->editCategory->setText(strCategory);
-    ui->editDetails->setText(strDetails);
-    ui->editAmount->setText(strAmount);
+    mui->editCategory->setText(strCategory);
+    mui->editDetails->setText(strDetails);
+    mui->editAmount->setText(strAmount);
 
     on_btnOkEditRecord_clicked();
   }
 }
 
 void MainWindow::on_btnGPS_clicked() {
-  if (ui->btnGPS->text() == tr("Start")) {
+  if (mui->btnGPS->text() == tr("Start")) {
     m_Steps->startRecordMotion();
 
-  } else if (ui->btnGPS->text() == tr("Stop")) {
+  } else if (mui->btnGPS->text() == tr("Stop")) {
     m_Steps->stopRecordMotion();
-    ui->btnGPS->setText(tr("Start"));
+    mui->btnGPS->setText(tr("Start"));
   }
 }
 
@@ -5784,7 +5791,7 @@ void MainWindow::on_btnEditNote_clicked() {
 
 void MainWindow::on_btnToPDF_clicked() {
   if (!QFile::exists(currentMDFile)) return;
-  ui->btnPDF->click();
+  mui->btnPDF->click();
 }
 
 void MainWindow::on_btnRecentOpen0_clicked() { on_btnRecentOpen_clicked(); }
@@ -5792,7 +5799,7 @@ void MainWindow::on_btnRecentOpen0_clicked() { on_btnRecentOpen_clicked(); }
 void MainWindow::on_btnWebBack_clicked() {}
 
 void MainWindow::on_btnWebDAVBackup_clicked() {
-  if (!ui->btnReader->isEnabled()) return;
+  if (!mui->btnReader->isEnabled()) return;
   m_CloudBackup->startBakData();
 }
 
@@ -5810,39 +5817,39 @@ void MainWindow::on_btnWebDAVRestore_clicked() {
               tr("This action overwrites local files with files in the cloud."),
           2))
     return;
-  m_CloudBackup->WEBDAV_URL = ui->editWebDAV->text().trimmed();
-  m_CloudBackup->USERNAME = ui->editWebDAVUsername->text().trimmed();
-  m_CloudBackup->APP_PASSWORD = ui->editWebDAVPassword->text().trimmed();
+  m_CloudBackup->WEBDAV_URL = mui->editWebDAV->text().trimmed();
+  m_CloudBackup->USERNAME = mui->editWebDAVUsername->text().trimmed();
+  m_CloudBackup->APP_PASSWORD = mui->editWebDAVPassword->text().trimmed();
   m_CloudBackup->downloadFile("Knot/memo.zip", filePath);
-  mw_one->ui->progressBar->setValue(0);
+  mui->progressBar->setValue(0);
 }
 
 void MainWindow::on_chkWebDAV_clicked() {
-  if (ui->chkWebDAV->isChecked())
-    ui->chkOneDrive->setChecked(false);
+  if (mui->chkWebDAV->isChecked())
+    mui->chkOneDrive->setChecked(false);
   else
-    ui->chkOneDrive->setChecked(true);
+    mui->chkOneDrive->setChecked(true);
 }
 
 void MainWindow::on_chkOneDrive_clicked() {
-  if (ui->chkOneDrive->isChecked())
-    ui->chkWebDAV->setChecked(false);
+  if (mui->chkOneDrive->isChecked())
+    mui->chkWebDAV->setChecked(false);
   else
-    ui->chkWebDAV->setChecked(true);
+    mui->chkWebDAV->setChecked(true);
 }
 
 void MainWindow::on_btnBack_NotesSearchResult_clicked() {
   clearWidgetFocus();
-  ui->frameNotesSearchResult->hide();
-  ui->frameNoteList->show();
+  mui->frameNotesSearchResult->hide();
+  mui->frameNoteList->show();
   isOpenSearchResult = false;
 }
 
 void MainWindow::on_editFindNote_returnPressed() { on_btnFindNotes_clicked(); }
 
 void MainWindow::on_btnClearSearchResults_clicked() {
-  ui->editNotesSearch->clear();
-  ui->editNotesSearch->setFocus();
+  mui->editNotesSearch->clear();
+  mui->editNotesSearch->setFocus();
 }
 
 void MainWindow::on_btnOpenSearchResult_clicked() {
@@ -5850,54 +5857,54 @@ void MainWindow::on_btnOpenSearchResult_clicked() {
   if (!QFile::exists(mdFile)) return;
   isOpenSearchResult = true;
   currentMDFile = mdFile;
-  mySearchText = ui->editNotesSearch->text().trimmed();
+  mySearchText = mui->editNotesSearch->text().trimmed();
   on_btnEditNote_clicked();
 }
 
 void MainWindow::on_btnFindNotes2_clicked() {
-  if (ui->f_FindNotes->isHidden())
-    ui->f_FindNotes->show();
+  if (mui->f_FindNotes->isHidden())
+    mui->f_FindNotes->show();
   else
-    ui->f_FindNotes->hide();
+    mui->f_FindNotes->hide();
 }
 
 void MainWindow::on_btnOpenEditFind_clicked() {
   isOpenSearchResult = true;
-  mySearchText = ui->editFindNote->text().trimmed();
+  mySearchText = mui->editFindNote->text().trimmed();
   on_btnEditNote_clicked();
 }
 
 void MainWindow::setEncSyncStatusTip() {
-  ui->lblStats->setStyleSheet(labelNormalStyleSheet);
+  mui->lblStats->setStyleSheet(labelNormalStyleSheet);
 
-  if (m_Preferences->ui->chkZip->isChecked() && ui->chkAutoSync->isChecked() &&
-      ui->chkWebDAV->isChecked())
-    ui->lblStats->setStyleSheet(labelEnSyncStyleSheet);
+  if (m_Preferences->ui->chkZip->isChecked() && mui->chkAutoSync->isChecked() &&
+      mui->chkWebDAV->isChecked())
+    mui->lblStats->setStyleSheet(labelEnSyncStyleSheet);
 
-  if (m_Preferences->ui->chkZip->isChecked() && !ui->chkAutoSync->isChecked() &&
-      !ui->chkWebDAV->isChecked())
-    ui->lblStats->setStyleSheet(labelEncStyleSheet);
+  if (m_Preferences->ui->chkZip->isChecked() &&
+      !mui->chkAutoSync->isChecked() && !mui->chkWebDAV->isChecked())
+    mui->lblStats->setStyleSheet(labelEncStyleSheet);
 
-  if (m_Preferences->ui->chkZip->isChecked() && !ui->chkAutoSync->isChecked() &&
-      ui->chkWebDAV->isChecked())
-    ui->lblStats->setStyleSheet(labelEncStyleSheet);
+  if (m_Preferences->ui->chkZip->isChecked() &&
+      !mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked())
+    mui->lblStats->setStyleSheet(labelEncStyleSheet);
 
-  if (m_Preferences->ui->chkZip->isChecked() && ui->chkAutoSync->isChecked() &&
-      !ui->chkWebDAV->isChecked())
-    ui->lblStats->setStyleSheet(labelEncStyleSheet);
+  if (m_Preferences->ui->chkZip->isChecked() && mui->chkAutoSync->isChecked() &&
+      !mui->chkWebDAV->isChecked())
+    mui->lblStats->setStyleSheet(labelEncStyleSheet);
 
-  if (!m_Preferences->ui->chkZip->isChecked() && ui->chkAutoSync->isChecked() &&
-      ui->chkWebDAV->isChecked())
-    ui->lblStats->setStyleSheet(labelSyncStyleSheet);
+  if (!m_Preferences->ui->chkZip->isChecked() &&
+      mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked())
+    mui->lblStats->setStyleSheet(labelSyncStyleSheet);
 
-  if (isAndroid) ui->lblVer->hide();
-  ui->lblVer->setText("Knot   V:" + ver);
-  ui->lblVer->setStyleSheet(ui->lblStats->styleSheet());
+  if (isAndroid) mui->lblVer->hide();
+  mui->lblVer->setText("Knot   V:" + ver);
+  mui->lblVer->setStyleSheet(mui->lblStats->styleSheet());
 }
 
 void MainWindow::on_btnTools_clicked() {
-  if (ui->f_Tools->isHidden())
-    ui->f_Tools->show();
+  if (mui->f_Tools->isHidden())
+    mui->f_Tools->show();
   else
-    ui->f_Tools->hide();
+    mui->f_Tools->hide();
 }

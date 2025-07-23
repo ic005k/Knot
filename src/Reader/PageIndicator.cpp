@@ -5,6 +5,7 @@
 #include "ui_PageIndicator.h"
 
 extern MainWindow* mw_one;
+extern Ui::MainWindow* mui;
 extern Method* m_Method;
 
 PageIndicator::PageIndicator(QWidget* parent)
@@ -42,7 +43,7 @@ void PageIndicator::setPicRight() {
 }
 
 void PageIndicator::init() {
-  if (mw_one->ui->frameReader->isHidden()) return;
+  if (mui->frameReader->isHidden()) return;
 
   int w = mw_one->width() - 20;
   QFontMetrics fontMetrics(ui->lblPageNumber->font());
@@ -50,8 +51,8 @@ void PageIndicator::init() {
   setFixedWidth(w);
   setFixedHeight(nFontHeight + 10);
   int y;
-  if (mw_one->ui->f_ReaderFun->isVisible())
-    y = mw_one->geometry().y() + mw_one->ui->f_ReaderFun->height() + 5;
+  if (mui->f_ReaderFun->isVisible())
+    y = mw_one->geometry().y() + mui->f_ReaderFun->height() + 5;
   else
     y = mw_one->geometry().y() + 5;
   this->setGeometry(mw_one->geometry().x() + (mw_one->width() - w) / 2, y,
@@ -62,8 +63,8 @@ void PageIndicator::init() {
 
 void PageIndicator::showPageNumber(QString page) {
   sn = 0;
-  cn = mw_one->ui->btnPages->text().split("\n").at(0).toInt();
-  tn = mw_one->ui->btnPages->text().split("\n").at(1).toInt();
+  cn = mui->btnPages->text().split("\n").at(0).toInt();
+  tn = mui->btnPages->text().split("\n").at(1).toInt();
   if (page == "left") {
     if (cn + 1 < tn) {
       sn = cn + 1;

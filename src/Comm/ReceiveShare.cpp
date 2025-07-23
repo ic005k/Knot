@@ -4,6 +4,7 @@
 #include "ui_MainWindow.h"
 
 extern MainWindow* mw_one;
+extern Ui::MainWindow* mui;
 extern Method* m_Method;
 
 extern QString currentMDFile, privateDir;
@@ -204,7 +205,7 @@ void ReceiveShare::on_btnInsertToNote_clicked() {
 void ReceiveShare::openNoteEditor() {
   closeAllChildWindows();
   mw_one->m_Notes->isRequestOpenNoteEditor = true;
-  mw_one->ui->btnNotes->click();
+  mui->btnNotes->click();
 }
 
 QObjectList ReceiveShare::getAllFrame(QObjectList lstUIControls) {
@@ -222,102 +223,99 @@ void ReceiveShare::closeAllChildWindows() {
 
   if (mw_one->m_TodoAlarm->isVisible()) {
     mw_one->m_TodoAlarm->ui->btnBack->click();
-    while (!mw_one->ui->frameTodo->isVisible())
+    while (!mui->frameTodo->isVisible())
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-    mw_one->ui->btnBackTodo->click();
+    mui->btnBackTodo->click();
   }
 
   if (mw_one->m_AboutThis->isVisible()) {
     mw_one->m_AboutThis->ui->btnBack_About->click();
   }
 
-  if (mw_one->ui->frameSetTab->isVisible()) mw_one->ui->btnBackSetTab->click();
+  if (mui->frameSetTab->isVisible()) mui->btnBackSetTab->click();
 
-  if (mw_one->ui->frameNoteRecycle->isVisible()) {
-    mw_one->ui->btnBackNoteRecycle->click();
-    mw_one->ui->btnBackNoteList->click();
+  if (mui->frameNoteRecycle->isVisible()) {
+    mui->btnBackNoteRecycle->click();
+    mui->btnBackNoteList->click();
   }
 
-  if (mw_one->ui->frameNotesSearchResult->isVisible()) {
-    mw_one->ui->btnBack_NotesSearchResult->click();
-    mw_one->ui->btnBackNoteList->click();
+  if (mui->frameNotesSearchResult->isVisible()) {
+    mui->btnBack_NotesSearchResult->click();
+    mui->btnBackNoteList->click();
   }
 
-  if (mw_one->ui->frameNoteList->isVisible()) {
-    mw_one->ui->btnBackNoteList->click();
+  if (mui->frameNoteList->isVisible()) {
+    mui->btnBackNoteList->click();
   }
 
-  if (mw_one->ui->frameNotes->isVisible()) mw_one->ui->btnBackNotes->click();
+  if (mui->frameNotes->isVisible()) mui->btnBackNotes->click();
 
-  if (mw_one->ui->frameTodoRecycle->isVisible()) {
-    mw_one->ui->btnReturnRecycle->click();
-    mw_one->ui->btnBackTodo->click();
+  if (mui->frameTodoRecycle->isVisible()) {
+    mui->btnReturnRecycle->click();
+    mui->btnBackTodo->click();
   }
 
-  if (mw_one->ui->frameTodo->isVisible()) mw_one->ui->btnBackTodo->click();
+  if (mui->frameTodo->isVisible()) mui->btnBackTodo->click();
 
   if (mw_one->m_StepsOptions->isVisible()) {
     mw_one->m_StepsOptions->ui->btnBack->click();
-    mw_one->ui->btnBackSteps->click();
+    mui->btnBackSteps->click();
   }
 
-  if (mw_one->ui->frameSteps->isVisible()) mw_one->ui->btnBackSteps->click();
+  if (mui->frameSteps->isVisible()) mui->btnBackSteps->click();
 
-  if (mw_one->ui->frameBookList->isVisible()) {
-    mw_one->ui->btnBackBookList->click();
-    mw_one->ui->btnBackReader->click();
+  if (mui->frameBookList->isVisible()) {
+    mui->btnBackBookList->click();
+    mui->btnBackReader->click();
   }
 
-  if (mw_one->ui->frameReader->isVisible()) {
-    mw_one->ui->btnBackReader->click();
+  if (mui->frameReader->isVisible()) {
+    mui->btnBackReader->click();
   }
 
   if (mw_one->m_Preferences->isVisible())
     mw_one->m_Preferences->ui->btnBack->click();
 
-  if (mw_one->ui->frameOne->isVisible()) mw_one->ui->btnBack_One->click();
+  if (mui->frameOne->isVisible()) mui->btnBack_One->click();
 
-  if (mw_one->ui->frameBakList->isVisible())
-    mw_one->ui->btnBackBakList->click();
+  if (mui->frameBakList->isVisible()) mui->btnBackBakList->click();
 
-  if (mw_one->ui->frameCategory->isVisible()) {
-    mw_one->ui->btnCancelType->click();
-    mw_one->ui->btnBackEditRecord->click();
+  if (mui->frameCategory->isVisible()) {
+    mui->btnCancelType->click();
+    mui->btnBackEditRecord->click();
   }
 
-  if (mw_one->ui->frameEditRecord->isVisible())
-    mw_one->ui->btnBackEditRecord->click();
+  if (mui->frameEditRecord->isVisible()) mui->btnBackEditRecord->click();
 
-  if (mw_one->ui->frameTabRecycle->isVisible())
-    mw_one->ui->btnBackTabRecycle->click();
+  if (mui->frameTabRecycle->isVisible()) mui->btnBackTabRecycle->click();
 
-  if (mw_one->ui->frameViewCate->isVisible()) {
-    mw_one->ui->btnOkViewCate->click();
-    mw_one->ui->btnBack_Report->click();
+  if (mui->frameViewCate->isVisible()) {
+    mui->btnOkViewCate->click();
+    mui->btnBack_Report->click();
   }
 
-  if (mw_one->ui->frameReport->isVisible()) mw_one->ui->btnBack_Report->click();
+  if (mui->frameReport->isVisible()) mui->btnBack_Report->click();
 
-  if (mw_one->ui->frameSearch->isVisible()) mw_one->ui->btnBackSearch->click();
+  if (mui->frameSearch->isVisible()) mui->btnBackSearch->click();
 }
 
 void ReceiveShare::closeAllActiveWindows() {
   if (mw_one->m_TodoAlarm->isVisible()) {
     mw_one->m_TodoAlarm->ui->btnBack->click();
-    mw_one->ui->btnBackTodo->click();
+    mui->btnBackTodo->click();
   }
 
   if (mw_one->m_AboutThis->isVisible()) {
     mw_one->m_AboutThis->on_btnBack_About_clicked();
   }
 
-  if (mw_one->ui->frameMain->isVisible()) return;
+  if (mui->frameMain->isVisible()) return;
 
   QObjectList frameList;
   frameList = getAllFrame(m_Method->getAllUIControls(mw_one));
   for (int i = 0; i < frameList.count(); i++) {
     QFrame* frame = (QFrame*)frameList.at(i);
-    if (frame->parent() == mw_one->ui->centralwidget &&
+    if (frame->parent() == mui->centralwidget &&
         frame->objectName() != "frameMain") {
       qDebug() << frame->objectName();
       if (frame->isVisible()) {
@@ -325,11 +323,11 @@ void ReceiveShare::closeAllActiveWindows() {
       }
     }
   }
-  mw_one->ui->frameMain->show();
+  mui->frameMain->show();
 }
 
 void ReceiveShare::closeAllActiveWindowsKeep(QString frameName) {
-  if (mw_one->ui->frameMain->isVisible()) return;
+  if (mui->frameMain->isVisible()) return;
 
   if (mw_one->m_TodoAlarm->isVisible()) {
     mw_one->m_TodoAlarm->ui->btnBack->click();
@@ -343,7 +341,7 @@ void ReceiveShare::closeAllActiveWindowsKeep(QString frameName) {
   frameList = getAllFrame(m_Method->getAllUIControls(mw_one));
   for (int i = 0; i < frameList.count(); i++) {
     QFrame* frame = (QFrame*)frameList.at(i);
-    if (frame->parent() == mw_one->ui->centralwidget &&
+    if (frame->parent() == mui->centralwidget &&
         frame->objectName() != frameName) {
       qDebug() << frame->objectName();
       if (frame->isVisible()) {
@@ -436,11 +434,11 @@ void ReceiveShare::goReceiveShare() {
     mw_one->m_Todo->isNeedAddToTodoList = true;
     mw_one->m_Todo->strNeedAddToTodoText = strReceiveShareData;
 
-    if (mw_one->ui->frameTodo->isHidden() && mw_one->ui->frameMain->isHidden())
+    if (mui->frameTodo->isHidden() && mui->frameMain->isHidden())
       closeAllChildWindows();
 
-    if (mw_one->ui->frameTodo->isHidden()) {
-      mw_one->ui->btnTodo->click();
+    if (mui->frameTodo->isHidden()) {
+      mui->btnTodo->click();
     }
   }
 
@@ -474,6 +472,6 @@ void ReceiveShare::goReceiveShare() {
     }
 
     closeAllChildWindows();
-    mw_one->ui->btnNotes->click();
+    mui->btnNotes->click();
   }
 }

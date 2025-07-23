@@ -13,6 +13,8 @@ extern QString iniDir;
 extern QString loadText(QString textFile);
 extern void StringToFile(QString buffers, QString fileName);
 
+extern Ui::MainWindow* mui;
+
 CategoryList::CategoryList(QWidget* parent)
     : QDialog(parent), ui(new Ui::CategoryList) {
   ui->setupUi(this);
@@ -70,10 +72,10 @@ void CategoryList::on_listWidget_itemClicked(QListWidgetItem* item) {
 }
 
 void CategoryList::on_btnDel_clicked() {
-  int count = m_Method->getCountFromQW(mw_one->ui->qwCategory);
+  int count = m_Method->getCountFromQW(mui->qwCategory);
   if (count == 0) return;
 
-  int row = m_Method->getCurrentIndexFromQW(mw_one->ui->qwCategory);
+  int row = m_Method->getCurrentIndexFromQW(mui->qwCategory);
 
   if (row < 0) return;
 
@@ -89,7 +91,7 @@ void CategoryList::on_btnDel_clicked() {
 
     ui->listWidget->takeItem(row);
 
-    m_Method->delItemFromQW(mw_one->ui->qwCategory, row);
+    m_Method->delItemFromQW(mui->qwCategory, row);
   }
   mw_one->m_EditRecord->saveMyClassification();
   if (ui->listWidget->count() > 0)
@@ -97,13 +99,12 @@ void CategoryList::on_btnDel_clicked() {
   else
     ui->editRename->clear();
 
-  count = m_Method->getCountFromQW(mw_one->ui->qwCategory);
-  mw_one->ui->lblTypeInfo->setText(tr("Total") + " : " +
-                                   QString::number(count));
+  count = m_Method->getCountFromQW(mui->qwCategory);
+  mui->lblTypeInfo->setText(tr("Total") + " : " + QString::number(count));
 }
 
 void CategoryList::on_btnOk_clicked() {
-  int index = m_Method->getCurrentIndexFromQW(mw_one->ui->qwCategory);
+  int index = m_Method->getCurrentIndexFromQW(mui->qwCategory);
   ui->listWidget->setCurrentRow(index);
 
   setCategoryText();
@@ -114,7 +115,7 @@ void CategoryList::on_btnOk_clicked() {
 void CategoryList::setCategoryText() {
   int row = ui->listWidget->currentRow();
   if (row >= 0) {
-    mw_one->ui->editCategory->setText(ui->listWidget->currentItem()->text());
+    mui->editCategory->setText(ui->listWidget->currentItem()->text());
   }
 
   close();
@@ -128,7 +129,7 @@ void CategoryList::on_listWidget_itemDoubleClicked(QListWidgetItem* item) {
 void CategoryList::on_btnRename_clicked() {
   if (ui->listWidget->count() == 0) return;
 
-  int row = m_Method->getCurrentIndexFromQW(mw_one->ui->qwCategory);
+  int row = m_Method->getCurrentIndexFromQW(mui->qwCategory);
   ui->listWidget->setCurrentRow(row);
 
   oldName = ui->listWidget->currentItem()->text().trimmed();
@@ -142,7 +143,7 @@ void CategoryList::on_btnRename_clicked() {
 
     ui->listWidget->insertItem(index, item);
 
-    m_Method->modifyItemText0(mw_one->ui->qwCategory, row, text);
+    m_Method->modifyItemText0(mui->qwCategory, row, text);
 
     QStringList list;
     for (int i = 0; i < ui->listWidget->count(); i++) {
@@ -172,7 +173,7 @@ void CategoryList::on_btnRename_clicked() {
 
     renameAll();
 
-    mw_one->ui->editCategory->setText(ui->editRename->text().trimmed());
+    mui->editCategory->setText(ui->editRename->text().trimmed());
 
     mw_one->reloadMain();
   }
@@ -210,6 +211,6 @@ void CategoryList::renameAll() {
 void CategoryList::on_btnCancel_clicked() {
   mw_one->clearWidgetFocus();
 
-  mw_one->ui->frameCategory->hide();
-  mw_one->ui->frameEditRecord->show();
+  mui->frameCategory->hide();
+  mui->frameEditRecord->show();
 }

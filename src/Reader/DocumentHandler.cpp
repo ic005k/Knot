@@ -67,6 +67,7 @@
 #include "ui_MainWindow.h"
 
 extern MainWindow *mw_one;
+extern Ui::MainWindow *mui;
 extern Method *m_Method;
 extern QStringList readTextList, htmlFiles;
 extern int htmlIndex;
@@ -241,7 +242,7 @@ QUrl DocumentHandler::fileUrl() const { return m_fileUrl; }
 
 void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
   m_Method->isClickLink = true;
-  mw_one->ui->btnAutoStop->click();
+  mui->btnAutoStop->click();
 
   if (mw_one->curx != 0) return;
 
@@ -351,7 +352,7 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
     picfile = str;
     qDebug() << "Pic File1 : " << picfile;
 
-    mw_one->ui->btnDelImage->hide();
+    mui->btnDelImage->hide();
     if (QFile(picfile).exists()) {
       LoadPic *m_LoadPic = new LoadPic(mw_one);
       m_LoadPic->initMain(picfile);
@@ -367,7 +368,7 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
         picfile = memoPicFile;
         LoadPic *m_LoadPic = new LoadPic(mw_one);
         m_LoadPic->initMain(memoPicFile);
-        mw_one->ui->btnDelImage->show();
+        mui->btnDelImage->show();
       }
     }
   }
@@ -496,7 +497,7 @@ void DocumentHandler::setBackDir(QString link) {
     if (catalogueFile != mw_one->m_Reader->currentHtmlFile &&
         !link.contains("#")) {
       mw_one->m_Reader->mainDirIndex = htmlIndex;
-      mw_one->ui->btnBackDir->show();
+      mui->btnBackDir->show();
       mw_one->repaint();
       qDebug() << "mainDirIndex: " << mw_one->m_Reader->mainDirIndex;
     }

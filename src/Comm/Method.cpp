@@ -6,6 +6,7 @@
 #include "ui_MainWindow.h"
 
 extern MainWindow *mw_one;
+extern Ui::MainWindow *mui;
 extern QTabWidget *tabData;
 extern QString iniDir, searchStr, currentMDFile, privateDir, encPassword,
     errorInfo;
@@ -143,7 +144,7 @@ int Method::getStrWidth(const QString str) {
 
 void Method::addItem(QString text_tab, QString text0, QString text1,
                      QString text2, QString text3, int itemH) {
-  QQuickItem *root = mw_one->ui->qwSearch->rootObject();
+  QQuickItem *root = mui->qwSearch->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "addItem",
                             Q_ARG(QVariant, text_tab), Q_ARG(QVariant, text0),
                             Q_ARG(QVariant, text1), Q_ARG(QVariant, text2),
@@ -151,12 +152,12 @@ void Method::addItem(QString text_tab, QString text0, QString text1,
 }
 
 void Method::delItem(int index) {
-  QQuickItem *root = mw_one->ui->qwSearch->rootObject();
+  QQuickItem *root = mui->qwSearch->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "delItem", Q_ARG(QVariant, index));
 }
 
 int Method::getCount() {
-  QQuickItem *root = mw_one->ui->qwSearch->rootObject();
+  QQuickItem *root = mui->qwSearch->rootObject();
   QVariant itemCount;
   QMetaObject::invokeMethod((QObject *)root, "getItemCount",
                             Q_RETURN_ARG(QVariant, itemCount));
@@ -171,7 +172,7 @@ void Method::clearAll() {
 }
 
 void Method::setCurrentIndex(int index) {
-  QQuickItem *root = mw_one->ui->qwSearch->rootObject();
+  QQuickItem *root = mui->qwSearch->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "setCurrentItem",
                             Q_ARG(QVariant, index));
 }
@@ -444,8 +445,7 @@ void Method::initSearchResults() {
   clearAll();
   int count = resultsList.count();
 
-  mw_one->ui->lblSearchResult->setText(tr("Results") + " : " +
-                                       QString::number(count));
+  mui->lblSearchResult->setText(tr("Results") + " : " + QString::number(count));
   if (count == 0) return;
 
   generateData(count);
@@ -521,20 +521,20 @@ void Method::clickMainDate() {
   mw_one->isDelItem = false;
   mw_one->isEditItem = false;
 
-  mw_one->ui->qwMainEvent->rootContext()->setContextProperty("isAniEffects",
-                                                             isAniEffects);
+  mui->qwMainEvent->rootContext()->setContextProperty("isAniEffects",
+                                                      isAniEffects);
 
-  mw_one->ui->qwMainEvent->rootContext()->setContextProperty(
-      "maineventWidth", mw_one->ui->qwMainEvent->width());
+  mui->qwMainEvent->rootContext()->setContextProperty(
+      "maineventWidth", mui->qwMainEvent->width());
 
-  QTreeWidget *tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
-  int maindateIndex = getCurrentIndexFromQW(mw_one->ui->qwMainDate);
-  int maindateCount = getCountFromQW(mw_one->ui->qwMainDate);
+  QTreeWidget *tw = mw_one->get_tw(mui->tabWidget->currentIndex());
+  int maindateIndex = getCurrentIndexFromQW(mui->qwMainDate);
+  int maindateCount = getCountFromQW(mui->qwMainDate);
   int topIndex = tw->topLevelItemCount() - maindateCount + maindateIndex;
 
   if (topIndex < 0) return;
 
-  clearAllBakList(mw_one->ui->qwMainEvent);
+  clearAllBakList(mui->qwMainEvent);
   QTreeWidgetItem *topItem = tw->topLevelItem(topIndex);
   int childCount = topItem->childCount();
   QString text0, text1, text2, text3;
@@ -546,13 +546,13 @@ void Method::clickMainDate() {
     text2 = childItem->text(2);
     text3 = childItem->text(3);
 
-    addItemToQW(mw_one->ui->qwMainEvent, text0, text1, text2, text3, 0);
+    addItemToQW(mui->qwMainEvent, text0, text1, text2, text3, 0);
   }
 
-  gotoEnd(mw_one->ui->qwMainEvent);
-  int count = getCountFromQW(mw_one->ui->qwMainEvent);
-  setCurrentIndexFromQW(mw_one->ui->qwMainEvent, count - 1);
-  setScrollBarPos(mw_one->ui->qwMainEvent, 1.0);
+  gotoEnd(mui->qwMainEvent);
+  int count = getCountFromQW(mui->qwMainEvent);
+  setCurrentIndexFromQW(mui->qwMainEvent, count - 1);
+  setScrollBarPos(mui->qwMainEvent, 1.0);
 
   setMainTabCurrentIndex();
 }
@@ -570,9 +570,9 @@ void Method::setMainTabCurrentIndex() {
 }
 
 void Method::clickMainDateData() {
-  QTreeWidget *tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
-  int maindateIndex = getCurrentIndexFromQW(mw_one->ui->qwMainDate);
-  int maindateCount = getCountFromQW(mw_one->ui->qwMainDate);
+  QTreeWidget *tw = mw_one->get_tw(mui->tabWidget->currentIndex());
+  int maindateIndex = getCurrentIndexFromQW(mui->qwMainDate);
+  int maindateCount = getCountFromQW(mui->qwMainDate);
   int topIndex = tw->topLevelItemCount() - maindateCount + maindateIndex;
 
   if (topIndex < 0) return;
@@ -583,11 +583,11 @@ void Method::clickMainDateData() {
 }
 
 void Method::clickMainEventData() {
-  QTreeWidget *tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
-  int maindateIndex = getCurrentIndexFromQW(mw_one->ui->qwMainDate);
-  int maindateCount = getCountFromQW(mw_one->ui->qwMainDate);
+  QTreeWidget *tw = mw_one->get_tw(mui->tabWidget->currentIndex());
+  int maindateIndex = getCurrentIndexFromQW(mui->qwMainDate);
+  int maindateCount = getCountFromQW(mui->qwMainDate);
   int topIndex = tw->topLevelItemCount() - maindateCount + maindateIndex;
-  int childIndex = getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
+  int childIndex = getCurrentIndexFromQW(mui->qwMainEvent);
   tw->setCurrentItem(tw->topLevelItem(topIndex)->child(childIndex));
 
   if (topIndex < 0) return;
@@ -599,11 +599,11 @@ void Method::clickMainEventData() {
 }
 
 void Method::reeditMainEventData() {
-  QTreeWidget *tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
-  int maindateIndex = getCurrentIndexFromQW(mw_one->ui->qwMainDate);
-  int maindateCount = getCountFromQW(mw_one->ui->qwMainDate);
+  QTreeWidget *tw = mw_one->get_tw(mui->tabWidget->currentIndex());
+  int maindateIndex = getCurrentIndexFromQW(mui->qwMainDate);
+  int maindateCount = getCountFromQW(mui->qwMainDate);
   int topIndex = tw->topLevelItemCount() - maindateCount + maindateIndex;
-  int childIndex = getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
+  int childIndex = getCurrentIndexFromQW(mui->qwMainEvent);
 
   if (topIndex < 0) return;
   if (childIndex < 0) return;
@@ -629,13 +629,13 @@ void Method::showNotsListMenu(int x, int y) {
 }
 
 void Method::setTypeRenameText() {
-  int index = getCurrentIndexFromQW(mw_one->ui->qwCategory);
-  QString str = getText0(mw_one->ui->qwCategory, index);
-  mw_one->ui->editRenameType->setText(str);
+  int index = getCurrentIndexFromQW(mui->qwCategory);
+  QString str = getText0(mui->qwCategory, index);
+  mui->editRenameType->setText(str);
 }
 
 void Method::okType() {
-  int index = getCurrentIndexFromQW(mw_one->ui->qwCategory);
+  int index = getCurrentIndexFromQW(mui->qwCategory);
   m_CategoryList->ui->listWidget->setCurrentRow(index);
   QListWidgetItem *item = m_CategoryList->ui->listWidget->currentItem();
   m_CategoryList->on_listWidget_itemDoubleClicked(item);
@@ -925,7 +925,7 @@ QString Method::getCustomColor() {
   x = mw_one->geometry().x();
   y = mw_one->geometry().y();
   w = mw_one->width();
-  h = mw_one->ui->frameMain->height() - 50;
+  h = mui->frameMain->height() - 50;
   colorDlg->setFixedWidth(w);
   colorDlg->setFixedHeight(h);
   colorDlg->setGeometry(x + (mw_one->width() - w) / 2, y, w, h);
@@ -2626,8 +2626,8 @@ void Method::set_ToolButtonStyle(QObject *parent) {
   for (int i = 0; i < btnList.count(); i++) {
     QToolButton *btn = (QToolButton *)btnList.at(i);
 
-    if (btn != mw_one->ui->btnStyle1 && btn != mw_one->ui->btnStyle2 &&
-        btn != mw_one->ui->btnStyle3 && btn != mw_one->ui->btnGPS) {
+    if (btn != mui->btnStyle1 && btn != mui->btnStyle2 &&
+        btn != mui->btnStyle3 && btn != mui->btnGPS) {
       if (isDark)
         setToolButtonQss(btn, 5, 3, "#2874AC", "#FFFFFF", "#2874AC", "#FFFFFF",
                          "#FF0000", "#FFFFFF");

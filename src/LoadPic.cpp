@@ -6,18 +6,20 @@ extern MainWindow* mw_one;
 extern Method* m_Method;
 extern QString picfile, imgFileName;
 
+extern Ui::MainWindow* mui;
+
 LoadPic::LoadPic(QWidget* parent) : QDialog(parent) {
   QFont font = this->font();
   font.setPointSize(13);
-  mw_one->ui->lblImgInfo->setFont(font);
-  mw_one->ui->lblImgInfo->adjustSize();
-  mw_one->ui->lblImgInfo->setWordWrap(true);
-  mw_one->ui->lblImgInfo->setText("");
+  mui->lblImgInfo->setFont(font);
+  mui->lblImgInfo->adjustSize();
+  mui->lblImgInfo->setWordWrap(true);
+  mui->lblImgInfo->setText("");
 
 #ifdef Q_OS_ANDROID
-  mw_one->ui->btnShareImage->show();
+  mui->btnShareImage->show();
 #else
-  mw_one->ui->btnShareImage->hide();
+  mui->btnShareImage->hide();
 #endif
 
   this->installEventFilter(this);
@@ -27,25 +29,23 @@ LoadPic::~LoadPic() {}
 
 void LoadPic::initMain(QString imgFile) {
   imgFileName = imgFile;
-  mw_one->ui->lblImgInfo->setText(
-      imgFile + "  " + m_Method->getFileSize(QFile(imgFile).size(), 2));
+  mui->lblImgInfo->setText(imgFile + "  " +
+                           m_Method->getFileSize(QFile(imgFile).size(), 2));
 
-  if (mw_one->ui->frameReader->isVisible()) mw_one->ui->frameReader->hide();
-  if (mw_one->ui->frameNotes->isVisible()) mw_one->ui->frameNotes->hide();
+  if (mui->frameReader->isVisible()) mui->frameReader->hide();
+  if (mui->frameNotes->isVisible()) mui->frameNotes->hide();
 
-  mw_one->ui->qw_Img->rootContext()->setContextProperty("myW", mw_one->width());
-  mw_one->ui->qw_Img->rootContext()->setContextProperty("myH",
-                                                        mw_one->height());
+  mui->qw_Img->rootContext()->setContextProperty("myW", mw_one->width());
+  mui->qw_Img->rootContext()->setContextProperty("myH", mw_one->height());
 
-  mw_one->ui->frameImgView->show();
+  mui->frameImgView->show();
 
-  mw_one->ui->qw_Img->rootContext()->setContextProperty(
-      "imgW", mw_one->ui->qw_Img->width() * 10);
-  mw_one->ui->qw_Img->rootContext()->setContextProperty(
-      "imgH", mw_one->ui->qw_Img->height() * 10);
-  mw_one->ui->qw_Img->rootContext()->setContextProperty("imgFile", imgFile);
-  mw_one->ui->qw_Img->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/imgview.qml")));
+  mui->qw_Img->rootContext()->setContextProperty("imgW",
+                                                 mui->qw_Img->width() * 10);
+  mui->qw_Img->rootContext()->setContextProperty("imgH",
+                                                 mui->qw_Img->height() * 10);
+  mui->qw_Img->rootContext()->setContextProperty("imgFile", imgFile);
+  mui->qw_Img->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/imgview.qml")));
 }
 
 bool LoadPic::eventFilter(QObject* watch, QEvent* evn) {

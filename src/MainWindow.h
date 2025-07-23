@@ -125,7 +125,7 @@ class MainWindow : public QMainWindow {
  public:
   MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
-  Ui::MainWindow *ui;
+  // Ui::MainWindow *ui;
 
   QMenu *mainMenu = nullptr;
 

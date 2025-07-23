@@ -9,6 +9,7 @@
 #include "ui_MainWindow.h"
 
 extern MainWindow *mw_one;
+extern Ui::MainWindow *mui;
 extern Method *m_Method;
 
 File::File() { connect(this, SIGNAL(sourceChanged()), this, SLOT(readFile())); }
@@ -60,11 +61,9 @@ void File::setStr(QString str) { m_text = str; }
 QString File::text() const { return m_text; }
 
 qreal File::textPos() {
-  if (!mw_one->ui->frameReader->isHidden())
-    mw_one->m_Reader->textPos = m_textPos;
+  if (!mui->frameReader->isHidden()) mw_one->m_Reader->textPos = m_textPos;
 
-  if (!mw_one->ui->frameNotes->isHidden())
-    mw_one->m_Notes->sliderPos = m_textPos;
+  if (!mui->frameNotes->isHidden()) mw_one->m_Notes->sliderPos = m_textPos;
 
   qDebug() << "m_textPos" << m_textPos;
 
@@ -72,10 +71,9 @@ qreal File::textPos() {
 }
 
 qreal File::textHeight() {
-  if (!mw_one->ui->frameNotes->isHidden())
-    mw_one->m_Notes->textHeight = m_textHeight;
+  if (!mui->frameNotes->isHidden()) mw_one->m_Notes->textHeight = m_textHeight;
 
-  if (!mw_one->ui->frameReader->isHidden())
+  if (!mui->frameReader->isHidden())
     mw_one->m_Reader->textHeight = m_textHeight;
 
   qDebug() << "m_textHeight" << m_textHeight << mw_one->m_Notes->textHeight;
@@ -100,6 +98,6 @@ QString File::prog() const { return m_prog; }
 
 void File::setProg(const QString &prog) {
   m_prog = prog;
-  mw_one->ui->progressBar->setValue(m_prog.toInt());
-  mw_one->ui->progBar->setValue(m_prog.toInt());
+  mui->progressBar->setValue(m_prog.toInt());
+  mui->progBar->setValue(m_prog.toInt());
 }

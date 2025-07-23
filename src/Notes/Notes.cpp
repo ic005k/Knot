@@ -9,6 +9,7 @@
 #include "ui_Notes.h"
 
 extern MainWindow *mw_one;
+extern Ui::MainWindow *mui;
 extern Method *m_Method;
 extern QString iniFile, iniDir, privateDir, currentMDFile, imgFileName, appName,
     encPassword, errorInfo;
@@ -140,7 +141,7 @@ void Notes::resizeEvent(QResizeEvent *event) { Q_UNUSED(event); }
 void Notes::on_btnDone_clicked() {
   saveMainNotes();
 
-  if (!mw_one->ui->frameNotes->isHidden()) {
+  if (!mui->frameNotes->isHidden()) {
     MD2Html(currentMDFile);
   }
 }
@@ -725,13 +726,12 @@ void Notes::closeEvent(QCloseEvent *event) {
   if (isSetNewNoteTitle()) {
     TitleGenerator generator;
     new_title = generator.genNewTitle(strNoteText);
-    mw_one->ui->btnRename->click();
+    mui->btnRename->click();
   }
 }
 
 void Notes::syncToWebDAV() {
-  if (mw_one->ui->chkAutoSync->isChecked() &&
-      mw_one->ui->chkWebDAV->isChecked()) {
+  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     if (notes_sync_files.count() > 0) {
       m_CloudBackup->uploadFilesToWebDAV(notes_sync_files);
     }
@@ -1096,7 +1096,7 @@ void Notes::javaNoteToQMLNote() {
       strNoteText = loadText(currentMDFile);
     }
     new_title = generator.genNewTitle(strNoteText);
-    mw_one->ui->btnRename->click();
+    mui->btnRename->click();
   }
 
   QString zipMD = privateDir + "KnotData/memo/" +
@@ -1141,7 +1141,7 @@ void Notes::loadEmptyNote() {
   currentMDFile = "";
   MD2Html(currentMDFile);
 
-  mw_one->ui->lblNoteName->setText("");
+  mui->lblNoteName->setText("");
   mw_one->m_NotesList->noteTitle = "";
 }
 
@@ -1347,10 +1347,10 @@ void Notes::openNotesUI() {
   mw_one->isMemoVisible = true;
   mw_one->isReaderVisible = false;
 
-  mw_one->ui->frameMain->hide();
-  mw_one->ui->frameNotes->show();
+  mui->frameMain->hide();
+  mui->frameNotes->show();
 
-  mw_one->ui->btnNotesList->click();
+  mui->btnNotesList->click();
 
   mw_one->closeProgress();
 
@@ -1358,7 +1358,7 @@ void Notes::openNotesUI() {
 
   if (isRequestOpenNoteEditor) {
     isRequestOpenNoteEditor = false;
-    mw_one->ui->btnEdit->click();
+    mui->btnEdit->click();
   }
 }
 
@@ -1477,8 +1477,7 @@ void Notes::openNotes() {
   mw_one->m_NotesList->needDelWebDAVFiles.clear();
   isPasswordError = false;
 
-  if (mw_one->ui->chkAutoSync->isChecked() &&
-      mw_one->ui->chkWebDAV->isChecked()) {
+  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     mw_one->showProgress();
 
     m_CloudBackup->createRemoteWebDAVDir();
@@ -2058,7 +2057,7 @@ void Notes::openBrowserOnce(const QString &htmlPath) {
   // QDesktopServices::openUrl(url);
 }
 
-void Notes::on_btnView_clicked() { mw_one->ui->btnOpenNote->click(); }
+void Notes::on_btnView_clicked() { mui->btnOpenNote->click(); }
 
 void Notes::init_md() {
 #ifndef Q_OS_ANDROID

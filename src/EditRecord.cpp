@@ -4,7 +4,9 @@
 
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
+
 extern MainWindow *mw_one;
+extern Ui::MainWindow *mui;
 extern Method *m_Method;
 extern QTabWidget *tabData;
 extern QString iniFile, iniDir, privateDir, btnYearText, btnMonthText;
@@ -24,55 +26,53 @@ EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {
   m_CategoryList = new CategoryList(this);
 
   this->installEventFilter(this);
-  // mw_one->ui->editCategory->installEventFilter(this);
-  // mw_one->ui->editDetails->viewport()->installEventFilter(mw_one);
-  mw_one->ui->editCategory->setFocus();
 
-  nH = mw_one->ui->editCategory->height();
+  mui->editCategory->setFocus();
+
+  nH = mui->editCategory->height();
 
   QFont font = this->font();
   font.setPointSize(22);
-  mw_one->ui->editCategory->setFont(font);
+  mui->editCategory->setFont(font);
   font.setPointSize(23);
   font.setBold(true);
 
-  mw_one->ui->editAmount->setFont(font);
+  mui->editAmount->setFont(font);
 
-  mw_one->ui->btn0->setFont(font);
-  mw_one->ui->btn1->setFont(font);
-  mw_one->ui->btn2->setFont(font);
-  mw_one->ui->btn3->setFont(font);
-  mw_one->ui->btn4->setFont(font);
-  mw_one->ui->btn5->setFont(font);
-  mw_one->ui->btn6->setFont(font);
-  mw_one->ui->btn7->setFont(font);
-  mw_one->ui->btn8->setFont(font);
-  mw_one->ui->btn9->setFont(font);
-  mw_one->ui->btn0->setFont(font);
-  mw_one->ui->btnDot->setFont(font);
-  mw_one->ui->btnDel_Number->setFont(font);
+  mui->btn0->setFont(font);
+  mui->btn1->setFont(font);
+  mui->btn2->setFont(font);
+  mui->btn3->setFont(font);
+  mui->btn4->setFont(font);
+  mui->btn5->setFont(font);
+  mui->btn6->setFont(font);
+  mui->btn7->setFont(font);
+  mui->btn8->setFont(font);
+  mui->btn9->setFont(font);
+  mui->btn0->setFont(font);
+  mui->btnDot->setFont(font);
+  mui->btnDel_Number->setFont(font);
 
   font.setPointSize(fontSize);
   font.setBold(true);
-  mw_one->ui->lblTitleEditRecord->setFont(font);
+  mui->lblTitleEditRecord->setFont(font);
 
   QValidator *validator =
-      new QRegularExpressionValidator(regxNumber, mw_one->ui->editAmount);
-  mw_one->ui->editAmount->setValidator(validator);
-  mw_one->ui->editAmount->setAttribute(Qt::WA_InputMethodEnabled, false);
-  mw_one->ui->editAmount->setReadOnly(true);
+      new QRegularExpressionValidator(regxNumber, mui->editAmount);
+  mui->editAmount->setValidator(validator);
+  mui->editAmount->setAttribute(Qt::WA_InputMethodEnabled, false);
+  mui->editAmount->setReadOnly(true);
 
-  mw_one->ui->editCategory->setPlaceholderText(tr("Please enter a category"));
+  mui->editCategory->setPlaceholderText(tr("Please enter a category"));
 
-  lblStyle = mw_one->ui->lblCategory->styleSheet();
+  lblStyle = mui->lblCategory->styleSheet();
 
-  mw_one->ui->hsM->setStyleSheet(mw_one->ui->hsH->styleSheet());
+  mui->hsM->setStyleSheet(mui->hsH->styleSheet());
 
-  m_Method->qssSlider = mw_one->ui->hsH->styleSheet();
+  m_Method->qssSlider = mui->hsH->styleSheet();
 
-  QScroller::grabGesture(mw_one->ui->editDetails,
-                         QScroller::LeftMouseButtonGesture);
-  m_Method->setSCrollPro(mw_one->ui->editDetails);
+  QScroller::grabGesture(mui->editDetails, QScroller::LeftMouseButtonGesture);
+  m_Method->setSCrollPro(mui->editDetails);
 }
 
 void EditRecord::init() {
@@ -81,8 +81,8 @@ void EditRecord::init() {
               mw_one->height());
 
   if (isAdd) {
-    mw_one->ui->editCategory->setText("");
-    mw_one->ui->editAmount->setText("");
+    mui->editCategory->setText("");
+    mui->editAmount->setText("");
   }
 
   show();
@@ -102,10 +102,9 @@ void EditRecord::on_btnOk_clicked() {
         tr("Modify Item") + " ( " + mw_one->getTabText() + " ) ";
 
   } else {
-    mw_one->add_Data(mw_one->get_tw(mw_one->ui->tabWidget->currentIndex()),
-                     mw_one->ui->lblTime->text(),
-                     mw_one->ui->editAmount->text().trimmed(),
-                     mw_one->ui->editCategory->text().trimmed());
+    mw_one->add_Data(mw_one->get_tw(mui->tabWidget->currentIndex()),
+                     mui->lblTime->text(), mui->editAmount->text().trimmed(),
+                     mui->editCategory->text().trimmed());
 
     mw_one->strLatestModify =
         tr("Add Item") + " ( " + mw_one->getTabText() + " ) ";
@@ -114,7 +113,7 @@ void EditRecord::on_btnOk_clicked() {
   mw_one->clickData();
 
   // Save Category Text
-  QString str = mw_one->ui->editCategory->text().trimmed();
+  QString str = mui->editCategory->text().trimmed();
   int count = m_CategoryList->ui->listWidget->count();
   for (int i = 0; i < count; i++) {
     QString str1 = m_CategoryList->ui->listWidget->item(i)->text().trimmed();
@@ -155,33 +154,32 @@ void EditRecord::on_btn0_clicked() { set_Amount("0"); }
 void EditRecord::on_btnDot_clicked() { set_Amount("."); }
 
 void EditRecord::on_btnDel_clicked() {
-  QString str = mw_one->ui->editAmount->text().trimmed();
+  QString str = mui->editAmount->text().trimmed();
   str = str.mid(0, str.length() - 1);
-  mw_one->ui->editAmount->setText(str);
+  mui->editAmount->setText(str);
 }
 
 void EditRecord::set_Amount(QString Number) {
-  QString str = mw_one->ui->editAmount->text().trimmed();
-  if (str == "0.00") mw_one->ui->editAmount->setText("");
+  QString str = mui->editAmount->text().trimmed();
+  if (str == "0.00") mui->editAmount->setText("");
   if (str.split(".").count() == 2 && str != "0.00") {
     QString str0 = str.split(".").at(1);
     if (str0.length() == 2) return;
   }
-  mw_one->ui->editAmount->setText(str + Number);
+  mui->editAmount->setText(str + Number);
 }
 
 void EditRecord::on_btnCustom_clicked() {
   this->hide();
-  mw_one->ui->frameEditRecord->hide();
-  mw_one->ui->frameCategory->show();
+  mui->frameEditRecord->hide();
+  mui->frameCategory->show();
   init_MyCategory();
   m_CategoryList->ui->listWidget->setCurrentRow(0);
-  m_Method->setCurrentIndexFromQW(mw_one->ui->qwCategory, 0);
+  m_Method->setCurrentIndexFromQW(mui->qwCategory, 0);
   m_Method->setTypeRenameText();
 
-  int count = m_Method->getCountFromQW(mw_one->ui->qwCategory);
-  mw_one->ui->lblTypeInfo->setText(tr("Total") + " : " +
-                                   QString::number(count));
+  int count = m_Method->getCountFromQW(mui->qwCategory);
+  mui->lblTypeInfo->setText(tr("Total") + " : " + QString::number(count));
 
   return;
 
@@ -256,7 +254,7 @@ void EditRecord::init_MyCategory() {
   ini_file = iniDir + "desc.ini";
   QSettings RegDesc(ini_file, QSettings::IniFormat);
 
-  m_Method->clearAllBakList(mw_one->ui->qwCategory);
+  m_Method->clearAllBakList(mui->qwCategory);
 
   c_list.clear();
   m_CategoryList->ui->listWidget->clear();
@@ -270,7 +268,7 @@ void EditRecord::init_MyCategory() {
     m_CategoryList->ui->listWidget->addItem(item);
     c_list.append(str);
 
-    m_Method->addItemToQW(mw_one->ui->qwCategory, str, "", "", "", 0);
+    m_Method->addItemToQW(mui->qwCategory, str, "", "", "", 0);
   }
 }
 
@@ -289,20 +287,16 @@ void EditRecord::getTime(int h, int m) {
     strs = "0" + QString::number(s);
   else
     strs = QString::number(s);
-  mw_one->ui->lblTime->setText(strh + ":" + strm + ":" + strs);
+  mui->lblTime->setText(strh + ":" + strm + ":" + strs);
 }
 
 bool EditRecord::eventFilter(QObject *watch, QEvent *evn) {
   return QWidget::eventFilter(watch, evn);
 }
 
-void EditRecord::on_btnClearAmount_clicked() {
-  mw_one->ui->editAmount->clear();
-}
+void EditRecord::on_btnClearAmount_clicked() { mui->editAmount->clear(); }
 
-void EditRecord::on_btnClearDesc_clicked() {
-  mw_one->ui->editCategory->clear();
-}
+void EditRecord::on_btnClearDesc_clicked() { mui->editCategory->clear(); }
 
 void EditRecord::on_editAmount_textChanged(const QString &arg1) {
   int count = 0;
@@ -311,68 +305,63 @@ void EditRecord::on_editAmount_textChanged(const QString &arg1) {
     if (count == 2) {
       QString str0 = arg1;
       QString str = str0.mid(0, str0.length() - 1);
-      mw_one->ui->editAmount->setText(str);
+      mui->editAmount->setText(str);
       break;
     }
   }
 
   if (arg1.length() > 0) {
-    mw_one->ui->lblAmount->setStyleSheet(lblStyleHighLight);
+    mui->lblAmount->setStyleSheet(lblStyleHighLight);
     if (!isDark) {
-      m_Method->setQLabelImage(mw_one->ui->lblAmount, nH, nH, ":/res/je_l.svg");
+      m_Method->setQLabelImage(mui->lblAmount, nH, nH, ":/res/je_l.svg");
     }
   } else {
-    mw_one->ui->lblAmount->setStyleSheet(lblStyle);
+    mui->lblAmount->setStyleSheet(lblStyle);
     if (!isDark) {
-      m_Method->setQLabelImage(mw_one->ui->lblAmount, nH, nH, ":/res/je.svg");
+      m_Method->setQLabelImage(mui->lblAmount, nH, nH, ":/res/je.svg");
     }
   }
 }
 
 void EditRecord::on_hsH_valueChanged(int value) {
-  getTime(value, mw_one->ui->hsM->value());
+  getTime(value, mui->hsM->value());
 }
 
 void EditRecord::on_hsM_valueChanged(int value) {
-  getTime(mw_one->ui->hsH->value(), value);
+  getTime(mui->hsH->value(), value);
 }
 
-void EditRecord::on_btnClearDetails_clicked() {
-  mw_one->ui->editDetails->clear();
-}
+void EditRecord::on_btnClearDetails_clicked() { mui->editDetails->clear(); }
 
 void EditRecord::on_editCategory_textChanged(const QString &arg1) {
   if (arg1.length() > 0) {
-    mw_one->ui->lblCategory->setStyleSheet(lblStyleHighLight);
+    mui->lblCategory->setStyleSheet(lblStyleHighLight);
     if (!isDark) {
-      m_Method->setQLabelImage(mw_one->ui->lblCategory, nH, nH,
-                               ":/res/fl_l.svg");
+      m_Method->setQLabelImage(mui->lblCategory, nH, nH, ":/res/fl_l.svg");
     }
   } else {
-    mw_one->ui->lblCategory->setStyleSheet(lblStyle);
+    mui->lblCategory->setStyleSheet(lblStyle);
     if (!isDark) {
-      m_Method->setQLabelImage(mw_one->ui->lblCategory, nH, nH, ":/res/fl.svg");
+      m_Method->setQLabelImage(mui->lblCategory, nH, nH, ":/res/fl.svg");
     }
   }
 
   QCompleter *completer = new QCompleter(c_list);
   completer->setFilterMode(Qt::MatchContains);
-  mw_one->ui->editCategory->setCompleter(completer);
+  mui->editCategory->setCompleter(completer);
 }
 
 void EditRecord::on_editDetails_textChanged() {
-  QString arg1 = mw_one->ui->editDetails->toPlainText();
+  QString arg1 = mui->editDetails->toPlainText();
   if (arg1.length() > 0) {
-    mw_one->ui->lblDetailsType->setStyleSheet(lblStyleHighLight);
+    mui->lblDetailsType->setStyleSheet(lblStyleHighLight);
     if (!isDark) {
-      m_Method->setQLabelImage(mw_one->ui->lblDetailsType, nH, nH,
-                               ":/res/xq_l.svg");
+      m_Method->setQLabelImage(mui->lblDetailsType, nH, nH, ":/res/xq_l.svg");
     }
   } else {
-    mw_one->ui->lblDetailsType->setStyleSheet(lblStyle);
+    mui->lblDetailsType->setStyleSheet(lblStyle);
     if (!isDark) {
-      m_Method->setQLabelImage(mw_one->ui->lblDetailsType, nH, nH,
-                               ":/res/xq.svg");
+      m_Method->setQLabelImage(mui->lblDetailsType, nH, nH, ":/res/xq.svg");
     }
   }
 }
@@ -579,18 +568,18 @@ void EditRecord::saveCurrentValue() {
   QString ini_file = privateDir + "editrecord_value.ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
 
-  Reg.setValue("value1", mw_one->ui->editCategory->text());
-  Reg.setValue("value2", mw_one->ui->editDetails->toPlainText());
-  Reg.setValue("value3", mw_one->ui->editAmount->text());
+  Reg.setValue("value1", mui->editCategory->text());
+  Reg.setValue("value2", mui->editDetails->toPlainText());
+  Reg.setValue("value3", mui->editAmount->text());
 }
 
 void EditRecord::setCurrentValue() {
   QString ini_file = privateDir + "editrecord_value.ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
 
-  mw_one->ui->editCategory->setText(Reg.value("value1").toString());
-  mw_one->ui->editDetails->setText(Reg.value("value2").toString());
-  mw_one->ui->editAmount->setText(Reg.value("value3").toString());
+  mui->editCategory->setText(Reg.value("value1").toString());
+  mui->editDetails->setText(Reg.value("value2").toString());
+  mui->editAmount->setText(Reg.value("value3").toString());
 }
 
 void EditRecord::monthSum() {

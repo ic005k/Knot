@@ -10,6 +10,8 @@ extern MainWindow *mw_one;
 extern Method *m_Method;
 extern bool isAndroid;
 
+extern Ui::MainWindow *mui;
+
 DateSelector::DateSelector(QWidget *parent)
     : QDialog(parent), ui(new Ui::DateSelector) {
   ui->setupUi(this);
@@ -108,30 +110,30 @@ void DateSelector::on_btnOk_clicked() {
   ymdList.append(m);
   ymdList.append(d);
 
-  if (!mw_one->ui->frameReport->isHidden()) {
+  if (!mui->frameReport->isHidden()) {
     if (dateFlag == 1 || dateFlag == 2) {
-      mw_one->ui->btnYear->setText(y);
+      mui->btnYear->setText(y);
 
       int value = m.toInt();
       if (value == 13)
-        mw_one->ui->btnMonth->setText(tr("Year-Round"));
+        mui->btnMonth->setText(tr("Year-Round"));
       else {
-        mw_one->ui->btnMonth->setText(m);
+        mui->btnMonth->setText(m);
       }
     }
 
     QString strYear, strMonth;
-    strYear = mw_one->ui->btnYear->text();
-    strMonth = mw_one->ui->btnMonth->text();
+    strYear = mui->btnYear->text();
+    strMonth = mui->btnMonth->text();
     if (dateFlag == 1 || dateFlag == 2)
       mw_one->m_Report->startReport1(strYear, strMonth);
 
     if (dateFlag == 3) {
-      mw_one->ui->btnStartDate->setText(y + "  " + m + "  " + d);
+      mui->btnStartDate->setText(y + "  " + m + "  " + d);
     }
 
     if (dateFlag == 4) {
-      mw_one->ui->btnEndDate->setText(y + "  " + m + "  " + d);
+      mui->btnEndDate->setText(y + "  " + m + "  " + d);
     }
 
     if (dateFlag == 3 || dateFlag == 4) mw_one->m_Report->startReport2();
@@ -139,7 +141,7 @@ void DateSelector::on_btnOk_clicked() {
     mw_one->m_Report->saveYMD();
   }
 
-  if (!mw_one->ui->frameSteps->isHidden()) {
+  if (!mui->frameSteps->isHidden()) {
     mw_one->m_Steps->getGpsListDataFromYearMonth();
   }
 
@@ -149,12 +151,12 @@ void DateSelector::on_btnOk_clicked() {
 void DateSelector::initStartEndDate(QString flag) {
   QString str;
   if (flag == "start") {
-    str = mw_one->ui->btnStartDate->text();
+    str = mui->btnStartDate->text();
     dateFlag = 3;
   }
 
   if (flag == "end") {
-    str = mw_one->ui->btnEndDate->text();
+    str = mui->btnEndDate->text();
     dateFlag = 4;
   }
 
