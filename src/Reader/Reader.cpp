@@ -251,7 +251,9 @@ void Reader::startOpenFile(QString openfile) {
     mw_one->m_ReadTWThread->wait();
 
     if (!mw_one->initMain) {
-      QTimer::singleShot(100, this, []() { mw_one->showProgress(); });
+      if (!fi.suffix().contains("pdf")) {
+        QTimer::singleShot(100, this, []() { mw_one->showProgress(); });
+      }
     }
 
     tmeShowEpubMsg->start(100);
@@ -396,10 +398,7 @@ void Reader::openFile(QString openfile) {
 
         strShowMsg = "Del temp ...";
         deleteDirfile(dirpath1);
-        // strShowMsg = "Copy temp0 to temp ...";
-        // copyDirectoryFiles(dirpath, dirpath1, true);
-        // strShowMsg = "Del temp0 ...";
-        // deleteDirfile(dirpath);
+
         strShowMsg = "Rename temp0 to temp...";
         QDir dir;
         dir.rename(dirpath, dirpath1);
@@ -1585,8 +1584,13 @@ void Reader::openBookListItem() {
   QString str = bookList.at(index);
   QStringList listBooks = str.split("|");
   QString bookfile = listBooks.at(1);
+  QFileInfo fi(bookfile);
   if (bookfile != fileName) {
     startOpenFile(bookfile);
+  } else {
+    if (fi.suffix().contains("pdf")) {
+      startOpenFile(bookfile);
+    }
   }
 
   isOpenBookListClick = true;

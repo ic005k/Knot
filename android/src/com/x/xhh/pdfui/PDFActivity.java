@@ -180,7 +180,7 @@ public class PDFActivity extends AppCompatActivity implements
             verticalPosition = pdfView.getCurrentYOffset(); // 根据PDFView的API获取当前垂直位置
             horizontalPosition = pdfView.getCurrentXOffset();
             f_zoom = pdfView.getZoom();
-            // 可以将这些值存入SharedPreferences，避免内存中变量被回收
+            // 可以将这些值存入ini文件，避免内存中变量被回收
             savePDFInfo();
         }
     }
@@ -523,8 +523,11 @@ public class PDFActivity extends AppCompatActivity implements
         }
 
         pdfView.postDelayed(() -> {
+
             pdfView.moveTo(currentX, currentY);
+
         }, 100);
+
     }
 
     private void savePDFInfo() {
