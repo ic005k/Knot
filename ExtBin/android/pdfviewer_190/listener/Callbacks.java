@@ -156,6 +156,7 @@ public class Callbacks {
     }
 
     public boolean callOnTap(MotionEvent event) {
+
         PDFActivity.staticHideOrShowToolBar();
 
         return onTapListener != null && onTapListener.onTap(event);

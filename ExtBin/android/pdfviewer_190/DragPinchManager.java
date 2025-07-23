@@ -63,10 +63,6 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         enabled = false;
     }
 
-    void disableLongpress(){
-        gestureDetector.setIsLongpressEnabled(false);
-    }
-
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
         boolean onTapHandled = pdfView.callbacks.callOnTap(e);
@@ -87,9 +83,6 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
 
     private boolean checkLinkTapped(float x, float y) {
         PdfFile pdfFile = pdfView.pdfFile;
-        if (pdfFile == null) {
-            return false;
-        }
         float mappedX = -pdfView.getCurrentXOffset() + x;
         float mappedY = -pdfView.getCurrentYOffset() + y;
         int page = pdfFile.getPageAtOffset(pdfView.isSwipeVertical() ? mappedY : mappedX, pdfView.getZoom());
@@ -204,7 +197,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         if (!pdfView.isSwipeEnabled()) {
             return false;
         }
-        if (pdfView.isPageFlingEnabled()) {
+        if (pdfView.doPageFling()) {
             if (pdfView.pageFillsScreen()) {
                 onBoundedFling(velocityX, velocityY);
             } else {
@@ -260,12 +253,10 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
     public boolean onScale(ScaleGestureDetector detector) {
         float dr = detector.getScaleFactor();
         float wantedZoom = pdfView.getZoom() * dr;
-        float minZoom = Math.min(MINIMUM_ZOOM, pdfView.getMinZoom());
-        float maxZoom = Math.min(MAXIMUM_ZOOM, pdfView.getMaxZoom());
-        if (wantedZoom < minZoom) {
-            dr = minZoom / pdfView.getZoom();
-        } else if (wantedZoom > maxZoom) {
-            dr = maxZoom / pdfView.getZoom();
+        if (wantedZoom < MINIMUM_ZOOM) {
+            dr = MINIMUM_ZOOM / pdfView.getZoom();
+        } else if (wantedZoom > MAXIMUM_ZOOM) {
+            dr = MAXIMUM_ZOOM / pdfView.getZoom();
         }
         pdfView.zoomCenteredRelativeTo(dr, new PointF(detector.getFocusX(), detector.getFocusY()));
         return true;

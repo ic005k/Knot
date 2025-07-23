@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 Bartosz Schiller
+ * Copyright 2016 Bartosz Schiller
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,11 @@
  */
 package com.github.barteksc.pdfviewer.listener;
 
-import android.view.MotionEvent;
-
-/**
- * Implement this interface to receive events from PDFView
- * when view has been long pressed
- */
-public interface OnLongPressListener {
+public interface OnErrorListener {
 
     /**
-     * Called when the user has a long tap gesture, before processing scroll handle toggling
-     *
-     * @param e MotionEvent that registered as a confirmed long press
+     * Called if error occurred while opening PDF
+     * @param t Throwable with error
      */
-    void onLongPress(MotionEvent e);
+    void onError(Throwable t);
 }

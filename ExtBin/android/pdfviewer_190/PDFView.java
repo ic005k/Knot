@@ -30,7 +30,6 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.HandlerThread;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -79,10 +78,13 @@ import java.util.List;
  * To fully understand this class you must know its principles :
  * - The PDF document is seen as if we always want to draw all the pages.
  * - The thing is that we only draw the visible parts.
- * - All parts are the same size, this is because we can't interrupt a native page rendering,
- * so we need these renderings to be as fast as possible, and be able to interrupt them
+ * - All parts are the same size, this is because we can't interrupt a native
+ * page rendering,
+ * so we need these renderings to be as fast as possible, and be able to
+ * interrupt them
  * as soon as we can.
- * - The parts are loaded when the current offset or the current zoom level changes
+ * - The parts are loaded when the current offset or the current zoom level
+ * changes
  * <p>
  * Important :
  * - DocumentPage = A page of the PDF document.
@@ -123,7 +125,7 @@ public class PDFView extends RelativeLayout {
     /** Drag manager manage all touch events */
     private DragPinchManager dragPinchManager;
 
-    PdfFile pdfFile;
+    public PdfFile pdfFile;
 
     /** The index of the current sequence */
     private int currentPage;
@@ -155,7 +157,7 @@ public class PDFView extends RelativeLayout {
     private DecodingAsyncTask decodingAsyncTask;
 
     /** The thread {@link #renderingHandler} will run on */
-    private HandlerThread renderingHandlerThread;
+    private final HandlerThread renderingHandlerThread;
     /** Handler always waiting in the background and rendering tasks */
     RenderingHandler renderingHandler;
 
@@ -172,8 +174,6 @@ public class PDFView extends RelativeLayout {
     /** Policy for fitting pages to screen */
     private FitPolicy pageFitPolicy = FitPolicy.WIDTH;
 
-    private boolean fitEachPage = false;
-
     private int defaultPage = 0;
 
     /** True if should scroll through pages vertically instead of horizontally */
@@ -183,7 +183,7 @@ public class PDFView extends RelativeLayout {
 
     private boolean doubletapEnabled = true;
 
-    private boolean nightMode = false;
+    public static boolean nightMode = false;
 
     private boolean pageSnap = true;
 
@@ -200,7 +200,8 @@ public class PDFView extends RelativeLayout {
 
     /**
      * True if bitmap should use ARGB_8888 format and take more memory
-     * False if bitmap should be compressed by using RGB_565 format and take less memory
+     * False if bitmap should be compressed by using RGB_565 format and take less
+     * memory
      */
     private boolean bestQuality = false;
 
@@ -212,7 +213,8 @@ public class PDFView extends RelativeLayout {
 
     /**
      * True if the view should render during scaling<br/>
-     * Can not be forced on older API versions (< Build.VERSION_CODES.KITKAT) as the GestureDetector does
+     * Can not be forced on older API versions (< Build.VERSION_CODES.KITKAT) as the
+     * GestureDetector does
      * not detect scrolling while scaling.<br/>
      * False otherwise
      */
@@ -220,8 +222,8 @@ public class PDFView extends RelativeLayout {
 
     /** Antialiasing and bitmap filtering */
     private boolean enableAntialiasing = true;
-    private PaintFlagsDrawFilter antialiasFilter =
-            new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+    private PaintFlagsDrawFilter antialiasFilter = new PaintFlagsDrawFilter(0,
+            Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
 
     /** Spacing between pages, in px */
     private int spacingPx = 0;
@@ -383,12 +385,13 @@ public class PDFView extends RelativeLayout {
     public void setNightMode(boolean nightMode) {
         this.nightMode = nightMode;
         if (nightMode) {
-            ColorMatrix colorMatrixInverted =
-                    new ColorMatrix(new float[]{
-                            -1, 0, 0, 0, 255,
-                            0, -1, 0, 0, 255,
-                            0, 0, -1, 0, 255,
-                            0, 0, 0, 1, 0});
+            // 将偏移量从 255 降低到一个较小的值（例如 180 或 200）
+            // 这样反色后的颜色不会完全达到白色，从而保留更多的暗部细节。
+            ColorMatrix colorMatrixInverted = new ColorMatrix(new float[] {
+                    -1, 0, 0, 0, 200,
+                    0, -1, 0, 0, 200,
+                    0, 0, -1, 0, 200,
+                    0, 0, 0, 1, 0 });
 
             ColorMatrixColorFilter filter = new ColorMatrixColorFilter(colorMatrixInverted);
             paint.setColorFilter(filter);
@@ -465,14 +468,6 @@ public class PDFView extends RelativeLayout {
     @Override
     protected void onDetachedFromWindow() {
         recycle();
-        if (renderingHandlerThread != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                renderingHandlerThread.quitSafely();
-            } else {
-                renderingHandlerThread.quit();
-            }
-            renderingHandlerThread = null;
-        }
         super.onDetachedFromWindow();
     }
 
@@ -485,33 +480,13 @@ public class PDFView extends RelativeLayout {
         if (isInEditMode() || state != State.SHOWN) {
             return;
         }
-
-        // calculates the position of the point which in the center of view relative to big strip
-        float centerPointInStripXOffset = -currentXOffset + oldw * 0.5f;
-        float centerPointInStripYOffset = -currentYOffset + oldh * 0.5f;
-
-        float relativeCenterPointInStripXOffset;
-        float relativeCenterPointInStripYOffset;
-
-        if (swipeVertical){
-            relativeCenterPointInStripXOffset = centerPointInStripXOffset / pdfFile.getMaxPageWidth();
-            relativeCenterPointInStripYOffset = centerPointInStripYOffset / pdfFile.getDocLen(zoom);
-        }else {
-            relativeCenterPointInStripXOffset = centerPointInStripXOffset / pdfFile.getDocLen(zoom);
-            relativeCenterPointInStripYOffset = centerPointInStripYOffset / pdfFile.getMaxPageHeight();
-        }
-
         animationManager.stopAll();
         pdfFile.recalculatePageSizes(new Size(w, h));
-
         if (swipeVertical) {
-            currentXOffset = -relativeCenterPointInStripXOffset * pdfFile.getMaxPageWidth() + w * 0.5f;
-            currentYOffset = -relativeCenterPointInStripYOffset * pdfFile.getDocLen(zoom) + h * 0.5f ;
-        }else {
-            currentXOffset = -relativeCenterPointInStripXOffset * pdfFile.getDocLen(zoom) + w * 0.5f;
-            currentYOffset = -relativeCenterPointInStripYOffset * pdfFile.getMaxPageHeight() + h * 0.5f;
+            moveTo(currentXOffset, -pdfFile.getPageOffset(currentPage, zoom));
+        } else {
+            moveTo(-pdfFile.getPageOffset(currentPage, zoom), currentYOffset);
         }
-        moveTo(currentXOffset,currentYOffset);
         loadPageByOffset();
     }
 
@@ -571,22 +546,23 @@ public class PDFView extends RelativeLayout {
 
         // That's where Canvas.translate(x, y) becomes very helpful.
         // This is the situation :
-        //  _______________________________________________
-        // |   			 |					 			   |
-        // | the actual  |					The big strip  |
-        // |	canvas	 | 								   |
-        // |_____________|								   |
+        // _______________________________________________
+        // | | |
+        // | the actual | The big strip |
+        // | canvas | |
+        // |_____________| |
         // |_______________________________________________|
         //
         // If the rendered part is on the bottom right corner of the strip
         // we can draw it but we won't see it because the canvas is not big enough.
 
-        // But if we call translate(-X, -Y) on the canvas just before drawing the object :
-        //  _______________________________________________
-        // |   			  					  _____________|
-        // |   The big strip     			 |			   |
-        // |		    					 |	the actual |
-        // |								 |	canvas	   |
+        // But if we call translate(-X, -Y) on the canvas just before drawing the object
+        // :
+        // _______________________________________________
+        // | _____________|
+        // | The big strip | |
+        // | | the actual |
+        // | | canvas |
         // |_________________________________|_____________|
         //
         // The object will be on the canvas.
@@ -817,8 +793,10 @@ public class PDFView extends RelativeLayout {
      * Move to the given X and Y offsets, but check them ahead of time
      * to be sure not to go outside the the big strip.
      *
-     * @param offsetX    The big strip X offset to use as the left border of the screen.
-     * @param offsetY    The big strip Y offset to use as the right border of the screen.
+     * @param offsetX    The big strip X offset to use as the left border of the
+     *                   screen.
+     * @param offsetY    The big strip Y offset to use as the right border of the
+     *                   screen.
      * @param moveHandle whether to move scroll handle or not
      */
     public void moveTo(float offsetX, float offsetY, boolean moveHandle) {
@@ -1000,7 +978,8 @@ public class PDFView extends RelativeLayout {
     }
 
     /**
-     * @return true if single page fills the entire screen in the scrolling direction
+     * @return true if single page fills the entire screen in the scrolling
+     *         direction
      */
     public boolean pageFillsScreen() {
         float start = -pdfFile.getPageOffset(currentPage, zoom);
@@ -1215,7 +1194,7 @@ public class PDFView extends RelativeLayout {
         return spacingPx;
     }
 
-    public boolean isAutoSpacingEnabled() {
+    public boolean doAutoSpacing() {
         return autoSpacing;
     }
 
@@ -1223,12 +1202,12 @@ public class PDFView extends RelativeLayout {
         this.pageFling = pageFling;
     }
 
-    public boolean isPageFlingEnabled() {
+    public boolean doPageFling() {
         return pageFling;
     }
 
-    private void setSpacing(int spacingDp) {
-        this.spacingPx = Util.getDP(getContext(), spacingDp);
+    private void setSpacing(int spacing) {
+        this.spacingPx = Util.getDP(getContext(), spacing);
     }
 
     private void setAutoSpacing(boolean autoSpacing) {
@@ -1243,15 +1222,7 @@ public class PDFView extends RelativeLayout {
         return pageFitPolicy;
     }
 
-    private void setFitEachPage(boolean fitEachPage) {
-        this.fitEachPage = fitEachPage;
-    }
-
-    public boolean isFitEachPage() {
-        return fitEachPage;
-    }
-
-    public boolean isPageSnap() {
+    public boolean doPageSnap() {
         return pageSnap;
     }
 
@@ -1307,7 +1278,10 @@ public class PDFView extends RelativeLayout {
         return new Configurator(new ByteArraySource(bytes));
     }
 
-    /** Use stream as the pdf source. Stream will be written to bytearray, because native code does not support Java Streams */
+    /**
+     * Use stream as the pdf source. Stream will be written to bytearray, because
+     * native code does not support Java Streams
+     */
     public Configurator fromStream(InputStream stream) {
         return new Configurator(new InputStreamSource(stream));
     }
@@ -1317,7 +1291,9 @@ public class PDFView extends RelativeLayout {
         return new Configurator(docSource);
     }
 
-    private enum State {DEFAULT, LOADED, SHOWN, ERROR}
+    private enum State {
+        DEFAULT, LOADED, SHOWN, ERROR
+    }
 
     public class Configurator {
 
@@ -1369,13 +1345,11 @@ public class PDFView extends RelativeLayout {
 
         private FitPolicy pageFitPolicy = FitPolicy.WIDTH;
 
-        private boolean fitEachPage = false;
-
         private boolean pageFling = false;
 
         private boolean pageSnap = false;
 
-        private boolean nightMode = false;
+        public static boolean nightMode = false;
 
         private Configurator(DocumentSource documentSource) {
             this.documentSource = documentSource;
@@ -1496,11 +1470,6 @@ public class PDFView extends RelativeLayout {
             return this;
         }
 
-        public Configurator fitEachPage(boolean fitEachPage) {
-            this.fitEachPage = fitEachPage;
-            return this;
-        }
-
         public Configurator pageSnap(boolean pageSnap) {
             this.pageSnap = pageSnap;
             return this;
@@ -1513,11 +1482,6 @@ public class PDFView extends RelativeLayout {
 
         public Configurator nightMode(boolean nightMode) {
             this.nightMode = nightMode;
-            return this;
-        }
-
-        public Configurator disableLongpress() {
-            PDFView.this.dragPinchManager.disableLongpress();
             return this;
         }
 
@@ -1549,7 +1513,6 @@ public class PDFView extends RelativeLayout {
             PDFView.this.setSpacing(spacing);
             PDFView.this.setAutoSpacing(autoSpacing);
             PDFView.this.setPageFitPolicy(pageFitPolicy);
-            PDFView.this.setFitEachPage(fitEachPage);
             PDFView.this.setPageSnap(pageSnap);
             PDFView.this.setPageFling(pageFling);
 

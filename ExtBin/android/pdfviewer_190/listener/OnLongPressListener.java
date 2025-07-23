@@ -24,9 +24,11 @@ import android.view.MotionEvent;
 public interface OnLongPressListener {
 
     /**
-     * Called when the user has a long tap gesture, before processing scroll handle toggling
+     * Called when the user has a long tap gesture, before processing scroll handle
+     * toggling
      *
      * @param e MotionEvent that registered as a confirmed long press
      */
     void onLongPress(MotionEvent e);
+
 }

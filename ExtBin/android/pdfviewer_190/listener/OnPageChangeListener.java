@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 Bartosz Schiller
+ * Copyright 2016 Bartosz Schiller
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,18 @@
  */
 package com.github.barteksc.pdfviewer.listener;
 
-import android.view.MotionEvent;
-
 /**
- * Implement this interface to receive events from PDFView
- * when view has been long pressed
+ * Implements this interface to receive events from PDFView
+ * when a page has changed through swipe
  */
-public interface OnLongPressListener {
+public interface OnPageChangeListener {
 
     /**
-     * Called when the user has a long tap gesture, before processing scroll handle toggling
+     * Called when the user use swipe to change page
      *
-     * @param e MotionEvent that registered as a confirmed long press
+     * @param page      the new page displayed, starting from 0
+     * @param pageCount the total page count
      */
-    void onLongPress(MotionEvent e);
+    void onPageChanged(int page, int pageCount);
+
 }

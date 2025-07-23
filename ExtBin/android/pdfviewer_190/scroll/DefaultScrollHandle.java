@@ -6,7 +6,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-//import android.support.v4.content.ContextCompat;
 import androidx.core.content.ContextCompat;
 import android.util.TypedValue;
 import android.view.MotionEvent;
@@ -15,7 +14,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.github.barteksc.pdfviewer.PDFView;
-//import com.github.barteksc.pdfviewer.R;
 import com.github.barteksc.pdfviewer.util.Util;
 
 public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle {
@@ -50,7 +48,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         this.inverted = inverted;
         textView = new TextView(context);
         setVisibility(INVISIBLE);
-        setTextColor(Color.BLACK);
+        setTextColor(Color.WHITE);
         setTextSize(DEFAULT_TEXT_SIZE);
     }
 
@@ -58,8 +56,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     public void setupLayout(PDFView pdfView) {
         int align, width, height;
         Drawable background;
-        // determine handler position, default is right (when scrolling vertically) or
-        // bottom (when scrolling horizontally)
+        // determine handler position, default is right (when scrolling vertically) or bottom (when scrolling horizontally)
         if (pdfView.isSwipeVertical()) {
             width = HANDLE_LONG;
             height = HANDLE_SHORT;
@@ -114,9 +111,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         } else {
             handler.removeCallbacks(hidePageScrollerRunnable);
         }
-        if (pdfView != null) {
-            setPosition((pdfView.isSwipeVertical() ? pdfView.getHeight() : pdfView.getWidth()) * position);
-        }
+        setPosition((pdfView.isSwipeVertical() ? pdfView.getHeight() : pdfView.getWidth()) * position);
     }
 
     private void setPosition(float pos) {

@@ -15,18 +15,11 @@
  */
 package com.github.barteksc.pdfviewer.listener;
 
-import android.view.MotionEvent;
-
-/**
- * Implement this interface to receive events from PDFView
- * when view has been long pressed
- */
-public interface OnLongPressListener {
+public interface OnRenderListener {
 
     /**
-     * Called when the user has a long tap gesture, before processing scroll handle toggling
-     *
-     * @param e MotionEvent that registered as a confirmed long press
+     * Called only once, when document is rendered
+     * @param nbPages number of pages
      */
-    void onLongPress(MotionEvent e);
+    void onInitiallyRendered(int nbPages);
 }

@@ -19,14 +19,15 @@ import android.view.MotionEvent;
 
 /**
  * Implement this interface to receive events from PDFView
- * when view has been long pressed
+ * when view has been touched
  */
-public interface OnLongPressListener {
+public interface OnTapListener {
 
     /**
-     * Called when the user has a long tap gesture, before processing scroll handle toggling
+     * Called when the user has a tap gesture, before processing scroll handle toggling
      *
-     * @param e MotionEvent that registered as a confirmed long press
+     * @param e MotionEvent that registered as a confirmed single tap
+     * @return true if the single tap was handled, false to toggle scroll handle
      */
-    void onLongPress(MotionEvent e);
+    boolean onTap(MotionEvent e);
 }

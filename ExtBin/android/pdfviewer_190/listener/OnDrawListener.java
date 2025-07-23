@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 Bartosz Schiller
+ * Copyright 2016 Bartosz Schiller
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,24 @@
  */
 package com.github.barteksc.pdfviewer.listener;
 
-import android.view.MotionEvent;
+import android.graphics.Canvas;
 
 /**
- * Implement this interface to receive events from PDFView
- * when view has been long pressed
+ * This interface allows an extern class to draw
+ * something on the PDFView canvas, above all images.
  */
-public interface OnLongPressListener {
+public interface OnDrawListener {
 
     /**
-     * Called when the user has a long tap gesture, before processing scroll handle toggling
+     * This method is called when the PDFView is
+     * drawing its view.
+     * <p>
+     * The page is starting at (0,0)
      *
-     * @param e MotionEvent that registered as a confirmed long press
+     * @param canvas        The canvas on which to draw things.
+     * @param pageWidth     The width of the current page.
+     * @param pageHeight    The height of the current page.
+     * @param displayedPage The current page index
      */
-    void onLongPress(MotionEvent e);
+    void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage);
 }

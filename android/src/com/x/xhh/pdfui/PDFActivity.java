@@ -79,6 +79,7 @@ public class PDFActivity extends AppCompatActivity implements
     private float horizontalPosition = 0;
     private boolean isPdfLoaded = false;
     private static PDFActivity instance;
+    private boolean isNightMode = false;
 
     public native static void CallJavaNotify_0();
 
@@ -229,13 +230,10 @@ public class PDFActivity extends AppCompatActivity implements
         btn_dark.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (PDFView.nightMode == false) {
-                    PDFView.nightMode = true;
-                    Configurator.nightMode = true;
-                } else {
-                    PDFView.nightMode = false;
-                    Configurator.nightMode = false;
-                }
+                if (isNightMode)
+                    isNightMode = false;
+                else
+                    isNightMode = true;
 
                 savePDFInfo();
                 PDFActivity.this.finish();
@@ -335,13 +333,11 @@ public class PDFActivity extends AppCompatActivity implements
                             else
                                 verticalPosition = 0; // 默认垂直位置（顶部）
 
-                            boolean isNight;
                             if (strNight != null)
-                                isNight = Boolean.parseBoolean(strNight);
+                                isNightMode = Boolean.parseBoolean(strNight);
                             else
-                                isNight = false;
-                            pdfView.nightMode = isNight;
-                            Configurator.nightMode = isNight;
+                                isNightMode = false;
+
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -369,6 +365,7 @@ public class PDFActivity extends AppCompatActivity implements
                 .spacing(10) // 单位 dp
                 .onPageError(this)
                 .pageFitPolicy(FitPolicy.BOTH)
+                .nightMode(isNightMode)
                 .load();
 
     }
@@ -387,6 +384,7 @@ public class PDFActivity extends AppCompatActivity implements
                 .scrollHandle(new DefaultScrollHandle(this))
                 .spacing(10) // 单位 dp
                 .onPageError(this)
+                .nightMode(isNightMode)
                 .load();
 
     }
@@ -543,7 +541,7 @@ public class PDFActivity extends AppCompatActivity implements
             name = name.replace("/", "");
             ini.put("pdf", name, String.valueOf(pageNumber));
             ini.put("zoom", name, String.valueOf(pdfView.getZoom()));
-            ini.put("night", name, String.valueOf(pdfView.nightMode));
+            ini.put("night", name, String.valueOf(isNightMode));
             // 保存垂直位置
             ini.put("positionY", name, String.valueOf(pdfView.getCurrentYOffset()));
             // 保存水平位置

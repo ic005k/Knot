@@ -138,14 +138,12 @@ class AnimationManager {
         public void onAnimationCancel(Animator animation) {
             pdfView.loadPages();
             pageFlinging = false;
-            hideHandle();
         }
 
         @Override
         public void onAnimationEnd(Animator animation) {
             pdfView.loadPages();
             pageFlinging = false;
-            hideHandle();
         }
     }
 
@@ -162,14 +160,12 @@ class AnimationManager {
         public void onAnimationCancel(Animator animation) {
             pdfView.loadPages();
             pageFlinging = false;
-            hideHandle();
         }
 
         @Override
         public void onAnimationEnd(Animator animation) {
             pdfView.loadPages();
             pageFlinging = false;
-            hideHandle();
         }
     }
 
@@ -191,15 +187,13 @@ class AnimationManager {
 
         @Override
         public void onAnimationCancel(Animator animation) {
-            pdfView.loadPages();
-            hideHandle();
         }
 
         @Override
         public void onAnimationEnd(Animator animation) {
             pdfView.loadPages();
-            pdfView.performPageSnap();
             hideHandle();
+            pdfView.performPageSnap();
         }
 
         @Override
