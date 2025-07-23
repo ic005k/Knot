@@ -165,7 +165,8 @@ class Notes : public QDialog {
 
   void init_md();
 
- protected:
+  void previewNote();
+  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
   bool eventFilter(QObject *obj, QEvent *event) override;

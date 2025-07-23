@@ -5202,30 +5202,7 @@ void MainWindow::on_rbHiking_clicked() {}
 
 void MainWindow::on_rbRunning_clicked() {}
 
-void MainWindow::on_btnOpenNote_clicked() {
-  if (!QFile::exists(currentMDFile)) return;
-
-  m_NotesList->setCurrentItemFromMDFile(currentMDFile);
-
-  QString title = m_NotesList->noteTitle;
-  m_NotesList->refreshRecentOpen(title);
-  m_NotesList->saveRecentOpen();
-
-  if (isAndroid) {
-    m_Method->setMDTitle(title);
-
-    m_Method->setMDFile(currentMDFile);
-    m_Notes->openMDWindow();
-
-    m_Notes->setAndroidNoteConfig("/cpos/currentMDFile",
-                                  QFileInfo(currentMDFile).baseName());
-
-    return;
-  } else {
-    m_Notes->MD2Html(currentMDFile);
-    m_Notes->openBrowserOnce(privateDir + "memo.html");
-  }
-}
+void MainWindow::on_btnOpenNote_clicked() { m_Notes->previewNote(); }
 
 void MainWindow::on_btnEditNote_clicked() {
   m_NotesList->setCurrentItemFromMDFile(currentMDFile);
@@ -5247,24 +5224,7 @@ void MainWindow::on_btnWebDAVBackup_clicked() {
 }
 
 void MainWindow::on_btnWebDAVRestore_clicked() {
-  QString filePath;
-  filePath = bakfileDir + "memo.zip";
-
-  if (QFile(filePath).exists()) QFile(filePath).remove();
-  if (filePath.isEmpty()) return;
-
-  ShowMessage *m_ShowMsg = new ShowMessage(this);
-  if (!m_ShowMsg->showMsg(
-          "WebDAV",
-          tr("Downloading data?") + "\n\n" +
-              tr("This action overwrites local files with files in the cloud."),
-          2))
-    return;
-  m_CloudBackup->WEBDAV_URL = mui->editWebDAV->text().trimmed();
-  m_CloudBackup->USERNAME = mui->editWebDAVUsername->text().trimmed();
-  m_CloudBackup->APP_PASSWORD = mui->editWebDAVPassword->text().trimmed();
-  m_CloudBackup->downloadFile("Knot/memo.zip", filePath);
-  mui->progressBar->setValue(0);
+  m_CloudBackup->webDAVRestoreData();
 }
 
 void MainWindow::on_chkWebDAV_clicked() {

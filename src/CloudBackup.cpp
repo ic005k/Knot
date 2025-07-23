@@ -907,3 +907,24 @@ void CloudBackup::init_CloudBacup() {
   mui->chkAutoSync->setChecked(
       iniPreferences->value("/cloudbak/autosync", 0).toBool());
 }
+
+void CloudBackup::webDAVRestoreData() {
+  QString filePath;
+  filePath = bakfileDir + "memo.zip";
+
+  if (QFile(filePath).exists()) QFile(filePath).remove();
+  if (filePath.isEmpty()) return;
+
+  ShowMessage *m_ShowMsg = new ShowMessage(this);
+  if (!m_ShowMsg->showMsg(
+          "WebDAV",
+          tr("Downloading data?") + "\n\n" +
+              tr("This action overwrites local files with files in the cloud."),
+          2))
+    return;
+  WEBDAV_URL = mui->editWebDAV->text().trimmed();
+  USERNAME = mui->editWebDAVUsername->text().trimmed();
+  APP_PASSWORD = mui->editWebDAVPassword->text().trimmed();
+  downloadFile("Knot/memo.zip", filePath);
+  mui->progressBar->setValue(0);
+}

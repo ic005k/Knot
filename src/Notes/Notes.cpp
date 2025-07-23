@@ -1685,7 +1685,7 @@ void Notes::openNotes() {
                       }
                     }
 
-                    mw_one->m_Notes->openNotesUI();
+                    openNotesUI();
                   });
 
               // 开始下载（1并发,根据文件的下载个数）
@@ -1694,7 +1694,7 @@ void Notes::openNotes() {
               downloader->downloadFiles(remoteFiles, lf, remoteFiles.count());
             }
 
-            if (remoteFiles.count() == 0) mw_one->m_Notes->openNotesUI();
+            if (remoteFiles.count() == 0) openNotesUI();
             break;
           }
         });
@@ -1702,11 +1702,11 @@ void Notes::openNotes() {
     QObject::connect(helper, &WebDavHelper::errorOccurred, this,
                      [=](const QString &error) {
                        qDebug() << "操作失败:" << error;
-                       mw_one->m_Notes->openNotesUI();
+                       openNotesUI();
                      });
   } else
 
-    mw_one->m_Notes->openNotesUI();
+    openNotesUI();
 }
 
 void Notes::updateMainnotesIniToSyncLists() {
@@ -1726,8 +1726,8 @@ void Notes::updateMainnotesIniToSyncLists() {
     QString enc_file = m_Method->useEnc(zipMainnotes);
     if (enc_file != "") zipMainnotes = enc_file;
 
-    mw_one->m_Notes->notes_sync_files.removeOne(zipMainnotes);
-    mw_one->m_Notes->notes_sync_files.append(zipMainnotes);
+    notes_sync_files.removeOne(zipMainnotes);
+    notes_sync_files.append(zipMainnotes);
   }
 }
 
@@ -2121,4 +2121,29 @@ void Notes::restoreEditorState(const QString &filePath) {
   settings.endGroup();
 
 #endif
+}
+
+void Notes::previewNote() {
+  if (!QFile::exists(currentMDFile)) return;
+
+  mw_one->m_NotesList->setCurrentItemFromMDFile(currentMDFile);
+
+  QString title = mw_one->m_NotesList->noteTitle;
+  mw_one->m_NotesList->refreshRecentOpen(title);
+  mw_one->m_NotesList->saveRecentOpen();
+
+  if (isAndroid) {
+    m_Method->setMDTitle(title);
+
+    m_Method->setMDFile(currentMDFile);
+    openMDWindow();
+
+    setAndroidNoteConfig("/cpos/currentMDFile",
+                         QFileInfo(currentMDFile).baseName());
+
+    return;
+  } else {
+    MD2Html(currentMDFile);
+    openBrowserOnce(privateDir + "memo.html");
+  }
 }
