@@ -7,7 +7,7 @@
 #include "ui_Preferences.h"
 
 extern QString iniFile, iniDir, privateDir, defaultFontFamily, customFontFamily,
-    encPassword;
+    encPassword, ver;
 extern MainWindow* mw_one;
 extern Ui::MainWindow* mui;
 extern Method* m_Method;
@@ -123,7 +123,7 @@ void Preferences::saveOptions() {
   iniPreferences->setValue("/Options/chkUIFont", ui->chkUIFont->isChecked());
 
   QString password = ui->editPassword->text().trimmed();
-  QString aesStr = m_CloudBackup->aesEncrypt(password, aes_key, aes_iv);
+  QString aesStr = m_CloudBackup->aesEncrypt(password, aes_key0, aes_iv0);
   iniPreferences->setValue("/zip/password", aesStr);
 
   isEncrypt = ui->chkZip->isChecked();
@@ -260,7 +260,7 @@ void Preferences::initOptions() {
 #endif
 
   QString aesStr = iniPreferences->value("/zip/password").toString();
-  QString password = m_CloudBackup->aesDecrypt(aesStr, aes_key, aes_iv);
+  QString password = m_CloudBackup->aesDecrypt(aesStr, aes_key0, aes_iv0);
   ui->editPassword->setText(password);
   ui->editValidate->setText(password);
 
@@ -458,7 +458,7 @@ void Preferences::on_editValidate_textChanged(const QString& arg1) {
 void Preferences::closeEvent(QCloseEvent* event) {
   Q_UNUSED(event);
   saveOptions();
-  mw_one->setEncSyncStatusTip();
+  setEncSyncStatusTip();
 }
 
 void Preferences::on_btnShowPassword_pressed() {
@@ -478,3 +478,31 @@ void Preferences::on_btnShowValidate_released() {
 }
 
 void Preferences::on_chkDark_clicked() {}
+
+void Preferences::setEncSyncStatusTip() {
+  mui->lblStats->setStyleSheet(mw_one->labelNormalStyleSheet);
+
+  if (ui->chkZip->isChecked() && mui->chkAutoSync->isChecked() &&
+      mui->chkWebDAV->isChecked())
+    mui->lblStats->setStyleSheet(mw_one->labelEnSyncStyleSheet);
+
+  if (ui->chkZip->isChecked() && !mui->chkAutoSync->isChecked() &&
+      !mui->chkWebDAV->isChecked())
+    mui->lblStats->setStyleSheet(mw_one->labelEncStyleSheet);
+
+  if (ui->chkZip->isChecked() && !mui->chkAutoSync->isChecked() &&
+      mui->chkWebDAV->isChecked())
+    mui->lblStats->setStyleSheet(mw_one->labelEncStyleSheet);
+
+  if (ui->chkZip->isChecked() && mui->chkAutoSync->isChecked() &&
+      !mui->chkWebDAV->isChecked())
+    mui->lblStats->setStyleSheet(mw_one->labelEncStyleSheet);
+
+  if (!ui->chkZip->isChecked() && mui->chkAutoSync->isChecked() &&
+      mui->chkWebDAV->isChecked())
+    mui->lblStats->setStyleSheet(mw_one->labelSyncStyleSheet);
+
+  if (isAndroid) mui->lblVer->hide();
+  mui->lblVer->setText("Knot   V:" + ver);
+  mui->lblVer->setStyleSheet(mui->lblStats->styleSheet());
+}

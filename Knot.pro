@@ -374,6 +374,7 @@ SOURCES += \
     src/Comm/qaesencryption.cpp \
     src/DateSelector.cpp \
     src/EditRecord.cpp \
+    src/JavaToQtBridge.cpp \
     src/LoadPic.cpp \
     src/MainWindow.cpp \
     src/Notes/ColorDialog.cpp \

@@ -475,3 +475,17 @@ void ReceiveShare::goReceiveShare() {
     mui->btnNotes->click();
   }
 }
+
+void ReceiveShare::callJavaNotify9() {
+  QSettings Reg(privateDir + "choice_book.ini", QSettings::IniFormat);
+
+  QString file = Reg.value("book/file", "").toString();
+  QString type = Reg.value("book/type", "filepicker").toString();
+  if (QFile::exists(file)) {
+    if (type == "defaultopen") {
+      closeAllChildWindows();
+      moveTaskToFront();
+    }
+    mw_one->m_Reader->startOpenFile(file);
+  }
+}

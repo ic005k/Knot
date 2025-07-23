@@ -45,6 +45,8 @@ class Preferences : public QDialog {
 
   QString setFontDemoUI(QString customFontPath, QToolButton *btn, int fontSize);
 
+  void setEncSyncStatusTip();
+
  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
 
@@ -93,8 +95,8 @@ class Preferences : public QDialog {
 
   QFont::Weight uiFontWeight;
 
-  QByteArray aes_key = "MySuperSecretKey1234567890";  // 长度不足32会自动处理
-  QByteArray aes_iv = "InitializationVe";
+  QByteArray aes_key0 = "MySuperSecretKey1234567890";  // 长度不足32会自动处理
+  QByteArray aes_iv0 = "InitializationVe";
 };
 
 #endif  // PREFERENCES_H

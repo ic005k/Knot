@@ -365,8 +365,6 @@ QLabel {
 
   void on_DelayCloseProgressBar();
 
-  void setEncSyncStatusTip();
-
   void clearWidgetFocus();
 
  protected:
@@ -875,9 +873,6 @@ QLabel {
   void init_ButtonStyle();
   QString strTime, strAmount, strCategory, strDetails;
 
-  QByteArray aes_key = "MySuperSecretKey1234567890";  // 长度不足32会自动处理
-  QByteArray aes_iv = "InitializationVe";             // 16字节
-  void init_CloudBacup();
   void startBackgroundTaskUpdateBakFileList();
 };
 

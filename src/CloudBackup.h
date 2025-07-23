@@ -68,6 +68,8 @@ class CloudBackup : public QDialog {
   void createRemoteWebDAVDir();
   void deleteWebDAVFiles(QStringList filesToDelete);
   void uploadFilesToWebDAV(QStringList files);
+  void backExit();
+  void init_CloudBacup();
  signals:
 
  protected:
@@ -106,6 +108,9 @@ class CloudBackup : public QDialog {
 
   QNetworkAccessManager *m_manager = nullptr;
   QHash<QNetworkReply *, QFile *> m_activeDownloads;  // 必须声明为类成员
+
+  QByteArray aes_key = "MySuperSecretKey1234567890";  // 长度不足32会自动处理
+  QByteArray aes_iv = "InitializationVe";             // 16字节
 };
 
 // 声明一个轻量级信号发射器,列出WebDAV上某个目录下的所有文件

@@ -25,6 +25,8 @@ extern QString iniFile, iniDir, zipfile, privateDir, bakfileDir;
 
 extern bool isZipOK, isMenuImport, isDownData, isAndroid, isUpData;
 
+extern QSettings *iniPreferences;
+
 WebDavHelper *listWebDavFiles(const QString &url, const QString &username,
                               const QString &password);
 QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray &data);
@@ -854,4 +856,54 @@ void CloudBackup::deleteWebDAVFiles(QStringList filesToDelete) {
     deleter.baseUrl = url;
     deleter.deleteFiles(filesToDelete);
   }
+}
+
+void CloudBackup::backExit() {
+  mw_one->clearWidgetFocus();
+
+  if (!mui->frameOne->isHidden()) {
+    if (mui->f_OneFun->isHidden()) {
+      mui->f_OneFun->show();
+      mui->f_FunWeb->hide();
+
+      loadLogQML();
+    } else {
+      mui->frameOne->hide();
+      mui->frameMain->show();
+    }
+  }
+
+  iniPreferences->setValue("/webdav/url", mui->editWebDAV->text().trimmed());
+
+  iniPreferences->setValue("/webdav/username",
+                           mui->editWebDAVUsername->text().trimmed());
+  QString password = mui->editWebDAVPassword->text().trimmed();
+  QString aesStr = aesEncrypt(password, aes_key, aes_iv);
+  iniPreferences->setValue("/webdav/password", aesStr);
+
+  iniPreferences->setValue("/cloudbak/onedrive", mui->chkOneDrive->isChecked());
+  iniPreferences->setValue("/cloudbak/webdav", mui->chkWebDAV->isChecked());
+  iniPreferences->setValue("/cloudbak/autosync", mui->chkAutoSync->isChecked());
+
+  mw_one->m_Preferences->setEncSyncStatusTip();
+}
+
+void CloudBackup::init_CloudBacup() {
+  mui->editWebDAV->setText(
+      iniPreferences->value("/webdav/url", "https://dav.jianguoyun.com/dav/")
+          .toString());
+
+  mui->editWebDAVUsername->setText(
+      iniPreferences->value("/webdav/username").toString());
+
+  QString aesStr = iniPreferences->value("/webdav/password").toString();
+  QString password = aesDecrypt(aesStr, aes_key, aes_iv);
+  mui->editWebDAVPassword->setText(password);
+
+  mui->chkOneDrive->setChecked(
+      iniPreferences->value("/cloudbak/onedrive", 0).toBool());
+  mui->chkWebDAV->setChecked(
+      iniPreferences->value("/cloudbak/webdav", 1).toBool());
+  mui->chkAutoSync->setChecked(
+      iniPreferences->value("/cloudbak/autosync", 0).toBool());
 }
