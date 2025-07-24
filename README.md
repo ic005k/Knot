@@ -1,9 +1,3 @@
-# Knot - Modern Qt6 Edition
-
-> **Important Note**  
-> This is the main development branch of the Knot project, requiring **Qt 6.6.3 or higher**.  
-> For Qt5 users, please visit: [Knot-Legacy](https://github.com/ic005k/Knot-Legacy)
----
 # Knot - Minimalist Cross-Scenario Recording Tool
 
 ![Android Version](https://img.shields.io/badge/Android-12.0%2B-brightgreen)
