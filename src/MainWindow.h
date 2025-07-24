@@ -286,7 +286,6 @@ QLabel {
 
   void initChartMonth();
   void initChartDay();
-  QTreeWidget *init_TreeWidget(QString);
 
   static void saveTab();
   bool isSlide = false;
@@ -609,6 +608,10 @@ QLabel {
 
   void on_btnCancelType_clicked();
 
+  void on_actionTabRecycle();
+
+  void on_actionShareFile();
+
  private slots:
   void on_btnMenu_clicked();
 
@@ -617,8 +620,6 @@ QLabel {
   void on_btnPDF_clicked();
 
   void on_btnPasteTodo_clicked();
-
-  void on_actionTabRecycle();
 
   void on_btnClearSearchText_clicked();
 
@@ -744,8 +745,6 @@ QLabel {
 
   void on_btnShareImage_clicked();
 
-  void on_actionShareFile();
-
   void on_btnDelImage_clicked();
 
   void on_btnSetBookmark_clicked();
@@ -863,7 +862,6 @@ QLabel {
   void init_ChartWidget();
 
   void init_UIWidget();
-  void init_Menu(QMenu *);
 
   void resetWinPos();
 

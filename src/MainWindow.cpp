@@ -618,7 +618,7 @@ void MainWindow::init_TotalData() {
     QString name;
     name = RegTab.value("twName" + QString::number(i)).toString();
     if (name.trimmed().length() == 0) name = "tab" + QString::number(i + 1);
-    QTreeWidget *tw = init_TreeWidget(name);
+    QTreeWidget *tw = m_MainHelper->init_TreeWidget(name);
 
     QString tabText = RegTab
                           .value("TabName" + QString::number(i),
@@ -632,7 +632,7 @@ void MainWindow::init_TotalData() {
   }
 
   if (TabCount == 0) {
-    QTreeWidget *tw = init_TreeWidget("20220303_101010_1");
+    QTreeWidget *tw = m_MainHelper->init_TreeWidget("20220303_101010_1");
 
     QString tabText = tr("Tab") + " " + QString::number(1);
     mui->tabWidget->addTab(tw, tabText);
@@ -1651,7 +1651,7 @@ void MainWindow::on_actionAdd_Tab_triggered() {
   QString ini_file = iniDir + twName + ".ini";
   if (QFile(ini_file).exists()) QFile(ini_file).remove();
 
-  QTreeWidget *tw = init_TreeWidget(twName);
+  QTreeWidget *tw = m_MainHelper->init_TreeWidget(twName);
 
   QString tabText = tr("Tab") + " " + QString::number(count + 1);
   mui->tabWidget->addTab(tw, tabText);
@@ -1732,59 +1732,6 @@ void MainWindow::on_actionDel_Tab_triggered() {
   }
 
   saveTab();
-}
-
-QTreeWidget *MainWindow::init_TreeWidget(QString name) {
-  QTreeWidget *tw = new QTreeWidget(this);
-  tw->setFixedHeight(0);
-  tw->setObjectName(name);
-
-  QString ini_file = iniDir + name + ".ini";
-  if (!QFile::exists(ini_file)) {
-    QSettings RegTab(ini_file, QSettings::IniFormat);
-
-    RegTab.setValue("/" + name + "/" + "CreatedTime",
-                    QDateTime::currentDateTime().toString());
-  }
-
-  QFont font;
-  font.setPointSize(fontSize);
-  tw->setFont(font);
-  font.setBold(true);
-  tw->header()->setFont(font);
-
-  font.setPointSize(fontSize + 1);
-
-  tw->setColumnCount(4);
-  tw->headerItem()->setText(0, "  " + tr("Date") + "  ");
-  tw->headerItem()->setText(1, "  " + tr("Freq") + "  ");
-  tw->headerItem()->setText(2, tr("Amount"));
-  tw->headerItem()->setText(3, tr("Year"));
-  tw->setColumnHidden(3, true);
-
-  tw->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-  tw->header()->setDefaultAlignment(Qt::AlignCenter);
-  tw->headerItem()->setTextAlignment(2, Qt::AlignRight);
-  tw->setAlternatingRowColors(true);
-  tw->setFrameShape(QTreeWidget::NoFrame);
-  tw->installEventFilter(this);
-  tw->viewport()->installEventFilter(this);
-  tw->setUniformRowHeights(true);  // 加快展开速度
-  connect(tw, &QTreeWidget::itemClicked, this, &MainWindow::on_twItemClicked);
-  connect(tw, &QTreeWidget::itemDoubleClicked, this,
-          &MainWindow::on_twItemDoubleClicked);
-  connect(tw, &QTreeWidget::itemPressed, [=]() {});
-
-  connect(tw->verticalScrollBar(), &QScrollBar::valueChanged, [=]() {});
-
-  // tw->setUniformRowHeights(false); //对速度可能有影响，数据量大时
-  QScrollBar *SB = tw->verticalScrollBar();
-  SB->setStyleSheet(m_Method->vsbarStyleSmall);
-  tw->setStyleSheet(treeStyle);
-  tw->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
-  QScroller::grabGesture(tw, QScroller::LeftMouseButtonGesture);
-  m_Method->setSCrollPro(tw);
-  return tw;
 }
 
 void MainWindow::on_twItemClicked() {
@@ -2906,6 +2853,7 @@ void MainWindow::init_Theme() {
 
 void MainWindow::init_Instance() {
   mw_one = this;
+  m_MainHelper = new MainHelper(this);
   CurrentYear = QString::number(QDate::currentDate().year());
   if (defaultFontFamily == "") defaultFontFamily = this->font().family();
 
@@ -2936,7 +2884,6 @@ void MainWindow::init_Instance() {
   m_NotesList = new NotesList(this);
 
   m_ReceiveShare = new ReceiveShare(this);
-  m_MainHelper = new MainHelper(this);
 
   if (m_Preferences->getDefaultFont() == "None")
     m_Preferences->setDefaultFont(this->font().family());
@@ -3312,94 +3259,6 @@ void MainWindow::on_btnSelTab_clicked() {
   getMainTabs();
 }
 
-void MainWindow::init_Menu(QMenu *mainMenu) {
-  QAction *actAddTab = new QAction(tr("Add Tab"));
-  QAction *actDelTab = new QAction(tr("Del Tab"));
-  QAction *actRenameTab = new QAction(tr("Rename Tab"));
-
-  QAction *actOpenKnotBakDir = new QAction(tr("Open KnotBak Dir"));
-
-  QAction *actReport = new QAction(tr("Report"));
-  actReport->setVisible(false);
-
-  QAction *actExportData = new QAction(tr("Export Data"));
-  QAction *actImportData = new QAction(tr("Import Data"));
-
-  QAction *actPreferences = new QAction(tr("Preferences"));
-
-  QAction *actAbout = new QAction(tr("About") + " (" + ver + ")");
-  QAction *actOneDrive = new QAction(tr("Cloud Backup and Restore Data"));
-
-  QAction *actBakFileList = new QAction(tr("Backup File List"));
-  QAction *actTabRecycle = new QAction(tr("Tab Recycle"));
-  QAction *actShareFile = new QAction(tr("Share File"));
-
-  connect(actAddTab, &QAction::triggered, this,
-          &MainWindow::on_actionAdd_Tab_triggered);
-  connect(actDelTab, &QAction::triggered, this,
-          &MainWindow::on_actionDel_Tab_triggered);
-  connect(actRenameTab, &QAction::triggered, this,
-          &MainWindow::on_actionRename_triggered);
-
-  connect(actBakFileList, &QAction::triggered, this,
-          &MainWindow::on_actionBakFileList);
-
-  connect(actTabRecycle, &QAction::triggered, this,
-          &MainWindow::on_actionTabRecycle);
-
-  connect(actOpenKnotBakDir, &QAction::triggered, this,
-          &MainWindow::on_openKnotBakDir);
-  connect(actReport, &QAction::triggered, this,
-          &MainWindow::on_actionReport_triggered);
-
-  connect(actExportData, &QAction::triggered, this,
-          &MainWindow::on_actionExport_Data_triggered);
-
-  connect(actImportData, &QAction::triggered, this,
-          &MainWindow::on_actionImport_Data_triggered);
-  connect(actPreferences, &QAction::triggered, this,
-          &MainWindow::on_actionPreferences_triggered);
-
-  connect(actOneDrive, &QAction::triggered, this,
-          &MainWindow::on_actionOneDriveBackupData);
-  connect(actAbout, &QAction::triggered, this, &MainWindow::on_actionAbout);
-  connect(actShareFile, &QAction::triggered, this,
-          &MainWindow::on_actionShareFile);
-
-  mainMenu->addAction(actAddTab);
-  mainMenu->addAction(actDelTab);
-  mainMenu->addAction(actRenameTab);
-
-  mainMenu->addAction(actReport);
-
-  mainMenu->addAction(actExportData);
-  mainMenu->addAction(actImportData);
-
-#ifdef Q_OS_ANDROID
-  mainMenu->addAction(actOpenKnotBakDir);
-  actOpenKnotBakDir->setVisible(false);
-  actShareFile->setVisible(false);
-#else
-  actShareFile->setVisible(false);
-  if (!m_Preferences->devMode) {
-    actAddTab->setVisible(false);
-    actDelTab->setVisible(false);
-    actRenameTab->setVisible(false);
-    actTabRecycle->setVisible(false);
-  }
-#endif
-
-  mainMenu->addAction(actPreferences);
-
-  mainMenu->addAction(actOneDrive);
-  mainMenu->addAction(actBakFileList);
-  mainMenu->addAction(actTabRecycle);
-  mainMenu->addAction(actShareFile);
-  mainMenu->addAction(actAbout);
-
-  mainMenu->setStyleSheet(m_Method->qssMenu);
-}
-
 void MainWindow::on_openKnotBakDir() {
 #ifdef Q_OS_ANDROID
 
@@ -3470,10 +3329,6 @@ void MainWindow::on_actionTabRecycle() {
 
     lastList.append(tab_name + "-=-" + tab_time + "-=-" + iniTotal);
   }
-
-  // Qt5 使用 QSet 去重
-  // QSet<QString> set = QSet<QString>::fromList(lastList);
-  // QStringList uniqueList = QStringList::fromSet(set);
 
   // Qt6 新写法（直接通过迭代器构造）
   QSet<QString> set(lastList.begin(), lastList.end());  // 直接构造 QSet
@@ -3549,7 +3404,7 @@ void MainWindow::startBackgroundTaskUpdateBakFileList() {
 
 void MainWindow::on_btnMenu_clicked() {
   mainMenu = new QMenu(this);
-  init_Menu(mainMenu);
+  m_MainHelper->init_Menu(mainMenu);
   int x = 0;
 #ifdef Q_OS_ANDROID
   x = mw_one->geometry().x() + 2;
@@ -4092,9 +3947,6 @@ void MainWindow::reloadMain() {
   mui->qwMainDate->rootContext()->setContextProperty("maindateWidth",
                                                      mui->qwMainDate->width());
   m_Method->clearAllBakList(mui->qwMainDate);
-
-  // QFontMetrics fontMetrics(font());
-  // int nFontHeight = fontMetrics.height();
 
   QTreeWidget *tw = get_tw(tabData->currentIndex());
 

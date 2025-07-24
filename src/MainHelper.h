@@ -2,7 +2,9 @@
 #define MAINHELPER_H
 
 #include <QDialog>
+#include <QMenu>
 #include <QObject>
+#include <QTreeWidget>
 #include <QWidget>
 
 class MainWindow;  // 前向声明，避免头文件循环包含
@@ -15,6 +17,8 @@ class MainHelper : public QDialog {
   void clickBtnChart();
   void clickBtnRestoreTab();
   bool mainEventFilter(QObject *watch, QEvent *evn);
+  QTreeWidget *init_TreeWidget(QString name);
+  void init_Menu(QMenu *mainMenu);
  signals:
 };
 

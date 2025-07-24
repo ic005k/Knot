@@ -8,8 +8,9 @@ extern Ui::MainWindow *mui;
 extern Method *m_Method;
 extern QTabWidget *tabData;
 extern QString iniDir, searchStr, currentMDFile, privateDir, encPassword,
-    errorInfo;
+    errorInfo, ver;
 extern bool isAndroid;
+extern int fontSize;
 
 MainHelper::MainHelper(QWidget *parent) : QDialog{parent} {}
 
@@ -215,7 +216,7 @@ void MainHelper::clickBtnRestoreTab() {
   }
 
   QString tab_name = m_Method->getText0(mui->qwTabRecycle, index);
-  QTreeWidget *tw = mw_one->init_TreeWidget(twName);
+  QTreeWidget *tw = init_TreeWidget(twName);
   mui->tabWidget->addTab(tw, tab_name);
 
   mw_one->addItem(tab_name, "", "", "", 0);
@@ -243,4 +244,144 @@ void MainHelper::clickBtnRestoreTab() {
   tabData->setCurrentIndex(count);
 
   mw_one->strLatestModify = tr("Restore Tab") + "(" + tab_name + ")";
+}
+
+QTreeWidget *MainHelper::init_TreeWidget(QString name) {
+  QTreeWidget *tw = new QTreeWidget(mw_one);
+  tw->setFixedHeight(0);
+  tw->setObjectName(name);
+
+  QString ini_file = iniDir + name + ".ini";
+  if (!QFile::exists(ini_file)) {
+    QSettings RegTab(ini_file, QSettings::IniFormat);
+
+    RegTab.setValue("/" + name + "/" + "CreatedTime",
+                    QDateTime::currentDateTime().toString());
+  }
+
+  QFont font;
+  font.setPointSize(fontSize);
+  tw->setFont(font);
+  font.setBold(true);
+  tw->header()->setFont(font);
+
+  font.setPointSize(fontSize + 1);
+
+  tw->setColumnCount(4);
+  tw->headerItem()->setText(0, "  " + tr("Date") + "  ");
+  tw->headerItem()->setText(1, "  " + tr("Freq") + "  ");
+  tw->headerItem()->setText(2, tr("Amount"));
+  tw->headerItem()->setText(3, tr("Year"));
+  tw->setColumnHidden(3, true);
+
+  tw->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+  tw->header()->setDefaultAlignment(Qt::AlignCenter);
+  tw->headerItem()->setTextAlignment(2, Qt::AlignRight);
+  tw->setAlternatingRowColors(true);
+  tw->setFrameShape(QTreeWidget::NoFrame);
+  tw->installEventFilter(mw_one);
+  tw->viewport()->installEventFilter(mw_one);
+  tw->setUniformRowHeights(true);  // 加快展开速度
+  connect(tw, &QTreeWidget::itemClicked, mw_one, &MainWindow::on_twItemClicked);
+  connect(tw, &QTreeWidget::itemDoubleClicked, mw_one,
+          &MainWindow::on_twItemDoubleClicked);
+  connect(tw, &QTreeWidget::itemPressed, [=]() {});
+
+  connect(tw->verticalScrollBar(), &QScrollBar::valueChanged, [=]() {});
+
+  QScrollBar *SB = tw->verticalScrollBar();
+  SB->setStyleSheet(m_Method->vsbarStyleSmall);
+  tw->setStyleSheet(mw_one->treeStyle);
+  tw->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
+  QScroller::grabGesture(tw, QScroller::LeftMouseButtonGesture);
+  m_Method->setSCrollPro(tw);
+  return tw;
+}
+
+void MainHelper::init_Menu(QMenu *mainMenu) {
+  QAction *actAddTab = new QAction(tr("Add Tab"));
+  QAction *actDelTab = new QAction(tr("Del Tab"));
+  QAction *actRenameTab = new QAction(tr("Rename Tab"));
+
+  QAction *actOpenKnotBakDir = new QAction(tr("Open KnotBak Dir"));
+
+  QAction *actReport = new QAction(tr("Report"));
+  actReport->setVisible(false);
+
+  QAction *actExportData = new QAction(tr("Export Data"));
+  QAction *actImportData = new QAction(tr("Import Data"));
+
+  QAction *actPreferences = new QAction(tr("Preferences"));
+
+  QAction *actAbout = new QAction(tr("About") + " (" + ver + ")");
+  QAction *actOneDrive = new QAction(tr("Cloud Backup and Restore Data"));
+
+  QAction *actBakFileList = new QAction(tr("Backup File List"));
+  QAction *actTabRecycle = new QAction(tr("Tab Recycle"));
+  QAction *actShareFile = new QAction(tr("Share File"));
+
+  connect(actAddTab, &QAction::triggered, mw_one,
+          &MainWindow::on_actionAdd_Tab_triggered);
+  connect(actDelTab, &QAction::triggered, mw_one,
+          &MainWindow::on_actionDel_Tab_triggered);
+  connect(actRenameTab, &QAction::triggered, mw_one,
+          &MainWindow::on_actionRename_triggered);
+
+  connect(actBakFileList, &QAction::triggered, mw_one,
+          &MainWindow::on_actionBakFileList);
+
+  connect(actTabRecycle, &QAction::triggered, mw_one,
+          &MainWindow::on_actionTabRecycle);
+
+  connect(actOpenKnotBakDir, &QAction::triggered, mw_one,
+          &MainWindow::on_openKnotBakDir);
+  connect(actReport, &QAction::triggered, mw_one,
+          &MainWindow::on_actionReport_triggered);
+
+  connect(actExportData, &QAction::triggered, mw_one,
+          &MainWindow::on_actionExport_Data_triggered);
+
+  connect(actImportData, &QAction::triggered, mw_one,
+          &MainWindow::on_actionImport_Data_triggered);
+  connect(actPreferences, &QAction::triggered, mw_one,
+          &MainWindow::on_actionPreferences_triggered);
+
+  connect(actOneDrive, &QAction::triggered, mw_one,
+          &MainWindow::on_actionOneDriveBackupData);
+  connect(actAbout, &QAction::triggered, mw_one, &MainWindow::on_actionAbout);
+  connect(actShareFile, &QAction::triggered, mw_one,
+          &MainWindow::on_actionShareFile);
+
+  mainMenu->addAction(actAddTab);
+  mainMenu->addAction(actDelTab);
+  mainMenu->addAction(actRenameTab);
+
+  mainMenu->addAction(actReport);
+
+  mainMenu->addAction(actExportData);
+  mainMenu->addAction(actImportData);
+
+#ifdef Q_OS_ANDROID
+  mainMenu->addAction(actOpenKnotBakDir);
+  actOpenKnotBakDir->setVisible(false);
+  actShareFile->setVisible(false);
+#else
+  actShareFile->setVisible(false);
+  if (!mw_one->m_Preferences->devMode) {
+    actAddTab->setVisible(false);
+    actDelTab->setVisible(false);
+    actRenameTab->setVisible(false);
+    actTabRecycle->setVisible(false);
+  }
+#endif
+
+  mainMenu->addAction(actPreferences);
+
+  mainMenu->addAction(actOneDrive);
+  mainMenu->addAction(actBakFileList);
+  mainMenu->addAction(actTabRecycle);
+  mainMenu->addAction(actShareFile);
+  mainMenu->addAction(actAbout);
+
+  mainMenu->setStyleSheet(m_Method->qssMenu);
 }
