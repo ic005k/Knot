@@ -69,8 +69,6 @@ extern ShowMessage *m_ShowMessage;
 extern ColorDialog *colorDlg;
 extern PrintPDF *m_PrintPDF;
 
-extern bool mainEventFilter(QObject *watch, QEvent *evn);
-
 void RegJni(const char *myClassName);
 
 Ui::MainWindow *mui;
@@ -362,8 +360,8 @@ void MainWindow::SaveFile(QString SaveType) {
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
-  ui->setupUi(this);
   mui = ui;
+  ui->setupUi(this);
 
   initMain = true;
 
@@ -2065,7 +2063,7 @@ void MainWindow::on_btnModifyRecord_clicked() {
 bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
   if (loading) return QWidget::eventFilter(watch, evn);
 
-  mainEventFilter(watch, evn);
+  m_MainHelper->mainEventFilter(watch, evn);
 
   return QWidget::eventFilter(watch, evn);
 }
@@ -2549,12 +2547,20 @@ void MainWindow::on_rbSteps_clicked() {
   PointList.clear();
   doubleList.clear();
 
-  QString sm = get_Month(QDate::currentDate().toString("ddd MM dd yyyy"));
+  QString sm = get_Month(m_Method->setCurrentDateValue());
+  QString strday, strmonth;
   for (int i = 0; i < count; i++) {
     QString strD = m_Steps->getDate(i);
-    if (sm == get_Month(strD)) {
-      int day = get_Day(strD);
+
+    QStringList list = strD.split(" ").at(0).split("-");
+    if (list.count() > 1) {
+      strmonth = list.at(1);
+      strday = list.at(2);
+    }
+    if (sm.toInt() == strmonth.toInt()) {
+      int day = strday.toInt();
       int steps = m_Steps->getSteps(i);
+
       PointList.append(QPointF(day, steps));
       doubleList.append(steps);
     }
@@ -2909,7 +2915,6 @@ void MainWindow::init_Instance() {
   tabChart = new QTabWidget;
   tabChart = mui->tabCharts;
 
-  m_MainHelper = new MainHelper(this);
   m_Method = new Method(this);
   myfile = new File();
   m_AboutThis = new AboutThis(this);
@@ -2931,6 +2936,7 @@ void MainWindow::init_Instance() {
   m_NotesList = new NotesList(this);
 
   m_ReceiveShare = new ReceiveShare(this);
+  m_MainHelper = new MainHelper(this);
 
   if (m_Preferences->getDefaultFont() == "None")
     m_Preferences->setDefaultFont(this->font().family());

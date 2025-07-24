@@ -1258,10 +1258,14 @@ border-radius: 4px;</string>
              </font>
             </property>
             <property name="styleSheet">
-             <string notr="true">border:none</string>
+             <string notr="true"/>
             </property>
             <property name="text">
              <string>Menu</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/mainmenu.svg</normaloff>:/res/mainmenu.svg</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -1300,8 +1304,8 @@ border-radius: 4px;</string>
              <string>Add</string>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>:/res/additem.png</normaloff>:/res/additem.png</iconset>
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/additem.svg</normaloff>:/res/additem.svg</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -1340,8 +1344,8 @@ border-radius: 4px;</string>
              <string>Del</string>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>:/res/delitem.png</normaloff>:/res/delitem.png</iconset>
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/delitem.svg</normaloff>:/res/delitem.svg</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -1380,8 +1384,8 @@ border-radius: 4px;</string>
              <string>Upload</string>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>:/res/onebak.png</normaloff>:/res/onebak.png</iconset>
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/upload.svg</normaloff>:/res/upload.svg</iconset>
             </property>
             <property name="iconSize">
              <size>
