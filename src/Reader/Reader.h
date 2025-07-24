@@ -142,7 +142,8 @@ class Reader : public QDialog {
   void setDefaultOpen(QString value);
   void setTextAreaCursorPos(int nCursorPos);
   bool eventFilterReaderAndroid(QObject *watch, QEvent *evn);
- public slots:
+  void showOrHideBookmark();
+  public slots:
   void setPageScroll0();
   void setPageScroll1();
   void setEpubPagePosition(int index, QString htmlFile);

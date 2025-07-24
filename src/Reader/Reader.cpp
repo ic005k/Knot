@@ -2700,9 +2700,27 @@ void Reader::setTextAreaCursorPos(int nCursorPos) {
                             Q_ARG(QVariant, nCursorPos));
 }
 
-//===============================================================================================
+void Reader::showOrHideBookmark() {
+  mui->btnAutoStop->click();
+
+  if (mui->f_ReaderSet->isVisible()) {
+    mw_one->on_btnBackReaderSet_clicked();
+  }
+  if (mui->qwBookmark->isHidden()) {
+    mui->qwReader->hide();
+    mui->qwBookmark->show();
+    showBookmarkList();
+    mui->btnCatalogue->setEnabled(false);
+  } else {
+    mui->qwBookmark->hide();
+    mui->qwReader->show();
+    mui->btnCatalogue->setEnabled(true);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////////
 // TextChunkModel
-//===============================================================================================
+///////////////////////////////////////////////////////////////////////////////////
 
 // 1：正确初始化
 TextChunkModel::TextChunkModel(QObject *parent) : QAbstractListModel(parent) {

@@ -64,6 +64,7 @@
 #include <QTreeWidgetItem>
 #include <QValueAxis>
 
+#include "MainHelper.h"
 #include "src/AboutThis.h"
 #include "src/CategoryList.h"
 #include "src/CloudBackup.h"
@@ -125,7 +126,7 @@ class MainWindow : public QMainWindow {
  public:
   MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
-  // Ui::MainWindow *ui;
+  Ui::MainWindow *ui;
 
   QMenu *mainMenu = nullptr;
 
@@ -266,6 +267,7 @@ QLabel {
 
   StepsOptions *m_StepsOptions;
   ReceiveShare *m_ReceiveShare;
+  MainHelper *m_MainHelper;
 
   File *myfile;
 
@@ -284,6 +286,7 @@ QLabel {
 
   void initChartMonth();
   void initChartDay();
+  QTreeWidget *init_TreeWidget(QString);
 
   static void saveTab();
   bool isSlide = false;
@@ -377,6 +380,7 @@ QLabel {
   void resizeEvent(QResizeEvent *event) override;
 
   void hideEvent(QHideEvent *event) override;
+
  public slots:
   void on_hSlider_sliderMoved(int position);
   void clickMainTab();
@@ -452,8 +456,6 @@ QLabel {
 
   void on_btnSelTab_clicked();
 
-  void on_btnMenu_clicked();
-
   void on_btnReader_clicked();
 
   void on_btnBackReader_clicked();
@@ -504,7 +506,6 @@ QLabel {
 
   void clickData();
 
- public slots:
   void on_btnStartSearch_clicked();
 
   void on_btnChart_clicked();
@@ -609,6 +610,7 @@ QLabel {
   void on_btnCancelType_clicked();
 
  private slots:
+  void on_btnMenu_clicked();
 
   void on_btnSync_clicked();
 
@@ -856,7 +858,6 @@ QLabel {
   qreal aoldX, aoldY, aoldZ;
   int countOne = 0;
   int max_day = 31;
-  QTreeWidget *init_TreeWidget(QString);
 
   void on_btnHideKey_clicked();
   void init_ChartWidget();

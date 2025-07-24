@@ -168,7 +168,9 @@ class NotesList : public QDialog {
 
   void refreshRecentOpen(QString name);
 
- protected:
+  void showFindNotes();
+  void restoreNoteFromRecycle();
+  protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
   void closeEvent(QCloseEvent *event) override;

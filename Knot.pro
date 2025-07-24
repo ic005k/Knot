@@ -376,6 +376,7 @@ SOURCES += \
     src/EditRecord.cpp \
     src/JavaToQtBridge.cpp \
     src/LoadPic.cpp \
+    src/MainHelper.cpp \
     src/MainWindow.cpp \
     src/Notes/ColorDialog.cpp \
     src/Notes/MoveTo.cpp \
@@ -605,6 +606,7 @@ HEADERS += \
     src/DateSelector.h \
     src/EditRecord.h \
     src/LoadPic.h \
+    src/MainHelper.h \
     src/MainWindow.h \
     src/Notes/ColorDialog.h \
     src/Notes/MoveTo.h \

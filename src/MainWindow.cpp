@@ -361,9 +361,9 @@ void MainWindow::SaveFile(QString SaveType) {
 }
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent) {  //, mui(new Ui::MainWindow) {
-  mui = new Ui::MainWindow;
-  mui->setupUi(this);
+    : QMainWindow(parent), ui(new Ui::MainWindow) {
+  ui->setupUi(this);
+  mui = ui;
 
   initMain = true;
 
@@ -2909,6 +2909,7 @@ void MainWindow::init_Instance() {
   tabChart = new QTabWidget;
   tabChart = mui->tabCharts;
 
+  m_MainHelper = new MainHelper(this);
   m_Method = new Method(this);
   myfile = new File();
   m_AboutThis = new AboutThis(this);
@@ -4313,64 +4314,7 @@ void MainWindow::on_btnDelTabRecycle_clicked() {
 }
 
 void MainWindow::on_btnRestoreTab_clicked() {
-  if (m_Method->getCountFromQW(mui->qwTabRecycle) == 0) return;
-
-  int count = mui->tabWidget->tabBar()->count();
-  QString twName = m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
-
-  int c_year = QDate::currentDate().year();
-  int iniFileCount = c_year - 2025 + 1 + 1;
-
-  int index = m_Method->getCurrentIndexFromQW(mui->qwTabRecycle);
-  QString recycle = m_Method->getText3(mui->qwTabRecycle, index);
-  QStringList recycleList = recycle.split("\n");
-
-  QString ini_file;
-  for (int i = 0; i < iniFileCount; i++) {
-    if (i == 0)
-      ini_file = iniDir + twName + ".ini";
-    else {
-      ini_file = iniDir + QString::number(2025 + i - 1) + "-" + twName + ".ini";
-    }
-
-    if (QFile(ini_file).exists()) QFile(ini_file).remove();
-    QString recFile;
-    if (recycleList.count() > 1)
-      recFile = recycleList.at(i);
-    else
-      recFile = recycle;
-    QFile::copy(recFile, ini_file);
-  }
-
-  QString tab_name = m_Method->getText0(mui->qwTabRecycle, index);
-  QTreeWidget *tw = init_TreeWidget(twName);
-  mui->tabWidget->addTab(tw, tab_name);
-
-  addItem(tab_name, "", "", "", 0);
-  setCurrentIndex(count);
-
-  readData(tw);
-
-  if (recycleList.count() > 1) {
-    for (int i = 0; i < recycleList.count(); i++) {
-      QFile recycle_file(recycle.split("\n").at(i));
-      recycle_file.remove();
-    }
-  } else {
-    QFile recycle_file(recycle);
-    recycle_file.remove();
-  }
-
-  on_btnBackTabRecycle_clicked();
-
-  saveTab();
-
-  reloadMain();
-  clickData();
-
-  tabData->setCurrentIndex(count);
-
-  strLatestModify = tr("Restore Tab") + "(" + tab_name + ")";
+  m_MainHelper->clickBtnRestoreTab();
 }
 
 void MainWindow::on_btnDelBakFile_clicked() {
@@ -4448,16 +4392,7 @@ void MainWindow::on_btnDelNoteRecycle_clicked() {
 }
 
 void MainWindow::on_btnRestoreNoteRecycle_clicked() {
-  int count = m_Method->getCountFromQW(mui->qwNoteRecycle);
-  if (count == 0) return;
-
-  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
-  if (index < 0) return;
-
-  if (m_NotesList->getNoteBookCount() == 0) return;
-
-  m_NotesList->setTWRBCurrentItem();
-  m_NotesList->on_btnRestore_clicked();
+  m_NotesList->restoreNoteFromRecycle();
 }
 
 void MainWindow::on_btnFindNotes_clicked() {
@@ -4477,23 +4412,7 @@ void MainWindow::on_btnClearNoteFindText_clicked() {
   mui->lblShowLineSn->setText("0");
 }
 
-void MainWindow::on_btnShowFindNotes_clicked() {
-  m_NotesList->recycleNotesList.clear();
-  int count = m_NotesList->ui->treeWidgetRecycle->topLevelItem(0)->childCount();
-  for (int i = 0; i < count; i++) {
-    QString file =
-        iniDir +
-        m_NotesList->ui->treeWidgetRecycle->topLevelItem(0)->child(i)->text(1);
-    m_NotesList->recycleNotesList.append(file);
-  }
-  qDebug() << "recycle notes = " << m_NotesList->recycleNotesList;
-
-  mui->frameNoteList->hide();
-  mui->frameNotesSearchResult->show();
-  mui->editNotesSearch->setFocus();
-
-  m_NotesList->openSearch();
-}
+void MainWindow::on_btnShowFindNotes_clicked() { m_NotesList->showFindNotes(); }
 
 void MainWindow::on_btnNoteBookMenu_clicked() {
   m_Method->showNoteBookMenu(mui->qwNoteBook->x(), mui->qwNoteBook->y());
@@ -4669,44 +4588,7 @@ void MainWindow::updateMainTab() {
   setCurrentIndex(tabData->currentIndex());
 }
 
-void MainWindow::on_btnChart_clicked() {
-  axisY->setTickCount(7);
-  axisY2->setTickCount(7);
-
-  if (mui->f_charts->isHidden()) {
-    mui->qwMainDate->hide();
-    mui->qwMainEvent->hide();
-
-    mui->f_charts->setMaximumHeight(this->height());
-    mui->f_charts->show();
-    mui->btnChartDay->show();
-    mui->btnChartMonth->show();
-    mui->rbAmount->show();
-    mui->rbFreq->show();
-    mui->rbSteps->show();
-    mui->f_cw->show();
-
-    mui->btnReport->hide();
-    mui->btnFind->hide();
-    mui->btnModifyRecord->hide();
-    mui->btnMove->hide();
-  } else {
-    mui->f_charts->setMaximumHeight(0);
-    mui->f_charts->hide();
-    mui->rbAmount->hide();
-    mui->rbFreq->hide();
-    mui->rbSteps->hide();
-    mui->btnChartDay->hide();
-    mui->btnChartMonth->hide();
-
-    mui->qwMainDate->show();
-    mui->qwMainEvent->show();
-    mui->btnReport->show();
-    mui->btnFind->show();
-    mui->btnModifyRecord->show();
-    mui->btnMove->show();
-  }
-}
+void MainWindow::on_btnChart_clicked() { m_MainHelper->clickBtnChart(); }
 
 void MainWindow::on_btnManagement_clicked() {
   int x, y, w, h;
@@ -4775,21 +4657,7 @@ void MainWindow::on_btnCatalogue_clicked() {
 void MainWindow::on_btnRemoveBookList_clicked() { m_Reader->removeBookList(); }
 
 void MainWindow::on_btnShowBookmark_clicked() {
-  mui->btnAutoStop->click();
-
-  if (mui->f_ReaderSet->isVisible()) {
-    on_btnBackReaderSet_clicked();
-  }
-  if (mui->qwBookmark->isHidden()) {
-    mui->qwReader->hide();
-    mui->qwBookmark->show();
-    m_Reader->showBookmarkList();
-    mui->btnCatalogue->setEnabled(false);
-  } else {
-    mui->qwBookmark->hide();
-    mui->qwReader->show();
-    mui->btnCatalogue->setEnabled(true);
-  }
+  m_Reader->showOrHideBookmark();
 }
 
 void MainWindow::stopTimerForPdf() {

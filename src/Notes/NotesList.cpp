@@ -1282,20 +1282,12 @@ void NotesList::onSearchFinished() {
     }
     strLineSn = strLineSn.trimmed();
 
-    // QString note_name = getCurrentNoteNameFromMDFile(filePath);
-    // if (note_name != "")
-    //   m_Method->addItemToQW(mui->qwNotesSearchResult, note_name,
-    //                         filePath, strLineSn, "", 0);
-
     if (!recycleNotesList.contains(filePath))
       searchResultList.append(filePath + "-==-" + strLineSn);
   }
 
   // ▶️ 释放资源
   watcher->deleteLater();
-
-  // mui->frameNoteList->hide();
-  // mui->frameNotesSearchResult->show();
 
   if (searchResultList.count() > 0) {
     mui->btnFindNextNote->setEnabled(true);
@@ -2301,7 +2293,7 @@ void NotesList::clickNoteBook() {
   if (text2.isEmpty()) {
     isStatus = true;
     int index_top = text1.toInt();
-    QTreeWidgetItem *topItem = mw_one->m_NotesList->tw->topLevelItem(index_top);
+    QTreeWidgetItem *topItem = tw->topLevelItem(index_top);
     int child_count = topItem->childCount();
     for (int i = 0; i < child_count; i++) {
       QString text0 = topItem->child(i)->text(0);
@@ -2311,7 +2303,7 @@ void NotesList::clickNoteBook() {
         QString item1 = m_Method->getLastModified(file);
         m_Method->addItemToQW(mui->qwNoteList, text0, item1, "", text3, 0);
 
-        mw_one->m_NotesList->pNoteItems.append(topItem->child(i));
+        pNoteItems.append(topItem->child(i));
       }
     }
   } else {
@@ -2322,8 +2314,7 @@ void NotesList::clickNoteBook() {
       indexMain = list.at(0).toInt();
       indexChild = list.at(1).toInt();
 
-      QTreeWidgetItem *topItem =
-          mw_one->m_NotesList->tw->topLevelItem(indexMain);
+      QTreeWidgetItem *topItem = tw->topLevelItem(indexMain);
       QTreeWidgetItem *childItem = topItem->child(indexChild);
       int count = childItem->childCount();
       for (int n = 0; n < count; n++) {
@@ -2333,7 +2324,7 @@ void NotesList::clickNoteBook() {
         QString item1 = m_Method->getLastModified(file);
         m_Method->addItemToQW(mui->qwNoteList, text0, item1, "", text3, 0);
 
-        mw_one->m_NotesList->pNoteItems.append(childItem->child(n));
+        pNoteItems.append(childItem->child(n));
       }
     }
   }
@@ -2622,5 +2613,34 @@ QString NotesList::getSearchResultQmlFile() {
 }
 
 QStringList NotesList::getValidMDFiles() { return validMDFiles; }
-
 template class QFutureWatcher<ResultsMap>;
+
+void NotesList::showFindNotes() {
+  recycleNotesList.clear();
+  int count = ui->treeWidgetRecycle->topLevelItem(0)->childCount();
+  for (int i = 0; i < count; i++) {
+    QString file =
+        iniDir + ui->treeWidgetRecycle->topLevelItem(0)->child(i)->text(1);
+    recycleNotesList.append(file);
+  }
+  qDebug() << "recycle notes = " << recycleNotesList;
+
+  mui->frameNoteList->hide();
+  mui->frameNotesSearchResult->show();
+  mui->editNotesSearch->setFocus();
+
+  openSearch();
+}
+
+void NotesList::restoreNoteFromRecycle() {
+  int count = m_Method->getCountFromQW(mui->qwNoteRecycle);
+  if (count == 0) return;
+
+  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
+  if (index < 0) return;
+
+  if (getNoteBookCount() == 0) return;
+
+  setTWRBCurrentItem();
+  on_btnRestore_clicked();
+}
