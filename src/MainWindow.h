@@ -129,6 +129,8 @@ class MainWindow : public QMainWindow {
 
   QMenu *mainMenu = nullptr;
 
+  int x, y, w, h;
+
   TextEditToolbar *textToolbar;
 
   QInputDialog *m_RenameDlg = nullptr;
@@ -503,6 +505,8 @@ QLabel {
   void clickData();
 
  public slots:
+  void on_btnStartSearch_clicked();
+
   void on_btnChart_clicked();
   void on_btnRename_clicked();
   void on_btnBack_NotesSearchResult_clicked();
@@ -615,8 +619,6 @@ QLabel {
   void on_actionTabRecycle();
 
   void on_btnClearSearchText_clicked();
-
-  void on_btnStartSearch_clicked();
 
   void on_btnImportBakList_clicked();
 
@@ -850,7 +852,7 @@ QLabel {
 
   int frameChartHeight;
   int yScale = 3;
-  int x, y, w, h;
+
   qreal aoldX, aoldY, aoldZ;
   int countOne = 0;
   int max_day = 31;

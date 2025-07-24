@@ -61,7 +61,7 @@ dependencies {
     // PDF
     //pdfium 核心依赖（pdfviewer 的底层引擎）
     implementation 'com.github.barteksc:pdfium-android:1.9.0'
-    // 目前正在使用的是3.2.0，采用源码直接集成，下面的依赖已不需要
+    // 目前正在使用的是3.2.0，直接集成源码，下面的依赖库已不需要
     //implementation 'com.github.barteksc:android-pdf-viewer:3.2.0-beta.1'
 
     // Markwon
