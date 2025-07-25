@@ -161,18 +161,23 @@ Rectangle {
 
                 id: idlistElemnet
 
-                width: parent.width
                 spacing: 2
                 Layout.fillWidth: true
 
                 ColumnLayout {
                     id: listCol
-                    height: parent.height
+
                     width: parent.width
                     spacing: 2
                     Layout.fillWidth: true
                     anchors.leftMargin: 0
                     anchors.rightMargin: 0
+
+                    Rectangle {
+                        width: view.width
+                        height: 5 // 空白高度
+                        color: "transparent"
+                    }
 
                     Text {
                         id: item0
@@ -238,6 +243,7 @@ Rectangle {
                         elide: Text.ElideRight
                         Layout.preferredWidth: listItem.width
                         font.bold: false
+                        font.pointSize: item0.font.pointSize - 1
                         text: text3
                         color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
 
@@ -245,6 +251,12 @@ Rectangle {
                         rightPadding: 5
 
                         visible: item3.text.length ? true : false
+                    }
+
+                    Rectangle {
+                        width: view.width
+                        height: 5 // 空白高度
+                        color: "transparent"
                     }
                 }
             }
@@ -272,6 +284,8 @@ Rectangle {
 
     ListView {
         id: view
+
+        boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
 
         anchors {
             fill: parent

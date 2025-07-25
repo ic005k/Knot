@@ -385,3 +385,233 @@ void MainHelper::init_Menu(QMenu *mainMenu) {
 
   mainMenu->setStyleSheet(m_Method->qssMenu);
 }
+
+void MainHelper::openTabRecycle() {
+  mui->frameMain->hide();
+  mui->frameTabRecycle->show();
+
+  m_Method->clearAllBakList(mui->qwTabRecycle);
+
+  QString tab_name, tab_time;
+  QStringList iniFiles;
+  QStringList fmt;
+  fmt.append("ini");
+  mw_one->m_NotesList->getAllFiles(iniDir, iniFiles, fmt);
+
+  QString iniTotal;
+  QStringList myList, nameList, iniList;
+  for (int i = 0; i < iniFiles.count(); i++) {
+    QString ini_file = iniFiles.at(i);
+    if (ini_file.contains("recycle_name_")) {
+      QFileInfo fi(ini_file);
+      QString ini_filename = fi.fileName();
+      ini_filename = ini_filename.replace(".ini", "");
+      tab_name = ini_filename.split("_").at(1);
+      QString t1, t2;
+      t1 = ini_filename.split("_").at(2);
+      t2 = ini_filename.split("_").at(3);
+      QStringList list = t2.split("-");
+      if (list.count() == 2) {
+        t2 = list.at(0);
+      }
+      tab_time = t1 + "  " + t2;
+
+      tab_name = m_Method->getRecycleTabName(t1 + "_" + t2);
+
+      myList.append(tab_name + "-=-" + tab_time + "-=-" + ini_file);
+      nameList.append(tab_name + "-=-" + tab_time);
+      iniList.append(ini_file);
+    }
+  }
+
+  int count = myList.count();
+  QStringList lastList;
+  for (int i = 0; i < count; i++) {
+    QString str1 = myList.at(i);
+    iniTotal = "";
+    QStringList list1 = str1.split("-=-");
+    tab_name = list1.at(0);
+    tab_time = list1.at(1);
+    for (int j = 0; j < count; j++) {
+      QString str2 = nameList.at(j);
+      if (str1.contains(str2)) {
+        iniTotal += iniList.at(j) + "\n";
+      }
+    }
+
+    lastList.append(tab_name + "-=-" + tab_time + "-=-" + iniTotal);
+  }
+
+  // Qt6 新写法（直接通过迭代器构造）
+  QSet<QString> set(lastList.begin(), lastList.end());  // 直接构造 QSet
+  QStringList uniqueList(set.begin(), set.end());       // 直接构造 QStringList
+
+  for (int i = 0; i < uniqueList.count(); i++) {
+    QString str = uniqueList.at(i);
+    tab_name = str.split("-=-").at(0);
+    tab_time = str.split("-=-").at(1);
+    iniTotal = str.split("-=-").at(2);
+    iniTotal = iniTotal.trimmed();
+    m_Method->addItemToQW(mui->qwTabRecycle, tab_name, tab_time, "", iniTotal,
+                          0);
+  }
+
+  int t_count = m_Method->getCountFromQW(mui->qwTabRecycle);
+  if (t_count > 0) {
+    m_Method->setCurrentIndexFromQW(mui->qwTabRecycle, 0);
+  }
+
+  mui->lblTitleTabRecycle->setText(tr("Tab Recycle") + "    " + tr("Total") +
+                                   " : " + QString::number(t_count));
+}
+
+void MainHelper::initQW() {
+  qmlRegisterType<File>("MyModel1", 1, 0, "File");
+  qmlRegisterType<DocumentHandler>("MyModel2", 1, 0, "DocumentHandler");
+
+  int f_size = 19;
+  if (fontSize <= f_size) f_size = fontSize;
+  mui->qwReport->rootContext()->setContextProperty("maxFontSize", f_size);
+  mui->qwReportSub->rootContext()->setContextProperty("maxFontSize", f_size);
+
+  mui->qwNotesTree->rootContext()->setContextProperty("fontSize", fontSize);
+  mui->qwNotesTree->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/tree_main.qml")));
+
+  mui->qwReader->rootContext()->setContextProperty("myW", this->width());
+  mui->qwReader->rootContext()->setContextProperty("myH", this->height());
+  mui->qwReader->rootContext()->setContextProperty("m_Reader",
+                                                   mw_one->m_Reader);
+  mui->qwReader->rootContext()->setContextProperty("myBackgroundColor",
+                                                   "#FFFFFF");
+
+  mui->qwCata->rootContext()->setContextProperty("m_Reader", mw_one->m_Reader);
+  mui->qwCata->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/epub_cata.qml")));
+
+  mui->qwBookmark->rootContext()->setContextProperty("m_Reader",
+                                                     mw_one->m_Reader);
+  mui->qwBookmark->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/bookmark.qml")));
+
+  mui->qw_Img->rootContext()->setContextProperty("myW", this->width());
+  mui->qw_Img->rootContext()->setContextProperty("myH", this->height());
+
+  mui->qwTodo->rootContext()->setContextProperty("maxFontSize", f_size);
+  mui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
+                                                 QVariant(false));
+  mui->qwTodo->rootContext()->setContextProperty("m_Todo", mw_one->m_Todo);
+  mui->qwTodo->rootContext()->setContextProperty("FontSize", fontSize);
+  mui->qwTodo->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/todo.qml")));
+
+  mui->qwRecycle->rootContext()->setContextProperty("FontSize", fontSize);
+  mui->qwRecycle->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/todorecycle.qml")));
+
+  mui->qwSteps->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/steps.qml")));
+  mui->qwSteps->rootContext()->setContextProperty("maxFontSize", f_size);
+  mui->qwSteps->rootContext()->setContextProperty("myW", this->width());
+  mui->qwSteps->rootContext()->setContextProperty("text0", "");
+  mui->qwSteps->rootContext()->setContextProperty("text1", "");
+  mui->qwSteps->rootContext()->setContextProperty("text2", "");
+  mui->qwSteps->rootContext()->setContextProperty("text3", "");
+
+  mui->qwSpeed->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/Speedometer.qml")));
+
+  mui->qwGpsList->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/gps_list.qml")));
+  mui->qwGpsList->rootContext()->setContextProperty("myW", this->width());
+  mui->qwGpsList->rootContext()->setContextProperty("m_Steps", mw_one->m_Steps);
+
+  mui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
+  mui->qwMap->setFocusPolicy(Qt::StrongFocus);  // 关键设置
+  mui->qwMap->setClearColor(Qt::transparent);   // 避免渲染冲突
+  mui->qwMap->setAttribute(Qt::WA_AcceptTouchEvents, true);
+  mui->qwMap->setAttribute(Qt::WA_TouchPadAcceptSingleTouchEvents, true);
+  mui->qwMap->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/map.qml")));
+
+  mui->qwReport->rootContext()->setContextProperty("m_Report",
+                                                   mw_one->m_Report);
+  mui->qwReport->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/report.qml")));
+  mui->qwReportSub->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/details.qml")));
+
+  mui->qwSearch->rootContext()->setContextProperty("m_Method", m_Method);
+  mui->qwSearch->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/search.qml")));
+
+  mui->qwBakList->rootContext()->setContextProperty("m_Method", m_Method);
+  mui->qwBakList->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/baklist.qml")));
+
+  mui->qwViewCate->rootContext()->setContextProperty("m_Report",
+                                                     mw_one->m_Report);
+  mui->qwViewCate->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/viewcate.qml")));
+
+  mui->qwTabRecycle->rootContext()->setContextProperty("m_Report",
+                                                       mw_one->m_Report);
+  mui->qwTabRecycle->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/tabrecycle.qml")));
+
+  mui->qwNoteBook->rootContext()->setContextProperty("m_NotesList",
+                                                     mw_one->m_NotesList);
+  mui->qwNoteBook->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwNoteBook->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/notebook.qml")));
+
+  if (isAndroid)
+    mui->qwNoteList->rootContext()->setContextProperty("noteTimeFontSize", 12);
+  else
+    mui->qwNoteList->rootContext()->setContextProperty("noteTimeFontSize", 8);
+  mui->qwNoteList->rootContext()->setContextProperty("m_NotesList",
+                                                     mw_one->m_NotesList);
+  mui->qwNoteList->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwNoteList->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/notelist.qml")));
+
+  mui->qwNotesSearchResult->rootContext()->setContextProperty("fontSize",
+                                                              fontSize);
+  mui->qwNotesSearchResult->rootContext()->setContextProperty(
+      "m_NotesList", mw_one->m_NotesList);
+  mui->qwNotesSearchResult->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwNotesSearchResult->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/SearchResults.qml")));
+
+  mui->qwNoteRecycle->rootContext()->setContextProperty("m_Method", m_Method);
+  mui->qwNoteRecycle->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/noterecycle.qml")));
+
+  mui->qwMainTab->setFixedHeight(50);
+  mui->qwMainTab->rootContext()->setContextProperty("maintabHeight",
+                                                    mui->qwMainTab->height());
+  mui->qwMainTab->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwMainTab->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/maintab.qml")));
+
+  mui->qwMainDate->rootContext()->setContextProperty("isAniEffects", true);
+  mui->qwMainDate->rootContext()->setContextProperty("maindateWidth",
+                                                     mui->qwMainDate->width());
+  mui->qwMainDate->rootContext()->setContextProperty("m_Method", m_Method);
+  mui->qwMainDate->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/maindate.qml")));
+
+  mui->qwMainEvent->rootContext()->setContextProperty("fontSize", fontSize);
+  mui->qwMainEvent->rootContext()->setContextProperty("isAniEffects", true);
+  mui->qwMainEvent->rootContext()->setContextProperty(
+      "maineventWidth", mui->qwMainEvent->width());
+  mui->qwMainEvent->rootContext()->setContextProperty("m_Method", m_Method);
+  mui->qwMainEvent->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/mainevent.qml")));
+
+  mui->qwCategory->rootContext()->setContextProperty("m_Method", m_Method);
+  mui->qwCategory->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/type.qml")));
+
+  mui->qwSelTab->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwSelTab->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/seltab.qml")));
+
+  mui->qwBookList->rootContext()->setContextProperty("fontSize", fontSize);
+  mui->qwBookList->rootContext()->setContextProperty("m_Reader",
+                                                     mw_one->m_Reader);
+  mui->qwBookList->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/booklist.qml")));
+}

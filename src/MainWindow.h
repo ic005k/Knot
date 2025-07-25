@@ -865,8 +865,6 @@ QLabel {
 
   void resetWinPos();
 
-  void initQW();
-
   void init_Instance();
   void updateMainTab();
   void getMainTabs();

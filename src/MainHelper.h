@@ -19,7 +19,9 @@ class MainHelper : public QDialog {
   bool mainEventFilter(QObject *watch, QEvent *evn);
   QTreeWidget *init_TreeWidget(QString name);
   void init_Menu(QMenu *mainMenu);
- signals:
+  void openTabRecycle();
+  void initQW();
+  signals:
 };
 
 #endif  // MAINHELPER_H
