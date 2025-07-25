@@ -288,7 +288,7 @@ void loadTheme(bool isDark) {
         QString("[color-scheme=\"%1\"] ").arg(isDark ? "dark" : "light"));
 
     qApp->setStyleSheet(styleSheet);
-    mw_one->init_Theme();
+    mw_one->m_MainHelper->init_Theme();
 
     // 强制窗口重绘
     QEvent updateEvent(QEvent::UpdateRequest);

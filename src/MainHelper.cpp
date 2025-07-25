@@ -8,9 +8,9 @@ extern Ui::MainWindow *mui;
 extern Method *m_Method;
 extern QTabWidget *tabData;
 extern QString iniDir, searchStr, currentMDFile, privateDir, encPassword,
-    errorInfo, ver;
-extern bool isAndroid;
-extern int fontSize;
+    errorInfo, ver, strDate, zipfile;
+extern bool isAndroid, isReadEnd, isDark, isZipOK, isMenuImport, isDownData;
+extern int fontSize, red;
 
 MainHelper::MainHelper(QWidget *parent) : QDialog{parent} {}
 
@@ -614,4 +614,585 @@ void MainHelper::initQW() {
                                                      mw_one->m_Reader);
   mui->qwBookList->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/booklist.qml")));
+}
+
+void MainHelper::init_UIWidget() {
+  QFontMetrics fontMetrics(font());
+  int nFontHeight = fontMetrics.height();
+  int nHeight = nFontHeight * 1.5;
+  mui->tabWidget->tabBar()->setFixedHeight(nHeight);
+  mui->tabWidget->setStyleSheet(mui->tabCharts->styleSheet());
+  mui->tabWidget->setFixedHeight(mui->tabWidget->tabBar()->height() + 0);
+  if (nHeight <= 36) nHeight = 36;
+  mui->qwMainTab->setFixedHeight(nHeight);
+  mui->tabWidget->hide();
+
+  mw_one->loginTime = m_Method->setCurrentDateTimeValue();
+  strDate = m_Method->setCurrentDateValue();
+  isReadEnd = true;
+
+  this->installEventFilter(this);
+
+  if (isAndroid) {
+    mw_one->textToolbar = new TextEditToolbar(this);
+    EditEventFilter *editFilter =
+        new EditEventFilter(mw_one->textToolbar, this);
+    mui->editCategory->installEventFilter(editFilter);
+    mui->editDetails->installEventFilter(editFilter);
+    mui->editTodo->installEventFilter(editFilter);
+    mui->editDetails->viewport()->installEventFilter(editFilter);
+    mui->editTodo->viewport()->installEventFilter(editFilter);
+    mui->editWebDAV->installEventFilter(editFilter);
+    mui->editWebDAVPassword->installEventFilter(editFilter);
+    mui->editWebDAVUsername->installEventFilter(editFilter);
+    mui->editFindNote->installEventFilter(editFilter);
+    mui->editNotesSearch->installEventFilter(editFilter);
+    mui->editSearchText->installEventFilter(editFilter);
+  }
+
+  mui->menubar->hide();
+  mui->statusbar->hide();
+  mui->frameReader->hide();
+  mui->frameTodo->hide();
+  mui->frameTodoRecycle->hide();
+  mui->frameSteps->hide();
+  mui->frameReport->hide();
+  mui->frameSearch->hide();
+  mui->frameBakList->hide();
+
+  mui->frameViewCate->hide();
+  mui->frameTabRecycle->hide();
+  mui->frameNoteList->hide();
+  mui->frameNotesSearchResult->hide();
+  mui->frameNoteRecycle->hide();
+  mui->f_FindNotes->hide();
+  mui->btnFindNextNote->setEnabled(false);
+  mui->btnFindPreviousNote->setEnabled(false);
+  mui->frameNotesTree->hide();
+  mui->qwCata->hide();
+  mui->qwBookmark->hide();
+
+  mui->frameCategory->hide();
+  mui->frameSetTab->hide();
+  mui->frameEditRecord->hide();
+  mui->frameBookList->hide();
+  mui->f_ReaderSet->hide();
+
+  mui->frameReader->layout()->setContentsMargins(0, 0, 0, 1);
+  mui->frameReader->setContentsMargins(0, 0, 0, 1);
+  mui->frameReader->layout()->setSpacing(1);
+  mui->frameImgView->hide();
+
+  mui->frameMain->layout()->setContentsMargins(1, 0, 1, 0);
+  mui->frameMain->setContentsMargins(1, 0, 1, 0);
+  mui->frameMain->layout()->setSpacing(1);
+
+  mui->frameOne->hide();
+  mui->f_FunWeb->hide();
+  mui->btnStorageInfo->hide();
+  mui->editCode->setLineWrapMode(QTextEdit::NoWrap);
+  mui->lblEpubInfo->hide();
+  mui->pEpubProg->hide();
+
+  mui->frameNotes->hide();
+  mui->frameNotes->layout()->setContentsMargins(1, 1, 1, 1);
+
+  mui->btnSetKey->hide();
+  mui->btnNotesList->hide();
+  mui->btnWebBack->hide();
+  mui->btnRecentOpen0->hide();
+
+  mui->chkOneDrive->setStyleSheet(mw_one->m_Preferences->chkStyle);
+  mui->chkWebDAV->setStyleSheet(mw_one->m_Preferences->chkStyle);
+  mui->chkAutoSync->setStyleSheet(mw_one->m_Preferences->chkStyle);
+  mui->twCloudBackup->setCurrentIndex(1);
+  mui->twCloudBackup->setTabVisible(0, false);
+  mui->chkWebDAV->hide();
+  mui->lblWebDAV->hide();
+
+  mui->editWebDAVPassword->setEchoMode(QLineEdit::EchoMode::Password);
+  mui->lblWebDAV->setStyleSheet(mw_one->labelNormalStyleSheet);
+  mui->lblTitleEditRecord->setStyleSheet(mw_one->labelNormalStyleSheet);
+
+  mui->textBrowser->installEventFilter(this);
+  mui->textBrowser->setMouseTracking(true);
+  mui->textBrowser->viewport()->installEventFilter(this);
+  mui->textBrowser->viewport()->setMouseTracking(true);
+  mui->qwReader->installEventFilter(this);
+
+  mui->tabWidget->tabBar()->installEventFilter(this);
+  mui->tabWidget->installEventFilter(this);
+  mui->tabWidget->setMouseTracking(true);
+  mui->lblStats->installEventFilter(this);
+  mui->editSearchText->installEventFilter(this);
+  mui->editFindNote->installEventFilter(this);
+
+  mui->lblTitleEditRecord->installEventFilter(this);
+  mui->lblNoteName->installEventFilter(this);
+
+  mui->lblStats->adjustSize();
+  mui->lblStats->setWordWrap(true);
+
+  mui->lblNoteTitle->adjustSize();
+  mui->lblNoteTitle->setWordWrap(true);
+  mui->lblNoteTitle->hide();
+  mui->f_Tools->hide();
+
+  mui->progBar->setMaximumHeight(4);
+  mui->progBar->hide();
+  mui->progBar->setStyleSheet(
+      "QProgressBar{border:0px solid #FFFFFF;"
+      "height:30;"
+      "background:rgba(25,255,25,0);"
+      "text-align:right;"
+      "color:rgb(255,255,255);"
+      "border-radius:0px;}"
+
+      "QProgressBar:chunk{"
+      "border-radius:0px;"
+      "background-color:rgba(18,150,219,255);"
+      "}");
+  mui->progReader->setStyleSheet(mui->progBar->styleSheet());
+  mui->progReader->setFixedHeight(4);
+
+  mui->tabCharts->tabBar()->hide();
+  m_Method->setToolButtonQss(mui->btnChartMonth, 5, 3, "#FF0000", "#FFFFFF",
+                             "#FF0000", "#FFFFFF", "#FF5555", "#FFFFFF");
+  m_Method->setToolButtonQss(mui->btnChartDay, 5, 3, "#455364", "#FFFFFF",
+                             "#455364", "#FFFFFF", "#555364", "#FFFFFF");
+
+  int nIConFontSize;
+#ifdef Q_OS_ANDROID
+  nIConFontSize = 12;
+#else
+  nIConFontSize = 9;
+#endif
+  QFont f = this->font();
+  f.setPointSize(nIConFontSize);
+  mui->btnTodo->setFont(f);
+  mui->btnSteps->setFont(f);
+  mui->btnChart->setFont(f);
+  mui->btnReader->setFont(f);
+  mui->btnNotes->setFont(f);
+  mui->btnSelTab->setFont(f);
+
+  f.setPointSize(nIConFontSize + 0);
+  mui->btnMenu->setFont(f);
+  mui->btnAdd->setFont(f);
+  mui->btnDel->setFont(f);
+  mui->btnSync->setFont(f);
+
+  mui->btnReport->setFont(f);
+  mui->btnFind->setFont(f);
+  mui->btnModifyRecord->setFont(f);
+  mui->btnMove->setFont(f);
+
+  f.setBold(true);
+  mui->lblSyncNote->setFont(f);
+  mui->lblShowLineSn->setFont(f);
+  mui->lblShowLineSn->setWordWrap(true);
+  mui->lblShowLineSn->adjustSize();
+
+  QString lblStyle = mui->lblTitleEditRecord->styleSheet();
+  mui->lblTotal->setStyleSheet(lblStyle);
+  mui->lblDetails->setStyleSheet(lblStyle);
+  mui->lblTitle->setStyleSheet(lblStyle);
+  mui->lblTitle_Report->setStyleSheet(lblStyle);
+
+  mui->tabMotion->setCornerWidget(mui->btnBackSteps, Qt::TopRightCorner);
+  mui->tabMotion->setCurrentIndex(1);
+  QString rbStyle = mui->rbCycling->styleSheet();
+  mui->rbHiking->setStyleSheet(rbStyle);
+  mui->rbRunning->setStyleSheet(rbStyle);
+  QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
+
+  mui->rbCycling->setChecked(Reg.value("/GPS/isCycling", 0).toBool());
+  mui->rbHiking->setChecked(Reg.value("/GPS/isHiking", 0).toBool());
+  mui->rbRunning->setChecked(Reg.value("/GPS/isRunning", 0).toBool());
+
+  mui->btnGPS->setStyleSheet(mw_one->m_Steps->btnRoundStyle);
+  mui->btnGPS->hide();
+  mui->frame_btnGps->setFixedHeight(80);
+  QWidget *centralWidget = new QWidget(this);
+  QVBoxLayout *layout = new QVBoxLayout(centralWidget);
+
+  SliderButton *sliderButton = new SliderButton(centralWidget);
+  sliderButton->setTipText(tr("Slide Right to Start or Stop."));
+  layout->addWidget(sliderButton);
+
+  QObject::connect(sliderButton, &SliderButton::sliderMovedToEnd, this,
+                   [&]() { mui->btnGPS->click(); });
+  mui->frame_btnGps->layout()->addWidget(centralWidget);
+}
+
+void MainHelper::startBackgroundTaskUpdateBakFileList() {
+  mw_one->showProgress();
+
+  mui->frameMain->hide();
+  mui->frameBakList->show();
+
+  QFuture<void> future = QtConcurrent::run([=]() {
+    bakFileList = mw_one->m_Preferences->getBakFilesList();
+    int bakCount = bakFileList.count();
+
+    if (bakCount > 15) {
+      int count_a = bakCount - 15;
+      for (int j = 0; j < count_a; j++) {
+        QString str = bakFileList.at(0);
+        QString fn = str.split("-===-").at(1);
+        QFile file(fn);
+        file.remove();
+        bakFileList.removeAt(0);
+      }
+    }
+  });
+
+  // 可选：使用 QFutureWatcher 监控进度
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+    m_Method->clearAllBakList(mui->qwBakList);
+    int bakCount = bakFileList.count();
+    for (int i = 0; i < bakCount; i++) {
+      QString action, bakfile;
+      QString str = bakFileList.at(bakCount - 1 - i);
+      action = str.split("-===-").at(0);
+      bakfile = str.split("-===-").at(1);
+      m_Method->addItemToQW(mui->qwBakList, action, "", "", bakfile, 0);
+    }
+
+    if (m_Method->getCountFromQW(mui->qwBakList) > 0)
+      m_Method->setCurrentIndexFromQW(mui->qwBakList, 0);
+
+    mui->lblBakListTitle->setText(
+        tr("Backup File List") + "    " + tr("Total") + " : " +
+        QString::number(m_Method->getCountFromQW(mui->qwBakList)));
+
+    qDebug() << "BakFileList update completed";
+    watcher->deleteLater();
+
+    mw_one->closeProgress();
+  });
+  watcher->setFuture(future);
+}
+
+void MainHelper::init_ButtonStyle() {
+  m_Method->set_ToolButtonStyle(mw_one);
+  mui->btnMenu->setStyleSheet("border:none");
+  mui->btnModifyRecord->setStyleSheet("border:none");
+  mui->btnMove->setStyleSheet("border:none");
+
+  mui->btnTodo->setStyleSheet("border:none");
+  mui->btnSteps->setStyleSheet("border:none");
+  mui->btnChart->setStyleSheet("border:none");
+  mui->btnReader->setStyleSheet("border:none");
+  mui->btnNotes->setStyleSheet("border:none");
+  mui->btnAdd->setStyleSheet("border:none");
+  mui->btnDel->setStyleSheet("border:none");
+  mui->btnPasteTodo->setStyleSheet("border:none");
+  mui->btnSync->setStyleSheet("border:none");
+  mui->btnFind->setStyleSheet("border:none");
+  mui->btnReport->setStyleSheet("border:none");
+  mui->btnSelTab->setStyleSheet("border:none");
+
+  if (isDark) {
+    mui->f_ReaderFun->setStyleSheet("QFrame{background-color: #2874AC;}");
+    mui->btnOpen->setStyleSheet("border:none; background-color:#2874AC;");
+    mui->btnBackReader->setStyleSheet("border:none; background-color:#2874AC;");
+    mui->btnCatalogue->setStyleSheet("border:none; background-color:#2874AC;");
+    mui->btnBackDir->setStyleSheet("border:none; background-color:#2874AC;");
+
+    mui->btnReadList->setStyleSheet("border:none; background-color:#2874AC;");
+    mui->btnShowBookmark->setStyleSheet(
+        "border:none; background-color:#2874AC;");
+    mui->btnPages->setStyleSheet("border:none; background-color:#2874AC;");
+    mui->btnAutoRun->setStyleSheet("border:none; background-color:#2874AC;");
+    mui->btnAutoStop->setStyleSheet("border:none; background-color:#2874AC;");
+
+    mui->btnPages->setStyleSheet(
+        "color: rgb(255, 255, 255);background-color: #2874AC; "
+        "border: "
+        "0px solid "
+        "rgb(255,0,0);border-radius: 0px;"
+        "font-weight: bold;");
+  } else {
+    mui->f_ReaderFun->setStyleSheet("QFrame{background-color: #3498DB;}");
+    mui->btnOpen->setStyleSheet("border:none; background-color:#3498DB;");
+    mui->btnBackReader->setStyleSheet("border:none; background-color:#3498DB;");
+    mui->btnCatalogue->setStyleSheet("border:none; background-color:#3498DB;");
+    mui->btnBackDir->setStyleSheet("border:none; background-color:#3498DB;");
+
+    mui->btnReadList->setStyleSheet("border:none; background-color:#3498DB;");
+    mui->btnShowBookmark->setStyleSheet(
+        "border:none; background-color:#3498DB;");
+    mui->btnPages->setStyleSheet("border:none; background-color:#3498DB;");
+    mui->btnAutoRun->setStyleSheet("border:none; background-color:#3498DB;");
+    mui->btnAutoStop->setStyleSheet("border:none; background-color:#3498DB;");
+
+    mui->btnPages->setStyleSheet(
+        "color: rgb(255, 255, 255);background-color: #3498DB; "
+        "border: "
+        "0px solid "
+        "rgb(255,0,0);border-radius: 0px;"
+        "font-weight: bold;");
+  }
+
+  QString style =
+      "QToolButton {background-color: rgb(255, 0, 0); color: "
+      "rgb(255,255,255); "
+      "border-radius:10px; "
+      "border:0px solid gray; } QToolButton:pressed { background-color: "
+      "rgb(220,220,230); color: black}";
+  mw_one->m_Preferences->ui->btnReStart->setStyleSheet(style);
+}
+
+void MainHelper::delBakFile() {
+  if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
+
+  int index = m_Method->getCurrentIndexFromQW(mui->qwBakList);
+  QString bak_file = m_Method->getText3(mui->qwBakList, index);
+
+  m_Method->m_widget = new QWidget(mw_one);
+  ShowMessage *m_ShowMsg = new ShowMessage(this);
+  if (!m_ShowMsg->showMsg("Knot",
+                          tr("Whether to remove") + "  " + bak_file + " ? ", 2))
+    return;
+
+  QFile file(bak_file);
+  file.remove();
+  m_Method->delItemFromQW(mui->qwBakList, index);
+
+  int newIndex = index - 1;
+  if (newIndex < 0) newIndex = 0;
+
+  m_Method->setCurrentIndexFromQW(mui->qwBakList, newIndex);
+
+  mui->lblBakListTitle->setText(
+      tr("Backup File List") + "    " + tr("Total") + " : " +
+      QString::number(m_Method->getCountFromQW(mui->qwBakList)));
+}
+
+void MainHelper::delTabRecycleFile() {
+  if (m_Method->getCountFromQW(mui->qwTabRecycle) == 0) return;
+  int index = m_Method->getCurrentIndexFromQW(mui->qwTabRecycle);
+  QString tab_file = m_Method->getText3(mui->qwTabRecycle, index);
+
+  m_Method->m_widget = new QWidget(mw_one);
+  ShowMessage *m_ShowMsg = new ShowMessage(this);
+  if (!m_ShowMsg->showMsg("Knot",
+                          tr("Whether to remove") + "  " + tab_file + " ? ", 2))
+    return;
+
+  QStringList list = tab_file.split("\n");
+  QString rec_file;
+  if (list.count() > 1) {
+    for (int i = 0; i < list.count(); i++) {
+      rec_file = list.at(i);
+      QFile file(rec_file);
+      file.remove();
+    }
+  } else {
+    rec_file = tab_file;
+    QFile file(rec_file);
+    file.remove();
+  }
+
+  m_Method->delItemFromQW(mui->qwTabRecycle, index);
+
+  mui->lblTitleTabRecycle->setText(
+      tr("Tab Recycle") + "    " + tr("Total") + " : " +
+      QString::number(m_Method->getCountFromQW(mui->qwTabRecycle)));
+}
+
+void MainHelper::importBakFileList() {
+  if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
+
+  int cur_index = m_Method->getCurrentIndexFromQW(mui->qwBakList);
+  QString str = m_Method->getText3(mui->qwBakList, cur_index);
+  zipfile = str.trimmed();
+
+  if (!zipfile.isNull()) {
+    m_Method->m_widget = new QWidget(mw_one);
+    ShowMessage *m_ShowMsg = new ShowMessage(this);
+    if (!m_ShowMsg->showMsg("Kont",
+                            tr("Import this data?") + "\n" +
+                                mw_one->m_Reader->getUriRealPath(zipfile),
+                            2)) {
+      isZipOK = false;
+      return;
+    }
+  }
+
+  isZipOK = true;
+  mui->btnBackBakList->click();
+  mw_one->showProgress();
+
+  isMenuImport = true;
+  isDownData = false;
+
+  mw_one->myImportDataThread->start();
+}
+
+void MainHelper::init_Theme() {
+  // Get the background color to fit the dark mode
+  QPalette pal = this->palette();
+  QBrush brush = pal.window();
+  red = brush.color().red();
+
+  qDebug() << "red=" << red;
+
+  mui->qwMainTab->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwMainDate->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwMainEvent->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwTodo->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwRecycle->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwNoteBook->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwNoteList->rootContext()->setContextProperty("isDark", isDark);
+
+  mui->qwNotesSearchResult->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwSearch->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwBakList->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwViewCate->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwTabRecycle->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwNoteRecycle->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwCategory->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwSelTab->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwBookList->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwReportSub->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwSteps->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwReport->rootContext()->setContextProperty("isDark", isDark);
+
+  mui->qwCata->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwBookmark->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwReader->rootContext()->setContextProperty("isDark", isDark);
+
+  if (!isDark) {
+    mui->f_Menu->setStyleSheet("background-color: rgb(243,243,243);");
+    mui->f_Btn->setStyleSheet("background-color: rgb(243,243,243);");
+    mui->f_cw->setStyleSheet("background-color: rgb(243,243,243);");
+    mui->f_charts->setStyleSheet("background-color: rgb(243,243,243);");
+
+    mw_one->chartMonth->setTheme(QChart::ChartThemeLight);
+    mw_one->chartDay->setTheme(QChart::ChartThemeLight);
+
+    mui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
+    mui->btnClear->setIcon(QIcon(":/res/clear.png"));
+
+    mui->btnModifyRecord->setIcon(QIcon(":/res/edit.svg"));
+    mui->btnMove->setIcon(QIcon(":/res/move.svg"));
+
+    mui->btnReader->setIcon(QIcon(":/res/reader.svg"));
+    mui->btnTodo->setIcon(QIcon(":/res/todo.svg"));
+    mui->btnSteps->setIcon(QIcon(":/res/steps.svg"));
+    mui->btnNotes->setIcon(QIcon(":/res/note.svg"));
+    mui->btnChart->setIcon(QIcon(":/res/chart.svg"));
+    mui->btnFind->setIcon(QIcon(":/res/find.png"));
+    mui->btnReport->setIcon(QIcon(":/res/report.svg"));
+    mui->btnSelTab->setIcon(QIcon(":/res/tab.svg"));
+
+    mui->btnMenu->setIcon(QIcon(":/res/mainmenu.svg"));
+    mui->btnAdd->setIcon(QIcon(":/res/additem.svg"));
+    mui->btnDel->setIcon(QIcon(":/res/delitem.svg"));
+    mui->btnSync->setIcon(QIcon(":/res/upload.svg"));
+
+    m_Method->setEditLightMode(mui->editTodo);
+
+    mui->editDetails->setStyleSheet(mui->editTodo->styleSheet());
+
+    mui->editTodo->verticalScrollBar()->setStyleSheet(
+        m_Method->lightScrollbarStyle);
+    mui->editDetails->verticalScrollBar()->setStyleSheet(
+        m_Method->lightScrollbarStyle);
+
+    mw_one->chartMonth->setTheme(QChart::ChartThemeLight);
+    mw_one->chartDay->setTheme(QChart::ChartThemeLight);
+
+  } else {
+    mui->f_Menu->setStyleSheet("background-color: #19232D;");
+    mui->f_Btn->setStyleSheet("background-color: #19232D;");
+    mui->f_cw->setStyleSheet("background-color: #19232D;");
+    mui->f_charts->setStyleSheet("background-color: #19232D;");
+
+    mw_one->chartMonth->setTheme(QChart::ChartThemeDark);
+    mw_one->chartDay->setTheme(QChart::ChartThemeDark);
+
+    mui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
+    mui->btnClear->setIcon(QIcon(":/res/clear.png"));
+
+    mui->btnReport->setIcon(QIcon(":/res/report_l.svg"));
+    mui->btnFind->setIcon(QIcon(":/res/find_l.png"));
+    mui->btnModifyRecord->setIcon(QIcon(":/res/edit_l.svg"));
+    mui->btnMove->setIcon(QIcon(":/res/move_l.svg"));
+
+    mui->btnReader->setIcon(QIcon(":/res/reader_l.svg"));
+    mui->btnTodo->setIcon(QIcon(":/res/todo_l.png"));
+    mui->btnSteps->setIcon(QIcon(":/res/steps_l.svg"));
+    mui->btnNotes->setIcon(QIcon(":/res/note_l.svg"));
+    mui->btnChart->setIcon(QIcon(":/res/chart_l.svg"));
+    mui->btnSelTab->setIcon(QIcon(":/res/tab_l.svg"));
+
+    mui->btnMenu->setIcon(QIcon(":/res/mainmenu_l.svg"));
+    mui->btnAdd->setIcon(QIcon(":/res/additem_l.svg"));
+    mui->btnDel->setIcon(QIcon(":/res/delitem_l.svg"));
+    mui->btnSync->setIcon(QIcon(":/res/upload_l.svg"));
+
+    m_Method->setEditDarkMode(mui->editTodo);
+
+    mui->editDetails->setStyleSheet(mui->editTodo->styleSheet());
+
+    mui->editTodo->verticalScrollBar()->setStyleSheet(
+        m_Method->darkScrollbarStyle);
+    mui->editDetails->verticalScrollBar()->setStyleSheet(
+        m_Method->darkScrollbarStyle);
+
+    mw_one->chartMonth->setTheme(QChart::ChartThemeDark);
+    mw_one->chartDay->setTheme(QChart::ChartThemeDark);
+  }
+
+  // Edit Record UI
+  int nH = mui->editCategory->height();
+  if (isDark) {
+    m_Method->setQLabelImage(mui->lblCategory, nH, nH, ":/res/fl_l.svg");
+    m_Method->setQLabelImage(mui->lblDetailsType, nH, nH, ":/res/xq_l.svg");
+    m_Method->setQLabelImage(mui->lblAmount, nH, nH, ":/res/je_l.svg");
+  } else {
+    m_Method->setQLabelImage(mui->lblCategory, nH, nH, ":/res/fl.svg");
+    m_Method->setQLabelImage(mui->lblDetailsType, nH, nH, ":/res/xq.svg");
+    m_Method->setQLabelImage(mui->lblAmount, nH, nH, ":/res/je.svg");
+  }
+
+  mw_one->m_EditRecord->on_editAmount_textChanged(mui->editAmount->text());
+  mw_one->m_EditRecord->on_editCategory_textChanged(mui->editCategory->text());
+  mw_one->m_EditRecord->on_editDetails_textChanged();
+
+  // Todo
+  mw_one->m_Todo->changeTodoIcon(mw_one->m_Todo->isToday);
+
+  // Android
+  m_Method->setDark(isDark);
+
+  // Notes Editor
+  mw_one->m_Notes->init_md();
+
+  // Chart
+  QFont font1;
+#ifdef Q_OS_ANDROID
+  font1.setPointSize(10);
+#else
+  font1.setPointSize(10);
+#endif
+  font1.setBold(true);
+  mw_one->chartMonth->setTitleFont(font1);
+  mw_one->chartDay->setTitleFont(font1);
+  mw_one->axisX->setLabelsFont(font1);
+  mw_one->axisY->setLabelsFont(font1);
+  mw_one->axisY->setTickCount(mw_one->yScale);
+  mw_one->axisX2->setLabelsFont(font1);
+  mw_one->axisY2->setLabelsFont(font1);
+  mw_one->axisY2->setTickCount(mw_one->yScale);
+
+  mui->lblNoteName->setStyleSheet(
+      "QLabel{background:lightyellow;color:black;}");
+
+  init_ButtonStyle();
 }

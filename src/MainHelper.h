@@ -21,7 +21,18 @@ class MainHelper : public QDialog {
   void init_Menu(QMenu *mainMenu);
   void openTabRecycle();
   void initQW();
-  signals:
+  void init_UIWidget();
+  void startBackgroundTaskUpdateBakFileList();
+
+  void init_ButtonStyle();
+  void delBakFile();
+  void delTabRecycleFile();
+  void importBakFileList();
+  void init_Theme();
+  private:
+  QStringList bakFileList;
+
+ signals:
 };
 
 #endif  // MAINHELPER_H

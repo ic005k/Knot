@@ -224,6 +224,7 @@ QLabel {
   QValueAxis *axisY;
   QValueAxis *axisX2;
   QValueAxis *axisY2;
+  int yScale = 3;
 
   qlonglong CurTableCount = 0;
 
@@ -359,8 +360,6 @@ QLabel {
   bool copyFileToPath(QString sourceDir, QString toDir, bool coverFileIfExist);
 
   void setScrollBarPos(double pos);
-
-  void init_Theme();
 
   void addItem(QString text0, QString text1, QString text2, QString text3,
                int itemH);
@@ -841,8 +840,6 @@ QLabel {
   void on_btnTools_clicked();
 
  private:
-  QStringList bakFileList;
-
   bool isMoveEntry;
   QTimer *tmeFlash;
   int nFlashCount = 0;
@@ -852,7 +849,6 @@ QLabel {
   bool isTabChanged = false;
 
   int frameChartHeight;
-  int yScale = 3;
 
   qreal aoldX, aoldY, aoldZ;
   int countOne = 0;
@@ -861,18 +857,15 @@ QLabel {
   void on_btnHideKey_clicked();
   void init_ChartWidget();
 
-  void init_UIWidget();
-
   void resetWinPos();
 
   void init_Instance();
   void updateMainTab();
   void getMainTabs();
 
-  void init_ButtonStyle();
   QString strTime, strAmount, strCategory, strDetails;
 
-  void startBackgroundTaskUpdateBakFileList();
+  void init_Thread_Timer();
 };
 
 class SaveThread : public QThread {
