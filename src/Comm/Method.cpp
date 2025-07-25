@@ -2698,3 +2698,48 @@ QObjectList Method::getAllUIControls(QObject *parent) {
 
   return lstOfChildren;
 }
+
+QString Method::secondsToTime(ulong totalTime) {
+  // 输入为秒数则ss=1，输入为毫秒数则ss=1000
+  qint64 ss = 1;
+  qint64 mi = ss * 60;
+  qint64 hh = mi * 60;
+  qint64 dd = hh * 24;
+
+  qint64 day = totalTime / dd;
+  qint64 hour = (totalTime - day * dd) / hh;
+  qint64 minute = (totalTime - day * dd - hour * hh) / mi;
+  qint64 second = (totalTime - day * dd - hour * hh - minute * mi) / ss;
+
+  QString hou = QString::number(hour, 10);
+  QString min = QString::number(minute, 10);
+  QString sec = QString::number(second, 10);
+
+  hou = hou.length() == 1 ? QString("0%1").arg(hou) : hou;
+  min = min.length() == 1 ? QString("0%1").arg(min) : min;
+  sec = sec.length() == 1 ? QString("0%1").arg(sec) : sec;
+  return hou + ":" + min + ":" + sec;
+}
+
+bool Method::copyFileToPath(QString sourceDir, QString toDir,
+                            bool coverFileIfExist) {
+  toDir.replace("\\", "/");
+  if (sourceDir == toDir) {
+    return true;
+  }
+  if (!QFile::exists(sourceDir)) {
+    return false;
+  }
+  QDir *createfile = new QDir;
+  bool exist = createfile->exists(toDir);
+  if (exist) {
+    if (coverFileIfExist) {
+      createfile->remove(toDir);
+    }
+  }  // end if
+
+  if (!QFile::copy(sourceDir, toDir)) {
+    return false;
+  }
+  return true;
+}

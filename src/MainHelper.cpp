@@ -1196,3 +1196,55 @@ void MainHelper::init_Theme() {
 
   init_ButtonStyle();
 }
+
+void MainHelper::sort_childItem(QTreeWidgetItem *item) {
+  QStringList keys, list, keyTime, keysNew;
+  int childCount = item->parent()->childCount();
+
+  for (int i = 0; i < childCount; i++) {
+    QString txt0 = item->parent()->child(i)->text(0);
+    QStringList list0 = txt0.split(".");
+    if (list0.count() == 2) {
+      txt0 = list0.at(1);
+      txt0 = txt0.trimmed();
+    }
+    QString txt1 = item->parent()->child(i)->text(1);
+    QString txt2 = item->parent()->child(i)->text(2);
+    QString txt3 = item->parent()->child(i)->text(3);
+    keys.append(txt0 + "|===|" + txt1 + "|===|" + txt2 + "|===|" + txt3);
+    keyTime.append(txt0);
+  }
+
+  std::sort(keyTime.begin(), keyTime.end(),
+            [](const QString &s1, const QString &s2) { return s1 < s2; });
+
+  for (int i = 0; i < keyTime.count(); i++) {
+    QString time = keyTime.at(i);
+    for (int n = 0; n < keys.count(); n++) {
+      QString str1 = keys.at(n);
+      QStringList l0 = str1.split("|===|");
+      if (time == l0.at(0)) {
+        keysNew.append(str1);
+        break;
+      }
+    }
+  }
+
+  for (int i = 0; i < childCount; i++) {
+    QTreeWidgetItem *childItem = item->parent()->child(i);
+    QString str = keysNew.at(i);
+    list.clear();
+    list = str.split("|===|");
+    if (list.count() == 4) {
+      int number = i + 1;
+      QString strChildCount = QString::number(childCount);
+      QString strNum;
+      strNum = QString("%1").arg(number, strChildCount.length(), 10,
+                                 QLatin1Char('0'));
+      childItem->setText(0, strNum + ". " + list.at(0).trimmed());
+      childItem->setText(1, list.at(1).trimmed());
+      childItem->setText(2, list.at(2).trimmed());
+      childItem->setText(3, list.at(3).trimmed());
+    }
+  }
+}

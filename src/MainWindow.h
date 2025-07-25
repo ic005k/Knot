@@ -137,16 +137,16 @@ class MainWindow : public QMainWindow {
   QInputDialog *m_RenameDlg = nullptr;
 
   QString labelNormalStyleSheet = R"(/* 动态适配明暗模式 */
-QLabel {
-    background-color: qlineargradient(
-        x1:0, y1:0, x2:1, y2:0,
-        stop:0 palette(light),  /* 明色端 */
-        stop:1 palette(mid)     /* 过渡色 */
-    );
-    color: palette(window-text); /* 跟随系统文本色 */
-    padding: 5px;
-    border-radius: 4px;         /* 可选：增加圆角提升质感 */
-})";
+    QLabel {
+        background-color: qlineargradient(
+            x1:0, y1:0, x2:1, y2:0,
+            stop:0 palette(light),  /* 明色端 */
+            stop:1 palette(mid)     /* 过渡色 */
+        );
+        color: palette(window-text); /* 跟随系统文本色 */
+        padding: 5px;
+        border-radius: 4px;         /* 可选：增加圆角提升质感 */
+    })";
 
   QString labelEnSyncStyleSheet =
       "background-color:qlineargradient(spread:pad,x1:1,y1:0,x2:0,y2:0,stop:0 "
@@ -296,15 +296,8 @@ QLabel {
   bool del_Data(QTreeWidget *);
   static QTreeWidget *get_tw(int tabIndex);
 
-  void sort_childItem(QTreeWidgetItem *);
-
   static QStringList get_MonthList(QString strY, QString strM);
   static void drawMonthChart();
-
-  QString setLineEditQss(QLineEdit *txt, int radius, int borderWidth,
-                         const QString &normalColor, const QString &focusColor);
-  QString setComboBoxQss(QComboBox *txt, int radius, int borderWidth,
-                         const QString &normalColor, const QString &focusColor);
 
   static void SaveFile(QString);
 
@@ -315,7 +308,6 @@ QLabel {
   static void drawDayChart();
   static void readDataInThread(int ExceptIndex);
 
-  QString secondsToTime(ulong ulSeconds);
   void stopJavaTimer();
 
   QString getYMD(QString date);
@@ -349,15 +341,13 @@ QLabel {
   bool setTWCurrentItem();
   QString getText1(int index);
   QString getText2(int index);
-  void gotoMainItem(QTreeWidgetItem *item);
+
   void startInitReport();
 
   void startSyncData();
 
   int getMaxDay(QString sy, QString sm);
   void showProgress();
-
-  bool copyFileToPath(QString sourceDir, QString toDir, bool coverFileIfExist);
 
   void setScrollBarPos(double pos);
 

@@ -871,7 +871,7 @@ void MainWindow::add_Data(QTreeWidget *tw, QString strTime, QString strAmount,
   int topCount = tw->topLevelItemCount();
   QTreeWidgetItem *topItem = tw->topLevelItem(topCount - 1);
   tw->setCurrentItem(topItem);
-  sort_childItem(topItem->child(0));
+  m_MainHelper->sort_childItem(topItem->child(0));
   tw->setCurrentItem(topItem->child(topItem->childCount() - 1));
 
   isEditItem = true;
@@ -1831,7 +1831,7 @@ void MainWindow::modify_Data() {
       item->parent()->setText(2, strAmount);
 
     int childRow0 = tw->currentIndex().row();
-    sort_childItem(item);
+    m_MainHelper->sort_childItem(item);
 
     int childRow1 = 0;
     for (int i = 0; i < topItem->childCount(); i++) {
@@ -1861,58 +1861,6 @@ void MainWindow::modify_Data() {
     isEditItem = true;
     m_Method->clickMainDate();
     m_Method->setCurrentIndexFromQW(mui->qwMainEvent, newrow);
-  }
-}
-
-void MainWindow::sort_childItem(QTreeWidgetItem *item) {
-  QStringList keys, list, keyTime, keysNew;
-  int childCount = item->parent()->childCount();
-
-  for (int i = 0; i < childCount; i++) {
-    QString txt0 = item->parent()->child(i)->text(0);
-    QStringList list0 = txt0.split(".");
-    if (list0.count() == 2) {
-      txt0 = list0.at(1);
-      txt0 = txt0.trimmed();
-    }
-    QString txt1 = item->parent()->child(i)->text(1);
-    QString txt2 = item->parent()->child(i)->text(2);
-    QString txt3 = item->parent()->child(i)->text(3);
-    keys.append(txt0 + "|===|" + txt1 + "|===|" + txt2 + "|===|" + txt3);
-    keyTime.append(txt0);
-  }
-
-  std::sort(keyTime.begin(), keyTime.end(),
-            [](const QString &s1, const QString &s2) { return s1 < s2; });
-
-  for (int i = 0; i < keyTime.count(); i++) {
-    QString time = keyTime.at(i);
-    for (int n = 0; n < keys.count(); n++) {
-      QString str1 = keys.at(n);
-      QStringList l0 = str1.split("|===|");
-      if (time == l0.at(0)) {
-        keysNew.append(str1);
-        break;
-      }
-    }
-  }
-
-  for (int i = 0; i < childCount; i++) {
-    QTreeWidgetItem *childItem = item->parent()->child(i);
-    QString str = keysNew.at(i);
-    list.clear();
-    list = str.split("|===|");
-    if (list.count() == 4) {
-      int number = i + 1;
-      QString strChildCount = QString::number(childCount);
-      QString strNum;
-      strNum = QString("%1").arg(number, strChildCount.length(), 10,
-                                 QLatin1Char('0'));
-      childItem->setText(0, strNum + ". " + list.at(0).trimmed());
-      childItem->setText(1, list.at(1).trimmed());
-      childItem->setText(2, list.at(2).trimmed());
-      childItem->setText(3, list.at(3).trimmed());
-    }
   }
 }
 
@@ -2177,29 +2125,6 @@ bool MainWindow::importBakData(QString fileName) {
   return true;
 }
 
-bool MainWindow::copyFileToPath(QString sourceDir, QString toDir,
-                                bool coverFileIfExist) {
-  toDir.replace("\\", "/");
-  if (sourceDir == toDir) {
-    return true;
-  }
-  if (!QFile::exists(sourceDir)) {
-    return false;
-  }
-  QDir *createfile = new QDir;
-  bool exist = createfile->exists(toDir);
-  if (exist) {
-    if (coverFileIfExist) {
-      createfile->remove(toDir);
-    }
-  }  // end if
-
-  if (!QFile::copy(sourceDir, toDir)) {
-    return false;
-  }
-  return true;
-}
-
 void MainWindow::showProgress() {
   dlgProg = new QDialog(this);
   dlgProg = m_Method->getProgBar();
@@ -2329,68 +2254,6 @@ QStringList MainWindow::get_MonthList(QString strY, QString strM) {
   return listMonth;
 }
 
-void MainWindow::gotoMainItem(QTreeWidgetItem *item) {
-  int count = getCount();
-  for (int i = 0; i < count; i++) {
-    QString text0 = getText0(i);
-    QString text1 = getText1(i);
-    QString text2 = getText2(i);
-    if (item->text(0) == text0 && item->text(1) == text1 &&
-        item->text(2) == text2) {
-      gotoIndex(i);
-      setCurrentIndex(i);
-      break;
-    }
-  }
-}
-
-QString MainWindow::setLineEditQss(QLineEdit *txt, int radius, int borderWidth,
-                                   const QString &normalColor,
-                                   const QString &focusColor) {
-  QStringList list;
-  list.append(QString("QLineEdit{border-style:none;padding:3px;border-radius:%"
-                      "1px;border:%2px solid %3;}")
-                  .arg(radius)
-                  .arg(borderWidth)
-                  .arg(normalColor));
-  list.append(QString("QLineEdit:focus{border:%1px solid %2;}")
-                  .arg(borderWidth)
-                  .arg(focusColor));
-
-  QString qss = list.join("");
-  txt->setStyleSheet(qss);
-  return qss;
-}
-
-QString MainWindow::setComboBoxQss(QComboBox *txt, int radius, int borderWidth,
-                                   const QString &normalColor,
-                                   const QString &focusColor) {
-  QStringList list;
-  list.append(QString("QComboBox{border-style:none;padding:3px;border-radius:%"
-                      "1px;border:%2px solid %3;}")
-                  .arg(radius)
-                  .arg(borderWidth)
-                  .arg(normalColor));
-  list.append(QString("QComboBox:focus{border:%1px solid %2;}")
-                  .arg(borderWidth)
-                  .arg(focusColor));
-  list.append(
-      QString("QComboBox::down-arrow{image:url(:/icon/"
-              "add_bottom.png);width:10px;height:10px;right:2px;}"));
-  list.append(QString(
-      "QComboBox::drop-down{subcontrol-origin:padding;subcontrol-position:"
-      "top "
-      "right;width:15px;border-left-width:0px;border-left-style:solid;border-"
-      "top-right-radius:3px;border-bottom-right-radius:3px;border-left-color:"
-      "#"
-      "B6B6B6;}"));
-  list.append(QString("QComboBox::drop-down:on{top:1px;}"));
-
-  QString qss = list.join("");
-  txt->setStyleSheet(qss);
-  return qss;
-}
-
 void MainWindow::on_actionFind_triggered() { on_btnFind_clicked(); }
 
 void MainWindow::on_btnTodo_clicked() { m_Todo->openTodo(); }
@@ -2516,28 +2379,6 @@ void MainWindow::on_rbSteps_clicked() {
 
   initChartMonth();
   chartMonth->setTitle("Y:" + tr("Steps") + "    X:" + tr("Days"));
-}
-
-QString MainWindow::secondsToTime(ulong totalTime) {
-  // 输入为秒数则ss=1，输入为毫秒数则ss=1000
-  qint64 ss = 1;
-  qint64 mi = ss * 60;
-  qint64 hh = mi * 60;
-  qint64 dd = hh * 24;
-
-  qint64 day = totalTime / dd;
-  qint64 hour = (totalTime - day * dd) / hh;
-  qint64 minute = (totalTime - day * dd - hour * hh) / mi;
-  qint64 second = (totalTime - day * dd - hour * hh - minute * mi) / ss;
-
-  QString hou = QString::number(hour, 10);
-  QString min = QString::number(minute, 10);
-  QString sec = QString::number(second, 10);
-
-  hou = hou.length() == 1 ? QString("0%1").arg(hou) : hou;
-  min = min.length() == 1 ? QString("0%1").arg(min) : min;
-  sec = sec.length() == 1 ? QString("0%1").arg(sec) : sec;
-  return hou + ":" + min + ":" + sec;
 }
 
 void MainWindow::on_btnNotes_clicked() { m_Notes->openNotes(); }

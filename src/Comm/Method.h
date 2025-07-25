@@ -388,6 +388,8 @@ class Method : public QDialog {
   QObjectList getAllPushButton(QObjectList lstUIControls);
   QObjectList getAllTreeWidget(QObjectList lstUIControls);
   QObjectList getAllUIControls(QObject *parent);
+  QString secondsToTime(ulong totalTime);
+  bool copyFileToPath(QString sourceDir, QString toDir, bool coverFileIfExist);
   protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
