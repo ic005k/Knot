@@ -5,29 +5,27 @@
 QString ver = "2.0.20";
 QString appName = "Knot";
 
-QList<QPointF> PointList;
-QList<double> doubleList;
-
-QGridLayout *gl1;
-QTreeWidgetItem *parentItem;
-bool isrbFreq = true;
-bool isEBook, isReport, isUpData, isZipOK, isMenuImport, isDownData, isEncrypt,
-    isRemovedTopItem;
-bool isAdd = false;
-
 QString iniFile, iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
     strStats, SaveType, strY, strM, btnYText, btnMText, btnDText, errorInfo,
     CurrentYearMonth, zipfile, txt, searchStr, currentMDFile, copyText,
     imgFileName, defaultFontFamily, customFontFamily, encPassword;
+
+QList<QPointF> PointList;
+QList<double> doubleList;
 QStringList listM;
 
-int today, fontSize, red, currentTabIndex;
-int chartMax = 5;
-
-double yMaxMonth, yMaxDay;
+QSettings *iniPreferences;
+CloudBackup *m_CloudBackup;
+QTreeWidgetItem *parentItem;
 MainWindow *mw_one;
+Ui::MainWindow *mui;
 Method *m_Method;
 QTabWidget *tabData, *tabChart;
+
+bool isrbFreq = true;
+bool isEBook, isReport, isUpData, isZipOK, isMenuImport, isDownData, isEncrypt,
+    isRemovedTopItem;
+bool isAdd = false;
 bool loading, isReadEnd, isReadTWEnd;
 bool isReadEBookEnd = true;
 bool isSaveEnd = true;
@@ -35,22 +33,22 @@ bool isBreak = false;
 bool isDark = false;
 bool isDelData = false;
 
-QRegularExpression regxNumber("^-?[0-9.]*$");
+int today, fontSize, red, currentTabIndex;
 
-QSettings *iniPreferences;
-CloudBackup *m_CloudBackup;
+int chartMax = 5;
+
+double yMaxMonth, yMaxDay;
+
+QRegularExpression regxNumber("^-?[0-9.]*$");
 
 extern bool isAndroid, isIOS, zh_cn, isEpub, isEpubError, isText, isPDF,
     isWholeMonth, isDateSection, isPasswordError, isInitThemeEnd,
     isNeedExecDeskShortcut;
 extern QString btnYearText, btnMonthText, strPage, ebookFile, strTitle,
     fileName, strOpfPath, catalogueFile, strShowMsg;
+extern QStringList readTextList, htmlFiles, listCategory;
 extern int iPage, sPos, totallines, baseLines, htmlIndex, s_y1, s_m1, s_d1,
     s_y2, s_m2, s_d2, totalPages, currentPage;
-extern QStringList readTextList, htmlFiles, listCategory;
-
-extern CategoryList *m_CategoryList;
-extern ReaderSet *m_ReaderSet;
 
 extern void setTableNoItemFlags(QTableWidget *t, int row);
 extern int deleteDirfile(QString dirName);
@@ -63,15 +61,12 @@ extern bool unzipToDir(const QString &zipPath, const QString &destDir);
 extern WebDavHelper *listWebDavFiles(const QString &url,
                                      const QString &username,
                                      const QString &password);
-
 extern QSplashScreen *splash;
 extern ShowMessage *m_ShowMessage;
+extern CategoryList *m_CategoryList;
+extern ReaderSet *m_ReaderSet;
 extern ColorDialog *colorDlg;
 extern PrintPDF *m_PrintPDF;
-
-void RegJni(const char *myClassName);
-
-Ui::MainWindow *mui;
 
 BakDataThread::BakDataThread(QObject *parent) : QThread{parent} {}
 void BakDataThread::run() {
