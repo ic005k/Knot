@@ -6864,7 +6864,9 @@ QRadioButton::indicator:checked {
          </property>
          <property name="font">
           <font>
+           <italic>false</italic>
            <bold>false</bold>
+           <underline>false</underline>
           </font>
          </property>
          <property name="styleSheet">

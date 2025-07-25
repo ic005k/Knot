@@ -478,8 +478,8 @@ void MainHelper::initQW() {
   mui->qwNotesTree->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/tree_main.qml")));
 
-  mui->qwReader->rootContext()->setContextProperty("myW", this->width());
-  mui->qwReader->rootContext()->setContextProperty("myH", this->height());
+  mui->qwReader->rootContext()->setContextProperty("myW", mw_one->width());
+  mui->qwReader->rootContext()->setContextProperty("myH", mw_one->height());
   mui->qwReader->rootContext()->setContextProperty("m_Reader",
                                                    mw_one->m_Reader);
   mui->qwReader->rootContext()->setContextProperty("myBackgroundColor",
@@ -493,8 +493,8 @@ void MainHelper::initQW() {
   mui->qwBookmark->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/bookmark.qml")));
 
-  mui->qw_Img->rootContext()->setContextProperty("myW", this->width());
-  mui->qw_Img->rootContext()->setContextProperty("myH", this->height());
+  mui->qw_Img->rootContext()->setContextProperty("myW", mw_one->width());
+  mui->qw_Img->rootContext()->setContextProperty("myH", mw_one->height());
 
   mui->qwTodo->rootContext()->setContextProperty("maxFontSize", f_size);
   mui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
@@ -509,7 +509,7 @@ void MainHelper::initQW() {
 
   mui->qwSteps->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/steps.qml")));
   mui->qwSteps->rootContext()->setContextProperty("maxFontSize", f_size);
-  mui->qwSteps->rootContext()->setContextProperty("myW", this->width());
+  mui->qwSteps->rootContext()->setContextProperty("myW", mw_one->width());
   mui->qwSteps->rootContext()->setContextProperty("text0", "");
   mui->qwSteps->rootContext()->setContextProperty("text1", "");
   mui->qwSteps->rootContext()->setContextProperty("text2", "");
@@ -520,7 +520,7 @@ void MainHelper::initQW() {
 
   mui->qwGpsList->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/gps_list.qml")));
-  mui->qwGpsList->rootContext()->setContextProperty("myW", this->width());
+  mui->qwGpsList->rootContext()->setContextProperty("myW", mw_one->width());
   mui->qwGpsList->rootContext()->setContextProperty("m_Steps", mw_one->m_Steps);
 
   mui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
@@ -631,12 +631,12 @@ void MainHelper::init_UIWidget() {
   strDate = m_Method->setCurrentDateValue();
   isReadEnd = true;
 
-  this->installEventFilter(this);
+  mw_one->installEventFilter(mw_one);
 
   if (isAndroid) {
-    mw_one->textToolbar = new TextEditToolbar(this);
+    mw_one->textToolbar = new TextEditToolbar(mw_one);
     EditEventFilter *editFilter =
-        new EditEventFilter(mw_one->textToolbar, this);
+        new EditEventFilter(mw_one->textToolbar, mw_one);
     mui->editCategory->installEventFilter(editFilter);
     mui->editDetails->installEventFilter(editFilter);
     mui->editTodo->installEventFilter(editFilter);
@@ -712,23 +712,23 @@ void MainHelper::init_UIWidget() {
 
   mui->editWebDAVPassword->setEchoMode(QLineEdit::EchoMode::Password);
   mui->lblWebDAV->setStyleSheet(mw_one->labelNormalStyleSheet);
-  mui->lblTitleEditRecord->setStyleSheet(mw_one->labelNormalStyleSheet);
+  mui->lblTitleEditRecord->setStyleSheet(clickableLabelButtonStyle);
 
-  mui->textBrowser->installEventFilter(this);
+  mui->textBrowser->installEventFilter(mw_one);
   mui->textBrowser->setMouseTracking(true);
-  mui->textBrowser->viewport()->installEventFilter(this);
+  mui->textBrowser->viewport()->installEventFilter(mw_one);
   mui->textBrowser->viewport()->setMouseTracking(true);
-  mui->qwReader->installEventFilter(this);
+  mui->qwReader->installEventFilter(mw_one);
 
-  mui->tabWidget->tabBar()->installEventFilter(this);
-  mui->tabWidget->installEventFilter(this);
+  mui->tabWidget->tabBar()->installEventFilter(mw_one);
+  mui->tabWidget->installEventFilter(mw_one);
   mui->tabWidget->setMouseTracking(true);
-  mui->lblStats->installEventFilter(this);
-  mui->editSearchText->installEventFilter(this);
-  mui->editFindNote->installEventFilter(this);
+  mui->lblStats->installEventFilter(mw_one);
+  mui->editSearchText->installEventFilter(mw_one);
+  mui->editFindNote->installEventFilter(mw_one);
 
-  mui->lblTitleEditRecord->installEventFilter(this);
-  mui->lblNoteName->installEventFilter(this);
+  mui->lblTitleEditRecord->installEventFilter(mw_one);
+  mui->lblNoteName->installEventFilter(mw_one);
 
   mui->lblStats->adjustSize();
   mui->lblStats->setWordWrap(true);
@@ -767,7 +767,7 @@ void MainHelper::init_UIWidget() {
 #else
   nIConFontSize = 9;
 #endif
-  QFont f = this->font();
+  QFont f = mw_one->font();
   f.setPointSize(nIConFontSize);
   mui->btnTodo->setFont(f);
   mui->btnSteps->setFont(f);
@@ -793,7 +793,7 @@ void MainHelper::init_UIWidget() {
   mui->lblShowLineSn->setWordWrap(true);
   mui->lblShowLineSn->adjustSize();
 
-  QString lblStyle = mui->lblTitleEditRecord->styleSheet();
+  QString lblStyle = mw_one->labelNormalStyleSheet;
   mui->lblTotal->setStyleSheet(lblStyle);
   mui->lblDetails->setStyleSheet(lblStyle);
   mui->lblTitle->setStyleSheet(lblStyle);
@@ -813,14 +813,14 @@ void MainHelper::init_UIWidget() {
   mui->btnGPS->setStyleSheet(mw_one->m_Steps->btnRoundStyle);
   mui->btnGPS->hide();
   mui->frame_btnGps->setFixedHeight(80);
-  QWidget *centralWidget = new QWidget(this);
+  QWidget *centralWidget = new QWidget(mw_one);
   QVBoxLayout *layout = new QVBoxLayout(centralWidget);
 
   SliderButton *sliderButton = new SliderButton(centralWidget);
   sliderButton->setTipText(tr("Slide Right to Start or Stop."));
   layout->addWidget(sliderButton);
 
-  QObject::connect(sliderButton, &SliderButton::sliderMovedToEnd, this,
+  QObject::connect(sliderButton, &SliderButton::sliderMovedToEnd, mw_one,
                    [&]() { mui->btnGPS->click(); });
   mui->frame_btnGps->layout()->addWidget(centralWidget);
 }
@@ -848,8 +848,8 @@ void MainHelper::startBackgroundTaskUpdateBakFileList() {
   });
 
   // 可选：使用 QFutureWatcher 监控进度
-  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(mw_one);
+  connect(watcher, &QFutureWatcher<void>::finished, mw_one, [=]() {
     m_Method->clearAllBakList(mui->qwBakList);
     int bakCount = bakFileList.count();
     for (int i = 0; i < bakCount; i++) {
@@ -952,7 +952,7 @@ void MainHelper::delBakFile() {
   QString bak_file = m_Method->getText3(mui->qwBakList, index);
 
   m_Method->m_widget = new QWidget(mw_one);
-  ShowMessage *m_ShowMsg = new ShowMessage(this);
+  ShowMessage *m_ShowMsg = new ShowMessage(mw_one);
   if (!m_ShowMsg->showMsg("Knot",
                           tr("Whether to remove") + "  " + bak_file + " ? ", 2))
     return;
@@ -977,7 +977,7 @@ void MainHelper::delTabRecycleFile() {
   QString tab_file = m_Method->getText3(mui->qwTabRecycle, index);
 
   m_Method->m_widget = new QWidget(mw_one);
-  ShowMessage *m_ShowMsg = new ShowMessage(this);
+  ShowMessage *m_ShowMsg = new ShowMessage(mw_one);
   if (!m_ShowMsg->showMsg("Knot",
                           tr("Whether to remove") + "  " + tab_file + " ? ", 2))
     return;
@@ -1012,7 +1012,7 @@ void MainHelper::importBakFileList() {
 
   if (!zipfile.isNull()) {
     m_Method->m_widget = new QWidget(mw_one);
-    ShowMessage *m_ShowMsg = new ShowMessage(this);
+    ShowMessage *m_ShowMsg = new ShowMessage(mw_one);
     if (!m_ShowMsg->showMsg("Kont",
                             tr("Import this data?") + "\n" +
                                 mw_one->m_Reader->getUriRealPath(zipfile),
@@ -1034,7 +1034,7 @@ void MainHelper::importBakFileList() {
 
 void MainHelper::init_Theme() {
   // Get the background color to fit the dark mode
-  QPalette pal = this->palette();
+  QPalette pal = mw_one->palette();
   QBrush brush = pal.window();
   red = brush.color().red();
 
