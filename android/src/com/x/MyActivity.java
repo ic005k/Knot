@@ -160,6 +160,8 @@ public class MyActivity
     extends QtActivity
     implements Application.ActivityLifecycleCallbacks {
 
+  private static boolean isQtMainEnd = false;
+
   public static final String ACTION_TODO_ALARM = "com.x.Knot.TODO_ALARM";
 
   // 安卓版本>=11时存储授权
@@ -871,7 +873,7 @@ public class MyActivity
     System.out.println("onResume...");
     super.onResume();
     updateStatusBarColor();
-    if (MyService.isReady)
+    if (MyService.isReady && isQtMainEnd)
       CallJavaNotify_0();
   }
 
@@ -912,6 +914,33 @@ public class MyActivity
     m_instance = null;
     mytts.shutdown();
     alarmWindows.remove(this); // 防止 Activity 泄漏
+  }
+
+  // 处理从系统设置页返回的回调
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    // 检测是否从"存储权限设置页"返回（Android 11+）
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+      // 检查用户是否实际授予了权限
+      if (Environment.isExternalStorageManager()) {
+        // 权限已授予，标记需要重启
+        prefs.edit().putBoolean("has_restarted_after_storage", false).apply();
+        // 调用重启方法
+        restartAppAfterPermission();
+      } else {
+        // 用户未授予权限，提示"功能受限"
+        String tip;
+        if (zh_cn)
+          tip = "未授予存储权限";
+        else
+          tip = "Storage permission not granted.";
+        showToastMessage(tip);
+        // 重置请求标记（允许用户下次再试）
+        prefs.edit().putBoolean(KEY_SHOULD_REQUEST, true).apply();
+      }
+    }
   }
 
   @Override
@@ -1126,6 +1155,35 @@ public class MyActivity
         // 更新标记，避免重复跳转
         prefs.edit().putBoolean(KEY_SHOULD_REQUEST, false).apply();
 
+        Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+        startActivity(intent);
+      }
+    }
+  }
+
+  private void checkStoragePermission_test() {
+    SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+    boolean shouldRequest = prefs.getBoolean(KEY_SHOULD_REQUEST, true);
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      // 检查是否已获得"所有文件访问权限"
+      if (Environment.isExternalStorageManager()) {
+        // 权限已授予，判断是否需要重启（首次授予时才重启）
+        boolean hasRestarted = prefs.getBoolean("has_restarted_after_storage", false);
+        if (!hasRestarted) {
+          // 标记已重启（避免下次启动重复重启）
+          prefs.edit().putBoolean("has_restarted_after_storage", true).apply();
+          // 调用重启方法
+          restartAppAfterPermission();
+        }
+        return; // 已处理，直接返回
+      }
+
+      // 未授予权限且需要请求（避免重复跳转设置页）
+      if (shouldRequest) {
+        // 更新标记，避免重复跳转
+        prefs.edit().putBoolean(KEY_SHOULD_REQUEST, false).apply();
+        // 跳转到系统设置页申请权限
         Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
         startActivity(intent);
       }
@@ -1905,6 +1963,34 @@ public class MyActivity
         Log.e(TAG, "断开输入法连接异常: " + e.getMessage());
       }
     });
+  }
+
+  // 新增：重启应用的方法
+  private void restartAppAfterPermission() {
+
+    // 延迟1秒执行重启（让Toast有时间显示）
+    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+      try {
+        // 获取应用启动意图
+        Intent intent = getPackageManager().getLaunchIntentForPackage(getPackageName());
+        if (intent != null) {
+          // 清除旧任务栈，确保重启后是全新状态
+          intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
+              | Intent.FLAG_ACTIVITY_NEW_TASK
+              | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+          startActivity(intent);
+        }
+        // 杀死当前进程（确保旧进程退出）
+        Process.killProcess(Process.myPid());
+        System.exit(0);
+      } catch (Exception e) {
+        Log.e(TAG, "重启应用失败: " + e.getMessage());
+      }
+    }, 1000); // 1秒延迟
+  }
+
+  public static void setQtMainEnd(boolean isEnd) {
+    isQtMainEnd = isEnd;
   }
 
 }
