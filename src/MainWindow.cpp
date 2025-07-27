@@ -2,7 +2,7 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "2.0.20";
+QString ver = "2.0.21";
 QString appName = "Knot";
 
 QString iniFile, iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
@@ -276,10 +276,10 @@ void MainWindow::ReadChartData() {
 
 void MainWindow::readChartDone() {
   if (tabChart->currentIndex() == 0) {
-    initChartMonth();
+    m_MainHelper->initChartMonth();
   }
   if (tabChart->currentIndex() == 1) {
-    initChartDay();
+    m_MainHelper->initChartDay();
   }
 
   if (isShowDetails)
@@ -973,26 +973,6 @@ bool MainWindow::del_Data(QTreeWidget *tw) {
   return true;
 }
 
-void MainWindow::on_AddRecord() {
-  isAdd = true;
-
-  mui->lblTitleEditRecord->setText(tr("Add") + "  : " +
-                                   tabData->tabText(tabData->currentIndex()));
-
-  mui->hsH->setValue(QTime::currentTime().hour());
-  mui->hsM->setValue(QTime::currentTime().minute());
-  m_EditRecord->getTime(mui->hsH->value(), mui->hsM->value());
-
-  mui->editDetails->clear();
-  mui->editCategory->setText("");
-  mui->editAmount->setText("");
-
-  mui->frameMain->hide();
-  mui->frameEditRecord->show();
-
-  // tmeFlash->start(300);
-}
-
 void MainWindow::on_tmeFlash() {
   nFlashCount = nFlashCount + 1;
   if (nFlashCount % 2 == 0)
@@ -1470,141 +1450,6 @@ void MainWindow::init_Stats(QTreeWidget *tw) {
 
   QString strAmount = QString("%1").arg(amount, 0, 'f', 2);
   strStats = tr("Total") + " : " + QString::number(tatol) + "    $" + strAmount;
-}
-
-void MainWindow::initChartMonth() {
-  if (loading) return;
-
-  int count = PointList.count();
-  if (count == 0) {
-    return;
-  }
-
-  barSeries->clear();
-  series->clear();
-  m_scatterSeries->clear();
-  bool isOne = true;
-
-  QBarSet *setY = new QBarSet("Y");
-  QStringList categories;
-
-  for (int i = 0; i < count; i++) {
-    if (PointList.at(i).y() != 1) isOne = false;
-  }
-
-  if (isOne) {
-    series->clear();
-    m_scatterSeries->clear();
-    QList<QPointF> tempPointList;
-    for (int i = 0; i < count; i++) {
-      double y0 = 0.0;
-      QString str = listM.at(i);
-      QStringList list1 = str.split(".");
-      if (list1.count() == 2) {
-        QStringList list = list1.at(1).split(":");
-        int t = 0;
-        if (list.count() == 3) {
-          QString a, b, c;
-          a = list.at(0);
-          b = list.at(1);
-          c = list.at(2);
-          int a1, b1;
-          a1 = a.toInt();
-          b1 = b.toInt();
-          t = a1 * 3600 + b1 * 60 + c.toInt();
-        }
-        y0 = (double)t / 3600;
-      }
-
-      tempPointList.append(QPointF(PointList.at(i).x(), y0));
-    }
-    PointList.clear();
-    PointList = tempPointList;
-  }
-
-  double maxValue = *std::max_element(doubleList.begin(), doubleList.end());
-  double max;
-  if (isrbFreq) {
-    max = chartMax;
-    if (maxValue >= max) {
-      max = maxValue;
-    }
-
-  } else {
-    max = 50.00;
-    if (maxValue >= max) max = maxValue;
-  }
-
-  yMaxMonth = max;
-
-  QList<double> dList, tempDList;
-  for (int i = 0; i < PointList.count(); i++) {
-    tempDList.append(PointList.at(i).y());
-    categories.append(QString::number(PointList.at(i).x()));
-  }
-  for (int i = 0; i < max_day; i++) {
-    dList.append(0);
-  }
-  for (int i = 0; i < categories.count(); i++) {
-    for (int n = 0; n < max_day; n++) {
-      if (categories.at(i) == QString::number(n + 1)) {
-        dList.removeAt(n);
-        dList.insert(n, PointList.at(i).y());
-      }
-    }
-  }
-
-  for (int i = 0; i < max_day; i++) setY->append(dList.at(i));
-  categories.clear();
-  for (int i = 0; i < max_day; i++) categories.append(QString::number(i + 1));
-  barSeries->append(setY);
-  axisX->setRange("", QString::number(max_day));
-  axisX->append(categories);
-  axisY->setRange(0, yMaxMonth);
-
-  if (isOne) {
-    axisY->setRange(0, 24);
-    chartMonth->setTitle(CurrentYear + "  Y:" + tr("Time") +
-                         "    X:" + tr("Days"));
-  } else {
-    axisY->setRange(0, yMaxMonth);
-    if (mui->rbFreq->isChecked())
-      chartMonth->setTitle(CurrentYear + "  Y:" + tr("Freq") +
-                           "    X:" + tr("Days"));
-
-    if (mui->rbAmount->isChecked())
-      chartMonth->setTitle(CurrentYear + "  Y:" + tr("Amount") +
-                           "    X:" + tr("Days"));
-  }
-}
-
-void MainWindow::initChartDay() {
-  if (loading) return;
-  series2->clear();
-  m_scatterSeries2->clear();
-  m_scatterSeries2_1->clear();
-
-  int count = PointList.count();
-  if (count == 0) return;
-  for (int i = 0; i < count; i++) {
-    series2->append(PointList.at(i));
-    m_scatterSeries2->append(PointList.at(i));
-    m_scatterSeries2_1->append(PointList.at(i));
-  }
-
-  axisX2->setRange(0, 24);
-  axisX2->setTickType(QValueAxis::TicksFixed);
-  axisX2->setTickCount(7);
-
-  axisY2->setRange(0, yMaxDay + 1);
-
-  if (mui->rbFreq->isChecked())
-    chartDay->setTitle(CurrentYear + "  Y:" + tr("Freq") +
-                       "    X:" + tr("Time"));
-
-  if (mui->rbAmount->isChecked())
-    chartDay->setTitle(CurrentYear + "  Y:" + tr("Amount") +
-                       "    X:" + tr("Time"));
 }
 
 void MainWindow::on_actionRename_triggered() {
@@ -2372,7 +2217,7 @@ void MainWindow::on_rbSteps_clicked() {
     }
   }
 
-  initChartMonth();
+  m_MainHelper->initChartMonth();
   chartMonth->setTitle("Y:" + tr("Steps") + "    X:" + tr("Days"));
 }
 
@@ -2888,7 +2733,7 @@ void MainWindow::on_btnPasteCode_clicked() {
 void MainWindow::on_btnAdd_clicked() {
   m_EditRecord->monthSum();
 
-  on_AddRecord();
+  m_MainHelper->on_AddRecord();
 }
 
 void MainWindow::on_btnDel_clicked() {

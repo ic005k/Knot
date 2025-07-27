@@ -31,7 +31,11 @@ class MainHelper : public QDialog {
   void init_Theme();
 
   void sort_childItem(QTreeWidgetItem *item);
-  private:
+  void on_AddRecord();
+  void initChartDay();
+  void initChartMonth();
+
+ private:
   QStringList bakFileList;
 
   QString clickableLabelButtonStyle = R"(

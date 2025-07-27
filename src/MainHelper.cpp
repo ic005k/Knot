@@ -7,10 +7,15 @@ extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern Method *m_Method;
 extern QTabWidget *tabData;
+extern QList<QPointF> PointList;
+extern QList<double> doubleList;
+extern QStringList listM;
 extern QString iniDir, searchStr, currentMDFile, privateDir, encPassword,
     errorInfo, ver, strDate, zipfile;
-extern bool isAndroid, isReadEnd, isDark, isZipOK, isMenuImport, isDownData;
-extern int fontSize, red;
+extern bool isAndroid, isReadEnd, isDark, isZipOK, isMenuImport, isDownData,
+    isAdd, loading, isrbFreq;
+extern int fontSize, red, chartMax;
+extern double yMaxMonth, yMaxDay;
 
 MainHelper::MainHelper(QWidget *parent) : QDialog{parent} {}
 
@@ -1247,4 +1252,160 @@ void MainHelper::sort_childItem(QTreeWidgetItem *item) {
       childItem->setText(3, list.at(3).trimmed());
     }
   }
+}
+
+void MainHelper::on_AddRecord() {
+  isAdd = true;
+
+  mui->lblTitleEditRecord->setText(tr("Add") + "  : " +
+                                   tabData->tabText(tabData->currentIndex()));
+
+  mui->hsH->setValue(QTime::currentTime().hour());
+  mui->hsM->setValue(QTime::currentTime().minute());
+  mw_one->m_EditRecord->getTime(mui->hsH->value(), mui->hsM->value());
+
+  mui->editDetails->clear();
+  mui->editCategory->setText("");
+  mui->editAmount->setText("");
+
+  mui->frameMain->hide();
+  mui->frameEditRecord->show();
+
+  // tmeFlash->start(300);
+}
+
+void MainHelper::initChartMonth() {
+  if (loading) return;
+
+  int count = PointList.count();
+  if (count == 0) {
+    return;
+  }
+
+  mw_one->barSeries->clear();
+  mw_one->series->clear();
+  mw_one->m_scatterSeries->clear();
+  bool isOne = true;
+
+  QBarSet *setY = new QBarSet("Y");
+  QStringList categories;
+
+  for (int i = 0; i < count; i++) {
+    if (PointList.at(i).y() != 1) isOne = false;
+  }
+
+  if (isOne) {
+    mw_one->series->clear();
+    mw_one->m_scatterSeries->clear();
+    QList<QPointF> tempPointList;
+    for (int i = 0; i < count; i++) {
+      double y0 = 0.0;
+      QString str = listM.at(i);
+      QStringList list1 = str.split(".");
+      if (list1.count() == 2) {
+        QStringList list = list1.at(1).split(":");
+        int t = 0;
+        if (list.count() == 3) {
+          QString a, b, c;
+          a = list.at(0);
+          b = list.at(1);
+          c = list.at(2);
+          int a1, b1;
+          a1 = a.toInt();
+          b1 = b.toInt();
+          t = a1 * 3600 + b1 * 60 + c.toInt();
+        }
+        y0 = (double)t / 3600;
+      }
+
+      tempPointList.append(QPointF(PointList.at(i).x(), y0));
+    }
+    PointList.clear();
+    PointList = tempPointList;
+  }
+
+  double maxValue = *std::max_element(doubleList.begin(), doubleList.end());
+  double max;
+  if (isrbFreq) {
+    max = chartMax;
+    if (maxValue >= max) {
+      max = maxValue;
+    }
+
+  } else {
+    max = 50.00;
+    if (maxValue >= max) max = maxValue;
+  }
+
+  yMaxMonth = max;
+
+  QList<double> dList, tempDList;
+  for (int i = 0; i < PointList.count(); i++) {
+    tempDList.append(PointList.at(i).y());
+    categories.append(QString::number(PointList.at(i).x()));
+  }
+  for (int i = 0; i < mw_one->max_day; i++) {
+    dList.append(0);
+  }
+  for (int i = 0; i < categories.count(); i++) {
+    for (int n = 0; n < mw_one->max_day; n++) {
+      if (categories.at(i) == QString::number(n + 1)) {
+        dList.removeAt(n);
+        dList.insert(n, PointList.at(i).y());
+      }
+    }
+  }
+
+  for (int i = 0; i < mw_one->max_day; i++) setY->append(dList.at(i));
+  categories.clear();
+  for (int i = 0; i < mw_one->max_day; i++)
+    categories.append(QString::number(i + 1));
+  mw_one->barSeries->append(setY);
+  mw_one->axisX->setRange("", QString::number(mw_one->max_day));
+  mw_one->axisX->append(categories);
+  mw_one->axisY->setRange(0, yMaxMonth);
+
+  if (isOne) {
+    mw_one->axisY->setRange(0, 24);
+    mw_one->chartMonth->setTitle(mw_one->CurrentYear + "  Y:" + tr("Time") +
+                                 "    X:" + tr("Days"));
+  } else {
+    mw_one->axisY->setRange(0, yMaxMonth);
+    if (mui->rbFreq->isChecked())
+      mw_one->chartMonth->setTitle(mw_one->CurrentYear + "  Y:" + tr("Freq") +
+                                   "    X:" + tr("Days"));
+
+    if (mui->rbAmount->isChecked())
+      mw_one->chartMonth->setTitle(mw_one->CurrentYear + "  Y:" + tr("Amount") +
+                                   "    X:" + tr("Days"));
+  }
+}
+
+void MainHelper::initChartDay() {
+  if (loading) return;
+  mw_one->series2->clear();
+  mw_one->m_scatterSeries2->clear();
+  mw_one->m_scatterSeries2_1->clear();
+
+  int count = PointList.count();
+  if (count == 0) return;
+  for (int i = 0; i < count; i++) {
+    mw_one->series2->append(PointList.at(i));
+    mw_one->m_scatterSeries2->append(PointList.at(i));
+    mw_one->m_scatterSeries2_1->append(PointList.at(i));
+  }
+
+  mw_one->axisX2->setRange(0, 24);
+  mw_one->axisX2->setTickType(QValueAxis::TicksFixed);
+  mw_one->axisX2->setTickCount(7);
+
+  mw_one->axisY2->setRange(0, yMaxDay + 1);
+
+  if (mui->rbFreq->isChecked())
+    mw_one->chartDay->setTitle(mw_one->CurrentYear + "  Y:" + tr("Freq") +
+                               "    X:" + tr("Time"));
+
+  if (mui->rbAmount->isChecked())
+    mw_one->chartDay->setTitle(mw_one->CurrentYear + "  Y:" + tr("Amount") +
+                               "    X:" + tr("Time"));
 }

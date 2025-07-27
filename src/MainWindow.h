@@ -285,9 +285,6 @@ class MainWindow : public QMainWindow {
   static void saveData(QTreeWidget *, int);
   static void readData(QTreeWidget *);
 
-  void initChartMonth();
-  void initChartDay();
-
   static void saveTab();
   bool isSlide = false;
   void init_TotalData();
@@ -360,6 +357,8 @@ class MainWindow : public QMainWindow {
 
   void clearWidgetFocus();
 
+  int max_day = 31;
+
  protected:
   void closeEvent(QCloseEvent *event) override;
   bool eventFilter(QObject *watch, QEvent *evn) override;
@@ -380,7 +379,7 @@ class MainWindow : public QMainWindow {
   void on_btnPageNext_clicked();
 
   void on_actionOneDriveBackupData();
-  void on_AddRecord();
+
   void on_actionReport_triggered();
 
   void on_btnCopy_clicked();
@@ -842,7 +841,6 @@ class MainWindow : public QMainWindow {
 
   qreal aoldX, aoldY, aoldZ;
   int countOne = 0;
-  int max_day = 31;
 
   void on_btnHideKey_clicked();
   void init_ChartWidget();
