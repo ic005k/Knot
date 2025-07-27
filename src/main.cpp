@@ -264,9 +264,11 @@ int main(int argc, char* argv[]) {
 
   w.show();
 
+#ifdef Q_OS_ANDROID
   // 通知 Java 层 Qt main() 已完成
   QJniObject::callStaticMethod<void>("com/x/MyActivity", "setQtMainEnd", "(Z)V",
                                      true);
+#endif
 
   return app.exec();
 }
