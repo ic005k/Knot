@@ -166,6 +166,7 @@ class Notes : public QDialog {
   void init_md();
 
   void previewNote();
+  void appendToSyncList(QString file);
   protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;

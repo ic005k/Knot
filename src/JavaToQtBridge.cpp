@@ -129,7 +129,7 @@ static void JavaNotify_7() {
 static void JavaNotify_8() {
   if (isInitThemeEnd) {
     if (mw_one->m_Steps->isNeedRestoreUI) {
-      QTimer::singleShot(1000, nullptr, []() { mw_one->execDeskShortcut(); });
+      QTimer::singleShot(1000, mw_one, []() { mw_one->execDeskShortcut(); });
 
     } else
       mw_one->execDeskShortcut();
@@ -408,8 +408,11 @@ static void JavaNotify_15() {
   }
 
   if (!mui->frameViewCate->isHidden()) {
-    mui->frameViewCate->hide();
-    mui->frameReport->show();
+    QTimer::singleShot(100, mw_one, []() {
+      mui->frameViewCate->hide();
+      mui->frameReport->show();
+    });
+
     return;
   }
 

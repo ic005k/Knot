@@ -586,6 +586,8 @@ void migrateOldDataIfNeeded() {
 
 #endif
 
+/////////////////////////////////////////////////
+
 void showSplash() {
   // 获取屏幕尺寸并创建全屏画布
   QSize targetSize;
@@ -609,9 +611,18 @@ void showSplash() {
   painter.setRenderHint(QPainter::TextAntialiasing);
 
   // 设置不规则形状的密度和大小范围
-  const int shapeCount = 100;  // 形状数量
-  const int minSize = 4 * dpr;
-  const int maxSize = 25 * dpr;
+  int shapeCount = 0;  // 形状数量
+  int minSize = 0;
+  int maxSize = 0;
+  if (isAndroid) {
+    shapeCount = 200;
+    minSize = 8 * dpr;
+    maxSize = 50 * dpr;
+  } else {
+    shapeCount = 100;
+    minSize = 4 * dpr;
+    maxSize = 25 * dpr;
+  }
 
   // 定义形状类型和半透明颜色调色板
 
@@ -703,6 +714,8 @@ void showSplash() {
   splash->setAttribute(Qt::WA_TranslucentBackground);  // 设置为透明背景
   splash->show();
 }
+
+////////////////////////////////////////////////////////
 
 // 安全转换函数
 Shapes::ShapeType safeConvertShapeType(int value) {

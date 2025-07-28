@@ -22,6 +22,11 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="font">
+      <font>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="text">
       <string>Data Encryption Protection(AES256):</string>
      </property>
@@ -115,6 +120,11 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <bold>true</bold>
+      </font>
      </property>
      <property name="styleSheet">
       <string notr="true">/* 动态适配明暗模式 */

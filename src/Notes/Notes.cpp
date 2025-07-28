@@ -202,8 +202,7 @@ void Notes::updateMDFileToSyncLists(QString currentMDFile) {
   QString enc_file = m_Method->useEnc(zipMD);
   if (enc_file != "") zipMD = enc_file;
 
-  notes_sync_files.append(zipMD);
-  qDebug() << "Add to Notes Sync ======>>>" << zipMD;
+  appendToSyncList(zipMD);
 }
 
 bool Notes::eventFilter(QObject *obj, QEvent *evn) {
@@ -370,7 +369,8 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
       privateDir + "KnotData/memo/images/" + QFileInfo(tarImageFile).fileName();
   QFile::copy(tarImageFile, zipImg);
   zipImg = m_Method->useEnc(zipImg);
-  notes_sync_files.append(zipImg);
+
+  appendToSyncList(zipImg);
 
   return strImage;
 }
@@ -1114,7 +1114,7 @@ void Notes::javaNoteToQMLNote() {
   QString enc_file = m_Method->useEnc(zipMD);
   if (enc_file != "") zipMD = enc_file;
 
-  notes_sync_files.append(zipMD);
+  appendToSyncList(zipMD);
 
   mw_one->m_NotesList->m_dbManager.updateFileIndex(currentMDFile);
 }
@@ -1727,8 +1727,7 @@ void Notes::updateMainnotesIniToSyncLists() {
     QString enc_file = m_Method->useEnc(zipMainnotes);
     if (enc_file != "") zipMainnotes = enc_file;
 
-    notes_sync_files.removeOne(zipMainnotes);
-    notes_sync_files.append(zipMainnotes);
+    appendToSyncList(zipMainnotes);
   }
 }
 
@@ -2147,4 +2146,10 @@ void Notes::previewNote() {
     MD2Html(currentMDFile);
     openBrowserOnce(privateDir + "memo.html");
   }
+}
+
+void Notes::appendToSyncList(QString file) {
+  notes_sync_files.removeOne(file);
+  notes_sync_files.append(file);
+  qDebug() << "Add to Notes Sync List ====>>>>" << file;
 }
