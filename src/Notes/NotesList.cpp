@@ -554,6 +554,7 @@ bool NotesList::on_btnImport_clicked() {
       ShowMessage *m_ShowMsg = new ShowMessage(this);
       m_ShowMsg->showMsg("Knot",
                          tr("Invalid Markdown file.") + "\n\n" + strInfo, 1);
+      return false;
     }
 
     if (QFile(fileName).exists() && isMD) {
@@ -580,6 +581,10 @@ bool NotesList::on_btnImport_clicked() {
       item1->setText(1, a);
 
       qDebug() << fileName << a;
+
+      mw_one->m_Notes->updateMDFileToSyncLists(currentMDFile);
+    } else {
+      return false;
     }
   }
 
@@ -2018,8 +2023,6 @@ void NotesList::on_actionImport_Note_triggered() {
     setNotesListCurrentIndex(getNotesListCount() - 1);
     clickNoteList();
     saveNotesList();
-
-    mw_one->m_Notes->updateMDFileToSyncLists(currentMDFile);
   }
 }
 
@@ -2349,6 +2352,8 @@ void NotesList::clickNoteList() {
 
   QString strMD = m_Method->getText3(mui->qwNoteList, index);
   currentMDFile = iniDir + strMD;
+
+  qDebug() << "currentMDFile=" << currentMDFile;
 
   if (!QFile::exists(currentMDFile)) {
     ShowMessage *msg = new ShowMessage(mw_one);

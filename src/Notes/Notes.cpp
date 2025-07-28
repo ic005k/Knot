@@ -203,6 +203,7 @@ void Notes::updateMDFileToSyncLists(QString currentMDFile) {
   if (enc_file != "") zipMD = enc_file;
 
   notes_sync_files.append(zipMD);
+  qDebug() << "Add to Notes Sync ======>>>" << zipMD;
 }
 
 bool Notes::eventFilter(QObject *obj, QEvent *evn) {

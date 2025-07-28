@@ -2,7 +2,7 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "2.0.21";
+QString ver = "2.0.22";
 QString appName = "Knot";
 
 QString iniFile, iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
