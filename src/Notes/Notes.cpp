@@ -2064,11 +2064,11 @@ void Notes::init_md() {
   if (isDark) {
     initMarkdownLexerDark();
     m_EditSource->verticalScrollBar()->setStyleSheet(
-        m_Method->darkScrollbarStyle);
+        mw_one->m_MainHelper->darkPCScrollbarStyle);
   } else {
     initMarkdownLexer();
     m_EditSource->verticalScrollBar()->setStyleSheet(
-        m_Method->lightScrollbarStyle);
+        mw_one->m_MainHelper->lightPCScrollbarStyle);
   }
 
   initMarkdownEditor(m_EditSource);
