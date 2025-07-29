@@ -45,8 +45,8 @@ void MainWindow::readTWDone() {
   mui->progBar->setMaximum(100);
 }
 
-ReadThread::ReadThread(QObject *parent) : QThread{parent} {}
-void ReadThread::run() {
+ReadChartThread::ReadChartThread(QObject *parent) : QThread{parent} {}
+void ReadChartThread::run() {
   if (isBreak) {
     emit isDone();
     return;

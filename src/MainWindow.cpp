@@ -499,8 +499,8 @@ MainWindow::~MainWindow() {
   mySaveThread->quit();
   mySaveThread->wait();
 
-  myReadThread->quit();
-  myReadThread->wait();
+  myReadChartThread->quit();
+  myReadChartThread->wait();
 
   m_ReadTWThread->quit();
   m_ReadTWThread->wait();
@@ -537,8 +537,8 @@ void MainWindow::startRead(QString Date) {
   readDate = Date;
   if (!isReadEnd) {
     isBreak = true;
-    myReadThread->quit();
-    myReadThread->wait();
+    myReadChartThread->quit();
+    myReadChartThread->wait();
 
     while (!isReadEnd)
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
@@ -546,7 +546,7 @@ void MainWindow::startRead(QString Date) {
 
   if (isReadEnd) {
     isBreak = false;
-    myReadThread->start();
+    myReadChartThread->start();
     if (mui->rbSteps->isChecked()) mui->rbFreq->click();
   }
 }
@@ -2061,8 +2061,9 @@ void MainWindow::init_Thread_Timer() {
   m_ReadTWThread = new ReadTWThread();
   connect(m_ReadTWThread, &ReadTWThread::isDone, this, &MainWindow::readTWDone);
 
-  myReadThread = new ReadThread();
-  connect(myReadThread, &ReadThread::isDone, this, &MainWindow::readChartDone);
+  myReadChartThread = new ReadChartThread();
+  connect(myReadChartThread, &ReadChartThread::isDone, this,
+          &MainWindow::readChartDone);
 
   mySaveThread = new SaveThread();
   connect(mySaveThread, &SaveThread::isDone, this, &MainWindow::saveDone);

@@ -84,10 +84,10 @@ class BakDataThread : public QThread {
  public slots:
 };
 
-class ReadThread : public QThread {
+class ReadChartThread : public QThread {
   Q_OBJECT
  public:
-  explicit ReadThread(QObject *parent = nullptr);
+  explicit ReadChartThread(QObject *parent = nullptr);
 
  protected:
   void run();

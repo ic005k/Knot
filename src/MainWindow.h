@@ -104,7 +104,7 @@
 #include "ui_TodoAlarm.h"
 
 class SaveThread;
-class ReadThread;
+class ReadChartThread;
 class ReadTWThread;
 class ReadEBookThread;
 class BakDataThread;
@@ -239,7 +239,7 @@ class MainWindow : public QMainWindow {
   QScatterSeries *m_scatterSeries2_1;
   static void get_Today(QTreeWidget *);
   SaveThread *mySaveThread;
-  ReadThread *myReadThread;
+  ReadChartThread *myReadChartThread;
   ReadTWThread *m_ReadTWThread;
   ReadEBookThread *myReadEBookThread;
   BakDataThread *myBakDataThread;
