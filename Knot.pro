@@ -378,6 +378,7 @@ SOURCES += \
     src/LoadPic.cpp \
     src/MainHelper.cpp \
     src/MainWindow.cpp \
+    src/MyThread.cpp \
     src/Notes/ColorDialog.cpp \
     src/Notes/MoveTo.cpp \
     src/Notes/NewNoteBook.cpp \
@@ -608,6 +609,7 @@ HEADERS += \
     src/LoadPic.h \
     src/MainHelper.h \
     src/MainWindow.h \
+    src/MyThread.h \
     src/Notes/ColorDialog.h \
     src/Notes/MoveTo.h \
     src/Notes/NewNoteBook.h \
