@@ -2,7 +2,7 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "2.0.22";
+QString ver = "2.0.23";
 QString appName = "Knot";
 
 QString iniFile, iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
@@ -1673,74 +1673,6 @@ void MainWindow::on_actionImport_Data_triggered() {
   myImportDataThread->start();
 }
 
-bool MainWindow::importBakData(QString fileName) {
-  if (fileName.isNull()) return false;
-
-  deleteDirfile(privateDir + "gps");
-  m_Reader->copyDirectoryFiles(iniDir + "memo/gps", privateDir + "gps", true);
-
-  QString zipPath = bakfileDir + "memo.zip";
-  if (fileName != zipPath) {
-    QFile::remove(zipPath);
-    QFile::copy(fileName, zipPath);
-  }
-
-  QString dec_file;
-  if (isEncrypt) {
-    dec_file = zipPath + ".dec";
-    bool result = false;
-    result = m_Method->decryptFile(zipPath, dec_file, encPassword);
-
-    while (result == false && isPasswordError == false)
-      QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-  } else
-    dec_file = zipPath;
-
-  // mw_one->m_Notes->unzip(zipPath);
-
-  deleteDirfile(bakfileDir + "KnotData");
-  bool unzipResult = false;
-  unzipResult =
-      m_Method->decompressWithPassword(dec_file, bakfileDir, encPassword);
-
-  while (unzipResult == false && isPasswordError == false)
-    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-
-  if (isPasswordError) {
-    return false;
-  }
-
-  isZipOK = true;
-
-  QString bakFileFrom;
-  QSettings Reg(bakfileDir + "KnotData/osflag.ini", QSettings::IniFormat);
-  bakFileFrom = Reg.value("os", "mobile").toString();
-  qDebug() << "bakFileFrom=" << bakFileFrom;
-
-  if (bakFileFrom == "desktop") {
-    deleteDirfile(iniDir + "memo");
-    QFile::remove(iniDir + "todo.ini");
-    QFile::remove(iniDir + "mainnotes.ini");
-
-    m_Reader->copyDirectoryFiles(bakfileDir + "KnotData/memo", iniDir + "memo",
-                                 true);
-    QFile::copy(bakfileDir + "KnotData/todo.ini", iniDir + "todo.ini");
-    QFile::copy(bakfileDir + "KnotData/mainnotes.ini",
-                iniDir + "mainnotes.ini");
-
-    deleteDirfile(iniDir + "memo/gps");
-    m_Reader->copyDirectoryFiles(bakfileDir + "KnotData/memo/gps",
-                                 iniDir + "memo/gps", true);
-  }
-
-  if (bakFileFrom == "mobile") {
-    deleteDirfile(iniDir);
-    m_Reader->copyDirectoryFiles(bakfileDir + "KnotData", iniDir, true);
-  }
-
-  return true;
-}
-
 void MainWindow::showProgress() {
   dlgProg = new QDialog(this);
   dlgProg = m_Method->getProgBar();
@@ -2674,56 +2606,6 @@ void MainWindow::setScrollBarPos(double pos) {
   QQuickItem *root = mui->qwMainTab->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "setScrollBarPos",
                             Q_ARG(QVariant, pos));
-}
-
-void MainWindow::reloadMain() {
-  bool isAniEffects;
-  if (isDelItem || isEditItem)
-    isAniEffects = false;
-  else
-    isAniEffects = true;
-
-  mui->qwMainDate->rootContext()->setContextProperty("isAniEffects",
-                                                     isAniEffects);
-  mui->qwMainDate->rootContext()->setContextProperty("maindateWidth",
-                                                     mui->qwMainDate->width());
-  m_Method->clearAllBakList(mui->qwMainDate);
-
-  QTreeWidget *tw = get_tw(tabData->currentIndex());
-
-  int total = tw->topLevelItemCount();
-
-  if (total == 0) {
-    m_Method->clearAllBakList(mui->qwMainEvent);
-    return;
-  }
-
-  int a;
-
-  if (total - days > 0)
-    a = total - days;
-  else
-    a = 0;
-
-  QString text0, text1, text2, text3, topitem;
-  for (int i = a; i < total; i++) {
-    QTreeWidgetItem *topItem = tw->topLevelItem(i);
-
-    text0 = topItem->text(0) + "  " + topItem->text(3);
-    text1 = topItem->text(1);
-    text2 = topItem->text(2);
-
-    topitem = text0;
-
-    m_Method->addItemToQW(mui->qwMainDate, text0, text1, text2, text3, 0);
-  }
-
-  m_Method->gotoEnd(mui->qwMainDate);
-  int count = m_Method->getCountFromQW(mui->qwMainDate);
-  m_Method->setCurrentIndexFromQW(mui->qwMainDate, count - 1);
-  m_Method->setScrollBarPos(mui->qwMainDate, 1.0);
-
-  m_Method->clickMainDate();
 }
 
 void MainWindow::reeditData() {

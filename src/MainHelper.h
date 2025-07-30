@@ -7,6 +7,7 @@
 #include <QObject>
 #include <QPainter>
 #include <QPropertyAnimation>
+#include <QSettings>
 #include <QTreeWidget>
 #include <QWidget>
 
