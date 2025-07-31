@@ -108,7 +108,8 @@ public class MyService extends Service {
         super.onCreate();
         Log.i(TAG, "Service on create");// 服务被创建
 
-        Context context = MyActivity.getMyAppContext();
+        // 权限设置页面需要在 Activity 的任务栈中启动，必须用 Activity 上下文,而不是getMyAppContext()
+        Context context = MyActivity.m_instance;
 
         if (MyActivity.zh_cn) {
             strRun = "运行中...";
