@@ -526,7 +526,9 @@ bool NotesList::on_btnImport_clicked() {
   fileNames =
       QFileDialog::getOpenFileNames(this, tr("Knot"), "", tr("MD File (*.*)"));
 
-  if (fileNames.at(0).isNull()) return false;
+  qDebug() << "Import Files:" << fileNames;
+
+  if (fileNames.count() == 0) return false;
 
   QTreeWidgetItem *item = ui->treeWidget->currentItem();
   for (int i = 0; i < fileNames.count(); i++) {
