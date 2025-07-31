@@ -185,6 +185,8 @@ static void JavaNotify_14() {
 }
 
 static void JavaNotify_15() {
+  qDebug() << "C++ JavaNotify_15";
+
   if (colorDlg != nullptr) {
     if (colorDlg->isVisible()) {
       colorDlg->close();
@@ -456,8 +458,6 @@ static void JavaNotify_15() {
     mui->btnBack_Tree->click();
     return;
   }
-
-  qDebug() << "C++ JavaNotify_15";
 }
 
 static const JNINativeMethod gMethods[] = {

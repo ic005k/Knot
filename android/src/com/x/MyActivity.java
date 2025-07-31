@@ -846,11 +846,29 @@ public class MyActivity
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     if (keyCode == KeyEvent.KEYCODE_BACK) {
-      // 直接处理返回键
-      CallJavaNotify_15();
-      return true; // 事件已处理
+      // 检查当前是否有对话框正在显示
+      if (isDialogShowing()) {
+        // 有对话框时，让系统默认处理（关闭对话框）
+        return super.onKeyDown(keyCode, event);
+      } else {
+        // 无对话框时，执行自定义返回逻辑
+        CallJavaNotify_15();
+        return true; // 事件已处理
+      }
     }
     return super.onKeyDown(keyCode, event);
+  }
+
+  // 辅助方法：判断当前是否有对话框显示
+  private boolean isDialogShowing() {
+    // 获取当前Activity的顶层窗口
+    Activity activity = this;
+    if (activity == null)
+      return false;
+
+    // 检查是否有模态对话框正在显示
+    WindowManager.LayoutParams params = activity.getWindow().getAttributes();
+    return (params.type == WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG);
   }
 
   @Override
@@ -914,33 +932,6 @@ public class MyActivity
     m_instance = null;
     mytts.shutdown();
     alarmWindows.remove(this); // 防止 Activity 泄漏
-  }
-
-  // 处理从系统设置页返回的回调
-  @Override
-  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode, resultCode, data);
-    // 检测是否从"存储权限设置页"返回（Android 11+）
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-      SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-      // 检查用户是否实际授予了权限
-      if (Environment.isExternalStorageManager()) {
-        // 权限已授予，标记需要重启
-        prefs.edit().putBoolean("has_restarted_after_storage", false).apply();
-        // 调用重启方法
-        restartAppAfterPermission();
-      } else {
-        // 用户未授予权限，提示"功能受限"
-        String tip;
-        if (zh_cn)
-          tip = "未授予存储权限";
-        else
-          tip = "Storage permission not granted.";
-        showToastMessage(tip);
-        // 重置请求标记（允许用户下次再试）
-        prefs.edit().putBoolean(KEY_SHOULD_REQUEST, true).apply();
-      }
-    }
   }
 
   @Override
@@ -1155,35 +1146,6 @@ public class MyActivity
         // 更新标记，避免重复跳转
         prefs.edit().putBoolean(KEY_SHOULD_REQUEST, false).apply();
 
-        Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-        startActivity(intent);
-      }
-    }
-  }
-
-  private void checkStoragePermission_test() {
-    SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-    boolean shouldRequest = prefs.getBoolean(KEY_SHOULD_REQUEST, true);
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-      // 检查是否已获得"所有文件访问权限"
-      if (Environment.isExternalStorageManager()) {
-        // 权限已授予，判断是否需要重启（首次授予时才重启）
-        boolean hasRestarted = prefs.getBoolean("has_restarted_after_storage", false);
-        if (!hasRestarted) {
-          // 标记已重启（避免下次启动重复重启）
-          prefs.edit().putBoolean("has_restarted_after_storage", true).apply();
-          // 调用重启方法
-          restartAppAfterPermission();
-        }
-        return; // 已处理，直接返回
-      }
-
-      // 未授予权限且需要请求（避免重复跳转设置页）
-      if (shouldRequest) {
-        // 更新标记，避免重复跳转
-        prefs.edit().putBoolean(KEY_SHOULD_REQUEST, false).apply();
-        // 跳转到系统设置页申请权限
         Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
         startActivity(intent);
       }

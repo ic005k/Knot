@@ -2,7 +2,7 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "2.0.23";
+QString ver = "2.0.24";
 QString appName = "Knot";
 
 QString iniFile, iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
@@ -310,7 +310,7 @@ void MainWindow::on_ExecShortcut() {
   if (keyType == "reader") m_Reader->ContinueReading();
   if (keyType == "add") mui->btnAdd->click();
   if (keyType == "exercise") {
-    QTimer::singleShot(100, this, [this]() { mui->btnSteps->click(); });
+    QTimer::singleShot(100, this, []() { mui->btnSteps->click(); });
   }
   if (keyType == "defaultopen") {
 #ifdef Q_OS_ANDROID
