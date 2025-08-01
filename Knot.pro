@@ -606,6 +606,7 @@ HEADERS += \
     src/Comm/qaesencryption.h \
     src/DateSelector.h \
     src/EditRecord.h \
+    src/Exercise/WeatherFetcher.h \
     src/LoadPic.h \
     src/MainHelper.h \
     src/MainWindow.h \

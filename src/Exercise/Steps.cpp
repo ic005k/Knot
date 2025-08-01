@@ -89,6 +89,20 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mui->f_speed->layout()->setSpacing(0);
   mui->f_speed->layout()->setContentsMargins(0, 0, 0, 0);
   mui->f_speed->layout()->addWidget(m_speedometer);
+
+  weatherFetcher = new WeatherFetcher(this);
+  connect(weatherFetcher, &WeatherFetcher::weatherUpdated, this,
+          [this](double temp) {
+            // 处理获取到的温度数据
+            strCurrentTemp = "[" + QString::number(temp) + "°C]";
+            qDebug() << strCurrentTemp;
+          });
+  connect(weatherFetcher, &WeatherFetcher::errorOccurred, this,
+          [this](const QString& error) {
+            // 处理错误
+            qDebug() << "天气获取错误:" << error;
+            strCurrentTemp = "";
+          });
 }
 
 Steps::~Steps() {}
@@ -609,8 +623,6 @@ void Steps::updateGetGps() {
   strTotalDistance = QString::number(m_TotalDistance) + " km";
   mui->lblTotalDistance->setText(strTotalDistance);
 
-  // strDurationTime = tr("Duration") + " : " + m_time.toString("hh:mm:ss");
-
   endDT = QDateTime::currentDateTime();
   qint64 secondsDiff = startDT.secsTo(endDT);
   // 处理负数（可选）
@@ -637,6 +649,26 @@ void Steps::updateGetGps() {
 
   if (m_time.second() % 5 == 0) {
     refreshMotionData();
+  }
+
+  if (m_distance > 0 || isGpsTest) {
+    // 先校验经纬度是否在有效范围（-90~90纬度，-180~180经度）
+    bool latValid = (latitude >= -90 && latitude <= 90);
+    bool lonValid = (longitude >= -180 && longitude <= 180);
+    if (!latValid || !lonValid) {
+      // 无效坐标，不请求
+
+    } else {
+      if (strCurrentTemp == "") {
+        if (m_time.second() % 5 == 0) {
+          weatherFetcher->fetchWeather(latitude, longitude);
+        }
+      } else {
+        if (m_time.second() % 1800 == 0) {
+          weatherFetcher->fetchWeather(latitude, longitude);
+        }
+      }
+    }
   }
 }
 
@@ -688,7 +720,8 @@ void Steps::refreshMotionData() {
   if (mui->rbRunning->isChecked()) str_type = tr("Running");
   t00 = str_type + " " + t0;
 
-  t1 = tr("Time") + ": " + strStartTime + " - " + strEndTime;
+  t1 = tr("Time") + ": " + strStartTime + " - " + strEndTime + " " +
+       strCurrentTemp;
   t2 = tr("Distance") + ": " + str1;
   t3 = tr("Exercise Duration") + ": " + str2;
   t4 = tr("Average Speed") + ": " + str3;

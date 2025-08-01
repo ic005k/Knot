@@ -11,6 +11,7 @@
 
 #include "Speedometer.h"
 #include "src/Exercise/StepsOptions.h"
+#include "src/Exercise/WeatherFetcher.h"
 
 namespace Ui {
 class Steps;
@@ -27,6 +28,7 @@ class Steps : public QDialog {
   bool isNeedRestoreUI = false;
 
   Speedometer *m_speedometer;
+  WeatherFetcher *weatherFetcher;
 
   QString btnRoundStyle =
       "QToolButton {"
@@ -130,6 +132,7 @@ class Steps : public QDialog {
   void updateGetGps();
 
  private:
+  QString strCurrentTemp;
   double maxSpeed = 0.00;
 
   int isHardStepSensor = -1;
@@ -196,7 +199,7 @@ class Steps : public QDialog {
   void refreshTotalDistance();
   qlonglong getTodaySteps();
   qlonglong getOldSteps();
-  signals:
+ signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();
