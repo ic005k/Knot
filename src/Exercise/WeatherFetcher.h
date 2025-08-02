@@ -137,7 +137,7 @@ class WeatherFetcher : public QObject {
       case Thunderstorm:
         return "🌩️";  // 雷暴
       default:
-        return "❓";  // 未知
+        return "";  // 未知
     }
   }
 
