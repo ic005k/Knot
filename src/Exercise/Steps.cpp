@@ -91,12 +91,29 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mui->f_speed->layout()->addWidget(m_speedometer);
 
   weatherFetcher = new WeatherFetcher(this);
-  connect(weatherFetcher, &WeatherFetcher::weatherUpdated, this,
-          [this](double temp) {
-            // 处理获取到的温度数据
-            strCurrentTemp = "[" + QString::number(temp) + "°C]";
-            qDebug() << strCurrentTemp;
-          });
+  // 连接信号时，通过天气代码转换为Unicode符号
+  connect(
+      weatherFetcher,
+      static_cast<void (WeatherFetcher::*)(double, int, const QString&)>(
+          &WeatherFetcher::weatherUpdated),
+      this, [this](double temp, int code, const QString& desc) {
+        // 1. 将天气代码转换为枚举
+        WeatherFetcher::WeatherCondition condition =
+            WeatherFetcher::weatherCodeToCondition(code);
+        // 2. 获取对应的Unicode符号
+        QString weatherIcon = WeatherFetcher::conditionToUnicode(condition);
+
+        // 3. 组合显示（符号+温度+描述）
+        strCurrentTemp = "\n" + tr("Weather") + ": " +
+                         QString("%1 %2℃  %3")
+                             .arg(weatherIcon)  // Unicode符号
+                             .arg(temp)         // 体感温度
+                             .arg(desc);        // 天气描述（中文/英文）
+
+        qDebug()
+            << strCurrentTemp;  // 示例："☀️ 28℃  晴" 或 "⛅ 15℃  PartlyCloudy"
+      });
+
   connect(weatherFetcher, &WeatherFetcher::errorOccurred, this,
           [this](const QString& error) {
             // 处理错误
@@ -511,6 +528,8 @@ void Steps::positionUpdated(const QGeoPositionInfo& info) {
 
 void Steps::updateGetGps() {
   m_time = m_time.addSecs(1);
+  totalSeconds = static_cast<qlonglong>(m_time.hour()) * 3600 +
+                 static_cast<qlonglong>(m_time.minute()) * 60 + m_time.second();
 
 #ifdef Q_OS_ANDROID
 
@@ -615,7 +634,7 @@ void Steps::updateGetGps() {
       qDebug() << "m_time%3=" << m_time.second();
     }
 
-    qDebug() << "m_time=" << m_time.second();
+    qDebug() << "m_time=" << m_time.second() << totalSeconds;
   }
 
 #endif
@@ -664,7 +683,7 @@ void Steps::updateGetGps() {
           weatherFetcher->fetchWeather(latitude, longitude);
         }
       } else {
-        if (m_time.second() % 1800 == 0) {
+        if (totalSeconds % 1800 == 0) {
           weatherFetcher->fetchWeather(latitude, longitude);
         }
       }
@@ -698,6 +717,7 @@ void Steps::stopRecordMotion() {
 
   mui->gboxMotionType->setEnabled(true);
   mui->btnSelGpsDate->setEnabled(true);
+  strCurrentTemp = "";
 }
 
 void Steps::refreshTotalDistance() {
@@ -720,8 +740,7 @@ void Steps::refreshMotionData() {
   if (mui->rbRunning->isChecked()) str_type = tr("Running");
   t00 = str_type + " " + t0;
 
-  t1 = tr("Time") + ": " + strStartTime + " - " + strEndTime + " " +
-       strCurrentTemp;
+  t1 = tr("Time") + ": " + strStartTime + " - " + strEndTime + strCurrentTemp;
   t2 = tr("Distance") + ": " + str1;
   t3 = tr("Exercise Duration") + ": " + str2;
   t4 = tr("Average Speed") + ": " + str3;

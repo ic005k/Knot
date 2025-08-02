@@ -10,11 +10,27 @@
 #include <QString>
 #include <QUrl>
 
+extern bool zh_cn;
+
 class WeatherFetcher : public QObject {
   Q_OBJECT
 
  public:
-  // 构造函数，需要传入父对象
+  // 天气状况枚举
+  enum WeatherCondition {
+    Clear,         // 晴
+    PartlyCloudy,  // 多云
+    Cloudy,        // 阴
+    Fog,           // 雾
+    Rain,          // 雨
+    Snow,          // 雪
+    Shower,        // 阵雨
+    Thunderstorm,  // 雷暴
+    Unknown        // 未知
+  };
+  Q_ENUM(WeatherCondition)
+
+  // 构造函数
   explicit WeatherFetcher(QObject *parent = nullptr) : QObject(parent) {
     // 初始化网络访问管理器
     m_networkManager = new QNetworkAccessManager(this);
@@ -27,23 +43,111 @@ class WeatherFetcher : public QObject {
   // 核心方法：使用经纬度获取天气信息
   void fetchWeather(double latitude, double longitude) {
     // 构建Open-Meteo API请求URL
-    // 仅请求当前温度数据，最小化数据传输
-    QString urlString = QString(
-                            "https://api.open-meteo.com/v1/forecast?"
-                            "latitude=%1&longitude=%2&"
-                            "current=temperature_2m&"
-                            "timezone=auto&"
-                            "units=metric")            // 确保返回摄氏度
-                            .arg(latitude, 0, 'f', 6)  // 保留6位小数的精度
-                            .arg(longitude, 0, 'f', 6);
+    QString urlString =
+        QString(
+            "https://api.open-meteo.com/v1/forecast?"
+            "latitude=%1&longitude=%2&"
+            "current=apparent_temperature,weather_code&"  // 请求体感温度和天气代码
+            "timezone=auto&"
+            "units=metric")            // 确保返回摄氏度
+            .arg(latitude, 0, 'f', 6)  // 保留6位小数的精度
+            .arg(longitude, 0, 'f', 6);
 
     // 发送GET请求
     m_networkManager->get(QNetworkRequest(QUrl(urlString)));
   }
 
+  // 静态方法：将天气代码转换为枚举
+  static WeatherCondition weatherCodeToCondition(int code) {
+    if (code >= 0 && code <= 2) return Clear;  // 晴天/少云
+    if (code == 3) return PartlyCloudy;        // 多云
+    if (code >= 45 && code <= 48) return Fog;  // 雾
+    if ((code >= 51 && code <= 57) || (code >= 61 && code <= 67))
+      return Rain;                                      // 雨
+    if (code >= 71 && code <= 77) return Snow;          // 雪
+    if (code >= 80 && code <= 86) return Shower;        // 阵雨
+    if (code >= 95 && code <= 99) return Thunderstorm;  // 雷暴
+    return Unknown;                                     // 未知
+  }
+
+  // 静态方法：将天气枚举转换为中文描述
+  static QString conditionToChinese(WeatherCondition condition) {
+    switch (condition) {
+      case Clear:
+        return "晴";
+      case PartlyCloudy:
+        return "多云";
+      case Cloudy:
+        return "阴";
+      case Fog:
+        return "雾";
+      case Rain:
+        return "雨";
+      case Snow:
+        return "雪";
+      case Shower:
+        return "阵雨";
+      case Thunderstorm:
+        return "雷暴";
+      default:
+        return "";
+    }
+  }
+
+  static QString conditionToEnglish(WeatherCondition condition) {
+    switch (condition) {
+      case Clear:
+        return "Clear";
+      case PartlyCloudy:
+        return "PartlyCloudy";
+      case Cloudy:
+        return "Cloudy";
+      case Fog:
+        return "Fog";
+      case Rain:
+        return "Rain";
+      case Snow:
+        return "Snow";
+      case Shower:
+        return "Shower";
+      case Thunderstorm:
+        return "Thunderstorm";
+      default:
+        return "";
+    }
+  }
+
+  // 将天气枚举转换为Unicode符号
+  static QString conditionToUnicode(WeatherCondition condition) {
+    switch (condition) {
+      case Clear:
+        return "☀️";  // 晴天
+      case PartlyCloudy:
+        return "⛅";  // 多云
+      case Cloudy:
+        return "☁️";  // 阴天
+      case Fog:
+        return "🌫️";  // 雾
+      case Rain:
+        return "🌧️";  // 雨
+      case Snow:
+        return "❄️";  // 雪
+      case Shower:
+        return "🌦️";  // 阵雨
+      case Thunderstorm:
+        return "🌩️";  // 雷暴
+      default:
+        return "❓";  // 未知
+    }
+  }
+
  signals:
-  // 天气数据获取成功信号，返回温度值(摄氏度)
-  void weatherUpdated(double temperature);
+  // 天气数据获取成功信号，返回体感温度和天气代码
+  void weatherUpdated(double apparentTemperature, int weatherCode);
+
+  // 重载信号：返回体感温度、天气代码和天气描述
+  void weatherUpdated(double apparentTemperature, int weatherCode,
+                      const QString &weatherDesc);
 
   // 错误信号，返回错误信息
   void errorOccurred(const QString &errorMessage);
@@ -70,19 +174,46 @@ class WeatherFetcher : public QObject {
 
     QJsonObject rootObj = jsonDoc.object();
 
-    // 提取温度数据
+    // 提取数据
     if (rootObj.contains("current") && rootObj["current"].isObject()) {
       QJsonObject currentObj = rootObj["current"].toObject();
-      if (currentObj.contains("temperature_2m") &&
-          currentObj["temperature_2m"].isDouble()) {
-        double temperature = currentObj["temperature_2m"].toDouble();
-        emit weatherUpdated(temperature);
+
+      // 验证体感温度
+      if (!currentObj.contains("apparent_temperature") ||
+          !currentObj["apparent_temperature"].isDouble()) {
+        emit errorOccurred(tr("未获取到体感温度数据"));
         reply->deleteLater();
         return;
       }
+
+      // 验证天气代码
+      if (!currentObj.contains("weather_code") ||
+          !currentObj["weather_code"].isDouble()) {
+        emit errorOccurred(tr("未获取到天气代码数据"));
+        reply->deleteLater();
+        return;
+      }
+
+      // 解析数据
+      double apparentTemperature =
+          currentObj["apparent_temperature"].toDouble();
+      int weatherCode = currentObj["weather_code"].toInt();
+      QString weatherDesc;
+
+      if (zh_cn)
+        weatherDesc = conditionToChinese(weatherCodeToCondition(weatherCode));
+      else
+        weatherDesc = conditionToEnglish(weatherCodeToCondition(weatherCode));
+
+      // 发射两个信号，方便不同场景使用
+      emit weatherUpdated(apparentTemperature, weatherCode);
+      emit weatherUpdated(apparentTemperature, weatherCode, weatherDesc);
+
+      reply->deleteLater();
+      return;
     }
 
-    // 如果到这里，说明数据格式不符合预期
+    // 数据格式不符合预期
     emit errorOccurred(tr("天气数据格式错误"));
     reply->deleteLater();
   }

@@ -134,6 +134,7 @@ class Steps : public QDialog {
  private:
   QString strCurrentTemp;
   double maxSpeed = 0.00;
+  qlonglong totalSeconds;
 
   int isHardStepSensor = -1;
 
