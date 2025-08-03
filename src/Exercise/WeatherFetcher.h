@@ -10,7 +10,7 @@
 #include <QString>
 #include <QUrl>
 
-extern bool zh_cn;
+extern bool isZH_CN;
 
 class WeatherFetcher : public QObject {
   Q_OBJECT
@@ -200,7 +200,7 @@ class WeatherFetcher : public QObject {
       int weatherCode = currentObj["weather_code"].toInt();
       QString weatherDesc;
 
-      if (zh_cn)
+      if (isZH_CN)
         weatherDesc = conditionToChinese(weatherCodeToCondition(weatherCode));
       else
         weatherDesc = conditionToEnglish(weatherCodeToCondition(weatherCode));

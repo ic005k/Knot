@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Window
-import QtQml
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Controls.Fusion
@@ -150,7 +149,8 @@ Rectangle {
         Rectangle {
             id: listItem
             width: ListView.view.width
-            height: item0.contentHeight + 16
+
+            height: listCol.implicitHeight + 0
             color: ListView.isCurrentItem ? "lightblue" : getColor()
 
             border.width: isDark ? 0 : 1
@@ -167,13 +167,19 @@ Rectangle {
                 Layout.fillWidth: true
 
                 ColumnLayout {
-                    id: idlistElemnet4
-                    height: parent.height
+                    id: listCol
+
                     width: parent.width
                     spacing: 2
                     Layout.fillWidth: true
                     anchors.leftMargin: 0
                     anchors.rightMargin: 0
+
+                    Rectangle {
+                        width: view.width
+                        height: 5 // 空白高度
+                        color: "transparent"
+                    }
 
                     Text {
                         id: item0
@@ -184,7 +190,7 @@ Rectangle {
                         horizontalAlignment: Text.AlignLeft
                         verticalAlignment: Text.AlignVCenter
                         wrapMode: TextArea.WordWrap
-                        font.bold: false
+                        font.bold: true
                         text: text0
                         color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
 
@@ -237,16 +243,23 @@ Rectangle {
                         width: parent.width
                         wrapMode: Text.WordWrap
                         elide: Text.ElideRight
-                        //Layout.maximumWidth: listItem.width
                         Layout.preferredWidth: listItem.width
                         font.bold: false
+                        font.italic: true
+                        font.pointSize: item0.font.pointSize - 2
                         text: text3
                         color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
 
                         leftPadding: 5
                         rightPadding: 5
 
-                        visible: false // item3.text.length ? true : false
+                        visible: item3.text.length ? true : false
+                    }
+
+                    Rectangle {
+                        width: view.width
+                        height: 5 // 空白高度
+                        color: "transparent"
                     }
                 }
             }
@@ -256,10 +269,10 @@ Rectangle {
                 property point clickPos: "0,0"
 
                 anchors.fill: parent
-                onPressed:function(mouse) {
+                onPressed: function (mouse) {
                     clickPos = Qt.point(mouse.x, mouse.y)
                 }
-                onReleased:function(mouse) {
+                onReleased: function (mouse) {
                     var delta = Qt.point(mouse.x - clickPos.x,
                                          mouse.y - clickPos.y)
                     console.debug("delta.x: " + delta.x)

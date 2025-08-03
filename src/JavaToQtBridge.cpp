@@ -13,7 +13,7 @@ extern Method *m_Method;
 
 extern QString iniFile, iniDir, zipfile, privateDir, bakfileDir;
 
-extern bool isAndroid, isIOS, zh_cn, isEpub, isEpubError, isText, isPDF,
+extern bool isAndroid, isIOS, isZH_CN, isEpub, isEpubError, isText, isPDF,
     isWholeMonth, isDateSection, isPasswordError, isInitThemeEnd,
     isNeedExecDeskShortcut, isReadTWEnd;
 

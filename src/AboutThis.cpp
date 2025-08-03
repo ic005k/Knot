@@ -4,10 +4,13 @@
 #include "ui_AboutThis.h"
 #include "ui_MainWindow.h"
 
+QString ver = "2.1.01";
+QString appName = "Knot";
+
 extern MainWindow *mw_one;
 extern Method *m_Method;
-extern bool loading, zh_cn;
-extern QString noteText, appName, ver;
+extern bool loading, isZH_CN;
+extern QString noteText;
 
 AboutThis::AboutThis(QWidget *parent) : QDialog(parent), ui(new Ui::AboutThis) {
   ui->setupUi(this);
@@ -136,7 +139,7 @@ int AboutThis::parse_UpdateJSON(QString str) {
 
     QVariantList list = root_Obj.value("assets").toArray().toVariantList();
     QString Url = getUrl(list);
-    if (zh_cn) {
+    if (isZH_CN) {
 #ifdef Q_OS_ANDROID
       // gitee
       s_link =

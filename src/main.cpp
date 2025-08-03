@@ -73,7 +73,7 @@ QString strJBDict3 = "";
 QString strJBDict4 = "";
 QString strJBDict5 = "";
 
-bool zh_cn = false;
+bool isZH_CN = false;
 bool isAndroid, isIOS;
 bool isInitThemeEnd;
 bool isNeedExecDeskShortcut = false;
@@ -362,35 +362,35 @@ void loadLocal() {
   QLocale locale;
 
   if (locale.language() == QLocale::English) {
-    zh_cn = false;
+    isZH_CN = false;
 
   } else if (locale.language() == QLocale::Chinese) {
     bool tr = false;
     tr = translator0.load(":/src/cn.qm");
     if (tr) {
       qApp->installTranslator(&translator0);
-      zh_cn = true;
+      isZH_CN = true;
     }
 
     bool tr1 = false;
-    tr1 = translator1.load(":/res/tr/qt_zh_CN.qm");
+    tr1 = translator1.load(":/res/tr/qt_isZH_CN.qm");
     if (tr1) {
       qApp->installTranslator(&translator1);
-      zh_cn = true;
+      isZH_CN = true;
     }
 
     bool tr2 = false;
-    tr2 = translator2.load(":/res/tr/qtbase_zh_CN.qm");
+    tr2 = translator2.load(":/res/tr/qtbase_isZH_CN.qm");
     if (tr2) {
       qApp->installTranslator(&translator2);
-      zh_cn = true;
+      isZH_CN = true;
     }
 
     bool tr3 = false;
-    tr3 = translator3.load(":/res/tr/qtlocation_zh_CN.qm");
+    tr3 = translator3.load(":/res/tr/qtlocation_isZH_CN.qm");
     if (tr3) {
       qApp->installTranslator(&translator3);
-      zh_cn = true;
+      isZH_CN = true;
     }
   }
 }

@@ -438,7 +438,11 @@ void NotesList::on_btnDel_clicked() {
 
         // Child NoteBook
       } else {
-        int count1 = item->child(i)->childCount();
+        auto *child_Item = item->child(i);
+        int count1 = child_Item->childCount();
+        delete childItem;
+        childItem = nullptr;
+
         for (int j = 0; j < count1; j++) {
           str0 = item->child(i)->child(j)->text(0);
           str1 = item->child(i)->child(j)->text(1);
@@ -2176,7 +2180,7 @@ void NotesList::loadAllRecycle() {
   for (int i = 0; i < childCount; i++) {
     QTreeWidgetItem *childItem = twrb->topLevelItem(0)->child(i);
     QString text0 = childItem->text(0);
-    QString text3 = childItem->text(1);
+    QString text3 = iniDir + childItem->text(1);
 
     m_Method->addItemToQW(mui->qwNoteRecycle, text0, "", "", text3, 0);
   }
@@ -2502,7 +2506,10 @@ void NotesList::setCurrentItemFromMDFile(QString mdFile) {
     if (isBreak) break;
   }
 
-  clickNoteList();
+  if (isBreak)
+    clickNoteList();
+  else
+    currentMDFile = mdFile;
 }
 
 QString NotesList::getCurrentNoteNameFromMDFile(QString mdFile) {

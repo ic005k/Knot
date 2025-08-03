@@ -2,9 +2,6 @@
 
 #include "ui_MainWindow.h"
 
-QString ver = "2.1.00";
-QString appName = "Knot";
-
 QString iniFile, iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
     strStats, SaveType, strY, strM, btnYText, btnMText, btnDText, errorInfo,
     CurrentYearMonth, zipfile, txt, searchStr, currentMDFile, copyText,
@@ -41,12 +38,15 @@ double yMaxMonth, yMaxDay;
 
 QRegularExpression regxNumber("^-?[0-9.]*$");
 
-extern bool isAndroid, isIOS, zh_cn, isEpub, isEpubError, isText, isPDF,
+extern bool isAndroid, isIOS, isZH_CN, isEpub, isEpubError, isText, isPDF,
     isWholeMonth, isDateSection, isPasswordError, isInitThemeEnd,
     isNeedExecDeskShortcut;
+
 extern QString btnYearText, btnMonthText, strPage, ebookFile, strTitle,
-    fileName, strOpfPath, catalogueFile, strShowMsg;
+    fileName, strOpfPath, catalogueFile, strShowMsg, ver, appName;
+
 extern QStringList readTextList, htmlFiles, listCategory;
+
 extern int iPage, sPos, totallines, baseLines, htmlIndex, s_y1, s_m1, s_d1,
     s_y2, s_m2, s_d2, totalPages, currentPage;
 

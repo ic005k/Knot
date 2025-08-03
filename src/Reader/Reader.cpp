@@ -11,7 +11,7 @@ extern Method *m_Method;
 extern ReaderSet *m_ReaderSet;
 
 extern QString iniFile, iniDir, privateDir;
-extern bool zh_cn, isAndroid, isIOS, isEBook, isReport;
+extern bool isZH_CN, isAndroid, isIOS, isEBook, isReport;
 extern int fontSize;
 
 extern int deleteDirfile(QString dirName);
@@ -589,7 +589,7 @@ void Reader::initReader() {
   font.setLetterSpacing(QFont::AbsoluteSpacing, 2);  // 字间距
 
   fileName = Reg.value("/Reader/FileName").toString();
-  // if (!QFile(fileName).exists() && zh_cn) fileName = ":/res/test.txt";
+  if (!QFile(fileName).exists() && isZH_CN) fileName = ":/res/test.txt";
 
   isInitReader = true;
 

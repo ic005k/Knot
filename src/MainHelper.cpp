@@ -23,8 +23,8 @@ extern QString iniFile, iniDir, privateDir, bakfileDir, strDate, readDate,
     strOpfPath, catalogueFile, strShowMsg;
 
 extern bool isAndroid, isReadEnd, isDark, isZipOK, isMenuImport, isDownData,
-    isAdd, loading, isrbFreq, isPasswordError, isEncrypt, isBreak, isIOS, zh_cn,
-    isEpub, isEpubError, isText, isPDF, isWholeMonth, isDateSection,
+    isAdd, loading, isrbFreq, isPasswordError, isEncrypt, isBreak, isIOS,
+    isZH_CN, isEpub, isEpubError, isText, isPDF, isWholeMonth, isDateSection,
     isInitThemeEnd, isNeedExecDeskShortcut;
 
 extern int fontSize, red, chartMax, iPage, sPos, totallines, baseLines,

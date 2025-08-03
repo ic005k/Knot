@@ -11,7 +11,8 @@ extern QTabWidget *tabData;
 extern QString iniDir, searchStr, currentMDFile, privateDir, encPassword,
     errorInfo;
 extern CategoryList *m_CategoryList;
-extern bool isEpub, isText, isPDF, loading, isDark, isAndroid, isEncrypt, zh_cn;
+extern bool isEpub, isText, isPDF, loading, isDark, isAndroid, isEncrypt,
+    isZH_CN;
 extern int iPage, sPos, totallines, baseLines, htmlIndex, s_y1, s_m1, s_d1,
     s_y2, s_m2, s_d2, fontSize;
 extern QStringList readTextList, htmlFiles, listCategory;
@@ -502,7 +503,7 @@ QString Method::getLastModified(QString file) {
   QFileInfo info(file);
   QDateTime lastModified = info.lastModified();
   QString item1;
-  if (zh_cn) {
+  if (isZH_CN) {
     // 使用中文区域设置格式化日期
     QLocale chineseLocale(QLocale::Chinese, QLocale::China);
     item1 = chineseLocale.toString(lastModified, "ddd MM月dd日 hh:mm:ss yyyy");
@@ -2557,7 +2558,7 @@ void Method::loadTreeFromDB(QTreeWidget *tree, const QString &dbFileName) {
 
 QString Method::setCurrentDateValue() {
   QString strdate;
-  if (zh_cn) {
+  if (isZH_CN) {
     QLocale chineseLocale(QLocale::Chinese, QLocale::China);
     strdate = chineseLocale.toString(QDate::currentDate(), "ddd MM dd yyyy");
   } else
@@ -2568,7 +2569,7 @@ QString Method::setCurrentDateValue() {
 
 QString Method::setCurrentDateTimeValue() {
   QString strdate;
-  if (zh_cn) {
+  if (isZH_CN) {
     QLocale chineseLocale(QLocale::Chinese, QLocale::China);
     strdate = chineseLocale.toString(QDateTime::currentDateTime(),
                                      "ddd MM dd HH:mm:ss yyyy");

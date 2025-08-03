@@ -15,7 +15,7 @@ extern Method* m_Method;
 extern QRegularExpression regxNumber;
 extern QList<float> rlistX, rlistY, rlistZ, glistX, glistY, glistZ;
 extern unsigned int num_steps_walk, num_steps_run, num_steps_hop;
-extern bool loading, isAndroid, zh_cn;
+extern bool loading, isAndroid, isZH_CN;
 extern QString iniFile, iniDir, strDate;
 extern void setTableNoItemFlags(QTableWidget* t, int row);
 
@@ -274,7 +274,7 @@ QString Steps::getCurrentDate() {
 
 QString Steps::getFullDate() {
   QString date;
-  if (zh_cn) {
+  if (isZH_CN) {
     QLocale chineseLocale(QLocale::Chinese, QLocale::China);
     date = chineseLocale.toString(QDate::currentDate(), "yyyy-M-d ddd");
   } else
@@ -478,7 +478,7 @@ void Steps::startRecordMotion() {
 
   strStartTime = QTime::currentTime().toString();
 
-  if (zh_cn) {
+  if (isZH_CN) {
     QLocale chineseLocale(QLocale::Chinese, QLocale::China);
     t0 = chineseLocale.toString(QDate::currentDate(), "ddd MM月 dd yyyy");
   } else

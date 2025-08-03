@@ -4,6 +4,8 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QRegularExpression>
+#include <QSqlError>
+#include <QSqlQuery>
 #include <QTextStream>
 
 extern std::unique_ptr<cppjieba::Jieba> jieba;
@@ -24,7 +26,8 @@ bool DatabaseManager::initDatabase(const QString &path) {
 }
 
 void DatabaseManager::setupDatabaseSchema() {
-  m_db.exec(
+  QSqlQuery query(m_db);
+  bool success1 = query.exec(
       "CREATE TABLE IF NOT EXISTS documents ("
       "id INTEGER PRIMARY KEY,"
       "path TEXT UNIQUE,"
@@ -32,9 +35,20 @@ void DatabaseManager::setupDatabaseSchema() {
       "content TEXT,"
       "terms TEXT)");
 
-  m_db.exec(
-      "CREATE VIRTUAL TABLE IF NOT EXISTS fts_documents USING fts5(path, "
-      "content, terms)");
+  // 错误处理
+  if (!success1) {
+    qWarning() << "Failed to create table:" << query.lastError().text();
+  }
+
+  bool success2 = query.exec(
+      "CREATE VIRTUAL TABLE IF NOT EXISTS fts_documents USING fts5("
+      "path, content, terms)");
+
+  // 错误处理
+  if (!success2) {
+    qWarning() << "Failed to create virtual table fts_documents:"
+               << query.lastError().text();
+  }
 }
 
 void DatabaseManager::updateFilesIndex(const QString &directory) {
@@ -123,7 +137,7 @@ QStringList DatabaseManager::tokenize(const QString &text) {
   }
 
   // 西文分词
-  QRegularExpression re("[^\\w]");
+  static QRegularExpression re("[^\\w]");
   QStringList westernWords = westernPart.split(re, Qt::SkipEmptyParts);
 
   // 合并结果

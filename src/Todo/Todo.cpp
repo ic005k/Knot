@@ -12,7 +12,7 @@ extern MainWindow* mw_one;
 extern Ui::MainWindow* mui;
 extern Method* m_Method;
 extern QString iniFile, iniDir, privateDir, encPassword, errorInfo;
-extern bool loading, isBreak, zh_cn, isDark, isAndroid, isPasswordError,
+extern bool loading, isBreak, isZH_CN, isDark, isAndroid, isPasswordError,
     isEncrypt;
 extern int fontSize;
 
