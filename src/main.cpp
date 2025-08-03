@@ -18,7 +18,6 @@
 #include <QSurfaceFormat>
 #include <QTranslator>
 #include <QWidget>
-#include <QtConcurrent>
 
 #include "MainWindow.h"
 #include "lib/cppjieba/Jieba.hpp"
@@ -74,7 +73,7 @@ QString strJBDict4 = "";
 QString strJBDict5 = "";
 
 bool isZH_CN = false;
-bool isAndroid, isIOS;
+bool isAndroid, isIOS, isWindows, isLinux, isMacOS;
 bool isInitThemeEnd;
 bool isNeedExecDeskShortcut = false;
 
@@ -89,13 +88,16 @@ int main(int argc, char* argv[]) {
   // 禁用文本选择（针对所有的可输入的编辑框）
   qputenv("QT_QPA_NO_TEXT_HANDLES", "1");
 
-#ifdef Q_OS_ANDROID
-
+#ifdef Q_OS_WIN
+  isWindows = true;
+#elif defined(Q_OS_MACOS)
+  isMacOS = true;
+#elif defined(Q_OS_IOS)
+  isIOS = true;
+#elif defined(Q_OS_ANDROID)
   isAndroid = true;
-
-#else
-  // 桌面端配置
-
+#elif defined(Q_OS_LINUX)
+  isLinux = true;
 #endif
 
   QApplication app(argc, argv);
@@ -135,8 +137,6 @@ int main(int argc, char* argv[]) {
   RegJni("com/xhh/pdfui/PDFActivity");
   RegJni("com/x/DefaultOpen");
   RegJni("com/x/DateTimePicker");
-
-  isIOS = false;
 
   iniDir = "/storage/emulated/0/KnotData/";
   privateDir = "/storage/emulated/0/.Knot/";

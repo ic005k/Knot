@@ -9,7 +9,7 @@ extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern Method *m_Method;
 extern QString iniDir, privateDir, currentMDFile, appName, errorInfo;
-extern bool isAndroid;
+extern bool isAndroid, isWindows, isLinux, isMacOS;
 extern int fontSize;
 
 extern QString loadText(QString textFile);
@@ -1077,6 +1077,17 @@ void NotesList::setDelNoteFlag(QString mdFile) {
   iniNotes.setValue("/NeedDelNotes/Note-" + QString::number(count), mdFile);
   count++;
   iniNotes.setValue("/NeedDelNotes/Count", count);
+
+  iniNotes.setValue("/NeedDelNotes/win", false);
+  iniNotes.setValue("/NeedDelNotes/android", false);
+  iniNotes.setValue("/NeedDelNotes/linux", false);
+  iniNotes.setValue("/NeedDelNotes/mac", false);
+
+  if (isWindows) iniNotes.setValue("/NeedDelNotes/win", true);
+  if (isAndroid) iniNotes.setValue("/NeedDelNotes/android", true);
+  if (isLinux) iniNotes.setValue("/NeedDelNotes/linux", true);
+  if (isMacOS) iniNotes.setValue("/NeedDelNotes/mac", true);
+
   iniNotes.sync();
 }
 
@@ -1084,6 +1095,29 @@ void NotesList::needDelNotes() {
   QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
   int count = iniNotes.value("/NeedDelNotes/Count", 0).toInt();
   if (count == 0) return;
+
+  bool _win, _android, _mac, _linux;
+  _win = iniNotes.value("/NeedDelNotes/win", false).toBool();
+  _android = iniNotes.value("/NeedDelNotes/android", false).toBool();
+  _mac = iniNotes.value("/NeedDelNotes/mac", false).toBool();
+  _linux = iniNotes.value("/NeedDelNotes/linux", false).toBool();
+
+  if (isWindows) {
+    if (_win) return;
+  }
+
+  if (isAndroid) {
+    if (_android) return;
+  }
+
+  if (isMacOS) {
+    if (_mac) return;
+  }
+
+  if (isLinux) {
+    if (_linux) return;
+  }
+
   bool isReset = false;
   for (int i = 0; i < count; i++) {
     QString mdFile =
@@ -1096,11 +1130,27 @@ void NotesList::needDelNotes() {
   }
 
   if (isReset) {
-    count = 0;
-    iniNotes.setValue("/NeedDelNotes/Count", count);
-    iniNotes.sync();
+    if (isWindows) iniNotes.setValue("/NeedDelNotes/win", true);
+    if (isAndroid) iniNotes.setValue("/NeedDelNotes/android", true);
+    if (isLinux) iniNotes.setValue("/NeedDelNotes/linux", true);
+    if (isMacOS) iniNotes.setValue("/NeedDelNotes/mac", true);
+
     mw_one->m_Notes->isSaveNoteTree = true;
   }
+
+  _win = iniNotes.value("/NeedDelNotes/win", false).toBool();
+  _android = iniNotes.value("/NeedDelNotes/android", false).toBool();
+  _mac = iniNotes.value("/NeedDelNotes/mac", false).toBool();
+  _linux = iniNotes.value("/NeedDelNotes/linux", false).toBool();
+
+  if (_win && _android && _mac && _linux) {
+    count = 0;
+    iniNotes.setValue("/NeedDelNotes/Count", count);
+
+    mw_one->m_Notes->isSaveNoteTree = true;
+  }
+
+  iniNotes.sync();
 }
 
 void NotesList::setWinPos() {
