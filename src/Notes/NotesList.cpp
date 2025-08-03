@@ -517,10 +517,18 @@ void NotesList::addItem(QTreeWidget *tw, QTreeWidgetItem *item) {
   tw->expandAll();
 }
 
-void NotesList::delFile(QString file) {
+bool NotesList::delFile(QString file) {
+  bool isOk = false;
   QFile _file(file);
-  if (_file.exists()) _file.remove();
+  if (_file.exists()) {
+    _file.remove();
+    isOk = true;
+  } else {
+    isOk = false;
+  }
+
   _file.close();
+  return isOk;
 }
 
 bool NotesList::on_btnImport_clicked() {
@@ -1053,12 +1061,46 @@ void NotesList::on_btnDel_Recycle_clicked() {
 
     delFile(md);
 
+    setDelNoteFlag(curItem->text(1));
+
     curItem->parent()->removeChild(curItem);
   }
 
   saveRecycle();
 
   resetQML_Recycle();
+}
+
+void NotesList::setDelNoteFlag(QString mdFile) {
+  QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
+  int count = iniNotes.value("/NeedDelNotes/Count", 0).toInt();
+  iniNotes.setValue("/NeedDelNotes/Note-" + QString::number(count), mdFile);
+  count++;
+  iniNotes.setValue("/NeedDelNotes/Count", count);
+  iniNotes.sync();
+}
+
+void NotesList::needDelNotes() {
+  QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
+  int count = iniNotes.value("/NeedDelNotes/Count", 0).toInt();
+  if (count == 0) return;
+  bool isReset = false;
+  for (int i = 0; i < count; i++) {
+    QString mdFile =
+        iniDir + iniNotes.value("/NeedDelNotes/Note-" + QString::number(i), "")
+                     .toString();
+
+    if (delFile(mdFile)) isReset = true;
+
+    qDebug() << "Need Del Note: " << mdFile << isReset;
+  }
+
+  if (isReset) {
+    count = 0;
+    iniNotes.setValue("/NeedDelNotes/Count", count);
+    iniNotes.sync();
+    mw_one->m_Notes->isSaveNoteTree = true;
+  }
 }
 
 void NotesList::setWinPos() {

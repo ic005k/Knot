@@ -84,7 +84,7 @@ class NotesList : public QDialog {
 
   void set_memo_dir();
 
-  void delFile(QString file);
+  bool delFile(QString file);
 
   void saveNotesList();
   void initNotesList();
@@ -170,7 +170,9 @@ class NotesList : public QDialog {
 
   void showFindNotes();
   void restoreNoteFromRecycle();
-  protected:
+  void needDelNotes();
+
+ protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
   void closeEvent(QCloseEvent *event) override;
@@ -278,6 +280,7 @@ class NotesList : public QDialog {
   void addItemToQW(QQuickWidget *qw, QString text0, QString text1,
                    QString text2, QString text3, QString text4, int itemH);
   void setColorFlag(QString strColor);
+  void setDelNoteFlag(QString mdFile);
 };
 
 class SearchMapper {

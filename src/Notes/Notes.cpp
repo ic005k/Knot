@@ -1345,6 +1345,10 @@ QString markdownToHtmlWithMath(const QString &md) {
 void Notes::openNotesUI() {
   init_all_notes();
 
+  isSaveNoteTree = false;
+
+  mw_one->m_NotesList->needDelNotes();
+
   mw_one->isMemoVisible = true;
   mw_one->isReaderVisible = false;
 
@@ -1354,8 +1358,6 @@ void Notes::openNotesUI() {
   mui->btnNotesList->click();
 
   mw_one->closeProgress();
-
-  isSaveNoteTree = false;
 
   if (isRequestOpenNoteEditor) {
     isRequestOpenNoteEditor = false;
