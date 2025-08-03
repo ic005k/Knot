@@ -7,6 +7,7 @@
 #include <QJniObject>       // Qt JNI 对象封装
 #endif
 
+#include <QElapsedTimer>
 #include <QFuture>
 #include <QObject>
 #include <QOpenGLContext>
@@ -27,7 +28,7 @@
 std::unique_ptr<cppjieba::Jieba> jieba;
 
 extern QString iniFile, txtFile, appName, iniDir, privateDir, bakfileDir,
-    customFontFamily, defaultFontFamily;
+    customFontFamily, defaultFontFamily, strStartTotalTime;
 extern int fontSize;
 extern void RegJni(const char* myClassName);
 extern void RegJni15(const char* myClassName);
@@ -80,6 +81,9 @@ bool isNeedExecDeskShortcut = false;
 #define Cross_Origin
 
 int main(int argc, char* argv[]) {
+  QElapsedTimer totalTimer;
+  totalTimer.start();
+
   QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
       Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 
@@ -269,6 +273,15 @@ int main(int argc, char* argv[]) {
   QJniObject::callStaticMethod<void>("com/x/MyActivity", "setQtMainEnd", "(Z)V",
                                      true);
 #endif
+
+  QTimer::singleShot(0, &app, [&]() {
+    qint64 totalElapsedMs = totalTimer.elapsed();
+    double totalElapsedSec = totalElapsedMs / 1000.0;
+
+    strStartTotalTime = QString::number(totalElapsedSec, 'f', 2);
+
+    qDebug() << "整体启动总耗时：" << strStartTotalTime << "秒";
+  });
 
   return app.exec();
 }

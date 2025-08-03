@@ -35,7 +35,7 @@
     </message>
     <message>
         <location filename="../../src/AboutThis.ui" line="176"/>
-        <location filename="../../src/AboutThis.cpp" line="192"/>
+        <location filename="../../src/AboutThis.cpp" line="197"/>
         <source>Upgrade Check</source>
         <translation type="unfinished"></translation>
     </message>
@@ -45,43 +45,43 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="53"/>
-        <location filename="../../src/AboutThis.cpp" line="265"/>
+        <location filename="../../src/AboutThis.cpp" line="58"/>
+        <location filename="../../src/AboutThis.cpp" line="270"/>
         <source>Download link copied.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="129"/>
+        <location filename="../../src/AboutThis.cpp" line="134"/>
         <source>Network error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="168"/>
+        <location filename="../../src/AboutThis.cpp" line="173"/>
         <source>New version detected!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="169"/>
+        <location filename="../../src/AboutThis.cpp" line="174"/>
         <source>Version: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="170"/>
+        <location filename="../../src/AboutThis.cpp" line="175"/>
         <source>Published at: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="171"/>
+        <location filename="../../src/AboutThis.cpp" line="176"/>
         <source>Release Notes: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="174"/>
+        <location filename="../../src/AboutThis.cpp" line="179"/>
         <source>Download</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="193"/>
+        <location filename="../../src/AboutThis.cpp" line="198"/>
         <source>You are currently using the latest version!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -594,7 +594,7 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="332"/>
-        <location filename="../../src/MainWindow.cpp" line="2754"/>
+        <location filename="../../src/MainWindow.cpp" line="2756"/>
         <source>Stop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -643,7 +643,7 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="636"/>
-        <location filename="../../src/MainWindow.cpp" line="1734"/>
+        <location filename="../../src/MainWindow.cpp" line="1736"/>
         <source>Reading Progress</source>
         <translation type="unfinished"></translation>
     </message>
@@ -772,14 +772,14 @@ in skydrive folder</source>
         <location filename="../../src/MainWindow.ui" line="2097"/>
         <location filename="../../src/MainWindow.ui" line="5154"/>
         <location filename="../../src/MainHelper.cpp" line="1627"/>
-        <location filename="../../src/MainWindow.cpp" line="886"/>
+        <location filename="../../src/MainWindow.cpp" line="887"/>
         <source>Month</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="1685"/>
         <location filename="../../src/MainWindow.ui" line="2126"/>
-        <location filename="../../src/MainWindow.cpp" line="887"/>
+        <location filename="../../src/MainWindow.cpp" line="888"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -805,7 +805,7 @@ in skydrive folder</source>
     <message>
         <location filename="../../src/MainWindow.ui" line="1827"/>
         <location filename="../../src/MainWindow.ui" line="3687"/>
-        <location filename="../../src/MainWindow.cpp" line="1112"/>
+        <location filename="../../src/MainWindow.cpp" line="1113"/>
         <source>Modify</source>
         <translation type="unfinished"></translation>
     </message>
@@ -822,7 +822,7 @@ in skydrive folder</source>
     <message>
         <location filename="../../src/MainWindow.ui" line="1947"/>
         <location filename="../../src/MainWindow.ui" line="7121"/>
-        <location filename="../../src/MainWindow.cpp" line="531"/>
+        <location filename="../../src/MainWindow.cpp" line="532"/>
         <source>Amount</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1249,8 +1249,8 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="4865"/>
-        <location filename="../../src/MainWindow.cpp" line="2751"/>
-        <location filename="../../src/MainWindow.cpp" line="2756"/>
+        <location filename="../../src/MainWindow.cpp" line="2753"/>
+        <location filename="../../src/MainWindow.cpp" line="2758"/>
         <source>Start</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1297,15 +1297,15 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="5212"/>
-        <location filename="../../src/MainWindow.cpp" line="834"/>
-        <location filename="../../src/MainWindow.cpp" line="1579"/>
+        <location filename="../../src/MainWindow.cpp" line="835"/>
+        <location filename="../../src/MainWindow.cpp" line="1581"/>
         <source>Total</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="5241"/>
         <location filename="../../src/MainWindow.ui" line="7059"/>
-        <location filename="../../src/MainWindow.cpp" line="533"/>
+        <location filename="../../src/MainWindow.cpp" line="534"/>
         <source>Details</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1379,7 +1379,7 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="6006"/>
-        <location filename="../../src/MainWindow.cpp" line="1937"/>
+        <location filename="../../src/MainWindow.cpp" line="1939"/>
         <source>Note Book</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1390,7 +1390,7 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="6068"/>
-        <location filename="../../src/MainWindow.cpp" line="1938"/>
+        <location filename="../../src/MainWindow.cpp" line="1940"/>
         <source>Note List</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1461,7 +1461,7 @@ in skydrive folder</source>
     <message>
         <location filename="../../src/MainWindow.ui" line="6928"/>
         <location filename="../../src/MainWindow.ui" line="6976"/>
-        <location filename="../../src/MainWindow.cpp" line="532"/>
+        <location filename="../../src/MainWindow.cpp" line="533"/>
         <source>Category</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1572,19 +1572,19 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="8136"/>
-        <location filename="../../src/MainWindow.cpp" line="868"/>
+        <location filename="../../src/MainWindow.cpp" line="869"/>
         <source>Rename Tab</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="8141"/>
-        <location filename="../../src/MainWindow.cpp" line="897"/>
+        <location filename="../../src/MainWindow.cpp" line="898"/>
         <source>Add Tab</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="8146"/>
-        <location filename="../../src/MainWindow.cpp" line="912"/>
+        <location filename="../../src/MainWindow.cpp" line="913"/>
         <source>Del Tab</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1644,40 +1644,40 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="243"/>
-        <location filename="../../src/MainWindow.cpp" line="255"/>
-        <location filename="../../src/MainWindow.cpp" line="879"/>
-        <location filename="../../src/MainWindow.cpp" line="947"/>
+        <location filename="../../src/MainWindow.cpp" line="244"/>
+        <location filename="../../src/MainWindow.cpp" line="256"/>
+        <location filename="../../src/MainWindow.cpp" line="880"/>
+        <location filename="../../src/MainWindow.cpp" line="948"/>
         <source>Tab</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="531"/>
+        <location filename="../../src/MainWindow.cpp" line="532"/>
         <source>Time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="538"/>
+        <location filename="../../src/MainWindow.cpp" line="539"/>
         <source>The last record will be moved.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="540"/>
+        <location filename="../../src/MainWindow.cpp" line="541"/>
         <source>The last record will be deleted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="544"/>
+        <location filename="../../src/MainWindow.cpp" line="545"/>
         <source>Del Item</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="578"/>
+        <location filename="../../src/MainWindow.cpp" line="579"/>
         <source>Only the current day&apos;s records can be moved.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="580"/>
+        <location filename="../../src/MainWindow.cpp" line="581"/>
         <source>Only the current day&apos;s records can be deleted.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1687,70 +1687,80 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="846"/>
+        <location filename="../../src/MainWindow.cpp" line="847"/>
         <source>Rename tab name : </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="846"/>
+        <location filename="../../src/MainWindow.cpp" line="847"/>
         <source>Tab name : </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="909"/>
+        <location filename="../../src/MainWindow.cpp" line="910"/>
         <source>Whether to remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="977"/>
+        <location filename="../../src/MainWindow.cpp" line="978"/>
         <source>Date</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1098"/>
+        <location filename="../../src/MainWindow.cpp" line="1099"/>
         <source>Only the data of the current year can be modified.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1225"/>
+        <location filename="../../src/MainWindow.cpp" line="1226"/>
         <source>An error occurred while compressing the file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1239"/>
-        <location filename="../../src/MainWindow.cpp" line="1255"/>
-        <location filename="../../src/MainWindow.cpp" line="1258"/>
+        <location filename="../../src/MainWindow.cpp" line="1240"/>
+        <location filename="../../src/MainWindow.cpp" line="1256"/>
+        <location filename="../../src/MainWindow.cpp" line="1259"/>
         <source>KnotBak</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1239"/>
+        <location filename="../../src/MainWindow.cpp" line="1240"/>
         <source>File (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1245"/>
-        <location filename="../../src/MainWindow.cpp" line="2606"/>
+        <location filename="../../src/MainWindow.cpp" line="1246"/>
+        <location filename="../../src/MainWindow.cpp" line="2608"/>
         <source>Share to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1256"/>
+        <location filename="../../src/MainWindow.cpp" line="1257"/>
         <source>Zip File (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1259"/>
+        <location filename="../../src/MainWindow.cpp" line="1260"/>
         <source>Zip File (*.zip);;All(*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1266"/>
+        <location filename="../../src/MainWindow.cpp" line="1267"/>
         <source>Import this data?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="2714"/>
+        <location filename="../../src/MainWindow.cpp" line="1338"/>
+        <source>Launched</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow.cpp" line="1339"/>
+        <source>Startup Time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow.cpp" line="2716"/>
         <source>Please enable permission to record audio!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1768,43 +1778,43 @@ in skydrive folder</source>
 <context>
     <name>Method</name>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="88"/>
+        <location filename="../../src/Comm/Method.cpp" line="89"/>
         <source>Ok</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="89"/>
-        <location filename="../../src/Comm/Method.cpp" line="768"/>
+        <location filename="../../src/Comm/Method.cpp" line="90"/>
+        <location filename="../../src/Comm/Method.cpp" line="769"/>
         <source>Cancel</source>
         <translation type="unfinished">Cancelar</translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="448"/>
+        <location filename="../../src/Comm/Method.cpp" line="449"/>
         <source>Results</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="471"/>
+        <location filename="../../src/Comm/Method.cpp" line="472"/>
         <source>Amount</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="474"/>
+        <location filename="../../src/Comm/Method.cpp" line="475"/>
         <source>Category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="477"/>
+        <location filename="../../src/Comm/Method.cpp" line="478"/>
         <source>Details</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="677"/>
+        <location filename="../../src/Comm/Method.cpp" line="678"/>
         <source>Reading, please wait...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="769"/>
+        <location filename="../../src/Comm/Method.cpp" line="770"/>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1996,7 +2006,7 @@ in skydrive folder</source>
     <message>
         <location filename="../../src/Notes/Notes.cpp" line="196"/>
         <location filename="../../src/Notes/Notes.cpp" line="1108"/>
-        <location filename="../../src/Notes/Notes.cpp" line="1721"/>
+        <location filename="../../src/Notes/Notes.cpp" line="1723"/>
         <source>An error occurred while compressing the file.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2103,13 +2113,13 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="1420"/>
+        <location filename="../../src/Notes/Notes.cpp" line="1422"/>
         <source>The current note does not exist. Please select another note or create a new note.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="1598"/>
-        <location filename="../../src/Notes/Notes.cpp" line="1642"/>
+        <location filename="../../src/Notes/Notes.cpp" line="1600"/>
+        <location filename="../../src/Notes/Notes.cpp" line="1644"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2139,7 +2149,7 @@ in skydrive folder</source>
     <message>
         <location filename="../../src/Notes/NotesList.ui" line="64"/>
         <location filename="../../src/Notes/NotesList.cpp" line="52"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="949"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="971"/>
         <source>Notebook</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2150,7 +2160,7 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.ui" line="87"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2045"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2151"/>
         <source>New Note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2214,13 +2224,13 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.ui" line="222"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2050"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2156"/>
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.ui" line="235"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2051"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2157"/>
         <source>Export</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2282,7 +2292,7 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1950"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2056"/>
         <source>Untitled Note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2317,131 +2327,131 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="488"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="492"/>
         <source>Note Book</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="489"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="493"/>
         <source>Note List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="527"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="539"/>
         <source>Knot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="527"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="539"/>
         <source>MD File (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="558"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="570"/>
         <source>Invalid Markdown file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="606"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="618"/>
         <source>MD File(*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="770"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="782"/>
         <source>Modi Notes List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="834"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="851"/>
         <source>Modi Notes Recycle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="950"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="972"/>
         <source>Notes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="965"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="987"/>
         <source>Notes Recycle Bin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1034"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1056"/>
         <source>Whether to remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1270"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1376"/>
         <source>No match was found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1865"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1971"/>
         <source>New NoteBook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1866"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1972"/>
         <source>Del NoteBook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1867"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1973"/>
         <source>Rename NoteBook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1868"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2048"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1974"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2154"/>
         <source>Move Up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1869"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2049"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1975"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2155"/>
         <source>Move Down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1870"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1976"/>
         <source>Set Color Marker</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1926"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2032"/>
         <source>Please create a new notebook first, and then create new notes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2046"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2152"/>
         <source>Del Note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2047"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2153"/>
         <source>Rename Note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2052"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2158"/>
         <source>Share</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2100"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2206"/>
         <source>Share to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2139"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2147"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2162"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2245"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2253"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2268"/>
         <source>Main Root</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2363"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2469"/>
         <source>The current note does not exist. Please select another note or create a new note.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2592,55 +2602,55 @@ in skydrive folder</source>
     <name>QInstaller</name>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="234"/>
-        <location filename="../../src/Comm/Method.cpp" line="2308"/>
+        <location filename="../../src/Comm/Method.cpp" line="2309"/>
         <source>bytes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="235"/>
-        <location filename="../../src/Comm/Method.cpp" line="2309"/>
+        <location filename="../../src/Comm/Method.cpp" line="2310"/>
         <source>KiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="236"/>
-        <location filename="../../src/Comm/Method.cpp" line="2310"/>
+        <location filename="../../src/Comm/Method.cpp" line="2311"/>
         <source>MiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="237"/>
-        <location filename="../../src/Comm/Method.cpp" line="2311"/>
+        <location filename="../../src/Comm/Method.cpp" line="2312"/>
         <source>GiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="238"/>
-        <location filename="../../src/Comm/Method.cpp" line="2312"/>
+        <location filename="../../src/Comm/Method.cpp" line="2313"/>
         <source>TiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="239"/>
-        <location filename="../../src/Comm/Method.cpp" line="2313"/>
+        <location filename="../../src/Comm/Method.cpp" line="2314"/>
         <source>PiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="240"/>
-        <location filename="../../src/Comm/Method.cpp" line="2314"/>
+        <location filename="../../src/Comm/Method.cpp" line="2315"/>
         <source>EiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="241"/>
-        <location filename="../../src/Comm/Method.cpp" line="2315"/>
+        <location filename="../../src/Comm/Method.cpp" line="2316"/>
         <source>ZiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="242"/>
-        <location filename="../../src/Comm/Method.cpp" line="2316"/>
+        <location filename="../../src/Comm/Method.cpp" line="2317"/>
         <source>YiB</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2648,8 +2658,8 @@ in skydrive folder</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../../src/main.cpp" line="703"/>
-        <location filename="../../src/main.cpp" line="707"/>
+        <location filename="../../src/main.cpp" line="716"/>
+        <location filename="../../src/main.cpp" line="720"/>
         <source>Loading, please wait...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7210,109 +7220,109 @@ in skydrive folder</source>
 <context>
     <name>Steps</name>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="147"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="224"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="364"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="158"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="235"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="375"/>
         <source>KM</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="227"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="238"/>
         <source>GPS Info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="359"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="370"/>
         <source>Calorie</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="439"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="450"/>
         <source>No GPS signal...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="440"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="453"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="451"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="464"/>
         <source>Start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="491"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="502"/>
         <source>Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="648"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="661"/>
         <source>Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="725"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="789"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1032"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1042"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="738"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="801"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1044"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1054"/>
         <source>Cycling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="726"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="794"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1034"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1044"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="739"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="806"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1046"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1056"/>
         <source>Hiking</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="727"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="799"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1036"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1046"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="740"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="811"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1048"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1058"/>
         <source>Running</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="730"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="743"/>
         <source>Time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="731"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="107"/>
         <source>Weather</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="732"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="744"/>
         <source>Distance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="733"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="745"/>
         <source>Exercise Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="734"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="746"/>
         <source>Average Speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1030"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1042"/>
         <source>Month</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1040"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1052"/>
         <source>Year</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1438"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1450"/>
         <source>Today</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1439"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1451"/>
         <source>km</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7698,27 +7708,27 @@ in skydrive folder</source>
 <context>
     <name>WeatherFetcher</name>
     <message>
-        <location filename="../../src/Exercise/WeatherFetcher.h" line="136"/>
+        <location filename="../../src/Exercise/WeatherFetcher.h" line="160"/>
         <source>网络错误: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/WeatherFetcher.h" line="146"/>
+        <location filename="../../src/Exercise/WeatherFetcher.h" line="170"/>
         <source>无法解析天气数据</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/WeatherFetcher.h" line="160"/>
+        <location filename="../../src/Exercise/WeatherFetcher.h" line="184"/>
         <source>未获取到体感温度数据</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/WeatherFetcher.h" line="168"/>
+        <location filename="../../src/Exercise/WeatherFetcher.h" line="192"/>
         <source>未获取到天气代码数据</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/WeatherFetcher.h" line="193"/>
+        <location filename="../../src/Exercise/WeatherFetcher.h" line="217"/>
         <source>天气数据格式错误</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7840,7 +7850,7 @@ in skydrive folder</source>
 <context>
     <name>noterecycle</name>
     <message>
-        <location filename="../../src/qmlsrc/noterecycle.qml" line="311"/>
+        <location filename="../../src/qmlsrc/noterecycle.qml" line="324"/>
         <source>Done</source>
         <translation type="unfinished"></translation>
     </message>

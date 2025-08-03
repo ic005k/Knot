@@ -43,7 +43,8 @@ extern bool isAndroid, isIOS, isZH_CN, isEpub, isEpubError, isText, isPDF,
     isNeedExecDeskShortcut;
 
 extern QString btnYearText, btnMonthText, strPage, ebookFile, strTitle,
-    fileName, strOpfPath, catalogueFile, strShowMsg, ver, appName;
+    fileName, strOpfPath, catalogueFile, strShowMsg, ver, appName,
+    strStartTotalTime;
 
 extern QStringList readTextList, htmlFiles, listCategory;
 
@@ -1334,7 +1335,8 @@ void MainWindow::on_actionAbout() {
   textBrowser->append(appName + "  Ver: " + ver);
 
   textBrowser->append("");
-  textBrowser->append("Launched: " + loginTime);
+  textBrowser->append(tr("Launched") + ": " + loginTime + "\n" +
+                      tr("Startup Time") + ": " + strStartTotalTime + " s");
   textBrowser->append("");
   textBrowser->setHidden(true);
 

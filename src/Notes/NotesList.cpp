@@ -832,6 +832,11 @@ void NotesList::saveNotesList() {
     }
   }
 
+  /*QString binaryPath = iniDir + "mainnotes.bin";  // 二进制文件路径
+  if (BinaryHandler::writeToBinary(binaryPath, tw)) {
+    mw_one->strLatestModify = tr("Modi Notes List (Binary)");
+  }*/
+
   // Save Note Name
   QSettings Reg1(iniDir + "curmd.ini", QSettings::IniFormat);
 
@@ -868,6 +873,11 @@ void NotesList::saveRecycle() {
 
 void NotesList::initNotesList() {
   tw->clear();
+
+  /*QString binaryPath = iniDir + "mainnotes.bin";
+  if (QFile::exists(binaryPath)) {
+    BinaryHandler::readFromBinary(binaryPath, tw);
+  }*/
 
   QSettings *iniNotes =
       new QSettings(iniDir + "mainnotes.ini", QSettings::IniFormat, NULL);

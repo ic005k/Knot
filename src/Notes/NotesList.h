@@ -25,6 +25,7 @@
 #include "src/Comm/TextEditToolbar.h"
 #include "src/Notes/MoveTo.h"
 #include "src/Notes/NewNoteBook.h"
+#include "src/Notes/SaveNoteTree.h"
 #include "ui_MoveTo.h"
 
 struct MySearchResult {

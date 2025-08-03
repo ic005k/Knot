@@ -7,6 +7,8 @@
 QString ver = "2.1.01";
 QString appName = "Knot";
 
+QString strStartTotalTime;
+
 extern MainWindow *mw_one;
 extern Method *m_Method;
 extern bool loading, isZH_CN;
