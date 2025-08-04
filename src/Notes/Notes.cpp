@@ -1345,7 +1345,7 @@ QString markdownToHtmlWithMath(const QString &md) {
 void Notes::openNotesUI() {
   init_all_notes();
 
-  isSaveNoteTree = false;
+  isSaveNotesConfig = false;
 
   mw_one->m_NotesList->needDelNotes();
 
@@ -1713,9 +1713,9 @@ void Notes::openNotes() {
 }
 
 void Notes::updateMainnotesIniToSyncLists() {
-  qDebug() << "isSaveNoteTree=" << isSaveNoteTree;
+  qDebug() << "isSaveNotesConfig=" << isSaveNotesConfig;
 
-  if (isSaveNoteTree) {
+  if (isSaveNotesConfig) {
     QString zipMainnotes = privateDir + "KnotData/mainnotes.ini.zip";
 
     if (!m_Method->compressFileWithZlib(iniDir + "mainnotes.ini", zipMainnotes,

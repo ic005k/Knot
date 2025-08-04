@@ -155,7 +155,7 @@ class Notes : public QDialog {
 
   void updateMainnotesIniToSyncLists();
 
-  bool isSaveNoteTree = false;
+  bool isSaveNotesConfig = false;
 
   void updateMDFileToSyncLists(QString currentMDFile);
 
@@ -167,7 +167,8 @@ class Notes : public QDialog {
 
   void previewNote();
   void appendToSyncList(QString file);
-  protected:
+
+ protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
   bool eventFilter(QObject *obj, QEvent *event) override;

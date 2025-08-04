@@ -842,7 +842,7 @@ void NotesList::saveNotesList() {
 
   Reg1.setValue("/MainNotes/NoteName", noteTitle);
 
-  mw_one->m_Notes->isSaveNoteTree = true;
+  mw_one->m_Notes->isSaveNotesConfig = true;
 }
 
 void NotesList::saveRecycle() {
@@ -868,7 +868,7 @@ void NotesList::saveRecycle() {
         strChild1);
   }
 
-  mw_one->m_Notes->isSaveNoteTree = true;
+  mw_one->m_Notes->isSaveNotesConfig = true;
 }
 
 void NotesList::initNotesList() {
@@ -1145,7 +1145,7 @@ void NotesList::needDelNotes() {
     if (isLinux) iniNotes.setValue("/NeedDelNotes/linux", true);
     if (isMacOS) iniNotes.setValue("/NeedDelNotes/mac", true);
 
-    mw_one->m_Notes->isSaveNoteTree = true;
+    mw_one->m_Notes->isSaveNotesConfig = true;
   }
 
   _win = iniNotes.value("/NeedDelNotes/win", false).toBool();
@@ -1157,7 +1157,7 @@ void NotesList::needDelNotes() {
     count = 0;
     iniNotes.setValue("/NeedDelNotes/Count", count);
 
-    mw_one->m_Notes->isSaveNoteTree = true;
+    mw_one->m_Notes->isSaveNotesConfig = true;
   }
 
   iniNotes.sync();

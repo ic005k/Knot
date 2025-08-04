@@ -220,8 +220,8 @@ Rectangle {
                         Image {
                             id: weatherIcon
                             source: item6.text
-                            sourceSize.height: 32
-                            sourceSize.width: 32
+                            sourceSize.height: 42
+                            sourceSize.width: 42
                             fillMode: Image.PreserveAspectFit
                             Layout.alignment: Qt.AlignVCenter
                             Layout.leftMargin: 5
