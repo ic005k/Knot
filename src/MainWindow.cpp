@@ -1335,8 +1335,8 @@ void MainWindow::on_actionAbout() {
   textBrowser->append(appName + "  Ver: " + ver);
 
   textBrowser->append("");
-  textBrowser->append(tr("Launched") + ": " + loginTime + "\n" +
-                      tr("Startup Time") + ": " + strStartTotalTime + " s");
+  textBrowser->append(tr("Startup Time") + ": " + strStartTotalTime + " s" +
+                      "\n" + loginTime);
   textBrowser->append("");
   textBrowser->setHidden(true);
 

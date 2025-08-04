@@ -162,5 +162,13 @@
         <file>res/theme/darkstyle.qss</file>
         <file>res/theme/lightstyle.qss</file>
         <file>src/cn.qm</file>
+        <file>res/weather/clear.svg</file>
+        <file>res/weather/cloudy.svg</file>
+        <file>res/weather/fog.svg</file>
+        <file>res/weather/partly_cloudy.svg</file>
+        <file>res/weather/rain.svg</file>
+        <file>res/weather/shower.svg</file>
+        <file>res/weather/snow.svg</file>
+        <file>res/weather/thunderstorm.svg</file>
     </qresource>
 </RCC>

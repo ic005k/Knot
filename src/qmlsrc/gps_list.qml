@@ -98,7 +98,7 @@ Rectangle {
                           })
     }
 
-    function insertItem(curIndex, t0, t1, t2, t3, t4, t5, height) {
+    function insertItem(curIndex, t0, t1, t2, t3, t4, t5, t6, height) {
 
         view.model.insert(curIndex, {
                               "text0": t0,
@@ -107,6 +107,7 @@ Rectangle {
                               "text3": t3,
                               "text4": t4,
                               "text5": t5,
+                              "text6": t6,
                               "myh": height
                           })
     }
@@ -210,24 +211,42 @@ Rectangle {
                         }
                     }
 
-                    Text {
-                        id: item1
+                    RowLayout {
+                        id: weatherTextContainer
                         Layout.preferredWidth: listItem.width
-
                         Layout.alignment: Qt.AlignHCenter
-                        horizontalAlignment: Text.AlignLeft
-                        verticalAlignment: Text.AlignVCenter
 
-                        width: parent.width
-                        wrapMode: TextArea.WordWrap
+                        // 显示SVG图标的组件
+                        Image {
+                            id: weatherIcon
+                            source: item6.text
+                            sourceSize.height: 32
+                            sourceSize.width: 32
+                            fillMode: Image.PreserveAspectFit
+                            Layout.alignment: Qt.AlignVCenter
+                            Layout.leftMargin: 5
+                            visible: item6.text.length ? true : false
+                        }
 
-                        font.bold: false
-                        text: text1
+                        Text {
+                            id: item1
+                            Layout.preferredWidth: listItem.width
 
-                        leftPadding: 5
-                        rightPadding: 5
+                            Layout.alignment: Qt.AlignHCenter
+                            horizontalAlignment: Text.AlignLeft
+                            verticalAlignment: Text.AlignVCenter
 
-                        visible: item1.text.length ? true : false
+                            width: parent.width
+                            wrapMode: TextArea.WordWrap
+
+                            font.bold: false
+                            text: text1
+
+                            leftPadding: 5
+                            rightPadding: 5
+
+                            visible: item1.text.length ? true : false
+                        }
                     }
 
                     Rectangle {
@@ -301,16 +320,32 @@ Rectangle {
                         width: parent.width
                         wrapMode: Text.WrapAnywhere
                         elide: Text.ElideRight
-                        //Layout.maximumWidth: listItem.width
+
                         Layout.preferredWidth: listItem.width
                         font.bold: false
                         text: text5
 
-                        //color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
                         leftPadding: 5
                         rightPadding: 5
 
                         visible: item5.text.length ? true : false
+                    }
+
+                    Text {
+                        id: item6
+                        anchors.rightMargin: 0
+                        width: parent.width
+                        wrapMode: Text.WrapAnywhere
+                        elide: Text.ElideRight
+
+                        Layout.preferredWidth: listItem.width
+                        font.bold: false
+                        text: text6
+
+                        leftPadding: 5
+                        rightPadding: 5
+
+                        visible: false
                     }
 
                     Button {

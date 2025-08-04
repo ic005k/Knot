@@ -92,27 +92,25 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
 
   weatherFetcher = new WeatherFetcher(this);
   // 连接信号时，通过天气代码转换为Unicode符号
-  connect(
-      weatherFetcher,
-      static_cast<void (WeatherFetcher::*)(double, int, const QString&)>(
-          &WeatherFetcher::weatherUpdated),
-      this, [this](double temp, int code, const QString& desc) {
-        // 1. 将天气代码转换为枚举
-        WeatherFetcher::WeatherCondition condition =
-            WeatherFetcher::weatherCodeToCondition(code);
-        // 2. 获取对应的Unicode符号
-        QString weatherIcon = WeatherFetcher::conditionToUnicode(condition);
+  connect(weatherFetcher,
+          static_cast<void (WeatherFetcher::*)(double, int, const QString&)>(
+              &WeatherFetcher::weatherUpdated),
+          this, [this](double temp, int code, const QString& desc) {
+            // 1. 将天气代码转换为枚举
+            WeatherFetcher::WeatherCondition condition =
+                WeatherFetcher::weatherCodeToCondition(code);
+            // 2. 获取对应的Unicode符号
+            QString weatherIcon = WeatherFetcher::conditionToUnicode(condition);
+            strCurrentWeatherIcon = weatherIcon;
 
-        // 3. 组合显示（符号+温度+描述）
-        strCurrentTemp = "\n" + tr("Weather") + ": " +
-                         QString("%1 %2℃  %3")
-                             .arg(weatherIcon)  // Unicode符号
-                             .arg(temp)         // 体感温度
-                             .arg(desc);        // 天气描述（中文/英文）
+            // 3. 组合显示（符号+温度+描述）
+            strCurrentTemp = "\n" + tr("Weather") + ": " +
+                             QString("%1℃  %2")  // 只保留温度和描述的占位符
+                                 .arg(temp)      // 体感温度
+                                 .arg(desc);     // 天气描述（中文/英文）
 
-        qDebug()
-            << strCurrentTemp;  // 示例："☀️ 28℃  晴" 或 "⛅ 15℃  PartlyCloudy"
-      });
+            qDebug() << strCurrentTemp << strCurrentWeatherIcon;
+          });
 
   connect(weatherFetcher, &WeatherFetcher::errorOccurred, this,
           [this](const QString& error) {
@@ -769,16 +767,16 @@ void Steps::refreshMotionData() {
       m_Method->delItemFromQW(mui->qwGpsList, 0);
     }
 
-    insertGpsList(0, t00, t1, t2, t3, t4, t5);
+    insertGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
 
     QSettings Reg1(iniDir + stry + "-gpslist.ini", QSettings::IniFormat);
 
     int count = getGpsListCount();
     QString strYearMonth = stry + "-" + strm;
     Reg1.setValue("/" + strYearMonth + "/Count", count);
-    Reg1.setValue(
-        "/" + strYearMonth + "/" + QString::number(count),
-        t00 + "-=-" + t1 + "-=-" + t2 + "-=-" + t3 + "-=-" + t4 + "-=-" + t5);
+    Reg1.setValue("/" + strYearMonth + "/" + QString::number(count),
+                  t00 + "-=-" + t1 + "-=-" + t2 + "-=-" + t3 + "-=-" + t4 +
+                      "-=-" + t5 + "-=-" + strCurrentWeatherIcon);
 
     double dMonthTotal = 0;  // 里程月总计
     double dCycling = 0;
@@ -827,13 +825,13 @@ void Steps::refreshMotionData() {
 }
 
 void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
-                          QString t3, QString t4, QString t5) {
+                          QString t3, QString t4, QString t5, QString t6) {
   QQuickItem* root = mui->qwGpsList->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "insertItem",
-                            Q_ARG(QVariant, curIndex), Q_ARG(QVariant, t0),
-                            Q_ARG(QVariant, t1), Q_ARG(QVariant, t2),
-                            Q_ARG(QVariant, t3), Q_ARG(QVariant, t4),
-                            Q_ARG(QVariant, t5), Q_ARG(QVariant, 0));
+  QMetaObject::invokeMethod(
+      (QObject*)root, "insertItem", Q_ARG(QVariant, curIndex),
+      Q_ARG(QVariant, t0), Q_ARG(QVariant, t1), Q_ARG(QVariant, t2),
+      Q_ARG(QVariant, t3), Q_ARG(QVariant, t4), Q_ARG(QVariant, t5),
+      Q_ARG(QVariant, t6), Q_ARG(QVariant, 0));
 }
 
 int Steps::getGpsListCount() {
@@ -870,7 +868,7 @@ void Steps::loadGpsList(int nYear, int nMonth) {
         Reg.value("/" + strYearMonth + "/" + QString::number(i + 1), "")
             .toString();
     QStringList list = str.split("-=-");
-    QString t0, t1, t2, t3, t4, t5;
+    QString t0, t1, t2, t3, t4, t5, t6;
     if (list.count() > 0) {
       t0 = list.at(0);
       t1 = list.at(1);
@@ -878,9 +876,10 @@ void Steps::loadGpsList(int nYear, int nMonth) {
       t3 = list.at(3);
       t4 = list.at(4);
       t5 = list.at(5);
+      if (list.count() == 7) t6 = list.at(6);
     }
 
-    insertGpsList(0, t0, t1, t2, t3, t4, t5);
+    insertGpsList(0, t0, t1, t2, t3, t4, t5, t6);
   }
 }
 

@@ -132,7 +132,8 @@ class Steps : public QDialog {
   void updateGetGps();
 
  private:
-  QString strCurrentTemp;
+  QString strCurrentTemp, strCurrentWeatherIcon;
+
   double maxSpeed = 0.00;
   qlonglong totalSeconds;
 
@@ -177,7 +178,7 @@ class Steps : public QDialog {
   QString t0, str1, str2, str3, str4, str5, str6, str7;
 
   void insertGpsList(int curIndex, QString t0, QString t1, QString t2,
-                     QString t3, QString t4, QString t5);
+                     QString t3, QString t4, QString t5, QString t6);
   QString strStartTime, strEndTime;
 
   QString getGpsListText2(int index);

@@ -121,9 +121,32 @@ class WeatherFetcher : public QObject {
   static QString conditionToUnicode(WeatherCondition condition) {
     switch (condition) {
       case Clear:
+        return "/res/weather/clear.svg";  // 晴天
+      case PartlyCloudy:
+        return "/res/weather/partly_cloudy.svg";  // 多云
+      case Cloudy:
+        return "/res/weather/cloudy.svg";  // 阴天
+      case Fog:
+        return "/res/weather/fog.svg";  // 雾
+      case Rain:
+        return "/res/weather/rain.svg";  // 雨
+      case Snow:
+        return "/res/weather/snow.svg";  // 雪
+      case Shower:
+        return "/res/weather/shower.svg";  // 阵雨
+      case Thunderstorm:
+        return "/res/weather/thunderstorm.svg";  // 雷暴
+      default:
+        return "";  // 未知
+    }
+  }
+
+  static QString conditionToUnicode_test(WeatherCondition condition) {
+    switch (condition) {
+      case Clear:
         return "☀️";  // 晴天
       case PartlyCloudy:
-        return "⛅";  // 多云
+        return "🌤️";  // 替代多云符号，安卓支持更好
       case Cloudy:
         return "☁️";  // 阴天
       case Fog:
