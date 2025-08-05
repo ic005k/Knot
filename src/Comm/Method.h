@@ -390,7 +390,8 @@ class Method : public QDialog {
   QObjectList getAllUIControls(QObject *parent);
   QString secondsToTime(ulong totalTime);
   bool copyFileToPath(QString sourceDir, QString toDir, bool coverFileIfExist);
-  protected:
+
+ protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
  public slots:
@@ -428,6 +429,128 @@ class IOSCircularProgress : public QWidget {
   Q_PROPERTY(qreal progress READ progress WRITE setProgress)
  public:
   explicit IOSCircularProgress(QWidget *parent = nullptr)
+      : QWidget(parent),
+        m_rotation(0),
+        m_progress(0),
+        m_penWidth(5),
+        m_seconds(0) {
+    setFixedSize(60, 60);
+
+    // 旋转动画
+    m_rotateAnimation = new QPropertyAnimation(this, "rotationAngle", this);
+    m_rotateAnimation->setDuration(1500);
+    m_rotateAnimation->setLoopCount(-1);
+    m_rotateAnimation->setStartValue(0);
+    m_rotateAnimation->setEndValue(360);
+    m_rotateAnimation->start();
+
+    // 进度动画（示例用）
+    QPropertyAnimation *progressAnim =
+        new QPropertyAnimation(this, "progress", this);
+    progressAnim->setDuration(3000);
+    progressAnim->setLoopCount(-1);
+    progressAnim->setStartValue(0);
+    progressAnim->setEndValue(1);
+    progressAnim->start();
+
+    // 初始化计时器，每秒更新一次
+    m_timer = new QTimer(this);
+    connect(m_timer, &QTimer::timeout, this,
+            &IOSCircularProgress::updateSeconds);
+    m_timer->start(1000);  // 1000毫秒 = 1秒
+  }
+
+  int rotationAngle() const { return m_rotation; }
+  void setRotationAngle(int angle) {
+    m_rotation = angle;
+    update();
+  }
+
+  qreal progress() const { return m_progress; }
+  void setProgress(qreal p) {
+    m_progress = qBound<qreal>(0, p, 1);
+    update();
+  }
+
+ protected:
+  void paintEvent(QPaintEvent *) override {
+    QPainter p(this);
+    p.setRenderHint(QPainter::Antialiasing);
+
+    const qreal outerRadius = qMin(width(), height()) * 0.5 - m_penWidth;
+    const QPointF center = rect().center();
+
+    // 绘制背景环
+    QPen bgPen(QColor("#E5E5E5"));
+    bgPen.setWidth(m_penWidth);
+    bgPen.setCapStyle(Qt::RoundCap);
+    p.setPen(bgPen);
+    p.drawEllipse(center, outerRadius, outerRadius);
+
+    // 绘制进度环
+    if (m_progress > 0) {
+      QConicalGradient gradient(center, -m_rotation);
+      gradient.setColorAt(0.0, QColor("#007AFF"));
+      gradient.setColorAt(0.5, QColor("#34C759"));
+      gradient.setColorAt(1.0, QColor("#007AFF"));
+
+      QPen progressPen(QBrush(gradient), m_penWidth);
+      progressPen.setCapStyle(Qt::RoundCap);
+      p.setPen(progressPen);
+
+      int startAngle = (-m_rotation + 90) * 16;
+      int spanAngle = -m_progress * 360 * 16;
+
+      p.drawArc(QRectF(center.x() - outerRadius, center.y() - outerRadius,
+                       outerRadius * 2, outerRadius * 2),
+                startAngle, spanAngle);
+    }
+
+    // 绘制高光
+    QRadialGradient highlight(center, outerRadius * 2);
+    highlight.setColorAt(0.0, QColor(255, 255, 255, 150));
+    highlight.setColorAt(0.3, QColor(255, 255, 255, 50));
+    highlight.setColorAt(1.0, Qt::transparent);
+    p.setBrush(highlight);
+    p.setPen(Qt::NoPen);
+    p.drawEllipse(center, outerRadius + m_penWidth / 2,
+                  outerRadius + m_penWidth / 2);
+
+    // 绘制中央秒数
+    p.setPen(QColor("#333333"));  // 文本颜色
+    QFont font = p.font();
+    // 调整字体大小以确保两位数不会超出圆圈
+    font.setPointSize(12);
+    p.setFont(font);
+
+    // 文本居中显示
+    p.drawText(rect(), Qt::AlignCenter, QString::number(m_seconds));
+  }
+
+ private slots:
+  // 更新秒数
+  void updateSeconds() {
+    m_seconds++;
+    // 如果需要，可以在这里添加重置逻辑，例如超过99秒后重置
+    // if (m_seconds > 99) m_seconds = 0;
+    update();  // 触发重绘
+  }
+
+ private:
+  QPropertyAnimation *m_rotateAnimation;
+  QTimer *m_timer;  // 计时器
+  int m_rotation;
+  qreal m_progress;
+  int m_penWidth;
+  int m_seconds;  // 秒数计数器
+};
+
+class IOSCircularProgress_NoTimer : public QWidget {
+  Q_OBJECT
+  Q_PROPERTY(int rotationAngle READ rotationAngle WRITE setRotationAngle)
+  Q_PROPERTY(qreal progress READ progress WRITE setProgress)
+ public:
+  explicit IOSCircularProgress_NoTimer(QWidget *parent = nullptr)
       : QWidget(parent), m_rotation(0), m_progress(0), m_penWidth(5) {
     setFixedSize(60, 60);
 
