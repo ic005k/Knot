@@ -818,9 +818,10 @@ void CloudBackup::getRemoteFileList(QString url) {
   isGetRemoteFileListEnd = false;
 
   WebDavHelper *helper = listWebDavFiles(url, USERNAME, APP_PASSWORD);
+  helper->setParent(this);
   // 连接信号
   QObject::connect(
-      helper, &WebDavHelper::listCompleted,
+      helper, &WebDavHelper::listCompleted, this,
       [=](const QList<QPair<QString, QDateTime>> &files) {
         qDebug() << "获取到文件列表:";
         qDebug() << "共找到" << files.size() << "个文件:";
@@ -835,7 +836,7 @@ void CloudBackup::getRemoteFileList(QString url) {
         isGetRemoteFileListEnd = true;
       });
 
-  QObject::connect(helper, &WebDavHelper::errorOccurred,
+  QObject::connect(helper, &WebDavHelper::errorOccurred, this,
                    [=](const QString &error) {
                      qDebug() << "操作失败:" << error;
                      isGetRemoteFileListEnd = true;

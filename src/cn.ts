@@ -265,7 +265,7 @@ in skydrive folder</source>
         <translation type="vanished">下载文件成功</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="921"/>
+        <location filename="CloudBackup.cpp" line="922"/>
         <source>Downloading data?</source>
         <translation>下载数据？</translation>
     </message>
@@ -300,7 +300,7 @@ in skydrive folder</source>
         <translation>下载错误</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="922"/>
+        <location filename="CloudBackup.cpp" line="923"/>
         <source>This action overwrites local files with files in the cloud.</source>
         <translation>此操作将会用云端的文件覆盖本地文件</translation>
     </message>
@@ -2097,12 +2097,11 @@ in skydrive folder</source>
         <translation>是否导入这个数据？</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="1338"/>
         <source>Launched</source>
-        <translation>应用启动</translation>
+        <translation type="vanished">应用启动</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="1339"/>
+        <location filename="MainWindow.cpp" line="1338"/>
         <source>Startup Time</source>
         <translation>启动时间</translation>
     </message>
@@ -2584,7 +2583,7 @@ in skydrive folder</source>
     <message>
         <location filename="Notes/Notes.cpp" line="196"/>
         <location filename="Notes/Notes.cpp" line="1108"/>
-        <location filename="Notes/Notes.cpp" line="1723"/>
+        <location filename="Notes/Notes.cpp" line="1743"/>
         <source>An error occurred while compressing the file.</source>
         <translation>压缩文件时发生错误。</translation>
     </message>
@@ -2640,8 +2639,13 @@ in skydrive folder</source>
         <translation>当前笔记不存在。请选择其它笔记或新建笔记。</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1600"/>
-        <location filename="Notes/Notes.cpp" line="1644"/>
+        <location filename="Notes/Notes.cpp" line="1587"/>
+        <source>Synchronization failed. Please try again later.</source>
+        <translation>同步失败，请稍后再试。</translation>
+    </message>
+    <message>
+        <location filename="Notes/Notes.cpp" line="1649"/>
+        <location filename="Notes/Notes.cpp" line="1691"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation>解压文件不成功，请在偏好设置里面检查各平台的密码是否一致。</translation>
     </message>
@@ -3032,7 +3036,7 @@ in skydrive folder</source>
         <translation>主根</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2469"/>
+        <location filename="Notes/NotesList.cpp" line="2467"/>
         <source>The current note does not exist. Please select another note or create a new note.</source>
         <translation>当前笔记不存在。请选择其它笔记或新建笔记。</translation>
     </message>
@@ -8177,8 +8181,8 @@ in skydrive folder</source>
         <translation type="vanished">暂停</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="451"/>
-        <location filename="Exercise/Steps.cpp" line="464"/>
+        <location filename="Exercise/Steps.cpp" line="449"/>
+        <location filename="Exercise/Steps.cpp" line="462"/>
         <source>Start</source>
         <translation>启动</translation>
     </message>
@@ -8187,37 +8191,37 @@ in skydrive folder</source>
         <translation type="vanished">步数</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="370"/>
+        <location filename="Exercise/Steps.cpp" line="368"/>
         <source>Calorie</source>
         <translation>卡路里</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="450"/>
+        <location filename="Exercise/Steps.cpp" line="448"/>
         <source>No GPS signal...</source>
         <oldsource>Search the GPS...</oldsource>
         <translation>没有GPS信号...</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="738"/>
-        <location filename="Exercise/Steps.cpp" line="801"/>
-        <location filename="Exercise/Steps.cpp" line="1044"/>
-        <location filename="Exercise/Steps.cpp" line="1054"/>
+        <location filename="Exercise/Steps.cpp" line="736"/>
+        <location filename="Exercise/Steps.cpp" line="799"/>
+        <location filename="Exercise/Steps.cpp" line="1043"/>
+        <location filename="Exercise/Steps.cpp" line="1053"/>
         <source>Cycling</source>
         <translation>骑行</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="739"/>
-        <location filename="Exercise/Steps.cpp" line="806"/>
-        <location filename="Exercise/Steps.cpp" line="1046"/>
-        <location filename="Exercise/Steps.cpp" line="1056"/>
+        <location filename="Exercise/Steps.cpp" line="737"/>
+        <location filename="Exercise/Steps.cpp" line="804"/>
+        <location filename="Exercise/Steps.cpp" line="1045"/>
+        <location filename="Exercise/Steps.cpp" line="1055"/>
         <source>Hiking</source>
         <translation>徒步</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="740"/>
-        <location filename="Exercise/Steps.cpp" line="811"/>
-        <location filename="Exercise/Steps.cpp" line="1048"/>
-        <location filename="Exercise/Steps.cpp" line="1058"/>
+        <location filename="Exercise/Steps.cpp" line="738"/>
+        <location filename="Exercise/Steps.cpp" line="809"/>
+        <location filename="Exercise/Steps.cpp" line="1047"/>
+        <location filename="Exercise/Steps.cpp" line="1057"/>
         <source>Running</source>
         <translation>跑步</translation>
     </message>
@@ -8227,32 +8231,32 @@ in skydrive folder</source>
         <translation>天气</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="745"/>
+        <location filename="Exercise/Steps.cpp" line="743"/>
         <source>Exercise Duration</source>
         <translation>运动时长</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="746"/>
+        <location filename="Exercise/Steps.cpp" line="744"/>
         <source>Average Speed</source>
         <translation>平均速度</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1042"/>
+        <location filename="Exercise/Steps.cpp" line="1041"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1052"/>
+        <location filename="Exercise/Steps.cpp" line="1051"/>
         <source>Year</source>
         <translation>年</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1450"/>
+        <location filename="Exercise/Steps.cpp" line="1449"/>
         <source>Today</source>
         <translation>今天</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1451"/>
+        <location filename="Exercise/Steps.cpp" line="1450"/>
         <source>km</source>
         <translation>公里</translation>
     </message>
@@ -8269,17 +8273,17 @@ in skydrive folder</source>
         <translation type="vanished">总距离</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="744"/>
+        <location filename="Exercise/Steps.cpp" line="742"/>
         <source>Distance</source>
         <translation>距离</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="661"/>
+        <location filename="Exercise/Steps.cpp" line="659"/>
         <source>Duration</source>
         <translation>持续时间</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="238"/>
+        <location filename="Exercise/Steps.cpp" line="236"/>
         <source>GPS Info</source>
         <translation>GPS信息</translation>
     </message>
@@ -8312,7 +8316,7 @@ in skydrive folder</source>
         <translation type="vanished">周日</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="502"/>
+        <location filename="Exercise/Steps.cpp" line="500"/>
         <source>Stop</source>
         <translation>停止</translation>
     </message>
@@ -8321,14 +8325,14 @@ in skydrive folder</source>
         <translation type="vanished">速度</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="743"/>
+        <location filename="Exercise/Steps.cpp" line="741"/>
         <source>Time</source>
         <translation>时间</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="158"/>
-        <location filename="Exercise/Steps.cpp" line="235"/>
-        <location filename="Exercise/Steps.cpp" line="375"/>
+        <location filename="Exercise/Steps.cpp" line="156"/>
+        <location filename="Exercise/Steps.cpp" line="233"/>
+        <location filename="Exercise/Steps.cpp" line="373"/>
         <source>KM</source>
         <translation>公里</translation>
     </message>
@@ -8848,27 +8852,27 @@ in skydrive folder</source>
 <context>
     <name>WeatherFetcher</name>
     <message>
-        <location filename="Exercise/WeatherFetcher.h" line="160"/>
+        <location filename="Exercise/WeatherFetcher.h" line="183"/>
         <source>网络错误: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/WeatherFetcher.h" line="170"/>
+        <location filename="Exercise/WeatherFetcher.h" line="193"/>
         <source>无法解析天气数据</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/WeatherFetcher.h" line="184"/>
+        <location filename="Exercise/WeatherFetcher.h" line="207"/>
         <source>未获取到体感温度数据</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/WeatherFetcher.h" line="192"/>
+        <location filename="Exercise/WeatherFetcher.h" line="215"/>
         <source>未获取到天气代码数据</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/WeatherFetcher.h" line="217"/>
+        <location filename="Exercise/WeatherFetcher.h" line="240"/>
         <source>天气数据格式错误</source>
         <translation></translation>
     </message>
@@ -10156,23 +10160,23 @@ in skydrive folder</source>
         <translation type="vanished">完成</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="193"/>
+        <location filename="qmlsrc/gps_list.qml" line="194"/>
         <source>Cycling</source>
         <oldsource>Clyling</oldsource>
         <translation>骑行</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="194"/>
+        <location filename="qmlsrc/gps_list.qml" line="195"/>
         <source>Hiking</source>
         <translation>徒步</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="194"/>
+        <location filename="qmlsrc/gps_list.qml" line="195"/>
         <source>Running</source>
         <translation>跑步</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="319"/>
+        <location filename="qmlsrc/gps_list.qml" line="354"/>
         <source>View GPS Track</source>
         <translation>查看GPS轨迹</translation>
     </message>

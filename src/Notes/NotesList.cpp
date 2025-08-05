@@ -2461,8 +2461,6 @@ void NotesList::clickNoteList() {
   QString strMD = m_Method->getText3(mui->qwNoteList, index);
   currentMDFile = iniDir + strMD;
 
-  qDebug() << "currentMDFile=" << currentMDFile;
-
   if (!QFile::exists(currentMDFile)) {
     ShowMessage *msg = new ShowMessage(mw_one);
     msg->showMsg(appName,

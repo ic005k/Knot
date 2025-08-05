@@ -258,12 +258,12 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="921"/>
+        <location filename="../../src/CloudBackup.cpp" line="922"/>
         <source>Downloading data?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="922"/>
+        <location filename="../../src/CloudBackup.cpp" line="923"/>
         <source>This action overwrites local files with files in the cloud.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1751,11 +1751,6 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="../../src/MainWindow.cpp" line="1338"/>
-        <source>Launched</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/MainWindow.cpp" line="1339"/>
         <source>Startup Time</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2006,7 +2001,7 @@ in skydrive folder</source>
     <message>
         <location filename="../../src/Notes/Notes.cpp" line="196"/>
         <location filename="../../src/Notes/Notes.cpp" line="1108"/>
-        <location filename="../../src/Notes/Notes.cpp" line="1723"/>
+        <location filename="../../src/Notes/Notes.cpp" line="1743"/>
         <source>An error occurred while compressing the file.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2118,8 +2113,13 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="1600"/>
-        <location filename="../../src/Notes/Notes.cpp" line="1644"/>
+        <location filename="../../src/Notes/Notes.cpp" line="1587"/>
+        <source>Synchronization failed. Please try again later.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/Notes.cpp" line="1649"/>
+        <location filename="../../src/Notes/Notes.cpp" line="1691"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2451,7 +2451,7 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2469"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2467"/>
         <source>The current note does not exist. Please select another note or create a new note.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7220,69 +7220,69 @@ in skydrive folder</source>
 <context>
     <name>Steps</name>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="158"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="235"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="375"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="156"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="233"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="373"/>
         <source>KM</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="238"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="236"/>
         <source>GPS Info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="370"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="368"/>
         <source>Calorie</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="450"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="448"/>
         <source>No GPS signal...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="451"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="464"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="449"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="462"/>
         <source>Start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="502"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="500"/>
         <source>Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="661"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="659"/>
         <source>Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="738"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="801"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1044"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1054"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="736"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="799"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1043"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1053"/>
         <source>Cycling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="739"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="806"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1046"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1056"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="737"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="804"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1045"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1055"/>
         <source>Hiking</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="740"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="811"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1048"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1058"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="738"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="809"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1047"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1057"/>
         <source>Running</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="743"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="741"/>
         <source>Time</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7292,37 +7292,37 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="744"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="742"/>
         <source>Distance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="745"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="743"/>
         <source>Exercise Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="746"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="744"/>
         <source>Average Speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1042"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1041"/>
         <source>Month</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1052"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1051"/>
         <source>Year</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1450"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1449"/>
         <source>Today</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1451"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1450"/>
         <source>km</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7708,27 +7708,27 @@ in skydrive folder</source>
 <context>
     <name>WeatherFetcher</name>
     <message>
-        <location filename="../../src/Exercise/WeatherFetcher.h" line="160"/>
+        <location filename="../../src/Exercise/WeatherFetcher.h" line="183"/>
         <source>网络错误: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/WeatherFetcher.h" line="170"/>
+        <location filename="../../src/Exercise/WeatherFetcher.h" line="193"/>
         <source>无法解析天气数据</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/WeatherFetcher.h" line="184"/>
+        <location filename="../../src/Exercise/WeatherFetcher.h" line="207"/>
         <source>未获取到体感温度数据</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/WeatherFetcher.h" line="192"/>
+        <location filename="../../src/Exercise/WeatherFetcher.h" line="215"/>
         <source>未获取到天气代码数据</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/WeatherFetcher.h" line="217"/>
+        <location filename="../../src/Exercise/WeatherFetcher.h" line="240"/>
         <source>天气数据格式错误</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7785,22 +7785,22 @@ in skydrive folder</source>
 <context>
     <name>gps_list</name>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="193"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="194"/>
         <source>Cycling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="194"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="195"/>
         <source>Hiking</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="194"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="195"/>
         <source>Running</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="319"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="354"/>
         <source>View GPS Track</source>
         <translation type="unfinished"></translation>
     </message>
