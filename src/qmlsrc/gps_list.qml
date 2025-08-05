@@ -192,7 +192,7 @@ Rectangle {
                         height: item0.contentHeight
                         color: item0.text.indexOf(
                                    qsTr("Cycling")) ? (item0.text.indexOf(
-                                                           qsTr("Hiking")) ? (item0.text.indexOf(qsTr("Running")) ? strTitleColor : "#87CEFA") : "#98FB98") : "#FF7F50"
+                                                           qsTr("Hiking")) ? (item0.text.indexOf(qsTr("Running")) ? strTitleColor : "#87CEFA") : "#98FB98") : "#FFA500"
 
                         Text {
                             id: item0
