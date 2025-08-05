@@ -208,6 +208,13 @@ static void JavaNotify_15() {
     }
   }
 
+  if (mw_one->m_Report->m_Menu != nullptr) {
+    if (mw_one->m_Report->m_Menu->isVisible()) {
+      mw_one->m_Report->m_Menu->close();
+      return;
+    }
+  }
+
   if (m_Method->menuNoteBook != nullptr) {
     if (m_Method->menuNoteBook->isVisible()) {
       m_Method->menuNoteBook->close();

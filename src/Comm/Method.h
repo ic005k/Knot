@@ -204,9 +204,9 @@ class Method : public QDialog {
   QString qssMenu =
       "QMenu {"
       "border: 1px solid rgb(172, 172, 172);"
-      "border-radius: 3px; }"
+      "border-radius: 0px; }"
       "QMenu::item {"
-      "border-bottom: 1px solid rgb(172, 172, 172);"
+      "border-bottom: 0px solid rgb(172, 172, 172);"
       "padding:10px 10px;"
       "margin:0px 0px; }"
       "QMenu::item:selected {"

@@ -788,7 +788,7 @@ void Report::loadDetailsQml() {
 }
 
 void Report::genReportMenu() {
-  QMenu* m_Menu = new QMenu(this);
+  m_Menu = new QMenu(this);
   m_Menu->setStyleSheet(m_Method->qssMenu);
 
   QAction* actOuttoPic = new QAction(tr("Output to Image"));
