@@ -8,6 +8,7 @@
 extern MainWindow* mw_one;
 extern Ui::MainWindow* mui;
 extern Method* m_Method;
+extern QTreeWidget *twrb, *tw;
 extern bool isDark, isAndroid;
 
 MoveTo::MoveTo(QWidget* parent) : QDialog(parent), ui(new Ui::MoveTo) {
@@ -29,11 +30,11 @@ MoveTo::MoveTo(QWidget* parent) : QDialog(parent), ui(new Ui::MoveTo) {
   QTreeWidgetItem* item = NULL;
   if (!mw_one->m_NotesList->ui->frame0->isHidden() ||
       !mui->frameNoteList->isHidden())
-    item = mw_one->m_NotesList->tw->currentItem();
+    item = tw->currentItem();
 
   if (!mw_one->m_NotesList->ui->frame1->isHidden() ||
       !mui->frameNoteRecycle->isHidden())
-    item = mw_one->m_NotesList->twrb->currentItem();
+    item = twrb->currentItem();
 
   if (item == NULL) close();
 
@@ -126,9 +127,9 @@ void MoveTo::initTopNoteBook() {
   listItems.clear();
   QStringList itemList;
   itemList.append(tr("Main Root"));
-  int count = mw_one->m_NotesList->tw->topLevelItemCount();
+  int count = tw->topLevelItemCount();
   for (int i = 0; i < count; i++) {
-    QTreeWidgetItem* topItem = mw_one->m_NotesList->tw->topLevelItem(i);
+    QTreeWidgetItem* topItem = tw->topLevelItem(i);
     QString strTop = topItem->text(0);
     itemList.append(strTop);
     listItems.append(topItem);
@@ -142,9 +143,9 @@ void MoveTo::initAllNoteBook() {
   listItems.clear();
   QStringList itemList;
 
-  int count = mw_one->m_NotesList->tw->topLevelItemCount();
+  int count = tw->topLevelItemCount();
   for (int i = 0; i < count; i++) {
-    QTreeWidgetItem* topItem = mw_one->m_NotesList->tw->topLevelItem(i);
+    QTreeWidgetItem* topItem = tw->topLevelItem(i);
     QString strTop = topItem->text(0);
     itemList.append(strTop);
     listItems.append(topItem);

@@ -80,9 +80,6 @@ class NotesList : public QDialog {
   int findCount;
   QList<QTreeWidgetItem *> findResultList;
 
-  QTreeWidget *twrb;
-  QTreeWidget *tw;
-
   void set_memo_dir();
 
   bool delFile(QString file);
@@ -282,6 +279,7 @@ class NotesList : public QDialog {
                    QString text2, QString text3, QString text4, int itemH);
   void setColorFlag(QString strColor);
   void setDelNoteFlag(QString mdFile);
+  void saveNotesListToFile();
 };
 
 class SearchMapper {

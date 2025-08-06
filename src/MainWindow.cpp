@@ -68,6 +68,7 @@ extern CategoryList *m_CategoryList;
 extern ReaderSet *m_ReaderSet;
 extern ColorDialog *colorDlg;
 extern PrintPDF *m_PrintPDF;
+extern QTreeWidget *twrb, *tw;
 
 void MainWindow::ReadChartData() {
   int index = tabData->currentIndex();
@@ -1935,7 +1936,7 @@ void MainWindow::on_btnNotesList_clicked() {
   mui->frameNoteList->show();
   m_NotesList->set_memo_dir();
 
-  if (m_NotesList->tw->topLevelItemCount() == 0) {
+  if (tw->topLevelItemCount() == 0) {
     mui->lblNoteBook->setText(tr("Note Book"));
     mui->lblNoteList->setText(tr("Note List"));
     return;
@@ -2536,7 +2537,7 @@ void MainWindow::on_btnManagement_clicked() {
   h = height();
   m_NotesList->setGeometry(x, y, w, h);
   m_NotesList->show();
-  m_NotesList->tw->setFocus();
+  tw->setFocus();
 }
 
 void MainWindow::on_btnUpMove_clicked() {

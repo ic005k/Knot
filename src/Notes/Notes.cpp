@@ -2148,8 +2148,6 @@ void Notes::restoreEditorState(const QString &filePath) {
 void Notes::previewNote() {
   if (!QFile::exists(currentMDFile)) return;
 
-  mw_one->m_NotesList->setCurrentItemFromMDFile(currentMDFile);
-
   QString title = mw_one->m_NotesList->noteTitle;
   mw_one->m_NotesList->refreshRecentOpen(title);
   mw_one->m_NotesList->saveRecentOpen();

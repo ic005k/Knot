@@ -5,6 +5,8 @@
 #include "ui_NewNoteBook.h"
 #include "ui_NotesList.h"
 
+QTreeWidget *twrb, *tw;
+
 extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern Method *m_Method;
@@ -777,9 +779,22 @@ void NotesList::setNoteBookVPos() {
 }
 
 void NotesList::saveNotesList() {
-  QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
+  QFuture<void> future = QtConcurrent::run([=]() { saveNotesListToFile(); });
 
-  mw_one->strLatestModify = tr("Modi Notes List");
+  // 可选：使用 QFutureWatcher 监控进度
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+    mw_one->strLatestModify = tr("Modi Notes List");
+    mw_one->m_Notes->isSaveNotesConfig = true;
+    qDebug() << "NotesList save completed";
+
+    watcher->deleteLater();
+  });
+  watcher->setFuture(future);
+}
+
+void NotesList::saveNotesListToFile() {
+  QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
 
   int count = tw->topLevelItemCount();
   iniNotes.setValue("/MainNotes/topItemCount", count);
@@ -832,17 +847,17 @@ void NotesList::saveNotesList() {
     }
   }
 
+  iniNotes.sync();
+
   /*QString binaryPath = iniDir + "mainnotes.bin";  // 二进制文件路径
   if (BinaryHandler::writeToBinary(binaryPath, tw)) {
     mw_one->strLatestModify = tr("Modi Notes List (Binary)");
   }*/
 
   // Save Note Name
-  QSettings Reg1(iniDir + "curmd.ini", QSettings::IniFormat);
-
-  Reg1.setValue("/MainNotes/NoteName", noteTitle);
-
-  mw_one->m_Notes->isSaveNotesConfig = true;
+  QSettings iniCurMD(iniDir + "curmd.ini", QSettings::IniFormat);
+  iniCurMD.setValue("/MainNotes/NoteName", noteTitle);
+  iniCurMD.sync();
 }
 
 void NotesList::saveRecycle() {
