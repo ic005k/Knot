@@ -480,7 +480,7 @@ public class PDFActivity extends AppCompatActivity implements
         savePDFInfo();
         MyProgBar.closeAndroidProgressBar();
 
-        // 是否内存
+        // 释放内存
         if (pdfView != null) {
             pdfView.recycle();
         }

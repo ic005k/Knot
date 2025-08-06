@@ -1593,7 +1593,8 @@ void Notes::openNotes() {
             // 开始下载（1并发,根据文件的下载个数）
             QString lf = privateDir;
             qDebug() << "lf=" << lf;
-            downloader->downloadFiles(remoteFiles, lf, remoteFiles.count());
+            int maxConcurrentDownloads = 1;
+            downloader->downloadFiles(remoteFiles, lf, maxConcurrentDownloads);
           }
 
           if (remoteFiles.count() == 0) openNotesUI();
