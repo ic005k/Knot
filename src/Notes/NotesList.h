@@ -227,7 +227,8 @@ class NotesList : public QDialog {
 
   void on_actionSetColorFlag();
 
- private:
+  void on_actionStatistics();
+  private:
   bool isActColorFlagStatus = false;
   QStringList validMDFiles;
 

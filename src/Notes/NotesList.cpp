@@ -1941,6 +1941,7 @@ void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
   QAction *actMoveDown = new QAction(tr("Move Down"));
   QAction *actSetColorFlag = new QAction(tr("Set Color Marker"));
   actSetColorFlag->setEnabled(isActColorFlagStatus);
+  QAction *actStatistics = new QAction(tr("Statistics"));
 
   connect(actNew, &QAction::triggered, this,
           &NotesList::on_actionAdd_NoteBook_triggered);
@@ -1956,6 +1957,9 @@ void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
   connect(actSetColorFlag, &QAction::triggered, this,
           &NotesList::on_actionSetColorFlag);
 
+  connect(actStatistics, &QAction::triggered, this,
+          &NotesList::on_actionStatistics);
+
   mainMenu->addAction(actNew);
   mainMenu->addAction(actRename);
   mainMenu->addAction(actDel);
@@ -1963,6 +1967,7 @@ void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
   mainMenu->addAction(actMoveUp);
   mainMenu->addAction(actMoveDown);
 
+  mainMenu->addAction(actStatistics);
   mainMenu->addAction(actSetColorFlag);
 
   actRename->setVisible(false);
@@ -1986,6 +1991,63 @@ void NotesList::on_actionSetColorFlag() {
   itemTop->setText(2, color_0);
   setColorFlag(color_0);
   saveNotesList();
+}
+
+void NotesList::on_actionStatistics() {
+  mw_one->showProgress();
+  int curNoteBookIndex = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
+  int curNotesListIndex = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
+
+  QTextEdit *edit = new QTextEdit();
+  int totalNotes = 0;
+
+  int countNoteBook = m_Method->getCountFromQW(mui->qwNoteBook);
+  for (int i = 0; i < countNoteBook; i++) {
+    m_Method->setCurrentIndexFromQW(mui->qwNoteBook, i);
+    clickNoteBook();
+    QString notebookTitle = m_Method->getText0(mui->qwNoteBook, i);
+    edit->append(QString::number(i + 1) + ". " + notebookTitle);
+
+    int countNotesList = m_Method->getCountFromQW(mui->qwNoteList);
+    totalNotes = totalNotes + countNotesList;
+    for (int j = 0; j < countNotesList; j++) {
+      QString titleNotesList = m_Method->getText0(mui->qwNoteList, j);
+      QString mdfile = iniDir + m_Method->getText3(mui->qwNoteList, j);
+      QString strFileStatus;
+      QFileInfo fi(mdfile);
+      if (fi.exists())
+        strFileStatus = "✔️";
+      else
+        strFileStatus = "❎";
+      edit->append("    " + QString::number(j + 1) + ". " + titleNotesList +
+                   "  " + strFileStatus);
+    }
+  }
+
+  QString str = edit->toPlainText();
+  edit->clear();
+  edit->append(tr("NoteBook") + ": " + QString::number(countNoteBook) + "    " +
+               tr("Notes") + ": " + QString::number(totalNotes));
+  edit->append("");
+  edit->append(str);
+
+  QString filepath = privateDir + "Statistics.html";
+  QString htmlContent = edit->toHtml();
+  edit->clear();
+  edit->setPlainText(htmlContent);
+  TextEditToFile(edit, filepath);
+  delete edit;
+
+  m_Method->setCurrentIndexFromQW(mui->qwNoteBook, curNoteBookIndex);
+  clickNoteBook();
+  m_Method->setCurrentIndexFromQW(mui->qwNoteList, curNotesListIndex);
+
+  mw_one->closeProgress();
+
+  QUrl fileUrl = QUrl::fromLocalFile(filepath);
+  bool success = QDesktopServices::openUrl(fileUrl);
+  if (!success) {
+  };
 }
 
 void NotesList::on_actionAdd_Note_triggered() {

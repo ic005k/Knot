@@ -4,7 +4,7 @@
 #include "ui_AboutThis.h"
 #include "ui_MainWindow.h"
 
-QString ver = "2.1.03";
+QString ver = "2.1.04";
 QString appName = "Knot";
 
 QString strStartTotalTime;
