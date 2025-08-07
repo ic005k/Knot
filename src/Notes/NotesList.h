@@ -25,7 +25,6 @@
 #include "src/Comm/TextEditToolbar.h"
 #include "src/Notes/MoveTo.h"
 #include "src/Notes/NewNoteBook.h"
-#include "src/Notes/SaveNoteTree.h"
 #include "ui_MoveTo.h"
 
 struct MySearchResult {
@@ -148,9 +147,6 @@ class NotesList : public QDialog {
   void saveCurrentNoteInfo();
   void genRecentOpenMenu();
 
-  void saveNoteBookVPos();
-  void setNoteBookVPos();
-
   void genCursorText();
   void renameCurrentItem(QString title);
   void setCurrentItemFromMDFile(QString mdFile);
@@ -228,7 +224,8 @@ class NotesList : public QDialog {
   void on_actionSetColorFlag();
 
   void on_actionStatistics();
-  private:
+
+ private:
   bool isActColorFlagStatus = false;
   QStringList validMDFiles;
 

@@ -767,17 +767,6 @@ void NotesList::saveCurrentNoteInfo() {
   Reg.setValue("/MainNotes/NoteName", noteTitle);
 }
 
-void NotesList::saveNoteBookVPos() {
-  QSettings iniFile(privateDir + "notes.ini", QSettings::IniFormat);
-  iniFile.setValue("/NoteBook/VPos", m_Method->getVPosForQW(mui->qwNoteBook));
-}
-
-void NotesList::setNoteBookVPos() {
-  QSettings iniFile(privateDir + "notes.ini", QSettings::IniFormat);
-  qreal txtPos = iniFile.value("/NoteBook/VPos", 0).toReal();
-  m_Method->setVPosForQW(mui->qwNoteBook, txtPos);
-}
-
 void NotesList::saveNotesList() {
   QFuture<void> future = QtConcurrent::run([=]() { saveNotesListToFile(); });
 
@@ -849,11 +838,6 @@ void NotesList::saveNotesListToFile() {
 
   iniNotes.sync();
 
-  /*QString binaryPath = iniDir + "mainnotes.bin";  // 二进制文件路径
-  if (BinaryHandler::writeToBinary(binaryPath, tw)) {
-    mw_one->strLatestModify = tr("Modi Notes List (Binary)");
-  }*/
-
   // Save Note Name
   QSettings iniCurMD(iniDir + "curmd.ini", QSettings::IniFormat);
   iniCurMD.setValue("/MainNotes/NoteName", noteTitle);
@@ -888,11 +872,6 @@ void NotesList::saveRecycle() {
 
 void NotesList::initNotesList() {
   tw->clear();
-
-  /*QString binaryPath = iniDir + "mainnotes.bin";
-  if (QFile::exists(binaryPath)) {
-    BinaryHandler::readFromBinary(binaryPath, tw);
-  }*/
 
   QSettings *iniNotes =
       new QSettings(iniDir + "mainnotes.ini", QSettings::IniFormat, NULL);
@@ -1974,6 +1953,7 @@ void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
   actDel->setVisible(false);
   actMoveUp->setVisible(false);
   actMoveDown->setVisible(false);
+  actStatistics->setVisible(false);
 
   mainMenu->setStyleSheet(m_Method->qssMenu);
 }

@@ -617,7 +617,6 @@ HEADERS += \
     src/Notes/Notes.h \
     src/Notes/NotesList.h \
     src/Notes/PrintPDF.h \
-    src/Notes/SaveNoteTree.h \
     src/Notes/database_manager.h \
     src/Notes/search_model.h \
     src/Notes/titlegenerator.h \

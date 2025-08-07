@@ -2286,7 +2286,6 @@ void MainWindow::on_btnBackNoteList_clicked() {
   clearWidgetFocus();
   mui->frameNoteList->hide();
   mui->frameMain->show();
-  m_NotesList->saveNoteBookVPos();
   m_NotesList->saveCurrentNoteInfo();
   m_NotesList->saveNotesListIndex();
   m_Notes->updateMainnotesIniToSyncLists();
