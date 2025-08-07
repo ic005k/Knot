@@ -54,6 +54,7 @@ EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {
   mui->btnDel_Number->setFont(font);
 
   font.setPointSize(fontSize);
+  mui->editDetails->setFont(font);
   font.setBold(true);
   mui->lblTitleEditRecord->setFont(font);
 

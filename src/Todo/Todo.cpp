@@ -27,7 +27,6 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
   ui->setupUi(this);
 
   this->installEventFilter(this);
-  // mui->editTodo->viewport()->installEventFilter(mw_one);
 
   this->setModal(true);
 
@@ -50,6 +49,8 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
   mui->progAudioBar->hide();
   mui->sliderPlayAudio->hide();
 
+  f.setPointSize(fontSize);
+  mui->editTodo->setFont(f);
   mui->editTodo->setFixedHeight(getEditTextHeight(mui->editTodo) + 4);
 
   tmeRecordTime = new QTimer(this);
