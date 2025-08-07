@@ -62,7 +62,7 @@ extern bool unzipToDir(const QString &zipPath, const QString &destDir);
 extern WebDavHelper *listWebDavFiles(const QString &url,
                                      const QString &username,
                                      const QString &password);
-extern QSplashScreen *splash;
+
 extern ShowMessage *m_ShowMessage;
 extern CategoryList *m_CategoryList;
 extern ReaderSet *m_ReaderSet;
@@ -200,9 +200,6 @@ MainWindow::MainWindow(QWidget *parent)
   if (QFile::exists(currentMDFile)) {
     m_Notes->MD2Html(currentMDFile);
   }
-
-  splash->close();
-  delete splash;
 
   initMain = false;
 }

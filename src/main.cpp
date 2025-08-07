@@ -283,6 +283,9 @@ int main(int argc, char* argv[]) {
     qDebug() << "整体启动总耗时：" << strStartTotalTime << "秒";
   });
 
+  splash->close();
+  delete splash;
+
   return app.exec();
 }
 
