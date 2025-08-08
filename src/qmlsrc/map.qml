@@ -261,11 +261,13 @@ Rectangle {
                 id: infoText1
                 text: qsTr("Distance") + ": 0 km"
                 color: "white"
+                font.pointSize: 18
             }
             Text {
                 id: infoText2
                 text: qsTr("Speed") + ": 0 km/h"
                 color: "white"
+                font.pointSize: 18
             }
         }
     }

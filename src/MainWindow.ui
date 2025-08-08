@@ -4232,7 +4232,7 @@ QSlider::handle:horizontal:disabled {
           <enum>QTabWidget::TabPosition::South</enum>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="tab_Steps">
           <attribute name="title">

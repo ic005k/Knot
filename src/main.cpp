@@ -335,8 +335,17 @@ void loadTheme(bool isDark) {
         widget != mui->btn4 && widget != mui->btn5 && widget != mui->btn6 &&
         widget != mui->btn7 && widget != mui->btn8 && widget != mui->btn9 &&
         widget != mui->btnDot && widget != mui->btnDel_Number &&
-        widget != mui->lblMonthSum) {
+        widget != mui->lblMonthSum && widget != mui->lblTime &&
+        widget != mui->lblGpsInfo && widget != mui->lblTotalDistance &&
+        widget != mui->lblCurrentDistance && widget != mui->lblAverageSpeed &&
+        widget != mui->lblRunTime && widget != mw_one->m_Steps->m_speedometer &&
+        widget != mw_one->m_MainHelper->sliderButton &&
+        widget != mui->lblGpsDateTime && widget != mui->btnPages &&
+        widget != mui->lblBookName) {
       widget->setFont(qApp->font());
+      font.setBold(true);
+      mui->lblViewCate1->setFont(font);
+      mui->lblTitleEditRecord->setFont(font);
       widget->updateGeometry();
       widget->repaint();
     }

@@ -12,11 +12,14 @@
 #include <QWidget>
 
 class MainWindow;  // 前向声明，避免头文件循环包含
+class SliderButton;
 
 class MainHelper : public QDialog {
   Q_OBJECT
  public:
   explicit MainHelper(QWidget *parent = nullptr);
+
+  SliderButton *sliderButton;
 
   QString lightPCScrollbarStyle = R"(
         /* Light Vertical Scrollbar */
