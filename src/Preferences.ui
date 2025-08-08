@@ -57,11 +57,7 @@
       <item>
        <widget class="QCheckBox" name="chkZip">
         <property name="styleSheet">
-         <string notr="true">QCheckBox::indicator {
-    /* 选择框尺寸 */
-    width:22px;
-    height:22px;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>Encrypt with Password</string>
@@ -322,20 +318,25 @@ QLabel {
       <item>
        <widget class="QCheckBox" name="chkDark">
         <property name="styleSheet">
-         <string notr="true">QCheckBox::indicator {
-    /* 选择框尺寸 */
-    width:25px;
-    height:25px;
+         <string notr="true">/* 核心修复：使用 border-image + background 组合 */
+QCheckBox::indicator {
+    width: 32px;
+    height: 18px;
+    border: none; 
+    background: transparent; /* 清除默认背景 */
 }
 
-QCheckBox::indicator:unchecked{
-    image:url(:/res/chk0.svg);
+QCheckBox::indicator:unchecked {
+    border-image: url(:/res/chk00.svg) 0 0 0 0 stretch stretch;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
-QCheckBox::indicator:checked{
-    image:url(:/res/chk1.svg);
-}
-</string>
+QCheckBox::indicator:checked {
+    border-image: url(:/res/chk11.svg) 0 0 0 0 stretch stretch;
+    background-position: center;
+    background-repeat: no-repeat;
+}</string>
         </property>
         <property name="text">
          <string>Dark Theme</string>
