@@ -254,6 +254,7 @@ Rectangle {
                         width: parent.width
                         wrapMode: TextArea.WordWrap
                         font.bold: false
+                        font.pointSize: noteTimeFontSize
                         text: text2
                         color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
 
@@ -271,7 +272,7 @@ Rectangle {
                         elide: Text.ElideRight
                         Layout.preferredWidth: listItem.width
                         font.bold: false
-                        font.pointSize: 12
+                        font.pointSize: noteTimeFontSize
                         text: text3
                         color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
 

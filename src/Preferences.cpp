@@ -23,27 +23,6 @@ Preferences::Preferences(QWidget* parent)
     : QDialog(parent), ui(new Ui::Preferences) {
   ui->setupUi(this);
 
-  QFont font0 = m_Method->getNewFont(20);
-  ui->btnCustomFont->setFont(font0);
-  ui->chkUIFont->setFont(font0);
-
-  ui->chkZip->setFont(font0);
-  ui->btnReStart->setFont(font0);
-
-#ifdef Q_OS_ANDROID
-  ui->sliderFontSize->setMinimum(15);
-
-  font0.setBold(true);
-  font0.setPointSize(13);
-  ui->lblZipTip->setFont(font0);
-#else
-  ui->sliderFontSize->setMinimum(9);
-
-  font0.setBold(true);
-  font0.setPointSize(9);
-  ui->lblZipTip->setFont(font0);
-#endif
-
   m_Method->set_ToolButtonStyle(this);
 
   this->installEventFilter(this);
@@ -74,8 +53,8 @@ Preferences::Preferences(QWidget* parent)
   ui->lbl3->setStyleSheet(lbl_style);
 
   ui->btnCustomFont->adjustSize();
-  ui->btnCustomFont->setStyleSheet(
-      "background-color: rgb(255, 255, 255);color:black;");
+  int hei = m_Method->getFontHeight();
+  ui->btnCustomFont->setFixedHeight(4 * hei);
 
   ui->lblZipTip->adjustSize();
   ui->lblZipTip->setWordWrap(true);

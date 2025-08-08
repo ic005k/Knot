@@ -341,7 +341,8 @@ void loadTheme(bool isDark) {
         widget != mui->lblRunTime && widget != mw_one->m_Steps->m_speedometer &&
         widget != mw_one->m_MainHelper->sliderButton &&
         widget != mui->lblGpsDateTime && widget != mui->btnPages &&
-        widget != mui->lblBookName) {
+        widget != mui->lblBookName && widget != mui->lblShowLineSn &&
+        widget != mw_one->m_PageIndicator->ui->lblPageNumber) {
       widget->setFont(qApp->font());
       font.setBold(true);
       mui->lblViewCate1->setFont(font);
