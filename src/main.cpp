@@ -21,6 +21,7 @@
 #include <QWidget>
 
 #include "MainWindow.h"
+#include "SplashTimer.h"
 #include "lib/cppjieba/Jieba.hpp"
 #include "lib/quazip/quazip.h"
 #include "lib/quazip/quazipfile.h"
@@ -110,7 +111,9 @@ int main(int argc, char* argv[]) {
 
   loadLocal();
 
-  showSplash();
+  // showSplash();
+  SplashTimer splash(isAndroid, 300, 100);
+  splash.show();
 
   // 设置应用程序标识（为QML里面使用Settings做准备）
   app.setOrganizationName("KnotCompany");
@@ -285,8 +288,9 @@ int main(int argc, char* argv[]) {
     qDebug() << "整体启动总耗时：" << strStartTotalTime << "秒";
   });
 
-  splash->close();
-  delete splash;
+  // splash->close();
+  // delete splash;
+  splash.close();
 
   return app.exec();
 }

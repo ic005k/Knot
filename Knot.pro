@@ -631,6 +631,7 @@ HEADERS += \
     src/Exercise/Speedometer.h \
     src/Exercise/Steps.h \
     src/Exercise/StepsOptions.h \
+    src/SplashTimer.h \
     src/Todo/Todo.h \
     src/Todo/TodoAlarm.h \
     lib/quazip/JlCompress.h \

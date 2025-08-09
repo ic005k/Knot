@@ -154,11 +154,15 @@ MainWindow::MainWindow(QWidget *parent)
   init_Instance();
 
   init_Options();
+
   init_Thread_Timer();
+
   m_MainHelper->init_UIWidget();
+
   init_ChartWidget();
 
   m_MainHelper->init_Theme();
+
   m_MainHelper->initQW();
 
   init_TotalData();
