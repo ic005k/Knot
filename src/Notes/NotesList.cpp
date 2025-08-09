@@ -2443,7 +2443,9 @@ void NotesList::clickNoteBook() {
         QString text3 = childItem->child(n)->text(1);
         QString file = iniDir + text3;
         QString item1 = m_Method->getLastModified(file);
-        m_Method->addItemToQW(mui->qwNoteList, text0, item1, "", text3, 0);
+        QString strSize = m_Method->getFileSize(QFile(file).size(), 2);
+        m_Method->addItemToQW(mui->qwNoteList, text0, item1 + " " + strSize, "",
+                              text3, 0);
 
         pNoteItems.append(childItem->child(n));
       }

@@ -538,9 +538,9 @@ bool MainWindow::del_Data(QTreeWidget *tw) {
 
         QString strTip;
         if (isMoveEntry)
-          strTip = tr("The last record will be moved.");
+          strTip = tr("The last record of today will be moved.");
         else
-          strTip = tr("The last record will be deleted.");
+          strTip = tr("The last record of today will be deleted.");
         ShowMessage *m_ShowMsg = new ShowMessage(this);
         if (!m_ShowMsg->showMsg(str, strTip + "\n\n" + str1, 2)) return false;
 

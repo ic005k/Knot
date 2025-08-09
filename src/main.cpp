@@ -44,14 +44,6 @@ extern Method* m_Method;
 void loadTheme(bool isDark);
 void loadLocal();
 
-void showSplash();
-namespace Shapes {
-enum ShapeType { Triangle, Rectangle, Square, Circle, Ellipse };
-}
-constexpr int ShapeTypeCount = 5;  // 显式定义枚举数量
-Shapes::ShapeType safeConvertShapeType(int value);
-QSplashScreen* splash;
-
 bool unzipToDir(const QString& zipPath, const QString& destDir);
 int deleteDirfile(QString dirName);
 QString loadText(QString textFile);
@@ -288,8 +280,6 @@ int main(int argc, char* argv[]) {
     qDebug() << "整体启动总耗时：" << strStartTotalTime << "秒";
   });
 
-  // splash->close();
-  // delete splash;
   splash.close();
 
   return app.exec();
@@ -636,147 +626,6 @@ void migrateOldDataIfNeeded() {
 }
 
 #endif
-
-/////////////////////////////////////////////////
-
-void showSplash() {
-  // 获取屏幕尺寸并创建全屏画布
-  QSize targetSize;
-  qreal dpr = qApp->devicePixelRatio();
-  if (isAndroid) {
-    QScreen* screen = QGuiApplication::primaryScreen();
-    QRect screenGeometry = screen->geometry();
-    targetSize = screenGeometry.size() * dpr;
-  } else {
-    targetSize = QSize(300 * dpr, 100 * dpr);
-  }
-
-  // 创建透明画布
-  QPixmap pixmap(targetSize);
-  // 使用中度中性灰背景 (RGB: 100,100,100)
-  QColor bgColor(100, 100, 100);
-  pixmap.fill(bgColor);  // 设置中性背景色
-  // 在透明背景上直接绘制文本
-  QPainter painter(&pixmap);
-  painter.setRenderHint(QPainter::Antialiasing);
-  painter.setRenderHint(QPainter::TextAntialiasing);
-
-  // 设置不规则形状的密度和大小范围
-  int shapeCount = 0;  // 形状数量
-  int minSize = 0;
-  int maxSize = 0;
-  if (isAndroid) {
-    shapeCount = 200;
-    minSize = 8 * dpr;
-    maxSize = 50 * dpr;
-  } else {
-    shapeCount = 100;
-    minSize = 4 * dpr;
-    maxSize = 25 * dpr;
-  }
-
-  // 定义形状类型和半透明颜色调色板
-
-  QVector<QColor> colors = {
-      QColor(220, 220, 220, 70),  // 浅灰白
-      QColor(180, 180, 200, 60),  // 灰蓝色
-      QColor(200, 200, 220, 80),  // 淡紫灰
-      QColor(170, 190, 210, 50)   // 灰青色
-  };
-
-  // 使用随机数引擎
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<int> sizeDist(minSize, maxSize);
-  std::uniform_int_distribution<int> typeDist(
-      0, ShapeTypeCount - 1);  // 使用枚举数量
-  std::uniform_int_distribution<int> colorDist(0, colors.size() - 1);
-  std::uniform_int_distribution<int> posXDist(0, pixmap.width());
-  std::uniform_int_distribution<int> posYDist(0, pixmap.height());
-
-  // 绘制随机不规则形状
-  for (int i = 0; i < shapeCount; ++i) {
-    int x = posXDist(gen);
-    int y = posYDist(gen);
-    int size1 = sizeDist(gen);
-    int size2 = sizeDist(gen);
-    QColor color = colors[colorDist(gen)];
-
-    painter.setBrush(QBrush(color));
-    painter.setPen(Qt::NoPen);
-
-    // 使用安全转换
-    switch (safeConvertShapeType(typeDist(gen))) {
-      case Shapes::ShapeType::Triangle:
-        // 随机三角形
-        {
-          QPolygon triangle;
-          triangle << QPoint(x, y) << QPoint(x + size1, y - size2 / 2)
-                   << QPoint(x + size1 / 2, y - size1);
-          painter.drawPolygon(triangle);
-        }
-        break;
-
-      case Shapes::ShapeType::Rectangle:
-        // 随机矩形
-        painter.drawRect(x, y, size1, size2);
-        break;
-
-      case Shapes::ShapeType::Square:
-        // 正方形 (尺寸相同)
-        painter.drawRect(x, y, size1, size1);
-        break;
-
-      case Shapes::ShapeType::Circle:
-        // 正圆
-        painter.drawEllipse(x, y, size1, size1);
-        break;
-
-      case Shapes::ShapeType::Ellipse:
-        // 椭圆
-        painter.drawEllipse(x, y, size1, size2);
-        break;
-    }
-  }
-
-  // 设置文字样式
-  QFont font = painter.font();
-  if (isAndroid)
-    font.setPointSizeF(16 * dpr);  // 根据设备DPI缩放文字大小
-  else
-    font.setPointSizeF(10 * dpr);
-  font.setBold(true);
-  painter.setFont(font);
-  painter.setPen(QColor(135, 206, 250));  // 设置文字颜色
-  // 计算文字位置（居中显示）
-  QFontMetrics metrics(font);
-  QRect textRect = metrics.boundingRect(pixmap.rect(), Qt::AlignCenter,
-                                        QObject::tr("Loading, please wait..."));
-  textRect.moveCenter(pixmap.rect().center());
-  // 绘制文字
-  painter.drawText(textRect, Qt::AlignCenter,
-                   QObject::tr("Loading, please wait..."));
-  painter.end();
-  // 设置设备像素比
-  pixmap.setDevicePixelRatio(dpr);
-
-  splash = new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint);
-  splash->setFixedSize(targetSize / dpr);
-  splash->setAttribute(Qt::WA_TranslucentBackground);  // 设置为透明背景
-  splash->show();
-}
-
-////////////////////////////////////////////////////////
-
-// 安全转换函数
-Shapes::ShapeType safeConvertShapeType(int value) {
-  if (value >= 0 && value < ShapeTypeCount) {
-    return static_cast<Shapes::ShapeType>(value);
-  }
-  // 默认返回第一个枚举值或根据需求调整
-  qWarning() << "Invalid ShapeType value:" << value;
-  return Shapes::ShapeType::Triangle;
-}
 
 void initAndroidGPU() {
   // 核心配置：启用基础硬件加速 + 兼容模式
