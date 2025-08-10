@@ -57,6 +57,14 @@ bool ShowMessage::eventFilter(QObject* watch, QEvent* evn) {
       on_btnCancel_clicked();
     }
 
+    if (keyEvent->key() == Qt::Key_Y) {
+      on_btnOk_clicked();
+    }
+
+    if (keyEvent->key() == Qt::Key_N) {
+      on_btnCancel_clicked();
+    }
+
     return true;
   }
 

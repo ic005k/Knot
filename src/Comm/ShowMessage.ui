@@ -147,6 +147,9 @@ QLabel[darkMode=&quot;true&quot;] {
           <property name="text">
            <string>Cancel</string>
           </property>
+          <property name="shortcut">
+           <string>N</string>
+          </property>
          </widget>
         </item>
         <item>
@@ -234,6 +237,9 @@ QLabel[darkMode=&quot;true&quot;] {
           </property>
           <property name="text">
            <string>Ok</string>
+          </property>
+          <property name="shortcut">
+           <string>Y</string>
           </property>
          </widget>
         </item>

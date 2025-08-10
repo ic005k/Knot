@@ -138,13 +138,7 @@ void Notes::editVSBarValueChanged() {}
 
 void Notes::resizeEvent(QResizeEvent *event) { Q_UNUSED(event); }
 
-void Notes::on_btnDone_clicked() {
-  saveMainNotes();
-
-  if (!mui->frameNotes->isHidden()) {
-    MD2Html(currentMDFile);
-  }
-}
+void Notes::on_btnDone_clicked() { saveMainNotes(); }
 
 void Notes::MD2Html(QString mdFile) {
   // QString htmlFileName = privateDir + "memo.html";
@@ -719,6 +713,8 @@ void Notes::closeEvent(QCloseEvent *event) {
 
   if (isTextChange) {
     ShowMessage *msg = new ShowMessage(this);
+    msg->ui->btnOk->setText(tr("Yes") + " (Y)");
+    msg->ui->btnCancel->setText(tr("No") + " (N)");
     if (msg->showMsg(tr("Notes"), tr("Do you want to save the notes?"), 2)) {
       saveMainNotes();
     }
@@ -2080,7 +2076,10 @@ void Notes::openBrowserOnce(const QString &htmlPath) {
   // QDesktopServices::openUrl(url);
 }
 
-void Notes::on_btnView_clicked() { mui->btnOpenNote->click(); }
+void Notes::on_btnView_clicked() {
+  ui->btnDone->click();
+  mui->btnOpenNote->click();
+}
 
 void Notes::init_md() {
 #ifndef Q_OS_ANDROID
