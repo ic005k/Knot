@@ -157,9 +157,13 @@
             android:screenOrientation="portrait">
         </activity>
 
-        <activity android:name="com.x.MDActivity" android:label="Knot"
+        <activity 
+            android:name="com.x.MDActivity" 
+            android:label="Knot"
             android:launchMode="standard"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            >
         </activity>
 
         <activity android:name="com.x.ImageViewerActivity" android:label="Knot"

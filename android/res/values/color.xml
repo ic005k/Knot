@@ -10,6 +10,7 @@
     <color name="light_gray">#FFE0E0E0</color>
     <color name="green">#00FF00</color>
     <color name="dark">#19232D</color>
+    <color name="dark_gray">#666666</color>
 
     <color name="colorPrimary">#D50000</color>
     <color name="colorPrimaryDark">#B71C1C</color>
@@ -308,5 +309,19 @@
     <color name="md_blue_grey_700">#455A64</color>
     <color name="md_blue_grey_800">#37474F</color>
     <color name="md_blue_grey_900">#263238</color>
+
+    <!-- 浅色模式颜色 -->
+    <color name="primary_light">#2196F3</color>
+    <color name="primary_dark_light">#0D47A1</color>
+    <color name="accent_light">#FF4081</color>
+    <color name="background_light">#F5F5F5</color>
+    <color name="text_primary_light">#212121</color>
+    
+    <!-- 深色模式颜色 -->
+    <color name="primary_dark">#1976D2</color>
+    <color name="primary_dark_dark">#004BA0</color>
+    <color name="accent_dark">#FF4081</color>
+    <color name="background_dark">#121212</color>
+    <color name="text_primary_dark">#FFFFFF</color>
     
 </resources>

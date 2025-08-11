@@ -7,6 +7,7 @@
 #include <QMimeData>
 #include <QObject>
 #include <QShortcut>
+#include <QStandardPaths>
 #include <QTextEdit>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -14,6 +15,9 @@
 
 #ifdef Q_OS_ANDROID
 #include <QtCore/private/qandroidextras_p.h>
+
+#include <QJniEnvironment>
+#include <QJniObject>
 #endif
 
 #include <QColorDialog>
