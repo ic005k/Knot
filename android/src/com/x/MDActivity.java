@@ -1,9 +1,5 @@
 package com.x;
 
-import com.stehno.mermaid.MermaidRenderer;
-import com.stehno.mermaid.MermaidException;
-
-
 import com.x.MyActivity;
 import com.x.NoteEditor;
 import com.x.ImageViewerActivity;
@@ -15,21 +11,6 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.annotation.NonNull;
 import android.text.style.ClickableSpan;
-
-import android.graphics.Bitmap;
-import io.noties.markwon.MarkwonVisitor;
-//import org.commonmark.node.CodeBlock;
-// 替换原来的CodeBlock导入，使用0.13.0版本的代码块类
-//import com.atlassian.commonmark.node.FencedCodeBlock;
-import org.commonmark.node.FencedCodeBlock;
-//import android.text.style.WidgetSpan;
-import android.view.ViewGroup;
-//import io.noties.markwon.widget.WidgetSpan;
-import android.text.TextPaint;
-
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.graphics.Paint; 
 
 import io.noties.markwon.Markwon;
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
@@ -243,7 +224,7 @@ import io.noties.markwon.MarkwonConfiguration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class MDActivity extends AppCompatActivity implements View.OnClickListener, Application.ActivityLifecycleCallbacks {
+public class MDActivity extends Activity implements View.OnClickListener, Application.ActivityLifecycleCallbacks {
 
     private TextView markdownView;
     private TextView titleView;
@@ -334,7 +315,7 @@ public class MDActivity extends AppCompatActivity implements View.OnClickListene
 
     }
 
-    /*private void initMarkdwon() {
+    private void initMarkdwon() {
         float fixedTextSize = 16; // 单位：sp
 
         // 将 sp 转换为像素（JLatexMathPlugin 需要像素值）
@@ -396,162 +377,8 @@ public class MDActivity extends AppCompatActivity implements View.OnClickListene
                     .build();
 
         }
-    }*/
+    }
 
-    private void initMarkdwon() {
-        float fixedTextSize = 16; // 单位：sp
-        float textSizeInPx = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_SP,
-                fixedTextSize,
-                getResources().getDisplayMetrics());
-        final Prism4j prism4j = new Prism4j(new MyGrammarLocator());
-    
-        AbstractMarkwonPlugin mermaidPlugin = new AbstractMarkwonPlugin() {
-            @Override
-            public void configureVisitor(@NonNull MarkwonVisitor.Builder builder) {
-                builder.on(FencedCodeBlock.class, (visitor, codeBlock) -> {
-                    // 获取代码块语言标识
-                    String language = codeBlock.getInfo();
-                    if (language != null && language.trim().equalsIgnoreCase("mermaid")) {
-                        // 【mermaid代码块处理逻辑不变】
-                        final String chartSource = codeBlock.getLiteral();
-                        SpannableString clickableText = new SpannableString("📊 点击查看图表");
-                        clickableText.setSpan(new ClickableSpan() {
-                            @Override
-                            public void onClick(@NonNull View widget) {
-                                showMermaidChart(chartSource);
-                            }
-        
-                            @Override // 必须添加@Override注解，确保正确重写
-                            public void updateDrawState(@NonNull TextPaint ds) {
-                                super.updateDrawState(ds);
-                                ds.setUnderlineText(false);
-                                ds.setColor(ContextCompat.getColor(MDActivity.this,
-                                        MyActivity.isDark ? R.color.light_gray : R.color.dark_gray));
-                            }
-                        }, 0, clickableText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        
-                        visitor.builder()
-                                .append("\n")
-                                .append(clickableText)
-                                .append("\n");
-                    } else {
-                        // 【关键修改：移除visitor.visit(codeBlock)，避免递归】
-                        // 非mermaid代码块会自动使用Markwon的默认渲染逻辑，无需手动调用visit
-                    }
-                });
-            }
-        };
-    
-        // 初始化Markwon实例（整合所有插件）
-        Context appContext = getApplicationContext();
-        if (!MyActivity.isDark) {
-            markwon = Markwon.builder(appContext)
-                    .usePlugin(StrikethroughPlugin.create())
-                    .usePlugin(TablePlugin.create(appContext))
-                    .usePlugin(TaskListPlugin.create(appContext))
-                    .usePlugin(LinkifyPlugin.create())
-                    .usePlugin(SimpleExtPlugin.create())
-                    .usePlugin(GlideImagesPlugin.create(appContext))
-                    .usePlugin(MarkwonInlineParserPlugin.create())
-                    .usePlugin(JLatexMathPlugin.create(textSizeInPx, builder -> {
-                        builder.inlinesEnabled(true);
-                    }))
-                    .usePlugin(new AbstractMarkwonPlugin() {
-                        @Override
-                        public void configureSpansFactory(MarkwonSpansFactory.Builder builder) {
-                            builder.appendFactory(Image.class, (configuration, props) -> {
-                                String url = ImageProps.DESTINATION.require(props);
-                                return new LinkSpan(configuration.theme(), url, new ImageLinkResolver());
-                            });
-                        }
-                    })
-                    .usePlugin(SyntaxHighlightPlugin.create(prism4j, Prism4jThemeDefault.create()))
-                    .usePlugin(HtmlPlugin.create())
-                    .usePlugin(mermaidPlugin) // 加入Mermaid处理插件
-                    .build();
-        } else {
-            // 深色模式配置
-            markwon = Markwon.builder(appContext)
-                    .usePlugin(StrikethroughPlugin.create())
-                    .usePlugin(TablePlugin.create(appContext))
-                    .usePlugin(TaskListPlugin.create(appContext))
-                    .usePlugin(LinkifyPlugin.create())
-                    .usePlugin(SimpleExtPlugin.create())
-                    .usePlugin(GlideImagesPlugin.create(appContext))
-                    .usePlugin(MarkwonInlineParserPlugin.create())
-                    .usePlugin(JLatexMathPlugin.create(textSizeInPx, builder -> {
-                        builder.inlinesEnabled(true);
-                    }))
-                    .usePlugin(new AbstractMarkwonPlugin() {
-                        @Override
-                        public void configureSpansFactory(MarkwonSpansFactory.Builder builder) {
-                            builder.appendFactory(Image.class, (configuration, props) -> {
-                                String url = ImageProps.DESTINATION.require(props);
-                                return new LinkSpan(configuration.theme(), url, new ImageLinkResolver());
-                            });
-                        }
-                    })
-                    .usePlugin(SyntaxHighlightPlugin.create(prism4j, Prism4jThemeDarkula.create()))
-                    .usePlugin(HtmlPlugin.create())
-                    .usePlugin(mermaidPlugin) // 加入Mermaid处理插件
-                    .build();
-        }
-    }
-    
-    private void showMermaidChart(String chartSource) {
-        try {
-            // 1. 渲染图表（已确认渲染成功）
-            Bitmap chartBitmap = MermaidRenderer.render(chartSource);
-            if (chartBitmap == null) {
-                Toast.makeText(this, 
-                        MyActivity.zh_cn ? "图表渲染为空" : "Chart is empty", 
-                        Toast.LENGTH_SHORT).show();
-                return;
-            }
-    
-            // 2. 创建ImageView并强制设置布局参数
-            ImageView chartImageView = new ImageView(this);
-            chartImageView.setImageBitmap(chartBitmap);
-            chartImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            chartImageView.setAdjustViewBounds(true);
-            
-            // 手动设置图片最大尺寸（确保不超出屏幕）
-            int maxWidth = (int) (getResources().getDisplayMetrics().widthPixels * 0.9f);
-            int maxHeight = (int) (getResources().getDisplayMetrics().heightPixels * 0.8f);
-            chartImageView.setMaxWidth(maxWidth);
-            chartImageView.setMaxHeight(maxHeight);
-    
-            // 3. 使用最简化的对话框配置
-            AlertDialog dialog = new AlertDialog.Builder(this)
-                    .setTitle(MyActivity.zh_cn ? "图表预览" : "Chart Preview")
-                    .setView(chartImageView)
-                    .setNegativeButton(MyActivity.zh_cn ? "关闭" : "Close", 
-                            (d, which) -> d.dismiss())
-                    .create();
-    
-            // 4. 直接显示对话框（避免复杂的尺寸计算）
-            dialog.show();
-    
-            // 5. 显示后调整对话框尺寸（确保图片可见）
-            Window window = dialog.getWindow();
-            if (window != null) {
-                // 使用WRAP_CONTENT确保图片完整显示
-                window.setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                // 设置背景为白色（避免深色模式下图片可能被遮挡）
-                window.setBackgroundDrawable(new ColorDrawable(
-                        MyActivity.isDark ? Color.BLACK : Color.WHITE));
-            }
-    
-        } catch (Exception e) {
-            Log.e("Mermaid", "显示失败", e);
-            Toast.makeText(this, 
-                    MyActivity.zh_cn ? "图表显示失败" : "Failed to show chart", 
-                    Toast.LENGTH_SHORT).show();
-        }
-    }
-        
-    
     @Override
     public void onClick(View v) {
         switch (v.getId()) {

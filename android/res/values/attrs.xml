@@ -6,8 +6,4 @@
         <attr name="sb_indicatorTextColor" format="color|reference" />
         <attr name="sb_horizontal" format="boolean|reference" />
     </declare-styleable>
-
-     <!-- 声明自定义属性 -->
-     <attr name="textPrimaryColor" format="color" />
-     <attr name="backgroundColor" format="color" />
 </resources>
