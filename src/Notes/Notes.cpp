@@ -44,6 +44,7 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   QString path = iniDir + "memo/";
   QDir dir(path);
   if (!dir.exists()) dir.mkdir(path);
+  htmlFileName = iniDir + "memo.html";
 
   this->installEventFilter(this);
   this->setModal(true);
@@ -141,8 +142,6 @@ void Notes::resizeEvent(QResizeEvent *event) { Q_UNUSED(event); }
 void Notes::on_btnDone_clicked() { saveMainNotes(); }
 
 void Notes::MD2Html(QString mdFile) {
-  // QString htmlFileName = privateDir + "memo.html";
-
   QString strmd = loadText(mdFile);
 
   strmd = strmd.replace("images/", "file://" + iniDir + "memo/images/");
@@ -496,8 +495,6 @@ void Notes::unzip(QString zipfile) {
 }
 
 QString Notes::addImagePathToHtml(QString strhtml) {
-  QString htmlFileName = privateDir + "memo.html";
-
   QTextEdit *edit = new QTextEdit;
   QPlainTextEdit *edit1 = new QPlainTextEdit;
   strhtml = strhtml.replace("><", ">\n<");
@@ -883,7 +880,7 @@ bool Notes::selectPDFFormat(QPrinter *printer) {
 
 void Notes::on_btnPDF_clicked() {
   MD2Html(currentMDFile);
-  QString html = loadText(privateDir + "memo.html");
+  QString html = loadText(htmlFileName);
   html = html.replace("file://", "");
   auto doc = new QTextDocument(this);
   doc->setHtml(html);
@@ -2071,9 +2068,6 @@ int Notes::getSearchMatchCount(const QString &text) {
 
 void Notes::openBrowserOnce(const QString &htmlPath) {
   QDesktopServices::openUrl(QUrl::fromLocalFile(htmlPath));
-
-  // QUrl url("http://localhost:8000/memo.html");
-  // QDesktopServices::openUrl(url);
 }
 
 void Notes::on_btnView_clicked() {
@@ -2164,7 +2158,7 @@ void Notes::previewNote() {
     return;
   } else {
     MD2Html(currentMDFile);
-    openBrowserOnce(privateDir + "memo.html");
+    openBrowserOnce(htmlFileName);
   }
 }
 

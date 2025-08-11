@@ -228,6 +228,7 @@ class Notes : public QDialog {
   void on_btnView_clicked();
 
  private:
+  QString htmlFileName;
   bool m_initialized = false;
 
   QString m_lastSearchText;

@@ -2164,6 +2164,7 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
   QAction *actImport = new QAction(tr("Import"));
   QAction *actExport = new QAction(tr("Export"));
   QAction *actShare = new QAction(tr("Share"));
+  QAction *actCopyLink = new QAction(tr("Copy Note Link"));
 
   connect(actNew, &QAction::triggered, this,
           &NotesList::on_actionAdd_Note_triggered);
@@ -2183,6 +2184,8 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
           &NotesList::on_actionExport_Note_triggered);
   connect(actShare, &QAction::triggered, this,
           &NotesList::on_actionShareNoteFile);
+  connect(actCopyLink, &QAction::triggered, this,
+          &NotesList::on_actionCopyNoteLink);
 
   mainMenu->addAction(actNew);
   mainMenu->addAction(actRename);
@@ -2194,6 +2197,8 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
 
   mainMenu->addAction(actMoveUp);
   mainMenu->addAction(actMoveDown);
+
+  mainMenu->addAction(actCopyLink);
 
   actRename->setVisible(false);
   actDel->setVisible(false);
@@ -2207,6 +2212,17 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
 #endif
 
   mainMenu->setStyleSheet(m_Method->qssMenu);
+}
+
+void NotesList::on_actionCopyNoteLink() {
+  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
+  QString file = m_Method->getText3(mui->qwNoteList, index);
+  QString name = m_Method->getText0(mui->qwNoteList, index);
+  QString strlink = "[" + name + "](" + file + ")";
+  QClipboard *clipboard = QApplication::clipboard();
+  clipboard->setText(strlink);
+  ShowMessage *msg = new ShowMessage(this);
+  msg->showMsg(appName, strlink, 1);
 }
 
 void NotesList::on_actionShareNoteFile() {

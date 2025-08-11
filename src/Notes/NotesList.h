@@ -278,6 +278,7 @@ class NotesList : public QDialog {
   void setColorFlag(QString strColor);
   void setDelNoteFlag(QString mdFile);
   void saveNotesListToFile();
+  void on_actionCopyNoteLink();
 };
 
 class SearchMapper {
