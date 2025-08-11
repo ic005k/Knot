@@ -2150,7 +2150,10 @@ void Notes::previewNote() {
     m_Method->setMDTitle(title);
 
     m_Method->setMDFile(currentMDFile);
-    openMDWindow();
+    // openMDWindow();
+
+    MD2Html(currentMDFile);
+    openLocalHtmlFileInAndroid();
 
     setAndroidNoteConfig("/cpos/currentMDFile",
                          QFileInfo(currentMDFile).baseName());
@@ -2166,4 +2169,22 @@ void Notes::appendToSyncList(QString file) {
   notes_sync_files.removeOne(file);
   notes_sync_files.append(file);
   qDebug() << "Add to Notes Sync List ====>>>>" << file;
+}
+
+// 调用Android方法打开本地HTML文件
+void Notes::openLocalHtmlFileInAndroid() {
+#ifdef Q_OS_ANDROID
+  // 调用主Activity的静态方法启动WebView
+  QJniObject::callStaticMethod<void>("com/x/MyActivity",  // 替换为实际包名
+                                     "launchWebView",  // 主Activity中的方法名
+                                     "()V"             // 方法签名
+  );
+
+  // 检查异常
+  QJniEnvironment env;
+  if (env->ExceptionCheck()) {
+    qDebug() << "启动WebView失败";
+    env->ExceptionClear();
+  }
+#endif
 }

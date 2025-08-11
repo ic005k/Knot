@@ -162,6 +162,11 @@
             android:screenOrientation="portrait">
         </activity>
 
+        <activity android:name=".WebViewActivity"
+            android:launchMode="standard"
+            android:screenOrientation="portrait">
+        </activity>
+
         <activity android:name="com.x.ImageViewerActivity" android:label="Knot"
             android:launchMode="standard"
             android:screenOrientation="portrait">

@@ -1955,4 +1955,11 @@ public class MyActivity
     isQtMainEnd = isEnd;
   }
 
+  public static void launchWebView() {
+
+    if (m_instance != null) {
+      WebViewActivity.openLocalHtml(m_instance);
+    }
+  }
+
 }

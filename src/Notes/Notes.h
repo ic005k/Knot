@@ -294,6 +294,7 @@ class Notes : public QDialog {
   void restoreEditorState(const QString &filePath);
   void processRemoteFiles(QStringList remoteFiles);
   void startBackgroundProcessRemoteFiles();
+  void openLocalHtmlFileInAndroid();
 };
 
 class LimitedTextEdit : public QTextEdit {
