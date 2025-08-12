@@ -15,6 +15,13 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.view.Window;
 import androidx.core.app.ActivityCompat;
+
+import android.os.Build;
+import android.view.WindowManager;
+import android.graphics.Color;
+
+import android.view.View;
+
 import android.Manifest;
 
 public class WebViewActivity extends Activity {
@@ -43,6 +50,16 @@ public class WebViewActivity extends Activity {
         instance = this;
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_webview);
+
+        if (MyActivity.isDark) {
+            this.setStatusBarColor("#19232D"); // 深色
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+
+        } else {
+            this.setStatusBarColor("#F3F3F3"); // 灰
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+
+        }
 
         // 初始化SharedPreferences
         scrollPositionPrefs = getSharedPreferences("WebViewScrollPositions", MODE_PRIVATE);
@@ -290,5 +307,13 @@ public class WebViewActivity extends Activity {
 
     public static WebViewActivity getInstance() {
         return instance;
+    }
+
+    private void setStatusBarColor(String color) {
+        // 需要安卓版本大于5.0以上
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            getWindow().setStatusBarColor(Color.parseColor(color));
+        }
     }
 }

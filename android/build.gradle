@@ -78,6 +78,8 @@ dependencies {
     implementation 'io.noties.markwon:editor:4.6.2'
     implementation 'io.noties.markwon:syntax-highlight:4.6.2'
 
+    implementation 'com.google.android.material:material:1.6.1'
+
     // Prism4j 语法高亮引擎
     implementation "io.noties:prism4j:2.0.0"
     kapt "io.noties:prism4j-bundler:2.0.0"  // 关键：使用 kapt 处理注解

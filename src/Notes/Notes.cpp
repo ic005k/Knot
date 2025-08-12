@@ -105,16 +105,15 @@ void Notes::showEvent(QShowEvent *event) {
     int btn_h = ui->btnNext->height();
     ui->btnDone->setFixedHeight(btn_h);
     ui->btnDone->setFixedWidth(btn_h);
-    int m_size = btn_h * 0.8;
-    ui->btnDone->setIconSize(QSize(m_size, m_size));
+    int m_size = btn_h * 1.0;
+    ui->btnDone->setIconSize(QSize(m_size - 9, m_size - 9));
 
     ui->btnView->setFixedHeight(btn_h);
     ui->btnView->setFixedWidth(btn_h);
     ui->btnView->setIconSize(QSize(m_size, m_size));
 
-    QFont font = mw_one->font();
-
 #ifndef Q_OS_ANDROID
+    QFont font = mw_one->font();
     m_EditSource->setFont(font);
     markdownLexer->setFont(font);
 #endif
@@ -2346,7 +2345,7 @@ void Notes::previewNote() {
     MD2Html(currentMDFile);
   });
 
-  // 可选：使用 QFutureWatcher 监控进度
+  // 使用 QFutureWatcher 监控进度
   QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     mw_one->closeProgress();

@@ -50,6 +50,11 @@
         <!-- 关键：禁用默认窗口蒙层 -->
         <item name="android:windowIsFloating">false</item>
     </style>
-   
+
+    <!-- 直接继承系统的日夜切换主题 -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+
+    </style>
+
 
 </resources>
