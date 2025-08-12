@@ -45,6 +45,8 @@
     <!-- 特殊MIUI权限 -->
     <uses-permission android:name="miui.permission.BIND_TTS_SERVICE" />
 
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+
     <!-- 查询所有TTS服务 -->
     <queries>
         <intent>

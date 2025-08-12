@@ -1942,7 +1942,7 @@ public class MyActivity
               | Intent.FLAG_ACTIVITY_CLEAR_TOP);
           startActivity(intent);
         }
-        // 杀死当前进程（确保旧进程退出）
+        // 终止当前进程（确保旧进程退出）
         Process.killProcess(Process.myPid());
         System.exit(0);
       } catch (Exception e) {
