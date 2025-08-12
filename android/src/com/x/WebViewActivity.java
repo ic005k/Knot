@@ -19,6 +19,7 @@ import android.Manifest;
 
 public class WebViewActivity extends Activity {
     private static final String TAG = "WebViewActivity"; // 调试标签
+    private static WebViewActivity instance;
     private WebView mWebView;
     private static final int REQUEST_EDIT = 1;
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -39,6 +40,7 @@ public class WebViewActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = this;
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_webview);
 
@@ -90,7 +92,7 @@ public class WebViewActivity extends Activity {
 
     // JavaScript接口
     public class WebAppInterface {
-        // 打开图片
+        // 打开图片（保留响应功能）
         @JavascriptInterface
         public void openImage(String url) {
             String localPath = url.replace("file://", "");
@@ -105,13 +107,13 @@ public class WebViewActivity extends Activity {
         public void makeCall(String phoneNumber) {
             String cleanNumber = phoneNumber.replaceAll("[^0-9+]", "");
             Log.d(TAG, "准备拨打号码: " + cleanNumber);
-            
+
             // 使用ACTION_DIAL打开拨号界面（而非直接拨号）
             Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + cleanNumber));
             startActivity(intent);
         }
 
-        // 发送邮件（恢复邮件处理功能）
+        // 发送邮件
         @JavascriptInterface
         public void sendEmail(String emailAddress) {
             Log.d(TAG, "准备发送邮件到: " + emailAddress);
@@ -144,13 +146,13 @@ public class WebViewActivity extends Activity {
                 new WebAppInterface().makeCall(phoneNumber);
                 return true;
             }
-            // 恢复处理邮件地址链接
+            // 处理邮件地址链接
             else if (url.startsWith("mailto:")) {
                 String email = url.substring(7);
                 new WebAppInterface().sendEmail(email);
                 return true;
             }
-            // 处理图片
+            // 处理图片链接（仅响应，不解析）
             else if (isImageUrl(url)) {
                 new WebAppInterface().openImage(url);
                 return true;
@@ -166,7 +168,7 @@ public class WebViewActivity extends Activity {
             return super.shouldOverrideUrlLoading(view, request);
         }
 
-        // 判断是否为图片URL
+        // 判断是否为图片URL（仅用于响应已存在的图片链接）
         private boolean isImageUrl(String url) {
             String lowerUrl = url.toLowerCase();
             return lowerUrl.endsWith(".jpg") || lowerUrl.endsWith(".jpeg")
@@ -189,40 +191,12 @@ public class WebViewActivity extends Activity {
                 }
             }
 
-            // 延迟执行JS处理（仅保留图片处理）
-            mWebView.postDelayed(() -> processContent(), 500);
-
-            // 添加滚动监听，实时保存位置
+            // 移除图片解析逻辑，仅保留滚动监听
             String scrollListenerJs = "window.onscroll = function() {" +
                     "   AndroidInterface.saveScrollPosition(window.scrollY);" +
                     "};";
             mWebView.evaluateJavascript(scrollListenerJs, null);
         }
-    }
-
-    // 处理内容，仅保留图片处理逻辑
-    private void processContent() {
-        String js = "javascript:(function() {" +
-                // 仅处理图片点击
-                "var images = document.getElementsByTagName('img');" +
-                "for (var i = 0; i < images.length; i++) {" +
-                "    var img = images[i];" +
-                "    img.style.cursor = 'pointer';" +
-                "    img.style.maxWidth = '100%';" +
-                "    if (!img.src.startsWith('http') && !img.src.startsWith('file://')) {" +
-                "        var baseUrl = window.location.href;" +
-                "        img.src = new URL(img.src, baseUrl).href;" +
-                "    }" +
-                "    img.onclick = function() {" +
-                "        AndroidInterface.openImage(this.src);" +
-                "    };" +
-                "}" +
-                "console.log('内容处理完成，图片数量: ' + images.length);" +
-                "})()";
-
-        mWebView.evaluateJavascript(js, result -> {
-            Log.d(TAG, "JS执行结果: " + result);
-        });
     }
 
     // 加载本地HTML文件的方法
@@ -312,5 +286,9 @@ public class WebViewActivity extends Activity {
         } else {
             Log.d(TAG, "已无历史记录可前进");
         }
+    }
+
+    public static WebViewActivity getInstance() {
+        return instance;
     }
 }

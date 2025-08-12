@@ -43,6 +43,7 @@ static void JavaNotify_12();
 static void JavaNotify_13();
 static void JavaNotify_14();
 static void JavaNotify_15();
+static void JavaNotify_16();
 #endif
 
 #ifdef Q_OS_ANDROID
@@ -467,6 +468,12 @@ static void JavaNotify_15() {
   }
 }
 
+static void JavaNotify_16() {
+  mui->btnOpenNote->click();
+
+  qDebug() << "C++ JavaNotify_16";
+}
+
 static const JNINativeMethod gMethods[] = {
     {"CallJavaNotify_0", "()V", (void *)JavaNotify_0},
     {"CallJavaNotify_1", "()V", (void *)JavaNotify_1},
@@ -488,6 +495,9 @@ static const JNINativeMethod gMethods[] = {
 
 static const JNINativeMethod gMethods15[] = {
     {"CallJavaNotify_15", "()V", (void *)JavaNotify_15}};
+
+static const JNINativeMethod gMethods16[] = {
+    {"CallJavaNotify_16", "()V", (void *)JavaNotify_16}};
 
 void RegJni(const char *myClassName) {
   QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
@@ -528,6 +538,28 @@ void RegJni15(const char *myClassName) {
       return;
     } else {
       qDebug() << "RegisterNatives15 success!";
+    }
+  });
+  qDebug() << "++++++++++++++++++++++++";
+}
+
+void RegJni16(const char *myClassName) {
+  QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
+    QJniEnvironment Environment;
+    const char *mClassName = myClassName;
+    jclass j_class;
+    j_class = Environment->FindClass(mClassName);
+    if (j_class == nullptr) {
+      qDebug() << "erro clazz";
+      return;
+    }
+    jint mj = Environment->RegisterNatives(
+        j_class, gMethods16, sizeof(gMethods16) / sizeof(gMethods16[0]));
+    if (mj != JNI_OK) {
+      qDebug() << "register native method failed!";
+      return;
+    } else {
+      qDebug() << "RegisterNatives16 success!";
     }
   });
   qDebug() << "++++++++++++++++++++++++";

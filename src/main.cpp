@@ -32,8 +32,10 @@ std::unique_ptr<cppjieba::Jieba> jieba;
 extern QString iniFile, txtFile, appName, iniDir, privateDir, bakfileDir,
     customFontFamily, defaultFontFamily, strStartTotalTime;
 extern int fontSize;
+
 extern void RegJni(const char* myClassName);
 extern void RegJni15(const char* myClassName);
+extern void RegJni16(const char* myClassName);
 
 extern bool isDark;
 extern MainWindow* mw_one;
@@ -128,6 +130,7 @@ int main(int argc, char* argv[]) {
   RegJni("com/x/ClockActivity");
   RegJni("com/x/ShareReceiveActivity");
   RegJni("com/x/NoteEditor");
+  RegJni16("com/x/NoteEditor");
   RegJni("com/x/MDActivity");
   RegJni("com/x/NewTodo");
   RegJni("com/x/NewNote");

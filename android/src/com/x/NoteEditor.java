@@ -227,6 +227,8 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
 
     public native static void CallJavaNotify_14();
 
+    public native static void CallJavaNotify_16();
+
     private static boolean isGoBackKnot = false;
 
     private ProgressBar progressBar;
@@ -713,12 +715,17 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         }
 
         if (isTextChanged) {
-            // saveNote();
+            isTextChanged = false;
 
-        } else {
             if (MyActivity.isEdit) {
+                MyActivity.isEdit = false;
+                if (WebViewActivity.getInstance() != null) {
+                    WebViewActivity.getInstance().finish();
+                }
+                CallJavaNotify_16();
 
             }
+
         }
 
         MyService.clearNotify();
