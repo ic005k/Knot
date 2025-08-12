@@ -36,6 +36,7 @@ extern int fontSize;
 extern void RegJni(const char* myClassName);
 extern void RegJni15(const char* myClassName);
 extern void RegJni16(const char* myClassName);
+extern void RegJni17(const char* myClassName);
 
 extern bool isDark;
 extern MainWindow* mw_one;
@@ -141,6 +142,7 @@ int main(int argc, char* argv[]) {
   RegJni("com/xhh/pdfui/PDFActivity");
   RegJni("com/x/DefaultOpen");
   RegJni("com/x/DateTimePicker");
+  RegJni17("com/x/WebViewActivity");
 
   iniDir = "/storage/emulated/0/KnotData/";
   privateDir = "/storage/emulated/0/.Knot/";

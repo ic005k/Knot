@@ -44,6 +44,8 @@ public class WebViewActivity extends Activity {
     // 用于存储页面位置的SharedPreferences
     private SharedPreferences scrollPositionPrefs;
 
+    public native static void CallJavaNotify_17();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -279,6 +281,13 @@ public class WebViewActivity extends Activity {
         super.onPause();
         // 在页面暂停时强制保存一次滚动位置
         mWebView.evaluateJavascript("AndroidInterface.saveScrollPosition(window.scrollY);", null);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        CallJavaNotify_17();
+
     }
 
     /**
