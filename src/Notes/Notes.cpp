@@ -2337,27 +2337,40 @@ void Notes::restoreEditorState(const QString &filePath) {
 void Notes::previewNote() {
   if (!QFile::exists(currentMDFile)) return;
 
+  mw_one->showProgress();
   QString title = mw_one->m_NotesList->noteTitle;
-  mw_one->m_NotesList->refreshRecentOpen(title);
-  mw_one->m_NotesList->saveRecentOpen();
 
-  if (isAndroid) {
-    m_Method->setMDTitle(title);
-
-    m_Method->setMDFile(currentMDFile);
-    // openMDWindow();
-
+  QFuture<void> future = QtConcurrent::run([=]() {
+    mw_one->m_NotesList->refreshRecentOpen(title);
+    mw_one->m_NotesList->saveRecentOpen();
     MD2Html(currentMDFile);
-    openLocalHtmlFileInAndroid();
+  });
 
-    setAndroidNoteConfig("/cpos/currentMDFile",
-                         QFileInfo(currentMDFile).baseName());
+  // 可选：使用 QFutureWatcher 监控进度
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+    mw_one->closeProgress();
 
-    return;
-  } else {
-    MD2Html(currentMDFile);
-    openBrowserOnce(htmlFileName);
-  }
+    if (isAndroid) {
+      m_Method->setMDTitle(title);
+
+      m_Method->setMDFile(currentMDFile);
+      // openMDWindow();
+
+      openLocalHtmlFileInAndroid();
+
+      setAndroidNoteConfig("/cpos/currentMDFile",
+                           QFileInfo(currentMDFile).baseName());
+
+      return;
+    } else {
+      openBrowserOnce(htmlFileName);
+    }
+
+    qDebug() << "Preview note completed";
+    watcher->deleteLater();
+  });
+  watcher->setFuture(future);
 }
 
 void Notes::appendToSyncList(QString file) {

@@ -110,7 +110,7 @@ void NotesList::startBackgroundTaskUpdateFilesIndex() {
 
   // 可选：使用 QFutureWatcher 监控进度
   QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, [=]() {
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Database update completed";
     watcher->deleteLater();
   });
@@ -2594,6 +2594,7 @@ void NotesList::genRecentOpenMenu() {
 
       connect(act, &QAction::triggered, this, [=]() {
         currentMDFile = file;
+        noteTitle = name;
 
 #ifdef Q_OS_ANDROID
         mw_one->on_btnOpenNote_clicked();
