@@ -95,17 +95,33 @@ public class WebViewActivity extends Activity {
 
         // 关闭按钮逻辑
         Button closeButton = findViewById(R.id.close_button);
+        if (MyActivity.zh_cn)
+            closeButton.setText("关闭");
+        else
+            closeButton.setText("Close");
         closeButton.setOnClickListener(v -> finish());
 
         Button editButton = findViewById(R.id.edit_button);
+        if (MyActivity.zh_cn)
+            editButton.setText("编辑");
+        else
+            editButton.setText("Edit");
         editButton.setOnClickListener(v -> openEdit());
 
         // 后退按钮
         Button backButton = findViewById(R.id.back_button);
+        if (MyActivity.zh_cn)
+            backButton.setText("后退");
+        else
+            backButton.setText("Back");
         backButton.setOnClickListener(v -> webGoBack());
 
         // 前进按钮
         Button forwardButton = findViewById(R.id.forward_button);
+        if (MyActivity.zh_cn)
+            forwardButton.setText("前进");
+        else
+            forwardButton.setText("Forw");
         forwardButton.setOnClickListener(v -> webGoForward());
     }
 
