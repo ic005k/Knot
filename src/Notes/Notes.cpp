@@ -28,7 +28,6 @@ extern WebDavHelper *listWebDavFiles(const QString &url,
                                      const QString &password);
 extern CloudBackup *m_CloudBackup;
 
-QString markdownToHtml(const QString &markdown, int options);
 QString markdownToHtmlWithMath(const QString &md);
 
 NoteIndexManager::NoteIndexManager(QObject *parent) : QObject{parent} {}
@@ -1138,36 +1137,10 @@ void Notes::loadEmptyNote() {
   mw_one->m_NotesList->noteTitle = "";
 }
 
-QString markdownToHtml(const QString &markdown, int options) {
-  // 处理空输入
-  if (markdown.isEmpty()) {
-    return QString();
-  }
-
-  // 转换为 UTF-8 字节数组（自动管理内存）
-  QByteArray mdUtf8 = markdown.toUtf8();
-
-  // 执行转换（使用字节数组的实际长度，避免 C 字符串截断问题）
-  char *html_cstr = cmark_markdown_to_html(
-      mdUtf8.constData(),  // 原始数据指针
-      mdUtf8.size(),       // 数据实际长度（重要！不用 strlen）
-      options);
-
-  // 检查转换结果
-  if (!html_cstr) {
-    return QString();  // 返回空表示失败
-  }
-
-  // 转换为 Qt 字符串
-  QString html = QString::fromUtf8(html_cstr);
-
-  // 释放 CMARK 分配的内存
-  free(html_cstr);
-
-  return html;
-}
+/////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////
+// QString markdownToHtmlWithMath2(const QString &md);
 QString markdownToHtmlWithMath(const QString &md) {
   // 初始化所有 GitHub 扩展
   cmark_gfm_core_extensions_ensure_registered();
