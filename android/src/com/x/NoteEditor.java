@@ -19,6 +19,28 @@ import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import io.noties.markwon.Markwon;
 import io.noties.markwon.editor.MarkwonEditor;
 import io.noties.markwon.editor.MarkwonEditorTextWatcher;
+import io.noties.markwon.syntax.Prism4jSyntaxHighlight;
+import io.noties.markwon.syntax.Prism4jTheme;
+import io.noties.prism4j.Prism4j;
+import io.noties.markwon.syntax.Prism4jThemeDefault;
+import io.noties.markwon.syntax.Prism4jThemeDarkula;
+import io.noties.markwon.syntax.SyntaxHighlightPlugin;
+import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
+import io.noties.markwon.ext.tables.TablePlugin;
+import io.noties.markwon.ext.tasklist.TaskListPlugin;
+import io.noties.markwon.html.HtmlPlugin;
+import io.noties.markwon.linkify.LinkifyPlugin;
+import io.noties.markwon.simple.ext.SimpleExtPlugin;
+import io.noties.markwon.image.glide.GlideImagesPlugin;
+import io.noties.markwon.image.ImagesPlugin;
+import io.noties.markwon.ext.latex.JLatexMathPlugin;
+import io.noties.markwon.AbstractMarkwonPlugin;
+import io.noties.markwon.inlineparser.MarkwonInlineParser;
+import io.noties.markwon.inlineparser.InlineProcessor;
+
+import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
+
+import io.noties.prism4j.annotations.PrismBundle;
 
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.content.ContextCompat;
@@ -149,6 +171,8 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
     private AudioManager mAudioManager;
     private InternalConfigure internalConfigure;
 
+    private final ExecutorService executor = Executors.newCachedThreadPool();
+
     private Button btn_cancel;
     private Button btnUndo;
     private Button btnRedo;
@@ -257,6 +281,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         String str_file = MyActivity.strMDFile;
         File file = new File(str_file);
         if (getFileSizeInKB(file) < 200) {
+
             // 初始化 Markwon
             final Markwon markwon = Markwon.create(context);
             // 初始化 MarkwonEditor
@@ -264,8 +289,9 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
             // 添加 MarkwonEditorTextWatcher 到 EditText
             editNote.addTextChangedListener(MarkwonEditorTextWatcher.withPreRender(
                     editor,
-                    Executors.newCachedThreadPool(),
+                    executor, // 使用全局线程池
                     editNote));
+
         }
 
         btn_cancel = (Button) findViewById(R.id.btn_cancel);
@@ -465,11 +491,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         } else {
             this.setStatusBarColor("#F3F3F3"); // 灰
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-
-            // if (myMethod == 1)
             setContentView(R.layout.noteeditor);
-            // if (myMethod == 2)
-            // setContentView(R.layout.noteeditor_large);
         }
 
         progressBar = findViewById(R.id.progressBar);
@@ -734,9 +756,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
 
         super.onDestroy();
 
-        if (myMethod == 2) {
-
-        }
+        executor.shutdown(); // 关闭线程池，避免泄露
 
         System.out.println("NoteEditor onDestroy...");
 
