@@ -380,6 +380,7 @@ SOURCES += \
     src/MainWindow.cpp \
     src/MyThread.cpp \
     src/Notes/ColorDialog.cpp \
+    src/Notes/MarkdownToHtml.cpp \
     src/Notes/MoveTo.cpp \
     src/Notes/NewNoteBook.cpp \
     src/Notes/Notes.cpp \
