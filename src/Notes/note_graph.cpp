@@ -353,7 +353,7 @@ void NoteRelationParser::onParsedDataReady(
   arrangeNodes(m_model);
 
   // 新增：打包数据为QML可直接使用的数组
-  QVariantList nodesArray;
+  /*QVariantList nodesArray;
   for (const auto &node : nodes) {
     QVariantMap nodeMap;
     nodeMap["name"] = node.name;
@@ -371,7 +371,7 @@ void NoteRelationParser::onParsedDataReady(
   }
 
   // 直接发送到QML
-  emit sendDataToQml(nodesArray, relationsArray);
+  emit sendDataToQml(nodesArray, relationsArray);*/
 
   emit parsingCompleted();
 

@@ -2219,11 +2219,13 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
 
 void NotesList::on_actionRelationshipGraph() {
   mw_one->showProgress();
-  mui->frameNoteList->hide();
-  mui->frameNotes->show();
 
   if (m_graphController) {
     m_graphController->setCurrentNotePath(currentMDFile);
+    mui->frameNoteList->hide();
+    mui->frameNotes->show();
+  } else {
+    mw_one->closeProgress();
   }
 }
 
