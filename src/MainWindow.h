@@ -480,8 +480,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnBackNotes_clicked();
 
-  void on_btnEdit_clicked();
-
   void on_btnNotes_clicked();
 
   void on_btnZoomIn_clicked();
@@ -529,8 +527,6 @@ class MainWindow : public QMainWindow {
   void on_textBrowser_selectionChanged();
 
   void on_timerMousePress();
-
-  void on_btnNotesList_clicked();
 
   void on_btnBackImg_clicked();
 
@@ -605,8 +601,6 @@ class MainWindow : public QMainWindow {
   void on_btnMenu_clicked();
 
   void on_btnSync_clicked();
-
-  void on_btnPDF_clicked();
 
   void on_btnPasteTodo_clicked();
 
@@ -806,10 +800,6 @@ class MainWindow : public QMainWindow {
   void on_rbRunning_clicked();
 
   void on_btnToPDF_clicked();
-
-  void on_btnRecentOpen0_clicked();
-
-  void on_btnWebBack_clicked();
 
   void on_btnWebDAVBackup_clicked();
 

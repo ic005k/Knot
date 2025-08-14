@@ -97,6 +97,9 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
   startBackgroundTaskUpdateFilesIndex();
 
   loadNotesListIndex();
+
+  // 初始化笔记关系图谱功能
+  initNoteGraphView();  // 关键：注册控制器到QML引擎
 }
 
 NotesList::~NotesList() { delete ui; }
@@ -228,7 +231,7 @@ QString NotesList::getCurrentMDFile() {
 
   QString curmd = Reg.value("/MainNotes/currentItem", "memo/xxx.md").toString();
   QString title = Reg.value("/MainNotes/NoteName", tr("Note Name")).toString();
-  mui->lblNoteName->setText(title);
+  mui->lblNoteGraphView->setText(title);
   noteTitle = title;
 
   return iniDir + curmd;
@@ -391,10 +394,10 @@ void NotesList::renameCurrentItem(QString title) {
 }
 
 void NotesList::setNoteName(QString name) {
-  mui->lblNoteName->adjustSize();
-  mui->lblNoteName->setWordWrap(true);
-  mui->lblNoteName->setText(name);
-  mui->lblNoteName->setToolTip(name);
+  mui->lblNoteGraphView->adjustSize();
+  mui->lblNoteGraphView->setWordWrap(true);
+  mui->lblNoteGraphView->setText(name);
+  mui->lblNoteGraphView->setToolTip(name);
   noteTitle = name;
 }
 
@@ -1113,10 +1116,6 @@ void NotesList::setWinPos() {
   int x = mw_one->geometry().x();
   this->setGeometry(x, mw_one->geometry().y(), w, mw_one->height());
   mui->btnBackNotes->hide();
-  mui->btnEdit->hide();
-  mui->btnNotesList->hide();
-  mui->btnSetKey->hide();
-  mui->btnPDF->hide();
 }
 
 void NotesList::clearFiles() {
@@ -2165,6 +2164,7 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
   QAction *actExport = new QAction(tr("Export"));
   QAction *actShare = new QAction(tr("Share"));
   QAction *actCopyLink = new QAction(tr("Copy Note Link"));
+  QAction *actRelationshipGraph = new QAction(tr("Relationship Graph"));
 
   connect(actNew, &QAction::triggered, this,
           &NotesList::on_actionAdd_Note_triggered);
@@ -2186,6 +2186,8 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
           &NotesList::on_actionShareNoteFile);
   connect(actCopyLink, &QAction::triggered, this,
           &NotesList::on_actionCopyNoteLink);
+  connect(actRelationshipGraph, &QAction::triggered, this,
+          &NotesList::on_actionRelationshipGraph);
 
   mainMenu->addAction(actNew);
   mainMenu->addAction(actRename);
@@ -2199,6 +2201,7 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
   mainMenu->addAction(actMoveDown);
 
   mainMenu->addAction(actCopyLink);
+  mainMenu->addAction(actRelationshipGraph);
 
   actRename->setVisible(false);
   actDel->setVisible(false);
@@ -2212,6 +2215,15 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
 #endif
 
   mainMenu->setStyleSheet(m_Method->qssMenu);
+}
+
+void NotesList::on_actionRelationshipGraph() {
+  mui->frameNoteList->hide();
+  mui->frameNotes->show();
+
+  if (m_graphController) {
+    m_graphController->setCurrentNotePath(currentMDFile);
+  }
 }
 
 void NotesList::on_actionCopyNoteLink() {
@@ -2501,7 +2513,7 @@ void NotesList::clickNoteList() {
 
   QString noteName = m_Method->getText0(mui->qwNoteList, index);
 
-  mui->lblNoteName->setText(noteName);
+  mui->lblNoteGraphView->setText(noteName);
   noteTitle = noteName;
 
   tw->setCurrentItem(pNoteItems.at(index));
@@ -2609,7 +2621,7 @@ void NotesList::genRecentOpenMenu() {
 
   int x = 0;
   x = mw_one->geometry().x() + 2;
-  int y = mw_one->geometry().y() + mui->btnRecentOpen0->height() + 4;
+  int y = mw_one->geometry().y() + mui->btnRecentOpen->height() + 4;
   QPoint pos(x, y);
   menuRecentOpen->exec(pos);
 }
@@ -2786,4 +2798,49 @@ void NotesList::restoreNoteFromRecycle() {
 
   setTWRBCurrentItem();
   on_btnRestore_clicked();
+}
+
+void NotesList::initNoteGraphView() {
+  // 1. 先初始化图谱组件（注册QML类型和单例）
+  initializeNoteGraph();
+
+  // 2. 确保 QQuickWidget 已初始化
+  if (!mui->qwNoteGraphView) {
+    qWarning() << "QQuickWidget 未初始化";
+    return;
+  }
+
+  // 3. 加载 QML 源文件（这一步会触发 QML 引擎初始化）
+  mui->qwNoteGraphView->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/NoteGraphView.qml")));
+
+  // 4. 获取 QML 引擎（此时引擎已初始化）
+  QQmlEngine *engine = mui->qwNoteGraphView->engine();
+  if (!engine) {
+    qWarning() << "无法获取 QML 引擎";
+    return;
+  }
+
+  // 5. 获取 NoteGraphController 单例（Qt 6 正确写法）
+  m_graphController = engine->singletonInstance<NoteGraphController *>(
+      "NoteGraph", "NoteGraphController");
+  if (!m_graphController) {
+    qWarning() << "无法获取 NoteGraphController 单例";
+    return;
+  }
+
+  // 6. 向 QML 暴露控制器（可选，QML 可直接通过单例名访问）
+  mui->qwNoteGraphView->rootContext()->setContextProperty("graphController",
+                                                          m_graphController);
+
+  // 7. 连接节点双击信号（打开对应笔记）
+  connect(m_graphController, &NoteGraphController::nodeDoubleClicked, this,
+          &NotesList::onNoteNodeDoubleClicked);
+}
+
+// 节点双击事件处理（打开对应的笔记）
+void NotesList::onNoteNodeDoubleClicked(const QString &filePath) {
+  qDebug() << "打开笔记：" << filePath;
+  // 这里添加你的打开笔记逻辑
+  // openNote(filePath);
 }

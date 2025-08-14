@@ -3,8 +3,6 @@ QT += charts sensors sql
 QT += qml quick quickwidgets location
 QT += xml svg concurrent
 
-
-
 # 在发布构建时禁用调试支持
 DEFINES += QT_NO_DEBUG QML_DISABLE_PROFILER
 
@@ -387,6 +385,7 @@ SOURCES += \
     src/Notes/NotesList.cpp \
     src/Notes/PrintPDF.cpp \
     src/Notes/database_manager.cpp \
+    src/Notes/note_graph.cpp \
     src/Notes/search_model.cpp \
     src/Notes/titlegenerator.cpp \
     src/Preferences.cpp \
@@ -619,6 +618,7 @@ HEADERS += \
     src/Notes/NotesList.h \
     src/Notes/PrintPDF.h \
     src/Notes/database_manager.h \
+    src/Notes/note_graph.h \
     src/Notes/search_model.h \
     src/Notes/titlegenerator.h \
     src/Preferences.h \

@@ -1854,8 +1854,6 @@ void MainWindow::on_btnBackNotes_clicked() {
   mui->frameNoteList->show();
 }
 
-void MainWindow::on_btnEdit_clicked() { m_Notes->openEditUI(); }
-
 void MainWindow::clearSelectBox() {
   QString tempFile = iniDir + "memo/texteditor.html";
   if (!mui->frameReader->isHidden()) {
@@ -1930,22 +1928,6 @@ void MainWindow::on_SetReaderFunVisible() {
 
 void MainWindow::on_timerMousePress() {
   if (!isMouseMove && isMousePress) on_btnSelText_clicked();
-}
-
-void MainWindow::on_btnNotesList_clicked() {
-  mui->frameNotes->hide();
-  mui->frameNoteList->show();
-  m_NotesList->set_memo_dir();
-
-  if (tw->topLevelItemCount() == 0) {
-    mui->lblNoteBook->setText(tr("Note Book"));
-    mui->lblNoteList->setText(tr("Note List"));
-    return;
-  }
-
-  m_NotesList->loadAllNoteBook();
-  m_NotesList->localNotesItem();
-  m_NotesList->setNoteLabel();
 }
 
 void MainWindow::on_btnBackImg_clicked() {
@@ -2211,8 +2193,6 @@ void MainWindow::on_btnCategory_clicked() {
 }
 
 void MainWindow::on_btnSync_clicked() { on_btnUpload_clicked(); }
-
-void MainWindow::on_btnPDF_clicked() { m_Notes->on_btnPDF_clicked(); }
 
 void MainWindow::on_btnPasteTodo_clicked() { mui->editTodo->paste(); }
 
@@ -2781,12 +2761,9 @@ void MainWindow::on_btnEditNote_clicked() {
 
 void MainWindow::on_btnToPDF_clicked() {
   if (!QFile::exists(currentMDFile)) return;
-  mui->btnPDF->click();
+
+  m_Notes->on_btnPDF_clicked();
 }
-
-void MainWindow::on_btnRecentOpen0_clicked() { on_btnRecentOpen_clicked(); }
-
-void MainWindow::on_btnWebBack_clicked() {}
 
 void MainWindow::on_btnWebDAVBackup_clicked() {
   if (!mui->btnReader->isEnabled()) return;

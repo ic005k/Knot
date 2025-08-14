@@ -11,6 +11,8 @@
 extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern Method *m_Method;
+extern QTreeWidget *twrb, *tw;
+
 extern QString iniFile, iniDir, privateDir, currentMDFile, imgFileName, appName,
     encPassword, errorInfo;
 extern bool isAndroid, isIOS, isDark, isPasswordError;
@@ -909,13 +911,13 @@ void Notes::on_btnPDF_clicked() {
   delete printer;
 }
 
-void Notes::editNote() { mw_one->on_btnEdit_clicked(); }
+void Notes::editNote() { openEditUI(); }
 
-void Notes::showNoteList() { mw_one->on_btnNotesList_clicked(); }
+void Notes::showNoteList() { openNotesUI(); }
 
 void Notes::on_editNote() {
   timerEditNote->stop();
-  mw_one->on_btnEdit_clicked();
+  openEditUI();
 }
 
 void Notes::setOpenSearchResultForAndroid(bool isValue, QString strSearchText) {
@@ -1133,7 +1135,7 @@ void Notes::loadEmptyNote() {
   currentMDFile = "";
   MD2Html(currentMDFile);
 
-  mui->lblNoteName->setText("");
+  mui->lblNoteGraphView->setText("");
   mw_one->m_NotesList->noteTitle = "";
 }
 
@@ -1148,15 +1150,25 @@ void Notes::openNotesUI() {
   mw_one->isReaderVisible = false;
 
   mui->frameMain->hide();
-  mui->frameNotes->show();
+  mui->frameNoteList->show();
 
-  mui->btnNotesList->click();
+  mw_one->m_NotesList->set_memo_dir();
+
+  if (tw->topLevelItemCount() == 0) {
+    mui->lblNoteBook->setText(tr("Note Book"));
+    mui->lblNoteList->setText(tr("Note List"));
+    return;
+  }
+
+  mw_one->m_NotesList->loadAllNoteBook();
+  mw_one->m_NotesList->localNotesItem();
+  mw_one->m_NotesList->setNoteLabel();
 
   mw_one->closeProgress();
 
   if (isRequestOpenNoteEditor) {
     isRequestOpenNoteEditor = false;
-    mui->btnEdit->click();
+    openEditUI();
   }
 }
 

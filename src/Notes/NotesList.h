@@ -25,6 +25,7 @@
 #include "src/Comm/TextEditToolbar.h"
 #include "src/Notes/MoveTo.h"
 #include "src/Notes/NewNoteBook.h"
+#include "src/Notes/note_graph.h"
 #include "ui_MoveTo.h"
 
 struct MySearchResult {
@@ -52,6 +53,7 @@ class NotesList : public QDialog {
   ~NotesList();
   Ui::NotesList *ui;
 
+  NoteGraphController *m_graphController;  // 图谱控制器
   QDialog *m_RenameNotes = nullptr;
   TextEditToolbar *textToolbarRenameNotes = nullptr;
   QMenu *menuRecentOpen = nullptr;
@@ -209,6 +211,7 @@ class NotesList : public QDialog {
 
   void on_btnMoveTo_clicked();
 
+  void on_actionRelationshipGraph();
  private slots:
 
   void on_editFind_textChanged(const QString &arg1);
@@ -224,6 +227,8 @@ class NotesList : public QDialog {
   void on_actionSetColorFlag();
 
   void on_actionStatistics();
+
+  void onNoteNodeDoubleClicked(const QString &filePath);
 
  private:
   bool isActColorFlagStatus = false;
@@ -279,6 +284,7 @@ class NotesList : public QDialog {
   void setDelNoteFlag(QString mdFile);
   void saveNotesListToFile();
   void on_actionCopyNoteLink();
+  void initNoteGraphView();
 };
 
 class SearchMapper {

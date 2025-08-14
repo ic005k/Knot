@@ -69,13 +69,6 @@ bool MainHelper::mainEventFilter(QObject *watch, QEvent *evn) {
     }
   }
 
-  if (watch == mui->lblNoteName) {
-    if (event->type() == QEvent::MouseButtonPress) {
-      mw_one->on_btnNotesList_clicked();
-      return true;
-    }
-  }
-
   if (isAndroid)
     mw_one->m_Reader->eventFilterReaderAndroid(watch, evn);
   else
@@ -719,11 +712,6 @@ void MainHelper::init_UIWidget() {
   mui->frameNotes->hide();
   mui->frameNotes->layout()->setContentsMargins(1, 1, 1, 1);
 
-  mui->btnSetKey->hide();
-  mui->btnNotesList->hide();
-  mui->btnWebBack->hide();
-  mui->btnRecentOpen0->hide();
-
   mui->chkOneDrive->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mui->chkWebDAV->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mui->chkAutoSync->setStyleSheet(mw_one->m_Preferences->chkStyle);
@@ -750,7 +738,7 @@ void MainHelper::init_UIWidget() {
   mui->editFindNote->installEventFilter(mw_one);
 
   mui->lblTitleEditRecord->installEventFilter(mw_one);
-  mui->lblNoteName->installEventFilter(mw_one);
+  mui->lblNoteGraphView->installEventFilter(mw_one);
 
   mui->lblStats->adjustSize();
   mui->lblStats->setWordWrap(true);
@@ -1213,7 +1201,7 @@ void MainHelper::init_Theme() {
   mw_one->axisY2->setLabelsFont(font1);
   mw_one->axisY2->setTickCount(mw_one->yScale);
 
-  mui->lblNoteName->setStyleSheet(
+  mui->lblNoteGraphView->setStyleSheet(
       "QLabel{background:lightyellow;color:black;}");
 
   init_ButtonStyle();
