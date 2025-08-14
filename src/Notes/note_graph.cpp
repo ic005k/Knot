@@ -172,103 +172,157 @@ void NoteRelationParser::parseNoteRelations(NoteGraphModel *model,
   });
 }
 
-// 后台任务：解析当前笔记中的引用（仅收集数据）
+// 解析当前笔记中符合格式的链接（[任意文本](memo/xxx.md)）
 void NoteRelationParser::parseNoteReferences(QVector<NoteNode> &nodes,
                                              QVector<NoteRelation> &relations,
                                              const QString &notePath,
                                              int sourceIndex) {
   QFile file(notePath);
-  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return;
-
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    qDebug() << "[parseNoteReferences] 无法打开文件：" << notePath;
+    return;
+  }
   QString content = file.readAll();
   file.close();
 
-  // 正则匹配markdown链接（如 [name](path.md)）
-  QRegularExpression regex(R"(\[(.*?)\]\((.*?\.md)\))");
-  QRegularExpressionMatchIterator it = regex.globalMatch(content);
+  // 正则：严格匹配 (memo/xxx.md) 格式的链接，捕获显示文本和文件名
+  QRegularExpression linkRegex(R"(\[(.*?)\]\((memo\/([^)]+\.md))\))");
+  QRegularExpressionMatchIterator it = linkRegex.globalMatch(content);
 
   while (it.hasNext()) {
     QRegularExpressionMatch match = it.next();
-    QString name = match.captured(1);
-    QString path = match.captured(2);
+    QString linkText =
+        match.captured(1);  // 链接显示文本（如"一个优秀的笔记软件..."）
+    QString fullLink = match.captured(
+        2);  // 完整链接路径（如"memo/20250322_092204_513504935.md"）
+    QString fileName =
+        match.captured(3);  // 文件名（如"20250322_092204_513504935.md"）
 
-    // 处理相对路径
-    if (!QFileInfo(path).isAbsolute()) {
-      path = QFileInfo(QFileInfo(notePath).absolutePath() + "/" + path)
-                 .absoluteFilePath();
-    }
+    qDebug() << "[parseNoteReferences] 找到有效链接：" << fullLink;
 
-    // 查找节点是否已存在，不存在则添加
+    // 构建节点（使用完整链接路径作为标识，确保唯一性）
     int targetIndex = -1;
     for (int i = 0; i < nodes.size(); ++i) {
-      if (nodes[i].filePath == path) {
+      // 比较完整链接路径，避免同名文件冲突
+      if (nodes[i].filePath == fullLink) {
         targetIndex = i;
         break;
       }
     }
     if (targetIndex == -1) {
-      nodes.append(NoteNode(name, path));
+      // 节点名称优先使用链接显示文本，为空则用文件名（不含.md）
+      QString nodeName =
+          linkText.isEmpty() ? QFileInfo(fileName).baseName() : linkText;
+      nodes.append(NoteNode(nodeName, fullLink, false));
       targetIndex = nodes.size() - 1;
+      qDebug() << "[parseNoteReferences] 新增节点：" << nodeName << "("
+               << fullLink << ")";
     }
 
-    // 添加关系
+    // 添加引用关系（当前笔记 → 目标笔记）
     relations.append(NoteRelation(sourceIndex, targetIndex));
   }
 }
 
-// 后台任务：递归查找引用当前笔记的文件（仅收集数据）
+// 查找其他笔记中是否包含指向当前笔记的链接（memo/当前文件名.md）
 void NoteRelationParser::findReferencingNotes(QVector<NoteNode> &nodes,
                                               QVector<NoteRelation> &relations,
                                               const QString &dirPath,
                                               const QString &currentNotePath,
                                               int currentNoteIndex) {
+  // 1. 获取当前笔记的文件名（如"20250814_194722_1451366970.md"）
+  QString currentFileName = QFileInfo(currentNotePath).fileName();
+  qDebug() << "[findReferencingNotes] 当前笔记文件名：" << currentFileName;
+
   QDir dir(dirPath);
-  if (!dir.exists()) return;
+  if (!dir.exists()) {
+    qDebug() << "[findReferencingNotes] 目录不存在：" << dirPath;
+    return;
+  }
 
-  // 遍历当前目录的.md文件
-  QStringList mdFiles =
-      dir.entryList(QStringList() << "*.md", QDir::Files | QDir::Readable);
+  // 2. 遍历目录下的所有.md文件（排除当前笔记）
+  QStringList mdFiles = dir.entryList(
+      QStringList() << "*.md", QDir::Files | QDir::Readable | QDir::NoSymLinks);
   for (const QString &fileName : mdFiles) {
-    QString filePath = dir.filePath(fileName);
-    if (filePath == currentNotePath) continue;  // 跳过当前笔记
+    QString mdFilePath = dir.filePath(fileName);
+    // 跳过当前笔记自身
+    if (mdFilePath == currentNotePath) {
+      continue;
+    }
 
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) continue;
-
+    // 3. 读取文件内容，提取所有memo/xxx.md格式的链接
+    QFile file(mdFilePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      qDebug() << "[findReferencingNotes] 无法打开文件：" << mdFilePath;
+      continue;
+    }
     QString content = file.readAll();
     file.close();
 
-    // 检查是否引用当前笔记
-    QString currentNoteFileName =
-        mw_one->m_Notes->m_NoteIndexManager->getNoteTitle(currentNotePath);
-    // QFileInfo(currentNotePath).fileName();
+    // 4. 正则匹配所有(memo/xxx.md)格式的链接
+    QRegularExpression linkRegex(R"(\[(.*?)\]\((memo\/([^)]+\.md))\))");
+    QRegularExpressionMatchIterator it = linkRegex.globalMatch(content);
 
-    if (content.contains(currentNoteFileName)) {
-      QString noteName = QFileInfo(filePath).baseName();
+    bool isReferencing = false;
+    QString refLinkText;  // 引用链接的显示文本
 
-      // 查找节点是否已存在
+    while (it.hasNext()) {
+      QRegularExpressionMatch match = it.next();
+      QString fullLink = match.captured(
+          2);  // 完整链接（如"memo/20250526_113843_1750251688.md"）
+      QString linkFileName = match.captured(
+          3);  // 链接中的文件名（如"20250526_113843_1750251688.md"）
+
+      // 5. 检查链接中的文件名是否与当前笔记的文件名一致
+      if (linkFileName == currentFileName) {
+        isReferencing = true;
+        refLinkText = match.captured(1);  // 记录链接显示文本
+        qDebug() << "[findReferencingNotes] 找到引用：" << mdFilePath
+                 << "中的链接" << fullLink << "匹配当前笔记";
+        break;  // 找到一个匹配即可
+      }
+    }
+
+    // 6. 若存在引用，记录文件名和名称
+    if (isReferencing) {
+      // 获取笔记名称（通过NoteIndexManager）
+      QString noteName =
+          mw_one->m_Notes->m_NoteIndexManager->getNoteTitle(mdFilePath);
+      // 若获取失败，使用文件名作为备选
+      if (noteName.isEmpty()) {
+        noteName = QFileInfo(mdFilePath).baseName();
+        qDebug() << "[findReferencingNotes] 无法获取笔记名称，使用文件名："
+                 << noteName;
+      }
+
+      // 添加节点（使用文件路径作为唯一标识）
       int sourceIndex = -1;
       for (int i = 0; i < nodes.size(); ++i) {
-        if (nodes[i].filePath == filePath) {
+        if (nodes[i].filePath == mdFilePath) {
           sourceIndex = i;
           break;
         }
       }
       if (sourceIndex == -1) {
-        nodes.append(NoteNode(noteName, filePath));
+        nodes.append(NoteNode(noteName, mdFilePath, false));
         sourceIndex = nodes.size() - 1;
+        qDebug() << "[findReferencingNotes] 新增引用节点：" << noteName << "("
+                 << mdFilePath << ")";
       }
 
-      // 添加关系（引用当前笔记）
+      // 记录引用关系
       relations.append(NoteRelation(sourceIndex, currentNoteIndex));
     }
   }
 
-  // 递归遍历子目录
-  QStringList subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+  // 7. 递归遍历子目录
+  QStringList subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot |
+                                      QDir::Readable | QDir::NoSymLinks);
   for (const QString &subDir : subDirs) {
-    findReferencingNotes(nodes, relations, dir.filePath(subDir),
-                         currentNotePath, currentNoteIndex);
+    QString subDirPath = dir.filePath(subDir);
+    qDebug() << "[findReferencingNotes] 进入子目录：" << subDirPath;
+    findReferencingNotes(nodes, relations, subDirPath, currentNotePath,
+                         currentNoteIndex);
   }
 }
 
@@ -285,8 +339,39 @@ void NoteRelationParser::onParsedDataReady(
     m_model->addRelation(rel);
   }
 
+  // 新增：汇总打印所有引用关系
+  qDebug() << "\n[解析完成] 总节点数：" << nodes.size() << "，总关系数："
+           << relations.size();
+  qDebug() << "引用关系列表：";
+  for (const auto &rel : relations) {
+    QString sourceName = nodes[rel.sourceIndex].name;
+    QString targetName = nodes[rel.targetIndex].name;
+    qDebug() << "  " << sourceName << " → " << targetName;
+  }
+
   // 排列节点位置（主线程执行，计算量小）
   arrangeNodes(m_model);
+
+  // 新增：打包数据为QML可直接使用的数组
+  QVariantList nodesArray;
+  for (const auto &node : nodes) {
+    QVariantMap nodeMap;
+    nodeMap["name"] = node.name;
+    nodeMap["filePath"] = node.filePath;
+    nodeMap["isCurrent"] = node.isCurrentNote;
+    nodesArray.append(nodeMap);
+  }
+
+  QVariantList relationsArray;
+  for (const auto &rel : relations) {
+    QVariantMap relMap;
+    relMap["source"] = rel.sourceIndex;
+    relMap["target"] = rel.targetIndex;
+    relationsArray.append(relMap);
+  }
+
+  // 直接发送到QML
+  emit sendDataToQml(nodesArray, relationsArray);
 
   emit parsingCompleted();
 

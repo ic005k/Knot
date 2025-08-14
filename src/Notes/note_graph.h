@@ -81,6 +81,8 @@ class NoteRelationParser : public QObject {
   // 新增：后台解析完成后传递数据的信号（跨线程使用）
   void parsedDataReady(const QVector<NoteNode> &nodes,
                        const QVector<NoteRelation> &relations);
+  void sendDataToQml(const QVariantList &nodesArray,
+                     const QVariantList &relationsArray);
 
  private slots:
   // 新增：主线程处理后台返回数据的槽函数
