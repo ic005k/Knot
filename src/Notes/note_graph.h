@@ -4,6 +4,7 @@
 #include <QAbstractItemModel>
 #include <QObject>
 #include <QPointF>
+#include <QPointer>  // 新增：用于安全持有模型指针
 #include <QString>
 #include <QVector>
 
@@ -24,6 +25,10 @@ struct NoteRelation {
 
   NoteRelation(int src, int tgt) : sourceIndex(src), targetIndex(tgt) {}
 };
+
+// 声明元类型（用于跨线程传递）
+Q_DECLARE_METATYPE(QVector<NoteNode>)
+Q_DECLARE_METATYPE(QVector<NoteRelation>)
 
 class NoteGraphModel : public QAbstractItemModel {
   Q_OBJECT
@@ -73,13 +78,29 @@ class NoteRelationParser : public QObject {
 
  signals:
   void parsingCompleted();
+  // 新增：后台解析完成后传递数据的信号（跨线程使用）
+  void parsedDataReady(const QVector<NoteNode> &nodes,
+                       const QVector<NoteRelation> &relations);
+
+ private slots:
+  // 新增：主线程处理后台返回数据的槽函数
+  void onParsedDataReady(const QVector<NoteNode> &nodes,
+                         const QVector<NoteRelation> &relations);
 
  private:
-  void parseNoteReferences(NoteGraphModel *model, const QString &notePath,
-                           bool isSource);
-  void findReferencingNotes(NoteGraphModel *model, const QString &dirPath,
-                            const QString &currentNotePath);
+  // 修改：原parseNoteReferences改为后台数据收集函数（参数调整）
+  void parseNoteReferences(QVector<NoteNode> &nodes,
+                           QVector<NoteRelation> &relations,
+                           const QString &notePath, int sourceIndex);
+  // 修改：原findReferencingNotes改为后台数据收集函数（参数调整）
+  void findReferencingNotes(QVector<NoteNode> &nodes,
+                            QVector<NoteRelation> &relations,
+                            const QString &dirPath,
+                            const QString &currentNotePath,
+                            int currentNoteIndex);
   void arrangeNodes(NoteGraphModel *model);
+  // 新增：持有模型指针（使用QPointer确保安全）
+  QPointer<NoteGraphModel> m_model;
 };
 
 class NoteGraphController : public QObject {

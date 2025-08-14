@@ -2218,6 +2218,7 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
 }
 
 void NotesList::on_actionRelationshipGraph() {
+  mw_one->showProgress();
   mui->frameNoteList->hide();
   mui->frameNotes->show();
 
