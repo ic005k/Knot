@@ -111,5 +111,6 @@ class NoteGraphController : public QObject {
 
 // 初始化函数声明
 void initializeNoteGraph();
+void registerNoteGraphTypes();  // <-- 新增：声明 registerNoteGraphTypes 函数
 
 #endif  // NOTE_GRAPH_H

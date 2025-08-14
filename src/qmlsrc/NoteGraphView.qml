@@ -1,259 +1,232 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import NoteGraph 1.0
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
+// QtQuick.Shapes 不再需要
 
 Item {
-    id: noteGraphView
-    anchors.fill: parent
+    id: graphViewRoot
 
-    // 控制器单例引用
-    property NoteGraphController controller: NoteGraphController ? NoteGraphController : null
-
-    // 基础配置参数
-    property real scaleFactor: 1.0
-    property real offsetX: 0
-    property real offsetY: 0
-    property bool isDragging: false  // 背景拖动状态（全局）
-    property real startDragX: 0
-    property real startDragY: 0
-    property int lastPaintTime: 0
-
-    // 模型变化监听
-    onControllerChanged: {
-        if (controller) {
-            controller.modelChanged.connect(refreshView);
-            controller.model.rowsRemoved.connect(function(parent, first, last) {
-                refreshView();
-            });
-            controller.model.rowsInserted.connect(function(parent, first, last) {
-                refreshView();
-            });
-        }
-    }
-
-    // 背景拖动区域（使用全局isDragging）
-    MouseArea {
-        id: backgroundMouseArea
+    // --- 主画布 ---
+    Item {
+        id: canvas
         anchors.fill: parent
+        // --- 用于画布平移的属性 ---
+        property real offsetX: 0
+        property real offsetY: 0
+        // --- 应用平移 ---
+        transform: Translate { x: canvas.offsetX; y: canvas.offsetY }
 
-        onPressed: function(mouse) {
-            noteGraphView.isDragging = true;  // 明确指定作用域
-            startDragX = mouse.x - offsetX;
-            startDragY = mouse.y - offsetY;
-        }
+        // --- 动态绘制所有边的 Canvas ---
+        Canvas {
+            id: edgesCanvas
+            anchors.fill: parent
+            z: 1 // 确保边在节点下方
 
-        onMouseXChanged: function(mouse) {
-            if (noteGraphView.isDragging) {  // 限定作用域
-                offsetX = mouse.x - startDragX;
-                offsetY = mouse.y - startDragY;
-                requestThrottledPaint();
-            }
-        }
-
-        onMouseYChanged: function(mouse) {
-            if (noteGraphView.isDragging) {  // 限定作用域
-                offsetX = mouse.x - startDragX;
-                offsetY = mouse.y - startDragY;
-                requestThrottledPaint();
-            }
-        }
-
-        onReleased: function(mouse) {
-            noteGraphView.isDragging = false;  // 明确指定作用域
-            connectionLines.requestPaint();
-        }
-        propagateComposedEvents: true
-    }
-
-    // 绘制连接线（强化可见性）
-    Canvas {
-        id: connectionLines
-        anchors.fill: parent
-        antialiasing: true
-
-        onPaint: {
-            const ctx = getContext("2d");
-            ctx.resetTransform();
-            ctx.clearRect(0, 0, width, height);
-
-            if (!controller || !controller.model) {
-                ctx.fillStyle = "red";
-                ctx.fillText("模型未加载", 50, 50);
-                return;
-            }
-
-            // 调试信息（确认关系数）
-            const relationCount = controller.model.getRelations ? controller.model.getRelations().length : 0;
-            ctx.fillStyle = "red";
-            ctx.fillText("节点数: " + controller.model.rowCount(), 50, 30);
-            ctx.fillText("关系数: " + relationCount, 50, 50);
-            if (relationCount === 0) {
-                ctx.fillText("无关系数据", 50, 70);
-                return;
-            }
-
-            // 应用视图偏移（居中显示）
-            ctx.translate(noteGraphView.offsetX + width/2, noteGraphView.offsetY + height/2);
-
-            // 绘制红色粗线
-            const relations = controller.model.getRelations();
-            ctx.strokeStyle = "#FF0000";  // 纯红色
-            ctx.lineWidth = 4;  // 固定粗度，确保可见
-            ctx.lineCap = "round";
-
-            for (let i = 0; i < relations.length; i++) {
-                const rel = relations[i];
-                const sourceIdx = controller.model.index(rel.source, 0);
-                const targetIdx = controller.model.index(rel.target, 0);
-
-                // 获取节点位置（强制转换为QPointF）
-                const sourcePos = controller.model.data(sourceIdx, NoteGraphModel.PositionRole).value;
-                const targetPos = controller.model.data(targetIdx, NoteGraphModel.PositionRole).value;
-
-                // 调试单个关系
-                if (!sourcePos || !targetPos) {
-                    ctx.fillText("节点位置无效: " + i, 50, 90 + i*20);
-                    continue;
+            onPaint: {
+                // --- 修改：直接使用上下文属性 graphController ---
+                if (!graphController || !graphController.model) {
+                    console.log("EdgesCanvas: graphController or model not ready.");
+                    return;
                 }
 
-                // 绘制连线
-                ctx.beginPath();
-                ctx.moveTo(sourcePos.x * scaleFactor, sourcePos.y * scaleFactor);
-                ctx.lineTo(targetPos.x * scaleFactor, targetPos.y * scaleFactor);
-                ctx.stroke();
+                const ctx = getContext("2d");
+                ctx.reset();
+                const model = graphController.model;
+                const nodeCount = model.count;
 
-                // 绘制箭头
-                drawArrow(ctx, targetPos.x * scaleFactor, targetPos.y * scaleFactor,
-                         sourcePos.x * scaleFactor, sourcePos.y * scaleFactor, 10);
+                if (nodeCount < 2) {
+                    console.log("EdgesCanvas: Not enough nodes to draw edges.");
+                    return;
+                }
+
+                console.log("EdgesCanvas: Drawing edges for", nodeCount, "nodes.");
+
+                ctx.strokeStyle = "#AD1457"; // 玫红色
+                ctx.lineWidth = 2;
+                ctx.fillStyle = "#AD1457"; // 箭头颜色
+
+                // --- 示例边绘制逻辑 ---
+                // 绘制简单的链状连接 (0->1, 1->2, ...)
+                for (let i = 0; i < nodeCount - 1; i++) {
+                    const srcIndex = i;
+                    const tgtIndex = i + 1;
+
+                    // 获取 QML 节点项
+                    const srcNodeItem = nodesRepeater.itemAt(srcIndex);
+                    const tgtNodeItem = nodesRepeater.itemAt(tgtIndex);
+
+                    // 检查节点项是否存在
+                    if (!srcNodeItem || !tgtNodeItem) {
+                        console.log("EdgesCanvas: Skipping edge", srcIndex, "->", tgtIndex, "- Node item not found.");
+                        continue;
+                    }
+
+                    // 计算节点中心点（考虑画布偏移）
+                    // 注意：itemAt 返回的是节点的根 Item (Rectangle)，我们使用它的 x,y,width,height
+                    const sx = srcNodeItem.x + srcNodeItem.width / 2;
+                    const sy = srcNodeItem.y + srcNodeItem.height / 2;
+                    const tx = tgtNodeItem.x + tgtNodeItem.width / 2;
+                    const ty = tgtNodeItem.y + tgtNodeItem.height / 2;
+
+                    const dx = tx - sx;
+                    const dy = ty - sy;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist === 0) {
+                        continue;
+                    }
+
+                    // 绘制贝塞尔曲线
+                    const offset = Math.min(80, 20 + dist / 8);
+                    const normX = -dy / dist;
+                    const normY = dx / dist;
+                    const midX = (sx + tx) / 2;
+                    const midY = (sy + ty) / 2;
+                    const cx1 = midX + normX * offset;
+                    const cy1 = midY + normY * offset;
+                    const cx2 = midX - normX * offset;
+                    const cy2 = midY - normY * offset;
+
+                    ctx.beginPath();
+                    ctx.moveTo(sx, sy);
+                    ctx.bezierCurveTo(cx1, cy1, cx2, cy2, tx, ty);
+                    ctx.stroke();
+
+                    // 绘制箭头 (在目标节点处)
+                    const angle = Math.atan2(dy, dx);
+                    const headLength = 10;
+                    ctx.beginPath();
+                    ctx.moveTo(tx, ty);
+                    ctx.lineTo(
+                        tx - headLength * Math.cos(angle - Math.PI / 6),
+                        ty - headLength * Math.sin(angle - Math.PI / 6)
+                    );
+                    ctx.lineTo(
+                        tx - headLength * Math.cos(angle + Math.PI / 6),
+                        ty - headLength * Math.sin(angle + Math.PI / 6)
+                    );
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                // --- 示例逻辑结束 ---
+                // --- 请在这里替换为您自己的完整边绘制逻辑 ---
+                // 例如，遍历所有节点对，检查它们之间是否有关系，然后绘制边
+                // for (let i = 0; i < nodeCount; i++) {
+                //     for (let j = 0; j < nodeCount; j++) {
+                //         if (i != j && /* 检查节点 i 和 j 是否有连接 */) {
+                //             // 获取节点 i 和 j 的 Item
+                //             // 计算中心点
+                //             // 绘制贝塞尔曲线和箭头
+                //         }
+                //     }
+                // }
+                console.log("EdgesCanvas: Drawing complete.");
+            }
+
+            // --- 提供给外部调用的刷新函数 ---
+            function requestUpdate() {
+                 console.log("EdgesCanvas: Update requested.");
+                 edgesCanvas.requestPaint(); // 触发 onPaint
             }
         }
 
-        function drawArrow(ctx, x, y, fromX, fromY, size) {
-            const angle = Math.atan2(y - fromY, x - fromX);
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(angle);
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(-size, size/2);
-            ctx.lineTo(-size, -size/2);
-            ctx.closePath();
-            ctx.fillStyle = "#FF0000";
-            ctx.fill();
-            ctx.restore();
-        }
-    }
 
-    // 节点视图（修复dragging作用域）
-    Repeater {
-        model: controller && controller.model ? controller.model : null
+        // --- 绘制节点 (使用上下文属性访问的模型) ---
+        Repeater {
+            id: nodesRepeater
+            model: graphController && graphController.model ? graphController.model : null
 
-        delegate: Rectangle {
-            id: nodeItem
-            property string nodeName: model.name || "未知节点"
-            property bool isCurrentNote: model.isCurrentNote || false
-            property string filePath: model.filePath || ""
-            property bool nodeDragging: false  // 节点拖动状态（独立变量，避免冲突）
-            property real nodeStartX: 0
-            property real nodeStartY: 0
-            signal positionChanged()
-            signal doubleClicked()
+            Rectangle {
+                id: nodeRect
+                x: model.position ? model.position.x : 0
+                y: model.position ? model.position.y : 0
+                width: Math.max(nodeText.implicitWidth + 20, 180)
+                height: nodeText.implicitHeight + 15
+                radius: 8
+                color: model.isCurrentNote ? "#0D47A1" : "#BBDEFB" // 蓝色系
+                border.color: model.isCurrentNote ? "#000000" : "#64B5F6"
+                border.width: model.isCurrentNote ? 2 : 1
+                z: 3 // 确保节点在边之上
 
-            // 节点位置（居中显示）
-            x: noteGraphView.offsetX + width/2 + (model.position.x || 0) * scaleFactor
-            y: noteGraphView.offsetY + height/2 + (model.position.y || 0) * scaleFactor
-            width: Math.max(textItem.implicitWidth + 16, 80)
-            height: Math.max(textItem.implicitHeight + 12, 40)
-            radius: 8
-            color: isCurrentNote ? "#4285F4" : "#F0F0F0"
-            border.color: isCurrentNote ? "#2D62D3" : "#CCCCCC"
-            border.width: 2
-
-            MouseArea {
-                anchors.fill: parent
-
-                onPressed: function(mouse) {
-                    nodeItem.nodeDragging = true;  // 使用节点自身的拖动变量
-                    nodeItem.nodeStartX = mouse.x;
-                    nodeItem.nodeStartY = mouse.y;
-                    nodeItem.z = 10;
+                Text {
+                    id: nodeText
+                    anchors.centerIn: parent
+                    text: model.name.length > 30 ? model.name.substring(0, 27) + "..." : model.name
+                    font.pixelSize: 14
+                    color: model.isCurrentNote ? "white" : "#000000"
+                    elide: Text.ElideRight
+                    horizontalAlignment: Text.AlignHCenter
                 }
 
-                onMouseXChanged: function(mouse) {
-                    if (nodeItem.nodeDragging) {  // 限定作用域
-                        nodeItem.x += mouse.x - nodeItem.nodeStartX;
-                        nodeItem.y += mouse.y - nodeItem.nodeStartY;
-                        nodeItem.nodeStartX = mouse.x;
-                        nodeItem.nodeStartY = mouse.y;
-                        nodeItem.positionChanged();
-                        requestThrottledPaint();
+                MouseArea {
+                    anchors.fill: parent
+                    drag.target: parent // 启用拖动
+
+                    onClicked: {
+                        console.log("Clicked note:", model.name, "Index:", index);
+                    }
+                    onDoubleClicked: {
+                         console.log("Double-clicked note:", model.name, "Index:", index);
+                         if (graphController) {
+                             graphController.nodeDoubleClicked(model.filePath);
+                         }
+                    }
+                    onReleased: {
+                         console.log("Node", index, "drag released at:", parent.x, ",", parent.y);
+                         // --- 关键：节点拖动后，通知边 Canvas 重绘 ---
+                         edgesCanvas.requestUpdate();
+                         // --- 可选：通知 C++ 更新节点位置 ---
+                         // if (graphController) {
+                         //     graphController.updateNodePosition(index, parent.x, parent.y);
+                         // }
                     }
                 }
-
-                onMouseYChanged: function(mouse) {
-                    if (nodeItem.nodeDragging) {  // 限定作用域
-                        nodeItem.x += mouse.x - nodeItem.nodeStartX;
-                        nodeItem.y += mouse.y - nodeItem.nodeStartY;
-                        nodeItem.nodeStartX = mouse.x;
-                        nodeItem.nodeStartY = mouse.y;
-                        nodeItem.positionChanged();
-                        requestThrottledPaint();
-                    }
-                }
-
-                onReleased: function(mouse) {
-                    nodeItem.nodeDragging = false;
-                    nodeItem.z = 0;
-                    connectionLines.requestPaint();
-                }
-
-                onDoubleClicked: function(mouse) {
-                    nodeItem.doubleClicked();
-                }
-                propagateComposedEvents: false
             }
+        } // Repeater (Nodes)
 
-            Text {
-                id: textItem
-                anchors.centerIn: parent
-                text: nodeName
-                color: isCurrentNote ? "white" : "black"
-                font.pixelSize: 14
-                font.family: "SimHei"
-                wrapMode: Text.WordWrap
-                width: parent.width - 16
+        // --- 用于画布平移的 MouseArea ---
+        MouseArea {
+            id: panArea
+            anchors.fill: parent
+            z: 0 // 确保在最底层
+            acceptedButtons: Qt.MiddleButton | Qt.RightButton
+            property point lastPos
+
+            onPressed: {
+                lastPos = Qt.point(mouse.x, mouse.y);
             }
 
             onPositionChanged: {
-                if (controller && controller.model) {
-                    controller.model.setNodePosition(
-                        index,
-                        (x - noteGraphView.offsetX - width/2) / scaleFactor,
-                        (y - noteGraphView.offsetY - height/2) / scaleFactor
-                    );
-                }
-            }
-
-            onDoubleClicked: {
-                if (controller) {
-                    controller.handleNodeDoubleClick(filePath);
+                if (pressedButtons & Qt.MiddleButton || pressedButtons & Qt.RightButton) {
+                    const deltaX = mouse.x - lastPos.x;
+                    const deltaY = mouse.y - lastPos.y;
+                    canvas.offsetX += deltaX;
+                    canvas.offsetY += deltaY;
+                    lastPos = Qt.point(mouse.x, mouse.y);
+                    // --- 关键：画布平移后，通知边 Canvas 重绘 ---
+                    edgesCanvas.requestUpdate();
                 }
             }
         }
+    } // Item (Canvas)
+
+    Component.onCompleted: {
+        console.log("NoteGraphView QML Component Completed.");
+        console.log("Initial graphController:", graphController);
+        // 延迟调用更新，确保节点已创建
+        Qt.callLater(function() {
+            console.log("Initial edge draw triggered.");
+            edgesCanvas.requestUpdate();
+        });
     }
 
-    // 重绘频率控制
-    function requestThrottledPaint() {
-        const now = Date.now();
-        if (now - lastPaintTime > 16) {
-            connectionLines.requestPaint();
-            lastPaintTime = now;
-        }
-    }
-
-    // 视图刷新函数
-    function refreshView() {
-        connectionLines.requestPaint();
+    // --- 提供给 C++ 调用的公共函数 ---
+    function updateGraph() {
+        console.log("NoteGraphView.updateGraph() called from C++.");
+        // 当模型更新时，触发边的重绘
+        edgesCanvas.requestUpdate();
     }
 }
+
+
+
