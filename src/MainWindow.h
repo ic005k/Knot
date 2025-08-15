@@ -819,6 +819,8 @@ class MainWindow : public QMainWindow {
 
   void on_btnTools_clicked();
 
+  void on_btnCopyNoteLink_clicked();
+
  private:
   bool isMoveEntry;
   QTimer *tmeFlash;

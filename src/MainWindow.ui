@@ -7877,6 +7877,19 @@ QSlider::handle:horizontal:disabled {
           </widget>
          </item>
          <item>
+          <widget class="QToolButton" name="btnCopyNoteLink">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Copy Note Link</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QToolButton" name="btnOpenSearchResult">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">

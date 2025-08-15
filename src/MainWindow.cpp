@@ -2831,3 +2831,16 @@ void MainWindow::on_btnTools_clicked() {
   else
     mui->f_Tools->hide();
 }
+
+void MainWindow::on_btnCopyNoteLink_clicked() {
+  QString mdFile = m_NotesList->getSearchResultQmlFile();
+  if (!QFile::exists(mdFile)) return;
+  QString file = mdFile;
+  file = file.replace(iniDir, "");
+  QString name = m_Notes->m_NoteIndexManager->getNoteTitle(mdFile);
+  QString strlink = "[" + name + "](" + file + ")";
+  QClipboard *clipboard = QApplication::clipboard();
+  clipboard->setText(strlink);
+  ShowMessage *msg = new ShowMessage(this);
+  msg->showMsg(appName, strlink, 1);
+}

@@ -1959,7 +1959,8 @@ void Notes::previewNote() {
   if (!QFile::exists(currentMDFile)) return;
 
   mw_one->showProgress();
-  QString title = mw_one->m_NotesList->noteTitle;
+  QString title =
+      mw_one->m_Notes->m_NoteIndexManager->getNoteTitle(currentMDFile);
 
   QFuture<void> future = QtConcurrent::run([=]() {
     mw_one->m_NotesList->refreshRecentOpen(title);
