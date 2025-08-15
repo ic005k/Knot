@@ -69,6 +69,8 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->btnFind->hide();
   ui->editFind->setMinimumWidth(65);
 
+  mui->lblNoteGraphView->hide();
+
   m_Method->set_ToolButtonStyle(this);
 
   // 创建快捷键：绑定 Ctrl+F

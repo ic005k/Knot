@@ -12,6 +12,7 @@
 #include "src/MainWindow.h"
 
 extern MainWindow *mw_one;
+extern QString iniDir;
 
 void registerNoteGraphTypes() {
   qmlRegisterType<NoteGraphModel>("NoteGraph", 1, 0, "NoteGraphModel");
@@ -351,27 +352,6 @@ void NoteRelationParser::onParsedDataReady(
 
   // 排列节点位置（主线程执行，计算量小）
   arrangeNodes(m_model);
-
-  // 新增：打包数据为QML可直接使用的数组
-  /*QVariantList nodesArray;
-  for (const auto &node : nodes) {
-    QVariantMap nodeMap;
-    nodeMap["name"] = node.name;
-    nodeMap["filePath"] = node.filePath;
-    nodeMap["isCurrent"] = node.isCurrentNote;
-    nodesArray.append(nodeMap);
-  }
-
-  QVariantList relationsArray;
-  for (const auto &rel : relations) {
-    QVariantMap relMap;
-    relMap["source"] = rel.sourceIndex;
-    relMap["target"] = rel.targetIndex;
-    relationsArray.append(relMap);
-  }
-
-  // 直接发送到QML
-  emit sendDataToQml(nodesArray, relationsArray);*/
 
   emit parsingCompleted();
 

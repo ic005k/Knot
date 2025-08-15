@@ -1852,6 +1852,7 @@ void MainWindow::on_btnUserInfo_clicked() {
 void MainWindow::on_btnBackNotes_clicked() {
   mui->frameNotes->hide();
   mui->frameNoteList->show();
+  mw_one->m_NotesList->clickNoteList();
 }
 
 void MainWindow::clearSelectBox() {

@@ -2814,7 +2814,7 @@ void NotesList::initNoteGraphView() {
     return;
   }
 
-  // *** 关键修改：在加载 QML 前，先设置一个占位符属性 ***
+  // 在加载 QML 前，先设置一个占位符属性 ***
   // 这可以避免 QML 在引擎初始化早期阶段因访问未定义属性而报错
   // 使用 nullptr 作为初始值
   mui->qwNoteGraphView->rootContext()->setContextProperty(
@@ -2848,7 +2848,7 @@ void NotesList::initNoteGraphView() {
     qDebug() << "成功获取 NoteGraphController 单例指针:" << controller;
   }
 
-  // 6. *** 关键修改：无论 controller 是否为空，都更新上下文属性 ***
+  // 6. 无论 controller 是否为空，都更新上下文属性 ***
   // 如果 controller 有效，QML 现在可以访问到真正的控制器实例。
   // 如果 controller 是 nullptr，QML 中的空值检查可以防止崩溃。
   m_graphController = controller;  // 更新成员变量
@@ -2869,6 +2869,12 @@ void NotesList::initNoteGraphView() {
 // 节点双击事件处理（打开对应的笔记）
 void NotesList::onNoteNodeDoubleClicked(const QString &filePath) {
   qDebug() << "打开笔记：" << filePath;
-  // 这里添加你的打开笔记逻辑
-  // openNote(filePath);
+  QFileInfo fi(filePath);
+  if (fi.exists()) {
+    currentMDFile = filePath;
+  } else {
+    currentMDFile = iniDir + filePath;
+  }
+
+  mw_one->m_Notes->previewNote();
 }
