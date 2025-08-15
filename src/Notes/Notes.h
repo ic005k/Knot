@@ -67,6 +67,10 @@ class Notes : public QDialog {
   ~Notes();
   Ui::Notes *ui;
 
+  void openLocalHtmlFileInAndroid();
+
+  QString htmlFileName;
+
   bool isRequestOpenNoteEditor = false;
 
   NoteIndexManager *m_NoteIndexManager;
@@ -232,7 +236,6 @@ class Notes : public QDialog {
   void on_btnView_clicked();
 
  private:
-  QString htmlFileName;
   bool m_initialized = false;
 
   QString m_lastSearchText;
@@ -294,7 +297,6 @@ class Notes : public QDialog {
   void restoreEditorState(const QString &filePath);
   void processRemoteFiles(QStringList remoteFiles);
   void startBackgroundProcessRemoteFiles();
-  void openLocalHtmlFileInAndroid();
 };
 
 class LimitedTextEdit : public QTextEdit {
