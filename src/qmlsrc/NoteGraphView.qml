@@ -51,7 +51,7 @@ Flickable {
             text: currentNode ? currentNode.name : ""
             color: "white"
             font.bold: true
-            font.pixelSize: 13
+            font.pixelSize: 14
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter // 垂直居中
@@ -431,7 +431,7 @@ Flickable {
                                         anchors.centerIn: parent
                                         text: "${nodeData.name}"
                                         color: "white"
-                                        font.pixelSize: 12
+                                        font.pixelSize: 13
                                         wrapMode: Text.WordWrap
                                         //width: ${nodeWidth * 0.8}
                                         horizontalAlignment: Text.AlignHCenter  // 水平居中
