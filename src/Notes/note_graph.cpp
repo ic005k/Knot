@@ -407,7 +407,9 @@ void NoteRelationParser::arrangeNodes(NoteGraphModel *model) {
 NoteGraphController::NoteGraphController(QObject *parent) : QObject(parent) {
   m_model = new NoteGraphModel(this);
   m_parser = new NoteRelationParser(this);
-  emit modelChanged();
+
+  // 延迟发射信号，确保对象完全构造
+  QTimer::singleShot(0, this, &NoteGraphController::modelChanged);
 }
 
 QString NoteGraphController::currentNotePath() const {
@@ -415,13 +417,13 @@ QString NoteGraphController::currentNotePath() const {
 }
 
 void NoteGraphController::setCurrentNotePath(const QString &path) {
-  if (m_currentNotePath != path) {
-    m_currentNotePath = path;
-    emit currentNotePathChanged();
-    m_parser->parseNoteRelations(m_model, m_currentNotePath);
-  } else {
-    mw_one->closeProgress();
-  }
+  // if (m_currentNotePath != path) {
+  m_currentNotePath = path;
+  emit currentNotePathChanged();
+  m_parser->parseNoteRelations(m_model, m_currentNotePath);
+  //} else {
+  //  mw_one->closeProgress();
+  //}
 }
 
 NoteGraphModel *NoteGraphController::model() const { return m_model; }

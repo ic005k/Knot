@@ -70,6 +70,9 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->editFind->setMinimumWidth(65);
 
   mui->lblNoteGraphView->hide();
+  if (isAndroid) {
+    mui->btnBack_NotesSearchResult->hide();
+  }
 
   m_Method->set_ToolButtonStyle(this);
 
