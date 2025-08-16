@@ -146,64 +146,35 @@ Rectangle {
         Rectangle {
             id: listItem
             width: ListView.view.width
-            height: getItemHeight() + 16
+            height: listCol.implicitHeight + 0
             color: ListView.isCurrentItem ? "lightblue" : getColor()
             border.width: isDark ? 0 : 1
             border.color: "lightgray" //"lightsteelblue"
 
             radius: 0
 
-            function getItemHeight() {
-                var item_tabH
-                var item0H
-                var item1H
-                var item2H
-                var item3H
-
-                if (item_tab.text.length == 0)
-                    item_tabH = 0
-                else
-                    item_tabH = item_tab.contentHeight
-
-                if (item0.text.length == 0)
-                    item0H = 0
-                else
-                    item0H = item0.contentHeight
-
-                if (item1.text.length == 0)
-                    item1H = 0
-                else
-                    item1H = item1.contentHeight
-
-                if (item2.text.length == 0)
-                    item2H = 0
-                else
-                    item2H = item2.contentHeight
-
-                if (item3.text.length == 0)
-                    item3H = 0
-                else
-                    item3H = item3.contentHeight
-
-                return item_tabH + item0H + item1H + item2H + item3H
-            }
-
             RowLayout {
 
                 id: idlistElemnet
-                height: parent.height
+
                 width: parent.width
                 spacing: 2
                 Layout.fillWidth: true
 
                 ColumnLayout {
-                    id: idlistElemnet4
+                    id: listCol
                     height: parent.height
                     width: parent.width
                     spacing: 2
                     Layout.fillWidth: true
                     anchors.leftMargin: 0
                     anchors.rightMargin: 0
+
+                    Rectangle {
+                        width: view.width
+                        height: 5 // 空白高度
+                        color: "transparent"
+                    }
 
                     Text {
                         id: item_tab
@@ -284,7 +255,7 @@ Rectangle {
                         width: parent.width
                         wrapMode: Text.WordWrap
                         elide: Text.ElideRight
-                        //Layout.maximumWidth: listItem.width
+
                         Layout.preferredWidth: listItem.width
                         font.bold: false
                         text: text3
@@ -294,6 +265,12 @@ Rectangle {
                         rightPadding: 5
 
                         visible: item3.text.length ? true : false
+                    }
+
+                    Rectangle {
+                        width: view.width
+                        height: 5 // 空白高度
+                        color: "transparent"
                     }
                 }
             }
@@ -310,79 +287,16 @@ Rectangle {
                     var delta = Qt.point(mouse.x - clickPos.x,
                                          mouse.y - clickPos.y)
                     console.debug("delta.x: " + delta.x)
-                    if ((delta.x < 0) && (aBtnShow.running === false)
-                            && (delBtn.width == 0)) {
-                        aBtnShow.start()
-                    } else if (aBtnHide.running === false
-                               && (delBtn.width > 0)) {
-                        aBtnHide.start()
-                    }
                 }
 
                 onClicked: {
 
                     view.currentIndex = index //实现item切换
-                    //mw_one.clickData()
                 }
 
                 onDoubleClicked: {
 
-                    //mw_one.reeditData()
-                    //var data = view.model.get(view.currentIndex)
-                    //console.log(data.text0 + "," + data.type + ", count=" + view.count)
                 }
-            }
-
-            Rectangle {
-                color: "#AAAAAA"
-                height: 0
-                width: parent.width
-                anchors.bottom: parent.bottom
-            }
-
-            Rectangle {
-                id: delBtn
-                visible: false
-                height: parent.height
-                width: 0
-                color: "#FF0000"
-
-                anchors.right: parent.right
-                anchors.rightMargin: -30
-                radius: 0
-
-                Text {
-                    width: 56
-                    anchors.centerIn: parent
-
-                    text: qsTr("Done")
-                    color: "#ffffff"
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        m_Todo.addToRecycle()
-                        view.model.remove(index)
-                    }
-                }
-            }
-
-            PropertyAnimation {
-                id: aBtnShow
-                target: delBtn
-                property: "width"
-                duration: 100
-                from: 0
-                to: 80
-            }
-            PropertyAnimation {
-                id: aBtnHide
-                target: delBtn
-                property: "width"
-                duration: 100
-                from: 80
-                to: 0
             }
         }
     }
@@ -395,19 +309,10 @@ Rectangle {
             margins: 4
         }
 
+        boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
+
         model: ListModel {
             id: listmain
-
-            // debug
-
-
-            /* ListElement {
-                text0: '<span style="background-color: #ff6600;">Hello</span>'
-                text1: "123456  <b>Hello</b> <i>World!</i>  123456"
-                text2: '123456 <font color="red"><b>TEST</b></font>  123456'
-                text3: "str3 1234567890 1234567890  1234567890 1234567890"
-                myh: 0
-            }*/
         }
         delegate: dragDelegate
 
@@ -447,21 +352,6 @@ Rectangle {
                 radius: 3
             }
             background: null // 彻底消除背景容器
-        }
-    }
-
-    function getListEleHeadColor(ntype) {
-        switch (ntype) {
-        case 0:
-            return "lightgray"
-        case 1:
-            return "red"
-        case 2:
-            return "yellow"
-        case 3:
-            return "lightblue"
-        default:
-            return "black"
         }
     }
 }
