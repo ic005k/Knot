@@ -2173,6 +2173,9 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
 }
 
 void NotesList::on_actionRelationshipGraph() {
+  QFileInfo fi(currentMDFile);
+  if (!fi.exists()) return;
+
   mw_one->showProgress();
 
   if (m_graphController) {
