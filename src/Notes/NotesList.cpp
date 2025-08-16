@@ -231,7 +231,7 @@ QString NotesList::getCurrentMDFile() {
 
   QString curmd = Reg.value("/MainNotes/currentItem", "memo/xxx.md").toString();
   QString title = Reg.value("/MainNotes/NoteName", tr("Note Name")).toString();
-  mui->lblNoteGraphView->setText(title);
+
   noteTitle = title;
 
   return iniDir + curmd;
@@ -393,13 +393,7 @@ void NotesList::renameCurrentItem(QString title) {
   resetQML_List();
 }
 
-void NotesList::setNoteName(QString name) {
-  mui->lblNoteGraphView->adjustSize();
-  mui->lblNoteGraphView->setWordWrap(true);
-  mui->lblNoteGraphView->setText(name);
-  mui->lblNoteGraphView->setToolTip(name);
-  noteTitle = name;
-}
+void NotesList::setNoteName(QString name) { noteTitle = name; }
 
 void NotesList::on_btnDel_clicked() {
   if (tw->topLevelItemCount() == 0) return;
@@ -2183,8 +2177,7 @@ void NotesList::on_actionRelationshipGraph() {
 
   if (m_graphController) {
     m_graphController->setCurrentNotePath(currentMDFile);
-    mui->frameNoteList->hide();
-    mui->frameNotes->show();
+
   } else {
     mw_one->closeProgress();
   }
@@ -2477,7 +2470,6 @@ void NotesList::clickNoteList() {
 
   QString noteName = m_Method->getText0(mui->qwNoteList, index);
 
-  mui->lblNoteGraphView->setText(noteName);
   noteTitle = noteName;
 
   tw->setCurrentItem(pNoteItems.at(index));

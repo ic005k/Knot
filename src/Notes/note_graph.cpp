@@ -10,8 +10,10 @@
 #include <QtMath>
 
 #include "src/MainWindow.h"
+#include "ui_MainWindow.h"
 
 extern MainWindow *mw_one;
+extern Ui::MainWindow *mui;
 extern QString iniDir;
 
 void registerNoteGraphTypes() {
@@ -330,7 +332,14 @@ void NoteRelationParser::findReferencingNotes(QVector<NoteNode> &nodes,
 // 主线程：处理后台返回的结果并更新模型
 void NoteRelationParser::onParsedDataReady(
     const QVector<NoteNode> &nodes, const QVector<NoteRelation> &relations) {
-  if (!m_model) return;
+  if (!m_model) {
+    mw_one->closeProgress();
+    return;
+  }
+
+  mw_one->closeProgress();
+  mui->frameNoteList->hide();
+  mui->frameNotes->show();
 
   // 批量添加节点和关系到模型（主线程操作）
   for (const auto &node : nodes) {
@@ -343,6 +352,14 @@ void NoteRelationParser::onParsedDataReady(
   // 新增：汇总打印所有引用关系
   qDebug() << "\n[解析完成] 总节点数：" << nodes.size() << "，总关系数："
            << relations.size();
+
+  QFont font = mw_one->font();
+  font.setPointSize(11);
+  mui->lblNoteGraphView->setFont(font);
+  mui->lblNoteGraphView->setText(
+      tr("Nodes") + ": " + QString::number(nodes.size()) + "  " +
+      tr("Relations") + ": " + QString::number(relations.size()));
+
   qDebug() << "引用关系列表：";
   for (const auto &rel : relations) {
     QString sourceName = nodes[rel.sourceIndex].name;
@@ -354,8 +371,6 @@ void NoteRelationParser::onParsedDataReady(
   arrangeNodes(m_model);
 
   emit parsingCompleted();
-
-  mw_one->closeProgress();
 }
 
 // 主线程：排列节点位置（保持不变）

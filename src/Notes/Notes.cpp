@@ -69,7 +69,6 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->btnFind->hide();
   ui->editFind->setMinimumWidth(65);
 
-  mui->lblNoteGraphView->hide();
   if (isAndroid) {
     mui->btnBack_NotesSearchResult->hide();
   }
@@ -1140,7 +1139,6 @@ void Notes::loadEmptyNote() {
   currentMDFile = "";
   MD2Html(currentMDFile);
 
-  mui->lblNoteGraphView->setText("");
   mw_one->m_NotesList->noteTitle = "";
 }
 

@@ -74,6 +74,7 @@ Flickable {
             const centerNodeW = nodeWidth * centerNodeScale
             const centerNodeH = nodeHeight * centerNodeScale
 
+            // 即使没有关系节点，也尝试绘制（虽然不会画出任何线）
             references.forEach(node => {
                                    if (node.x !== undefined
                                        && node.y !== undefined) {
@@ -213,6 +214,7 @@ Flickable {
                 "y": intersectY
             }
         }
+        // 如果没有找到边界交点，返回中心点作为后备
         return {
             "x": rcx,
             "y": rcy
@@ -234,9 +236,11 @@ Flickable {
 
         let controlPointOffsetX, controlPointOffsetY
         if (color === "#1e88e5") {
+            // 引用出去
             controlPointOffsetX = unitPerpX * offsetDistance
             controlPointOffsetY = unitPerpY * offsetDistance
         } else {
+            // 被引用
             controlPointOffsetX = -unitPerpX * offsetDistance
             controlPointOffsetY = -unitPerpY * offsetDistance
         }
@@ -251,6 +255,7 @@ Flickable {
         ctx.lineWidth = 2
         ctx.stroke()
 
+        // 绘制箭头
         const tangentX = 2 * (toX - controlX)
         const tangentY = 2 * (toY - controlY)
         const tangentLength = Math.sqrt(
@@ -274,10 +279,13 @@ Flickable {
 
     // --- 布局算法 ---
     function calculateNodePositions() {
-        clearNodes()
+        clearNodes() // 清除旧节点
 
+        // 始终进行布局计算，即使没有关系节点或没有当前节点
         if (!currentNode) {
+            // 如果没有当前节点，仍然居中并淡入
             centerOnCurrentNode()
+            triggerFadeIn()
             return
         }
 
@@ -285,53 +293,62 @@ Flickable {
         const refByCount = referencedBy.length
         const totalNodes = refCount + refByCount
 
-        if (totalNodes === 0) {
-            connectionCanvas.requestPaint()
-            centerOnCurrentNode()
-            return
-        }
-
+        // 注意：这里不再因为 totalNodes === 0 而提前返回
         const nodeArcLengthEstimate = nodeWidth + 35
+        // 估算节点所需弧长
         const nodesPerFullCircle = (2 * Math.PI * minRingRadius) / nodeArcLengthEstimate
 
         let currentRingRadius = minRingRadius
         if (totalNodes > nodesPerFullCircle) {
+            // 如果节点多，需要扩大半径
             currentRingRadius = (totalNodes * nodeArcLengthEstimate) / (2 * Math.PI)
         }
+        // 确保半径在合理范围内
         currentRingRadius = Math.max(minRingRadius, Math.min(maxRingRadius,
                                                              currentRingRadius))
 
         let index = 0
         const angleStep = totalNodes > 1 ? (2 * Math.PI) / totalNodes : 0
+        // 避免除以0
         const startAngle = -Math.PI / 2
+        // 从顶部开始放置
 
+        // 布局引用出去的节点
         references.forEach(node => {
                                const angle = startAngle + angleStep * index
                                const x = flickable.centerX + currentRingRadius * Math.cos(
                                    angle) - nodeWidth / 2
                                const y = flickable.centerY + currentRingRadius * Math.sin(
                                    angle) - nodeHeight / 2
-                               createNode(node, x, y, "#42a5f5", "#1976d2")
+                               createNode(node, x, y, "#42a5f5",
+                                          "#1976d2") // 蓝色系
                                index++
                            })
 
+        // 布局被引用的节点
         referencedBy.forEach(node => {
                                  const angle = startAngle + angleStep * index
                                  const x = flickable.centerX + currentRingRadius * Math.cos(
                                      angle) - nodeWidth / 2
                                  const y = flickable.centerY + currentRingRadius * Math.sin(
                                      angle) - nodeHeight / 2
-                                 createNode(node, x, y, "#ba68c8", "#6a1b9a")
+                                 createNode(node, x, y, "#ba68c8",
+                                            "#6a1b9a") // 紫色系
                                  index++
                              })
 
+        // 请求重绘连接线
         connectionCanvas.requestPaint()
-        centerOnCurrentNode() // 布局和绘制指令已发出
+        // 将内容居中到视图
+        centerOnCurrentNode()
+        // 触发淡入动画
+        triggerFadeIn()
+    }
 
+    // 封装淡入逻辑
+    function triggerFadeIn() {
         // 延迟一小段时间后淡入，确保绘制完成
-        // 使用 Qt.callLater 确保在当前 JS 执行栈清空后（即绘制指令被处理后）再执行
         Qt.callLater(function () {
-            // 可以再加一个极短的 Timer 以确保更大概率渲染完成
             let fadeInTimer = Qt.createQmlObject(
                     'import QtQuick 2.15; Timer { interval: 10; repeat: false; running: true; onTriggered: { flickable.opacity = 1; destroy(); } }',
                     flickable)
@@ -345,7 +362,7 @@ Flickable {
         flickable.contentY = -10000
         // 设为透明
         flickable.opacity = 0
-        // 强制刷新一次画布，清除可能的残留 (可选，但有助于确保干净)
+        // 强制刷新一次画布，清除可能的残留 (可选)
         connectionCanvas.requestPaint()
     }
 
@@ -365,6 +382,7 @@ Flickable {
         for (var i = children.length - 1; i >= 0; i--) {
             children[i].destroy()
         }
+        // 清除节点坐标缓存
         references.forEach(n => {
                                delete n.x
                                delete n.y
@@ -416,6 +434,7 @@ Flickable {
                                         }
                                         `, nodesContainer)
 
+        // 缓存节点坐标，供连线使用
         nodeData.x = x
         nodeData.y = y
     }
@@ -451,31 +470,30 @@ Flickable {
                           })
         }
 
+        // 查找当前节点
         currentNode = allNodes.find(n => n.isCurrent)
                 || (allNodes.length > 0 ? allNodes[0] : null)
 
-        if (!currentNode) {
-            calculateNodePositions()
-            return
+        // 如果有当前节点，则计算关系
+        if (currentNode) {
+            const relations = model.getRelations()
+            relations.forEach(rel => {
+                                  if (rel.source === currentNode.index) {
+                                      const targetNode = allNodes[rel.target]
+                                      if (targetNode && !references.includes(
+                                              targetNode)) {
+                                          references.push(targetNode)
+                                      }
+                                  } else if (rel.target === currentNode.index) {
+                                      const sourceNode = allNodes[rel.source]
+                                      if (sourceNode && !referencedBy.includes(
+                                              sourceNode)) {
+                                          referencedBy.push(sourceNode)
+                                      }
+                                  }
+                              })
         }
-
-        const relations = model.getRelations()
-        relations.forEach(rel => {
-                              if (rel.source === currentNode.index) {
-                                  const targetNode = allNodes[rel.target]
-                                  if (targetNode && !references.includes(
-                                          targetNode)) {
-                                      references.push(targetNode)
-                                  }
-                              } else if (rel.target === currentNode.index) {
-                                  const sourceNode = allNodes[rel.source]
-                                  if (sourceNode && !referencedBy.includes(
-                                          sourceNode)) {
-                                      referencedBy.push(sourceNode)
-                                  }
-                              }
-                          })
-
+        // 无论如何都调用布局计算
         calculateNodePositions()
     }
 
@@ -500,7 +518,5 @@ Flickable {
     Component.onCompleted: {
         // 首次加载数据
         initData()
-        // 注意：首次加载时，initData 结束后会调用 calculateNodePositions，
-        // 进而调用 centerOnCurrentNode 并触发淡入。
     }
 }

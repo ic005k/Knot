@@ -3087,6 +3087,9 @@ QTabBar::scroller {width:0}
            <property name="scaledContents">
             <bool>false</bool>
            </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
+           </property>
            <property name="wordWrap">
             <bool>true</bool>
            </property>

@@ -738,7 +738,6 @@ void MainHelper::init_UIWidget() {
   mui->editFindNote->installEventFilter(mw_one);
 
   mui->lblTitleEditRecord->installEventFilter(mw_one);
-  mui->lblNoteGraphView->installEventFilter(mw_one);
 
   mui->lblStats->adjustSize();
   mui->lblStats->setWordWrap(true);
@@ -1201,9 +1200,8 @@ void MainHelper::init_Theme() {
   mw_one->axisY2->setLabelsFont(font1);
   mw_one->axisY2->setTickCount(mw_one->yScale);
 
-  mui->lblNoteGraphView->setStyleSheet(
-      "QLabel{background:lightyellow;color:black;}");
-
+  mui->lblNoteGraphView->setWordWrap(true);
+  mui->lblNoteGraphView->adjustSize();
   init_ButtonStyle();
 }
 
