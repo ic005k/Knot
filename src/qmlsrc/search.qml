@@ -303,10 +303,10 @@ Rectangle {
                 property point clickPos: "0,0"
 
                 anchors.fill: parent
-                onPressed: function(mouse){
+                onPressed: function (mouse) {
                     clickPos = Qt.point(mouse.x, mouse.y)
                 }
-                onReleased: function(mouse){
+                onReleased: function (mouse) {
                     var delta = Qt.point(mouse.x - clickPos.x,
                                          mouse.y - clickPos.y)
                     console.debug("delta.x: " + delta.x)
@@ -448,8 +448,6 @@ Rectangle {
             }
             background: null // 彻底消除背景容器
         }
-
-
     }
 
     function getListEleHeadColor(ntype) {

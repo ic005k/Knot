@@ -391,6 +391,10 @@ class Method : public QDialog {
   QString secondsToTime(ulong totalTime);
   bool copyFileToPath(QString sourceDir, QString toDir, bool coverFileIfExist);
 
+  QString highlightTextInHtml(const QString &originalText,
+                              const QString &targetText,
+                              const QString &color = "red", bool bold = true);
+
  protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 

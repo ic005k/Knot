@@ -310,9 +310,6 @@ void Method::startSearch() {
   resultsList.clear();
   int tabCount = tabData->count();
 
-  QString a0 = "<font color=\" red \"><b>";
-  QString a1 = "</b></font>";
-
   for (int j = 0; j < tabCount; j++) {
     QTreeWidget *tw = mw_one->get_tw(j);
     QString tabStr = tabData->tabText(j);
@@ -359,20 +356,20 @@ void Method::startSearch() {
               if (strYear.contains(str) || day.contains(str) ||
                   weeks.contains(str)) {
                 is0 = true;
-                txt0 = txt0.replace(str, a0 + str + a1);
+                txt0 = highlightTextInHtml(txt0, str);
               }
 
               if (txt1.contains(str)) {
                 is1 = true;
-                txt1 = txt1.replace(str, a0 + str + a1);
+                txt1 = highlightTextInHtml(txt1, str);
               }
               if (txt2.contains(str)) {
                 is2 = true;
-                txt2 = txt2.replace(str, a0 + str + a1);
+                txt2 = highlightTextInHtml(txt2, str);
               }
               if (txt3.contains(str)) {
                 is3 = true;
-                txt3 = txt3.replace(str, a0 + str + a1);
+                txt3 = highlightTextInHtml(txt3, str);
               }
             }
           }
@@ -418,15 +415,15 @@ void Method::startSearch() {
             isYes = true;
 
             if (txt1.contains(searchStr)) {
-              txt1 = txt1.replace(searchStr, a0 + searchStr + a1);
+              txt1 = highlightTextInHtml(txt1, searchStr);
             }
 
             if (txt2.contains(searchStr)) {
-              txt2 = txt2.replace(searchStr, a0 + searchStr + a1);
+              txt2 = highlightTextInHtml(txt2, searchStr);
             }
 
             if (txt3.contains(searchStr)) {
-              txt3 = txt3.replace(searchStr, a0 + searchStr + a1);
+              txt3 = highlightTextInHtml(txt3, searchStr);
             }
           }
         }
@@ -438,6 +435,50 @@ void Method::startSearch() {
       }
     }
   }
+}
+
+/**
+ * @brief 将原始文本中的指定子串用红色加粗高亮，并转换为 QML 可用的 HTML
+ * @param originalText 原始文本（可含 \n）
+ * @param targetText 要高亮的文本（不支持跨 \n 匹配）
+ * @param color 高亮颜色（可选，默认 red）
+ * @param bold 是否加粗（可选，默认 true）
+ * @return 格式化后的 HTML 字符串
+ */
+QString Method::highlightTextInHtml(const QString &originalText,
+                                    const QString &targetText,
+                                    const QString &color, bool bold) {
+  if (targetText.isEmpty()) {
+    // 如果目标为空，只做换行和转义处理
+    QString result = originalText.toHtmlEscaped();
+    result.replace('\n', "<br>");
+    return result;
+  }
+
+  // 1. 转义 HTML 特殊字符（防止 <>& 等破坏结构）
+  QString escapedText = originalText.toHtmlEscaped();
+  QString escapedTarget = targetText.toHtmlEscaped();
+
+  // 2. 构建替换的 HTML 高亮标签
+  QString highlightStart = QString("<font color=\"%1\">").arg(color);
+  if (bold) {
+    highlightStart += "<b>";
+  }
+  QString highlightEnd = QString("%1</font>").arg(bold ? "</b>" : "");
+
+  // 3. 使用正则表达式安全替换（避免手动遍历出错）
+  // 注意：如果 target 中有正则特殊字符（如 . * + ?），需转义
+  QString escapedTargetRegex = QRegularExpression::escape(escapedTarget);
+
+  QRegularExpression regex(escapedTargetRegex);
+  QString result =
+      escapedText.replace(regex, highlightStart + escapedTarget + highlightEnd);
+
+  // 4. 将 \n 替换为 <br>（注意：必须在替换 target 之后！）
+  //     否则 \n 可能破坏标签结构
+  result.replace('\n', "<br>");
+
+  return result;
 }
 
 void Method::initSearchResults() {
