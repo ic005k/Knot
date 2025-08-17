@@ -174,7 +174,10 @@ class NotesList : public QDialog {
   void closeEvent(QCloseEvent *event) override;
 
  public slots:
+  void on_actionCopyNoteLink();
+
   void clickNoteList();
+
   void clickNoteBook();
 
   void on_btnClose_clicked();
@@ -283,7 +286,7 @@ class NotesList : public QDialog {
   void setColorFlag(QString strColor);
   void setDelNoteFlag(QString mdFile);
   void saveNotesListToFile();
-  void on_actionCopyNoteLink();
+
   void initNoteGraphView();
 };
 

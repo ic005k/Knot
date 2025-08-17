@@ -16,6 +16,9 @@ Rectangle {
     property int i: 0
     property int itemCount: 0
     property bool isHighPriority: false
+    property int btnW: 32
+    property int btnH: 32
+    property int iconSize: 30
 
     function setScrollBarPos(pos) {
         view.ScrollBar.vertical.position = 1.0 - view.ScrollBar.vertical.size
@@ -162,7 +165,8 @@ Rectangle {
             id: listItem
             width: ListView.view.width
 
-            height: colLayout.implicitHeight + 0
+            // height: colLayout.implicitHeight + 0
+            height: colLayout.implicitHeight + (ListView.isCurrentItem ? itemButtons.height : 0)
             color: ListView.isCurrentItem ? "lightblue" : getColor()
 
             border.width: isDark ? 0 : 1
@@ -170,7 +174,44 @@ Rectangle {
 
             radius: 2
 
-            RowLayout {
+            MouseArea {
+
+                property point clickPos: "0,0"
+
+                anchors.fill: parent
+
+                onPressed: function (mouse) {
+                    clickPos = Qt.point(mouse.x, mouse.y)
+                }
+                onReleased: function (mouse) {
+                    var delta = Qt.point(mouse.x - clickPos.x,
+                                         mouse.y - clickPos.y)
+                }
+
+                onClicked: function (mouse) {
+
+                    view.currentIndex = index //实现item切换
+
+                    for (i = 0; i < view.count; i++) {
+                        view.model.setProperty(i, "text2", "")
+                    }
+                    view.model.setProperty(index, "text2", "ShowRect")
+
+                    m_NotesList.clickNoteList()
+                }
+
+                onPressAndHold: {
+
+                }
+
+                onDoubleClicked: {
+
+                    mw_one.on_btnRename_clicked()
+                }
+            }
+
+            //RowLayout {
+            ColumnLayout {
 
                 id: idlistElemnet
 
@@ -288,40 +329,82 @@ Rectangle {
                         color: "transparent"
                     }
                 }
-            }
 
-            MouseArea {
+                Item {
+                    // 容器尺寸，可根据实际需求调整
+                    id: itemButtons
+                    width: parent.width
+                    height: 40 // 略大于按钮高度，留出边距
+                    visible: listItem.ListView.isCurrentItem ? true : false
 
-                property point clickPos: "0,0"
+                    // 使用Row布局实现水平排列
+                    Row {
+                        id: buttonRow
+                        anchors.left: parent.left // 左对齐
+                        anchors.top: parent.top
+                        spacing: 10 // 按钮之间的间距
 
-                anchors.fill: parent
-                onPressed: function (mouse) {
-                    clickPos = Qt.point(mouse.x, mouse.y)
-                }
-                onReleased: function (mouse) {
-                    var delta = Qt.point(mouse.x - clickPos.x,
-                                         mouse.y - clickPos.y)
-                }
+                        // 第一个工具按钮
+                        ToolButton {
+                            id: btn1
+                            icon.source: "qrc:/res/view.svg"
+                            text: "view"
 
-                onClicked: {
+                            width: btnW // 固定宽度
+                            height: btnH // 固定高度
+                            icon.width: iconSize - 13
+                            icon.height: iconSize - 13
+                            onClicked: {
+                                console.log("View按钮被点击")
+                                mw_one.on_btnOpenNote_clicked()
+                            }
+                        }
 
-                    view.currentIndex = index //实现item切换
+                        // 第二个工具按钮
+                        ToolButton {
+                            id: btn2
+                            icon.source: "qrc:/res/edit.svg"
 
-                    for (i = 0; i < view.count; i++) {
-                        view.model.setProperty(i, "text2", "")
+                            width: btnW
+                            height: btnH
+                            icon.width: iconSize
+                            icon.height: iconSize
+                            onClicked: {
+                                console.log("编辑按钮被点击")
+                                mw_one.on_btnEditNote_clicked()
+                            }
+                        }
+
+                        // 第三个工具按钮
+                        ToolButton {
+                            id: btn3
+                            icon.source: "qrc:/res/link.svg"
+
+                            width: btnW
+                            height: btnH
+                            icon.width: iconSize
+                            icon.height: iconSize
+                            onClicked: {
+                                console.log("链接按钮被点击")
+                                m_NotesList.on_actionCopyNoteLink()
+                            }
+                        }
+
+                        // 第四个工具按钮
+                        ToolButton {
+                            id: btn4
+                            icon.source: "qrc:/res/graph.svg"
+
+                            width: btnW
+                            height: btnH
+                            icon.width: iconSize - 13
+                            icon.height: iconSize - 13
+                            onClicked: {
+                                console.log("图谱按钮被点击")
+                                m_NotesList.on_actionRelationshipGraph()
+                            }
+                        }
                     }
-                    view.model.setProperty(index, "text2", "ShowRect")
-
-                    m_NotesList.clickNoteList()
-                }
-
-                onPressAndHold: {
-
-                }
-
-                onDoubleClicked: {
-
-                    mw_one.on_btnRename_clicked()
                 }
             }
         }

@@ -172,5 +172,8 @@
         <file>res/weather/thunderstorm.svg</file>
         <file>res/chk00.svg</file>
         <file>res/chk11.svg</file>
+        <file>res/graph.svg</file>
+        <file>res/link.svg</file>
+        <file>res/view.svg</file>
     </qresource>
 </RCC>
