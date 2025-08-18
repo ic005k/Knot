@@ -412,7 +412,7 @@ void Reader::openFile(QString openfile) {
         }
 
         QFile(strOpfPath + "main.css").remove();
-        QFile::copy(":/res/main.css", strOpfPath + "main.css");
+        QFile::copy(":/res/reader/main.css", strOpfPath + "main.css");
 
         QStringList temp_l0 = ncxList;
         ncxList.clear();
@@ -589,7 +589,7 @@ void Reader::initReader() {
   font.setLetterSpacing(QFont::AbsoluteSpacing, 2);  // 字间距
 
   fileName = Reg.value("/Reader/FileName").toString();
-  if (!QFile(fileName).exists() && isZH_CN) fileName = ":/res/test.txt";
+  if (!QFile(fileName).exists() && isZH_CN) fileName = ":/res/reader/test.txt";
 
   isInitReader = true;
 

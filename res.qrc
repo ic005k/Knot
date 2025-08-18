@@ -12,7 +12,6 @@
         <file>res/icon.icns</file>
         <file>res/icon.png</file>
         <file>res/low.png</file>
-        <file>res/main.css</file>
         <file>res/nosel.png</file>
         <file>res/open.png</file>
         <file>res/pause.png</file>
@@ -22,7 +21,6 @@
         <file>res/ReadList.png</file>
         <file>res/run.png</file>
         <file>res/sel.png</file>
-        <file>res/test.txt</file>
         <file>res/up.png</file>
         <file>res/msg.mp3</file>
         <file>res/clear.png</file>
@@ -175,5 +173,7 @@
         <file>res/graph.svg</file>
         <file>res/link.svg</file>
         <file>res/view.svg</file>
+        <file>res/reader/main.css</file>
+        <file>res/reader/test.txt</file>
     </qresource>
 </RCC>

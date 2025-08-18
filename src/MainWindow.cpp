@@ -2755,10 +2755,7 @@ void MainWindow::on_rbRunning_clicked() {}
 
 void MainWindow::on_btnOpenNote_clicked() { m_Notes->previewNote(); }
 
-void MainWindow::on_btnEditNote_clicked() {
-  m_NotesList->setCurrentItemFromMDFile(currentMDFile);
-  m_Notes->openEditUI();
-}
+void MainWindow::on_btnEditNote_clicked() { m_Notes->openEditUI(); }
 
 void MainWindow::on_btnToPDF_clicked() {
   if (!QFile::exists(currentMDFile)) return;
