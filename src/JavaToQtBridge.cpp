@@ -388,8 +388,8 @@ static void JavaNotify_15() {
     return;
   }
 
-  if (!mui->frameNotes->isHidden()) {
-    mui->btnBackNotes->click();
+  if (!mui->frameNotesGraph->isHidden()) {
+    mui->btnBackNotesGraph->click();
     return;
   }
 

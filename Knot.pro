@@ -390,7 +390,6 @@ SOURCES += \
     src/Notes/titlegenerator.cpp \
     src/Preferences.cpp \
     src/Reader/DocumentHandler.cpp \
-    src/Reader/File.cpp \
     src/Reader/PageIndicator.cpp \
     src/Reader/Reader.cpp \
     src/Reader/ReaderSet.cpp \
@@ -623,7 +622,6 @@ HEADERS += \
     src/Notes/titlegenerator.h \
     src/Preferences.h \
     src/Reader/DocumentHandler.h \
-    src/Reader/File.h \
     src/Reader/PageIndicator.h \
     src/Reader/Reader.h \
     src/Reader/ReaderSet.h \

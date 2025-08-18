@@ -481,7 +481,6 @@ void MainHelper::openTabRecycle() {
 }
 
 void MainHelper::initQW() {
-  qmlRegisterType<File>("MyModel1", 1, 0, "File");
   qmlRegisterType<DocumentHandler>("MyModel2", 1, 0, "DocumentHandler");
 
   int f_size = 19;
@@ -709,8 +708,8 @@ void MainHelper::init_UIWidget() {
   mui->lblEpubInfo->hide();
   mui->pEpubProg->hide();
 
-  mui->frameNotes->hide();
-  mui->frameNotes->layout()->setContentsMargins(1, 1, 1, 1);
+  mui->frameNotesGraph->hide();
+  mui->frameNotesGraph->layout()->setContentsMargins(1, 1, 1, 1);
 
   mui->chkOneDrive->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mui->chkWebDAV->setStyleSheet(mw_one->m_Preferences->chkStyle);

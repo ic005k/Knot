@@ -248,7 +248,10 @@ void ReceiveShare::closeAllChildWindows() {
     mui->btnBackNoteList->click();
   }
 
-  if (mui->frameNotes->isVisible()) mui->btnBackNotes->click();
+  if (mui->frameNotesGraph->isVisible()) {
+    mui->btnBackNotesGraph->click();
+    mui->btnBackNoteList->click();
+  }
 
   if (mui->frameTodoRecycle->isVisible()) {
     mui->btnReturnRecycle->click();
@@ -297,58 +300,6 @@ void ReceiveShare::closeAllChildWindows() {
   if (mui->frameReport->isVisible()) mui->btnBack_Report->click();
 
   if (mui->frameSearch->isVisible()) mui->btnBackSearch->click();
-}
-
-void ReceiveShare::closeAllActiveWindows() {
-  if (mw_one->m_TodoAlarm->isVisible()) {
-    mw_one->m_TodoAlarm->ui->btnBack->click();
-    mui->btnBackTodo->click();
-  }
-
-  if (mw_one->m_AboutThis->isVisible()) {
-    mw_one->m_AboutThis->on_btnBack_About_clicked();
-  }
-
-  if (mui->frameMain->isVisible()) return;
-
-  QObjectList frameList;
-  frameList = getAllFrame(m_Method->getAllUIControls(mw_one));
-  for (int i = 0; i < frameList.count(); i++) {
-    QFrame* frame = (QFrame*)frameList.at(i);
-    if (frame->parent() == mui->centralwidget &&
-        frame->objectName() != "frameMain") {
-      qDebug() << frame->objectName();
-      if (frame->isVisible()) {
-        frame->hide();
-      }
-    }
-  }
-  mui->frameMain->show();
-}
-
-void ReceiveShare::closeAllActiveWindowsKeep(QString frameName) {
-  if (mui->frameMain->isVisible()) return;
-
-  if (mw_one->m_TodoAlarm->isVisible()) {
-    mw_one->m_TodoAlarm->ui->btnBack->click();
-  }
-
-  if (mw_one->m_AboutThis->isVisible()) {
-    mw_one->m_AboutThis->on_btnBack_About_clicked();
-  }
-
-  QObjectList frameList;
-  frameList = getAllFrame(m_Method->getAllUIControls(mw_one));
-  for (int i = 0; i < frameList.count(); i++) {
-    QFrame* frame = (QFrame*)frameList.at(i);
-    if (frame->parent() == mui->centralwidget &&
-        frame->objectName() != frameName) {
-      qDebug() << frame->objectName();
-      if (frame->isVisible()) {
-        frame->hide();
-      }
-    }
-  }
 }
 
 void ReceiveShare::shareString(const QString& title, const QString& content) {

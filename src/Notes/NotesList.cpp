@@ -1109,7 +1109,7 @@ void NotesList::setWinPos() {
   int w = mw_one->width();
   int x = mw_one->geometry().x();
   this->setGeometry(x, mw_one->geometry().y(), w, mw_one->height());
-  mui->btnBackNotes->hide();
+  mui->btnBackNotesGraph->hide();
 }
 
 void NotesList::clearFiles() {

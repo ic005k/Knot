@@ -339,7 +339,7 @@ void NoteRelationParser::onParsedDataReady(
 
   mw_one->closeProgress();
   mui->frameNoteList->hide();
-  mui->frameNotes->show();
+  mui->frameNotesGraph->show();
 
   // 批量添加节点和关系到模型（主线程操作）
   for (const auto &node : nodes) {

@@ -81,7 +81,6 @@
 #include "src/Notes/Notes.h"
 #include "src/Notes/NotesList.h"
 #include "src/Preferences.h"
-#include "src/Reader/File.h"
 #include "src/Reader/PageIndicator.h"
 #include "src/Reader/Reader.h"
 #include "src/Reader/ReaderSet.h"
@@ -270,8 +269,6 @@ class MainWindow : public QMainWindow {
   StepsOptions *m_StepsOptions;
   ReceiveShare *m_ReceiveShare;
   MainHelper *m_MainHelper;
-
-  File *myfile;
 
   QList<QTreeWidgetItem *> findItemList;
   bool isFindTextChange = false;
@@ -478,7 +475,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnUserInfo_clicked();
 
-  void on_btnBackNotes_clicked();
+  void on_btnBackNotesGraph_clicked();
 
   void on_btnNotes_clicked();
 

@@ -747,8 +747,8 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     return;
   }
 
-  if (!mui->frameNotes->isHidden()) {
-    on_btnBackNotes_clicked();
+  if (!mui->frameNotesGraph->isHidden()) {
+    on_btnBackNotesGraph_clicked();
     event->ignore();
     return;
   }
@@ -1480,7 +1480,7 @@ void MainWindow::init_Instance() {
   tabChart = mui->tabCharts;
 
   m_Method = new Method(this);
-  myfile = new File();
+
   m_AboutThis = new AboutThis(this);
   m_Preferences = new Preferences(this);
   m_EditRecord = new EditRecord(this);
@@ -1849,8 +1849,8 @@ void MainWindow::on_btnUserInfo_clicked() {
   m_CloudBackup->on_pushButton_GetUserInfo_clicked();
 }
 
-void MainWindow::on_btnBackNotes_clicked() {
-  mui->frameNotes->hide();
+void MainWindow::on_btnBackNotesGraph_clicked() {
+  mui->frameNotesGraph->hide();
   mui->frameNoteList->show();
   mw_one->m_NotesList->clickNoteList();
 }
@@ -1876,7 +1876,7 @@ void MainWindow::clearSelectBox() {
     mw_one->m_Reader->setPageVPos();
   }
 
-  if (!mui->frameNotes->isHidden()) {
+  if (!mui->frameNotesGraph->isHidden()) {
   }
 }
 
@@ -1934,7 +1934,7 @@ void MainWindow::on_timerMousePress() {
 void MainWindow::on_btnBackImg_clicked() {
   mui->frameImgView->hide();
   if (isReaderVisible) mui->frameReader->show();
-  if (isMemoVisible) mui->frameNotes->show();
+  if (isMemoVisible) mui->frameNotesGraph->show();
 }
 
 void MainWindow::on_btnZoomIn_clicked() {

@@ -25,7 +25,6 @@
 #include <QXmlStreamReader>
 
 #include "src/Reader/DocumentHandler.h"
-#include "src/Reader/File.h"
 
 class TextChunkModel;
 
@@ -143,7 +142,7 @@ class Reader : public QDialog {
   void setTextAreaCursorPos(int nCursorPos);
   bool eventFilterReaderAndroid(QObject *watch, QEvent *evn);
   void showOrHideBookmark();
-  public slots:
+ public slots:
   void setPageScroll0();
   void setPageScroll1();
   void setEpubPagePosition(int index, QString htmlFile);

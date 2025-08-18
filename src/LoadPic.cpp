@@ -33,7 +33,7 @@ void LoadPic::initMain(QString imgFile) {
                            m_Method->getFileSize(QFile(imgFile).size(), 2));
 
   if (mui->frameReader->isVisible()) mui->frameReader->hide();
-  if (mui->frameNotes->isVisible()) mui->frameNotes->hide();
+  if (mui->frameNotesGraph->isVisible()) mui->frameNotesGraph->hide();
 
   mui->qw_Img->rootContext()->setContextProperty("myW", mw_one->width());
   mui->qw_Img->rootContext()->setContextProperty("myH", mw_one->height());
