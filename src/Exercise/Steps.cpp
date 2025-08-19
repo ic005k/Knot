@@ -1147,8 +1147,15 @@ void Steps::updateGpsTrack() {
   strGpsMapDistnce = st3;
   strGpsMapSpeed = st4;
 
-  QString csvPath =
-      iniDir + "/memo/gps/" + getCurrentYear() + "/" + getCurrentMonth() + "/";
+  QString str_year, str_month, str_gpsdate;
+  str_gpsdate = mui->btnSelGpsDate->text();
+  QStringList gpsdateList = str_gpsdate.split("-");
+  if (gpsdateList.count() == 2) {
+    str_year = gpsdateList.at(0).trimmed();
+    str_month = gpsdateList.at(1).trimmed();
+  }
+
+  QString csvPath = iniDir + "/memo/gps/" + str_year + "/" + str_month + "/";
   QString gpsFile = iniDir + "memo/gps/" + st1 + "-gps-" + st2 + ".csv";
   QString gpsOptimizedFile =
       iniDir + "memo/gps/" + st1 + "-gps-" + st2 + "-opt.csv";
