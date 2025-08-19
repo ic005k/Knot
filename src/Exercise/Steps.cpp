@@ -489,7 +489,12 @@ void Steps::startRecordMotion() {
   QString s0 = ss0.replace(" ", "");
   QString sst = strStartTime;
   QString s1 = sst.replace(":", "");
-  strCSVFile = iniDir + "/memo/gps/" + s0 + "-gps-" + s1 + ".csv";
+  QString csvPath =
+      iniDir + "/memo/gps/" + getCurrentYear() + "/" + getCurrentMonth() + "/";
+  if (!QDir(csvPath).exists()) {
+    QDir().mkpath(csvPath);
+  }
+  strCSVFile = csvPath + s0 + "-gps-" + s1 + ".csv";
 
   timer->start(1000);
   m_distance = 0;
@@ -1142,9 +1147,16 @@ void Steps::updateGpsTrack() {
   strGpsMapDistnce = st3;
   strGpsMapSpeed = st4;
 
+  QString csvPath =
+      iniDir + "/memo/gps/" + getCurrentYear() + "/" + getCurrentMonth() + "/";
   QString gpsFile = iniDir + "memo/gps/" + st1 + "-gps-" + st2 + ".csv";
   QString gpsOptimizedFile =
       iniDir + "memo/gps/" + st1 + "-gps-" + st2 + "-opt.csv";
+
+  if (!QFile::exists(gpsOptimizedFile)) {
+    gpsFile = csvPath + st1 + "-gps-" + st2 + ".csv";
+    gpsOptimizedFile = csvPath + st1 + "-gps-" + st2 + "-opt.csv";
+  }
 
   double lat = 0;
   double lon = 0;
@@ -1471,4 +1483,12 @@ void Steps::setCurrentGpsSpeed(double speed, double maxSpeed) {
                             QString::number(speed, 'f', 2).toDouble());
     rootObject->setProperty("myMaxSpeed", maxSpeed);
   }
+}
+
+QString Steps::getCurrentYear() {
+  return QString::number(QDate::currentDate().year());
+}
+
+QString Steps::getCurrentMonth() {
+  return QString::number(QDate::currentDate().month());
 }

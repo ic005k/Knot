@@ -201,6 +201,8 @@ class Steps : public QDialog {
   void refreshTotalDistance();
   qlonglong getTodaySteps();
   qlonglong getOldSteps();
+  QString getCurrentYear();
+  QString getCurrentMonth();
  signals:
   void distanceChanged(double distance);
   void timeChanged();
