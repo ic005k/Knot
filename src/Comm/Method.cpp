@@ -30,6 +30,8 @@ Method::Method(QWidget *parent) : QDialog(parent) {
 
   m_widget = new QWidget(mw_one);
   m_widget->close();
+
+  m_EnColorPicker = new EnhancedColorPicker(this);
 }
 
 void Method::init() {
@@ -955,6 +957,33 @@ qreal Method::getVPosForQW(QQuickWidget *qw) {
 
 QString Method::getCustomColor() {
   QString strColor;
+  int x, y, w, h;
+  x = mw_one->geometry().x();
+  y = mw_one->geometry().y();
+  if (isAndroid) {
+    w = mw_one->width();
+    h = mui->frameMain->height();
+  } else {
+    w = 300;
+    h = 650;
+  }
+
+  m_EnColorPicker->setFixedWidth(w);
+  m_EnColorPicker->setFixedHeight(h);
+  m_EnColorPicker->setGeometry(x + (mw_one->width() - w) / 2, y, w, h);
+
+  int result = m_EnColorPicker->exec();
+  if (result == QDialog::Accepted) {
+    QColor selectedColor = m_EnColorPicker->selectedColor();
+    strColor = selectedColor.name();
+    qDebug() << "color=" << strColor;
+    return strColor;  // 默认返回RGB格式 "#RRGGBB"
+    // 如需包含透明度：return selectedColor.name(QColor::HexArgb);
+  } else {
+    return NULL;
+  }
+
+  //////////////////////////////////////////////////////////////////////
 
 #ifdef Q_OS_ANDROID
   m_widget = new QWidget(this);
@@ -963,7 +992,7 @@ QString Method::getCustomColor() {
   colorDlg = new ColorDialog(this);
   connect(colorDlg, &QDialog::rejected, this,
           [=]() mutable { closeGrayWindows(); });
-  int x, y, w, h;
+
   x = mw_one->geometry().x();
   y = mw_one->geometry().y();
   w = mw_one->width();

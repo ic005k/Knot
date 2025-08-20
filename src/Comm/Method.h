@@ -43,6 +43,8 @@
 #include <QTreeWidgetItem>
 #include <QWidget>
 
+#include "src/Comm/enhancedcolorpicker.h"
+
 namespace Ui {
 class Method;
 }
@@ -54,6 +56,8 @@ class Method : public QDialog {
   explicit Method(QWidget *parent = nullptr);
   ~Method();
   Ui::Method *ui;
+
+  EnhancedColorPicker *m_EnColorPicker = nullptr;
 
   QMenu *menuNoteBook = nullptr;
   QMenu *menuNoteList = nullptr;

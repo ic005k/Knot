@@ -196,6 +196,13 @@ static void JavaNotify_15() {
     }
   }
 
+  if (m_Method->m_EnColorPicker != nullptr) {
+    if (m_Method->m_EnColorPicker->isVisible()) {
+      m_Method->m_EnColorPicker->close();
+      return;
+    }
+  }
+
   if (m_PrintPDF != nullptr) {
     if (m_PrintPDF->isVisible()) {
       m_PrintPDF->close();
