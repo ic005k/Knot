@@ -546,9 +546,8 @@ bool NotesList::on_btnImport_clicked() {
     QString fileName = fileNames.at(i);
 
     bool isMD = false;
-    QString strInfo;
-    isMD = fileName.contains(".md");
-    strInfo = fileName;
+
+    isMD = fileName.contains(".md") || fileName.contains(".txt");
 
 #ifdef Q_OS_ANDROID
 
@@ -566,16 +565,17 @@ bool NotesList::on_btnImport_clicked() {
       m_Method->m_widget = new QWidget(this);
       ShowMessage *m_ShowMsg = new ShowMessage(this);
       m_ShowMsg->showMsg("Knot",
-                         tr("Invalid Markdown file.") + "\n\n" + strInfo, 1);
+                         tr("Invalid Markdown file.") + "\n\n" + fileName, 1);
       return false;
     }
 
     if (QFile(fileName).exists() && isMD) {
       QTreeWidgetItem *item1;
 
-      TitleGenerator generator;
       QString strNoteText = loadText(fileName);
-      QString name = generator.genNewTitle(strNoteText);
+
+      QFileInfo fi(fileName);
+      QString name = fi.baseName();
 
       item1 = new QTreeWidgetItem(item);
       item1->setText(0, name);
@@ -585,10 +585,9 @@ bool NotesList::on_btnImport_clicked() {
       QString a = "memo/" + mw_one->m_Notes->getDateTimeStr() + "_" +
                   QString::number(i) + ".md";
       currentMDFile = iniDir + a;
-      QString str = loadText(fileName);
       QTextEdit *edit = new QTextEdit();
       edit->setAcceptRichText(false);
-      edit->setPlainText(str);
+      edit->setPlainText(strNoteText);
       TextEditToFile(edit, currentMDFile);
 
       item1->setText(1, a);

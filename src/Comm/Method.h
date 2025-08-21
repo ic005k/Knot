@@ -399,6 +399,8 @@ class Method : public QDialog {
                               const QString &targetText,
                               const QString &color = "red", bool bold = true);
 
+  QString convertDataToUnicode(QByteArray data);
+
  protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
@@ -429,6 +431,9 @@ class Method : public QDialog {
   QByteArray generateRandomBytes(int length);
   QByteArray deriveKey(const QString &password, const QByteArray &salt,
                        int keyLength);
+
+  static bool isUtf8(const QByteArray &data);
+  static bool isValidText(const QString &text);
 };
 
 class IOSCircularProgress : public QWidget {

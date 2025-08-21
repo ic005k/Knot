@@ -528,9 +528,8 @@ QString loadText(QString textFile) {
       qDebug() << "Cannot read file";
 
     } else {
-      QTextStream in(&file);
-
-      QString text = in.readAll();
+      QByteArray data = file.readAll();
+      QString text = m_Method->convertDataToUnicode(data);
       return text;
     }
     file.close();

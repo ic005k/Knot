@@ -88,7 +88,6 @@ class Reader : public QDialog {
   static QString getUriRealPath(QString uripath);
   static QString getNCX_File(QString path);
 
-  static QString GetCorrectUnicode(const QByteArray &text);
   void getReadList();
   void getBookList();
 
@@ -185,8 +184,7 @@ class Reader : public QDialog {
   int currentCataIndex = 0;
 
   QString updateContent();
-  static bool isUtf8(const QByteArray &data);
-  static bool isValidText(const QString &text);
+
   void handleDoubleClick(const QPointF &globalPos);
   bool handleTouchRelease(const QPointF &globalPos);
   bool handleTouchMove(const QPointF &globalPos);
