@@ -44,7 +44,10 @@ class SVSelectorWidget : public QWidget {
   Q_OBJECT
  public:
   explicit SVSelectorWidget(QWidget *parent = nullptr) : QWidget(parent) {
-    setFixedSize(220, 220);
+    setFixedWidth(220);
+    setMinimumHeight(100);
+    setMaximumHeight(220);
+
     m_hue = 0;
     m_saturation = 255;
     m_value = 255;
@@ -139,6 +142,8 @@ class EnhancedColorPicker : public QDialog {
   void initPresetColors();
 
   bool isShow = false;
+
+  bool m_skipHexUpdate = false;
 };
 
 #endif  // ENHANCEDCOLORPICKER_H

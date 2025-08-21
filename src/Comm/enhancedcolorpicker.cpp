@@ -14,30 +14,59 @@
 #include "ui_MainWindow.h"
 
 extern Ui::MainWindow *mui;
+extern bool isAndroid;
 
 QString simpleLargeSliderStyle = R"(
-        QSlider {
-            min-height: 20px; /* 整体高度放大 */
-        }
-
         QSlider::groove:horizontal {
-            height: 12px; /* 轨道高度放大 */
-            background: #eee;
-            border-radius: 6px;
-            margin: 0 20px;
+          border: 0px solid #bbb;
         }
 
         QSlider::sub-page:horizontal {
-            background: #666;
-            border-radius: 6px;
+          background: #1ABC9C;
+          border-radius: 0px;
+          margin-top: 15px;
+          margin-bottom: 15px;
+        }
+
+        QSlider::add-page:horizontal {
+          background: rgb(100,100,100);
+          border: 0px solid #777;
+          border-radius: 0px;
+          margin-top: 15px;
+          margin-bottom: 15px;
         }
 
         QSlider::handle:horizontal {
-            width: 30px; /* 滑块宽度放大 */
-            height: 30px; /* 滑块高度放大 */
-            margin: -0px 0; /* 扩展触摸区域 */
-            background: #666;
-            border-radius: 1px; /* 圆形滑块 */
+          background: rgb(255,255,255);
+          border: 1px solid rgba(10,10,10,255);
+        border-image: url(":/res/qslider_btn.png");
+          width: 25px;
+          height: 15px;
+          border-radius: 0px;
+          margin-top: 5px;
+          margin-bottom: 5px;
+        }
+
+        QSlider::handle:horizontal:hover {
+          background: rgb(0,191,255);
+          border: 1px solid rgba(25,25,25,255);
+          border-radius: 0px;
+        }
+
+        QSlider::sub-page:horizontal:disabled {
+          background: #bbb;
+          border-color: #999;
+        }
+
+        QSlider::add-page:horizontal:disabled {
+          background: #eee;
+          border-color: #999;
+        }
+
+        QSlider::handle:horizontal:disabled {
+          background: #eee;
+          border: 1px solid #aaa;
+          border-radius: 4px;
         }
     )";
 
@@ -174,10 +203,11 @@ EnhancedColorPicker::EnhancedColorPicker(QWidget *parent,
 
   // 创建主布局
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
+  mainLayout->setSpacing(10);
 
   // 颜色预览
   m_colorPreview = new QLabel();
-  m_colorPreview->setMinimumHeight(50);
+  m_colorPreview->setMinimumHeight(10);
   m_colorPreview->setMaximumHeight(220);
   m_colorPreview->setFixedWidth(220);
   mainLayout->addWidget(m_colorPreview, 0, Qt::AlignHCenter);
@@ -243,26 +273,32 @@ EnhancedColorPicker::EnhancedColorPicker(QWidget *parent,
   m_valueSlider->hide();
 
   // RGB控制
-  if (isShow) controlsLayout->addWidget(new QLabel(tr("Red:")), 3, 0);
+  controlsLayout->addWidget(new QLabel(tr("Red:")), 3, 0);
   m_redSlider = new QSlider(Qt::Horizontal);
   m_redSlider->setRange(0, 255);
   controlsLayout->addWidget(m_redSlider, 3, 1);
-  m_redSlider->setStyleSheet(simpleLargeSliderStyle);
-  m_redSlider->hide();
+  if (isAndroid) {
+    m_redSlider->setMinimumHeight(35);
+    m_redSlider->setStyleSheet(simpleLargeSliderStyle);
+  }
 
-  if (isShow) controlsLayout->addWidget(new QLabel(tr("Green:")), 4, 0);
+  controlsLayout->addWidget(new QLabel(tr("Green:")), 4, 0);
   m_greenSlider = new QSlider(Qt::Horizontal);
   m_greenSlider->setRange(0, 255);
   controlsLayout->addWidget(m_greenSlider, 4, 1);
-  m_greenSlider->setStyleSheet(simpleLargeSliderStyle);
-  m_greenSlider->hide();
+  if (isAndroid) {
+    m_greenSlider->setMinimumHeight(35);
+    m_greenSlider->setStyleSheet(simpleLargeSliderStyle);
+  }
 
-  if (isShow) controlsLayout->addWidget(new QLabel(tr("Blue:")), 5, 0);
+  controlsLayout->addWidget(new QLabel(tr("Blue:")), 5, 0);
   m_blueSlider = new QSlider(Qt::Horizontal);
   m_blueSlider->setRange(0, 255);
   controlsLayout->addWidget(m_blueSlider, 5, 1);
-  m_blueSlider->setStyleSheet(simpleLargeSliderStyle);
-  m_blueSlider->hide();
+  if (isAndroid) {
+    m_blueSlider->setMinimumHeight(35);
+    m_blueSlider->setStyleSheet(simpleLargeSliderStyle);
+  }
 
   // 透明度控制
   if (isShow) controlsLayout->addWidget(new QLabel(tr("透明度:")), 6, 0);
@@ -272,12 +308,11 @@ EnhancedColorPicker::EnhancedColorPicker(QWidget *parent,
   m_alphaSlider->hide();
 
   // 十六进制输入
-  if (isShow) controlsLayout->addWidget(new QLabel(tr("十六进制:")), 7, 0);
+  controlsLayout->addWidget(new QLabel(tr("HEX:")), 7, 0);
   m_hexEdit = new QLineEdit();
   m_hexEdit->setValidator(new QRegularExpressionValidator(
       QRegularExpression("^#?[0-9A-Fa-f]{6,8}$"), this));
   controlsLayout->addWidget(m_hexEdit, 7, 1);
-  m_hexEdit->hide();
 
   // 按钮
   QHBoxLayout *buttonLayout = new QHBoxLayout();
@@ -390,7 +425,9 @@ void EnhancedColorPicker::onHexInputChanged(const QString &text) {
     m_currentValue = color.value();
     m_currentAlpha = color.alpha();
 
+    m_skipHexUpdate = true;  // 用户正在输入，跳过更新
     updateControlsFromColor();
+    m_skipHexUpdate = false;  // 输入完成，恢复更新
   }
 }
 
@@ -460,7 +497,9 @@ void EnhancedColorPicker::updateControlsFromColor() {
   m_svSelector->setValue(m_currentValue);
 
   // 更新十六进制输入
-  m_hexEdit->setText(m_currentColor.name(QColor::HexArgb));
+  if (!m_skipHexUpdate) {
+    m_hexEdit->setText(m_currentColor.name(QColor::HexArgb));
+  }
 
   // 更新预览
   m_colorPreview->setStyleSheet(
