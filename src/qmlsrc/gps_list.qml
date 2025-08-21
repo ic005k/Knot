@@ -164,7 +164,7 @@ Rectangle {
 
             height: colLayout.implicitHeight + 5
 
-            color: index % 2 === 0 ? "#f0f0f0" : "#e0e0e0"
+            //color: index % 2 === 0 ? "#f0f0f0" : "#e0e0e0"
             border.color: "#ccc"
             border.width: 1
 
@@ -239,7 +239,9 @@ Rectangle {
                             width: parent.width
                             wrapMode: TextArea.WordWrap
 
+                            font.pointSize: item0.font.pointSize - 1
                             font.bold: false
+                            color: "#555555"
                             text: text1
 
                             leftPadding: 5
@@ -249,28 +251,23 @@ Rectangle {
                         }
                     }
 
-                    Rectangle {
+                    Text {
+                        id: item2
+                        anchors.rightMargin: 0
+                        Layout.preferredWidth: listItem.width
+                        Layout.alignment: Qt.AlignHCenter
+
+                        horizontalAlignment: Text.AlignLeft
                         width: parent.width
-                        height: item2.contentHeight
-                        color: "lightgray"
-                        Text {
-                            id: item2
-                            anchors.rightMargin: 0
-                            Layout.preferredWidth: listItem.width
-                            Layout.alignment: Qt.AlignHCenter
+                        wrapMode: TextArea.WordWrap
+                        font.bold: false
+                        text: text2
+                        color: "red"
 
-                            horizontalAlignment: Text.AlignLeft
-                            width: parent.width
-                            wrapMode: TextArea.WordWrap
-                            font.bold: false
-                            text: text2
-                            color: "red"
+                        leftPadding: 5
+                        rightPadding: 5
 
-                            leftPadding: 5
-                            rightPadding: 5
-
-                            visible: item2.text.length ? true : false
-                        }
+                        visible: item2.text.length ? true : false
                     }
 
                     Text {
@@ -290,28 +287,23 @@ Rectangle {
                         visible: item3.text.length ? true : false
                     }
 
-                    Rectangle {
+                    Text {
+                        id: item4
+                        anchors.rightMargin: 0
                         width: parent.width
-                        height: item4.contentHeight
-                        color: "lightgray"
-                        Text {
-                            id: item4
-                            anchors.rightMargin: 0
-                            width: parent.width
-                            wrapMode: Text.WrapAnywhere
-                            elide: Text.ElideRight
+                        wrapMode: Text.WrapAnywhere
+                        elide: Text.ElideRight
 
-                            Layout.preferredWidth: listItem.width
-                            font.bold: false
-                            text: text4
+                        Layout.preferredWidth: listItem.width
+                        font.bold: false
+                        text: text4
 
-                            color: "blue"
+                        color: "blue"
 
-                            leftPadding: 5
-                            rightPadding: 5
+                        leftPadding: 5
+                        rightPadding: 5
 
-                            visible: item4.text.length ? true : false
-                        }
+                        visible: item4.text.length ? true : false
                     }
 
                     Text {

@@ -364,62 +364,62 @@ in skydrive folder</source>
 <context>
     <name>EnhancedColorPicker</name>
     <message>
-        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="132"/>
-        <source>选择颜色</source>
+        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="191"/>
+        <source>Select Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="166"/>
+        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="228"/>
         <source>常用颜色:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="195"/>
+        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="257"/>
         <source>色相:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="201"/>
+        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="263"/>
         <source>饱和度:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="207"/>
+        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="269"/>
         <source>明度:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="214"/>
+        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="276"/>
         <source>Red:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="219"/>
+        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="285"/>
         <source>Green:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="224"/>
+        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="294"/>
         <source>Blue:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="230"/>
+        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="304"/>
         <source>透明度:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="237"/>
-        <source>十六进制:</source>
+        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="311"/>
+        <source>HEX:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="248"/>
+        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="321"/>
         <source>Ok</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="249"/>
+        <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="322"/>
         <source>Cancel</source>
         <translation type="unfinished">Cancelar</translation>
     </message>
@@ -2648,55 +2648,55 @@ in skydrive folder</source>
     <name>QInstaller</name>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="234"/>
-        <location filename="../../src/Comm/Method.cpp" line="2378"/>
+        <location filename="../../src/Comm/Method.cpp" line="2379"/>
         <source>bytes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="235"/>
-        <location filename="../../src/Comm/Method.cpp" line="2379"/>
+        <location filename="../../src/Comm/Method.cpp" line="2380"/>
         <source>KiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="236"/>
-        <location filename="../../src/Comm/Method.cpp" line="2380"/>
+        <location filename="../../src/Comm/Method.cpp" line="2381"/>
         <source>MiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="237"/>
-        <location filename="../../src/Comm/Method.cpp" line="2381"/>
+        <location filename="../../src/Comm/Method.cpp" line="2382"/>
         <source>GiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="238"/>
-        <location filename="../../src/Comm/Method.cpp" line="2382"/>
+        <location filename="../../src/Comm/Method.cpp" line="2383"/>
         <source>TiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="239"/>
-        <location filename="../../src/Comm/Method.cpp" line="2383"/>
+        <location filename="../../src/Comm/Method.cpp" line="2384"/>
         <source>PiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="240"/>
-        <location filename="../../src/Comm/Method.cpp" line="2384"/>
+        <location filename="../../src/Comm/Method.cpp" line="2385"/>
         <source>EiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="241"/>
-        <location filename="../../src/Comm/Method.cpp" line="2385"/>
+        <location filename="../../src/Comm/Method.cpp" line="2386"/>
         <source>ZiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="242"/>
-        <location filename="../../src/Comm/Method.cpp" line="2386"/>
+        <location filename="../../src/Comm/Method.cpp" line="2387"/>
         <source>YiB</source>
         <translation type="unfinished"></translation>
     </message>

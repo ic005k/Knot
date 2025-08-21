@@ -188,7 +188,7 @@ void SVSelectorWidget::calculateSV(const QPoint &pos) {
 EnhancedColorPicker::EnhancedColorPicker(QWidget *parent,
                                          const QColor &initialColor)
     : QDialog(parent), m_currentColor(initialColor) {
-  setWindowTitle(tr("选择颜色"));
+  setWindowTitle(tr("Select Color"));
   resize(500, 600);
 
   // 初始化颜色值
