@@ -76,6 +76,8 @@ bool isAndroid, isIOS, isWindows, isLinux, isMacOS;
 bool isInitThemeEnd;
 bool isNeedExecDeskShortcut = false;
 
+const QString uniqueKey = "MyUniqueApplicationKey_12345";
+
 #define Cross_Origin
 
 int main(int argc, char* argv[]) {
@@ -105,6 +107,17 @@ int main(int argc, char* argv[]) {
   QApplication app(argc, argv);
 
   loadLocal();
+
+#ifndef Q_OS_ANDROID
+  QSharedMemory sharedMemory(uniqueKey);
+  if (!sharedMemory.create(1)) {
+    QMessageBox::information(nullptr, "Knot",
+                             QObject::tr("The application is already running!"),
+                             QMessageBox::Ok);
+
+    return 0;
+  }
+#endif
 
   // showSplash();
   SplashTimer splash(isAndroid, 300, 100);

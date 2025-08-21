@@ -233,6 +233,9 @@ QString DatabaseManager::extractPreview(const QString &content,
 }
 
 void DatabaseManager::updateFileIndex(const QString &filePath) {
+  QFileInfo fi(filePath);
+  if (!fi.exists()) return;
+
   deleteFileIndex(filePath);
 
   executeTransactionWithRetry(
@@ -244,6 +247,9 @@ void DatabaseManager::updateFileIndex(const QString &filePath) {
 }
 
 void DatabaseManager::deleteFileIndex(const QString &filePath) {
+  QFileInfo fi(filePath);
+  if (!fi.exists()) return;
+
   QElapsedTimer timer;
   timer.start();
 

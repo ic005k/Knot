@@ -784,6 +784,12 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     return;
   }
 #else
+
+  while (m_Notes->notes_sync_files.count() > 0) {
+    qDebug() << "notes sysc files: " << m_Notes->notes_sync_files.count();
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+  }
+
   QSettings Reg(privateDir + "winpos.ini", QSettings::IniFormat);
 
   Reg.setValue("x", this->geometry().x());

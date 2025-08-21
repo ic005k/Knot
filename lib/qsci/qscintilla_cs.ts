@@ -2178,7 +2178,7 @@ in skydrive folder</source>
     <message>
         <location filename="../../src/Notes/NotesList.ui" line="64"/>
         <location filename="../../src/Notes/NotesList.cpp" line="54"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="962"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="961"/>
         <source>Notebook</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2189,7 +2189,7 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.ui" line="87"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2113"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2112"/>
         <source>New Note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2253,13 +2253,13 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.ui" line="222"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2118"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2117"/>
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.ui" line="235"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2119"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2118"/>
         <source>Export</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2321,7 +2321,7 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2018"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2017"/>
         <source>Untitled Note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2347,7 +2347,7 @@ in skydrive folder</source>
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.cpp" line="407"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="1982"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1981"/>
         <source>NoteBook</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2377,127 +2377,127 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="569"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="568"/>
         <source>Invalid Markdown file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="617"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="616"/>
         <source>MD File(*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="773"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="772"/>
         <source>Modi Notes List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="847"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="846"/>
         <source>Modi Notes Recycle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="963"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="1983"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="962"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1982"/>
         <source>Notes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="978"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="977"/>
         <source>Notes Recycle Bin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1047"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1046"/>
         <source>Whether to remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1314"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1313"/>
         <source>No match was found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1909"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1908"/>
         <source>New NoteBook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1910"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1909"/>
         <source>Del NoteBook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1911"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1910"/>
         <source>Rename NoteBook</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/NotesList.cpp" line="1911"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2115"/>
+        <source>Move Up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.cpp" line="1912"/>
         <location filename="../../src/Notes/NotesList.cpp" line="2116"/>
-        <source>Move Up</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1913"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2117"/>
         <source>Move Down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1914"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1913"/>
         <source>Set Color Marker</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1916"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1915"/>
         <source>Statistics</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1994"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1993"/>
         <source>Please create a new notebook first, and then create new notes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2114"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2113"/>
         <source>Del Note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2115"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2114"/>
         <source>Rename Note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2120"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2119"/>
         <source>Share</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2121"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2120"/>
         <source>Copy Note Link</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2122"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2121"/>
         <source>Relationship Graph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2202"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2201"/>
         <source>Share to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2241"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2249"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2264"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2240"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2248"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2263"/>
         <source>Main Root</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2467"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2466"/>
         <source>The current note does not exist. Please select another note or create a new note.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2706,6 +2706,11 @@ in skydrive folder</source>
     <message>
         <location filename="../../src/MainHelper.cpp" line="59"/>
         <source>Add</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/main.cpp" line="115"/>
+        <source>The application is already running!</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -7010,22 +7015,22 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="1563"/>
+        <location filename="../../src/Reader/Reader.cpp" line="1452"/>
         <source>Clear all reading history</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="1962"/>
+        <location filename="../../src/Reader/Reader.cpp" line="1851"/>
         <source>Remove from list?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="1985"/>
+        <location filename="../../src/Reader/Reader.cpp" line="1874"/>
         <source>The EPUB file was opened with an error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="2295"/>
+        <location filename="../../src/Reader/Reader.cpp" line="2184"/>
         <source>Share to</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7858,7 +7863,7 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="354"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="346"/>
         <source>View GPS Track</source>
         <translation type="unfinished"></translation>
     </message>

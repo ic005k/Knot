@@ -541,13 +541,17 @@ bool NotesList::on_btnImport_clicked() {
 
   if (fileNames.count() == 0) return false;
 
+  QStringList MDFileList;
+
   QTreeWidgetItem *item = ui->treeWidget->currentItem();
+
   for (int i = 0; i < fileNames.count(); i++) {
     QString fileName = fileNames.at(i);
 
     bool isMD = false;
-
-    isMD = fileName.contains(".md") || fileName.contains(".txt");
+    QString strFile = fileName;
+    strFile = strFile.toLower();
+    isMD = strFile.contains(".md") || strFile.contains(".txt");
 
 #ifdef Q_OS_ANDROID
 
@@ -566,10 +570,16 @@ bool NotesList::on_btnImport_clicked() {
       ShowMessage *m_ShowMsg = new ShowMessage(this);
       m_ShowMsg->showMsg("Knot",
                          tr("Invalid Markdown file.") + "\n\n" + fileName, 1);
-      return false;
-    }
 
-    if (QFile(fileName).exists() && isMD) {
+    } else {
+      MDFileList.append(fileName);
+    }
+  }
+
+  for (int i = 0; i < MDFileList.count(); i++) {
+    QString fileName = MDFileList.at(i);
+
+    if (QFile(fileName).exists()) {
       QTreeWidgetItem *item1;
 
       QString strNoteText = loadText(fileName);
@@ -1967,6 +1977,7 @@ void NotesList::on_actionSetColorFlag() {
 
 void NotesList::on_actionStatistics() {
   int totalNotes = 0;
+  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
 
   int countNoteBook = m_Method->getCountFromQW(mui->qwNoteBook);
   for (int i = 0; i < countNoteBook; i++) {
@@ -1975,6 +1986,9 @@ void NotesList::on_actionStatistics() {
     int countNotesList = strSum.toInt();
     totalNotes = totalNotes + countNotesList;
   }
+
+  m_Method->setCurrentIndexFromQW(mui->qwNoteBook, index);
+  clickNoteBook();
 
   ShowMessage *msg = new ShowMessage(this);
   msg->showMsg(appName,
