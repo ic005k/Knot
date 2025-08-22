@@ -206,6 +206,10 @@ MainWindow::MainWindow(QWidget *parent)
   }
 
   initMain = false;
+
+  if (!isAndroid) {
+    QTimer::singleShot(100, this, [this]() { execNeedSyncNotes(); });
+  }
 }
 
 void MainWindow::slotPointHoverd(const QPointF &point, bool state) {
@@ -785,9 +789,14 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   }
 #else
 
-  while (m_Notes->notes_sync_files.count() > 0) {
-    qDebug() << "notes sysc files: " << m_Notes->notes_sync_files.count();
-    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+  int m_count = m_Notes->notes_sync_files.count();
+  if (m_count > 0) {
+    QSettings RegSync(privateDir + "need_sync.ini", QSettings::IniFormat);
+    for (int i = 0; i < m_count; i++) {
+      RegSync.setValue("count", m_count);
+      RegSync.setValue("note" + QString::number(i),
+                       m_Notes->notes_sync_files.at(i));
+    }
   }
 
   QSettings Reg(privateDir + "winpos.ini", QSettings::IniFormat);
@@ -799,6 +808,19 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
   event->accept();
 #endif
+}
+
+void MainWindow::execNeedSyncNotes() {
+  QSettings RegSync(privateDir + "need_sync.ini", QSettings::IniFormat);
+  int count = RegSync.value("count", 0).toInt();
+  for (int i = 0; i < count; i++) {
+    QString note = RegSync.value("note" + QString::number(i), "").toString();
+    QFileInfo fi(note);
+    if (fi.exists()) {
+      m_Notes->notes_sync_files.append(note);
+    }
+  }
+  m_Notes->syncToWebDAV();
 }
 
 void MainWindow::setMini() {

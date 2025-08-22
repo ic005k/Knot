@@ -357,7 +357,8 @@ class MainWindow : public QMainWindow {
 
   int max_day = 31;
 
- protected:
+  void execNeedSyncNotes();
+  protected:
   void closeEvent(QCloseEvent *event) override;
   bool eventFilter(QObject *watch, QEvent *evn) override;
   void paintEvent(QPaintEvent *event) override;

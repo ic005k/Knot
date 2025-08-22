@@ -283,7 +283,7 @@ void DatabaseManager::deleteFileIndex(const QString &filePath) {
 
         return true;  // 返回成功标志
       },
-      3);  // 重试3次
+      1);  // 重试次数（之前是3），目前重试1次
 
   qInfo() << "删除操作耗时:" << timer.elapsed() << "ms"
           << "结果:" << (success ? "成功" : "失败");
