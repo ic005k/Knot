@@ -885,6 +885,11 @@ void NotesList::initNotesList() {
   int topCount = iniNotes->value("/MainNotes/topItemCount").toInt();
   int nNoteBook = topCount;
 
+  int notebook_index1 = -1;
+  int note_index1 = -1;
+  int notebook_index11 = -1;
+  int note_index11 = -1;
+
   int notesTotal = 0;
   QString str0, str1;
   for (int i = 0; i < topCount; i++) {
@@ -925,7 +930,10 @@ void NotesList::initNotesList() {
         childItem->setText(1, str1);
         childItem->setIcon(0, QIcon(":/res/n.png"));
 
-        mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(iniDir + str1, str0);
+        QString md = iniDir + str1;
+        mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(md, str0);
+        mw_one->m_Notes->m_NoteIndexManager->setNoteIndex(md, j);
+        mw_one->m_Notes->m_NoteIndexManager->setNotebookIndex(md, i);
 
       } else {
         QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
@@ -957,8 +965,10 @@ void NotesList::initNotesList() {
           item->setText(1, str11);
           item->setIcon(0, QIcon(":/res/n.png"));
 
-          mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(iniDir + str11,
-                                                            str00);
+          QString md = iniDir + str11;
+          mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(md, str00);
+          mw_one->m_Notes->m_NoteIndexManager->setNoteIndex(md, n);
+          mw_one->m_Notes->m_NoteIndexManager->setNotebookIndex(md, i);
 
           notesTotal++;
         }

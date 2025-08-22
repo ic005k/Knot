@@ -32,7 +32,7 @@ extern CloudBackup *m_CloudBackup;
 
 extern QString markdownToHtmlWithMath(const QString &md);
 
-NoteIndexManager::NoteIndexManager(QObject *parent) : QObject{parent} {}
+NoteIndexManager1::NoteIndexManager1(QObject *parent) : QObject{parent} {}
 
 Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->setupUi(this);
@@ -1175,7 +1175,9 @@ void Notes::openNotesUI() {
   }
 }
 
-bool NoteIndexManager::loadIndex(const QString &indexPath) {
+/////////////////////////////////////////////////////////////////////
+
+bool NoteIndexManager1::loadIndex(const QString &indexPath) {
   QFile file(indexPath);
   if (!file.open(QIODevice::ReadOnly)) return false;
 
@@ -1192,7 +1194,7 @@ bool NoteIndexManager::loadIndex(const QString &indexPath) {
   return true;
 }
 
-bool NoteIndexManager::saveIndex(const QString &indexPath) {
+bool NoteIndexManager1::saveIndex(const QString &indexPath) {
   QJsonObject root;
   root["version"] = 1.0;
 
@@ -1209,13 +1211,13 @@ bool NoteIndexManager::saveIndex(const QString &indexPath) {
   return true;
 }
 
-QString NoteIndexManager::getNoteTitle(const QString &filePath) const {
+QString NoteIndexManager1::getNoteTitle(const QString &filePath) const {
   return m_index.value(QDir::cleanPath(filePath),
                        QFileInfo(filePath).baseName());
 }
 
-void NoteIndexManager::setNoteTitle(const QString &filePath,
-                                    const QString &title) {
+void NoteIndexManager1::setNoteTitle(const QString &filePath,
+                                     const QString &title) {
   QString cleanPath = QDir::cleanPath(filePath);
   if (title.isEmpty()) {
     m_index.remove(cleanPath);
@@ -1223,6 +1225,8 @@ void NoteIndexManager::setNoteTitle(const QString &filePath,
     m_index[cleanPath] = title;
   }
 }
+
+///////////////////////////////////////////////////////////////////////////////////
 
 void Notes::openEditUI() {
   qDebug() << "currentMDFile=" << currentMDFile;

@@ -48,11 +48,12 @@
 #include "src/Comm/ShowMessage.h"
 #include "src/Notes/ColorDialog.h"
 #include "src/Notes/PrintPDF.h"
+#include "src/Notes/note_index_manager.h"
 #include "titlegenerator.h"
 #include "ui_PrintPDF.h"
 
 class LimitedTextEdit;
-class NoteIndexManager;
+class NoteIndexManager1;
 class MiniMap;
 
 namespace Ui {
@@ -341,10 +342,11 @@ class LimitedTextEdit : public QTextEdit {
   int maxLength;
 };
 
-class NoteIndexManager : public QObject {
+///////////////////////////////////////////////////////////////////////
+class NoteIndexManager1 : public QObject {
   Q_OBJECT
  public:
-  explicit NoteIndexManager(QObject *parent = nullptr);
+  explicit NoteIndexManager1(QObject *parent = nullptr);
 
   // 加载/保存索引
   bool loadIndex(const QString &indexPath);
@@ -358,5 +360,6 @@ class NoteIndexManager : public QObject {
   QHash<QString, QString> m_index;  // 内存哈希表加速查询
   QString m_currentIndexPath;
 };
+////////////////////////////////////////////////////////////////////////
 
 #endif  // NOTES_H
