@@ -87,14 +87,14 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
   connect(mui->editNotesSearch, &QLineEdit::textChanged, this,
           &NotesList::onSearchTextChanged);
 
-  loadIndexTimestamp();
-
-  m_dbManager.initDatabase(privateDir + "md_database_v3.db");
-
+  QString databaseFile = privateDir + "md_database_v3.db";
+  m_dbManager.initDatabase(databaseFile);
   mui->qwNotesSearchResult->rootContext()->setContextProperty("searchModel",
                                                               &m_searchModel);
-
-  startBackgroundTaskUpdateFilesIndex();
+  QFileInfo fi(databaseFile);
+  if (!fi.exists()) {
+    startBackgroundTaskUpdateFilesIndex();
+  }
 
   loadNotesListIndex();
 
@@ -605,6 +605,8 @@ bool NotesList::on_btnImport_clicked() {
       qDebug() << fileName << a;
 
       mw_one->m_Notes->updateMDFileToSyncLists(currentMDFile);
+
+      m_dbManager.updateFileIndex(currentMDFile);
     } else {
       return false;
     }
@@ -2117,6 +2119,8 @@ void NotesList::on_actionImport_Note_triggered() {
     clickNoteList();
     saveNotesList();
   }
+
+  updateAllNoteIndexManager();
 }
 
 void NotesList::on_actionExport_Note_triggered() {
@@ -2764,18 +2768,6 @@ void NotesList::onSearchTextChanged(const QString &text) {
 }
 
 void NotesList::openSearch() { return; }
-
-// 保存到 QSettings
-void NotesList::saveIndexTimestamp() {
-  QSettings settings;
-  settings.setValue("KnotNotes_LastIndexTime", m_lastIndexTime);
-}
-
-// 从 QSettings 加载
-void NotesList::loadIndexTimestamp() {
-  QSettings settings;
-  m_lastIndexTime = settings.value("KnotNotes_LastIndexTime", 0).toDateTime();
-}
 
 QString NotesList::getSearchResultQmlFile() {
   QQuickItem *root = mui->qwNotesSearchResult->rootObject();

@@ -170,7 +170,8 @@ class NotesList : public QDialog {
 
   void updateNoteIndexManager(QString mdFile, int notebookIndex, int noteIndex);
   void updateAllNoteIndexManager();
-  protected:
+
+ protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
   void closeEvent(QCloseEvent *event) override;
@@ -272,8 +273,7 @@ class NotesList : public QDialog {
 
   QDateTime m_lastIndexTime;  // 记录最后一次索引构建时间
   QMutex m_indexTimeMutex;    // 互斥锁
-  void saveIndexTimestamp();
-  void loadIndexTimestamp();
+
   bool m_isIndexing = false;  // 标记索引状态
 
   void clearInvalidMDFile();
