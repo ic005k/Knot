@@ -77,7 +77,7 @@ void NewNoteBook::on_btnCancel_clicked() {
 
 void NewNoteBook::on_btnOk_clicked() {
   isOk = true;
-  rootIndex = ui->listWidget->currentRow();
+  rootIndex = 0;  // ui->listWidget->currentRow();
   notebookName = ui->editName->text().trimmed();
   notebookRoot = ui->listWidget->currentItem()->text().trimmed();
   close();

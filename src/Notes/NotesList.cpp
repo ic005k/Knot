@@ -885,10 +885,7 @@ void NotesList::initNotesList() {
   int topCount = iniNotes->value("/MainNotes/topItemCount").toInt();
   int nNoteBook = topCount;
 
-  int notebook_index1 = -1;
-  int note_index1 = -1;
   int notebook_index11 = -1;
-  int note_index11 = -1;
 
   int notesTotal = 0;
   QString str0, str1;
@@ -932,8 +929,7 @@ void NotesList::initNotesList() {
 
         QString md = iniDir + str1;
         mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(md, str0);
-        mw_one->m_Notes->m_NoteIndexManager->setNoteIndex(md, j);
-        mw_one->m_Notes->m_NoteIndexManager->setNotebookIndex(md, i);
+        updateNoteIndexManager(md, i, j);
 
       } else {
         QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
@@ -950,6 +946,9 @@ void NotesList::initNotesList() {
                         ->value("/MainNotes/childCount" + QString::number(i) +
                                 QString::number(j))
                         .toInt();
+
+        notebook_index11 = i + 1;
+
         for (int n = 0; n < count; n++) {
           QString str00, str11;
           str00 = iniNotes
@@ -967,8 +966,7 @@ void NotesList::initNotesList() {
 
           QString md = iniDir + str11;
           mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(md, str00);
-          mw_one->m_Notes->m_NoteIndexManager->setNoteIndex(md, n);
-          mw_one->m_Notes->m_NoteIndexManager->setNotebookIndex(md, i);
+          updateNoteIndexManager(md, notebook_index11, n);
 
           notesTotal++;
         }
@@ -1681,6 +1679,8 @@ void NotesList::moveBy(int ud) {
 
   resetQML_List();
   saveNotesList();
+
+  updateAllNoteIndexManager();
 }
 
 void NotesList::on_btnUp_clicked() { moveBy(-1); }
@@ -2608,8 +2608,44 @@ void NotesList::genRecentOpenMenu() {
   menuRecentOpen->exec(pos);
 }
 
+void NotesList::updateNoteIndexManager(QString mdFile, int notebookIndex,
+                                       int noteIndex) {
+  mw_one->m_Notes->m_NoteIndexManager->setNotebookIndex(mdFile, notebookIndex);
+  mw_one->m_Notes->m_NoteIndexManager->setNoteIndex(mdFile, noteIndex);
+}
+
+void NotesList::updateAllNoteIndexManager() {
+  int topCount = tw->topLevelItemCount();
+  for (int i = 0; i < topCount; i++) {
+    QTreeWidgetItem *topItem = tw->topLevelItem(i);
+    int childCount = topItem->childCount();
+    for (int j = 0; j < childCount; j++) {
+      QTreeWidgetItem *childItem = topItem->child(j);
+      QString mdFile = iniDir + childItem->text(1);
+      QString title = childItem->text(0);
+      mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(mdFile, title);
+      updateNoteIndexManager(mdFile, i, j);
+    }
+  }
+}
+
 void NotesList::setCurrentItemFromMDFile(QString mdFile) {
   if (!QFile::exists(mdFile)) return;
+
+  int indexNoteBook, indexNote;
+  indexNoteBook = mw_one->m_Notes->m_NoteIndexManager->getNotebookIndex(mdFile);
+  indexNote = mw_one->m_Notes->m_NoteIndexManager->getNoteIndex(mdFile);
+  setNoteBookCurrentIndex(indexNoteBook);
+  clickNoteBook();
+  setNotesListCurrentIndex(indexNote);
+  clickNoteList();
+
+  qDebug() << indexNoteBook << indexNote
+           << mw_one->m_Notes->m_NoteIndexManager->getNoteTitle(mdFile)
+           << mdFile;
+
+  return;
+  ////////////////////////////
 
   int count = getNoteBookCount();
   bool isBreak = false;

@@ -168,7 +168,9 @@ class NotesList : public QDialog {
   void restoreNoteFromRecycle();
   void needDelNotes();
 
- protected:
+  void updateNoteIndexManager(QString mdFile, int notebookIndex, int noteIndex);
+  void updateAllNoteIndexManager();
+  protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
   void closeEvent(QCloseEvent *event) override;
