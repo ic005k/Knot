@@ -325,3 +325,98 @@ QStringList DatabaseManager::scanMarkdownFiles(const QString &directory) const {
   QDir dir(directory);
   return dir.entryList({"*.md"}, QDir::Files | QDir::NoDotAndDotDot);
 }
+
+// 核心功能：清理指定目录下，本地已删除但数据库中仍存在的MD文件记录
+void DatabaseManager::cleanMissingFileRecords(const QString &directory) {
+  if (directory.isEmpty()) {
+    emit errorOccurred("Invalid directory path (cleanMissingFileRecords)");
+    return;
+  }
+
+  QElapsedTimer timer;
+  timer.start();
+  QDir targetDir(directory);
+
+  // 步骤1：获取本地实际存在的MD文件（完整规范路径，确保与数据库路径一致）
+  QSet<QString> localExistedFiles;
+  const QStringList localMdFiles =
+      targetDir.entryList({"*.md"}, QDir::Files | QDir::NoDotAndDotDot);
+  for (const QString &fileName : localMdFiles) {
+    // 转成规范路径（避免相对路径/绝对路径不一致导致误删）
+    const QString canonicalPath =
+        QFileInfo(targetDir.filePath(fileName)).canonicalFilePath();
+    if (!canonicalPath.isEmpty()) {
+      localExistedFiles.insert(canonicalPath);
+    }
+  }
+
+  // 步骤2：获取数据库中所有存储的MD文件路径
+  QStringList dbStoredFiles;
+  QSqlQuery query("SELECT path FROM documents", m_db);
+  if (!query.exec()) {
+    qWarning() << "Failed to get db files (cleanMissingFileRecords):"
+               << query.lastError().text();
+    return;
+  }
+  while (query.next()) {
+    dbStoredFiles.append(query.value(0).toString());
+  }
+
+  // 步骤3：筛选出“数据库有但本地无”的无效路径
+  QList<QString> invalidDbPaths;
+  for (const QString &dbPath : dbStoredFiles) {
+    if (!dbPath.isEmpty() && !localExistedFiles.contains(dbPath)) {
+      invalidDbPaths.append(dbPath);
+    }
+  }
+
+  // 步骤4：批量删除无效记录（用事务提高效率，避免多次IO）
+  if (invalidDbPaths.isEmpty()) {
+    qInfo() << "No missing file records to clean (directory:" << directory
+            << ")";
+    return;
+  }
+
+  // 开启事务批量删除（复用已有事务重试逻辑，保证可靠性）
+  const bool cleanSuccess = executeTransactionWithRetry(
+      [&]() -> bool {
+        for (const QString &invalidPath : invalidDbPaths) {
+          // 删除主表记录
+          QSqlQuery delMain(m_db);
+          delMain.prepare("DELETE FROM documents WHERE path = ?");
+          delMain.addBindValue(invalidPath);
+          if (!delMain.exec()) {
+            throw std::runtime_error(
+                QString("Delete documents table failed: %1 (path:%2)")
+                    .arg(delMain.lastError().text())
+                    .arg(invalidPath)
+                    .toStdString());
+          }
+
+          // 删除FTS全文索引表记录（与主表同步）
+          QSqlQuery delFts(m_db);
+          delFts.prepare("DELETE FROM fts_documents WHERE path = ?");
+          delFts.addBindValue(invalidPath);
+          if (!delFts.exec()) {
+            throw std::runtime_error(
+                QString("Delete fts_documents table failed: %1 (path:%2)")
+                    .arg(delFts.lastError().text())
+                    .arg(invalidPath)
+                    .toStdString());
+          }
+        }
+        return true;  // 所有删除操作完成
+      },
+      3  // 重试3次（应对临时数据库锁等问题）
+  );
+
+  // 输出结果日志
+  if (cleanSuccess) {
+    qInfo() << "Clean missing file records success! "
+            << "Count:" << invalidDbPaths.size() << "Time:" << timer.elapsed()
+            << "ms (directory:" << directory << ")";
+  } else {
+    qWarning() << "Clean missing file records failed (directory:" << directory
+               << ")";
+  }
+}

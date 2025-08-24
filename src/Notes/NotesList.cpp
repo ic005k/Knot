@@ -2601,6 +2601,7 @@ void NotesList::genRecentOpenMenu() {
 #endif
 
         saveCurrentNoteInfo();
+        setCurrentItemFromMDFile(currentMDFile);
       });
     }
   }

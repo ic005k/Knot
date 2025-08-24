@@ -35,7 +35,8 @@ class DatabaseManager : public QObject {
   void deleteFileIndex(const QString &filePath);  // 强制移除索引
   void validateIndex();                           // 索引完整性检查
 
- signals:
+  void cleanMissingFileRecords(const QString &directory);
+  signals:
   void errorOccurred(const QString &message);
   void indexingProgress(int processed, int total);
 

@@ -1142,12 +1142,30 @@ void Notes::loadEmptyNote() {
   mw_one->m_NotesList->noteTitle = "";
 }
 
+void Notes::startBackgroundTaskDelAndClear() {
+  QString fullPath = iniDir + "memo";  // 先构造完整路径
+
+  QFuture<void> future = QtConcurrent::run([=]() {
+    mw_one->m_NotesList->needDelNotes();
+
+    mw_one->m_NotesList->m_dbManager.cleanMissingFileRecords(fullPath);
+  });
+
+  // 可选：使用 QFutureWatcher 监控进度
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+    qDebug() << "Database del and clear completed...";
+    watcher->deleteLater();
+  });
+  watcher->setFuture(future);
+}
+
 void Notes::openNotesUI() {
   init_all_notes();
 
   isSaveNotesConfig = false;
 
-  mw_one->m_NotesList->needDelNotes();
+  startBackgroundTaskDelAndClear();
 
   mw_one->isMemoVisible = true;
   mw_one->isReaderVisible = false;
@@ -1242,6 +1260,7 @@ void Notes::openEditUI() {
 
   mw_one->m_NotesList->refreshRecentOpen(mw_one->m_NotesList->noteTitle);
   mw_one->m_NotesList->saveRecentOpen();
+  mw_one->m_NotesList->setCurrentItemFromMDFile(currentMDFile);
 
   if (isAndroid) {
     m_Method->setMDFile(currentMDFile);
