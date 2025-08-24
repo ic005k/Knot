@@ -270,6 +270,8 @@ void NotesList::on_btnRename_clicked() {
   hframe->hide();
 
   QTextEdit *edit = new QTextEdit(this);
+  edit->setAcceptRichText(false);
+
   if (isAndroid) {
     if (textToolbarRenameNotes != nullptr) delete textToolbarRenameNotes;
     textToolbarRenameNotes =
@@ -1347,13 +1349,15 @@ void NotesList::onSearchFinished() {
     qDebug() << "匹配行号：" << it.value().lineNumbers;
 
     QString strLineSn;
-    for (int i = 0; i < lines.count(); i++) {
+    int linesCount = lines.count();
+    for (int i = 0; i < linesCount; i++) {
       strLineSn = strLineSn + " " + QString::number(lines.at(i));
     }
     strLineSn = strLineSn.trimmed();
 
     if (!recycleNotesList.contains(filePath))
-      searchResultList.append(filePath + "-==-" + strLineSn);
+      searchResultList.append(filePath + "-==-" + strLineSn + "-==-" +
+                              QString::number(linesCount));
   }
 
   // ▶️ 释放资源
@@ -1389,7 +1393,7 @@ void NotesList::goPrevious() {
 
   QStringList list = searchResultList.at(findCount).split("-==-");
   QString md_file = list.at(0);
-  mui->lblShowLineSn->setText(list.at(1));
+  mui->lblShowLineSn->setText(list.at(2));
   setCurrentItemFromMDFile(md_file);
   clickNoteList();
 
@@ -1406,7 +1410,7 @@ void NotesList::goNext() {
 
   QStringList list = searchResultList.at(findCount).split("-==-");
   QString md_file = list.at(0);
-  mui->lblShowLineSn->setText(list.at(1));
+  mui->lblShowLineSn->setText(list.at(2));
   setCurrentItemFromMDFile(md_file);
   clickNoteList();
 
@@ -2042,6 +2046,7 @@ void NotesList::on_actionAdd_Note_triggered() {
 
   renameCurrentItem(tr("Untitled Note"));
   saveNotesList();
+  updateAllNoteIndexManager();
 }
 
 void NotesList::on_actionDel_Note_triggered() {
@@ -2637,11 +2642,19 @@ void NotesList::updateAllNoteIndexManager() {
 void NotesList::setCurrentItemFromMDFile(QString mdFile) {
   if (!QFile::exists(mdFile)) return;
 
-  int indexNoteBook, indexNote;
+  int indexNoteBook, indexNote, countNoteBook, countNotes;
   indexNoteBook = mw_one->m_Notes->m_NoteIndexManager->getNotebookIndex(mdFile);
   indexNote = mw_one->m_Notes->m_NoteIndexManager->getNoteIndex(mdFile);
+
+  countNoteBook = m_Method->getCountFromQW(mui->qwNoteBook);
+  if (indexNoteBook < 0 || indexNoteBook >= countNoteBook) return;
+
   setNoteBookCurrentIndex(indexNoteBook);
   clickNoteBook();
+
+  countNotes = m_Method->getCountFromQW(mui->qwNoteList);
+  if (indexNote < 0 || indexNote >= countNotes) return;
+
   setNotesListCurrentIndex(indexNote);
   clickNoteList();
 

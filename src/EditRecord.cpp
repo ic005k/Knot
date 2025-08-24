@@ -28,6 +28,7 @@ EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {
   this->installEventFilter(this);
 
   mui->editCategory->setFocus();
+  mui->editDetails->setAcceptRichText(false);
 
   nH = mui->editCategory->height();
 

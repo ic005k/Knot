@@ -1108,6 +1108,8 @@ void Todo::reeditText() {
   hframe->hide();
 
   QTextEdit* edit = new QTextEdit(this);
+  edit->setAcceptRichText(false);
+
   if (isAndroid) {
     if (textToolbarReeditTodo != nullptr) delete textToolbarReeditTodo;
     textToolbarReeditTodo =
