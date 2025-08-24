@@ -178,6 +178,7 @@ class Notes : public QDialog {
   void appendToSyncList(QString file);
 
   void startBackgroundTaskDelAndClear();
+  void startBackgroundTaskUpdateNoteIndex();
   protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;

@@ -176,7 +176,7 @@ void Notes::saveMainNotes() {
 
     updateMDFileToSyncLists(currentMDFile);
 
-    mw_one->m_NotesList->m_dbManager.updateFileIndex(currentMDFile);
+    startBackgroundTaskUpdateNoteIndex();
   }
 
   isTextChange = false;
@@ -1113,7 +1113,7 @@ void Notes::javaNoteToQMLNote() {
 
   appendToSyncList(zipMD);
 
-  mw_one->m_NotesList->m_dbManager.updateFileIndex(currentMDFile);
+  startBackgroundTaskUpdateNoteIndex();
 }
 
 QString Notes::formatMDText(QString text) {
@@ -1155,6 +1155,21 @@ void Notes::startBackgroundTaskDelAndClear() {
   QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Database del and clear completed...";
+    watcher->deleteLater();
+  });
+  watcher->setFuture(future);
+}
+
+void Notes::startBackgroundTaskUpdateNoteIndex() {
+  QString fullPath = currentMDFile;
+
+  QFuture<void> future = QtConcurrent::run(
+      [=]() { mw_one->m_NotesList->m_dbManager.updateFileIndex(fullPath); });
+
+  // 可选：使用 QFutureWatcher 监控进度
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+    qDebug() << "Update note index completed:" + fullPath;
     watcher->deleteLater();
   });
   watcher->setFuture(future);

@@ -608,7 +608,7 @@ bool NotesList::on_btnImport_clicked() {
 
       mw_one->m_Notes->updateMDFileToSyncLists(currentMDFile);
 
-      m_dbManager.updateFileIndex(currentMDFile);
+      mw_one->m_Notes->startBackgroundTaskUpdateNoteIndex();
     } else {
       return false;
     }
