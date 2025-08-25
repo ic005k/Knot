@@ -125,6 +125,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.Time;
 import android.text.SpannableStringBuilder;
 import android.text.style.BackgroundColorSpan;
@@ -1012,6 +1013,65 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
     }
 
     private void saveNote() {
+        final String mContent = editNote.getText().toString();
+        final String filename = MyActivity.strMDFile;
+
+        findViewById(R.id.progressContainer).setVisibility(View.VISIBLE);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // 使用数组包装success变量，使其可以在内部类中访问
+                final boolean[] success = { false };
+                // 创建临时文件路径（在原文件同目录下，添加.tmp后缀）
+                String tempFilename = filename + ".tmp";
+
+                try {
+                    // 1. 先写入临时文件
+                    writeTextFile(mContent, tempFilename);
+
+                    // 2. 验证临时文件写入成功（检查文件存在且内容不为空）
+                    File tempFile = new File(tempFilename);
+                    if (tempFile.exists() && tempFile.length() > 0) {
+                        // 3. 原子重命名（Android 中 renameTo 对于同一分区是原子操作）
+                        File targetFile = new File(filename);
+                        // 先删除目标文件（避免重命名失败）
+                        if (targetFile.exists() && !targetFile.delete()) {
+                            throw new IOException("无法删除原有文件");
+                        }
+                        // 执行重命名（关键的原子操作）
+                        if (tempFile.renameTo(targetFile)) {
+                            success[0] = true; // 修改数组中的值
+                            CallJavaNotify_6();
+                        } else {
+                            throw new IOException("重命名临时文件失败");
+                        }
+                    } else {
+                        throw new IOException("临时文件写入不完整");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    // 失败时清理临时文件
+                    new File(tempFilename).delete();
+                } finally {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            findViewById(R.id.progressContainer).setVisibility(View.GONE);
+
+                            // 访问数组中的值
+                            if (success[0] && MyActivity.isEdit) {
+                                setResult(MDActivity.RESULT_SAVE);
+                            }
+                            finish();
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    private void saveNote_Non_atomic() {
         final String mContent = editNote.getText().toString();
         final String filename = MyActivity.strMDFile;
 

@@ -11,7 +11,7 @@ extern QTabWidget *tabData, *tabChart;
 extern QString iniDir;
 
 extern QString loadText(QString textFile);
-extern void StringToFile(QString buffers, QString fileName);
+extern bool StringToFile(QString buffers, QString fileName);
 
 extern Ui::MainWindow* mui;
 

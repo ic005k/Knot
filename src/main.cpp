@@ -52,7 +52,7 @@ int deleteDirfile(QString dirName);
 QString loadText(QString textFile);
 QString getTextEditLineText(QTextEdit* txtEdit, int i);
 void TextEditToFile(QTextEdit* txtEdit, QString fileName);
-void StringToFile(QString buffers, QString fileName);
+bool StringToFile(QString buffers, QString fileName);
 QPalette createDarkPalette();
 QPalette createLightPalette();
 
@@ -574,7 +574,8 @@ void TextEditToFile(QTextEdit* txtEdit, QString fileName) {
   delete file;
 }
 
-void StringToFile(QString buffers, QString fileName) {
+bool StringToFile(QString buffers, QString fileName) {
+  bool isValue;
   QFile* file;
   file = new QFile;
   file->setFileName(fileName);
@@ -583,11 +584,14 @@ void StringToFile(QString buffers, QString fileName) {
     QTextStream out(file);
     out << buffers;
     file->close();
-
-  } else
+    isValue = true;
+  } else {
     qDebug() << "Write failure!" << fileName;
+    isValue = false;
+  }
 
   delete file;
+  return isValue;
 }
 
 #ifdef Q_OS_ANDROID

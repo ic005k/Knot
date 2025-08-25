@@ -23,7 +23,7 @@ extern int deleteDirfile(QString dirName);
 extern QString loadText(QString textFile);
 extern QString getTextEditLineText(QTextEdit *txtEdit, int i);
 extern void TextEditToFile(QTextEdit *txtEdit, QString fileName);
-extern void StringToFile(QString buffers, QString fileName);
+extern bool StringToFile(QString buffers, QString fileName);
 
 extern WebDavHelper *listWebDavFiles(const QString &url,
                                      const QString &username,
@@ -170,13 +170,27 @@ void Notes::saveMainNotes() {
   if (isTextChange) {
     QString text = m_EditSource->text();
     text = formatMDText(text);
-    StringToFile(text, currentMDFile);
 
-    qDebug() << "Save Note: " << currentMDFile;
+    // 关键改进：基于目标文件生成唯一临时文件（同目录+唯一名称）
+    QFileInfo targetInfo(currentMDFile);
+    QString tempFile = targetInfo.dir().filePath(
+        targetInfo.fileName() + "." +
+        QString::number(QDateTime::currentMSecsSinceEpoch()) + ".tmp");
 
-    updateMDFileToSyncLists(currentMDFile);
-
-    startBackgroundTaskUpdateNoteIndex();
+    bool isOk = StringToFile(text, tempFile);
+    if (isOk) {
+      QFile::remove(currentMDFile);
+      if (QFile::rename(tempFile, currentMDFile)) {
+        qDebug() << "Save Note: " << currentMDFile;
+        updateMDFileToSyncLists(currentMDFile);
+        startBackgroundTaskUpdateNoteIndex();
+      } else {
+        qWarning() << "重命名失败，清理临时文件";
+        QFile::remove(tempFile);
+      }
+    } else {
+      qWarning() << "临时文件写入失败";
+    }
   }
 
   isTextChange = false;

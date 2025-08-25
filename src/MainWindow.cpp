@@ -56,7 +56,7 @@ extern int deleteDirfile(QString dirName);
 extern QString loadText(QString textFile);
 extern QString getTextEditLineText(QTextEdit *txtEdit, int i);
 extern void TextEditToFile(QTextEdit *txtEdit, QString fileName);
-extern void StringToFile(QString buffers, QString fileName);
+extern bool StringToFile(QString buffers, QString fileName);
 extern bool unzipToDir(const QString &zipPath, const QString &destDir);
 
 extern WebDavHelper *listWebDavFiles(const QString &url,

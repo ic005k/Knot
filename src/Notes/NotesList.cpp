@@ -17,7 +17,7 @@ extern int fontSize;
 extern QString loadText(QString textFile);
 extern QString getTextEditLineText(QTextEdit *txtEdit, int i);
 extern void TextEditToFile(QTextEdit *txtEdit, QString fileName);
-extern void StringToFile(QString buffers, QString fileName);
+extern bool StringToFile(QString buffers, QString fileName);
 
 QString strNoteNameIndexFile = "";
 
@@ -793,7 +793,9 @@ void NotesList::saveNotesList() {
 }
 
 void NotesList::saveNotesListToFile() {
-  QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
+  QString tempFile = iniDir + "temp.ini";
+  QString endFile = iniDir + "mainnotes.ini";
+  QSettings iniNotes(tempFile, QSettings::IniFormat);
 
   int count = tw->topLevelItemCount();
   iniNotes.setValue("/MainNotes/topItemCount", count);
@@ -847,6 +849,16 @@ void NotesList::saveNotesListToFile() {
   }
 
   iniNotes.sync();
+
+  QFile tempFileObj(tempFile);
+  if (tempFileObj.exists() && tempFileObj.size() > 0) {
+    QFile::remove(endFile);
+    if (!QFile::rename(tempFile, endFile)) {
+      qWarning() << "重命名失败:" << tempFile << "->" << endFile;
+      QFile::remove(tempFile);  // 清理临时文件
+      return;
+    }
+  }
 
   // Save Note Name
   QSettings iniCurMD(iniDir + "curmd.ini", QSettings::IniFormat);
@@ -1993,18 +2005,10 @@ void NotesList::on_actionSetColorFlag() {
 
 void NotesList::on_actionStatistics() {
   int totalNotes = 0;
-  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
-
-  int countNoteBook = m_Method->getCountFromQW(mui->qwNoteBook);
+  int countNoteBook = tw->topLevelItemCount();
   for (int i = 0; i < countNoteBook; i++) {
-    m_Method->setCurrentIndexFromQW(mui->qwNoteBook, i);
-    QString strSum = m_Method->getText3(mui->qwNoteBook, i);
-    int countNotesList = strSum.toInt();
-    totalNotes = totalNotes + countNotesList;
+    totalNotes = totalNotes + tw->topLevelItem(i)->childCount();
   }
-
-  m_Method->setCurrentIndexFromQW(mui->qwNoteBook, index);
-  clickNoteBook();
 
   ShowMessage *msg = new ShowMessage(this);
   msg->showMsg(appName,
