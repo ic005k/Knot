@@ -33,6 +33,8 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
   tw = ui->treeWidget;
   twrb = ui->treeWidgetRecycle;
 
+  noteModel = new NoteListModel(this);
+
   mui->f_FindNotes->setStyleSheet(
       "QFrame{background-color: #455364;color: #FFFFFF;border-radius:10px; "
       "border:0px solid gray;}");
@@ -2438,6 +2440,9 @@ void NotesList::clickNoteBook() {
     int index_top = text1.toInt();
     QTreeWidgetItem *topItem = tw->topLevelItem(index_top);
     int child_count = topItem->childCount();
+    QList<NoteItem> batchItems;
+    batchItems.reserve(
+        child_count);  // 预分配内存，避免循环中频繁扩容（优化性能）
     for (int i = 0; i < child_count; i++) {
       QString text0 = topItem->child(i)->text(0);
       QString text3 = topItem->child(i)->text(1);
@@ -2445,12 +2450,25 @@ void NotesList::clickNoteBook() {
         QString file = iniDir + text3;
         QString item1 = m_Method->getLastModified(file);
         QString strSize = m_Method->getFileSize(QFile(file).size(), 2);
-        m_Method->addItemToQW(mui->qwNoteList, text0, item1 + " " + strSize, "",
-                              text3, 0);
+        // m_Method->addItemToQW(mui->qwNoteList, text0, item1 + " " + strSize,
+        // "",
+        //                       text3, 0);
+
+        // 收集当前数据到NoteItem，加入批量列表（仅C++内存操作，无跨语言通信）
+        NoteItem newItem;
+        newItem.text0 = text0;                  // 对应QML的text0
+        newItem.text1 = item1 + " " + strSize;  // 对应QML的text1
+        newItem.text2 = "";                     // 对应QML的text2（空值）
+        newItem.text3 = text3;                  // 对应QML的text3
+        newItem.myh = 0;                        // 对应QML的myh
+        // 其他字段（time/dototext/type）若无需设置，默认初始化即可
+
+        batchItems.append(newItem);
 
         pNoteItems.append(topItem->child(i));
       }
     }
+    noteModel->addBatchItems(batchItems);
   } else {
     isStatus = false;
     QStringList list = text1.split("===");
@@ -2487,6 +2505,7 @@ void NotesList::clickNoteBook() {
 
 void NotesList::clickNoteList() {
   int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
+
   if (index < 0) {
     currentMDFile = "";
     return;

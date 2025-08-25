@@ -63,6 +63,13 @@ Rectangle {
     }
 
     function getText0(itemIndex) {
+        const text0 = noteModel.getText0(itemIndex)
+        console.log("[QML] 从C++接口获取text0：", text0)
+        return text0
+    }
+
+    function getText00(itemIndex) {
+
         var data = view.model.get(itemIndex)
         return data.text0
     }
@@ -78,6 +85,13 @@ Rectangle {
     }
 
     function getText3(itemIndex) {
+        const text3 = noteModel.getText3(itemIndex)
+        console.log("[QML] 从C++接口获取text3：", text3)
+        return text3
+    }
+
+    function getText33(itemIndex) {
+
         var data = view.model.get(itemIndex)
         return data.text3
     }
@@ -93,6 +107,11 @@ Rectangle {
     }
 
     function addItem(t0, t1, t2, t3, height) {
+        noteModel.addItem(t0, t1, t2, t3, height) // 调用C++模型的addItem
+    }
+
+    function addItem_old(t0, t1, t2, t3, height) {
+
         view.model.append({
                               "text0": t0,
                               "text1": t1,
@@ -111,8 +130,12 @@ Rectangle {
                           })
     }
 
-    function delItem(currentIndex) {
+    function delItem_old(currentIndex) {
         view.model.remove(currentIndex)
+    }
+
+    function delItem(currentIndex) {
+        noteModel.removeItem(currentIndex) // 调用C++接口
     }
 
     function modifyItem(currentIndex, strTime, strText) {
@@ -193,10 +216,11 @@ Rectangle {
                     view.currentIndex = index //实现item切换
 
                     for (i = 0; i < view.count; i++) {
-                        view.model.setProperty(i, "text2", "")
-                    }
-                    view.model.setProperty(index, "text2", "ShowRect")
 
+                        //view.model.setProperty(i, "text2", "")
+                    }
+
+                    // view.model.setProperty(index, "text2", "ShowRect")
                     m_NotesList.clickNoteList()
                 }
 
@@ -419,20 +443,23 @@ Rectangle {
             margins: 4
         }
 
-        model: ListModel {
+        model: noteModel
+
+
+        /* model: ListModel {
             id: listmain
 
             // debug
 
 
-            /*ListElement {
+            ListElement {
                 text0: '<span style="background-color: #ff6600;">Hello</span>'
                 text1: "123456  <b>Hello</b> <i>World!</i>  123456"
                 text2: '123456 <font color="red"><b>TEST</b></font>  123456'
                 text3: "str3 1234567890 1234567890  1234567890 1234567890"
                 myh: 0
-            }*/
-        }
+            }
+        }*/
         delegate: dragDelegate
 
         cacheBuffer: 50

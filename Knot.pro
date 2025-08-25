@@ -382,6 +382,7 @@ SOURCES += \
     src/Notes/MarkdownToHtml.cpp \
     src/Notes/MoveTo.cpp \
     src/Notes/NewNoteBook.cpp \
+    src/Notes/NoteListModel.cpp \
     src/Notes/Notes.cpp \
     src/Notes/NotesList.cpp \
     src/Notes/PrintPDF.cpp \
@@ -616,6 +617,7 @@ HEADERS += \
     src/Notes/ColorDialog.h \
     src/Notes/MoveTo.h \
     src/Notes/NewNoteBook.h \
+    src/Notes/NoteListModel.h \
     src/Notes/Notes.h \
     src/Notes/NotesList.h \
     src/Notes/PrintPDF.h \

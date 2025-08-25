@@ -580,6 +580,8 @@ void MainHelper::initQW() {
   mui->qwNoteList->rootContext()->setContextProperty("m_NotesList",
                                                      mw_one->m_NotesList);
   mui->qwNoteList->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwNoteList->rootContext()->setContextProperty(
+      "noteModel", mw_one->m_NotesList->noteModel);
   mui->qwNoteList->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/notelist.qml")));
 

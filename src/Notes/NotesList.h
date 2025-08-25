@@ -25,6 +25,7 @@
 #include "src/Comm/TextEditToolbar.h"
 #include "src/Notes/MoveTo.h"
 #include "src/Notes/NewNoteBook.h"
+#include "src/Notes/NoteListModel.h"
 #include "src/Notes/note_graph.h"
 #include "ui_MoveTo.h"
 
@@ -63,6 +64,8 @@ class NotesList : public QDialog {
   QString noteTitle;
 
   void saveNotesListIndex();
+
+  NoteListModel *noteModel;
 
   DatabaseManager m_dbManager;
 
