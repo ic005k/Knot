@@ -2427,50 +2427,112 @@ void NotesList::initQmlTree() {
   }
 }
 
+void NotesList::readyNotesData(QTreeWidgetItem *topItem) {
+  // 主线程预收集UI数据（按值捕获到后台线程，安全）
+  QVector<QPair<QString, QString>> uiDataList;
+  QVector<QTreeWidgetItem *> childItems;
+  int child_count = topItem->childCount();
+  for (int i = 0; i < child_count; ++i) {
+    QTreeWidgetItem *child = topItem->child(i);
+    uiDataList.append({child->text(0), child->text(1)});
+    childItems.append(child);
+  }
+  QString iniDirCopy = iniDir;  // 拷贝一份，避免捕获this的成员变量（更安全）
+
+  // 定义后台线程返回的结果类型
+  struct RawResult {
+    QString text0;
+    QString text1;
+    QString text3;
+  };
+
+  // 关键：后台线程通过return返回结果，不引用捕获局部变量
+  QFuture<QVector<RawResult>> future = QtConcurrent::run([=]() {
+    qDebug() << "后台处理开始，共" << child_count << "项";
+    QVector<RawResult> rawResults;  // 后台线程内部创建，生命周期由线程管理
+    rawResults.reserve(child_count);
+
+    for (int i = 0; i < child_count; ++i) {
+      const auto &uiData = uiDataList[i];
+      QString text0 = uiData.first;
+      QString text3 = uiData.second;
+
+      if (!text3.isEmpty()) {
+        QString file =
+            iniDirCopy + text3;  // 使用拷贝的iniDir，避免访问this成员
+        QString item1 = m_Method->getLastModified(file);
+        QString strSize = m_Method->getFileSize(QFile(file).size(), 2);
+
+        rawResults.push_back({text0, item1 + " " + strSize, text3});
+      }
+    }
+    qDebug() << "后台处理完成，有效数据" << rawResults.size() << "项";
+    return rawResults;  // 返回结果，由QFuture管理
+  });
+
+  // 主线程接收后台返回的结果
+  QFutureWatcher<QVector<RawResult>> *watcher =
+      new QFutureWatcher<QVector<RawResult>>(this);
+  connect(watcher, &QFutureWatcher<QVector<RawResult>>::finished, this, [=]() {
+    qDebug() << "主线程开始处理结果";
+
+    // 获取后台线程返回的结果（安全，由QFuture保证生命周期）
+    QVector<RawResult> rawResults = watcher->result();
+
+    // 构造NoteItem并更新模型
+    QList<NoteItem> batchItems;
+    batchItems.reserve(rawResults.size());
+
+    // 迭代器循环
+    for (auto it = rawResults.constBegin(); it != rawResults.constEnd(); ++it) {
+      const RawResult &result = *it;
+      NoteItem item;
+      item.text0 = result.text0;
+      item.text1 = result.text1;
+      item.text2 = "";
+      item.text3 = result.text3;
+      item.myh = 0;
+      batchItems.append(item);
+    }
+
+    noteModel->addBatchItems(batchItems);
+    pNoteItems.append(childItems.begin(), childItems.end());
+
+    // 其他UI操作
+    int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
+    int noteslistIndex = getSavedNotesListIndex(index);
+    setNotesListCurrentIndex(noteslistIndex);
+    setNoteLabel();
+    clickNoteList();
+    if (isMouseClick) {
+      setNotesListCurrentIndex(-1);
+      isMouseClick = false;
+    }
+
+    isReadyNoteDataEnd = true;
+
+    watcher->deleteLater();
+
+    qDebug() << "主线程处理结果完成！";
+  });
+  watcher->setFuture(future);
+}
+
 void NotesList::clickNoteBook() {
   pNoteItems.clear();
-  bool isStatus;
+  isActColorFlagStatus = true;
 
   m_Method->clearAllBakList(mui->qwNoteList);
   int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
   QString text1 = m_Method->getText1(mui->qwNoteBook, index);
   QString text2 = m_Method->getText2(mui->qwNoteBook, index);
   if (text2.isEmpty()) {
-    isStatus = true;
     int index_top = text1.toInt();
     QTreeWidgetItem *topItem = tw->topLevelItem(index_top);
-    int child_count = topItem->childCount();
-    QList<NoteItem> batchItems;
-    batchItems.reserve(
-        child_count);  // 预分配内存，避免循环中频繁扩容（优化性能）
-    for (int i = 0; i < child_count; i++) {
-      QString text0 = topItem->child(i)->text(0);
-      QString text3 = topItem->child(i)->text(1);
-      if (!text3.isEmpty()) {
-        QString file = iniDir + text3;
-        QString item1 = m_Method->getLastModified(file);
-        QString strSize = m_Method->getFileSize(QFile(file).size(), 2);
-        // m_Method->addItemToQW(mui->qwNoteList, text0, item1 + " " + strSize,
-        // "",
-        //                       text3, 0);
 
-        // 收集当前数据到NoteItem，加入批量列表（仅C++内存操作，无跨语言通信）
-        NoteItem newItem;
-        newItem.text0 = text0;                  // 对应QML的text0
-        newItem.text1 = item1 + " " + strSize;  // 对应QML的text1
-        newItem.text2 = "";                     // 对应QML的text2（空值）
-        newItem.text3 = text3;                  // 对应QML的text3
-        newItem.myh = 0;                        // 对应QML的myh
-        // 其他字段（time/dototext/type）若无需设置，默认初始化即可
+    readyNotesData(topItem);
 
-        batchItems.append(newItem);
-
-        pNoteItems.append(topItem->child(i));
-      }
-    }
-    noteModel->addBatchItems(batchItems);
   } else {
-    isStatus = false;
     QStringList list = text1.split("===");
     int indexMain, indexChild;
     if (list.count() == 2) {
@@ -2492,15 +2554,16 @@ void NotesList::clickNoteBook() {
         pNoteItems.append(childItem->child(n));
       }
     }
+
+    int noteslistIndex = getSavedNotesListIndex(index);
+    setNotesListCurrentIndex(noteslistIndex);
+    setNoteLabel();
+    clickNoteList();
+    if (isMouseClick) {
+      setNotesListCurrentIndex(-1);
+      isMouseClick = false;
+    }
   }
-
-  int noteslistIndex = getSavedNotesListIndex(index);
-  setNotesListCurrentIndex(noteslistIndex);
-  setNoteLabel();
-  clickNoteList();
-  setNotesListCurrentIndex(-1);
-
-  isActColorFlagStatus = isStatus;
 }
 
 void NotesList::clickNoteList() {
@@ -2544,6 +2607,11 @@ void NotesList::clickNoteList() {
     }
   }
   mIndexList.append(s_tr);
+}
+
+void NotesList::mouseClickNoteBook() {
+  isMouseClick = true;
+  clickNoteBook();
 }
 
 void NotesList::saveNotesListIndex() {
@@ -2629,6 +2697,7 @@ void NotesList::genRecentOpenMenu() {
 #endif
 
         saveCurrentNoteInfo();
+
         setCurrentItemFromMDFile(currentMDFile);
       });
     }
@@ -2673,7 +2742,12 @@ void NotesList::setCurrentItemFromMDFile(QString mdFile) {
   if (indexNoteBook < 0 || indexNoteBook >= countNoteBook) return;
 
   setNoteBookCurrentIndex(indexNoteBook);
+
+  isReadyNoteDataEnd = false;
   clickNoteBook();
+
+  while (!isReadyNoteDataEnd)
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
   countNotes = m_Method->getCountFromQW(mui->qwNoteList);
   if (indexNote < 0 || indexNote >= countNotes) return;

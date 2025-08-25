@@ -1289,7 +1289,6 @@ void Notes::openEditUI() {
 
   mw_one->m_NotesList->refreshRecentOpen(mw_one->m_NotesList->noteTitle);
   mw_one->m_NotesList->saveRecentOpen();
-  mw_one->m_NotesList->setCurrentItemFromMDFile(currentMDFile);
 
   if (isAndroid) {
     m_Method->setMDFile(currentMDFile);

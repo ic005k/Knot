@@ -180,6 +180,8 @@ class NotesList : public QDialog {
   void closeEvent(QCloseEvent *event) override;
 
  public slots:
+  void mouseClickNoteBook();
+
   void on_actionCopyNoteLink();
 
   void clickNoteList();
@@ -240,7 +242,12 @@ class NotesList : public QDialog {
   void onNoteNodeDoubleClicked(const QString &filePath);
 
  private:
+  bool isReadyNoteDataEnd;
+
+  bool isMouseClick = false;
+
   bool isActColorFlagStatus = false;
+
   QStringList validMDFiles;
 
   QStringList mIndexList;
@@ -293,6 +300,7 @@ class NotesList : public QDialog {
   void saveNotesListToFile();
 
   void initNoteGraphView();
+  void readyNotesData(QTreeWidgetItem *topItem);
 };
 
 class SearchMapper {

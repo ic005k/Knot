@@ -405,7 +405,7 @@ Rectangle {
 
                     view.currentIndex = index //实现item切换
 
-                    m_NotesList.clickNoteBook()
+                    m_NotesList.mouseClickNoteBook()
                 }
 
                 onPressAndHold: {
