@@ -943,24 +943,17 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         }
     }
 
-    public void writeTextFile(String content, String filename) {
-        try {
-            File file = new File(filename);
-
-            if (file.exists()) {
-                file.delete();
-            }
-            file.createNewFile();
-            // 获取该文件的缓冲输出流
-            BufferedWriter bufferedWriter = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
+    public boolean writeTextFile(String content, String filename) {
+        try (BufferedWriter bufferedWriter = new BufferedWriter(
+                new OutputStreamWriter(new FileOutputStream(filename), "UTF-8"))) {
             // 写入信息
             bufferedWriter.write(content);
             bufferedWriter.flush();// 清空缓冲区
-            bufferedWriter.close();// 关闭输出流
         } catch (Exception ex) {
             ex.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     // 生成文件
@@ -1028,11 +1021,11 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
 
                 try {
                     // 1. 先写入临时文件
-                    writeTextFile(mContent, tempFilename);
+                    boolean isOK = writeTextFile(mContent, tempFilename);
 
                     // 2. 验证临时文件写入成功（检查文件存在且内容不为空）
                     File tempFile = new File(tempFilename);
-                    if (tempFile.exists() && tempFile.length() > 0) {
+                    if (isOK && tempFile.exists() && tempFile.length() > 0) {
                         // 3. 原子重命名（Android 中 renameTo 对于同一分区是原子操作）
                         File targetFile = new File(filename);
                         // 先删除目标文件（避免重命名失败）
