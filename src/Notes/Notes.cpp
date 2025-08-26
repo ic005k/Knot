@@ -1189,6 +1189,22 @@ void Notes::startBackgroundTaskUpdateNoteIndex(QString mdFile) {
   watcher->setFuture(future);
 }
 
+void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
+  QStringList fullPathList = mdFileList;
+
+  QFuture<void> future = QtConcurrent::run([=]() {
+    mw_one->m_NotesList->m_dbManager.updateFileIndexes(fullPathList);
+  });
+
+  // 可选：使用 QFutureWatcher 监控进度
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+    qDebug() << "Update note index completed:" << fullPathList.count();
+    watcher->deleteLater();
+  });
+  watcher->setFuture(future);
+}
+
 void Notes::openNotesUI() {
   init_all_notes();
 

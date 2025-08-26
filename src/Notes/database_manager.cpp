@@ -246,6 +246,35 @@ void DatabaseManager::updateFileIndex(const QString &filePath) {
       1);
 }
 
+// 添加批量处理方法，一次性处理多个文件
+void DatabaseManager::updateFileIndexes(const QStringList &filePaths) {
+  if (filePaths.isEmpty()) return;
+
+  // 先收集所有存在的文件路径（过滤无效文件）
+  QStringList validFilePaths;
+  for (const QString &filePath : filePaths) {
+    if (QFileInfo(filePath).exists()) {
+      validFilePaths << filePath;
+    }
+  }
+
+  if (validFilePaths.isEmpty()) return;
+
+  // 批量执行事务，处理所有有效文件
+  executeTransactionWithRetry(
+      [this, validFilePaths]() -> bool {
+        // 在一个事务中处理所有文件，减少数据库操作开销
+        for (const QString &filePath : validFilePaths) {
+          // 先删除旧索引
+          deleteFileIndex(filePath);
+          // 再处理新索引
+          processFile(filePath);
+        }
+        return true;
+      },
+      1);
+}
+
 void DatabaseManager::deleteFileIndex(const QString &filePath) {
   QFileInfo fi(filePath);
   if (!fi.exists()) return;

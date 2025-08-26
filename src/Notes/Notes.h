@@ -180,6 +180,8 @@ class Notes : public QDialog {
   void startBackgroundTaskDelAndClear();
   void startBackgroundTaskUpdateNoteIndex(QString mdFile);
 
+  void startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList);
+
  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;

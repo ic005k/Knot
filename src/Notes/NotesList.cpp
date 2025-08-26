@@ -624,10 +624,7 @@ bool NotesList::on_btnImport_clicked() {
             qDebug() << "Import note completed:" +
                             QString::number(MDFileList.count());
 
-            for (int i = 0; i < MDFileList.count(); i++) {
-              QString mdFile = MDFileList.at(i);
-              mw_one->m_Notes->startBackgroundTaskUpdateNoteIndex(mdFile);
-            }
+            mw_one->m_Notes->startBackgroundTaskUpdateNoteIndexes(MDFileList);
 
             isImportFilesEnd = true;
             watcher->deleteLater();

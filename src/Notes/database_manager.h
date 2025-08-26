@@ -36,6 +36,7 @@ class DatabaseManager : public QObject {
   void validateIndex();                           // 索引完整性检查
 
   void cleanMissingFileRecords(const QString &directory);
+  void updateFileIndexes(const QStringList &filePaths);
   signals:
   void errorOccurred(const QString &message);
   void indexingProgress(int processed, int total);
