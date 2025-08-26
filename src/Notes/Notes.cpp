@@ -183,7 +183,7 @@ void Notes::saveMainNotes() {
       if (QFile::rename(tempFile, currentMDFile)) {
         qDebug() << "Save Note: " << currentMDFile;
         updateMDFileToSyncLists(currentMDFile);
-        startBackgroundTaskUpdateNoteIndex();
+        startBackgroundTaskUpdateNoteIndex(currentMDFile);
       } else {
         qWarning() << "重命名失败，清理临时文件";
         QFile::remove(tempFile);
@@ -1127,7 +1127,7 @@ void Notes::javaNoteToQMLNote() {
 
   appendToSyncList(zipMD);
 
-  startBackgroundTaskUpdateNoteIndex();
+  startBackgroundTaskUpdateNoteIndex(currentMDFile);
 }
 
 QString Notes::formatMDText(QString text) {
@@ -1174,8 +1174,8 @@ void Notes::startBackgroundTaskDelAndClear() {
   watcher->setFuture(future);
 }
 
-void Notes::startBackgroundTaskUpdateNoteIndex() {
-  QString fullPath = currentMDFile;
+void Notes::startBackgroundTaskUpdateNoteIndex(QString mdFile) {
+  QString fullPath = mdFile;
 
   QFuture<void> future = QtConcurrent::run(
       [=]() { mw_one->m_NotesList->m_dbManager.updateFileIndex(fullPath); });

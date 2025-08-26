@@ -569,54 +569,72 @@ bool NotesList::on_btnImport_clicked() {
 
 #endif
 
-    if (!isMD && !isAndroid) {
-      m_Method->m_widget = new QWidget(this);
-      ShowMessage *m_ShowMsg = new ShowMessage(this);
-      m_ShowMsg->showMsg("Knot",
-                         tr("Invalid Markdown file.") + "\n\n" + fileName, 1);
+    if (!isMD) {
+      qDebug() << tr("Invalid Markdown file.") + "\n\n" + fileName;
 
     } else {
       MDFileList.append(fileName);
     }
   }
 
-  for (int i = 0; i < MDFileList.count(); i++) {
-    QString fileName = MDFileList.at(i);
+  mw_one->showProgress();
+  isImportFilesEnd = false;
 
-    if (QFile(fileName).exists()) {
-      QTreeWidgetItem *item1;
+  QFuture<void> future = QtConcurrent::run([this, MDFileList, item]() {
+    for (int i = 0; i < MDFileList.count(); i++) {
+      QString fileName = MDFileList.at(i);
 
-      QString strNoteText = loadText(fileName);
+      if (QFile(fileName).exists()) {
+        QTreeWidgetItem *item1;
 
-      QFileInfo fi(fileName);
-      QString name = fi.baseName();
+        QString strNoteText = loadText(fileName);
 
-      item1 = new QTreeWidgetItem(item);
-      item1->setText(0, name);
+        QFileInfo fi(fileName);
+        QString name = fi.baseName();
 
-      tw->setCurrentItem(item1);
+        item1 = new QTreeWidgetItem(item);
+        item1->setText(0, name);
 
-      QString a = "memo/" + mw_one->m_Notes->getDateTimeStr() + "_" +
-                  QString::number(i) + ".md";
-      currentMDFile = iniDir + a;
-      QTextEdit *edit = new QTextEdit();
-      edit->setAcceptRichText(false);
-      edit->setPlainText(strNoteText);
-      TextEditToFile(edit, currentMDFile);
+        tw->setCurrentItem(item1);
 
-      item1->setText(1, a);
+        QString a = "memo/" + mw_one->m_Notes->getDateTimeStr() + "_" +
+                    QString::number(i) + ".md";
+        QString mdFile = iniDir + a;
+        QTextEdit *edit = new QTextEdit();
+        edit->setAcceptRichText(false);
+        edit->setPlainText(strNoteText);
+        TextEditToFile(edit, mdFile);
 
-      qDebug() << fileName << a;
+        item1->setText(1, a);
 
-      mw_one->m_Notes->updateMDFileToSyncLists(currentMDFile);
+        qDebug() << fileName << a;
 
-      mw_one->m_Notes->startBackgroundTaskUpdateNoteIndex();
-    } else {
-      return false;
+        mw_one->m_Notes->updateMDFileToSyncLists(mdFile);
+
+      } else {
+        isImportFilesEnd = true;
+      }
     }
-  }
+  });
 
-  return true;
+  // 可选：使用 QFutureWatcher 监控进度
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this,
+          [this, watcher, MDFileList]() {
+            qDebug() << "Import note completed:" +
+                            QString::number(MDFileList.count());
+
+            for (int i = 0; i < MDFileList.count(); i++) {
+              QString mdFile = MDFileList.at(i);
+              mw_one->m_Notes->startBackgroundTaskUpdateNoteIndex(mdFile);
+            }
+
+            isImportFilesEnd = true;
+            watcher->deleteLater();
+          });
+  watcher->setFuture(future);
+
+  return isImportFilesEnd;
 }
 
 void NotesList::on_btnExport_clicked() {
@@ -2122,14 +2140,17 @@ void NotesList::on_actionImport_Note_triggered() {
   if (indexBook < 0) return;
 
   setNoteBookCurrentItem();
-  bool isOk = on_btnImport_clicked();
+  on_btnImport_clicked();
 
-  if (isOk) {
-    clickNoteBook();
-    setNotesListCurrentIndex(getNotesListCount() - 1);
-    clickNoteList();
-    saveNotesList();
-  }
+  while (!isImportFilesEnd)
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+
+  mw_one->closeProgress();
+
+  clickNoteBook();
+  setNotesListCurrentIndex(getNotesListCount() - 1);
+  clickNoteList();
+  saveNotesList();
 
   updateAllNoteIndexManager();
 }
