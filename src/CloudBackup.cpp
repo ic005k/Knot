@@ -439,42 +439,55 @@ QString CloudBackup::aesDecrypt(QString cipherText, QByteArray key,
   return QString::fromUtf8(decrypted);
 }
 
-void CloudBackup::uploadFilesToWebDAV_test(QStringList files) {
+void CloudBackup::uploadFilesToWebDAV(QStringList files) {
   QNetworkAccessManager *manager = new QNetworkAccessManager();
   QString url = getWebDAVArgument();
+
+  // 使用QAtomicInt确保线程安全
+  QAtomicInt *activeReplyCount = new QAtomicInt(files.size());
+
+  // 处理空文件列表的情况
+  if (files.isEmpty()) {
+    manager->deleteLater();
+    delete activeReplyCount;
+    return;
+  }
 
   foreach (QString m_file, files) {
     QString localFile = m_file;
     QString remoteFile = m_file;
     remoteFile = remoteFile.replace(privateDir, "");
-    qDebug() << "remoteFile=" << remoteFile;
-    QString remoteUrl = url + remoteFile;
 
-    QString remotePath = "KnotData/";
-
-    qDebug() << "remotePath=" << remotePath;
+    // 规范URL拼接
+    QUrl baseUrl(url);
+    QUrl fullUrl = baseUrl.resolved(remoteFile);
 
     QFile *file = new QFile(localFile);
     if (!file->open(QIODevice::ReadOnly)) {
       qDebug() << "Failed to open file:" << localFile;
       delete file;
+
+      // 安全处理计数器
+      if (activeReplyCount->fetchAndSubRelaxed(1) == 1) {
+        manager->deleteLater();
+        delete activeReplyCount;
+      }
       continue;
     }
 
     QNetworkRequest request;
-    request.setUrl(QUrl(remoteUrl));
-
-    // QString auth = QString("%1:%2").arg(USERNAME).arg(APP_PASSWORD);
-    //  使用多参数arg()版本（更高效）
+    request.setUrl(fullUrl);
     QString auth = QString("%1:%2").arg(USERNAME, APP_PASSWORD);
-
     request.setRawHeader("Authorization",
                          "Basic " + auth.toLocal8Bit().toBase64());
 
     QNetworkReply *reply = manager->put(request, file);
-    file->setParent(reply);  // 确保文件在请求完成后被释放
+    file->setParent(reply);  // 文件随reply释放
 
-    // 可选：跟踪上传进度
+    // 弱引用this指针，避免悬垂指针
+    QPointer<CloudBackup> thisPtr(this);
+
+    // 上传进度跟踪
     QObject::connect(reply, &QNetworkReply::uploadProgress,
                      [=](qint64 bytesSent, qint64 bytesTotal) {
                        qDebug() << "Uploading" << m_file << bytesSent << "/"
@@ -483,6 +496,11 @@ void CloudBackup::uploadFilesToWebDAV_test(QStringList files) {
 
     // 处理完成/错误
     QObject::connect(reply, &QNetworkReply::finished, this, [=]() {
+      if (!thisPtr) {  // 检查对象是否已销毁
+        reply->deleteLater();
+        return;
+      }
+
       if (reply->error() == QNetworkReply::NoError) {
         qDebug() << "Upload succeeded:" << m_file;
         mw_one->m_Notes->notes_sync_files.removeOne(m_file);
@@ -490,66 +508,11 @@ void CloudBackup::uploadFilesToWebDAV_test(QStringList files) {
         qDebug() << "Error uploading" << m_file << ":" << reply->errorString();
       }
       reply->deleteLater();
-    });
-  }
-}
 
-void CloudBackup::uploadFilesToWebDAV(QStringList files) {
-  QNetworkAccessManager *manager = new QNetworkAccessManager();
-  QString url = getWebDAVArgument();
-
-  // 记录活跃的reply数量（用于判断是否所有任务都已完成）
-  int *activeReplyCount = new int(files.size());  // 初始值为文件总数
-
-  foreach (QString m_file, files) {
-    QString localFile = m_file;
-    QString remoteFile = m_file;
-    remoteFile = remoteFile.replace(privateDir, "");
-    QString remoteUrl = url + remoteFile;
-    QString remotePath = "KnotData/";
-
-    QFile *file = new QFile(localFile);
-    if (!file->open(QIODevice::ReadOnly)) {
-      qDebug() << "Failed to open file:" << localFile;
-      delete file;
-      // 减少计数器（当前文件上传失败，视为完成）
-      if (--(*activeReplyCount) == 0) {
+      // 原子操作减少计数器并检查是否为最后一个任务
+      if (activeReplyCount->fetchAndSubRelaxed(1) == 1) {
         manager->deleteLater();
         delete activeReplyCount;
-      }
-      continue;
-    }
-
-    QNetworkRequest request;
-    request.setUrl(QUrl(remoteUrl));
-    QString auth = QString("%1:%2").arg(USERNAME, APP_PASSWORD);
-    request.setRawHeader("Authorization",
-                         "Basic " + auth.toLocal8Bit().toBase64());
-
-    QNetworkReply *reply = manager->put(request, file);
-    file->setParent(reply);  // 文件随reply释放
-
-    // 上传进度跟踪（可选）
-    QObject::connect(reply, &QNetworkReply::uploadProgress,
-                     [=](qint64 bytesSent, qint64 bytesTotal) {
-                       qDebug() << "Uploading" << m_file << bytesSent << "/"
-                                << bytesTotal;
-                     });
-
-    // 处理完成/错误（核心：管理计数器和manager释放）
-    QObject::connect(reply, &QNetworkReply::finished, this, [=]() {
-      if (reply->error() == QNetworkReply::NoError) {
-        qDebug() << "Upload succeeded:" << m_file;
-        mw_one->m_Notes->notes_sync_files.removeOne(m_file);
-      } else {
-        qDebug() << "Error uploading" << m_file << ":" << reply->errorString();
-      }
-      reply->deleteLater();  // 释放reply
-
-      // 计数器减1，判断是否所有任务都已完成
-      if (--(*activeReplyCount) == 0) {
-        manager->deleteLater();   // 所有任务完成，释放manager
-        delete activeReplyCount;  // 释放计数器
       }
     });
   }

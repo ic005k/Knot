@@ -62,7 +62,6 @@ class CloudBackup : public QDialog {
   QString aesDecrypt(QString cipherText, QByteArray key, QByteArray iv);
 
   QString getWebDAVArgument();
-  void uploadFilesToWebDAV_test(QStringList files);
 
   void getRemoteFileList(QString url);
   void createRemoteWebDAVDir();
@@ -71,7 +70,7 @@ class CloudBackup : public QDialog {
   void backExit();
   void init_CloudBacup();
   void webDAVRestoreData();
-  signals:
+ signals:
 
  protected:
   bool eventFilter(QObject *obj, QEvent *evn) override;

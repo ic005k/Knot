@@ -569,7 +569,7 @@ bool NotesList::on_btnImport_clicked() {
 
 #endif
 
-    if (!isMD) {
+    if (!isMD && !isAndroid) {
       m_Method->m_widget = new QWidget(this);
       ShowMessage *m_ShowMsg = new ShowMessage(this);
       m_ShowMsg->showMsg("Knot",
