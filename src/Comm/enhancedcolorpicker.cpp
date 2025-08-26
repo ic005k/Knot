@@ -11,8 +11,10 @@
 #include <QValidator>
 #include <QtMath>
 
+#include "src/Comm/Method.h"
 #include "ui_MainWindow.h"
 
+extern Method *m_Method;
 extern Ui::MainWindow *mui;
 extern bool isAndroid;
 
@@ -320,6 +322,11 @@ EnhancedColorPicker::EnhancedColorPicker(QWidget *parent,
 
   QPushButton *okBtn = new QPushButton(tr("Ok"));
   QPushButton *cancelBtn = new QPushButton(tr("Cancel"));
+
+  m_Method->setPushButtonQss(okBtn, 4, 8, "#165DFF", "#FFFFFF", "#4080FF",
+                             "#FFFFFF", "#0E42D2", "#FFFFFF");
+  m_Method->setPushButtonQss(cancelBtn, 4, 8, "#165DFF", "#FFFFFF", "#4080FF",
+                             "#FFFFFF", "#0E42D2", "#FFFFFF");
 
   buttonLayout->addWidget(okBtn);
   buttonLayout->addWidget(cancelBtn);

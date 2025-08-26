@@ -2574,8 +2574,6 @@ void NotesList::clickNoteList() {
     return;
   }
 
-  isActColorFlagStatus = false;
-
   QString strMD = m_Method->getText3(mui->qwNoteList, index);
   currentMDFile = iniDir + strMD;
 

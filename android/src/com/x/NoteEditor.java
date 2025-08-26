@@ -172,6 +172,8 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
     private AudioManager mAudioManager;
     private InternalConfigure internalConfigure;
 
+    private boolean isSaved = false;
+
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
     private Button btn_cancel;
@@ -740,7 +742,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         if (isTextChanged) {
             isTextChanged = false;
 
-            if (MyActivity.isEdit) {
+            if (MyActivity.isEdit && isSaved) {
                 MyActivity.isEdit = false;
                 if (WebViewActivity.getInstance() != null) {
                     WebViewActivity.getInstance().finish();
@@ -892,26 +894,6 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
     public void onActivityDestroyed(Activity activity) {
 
     }
-
-    /*
-     * public String readTextFile(String filename) {
-     * try {
-     * File file = new File(filename);
-     * StringBuffer strBuf = new StringBuffer();
-     * BufferedReader bufferedReader = new BufferedReader(
-     * new InputStreamReader(new FileInputStream(file), "UTF-8"));
-     * int tempchar;
-     * while ((tempchar = bufferedReader.read()) != -1) {
-     * strBuf.append((char) tempchar);
-     * }
-     * bufferedReader.close();
-     * return strBuf.toString();
-     * } catch (Exception ex) {
-     * ex.printStackTrace();
-     * }
-     * return "";
-     * }
-     */
 
     public String readTextFile(String filename) {
         BufferedReader reader = null;
@@ -1441,6 +1423,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
                     public void onClick(DialogInterface dialog, int which) {
                         // ...To-do
                         saveNote();
+                        isSaved = true;
 
                     }
                 });
@@ -1450,7 +1433,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // ...To-do
-
+                        isSaved = false;
                         finish();
                     }
                 });
