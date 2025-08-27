@@ -175,7 +175,8 @@ class NotesList : public QDialog {
   void updateAllNoteIndexManager();
 
   void moveToFirst();
-  protected:
+
+ protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
   void closeEvent(QCloseEvent *event) override;
@@ -225,7 +226,7 @@ class NotesList : public QDialog {
 
   void on_actionRelationshipGraph();
   void qmlOpenEdit();
-  private slots:
+ private slots:
 
   void on_editFind_textChanged(const QString &arg1);
 
@@ -242,6 +243,8 @@ class NotesList : public QDialog {
   void on_actionStatistics();
 
   void onNoteNodeDoubleClicked(const QString &filePath);
+
+  void on_toolButton_clicked();
 
  private:
   bool isImportFilesEnd;

@@ -45,16 +45,20 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
   this->layout()->setContentsMargins(2, 2, 2, 2);
   ui->frame1->hide();
 
-  tw->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
-  QScroller::grabGesture(tw, QScroller::LeftMouseButtonGesture);
-  m_Method->setSCrollPro(tw);
+  if (isAndroid) {
+    tw->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
+    QScroller::grabGesture(tw, QScroller::LeftMouseButtonGesture);
+    m_Method->setSCrollPro(tw);
 
-  twrb->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
-  QScroller::grabGesture(twrb, QScroller::LeftMouseButtonGesture);
-  m_Method->setSCrollPro(twrb);
+    twrb->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
+    QScroller::grabGesture(twrb, QScroller::LeftMouseButtonGesture);
+    m_Method->setSCrollPro(twrb);
+  }
 
-  ui->treeWidget->headerItem()->setText(0, tr("Notebook"));
-  ui->treeWidget->setColumnHidden(1, true);
+  tw->headerItem()->setText(0, tr("Notebook"));
+  tw->setColumnHidden(1, false);
+  tw->setColumnWidth(0, 300);
+  tw->setColumnWidth(1, 300);
   twrb->header()->hide();
   twrb->setColumnHidden(1, true);
   twrb->setColumnWidth(0, 180);
@@ -72,7 +76,7 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
   ui->btnNewNote->hide();
   ui->btnNewNoteBook->hide();
   ui->editBook->hide();
-  ui->editNote->hide();
+
   ui->btnImport->hide();
   ui->btnExport->hide();
   ui->editName->hide();
@@ -182,7 +186,7 @@ void NotesList::on_btnNewNote_clicked() {
   QTreeWidgetItem *parentitem = ui->treeWidget->currentItem();
 
   QTreeWidgetItem *item1 = new QTreeWidgetItem(parentitem);
-  item1->setText(0, ui->editNote->text().trimmed());
+  item1->setText(0, "");
   item1->setText(1, noteFile);
   item1->setIcon(0, QIcon(":/res/n.png"));
 
@@ -793,6 +797,9 @@ void NotesList::saveCurrentNoteInfo() {
 }
 
 void NotesList::saveNotesList() {
+  saveNotesListToFile();
+  return;
+
   QFuture<void> future = QtConcurrent::run([=]() { saveNotesListToFile(); });
 
   // 可选：使用 QFutureWatcher 监控进度
@@ -800,7 +807,7 @@ void NotesList::saveNotesList() {
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     mw_one->strLatestModify = tr("Modi Notes List");
     mw_one->m_Notes->isSaveNotesConfig = true;
-    qDebug() << "NotesList save completed";
+    qDebug() << "NotesList save completed.";
 
     watcher->deleteLater();
   });
@@ -831,34 +838,12 @@ void NotesList::saveNotesListToFile() {
       QString strChild1 = childItem->text(1);
 
       if (!strChild1.isEmpty()) {
-        iniNotes.setValue(
-            "/MainNotes/childItem0" + QString::number(i) + QString::number(j),
-            strChild0);
-        iniNotes.setValue(
-            "/MainNotes/childItem1" + QString::number(i) + QString::number(j),
-            strChild1);
-      } else {
-        int count = childItem->childCount();
-        iniNotes.setValue(
-            "/MainNotes/childCount" + QString::number(i) + QString::number(j),
-            count);
-        iniNotes.setValue(
-            "/MainNotes/childItem0" + QString::number(i) + QString::number(j),
-            strChild0);
-        iniNotes.setValue(
-            "/MainNotes/childItem1" + QString::number(i) + QString::number(j),
-            "");
-        for (int n = 0; n < count; n++) {
-          QString strChild00 = childItem->child(n)->text(0);
-          QString strChild11 = childItem->child(n)->text(1);
-
-          iniNotes.setValue("/MainNotes/childItem0" + QString::number(i) +
-                                QString::number(j) + QString::number(n),
-                            strChild00);
-          iniNotes.setValue("/MainNotes/childItem1" + QString::number(i) +
-                                QString::number(j) + QString::number(n),
-                            strChild11);
-        }
+        iniNotes.setValue("/MainNotes/childItem0_" + QString::number(i) + "_" +
+                              QString::number(j),
+                          strChild0);
+        iniNotes.setValue("/MainNotes/childItem1_" + QString::number(i) + "_" +
+                              QString::number(j),
+                          strChild1);
       }
     }
   }
@@ -872,6 +857,11 @@ void NotesList::saveNotesListToFile() {
       qWarning() << "重命名失败:" << tempFile << "->" << endFile;
       QFile::remove(tempFile);  // 清理临时文件
       return;
+    } else {
+      qDebug() << "笔记大纲保存成功！";
+      for (int i = 0; i < tw->topLevelItem(1)->childCount(); i++) {
+        qDebug() << tw->topLevelItem(1)->child(i)->text(0);
+      }
     }
   }
 
@@ -916,8 +906,6 @@ void NotesList::initNotesList() {
   int topCount = iniNotes->value("/MainNotes/topItemCount").toInt();
   int nNoteBook = topCount;
 
-  int notebook_index11 = -1;
-
   int notesTotal = 0;
   QString str0, str1;
   for (int i = 0; i < topCount; i++) {
@@ -944,11 +932,11 @@ void NotesList::initNotesList() {
 
     for (int j = 0; j < childCount; j++) {
       str0 = iniNotes
-                 ->value("/MainNotes/childItem0" + QString::number(i) +
+                 ->value("/MainNotes/childItem0_" + QString::number(i) + "_" +
                          QString::number(j))
                  .toString();
       str1 = iniNotes
-                 ->value("/MainNotes/childItem1" + QString::number(i) +
+                 ->value("/MainNotes/childItem1_" + QString::number(i) + "_" +
                          QString::number(j))
                  .toString();
 
@@ -961,46 +949,6 @@ void NotesList::initNotesList() {
         QString md = iniDir + str1;
         mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(md, str0);
         updateNoteIndexManager(md, i, j);
-
-      } else {
-        QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
-        childItem->setText(0, str0);
-        childItem->setText(1, "");
-        childItem->setForeground(0, Qt::red);
-        childItem->setFont(0, font);
-        childItem->setIcon(0, QIcon(":/res/nb.png"));
-
-        nNoteBook++;
-        notesTotal--;
-
-        int count = iniNotes
-                        ->value("/MainNotes/childCount" + QString::number(i) +
-                                QString::number(j))
-                        .toInt();
-
-        notebook_index11 = i + 1;
-
-        for (int n = 0; n < count; n++) {
-          QString str00, str11;
-          str00 = iniNotes
-                      ->value("/MainNotes/childItem0" + QString::number(i) +
-                              QString::number(j) + QString::number(n))
-                      .toString();
-          str11 = iniNotes
-                      ->value("/MainNotes/childItem1" + QString::number(i) +
-                              QString::number(j) + QString::number(n))
-                      .toString();
-          QTreeWidgetItem *item = new QTreeWidgetItem(childItem);
-          item->setText(0, str00);
-          item->setText(1, str11);
-          item->setIcon(0, QIcon(":/res/n.png"));
-
-          QString md = iniDir + str11;
-          mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(md, str00);
-          updateNoteIndexManager(md, notebook_index11, n);
-
-          notesTotal++;
-        }
       }
     }
     tw->addTopLevelItem(topItem);
@@ -2044,16 +1992,13 @@ void NotesList::on_actionAdd_Note_triggered() {
     return;
   }
 
-  QString text = "";
-
-  tw->setCurrentItem(pNoteBookItems.at(notebookIndex));
-  ui->editNote->setText(text);
+  tw->setCurrentItem(tw->topLevelItem(notebookIndex));
 
   on_btnNewNote_clicked();
 
   QTreeWidgetItem *childItem = tw->currentItem();
   QString text3 = childItem->text(1);
-  m_Method->addItemToQW(mui->qwNoteList, text, "", "", text3, 0);
+  m_Method->addItemToQW(mui->qwNoteList, "", "", "", text3, 0);
 
   int count = getNotesListCount();
   setNotesListCurrentIndex(count - 1);
@@ -2583,12 +2528,15 @@ void NotesList::clickNoteBook() {
 }
 
 void NotesList::clickNoteList() {
+  int indexTop = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
   int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
 
   if (index < 0) {
     currentMDFile = "";
     return;
   }
+
+  if (indexTop < 0) return;
 
   QString strMD = m_Method->getText3(mui->qwNoteList, index);
   currentMDFile = iniDir + strMD;
@@ -2604,10 +2552,11 @@ void NotesList::clickNoteList() {
   }
 
   QString noteName = m_Method->getText0(mui->qwNoteList, index);
-
   noteTitle = noteName;
 
-  tw->setCurrentItem(pNoteItems.at(index));
+  QTreeWidgetItem *itemTop = tw->topLevelItem(indexTop);
+  QTreeWidgetItem *item = itemTop->child(index);
+  tw->setCurrentItem(item);
 
   int indexNoteBook = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
   QString s_tr = QString::number(indexNoteBook) + "=" + QString::number(index);
@@ -3040,3 +2989,5 @@ void NotesList::moveToFirst() {
 }
 
 void NotesList::qmlOpenEdit() { mui->btnEditNote->click(); }
+
+void NotesList::on_toolButton_clicked() { saveNotesList(); }

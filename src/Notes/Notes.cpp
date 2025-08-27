@@ -1554,8 +1554,6 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
             qDebug() << "kFile:" << kFile << " Update successfully. ";
           }
         }
-      } else {
-        // QFile::remove(zFile);
       }
     }
 
@@ -1597,8 +1595,6 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
           QFile::copy(pFile, kFile);
           mw_one->m_NotesList->m_dbManager.updateFileIndex(kFile);
         }
-      } else {
-        // QFile::remove(zFile);
       }
     }
 
