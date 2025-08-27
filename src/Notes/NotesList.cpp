@@ -77,8 +77,6 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
   ui->btnExport->hide();
   ui->editName->hide();
 
-  mui->btnManagement->setHidden(true);
-
   QScroller::grabGesture(ui->editName, QScroller::LeftMouseButtonGesture);
   m_Method->setSCrollPro(ui->editName);
 
@@ -3012,3 +3010,33 @@ void NotesList::onNoteNodeDoubleClicked(const QString &filePath) {
 
   mw_one->m_Notes->previewNote();
 }
+
+void NotesList::moveToFirst() {
+  return;
+
+  ////////////////////////////////////////////////////////
+
+  int indexNote = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
+  if (indexNote <= 0) return;
+  int countNote = m_Method->getCountFromQW(mui->qwNoteList);
+  if (countNote == 1) return;
+
+  QTreeWidgetItem *item = tw->currentItem();
+  if (item == NULL) return;
+
+  if (item->parent() != NULL) {
+    QTreeWidgetItem *parentItem = item->parent();
+    parentItem->removeChild(item);
+    parentItem->insertChild(0, item);
+    tw->setCurrentItem(item);
+
+    resetQML_List();
+    saveNotesList();
+
+    updateAllNoteIndexManager();
+
+    setNotesListCurrentIndex(0);
+  }
+}
+
+void NotesList::qmlOpenEdit() { mui->btnEditNote->click(); }

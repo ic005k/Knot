@@ -1305,6 +1305,7 @@ void Notes::openEditUI() {
 
   mw_one->m_NotesList->refreshRecentOpen(mw_one->m_NotesList->noteTitle);
   mw_one->m_NotesList->saveRecentOpen();
+  mw_one->m_NotesList->moveToFirst();
 
   if (isAndroid) {
     m_Method->setMDFile(currentMDFile);
@@ -1312,6 +1313,7 @@ void Notes::openEditUI() {
                          QFileInfo(currentMDFile).baseName());
 
     openAndroidNoteEditor();
+
     return;
   }
 
@@ -1354,6 +1356,11 @@ void Notes::openEditUI() {
 }
 
 void Notes::openNotes() {
+  if (!mw_one->m_Preferences->devMode)
+    mui->btnManagement->hide();
+  else
+    mui->btnManagement->show();
+
   mw_one->m_NotesList->needDelWebDAVFiles.clear();
   isPasswordError = false;
 
@@ -1423,7 +1430,6 @@ void Notes::openNotes() {
             QDateTime or_datetime = orgRemoteDateTime.at(j);
 
             QString local_file = privateDir + or_file;
-
             QDateTime local_datetime = QFileInfo(local_file).lastModified();
 
             // 先设置时区
@@ -1431,8 +1437,12 @@ void Notes::openNotes() {
             // 再统一时区
             local_datetime = local_datetime.toTimeZone(QTimeZone::utc());
 
-            if (or_datetime > local_datetime || !QFile::exists(local_file)) {
+            bool isLocalFileExists = QFile::exists(local_file);
+            if (or_datetime > local_datetime || !isLocalFileExists) {
               remoteFiles.append(or_file);
+              qDebug() << "Remote time: " << or_datetime
+                       << "Local time: " << local_datetime << or_file
+                       << isLocalFileExists << local_file;
             }
           }
 
@@ -1493,7 +1503,7 @@ void Notes::startBackgroundProcessRemoteFiles() {
 
   // 使用 QFutureWatcher 监控进度
   QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, [=]() {
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Remote files process completed";
     openNotesUI();
     watcher->deleteLater();
@@ -1545,7 +1555,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
           }
         }
       } else {
-        QFile::remove(zFile);
+        // QFile::remove(zFile);
       }
     }
 
@@ -1588,7 +1598,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
           mw_one->m_NotesList->m_dbManager.updateFileIndex(kFile);
         }
       } else {
-        QFile::remove(zFile);
+        // QFile::remove(zFile);
       }
     }
 
@@ -2040,6 +2050,8 @@ void Notes::previewNote() {
   QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     mw_one->closeProgress();
+
+    mw_one->m_NotesList->moveToFirst();
 
     if (isAndroid) {
       m_Method->setMDTitle(title);

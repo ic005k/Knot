@@ -656,6 +656,8 @@ QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray &data) {
   return files;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 WebDavDownloader::WebDavDownloader(const QString &username,
                                    const QString &password, QObject *parent)
     : QObject(parent), m_username(username), m_password(password) {
@@ -681,9 +683,12 @@ void WebDavDownloader::downloadFiles(const QList<QString> &remotePaths,
   completedFiles = 0;
   this->maxConcurrent = qMax(1, maxConcurrent);
 
-  // 启动初始下载
+  // 启动初始下载，每个任务之间加入延迟（毫秒）
+  const int INITIAL_DELAY = 50;  // 时间间隔
   for (int i = 0; i < qMin(this->maxConcurrent, downloadQueue.size()); ++i) {
-    startNextDownload();
+    // 第i个任务延迟i*INITIAL_DELAY毫秒启动，避免同时发起
+    QTimer::singleShot(i * INITIAL_DELAY, this,
+                       &WebDavDownloader::startNextDownload);
   }
 }
 
@@ -763,9 +768,12 @@ void WebDavDownloader::onDownloadFinished(QNetworkReply *reply) {
   // 进度更新
   emit progressChanged(completedFiles, totalFiles, localPath);
 
-  // 启动下一个下载
+  // 启动下一个下载（加入延迟）
   if (!downloadQueue.isEmpty()) {
-    startNextDownload();
+    // 设置延迟时间（毫秒），可根据需要调整
+    const int DOWNLOAD_DELAY = 50;  // 延迟
+    QTimer::singleShot(DOWNLOAD_DELAY, this,
+                       &WebDavDownloader::startNextDownload);
   }
 
   // 全部完成
@@ -774,6 +782,8 @@ void WebDavDownloader::onDownloadFinished(QNetworkReply *reply) {
     qDebug() << "所有下载任务完成";
   }
 }
+
+///////////////////////////////////////////////////////////////////////
 
 void CloudBackup::getRemoteFileList(QString url) {
   webdavFileList.clear();

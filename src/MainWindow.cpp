@@ -790,17 +790,14 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 #else
 
   int m_count = m_Notes->notes_sync_files.count();
-  if (m_count > 0) {
-    QSettings RegSync(privateDir + "need_sync.ini", QSettings::IniFormat);
-    for (int i = 0; i < m_count; i++) {
-      RegSync.setValue("count", m_count);
-      RegSync.setValue("note" + QString::number(i),
-                       m_Notes->notes_sync_files.at(i));
-    }
+  QSettings RegSync(privateDir + "need_sync.ini", QSettings::IniFormat);
+  RegSync.setValue("count", m_count);
+  for (int i = 0; i < m_count; i++) {
+    RegSync.setValue("note" + QString::number(i),
+                     m_Notes->notes_sync_files.at(i));
   }
 
   QSettings Reg(privateDir + "winpos.ini", QSettings::IniFormat);
-
   Reg.setValue("x", this->geometry().x());
   Reg.setValue("y", this->geometry().y());
   Reg.setValue("w", this->geometry().width());

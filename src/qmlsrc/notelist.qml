@@ -395,7 +395,7 @@ Rectangle {
                             icon.height: iconSize
                             onClicked: {
                                 console.log("编辑按钮被点击")
-                                mw_one.on_btnEditNote_clicked()
+                                m_NotesList.qmlOpenEdit()
                             }
                         }
 
