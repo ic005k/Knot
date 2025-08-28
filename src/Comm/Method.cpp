@@ -2914,3 +2914,15 @@ bool Method::isValidText(const QString &text) {
   // 要求至少70%的字符是可打印的或空格
   return (double)validChars / totalChars > 0.7;
 }
+
+void Method::upIniFile(QString tempFile, QString endFile) {
+  QFile tempFileObj(tempFile);
+  if (tempFileObj.exists() && tempFileObj.size() > 0) {
+    QFile::remove(endFile);
+    if (!QFile::rename(tempFile, endFile)) {
+      qWarning() << "重命名失败:" << tempFile << "->" << endFile;
+      QFile::remove(tempFile);  // 清理临时文件
+      return;
+    }
+  }
+}

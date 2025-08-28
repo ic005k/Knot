@@ -2568,8 +2568,6 @@ void MainWindow::on_btnDelNote_NoteBook_clicked() {
 void MainWindow::on_btnMoveTo_clicked() {
   m_NotesList->setTWCurrentItem();
   m_NotesList->on_btnMoveTo_clicked();
-
-  m_NotesList->updateAllNoteIndexManager();
 }
 
 void MainWindow::on_btnBack_Tree_clicked() {

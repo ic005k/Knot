@@ -329,13 +329,6 @@
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="toolButton">
-          <property name="text">
-           <string>...</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QToolButton" name="btnDel">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">

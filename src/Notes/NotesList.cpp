@@ -797,9 +797,6 @@ void NotesList::saveCurrentNoteInfo() {
 }
 
 void NotesList::saveNotesList() {
-  saveNotesListToFile();
-  return;
-
   QFuture<void> future = QtConcurrent::run([=]() { saveNotesListToFile(); });
 
   // 可选：使用 QFutureWatcher 监控进度
@@ -849,21 +846,7 @@ void NotesList::saveNotesListToFile() {
   }
 
   iniNotes.sync();
-
-  QFile tempFileObj(tempFile);
-  if (tempFileObj.exists() && tempFileObj.size() > 0) {
-    QFile::remove(endFile);
-    if (!QFile::rename(tempFile, endFile)) {
-      qWarning() << "重命名失败:" << tempFile << "->" << endFile;
-      QFile::remove(tempFile);  // 清理临时文件
-      return;
-    } else {
-      qDebug() << "笔记大纲保存成功！";
-      for (int i = 0; i < tw->topLevelItem(1)->childCount(); i++) {
-        qDebug() << tw->topLevelItem(1)->child(i)->text(0);
-      }
-    }
-  }
+  m_Method->upIniFile(tempFile, endFile);
 
   // Save Note Name
   QSettings iniCurMD(iniDir + "curmd.ini", QSettings::IniFormat);
@@ -1664,9 +1647,45 @@ void NotesList::moveBy(int ud) {
   updateAllNoteIndexManager();
 }
 
-void NotesList::on_btnUp_clicked() { moveBy(-1); }
+void NotesList::on_btnUp_clicked() {
+  moveBy(-1);
 
-void NotesList::on_btnDown_clicked() { moveBy(1); }
+  bool isParent = false;
+  QTreeWidgetItem *item = tw->currentItem();
+  if (item->parent() == NULL) {
+    isParent = true;
+
+  } else {
+    int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
+    setNotesListCurrentIndex(index - 1);
+    clickNoteList();
+    isParent = false;
+  }
+
+  if (isParent) {
+    isMouseClick = true;
+  }
+}
+
+void NotesList::on_btnDown_clicked() {
+  moveBy(1);
+
+  bool isParent = false;
+  QTreeWidgetItem *item = tw->currentItem();
+  if (item->parent() == NULL) {
+    isParent = true;
+
+  } else {
+    int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
+    setNotesListCurrentIndex(index + 1);
+    clickNoteList();
+    isParent = false;
+  }
+
+  if (isParent) {
+    isMouseClick = true;
+  }
+}
 
 void NotesList::setTWRBCurrentItem() {
   int index = m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
@@ -2220,8 +2239,11 @@ void NotesList::on_btnMoveTo_clicked() {
   }
 
   if (moveItem(tw)) {
-    resetQML_List();
     saveNotesList();
+    updateAllNoteIndexManager();
+
+    QTimer::singleShot(10, this,
+                       [this]() { setCurrentItemFromMDFile(currentMDFile); });
   }
 }
 
@@ -2463,6 +2485,7 @@ void NotesList::readyNotesData(QTreeWidgetItem *topItem) {
     int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
     int noteslistIndex = getSavedNotesListIndex(index);
     setNotesListCurrentIndex(noteslistIndex);
+
     setNoteLabel();
     clickNoteList();
     if (isMouseClick) {
@@ -2989,5 +3012,3 @@ void NotesList::moveToFirst() {
 }
 
 void NotesList::qmlOpenEdit() { mui->btnEditNote->click(); }
-
-void NotesList::on_toolButton_clicked() { saveNotesList(); }

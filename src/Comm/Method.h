@@ -401,7 +401,8 @@ class Method : public QDialog {
 
   QString convertDataToUnicode(QByteArray data);
 
- protected:
+  void upIniFile(QString tempFile, QString endFile);
+  protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
  public slots:

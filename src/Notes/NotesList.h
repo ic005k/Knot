@@ -244,8 +244,6 @@ class NotesList : public QDialog {
 
   void onNoteNodeDoubleClicked(const QString &filePath);
 
-  void on_toolButton_clicked();
-
  private:
   bool isImportFilesEnd;
 

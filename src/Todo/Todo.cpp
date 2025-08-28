@@ -79,8 +79,9 @@ void Todo::saveTodo() {
 
   int count_items = getCount();
 
-  QString todoFile = iniDir + "todo.ini";
-  iniTodo = new QSettings(todoFile, QSettings::IniFormat, this);
+  QString tempFile = iniDir + "todo.tmp";
+  QString endFile = iniDir + "todo.ini";
+  iniTodo = new QSettings(tempFile, QSettings::IniFormat, this);
 
   iniTodo->setValue("/Todo/Count", count_items);
   for (int i = 0; i < count_items; i++) {
@@ -101,6 +102,9 @@ void Todo::saveTodo() {
     iniTodo->setValue("/Todo/ItemRecycleDoneTime" + QString::number(i),
                       doneTime);
   }
+
+  iniTodo->sync();
+  m_Method->upIniFile(tempFile, endFile);
 
   isNeedSync = true;
 }
