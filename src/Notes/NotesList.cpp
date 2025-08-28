@@ -827,22 +827,28 @@ void NotesList::saveNotesListToFile() {
                       strtopcolorflag);
 
     int childCount = topItem->childCount();
-    iniNotes.setValue("/MainNotes/childCount" + QString::number(i), childCount);
-
+    int n_less = 0;
     for (int j = 0; j < childCount; j++) {
       QTreeWidgetItem *childItem = topItem->child(j);
       QString strChild0 = childItem->text(0);
       QString strChild1 = childItem->text(1);
 
-      if (!strChild1.isEmpty()) {
-        iniNotes.setValue("/MainNotes/childItem0_" + QString::number(i) + "_" +
-                              QString::number(j),
-                          strChild0);
-        iniNotes.setValue("/MainNotes/childItem1_" + QString::number(i) + "_" +
-                              QString::number(j),
-                          strChild1);
+      QString md_file = iniDir + strChild1;
+      if (QFile::exists(md_file)) {
+        if (!strChild1.isEmpty()) {
+          iniNotes.setValue("/MainNotes/childItem0_" + QString::number(i) +
+                                "_" + QString::number(j),
+                            strChild0);
+          iniNotes.setValue("/MainNotes/childItem1_" + QString::number(i) +
+                                "_" + QString::number(j),
+                            strChild1);
+        }
+      } else {
+        n_less++;
       }
     }
+    iniNotes.setValue("/MainNotes/childCount" + QString::number(i),
+                      childCount - n_less);
   }
 
   iniNotes.sync();
