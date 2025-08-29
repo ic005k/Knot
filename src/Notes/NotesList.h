@@ -98,6 +98,7 @@ class NotesList : public QDialog {
   void addItem(QTreeWidget *tw, QTreeWidgetItem *item);
 
   void initRecycle();
+  QStringList needDelFiles;
   void clearFiles();
   void getAllFiles(const QString &foldPath, QStringList &folds,
                    const QStringList &formats);

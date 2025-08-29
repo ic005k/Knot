@@ -868,6 +868,15 @@ void NotesList::saveNotesListToFile() {
         strChild1);
   }
 
+  // save need del files
+  needDelFiles.removeDuplicates();
+  int n_count = needDelFiles.count();
+  iniNotes.setValue("/NeedDelNotes/Count", n_count);
+  for (int i = 0; i < n_count; i++) {
+    QString mdFile = needDelFiles.at(i);
+    iniNotes.setValue("/NeedDelNotes/Note-" + QString::number(i), mdFile);
+  }
+
   iniNotes.sync();
   m_Method->upIniFile(tempFile, endFile);
 
@@ -1102,15 +1111,7 @@ void NotesList::on_btnDel_Recycle_clicked() {
   resetQML_Recycle();
 }
 
-void NotesList::setDelNoteFlag(QString mdFile) {
-  QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
-  int count = iniNotes.value("/NeedDelNotes/Count", 0).toInt();
-  iniNotes.setValue("/NeedDelNotes/Note-" + QString::number(count), mdFile);
-  count++;
-  iniNotes.setValue("/NeedDelNotes/Count", count);
-
-  iniNotes.sync();
-}
+void NotesList::setDelNoteFlag(QString mdFile) { needDelFiles.append(mdFile); }
 
 void NotesList::needDelNotes() {
   QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
@@ -1125,11 +1126,13 @@ void NotesList::needDelNotes() {
 
   bool isDelOk;
   for (int i = 0; i < count; i++) {
-    QString mdFile =
-        iniDir + iniNotes.value("/NeedDelNotes/Note-" + QString::number(i), "")
-                     .toString();
-
+    QString str1 =
+        iniNotes.value("/NeedDelNotes/Note-" + QString::number(i), "")
+            .toString();
+    QString mdFile = iniDir + str1;
     isDelOk = delFile(mdFile);
+
+    needDelFiles.append(str1);
 
     qDebug() << "Need Del Note: " << mdFile << isDelOk;
   }
