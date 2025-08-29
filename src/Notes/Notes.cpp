@@ -1205,8 +1205,8 @@ void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
 }
 
 void Notes::openNotesUI() {
-  startBackgroundTaskDelAndClear();
   mw_one->m_NotesList->needDelNotes();
+  startBackgroundTaskDelAndClear();
 
   init_all_notes();
 

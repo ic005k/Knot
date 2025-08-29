@@ -1097,13 +1097,13 @@ void NotesList::on_btnDel_Recycle_clicked() {
       needDelWebDAVFiles.append(image_file);
     }
 
-    m_dbManager.deleteFileIndex(md);
-
     delFile(md);
 
     setDelNoteFlag(curItem->text(1));
 
     curItem->parent()->removeChild(curItem);
+
+    isDelNoteRecycle = true;
   }
 
   saveNotesList();

@@ -2304,6 +2304,11 @@ void MainWindow::on_btnBackNoteRecycle_clicked() {
   mui->frameNoteRecycle->hide();
   mui->frameNoteList->show();
 
+  if (m_NotesList->isDelNoteRecycle) {
+    m_Notes->startBackgroundTaskDelAndClear();
+    m_NotesList->isDelNoteRecycle = false;
+  }
+
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     int count = m_NotesList->needDelWebDAVFiles.count();
     if (count > 0) {

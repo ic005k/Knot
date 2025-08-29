@@ -99,6 +99,7 @@ class NotesList : public QDialog {
 
   void initRecycle();
   QStringList needDelFiles;
+  bool isDelNoteRecycle = false;
   void clearFiles();
   void getAllFiles(const QString &foldPath, QStringList &folds,
                    const QStringList &formats);
