@@ -609,7 +609,9 @@ void MainWindow::on_tmeFlash() {
 
 void MainWindow::saveTab() {
   // Tab
-  QSettings Reg(iniDir + "tab.ini", QSettings::IniFormat);
+  QString tempFile = iniDir + "tab.tmp";
+  QString endFile = iniDir + "tab.ini";
+  QSettings Reg(tempFile, QSettings::IniFormat);
 
   int TabCount = tabData->tabBar()->count();
   Reg.setValue("TabCount", TabCount);
@@ -622,6 +624,9 @@ void MainWindow::saveTab() {
     QTreeWidget *tw = (QTreeWidget *)tabData->widget(i);
     Reg.setValue("twName" + QString::number(i), tw->objectName());
   }
+
+  Reg.sync();
+  m_Method->upIniFile(tempFile, endFile);
 }
 
 void MainWindow::saveData(QTreeWidget *tw, int tabIndex) {
