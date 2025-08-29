@@ -37,6 +37,8 @@ class EditRecord : public QDialog {
   static void saveModified();
   static void saveDeleted();
 
+  static void saveCurrentYearData();
+
  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   bool eventFilter(QObject *watch, QEvent *evn) override;

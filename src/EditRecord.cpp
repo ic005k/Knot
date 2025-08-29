@@ -566,6 +566,63 @@ void EditRecord::saveModified() {
   Reg.setValue(flag + QString::number(Sn) + "-childCount", childCount);
 }
 
+void EditRecord::saveCurrentYearData() {
+  QTreeWidget *tw = (QTreeWidget *)tabData->currentWidget();
+
+  QString name = tw->objectName();
+
+  QString strCurrentYear = QString::number(QDate::currentDate().year());
+  QString iniName = strCurrentYear + "-" + name;
+
+  QString tempFile = iniDir + iniName + ".tmp";
+  QString endFile = iniDir + iniName + ".ini";
+  QSettings Reg(tempFile, QSettings::IniFormat);
+
+  QString flag;
+  flag = "/" + name + "/";
+
+  int count = tw->topLevelItemCount();
+  if (count == 0) return;
+
+  Reg.setValue(flag + "TopCount", count);
+
+  int Sn = 0;
+  for (int i = 0; i < count; i++) {
+    QTreeWidgetItem *topItem = tw->topLevelItem(i);
+    Sn = i + 1;
+    if (topItem->text(3) == strCurrentYear) {
+      Reg.setValue(flag + QString::number(Sn) + "-topDate", topItem->text(0));
+      Reg.setValue(flag + QString::number(Sn) + "-topYear", topItem->text(3));
+      Reg.setValue(flag + QString::number(Sn) + "-topFreq", topItem->text(1));
+      Reg.setValue(flag + QString::number(Sn) + "-topAmount", topItem->text(2));
+
+      int childCount = topItem->childCount();
+      Reg.setValue(flag + QString::number(Sn) + "-childCount", childCount);
+
+      if (childCount > 0) {
+        for (int j = 0; j < childCount; j++) {
+          if (isBreak) return;
+          Reg.setValue(
+              flag + QString::number(Sn) + "-childTime" + QString::number(j),
+              topItem->child(j)->text(0));
+          Reg.setValue(
+              flag + QString::number(Sn) + "-childAmount" + QString::number(j),
+              topItem->child(j)->text(1));
+          Reg.setValue(
+              flag + QString::number(Sn) + "-childDesc" + QString::number(j),
+              topItem->child(j)->text(2));
+          Reg.setValue(
+              flag + QString::number(Sn) + "-childDetails" + QString::number(j),
+              topItem->child(j)->text(3));
+        }
+      }
+    }
+  }
+
+  Reg.sync();
+  m_Method->upIniFile(tempFile, endFile);
+}
+
 void EditRecord::saveCurrentValue() {
   QString ini_file = privateDir + "editrecord_value.ini";
   QSettings Reg(ini_file, QSettings::IniFormat);

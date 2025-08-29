@@ -2933,3 +2933,32 @@ void Method::upIniFile(QString tempFile, QString endFile) {
     }
   }
 }
+
+QStringList Method::getMdFilesInDir(const QString &dirPath,
+                                    bool includeFullPath) {
+  QStringList mdFiles;
+  QDir dir(dirPath);
+
+  // 检查目录是否存在
+  if (!dir.exists()) {
+    return mdFiles;
+  }
+
+  // 设置过滤条件
+  dir.setFilter(QDir::Files | QDir::NoSymLinks);
+  dir.setNameFilters(QStringList() << "*.md" << "*.MD");
+
+  // 获取文件信息列表
+  QFileInfoList fileInfoList = dir.entryInfoList();
+
+  // 提取文件名或完整路径
+  foreach (const QFileInfo &fileInfo, fileInfoList) {
+    if (includeFullPath) {
+      mdFiles << fileInfo.absoluteFilePath();
+    } else {
+      mdFiles << fileInfo.fileName();
+    }
+  }
+
+  return mdFiles;
+}

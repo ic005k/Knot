@@ -89,14 +89,7 @@ void MainWindow::ReadChartData() {
 
 void MainWindow::SaveFile(QString SaveType) {
   if (SaveType == "tab") {
-    if (isDelData) {
-      EditRecord::saveDeleted();
-    } else {
-      if (isAdd)
-        EditRecord::saveAdded();
-      else
-        EditRecord::saveModified();
-    }
+    EditRecord::saveCurrentYearData();
 
     saveTab();
 
@@ -1363,7 +1356,9 @@ void MainWindow::on_actionAbout() {
 
   textBrowser->append("");
   textBrowser->append(tr("Startup Time") + ": " + strStartTotalTime + " s" +
-                      "\n" + loginTime);
+                      "\n" + loginTime + "\n" + "(c) 2022-" +
+                      QString::number(QDate::currentDate().year()) +
+                      " The Knot Authors");
   textBrowser->append("");
   textBrowser->setHidden(true);
 
