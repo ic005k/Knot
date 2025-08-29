@@ -502,8 +502,6 @@ void NotesList::on_btnDel_clicked() {
 
   saveNotesList();
 
-  saveRecycle();
-
   resetQML_List();
 }
 
@@ -851,20 +849,7 @@ void NotesList::saveNotesListToFile() {
                       childCount - n_less);
   }
 
-  iniNotes.sync();
-  m_Method->upIniFile(tempFile, endFile);
-
-  // Save Note Name
-  QSettings iniCurMD(iniDir + "curmd.ini", QSettings::IniFormat);
-  iniCurMD.setValue("/MainNotes/NoteName", noteTitle);
-  iniCurMD.sync();
-}
-
-void NotesList::saveRecycle() {
-  QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
-
-  mw_one->strLatestModify = tr("Modi Notes Recycle");
-
+  // save recycle
   int i = 0;
   QTreeWidgetItem *topItem = twrb->topLevelItem(i);
   int childCount = topItem->childCount();
@@ -883,11 +868,18 @@ void NotesList::saveRecycle() {
         strChild1);
   }
 
-  mw_one->m_Notes->isSaveNotesConfig = true;
+  iniNotes.sync();
+  m_Method->upIniFile(tempFile, endFile);
+
+  // Save Note Name
+  QSettings iniCurMD(iniDir + "curmd.ini", QSettings::IniFormat);
+  iniCurMD.setValue("/MainNotes/NoteName", noteTitle);
+  iniCurMD.sync();
 }
 
 void NotesList::initNotesList() {
   tw->clear();
+  noteFiles.clear();
 
   QSettings *iniNotes =
       new QSettings(iniDir + "mainnotes.ini", QSettings::IniFormat, NULL);
@@ -938,6 +930,8 @@ void NotesList::initNotesList() {
         QString md = iniDir + str1;
         mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(md, str0);
         updateNoteIndexManager(md, i, j);
+
+        noteFiles.append(md);
       }
     }
     tw->addTopLevelItem(topItem);
@@ -955,6 +949,7 @@ void NotesList::initNotesList() {
 
 void NotesList::initRecycle() {
   twrb->clear();
+  recycleFiles.clear();
 
   QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
 
@@ -979,10 +974,62 @@ void NotesList::initRecycle() {
     childItem->setText(0, str0);
     childItem->setText(1, str1);
     childItem->setIcon(0, QIcon(":/res/n.png"));
+
+    recycleFiles.append(iniDir + str1);
   }
   twrb->addTopLevelItem(topItem);
 
   twrb->expandAll();
+}
+
+void NotesList::initUnclassified() {
+  QStringList dirFiles = m_Method->getMdFilesInDir(iniDir + "memo/", true);
+
+  QStringList excludeFiles = noteFiles + recycleFiles;
+  excludeFiles.removeDuplicates();
+
+  QStringList result;
+  foreach (const QString &file, dirFiles) {
+    if (!excludeFiles.contains(file)) {
+      result.append(file);
+    }
+  }
+
+  int count = result.count();
+  if (count == 0) return;
+
+  int topCount = tw->topLevelItemCount();
+
+  QTreeWidgetItem *topItem = new QTreeWidgetItem;
+  topItem->setText(0, tr("Unclassified"));
+  topItem->setText(2, "#FF0000");
+  topItem->setForeground(0, Qt::red);
+  QFont font = this->font();
+  font.setBold(true);
+  topItem->setFont(0, font);
+  topItem->setIcon(0, QIcon(":/res/nb.png"));
+
+  TitleGenerator generator;
+
+  for (int i = 0; i < count; i++) {
+    QString mdFile = result.at(i);
+    QString str0, str1;
+    str0 = generator.genNewTitle(loadText(mdFile));
+    str1 = mdFile;
+    str1 = str1.replace(iniDir, "");
+    QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
+    childItem->setText(0, str0);
+    childItem->setText(1, str1);
+    childItem->setIcon(0, QIcon(":/res/n.png"));
+
+    mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(mdFile, str0);
+    updateNoteIndexManager(mdFile, topCount, i);
+  }
+
+  tw->addTopLevelItem(topItem);
+  tw->expandAll();
+
+  qDebug() << result;
 }
 
 void NotesList::on_btnRecycle_clicked() {
@@ -1015,8 +1062,6 @@ void NotesList::on_btnRestore_clicked() {
     }
   } else
     return;
-
-  saveRecycle();
 
   saveNotesList();
 }
@@ -1052,7 +1097,7 @@ void NotesList::on_btnDel_Recycle_clicked() {
     curItem->parent()->removeChild(curItem);
   }
 
-  saveRecycle();
+  saveNotesList();
 
   resetQML_Recycle();
 }
@@ -1780,8 +1825,6 @@ void NotesList::on_actionDel_NoteBook_triggered() {
 
   setNoteLabel();
 
-  saveRecycle();
-
   saveNotesList();
 
   if (count == 0) {
@@ -2052,8 +2095,6 @@ void NotesList::on_actionDel_Note_triggered() {
   int count = getNotesListCount();
 
   setNoteLabel();
-
-  saveRecycle();
 
   saveNotesList();
 

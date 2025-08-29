@@ -61,6 +61,8 @@ class NotesList : public QDialog {
   MoveTo *m_MoveTo = nullptr;
   NewNoteBook *m_NewNoteBook = nullptr;
 
+  void startBackgroundTaskUpdateFilesIndex();
+
   QString noteTitle;
 
   void saveNotesListIndex();
@@ -95,7 +97,6 @@ class NotesList : public QDialog {
 
   void addItem(QTreeWidget *tw, QTreeWidgetItem *item);
 
-  void saveRecycle();
   void initRecycle();
   void clearFiles();
   void getAllFiles(const QString &foldPath, QStringList &folds,
@@ -176,6 +177,8 @@ class NotesList : public QDialog {
 
   void moveToFirst();
 
+  void initUnclassified();
+
  protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
@@ -225,7 +228,9 @@ class NotesList : public QDialog {
   void on_btnMoveTo_clicked();
 
   void on_actionRelationshipGraph();
+
   void qmlOpenEdit();
+
  private slots:
 
   void on_editFind_textChanged(const QString &arg1);
@@ -245,6 +250,8 @@ class NotesList : public QDialog {
   void onNoteNodeDoubleClicked(const QString &filePath);
 
  private:
+  QStringList noteFiles, recycleFiles;
+
   bool isImportFilesEnd;
 
   bool isReadyNoteDataEnd;
@@ -293,7 +300,6 @@ class NotesList : public QDialog {
 
   void clearInvalidMDFile();
   SearchModel m_searchModel;
-  void startBackgroundTaskUpdateFilesIndex();
 
   int getSavedNotesListIndex(int notebookIndex);
   bool safeWriteFile(const QString &filePath, const QString &content);

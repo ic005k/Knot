@@ -1139,6 +1139,7 @@ QString Notes::formatMDText(QString text) {
 void Notes::init_all_notes() {
   mw_one->m_NotesList->initNotesList();
   mw_one->m_NotesList->initRecycle();
+  mw_one->m_NotesList->initUnclassified();
 
   // load note
   currentMDFile = mw_one->m_NotesList->getCurrentMDFile();

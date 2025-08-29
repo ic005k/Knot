@@ -190,7 +190,7 @@ void MainWindow::importDataDone() {
                          QDate::currentDate().month());
     m_Steps->allGpsTotal();
 
-    m_NotesList->m_dbManager.updateFilesIndex(iniDir + "memo");
+    m_NotesList->startBackgroundTaskUpdateFilesIndex();
   }
 
   closeProgress();
