@@ -174,8 +174,6 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
 
     private boolean isSaved = false;
 
-    private final ExecutorService executor = Executors.newCachedThreadPool();
-
     private Button btn_cancel;
     private Button btnUndo;
     private Button btnRedo;
@@ -284,6 +282,8 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         String str_file = MyActivity.strMDFile;
         File file = new File(str_file);
         if (getFileSizeInKB(file) < 200) {
+
+            final ExecutorService executor = Executors.newCachedThreadPool();
 
             // 初始化 Markwon
             final Markwon markwon = Markwon.create(context);
@@ -758,8 +758,6 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
 
         super.onDestroy();
-
-        executor.shutdown(); // 关闭线程池，避免泄露
 
         System.out.println("NoteEditor onDestroy...");
 
