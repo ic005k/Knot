@@ -67,8 +67,9 @@ void DatabaseManager::updateFilesIndex(const QString &directory) {
   m_db.transaction();
 
   // 清空旧数据
-  m_db.exec("DELETE FROM documents");
-  m_db.exec("DELETE FROM fts_documents");
+  QSqlQuery query(m_db);
+  query.exec("DELETE FROM documents");
+  query.exec("DELETE FROM fts_documents");
 
   foreach (const QString &file, files) {
     processFile(dir.filePath(file));
@@ -253,7 +254,7 @@ void DatabaseManager::updateFileIndexes(const QStringList &filePaths) {
   // 先收集所有存在的文件路径（过滤无效文件）
   QStringList validFilePaths;
   for (const QString &filePath : filePaths) {
-    if (QFileInfo(filePath).exists()) {
+    if (QFile::exists(filePath)) {
       validFilePaths << filePath;
     }
   }

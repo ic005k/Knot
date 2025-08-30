@@ -181,7 +181,9 @@ class NotesList : public QDialog {
 
   void initUnclassified();
 
- protected:
+  void startBackgroundTaskDelFilesIndex(const QStringList &files);
+  QStringList getRecycleNoteFiles();
+  protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
   void closeEvent(QCloseEvent *event) override;

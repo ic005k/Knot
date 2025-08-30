@@ -2841,6 +2841,7 @@ void MainWindow::on_btnOpenSearchResult_clicked() {
   currentMDFile = mdFile;
   mySearchText = mui->editNotesSearch->text().trimmed();
   on_btnEditNote_clicked();
+  m_NotesList->setCurrentItemFromMDFile(mdFile);
 }
 
 void MainWindow::on_btnFindNotes2_clicked() {

@@ -95,8 +95,8 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
   m_dbManager.initDatabase(databaseFile);
   mui->qwNotesSearchResult->rootContext()->setContextProperty("searchModel",
                                                               &m_searchModel);
-  QFileInfo fi(databaseFile);
-  if (!fi.exists()) {
+  QFile m_dfile(databaseFile);
+  if (m_dfile.size() < 100000) {
     startBackgroundTaskUpdateFilesIndex();
   }
 
@@ -118,7 +118,29 @@ void NotesList::startBackgroundTaskUpdateFilesIndex() {
   // 可选：使用 QFutureWatcher 监控进度
   QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    qDebug() << "Database update completed";
+    qDebug() << "Database update completed.";
+
+    QStringList cycleFiles = getRecycleNoteFiles();
+    if (cycleFiles.count() > 0) startBackgroundTaskDelFilesIndex(cycleFiles);
+
+    watcher->deleteLater();
+  });
+  watcher->setFuture(future);
+}
+
+void NotesList::startBackgroundTaskDelFilesIndex(const QStringList &files) {
+  QStringList m_files = files;
+
+  QFuture<void> future = QtConcurrent::run([=]() {
+    for (int i = 0; i < m_files.count(); i++) {
+      QString filePath = m_files.at(i);
+      m_dbManager.deleteFileIndex(filePath);
+    }
+  });
+
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+    qDebug() << "Database del files completed.";
     watcher->deleteLater();
   });
   watcher->setFuture(future);
@@ -423,6 +445,7 @@ void NotesList::on_btnDel_clicked() {
     return;
   }
 
+  QStringList delFilesIndex;
   QString str0, str1;
   // Top Item
   if (item->parent() == NULL) {
@@ -434,6 +457,8 @@ void NotesList::on_btnDel_clicked() {
 
       str0 = item->child(i)->text(0);
       str1 = item->child(i)->text(1);
+
+      delFilesIndex.append(iniDir + str1);
 
       // Child Notes
       if (!str1.isEmpty()) {
@@ -472,6 +497,8 @@ void NotesList::on_btnDel_clicked() {
       childItem->setText(1, str1);
       addItem(twrb, childItem);
 
+      delFilesIndex.append(iniDir + str1);
+
       // Child NoteBook
     } else {
       int count = item->childCount();
@@ -497,6 +524,8 @@ void NotesList::on_btnDel_clicked() {
     mui->lblNoteBook->setText(tr("Note Book"));
     mui->lblNoteList->setText(tr("Note List"));
   }
+
+  startBackgroundTaskDelFilesIndex(delFilesIndex);
 
   tw->setFocus();
 
@@ -1281,6 +1310,12 @@ void reduceResults(ResultsMap &result, const MySearchResult &partial) {
 QFuture<ResultsMap> performSearchAsync(const QString &dirPath,
                                        const QString &keyword) {
   QStringList files = findMarkdownFiles(dirPath);
+  QStringList cycleFiles = mw_one->m_NotesList->getRecycleNoteFiles();
+
+  // 从files中移除所有存在于cycleFiles中的元素
+  files.removeIf(
+      [&cycleFiles](const QString &file) { return cycleFiles.contains(file); });
+
   QRegularExpression regex(keyword,
                            QRegularExpression::CaseInsensitiveOption |
                                QRegularExpression::UseUnicodePropertiesOption);
@@ -3062,3 +3097,14 @@ void NotesList::moveToFirst() {
 }
 
 void NotesList::qmlOpenEdit() { mui->btnEditNote->click(); }
+
+QStringList NotesList::getRecycleNoteFiles() {
+  QStringList cycleFiles;
+  QTreeWidgetItem *cycleTopItem = twrb->topLevelItem(0);
+  int count = cycleTopItem->childCount();
+  for (int i = 0; i < count; i++) {
+    QString filePath = iniDir + cycleTopItem->child(i)->text(1);
+    cycleFiles.append(filePath);
+  }
+  return cycleFiles;
+}
