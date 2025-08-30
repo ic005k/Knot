@@ -501,6 +501,11 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
 
         bindViews();
 
+        if (MyActivity.zh_cn)
+            editNote.setText("加载中, 请稍候...");
+        else
+            editNote.setText("Loading, please wait...");
+
         // 监听 UI 绘制完成
         findViewById(android.R.id.content).post(() -> {
 
@@ -561,10 +566,54 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
 
     private void loadMDFileChunks() {
         final String mdfile = MyActivity.strMDFile;
-        // final Handler mHandler = new Handler(Looper.getMainLooper());
 
-        // showAndroidProgressBar();
-        // progressBar.setVisibility(View.VISIBLE);
+        // 显示进度条
+        findViewById(R.id.progressContainer).setVisibility(View.VISIBLE);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // 1. 子线程一次性读取整个文件
+                final String data = readTextFile(mdfile);
+
+                // 2. 主线程直接设置完整文本
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        editNote.setText(data);
+                    }
+                });
+
+                // 短暂延迟以展示进度条（可选，根据需要调整）
+                try {
+                    File file = new File(mdfile);
+                    int delay = getFileSizeInKB(file) < 200 ? 50 : 100;
+                    Thread.sleep(delay);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                // 3. 完成后关闭进度条并执行其他操作
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setCursorPos();
+                        openSearchResult();
+                        isTextChanged = false;
+                        initRedoUndo();
+                        initEditTextChangedListener();
+                        init_all();
+                        // 隐藏进度条
+                        findViewById(R.id.progressContainer).setVisibility(View.GONE);
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void loadMDFileChunks_old() {
+        final String mdfile = MyActivity.strMDFile;
+
         findViewById(R.id.progressContainer).setVisibility(View.VISIBLE);
 
         new Thread(new Runnable() {
@@ -585,7 +634,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
                     final String chunk = data.substring(start, end);
 
                     // 主线程追加文本并更新进度
-                    // mHandler.post(new Runnable() {
+
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -596,9 +645,6 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
                             }
                             currentChunk.incrementAndGet();
 
-                            // 更新进度条（假设进度条支持进度百分比）
-                            // int progress = (int) ((currentChunk.get() / (float) totalChunks) * 100);
-                            // updateProgressBar(progress);
                         }
                     });
 
@@ -618,7 +664,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
                 }
 
                 // 4. 最终关闭进度条并执行其他操作
-                // mHandler.post(new Runnable() {
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -708,7 +754,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
             showNormalDialog();
         else {
             super.onBackPressed();
-            // AnimationWhenClosed();
+
         }
 
     }
