@@ -2962,3 +2962,18 @@ QStringList Method::getMdFilesInDir(const QString &dirPath,
 
   return mdFiles;
 }
+
+int Method::calculateCenterYForScreen(QWidget *widget) {
+  // 获取屏幕可用区域（排除任务栏等）
+  QScreen *screen =
+      widget->screen() ? widget->screen() : QGuiApplication::primaryScreen();
+  QRect screenRect = screen->availableGeometry();
+
+  // 计算屏幕垂直中心
+  int screenCenterY = screenRect.top() + screenRect.height() / 2;
+
+  // 计算控件垂直居中的y值（屏幕中心 - 控件高度的一半）
+  int widgetY = screenCenterY - (widget->height() / 2);
+
+  return widgetY;
+}

@@ -103,9 +103,15 @@ void ShowMessage::init() {
 
 #endif
 
-  setFixedWidth(w - 20);
-
   int nEditH = mw_one->m_Todo->getEditTextHeight(ui->editMsg);
+
+  // 彻底重置布局
+  setFixedSize(0, 0);
+  ui->verticalLayout->invalidate();
+  ui->verticalLayout->activate();
+  ui->horizontalLayout->invalidate();
+  ui->horizontalLayout->activate();
+
   int nH = 0;
   nH = nEditH + ui->btnCancel->height() + ui->lblTitle->height() +
        ui->hframe->height() + 70;
@@ -113,9 +119,11 @@ void ShowMessage::init() {
   if (nH > mw_one->height()) nH = mw_one->height() - 10;
 
   setFixedHeight(nH);
+  setFixedWidth(w - 20);
 
   w = width();
   h = nH;
+
   x = mw_one->geometry().x() + (mw_one->geometry().width() - w) / 2;
   y = mw_one->geometry().y() + (mw_one->geometry().height() - h) / 2;
   setGeometry(x, y, w, h);

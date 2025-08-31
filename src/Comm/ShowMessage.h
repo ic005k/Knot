@@ -6,6 +6,7 @@
 #include <QKeyEvent>
 #include <QMainWindow>
 #include <QMessageBox>
+#include <QScreen>
 
 namespace Ui {
 class ShowMessage;

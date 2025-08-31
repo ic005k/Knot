@@ -377,7 +377,7 @@ void NotesList::on_btnRename_clicked() {
     y = mw_one->geometry().y();
   } else {
     w = 320;
-    y = 20;
+    y = m_Method->calculateCenterYForScreen(m_RenameNotes);
   }
 
   x = mw_one->geometry().x() + (mw_one->width() - w) / 2;
@@ -2306,8 +2306,8 @@ void NotesList::on_actionRelationshipGraph() {
 
 void NotesList::on_actionCopyNoteLink() {
   int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
-  QString file = m_Method->getText3(mui->qwNoteList, index);
-  QString name = m_Method->getText0(mui->qwNoteList, index);
+  QString file = noteModel->getText3(index);
+  QString name = noteModel->getText0(index);
   QString strlink = "[" + name + "](" + file + ")";
   QClipboard *clipboard = QApplication::clipboard();
   clipboard->setText(strlink);

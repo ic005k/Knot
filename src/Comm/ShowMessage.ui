@@ -127,8 +127,14 @@ QLabel[darkMode=&quot;true&quot;] {
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="leftMargin">
+         <number>2</number>
+        </property>
         <property name="topMargin">
          <number>9</number>
+        </property>
+        <property name="rightMargin">
+         <number>2</number>
         </property>
         <item>
          <widget class="QToolButton" name="btnCancel">

@@ -403,6 +403,7 @@ class Method : public QDialog {
 
   void upIniFile(QString tempFile, QString endFile);
   QStringList getMdFilesInDir(const QString &dirPath, bool includeFullPath = false);
+  int calculateCenterYForScreen(QWidget *widget);
   protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
