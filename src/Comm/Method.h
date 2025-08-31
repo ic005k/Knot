@@ -402,9 +402,10 @@ class Method : public QDialog {
   QString convertDataToUnicode(QByteArray data);
 
   void upIniFile(QString tempFile, QString endFile);
-  QStringList getMdFilesInDir(const QString &dirPath, bool includeFullPath = false);
-  int calculateCenterYForScreen(QWidget *widget);
-  protected:
+  QStringList getMdFilesInDir(const QString &dirPath,
+                              bool includeFullPath = false);
+
+ protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
  public slots:

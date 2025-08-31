@@ -377,7 +377,7 @@ void NotesList::on_btnRename_clicked() {
     y = mw_one->geometry().y();
   } else {
     w = 320;
-    y = m_Method->calculateCenterYForScreen(m_RenameNotes);
+    y = mw_one->geometry().y() + (mw_one->height() - h) / 2;
   }
 
   x = mw_one->geometry().x() + (mw_one->width() - w) / 2;

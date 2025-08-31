@@ -2009,6 +2009,10 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
     mui->qwTodo->rootContext()->setContextProperty("m_width", mw_one->width());
     m_Todo->init_Todo();
   }
+
+  if (!mui->frameNoteList->isHidden()) {
+    m_NotesList->clickNoteBook();
+  }
 #endif
 }
 
