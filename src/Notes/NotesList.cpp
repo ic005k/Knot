@@ -320,10 +320,10 @@ void NotesList::on_btnRename_clicked() {
     edit->setPlainText(mw_one->m_Notes->new_title);
   }
 
-  QToolButton *btnCancel = new QToolButton(this);
-  QToolButton *btnPaste = new QToolButton(this);
-  QToolButton *btnCopy = new QToolButton(this);
-  QToolButton *btnOk = new QToolButton(this);
+  QToolButton *btnCancel = new QToolButton(m_RenameNotes);
+  QToolButton *btnPaste = new QToolButton(m_RenameNotes);
+  QToolButton *btnCopy = new QToolButton(m_RenameNotes);
+  QToolButton *btnOk = new QToolButton(m_RenameNotes);
   btnCancel->setText(tr("Cancel"));
   btnPaste->setText(tr("Paste"));
   btnCopy->setText(tr("Copy"));
@@ -376,12 +376,8 @@ void NotesList::on_btnRename_clicked() {
     w = mw_one->width() - 2;
     y = mw_one->geometry().y();
   } else {
-    w = mw_one->width();
-    if (w > 300)
-      w = 300;
-    else
-      w = mw_one->width() - 20;
-    y = mw_one->geometry().y() + (mw_one->height() - h) / 2;
+    w = 320;
+    y = 20;
   }
 
   x = mw_one->geometry().x() + (mw_one->width() - w) / 2;
@@ -1147,21 +1143,26 @@ void NotesList::needDelNotes() {
   int count = iniNotes.value("/NeedDelNotes/Count", 0).toInt();
   if (count == 0) return;
 
+  // read and save needDelFiles
+  needDelFiles.clear();
+  for (int i = 0; i < count; i++) {
+    QString str1 =
+        iniNotes.value("/NeedDelNotes/Note-" + QString::number(i), "")
+            .toString();
+    needDelFiles.append(str1);
+  }
+
   QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);
   int execCount = Reg.value("/ExecDelNotes/Count", 0).toInt();
   if (execCount == count) return;
   Reg.setValue("/ExecDelNotes/Count", count);
   Reg.sync();
 
+  // del files
   bool isDelOk;
   for (int i = 0; i < count; i++) {
-    QString str1 =
-        iniNotes.value("/NeedDelNotes/Note-" + QString::number(i), "")
-            .toString();
-    QString mdFile = iniDir + str1;
+    QString mdFile = iniDir + needDelFiles.at(i);
     isDelOk = delFile(mdFile);
-
-    needDelFiles.append(str1);
 
     qDebug() << "Need Del Note: " << mdFile << isDelOk;
   }
@@ -1283,7 +1284,7 @@ QStringList findMarkdownFiles(const QString &dirPath) {
 
   QList<QString> paths;
   QDir dir(iniDir + "memo/");
-  QStringList files = dir.entryList(QStringList() << "*.md", QDir::Files);
+  const QStringList files = dir.entryList(QStringList() << "*.md", QDir::Files);
   for (const QString &file : files) {
     QFileInfo info(dir.absoluteFilePath(file));
     QString canonicalPath = info.canonicalFilePath();  // 规范化路径

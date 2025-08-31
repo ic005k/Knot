@@ -1201,9 +1201,7 @@ void Todo::reeditText() {
     w = mw_one->width() - 2;
     y = mw_one->geometry().y();
   } else {
-    w = mw_one->width() / 2;
-    if (w < m_ReeditTodo->width()) w = m_ReeditTodo->width();
-
+    w = 300;
     y = mw_one->geometry().y() + (mw_one->height() - h) / 2;
   }
   x = mw_one->geometry().x() + (mw_one->width() - w) / 2;

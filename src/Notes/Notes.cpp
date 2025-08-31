@@ -1159,8 +1159,10 @@ void Notes::loadEmptyNote() {
 
 void Notes::startBackgroundTaskDelAndClear() {
   QString fullPath = iniDir + "memo";  // 先构造完整路径
-
+  isDelLocalNoteEnd = false;
   QFuture<void> future = QtConcurrent::run([=]() {
+    mw_one->m_NotesList->needDelNotes();
+    isDelLocalNoteEnd = true;
     mw_one->m_NotesList->m_dbManager.cleanMissingFileRecords(fullPath);
   });
 
@@ -1205,8 +1207,10 @@ void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
 }
 
 void Notes::openNotesUI() {
-  mw_one->m_NotesList->needDelNotes();
   startBackgroundTaskDelAndClear();
+
+  while (!isDelLocalNoteEnd)
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
   init_all_notes();
 

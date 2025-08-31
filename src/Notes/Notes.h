@@ -68,6 +68,8 @@ class Notes : public QDialog {
   ~Notes();
   Ui::Notes *ui;
 
+  bool isDelLocalNoteEnd;
+
   void openLocalHtmlFileInAndroid();
 
   QString htmlFileName;
