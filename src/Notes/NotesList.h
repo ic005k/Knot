@@ -183,7 +183,8 @@ class NotesList : public QDialog {
 
   void startBackgroundTaskDelFilesIndex(const QStringList &files);
   QStringList getRecycleNoteFiles();
-  protected:
+
+ protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
   void closeEvent(QCloseEvent *event) override;
@@ -272,8 +273,8 @@ class NotesList : public QDialog {
 
   QStringList knot_all_files;
 
-  void clearMD_Pic(QTreeWidget *tw);
-  void removePicFromMD(QString mdfile);
+  void clearMD_Pic();
+
   void removeFromFiles(QString str);
 
   void on_actionAdd_NoteBook_triggered();
@@ -302,7 +303,6 @@ class NotesList : public QDialog {
 
   bool m_isIndexing = false;  // 标记索引状态
 
-  void clearInvalidMDFile();
   SearchModel m_searchModel;
 
   int getSavedNotesListIndex(int notebookIndex);

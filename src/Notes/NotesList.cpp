@@ -1176,78 +1176,92 @@ void NotesList::setWinPos() {
 
 void NotesList::clearFiles() {
   QFile::remove(iniDir + "memo.zip");
+
   QString tempDir = iniDir;
   knot_all_files.clear();
   QStringList fmt = QString("zip;md;html;jpg;bmp;png;ini").split(';');
   getAllFiles(tempDir, knot_all_files, fmt);
-
-  clearMD_Pic(tw);
-  clearMD_Pic(twrb);
 
   int count = knot_all_files.count();
   for (int i = 0; i < count; i++) {
     QString filePath = knot_all_files.at(i);
 
     QFile file(filePath);
-    if (filePath.contains(".sync-conflict-") || filePath.contains(".png")) {
+    if (filePath.contains(".sync-conflict-")) {
       file.remove();
     }
   }
+
+  clearMD_Pic();
 }
 
-void NotesList::clearInvalidMDFile() {
-  QStringList tempList = knot_all_files;
-  for (const QString &item : validMDFiles) {
-    tempList.removeAll(item);
-  }
+void NotesList::clearMD_Pic() {
+  // 获取所有MD文件和图片文件
+  QStringList allmdFiles = m_Method->getMdFilesInDir(iniDir + "memo/", true);
+  QStringList allimgFiles;
+  QStringList fmt = QString("jpg;bmp;png").split(';');
+  getAllFiles(iniDir + "memo/images/", allimgFiles, fmt);
 
-  QDir dir;
-  QString path = privateDir + "invalid_md/";
-  dir.mkpath(path);
-  for (int i = 0; i < tempList.count(); i++) {
-    QString m_file = tempList.at(i);
-    QFileInfo fi(m_file);
-    if (fi.suffix() == "md") {
-      QString new_file = path + fi.fileName();
-      QFile::remove(new_file);
-      QFile::copy(m_file, new_file);
-      QFile::remove(m_file);
+  // 存储所有被引用的图片文件名
+  QStringList usedImageNames;
+
+  // 使用静态QRegularExpression对象，避免重复创建
+  static const QRegularExpression regex(
+      R"(!\[.*?\]\(([\w\-./\\]+\.(jpg|jpeg|bmp|png|gif))\))",
+      QRegularExpression::CaseInsensitiveOption);
+
+  // 1. 解析所有Markdown文件，提取引用的图片
+  foreach (const QString &mdFilePath, allmdFiles) {
+    QFile mdFile(mdFilePath);
+    if (!mdFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      qWarning() << "无法打开Markdown文件:" << mdFilePath;
+      continue;
     }
-  }
-}
 
-void NotesList::clearMD_Pic(QTreeWidget *tw) {
-  for (int i = 0; i < tw->topLevelItemCount(); i++) {
-    QTreeWidgetItem *topItem = tw->topLevelItem(i);
-    int childCount = topItem->childCount();
-    for (int j = 0; j < childCount; j++) {
-      QTreeWidgetItem *childItem = topItem->child(j);
-      if (!childItem->text(1).isEmpty()) {
-        QString str = childItem->text(1);
-        removePicFromMD(iniDir + str);
+    // 逐行读取，降低内存占用
+    QTextStream in(&mdFile);
+    QString line;
+    while (in.readLineInto(&line)) {
+      QRegularExpressionMatchIterator it = regex.globalMatch(line);
+      while (it.hasNext()) {
+        QRegularExpressionMatch match = it.next();
+        QString imagePath = match.captured(1);
+        // 处理相对路径：基于当前MD文件所在目录解析图片路径
+        QFileInfo mdFileInfo(mdFilePath);
+        QFileInfo imageInfo(mdFileInfo.dir(), imagePath);
+        usedImageNames << imageInfo.fileName();
+      }
+    }
+    mdFile.close();
+  }
+
+  // 去重处理
+  usedImageNames.removeDuplicates();
+
+  // 2. 找出并删除未被引用的图片
+  int deletedCount = 0;
+  int failedCount = 0;
+
+  foreach (const QString &imgFilePath, allimgFiles) {
+    QFileInfo imgInfo(imgFilePath);
+    QString imgFileName = imgInfo.fileName();
+
+    // 检查图片是否未被引用
+    if (!usedImageNames.contains(imgFileName)) {
+      QFile imgFile(imgFilePath);
+      if (imgFile.remove()) {
+        qDebug() << "已删除未使用的图片:" << imgFilePath;
+        deletedCount++;
       } else {
-        int count1 = childItem->childCount();
-        for (int n = 0; n < count1; n++) {
-          QString str = childItem->child(n)->text(1);
-          removePicFromMD(iniDir + str);
-        }
+        qWarning() << "删除失败:" << imgFilePath
+                   << "原因:" << imgFile.errorString();
+        failedCount++;
       }
     }
   }
-}
 
-void NotesList::removePicFromMD(QString mdfile) {
-  QString txt = loadText(mdfile);
-
-  for (int i = 0; i < knot_all_files.count(); i++) {
-    QString str0 = knot_all_files.at(i);
-    str0.replace(iniDir + "memo/", "");
-
-    if (txt.contains(str0)) {
-      knot_all_files.removeAt(i);
-      i = 0;
-    }
-  }
+  qDebug() << "图片清理完成 - 已删除:" << deletedCount
+           << "个, 删除失败:" << failedCount << "个";
 }
 
 void NotesList::getAllFiles(const QString &foldPath, QStringList &folds,
