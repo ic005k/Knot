@@ -1390,7 +1390,7 @@ void Notes::openNotes() {
     }
 
     // get md image files
-    m_CloudBackup->getRemoteFileList(url + "KnotData/memo/images");
+    m_CloudBackup->getRemoteFileList(url + "KnotData/memo/images/");
     while (!m_CloudBackup->isGetRemoteFileListEnd)
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     qDebug() << m_CloudBackup->webdavFileList

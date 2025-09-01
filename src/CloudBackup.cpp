@@ -295,8 +295,7 @@ void CloudBackup::createDirectory(QString webdavUrl, QString remoteDirPath) {
   m_manager->deleteLater();
 }
 
-void CloudBackup::downloadFile_Old(QString remoteFileName,
-                                   QString localSavePath) {
+void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
   m_manager = new QNetworkAccessManager();
 
   QUrl url(WEBDAV_URL + remoteFileName);
@@ -327,6 +326,15 @@ void CloudBackup::downloadFile_Old(QString remoteFileName,
               (bytesTotal > 0)
                   ? static_cast<int>((bytesReceived * 100) / bytesTotal)
                   : 0;
+
+          QString strReceived = m_Method->getFileSize(bytesReceived, 2);
+          // qDebug() << "bytesTotal=" << bytesTotal
+          //          << "bytesReceived=" << strReceived;
+          mui->lblReceivedBytes->setText(strReceived);
+          if (bytesTotal < 0) {
+            mui->progressBar->setMinimum(0);
+            mui->progressBar->setMaximum(0);
+          }
           mui->progressBar->setValue(percent);
         });
       });
@@ -404,7 +412,8 @@ void CloudBackup::downloadFile_Old(QString remoteFileName,
       });
 }
 
-void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
+void CloudBackup::downloadFile_Old(QString remoteFileName,
+                                   QString localSavePath) {
   // 初始化网络管理器
   if (m_manager != nullptr) {
     delete m_manager;
@@ -1074,7 +1083,7 @@ void CloudBackup::createRemoteWebDAVDir() {
   QString url = getWebDAVArgument();
   createDirectory(url, "KnotData/");
   createDirectory(url, "KnotData/memo/");
-  createDirectory(url, "KnotData/memo/images");
+  createDirectory(url, "KnotData/memo/images/");
 }
 
 void CloudBackup::deleteWebDAVFiles(QStringList filesToDelete) {
