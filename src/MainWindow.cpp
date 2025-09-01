@@ -2558,11 +2558,15 @@ void MainWindow::on_btnManagement_clicked() {
 }
 
 void MainWindow::on_btnUpMove_clicked() {
+  if (m_Method->getCountFromQW(mui->qwNoteBook) == 0) return;
+
   m_NotesList->setTWCurrentItem();
   m_NotesList->on_btnUp_clicked();
 }
 
 void MainWindow::on_btnDownMove_clicked() {
+  if (m_Method->getCountFromQW(mui->qwNoteBook) == 0) return;
+
   m_NotesList->setTWCurrentItem();
   m_NotesList->on_btnDown_clicked();
 }
