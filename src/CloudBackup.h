@@ -70,7 +70,9 @@ class CloudBackup : public QDialog {
   void backExit();
   void init_CloudBacup();
   void webDAVRestoreData();
- signals:
+  void downloadFile_Old(QString remoteFileName, QString localSavePath);
+  void changeComBoxWebDAV(const QString &arg1);
+  signals:
 
  protected:
   bool eventFilter(QObject *obj, QEvent *evn) override;

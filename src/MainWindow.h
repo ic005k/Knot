@@ -358,7 +358,8 @@ class MainWindow : public QMainWindow {
   int max_day = 31;
 
   void execNeedSyncNotes();
-  protected:
+
+ protected:
   void closeEvent(QCloseEvent *event) override;
   bool eventFilter(QObject *watch, QEvent *evn) override;
   void paintEvent(QPaintEvent *event) override;
@@ -818,6 +819,8 @@ class MainWindow : public QMainWindow {
   void on_btnTools_clicked();
 
   void on_btnCopyNoteLink_clicked();
+
+  void on_cboxWebDAV_currentTextChanged(const QString &arg1);
 
  private:
   bool isMoveEntry;

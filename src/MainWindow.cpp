@@ -2884,3 +2884,7 @@ void MainWindow::on_btnCopyNoteLink_clicked() {
   ShowMessage *msg = new ShowMessage(this);
   msg->showMsg(appName, strlink, 1);
 }
+
+void MainWindow::on_cboxWebDAV_currentTextChanged(const QString &arg1) {
+  m_CloudBackup->changeComBoxWebDAV(arg1);
+}

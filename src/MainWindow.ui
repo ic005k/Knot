@@ -2881,10 +2881,134 @@ QTabBar::scroller {width:0}
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="editWebDAV">
-                <property name="text">
-                 <string>https://dav.jianguoyun.com/dav/</string>
+               <widget class="QComboBox" name="cboxWebDAV">
+                <property name="styleSheet">
+                 <string notr="true">/* 安卓风格QComboBox样式 - 优化内边距和焦点显示 */
+QComboBox {
+    /* 基础尺寸调整：减小内边距，确保文本不居中靠拢 */
+    min-height: 48px;
+    padding: 0 12px; /* 减小水平内边距，避免文本居中感 */
+    border: 1px solid;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border-color: var(--border-color);
+    text-align: left;
+    /* 关键修复：确保焦点边框完整显示 */
+    margin: 0;
+    outline: none; /* 移除默认焦点虚线，避免冲突 */
+    transition: border-color 0.2s ease;
+}
+
+/* 下拉按钮区域：调整宽度避免挤压 */
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 40px; /* 适当减小宽度，避免占用过多空间 */
+    border-left: 1px solid var(--border-color);
+    background-color: transparent;
+    margin: 0; /* 移除默认外边距 */
+}
+
+/* 下拉箭头：微调大小 */
+QComboBox::down-arrow {
+    width: 0;
+    height: 0;
+    margin: auto;
+    border-left: 5px solid transparent; /* 稍小的箭头 */
+    border-right: 5px solid transparent;
+    border-top: 5px solid #2196f3; /* 蓝色箭头 */
+}
+
+/* 下拉列表容器 */
+QComboBox QAbstractItemView {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: 4px 0; /* 减小列表内边距 */
+    margin: 2px 0;
+    font-size: 14px;
+    outline: none;
+}
+
+/* 列表项样式：调整内边距 */
+QComboBox QAbstractItemView::item {
+    padding: 0 12px; /* 与主控件内边距一致 */
+    min-height: 48px;
+    background-color: transparent;
+    text-align: left;
+}
+
+/* 列表项交互效果 */
+QComboBox QAbstractItemView::item:hover {
+    background-color: var(--hover-color);
+}
+
+QComboBox QAbstractItemView::item:selected {
+    background-color: #2196f3;
+    color: #ffffff;
+}
+
+/* 焦点状态优化：完整显示边框 */
+QComboBox:focus {
+    border-color: #2196f3;
+    /* 可选：添加轻微阴影增强焦点效果 */
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+/* 禁用状态 */
+QComboBox:disabled {
+    background-color: var(--disabled-bg);
+    color: var(--disabled-text);
+    border-color: var(--disabled-border);
+}
+
+QComboBox:disabled::down-arrow {
+    border-top-color: var(--disabled-text);
+}
+
+/* 明模式配色 */
+@media (prefers-color-scheme: light) {
+    QComboBox {
+        --bg-color: #ffffff;
+        --text-color: #000000;
+        --border-color: #dddddd;
+        --hover-color: #f5f5f5;
+        --disabled-bg: #f9f9f9;
+        --disabled-text: #bbbbbb;
+        --disabled-border: #eeeeee;
+    }
+}
+
+/* 暗模式配色 */
+@media (prefers-color-scheme: dark) {
+    QComboBox {
+        --bg-color: #1e1e1e;
+        --text-color: #ffffff;
+        --border-color: #444444;
+        --hover-color: #333333;
+        --disabled-bg: #2d2d2d;
+        --disabled-text: #777777;
+        --disabled-border: #555555;
+    }
+}
+</string>
                 </property>
+                <property name="editable">
+                 <bool>true</bool>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>https://dav.jianguoyun.com/dav/</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>https://soya.infini-cloud.net/dav/</string>
+                 </property>
+                </item>
                </widget>
               </item>
               <item>

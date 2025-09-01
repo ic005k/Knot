@@ -658,7 +658,7 @@ void MainHelper::init_UIWidget() {
     mui->editTodo->installEventFilter(editFilter);
     mui->editDetails->viewport()->installEventFilter(editFilter);
     mui->editTodo->viewport()->installEventFilter(editFilter);
-    mui->editWebDAV->installEventFilter(editFilter);
+    mui->cboxWebDAV->installEventFilter(editFilter);
     mui->editWebDAVPassword->installEventFilter(editFilter);
     mui->editWebDAVUsername->installEventFilter(editFilter);
     mui->editFindNote->installEventFilter(editFilter);

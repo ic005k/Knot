@@ -159,7 +159,7 @@ void CloudBackup::uploadData() {
 }
 
 QString CloudBackup::getWebDAVArgument() {
-  QString url = mui->editWebDAV->text().trimmed();
+  QString url = mui->cboxWebDAV->currentText().trimmed();
   USERNAME = mui->editWebDAVUsername->text().trimmed();
   APP_PASSWORD = mui->editWebDAVPassword->text().trimmed();
   return url;
@@ -295,8 +295,9 @@ void CloudBackup::createDirectory(QString webdavUrl, QString remoteDirPath) {
   m_manager->deleteLater();
 }
 
-/*void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath)
-{ m_manager = new QNetworkAccessManager();
+void CloudBackup::downloadFile_Old(QString remoteFileName,
+                                   QString localSavePath) {
+  m_manager = new QNetworkAccessManager();
 
   QUrl url(WEBDAV_URL + remoteFileName);
   QNetworkRequest request(url);
@@ -401,7 +402,7 @@ void CloudBackup::createDirectory(QString webdavUrl, QString remoteDirPath) {
 
         reply->deleteLater();
       });
-}*/
+}
 
 void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
   // 初始化网络管理器
@@ -794,7 +795,7 @@ WebDavHelper *listWebDavFiles(const QString &url, const QString &username,
   request.setRawHeader("Depth", "1");  // 仅获取当前目录的直接子项
   // request.setRawHeader("Depth",
   //                      "infinity");  // 递归获取子目录，但有的webdav不支持
-  if (url.contains(mui->editWebDAV->text().trimmed()))
+  if (url.contains(mui->cboxWebDAV->currentText().trimmed()))
     request.setRawHeader("Brief", "t");  // 坚果云需要此头
   request.setHeader(QNetworkRequest::ContentTypeHeader,
                     "text/xml; charset=utf-8");
@@ -963,7 +964,7 @@ void WebDavDownloader::startNextDownload() {
   }
 
   // 构造请求URL "https://dav.jianguoyun.com/dav/"
-  QString strUrl = mui->editWebDAV->text().trimmed();
+  QString strUrl = mui->cboxWebDAV->currentText().trimmed();
   QUrl url(strUrl + remotePath);
   if (!url.isValid()) {
     qWarning() << "无效的URL:" << url.toString();
@@ -1100,13 +1101,23 @@ void CloudBackup::backExit() {
     }
   }
 
-  iniPreferences->setValue("/webdav/url", mui->editWebDAV->text().trimmed());
-
-  iniPreferences->setValue("/webdav/username",
-                           mui->editWebDAVUsername->text().trimmed());
+  QString strWebDAV = mui->cboxWebDAV->currentText().trimmed();
+  QString strUserName = mui->editWebDAVUsername->text().trimmed();
+  iniPreferences->setValue("/webdav/url", strWebDAV);
+  iniPreferences->setValue("/webdav/username", strUserName);
   QString password = mui->editWebDAVPassword->text().trimmed();
   QString aesStr = aesEncrypt(password, aes_key, aes_iv);
   iniPreferences->setValue("/webdav/password", aesStr);
+
+  iniPreferences->setValue("/webdav/username_" + strWebDAV, strUserName);
+  iniPreferences->setValue("/webdav/password_" + strWebDAV, aesStr);
+
+  int count = mui->cboxWebDAV->count();
+  iniPreferences->setValue("/webdav/count", count);
+  for (int i = 0; i < count; i++) {
+    iniPreferences->setValue("/webdav/text" + QString::number(i),
+                             mui->cboxWebDAV->itemText(i));
+  }
 
   iniPreferences->setValue("/cloudbak/onedrive", mui->chkOneDrive->isChecked());
   iniPreferences->setValue("/cloudbak/webdav", mui->chkWebDAV->isChecked());
@@ -1116,7 +1127,21 @@ void CloudBackup::backExit() {
 }
 
 void CloudBackup::init_CloudBacup() {
-  mui->editWebDAV->setText(
+  int count = iniPreferences->value("/webdav/count", 0).toInt();
+  mui->cboxWebDAV->clear();
+  QStringList txtList;
+  txtList.append("https://dav.jianguoyun.com/dav/");
+  txtList.append("https://soya.infini-cloud.net/dav/");
+  for (int i = 0; i < count; i++) {
+    QString text =
+        iniPreferences->value("/webdav/text" + QString::number(i), "")
+            .toString();
+    txtList.append(text);
+  }
+  txtList.removeDuplicates();
+  mui->cboxWebDAV->addItems(txtList);
+
+  mui->cboxWebDAV->setCurrentText(
       iniPreferences->value("/webdav/url", "https://dav.jianguoyun.com/dav/")
           .toString());
 
@@ -1135,6 +1160,16 @@ void CloudBackup::init_CloudBacup() {
       iniPreferences->value("/cloudbak/autosync", 0).toBool());
 }
 
+void CloudBackup::changeComBoxWebDAV(const QString &arg1) {
+  QString username, password;
+  username = iniPreferences->value("/webdav/username_" + arg1).toString();
+  QString aesStr = iniPreferences->value("/webdav/password_" + arg1).toString();
+  password = aesDecrypt(aesStr, aes_key, aes_iv);
+
+  mui->editWebDAVUsername->setText(username);
+  mui->editWebDAVPassword->setText(password);
+}
+
 void CloudBackup::webDAVRestoreData() {
   QString filePath;
   filePath = bakfileDir + "memo.zip";
@@ -1149,7 +1184,7 @@ void CloudBackup::webDAVRestoreData() {
               tr("This action overwrites local files with files in the cloud."),
           2))
     return;
-  WEBDAV_URL = mui->editWebDAV->text().trimmed();
+  WEBDAV_URL = mui->cboxWebDAV->currentText().trimmed();
   USERNAME = mui->editWebDAVUsername->text().trimmed();
   APP_PASSWORD = mui->editWebDAVPassword->text().trimmed();
   downloadFile("Knot/memo.zip", filePath);
