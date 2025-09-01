@@ -295,8 +295,8 @@ void CloudBackup::createDirectory(QString webdavUrl, QString remoteDirPath) {
   m_manager->deleteLater();
 }
 
-void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
-  m_manager = new QNetworkAccessManager();
+/*void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath)
+{ m_manager = new QNetworkAccessManager();
 
   QUrl url(WEBDAV_URL + remoteFileName);
   QNetworkRequest request(url);
@@ -401,6 +401,256 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
 
         reply->deleteLater();
       });
+}*/
+
+void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
+  // 初始化网络管理器
+  if (m_manager != nullptr) {
+    delete m_manager;
+    m_manager = nullptr;
+  }
+  m_manager = new QNetworkAccessManager(this);
+
+  // 1. 构建并校验URL
+  QUrl url(WEBDAV_URL + remoteFileName);
+  if (!url.isValid()) {
+    ShowMessage *m_ShowMsg = new ShowMessage(mw_one);
+    m_ShowMsg->showMsg("WebDAV", tr("Invalid URL: ") + url.toString(), 1);
+    return;
+  }
+
+  // 2. 构建网络请求
+  QNetworkRequest request(url);
+  request.setTransferTimeout(30000);  // 30秒超时
+  request.setRawHeader("User-Agent", "CloudBackup/1.0");
+
+  // 设置认证信息
+  QString auth = QString("%1:%2").arg(USERNAME).arg(APP_PASSWORD);
+  request.setRawHeader("Authorization", "Basic " + auth.toUtf8().toBase64());
+
+  // 3. 准备本地文件
+  QFile *localFile = new QFile(localSavePath);
+  if (!localFile->open(QIODevice::WriteOnly)) {
+    QString errorMsg =
+        tr("Failed to create local file: ") + localFile->errorString();
+    qDebug() << errorMsg;
+
+    ShowMessage *m_ShowMsg = new ShowMessage(mw_one);
+    m_ShowMsg->showMsg("WebDAV", errorMsg, 1);
+
+    delete localFile;
+    return;
+  }
+
+  // 4. 关键变量定义
+  qint64 bytesReceived = 0;         // 已接收字节数
+  qint64 fileTotalSize = -1;        // 文件总大小
+  bool serviceChecked = false;      // 是否已完成服务类型检查
+  bool useBusyProgress = true;      // 是否使用忙碌状态（默认是）
+  QTimer *progressTimer = nullptr;  // 进度更新定时器
+
+  // 5. 发起下载请求
+  QNetworkReply *reply = m_manager->get(request);
+  m_activeDownloads.insert(reply, localFile);
+
+  // 6. 服务类型检查与处理（完全分离的逻辑）
+  auto checkServiceType = [&]() {
+    // 检查是否有总大小信息
+    QByteArray contentLength = reply->rawHeader("Content-Length");
+    QByteArray contentRange = reply->rawHeader("Content-Range");
+
+    // 解析总大小
+    if (!contentLength.isEmpty()) {
+      bool conversionOk = false;
+      fileTotalSize = contentLength.toLongLong(&conversionOk);
+      if (conversionOk && fileTotalSize > 0) {
+        useBusyProgress = false;  // 标准服务，使用百分比
+      }
+    } else if (!contentRange.isEmpty()) {
+      QString rangeStr = contentRange;
+      int totalSepIndex = rangeStr.lastIndexOf('/');
+      if (totalSepIndex != -1) {
+        bool conversionOk = false;
+        fileTotalSize =
+            rangeStr.mid(totalSepIndex + 1).toLongLong(&conversionOk);
+        if (conversionOk && fileTotalSize > 0) {
+          useBusyProgress = false;  // 标准服务，使用百分比
+        }
+      }
+    }
+
+    // 根据服务类型初始化进度条（完全分离的初始化）
+    QMetaObject::invokeMethod(this, [this, useBusyProgress]() {
+      if (useBusyProgress) {
+        // 非标准服务：忙碌状态（min = max）
+        mui->progressBar->setRange(0, 0);
+        mui->progressBar->setValue(0);
+      } else {
+        // 标准服务：百分比状态
+        mui->progressBar->setRange(0, 100);
+        mui->progressBar->setValue(0);
+      }
+    });
+
+    // 初始化对应类型的进度更新逻辑（完全分离的更新机制）
+    if (!useBusyProgress) {
+      // 标准服务：使用字节计数更新百分比
+      connect(reply, &QNetworkReply::readyRead,
+              [this, reply, &bytesReceived, &fileTotalSize]() {
+                if (!reply || reply->isFinished()) return;
+
+                QFile *file = m_activeDownloads.value(reply);
+                if (file && file->isOpen()) {
+                  QByteArray data = reply->readAll();
+                  qint64 writeSize = file->write(data);
+                  if (writeSize > 0) {
+                    bytesReceived += writeSize;
+                    int percent = static_cast<int>((bytesReceived * 100.0) /
+                                                   fileTotalSize);
+                    percent = qMin(percent, 100);
+
+                    QMetaObject::invokeMethod(this, [this, percent]() {
+                      mui->progressBar->setValue(percent);
+                    });
+                  }
+                }
+              });
+    } else {
+      // 非标准服务：仅需保持忙碌状态，无需额外更新逻辑
+      qDebug() << "Using busy progress - no additional updates needed";
+    }
+
+    serviceChecked = true;
+  };
+
+  // 立即检查一次服务类型（可能此时元数据还未就绪）
+  checkServiceType();
+
+  // 元数据就绪后再次检查（确保准确判断服务类型）
+  connect(reply, &QNetworkReply::metaDataChanged, [&]() {
+    if (!serviceChecked) {
+      checkServiceType();
+    }
+  });
+
+  // 7. 非标准服务的数据接收处理（仅写入文件，不更新进度）
+  connect(reply, &QNetworkReply::readyRead,
+          [this, reply, localFile, &useBusyProgress]() {
+            if (useBusyProgress && reply && !reply->isFinished()) {
+              QFile *file = m_activeDownloads.value(reply);
+              if (file && file->isOpen()) {
+                // 仅写入数据，不处理进度（忙碌状态由Qt自动维护）
+                QByteArray data = reply->readAll();
+                file->write(data);
+              }
+            }
+          });
+
+  // 8. 下载完成处理 - 关键修复：将progressTimer改为按引用捕获
+  connect(
+      reply, &QNetworkReply::finished,
+      [this, reply, localFile, localSavePath, &useBusyProgress,
+       &progressTimer]()  // 这里使用&progressTimer按引用捕获
+      {
+        // 清理定时器（如果存在）
+        if (progressTimer != nullptr) {
+          progressTimer->stop();
+          delete progressTimer;
+          progressTimer = nullptr;
+        }
+
+        // 处理剩余数据
+        if (localFile->isOpen()) {
+          QByteArray remainingData = reply->readAll();
+          if (!remainingData.isEmpty()) {
+            localFile->write(remainingData);
+          }
+          localFile->close();
+        }
+
+        // 获取响应状态
+        const int statusCode =
+            reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        const QNetworkReply::NetworkError error = reply->error();
+
+        // 重置进度条为正常范围
+        QMetaObject::invokeMethod(
+            this, [this]() { mui->progressBar->setRange(0, 100); });
+
+        // 下载成功
+        if (error == QNetworkReply::NoError && statusCode >= 200 &&
+            statusCode < 300) {
+          // 进度条设为100%
+          QMetaObject::invokeMethod(
+              this, [this]() { mui->progressBar->setValue(100); });
+
+          // 成功提示
+          zipfile = localSavePath;
+          ShowMessage *showbox = new ShowMessage(this);
+          showbox->showMsg(
+              "WebDAV",
+              tr("Successfully downloaded file, saved to: ") + localSavePath +
+                  "\n\n" + tr("Final Size: ") +
+                  m_Method->getFileSize(QFile(localSavePath).size(), 2),
+              1);
+
+          // 导入逻辑
+          if (QFile::exists(localSavePath)) {
+            ShowMessage *m_ShowMsg = new ShowMessage(mw_one);
+            bool importConfirmed = m_ShowMsg->showMsg(
+                "Kont",
+                tr("Import this data?") + "\n" +
+                    mw_one->m_Reader->getUriRealPath(localSavePath),
+                2);
+
+            if (!importConfirmed) {
+              isZipOK = false;
+            } else {
+              isZipOK = true;
+              mw_one->showProgress();
+              isMenuImport = false;
+              isDownData = true;
+              mw_one->myImportDataThread->start();
+
+              if (isZipOK) {
+                mw_one->on_btnBack_One_clicked();
+              }
+            }
+          }
+        }
+        // 下载失败
+        else {
+          localFile->remove();
+          QString errorMsg =
+              tr("Download failed (Error %1): ").arg(statusCode) +
+              reply->errorString();
+          qDebug() << errorMsg;
+
+          ShowMessage *m_ShowMsg = new ShowMessage(mw_one);
+          if (statusCode == 401) {
+            m_ShowMsg->showMsg("WebDAV", tr("Authentication failed."), 1);
+          } else {
+            m_ShowMsg->showMsg("WebDAV", errorMsg, 1);
+          }
+          isZipOK = false;
+
+          // 重置进度条为0
+          QMetaObject::invokeMethod(
+              this, [this]() { mui->progressBar->setValue(0); });
+        }
+
+        // 清理资源
+        m_activeDownloads.remove(reply);
+        delete localFile;
+        reply->deleteLater();
+      });
+
+  // 错误处理
+  connect(reply, &QNetworkReply::errorOccurred,
+          [this, reply](QNetworkReply::NetworkError code) {
+            qDebug() << "Download error - Code:" << code
+                     << "Message:" << reply->errorString();
+          });
 }
 
 // 加密函数（返回Base64编码字符串）
@@ -712,8 +962,9 @@ void WebDavDownloader::startNextDownload() {
     return;
   }
 
-  // 构造请求URL
-  QUrl url("https://dav.jianguoyun.com/dav/" + remotePath);
+  // 构造请求URL "https://dav.jianguoyun.com/dav/"
+  QString strUrl = mui->editWebDAV->text().trimmed();
+  QUrl url(strUrl + remotePath);
   if (!url.isValid()) {
     qWarning() << "无效的URL:" << url.toString();
     return;

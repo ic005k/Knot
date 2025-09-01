@@ -2342,7 +2342,7 @@ QTabBar::scroller {width:0}
        <item>
         <widget class="QTabWidget" name="twCloudBackup">
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tab_3">
           <attribute name="title">
