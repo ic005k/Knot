@@ -209,6 +209,7 @@ void Todo::closeTodo() {
 
     QStringList files;
     files.append(todoZipFile);
+    mw_one->showProgress();
     m_CloudBackup->uploadFilesToWebDAV(files);
     isNeedSync = false;
   }

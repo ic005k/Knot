@@ -175,5 +175,6 @@
         <file>res/view.svg</file>
         <file>res/reader/main.css</file>
         <file>res/reader/test.txt</file>
+        <file>res/combo.svg</file>
     </qresource>
 </RCC>

@@ -2888,3 +2888,5 @@ void MainWindow::on_btnCopyNoteLink_clicked() {
 void MainWindow::on_cboxWebDAV_currentTextChanged(const QString &arg1) {
   m_CloudBackup->changeComBoxWebDAV(arg1);
 }
+
+void MainWindow::on_btnShowCboxList_clicked() { mui->cboxWebDAV->showPopup(); }

@@ -37,8 +37,10 @@ CloudBackup::CloudBackup(QWidget *parent)
 
   this->installEventFilter(this);
 
+  int mh = mui->cboxWebDAV->height();
+  mui->btnShowCboxList->setFixedSize(mh, mh);
+
   init();
-  // initQuick();
 
   QString secret;
   // 先从环境变量读取，便于CI运行
@@ -360,6 +362,9 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
               statusCode < 300) {
             file->write(reply->readAll());
             file->close();
+
+            mui->progressBar->setMinimum(0);
+            mui->progressBar->setMaximum(100);
 
             zipfile = localSavePath;
             ShowMessage *showbox = new ShowMessage(this);
@@ -771,6 +776,8 @@ void CloudBackup::uploadFilesToWebDAV(QStringList files) {
 
       // 原子操作减少计数器并检查是否为最后一个任务
       if (activeReplyCount->fetchAndSubRelaxed(1) == 1) {
+        mw_one->closeProgress();
+
         manager->deleteLater();
         delete activeReplyCount;
       }

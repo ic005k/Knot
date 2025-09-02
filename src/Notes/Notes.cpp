@@ -745,6 +745,7 @@ void Notes::closeEvent(QCloseEvent *event) {
 void Notes::syncToWebDAV() {
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     if (notes_sync_files.count() > 0) {
+      mw_one->showProgress();
       m_CloudBackup->uploadFilesToWebDAV(notes_sync_files);
     }
   }

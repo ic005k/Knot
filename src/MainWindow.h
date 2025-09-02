@@ -822,6 +822,8 @@ class MainWindow : public QMainWindow {
 
   void on_cboxWebDAV_currentTextChanged(const QString &arg1);
 
+  void on_btnShowCboxList_clicked();
+
  private:
   bool isMoveEntry;
   QTimer *tmeFlash;
