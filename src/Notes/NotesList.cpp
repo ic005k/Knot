@@ -582,18 +582,6 @@ bool NotesList::on_btnImport_clicked() {
     strFile = strFile.toLower();
     isMD = strFile.contains(".md") || strFile.contains(".txt");
 
-#ifdef Q_OS_ANDROID
-
-    /*QString fileAndroid = mw_one->m_Reader->getUriRealPath(fileName);
-    isMD = fileAndroid.contains(".md");
-
-    QStringList list = fileAndroid.split("/");
-    QString str = list.at(list.count() - 1);
-    if (str.toInt() > 0) isMD = true;
-    strInfo = fileAndroid;*/
-
-#endif
-
     if (!isMD) {
       qDebug() << tr("Invalid Markdown file.") + "\n\n" + fileName;
 
@@ -620,15 +608,10 @@ bool NotesList::on_btnImport_clicked() {
         item1 = new QTreeWidgetItem(item);
         item1->setText(0, name);
 
-        tw->setCurrentItem(item1);
-
         QString a = "memo/" + mw_one->m_Notes->getDateTimeStr() + "_" +
                     QString::number(i) + ".md";
         QString mdFile = iniDir + a;
-        QTextEdit *edit = new QTextEdit();
-        edit->setAcceptRichText(false);
-        edit->setPlainText(strNoteText);
-        TextEditToFile(edit, mdFile);
+        StringToFile(strNoteText, mdFile);
 
         item1->setText(1, a);
 
@@ -651,6 +634,7 @@ bool NotesList::on_btnImport_clicked() {
 
             mw_one->m_Notes->startBackgroundTaskUpdateNoteIndexes(MDFileList);
 
+            isImportNotes = true;
             isImportFilesEnd = true;
             watcher->deleteLater();
           });
@@ -2207,7 +2191,7 @@ void NotesList::on_actionImport_Note_triggered() {
   mw_one->closeProgress();
 
   clickNoteBook();
-  setNotesListCurrentIndex(getNotesListCount() - 1);
+
   clickNoteList();
   saveNotesList();
 
@@ -2582,9 +2566,16 @@ void NotesList::readyNotesData(QTreeWidgetItem *topItem) {
     pNoteItems.append(childItems.begin(), childItems.end());
 
     // 其他UI操作
+
     int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
     int noteslistIndex = getSavedNotesListIndex(index);
     setNotesListCurrentIndex(noteslistIndex);
+
+    if (isImportNotes) {
+      int noteCount = getNotesListCount();
+      setNotesListCurrentIndex(noteCount - 1);
+      isImportNotes = false;
+    }
 
     setNoteLabel();
     clickNoteList();
@@ -2641,7 +2632,9 @@ void NotesList::clickNoteBook() {
 
     int noteslistIndex = getSavedNotesListIndex(index);
     setNotesListCurrentIndex(noteslistIndex);
+
     setNoteLabel();
+
     clickNoteList();
     if (isMouseClick) {
       setNotesListCurrentIndex(-1);

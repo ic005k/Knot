@@ -259,6 +259,8 @@ class NotesList : public QDialog {
 
   bool isImportFilesEnd;
 
+  bool isImportNotes = false;
+
   bool isReadyNoteDataEnd;
 
   bool isMouseClick = false;
