@@ -113,6 +113,7 @@ class CloudBackup : public QDialog {
 
   QByteArray aes_key = "MySuperSecretKey1234567890";  // 长度不足32会自动处理
   QByteArray aes_iv = "InitializationVe";             // 16字节
+  void resetProgBar();
 };
 
 // 声明一个轻量级信号发射器,列出WebDAV上某个目录下的所有文件

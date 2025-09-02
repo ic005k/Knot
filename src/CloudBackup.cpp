@@ -363,8 +363,7 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
             file->write(reply->readAll());
             file->close();
 
-            mui->progressBar->setMinimum(0);
-            mui->progressBar->setMaximum(100);
+            resetProgBar();
 
             zipfile = localSavePath;
             ShowMessage *showbox = new ShowMessage(this);
@@ -399,6 +398,10 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
               if (isZipOK) mw_one->on_btnBack_One_clicked();
             }
           } else {
+            resetProgBar();
+            mui->progressBar->setValue(0);
+            mui->lblReceivedBytes->setText("0");
+
             file->remove();
             if (statusCode == 401) {
               ShowMessage *m_ShowMsg = new ShowMessage(mw_one);
@@ -414,7 +417,13 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
         }
 
         reply->deleteLater();
+
       });
+}
+
+void CloudBackup::resetProgBar() {
+  mui->progressBar->setMinimum(0);
+  mui->progressBar->setMaximum(100);
 }
 
 void CloudBackup::downloadFile_Old(QString remoteFileName,
