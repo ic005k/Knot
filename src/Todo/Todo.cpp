@@ -1482,17 +1482,16 @@ void Todo::openTodo() {
                         return;
                       }
 
-                      //  m_Method->decompressWithPassword(
-                      //     zFile, privateDir + "KnotData", encPassword);
-
                       QString zipToto = privateDir + "KnotData/todo.ini";
                       QString localTodo = iniDir + "todo.ini";
 
                       if (isPasswordError == false) {
                         if (QFileInfo(zipToto).lastModified() >
                             QFileInfo(localTodo).lastModified()) {
-                          QFile::remove(localTodo);
-                          QFile::copy(zipToto, localTodo);
+                          QString tempFile = iniDir + "temp_todo.tmp";
+                          if (QFile::exists(tempFile)) QFile::remove(tempFile);
+                          QFile::copy(zipToto, tempFile);
+                          m_Method->upIniFile(tempFile, localTodo);
                         }
                       } else {
                         QFile::remove(zFile);

@@ -1167,7 +1167,7 @@ void Notes::startBackgroundTaskDelAndClear() {
     mw_one->m_NotesList->m_dbManager.cleanMissingFileRecords(fullPath);
   });
 
-  // 可选：使用 QFutureWatcher 监控进度
+  // 使用 QFutureWatcher 监控进度
   QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Database del and clear completed...";
@@ -1182,7 +1182,7 @@ void Notes::startBackgroundTaskUpdateNoteIndex(QString mdFile) {
   QFuture<void> future = QtConcurrent::run(
       [=]() { mw_one->m_NotesList->m_dbManager.updateFileIndex(fullPath); });
 
-  // 可选：使用 QFutureWatcher 监控进度
+  // 使用 QFutureWatcher 监控进度
   QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Update note index completed:" + fullPath;
@@ -1211,6 +1211,9 @@ void Notes::openNotesUI() {
   mw_one->closeProgress();
   m_Method->closeInfoWindow();
 
+  mui->frameMain->hide();
+  mui->frameNoteList->show();
+
   startBackgroundTaskDelAndClear();
 
   while (!isDelLocalNoteEnd)
@@ -1222,9 +1225,6 @@ void Notes::openNotesUI() {
 
   mw_one->isMemoVisible = true;
   mw_one->isReaderVisible = false;
-
-  mui->frameMain->hide();
-  mui->frameNoteList->show();
 
   mw_one->m_NotesList->set_memo_dir();
 
@@ -1566,7 +1566,8 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
         QFileInfo pFileInfo(pFile);
         QFileInfo kFileInfo(kFile);
         if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
-          QString tempFile = iniDir + "tempFile_";
+          QString tempFile = iniDir + "temp_notes_ini.tmp";
+          if (QFile::exists(tempFile)) QFile::remove(tempFile);
           if (QFile::copy(pFile, tempFile)) {
             m_Method->upIniFile(tempFile, kFile);
             qDebug() << "kFile:" << kFile << " Update successfully. ";

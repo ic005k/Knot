@@ -2991,7 +2991,11 @@ void Method::showInfoWindow(const QString &info) {
   // 创建显示秒数的标签
   lblSeconds = new QLabel("0 s", infoWindow);
   lblSeconds->setAlignment(Qt::AlignHCenter);  // 水平居中
-  lblSeconds->setStyleSheet("margin: 5px; color: #666666; font-weight: bold;");
+  // lblSeconds->setStyleSheet("margin: 5px; color: #666666; font-weight:
+  // bold;");
+  lblSeconds->setStyleSheet(
+      "margin: 5px; background-color: #E67C73; color: white; font-weight: "
+      "bold;");
 
   // 设置布局
   QVBoxLayout *layout = new QVBoxLayout(infoWindow);
@@ -3007,13 +3011,17 @@ void Method::showInfoWindow(const QString &info) {
   hbox->addWidget(infoProgBar);
 
   // 设置宽度与主窗口一致
-  infoWindow->setFixedWidth(mw_one->width());
+  if (isAndroid)
+    infoWindow->setFixedWidth(mw_one->width());
+  else
+    infoWindow->setFixedWidth(300);
   infoWindow->setFixedHeight(150);
 
   // 计算位置
   QPoint mainPos = mw_one->mapToGlobal(QPoint(0, 0));
-  int x = mainPos.x();
-  int y = mainPos.y() - infoWindow->height();
+  int x = mainPos.x() + (mw_one->geometry().width() - infoWindow->width()) / 2;
+  int y =
+      mainPos.y() + (mw_one->geometry().height() - infoWindow->height()) / 2;
 
   // 屏幕边界检查
   QScreen *screen = QApplication::screenAt(mainPos);
