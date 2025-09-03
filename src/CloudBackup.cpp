@@ -1010,6 +1010,18 @@ void WebDavDownloader::startNextDownload() {
             // 下面未使用的两个变量用来计算下载进度（目前未实现）
             Q_UNUSED(bytesReceived);
             Q_UNUSED(bytesTotal);
+
+            qDebug() << "bytesReceived=" << bytesReceived << "->"
+                     << "bytesTotal=" << bytesTotal;
+
+            if (m_Method->lblInfo != nullptr) {
+              QString rece = m_Method->getFileSize(bytesReceived, 2);
+              m_Method->lblInfo->setText("[" + QString::number(completedFiles) +
+                                         "/" + QString::number(totalFiles) +
+                                         "] [" + rece + "] " +
+                                         activeDownloads[reply]);
+            }
+
             emit progressChanged(completedFiles, totalFiles,
                                  activeDownloads[reply]);
           });

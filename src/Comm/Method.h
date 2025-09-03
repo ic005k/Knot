@@ -57,6 +57,11 @@ class Method : public QDialog {
   ~Method();
   Ui::Method *ui;
 
+  QLabel *lblInfo = nullptr;
+  void showInfoWindow(const QString &info);
+  void closeInfoWindow();
+  void setInfoText(const QString &newText);
+
   EnhancedColorPicker *m_EnColorPicker = nullptr;
 
   QMenu *menuNoteBook = nullptr;
@@ -422,6 +427,11 @@ class Method : public QDialog {
  private slots:
 
  private:
+  QDialog *infoWindow = nullptr;
+  QLabel *lblSeconds = nullptr;
+  QTimer *timer = nullptr;
+  int secondCounter = 0;
+
   void setCellText(int row, int column, QString str, QTableWidget *table);
   void generateData(int count);
   int nProgressBarType = 2;

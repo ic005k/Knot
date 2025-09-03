@@ -481,7 +481,10 @@ void Preferences::setEncSyncStatusTip() {
       mui->chkWebDAV->isChecked())
     mui->lblStats->setStyleSheet(mw_one->labelSyncStyleSheet);
 
-  if (isAndroid) mui->lblVer->hide();
-  mui->lblVer->setText("Knot   V:" + ver);
-  mui->lblVer->setStyleSheet(mui->lblStats->styleSheet());
+  if (isAndroid)
+    mui->lblStatus->hide();
+  else {
+    mui->lblStatus->setText("Knot   V:" + ver);
+    mui->lblStatus->setStyleSheet(mui->lblStats->styleSheet());
+  }
 }

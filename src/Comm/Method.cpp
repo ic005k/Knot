@@ -2962,3 +2962,104 @@ QStringList Method::getMdFilesInDir(const QString &dirPath,
 
   return mdFiles;
 }
+
+void Method::showInfoWindow(const QString &info) {
+  // 先关闭已存在的窗口
+  closeInfoWindow();
+
+  // 确保主窗口指针有效
+  if (!mw_one) {
+    qDebug() << "错误：主窗口指针为空！";
+    return;
+  }
+
+  // 创建无标题窗口，使用Qt::Dialog确保可以设置为模态
+  infoWindow = new QDialog(
+      nullptr, Qt::FramelessWindowHint | Qt::Dialog | Qt::WindowStaysOnTopHint);
+  infoWindow->setAttribute(Qt::WA_DeleteOnClose);
+  infoWindow->setStyleSheet("background-color: #FFFFCC; color: black;");
+  infoWindow->setModal(true);  // 设置为模态窗口
+
+  // 创建信息标签并设置属性
+  lblInfo = new QLabel(info, infoWindow);
+  lblInfo->setWordWrap(true);
+  lblInfo->setMargin(10);
+  lblInfo->setMinimumWidth(100);  // 确保最小宽度
+
+  // 创建显示秒数的标签
+  lblSeconds = new QLabel("0 s", infoWindow);
+  lblSeconds->setAlignment(Qt::AlignHCenter);  // 水平居中
+  lblSeconds->setStyleSheet("margin: 5px; color: #666666; font-weight: bold;");
+
+  // 设置布局
+  QVBoxLayout *layout = new QVBoxLayout(infoWindow);
+  layout->setContentsMargins(5, 5, 5, 5);
+  layout->addWidget(lblInfo);
+  QHBoxLayout *hbox = new QHBoxLayout(infoWindow);
+  layout->addLayout(hbox);
+
+  QProgressBar *prog = new QProgressBar(infoWindow);
+  prog->setMaximum(0);
+  prog->setMinimum(0);
+  hbox->addWidget(lblSeconds);
+  hbox->addWidget(prog);
+
+  // 设置宽度与主窗口一致
+  infoWindow->setFixedWidth(mw_one->width());
+  infoWindow->setFixedHeight(120);
+
+  // 计算位置
+  QPoint mainPos = mw_one->mapToGlobal(QPoint(0, 0));
+  int x = mainPos.x();
+  int y = mainPos.y() - infoWindow->height();
+
+  // 屏幕边界检查
+  QScreen *screen = QApplication::screenAt(mainPos);
+  if (screen) {
+    QRect screenRect = screen->availableGeometry();
+    y = qMax(y, screenRect.top());
+    x = qBound(screenRect.left(), x, screenRect.right() - infoWindow->width());
+  }
+
+  infoWindow->move(x, y);
+
+  // 初始化计时器和秒数计数器
+  secondCounter = 0;
+  timer = new QTimer(infoWindow);  // 父对象设为infoWindow，确保自动释放
+  connect(timer, &QTimer::timeout, this, [this]() {
+    secondCounter++;
+    lblSeconds->setText(QString("%1 s").arg(secondCounter));
+  });
+  timer->start(1000);  // 每秒触发一次
+
+  // 显示窗口并确保它获得焦点
+  infoWindow->show();
+  infoWindow->raise();
+  infoWindow->activateWindow();
+}
+
+void Method::closeInfoWindow() {
+  if (infoWindow) {
+    infoWindow->close();
+    infoWindow->deleteLater();
+    infoWindow = nullptr;
+    lblInfo = nullptr;
+
+    if (timer) {
+      timer->stop();
+      timer = nullptr;
+      secondCounter = 0;  // 重置计数器
+    }
+  }
+}
+
+void Method::setInfoText(const QString &newText) {
+  // 如果窗口不存在，先创建
+  if (!infoWindow || !lblInfo) {
+    showInfoWindow(newText);
+    return;
+  }
+
+  // 更新文本内容
+  lblInfo->setText(newText);
+}

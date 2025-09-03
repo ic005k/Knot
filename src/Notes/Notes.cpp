@@ -1236,6 +1236,7 @@ void Notes::openNotesUI() {
   mw_one->m_NotesList->setNoteLabel();
 
   mw_one->closeProgress();
+  m_Method->closeInfoWindow();
 
   if (isRequestOpenNoteEditor) {
     isRequestOpenNoteEditor = false;
@@ -1370,7 +1371,8 @@ void Notes::openNotes() {
   isPasswordError = false;
 
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
-    mw_one->showProgress();
+    // mw_one->showProgress();
+    m_Method->showInfoWindow(tr("Processing..."));
 
     m_CloudBackup->createRemoteWebDAVDir();
 
@@ -1383,8 +1385,10 @@ void Notes::openNotes() {
     m_CloudBackup->getRemoteFileList(url + "KnotData/memo/");
     while (!m_CloudBackup->isGetRemoteFileListEnd)
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+
     qDebug() << m_CloudBackup->webdavFileList
              << m_CloudBackup->webdavDateTimeList;
+
     for (int i = 0; i < m_CloudBackup->webdavFileList.count(); i++) {
       orgRemoteFiles.append(m_CloudBackup->webdavFileList.at(i));
       orgRemoteDateTime.append(m_CloudBackup->webdavDateTimeList.at(i));
@@ -1411,7 +1415,9 @@ void Notes::openNotes() {
         helper, &WebDavHelper::listCompleted, this,
         [=](const QList<QPair<QString, QDateTime>> &files) {
           qDebug() << "获取到文件列表:";
-          qDebug() << "共找到" << files.size() << "个文件:";
+          QString info = "found " + QString::number(files.size()) + " files";
+          qDebug() << info;
+          // m_Method->setInfoText(info);
 
           if (files.size() == 0) {
             openNotesUI();
@@ -1459,10 +1465,12 @@ void Notes::openNotes() {
             // 连接信号
             QObject::connect(downloader, &WebDavDownloader::progressChanged,
                              [](int current, int total, QString file) {
-                               qDebug() << QString("进度: %1/%2  当前文件: %3")
-                                               .arg(current)
-                                               .arg(total)
-                                               .arg(file);
+                               QString info = QString("prog: %1/%2  cur: %3")
+                                                  .arg(current)
+                                                  .arg(total)
+                                                  .arg(file);
+                               qDebug() << info;
+                               // m_Method->setInfoText(info);
                              });
 
             QObject::connect(
@@ -1517,6 +1525,9 @@ void Notes::startBackgroundProcessRemoteFiles() {
 }
 
 void Notes::processRemoteFiles(QStringList remoteFiles) {
+  int totalFiles = remoteFiles.count();
+  int n_Files = 0;
+
   for (int i = 0; i < remoteFiles.count(); i++) {
     QString file = remoteFiles.at(i);
     QString pDir, pFile, kFile, asFile, zFile;
@@ -1532,6 +1543,8 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
       qDebug() << "file=" << file;
       qDebug() << "pFile=" << pFile;
       qDebug() << "kFile" << kFile;
+
+      n_Files++;
 
       QString dec_file = m_Method->useDec(zFile);
       if (dec_file != "") zFile = dec_file;
@@ -1572,6 +1585,8 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
       qDebug() << "kFile=" << kFile;
       qDebug() << "zFile=" << zFile;
 
+      n_Files++;
+
       QString dec_file = m_Method->useDec(zFile);
       if (dec_file != "") zFile = dec_file;
 
@@ -1611,12 +1626,19 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
       qDebug() << "pFile=" << pFile;
       qDebug() << "kFile" << kFile;
 
+      n_Files++;
+
       QFileInfo pFileInfo(pFile);
       QFileInfo kFileInfo(kFile);
       if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
         QFile::remove(kFile);
         QFile::copy(pFile, kFile);
       }
+    }
+
+    if (m_Method->lblInfo != nullptr) {
+      m_Method->lblInfo->setText("[" + QString::number(n_Files) + "/" +
+                                 QString::number(totalFiles) + "] " + pFile);
     }
   }
 }

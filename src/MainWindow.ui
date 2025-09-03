@@ -8013,7 +8013,7 @@ QSlider::handle:horizontal:disabled {
      </layout>
     </item>
     <item>
-     <widget class="QLabel" name="lblVer">
+     <widget class="QLabel" name="lblStatus">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
         <horstretch>0</horstretch>
