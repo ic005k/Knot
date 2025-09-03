@@ -29,6 +29,7 @@
 
 #include <QLabel>
 #include <QPainter>
+#include <QProgressBar>
 #include <QPropertyAnimation>
 #include <QQuickWidget>
 #include <QSqlDatabase>
@@ -57,6 +58,7 @@ class Method : public QDialog {
   ~Method();
   Ui::Method *ui;
 
+  QProgressBar *infoProgBar = nullptr;
   QLabel *lblInfo = nullptr;
   void showInfoWindow(const QString &info);
   void closeInfoWindow();

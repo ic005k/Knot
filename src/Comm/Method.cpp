@@ -23,6 +23,8 @@ bool isPasswordError = false;
 
 ColorDialog *colorDlg = nullptr;
 
+int infoProgBarValue, infoProgBarMax;
+
 Method::Method(QWidget *parent) : QDialog(parent) {
   set_ToolButtonStyle(this);
 
@@ -2998,15 +3000,15 @@ void Method::showInfoWindow(const QString &info) {
   QHBoxLayout *hbox = new QHBoxLayout(infoWindow);
   layout->addLayout(hbox);
 
-  QProgressBar *prog = new QProgressBar(infoWindow);
-  prog->setMaximum(0);
-  prog->setMinimum(0);
+  infoProgBar = new QProgressBar(infoWindow);
+  infoProgBar->setMaximum(0);
+  infoProgBar->setMinimum(0);
   hbox->addWidget(lblSeconds);
-  hbox->addWidget(prog);
+  hbox->addWidget(infoProgBar);
 
   // 设置宽度与主窗口一致
   infoWindow->setFixedWidth(mw_one->width());
-  infoWindow->setFixedHeight(120);
+  infoWindow->setFixedHeight(150);
 
   // 计算位置
   QPoint mainPos = mw_one->mapToGlobal(QPoint(0, 0));
@@ -3032,6 +3034,17 @@ void Method::showInfoWindow(const QString &info) {
   });
   timer->start(1000);  // 每秒触发一次
 
+  infoProgBarMax = 0;
+  infoProgBarValue = 0;
+  QTimer *timerProg = new QTimer(infoWindow);
+  connect(timerProg, &QTimer::timeout, this, [this]() {
+    if (infoProgBarMax > 0 && infoProgBarValue > 0) {
+      infoProgBar->setValue(infoProgBarValue);
+      infoProgBar->setMaximum(infoProgBarMax);
+    }
+  });
+  timerProg->start(250);
+
   // 显示窗口并确保它获得焦点
   infoWindow->show();
   infoWindow->raise();
@@ -3044,6 +3057,7 @@ void Method::closeInfoWindow() {
     infoWindow->deleteLater();
     infoWindow = nullptr;
     lblInfo = nullptr;
+    infoProgBar = nullptr;
 
     if (timer) {
       timer->stop();

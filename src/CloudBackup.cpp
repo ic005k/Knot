@@ -27,6 +27,8 @@ extern bool isZipOK, isMenuImport, isDownData, isAndroid, isUpData;
 
 extern QSettings *iniPreferences;
 
+extern int infoProgBarValue, infoProgBarMax;
+
 WebDavHelper *listWebDavFiles(const QString &url, const QString &username,
                               const QString &password);
 QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray &data);
@@ -1007,9 +1009,7 @@ void WebDavDownloader::startNextDownload() {
           [this, reply]() { onDownloadFinished(reply); });
   connect(reply, &QNetworkReply::downloadProgress, this,
           [this, reply](qint64 bytesReceived, qint64 bytesTotal) {
-            // 下面未使用的两个变量用来计算下载进度（目前未实现）
-            Q_UNUSED(bytesReceived);
-            Q_UNUSED(bytesTotal);
+            // 下面两个变量用来计算下载进度（目前未实现）
 
             qDebug() << "bytesReceived=" << bytesReceived << "->"
                      << "bytesTotal=" << bytesTotal;
@@ -1020,6 +1020,9 @@ void WebDavDownloader::startNextDownload() {
                                          "/" + QString::number(totalFiles) +
                                          "] [" + rece + "] " +
                                          activeDownloads[reply]);
+
+              infoProgBarMax = totalFiles;
+              infoProgBarValue = completedFiles;
             }
 
             emit progressChanged(completedFiles, totalFiles,

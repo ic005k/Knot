@@ -16,7 +16,7 @@ extern QTreeWidget *twrb, *tw;
 extern QString iniFile, iniDir, privateDir, currentMDFile, imgFileName, appName,
     encPassword, errorInfo;
 extern bool isAndroid, isIOS, isDark, isPasswordError;
-extern int fontSize;
+extern int fontSize, infoProgBarValue, infoProgBarMax;
 extern QRegularExpression regxNumber;
 
 extern int deleteDirfile(QString dirName);
@@ -1208,6 +1208,9 @@ void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
 }
 
 void Notes::openNotesUI() {
+  mw_one->closeProgress();
+  m_Method->closeInfoWindow();
+
   startBackgroundTaskDelAndClear();
 
   while (!isDelLocalNoteEnd)
@@ -1234,9 +1237,6 @@ void Notes::openNotesUI() {
   mw_one->m_NotesList->loadAllNoteBook();
   mw_one->m_NotesList->localNotesItem();
   mw_one->m_NotesList->setNoteLabel();
-
-  mw_one->closeProgress();
-  m_Method->closeInfoWindow();
 
   if (isRequestOpenNoteEditor) {
     isRequestOpenNoteEditor = false;
@@ -1417,7 +1417,6 @@ void Notes::openNotes() {
           qDebug() << "获取到文件列表:";
           QString info = "found " + QString::number(files.size()) + " files";
           qDebug() << info;
-          // m_Method->setInfoText(info);
 
           if (files.size() == 0) {
             openNotesUI();
@@ -1470,7 +1469,6 @@ void Notes::openNotes() {
                                                   .arg(total)
                                                   .arg(file);
                                qDebug() << info;
-                               // m_Method->setInfoText(info);
                              });
 
             QObject::connect(
@@ -1518,6 +1516,7 @@ void Notes::startBackgroundProcessRemoteFiles() {
   QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Remote files process completed";
+
     openNotesUI();
     watcher->deleteLater();
   });
@@ -1567,8 +1566,9 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
         QFileInfo pFileInfo(pFile);
         QFileInfo kFileInfo(kFile);
         if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
-          QFile::remove(kFile);
-          if (QFile::copy(pFile, kFile)) {
+          QString tempFile = iniDir + "tempFile_";
+          if (QFile::copy(pFile, tempFile)) {
+            m_Method->upIniFile(tempFile, kFile);
             qDebug() << "kFile:" << kFile << " Update successfully. ";
           }
         }
@@ -1639,6 +1639,8 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
     if (m_Method->lblInfo != nullptr) {
       m_Method->lblInfo->setText("[" + QString::number(n_Files) + "/" +
                                  QString::number(totalFiles) + "] " + pFile);
+      infoProgBarMax = totalFiles;
+      infoProgBarValue = n_Files;
     }
   }
 }
