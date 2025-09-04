@@ -11,7 +11,7 @@ QString orgLblStyle;
 extern MainWindow* mw_one;
 extern Ui::MainWindow* mui;
 extern Method* m_Method;
-extern QString iniFile, iniDir, privateDir, encPassword, errorInfo;
+extern QString iniFile, iniDir, privateDir, encPassword, errorInfo, appName;
 extern bool loading, isBreak, isZH_CN, isDark, isAndroid, isPasswordError,
     isEncrypt;
 extern int fontSize;
@@ -1402,9 +1402,19 @@ void Todo::openTodoUI() {
 
 void Todo::openTodo() {
   isPasswordError = false;
+  mw_one->showProgress();
 
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
-    mw_one->showProgress();
+    if (!m_CloudBackup->checkWebDAVConnection()) {
+      mw_one->closeProgress();
+      ShowMessage* msg = new ShowMessage(this);
+      msg->showMsg(appName,
+                   tr("WebDAV connection failed. Please check the network, "
+                      "website address or login information."),
+                   1);
+      openTodoUI();
+      return;
+    }
 
     m_CloudBackup->createRemoteWebDAVDir();
 

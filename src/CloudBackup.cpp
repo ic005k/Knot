@@ -1230,3 +1230,43 @@ void CloudBackup::webDAVRestoreData() {
   downloadFile("Knot/memo.zip", filePath);
   mui->progressBar->setValue(0);
 }
+
+bool CloudBackup::checkWebDAVConnection() {
+  QUrl url(mui->cboxWebDAV->currentText().trimmed());
+  QString username = mui->editWebDAVUsername->text().trimmed();
+  QString password = mui->editWebDAVPassword->text().trimmed();
+  QString errorMsg;
+  // 检查URL有效性
+  if (!url.isValid()) {
+    errorMsg = "连接失败，请检查网络、网址或登录信息";
+    return false;
+  }
+
+  QNetworkAccessManager manager;
+  QNetworkRequest request(url);
+
+  // 设置认证信息
+  if (!username.isEmpty() || !password.isEmpty()) {
+    QByteArray auth = username.toUtf8() + ":" + password.toUtf8();
+    request.setRawHeader("Authorization", "Basic " + auth.toBase64());
+  }
+
+  // 发送HEAD请求
+  QNetworkReply *reply = manager.head(request);
+
+  // 等待响应
+  QEventLoop loop;
+  QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+  loop.exec();
+
+  // 处理结果
+  if (reply->error() == QNetworkReply::NoError) {
+    errorMsg = "连接成功";
+    reply->deleteLater();
+    return true;
+  } else {
+    errorMsg = "连接失败，请检查网络、网址或登录信息";
+    reply->deleteLater();
+    return false;
+  }
+}

@@ -256,7 +256,7 @@ in skydrive folder</source>
         <translation type="vanished">获取用户信息成功</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="237"/>
+        <location filename="CloudBackup.cpp" line="239"/>
         <source>Success Upload File:</source>
         <translation>上传文件成功</translation>
     </message>
@@ -265,7 +265,7 @@ in skydrive folder</source>
         <translation type="vanished">下载文件成功</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1208"/>
+        <location filename="CloudBackup.cpp" line="1223"/>
         <source>Downloading data?</source>
         <translation>下载数据？</translation>
     </message>
@@ -274,70 +274,70 @@ in skydrive folder</source>
         <translation type="vanished">此操作将使用 OneDrive 上的数据覆盖本地数据。</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="149"/>
+        <location filename="CloudBackup.cpp" line="151"/>
         <source>Uploading data?</source>
         <translation>上传数据？</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="150"/>
+        <location filename="CloudBackup.cpp" line="152"/>
         <source>This action updates the data in the cloud.</source>
         <translation>此操作将更新云端的数据</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="252"/>
-        <location filename="CloudBackup.cpp" line="408"/>
-        <location filename="CloudBackup.cpp" line="655"/>
+        <location filename="CloudBackup.cpp" line="254"/>
+        <location filename="CloudBackup.cpp" line="410"/>
+        <location filename="CloudBackup.cpp" line="657"/>
         <source>Authentication failed.</source>
         <translation>认证失败，请检查网址、用户名、密码。如果使用坚果云，请使用“应用密码”而不是主密码，“应用密码”可通过坚果云网页端登录后进行设置。</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="256"/>
+        <location filename="CloudBackup.cpp" line="258"/>
         <source>Upload error</source>
         <translation>上传错误</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="412"/>
+        <location filename="CloudBackup.cpp" line="414"/>
         <source>Download error</source>
         <translation>下载错误</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="442"/>
+        <location filename="CloudBackup.cpp" line="444"/>
         <source>Invalid URL: </source>
-        <translation type="unfinished"></translation>
+        <translation>无效的URL：</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="459"/>
+        <location filename="CloudBackup.cpp" line="461"/>
         <source>Failed to create local file: </source>
-        <translation type="unfinished"></translation>
+        <translation>创建本地文件失败：</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="616"/>
+        <location filename="CloudBackup.cpp" line="618"/>
         <source>Successfully downloaded file, saved to: </source>
-        <translation type="unfinished"></translation>
+        <translation>文件下载成功，保存到：</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="617"/>
+        <location filename="CloudBackup.cpp" line="619"/>
         <source>Final Size: </source>
-        <translation type="unfinished"></translation>
+        <translation>最终大小：</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="649"/>
+        <location filename="CloudBackup.cpp" line="651"/>
         <source>Download failed (Error %1): </source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1209"/>
+        <location filename="CloudBackup.cpp" line="1224"/>
         <source>This action overwrites local files with files in the cloud.</source>
         <translation>此操作将会用云端的文件覆盖本地文件</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="372"/>
+        <location filename="CloudBackup.cpp" line="374"/>
         <source>Successfully downloaded file,File saved to</source>
         <translation>文件下载成功，已保存到</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="382"/>
-        <location filename="CloudBackup.cpp" line="626"/>
+        <location filename="CloudBackup.cpp" line="384"/>
+        <location filename="CloudBackup.cpp" line="628"/>
         <source>Import this data?</source>
         <translation>是否导入这个数据？</translation>
     </message>
@@ -2389,27 +2389,27 @@ in skydrive folder</source>
         <translation type="vanished">搜索</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="91"/>
+        <location filename="Comm/Method.cpp" line="93"/>
         <source>Ok</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="492"/>
+        <location filename="Comm/Method.cpp" line="494"/>
         <source>Results</source>
         <translation>结果</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="515"/>
+        <location filename="Comm/Method.cpp" line="517"/>
         <source>Amount</source>
         <translation>金额</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="518"/>
+        <location filename="Comm/Method.cpp" line="520"/>
         <source>Category</source>
         <translation>分类</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="521"/>
+        <location filename="Comm/Method.cpp" line="523"/>
         <source>Details</source>
         <translation>详细</translation>
     </message>
@@ -2418,18 +2418,18 @@ in skydrive folder</source>
         <translation type="vanished">最后修改</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="721"/>
+        <location filename="Comm/Method.cpp" line="723"/>
         <source>Reading, please wait...</source>
         <translation>读取中，请稍候...</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="92"/>
-        <location filename="Comm/Method.cpp" line="812"/>
+        <location filename="Comm/Method.cpp" line="94"/>
+        <location filename="Comm/Method.cpp" line="814"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="813"/>
+        <location filename="Comm/Method.cpp" line="815"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
@@ -2658,7 +2658,7 @@ in skydrive folder</source>
     <message>
         <location filename="Notes/Notes.cpp" line="207"/>
         <location filename="Notes/Notes.cpp" line="1120"/>
-        <location filename="Notes/Notes.cpp" line="1643"/>
+        <location filename="Notes/Notes.cpp" line="1667"/>
         <source>An error occurred while compressing the file.</source>
         <translation>压缩文件时发生错误。</translation>
     </message>
@@ -2711,12 +2711,12 @@ in skydrive folder</source>
         <translation>分享到</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1229"/>
+        <location filename="Notes/Notes.cpp" line="1232"/>
         <source>Note Book</source>
         <translation>笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1230"/>
+        <location filename="Notes/Notes.cpp" line="1233"/>
         <source>Note List</source>
         <translation>笔记列表</translation>
     </message>
@@ -2726,18 +2726,23 @@ in skydrive folder</source>
         <translation>当前笔记不存在。请选择其它笔记或新建笔记。</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1375"/>
+        <location filename="Notes/Notes.cpp" line="1377"/>
+        <source>WebDAV connection failed. Please check the network, website address or login information.</source>
+        <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
+    </message>
+    <message>
+        <location filename="Notes/Notes.cpp" line="1385"/>
         <source>Processing...</source>
         <translation>处理中...</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1487"/>
+        <location filename="Notes/Notes.cpp" line="1495"/>
         <source>Synchronization failed. Please try again later.</source>
         <translation>同步失败，请稍后再试。</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1551"/>
-        <location filename="Notes/Notes.cpp" line="1592"/>
+        <location filename="Notes/Notes.cpp" line="1564"/>
+        <location filename="Notes/Notes.cpp" line="1608"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation>解压文件不成功，请在偏好设置里面检查各平台的密码是否一致。</translation>
     </message>
@@ -3481,55 +3486,55 @@ in skydrive folder</source>
     <name>QInstaller</name>
     <message>
         <location filename="AutoUpdate.cpp" line="234"/>
-        <location filename="Comm/Method.cpp" line="2379"/>
+        <location filename="Comm/Method.cpp" line="2381"/>
         <source>bytes</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="235"/>
-        <location filename="Comm/Method.cpp" line="2380"/>
+        <location filename="Comm/Method.cpp" line="2382"/>
         <source>KiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="236"/>
-        <location filename="Comm/Method.cpp" line="2381"/>
+        <location filename="Comm/Method.cpp" line="2383"/>
         <source>MiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="237"/>
-        <location filename="Comm/Method.cpp" line="2382"/>
+        <location filename="Comm/Method.cpp" line="2384"/>
         <source>GiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="238"/>
-        <location filename="Comm/Method.cpp" line="2383"/>
+        <location filename="Comm/Method.cpp" line="2385"/>
         <source>TiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="239"/>
-        <location filename="Comm/Method.cpp" line="2384"/>
+        <location filename="Comm/Method.cpp" line="2386"/>
         <source>PiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="240"/>
-        <location filename="Comm/Method.cpp" line="2385"/>
+        <location filename="Comm/Method.cpp" line="2387"/>
         <source>EiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="241"/>
-        <location filename="Comm/Method.cpp" line="2386"/>
+        <location filename="Comm/Method.cpp" line="2388"/>
         <source>ZiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="242"/>
-        <location filename="Comm/Method.cpp" line="2387"/>
+        <location filename="Comm/Method.cpp" line="2389"/>
         <source>YiB</source>
         <translation></translation>
     </message>
@@ -8760,7 +8765,12 @@ in skydrive folder</source>
         <translation>音频记录进行中...</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1474"/>
+        <location filename="Todo/Todo.cpp" line="1410"/>
+        <source>WebDAV connection failed. Please check the network, website address or login information.</source>
+        <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
+    </message>
+    <message>
+        <location filename="Todo/Todo.cpp" line="1484"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation>解压文件不成功，请在偏好设置里面检查各平台的密码是否一致。</translation>
     </message>

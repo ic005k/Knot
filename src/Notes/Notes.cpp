@@ -1369,10 +1369,20 @@ void Notes::openNotes() {
 
   mw_one->m_NotesList->needDelWebDAVFiles.clear();
   isPasswordError = false;
+  m_Method->showInfoWindow(tr("Processing..."));
 
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
-    // mw_one->showProgress();
-    m_Method->showInfoWindow(tr("Processing..."));
+    if (!m_CloudBackup->checkWebDAVConnection()) {
+      m_Method->closeInfoWindow();
+      ShowMessage *msg = new ShowMessage(this);
+      msg->showMsg(appName,
+                   tr("WebDAV connection failed. Please check the network, "
+                      "website address or login information."),
+                   1);
+
+      openNotesUI();
+      return;
+    }
 
     m_CloudBackup->createRemoteWebDAVDir();
 

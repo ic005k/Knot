@@ -217,80 +217,80 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="237"/>
+        <location filename="../../src/CloudBackup.cpp" line="239"/>
         <source>Success Upload File:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="149"/>
+        <location filename="../../src/CloudBackup.cpp" line="151"/>
         <source>Uploading data?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="150"/>
+        <location filename="../../src/CloudBackup.cpp" line="152"/>
         <source>This action updates the data in the cloud.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="252"/>
-        <location filename="../../src/CloudBackup.cpp" line="408"/>
-        <location filename="../../src/CloudBackup.cpp" line="655"/>
+        <location filename="../../src/CloudBackup.cpp" line="254"/>
+        <location filename="../../src/CloudBackup.cpp" line="410"/>
+        <location filename="../../src/CloudBackup.cpp" line="657"/>
         <source>Authentication failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="256"/>
+        <location filename="../../src/CloudBackup.cpp" line="258"/>
         <source>Upload error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="372"/>
+        <location filename="../../src/CloudBackup.cpp" line="374"/>
         <source>Successfully downloaded file,File saved to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="382"/>
-        <location filename="../../src/CloudBackup.cpp" line="626"/>
+        <location filename="../../src/CloudBackup.cpp" line="384"/>
+        <location filename="../../src/CloudBackup.cpp" line="628"/>
         <source>Import this data?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="412"/>
+        <location filename="../../src/CloudBackup.cpp" line="414"/>
         <source>Download error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="442"/>
+        <location filename="../../src/CloudBackup.cpp" line="444"/>
         <source>Invalid URL: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="459"/>
+        <location filename="../../src/CloudBackup.cpp" line="461"/>
         <source>Failed to create local file: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="616"/>
+        <location filename="../../src/CloudBackup.cpp" line="618"/>
         <source>Successfully downloaded file, saved to: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="617"/>
+        <location filename="../../src/CloudBackup.cpp" line="619"/>
         <source>Final Size: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="649"/>
+        <location filename="../../src/CloudBackup.cpp" line="651"/>
         <source>Download failed (Error %1): </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1208"/>
+        <location filename="../../src/CloudBackup.cpp" line="1223"/>
         <source>Downloading data?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1209"/>
+        <location filename="../../src/CloudBackup.cpp" line="1224"/>
         <source>This action overwrites local files with files in the cloud.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1811,43 +1811,43 @@ in skydrive folder</source>
 <context>
     <name>Method</name>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="91"/>
+        <location filename="../../src/Comm/Method.cpp" line="93"/>
         <source>Ok</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="92"/>
-        <location filename="../../src/Comm/Method.cpp" line="812"/>
+        <location filename="../../src/Comm/Method.cpp" line="94"/>
+        <location filename="../../src/Comm/Method.cpp" line="814"/>
         <source>Cancel</source>
         <translation type="unfinished">Zrušit</translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="492"/>
+        <location filename="../../src/Comm/Method.cpp" line="494"/>
         <source>Results</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="515"/>
+        <location filename="../../src/Comm/Method.cpp" line="517"/>
         <source>Amount</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="518"/>
+        <location filename="../../src/Comm/Method.cpp" line="520"/>
         <source>Category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="521"/>
+        <location filename="../../src/Comm/Method.cpp" line="523"/>
         <source>Details</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="721"/>
+        <location filename="../../src/Comm/Method.cpp" line="723"/>
         <source>Reading, please wait...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="813"/>
+        <location filename="../../src/Comm/Method.cpp" line="815"/>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2052,7 +2052,7 @@ in skydrive folder</source>
     <message>
         <location filename="../../src/Notes/Notes.cpp" line="207"/>
         <location filename="../../src/Notes/Notes.cpp" line="1120"/>
-        <location filename="../../src/Notes/Notes.cpp" line="1643"/>
+        <location filename="../../src/Notes/Notes.cpp" line="1667"/>
         <source>An error occurred while compressing the file.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2161,12 +2161,12 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="1229"/>
+        <location filename="../../src/Notes/Notes.cpp" line="1232"/>
         <source>Note Book</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="1230"/>
+        <location filename="../../src/Notes/Notes.cpp" line="1233"/>
         <source>Note List</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2176,18 +2176,23 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="1375"/>
+        <location filename="../../src/Notes/Notes.cpp" line="1377"/>
+        <source>WebDAV connection failed. Please check the network, website address or login information.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/Notes.cpp" line="1385"/>
         <source>Processing...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="1487"/>
+        <location filename="../../src/Notes/Notes.cpp" line="1495"/>
         <source>Synchronization failed. Please try again later.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="1551"/>
-        <location filename="../../src/Notes/Notes.cpp" line="1592"/>
+        <location filename="../../src/Notes/Notes.cpp" line="1564"/>
+        <location filename="../../src/Notes/Notes.cpp" line="1608"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2686,55 +2691,55 @@ in skydrive folder</source>
     <name>QInstaller</name>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="234"/>
-        <location filename="../../src/Comm/Method.cpp" line="2379"/>
+        <location filename="../../src/Comm/Method.cpp" line="2381"/>
         <source>bytes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="235"/>
-        <location filename="../../src/Comm/Method.cpp" line="2380"/>
+        <location filename="../../src/Comm/Method.cpp" line="2382"/>
         <source>KiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="236"/>
-        <location filename="../../src/Comm/Method.cpp" line="2381"/>
+        <location filename="../../src/Comm/Method.cpp" line="2383"/>
         <source>MiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="237"/>
-        <location filename="../../src/Comm/Method.cpp" line="2382"/>
+        <location filename="../../src/Comm/Method.cpp" line="2384"/>
         <source>GiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="238"/>
-        <location filename="../../src/Comm/Method.cpp" line="2383"/>
+        <location filename="../../src/Comm/Method.cpp" line="2385"/>
         <source>TiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="239"/>
-        <location filename="../../src/Comm/Method.cpp" line="2384"/>
+        <location filename="../../src/Comm/Method.cpp" line="2386"/>
         <source>PiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="240"/>
-        <location filename="../../src/Comm/Method.cpp" line="2385"/>
+        <location filename="../../src/Comm/Method.cpp" line="2387"/>
         <source>EiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="241"/>
-        <location filename="../../src/Comm/Method.cpp" line="2386"/>
+        <location filename="../../src/Comm/Method.cpp" line="2388"/>
         <source>ZiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="242"/>
-        <location filename="../../src/Comm/Method.cpp" line="2387"/>
+        <location filename="../../src/Comm/Method.cpp" line="2389"/>
         <source>YiB</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7592,7 +7597,12 @@ in skydrive folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1474"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1410"/>
+        <source>WebDAV connection failed. Please check the network, website address or login information.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Todo/Todo.cpp" line="1484"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation type="unfinished"></translation>
     </message>
