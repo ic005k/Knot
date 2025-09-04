@@ -2935,6 +2935,10 @@ QComboBox {
                   <property name="text">
                    <string>...</string>
                   </property>
+                  <property name="icon">
+                   <iconset resource="../res.qrc">
+                    <normaloff>:/res/combo.svg</normaloff>:/res/combo.svg</iconset>
+                  </property>
                  </widget>
                 </item>
                </layout>

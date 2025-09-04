@@ -130,6 +130,17 @@ void EditRecord::on_btnOk_clicked() {
     m_CategoryList->ui->listWidget->insertItem(0, item);
   }
 
+  if (tabData->currentIndex() != 0) {
+    int curindex = tabData->currentIndex();
+    tabData->tabBar()->moveTab(curindex, 0);
+
+    mw_one->clearAll();
+    for (int i = 0; i < tabData->count(); i++) {
+      QString text = tabData->tabText(i);
+      mw_one->addItem(text, "", "", "", 0);
+    }
+  }
+
   mw_one->startSave("tab");
 }
 

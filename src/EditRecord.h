@@ -5,6 +5,7 @@
 #include <QDialog>
 #include <QListWidget>
 #include <QSet>
+#include <QTabWidget>
 #include <QTextEdit>
 #include <QWidgetAction>
 
