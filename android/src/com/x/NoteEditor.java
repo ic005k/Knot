@@ -175,6 +175,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
     private boolean isSaved = false;
 
     private Button btn_cancel;
+    private Button btnSave;
     private Button btnUndo;
     private Button btnRedo;
     private Button btnMenu;
@@ -197,11 +198,13 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
     private View mColorPreview;
 
     private boolean isAddImage = false;
+    private boolean isExit = false;
 
     private String currentMDFile;
     private static Context context;
     public static NoteEditor m_instance;
     private static boolean isTextChanged = false;
+
     private TextViewUndoRedo helper;
     private String strBack1 = "#FFC1C1";
     private String strBack2 = "#CFCFCF";
@@ -298,6 +301,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         }
 
         btn_cancel = (Button) findViewById(R.id.btn_cancel);
+        btnSave = (Button) findViewById(R.id.btn_save);
         btnFind = (Button) findViewById(R.id.btnFind);
         btnUndo = (Button) findViewById(R.id.btnUndo);
         btnRedo = (Button) findViewById(R.id.btnRedo);
@@ -326,6 +330,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
 
         if (MyActivity.zh_cn) {
             btn_cancel.setText("关闭");
+            btnSave.setText("保存");
             btnFind.setText("查找");
             btnUndo.setText("撤销");
             btnRedo.setText("恢复");
@@ -334,7 +339,8 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
             btnPrev.setText("<");
             btnNext.setText(">");
         } else {
-            btn_cancel.setText("Close");
+            btn_cancel.setText("Exit");
+            btnSave.setText("Save");
             btnFind.setText("Find");
             btnUndo.setText("Undo");
             btnRedo.setText("Redo");
@@ -352,6 +358,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         lblResult.setVisibility(View.GONE);
 
         btn_cancel.setOnClickListener(this);
+        btnSave.setOnClickListener(this);
         btnMenu.setOnClickListener(this);
 
         btnFind.setOnClickListener(this);
@@ -365,11 +372,20 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_cancel:
+                isExit = true;
                 btn_cancel.setBackgroundColor(getResources().getColor(R.color.red));
                 hideKeyBoard(m_instance);
                 onBackPressed();
                 btn_cancel.setBackgroundColor(getResources().getColor(R.color.normal));
 
+                break;
+
+            case R.id.btn_save:
+                if (isTextChanged) {
+                    saveNote();
+                    isTextChanged = false;
+
+                }
                 break;
 
             case R.id.btnUndo:
@@ -785,17 +801,12 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
             e.printStackTrace();
         }
 
-        if (isTextChanged) {
-            isTextChanged = false;
-
-            if (MyActivity.isEdit && isSaved) {
-                MyActivity.isEdit = false;
-                if (WebViewActivity.getInstance() != null) {
-                    WebViewActivity.getInstance().finish();
-                }
-                CallJavaNotify_16();
-
+        if (MyActivity.isEdit && isSaved) {
+            MyActivity.isEdit = false;
+            if (WebViewActivity.getInstance() != null) {
+                WebViewActivity.getInstance().finish();
             }
+            CallJavaNotify_16();
 
         }
 
@@ -1035,6 +1046,8 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
         final String mContent = editNote.getText().toString();
         final String filename = MyActivity.strMDFile;
 
+        isSaved = true;
+
         findViewById(R.id.progressContainer).setVisibility(View.VISIBLE);
 
         new Thread(new Runnable() {
@@ -1082,7 +1095,11 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
                             if (success[0] && MyActivity.isEdit) {
                                 setResult(MDActivity.RESULT_SAVE);
                             }
-                            finish();
+
+                            if (isExit) {
+                                finish();
+                            }
+
                         }
                     });
                 }
@@ -1467,7 +1484,6 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
                     public void onClick(DialogInterface dialog, int which) {
                         // ...To-do
                         saveNote();
-                        isSaved = true;
 
                     }
                 });

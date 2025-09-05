@@ -25,6 +25,17 @@
         />
 
         <Button
+            android:id="@+id/btn_save"
+            android:textAllCaps="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#3498DB"
+            android:textColor="#FFFFFF"
+            android:layout_weight="1"
+            android:text="Save"
+        />
+
+        <Button
             android:id="@+id/btnFind"
             android:textAllCaps="false"
             android:layout_width="wrap_content"
