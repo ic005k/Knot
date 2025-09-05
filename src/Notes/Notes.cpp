@@ -1235,7 +1235,7 @@ void Notes::openNotesUI() {
   }
 
   mw_one->m_NotesList->loadAllNoteBook();
-  mw_one->m_NotesList->localNotesItem();
+  mw_one->m_NotesList->setCurrentItemFromMDFile(currentMDFile);
   mw_one->m_NotesList->setNoteLabel();
 
   if (isRequestOpenNoteEditor) {

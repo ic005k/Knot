@@ -139,7 +139,6 @@ class NotesList : public QDialog {
 
   void resetQML_List();
 
-  void localNotesItem();
   QVariant addQmlTreeTopItem(QString strItem);
   QVariant addQmlTreeChildItem(QVariant parentItem, QString strChildItem,
                                QString iconFile);

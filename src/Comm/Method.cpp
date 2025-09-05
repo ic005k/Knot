@@ -2975,11 +2975,14 @@ void Method::showInfoWindow(const QString &info) {
     return;
   }
 
+  bool isStyle = false;
+
   // 创建无标题窗口，保持原有窗口属性
   infoWindow = new QDialog(
       nullptr, Qt::FramelessWindowHint | Qt::Dialog | Qt::WindowStaysOnTopHint);
   infoWindow->setAttribute(Qt::WA_DeleteOnClose);
-  infoWindow->setStyleSheet("background-color: #FFFFCC; color: black;");
+  if (isStyle)
+    infoWindow->setStyleSheet("background-color: #FFFFCC; color: black;");
   infoWindow->setModal(true);
 
   // 创建信息标签（保持原有属性）
@@ -3024,11 +3027,13 @@ void Method::showInfoWindow(const QString &info) {
 
   // 调整窗口大小以适应新增组件
   if (isAndroid)
-    infoWindow->setFixedWidth(mw_one->width());
+    infoWindow->setFixedWidth(mw_one->width() - 10);
   else
     infoWindow->setFixedWidth(300);
 
-  infoWindow->setFixedHeight(240);
+  int win_h = 240;
+  if (!isAndroid) win_h = 220;
+  infoWindow->setFixedHeight(win_h);
 
   // 计算位置（保持原有逻辑，确保窗口居中）
   QPoint mainPos = mw_one->mapToGlobal(QPoint(0, 0));

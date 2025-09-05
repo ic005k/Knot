@@ -2392,57 +2392,6 @@ void NotesList::loadAllRecycle() {
   }
 }
 
-void NotesList::localNotesItem() {
-  int topcount = tw->topLevelItemCount();
-  QString mdfile;
-  QTreeWidgetItem *curChildItem = NULL;
-  QTreeWidgetItem *curParentItem = NULL;
-  for (int i = 0; i < topcount; i++) {
-    QTreeWidgetItem *topItem = tw->topLevelItem(i);
-    int count = topItem->childCount();
-    for (int j = 0; j < count; j++) {
-      QTreeWidgetItem *childItem = topItem->child(j);
-      mdfile = childItem->text(1);
-      if (mdfile.isEmpty()) {
-        int count1 = childItem->childCount();
-        for (int n = 0; n < count1; n++) {
-          mdfile = childItem->child(n)->text(1);
-          if (iniDir + mdfile == currentMDFile) {
-            curChildItem = childItem->child(n);
-            curParentItem = childItem;
-            break;
-          }
-        }
-      } else {
-        mdfile = childItem->text(1);
-        if (iniDir + mdfile == currentMDFile) {
-          curChildItem = childItem;
-          curParentItem = topItem;
-          break;
-        }
-      }
-    }
-  }
-
-  int count0 = pNoteBookItems.count();
-  for (int i = 0; i < count0; i++) {
-    if (pNoteBookItems.at(i) == curParentItem) {
-      setNoteBookCurrentIndex(i);
-      break;
-    }
-  }
-
-  clickNoteBook();
-
-  int count1 = pNoteItems.count();
-  for (int i = 0; i < count1; i++) {
-    if (pNoteItems.at(i) == curChildItem) {
-      setNotesListCurrentIndex(i);
-      break;
-    }
-  }
-}
-
 QVariant NotesList::addQmlTreeTopItem(QString strItem) {
   QQuickItem *root = mui->qwNotesTree->rootObject();
   QVariant item;
