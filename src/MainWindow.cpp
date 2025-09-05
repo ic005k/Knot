@@ -787,13 +787,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   }
 #else
 
-  int m_count = m_Notes->notes_sync_files.count();
-  QSettings RegSync(privateDir + "need_sync.ini", QSettings::IniFormat);
-  RegSync.setValue("count", m_count);
-  for (int i = 0; i < m_count; i++) {
-    RegSync.setValue("note" + QString::number(i),
-                     m_Notes->notes_sync_files.at(i));
-  }
+  saveNeedSyncNotes();
 
   QSettings Reg(privateDir + "winpos.ini", QSettings::IniFormat);
   Reg.setValue("x", this->geometry().x());
@@ -805,16 +799,36 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 #endif
 }
 
+void MainWindow::saveNeedSyncNotes() {
+  int m_count = m_Notes->notes_sync_files.count();
+  QString tempFile = privateDir + "need_sync_" +
+                     QUuid::createUuid().toString(QUuid::WithoutBraces) +
+                     ".tmp";
+  QString endFile = privateDir + "need_sync.ini";
+  QSettings RegSync(tempFile, QSettings::IniFormat);
+  RegSync.setValue("count", m_count);
+  for (int i = 0; i < m_count; i++) {
+    RegSync.setValue("note" + QString::number(i),
+                     m_Notes->notes_sync_files.at(i));
+  }
+  RegSync.sync();
+  m_Method->upIniFile(tempFile, endFile);
+}
+
 void MainWindow::execNeedSyncNotes() {
   QSettings RegSync(privateDir + "need_sync.ini", QSettings::IniFormat);
   int count = RegSync.value("count", 0).toInt();
+  qDebug() << "==================================";
+  qDebug() << "Need exec sync >>" << count;
+  qDebug() << "==================================";
   for (int i = 0; i < count; i++) {
     QString note = RegSync.value("note" + QString::number(i), "").toString();
-    QFileInfo fi(note);
-    if (fi.exists()) {
+    if (QFile::exists(note)) {
+      m_Notes->notes_sync_files.removeOne(note);
       m_Notes->notes_sync_files.append(note);
     }
   }
+
   m_Notes->syncToWebDAV();
 }
 
@@ -2300,6 +2314,8 @@ void MainWindow::on_btnBackNoteList_clicked() {
   m_NotesList->saveCurrentNoteInfo();
   m_NotesList->saveNotesListIndex();
   m_Notes->updateMainnotesIniToSyncLists();
+
+  saveNeedSyncNotes();
 
   m_Notes->syncToWebDAV();
 }

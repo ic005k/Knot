@@ -1208,6 +1208,8 @@ void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
 }
 
 void Notes::openNotesUI() {
+  mw_one->execNeedSyncNotes();
+
   mw_one->closeProgress();
   m_Method->closeInfoWindow();
 
@@ -1369,11 +1371,13 @@ void Notes::openNotes() {
 
   mw_one->m_NotesList->needDelWebDAVFiles.clear();
   isPasswordError = false;
+  isWebDAVError = false;
   m_Method->showInfoWindow(tr("Processing..."));
 
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     if (!m_CloudBackup->checkWebDAVConnection()) {
       m_Method->closeInfoWindow();
+      isWebDAVError = true;
       ShowMessage *msg = new ShowMessage(this);
       msg->showMsg(appName,
                    tr("WebDAV connection failed. Please check the network, "

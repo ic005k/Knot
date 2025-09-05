@@ -68,6 +68,8 @@ class Notes : public QDialog {
   ~Notes();
   Ui::Notes *ui;
 
+  bool isWebDAVError = false;
+
   bool isDelLocalNoteEnd;
 
   void openLocalHtmlFileInAndroid();

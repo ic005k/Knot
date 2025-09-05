@@ -781,6 +781,7 @@ void CloudBackup::uploadFilesToWebDAV(QStringList files) {
       if (reply->error() == QNetworkReply::NoError) {
         qDebug() << "Upload succeeded:" << m_file;
         mw_one->m_Notes->notes_sync_files.removeOne(m_file);
+        mw_one->saveNeedSyncNotes();
       } else {
         qDebug() << "Error uploading" << m_file << ":" << reply->errorString();
       }

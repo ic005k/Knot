@@ -359,7 +359,8 @@ class MainWindow : public QMainWindow {
 
   void execNeedSyncNotes();
 
- protected:
+  void saveNeedSyncNotes();
+  protected:
   void closeEvent(QCloseEvent *event) override;
   bool eventFilter(QObject *watch, QEvent *evn) override;
   void paintEvent(QPaintEvent *event) override;
