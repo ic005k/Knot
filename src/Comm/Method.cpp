@@ -2975,73 +2975,77 @@ void Method::showInfoWindow(const QString &info) {
     return;
   }
 
-  // 创建无标题窗口，使用Qt::Dialog确保可以设置为模态
+  // 创建无标题窗口，保持原有窗口属性
   infoWindow = new QDialog(
       nullptr, Qt::FramelessWindowHint | Qt::Dialog | Qt::WindowStaysOnTopHint);
   infoWindow->setAttribute(Qt::WA_DeleteOnClose);
   infoWindow->setStyleSheet("background-color: #FFFFCC; color: black;");
-  infoWindow->setModal(true);  // 设置为模态窗口
+  infoWindow->setModal(true);
 
-  // 创建信息标签并设置属性
+  // 创建信息标签（保持原有属性）
   lblInfo = new QLabel(info, infoWindow);
   lblInfo->setWordWrap(true);
   lblInfo->setMargin(10);
-  lblInfo->setMinimumWidth(100);  // 确保最小宽度
+  lblInfo->setMinimumWidth(100);
 
-  // 创建显示秒数的标签
-  lblSeconds = new QLabel("0 s", infoWindow);
-  lblSeconds->setAlignment(Qt::AlignHCenter);  // 水平居中
-  // lblSeconds->setStyleSheet("margin: 5px; color: #666666; font-weight:
-  // bold;");
-  lblSeconds->setStyleSheet(
-      "margin: 5px; background-color: #E67C73; color: white; font-weight: "
-      "bold;");
+  QFont font = this->font();
+  font.setPointSize(fontSize - 1);
+  lblInfo->setFont(font);
 
-  // 设置布局
-  QVBoxLayout *layout = new QVBoxLayout(infoWindow);
-  layout->setContentsMargins(5, 5, 5, 5);
-  layout->addWidget(lblInfo);
-  QHBoxLayout *hbox = new QHBoxLayout(infoWindow);
-  layout->addLayout(hbox);
+  // --------------------------
+  // 新增：添加圆形数秒显示组件
+  // --------------------------
+  IOSCircularProgress *circularTimer = new IOSCircularProgress(infoWindow);
+  // 可根据需要调整大小（如果默认60x60不合适）
+  // circularTimer->setFixedSize(70, 70);
+
+  // 设置布局（核心：将圆形组件放在顶部）
+  QVBoxLayout *mainLayout = new QVBoxLayout(infoWindow);
+  mainLayout->setContentsMargins(10, 10, 10, 10);  // 适当增加边距，避免拥挤
+
+  // 顶部：圆形数秒组件（居中显示）
+  QHBoxLayout *topLayout = new QHBoxLayout();
+  topLayout->addStretch();  // 左侧留白，使组件居中
+  topLayout->addWidget(circularTimer);
+  topLayout->addStretch();           // 右侧留白，使组件居中
+  mainLayout->addLayout(topLayout);  // 将顶部布局加入主布局
+
+  // 中间：原有信息标签
+  mainLayout->addWidget(lblInfo);
+
+  // 底部：进度条（保持原有逻辑）
+  QHBoxLayout *bottomLayout = new QHBoxLayout();
+  mainLayout->addLayout(bottomLayout);
 
   infoProgBar = new QProgressBar(infoWindow);
   infoProgBar->setMaximum(0);
   infoProgBar->setMinimum(0);
-  hbox->addWidget(lblSeconds);
-  hbox->addWidget(infoProgBar);
+  bottomLayout->addWidget(infoProgBar);
 
-  // 设置宽度与主窗口一致
+  // 调整窗口大小以适应新增组件
   if (isAndroid)
     infoWindow->setFixedWidth(mw_one->width());
   else
     infoWindow->setFixedWidth(300);
-  infoWindow->setFixedHeight(150);
 
-  // 计算位置
+  infoWindow->setFixedHeight(240);
+
+  // 计算位置（保持原有逻辑，确保窗口居中）
   QPoint mainPos = mw_one->mapToGlobal(QPoint(0, 0));
   int x = mainPos.x() + (mw_one->geometry().width() - infoWindow->width()) / 2;
   int y =
       mainPos.y() + (mw_one->geometry().height() - infoWindow->height()) / 2;
 
-  // 屏幕边界检查
+  // 屏幕边界检查（保持原有逻辑）
   QScreen *screen = QApplication::screenAt(mainPos);
   if (screen) {
     QRect screenRect = screen->availableGeometry();
     y = qMax(y, screenRect.top());
     x = qBound(screenRect.left(), x, screenRect.right() - infoWindow->width());
   }
-
   infoWindow->move(x, y);
 
-  // 初始化计时器和秒数计数器
-  secondCounter = 0;
-  timer = new QTimer(infoWindow);  // 父对象设为infoWindow，确保自动释放
-  connect(timer, &QTimer::timeout, this, [this]() {
-    secondCounter++;
-    lblSeconds->setText(QString("%1 s").arg(secondCounter));
-  });
-  timer->start(1000);  // 每秒触发一次
-
+  // 进度条更新计时器（保持原有逻辑）
   infoProgBarMax = 0;
   infoProgBarValue = 0;
   QTimer *timerProg = new QTimer(infoWindow);
@@ -3053,7 +3057,7 @@ void Method::showInfoWindow(const QString &info) {
   });
   timerProg->start(250);
 
-  // 显示窗口并确保它获得焦点
+  // 显示窗口（保持原有逻辑）
   infoWindow->show();
   infoWindow->raise();
   infoWindow->activateWindow();
@@ -3066,22 +3070,13 @@ void Method::closeInfoWindow() {
     infoWindow = nullptr;
     lblInfo = nullptr;
     infoProgBar = nullptr;
-
-    if (timer) {
-      timer->stop();
-      timer = nullptr;
-      secondCounter = 0;  // 重置计数器
-    }
   }
 }
 
 void Method::setInfoText(const QString &newText) {
-  // 如果窗口不存在，先创建
   if (!infoWindow || !lblInfo) {
-    showInfoWindow(newText);
     return;
   }
 
-  // 更新文本内容
   lblInfo->setText(newText);
 }

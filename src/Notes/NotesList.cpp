@@ -2308,7 +2308,10 @@ void NotesList::on_actionShareNoteFile() {
 void NotesList::setNoteLabel() {
   mui->lblNoteBook->setText("" + QString::number(getNoteBookCount()));
   QString notesSum = QString::number(getNotesListCount());
-  mui->lblNoteList->setText("" + notesSum);
+  int index_note = getNotesListCurrentIndex();
+  QString notesSn = "";
+  if (index_note >= 0) notesSn = QString::number(index_note + 1) + "/";
+  mui->lblNoteList->setText(notesSn + notesSum);
   int index = getNoteBookCurrentIndex();
   m_Method->modifyItemText3(mui->qwNoteBook, index, notesSum);
 }
@@ -2656,6 +2659,8 @@ void NotesList::clickNoteList() {
 
   QString strMD = m_Method->getText3(mui->qwNoteList, index);
   currentMDFile = iniDir + strMD;
+
+  setNoteLabel();
 
   if (!QFile::exists(currentMDFile)) {
     ShowMessage *msg = new ShowMessage(mw_one);

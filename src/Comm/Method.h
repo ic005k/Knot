@@ -430,8 +430,6 @@ class Method : public QDialog {
 
  private:
   QDialog *infoWindow = nullptr;
-  QLabel *lblSeconds = nullptr;
-  QTimer *timer = nullptr;
   int secondCounter = 0;
 
   void setCellText(int row, int column, QString str, QTableWidget *table);

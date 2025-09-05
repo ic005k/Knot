@@ -291,6 +291,7 @@ void CloudBackup::createDirectory(QString webdavUrl, QString remoteDirPath) {
       reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
   if (statusCode == 201 || statusCode == 405) {  // 405表示目录已存在
     qDebug() << "目录已就绪:" << remoteDirPath;
+    m_Method->setInfoText(">> " + remoteDirPath);
   } else {
     qDebug() << "目录创建失败，状态码:" << statusCode;
   }
@@ -812,6 +813,7 @@ WebDavHelper *listWebDavFiles(const QString &url, const QString &username,
       manager, &QNetworkAccessManager::authenticationRequired,
       [username, password](QNetworkReply *reply, QAuthenticator *auth) {
         qDebug() << "正在认证:" << reply->url().toString();
+        m_Method->setInfoText(">> " + reply->url().toString());
         auth->setUser(username);
         auth->setPassword(password);
       });
