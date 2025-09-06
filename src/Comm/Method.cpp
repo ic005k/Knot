@@ -3013,8 +3013,16 @@ void Method::showInfoWindow(const QString &info) {
   topLayout->addStretch();           // 右侧留白，使组件居中
   mainLayout->addLayout(topLayout);  // 将顶部布局加入主布局
 
+  QFrame *frame = new QFrame(infoWindow);
+  frame->setStyleSheet("background-color: #FFFFCC; color: black;");
+  lblInfo->setStyleSheet("background-color: #FFFFCC; color: black;");
+
+  QVBoxLayout *v_box = new QVBoxLayout();
+  frame->setLayout(v_box);
+  v_box->addWidget(lblInfo);
+
   // 中间：原有信息标签
-  mainLayout->addWidget(lblInfo);
+  mainLayout->addWidget(frame);
 
   // 底部：进度条（保持原有逻辑）
   QHBoxLayout *bottomLayout = new QHBoxLayout();
@@ -3031,8 +3039,8 @@ void Method::showInfoWindow(const QString &info) {
   else
     infoWindow->setFixedWidth(300);
 
-  int win_h = 240;
-  if (!isAndroid) win_h = 220;
+  int win_h = 265;
+  if (!isAndroid) win_h = 230;
   infoWindow->setFixedHeight(win_h);
 
   // 计算位置（保持原有逻辑，确保窗口居中）
