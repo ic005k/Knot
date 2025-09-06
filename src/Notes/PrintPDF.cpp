@@ -18,6 +18,8 @@ PrintPDF::PrintPDF(QWidget* parent) : QDialog(parent), ui(new Ui::PrintPDF) {
 
   m_PrintPDF = this;
 
+  setFixedHeight(mw_one->geometry().height() * 0.8);
+
   QFont font = this->font();
   font.setPointSize(fontSize);
   ui->listWidget->setFont(font);
@@ -66,7 +68,8 @@ QString PrintPDF::getItem(QString title, QString lblText, QStringList valueList,
     w = mw_one->width() - 40;
   else
     w = 230;
-  h = valueList.count() * m_Method->getFontHeight() * 1.8;
+  h = height();
+  // (valueList.count()) * m_Method->getFontHeight() * 1.8;
   if (h > mw_one->height()) h = mw_one->height() - 50;
 
   x = mw_one->geometry().x() + (mw_one->geometry().width() - w) / 2;
@@ -76,6 +79,7 @@ QString PrintPDF::getItem(QString title, QString lblText, QStringList valueList,
   m_Method->m_widget = new QWidget(mw_one);
   m_Method->showGrayWindows();
   show();
+
   while (!isHidden()) QCoreApplication::processEvents();
 
   return strValue;

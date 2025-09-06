@@ -2991,10 +2991,6 @@ void Method::showInfoWindow(const QString &info) {
   lblInfo->setMargin(10);
   lblInfo->setMinimumWidth(100);
 
-  QFont font = this->font();
-  font.setPointSize(fontSize - 1);
-  lblInfo->setFont(font);
-
   // --------------------------
   // 新增：添加圆形数秒显示组件
   // --------------------------
@@ -3039,9 +3035,16 @@ void Method::showInfoWindow(const QString &info) {
   else
     infoWindow->setFixedWidth(300);
 
-  int win_h = 265;
-  if (!isAndroid) win_h = 230;
+  int win_h = 230;
+  QFont font = this->font();
+  if (!isAndroid) {
+    win_h = 225;
+    font.setPointSize(8);
+  } else {
+    font.setPointSize(15);
+  }
   infoWindow->setFixedHeight(win_h);
+  lblInfo->setFont(font);
 
   // 计算位置（保持原有逻辑，确保窗口居中）
   QPoint mainPos = mw_one->mapToGlobal(QPoint(0, 0));

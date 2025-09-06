@@ -812,6 +812,7 @@ bool Notes::selectPDFFormat(QPrinter *printer) {
             << QPageSize::A8 << QPageSize::A9 << QPageSize::Letter;
 
   PrintPDF *idlg1 = new PrintPDF(this);
+  idlg1->setFocus();
   QString pageSizeString =
       idlg1->getItem(tr("Page size"), tr("Page size"), pageSizeStrings, 4);
 
@@ -842,6 +843,7 @@ bool Notes::selectPDFFormat(QPrinter *printer) {
   orientations << QPageLayout::Portrait << QPageLayout::Landscape;
 
   PrintPDF *idlg2 = new PrintPDF(this);
+  idlg2->setFocus();
   QString orientationString = idlg2->getItem(
       tr("Orientation"), tr("Orientation"), orientationStrings, 0);
 

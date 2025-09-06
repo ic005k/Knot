@@ -2824,8 +2824,6 @@ void MainWindow::on_btnToPDF_clicked() {
   m_Notes->on_btnPDF_clicked();
 }
 
-void MainWindow::clickBtnToPDF() { mui->btnToPDF->click(); }
-
 void MainWindow::on_btnWebDAVBackup_clicked() {
   if (!mui->btnReader->isEnabled()) return;
   m_CloudBackup->startBakData();

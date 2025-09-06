@@ -86,7 +86,7 @@ Rectangle {
                                 mw_one.on_btnMoveTo_clicked()
                                 break
                             case 8:
-                                mw_one.clickBtnToPDF()
+                                mw_one.on_btnToPDF_clicked()
 
                                 break
                             case 9:

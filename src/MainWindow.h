@@ -618,7 +618,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnNoteRecycle_clicked();
 
-  void clickBtnToPDF();
  private slots:
   void on_btnMenu_clicked();
 
