@@ -585,6 +585,14 @@ void MainHelper::initQW() {
   mui->qwNoteList->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/notelist.qml")));
 
+  mui->qwNoteTools->rootContext()->setContextProperty("m_NotesList",
+                                                      mw_one->m_NotesList);
+  mui->qwNoteTools->rootContext()->setContextProperty("m_Notes",
+                                                      mw_one->m_Notes);
+  mui->qwNoteTools->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwNoteTools->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/note_toolsbar.qml")));
+
   mui->qwNotesSearchResult->rootContext()->setContextProperty("fontSize",
                                                               fontSize);
   mui->qwNotesSearchResult->rootContext()->setContextProperty(

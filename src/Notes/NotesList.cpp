@@ -39,6 +39,13 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
       "QFrame{background-color: #455364;color: #FFFFFF;border-radius:10px; "
       "border:0px solid gray;}");
   mui->f_Tools->setStyleSheet(mui->f_FindNotes->styleSheet());
+  mui->qwNoteTools->setFixedHeight(60);
+
+  mui->btnBackNoteList->hide();
+  mui->btnEditNote->hide();
+  mui->btnOpenNote->hide();
+  mui->btnShowFindNotes->hide();
+  mui->btnTools->hide();
 
   setModal(true);
   this->layout()->setSpacing(5);
@@ -1107,6 +1114,7 @@ void NotesList::on_btnDel_Recycle_clicked() {
     }
 
     delFile(md);
+    mw_one->m_Notes->notes_sync_files.removeOne(md);
 
     setDelNoteFlag(curItem->text(1));
 

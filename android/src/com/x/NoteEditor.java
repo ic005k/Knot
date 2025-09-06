@@ -766,6 +766,7 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
 
     @Override
     public void onBackPressed() {
+        isExit = true;
         if (isTextChanged)
             showNormalDialog();
         else {

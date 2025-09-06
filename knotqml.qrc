@@ -32,5 +32,6 @@
         <file>src/qmlsrc/SearchResults.qml</file>
         <file>src/qmlsrc/Speedometer.qml</file>
         <file>src/qmlsrc/NoteGraphView.qml</file>
+        <file>src/qmlsrc/note_toolsbar.qml</file>
     </qresource>
 </RCC>
