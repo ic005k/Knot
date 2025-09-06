@@ -1104,7 +1104,7 @@ void MainHelper::init_Theme() {
     mui->btnSteps->setIcon(QIcon(":/res/steps.svg"));
     mui->btnNotes->setIcon(QIcon(":/res/note.svg"));
     mui->btnChart->setIcon(QIcon(":/res/chart.svg"));
-    mui->btnFind->setIcon(QIcon(":/res/find.png"));
+    mui->btnFind->setIcon(QIcon(":/res/find.svg"));
     mui->btnReport->setIcon(QIcon(":/res/report.svg"));
     mui->btnSelTab->setIcon(QIcon(":/res/tab.svg"));
 

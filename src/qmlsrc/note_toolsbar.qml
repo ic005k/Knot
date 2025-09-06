@@ -47,7 +47,7 @@ Rectangle {
                         height: 38
                         icon.width: 25
                         icon.height: 25
-                        icon.source: ["qrc:/res/back.png", "qrc:/res/view.svg", "qrc:/res/edit.svg", "qrc:/res/find.png", "qrc:/res/up.svg", "qrc:/res/down.svg", "qrc:/res/delitem.svg", "qrc:/res/move.svg", "qrc:/res/topdf.svg", "qrc:/res/rename.svg", "qrc:/res/recycle.svg"][index]
+                        icon.source: ["qrc:/res/back.svg", "qrc:/res/view.svg", "qrc:/res/edit.svg", "qrc:/res/find.svg", "qrc:/res/up.svg", "qrc:/res/down.svg", "qrc:/res/delitem.svg", "qrc:/res/move.svg", "qrc:/res/topdf.svg", "qrc:/res/rename.svg", "qrc:/res/recycle.svg"][index]
 
                         background: Rectangle {
                             color: toolButton.hovered ? "#e0e0e0" : "transparent"

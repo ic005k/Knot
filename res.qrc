@@ -3,12 +3,10 @@
         <file>res/a1.png</file>
         <file>res/a2.png</file>
         <file>res/b.png</file>
-        <file>res/back.png</file>
         <file>res/dir.png</file>
         <file>res/done.png</file>
         <file>res/done1.png</file>
         <file>res/down.png</file>
-        <file>res/find.png</file>
         <file>res/icon.icns</file>
         <file>res/icon.png</file>
         <file>res/low.png</file>
@@ -179,5 +177,7 @@
         <file>res/down.svg</file>
         <file>res/up.svg</file>
         <file>res/rename.svg</file>
+        <file>res/find.svg</file>
+        <file>res/back.svg</file>
     </qresource>
 </RCC>
