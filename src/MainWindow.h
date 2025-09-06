@@ -360,7 +360,8 @@ class MainWindow : public QMainWindow {
   void execNeedSyncNotes();
 
   void saveNeedSyncNotes();
-  protected:
+
+ protected:
   void closeEvent(QCloseEvent *event) override;
   bool eventFilter(QObject *watch, QEvent *evn) override;
   void paintEvent(QPaintEvent *event) override;
@@ -378,6 +379,10 @@ class MainWindow : public QMainWindow {
   void readEBookDone();
   void on_btnPageUp_clicked();
   void on_btnPageNext_clicked();
+
+  void on_btnShowFindNotes_clicked();
+
+  void on_btnRename_clicked();
 
   void on_actionOneDriveBackupData();
 
@@ -495,7 +500,7 @@ class MainWindow : public QMainWindow {
   void on_btnStartSearch_clicked();
 
   void on_btnChart_clicked();
-  void on_btnRename_clicked();
+
   void on_btnBack_NotesSearchResult_clicked();
 
   void on_btnOpenSearchResult_clicked();
@@ -597,6 +602,20 @@ class MainWindow : public QMainWindow {
 
   void on_actionShareFile();
 
+  void on_btnUpMove_clicked();
+
+  void on_btnDownMove_clicked();
+
+  void on_btnDelNote_NoteBook_clicked();
+
+  void on_btnMoveTo_clicked();
+
+  void on_btnToPDF_clicked();
+
+  void on_btnManagement_clicked();
+
+  void on_btnNoteRecycle_clicked();
+
  private slots:
   void on_btnMenu_clicked();
 
@@ -616,8 +635,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnDelBakFile_clicked();
 
-  void on_btnNoteRecycle_clicked();
-
   void on_btnDelNoteRecycle_clicked();
 
   void on_btnRestoreNoteRecycle_clicked();
@@ -627,8 +644,6 @@ class MainWindow : public QMainWindow {
   void on_btnFindNextNote_clicked();
 
   void on_btnClearNoteFindText_clicked();
-
-  void on_btnShowFindNotes_clicked();
 
   void on_btnNoteBookMenu_clicked();
 
@@ -701,16 +716,6 @@ class MainWindow : public QMainWindow {
   void on_btnTabMoveUp_clicked();
 
   void on_btnTabMoveDown_clicked();
-
-  void on_btnManagement_clicked();
-
-  void on_btnUpMove_clicked();
-
-  void on_btnDownMove_clicked();
-
-  void on_btnDelNote_NoteBook_clicked();
-
-  void on_btnMoveTo_clicked();
 
   void on_btnHideFind_clicked();
 
@@ -798,8 +803,6 @@ class MainWindow : public QMainWindow {
   void on_rbHiking_clicked();
 
   void on_rbRunning_clicked();
-
-  void on_btnToPDF_clicked();
 
   void on_btnWebDAVBackup_clicked();
 

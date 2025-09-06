@@ -115,7 +115,7 @@ void Notes::showEvent(QShowEvent *event) {
 
     ui->btnView->setFixedHeight(btn_h);
     ui->btnView->setFixedWidth(btn_h);
-    ui->btnView->setIconSize(QSize(m_size, m_size));
+    ui->btnView->setIconSize(QSize(m_size + 5, m_size + 5));
 
 #ifndef Q_OS_ANDROID
     QFont font = mw_one->font();
