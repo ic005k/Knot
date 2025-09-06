@@ -361,6 +361,8 @@ class MainWindow : public QMainWindow {
 
   void saveNeedSyncNotes();
 
+  void updateMainTab();
+
  protected:
   void closeEvent(QCloseEvent *event) override;
   bool eventFilter(QObject *watch, QEvent *evn) override;
@@ -616,6 +618,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnNoteRecycle_clicked();
 
+  void clickBtnToPDF();
  private slots:
   void on_btnMenu_clicked();
 
@@ -848,7 +851,7 @@ class MainWindow : public QMainWindow {
   void resetWinPos();
 
   void init_Instance();
-  void updateMainTab();
+
   void getMainTabs();
 
   QString strTime, strAmount, strCategory, strDetails;

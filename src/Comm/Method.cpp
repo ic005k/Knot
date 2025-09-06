@@ -3093,3 +3093,23 @@ void Method::setInfoText(const QString &newText) {
 
   lblInfo->setText(newText);
 }
+
+int Method::getFlagToday(QTreeWidget *tw) {
+  QTreeWidgetItem *topitem = tw->topLevelItem(tw->topLevelItemCount() - 1);
+  QString t0, t3;
+  int y, m, d;
+  t0 = topitem->text(0);
+  t3 = topitem->text(3);
+  QStringList list = t0.split(" ");
+  m = list.at(1).toInt();
+  d = list.at(2).toInt();
+  y = t3.toInt();
+  int cy, cm, cd;
+  cy = QDate::currentDate().year();
+  cm = QDate::currentDate().month();
+  cd = QDate::currentDate().day();
+  int isFlagToday = 0;
+  if (y == cy && m == cm && d == cd) isFlagToday = 1;
+
+  return isFlagToday;
+}

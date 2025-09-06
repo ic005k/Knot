@@ -13,6 +13,7 @@ Rectangle {
 
     property int i: 0
     property int itemCount: 0
+    property int isFlagToday: 1
     property bool isHighPriority: false
 
     function setItemHeight(h) {}
@@ -83,13 +84,15 @@ Rectangle {
     }
 
     function addItem(t0, t1, t2, t3, height) {
+        isFlagToday = height
         view.model.append({
                               "text0": t0,
                               "text1": t1,
                               "text2": t2,
                               "text3": t3,
-                              "myh": height
+                              "isFlagToday": height
                           })
+        console.log("isToday:" + isFlagToday)
     }
 
     function insertItem(text0, text1, text2, text3, curIndex) {
@@ -162,35 +165,6 @@ Rectangle {
             border.color: "lightgray" //"lightsteelblue"
 
             radius: 6
-
-            function getItemHeight() {
-                var item0H
-                var item1H
-                var item2H
-                var item3H
-
-                if (item0.text.length === 0)
-                    item0H = 0
-                else
-                    item0H = item0.contentHeight
-
-                if (item1.text.length === 0)
-                    item1H = 0
-                else
-                    item1H = item1.contentHeight
-
-                if (item2.text.length === 0)
-                    item2H = 0
-                else
-                    item2H = item2.contentHeight
-
-                if (item3.text.length === 0)
-                    item3H = 0
-                else
-                    item3H = item3.contentHeight
-
-                return item0H + item1H + item2H + item3H
-            }
 
             RowLayout {
 
@@ -288,7 +262,7 @@ Rectangle {
                         anchors.rightMargin: 0
                         wrapMode: Text.WordWrap
                         elide: Text.ElideRight
-                        //Layout.maximumWidth: listItem.width
+
                         Layout.preferredWidth: listItem.width
                         font.bold: false
                         text: text3
@@ -300,6 +274,15 @@ Rectangle {
                         visible: item3.text.length ? true : false
                     }
                 }
+            }
+
+            Rectangle {
+                id: flagToday
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width - 6
+                height: 2
+                color: "#ff5588"
+                visible: model.isFlagToday === 1
             }
 
             MouseArea {

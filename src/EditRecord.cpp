@@ -141,6 +141,7 @@ void EditRecord::on_btnOk_clicked() {
     }
   }
 
+  mw_one->updateMainTab();
   mw_one->startSave("tab");
 }
 

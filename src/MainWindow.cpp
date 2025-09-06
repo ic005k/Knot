@@ -177,6 +177,7 @@ MainWindow::MainWindow(QWidget *parent)
   QTimer::singleShot(10, this, [this]() {
     reloadMain();
     clickData();
+    updateMainTab();
   });
 
   currentMDFile = m_NotesList->getCurrentMDFile();
@@ -2555,7 +2556,9 @@ void MainWindow::updateMainTab() {
   clearAll();
   for (int i = 0; i < tabData->count(); i++) {
     QString tabText = tabData->tabText(i);
-    addItem(tabText, "", "", "", 0);
+    QTreeWidget *tw = get_tw(i);
+    int isFlagToday = m_Method->getFlagToday(tw);
+    addItem(tabText, "", "", "", isFlagToday);
   }
   setCurrentIndex(tabData->currentIndex());
 }
@@ -2820,6 +2823,8 @@ void MainWindow::on_btnToPDF_clicked() {
 
   m_Notes->on_btnPDF_clicked();
 }
+
+void MainWindow::clickBtnToPDF() { mui->btnToPDF->click(); }
 
 void MainWindow::on_btnWebDAVBackup_clicked() {
   if (!mui->btnReader->isEnabled()) return;

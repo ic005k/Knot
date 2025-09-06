@@ -412,7 +412,8 @@ class Method : public QDialog {
   QStringList getMdFilesInDir(const QString &dirPath,
                               bool includeFullPath = false);
 
- protected:
+  int getFlagToday(QTreeWidget *tw);
+  protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
  public slots:
