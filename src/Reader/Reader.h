@@ -141,6 +141,9 @@ class Reader : public QDialog {
   void setTextAreaCursorPos(int nCursorPos);
   bool eventFilterReaderAndroid(QObject *watch, QEvent *evn);
   void showOrHideBookmark();
+
+  void initInfoShowFont();
+
  public slots:
   void setPageScroll0();
   void setPageScroll1();

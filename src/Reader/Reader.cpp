@@ -100,10 +100,6 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
   tmeAutoRun = new QTimer(mw_one);
   connect(tmeAutoRun, SIGNAL(timeout()), this, SLOT(autoRun()));
 
-  f.setPointSize(10);
-  mui->lblEpubInfo->setFont(f);
-  mui->pEpubProg->setFont(f);
-
   strEndFlag = "<p align=center>-----" + tr("bottom") + "-----</p>";
 }
 
@@ -261,6 +257,17 @@ void Reader::startOpenFile(QString openfile) {
 
   } else
     return;
+}
+
+void Reader::initInfoShowFont() {
+  QFont font = this->font();
+  if (!isAndroid) {
+    font.setPointSize(7);
+  } else {
+    font.setPointSize(13);
+  }
+  mui->lblEpubInfo->setFont(font);
+  mui->pEpubProg->setFont(font);
 }
 
 void Reader::openFile(QString openfile) {

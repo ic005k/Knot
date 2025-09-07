@@ -364,6 +364,8 @@ void loadTheme(bool isDark) {
     }
   }
 
+  mw_one->m_Reader->initInfoShowFont();
+
   isInitThemeEnd = true;
 
   if (isNeedExecDeskShortcut) {
