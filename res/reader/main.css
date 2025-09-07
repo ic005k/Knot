@@ -25,7 +25,7 @@ p {
     margin: 0.5em 0 !important; /* 轻微增加段落间距，确保分离 */
 }
 
-/*img {
+img {
     margin: 0px auto !important;
     padding: 0px;
     line-height: 35px;
@@ -34,7 +34,7 @@ p {
     height: auto !important;
     display: block !important;
     border: none !important;
-}*/
+}
 
 .cover {
     width: 100% !important;

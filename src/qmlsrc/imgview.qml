@@ -40,7 +40,7 @@ Item {
             //这里使图片居中显示
             x: mapItemArea.width / 2 - mapImg.width / 2
             y: mapItemArea.height / 2 - mapImg.height / 2
-            source: "file:///" + imgFile
+            source: imgFile
             //图像异步加载，只对本地图像有用
             asynchronous: true
         }

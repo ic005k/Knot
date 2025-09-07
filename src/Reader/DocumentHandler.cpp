@@ -246,7 +246,8 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
 
   if (mw_one->curx != 0) return;
 
-  qDebug() << "link : " << linkFile;
+  // qDebug() << "link : " << linkFile;
+
   copyText = linkFile;
   if (linkFile.mid(0, 4) == "http" || linkFile.mid(0, 4) == "www.") {
     if (linkFile.mid(0, 4) != "http") {
@@ -338,7 +339,7 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
     if (is_sup) return;
 
     mw_one->m_Reader->initLink(linkFile);
-  } else {
+  } else if (linkFile.contains("data:image/")) {
     // open picture
     if (htmlIndex == 0 && !mw_one->m_Reader->isHidden()) {
       mw_one->clearSelectBox();
@@ -346,31 +347,10 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
       return;
     }
 
-    QString str = linkFile;
-    str = str.replace("../", "");
-    str.replace("file:///", "");
-    picfile = str;
-    qDebug() << "Pic File1 : " << picfile;
-
     mui->btnDelImage->hide();
-    if (QFile(picfile).exists()) {
-      LoadPic *m_LoadPic = new LoadPic(mw_one);
-      m_LoadPic->initMain(picfile);
 
-    } else {
-      QString memoPicFile = linkFile;
-      memoPicFile.replace(strOpfPath, "");
-      memoPicFile.replace("file://", "");
-      qDebug() << "memoPicFile : " << memoPicFile
-               << QFile(memoPicFile).exists();
-
-      if (QFile(memoPicFile).exists()) {
-        picfile = memoPicFile;
-        LoadPic *m_LoadPic = new LoadPic(mw_one);
-        m_LoadPic->initMain(memoPicFile);
-        mui->btnDelImage->show();
-      }
-    }
+    LoadPic *m_LoadPic = new LoadPic(mw_one);
+    m_LoadPic->initMain(linkFile);
   }
 }
 

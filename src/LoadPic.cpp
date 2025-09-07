@@ -29,8 +29,8 @@ LoadPic::~LoadPic() {}
 
 void LoadPic::initMain(QString imgFile) {
   imgFileName = imgFile;
-  mui->lblImgInfo->setText(imgFile + "  " +
-                           m_Method->getFileSize(QFile(imgFile).size(), 2));
+  // mui->lblImgInfo->setText(imgFile + "  " +
+  //                         m_Method->getFileSize(QFile(imgFile).size(), 2));
 
   if (mui->frameReader->isVisible()) mui->frameReader->hide();
   if (mui->frameNotesGraph->isVisible()) mui->frameNotesGraph->hide();

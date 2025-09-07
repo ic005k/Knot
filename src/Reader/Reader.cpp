@@ -344,8 +344,6 @@ void Reader::openFile(QString openfile) {
 
       QStringList opfList = readText(opfContent);
 
-      // qDebug() << "opfList=" << opfList;
-
       htmlFiles.clear();
 
       int opfCount = opfList.count();
@@ -360,13 +358,9 @@ void Reader::openFile(QString openfile) {
             QString qfile;
             qfile = strOpfPath + get_href(idref, opfList);
             htmlFiles.append(qfile);
-
-            // qDebug() << "qfile=" << qfile;
           }
         }
       }
-
-      // QStringList htmlList = ncx2html();
 
       if (htmlFiles.count() == 0) {
         isEpub = false;
@@ -379,11 +373,7 @@ void Reader::openFile(QString openfile) {
         isText = false;
         isPDF = false;
 
-        // qDebug() << "htmlFiles=" << htmlFiles;
-
-        QFile(strOpfPath + "main.css").remove();
-        QFile::copy(":/res/reader/main.css", strOpfPath + "main.css");
-
+        ncx2html();
         QStringList temp_l0 = ncxList;
         ncxList.clear();
         for (int i = 0; i < temp_l0.count(); i++) {
@@ -811,9 +801,6 @@ QString Reader::processHtml(QString htmlFile, bool isWriteFile) {
 
   // 根目录处理
   QString rootPath = strOpfPath;
-  if (!rootPath.endsWith("/")) {
-    // rootPath += "/";
-  }
 
   // 2. 清理无效空格
   strHtml.replace("　", " ");
@@ -929,6 +916,7 @@ QString Reader::processHtml(QString htmlFile, bool isWriteFile) {
   return strHtml;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
 void Reader::setQMLHtml(QString htmlFile, QString htmlBuffer, QString skipID) {
   if (reader->fileExists(htmlFile)) {
     htmlBuffer = processHtml(htmlFile, false);
@@ -1643,16 +1631,9 @@ void Reader::showCatalogue() {
 QStringList Reader::ncx2html() {
   QStringList htmlList;
   ncxList.clear();
-  QString ncxFile;
-  QStringList fileList;
-  QStringList fmt;
-  fmt.append("ncx");
-  mw_one->m_NotesList->getAllFiles(strOpfPath, fileList, fmt);
-  if (fileList.count() >= 1) {
-    ncxFile = fileList.at(0);
-  }
+  QString ncxFile = strOpfPath + "toc.ncx";
 
-  if (!QFile(ncxFile).exists()) {
+  if (!reader->fileExists(ncxFile)) {
     return htmlList;
   }
 
@@ -1663,7 +1644,10 @@ QStringList Reader::ncx2html() {
 
   QTextEdit *text_edit = new QTextEdit;
   QTextEdit *text_edit0 = new QTextEdit;
-  QString strHtml0 = loadText(ncxFile);
+
+  QByteArray data = reader->readFile(ncxFile);
+  QString strHtml0 = m_Method->convertDataToUnicode(data);
+
   strHtml0 = strHtml0.replace("　", " ");
   strHtml0 = strHtml0.replace("<", "\n<");
   strHtml0 = strHtml0.replace(">", ">\n");
@@ -1747,7 +1731,7 @@ QStringList Reader::ncx2html() {
 
   plain_edit->appendPlainText("</body>");
   plain_edit->appendPlainText("</html>");
-  catalogueFile = strOpfPath + "catalogue.html";
+  catalogueFile = privateDir + "catalogue.html";
   PlainTextEditToFile(plain_edit, catalogueFile);
 
   if (strEpubTitle != "") {
