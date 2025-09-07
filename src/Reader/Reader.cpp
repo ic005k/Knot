@@ -792,7 +792,7 @@ QString Reader::processHtml(QString htmlFile, bool isWriteFile) {
   if (!isEpub || !reader->isOpen()) return "";
 
   // 获取屏幕宽度（用于判断是否需要缩放）
-  int screenWidth = mw_one->width() - 24;
+  int screenWidth = mw_one->width() - 60;
   qDebug() << "屏幕宽度:" << screenWidth;
 
   // 1. 读取原始HTML
@@ -808,14 +808,50 @@ QString Reader::processHtml(QString htmlFile, bool isWriteFile) {
   // 3. 引入自定义CSS（仅保留必要样式，图片缩放已在内存中完成）
   QString customCss = loadText(":/res/reader/main.css");
   // 移除原有图片样式（已无需依赖）
-  customCss = customCss.replace(QRegularExpression("img\\s*\\{[^}]*\\}"), "");
+
+  static const QRegularExpression imgCssReg("img\\s*\\{[^}]*\\}");
+  customCss = customCss.replace(imgCssReg, "");
+
+  // 添加图片样式：确保缩放后图片左缩进为0
+  customCss +=
+      "img { margin-left: 0 !important; max-width: 100%; height: auto; }";
   // 仅保留其他样式（段落、标题等）
   strHtml.replace("</head>",
                   QString("<style>%1</style></head>").arg(customCss));
 
-  // 4. 处理图片标签（核心：内存中缩放图片）
-  QRegularExpression imgReg("<img[^>]+>",
-                            QRegularExpression::DotMatchesEverythingOption);
+  // 4. 处理SVG中的image标签，替换为标准img标签
+  static const QRegularExpression svgImageReg(
+      "<image[^>]+>", QRegularExpression::DotMatchesEverythingOption);
+  int svgPos = 0;
+  QRegularExpressionMatch svgMatch;
+
+  // 先处理所有SVG中的image标签，替换为标准img标签
+  while ((svgPos = strHtml.indexOf(svgImageReg, svgPos, &svgMatch)) != -1) {
+    QString imageTag = svgMatch.captured(0);
+    QString imgTag = imageTag;
+
+    // 将SVG的image标签替换为标准img标签
+    imgTag.replace("<image", "<img");
+    // 处理xlink:href属性为src
+    imgTag.replace("xlink:href=", "src=");
+    // 移除SVG特定属性
+    static const QRegularExpression widthRegex("width=\"[^\"]+\"");
+    static const QRegularExpression heightRegex("height=\"[^\"]+\"");
+    static const QRegularExpression xRegex("x=\"[^\"]+\"");
+    static const QRegularExpression yRegex("y=\"[^\"]+\"");
+    imgTag.remove(widthRegex);
+    imgTag.remove(heightRegex);
+    imgTag.remove(xRegex);
+    imgTag.remove(yRegex);
+
+    // 替换原标签
+    strHtml.replace(svgPos, svgMatch.capturedLength(), imgTag);
+    svgPos += imgTag.length();
+  }
+
+  // 5. 处理所有img标签（包括刚从SVG转换过来的）
+  static const QRegularExpression imgReg(
+      "<img[^>]+>", QRegularExpression::DotMatchesEverythingOption);
   int pos = 0;
   QRegularExpressionMatch match;
 
@@ -823,12 +859,8 @@ QString Reader::processHtml(QString htmlFile, bool isWriteFile) {
     QString imgTag = match.captured(0);
     QString modifiedImg = imgTag;
 
-    // 处理xlink:href和标签名
-    modifiedImg.replace("xlink:href=", "src=");
-    modifiedImg.replace("<image", "<img");
-
     // 提取图片路径
-    QRegularExpression srcReg("src=[\"']([^\"']+)[\"']");
+    static const QRegularExpression srcReg("src=[\"']([^\"']+)[\"']");
     QRegularExpressionMatch srcMatch = srcReg.match(modifiedImg);
     if (srcMatch.hasMatch()) {
       QString imgPathRel = srcMatch.captured(1);
@@ -844,7 +876,7 @@ QString Reader::processHtml(QString htmlFile, bool isWriteFile) {
         continue;
       }
 
-      // 5. 关键：内存中加载并缩放图片
+      // 6. 关键：内存中加载并缩放图片
       QImage img;
       bool isImgValid = img.loadFromData(imgData);
       if (!isImgValid) {
@@ -860,15 +892,17 @@ QString Reader::processHtml(QString htmlFile, bool isWriteFile) {
 
       // 缩放逻辑：仅当图片宽 > 屏幕宽时缩放
       QImage scaledImg = img;
+      bool isScaled = false;
       if (originalWidth > screenWidth) {
         // 按比例缩放到屏幕宽度
         int scaledHeight = (originalHeight * screenWidth) / originalWidth;
         scaledImg = img.scaled(screenWidth, scaledHeight, Qt::KeepAspectRatio,
                                Qt::SmoothTransformation);
         qDebug() << "缩放后尺寸:" << screenWidth << "x" << scaledHeight;
+        isScaled = true;
       }
 
-      // 6. 缩放后的图片转换为字节数据（保持原格式）
+      // 7. 缩放后的图片转换为字节数据（保持原格式）
       QByteArray scaledData;
       QBuffer buffer(&scaledData);
       buffer.open(QIODevice::WriteOnly);
@@ -884,19 +918,28 @@ QString Reader::processHtml(QString htmlFile, bool isWriteFile) {
       }
       buffer.close();
 
-      // 7. 转换为Data URI
+      // 8. 转换为Data URI
       QString mimeType = format == "JPEG" ? "image/jpeg" : "image/png";
       QString dataUri = QString("data:%1;base64,%2")
-                            .arg(mimeType)
-                            .arg(QString(scaledData.toBase64()));
+                            .arg(mimeType, QString(scaledData.toBase64()));
 
-      // 8. 替换图片路径为缩放后的Data URI
+      // 9. 替换图片路径为缩放后的Data URI
       modifiedImg.replace(srcReg, QString("src=\"%1\"").arg(dataUri));
 
-      // 添加点击链接（可选）
+      // 确保图片没有左缩进，添加样式
+      if (isScaled) {
+        // 如果有style属性则添加，没有则创建
+        if (modifiedImg.contains("style=")) {
+          modifiedImg.replace("style=\"",
+                              "style=\"margin-left: 0 !important; ");
+        } else {
+          modifiedImg.insert(4, " style=\"margin-left: 0 !important;\"");
+        }
+      }
+
+      // 添加点击链接
       modifiedImg = QString("<a href=\"%1\" class=\"custom-img-link\">%2</a>")
-                        .arg(dataUri)
-                        .arg(modifiedImg);
+                        .arg(dataUri, modifiedImg);
     }
 
     // 替换原标签
@@ -904,9 +947,10 @@ QString Reader::processHtml(QString htmlFile, bool isWriteFile) {
     pos += modifiedImg.length();
   }
 
-  // 9. 写入文件（如果需要）
+  // 10. 写入文件（如果需要）
+
   if (isWriteFile) {
-    QFile file(htmlFile);
+    QFile file(privateDir + "ebook.html");
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
       file.write(strHtml.toUtf8());
       file.close();
