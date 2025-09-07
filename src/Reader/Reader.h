@@ -25,6 +25,7 @@
 #include <QXmlStreamReader>
 
 #include "src/Reader/DocumentHandler.h"
+#include "src/Reader/epubreader.h"
 
 class TextChunkModel;
 
@@ -192,6 +193,7 @@ class Reader : public QDialog {
   bool handleTouchRelease(const QPointF &globalPos);
   bool handleTouchMove(const QPointF &globalPos);
   bool handleTouchPress(const QPointF &globalPos);
+  QStringList parseChapters(const QByteArray &opfContent);
 };
 
 class TextChunkModel : public QAbstractListModel {

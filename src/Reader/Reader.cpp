@@ -45,6 +45,8 @@ static int press_y;
 static int relea_x;
 static int relea_y;
 
+EpubReader *reader = nullptr;
+
 Reader::Reader(QWidget *parent) : QDialog(parent) {
   qmlRegisterType<TextChunkModel>("EBook.Models", 1, 0, "TextChunkModel");
 
@@ -103,7 +105,12 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
   strEndFlag = "<p align=center>-----" + tr("bottom") + "-----</p>";
 }
 
-Reader::~Reader() {}
+Reader::~Reader() {
+  if (reader != nullptr) {
+    delete reader;
+    reader = nullptr;
+  }
+}
 
 bool Reader::eventFilter(QObject *obj, QEvent *evn) {
   if (evn->type() == QEvent::KeyRelease) {
@@ -281,6 +288,27 @@ void Reader::openFile(QString openfile) {
     QString strSuffix = fi.suffix();
 
     if (strSuffix == "epub") {
+      if (reader != nullptr) {
+        delete reader;
+        reader = nullptr;
+      }
+      reader = new EpubReader();
+      if (!reader->open(openfile)) {
+        return;
+      }
+
+      // 读取并解析 content.opf（路径通常在 META-INF/container.xml
+      // 中定义，需先解析）
+      QByteArray containerXml = reader->readFile("META-INF/container.xml");
+      // （简化处理：假设 content.opf 路径是 OEBPS/content.opf）
+      QByteArray opfContent = reader->readFile("OEBPS/content.opf");
+
+      qDebug() << containerXml;
+      qDebug() << opfContent;
+
+      return;
+
+      /////////////////////////
       QString dirpath, dirpath1;
       dirpath = privateDir + "temp0/";
       dirpath1 = privateDir + "temp/";
@@ -2762,4 +2790,11 @@ QVariantMap TextChunkModel::get(int index) const {
   result["text"] = m_chunks.at(index);  // 文本数据存储在 m_chunks
 
   return result;
+}
+
+// 解析 content.opf 获取章节路径列表
+QStringList Reader::parseChapters(const QByteArray &opfContent) {
+  QStringList chapters;
+
+  return chapters;
 }

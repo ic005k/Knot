@@ -397,6 +397,7 @@ SOURCES += \
     src/Reader/Reader.cpp \
     src/Reader/ReaderSet.cpp \
     src/Reader/SetReaderText.cpp \
+    src/Reader/epubreader.cpp \
     src/Report.cpp \
     src/Exercise/Speedometer.cpp \
     src/Exercise/Steps.cpp \
@@ -632,6 +633,7 @@ HEADERS += \
     src/Reader/Reader.h \
     src/Reader/ReaderSet.h \
     src/Reader/SetReaderText.h \
+    src/Reader/epubreader.h \
     src/Report.h \
     src/Exercise/Speedometer.h \
     src/Exercise/Steps.h \
