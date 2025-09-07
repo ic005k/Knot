@@ -25,16 +25,16 @@ p {
     margin: 0.5em 0 !important; /* 轻微增加段落间距，确保分离 */
 }
 
-img {
-    margin: 0px auto !important; /* 居中显示图片 */
+/*img {
+    margin: 0px auto !important;
     padding: 0px;
     line-height: 35px;
     border-radius: 5px !important;
     width: 100% !important;
     height: auto !important;
-    display: block !important; /* 确保图片居中生效 */
+    display: block !important;
     border: none !important;
-}
+}*/
 
 .cover {
     width: 100% !important;

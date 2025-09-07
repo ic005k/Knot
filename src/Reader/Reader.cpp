@@ -298,22 +298,18 @@ void Reader::openFile(QString openfile) {
         return;
       }
 
-      // 读取并解析 content.opf（路径通常在 META-INF/container.xml
-      // 中定义，需先解析）
-      QByteArray containerXml = reader->readFile("META-INF/container.xml");
-
-      qDebug() << containerXml;
-
-      QString dirpath, dirpath1;
-
-      QString strFullPath;
-
-      if (!reader->fileExists("META-INF/container.xml")) {
+      QString containerFile = "META-INF/container.xml";
+      if (!reader->fileExists(containerFile)) {
         isEpub = false;
         isEpubError = true;
         qDebug() << "====== isEpub == false ======";
         return;
       }
+
+      QString dirpath, dirpath1;
+      QString strFullPath;
+
+      QByteArray containerXml = reader->readFile(containerFile);
 
       QStringList conList = readText(containerXml);
       for (int i = 0; i < conList.count(); i++) {
@@ -341,6 +337,10 @@ void Reader::openFile(QString openfile) {
       QString strOpfFile = strFullPath;
       QFileInfo fi(strOpfFile);
       strOpfPath = fi.path() + "/";
+      if (strOpfPath == "./") strOpfPath = "";
+
+      qDebug() << "containerXml=" << containerXml
+               << "strOpfPath=" << strOpfPath;
 
       QStringList opfList = readText(opfContent);
 
@@ -801,41 +801,32 @@ void Reader::setEpubPagePosition(int index, QString htmlFile) {
 QString Reader::processHtml(QString htmlFile, bool isWriteFile) {
   if (!isEpub || !reader->isOpen()) return "";
 
-  // 获取屏幕宽度
-  int screenWidth = mw_one->width();
+  // 获取屏幕宽度（用于判断是否需要缩放）
+  int screenWidth = mw_one->width() - 24;
+  qDebug() << "屏幕宽度:" << screenWidth;
 
   // 1. 读取原始HTML
   QByteArray ba = reader->readFile(htmlFile);
   QString strHtml = QString::fromUtf8(ba);
 
-  // 根目录处理（确保以 "/" 结尾）
+  // 根目录处理
   QString rootPath = strOpfPath;
   if (!rootPath.endsWith("/")) {
-    rootPath += "/";
+    // rootPath += "/";
   }
 
   // 2. 清理无效空格
   strHtml.replace("　", " ");
 
-  // 3. 引入自定义CSS（图片自适应）
+  // 3. 引入自定义CSS（仅保留必要样式，图片缩放已在内存中完成）
   QString customCss = loadText(":/res/reader/main.css");
-  QString imgStyle = QString(R"(
-        img {
-            max-width: %1px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-        .custom-img-link {
-            text-decoration: none;
-        }
-    )")
-                         .arg(screenWidth);
-  customCss += imgStyle;
+  // 移除原有图片样式（已无需依赖）
+  customCss = customCss.replace(QRegularExpression("img\\s*\\{[^}]*\\}"), "");
+  // 仅保留其他样式（段落、标题等）
   strHtml.replace("</head>",
                   QString("<style>%1</style></head>").arg(customCss));
 
-  // 4. 处理图片标签为 Data URI
+  // 4. 处理图片标签（核心：内存中缩放图片）
   QRegularExpression imgReg("<img[^>]+>",
                             QRegularExpression::DotMatchesEverythingOption);
   int pos = 0;
@@ -845,63 +836,88 @@ QString Reader::processHtml(QString htmlFile, bool isWriteFile) {
     QString imgTag = match.captured(0);
     QString modifiedImg = imgTag;
 
+    // 处理xlink:href和标签名
     modifiedImg.replace("xlink:href=", "src=");
     modifiedImg.replace("<image", "<img");
 
+    // 提取图片路径
     QRegularExpression srcReg("src=[\"']([^\"']+)[\"']");
     QRegularExpressionMatch srcMatch = srcReg.match(modifiedImg);
     if (srcMatch.hasMatch()) {
-      QString imgPathRel = srcMatch.captured(1);  // 提取原始相对路径
-      qDebug() << "HTML中的图片相对路径:" << imgPathRel;
-
-      // 核心简化逻辑：
-      // 1. 去除路径中所有的 "../"（无论有多少级）
+      QString imgPathRel = srcMatch.captured(1);
       QString cleanedPath = imgPathRel.replace("../", "");
-      // 2. 拼接根目录（opfStrPath）
       QString imgPathAbs = rootPath + cleanedPath;
-      // 3. 清理可能的重复斜杠（如 "EPUB//images" → "EPUB/images"）
       imgPathAbs = QDir::cleanPath(imgPathAbs);
 
-      qDebug() << "压缩包内的绝对路径:" << imgPathAbs;
-
-      // 读取图片数据
+      // 读取图片原始数据
       QByteArray imgData = reader->readFile(imgPathAbs);
       if (imgData.isEmpty()) {
-        qWarning() << "图片数据为空（路径错误）:" << imgPathAbs;
+        qWarning() << "图片数据为空:" << imgPathAbs;
         pos += match.capturedLength();
         continue;
       }
 
-      // 生成Data URI（原有逻辑不变）
-      QString mimeType;
-      if (imgPathAbs.endsWith(".jpg", Qt::CaseInsensitive) ||
-          imgPathAbs.endsWith(".jpeg", Qt::CaseInsensitive)) {
-        mimeType = "image/jpeg";
-      } else if (imgPathAbs.endsWith(".png", Qt::CaseInsensitive)) {
-        mimeType = "image/png";
-      } else if (imgPathAbs.endsWith(".gif", Qt::CaseInsensitive)) {
-        mimeType = "image/gif";
-      } else if (imgPathAbs.endsWith(".svg", Qt::CaseInsensitive)) {
-        mimeType = "image/svg+xml";
-      } else {
-        mimeType = "image/unknown";
+      // 5. 关键：内存中加载并缩放图片
+      QImage img;
+      bool isImgValid = img.loadFromData(imgData);
+      if (!isImgValid) {
+        qWarning() << "图片格式无效:" << imgPathAbs;
+        pos += match.capturedLength();
+        continue;
       }
 
+      // 原始尺寸
+      int originalWidth = img.width();
+      int originalHeight = img.height();
+      qDebug() << "原始尺寸:" << originalWidth << "x" << originalHeight;
+
+      // 缩放逻辑：仅当图片宽 > 屏幕宽时缩放
+      QImage scaledImg = img;
+      if (originalWidth > screenWidth) {
+        // 按比例缩放到屏幕宽度
+        int scaledHeight = (originalHeight * screenWidth) / originalWidth;
+        scaledImg = img.scaled(screenWidth, scaledHeight, Qt::KeepAspectRatio,
+                               Qt::SmoothTransformation);
+        qDebug() << "缩放后尺寸:" << screenWidth << "x" << scaledHeight;
+      }
+
+      // 6. 缩放后的图片转换为字节数据（保持原格式）
+      QByteArray scaledData;
+      QBuffer buffer(&scaledData);
+      buffer.open(QIODevice::WriteOnly);
+      // 根据原图格式保存（JPEG/PNG等）
+      QString format = "PNG";  // 默认用PNG
+      if (imgPathAbs.endsWith(".jpg", Qt::CaseInsensitive) ||
+          imgPathAbs.endsWith(".jpeg", Qt::CaseInsensitive)) {
+        format = "JPEG";
+        // JPEG可设置质量（0-100）
+        scaledImg.save(&buffer, format.toUtf8().data(), 90);  // 高质量
+      } else {
+        scaledImg.save(&buffer, format.toUtf8().data());
+      }
+      buffer.close();
+
+      // 7. 转换为Data URI
+      QString mimeType = format == "JPEG" ? "image/jpeg" : "image/png";
       QString dataUri = QString("data:%1;base64,%2")
                             .arg(mimeType)
-                            .arg(QString(imgData.toBase64()));
+                            .arg(QString(scaledData.toBase64()));
 
+      // 8. 替换图片路径为缩放后的Data URI
       modifiedImg.replace(srcReg, QString("src=\"%1\"").arg(dataUri));
+
+      // 添加点击链接（可选）
       modifiedImg = QString("<a href=\"%1\" class=\"custom-img-link\">%2</a>")
                         .arg(dataUri)
                         .arg(modifiedImg);
     }
 
+    // 替换原标签
     strHtml.replace(pos, match.capturedLength(), modifiedImg);
     pos += modifiedImg.length();
   }
 
-  // 5. 写入文件（如果需要）
+  // 9. 写入文件（如果需要）
   if (isWriteFile) {
     QFile file(htmlFile);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {

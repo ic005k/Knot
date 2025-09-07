@@ -114,7 +114,7 @@ Rectangle {
     }
 
     function handleLinkClicked(link) {
-        console.log("Clicked link:", link)
+        //console.log("Clicked link:", link)
         document.setBackDir(link)
         document.parsingLink(link, "reader")
         // 如果需要保持滚动位置，可在此处记录位置
