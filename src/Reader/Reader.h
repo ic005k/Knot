@@ -15,6 +15,8 @@
 #include <QQmlEngine>
 #include <QQuickView>
 #include <QQuickWidget>
+#include <QRegExp>
+#include <QRegularExpression>
 #include <QSaveFile>
 #include <QString>
 #include <QStringList>
@@ -145,6 +147,7 @@ class Reader : public QDialog {
 
   void initInfoShowFont();
 
+  static QStringList readText(QByteArray data);
  public slots:
   void setPageScroll0();
   void setPageScroll1();
@@ -173,6 +176,7 @@ class Reader : public QDialog {
   void showEpubMsg();
 
  private:
+  QString customCss;
   int x, y, w, h;
   bool isInitReader = false;
   QString strSpace = "";

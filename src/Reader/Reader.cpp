@@ -103,6 +103,7 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
   connect(tmeAutoRun, SIGNAL(timeout()), this, SLOT(autoRun()));
 
   strEndFlag = "<p align=center>-----" + tr("bottom") + "-----</p>";
+  customCss = loadText(":/res/reader/main.css");
 }
 
 Reader::~Reader() {
@@ -300,45 +301,21 @@ void Reader::openFile(QString openfile) {
       // 读取并解析 content.opf（路径通常在 META-INF/container.xml
       // 中定义，需先解析）
       QByteArray containerXml = reader->readFile("META-INF/container.xml");
-      // （简化处理：假设 content.opf 路径是 OEBPS/content.opf）
-      QByteArray opfContent = reader->readFile("OEBPS/content.opf");
 
       qDebug() << containerXml;
-      qDebug() << opfContent;
 
-      return;
-
-      /////////////////////////
       QString dirpath, dirpath1;
-      dirpath = privateDir + "temp0/";
-      dirpath1 = privateDir + "temp/";
-
-      QString temp = privateDir + "temp.zip";
-      QFile::remove(temp);
-      if (!QFile::copy(openfile, temp)) {
-        QMessageBox box;
-        box.setText(openfile + "\n!=\n" + temp);
-        box.exec();
-      }
-
-      deleteDirfile(dirpath);
-      QDir dir;
-      dir.mkdir(dirpath);
-
-      m_Method->decompressWithPassword(temp, dirpath, "");
-
-      qDebug() << "openFile:" << openfile << "dirpath=" << dirpath;
 
       QString strFullPath;
-      QString strContainer = dirpath + "META-INF/container.xml";
-      if (!QFile(strContainer).exists()) {
+
+      if (!reader->fileExists("META-INF/container.xml")) {
         isEpub = false;
         isEpubError = true;
         qDebug() << "====== isEpub == false ======";
         return;
       }
 
-      QStringList conList = readText(strContainer);
+      QStringList conList = readText(containerXml);
       for (int i = 0; i < conList.count(); i++) {
         QString str = conList.at(i);
         if (str.contains("full-path")) {
@@ -357,14 +334,19 @@ void Reader::openFile(QString openfile) {
         }
       }
 
-      QString strOpfFile = dirpath + strFullPath;
+      qDebug() << "strFullPath=" << strFullPath;
+      // "OEBPS/content.opf"
+      QByteArray opfContent = reader->readFile(strFullPath);
+
+      QString strOpfFile = strFullPath;
       QFileInfo fi(strOpfFile);
       strOpfPath = fi.path() + "/";
-      QStringList opfList = readText(strOpfFile);
-      tempHtmlList.clear();
-      QStringList tempList;
 
-      qDebug() << "strOpfFile=" << strOpfFile;
+      QStringList opfList = readText(opfContent);
+
+      // qDebug() << "opfList=" << opfList;
+
+      htmlFiles.clear();
 
       int opfCount = opfList.count();
       if (opfCount > 1) {
@@ -377,74 +359,27 @@ void Reader::openFile(QString openfile) {
 
             QString qfile;
             qfile = strOpfPath + get_href(idref, opfList);
-            tempList.append(qfile);
+            htmlFiles.append(qfile);
 
-            strShowMsg = QFileInfo(qfile).baseName();
-          }
-
-          if (opfCount > 0) {
-            double percent = (double)i / (double)opfCount;
-            strPercent = QString::number(percent * 100, 'f', 0);
+            // qDebug() << "qfile=" << qfile;
           }
         }
       }
 
-      QStringList htmlList = ncx2html();
+      // QStringList htmlList = ncx2html();
 
-      if (tempList.count() == 0) {
-        tempList = htmlList;
-      }
-
-      int count_1 = tempList.count();
-      for (int i = 0; i < count_1; i++) {
-        QString qfile = tempList.at(i);
-        QFileInfo fi(qfile);
-        if (fi.exists() && !tempHtmlList.contains(qfile)) {
-          if (epubFileMethod == 1) {
-            if (fi.size() <= minBytes) {
-              tempHtmlList.append(qfile);
-
-            } else {
-              SplitFile(qfile);
-            }
-          }
-          if (epubFileMethod == 2) {
-            tempHtmlList.append(qfile);
-          }
-        }
-
-        if (count_1 > 0) {
-          double percent = (double)i / (double)count_1;
-          strPercent = QString::number(percent * 100, 'f', 0);
-        }
-      }
-
-      if (tempHtmlList.count() == 0) {
+      if (htmlFiles.count() == 0) {
         isEpub = false;
         isEpubError = true;
         strOpfPath = oldOpfPath;
-        qDebug() << "====== tempHtmlList Count== 0 ======";
+        qDebug() << "====== htmlFiles Count== 0 ======";
         return;
       } else {
         isEpub = true;
         isText = false;
         isPDF = false;
 
-        strShowMsg = "Del temp ...";
-        deleteDirfile(dirpath1);
-
-        strShowMsg = "Rename temp0 to temp...";
-        QDir dir;
-        dir.rename(dirpath, dirpath1);
-
-        htmlFiles.clear();
-
-        strOpfPath.replace(dirpath, dirpath1);
-        for (int i = 0; i < tempHtmlList.count(); i++) {
-          QString str = tempHtmlList.at(i);
-          str.replace(dirpath, dirpath1);
-          htmlFiles.append(str);
-        }
+        // qDebug() << "htmlFiles=" << htmlFiles;
 
         QFile(strOpfPath + "main.css").remove();
         QFile::copy(":/res/reader/main.css", strOpfPath + "main.css");
@@ -864,118 +799,122 @@ void Reader::setEpubPagePosition(int index, QString htmlFile) {
 }
 
 QString Reader::processHtml(QString htmlFile, bool isWriteFile) {
-  if (!isEpub) return "";
+  if (!isEpub || !reader->isOpen()) return "";
 
-  QPlainTextEdit *plain_edit = new QPlainTextEdit;
-  QTextEdit *text_edit = new QTextEdit;
-  QString strHtml = loadText(htmlFile);
+  // 获取屏幕宽度
+  int screenWidth = mw_one->width();
+
+  // 1. 读取原始HTML
+  QByteArray ba = reader->readFile(htmlFile);
+  QString strHtml = QString::fromUtf8(ba);
+
+  // 根目录处理（确保以 "/" 结尾）
+  QString rootPath = strOpfPath;
+  if (!rootPath.endsWith("/")) {
+    rootPath += "/";
+  }
+
+  // 2. 清理无效空格
   strHtml.replace("　", " ");
-  strHtml.replace("<", "\n<");
-  strHtml.replace(">", ">\n");
 
-  strHtml.replace("file:///" + strOpfPath, "");
-
-  strHtml.replace(".css", "");
-  strHtml.replace("font-family:", "font0-family:");
-  strHtml.replace("font-size:", "font0-size:");
-  strHtml.replace("font color", "font color0");
-  strHtml = strHtml.trimmed();
-
-  text_edit->setPlainText(strHtml);
-
-  for (int i = 0; i < text_edit->document()->lineCount(); i++) {
-    QString str = getTextEditLineText(text_edit, i);
-    str = str.trimmed();
-
-    if (str.contains("</head>")) {
-      QString css =
-          "<link href=\"../main.css\" rel=\"stylesheet\" type=\"text/css\" "
-          "/>";
-      css.replace("../", "file:///" + strOpfPath);
-      plain_edit->appendPlainText(css);
-      plain_edit->appendPlainText("</head>");
-    } else {
-      if (str.trimmed() != "") {
-        if (str.contains("<image") && str.contains("xlink:href=")) {
-          str.replace("xlink:href=", "src=");
-          str.replace("<image", "<img");
-          str.replace("height", "height1");
-          str.replace("width", "width1");
+  // 3. 引入自定义CSS（图片自适应）
+  QString customCss = loadText(":/res/reader/main.css");
+  QString imgStyle = QString(R"(
+        img {
+            max-width: %1px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
         }
-
-        if (str.mid(0, 4) == "<img") {
-          QString str1 = str;
-          QStringList list = str1.split(" ");
-          QString strSrc;
-          for (int k = 0; k < list.count(); k++) {
-            QString s1 = list.at(k);
-            if (s1.contains("src=")) {
-              strSrc = s1;
-              break;
-            }
-          }
-          strSrc = strSrc.replace("src=", "");
-          strSrc = strSrc.replace("/>", "");
-
-          QString strimg = strSrc;
-          strimg = strimg.replace("\"", "");
-          QString imgFile = strOpfPath + strimg;
-          imgFile = imgFile.replace("../", "");
-
-          // qDebug() << "imgFile=" << imgFile;
-
-          strSrc = "file:///" + imgFile;
-          str.replace(strimg, strSrc);
-          strSrc = "\"" + strSrc + "\"";
-
-          bool isCover = false;
-          QString imgFile_l = imgFile.toLower();
-          if (imgFile_l.contains("cover")) {
-            isCover = true;
-          }
-          int nw = 0;
-          if (isCover) {
-            nw = mui->qwReader->width() - 25;
-          } else {
-            nw = mui->qwReader->width() - 104;
-          }
-          QString strw = " width = " + QString::number(nw);
-          QImage img(imgFile);
-
-          if (!isCover) {
-            if (img.width() >= nw) {
-              str = str.replace(" width = ", " width1 = ");
-              str = str.replace("/>", strw + " />");
-              str = "<a href=" + strSrc + ">" + str + " </a>";
-            } else {
-              str = "<a href=" + strSrc + ">" + str + "</a>";
-            }
-          }
-
-          if (isCover) {
-            str = str.replace(" width = ", " width1 = ");
-            str = str.replace("/>", strw + " />");
-            str = str + " </a>";
-          }
-
-          // qDebug() << "strSrc=" << strSrc << str;
-
-          str = str.replace("width=", "width1=");
-          str = str.replace("height=", "height1=");
+        .custom-img-link {
+            text-decoration: none;
         }
+    )")
+                         .arg(screenWidth);
+  customCss += imgStyle;
+  strHtml.replace("</head>",
+                  QString("<style>%1</style></head>").arg(customCss));
 
-        plain_edit->appendPlainText(str);
+  // 4. 处理图片标签为 Data URI
+  QRegularExpression imgReg("<img[^>]+>",
+                            QRegularExpression::DotMatchesEverythingOption);
+  int pos = 0;
+  QRegularExpressionMatch match;
+
+  while ((pos = strHtml.indexOf(imgReg, pos, &match)) != -1) {
+    QString imgTag = match.captured(0);
+    QString modifiedImg = imgTag;
+
+    modifiedImg.replace("xlink:href=", "src=");
+    modifiedImg.replace("<image", "<img");
+
+    QRegularExpression srcReg("src=[\"']([^\"']+)[\"']");
+    QRegularExpressionMatch srcMatch = srcReg.match(modifiedImg);
+    if (srcMatch.hasMatch()) {
+      QString imgPathRel = srcMatch.captured(1);  // 提取原始相对路径
+      qDebug() << "HTML中的图片相对路径:" << imgPathRel;
+
+      // 核心简化逻辑：
+      // 1. 去除路径中所有的 "../"（无论有多少级）
+      QString cleanedPath = imgPathRel.replace("../", "");
+      // 2. 拼接根目录（opfStrPath）
+      QString imgPathAbs = rootPath + cleanedPath;
+      // 3. 清理可能的重复斜杠（如 "EPUB//images" → "EPUB/images"）
+      imgPathAbs = QDir::cleanPath(imgPathAbs);
+
+      qDebug() << "压缩包内的绝对路径:" << imgPathAbs;
+
+      // 读取图片数据
+      QByteArray imgData = reader->readFile(imgPathAbs);
+      if (imgData.isEmpty()) {
+        qWarning() << "图片数据为空（路径错误）:" << imgPathAbs;
+        pos += match.capturedLength();
+        continue;
       }
+
+      // 生成Data URI（原有逻辑不变）
+      QString mimeType;
+      if (imgPathAbs.endsWith(".jpg", Qt::CaseInsensitive) ||
+          imgPathAbs.endsWith(".jpeg", Qt::CaseInsensitive)) {
+        mimeType = "image/jpeg";
+      } else if (imgPathAbs.endsWith(".png", Qt::CaseInsensitive)) {
+        mimeType = "image/png";
+      } else if (imgPathAbs.endsWith(".gif", Qt::CaseInsensitive)) {
+        mimeType = "image/gif";
+      } else if (imgPathAbs.endsWith(".svg", Qt::CaseInsensitive)) {
+        mimeType = "image/svg+xml";
+      } else {
+        mimeType = "image/unknown";
+      }
+
+      QString dataUri = QString("data:%1;base64,%2")
+                            .arg(mimeType)
+                            .arg(QString(imgData.toBase64()));
+
+      modifiedImg.replace(srcReg, QString("src=\"%1\"").arg(dataUri));
+      modifiedImg = QString("<a href=\"%1\" class=\"custom-img-link\">%2</a>")
+                        .arg(dataUri)
+                        .arg(modifiedImg);
+    }
+
+    strHtml.replace(pos, match.capturedLength(), modifiedImg);
+    pos += modifiedImg.length();
+  }
+
+  // 5. 写入文件（如果需要）
+  if (isWriteFile) {
+    QFile file(htmlFile);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+      file.write(strHtml.toUtf8());
+      file.close();
     }
   }
 
-  if (isWriteFile) PlainTextEditToFile(plain_edit, htmlFile);
-
-  return plain_edit->toPlainText();
+  return strHtml;
 }
 
 void Reader::setQMLHtml(QString htmlFile, QString htmlBuffer, QString skipID) {
-  if (QFile::exists(htmlFile)) {
+  if (reader->fileExists(htmlFile)) {
     htmlBuffer = processHtml(htmlFile, false);
   }
   htmlBuffer.append(strEndFlag);
@@ -1040,6 +979,27 @@ QStringList Reader::readText(QString textFile) {
       if (!trimmed.isEmpty()) {
         list1.append(trimmed);
       }
+    }
+  }
+
+  return list1;
+}
+
+QStringList Reader::readText(QByteArray data) {
+  QStringList list, list1;
+
+  QString text;
+  text = m_Method->convertDataToUnicode(data);
+
+  text.replace(">", ">\n");
+  text.replace("<", "\n<");
+  list = text.split("\n");
+
+  // 使用索引遍历避免detach
+  for (int i = 0; i < list.size(); ++i) {
+    QString trimmed = list.at(i).trimmed();
+    if (!trimmed.isEmpty()) {
+      list1.append(trimmed);
     }
   }
 
