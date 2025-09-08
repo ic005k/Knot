@@ -306,11 +306,9 @@ void Reader::openFile(QString openfile) {
         return;
       }
 
-      QString dirpath, dirpath1;
+      // QString dirpath, dirpath1;
       QString strFullPath;
-
       QByteArray containerXml = reader->readFile(containerFile);
-
       QStringList conList = readText(containerXml);
       for (int i = 0; i < conList.count(); i++) {
         QString str = conList.at(i);
@@ -374,17 +372,8 @@ void Reader::openFile(QString openfile) {
         isPDF = false;
 
         ncx2html();
-        QStringList temp_l0 = ncxList;
-        ncxList.clear();
-        for (int i = 0; i < temp_l0.count(); i++) {
-          QString item = temp_l0.at(i);
-          item.replace(dirpath, dirpath1);
-          ncxList.append(item);
-        }
 
-        catalogueFile.replace(dirpath, dirpath1);
         QString str_cate = loadText(catalogueFile);
-        str_cate.replace(dirpath, dirpath1);
         StringToFile(str_cate, catalogueFile);
       }
 
@@ -1837,7 +1826,6 @@ QStringList Reader::ncx2html() {
   }
 
   plain_edit->appendPlainText("</ul>");
-
   plain_edit->appendPlainText("</body>");
   plain_edit->appendPlainText("</html>");
 
@@ -2867,7 +2855,6 @@ QVariantMap TextChunkModel::get(int index) const {
 QList<TocItem> Reader::parseTocFromNavFile(const QByteArray &navContent) {
   QList<TocItem> tocItems;  // 最终的目录列表
   QXmlStreamReader reader(navContent);
-  bool inTocNav = false;  // 标记是否进入 <nav epub:type="toc"> 区域
 
   // 解析XML，查找目录容器
   while (!reader.atEnd() && !reader.hasError()) {
@@ -2881,8 +2868,7 @@ QList<TocItem> Reader::parseTocFromNavFile(const QByteArray &navContent) {
         QXmlStreamAttributes attrs = reader.attributes();
         QString epubType = attrs.value("epub:type").toString();
         if (epubType == "toc") {
-          inTocNav = true;
-          // 进入容器后，解析内部的列表结构
+          //  进入容器后，解析内部的列表结构
           tocItems = parseOlElement(reader);
           break;  // 解析完目录后退出
         }
