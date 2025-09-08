@@ -1235,40 +1235,114 @@ void CloudBackup::webDAVRestoreData() {
 }
 
 bool CloudBackup::checkWebDAVConnection() {
-  QUrl url(mui->cboxWebDAV->currentText().trimmed());
-  QString username = mui->editWebDAVUsername->text().trimmed();
-  QString password = mui->editWebDAVPassword->text().trimmed();
-  QString errorMsg;
+  // 获取并处理URL
+  QString urlText = mui->cboxWebDAV->currentText().trimmed();
+  if (!urlText.endsWith("/")) {
+    urlText += "/";  // 确保URL以斜杠结尾，符合WebDAV规范
+  }
+  QUrl url(urlText);
+
+  QString m_errorMsg;
   // 检查URL有效性
-  if (!url.isValid()) {
-    errorMsg = "连接失败，请检查网络、网址或登录信息";
+  if (!url.isValid() || url.scheme() != "https") {
+    m_errorMsg = "URL无效，必须使用https协议";
     return false;
   }
 
+  QString username = mui->editWebDAVUsername->text().trimmed();
+  QString password = mui->editWebDAVPassword->text().trimmed();
+
+  // 创建网络管理器和请求
   QNetworkAccessManager manager;
   QNetworkRequest request(url);
 
-  // 设置认证信息
-  if (!username.isEmpty() || !password.isEmpty()) {
-    QByteArray auth = username.toUtf8() + ":" + password.toUtf8();
-    request.setRawHeader("Authorization", "Basic " + auth.toBase64());
-  }
+  // 设置必要的请求头
+  request.setRawHeader("User-Agent", "MyApp/1.0");
+  request.setRawHeader("Depth", "0");  // PROPFIND需要的深度头
+  request.setRawHeader("Content-Type", "application/xml");
 
-  // 发送HEAD请求
-  QNetworkReply *reply = manager.head(request);
+  // 准备PROPFIND请求的XML内容
+  QString xml =
+      "<?xml version=\"1.0\"?>"
+      "<propfind xmlns=\"DAV:\">"
+      "  <prop>"
+      "    <current-user-principal />"
+      "  </prop>"
+      "</propfind>";
+  QByteArray data = xml.toUtf8();
+
+  // 发送PROPFIND请求（WebDAV标准方法）
+  QNetworkReply *reply = manager.sendCustomRequest(request, "PROPFIND", data);
 
   // 等待响应
   QEventLoop loop;
   QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
   loop.exec();
 
-  // 处理结果
-  if (reply->error() == QNetworkReply::NoError) {
-    errorMsg = "连接成功";
+  // 处理可能的认证挑战
+  QVariant statusCode =
+      reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+  int status = statusCode.toInt();
+
+  if (status == 401) {  // 需要认证
+    // 提取认证挑战信息
+    QByteArray authHeader = reply->rawHeader("WWW-Authenticate");
+    reply->deleteLater();
+
+    // 构建认证信息
+    if (!authHeader.isEmpty() && authHeader.contains("Basic")) {
+      QByteArray auth = username.toUtf8() + ":" + password.toUtf8();
+      QNetworkRequest authRequest(url);
+
+      // 设置认证头和其他必要头信息
+      authRequest.setRawHeader("Authorization", "Basic " + auth.toBase64());
+      authRequest.setRawHeader("User-Agent", "MyApp/1.0");
+      authRequest.setRawHeader("Depth", "0");
+      authRequest.setRawHeader("Content-Type", "application/xml");
+
+      // 重新发送带认证信息的请求
+      QNetworkReply *authReply =
+          manager.sendCustomRequest(authRequest, "PROPFIND", data);
+      QEventLoop authLoop;
+      QObject::connect(authReply, &QNetworkReply::finished, &authLoop,
+                       &QEventLoop::quit);
+      authLoop.exec();
+
+      // 检查认证后的响应
+      QVariant authStatusCode =
+          authReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+      int authStatus = authStatusCode.toInt();
+
+      if (authReply->error() == QNetworkReply::NoError &&
+          (authStatus == 207 ||
+           authStatus == 200)) {  // 207是WebDAV的多状态响应
+        m_errorMsg = "连接成功";
+        authReply->deleteLater();
+        return true;
+      } else {
+        m_errorMsg = QString("认证失败: %1 (状态码: %2)")
+                         .arg(authReply->errorString())
+                         .arg(authStatus);
+        authReply->deleteLater();
+        return false;
+      }
+    } else {
+      m_errorMsg = "不支持的认证方式";
+      return false;
+    }
+  }
+  // 处理无需认证或直接成功的情况
+  else if (reply->error() == QNetworkReply::NoError &&
+           (status == 207 || status == 200)) {
+    m_errorMsg = "连接成功";
     reply->deleteLater();
     return true;
-  } else {
-    errorMsg = "连接失败，请检查网络、网址或登录信息";
+  }
+  // 处理其他错误
+  else {
+    m_errorMsg = QString("连接失败: %1 (状态码: %2)")
+                     .arg(reply->errorString())
+                     .arg(status);
     reply->deleteLater();
     return false;
   }
