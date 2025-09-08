@@ -29,6 +29,13 @@
 #include "src/Reader/DocumentHandler.h"
 #include "src/Reader/epubreader.h"
 
+// 目录项结构体（存储章节信息）
+struct TocItem {
+  QString title;              // 章节标题
+  QString href;               // 章节对应的内容文件路径（相对路径）
+  QList<TocItem> childItems;  // 子章节列表（嵌套层级）
+};
+
 class TextChunkModel;
 
 namespace Ui {
@@ -197,7 +204,12 @@ class Reader : public QDialog {
   bool handleTouchRelease(const QPointF &globalPos);
   bool handleTouchMove(const QPointF &globalPos);
   bool handleTouchPress(const QPointF &globalPos);
-  QStringList parseChapters(const QByteArray &opfContent);
+
+  static QString getNavFileInternalPath(const QByteArray &opfContent);
+  static QList<TocItem> parseTocFromNavFile(const QByteArray &navContent);
+  static QList<TocItem> parseOlElement(QXmlStreamReader &reader);
+  static TocItem parseLiElement(QXmlStreamReader &reader);
+  static void debugPrintTocItems(const QList<TocItem> &tocItems, int level);
 };
 
 class TextChunkModel : public QAbstractListModel {

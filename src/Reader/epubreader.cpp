@@ -87,3 +87,30 @@ QStringList EpubReader::getAllFilePaths() {
   }
   return paths;
 }
+
+qint64 EpubReader::getFileSize(const QString &internalPath) {
+  if (!isOpen()) {
+    qWarning() << "EPUB file not open";
+    return -1;
+  }
+
+  QString path = internalPath;
+  path.replace("\\", "/");
+
+  // 定位到指定文件
+  if (!m_zip->setCurrentFile(path)) {
+    qWarning() << "File not found:" << path << "Error:" << m_zip->getZipError();
+    return -1;
+  }
+
+  // 获取文件信息（无需打开文件）
+  QuaZipFileInfo fileInfo;
+  if (!m_zip->getCurrentFileInfo(&fileInfo)) {
+    qWarning() << "Failed to get file info:" << path
+               << "Error:" << m_zip->getZipError();
+    return -1;
+  }
+
+  // 返回未压缩的文件大小（也可根据需要返回压缩后的大小fileInfo.compressedSize）
+  return fileInfo.uncompressedSize;
+}

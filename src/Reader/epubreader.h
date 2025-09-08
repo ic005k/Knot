@@ -22,7 +22,8 @@ class EpubReader : public QObject {
   QStringList getAllFilePaths();
   bool isOpen() const { return m_zip != nullptr && m_zip->isOpen(); }
 
- private:
+  qint64 getFileSize(const QString &internalPath);
+  private:
   QuaZip *m_zip = nullptr;  // 指针方式，避免赋值运算符问题
   QString m_epubPath;
 };

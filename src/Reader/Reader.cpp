@@ -25,8 +25,8 @@ bool isOpen = false;
 bool isEpub, isText, isPDF, isEpubError;
 
 QStringList readTextList, htmlFiles, tempHtmlList, ncxList;
-QString strOpfPath, oldOpfPath, fileName, ebookFile, strTitle, catalogueFile,
-    strShowMsg, strEpubTitle, strPercent;
+QString strOpfPath, strOpfFile, oldOpfPath, fileName, ebookFile, strTitle,
+    catalogueFile, strShowMsg, strEpubTitle, strPercent;
 
 int sPos, totallines, totalPages, currentPage;
 int baseLines = 50;
@@ -334,7 +334,7 @@ void Reader::openFile(QString openfile) {
       // "OEBPS/content.opf"
       QByteArray opfContent = reader->readFile(strFullPath);
 
-      QString strOpfFile = strFullPath;
+      strOpfFile = strFullPath;
       QFileInfo fi(strOpfFile);
       strOpfPath = fi.path() + "/";
       if (strOpfPath == "./") strOpfPath = "";
@@ -975,8 +975,9 @@ void Reader::setQMLHtml(QString htmlFile, QString htmlBuffer, QString skipID) {
                             Q_ARG(QVariant, htmlBuffer));
 
   QFileInfo fi(htmlFile);
-  mui->lblInfo->setText(tr("Info") + " : " + fi.baseName() + "  " +
-                        m_Method->getFileSize(QFile(htmlFile).size(), 2));
+  mui->lblInfo->setText(
+      tr("Info") + " : " + fi.baseName() + "  " +
+      m_Method->getFileSize(reader->getFileSize(htmlFile), 2));
 
   qDebug() << "setQMLHtml:Html File=" << htmlFile;
 
@@ -1138,8 +1139,6 @@ void Reader::savePageVPos() {
   if (isText) {
     Reg.setValue("/Reader/vpos" + QString::number(currentPage), textPos);
   }
-
-  qDebug() << "savePageVPos:" << textPos;
 }
 
 void Reader::setPageVPos() {
@@ -1165,8 +1164,6 @@ void Reader::setPageVPos() {
   }
 
   setVPos(textPos);
-
-  qDebug() << "setPageVPos:" << textPos;
 }
 
 void Reader::setVPos(qreal pos) {
@@ -1672,10 +1669,78 @@ void Reader::showCatalogue() {
   showInfo();
 }
 
+QString Reader::getNavFileInternalPath(const QByteArray &opfContent) {
+  // 先将QByteArray转为QString（按UTF-8编码，EPUB标准编码）
+  QString opfStr = QString::fromUtf8(opfContent);
+
+  // 简单处理：直接查找包含 'id="nav"' 的item标签
+  int navItemStart = opfStr.indexOf("id=\"nav\"");
+  if (navItemStart == -1) {
+    qWarning() << "未找到id=\"nav\"的导航文件";
+    return QString();
+  }
+
+  // 从item标签开始向前找href属性（简单字符串匹配）
+  int itemStart = opfStr.lastIndexOf("<item", navItemStart);
+  if (itemStart == -1) {
+    qWarning() << "未找到包含id=\"nav\"的item标签";
+    return QString();
+  }
+
+  // 从item标签内提取href的值
+  int hrefStart = opfStr.indexOf("href=\"", itemStart);
+  if (hrefStart == -1) {
+    qWarning() << "id=\"nav\"的item标签中未找到href属性";
+    return QString();
+  }
+  hrefStart += 6;  // 跳过 "href=\""
+
+  int hrefEnd = opfStr.indexOf("\"", hrefStart);
+  if (hrefEnd == -1) {
+    qWarning() << "href属性值格式错误";
+    return QString();
+  }
+
+  // 提取href的值（导航文件相对路径）
+  return opfStr.mid(hrefStart, hrefEnd - hrefStart);
+}
+
 QStringList Reader::ncx2html() {
+  catalogueFile = privateDir + "catalogue.html";
   QStringList htmlList;
   ncxList.clear();
+  bool isNCX = false;
   QString ncxFile = strOpfPath + "toc.ncx";
+  QStringList epubFiles = reader->getAllFilePaths();
+  for (int i = 0; i < epubFiles.count(); i++) {
+    QString file = epubFiles.at(i);
+    QString l_file = file.toLower();
+    if (l_file.contains(".ncx")) {
+      ncxFile = file;
+      isNCX = true;
+      qDebug() << "ncxFile=" << ncxFile;
+      break;
+    }
+  }
+
+  if (!isNCX) {
+    QByteArray ba = reader->readFile(strOpfFile);
+    QString nav = strOpfPath + getNavFileInternalPath(ba);
+    qDebug() << "nav=" << nav;
+
+    QByteArray nav_data = reader->readFile(nav);
+    QList<TocItem> tocItems = parseTocFromNavFile(nav_data);
+
+    for (int i = 0; i < tocItems.count(); i++) {
+      qDebug() << tocItems.at(i).title << "====>>" << tocItems.at(i).href;
+      ncxList.append(tocItems.at(i).title + "===" + strOpfPath +
+                     tocItems.at(i).href);
+    }
+
+    // debugPrintTocItems(tocItems, 0);
+
+    return htmlList;
+  }
 
   if (!reader->fileExists(ncxFile)) {
     return htmlList;
@@ -1775,7 +1840,7 @@ QStringList Reader::ncx2html() {
 
   plain_edit->appendPlainText("</body>");
   plain_edit->appendPlainText("</html>");
-  catalogueFile = privateDir + "catalogue.html";
+
   PlainTextEditToFile(plain_edit, catalogueFile);
 
   if (strEpubTitle != "") {
@@ -2796,9 +2861,119 @@ QVariantMap TextChunkModel::get(int index) const {
   return result;
 }
 
-// 解析 content.opf 获取章节路径列表
-QStringList Reader::parseChapters(const QByteArray &opfContent) {
-  QStringList chapters;
+//////////////////////////////////////////////////////////////////////////////////////
 
-  return chapters;
+// 解析nav文件内容，生成目录结构
+QList<TocItem> Reader::parseTocFromNavFile(const QByteArray &navContent) {
+  QList<TocItem> tocItems;  // 最终的目录列表
+  QXmlStreamReader reader(navContent);
+  bool inTocNav = false;  // 标记是否进入 <nav epub:type="toc"> 区域
+
+  // 解析XML，查找目录容器
+  while (!reader.atEnd() && !reader.hasError()) {
+    QXmlStreamReader::TokenType token = reader.readNext();
+
+    // 1. 定位到目录根容器 <nav epub:type="toc">
+    if (token == QXmlStreamReader::StartElement) {
+      // 修正：QStringView -> QString 比较
+      if (reader.name().toString() == "nav") {  // 此处添加.toString()
+        // 检查是否为目录容器（epub:type="toc"）
+        QXmlStreamAttributes attrs = reader.attributes();
+        QString epubType = attrs.value("epub:type").toString();
+        if (epubType == "toc") {
+          inTocNav = true;
+          // 进入容器后，解析内部的列表结构
+          tocItems = parseOlElement(reader);
+          break;  // 解析完目录后退出
+        }
+      }
+    }
+  }
+
+  // 处理解析错误
+  if (reader.hasError()) {
+    qWarning() << "解析目录失败：" << reader.errorString();
+  } else if (tocItems.isEmpty()) {
+    qWarning() << "未在nav文件中找到有效的目录结构（<nav epub:type=\"toc\">）";
+  }
+
+  return tocItems;
+}
+
+// 递归解析 <ol> 元素（提取章节列表）
+QList<TocItem> Reader::parseOlElement(QXmlStreamReader &reader) {
+  QList<TocItem> items;
+
+  while (!reader.atEnd() && !reader.hasError()) {
+    QXmlStreamReader::TokenType token = reader.readNext();
+
+    // 遇到 </ol> 则结束当前层级解析（修正比较）
+    if (token == QXmlStreamReader::EndElement &&
+        reader.name().toString() == "ol") {  // 此处添加.toString()
+      break;
+    }
+
+    // 解析每个列表项 <li>（修正比较）
+    if (token == QXmlStreamReader::StartElement &&
+        reader.name().toString() == "li") {   // 此处添加.toString()
+      TocItem item = parseLiElement(reader);  // 解析单个章节
+      if (!item.title.isEmpty()) {
+        items.append(item);
+      }
+    }
+  }
+
+  return items;
+}
+
+// 解析 <li> 元素（提取单个章节的标题、链接和子章节）
+TocItem Reader::parseLiElement(QXmlStreamReader &reader) {
+  TocItem item;
+
+  while (!reader.atEnd() && !reader.hasError()) {
+    QXmlStreamReader::TokenType token = reader.readNext();
+
+    // 遇到 </li> 则结束当前章节解析（修正比较）
+    if (token == QXmlStreamReader::EndElement &&
+        reader.name().toString() == "li") {  // 此处添加.toString()
+      break;
+    }
+
+    // 解析章节链接 <a> 标签（标题和href）（修正比较）
+    if (token == QXmlStreamReader::StartElement &&
+        reader.name().toString() == "a") {  // 此处添加.toString()
+      // 提取链接（href属性）
+      QXmlStreamAttributes attrs = reader.attributes();
+      item.href = attrs.value("href").toString();
+
+      // 提取标题（<a>标签内的文本）
+      if (reader.readNext() == QXmlStreamReader::Characters) {
+        item.title = reader.text().toString().trimmed();  // 去除首尾空格
+      }
+    }
+
+    // 解析子章节（嵌套的 <ol> 元素）（修正比较）
+    if (token == QXmlStreamReader::StartElement &&
+        reader.name().toString() == "ol") {      // 此处添加.toString()
+      item.childItems = parseOlElement(reader);  // 递归解析子章节
+    }
+  }
+
+  return item;
+}
+
+// 递归打印目录项（辅助函数）
+void Reader::debugPrintTocItems(const QList<TocItem> &tocItems, int level) {
+  // 层级缩进（每级缩进4个空格，方便区分层级）
+  QString indent(level * 4, ' ');
+
+  for (const TocItem &item : tocItems) {
+    // 打印当前目录项的标题和链接
+    qDebug() << indent << "标题：" << item.title << "，链接：" << item.href;
+
+    // 递归打印子目录（层级+1）
+    if (!item.childItems.isEmpty()) {
+      debugPrintTocItems(item.childItems, level + 1);
+    }
+  }
 }
