@@ -286,7 +286,19 @@ void Reader::openFile(QString openfile) {
 
   if (QFile(openfile).exists()) {
     QFileInfo fi(openfile);
-    QString strSuffix = fi.suffix();
+    QString strSuffix0 = fi.suffix();
+    QString strSuffix = strSuffix0.toLower();
+
+    if (strSuffix != "epub" && strSuffix != "pdf" && strSuffix != "txt" &&
+        strSuffix != "css" && strSuffix != "ini" && strSuffix != "md" &&
+        strSuffix != "log" && strSuffix != "csv" && strSuffix != "tsv" &&
+        strSuffix != "html" && strSuffix != "htm" && strSuffix != "xml" &&
+        strSuffix != "json" && strSuffix != "yaml" && strSuffix != "yml" &&
+        strSuffix != "rtf" && strSuffix != "c" && strSuffix != "cpp" &&
+        strSuffix != "java" && strSuffix != "py" && strSuffix != "js" &&
+        strSuffix != "php" && strSuffix != "go" && strSuffix != "rb" &&
+        strSuffix != "hpp")
+      return;
 
     if (strSuffix == "epub") {
       if (reader != nullptr) {
@@ -306,7 +318,6 @@ void Reader::openFile(QString openfile) {
         return;
       }
 
-      // QString dirpath, dirpath1;
       QString strFullPath;
       QByteArray containerXml = reader->readFile(containerFile);
       QStringList conList = readText(containerXml);

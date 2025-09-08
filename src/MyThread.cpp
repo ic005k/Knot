@@ -7,7 +7,7 @@ extern int currentTabIndex;
 
 extern bool isReadTWEnd, isBreak, isReadEnd, isSaveEnd, isReadEBookEnd, isEBook,
     isReport, isMenuImport, isDownData, isUpData, isPasswordError, isZipOK,
-    loading;
+    loading, isOpen;
 
 extern QString SaveType, ebookFile, zipfile, strStats, errorInfo, iniDir,
     strDate;
@@ -122,8 +122,14 @@ void ReadEBookThread::run() {
 
 void MainWindow::readEBookDone() {
   if (isEBook) {
-    m_Reader->readBookDone();
     isEBook = false;
+
+    if (!isOpen) {
+      on_DelayCloseProgressBar();
+      return;
+    }
+
+    m_Reader->readBookDone();
   }
 
   if (isReport) {
