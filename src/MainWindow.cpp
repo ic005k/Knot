@@ -224,11 +224,10 @@ void MainWindow::init_TotalData() {
   for (int i = 0; i < count; i++) {
     mui->tabWidget->removeTab(0);
   }
-  QString ini_file;
 
+  QString ini_file;
   ini_file = iniDir + "tab.ini";
   QSettings RegTab(ini_file, QSettings::IniFormat);
-
   int TabCount = RegTab.value("TabCount", 0).toInt();
 
   clearAll();
@@ -262,7 +261,11 @@ void MainWindow::init_TotalData() {
 
   m_EditRecord->init_MyCategory();
 
-  currentTabIndex = RegTab.value("CurrentIndex").toInt();
+  if (TabCount > 0)
+    currentTabIndex = RegTab.value("CurrentIndex").toInt();
+  else
+    currentTabIndex = 0;
+
   mui->tabWidget->setCurrentIndex(currentTabIndex);
   setCurrentIndex(currentTabIndex);
   QTreeWidget *twCur = (QTreeWidget *)tabData->currentWidget();

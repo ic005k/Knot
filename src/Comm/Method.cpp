@@ -3098,6 +3098,8 @@ void Method::setInfoText(const QString &newText) {
 }
 
 int Method::getFlagToday(QTreeWidget *tw) {
+  if (tw->topLevelItemCount() == 0) return 0;
+
   QTreeWidgetItem *topitem = tw->topLevelItem(tw->topLevelItemCount() - 1);
   QString t0, t3;
   int y, m, d;
