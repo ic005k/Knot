@@ -276,6 +276,7 @@ void Reader::initInfoShowFont() {
   }
   mui->lblEpubInfo->setFont(font);
   mui->pEpubProg->setFont(font);
+  mui->lblInfo->setFont(font);
 }
 
 void Reader::openFile(QString openfile) {

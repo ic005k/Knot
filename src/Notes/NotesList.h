@@ -237,8 +237,6 @@ class NotesList : public QDialog {
 
  private slots:
 
-  void on_editFind_textChanged(const QString &arg1);
-
   void on_editFind_returnPressed();
 
   void on_actionShareNoteFile();
@@ -254,6 +252,10 @@ class NotesList : public QDialog {
   void onNoteNodeDoubleClicked(const QString &filePath);
 
  private:
+  QString notebookName;
+
+  QString noteName;
+
   QStringList noteFiles, recycleFiles;
 
   bool isImportFilesEnd;

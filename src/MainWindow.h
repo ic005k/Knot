@@ -467,8 +467,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnSelText_clicked();
 
-  void on_btnSignIn_clicked();
-
   void on_btnSignOut_clicked();
 
   void on_btnUpload_clicked();

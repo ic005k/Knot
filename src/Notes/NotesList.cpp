@@ -72,24 +72,8 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
 
   set_memo_dir();
 
-  QFont font = this->font();
-  font.setPointSize(fontSize - 1);
-  font.setBold(true);
-  ui->lblCount->setFont(font);
-
-  ui->btnFind->hide();
-  ui->editFind->hide();
-  ui->lblCount->hide();
-  ui->btnNewNote->hide();
-  ui->btnNewNoteBook->hide();
-  ui->editBook->hide();
-
   ui->btnImport->hide();
   ui->btnExport->hide();
-  ui->editName->hide();
-
-  QScroller::grabGesture(ui->editName, QScroller::LeftMouseButtonGesture);
-  m_Method->setSCrollPro(ui->editName);
 
   initNotesList();
   initRecycle();
@@ -188,7 +172,7 @@ void NotesList::on_btnClose_clicked() { this->close(); }
 
 void NotesList::on_btnNewNoteBook_clicked() {
   QTreeWidgetItem *item = new QTreeWidgetItem();
-  item->setText(0, ui->editBook->text().trimmed());
+  item->setText(0, notebookName);
   item->setText(2, "#FF0000");
   item->setForeground(0, Qt::red);
   item->setIcon(0, QIcon(":/res/nb.png"));
@@ -238,7 +222,7 @@ void NotesList::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column) {
 
   if (ui->treeWidget->topLevelItemCount() == 0) return;
 
-  ui->editName->setText(item->text(0));
+  noteName = item->text(0);
 
   return;
 
@@ -1498,69 +1482,7 @@ void NotesList::goFindResult(int index) {
                                  QString::number(findResult.count()));
 }
 
-void NotesList::on_btnFind_clicked() {
-  QString strFind = ui->editFind->text().trimmed().toLower();
-  if (strFind == "") {
-    mui->btnFindNextNote->setEnabled(false);
-    mui->btnFindPreviousNote->setEnabled(false);
-    return;
-  }
-  findResultList.clear();
-  int count = tw->topLevelItemCount();
-  for (int i = 0; i < count; i++) {
-    QTreeWidgetItem *topItem = tw->topLevelItem(i);
-    if (topItem->text(0).toLower().contains(strFind)) {
-      findResultList.append(topItem);
-      qDebug() << topItem->text(0);
-    }
-    int childCount = topItem->childCount();
-    for (int j = 0; j < childCount; j++) {
-      QTreeWidgetItem *childItem = topItem->child(j);
-      if (childItem->text(0).toLower().contains(strFind)) {
-        findResultList.append(childItem);
-        qDebug() << childItem->text(0);
-      }
-
-      QString str1 = childItem->text(1);
-      if (str1.isEmpty()) {
-        int count = childItem->childCount();
-        for (int n = 0; n < count; n++) {
-          QTreeWidgetItem *item = childItem->child(n);
-          if (item->text(0).toLower().contains(strFind)) {
-            findResultList.append(item);
-            qDebug() << item->text(0);
-          }
-        }
-      }
-    }
-  }
-
-  if (findResultList.count() > 0) {
-    tw->setCurrentItem(findResultList.at(0));
-    tw->scrollToItem(tw->currentItem());
-
-    localItem();
-
-    findCount = 0;
-    ui->lblCount->setText(QString::number(findCount + 1) + "->" +
-                          QString::number(findResultList.count()));
-
-    mui->lblFindNoteCount->setText(ui->lblCount->text());
-
-    mui->btnFindNextNote->setEnabled(true);
-    mui->btnFindPreviousNote->setEnabled(true);
-  } else {
-    mui->btnFindNextNote->setEnabled(false);
-    mui->btnFindPreviousNote->setEnabled(false);
-
-    ui->lblCount->setText("0");
-
-    mui->lblFindNoteCount->setText(ui->lblCount->text());
-
-    setNoteBookCurrentIndex(-1);
-    setNotesListCurrentIndex(-1);
-  }
-}
+void NotesList::on_btnFind_clicked() {}
 
 void NotesList::localItem() {
   QTreeWidgetItem *item = tw->currentItem();
@@ -1631,14 +1553,6 @@ void NotesList::modifyNoteBookText0(QString text0, int index) {
 
 void NotesList::modifyNotesListText0(QString text0, int index) {
   m_Method->modifyItemText0(mui->qwNoteList, index, text0);
-}
-
-void NotesList::on_editFind_textChanged(const QString &arg1) {
-  if (arg1.trimmed() == "") {
-    ui->lblCount->setText("0");
-    mui->lblFindNoteCount->setText("0");
-  }
-  on_btnFind_clicked();
 }
 
 void NotesList::on_editFind_returnPressed() {}
@@ -1830,7 +1744,7 @@ void NotesList::on_actionAdd_NoteBook_triggered() {
   text = m_NewNoteBook->notebookName;
   if (m_NewNoteBook->isOk && !text.isEmpty()) {
     rootIndex = m_NewNoteBook->rootIndex;
-    ui->editBook->setText(text);
+    notebookName = text;
     on_btnNewNoteBook_clicked();
 
     loadAllNoteBook();

@@ -73,6 +73,7 @@ class CloudBackup : public QDialog {
   void downloadFile_Old(QString remoteFileName, QString localSavePath);
   void changeComBoxWebDAV(const QString &arg1);
   bool checkWebDAVConnection();
+
  signals:
 
  protected:
@@ -85,8 +86,6 @@ class CloudBackup : public QDialog {
   void on_pushButton_GetUserInfo_clicked();
 
   void on_pushButton_clicked();
-
-  void on_lineEdit_fileID_textChanged(const QString &arg1);
 
   void on_pushButton_getFiles_clicked();
 

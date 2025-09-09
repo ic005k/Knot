@@ -1855,10 +1855,6 @@ void MainWindow::on_btnSelText_clicked() {
   m_Reader->selectText();
 }
 
-void MainWindow::on_btnSignIn_clicked() {
-  m_CloudBackup->on_pushButton_SignIn_clicked();
-}
-
 void MainWindow::on_btnSignOut_clicked() {
   m_CloudBackup->on_pushButton_SingOut_clicked();
 }
@@ -1995,11 +1991,7 @@ void MainWindow::on_btnReport_clicked() {
   mui->btnYear->setFixedHeight(mui->btnMonth->height());
 }
 
-void MainWindow::on_btnPasteCode_clicked() {
-  QClipboard *clipboard = QApplication::clipboard();
-  QString originalText = clipboard->text();
-  mui->editCode->setPlainText(originalText);
-}
+void MainWindow::on_btnPasteCode_clicked() {}
 
 void MainWindow::on_btnAdd_clicked() {
   m_EditRecord->monthSum();
@@ -2836,19 +2828,9 @@ void MainWindow::on_btnWebDAVRestore_clicked() {
   m_CloudBackup->webDAVRestoreData();
 }
 
-void MainWindow::on_chkWebDAV_clicked() {
-  if (mui->chkWebDAV->isChecked())
-    mui->chkOneDrive->setChecked(false);
-  else
-    mui->chkOneDrive->setChecked(true);
-}
+void MainWindow::on_chkWebDAV_clicked() {}
 
-void MainWindow::on_chkOneDrive_clicked() {
-  if (mui->chkOneDrive->isChecked())
-    mui->chkWebDAV->setChecked(false);
-  else
-    mui->chkWebDAV->setChecked(true);
-}
+void MainWindow::on_chkOneDrive_clicked() {}
 
 void MainWindow::on_btnBack_NotesSearchResult_clicked() {
   clearWidgetFocus();

@@ -712,16 +712,13 @@ void MainHelper::init_UIWidget() {
   mui->frameMain->layout()->setSpacing(1);
 
   mui->frameOne->hide();
-  mui->f_FunWeb->hide();
-  mui->btnStorageInfo->hide();
-  mui->editCode->setLineWrapMode(QTextEdit::NoWrap);
+
   mui->lblEpubInfo->hide();
   mui->pEpubProg->hide();
 
   mui->frameNotesGraph->hide();
   mui->frameNotesGraph->layout()->setContentsMargins(1, 1, 1, 1);
 
-  mui->chkOneDrive->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mui->chkWebDAV->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mui->chkAutoSync->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mui->twCloudBackup->setCurrentIndex(1);

@@ -21,7 +21,7 @@
 extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern Method *m_Method;
-extern QString iniFile, iniDir, zipfile, privateDir, bakfileDir;
+extern QString iniFile, iniDir, zipfile, privateDir, bakfileDir, appName;
 
 extern bool isZipOK, isMenuImport, isDownData, isAndroid, isUpData;
 
@@ -84,7 +84,7 @@ QString CloudBackup::initUserInfo(QString info) {
 
 void CloudBackup::init() {
   ui->frame->hide();
-  ui->lineEdit_fileID->setFocus();
+
   this->setGeometry(mw_one->geometry().x(), mw_one->geometry().y(),
                     mw_one->width(), mw_one->height());
   ui->frameOne->setMaximumHeight(100);
@@ -119,14 +119,6 @@ void CloudBackup::on_pushButton_GetUserInfo_clicked() {}
 
 void CloudBackup::on_pushButton_clicked() {}
 
-void CloudBackup::on_lineEdit_fileID_textChanged(const QString &arg1) {
-  ui->pushButton_deleteFile->setEnabled(!arg1.isEmpty());
-  // ui->pushButton_downloadFile->setEnabled(  !arg1.isEmpty() );
-  ui->pushButton_traserveFolder->setEnabled(!arg1.isEmpty());
-  // ui->pushButton_upload2->setEnabled(  !arg1.isEmpty() );
-  ui->pushButton_createFolder->setEnabled(!arg1.isEmpty());
-}
-
 void CloudBackup::on_pushButton_getFiles_clicked() {}
 
 void CloudBackup::on_pushButton_traserveFolder_clicked() {}
@@ -141,10 +133,7 @@ void CloudBackup::on_pushButton_deleteFile_clicked() {}
 
 void CloudBackup::uploadData() {
   QString strFlag;
-  if (mui->chkOneDrive->isChecked())
-    strFlag = "OneDrive";
-  else
-    strFlag = "WebDAV";
+  strFlag = "WebDAV";
   ShowMessage *m_ShowMsg = new ShowMessage(this);
   if (!m_ShowMsg->showMsg(
           strFlag,
@@ -1132,18 +1121,6 @@ void CloudBackup::deleteWebDAVFiles(QStringList filesToDelete) {
 void CloudBackup::backExit() {
   mw_one->clearWidgetFocus();
 
-  if (!mui->frameOne->isHidden()) {
-    if (mui->f_OneFun->isHidden()) {
-      mui->f_OneFun->show();
-      mui->f_FunWeb->hide();
-
-      loadLogQML();
-    } else {
-      mui->frameOne->hide();
-      mui->frameMain->show();
-    }
-  }
-
   QString strWebDAV = mui->cboxWebDAV->currentText().trimmed();
   QString strUserName = mui->editWebDAVUsername->text().trimmed();
   iniPreferences->setValue("/webdav/url", strWebDAV);
@@ -1162,7 +1139,6 @@ void CloudBackup::backExit() {
                              mui->cboxWebDAV->itemText(i));
   }
 
-  iniPreferences->setValue("/cloudbak/onedrive", mui->chkOneDrive->isChecked());
   iniPreferences->setValue("/cloudbak/webdav", mui->chkWebDAV->isChecked());
   iniPreferences->setValue("/cloudbak/autosync", mui->chkAutoSync->isChecked());
 
@@ -1195,8 +1171,6 @@ void CloudBackup::init_CloudBacup() {
   QString password = aesDecrypt(aesStr, aes_key, aes_iv);
   mui->editWebDAVPassword->setText(password);
 
-  mui->chkOneDrive->setChecked(
-      iniPreferences->value("/cloudbak/onedrive", 0).toBool());
   mui->chkWebDAV->setChecked(
       iniPreferences->value("/cloudbak/webdav", 1).toBool());
   mui->chkAutoSync->setChecked(
