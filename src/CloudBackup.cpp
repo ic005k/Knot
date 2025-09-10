@@ -1143,6 +1143,9 @@ void CloudBackup::backExit() {
   iniPreferences->setValue("/cloudbak/autosync", mui->chkAutoSync->isChecked());
 
   mw_one->m_Preferences->setEncSyncStatusTip();
+
+  mui->frameOne->hide();
+  mui->frameMain->show();
 }
 
 void CloudBackup::init_CloudBacup() {

@@ -447,21 +447,6 @@ QString Reader::get_href(QString idref, QStringList opfList) {
         }
       }
 
-      /* Method 2 */
-      /*QStringList l0 = str0.split(" ");
-      for (int j = 0; j < l0.count(); j++) {
-        QString s0 = l0.at(j);
-        if (s0.contains("href") && s0.contains("=")) {
-          QString s1 = s0.split("=").at(1);
-          s1 = s1.trimmed();
-          s1.replace("\"", "");
-          str1 = s1.trimmed();
-          // qDebug() << "id=" << idref << "href=" << str1;
-          return str1;
-          break;
-        }
-      }*/
-
       break;
     }
   }
