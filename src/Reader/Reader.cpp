@@ -1724,6 +1724,8 @@ QStringList Reader::ncx2html() {
                      tocItems.at(i).href);
     }
 
+    strEpubTitle = getEpub3Title(strOpfFile);
+    mui->lblCataInfo->setText(strEpubTitle);
     // debugPrintTocItems(tocItems, 0);
 
     return htmlList;
@@ -2974,4 +2976,55 @@ void Reader::debugPrintTocItems(const QList<TocItem> &tocItems, int level) {
       debugPrintTocItems(item.childItems, level + 1);
     }
   }
+}
+
+QString Reader::getEpub3Title(const QString &opfFile) {
+  // 读取OPF文件内容
+  QByteArray opfContent = reader->readFile(opfFile);
+
+  // 检查文件内容是否读取成功
+  if (opfContent.isEmpty()) {
+    qWarning() << "无法读取OPF文件内容:" << opfFile;
+    return QString();
+  }
+
+  // 创建XML解析器（注意：直接使用QByteArray作为参数，无需取地址）
+  QXmlStreamReader xml(opfContent);
+
+  // 解析XML内容
+  while (!xml.atEnd() && !xml.hasError()) {
+    // 读取下一个元素
+    QXmlStreamReader::TokenType token = xml.readNext();
+
+    // 只处理开始元素
+    if (token == QXmlStreamReader::StartElement) {
+      // 检查是否是dc:title元素
+      if (isDcTitleElement(xml)) {
+        // 读取元素文本内容（包含所有子节点文本）
+        QString title =
+            xml.readElementText(QXmlStreamReader::IncludeChildElements);
+        return title;
+      }
+    }
+  }
+
+  // 检查是否有解析错误
+  if (xml.hasError()) {
+    qWarning() << "XML解析错误:" << xml.errorString()
+               << "位置:" << xml.lineNumber() << "行," << xml.columnNumber()
+               << "列";
+  } else {
+    qWarning() << "在OPF文件中未找到dc:title元素";
+  }
+
+  return QString();
+}
+
+bool Reader::isDcTitleElement(const QXmlStreamReader &xml) {
+  // Dublin Core命名空间URI
+  const QStringView dcNamespace = u"http://purl.org/dc/elements/1.1/"_qs;
+
+  // 检查元素本地名称是否为"title"且命名空间是否为dc
+  // 使用QStringView字面量避免类型不匹配
+  return xml.name() == u"title"_qs && xml.namespaceUri() == dcNamespace;
 }

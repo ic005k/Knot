@@ -210,6 +210,8 @@ class Reader : public QDialog {
   static QList<TocItem> parseOlElement(QXmlStreamReader &reader);
   static TocItem parseLiElement(QXmlStreamReader &reader);
   static void debugPrintTocItems(const QList<TocItem> &tocItems, int level);
+  static bool isDcTitleElement(const QXmlStreamReader &xml);
+  static QString getEpub3Title(const QString &opfFile);
 };
 
 class TextChunkModel : public QAbstractListModel {

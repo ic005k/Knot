@@ -108,14 +108,8 @@ void Notes::showEvent(QShowEvent *event) {
   QWidget::showEvent(event);
   if (!m_initialized) {
     int btn_h = ui->btnNext->height();
-    ui->btnDone->setFixedHeight(btn_h);
-    ui->btnDone->setFixedWidth(btn_h);
-    int m_size = btn_h * 1.0;
-    ui->btnDone->setIconSize(QSize(m_size - 9, m_size - 9));
-
-    ui->btnView->setFixedHeight(btn_h);
-    ui->btnView->setFixedWidth(btn_h);
-    ui->btnView->setIconSize(QSize(m_size + 5, m_size + 5));
+    ui->btnDone->setFixedSize(btn_h, btn_h);
+    ui->btnView->setFixedSize(btn_h, btn_h);
 
 #ifndef Q_OS_ANDROID
     QFont font = mw_one->font();
