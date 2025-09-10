@@ -1977,8 +1977,24 @@ void Reader::readBookDone() {
     currentBookName = epubName;
   else
     currentBookName = fi.baseName();
+
+  const int MAX_BASIC_FILENAME_LENGTH = 250;
+  if (currentBookName.length() > MAX_BASIC_FILENAME_LENGTH) {
+    currentBookName = currentBookName.left(MAX_BASIC_FILENAME_LENGTH);
+  }
   QString extName = fi.suffix();
   currentBookName = currentBookName + "_" + extName;
+
+  // 依次替换所有禁止的特殊字符为空字符串
+  currentBookName.replace("\\", "");
+  currentBookName.replace("/", "");
+  currentBookName.replace(":", "");
+  currentBookName.replace("*", "");
+  currentBookName.replace("?", "");
+  currentBookName.replace("\"", "");
+  currentBookName.replace("<", "");
+  currentBookName.replace(">", "");
+  currentBookName.replace("|", "");
 
   if (isText || isEpub) {
     strShowMsg = "Read  EBook End...";
