@@ -1947,7 +1947,7 @@ void MainWindow::on_btnSearch_clicked() {
   on_btnCancelSel_clicked();
 }
 
-void MainWindow::on_btnCancelSel_clicked() { mui->btnSelText->click(); }
+void MainWindow::on_btnCancelSel_clicked() { on_btnSelText_clicked(); }
 
 void MainWindow::on_textBrowser_selectionChanged() {
   QString str = mui->textBrowser->textCursor().selectedText().trimmed();

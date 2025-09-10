@@ -909,47 +909,40 @@ void MainHelper::init_ButtonStyle() {
   mui->btnReport->setStyleSheet("border:none");
   mui->btnSelTab->setStyleSheet("border:none");
 
+  // Reader
+  mui->btnBackReader->setStyleSheet("border:none; ");
+  mui->btnCatalogue->setStyleSheet("border:none; ");
+  mui->btnShowBookmark->setStyleSheet("border:none; ");
+  mui->btnAutoRun->setStyleSheet("border:none; ");
+  mui->btnAutoStop->setStyleSheet("border:none; ");
+  mui->btnPages->setStyleSheet("border:none; ");
+  mui->btnOpen->setStyleSheet("border:none;");
+  mui->btnReadList->setStyleSheet("border:none; ");
+  // mui->f_ReaderFun->setStyleSheet("QFrame{background-color: #595959;}");
+
   if (isDark) {
-    mui->f_ReaderFun->setStyleSheet("QFrame{background-color: #2874AC;}");
-    mui->btnOpen->setStyleSheet("border:none; background-color:#2874AC;");
-    mui->btnBackReader->setStyleSheet("border:none; background-color:#2874AC;");
-    mui->btnCatalogue->setStyleSheet("border:none; background-color:#2874AC;");
-    mui->btnBackDir->setStyleSheet("border:none; background-color:#2874AC;");
-
-    mui->btnReadList->setStyleSheet("border:none; background-color:#2874AC;");
-    mui->btnShowBookmark->setStyleSheet(
-        "border:none; background-color:#2874AC;");
-    mui->btnPages->setStyleSheet("border:none; background-color:#2874AC;");
-    mui->btnAutoRun->setStyleSheet("border:none; background-color:#2874AC;");
-    mui->btnAutoStop->setStyleSheet("border:none; background-color:#2874AC;");
-
-    mui->btnPages->setStyleSheet(
-        "color: rgb(255, 255, 255);background-color: #2874AC; "
-        "border: "
-        "0px solid "
-        "rgb(255,0,0);border-radius: 0px;"
-        "font-weight: bold;");
+    mui->btnBackReader->setIcon(QIcon(":/res/reader/exit_l.svg"));
+    mui->btnCatalogue->setIcon(QIcon(":/res/reader/cata_l.svg"));
+    mui->btnShowBookmark->setIcon(QIcon(":/res/reader/bookmark_l.svg"));
+    mui->btnAutoRun->setIcon(QIcon(":/res/reader/run_l.svg"));
+    mui->btnAutoStop->setIcon(QIcon(":/res/reader/stop_l.svg"));
+    mui->btnOpen->setIcon(QIcon(":/res/reader/open_l.svg"));
+    mui->btnReadList->setIcon(QIcon(":/res/reader/booklist_l.svg"));
   } else {
-    mui->f_ReaderFun->setStyleSheet("QFrame{background-color: #3498DB;}");
-    mui->btnOpen->setStyleSheet("border:none; background-color:#3498DB;");
-    mui->btnBackReader->setStyleSheet("border:none; background-color:#3498DB;");
-    mui->btnCatalogue->setStyleSheet("border:none; background-color:#3498DB;");
-    mui->btnBackDir->setStyleSheet("border:none; background-color:#3498DB;");
-
-    mui->btnReadList->setStyleSheet("border:none; background-color:#3498DB;");
-    mui->btnShowBookmark->setStyleSheet(
-        "border:none; background-color:#3498DB;");
-    mui->btnPages->setStyleSheet("border:none; background-color:#3498DB;");
-    mui->btnAutoRun->setStyleSheet("border:none; background-color:#3498DB;");
-    mui->btnAutoStop->setStyleSheet("border:none; background-color:#3498DB;");
-
-    mui->btnPages->setStyleSheet(
-        "color: rgb(255, 255, 255);background-color: #3498DB; "
-        "border: "
-        "0px solid "
-        "rgb(255,0,0);border-radius: 0px;"
-        "font-weight: bold;");
+    mui->btnBackReader->setIcon(QIcon(":/res/reader/exit.svg"));
+    mui->btnCatalogue->setIcon(QIcon(":/res/reader/cata.svg"));
+    mui->btnShowBookmark->setIcon(QIcon(":/res/reader/bookmark.svg"));
+    mui->btnAutoRun->setIcon(QIcon(":/res/reader/run.svg"));
+    mui->btnAutoStop->setIcon(QIcon(":/res/reader/stop.svg"));
+    mui->btnOpen->setIcon(QIcon(":/res/reader/open.svg"));
+    mui->btnReadList->setIcon(QIcon(":/res/reader/booklist.svg"));
   }
+
+  mui->btnPages->setStyleSheet(
+      "color: rgb(0, 0, 0);background-color: rgb(254, 234, 112);border: "
+      "0px solid "
+      "rgb(255,0,0);border-radius: 0px;"
+      "font-weight: bold;");
 
   QString style =
       "QToolButton {background-color: rgb(255, 0, 0); color: "

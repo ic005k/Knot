@@ -477,7 +477,7 @@ void DocumentHandler::setBackDir(QString link) {
     if (catalogueFile != mw_one->m_Reader->currentHtmlFile &&
         !link.contains("#")) {
       mw_one->m_Reader->mainDirIndex = htmlIndex;
-      mui->btnBackDir->show();
+
       mw_one->repaint();
       qDebug() << "mainDirIndex: " << mw_one->m_Reader->mainDirIndex;
     }

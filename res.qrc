@@ -3,21 +3,16 @@
         <file>res/a1.png</file>
         <file>res/a2.png</file>
         <file>res/b.png</file>
-        <file>res/dir.png</file>
         <file>res/done.png</file>
-        <file>res/done1.png</file>
         <file>res/down.png</file>
         <file>res/icon.icns</file>
         <file>res/icon.png</file>
         <file>res/low.png</file>
         <file>res/nosel.png</file>
-        <file>res/open.png</file>
         <file>res/pause.png</file>
         <file>res/qslider.png</file>
         <file>res/qslider_bg.png</file>
         <file>res/qslider_btn.png</file>
-        <file>res/ReadList.png</file>
-        <file>res/run.png</file>
         <file>res/sel.png</file>
         <file>res/up.png</file>
         <file>res/msg.mp3</file>
@@ -29,11 +24,6 @@
         <file>res/pic.png</file>
         <file>res/info.png</file>
         <file>res/b3.png</file>
-        <file>res/font1.png</file>
-        <file>res/font2.png</file>
-        <file>res/font3.png</file>
-        <file>res/font4.png</file>
-        <file>res/font5.png</file>
         <file>res/link.png</file>
         <file>res/color.png</file>
         <file>res/apk.png</file>
@@ -65,9 +55,7 @@
         <file>res/coin.svg</file>
         <file>res/find_l.png</file>
         <file>res/back_l.png</file>
-        <file>res/books_l.png</file>
         <file>res/list_l.png</file>
-        <file>res/open_l.png</file>
         <file>res/sum.png</file>
         <file>res/p0.png</file>
         <file>res/n.png</file>
@@ -82,7 +70,6 @@
         <file>res/todo_done.png</file>
         <file>res/options.png</file>
         <file>res/return_l.png</file>
-        <file>res/exit_l.png</file>
         <file>res/url_l.png</file>
         <file>res/recent_l.png</file>
         <file>res/ok_l.png</file>
@@ -118,7 +105,6 @@
         <file>res/upload.svg</file>
         <file>res/mainmenu_l.svg</file>
         <file>res/mainmenu.svg</file>
-        <file>res/bookmark_l.svg</file>
         <file>res/set_bookmark_l.svg</file>
         <file>res/report_l.svg</file>
         <file>res/report.svg</file>
@@ -139,8 +125,6 @@
         <file>res/xq_l.svg</file>
         <file>res/chart_l.svg</file>
         <file>res/chart.svg</file>
-        <file>res/stop_l.svg</file>
-        <file>res/run_l.svg</file>
         <file>res/voice_l.svg</file>
         <file>res/audio.svg</file>
         <file>res/coin_l.svg</file>
@@ -179,5 +163,19 @@
         <file>res/rename.svg</file>
         <file>res/find.svg</file>
         <file>res/back.svg</file>
+        <file>res/reader/booklist.svg</file>
+        <file>res/reader/booklist_l.svg</file>
+        <file>res/reader/bookmark.svg</file>
+        <file>res/reader/bookmark_l.svg</file>
+        <file>res/reader/cata.svg</file>
+        <file>res/reader/cata_l.svg</file>
+        <file>res/reader/exit.svg</file>
+        <file>res/reader/exit_l.svg</file>
+        <file>res/reader/open.svg</file>
+        <file>res/reader/open_l.svg</file>
+        <file>res/reader/run.svg</file>
+        <file>res/reader/run_l.svg</file>
+        <file>res/reader/stop.svg</file>
+        <file>res/reader/stop_l.svg</file>
     </qresource>
 </RCC>

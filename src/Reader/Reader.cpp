@@ -56,7 +56,6 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
 
   mui->btnAutoStop->hide();
 
-  mui->btnBackDir->hide();
   mui->lblTitle->hide();
   mui->f_ReaderFun2->hide();
   mui->btnBackward->hide();
@@ -77,19 +76,6 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
   pt.setBrush(QPalette::Highlight, Qt::red);
   pt.setBrush(QPalette::HighlightedText, Qt::white);
   mui->textBrowser->setPalette(pt);
-
-  mui->btnPageNext->setStyleSheet("border:none");
-  mui->btnPageUp->setStyleSheet("border:none");
-  mui->btnSelText->setStyleSheet("border:none");
-
-  mui->btnPageNext->hide();
-  mui->btnPageUp->hide();
-  mui->btnSelText->hide();
-  mui->btnPages->setStyleSheet(
-      "color: rgb(0, 0, 0);background-color: rgb(254, 234, 112);border: "
-      "0px solid "
-      "rgb(255,0,0);border-radius: 4px;"
-      "font-weight: bold;");
 
   QFont f = this->font();
   f.setPointSize(10);
@@ -2027,14 +2013,13 @@ void Reader::readBookDone() {
     }
 
     if (isText) {
-      mui->btnBackDir->hide();
       mui->btnCatalogue->hide();
       mui->lblInfo->hide();
     }
   }
 
   mui->lblBookName->setText(strTitle);
-  mui->btnBackDir->hide();
+
   tmeShowEpubMsg->stop();
   mui->lblEpubInfo->hide();
   mui->pEpubProg->hide();
@@ -2121,7 +2106,6 @@ void Reader::selectText() {
   m_ReaderSet->close();
 
   if (!isSelText) {
-    mui->btnSelText->setIcon(QIcon(":/res/choice1.png"));
     isSelText = true;
 
     mui->textBrowser->setReadOnly(true);
@@ -2158,7 +2142,7 @@ void Reader::selectText() {
 void Reader::closeSelText() {
   if (isSelText) {
     isSelText = false;
-    mui->btnSelText->setIcon(QIcon(":/res/choice0.png"));
+
     mui->textBrowser->hide();
     mui->qwReader->show();
     mw_one->mydlgSetText->close();

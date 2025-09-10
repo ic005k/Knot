@@ -349,7 +349,8 @@ static void JavaNotify_15() {
       return;
 
     } else if (!mui->textBrowser->isHidden()) {
-      mui->btnSelText->click();
+      QTimer::singleShot(100, mw_one,
+                         []() { mw_one->on_btnSelText_clicked(); });
       return;
     }
 
