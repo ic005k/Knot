@@ -179,7 +179,6 @@ Rectangle {
             font.family: FontName
             color: myTextColor
 
-            //renderType: Text.NativeRendering // 使用原生渲染引擎,在Qt6.6.3的安卓上表现迟钝，非常容易导致崩溃
             renderType: Text.QtRendering // 比NativeRendering更轻量
 
             // 处理链接点击
