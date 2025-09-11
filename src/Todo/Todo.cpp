@@ -207,10 +207,10 @@ void Todo::closeTodo() {
     QString enc_file = m_Method->useEnc(todoZipFile);
     if (enc_file != "") todoZipFile = enc_file;
 
-    QStringList files;
-    files.append(todoZipFile);
+    mw_one->m_Notes->notes_sync_files.removeOne(todoZipFile);
+    mw_one->m_Notes->notes_sync_files.append(todoZipFile);
     mw_one->showProgress();
-    m_CloudBackup->uploadFilesToWebDAV(files);
+    m_CloudBackup->uploadFilesToWebDAV(mw_one->m_Notes->notes_sync_files);
     isNeedSync = false;
   }
 }
@@ -1382,6 +1382,8 @@ void Todo::on_ShowPlayProgress() {
 }
 
 void Todo::openTodoUI() {
+  mw_one->execNeedSyncNotes();
+
   mui->qwTodo->rootContext()->setContextProperty("m_width", mw_one->width());
   mui->frameMain->hide();
   mui->frameTodo->show();
@@ -1453,8 +1455,13 @@ void Todo::openTodo() {
 
           bool isTodoFile = false;
           for (const auto& [path, mtime] : files) {
-            qDebug() << "路径:" << path
-                     << "修改时间:" << mtime.toString("yyyy-MM-dd hh:mm:ss");
+            QDateTime remoteTime = mtime;  // 创建非const副本
+            remoteTime.toTimeZone(QTimeZone::utc());
+            remoteTime = remoteTime.toLocalTime();
+
+            qDebug() << "路径:" << path << "修改时间:" << remoteTime
+                     << remoteTime.toString("yyyy-MM-dd hh:mm:ss");
+
             QString remoteFile = path;
             remoteFile = remoteFile.replace("/dav/", "");  // 此处需注意
             if (remoteFile.contains("todo.ini.zip")) {
@@ -1462,12 +1469,9 @@ void Todo::openTodo() {
               QString localFile = privateDir + "KnotData/todo.ini.zip";
               QDateTime localModi = QFileInfo(localFile).lastModified();
 
-              // 先设置时区
-              localModi.setTimeZone(QTimeZone::systemTimeZone());
-              // 再统一时区
-              localModi = localModi.toTimeZone(QTimeZone::utc());
+              qDebug() << "localModi=" << localModi;
 
-              if (mtime > localModi || !QFile::exists(localFile)) {
+              if (remoteTime > localModi || !QFile::exists(localFile)) {
                 // 初始化下载器
                 WebDavDownloader* downloader = new WebDavDownloader(
                     m_CloudBackup->USERNAME, m_CloudBackup->APP_PASSWORD);
@@ -1542,7 +1546,7 @@ void Todo::openTodo() {
           if (isTodoFile == false) mw_one->m_Todo->openTodoUI();
         });
 
-    QObject::connect(helper, &WebDavHelper::errorOccurred,
+    QObject::connect(helper, &WebDavHelper::errorOccurred, this,
                      [](const QString& error) {
                        qDebug() << "操作失败:" << error;
                        mw_one->m_Todo->openTodoUI();

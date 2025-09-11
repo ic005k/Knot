@@ -1447,14 +1447,11 @@ void Notes::openNotes() {
           for (int j = 0; j < orgRemoteFiles.count(); j++) {
             QString or_file = orgRemoteFiles.at(j);
             QDateTime or_datetime = orgRemoteDateTime.at(j);
+            or_datetime.toTimeZone(QTimeZone::utc());
+            or_datetime = or_datetime.toLocalTime();
 
             QString local_file = privateDir + or_file;
             QDateTime local_datetime = QFileInfo(local_file).lastModified();
-
-            // 先设置时区
-            local_datetime.setTimeZone(QTimeZone::systemTimeZone());
-            // 再统一时区
-            local_datetime = local_datetime.toTimeZone(QTimeZone::utc());
 
             bool isLocalFileExists = QFile::exists(local_file);
             if (or_datetime > local_datetime || !isLocalFileExists) {
