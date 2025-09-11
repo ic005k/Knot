@@ -73,33 +73,14 @@ class CloudBackup : public QDialog {
   void downloadFile_Old(QString remoteFileName, QString localSavePath);
   void changeComBoxWebDAV(const QString &arg1);
   bool checkWebDAVConnection();
+  void on_pushButton_downloadFile_clicked();
+  void on_btnBack_clicked();
 
  signals:
 
  protected:
   bool eventFilter(QObject *obj, QEvent *evn) override;
  public slots:
-  void on_pushButton_SignIn_clicked();
-  void on_pushButton_SingOut_clicked();
-  void on_pushButton_downloadFile_clicked();
-
-  void on_pushButton_GetUserInfo_clicked();
-
-  void on_pushButton_clicked();
-
-  void on_pushButton_getFiles_clicked();
-
-  void on_pushButton_traserveFolder_clicked();
-
-  void on_pushButton_getFolders_clicked();
-
-  void on_pushButton_createFolder_clicked();
-
-  void on_pushButton_deleteFile_clicked();
-
-  void on_pushButton_storageInfo_clicked();
-
-  void on_btnBack_clicked();
 
  private slots:
   void updateUploadProgress(qint64 bytesSent, qint64 bytesTotal);

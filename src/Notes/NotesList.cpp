@@ -1482,8 +1482,6 @@ void NotesList::goFindResult(int index) {
                                  QString::number(findResult.count()));
 }
 
-void NotesList::on_btnFind_clicked() {}
-
 void NotesList::localItem() {
   QTreeWidgetItem *item = tw->currentItem();
   // NoteBook
@@ -1554,8 +1552,6 @@ void NotesList::modifyNoteBookText0(QString text0, int index) {
 void NotesList::modifyNotesListText0(QString text0, int index) {
   m_Method->modifyItemText0(mui->qwNoteList, index, text0);
 }
-
-void NotesList::on_editFind_returnPressed() {}
 
 void NotesList::on_KVChanged() {
   if (!pAndroidKeyboard->isVisible()) {

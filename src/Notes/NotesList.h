@@ -183,6 +183,10 @@ class NotesList : public QDialog {
   void startBackgroundTaskDelFilesIndex(const QStringList &files);
   QStringList getRecycleNoteFiles();
 
+  void on_btnNewNote_clicked();
+  void on_btnNewNoteBook_clicked();
+  void on_btnBack_clicked();
+
  protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
@@ -199,10 +203,6 @@ class NotesList : public QDialog {
 
   void on_btnClose_clicked();
 
-  void on_btnNewNoteBook_clicked();
-
-  void on_btnNewNote_clicked();
-
   void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
 
   void on_btnRename_clicked();
@@ -215,15 +215,11 @@ class NotesList : public QDialog {
 
   void on_btnRecycle_clicked();
 
-  void on_btnBack_clicked();
-
   void on_btnRestore_clicked();
 
   void on_btnDel_Recycle_clicked();
 
   void on_KVChanged();
-
-  void on_btnFind_clicked();
 
   void on_btnUp_clicked();
 
@@ -236,8 +232,6 @@ class NotesList : public QDialog {
   void qmlOpenEdit();
 
  private slots:
-
-  void on_editFind_returnPressed();
 
   void on_actionShareNoteFile();
 

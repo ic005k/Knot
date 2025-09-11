@@ -363,6 +363,13 @@ class MainWindow : public QMainWindow {
 
   void updateMainTab();
 
+  void on_btnPageUp_clicked();
+  void on_btnPageNext_clicked();
+  void on_btnBackDir_clicked();
+  void on_btnSelText_clicked();
+  void on_btnUpload_clicked();
+  void on_btnDownload_clicked();
+
  protected:
   void closeEvent(QCloseEvent *event) override;
   bool eventFilter(QObject *watch, QEvent *evn) override;
@@ -379,8 +386,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnTodo_clicked();
   void readEBookDone();
-  void on_btnPageUp_clicked();
-  void on_btnPageNext_clicked();
 
   void on_btnShowFindNotes_clicked();
 
@@ -461,27 +466,9 @@ class MainWindow : public QMainWindow {
 
   void on_btnReadList_clicked();
 
-  void on_btnBackDir_clicked();
-
   void on_actionBakFileList();
 
-  void on_btnSelText_clicked();
-
-  void on_btnSignOut_clicked();
-
-  void on_btnUpload_clicked();
-
-  void on_btnDownload_clicked();
-
   void on_btnBack_One_clicked();
-
-  void on_btnRefreshToken_clicked();
-
-  void on_btnStorageInfo_clicked();
-
-  void on_btnRefreshWeb_clicked();
-
-  void on_btnUserInfo_clicked();
 
   void on_btnBackNotesGraph_clicked();
 
@@ -536,8 +523,6 @@ class MainWindow : public QMainWindow {
   void on_btnBackImg_clicked();
 
   void on_btnReport_clicked();
-
-  void on_btnPasteCode_clicked();
 
   void on_btnAdd_clicked();
 
@@ -809,8 +794,6 @@ class MainWindow : public QMainWindow {
   void on_btnWebDAVRestore_clicked();
 
   void on_chkWebDAV_clicked();
-
-  void on_chkOneDrive_clicked();
 
   void on_editFindNote_returnPressed();
 

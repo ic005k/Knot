@@ -111,25 +111,7 @@ bool CloudBackup::eventFilter(QObject *obj, QEvent *evn) {
   return QWidget::eventFilter(obj, evn);
 }
 
-void CloudBackup::on_pushButton_SignIn_clicked() {}
-
-void CloudBackup::on_pushButton_SingOut_clicked() {}
-
-void CloudBackup::on_pushButton_GetUserInfo_clicked() {}
-
-void CloudBackup::on_pushButton_clicked() {}
-
-void CloudBackup::on_pushButton_getFiles_clicked() {}
-
-void CloudBackup::on_pushButton_traserveFolder_clicked() {}
-
-void CloudBackup::on_pushButton_getFolders_clicked() {}
-
 void CloudBackup::on_pushButton_downloadFile_clicked() {}
-
-void CloudBackup::on_pushButton_createFolder_clicked() {}
-
-void CloudBackup::on_pushButton_deleteFile_clicked() {}
 
 void CloudBackup::uploadData() {
   QString strFlag;
@@ -157,8 +139,6 @@ QString CloudBackup::getWebDAVArgument() {
   APP_PASSWORD = mui->editWebDAVPassword->text().trimmed();
   return url;
 }
-
-void CloudBackup::on_pushButton_storageInfo_clicked() {}
 
 void CloudBackup::on_btnBack_clicked() {}
 

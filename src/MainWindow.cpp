@@ -197,10 +197,6 @@ MainWindow::MainWindow(QWidget *parent)
   m_Preferences->setEncSyncStatusTip();
 
   initMain = false;
-
-  if (!isAndroid) {
-    QTimer::singleShot(100, this, [this]() { execNeedSyncNotes(); });
-  }
 }
 
 void MainWindow::slotPointHoverd(const QPointF &point, bool state) {
@@ -1878,10 +1874,6 @@ void MainWindow::on_btnSelText_clicked() {
   m_Reader->selectText();
 }
 
-void MainWindow::on_btnSignOut_clicked() {
-  m_CloudBackup->on_pushButton_SingOut_clicked();
-}
-
 void MainWindow::on_btnUpload_clicked() {
   if (!mui->btnReader->isEnabled()) return;
   m_CloudBackup->startBakData();
@@ -1892,24 +1884,6 @@ void MainWindow::on_btnDownload_clicked() {
 }
 
 void MainWindow::on_btnBack_One_clicked() { m_CloudBackup->backExit(); }
-
-void MainWindow::on_btnRefreshToken_clicked() {
-  m_CloudBackup->on_pushButton_clicked();
-}
-
-void MainWindow::on_btnStorageInfo_clicked() {
-  m_CloudBackup->on_pushButton_storageInfo_clicked();
-}
-
-void MainWindow::on_btnRefreshWeb_clicked() {}
-
-void MainWindow::on_btnUserInfo_clicked() {
-  QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-  qDebug() << manager->supportedSchemes();
-  qDebug() << QSslSocket::sslLibraryBuildVersionString();
-
-  m_CloudBackup->on_pushButton_GetUserInfo_clicked();
-}
 
 void MainWindow::on_btnBackNotesGraph_clicked() {
   mui->frameNotesGraph->hide();
@@ -2026,8 +2000,6 @@ void MainWindow::on_btnReport_clicked() {
   on_actionReport_triggered();
   mui->btnYear->setFixedHeight(mui->btnMonth->height());
 }
-
-void MainWindow::on_btnPasteCode_clicked() {}
 
 void MainWindow::on_btnAdd_clicked() {
   m_EditRecord->monthSum();
@@ -2879,8 +2851,6 @@ void MainWindow::on_btnWebDAVRestore_clicked() {
 }
 
 void MainWindow::on_chkWebDAV_clicked() {}
-
-void MainWindow::on_chkOneDrive_clicked() {}
 
 void MainWindow::on_btnBack_NotesSearchResult_clicked() {
   clearWidgetFocus();

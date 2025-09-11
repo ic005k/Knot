@@ -236,10 +236,6 @@
               <property name="text">
                <string>Exit</string>
               </property>
-              <property name="icon">
-               <iconset>
-                <normaloff>:/res/exit_l.png</normaloff>:/res/exit_l.png</iconset>
-              </property>
               <property name="iconSize">
                <size>
                 <width>24</width>
@@ -260,11 +256,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>...</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../res.qrc">
-                <normaloff>:/res/list_l.png</normaloff>:/res/list_l.png</iconset>
+               <string>Cata</string>
               </property>
               <property name="iconSize">
                <size>
@@ -285,10 +277,6 @@
               <property name="text">
                <string>BookMark</string>
               </property>
-              <property name="icon">
-               <iconset>
-                <normaloff>:/res/bookmark_l.svg</normaloff>:/res/bookmark_l.svg</iconset>
-              </property>
               <property name="iconSize">
                <size>
                 <width>24</width>
@@ -308,10 +296,6 @@
               <property name="text">
                <string>Run</string>
               </property>
-              <property name="icon">
-               <iconset>
-                <normaloff>:/res/run_l.svg</normaloff>:/res/run_l.svg</iconset>
-              </property>
               <property name="iconSize">
                <size>
                 <width>24</width>
@@ -330,10 +314,6 @@
               </property>
               <property name="text">
                <string>Stop</string>
-              </property>
-              <property name="icon">
-               <iconset>
-                <normaloff>:/res/stop_l.svg</normaloff>:/res/stop_l.svg</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -363,10 +343,6 @@
               <property name="text">
                <string>1
 1</string>
-              </property>
-              <property name="icon">
-               <iconset>
-                <normaloff>:/src/lines.png</normaloff>:/src/lines.png</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -401,10 +377,6 @@
               <property name="text">
                <string>Open</string>
               </property>
-              <property name="icon">
-               <iconset>
-                <normaloff>:/res/open_l.png</normaloff>:/res/open_l.png</iconset>
-              </property>
               <property name="iconSize">
                <size>
                 <width>24</width>
@@ -431,10 +403,6 @@
               </property>
               <property name="text">
                <string>BookList</string>
-              </property>
-              <property name="icon">
-               <iconset>
-                <normaloff>:/res/books_l.png</normaloff>:/res/books_l.png</iconset>
               </property>
               <property name="iconSize">
                <size>

@@ -52,9 +52,6 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   this->layout()->setContentsMargins(5, 5, 5, 5);
   ui->frameEdit->layout()->setContentsMargins(0, 0, 0, 0);
 
-  timerEditPanel = new QTimer(this);
-  connect(timerEditPanel, SIGNAL(timeout()), this, SLOT(on_showEditPanel()));
-
   timerEditNote = new QTimer(this);
   connect(timerEditNote, SIGNAL(timeout()), this, SLOT(on_editNote()));
 
@@ -97,7 +94,7 @@ void Notes::initEditor() {
   connect(m_EditSource->verticalScrollBar(), SIGNAL(valueChanged(int)), this,
           SLOT(editVSBarValueChanged()));
   connect(m_EditSource, &QsciScintilla::textChanged, this,
-          &Notes::on_editSource_textChanged);
+          &Notes::editSource_textChanged);
   ui->frameEdit->layout()->addWidget(m_EditSource);
   m_EditSource->setFocus();
 
@@ -754,7 +751,7 @@ bool Notes::isSetNewNoteTitle() {
   return false;
 }
 
-void Notes::on_editSource_textChanged() { isTextChange = true; }
+void Notes::editSource_textChanged() { isTextChange = true; }
 
 void Notes::show_findText() {
 #ifndef Q_OS_ANDROID

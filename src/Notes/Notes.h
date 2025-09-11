@@ -91,7 +91,6 @@ class Notes : public QDialog {
 
   bool isTextChange;
 
-  QTimer *timerEditPanel;
   QString htmlBuffer;
   QTextEdit *byTextEdit;
   QLineEdit *byLineEdit;
@@ -233,7 +232,7 @@ class Notes : public QDialog {
 
  private slots:
 
-  void on_editSource_textChanged();
+  void editSource_textChanged();
 
   void on_btnFind_clicked();
 
