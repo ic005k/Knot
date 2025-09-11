@@ -77,7 +77,7 @@ class MainHelper : public QDialog {
   QTreeWidget *init_TreeWidget(QString name);
   void init_Menu(QMenu *mainMenu);
   void openTabRecycle();
-  void initQW();
+  void initNotesQW();
   void init_UIWidget();
   void startBackgroundTaskUpdateBakFileList();
 
@@ -91,6 +91,8 @@ class MainHelper : public QDialog {
   void on_AddRecord();
   void initChartDay();
   void initChartMonth();
+
+  void initMainQW();
 
  private:
   QStringList bakFileList;

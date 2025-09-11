@@ -156,7 +156,7 @@ MainWindow::MainWindow(QWidget *parent)
 
   m_MainHelper->init_Theme();
 
-  m_MainHelper->initQW();
+  m_MainHelper->initMainQW();
 
   init_TotalData();
 
@@ -181,6 +181,7 @@ MainWindow::MainWindow(QWidget *parent)
   });
 
   currentMDFile = m_NotesList->getCurrentMDFile();
+
   if (isAndroid) {
     QTimer::singleShot(2000, this, SLOT(on_ReceiveShare()));
 
@@ -194,10 +195,6 @@ MainWindow::MainWindow(QWidget *parent)
 
   m_CloudBackup->init_CloudBacup();
   m_Preferences->setEncSyncStatusTip();
-
-  if (QFile::exists(currentMDFile)) {
-    m_Notes->MD2Html(currentMDFile);
-  }
 
   initMain = false;
 
@@ -1408,6 +1405,12 @@ void MainWindow::on_actionAbout() {
 }
 
 void MainWindow::on_btnFind_clicked() {
+  if (mui->qwSearch->source().isEmpty()) {
+    mui->qwSearch->rootContext()->setContextProperty("m_Method", m_Method);
+    mui->qwSearch->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/search.qml")));
+  }
+
   mui->frameMain->hide();
   mui->frameSearch->show();
   mui->editSearchText->setFocus();
@@ -1628,6 +1631,12 @@ void MainWindow::getMainTabs() {
 }
 
 void MainWindow::on_btnSelTab_clicked() {
+  if (mui->qwSelTab->source().isEmpty()) {
+    mui->qwSelTab->rootContext()->setContextProperty("mw_one", mw_one);
+    mui->qwSelTab->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/seltab.qml")));
+  }
+
   mui->frameMain->hide();
   mui->frameSetTab->show();
   getMainTabs();
@@ -1651,6 +1660,12 @@ void MainWindow::on_actionOneDriveBackupData() {
 void MainWindow::on_actionTabRecycle() { m_MainHelper->openTabRecycle(); }
 
 void MainWindow::on_actionBakFileList() {
+  if (mui->qwBakList->source().isEmpty()) {
+    mui->qwBakList->rootContext()->setContextProperty("m_Method", m_Method);
+    mui->qwBakList->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/baklist.qml")));
+  }
+
   m_MainHelper->startBackgroundTaskUpdateBakFileList();
 }
 
@@ -1811,6 +1826,14 @@ void MainWindow::on_hSlider_sliderMoved(int position) {
 }
 
 void MainWindow::on_btnReadList_clicked() {
+  if (mui->qwBookList->source().isEmpty()) {
+    mui->qwBookList->rootContext()->setContextProperty("fontSize", fontSize);
+    mui->qwBookList->rootContext()->setContextProperty("m_Reader",
+                                                       mw_one->m_Reader);
+    mui->qwBookList->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/booklist.qml")));
+  }
+
   mui->btnAutoStop->click();
 
   m_Reader->saveReader("", false);
@@ -1987,6 +2010,19 @@ void MainWindow::on_btnZoomOut_clicked() {
 }
 
 void MainWindow::on_btnReport_clicked() {
+  if (mui->qwReport->source().isEmpty()) {
+    int f_size = 19;
+    if (fontSize <= f_size) f_size = fontSize;
+    mui->qwReport->rootContext()->setContextProperty("maxFontSize", f_size);
+    mui->qwReportSub->rootContext()->setContextProperty("maxFontSize", f_size);
+    mui->qwReport->rootContext()->setContextProperty("m_Report",
+                                                     mw_one->m_Report);
+    mui->qwReport->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/report.qml")));
+    mui->qwReportSub->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/details.qml")));
+  }
+
   on_actionReport_triggered();
   mui->btnYear->setFixedHeight(mui->btnMonth->height());
 }
@@ -2622,6 +2658,13 @@ void MainWindow::on_btnRecentOpen_clicked() {
 void MainWindow::on_btnMenuReport_clicked() { m_Report->genReportMenu(); }
 
 void MainWindow::on_btnCatalogue_clicked() {
+  if (mui->qwCata->source().isEmpty()) {
+    mui->qwCata->rootContext()->setContextProperty("m_Reader",
+                                                   mw_one->m_Reader);
+    mui->qwCata->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/epub_cata.qml")));
+  }
+
   mui->btnAutoStop->click();
 
   if (mui->f_ReaderSet->isVisible()) {
@@ -2633,6 +2676,13 @@ void MainWindow::on_btnCatalogue_clicked() {
 void MainWindow::on_btnRemoveBookList_clicked() { m_Reader->removeBookList(); }
 
 void MainWindow::on_btnShowBookmark_clicked() {
+  if (mui->qwBookmark->source().isEmpty()) {
+    mui->qwBookmark->rootContext()->setContextProperty("m_Reader",
+                                                       mw_one->m_Reader);
+    mui->qwBookmark->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/bookmark.qml")));
+  }
+
   m_Reader->showOrHideBookmark();
 }
 

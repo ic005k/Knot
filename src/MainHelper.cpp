@@ -402,6 +402,13 @@ void MainHelper::init_Menu(QMenu *mainMenu) {
 }
 
 void MainHelper::openTabRecycle() {
+  if (mui->qwTabRecycle->source().isEmpty()) {
+    mui->qwTabRecycle->rootContext()->setContextProperty("m_Report",
+                                                         mw_one->m_Report);
+    mui->qwTabRecycle->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/tabrecycle.qml")));
+  }
+
   mui->frameMain->hide();
   mui->frameTabRecycle->show();
 
@@ -480,130 +487,8 @@ void MainHelper::openTabRecycle() {
                                    " : " + QString::number(t_count));
 }
 
-void MainHelper::initQW() {
+void MainHelper::initMainQW() {
   qmlRegisterType<DocumentHandler>("MyModel2", 1, 0, "DocumentHandler");
-
-  int f_size = 19;
-  if (fontSize <= f_size) f_size = fontSize;
-  mui->qwReport->rootContext()->setContextProperty("maxFontSize", f_size);
-  mui->qwReportSub->rootContext()->setContextProperty("maxFontSize", f_size);
-
-  mui->qwNotesTree->rootContext()->setContextProperty("fontSize", fontSize);
-  mui->qwNotesTree->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/tree_main.qml")));
-
-  mui->qwReader->rootContext()->setContextProperty("myW", mw_one->width());
-  mui->qwReader->rootContext()->setContextProperty("myH", mw_one->height());
-  mui->qwReader->rootContext()->setContextProperty("m_Reader",
-                                                   mw_one->m_Reader);
-  mui->qwReader->rootContext()->setContextProperty("myBackgroundColor",
-                                                   "#FFFFFF");
-
-  mui->qwCata->rootContext()->setContextProperty("m_Reader", mw_one->m_Reader);
-  mui->qwCata->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/epub_cata.qml")));
-
-  mui->qwBookmark->rootContext()->setContextProperty("m_Reader",
-                                                     mw_one->m_Reader);
-  mui->qwBookmark->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/bookmark.qml")));
-
-  mui->qw_Img->rootContext()->setContextProperty("myW", mw_one->width());
-  mui->qw_Img->rootContext()->setContextProperty("myH", mw_one->height());
-
-  mui->qwTodo->rootContext()->setContextProperty("maxFontSize", f_size);
-  mui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
-                                                 QVariant(false));
-  mui->qwTodo->rootContext()->setContextProperty("m_Todo", mw_one->m_Todo);
-  mui->qwTodo->rootContext()->setContextProperty("FontSize", fontSize);
-  mui->qwTodo->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/todo.qml")));
-
-  mui->qwRecycle->rootContext()->setContextProperty("FontSize", fontSize);
-  mui->qwRecycle->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/todorecycle.qml")));
-
-  mui->qwSteps->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/steps.qml")));
-  mui->qwSteps->rootContext()->setContextProperty("maxFontSize", f_size);
-  mui->qwSteps->rootContext()->setContextProperty("myW", mw_one->width());
-  mui->qwSteps->rootContext()->setContextProperty("text0", "");
-  mui->qwSteps->rootContext()->setContextProperty("text1", "");
-  mui->qwSteps->rootContext()->setContextProperty("text2", "");
-  mui->qwSteps->rootContext()->setContextProperty("text3", "");
-
-  mui->qwSpeed->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/Speedometer.qml")));
-
-  mui->qwGpsList->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/gps_list.qml")));
-  mui->qwGpsList->rootContext()->setContextProperty("myW", mw_one->width());
-  mui->qwGpsList->rootContext()->setContextProperty("m_Steps", mw_one->m_Steps);
-
-  mui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
-  mui->qwMap->setFocusPolicy(Qt::StrongFocus);  // 关键设置
-  mui->qwMap->setClearColor(Qt::transparent);   // 避免渲染冲突
-  mui->qwMap->setAttribute(Qt::WA_AcceptTouchEvents, true);
-  mui->qwMap->setAttribute(Qt::WA_TouchPadAcceptSingleTouchEvents, true);
-  mui->qwMap->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/map.qml")));
-
-  mui->qwReport->rootContext()->setContextProperty("m_Report",
-                                                   mw_one->m_Report);
-  mui->qwReport->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/report.qml")));
-  mui->qwReportSub->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/details.qml")));
-
-  mui->qwSearch->rootContext()->setContextProperty("m_Method", m_Method);
-  mui->qwSearch->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/search.qml")));
-
-  mui->qwBakList->rootContext()->setContextProperty("m_Method", m_Method);
-  mui->qwBakList->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/baklist.qml")));
-
-  mui->qwViewCate->rootContext()->setContextProperty("m_Report",
-                                                     mw_one->m_Report);
-  mui->qwViewCate->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/viewcate.qml")));
-
-  mui->qwTabRecycle->rootContext()->setContextProperty("m_Report",
-                                                       mw_one->m_Report);
-  mui->qwTabRecycle->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/tabrecycle.qml")));
-
-  mui->qwNoteBook->rootContext()->setContextProperty("m_NotesList",
-                                                     mw_one->m_NotesList);
-  mui->qwNoteBook->rootContext()->setContextProperty("mw_one", mw_one);
-  mui->qwNoteBook->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/notebook.qml")));
-
-  if (isAndroid)
-    mui->qwNoteList->rootContext()->setContextProperty("noteTimeFontSize", 12);
-  else
-    mui->qwNoteList->rootContext()->setContextProperty("noteTimeFontSize", 8);
-  mui->qwNoteList->rootContext()->setContextProperty("m_NotesList",
-                                                     mw_one->m_NotesList);
-  mui->qwNoteList->rootContext()->setContextProperty("mw_one", mw_one);
-  mui->qwNoteList->rootContext()->setContextProperty(
-      "noteModel", mw_one->m_NotesList->noteModel);
-  mui->qwNoteList->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/notelist.qml")));
-
-  mui->qwNoteTools->rootContext()->setContextProperty("m_NotesList",
-                                                      mw_one->m_NotesList);
-  mui->qwNoteTools->rootContext()->setContextProperty("m_Notes",
-                                                      mw_one->m_Notes);
-  mui->qwNoteTools->rootContext()->setContextProperty("mw_one", mw_one);
-  mui->qwNoteTools->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/note_toolsbar.qml")));
-
-  mui->qwNotesSearchResult->rootContext()->setContextProperty("fontSize",
-                                                              fontSize);
-  mui->qwNotesSearchResult->rootContext()->setContextProperty(
-      "m_NotesList", mw_one->m_NotesList);
-  mui->qwNotesSearchResult->rootContext()->setContextProperty("mw_one", mw_one);
-  mui->qwNotesSearchResult->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/SearchResults.qml")));
-
-  mui->qwNoteRecycle->rootContext()->setContextProperty("m_Method", m_Method);
-  mui->qwNoteRecycle->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/noterecycle.qml")));
 
   mui->qwMainTab->setFixedHeight(50);
   mui->qwMainTab->rootContext()->setContextProperty("maintabHeight",
@@ -627,17 +512,63 @@ void MainHelper::initQW() {
   mui->qwMainEvent->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/mainevent.qml")));
 
-  mui->qwCategory->rootContext()->setContextProperty("m_Method", m_Method);
-  mui->qwCategory->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/type.qml")));
+  mui->qwNotesTree->rootContext()->setContextProperty("fontSize", fontSize);
+  mui->qwNotesTree->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/tree_main.qml")));
 
-  mui->qwSelTab->rootContext()->setContextProperty("mw_one", mw_one);
-  mui->qwSelTab->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/seltab.qml")));
+  mui->qw_Img->rootContext()->setContextProperty("myW", mw_one->width());
+  mui->qw_Img->rootContext()->setContextProperty("myH", mw_one->height());
 
-  mui->qwBookList->rootContext()->setContextProperty("fontSize", fontSize);
-  mui->qwBookList->rootContext()->setContextProperty("m_Reader",
-                                                     mw_one->m_Reader);
-  mui->qwBookList->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/booklist.qml")));
+  mui->qwReader->rootContext()->setContextProperty("myW", mw_one->width());
+  mui->qwReader->rootContext()->setContextProperty("myH", mw_one->height());
+  mui->qwReader->rootContext()->setContextProperty("m_Reader",
+                                                   mw_one->m_Reader);
+  mui->qwReader->rootContext()->setContextProperty("myBackgroundColor",
+                                                   "#FFFFFF");
+}
+
+void MainHelper::initNotesQW() {
+  if (mui->qwNoteBook->source().isEmpty()) {
+    mui->qwNoteBook->rootContext()->setContextProperty("m_NotesList",
+                                                       mw_one->m_NotesList);
+    mui->qwNoteBook->rootContext()->setContextProperty("mw_one", mw_one);
+    mui->qwNoteBook->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/notebook.qml")));
+
+    if (isAndroid)
+      mui->qwNoteList->rootContext()->setContextProperty("noteTimeFontSize",
+                                                         12);
+    else
+      mui->qwNoteList->rootContext()->setContextProperty("noteTimeFontSize", 8);
+    mui->qwNoteList->rootContext()->setContextProperty("m_NotesList",
+                                                       mw_one->m_NotesList);
+    mui->qwNoteList->rootContext()->setContextProperty("mw_one", mw_one);
+    mui->qwNoteList->rootContext()->setContextProperty(
+        "noteModel", mw_one->m_NotesList->noteModel);
+    mui->qwNoteList->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/notelist.qml")));
+
+    mui->qwNoteTools->rootContext()->setContextProperty("m_NotesList",
+                                                        mw_one->m_NotesList);
+    mui->qwNoteTools->rootContext()->setContextProperty("m_Notes",
+                                                        mw_one->m_Notes);
+    mui->qwNoteTools->rootContext()->setContextProperty("mw_one", mw_one);
+    mui->qwNoteTools->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/note_toolsbar.qml")));
+
+    mui->qwNotesSearchResult->rootContext()->setContextProperty("fontSize",
+                                                                fontSize);
+    mui->qwNotesSearchResult->rootContext()->setContextProperty(
+        "m_NotesList", mw_one->m_NotesList);
+    mui->qwNotesSearchResult->rootContext()->setContextProperty("mw_one",
+                                                                mw_one);
+    mui->qwNotesSearchResult->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/SearchResults.qml")));
+
+    mui->qwNoteRecycle->rootContext()->setContextProperty("m_Method", m_Method);
+    mui->qwNoteRecycle->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/noterecycle.qml")));
+  }
 }
 
 void MainHelper::init_UIWidget() {

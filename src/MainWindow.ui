@@ -283,7 +283,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>...</string>
+               <string>BookMark</string>
               </property>
               <property name="icon">
                <iconset>
@@ -430,7 +430,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Books</string>
+               <string>BookList</string>
               </property>
               <property name="icon">
                <iconset>

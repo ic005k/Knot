@@ -2003,8 +2003,11 @@ void Reader::readBookDone() {
     mui->qwReader->rootContext()->setContextProperty("isAni", true);
     mui->qwReader->rootContext()->setContextProperty("aniW", mw_one->width());
     mui->qwReader->rootContext()->setContextProperty("toW", 0);
-    mui->qwReader->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/reader.qml")));
+
+    if (mui->qwReader->source().isEmpty()) {
+      mui->qwReader->setSource(
+          QUrl(QStringLiteral("qrc:/src/qmlsrc/reader.qml")));
+    }
 
     if (isEpub) {
       mui->lblInfo->show();

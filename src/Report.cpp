@@ -380,6 +380,13 @@ void Report::saveYMD() {
 int Report::cmp(const void* a, const void* b) { return *(int*)a < *(int*)b; }
 
 void Report::on_btnCategory_clicked() {
+  if (mui->qwViewCate->source().isEmpty()) {
+    mui->qwViewCate->rootContext()->setContextProperty("m_Report",
+                                                       mw_one->m_Report);
+    mui->qwViewCate->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/viewcate.qml")));
+  }
+
   mui->frameReport->hide();
   mui->frameViewCate->show();
 

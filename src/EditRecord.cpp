@@ -184,6 +184,12 @@ void EditRecord::set_Amount(QString Number) {
 }
 
 void EditRecord::on_btnCustom_clicked() {
+  if (mui->qwCategory->source().isEmpty()) {
+    mui->qwCategory->rootContext()->setContextProperty("m_Method", m_Method);
+    mui->qwCategory->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/type.qml")));
+  }
+
   this->hide();
   mui->frameEditRecord->hide();
   mui->frameCategory->show();

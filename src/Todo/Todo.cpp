@@ -1401,6 +1401,21 @@ void Todo::openTodoUI() {
 }
 
 void Todo::openTodo() {
+  if (mui->qwTodo->source().isEmpty()) {
+    int f_size = 19;
+    if (fontSize <= f_size) f_size = fontSize;
+    mui->qwTodo->rootContext()->setContextProperty("maxFontSize", f_size);
+    mui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
+                                                   QVariant(false));
+    mui->qwTodo->rootContext()->setContextProperty("m_Todo", mw_one->m_Todo);
+    mui->qwTodo->rootContext()->setContextProperty("FontSize", fontSize);
+    mui->qwTodo->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/todo.qml")));
+
+    mui->qwRecycle->rootContext()->setContextProperty("FontSize", fontSize);
+    mui->qwRecycle->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/todorecycle.qml")));
+  }
+
   isPasswordError = false;
   mw_one->showProgress();
 
