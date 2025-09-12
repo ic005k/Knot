@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
 #endif
 
   // showSplash();
-  SplashTimer splash(isAndroid, 300, 100);
+  SplashTimer splash(isAndroid, 320, 100);
   splash.show();
 
   // 设置应用程序标识（为QML里面使用Settings做准备）
