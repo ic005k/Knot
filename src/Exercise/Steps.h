@@ -123,6 +123,9 @@ class Steps : public QDialog {
   void getHardStepSensor();
   void openStepsUI();
   void setCurrentGpsSpeed(double speed, double maxSpeed);
+
+  QString getFullDate();
+
  public slots:
   void clearAllGpsList();
   void getGpsTrack();
@@ -197,7 +200,6 @@ class Steps : public QDialog {
   void sendMsg(int CurTableCount);
   qlonglong getAndroidSteps();
 
-  QString getFullDate();
   void refreshTotalDistance();
   qlonglong getTodaySteps();
   qlonglong getOldSteps();

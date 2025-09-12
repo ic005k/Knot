@@ -1164,6 +1164,13 @@ qreal Reader::getVPos() {
 }
 
 QString Reader::getBookmarkText() {
+  isGetBookmarkText = true;
+  selectText();
+
+  return getFirstThreeLines(mui->textBrowser);
+}
+
+QString Reader::getBookmarkTextFromQML() {
   QVariant item;
   QQuickItem *root = mui->qwReader->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "getBookmarkText",
@@ -2133,12 +2140,17 @@ void Reader::selectText() {
     mui->textBrowser->verticalScrollBar()->setSliderPosition(s1);
     qDebug() << "s0=" << s0 << "h0=" << h0 << "s1=" << s1 << "h1=" << h1;
 
-    mw_one->mydlgSetText->setFixedWidth(mw_one->width() - 4);
-    mw_one->mydlgSetText->init(
-        mw_one->geometry().x() +
-            (mw_one->width() - mw_one->mydlgSetText->width()) / 2,
-        mw_one->geometry().y(), mw_one->mydlgSetText->width(),
-        mw_one->mydlgSetText->height());
+    if (!isGetBookmarkText) {
+      mw_one->mydlgSetText->setFixedWidth(mw_one->width() - 4);
+      mw_one->mydlgSetText->init(
+          mw_one->geometry().x() +
+              (mw_one->width() - mw_one->mydlgSetText->width()) / 2,
+          mw_one->geometry().y(), mw_one->mydlgSetText->width(),
+          mw_one->mydlgSetText->height());
+    } else {
+      isGetBookmarkText = false;
+      closeSelText();
+    }
 
   } else {
     closeSelText();
@@ -3015,4 +3027,89 @@ bool Reader::isDcTitleElement(const QXmlStreamReader &xml) {
   // 检查元素本地名称是否为"title"且命名空间是否为dc
   // 使用QStringView字面量避免类型不匹配
   return xml.name() == u"title"_qs && xml.namespaceUri() == dcNamespace;
+}
+
+/**
+ * 获取QTextEdit中视觉上显示的前三行内容
+ * 考虑自动换行、富文本格式（最终返回纯文本）
+ */
+QString Reader::getFirstThreeLines(QTextEdit *textEdit) {
+  if (!textEdit || !textEdit->document()) return "";
+
+  // 1. 可视区域参数（复用原算法的核心计算）
+  int viewportHeight = textEdit->viewport()->height();
+  int scrollY = textEdit->verticalScrollBar()->value();
+  int viewTop = scrollY;
+  int viewBottom = scrollY + viewportHeight;
+  int viewportWidth = textEdit->viewport()->width() - 4;  // 内容宽度
+  const int targetLines = 3;
+
+  QStringList resultLines;
+  int foundLines = 0;
+  double currentY = 0.0;  // 累积高度（复用原算法的块定位逻辑）
+
+  QTextDocument *doc = textEdit->document();
+  QTextBlock block = doc->begin();
+
+  while (block.isValid() && foundLines < targetLines) {
+    QTextLayout *layout = block.layout();
+    if (!layout) {
+      block = block.next();
+      continue;
+    }
+
+    // 2. 块级可见性判断（核心复用原算法）
+    double blockHeight = layout->boundingRect().height();
+    double blockTop = currentY;
+    double blockBottom = currentY + blockHeight;
+
+    // 块完全在可视区域上方：跳过
+    if (blockBottom <= viewTop) {
+      currentY += blockHeight;
+      block = block.next();
+      continue;
+    }
+
+    // 块完全在可视区域下方：退出（原算法的提前退出逻辑）
+    if (blockTop >= viewBottom) {
+      break;
+    }
+
+    // 3. 块部分或完全可见：拆分到行级判断
+    QString blockText = block.text();
+    layout->beginLayout();
+    QTextLine textLine = layout->createLine();
+
+    while (textLine.isValid() && foundLines < targetLines) {
+      textLine.setLineWidth(viewportWidth);  // Qt6行宽设置
+
+      // 计算行的垂直范围（相对于文档顶部）
+      double lineTop = blockTop + textLine.y();
+      double lineBottom = lineTop + textLine.height();
+
+      // 行完全在可视区域外：跳过
+      if (lineBottom <= viewTop || lineTop >= viewBottom) {
+        textLine = layout->createLine();
+        continue;
+      }
+
+      // 行部分或完全可见：提取文本
+      int startIdx = textLine.textStart();
+      int length = textLine.textLength();
+      QString lineText = blockText.mid(startIdx, length).trimmed();
+
+      if (!lineText.isEmpty()) {
+        resultLines.append(lineText);
+        foundLines++;
+      }
+
+      textLine = layout->createLine();
+    }
+
+    layout->endLayout();
+    currentY += blockHeight;
+    block = block.next();
+  }
+
+  return resultLines.join("\n");
 }

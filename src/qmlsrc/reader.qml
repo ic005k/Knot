@@ -92,7 +92,7 @@ Rectangle {
         x = 0
     }
 
-    function getBookmarkText() {
+    function getBookmarkText_() {
         // 基于当前可视区域的首个可见项计算
         let firstVisibleIndex = contentListView.indexAt(
                 0, contentListView.contentY)
@@ -107,6 +107,55 @@ Rectangle {
         let relY = contentListView.contentY - delegateItem.y
         let pos = delegateItem.positionAt(0, relY)
         return delegateItem.text.substring(pos, pos + 100) // 取前100字符
+    }
+
+    function getBookmarkText() {
+        // 检查 ListView 是否有内容
+        if (contentListView.count === 0) {
+            return "Bookmark";
+        }
+
+        // 1. 找到第一个可见的 delegate 项的索引
+        // 使用 contentY + 1 来稍微向下一点，确保能获取到正在进入视图的项
+        let firstVisibleIndex = contentListView.indexAt(0, contentListView.contentY + 1);
+
+        // 2. 如果 indexAt 没找到（可能在列表顶部），则默认为索引 0
+        if (firstVisibleIndex === -1) {
+            firstVisibleIndex = 0;
+        }
+
+        // 3. 使用索引获取对应的 delegate 项实例
+        let firstVisibleItem = contentListView.itemAtIndex(firstVisibleIndex);
+
+        // 4. 检查是否成功获取到了 delegate 项
+        if (firstVisibleItem) {
+            // 5. 确保 delegate 项是 Text 类型并且已加载内容
+            //    假设 delegate 的根元素就是 Text { id: m_text }
+            let delegateTextItem = firstVisibleItem;
+
+            // 6. 关键：使用 Accessible.text 获取渲染后的纯文本
+            //    这会自动处理 HTML 标签
+            let renderedPlainText = delegateTextItem.Accessible.text;
+
+            // 7. 检查获取到的文本是否存在且非空
+            if (typeof renderedPlainText === 'string' && renderedPlainText.length > 0) {
+                // 8. 返回前100个字符
+                return renderedPlainText.substring(0, Math.min(100, renderedPlainText.length));
+            } else {
+                 // 如果 Accessible.text 暂时不可用或为空，尝试回退到原始 text 并简单处理
+                 // 这种情况较少见，但可以作为一种后备方案
+                 console.warn("Accessible.text is empty or not available, falling back to raw text processing for item at index:", firstVisibleIndex);
+                 let rawText = delegateTextItem.text;
+                 if (rawText) {
+                     let fallbackPlainText = rawText.replace(/<[^>]*>/g, '');
+                     return fallbackPlainText.substring(0, Math.min(100, fallbackPlainText.length));
+                 }
+            }
+        }
+
+        // 如果以上方法都失败，则返回默认值
+        console.log("Could not retrieve text from the first visible item.");
+        return "Bookmark";
     }
 
     function setTextAreaCursorPos(nCursorPos) {

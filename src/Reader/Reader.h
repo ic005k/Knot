@@ -155,6 +155,7 @@ class Reader : public QDialog {
   void initInfoShowFont();
 
   static QStringList readText(QByteArray data);
+  QString getBookmarkTextFromQML();
  public slots:
   void setPageScroll0();
   void setPageScroll1();
@@ -212,6 +213,9 @@ class Reader : public QDialog {
   static void debugPrintTocItems(const QList<TocItem> &tocItems, int level);
   static bool isDcTitleElement(const QXmlStreamReader &xml);
   static QString getEpub3Title(const QString &opfFile);
+
+  bool isGetBookmarkText = false;
+  QString getFirstThreeLines(QTextEdit *textEdit);
 };
 
 class TextChunkModel : public QAbstractListModel {
