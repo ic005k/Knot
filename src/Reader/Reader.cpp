@@ -1094,6 +1094,7 @@ void Reader::setQmlLandscape(bool isValue) {
   if (!mui->qwReader || !mui->qwReader->rootObject()) {
     return;
   }
+
   QObject *rootObject = mui->qwReader->rootObject();
   bool result = QMetaObject::invokeMethod(
       rootObject, "setLandscape",
@@ -1102,6 +1103,54 @@ void Reader::setQmlLandscape(bool isValue) {
 
   if (!result) {
   }
+}
+
+bool Reader::getLandscape() {
+  QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
+                QSettings::IniFormat);
+  bool oldLandscape = isLandscape;
+  bool newLandscape = false;
+
+  QFileInfo fiHtml(currentHtmlFile);
+  if (isEpub) {
+    if (mui->qwCata->isVisible()) {
+      textPos = Reg.value("/Reader/vpos  CataVPos", 0).toReal();
+      int index = Reg.value("/Reader/vpos  CataIndex", 0).toReal();
+      if (currentCataIndex > 0) index = currentCataIndex;
+      m_Method->setCurrentIndexFromQW(mui->qwCata, index);
+    } else {
+      if (htmlIndex >= 0)
+        textPos = Reg.value("/Reader/vpos" + fiHtml.baseName(), 0).toReal();
+
+      QString key = "/Reader/vpos_" + fiHtml.baseName() + "_isLandscape";
+      bool exists = Reg.contains(key);
+      if (exists) {
+        newLandscape = Reg.value(key, false).toBool();
+      } else {
+        newLandscape = isLandscape;
+      }
+    }
+  }
+
+  if (isText) {
+    textPos = Reg.value("/Reader/vpos" + QString::number(currentPage), false)
+                  .toReal();
+
+    QString key =
+        "/Reader/vpos_" + QString::number(currentPage) + "_isLandscape";
+    bool exists = Reg.contains(key);
+    if (exists) {
+      newLandscape = Reg.value(key, false).toBool();
+    } else {
+      newLandscape = isLandscape;
+    }
+  }
+
+  if (oldLandscape != newLandscape) {
+    isLandscape = newLandscape;
+  }
+
+  return isLandscape;
 }
 
 void Reader::savePageVPos() {
@@ -2047,6 +2096,9 @@ void Reader::readBookDone() {
       mui->frameReader->show();
     }
 
+    isLandscape = getLandscape();
+    mui->qwReader->rootContext()->setContextProperty("isLandscapeValue",
+                                                     isLandscape);
     mui->qwReader->rootContext()->setContextProperty("strText", "");
     mui->qwReader->rootContext()->setContextProperty("isSelText", isSelText);
     mui->qwReader->rootContext()->setContextProperty("isAni", true);
@@ -2909,7 +2961,11 @@ void Reader::autoRun() {
   qreal a = getVPos();
   qreal h = getVHeight();
 
-  if (a + mui->qwReader->height() >= h) mui->btnAutoStop->click();
+  if (!isLandscape) {
+    if (a + mui->qwReader->height() >= h) mui->btnAutoStop->click();
+  } else {
+    if (a + mui->qwReader->width() >= h) mui->btnAutoStop->click();
+  }
 
   a = a + scrollValue;
   setVPos(a);
@@ -2950,6 +3006,12 @@ void Reader::on_SetReaderFunVisible() {
     }
 
     qreal vpos = getVPos();
+    qreal w, new_w;
+    if (!isLandscape)
+      w = mui->qwReader->width();
+    else
+      w = mui->qwReader->height();
+
     mui->qwReader->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/reader.qml")));
     if (isEpub) setQMLHtml(currentHtmlFile, "", "");
@@ -2958,7 +3020,14 @@ void Reader::on_SetReaderFunVisible() {
       setQMLText(txt1);
     }
     setQmlLandscape(isLandscape);
-    setVPos(vpos);
+
+    if (!isLandscape)
+      new_w = mui->qwReader->width();
+    else
+      new_w = mui->qwReader->height();
+    qreal new_vpos = w * vpos / new_w;
+
+    setVPos(new_vpos);
   }
 }
 

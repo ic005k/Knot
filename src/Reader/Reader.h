@@ -220,6 +220,7 @@ class Reader : public QDialog {
 
   bool isGetBookmarkText = false;
   QString getFirstThreeLines(QTextEdit *textEdit);
+  bool getLandscape();
 };
 
 class TextChunkModel : public QAbstractListModel {

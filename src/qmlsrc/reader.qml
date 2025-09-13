@@ -9,11 +9,9 @@ import QtQuick.Controls.Fusion
 Item {
     id: root
     visible: true
-    width: myW
-    height: myH
 
     // 横屏控制变量
-    property bool isLandscape: false
+    property bool isLandscape: isLandscapeValue
 
     // 面积法所需变量
     property real prevContentY: 0 // 切换前的滚动位置

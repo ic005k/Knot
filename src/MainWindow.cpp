@@ -1714,6 +1714,11 @@ void MainWindow::on_btnReader_clicked() {
   mui->frameReader->show();
   mui->f_ReaderFun->show();
 
+  // mui->qwReader->rootContext()->setContextProperty("myW",
+  //                                                  mui->qwReader->width());
+  // mui->qwReader->rootContext()->setContextProperty("myH",
+  //                                                  mui->qwReader->height());
+
   isReaderVisible = true;
   isMemoVisible = false;
 
@@ -1724,11 +1729,6 @@ void MainWindow::on_btnReader_clicked() {
     isOne = true;
     m_Reader->setPageVPos();
   }
-
-  mui->qwReader->rootContext()->setContextProperty("myW",
-                                                   this->geometry().width());
-  mui->qwReader->rootContext()->setContextProperty("myH",
-                                                   this->geometry().height());
 }
 
 void MainWindow::on_btnBackReader_clicked() {
@@ -2001,8 +2001,8 @@ void MainWindow::on_btnDel_clicked() {
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
   Q_UNUSED(event);
-  mui->qwReader->rootContext()->setContextProperty("myW", this->width());
-  mui->qwReader->rootContext()->setContextProperty("myH", this->height());
+  mui->qwReader->rootContext()->setContextProperty("myW", mw_one->width());
+  mui->qwReader->rootContext()->setContextProperty("myH", mw_one->height());
   mui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
                                                  QVariant(false));
   mui->qwSteps->rootContext()->setContextProperty("myW", this->width());

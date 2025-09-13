@@ -3,6 +3,8 @@
 
 #include <QDialog>
 #include <QGraphicsOpacityEffect>
+#include <QTransform>
+#include <QWidget>
 
 namespace Ui {
 class PageIndicator;
