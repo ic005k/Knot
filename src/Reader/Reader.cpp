@@ -474,6 +474,7 @@ void Reader::saveReader(QString BookmarkText, bool isSetBookmark) {
       Reg.setValue("/Bookmark/currentPage" + bookmarkSn, currentPage - 1);
       Reg.setValue("/Bookmark/Name" + bookmarkSn, BookmarkText);
       Reg.setValue("/Bookmark/VPos" + bookmarkSn, getVPos());
+      Reg.setValue("/Bookmark/isLandscape" + bookmarkSn, isLandscape);
 
     } else {
       Reg.setValue("/Reader/currentPage", currentPage - 1);
@@ -485,6 +486,7 @@ void Reader::saveReader(QString BookmarkText, bool isSetBookmark) {
       Reg.setValue("/Bookmark/htmlIndex" + bookmarkSn, htmlIndex);
       Reg.setValue("/Bookmark/Name" + bookmarkSn, BookmarkText);
       Reg.setValue("/Bookmark/VPos" + bookmarkSn, getVPos());
+      Reg.setValue("/Bookmark/isLandscape" + bookmarkSn, isLandscape);
     } else {
       Reg.setValue("/Reader/htmlIndex", htmlIndex);
       // dir
@@ -1088,11 +1090,23 @@ void Reader::PlainTextEditToFile(QPlainTextEdit *txtEdit, QString fileName) {
     qDebug() << "Write failure!" << fileName;
 }
 
+void Reader::setQmlLandscape(bool isValue) {
+  if (!mui->qwReader || !mui->qwReader->rootObject()) {
+    return;
+  }
+  QObject *rootObject = mui->qwReader->rootObject();
+  bool result = QMetaObject::invokeMethod(
+      rootObject, "setLandscape",
+      Qt::QueuedConnection,  // 推荐使用队列连接避免线程问题
+      Q_ARG(QVariant, isValue));
+
+  if (!result) {
+  }
+}
+
 void Reader::savePageVPos() {
   QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
                 QSettings::IniFormat);
-
-  Reg.setValue("isLandscape", isLandscape);
 
   QFileInfo fiHtml(currentHtmlFile);
   textPos = getVPos();
@@ -1104,17 +1118,24 @@ void Reader::savePageVPos() {
     } else {
       if (htmlIndex >= 0)
         Reg.setValue("/Reader/vpos" + fiHtml.baseName(), textPos);
+      Reg.setValue("/Reader/vpos_" + fiHtml.baseName() + "_isLandscape",
+                   isLandscape);
     }
   }
 
   if (isText) {
     Reg.setValue("/Reader/vpos" + QString::number(currentPage), textPos);
+    Reg.setValue(
+        "/Reader/vpos_" + QString::number(currentPage) + "_isLandscape",
+        isLandscape);
   }
 }
 
 void Reader::setPageVPos() {
   QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
                 QSettings::IniFormat);
+  bool oldLandscape = isLandscape;
+  bool newLandscape = false;
 
   QFileInfo fiHtml(currentHtmlFile);
   if (isEpub) {
@@ -1126,12 +1147,34 @@ void Reader::setPageVPos() {
     } else {
       if (htmlIndex >= 0)
         textPos = Reg.value("/Reader/vpos" + fiHtml.baseName(), 0).toReal();
+
+      QString key = "/Reader/vpos_" + fiHtml.baseName() + "_isLandscape";
+      bool exists = Reg.contains(key);
+      if (exists) {
+        newLandscape = Reg.value(key, false).toBool();
+      } else {
+        newLandscape = isLandscape;
+      }
     }
   }
 
   if (isText) {
-    textPos =
-        Reg.value("/Reader/vpos" + QString::number(currentPage), 0).toReal();
+    textPos = Reg.value("/Reader/vpos" + QString::number(currentPage), false)
+                  .toReal();
+
+    QString key =
+        "/Reader/vpos_" + QString::number(currentPage) + "_isLandscape";
+    bool exists = Reg.contains(key);
+    if (exists) {
+      newLandscape = Reg.value(key, false).toBool();
+    } else {
+      newLandscape = isLandscape;
+    }
+  }
+
+  if (oldLandscape != newLandscape) {
+    isLandscape = newLandscape;
+    setQmlLandscape(isLandscape);
   }
 
   setVPos(textPos);
@@ -2216,12 +2259,16 @@ void Reader::clickBookmarkList(int i) {
         Reg.value("/Bookmark/currentPage" + QString::number(index)).toInt();
     goNextPage();
     textPos = Reg.value("/Bookmark/VPos" + QString::number(index)).toReal();
+    isLandscape =
+        Reg.value("/Bookmark/isLandscape" + QString::number(index)).toBool();
   }
 
   if (isEpub) {
     htmlIndex =
         Reg.value("/Bookmark/htmlIndex" + QString::number(index)).toInt();
     textPos = Reg.value("/Bookmark/VPos" + QString::number(index)).toReal();
+    isLandscape =
+        Reg.value("/Bookmark/isLandscape" + QString::number(index)).toBool();
     if (htmlIndex >= htmlFiles.count()) {
       htmlIndex = 0;
     }
@@ -2231,6 +2278,8 @@ void Reader::clickBookmarkList(int i) {
 
     showInfo();
   }
+
+  setQmlLandscape(isLandscape);
   setVPos(textPos);
 
   mui->qwBookmark->hide();
@@ -2245,8 +2294,6 @@ void Reader::showBookmarkList() {
     m_Method->addItemToQW(mui->qwBookmark, list.at(i), "", "", "", 0);
   }
 }
-
-void Reader::setPanelVisible() { mw_one->on_SetReaderFunVisible(); }
 
 void Reader::ContinueReading() {
   while (!mui->btnReader->isEnabled())
@@ -2365,7 +2412,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       relea_y = currentPos.y();
       mui->lblTitle->hide();
       QQuickItem *root = mui->qwReader->rootObject();
-      mw_one->isTurnThePage = false;
+      isTurnThePage = false;
 
       // 复用原有鼠标释放时的翻页逻辑
       // 【注意】保持与下面鼠标释放事件中的代码完全一致
@@ -2379,7 +2426,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
             QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
             return true;
           }
-          mw_one->isTurnThePage = true;
+          isTurnThePage = true;
           mw_one->on_btnPageUp_clicked();
           mw_one->m_PageIndicator->close();
         }
@@ -2392,7 +2439,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
             QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
             return true;
           }
-          mw_one->isTurnThePage = true;
+          isTurnThePage = true;
           mw_one->on_btnPageNext_clicked();
           mw_one->m_PageIndicator->close();
         }
@@ -2406,7 +2453,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
             QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
             return true;
           }
-          mw_one->isTurnThePage = true;
+          isTurnThePage = true;
           mw_one->on_btnPageNext_clicked();
           mw_one->m_PageIndicator->close();
         }
@@ -2419,7 +2466,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
             QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
             return true;
           }
-          mw_one->isTurnThePage = true;
+          isTurnThePage = true;
           mw_one->on_btnPageUp_clicked();
           mw_one->m_PageIndicator->close();
         }
@@ -2514,7 +2561,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       int qwY = mui->qwReader->y();
 
       if ((mY > qwY + h3) && (mY < qwY + h3 * 2)) {
-        mw_one->on_SetReaderFunVisible();
+        on_SetReaderFunVisible();
       }
 
       if ((mY > qwY) && (mY < qwY + h3)) {
@@ -2533,7 +2580,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       mui->lblTitle->hide();
       QQuickItem *root = mui->qwReader->rootObject();
 
-      mw_one->isTurnThePage = false;
+      isTurnThePage = false;
       mw_one->isMousePress = false;
 
       // 原有竖屏和横屏翻页逻辑不变
@@ -2550,7 +2597,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
               return QWidget::eventFilter(watch, evn);
             }
           }
-          mw_one->isTurnThePage = true;
+          isTurnThePage = true;
           mw_one->on_btnPageUp_clicked();
           mw_one->m_PageIndicator->close();
         }
@@ -2567,7 +2614,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
               return QWidget::eventFilter(watch, evn);
             }
           }
-          mw_one->isTurnThePage = true;
+          isTurnThePage = true;
           mw_one->on_btnPageNext_clicked();
           mw_one->m_PageIndicator->close();
         }
@@ -2584,7 +2631,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
               return QWidget::eventFilter(watch, evn);
             }
           }
-          mw_one->isTurnThePage = true;
+          isTurnThePage = true;
           mw_one->on_btnPageNext_clicked();
           mw_one->m_PageIndicator->close();
         }
@@ -2601,7 +2648,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
               return QWidget::eventFilter(watch, evn);
             }
           }
-          mw_one->isTurnThePage = true;
+          isTurnThePage = true;
           mw_one->on_btnPageUp_clicked();
           mw_one->m_PageIndicator->close();
         }
@@ -2758,7 +2805,7 @@ bool Reader::handleTouchRelease(const QPointF &globalPos) {
 
   mui->lblTitle->hide();
   mw_one->isMousePress = false;
-  mw_one->isTurnThePage = false;
+  isTurnThePage = false;
 
   QQuickItem *root = mui->qwReader->rootObject();
   int length = 75;
@@ -2781,7 +2828,7 @@ bool Reader::handleTouchRelease(const QPointF &globalPos) {
       }
     }
 
-    mw_one->isTurnThePage = true;
+    isTurnThePage = true;
     mw_one->on_btnPageUp_clicked();
     mw_one->m_PageIndicator->close();
   }
@@ -2803,7 +2850,7 @@ bool Reader::handleTouchRelease(const QPointF &globalPos) {
       }
     }
 
-    mw_one->isTurnThePage = true;
+    isTurnThePage = true;
     mw_one->on_btnPageNext_clicked();
     mw_one->m_PageIndicator->close();
   }
@@ -2830,15 +2877,15 @@ void Reader::handleDoubleClick(const QPointF &globalPos) {
 
   // 中间区域：显示/隐藏功能
   if ((mY > qwY + h3) && (mY < qwY + h3 * 2)) {
-    mw_one->on_SetReaderFunVisible();
+    on_SetReaderFunVisible();
   }
   // 上部分区域：滚动到顶部
   else if ((mY > qwY) && (mY < qwY + h3)) {
-    mw_one->m_Reader->setPageScroll0();
+    setPageScroll0();
   }
   // 下部分区域：滚动到底部
   else if (mY > qwY + h3 * 2) {
-    mw_one->m_Reader->setPageScroll1();
+    setPageScroll1();
   }
 }
 
@@ -2890,6 +2937,28 @@ void Reader::showOrHideBookmark() {
     mui->qwBookmark->hide();
     mui->qwReader->show();
     mui->btnCatalogue->setEnabled(true);
+  }
+}
+
+void Reader::on_SetReaderFunVisible() {
+  if (!isTurnThePage) {
+    if (mui->f_ReaderFun->isHidden())
+      mui->f_ReaderFun->show();
+    else {
+      mui->f_ReaderFun->hide();
+      m_ReaderSet->hide();
+    }
+
+    qreal vpos = getVPos();
+    mui->qwReader->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/reader.qml")));
+    if (isEpub) setQMLHtml(currentHtmlFile, "", "");
+    if (isText) {
+      QString txt1 = updateContent();
+      setQMLText(txt1);
+    }
+    setQmlLandscape(isLandscape);
+    setVPos(vpos);
   }
 }
 

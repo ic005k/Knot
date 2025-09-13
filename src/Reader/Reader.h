@@ -158,6 +158,10 @@ class Reader : public QDialog {
 
   static QStringList readText(QByteArray data);
   QString getBookmarkTextFromQML();
+  void setQmlLandscape(bool isValue);
+  void on_SetReaderFunVisible();
+  bool isTurnThePage = false;
+
  public slots:
   void setPageScroll0();
   void setPageScroll1();
@@ -169,8 +173,6 @@ class Reader : public QDialog {
   void openCataList(QString htmlFile);
 
   void clickBookmarkList(int i);
-
-  void setPanelVisible();
 
  protected:
   bool eventFilter(QObject *obj, QEvent *evn) override;

@@ -194,7 +194,6 @@ class MainWindow : public QMainWindow {
   qreal curx = 0;
   bool isMousePress = false;
   bool isMouseMove = false;
-  bool isTurnThePage = false;
 
   bool initMain = false;
 
@@ -382,7 +381,6 @@ class MainWindow : public QMainWindow {
  public slots:
   void on_hSlider_sliderMoved(int position);
   void clickMainTab();
-  void on_SetReaderFunVisible();
 
   void on_btnTodo_clicked();
   void readEBookDone();

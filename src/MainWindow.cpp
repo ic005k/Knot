@@ -1950,17 +1950,6 @@ void MainWindow::on_textBrowser_selectionChanged() {
   mydlgSetText->ui->lineEdit->setText(str);
 }
 
-void MainWindow::on_SetReaderFunVisible() {
-  if (!isTurnThePage) {
-    if (mui->f_ReaderFun->isHidden())
-      mui->f_ReaderFun->show();
-    else {
-      mui->f_ReaderFun->hide();
-      m_ReaderSet->hide();
-    }
-  }
-}
-
 void MainWindow::on_timerMousePress() {
   if (!isMouseMove && isMousePress) on_btnSelText_clicked();
 }

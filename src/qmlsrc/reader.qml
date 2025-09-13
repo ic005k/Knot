@@ -27,6 +27,10 @@ Item {
     property bool isPDF: false
     property bool isEPUBText: false
 
+    function setLandscape(isValue) {
+        isLandscape = isValue
+    }
+
     // 原有功能函数（完整保留）
     function getText() {
         return m_text.text
@@ -271,7 +275,7 @@ Item {
                     }
                 }
                 // contentItem:
-                contentItem:Rectangle {
+                contentItem: Rectangle {
                     color: isDark ? "#3498db" : "#606060"
                     opacity: vbar.active ? (isDark ? 0.8 : 0.7) : 0
                     Behavior on opacity {
