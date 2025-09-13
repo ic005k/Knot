@@ -811,6 +811,8 @@ class MainWindow : public QMainWindow {
 
   void on_btnShowCboxList_clicked();
 
+  void on_btnRotation_clicked();
+
  private:
   bool isMoveEntry;
   QTimer *tmeFlash;

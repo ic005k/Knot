@@ -2914,3 +2914,13 @@ void MainWindow::on_cboxWebDAV_currentTextChanged(const QString &arg1) {
 }
 
 void MainWindow::on_btnShowCboxList_clicked() { mui->cboxWebDAV->showPopup(); }
+
+void MainWindow::on_btnRotation_clicked() {
+  QQuickItem *rootItem = mui->qwReader->rootObject();
+  QQuickItem *orientationButton =
+      rootItem->findChild<QQuickItem *>("orientationButton");
+  if (orientationButton) {
+    QMetaObject::invokeMethod(orientationButton, "clicked");
+    m_Reader->isLandscape = !m_Reader->isLandscape;
+  }
+}

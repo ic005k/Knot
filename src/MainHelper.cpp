@@ -849,10 +849,12 @@ void MainHelper::init_ButtonStyle() {
   mui->btnPages->setStyleSheet("border:none; ");
   mui->btnOpen->setStyleSheet("border:none;");
   mui->btnReadList->setStyleSheet("border:none; ");
+  mui->btnRotation->setStyleSheet("border:none; ");
   // mui->f_ReaderFun->setStyleSheet("QFrame{background-color: #595959;}");
 
   if (isDark) {
     mui->btnBackReader->setIcon(QIcon(":/res/reader/exit_l.svg"));
+    mui->btnRotation->setIcon(QIcon(":/res/reader/rotation_l.svg"));
     mui->btnCatalogue->setIcon(QIcon(":/res/reader/cata_l.svg"));
     mui->btnShowBookmark->setIcon(QIcon(":/res/reader/bookmark_l.svg"));
     mui->btnAutoRun->setIcon(QIcon(":/res/reader/run_l.svg"));
@@ -861,6 +863,7 @@ void MainHelper::init_ButtonStyle() {
     mui->btnReadList->setIcon(QIcon(":/res/reader/booklist_l.svg"));
   } else {
     mui->btnBackReader->setIcon(QIcon(":/res/reader/exit.svg"));
+    mui->btnRotation->setIcon(QIcon(":/res/reader/rotation.svg"));
     mui->btnCatalogue->setIcon(QIcon(":/res/reader/cata.svg"));
     mui->btnShowBookmark->setIcon(QIcon(":/res/reader/bookmark.svg"));
     mui->btnAutoRun->setIcon(QIcon(":/res/reader/run.svg"));

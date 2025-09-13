@@ -177,5 +177,7 @@
         <file>res/reader/run_l.svg</file>
         <file>res/reader/stop.svg</file>
         <file>res/reader/stop_l.svg</file>
+        <file>res/reader/rotation.svg</file>
+        <file>res/reader/rotation_l.svg</file>
     </qresource>
 </RCC>

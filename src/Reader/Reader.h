@@ -50,6 +50,8 @@ class Reader : public QDialog {
   ~Reader();
   Ui::Reader *ui;
 
+  bool isLandscape = false;
+
   qreal scrollValue = 1;
   bool isOpenBookListClick = false;
   bool isSelText = false;
