@@ -1714,15 +1714,12 @@ void MainWindow::on_btnReader_clicked() {
   mui->frameReader->show();
   mui->f_ReaderFun->show();
 
-  // mui->qwReader->rootContext()->setContextProperty("myW",
-  //                                                  mui->qwReader->width());
-  // mui->qwReader->rootContext()->setContextProperty("myH",
-  //                                                  mui->qwReader->height());
-
   isReaderVisible = true;
   isMemoVisible = false;
 
   if (!isOne) {
+    m_Reader->startOpenFile(fileName);
+
     while (!mui->btnReader->isEnabled())
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 

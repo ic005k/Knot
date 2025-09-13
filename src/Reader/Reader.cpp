@@ -535,7 +535,7 @@ void Reader::initReader() {
     QFileInfo fi(fileName);
     if (fi.suffix().toLower() != "pdf") {
       if (m_Method->getExecDone() == "true") {
-        startOpenFile(fileName);
+        // startOpenFile(fileName);
       } else {
         if (m_Method->getKeyType() != "defaultopen") startOpenFile(fileName);
       }
@@ -543,7 +543,7 @@ void Reader::initReader() {
     } else
       isPDF = true;
   } else {
-    startOpenFile(fileName);
+    // startOpenFile(fileName);
   }
 
   getBookList();
@@ -2096,9 +2096,6 @@ void Reader::readBookDone() {
       mui->frameReader->show();
     }
 
-    isLandscape = getLandscape();
-    mui->qwReader->rootContext()->setContextProperty("isLandscapeValue",
-                                                     isLandscape);
     mui->qwReader->rootContext()->setContextProperty("strText", "");
     mui->qwReader->rootContext()->setContextProperty("isSelText", isSelText);
     mui->qwReader->rootContext()->setContextProperty("isAni", true);

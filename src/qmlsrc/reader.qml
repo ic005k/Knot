@@ -11,7 +11,7 @@ Item {
     visible: true
 
     // 横屏控制变量
-    property bool isLandscape: isLandscapeValue
+    property bool isLandscape: false
 
     // 面积法所需变量
     property real prevContentY: 0 // 切换前的滚动位置
