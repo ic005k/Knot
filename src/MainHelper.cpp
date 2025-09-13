@@ -69,10 +69,7 @@ bool MainHelper::mainEventFilter(QObject *watch, QEvent *evn) {
     }
   }
 
-  if (isAndroid)
-    mw_one->m_Reader->eventFilterReaderAndroid(watch, evn);
-  else
-    mw_one->m_Reader->eventFilterReader(watch, evn);
+  mw_one->m_Reader->eventFilterReader(watch, evn);
 
   mw_one->m_Notes->eventFilterQwNote(watch, evn);
 

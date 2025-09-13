@@ -1721,16 +1721,14 @@ void MainWindow::on_btnReader_clicked() {
     while (!mui->btnReader->isEnabled())
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
-    mwh = this->height();
-    setFixedHeight(mwh);
-    mui->qwReader->rootContext()->setContextProperty("myW", this->width());
-    mui->qwReader->rootContext()->setContextProperty("myH", mwh);
-  }
-
-  if (!isOne) {
     isOne = true;
     m_Reader->setPageVPos();
   }
+
+  mui->qwReader->rootContext()->setContextProperty("myW",
+                                                   this->geometry().width());
+  mui->qwReader->rootContext()->setContextProperty("myH",
+                                                   this->geometry().height());
 }
 
 void MainWindow::on_btnBackReader_clicked() {

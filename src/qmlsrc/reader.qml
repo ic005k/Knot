@@ -4,18 +4,21 @@ import QtQuick.Layouts
 
 import MyModel2 1.0
 import EBook.Models 1.0
+import QtQuick.Controls.Fusion
 
 Item {
     id: root
     visible: true
+    width: myW
+    height: myH
 
     // 横屏控制变量
     property bool isLandscape: false
 
     // 面积法所需变量
-    property real prevContentY: 0       // 切换前的滚动位置
-    property real prevContentHeight: 0  // 切换前的内容总高度
-    property bool isSwitching: false    // 标记正在切换方向
+    property real prevContentY: 0 // 切换前的滚动位置
+    property real prevContentHeight: 0 // 切换前的内容总高度
+    property bool isSwitching: false // 标记正在切换方向
 
     // 原有属性
     property string strUrl: ""
@@ -137,7 +140,8 @@ Item {
         // 2. 更新容器尺寸
         rotateContainer.width = isLandscape ? root.height : root.width
         rotateContainer.height = isLandscape ? root.width : root.height
-        console.log("横屏模式更新 - 旋转容器尺寸:", rotateContainer.width, "x", rotateContainer.height)
+        console.log("横屏模式更新 - 旋转容器尺寸:", rotateContainer.width, "x",
+                    rotateContainer.height)
     }
 
     DocumentHandler {
@@ -207,13 +211,16 @@ Item {
             onContentHeightChanged: {
                 if (isSwitching) {
                     // 确保内容高度有效
-                    if (prevContentHeight > 0 && contentListView.contentHeight > 0) {
+                    if (prevContentHeight > 0
+                            && contentListView.contentHeight > 0) {
                         // 核心公式：新位置 = 旧比例 × 新总高度
                         const scrollRatio = prevContentY / prevContentHeight
                         let newContentY = scrollRatio * contentListView.contentHeight
 
                         // 边界处理：不超过可滚动范围
-                        const maxY = Math.max(0, contentListView.contentHeight - contentListView.height)
+                        const maxY = Math.max(
+                                       0,
+                                       contentListView.contentHeight - contentListView.height)
                         newContentY = Math.min(newContentY, maxY)
                         newContentY = Math.max(newContentY, 0)
 
@@ -255,19 +262,16 @@ Item {
                 policy: ScrollBar.AsNeeded
                 interactive: false // 禁止拖动操作
                 width: 10
-
                 size: contentListView.visibleArea.heightRatio
                 minimumSize: 0.1
-
                 visible: opacity > 0
-
                 Behavior on opacity {
                     NumberAnimation {
                         duration: 300
                     }
                 }
-
-                contentItem: Rectangle {
+                // contentItem:
+                contentItem:Rectangle {
                     color: isDark ? "#3498db" : "#606060"
                     opacity: vbar.active ? (isDark ? 0.8 : 0.7) : 0
                     Behavior on opacity {
@@ -278,7 +282,6 @@ Item {
                     }
                     radius: 3
                 }
-
                 background: null
             }
         }
