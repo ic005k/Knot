@@ -83,9 +83,6 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
   f.setBold(true);
   mui->btnPages->setFont(f);
 
-  tmeShowEpubMsg = new QTimer(mw_one);
-  connect(tmeShowEpubMsg, SIGNAL(timeout()), this, SLOT(showEpubMsg()));
-
   tmeAutoRun = new QTimer(mw_one);
   connect(tmeAutoRun, SIGNAL(timeout()), this, SLOT(autoRun()));
 
@@ -212,8 +209,6 @@ void Reader::startOpenFile(QString openfile) {
   isEpubError = false;
   strShowMsg = "";
   strPercent = "";
-  mui->lblEpubInfo->setFixedWidth(36);
-  mui->pEpubProg->setMaximum(100);
 
   setReaderStyle();
 
@@ -246,8 +241,6 @@ void Reader::startOpenFile(QString openfile) {
       }
     }
 
-    tmeShowEpubMsg->start(100);
-
     mw_one->myReadEBookThread->start();
 
   } else
@@ -261,8 +254,7 @@ void Reader::initInfoShowFont() {
   } else {
     font.setPointSize(13);
   }
-  mui->lblEpubInfo->setFont(font);
-  mui->pEpubProg->setFont(font);
+
   mui->lblInfo->setFont(font);
 }
 
@@ -2006,18 +1998,6 @@ QString Reader::getSkipText(QString htmlFile, QString skipID) {
   return "";
 }
 
-void Reader::showEpubMsg() {
-  if (strShowMsg != "") {
-    mui->lblEpubInfo->show();
-    mui->pEpubProg->show();
-    if (strPercent != "") {
-      mui->lblEpubInfo->setText(strPercent + "% ");
-    }
-    mui->pEpubProg->setValue(strPercent.toInt());
-    mui->pEpubProg->setFormat(strShowMsg);
-  }
-}
-
 void Reader::removeBookList() {
   int index = m_Method->getCurrentIndexFromQW(mui->qwBookList);
   if (index <= 0) return;
@@ -2037,10 +2017,6 @@ void Reader::readBookDone() {
   }
 
   if (isEpubError) {
-    tmeShowEpubMsg->stop();
-
-    mui->lblEpubInfo->hide();
-    mui->pEpubProg->hide();
     mui->btnReader->setEnabled(true);
     mui->f_ReaderFun->setEnabled(true);
     mw_one->closeProgress();
@@ -2109,7 +2085,6 @@ void Reader::readBookDone() {
 
     if (isEpub) {
       mui->lblInfo->show();
-      mui->qwReader->rootContext()->setContextProperty("htmlPath", strOpfPath);
       if (QFile(catalogueFile).exists()) {
         mui->btnCatalogue->show();
       } else
@@ -2123,10 +2098,6 @@ void Reader::readBookDone() {
   }
 
   mui->lblBookName->setText(strTitle);
-
-  tmeShowEpubMsg->stop();
-  mui->lblEpubInfo->hide();
-  mui->pEpubProg->hide();
 
   for (int i = 0; i < bookList.count(); i++) {
     QString str = bookList.at(i);
@@ -3002,12 +2973,16 @@ void Reader::on_SetReaderFunVisible() {
       m_ReaderSet->hide();
     }
 
+    bool isTemp = isLandscape;
+    if (isTemp) {
+      return;
+
+      setQmlLandscape(false);
+    }
+
     qreal vpos = getVPos();
-    qreal w, new_w;
-    if (!isLandscape)
-      w = mui->qwReader->width();
-    else
-      w = mui->qwReader->height();
+
+    if (!isLandscape) w = mui->qwReader->width();
 
     mui->qwReader->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/reader.qml")));
@@ -3016,15 +2991,9 @@ void Reader::on_SetReaderFunVisible() {
       QString txt1 = updateContent();
       setQMLText(txt1);
     }
-    setQmlLandscape(isLandscape);
 
-    if (!isLandscape)
-      new_w = mui->qwReader->width();
-    else
-      new_w = mui->qwReader->height();
-    qreal new_vpos = w * vpos / new_w;
-
-    setVPos(new_vpos);
+    setVPos(vpos);
+    if (isTemp) setQmlLandscape(true);
   }
 }
 

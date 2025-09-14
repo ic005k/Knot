@@ -1720,9 +1720,6 @@ void MainWindow::on_btnReader_clicked() {
   if (!isOne) {
     m_Reader->startOpenFile(fileName);
 
-    while (!mui->btnReader->isEnabled())
-      QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-
     isOne = true;
     m_Reader->setPageVPos();
   }
@@ -2640,12 +2637,6 @@ void MainWindow::on_btnShowBookmark_clicked() {
   }
 
   m_Reader->showOrHideBookmark();
-}
-
-void MainWindow::stopTimerForPdf() {
-  m_Reader->tmeShowEpubMsg->stop();
-  mui->pEpubProg->hide();
-  mui->lblEpubInfo->hide();
 }
 
 void MainWindow::on_btnShareImage_clicked() {

@@ -7453,33 +7453,6 @@ QSlider::handle:horizontal:disabled {
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_50">
-      <item>
-       <widget class="QLabel" name="lblEpubInfo">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>20% </string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProgressBar" name="pEpubProg">
-        <property name="value">
-         <number>24</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
      <widget class="QLabel" name="lblStatus">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">

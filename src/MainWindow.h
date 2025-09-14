@@ -565,7 +565,6 @@ class MainWindow : public QMainWindow {
   void closeProgress();
 
   void selTab();
-  void stopTimerForPdf();
 
   void updateGpsMapDone();
 

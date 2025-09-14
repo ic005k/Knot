@@ -56,7 +56,7 @@ class Reader : public QDialog {
   bool isOpenBookListClick = false;
   bool isSelText = false;
   int pdfMethod = 2;
-  QTimer *tmeShowEpubMsg;
+
   QTimer *tmeAutoRun;
   QDialog *frame;
   QString openfile;
@@ -185,7 +185,6 @@ class Reader : public QDialog {
 
  private slots:
   void autoRun();
-  void showEpubMsg();
 
  private:
   QString customCss;

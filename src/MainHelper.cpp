@@ -641,9 +641,6 @@ void MainHelper::init_UIWidget() {
 
   mui->frameOne->hide();
 
-  mui->lblEpubInfo->hide();
-  mui->pEpubProg->hide();
-
   mui->frameNotesGraph->hide();
   mui->frameNotesGraph->layout()->setContentsMargins(1, 1, 1, 1);
 
