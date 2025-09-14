@@ -1719,29 +1719,11 @@ void MainWindow::on_btnReader_clicked() {
 
   if (!isOne) {
     m_Reader->startOpenFile(fileName);
-
     isOne = true;
-    m_Reader->setPageVPos();
   }
 }
 
-void MainWindow::on_btnBackReader_clicked() {
-  mui->btnAutoStop->click();
-
-  m_ReaderSet->close();
-
-  if (m_Reader->isSelText) on_btnSelText_clicked();
-
-  if (mui->f_ReaderSet->isVisible()) {
-    on_btnBackReaderSet_clicked();
-  }
-
-  m_Reader->saveReader("", false);
-  m_Reader->savePageVPos();
-
-  mui->frameReader->hide();
-  mui->frameMain->show();
-}
+void MainWindow::on_btnBackReader_clicked() { m_Reader->closeReader(); }
 
 void MainWindow::on_btnOpen_clicked() {
   mui->btnAutoStop->click();

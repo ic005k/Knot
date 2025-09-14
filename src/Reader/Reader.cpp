@@ -450,8 +450,8 @@ QString Reader::get_href(QString idref, QStringList opfList) {
 void Reader::saveReader(QString BookmarkText, bool isSetBookmark) {
   m_ReaderSet->saveScrollValue();
 
-  QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
-                QSettings::IniFormat);
+  QString endFile = privateDir + "bookini/" + currentBookName + ".ini";
+  QSettings Reg(endFile, QSettings::IniFormat);
 
   QString bookmarkSn;
   if (isSetBookmark) {
@@ -485,18 +485,21 @@ void Reader::saveReader(QString BookmarkText, bool isSetBookmark) {
       Reg.setValue("/Reader/MainDirIndex", mainDirIndex);
     }
   }
+  Reg.sync();
 
-  if (isSetBookmark) {
-  } else {
+  if (!isSetBookmark) {
     // book list
-    QSettings Reg1(privateDir + "reader.ini", QSettings::IniFormat);
 
+    QString endFile = privateDir + "reader.ini";
+    QSettings Reg1(endFile, QSettings::IniFormat);
     Reg1.setValue("/Reader/FileName", fileName);
     Reg1.setValue("/Reader/FontSize", readerFontSize);
     Reg1.setValue("/Reader/BookCount", bookList.count());
     for (int i = 0; i < bookList.count(); i++) {
       Reg1.setValue("/Reader/BookSn" + QString::number(i), bookList.at(i));
     }
+
+    Reg1.sync();
   }
 }
 
@@ -524,18 +527,11 @@ void Reader::initReader() {
     if (m_Method->getKeyType() == "defaultopen" &&
         m_Method->getExecDone() == "false")
       isInitReader = false;
-    QFileInfo fi(fileName);
-    if (fi.suffix().toLower() != "pdf") {
-      if (m_Method->getExecDone() == "true") {
-        // startOpenFile(fileName);
-      } else {
-        // if (m_Method->getKeyType() != "defaultopen") startOpenFile(fileName);
-      }
 
-    } else
+    QFileInfo fi(fileName);
+    if (fi.suffix().toLower() == "pdf") {
       isPDF = true;
-  } else {
-    // startOpenFile(fileName);
+    }
   }
 
   getBookList();
@@ -1082,6 +1078,23 @@ void Reader::PlainTextEditToFile(QPlainTextEdit *txtEdit, QString fileName) {
     qDebug() << "Write failure!" << fileName;
 }
 
+bool Reader::getQmlReadyEnd() {
+  if (!mui->qwReader || !mui->qwReader->rootObject()) {
+    return false;
+  }
+
+  QObject *rootObject = mui->qwReader->rootObject();
+  QVariant resultVar;  // 先用QVariant接收（适配QML的类型传递）
+
+  // 调用QML函数，用QVariant接收返回值
+  QMetaObject::invokeMethod(
+      rootObject, "getReadyEnd", Qt::DirectConnection,
+      Q_RETURN_ARG(QVariant, resultVar)  // 关键：用QVariant接收
+  );
+
+  return resultVar.toBool();
+}
+
 void Reader::setQmlLandscape(bool isValue) {
   if (!mui->qwReader || !mui->qwReader->rootObject()) {
     return;
@@ -1146,8 +1159,8 @@ bool Reader::getLandscape() {
 }
 
 void Reader::savePageVPos() {
-  QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
-                QSettings::IniFormat);
+  QString endFile = privateDir + "bookini/" + currentBookName + ".ini";
+  QSettings Reg(endFile, QSettings::IniFormat);
 
   QFileInfo fiHtml(currentHtmlFile);
   textPos = getVPos();
@@ -1170,6 +1183,10 @@ void Reader::savePageVPos() {
         "/Reader/vpos_" + QString::number(currentPage) + "_isLandscape",
         isLandscape);
   }
+
+  Reg.sync();
+
+  qDebug() << "saveVPos=" << textPos;
 }
 
 void Reader::setPageVPos() {
@@ -1216,9 +1233,13 @@ void Reader::setPageVPos() {
   if (oldLandscape != newLandscape) {
     isLandscape = newLandscape;
     setQmlLandscape(isLandscape);
+    while (!getQmlReadyEnd())
+      QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
   }
 
+  m_Method->Sleep(200);
   setVPos(textPos);
+  qDebug() << "setVPos=" << textPos;
 }
 
 void Reader::setVPos(qreal pos) {
@@ -1736,7 +1757,7 @@ QString Reader::getNavFileInternalPath(const QByteArray &opfContent) {
   QString opfStr = QString::fromUtf8(opfContent);
 
   // 简单处理：直接查找包含 'id="nav"' 的item标签
-  int navItemStart = opfStr.indexOf("id=\"nav\"");
+  int navItemStart = opfStr.indexOf("=\"nav\"");
   if (navItemStart == -1) {
     qWarning() << "未找到id=\"nav\"的导航文件";
     return QString();
@@ -3396,4 +3417,19 @@ QString Reader::getFirstThreeLines(QTextEdit *textEdit) {
   }
 
   return resultLines.join("\n");
+}
+
+void Reader::closeReader() {
+  mui->btnAutoStop->click();
+  m_ReaderSet->close();
+  if (isSelText) mw_one->on_btnSelText_clicked();
+  if (mui->f_ReaderSet->isVisible()) {
+    mw_one->on_btnBackReaderSet_clicked();
+  }
+
+  saveReader("", false);
+  savePageVPos();
+
+  mui->frameReader->hide();
+  mui->frameMain->show();
 }

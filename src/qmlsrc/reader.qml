@@ -12,6 +12,7 @@ Item {
 
     // 横屏控制变量
     property bool isLandscape: false
+    property bool isReadyEnd: false
 
     // 面积法所需变量
     property real prevContentY: 0 // 切换前的滚动位置
@@ -27,6 +28,10 @@ Item {
 
     function setLandscape(isValue) {
         isLandscape = isValue
+    }
+
+    function getReadyEnd() {
+        return isReadyEnd
     }
 
     // 原有功能函数（完整保留）
@@ -134,6 +139,7 @@ Item {
 
     // 横屏模式变化处理（集成面积法核心逻辑）
     onIsLandscapeChanged: {
+        isReadyEnd = false
         // 1. 切换前保存当前状态
         prevContentY = contentListView.contentY
         prevContentHeight = contentListView.contentHeight
@@ -229,6 +235,7 @@ Item {
                         // 应用新位置
                         contentListView.contentY = newContentY
                         console.log(`面积法映射: 旧位置=${prevContentY}, 旧总高=${prevContentHeight}, 新总高=${contentListView.contentHeight}, 新位置=${newContentY}`)
+                        isReadyEnd = true
                     }
                     isSwitching = false // 结束切换标记
                 }

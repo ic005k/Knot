@@ -18,6 +18,7 @@
 #include <QRegExp>
 #include <QRegularExpression>
 #include <QSaveFile>
+#include <QSettings>
 #include <QString>
 #include <QStringList>
 #include <QTextBlock>
@@ -162,6 +163,7 @@ class Reader : public QDialog {
   void on_SetReaderFunVisible();
   bool isTurnThePage = false;
 
+  void closeReader();
  public slots:
   void setPageScroll0();
   void setPageScroll1();
@@ -220,6 +222,7 @@ class Reader : public QDialog {
   bool isGetBookmarkText = false;
   QString getFirstThreeLines(QTextEdit *textEdit);
   bool getLandscape();
+  bool getQmlReadyEnd();
 };
 
 class TextChunkModel : public QAbstractListModel {
