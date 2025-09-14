@@ -154,13 +154,9 @@ MainWindow::MainWindow(QWidget *parent)
 
   init_ChartWidget();
 
-  m_MainHelper->init_Theme();
-
   m_MainHelper->initMainQW();
 
   init_TotalData();
-
-  m_Reader->initReader();
 
   loading = false;
 
@@ -1698,6 +1694,10 @@ QString MainWindow::getYMD(QString date) {
 }
 
 void MainWindow::on_btnReader_clicked() {
+  if (!isOne) {
+    m_Reader->initReader();
+  }
+
   if (isPDF) {
     if (isAndroid) {
       mui->frameMain->hide();

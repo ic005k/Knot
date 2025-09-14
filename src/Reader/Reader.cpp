@@ -529,7 +529,7 @@ void Reader::initReader() {
       if (m_Method->getExecDone() == "true") {
         // startOpenFile(fileName);
       } else {
-        if (m_Method->getKeyType() != "defaultopen") startOpenFile(fileName);
+        // if (m_Method->getKeyType() != "defaultopen") startOpenFile(fileName);
       }
 
     } else

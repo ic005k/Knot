@@ -488,12 +488,14 @@ void MainHelper::initMainQW() {
   qmlRegisterType<DocumentHandler>("MyModel2", 1, 0, "DocumentHandler");
 
   mui->qwMainTab->setFixedHeight(50);
+  mui->qwMainTab->rootContext()->setContextProperty("isDark", isDark);
   mui->qwMainTab->rootContext()->setContextProperty("maintabHeight",
                                                     mui->qwMainTab->height());
   mui->qwMainTab->rootContext()->setContextProperty("mw_one", mw_one);
   mui->qwMainTab->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/maintab.qml")));
 
+  mui->qwMainDate->rootContext()->setContextProperty("isDark", isDark);
   mui->qwMainDate->rootContext()->setContextProperty("isAniEffects", true);
   mui->qwMainDate->rootContext()->setContextProperty("maindateWidth",
                                                      mui->qwMainDate->width());
@@ -501,6 +503,7 @@ void MainHelper::initMainQW() {
   mui->qwMainDate->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/maindate.qml")));
 
+  mui->qwMainEvent->rootContext()->setContextProperty("isDark", isDark);
   mui->qwMainEvent->rootContext()->setContextProperty("fontSize", fontSize);
   mui->qwMainEvent->rootContext()->setContextProperty("isAniEffects", true);
   mui->qwMainEvent->rootContext()->setContextProperty(
