@@ -1438,10 +1438,11 @@ void Notes::openNotes() {
             QString remote_f = path;
             remote_f = remote_f.replace("/dav/", "");  // 此处需注意
 
-            orgRemoteFiles.append(remote_f);
-            orgRemoteDateTime.append(mtime);
-
-            if (path.contains("mainnotes.ini.zip")) break;
+            if (path.contains("mainnotes.ini.zip")) {
+              orgRemoteFiles.append(remote_f);
+              orgRemoteDateTime.append(mtime);
+              break;
+            }
           }
 
           for (int j = 0; j < orgRemoteFiles.count(); j++) {
