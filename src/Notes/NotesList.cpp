@@ -83,7 +83,7 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
           &NotesList::onSearchTextChanged);
   mui->qwNotesSearchResult->rootContext()->setContextProperty("searchModel",
                                                               &m_searchModel);
-  initSerachDatabase(false);
+  initSerachDatabase();
 
   loadNotesListIndex();
 
@@ -93,9 +93,8 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
 
 NotesList::~NotesList() { delete ui; }
 
-void NotesList::initSerachDatabase(bool isDelDatabase) {
+void NotesList::initSerachDatabase() {
   QString databaseFile = privateDir + "md_database_v3.db";
-  if (isDelDatabase) m_dbManager.deleteDatabaseFile(databaseFile);
   m_dbManager.initDatabase(databaseFile);
   QFile m_dfile(databaseFile);
   if (m_dfile.size() < 100000) {
@@ -1969,7 +1968,11 @@ void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
             tr("Rebuilding the index will take some time. Click OK to start."),
             2)) {
       mw_one->showProgress();
-      initSerachDatabase(true);
+      QString databaseFile = privateDir + "md_database_v3.db";
+      if (m_dbManager.deleteDatabaseFile(databaseFile))
+        initSerachDatabase();
+      else
+        mw_one->closeProgress();
     }
   });
 

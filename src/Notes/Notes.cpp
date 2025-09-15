@@ -1395,8 +1395,8 @@ void Notes::openNotes() {
     while (!m_CloudBackup->isGetRemoteFileListEnd)
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
-    qDebug() << m_CloudBackup->webdavFileList
-             << m_CloudBackup->webdavDateTimeList;
+    // qDebug() << m_CloudBackup->webdavFileList
+    //          << m_CloudBackup->webdavDateTimeList;
 
     for (int i = 0; i < m_CloudBackup->webdavFileList.count(); i++) {
       orgRemoteFiles.append(m_CloudBackup->webdavFileList.at(i));
@@ -1407,8 +1407,10 @@ void Notes::openNotes() {
     m_CloudBackup->getRemoteFileList(url + "KnotData/memo/images/");
     while (!m_CloudBackup->isGetRemoteFileListEnd)
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-    qDebug() << m_CloudBackup->webdavFileList
-             << m_CloudBackup->webdavDateTimeList;
+
+    // qDebug() << m_CloudBackup->webdavFileList
+    //          << m_CloudBackup->webdavDateTimeList;
+
     for (int i = 0; i < m_CloudBackup->webdavFileList.count(); i++) {
       orgRemoteFiles.append(m_CloudBackup->webdavFileList.at(i));
       orgRemoteDateTime.append(m_CloudBackup->webdavDateTimeList.at(i));
