@@ -160,20 +160,28 @@ QStringList DatabaseManager::tokenize(const QString &text) {
 
 QVector<DatabaseManager::SearchResult> DatabaseManager::searchDocuments(
     const QString &query, NoteIndexManager *indexManager, int limit) {
+  Q_UNUSED(limit);
   QStringList keywords = tokenize(query);
 
   QStringList conditions;
-  for (const QString &kw : keywords) {
+  for (const QString &kw : std::as_const(keywords)) {
     QString escaped = kw;
     escaped.replace("'", "''");
     conditions << QString("(content MATCH '\"%1\"' OR terms MATCH '\"%1\"')")
                       .arg(escaped);
   }
 
-  QString sql =
-      QString("SELECT path, content FROM fts_documents WHERE %1 LIMIT %2")
-          .arg(conditions.join(" AND "))
-          .arg(limit);
+  // 函数内部判断：如果 limit 为 -1 则不添加 LIMIT 子句
+  limit = -1;
+  QString sql;
+  if (limit <= 0) {
+    sql = QString("SELECT path, content FROM fts_documents WHERE %1")
+              .arg(conditions.join(" AND "));
+  } else {
+    sql = QString("SELECT path, content FROM fts_documents WHERE %1 LIMIT %2")
+              .arg(conditions.join(" AND "))
+              .arg(limit);
+  }
 
   QVector<SearchResult> results;
   QSqlQuery q(m_db);
@@ -181,8 +189,6 @@ QVector<DatabaseManager::SearchResult> DatabaseManager::searchDocuments(
     while (q.next()) {
       QString path = q.value(0).toString();
       QString content = q.value(1).toString();
-
-      // results.append({path, extractPreview(content, keywords)});
 
       SearchResult item;
       item.filePath = path;
@@ -195,6 +201,8 @@ QVector<DatabaseManager::SearchResult> DatabaseManager::searchDocuments(
       results.append(item);
     }
   }
+
+  qDebug() << "resultsCount=" << results.count();
   return results;
 }
 

@@ -2826,6 +2826,8 @@ void NotesList::onSearchTextChanged(const QString &text) {
     auto results =
         m_dbManager.searchDocuments(text, mw_one->m_Notes->m_NoteIndexManager);
     m_searchModel.setResults(results);
+    mui->lblNoteSearchResult->setText(tr("Note Search Results:") +
+                                      QString::number(results.count()));
   });
 }
 
