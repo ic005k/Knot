@@ -37,6 +37,8 @@ class DatabaseManager : public QObject {
 
   void cleanMissingFileRecords(const QString &directory);
   void updateFileIndexes(const QStringList &filePaths);
+  bool deleteDatabaseFile(const QString &dbPath);
+  void closeDatabase();
   signals:
   void errorOccurred(const QString &message);
   void indexingProgress(int processed, int total);

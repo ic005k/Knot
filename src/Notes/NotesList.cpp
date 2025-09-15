@@ -81,15 +81,9 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
   // 连接搜索框
   connect(mui->editNotesSearch, &QLineEdit::textChanged, this,
           &NotesList::onSearchTextChanged);
-
-  QString databaseFile = privateDir + "md_database_v3.db";
-  m_dbManager.initDatabase(databaseFile);
   mui->qwNotesSearchResult->rootContext()->setContextProperty("searchModel",
                                                               &m_searchModel);
-  QFile m_dfile(databaseFile);
-  if (m_dfile.size() < 100000) {
-    startBackgroundTaskUpdateFilesIndex();
-  }
+  initSerachDatabase(false);
 
   loadNotesListIndex();
 
@@ -98,6 +92,16 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
 }
 
 NotesList::~NotesList() { delete ui; }
+
+void NotesList::initSerachDatabase(bool isDelDatabase) {
+  QString databaseFile = privateDir + "md_database_v3.db";
+  if (isDelDatabase) m_dbManager.deleteDatabaseFile(databaseFile);
+  m_dbManager.initDatabase(databaseFile);
+  QFile m_dfile(databaseFile);
+  if (m_dfile.size() < 100000) {
+    startBackgroundTaskUpdateFilesIndex();
+  }
+}
 
 void NotesList::startBackgroundTaskUpdateFilesIndex() {
   QString fullPath = iniDir + "memo";  // 先构造完整路径
@@ -110,6 +114,7 @@ void NotesList::startBackgroundTaskUpdateFilesIndex() {
   QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Database update completed.";
+    mw_one->closeProgress();
 
     QStringList cycleFiles = getRecycleNoteFiles();
     if (cycleFiles.count() > 0) startBackgroundTaskDelFilesIndex(cycleFiles);
@@ -1937,6 +1942,8 @@ void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
   QAction *actSetColorFlag = new QAction(tr("Set Color Marker"));
   actSetColorFlag->setEnabled(isActColorFlagStatus);
   QAction *actStatistics = new QAction(tr("Statistics"));
+  QAction *actRebuildSearchIndex =
+      new QAction(tr("Rebuild Search Database Index"));
 
   connect(actNew, &QAction::triggered, this,
           &NotesList::on_actionAdd_NoteBook_triggered);
@@ -1955,6 +1962,17 @@ void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
   connect(actStatistics, &QAction::triggered, this,
           &NotesList::on_actionStatistics);
 
+  connect(actRebuildSearchIndex, &QAction::triggered, this, [this]() {
+    ShowMessage *msg = new ShowMessage(this);
+    if (msg->showMsg(
+            appName,
+            tr("Rebuilding the index will take some time. Click OK to start."),
+            2)) {
+      mw_one->showProgress();
+      initSerachDatabase(true);
+    }
+  });
+
   mainMenu->addAction(actNew);
   mainMenu->addAction(actRename);
   mainMenu->addAction(actDel);
@@ -1963,6 +1981,7 @@ void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
   mainMenu->addAction(actMoveDown);
 
   mainMenu->addAction(actStatistics);
+  mainMenu->addAction(actRebuildSearchIndex);
   mainMenu->addAction(actSetColorFlag);
 
   actRename->setVisible(false);

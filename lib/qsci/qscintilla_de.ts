@@ -2078,17 +2078,17 @@
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.cpp" line="65"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="950"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="955"/>
         <source>Notebook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2133"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2152"/>
         <source>New Note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="424"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="429"/>
         <source>Note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2110,7 +2110,7 @@
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.ui" line="76"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="280"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="285"/>
         <source>Rename</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2121,13 +2121,13 @@
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.ui" line="102"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2138"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2157"/>
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.ui" line="115"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2139"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2158"/>
         <source>Export</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2184,193 +2184,203 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="250"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="255"/>
         <source>Note Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2034"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2053"/>
         <source>Untitled Note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="318"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="323"/>
         <source>Cancel</source>
         <translation type="unfinished">Abbrechen</translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="319"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="324"/>
         <source>Paste</source>
         <translation type="unfinished">Einfügen</translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="320"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="325"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="321"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="326"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="422"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2001"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="427"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2020"/>
         <source>NoteBook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="429"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="434"/>
         <source>Move to the recycle bin?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="511"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="516"/>
         <source>Note Book</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="512"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="517"/>
         <source>Note List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="558"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="563"/>
         <source>Knot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="558"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="563"/>
         <source>MD File (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="577"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="582"/>
         <source>Invalid Markdown file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="647"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="652"/>
         <source>MD File(*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="803"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="808"/>
         <source>Modi Notes List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="951"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2002"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="956"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2021"/>
         <source>Notes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="967"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="972"/>
         <source>Notes Recycle Bin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1013"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1018"/>
         <source>Unclassified</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1086"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1091"/>
         <source>Whether to remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1373"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1378"/>
         <source>No match was found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1932"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1937"/>
         <source>New NoteBook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1933"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1938"/>
         <source>Del NoteBook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1934"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1939"/>
         <source>Rename NoteBook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1935"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2136"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1940"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2155"/>
         <source>Move Up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1936"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2137"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1941"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2156"/>
         <source>Move Down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1937"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1942"/>
         <source>Set Color Marker</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="1939"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1944"/>
         <source>Statistics</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2013"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="1946"/>
+        <source>Rebuild Search Database Index</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/NotesList.cpp" line="1969"/>
+        <source>Rebuilding the index will take some time. Click OK to start.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/NotesList.cpp" line="2032"/>
         <source>Please create a new notebook first, and then create new notes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2134"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2153"/>
         <source>Del Note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2135"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2154"/>
         <source>Rename Note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2140"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2159"/>
         <source>Share</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2141"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2160"/>
         <source>Copy Note Link</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2142"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2161"/>
         <source>Relationship Graph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2222"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2241"/>
         <source>Share to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2267"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2275"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2290"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2286"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2294"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2309"/>
         <source>Main Root</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2535"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2554"/>
         <source>The current note does not exist. Please select another note or create a new note.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2829"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2848"/>
         <source>Note Search Results:</source>
         <translation type="unfinished"></translation>
     </message>

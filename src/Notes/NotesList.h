@@ -313,6 +313,7 @@ class NotesList : public QDialog {
 
   void initNoteGraphView();
   void readyNotesData(QTreeWidgetItem *topItem);
+  void initSerachDatabase(bool isDelDatabase);
 };
 
 class SearchMapper {

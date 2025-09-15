@@ -458,3 +458,63 @@ void DatabaseManager::cleanMissingFileRecords(const QString &directory) {
                << ")";
   }
 }
+
+// 实现关闭数据库连接的函数
+void DatabaseManager::closeDatabase() {
+  // 检查数据库是否处于打开状态
+  if (m_db.isOpen()) {
+    // 关闭数据库连接
+    m_db.close();
+  }
+
+  // 移除默认连接（关键步骤，确保释放资源）
+  if (QSqlDatabase::contains(QSqlDatabase::defaultConnection)) {
+    QSqlDatabase::removeDatabase(QSqlDatabase::defaultConnection);
+  }
+}
+
+// 实现删除数据库文件的函数
+bool DatabaseManager::deleteDatabaseFile(const QString &dbPath) {
+  // 步骤1：先关闭所有数据库连接
+  closeDatabase();
+
+  // 步骤2：检查是否还有未关闭的连接（防御性检查）
+  if (QSqlDatabase::contains(QSqlDatabase::defaultConnection)) {
+    qWarning() << "数据库连接仍未释放，无法删除文件";
+    return false;
+  }
+
+  // 步骤3：删除主数据库文件
+  QFile dbFile(dbPath);
+  if (!dbFile.exists()) {
+    qWarning() << "数据库文件不存在:" << dbPath;
+    return false;
+  }
+
+  bool mainFileDeleted = dbFile.remove();
+  if (!mainFileDeleted) {
+    qWarning() << "删除主数据库文件失败:" << dbFile.errorString();
+    return false;
+  }
+
+  // 步骤4：删除SQLite可能生成的临时文件
+  QString shmFile = dbPath + "-shm";
+  QString walFile = dbPath + "-wal";
+
+  if (QFile::exists(shmFile) && !QFile::remove(shmFile)) {
+    qWarning() << "删除SHM文件失败:" << shmFile;
+  }
+
+  if (QFile::exists(walFile) && !QFile::remove(walFile)) {
+    qWarning() << "删除WAL文件失败:" << walFile;
+  }
+
+  // 最终验证
+  if (!QFile::exists(dbPath)) {
+    qInfo() << "数据库文件删除成功:" << dbPath;
+    return true;
+  } else {
+    qWarning() << "数据库文件删除后仍存在，可能被其他进程占用";
+    return false;
+  }
+}
