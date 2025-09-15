@@ -315,14 +315,14 @@ Rectangle {
                 property point clickPos: "0,0"
 
                 anchors.fill: parent
-                onPressed: function(mouse){
+                onPressed: function (mouse) {
                     clickPos = Qt.point(mouse.x, mouse.y)
 
                     item0.color = "white"
                     listItem.color = "red"
                 }
 
-                onReleased: function(mouse){
+                onReleased: function (mouse) {
 
                     var delta = Qt.point(mouse.x - clickPos.x,
                                          mouse.y - clickPos.y)
@@ -419,6 +419,8 @@ Rectangle {
             fill: parent
             margins: 4
         }
+
+        boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
 
         model: ListModel {
             id: listmain
