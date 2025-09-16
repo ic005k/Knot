@@ -3118,3 +3118,11 @@ int Method::getFlagToday(QTreeWidget *tw) {
 
   return isFlagToday;
 }
+
+QString Method::getFileUTCString(const QString &file) {
+  QFileInfo fileInfo(file);
+  if (!fileInfo.exists()) return "00000000000000";
+  QDateTime localTime = fileInfo.lastModified();
+  QDateTime utcTime = localTime.toUTC();
+  return utcTime.toString("yyyyMMddHHmmss");  // 无特殊字符，适合嵌入文件名
+}

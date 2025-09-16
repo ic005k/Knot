@@ -190,7 +190,8 @@ void Notes::saveMainNotes() {
 }
 
 void Notes::updateMDFileToSyncLists(QString currentMDFile) {
-  QString zipMD = privateDir + "KnotData/memo/" +
+  QString lastModi = m_Method->getFileUTCString(currentMDFile);
+  QString zipMD = privateDir + "KnotData/memo/" + lastModi + "_" +
                   QFileInfo(currentMDFile).fileName() + ".zip";
 
   if (!m_Method->compressFileWithZlib(currentMDFile, zipMD,
@@ -367,8 +368,9 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
     qDebug() << "pic=" << strTar << nLeftMargin;
   }
 
-  QString zipImg =
-      privateDir + "KnotData/memo/images/" + QFileInfo(tarImageFile).fileName();
+  QString lastModi = m_Method->getFileUTCString(tarImageFile);
+  QString zipImg = privateDir + "KnotData/memo/images/" + lastModi + "_" +
+                   QFileInfo(tarImageFile).fileName();
   QFile::copy(tarImageFile, zipImg);
   zipImg = m_Method->useEnc(zipImg);
 
@@ -737,6 +739,29 @@ void Notes::syncToWebDAV() {
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     if (notes_sync_files.count() > 0) {
       mw_one->showProgress();
+
+      // 先删除旧文件
+      QStringList delFiles;
+      for (int j = 0; j < notes_sync_files.count(); j++) {
+        QString syncFile = notes_sync_files.at(j);
+        QFileInfo fi(syncFile);
+        QString fn = fi.fileName();
+        QStringList list = fn.split("_");
+        QString baseFlag;
+        if (list.count() == 4 || list.count() == 2) {
+          QString a0 = list.at(0);
+          baseFlag = fn;
+          baseFlag = baseFlag.replace(a0, "");
+
+          for (int i = 0; i < orgRemoteFiles.count(); i++) {
+            QString orgFile = orgRemoteFiles.at(i);
+            if (orgFile.contains(baseFlag)) delFiles.append(orgFile);
+          }
+        }
+      }
+      qDebug() << "delFiles=" << delFiles;
+      m_CloudBackup->deleteWebDAVFiles(delFiles);
+
       m_CloudBackup->uploadFilesToWebDAV(notes_sync_files);
     }
   }
@@ -1105,7 +1130,8 @@ void Notes::javaNoteToQMLNote() {
     mui->btnRename->click();
   }
 
-  QString zipMD = privateDir + "KnotData/memo/" +
+  QString lastModi = m_Method->getFileUTCString(currentMDFile);
+  QString zipMD = privateDir + "KnotData/memo/" + lastModi + "_" +
                   QFileInfo(currentMDFile).fileName() + ".zip";
 
   if (!m_Method->compressFileWithZlib(currentMDFile, zipMD,
@@ -1456,12 +1482,28 @@ void Notes::openNotes() {
             QString local_file = privateDir + or_file;
             QDateTime local_datetime = QFileInfo(local_file).lastModified();
 
-            bool isLocalFileExists = QFile::exists(local_file);
-            if (or_datetime > local_datetime || !isLocalFileExists) {
+            QString local_realfile, localLastModi;
+            QFileInfo fi(local_file);
+            QString fn = fi.fileName();
+            fn = fn.replace(".zip", "");
+            if (local_file.contains(".ini")) local_realfile = iniDir + fn;
+            if (local_file.contains(".md"))
+              local_realfile = iniDir + "memo/" + fn;
+            if (local_file.contains("images"))
+              local_realfile = iniDir + "memo/images/" + fn;
+            localLastModi = m_Method->getFileUTCString(local_realfile);
+            QString remoteLastModi;
+            QStringList list = fn.split("_");
+            if (list.count() == 4) {
+              remoteLastModi = list.at(0).trimmed();
+            }
+
+            if (remoteLastModi > localLastModi) {
+              // if (or_datetime > local_datetime) {
               remoteFiles.append(or_file);
-              qDebug() << "Remote time: " << or_datetime
-                       << "Local time: " << local_datetime << or_file
-                       << isLocalFileExists << local_file;
+              qDebug() << "Remote time: " << remoteLastModi
+                       << "Local time: " << localLastModi << or_file
+                       << local_realfile;
             }
           }
 
@@ -1659,7 +1701,9 @@ void Notes::updateMainnotesIniToSyncLists() {
   qDebug() << "isSaveNotesConfig=" << isSaveNotesConfig;
 
   if (isSaveNotesConfig) {
-    QString zipMainnotes = privateDir + "KnotData/mainnotes.ini.zip";
+    QString lastModi = m_Method->getFileUTCString(iniDir + "mainnotes.ini");
+    QString zipMainnotes =
+        privateDir + "KnotData/" + lastModi + "_mainnotes.ini.zip";
 
     if (!m_Method->compressFileWithZlib(iniDir + "mainnotes.ini", zipMainnotes,
                                         Z_DEFAULT_COMPRESSION)) {

@@ -413,6 +413,7 @@ class Method : public QDialog {
                               bool includeFullPath = false);
 
   int getFlagToday(QTreeWidget *tw);
+  QString getFileUTCString(const QString &file);
   protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
