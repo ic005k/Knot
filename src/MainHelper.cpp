@@ -869,11 +869,11 @@ void MainHelper::init_ButtonStyle() {
     mui->btnReadList->setIcon(QIcon(":/res/reader/booklist.svg"));
   }
 
-  mui->btnPages->setStyleSheet(
+  /*mui->btnPages->setStyleSheet(
       "color: rgb(255, 255, 255);background-color: #FF9933;border: "
       "0px solid "
       "rgb(255,0,0);border-radius: 4px;"
-      "font-weight: bold;");
+      "font-weight: bold;");*/
 
   QString style =
       "QToolButton {background-color: rgb(255, 0, 0); color: "

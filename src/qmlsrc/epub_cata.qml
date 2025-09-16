@@ -381,39 +381,10 @@ Rectangle {
         spacing: 4
         cacheBuffer: 50
 
-        // 核心配置：绑定滚动状态
-        property bool isScrolling: false
-        onMovementStarted: isScrolling = true
-        onMovementEnded: isScrolling = false
-
+        // 滚动条
         ScrollBar.vertical: ScrollBar {
-            id: vbar
             policy: ScrollBar.AsNeeded
-            interactive: false // 关键！禁止拖动操作
             width: 8
-
-            // 动态显隐控制
-            visible: opacity > 0
-            opacity: view.isScrolling ? 1 : 0
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 300
-                }
-            }
-
-            // 极简样式
-            contentItem: Rectangle {
-                color: isDark ? "#3498db" : "#606060"
-                opacity: vbar.active ? (isDark ? 0.8 : 0.7) : 0
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 200 // 更流畅的动画
-                        easing.type: Easing.OutQuad
-                    }
-                }
-                radius: 3
-            }
-            background: null // 彻底消除背景容器
         }
     }
 

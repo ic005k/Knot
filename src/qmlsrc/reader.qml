@@ -266,32 +266,10 @@ Item {
                 }
             }
 
+            // 滚动条
             ScrollBar.vertical: ScrollBar {
-                id: vbar
                 policy: ScrollBar.AsNeeded
-                interactive: false // 禁止拖动操作
-                width: 10
-                size: contentListView.visibleArea.heightRatio
-                minimumSize: 0.1
-                visible: opacity > 0
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 300
-                    }
-                }
-                // contentItem:
-                contentItem: Rectangle {
-                    color: isDark ? "#3498db" : "#606060"
-                    opacity: vbar.active ? (isDark ? 0.8 : 0.7) : 0
-                    Behavior on opacity {
-                        NumberAnimation {
-                            duration: 200
-                            easing.type: Easing.OutQuad
-                        }
-                    }
-                    radius: 3
-                }
-                background: null
+                width: 8
             }
         }
     }
