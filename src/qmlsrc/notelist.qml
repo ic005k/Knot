@@ -64,7 +64,7 @@ Rectangle {
 
     function getText0(itemIndex) {
         const text0 = noteModel.getText0(itemIndex)
-        console.log("[QML] 从C++接口获取text0：", text0)
+        //console.log("[QML] 从C++接口获取text0：", text0)
         return text0
     }
 
@@ -86,7 +86,7 @@ Rectangle {
 
     function getText3(itemIndex) {
         const text3 = noteModel.getText3(itemIndex)
-        console.log("[QML] 从C++接口获取text3：", text3)
+        //console.log("[QML] 从C++接口获取text3：", text3)
         return text3
     }
 

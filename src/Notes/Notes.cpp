@@ -1480,7 +1480,6 @@ void Notes::openNotes() {
             or_datetime = or_datetime.toLocalTime();
 
             QString local_file = privateDir + or_file;
-            QDateTime local_datetime = QFileInfo(local_file).lastModified();
 
             QString local_realfile, localLastModi;
             QFileInfo fi(local_file);
@@ -1491,19 +1490,21 @@ void Notes::openNotes() {
               local_realfile = iniDir + "memo/" + fn;
             if (local_file.contains("images"))
               local_realfile = iniDir + "memo/images/" + fn;
-            localLastModi = m_Method->getFileUTCString(local_realfile);
+
             QString remoteLastModi;
             QStringList list = fn.split("_");
-            if (list.count() == 4) {
+            if (list.count() == 4 || or_file.contains("mainnotes.ini")) {
               remoteLastModi = list.at(0).trimmed();
-            }
 
-            if (remoteLastModi > localLastModi) {
-              // if (or_datetime > local_datetime) {
-              remoteFiles.append(or_file);
-              qDebug() << "Remote time: " << remoteLastModi
-                       << "Local time: " << localLastModi << or_file
-                       << local_realfile;
+              local_realfile = local_realfile.replace(remoteLastModi + "_", "");
+              localLastModi = m_Method->getFileUTCString(local_realfile);
+
+              if (remoteLastModi > localLastModi) {
+                remoteFiles.append(or_file);
+                qDebug() << "Remote time: " << remoteLastModi
+                         << "Local time: " << localLastModi << or_file
+                         << local_realfile;
+              }
             }
           }
 
@@ -1585,11 +1586,20 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
     zFile = pFile;
     asFile = file;
 
+    QFileInfo fi(file);
+    QString fn = fi.fileName();
+    QStringList list = fn.split("_");
+    QString remoteLastModi;
+    if (list.count() == 4 || list.count() == 2)
+      remoteLastModi = list.at(0).trimmed();
+
     if (file.contains("mainnotes.ini.zip")) {
       pDir = privateDir + "KnotData";
       pFile = pFile.replace(".zip", "");
       kFile = iniDir + asFile.replace("KnotData/", "");
       kFile = kFile.replace(".zip", "");
+      kFile = kFile.replace(remoteLastModi + "_", "");
+
       qDebug() << "file=" << file;
       qDebug() << "pFile=" << pFile;
       qDebug() << "kFile" << kFile;
@@ -1632,6 +1642,8 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
       pFile = pFile.replace(".zip", "");
       kFile = iniDir + asFile.replace("KnotData/", "");
       kFile = kFile.replace(".zip", "");
+      kFile = kFile.replace(remoteLastModi + "_", "");
+
       qDebug() << "file=" << file;
       qDebug() << "pFile=" << pFile;
       qDebug() << "kFile=" << kFile;
@@ -1673,6 +1685,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
     if (file.contains(".png")) {
       pFile = m_Method->useDec(pFile);
       kFile = iniDir + asFile.replace("KnotData/", "");
+      kFile = kFile.replace(remoteLastModi + "_", "");
 
       qDebug() << "file=" << file;
       qDebug() << "pFile=" << pFile;
