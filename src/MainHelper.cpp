@@ -870,9 +870,9 @@ void MainHelper::init_ButtonStyle() {
   }
 
   mui->btnPages->setStyleSheet(
-      "color: rgb(0, 0, 0);background-color: rgb(254, 234, 112);border: "
+      "color: rgb(255, 255, 255);background-color: #FF9933;border: "
       "0px solid "
-      "rgb(255,0,0);border-radius: 0px;"
+      "rgb(255,0,0);border-radius: 4px;"
       "font-weight: bold;");
 
   QString style =

@@ -463,13 +463,13 @@ void Reader::saveReader(QString BookmarkText, bool isSetBookmark) {
 
   if (isText) {
     if (isSetBookmark) {
-      Reg.setValue("/Bookmark/currentPage" + bookmarkSn, currentPage - 1);
+      Reg.setValue("/Bookmark/currentPage" + bookmarkSn, currentPage);
       Reg.setValue("/Bookmark/Name" + bookmarkSn, BookmarkText);
       Reg.setValue("/Bookmark/VPos" + bookmarkSn, getVPos());
       Reg.setValue("/Bookmark/isLandscape" + bookmarkSn, isLandscape);
 
     } else {
-      Reg.setValue("/Reader/currentPage", currentPage - 1);
+      Reg.setValue("/Reader/currentPage", currentPage);
     }
   }
 
@@ -1028,9 +1028,9 @@ void Reader::goBookReadPosition() {
                   QSettings::IniFormat);
 
     if (isText) {
-      currentPage = Reg.value("/Reader/currentPage", -1).toULongLong();
-      goNextPage();
-      showInfo();
+      currentPage = Reg.value("/Reader/currentPage", 0).toULongLong();
+      QString txt1 = updateContent();
+      setQMLText(txt1);
     }
 
     if (isEpub) {
@@ -1042,13 +1042,10 @@ void Reader::goBookReadPosition() {
 
       currentHtmlFile = htmlFiles.at(htmlIndex);
       setQMLHtml(currentHtmlFile, "", "");
-
-      setPageVPos();
-      showInfo();
-
-      qreal pos = getVPos();
-      setVPos(pos + 0.01);
     }
+
+    setPageVPos();
+    showInfo();
   }
 }
 
