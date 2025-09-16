@@ -751,7 +751,7 @@ void Notes::syncToWebDAV() {
         if (list.count() == 4 || list.count() == 2) {
           QString a0 = list.at(0);
           baseFlag = fn;
-          baseFlag = baseFlag.replace(a0, "");
+          baseFlag = baseFlag.replace(a0 + "_", "");
 
           for (int i = 0; i < orgRemoteFiles.count(); i++) {
             QString orgFile = orgRemoteFiles.at(i);
@@ -1469,7 +1469,6 @@ void Notes::openNotes() {
             if (path.contains("mainnotes.ini.zip")) {
               orgRemoteFiles.append(remote_f);
               orgRemoteDateTime.append(mtime);
-              break;
             }
           }
 
@@ -1493,7 +1492,7 @@ void Notes::openNotes() {
 
             QString remoteLastModi;
             QStringList list = fn.split("_");
-            if (list.count() == 4 || or_file.contains("mainnotes.ini")) {
+            if (list.count() == 4 || or_file.contains("_mainnotes.ini")) {
               remoteLastModi = list.at(0).trimmed();
 
               local_realfile = local_realfile.replace(remoteLastModi + "_", "");
