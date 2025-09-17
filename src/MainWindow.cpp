@@ -2308,7 +2308,6 @@ void MainWindow::on_btnBackNoteRecycle_clicked() {
         if (!baseFlag.isEmpty()) {
           for (int j = 0; j < m_Notes->orgRemoteFiles.count(); j++) {
             QString remoteFile = m_Notes->orgRemoteFiles.at(j);
-            // qDebug() << "remoteFile=" << remoteFile;
             if (remoteFile.contains(baseFlag)) files.append(remoteFile);
           }
         }

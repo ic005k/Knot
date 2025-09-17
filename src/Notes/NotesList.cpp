@@ -1130,6 +1130,11 @@ void NotesList::needDelNotes() {
         iniNotes.value("/NeedDelNotes/Note-" + QString::number(i), "")
             .toString();
     needDelFiles.append(str1);
+
+    if (i >= 500) {
+      needDelFiles.removeAt(0);
+      needDelFiles.insert(0, str1);
+    }
   }
 
   QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);

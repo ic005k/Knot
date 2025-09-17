@@ -753,7 +753,7 @@ void Notes::syncToWebDAV() {
           }
         }
       }
-      qDebug() << "delFiles=" << delFiles;
+      qDebug() << "delWebDAVFiles=" << delFiles;
       m_CloudBackup->deleteWebDAVFiles(delFiles);
 
       m_CloudBackup->uploadFilesToWebDAV(notes_sync_files);
