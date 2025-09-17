@@ -744,15 +744,9 @@ void Notes::syncToWebDAV() {
       QStringList delFiles;
       for (int j = 0; j < notes_sync_files.count(); j++) {
         QString syncFile = notes_sync_files.at(j);
-        QFileInfo fi(syncFile);
-        QString fn = fi.fileName();
-        QStringList list = fn.split("_");
-        QString baseFlag;
-        if (list.count() == 4 || list.count() == 2) {
-          QString a0 = list.at(0);
-          baseFlag = fn;
-          baseFlag = baseFlag.replace(a0 + "_", "");
 
+        QString baseFlag = m_Method->getBaseFlag(syncFile);
+        if (!baseFlag.isEmpty()) {
           for (int i = 0; i < orgRemoteFiles.count(); i++) {
             QString orgFile = orgRemoteFiles.at(i);
             if (orgFile.contains(baseFlag)) delFiles.append(orgFile);

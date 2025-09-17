@@ -185,6 +185,8 @@ class Notes : public QDialog {
 
   void startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList);
 
+  QStringList orgRemoteFiles;
+
  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
@@ -250,7 +252,6 @@ class Notes : public QDialog {
   QString m_lastSearchText;
   int m_searchFlags = 0;
 
-  QStringList orgRemoteFiles;
   QList<QDateTime> orgRemoteDateTime;
   QList<QString> remoteFiles;
 

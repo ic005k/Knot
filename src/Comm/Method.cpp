@@ -3126,3 +3126,23 @@ QString Method::getFileUTCString(const QString &file) {
   QDateTime utcTime = localTime.toUTC();
   return utcTime.toString("yyyyMMddHHmmss");  // 无特殊字符，适合嵌入文件名
 }
+
+QString Method::getBaseFlag(const QString &file) {
+  QFileInfo fi(file);
+  QString fn = fi.fileName();
+  QStringList list = fn.split("_");
+  QString baseFlag = "";
+  if (list.count() > 0) {
+    QString a0 = list.at(0).trimmed();
+    if (a0.length() == 14) {
+      baseFlag = fn;
+      baseFlag = baseFlag.replace(a0 + "_", "");
+    } else
+      baseFlag = fn;
+  } else
+    baseFlag = fn;
+
+  qDebug() << "baseFlag=" << baseFlag;
+
+  return baseFlag;
+}

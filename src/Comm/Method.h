@@ -414,6 +414,7 @@ class Method : public QDialog {
 
   int getFlagToday(QTreeWidget *tw);
   QString getFileUTCString(const QString &file);
+  QString getBaseFlag(const QString &file);
   protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
