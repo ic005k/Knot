@@ -6,6 +6,7 @@
 extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern Method *m_Method;
+extern NotesList *m_NotesList;
 extern QTabWidget *tabData, *tabChart;
 extern QTreeWidgetItem *parentItem;
 
@@ -415,7 +416,7 @@ void MainHelper::openTabRecycle() {
   QStringList iniFiles;
   QStringList fmt;
   fmt.append("ini");
-  mw_one->m_NotesList->getAllFiles(iniDir, iniFiles, fmt);
+  m_NotesList->getAllFiles(iniDir, iniFiles, fmt);
 
   QString iniTotal;
   QStringList myList, nameList, iniList;
@@ -530,7 +531,7 @@ void MainHelper::initMainQW() {
 void MainHelper::initNotesQW() {
   if (mui->qwNoteBook->source().isEmpty()) {
     mui->qwNoteBook->rootContext()->setContextProperty("m_NotesList",
-                                                       mw_one->m_NotesList);
+                                                       m_NotesList);
     mui->qwNoteBook->rootContext()->setContextProperty("mw_one", mw_one);
     mui->qwNoteBook->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/notebook.qml")));
@@ -541,15 +542,15 @@ void MainHelper::initNotesQW() {
     else
       mui->qwNoteList->rootContext()->setContextProperty("noteTimeFontSize", 8);
     mui->qwNoteList->rootContext()->setContextProperty("m_NotesList",
-                                                       mw_one->m_NotesList);
+                                                       m_NotesList);
     mui->qwNoteList->rootContext()->setContextProperty("mw_one", mw_one);
-    mui->qwNoteList->rootContext()->setContextProperty(
-        "noteModel", mw_one->m_NotesList->noteModel);
+    mui->qwNoteList->rootContext()->setContextProperty("noteModel",
+                                                       m_NotesList->noteModel);
     mui->qwNoteList->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/notelist.qml")));
 
     mui->qwNoteTools->rootContext()->setContextProperty("m_NotesList",
-                                                        mw_one->m_NotesList);
+                                                        m_NotesList);
     mui->qwNoteTools->rootContext()->setContextProperty("m_Notes",
                                                         mw_one->m_Notes);
     mui->qwNoteTools->rootContext()->setContextProperty("mw_one", mw_one);
@@ -558,8 +559,8 @@ void MainHelper::initNotesQW() {
 
     mui->qwNotesSearchResult->rootContext()->setContextProperty("fontSize",
                                                                 fontSize);
-    mui->qwNotesSearchResult->rootContext()->setContextProperty(
-        "m_NotesList", mw_one->m_NotesList);
+    mui->qwNotesSearchResult->rootContext()->setContextProperty("m_NotesList",
+                                                                m_NotesList);
     mui->qwNotesSearchResult->rootContext()->setContextProperty("mw_one",
                                                                 mw_one);
     mui->qwNotesSearchResult->setSource(

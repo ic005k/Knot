@@ -10,6 +10,7 @@ QTreeWidget *twrb, *tw;
 extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern Method *m_Method;
+extern NotesList *m_NotesList;
 extern QString iniDir, privateDir, currentMDFile, appName, errorInfo;
 extern bool isAndroid, isWindows, isLinux, isMacOS;
 extern int fontSize;
@@ -1310,7 +1311,7 @@ void reduceResults(ResultsMap &result, const MySearchResult &partial) {
 QFuture<ResultsMap> performSearchAsync(const QString &dirPath,
                                        const QString &keyword) {
   QStringList files = findMarkdownFiles(dirPath);
-  QStringList cycleFiles = mw_one->m_NotesList->getRecycleNoteFiles();
+  QStringList cycleFiles = m_NotesList->getRecycleNoteFiles();
 
   // 从files中移除所有存在于cycleFiles中的元素
   files.removeIf(
@@ -1335,12 +1336,11 @@ void displayResults(const ResultsMap &results) {
     for (int i = 0; i < lineNumbersList.count(); i++) {
       strLine = strLine + " " + QString::number(lineNumbersList.at(i));
     }
-    mw_one->m_NotesList->searchResultList.append(file + "-==-" +
-                                                 strLine.trimmed());
+    m_NotesList->searchResultList.append(file + "-==-" + strLine.trimmed());
   }
-  qDebug() << mw_one->m_NotesList->searchResultList;
+  qDebug() << m_NotesList->searchResultList;
 
-  mw_one->m_NotesList->showNotesSearchResult();
+  m_NotesList->showNotesSearchResult();
 }
 
 void NotesList::showNotesSearchResult() {
@@ -2709,15 +2709,15 @@ void NotesList::updateAllNoteIndexManager() {
   }
 }
 
-void NotesList::setCurrentItemFromMDFile(QString mdFile) {
-  if (!QFile::exists(mdFile)) return;
+bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
+  if (!QFile::exists(mdFile)) return false;
 
   int indexNoteBook, indexNote, countNoteBook, countNotes;
   indexNoteBook = mw_one->m_Notes->m_NoteIndexManager->getNotebookIndex(mdFile);
   indexNote = mw_one->m_Notes->m_NoteIndexManager->getNoteIndex(mdFile);
 
   countNoteBook = m_Method->getCountFromQW(mui->qwNoteBook);
-  if (indexNoteBook < 0 || indexNoteBook >= countNoteBook) return;
+  if (indexNoteBook < 0 || indexNoteBook >= countNoteBook) return false;
 
   setNoteBookCurrentIndex(indexNoteBook);
 
@@ -2728,7 +2728,7 @@ void NotesList::setCurrentItemFromMDFile(QString mdFile) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
   countNotes = m_Method->getCountFromQW(mui->qwNoteList);
-  if (indexNote < 0 || indexNote >= countNotes) return;
+  if (indexNote < 0 || indexNote >= countNotes) return false;
 
   setNotesListCurrentIndex(indexNote);
   clickNoteList();
@@ -2737,31 +2737,7 @@ void NotesList::setCurrentItemFromMDFile(QString mdFile) {
            << mw_one->m_Notes->m_NoteIndexManager->getNoteTitle(mdFile)
            << mdFile;
 
-  return;
-  ////////////////////////////
-
-  int count = getNoteBookCount();
-  bool isBreak = false;
-  for (int i = 0; i < count; i++) {
-    setNoteBookCurrentIndex(i);
-    clickNoteBook();
-    int count1 = getNotesListCount();
-    for (int j = 0; j < count1; j++) {
-      setNotesListCurrentIndex(j);
-      QString strMD = iniDir + m_Method->getText3(mui->qwNoteList, j);
-      if (mdFile == strMD) {
-        isBreak = true;
-        break;
-      }
-    }
-
-    if (isBreak) break;
-  }
-
-  if (isBreak)
-    clickNoteList();
-  else
-    currentMDFile = mdFile;
+  return true;
 }
 
 QString NotesList::getCurrentNoteNameFromMDFile(QString mdFile) {

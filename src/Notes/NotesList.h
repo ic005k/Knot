@@ -156,7 +156,7 @@ class NotesList : public QDialog {
 
   void genCursorText();
   void renameCurrentItem(QString title);
-  void setCurrentItemFromMDFile(QString mdFile);
+  bool setCurrentItemFromMDFile(QString mdFile);
   QStringList extractLocalImagesFromMarkdown(const QString &filePath);
 
   void showNotesSearchResult();

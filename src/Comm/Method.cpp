@@ -8,6 +8,7 @@
 extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern QTabWidget *tabData;
+extern NotesList *m_NotesList;
 extern QString iniDir, searchStr, currentMDFile, privateDir, encPassword,
     errorInfo;
 extern CategoryList *m_CategoryList;
@@ -660,7 +661,7 @@ void Method::reeditMainEventData() {
 
 void Method::showNoteBookMenu(int x, int y) {
   menuNoteBook = new QMenu(this);
-  mw_one->m_NotesList->init_NoteBookMenu(menuNoteBook);
+  m_NotesList->init_NoteBookMenu(menuNoteBook);
 
   QPoint pos(mw_one->geometry().x() + x, mw_one->geometry().y() + y);
   menuNoteBook->exec(pos);
@@ -668,7 +669,7 @@ void Method::showNoteBookMenu(int x, int y) {
 
 void Method::showNotsListMenu(int x, int y) {
   menuNoteList = new QMenu(this);
-  mw_one->m_NotesList->init_NotesListMenu(menuNoteList);
+  m_NotesList->init_NotesListMenu(menuNoteList);
 
   QPoint pos(mw_one->geometry().x() + x, mw_one->geometry().y() + y);
   menuNoteList->exec(pos);

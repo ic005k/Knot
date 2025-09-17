@@ -11,6 +11,7 @@
 extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern Method *m_Method;
+extern NotesList *m_NotesList;
 extern QTreeWidget *twrb, *tw;
 
 extern QString iniFile, iniDir, privateDir, currentMDFile, imgFileName, appName,
@@ -762,7 +763,7 @@ void Notes::syncToWebDAV() {
 }
 
 bool Notes::isSetNewNoteTitle() {
-  QString title = mw_one->m_NotesList->noteTitle;
+  QString title = m_NotesList->noteTitle;
   if (title.trimmed() == "无标题笔记" || title.trimmed() == "Untitled Note") {
     return true;
   }
@@ -877,15 +878,15 @@ bool Notes::selectPDFFormat(QPrinter *printer) {
                     orientationIndex);
 
 #ifdef Q_OS_ANDROID
-  pdfFileName = "/storage/emulated/0/KnotBak/" +
-                mw_one->m_NotesList->noteTitle + QStringLiteral(".pdf");
+  pdfFileName = "/storage/emulated/0/KnotBak/" + m_NotesList->noteTitle +
+                QStringLiteral(".pdf");
 #else
   QFileDialog dialog(NULL, QStringLiteral("NotePDFExport"));
   dialog.setFileMode(QFileDialog::AnyFile);
   dialog.setAcceptMode(QFileDialog::AcceptSave);
   dialog.setNameFilter(tr("PDF files") + QStringLiteral(" (*.pdf)"));
   dialog.setWindowTitle(tr("Export current note as PDF"));
-  dialog.selectFile(mw_one->m_NotesList->noteTitle + QStringLiteral(".pdf"));
+  dialog.selectFile(m_NotesList->noteTitle + QStringLiteral(".pdf"));
   int ret = dialog.exec();
 
   if (ret != QDialog::Accepted) {
@@ -1151,12 +1152,12 @@ QString Notes::formatMDText(QString text) {
 }
 
 void Notes::init_all_notes() {
-  mw_one->m_NotesList->initNotesList();
-  mw_one->m_NotesList->initRecycle();
-  mw_one->m_NotesList->initUnclassified();
+  m_NotesList->initNotesList();
+  m_NotesList->initRecycle();
+  m_NotesList->initUnclassified();
 
   // load note
-  currentMDFile = mw_one->m_NotesList->getCurrentMDFile();
+  currentMDFile = m_NotesList->getCurrentMDFile();
   qDebug() << "currentMDFile=" << currentMDFile;
   if (QFile::exists(currentMDFile)) {
   } else {
@@ -1168,16 +1169,16 @@ void Notes::loadEmptyNote() {
   currentMDFile = "";
   MD2Html(currentMDFile);
 
-  mw_one->m_NotesList->noteTitle = "";
+  m_NotesList->noteTitle = "";
 }
 
 void Notes::startBackgroundTaskDelAndClear() {
   QString fullPath = iniDir + "memo";  // 先构造完整路径
   isDelLocalNoteEnd = false;
   QFuture<void> future = QtConcurrent::run([=]() {
-    mw_one->m_NotesList->needDelNotes();
+    m_NotesList->needDelNotes();
     isDelLocalNoteEnd = true;
-    mw_one->m_NotesList->m_dbManager.cleanMissingFileRecords(fullPath);
+    m_NotesList->m_dbManager.cleanMissingFileRecords(fullPath);
   });
 
   // 使用 QFutureWatcher 监控进度
@@ -1193,7 +1194,7 @@ void Notes::startBackgroundTaskUpdateNoteIndex(QString mdFile) {
   QString fullPath = mdFile;
 
   QFuture<void> future = QtConcurrent::run(
-      [=]() { mw_one->m_NotesList->m_dbManager.updateFileIndex(fullPath); });
+      [=]() { m_NotesList->m_dbManager.updateFileIndex(fullPath); });
 
   // 使用 QFutureWatcher 监控进度
   QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
@@ -1207,9 +1208,8 @@ void Notes::startBackgroundTaskUpdateNoteIndex(QString mdFile) {
 void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
   QStringList fullPathList = mdFileList;
 
-  QFuture<void> future = QtConcurrent::run([=]() {
-    mw_one->m_NotesList->m_dbManager.updateFileIndexes(fullPathList);
-  });
+  QFuture<void> future = QtConcurrent::run(
+      [=]() { m_NotesList->m_dbManager.updateFileIndexes(fullPathList); });
 
   // 可选：使用 QFutureWatcher 监控进度
   QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
@@ -1241,7 +1241,7 @@ void Notes::openNotesUI() {
   mw_one->isMemoVisible = true;
   mw_one->isReaderVisible = false;
 
-  mw_one->m_NotesList->set_memo_dir();
+  m_NotesList->set_memo_dir();
 
   if (tw->topLevelItemCount() == 0) {
     mui->lblNoteBook->setText(tr("Note Book"));
@@ -1249,9 +1249,11 @@ void Notes::openNotesUI() {
     return;
   }
 
-  mw_one->m_NotesList->loadAllNoteBook();
-  mw_one->m_NotesList->setCurrentItemFromMDFile(currentMDFile);
-  mw_one->m_NotesList->setNoteLabel();
+  m_NotesList->loadAllNoteBook();
+  if (!m_NotesList->setCurrentItemFromMDFile(currentMDFile)) {
+    m_NotesList->clickNoteBook();
+  }
+  m_NotesList->setNoteLabel();
 
   if (isRequestOpenNoteEditor) {
     isRequestOpenNoteEditor = false;
@@ -1324,9 +1326,9 @@ void Notes::openEditUI() {
     return;
   }
 
-  mw_one->m_NotesList->refreshRecentOpen(mw_one->m_NotesList->noteTitle);
-  mw_one->m_NotesList->saveRecentOpen();
-  mw_one->m_NotesList->moveToFirst();
+  m_NotesList->refreshRecentOpen(m_NotesList->noteTitle);
+  m_NotesList->saveRecentOpen();
+  m_NotesList->moveToFirst();
 
   if (isAndroid) {
     m_Method->setMDFile(currentMDFile);
@@ -1384,7 +1386,7 @@ void Notes::openNotes() {
   else
     mui->btnManagement->show();
 
-  mw_one->m_NotesList->needDelWebDAVFiles.clear();
+  m_NotesList->needDelWebDAVFiles.clear();
   isPasswordError = false;
   isWebDAVError = false;
   m_Method->showInfoWindow(tr("Processing..."));
@@ -1670,7 +1672,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
         if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
           QFile::remove(kFile);
           QFile::copy(pFile, kFile);
-          mw_one->m_NotesList->m_dbManager.updateFileIndex(kFile);
+          m_NotesList->m_dbManager.updateFileIndex(kFile);
         }
       }
     }
@@ -2126,8 +2128,8 @@ void Notes::previewNote() {
       mw_one->m_Notes->m_NoteIndexManager->getNoteTitle(currentMDFile);
 
   QFuture<void> future = QtConcurrent::run([=]() {
-    mw_one->m_NotesList->refreshRecentOpen(title);
-    mw_one->m_NotesList->saveRecentOpen();
+    m_NotesList->refreshRecentOpen(title);
+    m_NotesList->saveRecentOpen();
     MD2Html(currentMDFile);
   });
 
@@ -2136,7 +2138,7 @@ void Notes::previewNote() {
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     mw_one->closeProgress();
 
-    mw_one->m_NotesList->moveToFirst();
+    m_NotesList->moveToFirst();
 
     if (isAndroid) {
       m_Method->setMDTitle(title);

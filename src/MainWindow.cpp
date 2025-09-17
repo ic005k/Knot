@@ -17,6 +17,7 @@ QTreeWidgetItem *parentItem;
 MainWindow *mw_one;
 Ui::MainWindow *mui;
 Method *m_Method;
+NotesList *m_NotesList;
 QTabWidget *tabData, *tabChart;
 
 bool isrbFreq = true;
@@ -1862,7 +1863,7 @@ void MainWindow::on_btnBack_One_clicked() { m_CloudBackup->backExit(); }
 void MainWindow::on_btnBackNotesGraph_clicked() {
   mui->frameNotesGraph->hide();
   mui->frameNoteList->show();
-  mw_one->m_NotesList->clickNoteList();
+  m_NotesList->clickNoteList();
 }
 
 void MainWindow::clearSelectBox() {

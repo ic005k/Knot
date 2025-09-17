@@ -263,7 +263,6 @@ class MainWindow : public QMainWindow {
   PageIndicator *m_PageIndicator;
 
   dlgSetText *mydlgSetText;
-  NotesList *m_NotesList;
 
   StepsOptions *m_StepsOptions;
   ReceiveShare *m_ReceiveShare;

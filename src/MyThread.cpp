@@ -17,6 +17,7 @@ extern QStringList readTextList, htmlFiles, listCategory;
 extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern Method *m_Method;
+extern NotesList *m_NotesList;
 extern QTabWidget *tabData, *tabChart;
 extern CloudBackup *m_CloudBackup;
 

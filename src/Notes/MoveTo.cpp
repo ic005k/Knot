@@ -8,6 +8,7 @@
 extern MainWindow* mw_one;
 extern Ui::MainWindow* mui;
 extern Method* m_Method;
+extern NotesList* m_NotesList;
 extern QTreeWidget *twrb, *tw;
 extern bool isDark, isAndroid;
 
@@ -28,11 +29,10 @@ MoveTo::MoveTo(QWidget* parent) : QDialog(parent), ui(new Ui::MoveTo) {
   m_Method->set_ToolButtonStyle(this);
 
   QTreeWidgetItem* item = NULL;
-  if (!mw_one->m_NotesList->ui->frame0->isHidden() ||
-      !mui->frameNoteList->isHidden())
+  if (!m_NotesList->ui->frame0->isHidden() || !mui->frameNoteList->isHidden())
     item = tw->currentItem();
 
-  if (!mw_one->m_NotesList->ui->frame1->isHidden() ||
+  if (!m_NotesList->ui->frame1->isHidden() ||
       !mui->frameNoteRecycle->isHidden())
     item = twrb->currentItem();
 

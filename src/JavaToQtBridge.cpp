@@ -10,6 +10,7 @@ extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 
 extern Method *m_Method;
+extern NotesList *m_NotesList;
 
 extern QString iniFile, iniDir, zipfile, privateDir, bakfileDir;
 
@@ -238,23 +239,23 @@ static void JavaNotify_15() {
     }
   }
 
-  if (mw_one->m_NotesList->menuRecentOpen != nullptr) {
-    if (mw_one->m_NotesList->menuRecentOpen->isVisible()) {
-      mw_one->m_NotesList->menuRecentOpen->close();
+  if (m_NotesList->menuRecentOpen != nullptr) {
+    if (m_NotesList->menuRecentOpen->isVisible()) {
+      m_NotesList->menuRecentOpen->close();
       return;
     }
   }
 
-  if (mw_one->m_NotesList->m_MoveTo != nullptr) {
-    if (mw_one->m_NotesList->m_MoveTo->isVisible()) {
-      mw_one->m_NotesList->m_MoveTo->ui->btnCancel->click();
+  if (m_NotesList->m_MoveTo != nullptr) {
+    if (m_NotesList->m_MoveTo->isVisible()) {
+      m_NotesList->m_MoveTo->ui->btnCancel->click();
       return;
     }
   }
 
-  if (mw_one->m_NotesList->m_NewNoteBook != nullptr) {
-    if (mw_one->m_NotesList->m_NewNoteBook->isVisible()) {
-      mw_one->m_NotesList->m_NewNoteBook->ui->btnCancel->click();
+  if (m_NotesList->m_NewNoteBook != nullptr) {
+    if (m_NotesList->m_NewNoteBook->isVisible()) {
+      m_NotesList->m_NewNoteBook->ui->btnCancel->click();
       return;
     }
   }
@@ -301,16 +302,16 @@ static void JavaNotify_15() {
     }
   }
 
-  if (mw_one->m_NotesList->textToolbarRenameNotes != nullptr) {
-    if (mw_one->m_NotesList->textToolbarRenameNotes->isVisible()) {
-      mw_one->m_NotesList->textToolbarRenameNotes->hide();
+  if (m_NotesList->textToolbarRenameNotes != nullptr) {
+    if (m_NotesList->textToolbarRenameNotes->isVisible()) {
+      m_NotesList->textToolbarRenameNotes->hide();
       return;
     }
   }
 
-  if (mw_one->m_NotesList->m_RenameNotes != nullptr) {
-    if (mw_one->m_NotesList->m_RenameNotes->isVisible()) {
-      mw_one->m_NotesList->m_RenameNotes->close();
+  if (m_NotesList->m_RenameNotes != nullptr) {
+    if (m_NotesList->m_RenameNotes->isVisible()) {
+      m_NotesList->m_RenameNotes->close();
       return;
     }
   }
@@ -484,8 +485,7 @@ static void JavaNotify_16() {
 }
 
 static void JavaNotify_17() {
-  QTimer::singleShot(100, mw_one,
-                     []() { mw_one->m_NotesList->clickNoteList(); });
+  QTimer::singleShot(100, mw_one, []() { m_NotesList->clickNoteList(); });
   qDebug() << "C++ JavaNotify_17";
 }
 
