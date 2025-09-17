@@ -2366,6 +2366,11 @@ QComboBox {
                     <string>https://soya.infini-cloud.net/dav/</string>
                    </property>
                   </item>
+                  <item>
+                   <property name="text">
+                    <string>https://app.koofr.net/dav/Koofr/</string>
+                   </property>
+                  </item>
                  </widget>
                 </item>
                 <item>

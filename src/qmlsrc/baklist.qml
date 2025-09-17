@@ -143,6 +143,14 @@ Rectangle {
             return "black"
     }
 
+    function getFontColor3() {
+
+        if (isDark)
+            return "#BBBBBB"
+        else
+            return "#555555"
+    }
+
     Component {
         id: dragDelegate
 
@@ -251,7 +259,7 @@ Rectangle {
                         font.pointSize: item0.font.pointSize * 0.85
                         text: text3
 
-                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor3()
                         leftPadding: 5
                         rightPadding: 5
 

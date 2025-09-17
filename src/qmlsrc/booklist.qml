@@ -144,7 +144,7 @@ Rectangle {
     function getFontColor() {
 
         if (isDark)
-            return "#EEEEEE"
+            return "#FFFFFF"
         else
             return "black"
     }
@@ -152,9 +152,9 @@ Rectangle {
     function getFontColorGray() {
 
         if (isDark)
-            return "lightgray"
+            return "#BBBBBB"
         else
-            return "gray"
+            return "#555555"
     }
 
     Component {
@@ -284,7 +284,7 @@ Rectangle {
                         verticalAlignment: Text.AlignVCenter
                         width: parent.width
                         wrapMode: TextArea.WrapAnywhere
-                        color: listItem.ListView.isCurrentItem ? "#4F4F4F" : getFontColorGray()
+                        color: listItem.ListView.isCurrentItem ? "#000000" : getFontColorGray()
                         font.bold: false
                         font.italic: true
                         font.pointSize: fontSize * 0.85

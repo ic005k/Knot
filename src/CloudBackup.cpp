@@ -1134,6 +1134,7 @@ void CloudBackup::init_CloudBacup() {
   QStringList txtList;
   txtList.append("https://dav.jianguoyun.com/dav/");
   txtList.append("https://soya.infini-cloud.net/dav/");
+  txtList.append("https://app.koofr.net/dav/Koofr/");
   for (int i = 0; i < count; i++) {
     QString text =
         iniPreferences->value("/webdav/text" + QString::number(i), "")

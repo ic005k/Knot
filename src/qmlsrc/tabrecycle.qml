@@ -128,7 +128,7 @@ Rectangle {
         var strColor
 
         if (isDark)
-            strColor = "#455364"
+            strColor = "#000000"
         else
             strColor = "#ffffff"
 
@@ -141,6 +141,14 @@ Rectangle {
             return "white"
         else
             return "black"
+    }
+
+    function getFontColor3() {
+
+        if (isDark)
+            return "#BBBBBB"
+        else
+            return "#555555"
     }
 
     Component {
@@ -226,6 +234,7 @@ Rectangle {
                         width: parent.width
                         wrapMode: TextArea.WordWrap
                         font.bold: false
+
                         text: text2
                         color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
 
@@ -243,9 +252,10 @@ Rectangle {
                         elide: Text.ElideRight
                         Layout.preferredWidth: listItem.width
                         font.bold: false
+                        font.italic: true
                         font.pointSize: item0.font.pointSize - 1
                         text: text3
-                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor3()
 
                         leftPadding: 5
                         rightPadding: 5

@@ -143,6 +143,14 @@ Rectangle {
             return "black"
     }
 
+    function getFontColor3() {
+
+        if (isDark)
+            return "#BBBBBB"
+        else
+            return "#555555"
+    }
+
     Component {
         id: dragDelegate
 
@@ -248,7 +256,7 @@ Rectangle {
                         font.italic: true
                         font.pointSize: item0.font.pointSize - 2
                         text: text3
-                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor3()
 
                         leftPadding: 5
                         rightPadding: 5
@@ -276,79 +284,16 @@ Rectangle {
                     var delta = Qt.point(mouse.x - clickPos.x,
                                          mouse.y - clickPos.y)
                     console.debug("delta.x: " + delta.x)
-                    if ((delta.x < 0) && (aBtnShow.running === false)
-                            && (delBtn.width == 0)) {
-                        aBtnShow.start()
-                    } else if (aBtnHide.running === false
-                               && (delBtn.width > 0)) {
-                        aBtnHide.start()
-                    }
                 }
 
                 onClicked: {
 
                     view.currentIndex = index //实现item切换
-                    //mw_one.clickData()
                 }
 
                 onDoubleClicked: {
 
-                    //mw_one.reeditData()
-                    //var data = view.model.get(view.currentIndex)
-                    //console.log(data.text0 + "," + data.type + ", count=" + view.count)
                 }
-            }
-
-            Rectangle {
-                color: "#AAAAAA"
-                height: 0
-                width: parent.width
-                anchors.bottom: parent.bottom
-            }
-
-            Rectangle {
-                id: delBtn
-                visible: false
-                height: parent.height
-                width: 0
-                color: "#FF0000"
-
-                anchors.right: parent.right
-                anchors.rightMargin: -30
-                radius: 0
-
-                Text {
-                    width: 56
-                    anchors.centerIn: parent
-
-                    text: qsTr("Done")
-                    color: "#ffffff"
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        m_Todo.addToRecycle()
-                        view.model.remove(index)
-                    }
-                }
-            }
-
-            PropertyAnimation {
-                id: aBtnShow
-                target: delBtn
-                property: "width"
-                duration: 100
-                from: 0
-                to: 80
-            }
-            PropertyAnimation {
-                id: aBtnHide
-                target: delBtn
-                property: "width"
-                duration: 100
-                from: 80
-                to: 0
             }
         }
     }
