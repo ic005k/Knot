@@ -31,6 +31,10 @@ Method::Method(QWidget *parent) : QDialog(parent) {
 
   this->installEventFilter(this);
 
+  QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);
+  count1 = Reg.value("/AccessWebDAV/count1", 0).toInt();
+  count2 = Reg.value("/AccessWebDAV/count2", 0).toInt();
+
   m_widget = new QWidget(mw_one);
   m_widget->close();
 
@@ -3146,4 +3150,27 @@ QString Method::getBaseFlag(const QString &file) {
   qDebug() << "baseFlag=" << baseFlag;
 
   return baseFlag;
+}
+
+void Method::setAccessCount(int count) {
+  int m = QTime::currentTime().minute();
+  if (m < 30) {
+    count1 = count1 + count;
+    count2 = 0;
+  }
+  if (m >= 30) {
+    count2 = count2 + count;
+    count1 = 0;
+  }
+
+  QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);
+  Reg.setValue("/AccessWebDAV/count1", count1);
+  Reg.setValue("/AccessWebDAV/count2", count2);
+  Reg.sync();
+}
+
+int Method::getAccessCount() {
+  if (count1 > 0) return count1;
+  if (count2 > 0) return count2;
+  return 0;
 }

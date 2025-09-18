@@ -2023,10 +2023,15 @@ void NotesList::on_actionStatistics() {
     totalNotes = totalNotes + tw->topLevelItem(i)->childCount();
   }
 
+  QString strAccessCount = tr("Access WebDAV:") +
+                           QString::number(m_Method->getAccessCount()) +
+                           "t/30min";
+
   ShowMessage *msg = new ShowMessage(this);
   msg->showMsg(appName,
                tr("NoteBook") + ": " + QString::number(countNoteBook) + "    " +
-                   tr("Notes") + ": " + QString::number(totalNotes),
+                   tr("Notes") + ": " + QString::number(totalNotes) + "\n\n" +
+                   strAccessCount,
                1);
 }
 

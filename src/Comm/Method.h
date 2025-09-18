@@ -415,6 +415,10 @@ class Method : public QDialog {
   int getFlagToday(QTreeWidget *tw);
   QString getFileUTCString(const QString &file);
   QString getBaseFlag(const QString &file);
+
+  void setAccessCount(int count);
+
+  int getAccessCount();
   protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
@@ -432,6 +436,8 @@ class Method : public QDialog {
  private slots:
 
  private:
+  int count1 = 0;
+  int count2 = 0;
   QDialog *infoWindow = nullptr;
   int secondCounter = 0;
 

@@ -2316,6 +2316,7 @@ void MainWindow::on_btnBackNoteRecycle_clicked() {
 
       qDebug() << "recycleDelFiles=" << files;
       m_CloudBackup->deleteWebDAVFiles(files);
+      m_Method->setAccessCount(files.count());
     }
   }
 }

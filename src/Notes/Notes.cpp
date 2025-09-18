@@ -758,6 +758,7 @@ void Notes::syncToWebDAV() {
       m_CloudBackup->deleteWebDAVFiles(delFiles);
 
       m_CloudBackup->uploadFilesToWebDAV(notes_sync_files);
+      m_Method->setAccessCount(notes_sync_files.count());
     }
   }
 }
@@ -1443,6 +1444,8 @@ void Notes::openNotes() {
                         m_CloudBackup->APP_PASSWORD);
     helper->setParent(this);
 
+    m_Method->setAccessCount(6);
+
     // 连接信号
     QObject::connect(
         helper, &WebDavHelper::listCompleted, this,
@@ -1540,6 +1543,7 @@ void Notes::openNotes() {
             qDebug() << "lf=" << lf;
             int maxConcurrentDownloads = 1;
             downloader->downloadFiles(remoteFiles, lf, maxConcurrentDownloads);
+            m_Method->setAccessCount(remoteFiles.count());
           }
 
           if (remoteFiles.count() == 0) openNotesUI();
