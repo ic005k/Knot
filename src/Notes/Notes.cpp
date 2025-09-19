@@ -160,8 +160,8 @@ void Notes::saveMainNotes() {
   mw_one->strLatestModify = tr("Modi Notes");
 
   if (isTextChange) {
-    QString text = m_EditSource->text();
-    text = formatMDText(text);
+    newText = m_EditSource->text();
+    newText = formatMDText(newText);
 
     // 关键改进：基于目标文件生成唯一临时文件（同目录+唯一名称）
     QFileInfo targetInfo(currentMDFile);
@@ -169,7 +169,7 @@ void Notes::saveMainNotes() {
         targetInfo.fileName() + "." +
         QString::number(QDateTime::currentMSecsSinceEpoch()) + ".tmp");
 
-    bool isOk = StringToFile(text, tempFile);
+    bool isOk = StringToFile(newText, tempFile);
     if (isOk) {
       QFile::remove(currentMDFile);
       if (QFile::rename(tempFile, currentMDFile)) {
@@ -183,6 +183,17 @@ void Notes::saveMainNotes() {
     } else {
       qWarning() << "临时文件写入失败";
     }
+
+    QString strDiff = m_NoteDiffManager.createPatchFromTexts(oldText, newText);
+    qDebug() << "strDiff=" << strDiff;
+    // 1. 计算新旧文本的差异
+    QList<Diff> diffs = m_NoteDiffManager.computeDiffs(oldText, newText);
+
+    // 2. 转换为 HTML 格式的可视化差异
+    QList<Diff> filteredDiffs =
+        m_NoteDiffManager.filterDiffsForDisplay(diffs, 3);
+    QString diffHtml = m_NoteDiffManager.diffsToHtml(filteredDiffs);
+    qDebug() << "diffHtml=" << diffHtml;
   }
 
   isTextChange = false;
@@ -1327,6 +1338,8 @@ void Notes::openEditUI() {
     return;
   }
 
+  oldText = loadText(currentMDFile);
+
   m_NotesList->refreshRecentOpen(m_NotesList->noteTitle);
   m_NotesList->saveRecentOpen();
   m_NotesList->moveToFirst();
@@ -1347,9 +1360,8 @@ void Notes::openEditUI() {
 
   init();
 
-  QString mdString = loadText(currentMDFile);
   m_EditSource->setWrapMode(QsciScintilla::WrapNone);
-  m_EditSource->setText(mdString);
+  m_EditSource->setText(oldText);
   m_EditSource->setWrapMode(QsciScintilla::WrapWord);  // 按单词换行
 
   show();

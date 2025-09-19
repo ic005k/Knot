@@ -47,6 +47,7 @@
 
 #include "src/Comm/ShowMessage.h"
 #include "src/Notes/ColorDialog.h"
+#include "src/Notes/NoteDiffManager.h"
 #include "src/Notes/PrintPDF.h"
 #include "src/Notes/note_index_manager.h"
 #include "titlegenerator.h"
@@ -67,6 +68,8 @@ class Notes : public QDialog {
   explicit Notes(QWidget *parent = nullptr);
   ~Notes();
   Ui::Notes *ui;
+
+  NoteDiffManager m_NoteDiffManager;
 
   bool isWebDAVError = false;
 
@@ -247,6 +250,8 @@ class Notes : public QDialog {
   void on_btnView_clicked();
 
  private:
+  QString oldText, newText;
+
   bool m_initialized = false;
 
   QString m_lastSearchText;

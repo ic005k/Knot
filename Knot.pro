@@ -343,6 +343,7 @@ SOURCES += \
 }
 
 SOURCES += \
+    lib/diff/diff_match_patch.cpp \
     lib/zlib/adler32.c \
     lib/zlib/compress.c \
     lib/zlib/crc32.c \
@@ -382,6 +383,7 @@ SOURCES += \
     src/Notes/MarkdownToHtml.cpp \
     src/Notes/MoveTo.cpp \
     src/Notes/NewNoteBook.cpp \
+    src/Notes/NoteDiffManager.cpp \
     src/Notes/NoteListModel.cpp \
     src/Notes/Notes.cpp \
     src/Notes/NotesList.cpp \
@@ -583,6 +585,7 @@ HEADERS += \
 }
 
 HEADERS += \
+    lib/diff/diff_match_patch.h \
     lib/zlib/crc32.h \
     lib/zlib/deflate.h \
     lib/zlib/gzguts.h \
@@ -618,6 +621,7 @@ HEADERS += \
     src/Notes/ColorDialog.h \
     src/Notes/MoveTo.h \
     src/Notes/NewNoteBook.h \
+    src/Notes/NoteDiffManager.h \
     src/Notes/NoteListModel.h \
     src/Notes/Notes.h \
     src/Notes/NotesList.h \
