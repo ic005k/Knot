@@ -192,6 +192,8 @@ void Notes::saveMainNotes() {
 }
 
 void Notes::updateDiff(const QString &oldText, const QString &newText) {
+  if (oldText.isEmpty()) return;
+
   QString strDiff = m_NoteDiffManager.createPatchFromTexts(oldText, newText);
   // qDebug() << "strDiff=" << strDiff;
   //  1. 计算新旧文本的差异
@@ -1157,26 +1159,29 @@ void Notes::zipNoteToSyncList() {
     return;
   }
 
-  if (!m_Method->compressFileWithZlib(getCurrentJSON(), zipJSON,
-                                      Z_DEFAULT_COMPRESSION)) {
-    errorInfo = tr("An error occurred while compressing the file.");
-    ShowMessage *msg = new ShowMessage(this);
-    msg->showMsg("Knot", errorInfo, 1);
-    return;
-  }
-
   QString enc_file = m_Method->useEnc(zipMD);
   if (enc_file != "") zipMD = enc_file;
 
-  QString enc_json = m_Method->useEnc(zipJSON);
-  if (enc_json != "") zipJSON = enc_json;
-
   appendToSyncList(zipMD);
-  appendToSyncList(zipJSON);
+
+  QString json = getCurrentJSON(currentMDFile);
+  if (QFile::exists(json)) {
+    if (!m_Method->compressFileWithZlib(json, zipJSON, Z_DEFAULT_COMPRESSION)) {
+      errorInfo = tr("An error occurred while compressing the file.");
+      ShowMessage *msg = new ShowMessage(this);
+      msg->showMsg("Knot", errorInfo, 1);
+      return;
+    }
+
+    QString enc_json = m_Method->useEnc(zipJSON);
+    if (enc_json != "") zipJSON = enc_json;
+
+    appendToSyncList(zipJSON);
+  }
 }
 
-QString Notes::getCurrentJSON() {
-  QFileInfo fi(currentMDFile);
+QString Notes::getCurrentJSON(const QString &md) {
+  QFileInfo fi(md);
   return iniDir + "memo/" + fi.baseName() + ".json";
 }
 

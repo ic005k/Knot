@@ -1103,7 +1103,10 @@ void NotesList::on_btnDel_Recycle_clicked() {
     }
 
     delFile(md);
+    QString json = mw_one->m_Notes->getCurrentJSON(md);
+    delFile(json);
     mw_one->m_Notes->notes_sync_files.removeOne(md);
+    mw_one->m_Notes->notes_sync_files.removeOne(json);
 
     setDelNoteFlag(curItem->text(1));
 
@@ -1145,12 +1148,15 @@ void NotesList::needDelNotes() {
   Reg.sync();
 
   // del files
-  bool isDelOk;
+  bool isDelMDOk, isDelJSONOk;
   for (int i = 0; i < count; i++) {
     QString mdFile = iniDir + needDelFiles.at(i);
-    isDelOk = delFile(mdFile);
+    QString jsonFile = mw_one->m_Notes->getCurrentJSON(mdFile);
+    isDelMDOk = delFile(mdFile);
+    isDelJSONOk = delFile(jsonFile);
 
-    qDebug() << "Need Del Note: " << mdFile << isDelOk;
+    qDebug() << "Need Del Note: " << mdFile << isDelMDOk;
+    qDebug() << "Need Del Note: " << jsonFile << isDelJSONOk;
   }
 }
 
@@ -2230,8 +2236,8 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
 
 void NotesList::on_actionModificationHistory() {
   // 读取差异记录
-  QList<QJsonObject> allDiffs =
-      mw_one->m_Notes->loadAllDiffs(mw_one->m_Notes->getCurrentJSON());
+  QList<QJsonObject> allDiffs = mw_one->m_Notes->loadAllDiffs(
+      mw_one->m_Notes->getCurrentJSON(currentMDFile));
 
   // 按修改时间排序（最新的在前面）
   std::sort(allDiffs.begin(), allDiffs.end(),

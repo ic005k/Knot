@@ -20,7 +20,7 @@ Rectangle {
 
         // 列表标题：清晰提示功能
         Text {
-            text: "修改历史"
+            text: qsTr("Modify History")
             font.family: "Microsoft YaHei"
             font.pointSize: 14
             font.bold: true
@@ -102,7 +102,7 @@ Rectangle {
 
                 Text {
                     anchors.centerIn: parent
-                    text: "暂无修改记录"
+                    text: qsTr("No modification records")
 
                     color: "#999"
                 }

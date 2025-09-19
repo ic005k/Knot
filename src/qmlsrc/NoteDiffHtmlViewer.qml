@@ -1,12 +1,13 @@
-import QtQuick 6.2
-import QtQuick.Controls 6.2
-import QtQuick.Layouts 6.2
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Controls.Fusion
 
 Rectangle {
     id: root
     objectName: "diffHtmlRoot"
     width: 300
-    height: parent.height // 必须绑定高度，避免滚动范围异常
+    //height: parent.height // 必须绑定高度，避免滚动范围异常
     color: "#ffffff"
     border.color: "#eee"
     border.width: 1
@@ -17,7 +18,7 @@ Rectangle {
         id: scrollView
         anchors.fill: parent
         // 1. Qt6 中禁用水平滚动条的正确方式（通过子控件 ScrollBar.horizontal）
-        ScrollBar.horizontal.policy: ScrollBar.Off // 彻底关闭水平滚动条
+        //ScrollBar.horizontal.policy: ScrollBar.Off // 彻底关闭水平滚动条
         // 2. 固定内容宽度 = ScrollView 可用宽度（无水平滚动空间）
         contentWidth: scrollView.availableWidth // availableWidth 是扣除边距后的实际宽度
         // 3. 内边距（避免内容贴边，且不影响宽度计算）
@@ -44,7 +45,7 @@ Rectangle {
     // 空内容提示
     Text {
         visible: root.htmlContent === ""
-        text: "暂无差异内容"
+        text: qsTr("No differences")
         color: "#999999"
         anchors.centerIn: parent
     }

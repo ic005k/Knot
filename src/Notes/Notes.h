@@ -195,7 +195,7 @@ class Notes : public QDialog {
   bool appendDiffToFile(const QString &diffFilePath,
                         const QString &noteFilePath, const QString &strDiff,
                         const QString &diffHtml);
-  QString getCurrentJSON();
+  QString getCurrentJSON(const QString &md);
 
  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
