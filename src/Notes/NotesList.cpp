@@ -2172,6 +2172,7 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
   QAction *actShare = new QAction(tr("Share"));
   QAction *actCopyLink = new QAction(tr("Copy Note Link"));
   QAction *actRelationshipGraph = new QAction(tr("Relationship Graph"));
+  QAction *actModificationHistory = new QAction(tr("Modification History"));
 
   connect(actNew, &QAction::triggered, this,
           &NotesList::on_actionAdd_Note_triggered);
@@ -2195,6 +2196,8 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
           &NotesList::on_actionCopyNoteLink);
   connect(actRelationshipGraph, &QAction::triggered, this,
           &NotesList::on_actionRelationshipGraph);
+  connect(actModificationHistory, &QAction::triggered, this,
+          &NotesList::on_actionModificationHistory);
 
   mainMenu->addAction(actNew);
   mainMenu->addAction(actRename);
@@ -2209,6 +2212,7 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
 
   mainMenu->addAction(actCopyLink);
   mainMenu->addAction(actRelationshipGraph);
+  mainMenu->addAction(actModificationHistory);
 
   actRename->setVisible(false);
   actDel->setVisible(false);
@@ -2222,6 +2226,102 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
 #endif
 
   mainMenu->setStyleSheet(m_Method->qssMenu);
+}
+
+void NotesList::on_actionModificationHistory() {
+  // 读取差异记录
+  QList<QJsonObject> allDiffs =
+      mw_one->m_Notes->loadAllDiffs(mw_one->m_Notes->getCurrentJSON());
+
+  // 按修改时间排序（最新的在前面）
+  std::sort(allDiffs.begin(), allDiffs.end(),
+            [](const QJsonObject &a, const QJsonObject &b) {
+              return a["modifyTime"].toString() > b["modifyTime"].toString();
+            });
+
+  if (mui->qwNoteVersion->source().isEmpty()) {
+    mui->qwNoteVersion->rootContext()->setContextProperty("m_NotesList",
+                                                          m_NotesList);
+    mui->qwNoteVersion->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/NoteVersionList.qml")));
+  }
+
+  // 获取 QML 根对象（即 NoteVersionList.qml 中的 Rectangle）
+  QQuickItem *rootItem = mui->qwNoteVersion->rootObject();
+  if (!rootItem) {
+    qWarning() << "获取 QML 根对象失败";
+    return;
+  }
+
+  mui->frameNoteList->hide();
+  mui->frameDiff->show();
+
+  // 获取 QML 中的 ListModel（id: noteVersionModel）
+  QObject *versionModel = rootItem->findChild<QObject *>("noteVersionModel");
+  if (!versionModel) {
+    qWarning() << "获取 noteVersionModel 失败";
+    return;
+  }
+
+  // 清空旧数据（调用 QML 中的 clearModel() 方法）
+  QMetaObject::invokeMethod(versionModel, "clearModel");
+
+  noteDiffTime.clear();
+  noteDiffHtml.clear();
+  noteDiffPatch.clear();
+
+  // 遍历展示（例如在QListView中显示版本列表）
+  foreach (const QJsonObject &diff, allDiffs) {
+    QString version = diff["version"].toString();  // 版本（笔记修改时间）
+    QString time = diff["modifyTime"].toString();  // 修改时间
+    QString html = diff["htmlDiff"].toString();    // 可视化内容
+    QString patch = diff["patch"].toString();
+
+    noteDiffTime.append(time);
+    noteDiffHtml.append(html);
+    noteDiffPatch.append(patch);
+
+    QMetaObject::invokeMethod(
+        versionModel, "addRecord",
+        Q_ARG(QVariant, version)  // 传入修改时间（QVariant 适配 QML 类型）
+    );
+  }
+}
+
+void NotesList::getNoteDiffHtml() {
+  int index = getSelectedVersionIndex();
+  if (index < 0) return;
+
+  QString html = noteDiffHtml.at(index);
+  qDebug() << "html=" << html;
+}
+
+int NotesList::getSelectedVersionIndex() {
+  // 1. 获取 QML 根对象（确保 QML 已加载完成）
+  QQuickItem *rootItem = mui->qwNoteVersion->rootObject();
+  if (!rootItem) {
+    qWarning() << "获取 QML 根对象失败，无法读取选中索引";
+    return -1;  // 返回 -1 表示未获取到根对象
+  }
+
+  // 2. 读取根对象的 currentSelectedIndex 属性
+  // 注意：属性名必须和 QML 中定义的完全一致（currentSelectedIndex）
+  QVariant selectedIndexVar = rootItem->property("currentSelectedIndex");
+  if (!selectedIndexVar.isValid()) {
+    qWarning() << "QML 中未找到 currentSelectedIndex 属性，可能 QML 未正确修改";
+    return -1;  // 返回 -1 表示属性无效
+  }
+
+  // 3. 将 QVariant 转为 int 类型（QML 中属性是 int，所以转 int 安全）
+  int selectedIndex = selectedIndexVar.toInt();
+  qDebug() << "当前选中的列表索引：" << selectedIndex;
+
+  // 4. 处理未选中的情况（QML 中初始值是 -1，未选中时也会返回 -1）
+  if (selectedIndex == -1) {
+    qDebug() << "当前无选中项";
+  }
+
+  return selectedIndex;
 }
 
 void NotesList::on_actionRelationshipGraph() {

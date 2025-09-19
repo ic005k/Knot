@@ -33,5 +33,6 @@
         <file>src/qmlsrc/Speedometer.qml</file>
         <file>src/qmlsrc/NoteGraphView.qml</file>
         <file>src/qmlsrc/note_toolsbar.qml</file>
+        <file>src/qmlsrc/NoteVersionList.qml</file>
     </qresource>
 </RCC>

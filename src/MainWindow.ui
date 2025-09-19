@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>698</width>
-    <height>9456</height>
+    <height>9742</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -24,7 +24,7 @@
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_38">
+   <layout class="QVBoxLayout" name="verticalLayout_8">
     <item>
      <widget class="QFrame" name="frameReader">
       <property name="minimumSize">
@@ -7453,6 +7453,45 @@ QSlider::handle:horizontal:disabled {
           </widget>
          </item>
         </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="frameDiff">
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QQuickWidget" name="qwNoteVersion">
+         <property name="resizeMode">
+          <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QQuickWidget" name="qwNoteDiff">
+         <property name="resizeMode">
+          <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="btnBackNoteDiff">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Back</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

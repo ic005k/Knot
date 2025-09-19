@@ -195,6 +195,7 @@ class Notes : public QDialog {
   bool appendDiffToFile(const QString &diffFilePath,
                         const QString &noteFilePath, const QString &strDiff,
                         const QString &diffHtml);
+  QString getCurrentJSON();
 
  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
@@ -238,6 +239,7 @@ class Notes : public QDialog {
   void on_editNote();
 
   void delLink(QString link);
+
  signals:
   void sendUpdate();
 
@@ -323,7 +325,7 @@ class Notes : public QDialog {
 
   QString getFileVersion(const QString &filePath);
   void updateDiff(const QString &oldText, const QString &newText);
-  QString getCurrentJSON();
+
   void zipNoteToSyncList();
 };
 

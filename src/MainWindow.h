@@ -809,6 +809,8 @@ class MainWindow : public QMainWindow {
 
   void on_btnRotation_clicked();
 
+  void on_btnBackNoteDiff_clicked();
+
  private:
   bool isMoveEntry;
   QTimer *tmeFlash;

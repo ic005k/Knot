@@ -627,6 +627,7 @@ void MainHelper::init_UIWidget() {
   mui->frameNotesTree->hide();
   mui->qwCata->hide();
   mui->qwBookmark->hide();
+  mui->frameDiff->hide();
 
   mui->frameCategory->hide();
   mui->frameSetTab->hide();

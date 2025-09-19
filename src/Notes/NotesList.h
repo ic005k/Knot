@@ -231,7 +231,8 @@ class NotesList : public QDialog {
 
   void qmlOpenEdit();
 
- private slots:
+  void getNoteDiffHtml();
+  private slots:
 
   void on_actionShareNoteFile();
 
@@ -245,7 +246,11 @@ class NotesList : public QDialog {
 
   void onNoteNodeDoubleClicked(const QString &filePath);
 
+  void on_actionModificationHistory();
+
  private:
+  QStringList noteDiffTime, noteDiffHtml, noteDiffPatch;
+
   QString notebookName;
 
   QString noteName;
@@ -314,6 +319,7 @@ class NotesList : public QDialog {
   void initNoteGraphView();
   void readyNotesData(QTreeWidgetItem *topItem);
   void initSerachDatabase();
+  int getSelectedVersionIndex();
 };
 
 class SearchMapper {

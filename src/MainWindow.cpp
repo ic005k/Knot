@@ -743,6 +743,12 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     return;
   }
 
+  if (!mui->frameDiff->isHidden()) {
+    on_btnBackNoteDiff_clicked();
+    event->ignore();
+    return;
+  }
+
   if (!mui->frameNotesGraph->isHidden()) {
     on_btnBackNotesGraph_clicked();
     event->ignore();
@@ -2891,4 +2897,9 @@ void MainWindow::on_btnRotation_clicked() {
     QMetaObject::invokeMethod(orientationButton, "clicked");
     m_Reader->isLandscape = !m_Reader->isLandscape;
   }
+}
+
+void MainWindow::on_btnBackNoteDiff_clicked() {
+  mui->frameDiff->hide();
+  mui->frameNoteList->show();
 }
