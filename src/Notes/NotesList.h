@@ -320,6 +320,7 @@ class NotesList : public QDialog {
   void readyNotesData(QTreeWidgetItem *topItem);
   void initSerachDatabase();
   int getSelectedVersionIndex();
+  void setNoteDiffHtmlToQML(const QString &html);
 };
 
 class SearchMapper {

@@ -73,7 +73,8 @@ QString Diff::strOperation(Operation op) {
 QString Diff::toString() const {
   QString prettyText = text;
   // Replace linebreaks with Pilcrow signs.
-  prettyText.replace('\n', L'\u00b6');
+  // prettyText.replace('\n', L'\u00b6'); //安卓不支持
+  prettyText.replace('\n', u'\u00b6');
   return QString("Diff(") + strOperation(operation) + QString(",\"") +
          prettyText + QString("\")");
 }
@@ -1287,12 +1288,19 @@ QString diff_match_patch::diff_prettyHtml(const QList<Diff> &diffs) {
 
     switch (aDiff.operation) {
       case INSERT_OP:
-        // 新增内容：使用颜色名称"green"
-        html += QString("<font color= green>") + text + "</font>";
+        // 方案0：新增内容：使用颜色名称"blue"
+        // html += QString("<font color= \"blue\">") + text + "</font>";
+        // 方案1：亮橙色文字 + 加粗（对比度高，显眼且兼容）
+        // html += QString("<font color=\"#FF5733\"><b>") + text +
+        // "</b></font>";
+        // 方案2：紫色文字 + 【新增】标记（更直观，适合需要明确标识的场景）
+        html +=
+            QString("<font color=\"#9933FF\"><b>【+】") + text + "</b></font>";
+
         break;
       case DELETE_OP:
         // 删除内容：使用颜色名称"red" + <s>删除线
-        html += QString("<font color=red><s>") + text + "</s></font>";
+        html += QString("<font color=\"red\"><s>") + text + "</s></font>";
         break;
       case EQUAL_OP:
         html += text;

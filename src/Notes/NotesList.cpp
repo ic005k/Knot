@@ -2286,6 +2286,8 @@ void NotesList::on_actionModificationHistory() {
         Q_ARG(QVariant, version)  // 传入修改时间（QVariant 适配 QML 类型）
     );
   }
+
+  setNoteDiffHtmlToQML("");
 }
 
 void NotesList::getNoteDiffHtml() {
@@ -2293,30 +2295,46 @@ void NotesList::getNoteDiffHtml() {
   if (index < 0) return;
 
   QString html = noteDiffHtml.at(index);
-  qDebug() << "html=" << html;
+  setNoteDiffHtmlToQML(html);
+}
+
+void NotesList::setNoteDiffHtmlToQML(const QString &html) {
+  if (mui->qwNoteDiff->source().isEmpty()) {
+    mui->qwNoteDiff->rootContext()->setContextProperty("m_NotesList",
+                                                       m_NotesList);
+    mui->qwNoteDiff->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/NoteDiffHtmlViewer.qml")));
+    mui->qwNoteDiff->setResizeMode(
+        QQuickWidget::SizeRootObjectToView);  // 自适应大小
+  }
+  QQuickItem *rootItem = mui->qwNoteDiff->rootObject();
+  if (!rootItem) {
+    qWarning() << "获取 QML 根对象失败，无法更新 HTML 内容";
+    return;
+  }
+
+  // 设置 QML 中的 htmlContent 属性（名称必须与 QML 中完全一致）
+  rootItem->setProperty("htmlContent", html);
 }
 
 int NotesList::getSelectedVersionIndex() {
-  // 1. 获取 QML 根对象（确保 QML 已加载完成）
   QQuickItem *rootItem = mui->qwNoteVersion->rootObject();
   if (!rootItem) {
     qWarning() << "获取 QML 根对象失败，无法读取选中索引";
-    return -1;  // 返回 -1 表示未获取到根对象
+    return -1;
   }
 
-  // 2. 读取根对象的 currentSelectedIndex 属性
+  // 读取根对象的 currentSelectedIndex 属性
   // 注意：属性名必须和 QML 中定义的完全一致（currentSelectedIndex）
   QVariant selectedIndexVar = rootItem->property("currentSelectedIndex");
   if (!selectedIndexVar.isValid()) {
     qWarning() << "QML 中未找到 currentSelectedIndex 属性，可能 QML 未正确修改";
-    return -1;  // 返回 -1 表示属性无效
+    return -1;
   }
 
-  // 3. 将 QVariant 转为 int 类型（QML 中属性是 int，所以转 int 安全）
   int selectedIndex = selectedIndexVar.toInt();
   qDebug() << "当前选中的列表索引：" << selectedIndex;
 
-  // 4. 处理未选中的情况（QML 中初始值是 -1，未选中时也会返回 -1）
   if (selectedIndex == -1) {
     qDebug() << "当前无选中项";
   }
