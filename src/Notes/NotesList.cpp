@@ -606,14 +606,14 @@ bool NotesList::on_btnImport_clicked() {
 
         QString a = "memo/" + mw_one->m_Notes->getDateTimeStr() + "_" +
                     QString::number(i) + ".md";
-        QString mdFile = iniDir + a;
-        StringToFile(strNoteText, mdFile);
+        currentMDFile = iniDir + a;
+        StringToFile(strNoteText, currentMDFile);
 
         item1->setText(1, a);
 
         qDebug() << fileName << a;
 
-        mw_one->m_Notes->updateMDFileToSyncLists(mdFile);
+        mw_one->m_Notes->updateMDFileToSyncLists();
 
       } else {
         isImportFilesEnd = true;

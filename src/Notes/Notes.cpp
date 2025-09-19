@@ -174,7 +174,8 @@ void Notes::saveMainNotes() {
       QFile::remove(currentMDFile);
       if (QFile::rename(tempFile, currentMDFile)) {
         qDebug() << "Save Note: " << currentMDFile;
-        updateMDFileToSyncLists(currentMDFile);
+        updateDiff(oldText, newText);
+        updateMDFileToSyncLists();
         startBackgroundTaskUpdateNoteIndex(currentMDFile);
       } else {
         qWarning() << "重命名失败，清理临时文件";
@@ -183,29 +184,6 @@ void Notes::saveMainNotes() {
     } else {
       qWarning() << "临时文件写入失败";
     }
-
-    QString strDiff = m_NoteDiffManager.createPatchFromTexts(oldText, newText);
-    // qDebug() << "strDiff=" << strDiff;
-    //  1. 计算新旧文本的差异
-    QString cleanedOldText = oldText;
-    QString cleanedNewText = newText;
-    cleanedOldText = cleanedOldText.replace("\r", "");  // 直接删除所有 \r
-    cleanedNewText = cleanedNewText.replace("\r", "");
-    QList<Diff> diffs =
-        m_NoteDiffManager.computeDiffs(cleanedOldText, cleanedNewText);
-    // 2. 转换为 HTML 格式的可视化差异
-    QList<Diff> filteredDiffs =
-        m_NoteDiffManager.filterDiffsForDisplay(diffs, 3);
-    QString diffHtml = m_NoteDiffManager.diffsToHtml(filteredDiffs);
-    // qDebug() << "diffHtml=" << diffHtml;
-
-    QFileInfo fi(currentMDFile);
-    QString diffFilePath = iniDir + "/memo/" + fi.baseName() + ".json";
-    bool success =
-        appendDiffToFile(diffFilePath, currentMDFile, strDiff, diffHtml);
-    if (success) {
-      qDebug() << "差异已追加保存";
-    }
   }
 
   isTextChange = false;
@@ -213,24 +191,31 @@ void Notes::saveMainNotes() {
 #endif
 }
 
-void Notes::updateMDFileToSyncLists(QString currentMDFile) {
-  QString lastModi = m_Method->getFileUTCString(currentMDFile);
-  QString zipMD = privateDir + "KnotData/memo/" + lastModi + "_" +
-                  QFileInfo(currentMDFile).fileName() + ".zip";
+void Notes::updateDiff(const QString &oldText, const QString &newText) {
+  QString strDiff = m_NoteDiffManager.createPatchFromTexts(oldText, newText);
+  // qDebug() << "strDiff=" << strDiff;
+  //  1. 计算新旧文本的差异
+  QString cleanedOldText = oldText;
+  QString cleanedNewText = newText;
+  cleanedOldText = cleanedOldText.replace("\r", "");  // 直接删除所有 \r
+  cleanedNewText = cleanedNewText.replace("\r", "");
+  QList<Diff> diffs =
+      m_NoteDiffManager.computeDiffs(cleanedOldText, cleanedNewText);
+  // 2. 转换为 HTML 格式的可视化差异
+  QList<Diff> filteredDiffs = m_NoteDiffManager.filterDiffsForDisplay(diffs, 3);
+  QString diffHtml = m_NoteDiffManager.diffsToHtml(filteredDiffs);
+  // qDebug() << "diffHtml=" << diffHtml;
 
-  if (!m_Method->compressFileWithZlib(currentMDFile, zipMD,
-                                      Z_DEFAULT_COMPRESSION)) {
-    errorInfo = tr("An error occurred while compressing the file.");
-    ShowMessage *msg = new ShowMessage(this);
-    msg->showMsg("Knot", errorInfo, 1);
-    return;
+  QFileInfo fi(currentMDFile);
+  QString diffFilePath = iniDir + "/memo/" + fi.baseName() + ".json";
+  bool success =
+      appendDiffToFile(diffFilePath, currentMDFile, strDiff, diffHtml);
+  if (success) {
+    qDebug() << "差异已追加保存";
   }
-
-  QString enc_file = m_Method->useEnc(zipMD);
-  if (enc_file != "") zipMD = enc_file;
-
-  appendToSyncList(zipMD);
 }
+
+void Notes::updateMDFileToSyncLists() { zipNoteToSyncList(); }
 
 bool Notes::eventFilter(QObject *obj, QEvent *evn) {
   QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
@@ -738,7 +723,7 @@ void Notes::closeEvent(QCloseEvent *event) {
   saveEditorState(currentMDFile);
 
 #ifndef Q_OS_ANDROID
-  strNoteText = m_EditSource->text().trimmed();
+  newText = m_EditSource->text().trimmed();
 #endif
 
   m_Method->Sleep(100);
@@ -754,7 +739,7 @@ void Notes::closeEvent(QCloseEvent *event) {
 
   if (isSetNewNoteTitle()) {
     TitleGenerator generator;
-    new_title = generator.genNewTitle(strNoteText);
+    new_title = generator.genNewTitle(newText);
     mui->btnRename->click();
   }
 }
@@ -1140,20 +1125,39 @@ void Notes::delLink(QString link) {
 }
 
 void Notes::javaNoteToQMLNote() {
+  newText = loadText(currentMDFile);
+  updateDiff(oldText, newText);
+
   if (isSetNewNoteTitle()) {
     TitleGenerator generator;
     if (isAndroid) {
-      strNoteText = loadText(currentMDFile);
     }
-    new_title = generator.genNewTitle(strNoteText);
+    new_title = generator.genNewTitle(newText);
     mui->btnRename->click();
   }
 
+  zipNoteToSyncList();
+
+  startBackgroundTaskUpdateNoteIndex(currentMDFile);
+}
+
+void Notes::zipNoteToSyncList() {
+  QFileInfo fi(currentMDFile);
   QString lastModi = m_Method->getFileUTCString(currentMDFile);
-  QString zipMD = privateDir + "KnotData/memo/" + lastModi + "_" +
-                  QFileInfo(currentMDFile).fileName() + ".zip";
+  QString zipMD =
+      privateDir + "KnotData/memo/" + lastModi + "_" + fi.fileName() + ".zip";
+  QString zipJSON = privateDir + "KnotData/memo/" + lastModi + "_" +
+                    fi.baseName() + ".json.zip";
 
   if (!m_Method->compressFileWithZlib(currentMDFile, zipMD,
+                                      Z_DEFAULT_COMPRESSION)) {
+    errorInfo = tr("An error occurred while compressing the file.");
+    ShowMessage *msg = new ShowMessage(this);
+    msg->showMsg("Knot", errorInfo, 1);
+    return;
+  }
+
+  if (!m_Method->compressFileWithZlib(getCurrentJSON(), zipJSON,
                                       Z_DEFAULT_COMPRESSION)) {
     errorInfo = tr("An error occurred while compressing the file.");
     ShowMessage *msg = new ShowMessage(this);
@@ -1164,9 +1168,16 @@ void Notes::javaNoteToQMLNote() {
   QString enc_file = m_Method->useEnc(zipMD);
   if (enc_file != "") zipMD = enc_file;
 
-  appendToSyncList(zipMD);
+  QString enc_json = m_Method->useEnc(zipJSON);
+  if (enc_json != "") zipJSON = enc_json;
 
-  startBackgroundTaskUpdateNoteIndex(currentMDFile);
+  appendToSyncList(zipMD);
+  appendToSyncList(zipJSON);
+}
+
+QString Notes::getCurrentJSON() {
+  QFileInfo fi(currentMDFile);
+  return iniDir + "memo/" + fi.baseName() + ".json";
 }
 
 QString Notes::formatMDText(QString text) {
@@ -1510,6 +1521,8 @@ void Notes::openNotes() {
             if (local_file.contains(".ini")) local_realfile = iniDir + fn;
             if (local_file.contains(".md"))
               local_realfile = iniDir + "memo/" + fn;
+            if (local_file.contains(".json"))
+              local_realfile = iniDir + "memo/" + fn;
             if (local_file.contains("images"))
               local_realfile = iniDir + "memo/images/" + fn;
 
@@ -1701,6 +1714,50 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
           QFile::remove(kFile);
           QFile::copy(pFile, kFile);
           m_NotesList->m_dbManager.updateFileIndex(kFile);
+        }
+      }
+    }
+
+    if (file.contains(".json.zip")) {
+      pDir = privateDir + "KnotData/memo";
+      pFile = pFile.replace(".zip", "");
+      kFile = iniDir + asFile.replace("KnotData/", "");
+      kFile = kFile.replace(".zip", "");
+      kFile = kFile.replace(remoteLastModi + "_", "");
+
+      qDebug() << "file=" << file;
+      qDebug() << "pFile=" << pFile;
+      qDebug() << "kFile=" << kFile;
+      qDebug() << "zFile=" << zFile;
+
+      n_Files++;
+
+      QString dec_file = m_Method->useDec(zFile);
+      if (dec_file != "") zFile = dec_file;
+
+      if (QFile::exists(zFile)) {
+        if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
+          mw_one->closeProgress();
+          errorInfo =
+              tr("Decompression failed. Please check in "
+                 "Preferences that the passwords are "
+                 "consistent across all platforms.");
+
+          ShowMessage *msg = new ShowMessage();
+          msg->showMsg("Knot", errorInfo, 1);
+          isPasswordError = true;
+          QFile::remove(zFile);
+          QFile::remove(privateDir + "KnotData/mainnotes.ini.zip");
+          return;
+        }
+      }
+
+      if (isPasswordError == false) {
+        QFileInfo pFileInfo(pFile);
+        QFileInfo kFileInfo(kFile);
+        if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
+          QFile::remove(kFile);
+          QFile::copy(pFile, kFile);
         }
       }
     }

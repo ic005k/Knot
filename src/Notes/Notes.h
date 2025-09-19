@@ -172,7 +172,7 @@ class Notes : public QDialog {
 
   bool isSaveNotesConfig = false;
 
-  void updateMDFileToSyncLists(QString currentMDFile);
+  void updateMDFileToSyncLists();
 
   void initEditor();
 
@@ -192,8 +192,11 @@ class Notes : public QDialog {
 
   QList<QJsonObject> loadAllDiffs(const QString &diffFilePath);
 
-  bool appendDiffToFile(const QString &diffFilePath, const QString &noteFilePath, const QString &strDiff, const QString &diffHtml);
-  protected:
+  bool appendDiffToFile(const QString &diffFilePath,
+                        const QString &noteFilePath, const QString &strDiff,
+                        const QString &diffHtml);
+
+ protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
   bool eventFilter(QObject *obj, QEvent *event) override;
@@ -255,6 +258,8 @@ class Notes : public QDialog {
  private:
   QString oldText, newText;
 
+  QString currentJSON;
+
   bool m_initialized = false;
 
   QString m_lastSearchText;
@@ -264,7 +269,7 @@ class Notes : public QDialog {
   QList<QString> remoteFiles;
 
   int x_left, x_right, y_left, y_right;
-  QString strNoteText;
+
   int y1;
   QString pdfFileName;
   bool isMouseRelease = false;
@@ -317,6 +322,9 @@ class Notes : public QDialog {
   void startBackgroundProcessRemoteFiles();
 
   QString getFileVersion(const QString &filePath);
+  void updateDiff(const QString &oldText, const QString &newText);
+  QString getCurrentJSON();
+  void zipNoteToSyncList();
 };
 
 class LimitedTextEdit : public QTextEdit {
