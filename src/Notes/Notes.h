@@ -190,7 +190,10 @@ class Notes : public QDialog {
 
   QStringList orgRemoteFiles;
 
- protected:
+  QList<QJsonObject> loadAllDiffs(const QString &diffFilePath);
+
+  bool appendDiffToFile(const QString &diffFilePath, const QString &noteFilePath, const QString &strDiff, const QString &diffHtml);
+  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
   bool eventFilter(QObject *obj, QEvent *event) override;
@@ -312,6 +315,8 @@ class Notes : public QDialog {
   void restoreEditorState(const QString &filePath);
   void processRemoteFiles(QStringList remoteFiles);
   void startBackgroundProcessRemoteFiles();
+
+  QString getFileVersion(const QString &filePath);
 };
 
 class LimitedTextEdit : public QTextEdit {

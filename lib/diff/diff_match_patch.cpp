@@ -1288,11 +1288,11 @@ QString diff_match_patch::diff_prettyHtml(const QList<Diff> &diffs) {
     switch (aDiff.operation) {
       case INSERT_OP:
         // 新增内容：使用颜色名称"green"
-        html += QString("<font color=\"green\">") + text + "</font>";
+        html += QString("<font color= green>") + text + "</font>";
         break;
       case DELETE_OP:
         // 删除内容：使用颜色名称"red" + <s>删除线
-        html += QString("<font color=\"red\"><s>") + text + "</s></font>";
+        html += QString("<font color=red><s>") + text + "</s></font>";
         break;
       case EQUAL_OP:
         html += text;

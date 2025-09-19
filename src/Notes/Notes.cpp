@@ -185,15 +185,27 @@ void Notes::saveMainNotes() {
     }
 
     QString strDiff = m_NoteDiffManager.createPatchFromTexts(oldText, newText);
-    qDebug() << "strDiff=" << strDiff;
-    // 1. 计算新旧文本的差异
-    QList<Diff> diffs = m_NoteDiffManager.computeDiffs(oldText, newText);
-
+    // qDebug() << "strDiff=" << strDiff;
+    //  1. 计算新旧文本的差异
+    QString cleanedOldText = oldText;
+    QString cleanedNewText = newText;
+    cleanedOldText = cleanedOldText.replace("\r", "");  // 直接删除所有 \r
+    cleanedNewText = cleanedNewText.replace("\r", "");
+    QList<Diff> diffs =
+        m_NoteDiffManager.computeDiffs(cleanedOldText, cleanedNewText);
     // 2. 转换为 HTML 格式的可视化差异
     QList<Diff> filteredDiffs =
         m_NoteDiffManager.filterDiffsForDisplay(diffs, 3);
     QString diffHtml = m_NoteDiffManager.diffsToHtml(filteredDiffs);
-    qDebug() << "diffHtml=" << diffHtml;
+    // qDebug() << "diffHtml=" << diffHtml;
+
+    QFileInfo fi(currentMDFile);
+    QString diffFilePath = iniDir + "/memo/" + fi.baseName() + ".json";
+    bool success =
+        appendDiffToFile(diffFilePath, currentMDFile, strDiff, diffHtml);
+    if (success) {
+      qDebug() << "差异已追加保存";
+    }
   }
 
   isTextChange = false;
@@ -2200,4 +2212,101 @@ void Notes::openLocalHtmlFileInAndroid() {
     env->ExceptionClear();
   }
 #endif
+}
+
+// 工具函数：获取文件最后修改时间（作为版本标识）
+QString Notes::getFileVersion(const QString &filePath) {
+  QFileInfo fileInfo(filePath);
+  if (fileInfo.exists()) {
+    // 返回ISO格式时间（如：2023-10-05T14:30:25），便于排序和解析
+    return fileInfo.lastModified().toString(Qt::ISODate);
+  }
+  return QDateTime::currentDateTime().toString(
+      Qt::ISODate);  // 新文件用当前时间
+}
+
+// 保存差异（追加模式）：若文件存在则添加到数组，不存在则创建新数组
+bool Notes::appendDiffToFile(
+    const QString &diffFilePath,  // 差异记录文件路径
+    const QString &noteFilePath,  // 被修改的笔记文件路径
+    const QString &strDiff,       // 补丁数据
+    const QString &diffHtml)      // 可视化HTML
+{
+  // 1. 准备当前版本信息（用笔记文件的最后修改时间作为版本）
+  QString version = getFileVersion(noteFilePath);
+  QString timestamp =
+      QDateTime::currentDateTime().toString(Qt::ISODate);  // 本次修改时间
+
+  // 2. 读取现有记录（若文件存在）
+  QList<QJsonObject> diffList;
+  QFile file(diffFilePath);
+  if (file.exists()) {
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      qWarning() << "无法读取差异文件：" << diffFilePath;
+      return false;
+    }
+    QByteArray data = file.readAll();
+    file.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (doc.isArray()) {
+      // 解析现有JSON数组
+      QJsonArray arr = doc.array();
+      for (int i = 0; i < arr.size(); ++i) {
+        if (arr[i].isObject()) {
+          diffList.append(arr[i].toObject());
+        }
+      }
+    } else {
+      qWarning() << "差异文件格式错误，将创建新文件";
+    }
+  }
+
+  // 3. 添加新的差异记录
+  QJsonObject newDiff;
+  newDiff["version"] = version;        // 版本标识（笔记文件修改时间）
+  newDiff["modifyTime"] = timestamp;   // 本次修改发生的时间
+  newDiff["notePath"] = noteFilePath;  // 关联的笔记文件路径
+  newDiff["patch"] = strDiff;          // 补丁数据
+  newDiff["htmlDiff"] = diffHtml;      // 可视化HTML
+  diffList.append(newDiff);
+
+  // 4. 写入文件（覆盖原文件，包含所有记录）
+  if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    qWarning() << "无法写入差异文件：" << diffFilePath;
+    return false;
+  }
+
+  QJsonArray newArr;
+  foreach (const QJsonObject &obj, diffList) {
+    newArr.append(obj);
+  }
+
+  QTextStream out(&file);
+  out << QJsonDocument(newArr).toJson(QJsonDocument::Indented);  // 格式化输出
+  file.close();
+  return true;
+}
+
+// 读取所有差异记录（供APP列表调用）
+QList<QJsonObject> Notes::loadAllDiffs(const QString &diffFilePath) {
+  QList<QJsonObject> diffList;
+  QFile file(diffFilePath);
+  if (!file.exists() || !file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    return diffList;  // 文件不存在或无法打开，返回空列表
+  }
+
+  QByteArray data = file.readAll();
+  file.close();
+
+  QJsonDocument doc = QJsonDocument::fromJson(data);
+  if (doc.isArray()) {
+    QJsonArray arr = doc.array();
+    for (int i = 0; i < arr.size(); ++i) {
+      if (arr[i].isObject()) {
+        diffList.append(arr[i].toObject());
+      }
+    }
+  }
+  return diffList;
 }
