@@ -3160,6 +3160,7 @@ void NotesList::newtextToOldtextFromDiffStr() {
 
   // 处理最终结果
   QString html = markdownToHtmlWithMath(currentText);
+  html = html.replace("images/", "file:///" + iniDir + "memo/images/");
   if (allSuccess) {
     qDebug() << "成功反推到版本" << targetIndex;
     setNoteDiffHtmlToQML(html);

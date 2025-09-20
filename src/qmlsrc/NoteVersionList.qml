@@ -1,6 +1,7 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Controls.Fusion
 
 // 主容器：适配 QuickWidget 大小，带轻微阴影
 Rectangle {
@@ -56,6 +57,7 @@ Rectangle {
 
             // 列表项模板（Delegate）：每条修改记录的显示样式
             delegate: Rectangle {
+                id: deleRect
                 width: versionListView.width
                 height: 40 // 固定高度，避免列表项高低不一
                 color: model.isSelected ? "#e6f7ff" : "transparent" // 选中时浅蓝色背景
@@ -97,14 +99,41 @@ Rectangle {
                     text: qsTr("Old Text")
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.right: parent.right
-                    anchors.rightMargin: 10 // 距离右边框的距离
-                    visible: model.isSelected
-                    height: 28
-                    width: 60
+                    anchors.rightMargin: 10
 
-                    // 按钮点击事件（留空，等待具体实现）
+                    // 通过contentItem自定义文字（兼容大多数Qt版本）
+                    contentItem: Text {
+                        text: parent.text // 与按钮text绑定
+                        color: "#ffffff" // 白色文字（强制生效）
+                        font: parent.font // 继承按钮字体设置
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        width: parent.width // 文字区域占满按钮宽度
+                        height: parent.height // 文字区域占满按钮高度
+                    }
+
+                    // 背景样式：柔和蓝色
+                    background: Rectangle {
+                        color: "#5c6bc0" // 柔和的蓝色
+                        radius: 4
+                    }
+
+                    // 尺寸逻辑
+                    font.pointSize: 12
+                    height: Math.min(font.pointSize * 2.4, 36)
+                    width: Math.min(text.length * font.pointSize * 1.8 + 20,
+                                    100)
+
+                    Component.onCompleted: {
+                        if (Qt.platform.os === "android") {
+                            height *= 1.1
+                            width *= 1.1
+                        }
+                    }
+
+                    visible: model.isSelected
+
                     onClicked: {
-                        // 旧文本按钮点击事件处理逻辑将在这里实现
                         m_NotesList.newtextToOldtextFromDiffStr()
                     }
                 }
@@ -122,6 +151,12 @@ Rectangle {
 
                     color: "#999"
                 }
+            }
+
+            // 滚动条
+            ScrollBar.vertical: ScrollBar {
+                policy: ScrollBar.AsNeeded
+                width: 8
             }
         }
     }
