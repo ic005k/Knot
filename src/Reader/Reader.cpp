@@ -1055,8 +1055,9 @@ void Reader::setFontSize(int fontSize) {
 
   mui->qwReader->rootContext()->setContextProperty("FontSize", fontSize);
 
+  m_Method->Sleep(100);
   qreal h2 = getVHeight();
-  qreal pos2 = getNewVPos(pos1, h1, h2);
+  qreal pos2 = pos1 * h2 / h1;
   setVPos(pos2);
   textPos = pos2;
 }
@@ -1286,12 +1287,6 @@ qreal Reader::getVHeight() {
                             Q_RETURN_ARG(QVariant, itemCount));
   textHeight = itemCount.toDouble();
   return textHeight;
-}
-
-qreal Reader::getNewVPos(qreal pos1, qreal h1, qreal h2) {
-  qreal pos2;
-  pos2 = pos1 * h2 / h1;
-  return pos2;
 }
 
 void Reader::showInfo() {

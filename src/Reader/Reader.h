@@ -112,7 +112,7 @@ class Reader : public QDialog {
   qreal getVPos();
   void setReaderStyle();
   qreal getVHeight();
-  qreal getNewVPos(qreal pos1, qreal h1, qreal h2);
+
   static QString processHtml(QString htmlFile, bool isWriteFile);
 
   void goNextPage();
