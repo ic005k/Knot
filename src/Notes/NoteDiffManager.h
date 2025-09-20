@@ -43,6 +43,7 @@ class NoteDiffManager {
   QString applyPatch(const QString &oldText, QList<Patch> &patches,
                      QVector<bool> &success);
   QList<Diff> filterDiffsForDisplay(const QList<Diff> &originalDiffs, int contextLines);
+  QString revertPatchToOldText(const QString &newText, const QString &patchStr, QVector<bool> &success);
 };
 
 #endif  // NOTEDIFFMANAGER_H

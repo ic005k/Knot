@@ -2899,7 +2899,4 @@ void MainWindow::on_btnRotation_clicked() {
   }
 }
 
-void MainWindow::on_btnBackNoteDiff_clicked() {
-  mui->frameDiff->hide();
-  mui->frameNoteList->show();
-}
+void MainWindow::on_btnBackNoteDiff_clicked() { m_NotesList->closeNoteDiff(); }

@@ -207,3 +207,69 @@ QList<Diff> NoteDiffManager::mergeAdjacentDiffs(const QList<Diff> &diffs) {
   merged.append(current);
   return merged;
 }
+
+// 核心函数：通过“新文本 + 补丁”反推“旧文本”
+// 参数：
+//   newText: 目标新文本
+//   patchStr: 从旧文本生成新文本的补丁字符串
+//   success: 输出参数，记录每个补丁片段的应用成功状态（true=成功，false=失败）
+// 返回值：反推得到的旧文本
+QString NoteDiffManager::revertPatchToOldText(const QString &newText,
+                                              const QString &patchStr,
+                                              QVector<bool> &success) {
+  // 1. 边界处理：空补丁→新旧文本相同，直接返回新文本
+  if (patchStr.isEmpty()) {
+    success.clear();
+    return newText;
+  }
+
+  // 2. 解析原始补丁（旧→新的补丁）
+  QList<Patch> originalPatches = parsePatch(patchStr);
+  if (originalPatches.isEmpty()) {
+    success.clear();
+    return newText;
+  }
+
+  // 3. 生成“反向补丁”（新→旧的补丁）：反转每个补丁的操作和位置参数
+  QList<Patch> reversedPatches;
+  foreach (const Patch &origPatch, originalPatches) {
+    Patch reversedPatch;
+
+    // 3.1 反转补丁的位置/长度参数（新旧文本角色互换）
+    // 原patch：start1=旧文本位置，start2=新文本位置；length1=旧文本影响长度，length2=新文本影响长度
+    // 反向patch：start1=新文本位置（原start2），start2=旧文本位置（原start1）
+    reversedPatch.start1 = origPatch.start2;
+    reversedPatch.start2 = origPatch.start1;
+    reversedPatch.length1 = origPatch.length2;
+    reversedPatch.length2 = origPatch.length1;
+
+    // 3.2 反转每个Diff的操作类型
+    foreach (const Diff &origDiff, origPatch.diffs) {
+      Diff reversedDiff;
+      reversedDiff.text = origDiff.text;  // 文本内容不变，仅反转操作
+
+      switch (origDiff.operation) {
+        case INSERT_OP:
+          // 原操作：旧文本→新文本 新增内容→反向需从新文本删除→DELETE_OP
+          reversedDiff.operation = DELETE_OP;
+          break;
+        case DELETE_OP:
+          // 原操作：旧文本→新文本 删除内容→反向需加回旧文本→INSERT_OP
+          reversedDiff.operation = INSERT_OP;
+          break;
+        case EQUAL_OP:
+          // 原操作：新旧文本相同→反向仍相同→保持EQUAL_OP
+          reversedDiff.operation = EQUAL_OP;
+          break;
+      }
+
+      reversedPatch.diffs.append(reversedDiff);
+    }
+
+    reversedPatches.append(reversedPatch);
+  }
+
+  // 4. 应用“反向补丁”到新文本→得到旧文本（复用现有applyPatch逻辑）
+  // 此时逻辑：新文本 + 反向补丁 → 旧文本
+  return applyPatch(newText, reversedPatches, success);
+}

@@ -2478,12 +2478,17 @@
 <context>
     <name>NoteVersionList</name>
     <message>
-        <location filename="qmlsrc/NoteVersionList.qml" line="23"/>
+        <location filename="qmlsrc/NoteVersionList.qml" line="21"/>
         <source>Modify History</source>
         <translation>修改历史</translation>
     </message>
     <message>
-        <location filename="qmlsrc/NoteVersionList.qml" line="105"/>
+        <location filename="qmlsrc/NoteVersionList.qml" line="97"/>
+        <source>Old Text</source>
+        <translation>旧文本</translation>
+    </message>
+    <message>
+        <location filename="qmlsrc/NoteVersionList.qml" line="120"/>
         <source>No modification records</source>
         <translation>无修改记录</translation>
     </message>
@@ -2492,7 +2497,7 @@
     <name>Notes</name>
     <message>
         <location filename="Notes/Notes.ui" line="14"/>
-        <location filename="Notes/Notes.cpp" line="735"/>
+        <location filename="Notes/Notes.cpp" line="737"/>
         <source>Notes</source>
         <translation>笔记</translation>
     </message>
@@ -2631,43 +2636,43 @@
         <translation>修改笔记</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1154"/>
-        <location filename="Notes/Notes.cpp" line="1162"/>
-        <location filename="Notes/Notes.cpp" line="1803"/>
+        <location filename="Notes/Notes.cpp" line="1156"/>
+        <location filename="Notes/Notes.cpp" line="1170"/>
+        <location filename="Notes/Notes.cpp" line="1808"/>
         <source>An error occurred while compressing the file.</source>
         <translation>压缩文件时发生错误。</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="269"/>
+        <location filename="Notes/Notes.cpp" line="271"/>
         <source>Load Ds File</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="309"/>
+        <location filename="Notes/Notes.cpp" line="311"/>
         <source>Knot</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="310"/>
+        <location filename="Notes/Notes.cpp" line="312"/>
         <source>Picture Files (*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="349"/>
-        <location filename="Notes/Notes.cpp" line="734"/>
-        <location filename="Notes/Notes.cpp" line="937"/>
+        <location filename="Notes/Notes.cpp" line="351"/>
+        <location filename="Notes/Notes.cpp" line="736"/>
+        <location filename="Notes/Notes.cpp" line="939"/>
         <source>No</source>
         <translation>否</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="350"/>
-        <location filename="Notes/Notes.cpp" line="733"/>
-        <location filename="Notes/Notes.cpp" line="938"/>
+        <location filename="Notes/Notes.cpp" line="352"/>
+        <location filename="Notes/Notes.cpp" line="735"/>
+        <location filename="Notes/Notes.cpp" line="940"/>
         <source>Yes</source>
         <translation>是</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="352"/>
+        <location filename="Notes/Notes.cpp" line="354"/>
         <source>Is the original size of the image used?</source>
         <translation>是否使用图像的原始尺寸？</translation>
     </message>
@@ -2676,49 +2681,49 @@
         <translation type="vanished">标题</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="941"/>
+        <location filename="Notes/Notes.cpp" line="943"/>
         <source>Want to share this PDF file?</source>
         <translation>是否分享此PDF文件？</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="945"/>
+        <location filename="Notes/Notes.cpp" line="947"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1282"/>
+        <location filename="Notes/Notes.cpp" line="1287"/>
         <source>Note Book</source>
         <translation>笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1283"/>
+        <location filename="Notes/Notes.cpp" line="1288"/>
         <source>Note List</source>
         <translation>笔记列表</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1357"/>
+        <location filename="Notes/Notes.cpp" line="1362"/>
         <source>The current note does not exist. Please select another note or create a new note.</source>
         <translation>当前笔记不存在。请选择其它笔记或新建笔记。</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1436"/>
+        <location filename="Notes/Notes.cpp" line="1441"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1428"/>
+        <location filename="Notes/Notes.cpp" line="1433"/>
         <source>Processing...</source>
         <translation>处理中...</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1572"/>
+        <location filename="Notes/Notes.cpp" line="1577"/>
         <source>Synchronization failed. Please try again later.</source>
         <translation>同步失败，请稍后再试。</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1651"/>
-        <location filename="Notes/Notes.cpp" line="1697"/>
-        <location filename="Notes/Notes.cpp" line="1742"/>
+        <location filename="Notes/Notes.cpp" line="1656"/>
+        <location filename="Notes/Notes.cpp" line="1702"/>
+        <location filename="Notes/Notes.cpp" line="1747"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation>解压文件不成功，请在偏好设置里面检查各平台的密码是否一致。</translation>
     </message>
@@ -2728,34 +2733,34 @@
     </message>
     <message>
         <location filename="Notes/Notes.ui" line="70"/>
-        <location filename="Notes/Notes.cpp" line="599"/>
+        <location filename="Notes/Notes.cpp" line="601"/>
         <source>Bold Italic</source>
         <translation>粗斜体</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="612"/>
+        <location filename="Notes/Notes.cpp" line="614"/>
         <source>Italic</source>
         <translation>斜体</translation>
     </message>
     <message>
         <location filename="Notes/Notes.ui" line="179"/>
-        <location filename="Notes/Notes.cpp" line="625"/>
+        <location filename="Notes/Notes.cpp" line="627"/>
         <source>Underline</source>
         <translation>下划线</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="639"/>
+        <location filename="Notes/Notes.cpp" line="641"/>
         <source>Strickout</source>
         <translation>删除线</translation>
     </message>
     <message>
         <location filename="Notes/Notes.ui" line="217"/>
-        <location filename="Notes/Notes.cpp" line="656"/>
+        <location filename="Notes/Notes.cpp" line="658"/>
         <source>Color</source>
         <translation>颜色</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1051"/>
+        <location filename="Notes/Notes.cpp" line="1053"/>
         <source>Delete this image?</source>
         <translation>删除这个图片？</translation>
     </message>
@@ -2765,12 +2770,12 @@
     </message>
     <message>
         <location filename="Notes/Notes.ui" line="366"/>
-        <location filename="Notes/Notes.cpp" line="671"/>
+        <location filename="Notes/Notes.cpp" line="673"/>
         <source>Bold</source>
         <translation>粗体</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="735"/>
+        <location filename="Notes/Notes.cpp" line="737"/>
         <source>Do you want to save the notes?</source>
         <translation>您想保存笔记吗？</translation>
     </message>
@@ -2787,7 +2792,7 @@
         <translation type="vanished">已到达文档的开头</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="828"/>
+        <location filename="Notes/Notes.cpp" line="830"/>
         <source>Letter</source>
         <translation>信函</translation>
     </message>
@@ -2800,7 +2805,7 @@
         <translation type="vanished">取消</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="837"/>
+        <location filename="Notes/Notes.cpp" line="839"/>
         <source>Page size</source>
         <translation>页面尺寸</translation>
     </message>
@@ -2809,17 +2814,17 @@
         <translation type="vanished">页面尺寸：</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="861"/>
+        <location filename="Notes/Notes.cpp" line="863"/>
         <source>Portrait</source>
         <translation>纵向</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="861"/>
+        <location filename="Notes/Notes.cpp" line="863"/>
         <source>Landscape</source>
         <translation>横向</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="868"/>
+        <location filename="Notes/Notes.cpp" line="870"/>
         <source>Orientation</source>
         <translation>方向</translation>
     </message>
@@ -2828,17 +2833,17 @@
         <translation type="vanished">方向：</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="940"/>
+        <location filename="Notes/Notes.cpp" line="942"/>
         <source>The PDF file is successfully exported.</source>
         <translation>PDF文件导出成功</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="896"/>
+        <location filename="Notes/Notes.cpp" line="898"/>
         <source>PDF files</source>
         <translation>PDF文件</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="897"/>
+        <location filename="Notes/Notes.cpp" line="899"/>
         <source>Export current note as PDF</source>
         <translation>输出当前笔记到PDF</translation>
     </message>

@@ -4,8 +4,6 @@ import QtQuick.Layouts 1.15
 
 // 主容器：适配 QuickWidget 大小，带轻微阴影
 Rectangle {
-    //width: parent.width  // 跟随 QuickWidget 宽度
-    //height: parent.height // 跟随 QuickWidget 高度
     color: "#f9f9f9" // 浅灰背景，避免刺眼
     radius: 4 // 轻微圆角，提升美观度
     border.color: "#eee" // 细边框，区分区域
@@ -51,8 +49,7 @@ Rectangle {
                 function addRecord(modifyTime) {
                     noteVersionModel.append({
                                                 "time": modifyTime,
-                                                "isSelected"// 修改时间（核心显示内容）
-                                                : false // 选中状态（默认未选中）
+                                                "isSelected": false // 选中状态（默认未选中）
                                             })
                 }
             }
@@ -78,19 +75,38 @@ Rectangle {
 
                         currentSelectedIndex = index
 
-                        // （可选）发送信号给 C++，告知当前选中的时间（后续可扩展查看该版本详情）
+                        // （可选）发送信号给 C++，告知当前选中的时间
                         m_NotesList.getNoteDiffHtml()
                     }
                 }
 
-                // 修改时间文本：居中显示，清晰易读
+                // 修改时间文本：左对齐显示，清晰易读
                 Text {
-                    anchors.centerIn: parent
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
                     text: model.time
 
                     color: "#333"
                     elide: Text.ElideRight // 时间过长时右侧省略，避免换行
-                    width: parent.width - 20 // 预留左右边距，防止文本贴边
+                    width: parent.width - 80 // 预留按钮空间
+                }
+
+                // "旧文本"按钮：仅在条目选中时显示，靠右对齐
+                Button {
+                    text: qsTr("Old Text")
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: parent.right
+                    anchors.rightMargin: 10 // 距离右边框的距离
+                    visible: model.isSelected
+                    height: 28
+                    width: 60
+
+                    // 按钮点击事件（留空，等待具体实现）
+                    onClicked: {
+                        // 旧文本按钮点击事件处理逻辑将在这里实现
+                        m_NotesList.newtextToOldtextFromDiffStr()
+                    }
                 }
             }
 
