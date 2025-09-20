@@ -246,6 +246,7 @@ void ReceiveShare::closeAllChildWindows() {
 
   if (mui->frameDiff->isVisible()) {
     mui->btnBackNoteDiff->click();
+    mui->btnBackNoteList->click();
   }
 
   if (mui->frameNoteList->isVisible()) {
