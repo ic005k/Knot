@@ -177,8 +177,6 @@ MainWindow::MainWindow(QWidget *parent)
     updateMainTab();
   });
 
-  currentMDFile = m_NotesList->getCurrentMDFile();
-
   if (isAndroid) {
     QTimer::singleShot(2000, this, SLOT(on_ReceiveShare()));
 

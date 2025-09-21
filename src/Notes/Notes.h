@@ -258,6 +258,8 @@ class Notes : public QDialog {
   void on_btnView_clicked();
 
  private:
+  bool isReceiveRemoteFile = false;
+
   QString oldText, newText;
 
   QString currentJSON;

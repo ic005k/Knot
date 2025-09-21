@@ -1197,7 +1197,10 @@ void Notes::init_all_notes() {
   m_NotesList->initUnclassified();
 
   // load note
-  currentMDFile = m_NotesList->getCurrentMDFile();
+  if (!isReceiveRemoteFile) {
+    currentMDFile = m_NotesList->getCurrentMDFile();
+  } else
+    isReceiveRemoteFile = false;
   qDebug() << "currentMDFile=" << currentMDFile;
   if (QFile::exists(currentMDFile)) {
   } else {
@@ -1792,6 +1795,16 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
       infoProgBarMax = totalFiles;
       infoProgBarValue = n_Files;
     }
+  }
+
+  QString endFile = iniDir + "mainnotes.ini";
+  QSettings iniNotes(endFile, QSettings::IniFormat);
+  QString md = iniNotes.value("CurrentMD", "").toString();
+  md = iniDir + md;
+  if (QFile::exists(md)) {
+    isReceiveRemoteFile = true;
+    currentMDFile = md;
+    qDebug() << "远程md文件=" << md;
   }
 }
 

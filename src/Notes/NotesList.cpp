@@ -556,8 +556,8 @@ bool NotesList::delFile(QString file) {
   return isOk;
 }
 
-bool NotesList::on_btnImport_clicked() {
-  if (ui->treeWidget->topLevelItemCount() == 0) return false;
+int NotesList::on_btnImport_clicked() {
+  if (ui->treeWidget->topLevelItemCount() == 0) return 0;
 
   QStringList fileNames;
   fileNames =
@@ -565,7 +565,10 @@ bool NotesList::on_btnImport_clicked() {
 
   qDebug() << "Import Files:" << fileNames;
 
-  if (fileNames.count() == 0) return false;
+  if (fileNames.count() == 0) {
+    isImportFilesEnd = true;
+    return 0;
+  }
 
   QStringList MDFileList;
 
@@ -637,7 +640,7 @@ bool NotesList::on_btnImport_clicked() {
           });
   watcher->setFuture(future);
 
-  return isImportFilesEnd;
+  return MDFileList.count();
 }
 
 void NotesList::on_btnExport_clicked() {
@@ -798,6 +801,7 @@ void NotesList::saveCurrentNoteInfo() {
 
   Reg.setValue("/MainNotes/currentItem", iniName);
   Reg.setValue("/MainNotes/NoteName", noteTitle);
+  Reg.sync();
 }
 
 void NotesList::saveNotesList() {
@@ -819,6 +823,10 @@ void NotesList::saveNotesListToFile() {
   QString tempFile = iniDir + "temp.ini";
   QString endFile = iniDir + "mainnotes.ini";
   QSettings iniNotes(tempFile, QSettings::IniFormat);
+
+  QString md = currentMDFile;
+  md = md.replace(iniDir, "");
+  iniNotes.setValue("CurrentMD", md);
 
   int count = tw->topLevelItemCount();
   iniNotes.setValue("/MainNotes/topItemCount", count);
@@ -887,9 +895,7 @@ void NotesList::saveNotesListToFile() {
   m_Method->upIniFile(tempFile, endFile);
 
   // Save Note Name
-  QSettings iniCurMD(iniDir + "curmd.ini", QSettings::IniFormat);
-  iniCurMD.setValue("/MainNotes/NoteName", noteTitle);
-  iniCurMD.sync();
+  saveCurrentNoteInfo();
 }
 
 void NotesList::initNotesList() {
@@ -2140,19 +2146,21 @@ void NotesList::on_actionImport_Note_triggered() {
   if (indexBook < 0) return;
 
   setNoteBookCurrentItem();
-  on_btnImport_clicked();
+  int fileCount = on_btnImport_clicked();
 
   while (!isImportFilesEnd)
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
   mw_one->closeProgress();
 
-  clickNoteBook();
+  if (fileCount > 0) {
+    clickNoteBook();
 
-  clickNoteList();
-  saveNotesList();
+    clickNoteList();
+    saveNotesList();
 
-  updateAllNoteIndexManager();
+    updateAllNoteIndexManager();
+  }
 }
 
 void NotesList::on_actionExport_Note_triggered() {
