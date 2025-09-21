@@ -736,8 +736,11 @@ void CloudBackup::uploadFilesToWebDAV(QStringList files) {
     // 上传进度跟踪
     QObject::connect(reply, &QNetworkReply::uploadProgress,
                      [=](qint64 bytesSent, qint64 bytesTotal) {
-                       qDebug() << "Uploading" << m_file << bytesSent << "/"
-                                << bytesTotal;
+                       Q_UNUSED(bytesSent);
+                       Q_UNUSED(bytesTotal);
+
+                       // qDebug() << "Uploading" << m_file << bytesSent << "/"
+                       //          << bytesTotal;
                      });
 
     // 处理完成/错误
@@ -748,8 +751,10 @@ void CloudBackup::uploadFilesToWebDAV(QStringList files) {
       }
 
       if (reply->error() == QNetworkReply::NoError) {
-        qDebug() << "Upload succeeded:" << m_file;
         mw_one->m_Notes->notes_sync_files.removeOne(m_file);
+        qDebug() << "Upload succeeded:" << m_file
+                 << "Rema:" << mw_one->m_Notes->notes_sync_files.count();
+
         mw_one->saveNeedSyncNotes();
       } else {
         qDebug() << "Error uploading" << m_file << ":" << reply->errorString();

@@ -593,6 +593,13 @@ int NotesList::on_btnImport_clicked() {
   mw_one->showProgress();
   isImportFilesEnd = false;
 
+  if (MDFileList.count() > 10) {
+    MDFileList.resize(10);
+    ShowMessage *msg = new ShowMessage(this);
+    msg->showMsg(appName,
+                 tr("A maximum of 10 files can be imported at a time."), 1);
+  }
+
   QFuture<void> future = QtConcurrent::run([this, MDFileList, item]() {
     for (int i = 0; i < MDFileList.count(); i++) {
       QString fileName = MDFileList.at(i);
