@@ -179,5 +179,10 @@
         <file>res/reader/stop_l.svg</file>
         <file>res/reader/rotation.svg</file>
         <file>res/reader/rotation_l.svg</file>
+        <file>res/back_l.svg</file>
+        <file>res/down_l.svg</file>
+        <file>res/find_l.svg</file>
+        <file>res/up_l.svg</file>
+        <file>res/rename_l.svg</file>
     </qresource>
 </RCC>

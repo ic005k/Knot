@@ -549,6 +549,7 @@ void MainHelper::initNotesQW() {
     mui->qwNoteList->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/notelist.qml")));
 
+    mui->qwNoteTools->rootContext()->setContextProperty("isDark", isDark);
     mui->qwNoteTools->rootContext()->setContextProperty("m_NotesList",
                                                         m_NotesList);
     mui->qwNoteTools->rootContext()->setContextProperty("m_Notes",
@@ -1114,6 +1115,9 @@ void MainHelper::init_Theme() {
 
   // Notes Editor
   mw_one->m_Notes->init_md();
+
+  // Notes ToolsBar
+  mui->qwNoteTools->rootContext()->setContextProperty("isDark", isDark);
 
   // Chart
   QFont font1;

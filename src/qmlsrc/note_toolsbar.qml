@@ -6,9 +6,21 @@ Rectangle {
     id: root
     height: 40
     width: 300
-    color: "#f0f0f0"
+    color: isDark ? "#333333" : "#f0f0f0"
     border.color: "#cccccc"
     border.width: 0
+
+    function iconSourceByTheme(index) {
+
+        if (!isDark) {
+            var icons = ["qrc:/res/back.svg", "qrc:/res/view.svg", "qrc:/res/edit.svg", "qrc:/res/find.svg", "qrc:/res/up.svg", "qrc:/res/down.svg", "qrc:/res/delitem.svg", "qrc:/res/move.svg", "qrc:/res/topdf.svg", "qrc:/res/rename.svg", "qrc:/res/recycle.svg"]
+            return icons[index]
+        }
+        if (isDark) {
+            var icons0 = ["qrc:/res/back_l.svg", "qrc:/res/view_l.svg", "qrc:/res/edit_l.svg", "qrc:/res/find_l.svg", "qrc:/res/up_l.svg", "qrc:/res/down_l.svg", "qrc:/res/delitem_l.svg", "qrc:/res/move_l.svg", "qrc:/res/topdf_l.svg", "qrc:/res/rename_l.svg", "qrc:/res/recycle_l.svg"]
+            return icons0[index]
+        }
+    }
 
     Rectangle {
         id: rect
@@ -47,10 +59,10 @@ Rectangle {
                         height: 38
                         icon.width: 25
                         icon.height: 25
-                        icon.source: ["qrc:/res/back.svg", "qrc:/res/view.svg", "qrc:/res/edit.svg", "qrc:/res/find.svg", "qrc:/res/up.svg", "qrc:/res/down.svg", "qrc:/res/delitem.svg", "qrc:/res/move.svg", "qrc:/res/topdf.svg", "qrc:/res/rename.svg", "qrc:/res/recycle.svg"][index]
+                        icon.source: isDark ? ["qrc:/res/back_l.svg", "qrc:/res/view_l.svg", "qrc:/res/edit_l.svg", "qrc:/res/find_l.svg", "qrc:/res/up_l.svg", "qrc:/res/down_l.svg", "qrc:/res/delitem_l.svg", "qrc:/res/move_l.svg", "qrc:/res/topdf_l.svg", "qrc:/res/rename_l.svg", "qrc:/res/recycle_l.svg"][index] : ["qrc:/res/back.svg", "qrc:/res/view.svg", "qrc:/res/edit.svg", "qrc:/res/find.svg", "qrc:/res/up.svg", "qrc:/res/down.svg", "qrc:/res/delitem.svg", "qrc:/res/move.svg", "qrc:/res/topdf.svg", "qrc:/res/rename.svg", "qrc:/res/recycle.svg"][index]
 
                         background: Rectangle {
-                            color: toolButton.hovered ? "#e0e0e0" : "transparent"
+                            color: toolButton.hovered ? (isDark ? "#444444" : "#e0e0e0") : "transparent"
                             radius: 6
                         }
 
