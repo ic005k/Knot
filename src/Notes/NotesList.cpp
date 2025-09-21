@@ -1119,8 +1119,14 @@ void NotesList::on_btnDel_Recycle_clicked() {
     delFile(md);
     QString json = mw_one->m_Notes->getCurrentJSON(md);
     delFile(json);
-    mw_one->m_Notes->notes_sync_files.removeOne(md);
-    mw_one->m_Notes->notes_sync_files.removeOne(json);
+
+    QStringList tempList = mw_one->m_Notes->notes_sync_files;
+    for (int i = 0; i < tempList.count(); i++) {
+      QString file = tempList.at(i);
+      QString baseFlag = m_Method->getBaseFlag(file);
+      if (file.contains(baseFlag))
+        mw_one->m_Notes->notes_sync_files.removeOne(file);
+    }
 
     setDelNoteFlag(curItem->text(1));
 
