@@ -197,6 +197,8 @@ class Notes : public QDialog {
                         const QString &diffHtml);
   QString getCurrentJSON(const QString &md);
 
+  void delRemoteFile(const QStringList &Files);
+
  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;

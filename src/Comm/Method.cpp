@@ -3153,6 +3153,8 @@ QString Method::getBaseFlag(const QString &file) {
   } else
     baseFlag = fn;
 
+  if (baseFlag.contains(".md.zip")) baseFlag = baseFlag.replace(".md.zip", "");
+
   qDebug() << "baseFlag=" << baseFlag;
 
   return baseFlag;

@@ -752,25 +752,29 @@ void Notes::syncToWebDAV() {
       mw_one->showProgress();
 
       // 先删除旧文件
-      QStringList delFiles;
-      for (int j = 0; j < notes_sync_files.count(); j++) {
-        QString syncFile = notes_sync_files.at(j);
-
-        QString baseFlag = m_Method->getBaseFlag(syncFile);
-        if (!baseFlag.isEmpty()) {
-          for (int i = 0; i < orgRemoteFiles.count(); i++) {
-            QString orgFile = orgRemoteFiles.at(i);
-            if (orgFile.contains(baseFlag)) delFiles.append(orgFile);
-          }
-        }
-      }
-      qDebug() << "delWebDAVFiles=" << delFiles;
-      m_CloudBackup->deleteWebDAVFiles(delFiles);
+      delRemoteFile(notes_sync_files);
 
       m_CloudBackup->uploadFilesToWebDAV(notes_sync_files);
       m_Method->setAccessCount(notes_sync_files.count());
     }
   }
+}
+
+void Notes::delRemoteFile(const QStringList &Files) {
+  QStringList delFiles;
+  for (int j = 0; j < Files.count(); j++) {
+    QString syncFile = Files.at(j);
+
+    QString baseFlag = m_Method->getBaseFlag(syncFile);
+    if (!baseFlag.isEmpty()) {
+      for (int i = 0; i < orgRemoteFiles.count(); i++) {
+        QString orgFile = orgRemoteFiles.at(i);
+        if (orgFile.contains(baseFlag)) delFiles.append(orgFile);
+      }
+    }
+  }
+  qDebug() << "delWebDAVFiles=" << delFiles;
+  m_CloudBackup->deleteWebDAVFiles(delFiles);
 }
 
 bool Notes::isSetNewNoteTitle() {
@@ -1430,7 +1434,6 @@ void Notes::openNotes() {
   else
     mui->btnManagement->show();
 
-  m_NotesList->needDelWebDAVFiles.clear();
   isPasswordError = false;
   isWebDAVError = false;
   m_Method->showInfoWindow(tr("Processing..."));

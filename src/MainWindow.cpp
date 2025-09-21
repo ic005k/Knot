@@ -2303,31 +2303,16 @@ void MainWindow::on_btnBackNoteRecycle_clicked() {
 
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     int count = m_NotesList->needDelWebDAVFiles.count();
-    if (count > 0) {
-      QStringList files;
-      for (int i = 0; i < count; i++) {
-        QString file = m_NotesList->needDelWebDAVFiles.at(i);
-        file = file.replace(iniDir, "KnotData/");
-
-        QString baseFlag = m_Method->getBaseFlag(file);
-        if (!baseFlag.isEmpty()) {
-          for (int j = 0; j < m_Notes->orgRemoteFiles.count(); j++) {
-            QString remoteFile = m_Notes->orgRemoteFiles.at(j);
-            if (remoteFile.contains(baseFlag)) files.append(remoteFile);
-          }
-        }
-      }
-
-      qDebug() << "recycleDelFiles=" << files;
-      m_CloudBackup->deleteWebDAVFiles(files);
-      m_Method->setAccessCount(files.count());
-    }
+    if (count > 0) m_Notes->delRemoteFile(m_NotesList->needDelWebDAVFiles);
+    m_Method->setAccessCount(m_NotesList->needDelWebDAVFiles.count());
   }
 }
 
 void MainWindow::on_btnNoteRecycle_clicked() {
   mui->frameNoteList->hide();
   mui->frameNoteRecycle->show();
+
+  m_NotesList->needDelWebDAVFiles.clear();
 
   m_NotesList->loadAllRecycle();
 }
