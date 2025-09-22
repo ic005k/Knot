@@ -593,7 +593,7 @@ int NotesList::on_btnImport_clicked() {
   mw_one->showProgress();
   isImportFilesEnd = false;
 
-  if (MDFileList.count() > 10) {
+  if (MDFileList.count() > 1000) {
     MDFileList.resize(10);
     ShowMessage *msg = new ShowMessage(this);
     msg->showMsg(appName,

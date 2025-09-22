@@ -1519,6 +1519,9 @@ void Notes::openNotes() {
 
           for (int j = 0; j < orgRemoteFiles.count(); j++) {
             QString or_file = orgRemoteFiles.at(j);
+
+            // qDebug() << "or_file=" << or_file;
+
             QDateTime or_datetime = orgRemoteDateTime.at(j);
             or_datetime.toTimeZone(QTimeZone::utc());
             or_datetime = or_datetime.toLocalTime();

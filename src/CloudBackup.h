@@ -1,6 +1,7 @@
 ﻿#ifndef CLOUDBACKUP_H
 #define CLOUDBACKUP_H
 
+#include <QAtomicInt>
 #include <QAuthenticator>
 #include <QCoreApplication>
 #include <QDebug>
@@ -15,6 +16,7 @@
 #include <QObject>
 #include <QQueue>
 #include <QQuickWidget>
+#include <functional>
 
 namespace Ui {
 class CloudBackup;
@@ -66,7 +68,7 @@ class CloudBackup : public QDialog {
   void getRemoteFileList(QString url);
   void createRemoteWebDAVDir();
   void deleteWebDAVFiles(QStringList filesToDelete);
-  void uploadFilesToWebDAV(QStringList files);
+  void uploadFilesToWebDAV(const QStringList &files);
   void backExit();
   void init_CloudBacup();
   void webDAVRestoreData();
@@ -76,6 +78,7 @@ class CloudBackup : public QDialog {
   void on_pushButton_downloadFile_clicked();
   void on_btnBack_clicked();
 
+  void uploadFilesToWebDAV_old(QStringList files);
  signals:
 
  protected:
@@ -84,6 +87,9 @@ class CloudBackup : public QDialog {
 
  private slots:
   void updateUploadProgress(qint64 bytesSent, qint64 bytesTotal);
+  void startNextUpload();
+
+  void handleUploadFinished(QNetworkReply *reply, const QString &filePath);
 
  private:
   QtOneDrive *oneDrive = nullptr;
@@ -95,6 +101,18 @@ class CloudBackup : public QDialog {
   QByteArray aes_key = "MySuperSecretKey1234567890";  // 长度不足32会自动处理
   QByteArray aes_iv = "InitializationVe";             // 16字节
   void resetProgBar();
+
+  QNetworkAccessManager *manager = nullptr;
+  QQueue<QString> uploadQueue;
+  QSet<QNetworkReply *> activeReplies;
+  int maxConcurrentUploads = 1;  // 并发数
+
+  QString nextPageUrl;
+  QList<QPair<QString, QDateTime>> allFiles;
+
+  void fetchNextPage();
+  void processFileList();
+  QString parseNextPageUrl(const QList<QNetworkReply::RawHeaderPair> &headers);
 };
 
 // 声明一个轻量级信号发射器,列出WebDAV上某个目录下的所有文件
@@ -103,9 +121,20 @@ class WebDavHelper : public QObject {
  public:
   explicit WebDavHelper(QObject *parent = nullptr) : QObject(parent) {}
 
+  void setResponseHeaders(const QList<QNetworkReply::RawHeaderPair> &headers) {
+    responseHeaders = headers;
+  }
+
+  QList<QNetworkReply::RawHeaderPair> getResponseHeaders() const {
+    return responseHeaders;
+  }
+
  signals:
   void listCompleted(const QList<QPair<QString, QDateTime>> &files);
   void errorOccurred(const QString &error);
+
+ private:
+  QList<QNetworkReply::RawHeaderPair> responseHeaders;
 };
 
 class WebDavDownloader : public QObject {

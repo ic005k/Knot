@@ -97,6 +97,10 @@ CloudBackup::~CloudBackup() {
   if (m_manager) {
     m_manager->deleteLater();  // 释放成员变量m_manager
   }
+
+  if (manager) {
+    manager->deleteLater();  // 释放成员变量manager
+  }
 }
 
 bool CloudBackup::eventFilter(QObject *obj, QEvent *evn) {
@@ -685,7 +689,7 @@ QString CloudBackup::aesDecrypt(QString cipherText, QByteArray key,
   return QString::fromUtf8(decrypted);
 }
 
-void CloudBackup::uploadFilesToWebDAV(QStringList files) {
+void CloudBackup::uploadFilesToWebDAV_old(QStringList files) {
   QNetworkAccessManager *manager = new QNetworkAccessManager();
   QString url = getWebDAVArgument();
 
@@ -772,39 +776,107 @@ void CloudBackup::uploadFilesToWebDAV(QStringList files) {
   }
 }
 
-// 核心函数：列出目录文件（认证信息直接作为参数）
+///////////////////////////////////////////////////////////////////////////////////
+
+void CloudBackup::uploadFilesToWebDAV(const QStringList &files) {
+  // 将新文件添加到队列
+  for (const QString &file : files) {
+    uploadQueue.enqueue(file);
+  }
+
+  // 启动上传处理
+  startNextUpload();
+}
+
+void CloudBackup::startNextUpload() {
+  // 检查是否达到最大并发数
+  while (activeReplies.size() < maxConcurrentUploads &&
+         !uploadQueue.isEmpty()) {
+    QString filePath = uploadQueue.dequeue();
+    QString remoteFile = filePath;
+    remoteFile.replace(privateDir, "");
+    QUrl fullUrl = QUrl(getWebDAVArgument()).resolved(remoteFile);
+
+    QFile *file = new QFile(filePath);
+    if (!file->open(QIODevice::ReadOnly)) {
+      qWarning() << "Failed to open file:" << filePath;
+      delete file;
+      continue;
+    }
+
+    QNetworkRequest request(fullUrl);
+    QString auth = QString("%1:%2").arg(USERNAME, APP_PASSWORD);
+    request.setRawHeader("Authorization",
+                         "Basic " + auth.toLocal8Bit().toBase64());
+
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    QNetworkReply *reply = manager->put(request, file);
+    file->setParent(reply);
+    activeReplies.insert(reply);
+
+    // 使用 Qt 的信号槽机制安全处理完成事件
+    connect(reply, &QNetworkReply::finished, this, [this, reply, filePath]() {
+      handleUploadFinished(reply, filePath);
+    });
+  }
+}
+
+void CloudBackup::handleUploadFinished(QNetworkReply *reply,
+                                       const QString &filePath) {
+  // 确保从活动集合中移除
+  activeReplies.remove(reply);
+
+  if (reply->error() == QNetworkReply::NoError) {
+    // 处理成功上传
+    if (mw_one && mw_one->m_Notes) {
+      mw_one->m_Notes->notes_sync_files.removeOne(filePath);
+      qDebug() << "Upload succeeded:" << filePath
+               << "Remaining:" << mw_one->m_Notes->notes_sync_files.count();
+      mw_one->saveNeedSyncNotes();
+    }
+  } else {
+    qWarning() << "Error uploading" << filePath << ":" << reply->errorString();
+    // 可选：将失败的文件重新加入队列重试
+    // uploadQueue.enqueue(filePath);
+  }
+
+  // 清理资源
+  reply->deleteLater();
+
+  // 检查是否所有上传都已完成
+  if (activeReplies.isEmpty() && uploadQueue.isEmpty()) {
+    if (mw_one) {
+      mw_one->closeProgress();
+    }
+  } else {
+    // 启动下一个上传
+    startNextUpload();
+  }
+}
+/// /////////////////////////////////////////////////////////////////////////////////
+
+// 核心函数：列出目录文件（支持坚果云分页）
 WebDavHelper *listWebDavFiles(const QString &url, const QString &username,
-                              const QString &password
-
-) {
-  // 创建信号发射器对象
+                              const QString &password) {
   WebDavHelper *helper = new WebDavHelper();
-
-  // 每个请求使用独立的NetworkManager
   QNetworkAccessManager *manager = new QNetworkAccessManager(helper);
 
-  // 连接认证信号（Lambda捕获当前请求的账号密码）
+  // 连接认证信号
   QObject::connect(
       manager, &QNetworkAccessManager::authenticationRequired,
       [username, password](QNetworkReply *reply, QAuthenticator *auth) {
-        qDebug() << "正在认证:" << reply->url().toString();
-        m_Method->setInfoText(">> " + reply->url().toString());
         auth->setUser(username);
         auth->setPassword(password);
       });
 
-  // 构造请求
   QNetworkRequest request;
   request.setUrl(QUrl(url));
-  request.setRawHeader("Depth", "1");  // 仅获取当前目录的直接子项
-  // request.setRawHeader("Depth",
-  //                      "infinity");  // 递归获取子目录，但有的webdav不支持
-  if (url.contains(mui->cboxWebDAV->currentText().trimmed()))
-    request.setRawHeader("Brief", "t");  // 坚果云需要此头
+  request.setRawHeader("Depth", "1");
+  if (url.contains("jianguoyun.com"))  // 坚果云特定头
+    request.setRawHeader("Brief", "t");
   request.setHeader(QNetworkRequest::ContentTypeHeader,
                     "text/xml; charset=utf-8");
 
-  // 严格格式的XML请求体
   const QByteArray body = R"(<?xml version="1.0" encoding="utf-8"?>
         <d:propfind xmlns:d="DAV:">
             <d:prop>
@@ -814,10 +886,8 @@ WebDavHelper *listWebDavFiles(const QString &url, const QString &username,
             </d:prop>
         </d:propfind>)";
 
-  // 发送请求
   QNetworkReply *reply = manager->sendCustomRequest(request, "PROPFIND", body);
 
-  // 处理响应
   QObject::connect(reply, &QNetworkReply::finished, [manager, helper, reply]() {
     if (reply->error() != QNetworkReply::NoError) {
       const QString error =
@@ -827,20 +897,22 @@ WebDavHelper *listWebDavFiles(const QString &url, const QString &username,
               .arg(reply->errorString());
       emit helper->errorOccurred(error);
     } else {
+      // 保存响应头
+      helper->setResponseHeaders(reply->rawHeaderPairs());
+
       QByteArray responseData = reply->readAll();
       QList<QPair<QString, QDateTime>> files =
-          parseWebDavResponse(responseData);  // 调用解析函数
+          parseWebDavResponse(responseData);
       emit helper->listCompleted(files);
     }
 
-    // 清理资源
     reply->deleteLater();
     manager->deleteLater();
   });
 
   return helper;
 }
-
+// 解析函数
 QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray &data) {
   QList<QPair<QString, QDateTime>> files;
   QXmlStreamReader xml(data);
@@ -862,10 +934,7 @@ QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray &data) {
     if (xml.isStartElement()) {
       if (xml.name() == QLatin1String("href")) {
         currentHref = xml.readElementText();
-
         // 规范化路径（去除URL编码）
-        // currentHref = QUrl::fromPercentEncoding(currentHref.toUtf8());
-        // 一次性完成编码转换
         currentHref = QString::fromUtf8(
             QByteArray::fromPercentEncoding(currentHref.toLatin1()));
 
@@ -891,8 +960,6 @@ QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray &data) {
         while (xml.readNextStartElement()) {
           if (xml.name() == QLatin1String("collection")) {
             isDirectory = true;
-
-            // xml.skipCurrentElement();
           }
           xml.skipCurrentElement();  // 直接跳过剩余内容
         }
@@ -911,7 +978,7 @@ QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray &data) {
   return files;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
 
 WebDavDownloader::WebDavDownloader(const QString &username,
                                    const QString &password, QObject *parent)
@@ -1054,7 +1121,7 @@ void WebDavDownloader::onDownloadFinished(QNetworkReply *reply) {
 
 ///////////////////////////////////////////////////////////////////////
 
-void CloudBackup::getRemoteFileList(QString url) {
+/*void CloudBackup::getRemoteFileList(QString url) {
   webdavFileList.clear();
   webdavDateTimeList.clear();
   isGetRemoteFileListEnd = false;
@@ -1074,6 +1141,7 @@ void CloudBackup::getRemoteFileList(QString url) {
                        QString remoteFile = path;
                        remoteFile =
                            remoteFile.replace("/dav/", "");  // 此处需注意
+
                        webdavFileList.append(remoteFile);
                        webdavDateTimeList.append(mtime);
                      }
@@ -1085,7 +1153,93 @@ void CloudBackup::getRemoteFileList(QString url) {
                      qDebug() << "操作失败:" << error;
                      isGetRemoteFileListEnd = true;
                    });
+}*/
+
+void CloudBackup::getRemoteFileList(QString url) {
+  webdavFileList.clear();
+  webdavDateTimeList.clear();
+  isGetRemoteFileListEnd = false;
+  nextPageUrl = url;
+  allFiles.clear();
+
+  // 开始获取第一页
+  fetchNextPage();
 }
+
+void CloudBackup::fetchNextPage() {
+  if (nextPageUrl.isEmpty()) {
+    // 所有页面处理完成
+    processFileList();
+    return;
+  }
+
+  WebDavHelper *helper = listWebDavFiles(nextPageUrl, USERNAME, APP_PASSWORD);
+  helper->setParent(this);
+
+  QObject::connect(
+      helper, &WebDavHelper::listCompleted, this,
+      [this, helper](const QList<QPair<QString, QDateTime>> &files) {
+        allFiles.append(files);
+
+        // 解析下一页URL
+        nextPageUrl = parseNextPageUrl(helper->getResponseHeaders());
+
+        // 删除当前 helper
+        helper->deleteLater();
+
+        if (!nextPageUrl.isEmpty()) {
+          // 继续获取下一页
+          QTimer::singleShot(100, this, &CloudBackup::fetchNextPage);
+        } else {
+          // 所有页面处理完成
+          processFileList();
+        }
+      });
+
+  QObject::connect(helper, &WebDavHelper::errorOccurred, this,
+                   [this, helper](const QString &error) {
+                     qDebug() << "获取文件列表出错:" << error;
+                     helper->deleteLater();
+                     processFileList();  // 即使出错也处理已获取的文件
+                   });
+}
+
+QString CloudBackup::parseNextPageUrl(
+    const QList<QNetworkReply::RawHeaderPair> &headers) {
+  // 查找 Link 头
+  for (const auto &header : headers) {
+    if (header.first.compare("Link", Qt::CaseInsensitive) == 0) {
+      QByteArray linkValue = header.second;
+
+      // 坚果云分页格式: <URL>; rel="next"
+      QRegularExpression nextPageRegex(
+          "<([^>]*)>\\s*;\\s*rel\\s*=\\s*\"?next\"?");
+      QRegularExpressionMatch match = nextPageRegex.match(linkValue);
+      if (match.hasMatch()) {
+        return match.captured(1);
+      }
+    }
+  }
+  return QString();  // 没有找到下一页
+}
+
+void CloudBackup::processFileList() {
+  qDebug() << "获取到文件列表:";
+  qDebug() << "共找到" << allFiles.size() << "个文件:";
+
+  for (const auto &[path, mtime] : allFiles) {
+    QString remoteFile = path;
+    remoteFile = remoteFile.replace("/dav/", "");  // 坚果云路径处理
+
+    webdavFileList.append(remoteFile);
+    webdavDateTimeList.append(mtime);
+  }
+
+  isGetRemoteFileListEnd = true;
+  // emit fileListReady();  // 通知其他部分文件列表已准备好
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CloudBackup::createRemoteWebDAVDir() {
   QString url = getWebDAVArgument();
