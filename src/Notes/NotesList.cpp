@@ -607,8 +607,6 @@ int NotesList::on_btnImport_clicked() {
       if (QFile(fileName).exists()) {
         QTreeWidgetItem *item1;
 
-        QString strNoteText = loadText(fileName);
-
         QFileInfo fi(fileName);
         QString name = fi.baseName();
 
@@ -618,7 +616,11 @@ int NotesList::on_btnImport_clicked() {
         QString a = "memo/" + mw_one->m_Notes->getDateTimeStr() + "_" +
                     QString::number(i) + ".md";
         currentMDFile = iniDir + a;
-        StringToFile(strNoteText, currentMDFile);
+
+        // QString strNoteText = loadText(fileName);
+        // StringToFile(strNoteText, currentMDFile);
+
+        QFile::copy(fileName, currentMDFile);
 
         item1->setText(1, a);
 
