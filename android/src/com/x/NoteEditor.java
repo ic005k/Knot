@@ -953,6 +953,132 @@ public class NoteEditor extends Activity implements View.OnClickListener, Applic
 
     public String readTextFile(String filename) {
         BufferedReader reader = null;
+        FileInputStream fis = null;
+        try {
+            File file = new File(filename);
+            fis = new FileInputStream(file);
+
+            // 1. 先读取文件前 1024 字节（足够判断编码），避免读取大文件时内存溢出
+            byte[] sampleBytes = new byte[Math.min(1024, (int) file.length())];
+            int sampleReadLen = fis.read(sampleBytes);
+            fis.close(); // 先关闭，后续重新打开完整文件
+
+            // 2. 检测编码：优先尝试 UTF-8，再试 GBK，最后兜底
+            Charset targetCharset = detectCharset(sampleBytes, sampleReadLen);
+
+            // 3. 用检测到的编码读取完整文件
+            fis = new FileInputStream(file);
+            reader = new BufferedReader(
+                    new InputStreamReader(fis, targetCharset));
+
+            // 4. 读取内容
+            char[] buffer = new char[8192];
+            StringBuilder sb = new StringBuilder();
+            int charsRead;
+            while ((charsRead = reader.read(buffer)) != -1) {
+                sb.append(buffer, 0, charsRead);
+            }
+            return sb.toString();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            // 异常时降级为 UTF-8 读取
+            return readTextFileWithCharset(filename, StandardCharsets.UTF_8);
+        } finally {
+            try {
+                if (reader != null)
+                    reader.close();
+                if (fis != null)
+                    fis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 核心：检测字节数组的编码（支持 UTF-8、GBK）
+     */
+    private Charset detectCharset(byte[] sampleBytes, int sampleReadLen) {
+        // 先检测 BOM（覆盖 UTF-8/UTF-16）
+        if (sampleReadLen >= 3 && sampleBytes[0] == (byte) 0xEF
+                && sampleBytes[1] == (byte) 0xBB && sampleBytes[2] == (byte) 0xBF) {
+            return StandardCharsets.UTF_8; // UTF-8 BOM
+        }
+        if (sampleReadLen >= 2) {
+            if (sampleBytes[0] == (byte) 0xFF && sampleBytes[1] == (byte) 0xFE) {
+                return StandardCharsets.UTF_16LE; // UTF-16 小端
+            }
+            if (sampleBytes[0] == (byte) 0xFE && sampleBytes[1] == (byte) 0xFF) {
+                return StandardCharsets.UTF_16BE; // UTF-16 大端
+            }
+        }
+
+        // 无 BOM 时，对比 UTF-8 和 GBK 的解码有效性
+        // 原则：UTF-8 解码出现无效字符（�）少，GBK 解码更通顺，则判断为 GBK
+        int utf8InvalidCount = countInvalidChars(sampleBytes, sampleReadLen, StandardCharsets.UTF_8);
+        int gbkInvalidCount = countInvalidChars(sampleBytes, sampleReadLen, Charset.forName("GBK"));
+
+        // 若 GBK 无效字符更少，说明是 GBK 编码
+        if (gbkInvalidCount < utf8InvalidCount) {
+            return Charset.forName("GBK");
+        }
+
+        // 否则默认 UTF-8
+        return StandardCharsets.UTF_8;
+    }
+
+    /**
+     * 统计指定编码解码后的无效字符数（� 是无效字符的标识）
+     */
+    private int countInvalidChars(byte[] bytes, int len, Charset charset) {
+        try {
+            String content = new String(bytes, 0, len, charset);
+            int invalidCount = 0;
+            for (char c : content.toCharArray()) {
+                // U+FFFD 是「替换字符」，表示解码失败
+                if (c == '\uFFFD') {
+                    invalidCount++;
+                }
+            }
+            return invalidCount;
+        } catch (Exception e) {
+            // 编码不支持时，返回极大值（表示该编码不可用）
+            return Integer.MAX_VALUE;
+        }
+    }
+
+    /**
+     * 辅助方法：用指定编码读取文件
+     */
+    private String readTextFileWithCharset(String filename, Charset charset) {
+        BufferedReader reader = null;
+        try {
+            File file = new File(filename);
+            reader = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(file), charset));
+            char[] buffer = new char[8192];
+            StringBuilder sb = new StringBuilder();
+            int charsRead;
+            while ((charsRead = reader.read(buffer)) != -1) {
+                sb.append(buffer, 0, charsRead);
+            }
+            return sb.toString();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return "";
+        } finally {
+            try {
+                if (reader != null)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public String readTextFile_old(String filename) {
+        BufferedReader reader = null;
         try {
             File file = new File(filename);
             reader = new BufferedReader(
