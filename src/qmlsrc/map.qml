@@ -33,12 +33,6 @@ Rectangle {
 
         var newCoordinate = QtPositioning.coordinate(lat, lon)
 
-        //方法1（在线程中执行效率太低）
-        //let pathArray = polyline.path
-        //pathArray.push(newCoordinate) // 添加新的点
-        //polyline.path = pathArray
-
-        //方法2（推荐）
         polyline.addCoordinate(QtPositioning.coordinate(lat, lon))
 
         map.center = newCoordinate
@@ -81,7 +75,13 @@ Rectangle {
         }
         PluginParameter {
             name: "osm.mapping.providersrepository.disabled"
-            value: false // 禁用不可靠的重定向服务
+            value: true // 禁用不可靠的重定向服务
+        }
+
+        // 增加瓦片尺寸参数（配合高清显示）
+        PluginParameter {
+            name: "osm.mapping.tile.size"
+            value: "512" // 高清瓦片通常为512x512像素（默认256）
         }
 
         // 高清地图
