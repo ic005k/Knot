@@ -69,6 +69,7 @@ class Steps : public QDialog {
   double dleSlope = 5;
   void saveSteps();
   void loadStepsToTable();
+  QJsonObject rootObj;
   QString lblStyleLight = "background-color: rgb(25, 239, 21);color:black";
 
   void addRecord(QString, qlonglong, QString);
@@ -210,13 +211,13 @@ class Steps : public QDialog {
   qlonglong getOldSteps();
   QString getCurrentYear();
   QString getCurrentMonth();
+
   void writeStepsToJson(const QString &iniDir, int count,
                         const QList<QString> &listDate,
                         const QList<int> &listSteps,
-                        const QList<QString> &listKm);
-  void loadStepsToTable_ini();
-  qlonglong getTodaySteps_ini();
-  signals:
+                        const QList<QString> &listKm, const QString &strLength,
+                        const QString &strThreshold);
+ signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();
