@@ -59,12 +59,18 @@ void StepsOptions::init() {
 
 void StepsOptions::on_btnBack_clicked() {
   mw_one->clearWidgetFocus();
+  if (isTextChange) {
+    QString strLength = ui->editStepLength->text().trimmed();
+    QString strThreshold = ui->editStepsThreshold->text().trimmed();
+    QJsonObject stepsObj = mw_one->m_Steps->rootObj["Steps"].toObject();
+    stepsObj["Length"] = strLength;
+    stepsObj["Threshold"] = strThreshold;
+    mw_one->m_Steps->rootObj["Steps"] = stepsObj;
+
+    mw_one->m_Steps->loadStepsToTable();
+  }
 
   close();
-
-  if (isTextChange) {
-    mw_one->on_btnSteps_clicked();
-  }
 }
 
 void StepsOptions::on_editStepsThreshold_textChanged(const QString &arg1) {
