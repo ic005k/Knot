@@ -488,6 +488,38 @@ void MainHelper::openTabRecycle() {
 void MainHelper::initMainQW() {
   qmlRegisterType<DocumentHandler>("MyModel2", 1, 0, "DocumentHandler");
 
+  if (mui->qwSteps->source().isEmpty()) {
+    int f_size = 19;
+    if (fontSize <= f_size) f_size = fontSize;
+
+    mui->qwSteps->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
+
+    mui->qwSteps->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/steps.qml")));
+    mui->qwSteps->rootContext()->setContextProperty("maxFontSize", f_size);
+    mui->qwSteps->rootContext()->setContextProperty("myW", mw_one->width());
+    mui->qwSteps->rootContext()->setContextProperty("text0", "");
+    mui->qwSteps->rootContext()->setContextProperty("text1", "");
+    mui->qwSteps->rootContext()->setContextProperty("text2", "");
+    mui->qwSteps->rootContext()->setContextProperty("text3", "");
+
+    mui->qwSpeed->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/Speedometer.qml")));
+
+    mui->qwGpsList->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/gps_list.qml")));
+    mui->qwGpsList->rootContext()->setContextProperty("myW", mw_one->width());
+    mui->qwGpsList->rootContext()->setContextProperty("m_Steps",
+                                                      mw_one->m_Steps);
+
+    mui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    mui->qwMap->setFocusPolicy(Qt::StrongFocus);  // 关键设置
+    mui->qwMap->setClearColor(Qt::transparent);   // 避免渲染冲突
+    mui->qwMap->setAttribute(Qt::WA_AcceptTouchEvents, true);
+    mui->qwMap->setAttribute(Qt::WA_TouchPadAcceptSingleTouchEvents, true);
+    mui->qwMap->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/map.qml")));
+  }
+
   mui->qwMainTab->setFixedHeight(50);
   mui->qwMainTab->rootContext()->setContextProperty("isDark", isDark);
   mui->qwMainTab->rootContext()->setContextProperty("maintabHeight",

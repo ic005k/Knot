@@ -59,6 +59,11 @@ Rectangle {
         id: osmPlugin
         name: "osm"
 
+        PluginParameter {
+            name: "osm.mapping.providersrepository.disabled"
+            value: true // 禁用不可靠的重定向服务
+        }
+
         // 确保使用Qt6兼容的参数
         PluginParameter {
             name: "osm.mapping.input.touch.enabled"
@@ -69,34 +74,40 @@ Rectangle {
             value: "true"
         }
 
+        // ✅ 设置自定义 host（必须以 / 结尾）
         PluginParameter {
             name: "osm.mapping.custom.host"
-            value: "https://tile.openstreetmap.org/" // 官方推荐的OSM瓦片服务
-        }
-        PluginParameter {
-            name: "osm.mapping.providersrepository.disabled"
-            value: true // 禁用不可靠的重定向服务
+            value: "https://tile.thunderforest.com/"
         }
 
-        // 增加瓦片尺寸参数（配合高清显示）
+        // ✅ 使用正确的图层名：cycle（不是 cycle@2x）
         PluginParameter {
-            name: "osm.mapping.tile.size"
-            value: "512" // 高清瓦片通常为512x512像素（默认256）
+            name: "osm.mapping.custom.url.cycle"
+            value: "cycle/{z}/{x}/{y}.png?apikey=5ad09b54d1e542909f4f20f3a01786ae"
         }
 
-        // 高清地图
+        // ✅ 启用高清支持
         PluginParameter {
             name: "osm.mapping.highdpi_tiles"
             value: true
         }
+
+        // ✅ 设置瓦片大小为 512（高清）
         PluginParameter {
-            name: "osm.mapping.offline.directory"
-            value: "./map_cache"
+            name: "osm.mapping.tile.size"
+            value: "512"
         }
 
+        // ✅ 必须设置 User-Agent
         PluginParameter {
-            name: "user-agent" // 必填！避免被OSM服务器拒绝
+            name: "user-agent"
             value: "Knot/1.0 (QtLocation)"
+        }
+
+        // ✅ 可选：设置缓存目录（方便清除）
+        PluginParameter {
+            name: "osm.mapping.offline.directory"
+            value: "./map_cache_clean"
         }
     }
 

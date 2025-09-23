@@ -5,6 +5,11 @@
 #include <QDialog>
 #include <QGeoCoordinate>
 #include <QGeoPositionInfoSource>
+#include <QGeoServiceProvider>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QQmlApplicationEngine>
 #include <QRegularExpressionValidator>
 #include <iomanip>  // 包含 std::setprecision
 #include <iostream>
@@ -205,7 +210,13 @@ class Steps : public QDialog {
   qlonglong getOldSteps();
   QString getCurrentYear();
   QString getCurrentMonth();
- signals:
+  void writeStepsToJson(const QString &iniDir, int count,
+                        const QList<QString> &listDate,
+                        const QList<int> &listSteps,
+                        const QList<QString> &listKm);
+  void loadStepsToTable_ini();
+  qlonglong getTodaySteps_ini();
+  signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();

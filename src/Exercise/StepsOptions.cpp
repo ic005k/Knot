@@ -60,14 +60,8 @@ void StepsOptions::init() {
 void StepsOptions::on_btnBack_clicked() {
   mw_one->clearWidgetFocus();
 
-  QSettings Reg(iniDir + "steps.ini", QSettings::IniFormat);
-
-  Reg.setValue("/Steps/Length",
-               mw_one->m_StepsOptions->ui->editStepLength->text().trimmed());
-  Reg.setValue(
-      "/Steps/Threshold",
-      mw_one->m_StepsOptions->ui->editStepsThreshold->text().trimmed());
   close();
+
   if (isTextChange) {
     mw_one->on_btnSteps_clicked();
   }
