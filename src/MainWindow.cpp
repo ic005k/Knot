@@ -954,22 +954,37 @@ void MainWindow::on_actionDel_Tab_triggered() {
 
   QTreeWidget *tw = (QTreeWidget *)tabData->currentWidget();
   QString twName = tw->objectName();
-
   int c_year = QDate::currentDate().year();
-  int iniFileCount = c_year - 2025 + 1 + 1;
-  for (int i = 0; i < iniFileCount; i++) {
-    QString tab_file;
-    if (i == 0)
-      tab_file = iniDir + twName + ".ini";
-    else {
-      tab_file = iniDir + QString::number(2025 + i - 1) + "-" + twName + ".ini";
-    }
 
-    if (QFile::exists(tab_file)) {
-      QFile::copy(tab_file, iniDir + "recycle_name" + "_" + date_time + "-" +
-                                QString::number(i) + ".ini");
-      QFile file(tab_file);
-      file.remove();
+  bool isFileExists = false;
+  for (int i = 2022; i <= c_year; i++) {
+    QString file = iniDir + QString::number(i) + "-" + twName + ".json";
+    if (QFile::exists(file)) {
+      isFileExists = true;
+      QFileInfo fi(file);
+      QString fn = fi.fileName();
+      QString newFile = iniDir + "recycle_" + tab_name + "_" + fn;
+      QFile::rename(file, newFile);
+    }
+  }
+
+  if (!isFileExists) {  // ini files
+    int iniFileCount = c_year - 2025 + 1 + 1;
+    for (int i = 0; i < iniFileCount; i++) {
+      QString tab_file;
+      if (i == 0)
+        tab_file = iniDir + twName + ".ini";
+      else {
+        tab_file =
+            iniDir + QString::number(2025 + i - 1) + "-" + twName + ".ini";
+      }
+
+      if (QFile::exists(tab_file)) {
+        QFile::copy(tab_file, iniDir + "recycle_name" + "_" + date_time + "-" +
+                                  QString::number(i) + ".ini");
+        QFile file(tab_file);
+        file.remove();
+      }
     }
   }
 

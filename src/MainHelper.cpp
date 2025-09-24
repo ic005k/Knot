@@ -211,21 +211,52 @@ void MainHelper::clickBtnRestoreTab() {
   QString recycle = m_Method->getText3(mui->qwTabRecycle, index);
   QStringList recycleList = recycle.split("\n");
 
-  QString ini_file;
-  for (int i = 0; i < iniFileCount; i++) {
-    if (i == 0)
-      ini_file = iniDir + twName + ".ini";
-    else {
-      ini_file = iniDir + QString::number(2025 + i - 1) + "-" + twName + ".ini";
+  if (recycleList.at(0).contains(".json")) {
+    for (int i = 0; i < recycleList.count(); i++) {
+      QString file, newFile;
+      file = recycleList.at(i);
+      QFileInfo fi(file);
+      QString fn = fi.fileName();
+      QStringList list = fn.split("_");
+      if (list.count() > 0) {
+        QString a1 = list.at(0) + "_";
+        QString a2 = list.at(1) + "_";
+        fn = fn.replace(a1, "");
+        fn = fn.replace(a2, "");
+
+        newFile = iniDir + fn;
+        QFile::rename(file, newFile);
+
+        // Get tw name
+        QStringList list1 = fn.split("-");
+        if (fn.endsWith(".json") && list1.count() >= 2) {
+          QString a3 = list1.at(0) + "-";
+          QString tn = fn;
+          tn = tn.replace(a3, "");
+          tn = tn.replace(".json", "");
+          twName = tn;
+        }
+      }
     }
 
-    if (QFile(ini_file).exists()) QFile(ini_file).remove();
-    QString recFile;
-    if (recycleList.count() > 1)
-      recFile = recycleList.at(i);
-    else
-      recFile = recycle;
-    QFile::copy(recFile, ini_file);
+  } else {  // ini files
+    QString ini_file;
+    for (int i = 0; i < iniFileCount; i++) {
+      if (i == 0)
+        ini_file = iniDir + twName + ".ini";
+      else {
+        ini_file =
+            iniDir + QString::number(2025 + i - 1) + "-" + twName + ".ini";
+      }
+
+      if (QFile(ini_file).exists()) QFile(ini_file).remove();
+      QString recFile;
+      if (recycleList.count() > 1)
+        recFile = recycleList.at(i);
+      else
+        recFile = recycle;
+      QFile::copy(recFile, ini_file);
+    }
   }
 
   QString tab_name = m_Method->getText0(mui->qwTabRecycle, index);
@@ -415,14 +446,14 @@ void MainHelper::openTabRecycle() {
   QString tab_name, tab_time;
   QStringList iniFiles;
   QStringList fmt;
-  fmt.append("ini");
+  fmt << "ini" << "json";
   m_NotesList->getAllFiles(iniDir, iniFiles, fmt);
 
   QString iniTotal;
   QStringList myList, nameList, iniList;
   for (int i = 0; i < iniFiles.count(); i++) {
     QString ini_file = iniFiles.at(i);
-    if (ini_file.contains("recycle_name_")) {
+    if (ini_file.contains("recycle_name_") && ini_file.contains(".ini")) {
       QFileInfo fi(ini_file);
       QString ini_filename = fi.fileName();
       ini_filename = ini_filename.replace(".ini", "");
@@ -438,6 +469,17 @@ void MainHelper::openTabRecycle() {
 
       tab_name = m_Method->getRecycleTabName(t1 + "_" + t2);
 
+      myList.append(tab_name + "-=-" + tab_time + "-=-" + ini_file);
+      nameList.append(tab_name + "-=-" + tab_time);
+      iniList.append(ini_file);
+    }
+
+    if (ini_file.contains("recycle_") && ini_file.contains(".json")) {
+      QStringList list = ini_file.split("_");
+      if (list.count() > 0) {
+        tab_name = list.at(1);
+      }
+      tab_time = "----------";
       myList.append(tab_name + "-=-" + tab_time + "-=-" + ini_file);
       nameList.append(tab_name + "-=-" + tab_time);
       iniList.append(ini_file);
