@@ -1729,11 +1729,32 @@ void MainWindow::init_ChartWidget() {
 
 void MainWindow::readData(QTreeWidget *tw) {
   tw->clear();
+  QString name = tw->objectName();
+
+  int cu_year = QDate::currentDate().year();
+  bool isFileExists = false;
+  for (int i = 2022; i <= cu_year; i++) {
+    QString file = iniDir + QString::number(i) + "-" + name + ".json";
+    if (QFile::exists(file)) {
+      isFileExists = true;
+    }
+  }
+
+  if (isFileExists) {
+    DataManager *dataMgr = new DataManager(iniDir, nullptr);
+    dataMgr->loadData(tw);
+    delete dataMgr;
+    dataMgr = nullptr;
+
+    return;
+  }
+
+  /////////////////////////////////////////////////////
 
   QStringList myTopStrList;
 
   int iniFileCount = QDate::currentDate().year() - 2025 + 1 + 1;
-  QString name = tw->objectName();
+
   QString ini_file;
   for (int p = 0; p < iniFileCount; p++) {
     if (p == 0) {

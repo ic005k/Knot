@@ -21,6 +21,7 @@ extern void TextEditToFile(QTextEdit *txtEdit, QString fileName);
 QStringList c_list;
 
 CategoryList *m_CategoryList;
+static DataManager *dataMgr = nullptr;
 
 EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {
   m_CategoryList = new CategoryList(this);
@@ -90,7 +91,9 @@ void EditRecord::init() {
   show();
 }
 
-EditRecord::~EditRecord() {}
+EditRecord::~EditRecord() {
+  if (dataMgr != nullptr) delete dataMgr;
+}
 
 void EditRecord::keyReleaseEvent(QKeyEvent *event) { Q_UNUSED(event); }
 
@@ -580,9 +583,33 @@ void EditRecord::saveModified() {
 }
 
 void EditRecord::saveCurrentYearData() {
+  if (dataMgr != nullptr) delete dataMgr;
+  dataMgr = new DataManager(iniDir, nullptr);
+
   QTreeWidget *tw = (QTreeWidget *)tabData->currentWidget();
+  if (!tw) {
+    qWarning() << "当前控件不是QTreeWidget，无法保存数据";
+    return;
+  }
 
   QString name = tw->objectName();
+  QList<int> listAllYear = getExistingYears(tw);
+  int count_year = listAllYear.count();
+  int current_year = QDate::currentDate().year();
+  bool currentYearSaved = false;
+  for (int i = 0; i < count_year; i++) {
+    int year = listAllYear.at(i);
+    QString file = iniDir + QString::number(year) + "-" + name + ".json";
+    if (!QFile::exists(file)) {
+      dataMgr->saveData(tw, year);
+      if (year == current_year) currentYearSaved = true;
+    }
+  }
+  if (!currentYearSaved) dataMgr->saveData(tw);
+
+  return;
+
+  ///////////////////////////////////////////////////////////////////
 
   QString strCurrentYear = QString::number(QDate::currentDate().year());
   QString iniName = strCurrentYear + "-" + name;
@@ -677,4 +704,28 @@ void EditRecord::monthSum() {
   btnMonthText = str2;
   isWholeMonth = b1;
   isDateSection = b2;
+}
+
+QList<int> EditRecord::getExistingYears(QTreeWidget *tw) {
+  QSet<int> yearsSet;  // 先用QSet自动去重
+  for (int i = 0; i < tw->topLevelItemCount(); ++i) {
+    QTreeWidgetItem *item = tw->topLevelItem(i);
+    bool isNumber;
+    int year = item->text(3).toInt(&isNumber);
+    if (isNumber && year >= DataManager::kDataStartYear) {
+      yearsSet.insert(year);
+    }
+  }
+
+  // 手动将QSet元素转换为QList（兼容所有Qt版本）
+  QList<int> yearsList;
+  // 遍历QSet，逐个插入QList
+  for (int year : yearsSet) {
+    yearsList.append(year);
+  }
+
+  // 排序（升序）
+  std::sort(yearsList.begin(), yearsList.end());
+
+  return yearsList;
 }

@@ -372,6 +372,7 @@ SOURCES += \
     src/Comm/enhancedcolorpicker.cpp \
     src/Comm/inputmethodreset.cpp \
     src/Comm/qaesencryption.cpp \
+    src/DataManager.cpp \
     src/DateSelector.cpp \
     src/EditRecord.cpp \
     src/JavaToQtBridge.cpp \
@@ -611,6 +612,7 @@ HEADERS += \
     src/Comm/enhancedcolorpicker.h \
     src/Comm/inputmethodreset.h \
     src/Comm/qaesencryption.h \
+    src/DataManager.h \
     src/DateSelector.h \
     src/EditRecord.h \
     src/Exercise/WeatherFetcher.h \

@@ -3,12 +3,15 @@
 
 #include <QCompleter>
 #include <QDialog>
+#include <QList>
 #include <QListWidget>
 #include <QSet>
 #include <QTabWidget>
 #include <QTextEdit>
 #include <QWidgetAction>
+#include <algorithm>
 
+#include "DataManager.h"
 #include "src/CategoryList.h"
 
 namespace Ui {
@@ -88,6 +91,8 @@ class EditRecord : public QDialog {
 
   QString lblStyle;
   int nH;
+
+  static QList<int> getExistingYears(QTreeWidget *tw);
 };
 
 #endif  // EDITRECORD_H
