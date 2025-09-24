@@ -238,7 +238,8 @@ void MainWindow::init_TotalData() {
   }
 
   if (TabCount == 0) {
-    QTreeWidget *tw = m_MainHelper->init_TreeWidget("20220303_101010_1");
+    QString tw_name = m_Notes->getDateTimeStr() + "_" + QString::number(1);
+    QTreeWidget *tw = m_MainHelper->init_TreeWidget(tw_name);
 
     QString tabText = tr("Tab") + " " + QString::number(1);
     mui->tabWidget->addTab(tw, tabText);
