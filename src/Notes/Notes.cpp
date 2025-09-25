@@ -56,11 +56,6 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   timerEditNote = new QTimer(this);
   connect(timerEditNote, SIGNAL(timeout()), this, SLOT(on_editNote()));
 
-  bCursorVisible = true;
-  timerCur = new QTimer(this);
-  connect(this, SIGNAL(sendUpdate()), this, SLOT(update()));
-  connect(timerCur, SIGNAL(timeout()), this, SLOT(timerSlot()));
-
   ui->btnColor->hide();
   ui->lblCount->hide();
 
@@ -79,6 +74,13 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
     ui->editFind->setFocus();
     ui->editFind->selectAll();
   });
+
+  // 清理 memo 目录下的旧备份文件（仅保留最新）
+  QDir memoDir(iniDir + "memo/");
+  memoDir.setNameFilters(QStringList() << "*.md.bak" << "*.json.bak");
+  foreach (const QString &bakFile, memoDir.entryList()) {
+    memoDir.remove(bakFile);
+  }
 }
 
 void Notes::initEditor() {
@@ -92,8 +94,8 @@ void Notes::initEditor() {
   m_EditSource->setContentsMargins(1, 1, 1, 1);
   m_EditSource->setStyleSheet("border:none");
 
-  connect(m_EditSource->verticalScrollBar(), SIGNAL(valueChanged(int)), this,
-          SLOT(editVSBarValueChanged()));
+  connect(m_EditSource->verticalScrollBar(), &QScrollBar::valueChanged, this,
+          &Notes::editVSBarValueChanged);
   connect(m_EditSource, &QsciScintilla::textChanged, this,
           &Notes::editSource_textChanged);
   ui->frameEdit->layout()->addWidget(m_EditSource);
@@ -127,7 +129,10 @@ void Notes::init() {
 
 void Notes::wheelEvent(QWheelEvent *e) { Q_UNUSED(e); }
 
-Notes::~Notes() { delete ui; }
+Notes::~Notes() {
+  delete m_NoteIndexManager;
+  delete ui;
+}
 
 void Notes::keyReleaseEvent(QKeyEvent *event) { event->accept(); }
 
@@ -171,15 +176,17 @@ void Notes::saveMainNotes() {
 
     bool isOk = StringToFile(newText, tempFile);
     if (isOk) {
-      QFile::remove(currentMDFile);
+      QFile::rename(currentMDFile, currentMDFile + ".bak");
       if (QFile::rename(tempFile, currentMDFile)) {
         qDebug() << "Save Note: " << currentMDFile;
+        QFile::remove(currentMDFile + ".bak");
         updateDiff(oldText, newText);
         updateMDFileToSyncLists();
         startBackgroundTaskUpdateNoteIndex(currentMDFile);
       } else {
         qWarning() << "重命名失败，清理临时文件";
         QFile::remove(tempFile);
+        QFile::rename(currentMDFile + ".bak", currentMDFile);
       }
     } else {
       qWarning() << "临时文件写入失败";
@@ -224,9 +231,6 @@ bool Notes::eventFilter(QObject *obj, QEvent *evn) {
   if (evn->type() == QEvent::KeyRelease) {
     if (keyEvent->key() == Qt::Key_Back) {
     }
-
-    if (evn->type() == QEvent::KeyPress) {
-    }
   }
 
   if (evn->type() == QEvent::KeyPress) {
@@ -263,18 +267,6 @@ void Notes::on_KVChanged() {
                         mw_one->width(), newHeight);
     }
   }
-}
-
-QString Notes::Deciphering(const QString &fileName) {
-  QFile file(fileName);
-  if (!file.open(QIODevice::ReadOnly)) {
-    QMessageBox::warning(this, tr("Load Ds File"), file.errorString(),
-                         QMessageBox::Yes);
-  }
-
-  return QByteArray::fromBase64(file.readAll());
-
-  file.close();
 }
 
 QString Notes::getDateTimeStr() {
@@ -347,7 +339,7 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
     }
 
     if (!isAndroid) {
-      ShowMessage *msg = new ShowMessage();
+      ShowMessage *msg = new ShowMessage(this);
       msg->ui->btnCancel->setText(tr("No"));
       msg->ui->btnOk->setText(tr("Yes"));
       bool isYes = msg->showMsg(
@@ -388,132 +380,6 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
   appendToSyncList(zipImg);
 
   return strImage;
-}
-
-QStringList Notes::getImgFileFromHtml(QString htmlfile) {
-  QStringList list;
-  QString strHtml = loadText(htmlfile);
-  strHtml = strHtml.replace("><", ">\n<");
-  QTextEdit *edit = new QTextEdit;
-  edit->setPlainText(strHtml);
-  for (int i = 0; i < edit->document()->lineCount(); i++) {
-    QString str = getTextEditLineText(edit, i).trimmed();
-    if (str.contains("<img src=")) {
-      str = str.replace("<img src=", "");
-      str = str.replace("/>", "");
-      str = str.replace("\"", "");
-      str = str.trimmed();
-      qDebug() << str;
-      list.append(str);
-    }
-  }
-  return list;
-}
-
-void Notes::zipMemo() {
-  QDir::setCurrent(iniDir);
-
-#ifdef Q_OS_LINUX
-  QProcess *pro = new QProcess;
-  pro->execute("zip", QStringList() << "-r"
-                                    << "memo.zip"
-                                    << "memo");
-  pro->waitForFinished();
-#endif
-
-#ifdef Q_OS_MACOS
-  QProcess *pro = new QProcess;
-  pro->execute("zip", QStringList() << "-r"
-                                    << "memo.zip"
-                                    << "memo");
-  pro->waitForFinished();
-#endif
-
-#ifdef Q_OS_WIN
-
-  QString strZip, strExec, strzip, tagDir;
-  tagDir = "memo";
-  strZip = iniDir + "memo.zip";
-  QTextEdit *txtEdit = new QTextEdit();
-  strzip = qApp->applicationDirPath() + "/zip.exe";
-  strzip = "\"" + strzip + "\"";
-  strZip = "\"" + strZip + "\"";
-  strExec = iniDir;
-  strExec = "\"" + strExec + "\"";
-  QString strCommand1;
-  QString strx = "\"" + tagDir + "\"";
-  strCommand1 = strzip + " -r " + strZip + " " + strx;
-  txtEdit->append(strCommand1);
-  QString fileName = iniDir + "zip.bat";
-  TextEditToFile(txtEdit, fileName);
-
-  QString exefile = iniDir + "zip.bat";
-  QProcess *pro = new QProcess;
-  pro->execute("cmd.exe", QStringList() << "/c" << exefile);
-  pro->waitForFinished();
-
-#endif
-
-#ifdef Q_OS_ANDROID
-
-  QJniObject javaZipFile = QJniObject::fromString(iniDir + "memo.zip");
-  QJniObject javaZipDir = QJniObject::fromString(iniDir + "memo");
-  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callStaticMethod<void>("com.x/MyActivity", "compressFileToZip",
-                                    "(Ljava/lang/String;Ljava/lang/String;)V",
-                                    javaZipDir.object<jstring>(),
-                                    javaZipFile.object<jstring>());
-
-#endif
-}
-
-void Notes::unzip(QString zipfile) {
-  deleteDirfile(iniDir + "memo");
-  QDir::setCurrent(iniDir);
-#ifdef Q_OS_MACOS
-  QProcess *pro = new QProcess;
-  pro->execute("unzip", QStringList() << "-o" << zipfile << "-d" << iniDir);
-  pro->waitForFinished();
-#endif
-
-#ifdef Q_OS_LINUX
-  QProcess *pro = new QProcess;
-  pro->execute("unzip", QStringList() << "-o" << zipfile << "-d" << iniDir);
-  pro->waitForFinished();
-#endif
-
-#ifdef Q_OS_WIN
-  QString strZip, strExec, strUnzip, tagDir;
-  tagDir = iniDir;
-  strZip = zipfile;
-  QTextEdit *txtEdit = new QTextEdit();
-  strUnzip = qApp->applicationDirPath() + "/7z.exe";
-  qDebug() << qApp->applicationDirPath() << ".....";
-  strUnzip = "\"" + strUnzip + "\"";
-  strZip = "\"" + strZip + "\"";
-  strExec = iniDir;
-  strExec = "\"" + strExec + "\"";
-  QString strCommand1;
-  QString strx = "\"" + tagDir + "\"";
-  strCommand1 = strUnzip + " x " + strZip + " -o" + strx + " -y";
-  txtEdit->append(strCommand1);
-  QString fileName = iniDir + "un.bat";
-  TextEditToFile(txtEdit, fileName);
-
-  QProcess::execute("cmd.exe", QStringList() << "/c" << fileName);
-
-#endif
-
-#ifdef Q_OS_ANDROID
-
-  QJniObject javaZipFile = QJniObject::fromString(zipfile);
-  QJniObject javaZipDir = QJniObject::fromString(iniDir);
-  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callStaticMethod<void>(
-      "com.x/MyActivity", "Unzip", "(Ljava/lang/String;Ljava/lang/String;)V",
-      javaZipFile.object<jstring>(), javaZipDir.object<jstring>());
-
-#endif
 }
 
 QString Notes::addImagePathToHtml(QString strhtml) {
@@ -567,6 +433,9 @@ QString Notes::addImagePathToHtml(QString strhtml) {
   edit1->setPlainText(strEnd);
 
   mw_one->m_Reader->PlainTextEditToFile(edit1, htmlFileName);
+
+  delete edit;
+  delete edit1;
 
   return strEnd;
 }
@@ -708,16 +577,6 @@ bool Notes::eventFilterQwNote(QObject *watch, QEvent *event) {
 void Notes::paintEvent(QPaintEvent *event) {
   Q_UNUSED(event);
   return;
-}
-
-void Notes::timerSlot() {
-  if (bCursorVisible) {
-    bCursorVisible = false;
-  } else {
-    bCursorVisible = true;
-  }
-
-  emit sendUpdate();
 }
 
 void Notes::closeEvent(QCloseEvent *event) {
@@ -1190,9 +1049,8 @@ QString Notes::getCurrentJSON(const QString &md) {
 }
 
 QString Notes::formatMDText(QString text) {
-  for (int i = 0; i < 10; i++) text.replace("\n\n\n", "\n\n");
-
-  return text;
+  static const QRegularExpression re("\n{3,}");  // 只编译一次
+  return text.replace(re, "\n\n");
 }
 
 void Notes::init_all_notes() {
@@ -1270,9 +1128,6 @@ void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
 void Notes::openNotesUI() {
   mw_one->execNeedSyncNotes();
 
-  mw_one->closeProgress();
-  m_Method->closeInfoWindow();
-
   mui->frameMain->hide();
   mui->frameNoteList->show();
 
@@ -1282,6 +1137,8 @@ void Notes::openNotesUI() {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
   init_all_notes();
+
+  m_Method->closeInfoWindow();
 
   isSaveNotesConfig = false;
 
@@ -1666,7 +1523,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
                "Preferences that the passwords are "
                "consistent across all platforms.");
 
-        ShowMessage *msg = new ShowMessage();
+        ShowMessage *msg = new ShowMessage(this);
         msg->showMsg("Knot", errorInfo, 1);
         isPasswordError = true;
         QFile::remove(zFile);
@@ -1712,7 +1569,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
                  "Preferences that the passwords are "
                  "consistent across all platforms.");
 
-          ShowMessage *msg = new ShowMessage();
+          ShowMessage *msg = new ShowMessage(this);
           msg->showMsg("Knot", errorInfo, 1);
           isPasswordError = true;
           QFile::remove(zFile);
@@ -1757,7 +1614,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
                  "Preferences that the passwords are "
                  "consistent across all platforms.");
 
-          ShowMessage *msg = new ShowMessage();
+          ShowMessage *msg = new ShowMessage(this);
           msg->showMsg("Knot", errorInfo, 1);
           isPasswordError = true;
           QFile::remove(zFile);
@@ -1948,9 +1805,14 @@ void Notes::initMarkdownEditor(QsciScintilla *editor) {
   editor->setMarginType(0, QsciScintilla::NumberMargin);  // 声明行号边距类型
 
   // 设置行号字体
+  // 获取系统默认等宽字体（优先），无则用 Consolas
+  QFont monoFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+  if (monoFont.family().isEmpty()) {
+    monoFont = QFont("Consolas", 10);  // fallback
+  }
   editor->SendScintilla(QsciScintilla::SCI_STYLESETFONT,
                         QsciScintilla::STYLE_LINENUMBER,
-                        QFontInfo(QFont("Consolas", 10)).family().toUtf8());
+                        monoFont.family().toUtf8());
 
   // 获取当前字体（需与行号字体一致）
   QFont font("Consolas", 10);  // 或使用编辑器当前字体：m_EditSource->font()
@@ -2233,8 +2095,7 @@ void Notes::previewNote() {
   if (!QFile::exists(currentMDFile)) return;
 
   mw_one->showProgress();
-  QString title =
-      mw_one->m_Notes->m_NoteIndexManager->getNoteTitle(currentMDFile);
+  QString title = m_NoteIndexManager->getNoteTitle(currentMDFile);
 
   QFuture<void> future = QtConcurrent::run([=]() {
     m_NotesList->refreshRecentOpen(title);

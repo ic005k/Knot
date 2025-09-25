@@ -110,12 +110,7 @@ class Notes : public QDialog {
   qlonglong curPos;
   qreal sliderPos;
 
-  QString Deciphering(const QString &fileName);
-
   void init();
-
-  QStringList getImgFileFromHtml(QString htmlfile);
-  void zipMemo();
 
   qreal getVHeight();
 
@@ -123,7 +118,6 @@ class Notes : public QDialog {
   void MD2Html(QString mdFile);
 
   qreal getVPos();
-  void unzip(QString zipfile);
 
   void show_findText();
 
@@ -212,8 +206,6 @@ class Notes : public QDialog {
 
   void editVSBarValueChanged();
 
-  void timerSlot();
-
   void on_btnDone_clicked();
 
   void on_KVChanged();
@@ -243,7 +235,6 @@ class Notes : public QDialog {
   void delLink(QString link);
 
  signals:
-  void sendUpdate();
 
  private slots:
 
@@ -281,10 +272,6 @@ class Notes : public QDialog {
   bool isMouseRelease = false;
   bool isMousePress = false;
   bool isMouseMove = false;
-
-  QTimer *timerCur;
-  QPainter *pPainter;
-  bool bCursorVisible;
 
   bool isFunShow;
 

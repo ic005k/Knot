@@ -1488,7 +1488,7 @@ void Todo::openTodo() {
 
                 QObject::connect(
                     downloader, &WebDavDownloader::downloadFinished, this,
-                    [](bool success, QString error) {
+                    [this](bool success, QString error) {
                       qDebug() << (success ? "下载成功" : "下载失败: " + error);
                       QString zFile = privateDir + "KnotData/todo.ini.zip";
 
@@ -1504,7 +1504,7 @@ void Todo::openTodo() {
                                "Preferences that the passwords are consistent "
                                "across all platforms.");
 
-                        ShowMessage* msg = new ShowMessage();
+                        ShowMessage* msg = new ShowMessage(this);
                         msg->showMsg("Knot", errorInfo, 1);
                         isPasswordError = true;
                         QFile::remove(zFile);
