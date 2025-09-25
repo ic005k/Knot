@@ -35,20 +35,9 @@ extern void RegJni15(const char* myClassName);
 extern void RegJni16(const char* myClassName);
 extern void RegJni17(const char* myClassName);
 
-extern MainWindow* mw_one;
-extern Ui::MainWindow* mui;
-extern QSettings* iniPreferences;
-extern Method* m_Method;
-
 void loadTheme(bool isDark);
 void loadLocal();
 
-bool unzipToDir(const QString& zipPath, const QString& destDir);
-int deleteDirfile(QString dirName);
-QString loadText(QString textFile);
-QString getTextEditLineText(QTextEdit* txtEdit, int i);
-void TextEditToFile(QTextEdit* txtEdit, QString fileName);
-bool StringToFile(QString buffers, QString fileName);
 QPalette createDarkPalette();
 QPalette createLightPalette();
 
@@ -491,100 +480,6 @@ bool unzipToDir(const QString& zipPath, const QString& destDir) {
 
   zip.close();
   return true;
-}
-
-int deleteDirfile(QString dirName) {
-  QDir directory(dirName);
-  if (!directory.exists()) {
-    return true;
-  }
-
-  QString srcPath = QDir::toNativeSeparators(dirName);
-  if (!srcPath.endsWith(QDir::separator())) srcPath += QDir::separator();
-
-  QStringList fileNames = directory.entryList(
-      QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
-  bool error = false;
-  for (QStringList::size_type i = 0; i != fileNames.size(); ++i) {
-    QString filePath = srcPath + fileNames.at(i);
-    QFileInfo fileInfo(filePath);
-    if (fileInfo.isFile() || fileInfo.isSymLink()) {
-      QFile::setPermissions(filePath, QFile::WriteOwner);
-      if (!QFile::remove(filePath)) {
-        error = true;
-      }
-    } else if (fileInfo.isDir()) {
-      if (!deleteDirfile(filePath)) {
-        error = true;
-      }
-    }
-  }
-
-  if (!directory.rmdir(QDir::toNativeSeparators(directory.path()))) {
-    error = true;
-  }
-  return !error;
-}
-
-QString loadText(QString textFile) {
-  bool isExists = QFile(textFile).exists();
-  if (isExists) {
-    QFile file(textFile);
-    if (!file.open(QFile::ReadOnly | QFile::Text)) {
-      qDebug() << "Cannot read file";
-
-    } else {
-      QByteArray data = file.readAll();
-      QString text = m_Method->convertDataToUnicode(data);
-      return text;
-    }
-    file.close();
-  }
-
-  return "";
-}
-
-QString getTextEditLineText(QTextEdit* txtEdit, int i) {
-  QTextBlock block = txtEdit->document()->findBlockByNumber(i);
-  txtEdit->setTextCursor(QTextCursor(block));
-  QString lineText = txtEdit->document()->findBlockByNumber(i).text();
-  return lineText;
-}
-
-void TextEditToFile(QTextEdit* txtEdit, QString fileName) {
-  QFile* file;
-  file = new QFile;
-  file->setFileName(fileName);
-  bool ok = file->open(QIODevice::WriteOnly | QIODevice::Text);
-  if (ok) {
-    QTextStream out(file);
-    out << txtEdit->toPlainText();
-    file->close();
-
-  } else
-    qDebug() << "Write failure!" << fileName;
-
-  delete file;
-}
-
-bool StringToFile(QString buffers, QString fileName) {
-  bool isValue;
-  QFile* file;
-  file = new QFile;
-  file->setFileName(fileName);
-  bool ok = file->open(QIODevice::WriteOnly | QIODevice::Text);
-  if (ok) {
-    QTextStream out(file);
-    out << buffers;
-    file->close();
-    isValue = true;
-  } else {
-    qDebug() << "Write failure!" << fileName;
-    isValue = false;
-  }
-
-  delete file;
-  return isValue;
 }
 
 #ifdef Q_OS_ANDROID

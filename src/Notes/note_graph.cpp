@@ -13,9 +13,6 @@
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
-extern MainWindow *mw_one;
-extern Ui::MainWindow *mui;
-
 void registerNoteGraphTypes() {
   qmlRegisterType<NoteGraphModel>("NoteGraph", 1, 0, "NoteGraphModel");
   qmlRegisterType<NoteRelationParser>("NoteGraph", 1, 0, "NoteRelationParser");
@@ -156,7 +153,7 @@ void NoteRelationParser::parseNoteRelations(NoteGraphModel *model,
       mw_one->m_Notes->m_NoteIndexManager->getNoteTitle(currentNotePath);
 
   // 启动后台任务（使用QtConcurrent线程池）
-  QtConcurrent::run([=]() {
+  QFuture<void> future = QtConcurrent::run([=]() {
     QVector<NoteNode> nodes;
     QVector<NoteRelation> relations;
 
@@ -173,6 +170,12 @@ void NoteRelationParser::parseNoteRelations(NoteGraphModel *model,
     // 发送结果到主线程（触发parsedDataReady信号）
     emit parsedDataReady(nodes, relations);
   });
+
+  // 使用 QFutureWatcher 监控进度
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this,
+          [=]() { watcher->deleteLater(); });
+  watcher->setFuture(future);
 }
 
 // 解析当前笔记中符合格式的链接（[任意文本](memo/xxx.md)）

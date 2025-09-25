@@ -6,19 +6,6 @@
 #include "ui_NewNoteBook.h"
 #include "ui_NotesList.h"
 
-QTreeWidget *twrb, *tw;
-
-extern MainWindow *mw_one;
-extern Ui::MainWindow *mui;
-extern Method *m_Method;
-extern NotesList *m_NotesList;
-
-extern QString loadText(QString textFile);
-extern QString getTextEditLineText(QTextEdit *txtEdit, int i);
-extern void TextEditToFile(QTextEdit *txtEdit, QString fileName);
-extern bool StringToFile(QString buffers, QString fileName);
-extern QString markdownToHtmlWithMath(const QString &md);
-
 QString strNoteNameIndexFile = "";
 
 NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {

@@ -6,19 +6,8 @@
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
-extern MainWindow *mw_one;
-extern Ui::MainWindow *mui;
-extern Method *m_Method;
-extern QTabWidget *tabData;
-
-extern QRegularExpression regxNumber;
-
-extern QString loadText(QString textFile);
-extern void TextEditToFile(QTextEdit *txtEdit, QString fileName);
-
 QStringList c_list;
 
-CategoryList *m_CategoryList;
 static DataManager *dataMgr = nullptr;
 
 EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {

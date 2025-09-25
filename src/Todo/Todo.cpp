@@ -6,17 +6,10 @@
 #include "ui_Todo.h"
 
 QString highLblStyle = "color:rgb(212,35,122)";
-int highCount;
+
 QString orgLblStyle;
 
-extern MainWindow* mw_one;
-extern Ui::MainWindow* mui;
-extern Method* m_Method;
-
-extern WebDavHelper* listWebDavFiles(const QString& url,
-                                     const QString& username,
-                                     const QString& password);
-extern CloudBackup* m_CloudBackup;
+int highCount;
 
 bool isNeedSync = false;
 

@@ -7,18 +7,6 @@
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
-extern MainWindow *mw_one;
-extern Ui::MainWindow *mui;
-
-extern Method *m_Method;
-extern NotesList *m_NotesList;
-
-extern ShowMessage *m_ShowMessage;
-extern ColorDialog *colorDlg;
-extern PrintPDF *m_PrintPDF;
-
-extern QTabWidget *tabData, *tabChart;
-
 #ifdef Q_OS_ANDROID
 static void JavaNotify_0();
 static void JavaNotify_1();

@@ -67,12 +67,6 @@
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
-extern MainWindow *mw_one;
-extern Ui::MainWindow *mui;
-extern Method *m_Method;
-extern QStringList readTextList, htmlFiles;
-extern int htmlIndex;
-
 QString picfile;
 
 DocumentHandler::DocumentHandler(QObject *parent)

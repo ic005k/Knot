@@ -4,11 +4,6 @@
 #include "src/defines.h"
 #include "ui_StepsOptions.h"
 
-extern MainWindow *mw_one;
-extern Method *m_Method;
-
-extern QRegularExpression regxNumber;
-
 StepsOptions::StepsOptions(QWidget *parent)
     : QDialog(parent), ui(new Ui::StepsOptions) {
   ui->setupUi(this);

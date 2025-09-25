@@ -15,9 +15,6 @@
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
-extern Method *m_Method;
-extern Ui::MainWindow *mui;
-
 QString simpleLargeSliderStyle = R"(
         QSlider::groove:horizontal {
           border: 0px solid #bbb;

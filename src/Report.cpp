@@ -7,20 +7,10 @@
 #include "ui_DateSelector.h"
 #include "ui_MainWindow.h"
 
-extern MainWindow* mw_one;
-extern Ui::MainWindow* mui;
-extern Method* m_Method;
-
-extern QTabWidget *tabData, *tabChart;
-
-QStringList listCategory;
-
 QTreeWidget* twOut2Img;
 QLabel *lblTotal, *lblDetails;
 QToolButton *btnCategory, *btnMonth, *btnYear;
 int twTotalRow = 0;
-
-void setTableNoItemFlags(QTableWidget* t, int row);
 
 Report::Report(QWidget* parent) : QDialog(parent) {
   this->installEventFilter(this);
@@ -528,12 +518,6 @@ void Report::getCategoryData(QString strCategory, bool appendTable) {
 
   if (m_Method->getCountFromQW(mui->qwReportSub) > 0)
     m_Method->setCurrentIndexFromQW(mui->qwReportSub, 0);
-}
-
-void setTableNoItemFlags(QTableWidget* t, int row) {
-  for (int z = 0; z < t->columnCount(); z++) {
-    t->item(row, z)->setFlags(Qt::NoItemFlags);
-  }
 }
 
 QString Report::Out2Img(bool isShowMessage) {

@@ -4,15 +4,6 @@
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
-ReaderSet *m_ReaderSet;
-
-extern MainWindow *mw_one;
-extern Ui::MainWindow *mui;
-extern Method *m_Method;
-
-extern QSettings *iniPreferences;
-extern QRegularExpression regxNumber;
-
 extern QFont::Weight readerFontWeight;
 
 ReaderSet::ReaderSet(QWidget *parent) : QDialog(parent) {

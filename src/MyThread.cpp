@@ -4,17 +4,6 @@
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
-extern int currentTabIndex;
-
-extern QStringList readTextList, htmlFiles, listCategory;
-
-extern MainWindow *mw_one;
-extern Ui::MainWindow *mui;
-extern Method *m_Method;
-extern NotesList *m_NotesList;
-extern QTabWidget *tabData, *tabChart;
-extern CloudBackup *m_CloudBackup;
-
 MyThread::MyThread() {}
 
 ReadTWThread::ReadTWThread(QObject *parent) : QThread{parent} {}

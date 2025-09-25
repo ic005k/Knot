@@ -1,10 +1,8 @@
 #include "SetReaderText.h"
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_SetReaderText.h"
-
-extern MainWindow *mw_one;
-extern Method *m_Method;
 
 dlgSetText::dlgSetText(QWidget *parent)
     : QDialog(parent), ui(new Ui::dlgSetText) {

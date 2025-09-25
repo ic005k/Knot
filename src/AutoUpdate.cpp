@@ -4,9 +4,6 @@
 #include "src/defines.h"
 #include "ui_AutoUpdate.h"
 
-extern MainWindow* mw_one;
-extern Method* m_Method;
-
 AutoUpdate::AutoUpdate(QWidget* parent)
     : QDialog(parent), ui(new Ui::AutoUpdate) {
   ui->setupUi(this);
@@ -250,24 +247,10 @@ QString AutoUpdate::GetFileSize(const qint64& size, int precision) {
       .arg(measure);
 }
 
-void AutoUpdate::TextEditToFile(QTextEdit* txtEdit, QString fileName) {
-  QFile* file;
-  file = new QFile;
-  file->setFileName(fileName);
-  bool ok = file->open(QIODevice::WriteOnly);
-  if (ok) {
-    QTextStream out(file);
-    out << txtEdit->toPlainText();
-    file->close();
-    delete file;
-  }
-}
-
 void AutoUpdate::keyPressEvent(QKeyEvent* event) {
   switch (event->key()) {
     case Qt::Key_Escape:
-      // reply->close();
-      // close();
+
       break;
 
     case Qt::Key_Return:

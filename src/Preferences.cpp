@@ -7,14 +7,6 @@
 #include "ui_MainWindow.h"
 #include "ui_Preferences.h"
 
-extern MainWindow* mw_one;
-extern Ui::MainWindow* mui;
-extern Method* m_Method;
-
-extern QSettings* iniPreferences;
-extern ReaderSet* m_ReaderSet;
-extern CloudBackup* m_CloudBackup;
-
 QFont::Weight readerFontWeight;
 
 Preferences::Preferences(QWidget* parent)

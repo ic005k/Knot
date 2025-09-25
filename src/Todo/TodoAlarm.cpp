@@ -1,12 +1,9 @@
 #include "TodoAlarm.h"
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 #include "ui_TodoAlarm.h"
-
-extern MainWindow* mw_one;
-extern Ui::MainWindow* mui;
-extern Method* m_Method;
 
 TodoAlarm::TodoAlarm(QWidget* parent) : QDialog(parent), ui(new Ui::TodoAlarm) {
   ui->setupUi(this);

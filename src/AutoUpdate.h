@@ -41,8 +41,6 @@ class AutoUpdate : public QDialog {
 
   QString GetFileSize(qint64 size);
 
-  void TextEditToFile(QTextEdit* txtEdit, QString fileName);
-
   QString GetFileSize(const qint64& size, int precision);
 
   void startDownload(QString strLink);

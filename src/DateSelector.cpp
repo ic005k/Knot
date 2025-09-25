@@ -1,15 +1,9 @@
 #include "DateSelector.h"
 
 #include "MainWindow.h"
+#include "src/defines.h"
 #include "ui_DateSelector.h"
 #include "ui_MainWindow.h"
-
-QStringList ymdList;
-
-extern MainWindow *mw_one;
-extern Method *m_Method;
-
-extern Ui::MainWindow *mui;
 
 DateSelector::DateSelector(QWidget *parent)
     : QDialog(parent), ui(new Ui::DateSelector) {

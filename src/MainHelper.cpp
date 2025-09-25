@@ -4,23 +4,6 @@
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
-extern MainWindow *mw_one;
-extern Ui::MainWindow *mui;
-extern Method *m_Method;
-extern NotesList *m_NotesList;
-extern QTabWidget *tabData, *tabChart;
-extern QTreeWidgetItem *parentItem;
-
-extern QList<QPointF> PointList;
-
-extern QList<double> doubleList;
-
-extern QStringList listM;
-
-extern double yMaxMonth, yMaxDay;
-
-extern int deleteDirfile(QString dirName);
-
 MainHelper::MainHelper(QWidget *parent) : QDialog{parent} {}
 
 bool MainHelper::mainEventFilter(QObject *watch, QEvent *evn) {

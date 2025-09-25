@@ -19,16 +19,6 @@
 #include "ui_CloudBackup.h"
 #include "ui_MainWindow.h"
 
-extern MainWindow *mw_one;
-extern Ui::MainWindow *mui;
-extern Method *m_Method;
-
-extern QSettings *iniPreferences;
-
-extern int infoProgBarValue, infoProgBarMax;
-
-WebDavHelper *listWebDavFiles(const QString &url, const QString &username,
-                              const QString &password);
 QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray &data);
 
 CloudBackup::CloudBackup(QWidget *parent)
@@ -1118,40 +1108,6 @@ void WebDavDownloader::onDownloadFinished(QNetworkReply *reply) {
 }
 
 ///////////////////////////////////////////////////////////////////////
-
-/*void CloudBackup::getRemoteFileList(QString url) {
-  webdavFileList.clear();
-  webdavDateTimeList.clear();
-  isGetRemoteFileListEnd = false;
-
-  WebDavHelper *helper = listWebDavFiles(url, USERNAME, APP_PASSWORD);
-  helper->setParent(this);
-  // 连接信号
-  QObject::connect(helper, &WebDavHelper::listCompleted, this,
-                   [=](const QList<QPair<QString, QDateTime>> &files) {
-                     qDebug() << "获取到文件列表:";
-                     qDebug() << "共找到" << files.size() << "个文件:";
-                     for (const auto &[path, mtime] : files) {
-                       // qDebug() << "路径:" << path
-                       //          << "修改时间:" << mtime.toString("yyyy-MM-dd
-                       //          hh:mm:ss");
-
-                       QString remoteFile = path;
-                       remoteFile =
-                           remoteFile.replace("/dav/", "");  // 此处需注意
-
-                       webdavFileList.append(remoteFile);
-                       webdavDateTimeList.append(mtime);
-                     }
-                     isGetRemoteFileListEnd = true;
-                   });
-
-  QObject::connect(helper, &WebDavHelper::errorOccurred, this,
-                   [=](const QString &error) {
-                     qDebug() << "操作失败:" << error;
-                     isGetRemoteFileListEnd = true;
-                   });
-}*/
 
 void CloudBackup::getRemoteFileList(QString url) {
   webdavFileList.clear();

@@ -54,8 +54,6 @@ static QString postprocessMath(const QString &html) {
   return processed;
 }
 
-QString markdownToHtmlWithMath(const QString &md);
-
 /////////////////////////////////////////////////////////////
 QString markdownToHtmlWithMath(const QString &md) {
   // 初始化GitHub扩展

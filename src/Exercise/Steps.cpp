@@ -8,17 +8,6 @@
 #include "ui_MainWindow.h"
 #include "ui_StepsOptions.h"
 
-extern QStringList ymdList;
-
-extern MainWindow* mw_one;
-extern Ui::MainWindow* mui;
-extern Method* m_Method;
-extern QRegularExpression regxNumber;
-extern QList<float> rlistX, rlistY, rlistZ, glistX, glistY, glistZ;
-extern unsigned int num_steps_walk, num_steps_run, num_steps_hop;
-
-extern void setTableNoItemFlags(QTableWidget* t, int row);
-
 struct GPSCoordinate {
   double latitude;
   double longitude;

@@ -6,18 +6,7 @@
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
-extern MainWindow *mw_one;
-extern Ui::MainWindow *mui;
-extern QTabWidget *tabData;
-extern NotesList *m_NotesList;
-
-extern CategoryList *m_CategoryList;
-
-extern QStringList readTextList, htmlFiles, listCategory;
-
 QStringList resultsList;
-
-ColorDialog *colorDlg = nullptr;
 
 Method::Method(QWidget *parent) : QDialog(parent) {
   set_ToolButtonStyle(this);

@@ -4,11 +4,6 @@
 #include "src/defines.h"
 #include "ui_ShowMessage.h"
 
-extern MainWindow* mw_one;
-extern Method* m_Method;
-
-ShowMessage* m_ShowMessage = nullptr;
-
 ShowMessage::ShowMessage(QWidget* parent)
     : QDialog(parent), ui(new Ui::ShowMessage) {
   ui->setupUi(this);

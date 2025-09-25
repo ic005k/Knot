@@ -6,20 +6,6 @@
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
-extern MainWindow *mw_one;
-extern Ui::MainWindow *mui;
-extern Method *m_Method;
-extern ReaderSet *m_ReaderSet;
-
-extern int deleteDirfile(QString dirName);
-extern QString loadText(QString textFile);
-extern QString getTextEditLineText(QTextEdit *txtEdit, int i);
-extern void TextEditToFile(QTextEdit *txtEdit, QString fileName);
-extern bool StringToFile(QString buffers, QString fileName);
-extern bool unzipToDir(const QString &zipPath, const QString &destDir);
-
-QStringList readTextList, htmlFiles, tempHtmlList, ncxList;
-
 QByteArray bookFileData;
 
 static int press_x;
@@ -1828,8 +1814,6 @@ QStringList Reader::ncx2html() {
       text_edit->append(str);
     }
   }
-
-  // TextEditToFile(text_edit, privateDir + "ncx_test.txt");
 
   QString strAuthor;
   for (int i = 0; i < text_edit->document()->lineCount(); i++) {

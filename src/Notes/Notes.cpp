@@ -9,27 +9,6 @@
 #include "ui_MainWindow.h"
 #include "ui_Notes.h"
 
-extern MainWindow *mw_one;
-extern Ui::MainWindow *mui;
-extern Method *m_Method;
-extern NotesList *m_NotesList;
-extern QTreeWidget *twrb, *tw;
-
-extern QRegularExpression regxNumber;
-
-extern int deleteDirfile(QString dirName);
-extern QString loadText(QString textFile);
-extern QString getTextEditLineText(QTextEdit *txtEdit, int i);
-extern void TextEditToFile(QTextEdit *txtEdit, QString fileName);
-extern bool StringToFile(QString buffers, QString fileName);
-
-extern WebDavHelper *listWebDavFiles(const QString &url,
-                                     const QString &username,
-                                     const QString &password);
-extern CloudBackup *m_CloudBackup;
-
-extern QString markdownToHtmlWithMath(const QString &md);
-
 NoteIndexManager1::NoteIndexManager1(QObject *parent) : QObject{parent} {}
 
 Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {

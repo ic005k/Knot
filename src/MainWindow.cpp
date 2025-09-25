@@ -3,101 +3,6 @@
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
-QList<QPointF> PointList;
-QList<double> doubleList;
-QStringList listM;
-
-QSettings *iniPreferences;
-CloudBackup *m_CloudBackup;
-QTreeWidgetItem *parentItem;
-MainWindow *mw_one;
-Ui::MainWindow *mui;
-Method *m_Method;
-NotesList *m_NotesList;
-QTabWidget *tabData, *tabChart;
-
-double yMaxMonth, yMaxDay;
-
-QRegularExpression regxNumber("^-?[0-9.]*$");
-
-extern QStringList readTextList, htmlFiles, listCategory;
-
-extern int iPage, sPos, totallines, baseLines, htmlIndex, s_y1, s_m1, s_d1,
-    s_y2, s_m2, s_d2, totalPages, currentPage;
-
-extern void setTableNoItemFlags(QTableWidget *t, int row);
-extern int deleteDirfile(QString dirName);
-extern QString loadText(QString textFile);
-extern QString getTextEditLineText(QTextEdit *txtEdit, int i);
-extern void TextEditToFile(QTextEdit *txtEdit, QString fileName);
-extern bool StringToFile(QString buffers, QString fileName);
-extern bool unzipToDir(const QString &zipPath, const QString &destDir);
-
-extern WebDavHelper *listWebDavFiles(const QString &url,
-                                     const QString &username,
-                                     const QString &password);
-
-extern ShowMessage *m_ShowMessage;
-extern CategoryList *m_CategoryList;
-extern ReaderSet *m_ReaderSet;
-extern ColorDialog *colorDlg;
-extern PrintPDF *m_PrintPDF;
-extern QTreeWidget *twrb, *tw;
-
-void MainWindow::ReadChartData() {
-  int index = tabData->currentIndex();
-  QTreeWidget *tw = (QTreeWidget *)tabData->widget(index);
-
-  strY = get_Year(readDate);
-  strM = get_Month(readDate);
-
-  if (tabChart->currentIndex() == 0) {
-    drawMonthChart();
-  }
-  if (tabChart->currentIndex() == 1) {
-    drawDayChart();
-  }
-  get_Today(tw);
-  init_Stats(tw);
-}
-
-void MainWindow::SaveFile(QString SaveType) {
-  if (SaveType == "tab") {
-    EditRecord::saveCurrentYearData();
-
-    saveTab();
-
-    EditRecord::saveMyClassification();
-
-    isAdd = false;
-    isDelData = false;
-  }
-
-  if (SaveType == "alltab") {
-    for (int i = 0; i < tabData->tabBar()->count(); i++) {
-      if (isBreak) break;
-
-      QTreeWidget *tw = (QTreeWidget *)tabData->widget(i);
-      QString name = tw->objectName();
-      QString iniName =
-          QString::number(QDate::currentDate().year()) + "-" + name;
-      QString ini_file = iniDir + iniName + ".ini";
-      if (QFile(ini_file).exists()) QFile(ini_file).remove();
-
-      saveData(tw, i);
-    }
-
-    saveTab();
-    EditRecord::saveMyClassification();
-  }
-
-  if (SaveType == "todo") {
-  }
-
-  if (SaveType == "notes") {
-  }
-}
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   mui = ui;
@@ -2870,3 +2775,57 @@ void MainWindow::on_btnRotation_clicked() {
 }
 
 void MainWindow::on_btnBackNoteDiff_clicked() { m_NotesList->closeNoteDiff(); }
+
+void MainWindow::ReadChartData() {
+  int index = tabData->currentIndex();
+  QTreeWidget *tw = (QTreeWidget *)tabData->widget(index);
+
+  strY = get_Year(readDate);
+  strM = get_Month(readDate);
+
+  if (tabChart->currentIndex() == 0) {
+    drawMonthChart();
+  }
+  if (tabChart->currentIndex() == 1) {
+    drawDayChart();
+  }
+  get_Today(tw);
+  init_Stats(tw);
+}
+
+void MainWindow::SaveFile(QString SaveType) {
+  if (SaveType == "tab") {
+    EditRecord::saveCurrentYearData();
+
+    saveTab();
+
+    EditRecord::saveMyClassification();
+
+    isAdd = false;
+    isDelData = false;
+  }
+
+  if (SaveType == "alltab") {
+    for (int i = 0; i < tabData->tabBar()->count(); i++) {
+      if (isBreak) break;
+
+      QTreeWidget *tw = (QTreeWidget *)tabData->widget(i);
+      QString name = tw->objectName();
+      QString iniName =
+          QString::number(QDate::currentDate().year()) + "-" + name;
+      QString ini_file = iniDir + iniName + ".ini";
+      if (QFile(ini_file).exists()) QFile(ini_file).remove();
+
+      saveData(tw, i);
+    }
+
+    saveTab();
+    EditRecord::saveMyClassification();
+  }
+
+  if (SaveType == "todo") {
+  }
+
+  if (SaveType == "notes") {
+  }
+}

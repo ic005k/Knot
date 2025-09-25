@@ -4,16 +4,6 @@
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
-extern MainWindow* mw_one;
-extern Ui::MainWindow* mui;
-extern Method* m_Method;
-
-extern int deleteDirfile(QString dirName);
-extern QString loadText(QString textFile);
-extern QString getTextEditLineText(QTextEdit* txtEdit, int i);
-extern void TextEditToFile(QTextEdit* txtEdit, QString fileName);
-extern bool StringToFile(QString buffers, QString fileName);
-
 ReceiveShare::ReceiveShare(QWidget* parent) : QDialog(parent) {}
 
 ReceiveShare::~ReceiveShare() {}

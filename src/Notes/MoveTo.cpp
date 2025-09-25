@@ -2,14 +2,9 @@
 
 #include "src/Comm/Method.h"
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 #include "ui_MoveTo.h"
-
-extern MainWindow* mw_one;
-extern Ui::MainWindow* mui;
-extern Method* m_Method;
-extern NotesList* m_NotesList;
-extern QTreeWidget *twrb, *tw;
 
 MoveTo::MoveTo(QWidget* parent) : QDialog(parent), ui(new Ui::MoveTo) {
   ui->setupUi(this);

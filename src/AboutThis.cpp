@@ -5,9 +5,6 @@
 #include "ui_AboutThis.h"
 #include "ui_MainWindow.h"
 
-extern MainWindow *mw_one;
-extern Method *m_Method;
-
 AboutThis::AboutThis(QWidget *parent) : QDialog(parent), ui(new Ui::AboutThis) {
   ui->setupUi(this);
 

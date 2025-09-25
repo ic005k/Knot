@@ -1,11 +1,8 @@
 #include "NewNoteBook.h"
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_NewNoteBook.h"
-
-extern MainWindow* mw_one;
-extern Method* m_Method;
-extern NotesList* m_NotesList;
 
 NewNoteBook::NewNoteBook(QWidget* parent)
     : QDialog(parent), ui(new Ui::NewNoteBook) {

@@ -5,16 +5,6 @@
 #include "ui_CategoryList.h"
 #include "ui_MainWindow.h"
 
-extern MainWindow* mw_one;
-extern Method* m_Method;
-
-extern QTabWidget *tabData, *tabChart;
-
-extern QString loadText(QString textFile);
-extern bool StringToFile(QString buffers, QString fileName);
-
-extern Ui::MainWindow* mui;
-
 CategoryList::CategoryList(QWidget* parent)
     : QDialog(parent), ui(new Ui::CategoryList) {
   ui->setupUi(this);

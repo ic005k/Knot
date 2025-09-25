@@ -4,11 +4,6 @@
 #include "src/defines.h"
 #include "ui_PrintPDF.h"
 
-extern MainWindow* mw_one;
-extern Method* m_Method;
-
-PrintPDF* m_PrintPDF = nullptr;
-
 PrintPDF::PrintPDF(QWidget* parent) : QDialog(parent), ui(new Ui::PrintPDF) {
   ui->setupUi(this);
   setWindowFlag(Qt::FramelessWindowHint);
