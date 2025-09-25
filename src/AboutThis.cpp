@@ -1,18 +1,12 @@
 ﻿#include "src/AboutThis.h"
 
 #include "MainWindow.h"
+#include "src/defines.h"
 #include "ui_AboutThis.h"
 #include "ui_MainWindow.h"
 
-QString ver = "2.1.31";
-QString appName = "Knot";
-
-QString strStartTotalTime;
-
 extern MainWindow *mw_one;
 extern Method *m_Method;
-extern bool loading, isZH_CN;
-extern QString noteText;
 
 AboutThis::AboutThis(QWidget *parent) : QDialog(parent), ui(new Ui::AboutThis) {
   ui->setupUi(this);

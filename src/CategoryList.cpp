@@ -1,14 +1,14 @@
 #include "CategoryList.h"
 
 #include "MainWindow.h"
+#include "src/defines.h"
 #include "ui_CategoryList.h"
 #include "ui_MainWindow.h"
 
 extern MainWindow* mw_one;
 extern Method* m_Method;
-extern int fontSize, red;
+
 extern QTabWidget *tabData, *tabChart;
-extern QString iniDir;
 
 extern QString loadText(QString textFile);
 extern bool StringToFile(QString buffers, QString fileName);

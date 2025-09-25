@@ -3,17 +3,15 @@
 #include <QKeyEvent>
 
 #include "MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 
 extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern Method *m_Method;
 extern QTabWidget *tabData;
-extern QString iniFile, iniDir, privateDir, btnYearText, btnMonthText;
+
 extern QRegularExpression regxNumber;
-extern bool isBreak, isReport, isWholeMonth, isDateSection, isDark, isAdd,
-    isRemovedTopItem;
-extern int fontSize;
 
 extern QString loadText(QString textFile);
 extern void TextEditToFile(QTextEdit *txtEdit, QString fileName);

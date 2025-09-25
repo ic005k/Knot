@@ -8,7 +8,6 @@ QStringList ymdList;
 
 extern MainWindow *mw_one;
 extern Method *m_Method;
-extern bool isAndroid;
 
 extern Ui::MainWindow *mui;
 

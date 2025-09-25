@@ -4,6 +4,7 @@
 #include <QSettings>
 
 #include "MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 
 extern MainWindow *mw_one;
@@ -11,15 +12,6 @@ extern Ui::MainWindow *mui;
 
 extern Method *m_Method;
 extern NotesList *m_NotesList;
-
-extern QString iniFile, iniDir, zipfile, privateDir, bakfileDir;
-
-extern bool isAndroid, isIOS, isZH_CN, isEpub, isEpubError, isText, isPDF,
-    isWholeMonth, isDateSection, isPasswordError, isInitThemeEnd,
-    isNeedExecDeskShortcut, isReadTWEnd;
-
-extern QString btnYearText, btnMonthText, strPage, ebookFile, strTitle,
-    fileName, strOpfPath, catalogueFile, strShowMsg;
 
 extern ShowMessage *m_ShowMessage;
 extern ColorDialog *colorDlg;

@@ -1,12 +1,11 @@
 #include "PrintPDF.h"
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_PrintPDF.h"
 
 extern MainWindow* mw_one;
 extern Method* m_Method;
-extern int fontSize;
-extern bool isAndroid;
 
 PrintPDF* m_PrintPDF = nullptr;
 

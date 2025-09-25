@@ -1,12 +1,11 @@
 #include "ShowMessage.h"
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_ShowMessage.h"
 
 extern MainWindow* mw_one;
 extern Method* m_Method;
-extern QString copyText;
-extern bool isDark, isAndroid;
 
 ShowMessage* m_ShowMessage = nullptr;
 

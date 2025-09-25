@@ -1,16 +1,10 @@
 #include "MyThread.h"
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 
 extern int currentTabIndex;
-
-extern bool isReadTWEnd, isBreak, isReadEnd, isSaveEnd, isReadEBookEnd, isEBook,
-    isReport, isMenuImport, isDownData, isUpData, isPasswordError, isZipOK,
-    loading, isOpen;
-
-extern QString SaveType, ebookFile, zipfile, strStats, errorInfo, iniDir,
-    strDate;
 
 extern QStringList readTextList, htmlFiles, listCategory;
 

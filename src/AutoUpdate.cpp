@@ -1,12 +1,11 @@
 #include "AutoUpdate.h"
 
 #include "MainWindow.h"
+#include "src/defines.h"
 #include "ui_AutoUpdate.h"
 
 extern MainWindow* mw_one;
 extern Method* m_Method;
-extern QString iniDir, privateDir;
-extern bool isDark;
 
 AutoUpdate::AutoUpdate(QWidget* parent)
     : QDialog(parent), ui(new Ui::AutoUpdate) {

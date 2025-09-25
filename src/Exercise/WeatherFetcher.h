@@ -10,7 +10,7 @@
 #include <QString>
 #include <QUrl>
 
-extern bool isZH_CN;
+#include "src/defines.h"
 
 class WeatherFetcher : public QObject {
   Q_OBJECT

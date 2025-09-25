@@ -15,10 +15,6 @@ extern Method *m_Method;
 extern NotesList *m_NotesList;
 extern QTreeWidget *twrb, *tw;
 
-extern QString iniFile, iniDir, privateDir, currentMDFile, imgFileName, appName,
-    encPassword, errorInfo;
-extern bool isAndroid, isIOS, isDark, isPasswordError;
-extern int fontSize, infoProgBarValue, infoProgBarMax;
 extern QRegularExpression regxNumber;
 
 extern int deleteDirfile(QString dirName);

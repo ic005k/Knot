@@ -10,11 +10,11 @@
 #include <QtMath>
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 
 extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
-extern QString iniDir;
 
 void registerNoteGraphTypes() {
   qmlRegisterType<NoteGraphModel>("NoteGraph", 1, 0, "NoteGraphModel");

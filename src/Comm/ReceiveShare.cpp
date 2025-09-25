@@ -1,13 +1,12 @@
 #include "ReceiveShare.h"
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 
 extern MainWindow* mw_one;
 extern Ui::MainWindow* mui;
 extern Method* m_Method;
-
-extern QString currentMDFile, privateDir;
 
 extern int deleteDirfile(QString dirName);
 extern QString loadText(QString textFile);

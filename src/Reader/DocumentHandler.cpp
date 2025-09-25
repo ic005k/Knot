@@ -64,6 +64,7 @@
 
 #include "src/LoadPic.h"
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 
 extern MainWindow *mw_one;
@@ -71,7 +72,7 @@ extern Ui::MainWindow *mui;
 extern Method *m_Method;
 extern QStringList readTextList, htmlFiles;
 extern int htmlIndex;
-extern QString strOpfPath, appName, copyText, catalogueFile;
+
 QString picfile;
 
 DocumentHandler::DocumentHandler(QObject *parent)

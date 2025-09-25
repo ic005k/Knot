@@ -1,11 +1,12 @@
 #include "StepsOptions.h"
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_StepsOptions.h"
 
 extern MainWindow *mw_one;
 extern Method *m_Method;
-extern QString iniDir;
+
 extern QRegularExpression regxNumber;
 
 StepsOptions::StepsOptions(QWidget *parent)

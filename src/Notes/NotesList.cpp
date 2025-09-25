@@ -1,6 +1,7 @@
 ﻿#include "NotesList.h"
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 #include "ui_NewNoteBook.h"
 #include "ui_NotesList.h"
@@ -11,9 +12,6 @@ extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern Method *m_Method;
 extern NotesList *m_NotesList;
-extern QString iniDir, privateDir, currentMDFile, appName, errorInfo;
-extern bool isAndroid, isWindows, isLinux, isMacOS;
-extern int fontSize;
 
 extern QString loadText(QString textFile);
 extern QString getTextEditLineText(QTextEdit *txtEdit, int i);

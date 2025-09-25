@@ -1,6 +1,7 @@
 #include "Todo.h"
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 #include "ui_Todo.h"
 
@@ -11,10 +12,6 @@ QString orgLblStyle;
 extern MainWindow* mw_one;
 extern Ui::MainWindow* mui;
 extern Method* m_Method;
-extern QString iniFile, iniDir, privateDir, encPassword, errorInfo, appName;
-extern bool loading, isBreak, isZH_CN, isDark, isAndroid, isPasswordError,
-    isEncrypt;
-extern int fontSize;
 
 extern WebDavHelper* listWebDavFiles(const QString& url,
                                      const QString& username,

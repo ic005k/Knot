@@ -3,16 +3,13 @@
 #include <QKeyEvent>
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 
 extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern Method *m_Method;
 extern ReaderSet *m_ReaderSet;
-
-extern QString iniFile, iniDir, privateDir;
-extern bool isZH_CN, isAndroid, isIOS, isEBook, isReport;
-extern int fontSize;
 
 extern int deleteDirfile(QString dirName);
 extern QString loadText(QString textFile);
@@ -21,22 +18,7 @@ extern void TextEditToFile(QTextEdit *txtEdit, QString fileName);
 extern bool StringToFile(QString buffers, QString fileName);
 extern bool unzipToDir(const QString &zipPath, const QString &destDir);
 
-bool isOpen = false;
-bool isEpub, isText, isPDF, isEpubError;
-
 QStringList readTextList, htmlFiles, tempHtmlList, ncxList;
-QString strOpfPath, strOpfFile, oldOpfPath, fileName, ebookFile, strTitle,
-    catalogueFile, strShowMsg, strEpubTitle, strPercent;
-
-int sPos, totallines, totalPages, currentPage;
-int baseLines = 50;
-int htmlIndex = 0;
-int minBytes = 200000;
-int maxBytes = 400000;
-
-int zlibMethod = 1;
-int readerFontSize = 18;
-int epubFileMethod = 2;
 
 QByteArray bookFileData;
 

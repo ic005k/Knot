@@ -10,22 +10,14 @@ extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern QTabWidget *tabData;
 extern NotesList *m_NotesList;
-extern QString iniDir, searchStr, currentMDFile, privateDir, encPassword,
-    errorInfo;
+
 extern CategoryList *m_CategoryList;
-extern bool isEpub, isText, isPDF, loading, isDark, isAndroid, isEncrypt,
-    isZH_CN;
-extern int iPage, sPos, totallines, baseLines, htmlIndex, s_y1, s_m1, s_d1,
-    s_y2, s_m2, s_d2, fontSize;
+
 extern QStringList readTextList, htmlFiles, listCategory;
 
 QStringList resultsList;
 
-bool isPasswordError = false;
-
 ColorDialog *colorDlg = nullptr;
-
-int infoProgBarValue, infoProgBarMax;
 
 Method::Method(QWidget *parent) : QDialog(parent) {
   set_ToolButtonStyle(this);

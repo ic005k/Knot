@@ -1,11 +1,7 @@
 ﻿#include "MainWindow.h"
 
+#include "src/defines.h"
 #include "ui_MainWindow.h"
-
-QString iniFile, iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
-    strStats, SaveType, strY, strM, btnYText, btnMText, btnDText, errorInfo,
-    CurrentYearMonth, zipfile, txt, searchStr, currentMDFile, copyText,
-    imgFileName, defaultFontFamily, customFontFamily, encPassword;
 
 QList<QPointF> PointList;
 QList<double> doubleList;
@@ -20,32 +16,9 @@ Method *m_Method;
 NotesList *m_NotesList;
 QTabWidget *tabData, *tabChart;
 
-bool isrbFreq = true;
-bool isEBook, isReport, isUpData, isZipOK, isMenuImport, isDownData, isEncrypt,
-    isRemovedTopItem;
-bool isAdd = false;
-bool loading, isReadEnd, isReadTWEnd;
-bool isReadEBookEnd = true;
-bool isSaveEnd = true;
-bool isBreak = false;
-bool isDark = false;
-bool isDelData = false;
-
-int today, fontSize, red, currentTabIndex;
-
-int chartMax = 5;
-
 double yMaxMonth, yMaxDay;
 
 QRegularExpression regxNumber("^-?[0-9.]*$");
-
-extern bool isAndroid, isIOS, isZH_CN, isEpub, isEpubError, isText, isPDF,
-    isWholeMonth, isDateSection, isPasswordError, isInitThemeEnd,
-    isNeedExecDeskShortcut;
-
-extern QString btnYearText, btnMonthText, strPage, ebookFile, strTitle,
-    fileName, strOpfPath, catalogueFile, strShowMsg, ver, appName,
-    strStartTotalTime;
 
 extern QStringList readTextList, htmlFiles, listCategory;
 

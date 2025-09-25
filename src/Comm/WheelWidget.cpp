@@ -6,7 +6,7 @@
 #include <QWheelEvent>
 #include <QtMath>
 
-extern bool isDark;
+#include "src/defines.h"
 
 WheelWidget::WheelWidget(QWidget* parent) : QWidget(parent) {
   m_itemHeight = 45;

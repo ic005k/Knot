@@ -1,6 +1,7 @@
 #include "MainHelper.h"
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 
 extern MainWindow *mw_one;
@@ -15,21 +16,6 @@ extern QList<QPointF> PointList;
 extern QList<double> doubleList;
 
 extern QStringList listM;
-
-extern QString iniFile, iniDir, privateDir, bakfileDir, strDate, readDate,
-    noteText, strStats, SaveType, strY, strM, btnYText, btnMText, btnDText,
-    errorInfo, CurrentYearMonth, zipfile, txt, searchStr, currentMDFile,
-    copyText, imgFileName, defaultFontFamily, customFontFamily, encPassword,
-    ver, btnYearText, btnMonthText, strPage, ebookFile, strTitle, fileName,
-    strOpfPath, catalogueFile, strShowMsg;
-
-extern bool isAndroid, isReadEnd, isDark, isZipOK, isMenuImport, isDownData,
-    isAdd, loading, isrbFreq, isPasswordError, isEncrypt, isBreak, isIOS,
-    isZH_CN, isEpub, isEpubError, isText, isPDF, isWholeMonth, isDateSection,
-    isInitThemeEnd, isNeedExecDeskShortcut;
-
-extern int fontSize, red, chartMax, iPage, sPos, totallines, baseLines,
-    htmlIndex, s_y1, s_m1, s_d1, s_y2, s_m2, s_d2, totalPages, currentPage;
 
 extern double yMaxMonth, yMaxDay;
 

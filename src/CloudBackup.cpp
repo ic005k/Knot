@@ -15,15 +15,13 @@
 
 #include "Comm/qaesencryption.h"
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_CloudBackup.h"
 #include "ui_MainWindow.h"
 
 extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern Method *m_Method;
-extern QString iniFile, iniDir, zipfile, privateDir, bakfileDir, appName;
-
-extern bool isZipOK, isMenuImport, isDownData, isAndroid, isUpData;
 
 extern QSettings *iniPreferences;
 

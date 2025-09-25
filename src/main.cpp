@@ -30,16 +30,11 @@
 
 std::unique_ptr<cppjieba::Jieba> jieba;
 
-extern QString iniFile, txtFile, appName, iniDir, privateDir, bakfileDir,
-    customFontFamily, defaultFontFamily, strStartTotalTime;
-extern int fontSize;
-
 extern void RegJni(const char* myClassName);
 extern void RegJni15(const char* myClassName);
 extern void RegJni16(const char* myClassName);
 extern void RegJni17(const char* myClassName);
 
-extern bool isDark;
 extern MainWindow* mw_one;
 extern Ui::MainWindow* mui;
 extern QSettings* iniPreferences;
@@ -71,11 +66,6 @@ QString strJBDict2 = "";
 QString strJBDict3 = "";
 QString strJBDict4 = "";
 QString strJBDict5 = "";
-
-bool isZH_CN = false;
-bool isAndroid, isIOS, isWindows, isLinux, isMacOS;
-bool isInitThemeEnd;
-bool isNeedExecDeskShortcut = false;
 
 const QString uniqueKey = "MyUniqueApplicationKey_12345";
 

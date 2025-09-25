@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 #include "ui_StepsOptions.h"
 
@@ -15,10 +16,8 @@ extern Method* m_Method;
 extern QRegularExpression regxNumber;
 extern QList<float> rlistX, rlistY, rlistZ, glistX, glistY, glistZ;
 extern unsigned int num_steps_walk, num_steps_run, num_steps_hop;
-extern bool loading, isAndroid, isZH_CN;
-extern QString iniFile, iniDir, strDate;
+
 extern void setTableNoItemFlags(QTableWidget* t, int row);
-extern int fontSize;
 
 struct GPSCoordinate {
   double latitude;

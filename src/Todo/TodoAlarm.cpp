@@ -7,8 +7,6 @@
 extern MainWindow* mw_one;
 extern Ui::MainWindow* mui;
 extern Method* m_Method;
-extern int fontSize;
-extern bool isDark, isAndroid;
 
 TodoAlarm::TodoAlarm(QWidget* parent) : QDialog(parent), ui(new Ui::TodoAlarm) {
   ui->setupUi(this);

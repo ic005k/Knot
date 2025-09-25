@@ -3,16 +3,14 @@
 #include <QKeyEvent>
 
 #include "MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 #include "ui_Preferences.h"
 
-extern QString iniFile, iniDir, privateDir, defaultFontFamily, customFontFamily,
-    encPassword, ver;
 extern MainWindow* mw_one;
 extern Ui::MainWindow* mui;
 extern Method* m_Method;
-extern bool isBreak, isDark, isEncrypt, isAndroid;
-extern int fontSize;
+
 extern QSettings* iniPreferences;
 extern ReaderSet* m_ReaderSet;
 extern CloudBackup* m_CloudBackup;

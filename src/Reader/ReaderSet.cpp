@@ -1,18 +1,17 @@
 #include "ReaderSet.h"
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 
 ReaderSet *m_ReaderSet;
 
-extern int fontSize, readerFontSize;
 extern MainWindow *mw_one;
 extern Ui::MainWindow *mui;
 extern Method *m_Method;
-extern QString iniDir, privateDir, defaultFontFamily, customFontFamily;
+
 extern QSettings *iniPreferences;
 extern QRegularExpression regxNumber;
-extern bool isAndroid;
 
 extern QFont::Weight readerFontWeight;
 

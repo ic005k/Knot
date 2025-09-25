@@ -3,33 +3,22 @@
 #include <qdebug.h>
 
 #include "MainWindow.h"
+#include "src/defines.h"
 #include "ui_DateSelector.h"
 #include "ui_MainWindow.h"
 
-extern int fontSize;
 extern MainWindow* mw_one;
 extern Ui::MainWindow* mui;
 extern Method* m_Method;
-extern QString iniFile, iniDir, btnYText, btnMText, btnDText;
-extern QTabWidget *tabData, *tabChart;
-extern bool isEBook, isReport, isDark, isAndroid;
 
-QString btnYearText, btnMonthText;
+extern QTabWidget *tabData, *tabChart;
+
 QStringList listCategory;
 
 QTreeWidget* twOut2Img;
 QLabel *lblTotal, *lblDetails;
 QToolButton *btnCategory, *btnMonth, *btnYear;
 int twTotalRow = 0;
-bool isWholeMonth = true;
-bool isDateSection = false;
-
-int s_y1 = 0;
-int s_m1 = 0;
-int s_d1 = 0;
-int s_y2 = 0;
-int s_m2 = 0;
-int s_d2 = 0;
 
 void setTableNoItemFlags(QTableWidget* t, int row);
 
