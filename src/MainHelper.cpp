@@ -392,6 +392,8 @@ void MainHelper::init_Menu(QMenu *mainMenu) {
 }
 
 void MainHelper::openTabRecycle() {
+  mw_one->showProgress();
+
   if (mui->qwTabRecycle->source().isEmpty()) {
     mui->qwTabRecycle->rootContext()->setContextProperty("m_Report",
                                                          mw_one->m_Report);
@@ -399,93 +401,117 @@ void MainHelper::openTabRecycle() {
         QUrl(QStringLiteral("qrc:/src/qmlsrc/tabrecycle.qml")));
   }
 
+  // 切换UI
   mui->frameMain->hide();
   mui->frameTabRecycle->show();
-
   m_Method->clearAllBakList(mui->qwTabRecycle);
 
-  QString tab_name, tab_time;
-  QStringList iniFiles;
-  QStringList fmt;
-  fmt << "ini" << "json";
-  m_NotesList->getAllFiles(iniDir, iniFiles, fmt);
+  // 使用QFutureWatcher监控后台任务完成
+  QFutureWatcher<QStringList> *watcher = new QFutureWatcher<QStringList>(this);
 
-  QString iniTotal;
-  QStringList myList, nameList, iniList;
-  for (int i = 0; i < iniFiles.count(); i++) {
-    QString ini_file = iniFiles.at(i);
-    if (ini_file.contains("recycle_name_") && ini_file.contains(".ini")) {
-      QFileInfo fi(ini_file);
-      QString ini_filename = fi.fileName();
-      ini_filename = ini_filename.replace(".ini", "");
-      tab_name = ini_filename.split("_").at(1);
-      QString t1, t2;
-      t1 = ini_filename.split("_").at(2);
-      t2 = ini_filename.split("_").at(3);
-      QStringList list = t2.split("-");
-      if (list.count() == 2) {
-        t2 = list.at(0);
+  // 后台执行文件处理
+  QFuture<QStringList> future = QtConcurrent::run([=]() -> QStringList {
+    QString tab_name, tab_time;
+    QStringList iniFiles;
+    QStringList fmt;
+    fmt << "ini" << "json";
+
+    // 获取所有文件（耗时操作，在后台执行）
+    m_NotesList->getAllFiles(iniDir, iniFiles, fmt);
+
+    QString iniTotal;
+    QStringList myList, nameList, iniList;
+
+    // 处理文件列表
+    for (int i = 0; i < iniFiles.count(); i++) {
+      QString ini_file = iniFiles.at(i);
+      if (ini_file.contains("recycle_name_") && ini_file.contains(".ini")) {
+        QFileInfo fi(ini_file);
+        QString ini_filename = fi.fileName();
+        ini_filename = ini_filename.replace(".ini", "");
+        tab_name = ini_filename.split("_").at(1);
+        QString t1, t2;
+        t1 = ini_filename.split("_").at(2);
+        t2 = ini_filename.split("_").at(3);
+        QStringList list = t2.split("-");
+        if (list.count() == 2) {
+          t2 = list.at(0);
+        }
+        tab_time = t1 + "  " + t2;
+
+        tab_name = m_Method->getRecycleTabName(t1 + "_" + t2);
+
+        myList.append(tab_name + "-=-" + tab_time + "-=-" + ini_file);
+        nameList.append(tab_name + "-=-" + tab_time);
+        iniList.append(ini_file);
       }
-      tab_time = t1 + "  " + t2;
 
-      tab_name = m_Method->getRecycleTabName(t1 + "_" + t2);
-
-      myList.append(tab_name + "-=-" + tab_time + "-=-" + ini_file);
-      nameList.append(tab_name + "-=-" + tab_time);
-      iniList.append(ini_file);
-    }
-
-    if (ini_file.contains("recycle_") && ini_file.contains(".json")) {
-      QStringList list = ini_file.split("_");
-      if (list.count() > 0) {
-        tab_name = list.at(1);
-      }
-      tab_time = "----------";
-      myList.append(tab_name + "-=-" + tab_time + "-=-" + ini_file);
-      nameList.append(tab_name + "-=-" + tab_time);
-      iniList.append(ini_file);
-    }
-  }
-
-  int count = myList.count();
-  QStringList lastList;
-  for (int i = 0; i < count; i++) {
-    QString str1 = myList.at(i);
-    iniTotal = "";
-    QStringList list1 = str1.split("-=-");
-    tab_name = list1.at(0);
-    tab_time = list1.at(1);
-    for (int j = 0; j < count; j++) {
-      QString str2 = nameList.at(j);
-      if (str1.contains(str2)) {
-        iniTotal += iniList.at(j) + "\n";
+      if (ini_file.contains("recycle_") && ini_file.contains(".json")) {
+        QStringList list = ini_file.split("_");
+        if (list.count() > 0) {
+          tab_name = list.at(1);
+        }
+        tab_time = "----------";
+        myList.append(tab_name + "-=-" + tab_time + "-=-" + ini_file);
+        nameList.append(tab_name + "-=-" + tab_time);
+        iniList.append(ini_file);
       }
     }
 
-    lastList.append(tab_name + "-=-" + tab_time + "-=-" + iniTotal);
-  }
+    int count = myList.count();
+    QStringList lastList;
+    for (int i = 0; i < count; i++) {
+      QString str1 = myList.at(i);
+      iniTotal = "";
+      QStringList list1 = str1.split("-=-");
+      tab_name = list1.at(0);
+      tab_time = list1.at(1);
+      for (int j = 0; j < count; j++) {
+        QString str2 = nameList.at(j);
+        if (str1.contains(str2)) {
+          iniTotal += iniList.at(j) + "\n";
+        }
+      }
 
-  // Qt6 新写法（直接通过迭代器构造）
-  QSet<QString> set(lastList.begin(), lastList.end());  // 直接构造 QSet
-  QStringList uniqueList(set.begin(), set.end());       // 直接构造 QStringList
+      lastList.append(tab_name + "-=-" + tab_time + "-=-" + iniTotal);
+    }
 
-  for (int i = 0; i < uniqueList.count(); i++) {
-    QString str = uniqueList.at(i);
-    tab_name = str.split("-=-").at(0);
-    tab_time = str.split("-=-").at(1);
-    iniTotal = str.split("-=-").at(2);
-    iniTotal = iniTotal.trimmed();
-    m_Method->addItemToQW(mui->qwTabRecycle, tab_name, tab_time, "", iniTotal,
-                          0);
-  }
+    // 去重处理
+    QSet<QString> set(lastList.begin(), lastList.end());
+    return QStringList(set.begin(), set.end());
+  });
 
-  int t_count = m_Method->getCountFromQW(mui->qwTabRecycle);
-  if (t_count > 0) {
-    m_Method->setCurrentIndexFromQW(mui->qwTabRecycle, 0);
-  }
+  // 将future与watcher关联
+  watcher->setFuture(future);
 
-  mui->lblTitleTabRecycle->setText(tr("Tab Recycle") + "    " + tr("Total") +
-                                   " : " + QString::number(t_count));
+  // 当后台任务完成时，在主线程更新UI
+  connect(watcher, &QFutureWatcher<QStringList>::finished, this, [=]() {
+    QStringList uniqueList = watcher->result();
+
+    // 在主线程更新UI
+    for (int i = 0; i < uniqueList.count(); i++) {
+      QString str = uniqueList.at(i);
+      QString tab_name = str.split("-=-").at(0);
+      QString tab_time = str.split("-=-").at(1);
+      QString iniTotal = str.split("-=-").at(2);
+      iniTotal = iniTotal.trimmed();
+      m_Method->addItemToQW(mui->qwTabRecycle, tab_name, tab_time, "", iniTotal,
+                            0);
+    }
+
+    int t_count = m_Method->getCountFromQW(mui->qwTabRecycle);
+    if (t_count > 0) {
+      m_Method->setCurrentIndexFromQW(mui->qwTabRecycle, 0);
+    }
+
+    mui->lblTitleTabRecycle->setText(tr("Tab Recycle") + "    " + tr("Total") +
+                                     " : " + QString::number(t_count));
+
+    // 清理watcher
+    watcher->deleteLater();
+
+    mw_one->closeProgress();
+  });
 }
 
 void MainHelper::initMainQW() {

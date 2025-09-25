@@ -8,8 +8,6 @@
 
 QStringList c_list;
 
-static DataManager *dataMgr = nullptr;
-
 EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {
   m_CategoryList = new CategoryList(this);
 
@@ -78,9 +76,7 @@ void EditRecord::init() {
   show();
 }
 
-EditRecord::~EditRecord() {
-  if (dataMgr != nullptr) delete dataMgr;
-}
+EditRecord::~EditRecord() { delete m_CategoryList; }
 
 void EditRecord::keyReleaseEvent(QKeyEvent *event) { Q_UNUSED(event); }
 
@@ -570,14 +566,12 @@ void EditRecord::saveModified() {
 }
 
 void EditRecord::saveCurrentYearData() {
-  if (dataMgr != nullptr) delete dataMgr;
-  dataMgr = new DataManager(iniDir, nullptr);
-
   QTreeWidget *tw = (QTreeWidget *)tabData->currentWidget();
   if (!tw) {
-    qWarning() << "当前控件不是QTreeWidget，无法保存数据";
     return;
   }
+
+  DataManager *dataMgr = new DataManager(iniDir, nullptr);
 
   QString name = tw->objectName();
   QList<int> listAllYear = getExistingYears(tw);
@@ -593,6 +587,8 @@ void EditRecord::saveCurrentYearData() {
     }
   }
   if (!currentYearSaved) dataMgr->saveData(tw);
+
+  delete dataMgr;
 
   return;
 

@@ -324,6 +324,7 @@ class NotesList : public QDialog {
   void initSerachDatabase();
   int getSelectedVersionIndex();
   void setNoteDiffHtmlToQML(const QString &html);
+  void navigateFindResult(int step);
 };
 
 class SearchMapper {

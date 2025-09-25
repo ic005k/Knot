@@ -1447,38 +1447,49 @@ void NotesList::startFind(QString strFind) {
           &NotesList::onSearchFinished);
 }
 
-void NotesList::goPrevious() {
-  findCount = findCount - 1;
-  if (findCount < 0) findCount = searchResultList.count() - 1;
+// 通用导航函数：step 为 -1 表示上一个，1 表示下一个
+void NotesList::navigateFindResult(int step) {
+  // 检查搜索结果列表是否为空
+  if (searchResultList.isEmpty()) {
+    mui->lblFindNoteCount->setText("0 -> 0");
+    return;
+  }
 
+  // 更新当前索引（根据步长调整）
+  findCount += step;
+
+  // 处理循环边界（索引超出范围时循环到首尾）
+  int listCount = searchResultList.count();
+  if (findCount < 0) {
+    findCount = listCount - 1;
+  } else if (findCount >= listCount) {
+    findCount = 0;
+  }
+
+  // 解析当前结果项（带格式校验）
   QStringList list = searchResultList.at(findCount).split("-==-");
-  QString md_file = list.at(0);
-  mui->lblShowLineSn->setText(list.at(2));
-  setCurrentItemFromMDFile(md_file);
-  clickNoteList();
+  if (list.size() >= 3) {  // 确保分割后有足够的元素
+    QString md_file = list.at(0);
+    mui->lblShowLineSn->setText(list.at(2));
+    setCurrentItemFromMDFile(md_file);
+    clickNoteList();
+  }
 
+  // 更新计数标签
   mui->lblFindNoteCount->setText(QString::number(findCount + 1) + " -> " +
-                                 QString::number(searchResultList.count()));
+                                 QString::number(listCount));
 
-  if (pAndroidKeyboard->isVisible()) pAndroidKeyboard->hide();
+  // 隐藏安卓键盘（如果可见）
+  if (pAndroidKeyboard->isVisible()) {
+    pAndroidKeyboard->hide();
+  }
 }
 
-void NotesList::goNext() {
-  findCount = findCount + 1;
+// 上一个结果（复用通用导航函数，步长为 -1）
+void NotesList::goPrevious() { navigateFindResult(-1); }
 
-  if (findCount > searchResultList.count() - 1) findCount = 0;
-
-  QStringList list = searchResultList.at(findCount).split("-==-");
-  QString md_file = list.at(0);
-  mui->lblShowLineSn->setText(list.at(2));
-  setCurrentItemFromMDFile(md_file);
-  clickNoteList();
-
-  mui->lblFindNoteCount->setText(QString::number(findCount + 1) + " -> " +
-                                 QString::number(searchResultList.count()));
-
-  if (pAndroidKeyboard->isVisible()) pAndroidKeyboard->hide();
-}
+// 下一个结果（复用通用导航函数，步长为 1）
+void NotesList::goNext() { navigateFindResult(1); }
 
 void NotesList::goFindResult(int index) {
   if (findResult.count() == 0) return;
@@ -2799,7 +2810,7 @@ void NotesList::genRecentOpenMenu() {
       QString txt = QString::number(i + 1) + " . " + name;
       QString menuTitle =
           fm.elidedText(txt, Qt::ElideRight, mw_one->width() - 30);
-      QAction *act = new QAction(menuTitle);
+      QAction *act = new QAction(menuTitle, menuRecentOpen);
       menuRecentOpen->addAction(act);
 
       connect(act, &QAction::triggered, this, [=]() {
