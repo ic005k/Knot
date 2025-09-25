@@ -25,6 +25,7 @@
 #include "lib/cppjieba/Jieba.hpp"
 #include "lib/quazip/quazip.h"
 #include "lib/quazip/quazipfile.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 
 std::unique_ptr<cppjieba::Jieba> jieba;
@@ -139,8 +140,8 @@ int main(int argc, char* argv[]) {
   defaultFontSize = 17;
 
   RegJni("com/x/MyService");
-  RegJni("com/x/MyActivity");
-  RegJni15("com/x/MyActivity");
+  RegJni(ANDROID_MAIN_ACTIVITY);
+  RegJni15(ANDROID_MAIN_ACTIVITY);
   RegJni("com/x/ClockActivity");
   RegJni("com/x/ShareReceiveActivity");
   RegJni("com/x/NoteEditor");
@@ -285,8 +286,8 @@ int main(int argc, char* argv[]) {
 
 #ifdef Q_OS_ANDROID
   // 通知 Java 层 Qt main() 已完成
-  QJniObject::callStaticMethod<void>("com/x/MyActivity", "setQtMainEnd", "(Z)V",
-                                     true);
+  QJniObject::callStaticMethod<void>(ANDROID_MAIN_ACTIVITY, "setQtMainEnd",
+                                     "(Z)V", true);
 #endif
 
   QTimer::singleShot(0, &app, [&]() {

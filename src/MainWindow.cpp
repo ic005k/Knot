@@ -2641,7 +2641,7 @@ void MainWindow::on_btnShareImage_clicked() {
 
 void MainWindow::on_btnHideKey_clicked() { pAndroidKeyboard->hide(); }
 
-void MainWindow::on_btnDelImage_clicked() { m_Notes->delImage(); }
+void MainWindow::on_btnDelImage_clicked() {}
 
 void MainWindow::on_btnBackReaderSet_clicked() {
   mui->f_ReaderSet->hide();

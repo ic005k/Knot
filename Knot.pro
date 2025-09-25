@@ -664,6 +664,7 @@ HEADERS += \
     lib/quazip/quazipnewinfo.h \
     lib/quazip/unzip.h \
     lib/quazip/zip.h \
+    src/defines.h \
     win.rc
 
 FORMS += \

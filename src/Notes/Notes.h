@@ -138,8 +138,6 @@ class Notes : public QDialog {
   auto getAndroidNoteConfig(QString key);
   void setAndroidNoteConfig(QString key, QString value);
 
-  void delImage();
-
   void javaNoteToQMLNote();
   QString formatMDText(QString text);
 
@@ -279,7 +277,7 @@ class Notes : public QDialog {
 
   QInputMethod *pAndroidKeyboard = QApplication::inputMethod();
   void wheelEvent(QWheelEvent *e) override;
-  QString imgDir = "==Image==";
+
   QColor StringToColor(QString mRgbStr);
 
   void setOpenSearchResultForAndroid(bool isValue, QString strSearchText);

@@ -3,6 +3,7 @@
 #include "cmark-gfm-core-extensions.h"
 #include "cmark_wrapper.h"
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "subscript.h"
 #include "superscript.h"
 #include "ui_MainWindow.h"
@@ -911,48 +912,6 @@ void Notes::setAndroidNoteConfig(QString key, QString value) {
   Reg.setValue(key, value);
 }
 
-void Notes::delImage() {
-  ShowMessage *m_ShowMsg = new ShowMessage(this);
-  if (!m_ShowMsg->showMsg("Knot", tr("Delete this image?"), 2)) return;
-
-  QFileInfo fi(imgFileName);
-  QString name = fi.fileName();
-  QString buffers = loadText(currentMDFile);
-
-  int startPos, endPos, length;
-  int index = 0;
-  QStringList imgTitleList;
-  while (buffers.indexOf("![", index) != -1) {
-    startPos = buffers.indexOf("![", index) + 2;
-    if (startPos - 2 >= 0) {
-      endPos = buffers.indexOf("]", startPos + 1);
-      length = endPos - startPos;
-      QString subStr = buffers.mid(startPos, length);
-      imgTitleList.append(subStr);
-      qDebug() << "delImage():" << startPos << length << subStr;
-      index = endPos + 1;
-    }
-  }
-
-  for (int i = 0; i < imgTitleList.count(); i++) {
-    QString title = imgTitleList.at(i);
-    QString strImg =
-        "![" + title + "](file://" + imgDir + "memo/images/" + name + ")";
-    buffers.replace(strImg, "");
-  }
-
-  qreal oldPos = getVPos();
-  QImage img(imgFileName);
-  int nImagHeight = img.height();
-  qreal newPos = oldPos - nImagHeight;
-  refreshQMLVPos(newPos);
-
-  buffers = formatMDText(buffers);
-  StringToFile(buffers, currentMDFile);
-
-  mw_one->on_btnBackImg_clicked();
-}
-
 void Notes::delLink(QString link) {
   QString mdBuffers = loadText(currentMDFile);
 
@@ -1701,8 +1660,7 @@ void Notes::initMarkdownLexer() {
   markdownLexer = new QsciLexerMarkdown(m_EditSource);
   m_EditSource->setLexer(markdownLexer);
 
-  m_EditSource->SendScintilla(
-      QsciScintilla::SCI_STYLERESETDEFAULT);  // Scintilla 重置
+  // Scintilla 重置
   m_EditSource->SendScintilla(QsciScintilla::SCI_STYLERESETDEFAULT);
   m_EditSource->setCaretForegroundColor(QColor(0, 0, 0));  // 光标颜色
   m_EditSource->recolor();
@@ -1814,11 +1772,8 @@ void Notes::initMarkdownEditor(QsciScintilla *editor) {
                         QsciScintilla::STYLE_LINENUMBER,
                         monoFont.family().toUtf8());
 
-  // 获取当前字体（需与行号字体一致）
-  QFont font("Consolas", 10);  // 或使用编辑器当前字体：m_EditSource->font()
-
   // 创建字体度量对象
-  QFontMetrics metrics(font);
+  QFontMetrics metrics(monoFont);
 
   // 计算最大行号文本宽度（例如 " 9999 "）
   int maxLineNumber = 10000;  // 预估最大行号
@@ -2142,7 +2097,7 @@ void Notes::appendToSyncList(QString file) {
 void Notes::openLocalHtmlFileInAndroid() {
 #ifdef Q_OS_ANDROID
   // 调用主Activity的静态方法启动WebView
-  QJniObject::callStaticMethod<void>("com/x/MyActivity",  // 替换为实际包名
+  QJniObject::callStaticMethod<void>(ANDROID_MAIN_ACTIVITY,  // 替换为实际包名
                                      "launchWebView",  // 主Activity中的方法名
                                      "()V"             // 方法签名
   );

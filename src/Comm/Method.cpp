@@ -3,6 +3,7 @@
 #include <QKeyEvent>
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 #include "ui_MainWindow.h"
 
 extern MainWindow *mw_one;
@@ -128,14 +129,14 @@ void Method::closeQtKeyboard() {
 
 void Method::closeAndroidKeyboard() {
 #ifdef Q_OS_ANDROID
-  QJniObject::callStaticMethod<void>("com/x/MyActivity", "hideSoftInput",
+  QJniObject::callStaticMethod<void>(ANDROID_MAIN_ACTIVITY, "hideSoftInput",
                                      "()V");
 #endif
 }
 
 void Method::callJavaForceDisconnectInputMethod() {
 #ifdef Q_OS_ANDROID
-  QJniObject::callStaticMethod<void>("com/x/MyActivity",
+  QJniObject::callStaticMethod<void>(ANDROID_MAIN_ACTIVITY,
                                      "forceDisconnectInputMethod", "()V");
 #endif
 }
@@ -2688,11 +2689,11 @@ QStringList Method::removeDuplicatesFromQStringList(const QStringList &list) {
 
 bool Method::getLockScreenStatus() {
 #ifdef Q_OS_ANDROID
-  jboolean locked =
-      QJniObject::callStaticMethod<jboolean>("com/x/MyActivity",  // Java类全名
-                                             "getLockScreenStatus",  // 方法名
-                                             "()Z"  // JNI签名（boolean无参数）
-      );
+  jboolean locked = QJniObject::callStaticMethod<jboolean>(
+      ANDROID_MAIN_ACTIVITY,  // Java类全名
+      "getLockScreenStatus",  // 方法名
+      "()Z"                   // JNI签名（boolean无参数）
+  );
 
   return static_cast<bool>(locked);
 #endif
