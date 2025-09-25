@@ -295,14 +295,6 @@ QTreeWidget *MainHelper::init_TreeWidget(QString name) {
   tw->setFixedHeight(0);
   tw->setObjectName(name);
 
-  QString ini_file = iniDir + name + ".ini";
-  if (!QFile::exists(ini_file)) {
-    QSettings RegTab(ini_file, QSettings::IniFormat);
-
-    RegTab.setValue("/" + name + "/" + "CreatedTime",
-                    QDateTime::currentDateTime().toString());
-  }
-
   QFont font;
   font.setPointSize(fontSize);
   tw->setFont(font);

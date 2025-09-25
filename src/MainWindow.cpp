@@ -233,8 +233,6 @@ void MainWindow::init_TotalData() {
     mui->tabWidget->addTab(tw, tabText);
 
     addItem(tabText, "", "", "", 0);
-
-    RegTab.setValue("twName" + QString::number(i), name);
   }
 
   if (TabCount == 0) {
@@ -245,7 +243,7 @@ void MainWindow::init_TotalData() {
     mui->tabWidget->addTab(tw, tabText);
     addItem(tabText, "", "", "", 0);
 
-    mui->tabWidget->setTabToolTip(0, "");
+    saveTab();
   }
 
   m_EditRecord->init_MyCategory();
@@ -996,14 +994,14 @@ void MainWindow::on_actionDel_Tab_triggered() {
   }
 
   if (TabCount == 1) {
-    QTreeWidget *tw = (QTreeWidget *)mui->tabWidget->currentWidget();
-    tw->clear();
-    tabData->setTabText(0, tr("Tab") + " 1");
+    mui->tabWidget->removeTab(0);
+    QString tw_name = m_Notes->getDateTimeStr() + "_" + QString::number(1);
+    QTreeWidget *tw = m_MainHelper->init_TreeWidget(tw_name);
+    QString tabText = tr("Tab 1");
+    mui->tabWidget->addTab(tw, tabText);
 
     clearAll();
     addItem(tabData->tabText(0), "", "", "", 0);
-
-    mui->tabWidget->setTabToolTip(0, "");
 
     reloadMain();
   }
