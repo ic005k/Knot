@@ -83,9 +83,10 @@ inline int epubFileMethod = 2;
 
 inline double yMaxMonth, yMaxDay;
 
-inline bool isAndroid, isReadEnd, isZipOK, isMenuImport, isDownData, loading,
-    isEncrypt, isIOS, isEpub, isEpubError, isText, isPDF, isInitThemeEnd,
-    isUpData, isRemovedTopItem, isReport, isReadTWEnd, isWindows, isEBook;
+inline bool isAndroid, isLinux, isMacOS, isReadEnd, isZipOK, isMenuImport,
+    isDownData, loading, isEncrypt, isIOS, isEpub, isEpubError, isText, isPDF,
+    isInitThemeEnd, isUpData, isRemovedTopItem, isReport, isReadTWEnd,
+    isWindows, isEBook;
 
 inline bool isPasswordError = false;
 inline bool isrbFreq = true;
