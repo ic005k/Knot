@@ -2182,6 +2182,12 @@ void MainWindow::on_btnBackNoteList_clicked() {
   saveNeedSyncNotes();
 
   m_Notes->syncToWebDAV();
+
+  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+    int count = m_NotesList->needDelWebDAVFiles.count();
+    if (count > 0) m_Notes->delRemoteFile(m_NotesList->needDelWebDAVFiles);
+    m_Method->setAccessCount(m_NotesList->needDelWebDAVFiles.count());
+  }
 }
 
 void MainWindow::on_btnBackNoteRecycle_clicked() {
@@ -2191,12 +2197,6 @@ void MainWindow::on_btnBackNoteRecycle_clicked() {
   if (m_NotesList->isDelNoteRecycle) {
     m_Notes->startBackgroundTaskDelAndClear();
     m_NotesList->isDelNoteRecycle = false;
-  }
-
-  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
-    int count = m_NotesList->needDelWebDAVFiles.count();
-    if (count > 0) m_Notes->delRemoteFile(m_NotesList->needDelWebDAVFiles);
-    m_Method->setAccessCount(m_NotesList->needDelWebDAVFiles.count());
   }
 }
 

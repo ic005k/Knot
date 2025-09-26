@@ -20,6 +20,7 @@ PageIndicator::PageIndicator(QWidget* parent)
 
   setGeometry(0, 0, 1, 1);
 
+  ui->lblPageNumber->hide();
   ui->lblPageNumber->setStyleSheet("color:#ff6600;");
   ui->lblPageNumber->adjustSize();
 
@@ -42,19 +43,21 @@ void PageIndicator::setPicRight() {
 void PageIndicator::init() {
   if (mui->frameReader->isHidden()) return;
 
-  int w = mw_one->width() - 20;
+  int w = 260;
   QFontMetrics fontMetrics(ui->lblPageNumber->font());
   int nFontHeight = fontMetrics.height();
-  setFixedWidth(w);
-  setFixedHeight(nFontHeight + 10);
-  int y;
-  if (mui->f_ReaderFun->isVisible())
-    y = mw_one->geometry().y() + mui->f_ReaderFun->height() + 5;
-  else
-    y = mw_one->geometry().y() + 5;
-  this->setGeometry(mw_one->geometry().x() + (mw_one->width() - w) / 2, y,
-                    this->width(), this->height());
+  int h = nFontHeight + 10;
 
+  if (mw_one->m_Reader->isLandscape) {
+    setFixedWidth(h);
+    setFixedHeight(w);
+
+  } else {
+    setFixedWidth(w);
+    setFixedHeight(h);
+  }
+
+  move(mw_one->frameGeometry().center() - this->rect().center());
   this->show();
 }
 
@@ -83,6 +86,32 @@ void PageIndicator::showPageNumber(QString page) {
   }
 }
 
+void PageIndicator::drawSN(const QString& sn) {
+  QPainter painter(this);
+  painter.setPen(QColor(255, 102, 0));  // #ff6600
+  painter.setRenderHint(QPainter::Antialiasing, true);
+  painter.setRenderHint(QPainter::TextAntialiasing, true);
+
+  QFont font("Arial,Helvetica,sans-serif", 60);
+  font.setStyleStrategy(QFont::PreferAntialias);  // 抗锯齿
+  painter.setFont(font);
+
+  if (mw_one->m_Reader->isLandscape) {
+    // 横屏：顺时针旋转90度
+    painter.save();
+    painter.translate(width(), 0);  // 将原点移到右上角
+    painter.rotate(90);             // 顺时针旋转90度
+
+    // 绘制文本（此时Y轴方向变为向右）
+    painter.drawText(QRect(0, 0, height(), width()), Qt::AlignCenter, sn);
+
+    painter.restore();
+  } else {
+    // 正常竖屏绘制
+    painter.drawText(rect(), Qt::AlignCenter, sn);
+  }
+}
+
 void PageIndicator::setY(int y) {
   this->setGeometry(
       mw_one->geometry().x() + mw_one->width() - this->width() - 10, y,
@@ -103,11 +132,7 @@ bool PageIndicator::eventFilter(QObject* watch, QEvent* evn) {
 void PageIndicator::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }
 
 void PageIndicator::paintEvent(QPaintEvent* event) {
-  Q_UNUSED(event);
-  return;
-
-  QPainter painter(this);
-  painter.fillRect(this->rect(), QColor(0, 0, 0, 0));
+  drawSN(QString::number(sn));
   QWidget::paintEvent(event);
 }
 

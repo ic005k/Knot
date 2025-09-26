@@ -34,6 +34,7 @@ class PageIndicator : public QDialog {
 
  private:
   int sn, cn, tn;
+     void drawSN(const QString &sn);
 };
 
 #endif  // PAGEINDICATOR_H

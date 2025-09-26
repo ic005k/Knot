@@ -1331,6 +1331,7 @@ void NotesList::setDelNoteFlag(QString mdFile) { needDelFiles.append(mdFile); }
 void NotesList::needDelNotes() {
   QString jsonFile0 = iniDir + "mainnotes.json";
   int count = 0;
+
   if (QFile::exists(jsonFile0)) {
     QFile f(jsonFile0);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -1369,6 +1370,8 @@ void NotesList::needDelNotes() {
         needDelFiles.removeAt(0);  // 移除老的
       }
     }
+
+    qDebug() << "needDelFiles=" << needDelFiles.count();
 
   } else {
     QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
