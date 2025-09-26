@@ -1457,13 +1457,13 @@ bool MainWindow::importBakData(QString fileName) {
   if (bakFileFrom == "desktop") {
     deleteDirfile(iniDir + "memo");
     QFile::remove(iniDir + "todo.json");
-    QFile::remove(iniDir + "mainnotes.ini");
+    QFile::remove(iniDir + "mainnotes.json");
 
     m_Reader->copyDirectoryFiles(bakfileDir + "KnotData/memo", iniDir + "memo",
                                  true);
     QFile::copy(bakfileDir + "KnotData/todo.json", iniDir + "todo.json");
-    QFile::copy(bakfileDir + "KnotData/mainnotes.ini",
-                iniDir + "mainnotes.ini");
+    QFile::copy(bakfileDir + "KnotData/mainnotes.json",
+                iniDir + "mainnotes.json");
 
     deleteDirfile(iniDir + "memo/gps");
     m_Reader->copyDirectoryFiles(bakfileDir + "KnotData/memo/gps",

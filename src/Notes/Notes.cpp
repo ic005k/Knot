@@ -1302,7 +1302,7 @@ void Notes::openNotes() {
             QString remote_f = path;
             remote_f = remote_f.replace("/dav/", "");  // 此处需注意
 
-            if (path.contains("mainnotes.ini.zip")) {
+            if (path.contains("mainnotes.json.zip")) {
               orgRemoteFiles.append(remote_f);
               orgRemoteDateTime.append(mtime);
             }
@@ -1323,17 +1323,19 @@ void Notes::openNotes() {
             QFileInfo fi(local_file);
             QString fn = fi.fileName();
             fn = fn.replace(".zip", "");
-            if (local_file.contains(".ini")) local_realfile = iniDir + fn;
+            if (local_file.contains("mainnotes.json"))
+              local_realfile = iniDir + fn;
             if (local_file.contains(".md"))
               local_realfile = iniDir + "memo/" + fn;
-            if (local_file.contains(".json"))
+            if (local_file.contains(".json") &&
+                !local_file.contains("mainnotes.json"))
               local_realfile = iniDir + "memo/" + fn;
             if (local_file.contains("images"))
               local_realfile = iniDir + "memo/images/" + fn;
 
             QString remoteLastModi;
             QStringList list = fn.split("_");
-            if (list.count() == 4 || or_file.contains("_mainnotes.ini")) {
+            if (list.count() == 4 || or_file.contains("_mainnotes.json")) {
               remoteLastModi = list.at(0).trimmed();
 
               local_realfile = local_realfile.replace(remoteLastModi + "_", "");
@@ -1434,7 +1436,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
     if (list.count() == 4 || list.count() == 2)
       remoteLastModi = list.at(0).trimmed();
 
-    if (file.contains("mainnotes.ini.zip")) {
+    if (file.contains("mainnotes.json.zip")) {
       pDir = privateDir + "KnotData";
       pFile = pFile.replace(".zip", "");
       kFile = iniDir + asFile.replace("KnotData/", "");
@@ -1507,7 +1509,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
           msg->showMsg("Knot", errorInfo, 1);
           isPasswordError = true;
           QFile::remove(zFile);
-          QFile::remove(privateDir + "KnotData/mainnotes.ini.zip");
+          QFile::remove(privateDir + "KnotData/mainnotes.json.zip");
           return;
         }
       }
@@ -1552,7 +1554,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
           msg->showMsg("Knot", errorInfo, 1);
           isPasswordError = true;
           QFile::remove(zFile);
-          QFile::remove(privateDir + "KnotData/mainnotes.ini.zip");
+          QFile::remove(privateDir + "KnotData/mainnotes.json.zip");
           return;
         }
       }
@@ -1594,14 +1596,43 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
     }
   }
 
-  QString endFile = iniDir + "mainnotes.ini";
-  QSettings iniNotes(endFile, QSettings::IniFormat);
-  QString md = iniNotes.value("CurrentMD", "").toString();
-  md = iniDir + md;
-  if (QFile::exists(md)) {
-    isReceiveRemoteFile = true;
-    currentMDFile = md;
-    qDebug() << "远程md文件=" << md;
+  QString jsonFile = iniDir + "mainnotes.json";
+  if (QFile::exists(jsonFile)) {
+    QFile f(jsonFile);
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      return;  // 文件不存在或无法打开
+    }
+
+    QByteArray data = f.readAll();
+    f.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (doc.isNull()) {
+      return;  // JSON 解析失败
+    }
+
+    QJsonObject rootObj = doc.object();
+
+    // 读取当前 MD 文件路径
+    QString md = rootObj["CurrentMD"].toString();
+    if (!md.isEmpty()) {
+      md = iniDir + md;
+      if (QFile::exists(md)) {
+        isReceiveRemoteFile = true;
+        currentMDFile = md;
+        qDebug() << "远程md文件=" << md;
+      }
+    }
+  } else {
+    QString endFile = iniDir + "mainnotes.ini";
+    QSettings iniNotes(endFile, QSettings::IniFormat);
+    QString md = iniNotes.value("CurrentMD", "").toString();
+    md = iniDir + md;
+    if (QFile::exists(md)) {
+      isReceiveRemoteFile = true;
+      currentMDFile = md;
+      qDebug() << "远程md文件=" << md;
+    }
   }
 }
 
@@ -1609,11 +1640,11 @@ void Notes::updateMainnotesIniToSyncLists() {
   qDebug() << "isSaveNotesConfig=" << isSaveNotesConfig;
 
   if (isSaveNotesConfig) {
-    QString lastModi = m_Method->getFileUTCString(iniDir + "mainnotes.ini");
+    QString lastModi = m_Method->getFileUTCString(iniDir + "mainnotes.json");
     QString zipMainnotes =
-        privateDir + "KnotData/" + lastModi + "_mainnotes.ini.zip";
+        privateDir + "KnotData/" + lastModi + "_mainnotes.json.zip";
 
-    if (!m_Method->compressFileWithZlib(iniDir + "mainnotes.ini", zipMainnotes,
+    if (!m_Method->compressFileWithZlib(iniDir + "mainnotes.json", zipMainnotes,
                                         Z_DEFAULT_COMPRESSION)) {
       errorInfo = tr("An error occurred while compressing the file.");
       ShowMessage *msg = new ShowMessage(this);

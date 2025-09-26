@@ -814,17 +814,98 @@ void NotesList::saveNotesList() {
 }
 
 void NotesList::saveNotesListToFile() {
+  QString tempFile0 = iniDir + "temp.json";
+  QString endFile0 = iniDir + "mainnotes.json";
+
+  QJsonObject rootObj;
+
+  // 当前 MD 文件
+  QString md = currentMDFile;
+  md = md.replace(iniDir, "");
+  rootObj["CurrentMD"] = md;
+
+  // 主笔记树
+  QJsonArray mainNotesArray;
+  int count = tw->topLevelItemCount();
+  for (int i = 0; i < count; i++) {
+    QTreeWidgetItem *topItem = tw->topLevelItem(i);
+    QJsonObject topObj;
+    topObj["name"] = topItem->text(0);
+    topObj["colorFlag"] = topItem->text(2);
+
+    QJsonArray childrenArray;
+    int childCount = topItem->childCount();
+    int n_less = 0;
+    for (int j = 0; j < childCount; j++) {
+      QTreeWidgetItem *childItem = topItem->child(j);
+      QString strChild1 = childItem->text(1);
+      QString md_file = iniDir + strChild1;
+
+      if (QFile::exists(md_file) && !strChild1.isEmpty()) {
+        QJsonObject childObj;
+        childObj["name"] = childItem->text(0);
+        childObj["file"] = strChild1;
+        childrenArray.append(childObj);
+      } else {
+        n_less++;
+      }
+    }
+    topObj["children"] = childrenArray;
+    mainNotesArray.append(topObj);
+  }
+  rootObj["mainNotes"] = mainNotesArray;
+
+  // 回收站
+  QJsonArray recycleBinArray;
+  if (twrb->topLevelItemCount() > 0) {
+    QTreeWidgetItem *rbTopItem = twrb->topLevelItem(0);
+    int rbChildCount = rbTopItem->childCount();
+    for (int j = 0; j < rbChildCount; j++) {
+      QTreeWidgetItem *childItem = rbTopItem->child(j);
+      QJsonObject rbObj;
+      rbObj["name"] = childItem->text(0);
+      rbObj["file"] = childItem->text(1);
+      recycleBinArray.append(rbObj);
+    }
+  }
+  rootObj["recycleBin"] = recycleBinArray;
+
+  // 待删除文件
+  needDelFiles.removeDuplicates();
+  QJsonArray needDelArray;
+  for (const QString &file : std::as_const(needDelFiles)) {
+    needDelArray.append(file);
+  }
+  rootObj["needDelNotes"] = needDelArray;
+
+  // 保存 JSON 到临时文件
+  QJsonDocument doc(rootObj);
+  QFile f(tempFile0);
+  if (f.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    f.write(doc.toJson(QJsonDocument::Indented));
+    f.close();
+  }
+
+  // 覆盖到最终文件
+  m_Method->upIniFile(tempFile0, endFile0);
+
+  // Save Note Name
+  saveCurrentNoteInfo();
+
+  return;
+
+  ///////////////////////////////////////////////////////////////////////////
   QString tempFile = iniDir + "temp.ini";
   QString endFile = iniDir + "mainnotes.ini";
   QSettings iniNotes(tempFile, QSettings::IniFormat);
 
-  QString md = currentMDFile;
-  md = md.replace(iniDir, "");
-  iniNotes.setValue("CurrentMD", md);
+  QString md1 = currentMDFile;
+  md1 = md1.replace(iniDir, "");
+  iniNotes.setValue("CurrentMD", md1);
 
-  int count = tw->topLevelItemCount();
-  iniNotes.setValue("/MainNotes/topItemCount", count);
-  for (int i = 0; i < count; i++) {
+  int count1 = tw->topLevelItemCount();
+  iniNotes.setValue("/MainNotes/topItemCount", count1);
+  for (int i = 0; i < count1; i++) {
     QTreeWidgetItem *topItem = tw->topLevelItem(i);
     QString strtop = topItem->text(0);
     QString strtopcolorflag = topItem->text(2);
@@ -860,10 +941,11 @@ void NotesList::saveNotesListToFile() {
   // save recycle
   int i = 0;
   QTreeWidgetItem *topItem = twrb->topLevelItem(i);
-  int childCount = topItem->childCount();
-  iniNotes.setValue("/MainNotes/rbchildCount" + QString::number(i), childCount);
+  int childCount1 = topItem->childCount();
+  iniNotes.setValue("/MainNotes/rbchildCount" + QString::number(i),
+                    childCount1);
 
-  for (int j = 0; j < childCount; j++) {
+  for (int j = 0; j < childCount1; j++) {
     QTreeWidgetItem *childItem = twrb->topLevelItem(i)->child(j);
     QString strChild0 = childItem->text(0);
     QString strChild1 = childItem->text(1);
@@ -896,66 +978,139 @@ void NotesList::initNotesList() {
   tw->clear();
   noteFiles.clear();
 
-  QSettings *iniNotes =
-      new QSettings(iniDir + "mainnotes.ini", QSettings::IniFormat, NULL);
+  QString jsonFile = iniDir + "mainnotes.json";
 
-  int topCount = iniNotes->value("/MainNotes/topItemCount").toInt();
-  int nNoteBook = topCount;
-
-  int notesTotal = 0;
-  QString str0, str1;
-  for (int i = 0; i < topCount; i++) {
-    QString strTop =
-        iniNotes->value("/MainNotes/strTopItem" + QString::number(i))
-            .toString();
-    QString strTopColorFlag =
-        iniNotes
-            ->value("/MainNotes/strTopColorFlag" + QString::number(i),
-                    "#FF0000")
-            .toString();
-    int childCount =
-        iniNotes->value("/MainNotes/childCount" + QString::number(i)).toInt();
-    notesTotal = notesTotal + childCount;
-
-    QTreeWidgetItem *topItem = new QTreeWidgetItem;
-    topItem->setText(0, strTop);
-    topItem->setText(2, strTopColorFlag);
-    topItem->setForeground(0, Qt::red);
-    QFont font = this->font();
-    font.setBold(true);
-    topItem->setFont(0, font);
-    topItem->setIcon(0, QIcon(":/res/nb.png"));
-
-    for (int j = 0; j < childCount; j++) {
-      str0 = iniNotes
-                 ->value("/MainNotes/childItem0_" + QString::number(i) + "_" +
-                         QString::number(j))
-                 .toString();
-      str1 = iniNotes
-                 ->value("/MainNotes/childItem1_" + QString::number(i) + "_" +
-                         QString::number(j))
-                 .toString();
-
-      if (!str1.isEmpty()) {
-        QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
-        childItem->setText(0, str0);
-        childItem->setText(1, str1);
-        childItem->setIcon(0, QIcon(":/res/n.png"));
-
-        QString md = iniDir + str1;
-        mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(md, str0);
-        updateNoteIndexManager(md, i, j);
-
-        noteFiles.append(md);
-      }
+  if (QFile::exists(jsonFile)) {
+    QFile f(jsonFile);
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      return;  // 文件不存在或无法打开
     }
-    tw->addTopLevelItem(topItem);
-  }
 
-  tw->headerItem()->setText(
-      0, tr("Notebook") + " : " + QString::number(nNoteBook) + "  " +
-             tr("Notes") + " : " + QString::number(notesTotal));
-  tw->expandAll();
+    QByteArray data = f.readAll();
+    f.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (doc.isNull()) {
+      return;  // JSON 解析失败
+    }
+
+    QJsonObject rootObj = doc.object();
+
+    // 获取 mainNotes 数组
+    QJsonArray mainNotesArray = rootObj["mainNotes"].toArray();
+
+    int nNoteBook = mainNotesArray.size();
+    int notesTotal = 0;
+
+    for (int i = 0; i < mainNotesArray.size(); ++i) {
+      QJsonObject topObj = mainNotesArray[i].toObject();
+
+      QString strTop = topObj["name"].toString();
+      QString strTopColorFlag = topObj["colorFlag"].toString("#FF0000");
+
+      QTreeWidgetItem *topItem = new QTreeWidgetItem;
+      topItem->setText(0, strTop);
+      topItem->setText(2, strTopColorFlag);
+      topItem->setForeground(0, Qt::red);
+
+      QFont font = this->font();
+      font.setBold(true);
+      topItem->setFont(0, font);
+      topItem->setIcon(0, QIcon(":/res/nb.png"));
+
+      // 子节点
+      QJsonArray childrenArray = topObj["children"].toArray();
+      notesTotal += childrenArray.size();
+
+      for (int j = 0; j < childrenArray.size(); ++j) {
+        QJsonObject childObj = childrenArray[j].toObject();
+        QString str0 = childObj["name"].toString();
+        QString str1 = childObj["file"].toString();
+
+        if (!str1.isEmpty()) {
+          QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
+          childItem->setText(0, str0);
+          childItem->setText(1, str1);
+          childItem->setIcon(0, QIcon(":/res/n.png"));
+
+          QString md = iniDir + str1;
+          mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(md, str0);
+          updateNoteIndexManager(md, i, j);
+
+          noteFiles.append(md);
+        }
+      }
+
+      tw->addTopLevelItem(topItem);
+    }
+
+    tw->headerItem()->setText(
+        0, tr("Notebook") + " : " + QString::number(nNoteBook) + "  " +
+               tr("Notes") + " : " + QString::number(notesTotal));
+    tw->expandAll();
+
+  } else {
+    QSettings *iniNotes =
+        new QSettings(iniDir + "mainnotes.ini", QSettings::IniFormat, NULL);
+
+    int topCount = iniNotes->value("/MainNotes/topItemCount").toInt();
+    int nNoteBook = topCount;
+
+    int notesTotal = 0;
+    QString str0, str1;
+    for (int i = 0; i < topCount; i++) {
+      QString strTop =
+          iniNotes->value("/MainNotes/strTopItem" + QString::number(i))
+              .toString();
+      QString strTopColorFlag =
+          iniNotes
+              ->value("/MainNotes/strTopColorFlag" + QString::number(i),
+                      "#FF0000")
+              .toString();
+      int childCount =
+          iniNotes->value("/MainNotes/childCount" + QString::number(i)).toInt();
+      notesTotal = notesTotal + childCount;
+
+      QTreeWidgetItem *topItem = new QTreeWidgetItem;
+      topItem->setText(0, strTop);
+      topItem->setText(2, strTopColorFlag);
+      topItem->setForeground(0, Qt::red);
+      QFont font = this->font();
+      font.setBold(true);
+      topItem->setFont(0, font);
+      topItem->setIcon(0, QIcon(":/res/nb.png"));
+
+      for (int j = 0; j < childCount; j++) {
+        str0 = iniNotes
+                   ->value("/MainNotes/childItem0_" + QString::number(i) + "_" +
+                           QString::number(j))
+                   .toString();
+        str1 = iniNotes
+                   ->value("/MainNotes/childItem1_" + QString::number(i) + "_" +
+                           QString::number(j))
+                   .toString();
+
+        if (!str1.isEmpty()) {
+          QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
+          childItem->setText(0, str0);
+          childItem->setText(1, str1);
+          childItem->setIcon(0, QIcon(":/res/n.png"));
+
+          QString md = iniDir + str1;
+          mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(md, str0);
+          updateNoteIndexManager(md, i, j);
+
+          noteFiles.append(md);
+        }
+      }
+      tw->addTopLevelItem(topItem);
+    }
+
+    tw->headerItem()->setText(
+        0, tr("Notebook") + " : " + QString::number(nNoteBook) + "  " +
+               tr("Notes") + " : " + QString::number(notesTotal));
+    tw->expandAll();
+  }
 
   mw_one->m_Notes->m_NoteIndexManager->saveIndex(strNoteNameIndexFile);
 
@@ -966,35 +1121,79 @@ void NotesList::initRecycle() {
   twrb->clear();
   recycleFiles.clear();
 
-  QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
+  QString jsonFile = iniDir + "mainnotes.json";
 
-  int i = 0;
-  QTreeWidgetItem *topItem = new QTreeWidgetItem;
-  topItem->setText(0, tr("Notes Recycle Bin"));
+  if (QFile::exists(jsonFile)) {
+    QFile f(jsonFile);
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      return;  // 文件不存在或无法打开
+    }
 
-  int childCount =
-      iniNotes.value("/MainNotes/rbchildCount" + QString::number(i)).toInt();
-  for (int j = 0; j < childCount; j++) {
-    QString str0, str1;
-    str0 = iniNotes
-               .value("/MainNotes/rbchildItem0" + QString::number(i) +
-                      QString::number(j))
-               .toString();
-    str1 = iniNotes
-               .value("/MainNotes/rbchildItem1" + QString::number(i) +
-                      QString::number(j))
-               .toString();
+    QByteArray data = f.readAll();
+    f.close();
 
-    QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
-    childItem->setText(0, str0);
-    childItem->setText(1, str1);
-    childItem->setIcon(0, QIcon(":/res/n.png"));
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (doc.isNull()) {
+      return;  // JSON 解析失败
+    }
 
-    recycleFiles.append(iniDir + str1);
+    QJsonObject rootObj = doc.object();
+
+    // 获取回收站数组
+    QJsonArray recycleBinArray = rootObj["recycleBin"].toArray();
+
+    // 创建顶层项
+    QTreeWidgetItem *topItem = new QTreeWidgetItem;
+    topItem->setText(0, tr("Notes Recycle Bin"));
+
+    // 遍历回收站数组
+    for (const QJsonValue &val : recycleBinArray) {
+      QJsonObject obj = val.toObject();
+      QString str0 = obj["name"].toString();
+      QString str1 = obj["file"].toString();
+
+      QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
+      childItem->setText(0, str0);
+      childItem->setText(1, str1);
+      childItem->setIcon(0, QIcon(":/res/n.png"));
+
+      recycleFiles.append(iniDir + str1);
+    }
+
+    twrb->addTopLevelItem(topItem);
+    twrb->expandAll();
+
+  } else {
+    QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
+
+    int i = 0;
+    QTreeWidgetItem *topItem = new QTreeWidgetItem;
+    topItem->setText(0, tr("Notes Recycle Bin"));
+
+    int childCount =
+        iniNotes.value("/MainNotes/rbchildCount" + QString::number(i)).toInt();
+    for (int j = 0; j < childCount; j++) {
+      QString str0, str1;
+      str0 = iniNotes
+                 .value("/MainNotes/rbchildItem0" + QString::number(i) +
+                        QString::number(j))
+                 .toString();
+      str1 = iniNotes
+                 .value("/MainNotes/rbchildItem1" + QString::number(i) +
+                        QString::number(j))
+                 .toString();
+
+      QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
+      childItem->setText(0, str0);
+      childItem->setText(1, str1);
+      childItem->setIcon(0, QIcon(":/res/n.png"));
+
+      recycleFiles.append(iniDir + str1);
+    }
+    twrb->addTopLevelItem(topItem);
+
+    twrb->expandAll();
   }
-  twrb->addTopLevelItem(topItem);
-
-  twrb->expandAll();
 }
 
 void NotesList::initUnclassified() {
@@ -1130,40 +1329,120 @@ void NotesList::on_btnDel_Recycle_clicked() {
 void NotesList::setDelNoteFlag(QString mdFile) { needDelFiles.append(mdFile); }
 
 void NotesList::needDelNotes() {
-  QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
-  int count = iniNotes.value("/NeedDelNotes/Count", 0).toInt();
-  if (count == 0) return;
+  QString jsonFile0 = iniDir + "mainnotes.json";
+  int count = 0;
+  if (QFile::exists(jsonFile0)) {
+    QFile f(jsonFile0);
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      qWarning() << "打开 mainnotes.json 失败:" << f.errorString();
+      return;  // 文件不存在或无法打开
+    }
 
-  // read and save needDelFiles
-  needDelFiles.clear();
-  for (int i = 0; i < count; i++) {
-    QString str1 =
-        iniNotes.value("/NeedDelNotes/Note-" + QString::number(i), "")
-            .toString();
-    needDelFiles.append(str1);
+    QByteArray data = f.readAll();
+    f.close();
 
-    if (i >= 500) {
-      needDelFiles.removeAt(0);
-      needDelFiles.insert(0, str1);
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (doc.isNull()) {
+      qWarning() << "解析 mainnotes.json 失败（格式无效）";
+      return;  // JSON 解析失败
+    }
+
+    QJsonObject rootObj = doc.object();
+
+    if (!rootObj.contains("needDelNotes") ||
+        !rootObj["needDelNotes"].isArray()) {
+      qWarning() << "JSON中缺少needDelNotes数组";
+      return;
+    }
+
+    // 获取待删除文件数组
+    QJsonArray needDelArray = rootObj["needDelNotes"].toArray();
+
+    needDelFiles.clear();
+    count = needDelArray.size();
+    for (int i = 0; i < count; ++i) {
+      QString str1 = needDelArray[i].toString();
+      if (str1.isEmpty()) continue;
+      needDelFiles.append(str1);
+
+      if (needDelFiles.count() > 500) {
+        needDelFiles.removeAt(0);  // 移除老的
+      }
+    }
+
+  } else {
+    QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
+    count = iniNotes.value("/NeedDelNotes/Count", 0).toInt();
+    if (count == 0) return;
+
+    needDelFiles.clear();
+    for (int i = 0; i < count; i++) {
+      QString str1 =
+          iniNotes.value("/NeedDelNotes/Note-" + QString::number(i), "")
+              .toString();
+      if (str1.isEmpty()) continue;
+      needDelFiles.append(str1);
+
+      if (needDelFiles.count() > 500) {
+        needDelFiles.removeAt(0);  // 移除老的
+      }
     }
   }
 
-  QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);
-  int execCount = Reg.value("/ExecDelNotes/Count", 0).toInt();
-  if (execCount == count) return;
-  Reg.setValue("/ExecDelNotes/Count", count);
-  Reg.sync();
+  // 定义保存的文件路径
+  QString jsonPath = privateDir + "LocalDelList.json";
 
-  // del files
-  bool isDelMDOk, isDelJSONOk;
-  for (int i = 0; i < count; i++) {
-    QString mdFile = iniDir + needDelFiles.at(i);
-    QString jsonFile = mw_one->m_Notes->getCurrentJSON(mdFile);
-    isDelMDOk = delFile(mdFile);
-    isDelJSONOk = delFile(jsonFile);
+  // 读取上次保存的删除列表
+  QStringList lastDelList;
 
-    qDebug() << "Need Del Note: " << mdFile << isDelMDOk;
-    qDebug() << "Need Del Note: " << jsonFile << isDelJSONOk;
+  QFile jsonFile(jsonPath);
+  if (jsonFile.exists() && jsonFile.open(QIODevice::ReadOnly)) {
+    QByteArray data = jsonFile.readAll();
+    jsonFile.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (doc.isArray()) {
+      QJsonArray arr = doc.array();
+      for (auto it = arr.begin(); it != arr.end(); ++it) {
+        if (it->isString()) {
+          lastDelList.append(it->toString());
+        }
+      }
+    }
+  }
+
+  // 比较本次服务器下发的列表(直接比较集合）
+  if (QSet<QString>(needDelFiles.begin(), needDelFiles.end()) !=
+      QSet<QString>(lastDelList.begin(), lastDelList.end())) {
+    // del files
+    bool isDelMDOk, isDelJSONOk;
+    for (int i = 0; i < needDelFiles.count(); i++) {
+      QString mdFile = iniDir + needDelFiles.at(i);
+      QString strFile = mw_one->m_Notes->getCurrentJSON(mdFile);
+      isDelMDOk = delFile(mdFile);
+      isDelJSONOk = delFile(strFile);
+
+      qDebug() << "Need Del Note: " << mdFile << isDelMDOk;
+      qDebug() << "Need Del Note: " << strFile << isDelJSONOk;
+    }
+
+    // 保存本次的删除列表到 JSON 文件
+    QJsonArray newArr;
+    for (const QString &fileName : std::as_const(needDelFiles)) {
+      newArr.append(fileName);
+    }
+
+    QJsonDocument newDoc(newArr);
+    if (jsonFile.open(QIODevice::WriteOnly)) {
+      jsonFile.write(
+          newDoc.toJson(QJsonDocument::Indented));  // 缩进格式，方便查看
+      jsonFile.close();
+    } else {
+      qWarning() << "无法打开文件进行写入:" << jsonFile.errorString();
+      return;
+    }
+  } else {
+    qDebug() << "删除列表无变化，跳过删除。";
   }
 }
 

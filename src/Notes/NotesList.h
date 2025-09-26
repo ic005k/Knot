@@ -19,6 +19,7 @@
 #include <QTreeWidgetItem>
 #include <QtConcurrent/QtConcurrent>
 #include <QtConcurrent/QtConcurrentRun>
+#include <utility>  // for std::as_const
 
 #include "database_manager.h"
 #include "search_model.h"
