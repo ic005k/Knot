@@ -853,6 +853,7 @@ WebDavHelper *listWebDavFiles(const QString &url, const QString &username,
   QObject::connect(
       manager, &QNetworkAccessManager::authenticationRequired,
       [username, password](QNetworkReply *reply, QAuthenticator *auth) {
+        Q_UNUSED(reply);
         auth->setUser(username);
         auth->setPassword(password);
       });

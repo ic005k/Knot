@@ -7,6 +7,8 @@
 #include <QFile>
 #include <QFutureWatcher>
 #include <QInputMethod>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QKeyEvent>
 #include <QListWidget>
 #include <QListWidgetItem>

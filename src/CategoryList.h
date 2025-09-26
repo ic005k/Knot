@@ -43,6 +43,7 @@ class CategoryList : public QDialog {
   void setCategoryText();
   void renameAll();
   QString oldName;
+  void renameAll_oldini();
 };
 
 #endif  // CATEGORYLIST_H

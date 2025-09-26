@@ -169,7 +169,7 @@ void CategoryList::on_btnRename_clicked() {
   }
 }
 
-void CategoryList::renameAll() {
+void CategoryList::renameAll_oldini() {
   QDir dir(iniDir);
 
   // 设置过滤器：只要.ini文件且排除目录
@@ -194,6 +194,111 @@ void CategoryList::renameAll() {
       StringToFile(strNew, file);
       qDebug() << oldName << " --> " << newName;
       qDebug() << "Rename: " + file;
+    }
+  }
+}
+
+void CategoryList::renameAll() {
+  // 1. 初始化目录和过滤规则（简单直接）
+  QDir dir(iniDir);
+  QStringList filters;
+  filters << "*.json";
+  dir.setNameFilters(filters);
+  dir.setFilter(QDir::Files | QDir::NoDotAndDotDot);
+
+  // 2. 先把文件列表存到局部变量（避免临时对象引发的问题）
+  QFileInfoList fileInfoList = dir.entryInfoList();
+
+  // 3. 获取新名称（提前取，避免循环内重复访问UI）
+  QString newName = ui->editRename->text().trimmed();
+  if (newName.isEmpty()) {
+    qWarning() << "新名称不能为空，取消修改";
+    return;
+  }
+
+  // 4. 传统索引循环（最稳定，无任何兼容性问题）
+  for (int i = 0; i < fileInfoList.count(); ++i) {
+    QFileInfo fileInfo = fileInfoList.at(i);
+    QString filePath = fileInfo.absoluteFilePath();
+
+    // 5. 读取文件内容（基础文件操作，无技巧）
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      qWarning() << "无法打开文件读取:" << filePath
+                 << "错误:" << file.errorString();
+      continue;  // 跳过当前文件，继续下一个
+    }
+    QByteArray fileData = file.readAll();
+    file.close();  // 及时关闭文件，避免占用
+
+    // 6. 解析JSON（结构化处理，避免暴力替换）
+    QJsonParseError parseError;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(fileData, &parseError);
+    if (parseError.error != QJsonParseError::NoError) {
+      qWarning() << "JSON解析失败:" << filePath
+                 << "错误:" << parseError.errorString();
+      continue;
+    }
+    if (!jsonDoc.isObject()) {
+      qWarning() << "JSON根节点不是对象:" << filePath;
+      continue;
+    }
+
+    // 7. 精准修改"childDesc"（按你的JSON结构逐层遍历）
+    QJsonObject rootObj = jsonDoc.object();
+    bool isModified = false;
+
+    // 处理topItems数组
+    if (rootObj.contains("topItems") && rootObj["topItems"].isArray()) {
+      QJsonArray topItemsArr = rootObj["topItems"].toArray();
+      for (int j = 0; j < topItemsArr.count(); ++j) {
+        if (!topItemsArr[j].isObject()) continue;  // 跳过非对象元素
+        QJsonObject topItemObj = topItemsArr[j].toObject();
+
+        // 处理children子数组
+        if (topItemObj.contains("children") &&
+            topItemObj["children"].isArray()) {
+          QJsonArray childrenArr = topItemObj["children"].toArray();
+          for (int k = 0; k < childrenArr.count(); ++k) {
+            if (!childrenArr[k].isObject()) continue;  // 跳过非对象元素
+            QJsonObject childObj = childrenArr[k].toObject();
+
+            // 只修改childDesc等于oldName的项
+            if (childObj.contains("childDesc") &&
+                childObj["childDesc"].isString()) {
+              QString oldDesc = childObj["childDesc"].toString();
+              if (oldDesc == oldName) {
+                childObj["childDesc"] = newName;
+                childrenArr[k] = childObj;
+                isModified = true;  // 标记为已修改
+              }
+            }
+          }
+          topItemObj["children"] = childrenArr;
+          topItemsArr[j] = topItemObj;
+        }
+      }
+      rootObj["topItems"] = topItemsArr;
+    }
+
+    // 8. 有修改才写回文件（减少磁盘IO）
+    if (isModified) {
+      if (file.open(QIODevice::WriteOnly | QIODevice::Text |
+                    QIODevice::Truncate)) {
+        // 第一步：先给 jsonDoc 设置修改后的 rootObj（单独执行，因为返回 void）
+        jsonDoc.setObject(rootObj);
+        // 第二步：再调用 toJson() 获取 JSON 字符串（此时调用者是 QJsonDocument
+        // 对象）
+        QByteArray jsonData = jsonDoc.toJson(QJsonDocument::Indented);
+        // 第三步：写入文件
+        file.write(jsonData);
+        file.close();
+        qDebug() << "修改成功:" << filePath << "(" << oldName << "→" << newName
+                 << ")";
+      } else {
+        qWarning() << "无法打开文件写入:" << filePath
+                   << "错误:" << file.errorString();
+      }
     }
   }
 }

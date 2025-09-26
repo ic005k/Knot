@@ -3024,30 +3024,49 @@ void NotesList::mouseClickNoteBook() {
 }
 
 void NotesList::saveNotesListIndex() {
-  QSettings Reg(privateDir + "noteslistindex.ini", QSettings::IniFormat);
-  for (int i = 0; i < mIndexList.count(); i++) {
-    QString str = mIndexList.at(i);
-    int indexNoteBook = str.split("=").at(0).toInt();
-    if (indexNoteBook < 0) indexNoteBook = 0;
-    int indexNoteList = str.split("=").at(1).toInt();
-    if (indexNoteList < 0) indexNoteList = 0;
+  QJsonObject root;
+  QJsonArray array;
 
-    Reg.setValue(QString::number(indexNoteBook),
-                 QString::number(indexNoteList));
+  for (const QString &item : std::as_const(mIndexList)) {
+    array.append(item);
   }
 
-  Reg.setValue("count", QString::number(mIndexList.count()));
+  root["list"] = array;
+
+  QFile file(privateDir + QDir::separator() + "noteslistindex.json");
+  if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    QJsonDocument doc(root);
+    file.write(doc.toJson(QJsonDocument::Indented));
+    file.close();
+  } else {
+    qWarning() << "无法打开文件进行写入:" << file.errorString();
+  }
 }
 
 void NotesList::loadNotesListIndex() {
-  QSettings Reg(privateDir + "noteslistindex.ini", QSettings::IniFormat);
-  int count = Reg.value("count", 0).toInt();
+  QFile file(privateDir + QDir::separator() + "noteslistindex.json");
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    qWarning() << "无法打开文件进行读取:" << file.errorString();
+    return;
+  }
+
+  QByteArray data = file.readAll();
+  file.close();
+
+  QJsonDocument doc = QJsonDocument::fromJson(data);
+  if (doc.isNull()) {
+    qWarning() << "JSON 解析失败";
+    return;
+  }
+
+  QJsonObject root = doc.object();
+  QJsonArray array = root["list"].toArray();
+
   mIndexList.clear();
-  for (int i = 0; i < count; i++) {
-    int indexNoteList;
-    indexNoteList = Reg.value(QString::number(i), 0).toInt();
-    QString str = QString::number(i) + "=" + QString::number(indexNoteList);
-    mIndexList.append(str);
+  for (const QJsonValue &value : std::as_const(array)) {
+    if (value.isString()) {
+      mIndexList.append(value.toString());
+    }
   }
 }
 
