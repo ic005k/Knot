@@ -50,13 +50,13 @@ inline QTreeWidget *twrb, *tw;
 
 inline QRegularExpression regxNumber("^-?[0-9.]*$");
 
-inline QString iniFile, iniDir, privateDir, bakfileDir, strDate, readDate,
-    noteText, strStats, SaveType, strY, strM, btnYText, btnMText, btnDText,
-    errorInfo, CurrentYearMonth, zipfile, txt, searchStr, currentMDFile,
-    copyText, imgFileName, defaultFontFamily, customFontFamily, encPassword,
-    btnYearText, btnMonthText, strPage, ebookFile, strTitle, fileName,
-    strOpfPath, catalogueFile, strShowMsg, strStartTotalTime, strOpfFile,
-    oldOpfPath, strEpubTitle, strPercent;
+inline QString iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
+    strStats, SaveType, strY, strM, btnYText, btnMText, btnDText, errorInfo,
+    CurrentYearMonth, zipfile, txt, searchStr, currentMDFile, copyText,
+    imgFileName, defaultFontFamily, customFontFamily, encPassword, btnYearText,
+    btnMonthText, strPage, ebookFile, strTitle, fileName, strOpfPath,
+    catalogueFile, strShowMsg, strStartTotalTime, strOpfFile, oldOpfPath,
+    strEpubTitle, strPercent;
 
 inline QString ver = "2.1.31";
 inline QString appName = "Knot";

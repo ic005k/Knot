@@ -498,68 +498,6 @@ void MainWindow::saveTab() {
   m_Method->upIniFile(tempFile, endFile);
 }
 
-void MainWindow::saveData(QTreeWidget *tw, int tabIndex) {
-  Q_UNUSED(tabIndex);
-
-  QString name = tw->objectName();
-  QString strYear = QString::number(QDate::currentDate().year());
-  QString iniName = strYear + "-" + name;
-  QString ini_file = iniDir + iniName + ".ini";
-  QSettings Reg(ini_file, QSettings::IniFormat);
-
-  if (!QFile::exists(ini_file)) {
-    Reg.setValue("/" + name + "/" + "CreatedTime",
-                 QDateTime::currentDateTime().toString());
-  }
-
-  int count = tw->topLevelItemCount();
-  int m_sn = 0;
-
-  QString flag;
-  QString group = Reg.childGroups().at(0);
-  if (group.trimmed().length() == 0)
-    flag = "/" + name + "/";
-  else
-    flag = "/" + group + "/";
-
-  for (int i = 0; i < count; i++) {
-    if (isBreak) break;
-    int childCount = tw->topLevelItem(i)->childCount();
-    QString topText3 = tw->topLevelItem(i)->text(3);
-    if (childCount > 0 && topText3 == strYear) {
-      Reg.setValue(flag + QString::number(m_sn + 1) + "-topDate",
-                   tw->topLevelItem(i)->text(0));
-      Reg.setValue(flag + QString::number(m_sn + 1) + "-topYear", topText3);
-      Reg.setValue(flag + QString::number(m_sn + 1) + "-topFreq",
-                   tw->topLevelItem(i)->text(1));
-      Reg.setValue(flag + QString::number(m_sn + 1) + "-topAmount",
-                   tw->topLevelItem(i)->text(2));
-
-      Reg.setValue(flag + QString::number(m_sn + 1) + "-childCount",
-                   childCount);
-      for (int j = 0; j < childCount; j++) {
-        if (isBreak) return;
-        Reg.setValue(flag + QString::number(m_sn + 1) + "-childTime" +
-                         QString::number(j),
-                     tw->topLevelItem(i)->child(j)->text(0));
-        Reg.setValue(flag + QString::number(m_sn + 1) + "-childAmount" +
-                         QString::number(j),
-                     tw->topLevelItem(i)->child(j)->text(1));
-        Reg.setValue(flag + QString::number(m_sn + 1) + "-childDesc" +
-                         QString::number(j),
-                     tw->topLevelItem(i)->child(j)->text(2));
-        Reg.setValue(flag + QString::number(m_sn + 1) + "-childDetails" +
-                         QString::number(j),
-                     tw->topLevelItem(i)->child(j)->text(3));
-      }
-
-      m_sn++;
-    }
-
-    Reg.setValue(flag + "TopCount", m_sn);
-  }
-}
-
 void MainWindow::get_Today(QTreeWidget *tw) {
   int count = tw->topLevelItemCount();
   if (count <= 0) {
@@ -786,8 +724,6 @@ void MainWindow::on_actionRename_triggered() {
 void MainWindow::on_actionAdd_Tab_triggered() {
   int count = mui->tabWidget->tabBar()->count();
   QString twName = m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
-  QString ini_file = iniDir + twName + ".ini";
-  if (QFile(ini_file).exists()) QFile(ini_file).remove();
 
   QTreeWidget *tw = m_MainHelper->init_TreeWidget(twName);
 
@@ -2803,29 +2739,5 @@ void MainWindow::SaveFile(QString SaveType) {
 
     isAdd = false;
     isDelData = false;
-  }
-
-  if (SaveType == "alltab") {
-    for (int i = 0; i < tabData->tabBar()->count(); i++) {
-      if (isBreak) break;
-
-      QTreeWidget *tw = (QTreeWidget *)tabData->widget(i);
-      QString name = tw->objectName();
-      QString iniName =
-          QString::number(QDate::currentDate().year()) + "-" + name;
-      QString ini_file = iniDir + iniName + ".ini";
-      if (QFile(ini_file).exists()) QFile(ini_file).remove();
-
-      saveData(tw, i);
-    }
-
-    saveTab();
-    EditRecord::saveMyClassification();
-  }
-
-  if (SaveType == "todo") {
-  }
-
-  if (SaveType == "notes") {
   }
 }

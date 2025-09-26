@@ -37,10 +37,6 @@ class EditRecord : public QDialog {
 
   void init();
 
-  static void saveAdded();
-  static void saveModified();
-  static void saveDeleted();
-
   static void saveCurrentYearData();
 
  protected:

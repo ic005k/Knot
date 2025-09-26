@@ -278,7 +278,6 @@ class MainWindow : public QMainWindow {
   QTimer *timerSyncData;
   QTimer *tmeStartRecordAudio;
 
-  static void saveData(QTreeWidget *, int);
   static void readData(QTreeWidget *);
 
   static void saveTab();

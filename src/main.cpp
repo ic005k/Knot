@@ -184,8 +184,6 @@ int main(int argc, char* argv[]) {
                                             strJBDict2.toStdString(),
                                             strJBDict3.toStdString());
 
-  iniFile = iniDir + appName + ".ini";
-
   QDir dir0;
   dir0.mkpath(iniDir);
 
