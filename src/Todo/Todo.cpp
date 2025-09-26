@@ -67,33 +67,45 @@ void Todo::saveTodo() {
 
   highCount = 0;
 
+  // 获取数据
   int count_items = getCount();
-
-  QString tempFile = iniDir + "todo.tmp";
-  QString endFile = iniDir + "todo.ini";
-  iniTodo = new QSettings(tempFile, QSettings::IniFormat, this);
-
-  iniTodo->setValue("/Todo/Count", count_items);
-  for (int i = 0; i < count_items; i++) {
-    QString strText = getItemTodoText(i);
-    QString strTime = getItemTime(i);
-    int type = getItemType(i);
-    iniTodo->setValue("/Todo/Item" + QString::number(i), strText);
-    iniTodo->setValue("/Todo/Time" + QString::number(i), strTime);
-    iniTodo->setValue("/Todo/Type" + QString::number(i), type);
-  }
-
   int count1 = getCountRecycle();
-  iniTodo->setValue("/Todo/Count1", count1);
+
+  // 构建 JSON 对象
+  QJsonObject rootObj;
+
+  // 待办事项数组
+  QJsonArray todoArray;
+  for (int i = 0; i < count_items; i++) {
+    QJsonObject itemObj;
+    itemObj["text"] = getItemTodoText(i);
+    itemObj["time"] = getItemTime(i);
+    itemObj["type"] = getItemType(i);
+    todoArray.append(itemObj);
+  }
+  rootObj["todo"] = todoArray;
+
+  // 回收站数组
+  QJsonArray recycleArray;
   for (int i = 0; i < count1; i++) {
-    QString doneTime = getItemTimeRecycle(i);
-    QString str = getItemTodoTextRecycle(i);
-    iniTodo->setValue("/Todo/ItemRecycle" + QString::number(i), str);
-    iniTodo->setValue("/Todo/ItemRecycleDoneTime" + QString::number(i),
-                      doneTime);
+    QJsonObject recycleObj;
+    recycleObj["text"] = getItemTodoTextRecycle(i);
+    recycleObj["doneTime"] = getItemTimeRecycle(i);
+    recycleArray.append(recycleObj);
+  }
+  rootObj["recycle"] = recycleArray;
+
+  // 写入文件
+  QString tempFile = iniDir + "todo.tmp";
+  QString endFile = iniDir + "todo.json";  // 改成 json 后缀
+
+  QFile file(tempFile);
+  if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    QJsonDocument doc(rootObj);
+    file.write(doc.toJson(QJsonDocument::Indented));  // 缩进格式化
+    file.close();
   }
 
-  iniTodo->sync();
   m_Method->upIniFile(tempFile, endFile);
 
   isNeedSync = true;
@@ -102,27 +114,69 @@ void Todo::saveTodo() {
 void Todo::init_Todo() {
   clearAll();
 
-  iniTodo = new QSettings(iniDir + "todo.ini", QSettings::IniFormat, this);
+  QString filePath = iniDir + "todo.json";
+  if (QFile::exists(filePath)) {
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      qWarning("无法打开 JSON 文件: %s", qPrintable(filePath));
+      return;
+    }
 
-  int count = iniTodo->value("/Todo/Count").toInt();
-  for (int i = 0; i < count; i++) {
-    QString str = iniTodo->value("/Todo/Item" + QString::number(i)).toString();
-    QString strTime =
-        iniTodo->value("/Todo/Time" + QString::number(i)).toString();
-    int type = iniTodo->value("/Todo/Type" + QString::number(i)).toInt();
+    QByteArray data = file.readAll();
+    file.close();
 
-    addItem(strTime, type, str);
-  }
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (doc.isNull()) {
+      qWarning("JSON 解析失败");
+      return;
+    }
 
-  clearAllRecycle();
-  int count1 = iniTodo->value("/Todo/Count1").toInt();
-  for (int i = 0; i < count1; i++) {
-    QString doneTime =
-        iniTodo->value("/Todo/ItemRecycleDoneTime" + QString::number(i))
-            .toString();
-    QString str =
-        iniTodo->value("/Todo/ItemRecycle" + QString::number(i)).toString();
-    addItemRecycle(doneTime, 0, str);
+    QJsonObject root = doc.object();
+
+    // 读取待办事项
+    QJsonArray todoArray = root["todo"].toArray();
+    for (int i = 0; i < todoArray.size(); i++) {
+      QJsonObject item = todoArray[i].toObject();
+      QString strTime = item["time"].toString();
+      int type = item["type"].toInt();
+      QString strText = item["text"].toString();
+
+      addItem(strTime, type, strText);  // 你的添加函数
+    }
+
+    // 读取回收站
+    clearAllRecycle();  // 清空现有回收站数据
+    QJsonArray recycleArray = root["recycle"].toArray();
+    for (int i = 0; i < recycleArray.size(); i++) {
+      QJsonObject item = recycleArray[i].toObject();
+      QString doneTime = item["doneTime"].toString();
+      QString strText = item["text"].toString();
+
+      addItemRecycle(doneTime, 0, strText);  // 你的添加函数
+    }
+  } else {
+    iniTodo = new QSettings(iniDir + "todo.ini", QSettings::IniFormat, this);
+    int count = iniTodo->value("/Todo/Count").toInt();
+    for (int i = 0; i < count; i++) {
+      QString str =
+          iniTodo->value("/Todo/Item" + QString::number(i)).toString();
+      QString strTime =
+          iniTodo->value("/Todo/Time" + QString::number(i)).toString();
+      int type = iniTodo->value("/Todo/Type" + QString::number(i)).toInt();
+
+      addItem(strTime, type, str);
+    }
+
+    clearAllRecycle();
+    int count1 = iniTodo->value("/Todo/Count1").toInt();
+    for (int i = 0; i < count1; i++) {
+      QString doneTime =
+          iniTodo->value("/Todo/ItemRecycleDoneTime" + QString::number(i))
+              .toString();
+      QString str =
+          iniTodo->value("/Todo/ItemRecycle" + QString::number(i)).toString();
+      addItemRecycle(doneTime, 0, str);
+    }
   }
 
   refreshTableLists();
@@ -183,8 +237,8 @@ void Todo::closeTodo() {
 
   if (isNeedSync && mui->chkAutoSync->isChecked() &&
       mui->chkWebDAV->isChecked()) {
-    QString todoFile = iniDir + "todo.ini";
-    QString todoZipFile = privateDir + "KnotData/todo.ini.zip";
+    QString todoFile = iniDir + "todo.json";
+    QString todoZipFile = privateDir + "KnotData/todo.json.zip";
 
     if (!m_Method->compressFileWithZlib(todoFile, todoZipFile,
                                         Z_DEFAULT_COMPRESSION)) {
@@ -634,17 +688,49 @@ void Todo::refreshTableLists() {
 void Todo::refreshTableListsFromIni() {
   tableLists.clear();
 
-  iniTodo = new QSettings(iniDir + "todo.ini", QSettings::IniFormat, this);
+  QString filePath = iniDir + "todo.json";
 
-  int count_items = iniTodo->value("/Todo/Count", 0).toInt();
+  if (QFile::exists(filePath)) {
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      qWarning("无法打开 JSON 文件: %s", qPrintable(filePath));
+      return;
+    }
 
-  for (int i = 0; i < count_items; i++) {
-    QString strTime =
-        iniTodo->value("/Todo/Time" + QString::number(i)).toString();
-    QString strText =
-        iniTodo->value("/Todo/Item" + QString::number(i)).toString();
+    QByteArray data = file.readAll();
+    file.close();
 
-    tableLists.append(strTime + "|=|" + strText);
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (doc.isNull()) {
+      qWarning("JSON 解析失败");
+      return;
+    }
+
+    QJsonObject root = doc.object();
+
+    // 读取待办事项数组
+    QJsonArray todoArray = root["todo"].toArray();
+    for (int i = 0; i < todoArray.size(); i++) {
+      QJsonObject item = todoArray[i].toObject();
+      QString strTime = item["time"].toString();
+      QString strText = item["text"].toString();
+
+      // 保持原格式拼接
+      tableLists.append(strTime + "|=|" + strText);
+    }
+  } else {
+    qWarning("JSON 文件不存在: %s", qPrintable(filePath));
+
+    iniTodo = new QSettings(iniDir + "todo.ini", QSettings::IniFormat, this);
+    int count_items = iniTodo->value("/Todo/Count", 0).toInt();
+    for (int i = 0; i < count_items; i++) {
+      QString strTime =
+          iniTodo->value("/Todo/Time" + QString::number(i)).toString();
+      QString strText =
+          iniTodo->value("/Todo/Item" + QString::number(i)).toString();
+
+      tableLists.append(strTime + "|=|" + strText);
+    }
   }
 }
 
@@ -1454,9 +1540,9 @@ void Todo::openTodo() {
 
             QString remoteFile = path;
             remoteFile = remoteFile.replace("/dav/", "");  // 此处需注意
-            if (remoteFile.contains("todo.ini.zip")) {
+            if (remoteFile.contains("todo.json.zip")) {
               isTodoFile = true;
-              QString localFile = privateDir + "KnotData/todo.ini.zip";
+              QString localFile = privateDir + "KnotData/todo.json.zip";
               QDateTime localModi = QFileInfo(localFile).lastModified();
 
               qDebug() << "localModi=" << localModi;
@@ -1480,14 +1566,14 @@ void Todo::openTodo() {
                     downloader, &WebDavDownloader::downloadFinished, this,
                     [this](bool success, QString error) {
                       qDebug() << (success ? "下载成功" : "下载失败: " + error);
-                      QString zFile = privateDir + "KnotData/todo.ini.zip";
+                      QString zFile = privateDir + "KnotData/todo.json.zip";
 
                       QString dec_file = m_Method->useDec(zFile);
                       if (dec_file != "") zFile = dec_file;
 
                       errorInfo = "";
                       if (!m_Method->decompressFileWithZlib(
-                              zFile, privateDir + "KnotData/todo.ini")) {
+                              zFile, privateDir + "KnotData/todo.json")) {
                         mw_one->closeProgress();
                         errorInfo =
                             tr("Decompression failed. Please check in "
@@ -1501,8 +1587,8 @@ void Todo::openTodo() {
                         return;
                       }
 
-                      QString zipToto = privateDir + "KnotData/todo.ini";
-                      QString localTodo = iniDir + "todo.ini";
+                      QString zipToto = privateDir + "KnotData/todo.json";
+                      QString localTodo = iniDir + "todo.json";
 
                       if (isPasswordError == false) {
                         if (QFileInfo(zipToto).lastModified() >
