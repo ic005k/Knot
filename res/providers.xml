@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<providers>
+    <!-- 仅保留插件必须的标签，无任何多余内容 -->
+    <provider>
+        <name>ThunderforestCycleHD</name> <!-- 英文名称，避免编码问题 -->
+        <type>mapping</type> <!-- 固定值：mapping（地图类型） -->
+        <!-- 你的Thunderforest高清URL，确保无多余空格 -->
+        <url>https://tile.thunderforest.com/cycle/%z/%x/%y@2x.png?apikey=5ad09b54d1e542909f4f20f3a01786ae</url>
+        <tileSize>512</tileSize> <!-- 高清瓦片尺寸，必加 -->
+    </provider>
+</providers>

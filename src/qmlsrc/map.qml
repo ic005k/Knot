@@ -169,7 +169,8 @@ Rectangle {
         }
 
         // 双击缩放处理
-        TapHandler {
+
+        /*TapHandler {
             acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchScreen
 
             onDoubleTapped: eventPoint => {
@@ -178,7 +179,7 @@ Rectangle {
                                     eventPoint.accepted = true
                                 }
                             }
-        }
+        }*/
 
         // 直接使用 Map 而不是 MapView
         Map {

@@ -16,7 +16,7 @@ on:
     types: [ published ] # 监听发布事件
 
 env:
-  QT_VERSION: "6.6.3"
+  QT_VERSION: "6.7.0"
   QT_ARCH: "android_arm64_v8a"
   DESKTOP_ARCH: "win64_mingw"
   NDK_VERSION: "26.1.10909125"

@@ -810,8 +810,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnBackNoteDiff_clicked();
 
-  void on_btnSendEmail_clicked();
-
   void on_btnShareBakFile_clicked();
 
  private:
@@ -840,6 +838,8 @@ class MainWindow : public QMainWindow {
   QString strTime, strAmount, strCategory, strDetails;
 
   void init_Thread_Timer();
+
+  void on_btnSendEmail_clicked();
 };
 
 #endif  // MAINWINDOW_H
