@@ -416,14 +416,6 @@ QString Notes::addImagePathToHtml(QString strhtml) {
   return strEnd;
 }
 
-void Notes::refreshQMLVPos(qreal newPos) {
-  QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);
-
-  if (QFile(currentMDFile).exists()) {
-    Reg.setValue("/MainNotes/SlidePos" + currentMDFile, newPos);
-  }
-}
-
 qreal Notes::getVPos() { return sliderPos; }
 
 qreal Notes::getVHeight() { return textHeight; }

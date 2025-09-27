@@ -3164,3 +3164,41 @@ int Method::getAccessCount() {
   if (count2 > 0) return count2;
   return 0;
 }
+
+bool Method::sendMailWithAttachment(const QString &recipient,
+                                    const QString &filePath) {
+  QUrl mailtoUrl;
+  mailtoUrl.setScheme("mailto");
+
+  // 如果提供了收件人，则设置
+  if (!recipient.isEmpty()) {
+    mailtoUrl.setPath(recipient);
+  }
+
+  QUrlQuery query;
+
+  // 如果提供了文件路径，则设置主题（文件名）和附件
+  if (!filePath.isEmpty()) {
+    QFileInfo fileInfo(filePath);
+    if (!fileInfo.exists()) {
+      qWarning() << "文件不存在:" << filePath;
+      return false;
+    }
+
+    // 文件名作为邮件主题
+    query.addQueryItem("subject", fileInfo.fileName());
+
+    // 邮件正文
+    query.addQueryItem("body", tr("Please check the attachment."));
+
+    // 附件路径需要 URL 编码
+    QString encodedPath = QUrl::fromLocalFile(filePath).toString();
+    query.addQueryItem("attachment", encodedPath);
+  }
+
+  mailtoUrl.setQuery(query);
+
+  qDebug() << "Mailto URL:" << mailtoUrl.toString();
+
+  return QDesktopServices::openUrl(mailtoUrl);
+}

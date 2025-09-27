@@ -1598,7 +1598,7 @@ void Steps::initTodayInitSteps() {
 
     QString date = jsonObj["Date"].toString("");  // 第二个参数为默认值
 
-    // 5. 获取当前日期（与原逻辑一致）
+    // 获取当前日期（与原逻辑一致）
     QString c_date = getCurrentDate();
 
     if (date != c_date) {

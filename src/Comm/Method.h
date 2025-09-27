@@ -419,6 +419,7 @@ class Method : public QDialog {
   void setAccessCount(int count);
 
   int getAccessCount();
+  bool sendMailWithAttachment(const QString &recipient = "", const QString &filePath = "");
   protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 

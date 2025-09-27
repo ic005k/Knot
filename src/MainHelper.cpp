@@ -666,6 +666,8 @@ void MainHelper::init_UIWidget() {
     mui->editFindNote->installEventFilter(editFilter);
     mui->editNotesSearch->installEventFilter(editFilter);
     mui->editSearchText->installEventFilter(editFilter);
+  } else {
+    mui->btnShareBakFile->hide();
   }
 
   mui->menubar->hide();

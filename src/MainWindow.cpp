@@ -2741,3 +2741,26 @@ void MainWindow::SaveFile(QString SaveType) {
     isDelData = false;
   }
 }
+
+void MainWindow::on_btnSendEmail_clicked() {
+  if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
+
+  int cur_index = m_Method->getCurrentIndexFromQW(mui->qwBakList);
+  QString filePath = m_Method->getText3(mui->qwBakList, cur_index);
+
+  if (m_Method->sendMailWithAttachment("", filePath)) {
+    qDebug() << "The default email client of the system has been invoked.";
+  } else {
+    qDebug() << "The call to the email client failed!";
+  }
+}
+
+void MainWindow::on_btnShareBakFile_clicked() {
+  if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
+
+  int cur_index = m_Method->getCurrentIndexFromQW(mui->qwBakList);
+  QString filePath = m_Method->getText3(mui->qwBakList, cur_index);
+  if (QFile::exists(filePath)) {
+    mw_one->m_ReceiveShare->shareImage(tr("Share to"), filePath, "*/*");
+  }
+}

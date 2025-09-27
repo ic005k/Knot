@@ -810,6 +810,10 @@ class MainWindow : public QMainWindow {
 
   void on_btnBackNoteDiff_clicked();
 
+  void on_btnSendEmail_clicked();
+
+  void on_btnShareBakFile_clicked();
+
  private:
   bool isMoveEntry;
   QTimer *tmeFlash;

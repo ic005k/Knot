@@ -144,8 +144,6 @@ class Notes : public QDialog {
   void init_all_notes();
   void loadEmptyNote();
 
-  void refreshQMLVPos(qreal newPos);
-
   void openMDWindow();
 
   bool isSetNewNoteTitle();

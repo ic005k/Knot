@@ -58,7 +58,7 @@ inline QString iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
     catalogueFile, strShowMsg, strStartTotalTime, strOpfFile, oldOpfPath,
     strEpubTitle, strPercent;
 
-inline QString ver = "2.1.31";
+inline QString ver = "2.1.32";
 inline QString appName = "Knot";
 
 inline QStringList readTextList, htmlFiles, listCategory, ncxList, tempHtmlList,
