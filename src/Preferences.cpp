@@ -284,8 +284,9 @@ void Preferences::initOptions() {
     readerFont = setFontDemoUI(readerFontFile, mui->btnFont, fontSize);
   else
     readerFont = defaultFontFamily;
-  qvReader->rootContext()->setContextProperty("FontName", readerFont);
-  qvReader->rootContext()->setContextProperty("FontWeight", readerFontWeight);
+  mui->qwReader->rootContext()->setContextProperty("FontName", readerFont);
+  mui->qwReader->rootContext()->setContextProperty("FontWeight",
+                                                   readerFontWeight);
 }
 
 void Preferences::on_btnReStart_clicked() {

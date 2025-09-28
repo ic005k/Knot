@@ -184,6 +184,5 @@
         <file>res/find_l.svg</file>
         <file>res/up_l.svg</file>
         <file>res/rename_l.svg</file>
-        <file>res/providers.xml</file>
     </qresource>
 </RCC>

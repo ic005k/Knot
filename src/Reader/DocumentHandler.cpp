@@ -264,7 +264,7 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
     }
 
     if (ok) QDesktopServices::openUrl(url);
-
+    mw_one->clearSelectBox();
   }
 
   else if (linkFile.contains("@")) {
@@ -278,6 +278,7 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
         appName, tr("Writing an email?") + "\n\n" + linkFile + "\n", 3);
     if (ok) QDesktopServices::openUrl(QUrl(linkFile));
 
+    mw_one->clearSelectBox();
   }
 
   else if (linkFile.contains(".html") || linkFile.contains(".xhtml") ||
@@ -336,6 +337,8 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
   } else if (linkFile.contains("data:image/")) {
     // open picture
     if (htmlIndex == 0 && !mw_one->m_Reader->isHidden()) {
+      mw_one->clearSelectBox();
+
       return;
     }
 

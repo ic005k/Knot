@@ -4,7 +4,6 @@
 #include <qglobal.h>
 
 #include <QFile>
-#include <QQuickView>
 #include <QRegularExpression>
 #include <QSettings>
 #include <QTabWidget>
@@ -102,16 +101,6 @@ inline bool isDateSection = false;
 inline bool isOpen = false;
 inline bool isZH_CN = false;
 inline bool isNeedExecDeskShortcut = false;
-
-inline QQuickView *qvTabRecycle = nullptr;
-inline QQuickView *qvReader = nullptr;
-inline QQuickView *qvBookmark = nullptr;
-inline QQuickView *qvCata = nullptr;
-
-inline QWidget *qmlWidgetReader;
-inline QWidget *qmlWidgetBookmark;
-inline QWidget *qmlWidgetCata;
-inline QWidget *qmlWidgetTabRecycle;
 
 inline QString loadText(QString textFile);
 inline void TextEditToFile(QTextEdit *txtEdit, QString fileName);

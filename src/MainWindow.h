@@ -310,6 +310,8 @@ class MainWindow : public QMainWindow {
 
   void refreshMainUI();
 
+  void clearSelectBox();
+
   QString getSelectedText();
 
   int calcStringPixelWidth(QString s_str, QFont font, int n_font_size);
@@ -808,6 +810,8 @@ class MainWindow : public QMainWindow {
 
   void on_btnBackNoteDiff_clicked();
 
+  void on_btnSendEmail_clicked();
+
   void on_btnShareBakFile_clicked();
 
  private:
@@ -836,8 +840,6 @@ class MainWindow : public QMainWindow {
   QString strTime, strAmount, strCategory, strDetails;
 
   void init_Thread_Timer();
-
-  void on_btnSendEmail_clicked();
 };
 
 #endif  // MAINWINDOW_H

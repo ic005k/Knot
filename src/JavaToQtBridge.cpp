@@ -317,11 +317,11 @@ static void JavaNotify_15() {
   }
 
   if (!mui->frameReader->isHidden()) {
-    if (qmlWidgetCata->isVisible()) {
+    if (mui->qwCata->isVisible()) {
       mui->btnCatalogue->click();
       return;
 
-    } else if (qmlWidgetBookmark->isVisible()) {
+    } else if (mui->qwBookmark->isVisible()) {
       mui->btnShowBookmark->click();
       return;
 

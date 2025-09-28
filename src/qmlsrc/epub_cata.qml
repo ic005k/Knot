@@ -383,7 +383,6 @@ Rectangle {
 
         // 滚动条
         ScrollBar.vertical: ScrollBar {
-            id: vbar
             policy: ScrollBar.AsNeeded
             width: 8
         }

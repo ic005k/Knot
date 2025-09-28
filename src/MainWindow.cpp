@@ -514,7 +514,7 @@ void MainWindow::get_Today(QTreeWidget *tw) {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-  if (qmlWidgetCata->isVisible()) {
+  if (mui->qwCata->isVisible()) {
     on_btnCatalogue_clicked();
     event->ignore();
     return;
@@ -1344,39 +1344,6 @@ void MainWindow::init_Instance() {
   CurrentYear = QString::number(QDate::currentDate().year());
   if (defaultFontFamily == "") defaultFontFamily = this->font().family();
 
-  if (qvReader == nullptr) {
-    qvReader = new QQuickView();
-    qvReader->installEventFilter(mw_one);
-    qvReader->rootContext()->setContextProperty("isDark", isDark);
-    qvReader->setResizeMode(QQuickView::SizeRootObjectToView);
-
-    qvBookmark = new QQuickView();
-    qvBookmark->setResizeMode(QQuickView::SizeRootObjectToView);
-    qvBookmark->hide();
-
-    qvCata = new QQuickView();
-    qvCata->setResizeMode(QQuickView::SizeRootObjectToView);
-    qvCata->hide();
-
-    qmlWidgetReader = QWidget::createWindowContainer(qvReader);
-    qmlWidgetReader->setSizePolicy(QSizePolicy::Preferred,
-                                   QSizePolicy::Expanding);
-
-    qmlWidgetBookmark = QWidget::createWindowContainer(qvBookmark);
-    qmlWidgetBookmark->setSizePolicy(QSizePolicy::Preferred,
-                                     QSizePolicy::Expanding);
-    qmlWidgetBookmark->hide();
-
-    qmlWidgetCata = QWidget::createWindowContainer(qvCata);
-    qmlWidgetCata->setSizePolicy(QSizePolicy::Preferred,
-                                 QSizePolicy::Expanding);
-    qmlWidgetCata->move(-2000, -2000);
-
-    mui->f_ReaderPanel->layout()->addWidget(qmlWidgetReader);
-    mui->f_ReaderPanel->layout()->addWidget(qmlWidgetBookmark);
-    mui->f_ReaderPanel->layout()->addWidget(qmlWidgetCata);
-  }
-
   tabData = new QTabWidget;
   tabData = mui->tabWidget;
 
@@ -1578,8 +1545,6 @@ void MainWindow::on_btnReader_clicked() {
 
   mui->frameMain->hide();
   mui->frameReader->show();
-  qmlWidgetReader->move(0, 0);
-  qmlWidgetReader->show();
   mui->f_ReaderFun->show();
 
   isReaderVisible = true;
@@ -1602,7 +1567,7 @@ void MainWindow::on_btnOpen_clicked() {
   if (mui->f_ReaderSet->isVisible()) {
     on_btnBackReaderSet_clicked();
   }
-  if (qmlWidgetBookmark->isVisible()) {
+  if (mui->qwBookmark->isVisible()) {
     on_btnShowBookmark_clicked();
   }
   m_ReaderSet->close();
@@ -1617,13 +1582,13 @@ void MainWindow::on_btnPageNext_clicked() { m_Reader->goNextPage(); }
 void MainWindow::on_btnPages_clicked() {
   mui->btnAutoStop->click();
 
-  if (qmlWidgetCata->isVisible()) return;
+  if (mui->qwCata->isVisible()) return;
 
   if (mui->f_ReaderSet->isHidden()) {
     mui->f_ReaderSet->show();
 
     m_Reader->closeSelText();
-    if (qmlWidgetBookmark->isVisible()) {
+    if (mui->qwBookmark->isVisible()) {
       on_btnShowBookmark_clicked();
     }
 
@@ -1683,7 +1648,7 @@ void MainWindow::on_btnReadList_clicked() {
     on_btnBackReaderSet_clicked();
   }
 
-  if (qmlWidgetBookmark->isVisible()) {
+  if (mui->qwBookmark->isVisible()) {
     mw_one->on_btnShowBookmark_clicked();
   }
 
@@ -1733,6 +1698,31 @@ void MainWindow::on_btnBackNotesGraph_clicked() {
   m_NotesList->clickNoteList();
 }
 
+void MainWindow::clearSelectBox() {
+  QString tempFile = iniDir + "memo/texteditor.html";
+  if (!mui->frameReader->isHidden()) {
+    mw_one->m_Reader->savePageVPos();
+    bool isAni = false;
+    mui->qwReader->rootContext()->setContextProperty("isAni", isAni);
+    QQuickItem *root = mui->qwReader->rootObject();
+    QMetaObject::invokeMethod((QObject *)root, "loadHtml",
+                              Q_ARG(QVariant, tempFile));
+    m_Method->Sleep(50);
+    if (isEpub) {
+      QMetaObject::invokeMethod(
+          (QObject *)root, "loadHtml",
+          Q_ARG(QVariant, mw_one->m_Reader->currentHtmlFile));
+    } else {
+      mui->qwReader->rootContext()->setContextProperty("strText",
+                                                       m_Reader->currentTxt);
+    }
+    mw_one->m_Reader->setPageVPos();
+  }
+
+  if (!mui->frameNotesGraph->isHidden()) {
+  }
+}
+
 void MainWindow::on_btnCopy_clicked() {
   QClipboard *clipboard = QApplication::clipboard();
   clipboard->setText(mydlgSetText->ui->lineEdit->text().trimmed());
@@ -1742,7 +1732,7 @@ void MainWindow::on_btnCopy_clicked() {
 QString MainWindow::getSelectedText() {
   QString str;
   QVariant returnedValue;
-  QQuickItem *root = qvReader->rootObject();
+  QQuickItem *root = mui->qwReader->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "getSelectedText",
                             Q_RETURN_ARG(QVariant, returnedValue));
   str = returnedValue.toString();
@@ -1820,8 +1810,8 @@ void MainWindow::on_btnDel_clicked() {
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
   Q_UNUSED(event);
-  qvReader->rootContext()->setContextProperty("myW", mw_one->width());
-  qvReader->rootContext()->setContextProperty("myH", mw_one->height());
+  mui->qwReader->rootContext()->setContextProperty("myW", mw_one->width());
+  mui->qwReader->rootContext()->setContextProperty("myH", mw_one->height());
   mui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
                                                  QVariant(false));
   mui->qwSteps->rootContext()->setContextProperty("myW", this->width());
@@ -2103,7 +2093,6 @@ void MainWindow::on_btnImportBakList_clicked() {
 void MainWindow::on_btnOkViewCate_clicked() { m_Report->on_CateOk(); }
 
 void MainWindow::on_btnBackTabRecycle_clicked() {
-  qmlWidgetTabRecycle->move(-1000, -1000);
   mui->frameTabRecycle->hide();
   mui->frameMain->show();
 }
@@ -2432,6 +2421,13 @@ void MainWindow::on_btnRecentOpen_clicked() {
 void MainWindow::on_btnMenuReport_clicked() { m_Report->genReportMenu(); }
 
 void MainWindow::on_btnCatalogue_clicked() {
+  if (mui->qwCata->source().isEmpty()) {
+    mui->qwCata->rootContext()->setContextProperty("m_Reader",
+                                                   mw_one->m_Reader);
+    mui->qwCata->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/epub_cata.qml")));
+  }
+
   mui->btnAutoStop->click();
 
   if (mui->f_ReaderSet->isVisible()) {
@@ -2443,9 +2439,11 @@ void MainWindow::on_btnCatalogue_clicked() {
 void MainWindow::on_btnRemoveBookList_clicked() { m_Reader->removeBookList(); }
 
 void MainWindow::on_btnShowBookmark_clicked() {
-  if (qvBookmark->source().isEmpty()) {
-    qvBookmark->rootContext()->setContextProperty("m_Reader", mw_one->m_Reader);
-    qvBookmark->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/bookmark.qml")));
+  if (mui->qwBookmark->source().isEmpty()) {
+    mui->qwBookmark->rootContext()->setContextProperty("m_Reader",
+                                                       mw_one->m_Reader);
+    mui->qwBookmark->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/bookmark.qml")));
   }
 
   m_Reader->showOrHideBookmark();
@@ -2703,7 +2701,7 @@ void MainWindow::on_cboxWebDAV_currentTextChanged(const QString &arg1) {
 void MainWindow::on_btnShowCboxList_clicked() { mui->cboxWebDAV->showPopup(); }
 
 void MainWindow::on_btnRotation_clicked() {
-  QQuickItem *rootItem = qvReader->rootObject();
+  QQuickItem *rootItem = mui->qwReader->rootObject();
   QQuickItem *orientationButton =
       rootItem->findChild<QQuickItem *>("orientationButton");
   if (orientationButton) {

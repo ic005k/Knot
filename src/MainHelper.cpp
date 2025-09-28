@@ -167,7 +167,7 @@ void MainHelper::clickBtnChart() {
 }
 
 void MainHelper::clickBtnRestoreTab() {
-  if (m_Method->getCountFromQW(qvTabRecycle) == 0) return;
+  if (m_Method->getCountFromQW(mui->qwTabRecycle) == 0) return;
 
   int count = mui->tabWidget->tabBar()->count();
   QString twName =
@@ -176,8 +176,8 @@ void MainHelper::clickBtnRestoreTab() {
   int c_year = QDate::currentDate().year();
   int iniFileCount = c_year - 2025 + 1 + 1;
 
-  int index = m_Method->getCurrentIndexFromQW(qvTabRecycle);
-  QString recycle = m_Method->getText3(qvTabRecycle, index);
+  int index = m_Method->getCurrentIndexFromQW(mui->qwTabRecycle);
+  QString recycle = m_Method->getText3(mui->qwTabRecycle, index);
   QStringList recycleList = recycle.split("\n");
 
   if (recycleList.at(0).contains(".json")) {
@@ -228,7 +228,7 @@ void MainHelper::clickBtnRestoreTab() {
     }
   }
 
-  QString tab_name = m_Method->getText0(qvTabRecycle, index);
+  QString tab_name = m_Method->getText0(mui->qwTabRecycle, index);
   QTreeWidget *tw = init_TreeWidget(twName);
   mui->tabWidget->addTab(tw, tab_name);
 
@@ -394,13 +394,17 @@ void MainHelper::init_Menu(QMenu *mainMenu) {
 void MainHelper::openTabRecycle() {
   mw_one->showProgress();
 
+  if (mui->qwTabRecycle->source().isEmpty()) {
+    mui->qwTabRecycle->rootContext()->setContextProperty("m_Report",
+                                                         mw_one->m_Report);
+    mui->qwTabRecycle->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/tabrecycle.qml")));
+  }
+
   // 切换UI
   mui->frameMain->hide();
   mui->frameTabRecycle->show();
-
-  qmlWidgetTabRecycle->move(0, 0);
-
-  m_Method->clearAllBakList(qvTabRecycle);
+  m_Method->clearAllBakList(mui->qwTabRecycle);
 
   // 使用QFutureWatcher监控后台任务完成
   QFutureWatcher<QStringList> *watcher = new QFutureWatcher<QStringList>(this);
@@ -491,12 +495,13 @@ void MainHelper::openTabRecycle() {
       QString tab_time = str.split("-=-").at(1);
       QString iniTotal = str.split("-=-").at(2);
       iniTotal = iniTotal.trimmed();
-      m_Method->addItemToQW(qvTabRecycle, tab_name, tab_time, "", iniTotal, 0);
+      m_Method->addItemToQW(mui->qwTabRecycle, tab_name, tab_time, "", iniTotal,
+                            0);
     }
 
-    int t_count = m_Method->getCountFromQW(qvTabRecycle);
+    int t_count = m_Method->getCountFromQW(mui->qwTabRecycle);
     if (t_count > 0) {
-      m_Method->setCurrentIndexFromQW(qvTabRecycle, 0);
+      m_Method->setCurrentIndexFromQW(mui->qwTabRecycle, 0);
     }
 
     mui->lblTitleTabRecycle->setText(tr("Tab Recycle") + "    " + tr("Total") +
@@ -511,30 +516,6 @@ void MainHelper::openTabRecycle() {
 
 void MainHelper::initMainQW() {
   qmlRegisterType<DocumentHandler>("MyModel2", 1, 0, "DocumentHandler");
-
-  if (qvCata->source().isEmpty()) {
-    qvCata->rootContext()->setContextProperty("isDark", isDark);
-    qvCata->rootContext()->setContextProperty("m_Reader", mw_one->m_Reader);
-    qvCata->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/epub_cata.qml")));
-  }
-
-  if (qvTabRecycle == nullptr) {
-    qvTabRecycle = new QQuickView();
-    qvTabRecycle->rootContext()->setContextProperty("isDark", isDark);
-    qvTabRecycle->rootContext()->setContextProperty("m_Report",
-                                                    mw_one->m_Report);
-    qvTabRecycle->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/tabrecycle.qml")));
-    qvTabRecycle->setResizeMode(QQuickView::SizeRootObjectToView);
-
-    qmlWidgetTabRecycle = QWidget::createWindowContainer(qvTabRecycle);
-
-    QVBoxLayout *layout =
-        qobject_cast<QVBoxLayout *>(mui->frameTabRecycle->layout());
-    if (layout) {
-      layout->insertWidget(0, qmlWidgetTabRecycle);  // 插入到最上方
-    }
-  }
 
   if (mui->qwSteps->source().isEmpty()) {
     int f_size = 19;
@@ -600,10 +581,12 @@ void MainHelper::initMainQW() {
   mui->qw_Img->rootContext()->setContextProperty("myW", mw_one->width());
   mui->qw_Img->rootContext()->setContextProperty("myH", mw_one->height());
 
-  qvReader->rootContext()->setContextProperty("myW", mw_one->width());
-  qvReader->rootContext()->setContextProperty("myH", mw_one->height());
-  qvReader->rootContext()->setContextProperty("m_Reader", mw_one->m_Reader);
-  qvReader->rootContext()->setContextProperty("myBackgroundColor", "#FFFFFF");
+  mui->qwReader->rootContext()->setContextProperty("myW", mw_one->width());
+  mui->qwReader->rootContext()->setContextProperty("myH", mw_one->height());
+  mui->qwReader->rootContext()->setContextProperty("m_Reader",
+                                                   mw_one->m_Reader);
+  mui->qwReader->rootContext()->setContextProperty("myBackgroundColor",
+                                                   "#FFFFFF");
 }
 
 void MainHelper::initNotesQW() {
@@ -706,8 +689,8 @@ void MainHelper::init_UIWidget() {
   mui->btnFindNextNote->setEnabled(false);
   mui->btnFindPreviousNote->setEnabled(false);
   mui->frameNotesTree->hide();
-  qmlWidgetCata->hide();
-  qmlWidgetCata->move(-2000, -2000);
+  mui->qwCata->hide();
+  mui->qwBookmark->hide();
   mui->frameDiff->hide();
 
   mui->frameCategory->hide();
@@ -745,6 +728,7 @@ void MainHelper::init_UIWidget() {
   mui->textBrowser->setMouseTracking(true);
   mui->textBrowser->viewport()->installEventFilter(mw_one);
   mui->textBrowser->viewport()->setMouseTracking(true);
+  mui->qwReader->installEventFilter(mw_one);
 
   mui->tabWidget->tabBar()->installEventFilter(mw_one);
   mui->tabWidget->installEventFilter(mw_one);
@@ -993,9 +977,9 @@ void MainHelper::delBakFile() {
 }
 
 void MainHelper::delTabRecycleFile() {
-  if (m_Method->getCountFromQW(qvTabRecycle) == 0) return;
-  int index = m_Method->getCurrentIndexFromQW(qvTabRecycle);
-  QString tab_file = m_Method->getText3(qvTabRecycle, index);
+  if (m_Method->getCountFromQW(mui->qwTabRecycle) == 0) return;
+  int index = m_Method->getCurrentIndexFromQW(mui->qwTabRecycle);
+  QString tab_file = m_Method->getText3(mui->qwTabRecycle, index);
 
   m_Method->m_widget = new QWidget(mw_one);
   ShowMessage *m_ShowMsg = new ShowMessage(mw_one);
@@ -1017,11 +1001,11 @@ void MainHelper::delTabRecycleFile() {
     file.remove();
   }
 
-  m_Method->delItemFromQW(qvTabRecycle, index);
+  m_Method->delItemFromQW(mui->qwTabRecycle, index);
 
   mui->lblTitleTabRecycle->setText(
       tr("Tab Recycle") + "    " + tr("Total") + " : " +
-      QString::number(m_Method->getCountFromQW(qvTabRecycle)));
+      QString::number(m_Method->getCountFromQW(mui->qwTabRecycle)));
 }
 
 void MainHelper::importBakFileList() {
@@ -1073,7 +1057,7 @@ void MainHelper::init_Theme() {
   mui->qwSearch->rootContext()->setContextProperty("isDark", isDark);
   mui->qwBakList->rootContext()->setContextProperty("isDark", isDark);
   mui->qwViewCate->rootContext()->setContextProperty("isDark", isDark);
-  qvTabRecycle->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwTabRecycle->rootContext()->setContextProperty("isDark", isDark);
   mui->qwNoteRecycle->rootContext()->setContextProperty("isDark", isDark);
   mui->qwCategory->rootContext()->setContextProperty("isDark", isDark);
   mui->qwSelTab->rootContext()->setContextProperty("isDark", isDark);
@@ -1083,9 +1067,9 @@ void MainHelper::init_Theme() {
   mui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
   mui->qwReport->rootContext()->setContextProperty("isDark", isDark);
 
-  qvCata->rootContext()->setContextProperty("isDark", isDark);
-  qvBookmark->rootContext()->setContextProperty("isDark", isDark);
-  qvReader->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwCata->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwBookmark->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwReader->rootContext()->setContextProperty("isDark", isDark);
 
   if (!isDark) {
     mui->f_Menu->setStyleSheet("background-color: rgb(243,243,243);");
