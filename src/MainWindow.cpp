@@ -514,7 +514,7 @@ void MainWindow::get_Today(QTreeWidget *tw) {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-  if (qvCata->isVisible()) {
+  if (qmlWidgetCata->isVisible()) {
     on_btnCatalogue_clicked();
     event->ignore();
     return;
@@ -1352,28 +1352,29 @@ void MainWindow::init_Instance() {
 
     qvBookmark = new QQuickView();
     qvBookmark->setResizeMode(QQuickView::SizeRootObjectToView);
+    qvBookmark->hide();
 
     qvCata = new QQuickView();
     qvCata->setResizeMode(QQuickView::SizeRootObjectToView);
+    qvCata->hide();
 
-    QWidget *qmlWidget1 = QWidget::createWindowContainer(qvReader);
-    qmlWidget1->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    qmlWidgetReader = QWidget::createWindowContainer(qvReader);
+    qmlWidgetReader->setSizePolicy(QSizePolicy::Preferred,
+                                   QSizePolicy::Expanding);
 
-    QWidget *qmlWidget2 = QWidget::createWindowContainer(qvBookmark);
-    qmlWidget2->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-    qmlWidget2->hide();
+    qmlWidgetBookmark = QWidget::createWindowContainer(qvBookmark);
+    qmlWidgetBookmark->setSizePolicy(QSizePolicy::Preferred,
+                                     QSizePolicy::Expanding);
+    qmlWidgetBookmark->hide();
 
-    QWidget *qmlWidget3 = QWidget::createWindowContainer(qvCata);
-    qmlWidget3->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-    qmlWidget3->hide();
+    qmlWidgetCata = QWidget::createWindowContainer(qvCata);
+    qmlWidgetCata->setSizePolicy(QSizePolicy::Preferred,
+                                 QSizePolicy::Expanding);
+    qmlWidgetCata->move(-2000, -2000);
 
-    QVBoxLayout *layout =
-        qobject_cast<QVBoxLayout *>(mui->frameReader->layout());
-    if (layout) {
-      layout->insertWidget(4, qmlWidget1);
-      layout->insertWidget(4, qmlWidget2);
-      layout->insertWidget(4, qmlWidget3);
-    }
+    mui->f_ReaderPanel->layout()->addWidget(qmlWidgetReader);
+    mui->f_ReaderPanel->layout()->addWidget(qmlWidgetBookmark);
+    mui->f_ReaderPanel->layout()->addWidget(qmlWidgetCata);
   }
 
   tabData = new QTabWidget;
@@ -1577,6 +1578,8 @@ void MainWindow::on_btnReader_clicked() {
 
   mui->frameMain->hide();
   mui->frameReader->show();
+  qmlWidgetReader->move(0, 0);
+  qmlWidgetReader->show();
   mui->f_ReaderFun->show();
 
   isReaderVisible = true;
@@ -1599,7 +1602,7 @@ void MainWindow::on_btnOpen_clicked() {
   if (mui->f_ReaderSet->isVisible()) {
     on_btnBackReaderSet_clicked();
   }
-  if (qvBookmark->isVisible()) {
+  if (qmlWidgetBookmark->isVisible()) {
     on_btnShowBookmark_clicked();
   }
   m_ReaderSet->close();
@@ -1614,13 +1617,13 @@ void MainWindow::on_btnPageNext_clicked() { m_Reader->goNextPage(); }
 void MainWindow::on_btnPages_clicked() {
   mui->btnAutoStop->click();
 
-  if (qvCata->isVisible()) return;
+  if (qmlWidgetCata->isVisible()) return;
 
   if (mui->f_ReaderSet->isHidden()) {
     mui->f_ReaderSet->show();
 
     m_Reader->closeSelText();
-    if (qvBookmark->isVisible()) {
+    if (qmlWidgetBookmark->isVisible()) {
       on_btnShowBookmark_clicked();
     }
 
@@ -1680,7 +1683,7 @@ void MainWindow::on_btnReadList_clicked() {
     on_btnBackReaderSet_clicked();
   }
 
-  if (qvBookmark->isVisible()) {
+  if (qmlWidgetBookmark->isVisible()) {
     mw_one->on_btnShowBookmark_clicked();
   }
 
@@ -2100,6 +2103,7 @@ void MainWindow::on_btnImportBakList_clicked() {
 void MainWindow::on_btnOkViewCate_clicked() { m_Report->on_CateOk(); }
 
 void MainWindow::on_btnBackTabRecycle_clicked() {
+  qmlWidgetTabRecycle->move(-1000, -1000);
   mui->frameTabRecycle->hide();
   mui->frameMain->show();
 }

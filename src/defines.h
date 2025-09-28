@@ -108,6 +108,11 @@ inline QQuickView *qvReader = nullptr;
 inline QQuickView *qvBookmark = nullptr;
 inline QQuickView *qvCata = nullptr;
 
+inline QWidget *qmlWidgetReader;
+inline QWidget *qmlWidgetBookmark;
+inline QWidget *qmlWidgetCata;
+inline QWidget *qmlWidgetTabRecycle;
+
 inline QString loadText(QString textFile);
 inline void TextEditToFile(QTextEdit *txtEdit, QString fileName);
 inline int deleteDirfile(QString dirName);

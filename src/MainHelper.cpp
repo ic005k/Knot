@@ -398,6 +398,8 @@ void MainHelper::openTabRecycle() {
   mui->frameMain->hide();
   mui->frameTabRecycle->show();
 
+  qmlWidgetTabRecycle->move(0, 0);
+
   m_Method->clearAllBakList(qvTabRecycle);
 
   // 使用QFutureWatcher监控后台任务完成
@@ -525,12 +527,12 @@ void MainHelper::initMainQW() {
         QUrl(QStringLiteral("qrc:/src/qmlsrc/tabrecycle.qml")));
     qvTabRecycle->setResizeMode(QQuickView::SizeRootObjectToView);
 
-    QWidget *qmlWidget = QWidget::createWindowContainer(qvTabRecycle);
+    qmlWidgetTabRecycle = QWidget::createWindowContainer(qvTabRecycle);
 
     QVBoxLayout *layout =
         qobject_cast<QVBoxLayout *>(mui->frameTabRecycle->layout());
     if (layout) {
-      layout->insertWidget(0, qmlWidget);  // 插入到最上方
+      layout->insertWidget(0, qmlWidgetTabRecycle);  // 插入到最上方
     }
   }
 
@@ -704,8 +706,8 @@ void MainHelper::init_UIWidget() {
   mui->btnFindNextNote->setEnabled(false);
   mui->btnFindPreviousNote->setEnabled(false);
   mui->frameNotesTree->hide();
-  qvCata->hide();
-  qvBookmark->hide();
+  qmlWidgetCata->hide();
+  qmlWidgetCata->move(-2000, -2000);
   mui->frameDiff->hide();
 
   mui->frameCategory->hide();
