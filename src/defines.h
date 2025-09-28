@@ -104,6 +104,9 @@ inline bool isZH_CN = false;
 inline bool isNeedExecDeskShortcut = false;
 
 inline QQuickView *qvTabRecycle = nullptr;
+inline QQuickView *qvReader = nullptr;
+inline QQuickView *qvBookmark = nullptr;
+inline QQuickView *qvCata = nullptr;
 
 inline QString loadText(QString textFile);
 inline void TextEditToFile(QTextEdit *txtEdit, QString fileName);

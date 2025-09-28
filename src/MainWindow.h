@@ -310,8 +310,6 @@ class MainWindow : public QMainWindow {
 
   void refreshMainUI();
 
-  void clearSelectBox();
-
   QString getSelectedText();
 
   int calcStringPixelWidth(QString s_str, QFont font, int n_font_size);

@@ -72,8 +72,8 @@ void ReaderSet::init() {
   w = mw_one->width();
   h = this->height();
   x = mw_one->geometry().x();
-  y = mw_one->geometry().y() + mui->qwReader->geometry().y() +
-      (mui->qwReader->height() - h) / 2;
+  y = mw_one->geometry().y() + qvReader->geometry().y() +
+      (qvReader->height() - h) / 2;
   setFixedWidth(w);
   setGeometry(x, y, w, h);
 
@@ -175,9 +175,8 @@ void ReaderSet::on_btnFont_clicked() {
   iniPreferences->setValue("/Options/ReaderFont", fileName);
 
   mw_one->m_Reader->savePageVPos();
-  mui->qwReader->rootContext()->setContextProperty("FontName", readerFont);
-  mui->qwReader->rootContext()->setContextProperty("FontWeight",
-                                                   readerFontWeight);
+  qvReader->rootContext()->setContextProperty("FontName", readerFont);
+  qvReader->rootContext()->setContextProperty("FontWeight", readerFontWeight);
   mw_one->m_Reader->setPageVPos();
 }
 

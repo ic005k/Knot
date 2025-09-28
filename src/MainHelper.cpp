@@ -393,7 +393,6 @@ void MainHelper::init_Menu(QMenu *mainMenu) {
 
 void MainHelper::openTabRecycle() {
   mw_one->showProgress();
-  mui->qwTabRecycle->hide();
 
   // 切换UI
   mui->frameMain->hide();
@@ -511,6 +510,12 @@ void MainHelper::openTabRecycle() {
 void MainHelper::initMainQW() {
   qmlRegisterType<DocumentHandler>("MyModel2", 1, 0, "DocumentHandler");
 
+  if (qvCata->source().isEmpty()) {
+    qvCata->rootContext()->setContextProperty("isDark", isDark);
+    qvCata->rootContext()->setContextProperty("m_Reader", mw_one->m_Reader);
+    qvCata->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/epub_cata.qml")));
+  }
+
   if (qvTabRecycle == nullptr) {
     qvTabRecycle = new QQuickView();
     qvTabRecycle->rootContext()->setContextProperty("isDark", isDark);
@@ -521,7 +526,12 @@ void MainHelper::initMainQW() {
     qvTabRecycle->setResizeMode(QQuickView::SizeRootObjectToView);
 
     QWidget *qmlWidget = QWidget::createWindowContainer(qvTabRecycle);
-    mui->frameTabRecycle->layout()->addWidget(qmlWidget);
+
+    QVBoxLayout *layout =
+        qobject_cast<QVBoxLayout *>(mui->frameTabRecycle->layout());
+    if (layout) {
+      layout->insertWidget(0, qmlWidget);  // 插入到最上方
+    }
   }
 
   if (mui->qwSteps->source().isEmpty()) {
@@ -588,12 +598,10 @@ void MainHelper::initMainQW() {
   mui->qw_Img->rootContext()->setContextProperty("myW", mw_one->width());
   mui->qw_Img->rootContext()->setContextProperty("myH", mw_one->height());
 
-  mui->qwReader->rootContext()->setContextProperty("myW", mw_one->width());
-  mui->qwReader->rootContext()->setContextProperty("myH", mw_one->height());
-  mui->qwReader->rootContext()->setContextProperty("m_Reader",
-                                                   mw_one->m_Reader);
-  mui->qwReader->rootContext()->setContextProperty("myBackgroundColor",
-                                                   "#FFFFFF");
+  qvReader->rootContext()->setContextProperty("myW", mw_one->width());
+  qvReader->rootContext()->setContextProperty("myH", mw_one->height());
+  qvReader->rootContext()->setContextProperty("m_Reader", mw_one->m_Reader);
+  qvReader->rootContext()->setContextProperty("myBackgroundColor", "#FFFFFF");
 }
 
 void MainHelper::initNotesQW() {
@@ -696,8 +704,8 @@ void MainHelper::init_UIWidget() {
   mui->btnFindNextNote->setEnabled(false);
   mui->btnFindPreviousNote->setEnabled(false);
   mui->frameNotesTree->hide();
-  mui->qwCata->hide();
-  mui->qwBookmark->hide();
+  qvCata->hide();
+  qvBookmark->hide();
   mui->frameDiff->hide();
 
   mui->frameCategory->hide();
@@ -735,7 +743,6 @@ void MainHelper::init_UIWidget() {
   mui->textBrowser->setMouseTracking(true);
   mui->textBrowser->viewport()->installEventFilter(mw_one);
   mui->textBrowser->viewport()->setMouseTracking(true);
-  mui->qwReader->installEventFilter(mw_one);
 
   mui->tabWidget->tabBar()->installEventFilter(mw_one);
   mui->tabWidget->installEventFilter(mw_one);
@@ -1074,9 +1081,9 @@ void MainHelper::init_Theme() {
   mui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
   mui->qwReport->rootContext()->setContextProperty("isDark", isDark);
 
-  mui->qwCata->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwBookmark->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwReader->rootContext()->setContextProperty("isDark", isDark);
+  qvCata->rootContext()->setContextProperty("isDark", isDark);
+  qvBookmark->rootContext()->setContextProperty("isDark", isDark);
+  qvReader->rootContext()->setContextProperty("isDark", isDark);
 
   if (!isDark) {
     mui->f_Menu->setStyleSheet("background-color: rgb(243,243,243);");

@@ -962,51 +962,6 @@ border-radius: 4px;</string>
         </widget>
        </item>
        <item>
-        <widget class="QQuickWidget" name="qwReader">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="resizeMode">
-          <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QQuickWidget" name="qwCata">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="resizeMode">
-          <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QQuickWidget" name="qwBookmark">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="resizeMode">
-          <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QTextEdit" name="textBrowser"/>
        </item>
        <item>
@@ -5063,19 +5018,6 @@ QRadioButton::indicator:checked {
          </property>
          <property name="text">
           <string>Tab Recycle</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QQuickWidget" name="qwTabRecycle">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="resizeMode">
-          <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
          </property>
         </widget>
        </item>
