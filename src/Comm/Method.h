@@ -22,6 +22,7 @@
 #include <QFileInfoList>
 #include <QInputDialog>
 #include <QInputMethod>
+#include <QQuickView>
 
 #ifdef Q_OS_ANDROID
 #include <QJniObject>
@@ -419,7 +420,20 @@ class Method : public QDialog {
   void setAccessCount(int count);
 
   int getAccessCount();
-  bool sendMailWithAttachment(const QString &recipient = "", const QString &filePath = "");
+  bool sendMailWithAttachment(const QString &recipient = "",
+                              const QString &filePath = "");
+
+  QString getText3(QQuickView *qv, int index);
+
+  int getCountFromQW(QQuickView *qv);
+  void clearAllBakList(QQuickView *qv);
+
+  void delItemFromQW(QQuickView *qw, int index);
+  QString getText0(QQuickView *qv, int index);
+  int getCurrentIndexFromQW(QQuickView *qv);
+  void setCurrentIndexFromQW(QQuickView *qw, int index);
+
+  void addItemToQW(QQuickView *qw, QString text0, QString text1, QString text2, QString text3, int itemH);
   protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
