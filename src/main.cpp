@@ -61,8 +61,11 @@ const QString uniqueKey = "MyUniqueApplicationKey_12345";
 #define Cross_Origin
 
 int main(int argc, char* argv[]) {
-  // 强制使用 OpenGL ES 后端
+#ifdef Q_OS_ANDROID
+  // 仅在 Android 平台强制 OpenGL ES
   qputenv("QSG_RHI_BACKEND", "opengl");
+  qputenv("QSG_RENDER_LOOP", "basic");
+#endif
 
   QElapsedTimer totalTimer;
   totalTimer.start();
