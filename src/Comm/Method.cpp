@@ -2686,21 +2686,8 @@ void Method::set_ToolButtonStyle(QObject *parent) {
 
     if (btn != mui->btnStyle1 && btn != mui->btnStyle2 &&
         btn != mui->btnStyle3 && btn != mui->btnGPS) {
-      if (isDark) {
-        if (isAndroid)
-          setToolButtonQss(btn, 4, 5, "#2D3748", "#FFFFFF", "#2D3748",
-                           "#FFFFFF", "#1A202C", "#FFFFFF");
-        else
-          setToolButtonQss(btn, 4, 5, "#2D3748", "#FFFFFF", "#4A5568",
-                           "#FFFFFF", "#1A202C", "#FFFFFF");
-      } else {
-        if (isAndroid)
-          setToolButtonQss(btn, 4, 5, "#3B82F6", "#FFFFFF", "#3B82F6",
-                           "#FFFFFF", "#2563EB", "#FFFFFF");
-        else
-          setToolButtonQss(btn, 4, 5, "#3B82F6", "#FFFFFF", "#60A5FA",
-                           "#FFFFFF", "#2563EB", "#FFFFFF");
-      }
+      setToolButtonQss(btn, 4, 5, "#3B82F6", "#FFFFFF", "#3B82F6", "#FFFFFF",
+                       "#FF0000", "#FFFFFF");
     }
   }
 }
