@@ -4,6 +4,7 @@
 #include <qglobal.h>
 
 #include <QFile>
+#include <QQmlEngine>
 #include <QRegularExpression>
 #include <QSettings>
 #include <QTabWidget>

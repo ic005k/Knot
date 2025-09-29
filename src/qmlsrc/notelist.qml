@@ -309,24 +309,32 @@ Rectangle {
                         visible: item1.text.length ? true : false
                     }
 
-                    Text {
-                        id: item2
-                        anchors.rightMargin: 0
-                        Layout.preferredWidth: listItem.width
-                        Layout.alignment: Qt.AlignHCenter
-
-                        horizontalAlignment: Text.AlignLeft
+                    Rectangle {
                         width: parent.width
-                        wrapMode: TextArea.WordWrap
-                        font.bold: false
-                        font.pointSize: noteTimeFontSize
-                        text: text2
-                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+                        height: 25
+                        color: "red" // 红底
+                        visible: item2.text.length ? true : false
 
-                        leftPadding: 5
-                        rightPadding: 5
+                        Text {
+                            id: item2
+                            anchors.rightMargin: 0
+                            anchors.centerIn: parent // 水平+垂直居中
+                            Layout.preferredWidth: listItem.width
+                            Layout.alignment: Qt.AlignHCenter
 
-                        visible: false
+                            horizontalAlignment: Text.AlignLeft
+                            width: parent.width
+                            wrapMode: TextArea.WordWrap
+                            font.bold: true
+                            font.pointSize: noteTimeFontSize
+                            text: text2
+                            color: "white"
+
+                            leftPadding: 5
+                            rightPadding: 5
+
+                            visible:true;// item2.text.length ? true : false
+                        }
                     }
 
                     Text {

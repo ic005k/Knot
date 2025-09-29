@@ -522,6 +522,7 @@ void MainHelper::initMainQW() {
     if (fontSize <= f_size) f_size = fontSize;
 
     mui->qwSteps->rootContext()->setContextProperty("isDark", isDark);
+
     mui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
 
     mui->qwSteps->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/steps.qml")));

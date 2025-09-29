@@ -2838,6 +2838,7 @@ void NotesList::readyNotesData(QTreeWidgetItem *topItem) {
   struct RawResult {
     QString text0;
     QString text1;
+    QString text2;
     QString text3;
   };
 
@@ -2857,8 +2858,10 @@ void NotesList::readyNotesData(QTreeWidgetItem *topItem) {
             iniDirCopy + text3;  // 使用拷贝的iniDir，避免访问this成员
         QString item1 = m_Method->getLastModified(file);
         QString strSize = m_Method->getFileSize(QFile(file).size(), 2);
+        QString text2 = "";
+        if (!QFile::exists(file)) text2 = tr("File does not exist");
 
-        rawResults.push_back({text0, item1 + " " + strSize, text3});
+        rawResults.push_back({text0, item1 + " " + strSize, text2, text3});
       }
     }
     qDebug() << "后台处理完成，有效数据" << rawResults.size() << "项";
@@ -2884,7 +2887,7 @@ void NotesList::readyNotesData(QTreeWidgetItem *topItem) {
       NoteItem item;
       item.text0 = result.text0;
       item.text1 = result.text1;
-      item.text2 = "";
+      item.text2 = result.text2;
       item.text3 = result.text3;
       item.myh = 0;
       batchItems.append(item);
@@ -2934,40 +2937,6 @@ void NotesList::clickNoteBook() {
     QTreeWidgetItem *topItem = tw->topLevelItem(index_top);
 
     readyNotesData(topItem);
-
-  } else {
-    QStringList list = text1.split("===");
-    int indexMain, indexChild;
-    if (list.count() == 2) {
-      indexMain = list.at(0).toInt();
-      indexChild = list.at(1).toInt();
-
-      QTreeWidgetItem *topItem = tw->topLevelItem(indexMain);
-      QTreeWidgetItem *childItem = topItem->child(indexChild);
-      int count = childItem->childCount();
-      for (int n = 0; n < count; n++) {
-        QString text0 = childItem->child(n)->text(0);
-        QString text3 = childItem->child(n)->text(1);
-        QString file = iniDir + text3;
-        QString item1 = m_Method->getLastModified(file);
-        QString strSize = m_Method->getFileSize(QFile(file).size(), 2);
-        m_Method->addItemToQW(mui->qwNoteList, text0, item1 + " " + strSize, "",
-                              text3, 0);
-
-        pNoteItems.append(childItem->child(n));
-      }
-    }
-
-    int noteslistIndex = getSavedNotesListIndex(index);
-    setNotesListCurrentIndex(noteslistIndex);
-
-    setNoteLabel();
-
-    clickNoteList();
-    if (isMouseClick) {
-      setNotesListCurrentIndex(-1);
-      isMouseClick = false;
-    }
   }
 }
 
@@ -2988,11 +2957,11 @@ void NotesList::clickNoteList() {
   setNoteLabel();
 
   if (!QFile::exists(currentMDFile)) {
-    ShowMessage *msg = new ShowMessage(mw_one);
+    /*ShowMessage *msg = new ShowMessage(mw_one);
     msg->showMsg(appName,
                  tr("The current note does not exist. Please select another "
                     "note or create a new note."),
-                 0);
+                 0);*/
 
     return;
   }

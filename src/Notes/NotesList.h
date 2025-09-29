@@ -192,6 +192,8 @@ class NotesList : public QDialog {
 
   void closeNoteDiff();
 
+  void on_actionAdd_Note_triggered();
+
  protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
@@ -238,6 +240,7 @@ class NotesList : public QDialog {
 
   void getNoteDiffHtml();
   void newtextToOldtextFromDiffStr();
+
  private slots:
 
   void on_actionShareNoteFile();
@@ -291,7 +294,6 @@ class NotesList : public QDialog {
   void on_actionMoveUp_NoteBook_triggered();
   void on_actionMoveDown_NoteBook_triggered();
 
-  void on_actionAdd_Note_triggered();
   void on_actionDel_Note_triggered();
   void on_actionRename_Note_triggered();
   void on_actionMoveUp_Note_triggered();

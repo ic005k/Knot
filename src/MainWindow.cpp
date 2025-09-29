@@ -2764,3 +2764,7 @@ void MainWindow::on_btnShareBakFile_clicked() {
     mw_one->m_ReceiveShare->shareImage(tr("Share to"), filePath, "*/*");
   }
 }
+
+void MainWindow::on_btnNewNote_clicked() {
+  m_NotesList->on_actionAdd_Note_triggered();
+}
