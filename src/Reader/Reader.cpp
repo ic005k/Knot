@@ -3377,7 +3377,18 @@ QString Reader::getFirstThreeLines(QTextEdit *textEdit) {
   return resultLines.join("\n");
 }
 
+QString Reader::getReadTotalTime() {
+  endDateTime = QDateTime::currentDateTime();
+  qint64 seconds = startDateTime.secsTo(endDateTime);
+  double hours = qMax(0.0, seconds / 3600.0);
+  writeTotalHours(totalHours + hours);
+  QString display = QString::number(totalHours + hours, 'f', 1);
+  return display;
+}
+
 void Reader::closeReader() {
+  qDebug() << getReadTotalTime();
+
   mui->btnAutoStop->click();
   m_ReaderSet->close();
   if (isSelText) mw_one->on_btnSelText_clicked();
@@ -3390,4 +3401,69 @@ void Reader::closeReader() {
 
   mui->frameReader->hide();
   mui->frameMain->show();
+}
+
+void Reader::openReader() {
+  if (!isOne) {
+    initReader();
+  }
+
+  if (isPDF) {
+    if (isAndroid) {
+      mui->frameMain->hide();
+      mui->frameBookList->show();
+
+      getReadList();
+
+      openMyPDF(fileName);
+      return;
+    }
+  }
+
+  mui->frameMain->hide();
+  mui->frameReader->show();
+  mui->f_ReaderFun->show();
+
+  mw_one->isReaderVisible = true;
+  mw_one->isMemoVisible = false;
+
+  if (!isOne) {
+    startOpenFile(fileName);
+    isOne = true;
+  }
+
+  startDateTime = QDateTime::currentDateTime();
+  totalHours = readTotalHours();
+}
+
+double Reader::readTotalHours() {
+  QString path = iniDir + "reader.json";
+  QFile file(path);
+  if (!file.exists()) return 0.0;
+
+  if (!file.open(QIODevice::ReadOnly)) return 0.0;
+
+  QByteArray data = file.readAll();
+  file.close();
+
+  QJsonDocument doc = QJsonDocument::fromJson(data);
+  if (doc.isNull()) return 0.0;
+
+  QJsonObject obj = doc.object();
+  return obj.value("totalHours").toDouble(0.0);
+}
+
+bool Reader::writeTotalHours(double value) {
+  QString path = iniDir + "reader.json";
+  QJsonObject obj;
+  obj.insert("totalHours", value);
+
+  QJsonDocument doc(obj);
+
+  QFile file(path);
+  if (!file.open(QIODevice::WriteOnly)) return false;
+
+  file.write(doc.toJson(QJsonDocument::Indented));
+  file.close();
+  return true;
 }

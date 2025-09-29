@@ -833,6 +833,24 @@ border-radius: 4px;</string>
            </widget>
           </item>
           <item>
+           <widget class="QLabel" name="lblTotalReading">
+            <property name="styleSheet">
+             <string notr="true">QLabel {
+    background-color: #2ECC71;  /* 鲜明的绿色背景 */
+    color: #000000;             /* 纯黑文字 */
+   
+    font-weight: bold;
+    border: 1px solid #27AE60;  /* 深绿色边框，增强工业感 */
+    border-radius: 2px;         /* 轻微圆角，避免过于生硬 */
+    padding: 3px 8px;
+}</string>
+            </property>
+            <property name="text">
+             <string>Total Reading</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <layout class="QHBoxLayout" name="horizontalLayout_62">
             <item>
              <widget class="QToolButton" name="btnBackReaderSet">

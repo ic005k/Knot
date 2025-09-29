@@ -202,7 +202,6 @@ class MainWindow : public QMainWindow {
   QString loginTime;
 
   int mwh;
-  bool isOne = false;
 
   QString listStyle =
       "QListWidget{item-background: "

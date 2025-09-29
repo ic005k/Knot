@@ -1526,35 +1526,7 @@ QString MainWindow::getYMD(QString date) {
   return str;
 }
 
-void MainWindow::on_btnReader_clicked() {
-  if (!isOne) {
-    m_Reader->initReader();
-  }
-
-  if (isPDF) {
-    if (isAndroid) {
-      mui->frameMain->hide();
-      mui->frameBookList->show();
-
-      m_Reader->getReadList();
-
-      m_Reader->openMyPDF(fileName);
-      return;
-    }
-  }
-
-  mui->frameMain->hide();
-  mui->frameReader->show();
-  mui->f_ReaderFun->show();
-
-  isReaderVisible = true;
-  isMemoVisible = false;
-
-  if (!isOne) {
-    m_Reader->startOpenFile(fileName);
-    isOne = true;
-  }
-}
+void MainWindow::on_btnReader_clicked() { m_Reader->openReader(); }
 
 void MainWindow::on_btnBackReader_clicked() { m_Reader->closeReader(); }
 
@@ -1585,6 +1557,8 @@ void MainWindow::on_btnPages_clicked() {
   if (mui->qwCata->isVisible()) return;
 
   if (mui->f_ReaderSet->isHidden()) {
+    mui->lblTotalReading->setText(tr("Total Reading: ") +
+                                  m_Reader->getReadTotalTime() + " h");
     mui->f_ReaderSet->show();
 
     m_Reader->closeSelText();

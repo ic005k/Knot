@@ -34,6 +34,13 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
   mui->btnShowFindNotes->hide();
   mui->btnTools->hide();
 
+  if (isAndroid) {
+    QFont font = this->font();
+    font.setPointSize(13);
+    mui->lblNoteBook->setFont(font);
+    mui->lblNoteList->setFont(font);
+  }
+
   setModal(true);
   this->layout()->setSpacing(5);
   this->layout()->setContentsMargins(2, 2, 2, 2);

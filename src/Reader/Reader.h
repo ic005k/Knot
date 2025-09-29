@@ -164,6 +164,8 @@ class Reader : public QDialog {
   bool isTurnThePage = false;
 
   void closeReader();
+  void openReader();
+  QString getReadTotalTime();
  public slots:
   void setPageScroll0();
   void setPageScroll1();
@@ -189,6 +191,9 @@ class Reader : public QDialog {
   void autoRun();
 
  private:
+  QDateTime startDateTime, endDateTime;
+  double totalHours = 0.0;
+  bool isOne = false;
   QString customCss;
   int x, y, w, h;
   bool isInitReader = false;
@@ -223,6 +228,8 @@ class Reader : public QDialog {
   QString getFirstThreeLines(QTextEdit *textEdit);
   bool getLandscape();
   bool getQmlReadyEnd();
+  double readTotalHours();
+  bool writeTotalHours(double value);
 };
 
 class TextChunkModel : public QAbstractListModel {
