@@ -1517,7 +1517,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
       }
     }
 
-    if (file.contains(".json.zip")) {
+    if (file.contains(".json.zip") && !file.contains("mainnotes.json.zip")) {
       pDir = privateDir + "KnotData/memo";
       pFile = pFile.replace(".zip", "");
       kFile = iniDir + asFile.replace("KnotData/", "");
