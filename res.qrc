@@ -21,15 +21,12 @@
         <file>res/choice1.png</file>
         <file>res/redo.png</file>
         <file>res/undo.png</file>
-        <file>res/pic.png</file>
         <file>res/info.png</file>
         <file>res/b3.png</file>
-        <file>res/link.png</file>
         <file>res/color.png</file>
         <file>res/apk.png</file>
         <file>res/icon.ico</file>
         <file>res/tr/qt_zh_CN.qm</file>
-        <file>res/paste.png</file>
         <file>res/cleft.png</file>
         <file>res/cright.png</file>
         <file>res/sleft.svg</file>
@@ -55,7 +52,6 @@
         <file>res/coin.svg</file>
         <file>res/find_l.png</file>
         <file>res/back_l.png</file>
-        <file>res/list_l.png</file>
         <file>res/sum.png</file>
         <file>res/p0.png</file>
         <file>res/n.png</file>
@@ -68,13 +64,10 @@
         <file>res/btn_expand.png</file>
         <file>res/btn_collapse.png</file>
         <file>res/todo_done.png</file>
-        <file>res/options.png</file>
         <file>res/return_l.png</file>
         <file>res/url_l.png</file>
-        <file>res/recent_l.png</file>
         <file>res/ok_l.png</file>
         <file>res/status.png</file>
-        <file>res/hide_l.png</file>
         <file>res/share.png</file>
         <file>res/note_l.svg</file>
         <file>res/note.svg</file>
@@ -184,6 +177,11 @@
         <file>res/find_l.svg</file>
         <file>res/up_l.svg</file>
         <file>res/rename_l.svg</file>
+        <file>res/newnote_l.svg</file>
         <file>res/newnote.svg</file>
+        <file>res/recent.svg</file>
+        <file>res/recent_l.svg</file>
+        <file>res/find2.svg</file>
+        <file>res/notes.svg</file>
     </qresource>
 </RCC>

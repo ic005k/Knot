@@ -916,7 +916,15 @@ void MainHelper::init_ButtonStyle() {
   mui->btnRotation->setStyleSheet("border:none; ");
   // mui->f_ReaderFun->setStyleSheet("QFrame{background-color: #595959;}");
 
+  // Notes
+  mui->btnNoteBookMenu->setStyleSheet("border:none; ");
+  mui->btnNewNote->setStyleSheet("border:none; ");
+  mui->btnFindNotes2->setStyleSheet("border:none; ");
+  mui->btnNoteMenu->setStyleSheet("border:none; ");
+  mui->btnRecentOpen->setStyleSheet("border:none; ");
+
   if (isDark) {
+    // Reader
     mui->btnBackReader->setIcon(QIcon(":/res/reader/exit_l.svg"));
     mui->btnRotation->setIcon(QIcon(":/res/reader/rotation_l.svg"));
     mui->btnCatalogue->setIcon(QIcon(":/res/reader/cata_l.svg"));
@@ -925,6 +933,14 @@ void MainHelper::init_ButtonStyle() {
     mui->btnAutoStop->setIcon(QIcon(":/res/reader/stop_l.svg"));
     mui->btnOpen->setIcon(QIcon(":/res/reader/open_l.svg"));
     mui->btnReadList->setIcon(QIcon(":/res/reader/booklist_l.svg"));
+
+    // Notes
+    mui->btnNoteBookMenu->setIcon(QIcon(":/res/nb_l.svg"));
+    mui->btnNewNote->setIcon(QIcon(":/res/newnote_l.svg"));
+    mui->btnFindNotes2->setIcon(QIcon(":/res/find2_l.svg"));
+    mui->btnNoteMenu->setIcon(QIcon(":/res/notes_l.svg"));
+    mui->btnRecentOpen->setIcon(QIcon(":/res/recent_l.svg"));
+
   } else {
     mui->btnBackReader->setIcon(QIcon(":/res/reader/exit.svg"));
     mui->btnRotation->setIcon(QIcon(":/res/reader/rotation.svg"));
@@ -934,6 +950,13 @@ void MainHelper::init_ButtonStyle() {
     mui->btnAutoStop->setIcon(QIcon(":/res/reader/stop.svg"));
     mui->btnOpen->setIcon(QIcon(":/res/reader/open.svg"));
     mui->btnReadList->setIcon(QIcon(":/res/reader/booklist.svg"));
+
+    // Notes
+    mui->btnNoteBookMenu->setIcon(QIcon(":/res/nb.svg"));
+    mui->btnNewNote->setIcon(QIcon(":/res/newnote.svg"));
+    mui->btnFindNotes2->setIcon(QIcon(":/res/find2.svg"));
+    mui->btnNoteMenu->setIcon(QIcon(":/res/notes.svg"));
+    mui->btnRecentOpen->setIcon(QIcon(":/res/recent.svg"));
   }
 
   /*mui->btnPages->setStyleSheet(

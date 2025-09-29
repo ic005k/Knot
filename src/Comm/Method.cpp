@@ -9,8 +9,6 @@
 QStringList resultsList;
 
 Method::Method(QWidget *parent) : QDialog(parent) {
-  set_ToolButtonStyle(this);
-
   this->installEventFilter(this);
 
   QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);

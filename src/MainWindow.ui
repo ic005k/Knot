@@ -3362,7 +3362,7 @@ QSlider::handle:horizontal:disabled {
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset resource="../res.qrc">
+            <iconset>
              <normaloff>:/res/paste.png</normaloff>:/res/paste.png</iconset>
            </property>
            <property name="iconSize">
@@ -3801,7 +3801,7 @@ QSlider::handle:horizontal:disabled {
                 <string>...</string>
                </property>
                <property name="icon">
-                <iconset resource="../res.qrc">
+                <iconset>
                  <normaloff>:/res/options.png</normaloff>:/res/options.png</iconset>
                </property>
                <property name="iconSize">
@@ -5369,8 +5369,8 @@ QRadioButton::indicator:checked {
                </property>
                <property name="iconSize">
                 <size>
-                 <width>25</width>
-                 <height>25</height>
+                 <width>32</width>
+                 <height>32</height>
                 </size>
                </property>
               </widget>
@@ -5399,8 +5399,8 @@ QRadioButton::indicator:checked {
                </property>
                <property name="iconSize">
                 <size>
-                 <width>25</width>
-                 <height>25</height>
+                 <width>32</width>
+                 <height>32</height>
                 </size>
                </property>
               </widget>
@@ -5416,8 +5416,8 @@ QRadioButton::indicator:checked {
                </property>
                <property name="iconSize">
                 <size>
-                 <width>25</width>
-                 <height>25</height>
+                 <width>32</width>
+                 <height>32</height>
                 </size>
                </property>
               </widget>
@@ -5448,8 +5448,8 @@ QRadioButton::indicator:checked {
                </property>
                <property name="iconSize">
                 <size>
-                 <width>25</width>
-                 <height>25</height>
+                 <width>32</width>
+                 <height>32</height>
                 </size>
                </property>
               </widget>
@@ -5474,12 +5474,12 @@ QRadioButton::indicator:checked {
                </property>
                <property name="icon">
                 <iconset resource="../res.qrc">
-                 <normaloff>:/res/recent_l.png</normaloff>:/res/recent_l.png</iconset>
+                 <normaloff>:/res/recent_l.svg</normaloff>:/res/recent_l.svg</iconset>
                </property>
                <property name="iconSize">
                 <size>
-                 <width>25</width>
-                 <height>25</height>
+                 <width>32</width>
+                 <height>32</height>
                 </size>
                </property>
               </widget>
