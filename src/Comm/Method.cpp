@@ -2983,8 +2983,6 @@ void Method::showInfoWindow(const QString &info) {
   mainLayout->addLayout(topLayout);  // 将顶部布局加入主布局
 
   QFrame *frame = new QFrame(infoWindow);
-  frame->setStyleSheet("background-color: #F0F4F8; color: black;");
-  lblInfo->setStyleSheet("background-color: #F0F4F8; color: #2D3748;");
 
   QVBoxLayout *v_box = new QVBoxLayout();
   frame->setLayout(v_box);
