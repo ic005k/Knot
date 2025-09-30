@@ -2089,7 +2089,7 @@ void Notes::appendToSyncList(QString file) {
   QString baseFlag = m_Method->getBaseFlag(file);
 
   // 一次性移除所有包含相同 baseFlag 的文件
-  notes_sync_files.removeIf([this, &baseFlag](const QString &f) {
+  notes_sync_files.removeIf([&baseFlag](const QString &f) {
     return m_Method->getBaseFlag(f) == baseFlag;
   });
   notes_sync_files.append(file);

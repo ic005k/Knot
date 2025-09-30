@@ -690,6 +690,7 @@ QDialog *Method::getProgBar() {
   dlg = new QDialog(this);
   dlg->setWindowFlag(Qt::FramelessWindowHint);
   dlg->setModal(true);
+  dlg->setAttribute(Qt::WA_DeleteOnClose);  // 自动销毁
   dlg->setFixedHeight(100);
   dlg->setFixedWidth(130);
   QVBoxLayout *vbox = new QVBoxLayout;
@@ -3054,7 +3055,6 @@ void Method::showInfoWindow(const QString &info) {
 void Method::closeInfoWindow() {
   if (infoWindow) {
     infoWindow->close();
-    infoWindow->deleteLater();
     infoWindow = nullptr;
     lblInfo = nullptr;
     infoProgBar = nullptr;

@@ -1145,18 +1145,14 @@ void MainWindow::on_actionImport_Data_triggered() {
 }
 
 void MainWindow::showProgress() {
-  dlgProg = new QDialog(this);
+  if (dlgProg) closeProgress();  // 先关旧的
   dlgProg = m_Method->getProgBar();
-
   if (!initMain) dlgProg->show();
 }
 
 void MainWindow::closeProgress() {
-  if (!initMain) {
-    if (dlgProg == nullptr) return;
-
-    dlgProg->close();
-    delete dlgProg;
+  if (!initMain && dlgProg) {
+    dlgProg->close();  // 自动销毁，不需要 delete
     dlgProg = nullptr;
   }
 }
