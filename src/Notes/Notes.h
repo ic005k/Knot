@@ -38,6 +38,7 @@
 #include <QTextBlock>
 #include <QTextDocument>
 #include <QTextDocumentFragment>
+#include <algorithm>
 
 #ifndef Q_OS_ANDROID
 #include "lib/qsci/Qsci/qscilexercpp.h"

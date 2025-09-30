@@ -98,7 +98,7 @@ QString ReceiveShare::addToNote_Java() {
     for (int i = 0; i < imgCount; i++) {
       QString imgFile =
           "/storage/emulated/0/.Knot/img" + QString::number(i) + ".png";
-      QString strImg = mw_one->m_Notes->insertImage(imgFile, false);
+      QString strImg = m_Notes->insertImage(imgFile, false);
       strData = strData + strImg;
     }
   }
@@ -136,7 +136,7 @@ void ReceiveShare::addToNote(bool isInsert) {
       edit->insertPlainText(strReceiveShareData);
     }
     if (shareType == "image/*") {
-      QString strImg = mw_one->m_Notes->insertImage(imgFile, false);
+      QString strImg = m_Notes->insertImage(imgFile, false);
       edit->insertPlainText(strImg);
     }
   } else {
@@ -147,7 +147,7 @@ void ReceiveShare::addToNote(bool isInsert) {
       setCursorPos(newPos);
     }
     if (shareType == "image/*") {
-      QString strImg = mw_one->m_Notes->insertImage(imgFile, false);
+      QString strImg = m_Notes->insertImage(imgFile, false);
       edit->append(strImg);
       int newPos = strBuffer.length() + strImg.length();
       setCursorPos(newPos);
@@ -193,7 +193,7 @@ void ReceiveShare::on_btnInsertToNote_clicked() {
 
 void ReceiveShare::openNoteEditor() {
   closeAllChildWindows();
-  mw_one->m_Notes->isRequestOpenNoteEditor = true;
+  m_Notes->isRequestOpenNoteEditor = true;
   mui->btnNotes->click();
 }
 

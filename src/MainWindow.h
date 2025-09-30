@@ -254,7 +254,7 @@ class MainWindow : public QMainWindow {
   Todo *m_Todo;
   Report *m_Report;
   Preferences *m_Preferences;
-  Notes *m_Notes;
+
   Steps *m_Steps;
   Reader *m_Reader;
   TodoAlarm *m_TodoAlarm;

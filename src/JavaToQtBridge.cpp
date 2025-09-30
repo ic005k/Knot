@@ -98,13 +98,13 @@ static void JavaNotify_5() {
 }
 
 static void JavaNotify_6() {
-  mw_one->m_Notes->javaNoteToQMLNote();
+  m_Notes->javaNoteToQMLNote();
 
   qDebug() << "C++ JavaNotify_6";
 }
 
 static void JavaNotify_7() {
-  mw_one->m_Notes->insertImage(privateDir + "receive_share_pic.png", true);
+  m_Notes->insertImage(privateDir + "receive_share_pic.png", true);
 
   qDebug() << "C++ JavaNotify_7";
 }

@@ -41,7 +41,7 @@ bool MainHelper::mainEventFilter(QObject *watch, QEvent *evn) {
 
   mw_one->m_Reader->eventFilterReader(watch, evn);
 
-  mw_one->m_Notes->eventFilterQwNote(watch, evn);
+  m_Notes->eventFilterQwNote(watch, evn);
 
   if (watch == mui->textBrowser->viewport()) {
     if (event->type() == QEvent::MouseButtonPress) {
@@ -170,8 +170,7 @@ void MainHelper::clickBtnRestoreTab() {
   if (m_Method->getCountFromQW(mui->qwTabRecycle) == 0) return;
 
   int count = mui->tabWidget->tabBar()->count();
-  QString twName =
-      mw_one->m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
+  QString twName = m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
 
   int c_year = QDate::currentDate().year();
   int iniFileCount = c_year - 2025 + 1 + 1;
@@ -614,8 +613,7 @@ void MainHelper::initNotesQW() {
     mui->qwNoteTools->rootContext()->setContextProperty("isDark", isDark);
     mui->qwNoteTools->rootContext()->setContextProperty("m_NotesList",
                                                         m_NotesList);
-    mui->qwNoteTools->rootContext()->setContextProperty("m_Notes",
-                                                        mw_one->m_Notes);
+    mui->qwNoteTools->rootContext()->setContextProperty("m_Notes", m_Notes);
     mui->qwNoteTools->rootContext()->setContextProperty("mw_one", mw_one);
     mui->qwNoteTools->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/note_toolsbar.qml")));
@@ -1201,7 +1199,7 @@ void MainHelper::init_Theme() {
   m_Method->setDark(isDark);
 
   // Notes Editor
-  mw_one->m_Notes->init_md();
+  m_Notes->init_md();
 
   // Notes ToolsBar
   mui->qwNoteTools->rootContext()->setContextProperty("isDark", isDark);

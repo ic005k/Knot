@@ -192,8 +192,8 @@ void NotesList::on_btnNewNote_clicked() {
   int rand = QRandomGenerator::global()->generate();
   if (rand < 0) rand = 0 - rand;
 
-  QString noteFile = "memo/" + mw_one->m_Notes->getDateTimeStr() + "_" +
-                     QString::number(rand) + ".md";
+  QString noteFile =
+      "memo/" + m_Notes->getDateTimeStr() + "_" + QString::number(rand) + ".md";
   QTreeWidgetItem *parentitem = ui->treeWidget->currentItem();
 
   QTreeWidgetItem *item1 = new QTreeWidgetItem(parentitem);
@@ -306,7 +306,7 @@ void NotesList::on_btnRename_clicked() {
 
   if (edit->toPlainText().trimmed() == "无标题笔记" ||
       edit->toPlainText().trimmed() == "Untitled Note") {
-    edit->setPlainText(mw_one->m_Notes->new_title);
+    edit->setPlainText(m_Notes->new_title);
   }
 
   QToolButton *btnCancel = new QToolButton(m_RenameNotes);
@@ -388,9 +388,9 @@ void NotesList::renameCurrentItem(QString title) {
   if (item->parent() != NULL && !item->text(1).isEmpty()) {
     setNoteName(item->text(0));
 
-    mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(iniDir + item->text(1),
-                                                      item->text(0));
-    mw_one->m_Notes->m_NoteIndexManager->saveIndex(strNoteNameIndexFile);
+    m_Notes->m_NoteIndexManager->setNoteTitle(iniDir + item->text(1),
+                                              item->text(0));
+    m_Notes->m_NoteIndexManager->saveIndex(strNoteNameIndexFile);
 
     for (int i = 0; i < listRecentOpen.count(); i++) {
       QString str = listRecentOpen.at(i);
@@ -502,10 +502,10 @@ void NotesList::on_btnDel_clicked() {
 
   if (tw->topLevelItemCount() > 0) {
     if (tw->currentItem()->childCount() == 0) {
-      mw_one->m_Notes->loadEmptyNote();
+      m_Notes->loadEmptyNote();
     }
   } else {
-    mw_one->m_Notes->loadEmptyNote();
+    m_Notes->loadEmptyNote();
     mui->lblNoteBook->setText(tr("Note Book"));
     mui->lblNoteList->setText(tr("Note List"));
   }
@@ -605,7 +605,7 @@ int NotesList::on_btnImport_clicked() {
         item1 = new QTreeWidgetItem(item);
         item1->setText(0, name);
 
-        QString a = "memo/" + mw_one->m_Notes->getDateTimeStr() + "_" +
+        QString a = "memo/" + m_Notes->getDateTimeStr() + "_" +
                     QString::number(i) + ".md";
         currentMDFile = iniDir + a;
 
@@ -618,7 +618,7 @@ int NotesList::on_btnImport_clicked() {
 
         qDebug() << fileName << a;
 
-        mw_one->m_Notes->updateMDFileToSyncLists();
+        m_Notes->updateMDFileToSyncLists();
 
       } else {
         isImportFilesEnd = true;
@@ -633,7 +633,7 @@ int NotesList::on_btnImport_clicked() {
             qDebug() << "Import note completed:" +
                             QString::number(MDFileList.count());
 
-            mw_one->m_Notes->startBackgroundTaskUpdateNoteIndexes(MDFileList);
+            m_Notes->startBackgroundTaskUpdateNoteIndexes(MDFileList);
 
             isImportNotes = true;
             isImportFilesEnd = true;
@@ -812,7 +812,7 @@ void NotesList::saveNotesList() {
   QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     mw_one->strLatestModify = tr("Modi Notes List");
-    mw_one->m_Notes->isSaveNotesConfig = true;
+    m_Notes->isSaveNotesConfig = true;
     qDebug() << "NotesList save completed.";
 
     watcher->deleteLater();
@@ -1041,7 +1041,7 @@ void NotesList::initNotesList() {
           childItem->setIcon(0, QIcon(":/res/n.png"));
 
           QString md = iniDir + str1;
-          mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(md, str0);
+          m_Notes->m_NoteIndexManager->setNoteTitle(md, str0);
           updateNoteIndexManager(md, i, j);
 
           noteFiles.append(md);
@@ -1104,7 +1104,7 @@ void NotesList::initNotesList() {
           childItem->setIcon(0, QIcon(":/res/n.png"));
 
           QString md = iniDir + str1;
-          mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(md, str0);
+          m_Notes->m_NoteIndexManager->setNoteTitle(md, str0);
           updateNoteIndexManager(md, i, j);
 
           noteFiles.append(md);
@@ -1119,7 +1119,7 @@ void NotesList::initNotesList() {
     tw->expandAll();
   }
 
-  mw_one->m_Notes->m_NoteIndexManager->saveIndex(strNoteNameIndexFile);
+  m_Notes->m_NoteIndexManager->saveIndex(strNoteNameIndexFile);
 
   initRecentOpen();
 }
@@ -1243,7 +1243,7 @@ void NotesList::initUnclassified() {
     childItem->setText(1, str1);
     childItem->setIcon(0, QIcon(":/res/n.png"));
 
-    mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(mdFile, str0);
+    m_Notes->m_NoteIndexManager->setNoteTitle(mdFile, str0);
     updateNoteIndexManager(mdFile, topCount, i);
   }
 
@@ -1310,15 +1310,14 @@ void NotesList::on_btnDel_Recycle_clicked() {
     }
 
     delFile(md);
-    QString json = mw_one->m_Notes->getCurrentJSON(md);
+    QString json = m_Notes->getCurrentJSON(md);
     delFile(json);
 
-    QStringList tempList = mw_one->m_Notes->notes_sync_files;
+    QStringList tempList = m_Notes->notes_sync_files;
     for (int i = 0; i < tempList.count(); i++) {
       QString file = tempList.at(i);
       QString baseFlag = m_Method->getBaseFlag(file);
-      if (file.contains(baseFlag))
-        mw_one->m_Notes->notes_sync_files.removeOne(file);
+      if (file.contains(baseFlag)) m_Notes->notes_sync_files.removeOne(file);
     }
 
     setDelNoteFlag(curItem->text(1));
@@ -1428,7 +1427,7 @@ void NotesList::needDelNotes() {
     bool isDelMDOk, isDelJSONOk;
     for (int i = 0; i < needDelFiles.count(); i++) {
       QString mdFile = iniDir + needDelFiles.at(i);
-      QString strFile = mw_one->m_Notes->getCurrentJSON(mdFile);
+      QString strFile = m_Notes->getCurrentJSON(mdFile);
       isDelMDOk = delFile(mdFile);
       isDelJSONOk = delFile(strFile);
 
@@ -2105,7 +2104,7 @@ void NotesList::on_actionDel_NoteBook_triggered() {
   saveNotesList();
 
   if (count == 0) {
-    mw_one->m_Notes->loadEmptyNote();
+    m_Notes->loadEmptyNote();
   }
 }
 
@@ -2399,7 +2398,7 @@ void NotesList::on_actionDel_Note_triggered() {
   saveNotesList();
 
   if (count == 0) {
-    mw_one->m_Notes->loadEmptyNote();
+    m_Notes->loadEmptyNote();
   }
 }
 
@@ -2545,8 +2544,8 @@ void NotesList::init_NotesListMenu(QMenu *mainMenu) {
 
 void NotesList::on_actionModificationHistory() {
   // 读取差异记录
-  QList<QJsonObject> allDiffs = mw_one->m_Notes->loadAllDiffs(
-      mw_one->m_Notes->getCurrentJSON(currentMDFile));
+  QList<QJsonObject> allDiffs =
+      m_Notes->loadAllDiffs(m_Notes->getCurrentJSON(currentMDFile));
 
   // 按修改时间排序（最新的在前面）
   std::sort(allDiffs.begin(), allDiffs.end(),
@@ -2689,7 +2688,6 @@ void NotesList::on_actionShareNoteFile() {
 }
 
 void NotesList::setNoteLabel() {
-  mui->lblNoteBook->setText("" + QString::number(getNoteBookCount()));
   QString notesSum = QString::number(getNotesListCount());
   int index_note = getNotesListCurrentIndex();
   QString notesSn = "";
@@ -2932,11 +2930,20 @@ void NotesList::readyNotesData(QTreeWidgetItem *topItem) {
 }
 
 void NotesList::clickNoteBook() {
+  int count = m_Method->getCountFromQW(mui->qwNoteBook);
+  if (count <= 0) return;
+
+  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
+  if (index < 0) return;
+
+  mui->lblNoteBook->setText(QString::number(index + 1) + "/" +
+                            QString::number(count));
+
   pNoteItems.clear();
   isActColorFlagStatus = true;
 
   m_Method->clearAllBakList(mui->qwNoteList);
-  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
+
   QString text1 = m_Method->getText1(mui->qwNoteBook, index);
   QString text2 = m_Method->getText2(mui->qwNoteBook, index);
   if (text2.isEmpty()) {
@@ -3116,8 +3123,8 @@ void NotesList::genRecentOpenMenu() {
 
 void NotesList::updateNoteIndexManager(QString mdFile, int notebookIndex,
                                        int noteIndex) {
-  mw_one->m_Notes->m_NoteIndexManager->setNotebookIndex(mdFile, notebookIndex);
-  mw_one->m_Notes->m_NoteIndexManager->setNoteIndex(mdFile, noteIndex);
+  m_Notes->m_NoteIndexManager->setNotebookIndex(mdFile, notebookIndex);
+  m_Notes->m_NoteIndexManager->setNoteIndex(mdFile, noteIndex);
 }
 
 void NotesList::updateAllNoteIndexManager() {
@@ -3129,7 +3136,7 @@ void NotesList::updateAllNoteIndexManager() {
       QTreeWidgetItem *childItem = topItem->child(j);
       QString mdFile = iniDir + childItem->text(1);
       QString title = childItem->text(0);
-      mw_one->m_Notes->m_NoteIndexManager->setNoteTitle(mdFile, title);
+      m_Notes->m_NoteIndexManager->setNoteTitle(mdFile, title);
       updateNoteIndexManager(mdFile, i, j);
     }
   }
@@ -3139,8 +3146,8 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
   if (!QFile::exists(mdFile)) return false;
 
   int indexNoteBook, indexNote, countNoteBook, countNotes;
-  indexNoteBook = mw_one->m_Notes->m_NoteIndexManager->getNotebookIndex(mdFile);
-  indexNote = mw_one->m_Notes->m_NoteIndexManager->getNoteIndex(mdFile);
+  indexNoteBook = m_Notes->m_NoteIndexManager->getNotebookIndex(mdFile);
+  indexNote = m_Notes->m_NoteIndexManager->getNoteIndex(mdFile);
 
   countNoteBook = m_Method->getCountFromQW(mui->qwNoteBook);
   if (indexNoteBook < 0 || indexNoteBook >= countNoteBook) return false;
@@ -3160,14 +3167,13 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
   clickNoteList();
 
   qDebug() << indexNoteBook << indexNote
-           << mw_one->m_Notes->m_NoteIndexManager->getNoteTitle(mdFile)
-           << mdFile;
+           << m_Notes->m_NoteIndexManager->getNoteTitle(mdFile) << mdFile;
 
   return true;
 }
 
 QString NotesList::getCurrentNoteNameFromMDFile(QString mdFile) {
-  return mw_one->m_Notes->m_NoteIndexManager->getNoteTitle(mdFile);
+  return m_Notes->m_NoteIndexManager->getNoteTitle(mdFile);
 }
 
 void NotesList::genCursorText() {
@@ -3253,7 +3259,7 @@ QStringList NotesList::extractLocalImagesFromMarkdown(const QString &filePath) {
 void NotesList::onSearchTextChanged(const QString &text) {
   QTimer::singleShot(300, this, [this, text]() {  // 防抖处理
     auto results =
-        m_dbManager.searchDocuments(text, mw_one->m_Notes->m_NoteIndexManager);
+        m_dbManager.searchDocuments(text, m_Notes->m_NoteIndexManager);
     m_searchModel.setResults(results);
     mui->lblNoteSearchResult->setText(tr("Note Search Results:") +
                                       QString::number(results.count()));
@@ -3376,7 +3382,7 @@ void NotesList::onNoteNodeDoubleClicked(const QString &filePath) {
     currentMDFile = iniDir + filePath;
   }
 
-  mw_one->m_Notes->previewNote();
+  m_Notes->previewNote();
 }
 
 void NotesList::moveToFirst() {
@@ -3443,7 +3449,7 @@ void NotesList::newtextToOldtextFromDiffStr() {
     QVector<bool> revertSuccess;
 
     // 调用反推函数，用当前文本和补丁得到上一版本文本
-    currentText = mw_one->m_Notes->m_NoteDiffManager.revertPatchToOldText(
+    currentText = m_Notes->m_NoteDiffManager.revertPatchToOldText(
         currentText, patchStr, revertSuccess);
 
     // 检查当前步骤是否成功

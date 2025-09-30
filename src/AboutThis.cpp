@@ -8,6 +8,8 @@
 AboutThis::AboutThis(QWidget *parent) : QDialog(parent), ui(new Ui::AboutThis) {
   ui->setupUi(this);
 
+  ver = "2.1.33";
+
   this->layout()->setContentsMargins(5, 5, 5, 5);
 
   m_Method->set_ToolButtonStyle(this);
@@ -143,6 +145,8 @@ int AboutThis::parse_UpdateJSON(QString str) {
       QString mirror0 = "";
       QString mirror1 = "https://ghproxy.com/";
       QString mirror2 = "https://gh.flyinbug.top/gh/";
+      Q_UNUSED(mirror1);
+      Q_UNUSED(mirror2);
 
       s_link = mirror0 + Url;
 #endif

@@ -251,10 +251,9 @@ void Todo::closeTodo() {
     QString enc_file = m_Method->useEnc(todoZipFile);
     if (enc_file != "") todoZipFile = enc_file;
 
-    mw_one->m_Notes->notes_sync_files.removeOne(todoZipFile);
-    mw_one->m_Notes->notes_sync_files.append(todoZipFile);
+    m_Notes->appendToSyncList(todoZipFile);
     mw_one->showProgress();
-    m_CloudBackup->uploadFilesToWebDAV(mw_one->m_Notes->notes_sync_files);
+    m_CloudBackup->uploadFilesToWebDAV(m_Notes->notes_sync_files);
     isNeedSync = false;
   }
 }

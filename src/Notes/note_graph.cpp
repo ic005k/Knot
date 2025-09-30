@@ -150,7 +150,7 @@ void NoteRelationParser::parseNoteRelations(NoteGraphModel *model,
 
   // 获取当前笔记名称
   QString currentNoteName =
-      mw_one->m_Notes->m_NoteIndexManager->getNoteTitle(currentNotePath);
+      m_Notes->m_NoteIndexManager->getNoteTitle(currentNotePath);
 
   // 启动后台任务（使用QtConcurrent线程池）
   QFuture<void> future = QtConcurrent::run([=]() {
@@ -292,8 +292,7 @@ void NoteRelationParser::findReferencingNotes(QVector<NoteNode> &nodes,
     // 6. 若存在引用，记录文件名和名称
     if (isReferencing) {
       // 获取笔记名称（通过NoteIndexManager）
-      QString noteName =
-          mw_one->m_Notes->m_NoteIndexManager->getNoteTitle(mdFilePath);
+      QString noteName = m_Notes->m_NoteIndexManager->getNoteTitle(mdFilePath);
       // 若获取失败，使用文件名作为备选
       if (noteName.isEmpty()) {
         noteName = QFileInfo(mdFilePath).baseName();

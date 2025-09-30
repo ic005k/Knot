@@ -20,6 +20,7 @@
 class CloudBackup;
 class Method;
 class MainWindow;
+class Notes;
 class NotesList;
 class ReaderSet;
 class ShowMessage;
@@ -41,6 +42,7 @@ inline QTreeWidgetItem *parentItem;
 inline MainWindow *mw_one;
 inline Ui::MainWindow *mui;
 inline Method *m_Method;
+inline Notes *m_Notes;
 inline NotesList *m_NotesList;
 inline QTabWidget *tabData, *tabChart;
 inline ShowMessage *m_ShowMessage;
@@ -59,7 +61,7 @@ inline QString iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
     catalogueFile, strShowMsg, strStartTotalTime, strOpfFile, oldOpfPath,
     strEpubTitle, strPercent;
 
-inline QString ver = "2.1.32";
+inline QString ver;
 inline QString appName = "Knot";
 
 inline QStringList readTextList, htmlFiles, listCategory, ncxList, tempHtmlList,

@@ -202,7 +202,7 @@ void ShowMessage::on_btnDel_clicked() {
   close();
   ShowMessage* msg = new ShowMessage(mw_one);
   if (msg->showMsg("Knot", tr("Delete this link?"), 2)) {
-    mw_one->m_Notes->delLink(copyText);
+    m_Notes->delLink(copyText);
   }
 }
 

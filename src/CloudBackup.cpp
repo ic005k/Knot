@@ -743,9 +743,9 @@ void CloudBackup::uploadFilesToWebDAV_old(QStringList files) {
       }
 
       if (reply->error() == QNetworkReply::NoError) {
-        mw_one->m_Notes->notes_sync_files.removeOne(m_file);
+        m_Notes->notes_sync_files.removeOne(m_file);
         qDebug() << "Upload succeeded:" << m_file
-                 << "Rema:" << mw_one->m_Notes->notes_sync_files.count();
+                 << "Rema:" << m_Notes->notes_sync_files.count();
 
         mw_one->saveNeedSyncNotes();
       } else {
@@ -816,10 +816,10 @@ void CloudBackup::handleUploadFinished(QNetworkReply *reply,
 
   if (reply->error() == QNetworkReply::NoError) {
     // 处理成功上传
-    if (mw_one && mw_one->m_Notes) {
-      mw_one->m_Notes->notes_sync_files.removeOne(filePath);
+    if (mw_one && m_Notes) {
+      m_Notes->notes_sync_files.removeOne(filePath);
       qDebug() << "Upload succeeded:" << filePath
-               << "Remaining:" << mw_one->m_Notes->notes_sync_files.count();
+               << "Remaining:" << m_Notes->notes_sync_files.count();
       mw_one->saveNeedSyncNotes();
     }
   } else {

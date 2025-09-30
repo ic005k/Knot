@@ -637,8 +637,7 @@ void MainWindow::execNeedSyncNotes() {
   for (int i = 0; i < count; i++) {
     QString note = RegSync.value("note" + QString::number(i), "").toString();
     if (QFile::exists(note)) {
-      m_Notes->notes_sync_files.removeOne(note);
-      m_Notes->notes_sync_files.append(note);
+      m_Notes->appendToSyncList(note);
     }
   }
 
