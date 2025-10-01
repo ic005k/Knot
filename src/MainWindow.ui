@@ -3594,7 +3594,7 @@ QSlider::handle:horizontal:disabled {
           <enum>QTabWidget::TabPosition::South</enum>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_Steps">
           <attribute name="title">
@@ -3798,7 +3798,7 @@ QSlider::handle:horizontal:disabled {
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>...</string>
+                <string>Options</string>
                </property>
                <property name="icon">
                 <iconset>
@@ -3809,6 +3809,9 @@ QSlider::handle:horizontal:disabled {
                  <width>28</width>
                  <height>28</height>
                 </size>
+               </property>
+               <property name="toolButtonStyle">
+                <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
                </property>
               </widget>
              </item>
@@ -3838,6 +3841,9 @@ QSlider::handle:horizontal:disabled {
                  <width>28</width>
                  <height>28</height>
                 </size>
+               </property>
+               <property name="toolButtonStyle">
+                <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
                </property>
               </widget>
              </item>
