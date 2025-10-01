@@ -204,6 +204,7 @@ void NotesList::on_btnNewNote_clicked() {
   QTextEdit *edit = new QTextEdit();
   edit->append("");
   TextEditToFile(edit, iniDir + noteFile);
+  delete edit;
 
   ui->treeWidget->setCurrentItem(item1);
   on_treeWidget_itemClicked(item1, 0);
@@ -2371,6 +2372,7 @@ void NotesList::on_actionAdd_Note_triggered() {
   setNotesListCurrentIndex(count - 1);
 
   clickNoteList();
+  m_Notes->updateMDFileToSyncLists();
   mw_one->on_btnEditNote_clicked();
 
   setNoteLabel();

@@ -934,6 +934,27 @@ void Notes::javaNoteToQMLNote() {
 
 void Notes::zipNoteToSyncList() {
   QFileInfo fi(currentMDFile);
+
+  // 只处理 .md 文件
+  if (currentMDFile.endsWith(".md", Qt::CaseInsensitive)) {
+    if (fi.exists() && fi.size() == 0) {
+      // 文件存在且为空 -> 写入一个空格
+      QSaveFile saveFile(currentMDFile);
+      if (saveFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        saveFile.write(" ");  // 写入一个空格
+        if (!saveFile.commit()) {
+          qWarning() << "Failed to write space to empty file:" << currentMDFile
+                     << saveFile.errorString();
+        } else {
+          qDebug() << "Appended space to empty file:" << currentMDFile;
+        }
+      } else {
+        qWarning() << "Failed to open empty file for writing:" << currentMDFile
+                   << saveFile.errorString();
+      }
+    }
+  }
+
   QString lastModi = m_Method->getFileUTCString(currentMDFile);
   QString zipMD =
       privateDir + "KnotData/memo/" + lastModi + "_" + fi.fileName() + ".zip";

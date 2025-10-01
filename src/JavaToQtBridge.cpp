@@ -372,6 +372,11 @@ static void JavaNotify_15() {
     return;
   }
 
+  if (mui->f_FindNotes->isVisible()) {
+    mui->f_FindNotes->hide();
+    return;
+  }
+
   if (!mui->frameNoteList->isHidden()) {
     mui->btnBackNoteList->click();
     return;
