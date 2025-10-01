@@ -492,6 +492,9 @@ void Steps::setTableSteps(qlonglong steps) {
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Set steps table completed.";
+
+    if (mui->frameSteps->isHidden()) saveSteps();
+
     loadStepsToTable();
 
     watcher->deleteLater();

@@ -8,7 +8,7 @@
 AboutThis::AboutThis(QWidget *parent) : QDialog(parent), ui(new Ui::AboutThis) {
   ui->setupUi(this);
 
-  ver = "2.1.33";
+  ver = "2.1.34";
 
   this->layout()->setContentsMargins(5, 5, 5, 5);
 
