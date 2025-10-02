@@ -83,7 +83,7 @@ class CloudBackup : public QDialog {
   QString unifyWebDAVBaseUrlToDavEnd(QString url);
 
   QString getWebDAVDataDir(const QString &url);
-  signals:
+ signals:
 
  protected:
   bool eventFilter(QObject *obj, QEvent *evn) override;
@@ -171,7 +171,7 @@ class WebDavDownloader : public QObject {
   int completedFiles;
 };
 
-class CloudDeleter : public QObject {
+/*class CloudDeleter : public QObject {
   Q_OBJECT
  public:
   CloudDeleter(const QString &user, const QString &appPassword,
@@ -224,6 +224,6 @@ class CloudDeleter : public QObject {
  private:
   QString username;
   QString password;
-};
+};*/
 
 #endif  // CLOUDBACKUP_H

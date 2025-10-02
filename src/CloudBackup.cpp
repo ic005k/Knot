@@ -14,6 +14,7 @@
 #include <QXmlStreamReader>
 
 #include "Comm/qaesencryption.h"
+#include "DelWebDAVFiles.h"
 #include "src/MainWindow.h"
 #include "src/defines.h"
 #include "ui_CloudBackup.h"

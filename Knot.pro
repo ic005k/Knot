@@ -614,6 +614,7 @@ HEADERS += \
     src/Comm/qaesencryption.h \
     src/DataManager.h \
     src/DateSelector.h \
+    src/DelWebDAVFiles.h \
     src/EditRecord.h \
     src/Exercise/WeatherFetcher.h \
     src/LoadPic.h \
