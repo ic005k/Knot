@@ -985,8 +985,17 @@ void WebDavDownloader::downloadFiles(const QList<QString> &remotePaths,
   activeDownloads.clear();
 
   // 初始化队列
+  QString baseUrl = m_CloudBackup->getWebDAVArgument();
+  QString dataDir = m_CloudBackup->getWebDAVDataDir(baseUrl);
+
   for (const QString &remotePath : remotePaths) {
     QString localPath = QDir(localBaseDir).absoluteFilePath(remotePath);
+
+    if (!dataDir.isEmpty()) {
+      qDebug() << "WebDAV 数据目录是:" << dataDir;
+      localPath = localPath.replace("/" + dataDir + "/", "/");
+    }
+
     downloadQueue.enqueue({remotePath, localPath});
   }
 
@@ -1023,8 +1032,9 @@ void WebDavDownloader::startNextDownload() {
     return;
   }
 
-  // 构造请求URL "https://dav.jianguoyun.com/dav/"
+  // 构造请求URL
   QString strUrl = mui->cboxWebDAV->currentText().trimmed();
+  strUrl = m_CloudBackup->unifyWebDAVBaseUrlToDavEnd(strUrl);
   QUrl url(strUrl + remotePath);
   if (!url.isValid()) {
     qWarning() << "无效的URL:" << url.toString();
@@ -1206,6 +1216,7 @@ void CloudBackup::createRemoteWebDAVDir() {
 void CloudBackup::deleteWebDAVFiles(QStringList filesToDelete) {
   if (filesToDelete.count() > 0) {
     QString url = getWebDAVArgument();
+    url = unifyWebDAVBaseUrlToDavEnd(url);
     CloudDeleter deleter(USERNAME, APP_PASSWORD);
     deleter.baseUrl = url;
     deleter.deleteFiles(filesToDelete);
@@ -1418,4 +1429,38 @@ bool CloudBackup::checkWebDAVConnection() {
     reply->deleteLater();
     return false;
   }
+}
+
+QString CloudBackup::unifyWebDAVBaseUrlToDavEnd(QString url) {
+  int davIndex = url.lastIndexOf("/dav/");
+  if (davIndex != -1) {
+    url = url.left(davIndex + 4);
+    if (!url.endsWith("/")) {
+      url += "/";
+    }
+  }
+
+  return url;
+}
+
+QString CloudBackup::getWebDAVDataDir(const QString &url) {
+  // 1. 找到最后一个 "/dav/" 的位置
+  int davIndex = url.lastIndexOf("/dav/");
+  if (davIndex == -1) {
+    return QString();  // 没有 /dav/，返回空
+  }
+
+  // 2. 提取 "/dav/" 之后的全部内容
+  QString afterDav = url.mid(davIndex + 5);  // "/dav/" 长度为 5
+
+  // 3. 去掉前后的空白和斜杠
+  afterDav = afterDav.trimmed();
+  while (!afterDav.isEmpty() && afterDav.front() == '/') {
+    afterDav.remove(0, 1);
+  }
+  while (!afterDav.isEmpty() && afterDav.back() == '/') {
+    afterDav.chop(1);
+  }
+
+  return afterDav;
 }

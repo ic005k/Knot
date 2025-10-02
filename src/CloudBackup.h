@@ -79,7 +79,11 @@ class CloudBackup : public QDialog {
   void on_btnBack_clicked();
 
   void uploadFilesToWebDAV_old(QStringList files);
- signals:
+
+  QString unifyWebDAVBaseUrlToDavEnd(QString url);
+
+  QString getWebDAVDataDir(const QString &url);
+  signals:
 
  protected:
   bool eventFilter(QObject *obj, QEvent *evn) override;

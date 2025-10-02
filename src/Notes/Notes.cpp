@@ -1435,12 +1435,22 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
   int totalFiles = remoteFiles.count();
   int n_Files = 0;
 
+  QString baseUrl = m_CloudBackup->getWebDAVArgument();
+  QString dataDir = m_CloudBackup->getWebDAVDataDir(baseUrl);
+
   for (int i = 0; i < remoteFiles.count(); i++) {
     QString file = remoteFiles.at(i);
+
+    QString temp_f = file;
+    if (!dataDir.isEmpty()) {
+      qDebug() << "WebDAV 数据目录是:" << dataDir;
+      temp_f = temp_f.replace(dataDir + "/", "");
+    }
+
     QString pDir, pFile, kFile, asFile, zFile;
-    pFile = privateDir + file;
+    pFile = privateDir + temp_f;
     zFile = pFile;
-    asFile = file;
+    asFile = temp_f;
 
     QFileInfo fi(file);
     QString fn = fi.fileName();
