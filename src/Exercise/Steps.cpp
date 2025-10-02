@@ -117,7 +117,7 @@ bool Steps::eventFilter(QObject* watch, QEvent* evn) {
   if (evn->type() == QEvent::KeyRelease) {
     QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
-      on_btnBack_clicked();
+      closeSteps();
       return true;
     }
   }
@@ -125,8 +125,7 @@ bool Steps::eventFilter(QObject* watch, QEvent* evn) {
   return QWidget::eventFilter(watch, evn);
 }
 
-void Steps::on_btnBack_clicked() {
-  saveSteps();
+void Steps::closeSteps() {
   saveMovementType();
   mui->frameSteps->hide();
   mui->frameMain->show();
@@ -146,27 +145,30 @@ void Steps::on_btnReset_clicked() {
 }
 
 void Steps::saveSteps() {
-  if (getCount() > maxCount) {
-    m_Method->delItemFromQW(mui->qwSteps, 0);
-  }
-  int count = getCount();
-
-  QStringList listDate, listKm;
-  QList<int> listSteps;
-  for (int i = 0; i < count; i++) {
-    listDate.append(getDate(i));
-    listSteps.append(getSteps(i));
-    listKm.append(getKM(i));
-  }
-
   QString strLength =
       mw_one->m_StepsOptions->ui->editStepLength->text().trimmed();
   QString strThreshold =
       mw_one->m_StepsOptions->ui->editStepsThreshold->text().trimmed();
+  QJsonObject stepsObj = rootObj["Steps"].toObject();
+  stepsObj["Length"] = strLength;
+  stepsObj["Threshold"] = strThreshold;
+
+  // 将Steps节点加入根对象
+  rootObj["Steps"] = stepsObj;
 
   QFuture<void> future = QtConcurrent::run([=]() {
-    writeStepsToJson(iniDir, count, listDate, listSteps, listKm, strLength,
-                     strThreshold);
+    // 写入JSON文件
+    QString jsonPath = iniDir + "steps.json";
+    // 读取现有JSON文件（如果存在）
+    QFile file(jsonPath);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+      QJsonDocument doc(rootObj);
+      file.write(doc.toJson(QJsonDocument::Indented));  // 格式化输出，便于阅读
+      file.close();
+      qDebug() << "JSON文件写入成功:" << jsonPath;
+    } else {
+      qDebug() << "JSON文件打开失败:" << file.errorString();
+    }
   });
 
   // 使用 QFutureWatcher 监控进度
@@ -179,69 +181,11 @@ void Steps::saveSteps() {
   watcher->setFuture(future);
 }
 
-// 转换后的JSON写入函数
-void Steps::writeStepsToJson(const QString& iniDir, int count,
-                             const QList<QString>& listDate,
-                             const QList<int>& listSteps,
-                             const QList<QString>& listKm,
-                             const QString& strLength,
-                             const QString& strThreshold) {
-  // 构建Steps节点（对应原来的/Steps节点）
-  QJsonObject stepsObj;
-
-  stepsObj["Length"] = strLength;
-  stepsObj["Threshold"] = strThreshold;
-
-  // 设置计数（对应原来的/Steps/Count）
-  if (count > 0) {
-    stepsObj["Count"] = count;
-  }
-
-  // 构建Table数组（对应原来的/Steps/Table-i-*）
-  QJsonArray tableArray;
-  for (int i = 0; i < count; i++) {
-    // 每个元素是一个数组，对应[日期, 步数, 公里数]
-    QJsonArray rowArray;
-    rowArray.append(listDate.at(i));   // 对应Table-i-0
-    rowArray.append(listSteps.at(i));  // 对应Table-i-1
-    rowArray.append(listKm.at(i));     // 对应Table-i-2
-    tableArray.append(rowArray);
-  }
-  stepsObj["Table"] = tableArray;  // 将数组存入Steps节点
-
-  // 将Steps节点加入根对象
-  rootObj["Steps"] = stepsObj;
-
-  // 写入JSON文件
-  QString jsonPath = iniDir + "steps.json";
-  // 读取现有JSON文件（如果存在）
-  QFile file(jsonPath);
-  if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-    QJsonDocument doc(rootObj);
-    file.write(doc.toJson(QJsonDocument::Indented));  // 格式化输出，便于阅读
-    file.close();
-    qDebug() << "JSON文件写入成功:" << jsonPath;
-  } else {
-    qDebug() << "JSON文件打开失败:" << file.errorString();
-  }
-}
-
 void Steps::loadStepsToTable() {
   clearAll();
 
   // 获取Steps对象（对应原INI的/Steps节点）
   QJsonObject stepsObj = rootObj["Steps"].toObject();
-
-  // 读取步长和阈值（对应原/Steps/Length和/Steps/Threshold）
-  QString stepLength = stepsObj["Length"].toString("35");
-  QString stepsThreshold = stepsObj["Threshold"].toString("10000");
-
-  mw_one->m_StepsOptions->ui->editStepLength->setText(stepLength);
-  mw_one->m_StepsOptions->ui->editStepsThreshold->setText(stepsThreshold);
-
-  // 设置上下文属性
-  mui->qwSteps->rootContext()->setContextProperty("nStepsThreshold",
-                                                  stepsThreshold.toInt());
 
   // 读取记录总数（对应原/Steps/Count）
   int count = stepsObj["Count"].toInt(0);
@@ -267,7 +211,10 @@ void Steps::loadStepsToTable() {
 
     // 处理公里数（若为空则计算）
     if (str2.isEmpty()) {
-      double km = stepLength.trimmed().toDouble() * steps / 100 / 1000;
+      double km = mw_one->m_StepsOptions->ui->editStepLength->text()
+                      .trimmed()
+                      .toDouble() *
+                  steps / 100 / 1000;
       str2 = QString("%1").arg(km, 0, 'f', 2);
     }
 
@@ -387,120 +334,123 @@ qlonglong Steps::getTodaySteps() {
 }
 
 void Steps::setTableSteps(qlonglong steps) {
+  QString jsonPath = iniDir + "steps.json";
+  QFile file(jsonPath);
+
+  // 读取JSON文件
+  if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    rootObj = QJsonDocument::fromJson(file.readAll()).object();
+    file.close();
+  }
+
+  // 读取Steps对象中的Count值（对应原INI的/Steps/Count），默认0
+  QJsonObject stepsObj = rootObj["Steps"].toObject();  // 获取Steps节点
+  int count = stepsObj["Count"].toInt(0);              // 读取Count，默认值0
+
+  // 读取步长和阈值（对应原/Steps/Length和/Steps/Threshold）
+  QString stepLength = stepsObj["Length"].toString("35");
+  QString stepsThreshold = stepsObj["Threshold"].toString("10000");
+
+  mw_one->m_StepsOptions->ui->editStepLength->setText(stepLength);
+  mw_one->m_StepsOptions->ui->editStepsThreshold->setText(stepsThreshold);
+  // 设置上下文属性
+  mui->qwSteps->rootContext()->setContextProperty("nStepsThreshold",
+                                                  stepsThreshold.toInt());
+
   double km =
       mw_one->m_StepsOptions->ui->editStepLength->text().trimmed().toDouble() *
       steps / 100 / 1000;
+  QString strKM = QString("%1").arg(km, 0, 'f', 2);
 
-  QFuture<void> future = QtConcurrent::run([=]() {
-    QString jsonPath = iniDir + "steps.json";
-    QFile file(jsonPath);
+  QString date, c_date, full_date;
+  full_date = getFullDate();
+  c_date = getCurrentDate();
+  if (count > 0) {
+    // 从已获取的stepsObj中读取Table数组
+    QJsonArray tableArray = stepsObj["Table"].toArray();
 
-    // 读取JSON文件
-    if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      rootObj = QJsonDocument::fromJson(file.readAll()).object();
-      file.close();
+    // 读取倒数第一个Table元素的0索引值
+    int index = count - 1;
+    if (index >= 0 && index < tableArray.size()) {
+      QJsonValue tableItem = tableArray.at(index);
+      if (tableItem.isArray()) {
+        // 取数组第0个元素作为日期，默认空字符串
+        date = tableItem.toArray().at(0).toString("");
+      } else {
+        date = "";
+      }
+    } else {
+      date = "";
     }
 
-    // 读取Steps对象中的Count值（对应原INI的/Steps/Count），默认0
-    QJsonObject stepsObj = rootObj["Steps"].toObject();  // 获取Steps节点
-    int count = stepsObj["Count"].toInt(0);              // 读取Count，默认值0
+    QString mdate = "";
+    if (!date.isEmpty()) {  // 只有date非空时，才拆分日期
+      mdate = date.split(" ").at(0).trimmed();
+    }
 
-    QString date, c_date, full_date;
-    full_date = getFullDate();
-    c_date = getCurrentDate();
-    if (count > 0) {
-      // 从已获取的stepsObj中读取Table数组（对应原INI的/Steps/Table-*）
-      QJsonArray tableArray = stepsObj["Table"].toArray();
-
-      // 读取倒数第一个Table元素的0索引值（对应原/Steps/Table-(count-1)-0）
-      // 先判断索引是否有效，避免越界
+    // 表中已有今天的记录，则直接修改此记录
+    if (mdate == c_date) {
       int index = count - 1;
+
       if (index >= 0 && index < tableArray.size()) {
-        QJsonValue tableItem = tableArray.at(index);
-        if (tableItem.isArray()) {
-          // 取数组第0个元素作为日期，默认空字符串
-          date = tableItem.toArray().at(0).toString("");
-        } else {
-          date = "";  // 格式异常时用默认值
-        }
-      } else {
-        date = "";  // 索引无效时用默认值
-      }
+        // 获取当前索引对应的数组项（[日期, 步数, 公里数]）
+        QJsonArray rowArray = tableArray.at(index).toArray();
 
-      QString mdate = "";
-      if (!date.isEmpty()) {  // 只有date非空时，才拆分日期
-        mdate = date.split(" ").at(0).trimmed();
-      }
+        // 更新数组中的三个值
+        rowArray[0] = date;           // 对应-0（日期）
+        rowArray[1] = (double)steps;  // 对应-1（步数）
+        rowArray[2] = strKM;          // 对应-2（公里数）
 
-      if (mdate == c_date) {
-        QString strKM = QString("%1").arg(km, 0, 'f', 2);
+        // 将更新后的行放回数组
+        tableArray[index] = rowArray;
 
-        // 计算目标索引（对应原count-1）
-        int index = count - 1;
-
-        // 确保索引有效（在数组范围内）
-        if (index >= 0 && index < tableArray.size()) {
-          // 获取当前索引对应的数组项（[日期, 步数, 公里数]）
-          QJsonArray rowArray = tableArray.at(index).toArray();
-
-          // 更新数组中的三个值（对应原Table-(count-1)-0/1/2）
-          rowArray[0] = date;           // 对应-0（日期）
-          rowArray[1] = (double)steps;  // 对应-1（步数）
-          rowArray[2] = strKM;          // 对应-2（公里数）
-
-          // 将更新后的行放回数组
-          tableArray[index] = rowArray;
-
-          // 同步更新stepsObj中的Table数组
-          stepsObj["Table"] = tableArray;
-        }
-
-      } else {
-        count++;
-
-        // 新建一行数据
-        QJsonArray newRow;
-        newRow.append(full_date);
-        newRow.append(0);
-        newRow.append("0");
-        tableArray.append(newRow);  // 新增到数组
+        // 同步更新stepsObj中的Table数组
         stepsObj["Table"] = tableArray;
-        stepsObj["Count"] = count;
       }
-    } else {              // count==0
-      count = count + 1;  // 从0变成1，代表要新增第一条记录
-      QJsonArray tableArray = stepsObj["Table"].toArray();
 
-      // 1. 创建第一条记录的数组（日期、步数、公里数）
+    } else {  // 在当前表中增加新数据
+      count++;
+
+      if (count > maxCount) {
+        tableArray.removeAt(0);
+        count = maxCount;
+      }
+
+      // 新建一行数据
       QJsonArray newRow;
-      newRow.append(full_date);  // 完整日期
-      newRow.append(0);          // 初始步数0
-      newRow.append("0");        // 初始公里数"0"
+      newRow.append(full_date);
+      newRow.append(steps);
+      newRow.append(strKM);
+      tableArray.append(newRow);  // 新增到数组
 
-      // 2. 用append新增到数组末尾（关键！空数组会变成size=1）
-      tableArray.append(newRow);
-
-      // 3. 同步更新stepsObj和count
       stepsObj["Table"] = tableArray;
-      stepsObj["Count"] = count;  // 此时count=1，与tableArray.size()=1一致
+      stepsObj["Count"] = count;
     }
+  } else {              // count==0
+    count = count + 1;  // 从0变成1，代表要新增第一条记录
+    QJsonArray tableArray = stepsObj["Table"].toArray();
 
-    rootObj["Steps"] = stepsObj;
-  });
+    // 1. 创建第一条记录的数组（日期、步数、公里数）
+    QJsonArray newRow;
+    newRow.append(full_date);
+    newRow.append(steps);
+    newRow.append(strKM);
 
-  // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    qDebug() << "Set steps table completed.";
+    // 2. 用append新增到数组末尾（关键！空数组会变成size=1）
+    tableArray.append(newRow);
 
-    if (mui->frameSteps->isHidden())
-      saveSteps();
-    else
-      loadStepsToTable();
+    // 3. 同步更新stepsObj和count
+    stepsObj["Table"] = tableArray;
+    stepsObj["Count"] = count;
+  }
 
-    watcher->deleteLater();
-  });
-  watcher->setFuture(future);
+  rootObj["Steps"] = stepsObj;
+
+  qDebug() << "Set steps table completed.";
+
+  saveSteps();
+
+  loadStepsToTable();
 }
 
 void Steps::setMaxMark() {
@@ -1586,66 +1536,55 @@ qlonglong Steps::getAndroidSteps() {
 void Steps::initTodayInitSteps() {
   qlonglong a = getAndroidSteps();
 
-  QFuture<void> future = QtConcurrent::run([=]() {
-    QString jsonPath = iniDir + "initsteps.json";
-    QJsonObject jsonObj;
-    QFile file(jsonPath);
-    if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      QByteArray data = file.readAll();
-      file.close();
+  QString jsonPath = iniDir + "initsteps.json";
+  QJsonObject jsonObj;
+  QFile file(jsonPath);
+  if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    QByteArray data = file.readAll();
+    file.close();
 
-      QJsonDocument doc = QJsonDocument::fromJson(data);
-      if (doc.isObject()) {
-        jsonObj = doc.object();
-      }
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (doc.isObject()) {
+      jsonObj = doc.object();
+    }
+  }
+
+  QString date = jsonObj["Date"].toString("");  // 第二个参数为默认值
+
+  // 获取当前日期（与原逻辑一致）
+  QString c_date = getCurrentDate();
+
+  if (date != c_date) {
+    // 更新JSON对象（基于已有的jsonObj）
+    jsonObj["Date"] = c_date;
+    jsonObj["InitValue"] = (double)a;  // 处理长整数类型
+    jsonObj["oldSteps"] = 0;
+
+    // 写入文件（复用已定义的file对象）
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+      file.write(QJsonDocument(jsonObj).toJson(QJsonDocument::Indented));
+      file.close();
     }
 
-    QString date = jsonObj["Date"].toString("");  // 第二个参数为默认值
+    initTodaySteps = a;
+  } else {
+    //  从JSON中读取InitValue，默认值0，转换为qlonglong
+    initTodaySteps = jsonObj["InitValue"].toVariant().toLongLong(0);
 
-    // 获取当前日期（与原逻辑一致）
-    QString c_date = getCurrentDate();
+    if (a - initTodaySteps <= 0) {
+      // 更新JSON键值
+      jsonObj["InitValue"] = (double)a;               // 存储InitValue
+      jsonObj["oldSteps"] = (double)getTodaySteps();  // 存储oldSteps
 
-    if (date != c_date) {
-      // 更新JSON对象（基于已有的jsonObj）
-      jsonObj["Date"] = c_date;
-      jsonObj["InitValue"] = (double)a;  // 处理长整数类型
-      jsonObj["oldSteps"] = 0;
-
-      // 写入文件（复用已定义的file对象）
+      // 写入文件（同步操作，对应Reg.sync()）
       if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         file.write(QJsonDocument(jsonObj).toJson(QJsonDocument::Indented));
         file.close();
       }
 
       initTodaySteps = a;
-    } else {
-      //  从JSON中读取InitValue，默认值0，转换为qlonglong
-      initTodaySteps = jsonObj["InitValue"].toVariant().toLongLong(0);
-
-      if (a - initTodaySteps <= 0) {
-        // 更新JSON键值
-        jsonObj["InitValue"] = (double)a;               // 存储InitValue
-        jsonObj["oldSteps"] = (double)getTodaySteps();  // 存储oldSteps
-
-        // 写入文件（同步操作，对应Reg.sync()）
-        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-          file.write(QJsonDocument(jsonObj).toJson(QJsonDocument::Indented));
-          file.close();
-        }
-
-        initTodaySteps = a;
-      }
     }
-  });
-
-  // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    qDebug() << "InitTodaySteps completed.";
-
-    watcher->deleteLater();
-  });
-  watcher->setFuture(future);
+  }
 }
 
 qlonglong Steps::getOldSteps() {

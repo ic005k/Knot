@@ -1991,7 +1991,7 @@ bool MainWindow::setTWCurrentItem() {
   return isSel;
 }
 
-void MainWindow::on_btnBackSteps_clicked() { m_Steps->on_btnBack_clicked(); }
+void MainWindow::on_btnBackSteps_clicked() { m_Steps->closeSteps(); }
 
 void MainWindow::on_btnReset_clicked() { m_Steps->on_btnReset_clicked(); }
 

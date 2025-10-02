@@ -96,7 +96,7 @@ class Steps : public QDialog {
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
  public:
-  void on_btnBack_clicked();
+  void closeSteps();
 
   void on_btnReset_clicked();
 
@@ -212,11 +212,6 @@ class Steps : public QDialog {
   QString getCurrentYear();
   QString getCurrentMonth();
 
-  void writeStepsToJson(const QString &iniDir, int count,
-                        const QList<QString> &listDate,
-                        const QList<int> &listSteps,
-                        const QList<QString> &listKm, const QString &strLength,
-                        const QString &strThreshold);
  signals:
   void distanceChanged(double distance);
   void timeChanged();
