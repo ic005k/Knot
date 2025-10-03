@@ -362,7 +362,7 @@ class MainWindow : public QMainWindow {
   void on_btnPageUp_clicked();
   void on_btnPageNext_clicked();
   void on_btnBackDir_clicked();
-  void on_btnSelText_clicked();
+
   void on_btnUpload_clicked();
   void on_btnDownload_clicked();
 
@@ -376,6 +376,8 @@ class MainWindow : public QMainWindow {
   void hideEvent(QHideEvent *event) override;
 
  public slots:
+  void on_btnSelText_clicked();
+
   void on_hSlider_sliderMoved(int position);
   void clickMainTab();
 

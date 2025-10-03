@@ -585,6 +585,7 @@ void MainHelper::initMainQW() {
   mui->qwReader->rootContext()->setContextProperty("myH", mw_one->height());
   mui->qwReader->rootContext()->setContextProperty("m_Reader",
                                                    mw_one->m_Reader);
+  mui->qwReader->rootContext()->setContextProperty("mw_one", mw_one);
   mui->qwReader->rootContext()->setContextProperty("myBackgroundColor",
                                                    "#FFFFFF");
 }

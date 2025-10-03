@@ -254,8 +254,7 @@ Item {
                 color: myTextColor
                 renderType: Text.QtRendering
 
-                onLinkActivated: handleLinkClicked(link)
-
+                //onLinkActivated: handleLinkClicked(link)
                 PropertyAnimation on x {
                     easing.type: Easing.Linear
                     running: isAni
@@ -263,6 +262,27 @@ Item {
                     to: 0
                     duration: 200
                     loops: 1
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        var link = m_text.linkAt(mouse.x, mouse.y)
+                        if (link) {
+                            handleLinkClicked(link)
+                        } else {
+                            // 可以在这里处理非链接区域的点击事件
+                            console.log("点击了非链接区域")
+                        }
+                    }
+
+                    onDoubleClicked: {
+                        m_Reader.on_SetReaderFunVisible()
+                    }
+
+                    onPressAndHold: {
+                        mw_one.on_btnSelText_clicked()
+                    }
                 }
             }
 

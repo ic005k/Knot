@@ -160,13 +160,16 @@ class Reader : public QDialog {
   static QStringList readText(QByteArray data);
   QString getBookmarkTextFromQML();
   void setQmlLandscape(bool isValue);
-  void on_SetReaderFunVisible();
+
   bool isTurnThePage = false;
 
   void closeReader();
   void openReader();
   QString getReadTotalTime();
+
  public slots:
+  void on_SetReaderFunVisible();
+
   void setPageScroll0();
   void setPageScroll1();
   void setEpubPagePosition(int index, QString htmlFile);

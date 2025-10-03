@@ -2358,7 +2358,8 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       pressPos = touchPoint.pos();
       mw_one->isMousePress = true;
       mw_one->isMouseMove = false;
-      mw_one->timerMousePress->start(1300);
+
+      // mw_one->timerMousePress->start(1300);
 
       // 映射到原有鼠标事件的坐标变量
       press_x = pressPos.x();
@@ -2489,7 +2490,8 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       if (event->type() == QEvent::MouseButtonPress) {
         mw_one->isMousePress = true;
         mw_one->isMouseMove = false;
-        if (!mw_one->isMouseMove) mw_one->timerMousePress->start(1300);
+
+        // if (!mw_one->isMouseMove) mw_one->timerMousePress->start(1300);
       }
 
       if (event->type() == QEvent::MouseButtonRelease) {
@@ -2549,7 +2551,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       h = mui->qwReader->height();
     }
 
-    if (event->type() == QEvent::MouseButtonDblClick) {
+    /*if (event->type() == QEvent::MouseButtonDblClick) {
       // 原有双击逻辑不变
       if (m_Method->isClickLink) {
         m_Method->isClickLink = false;
@@ -2570,7 +2572,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       if (mY > qwY + h3 * 2) {
         mw_one->m_Reader->setPageScroll1();
       }
-    }
+    }*/
 
     if (event->type() == QEvent::MouseButtonRelease) {
       QPointF pos = event->position();
@@ -2963,8 +2965,8 @@ void Reader::on_SetReaderFunVisible() {
 
     if (!isLandscape) w = mui->qwReader->width();
 
-    mui->qwReader->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/reader.qml")));
+    // mui->qwReader->setSource(
+    //     QUrl(QStringLiteral("qrc:/src/qmlsrc/reader.qml")));
     if (isEpub) setQMLHtml(currentHtmlFile, "", "");
     if (isText) {
       QString txt1 = updateContent();
