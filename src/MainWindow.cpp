@@ -1724,6 +1724,7 @@ void MainWindow::on_btnCancelSel_clicked() {
   mui->textBrowser->hide();
   mui->qwReader->show();
   mui->f_ReaderFun->show();
+  m_Reader->isSelText = false;
 }
 
 void MainWindow::on_textBrowser_selectionChanged() {

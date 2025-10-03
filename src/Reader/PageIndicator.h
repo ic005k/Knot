@@ -21,12 +21,15 @@ class PageIndicator : public QDialog {
   void init();
 
   void setY(int y);
-  void setPicLeft();
-  void setPicRight();
 
   void showPageNumber(QString page);
 
- protected:
+ public slots:
+  void setPicLeft();
+  void setPicRight();
+
+  void closeUI();
+  protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
   void closeEvent(QCloseEvent *event) override;
   void paintEvent(QPaintEvent *event) override;
@@ -34,7 +37,7 @@ class PageIndicator : public QDialog {
 
  private:
   int sn, cn, tn;
-     void drawSN(const QString &sn);
+  void drawSN(const QString &sn);
 };
 
 #endif  // PAGEINDICATOR_H

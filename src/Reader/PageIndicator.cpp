@@ -40,6 +40,8 @@ void PageIndicator::setPicRight() {
   init();
 }
 
+void PageIndicator::closeUI() { close(); }
+
 void PageIndicator::init() {
   if (mui->frameReader->isHidden()) return;
 

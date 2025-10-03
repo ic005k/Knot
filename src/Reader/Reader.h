@@ -115,8 +115,6 @@ class Reader : public QDialog {
 
   static QString processHtml(QString htmlFile, bool isWriteFile);
 
-  void goNextPage();
-  void goUpPage();
   void on_btnOpen_clicked();
 
   void setAni();
@@ -191,6 +189,9 @@ class Reader : public QDialog {
   void openBookListItem();
 
   void showTextFun();
+
+  void goNextPage();
+  void goUpPage();
 
  private slots:
   void autoRun();

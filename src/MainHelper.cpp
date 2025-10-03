@@ -39,62 +39,11 @@ bool MainHelper::mainEventFilter(QObject *watch, QEvent *evn) {
     }
   }
 
-  mw_one->m_Reader->eventFilterReader(watch, evn);
+  // mw_one->m_Reader->eventFilterReader(watch, evn);
 
   m_Notes->eventFilterQwNote(watch, evn);
 
-  /*if (watch == mui->textBrowser->viewport()) {
-    if (event->type() == QEvent::MouseButtonPress) {
-      mw_one->isMousePress = true;
-    }
-
-    if (event->type() == QEvent::MouseButtonRelease) {
-      mw_one->isMousePress = false;
-
-      QString str = mui->textBrowser->textCursor().selectedText().trimmed();
-      if (str == "") {
-        mw_one->mydlgSetText->close();
-      } else {
-        int y1;
-        int a = 30;
-        if (event->globalPosition().y() - a - mw_one->mydlgSetText->height() >=
-            0)
-          y1 = event->globalPosition().y() - a - mw_one->mydlgSetText->height();
-        else
-          y1 = event->globalPosition().y() + a;
-
-        mw_one->mydlgSetText->setFixedWidth(mw_one->width() - 4);
-        mw_one->mydlgSetText->init(
-            mw_one->geometry().x() +
-                (mw_one->width() - mw_one->mydlgSetText->width()) / 2,
-            y1, mw_one->mydlgSetText->width(), mw_one->mydlgSetText->height());
-      }
-    }
-
-    if (event->type() == QEvent::MouseMove) {
-      if (mw_one->isMousePress) {
-        QString str = mui->textBrowser->textCursor().selectedText().trimmed();
-        if (str != "") {
-          int y1;
-          int a = 30;
-          if (event->globalPosition().y() - a -
-                  mw_one->mydlgSetText->height() >=
-              0)
-            y1 = event->globalPosition().y() - a -
-                 mw_one->mydlgSetText->height();
-          else
-            y1 = event->globalPosition().y() + a;
-
-          mw_one->mydlgSetText->setFixedWidth(mw_one->width() - 4);
-          mw_one->mydlgSetText->init(
-              mw_one->geometry().x() +
-                  (mw_one->width() - mw_one->mydlgSetText->width()) / 2,
-              y1, mw_one->mydlgSetText->width(),
-              mw_one->mydlgSetText->height());
-        }
-      }
-    }
-
+  if (watch == mui->textBrowser->viewport()) {
     if (event->type() == QEvent::MouseButtonDblClick) {
       QTextCursor cursor = mui->textBrowser->textCursor();
       cursor.setPosition(cursor.anchor());
@@ -102,7 +51,7 @@ bool MainHelper::mainEventFilter(QObject *watch, QEvent *evn) {
 
       return true;
     }
-  }*/
+  }
 
   if (watch == mw_one->chartview || watch == mw_one->chartview1) {
     if (event->type() == QEvent::MouseButtonDblClick) {
@@ -586,6 +535,8 @@ void MainHelper::initMainQW() {
   mui->qwReader->rootContext()->setContextProperty("m_Reader",
                                                    mw_one->m_Reader);
   mui->qwReader->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwReader->rootContext()->setContextProperty("m_PageIndicator",
+                                                   mw_one->m_PageIndicator);
   mui->qwReader->rootContext()->setContextProperty("myBackgroundColor",
                                                    "#FFFFFF");
 }

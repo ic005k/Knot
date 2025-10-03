@@ -10,6 +10,15 @@ Item {
     id: root
     visible: true
 
+    // 翻页属性
+    property point pressPos: Qt.point(0, 0)
+    property bool isPressing: false
+    property bool isMoving: false
+    property int scrollThreshold: 75
+    property int offsetLimit: 35
+    property bool needSwipePage: false
+    property bool swipeToNextPage: false // true=下一页，false=上一页
+
     // 横屏控制变量
     property bool isLandscape: false
     property bool isReadyEnd: false
@@ -134,7 +143,7 @@ Item {
     }
     function handleLinkClicked(link) {
         document.setBackDir(link)
-        document.parsingLink(link, "reader")
+        document.parsingLink(link, "m_Reader")
     }
 
     // 横屏模式变化处理（集成面积法核心逻辑）
@@ -269,12 +278,14 @@ Item {
                     anchors.fill: parent
 
                     onClicked: {
-                        var link = m_text.linkAt(mouse.x, mouse.y)
-                        if (link) {
-                            handleLinkClicked(link)
-                        } else {
-                            // 可以在这里处理非链接区域的点击事件
-                            console.log("点击了非链接区域")
+                        if (!isMoving) {
+                            var link = m_text.linkAt(mouse.x, mouse.y)
+                            if (link) {
+                                handleLinkClicked(link)
+                            } else {
+                                // 可以在这里处理非链接区域的点击事件
+                                console.log("点击了非链接区域")
+                            }
                         }
                     }
 
@@ -284,8 +295,32 @@ Item {
                     }
 
                     onPressAndHold: {
+                        if (!isMoving)
+                            mw_one.on_btnSelText_clicked()
+                    }
 
-                        mw_one.on_btnSelText_clicked()
+                    onPressed: {
+                        isPressing = true
+                        isMoving = false
+                        pressPos = Qt.point(mouse.x, mouse.y)
+                        root.setX(0)
+                    }
+
+                    onPositionChanged: {
+                        const deltaX = mouse.x - root.pressPos.x
+                        const deltaY = mouse.y - root.pressPos.y
+                        root.isMoving = (Math.abs(deltaX) > 20 || Math.abs(
+                                             deltaY) > 20)
+
+                        root.updatePageIndicator(deltaX, deltaY,
+                                                 mouse.x, mouse.y)
+                    }
+
+                    onReleased: {
+                        root.isPressing = false
+                        const deltaX = mouse.x - root.pressPos.x
+                        const deltaY = mouse.y - root.pressPos.y
+                        root.handleSwipeGesture(deltaX, deltaY)
                     }
                 }
             }
@@ -309,5 +344,70 @@ Item {
             isLandscape = !isLandscape
             console.log("QQuickWidget尺寸:", root.width, "x", root.height)
         }
+    }
+
+    function updatePageIndicator(deltaX, deltaY, currentMouseX, currentMouseY) {
+        if (!root.isPressing)
+            return
+
+        // 右滑 → 上一页
+        if (deltaX > root.scrollThreshold && Math.abs(
+                    deltaY) < root.offsetLimit) {
+            if (m_Reader.currentPage !== 0) {
+                m_PageIndicator.setPicRight()
+                root.needSwipePage = true
+                root.swipeToNextPage = false // 上一页
+            } else {
+                m_PageIndicator.closeUI()
+                root.needSwipePage = false
+            }
+        } // 左滑 → 下一页
+        else if (deltaX < -root.scrollThreshold && Math.abs(
+                     deltaY) < root.offsetLimit) {
+            if (m_Reader.currentPage !== m_Reader.totalPages - 1) {
+                m_PageIndicator.setPicLeft()
+                root.needSwipePage = true
+                root.swipeToNextPage = true // 下一页
+            } else {
+                m_PageIndicator.closeUI()
+                root.needSwipePage = false
+            }
+        } // 不满足条件
+        else {
+            m_PageIndicator.closeUI()
+            root.needSwipePage = false
+        }
+    }
+
+    function handleSwipeGesture(deltaX, deltaY) {
+        m_PageIndicator.closeUI()
+
+        console.log("deltaX:", deltaX, " deltaY:", deltaY, " threshold:",
+                    root.scrollThreshold)
+
+        // 优先使用滑动过程中已经确定的结果
+        if (root.needSwipePage) {
+            if (root.swipeToNextPage) {
+                console.log("释放：触发下一页")
+                m_Reader.goNextPage()
+            } else {
+                console.log("释放：触发上一页")
+                m_Reader.goUpPage()
+            }
+        } // 兜底判断（防止某些情况下没有经过 updatePageIndicator 的场景）
+        else if (Math.abs(deltaX) > root.scrollThreshold) {
+            if (deltaX > 0) {
+                console.log("触发上一页（兜底）")
+                m_Reader.goUpPage()
+            } else {
+                console.log("触发下一页（兜底）")
+                m_Reader.goNextPage()
+            }
+        } else {
+            root.setX(0)
+        }
+
+        // 重置翻页意图
+        root.needSwipePage = false
     }
 }
