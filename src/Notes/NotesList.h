@@ -41,9 +41,6 @@ MySearchResult searchInFile(const QString &filePath,
                             const QRegularExpression &regex);
 QStringList findMarkdownFiles(const QString &dirPath);
 void reduceResults(ResultsMap &result, const MySearchResult &partial);
-QFuture<ResultsMap> performSearchAsync(const QString &dirPath,
-                                       const QString &keyword);
-void displayResults(const ResultsMap &results);
 
 namespace Ui {
 class NotesList;
@@ -330,6 +327,10 @@ class NotesList : public QDialog {
   int getSelectedVersionIndex();
   void setNoteDiffHtmlToQML(const QString &html);
   void navigateFindResult(int step);
+
+  QFuture<ResultsMap> performSearchAsync(const QString &dirPath,
+                                         const QString &keyword);
+  void displayResults(const ResultsMap &results);
 };
 
 class SearchMapper {

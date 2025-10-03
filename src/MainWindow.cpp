@@ -2132,7 +2132,6 @@ void MainWindow::on_btnRestoreNoteRecycle_clicked() {
 }
 
 void MainWindow::on_btnFindNotes_clicked() {
-  showProgress();
   m_NotesList->startFind(mui->editFindNote->text().trimmed());
 }
 

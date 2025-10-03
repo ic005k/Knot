@@ -1609,26 +1609,28 @@ void reduceResults(ResultsMap &result, const MySearchResult &partial) {
   }
 }
 
-// 主搜索函数
-QFuture<ResultsMap> performSearchAsync(const QString &dirPath,
-                                       const QString &keyword) {
-  QStringList files = findMarkdownFiles(dirPath);
-  QStringList cycleFiles = m_NotesList->getRecycleNoteFiles();
+QFuture<ResultsMap> NotesList::performSearchAsync(const QString &dirPath,
+                                                  const QString &keyword) {
+  return QtConcurrent::run([this, dirPath, keyword]() {
+    QStringList files = findMarkdownFiles(dirPath);
+    QStringList cycleFiles = m_NotesList->getRecycleNoteFiles();
 
-  // 从files中移除所有存在于cycleFiles中的元素
-  files.removeIf(
-      [&cycleFiles](const QString &file) { return cycleFiles.contains(file); });
+    files.removeIf([&cycleFiles](const QString &file) {
+      return cycleFiles.contains(file);
+    });
 
-  QRegularExpression regex(keyword,
-                           QRegularExpression::CaseInsensitiveOption |
-                               QRegularExpression::UseUnicodePropertiesOption);
+    QRegularExpression regex(
+        keyword, QRegularExpression::CaseInsensitiveOption |
+                     QRegularExpression::UseUnicodePropertiesOption);
 
-  return QtConcurrent::mappedReduced(  // 注意改用 mappedReduced 非阻塞版本
-      files, SearchMapper(regex), reduceResults,
-      QtConcurrent::ReduceOption::UnorderedReduce);
+    // 注意这里用 blockingMappedReduced
+    return QtConcurrent::blockingMappedReduced(
+        files, SearchMapper(regex), reduceResults,
+        QtConcurrent::ReduceOption::UnorderedReduce);
+  });
 }
 
-void displayResults(const ResultsMap &results) {
+void NotesList::displayResults(const ResultsMap &results) {
   for (auto it = results.begin(); it != results.end(); ++it) {
     qDebug() << "文件：" << it.key();
     qDebug() << "匹配行号：" << it.value().lineNumbers;
@@ -1724,6 +1726,8 @@ void NotesList::onSearchFinished() {
 }
 
 void NotesList::startFind(QString strFind) {
+  mw_one->showProgress();
+
   QString directory = iniDir + "memo/";
   QString keyword = strFind;
   searchResultList.clear();

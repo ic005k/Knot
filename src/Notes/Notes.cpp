@@ -1166,6 +1166,9 @@ void NoteIndexManager1::setNoteTitle(const QString &filePath,
 ///////////////////////////////////////////////////////////////////////////////////
 
 void Notes::openEditUI() {
+  int count = m_NotesList->getNoteBookCount();
+  if (count == 0) return;
+
   qDebug() << "currentMDFile=" << currentMDFile;
   if (!QFile::exists(currentMDFile)) {
     ShowMessage *msg = new ShowMessage(mw_one);
@@ -2076,6 +2079,9 @@ void Notes::restoreEditorState(const QString &filePath) {
 }
 
 void Notes::previewNote() {
+  int count = m_NotesList->getNoteBookCount();
+  if (count == 0) return;
+
   if (!QFile::exists(currentMDFile)) return;
 
   mw_one->showProgress();
