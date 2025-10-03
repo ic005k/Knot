@@ -241,7 +241,7 @@ Item {
                 }
             }
 
-            delegate: Text {
+            delegate: TextEdit {
                 id: m_text
                 width: rotateContainer.width
                 leftPadding: 10
@@ -253,6 +253,7 @@ Item {
                 font.family: FontName
                 color: myTextColor
                 renderType: Text.QtRendering
+                readOnly: true
 
                 //onLinkActivated: handleLinkClicked(link)
                 PropertyAnimation on x {
@@ -266,6 +267,7 @@ Item {
 
                 MouseArea {
                     anchors.fill: parent
+
                     onClicked: {
                         var link = m_text.linkAt(mouse.x, mouse.y)
                         if (link) {
@@ -277,10 +279,12 @@ Item {
                     }
 
                     onDoubleClicked: {
+
                         m_Reader.on_SetReaderFunVisible()
                     }
 
                     onPressAndHold: {
+
                         mw_one.on_btnSelText_clicked()
                     }
                 }

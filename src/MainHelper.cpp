@@ -43,7 +43,7 @@ bool MainHelper::mainEventFilter(QObject *watch, QEvent *evn) {
 
   m_Notes->eventFilterQwNote(watch, evn);
 
-  if (watch == mui->textBrowser->viewport()) {
+  /*if (watch == mui->textBrowser->viewport()) {
     if (event->type() == QEvent::MouseButtonPress) {
       mw_one->isMousePress = true;
     }
@@ -102,7 +102,7 @@ bool MainHelper::mainEventFilter(QObject *watch, QEvent *evn) {
 
       return true;
     }
-  }
+  }*/
 
   if (watch == mw_one->chartview || watch == mw_one->chartview1) {
     if (event->type() == QEvent::MouseButtonDblClick) {

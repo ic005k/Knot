@@ -817,6 +817,8 @@ class MainWindow : public QMainWindow {
 
   void on_btnNewNote_clicked();
 
+  void on_btnShareBookText_clicked();
+
  private:
   bool isMoveEntry;
   QTimer *tmeFlash;

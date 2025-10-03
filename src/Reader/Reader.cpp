@@ -26,8 +26,6 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
 
   mui->lblTitle->hide();
   mui->f_ReaderFun2->hide();
-  mui->btnBackward->hide();
-  mui->btnForward->hide();
   mui->textBrowser->hide();
   mui->lblCataInfo->hide();
   mui->btnBackReader->hide();
@@ -534,8 +532,6 @@ void Reader::setQMLText(QString txt1) {
 
   qsShow = str1 + qsShow + strEndFlag + str2;
   currentTxt = qsShow;
-
-  // loadQMLText(currentTxt);
 
   QQuickItem *root = mui->qwReader->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "loadHtmlBuffer",
@@ -2166,12 +2162,14 @@ void Reader::selectText() {
     QFont font;
     font.setPixelSize(readerFontSize);
     font.setFamily(mui->btnFont->font().family());
-    font.setLetterSpacing(QFont::AbsoluteSpacing, 2);
+    // font.setLetterSpacing(QFont::AbsoluteSpacing, 2);
     mui->textBrowser->setFont(font);
 
     mui->textBrowser->setHtml(currentTxt);
 
     mui->qwReader->hide();
+    mui->f_ReaderFun->hide();
+    mui->f_ReaderFun2->show();
     mui->textBrowser->show();
 
     qreal h0 = getVHeight();
@@ -2181,7 +2179,7 @@ void Reader::selectText() {
     mui->textBrowser->verticalScrollBar()->setSliderPosition(s1);
     qDebug() << "s0=" << s0 << "h0=" << h0 << "s1=" << s1 << "h1=" << h1;
 
-    if (!isGetBookmarkText) {
+    /*if (!isGetBookmarkText) {
       mw_one->mydlgSetText->setFixedWidth(mw_one->width() - 4);
       mw_one->mydlgSetText->init(
           mw_one->geometry().x() +
@@ -2191,7 +2189,7 @@ void Reader::selectText() {
     } else {
       isGetBookmarkText = false;
       closeSelText();
-    }
+    }*/
 
   } else {
     closeSelText();
@@ -2202,6 +2200,7 @@ void Reader::closeSelText() {
   if (isSelText) {
     isSelText = false;
 
+    mui->f_ReaderFun2->hide();
     mui->textBrowser->hide();
     mui->qwReader->show();
     mw_one->mydlgSetText->close();
@@ -2345,17 +2344,16 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
   if (evn->type() == QEvent::TouchBegin || evn->type() == QEvent::TouchUpdate ||
       evn->type() == QEvent::TouchEnd) {
     QTouchEvent *touchEvent = static_cast<QTouchEvent *>(evn);
-    const QList<QTouchEvent::TouchPoint> touchPoints =
-        touchEvent->touchPoints();
+    const QList<QTouchEvent::TouchPoint> touchPoints = touchEvent->points();
     if (touchPoints.isEmpty()) return false;
 
     // 只处理单指触摸（翻页通常不需要多指）
     const QTouchEvent::TouchPoint &touchPoint = touchPoints.first();
-    currentPos = touchPoint.pos();  // 触摸点当前位置（相对控件）
+    currentPos = touchPoint.position();  // 触摸点当前位置（相对控件）
 
     if (evn->type() == QEvent::TouchBegin) {
       // 触摸开始：对应鼠标按下
-      pressPos = touchPoint.pos();
+      pressPos = touchPoint.position();
       mw_one->isMousePress = true;
       mw_one->isMouseMove = false;
 
@@ -2379,7 +2377,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
 
       // 复用原有鼠标移动时的指示器逻辑
       if (mw_one->isMousePress && mui->textBrowser->isHidden()) {
-        // 这里直接复用你原有的鼠标移动判断逻辑（已包含横竖屏处理）
+        // 这里直接复用原有的鼠标移动判断逻辑（已包含横竖屏处理）
         // 【注意】保持与下面鼠标移动事件中的代码完全一致
         if (!isLandscape) {
           if ((relea_x - press_x) > 75 && qAbs(relea_y - press_y) < 35) {
@@ -2677,51 +2675,6 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
   return QWidget::eventFilter(watch, evn);
 }
 
-bool Reader::eventFilterReaderAndroid(QObject *watch, QEvent *evn) {
-  // 处理触摸事件（Android）
-  if (evn->type() == QEvent::TouchBegin || evn->type() == QEvent::TouchUpdate ||
-      evn->type() == QEvent::TouchEnd || evn->type() == QEvent::TouchCancel) {
-    QTouchEvent *touchEvent = static_cast<QTouchEvent *>(evn);
-    const QList<QTouchEvent::TouchPoint> &touchPoints = touchEvent->points();
-
-    // 只处理单指触摸
-    if (touchPoints.count() == 1 && watch == mui->qwReader) {
-      const QTouchEvent::TouchPoint &touchPoint = touchPoints.first();
-
-      // 将触摸点位置转换为全局坐标
-      QPointF globalPos =
-          mui->qwReader->mapToGlobal(touchPoint.position().toPoint());
-
-      // 使用正确的枚举类型和值
-      auto state = touchPoint.state();
-      if (state == QEventPoint::Pressed) {
-        return handleTouchPress(globalPos);
-      } else if (state == QEventPoint::Updated) {
-        return handleTouchMove(globalPos);
-      } else if (state == QEventPoint::Released) {
-        return handleTouchRelease(globalPos);
-      } else {
-        mw_one->isMousePress = false;
-        return true;
-      }
-    }
-    return false;
-  }
-
-  // 处理桌面端的鼠标事件（保留原有逻辑）
-  if (evn->type() == QEvent::MouseButtonPress ||
-      evn->type() == QEvent::MouseMove ||
-      evn->type() == QEvent::MouseButtonRelease ||
-      evn->type() == QEvent::MouseButtonDblClick) {
-    QMouseEvent *event = static_cast<QMouseEvent *>(evn);
-    if (watch == mui->qwReader) {
-      Q_UNUSED(event);
-    }
-  }
-
-  return QWidget::eventFilter(watch, evn);
-}
-
 bool Reader::handleTouchPress(const QPointF &globalPos) {
   // 记录按下位置和时间
   static qint64 lastPressTime = 0;
@@ -2729,7 +2682,7 @@ bool Reader::handleTouchPress(const QPointF &globalPos) {
 
   // 双击检测（300ms内两次按下）
   if (currentTime - lastPressTime < 300) {
-    handleDoubleClick(globalPos);
+    // handleDoubleClick(globalPos);
     lastPressTime = 0;
     return true;
   }
@@ -2741,7 +2694,7 @@ bool Reader::handleTouchPress(const QPointF &globalPos) {
 
   // 启动长按计时器
   if (!mw_one->isMouseMove) {
-    mw_one->timerMousePress->start(1300);
+    // mw_one->timerMousePress->start(1300);
   }
 
   // 记录按下位置
@@ -2947,12 +2900,16 @@ void Reader::showOrHideBookmark() {
 
 void Reader::on_SetReaderFunVisible() {
   if (!isTurnThePage) {
-    if (mui->f_ReaderFun->isHidden())
+    if (mui->f_ReaderFun->isHidden()) {
       mui->f_ReaderFun->show();
-    else {
+      mui->lblBookName->show();
+    } else {
       mui->f_ReaderFun->hide();
+      mui->lblBookName->hide();
       m_ReaderSet->hide();
     }
+
+    return;
 
     bool isTemp = isLandscape;
     if (isTemp) {
@@ -3468,4 +3425,11 @@ bool Reader::writeTotalHours(double value) {
   file.write(doc.toJson(QJsonDocument::Indented));
   file.close();
   return true;
+}
+
+void Reader::showTextFun() {
+  if (mui->f_ReaderFun2->isHidden()) {
+    mui->f_ReaderFun->hide();
+    mui->f_ReaderFun2->show();
+  }
 }

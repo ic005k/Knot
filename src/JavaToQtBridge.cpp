@@ -311,6 +311,11 @@ static void JavaNotify_15() {
     return;
   }
 
+  if (mui->f_ReaderFun2->isVisible()) {
+    mui->btnCancelSel->click();
+    return;
+  }
+
   if (mui->f_ReaderSet->isVisible()) {
     mui->btnBackReaderSet->click();
     return;

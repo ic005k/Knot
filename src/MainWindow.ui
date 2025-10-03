@@ -90,21 +90,6 @@
            <number>5</number>
           </property>
           <item>
-           <widget class="QLineEdit" name="editSetText">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>20</pointsize>
-             </font>
-            </property>
-           </widget>
-          </item>
-          <item>
            <layout class="QHBoxLayout" name="horizontalLayout_11">
             <property name="spacing">
              <number>5</number>
@@ -130,6 +115,16 @@
              </widget>
             </item>
             <item>
+             <widget class="QLineEdit" name="editSetText">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QToolButton" name="btnSearch">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -143,7 +138,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="btnBackward">
+             <widget class="QToolButton" name="btnShareBookText">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -151,20 +146,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>Backward</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="btnForward">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Forward</string>
+               <string>Share</string>
               </property>
              </widget>
             </item>

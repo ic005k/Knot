@@ -152,7 +152,7 @@ class Reader : public QDialog {
 
   void setDefaultOpen(QString value);
   void setTextAreaCursorPos(int nCursorPos);
-  bool eventFilterReaderAndroid(QObject *watch, QEvent *evn);
+
   void showOrHideBookmark();
 
   void initInfoShowFont();
@@ -189,6 +189,8 @@ class Reader : public QDialog {
 
  public slots:
   void openBookListItem();
+
+  void showTextFun();
 
  private slots:
   void autoRun();

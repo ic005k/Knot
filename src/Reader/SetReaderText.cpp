@@ -10,7 +10,7 @@ dlgSetText::dlgSetText(QWidget *parent)
 
   m_Method->set_ToolButtonStyle(this);
 
-  ui->lineEdit->setReadOnly(true);
+  ui->lineEdit->setReadOnly(false);
 
 #ifdef Q_OS_ANDROID
   ui->btnShare->show();

@@ -1694,8 +1694,7 @@ void MainWindow::clearSelectBox() {
 
 void MainWindow::on_btnCopy_clicked() {
   QClipboard *clipboard = QApplication::clipboard();
-  clipboard->setText(mydlgSetText->ui->lineEdit->text().trimmed());
-  on_btnCancelSel_clicked();
+  clipboard->setText(mui->editSetText->text().trimmed());
 }
 
 QString MainWindow::getSelectedText() {
@@ -1710,6 +1709,7 @@ QString MainWindow::getSelectedText() {
 
 void MainWindow::on_btnSearch_clicked() {
   QString str = mydlgSetText->ui->lineEdit->text().trimmed();
+  str = mui->editSetText->text().trimmed();
   if (str == "") return;
 
   QString strurl;
@@ -1717,10 +1717,14 @@ void MainWindow::on_btnSearch_clicked() {
 
   QUrl url(strurl);
   QDesktopServices::openUrl(url);
-  on_btnCancelSel_clicked();
 }
 
-void MainWindow::on_btnCancelSel_clicked() { on_btnSelText_clicked(); }
+void MainWindow::on_btnCancelSel_clicked() {
+  mui->f_ReaderFun2->hide();
+  mui->textBrowser->hide();
+  mui->qwReader->show();
+  mui->f_ReaderFun->show();
+}
 
 void MainWindow::on_textBrowser_selectionChanged() {
   QString str = mui->textBrowser->textCursor().selectedText().trimmed();
@@ -2735,4 +2739,11 @@ void MainWindow::on_btnShareBakFile_clicked() {
 
 void MainWindow::on_btnNewNote_clicked() {
   m_NotesList->on_actionAdd_Note_triggered();
+}
+
+void MainWindow::on_btnShareBookText_clicked() {
+  QString txt = mui->editSetText->text().trimmed();
+  if (txt.length() > 0) {
+    mw_one->m_ReceiveShare->shareString(tr("Share to"), txt);
+  }
 }
