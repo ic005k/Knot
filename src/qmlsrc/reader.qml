@@ -147,7 +147,7 @@ Item {
     }
     function handleLinkClicked(link) {
         document.setBackDir(link)
-        document.parsingLink(link, "m_Reader")
+        document.parsingLink(link, "reader")
     }
 
     // 横屏模式变化处理（集成面积法核心逻辑）

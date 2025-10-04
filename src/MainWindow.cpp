@@ -1359,8 +1359,6 @@ void MainWindow::init_Instance() {
   m_TodoAlarm = new TodoAlarm(this);
   m_DateSelector = new DateSelector(this);
   m_CloudBackup = new CloudBackup;
-  m_PageIndicator = new PageIndicator(this);
-  m_PageIndicator->close();
   m_ReaderSet = new ReaderSet(this);
   mydlgSetText = new dlgSetText(this);
   m_NotesList = new NotesList(this);
@@ -1667,31 +1665,6 @@ void MainWindow::on_btnBackNotesGraph_clicked() {
   mui->frameNotesGraph->hide();
   mui->frameNoteList->show();
   m_NotesList->clickNoteList();
-}
-
-void MainWindow::clearSelectBox() {
-  QString tempFile = iniDir + "memo/texteditor.html";
-  if (!mui->frameReader->isHidden()) {
-    mw_one->m_Reader->savePageVPos();
-    bool isAni = false;
-    mui->qwReader->rootContext()->setContextProperty("isAni", isAni);
-    QQuickItem *root = mui->qwReader->rootObject();
-    QMetaObject::invokeMethod((QObject *)root, "loadHtml",
-                              Q_ARG(QVariant, tempFile));
-    m_Method->Sleep(50);
-    if (isEpub) {
-      QMetaObject::invokeMethod(
-          (QObject *)root, "loadHtml",
-          Q_ARG(QVariant, mw_one->m_Reader->currentHtmlFile));
-    } else {
-      mui->qwReader->rootContext()->setContextProperty("strText",
-                                                       m_Reader->currentTxt);
-    }
-    mw_one->m_Reader->setPageVPos();
-  }
-
-  if (!mui->frameNotesGraph->isHidden()) {
-  }
 }
 
 void MainWindow::on_btnCopy_clicked() {

@@ -654,14 +654,16 @@ void Reader::initLink(QString htmlFile) {
     QString str = htmlFiles.at(i);
     QString str1 = htmlFile;
     QStringList list = htmlFile.split("#");
-    if (list.count() == 2) str1 = list.at(0);
-    QStringList list2 = str1.split("/");
-    if (list2.count() > 0) {
-      str1 = list2.at(list2.count() - 1);
+    if (list.count() == 2) {
+      str1 = list.at(0);
+      QStringList list2 = str1.split("/");
+      if (list2.count() > 0) {
+        str1 = list2.at(list2.count() - 1);
+      }
     }
 
     if (str.contains(str1)) {
-      setEpubPagePosition(i, htmlFile);
+      setEpubPagePosition(i, str);
       break;
     }
   }
@@ -2188,17 +2190,10 @@ void Reader::selectText() {
     mui->textBrowser->verticalScrollBar()->setSliderPosition(s1);
     qDebug() << "s0=" << s0 << "h0=" << h0 << "s1=" << s1 << "h1=" << h1;
 
-    /*if (!isGetBookmarkText) {
-      mw_one->mydlgSetText->setFixedWidth(mw_one->width() - 4);
-      mw_one->mydlgSetText->init(
-          mw_one->geometry().x() +
-              (mw_one->width() - mw_one->mydlgSetText->width()) / 2,
-          mw_one->geometry().y(), mw_one->mydlgSetText->width(),
-          mw_one->mydlgSetText->height());
-    } else {
-      isGetBookmarkText = false;
+    if (isGetBookmarkText) {
       closeSelText();
-    }*/
+      isGetBookmarkText = false;
+    }
 
   } else {
     closeSelText();
@@ -2212,6 +2207,7 @@ void Reader::closeSelText() {
     mui->f_ReaderFun2->hide();
     mui->textBrowser->hide();
     mui->qwReader->show();
+    mui->f_ReaderFun->show();
     mw_one->mydlgSetText->close();
   }
 }

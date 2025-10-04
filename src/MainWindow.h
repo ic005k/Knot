@@ -81,7 +81,6 @@
 #include "src/Notes/Notes.h"
 #include "src/Notes/NotesList.h"
 #include "src/Preferences.h"
-#include "src/Reader/PageIndicator.h"
 #include "src/Reader/Reader.h"
 #include "src/Reader/ReaderSet.h"
 #include "src/Reader/SetReaderText.h"
@@ -259,7 +258,6 @@ class MainWindow : public QMainWindow {
   Reader *m_Reader;
   TodoAlarm *m_TodoAlarm;
   DateSelector *m_DateSelector = nullptr;
-  PageIndicator *m_PageIndicator;
 
   dlgSetText *mydlgSetText;
 
@@ -308,8 +306,6 @@ class MainWindow : public QMainWindow {
   QString getTabText();
 
   void refreshMainUI();
-
-  void clearSelectBox();
 
   QString getSelectedText();
 

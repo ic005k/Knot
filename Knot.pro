@@ -396,7 +396,6 @@ SOURCES += \
     src/Notes/titlegenerator.cpp \
     src/Preferences.cpp \
     src/Reader/DocumentHandler.cpp \
-    src/Reader/PageIndicator.cpp \
     src/Reader/Reader.cpp \
     src/Reader/ReaderSet.cpp \
     src/Reader/SetReaderText.cpp \
@@ -636,7 +635,6 @@ HEADERS += \
     src/Notes/titlegenerator.h \
     src/Preferences.h \
     src/Reader/DocumentHandler.h \
-    src/Reader/PageIndicator.h \
     src/Reader/Reader.h \
     src/Reader/ReaderSet.h \
     src/Reader/SetReaderText.h \
@@ -682,7 +680,6 @@ FORMS += \
     src/Notes/NotesList.ui \
     src/Notes/PrintPDF.ui \
     src/Preferences.ui \
-    src/Reader/PageIndicator.ui \
     src/Reader/SetReaderText.ui \
     src/Exercise/StepsOptions.ui \
     src/Todo/Todo.ui \

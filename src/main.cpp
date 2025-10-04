@@ -332,7 +332,7 @@ void loadTheme(bool isDark) {
         widget != mw_one->m_MainHelper->sliderButton &&
         widget != mui->lblGpsDateTime && widget != mui->btnPages &&
         widget != mui->lblBookName && widget != mui->lblShowLineSn &&
-        widget != mw_one->m_PageIndicator->ui->lblPageNumber &&
+
         widget != mui->lblNoteBook && widget != mui->lblNoteList) {
       widget->setFont(qApp->font());
       font.setBold(true);
