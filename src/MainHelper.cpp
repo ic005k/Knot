@@ -39,7 +39,7 @@ bool MainHelper::mainEventFilter(QObject *watch, QEvent *evn) {
     }
   }
 
-  // mw_one->m_Reader->eventFilterReader(watch, evn);
+  mw_one->m_Reader->eventFilterReader(watch, evn);
 
   m_Notes->eventFilterQwNote(watch, evn);
 
@@ -537,8 +537,6 @@ void MainHelper::initMainQW() {
   mui->qwReader->rootContext()->setContextProperty("mw_one", mw_one);
   mui->qwReader->rootContext()->setContextProperty("currentPage", currentPage);
   mui->qwReader->rootContext()->setContextProperty("totalPages", totalPages);
-  mui->qwReader->rootContext()->setContextProperty("m_PageIndicator",
-                                                   mw_one->m_PageIndicator);
   mui->qwReader->rootContext()->setContextProperty("myBackgroundColor",
                                                    "#FFFFFF");
 }

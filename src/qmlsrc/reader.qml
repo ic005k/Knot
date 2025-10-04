@@ -235,8 +235,8 @@ Item {
                 propagateComposedEvents: true // 把事件传递给子元素（delegate）
 
                 onDoubleClicked: {
-
-                    m_Reader.on_SetReaderFunVisible()
+                    if (!isMoving)
+                        m_Reader.on_SetReaderFunVisible()
                 }
 
                 onPressAndHold: {
@@ -244,58 +244,16 @@ Item {
                         mw_one.on_btnSelText_clicked()
                 }
 
-                onPressed: {
-                    isPressing = true
-                    isMoving = false
-                    pressPos = Qt.point(mouse.x, mouse.y)
-                    root.setX(0)
-                }
-
                 onPositionChanged: {
-                    // 时间节流
-                    var now = Date.now()
-                    if (now - root.lastTouchUpdate < root.touchThrottle) {
-                        return
-                    }
-                    root.lastTouchUpdate = now
-
-                    var deltaX = mouse.x - root.pressPos.x
-                    var deltaY = mouse.y - root.pressPos.y
-
-                    // 触摸死区过滤（防止轻微抖动）
-                    if (Math.abs(deltaX) < root.touchDeadzone && Math.abs(
-                                deltaY) < root.touchDeadzone) {
-                        return
-                    }
-
-                    // 判断释放有滑动的动作
-                    if (Math.abs(deltaX) > Math.abs(35)) {
-
-                        root.isMoving = true
-                        root.updatePageIndicator(deltaX, deltaY,
-                                                 mouse.x, mouse.y)
-                        mouse.accepted = true
-                    } else {
-
-                        mouse.accepted = false
-                    }
-
-                    console.log(deltaX + "  " + deltaY)
+                    isMoving = true
                 }
 
                 onReleased: {
-                    if (root.isMoving) {
-                        root.handleSwipeGesture()
-                    }
-
-                    // 非滑动时，事件传递给delegate处理点击
-                    mouse.accepted = !root.isMoving
+                    isMoving = false
                 }
 
                 onCanceled: {
-                    isPressing = false
                     isMoving = false
-                    pageIndicator.visible = false
                 }
             }
 
@@ -393,6 +351,8 @@ Item {
     function updatePageIndicator(deltaX, deltaY, currentMouseX, currentMouseY) {
         if (!root.isPressing)
             return
+        if (!root.isMoving)
+            return
 
         // 右滑 → 上一页
         if (deltaX > root.scrollThreshold && Math.abs(
@@ -415,7 +375,7 @@ Item {
                 root.needSwipePage = true
                 root.swipeToNextPage = true // 下一页
             } else {
-                pageIndicator.visible = false
+
                 root.needSwipePage = false
             }
         } // 不满足条件
@@ -423,10 +383,11 @@ Item {
             pageIndicator.visible = false
             root.needSwipePage = false
         }
+
+        console.log("needSwipePage=" + needSwipePage)
     }
 
     function handleSwipeGesture() {
-        pageIndicator.visible = false
 
         if (root.needSwipePage) {
             if (root.swipeToNextPage) {
@@ -438,12 +399,29 @@ Item {
                 m_Reader.goUpPage()
                 console.log("释放：触发上一页")
             }
+            isPressing = false
+            isMoving = false
+            pageIndicator.visible = false
         } else {
             root.setX(0)
         }
 
         // 重置翻页意图
         root.needSwipePage = false
+    }
+
+    function showBookPageNext() {
+        pageIndicator.showPage(currentPage + 1, totalPages)
+        pageIndicator.visible = true
+    }
+
+    function showBookPageUp() {
+        pageIndicator.showPage(currentPage - 1, totalPages)
+        pageIndicator.visible = true
+    }
+
+    function closeBookPage() {
+        pageIndicator.visible = false
     }
 
     Item {
@@ -458,7 +436,7 @@ Item {
         // 半透明背景
         Rectangle {
             anchors.fill: parent
-            color: "blue"
+            color: "black"
             opacity: 0.7
             radius: 4
 

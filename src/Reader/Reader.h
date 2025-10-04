@@ -159,13 +159,14 @@ class Reader : public QDialog {
   QString getBookmarkTextFromQML();
   void setQmlLandscape(bool isValue);
 
-  bool isTurnThePage = false;
-
   void closeReader();
   void openReader();
   QString getReadTotalTime();
 
   void updateReaderProperty(int currentPage, int totalPages);
+  void showBookPageNext();
+  void showBookPageUp();
+  void closeBookPage();
  public slots:
   void on_SetReaderFunVisible();
 
@@ -219,8 +220,7 @@ class Reader : public QDialog {
   QString updateContent();
 
   void handleDoubleClick(const QPointF &globalPos);
-  bool handleTouchRelease(const QPointF &globalPos);
-  bool handleTouchMove(const QPointF &globalPos);
+
   bool handleTouchPress(const QPointF &globalPos);
 
   static QString getNavFileInternalPath(const QByteArray &opfContent);
