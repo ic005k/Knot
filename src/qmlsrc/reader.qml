@@ -15,9 +15,13 @@ Item {
     property bool isPressing: false
     property bool isMoving: false
     property int scrollThreshold: 75
-    property int offsetLimit: 35
+    property int offsetLimit: 55 // 35
     property bool needSwipePage: false
     property bool swipeToNextPage: false // true=下一页，false=上一页
+
+    property int touchDeadzone: 15 // 触摸死区15px，过滤手指抖动
+    property int lastTouchUpdate: 0
+    property int touchThrottle: 16 // 50ms 内最多更新一次
 
     // 横屏控制变量
     property bool isLandscape: false
@@ -224,6 +228,77 @@ Item {
             }
             clip: true
 
+            MouseArea {
+
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton // 恢复接收左键，才能处理点击/双击/长按
+                propagateComposedEvents: true // 把事件传递给子元素（delegate）
+
+                onDoubleClicked: {
+
+                    m_Reader.on_SetReaderFunVisible()
+                }
+
+                onPressAndHold: {
+                    if (!isMoving)
+                        mw_one.on_btnSelText_clicked()
+                }
+
+                onPressed: {
+                    isPressing = true
+                    isMoving = false
+                    pressPos = Qt.point(mouse.x, mouse.y)
+                    root.setX(0)
+                }
+
+                onPositionChanged: {
+                    // 时间节流
+                    var now = Date.now()
+                    if (now - root.lastTouchUpdate < root.touchThrottle) {
+                        return
+                    }
+                    root.lastTouchUpdate = now
+
+                    var deltaX = mouse.x - root.pressPos.x
+                    var deltaY = mouse.y - root.pressPos.y
+
+                    // 触摸死区过滤（防止轻微抖动）
+                    if (Math.abs(deltaX) < root.touchDeadzone && Math.abs(
+                                deltaY) < root.touchDeadzone) {
+                        return
+                    }
+
+                    // 判断释放有滑动的动作
+                    if (Math.abs(deltaX) > Math.abs(35)) {
+
+                        root.isMoving = true
+                        root.updatePageIndicator(deltaX, deltaY,
+                                                 mouse.x, mouse.y)
+                        mouse.accepted = true
+                    } else {
+
+                        mouse.accepted = false
+                    }
+
+                    console.log(deltaX + "  " + deltaY)
+                }
+
+                onReleased: {
+                    if (root.isMoving) {
+                        root.handleSwipeGesture()
+                    }
+
+                    // 非滑动时，事件传递给delegate处理点击
+                    mouse.accepted = !root.isMoving
+                }
+
+                onCanceled: {
+                    isPressing = false
+                    isMoving = false
+                    pageIndicator.visible = false
+                }
+            }
+
             // 3. 布局更新后应用面积法计算新位置
             onContentHeightChanged: {
                 if (isSwitching) {
@@ -250,7 +325,7 @@ Item {
                 }
             }
 
-            delegate: TextEdit {
+            delegate: Text {
                 id: m_text
                 width: rotateContainer.width
                 leftPadding: 10
@@ -262,7 +337,6 @@ Item {
                 font.family: FontName
                 color: myTextColor
                 renderType: Text.QtRendering
-                readOnly: true
 
                 //onLinkActivated: handleLinkClicked(link)
                 PropertyAnimation on x {
@@ -274,53 +348,23 @@ Item {
                     loops: 1
                 }
 
+                // ！！！delegate内部的MouseArea：处理点击链接、双击、长按
                 MouseArea {
                     anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton // 只处理左键点击
+                    propagateComposedEvents: false // 不传递事件（避免和全局冲突）
 
                     onClicked: {
-                        if (!isMoving) {
+                        // 只有“非滑动”时才处理点击
+                        if (!root.isMoving) {
+                            // ！！！这里能直接访问m_text（同delegate作用域）
                             var link = m_text.linkAt(mouse.x, mouse.y)
                             if (link) {
-                                handleLinkClicked(link)
+                                root.handleLinkClicked(link) // 调用全局的链接处理函数
                             } else {
-                                // 可以在这里处理非链接区域的点击事件
-                                console.log("点击了非链接区域")
+                                console.log("点击了非链接区域（文本块：" + index + "）")
                             }
                         }
-                    }
-
-                    onDoubleClicked: {
-
-                        m_Reader.on_SetReaderFunVisible()
-                    }
-
-                    onPressAndHold: {
-                        if (!isMoving)
-                            mw_one.on_btnSelText_clicked()
-                    }
-
-                    onPressed: {
-                        isPressing = true
-                        isMoving = false
-                        pressPos = Qt.point(mouse.x, mouse.y)
-                        root.setX(0)
-                    }
-
-                    onPositionChanged: {
-                        const deltaX = mouse.x - root.pressPos.x
-                        const deltaY = mouse.y - root.pressPos.y
-                        root.isMoving = (Math.abs(deltaX) > 20 || Math.abs(
-                                             deltaY) > 20)
-
-                        root.updatePageIndicator(deltaX, deltaY,
-                                                 mouse.x, mouse.y)
-                    }
-
-                    onReleased: {
-                        root.isPressing = false
-                        const deltaX = mouse.x - root.pressPos.x
-                        const deltaY = mouse.y - root.pressPos.y
-                        root.handleSwipeGesture(deltaX, deltaY)
                     }
                 }
             }
@@ -353,55 +397,46 @@ Item {
         // 右滑 → 上一页
         if (deltaX > root.scrollThreshold && Math.abs(
                     deltaY) < root.offsetLimit) {
-            if (m_Reader.currentPage !== 0) {
-                m_PageIndicator.setPicRight()
+            if (currentPage > 1) {
+
+                pageIndicator.showPage(currentPage - 1, totalPages)
                 root.needSwipePage = true
                 root.swipeToNextPage = false // 上一页
             } else {
-                m_PageIndicator.closeUI()
+
                 root.needSwipePage = false
             }
         } // 左滑 → 下一页
         else if (deltaX < -root.scrollThreshold && Math.abs(
                      deltaY) < root.offsetLimit) {
-            if (m_Reader.currentPage !== m_Reader.totalPages - 1) {
-                m_PageIndicator.setPicLeft()
+            if (currentPage <= totalPages - 1) {
+
+                pageIndicator.showPage(currentPage + 1, totalPages)
                 root.needSwipePage = true
                 root.swipeToNextPage = true // 下一页
             } else {
-                m_PageIndicator.closeUI()
+                pageIndicator.visible = false
                 root.needSwipePage = false
             }
         } // 不满足条件
         else {
-            m_PageIndicator.closeUI()
+            pageIndicator.visible = false
             root.needSwipePage = false
         }
     }
 
-    function handleSwipeGesture(deltaX, deltaY) {
-        m_PageIndicator.closeUI()
+    function handleSwipeGesture() {
+        pageIndicator.visible = false
 
-        console.log("deltaX:", deltaX, " deltaY:", deltaY, " threshold:",
-                    root.scrollThreshold)
-
-        // 优先使用滑动过程中已经确定的结果
         if (root.needSwipePage) {
             if (root.swipeToNextPage) {
+
+                m_Reader.goNextPage()
                 console.log("释放：触发下一页")
-                m_Reader.goNextPage()
             } else {
+
+                m_Reader.goUpPage()
                 console.log("释放：触发上一页")
-                m_Reader.goUpPage()
-            }
-        } // 兜底判断（防止某些情况下没有经过 updatePageIndicator 的场景）
-        else if (Math.abs(deltaX) > root.scrollThreshold) {
-            if (deltaX > 0) {
-                console.log("触发上一页（兜底）")
-                m_Reader.goUpPage()
-            } else {
-                console.log("触发下一页（兜底）")
-                m_Reader.goNextPage()
             }
         } else {
             root.setX(0)
@@ -409,5 +444,61 @@ Item {
 
         // 重置翻页意图
         root.needSwipePage = false
+    }
+
+    Item {
+        id: pageIndicator
+        // 固定尺寸
+        width: 150
+        height: 60
+        // 关键：屏幕中央
+        anchors.centerIn: parent
+        visible: false // 默认隐藏
+
+        // 半透明背景
+        Rectangle {
+            anchors.fill: parent
+            color: "blue"
+            opacity: 0.7
+            radius: 4
+
+            // 根据横屏/竖屏自动旋转
+            rotation: isLandscape ? 90 : 0
+            // 旋转中心设为文本中心
+            transformOrigin: Item.Center
+        }
+
+        // 页码文本
+        Text {
+            id: mytext
+            anchors.centerIn: parent
+            text: "1/1"
+            font.pixelSize: 45
+            font.bold: true
+            color: "white"
+            padding: 8 // 留点内边距，避免文字贴边
+
+            // 根据横屏/竖屏自动旋转
+            rotation: isLandscape ? 90 : 0
+            // 旋转中心设为文本中心
+            transformOrigin: Item.Center
+        }
+
+        // 自动隐藏计时器
+        Timer {
+            id: hideTimer
+            interval: 3000
+            onTriggered: pageIndicator.visible = false
+        }
+
+        // 对外方法：显示页码（无任何多余判断）
+        function showPage(current, total) {
+
+            pageIndicator.visible = true
+            mytext.text = current
+
+            // 定时关闭
+            // hideTimer.restart()
+        }
     }
 }

@@ -1254,21 +1254,30 @@ qreal Reader::getVHeight() {
 }
 
 void Reader::showInfo() {
+  int cPage = 0, tPage = 0;
   if (isText) {
-    mui->btnPages->setText(QString::number(currentPage + 1) + "\n" +
-                           QString::number(totalPages));
-    mui->progReader->setMaximum(totalPages);
-    mui->progReader->setValue(currentPage + 1);
+    cPage = currentPage + 1;
+    tPage = totalPages;
   }
 
   if (isEpub) {
-    mui->btnPages->setText(QString::number(htmlIndex + 1) + "\n" +
-                           QString::number(htmlFiles.count()));
-    mui->progReader->setMaximum(htmlFiles.count());
-    mui->progReader->setValue(htmlIndex + 1);
+    cPage = htmlIndex + 1;
+    tPage = htmlFiles.count();
   }
 
+  mui->btnPages->setText(QString::number(cPage) + "\n" +
+                         QString::number(tPage));
+  mui->progReader->setMaximum(tPage);
+  mui->progReader->setValue(cPage);
+
   m_ReaderSet->updateProgress();
+
+  updateReaderProperty(cPage, tPage);
+}
+
+void Reader::updateReaderProperty(int currentPage, int totalPages) {
+  mui->qwReader->rootContext()->setContextProperty("currentPage", currentPage);
+  mui->qwReader->rootContext()->setContextProperty("totalPages", totalPages);
 }
 
 void Reader::SplitFile(QString qfile) {

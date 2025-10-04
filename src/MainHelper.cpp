@@ -535,6 +535,8 @@ void MainHelper::initMainQW() {
   mui->qwReader->rootContext()->setContextProperty("m_Reader",
                                                    mw_one->m_Reader);
   mui->qwReader->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwReader->rootContext()->setContextProperty("currentPage", currentPage);
+  mui->qwReader->rootContext()->setContextProperty("totalPages", totalPages);
   mui->qwReader->rootContext()->setContextProperty("m_PageIndicator",
                                                    mw_one->m_PageIndicator);
   mui->qwReader->rootContext()->setContextProperty("myBackgroundColor",

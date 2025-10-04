@@ -1580,6 +1580,7 @@ void MainWindow::on_hSlider_sliderMoved(int position) {
   if (isText) {
     mui->btnPages->setText(QString::number(position) + "\n" +
                            QString::number(totalPages));
+    m_Reader->updateReaderProperty(position, totalPages);
     mui->progReader->setMinimum(1);
     mui->progReader->setMaximum(totalPages);
     mui->progReader->setValue(position);
@@ -1588,6 +1589,7 @@ void MainWindow::on_hSlider_sliderMoved(int position) {
   if (isEpub) {
     mui->btnPages->setText(QString::number(position) + "\n" +
                            QString::number(htmlFiles.count()));
+    m_Reader->updateReaderProperty(position, htmlFiles.count());
     mui->progReader->setMinimum(1);
     mui->progReader->setMaximum(htmlFiles.count());
     if (position == 0) position = 1;

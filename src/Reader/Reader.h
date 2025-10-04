@@ -165,6 +165,7 @@ class Reader : public QDialog {
   void openReader();
   QString getReadTotalTime();
 
+  void updateReaderProperty(int currentPage, int totalPages);
  public slots:
   void on_SetReaderFunVisible();
 
