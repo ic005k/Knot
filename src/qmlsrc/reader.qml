@@ -411,42 +411,35 @@ Item {
     }
 
     function showBookPageNext() {
+
         pageIndicator.showPage(currentPage + 1, totalPages)
-        pageIndicator.visible = true
     }
 
     function showBookPageUp() {
+
         pageIndicator.showPage(currentPage - 1, totalPages)
-        pageIndicator.visible = true
     }
 
     function closeBookPage() {
-        pageIndicator.visible = false
+        pageIndicator.hide()
     }
 
     Item {
         id: pageIndicator
-        // 固定尺寸
         width: 150
         height: 60
-        // 关键：屏幕中央
         anchors.centerIn: parent
-        visible: false // 默认隐藏
+        opacity: 0 // 初始透明，不隐藏
 
-        // 半透明背景
         Rectangle {
             anchors.fill: parent
             color: "black"
             opacity: 0.7
             radius: 4
-
-            // 根据横屏/竖屏自动旋转
             rotation: isLandscape ? 90 : 0
-            // 旋转中心设为文本中心
             transformOrigin: Item.Center
         }
 
-        // 页码文本
         Text {
             id: mytext
             anchors.centerIn: parent
@@ -454,29 +447,49 @@ Item {
             font.pixelSize: 45
             font.bold: true
             color: "white"
-            padding: 8 // 留点内边距，避免文字贴边
-
-            // 根据横屏/竖屏自动旋转
+            padding: 8
             rotation: isLandscape ? 90 : 0
-            // 旋转中心设为文本中心
             transformOrigin: Item.Center
         }
 
-        // 自动隐藏计时器
+        // 淡入动画
+        PropertyAnimation {
+            id: fadeInAnim
+            target: pageIndicator
+            property: "opacity"
+            to: 1
+            duration: 300
+        }
+
+        // 淡出动画
+        PropertyAnimation {
+            id: fadeOutAnim
+            target: pageIndicator
+            property: "opacity"
+            to: 0
+            duration: 300
+        }
+
+        // 备用 Timer（默认不启动）
         Timer {
             id: hideTimer
             interval: 3000
-            onTriggered: pageIndicator.visible = false
+            onTriggered: hide()
         }
 
-        // 对外方法：显示页码（无任何多余判断）
+        function show() {
+            fadeOutAnim.stop() // 防止淡出中突然淡入
+            fadeInAnim.start()
+        }
+
+        function hide() {
+            fadeInAnim.stop() // 防止淡入中突然淡出
+            fadeOutAnim.start()
+        }
+
         function showPage(current, total) {
-
-            pageIndicator.visible = true
             mytext.text = current
-
-            // 定时关闭
-            // hideTimer.restart()
+            show()
         }
     }
 }
