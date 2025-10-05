@@ -644,8 +644,6 @@ Item {
         focus: true
         anchors.centerIn: Overlay.overlay
 
-
-
         function showNote(content, index) {
             noteContent.text = content
             currentNoteIndex = index
@@ -673,6 +671,7 @@ Item {
             }
 
             RowLayout {
+                Layout.alignment: Qt.AlignHCenter
                 Button {
                     text: qsTr("Edit")
                     onClicked: {
@@ -681,12 +680,15 @@ Item {
                                            "content": noteContent.text
                                        })
                         notePopup.close()
+                        m_Reader.editBookNote(currentNoteIndex,
+                                              noteContent.text)
                     }
                 }
                 Button {
                     text: qsTr("Del")
                     onClicked: {
                         notesModel.remove(currentNoteIndex)
+                        m_Reader.delReadNote(currentNoteIndex)
                         notePopup.close()
                     }
                 }
@@ -886,6 +888,23 @@ Item {
             end: 310
             color: "#8000FF50"
             content: "这是第3条笔记的内容"
+        }
+    }
+
+    // 自动刷新笔记模型数据
+    Connections {
+        target: m_Reader
+        onNotesLoaded: function (notes) {
+            notesModel.clear()
+            for (var i = 0; i < notes.length; i++) {
+                var n = notes[i]
+                notesModel.append({
+                                      "start": n.start,
+                                      "end": n.end,
+                                      "color": n.color,
+                                      "content": n.content
+                                  })
+            }
         }
     }
 }

@@ -1256,7 +1256,8 @@ qreal Reader::getVHeight() {
 }
 
 void Reader::showInfo() {
-  int cPage = 0, tPage = 0;
+  cPage = 0;
+  int tPage = 0;
   if (isText) {
     cPage = currentPage + 1;
     tPage = totalPages;
@@ -1275,6 +1276,7 @@ void Reader::showInfo() {
   m_ReaderSet->updateProgress();
 
   updateReaderProperty(cPage, tPage);
+  readReadNote(cPage);
 }
 
 void Reader::updateReaderProperty(int currentPage, int totalPages) {
@@ -3386,12 +3388,301 @@ void Reader::addBookNote() {
   QVBoxLayout *layout = new QVBoxLayout(&dlg);
   layout->addWidget(textEdit);
   layout->addWidget(buttonBox);
+  m_Method->set_ToolButtonStyle(&dlg);
 
   if (dlg.exec() == QDialog::Accepted) {
     QString noteText = textEdit->toPlainText();
     // 在这里处理用户输入的笔记内容
+
+    QTextCursor cursor = mui->textBrowser->textCursor();
+    int start = 0, end = 0;
+    if (cursor.hasSelection()) {
+      start = cursor.selectionStart();
+      end = cursor.selectionEnd();
+      qDebug() << "Selection start:" << start << " end:" << end;
+    } else {
+      qDebug() << "No text selected.";
+    }
+
+    QString color = "#8500FF00";
+    saveReadNote(cPage, start, end, color, noteText);
+    readReadNote(cPage);
+
     qDebug() << "Note added:" << noteText;
   } else {
     qDebug() << "Note canceled.";
   }
+}
+
+void Reader::editBookNote(int index, const QString &content) {
+  QDialog dlg(this);
+  dlg.setWindowTitle(tr("Note"));
+
+  QTextEdit *textEdit = new QTextEdit(&dlg);
+
+  QDialogButtonBox *buttonBox = new QDialogButtonBox(
+      QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+  buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Ok"));
+  buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+
+  QObject::connect(buttonBox, &QDialogButtonBox::accepted, &dlg,
+                   &QDialog::accept);
+  QObject::connect(buttonBox, &QDialogButtonBox::rejected, &dlg,
+                   &QDialog::reject);
+
+  QVBoxLayout *layout = new QVBoxLayout(&dlg);
+  layout->addWidget(textEdit);
+  layout->addWidget(buttonBox);
+  m_Method->set_ToolButtonStyle(&dlg);
+
+  textEdit->setPlainText(content);
+
+  if (dlg.exec() == QDialog::Accepted) {
+    QString noteText = textEdit->toPlainText();
+
+    updateReadNote(cPage, index, noteText);
+
+    qDebug() << "Note added:" << noteText;
+  } else {
+    qDebug() << "Note canceled.";
+  }
+}
+
+void Reader::saveReadNote(int page, int start, int end, const QString &color,
+                          const QString &content) {
+  QString file = iniDir + "memo/readnote/" + currentBookName + ".json";
+
+  // 确保目录存在
+  QDir().mkpath(QFileInfo(file).path());
+
+  // 读取已有 JSON 数据
+  QJsonDocument doc;
+  if (QFile::exists(file)) {
+    QFile f(file);
+    if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      QByteArray data = f.readAll();
+      doc = QJsonDocument::fromJson(data);
+      f.close();
+    }
+  }
+
+  // 如果文件为空，创建一个空对象
+  if (doc.isNull()) {
+    doc.setObject(QJsonObject());
+  }
+
+  QJsonObject root = doc.object();
+
+  // 获取 page 对应的数组（如果不存在则新建）
+  QJsonArray pageArray;
+  if (root.contains(QString::number(page))) {
+    pageArray = root[QString::number(page)].toArray();
+  }
+
+  // 创建新的笔记对象
+  QJsonObject noteObj;
+  noteObj["start"] = start;
+  noteObj["end"] = end;
+  noteObj["color"] = color;
+  noteObj["content"] = content;
+  noteObj["timestamp"] = QDateTime::currentMSecsSinceEpoch();  // 增加时间戳
+
+  // 追加到数组
+  pageArray.append(noteObj);
+
+  // 更新 root 对象
+  root[QString::number(page)] = pageArray;
+  doc.setObject(root);
+
+  // 写回文件
+  QFile f(file);
+  if (f.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    f.write(doc.toJson(QJsonDocument::Indented));
+    f.close();
+  }
+}
+
+void Reader::readReadNote(int page) {
+  QString file = iniDir + "memo/readnote/" + currentBookName + ".json";
+
+  QFile f(file);
+  if (!f.exists()) {
+    qDebug() << "Note file not exists:" << file;
+    return;
+  }
+
+  if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    qDebug() << "Failed to open note file:" << f.errorString();
+    return;
+  }
+
+  QByteArray data = f.readAll();
+  f.close();
+
+  QJsonDocument doc = QJsonDocument::fromJson(data);
+  if (doc.isNull()) {
+    qDebug() << "Failed to parse JSON";
+    return;
+  }
+
+  QJsonObject root = doc.object();
+
+  // 获取 page 对应的笔记数组
+  if (root.contains(QString::number(page))) {
+    QJsonArray pageArray = root[QString::number(page)].toArray();
+
+    // 转换为 QVariantList，方便 QML 接收
+    QVariantList notesList;
+    for (int i = 0; i < pageArray.size(); ++i) {
+      QJsonObject noteObj = pageArray[i].toObject();
+      QVariantMap noteMap;
+      noteMap["start"] = noteObj["start"].toInt();
+      noteMap["end"] = noteObj["end"].toInt();
+      noteMap["color"] = noteObj["color"].toString();
+      noteMap["content"] = noteObj["content"].toString();
+      notesList.append(noteMap);
+    }
+
+    // TODO: 将 notesList 传递给 QML 的 notesModel
+    emit notesLoaded(notesList);
+  } else {
+    qDebug() << "No notes for page:" << page;
+    emit notesLoaded(QVariantList());  // 发送空列表
+  }
+}
+
+void Reader::delReadNote(int index) {
+  int page = cPage;
+  QString file = iniDir + "memo/readnote/" + currentBookName + ".json";
+
+  // 如果文件不存在，直接返回
+  if (!QFile::exists(file)) {
+    qDebug() << "Note file not exists:" << file;
+    return;
+  }
+
+  // 打开并读取 JSON
+  QFile f(file);
+  if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    qDebug() << "Failed to open note file for reading:" << f.errorString();
+    return;
+  }
+
+  QByteArray data = f.readAll();
+  f.close();
+
+  QJsonDocument doc = QJsonDocument::fromJson(data);
+  if (doc.isNull()) {
+    qDebug() << "Failed to parse JSON";
+    return;
+  }
+
+  QJsonObject root = doc.object();
+
+  // 检查 page 是否存在
+  QString pageKey = QString::number(page);
+  if (!root.contains(pageKey)) {
+    qDebug() << "No notes for page:" << page;
+    return;
+  }
+
+  QJsonArray notesArray = root[pageKey].toArray();
+
+  // 检查 index 是否有效
+  if (index < 0 || index >= notesArray.size()) {
+    qDebug() << "Invalid note index:" << index;
+    return;
+  }
+
+  // 删除指定索引的笔记
+  notesArray.removeAt(index);
+
+  // 如果删除后该 page 没有笔记，可将其从 JSON 中移除（可选）
+  if (notesArray.isEmpty()) {
+    root.remove(pageKey);
+  } else {
+    root[pageKey] = notesArray;
+  }
+
+  // 写回文件
+  if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    qDebug() << "Failed to open note file for writing:" << f.errorString();
+    return;
+  }
+
+  doc.setObject(root);
+  f.write(doc.toJson(QJsonDocument::Indented));
+  f.close();
+
+  qDebug() << "Note at index" << index << "on page" << page
+           << "has been deleted.";
+
+  // 刷新 QML 中的笔记模型(备选)
+  // readReadNote(page);
+}
+
+void Reader::updateReadNote(int page, int index, const QString &content) {
+  QString file = iniDir + "memo/readnote/" + currentBookName + ".json";
+
+  // 文件不存在则无法更新
+  if (!QFile::exists(file)) {
+    qDebug() << "Note file not exists:" << file;
+    return;
+  }
+
+  // 读取 JSON 文件
+  QFile f(file);
+  if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    qDebug() << "Failed to open note file for reading:" << f.errorString();
+    return;
+  }
+
+  QByteArray data = f.readAll();
+  f.close();
+
+  QJsonDocument doc = QJsonDocument::fromJson(data);
+  if (doc.isNull()) {
+    qDebug() << "Failed to parse JSON";
+    return;
+  }
+
+  QJsonObject root = doc.object();
+  QString pageKey = QString::number(page);
+
+  // 如果 page 不存在，直接返回
+  if (!root.contains(pageKey)) {
+    qDebug() << "No notes for page:" << page;
+    return;
+  }
+
+  QJsonArray notesArray = root[pageKey].toArray();
+
+  // 检查 index 是否有效
+  if (index < 0 || index >= notesArray.size()) {
+    qDebug() << "Invalid note index:" << index;
+    return;
+  }
+
+  // 更新 content
+  QJsonObject noteObj = notesArray[index].toObject();
+  noteObj["content"] = content;  // 只更新内容，保留原 start/end/color
+  notesArray.replace(index, noteObj);
+
+  // 写回 JSON
+  root[pageKey] = notesArray;
+  doc.setObject(root);
+
+  if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    qDebug() << "Failed to open note file for writing:" << f.errorString();
+    return;
+  }
+
+  f.write(doc.toJson(QJsonDocument::Indented));
+  f.close();
+
+  qDebug() << "Note at index" << index << "on page" << page
+           << "has been updated.";
+
+  // 刷新 QML 模型
+  readReadNote(page);
 }

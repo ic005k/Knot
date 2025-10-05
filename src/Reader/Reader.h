@@ -168,7 +168,8 @@ class Reader : public QDialog {
   void showBookPageUp();
   void closeBookPage();
   void addBookNote();
-  public slots:
+  void readReadNote(int page);
+ public slots:
   void on_SetReaderFunVisible();
 
   void setPageScroll0();
@@ -188,6 +189,9 @@ class Reader : public QDialog {
   void closeEvent(QCloseEvent *event) override;
   void paintEvent(QPaintEvent *event) override;
 
+ signals:
+  void notesLoaded(const QVariantList &notes);
+
  public slots:
   void openBookListItem();
 
@@ -196,7 +200,9 @@ class Reader : public QDialog {
   void goNextPage();
   void goUpPage();
 
- private slots:
+  void delReadNote(int index);
+  void editBookNote(int index, const QString &content);
+  private slots:
   void autoRun();
 
  private:
@@ -238,8 +244,12 @@ class Reader : public QDialog {
   bool getQmlReadyEnd();
   double readTotalHours();
   bool writeTotalHours(double value);
+  void saveReadNote(int page, int start, int end, const QString &color,
+                    const QString &content);
+  int cPage;
+  void updateReadNote(int page, int index, const QString &content);
 };
-
+///////////////////////////////////////////////////////////////////////////////////
 class TextChunkModel : public QAbstractListModel {
   Q_OBJECT
  public:
