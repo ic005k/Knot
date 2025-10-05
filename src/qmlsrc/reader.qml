@@ -23,6 +23,19 @@ Item {
     property int lastTouchUpdate: 0
     property int touchThrottle: 16 // 50ms 内最多更新一次
 
+    // 笔记功能
+    property var notesModel0: [{
+            "start": 50,
+            "end": 120,
+            "color": "#FF572280",
+            "content": "这是第一条笔记的内容"
+        }, {
+            "start": 200,
+            "end": 250,
+            "color": "#4CAF5080",
+            "content": "这是第二条笔记的内容"
+        }]
+
     // 横屏控制变量
     property bool isLandscape: false
     property bool isReadyEnd: false
@@ -81,6 +94,7 @@ Item {
     function loadHtmlBuffer(strhtml) {
         textModel.splitContent(strhtml)
         isEPUBText = true
+        strText = strhtml
     }
     function setVPos(vpos) {
         contentListView.contentY = vpos
@@ -283,7 +297,7 @@ Item {
                 }
             }
 
-            delegate: Text {
+            delegate: TextEdit {
                 id: m_text
                 width: rotateContainer.width
                 leftPadding: 10
@@ -296,6 +310,151 @@ Item {
                 color: myTextColor
                 renderType: Text.QtRendering
 
+                readOnly: true
+                selectByMouse: true
+
+                // 笔记高亮渲染 - 仅渲染，不添加交互
+                Repeater {
+                    id: notesRepeater
+                    model: notesModel
+
+                    delegate: Item {
+                        id: noteDelegate
+
+                        // 检查位置是否有效
+                        property bool isValidPosition: model.start >= 0
+                                                       && model.end <= m_text.length
+
+                        // 计算起始和结束位置
+                        property var startRect: isValidPosition ? m_text.positionToRectangle(
+                                                                      model.start) : null
+                        property var endRect: isValidPosition ? m_text.positionToRectangle(
+                                                                    model.end) : null
+
+                        // 确保颜色值有效
+                        property color noteColor: model.color ? model.color : "#FFFF0080"
+
+                        // 单行笔记
+                        Rectangle {
+                            id: noteRect
+                            visible: isValidPosition && startRect && endRect
+                                     && startRect.y === endRect.y
+                            color: noteDelegate.noteColor
+                            opacity: 0.4
+                            x: startRect ? startRect.x : 0
+                            y: startRect ? startRect.y : 0
+                            width: startRect
+                                   && endRect ? (endRect.x + endRect.width - x) : 0
+                            height: startRect ? startRect.height : 0
+                            z: 5 // 确保在文本下方
+                        }
+
+                        // 跨行笔记
+                        Repeater {
+                            model: isValidPosition && startRect && endRect
+                                   && startRect.y
+                                   !== endRect.y ? Math.floor(
+                                                       (endRect.y - startRect.y)
+                                                       / startRect.height) + 1 : 0
+
+                            delegate: Rectangle {
+                                id: multiLineRect
+                                color: noteDelegate.noteColor
+                                opacity: 0.4
+                                x: index === 0 ? (startRect ? startRect.x : 0) : 0
+                                y: startRect ? startRect.y + index * startRect.height : 0
+                                width: {
+                                    if (!startRect || !endRect)
+                                        return 0
+                                    if (index === 0)
+                                        return m_text.width - x // 第一行
+                                    if (index === parent.model - 1)
+                                        return endRect.x + endRect.width // 最后一行
+                                    return m_text.width // 中间行
+                                }
+                                height: startRect ? startRect.height : 0
+                                z: 5 // 确保在文本下方
+                            }
+                        }
+                    }
+                }
+
+                MouseArea {
+                    id: textMouseArea
+                    anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton
+                    propagateComposedEvents: true
+
+                    onClicked: function (mouse) {
+                        // 检查是否点击了笔记区域
+                        var clickedNote = false
+                        var noteContent = ""
+                        var noteIndex = -1
+
+                        for (var i = 0; i < notesModel.count; i++) {
+                            if (isPointInNote(mouse.x, mouse.y, i)) {
+                                clickedNote = true
+                                noteIndex = i
+                                noteContent = notesModel.get(i).content
+                                console.log("点击了笔记区域")
+                                break
+                            }
+                        }
+
+                        if (clickedNote) {
+                            console.log("显示笔记内容:", noteContent)
+                            notePopup.showNote(noteContent)
+                            mouse.accepted = true
+                        } else if (!root.isMoving) {
+                            var link = m_text.linkAt(mouse.x, mouse.y)
+                            if (link) {
+                                root.handleLinkClicked(link)
+                            } else {
+                                console.log("点击了非链接区域（文本块：" + index + "）")
+                            }
+                        }
+                    }
+
+                    // 检查点是否在笔记区域内
+                    function isPointInNote(x, y, noteIndex) {
+                        // 获取笔记委托项
+                        var noteItem = notesRepeater.itemAt(noteIndex)
+                        if (!noteItem || !noteItem.isValidPosition)
+                            return false
+
+                        var startRect = noteItem.startRect
+                        var endRect = noteItem.endRect
+
+                        if (!startRect || !endRect)
+                            return false
+
+                        // 检查点是否在笔记区域内
+                        if (startRect.y === endRect.y) {
+                            return x >= startRect.x
+                                    && x <= endRect.x + endRect.width
+                                    && y >= startRect.y
+                                    && y <= startRect.y + startRect.height
+                        } else {
+                            // 跨行笔记处理
+                            var lineHeight = startRect.height
+                            var startY = startRect.y
+                            var endY = endRect.y
+
+                            // 检查点是否在笔记区域内
+                            if (y >= startY && y <= endY + lineHeight) {
+                                if (y === startY) {
+                                    return x >= startRect.x
+                                } else if (y === endY) {
+                                    return x <= endRect.x + endRect.width
+                                } else {
+                                    return true
+                                }
+                            }
+                        }
+                        return false
+                    }
+                }
+
                 //onLinkActivated: handleLinkClicked(link)
                 PropertyAnimation on x {
                     easing.type: Easing.Linear
@@ -306,13 +465,13 @@ Item {
                     loops: 1
                 }
 
-                // ！！！delegate内部的MouseArea：处理点击链接、双击、长按
-                MouseArea {
+
+                /*MouseArea {
                     anchors.fill: parent
                     acceptedButtons: Qt.LeftButton // 只处理左键点击
                     propagateComposedEvents: false // 不传递事件（避免和全局冲突）
 
-                    onClicked: {
+                    onClicked: function (mouse) {
                         // 只有“非滑动”时才处理点击
                         if (!root.isMoving) {
                             // ！！！这里能直接访问m_text（同delegate作用域）
@@ -324,7 +483,9 @@ Item {
                             }
                         }
                     }
-                }
+                }*/
+
+                ////////////////////////////////////////////////////
             }
 
             // 滚动条
@@ -333,6 +494,64 @@ Item {
                 width: 8
             }
         }
+
+        // ==============================================
+        Item {}
+        // ==============================================
+        // 【新增结束】
+        // ==============================================
+    }
+
+    // 笔记详情弹窗
+    Popup {
+        id: notePopup
+        width: 300
+        height: 200
+        modal: true
+        focus: true
+        anchors.centerIn: Overlay.overlay
+
+        // 修复：确保正确显示笔记内容
+        function showNote(content) {
+            noteContent.text = content
+            open()
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 10
+
+            Label {
+                text: "笔记内容:"
+                font.bold: true
+            }
+
+            ScrollView {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                TextArea {
+                    id: noteContent
+                    readOnly: true
+                    wrapMode: Text.Wrap
+                }
+            }
+
+            Button {
+                text: "关闭"
+                onClicked: notePopup.close()
+            }
+        }
+    }
+
+    // 添加新笔记的函数
+    function addNote(start, end, color, content) {
+        notesModel.append({
+                              "start": start,
+                              "end": end,
+                              "color": color,
+                              "content": content
+                          })
     }
 
     // 横屏切换按钮
@@ -490,6 +709,29 @@ Item {
         function showPage(current, total) {
             mytext.text = current
             show()
+        }
+    }
+
+    ListModel {
+        id: notesModel
+        ListElement {
+            start: 50
+            end: 120
+            color: "#FF572280"
+            content: "这是第1条笔记的内容"
+        }
+        ListElement {
+            start: 200
+            end: 250
+            color: "#4CAF5080"
+            content: "这是第2条笔记的内容"
+        }
+
+        ListElement {
+            start: 300
+            end: 310
+            color: "#8000FF50"
+            content: "这是第3条笔记的内容"
         }
     }
 }
