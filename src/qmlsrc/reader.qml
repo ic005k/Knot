@@ -433,7 +433,7 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            color: "black"
+            color: "#3A362E"
             opacity: 0.7
             radius: 4
             rotation: isLandscape ? 90 : 0
@@ -446,7 +446,7 @@ Item {
             text: "1/1"
             font.pixelSize: 45
             font.bold: true
-            color: "white"
+            color: "#F0E6D2"
             padding: 8
             rotation: isLandscape ? 90 : 0
             transformOrigin: Item.Center
