@@ -24,17 +24,11 @@ Item {
     property int touchThrottle: 16 // 50ms 内最多更新一次
 
     // 笔记功能
-    property var notesModel0: [{
-            "start": 50,
-            "end": 120,
-            "color": "#FF572280",
-            "content": "这是第一条笔记的内容"
-        }, {
-            "start": 200,
-            "end": 250,
-            "color": "#4CAF5080",
-            "content": "这是第二条笔记的内容"
-        }]
+    property bool isSelectionMode: false // 是否处于文本选择模式
+    property int selectionStart: -1 // 文本选择起始位置
+    property int selectionEnd: -1 // 文本选择结束位置
+    property color selectionColor: "#FFFF0080" // 选择高亮颜色
+    property int currentNoteIndex: -1 // 当前点击的笔记索引
 
     // 横屏控制变量
     property bool isLandscape: false
@@ -233,6 +227,7 @@ Item {
         // 内容列表
         ListView {
             id: contentListView
+            visible: !isSelectionMode // 选择模式下隐藏
             width: rotateContainer.width
             height: rotateContainer.height
             spacing: 5
@@ -254,8 +249,17 @@ Item {
                 }
 
                 onPressAndHold: {
+
                     if (!isMoving)
                         mw_one.on_btnSelText_clicked()
+
+
+                    /*if (!root.isMoving) {
+                        // 进入选择模式
+                        root.isSelectionMode = true
+                        root.selectionStart = -1
+                        root.selectionEnd = -1
+                    }*/
                 }
 
                 onPositionChanged: {
@@ -311,7 +315,7 @@ Item {
                 renderType: Text.QtRendering
 
                 readOnly: true
-                selectByMouse: true
+                selectByMouse: false
 
                 // 笔记高亮渲染 - 仅渲染，不添加交互
                 Repeater {
@@ -403,7 +407,8 @@ Item {
 
                         if (clickedNote) {
                             console.log("显示笔记内容:", noteContent)
-                            notePopup.showNote(noteContent)
+                            //notePopup.showNote(noteContent)
+                            notePopup.showNote(noteContent, noteIndex) // 传递索引
                             mouse.accepted = true
                         } else if (!root.isMoving) {
                             var link = m_text.linkAt(mouse.x, mouse.y)
@@ -465,26 +470,6 @@ Item {
                     loops: 1
                 }
 
-
-                /*MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.LeftButton // 只处理左键点击
-                    propagateComposedEvents: false // 不传递事件（避免和全局冲突）
-
-                    onClicked: function (mouse) {
-                        // 只有“非滑动”时才处理点击
-                        if (!root.isMoving) {
-                            // ！！！这里能直接访问m_text（同delegate作用域）
-                            var link = m_text.linkAt(mouse.x, mouse.y)
-                            if (link) {
-                                root.handleLinkClicked(link) // 调用全局的链接处理函数
-                            } else {
-                                console.log("点击了非链接区域（文本块：" + index + "）")
-                            }
-                        }
-                    }
-                }*/
-
                 ////////////////////////////////////////////////////
             }
 
@@ -496,14 +481,123 @@ Item {
         }
 
         // ==============================================
-        Item {}
+        // 选择渲染层（覆盖在文本层上方）
+        Item {
+            id: selectionLayer
+            anchors.fill: parent
+            visible: isSelectionMode
+
+            // 关键修复：添加滚动视图
+            ScrollView {
+                id: selectionScrollView
+                anchors.fill: parent
+                contentWidth: selectionListView.contentWidth
+                contentHeight: selectionListView.contentHeight
+                clip: true
+
+                // 同步滚动位置
+                Component.onCompleted: {
+                    contentY = contentListView.contentY
+                }
+
+                // 文本选择渲染
+                ListView {
+                    id: selectionListView
+                    width: rotateContainer.width
+                    height: rotateContainer.height
+                    model: textModel
+                    spacing: contentListView.spacing
+                    contentY: contentListView.contentY // 同步滚动位置
+
+                    delegate: TextEdit {
+                        id: selectionText
+                        width: rotateContainer.width
+                        leftPadding: 10
+                        rightPadding: 10
+                        textFormat: Text.RichText
+                        text: model.text
+                        wrapMode: Text.Wrap
+                        font.pixelSize: FontSize
+                        font.family: FontName
+                        color: myTextColor
+                        renderType: Text.QtRendering
+
+                        // 可编辑模式
+                        readOnly: true
+                        selectByMouse: true
+
+                        // 文本选择高亮
+                        Rectangle {
+                            visible: selectionText.selectedText.length > 0
+                            color: selectionColor
+                            opacity: 0.4
+                            x: selectionText.positionToRectangle(
+                                   selectionText.selectionStart).x
+                            y: selectionText.positionToRectangle(
+                                   selectionText.selectionStart).y
+                            width: selectionText.positionToRectangle(
+                                       selectionText.selectionEnd).x
+                                   + selectionText.positionToRectangle(
+                                       selectionText.selectionEnd).width - x
+                            height: selectionText.positionToRectangle(
+                                        selectionText.selectionStart).height
+                        }
+                    }
+                }
+            }
+
+            // 笔记操作工具栏
+            Row {
+                anchors.top: parent.top
+                anchors.right: parent.right
+                spacing: 10
+                padding: 10
+                z: 100
+
+                Button {
+                    text: "添加笔记"
+                    onClicked: {
+                        // 获取当前选择的文本和位置
+                        var selectedText = ""
+                        var startPos = -1
+                        var endPos = -1
+
+                        // 查找当前选择的文本块
+                        for (var i = 0; i < selectionListView.contentItem.children.length; i++) {
+                            var child = selectionListView.contentItem.children[i]
+                            if (child.selectedText
+                                    && child.selectedText.length > 0) {
+                                selectedText = child.selectedText
+                                startPos = child.selectionStart
+                                endPos = child.selectionEnd
+                                break
+                            }
+                        }
+
+                        if (selectedText.length > 0) {
+                            noteDialog.showDialog(selectedText,
+                                                  startPos, endPos)
+                        }
+                    }
+                }
+
+                Button {
+                    text: "取消"
+                    onClicked: {
+                        root.isSelectionMode = false
+                    }
+                }
+            }
+        }
         // ==============================================
         // 【新增结束】
         // ==============================================
     }
 
     // 笔记详情弹窗
-    Popup {
+
+
+    /*Popup {
         id: notePopup
         width: 300
         height: 200
@@ -511,7 +605,6 @@ Item {
         focus: true
         anchors.centerIn: Overlay.overlay
 
-        // 修复：确保正确显示笔记内容
         function showNote(content) {
             noteContent.text = content
             open()
@@ -540,6 +633,67 @@ Item {
             Button {
                 text: "关闭"
                 onClicked: notePopup.close()
+            }
+        }
+    }*/
+    Popup {
+        id: notePopup
+        width: 300
+        height: 200
+        modal: true
+        focus: true
+        anchors.centerIn: Overlay.overlay
+
+
+
+        function showNote(content, index) {
+            noteContent.text = content
+            currentNoteIndex = index
+            open()
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 10
+
+            Label {
+                text: qsTr("Note Content:")
+                font.bold: true
+            }
+
+            ScrollView {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                TextArea {
+                    id: noteContent
+                    readOnly: true
+                    wrapMode: Text.Wrap
+                }
+            }
+
+            RowLayout {
+                Button {
+                    text: qsTr("Edit")
+                    onClicked: {
+                        // 打开编辑弹窗，修改后更新模型
+                        notesModel.set(currentNoteIndex, {
+                                           "content": noteContent.text
+                                       })
+                        notePopup.close()
+                    }
+                }
+                Button {
+                    text: qsTr("Del")
+                    onClicked: {
+                        notesModel.remove(currentNoteIndex)
+                        notePopup.close()
+                    }
+                }
+                Button {
+                    text: qsTr("Close")
+                    onClicked: notePopup.close()
+                }
             }
         }
     }

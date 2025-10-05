@@ -2723,3 +2723,5 @@ void MainWindow::on_btnShareBookText_clicked() {
     mw_one->m_ReceiveShare->shareString(tr("Share to"), txt);
   }
 }
+
+void MainWindow::on_btnAddBookNote_clicked() { m_Reader->addBookNote(); }

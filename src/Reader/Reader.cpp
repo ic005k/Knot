@@ -3366,3 +3366,32 @@ void Reader::closeBookPage() {
                   "(function not found?)";
   }
 }
+
+void Reader::addBookNote() {
+  QDialog dlg(this);
+  dlg.setWindowTitle(tr("Note"));  // 英文 tr 方式
+
+  QTextEdit *textEdit = new QTextEdit(&dlg);
+
+  QDialogButtonBox *buttonBox = new QDialogButtonBox(
+      QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+  buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Ok"));
+  buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+
+  QObject::connect(buttonBox, &QDialogButtonBox::accepted, &dlg,
+                   &QDialog::accept);
+  QObject::connect(buttonBox, &QDialogButtonBox::rejected, &dlg,
+                   &QDialog::reject);
+
+  QVBoxLayout *layout = new QVBoxLayout(&dlg);
+  layout->addWidget(textEdit);
+  layout->addWidget(buttonBox);
+
+  if (dlg.exec() == QDialog::Accepted) {
+    QString noteText = textEdit->toPlainText();
+    // 在这里处理用户输入的笔记内容
+    qDebug() << "Note added:" << noteText;
+  } else {
+    qDebug() << "Note canceled.";
+  }
+}

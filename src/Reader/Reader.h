@@ -167,7 +167,8 @@ class Reader : public QDialog {
   void showBookPageNext();
   void showBookPageUp();
   void closeBookPage();
- public slots:
+  void addBookNote();
+  public slots:
   void on_SetReaderFunVisible();
 
   void setPageScroll0();
