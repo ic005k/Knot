@@ -597,8 +597,8 @@ Item {
     // 笔记详情弹窗
     Popup {
         id: notePopup
-        width: 300
-        height: 300
+        width: 320
+        height: 360
         font.pointSize: FontSize
         modal: true
         focus: true
@@ -627,15 +627,44 @@ Item {
                 font.bold: true
             }
 
-            ScrollView {
+            Flickable {
+                id: flickable
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                contentWidth: noteContent.width
+                contentHeight: noteContent.implicitHeight
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                flickableDirection: Flickable.VerticalFlick
 
-                TextArea {
+                // 文本内容
+                TextEdit {
                     id: noteContent
+                    width: flickable.width
                     font.pointSize: FontSize
                     readOnly: true
-                    wrapMode: Text.WordWrap
+                    wrapMode: Text.Wrap
+                    selectByMouse: false
+                    textFormat: Text.PlainText
+
+                    // 确保文本区域高度正确
+                    onTextChanged: {
+                        // 强制更新布局
+                        noteContent.forceActiveFocus()
+                        Qt.callLater(() => {
+                                         flickable.contentHeight = noteContent.implicitHeight
+                                     })
+                    }
+                }
+
+                // 垂直滚动条
+                ScrollBar.vertical: ScrollBar {
+                    id: vbar
+                    policy: ScrollBar.AsNeeded
+                    width: 8
+                    anchors.top: parent.top
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
                 }
             }
 
