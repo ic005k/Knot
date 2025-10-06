@@ -53,6 +53,9 @@ class Reader : public QDialog {
   ~Reader();
   Ui::Reader *ui;
 
+  QDialog *dlgAddBookNote = nullptr;
+  QDialog *dlgEditBookNote = nullptr;
+
   bool isLandscape = false;
 
   qreal scrollValue = 1;

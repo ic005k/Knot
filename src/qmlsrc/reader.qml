@@ -599,7 +599,7 @@ Item {
         id: notePopup
         width: 300
         height: 300
-        font.pointSize: fontSize
+        font.pointSize: FontSize
         modal: true
         focus: true
         anchors.centerIn: Overlay.overlay
@@ -622,7 +622,7 @@ Item {
             anchors.margins: 10
 
             Label {
-                font.pointSize: fontSize
+                font.pointSize: FontSize
                 text: qsTr("Note Content:")
                 font.bold: true
             }
@@ -633,7 +633,7 @@ Item {
 
                 TextArea {
                     id: noteContent
-                    font.pointSize: fontSize
+                    font.pointSize: FontSize
                     readOnly: true
                     wrapMode: Text.WordWrap
                 }
@@ -642,7 +642,7 @@ Item {
             RowLayout {
                 Layout.alignment: Qt.AlignHCenter
                 Button {
-                    font.pointSize: fontSize
+                    font.pointSize: FontSize
                     text: qsTr("Edit")
                     onClicked: {
                         // 打开编辑弹窗，修改后更新模型
@@ -655,7 +655,7 @@ Item {
                     }
                 }
                 Button {
-                    font.pointSize: fontSize
+                    font.pointSize: FontSize
                     text: qsTr("Del")
                     onClicked: {
 
@@ -666,7 +666,7 @@ Item {
                     }
                 }
                 Button {
-                    font.pointSize: fontSize
+                    font.pointSize: FontSize
                     text: qsTr("Close")
                     onClicked: notePopup.close()
                 }
@@ -676,7 +676,7 @@ Item {
 
     Dialog {
         id: deleteConfirmDialog
-        font.pointSize: fontSize
+        font.pointSize: FontSize
         title: qsTr("Delete Confirmation")
 
         modal: true
@@ -687,7 +687,7 @@ Item {
         y: (parent.height - height) / 2
 
         Label {
-            font.pointSize: fontSize
+            font.pointSize: FontSize
             text: qsTr("Are you sure you want to delete this note?")
             anchors.centerIn: parent
         }

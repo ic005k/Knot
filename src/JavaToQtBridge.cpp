@@ -247,6 +247,13 @@ static void JavaNotify_15() {
     }
   }
 
+  if (textToolbar != nullptr) {
+    if (textToolbar->isVisible()) {
+      textToolbar->hide();
+      return;
+    }
+  }
+
   if (mw_one->m_Preferences->textToolbarPreferences != nullptr) {
     if (mw_one->m_Preferences->textToolbarPreferences->isVisible()) {
       mw_one->m_Preferences->textToolbarPreferences->hide();
@@ -309,6 +316,26 @@ static void JavaNotify_15() {
   if (mw_one->m_StepsOptions->isVisible()) {
     mw_one->m_StepsOptions->ui->btnBack->click();
     return;
+  }
+
+  if (mui->qwViewBookNote->isVisible()) {
+    QTimer::singleShot(100, mw_one,
+                       []() { mw_one->m_Reader->closeViewBookNote(); });
+    return;
+  }
+
+  if (mw_one->m_Reader->dlgAddBookNote != nullptr) {
+    if (mw_one->m_Reader->dlgAddBookNote->isVisible()) {
+      mw_one->m_Reader->dlgAddBookNote->close();
+      return;
+    }
+  }
+
+  if (mw_one->m_Reader->dlgEditBookNote != nullptr) {
+    if (mw_one->m_Reader->dlgEditBookNote->isVisible()) {
+      mw_one->m_Reader->dlgEditBookNote->close();
+      return;
+    }
   }
 
   if (mui->f_ReaderFun2->isVisible()) {

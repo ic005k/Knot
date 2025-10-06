@@ -15,6 +15,7 @@
 
 #include "src/CloudBackup.h"
 #include "src/Comm/Method.h"
+#include "src/Comm/TextEditToolbar.h"
 
 // 用“前向声明”替代“#include 具体头文件”，避免循环引用
 class CloudBackup;
@@ -50,6 +51,7 @@ inline CategoryList *m_CategoryList;
 inline ColorDialog *colorDlg;
 inline PrintPDF *m_PrintPDF;
 inline QTreeWidget *twrb, *tw;
+inline TextEditToolbar *textToolbar = nullptr;
 
 inline QRegularExpression regxNumber("^-?[0-9.]*$");
 

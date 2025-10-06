@@ -3379,32 +3379,42 @@ void Reader::closeBookPage() {
 void Reader::addBookNote() {
   if (mui->editSetText->text().trimmed() == "") return;
 
-  QDialog dlg(mw_one);
-  dlg.setWindowTitle(tr("Note"));  // 英文 tr 方式
+  dlgAddBookNote = new QDialog(mw_one);
+  dlgAddBookNote->setFixedSize(320, 320);
+  dlgAddBookNote->setWindowTitle(tr("Note"));
 
-  QTextEdit *textEdit = new QTextEdit(&dlg);
+  QTextEdit *textEdit = new QTextEdit(dlgAddBookNote);
+
+  if (isAndroid) {
+    if (textToolbar != nullptr) delete textToolbar;
+    textToolbar = new TextEditToolbar(dlgAddBookNote);
+    EditEventFilter *editFilter =
+        new EditEventFilter(textToolbar, dlgAddBookNote);
+    textEdit->installEventFilter(editFilter);
+    textEdit->viewport()->installEventFilter(editFilter);
+  }
 
   QDialogButtonBox *buttonBox = new QDialogButtonBox(
-      QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+      QDialogButtonBox::Ok | QDialogButtonBox::Cancel, dlgAddBookNote);
   buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Ok"));
   buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
 
-  QObject::connect(buttonBox, &QDialogButtonBox::accepted, &dlg,
+  QObject::connect(buttonBox, &QDialogButtonBox::accepted, dlgAddBookNote,
                    &QDialog::accept);
-  QObject::connect(buttonBox, &QDialogButtonBox::rejected, &dlg,
+  QObject::connect(buttonBox, &QDialogButtonBox::rejected, dlgAddBookNote,
                    &QDialog::reject);
 
-  QVBoxLayout *layout = new QVBoxLayout(&dlg);
+  QVBoxLayout *layout = new QVBoxLayout(dlgAddBookNote);
   layout->addWidget(textEdit);
   layout->addWidget(buttonBox);
-  m_Method->set_ToolButtonStyle(&dlg);
+  m_Method->set_ToolButtonStyle(dlgAddBookNote);
 
-  dlg.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
-                                      dlg.sizeHint(),     // 使用建议大小
-                                      mw_one->geometry()  // 父窗口几何区域
-                                      ));
+  QRect parentRect = mw_one->geometry();
+  int x = parentRect.x() + (parentRect.width() - dlgAddBookNote->width()) / 2;
+  int y = 50;
+  dlgAddBookNote->move(x, y);
 
-  if (dlg.exec() == QDialog::Accepted) {
+  if (dlgAddBookNote->exec() == QDialog::Accepted) {
     QString noteText = textEdit->toPlainText();
     // 在这里处理用户输入的笔记内容
 
@@ -3430,34 +3440,44 @@ void Reader::addBookNote() {
 }
 
 void Reader::editBookNote(int index, const QString &content) {
-  QDialog dlg(mw_one);
-  dlg.setWindowTitle(tr("Note"));
+  dlgEditBookNote = new QDialog(mw_one);
+  dlgEditBookNote->setFixedSize(320, 320);
+  dlgEditBookNote->setWindowTitle(tr("Note"));
 
-  QTextEdit *textEdit = new QTextEdit(&dlg);
+  QTextEdit *textEdit = new QTextEdit(dlgEditBookNote);
+
+  if (isAndroid) {
+    if (textToolbar != nullptr) delete textToolbar;
+    textToolbar = new TextEditToolbar(dlgEditBookNote);
+    EditEventFilter *editFilter =
+        new EditEventFilter(textToolbar, dlgEditBookNote);
+    textEdit->installEventFilter(editFilter);
+    textEdit->viewport()->installEventFilter(editFilter);
+  }
 
   QDialogButtonBox *buttonBox = new QDialogButtonBox(
-      QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+      QDialogButtonBox::Ok | QDialogButtonBox::Cancel, dlgEditBookNote);
   buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Ok"));
   buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
 
-  QObject::connect(buttonBox, &QDialogButtonBox::accepted, &dlg,
+  QObject::connect(buttonBox, &QDialogButtonBox::accepted, dlgEditBookNote,
                    &QDialog::accept);
-  QObject::connect(buttonBox, &QDialogButtonBox::rejected, &dlg,
+  QObject::connect(buttonBox, &QDialogButtonBox::rejected, dlgEditBookNote,
                    &QDialog::reject);
 
-  QVBoxLayout *layout = new QVBoxLayout(&dlg);
+  QVBoxLayout *layout = new QVBoxLayout(dlgEditBookNote);
   layout->addWidget(textEdit);
   layout->addWidget(buttonBox);
-  m_Method->set_ToolButtonStyle(&dlg);
+  m_Method->set_ToolButtonStyle(dlgEditBookNote);
 
-  dlg.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
-                                      dlg.sizeHint(),     // 使用建议大小
-                                      mw_one->geometry()  // 父窗口几何区域
-                                      ));
+  QRect parentRect = mw_one->geometry();
+  int x = parentRect.x() + (parentRect.width() - dlgEditBookNote->width()) / 2;
+  int y = 50;
+  dlgEditBookNote->move(x, y);
 
   textEdit->setPlainText(content);
 
-  if (dlg.exec() == QDialog::Accepted) {
+  if (dlgEditBookNote->exec() == QDialog::Accepted) {
     QString noteText = textEdit->toPlainText();
 
     updateReadNote(cPage, index, noteText);

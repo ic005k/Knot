@@ -20,6 +20,8 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true // 关键：填充剩余高度
 
+            boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
+
             delegate: Rectangle {
                 id: itemDelegate
                 width: listView.width
@@ -43,7 +45,7 @@ Rectangle {
                             id: text0
                             width: parent.width
                             text: qsTr("Pages:") + model.page
-                            font.pointSize: 10
+                            font.pointSize: fontSize
                             color: "#333333"
                             wrapMode: Text.WordWrap
                         }
@@ -61,7 +63,7 @@ Rectangle {
                             anchors.fill: parent
                             anchors.margins: 4
                             text: model.quote
-                            font.pointSize: 10
+                            font.pointSize: fontSize
                             color: "#333333"
                             wrapMode: Text.WordWrap
                         }
@@ -71,7 +73,7 @@ Rectangle {
                         id: text2
                         width: parent.width
                         text: model.content
-                        font.pointSize: 10
+                        font.pointSize: fontSize
                         color: "#333333"
                         wrapMode: Text.WordWrap
                     }
