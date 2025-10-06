@@ -23,7 +23,8 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
   // 定义角色名（QML 里用的名字）
   notesModel->setItemRoleNames({{Qt::UserRole + 1, "quote"},
                                 {Qt::UserRole + 2, "page"},
-                                {Qt::UserRole + 3, "content"}});
+                                {Qt::UserRole + 3, "content"},
+                                {Qt::UserRole + 4, "pageIndex"}});
 
   if (!isAndroid) mui->btnShareBook->hide();
 
@@ -3380,10 +3381,11 @@ void Reader::addBookNote() {
   if (mui->editSetText->text().trimmed() == "") return;
 
   dlgAddBookNote = new QDialog(mw_one);
-  dlgAddBookNote->setFixedSize(320, 320);
+  dlgAddBookNote->setFixedSize(mw_one->geometry().width() - 20, 320);
   dlgAddBookNote->setWindowTitle(tr("Note"));
 
   QTextEdit *textEdit = new QTextEdit(dlgAddBookNote);
+  textEdit->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
 
   if (isAndroid) {
     if (textToolbar != nullptr) delete textToolbar;
@@ -3439,12 +3441,13 @@ void Reader::addBookNote() {
   }
 }
 
-void Reader::editBookNote(int index, const QString &content) {
+void Reader::editBookNote(int index, int page, const QString &content) {
   dlgEditBookNote = new QDialog(mw_one);
-  dlgEditBookNote->setFixedSize(320, 320);
+  dlgEditBookNote->setFixedSize(mw_one->geometry().width() - 20, 320);
   dlgEditBookNote->setWindowTitle(tr("Note"));
 
   QTextEdit *textEdit = new QTextEdit(dlgEditBookNote);
+  textEdit->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
 
   if (isAndroid) {
     if (textToolbar != nullptr) delete textToolbar;
@@ -3480,7 +3483,13 @@ void Reader::editBookNote(int index, const QString &content) {
   if (dlgEditBookNote->exec() == QDialog::Accepted) {
     QString noteText = textEdit->toPlainText();
 
-    updateReadNote(cPage, index, noteText);
+    int mpage = 0;
+    if (page == -1)
+      mpage = cPage;
+    else
+      mpage = page;
+
+    updateReadNote(mpage, index, noteText);
 
     qDebug() << "Note added:" << noteText;
   } else {
@@ -3502,6 +3511,8 @@ void Reader::viewBookNote() {
         QUrl(QStringLiteral("qrc:/src/qmlsrc/viewbooknote.qml")));
   }
 
+  initBookNoteValue(-1, -1);
+
   mui->qwReader->hide();
   mui->qwViewCate->hide();
   mui->qwBookmark->hide();
@@ -3518,6 +3529,9 @@ void Reader::closeViewBookNote() {
 }
 
 void Reader::appendNoteDataToQmlList() {
+  // 清空旧数据
+  notesModel->clear();
+
   QString file = iniDir + "memo/readnote/" + currentBookName + ".json";
 
   QFile jsonFile(file);
@@ -3537,9 +3551,6 @@ void Reader::appendNoteDataToQmlList() {
 
   QJsonObject rootObj = doc.object();
 
-  // 清空旧数据
-  notesModel->clear();
-
   // 遍历所有页码
   for (auto it = rootObj.begin(); it != rootObj.end(); ++it) {
     int page = it.key().toInt();  // 页码
@@ -3558,6 +3569,7 @@ void Reader::appendNoteDataToQmlList() {
       item->setData(quote, Qt::UserRole + 1);    // quote
       item->setData(page, Qt::UserRole + 2);     // page
       item->setData(content, Qt::UserRole + 3);  // content
+      item->setData(i, Qt::UserRole + 4);        // 保存 page 内索引
 
       notesModel->appendRow(item);
     }
@@ -3625,6 +3637,7 @@ void Reader::readReadNote(int page) {
   QFile f(file);
   if (!f.exists()) {
     qDebug() << "Note file not exists:" << file;
+    emit notesLoaded(QVariantList());  // 发送空列表
     return;
   }
 
@@ -3802,4 +3815,20 @@ void Reader::updateReadNote(int page, int index, const QString &content) {
 
   // 刷新 QML 模型
   readReadNote(page);
+}
+
+void Reader::initBookNoteValue(int cindex, int cpage) {
+  QQuickItem *root = mui->qwViewBookNote->rootObject();
+  if (!root) {
+    qWarning("Error: QML root object not found!");
+    return;
+  }
+
+  // 调用 QML 函数 initValue(cindex, cpage)
+  QMetaObject::invokeMethod(root,
+                            "initValue",              // QML 函数名
+                            Qt::DirectConnection,     // 连接方式：同步调用
+                            Q_ARG(QVariant, cindex),  // 第一个参数
+                            Q_ARG(QVariant, cpage)    // 第二个参数
+  );
 }

@@ -206,6 +206,26 @@ class Method : public QDialog {
       "QScrollBar::sub-line:vertical{"  // 向上箭头样式
       "background:url() center no-repeat;}";
 
+  QString vsbarStyleBig =
+      "QScrollBar:vertical{"  // 垂直滑块整体
+      "width:20px;"
+      "background:rgb(255,255,255);"        // 背景色
+      "padding-top:0px;"                    // 上预留位置（放置向上箭头）
+      "padding-bottom:0px;"                 // 下预留位置（放置向下箭头）
+      "padding-left:1px;"                   // 左预留位置（美观）
+      "padding-right:1px;"                  // 右预留位置（美观）
+      "border-left:0px solid #d7d7d7;}"     // 左分割线
+      "QScrollBar::handle:vertical{"        // 滑块样式
+      "background:rgb(202,197,191);"        // 滑块颜色
+      "border-radius:2px;"                  // 边角圆润
+      "min-height:60px;}"                   // 滑块最小高度
+      "QScrollBar::handle:vertical:hover{"  // 鼠标触及滑块样式
+      "background:#d0d0d0;}"                // 滑块颜色
+      "QScrollBar::add-line:vertical{"      // 向下箭头样式
+      "background:url() center no-repeat;}"
+      "QScrollBar::sub-line:vertical{"  // 向上箭头样式
+      "background:url() center no-repeat;}";
+
   QString listStyleMain =
       "QListWidget{outline:0px;}"
       "QListWidget::item:selected{background:rgb(255,0,0); border:0px "
@@ -419,8 +439,10 @@ class Method : public QDialog {
   void setAccessCount(int count);
 
   int getAccessCount();
-  bool sendMailWithAttachment(const QString &recipient = "", const QString &filePath = "");
-  protected:
+  bool sendMailWithAttachment(const QString &recipient = "",
+                              const QString &filePath = "");
+
+ protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
  public slots:

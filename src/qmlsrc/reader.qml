@@ -482,113 +482,7 @@ Item {
 
         // ==============================================
         // 选择渲染层（覆盖在文本层上方）
-        Item {
-            id: selectionLayer
-            anchors.fill: parent
-            visible: isSelectionMode
-
-            // 关键修复：添加滚动视图
-            ScrollView {
-                id: selectionScrollView
-                anchors.fill: parent
-                contentWidth: selectionListView.contentWidth
-                contentHeight: selectionListView.contentHeight
-                clip: true
-
-                // 同步滚动位置
-                Component.onCompleted: {
-                    contentY = contentListView.contentY
-                }
-
-                // 文本选择渲染
-                ListView {
-                    id: selectionListView
-                    width: rotateContainer.width
-                    height: rotateContainer.height
-                    model: textModel
-                    spacing: contentListView.spacing
-                    contentY: contentListView.contentY // 同步滚动位置
-
-                    delegate: TextEdit {
-                        id: selectionText
-                        width: rotateContainer.width
-                        leftPadding: 10
-                        rightPadding: 10
-                        textFormat: Text.RichText
-                        text: model.text
-                        wrapMode: Text.Wrap
-                        font.pixelSize: FontSize
-                        font.family: FontName
-                        color: myTextColor
-                        renderType: Text.QtRendering
-
-                        // 可编辑模式
-                        readOnly: true
-                        selectByMouse: true
-
-                        // 文本选择高亮
-                        Rectangle {
-                            visible: selectionText.selectedText.length > 0
-                            color: selectionColor
-                            opacity: 0.4
-                            x: selectionText.positionToRectangle(
-                                   selectionText.selectionStart).x
-                            y: selectionText.positionToRectangle(
-                                   selectionText.selectionStart).y
-                            width: selectionText.positionToRectangle(
-                                       selectionText.selectionEnd).x
-                                   + selectionText.positionToRectangle(
-                                       selectionText.selectionEnd).width - x
-                            height: selectionText.positionToRectangle(
-                                        selectionText.selectionStart).height
-                        }
-                    }
-                }
-            }
-
-            // 笔记操作工具栏
-            Row {
-                anchors.top: parent.top
-                anchors.right: parent.right
-                spacing: 10
-                padding: 10
-                z: 100
-
-                Button {
-                    text: "添加笔记"
-                    onClicked: {
-                        // 获取当前选择的文本和位置
-                        var selectedText = ""
-                        var startPos = -1
-                        var endPos = -1
-
-                        // 查找当前选择的文本块
-                        for (var i = 0; i < selectionListView.contentItem.children.length; i++) {
-                            var child = selectionListView.contentItem.children[i]
-                            if (child.selectedText
-                                    && child.selectedText.length > 0) {
-                                selectedText = child.selectedText
-                                startPos = child.selectionStart
-                                endPos = child.selectionEnd
-                                break
-                            }
-                        }
-
-                        if (selectedText.length > 0) {
-                            noteDialog.showDialog(selectedText,
-                                                  startPos, endPos)
-                        }
-                    }
-                }
-
-                Button {
-                    text: "取消"
-                    onClicked: {
-                        root.isSelectionMode = false
-                    }
-                }
-            }
-        }
+        Item {}
         // ==============================================
         // 【新增结束】
         // ==============================================
@@ -605,7 +499,7 @@ Item {
         anchors.centerIn: Overlay.overlay
 
         background: Rectangle {
-            color: notePopup.palette.window
+            color: isDark ? "#000000" : "#333333"
             border.color: notePopup.palette.windowText
             border.width: 1
             radius: 8
@@ -624,6 +518,7 @@ Item {
             Label {
                 font.pointSize: FontSize
                 text: qsTr("Note Content:")
+                color: isDark ? "#EEEEEE" : "#111111"
                 font.bold: true
             }
 
@@ -646,6 +541,7 @@ Item {
                     wrapMode: Text.Wrap
                     selectByMouse: false
                     textFormat: Text.PlainText
+                    color: isDark ? "#EEEEEE" : "#111111"
 
                     // 确保文本区域高度正确
                     onTextChanged: {
@@ -679,7 +575,7 @@ Item {
                                            "content": noteContent.text
                                        })
                         notePopup.close()
-                        m_Reader.editBookNote(currentNoteIndex,
+                        m_Reader.editBookNote(currentNoteIndex, -1,
                                               noteContent.text)
                     }
                 }
@@ -688,9 +584,6 @@ Item {
                     text: qsTr("Del")
                     onClicked: {
 
-                        //notesModel.remove(currentNoteIndex)
-                        //m_Reader.delReadNote(currentNoteIndex)
-                        //notePopup.close()
                         deleteConfirmDialog.open()
                     }
                 }
@@ -928,7 +821,7 @@ Item {
     // 自动刷新笔记模型数据
     Connections {
         target: m_Reader
-        onNotesLoaded: function (notes) {
+        function onNotesLoaded(notes) {
             notesModel.clear()
             for (var i = 0; i < notes.length; i++) {
                 var n = notes[i]

@@ -207,7 +207,7 @@ class Reader : public QDialog {
   void goUpPage();
 
   void delReadNote(int index);
-  void editBookNote(int index, const QString &content);
+  void editBookNote(int index, int page, const QString &content);
   void closeViewBookNote();
  private slots:
   void autoRun();
@@ -257,6 +257,7 @@ class Reader : public QDialog {
   void updateReadNote(int page, int index, const QString &content);
   void appendNoteDataToQmlList();
   QStandardItemModel *notesModel = nullptr;
+  void initBookNoteValue(int cindex, int cpage);
 };
 //////////////////////////////////////////////////////////////////////////////////
 

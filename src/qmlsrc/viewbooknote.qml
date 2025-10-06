@@ -9,6 +9,20 @@ Rectangle {
     height: 600
     color: "#f0f0f0"
 
+    property int cIndex: -1
+    property int nPagesIndex: -1
+    property int cPage: -1
+    property string strNoteText: ""
+
+    function initValue(cindex, cpage) {
+        cIndex = cindex
+        cPage = cpage
+    }
+
+    function setText2(text) {
+        text2.text = text
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
@@ -27,6 +41,20 @@ Rectangle {
                 width: listView.width
                 height: column.implicitHeight + 6
                 color: index % 2 === 0 ? "#ffffff" : "#f9f9f9"
+
+                Rectangle {
+                    color: "#FF0000"
+                    radius: 0
+                    width: 5
+                    height: parent.height
+
+                    opacity: cIndex === index ? 1 : 0
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: 200
+                        } // 200毫秒平滑过渡
+                    }
+                }
 
                 Column {
                     id: column
@@ -89,7 +117,18 @@ Rectangle {
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: console.log("点击了条目:", index, model.page)
+
+                    onClicked: {
+
+                        listView.currentIndex = index
+                        cIndex = index
+                        cPage = model.page
+                        strNoteText = model.content
+                        nPagesIndex = model.pageIndex
+                        btnedit.enabled = true
+                        console.log("点击了条目:", cIndex, cPage, nPagesIndex,
+                                    strNoteText)
+                    }
                 }
             }
 
@@ -100,14 +139,35 @@ Rectangle {
         }
 
         // 按钮 - 现在会固定在底部
-        Button {
-            text: qsTr("Close")
+        RowLayout {
             Layout.alignment: Qt.AlignHCenter
             Layout.bottomMargin: 10
             Layout.topMargin: 10
+            spacing: 15
 
-            onClicked: {
-                m_Reader.closeViewBookNote()
+            Button {
+                id: btnedit
+                enabled: false
+                text: qsTr("Edit")
+                font.pointSize: fontSize
+
+                onClicked: {
+
+                    if (cIndex >= 0) {
+                        console.log("开始编辑条目:", nPagesIndex, cPage, strNoteText)
+                        m_Reader.editBookNote(nPagesIndex, cPage, strNoteText)
+                    } else {
+                        console.log("请先选中一个条目再编辑")
+                    }
+                }
+            }
+
+            Button {
+                text: qsTr("Close")
+                font.pointSize: fontSize
+                onClicked: {
+                    m_Reader.closeViewBookNote()
+                }
             }
         }
     }
