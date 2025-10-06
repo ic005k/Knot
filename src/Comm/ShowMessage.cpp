@@ -26,6 +26,7 @@ ShowMessage::ShowMessage(QWidget* parent)
 
   ui->editMsg->adjustSize();
   ui->editMsg->setReadOnly(true);
+
   QScroller::grabGesture(ui->editMsg, QScroller::LeftMouseButtonGesture);
   m_Method->setSCrollPro(ui->editMsg);
 

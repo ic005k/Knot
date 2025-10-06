@@ -137,8 +137,6 @@ void CloudBackup::on_btnBack_clicked() {}
 
 void CloudBackup::loadLogQML() {}
 
-void CloudBackup::loadText(QString str) {}
-
 void CloudBackup::initQuick() {}
 
 int CloudBackup::getProg() { return 0; }

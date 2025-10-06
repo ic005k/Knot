@@ -29,7 +29,7 @@ CategoryList::CategoryList(QWidget* parent)
   ui->listWidget->setMovement(QListView::Static);
   ui->listWidget->setStyleSheet(m_Method->listStyleMain);
   ui->listWidget->setSpacing(12);
-  m_Method->setSCrollPro(ui->listWidget);
+
   QFont font;
   font.setPointSize(fontSize + 3);
   ui->listWidget->setFont(font);

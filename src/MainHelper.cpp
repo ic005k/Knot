@@ -246,8 +246,7 @@ QTreeWidget *MainHelper::init_TreeWidget(QString name) {
   SB->setStyleSheet(m_Method->vsbarStyleSmall);
   tw->setStyleSheet(mw_one->treeStyle);
   tw->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
-  QScroller::grabGesture(tw, QScroller::LeftMouseButtonGesture);
-  m_Method->setSCrollPro(tw);
+
   return tw;
 }
 
@@ -1078,11 +1077,6 @@ void MainHelper::init_Theme() {
 
     mui->editDetails->setStyleSheet(mui->editTodo->styleSheet());
 
-    mui->editTodo->verticalScrollBar()->setStyleSheet(
-        m_Method->lightScrollbarStyle);
-    mui->editDetails->verticalScrollBar()->setStyleSheet(
-        m_Method->lightScrollbarStyle);
-
     mw_one->chartMonth->setTheme(QChart::ChartThemeLight);
     mw_one->chartDay->setTheme(QChart::ChartThemeLight);
 
@@ -1119,14 +1113,12 @@ void MainHelper::init_Theme() {
 
     mui->editDetails->setStyleSheet(mui->editTodo->styleSheet());
 
-    mui->editTodo->verticalScrollBar()->setStyleSheet(
-        m_Method->darkScrollbarStyle);
-    mui->editDetails->verticalScrollBar()->setStyleSheet(
-        m_Method->darkScrollbarStyle);
-
     mw_one->chartMonth->setTheme(QChart::ChartThemeDark);
     mw_one->chartDay->setTheme(QChart::ChartThemeDark);
   }
+
+  mui->editTodo->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
+  mui->editDetails->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
 
   // Edit Record UI
   int nH = mui->editCategory->height();

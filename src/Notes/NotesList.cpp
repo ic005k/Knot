@@ -46,16 +46,6 @@ NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
   this->layout()->setContentsMargins(2, 2, 2, 2);
   ui->frame1->hide();
 
-  if (isAndroid) {
-    tw->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
-    QScroller::grabGesture(tw, QScroller::LeftMouseButtonGesture);
-    m_Method->setSCrollPro(tw);
-
-    twrb->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
-    QScroller::grabGesture(twrb, QScroller::LeftMouseButtonGesture);
-    m_Method->setSCrollPro(twrb);
-  }
-
   tw->headerItem()->setText(0, tr("Notebook"));
   tw->setColumnHidden(1, false);
   tw->setColumnWidth(0, 300);
@@ -303,7 +293,6 @@ void NotesList::on_btnRename_clicked() {
   edit->horizontalScrollBar()->setHidden(true);
   edit->verticalScrollBar()->setStyleSheet(
       mui->editDetails->verticalScrollBar()->styleSheet());
-  m_Method->setSCrollPro(edit);
 
   if (edit->toPlainText().trimmed() == "无标题笔记" ||
       edit->toPlainText().trimmed() == "Untitled Note") {

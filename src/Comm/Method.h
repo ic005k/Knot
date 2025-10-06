@@ -207,24 +207,31 @@ class Method : public QDialog {
       "background:url() center no-repeat;}";
 
   QString vsbarStyleBig =
-      "QScrollBar:vertical{"  // 垂直滑块整体
-      "width:20px;"
-      "background:rgb(255,255,255);"        // 背景色
-      "padding-top:0px;"                    // 上预留位置（放置向上箭头）
-      "padding-bottom:0px;"                 // 下预留位置（放置向下箭头）
-      "padding-left:1px;"                   // 左预留位置（美观）
-      "padding-right:1px;"                  // 右预留位置（美观）
-      "border-left:0px solid #d7d7d7;}"     // 左分割线
-      "QScrollBar::handle:vertical{"        // 滑块样式
-      "background:rgb(202,197,191);"        // 滑块颜色
-      "border-radius:2px;"                  // 边角圆润
-      "min-height:60px;}"                   // 滑块最小高度
-      "QScrollBar::handle:vertical:hover{"  // 鼠标触及滑块样式
-      "background:#d0d0d0;}"                // 滑块颜色
-      "QScrollBar::add-line:vertical{"      // 向下箭头样式
-      "background:url() center no-repeat;}"
-      "QScrollBar::sub-line:vertical{"  // 向上箭头样式
-      "background:url() center no-repeat;}";
+      "QScrollBar:vertical{"
+      "width:48px;"              // 触摸区域大
+      "background:transparent;"  // 背景透明
+      "margin:0px;"
+      "padding:0px;"
+      "}"
+      "QScrollBar::handle:vertical{"
+      "background:rgba(150,150,150,180);"  // 半透明
+      "border-radius:2px;"                 // 平时细
+      "min-height:60px;"
+      "margin-left:22px;"  // 居中
+      "margin-right:22px;"
+      "}"
+      "QScrollBar::handle:vertical:hover{"
+      "background:rgba(120,120,120,220);"
+      "border-radius:6px;"  // 触摸时变宽
+      "margin-left:18px;"
+      "margin-right:18px;"
+      "}"
+      "QScrollBar::handle:vertical:pressed{"
+      "background:rgba(100,100,100,255);"
+      "}"
+      "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical{"
+      "height:0px;"  // 隐藏按钮
+      "}";
 
   QString listStyleMain =
       "QListWidget{outline:0px;}"

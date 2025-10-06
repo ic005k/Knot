@@ -50,8 +50,8 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
   connect(tmePlayProgress, SIGNAL(timeout()), this,
           SLOT(on_ShowPlayProgress()));
 
-  QScroller::grabGesture(mui->editTodo, QScroller::LeftMouseButtonGesture);
-  m_Method->setSCrollPro(mui->editTodo);
+  // QScroller::grabGesture(mui->editTodo, QScroller::LeftMouseButtonGesture);
+  // m_Method->setSCrollPro(mui->editTodo);
 }
 
 Todo::~Todo() { delete ui; }
@@ -1202,11 +1202,6 @@ void Todo::reeditText() {
   vbox->addWidget(edit);
   edit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
   edit->setPlainText(strItem);
-
-  if (isAndroid) {
-    QScroller::grabGesture(edit, QScroller::LeftMouseButtonGesture);
-    m_Method->setSCrollPro(edit);
-  }
 
   edit->horizontalScrollBar()->setHidden(true);
   edit->verticalScrollBar()->setStyleSheet(

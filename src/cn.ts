@@ -213,7 +213,7 @@
         <translation type="vanished">获取用户信息成功</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="201"/>
+        <location filename="CloudBackup.cpp" line="199"/>
         <source>Success Upload File:</source>
         <translation>上传文件成功</translation>
     </message>
@@ -222,7 +222,7 @@
         <translation type="vanished">下载文件成功</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1059"/>
+        <location filename="CloudBackup.cpp" line="1057"/>
         <source>Downloading data?</source>
         <translation>下载数据？</translation>
     </message>
@@ -241,18 +241,18 @@
         <translation>此操作将更新云端的数据</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="216"/>
-        <location filename="CloudBackup.cpp" line="373"/>
+        <location filename="CloudBackup.cpp" line="214"/>
+        <location filename="CloudBackup.cpp" line="371"/>
         <source>Authentication failed.</source>
         <translation>认证失败，请检查网址、用户名、密码。如果使用坚果云，请使用“应用密码”而不是主密码，“应用密码”可通过坚果云网页端登录后进行设置。</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="220"/>
+        <location filename="CloudBackup.cpp" line="218"/>
         <source>Upload error</source>
         <translation>上传错误</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="377"/>
+        <location filename="CloudBackup.cpp" line="375"/>
         <source>Download error</source>
         <translation>下载错误</translation>
     </message>
@@ -273,17 +273,17 @@
         <translation type="vanished">最终大小：</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1060"/>
+        <location filename="CloudBackup.cpp" line="1058"/>
         <source>This action overwrites local files with files in the cloud.</source>
         <translation>此操作将会用云端的文件覆盖本地文件</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="337"/>
+        <location filename="CloudBackup.cpp" line="335"/>
         <source>Successfully downloaded file,File saved to</source>
         <translation>文件下载成功，已保存到</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="347"/>
+        <location filename="CloudBackup.cpp" line="345"/>
         <source>Import this data?</source>
         <translation>是否导入这个数据？</translation>
     </message>
@@ -446,57 +446,57 @@
     <message>
         <location filename="Comm/enhancedcolorpicker.cpp" line="227"/>
         <source>常用颜色:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="Comm/enhancedcolorpicker.cpp" line="256"/>
         <source>色相:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="Comm/enhancedcolorpicker.cpp" line="262"/>
         <source>饱和度:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="Comm/enhancedcolorpicker.cpp" line="268"/>
         <source>明度:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="Comm/enhancedcolorpicker.cpp" line="275"/>
         <source>Red:</source>
-        <translation type="unfinished">红：</translation>
+        <translation>红：</translation>
     </message>
     <message>
         <location filename="Comm/enhancedcolorpicker.cpp" line="284"/>
         <source>Green:</source>
-        <translation type="unfinished">绿：</translation>
+        <translation>绿：</translation>
     </message>
     <message>
         <location filename="Comm/enhancedcolorpicker.cpp" line="293"/>
         <source>Blue:</source>
-        <translation type="unfinished">蓝：</translation>
+        <translation>蓝：</translation>
     </message>
     <message>
         <location filename="Comm/enhancedcolorpicker.cpp" line="303"/>
         <source>透明度:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="Comm/enhancedcolorpicker.cpp" line="310"/>
         <source>HEX:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="Comm/enhancedcolorpicker.cpp" line="320"/>
         <source>Ok</source>
-        <translation type="unfinished">确定</translation>
+        <translation>确定</translation>
     </message>
     <message>
         <location filename="Comm/enhancedcolorpicker.cpp" line="321"/>
         <source>Cancel</source>
-        <translation type="unfinished">取消</translation>
+        <translation>取消</translation>
     </message>
 </context>
 <context>
@@ -7881,17 +7881,17 @@
 <context>
     <name>Reader</name>
     <message>
-        <location filename="Reader/Reader.cpp" line="61"/>
+        <location filename="Reader/Reader.cpp" line="62"/>
         <source>bottom</source>
         <translation>底部</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="91"/>
+        <location filename="Reader/Reader.cpp" line="92"/>
         <source>Knot</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="91"/>
+        <location filename="Reader/Reader.cpp" line="92"/>
         <source>Txt Files (*.*)</source>
         <translation></translation>
     </message>
@@ -7900,45 +7900,45 @@
         <translation type="vanished">滚动值</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="484"/>
+        <location filename="Reader/Reader.cpp" line="485"/>
         <source>Scroll Speed</source>
         <translation>滚动速度</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="914"/>
+        <location filename="Reader/Reader.cpp" line="915"/>
         <source>Info</source>
         <translation>信息</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="2000"/>
+        <location filename="Reader/Reader.cpp" line="2001"/>
         <source>Remove from list?</source>
         <translation>从列表中移除？</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="2019"/>
+        <location filename="Reader/Reader.cpp" line="2020"/>
         <source>The EPUB file was opened with an error.</source>
         <translation>EPUB文件打开出错</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="2347"/>
+        <location filename="Reader/Reader.cpp" line="2348"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="3383"/>
-        <location filename="Reader/Reader.cpp" line="3429"/>
+        <location filename="Reader/Reader.cpp" line="3385"/>
+        <location filename="Reader/Reader.cpp" line="3447"/>
         <source>Note</source>
         <translation>笔记</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="3389"/>
-        <location filename="Reader/Reader.cpp" line="3435"/>
+        <location filename="Reader/Reader.cpp" line="3401"/>
+        <location filename="Reader/Reader.cpp" line="3463"/>
         <source>Ok</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="3390"/>
-        <location filename="Reader/Reader.cpp" line="3436"/>
+        <location filename="Reader/Reader.cpp" line="3402"/>
+        <location filename="Reader/Reader.cpp" line="3464"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -7947,13 +7947,13 @@
         <translation type="vanished">页</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="943"/>
+        <location filename="Reader/Reader.cpp" line="944"/>
         <source>Cannot read file %1:
 %2.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="1550"/>
+        <location filename="Reader/Reader.cpp" line="1551"/>
         <source>Clear all reading history</source>
         <translation>清除所有的阅读记录</translation>
     </message>
@@ -10589,32 +10589,32 @@
         <translation type="vanished">粘贴</translation>
     </message>
     <message>
-        <location filename="qmlsrc/reader.qml" line="626"/>
+        <location filename="qmlsrc/reader.qml" line="520"/>
         <source>Note Content:</source>
         <translation>笔记内容：</translation>
     </message>
     <message>
-        <location filename="qmlsrc/reader.qml" line="646"/>
+        <location filename="qmlsrc/reader.qml" line="571"/>
         <source>Edit</source>
         <translation>编辑</translation>
     </message>
     <message>
-        <location filename="qmlsrc/reader.qml" line="659"/>
+        <location filename="qmlsrc/reader.qml" line="584"/>
         <source>Del</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="qmlsrc/reader.qml" line="670"/>
+        <location filename="qmlsrc/reader.qml" line="592"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="qmlsrc/reader.qml" line="680"/>
+        <location filename="qmlsrc/reader.qml" line="602"/>
         <source>Delete Confirmation</source>
         <translation>删除确认</translation>
     </message>
     <message>
-        <location filename="qmlsrc/reader.qml" line="691"/>
+        <location filename="qmlsrc/reader.qml" line="613"/>
         <source>Are you sure you want to delete this note?</source>
         <translation>确定要删除这条笔记？</translation>
     </message>
@@ -10701,12 +10701,17 @@
 <context>
     <name>viewbooknote</name>
     <message>
-        <location filename="qmlsrc/viewbooknote.qml" line="60"/>
+        <location filename="qmlsrc/viewbooknote.qml" line="75"/>
         <source>Pages:</source>
         <translation>页码：</translation>
     </message>
     <message>
-        <location filename="qmlsrc/viewbooknote.qml" line="118"/>
+        <location filename="qmlsrc/viewbooknote.qml" line="151"/>
+        <source>Edit</source>
+        <translation>编辑</translation>
+    </message>
+    <message>
+        <location filename="qmlsrc/viewbooknote.qml" line="166"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>

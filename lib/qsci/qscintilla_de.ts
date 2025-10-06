@@ -146,7 +146,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="201"/>
+        <location filename="../../src/CloudBackup.cpp" line="199"/>
         <source>Success Upload File:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -161,38 +161,38 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="216"/>
-        <location filename="../../src/CloudBackup.cpp" line="373"/>
+        <location filename="../../src/CloudBackup.cpp" line="214"/>
+        <location filename="../../src/CloudBackup.cpp" line="371"/>
         <source>Authentication failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="220"/>
+        <location filename="../../src/CloudBackup.cpp" line="218"/>
         <source>Upload error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="337"/>
+        <location filename="../../src/CloudBackup.cpp" line="335"/>
         <source>Successfully downloaded file,File saved to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="347"/>
+        <location filename="../../src/CloudBackup.cpp" line="345"/>
         <source>Import this data?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="377"/>
+        <location filename="../../src/CloudBackup.cpp" line="375"/>
         <source>Download error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1059"/>
+        <location filename="../../src/CloudBackup.cpp" line="1057"/>
         <source>Downloading data?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1060"/>
+        <location filename="../../src/CloudBackup.cpp" line="1058"/>
         <source>This action overwrites local files with files in the cloud.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6888,71 +6888,71 @@
 <context>
     <name>Reader</name>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="61"/>
+        <location filename="../../src/Reader/Reader.cpp" line="62"/>
         <source>bottom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="91"/>
+        <location filename="../../src/Reader/Reader.cpp" line="92"/>
         <source>Knot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="91"/>
+        <location filename="../../src/Reader/Reader.cpp" line="92"/>
         <source>Txt Files (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="484"/>
+        <location filename="../../src/Reader/Reader.cpp" line="485"/>
         <source>Scroll Speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="914"/>
+        <location filename="../../src/Reader/Reader.cpp" line="915"/>
         <source>Info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="943"/>
+        <location filename="../../src/Reader/Reader.cpp" line="944"/>
         <source>Cannot read file %1:
 %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="1550"/>
+        <location filename="../../src/Reader/Reader.cpp" line="1551"/>
         <source>Clear all reading history</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="2000"/>
+        <location filename="../../src/Reader/Reader.cpp" line="2001"/>
         <source>Remove from list?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="2019"/>
+        <location filename="../../src/Reader/Reader.cpp" line="2020"/>
         <source>The EPUB file was opened with an error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="2347"/>
+        <location filename="../../src/Reader/Reader.cpp" line="2348"/>
         <source>Share to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="3383"/>
-        <location filename="../../src/Reader/Reader.cpp" line="3429"/>
+        <location filename="../../src/Reader/Reader.cpp" line="3385"/>
+        <location filename="../../src/Reader/Reader.cpp" line="3447"/>
         <source>Note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="3389"/>
-        <location filename="../../src/Reader/Reader.cpp" line="3435"/>
+        <location filename="../../src/Reader/Reader.cpp" line="3401"/>
+        <location filename="../../src/Reader/Reader.cpp" line="3463"/>
         <source>Ok</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="3390"/>
-        <location filename="../../src/Reader/Reader.cpp" line="3436"/>
+        <location filename="../../src/Reader/Reader.cpp" line="3402"/>
+        <location filename="../../src/Reader/Reader.cpp" line="3464"/>
         <source>Cancel</source>
         <translation type="unfinished">Abbrechen</translation>
     </message>
@@ -7844,32 +7844,32 @@
 <context>
     <name>reader</name>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="626"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="520"/>
         <source>Note Content:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="646"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="571"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="659"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="584"/>
         <source>Del</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="670"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="592"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="680"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="602"/>
         <source>Delete Confirmation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="691"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="613"/>
         <source>Are you sure you want to delete this note?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7895,12 +7895,17 @@
 <context>
     <name>viewbooknote</name>
     <message>
-        <location filename="../../src/qmlsrc/viewbooknote.qml" line="60"/>
+        <location filename="../../src/qmlsrc/viewbooknote.qml" line="75"/>
         <source>Pages:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/viewbooknote.qml" line="118"/>
+        <location filename="../../src/qmlsrc/viewbooknote.qml" line="151"/>
+        <source>Edit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/viewbooknote.qml" line="166"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>

@@ -59,8 +59,9 @@ EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {
 
   m_Method->qssSlider = mui->hsH->styleSheet();
 
-  QScroller::grabGesture(mui->editDetails, QScroller::LeftMouseButtonGesture);
-  m_Method->setSCrollPro(mui->editDetails);
+  // QScroller::grabGesture(mui->editDetails,
+  // QScroller::LeftMouseButtonGesture);
+  // m_Method->setSCrollPro(mui->editDetails);
 }
 
 void EditRecord::init() {
