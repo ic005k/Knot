@@ -19,6 +19,7 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
   qmlRegisterType<TextChunkModel>("EBook.Models", 1, 0, "TextChunkModel");
 
   this->installEventFilter(this);
+  notesModel = new QStandardItemModel(this);
 
   if (!isAndroid) mui->btnShareBook->hide();
 
@@ -36,6 +37,7 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
 
   mui->textBrowser->horizontalScrollBar()->hide();
   mui->textBrowser->verticalScrollBar()->hide();
+  mui->qwViewBookNote->hide();
 
   QPalette pt = palette();
   pt.setBrush(QPalette::Text, Qt::black);
@@ -3250,6 +3252,7 @@ void Reader::closeReader() {
   saveReader("", false);
   savePageVPos();
 
+  mui->qwViewBookNote->hide();
   mui->frameReader->hide();
   mui->frameMain->show();
 }
@@ -3445,6 +3448,82 @@ void Reader::editBookNote(int index, const QString &content) {
     qDebug() << "Note added:" << noteText;
   } else {
     qDebug() << "Note canceled.";
+  }
+}
+
+void Reader::viewBookNote() {
+  if (mui->qwViewBookNote->source().isEmpty()) {
+    mui->qwViewBookNote->rootContext()->setContextProperty("m_Reader",
+                                                           mw_one->m_Reader);
+    mui->qwViewBookNote->rootContext()->setContextProperty("fontSize",
+                                                           fontSize);
+    mui->qwViewBookNote->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwViewBookNote->rootContext()->setContextProperty("notesModel",
+                                                           notesModel);
+
+    mui->qwViewBookNote->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/viewbooknote.qml")));
+  }
+
+  mui->qwReader->hide();
+  mui->qwViewCate->hide();
+  mui->qwBookmark->hide();
+  mui->qwViewBookNote->show();
+  appendNoteDataToQmlList();
+
+  mui->btnBackReaderSet->click();
+}
+
+void Reader::closeViewBookNote() {
+  mui->qwViewBookNote->hide();
+  mui->qwReader->show();
+}
+
+void Reader::appendNoteDataToQmlList() {
+  QString file = iniDir + "memo/readnote/" + currentBookName + ".json";
+
+  QFile jsonFile(file);
+  if (!jsonFile.open(QIODevice::ReadOnly)) {
+    qWarning() << "无法打开文件:" << file;
+    return;
+  }
+
+  QByteArray data = jsonFile.readAll();
+  jsonFile.close();
+
+  QJsonDocument doc = QJsonDocument::fromJson(data);
+  if (doc.isNull()) {
+    qWarning() << "JSON 解析失败";
+    return;
+  }
+
+  QJsonObject rootObj = doc.object();
+
+  // 清空旧数据
+  notesModel->clear();
+
+  // 遍历所有页码
+  for (auto it = rootObj.begin(); it != rootObj.end(); ++it) {
+    int page = it.key().toInt();  // 页码
+    QJsonArray notesArray = it.value().toArray();
+
+    // 遍历该页的所有笔记
+    for (int i = 0; i < notesArray.size(); ++i) {
+      QJsonObject noteObj = notesArray[i].toObject();
+      QString content = noteObj["content"].toString();
+
+      // 限制内容长度，超过则显示省略号
+      if (content.length() > 15) {
+        content = content.left(15) + "...";
+      }
+
+      // 格式化标题
+      QString title = QString("%1，%2").arg(page).arg(content);
+
+      // 添加到模型
+      QStandardItem *item = new QStandardItem(title);
+      notesModel->appendRow(item);
+    }
   }
 }
 

@@ -1524,6 +1524,8 @@ void MainWindow::on_btnReader_clicked() { m_Reader->openReader(); }
 void MainWindow::on_btnBackReader_clicked() { m_Reader->closeReader(); }
 
 void MainWindow::on_btnOpen_clicked() {
+  if (mui->qwViewBookNote->isVisible()) return;
+
   mui->btnAutoStop->click();
 
   m_Reader->saveReader("", false);
@@ -1545,6 +1547,8 @@ void MainWindow::on_btnPageUp_clicked() { m_Reader->goUpPage(); }
 void MainWindow::on_btnPageNext_clicked() { m_Reader->goNextPage(); }
 
 void MainWindow::on_btnPages_clicked() {
+  if (mui->qwViewBookNote->isVisible()) return;
+
   mui->btnAutoStop->click();
 
   if (mui->qwCata->isVisible()) return;
@@ -1598,6 +1602,8 @@ void MainWindow::on_hSlider_sliderMoved(int position) {
 }
 
 void MainWindow::on_btnReadList_clicked() {
+  if (mui->qwViewBookNote->isVisible()) return;
+
   if (mui->qwBookList->source().isEmpty()) {
     mui->qwBookList->rootContext()->setContextProperty("fontSize", fontSize);
     mui->qwBookList->rootContext()->setContextProperty("m_Reader",
@@ -2369,6 +2375,8 @@ void MainWindow::on_btnRecentOpen_clicked() {
 void MainWindow::on_btnMenuReport_clicked() { m_Report->genReportMenu(); }
 
 void MainWindow::on_btnCatalogue_clicked() {
+  if (mui->qwViewBookNote->isVisible()) return;
+
   if (mui->qwCata->source().isEmpty()) {
     mui->qwCata->rootContext()->setContextProperty("m_Reader",
                                                    mw_one->m_Reader);
@@ -2387,6 +2395,8 @@ void MainWindow::on_btnCatalogue_clicked() {
 void MainWindow::on_btnRemoveBookList_clicked() { m_Reader->removeBookList(); }
 
 void MainWindow::on_btnShowBookmark_clicked() {
+  if (mui->qwViewBookNote->isVisible()) return;
+
   if (mui->qwBookmark->source().isEmpty()) {
     mui->qwBookmark->rootContext()->setContextProperty("m_Reader",
                                                        mw_one->m_Reader);
@@ -2470,6 +2480,8 @@ void MainWindow::on_CloseProgressBar() {
 void MainWindow::on_btnShareBook_clicked() { m_Reader->shareBook(); }
 
 void MainWindow::on_btnAutoRun_clicked() {
+  if (mui->qwViewBookNote->isVisible()) return;
+
   m_Reader->tmeAutoRun->start(50);
   mui->btnAutoRun->hide();
   mui->btnAutoStop->show();
@@ -2649,6 +2661,8 @@ void MainWindow::on_cboxWebDAV_currentTextChanged(const QString &arg1) {
 void MainWindow::on_btnShowCboxList_clicked() { mui->cboxWebDAV->showPopup(); }
 
 void MainWindow::on_btnRotation_clicked() {
+  if (mui->qwViewBookNote->isVisible()) return;
+
   QQuickItem *rootItem = mui->qwReader->rootObject();
   QQuickItem *orientationButton =
       rootItem->findChild<QQuickItem *>("orientationButton");
@@ -2725,3 +2739,5 @@ void MainWindow::on_btnShareBookText_clicked() {
 }
 
 void MainWindow::on_btnAddBookNote_clicked() { m_Reader->addBookNote(); }
+
+void MainWindow::on_btnViewBookNote_clicked() { m_Reader->viewBookNote(); }

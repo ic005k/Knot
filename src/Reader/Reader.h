@@ -19,6 +19,7 @@
 #include <QRegularExpression>
 #include <QSaveFile>
 #include <QSettings>
+#include <QStandardItemModel>
 #include <QString>
 #include <QStringList>
 #include <QTextBlock>
@@ -26,6 +27,7 @@
 #include <QTextCodec>
 #include <QVBoxLayout>
 #include <QXmlStreamReader>
+#include <vector>
 
 #include "src/Reader/DocumentHandler.h"
 #include "src/Reader/epubreader.h"
@@ -169,6 +171,7 @@ class Reader : public QDialog {
   void closeBookPage();
   void addBookNote();
   void readReadNote(int page);
+  void viewBookNote();
  public slots:
   void on_SetReaderFunVisible();
 
@@ -202,7 +205,8 @@ class Reader : public QDialog {
 
   void delReadNote(int index);
   void editBookNote(int index, const QString &content);
-  private slots:
+  void closeViewBookNote();
+ private slots:
   void autoRun();
 
  private:
@@ -248,7 +252,11 @@ class Reader : public QDialog {
                     const QString &content);
   int cPage;
   void updateReadNote(int page, int index, const QString &content);
+  void appendNoteDataToQmlList();
+  QStandardItemModel *notesModel = nullptr;
 };
+//////////////////////////////////////////////////////////////////////////////////
+
 ///////////////////////////////////////////////////////////////////////////////////
 class TextChunkModel : public QAbstractListModel {
   Q_OBJECT

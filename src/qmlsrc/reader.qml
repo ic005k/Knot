@@ -595,54 +595,21 @@ Item {
     }
 
     // 笔记详情弹窗
-
-
-    /*Popup {
-        id: notePopup
-        width: 300
-        height: 200
-        modal: true
-        focus: true
-        anchors.centerIn: Overlay.overlay
-
-        function showNote(content) {
-            noteContent.text = content
-            open()
-        }
-
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 10
-
-            Label {
-                text: "笔记内容:"
-                font.bold: true
-            }
-
-            ScrollView {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-
-                TextArea {
-                    id: noteContent
-                    readOnly: true
-                    wrapMode: Text.Wrap
-                }
-            }
-
-            Button {
-                text: "关闭"
-                onClicked: notePopup.close()
-            }
-        }
-    }*/
     Popup {
         id: notePopup
         width: 300
-        height: 200
+        height: 300
+        font.pointSize: fontSize
         modal: true
         focus: true
         anchors.centerIn: Overlay.overlay
+
+        background: Rectangle {
+            color: notePopup.palette.window
+            border.color: notePopup.palette.windowText
+            border.width: 1
+            radius: 8
+        }
 
         function showNote(content, index) {
             noteContent.text = content
@@ -687,9 +654,11 @@ Item {
                 Button {
                     text: qsTr("Del")
                     onClicked: {
-                        notesModel.remove(currentNoteIndex)
-                        m_Reader.delReadNote(currentNoteIndex)
-                        notePopup.close()
+
+                        //notesModel.remove(currentNoteIndex)
+                        //m_Reader.delReadNote(currentNoteIndex)
+                        //notePopup.close()
+                        deleteConfirmDialog.open()
                     }
                 }
                 Button {
@@ -697,6 +666,34 @@ Item {
                     onClicked: notePopup.close()
                 }
             }
+        }
+    }
+
+    Dialog {
+        id: deleteConfirmDialog
+        title: qsTr("Delete Confirmation")
+        font.pointSize: fontSize
+        modal: true
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        // 确保对话框居中显示
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+
+        Label {
+
+            text: qsTr("Are you sure you want to delete this note?")
+            anchors.centerIn: parent
+        }
+    }
+
+    // 在根组件添加连接
+    Connections {
+        target: deleteConfirmDialog
+        function onAccepted() {
+            notesModel.remove(currentNoteIndex)
+            m_Reader.delReadNote(currentNoteIndex)
+            notePopup.close()
         }
     }
 
@@ -870,7 +867,9 @@ Item {
 
     ListModel {
         id: notesModel
-        ListElement {
+
+
+        /*ListElement {
             start: 50
             end: 120
             color: "#FF572280"
@@ -888,7 +887,7 @@ Item {
             end: 310
             color: "#8000FF50"
             content: "这是第3条笔记的内容"
-        }
+        }*/
     }
 
     // 自动刷新笔记模型数据
