@@ -249,7 +249,7 @@ class Reader : public QDialog {
   double readTotalHours();
   bool writeTotalHours(double value);
   void saveReadNote(int page, int start, int end, const QString &color,
-                    const QString &content);
+                    const QString &content, const QString &quote);
   int cPage;
   void updateReadNote(int page, int index, const QString &content);
   void appendNoteDataToQmlList();

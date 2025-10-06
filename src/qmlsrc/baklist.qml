@@ -312,8 +312,6 @@ Rectangle {
         model: ListModel {
             id: listmain
 
-            // debug
-
 
             /* ListElement {
                 text0: '<span style="background-color: #ff6600;">Hello</span>'

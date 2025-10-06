@@ -622,6 +622,7 @@ Item {
             anchors.margins: 10
 
             Label {
+                font.pointSize: fontSize
                 text: qsTr("Note Content:")
                 font.bold: true
             }
@@ -632,14 +633,16 @@ Item {
 
                 TextArea {
                     id: noteContent
+                    font.pointSize: fontSize
                     readOnly: true
-                    wrapMode: Text.Wrap
+                    wrapMode: Text.WordWrap
                 }
             }
 
             RowLayout {
                 Layout.alignment: Qt.AlignHCenter
                 Button {
+                    font.pointSize: fontSize
                     text: qsTr("Edit")
                     onClicked: {
                         // 打开编辑弹窗，修改后更新模型
@@ -652,6 +655,7 @@ Item {
                     }
                 }
                 Button {
+                    font.pointSize: fontSize
                     text: qsTr("Del")
                     onClicked: {
 
@@ -662,6 +666,7 @@ Item {
                     }
                 }
                 Button {
+                    font.pointSize: fontSize
                     text: qsTr("Close")
                     onClicked: notePopup.close()
                 }
@@ -671,8 +676,9 @@ Item {
 
     Dialog {
         id: deleteConfirmDialog
-        title: qsTr("Delete Confirmation")
         font.pointSize: fontSize
+        title: qsTr("Delete Confirmation")
+
         modal: true
         standardButtons: Dialog.Ok | Dialog.Cancel
 
@@ -681,7 +687,7 @@ Item {
         y: (parent.height - height) / 2
 
         Label {
-
+            font.pointSize: fontSize
             text: qsTr("Are you sure you want to delete this note?")
             anchors.centerIn: parent
         }

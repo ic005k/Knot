@@ -20,6 +20,10 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
 
   this->installEventFilter(this);
   notesModel = new QStandardItemModel(this);
+  // 定义角色名（QML 里用的名字）
+  notesModel->setItemRoleNames({{Qt::UserRole + 1, "quote"},
+                                {Qt::UserRole + 2, "page"},
+                                {Qt::UserRole + 3, "content"}});
 
   if (!isAndroid) mui->btnShareBook->hide();
 
@@ -3252,7 +3256,7 @@ void Reader::closeReader() {
   saveReader("", false);
   savePageVPos();
 
-  mui->qwViewBookNote->hide();
+  closeViewBookNote();
   mui->frameReader->hide();
   mui->frameMain->show();
 }
@@ -3373,7 +3377,9 @@ void Reader::closeBookPage() {
 }
 
 void Reader::addBookNote() {
-  QDialog dlg(this);
+  if (mui->editSetText->text().trimmed() == "") return;
+
+  QDialog dlg(mw_one);
   dlg.setWindowTitle(tr("Note"));  // 英文 tr 方式
 
   QTextEdit *textEdit = new QTextEdit(&dlg);
@@ -3393,6 +3399,11 @@ void Reader::addBookNote() {
   layout->addWidget(buttonBox);
   m_Method->set_ToolButtonStyle(&dlg);
 
+  dlg.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
+                                      dlg.sizeHint(),     // 使用建议大小
+                                      mw_one->geometry()  // 父窗口几何区域
+                                      ));
+
   if (dlg.exec() == QDialog::Accepted) {
     QString noteText = textEdit->toPlainText();
     // 在这里处理用户输入的笔记内容
@@ -3408,7 +3419,8 @@ void Reader::addBookNote() {
     }
 
     QString color = "#8500FF00";
-    saveReadNote(cPage, start, end, color, noteText);
+    saveReadNote(cPage, start, end, color, noteText,
+                 mui->editSetText->text().trimmed());
     readReadNote(cPage);
 
     qDebug() << "Note added:" << noteText;
@@ -3418,7 +3430,7 @@ void Reader::addBookNote() {
 }
 
 void Reader::editBookNote(int index, const QString &content) {
-  QDialog dlg(this);
+  QDialog dlg(mw_one);
   dlg.setWindowTitle(tr("Note"));
 
   QTextEdit *textEdit = new QTextEdit(&dlg);
@@ -3437,6 +3449,11 @@ void Reader::editBookNote(int index, const QString &content) {
   layout->addWidget(textEdit);
   layout->addWidget(buttonBox);
   m_Method->set_ToolButtonStyle(&dlg);
+
+  dlg.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
+                                      dlg.sizeHint(),     // 使用建议大小
+                                      mw_one->geometry()  // 父窗口几何区域
+                                      ));
 
   textEdit->setPlainText(content);
 
@@ -3475,6 +3492,7 @@ void Reader::viewBookNote() {
 }
 
 void Reader::closeViewBookNote() {
+  if (mui->qwViewBookNote->isHidden()) return;
   mui->qwViewBookNote->hide();
   mui->qwReader->show();
 }
@@ -3511,24 +3529,23 @@ void Reader::appendNoteDataToQmlList() {
     for (int i = 0; i < notesArray.size(); ++i) {
       QJsonObject noteObj = notesArray[i].toObject();
       QString content = noteObj["content"].toString();
+      QString quote = noteObj["quote"].toString();
 
-      // 限制内容长度，超过则显示省略号
-      if (content.length() > 15) {
-        content = content.left(15) + "...";
-      }
+      // 创建 item
+      QStandardItem *item = new QStandardItem();
 
-      // 格式化标题
-      QString title = QString("%1，%2").arg(page).arg(content);
+      // 存三个字段到不同角色
+      item->setData(quote, Qt::UserRole + 1);    // quote
+      item->setData(page, Qt::UserRole + 2);     // page
+      item->setData(content, Qt::UserRole + 3);  // content
 
-      // 添加到模型
-      QStandardItem *item = new QStandardItem(title);
       notesModel->appendRow(item);
     }
   }
 }
 
 void Reader::saveReadNote(int page, int start, int end, const QString &color,
-                          const QString &content) {
+                          const QString &content, const QString &quote) {
   QString file = iniDir + "memo/readnote/" + currentBookName + ".json";
 
   // 确保目录存在
@@ -3564,6 +3581,7 @@ void Reader::saveReadNote(int page, int start, int end, const QString &color,
   noteObj["end"] = end;
   noteObj["color"] = color;
   noteObj["content"] = content;
+  noteObj["quote"] = quote;
   noteObj["timestamp"] = QDateTime::currentMSecsSinceEpoch();  // 增加时间戳
 
   // 追加到数组

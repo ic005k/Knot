@@ -72,7 +72,7 @@ class CloudBackup : public QDialog {
   void backExit();
   void init_CloudBacup();
   void webDAVRestoreData();
-  void downloadFile_Old(QString remoteFileName, QString localSavePath);
+
   void changeComBoxWebDAV(const QString &arg1);
   bool checkWebDAVConnection();
   void on_pushButton_downloadFile_clicked();
