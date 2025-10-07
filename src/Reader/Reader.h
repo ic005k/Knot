@@ -2,6 +2,7 @@
 #define READER_H
 
 #include <QAbstractListModel>
+#include <QButtonGroup>
 #include <QDialog>
 #include <QDomDocument>
 #include <QDomElement>
@@ -9,6 +10,7 @@
 #include <QEvent>
 #include <QFile>
 #include <QFontDialog>
+#include <QOverload>
 #include <QPlainTextEdit>
 #include <QProcess>
 #include <QProgressBar>
@@ -218,6 +220,7 @@ class Reader : public QDialog {
   void autoRun();
 
  private:
+  QString strColor;
   QDateTime startDateTime, endDateTime;
   double totalHours = 0.0;
   bool isOne = false;

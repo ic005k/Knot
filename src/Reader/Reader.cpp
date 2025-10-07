@@ -3412,10 +3412,76 @@ void Reader::addBookNote() {
   QObject::connect(buttonBox, &QDialogButtonBox::rejected, dlgAddBookNote,
                    &QDialog::reject);
 
-  QVBoxLayout *layout = new QVBoxLayout(dlgAddBookNote);
-  layout->addWidget(textEdit);
-  layout->addWidget(buttonBox);
+  QVBoxLayout *vlayout = new QVBoxLayout(dlgAddBookNote);
+  QHBoxLayout *layout = new QHBoxLayout(dlgAddBookNote);
+  vlayout->addWidget(textEdit);
+  vlayout->addLayout(layout);
+  vlayout->addWidget(buttonBox);
+
   m_Method->set_ToolButtonStyle(dlgAddBookNote);
+
+  //----------------------------------------------
+
+  layout->setSpacing(10);
+
+  // 创建按钮组，设置互斥
+  QButtonGroup *btnGroup = new QButtonGroup(this);
+  btnGroup->setExclusive(true);
+
+  QList<QPushButton *> colorButtons;
+
+  QStringList colorList = {
+      "#8500FF00",  // 保留：半透明纯绿（基准色，辅助标记）
+      "#85FF0000",  // 半透明纯红（重点提醒/错误标记，醒目不刺眼）
+      "#850000FF",  // 半透明纯蓝（关键信息/重要补充，与红色对比强烈）
+      "#85FFFF00",  // 半透明纯黄（核心高亮/荧光笔平替，视觉焦点）
+      "#8500FFFF",  // 半透明纯青（特殊注释/技术细节，独特不相近）
+      "#85FF00FF"   // 半透明纯洋红（个性化标记/主观标注，区分度拉满）
+  };
+
+  for (const QString &colorStr : colorList) {
+    QPushButton *btn = new QPushButton(this);
+    btn->setFixedSize(50, 50);
+    btn->setCheckable(true);
+
+    // 设置样式表背景色
+    QString style = QString(R"(
+        QPushButton {
+            border: 2px outset #666;
+            background-color: %1;
+        }
+        QPushButton:checked {
+            border: 2px inset #666;
+            background-color: %1;
+        }
+    )")
+                        .arg(colorStr);
+
+    btn->setStyleSheet(style);
+
+    // 把原始颜色字符串存到按钮属性里
+    btn->setProperty("colorCode", colorStr);
+
+    layout->addWidget(btn);
+    btnGroup->addButton(btn);
+
+    colorButtons.append(btn);
+  }
+
+  // 默认选中第一个按钮
+  if (!colorButtons.isEmpty()) {
+    colorButtons.first()->setChecked(true);
+  }
+
+  // 连接信号槽（获取选中的颜色）
+  strColor = "#8500FF00";  //(默认)
+  connect(btnGroup,
+          QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked), this,
+          [=](QAbstractButton *btn) {
+            strColor = btn->property("colorCode").toString();
+          });
+
+  //-------------------------------------------------------------------
 
   QRect parentRect = mw_one->geometry();
   int x = parentRect.x() + (parentRect.width() - dlgAddBookNote->width()) / 2;
@@ -3436,8 +3502,8 @@ void Reader::addBookNote() {
       qDebug() << "No text selected.";
     }
 
-    QString color = "#8500FF00";
-    saveReadNote(cPage, start, end, color, noteText,
+    qDebug() << strColor;
+    saveReadNote(cPage, start, end, strColor, noteText,
                  mui->editSetText->text().trimmed());
     readReadNote(cPage);
 
