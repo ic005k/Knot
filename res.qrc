@@ -183,5 +183,7 @@
         <file>res/recent_l.svg</file>
         <file>res/find2.svg</file>
         <file>res/notes.svg</file>
+        <file>res/set.svg</file>
+        <file>res/set_l.svg</file>
     </qresource>
 </RCC>

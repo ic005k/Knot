@@ -19,8 +19,14 @@ Rectangle {
         cPage = cpage
     }
 
-    function setText2(text) {
-        text2.text = text
+    function modifyText2(currentIndex, strText) {
+        if (currentIndex >= 0 && currentIndex < notesModel.rowCount()) {
+            var idx = notesModel.index(currentIndex, 0) // 行索引，列 0
+            notesModel.setData(idx, strText, 259) // 259 是 Qt::UserRole + 3 Qt::UserRole=256
+            console.log("修改后 content:", notesModel.data(idx, 259))
+        }
+
+        console.log("currentIndex=", currentIndex, strText)
     }
 
     ColumnLayout {
@@ -126,6 +132,7 @@ Rectangle {
                         strNoteText = model.content
                         nPagesIndex = model.pageIndex
                         btnedit.enabled = true
+                        m_Reader.setNoteListCurrentIndexValue(cIndex)
                         console.log("点击了条目:", cIndex, cPage, nPagesIndex,
                                     strNoteText)
                     }

@@ -402,6 +402,10 @@
                <string>1
 1</string>
               </property>
+              <property name="icon">
+               <iconset resource="../res.qrc">
+                <normaloff>:/res/set_l.svg</normaloff>:/res/set_l.svg</iconset>
+              </property>
               <property name="iconSize">
                <size>
                 <width>24</width>
@@ -409,7 +413,7 @@
                </size>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
               </property>
              </widget>
             </item>

@@ -318,12 +318,6 @@ static void JavaNotify_15() {
     return;
   }
 
-  if (mui->qwViewBookNote->isVisible()) {
-    QTimer::singleShot(100, mw_one,
-                       []() { mw_one->m_Reader->closeViewBookNote(); });
-    return;
-  }
-
   if (mw_one->m_Reader->dlgAddBookNote != nullptr) {
     if (mw_one->m_Reader->dlgAddBookNote->isVisible()) {
       mw_one->m_Reader->dlgAddBookNote->close();
@@ -336,6 +330,12 @@ static void JavaNotify_15() {
       mw_one->m_Reader->dlgEditBookNote->close();
       return;
     }
+  }
+
+  if (mui->qwViewBookNote->isVisible()) {
+    QTimer::singleShot(100, mw_one,
+                       []() { mw_one->m_Reader->closeViewBookNote(); });
+    return;
   }
 
   if (mui->f_ReaderFun2->isVisible()) {

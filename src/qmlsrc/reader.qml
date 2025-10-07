@@ -407,7 +407,7 @@ Item {
 
                         if (clickedNote) {
                             console.log("显示笔记内容:", noteContent)
-                            //notePopup.showNote(noteContent)
+                            m_Reader.setShowNoteValue(true)
                             notePopup.showNote(noteContent, noteIndex) // 传递索引
                             mouse.accepted = true
                         } else if (!root.isMoving) {
@@ -499,7 +499,7 @@ Item {
         anchors.centerIn: Overlay.overlay
 
         background: Rectangle {
-            color: isDark ? "#000000" : "#333333"
+            color: isDark ? "#333333" : "#DDDDDD"
             border.color: notePopup.palette.windowText
             border.width: 1
             radius: 8
@@ -575,6 +575,7 @@ Item {
                                            "content": noteContent.text
                                        })
                         notePopup.close()
+                        m_Reader.setShowNoteValue(false)
                         m_Reader.editBookNote(currentNoteIndex, -1,
                                               noteContent.text)
                     }
@@ -590,7 +591,10 @@ Item {
                 Button {
                     font.pointSize: FontSize
                     text: qsTr("Close")
-                    onClicked: notePopup.close()
+                    onClicked: {
+                        notePopup.close()
+                        m_Reader.setShowNoteValue(false)
+                    }
                 }
             }
         }
@@ -615,13 +619,14 @@ Item {
         }
     }
 
-    // 在根组件添加连接
+    // 删除确认后执行删除
     Connections {
         target: deleteConfirmDialog
         function onAccepted() {
             notesModel.remove(currentNoteIndex)
             m_Reader.delReadNote(currentNoteIndex)
             notePopup.close()
+            m_Reader.setShowNoteValue(false)
         }
     }
 

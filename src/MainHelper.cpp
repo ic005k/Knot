@@ -882,6 +882,7 @@ void MainHelper::init_ButtonStyle() {
     mui->btnAutoStop->setIcon(QIcon(":/res/reader/stop_l.svg"));
     mui->btnOpen->setIcon(QIcon(":/res/reader/open_l.svg"));
     mui->btnReadList->setIcon(QIcon(":/res/reader/booklist_l.svg"));
+    mui->btnPages->setIcon(QIcon(":/res/set_l.svg"));
 
     // Notes
     mui->btnNoteBookMenu->setIcon(QIcon(":/res/nb_l.svg"));
@@ -899,6 +900,7 @@ void MainHelper::init_ButtonStyle() {
     mui->btnAutoStop->setIcon(QIcon(":/res/reader/stop.svg"));
     mui->btnOpen->setIcon(QIcon(":/res/reader/open.svg"));
     mui->btnReadList->setIcon(QIcon(":/res/reader/booklist.svg"));
+    mui->btnPages->setIcon(QIcon(":/res/set.svg"));
 
     // Notes
     mui->btnNoteBookMenu->setIcon(QIcon(":/res/nb.svg"));

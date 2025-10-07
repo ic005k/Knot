@@ -56,6 +56,9 @@ class Reader : public QDialog {
   QDialog *dlgAddBookNote = nullptr;
   QDialog *dlgEditBookNote = nullptr;
 
+  bool isShowNote = false;
+  int currentNoteListIndex = -1;
+
   bool isLandscape = false;
 
   qreal scrollValue = 1;
@@ -209,6 +212,8 @@ class Reader : public QDialog {
   void delReadNote(int index);
   void editBookNote(int index, int page, const QString &content);
   void closeViewBookNote();
+  void setShowNoteValue(bool value);
+  void setNoteListCurrentIndexValue(int value);
  private slots:
   void autoRun();
 
@@ -258,6 +263,7 @@ class Reader : public QDialog {
   void appendNoteDataToQmlList();
   QStandardItemModel *notesModel = nullptr;
   void initBookNoteValue(int cindex, int cpage);
+  void modifyText2(int currentIndex, const QString &text);
 };
 //////////////////////////////////////////////////////////////////////////////////
 

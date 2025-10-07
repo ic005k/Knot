@@ -2350,6 +2350,12 @@ void Reader::shareBook() {
 }
 
 bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
+  if (isShowNote) return false;
+  if (mui->textBrowser->isVisible()) return false;
+  if (dlgEditBookNote != nullptr) {
+    if (dlgEditBookNote->isVisible()) return false;
+  }
+
   // 统一处理鼠标和触摸事件的坐标变量
   static QPointF pressPos;    // 按下/触摸开始位置
   static QPointF currentPos;  // 当前移动位置
@@ -2389,7 +2395,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       relea_x = currentPos.x();
       relea_y = currentPos.y();
 
-      if (mw_one->isMousePress && mui->textBrowser->isHidden()) {
+      if (mw_one->isMousePress) {
         if (!isLandscape) {
           if ((relea_x - press_x) > 75 && qAbs(relea_y - press_y) < 35) {
             int cn = mui->btnPages->text().split("\n").at(0).toInt();
@@ -3491,6 +3497,10 @@ void Reader::editBookNote(int index, int page, const QString &content) {
 
     updateReadNote(mpage, index, noteText);
 
+    if (mui->qwViewBookNote->isVisible()) {
+      modifyText2(currentNoteListIndex, noteText);
+    }
+
     qDebug() << "Note added:" << noteText;
   } else {
     qDebug() << "Note canceled.";
@@ -3825,10 +3835,29 @@ void Reader::initBookNoteValue(int cindex, int cpage) {
   }
 
   // 调用 QML 函数 initValue(cindex, cpage)
-  QMetaObject::invokeMethod(root,
-                            "initValue",              // QML 函数名
-                            Qt::DirectConnection,     // 连接方式：同步调用
-                            Q_ARG(QVariant, cindex),  // 第一个参数
-                            Q_ARG(QVariant, cpage)    // 第二个参数
-  );
+  QMetaObject::invokeMethod(root, "initValue",
+                            Qt::DirectConnection,  // 连接方式：同步调用
+                            Q_ARG(QVariant, cindex), Q_ARG(QVariant, cpage));
+}
+
+void Reader::setShowNoteValue(bool value) { isShowNote = value; }
+
+void Reader::setNoteListCurrentIndexValue(int value) {
+  currentNoteListIndex = value;
+}
+
+void Reader::modifyText2(int currentIndex, const QString &text) {
+  QQuickItem *root = mui->qwViewBookNote->rootObject();
+  if (!root) {
+    qWarning("Error: QML root object not found!");
+    return;
+  }
+
+  // 调用 QML 函数 modifyText2(currentIndex, text)
+  QVariant returnValue;
+  QMetaObject::invokeMethod(
+      root, "modifyText2", Q_RETURN_ARG(QVariant, returnValue),
+      Q_ARG(QVariant, currentIndex), Q_ARG(QVariant, text));
+
+  qDebug() << "QML modifyText2 called, return value:" << returnValue;
 }

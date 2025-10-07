@@ -261,6 +261,14 @@ void ReceiveShare::closeAllChildWindows() {
 
   if (mui->frameSteps->isVisible()) mui->btnBackSteps->click();
 
+  if (mui->qwViewBookNote->isVisible()) {
+    QTimer::singleShot(100, mw_one, []() {
+      mw_one->m_Reader->closeViewBookNote();
+      mui->btnBackReader->click();
+    });
+    return;
+  }
+
   if (mui->frameBookList->isVisible()) {
     mui->btnBackBookList->click();
     mui->btnBackReader->click();
