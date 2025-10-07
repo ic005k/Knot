@@ -262,7 +262,8 @@ class Reader : public QDialog {
   void saveReadNote(int page, int start, int end, const QString &color,
                     const QString &content, const QString &quote);
   int cPage;
-  void updateReadNote(int page, int index, const QString &content);
+  void updateReadNote(int page, int index, const QString &content,
+                      const QString &color);
   void appendNoteDataToQmlList();
   QStandardItemModel *notesModel = nullptr;
   void initBookNoteValue(int cindex, int cpage);

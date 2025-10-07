@@ -2350,10 +2350,10 @@ void Reader::shareBook() {
 }
 
 bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
-  if (isShowNote) return false;
-  if (mui->textBrowser->isVisible()) return false;
+  if (isShowNote) return true;
+  if (mui->textBrowser->isVisible()) return true;
   if (dlgEditBookNote != nullptr) {
-    if (dlgEditBookNote->isVisible()) return false;
+    if (dlgEditBookNote->isVisible()) return true;
   }
 
   // 统一处理鼠标和触摸事件的坐标变量
@@ -3387,7 +3387,7 @@ void Reader::addBookNote() {
   if (mui->editSetText->text().trimmed() == "") return;
 
   dlgAddBookNote = new QDialog(mw_one);
-  dlgAddBookNote->setFixedSize(mw_one->geometry().width() - 20, 320);
+  dlgAddBookNote->setFixedSize(mw_one->geometry().width() - 2, 350);
   dlgAddBookNote->setWindowTitle(tr("Note"));
 
   QTextEdit *textEdit = new QTextEdit(dlgAddBookNote);
@@ -3444,16 +3444,16 @@ void Reader::addBookNote() {
     btn->setFixedSize(50, 50);
     btn->setCheckable(true);
 
-    // 设置样式表背景色
+    // 设置样式
     QString style = QString(R"(
-        QPushButton {
-            border: 2px outset #666;
-            background-color: %1;
-        }
-        QPushButton:checked {
-            border: 2px inset #666;
-            background-color: %1;
-        }
+    QPushButton {
+        border: 2px outset #666;
+        background-color: %1;
+    }
+    QPushButton:checked {
+        border: 2px solid red;         /* 选中时用红色边框 */
+        background-color: %1;
+    }
     )")
                         .arg(colorStr);
 
@@ -3485,7 +3485,7 @@ void Reader::addBookNote() {
 
   QRect parentRect = mw_one->geometry();
   int x = parentRect.x() + (parentRect.width() - dlgAddBookNote->width()) / 2;
-  int y = 50;
+  int y = parentRect.y() + 1;
   dlgAddBookNote->move(x, y);
 
   if (dlgAddBookNote->exec() == QDialog::Accepted) {
@@ -3515,7 +3515,7 @@ void Reader::addBookNote() {
 
 void Reader::editBookNote(int index, int page, const QString &content) {
   dlgEditBookNote = new QDialog(mw_one);
-  dlgEditBookNote->setFixedSize(mw_one->geometry().width() - 20, 320);
+  dlgEditBookNote->setFixedSize(mw_one->geometry().width() - 2, 350);
   dlgEditBookNote->setWindowTitle(tr("Note"));
 
   QTextEdit *textEdit = new QTextEdit(dlgEditBookNote);
@@ -3540,14 +3540,80 @@ void Reader::editBookNote(int index, int page, const QString &content) {
   QObject::connect(buttonBox, &QDialogButtonBox::rejected, dlgEditBookNote,
                    &QDialog::reject);
 
-  QVBoxLayout *layout = new QVBoxLayout(dlgEditBookNote);
-  layout->addWidget(textEdit);
-  layout->addWidget(buttonBox);
+  QVBoxLayout *vlayout = new QVBoxLayout(dlgEditBookNote);
+  QHBoxLayout *layout = new QHBoxLayout(dlgEditBookNote);
+  vlayout->addWidget(textEdit);
+  vlayout->addLayout(layout);
+  vlayout->addWidget(buttonBox);
+
   m_Method->set_ToolButtonStyle(dlgEditBookNote);
+
+  //----------------------------------------------
+
+  layout->setSpacing(10);
+
+  // 创建按钮组，设置互斥
+  QButtonGroup *btnGroup = new QButtonGroup(this);
+  btnGroup->setExclusive(true);
+
+  QList<QPushButton *> colorButtons;
+
+  QStringList colorList = {
+      "#8500FF00",  // 保留：半透明纯绿（基准色，辅助标记）
+      "#85FF0000",  // 半透明纯红（重点提醒/错误标记，醒目不刺眼）
+      "#850000FF",  // 半透明纯蓝（关键信息/重要补充，与红色对比强烈）
+      "#85FFFF00",  // 半透明纯黄（核心高亮/荧光笔平替，视觉焦点）
+      "#8500FFFF",  // 半透明纯青（特殊注释/技术细节，独特不相近）
+      "#85FF00FF"   // 半透明纯洋红（个性化标记/主观标注，区分度拉满）
+  };
+
+  for (const QString &colorStr : colorList) {
+    QPushButton *btn = new QPushButton(this);
+    btn->setFixedSize(50, 50);
+    btn->setCheckable(true);
+
+    // 设置样式
+    QString style = QString(R"(
+    QPushButton {
+        border: 2px outset #666;
+        background-color: %1;
+    }
+    QPushButton:checked {
+        border: 2px solid red;         /* 选中时用红色边框 */
+        background-color: %1;
+    }
+    )")
+                        .arg(colorStr);
+
+    btn->setStyleSheet(style);
+
+    // 把原始颜色字符串存到按钮属性里
+    btn->setProperty("colorCode", colorStr);
+
+    layout->addWidget(btn);
+    btnGroup->addButton(btn);
+
+    colorButtons.append(btn);
+  }
+
+  // 默认选中第一个按钮
+  if (!colorButtons.isEmpty()) {
+    colorButtons.first()->setChecked(true);
+  }
+
+  // 连接信号槽（获取选中的颜色）
+  strColor = "#8500FF00";  //(默认)
+  connect(btnGroup,
+          QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked), this,
+          [=](QAbstractButton *btn) {
+            strColor = btn->property("colorCode").toString();
+          });
+
+  //-------------------------------------------------------------------
 
   QRect parentRect = mw_one->geometry();
   int x = parentRect.x() + (parentRect.width() - dlgEditBookNote->width()) / 2;
-  int y = 50;
+  int y = parentRect.y() + 1;
   dlgEditBookNote->move(x, y);
 
   textEdit->setPlainText(content);
@@ -3561,7 +3627,7 @@ void Reader::editBookNote(int index, int page, const QString &content) {
     else
       mpage = page;
 
-    updateReadNote(mpage, index, noteText);
+    updateReadNote(mpage, index, noteText, strColor);
 
     if (mui->qwViewBookNote->isVisible()) {
       modifyText2(currentNoteListIndex, noteText);
@@ -3827,7 +3893,8 @@ void Reader::delReadNote(int index) {
   // readReadNote(page);
 }
 
-void Reader::updateReadNote(int page, int index, const QString &content) {
+void Reader::updateReadNote(int page, int index, const QString &content,
+                            const QString &color) {
   QString file = iniDir + "memo/readnote/" + currentBookName + ".json";
 
   // 文件不存在则无法更新
@@ -3869,9 +3936,10 @@ void Reader::updateReadNote(int page, int index, const QString &content) {
     return;
   }
 
-  // 更新 content
+  // 更新
   QJsonObject noteObj = notesArray[index].toObject();
-  noteObj["content"] = content;  // 只更新内容，保留原 start/end/color
+  noteObj["content"] = content;
+  noteObj["color"] = color;
   notesArray.replace(index, noteObj);
 
   // 写回 JSON
