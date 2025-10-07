@@ -3958,7 +3958,9 @@ void Reader::updateReadNote(int page, int index, const QString &content,
            << "has been updated.";
 
   // 刷新 QML 模型
-  readReadNote(page);
+  if (page == cPage) {
+    readReadNote(page);
+  }
 }
 
 void Reader::initBookNoteValue(int cindex, int cpage) {
