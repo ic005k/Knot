@@ -1045,6 +1045,7 @@ void MainHelper::init_Theme() {
   mui->qwCata->rootContext()->setContextProperty("isDark", isDark);
   mui->qwBookmark->rootContext()->setContextProperty("isDark", isDark);
   mui->qwReader->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwViewBookNote->rootContext()->setContextProperty("isDark", isDark);
 
   if (!isDark) {
     mui->f_Menu->setStyleSheet("background-color: rgb(243,243,243);");

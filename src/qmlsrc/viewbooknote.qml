@@ -7,7 +7,7 @@ Rectangle {
     id: root
     width: 400
     height: 600
-    color: "#f0f0f0"
+    color: isDark ? "#333333" : "#f0f0f0"
 
     property int cIndex: -1
     property int nPagesIndex: -1
@@ -22,7 +22,8 @@ Rectangle {
     function modifyText2(currentIndex, strText) {
         if (currentIndex >= 0 && currentIndex < notesModel.rowCount()) {
             var idx = notesModel.index(currentIndex, 0) // 行索引，列 0
-            notesModel.setData(idx, strText, 259) // 259 是 Qt::UserRole + 3 Qt::UserRole=256
+            notesModel.setData(idx, strText,
+                               259) // 259 是 Qt::UserRole + 3 Qt::UserRole=256
             console.log("修改后 content:", notesModel.data(idx, 259))
         }
 
@@ -46,7 +47,8 @@ Rectangle {
                 id: itemDelegate
                 width: listView.width
                 height: column.implicitHeight + 6
-                color: index % 2 === 0 ? "#ffffff" : "#f9f9f9"
+                //color: index % 2 === 0 ? "#ffffff" : "#f9f9f9"
+                color: isDark ? "#333333" : "#f0f0f0"
 
                 Rectangle {
                     color: "#FF0000"
@@ -80,7 +82,8 @@ Rectangle {
                             width: parent.width
                             text: qsTr("Pages:") + model.page
                             font.pointSize: fontSize
-                            color: "#333333"
+                            font.bold: true
+                            color: isDark ? "#EEEEEE" : "#333333"
                             wrapMode: Text.WordWrap
                         }
                     }
@@ -89,7 +92,7 @@ Rectangle {
                         id: rect1
                         width: parent.width
                         height: text1.implicitHeight + 8
-                        color: "#f0f0f0"
+                        color: isDark ? "#555555" : "#f0f0f0"
                         radius: 4
 
                         Text {
@@ -98,7 +101,8 @@ Rectangle {
                             anchors.margins: 4
                             text: model.quote
                             font.pointSize: fontSize
-                            color: "#333333"
+                            font.italic: true
+                            color: isDark ? "#DDDDDD" : "#333333"
                             wrapMode: Text.WordWrap
                         }
                     }
@@ -108,7 +112,7 @@ Rectangle {
                         width: parent.width
                         text: model.content
                         font.pointSize: fontSize
-                        color: "#333333"
+                        color: isDark ? "#DDDDDD" : "#333333"
                         wrapMode: Text.WordWrap
                     }
                 }
@@ -118,7 +122,7 @@ Rectangle {
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
                     height: 1
-                    color: "#e0e0e0"
+                    color: isDark ? "#666666" : "#e0e0e0"
                 }
 
                 MouseArea {
