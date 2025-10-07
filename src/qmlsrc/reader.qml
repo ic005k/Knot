@@ -411,6 +411,7 @@ Item {
                             notePopup.showNote(noteContent, noteIndex) // 传递索引
                             mouse.accepted = true
                         } else if (!root.isMoving) {
+
                             var link = m_text.linkAt(mouse.x, mouse.y)
                             if (link) {
                                 root.handleLinkClicked(link)
@@ -596,6 +597,22 @@ Item {
                         m_Reader.setShowNoteValue(false)
                     }
                 }
+            }
+        }
+
+        onClosed: {
+
+            console.log("弹窗已关闭，等待 500ms 后执行")
+            timer.start()
+        }
+
+        Timer {
+            id: timer
+            interval: 500 // 延时 500 毫秒
+            running: false
+            repeat: false
+            onTriggered: {
+                m_Reader.setShowNoteValue(false)
             }
         }
     }

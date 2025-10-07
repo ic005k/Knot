@@ -1027,6 +1027,9 @@ void MainHelper::init_Theme() {
   mui->qwRecycle->rootContext()->setContextProperty("isDark", isDark);
   mui->qwNoteBook->rootContext()->setContextProperty("isDark", isDark);
   mui->qwNoteList->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwNoteVersion->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwNoteDiff->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwNoteGraphView->rootContext()->setContextProperty("isDark", isDark);
 
   mui->qwNotesSearchResult->rootContext()->setContextProperty("isDark", isDark);
   mui->qwSearch->rootContext()->setContextProperty("isDark", isDark);

@@ -5,7 +5,7 @@ import QtQuick.Controls.Fusion
 
 // 主容器：适配 QuickWidget 大小，带轻微阴影
 Rectangle {
-    color: "#f9f9f9" // 浅灰背景，避免刺眼
+    color: isDark ? "#333333" : "#f9f9f9" // 浅灰背景，避免刺眼
     radius: 4 // 轻微圆角，提升美观度
     border.color: "#eee" // 细边框，区分区域
     border.width: 1
@@ -23,7 +23,7 @@ Rectangle {
             font.family: "Microsoft YaHei"
             font.pointSize: 14
             font.bold: true
-            color: "#333"
+            color: isDark ? "#DDDDDD" : "#333"
             Layout.leftMargin: 4
             Layout.bottomMargin: 8
         }
@@ -89,7 +89,7 @@ Rectangle {
                     anchors.leftMargin: 10
                     text: model.time
 
-                    color: "#333"
+                    color: isDark?(model.isSelected ? "#333":"#DDD") : "#333"
                     elide: Text.ElideRight // 时间过长时右侧省略，避免换行
                     width: parent.width - 80 // 预留按钮空间
                 }
@@ -149,7 +149,7 @@ Rectangle {
                     anchors.centerIn: parent
                     text: qsTr("No modification records")
 
-                    color: "#999"
+                    color: isDark ? "#DDD" : "#999"
                 }
             }
 

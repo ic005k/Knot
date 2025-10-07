@@ -11,6 +11,18 @@ Flickable {
     // 初始透明度设为0，等待首次数据加载完成后再淡入
     opacity: 0
 
+    // 背景矩形
+    Rectangle {
+        anchors.fill: parent
+        color: isDark ? "#1a1a1a" : "#ffffff"
+        // 可选：加个淡入淡出动画
+        Behavior on color {
+            ColorAnimation {
+                duration: 300
+            }
+        }
+    }
+
     // --- 数据存储 ---
     property var currentNode: null
     property var references: []

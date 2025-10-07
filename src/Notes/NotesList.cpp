@@ -3320,9 +3320,7 @@ void NotesList::initNoteGraphView() {
   // 使用 nullptr 作为初始值
   mui->qwNoteGraphView->rootContext()->setContextProperty(
       "graphController", QVariant::fromValue<QObject *>(nullptr));
-  // 或者使用一个空的 QObject 实例 (如果需要一个非 null 对象)
-  // mui->qwNoteGraphView->rootContext()->setContextProperty("graphController",
-  // new QObject(mui->qwNoteGraphView));
+  mui->qwNoteGraphView->rootContext()->setContextProperty("isDark", isDark);
 
   // 3. 加载 QML 源文件（这一步会触发 QML 引擎初始化）
   // 此时，QML 引擎已经知道 graphController 这个属性的存在（虽然是 nullptr）

@@ -165,6 +165,7 @@ Rectangle {
             height: colLayout.implicitHeight + 5
 
             //color: index % 2 === 0 ? "#f0f0f0" : "#e0e0e0"
+            color: isDark ? "#333" : "#DDD"
             border.color: "#ccc"
             border.width: 1
 
@@ -206,6 +207,8 @@ Rectangle {
                             font.bold: true
                             text: text0
 
+                            color: isDark ? "#333" : "#333"
+
                             leftPadding: 5
                             rightPadding: 5
                         }
@@ -241,7 +244,7 @@ Rectangle {
 
                             font.pointSize: item0.font.pointSize - 1
                             font.bold: false
-                            color: "#555555"
+                            color: isDark ? "#BBB" : "#555"
                             text: text1
 
                             leftPadding: 5
@@ -262,7 +265,7 @@ Rectangle {
                         wrapMode: TextArea.WordWrap
                         font.bold: false
                         text: text2
-                        color: "red"
+                        color: isDark ? "#FF6666" : "red"
 
                         leftPadding: 5
                         rightPadding: 5
@@ -281,6 +284,8 @@ Rectangle {
                         font.bold: false
                         text: text3
 
+                        color: isDark ? "#DDD" : "#333"
+
                         leftPadding: 5
                         rightPadding: 5
 
@@ -298,7 +303,7 @@ Rectangle {
                         font.bold: false
                         text: text4
 
-                        color: "blue"
+                        color: isDark ? "#6666FF" : "blue"
 
                         leftPadding: 5
                         rightPadding: 5
@@ -317,6 +322,8 @@ Rectangle {
                         font.bold: false
                         text: text5
 
+                        color: isDark ? "#DDD" : "#333"
+
                         leftPadding: 5
                         rightPadding: 5
 
@@ -333,6 +340,8 @@ Rectangle {
                         Layout.preferredWidth: listItem.width
                         font.bold: false
                         text: text6
+
+                        color: isDark ? "#DDD" : "#333"
 
                         leftPadding: 5
                         rightPadding: 5

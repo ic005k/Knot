@@ -41,6 +41,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true // 关键：填充剩余高度
 
+
             boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
 
             delegate: Rectangle {
@@ -72,6 +73,12 @@ Rectangle {
                     spacing: 6
 
                     Rectangle {
+                        width: parent.width
+                        height: 2 // 空白高度
+                        color: "transparent"
+                    }
+
+                    Rectangle {
                         color: "#8000FF00"
                         radius: 4
                         width: text0.implicitWidth + 8
@@ -92,7 +99,7 @@ Rectangle {
                         id: rect1
                         width: parent.width
                         height: text1.implicitHeight + 8
-                        color: isDark ? "#555555" : "#f0f0f0"
+                        color: isDark ? "#555555" : "#DDDDDD"
                         radius: 4
 
                         Text {
@@ -124,6 +131,8 @@ Rectangle {
                     height: 1
                     color: isDark ? "#666666" : "#e0e0e0"
                 }
+
+
 
                 MouseArea {
                     anchors.fill: parent
