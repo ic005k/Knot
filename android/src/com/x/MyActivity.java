@@ -1962,4 +1962,29 @@ public class MyActivity
     }
   }
 
+  /**
+   * 保持屏幕常亮（强制在 UI 线程执行）
+   */
+  public static void keepScreenOn(Activity activity) {
+    // 关键：通过 runOnUiThread 切换到 UI 线程
+    activity.runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+      }
+    });
+  }
+
+  /**
+   * 取消屏幕常亮（强制在 UI 线程执行）
+   */
+  public static void cancelKeepScreenOn(Activity activity) {
+    activity.runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+      }
+    });
+  }
+
 }

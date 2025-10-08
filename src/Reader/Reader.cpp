@@ -3266,6 +3266,7 @@ void Reader::closeReader() {
   closeViewBookNote();
   mui->frameReader->hide();
   mui->frameMain->show();
+  cancelKeepScreenOn();
 }
 
 void Reader::openReader() {
@@ -3299,6 +3300,7 @@ void Reader::openReader() {
 
   startDateTime = QDateTime::currentDateTime();
   totalHours = readTotalHours();
+  keepScreenOn();
 }
 
 double Reader::readTotalHours() {
@@ -3996,4 +3998,29 @@ void Reader::modifyText2(int currentIndex, const QString &text) {
       Q_ARG(QVariant, currentIndex), Q_ARG(QVariant, text));
 
   qDebug() << "QML modifyText2 called, return value:" << returnValue;
+}
+
+void Reader::keepScreenOn() {
+  // 获取当前 Android Activity
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  if (activity.isValid()) {
+    QJniObject::callStaticMethod<void>(
+        "com/x/MyActivity",           // Java 类路径（注意用 / 代替 .）
+        "keepScreenOn",               // 方法名
+        "(Landroid/app/Activity;)V",  // 方法签名
+        activity.object<jobject>());
+  } else {
+    qWarning() << "keepScreenOn: activity is invalid";
+  }
+}
+
+void Reader::cancelKeepScreenOn() {
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  if (activity.isValid()) {
+    QJniObject::callStaticMethod<void>("com/x/MyActivity", "cancelKeepScreenOn",
+                                       "(Landroid/app/Activity;)V",
+                                       activity.object<jobject>());
+  } else {
+    qWarning() << "cancelKeepScreenOn: activity is invalid";
+  }
 }

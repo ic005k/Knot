@@ -954,7 +954,7 @@ border-radius: 4px;</string>
               </property>
               <property name="icon">
                <iconset resource="../res.qrc">
-                <normaloff>:/res/notes_l.svg</normaloff>:/res/notes_l.svg</iconset>
+                <normaloff>:/res/reader/booknote_l.svg</normaloff>:/res/reader/booknote_l.svg</iconset>
               </property>
               <property name="iconSize">
                <size>

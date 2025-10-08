@@ -180,7 +180,9 @@ class Reader : public QDialog {
   void addBookNote();
   void readReadNote(int page);
   void viewBookNote();
- public slots:
+  void keepScreenOn();
+  void cancelKeepScreenOn();
+  public slots:
   void on_SetReaderFunVisible();
 
   void setPageScroll0();

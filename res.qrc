@@ -185,5 +185,7 @@
         <file>res/notes.svg</file>
         <file>res/set.svg</file>
         <file>res/set_l.svg</file>
+        <file>res/reader/booknote.svg</file>
+        <file>res/reader/booknote_l.svg</file>
     </qresource>
 </RCC>
