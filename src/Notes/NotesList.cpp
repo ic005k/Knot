@@ -350,7 +350,7 @@ void NotesList::on_btnRename_clicked() {
   });
 
   int x, y, w, h;
-  h = mw_one->height() / 3;
+  h = 300;
   if (isAndroid) {
     w = mw_one->width() - 2;
     y = mw_one->geometry().y();

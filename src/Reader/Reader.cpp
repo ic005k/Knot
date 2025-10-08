@@ -32,6 +32,7 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
 
   mui->lblTitle->hide();
   mui->f_ReaderFun2->hide();
+  mui->textBrowser1->hide();
   mui->textBrowser->hide();
   mui->lblCataInfo->hide();
   mui->btnBackReader->hide();
@@ -2182,8 +2183,24 @@ void Reader::selectText() {
     QFont font;
     font.setPixelSize(readerFontSize);
     font.setFamily(mui->btnFont->font().family());
-    // font.setLetterSpacing(QFont::AbsoluteSpacing, 2);
+    font.setLetterSpacing(QFont::AbsoluteSpacing, 2);
     mui->textBrowser->setFont(font);
+
+    mui->textBrowser->document()->setDocumentMargin(0);
+    mui->textBrowser->viewport()->setAutoFillBackground(false);
+    QString css;
+    if (isDark)
+      css =
+          "<style>body { color: #DDDDDD !important; background: #333333 "
+          "!important; "
+          "}</style>";
+    else
+      css =
+          "<style>body { color: #333333 !important; background: #DDDDDD "
+          "!important; "
+          "}</style>";
+
+    currentTxt.insert(currentTxt.indexOf("</head>") + 7, css);
 
     mui->textBrowser->setHtml(currentTxt);
 

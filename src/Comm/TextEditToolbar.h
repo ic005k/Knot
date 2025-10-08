@@ -491,6 +491,7 @@ class EditEventFilter : public QObject {
     qDebug() << "Long press detected - show toolbar";
     if (m_target && m_toolbar) {
       m_toolbar->bindEditWidget(static_cast<QWidget *>(m_target));
+      return;
       m_toolbar->showAtSelection();
     }
   }

@@ -1701,6 +1701,10 @@ void MainWindow::on_btnSearch_clicked() {
 }
 
 void MainWindow::on_btnCancelSel_clicked() {
+  QTextCursor cursor = mui->textBrowser->textCursor();
+  cursor.clearSelection();
+  mui->textBrowser->setTextCursor(cursor);
+
   mui->f_ReaderFun2->hide();
   mui->textBrowser->hide();
   mui->qwReader->show();

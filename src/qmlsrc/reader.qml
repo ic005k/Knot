@@ -7,6 +7,7 @@ import EBook.Models 1.0
 import QtQuick.Controls.Fusion
 
 Item {
+
     id: root
     visible: true
 
@@ -248,20 +249,12 @@ Item {
                         m_Reader.on_SetReaderFunVisible()
                 }
 
-                onPressAndHold: {
+                onPressAndHold: function (mouse) {
 
                     if (!isMoving)
                         mw_one.on_btnSelText_clicked()
-
-
-                    /*if (!root.isMoving) {
-                        // 进入选择模式
-                        root.isSelectionMode = true
-                        root.selectionStart = -1
-                        root.selectionEnd = -1
-                    }*/
+                    mouse.accepted = false
                 }
-
                 onPositionChanged: {
                     isMoving = true
                 }
@@ -325,59 +318,74 @@ Item {
                     delegate: Item {
                         id: noteDelegate
 
-                        // 检查位置是否有效
-                        property bool isValidPosition: model.start >= 0
-                                                       && model.end <= m_text.length
-
-                        // 计算起始和结束位置
-                        property var startRect: isValidPosition ? m_text.positionToRectangle(
-                                                                      model.start) : null
-                        property var endRect: isValidPosition ? m_text.positionToRectangle(
-                                                                    model.end) : null
-
-                        // 确保颜色值有效
+                        property int noteStart: model.start
+                        property int noteEnd: model.end
+                        property bool isValidPosition: noteStart >= 0
+                                                       && noteEnd <= m_text.length
                         property color noteColor: model.color ? model.color : "#FFFF0080"
 
-                        // 单行笔记
-                        Rectangle {
-                            id: noteRect
-                            visible: isValidPosition && startRect && endRect
-                                     && startRect.y === endRect.y
-                            color: noteDelegate.noteColor
-                            opacity: 0.4
-                            x: startRect ? startRect.x : 0
-                            y: startRect ? startRect.y : 0
-                            width: startRect
-                                   && endRect ? (endRect.x + endRect.width - x) : 0
-                            height: startRect ? startRect.height : 0
-                            z: 5 // 确保在文本下方
-                        }
+                        // 计算 start/end 矩形（用于点击判断）
+                        property var startRect: isValidPosition ? m_text.positionToRectangle(
+                                                                      noteStart) : null
+                        property var endRect: isValidPosition ? m_text.positionToRectangle(
+                                                                    noteEnd) : null
 
-                        // 跨行笔记
+                        visible: isValidPosition
+
+                        // 逐字符高亮
                         Repeater {
-                            model: isValidPosition && startRect && endRect
-                                   && startRect.y
-                                   !== endRect.y ? Math.floor(
-                                                       (endRect.y - startRect.y)
-                                                       / startRect.height) + 1 : 0
+                            model: Math.max(0, noteEnd - noteStart)
 
                             delegate: Rectangle {
-                                id: multiLineRect
-                                color: noteDelegate.noteColor
-                                opacity: 0.4
-                                x: index === 0 ? (startRect ? startRect.x : 0) : 0
-                                y: startRect ? startRect.y + index * startRect.height : 0
-                                width: {
-                                    if (!startRect || !endRect)
+                                property int charIndex: noteStart + index
+                                property var leftCursorRect: m_text.positionToRectangle(
+                                                                 charIndex)
+                                property var rightCursorRect: m_text.positionToRectangle(
+                                                                  charIndex + 1)
+
+                                property real charWidth: {
+                                    if (!leftCursorRect)
                                         return 0
-                                    if (index === 0)
-                                        return m_text.width - x // 第一行
-                                    if (index === parent.model - 1)
-                                        return endRect.x + endRect.width // 最后一行
-                                    return m_text.width // 中间行
+                                    if (!rightCursorRect)
+                                        return leftCursorRect.width
+
+                                    var w = rightCursorRect.x - leftCursorRect.x
+
+                                    // 宽度有效
+                                    if (w > 0) {
+                                        return w
+                                    }
+
+                                    // 宽度无效时，取前一个字符的宽度
+                                    if (charIndex > 0) {
+                                        var prevLeft = m_text.positionToRectangle(
+                                                    charIndex - 1)
+                                        var prevRight = m_text.positionToRectangle(
+                                                    charIndex)
+                                        if (prevLeft && prevRight) {
+                                            var prevW = prevRight.x - prevLeft.x
+                                            if (prevW > 0) {
+                                                return prevW
+                                            }
+                                        }
+                                    }
+
+                                    // 兜底
+                                    return leftCursorRect.width
                                 }
-                                height: startRect ? startRect.height : 0
-                                z: 5 // 确保在文本下方
+
+                                property real charHeight: leftCursorRect ? leftCursorRect.height : 0
+
+                                visible: leftCursorRect !== null
+                                         && charWidth > 0
+
+                                x: leftCursorRect.x
+                                y: leftCursorRect.y
+                                width: charWidth
+                                height: charHeight
+                                color: noteColor
+                                opacity: 0.4
+                                z: 5
                             }
                         }
                     }
@@ -389,7 +397,21 @@ Item {
                     acceptedButtons: Qt.LeftButton
                     propagateComposedEvents: true
 
+                    onPressAndHold: function (mouse) {
+
+
+                        /*if (!root.isMoving) {
+                            // 进入选择模式
+                            root.isSelectionMode = true
+
+                            root.selectionStart = -1
+                            root.selectionEnd = -1
+                        }*/
+                        console.log("长按已经启动...")
+                    }
+
                     onClicked: function (mouse) {
+
                         // 检查是否点击了笔记区域
                         var clickedNote = false
                         var noteContent = ""
@@ -483,7 +505,126 @@ Item {
 
         // ==============================================
         // 选择渲染层（覆盖在文本层上方）
-        Item {}
+        Item {
+            id: selectionLayer
+            anchors.fill: parent
+            visible: isSelectionMode
+
+            // 添加滚动视图容器
+            ScrollView {
+                id: selectionScrollView
+                anchors.fill: parent
+                contentWidth: selectionListView.contentWidth
+                contentHeight: selectionListView.contentHeight
+                clip: true
+
+                // 同步滚动位置
+                Component.onCompleted: {
+                    contentY = contentListView.contentY
+                }
+
+                // 文本选择渲染
+                ListView {
+                    id: selectionListView
+                    width: rotateContainer.width
+                    height: rotateContainer.height
+                    model: textModel
+                    spacing: contentListView.spacing // 保持相同的间距
+                    contentY: contentListView.contentY // 同步滚动位置
+
+                    delegate: TextEdit {
+                        id: selectionText
+                        width: rotateContainer.width
+                        leftPadding: 10
+                        rightPadding: 10
+                        textFormat: Text.RichText
+                        text: model.text
+                        wrapMode: Text.Wrap
+                        font.pixelSize: FontSize
+                        font.family: FontName
+                        color: myTextColor
+                        renderType: Text.QtRendering
+
+                        // 可编辑模式
+                        readOnly: true
+                        selectByMouse: true
+
+                        // 文本选择高亮
+                        Rectangle {
+                            visible: selectionText.selectedText.length > 0
+                            color: selectionColor
+                            opacity: 0.4
+                            x: selectionText.positionToRectangle(
+                                   selectionText.selectionStart).x
+                            y: selectionText.positionToRectangle(
+                                   selectionText.selectionStart).y
+                            width: selectionText.positionToRectangle(
+                                       selectionText.selectionEnd).x
+                                   + selectionText.positionToRectangle(
+                                       selectionText.selectionEnd).width - x
+                            height: selectionText.positionToRectangle(
+                                        selectionText.selectionStart).height
+                        }
+
+                        MouseArea {
+                            id: textMouseArea1
+                            anchors.fill: parent
+                            acceptedButtons: Qt.LeftButton
+                            propagateComposedEvents: true
+
+                            onPressAndHold: function (mouse) {
+
+                                console.log("渲染层长按已经启动...")
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 笔记操作工具栏
+            Row {
+                anchors.top: parent.top
+                anchors.right: parent.right
+                spacing: 10
+                padding: 10
+                z: 100
+
+                Button {
+                    text: "添加笔记"
+                    onClicked: {
+                        // 获取当前选择的文本和位置
+                        var selectedText = ""
+                        var startPos = -1
+                        var endPos = -1
+
+                        // 查找当前选择的文本块
+                        for (var i = 0; i < selectionListView.contentItem.children.length; i++) {
+                            var child = selectionListView.contentItem.children[i]
+                            if (child.selectedText
+                                    && child.selectedText.length > 0) {
+                                selectedText = child.selectedText
+                                startPos = child.selectionStart
+                                endPos = child.selectionEnd
+                                break
+                            }
+                        }
+
+                        if (selectedText.length > 0) {
+                            noteDialog.showDialog(selectedText,
+                                                  startPos, endPos)
+                        }
+                    }
+                }
+
+                Button {
+                    text: "取消"
+                    onClicked: {
+                        root.isSelectionMode = false
+                    }
+                }
+            }
+        }
+
         // ==============================================
         // 【新增结束】
         // ==============================================
@@ -817,27 +958,6 @@ Item {
 
     ListModel {
         id: notesModel
-
-
-        /*ListElement {
-            start: 50
-            end: 120
-            color: "#FF572280"
-            content: "这是第1条笔记的内容"
-        }
-        ListElement {
-            start: 200
-            end: 250
-            color: "#4CAF5080"
-            content: "这是第2条笔记的内容"
-        }
-
-        ListElement {
-            start: 300
-            end: 310
-            color: "#8000FF50"
-            content: "这是第3条笔记的内容"
-        }*/
     }
 
     // 自动刷新笔记模型数据

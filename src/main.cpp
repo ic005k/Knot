@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
   QApplication::setStyle(QStyleFactory::create("Fusion"));
 
   // 禁用文本选择（针对所有的可输入的编辑框）
-  qputenv("QT_QPA_NO_TEXT_HANDLES", "1");
+  // qputenv("QT_QPA_NO_TEXT_HANDLES", "1");
 
 #ifdef Q_OS_WIN
   isWindows = true;
