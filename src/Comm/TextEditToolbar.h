@@ -90,39 +90,44 @@ class TextEditToolbar : public QWidget {
   void showAtSelection() {
     if (!m_textEdit && !m_lineEdit) return;
 
-    // 获取选择范围在屏幕上的位置（用于定位窗口）
-    QRect selectionRect;
-    if (m_textEdit) {
-      // 1. 获取控件局部坐标系中的选择矩形
-      QRect localRect = m_textEdit->cursorRect(m_textEdit->textCursor());
-      // 2. 将局部矩形转换为全局坐标系矩形（关键修复）
-      QPoint globalTopLeft = m_textEdit->mapToGlobal(localRect.topLeft());
-      selectionRect =
-          QRect(globalTopLeft, localRect.size());  // 用点和大小构造矩形
-    } else if (m_lineEdit) {
-      // 1. 获取控件局部坐标系中的矩形
-      QRect localRect = m_lineEdit->rect();
-      // 2. 转换为全局坐标系矩形（关键修复）
-      QPoint globalTopLeft = m_lineEdit->mapToGlobal(localRect.topLeft());
-      selectionRect =
-          QRect(globalTopLeft, localRect.size());  // 用点和大小构造矩形
+    QWidget *editWidget = m_textEdit ? static_cast<QWidget *>(m_textEdit)
+                                     : static_cast<QWidget *>(m_lineEdit);
+    QWidget *topLevelWindow = editWidget ? editWidget->window() : nullptr;
+    if (!topLevelWindow) return;
+
+    // 获取编辑框内容区域的全局坐标
+    QRect editContentRect = editWidget->rect();
+    QPoint editTopLeft = editWidget->mapToGlobal(editContentRect.topLeft());
+    QPoint editBottomLeft =
+        editWidget->mapToGlobal(editContentRect.bottomLeft());
+
+    QRect screenRect = QApplication::primaryScreen()->geometry();
+    const int SPACING = 5;
+
+    int targetX = editTopLeft.x();
+    int targetY;
+
+    // 优先放上方
+    if (editTopLeft.y() >= height() + SPACING) {
+      targetY = editTopLeft.y() - height() - SPACING;
+    } else {
+      // 上方空间不足才放下方
+      targetY = editBottomLeft.y() + SPACING;
     }
 
-    // 窗口定位到选择范围上方（避免遮挡）
-    int targetX = selectionRect.x();
-    int targetY = selectionRect.y() - height() - 10;
-
-    // 确保窗口不超出屏幕边界
-    QRect screenRect = QApplication::primaryScreen()->geometry();
+    // 防止超出屏幕
     if (targetX + width() > screenRect.right()) {
       targetX = screenRect.right() - width();
     }
-    if (targetY < 0) {
-      targetY = selectionRect.bottom() + 10;  // 显示在下方
+    if (targetY + height() > screenRect.bottom()) {
+      targetY = screenRect.bottom() - height();
     }
+    if (targetX < 0) targetX = 0;
+    if (targetY < 0) targetY = 0;
 
     move(targetX, targetY);
     show();
+    raise();  // 把自己提到父窗口内所有子控件的最前面
   }
 
  private slots:

@@ -4001,6 +4001,7 @@ void Reader::modifyText2(int currentIndex, const QString &text) {
 }
 
 void Reader::keepScreenOn() {
+#ifdef Q_OS_ANDROID
   // 获取当前 Android Activity
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
   if (activity.isValid()) {
@@ -4012,9 +4013,12 @@ void Reader::keepScreenOn() {
   } else {
     qWarning() << "keepScreenOn: activity is invalid";
   }
+#endif
 }
 
 void Reader::cancelKeepScreenOn() {
+#ifdef Q_OS_ANDROID
+
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
   if (activity.isValid()) {
     QJniObject::callStaticMethod<void>("com/x/MyActivity", "cancelKeepScreenOn",
@@ -4023,4 +4027,6 @@ void Reader::cancelKeepScreenOn() {
   } else {
     qWarning() << "cancelKeepScreenOn: activity is invalid";
   }
+
+#endif
 }
