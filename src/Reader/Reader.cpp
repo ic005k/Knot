@@ -31,7 +31,7 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
   mui->btnAutoStop->hide();
 
   mui->lblTitle->hide();
-  mui->f_ReaderFun2->hide();
+  mui->f_ReaderNote->hide();
   mui->textBrowser1->hide();
   mui->textBrowser->hide();
   mui->lblCataInfo->hide();
@@ -2204,10 +2204,10 @@ void Reader::selectText() {
 
     mui->textBrowser->setHtml(currentTxt);
 
-    mui->qwReader->hide();
+    // mui->qwReader->hide();
     mui->f_ReaderFun->hide();
-    mui->f_ReaderFun2->show();
-    mui->textBrowser->show();
+    mui->f_ReaderNote->show();
+    // mui->textBrowser->show();
 
     qreal h0 = getVHeight();
     qreal h1 = mui->textBrowser->document()->size().height();
@@ -2230,7 +2230,7 @@ void Reader::closeSelText() {
   if (isSelText) {
     isSelText = false;
 
-    mui->f_ReaderFun2->hide();
+    mui->f_ReaderNote->hide();
     mui->textBrowser->hide();
     mui->qwReader->show();
     mui->f_ReaderFun->show();
@@ -2368,6 +2368,7 @@ void Reader::shareBook() {
 
 bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
   if (isShowNote) return true;
+  if (mui->f_ReaderNote->isVisible()) return true;
   if (mui->textBrowser->isVisible()) return true;
   if (dlgEditBookNote != nullptr) {
     if (dlgEditBookNote->isVisible()) return true;
@@ -3353,9 +3354,9 @@ bool Reader::writeTotalHours(double value) {
 }
 
 void Reader::showTextFun() {
-  if (mui->f_ReaderFun2->isHidden()) {
+  if (mui->f_ReaderNote->isHidden()) {
     mui->f_ReaderFun->hide();
-    mui->f_ReaderFun2->show();
+    mui->f_ReaderNote->show();
   }
 }
 
@@ -4046,4 +4047,44 @@ void Reader::cancelKeepScreenOn() {
   }
 
 #endif
+}
+
+void Reader::resetTextSelection() {
+  QQuickItem *root = mui->qwReader->rootObject();
+  if (!root) {
+    qWarning() << "QML rootObject is null, cannot reset selection.";
+    return;
+  }
+
+  QVariant result;
+  bool success = QMetaObject::invokeMethod(root, "resetTextSelection",
+                                           Q_RETURN_ARG(QVariant, result));
+
+  if (success) {
+    qDebug() << "调用 QML 重置选择函数成功";
+  } else {
+    qWarning() << "调用 QML 重置选择函数失败，可能函数名错误或对象不存在";
+  }
+
+  setBookPagePressHold(false);
+}
+
+void Reader::setBookPagePressHold(bool value) {
+  QQuickItem *root = mui->qwReader->rootObject();
+  if (!root) {
+    qWarning() << "QML rootObject is null, cannot set book page press hold.";
+    return;
+  }
+
+  QVariant result;
+  bool success = QMetaObject::invokeMethod(root, "setBookPagePressHold",
+                                           Q_RETURN_ARG(QVariant, result),
+                                           Q_ARG(QVariant, value));
+
+  if (success) {
+    qDebug() << "调用 QML setBookPagePressHold 成功，值已设为" << value;
+  } else {
+    qWarning()
+        << "调用 QML setBookPagePressHold 失败，可能函数名错误或对象不存在";
+  }
 }

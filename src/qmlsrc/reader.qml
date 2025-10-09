@@ -30,6 +30,10 @@ Item {
     property int selectionEnd: -1 // 文本选择结束位置
     property color selectionColor: "#FFFF0080" // 选择高亮颜色
     property int currentNoteIndex: -1 // 当前点击的笔记索引
+    property bool isBookPagePressHold: false
+    // 存储当前有选择的 m_text 实例（解决 delegate 内无法访问问题）
+    property var currentSelectedTextEdit: null
+    property string selectionText: "" // 文本选择的内容
 
     // 横屏控制变量
     property bool isLandscape: false
@@ -46,6 +50,28 @@ Item {
     property string pdfFile: ""
     property bool isPDF: false
     property bool isEPUBText: false
+
+    // 重置文本选择状态（解决 delegate 内 m_text 无法访问问题）
+    function resetTextSelection() {
+        // 1. 取消“当前有选择的 TextEdit”的选择（通过记录的实例）
+        if (root.currentSelectedTextEdit) {
+            root.currentSelectedTextEdit.deselect() // 取消高亮
+            root.currentSelectedTextEdit.cursorPosition
+                    = root.currentSelectedTextEdit.selectionStart
+            console.log("已取消当前文本块的选择")
+        }
+
+        // 2. 清空所有记录（实例 + 选择位置）
+        root.currentSelectedTextEdit = null // 清空实例引用
+        root.selectionStart = -1
+        root.selectionEnd = -1
+
+        console.log("文本选择已完全重置")
+    }
+
+    function setBookPagePressHold(value) {
+        root.isBookPagePressHold = value
+    }
 
     function setLandscape(isValue) {
         isLandscape = isValue
@@ -245,14 +271,17 @@ Item {
                 propagateComposedEvents: true // 把事件传递给子元素（delegate）
 
                 onDoubleClicked: {
-                    if (!isMoving)
+                    if (!isMoving) {
                         m_Reader.on_SetReaderFunVisible()
+                    }
                 }
 
                 onPressAndHold: function (mouse) {
 
-                    if (!isMoving)
+                    if (!isMoving && !root.isBookPagePressHold) {
                         mw_one.on_btnSelText_clicked()
+                        root.isBookPagePressHold = true
+                    }
                     mouse.accepted = false
                 }
                 onPositionChanged: {
@@ -398,16 +427,37 @@ Item {
                     propagateComposedEvents: true
 
                     onPressAndHold: function (mouse) {
+                        console.log("文本长按已经启动...")
 
+                        // 1. 获取长按位置对应的字符索引（相对于 m_text）
+                        var pressCharPos = m_text.positionAt(mouse.x, mouse.y)
 
-                        /*if (!root.isMoving) {
-                            // 进入选择模式
-                            root.isSelectionMode = true
+                        // 2. 边界判断：确保位置有效（避免 -1 等错误值）
+                        if (pressCharPos >= 0
+                                && pressCharPos < m_text.text.length) {
+                            // 3. 计算选择范围（当前位置 + 2 个字符，不超过文本总长）
+                            var selectStart = pressCharPos
+                            var selectEnd = Math.min(pressCharPos + 2,
+                                                     m_text.text.length)
 
+                            root.currentSelectedTextEdit = m_text
+
+                            // 4. 存储位置到全局属性（供后续自绘手柄使用）
+                            root.selectionStart = selectStart
+                            root.selectionEnd = selectEnd
+
+                            // 5. 触发 TextEdit 自身的选择（显示默认文本高亮，可选）
+                            m_text.select(selectStart, selectEnd)
+
+                            console.log("长按选择存储：start=" + root.selectionStart
+                                        + ", end=" + root.selectionEnd)
+                        } else {
+                            // 6. 位置无效时，重置全局属性
+                            root.currentSelectedTextEdit = null
                             root.selectionStart = -1
                             root.selectionEnd = -1
-                        }*/
-                        console.log("长按已经启动...")
+                            console.log("长按位置无效，重置选择")
+                        }
                     }
 
                     onClicked: function (mouse) {
@@ -973,6 +1023,421 @@ Item {
                                       "color": n.color,
                                       "content": n.content
                                   })
+            }
+        }
+    }
+
+    // ==== 自定义选择手柄层（可拖动 + 双向绑定 + Qt6 兼容）====
+
+    /*Item {
+        id: handleLayer
+        anchors.fill: parent
+        z: 100
+
+        property bool isDragging: false
+
+        // ==== 起点手柄 ====
+        Rectangle {
+            id: startHandle
+            visible: root.selectionStart !== -1 && root.selectionEnd !== -1
+            width: 20
+            height: 20
+            radius: 10
+            color: root.selectionColor
+            border.color: "white"
+            border.width: 2
+
+            MouseArea {
+                anchors.fill: parent
+                drag.target: startHandle
+                drag.axis: Drag.XAndYAxis
+                drag.minimumX: 0
+                drag.minimumY: 0
+                drag.maximumX: root.width - startHandle.width
+                drag.maximumY: root.height - startHandle.height
+
+                onPressed: function(mouse) {
+                    mouse.accepted = true;
+                    contentListView.interactive = false;
+                    handleLayer.isDragging = true;
+                    startHandle.z = 10001;
+                    root.currentSelectedTextEdit.forceActiveFocus();
+                    console.log("===== 起点手柄 onPressed 触发 =====");
+                }
+
+                onPositionChanged: function(mouse) {
+                    if (mouse.pressed && root.currentSelectedTextEdit) {
+                        var textEdit = root.currentSelectedTextEdit;
+                        var cx = startHandle.width / 2;
+                        var cy = startHandle.height / 2;
+
+                        console.log("===== 起点手柄拖动 =====");
+                        console.log("手柄屏幕坐标:", startHandle.x + cx, startHandle.y + cy);
+
+                        // 手柄中心坐标映射到 TextEdit 本地坐标
+                        var localPos = startHandle.mapToItem(textEdit, cx, cy);
+                        console.log("映射到 TextEdit 本地坐标:", localPos.x, localPos.y);
+
+                        // 补偿 Flickable 滚动偏移
+                        localPos.y += contentListView.contentY;
+                        console.log("补偿滚动后坐标:", localPos.x, localPos.y);
+
+                        // 获取字符索引
+                        var charIndex = textEdit.positionAt(localPos.x, localPos.y);
+                        console.log("positionAt() 返回字符索引:", charIndex);
+
+                        if (charIndex >= 0 && charIndex <= root.selectionEnd) {
+                            console.log("更新 selectionStart 前:", root.selectionStart);
+                            root.selectionStart = charIndex;
+                            console.log("更新 selectionStart 后:", root.selectionStart);
+
+                            // 调用 select() 刷新高亮
+                            textEdit.select(root.selectionStart, root.selectionEnd);
+                            root.selectionText = textEdit.selectedText;
+                            console.log("当前选中文本:", root.selectionText);
+                        } else {
+                            console.log("字符索引超出范围，不更新选择");
+                        }
+                    }
+                }
+
+                onReleased: function() {
+                    contentListView.interactive = true;
+                    handleLayer.isDragging = false;
+                    startHandle.z = 100;
+                }
+            }
+        }
+
+        // ==== 终点手柄 ====
+        Rectangle {
+            id: endHandle
+            visible: root.selectionStart !== -1 && root.selectionEnd !== -1
+            width: 20
+            height: 20
+            radius: 10
+            color: root.selectionColor
+            border.color: "white"
+            border.width: 2
+
+            MouseArea {
+                anchors.fill: parent
+                drag.target: endHandle
+                drag.axis: Drag.XAndYAxis
+                drag.minimumX: 0
+                drag.minimumY: 0
+                drag.maximumX: root.width - endHandle.width
+                drag.maximumY: root.height - endHandle.height
+
+                onPressed: function(mouse) {
+                    mouse.accepted = true;
+                    contentListView.interactive = false;
+                    handleLayer.isDragging = true;
+                    endHandle.z = 10001;
+                    root.currentSelectedTextEdit.forceActiveFocus();
+                }
+
+                onPositionChanged: function(mouse) {
+                    if (mouse.pressed && root.currentSelectedTextEdit) {
+                        var textEdit = root.currentSelectedTextEdit;
+                        var cx = endHandle.width / 2;
+                        var cy = endHandle.height / 2;
+
+                        var localPos = endHandle.mapToItem(textEdit, cx, cy);
+                        localPos.y += contentListView.contentY;
+
+                        var charIndex = textEdit.positionAt(localPos.x, localPos.y);
+
+                        if (charIndex >= root.selectionStart && charIndex <= textEdit.text.length) {
+                            root.selectionEnd = charIndex;
+                            textEdit.select(root.selectionStart, root.selectionEnd);
+                            root.selectionText = textEdit.selectedText;
+                        }
+                    }
+                }
+
+                onReleased: function() {
+                    contentListView.interactive = true;
+                    handleLayer.isDragging = false;
+                    endHandle.z = 100;
+                }
+            }
+        }
+
+        // ==== 更新手柄位置 ====
+        function updateHandlePositions() {
+            if (handleLayer.isDragging || !root.currentSelectedTextEdit) return;
+
+            var startRect = root.currentSelectedTextEdit.positionToRectangle(root.selectionStart);
+            var endRect = root.currentSelectedTextEdit.positionToRectangle(root.selectionEnd);
+
+            if (startRect) {
+                // 起点手柄显示在 selectionStart 前一个字符位置（解决压字问题）
+                if (root.selectionStart > 0) {
+                    var prevRect = root.currentSelectedTextEdit.positionToRectangle(root.selectionStart - 1);
+                    startHandle.x = prevRect.x;
+                    startHandle.y = prevRect.y - contentListView.contentY;
+                } else {
+                    startHandle.x = startRect.x;
+                    startHandle.y = startRect.y - contentListView.contentY;
+                }
+            }
+
+            if (endRect) {
+                endHandle.x = endRect.x;
+                endHandle.y = endRect.y - contentListView.contentY;
+            }
+        }
+
+        // ==== 监听选择变化 ====
+        Connections {
+            target: root
+            function onSelectionStartChanged() {
+                handleLayer.updateHandlePositions();
+            }
+            function onSelectionEndChanged() {
+                handleLayer.updateHandlePositions();
+            }
+        }
+
+        // ==== 监听滚动变化 ====
+        Connections {
+            target: contentListView
+            function onContentYChanged() {
+                handleLayer.updateHandlePositions();
+            }
+        }
+    }*/
+    Item {
+        id: selectionControlPanel
+        visible: root.currentSelectedTextEdit && root.selectionStart !== -1
+                 && root.selectionEnd !== -1
+        z: 3000
+
+        // 1. 核心修复：增加面板高度（从40→48），给垂直方向留足空隙
+        width: 300
+        height: 48 // 关键调整：比按钮高度（30）+ 上下内边距（8×2=16）多2px冗余，避免贴边
+        x: (root.width - width) / 2
+        y: 10
+
+        Rectangle {
+            anchors.fill: parent
+            color: "#FFFFFF"
+            border.color: "#E0E0E0"
+            border.width: 1
+            radius: 6
+        }
+
+        // 外层布局：确保垂直居中，且上下有间隙
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: 8 // 上下内边距8px，配合面板高度48，按钮上下各留 (48-30-8×2)/2 = 1px 冗余
+            spacing: 15
+            Layout.alignment: Qt.AlignCenter // 水平+垂直都居中
+
+            // 起点控制组
+            RowLayout {
+                spacing: 6
+                Layout.alignment: Qt.AlignVCenter
+
+                Text {
+                    text: "起点："
+                    font.pixelSize: 12
+                    color: "#333333"
+                    Layout.preferredWidth: 30
+                    Layout.maximumWidth: 30
+                    Layout.alignment: Qt.AlignVCenter
+                }
+
+                Button {
+                    text: "-"
+                    Layout.preferredWidth: 30
+                    Layout.maximumWidth: 30
+                    Layout.preferredHeight: 30 // 按钮高度不变
+                    Layout.maximumHeight: 30
+                    width: 30
+                    height: 30
+                    font.pixelSize: 13
+                    flat: false
+                    Layout.alignment: Qt.AlignVCenter
+                    onClicked: {
+                        if (root.currentSelectedTextEdit
+                                && root.selectionStart > 0) {
+                            root.selectionStart -= 1
+                            root.currentSelectedTextEdit.select(
+                                        root.selectionStart, root.selectionEnd)
+                            if (root.hasOwnProperty("selectionText")) {
+                                root.selectionText = root.currentSelectedTextEdit.selectedText
+                            }
+                        }
+                    }
+                }
+
+                Button {
+                    text: "+"
+                    Layout.preferredWidth: 30
+                    Layout.maximumWidth: 30
+                    Layout.preferredHeight: 30
+                    Layout.maximumHeight: 30
+                    width: 30
+                    height: 30
+                    font.pixelSize: 13
+                    flat: false
+                    Layout.alignment: Qt.AlignVCenter
+                    onClicked: {
+                        if (root.currentSelectedTextEdit
+                                && root.selectionStart < root.selectionEnd - 1) {
+                            root.selectionStart += 1
+                            root.currentSelectedTextEdit.select(
+                                        root.selectionStart, root.selectionEnd)
+                            if (root.hasOwnProperty("selectionText")) {
+                                root.selectionText = root.currentSelectedTextEdit.selectedText
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 终点控制组
+            RowLayout {
+                spacing: 6
+                Layout.alignment: Qt.AlignVCenter
+
+                Text {
+                    text: "终点："
+                    font.pixelSize: 12
+                    color: "#333333"
+                    Layout.preferredWidth: 30
+                    Layout.maximumWidth: 30
+                    Layout.alignment: Qt.AlignVCenter
+                }
+
+                Button {
+                    text: "-"
+                    Layout.preferredWidth: 30
+                    Layout.maximumWidth: 30
+                    Layout.preferredHeight: 30
+                    Layout.maximumHeight: 30
+                    width: 30
+                    height: 30
+                    font.pixelSize: 13
+                    flat: false
+                    Layout.alignment: Qt.AlignVCenter
+                    onClicked: {
+                        if (root.currentSelectedTextEdit
+                                && root.selectionEnd > root.selectionStart + 1) {
+                            root.selectionEnd -= 1
+                            root.currentSelectedTextEdit.select(
+                                        root.selectionStart, root.selectionEnd)
+                            if (root.hasOwnProperty("selectionText")) {
+                                root.selectionText = root.currentSelectedTextEdit.selectedText
+                            }
+                        }
+                    }
+                }
+
+                Button {
+                    text: "+"
+                    Layout.preferredWidth: 30
+                    Layout.maximumWidth: 30
+                    Layout.preferredHeight: 30
+                    Layout.maximumHeight: 30
+                    width: 30
+                    height: 30
+                    font.pixelSize: 13
+                    flat: false
+                    Layout.alignment: Qt.AlignVCenter
+                    onClicked: {
+                        if (root.currentSelectedTextEdit
+                                && root.selectionEnd < root.currentSelectedTextEdit.text.length) {
+                            root.selectionEnd += 1
+                            root.currentSelectedTextEdit.select(
+                                        root.selectionStart, root.selectionEnd)
+                            if (root.hasOwnProperty("selectionText")) {
+                                root.selectionText = root.currentSelectedTextEdit.selectedText
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 监听root状态
+        Connections {
+            target: root
+            function onSelectionStartChanged() {
+                if (root.currentSelectedTextEdit) {
+                    root.currentSelectedTextEdit.select(root.selectionStart,
+                                                        root.selectionEnd)
+                }
+                selectionControlPanel.visible = (root.currentSelectedTextEdit
+                                                 && root.selectionStart !== -1
+                                                 && root.selectionEnd !== -1)
+            }
+
+            function onSelectionEndChanged() {
+                if (root.currentSelectedTextEdit) {
+                    root.currentSelectedTextEdit.select(root.selectionStart,
+                                                        root.selectionEnd)
+                }
+                selectionControlPanel.visible = (root.currentSelectedTextEdit
+                                                 && root.selectionStart !== -1
+                                                 && root.selectionEnd !== -1)
+            }
+
+            function onCurrentSelectedTextEditChanged() {
+                selectionControlPanel.visible = (root.currentSelectedTextEdit
+                                                 && root.selectionStart !== -1
+                                                 && root.selectionEnd !== -1)
+            }
+        }
+    }
+
+    // movableItem 定义在 rotateContainer 之后
+    Item {
+        id: movableItem
+        x: 50
+        y: 50
+        width: 60 // 增大以便点击
+        height: 60
+        z: 10000
+        visible: false
+
+        // 添加半透明背景，确保在最上层
+        Rectangle {
+            anchors.fill: parent
+            color: "blue"
+            radius: 10
+            opacity: 0.8
+            border.width: 3
+            border.color: "white"
+        }
+
+        Text {
+            anchors.centerIn: parent
+            text: "拖我"
+            color: "white"
+            font.bold: true
+            font.pixelSize: 12
+        }
+
+        // 使用 drag 属性的简化版本
+        MouseArea {
+            anchors.fill: parent
+            drag.target: movableItem
+            drag.axis: Drag.XAndYAxis
+            drag.minimumX: 0
+            drag.minimumY: 0
+            drag.maximumX: root.width - movableItem.width
+            drag.maximumY: root.height - movableItem.height
+
+            onPressed: {
+                console.log("开始拖动 movableItem")
+                movableItem.z = 10001 // 拖动时提到最前
+            }
+
+            onReleased: {
+                console.log("拖动结束，位置：", movableItem.x, movableItem.y)
             }
         }
     }

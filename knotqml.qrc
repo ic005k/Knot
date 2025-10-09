@@ -36,5 +36,6 @@
         <file>src/qmlsrc/NoteVersionList.qml</file>
         <file>src/qmlsrc/NoteDiffHtmlViewer.qml</file>
         <file>src/qmlsrc/viewbooknote.qml</file>
+        <file>src/qmlsrc/test.qml</file>
     </qresource>
 </RCC>

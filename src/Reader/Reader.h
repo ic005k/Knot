@@ -182,7 +182,9 @@ class Reader : public QDialog {
   void viewBookNote();
   void keepScreenOn();
   void cancelKeepScreenOn();
-  public slots:
+  void resetTextSelection();
+  void setBookPagePressHold(bool value);
+ public slots:
   void on_SetReaderFunVisible();
 
   void setPageScroll0();
