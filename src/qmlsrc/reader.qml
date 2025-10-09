@@ -450,7 +450,7 @@ Item {
                             m_text.select(selectStart, selectEnd)
 
                             root.selectionText = root.currentSelectedTextEdit.selectedText
-                            m_Reader.setEditText(root.selectionText,"right")
+                            m_Reader.setEditText(root.selectionText, "right")
                             m_Reader.setStartEnd(root.selectionStart,
                                                  root.selectionEnd)
 
@@ -1062,55 +1062,67 @@ Item {
                 drag.maximumX: root.width - startHandle.width
                 drag.maximumY: root.height - startHandle.height
 
-                onPressed: function(mouse) {
-                    mouse.accepted = true;
-                    contentListView.interactive = false;
-                    handleLayer.isDragging = true;
-                    startHandle.z = 10001;
-                    root.currentSelectedTextEdit.forceActiveFocus();
-                    console.log("===== 起点手柄 onPressed 触发 =====");
+                onPressed: function (mouse) {
+                    mouse.accepted = true
+                    contentListView.interactive = false
+                    handleLayer.isDragging = true
+                    startHandle.z = 10001
+                    root.currentSelectedTextEdit.forceActiveFocus()
+
+                    var pressCharPos = root.currentSelectedTextEdit.positionAt(
+                                mouse.x, mouse.y)
+                    const pos = startHandle.mapToItem(handleLayer, 0, 0)
+
+                    console.log("===== 起点手柄 onPressed 触发 =====", pressCharPos,
+                                pos, offsetX)
                 }
 
-                onPositionChanged: function(mouse) {
+                onPositionChanged: function (mouse) {
                     if (mouse.pressed && root.currentSelectedTextEdit) {
-                        var textEdit = root.currentSelectedTextEdit;
-                        var cx = startHandle.width / 2;
-                        var cy = startHandle.height / 2;
+                        var textEdit = root.currentSelectedTextEdit
+                        var cx = startHandle.width / 2
+                        var cy = startHandle.height / 2
 
-                        console.log("===== 起点手柄拖动 =====");
-                        console.log("手柄屏幕坐标:", startHandle.x + cx, startHandle.y + cy);
+                        console.log("===== 起点手柄拖动 =====")
+                        console.log("手柄屏幕坐标:", startHandle.x + cx,
+                                    startHandle.y + cy)
 
                         // 手柄中心坐标映射到 TextEdit 本地坐标
-                        var localPos = startHandle.mapToItem(textEdit, cx, cy);
-                        console.log("映射到 TextEdit 本地坐标:", localPos.x, localPos.y);
+                        var localPos = startHandle.mapToItem(textEdit, cx, cy)
+                        console.log("映射到 TextEdit 本地坐标:", localPos.x,
+                                    localPos.y)
 
                         // 补偿 Flickable 滚动偏移
-                        localPos.y += contentListView.contentY;
-                        console.log("补偿滚动后坐标:", localPos.x, localPos.y);
+                        localPos.y += contentListView.contentY
+                        console.log("补偿滚动后坐标:", localPos.x, localPos.y)
 
                         // 获取字符索引
-                        var charIndex = textEdit.positionAt(localPos.x, localPos.y);
-                        console.log("positionAt() 返回字符索引:", charIndex);
+                        var charIndex = textEdit.positionAt(localPos.x,
+                                                            localPos.y)
+                        console.log("positionAt() 返回字符索引:", charIndex)
 
                         if (charIndex >= 0 && charIndex <= root.selectionEnd) {
-                            console.log("更新 selectionStart 前:", root.selectionStart);
-                            root.selectionStart = charIndex;
-                            console.log("更新 selectionStart 后:", root.selectionStart);
+                            console.log("更新 selectionStart 前:",
+                                        root.selectionStart)
+                            root.selectionStart = charIndex
+                            console.log("更新 selectionStart 后:",
+                                        root.selectionStart)
 
                             // 调用 select() 刷新高亮
-                            textEdit.select(root.selectionStart, root.selectionEnd);
-                            root.selectionText = textEdit.selectedText;
-                            console.log("当前选中文本:", root.selectionText);
+                            textEdit.select(root.selectionStart,
+                                            root.selectionEnd)
+                            root.selectionText = textEdit.selectedText
+                            console.log("当前选中文本:", root.selectionText)
                         } else {
-                            console.log("字符索引超出范围，不更新选择");
+                            console.log("字符索引超出范围，不更新选择")
                         }
                     }
                 }
 
-                onReleased: function() {
-                    contentListView.interactive = true;
-                    handleLayer.isDragging = false;
-                    startHandle.z = 100;
+                onReleased: function () {
+                    contentListView.interactive = true
+                    handleLayer.isDragging = false
+                    startHandle.z = 100
                 }
             }
         }
@@ -1135,63 +1147,70 @@ Item {
                 drag.maximumX: root.width - endHandle.width
                 drag.maximumY: root.height - endHandle.height
 
-                onPressed: function(mouse) {
-                    mouse.accepted = true;
-                    contentListView.interactive = false;
-                    handleLayer.isDragging = true;
-                    endHandle.z = 10001;
-                    root.currentSelectedTextEdit.forceActiveFocus();
+                onPressed: function (mouse) {
+                    mouse.accepted = true
+                    contentListView.interactive = false
+                    handleLayer.isDragging = true
+                    endHandle.z = 10001
+                    root.currentSelectedTextEdit.forceActiveFocus()
                 }
 
-                onPositionChanged: function(mouse) {
+                onPositionChanged: function (mouse) {
                     if (mouse.pressed && root.currentSelectedTextEdit) {
-                        var textEdit = root.currentSelectedTextEdit;
-                        var cx = endHandle.width / 2;
-                        var cy = endHandle.height / 2;
+                        var textEdit = root.currentSelectedTextEdit
+                        var cx = endHandle.width / 2
+                        var cy = endHandle.height / 2
 
-                        var localPos = endHandle.mapToItem(textEdit, cx, cy);
-                        localPos.y += contentListView.contentY;
+                        var localPos = endHandle.mapToItem(textEdit, cx, cy)
+                        localPos.y += contentListView.contentY
 
-                        var charIndex = textEdit.positionAt(localPos.x, localPos.y);
+                        var charIndex = textEdit.positionAt(localPos.x,
+                                                            localPos.y)
 
-                        if (charIndex >= root.selectionStart && charIndex <= textEdit.text.length) {
-                            root.selectionEnd = charIndex;
-                            textEdit.select(root.selectionStart, root.selectionEnd);
-                            root.selectionText = textEdit.selectedText;
+                        if (charIndex >= root.selectionStart
+                                && charIndex <= textEdit.text.length) {
+                            root.selectionEnd = charIndex
+                            textEdit.select(root.selectionStart,
+                                            root.selectionEnd)
+                            root.selectionText = textEdit.selectedText
                         }
                     }
                 }
 
-                onReleased: function() {
-                    contentListView.interactive = true;
-                    handleLayer.isDragging = false;
-                    endHandle.z = 100;
+                onReleased: function () {
+                    contentListView.interactive = true
+                    handleLayer.isDragging = false
+                    endHandle.z = 100
                 }
             }
         }
 
         // ==== 更新手柄位置 ====
         function updateHandlePositions() {
-            if (handleLayer.isDragging || !root.currentSelectedTextEdit) return;
+            if (handleLayer.isDragging || !root.currentSelectedTextEdit)
+                return
 
-            var startRect = root.currentSelectedTextEdit.positionToRectangle(root.selectionStart);
-            var endRect = root.currentSelectedTextEdit.positionToRectangle(root.selectionEnd);
+            var startRect = root.currentSelectedTextEdit.positionToRectangle(
+                        root.selectionStart)
+            var endRect = root.currentSelectedTextEdit.positionToRectangle(
+                        root.selectionEnd)
 
             if (startRect) {
                 // 起点手柄显示在 selectionStart 前一个字符位置（解决压字问题）
                 if (root.selectionStart > 0) {
-                    var prevRect = root.currentSelectedTextEdit.positionToRectangle(root.selectionStart - 1);
-                    startHandle.x = prevRect.x;
-                    startHandle.y = prevRect.y - contentListView.contentY;
+                    var prevRect = root.currentSelectedTextEdit.positionToRectangle(
+                                root.selectionStart - 1)
+                    startHandle.x = prevRect.x
+                    startHandle.y = prevRect.y - contentListView.contentY
                 } else {
-                    startHandle.x = startRect.x;
-                    startHandle.y = startRect.y - contentListView.contentY;
+                    startHandle.x = startRect.x
+                    startHandle.y = startRect.y - contentListView.contentY
                 }
             }
 
             if (endRect) {
-                endHandle.x = endRect.x;
-                endHandle.y = endRect.y - contentListView.contentY;
+                endHandle.x = endRect.x
+                endHandle.y = endRect.y - contentListView.contentY
             }
         }
 
@@ -1199,10 +1218,10 @@ Item {
         Connections {
             target: root
             function onSelectionStartChanged() {
-                handleLayer.updateHandlePositions();
+                handleLayer.updateHandlePositions()
             }
             function onSelectionEndChanged() {
-                handleLayer.updateHandlePositions();
+                handleLayer.updateHandlePositions()
             }
         }
 
@@ -1210,10 +1229,369 @@ Item {
         Connections {
             target: contentListView
             function onContentYChanged() {
-                handleLayer.updateHandlePositions();
+                handleLayer.updateHandlePositions()
             }
         }
     }*/
+
+    //////////////////////////////////////////////////////////////////////////
+    // ==================== 起点手柄 ====================
+    Item {
+        id: startHandle
+        width: 24
+        height: 24
+        z: 10001
+        visible: root.selectionStart !== -1 && root.selectionEnd !== -1
+
+        Rectangle {
+            anchors.fill: parent
+            radius: 12
+            color: root.selectionColor
+            border.color: "white"
+            border.width: 2
+        }
+
+        MouseArea {
+            id: startHandleArea
+            anchors.fill: parent
+            drag.target: startHandle
+            drag.axis: Drag.XAndYAxis
+            drag.minimumX: 0
+            drag.minimumY: 0
+            drag.maximumX: root.width - startHandle.width
+            drag.maximumY: root.height - startHandle.height
+
+            property real lastX: startHandle.x
+            property real lastY: startHandle.y
+            property int logCounter: 0
+
+            onPressed: {
+                console.log("起点手柄按下")
+                startHandle.z = 10001
+                lastX = startHandle.x
+                lastY = startHandle.y
+                logCounter = 0
+            }
+
+            onPositionChanged: function (mouse) {
+                logCounter++
+                if (logCounter % 5 === 0) {
+                    console.log("起点手柄拖动中 - X:", startHandle.x.toFixed(1), "Y:",
+                                startHandle.y.toFixed(1),
+                                "ΔX:", (startHandle.x - lastX).toFixed(1),
+                                "ΔY:", (startHandle.y - lastY).toFixed(1))
+                    lastX = startHandle.x
+                    lastY = startHandle.y
+
+                    // 严格遵循可拖动矩形的方法获取字符位置
+                    // 1. 将手柄位置映射到 contentListView
+                    var listViewPos = contentListView.mapFromItem(startHandle,
+                                                                  mouse.x,
+                                                                  mouse.y)
+
+                    // 2. 考虑滚动偏移
+                    var contentYPos = listViewPos.y + contentListView.contentY
+
+                    // 3. 获取列表项索引
+                    var itemIndex = contentListView.indexAt(listViewPos.x,
+                                                            contentYPos)
+                    console.log("列表项索引:", itemIndex)
+
+                    if (itemIndex >= 0) {
+                        var item = contentListView.itemAtIndex(itemIndex)
+                        if (item) {
+                            // 4. 将鼠标位置映射到该 item
+                            var itemPos = item.mapFromItem(startHandle,
+                                                           mouse.x, mouse.y)
+
+                            // 5. 获取字符索引
+                            var charIndex = item.positionAt(itemPos.x,
+                                                            itemPos.y)
+                            console.log("起点手柄位置 - 字符索引:", charIndex)
+
+                            // 确保新位置在有效范围内
+                            if (charIndex >= 0
+                                    && charIndex <= root.selectionEnd) {
+                                console.log("更新 selectionStart 前:",
+                                            root.selectionStart)
+                                root.selectionStart = charIndex
+                                console.log("更新 selectionStart 后:",
+                                            root.selectionStart)
+
+                                // 刷新文本选择
+                                item.select(root.selectionStart,
+                                            root.selectionEnd)
+                                root.selectionText = item.selectedText
+
+                                // 通知外部组件更新
+                                if (root.hasOwnProperty("selectionText")) {
+                                    m_Reader.setEditText(root.selectionText,
+                                                         "left")
+                                    m_Reader.setStartEnd(root.selectionStart,
+                                                         root.selectionEnd)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            onReleased: {
+                updateHandlePositions()
+                console.log("起点手柄释放")
+            }
+        }
+    }
+
+    // ==================== 终点手柄 ====================
+    Item {
+        id: endHandle
+        width: 24
+        height: 24
+        z: 10001
+        visible: root.selectionStart !== -1 && root.selectionEnd !== -1
+
+        Rectangle {
+            anchors.fill: parent
+            radius: 12
+            color: root.selectionColor
+            border.color: "white"
+            border.width: 2
+        }
+
+        MouseArea {
+            id: endHandleArea
+            anchors.fill: parent
+            drag.target: endHandle
+            drag.axis: Drag.XAndYAxis
+            drag.minimumX: 0
+            drag.minimumY: 0
+            drag.maximumX: root.width - endHandle.width
+            drag.maximumY: root.height - endHandle.height
+
+            property real lastX: endHandle.x
+            property real lastY: endHandle.y
+            property int logCounter: 0
+
+            onPressed: {
+                console.log("终点手柄按下")
+                endHandle.z = 10001
+                lastX = endHandle.x
+                lastY = endHandle.y
+                logCounter = 0
+            }
+
+            onPositionChanged: function (mouse) {
+                logCounter++
+                if (logCounter % 5 === 0) {
+                    console.log("终点手柄拖动中 - X:", endHandle.x.toFixed(1), "Y:",
+                                endHandle.y.toFixed(1),
+                                "ΔX:", (endHandle.x - lastX).toFixed(1),
+                                "ΔY:", (endHandle.y - lastY).toFixed(1))
+                    lastX = endHandle.x
+                    lastY = endHandle.y
+
+                    // 严格遵循可拖动矩形的方法获取字符位置
+                    // 1. 将手柄位置映射到 contentListView
+                    var listViewPos = contentListView.mapFromItem(endHandle,
+                                                                  mouse.x,
+                                                                  mouse.y)
+
+                    // 2. 考虑滚动偏移
+                    var contentYPos = listViewPos.y + contentListView.contentY
+
+                    // 3. 获取列表项索引
+                    var itemIndex = contentListView.indexAt(listViewPos.x,
+                                                            contentYPos)
+                    console.log("列表项索引:", itemIndex)
+
+                    if (itemIndex >= 0) {
+                        var item = contentListView.itemAtIndex(itemIndex)
+                        if (item) {
+                            // 4. 将鼠标位置映射到该 item
+                            var itemPos = item.mapFromItem(endHandle,
+                                                           mouse.x, mouse.y)
+
+                            // 5. 获取字符索引
+                            var charIndex = item.positionAt(itemPos.x,
+                                                            itemPos.y)
+                            console.log("终点手柄位置 - 字符索引:", charIndex)
+
+                            // 确保新位置在有效范围内
+                            if (charIndex >= root.selectionStart
+                                    && charIndex <= item.text.length) {
+                                console.log("更新 selectionEnd 前:",
+                                            root.selectionEnd)
+                                root.selectionEnd = charIndex
+                                console.log("更新 selectionEnd 后:",
+                                            root.selectionEnd)
+
+                                // 刷新文本选择
+                                item.select(root.selectionStart,
+                                            root.selectionEnd)
+                                root.selectionText = item.selectedText
+
+                                // 通知外部组件更新
+                                if (root.hasOwnProperty("selectionText")) {
+                                    m_Reader.setEditText(root.selectionText,
+                                                         "right")
+                                    m_Reader.setStartEnd(root.selectionStart,
+                                                         root.selectionEnd)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            onReleased: {
+                updateHandlePositions()
+                console.log("终点手柄释放")
+            }
+        }
+    }
+
+    // ==================== 手柄位置更新函数 ====================
+    function updateHandlePositions() {
+        if (!root.currentSelectedTextEdit || root.selectionStart === -1
+                || root.selectionEnd === -1)
+            return
+
+        var textEdit = root.currentSelectedTextEdit
+
+        // 更新起点手柄位置
+        var startRect = textEdit.positionToRectangle(root.selectionStart)
+        if (startRect) {
+            // 起点手柄显示在 selectionStart 前一个字符位置（解决压字问题）
+            if (root.selectionStart > 0) {
+                var prevRect = textEdit.positionToRectangle(
+                            root.selectionStart - 1)
+                startHandle.x = prevRect.x
+                startHandle.y = prevRect.y - contentListView.contentY
+            } else {
+                startHandle.x = startRect.x
+                startHandle.y = startRect.y - contentListView.contentY
+            }
+        }
+
+        // 更新终点手柄位置
+        var endRect = textEdit.positionToRectangle(root.selectionEnd)
+        if (endRect) {
+            endHandle.x = endRect.x
+            endHandle.y = endRect.y - contentListView.contentY
+        }
+    }
+
+    // ==================== 监听事件 ====================
+    Connections {
+        target: root
+        function onSelectionStartChanged() {
+            updateHandlePositions()
+        }
+        function onSelectionEndChanged() {
+            updateHandlePositions()
+        }
+    }
+
+    Connections {
+        target: contentListView
+        function onContentYChanged() {
+            updateHandlePositions()
+        }
+    }
+
+    ////////////////////////////////test///////////////////////////////////////
+    Item {
+        id: movableItem
+        x: 50
+        y: 50
+        width: 30
+        height: 30
+        z: 10000
+        visible: false
+
+        Rectangle {
+            anchors.fill: parent
+            color: "blue"
+            radius: 10
+            opacity: 0.8
+            border.width: 3
+            border.color: "white"
+        }
+
+        Text {
+            anchors.centerIn: parent
+            text: "拖"
+            color: "white"
+            font.bold: true
+            font.pixelSize: 12
+        }
+
+        MouseArea {
+            id: dragArea
+            anchors.fill: parent
+            drag.target: movableItem
+            drag.axis: Drag.XAndYAxis
+            drag.minimumX: 0
+            drag.minimumY: 0
+            drag.maximumX: root.width - movableItem.width
+            drag.maximumY: root.height - movableItem.height
+
+            // 添加位置变化跟踪
+            property real lastX: movableItem.x
+            property real lastY: movableItem.y
+            property int logCounter: 0
+
+            onPressed: {
+                console.log("开始拖动 movableItem")
+                movableItem.z = 10001
+                // 记录初始位置
+                lastX = movableItem.x
+                lastY = movableItem.y
+                logCounter = 0
+            }
+
+            onPositionChanged: function (mouse) {
+                // 减少日志输出频率，每5次位置变化记录一次
+                logCounter++
+                if (logCounter % 5 === 0) {
+                    console.log("拖动中 - X:", movableItem.x.toFixed(1), "Y:",
+                                movableItem.y.toFixed(1),
+                                "ΔX:", (movableItem.x - lastX).toFixed(1),
+                                "ΔY:", (movableItem.y - lastY).toFixed(1))
+                    lastX = movableItem.x
+                    lastY = movableItem.y
+
+                    // 新增：获取鼠标在 m_text 中的位置
+                    var listViewPos = contentListView.mapFromItem(movableItem,
+                                                                  mouse.x,
+                                                                  mouse.y)
+                    var contentYPos = listViewPos.y + contentListView.contentY
+                    var itemIndex = contentListView.indexAt(listViewPos.x,
+                                                            contentYPos)
+
+                    if (itemIndex >= 0) {
+                        var item = contentListView.itemAtIndex(itemIndex)
+                        if (item) {
+                            // 将鼠标位置映射到该 item
+                            var itemPos = item.mapFromItem(movableItem,
+                                                           mouse.x, mouse.y)
+                            var charIndex = item.positionAt(itemPos.x,
+                                                            itemPos.y)
+                            console.log("当前字符位置:", charIndex)
+                        }
+                    }
+                }
+            }
+
+            onReleased: {
+                console.log("拖动结束 - 最终位置: X:", movableItem.x.toFixed(1), "Y:",
+                            movableItem.y.toFixed(1))
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
     Item {
         id: selectionControlPanel
         visible: root.currentSelectedTextEdit && root.selectionStart !== -1
