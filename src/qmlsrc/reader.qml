@@ -271,7 +271,7 @@ Item {
                 propagateComposedEvents: true // 把事件传递给子元素（delegate）
 
                 onDoubleClicked: {
-                    if (!isMoving) {
+                    if (!isMoving && !root.isBookPagePressHold) {
                         m_Reader.on_SetReaderFunVisible()
                     }
                 }
@@ -448,6 +448,11 @@ Item {
 
                             // 5. 触发 TextEdit 自身的选择（显示默认文本高亮，可选）
                             m_text.select(selectStart, selectEnd)
+
+                            root.selectionText = root.currentSelectedTextEdit.selectedText
+                            m_Reader.setEditText(root.selectionText,"right")
+                            m_Reader.setStartEnd(root.selectionStart,
+                                                 root.selectionEnd)
 
                             console.log("长按选择存储：start=" + root.selectionStart
                                         + ", end=" + root.selectionEnd)
@@ -1027,7 +1032,8 @@ Item {
         }
     }
 
-    // ==== 自定义选择手柄层（可拖动 + 双向绑定 + Qt6 兼容）====
+    // ==== 自定义选择手柄层====
+
 
     /*Item {
         id: handleLayer
@@ -1214,15 +1220,14 @@ Item {
                  && root.selectionEnd !== -1
         z: 3000
 
-        // 1. 核心修复：增加面板高度（从40→48），给垂直方向留足空隙
         width: 300
-        height: 48 // 关键调整：比按钮高度（30）+ 上下内边距（8×2=16）多2px冗余，避免贴边
+        height: 55
         x: (root.width - width) / 2
         y: 10
 
         Rectangle {
             anchors.fill: parent
-            color: "#FFFFFF"
+            color: isDark ? "#555555" : "#EEEEEE"
             border.color: "#E0E0E0"
             border.width: 1
             radius: 6
@@ -1231,7 +1236,7 @@ Item {
         // 外层布局：确保垂直居中，且上下有间隙
         RowLayout {
             anchors.fill: parent
-            anchors.margins: 8 // 上下内边距8px，配合面板高度48，按钮上下各留 (48-30-8×2)/2 = 1px 冗余
+            anchors.margins: 8
             spacing: 15
             Layout.alignment: Qt.AlignCenter // 水平+垂直都居中
 
@@ -1241,25 +1246,30 @@ Item {
                 Layout.alignment: Qt.AlignVCenter
 
                 Text {
-                    text: "起点："
-                    font.pixelSize: 12
-                    color: "#333333"
-                    Layout.preferredWidth: 30
-                    Layout.maximumWidth: 30
+                    text: qsTr("Start:")
+                    font.pixelSize: 13
+                    color: isDark ? "#DDDDDD" : "#333333"
+                    Layout.preferredWidth: 40
+                    Layout.maximumWidth: 40
                     Layout.alignment: Qt.AlignVCenter
                 }
 
                 Button {
                     text: "-"
-                    Layout.preferredWidth: 30
-                    Layout.maximumWidth: 30
-                    Layout.preferredHeight: 30 // 按钮高度不变
-                    Layout.maximumHeight: 30
-                    width: 30
-                    height: 30
-                    font.pixelSize: 13
+                    Layout.preferredWidth: 40
+                    Layout.maximumWidth: 40
+                    Layout.preferredHeight: 40
+                    Layout.maximumHeight: 40
+                    width: 40
+                    height: 40
+                    font.pointSize: uiFontSize
                     flat: false
                     Layout.alignment: Qt.AlignVCenter
+
+                    autoRepeat: true
+                    autoRepeatDelay: 300
+                    autoRepeatInterval: 100
+
                     onClicked: {
                         if (root.currentSelectedTextEdit
                                 && root.selectionStart > 0) {
@@ -1268,6 +1278,9 @@ Item {
                                         root.selectionStart, root.selectionEnd)
                             if (root.hasOwnProperty("selectionText")) {
                                 root.selectionText = root.currentSelectedTextEdit.selectedText
+                                m_Reader.setEditText(root.selectionText, "left")
+                                m_Reader.setStartEnd(root.selectionStart,
+                                                     root.selectionEnd)
                             }
                         }
                     }
@@ -1275,15 +1288,20 @@ Item {
 
                 Button {
                     text: "+"
-                    Layout.preferredWidth: 30
-                    Layout.maximumWidth: 30
-                    Layout.preferredHeight: 30
-                    Layout.maximumHeight: 30
-                    width: 30
-                    height: 30
-                    font.pixelSize: 13
+                    Layout.preferredWidth: 40
+                    Layout.maximumWidth: 40
+                    Layout.preferredHeight: 40
+                    Layout.maximumHeight: 40
+                    width: 40
+                    height: 40
+                    font.pointSize: uiFontSize
                     flat: false
                     Layout.alignment: Qt.AlignVCenter
+
+                    autoRepeat: true
+                    autoRepeatDelay: 300
+                    autoRepeatInterval: 100
+
                     onClicked: {
                         if (root.currentSelectedTextEdit
                                 && root.selectionStart < root.selectionEnd - 1) {
@@ -1292,6 +1310,9 @@ Item {
                                         root.selectionStart, root.selectionEnd)
                             if (root.hasOwnProperty("selectionText")) {
                                 root.selectionText = root.currentSelectedTextEdit.selectedText
+                                m_Reader.setEditText(root.selectionText, "left")
+                                m_Reader.setStartEnd(root.selectionStart,
+                                                     root.selectionEnd)
                             }
                         }
                     }
@@ -1304,25 +1325,30 @@ Item {
                 Layout.alignment: Qt.AlignVCenter
 
                 Text {
-                    text: "终点："
-                    font.pixelSize: 12
-                    color: "#333333"
-                    Layout.preferredWidth: 30
-                    Layout.maximumWidth: 30
+                    text: qsTr("End:")
+                    font.pixelSize: 13
+                    color: isDark ? "#DDDDDD" : "#333333"
+                    Layout.preferredWidth: 40
+                    Layout.maximumWidth: 40
                     Layout.alignment: Qt.AlignVCenter
                 }
 
                 Button {
                     text: "-"
-                    Layout.preferredWidth: 30
-                    Layout.maximumWidth: 30
-                    Layout.preferredHeight: 30
-                    Layout.maximumHeight: 30
-                    width: 30
-                    height: 30
-                    font.pixelSize: 13
+                    Layout.preferredWidth: 40
+                    Layout.maximumWidth: 40
+                    Layout.preferredHeight: 40
+                    Layout.maximumHeight: 40
+                    width: 40
+                    height: 40
+                    font.pointSize: uiFontSize
                     flat: false
                     Layout.alignment: Qt.AlignVCenter
+
+                    autoRepeat: true
+                    autoRepeatDelay: 300
+                    autoRepeatInterval: 100
+
                     onClicked: {
                         if (root.currentSelectedTextEdit
                                 && root.selectionEnd > root.selectionStart + 1) {
@@ -1331,6 +1357,10 @@ Item {
                                         root.selectionStart, root.selectionEnd)
                             if (root.hasOwnProperty("selectionText")) {
                                 root.selectionText = root.currentSelectedTextEdit.selectedText
+                                m_Reader.setEditText(root.selectionText,
+                                                     "right")
+                                m_Reader.setStartEnd(root.selectionStart,
+                                                     root.selectionEnd)
                             }
                         }
                     }
@@ -1338,15 +1368,20 @@ Item {
 
                 Button {
                     text: "+"
-                    Layout.preferredWidth: 30
-                    Layout.maximumWidth: 30
-                    Layout.preferredHeight: 30
-                    Layout.maximumHeight: 30
-                    width: 30
-                    height: 30
-                    font.pixelSize: 13
+                    Layout.preferredWidth: 40
+                    Layout.maximumWidth: 40
+                    Layout.preferredHeight: 40
+                    Layout.maximumHeight: 40
+                    width: 40
+                    height: 40
+                    font.pointSize: uiFontSize
                     flat: false
                     Layout.alignment: Qt.AlignVCenter
+
+                    autoRepeat: true
+                    autoRepeatDelay: 300
+                    autoRepeatInterval: 100
+
                     onClicked: {
                         if (root.currentSelectedTextEdit
                                 && root.selectionEnd < root.currentSelectedTextEdit.text.length) {
@@ -1355,6 +1390,10 @@ Item {
                                         root.selectionStart, root.selectionEnd)
                             if (root.hasOwnProperty("selectionText")) {
                                 root.selectionText = root.currentSelectedTextEdit.selectedText
+                                m_Reader.setEditText(root.selectionText,
+                                                     "right")
+                                m_Reader.setStartEnd(root.selectionStart,
+                                                     root.selectionEnd)
                             }
                         }
                     }
@@ -1389,55 +1428,6 @@ Item {
                 selectionControlPanel.visible = (root.currentSelectedTextEdit
                                                  && root.selectionStart !== -1
                                                  && root.selectionEnd !== -1)
-            }
-        }
-    }
-
-    // movableItem 定义在 rotateContainer 之后
-    Item {
-        id: movableItem
-        x: 50
-        y: 50
-        width: 60 // 增大以便点击
-        height: 60
-        z: 10000
-        visible: false
-
-        // 添加半透明背景，确保在最上层
-        Rectangle {
-            anchors.fill: parent
-            color: "blue"
-            radius: 10
-            opacity: 0.8
-            border.width: 3
-            border.color: "white"
-        }
-
-        Text {
-            anchors.centerIn: parent
-            text: "拖我"
-            color: "white"
-            font.bold: true
-            font.pixelSize: 12
-        }
-
-        // 使用 drag 属性的简化版本
-        MouseArea {
-            anchors.fill: parent
-            drag.target: movableItem
-            drag.axis: Drag.XAndYAxis
-            drag.minimumX: 0
-            drag.minimumY: 0
-            drag.maximumX: root.width - movableItem.width
-            drag.maximumY: root.height - movableItem.height
-
-            onPressed: {
-                console.log("开始拖动 movableItem")
-                movableItem.z = 10001 // 拖动时提到最前
-            }
-
-            onReleased: {
-                console.log("拖动结束，位置：", movableItem.x, movableItem.y)
             }
         }
     }

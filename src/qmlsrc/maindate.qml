@@ -174,7 +174,7 @@ Rectangle {
             id: listItem
             width: ListView.view.width
 
-            height: listCol.implicitHeight + 0
+            height: Math.max(listCol.childrenRect.height, 40)
 
             //选中颜色设置 #94caf7
             color: ListView.isCurrentItem ? "lightblue" : getColor()
@@ -190,26 +190,14 @@ Rectangle {
 
                 width: parent.width
                 spacing: 2
-                Layout.fillWidth: true
 
-                Rectangle {
-                    height: parent.height - 2
-                    width: 6
-                    radius: 2
-                    anchors.leftMargin: 1
-                    color: "red"
-                    visible: false
-                    Text {
-                        anchors.centerIn: parent
-                    }
-                }
-
+                //Layout.fillWidth: true
                 ColumnLayout {
                     id: listCol
-                    height: parent.height
+
                     width: parent.width
                     spacing: 2
-                    Layout.fillWidth: true
+                    // Layout.fillWidth: true
                     anchors.leftMargin: 0
                     anchors.rightMargin: 0
 
@@ -221,7 +209,8 @@ Rectangle {
                             id: item0Img
 
                             width: iconW
-                            height: item0.contentHeight
+                            height: iconW
+                            //height: item0.contentHeight
                             fillMode: Image.NoOption
                             horizontalAlignment: Image.AlignHCenter
                             verticalAlignment: Image.AlignVCenter
@@ -237,7 +226,7 @@ Rectangle {
                         Text {
                             id: item0
 
-                            width: parent.width
+                            //width: parent.width
                             Layout.preferredWidth: listItem.width - 0
                             Layout.alignment: Qt.AlignHCenter
                             horizontalAlignment: Text.AlignLeft
@@ -262,7 +251,8 @@ Rectangle {
                             id: item1Img
 
                             width: iconW
-                            height: parent.height - 2
+                            height: iconW
+                            //height: parent.height - 2
                             fillMode: Image.NoOption
                             horizontalAlignment: Image.AlignHCenter
                             verticalAlignment: Image.AlignVCenter
@@ -292,7 +282,7 @@ Rectangle {
                             horizontalAlignment: Text.AlignLeft
                             verticalAlignment: Text.AlignVCenter
 
-                            width: parent.width
+                            //width: parent.width
                             wrapMode: TextArea.WrapAnywhere
                             color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
                             font.bold: false
@@ -315,7 +305,8 @@ Rectangle {
                             id: item2Img
 
                             width: iconW
-                            height: parent.height - 2
+                            height: iconW
+                            //height: parent.height - 2
                             fillMode: Image.NoOption
                             horizontalAlignment: Image.AlignHCenter
                             verticalAlignment: Image.AlignVCenter
@@ -344,7 +335,7 @@ Rectangle {
                             Layout.alignment: Qt.AlignHCenter
 
                             horizontalAlignment: Text.AlignLeft
-                            width: parent.width
+                            //width: parent.width
                             wrapMode: TextArea.WrapAnywhere
                             font.bold: false
                             text: text2

@@ -220,10 +220,13 @@ class Reader : public QDialog {
   void closeViewBookNote();
   void setShowNoteValue(bool value);
   void setNoteListCurrentIndexValue(int value);
+  void setEditText(const QString &txt, const QString &direction);
+  void setStartEnd(int start, int end);
  private slots:
   void autoRun();
 
  private:
+  int startNote, endNote;
   QString strColor;
   QDateTime startDateTime, endDateTime;
   double totalHours = 0.0;

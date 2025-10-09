@@ -338,7 +338,7 @@ static void JavaNotify_15() {
     return;
   }
 
-  if (mui->f_ReaderFun2->isVisible()) {
+  if (mui->f_ReaderNote->isVisible()) {
     mui->btnCancelSel->click();
     return;
   }

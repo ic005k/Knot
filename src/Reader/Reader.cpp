@@ -489,6 +489,7 @@ void Reader::initReader() {
   int fsize = Reg.value("/Reader/FontSize", 18).toInt();
   readerFontSize = fsize;
   mui->qwReader->rootContext()->setContextProperty("FontSize", fsize);
+  mui->qwReader->rootContext()->setContextProperty("uiFontSize", fontSize);
   font.setPointSize(fsize);
   font.setLetterSpacing(QFont::AbsoluteSpacing, 2);  // 字间距
 
@@ -3523,7 +3524,7 @@ void Reader::addBookNote() {
     }
 
     qDebug() << strColor;
-    saveReadNote(cPage, start, end, strColor, noteText,
+    saveReadNote(cPage, startNote, endNote, strColor, noteText,
                  mui->editSetText->text().trimmed());
     readReadNote(cPage);
 
@@ -4087,4 +4088,17 @@ void Reader::setBookPagePressHold(bool value) {
     qWarning()
         << "调用 QML setBookPagePressHold 失败，可能函数名错误或对象不存在";
   }
+}
+
+void Reader::setEditText(const QString &txt, const QString &direction) {
+  mui->editSetText->setText(txt);
+  if (direction == "left")
+    mui->editSetText->setCursorPosition(0);
+  else
+    mui->editSetText->setCursorPosition(mui->editSetText->text().length());
+}
+
+void Reader::setStartEnd(int start, int end) {
+  startNote = start;
+  endNote = end;
 }
