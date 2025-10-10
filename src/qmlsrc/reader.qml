@@ -1032,209 +1032,7 @@ Item {
         }
     }
 
-    // ==== 自定义选择手柄层====
-
-
-    /*Item {
-        id: handleLayer
-        anchors.fill: parent
-        z: 100
-
-        property bool isDragging: false
-
-        // ==== 起点手柄 ====
-        Rectangle {
-            id: startHandle
-            visible: root.selectionStart !== -1 && root.selectionEnd !== -1
-            width: 20
-            height: 20
-            radius: 10
-            color: root.selectionColor
-            border.color: "white"
-            border.width: 2
-
-            MouseArea {
-                anchors.fill: parent
-                drag.target: startHandle
-                drag.axis: Drag.XAndYAxis
-                drag.minimumX: 0
-                drag.minimumY: 0
-                drag.maximumX: root.width - startHandle.width
-                drag.maximumY: root.height - startHandle.height
-
-                onPressed: function (mouse) {
-                    mouse.accepted = true
-                    contentListView.interactive = false
-                    handleLayer.isDragging = true
-                    startHandle.z = 10001
-                    root.currentSelectedTextEdit.forceActiveFocus()
-
-                    var pressCharPos = root.currentSelectedTextEdit.positionAt(
-                                mouse.x, mouse.y)
-                    const pos = startHandle.mapToItem(handleLayer, 0, 0)
-
-                    console.log("===== 起点手柄 onPressed 触发 =====", pressCharPos,
-                                pos, offsetX)
-                }
-
-                onPositionChanged: function (mouse) {
-                    if (mouse.pressed && root.currentSelectedTextEdit) {
-                        var textEdit = root.currentSelectedTextEdit
-                        var cx = startHandle.width / 2
-                        var cy = startHandle.height / 2
-
-                        console.log("===== 起点手柄拖动 =====")
-                        console.log("手柄屏幕坐标:", startHandle.x + cx,
-                                    startHandle.y + cy)
-
-                        // 手柄中心坐标映射到 TextEdit 本地坐标
-                        var localPos = startHandle.mapToItem(textEdit, cx, cy)
-                        console.log("映射到 TextEdit 本地坐标:", localPos.x,
-                                    localPos.y)
-
-                        // 补偿 Flickable 滚动偏移
-                        localPos.y += contentListView.contentY
-                        console.log("补偿滚动后坐标:", localPos.x, localPos.y)
-
-                        // 获取字符索引
-                        var charIndex = textEdit.positionAt(localPos.x,
-                                                            localPos.y)
-                        console.log("positionAt() 返回字符索引:", charIndex)
-
-                        if (charIndex >= 0 && charIndex <= root.selectionEnd) {
-                            console.log("更新 selectionStart 前:",
-                                        root.selectionStart)
-                            root.selectionStart = charIndex
-                            console.log("更新 selectionStart 后:",
-                                        root.selectionStart)
-
-                            // 调用 select() 刷新高亮
-                            textEdit.select(root.selectionStart,
-                                            root.selectionEnd)
-                            root.selectionText = textEdit.selectedText
-                            console.log("当前选中文本:", root.selectionText)
-                        } else {
-                            console.log("字符索引超出范围，不更新选择")
-                        }
-                    }
-                }
-
-                onReleased: function () {
-                    contentListView.interactive = true
-                    handleLayer.isDragging = false
-                    startHandle.z = 100
-                }
-            }
-        }
-
-        // ==== 终点手柄 ====
-        Rectangle {
-            id: endHandle
-            visible: root.selectionStart !== -1 && root.selectionEnd !== -1
-            width: 20
-            height: 20
-            radius: 10
-            color: root.selectionColor
-            border.color: "white"
-            border.width: 2
-
-            MouseArea {
-                anchors.fill: parent
-                drag.target: endHandle
-                drag.axis: Drag.XAndYAxis
-                drag.minimumX: 0
-                drag.minimumY: 0
-                drag.maximumX: root.width - endHandle.width
-                drag.maximumY: root.height - endHandle.height
-
-                onPressed: function (mouse) {
-                    mouse.accepted = true
-                    contentListView.interactive = false
-                    handleLayer.isDragging = true
-                    endHandle.z = 10001
-                    root.currentSelectedTextEdit.forceActiveFocus()
-                }
-
-                onPositionChanged: function (mouse) {
-                    if (mouse.pressed && root.currentSelectedTextEdit) {
-                        var textEdit = root.currentSelectedTextEdit
-                        var cx = endHandle.width / 2
-                        var cy = endHandle.height / 2
-
-                        var localPos = endHandle.mapToItem(textEdit, cx, cy)
-                        localPos.y += contentListView.contentY
-
-                        var charIndex = textEdit.positionAt(localPos.x,
-                                                            localPos.y)
-
-                        if (charIndex >= root.selectionStart
-                                && charIndex <= textEdit.text.length) {
-                            root.selectionEnd = charIndex
-                            textEdit.select(root.selectionStart,
-                                            root.selectionEnd)
-                            root.selectionText = textEdit.selectedText
-                        }
-                    }
-                }
-
-                onReleased: function () {
-                    contentListView.interactive = true
-                    handleLayer.isDragging = false
-                    endHandle.z = 100
-                }
-            }
-        }
-
-        // ==== 更新手柄位置 ====
-        function updateHandlePositions() {
-            if (handleLayer.isDragging || !root.currentSelectedTextEdit)
-                return
-
-            var startRect = root.currentSelectedTextEdit.positionToRectangle(
-                        root.selectionStart)
-            var endRect = root.currentSelectedTextEdit.positionToRectangle(
-                        root.selectionEnd)
-
-            if (startRect) {
-                // 起点手柄显示在 selectionStart 前一个字符位置（解决压字问题）
-                if (root.selectionStart > 0) {
-                    var prevRect = root.currentSelectedTextEdit.positionToRectangle(
-                                root.selectionStart - 1)
-                    startHandle.x = prevRect.x
-                    startHandle.y = prevRect.y - contentListView.contentY
-                } else {
-                    startHandle.x = startRect.x
-                    startHandle.y = startRect.y - contentListView.contentY
-                }
-            }
-
-            if (endRect) {
-                endHandle.x = endRect.x
-                endHandle.y = endRect.y - contentListView.contentY
-            }
-        }
-
-        // ==== 监听选择变化 ====
-        Connections {
-            target: root
-            function onSelectionStartChanged() {
-                handleLayer.updateHandlePositions()
-            }
-            function onSelectionEndChanged() {
-                handleLayer.updateHandlePositions()
-            }
-        }
-
-        // ==== 监听滚动变化 ====
-        Connections {
-            target: contentListView
-            function onContentYChanged() {
-                handleLayer.updateHandlePositions()
-            }
-        }
-    }*/
-
-    //////////////////////////////////////////////////////////////////////////
+    ///////////////////////////自定义选择手柄层//////////////////////////////////////
     // ==================== 起点手柄 ====================
     Item {
         id: startHandle
@@ -1242,6 +1040,7 @@ Item {
         height: 24
         z: 10001
         visible: root.selectionStart !== -1 && root.selectionEnd !== -1
+                 && !isLandscape
 
         Rectangle {
             anchors.fill: parent
@@ -1350,6 +1149,7 @@ Item {
         height: 24
         z: 10001
         visible: root.selectionStart !== -1 && root.selectionEnd !== -1
+                 && !isLandscape
 
         Rectangle {
             anchors.fill: parent

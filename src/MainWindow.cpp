@@ -2674,6 +2674,7 @@ void MainWindow::on_btnRotation_clicked() {
   if (orientationButton) {
     QMetaObject::invokeMethod(orientationButton, "clicked");
     m_Reader->isLandscape = !m_Reader->isLandscape;
+    m_Reader->readReadNote(m_Reader->cPage);
   }
 }
 

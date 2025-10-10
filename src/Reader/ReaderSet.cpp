@@ -179,6 +179,8 @@ void ReaderSet::on_btnFont_clicked() {
   mui->qwReader->rootContext()->setContextProperty("FontWeight",
                                                    readerFontWeight);
   mw_one->m_Reader->setPageVPos();
+
+  mw_one->m_Reader->readReadNote(mw_one->m_Reader->cPage);
 }
 
 void ReaderSet::on_hSlider_valueChanged(int value) { Q_UNUSED(value); }

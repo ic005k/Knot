@@ -1035,6 +1035,8 @@ void Reader::setFontSize(int fontSize) {
   qreal pos2 = pos1 * h2 / h1;
   setVPos(pos2);
   textPos = pos2;
+
+  readReadNote(cPage);
 }
 
 void Reader::PlainTextEditToFile(QPlainTextEdit *txtEdit, QString fileName) {
@@ -1143,10 +1145,15 @@ void Reader::savePageVPos() {
       int index = m_Method->getCurrentIndexFromQW(mui->qwCata);
       Reg.setValue("/Reader/vpos  CataIndex", index);
     } else {
-      if (htmlIndex >= 0)
+      if (htmlIndex >= 0) {
         Reg.setValue("/Reader/vpos" + fiHtml.baseName(), textPos);
-      Reg.setValue("/Reader/vpos_" + fiHtml.baseName() + "_isLandscape",
-                   isLandscape);
+        Reg.setValue("/Reader/vpos_" + fiHtml.baseName() + "_isLandscape",
+                     isLandscape);
+
+        qreal h = getVHeight();
+        qreal ratio = textPos / h;
+        Reg.setValue("/Reader/ratio" + fiHtml.baseName(), ratio);
+      }
     }
   }
 
@@ -1155,6 +1162,10 @@ void Reader::savePageVPos() {
     Reg.setValue(
         "/Reader/vpos_" + QString::number(currentPage) + "_isLandscape",
         isLandscape);
+
+    qreal h = getVHeight();
+    qreal ratio = textPos / h;
+    Reg.setValue("/Reader/ratio" + QString::number(currentPage), ratio);
   }
 
   Reg.sync();
@@ -1167,6 +1178,7 @@ void Reader::setPageVPos() {
                 QSettings::IniFormat);
   bool oldLandscape = isLandscape;
   bool newLandscape = false;
+  qreal ratio = -1;
 
   QFileInfo fiHtml(currentHtmlFile);
   if (isEpub) {
@@ -1176,22 +1188,25 @@ void Reader::setPageVPos() {
       if (currentCataIndex > 0) index = currentCataIndex;
       m_Method->setCurrentIndexFromQW(mui->qwCata, index);
     } else {
-      if (htmlIndex >= 0)
+      if (htmlIndex >= 0) {
         textPos = Reg.value("/Reader/vpos" + fiHtml.baseName(), 0).toReal();
 
-      QString key = "/Reader/vpos_" + fiHtml.baseName() + "_isLandscape";
-      bool exists = Reg.contains(key);
-      if (exists) {
-        newLandscape = Reg.value(key, false).toBool();
-      } else {
-        newLandscape = isLandscape;
+        QString key = "/Reader/vpos_" + fiHtml.baseName() + "_isLandscape";
+        bool exists = Reg.contains(key);
+        if (exists) {
+          newLandscape = Reg.value(key, false).toBool();
+        } else {
+          newLandscape = isLandscape;
+        }
+
+        ratio = Reg.value("/Reader/ratio" + fiHtml.baseName(), 0).toReal();
       }
     }
   }
 
   if (isText) {
-    textPos = Reg.value("/Reader/vpos" + QString::number(currentPage), false)
-                  .toReal();
+    textPos =
+        Reg.value("/Reader/vpos" + QString::number(currentPage), 0).toReal();
 
     QString key =
         "/Reader/vpos_" + QString::number(currentPage) + "_isLandscape";
@@ -1201,6 +1216,9 @@ void Reader::setPageVPos() {
     } else {
       newLandscape = isLandscape;
     }
+
+    ratio =
+        Reg.value("/Reader/ratio" + QString::number(currentPage), 0).toReal();
   }
 
   if (oldLandscape != newLandscape) {
@@ -1211,8 +1229,15 @@ void Reader::setPageVPos() {
   }
 
   m_Method->Sleep(200);
+
+  if (ratio > 0) {
+    qreal h = getVHeight();
+    textPos = h * ratio;
+  }
+
   setVPos(textPos);
-  qDebug() << "setVPos=" << textPos;
+
+  qDebug() << "setVPos=" << textPos << "ratio=" << ratio;
 }
 
 void Reader::setVPos(qreal pos) {
