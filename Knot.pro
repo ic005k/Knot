@@ -367,6 +367,7 @@ SOURCES += \
     src/Comm/Method.cpp \
     src/Comm/ReceiveShare.cpp \
     src/Comm/ShowMessage.cpp \
+    src/Comm/TextEditToolbar.cpp \
     src/Comm/Time24Picker.cpp \
     src/Comm/WheelWidget.cpp \
     src/Comm/enhancedcolorpicker.cpp \

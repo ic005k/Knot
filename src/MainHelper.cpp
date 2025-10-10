@@ -591,21 +591,22 @@ void MainHelper::init_UIWidget() {
 
   mw_one->installEventFilter(mw_one);
 
+  // if (isAndroid) {
+  mw_one->textToolbar = new TextEditToolbar(mw_one);
+  EditEventFilter *editFilter =
+      new EditEventFilter(mw_one->textToolbar, mw_one);
+  mui->editCategory->installEventFilter(editFilter);
+  mui->editDetails->installEventFilter(editFilter);
+  mui->editTodo->installEventFilter(editFilter);
+  mui->editDetails->viewport()->installEventFilter(editFilter);
+  mui->editTodo->viewport()->installEventFilter(editFilter);
+  mui->cboxWebDAV->lineEdit()->installEventFilter(editFilter);
+  mui->editWebDAVPassword->installEventFilter(editFilter);
+  mui->editWebDAVUsername->installEventFilter(editFilter);
+  mui->editFindNote->installEventFilter(editFilter);
+  mui->editNotesSearch->installEventFilter(editFilter);
+  mui->editSearchText->installEventFilter(editFilter);
   if (isAndroid) {
-    mw_one->textToolbar = new TextEditToolbar(mw_one);
-    EditEventFilter *editFilter =
-        new EditEventFilter(mw_one->textToolbar, mw_one);
-    mui->editCategory->installEventFilter(editFilter);
-    mui->editDetails->installEventFilter(editFilter);
-    mui->editTodo->installEventFilter(editFilter);
-    mui->editDetails->viewport()->installEventFilter(editFilter);
-    mui->editTodo->viewport()->installEventFilter(editFilter);
-    mui->cboxWebDAV->lineEdit()->installEventFilter(editFilter);
-    mui->editWebDAVPassword->installEventFilter(editFilter);
-    mui->editWebDAVUsername->installEventFilter(editFilter);
-    mui->editFindNote->installEventFilter(editFilter);
-    mui->editNotesSearch->installEventFilter(editFilter);
-    mui->editSearchText->installEventFilter(editFilter);
   } else {
     mui->btnShareBakFile->hide();
   }
