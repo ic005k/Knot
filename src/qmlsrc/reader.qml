@@ -140,91 +140,6 @@ Item {
     }
 
     ///////////////////////////////////////////////////////////////
-
-
-    /*function getBookmarkText() {
-        if (contentListView.count === 0)
-            return "Bookmark"
-
-        // 获取当前视口顶部的字符位置
-        let topCharPos = getCharPositionAtViewportTop()
-        if (topCharPos === -1)
-            return "Bookmark"
-
-        // 从该位置开始向后获取实际显示的文本
-        return getVisibleTextFromPosition(topCharPos, 100) + "..." // 获取100个字符
-    }
-
-    function getCharPositionAtViewportTop() {
-        // 处理横屏模式
-        let viewportTop = root.isLandscape ? rotateContainer.height
-                                             - contentListView.contentX : contentListView.contentY
-
-        // 获取第一个可见项的索引
-        let firstVisibleIndex = contentListView.indexAt(0, viewportTop)
-        if (firstVisibleIndex === -1)
-            return -1
-
-        // 获取该项实例
-        let delegateItem = contentListView.itemAtIndex(firstVisibleIndex)
-        if (!delegateItem)
-            return -1
-
-        // 计算该项内的相对位置
-        let relativePos = viewportTop - delegateItem.y
-
-        // 获取该位置对应的字符索引
-        return delegateItem.positionAt(0, relativePos)
-    }
-
-    function getVisibleTextFromPosition(startPos, maxLength) {
-        let result = ""
-        let currentPos = startPos
-        let charsCollected = 0
-
-        // 遍历所有文本块
-        for (var i = 0; i < contentListView.count; i++) {
-            let delegateItem = contentListView.itemAtIndex(i)
-            if (!delegateItem)
-                continue
-
-            // 获取文本块的实际显示内容
-            let text = getRenderedText(delegateItem)
-
-            // 如果当前块包含起始位置
-            if (currentPos < text.length) {
-                let chunk = text.substring(
-                        currentPos,
-                        Math.min(currentPos + maxLength - charsCollected,
-                                 text.length))
-                result += chunk
-                charsCollected += chunk.length
-
-                if (charsCollected >= maxLength) {
-                    return result
-                }
-            }
-
-            // 更新位置为下一个块的起始位置
-            currentPos = Math.max(0, currentPos - text.length)
-        }
-
-        return result
-    }
-
-    // 获取实际渲染的文本内容（去除HTML标签）
-    function getRenderedText(textEdit) {
-        // 方法1：使用TextEdit的getText方法获取纯文本
-        if (typeof textEdit.getText === "function") {
-            return textEdit.getText(0, textEdit.length)
-        }
-
-        // 方法2：使用正则表达式去除HTML标签
-        return textEdit.text.replace(/<[^>]*>/g, '')
-    }*/
-
-
-
     function getBookmarkText() {
         if (contentListView.count === 0)
             return "Bookmark"
@@ -251,7 +166,8 @@ Item {
         console.log("文本长度:", text.length)
 
         // 从该位置开始向后获取文本
-        let result = text.substring(charPos, Math.min(charPos + 100, text.length))
+        let result = text.substring(charPos, Math.min(charPos + 100,
+                                                      text.length))
         console.log("书签文本:", result)
 
         return result
@@ -263,28 +179,37 @@ Item {
         console.log("模拟点击位置:", mousePoint.x, mousePoint.y)
 
         // 将屏幕坐标映射到旋转容器坐标系
-        let pointInRotateContainer = rotateContainer.mapFromItem(null, mousePoint.x, mousePoint.y)
-        console.log("在旋转容器中的坐标:", pointInRotateContainer.x, pointInRotateContainer.y)
+        let pointInRotateContainer = rotateContainer.mapFromItem(null,
+                                                                 mousePoint.x,
+                                                                 mousePoint.y)
+        console.log("在旋转容器中的坐标:", pointInRotateContainer.x,
+                    pointInRotateContainer.y)
 
         // 在横屏模式下补偿Y坐标偏移
         if (root.isLandscape) {
             pointInRotateContainer.y = pointInRotateContainer.y - rotateContainer.height
-            console.log("横屏模式 - 补偿后坐标:", pointInRotateContainer.x, pointInRotateContainer.y)
+            console.log("横屏模式 - 补偿后坐标:", pointInRotateContainer.x,
+                        pointInRotateContainer.y)
         }
 
         // 将旋转容器坐标映射到ListView坐标系
-        let pointInListView = contentListView.mapFromItem(rotateContainer, pointInRotateContainer.x, pointInRotateContainer.y)
+        let pointInListView = contentListView.mapFromItem(
+                rotateContainer, pointInRotateContainer.x,
+                pointInRotateContainer.y)
         console.log("在ListView中的坐标:", pointInListView.x, pointInListView.y)
 
         // 在横屏模式下，进一步调整ListView坐标
         if (root.isLandscape) {
             // 减去文本块的Y位置，确保局部坐标从0开始
             pointInListView.y = pointInListView.y - delegateItem.y
-            console.log("横屏模式 - 调整后ListView坐标:", pointInListView.x, pointInListView.y)
+            console.log("横屏模式 - 调整后ListView坐标:", pointInListView.x,
+                        pointInListView.y)
         }
 
         // 将ListView坐标映射到文本块的局部坐标
-        let pointInItem = delegateItem.mapFromItem(contentListView, pointInListView.x, pointInListView.y)
+        let pointInItem = delegateItem.mapFromItem(contentListView,
+                                                   pointInListView.x,
+                                                   pointInListView.y)
         console.log("在文本块内的局部坐标:", pointInItem.x, pointInItem.y)
 
         // 获取该位置对应的字符索引
@@ -305,10 +230,6 @@ Item {
         // 最后使用正则表达式去除HTML标签
         return textEdit.text.replace(/<[^>]*>/g, '')
     }
-
-
-
-
 
     ///////////////////////////////////////////////////////
     function setTextAreaCursorPos(nCursorPos) {

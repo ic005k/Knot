@@ -1104,12 +1104,6 @@ border-radius: 4px;</string>
         </widget>
        </item>
        <item>
-        <widget class="QTextEdit" name="textBrowser"/>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="textBrowser1"/>
-       </item>
-       <item>
         <widget class="QLabel" name="lblBookName">
          <property name="font">
           <font>

@@ -43,16 +43,6 @@ bool MainHelper::mainEventFilter(QObject *watch, QEvent *evn) {
 
   m_Notes->eventFilterQwNote(watch, evn);
 
-  if (watch == mui->textBrowser->viewport()) {
-    if (event->type() == QEvent::MouseButtonDblClick) {
-      QTextCursor cursor = mui->textBrowser->textCursor();
-      cursor.setPosition(cursor.anchor());
-      mui->textBrowser->setTextCursor(cursor);
-
-      return true;
-    }
-  }
-
   if (watch == mw_one->chartview || watch == mw_one->chartview1) {
     if (event->type() == QEvent::MouseButtonDblClick) {
       mw_one->on_btnChart_clicked();
@@ -674,10 +664,6 @@ void MainHelper::init_UIWidget() {
   mui->lblWebDAV->setStyleSheet(mw_one->labelNormalStyleSheet);
   mui->lblTitleEditRecord->setStyleSheet(clickableLabelButtonStyle);
 
-  mui->textBrowser->installEventFilter(mw_one);
-  mui->textBrowser->setMouseTracking(true);
-  mui->textBrowser->viewport()->installEventFilter(mw_one);
-  mui->textBrowser->viewport()->setMouseTracking(true);
   mui->qwReader->installEventFilter(mw_one);
 
   mui->tabWidget->tabBar()->installEventFilter(mw_one);

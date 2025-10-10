@@ -145,7 +145,6 @@ class Reader : public QDialog {
 
   void closeSelText();
 
-  QString getBookmarkText();
   QStringList getCurrentBookmarkList();
   void showBookmarkList();
 
@@ -262,7 +261,7 @@ class Reader : public QDialog {
   static QString getEpub3Title(const QString &opfFile);
 
   bool isGetBookmarkText = false;
-  QString getFirstThreeLines(QTextEdit *textEdit);
+
   bool getLandscape();
   bool getQmlReadyEnd();
   double readTotalHours();

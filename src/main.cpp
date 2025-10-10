@@ -157,6 +157,7 @@ int main(int argc, char* argv[]) {
   p_dir.mkpath(privateDir);
   p_dir.mkpath(iniDir);
   p_dir.mkpath(iniDir + "memo/readnote");
+  p_dir.mkpath(iniDir + "bookini");
   QString bak_dir = iniDir;
   bak_dir = bak_dir.replace("KnotData", "KnotBak");
   p_dir.mkpath(bak_dir);

@@ -32,8 +32,7 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
 
   mui->lblTitle->hide();
   mui->f_ReaderNote->hide();
-  mui->textBrowser1->hide();
-  mui->textBrowser->hide();
+
   mui->lblCataInfo->hide();
   mui->btnBackReader->hide();
   mui->lblCataInfo->adjustSize();
@@ -41,16 +40,7 @@ Reader::Reader(QWidget *parent) : QDialog(parent) {
   mui->lblBookName->adjustSize();
   mui->lblBookName->setWordWrap(true);
 
-  mui->textBrowser->horizontalScrollBar()->hide();
-  mui->textBrowser->verticalScrollBar()->hide();
   mui->qwViewBookNote->hide();
-
-  QPalette pt = palette();
-  pt.setBrush(QPalette::Text, Qt::black);
-  pt.setBrush(QPalette::Base, QColor(235, 235, 235));
-  pt.setBrush(QPalette::Highlight, Qt::red);
-  pt.setBrush(QPalette::HighlightedText, Qt::white);
-  mui->textBrowser->setPalette(pt);
 
   QFont f = this->font();
   f.setPointSize(10);
@@ -164,13 +154,6 @@ void Reader::setReaderStyle() {
     textColor = QColor(46, 139, 87);
     baseColor = QColor(0, 0, 0);
   }
-
-  QPalette pt = palette();
-  pt.setBrush(QPalette::Text, textColor);
-  pt.setBrush(QPalette::Base, baseColor);
-  pt.setBrush(QPalette::Highlight, Qt::red);
-  pt.setBrush(QPalette::HighlightedText, Qt::white);
-  mui->textBrowser->setPalette(pt);
 }
 
 void Reader::startOpenFile(QString openfile) {
@@ -424,7 +407,7 @@ QString Reader::get_href(QString idref, QStringList opfList) {
 void Reader::saveReader(QString BookmarkText, bool isSetBookmark) {
   m_ReaderSet->saveScrollValue();
 
-  QString endFile = privateDir + "bookini/" + currentBookName + ".ini";
+  QString endFile = iniDir + "bookini/" + currentBookName + ".ini";
   QSettings Reg(endFile, QSettings::IniFormat);
 
   QString bookmarkSn;
@@ -999,8 +982,11 @@ void Reader::paintEvent(QPaintEvent *event) { Q_UNUSED(event); }
 
 void Reader::goBookReadPosition() {
   if (isOpen) {
-    QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
-                  QSettings::IniFormat);
+    QString file = iniDir + "bookini/" + currentBookName + ".ini";
+    if (!QFile::exists(file))
+      file = privateDir + "bookini/" + currentBookName + ".ini";
+
+    QSettings Reg(file, QSettings::IniFormat);
 
     if (isText) {
       currentPage = Reg.value("/Reader/currentPage", 0).toULongLong();
@@ -1086,8 +1072,12 @@ void Reader::setQmlLandscape(bool isValue) {
 }
 
 bool Reader::getLandscape() {
-  QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
-                QSettings::IniFormat);
+  QString file = iniDir + "bookini/" + currentBookName + ".ini";
+  if (!QFile::exists(file))
+    file = privateDir + "bookini/" + currentBookName + ".ini";
+
+  QSettings Reg(file, QSettings::IniFormat);
+
   bool oldLandscape = isLandscape;
   bool newLandscape = false;
 
@@ -1134,7 +1124,7 @@ bool Reader::getLandscape() {
 }
 
 void Reader::savePageVPos() {
-  QString endFile = privateDir + "bookini/" + currentBookName + ".ini";
+  QString endFile = iniDir + "bookini/" + currentBookName + ".ini";
   QSettings Reg(endFile, QSettings::IniFormat);
 
   QFileInfo fiHtml(currentHtmlFile);
@@ -1174,8 +1164,12 @@ void Reader::savePageVPos() {
 }
 
 void Reader::setPageVPos() {
-  QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
-                QSettings::IniFormat);
+  QString file = iniDir + "bookini/" + currentBookName + ".ini";
+  if (!QFile::exists(file))
+    file = privateDir + "bookini/" + currentBookName + ".ini";
+
+  QSettings Reg(file, QSettings::IniFormat);
+
   bool oldLandscape = isLandscape;
   bool newLandscape = false;
   qreal ratio = -1;
@@ -1265,19 +1259,12 @@ qreal Reader::getVPos() {
   return textPos;
 }
 
-QString Reader::getBookmarkText() {
-  isGetBookmarkText = true;
-  selectText();
-
-  return getFirstThreeLines(mui->textBrowser);
-}
-
 QString Reader::getBookmarkTextFromQML() {
   QVariant item;
   QQuickItem *root = mui->qwReader->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "getBookmarkText",
                             Q_RETURN_ARG(QVariant, item));
-  return item.toString();
+  return item.toString() + "...";
 }
 
 qreal Reader::getVHeight() {
@@ -2205,42 +2192,8 @@ void Reader::selectText() {
   if (!isSelText) {
     isSelText = true;
 
-    mui->textBrowser->setReadOnly(true);
-    QFont font;
-    font.setPixelSize(readerFontSize);
-    font.setFamily(mui->btnFont->font().family());
-    font.setLetterSpacing(QFont::AbsoluteSpacing, 2);
-    mui->textBrowser->setFont(font);
-
-    mui->textBrowser->document()->setDocumentMargin(0);
-    mui->textBrowser->viewport()->setAutoFillBackground(false);
-    QString css;
-    if (isDark)
-      css =
-          "<style>body { color: #DDDDDD !important; background: #333333 "
-          "!important; "
-          "}</style>";
-    else
-      css =
-          "<style>body { color: #333333 !important; background: #DDDDDD "
-          "!important; "
-          "}</style>";
-
-    currentTxt.insert(currentTxt.indexOf("</head>") + 7, css);
-
-    mui->textBrowser->setHtml(currentTxt);
-
-    // mui->qwReader->hide();
     mui->f_ReaderFun->hide();
     mui->f_ReaderNote->show();
-    // mui->textBrowser->show();
-
-    qreal h0 = getVHeight();
-    qreal h1 = mui->textBrowser->document()->size().height();
-    qreal s0 = getVPos();
-    qreal s1 = (s0 * h1) / h0;
-    mui->textBrowser->verticalScrollBar()->setSliderPosition(s1);
-    qDebug() << "s0=" << s0 << "h0=" << h0 << "s1=" << s1 << "h1=" << h1;
 
     if (isGetBookmarkText) {
       closeSelText();
@@ -2257,7 +2210,7 @@ void Reader::closeSelText() {
     isSelText = false;
 
     mui->f_ReaderNote->hide();
-    mui->textBrowser->hide();
+
     mui->qwReader->show();
     mui->f_ReaderFun->show();
     mw_one->mydlgSetText->close();
@@ -2292,8 +2245,12 @@ void Reader::setPageScroll1() {
 
 QStringList Reader::getCurrentBookmarkList() {
   QStringList list;
-  QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
-                QSettings::IniFormat);
+
+  QString file = iniDir + "bookini/" + currentBookName + ".ini";
+  if (!QFile::exists(file))
+    file = privateDir + "bookini/" + currentBookName + ".ini";
+
+  QSettings Reg(file, QSettings::IniFormat);
 
   int count = Reg.value("/Bookmark/count", 0).toInt();
   for (int i = 0; i < count; i++) {
@@ -2306,8 +2263,12 @@ QStringList Reader::getCurrentBookmarkList() {
 void Reader::clickBookmarkList(int i) {
   int count = m_Method->getCountFromQW(mui->qwBookmark);
   int index = count - 1 - i;
-  QSettings Reg(privateDir + "bookini/" + currentBookName + ".ini",
-                QSettings::IniFormat);
+
+  QString file = iniDir + "bookini/" + currentBookName + ".ini";
+  if (!QFile::exists(file))
+    file = privateDir + "bookini/" + currentBookName + ".ini";
+
+  QSettings Reg(file, QSettings::IniFormat);
 
   if (isText) {
     currentPage =
@@ -2395,7 +2356,6 @@ void Reader::shareBook() {
 bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
   if (isShowNote) return true;
   if (mui->f_ReaderNote->isVisible()) return true;
-  if (mui->textBrowser->isVisible()) return true;
   if (dlgEditBookNote != nullptr) {
     if (dlgEditBookNote->isVisible()) return true;
   }
@@ -2544,7 +2504,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
   if (watch == mui->qwReader) {
     int length = 75;
 
-    if (mui->textBrowser->isHidden()) {
+    if (mui->qwReader->isVisible()) {
       if (event->type() == QEvent::MouseButtonPress) {
         mw_one->isMousePress = true;
         mw_one->isMouseMove = false;
@@ -3200,91 +3160,6 @@ bool Reader::isDcTitleElement(const QXmlStreamReader &xml) {
   return xml.name() == u"title"_qs && xml.namespaceUri() == dcNamespace;
 }
 
-/**
- * 获取QTextEdit中视觉上显示的前三行内容
- * 考虑自动换行、富文本格式（最终返回纯文本）
- */
-QString Reader::getFirstThreeLines(QTextEdit *textEdit) {
-  if (!textEdit || !textEdit->document()) return "";
-
-  // 1. 可视区域参数（复用原算法的核心计算）
-  int viewportHeight = textEdit->viewport()->height();
-  int scrollY = textEdit->verticalScrollBar()->value();
-  int viewTop = scrollY;
-  int viewBottom = scrollY + viewportHeight;
-  int viewportWidth = textEdit->viewport()->width() - 4;  // 内容宽度
-  const int targetLines = 3;
-
-  QStringList resultLines;
-  int foundLines = 0;
-  double currentY = 0.0;  // 累积高度（复用原算法的块定位逻辑）
-
-  QTextDocument *doc = textEdit->document();
-  QTextBlock block = doc->begin();
-
-  while (block.isValid() && foundLines < targetLines) {
-    QTextLayout *layout = block.layout();
-    if (!layout) {
-      block = block.next();
-      continue;
-    }
-
-    // 2. 块级可见性判断（核心复用原算法）
-    double blockHeight = layout->boundingRect().height();
-    double blockTop = currentY;
-    double blockBottom = currentY + blockHeight;
-
-    // 块完全在可视区域上方：跳过
-    if (blockBottom <= viewTop) {
-      currentY += blockHeight;
-      block = block.next();
-      continue;
-    }
-
-    // 块完全在可视区域下方：退出（原算法的提前退出逻辑）
-    if (blockTop >= viewBottom) {
-      break;
-    }
-
-    // 3. 块部分或完全可见：拆分到行级判断
-    QString blockText = block.text();
-    layout->beginLayout();
-    QTextLine textLine = layout->createLine();
-
-    while (textLine.isValid() && foundLines < targetLines) {
-      textLine.setLineWidth(viewportWidth);  // Qt6行宽设置
-
-      // 计算行的垂直范围（相对于文档顶部）
-      double lineTop = blockTop + textLine.y();
-      double lineBottom = lineTop + textLine.height();
-
-      // 行完全在可视区域外：跳过
-      if (lineBottom <= viewTop || lineTop >= viewBottom) {
-        textLine = layout->createLine();
-        continue;
-      }
-
-      // 行部分或完全可见：提取文本
-      int startIdx = textLine.textStart();
-      int length = textLine.textLength();
-      QString lineText = blockText.mid(startIdx, length).trimmed();
-
-      if (!lineText.isEmpty()) {
-        resultLines.append(lineText);
-        foundLines++;
-      }
-
-      textLine = layout->createLine();
-    }
-
-    layout->endLayout();
-    currentY += blockHeight;
-    block = block.next();
-  }
-
-  return resultLines.join("\n");
-}
-
 QString Reader::getReadTotalTime() {
   endDateTime = QDateTime::currentDateTime();
   qint64 seconds = startDateTime.secsTo(endDateTime);
@@ -3537,16 +3412,6 @@ void Reader::addBookNote() {
   if (dlgAddBookNote->exec() == QDialog::Accepted) {
     QString noteText = textEdit->toPlainText();
     // 在这里处理用户输入的笔记内容
-
-    QTextCursor cursor = mui->textBrowser->textCursor();
-    int start = 0, end = 0;
-    if (cursor.hasSelection()) {
-      start = cursor.selectionStart();
-      end = cursor.selectionEnd();
-      qDebug() << "Selection start:" << start << " end:" << end;
-    } else {
-      qDebug() << "No text selected.";
-    }
 
     qDebug() << strColor;
     saveReadNote(cPage, startNote, endNote, strColor, noteText,

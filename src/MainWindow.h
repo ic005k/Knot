@@ -508,8 +508,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnBackNoteRecycle_clicked();
 
-  void on_textBrowser_selectionChanged();
-
   void on_timerMousePress();
 
   void on_btnBackImg_clicked();

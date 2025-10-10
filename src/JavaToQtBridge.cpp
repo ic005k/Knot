@@ -361,10 +361,6 @@ static void JavaNotify_15() {
       mw_one->mydlgSetText->close();
       return;
 
-    } else if (!mui->textBrowser->isHidden()) {
-      QTimer::singleShot(100, mw_one,
-                         []() { mw_one->on_btnSelText_clicked(); });
-      return;
     }
 
     else {
