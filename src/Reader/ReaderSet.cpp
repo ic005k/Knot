@@ -264,9 +264,9 @@ void ReaderSet::on_editForegroundColor_textChanged(const QString &arg1) {
 
 void ReaderSet::on_btnSetBookmark_clicked() {
   QString page = mui->btnPages->text().split("\n").at(0);
-  QString txt = "( " + page + " ) " + mw_one->m_Reader->getBookmarkText() +
-                "\n" + mw_one->m_Steps->getFullDate() + "  " +
-                QTime::currentTime().toString();
+  QString txt =
+      "( " + page + " ) " + mw_one->m_Reader->getBookmarkTextFromQML() + "\n" +
+      mw_one->m_Steps->getFullDate() + "  " + QTime::currentTime().toString();
   mw_one->m_Reader->saveReader(txt, true);
   if (isAndroid) m_Method->showToastMessage(tr("Bookmark setup is complete."));
 }
