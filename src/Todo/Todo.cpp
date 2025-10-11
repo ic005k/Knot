@@ -1240,21 +1240,37 @@ void Todo::reeditText() {
 
   connect(btnCancel, &QToolButton::clicked, m_ReeditTodo,
           [=]() mutable { m_ReeditTodo->close(); });
-  connect(m_ReeditTodo, &QDialog::rejected, m_ReeditTodo,
-          [=]() mutable { m_Method->closeGrayWindows(); });
+
+  connect(m_ReeditTodo, &QDialog::rejected, m_ReeditTodo, [=]() mutable {
+    m_Method->closeGrayWindows();
+  });
+
   connect(m_ReeditTodo, &QDialog::accepted, m_ReeditTodo,
           [=]() mutable { m_Method->closeGrayWindows(); });
+
+  connect(m_ReeditTodo, &QDialog::finished, this, [this](int result) {
+    Q_UNUSED(result);
+    if (textToolbarReeditTodo != nullptr &&
+        textToolbarReeditTodo->isVisible()) {
+      textToolbarReeditTodo->hide();
+    }
+
+    m_Method->closeGrayWindows();
+  });
+
   connect(btnCopy, &QToolButton::clicked, m_ReeditTodo, [=]() mutable {
     edit->selectAll();
     edit->copy();
     m_ReeditTodo->close();
   });
+
   connect(btnShare, &QToolButton::clicked, m_ReeditTodo, [=]() mutable {
     QString txt = edit->toPlainText().trimmed();
     if (txt.length() > 0) {
       mw_one->m_ReceiveShare->shareString(tr("Share to"), txt);
     }
   });
+
   connect(btnOk, &QToolButton::clicked, m_ReeditTodo, [=]() mutable {
     QString strTime = getItemTime(row);
     int type = getItemType(row);

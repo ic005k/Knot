@@ -3333,12 +3333,10 @@ void Reader::addBookNote() {
   QObject::connect(buttonBox, &QDialogButtonBox::rejected, dlgAddBookNote,
                    &QDialog::reject);
 
-  connect(dlgAddBookNote, &QObject::destroyed, this, [this](QObject *obj) {
-    Q_UNUSED(obj);
-    if (textToolbarReader != nullptr) {
-      if (textToolbarReader->isVisible()) {
-        textToolbarReader->hide();
-      }
+  connect(dlgAddBookNote, &QDialog::finished, this, [this](int result) {
+    Q_UNUSED(result);
+    if (textToolbarReader != nullptr && textToolbarReader->isVisible()) {
+      textToolbarReader->hide();
     }
   });
 
@@ -3460,12 +3458,10 @@ void Reader::editBookNote(int index, int page, const QString &content) {
   QObject::connect(buttonBox, &QDialogButtonBox::rejected, dlgEditBookNote,
                    &QDialog::reject);
 
-  connect(dlgEditBookNote, &QObject::destroyed, this, [this](QObject *obj) {
-    Q_UNUSED(obj);
-    if (textToolbarReader != nullptr) {
-      if (textToolbarReader->isVisible()) {
-        textToolbarReader->hide();
-      }
+  connect(dlgEditBookNote, &QDialog::finished, this, [this](int result) {
+    Q_UNUSED(result);
+    if (textToolbarReader != nullptr && textToolbarReader->isVisible()) {
+      textToolbarReader->hide();
     }
   });
 

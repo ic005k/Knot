@@ -594,17 +594,6 @@ void MainHelper::init_UIWidget() {
   // if (isAndroid) {
   textToolbar = new TextEditToolbar(mw_one);
   EditEventFilter *editFilter = new EditEventFilter(textToolbar, mw_one);
-  /*mui->editCategory->installEventFilter(editFilter);
-  mui->editDetails->installEventFilter(editFilter);
-  mui->editTodo->installEventFilter(editFilter);
-  mui->editDetails->viewport()->installEventFilter(editFilter);
-  mui->editTodo->viewport()->installEventFilter(editFilter);
-  mui->cboxWebDAV->lineEdit()->installEventFilter(editFilter);
-  mui->editWebDAVPassword->installEventFilter(editFilter);
-  mui->editWebDAVUsername->installEventFilter(editFilter);
-  mui->editFindNote->installEventFilter(editFilter);
-  mui->editNotesSearch->installEventFilter(editFilter);
-  mui->editSearchText->installEventFilter(editFilter);*/
 
   m_Method->setLineEditToolBar(mw_one, editFilter);
   m_Method->setTextEditToolBar(mw_one, editFilter);
