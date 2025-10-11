@@ -68,17 +68,20 @@ class TextEditToolbar : public QWidget {
   void onStartHandlePressed();
   void onEndHandlePressed();
 
- private:
+  void onDelClicked();
+  void onCursorRightClicked();
+  void onCursorLeftClicked();
+
+  void onCloseClicked();
+
+  void onCursorPositionChanged();
+  private:
   // 初始化函数声明
   void initButtons();
   void initHandles();
   void adjustButtonSizes();
   void showHandlesAtSelection();
   void setupMinimumSize();  // 原私有函数声明
-
-  // 选择调整函数声明
-  void adjustTextEditSelection(int step);
-  void adjustLineEditSelection(int step);
 
   // 手柄与选择同步函数声明
   void updateSelectionFromHandle(const QPoint &globalPos, bool isStartHandle);
@@ -94,6 +97,11 @@ class TextEditToolbar : public QWidget {
   QPushButton *btnPaste = nullptr;
   QPushButton *btnSelectAll = nullptr;
 
+  QPushButton *btnCursorLeft;
+  QPushButton *btnCursorRight;
+  QPushButton *btnDel;
+  QPushButton *btnClose;
+
   // 选择手柄
   HandleWidget *m_startHandle = nullptr;
   HandleWidget *m_endHandle = nullptr;
@@ -105,6 +113,7 @@ class TextEditToolbar : public QWidget {
   // 当前选择位置
   int m_startPos = 0;
   int m_endPos = 0;
+  int currentCursorPos = 0;
 
   void autoSelectTwoChars();
 
@@ -114,6 +123,7 @@ class TextEditToolbar : public QWidget {
   bool m_dragging = false;
   int m_dragAnchorStart = 0;
   int m_dragAnchorEnd = 0;
+  void selectEditText(int start, int end);
 };
 
 /////////////////////////////////////////////////////////////////////////////
