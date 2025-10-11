@@ -2733,6 +2733,26 @@ QObjectList Method::getAllTreeWidget(QObjectList lstUIControls) {
   return lst;
 }
 
+QObjectList Method::getAllLineEdit(QObjectList lstUIControls) {
+  QObjectList lst;
+  foreach (QObject *obj, lstUIControls) {
+    if (obj->metaObject()->className() == QStringLiteral("QLineEdit")) {
+      lst.append(obj);
+    }
+  }
+  return lst;
+}
+
+QObjectList Method::getAllTextEdit(QObjectList lstUIControls) {
+  QObjectList lst;
+  foreach (QObject *obj, lstUIControls) {
+    if (obj->metaObject()->className() == QStringLiteral("QTextEdit")) {
+      lst.append(obj);
+    }
+  }
+  return lst;
+}
+
 QObjectList Method::getAllUIControls(QObject *parent) {
   QObjectList lstOfChildren, lstTemp;
   if (parent) {
@@ -3184,4 +3204,25 @@ bool Method::sendMailWithAttachment(const QString &recipient,
   qDebug() << "Mailto URL:" << mailtoUrl.toString();
 
   return QDesktopServices::openUrl(mailtoUrl);
+}
+
+void Method::setLineEditToolBar(QObject *parent, EditEventFilter *editFilter) {
+  QObjectList btnList = getAllLineEdit(getAllUIControls(parent));
+
+  for (int i = 0; i < btnList.count(); i++) {
+    QLineEdit *btn = (QLineEdit *)btnList.at(i);
+
+    btn->installEventFilter(editFilter);
+  }
+}
+
+void Method::setTextEditToolBar(QObject *parent, EditEventFilter *editFilter) {
+  QObjectList btnList = getAllTextEdit(getAllUIControls(parent));
+
+  for (int i = 0; i < btnList.count(); i++) {
+    QTextEdit *btn = (QTextEdit *)btnList.at(i);
+
+    btn->installEventFilter(editFilter);
+    btn->viewport()->installEventFilter(editFilter);
+  }
 }

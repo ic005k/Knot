@@ -130,8 +130,6 @@ class MainWindow : public QMainWindow {
 
   int x, y, w, h;
 
-  TextEditToolbar *textToolbar;
-
   QInputDialog *m_RenameDlg = nullptr;
 
   QString labelNormalStyleSheet = R"(/* 动态适配明暗模式 */

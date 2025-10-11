@@ -44,6 +44,7 @@
 #include <QTreeWidgetItem>
 #include <QWidget>
 
+#include "src/Comm/TextEditToolbar.h"
 #include "src/Comm/enhancedcolorpicker.h"
 
 namespace Ui {
@@ -448,6 +449,11 @@ class Method : public QDialog {
   int getAccessCount();
   bool sendMailWithAttachment(const QString &recipient = "",
                               const QString &filePath = "");
+
+  QObjectList getAllTextEdit(QObjectList lstUIControls);
+  QObjectList getAllLineEdit(QObjectList lstUIControls);
+  void setLineEditToolBar(QObject *parent, EditEventFilter *editFilter);
+  void setTextEditToolBar(QObject *parent, EditEventFilter *editFilter);
 
  protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;

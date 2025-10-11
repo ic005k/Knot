@@ -240,9 +240,9 @@ static void JavaNotify_15() {
     }
   }
 
-  if (mw_one->textToolbar != nullptr) {
-    if (mw_one->textToolbar->isVisible()) {
-      mw_one->textToolbar->hide();
+  if (textToolbarReader != nullptr) {
+    if (textToolbarReader->isVisible()) {
+      textToolbarReader->hide();
       return;
     }
   }

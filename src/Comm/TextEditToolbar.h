@@ -84,7 +84,6 @@ class TextEditToolbar : public QWidget {
   void updateSelectionFromHandle(const QPoint &globalPos, bool isStartHandle);
   void updateSelection(int start, int end);
   void updateHandlesPosition();
-  static QRect getLineEditCursorRect(QLineEdit *lineEdit);  // 静态函数声明
 
   // 成员变量声明
   // 按钮

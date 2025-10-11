@@ -16,7 +16,7 @@
 HandleWidget::HandleWidget(QWidget *parent)
     : QWidget(parent,
               Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool) {
-  setFixedSize(24, 24);
+  setFixedSize(32, 32);
   setAttribute(Qt::WA_TranslucentBackground);
   setMouseTracking(true);
   setCursor(Qt::OpenHandCursor);
@@ -74,7 +74,7 @@ void HandleWidget::mouseMoveEvent(QMouseEvent *event) {
 TextEditToolbar::TextEditToolbar(QWidget *parent) : QWidget(parent) {
   // 窗口属性设置
   setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Tool);
-  setAttribute(Qt::WA_TranslucentBackground);
+  // setAttribute(Qt::WA_TranslucentBackground);
   installEventFilter(this);
   setFocusPolicy(Qt::StrongFocus);
 
@@ -167,25 +167,15 @@ void TextEditToolbar::initHandles() {
 }
 
 void TextEditToolbar::adjustButtonSizes() {
-  // 固定按钮尺寸：44x44px（触摸友好，刚好显示文字/图标）
   const int BUTTON_SIZE = 44;
-  // 固定工具栏宽度：内边距(8 * 2) + 6个按钮(44 * 6) + 5个间距(5 * 5) =
-  // 16+264+25=305 → 取整300px（足够容纳）
   const int TOOLBAR_WIDTH = 300;
-  // 固定工具栏高度：按钮高度(44) + 上下内边距(8 * 2) = 60px
   const int TOOLBAR_HEIGHT = 60;
-
-  // 1. 给所有按钮设固定大小
   QList<QPushButton *> buttons = {btnMinus, btnPlus,  btnCopy,
                                   btnCut,   btnPaste, btnSelectAll};
   for (auto btn : buttons) {
     btn->setFixedSize(BUTTON_SIZE, BUTTON_SIZE);
   }
-
-  // 2. 给工具栏设固定大小
   setFixedSize(TOOLBAR_WIDTH, TOOLBAR_HEIGHT);
-
-  // 3. 确保布局间距匹配（避免按钮挤压）
   QHBoxLayout *mainLayout = qobject_cast<QHBoxLayout *>(layout());
   if (mainLayout) {
     mainLayout->setSpacing(5);                   // 按钮间固定间距5px
@@ -198,37 +188,29 @@ void TextEditToolbar::bindEditWidget(QWidget *editWidget) {
   if (m_textEdit) {
     disconnect(m_textEdit, &QTextEdit::selectionChanged, this,
                &TextEditToolbar::onSelectionChanged);
+    m_textEdit = nullptr;
   }
   if (m_lineEdit) {
-    disconnect(m_lineEdit, &QLineEdit::cursorPositionChanged, this,
+    disconnect(m_lineEdit, &QLineEdit::selectionChanged, this,
                &TextEditToolbar::onSelectionChanged);
-    disconnect(m_lineEdit, &QLineEdit::textChanged, this,
-               &TextEditToolbar::onSelectionChanged);
+    m_lineEdit = nullptr;
   }
 
-  // 2. 解绑旧控件
-  m_textEdit = nullptr;
-  m_lineEdit = nullptr;
-
-  // 3. 绑定新控件（QTextEdit 或 QLineEdit）
+  // 2. 绑定新控件（QTextEdit 或 QLineEdit）
   m_textEdit = qobject_cast<QTextEdit *>(editWidget);
   m_lineEdit = qobject_cast<QLineEdit *>(editWidget);
 
   if (!m_textEdit && !m_lineEdit) {
-    qWarning() << "TextEditToolbar: 绑定失败，目标不是QTextEdit或QLineEdit";
+    qWarning() << "TextEditToolbar: 绑定失败，目标不是 QTextEdit 或 QLineEdit";
     return;
   }
 
-  // 4. 绑定选择变化信号（关键：实时监听选择状态）
+  // 3. 绑定选择变化信号（Qt6 统一用 selectionChanged）
   if (m_textEdit) {
-    // QTextEdit 有现成的 selectionChanged 信号
     connect(m_textEdit, &QTextEdit::selectionChanged, this,
             &TextEditToolbar::onSelectionChanged);
-  } else if (m_lineEdit) {
-    // QLineEdit 用 cursorPositionChanged + textChanged 覆盖选择变化场景
-    connect(m_lineEdit, &QLineEdit::cursorPositionChanged, this,
-            &TextEditToolbar::onSelectionChanged);
-    connect(m_lineEdit, &QLineEdit::textChanged, this,
+  } else {
+    connect(m_lineEdit, &QLineEdit::selectionChanged, this,
             &TextEditToolbar::onSelectionChanged);
   }
 }
@@ -373,8 +355,6 @@ void TextEditToolbar::autoSelectTwoChars() {
 void TextEditToolbar::showHandlesAtSelection() {
   if (!m_textEdit && !m_lineEdit) return;
 
-  QWidget *editWidget = m_textEdit ? static_cast<QWidget *>(m_textEdit)
-                                   : static_cast<QWidget *>(m_lineEdit);
   int startPos = 0, endPos = 0;
 
   qDebug() << "[showHandlesAtSelection] 开始显示手柄";
@@ -420,75 +400,85 @@ void TextEditToolbar::showHandlesAtSelection() {
   }
   // -------------------------- QLineEdit 处理 --------------------------
   else if (m_lineEdit) {
-    int startPos = m_lineEdit->selectionStart();
-    int endPos =
-        m_lineEdit->selectionStart() + m_lineEdit->selectedText().length();
-
-    qDebug() << "[QLineEdit状态] 选择起始:" << startPos << "选择结束:" << endPos
-             << "选择长度:" << m_lineEdit->selectedText().length()
-             << "选中文本:" << m_lineEdit->selectedText()
-             << "光标位置:" << m_lineEdit->cursorPosition();
-
-    // 无选择时隐藏手柄
-    if (startPos == endPos || startPos < 0) {
+    // 1. 利用 QLineEdit 选中特性：光标在末尾，计算起点
+    int cursorEndPos = m_lineEdit->cursorPosition();         // 选择末尾（固定）
+    int selectLength = m_lineEdit->selectedText().length();  // 选择长度
+    int selectStartPos = cursorEndPos - selectLength;        // 选择起点（精准）
+    if (selectLength <= 0 || selectStartPos < 0 ||
+        cursorEndPos > m_lineEdit->text().length()) {
       m_startHandle->hide();
       m_endHandle->hide();
-      qDebug() << "[showHandlesAtSelection] 无选择或无效位置，隐藏手柄";
       return;
     }
 
-    // 计算起始和结束位置的光标矩形
-    QRect startRect = getLineEditCursorRect(m_lineEdit);
-    QRect endRect = getLineEditCursorRect(m_lineEdit);
+    // 2. 关键：计算【动态滚动偏移】（获取可视区真实位置）
+    QRect contentRect =
+        m_lineEdit->contentsRect();  // 可视区本地矩形（左0，上0）
+    QFontMetrics fm = m_lineEdit->fontMetrics();
+    QString fullText = m_lineEdit->text();
+    // 可视区左边界对应的光标位置（滚动后，这个光标是当前可见的最左侧字符）
+    int visibleLeftCursor =
+        m_lineEdit->cursorPositionAt(QPoint(0, contentRect.height() / 2));
+    // 滚动偏移 = 可视区左边界光标对应的文本宽度（即：隐藏的文本宽度）
+    int scrollOffset = fm.horizontalAdvance(fullText.left(visibleLeftCursor));
 
-    // 调整起始位置矩形
-    QLineEdit tempStart;
-    tempStart.setFont(m_lineEdit->font());
-    tempStart.setText(m_lineEdit->text().left(startPos));
-    QRect tempStartRect = getLineEditCursorRect(&tempStart);
-    startRect.setLeft(tempStartRect.left());
+    // 3. 计算【可视区本地宽度】（去掉隐藏部分，仅保留可见的宽度）
+    // 起点本地宽度：选择起点在可视区内的宽度（全局宽度 - 隐藏宽度）
+    int startLocalWidth =
+        fm.horizontalAdvance(fullText.left(selectStartPos)) - scrollOffset;
+    // 终点本地宽度：选择终点在可视区内的宽度
+    int endLocalWidth =
+        fm.horizontalAdvance(fullText.left(cursorEndPos)) - scrollOffset;
 
-    // 调整结束位置矩形
-    QLineEdit tempEnd;
-    tempEnd.setFont(m_lineEdit->font());
-    tempEnd.setText(m_lineEdit->text().left(endPos));
-    QRect tempEndRect = getLineEditCursorRect(&tempEnd);
-    endRect.setLeft(tempEndRect.left());
+    // 4. 基础参数：手柄尺寸、屏幕范围、垂直居中
+    QRect screenRect = QApplication::primaryScreen()->availableGeometry();
+    int handleHalfW = m_startHandle->width() / 2;   // 手柄半宽（中心对齐用）
+    int handleHalfH = m_startHandle->height() / 2;  // 手柄半高（垂直居中用）
+    int fixedY = contentRect.top() + contentRect.height() / 2 -
+                 handleHalfH;  // 垂直居中位置
 
-    // 转换为全局坐标
-    QPoint startGlobal = m_lineEdit->mapToGlobal(
-        QPoint(startRect.left(), startRect.center().y()));
-    QPoint endGlobal =
-        m_lineEdit->mapToGlobal(QPoint(endRect.right(), endRect.center().y()));
+    // 5. 手柄位置计算（核心：本地宽度 + 中心对齐，无偏移）
+    // 起点手柄：本地宽度 - 手柄半宽（中心对准选择起点，不压字）
+    QPoint startLocal(startLocalWidth - handleHalfW, fixedY);
+    // 终点手柄：本地宽度 - 手柄半宽（中心对准选择终点，不重叠）
+    QPoint endLocal(endLocalWidth - handleHalfW, fixedY);
 
-    // 调整手柄位置（避免遮挡文本）
-    startGlobal -=
-        QPoint(m_startHandle->width() / 2, m_startHandle->height() / 2);
-    startGlobal.rx() -= m_startHandle->width() / 4;  // 水平左移
+    // 6. 转换为全局坐标（加上 QLineEdit 自身的全局左边界）
+    QPoint lineEditGlobalPos =
+        m_lineEdit->mapToGlobal(QPoint(0, 0));  // QLineEdit 自身的全局位置
+    QPoint startGlobal = lineEditGlobalPos + startLocal;
+    QPoint endGlobal = lineEditGlobalPos + endLocal;
 
-    endGlobal -= QPoint(m_endHandle->width() / 2, m_endHandle->height() / 2);
-    endGlobal.rx() += m_endHandle->width() / 4;  // 水平右移
+    // 7. 屏幕内兜底（避免超出屏幕）
+    startGlobal.setX(qMax(
+        screenRect.left(),
+        qMin(startGlobal.x(), screenRect.right() - m_startHandle->width())));
+    startGlobal.setY(qMax(
+        screenRect.top(),
+        qMin(startGlobal.y(), screenRect.bottom() - m_startHandle->height())));
+    endGlobal.setX(
+        qMax(screenRect.left(),
+             qMin(endGlobal.x(), screenRect.right() - m_startHandle->width())));
+    endGlobal.setY(qMax(
+        screenRect.top(),
+        qMin(endGlobal.y(), screenRect.bottom() - m_startHandle->height())));
 
-    // 移动手柄
+    // 8. 显示手柄
     m_startHandle->move(startGlobal);
     m_endHandle->move(endGlobal);
-
-    // 确保手柄显示
     m_startHandle->show();
     m_endHandle->show();
     m_startHandle->raise();
     m_endHandle->raise();
 
-    qDebug() << "[Handle Pos] Start:" << startGlobal << "End:" << endGlobal;
-
-    // 调试信息
-    qDebug() << "手柄显示状态: "
-             << "StartHandle visible:" << m_startHandle->isVisible()
-             << "EndHandle visible:" << m_endHandle->isVisible()
-             << "StartHandle geometry:" << m_startHandle->geometry()
-             << "EndHandle geometry:" << m_endHandle->geometry();
+    // 调试：验证参数（确保本地宽度在可视区内）
+    qDebug() << "[QLineEdit 修复后] "
+             << "滚动偏移：" << scrollOffset << "起点本地宽度："
+             << startLocalWidth << "终点本地宽度：" << endLocalWidth
+             << "可视区宽度：" << contentRect.width() << "全局位置：Start("
+             << startGlobal.x() << "," << startGlobal.y() << "), End("
+             << endGlobal.x() << "," << endGlobal.y() << ")";
   }
-
   // 更新选择位置变量
   m_startPos = startPos;
   m_endPos = endPos;
@@ -643,76 +633,69 @@ void TextEditToolbar::updateHandlesPosition() {
     endGlobal.rx() += m_endHandle->width() / 2;
     m_endHandle->move(endGlobal);
   }
-  // QLineEdit
+  // QLineEdit 处理
   else if (m_lineEdit) {
-    int startPos = m_lineEdit->selectionStart();
-    int endPos =
-        m_lineEdit->selectionStart() + m_lineEdit->selectedText().length();
+    // 1. 计算选择起点/终点（基于光标在末尾特性）
+    int cursorEndPos = m_lineEdit->cursorPosition();
+    int selectLength = m_lineEdit->selectedText().length();
+    int selectStartPos = cursorEndPos - selectLength;
+    if (selectLength <= 0 || selectStartPos < 0 ||
+        cursorEndPos > m_lineEdit->text().length()) {
+      m_startHandle->hide();
+      m_endHandle->hide();
+      return;
+    }
 
-    // 起始手柄
-    QLineEdit tempStartEdit;
-    tempStartEdit.setFont(m_lineEdit->font());
-    tempStartEdit.setText(m_lineEdit->text().left(startPos));
-    QRect startRect = getLineEditCursorRect(&tempStartEdit);
-    QPoint startGlobal =
-        m_lineEdit->mapToGlobal(
-            QPoint(startRect.left(), startRect.center().y())) -
-        QPoint(m_startHandle->width() / 2, m_startHandle->height() / 2);
-    startGlobal.rx() -= m_startHandle->width() / 2;
+    // 2. 计算动态滚动偏移
+    QRect contentRect = m_lineEdit->contentsRect();
+    QFontMetrics fm = m_lineEdit->fontMetrics();
+    QString fullText = m_lineEdit->text();
+    int visibleLeftCursor =
+        m_lineEdit->cursorPositionAt(QPoint(0, contentRect.height() / 2));
+    int scrollOffset = fm.horizontalAdvance(fullText.left(visibleLeftCursor));
+
+    // 3. 全局宽度转本地宽度
+    int startLocalWidth =
+        fm.horizontalAdvance(fullText.left(selectStartPos)) - scrollOffset;
+    int endLocalWidth =
+        fm.horizontalAdvance(fullText.left(cursorEndPos)) - scrollOffset;
+
+    // 4. 手柄位置计算（同步中心对齐）
+    QRect screenRect = QApplication::primaryScreen()->availableGeometry();
+    int handleHalfW = m_startHandle->width() / 2;
+    int handleHalfH = m_startHandle->height() / 2;
+    int fixedY = contentRect.top() + contentRect.height() / 2 - handleHalfH;
+
+    QPoint startLocal(startLocalWidth - handleHalfW, fixedY);
+    QPoint endLocal(endLocalWidth - handleHalfW, fixedY);
+
+    // 5. 转换为全局坐标
+    QPoint lineEditGlobalPos = m_lineEdit->mapToGlobal(QPoint(0, 0));
+    QPoint startGlobal = lineEditGlobalPos + startLocal;
+    QPoint endGlobal = lineEditGlobalPos + endLocal;
+
+    // 6. 屏幕兜底
+    startGlobal.setX(qMax(
+        screenRect.left(),
+        qMin(startGlobal.x(), screenRect.right() - m_startHandle->width())));
+    startGlobal.setY(qMax(
+        screenRect.top(),
+        qMin(startGlobal.y(), screenRect.bottom() - m_startHandle->height())));
+    endGlobal.setX(
+        qMax(screenRect.left(),
+             qMin(endGlobal.x(), screenRect.right() - m_startHandle->width())));
+    endGlobal.setY(qMax(
+        screenRect.top(),
+        qMin(endGlobal.y(), screenRect.bottom() - m_startHandle->height())));
+
+    // 7. 更新手柄
     m_startHandle->move(startGlobal);
-    m_startHandle->show();
-    m_startHandle->raise();
-
-    // 结束手柄
-    QLineEdit tempEndEdit;
-    tempEndEdit.setFont(m_lineEdit->font());
-    tempEndEdit.setText(m_lineEdit->text().left(endPos));
-    QRect endRect = getLineEditCursorRect(&tempEndEdit);
-    QPoint endGlobal =
-        m_lineEdit->mapToGlobal(QPoint(endRect.right(), endRect.center().y())) -
-        QPoint(m_endHandle->width() / 2, m_endHandle->height() / 2);
-    endGlobal.rx() += m_endHandle->width() / 2;
     m_endHandle->move(endGlobal);
+    m_startHandle->show();
     m_endHandle->show();
+    m_startHandle->raise();
     m_endHandle->raise();
   }
-}
-
-QRect TextEditToolbar::getLineEditCursorRect(QLineEdit *lineEdit) {
-  if (!lineEdit) return QRect();
-
-  // 获取编辑框基础矩形
-  QRect contentRect = lineEdit->rect();
-  QMargins margins = lineEdit->contentsMargins();
-  contentRect.adjust(margins.left(), margins.top(), -margins.right(),
-                     -margins.bottom());
-
-  // 计算光标前文本的宽度
-  QFontMetrics fm(lineEdit->font());
-  QString prefixText = lineEdit->text().left(lineEdit->cursorPosition());
-
-  // 使用更高效的方式计算文本宽度
-  int textWidth = 0;
-  if (prefixText.length() > 1000) {
-    // 对于超长文本，使用优化算法
-    textWidth = fm.horizontalAdvance(prefixText, prefixText.length());
-  } else {
-    textWidth = fm.horizontalAdvance(prefixText);
-  }
-
-  // 考虑文本对齐方式
-  int alignment = lineEdit->alignment();
-  if (alignment & Qt::AlignRight) {
-    textWidth = contentRect.width() - textWidth;
-  } else if (alignment & Qt::AlignHCenter) {
-    textWidth = (contentRect.width() - textWidth) / 2;
-  }
-
-  // 固定光标宽度
-  const int cursorWidth = 2;
-
-  return QRect(contentRect.left() + textWidth, contentRect.top(), cursorWidth,
-               contentRect.height());
 }
 
 // ========================== 事件处理实现 ==========================
@@ -812,6 +795,7 @@ void TextEditToolbar::onHandleReleased() {
   // 释放后更新基准（可选，下次拖动基于新位置）
   m_originalStartPos = m_startPos;
   m_originalEndPos = m_endPos;
+  updateHandlesPosition();
   qDebug() << "[HandleReleased] 基准更新为：" << m_originalStartPos << "-"
            << m_originalEndPos;
 }

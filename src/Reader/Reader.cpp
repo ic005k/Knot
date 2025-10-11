@@ -3315,10 +3315,10 @@ void Reader::addBookNote() {
   textEdit->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
 
   if (isAndroid) {
-    if (textToolbar != nullptr) delete textToolbar;
-    textToolbar = new TextEditToolbar(dlgAddBookNote);
+    if (textToolbarReader != nullptr) delete textToolbarReader;
+    textToolbarReader = new TextEditToolbar(dlgAddBookNote);
     EditEventFilter *editFilter =
-        new EditEventFilter(textToolbar, dlgAddBookNote);
+        new EditEventFilter(textToolbarReader, dlgAddBookNote);
     textEdit->installEventFilter(editFilter);
     textEdit->viewport()->installEventFilter(editFilter);
   }
@@ -3433,10 +3433,10 @@ void Reader::editBookNote(int index, int page, const QString &content) {
   textEdit->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
 
   if (isAndroid) {
-    if (textToolbar != nullptr) delete textToolbar;
-    textToolbar = new TextEditToolbar(dlgEditBookNote);
+    if (textToolbarReader != nullptr) delete textToolbarReader;
+    textToolbarReader = new TextEditToolbar(dlgEditBookNote);
     EditEventFilter *editFilter =
-        new EditEventFilter(textToolbar, dlgEditBookNote);
+        new EditEventFilter(textToolbarReader, dlgEditBookNote);
     textEdit->installEventFilter(editFilter);
     textEdit->viewport()->installEventFilter(editFilter);
   }

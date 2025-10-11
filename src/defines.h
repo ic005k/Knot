@@ -51,7 +51,9 @@ inline CategoryList *m_CategoryList;
 inline ColorDialog *colorDlg;
 inline PrintPDF *m_PrintPDF;
 inline QTreeWidget *twrb, *tw;
+
 inline TextEditToolbar *textToolbar = nullptr;
+inline TextEditToolbar *textToolbarReader = nullptr;
 
 inline QRegularExpression regxNumber("^-?[0-9.]*$");
 
