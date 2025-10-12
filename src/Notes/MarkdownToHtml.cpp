@@ -34,22 +34,21 @@ static QString postprocessMath(const QString &html) {
   // 1. 处理行内公式：
   // 匹配模式：&lt;z_m_i&gt;(...)<br/>&lt;/z_m_i&gt;（cmark转换后的格式）
   // 替换为：$...$（移除标签，保留公式内容）
-  processed.replace(
-      QRegularExpression(
-          R"(&lt;z_m_i&gt;\(([\s\S]*?)\)&lt;/z_m_i&gt;)",  // 关键修正：匹配转义标签+()
-          QRegularExpression::DotMatchesEverythingOption),
-      "$\\1$");
+  static const QRegularExpression regex(
+      R"(&lt;z_m_i&gt;\(([\s\S]*?)\)&lt;/z_m_i&gt;)",
+      QRegularExpression::DotMatchesEverythingOption);
+
+  processed.replace(regex, "$\\1$");
 
   // 2. 处理块级公式：
   // 匹配模式：&lt;z_m_b&gt;[...]<br/>&lt;/z_m_b&gt;（cmark转换后的格式）
   // 替换为：$$...$$（移除标签，保留公式内容）
-  processed.replace(
-      QRegularExpression(
-          R"(&lt;z_m_b&gt;\[([\s\S]*?)\]&lt;/z_m_b&gt;)",  // 关键修正：匹配转义标签+[]
-          QRegularExpression::DotMatchesEverythingOption |
-              QRegularExpression::MultilineOption  // 支持跨多行匹配
-          ),
-      "$$\\1$$");
+  static const QRegularExpression regex1(
+      R"(&lt;z_m_b&gt;\[([\s\S]*?)\]&lt;/z_m_b&gt;)",
+      QRegularExpression::DotMatchesEverythingOption |
+          QRegularExpression::MultilineOption);
+
+  processed.replace(regex1, "$$\\1$$");
 
   return processed;
 }

@@ -1056,6 +1056,8 @@ void MainWindow::clearWidgetFocus() {
   if (QWidget *focused = focusWidget()) {
     focused->clearFocus();
   }
+
+  closeTextToolBar();
 }
 
 void MainWindow::hideEvent(QHideEvent *event) { QWidget::hideEvent(event); }
@@ -2357,7 +2359,10 @@ void MainWindow::on_btnRename_clicked() {
   m_NotesList->on_btnRename_clicked();
 }
 
-void MainWindow::on_btnHideFind_clicked() { mui->f_FindNotes->hide(); }
+void MainWindow::on_btnHideFind_clicked() {
+  closeTextToolBar();
+  mui->f_FindNotes->hide();
+}
 
 void MainWindow::on_btnStepsOptions_clicked() {
   mw_one->m_StepsOptions->init();

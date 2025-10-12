@@ -278,15 +278,12 @@ void NotesList::on_btnRename_clicked() {
   QTextEdit *edit = new QTextEdit(this);
   edit->setAcceptRichText(false);
 
-  if (isAndroid) {
-    if (textToolbarRenameNotes != nullptr) delete textToolbarRenameNotes;
-    textToolbarRenameNotes =
-        new TextEditToolbar(m_RenameNotes);  // 父窗口为QDialog
-    EditEventFilter *editFilter =
-        new EditEventFilter(textToolbarRenameNotes, m_RenameNotes);
-    edit->installEventFilter(editFilter);
-    edit->viewport()->installEventFilter(editFilter);
-  }
+  initTextToolbarDynamic(m_RenameNotes);
+  EditEventFilter *editFilter =
+      new EditEventFilter(textToolbarDynamic, m_RenameNotes);
+  edit->installEventFilter(editFilter);
+  edit->viewport()->installEventFilter(editFilter);
+
   vbox->addWidget(edit);
   edit->setPlainText(item->text(0));
   QScroller::grabGesture(edit, QScroller::LeftMouseButtonGesture);
@@ -347,6 +344,12 @@ void NotesList::on_btnRename_clicked() {
 
     saveNotesList();
     m_RenameNotes->close();
+  });
+
+  connect(m_RenameNotes, &QDialog::finished, this, [this](int result) {
+    Q_UNUSED(result);
+    closeTextToolBar();
+    m_Method->closeGrayWindows();
   });
 
   int x, y, w, h;

@@ -53,7 +53,7 @@ inline PrintPDF *m_PrintPDF;
 inline QTreeWidget *twrb, *tw;
 
 inline TextEditToolbar *textToolbar = nullptr;
-inline TextEditToolbar *textToolbarReader = nullptr;
+inline TextEditToolbar *textToolbarDynamic = nullptr;
 
 inline QRegularExpression regxNumber("^-?[0-9.]*$");
 
@@ -120,6 +120,27 @@ inline int deleteDirfile(QString dirName);
 inline WebDavHelper *listWebDavFiles(const QString &url,
                                      const QString &username,
                                      const QString &password);
+inline void closeTextToolBar();
+inline void initTextToolbarDynamic(QWidget *parent);
+
+void closeTextToolBar() {
+  if (textToolbar != nullptr && textToolbar->isVisible()) {
+    textToolbar->hide();
+    return;
+  }
+
+  if (textToolbarDynamic != nullptr && textToolbarDynamic->isVisible()) {
+    textToolbarDynamic->hide();
+  }
+}
+
+void initTextToolbarDynamic(QWidget *parent) {
+  if (textToolbarDynamic != nullptr) {
+    delete textToolbarDynamic;
+    textToolbarDynamic = nullptr;
+  }
+  textToolbarDynamic = new TextEditToolbar(parent);
+}
 
 QString loadText(QString textFile) {
   bool isExists = QFile(textFile).exists();

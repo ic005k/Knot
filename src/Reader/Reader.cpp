@@ -3313,14 +3313,11 @@ void Reader::addBookNote() {
   QTextEdit *textEdit = new QTextEdit(dlgAddBookNote);
   textEdit->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
 
-  if (isAndroid) {
-    if (textToolbarReader != nullptr) delete textToolbarReader;
-    textToolbarReader = new TextEditToolbar(dlgAddBookNote);
-    EditEventFilter *editFilter =
-        new EditEventFilter(textToolbarReader, dlgAddBookNote);
-    textEdit->installEventFilter(editFilter);
-    textEdit->viewport()->installEventFilter(editFilter);
-  }
+  initTextToolbarDynamic(dlgAddBookNote);
+  EditEventFilter *editFilter =
+      new EditEventFilter(textToolbarDynamic, dlgAddBookNote);
+  textEdit->installEventFilter(editFilter);
+  textEdit->viewport()->installEventFilter(editFilter);
 
   QDialogButtonBox *buttonBox = new QDialogButtonBox(
       QDialogButtonBox::Ok | QDialogButtonBox::Cancel, dlgAddBookNote);
@@ -3334,9 +3331,7 @@ void Reader::addBookNote() {
 
   connect(dlgAddBookNote, &QDialog::finished, this, [this](int result) {
     Q_UNUSED(result);
-    if (textToolbarReader != nullptr && textToolbarReader->isVisible()) {
-      textToolbarReader->hide();
-    }
+    closeTextToolBar();
   });
 
   QVBoxLayout *vlayout = new QVBoxLayout(dlgAddBookNote);
@@ -3438,14 +3433,11 @@ void Reader::editBookNote(int index, int page, const QString &content) {
   QTextEdit *textEdit = new QTextEdit(dlgEditBookNote);
   textEdit->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
 
-  if (isAndroid) {
-    if (textToolbarReader != nullptr) delete textToolbarReader;
-    textToolbarReader = new TextEditToolbar(dlgEditBookNote);
-    EditEventFilter *editFilter =
-        new EditEventFilter(textToolbarReader, dlgEditBookNote);
-    textEdit->installEventFilter(editFilter);
-    textEdit->viewport()->installEventFilter(editFilter);
-  }
+  initTextToolbarDynamic(dlgEditBookNote);
+  EditEventFilter *editFilter =
+      new EditEventFilter(textToolbarDynamic, dlgEditBookNote);
+  textEdit->installEventFilter(editFilter);
+  textEdit->viewport()->installEventFilter(editFilter);
 
   QDialogButtonBox *buttonBox = new QDialogButtonBox(
       QDialogButtonBox::Ok | QDialogButtonBox::Cancel, dlgEditBookNote);
@@ -3459,9 +3451,7 @@ void Reader::editBookNote(int index, int page, const QString &content) {
 
   connect(dlgEditBookNote, &QDialog::finished, this, [this](int result) {
     Q_UNUSED(result);
-    if (textToolbarReader != nullptr && textToolbarReader->isVisible()) {
-      textToolbarReader->hide();
-    }
+    closeTextToolBar();
   });
 
   QVBoxLayout *vlayout = new QVBoxLayout(dlgEditBookNote);

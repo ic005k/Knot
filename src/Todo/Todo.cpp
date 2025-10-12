@@ -1190,15 +1190,12 @@ void Todo::reeditText() {
   QTextEdit* edit = new QTextEdit(this);
   edit->setAcceptRichText(false);
 
-  if (isAndroid) {
-    if (textToolbarReeditTodo != nullptr) delete textToolbarReeditTodo;
-    textToolbarReeditTodo =
-        new TextEditToolbar(m_ReeditTodo);  // 父窗口为QDialog
-    EditEventFilter* editFilter =
-        new EditEventFilter(textToolbarReeditTodo, m_ReeditTodo);
-    edit->installEventFilter(editFilter);
-    edit->viewport()->installEventFilter(editFilter);
-  }
+  initTextToolbarDynamic(m_ReeditTodo);
+  EditEventFilter* editFilter =
+      new EditEventFilter(textToolbarDynamic, m_ReeditTodo);
+  edit->installEventFilter(editFilter);
+  edit->viewport()->installEventFilter(editFilter);
+
   vbox->addWidget(edit);
   edit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
   edit->setPlainText(strItem);
@@ -1241,19 +1238,15 @@ void Todo::reeditText() {
   connect(btnCancel, &QToolButton::clicked, m_ReeditTodo,
           [=]() mutable { m_ReeditTodo->close(); });
 
-  connect(m_ReeditTodo, &QDialog::rejected, m_ReeditTodo, [=]() mutable {
-    m_Method->closeGrayWindows();
-  });
+  connect(m_ReeditTodo, &QDialog::rejected, m_ReeditTodo,
+          [=]() mutable { m_Method->closeGrayWindows(); });
 
   connect(m_ReeditTodo, &QDialog::accepted, m_ReeditTodo,
           [=]() mutable { m_Method->closeGrayWindows(); });
 
   connect(m_ReeditTodo, &QDialog::finished, this, [this](int result) {
     Q_UNUSED(result);
-    if (textToolbarReeditTodo != nullptr &&
-        textToolbarReeditTodo->isVisible()) {
-      textToolbarReeditTodo->hide();
-    }
+    closeTextToolBar();
 
     m_Method->closeGrayWindows();
   });

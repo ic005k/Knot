@@ -56,7 +56,7 @@ class NotesList : public QDialog {
 
   NoteGraphController *m_graphController;  // 图谱控制器
   QDialog *m_RenameNotes = nullptr;
-  TextEditToolbar *textToolbarRenameNotes = nullptr;
+
   QMenu *menuRecentOpen = nullptr;
   MoveTo *m_MoveTo = nullptr;
   NewNoteBook *m_NewNoteBook = nullptr;

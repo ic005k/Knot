@@ -240,18 +240,14 @@ static void JavaNotify_15() {
     }
   }
 
-  if (textToolbarReader != nullptr) {
-    if (textToolbarReader->isVisible()) {
-      textToolbarReader->hide();
-      return;
-    }
+  if (textToolbarDynamic != nullptr) {
+    closeTextToolBar();
+    return;
   }
 
   if (textToolbar != nullptr) {
-    if (textToolbar->isVisible()) {
-      textToolbar->hide();
-      return;
-    }
+    closeTextToolBar();
+    return;
   }
 
   if (mw_one->m_Preferences->textToolbarPreferences != nullptr) {
@@ -275,23 +271,9 @@ static void JavaNotify_15() {
     }
   }
 
-  if (mw_one->m_Todo->textToolbarReeditTodo != nullptr) {
-    if (mw_one->m_Todo->textToolbarReeditTodo->isVisible()) {
-      mw_one->m_Todo->textToolbarReeditTodo->hide();
-      return;
-    }
-  }
-
   if (mw_one->m_Todo->m_ReeditTodo != nullptr) {
     if (mw_one->m_Todo->m_ReeditTodo->isVisible()) {
       mw_one->m_Todo->m_ReeditTodo->close();
-      return;
-    }
-  }
-
-  if (m_NotesList->textToolbarRenameNotes != nullptr) {
-    if (m_NotesList->textToolbarRenameNotes->isVisible()) {
-      m_NotesList->textToolbarRenameNotes->hide();
       return;
     }
   }

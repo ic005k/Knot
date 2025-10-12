@@ -27,8 +27,6 @@ class Todo : public QDialog {
 
   QDialog *m_ReeditTodo = nullptr;
 
-  TextEditToolbar *textToolbarReeditTodo = nullptr;
-
   bool isNeedAddToTodoList = false;
   QString strNeedAddToTodoText;
   int nInterval = 500;
