@@ -465,7 +465,7 @@ void Reader::initReader() {
 
   readerStyle = Reg.value("/Reader/Style", "1").toString();
   scrollValue = Reg.value("/Reader/ScrollValue", "1").toReal();
-  QString value = QString::number(scrollValue, 'f', 1);
+  QString value = QString::number(scrollValue, 'f', 2);
   mui->lblSpeed->setText(tr("Scroll Speed") + " : " + value);
 
   QFont font;
@@ -2213,7 +2213,6 @@ void Reader::closeSelText() {
 
     mui->qwReader->show();
     mui->f_ReaderFun->show();
-    mw_one->mydlgSetText->close();
   }
 }
 

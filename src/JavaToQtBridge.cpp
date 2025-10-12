@@ -357,10 +357,6 @@ static void JavaNotify_15() {
       mui->btnShowBookmark->click();
       return;
 
-    } else if (!mw_one->mydlgSetText->isHidden()) {
-      mw_one->mydlgSetText->close();
-      return;
-
     }
 
     else {

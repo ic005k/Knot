@@ -75,7 +75,10 @@ class TextEditToolbar : public QWidget {
   void onCloseClicked();
 
   void onCursorPositionChanged();
-  private:
+  void onMinusReleased();
+  void onMinusPressed();
+
+ private:
   // 初始化函数声明
   void initButtons();
   void initHandles();
@@ -114,6 +117,7 @@ class TextEditToolbar : public QWidget {
   int m_startPos = 0;
   int m_endPos = 0;
   int currentCursorPos = 0;
+  int m_dragAnchorEnd;
 
   void autoSelectTwoChars();
 
@@ -122,8 +126,9 @@ class TextEditToolbar : public QWidget {
 
   bool m_dragging = false;
   int m_dragAnchorStart = 0;
-  int m_dragAnchorEnd = 0;
+  int m_dragAnchorEnd3 = 0;
   void selectEditText(int start, int end);
+  bool isOne = false;
 };
 
 /////////////////////////////////////////////////////////////////////////////

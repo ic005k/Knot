@@ -1360,7 +1360,7 @@ void MainWindow::init_Instance() {
   m_DateSelector = new DateSelector(this);
   m_CloudBackup = new CloudBackup;
   m_ReaderSet = new ReaderSet(this);
-  mydlgSetText = new dlgSetText(this);
+
   m_NotesList = new NotesList(this);
 
   m_ReceiveShare = new ReceiveShare(this);
@@ -1689,8 +1689,7 @@ QString MainWindow::getSelectedText() {
 }
 
 void MainWindow::on_btnSearch_clicked() {
-  QString str = mydlgSetText->ui->lineEdit->text().trimmed();
-  str = mui->editSetText->text().trimmed();
+  QString str = mui->editSetText->text().trimmed();
   if (str == "") return;
 
   QString strurl;

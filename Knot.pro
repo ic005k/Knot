@@ -399,7 +399,6 @@ SOURCES += \
     src/Reader/DocumentHandler.cpp \
     src/Reader/Reader.cpp \
     src/Reader/ReaderSet.cpp \
-    src/Reader/SetReaderText.cpp \
     src/Reader/epubreader.cpp \
     src/Report.cpp \
     src/Exercise/Speedometer.cpp \
@@ -638,7 +637,6 @@ HEADERS += \
     src/Reader/DocumentHandler.h \
     src/Reader/Reader.h \
     src/Reader/ReaderSet.h \
-    src/Reader/SetReaderText.h \
     src/Reader/epubreader.h \
     src/Report.h \
     src/Exercise/Speedometer.h \
@@ -681,7 +679,6 @@ FORMS += \
     src/Notes/NotesList.ui \
     src/Notes/PrintPDF.ui \
     src/Preferences.ui \
-    src/Reader/SetReaderText.ui \
     src/Exercise/StepsOptions.ui \
     src/Todo/Todo.ui \
     src/Todo/TodoAlarm.ui

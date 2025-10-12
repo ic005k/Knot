@@ -107,9 +107,9 @@ TextEditToolbar::TextEditToolbar(QWidget *parent) : QWidget(parent) {
       Qt::AlignLeft);  // 明确左对齐，与上排第一个按钮对齐
   bottomHLayout->addWidget(btnCursorLeft);
   bottomHLayout->addWidget(btnCursorRight);
-  bottomHLayout->addWidget(btnDel);
-  bottomHLayout->addWidget(btnSelectAll);
   bottomHLayout->addWidget(btnClose);
+  bottomHLayout->addWidget(btnSelectAll);
+  bottomHLayout->addWidget(btnDel);
   bottomHLayout->addSpacerItem(  // 保留弹簧，仅占用右侧空间，不影响左对齐
       new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
 
@@ -176,6 +176,12 @@ void TextEditToolbar::initButtons() {
   // 绑定点击信号槽
   connect(btnMinus, &QPushButton::clicked, this,
           &TextEditToolbar::onMinusClicked);
+
+  // connect(btnMinus, &QPushButton::pressed, this,
+  //         &TextEditToolbar::onMinusPressed);
+  // connect(btnMinus, &QPushButton::released, this,
+  //         &TextEditToolbar::onMinusReleased);
+
   connect(btnPlus, &QPushButton::clicked, this,
           &TextEditToolbar::onPlusClicked);
   connect(btnCopy, &QPushButton::clicked, this,
@@ -330,6 +336,13 @@ void TextEditToolbar::onSelectionChanged() {
              << currentCursorPos;
   } else {
     updateHandlesPosition();
+
+    if (m_lineEdit) {
+      m_startHandle->hide();
+      m_endHandle->hide();
+      return;
+    }
+
     m_startHandle->show();
     m_endHandle->show();
     qDebug() << "[SelectionChanged] 有选择，更新选择范围:" << m_startPos << "-"
@@ -559,7 +572,7 @@ void TextEditToolbar::hide() {
 }
 
 // 统一选中文本的函数
-void TextEditToolbar::selectEditText(int start, int end) {
+/*void TextEditToolbar::selectEditText(int start, int end) {
   if (!m_textEdit && !m_lineEdit) return;
 
   // 确保 start <= end
@@ -580,6 +593,33 @@ void TextEditToolbar::selectEditText(int start, int end) {
   }
 
   // 保存最新选择位置
+  m_startPos = start;
+  m_endPos = end;
+}*/
+
+// 统一选中文本的函数
+void TextEditToolbar::selectEditText(int start, int end) {
+  if (!m_textEdit && !m_lineEdit) return;
+
+  if (start > end) std::swap(start, end);
+
+  if (m_textEdit) {
+    QTextCursor cursor = m_textEdit->textCursor();
+    cursor.setPosition(start, QTextCursor::MoveAnchor);
+    cursor.setPosition(end, QTextCursor::KeepAnchor);
+    m_textEdit->setTextCursor(cursor);
+
+    // 让起点可见（不改变选区）
+    QTextCursor startCursor = m_textEdit->textCursor();
+    startCursor.setPosition(start);
+    m_textEdit->ensureCursorVisible();
+  } else if (m_lineEdit) {
+    // 临时移到起点触发滚动
+    m_lineEdit->setCursorPosition(start);
+    // 恢复选择
+    m_lineEdit->setSelection(start, end - start);
+  }
+
   m_startPos = start;
   m_endPos = end;
 }
@@ -785,6 +825,55 @@ void TextEditToolbar::onMinusClicked() {
 
   selectEditText(start, end);
   updateHandlesPosition();
+}
+
+// 按下按钮时模拟键盘按下
+void TextEditToolbar::onMinusPressed() {
+  QWidget *editor = m_textEdit ? static_cast<QWidget *>(m_textEdit)
+                               : static_cast<QWidget *>(m_lineEdit);
+  if (!editor) return;
+
+  // 保存当前终点
+  if (!isOne) {
+    isOne = true;
+    m_dragAnchorEnd3 = m_endPos;
+  }
+
+  int start = m_startPos;
+  if (m_lineEdit) m_lineEdit->setCursorPosition(start);
+
+  if (m_textEdit) {
+    QTextCursor cursor = m_textEdit->textCursor();
+    cursor.setPosition(start, QTextCursor::MoveAnchor);  // 设置光标起点
+  }
+
+  // 发送向左方向键按下事件（滚到可视区）
+  QApplication::postEvent(
+      editor, new QKeyEvent(QEvent::KeyPress, Qt::Key_Left, Qt::NoModifier));
+}
+
+// 松开按钮时用保存的终点重新选中
+void TextEditToolbar::onMinusReleased() {
+  QWidget *editor = m_textEdit ? static_cast<QWidget *>(m_textEdit)
+                               : static_cast<QWidget *>(m_lineEdit);
+  if (!editor) return;
+
+  isOne = false;
+
+  // 发送键盘抬起事件
+  QApplication::postEvent(
+      editor, new QKeyEvent(QEvent::KeyRelease, Qt::Key_Left, Qt::NoModifier));
+
+  // 用保存的终点计算新范围
+  QTimer::singleShot(0, this, [this]() {
+    int start = m_startPos;      // 这个是被键盘事件更新后的起点
+    int end = m_dragAnchorEnd3;  // 用按下时保存的终点
+
+    if (start > end) std::swap(start, end);
+
+    selectEditText(start, end);
+    updateHandlesPosition();
+  });
 }
 
 void TextEditToolbar::onPlusClicked() {

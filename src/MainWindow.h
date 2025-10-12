@@ -83,7 +83,6 @@
 #include "src/Preferences.h"
 #include "src/Reader/Reader.h"
 #include "src/Reader/ReaderSet.h"
-#include "src/Reader/SetReaderText.h"
 #include "src/Report.h"
 #include "src/Todo/Todo.h"
 #include "src/Todo/TodoAlarm.h"
@@ -94,7 +93,6 @@
 #include "ui_Notes.h"
 #include "ui_NotesList.h"
 #include "ui_Preferences.h"
-#include "ui_SetReaderText.h"
 #include "ui_ShowMessage.h"
 #include "ui_StepsOptions.h"
 #include "ui_Todo.h"
@@ -255,8 +253,6 @@ class MainWindow : public QMainWindow {
   Reader *m_Reader;
   TodoAlarm *m_TodoAlarm;
   DateSelector *m_DateSelector = nullptr;
-
-  dlgSetText *mydlgSetText;
 
   StepsOptions *m_StepsOptions;
   ReceiveShare *m_ReceiveShare;

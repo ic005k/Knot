@@ -591,14 +591,14 @@ void MainHelper::init_UIWidget() {
 
   mw_one->installEventFilter(mw_one);
 
-  // if (isAndroid) {
-  textToolbar = new TextEditToolbar(mw_one);
-  EditEventFilter *editFilter = new EditEventFilter(textToolbar, mw_one);
-
-  m_Method->setLineEditToolBar(mw_one, editFilter);
-  m_Method->setTextEditToolBar(mw_one, editFilter);
-
   if (isAndroid) {
+    textToolbar = new TextEditToolbar(mw_one);
+    EditEventFilter *editFilter = new EditEventFilter(textToolbar, mw_one);
+
+    m_Method->setLineEditToolBar(mw_one, editFilter);
+    m_Method->setTextEditToolBar(mw_one, editFilter);
+
+    // if (isAndroid) {
   } else {
     mui->btnShareBakFile->hide();
   }
