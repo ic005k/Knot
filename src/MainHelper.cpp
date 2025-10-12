@@ -596,7 +596,6 @@ void MainHelper::init_UIWidget() {
   EditEventFilter *editFilter = new EditEventFilter(textToolbar, mw_one);
   m_Method->setLineEditToolBar(mw_one, editFilter);
   m_Method->setTextEditToolBar(mw_one, editFilter);
-  m_Method->setLineEditToolBar(mw_one->m_Preferences, editFilter);
 
   if (isAndroid) {
   } else {

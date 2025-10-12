@@ -37,6 +37,16 @@ void NewNoteBook::showDialog() {
 
   ui->editName->setFocus();
 
+  // init edit toolbar
+  initTextToolbarDynamic(this);
+  if (editFilter != nullptr) {
+    ui->editName->removeEventFilter(editFilter);
+    delete editFilter;
+    editFilter = nullptr;
+  }
+  editFilter = new EditEventFilter(textToolbarDynamic, this);
+  ui->editName->installEventFilter(editFilter);
+
   m_Method->showGrayWindows();
   show();
   while (!isHidden()) QCoreApplication::processEvents();
@@ -63,6 +73,7 @@ bool NewNoteBook::eventFilter(QObject* watch, QEvent* evn) {
 
 void NewNoteBook::closeEvent(QCloseEvent* event) {
   Q_UNUSED(event)
+  closeTextToolBar();
   m_Method->closeGrayWindows();
 }
 

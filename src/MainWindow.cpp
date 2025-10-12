@@ -1298,26 +1298,7 @@ void MainWindow::startInitReport() {
 }
 
 void MainWindow::on_actionPreferences_triggered() {
-  int x, y;
-  if (isAndroid) {
-    m_Preferences->setFixedWidth(this->width());
-    m_Preferences->setFixedHeight(this->height());
-    x = geometry().x();
-    y = geometry().y();
-  } else {
-    x = geometry().x() + (width() - m_Preferences->width()) / 2;
-    y = geometry().y() + (height() - m_Preferences->height()) / 2;
-    m_Preferences->setFixedWidth(350);
-  }
-
-  if (y < 0) y = 50;
-
-  m_Preferences->setGeometry(x, y, m_Preferences->width(), height());
-  m_Preferences->setModal(true);
-  m_Preferences->ui->sliderFontSize->setStyleSheet(mui->hsM->styleSheet());
-  m_Preferences->ui->sliderFontSize->setValue(fontSize);
-  m_Preferences->show();
-  m_Preferences->initCheckStatus();
+  m_Preferences->openPreferences();
 }
 
 void MainWindow::on_tabCharts_currentChanged(int index) {
@@ -2416,6 +2397,7 @@ void MainWindow::on_btnHideKey_clicked() { pAndroidKeyboard->hide(); }
 void MainWindow::on_btnDelImage_clicked() {}
 
 void MainWindow::on_btnBackReaderSet_clicked() {
+  closeTextToolBar();
   mui->f_ReaderSet->hide();
   qreal pos = m_Reader->getVPos();
   m_Reader->setVPos(pos + 0.01);

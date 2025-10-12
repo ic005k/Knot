@@ -18,14 +18,6 @@ Preferences::Preferences(QWidget* parent)
   this->installEventFilter(this);
   ui->lblFontSize->installEventFilter(this);
 
-  /*if (isAndroid) {
-    textToolbarPreferences = new TextEditToolbar(this);
-    EditEventFilter* editFilter =
-        new EditEventFilter(textToolbarPreferences, this);
-    ui->editPassword->installEventFilter(editFilter);
-    ui->editValidate->installEventFilter(editFilter);
-  }*/
-
   ui->lblZipTip->hide();
   ui->gboxAdditional->hide();
   ui->lblAdditional->hide();
@@ -426,6 +418,7 @@ void Preferences::on_editValidate_textChanged(const QString& arg1) {
 
 void Preferences::closeEvent(QCloseEvent* event) {
   Q_UNUSED(event);
+  closeTextToolBar();
   saveOptions();
   setEncSyncStatusTip();
 }
@@ -477,4 +470,42 @@ void Preferences::setEncSyncStatusTip() {
     mui->lblStatus->setText("Knot   V:" + ver);
     mui->lblStatus->setStyleSheet(mui->lblStats->styleSheet());
   }
+}
+
+void Preferences::openPreferences() {
+  int x, y;
+  if (isAndroid) {
+    setFixedWidth(mw_one->width());
+    setFixedHeight(mw_one->height());
+    x = mw_one->geometry().x();
+    y = mw_one->geometry().y();
+
+  } else {
+    x = mw_one->geometry().x() + (width() - width()) / 2;
+    y = mw_one->geometry().y() + (height() - height()) / 2;
+    setFixedWidth(350);
+    setFixedHeight(mw_one->height());
+  }
+
+  if (y < 0) y = 50;
+
+  setGeometry(x, y, width(), height());
+  setModal(true);
+  ui->sliderFontSize->setStyleSheet(mui->hsM->styleSheet());
+  ui->sliderFontSize->setValue(fontSize);
+  show();
+  initCheckStatus();
+
+  // init edit toolbar
+  initTextToolbarDynamic(this);
+  if (editFilter != nullptr) {
+    ui->editPassword->removeEventFilter(editFilter);
+    ui->editValidate->removeEventFilter(editFilter);
+    delete editFilter;
+    editFilter = nullptr;
+  }
+  editFilter = new EditEventFilter(textToolbarDynamic, this);
+
+  ui->editPassword->installEventFilter(editFilter);
+  ui->editValidate->installEventFilter(editFilter);
 }

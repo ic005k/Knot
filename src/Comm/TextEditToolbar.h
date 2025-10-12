@@ -10,6 +10,7 @@
 #include <QPushButton>
 #include <QScrollBar>
 #include <QTextEdit>
+#include <QTextLayout>
 #include <QTimer>
 #include <QTouchEvent>
 #include <QWidget>
@@ -136,6 +137,9 @@ class TextEditToolbar : public QWidget {
   void updateLineEditHandlesPosition(int startPos, int endPos);
   int getTextPositionFromGlobal(const QPoint &globalPos);
   int getTextLength();
+
+  void updateLineEditHandlesPositionForNormalMode(int startPos, int endPos);
+  void updateLineEditHandlesPositionForPasswordMode(int startPos, int endPos);
 };
 
 /////////////////////////////////////////////////////////////////////////////

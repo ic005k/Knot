@@ -745,10 +745,109 @@ void TextEditToolbar::updateLineEditHandlesPosition(int startPos, int endPos) {
     return;
   }
 
-  // 获取字体度量
-  QFontMetrics fm(m_lineEdit->font());
+  // 检查是否是密码模式
+  bool isPasswordMode = (m_lineEdit->echoMode() != QLineEdit::Normal);
 
-  // 获取 QLineEdit 的内容矩形（考虑内边距）
+  // 对于密码模式，使用更简单但更可靠的计算方法
+  if (isPasswordMode) {
+    updateLineEditHandlesPositionForPasswordMode(startPos, endPos);
+    return;
+  }
+
+  // 普通模式使用原来的计算方法
+  updateLineEditHandlesPositionForNormalMode(startPos, endPos);
+}
+
+void TextEditToolbar::updateLineEditHandlesPositionForPasswordMode(int startPos,
+                                                                   int endPos) {
+  return;
+
+  if (!m_lineEdit) return;
+
+  QString text = m_lineEdit->text();
+  if (text.isEmpty()) return;
+
+  QFontMetrics fm(m_lineEdit->font());
+  QRect contentRect = m_lineEdit->contentsRect();
+  QPoint lineEditGlobalPos = m_lineEdit->mapToGlobal(QPoint(0, 0));
+
+  // 密码模式：使用平均字符宽度计算
+  int averageCharWidth = fm.averageCharWidth();
+  int totalTextWidth = text.length() * averageCharWidth;
+
+  // 计算字符位置
+  int startTextPos = startPos * averageCharWidth;
+  int endTextPos = endPos * averageCharWidth;
+
+  // 计算滚动偏移（简化版本）
+  int scrollOffset = 0;
+  if (totalTextWidth > contentRect.width()) {
+    int cursorPos = m_lineEdit->cursorPosition();
+    int textBeforeCursor = cursorPos * averageCharWidth;
+    if (textBeforeCursor > contentRect.width()) {
+      scrollOffset = textBeforeCursor - contentRect.width() + averageCharWidth;
+    }
+    scrollOffset =
+        qMax(0, qMin(scrollOffset, totalTextWidth - contentRect.width()));
+  }
+
+  // 转换为可视区域内的坐标
+  int startVisibleX = contentRect.left() + startTextPos - scrollOffset;
+  int endVisibleX = contentRect.left() + endTextPos - scrollOffset;
+
+  // 确保坐标在可见区域内
+  startVisibleX =
+      qMax(contentRect.left(), qMin(startVisibleX, contentRect.right()));
+  endVisibleX =
+      qMax(contentRect.left(), qMin(endVisibleX, contentRect.right()));
+
+  // 计算手柄垂直位置（居中）
+  int handleY = contentRect.center().y() - m_startHandle->height() / 2;
+
+  // 计算全局坐标
+  QPoint startGlobal = lineEditGlobalPos + QPoint(startVisibleX, handleY);
+  QPoint endGlobal = lineEditGlobalPos + QPoint(endVisibleX, handleY);
+
+  // 调整手柄位置，使其边缘紧贴选区边界
+  startGlobal.rx() -= m_startHandle->width();  // 起始手柄右边缘对齐选区起始位置
+
+  // 屏幕边界检查
+  QRect screenRect = QApplication::primaryScreen()->availableGeometry();
+
+  // 起始手柄边界检查
+  startGlobal.setX(qMax(screenRect.left(), startGlobal.x()));
+  startGlobal.setY(qMax(
+      screenRect.top(),
+      qMin(startGlobal.y(), screenRect.bottom() - m_startHandle->height())));
+
+  // 结束手柄边界检查
+  endGlobal.setX(
+      qMin(endGlobal.x(), screenRect.right() - m_endHandle->width()));
+  endGlobal.setY(
+      qMax(screenRect.top(),
+           qMin(endGlobal.y(), screenRect.bottom() - m_endHandle->height())));
+
+  m_startHandle->move(startGlobal);
+  m_endHandle->move(endGlobal);
+
+  qDebug() << "[QLineEdit密码模式定位] StartPos:" << startPos
+           << "EndPos:" << endPos << "StartTextPos:" << startTextPos
+           << "EndTextPos:" << endTextPos << "StartVisibleX:" << startVisibleX
+           << "EndVisibleX:" << endVisibleX << "ScrollOffset:" << scrollOffset
+           << "TextLength:" << text.length()
+           << "AverageCharWidth:" << averageCharWidth
+           << "StartGlobal:" << startGlobal << "EndGlobal:" << endGlobal;
+}
+
+void TextEditToolbar::updateLineEditHandlesPositionForNormalMode(int startPos,
+                                                                 int endPos) {
+  if (!m_lineEdit) return;
+
+  QString text = m_lineEdit->text();
+  if (text.isEmpty()) return;
+
+  // 普通模式使用原来的计算方法
+  QFontMetrics fm(m_lineEdit->font());
   QRect contentRect = m_lineEdit->contentsRect();
   QPoint lineEditGlobalPos = m_lineEdit->mapToGlobal(QPoint(0, 0));
 
@@ -785,69 +884,50 @@ void TextEditToolbar::updateLineEditHandlesPosition(int startPos, int endPos) {
   // 计算手柄垂直位置（居中）
   int handleY = contentRect.center().y() - m_startHandle->height() / 2;
 
-  // 关键改进：更精确的坐标计算，模仿 QTextEdit 的精确度
-  // 获取字符宽度信息，用于精确对齐
-  int startCharWidth = (startPos < text.length())
-                           ? fm.horizontalAdvance(text.mid(startPos, 1))
-                           : fm.averageCharWidth();
-  int endCharWidth = (endPos < text.length())
-                         ? fm.horizontalAdvance(text.mid(endPos, 1))
-                         : fm.averageCharWidth();
-
-  // 计算全局坐标 - 精确模仿 QTextEdit 的定位
-  // 起始手柄：右边缘精确对齐选区起始位置
+  // 计算全局坐标
   QPoint startGlobal = lineEditGlobalPos + QPoint(startVisibleX, handleY);
-  startGlobal.rx() -= m_startHandle->width();  // 向左移动手柄宽度，使右边缘对齐
-
-  // 结束手柄：左边缘精确对齐选区结束位置
   QPoint endGlobal = lineEditGlobalPos + QPoint(endVisibleX, handleY);
 
-  // 微调：基于字符宽度进行精确偏移
-  // 起始手柄需要额外考虑字符宽度，确保不压字
-  startGlobal.rx() += startCharWidth / 4;  // 轻微向右偏移字符宽度的1/4
-
-  // 结束手柄也需要轻微调整
-  endGlobal.rx() += endCharWidth / 4;  // 轻微向右偏移字符宽度的1/4
+  // 调整手柄位置，使其边缘紧贴选区边界
+  startGlobal.rx() -= m_startHandle->width();  // 起始手柄右边缘对齐选区起始位置
 
   // 屏幕边界检查
   QRect screenRect = QApplication::primaryScreen()->availableGeometry();
 
   // 起始手柄边界检查
-  if (startGlobal.x() < screenRect.left()) {
-    startGlobal.setX(screenRect.left());
-  }
-  if (startGlobal.y() < screenRect.top()) {
-    startGlobal.setY(screenRect.top());
-  }
-  if (startGlobal.y() + m_startHandle->height() > screenRect.bottom()) {
-    startGlobal.setY(screenRect.bottom() - m_startHandle->height());
-  }
+  startGlobal.setX(qMax(screenRect.left(), startGlobal.x()));
+  startGlobal.setY(qMax(
+      screenRect.top(),
+      qMin(startGlobal.y(), screenRect.bottom() - m_startHandle->height())));
 
   // 结束手柄边界检查
-  if (endGlobal.x() + m_endHandle->width() > screenRect.right()) {
-    endGlobal.setX(screenRect.right() - m_endHandle->width());
-  }
-  if (endGlobal.y() < screenRect.top()) {
-    endGlobal.setY(screenRect.top());
-  }
-  if (endGlobal.y() + m_endHandle->height() > screenRect.bottom()) {
-    endGlobal.setY(screenRect.bottom() - m_endHandle->height());
-  }
+  endGlobal.setX(
+      qMin(endGlobal.x(), screenRect.right() - m_endHandle->width()));
+  endGlobal.setY(
+      qMax(screenRect.top(),
+           qMin(endGlobal.y(), screenRect.bottom() - m_endHandle->height())));
 
   m_startHandle->move(startGlobal);
   m_endHandle->move(endGlobal);
 
-  qDebug() << "[QLineEdit精确模仿QTextEdit] StartPos:" << startPos
+  qDebug() << "[QLineEdit普通模式定位] StartPos:" << startPos
            << "EndPos:" << endPos << "StartTextPos:" << startTextPos
-           << "EndTextPos:" << endTextPos << "StartCharWidth:" << startCharWidth
-           << "EndCharWidth:" << endCharWidth
-           << "StartVisibleX:" << startVisibleX << "EndVisibleX:" << endVisibleX
-           << "ScrollOffset:" << scrollOffset << "StartGlobal:" << startGlobal
+           << "EndTextPos:" << endTextPos << "StartVisibleX:" << startVisibleX
+           << "EndVisibleX:" << endVisibleX << "ScrollOffset:" << scrollOffset
+           << "TextLength:" << text.length() << "StartGlobal:" << startGlobal
            << "EndGlobal:" << endGlobal;
 }
 
 // 统一的手柄显示函数
 void TextEditToolbar::showHandlesAtSelection() {
+  // 如果是 QLineEdit，隐藏手柄并返回
+  if (m_lineEdit) {
+    m_startHandle->hide();
+    m_endHandle->hide();
+    qDebug() << "[showHandlesAtSelection] QLineEdit 模式，隐藏手柄";
+    return;
+  }
+
   if (!m_textEdit && !m_lineEdit) return;
 
   qDebug() << "[showHandlesAtSelection] 开始显示手柄";

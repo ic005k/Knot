@@ -250,13 +250,6 @@ static void JavaNotify_15() {
     return;
   }
 
-  if (mw_one->m_Preferences->textToolbarPreferences != nullptr) {
-    if (mw_one->m_Preferences->textToolbarPreferences->isVisible()) {
-      mw_one->m_Preferences->textToolbarPreferences->hide();
-      return;
-    }
-  }
-
   if (m_ShowMessage != nullptr) {
     if (m_ShowMessage->isVisible()) {
       m_ShowMessage->close();

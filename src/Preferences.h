@@ -20,7 +20,6 @@ class Preferences : public QDialog {
   ~Preferences();
   Ui::Preferences *ui;
 
-  TextEditToolbar *textToolbarPreferences;
   bool devMode = false;
   QString chkStyle;
   bool isFontChange = false;
@@ -46,6 +45,8 @@ class Preferences : public QDialog {
   QString setFontDemoUI(QString customFontPath, QToolButton *btn, int fontSize);
 
   void setEncSyncStatusTip();
+
+  void openPreferences();
 
  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
@@ -86,6 +87,8 @@ class Preferences : public QDialog {
   void on_chkDark_clicked();
 
  private:
+  EditEventFilter *editFilter = nullptr;
+
   QString iniBakFiles = "BakFiles.ini";
   void getCheckStatusChange();
   QString orgCustomFontText;
