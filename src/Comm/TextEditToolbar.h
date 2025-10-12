@@ -8,6 +8,7 @@
 #include <QMouseEvent>
 #include <QPoint>
 #include <QPushButton>
+#include <QScrollBar>
 #include <QTextEdit>
 #include <QTimer>
 #include <QTouchEvent>
@@ -78,6 +79,8 @@ class TextEditToolbar : public QWidget {
   void onMinusReleased();
   void onMinusPressed();
 
+  void onScrollChanged();
+
  private:
   // 初始化函数声明
   void initButtons();
@@ -129,6 +132,10 @@ class TextEditToolbar : public QWidget {
   int m_dragAnchorEnd3 = 0;
   void selectEditText(int start, int end);
   bool isOne = false;
+  void updateTextEditHandlesPosition(int startPos, int endPos);
+  void updateLineEditHandlesPosition(int startPos, int endPos);
+  int getTextPositionFromGlobal(const QPoint &globalPos);
+  int getTextLength();
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -126,7 +126,6 @@ inline void initTextToolbarDynamic(QWidget *parent);
 void closeTextToolBar() {
   if (textToolbar != nullptr && textToolbar->isVisible()) {
     textToolbar->hide();
-    return;
   }
 
   if (textToolbarDynamic != nullptr && textToolbarDynamic->isVisible()) {

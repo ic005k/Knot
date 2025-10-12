@@ -240,12 +240,12 @@ static void JavaNotify_15() {
     }
   }
 
-  if (textToolbarDynamic != nullptr) {
+  if (textToolbarDynamic != nullptr && textToolbarDynamic->isVisible()) {
     closeTextToolBar();
     return;
   }
 
-  if (textToolbar != nullptr) {
+  if (textToolbar != nullptr && textToolbar->isVisible()) {
     closeTextToolBar();
     return;
   }

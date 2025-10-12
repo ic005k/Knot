@@ -18,13 +18,13 @@ Preferences::Preferences(QWidget* parent)
   this->installEventFilter(this);
   ui->lblFontSize->installEventFilter(this);
 
-  if (isAndroid) {
+  /*if (isAndroid) {
     textToolbarPreferences = new TextEditToolbar(this);
     EditEventFilter* editFilter =
         new EditEventFilter(textToolbarPreferences, this);
     ui->editPassword->installEventFilter(editFilter);
     ui->editValidate->installEventFilter(editFilter);
-  }
+  }*/
 
   ui->lblZipTip->hide();
   ui->gboxAdditional->hide();
