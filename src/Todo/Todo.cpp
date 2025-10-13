@@ -1381,10 +1381,17 @@ void Todo::stopPlayVoice() {
 
   int row = getCurrentIndex();
   if (row >= 0) {
-    if (isVoice(row))
-      mui->btnModify->setIcon(QIcon(":/res/voice_l.svg"));
-    else
-      mui->btnModify->setIcon(QIcon(":/res/edit_l.svg"));
+    if (isVoice(row)) {
+      if (isDark)
+        mui->btnModify->setIcon(QIcon(":/res/voice_l.svg"));
+      else
+        mui->btnModify->setIcon(QIcon(":/res/voice.svg"));
+    } else {
+      if (isDark)
+        mui->btnModify->setIcon(QIcon(":/res/edit_l.svg"));
+      else
+        mui->btnModify->setIcon(QIcon(":/res/edit.svg"));
+    }
   }
 }
 

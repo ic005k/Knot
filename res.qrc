@@ -7,7 +7,6 @@
         <file>res/down.png</file>
         <file>res/icon.icns</file>
         <file>res/icon.png</file>
-        <file>res/low.png</file>
         <file>res/nosel.png</file>
         <file>res/pause.png</file>
         <file>res/qslider.png</file>
@@ -187,5 +186,9 @@
         <file>res/set_l.svg</file>
         <file>res/reader/booknote.svg</file>
         <file>res/reader/booknote_l.svg</file>
+        <file>res/low.svg</file>
+        <file>res/low_l.svg</file>
+        <file>res/high.svg</file>
+        <file>res/voice.svg</file>
     </qresource>
 </RCC>

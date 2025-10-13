@@ -831,6 +831,14 @@ void MainHelper::init_ButtonStyle() {
   mui->btnReport->setStyleSheet("border:none");
   mui->btnSelTab->setStyleSheet("border:none");
 
+  // Todo
+  mui->btnBackTodo->setStyleSheet("border:none; ");
+  mui->btnHigh->setStyleSheet("border:none; ");
+  mui->btnLow->setStyleSheet("border:none; ");
+  mui->btnModify->setStyleSheet("border:none; ");
+  mui->btnSetTime->setStyleSheet("border:none; ");
+  mui->btnRecycle->setStyleSheet("border:none; ");
+
   // Reader
   mui->btnBackReader->setStyleSheet("border:none; ");
   mui->btnCatalogue->setStyleSheet("border:none; ");
@@ -862,6 +870,14 @@ void MainHelper::init_ButtonStyle() {
     mui->btnReadList->setIcon(QIcon(":/res/reader/booklist_l.svg"));
     mui->btnPages->setIcon(QIcon(":/res/set_l.svg"));
 
+    // Todo
+    mui->btnBackTodo->setIcon(QIcon(":/res/back_l.svg"));
+    mui->btnHigh->setIcon(QIcon(":/res/high_l.svg"));
+    mui->btnLow->setIcon(QIcon(":/res/low_l.svg"));
+    mui->btnModify->setIcon(QIcon(":/res/edit_l.svg"));
+    mui->btnSetTime->setIcon(QIcon(":/res/alarm_l.svg"));
+    mui->btnRecycle->setIcon(QIcon(":/res/recycle_l.svg"));
+
     // Notes
     mui->btnNoteBookMenu->setIcon(QIcon(":/res/nb_l.svg"));
     mui->btnNewNote->setIcon(QIcon(":/res/newnote_l.svg"));
@@ -870,6 +886,7 @@ void MainHelper::init_ButtonStyle() {
     mui->btnRecentOpen->setIcon(QIcon(":/res/recent_l.svg"));
 
   } else {
+    // Reader
     mui->btnBackReader->setIcon(QIcon(":/res/reader/exit.svg"));
     mui->btnRotation->setIcon(QIcon(":/res/reader/rotation.svg"));
     mui->btnCatalogue->setIcon(QIcon(":/res/reader/cata.svg"));
@@ -879,6 +896,14 @@ void MainHelper::init_ButtonStyle() {
     mui->btnOpen->setIcon(QIcon(":/res/reader/open.svg"));
     mui->btnReadList->setIcon(QIcon(":/res/reader/booklist.svg"));
     mui->btnPages->setIcon(QIcon(":/res/set.svg"));
+
+    // Todo
+    mui->btnBackTodo->setIcon(QIcon(":/res/back.svg"));
+    mui->btnHigh->setIcon(QIcon(":/res/high.svg"));
+    mui->btnLow->setIcon(QIcon(":/res/low.svg"));
+    mui->btnModify->setIcon(QIcon(":/res/edit.svg"));
+    mui->btnSetTime->setIcon(QIcon(":/res/alarm.svg"));
+    mui->btnRecycle->setIcon(QIcon(":/res/recycle.svg"));
 
     // Notes
     mui->btnNoteBookMenu->setIcon(QIcon(":/res/nb.svg"));
