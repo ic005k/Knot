@@ -1,0 +1,12 @@
+{
+    "UrlTemplate": "https://tile.thunderforest.com/cycle/{z}/{x}/{y}@2x.png?apikey=5ad09b54d1e542909f4f20f3a01786ae",
+    "ImageFormat": "png",
+    "ID": "thf-cycle-hires",
+    "Name": "Thunderforest Cycle HD",
+    "MaximumZoomLevel": 20,
+    "MinimumZoomLevel": 0,
+    "MapCopyRight": "<a href='https://www.thunderforest.com'>Thunderforest</a>",
+    "DataCopyRight": "<a href='https://www.openstreetmap.org/copyright'>OpenStreetMap contributors</a>",
+    "Tilesize": 512,
+    "Type": "tile"
+}

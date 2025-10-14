@@ -3169,11 +3169,14 @@ QString Reader::getReadTotalTime() {
 }
 
 void Reader::closeReader() {
-  qDebug() << getReadTotalTime();
+  QString time = getReadTotalTime();
+  qDebug() << time;
 
   mui->btnAutoStop->click();
   m_ReaderSet->close();
-  if (isSelText) mw_one->on_btnSelText_clicked();
+  if (mui->f_ReaderNote->isVisible()) {
+    mw_one->on_btnCancelSel_clicked();
+  }
   if (mui->f_ReaderSet->isVisible()) {
     mw_one->on_btnBackReaderSet_clicked();
   }
@@ -3182,9 +3185,11 @@ void Reader::closeReader() {
   savePageVPos();
 
   closeViewBookNote();
-  mui->frameReader->hide();
-  mui->frameMain->show();
+
   cancelKeepScreenOn();
+
+  mui->frameMain->show();
+  mui->frameReader->hide();
 }
 
 void Reader::openReader() {

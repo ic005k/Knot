@@ -46,9 +46,6 @@ MainWindow::MainWindow(QWidget *parent)
 
   resetWinPos();
 
-  m_Todo->refreshTableListsFromIni();
-  m_Todo->refreshAlarm();
-
   QTimer::singleShot(10, this, [this]() {
     reloadMain();
     clickData();

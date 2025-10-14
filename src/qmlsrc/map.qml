@@ -59,55 +59,75 @@ Rectangle {
         id: osmPlugin
         name: "osm"
 
+        // 禁用默认提供商
         PluginParameter {
             name: "osm.mapping.providersrepository.disabled"
-            value: true // 禁用不可靠的重定向服务
+            value: true
         }
 
-        // 确保使用Qt6兼容的参数
-        PluginParameter {
-            name: "osm.mapping.input.touch.enabled"
-            value: "true"
-        }
-        PluginParameter {
-            name: "osm.mapping.input.mouse.enabled"
-            value: "true"
-        }
-
-        // ✅ 设置自定义 host（必须以 / 结尾）
-        PluginParameter {
-            name: "osm.mapping.custom.host"
-            value: "https://tile.thunderforest.com/"
-        }
-
-        // ✅ 使用正确的图层名：cycle（不是 cycle@2x）
-        PluginParameter {
-            name: "osm.mapping.custom.url.cycle"
-            value: "cycle/{z}/{x}/{y}.png?apikey=5ad09b54d1e542909f4f20f3a01786ae"
-        }
-
-        // ✅ 启用高清支持
+        // 高清配置
         PluginParameter {
             name: "osm.mapping.highdpi_tiles"
             value: true
         }
-
-        // ✅ 设置瓦片大小为 512（高清）
         PluginParameter {
             name: "osm.mapping.tile.size"
-            value: "512"
+            value: 512
         }
 
-        // ✅ 必须设置 User-Agent
+        // 直接指定URL模板（推荐）
+        PluginParameter {
+            name: "osm.mapping.custom.url"
+            value: "https://tile.thunderforest.com/cycle/{z}/{x}/{y}@2x.png?apikey=5ad09b54d1e542909f4f20f3a01786ae"
+        }
+
+        // User-Agent
+        PluginParameter {
+            name: "user-agent"
+            value: "YourApp/1.0"
+        }
+
+        // 可选：缓存设置
+        PluginParameter {
+            name: "osm.mapping.cache.directory"
+            value: "./map_cache"
+        }
+        PluginParameter {
+            name: "osm.mapping.cache.size"
+            value: "102400" // 100MB
+        }
+    }
+
+    Plugin {
+        id: osmPlugin_test
+        name: "osm"
+
+        // 禁用远程仓库，使用本地配置
+        PluginParameter {
+            name: "osm.mapping.providersrepository.disabled"
+            value: true
+        }
+        PluginParameter {
+            name: "osm.mapping.providersrepository.address"
+            value: "/res/providers.json" // 完整路径 qrc://
+        }
+
+        // 高清参数
+        PluginParameter {
+            name: "osm.mapping.highdpi_tiles"
+            value: true
+        }
+        PluginParameter {
+            name: "osm.mapping.tile.size"
+            value: 512
+        }
         PluginParameter {
             name: "user-agent"
             value: "Knot/1.0 (QtLocation)"
         }
-
-        // ✅ 可选：设置缓存目录（方便清除）
         PluginParameter {
             name: "osm.mapping.offline.directory"
-            value: "./map_cache_clean"
+            value: "./map_cache"
         }
     }
 
@@ -168,18 +188,6 @@ Rectangle {
             }
         }
 
-        // 双击缩放处理
-        TapHandler {
-            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchScreen
-
-            onDoubleTapped: eventPoint => {
-                                if (eventPoint.button === Qt.LeftButton) {
-                                    map.zoomLevel += 1
-                                    eventPoint.accepted = true
-                                }
-                            }
-        }
-
         // 直接使用 Map 而不是 MapView
         Map {
             id: map
@@ -190,6 +198,14 @@ Rectangle {
             focus: true
 
             activeMapType: supportedMapTypes[1] // Cycle map provided by Thunderforest
+
+            // 确保选择正确的map type
+            Component.onCompleted: {
+                console.log("Available map types:", supportedMapTypes.length)
+                for (var i = 0; i < supportedMapTypes.length; i++) {
+                    console.log(i + ":", supportedMapTypes[i].name)
+                }
+            }
 
             // 控制状态变量
             property bool dragging: true

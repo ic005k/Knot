@@ -190,5 +190,6 @@
         <file>res/low_l.svg</file>
         <file>res/high.svg</file>
         <file>res/voice.svg</file>
+        <file>res/providers.json</file>
     </qresource>
 </RCC>

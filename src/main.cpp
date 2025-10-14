@@ -347,6 +347,9 @@ void loadTheme(bool isDark) {
 
   mw_one->m_Reader->initInfoShowFont();
 
+  mw_one->m_Todo->refreshTableListsFromIni();
+  mw_one->m_Todo->refreshAlarm();
+
   isInitThemeEnd = true;
 
   if (isNeedExecDeskShortcut) {
