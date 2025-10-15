@@ -163,6 +163,10 @@ public class MapActivity extends Activity {
 
             setupThunderforestTiles();
 
+            // 地图初始化完成后，刷新一次覆盖层
+            osmMapView.invalidate();
+            Log.d(TAG, "地图初始化完成，覆盖层已刷新");
+
         } catch (Exception e) {
             Log.e(TAG, "地图初始化失败", e);
             topInfoLabel.setText("地图初始化失败，尝试备用方案");
@@ -312,13 +316,21 @@ public class MapActivity extends Activity {
         }
 
         currentLocationMarker = new Marker(osmMapView);
-        // 使用系统图标（或自定义图标）
-        currentLocationMarker.setIcon(getResources().getDrawable(android.R.drawable.presence_online));
+        // 引用自定义红色圆点图标（关键修改）
+        currentLocationMarker.setIcon(ContextCompat.getDrawable(this, R.drawable.marker_center));
+        // 锚点设置为图标中心，确保圆点中心与经纬度完全对齐
         currentLocationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
-        // 初始隐藏（用setEnabled控制可见性）
-        currentLocationMarker.setEnabled(false); // 替换setVisible(false)
+        // 初始隐藏，同时设置初始位置（避免位置为空）
+        currentLocationMarker.setPosition(new GeoPoint(OSLO_LATITUDE, OSLO_LONGITUDE));
+        currentLocationMarker.setEnabled(false);
 
+        // 关键：调整覆盖层顺序，将标识放在最上层（避免被轨迹线遮挡）
         osmMapView.getOverlays().add(currentLocationMarker);
+        // 移除后重新添加，确保在所有覆盖层最上方
+        osmMapView.getOverlays().remove(currentLocationMarker);
+        osmMapView.getOverlays().add(currentLocationMarker);
+
+        Log.d(TAG, "中心点标识初始化完成，初始位置：奥斯陆");
     }
 
     /**
@@ -328,34 +340,32 @@ public class MapActivity extends Activity {
      * @param longitude 经度（合法范围：-180.0 ~ 180.0）
      */
     public void appendTrackPoint(double latitude, double longitude) {
-        // 1. 基础合法性校验（经纬度 + MapActivity 核心对象是否初始化）
+        // 1. 基础合法性校验
         if (latitude < -90.0 || latitude > 90.0 || longitude < -180.0 || longitude > 180.0) {
             Log.w(TAG, "非法经纬度，跳过该轨迹点 | 纬度：" + latitude + "，经度：" + longitude);
             return;
         }
-        // 关键：判断核心地图对象是否为空（避免未初始化/已销毁时调用）
-        if (osmController == null || osmMapView == null || osmPolyline == null) {
-            Log.e(TAG, "地图对象未初始化或已销毁，无法追加轨迹点");
+        // 增加 currentLocationMarker 的空值判断（关键）
+        if (osmController == null || osmMapView == null || osmPolyline == null || currentLocationMarker == null) {
+            Log.e(TAG, "地图对象未初始化，无法追加轨迹点");
             return;
         }
 
-        // 2. 确保在 UI 线程操作地图
         runOnUiThread(() -> {
             try {
                 GeoPoint newPoint = new GeoPoint(latitude, longitude);
                 osmTrackPoints.add(newPoint);
                 osmPolyline.setPoints(osmTrackPoints);
 
-                // 此时 osmController 已确认非空，可安全调用
+                // 移动地图中心并更新标识
                 osmController.setCenter(newPoint);
-                Log.d(TAG, "地图中心更新到当前轨迹点 | 纬度：" + latitude + "，经度：" + longitude);
-
-                // 显示标识并更新位置（用setEnabled控制可见性）
                 currentLocationMarker.setPosition(newPoint);
-                currentLocationMarker.setEnabled(true);
+                currentLocationMarker.setEnabled(true); // 显示标识
+                Log.d(TAG, "标识已更新到新轨迹点 | 可见性：" + currentLocationMarker.isEnabled());
 
+                // 强制刷新地图，确保标识立即显示
                 osmMapView.invalidate();
-                Log.d(TAG, "轨迹点追加成功 | 当前总点数：" + osmTrackPoints.size());
+                Log.d(TAG, "轨迹点追加成功 | 总点数：" + osmTrackPoints.size());
             } catch (Exception e) {
                 Log.e(TAG, "追加轨迹点异常", e);
             }
@@ -375,7 +385,7 @@ public class MapActivity extends Activity {
         runOnUiThread(() -> {
             osmTrackPoints.clear();
             osmPolyline.setPoints(osmTrackPoints);
-            currentLocationMarker.setEnabled(false); 
+            currentLocationMarker.setEnabled(false);
             osmMapView.invalidate();
             Log.d(TAG, "轨迹数据已清空");
         });

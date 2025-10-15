@@ -86,6 +86,8 @@ import com.x.AlarmReceiver;
 
 import com.xhh.pdfui.PDFActivity;
 
+import org.osmdroid.util.GeoPoint;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -119,6 +121,7 @@ import java.util.Random;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
@@ -161,6 +164,7 @@ public class MyActivity
     implements Application.ActivityLifecycleCallbacks {
 
   public static MapActivity mapActivityInstance = null;
+  private final List<GeoPoint> osmTrackPoints = new CopyOnWriteArrayList<>();
 
   private static boolean isQtMainEnd = false;
 
@@ -1360,10 +1364,13 @@ public class MyActivity
     getMyAppContext().startActivity(i);
   }
 
-  public static void openMapWindow() {
+  public void openMapWindow() {
     Intent i = new Intent(getMyAppContext(), MapActivity.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     getMyAppContext().startActivity(i);
+
+    replayAllTrackPoints();
+
   }
 
   public void forwardClearTrack() {
@@ -2013,5 +2020,74 @@ public class MyActivity
       }
     });
   }
+
+  public void addTrackPoint(double latitude, double longitude) {
+    // 经纬度合法性校验
+    if (latitude < -90.0 || latitude > 90.0 || longitude < -180.0 || longitude > 180.0) {
+      Log.w(TAG, "非法经纬度，跳过添加 | 纬度：" + latitude + "，经度：" + longitude);
+      return;
+    }
+
+    // 核心操作：向CopyOnWriteArrayList添加数据（线程安全）
+    GeoPoint newPoint = new GeoPoint(latitude, longitude);
+    osmTrackPoints.add(newPoint);
+    Log.d(TAG, "已添加轨迹点 | 总数量：" + osmTrackPoints.size());
+
+  }
+
+  public void clearTrackPoints() {
+    // 核心操作：清空CopyOnWriteArrayList（线程安全）
+    osmTrackPoints.clear();
+    Log.d(TAG, "已清空所有轨迹数据");
+
+  }
+
+  /**
+   * 遍历 osmTrackPoints 集合，调用 forwardAppendTrackPoint 重放所有轨迹点
+   * （实际是通过 MyActivity 转发，最终调用自身的 appendTrackPoint 方法）
+   */
+  public void replayAllTrackPoints() {
+    // 1. 校验集合非空
+    if (osmTrackPoints.isEmpty()) {
+      Log.d(TAG, "osmTrackPoints 集合为空，无需遍历");
+      return;
+    }
+
+    // 2. 校验 MyActivity 实例有效（避免空指针）
+    if (MyActivity.mapActivityInstance == null) {
+      Log.e(TAG, "MyActivity 中 MapActivity 实例为空，无法重放轨迹");
+      return;
+    }
+
+    Log.d(TAG, "开始遍历轨迹集合，总点数：" + osmTrackPoints.size());
+
+    // 3. 遍历集合（CopyOnWriteArrayList 遍历线程安全）
+    for (GeoPoint point : osmTrackPoints) {
+      if (point == null) {
+        Log.w(TAG, "跳过空的轨迹点");
+        continue;
+      }
+
+      // 提取经纬度
+      double latitude = point.getLatitude();
+      double longitude = point.getLongitude();
+
+      // 调用 MyActivity 的 forwardAppendTrackPoint 方法
+      forwardAppendTrackPoint(latitude, longitude);
+
+      // 可选：添加延迟，模拟轨迹实时播放效果（单位：毫秒，根据需求调整）
+      try {
+        Thread.sleep(100); // 每100毫秒播放一个点
+      } catch (InterruptedException e) {
+        Log.e(TAG, "轨迹播放延迟被中断", e);
+        Thread.currentThread().interrupt(); // 恢复中断状态
+        break;
+      }
+    }
+
+    Log.d(TAG, "轨迹集合遍历完成");
+  }
+
+  // 你已有的其他方法（appendTrackPoint、clearTrack 等）...
 
 }

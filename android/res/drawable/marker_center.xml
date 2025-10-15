@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <!-- 红色实心圆点 -->
+    <solid android:color="#FFFF0000" />
+    <!-- 图标大小：30dp x 30dp（可根据需求调整） -->
+    <size
+        android:width="30dp"
+        android:height="30dp" />
+    <!-- 可选：添加白色边框，增强辨识度 -->
+    <stroke
+        android:width="2dp"
+        android:color="#FFFFFF" />
+</shape>
