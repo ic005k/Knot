@@ -1180,6 +1180,8 @@ void Steps::appendTrack(double lat, double lon) {
   QQuickItem* root = mui->qwMap->rootObject();
   QMetaObject::invokeMethod((QObject*)root, "appendTrack", Q_ARG(QVariant, lat),
                             Q_ARG(QVariant, lon));
+
+  appendTrackPointAndroid(lat, lon);
 }
 
 void Steps::updateInfoText(QString strDistance, QString strSpeed) {
@@ -1204,6 +1206,8 @@ void Steps::updateMapTrackUi(double lat, double lon) {
 void Steps::clearTrack() {
   QQuickItem* root = mui->qwMap->rootObject();
   QMetaObject::invokeMethod((QObject*)root, "clearTrack");
+
+  clearTrackAndroid();
 }
 
 void Steps::writeGpsPos(double lat, double lon, int i, int count) {
@@ -1224,6 +1228,8 @@ void Steps::writeGpsPos(double lat, double lon, int i, int count) {
 
 void Steps::getGpsTrack() {
   if (timer->isActive()) return;
+
+  openMapWindow();
 
   mw_one->showProgress();
   QQuickItem* root = mui->qwGpsList->rootObject();
@@ -1376,6 +1382,8 @@ void Steps::updateGpsMapUi() {
 
     updateInfoText(strGpsMapDistnce, strGpsMapSpeed);
     mui->tabMotion->setCurrentIndex(3);
+
+    appendTrackPointAndroid(lastLat, lastLon);
   }
 }
 
@@ -1669,6 +1677,60 @@ void Steps::openMapWindow() {
 
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callStaticMethod<void>("com.x/MyActivity", "openMapWindow", "()V");
+
+#endif
+}
+
+void Steps::clearTrackAndroid() {
+#ifdef Q_OS_ANDROID
+
+  try {
+    // 步骤1：获取主活动MyActivity实例（Qt默认获取的是主活动）
+    QJniObject myActivity = QNativeInterface::QAndroidApplication::context();
+    if (!myActivity.isValid()) {
+      qWarning() << "Qt获取MyActivity实例失败，无法清除轨迹";
+      return;
+    }
+
+    // 步骤2：调用MyActivity的forwardClearTrack()转发方法
+    myActivity.callMethod<void>("forwardClearTrack");
+    qDebug() << "Qt调用MyActivity.forwardClearTrack()成功，已转发清除轨迹请求";
+
+  } catch (const std::exception& e) {
+    qCritical() << "清除轨迹调用异常：" << e.what();
+  } catch (...) {
+    qCritical() << "清除轨迹发生未知错误";
+  }
+
+#endif
+}
+
+void Steps::appendTrackPointAndroid(double latitude, double longitude) {
+#ifdef Q_OS_ANDROID
+
+  try {
+    if (latitude < -90.0 || latitude > 90.0 || longitude < -180.0 ||
+        longitude > 180.0) {
+      qWarning() << "无效经纬度：" << latitude << "," << longitude;
+      return;
+    }
+
+    QJniObject myActivity = QNativeInterface::QAndroidApplication::context();
+    if (!myActivity.isValid()) {
+      qWarning() << "Qt获取MyActivity实例失败，无法追加轨迹点";
+      return;
+    }
+
+    myActivity.callMethod<void>("forwardAppendTrackPoint", "(DD)V", latitude,
+                                longitude);
+    qDebug() << "Qt调用MyActivity.forwardAppendTrackPoint()成功，轨迹点："
+             << latitude << "," << longitude;
+
+  } catch (const std::exception& e) {
+    qCritical() << "追加轨迹点异常：" << e.what();
+  } catch (...) {
+    qCritical() << "追加轨迹点发生未知错误";
+  }
 
 #endif
 }

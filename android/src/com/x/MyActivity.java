@@ -160,6 +160,8 @@ public class MyActivity
     extends QtActivity
     implements Application.ActivityLifecycleCallbacks {
 
+  public static MapActivity mapActivityInstance = null;
+
   private static boolean isQtMainEnd = false;
 
   public static final String ACTION_TODO_ALARM = "com.x.Knot.TODO_ALARM";
@@ -932,6 +934,7 @@ public class MyActivity
     m_instance = null;
     mytts.shutdown();
     alarmWindows.remove(this); // 防止 Activity 泄漏
+    mapActivityInstance = null;
   }
 
   @Override
@@ -1361,6 +1364,24 @@ public class MyActivity
     Intent i = new Intent(getMyAppContext(), MapActivity.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     getMyAppContext().startActivity(i);
+  }
+
+  public void forwardClearTrack() {
+    // 先判断MapActivity是否已创建
+    if (mapActivityInstance != null) {
+      mapActivityInstance.clearTrack(); // 调用MapActivity的清除方法
+    } else {
+      // 可选：日志或提示地图窗口未打开
+      android.util.Log.w("MyActivity", "MapActivity未启动，无法清除轨迹");
+    }
+  }
+
+  public void forwardAppendTrackPoint(double latitude, double longitude) {
+    if (mapActivityInstance != null) {
+      mapActivityInstance.appendTrackPoint(latitude, longitude); // 调用MapActivity的追加方法
+    } else {
+      android.util.Log.w("MyActivity", "MapActivity未启动，无法追加轨迹点");
+    }
   }
 
   public void openDateTimePicker() {

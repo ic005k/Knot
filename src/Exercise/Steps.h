@@ -213,7 +213,9 @@ class Steps : public QDialog {
   QString getCurrentYear();
   QString getCurrentMonth();
 
- signals:
+  void clearTrackAndroid();
+  void appendTrackPointAndroid(double latitude, double longitude);
+  signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();

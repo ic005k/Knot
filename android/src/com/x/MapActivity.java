@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import android.view.Window;
+import org.osmdroid.views.overlay.Marker;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -44,23 +45,28 @@ public class MapActivity extends Activity {
     private Button switchMapBtn;
     private boolean usingThunderforest = true; // 跟踪当前使用的瓦片源
 
+    private Marker currentLocationMarker;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
+        MyActivity.mapActivityInstance = this;
+
         // 去除title(App Name)
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        
+
         // 初始化OSM配置 - 这必须在setContentView之前
         initOsmGlobalConfig();
-        
+
         setContentView(R.layout.activity_map);
-        
+
         // 检查并请求必要的权限
         checkPermissions();
-        
+
         initViews();
         initOsmMap();
+        initCenterMarker();
     }
 
     private void initOsmGlobalConfig() {
@@ -68,18 +74,18 @@ public class MapActivity extends Activity {
             // 正确设置全局配置
             Configuration.getInstance().load(this, getPreferences(MODE_PRIVATE));
             Configuration.getInstance().setUserAgentValue(USER_AGENT);
-            
+
             File basePath = getExternalFilesDir(null);
             if (basePath != null) {
                 Configuration.getInstance().setOsmdroidBasePath(basePath);
-                
+
                 File tileCache = new File(basePath, "tiles");
                 if (!tileCache.exists()) {
                     tileCache.mkdirs();
                 }
                 Configuration.getInstance().setOsmdroidTileCache(tileCache);
             }
-            
+
             Configuration.getInstance().setDebugMode(true);
             Log.d(TAG, "OSM配置初始化完成");
         } catch (Exception e) {
@@ -104,7 +110,7 @@ public class MapActivity extends Activity {
     private void switchMapSource() {
         clearOsmCache();
         usingThunderforest = !usingThunderforest;
-        
+
         if (usingThunderforest) {
             setupThunderforestTiles();
             topInfoLabel.setText("切换到Thunderforest，加载中...");
@@ -112,17 +118,16 @@ public class MapActivity extends Activity {
             setupOpenStreetMapTiles();
             topInfoLabel.setText("切换到OpenStreetMap，加载中...");
         }
-        
+
         osmMapView.invalidate();
     }
 
     private void initOsmMap() {
         try {
-            // 基础地图设置
             osmMapView.setMultiTouchControls(true);
             osmMapView.setTilesScaledToDpi(true);
 
-            // 定位到奥斯陆
+            // 初始化地图控制器和默认中心
             osmController = osmMapView.getController();
             GeoPoint osloCenter = new GeoPoint(OSLO_LATITUDE, OSLO_LONGITUDE);
             osmController.setCenter(osloCenter);
@@ -131,19 +136,21 @@ public class MapActivity extends Activity {
             // 初始化轨迹线
             osmPolyline = new Polyline();
             osmPolyline.setColor(0xFFFF0000); // 红色轨迹
-            osmPolyline.setWidth(5f);        // 轨迹线宽度
-            osmPolyline.setPoints(osmTrackPoints); // 设置点列表
+            osmPolyline.setWidth(5f);
             osmMapView.getOverlays().add(osmPolyline);
 
-            // 地图状态监听
+            // 地图监听（保留原有逻辑）
             osmMapView.setMapListener(new MapListener() {
                 @Override
                 public boolean onScroll(ScrollEvent event) {
                     org.osmdroid.api.IGeoPoint center = osmMapView.getMapCenter();
                     topInfoLabel.setText(String.format(
-                        "纬度:%.4f 经度:%.4f",
-                        center.getLatitude(), center.getLongitude()
-                    ));
+                            "纬度:%.4f 经度:%.4f",
+                            center.getLatitude(), center.getLongitude()));
+                    // 用isEnabled()判断是否可见
+                    if (currentLocationMarker != null && currentLocationMarker.isEnabled()) {
+                        currentLocationMarker.setPosition(new GeoPoint(center.getLatitude(), center.getLongitude()));
+                    }
                     return false;
                 }
 
@@ -153,15 +160,12 @@ public class MapActivity extends Activity {
                     return false;
                 }
             });
-            
-            // 尝试加载Thunderforest瓦片
+
             setupThunderforestTiles();
-            
+
         } catch (Exception e) {
             Log.e(TAG, "地图初始化失败", e);
             topInfoLabel.setText("地图初始化失败，尝试备用方案");
-            
-            // 备用方案：使用OpenStreetMap
             setupOpenStreetMapTiles();
         }
     }
@@ -169,14 +173,13 @@ public class MapActivity extends Activity {
     private void setupThunderforestTiles() {
         try {
             ITileSource thunderforestTile = new XYTileSource(
-                "Thunderforest_Cycle",
-                1, 18, 256, ".png",
-                new String[]{
-                    "https://a.tile.thunderforest.com/cycle/",
-                    "https://b.tile.thunderforest.com/cycle/", 
-                    "https://c.tile.thunderforest.com/cycle/"
-                }
-            ) {
+                    "Thunderforest_Cycle",
+                    1, 18, 256, ".png",
+                    new String[] {
+                            "https://a.tile.thunderforest.com/cycle/",
+                            "https://b.tile.thunderforest.com/cycle/",
+                            "https://c.tile.thunderforest.com/cycle/"
+                    }) {
                 @Override
                 public String getTileURLString(long pMapTileIndex) {
                     String url = super.getTileURLString(pMapTileIndex);
@@ -188,7 +191,7 @@ public class MapActivity extends Activity {
             osmMapView.setTileSource(thunderforestTile);
             topInfoLabel.setText("地图加载完成 - Thunderforest");
             usingThunderforest = true;
-            
+
         } catch (Exception e) {
             Log.e(TAG, "Thunderforest TileSource失败", e);
             topInfoLabel.setText("Thunderforest加载失败，切换到OpenStreetMap");
@@ -199,19 +202,18 @@ public class MapActivity extends Activity {
     private void setupOpenStreetMapTiles() {
         try {
             ITileSource osmTileSource = new XYTileSource(
-                "OpenStreetMap", 
-                1, 18, 256, ".png", 
-                new String[]{
-                    "https://a.tile.openstreetmap.org/",
-                    "https://b.tile.openstreetmap.org/",
-                    "https://c.tile.openstreetmap.org/"
-                }
-            );
-            
+                    "OpenStreetMap",
+                    1, 18, 256, ".png",
+                    new String[] {
+                            "https://a.tile.openstreetmap.org/",
+                            "https://b.tile.openstreetmap.org/",
+                            "https://c.tile.openstreetmap.org/"
+                    });
+
             osmMapView.setTileSource(osmTileSource);
             topInfoLabel.setText("使用OpenStreetMap瓦片");
             usingThunderforest = false;
-            
+
         } catch (Exception ex) {
             Log.e(TAG, "OpenStreetMap也失败", ex);
             topInfoLabel.setText("地图加载失败，请检查网络连接");
@@ -222,7 +224,7 @@ public class MapActivity extends Activity {
     private void checkPermissions() {
         List<String> permissionsNeeded = new ArrayList<>();
 
-        final String[] permissions = new String[]{
+        final String[] permissions = new String[] {
                 Manifest.permission.INTERNET,
                 Manifest.permission.ACCESS_NETWORK_STATE,
                 // Android 10+ 不需要WRITE_EXTERNAL_STORAGE权限
@@ -239,8 +241,7 @@ public class MapActivity extends Activity {
             ActivityCompat.requestPermissions(
                     this,
                     permissionsNeeded.toArray(new String[0]),
-                    REQUEST_PERMISSIONS_REQUEST_CODE
-            );
+                    REQUEST_PERMISSIONS_REQUEST_CODE);
         }
     }
 
@@ -250,28 +251,30 @@ public class MapActivity extends Activity {
             if (osmMapView != null && osmMapView.getTileProvider() != null) {
                 osmMapView.getTileProvider().clearTileCache();
             }
-            
+
             // 清除磁盘缓存
             File cacheDir = Configuration.getInstance().getOsmdroidTileCache();
             if (cacheDir != null && cacheDir.exists()) {
                 deleteDir(cacheDir);
                 cacheDir.mkdirs();
             }
-            
+
             Log.d(TAG, "已清除瓦片缓存");
-            
+
         } catch (Exception e) {
             Log.e(TAG, "清除缓存失败", e);
         }
     }
 
     private boolean deleteDir(File dir) {
-        if (dir == null) return false;
+        if (dir == null)
+            return false;
         if (dir.isDirectory()) {
             File[] files = dir.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    if (!deleteDir(file)) return false;
+                    if (!deleteDir(file))
+                        return false;
                 }
             }
         }
@@ -289,7 +292,7 @@ public class MapActivity extends Activity {
                     break;
                 }
             }
-            
+
             if (allGranted) {
                 Log.d(TAG, "所有权限已授予");
                 if (osmMapView != null) {
@@ -302,36 +305,56 @@ public class MapActivity extends Activity {
         }
     }
 
+    private void initCenterMarker() {
+        if (osmMapView == null) {
+            Log.e(TAG, "地图未初始化，无法创建中心点标识");
+            return;
+        }
+
+        currentLocationMarker = new Marker(osmMapView);
+        // 使用系统图标（或自定义图标）
+        currentLocationMarker.setIcon(getResources().getDrawable(android.R.drawable.presence_online));
+        currentLocationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
+        // 初始隐藏（用setEnabled控制可见性）
+        currentLocationMarker.setEnabled(false); // 替换setVisible(false)
+
+        osmMapView.getOverlays().add(currentLocationMarker);
+    }
+
     /**
-     * 【核心修改】追加轨迹点的接口方法
-     * 直接接收纬度和经度参数，内部自动转换为GeoPoint并更新轨迹
-     * @param latitude 纬度（合法范围：-90.0 ~ 90.0）
+     * 追加轨迹点的接口方法（每次追加都将地图中心定位到当前点）
+     * 
+     * @param latitude  纬度（合法范围：-90.0 ~ 90.0）
      * @param longitude 经度（合法范围：-180.0 ~ 180.0）
      */
     public void appendTrackPoint(double latitude, double longitude) {
-        // 1. 校验经纬度合法性，过滤无效数据
+        // 1. 基础合法性校验（经纬度 + MapActivity 核心对象是否初始化）
         if (latitude < -90.0 || latitude > 90.0 || longitude < -180.0 || longitude > 180.0) {
             Log.w(TAG, "非法经纬度，跳过该轨迹点 | 纬度：" + latitude + "，经度：" + longitude);
             return;
         }
+        // 关键：判断核心地图对象是否为空（避免未初始化/已销毁时调用）
+        if (osmController == null || osmMapView == null || osmPolyline == null) {
+            Log.e(TAG, "地图对象未初始化或已销毁，无法追加轨迹点");
+            return;
+        }
 
-        // 2. 地图操作需在UI线程执行，避免线程安全问题
+        // 2. 确保在 UI 线程操作地图
         runOnUiThread(() -> {
             try {
-                // 3. 经纬度转OSM所需的GeoPoint对象
                 GeoPoint newPoint = new GeoPoint(latitude, longitude);
-                // 4. 追加到轨迹点列表
                 osmTrackPoints.add(newPoint);
-                // 5. 更新轨迹线的点集，刷新显示
                 osmPolyline.setPoints(osmTrackPoints);
-                // 6. 第一个点时自动定位到该位置
-                if (osmTrackPoints.size() == 1) {
-                    osmController.setCenter(newPoint);
-                    Log.d(TAG, "首次轨迹点定位 | 纬度：" + latitude + "，经度：" + longitude);
-                }
-                // 7. 刷新地图，确保轨迹实时生效
+
+                // 此时 osmController 已确认非空，可安全调用
+                osmController.setCenter(newPoint);
+                Log.d(TAG, "地图中心更新到当前轨迹点 | 纬度：" + latitude + "，经度：" + longitude);
+
+                // 显示标识并更新位置（用setEnabled控制可见性）
+                currentLocationMarker.setPosition(newPoint);
+                currentLocationMarker.setEnabled(true);
+
                 osmMapView.invalidate();
-                // 8. 日志记录轨迹点数量，便于调试
                 Log.d(TAG, "轨迹点追加成功 | 当前总点数：" + osmTrackPoints.size());
             } catch (Exception e) {
                 Log.e(TAG, "追加轨迹点异常", e);
@@ -343,9 +366,16 @@ public class MapActivity extends Activity {
      * 清除所有轨迹数据（辅助方法）
      */
     public void clearTrack() {
+        // 先判断核心对象是否为空
+        if (osmMapView == null || osmPolyline == null) {
+            Log.e(TAG, "地图对象未初始化或已销毁，无法清除轨迹");
+            return;
+        }
+
         runOnUiThread(() -> {
             osmTrackPoints.clear();
             osmPolyline.setPoints(osmTrackPoints);
+            currentLocationMarker.setEnabled(false); 
             osmMapView.invalidate();
             Log.d(TAG, "轨迹数据已清空");
         });
@@ -375,6 +405,25 @@ public class MapActivity extends Activity {
             if (osmMapView.getTileProvider() != null) {
                 osmMapView.getTileProvider().clearTileCache();
             }
+        }
+
+        if (currentLocationMarker != null) {
+            osmMapView.getOverlays().remove(currentLocationMarker);
+            currentLocationMarker = null;
+        }
+
+        // 释放地图资源（避免内存泄漏）
+        if (osmMapView != null) {
+            osmMapView.onDetach();
+            osmMapView.getTileProvider().clearTileCache();
+            osmMapView = null; // 置空，避免后续误访问
+        }
+        osmController = null; // 置空核心对象
+        osmPolyline = null;
+        osmTrackPoints.clear();
+
+        if (MyActivity.mapActivityInstance == this) {
+            MyActivity.mapActivityInstance = null;
         }
     }
 }
