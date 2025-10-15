@@ -3670,7 +3670,7 @@ QSlider::handle:horizontal:disabled {
           <enum>QTabWidget::TabPosition::South</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tab_Steps">
           <attribute name="title">
@@ -4228,10 +4228,9 @@ QSlider::handle:horizontal:disabled {
               <item>
                <widget class="QRadioButton" name="rbCycling">
                 <property name="styleSheet">
-                 <string notr="true">QRadioButton::indicator {
+                 <string notr="true">/*QRadioButton::indicator {
     width: 25px;
     height: 25px;
-    /*image: url(:/src/sel.png);*/
     
     position: relative;
     left: 0px;
@@ -4246,7 +4245,66 @@ QRadioButton::indicator:unchecked {
 
 QRadioButton::indicator:checked {
     image: url(:/res/sel.png);
+}*/
+
+QRadioButton {
+    /* 基础按钮样式 */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin: 2px;
+    
+    /* 文本居中，类似普通按钮 */
+    text-align: center;
+    
+    /* 隐藏默认指示器 */
+    spacing: 2;
 }
+
+/* 隐藏原生指示器 */
+QRadioButton::indicator {
+    width: 10;
+    height: 10;
+}
+
+/* 未选中状态 - 灰暗底色（类似电灯关闭） */
+QRadioButton:unchecked {
+    background-color: #f0f0f0;
+    color: #666;
+    border-color: #ddd;
+}
+
+/* 选中状态 - 亮绿色（类似电灯开启） */
+QRadioButton:checked {
+    background-color: #7FFF00; /* 亮绿色 */
+    color: #333;
+    border-color: #66cc00;
+}
+
+/* 可选：另一种选中色（亮黄色） */
+/* QRadioButton:checked {
+    background-color: #FFFF99; 亮黄色
+    color: #333;
+    border-color: #ffcc66;
+} */
+
+/* 交互反馈 */
+QRadioButton:hover:unchecked {
+    background-color: #e8e8e8;
+    border-color: #bbb;
+}
+
+QRadioButton:pressed {
+    transform: scale(0.98);
+}
+
+/* 禁用状态 */
+QRadioButton:disabled {
+    background-color: #f5f5f5;
+    color: #aaa;
+    border-color: #eee;
+}
+
 
 
 </string>
@@ -4255,17 +4313,80 @@ QRadioButton::indicator:checked {
                  <string>Cycling</string>
                 </property>
                 <property name="checked">
-                 <bool>true</bool>
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QRadioButton" name="rbHiking">
                 <property name="styleSheet">
-                 <string notr="true"/>
+                 <string notr="true">QRadioButton {
+    /* 基础按钮样式 */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px 16px;
+    margin: 2px;
+    
+    /* 文本居中，类似普通按钮 */
+    text-align: center;
+    
+    /* 隐藏默认指示器 */
+    spacing: 0;
+}
+
+/* 隐藏原生指示器 */
+QRadioButton::indicator {
+    width: 0;
+    height: 0;
+}
+
+/* 未选中状态 - 灰暗底色（类似电灯关闭） */
+QRadioButton:unchecked {
+    background-color: #f0f0f0;
+    color: #666;
+    border-color: #ddd;
+}
+
+/* 选中状态 - 亮绿色（类似电灯开启） */
+QRadioButton:checked {
+    background-color: #7FFF00; /* 亮绿色 */
+    color: #333;
+    border-color: #66cc00;
+}
+
+/* 可选：另一种选中色（亮黄色） */
+/* QRadioButton:checked {
+    background-color: #FFFF99; 亮黄色
+    color: #333;
+    border-color: #ffcc66;
+} */
+
+/* 交互反馈 */
+QRadioButton:hover:unchecked {
+    background-color: #e8e8e8;
+    border-color: #bbb;
+}
+
+QRadioButton:pressed {
+    transform: scale(0.98);
+}
+
+/* 禁用状态 */
+QRadioButton:disabled {
+    background-color: #f5f5f5;
+    color: #aaa;
+    border-color: #eee;
+}
+</string>
                 </property>
                 <property name="text">
                  <string>Hiking</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
