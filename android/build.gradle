@@ -80,6 +80,10 @@ dependencies {
 
     implementation 'com.google.android.material:material:1.6.1'
 
+    // 添加osmdroid依赖（最新版本可查官网）
+    implementation 'org.osmdroid:osmdroid-android:6.1.20'
+    implementation 'org.osmdroid:osmdroid-mapsforge:6.1.20'
+
     // Prism4j 语法高亮引擎
     implementation "io.noties:prism4j:2.0.0"
     kapt "io.noties:prism4j-bundler:2.0.0"  // 关键：使用 kapt 处理注解

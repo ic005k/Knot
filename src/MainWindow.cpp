@@ -2721,3 +2721,5 @@ void MainWindow::on_btnShareBookText_clicked() {
 void MainWindow::on_btnAddBookNote_clicked() { m_Reader->addBookNote(); }
 
 void MainWindow::on_btnViewBookNote_clicked() { m_Reader->viewBookNote(); }
+
+void MainWindow::on_btnMap_clicked() { m_Steps->openMapWindow(); }

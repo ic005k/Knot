@@ -1663,3 +1663,12 @@ QString Steps::getCurrentYear() {
 QString Steps::getCurrentMonth() {
   return QString::number(QDate::currentDate().month());
 }
+
+void Steps::openMapWindow() {
+#ifdef Q_OS_ANDROID
+
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  activity.callStaticMethod<void>("com.x/MyActivity", "openMapWindow", "()V");
+
+#endif
+}

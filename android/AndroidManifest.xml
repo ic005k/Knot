@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http:// schemas.android.com/ tools" package="com.x" android:installLocation="auto"
-    android:versionCode="1" android:versionName="2.1.42">
+    android:versionCode="1" android:versionName="2.1.43">
 
     <!-- The following comment will be replaced upon deployment with default permissions based on
     the dependencies of the application.
@@ -160,6 +160,11 @@
         </activity>
 
         <activity android:name="com.x.MDActivity" android:label="Knot"
+            android:launchMode="standard"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity android:name="com.x.MapActivity" android:label="Knot"
             android:launchMode="standard"
             android:screenOrientation="portrait">
         </activity>

@@ -132,7 +132,8 @@ class Steps : public QDialog {
 
   QString getFullDate();
 
- public slots:
+  void openMapWindow();
+  public slots:
   void clearAllGpsList();
   void getGpsTrack();
  private slots:

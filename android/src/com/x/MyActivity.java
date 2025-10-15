@@ -1357,6 +1357,12 @@ public class MyActivity
     getMyAppContext().startActivity(i);
   }
 
+  public static void openMapWindow() {
+    Intent i = new Intent(getMyAppContext(), MapActivity.class);
+    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    getMyAppContext().startActivity(i);
+  }
+
   public void openDateTimePicker() {
     Intent i = new Intent(getMyAppContext(), DateTimePicker.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
