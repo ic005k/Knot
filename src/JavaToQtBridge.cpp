@@ -35,7 +35,7 @@ static void JavaNotify_0() {
   if (mw_one->initMain) return;
 
   if (mw_one->m_Steps->isNeedRestoreUI) {
-    mui->btnSteps->click();
+    // mui->btnSteps->click();
   }
 
   qDebug() << "C++ JavaNotify_0";
@@ -47,7 +47,7 @@ static void JavaNotify_1() {
   if (mw_one->initMain) return;
 
   if (!mui->frameSteps->isHidden()) {
-    mui->btnBackSteps->click();
+    // mui->btnBackSteps->click();
     mw_one->m_Steps->isNeedRestoreUI = true;
   }
 

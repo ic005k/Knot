@@ -215,8 +215,8 @@ class Steps : public QDialog {
 
   void clearTrackAndroid();
   void appendTrackPointAndroid(double latitude, double longitude);
-  void addTrackPointToAndroid(double latitude, double longitude);
-  void clearTrackPointToAndroid();
+  void addTrackDataToAndroid(double latitude, double longitude);
+  void clearTrackDataToAndroid();
  signals:
   void distanceChanged(double distance);
   void timeChanged();

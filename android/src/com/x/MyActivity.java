@@ -164,7 +164,7 @@ public class MyActivity
     implements Application.ActivityLifecycleCallbacks {
 
   public static MapActivity mapActivityInstance = null;
-  private final List<GeoPoint> osmTrackPoints = new CopyOnWriteArrayList<>();
+  public static List<GeoPoint> osmTrackPoints = new CopyOnWriteArrayList<>();
 
   private static boolean isQtMainEnd = false;
 
@@ -1369,7 +1369,7 @@ public class MyActivity
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     getMyAppContext().startActivity(i);
 
-    replayAllTrackPoints();
+    //replayAllTrackPoints();
 
   }
 
@@ -1387,7 +1387,7 @@ public class MyActivity
     if (mapActivityInstance != null) {
       mapActivityInstance.appendTrackPoint(latitude, longitude); // 调用MapActivity的追加方法
     } else {
-      android.util.Log.w("MyActivity", "MapActivity未启动，无法追加轨迹点");
+      // android.util.Log.w("MyActivity", "MapActivity未启动，无法追加轨迹点");
     }
   }
 
@@ -2087,7 +2087,5 @@ public class MyActivity
 
     Log.d(TAG, "轨迹集合遍历完成");
   }
-
-  // 你已有的其他方法（appendTrackPoint、clearTrack 等）...
 
 }

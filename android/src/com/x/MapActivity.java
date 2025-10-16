@@ -11,7 +11,12 @@ import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import android.view.Window;
-import org.osmdroid.views.overlay.Marker;
+import android.graphics.Color;
+import android.view.WindowManager;
+import android.os.Build;
+import android.view.ViewTreeObserver;
+import android.os.Handler;
+import android.os.Looper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,6 +32,7 @@ import org.osmdroid.api.IMapController;
 import org.osmdroid.events.MapListener;
 import org.osmdroid.events.ScrollEvent;
 import org.osmdroid.events.ZoomEvent;
+import org.osmdroid.views.overlay.Marker;
 
 public class MapActivity extends Activity {
     private static final String TAG = "OSM_Final";
@@ -56,17 +62,53 @@ public class MapActivity extends Activity {
         // 去除title(App Name)
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
+        if (MyActivity.isDark) {
+            this.setStatusBarColor("#19232D"); // 深色
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            setContentView(R.layout.noteeditor_dark);
+        } else {
+            this.setStatusBarColor("#F3F3F3"); // 灰
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            setContentView(R.layout.noteeditor);
+        }
+
         // 初始化OSM配置 - 这必须在setContentView之前
         initOsmGlobalConfig();
 
         setContentView(R.layout.activity_map);
 
         // 检查并请求必要的权限
-        checkPermissions();
+        // checkPermissions();
 
         initViews();
         initOsmMap();
         initCenterMarker();
+
+        // 监听地图布局完成并延迟绘制轨迹
+        if (osmMapView != null) {
+            ViewTreeObserver observer = osmMapView.getViewTreeObserver();
+            observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        osmMapView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    } else {
+                        // 兼容旧版本
+                        osmMapView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    }
+
+                    // 动态计算延迟时间
+                    int delay = MyActivity.osmTrackPoints.size() > 1000 ? 500 : 200;
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        if (osmMapView != null && !isFinishing() && !isDestroyed()) {
+                            drawAllTrackPoints();
+                        }
+                    }, delay);
+                }
+            });
+        }
+
     }
 
     private void initOsmGlobalConfig() {
@@ -345,11 +387,13 @@ public class MapActivity extends Activity {
             Log.w(TAG, "非法经纬度，跳过该轨迹点 | 纬度：" + latitude + "，经度：" + longitude);
             return;
         }
+
         // 增加 currentLocationMarker 的空值判断（关键）
-        if (osmController == null || osmMapView == null || osmPolyline == null || currentLocationMarker == null) {
-            Log.e(TAG, "地图对象未初始化，无法追加轨迹点");
-            return;
-        }
+        // if (osmController == null || osmMapView == null || osmPolyline == null ||
+        // currentLocationMarker == null) {
+        // Log.e(TAG, "地图对象未初始化，无法追加轨迹点");
+        // return;
+        // }
 
         runOnUiThread(() -> {
             try {
@@ -409,31 +453,92 @@ public class MapActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        super.onDestroy(); // 优先调用父类销毁方法
+
+        // 1. 清理地图叠加层（避免视图层级引用泄漏）
         if (osmMapView != null) {
-            osmMapView.onDetach();
+            // 移除所有叠加层（包括轨迹线、标记点）
+            osmMapView.getOverlays().clear();
+            // 清理瓦片缓存（释放磁盘/内存缓存，不影响渲染上下文）
             if (osmMapView.getTileProvider() != null) {
                 osmMapView.getTileProvider().clearTileCache();
             }
+            // 释放绘制缓存（纯Android视图资源，与Qt渲染无关）
+            osmMapView.destroyDrawingCache();
+            // 正常置空，无需延迟（已确认与地图渲染无关）
+            osmMapView = null;
         }
 
-        if (currentLocationMarker != null) {
-            osmMapView.getOverlays().remove(currentLocationMarker);
-            currentLocationMarker = null;
+        // 2. 清理轨迹数据（避免集合引用导致的内存泄漏）
+        if (osmTrackPoints != null) {
+            synchronized (osmTrackPoints) { // 确保线程安全
+                osmTrackPoints.clear();
+            }
+            osmTrackPoints = null; // 彻底释放引用
         }
 
-        // 释放地图资源（避免内存泄漏）
-        if (osmMapView != null) {
-            osmMapView.onDetach();
-            osmMapView.getTileProvider().clearTileCache();
-            osmMapView = null; // 置空，避免后续误访问
-        }
-        osmController = null; // 置空核心对象
+        // 3. 置空其他辅助对象（解除对象间引用）
+        currentLocationMarker = null;
+        osmController = null;
         osmPolyline = null;
-        osmTrackPoints.clear();
 
-        if (MyActivity.mapActivityInstance == this) {
-            MyActivity.mapActivityInstance = null;
+        // 4. 解除静态引用（核心！避免Activity实例泄漏）
+        synchronized (MyActivity.class) {
+            if (MyActivity.mapActivityInstance == this) {
+                MyActivity.mapActivityInstance = null;
+            }
+        }
+
+        Log.d(TAG, "正常释放资源完成（与地图渲染无关场景）");
+    }
+
+    private void drawAllTrackPoints() {
+        // 1. 校验集合非空
+        if (MyActivity.osmTrackPoints.isEmpty()) {
+            Log.d(TAG, "osmTrackPoints 集合为空，无需遍历");
+            return;
+        }
+
+        // 2. 校验 MyActivity 实例有效（避免空指针）
+        if (MyActivity.mapActivityInstance == null) {
+            Log.e(TAG, "MyActivity 中 MapActivity 实例为空，无法重放轨迹");
+            return;
+        }
+
+        Log.d(TAG, "开始遍历轨迹集合，总点数：" + MyActivity.osmTrackPoints.size());
+
+        // 3. 遍历集合（CopyOnWriteArrayList 遍历线程安全）
+        for (GeoPoint point : MyActivity.osmTrackPoints) {
+            if (point == null) {
+                Log.w(TAG, "跳过空的轨迹点");
+                continue;
+            }
+
+            // 提取经纬度
+            double latitude = point.getLatitude();
+            double longitude = point.getLongitude();
+
+            appendTrackPoint(latitude, longitude);
+
+            // 可选：添加延迟，模拟轨迹实时播放效果（单位：毫秒，根据需求调整）
+            try {
+                Thread.sleep(100); // 每100毫秒播放一个点
+            } catch (InterruptedException e) {
+                Log.e(TAG, "轨迹播放延迟被中断", e);
+                Thread.currentThread().interrupt(); // 恢复中断状态
+                break;
+            }
+        }
+
+        Log.d(TAG, "轨迹集合遍历完成");
+    }
+
+    private void setStatusBarColor(String color) {
+        // 需要安卓版本大于5.0以上
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            getWindow().setStatusBarColor(Color.parseColor(color));
         }
     }
+
 }

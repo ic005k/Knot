@@ -739,7 +739,6 @@ void MainHelper::init_UIWidget() {
   mui->f_steps_btn->setFixedHeight(mui->tabMotion->tabBar()->height());
   mui->f_steps_btn->setContentsMargins(0, 0, 0, 0);
   mui->f_steps_btn->layout()->setContentsMargins(0, 0, 0, 0);
-  mui->btnBackSteps->hide();
   mui->tabMotion->setCornerWidget(mui->f_steps_btn, Qt::TopRightCorner);
 
   mui->tabMotion->setCurrentIndex(1);

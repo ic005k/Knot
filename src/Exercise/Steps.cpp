@@ -43,6 +43,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mui->lblTitle2->setFont(font0);
   mui->lblTitle3->setFont(font0);
   mui->lblTitle4->setFont(font0);
+  mui->tabMotion->setTabVisible(3, false);
 
   QFont font1 = m_Method->getNewFont(17);
   font1.setBold(true);
@@ -1177,7 +1178,7 @@ void Steps::allGpsTotal() {
 }
 
 void Steps::appendTrack(double lat, double lon) {
-  appendTrackPointAndroid(lat, lon);
+  addTrackDataToAndroid(lat, lon);
   appendTrackPointAndroid(lat, lon);
 
   return;
@@ -1212,7 +1213,8 @@ void Steps::updateMapTrackUi(double lat, double lon) {
 
 void Steps::clearTrack() {
   clearTrackAndroid();
-  clearTrackPointToAndroid();
+
+  if (!timer->isActive()) clearTrackDataToAndroid();
 
   return;
 
@@ -1387,13 +1389,14 @@ void Steps::updateGpsTrack() {
 
 void Steps::updateGpsMapUi() {
   if (isGpsMapTrackFile) {
+    appendTrackPointAndroid(lastLat, lastLon);
+
+    return;
+
     updateMapTrackUi(lastLat, lastLon);
     mui->lblGpsDateTime->setText(strGpsMapDateTime);
 
     updateInfoText(strGpsMapDistnce, strGpsMapSpeed);
-    mui->tabMotion->setCurrentIndex(3);
-
-    appendTrackPointAndroid(lastLat, lastLon);
   }
 }
 
@@ -1716,6 +1719,9 @@ void Steps::clearTrackAndroid() {
 }
 
 void Steps::appendTrackPointAndroid(double latitude, double longitude) {
+  Q_UNUSED(latitude);
+  Q_UNUSED(longitude);
+
 #ifdef Q_OS_ANDROID
 
   try {
@@ -1745,7 +1751,7 @@ void Steps::appendTrackPointAndroid(double latitude, double longitude) {
 #endif
 }
 
-void Steps::addTrackPointToAndroid(double latitude, double longitude) {
+void Steps::addTrackDataToAndroid(double latitude, double longitude) {
 #ifdef Q_OS_ANDROID
 
   try {
@@ -1769,7 +1775,7 @@ void Steps::addTrackPointToAndroid(double latitude, double longitude) {
 #endif
 }
 
-void Steps::clearTrackPointToAndroid() {
+void Steps::clearTrackDataToAndroid() {
 #ifdef Q_OS_ANDROID
 
   try {
