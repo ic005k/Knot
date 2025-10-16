@@ -4258,13 +4258,23 @@ QRadioButton {
     text-align: center;
     
     /* 隐藏默认指示器 */
-    spacing: 2;
+    spacing: 3;
 }
 
-/* 隐藏原生指示器 */
+
+/* 自定义矩形指示器（核心修改） */
 QRadioButton::indicator {
-    width: 10;
-    height: 10;
+    width: 3px; /* 满足需求：宽度3 */
+    height: 16px; /* 高度接近按钮（按钮总高24px - 上下各4px padding = 16px） */
+    border-radius: 0; /* 取消圆角，确保是纯矩形 */
+    background-color: #999; /* 未选中时的矩形颜色（浅灰） */
+}
+
+/* 选中状态的矩形样式（区分选中/未选中） */
+QRadioButton::indicator:checked {
+    background-color: #2196F3; /* 选中时的矩形颜色（示例：蓝色） */
+    /* 可选：选中时加细边框，增强视觉区分 */
+    /* border: 1px solid #1976D2; */
 }
 
 /* 未选中状态 - 灰暗底色（类似电灯关闭） */
@@ -4324,20 +4334,30 @@ QRadioButton:disabled {
     /* 基础按钮样式 */
     border: 1px solid #ccc;
     border-radius: 4px;
-    padding: 8px 16px;
+    padding: 4px 8px;
     margin: 2px;
     
     /* 文本居中，类似普通按钮 */
     text-align: center;
     
     /* 隐藏默认指示器 */
-    spacing: 0;
+    spacing: 3;
 }
 
-/* 隐藏原生指示器 */
+
+/* 自定义矩形指示器（核心修改） */
 QRadioButton::indicator {
-    width: 0;
-    height: 0;
+    width: 3px; /* 满足需求：宽度3 */
+    height: 16px; /* 高度接近按钮（按钮总高24px - 上下各4px padding = 16px） */
+    border-radius: 0; /* 取消圆角，确保是纯矩形 */
+    background-color: #999; /* 未选中时的矩形颜色（浅灰） */
+}
+
+/* 选中状态的矩形样式（区分选中/未选中） */
+QRadioButton::indicator:checked {
+    background-color: #2196F3; /* 选中时的矩形颜色（示例：蓝色） */
+    /* 可选：选中时加细边框，增强视觉区分 */
+    /* border: 1px solid #1976D2; */
 }
 
 /* 未选中状态 - 灰暗底色（类似电灯关闭） */
@@ -4377,6 +4397,9 @@ QRadioButton:disabled {
     color: #aaa;
     border-color: #eee;
 }
+
+
+
 </string>
                 </property>
                 <property name="text">
