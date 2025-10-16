@@ -164,7 +164,9 @@ public class MyActivity
     implements Application.ActivityLifecycleCallbacks {
 
   public static MapActivity mapActivityInstance = null;
-  public static List<GeoPoint> osmTrackPoints = new CopyOnWriteArrayList<>();
+  public static List<GeoPoint> osmTrackPoints = new ArrayList<>();
+  public static String lblDate = "Date";
+  public static String lblInfo = "Speed";
 
   private static boolean isQtMainEnd = false;
 
@@ -1369,8 +1371,6 @@ public class MyActivity
     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     getMyAppContext().startActivity(i);
 
-    //replayAllTrackPoints();
-
   }
 
   public void forwardClearTrack() {
@@ -2031,7 +2031,7 @@ public class MyActivity
     // 核心操作：向CopyOnWriteArrayList添加数据（线程安全）
     GeoPoint newPoint = new GeoPoint(latitude, longitude);
     osmTrackPoints.add(newPoint);
-    Log.d(TAG, "已添加轨迹点 | 总数量：" + osmTrackPoints.size());
+    // Log.d(TAG, "已添加轨迹点 | 总数量：" + osmTrackPoints.size());
 
   }
 
@@ -2086,6 +2086,21 @@ public class MyActivity
     }
 
     Log.d(TAG, "轨迹集合遍历完成");
+  }
+
+  public void setDateTitle(String str) {
+    lblDate = str;
+
+    if (mapActivityInstance != null) {
+      MapActivity.topDateLabel.setText(str);
+    }
+  }
+
+  public void setInfoTitle(String str) {
+    lblInfo = str;
+    if (mapActivityInstance != null) {
+      MapActivity.bottomInfoLabel.setText(str);
+    }
   }
 
 }

@@ -46,8 +46,9 @@ public class MapActivity extends Activity {
     private IMapController osmController;
     private Polyline osmPolyline;
     private List<GeoPoint> osmTrackPoints = new ArrayList<>();
+    public static TextView topDateLabel;
     private TextView topInfoLabel;
-    private TextView bottomInfoLabel;
+    public static TextView bottomInfoLabel;
     private Button switchMapBtn;
     private boolean usingThunderforest = true; // 跟踪当前使用的瓦片源
 
@@ -103,6 +104,8 @@ public class MapActivity extends Activity {
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
                         if (osmMapView != null && !isFinishing() && !isDestroyed()) {
                             drawAllTrackPoints();
+                            topDateLabel.setText(MyActivity.lblDate);
+                            bottomInfoLabel.setText(MyActivity.lblInfo);
                         }
                     }, delay);
                 }
@@ -136,6 +139,7 @@ public class MapActivity extends Activity {
     }
 
     private void initViews() {
+        topDateLabel = findViewById(R.id.topDateLabel);
         topInfoLabel = findViewById(R.id.topInfoLabel);
         bottomInfoLabel = findViewById(R.id.bottomInfoLabel);
         switchMapBtn = findViewById(R.id.switchMapBtn);
@@ -405,11 +409,11 @@ public class MapActivity extends Activity {
                 osmController.setCenter(newPoint);
                 currentLocationMarker.setPosition(newPoint);
                 currentLocationMarker.setEnabled(true); // 显示标识
-                Log.d(TAG, "标识已更新到新轨迹点 | 可见性：" + currentLocationMarker.isEnabled());
+                // Log.d(TAG, "标识已更新到新轨迹点 | 可见性：" + currentLocationMarker.isEnabled());
 
                 // 强制刷新地图，确保标识立即显示
                 osmMapView.invalidate();
-                Log.d(TAG, "轨迹点追加成功 | 总点数：" + osmTrackPoints.size());
+                // Log.d(TAG, "轨迹点追加成功 | 总点数：" + osmTrackPoints.size());
             } catch (Exception e) {
                 Log.e(TAG, "追加轨迹点异常", e);
             }
@@ -520,14 +524,6 @@ public class MapActivity extends Activity {
 
             appendTrackPoint(latitude, longitude);
 
-            // 可选：添加延迟，模拟轨迹实时播放效果（单位：毫秒，根据需求调整）
-            try {
-                Thread.sleep(100); // 每100毫秒播放一个点
-            } catch (InterruptedException e) {
-                Log.e(TAG, "轨迹播放延迟被中断", e);
-                Thread.currentThread().interrupt(); // 恢复中断状态
-                break;
-            }
         }
 
         Log.d(TAG, "轨迹集合遍历完成");

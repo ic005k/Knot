@@ -360,6 +360,7 @@ Rectangle {
                         onClicked: {
                             strGpsTime = item0.text + "-=-" + item1.text + "-=-"
                                     + item2.text + "-=-" + item4.text
+
                             m_Steps.getGpsTrack()
                         }
 

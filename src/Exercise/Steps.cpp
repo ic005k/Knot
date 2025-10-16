@@ -594,6 +594,8 @@ void Steps::startRecordMotion() {
     t0 = QDate::currentDate().toString();
 
   mui->lblGpsDateTime->setText(t0 + " " + strStartTime);
+  setDateLabelToAndroid(t0 + " " + strStartTime);
+
   startDT = QDateTime::currentDateTime();
 
   QString ss0 = t0;
@@ -721,6 +723,8 @@ void Steps::updateGetGps() {
       }
 
       updateInfoText(str1, str3);
+
+      setInfoLabelToAndroid(str1 + " | " + str3);
     }
   }
 
@@ -1196,7 +1200,8 @@ void Steps::updateInfoText(QString strDistance, QString strSpeed) {
 }
 
 void Steps::updateTrackData(double lat, double lon) {
-  appendTrackPointAndroid(lat, lon);
+  addTrackDataToAndroid(lat, lon);
+  // appendTrackPointAndroid(lat, lon);
 
   return;
 
@@ -1240,8 +1245,6 @@ void Steps::writeGpsPos(double lat, double lon, int i, int count) {
 
 void Steps::getGpsTrack() {
   if (timer->isActive()) return;
-
-  openMapWindow();
 
   mw_one->showProgress();
   QQuickItem* root = mui->qwGpsList->rootObject();
@@ -1390,6 +1393,10 @@ void Steps::updateGpsTrack() {
 void Steps::updateGpsMapUi() {
   if (isGpsMapTrackFile) {
     appendTrackPointAndroid(lastLat, lastLon);
+    setDateLabelToAndroid(strGpsMapDateTime);
+    setInfoLabelToAndroid(strGpsMapDistnce + " | " + strGpsMapSpeed);
+
+    openMapWindow();
 
     return;
 
@@ -1791,6 +1798,36 @@ void Steps::clearTrackDataToAndroid() {
     }
   } catch (const std::exception& e) {
     qCritical() << "调用clearTrackPoints失败：" << e.what();
+  }
+
+#endif
+}
+
+void Steps::setDateLabelToAndroid(const QString& str) {
+  Q_UNUSED(str);
+#ifdef Q_OS_ANDROID
+
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  if (activity.isValid()) {
+    // 将QString转换为Java的String
+    QJniObject javaStr = QJniObject::fromString(str);
+    // 调用Java的setDateTitle方法
+    activity.callMethod<void>("setDateTitle", "(Ljava/lang/String;)V",
+                              javaStr.object<jstring>());
+  }
+
+#endif
+}
+
+void Steps::setInfoLabelToAndroid(const QString& str) {
+  Q_UNUSED(str);
+#ifdef Q_OS_ANDROID
+
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  if (activity.isValid()) {
+    QJniObject javaStr = QJniObject::fromString(str);
+    activity.callMethod<void>("setInfoTitle", "(Ljava/lang/String;)V",
+                              javaStr.object<jstring>());
   }
 
 #endif

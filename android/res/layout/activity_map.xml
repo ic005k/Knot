@@ -7,13 +7,24 @@
 
     <!-- 顶部信息栏（显示地图状态/自定义信息） -->
     <TextView
-        android:id="@+id/topInfoLabel"
+        android:id="@+id/topDateLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:background="#2196F3"
         android:textColor="@android:color/white"
-        android:textSize="16sp"
+        android:textSize="13sp"
+        android:gravity="center_horizontal"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/topInfoLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:background="#98FB98"
+        android:textColor="@android:color/black"
+        android:textSize="12sp"
         android:text="当前地图：OSM | 加载中..." />
 
     <!-- 中间：OSM地图容器（占满剩余空间） -->
@@ -48,7 +59,8 @@
         android:padding="8dp"
         android:background="#2196F3"
         android:textColor="@android:color/white"
-        android:textSize="16sp"
+        android:textSize="13sp"
+        android:gravity="center_horizontal"
         android:text="距离: 0.0km | 速度: 0.0km/h" />
 
 </LinearLayout>

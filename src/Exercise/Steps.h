@@ -132,10 +132,10 @@ class Steps : public QDialog {
 
   QString getFullDate();
 
-  void openMapWindow();
  public slots:
   void clearAllGpsList();
   void getGpsTrack();
+  void openMapWindow();
  private slots:
   void positionUpdated(const QGeoPositionInfo &info);
 
@@ -217,6 +217,8 @@ class Steps : public QDialog {
   void appendTrackPointAndroid(double latitude, double longitude);
   void addTrackDataToAndroid(double latitude, double longitude);
   void clearTrackDataToAndroid();
+  void setDateLabelToAndroid(const QString &str);
+  void setInfoLabelToAndroid(const QString &str);
  signals:
   void distanceChanged(double distance);
   void timeChanged();
