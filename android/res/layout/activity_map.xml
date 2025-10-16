@@ -10,10 +10,10 @@
         android:id="@+id/topDateLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
+        android:padding="6dp"
         android:background="#2196F3"
         android:textColor="@android:color/white"
-        android:textSize="13sp"
+        android:textSize="12sp"
         android:gravity="center_horizontal"
         android:text="" />
 
@@ -21,11 +21,13 @@
         android:id="@+id/topInfoLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
+        android:padding="6dp"
         android:background="#98FB98"
         android:textColor="@android:color/black"
-        android:textSize="12sp"
-        android:text="当前地图：OSM | 加载中..." />
+        android:textSize="10sp"
+        android:gravity="center_horizontal"
+        android:typeface="monospace" 
+        android:text="Zoom..." />
 
     <!-- 中间：OSM地图容器（占满剩余空间） -->
     <FrameLayout
@@ -56,10 +58,10 @@
         android:id="@+id/bottomInfoLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
+        android:padding="6dp"
         android:background="#2196F3"
         android:textColor="@android:color/white"
-        android:textSize="13sp"
+        android:textSize="12sp"
         android:gravity="center_horizontal"
         android:text="距离: 0.0km | 速度: 0.0km/h" />
 

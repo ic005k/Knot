@@ -189,11 +189,19 @@ public class MapActivity extends Activity {
             osmMapView.setMapListener(new MapListener() {
                 @Override
                 public boolean onScroll(ScrollEvent event) {
+                    // 获取当前地图中心坐标
                     org.osmdroid.api.IGeoPoint center = osmMapView.getMapCenter();
+                    // 获取当前缩放级别
+                    double zoomLevel = osmMapView.getZoomLevel();
+
+                    // 同时显示缩放级、纬度、经度
                     topInfoLabel.setText(String.format(
-                            "纬度:%.4f 经度:%.4f",
-                            center.getLatitude(), center.getLongitude()));
-                    // 用isEnabled()判断是否可见
+                            "Zoom: %d | Lat: %.4f | Lng: %.4f",
+                            (int) zoomLevel,
+                            center.getLatitude(),
+                            center.getLongitude()));
+
+                    // 更新当前位置标记
                     if (currentLocationMarker != null && currentLocationMarker.isEnabled()) {
                         currentLocationMarker.setPosition(new GeoPoint(center.getLatitude(), center.getLongitude()));
                     }
@@ -202,7 +210,17 @@ public class MapActivity extends Activity {
 
                 @Override
                 public boolean onZoom(ZoomEvent event) {
-                    topInfoLabel.setText(String.format("缩放级:%d", (int) event.getZoomLevel()));
+                    // 获取当前地图中心坐标
+                    org.osmdroid.api.IGeoPoint center = osmMapView.getMapCenter();
+                    // 获取当前缩放级别（从事件中获取最新缩放级）
+                    double zoomLevel = event.getZoomLevel();
+
+                    // 同时显示缩放级、纬度、经度
+                    topInfoLabel.setText(String.format(
+                            "Zoom: %d | Lat: %.4f | Lng: %.4f",
+                            (int) zoomLevel,
+                            center.getLatitude(),
+                            center.getLongitude()));
                     return false;
                 }
             });
