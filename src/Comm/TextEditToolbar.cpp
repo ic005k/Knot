@@ -192,7 +192,7 @@ void TextEditToolbar::initButtons() {
   btnCursorLeft = new QPushButton("->", this);
   btnCursorRight = new QPushButton("<-", this);
   btnDel = new QPushButton(tr("Del"), this);
-  btnClose = new QPushButton(tr("Cls"), this);
+  btnClose = new QPushButton(tr("Close"), this);
 
   // 开启长按连续触发（使用默认值：延迟 500ms，间隔 100ms）
   btnMinus->setAutoRepeat(true);
@@ -244,19 +244,20 @@ void TextEditToolbar::initHandles() {
 }
 
 void TextEditToolbar::adjustButtonSizes() {
-  const int BUTTON_SIZE = 44;      // 按钮大小不变（与原有一致）
-  const int TOOLBAR_WIDTH = 258;   // 宽度不变
-  const int TOOLBAR_HEIGHT = 110;  // 高度不变
+  const int BUTTON_HEIGHT = 42;
+  const int BUTTON_WIDTH = 55;
+  const int TOOLBAR_WIDTH = 312;
+  const int TOOLBAR_HEIGHT = 108;
 
-  // 统一设置按钮大小（44×44）- 不变
+  // 统一设置按钮大小
   QList<QPushButton *> buttons = {
       btnMinus,     btnPlus,       btnCopy,        btnCut, btnPaste,
       btnSelectAll, btnCursorLeft, btnCursorRight, btnDel, btnClose};
   for (auto btn : buttons) {
-    btn->setFixedSize(BUTTON_SIZE, BUTTON_SIZE);
+    btn->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
   }
 
-  // 更新工具栏固定尺寸 - 不变
+  // 更新工具栏固定尺寸
   setFixedSize(TOOLBAR_WIDTH, TOOLBAR_HEIGHT);
 
   // 仅保留「边距清零」逻辑，删除重复的spacing设置
