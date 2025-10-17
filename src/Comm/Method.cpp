@@ -3024,7 +3024,7 @@ void Method::showInfoWindow(const QString &info) {
   if (isAndroid)
     infoWindow->setFixedWidth(mw_one->width() - 10);
   else
-    infoWindow->setFixedWidth(300);
+    infoWindow->setFixedWidth(350);
 
   int win_h = 230;
   QFont font = this->font();

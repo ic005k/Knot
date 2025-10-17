@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout 
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+>
 
     <!-- 顶部信息栏（显示地图状态/自定义信息） -->
     <TextView
@@ -15,31 +16,35 @@
         android:textColor="@android:color/white"
         android:textSize="12sp"
         android:gravity="center_horizontal"
-        android:text="" />
+        android:text=""
+    />
 
     <TextView
         android:id="@+id/topInfoLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="6dp"
-        android:background="#98FB98"
+        android:background="#8098FB98"
         android:textColor="@android:color/black"
         android:textSize="10sp"
         android:gravity="center_horizontal"
-        android:typeface="monospace" 
-        android:text="Zoom..." />
+        android:typeface="monospace"
+        android:text="Zoom..."
+    />
 
     <!-- 中间：OSM地图容器（占满剩余空间） -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+    >
 
         <!-- OSM地图视图（唯一地图源） -->
         <org.osmdroid.views.MapView
             android:id="@+id/osmMapView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+        />
 
         <!-- 暂留地图切换按钮（后续可扩展，当前隐藏或显示均可） -->
         <Button
@@ -50,7 +55,8 @@
             android:background="#FFFFFF"
             android:text="切换地图（暂不可用）"
             android:textSize="14sp"
-            android:visibility="gone" /> <!-- 暂时隐藏，后续需用再改为visible -->
+            android:visibility="gone"
+        /> <!-- 暂时隐藏，后续需用再改为visible -->
     </FrameLayout>
 
     <!-- 底部信息栏（显示距离/速度） -->
@@ -63,6 +69,7 @@
         android:textColor="@android:color/white"
         android:textSize="12sp"
         android:gravity="center_horizontal"
-        android:text="距离: 0.0km | 速度: 0.0km/h" />
+        android:text="距离: 0.0km | 速度: 0.0km/h"
+    />
 
 </LinearLayout>

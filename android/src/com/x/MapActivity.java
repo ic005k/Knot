@@ -1,45 +1,46 @@
 package com.x;
 
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-import android.app.Activity;
-import android.util.Log;
 import android.Manifest;
+import android.app.Activity;
 import android.content.pm.PackageManager;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import android.view.Window;
 import android.graphics.Color;
-import android.view.WindowManager;
 import android.os.Build;
-import android.view.ViewTreeObserver;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-
+import android.util.Log;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.TextView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
+import org.osmdroid.events.MapListener;
+import org.osmdroid.events.ScrollEvent;
+import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.Polyline;
-import org.osmdroid.api.IMapController;
-import org.osmdroid.events.MapListener;
-import org.osmdroid.events.ScrollEvent;
-import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.Polyline;
 
 public class MapActivity extends Activity {
+
     private static final String TAG = "OSM_Final";
-    private static final String THUNDERFOREST_API_KEY = "5ad09b54d1e542909f4f20f3a01786ae"; // 确保此API密钥有效
+    private static final String THUNDERFOREST_API_KEY =
+        "5ad09b54d1e542909f4f20f3a01786ae"; // 确保此API密钥有效
     private static final double OSLO_LATITUDE = 59.9139;
     private static final double OSLO_LONGITUDE = 10.7522;
-    private static final String USER_AGENT = "Knot/1.0 (Android; com.x; " + android.os.Build.VERSION.RELEASE + ")";
+    private static final String USER_AGENT =
+        "Knot/1.0 (Android; com.x; " + android.os.Build.VERSION.RELEASE + ")";
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
 
     private MapView osmMapView;
@@ -65,11 +66,15 @@ public class MapActivity extends Activity {
 
         if (MyActivity.isDark) {
             this.setStatusBarColor("#19232D"); // 深色
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            getWindow()
+                .getDecorView()
+                .setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             setContentView(R.layout.noteeditor_dark);
         } else {
             this.setStatusBarColor("#F3F3F3"); // 灰
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            getWindow()
+                .getDecorView()
+                .setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             setContentView(R.layout.noteeditor);
         }
 
@@ -88,36 +93,56 @@ public class MapActivity extends Activity {
         // 监听地图布局完成并延迟绘制轨迹
         if (osmMapView != null) {
             ViewTreeObserver observer = osmMapView.getViewTreeObserver();
-            observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        osmMapView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    } else {
-                        // 兼容旧版本
-                        osmMapView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                    }
-
-                    // 动态计算延迟时间
-                    int delay = MyActivity.osmTrackPoints.size() > 1000 ? 500 : 200;
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        if (osmMapView != null && !isFinishing() && !isDestroyed()) {
-                            drawAllTrackPoints();
-                            topDateLabel.setText(MyActivity.lblDate);
-                            bottomInfoLabel.setText(MyActivity.lblInfo);
+            observer.addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        if (
+                            Build.VERSION.SDK_INT >=
+                            Build.VERSION_CODES.JELLY_BEAN
+                        ) {
+                            osmMapView
+                                .getViewTreeObserver()
+                                .removeOnGlobalLayoutListener(this);
+                        } else {
+                            // 兼容旧版本
+                            osmMapView
+                                .getViewTreeObserver()
+                                .removeGlobalOnLayoutListener(this);
                         }
-                    }, delay);
-                }
-            });
-        }
 
+                        // 动态计算延迟时间
+                        int delay = MyActivity.osmTrackPoints.size() > 100
+                            ? 50
+                            : 20;
+                        delay = 0; //目前取消延迟
+                        new Handler(Looper.getMainLooper()).postDelayed(
+                            () -> {
+                                if (
+                                    osmMapView != null &&
+                                    !isFinishing() &&
+                                    !isDestroyed()
+                                ) {
+                                    drawAllTrackPoints();
+                                    topDateLabel.setText(MyActivity.lblDate);
+                                    bottomInfoLabel.setText(MyActivity.lblInfo);
+                                }
+                            },
+                            delay
+                        );
+                    }
+                }
+            );
+        }
     }
 
     private void initOsmGlobalConfig() {
         try {
             // 正确设置全局配置
-            Configuration.getInstance().load(this, getPreferences(MODE_PRIVATE));
+            Configuration.getInstance().load(
+                this,
+                getPreferences(MODE_PRIVATE)
+            );
             Configuration.getInstance().setUserAgentValue(USER_AGENT);
 
             File basePath = getExternalFilesDir(null);
@@ -186,51 +211,68 @@ public class MapActivity extends Activity {
             osmMapView.getOverlays().add(osmPolyline);
 
             // 地图监听（保留原有逻辑）
-            osmMapView.setMapListener(new MapListener() {
-                @Override
-                public boolean onScroll(ScrollEvent event) {
-                    // 获取当前地图中心坐标
-                    org.osmdroid.api.IGeoPoint center = osmMapView.getMapCenter();
-                    // 获取当前缩放级别
-                    double zoomLevel = osmMapView.getZoomLevel();
+            osmMapView.setMapListener(
+                new MapListener() {
+                    @Override
+                    public boolean onScroll(ScrollEvent event) {
+                        // 获取当前地图中心坐标
+                        org.osmdroid.api.IGeoPoint center =
+                            osmMapView.getMapCenter();
+                        // 获取当前缩放级别
+                        double zoomLevel = osmMapView.getZoomLevel();
 
-                    // 同时显示缩放级、纬度、经度
-                    topInfoLabel.setText(String.format(
-                            "Zoom: %d | Lat: %.4f | Lng: %.4f",
-                            (int) zoomLevel,
-                            center.getLatitude(),
-                            center.getLongitude()));
+                        // 同时显示缩放级、纬度、经度
+                        topInfoLabel.setText(
+                            String.format(
+                                "Zoom: %d | Lat: %.4f | Lng: %.4f",
+                                (int) zoomLevel,
+                                center.getLatitude(),
+                                center.getLongitude()
+                            )
+                        );
 
-                    // 更新当前位置标记
-                    if (currentLocationMarker != null && currentLocationMarker.isEnabled()) {
-                        currentLocationMarker.setPosition(new GeoPoint(center.getLatitude(), center.getLongitude()));
+                        // 更新当前位置标记
+                        if (
+                            currentLocationMarker != null &&
+                            currentLocationMarker.isEnabled()
+                        ) {
+                            currentLocationMarker.setPosition(
+                                new GeoPoint(
+                                    center.getLatitude(),
+                                    center.getLongitude()
+                                )
+                            );
+                        }
+                        return false;
                     }
-                    return false;
-                }
 
-                @Override
-                public boolean onZoom(ZoomEvent event) {
-                    // 获取当前地图中心坐标
-                    org.osmdroid.api.IGeoPoint center = osmMapView.getMapCenter();
-                    // 获取当前缩放级别（从事件中获取最新缩放级）
-                    double zoomLevel = event.getZoomLevel();
+                    @Override
+                    public boolean onZoom(ZoomEvent event) {
+                        // 获取当前地图中心坐标
+                        org.osmdroid.api.IGeoPoint center =
+                            osmMapView.getMapCenter();
+                        // 获取当前缩放级别（从事件中获取最新缩放级）
+                        double zoomLevel = event.getZoomLevel();
 
-                    // 同时显示缩放级、纬度、经度
-                    topInfoLabel.setText(String.format(
-                            "Zoom: %d | Lat: %.4f | Lng: %.4f",
-                            (int) zoomLevel,
-                            center.getLatitude(),
-                            center.getLongitude()));
-                    return false;
+                        // 同时显示缩放级、纬度、经度
+                        topInfoLabel.setText(
+                            String.format(
+                                "Zoom: %d | Lat: %.4f | Lng: %.4f",
+                                (int) zoomLevel,
+                                center.getLatitude(),
+                                center.getLongitude()
+                            )
+                        );
+                        return false;
+                    }
                 }
-            });
+            );
 
             setupThunderforestTiles();
 
             // 地图初始化完成后，刷新一次覆盖层
             osmMapView.invalidate();
             Log.d(TAG, "地图初始化完成，覆盖层已刷新");
-
         } catch (Exception e) {
             Log.e(TAG, "地图初始化失败", e);
             topInfoLabel.setText("地图初始化失败，尝试备用方案");
@@ -241,13 +283,17 @@ public class MapActivity extends Activity {
     private void setupThunderforestTiles() {
         try {
             ITileSource thunderforestTile = new XYTileSource(
-                    "Thunderforest_Cycle",
-                    1, 18, 256, ".png",
-                    new String[] {
-                            "https://a.tile.thunderforest.com/cycle/",
-                            "https://b.tile.thunderforest.com/cycle/",
-                            "https://c.tile.thunderforest.com/cycle/"
-                    }) {
+                "Thunderforest_Cycle",
+                1,
+                18,
+                256,
+                ".png",
+                new String[] {
+                    "https://a.tile.thunderforest.com/cycle/",
+                    "https://b.tile.thunderforest.com/cycle/",
+                    "https://c.tile.thunderforest.com/cycle/",
+                }
+            ) {
                 @Override
                 public String getTileURLString(long pMapTileIndex) {
                     String url = super.getTileURLString(pMapTileIndex);
@@ -259,7 +305,6 @@ public class MapActivity extends Activity {
             osmMapView.setTileSource(thunderforestTile);
             topInfoLabel.setText("地图加载完成 - Thunderforest");
             usingThunderforest = true;
-
         } catch (Exception e) {
             Log.e(TAG, "Thunderforest TileSource失败", e);
             topInfoLabel.setText("Thunderforest加载失败，切换到OpenStreetMap");
@@ -270,18 +315,21 @@ public class MapActivity extends Activity {
     private void setupOpenStreetMapTiles() {
         try {
             ITileSource osmTileSource = new XYTileSource(
-                    "OpenStreetMap",
-                    1, 18, 256, ".png",
-                    new String[] {
-                            "https://a.tile.openstreetmap.org/",
-                            "https://b.tile.openstreetmap.org/",
-                            "https://c.tile.openstreetmap.org/"
-                    });
+                "OpenStreetMap",
+                1,
+                18,
+                256,
+                ".png",
+                new String[] {
+                    "https://a.tile.openstreetmap.org/",
+                    "https://b.tile.openstreetmap.org/",
+                    "https://c.tile.openstreetmap.org/",
+                }
+            );
 
             osmMapView.setTileSource(osmTileSource);
             topInfoLabel.setText("使用OpenStreetMap瓦片");
             usingThunderforest = false;
-
         } catch (Exception ex) {
             Log.e(TAG, "OpenStreetMap也失败", ex);
             topInfoLabel.setText("地图加载失败，请检查网络连接");
@@ -293,23 +341,27 @@ public class MapActivity extends Activity {
         List<String> permissionsNeeded = new ArrayList<>();
 
         final String[] permissions = new String[] {
-                Manifest.permission.INTERNET,
-                Manifest.permission.ACCESS_NETWORK_STATE,
-                // Android 10+ 不需要WRITE_EXTERNAL_STORAGE权限
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            Manifest.permission.INTERNET,
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            // Android 10+ 不需要WRITE_EXTERNAL_STORAGE权限
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
         };
 
         for (String permission : permissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            if (
+                ContextCompat.checkSelfPermission(this, permission) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
                 permissionsNeeded.add(permission);
             }
         }
 
         if (!permissionsNeeded.isEmpty()) {
             ActivityCompat.requestPermissions(
-                    this,
-                    permissionsNeeded.toArray(new String[0]),
-                    REQUEST_PERMISSIONS_REQUEST_CODE);
+                this,
+                permissionsNeeded.toArray(new String[0]),
+                REQUEST_PERMISSIONS_REQUEST_CODE
+            );
         }
     }
 
@@ -328,21 +380,18 @@ public class MapActivity extends Activity {
             }
 
             Log.d(TAG, "已清除瓦片缓存");
-
         } catch (Exception e) {
             Log.e(TAG, "清除缓存失败", e);
         }
     }
 
     private boolean deleteDir(File dir) {
-        if (dir == null)
-            return false;
+        if (dir == null) return false;
         if (dir.isDirectory()) {
             File[] files = dir.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    if (!deleteDir(file))
-                        return false;
+                    if (!deleteDir(file)) return false;
                 }
             }
         }
@@ -350,8 +399,16 @@ public class MapActivity extends Activity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    public void onRequestPermissionsResult(
+        int requestCode,
+        String[] permissions,
+        int[] grantResults
+    ) {
+        super.onRequestPermissionsResult(
+            requestCode,
+            permissions,
+            grantResults
+        );
         if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
             boolean allGranted = true;
             for (int result : grantResults) {
@@ -381,11 +438,18 @@ public class MapActivity extends Activity {
 
         currentLocationMarker = new Marker(osmMapView);
         // 引用自定义红色圆点图标（关键修改）
-        currentLocationMarker.setIcon(ContextCompat.getDrawable(this, R.drawable.marker_center));
+        currentLocationMarker.setIcon(
+            ContextCompat.getDrawable(this, R.drawable.marker_center)
+        );
         // 锚点设置为图标中心，确保圆点中心与经纬度完全对齐
-        currentLocationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
+        currentLocationMarker.setAnchor(
+            Marker.ANCHOR_CENTER,
+            Marker.ANCHOR_CENTER
+        );
         // 初始隐藏，同时设置初始位置（避免位置为空）
-        currentLocationMarker.setPosition(new GeoPoint(OSLO_LATITUDE, OSLO_LONGITUDE));
+        currentLocationMarker.setPosition(
+            new GeoPoint(OSLO_LATITUDE, OSLO_LONGITUDE)
+        );
         currentLocationMarker.setEnabled(false);
 
         // 关键：调整覆盖层顺序，将标识放在最上层（避免被轨迹线遮挡）
@@ -399,14 +463,25 @@ public class MapActivity extends Activity {
 
     /**
      * 追加轨迹点的接口方法（每次追加都将地图中心定位到当前点）
-     * 
+     *
      * @param latitude  纬度（合法范围：-90.0 ~ 90.0）
      * @param longitude 经度（合法范围：-180.0 ~ 180.0）
      */
     public void appendTrackPoint(double latitude, double longitude) {
         // 1. 基础合法性校验
-        if (latitude < -90.0 || latitude > 90.0 || longitude < -180.0 || longitude > 180.0) {
-            Log.w(TAG, "非法经纬度，跳过该轨迹点 | 纬度：" + latitude + "，经度：" + longitude);
+        if (
+            latitude < -90.0 ||
+            latitude > 90.0 ||
+            longitude < -180.0 ||
+            longitude > 180.0
+        ) {
+            Log.w(
+                TAG,
+                "非法经纬度，跳过该轨迹点 | 纬度：" +
+                    latitude +
+                    "，经度：" +
+                    longitude
+            );
             return;
         }
 
@@ -493,7 +568,8 @@ public class MapActivity extends Activity {
 
         // 2. 清理轨迹数据（避免集合引用导致的内存泄漏）
         if (osmTrackPoints != null) {
-            synchronized (osmTrackPoints) { // 确保线程安全
+            synchronized (osmTrackPoints) {
+                // 确保线程安全
                 osmTrackPoints.clear();
             }
             osmTrackPoints = null; // 彻底释放引用
@@ -527,7 +603,10 @@ public class MapActivity extends Activity {
             return;
         }
 
-        Log.d(TAG, "开始遍历轨迹集合，总点数：" + MyActivity.osmTrackPoints.size());
+        Log.d(
+            TAG,
+            "开始遍历轨迹集合，总点数：" + MyActivity.osmTrackPoints.size()
+        );
 
         // 3. 遍历集合（CopyOnWriteArrayList 遍历线程安全）
         for (GeoPoint point : MyActivity.osmTrackPoints) {
@@ -541,7 +620,6 @@ public class MapActivity extends Activity {
             double longitude = point.getLongitude();
 
             appendTrackPoint(latitude, longitude);
-
         }
 
         Log.d(TAG, "轨迹集合遍历完成");
@@ -550,9 +628,10 @@ public class MapActivity extends Activity {
     private void setStatusBarColor(String color) {
         // 需要安卓版本大于5.0以上
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            getWindow().addFlags(
+                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+            );
             getWindow().setStatusBarColor(Color.parseColor(color));
         }
     }
-
 }
