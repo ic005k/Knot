@@ -34,6 +34,18 @@ import org.osmdroid.views.overlay.Polyline;
 
 public class MapActivity extends Activity {
 
+    // 直接定义两个Thunderforest图层的URL数组（核心简化点）
+    private static final String[] TILE_URLS_CYCLE = {
+        "https://a.tile.thunderforest.com/cycle/",
+        "https://b.tile.thunderforest.com/cycle/",
+        "https://c.tile.thunderforest.com/cycle/",
+    };
+    private static final String[] TILE_URLS_OUTDOORS = {
+        "https://a.tile.thunderforest.com/outdoors/",
+        "https://b.tile.thunderforest.com/outdoors/",
+        "https://c.tile.thunderforest.com/outdoors/",
+    };
+
     private static final String TAG = "OSM_Final";
     private static final String THUNDERFOREST_API_KEY =
         "5ad09b54d1e542909f4f20f3a01786ae"; // 确保此API密钥有效
@@ -280,7 +292,7 @@ public class MapActivity extends Activity {
         }
     }
 
-    private void setupThunderforestTiles() {
+    private void setupThunderforestTiles_Low() {
         try {
             ITileSource thunderforestTile = new XYTileSource(
                 "Thunderforest_Cycle",
@@ -308,6 +320,37 @@ public class MapActivity extends Activity {
         } catch (Exception e) {
             Log.e(TAG, "Thunderforest TileSource失败", e);
             topInfoLabel.setText("Thunderforest加载失败，切换到OpenStreetMap");
+            setupOpenStreetMapTiles();
+        }
+    }
+
+    private void setupThunderforestTiles() {
+        try {
+            // 关键修改1：后缀改为 "@2x.png"（因为要拼接成 {y}@2x.png）
+            ITileSource thunderforestTile = new XYTileSource(
+                "Thunderforest_Cycle_HD",
+                1,
+                18,
+                512, // 瓦片尺寸512不变（高清核心）
+                "@2x.png", // 后缀改为 "@2x.png"（原是 ".png"）
+                TILE_URLS_CYCLE
+            ) {
+                @Override
+                public String getTileURLString(long pMapTileIndex) {
+                    String url = super.getTileURLString(pMapTileIndex);
+                    // 关键修改2：移除原有的 ".png@2x" 替换逻辑，因为后缀已改为 "@2x.png"
+                    // 此时super生成的URL已为：https://xxx/cycle/z/x/y@2x.png
+                    // 直接附加API密钥即可
+                    return url + "?apikey=" + THUNDERFOREST_API_KEY;
+                }
+            };
+
+            osmMapView.setTileSource(thunderforestTile);
+            topInfoLabel.setText("地图加载完成 - Thunderforest（高清）");
+            usingThunderforest = true;
+        } catch (Exception e) {
+            Log.e(TAG, "Thunderforest高清瓦片加载失败", e);
+            topInfoLabel.setText("高清瓦片加载失败，切换到普通瓦片");
             setupOpenStreetMapTiles();
         }
     }

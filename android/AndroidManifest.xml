@@ -1,7 +1,12 @@
-<?xml version="1.0"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http:// schemas.android.com/ tools" package="com.x" android:installLocation="auto"
-    android:versionCode="1" android:versionName="2.1.44">
+<?xml version="1.0" ?>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http:// schemas.android.com/ tools"
+    package="com.x"
+    android:installLocation="auto"
+    android:versionCode="1"
+    android:versionName="2.1.45"
+>
 
     <!-- The following comment will be replaced upon deployment with default permissions based on
     the dependencies of the application.
@@ -19,27 +24,43 @@
     <uses-permission android:name="android.permission.REORDER_TASKS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- Android 10+
+    <uses-permission
+        android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
+    /> <!-- Android 10+
     需要 -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+    />
 
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
-    <uses-feature android:name="android.hardware.sensor.stepcounter" android:required="true" />
-    <uses-feature android:name="android.hardware.sensor.stepdetector" android:required="true" />
+    <uses-feature
+        android:name="android.hardware.sensor.stepcounter"
+        android:required="true"
+    />
+    <uses-feature
+        android:name="android.hardware.sensor.stepdetector"
+        android:required="true"
+    />
 
     <uses-permission android:name="android.permission.DEVICE_POWER" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission
+        android:name="android.permission.REQUEST_INSTALL_PACKAGES"
+    />
 
     <!-- Android 12+ 设置精确闹钟所需权限 -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- Android 13+ 需要 -->
+    <uses-permission
+        android:name="android.permission.POST_NOTIFICATIONS"
+    /> <!-- Android 13+ 需要 -->
 
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission
+        android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+    />
 
     <uses-permission android:name="android.permission.BIND_TTS" />
     <!-- 特殊MIUI权限 -->
@@ -62,8 +83,12 @@
          Remove the comment if you do not require these default features. -->
 
 
-    <supports-screens android:anyDensity="true" android:largeScreens="true"
-        android:normalScreens="true" android:smallScreens="true" />
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:smallScreens="true"
+    />
     <application
         android:name="org.qtproject.qt.android.bindings.QtApplication"
         android:extractNativeLibs="true"
@@ -78,12 +103,16 @@
         <!-- android:windowSoftInputMode="adjustResize" -->
 
         <!-- singleTop singleTask standard -->
-        <activity android:name="com.x.MyActivity"
+        <activity
+            android:name="com.x.MyActivity"
             android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density"
-            android:exported="true" android:label="Knot"
+            android:exported="true"
+            android:label="Knot"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait" android:theme="@style/splashScreenTheme"
-            android:windowSoftInputMode="stateUnspecified">
+            android:screenOrientation="portrait"
+            android:theme="@style/splashScreenTheme"
+            android:windowSoftInputMode="stateUnspecified"
+        >
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -94,30 +123,52 @@
             <!-- meta-data android:name="android.app.arguments" android:value="arg1 arg2 arg3"/ -->
             <!-- Application arguments -->
 
-            <meta-data android:name="android.app.lib_name" android:value="Knot" />
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="Knot"
+            />
 
             <!--  Messages maps -->
-            <meta-data android:name="android.app.fatal_error_msg"
-                android:value="@string/fatal_error_msg" />
-            <meta-data android:name="android.app.unsupported_android_version"
-                android:value="@string/unsupported_android_version" />
+            <meta-data
+                android:name="android.app.fatal_error_msg"
+                android:value="@string/fatal_error_msg"
+            />
+            <meta-data
+                android:name="android.app.unsupported_android_version"
+                android:value="@string/unsupported_android_version"
+            />
 
-            <meta-data android:name="android.app.background_running" android:value="true" />
+            <meta-data
+                android:name="android.app.background_running"
+                android:value="true"
+            />
 
 
-            <meta-data android:name="android.app.auto_screen_scale_factor" android:value="false" />
+            <meta-data
+                android:name="android.app.auto_screen_scale_factor"
+                android:value="false"
+            />
 
 
-            <meta-data android:name="android.app.extract_android_style" android:value="default" />
+            <meta-data
+                android:name="android.app.extract_android_style"
+                android:value="default"
+            />
 
             <!-- extract android style -->
 
-            <meta-data android:name="android.app.splash_screen_drawable"
-                android:resource="@drawable/splashscreen" />
-            <meta-data android:name="android.app.splash_screen_drawable_portrait"
-                android:resource="@drawable/splashscreen_port" />
-            <meta-data android:name="android.app.splash_screen_drawable_landscape"
-                android:resource="@drawable/splashscreen_land" />
+            <meta-data
+                android:name="android.app.splash_screen_drawable"
+                android:resource="@drawable/splashscreen"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_portrait"
+                android:resource="@drawable/splashscreen_port"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_landscape"
+                android:resource="@drawable/splashscreen_land"
+            />
 
             <!--meta-data
             android:name="android.app.shortcuts" android:resource="@xml/desk_menu" /-->
@@ -126,8 +177,10 @@
 
         <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
         <service android:name="com.x.MyService">
-            <meta-data android:name="android.app.lib_name"
-                android:value="-- %%INSERT_APP_LIB_NAME%% --" />
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="-- %%INSERT_APP_LIB_NAME%% --"
+            />
         </service>
 
         <!-- 声明 TTS 服务 -->
@@ -135,60 +188,89 @@
             android:name=".TTSForegroundService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
+            android:foregroundServiceType="mediaPlayback"
+        />
 
         <activity
             android:name="com.x.ClockActivity"
             android:label="Knot"
             android:launchMode="standard"
             android:screenOrientation="portrait"
-            android:theme="@style/splashScreenTheme">
+            android:theme="@style/splashScreenTheme"
+        >
 
-            <meta-data android:name="android.app.splash_screen_drawable"
-                android:resource="@drawable/splashscreen" />
-            <meta-data android:name="android.app.splash_screen_drawable_portrait"
-                android:resource="@drawable/splashscreen_port" />
-            <meta-data android:name="android.app.splash_screen_drawable_landscape"
-                android:resource="@drawable/splashscreen_land" />
+            <meta-data
+                android:name="android.app.splash_screen_drawable"
+                android:resource="@drawable/splashscreen"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_portrait"
+                android:resource="@drawable/splashscreen_port"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_landscape"
+                android:resource="@drawable/splashscreen_land"
+            />
 
 
         </activity>
 
-        <activity android:name="com.x.NoteEditor" android:label="Knot"
-            android:launchMode="standard"
-            android:screenOrientation="portrait">
-        </activity>
-
-        <activity android:name="com.x.MDActivity" android:label="Knot"
-            android:launchMode="standard"
-            android:screenOrientation="portrait">
-        </activity>
-
-        <activity android:name="com.x.MapActivity" android:label="Knot"
-            android:launchMode="standard"
-            android:screenOrientation="portrait">
-        </activity>
-
-        <activity android:name=".WebViewActivity"
+        <activity
+            android:name="com.x.NoteEditor"
+            android:label="Knot"
             android:launchMode="standard"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme">
+        >
         </activity>
 
-        <activity android:name="com.x.ImageViewerActivity" android:label="Knot"
+        <activity
+            android:name="com.x.MDActivity"
+            android:label="Knot"
             android:launchMode="standard"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+        >
         </activity>
 
-        <activity android:name="com.x.DateTimePicker" android:label="Knot"
+        <activity
+            android:name="com.x.MapActivity"
+            android:label="Knot"
+            android:launchMode="standard"
+            android:screenOrientation="portrait"
+        >
+        </activity>
+
+        <activity
+            android:name=".WebViewActivity"
+            android:launchMode="standard"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+        >
+        </activity>
+
+        <activity
+            android:name="com.x.ImageViewerActivity"
+            android:label="Knot"
+            android:launchMode="standard"
+            android:screenOrientation="portrait"
+        >
+        </activity>
+
+        <activity
+            android:name="com.x.DateTimePicker"
+            android:label="Knot"
             android:theme="@android:style/Theme.Translucent"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+        >
         </activity>
 
 
-        <activity android:name="com.x.ShareReceiveActivity" android:exported="true"
-            android:label="Todo or Note" android:screenOrientation="unspecified"
-            android:theme="@style/splashScreenTheme">
+        <activity
+            android:name="com.x.ShareReceiveActivity"
+            android:exported="true"
+            android:label="Todo or Note"
+            android:screenOrientation="unspecified"
+            android:theme="@style/splashScreenTheme"
+        >
 
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -241,16 +323,26 @@
                 <data android:mimeType="video/*" />
             </intent-filter>
 
-            <meta-data android:name="android.app.splash_screen_drawable"
-                android:resource="@drawable/splashscreen" />
-            <meta-data android:name="android.app.splash_screen_drawable_portrait"
-                android:resource="@drawable/splashscreen_port" />
-            <meta-data android:name="android.app.splash_screen_drawable_landscape"
-                android:resource="@drawable/splashscreen_land" />
+            <meta-data
+                android:name="android.app.splash_screen_drawable"
+                android:resource="@drawable/splashscreen"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_portrait"
+                android:resource="@drawable/splashscreen_port"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_landscape"
+                android:resource="@drawable/splashscreen_land"
+            />
         </activity>
 
-        <activity android:name="com.x.DefaultOpen" android:exported="true" android:label="Reader"
-            android:theme="@style/splashScreenTheme">
+        <activity
+            android:name="com.x.DefaultOpen"
+            android:exported="true"
+            android:label="Reader"
+            android:theme="@style/splashScreenTheme"
+        >
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -265,85 +357,148 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.x.AddRecord" android:exported="true" android:label="AddRecord"
-            android:theme="@style/splashScreenTheme">
+        <activity
+            android:name="com.x.AddRecord"
+            android:exported="true"
+            android:label="AddRecord"
+            android:theme="@style/splashScreenTheme"
+        >
 
-            <meta-data android:name="android.app.splash_screen_drawable"
-                android:resource="@drawable/splashscreen" />
-            <meta-data android:name="android.app.splash_screen_drawable_portrait"
-                android:resource="@drawable/splashscreen_port" />
-            <meta-data android:name="android.app.splash_screen_drawable_landscape"
-                android:resource="@drawable/splashscreen_land" />
+            <meta-data
+                android:name="android.app.splash_screen_drawable"
+                android:resource="@drawable/splashscreen"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_portrait"
+                android:resource="@drawable/splashscreen_port"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_landscape"
+                android:resource="@drawable/splashscreen_land"
+            />
         </activity>
 
-        <activity android:name="com.x.NewTodo" android:exported="true" android:label="NewTodo"
-            android:theme="@style/splashScreenTheme">
+        <activity
+            android:name="com.x.NewTodo"
+            android:exported="true"
+            android:label="NewTodo"
+            android:theme="@style/splashScreenTheme"
+        >
 
-            <meta-data android:name="android.app.splash_screen_drawable"
-                android:resource="@drawable/splashscreen" />
-            <meta-data android:name="android.app.splash_screen_drawable_portrait"
-                android:resource="@drawable/splashscreen_port" />
-            <meta-data android:name="android.app.splash_screen_drawable_landscape"
-                android:resource="@drawable/splashscreen_land" />
+            <meta-data
+                android:name="android.app.splash_screen_drawable"
+                android:resource="@drawable/splashscreen"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_portrait"
+                android:resource="@drawable/splashscreen_port"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_landscape"
+                android:resource="@drawable/splashscreen_land"
+            />
 
             <!-- 添加 Intent Filter 支持自定义 Action -->
             <intent-filter>
-                <action android:name="com.x.action.NEW_TODO" /> <!-- 匹配快捷方式 -->
+                <action
+                    android:name="com.x.action.NEW_TODO"
+                /> <!-- 匹配快捷方式 -->
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
-        <activity android:name="com.x.NewNote" android:exported="true" android:label="NewNote"
-            android:theme="@style/splashScreenTheme">
+        <activity
+            android:name="com.x.NewNote"
+            android:exported="true"
+            android:label="NewNote"
+            android:theme="@style/splashScreenTheme"
+        >
 
-            <meta-data android:name="android.app.splash_screen_drawable"
-                android:resource="@drawable/splashscreen" />
-            <meta-data android:name="android.app.splash_screen_drawable_portrait"
-                android:resource="@drawable/splashscreen_port" />
-            <meta-data android:name="android.app.splash_screen_drawable_landscape"
-                android:resource="@drawable/splashscreen_land" />
+            <meta-data
+                android:name="android.app.splash_screen_drawable"
+                android:resource="@drawable/splashscreen"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_portrait"
+                android:resource="@drawable/splashscreen_port"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_landscape"
+                android:resource="@drawable/splashscreen_land"
+            />
         </activity>
 
-        <activity android:name="com.x.ContinueReading" android:exported="true"
+        <activity
+            android:name="com.x.ContinueReading"
+            android:exported="true"
             android:label="ContinueReading"
-            android:theme="@style/splashScreenTheme">
-            <meta-data android:name="android.app.splash_screen_drawable"
-                android:resource="@drawable/splashscreen" />
-            <meta-data android:name="android.app.splash_screen_drawable_portrait"
-                android:resource="@drawable/splashscreen_port" />
-            <meta-data android:name="android.app.splash_screen_drawable_landscape"
-                android:resource="@drawable/splashscreen_land" />
+            android:theme="@style/splashScreenTheme"
+        >
+            <meta-data
+                android:name="android.app.splash_screen_drawable"
+                android:resource="@drawable/splashscreen"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_portrait"
+                android:resource="@drawable/splashscreen_port"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_landscape"
+                android:resource="@drawable/splashscreen_land"
+            />
         </activity>
 
-        <activity android:name="com.x.Desk_Exercise" android:exported="true"
+        <activity
+            android:name="com.x.Desk_Exercise"
+            android:exported="true"
             android:label="Exercise"
-            android:theme="@style/splashScreenTheme">
-            <meta-data android:name="android.app.splash_screen_drawable"
-                android:resource="@drawable/splashscreen" />
-            <meta-data android:name="android.app.splash_screen_drawable_portrait"
-                android:resource="@drawable/splashscreen_port" />
-            <meta-data android:name="android.app.splash_screen_drawable_landscape"
-                android:resource="@drawable/splashscreen_land" />
+            android:theme="@style/splashScreenTheme"
+        >
+            <meta-data
+                android:name="android.app.splash_screen_drawable"
+                android:resource="@drawable/splashscreen"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_portrait"
+                android:resource="@drawable/splashscreen_port"
+            />
+            <meta-data
+                android:name="android.app.splash_screen_drawable_landscape"
+                android:resource="@drawable/splashscreen_land"
+            />
         </activity>
 
-        <activity android:name="com.x.FilePicker" android:exported="true" android:label="FilePicker"
+        <activity
+            android:name="com.x.FilePicker"
+            android:exported="true"
+            android:label="FilePicker"
             android:launchMode="standard"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+        >
         </activity>
 
-        <activity android:name="com.x.MyProgBar" android:exported="true"
+        <activity
+            android:name="com.x.MyProgBar"
+            android:exported="true"
             android:launchMode="standard"
-            android:label="MyProgBar">
+            android:label="MyProgBar"
+        >
 
         </activity>
 
-        <activity android:name="com.x.TempActivity" android:exported="true"
-            android:label="TempActivity">
+        <activity
+            android:name="com.x.TempActivity"
+            android:exported="true"
+            android:label="TempActivity"
+        >
         </activity>
 
-        <activity android:name="com.x.MyPDF" android:exported="true"
+        <activity
+            android:name="com.x.MyPDF"
+            android:exported="true"
             android:launchMode="standard"
-            android:label="MyPDF">
+            android:label="MyPDF"
+        >
         </activity>
 
         <activity
@@ -352,17 +507,24 @@
             android:launchMode="standard"
             android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize"
-            android:label="PDFActivity">
+            android:label="PDFActivity"
+        >
         </activity>
 
-        <activity android:name="com.xhh.pdfui.PDFPreviewActivity" android:exported="true"
+        <activity
+            android:name="com.xhh.pdfui.PDFPreviewActivity"
+            android:exported="true"
             android:launchMode="standard"
-            android:label="PDFPreviewActivity">
+            android:label="PDFPreviewActivity"
+        >
         </activity>
 
-        <activity android:name="com.xhh.pdfui.PDFCatelogueActivity" android:exported="true"
+        <activity
+            android:name="com.xhh.pdfui.PDFCatelogueActivity"
+            android:exported="true"
             android:launchMode="standard"
-            android:label="PDFCatelogueActivity">
+            android:label="PDFCatelogueActivity"
+        >
         </activity>
 
 
@@ -383,11 +545,14 @@
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.x"
             android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
+            android:grantUriPermissions="true"
+        >
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"
+            />
 
-            <!-- meta-data android:name="androidx.core.content.FileProvider.paths" 
+            <!-- meta-data android:name="androidx.core.content.FileProvider.paths"
                 android:resource="@xml/file_paths"/ -->
         </provider>
 
