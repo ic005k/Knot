@@ -328,7 +328,7 @@ Item {
 
                 onDoubleClicked: {
                     if (!isMoving && !root.isBookPagePressHold) {
-                        m_Reader.on_SetReaderFunVisible()
+                        //m_Reader.on_SetReaderFunVisible()
                     }
                 }
 

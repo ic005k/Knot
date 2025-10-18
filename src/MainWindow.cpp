@@ -2465,6 +2465,7 @@ void MainWindow::on_btnAutoRun_clicked() {
     m_Reader->tmeAutoRun->start(50);
     mui->btnAutoRun->hide();
     mui->btnAutoStop->show();
+    m_Reader->isAutoRun = true;
   }
 }
 
@@ -2473,6 +2474,7 @@ void MainWindow::on_btnAutoStop_clicked() {
     m_Reader->tmeAutoRun->stop();
     mui->btnAutoStop->hide();
     mui->btnAutoRun->show();
+    m_Reader->isAutoRun = false;
   }
 }
 

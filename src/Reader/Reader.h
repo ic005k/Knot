@@ -58,6 +58,8 @@ class Reader : public QDialog {
   QDialog *dlgAddBookNote = nullptr;
   QDialog *dlgEditBookNote = nullptr;
 
+  bool isAutoRun = false;
+
   bool isShowNote = false;
   int currentNoteListIndex = -1;
 
@@ -184,6 +186,7 @@ class Reader : public QDialog {
   void cancelKeepScreenOn();
   void resetTextSelection();
   void setBookPagePressHold(bool value);
+
  public slots:
   void on_SetReaderFunVisible();
 

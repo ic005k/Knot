@@ -2389,7 +2389,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       mw_one->isMouseMove = false;
 
       // mw_one->timerMousePress->start(1300);
-      if (mui->btnAutoStop->isVisible()) tmeAutoRun->stop();
+      if (isAutoRun) tmeAutoRun->stop();
 
       // 映射到原有鼠标事件的坐标变量
       press_x = pressPos.x();
@@ -2407,7 +2407,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       relea_x = currentPos.x();
       relea_y = currentPos.y();
 
-      if (mui->btnAutoStop->isVisible()) tmeAutoRun->stop();
+      if (isAutoRun) tmeAutoRun->stop();
 
       if (mw_one->isMousePress) {
         if (!isLandscape) {
@@ -2506,7 +2506,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       }
       mw_one->curx = 0;
 
-      if (mui->btnAutoStop->isVisible()) tmeAutoRun->start(50);
+      if (isAutoRun) tmeAutoRun->start(50);
 
       touchEvent->accept();
       return true;
@@ -2533,7 +2533,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
         h = mui->qwReader->height();
 
         // if (!mw_one->isMouseMove) mw_one->timerMousePress->start(1300);
-        if (mui->btnAutoStop->isVisible()) tmeAutoRun->stop();
+        if (isAutoRun) tmeAutoRun->stop();
       }
 
       if (event->type() == QEvent::MouseMove) {
@@ -2581,7 +2581,11 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
         }
       }
 
-      /*if (event->type() == QEvent::MouseButtonDblClick) {
+      if (event->type() == QEvent::MouseButtonDblClick) {
+        on_SetReaderFunVisible();
+
+        return true;
+
         // 双击逻辑
         if (m_Method->isClickLink) {
           m_Method->isClickLink = false;
@@ -2602,7 +2606,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
         if (mY > qwY + h3 * 2) {
           mw_one->m_Reader->setPageScroll1();
         }
-      }*/
+      }
 
       if (event->type() == QEvent::MouseButtonRelease) {
         QPointF pos = event->position();
@@ -2689,7 +2693,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
 
         mw_one->curx = 0;
 
-        if (mui->btnAutoStop->isVisible()) tmeAutoRun->start(50);
+        if (isAutoRun) tmeAutoRun->start(50);
       }
     }
   }
@@ -2703,8 +2707,8 @@ bool Reader::handleTouchPress(const QPointF &globalPos) {
   qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
 
   // 双击检测（300ms内两次按下）
-  if (currentTime - lastPressTime < 300) {
-    // handleDoubleClick(globalPos);
+  if (currentTime - lastPressTime < 350) {
+    handleDoubleClick(globalPos);
     lastPressTime = 0;
     return true;
   }
@@ -2733,6 +2737,10 @@ bool Reader::handleTouchPress(const QPointF &globalPos) {
 }
 
 void Reader::handleDoubleClick(const QPointF &globalPos) {
+  on_SetReaderFunVisible();
+
+  return;
+
   // 处理链接点击状态
   if (m_Method->isClickLink) {
     m_Method->isClickLink = false;
@@ -2822,29 +2830,25 @@ void Reader::on_SetReaderFunVisible() {
     m_ReaderSet->hide();
   }
 
-  return;
-
-  bool isTemp = isLandscape;
-  if (isTemp) {
-    return;
-
-    setQmlLandscape(false);
-  }
-
   qreal vpos = getVPos();
+  qreal vh = getVHeight();
+  qreal ra = vpos / vh;
+  bool isTemp = isLandscape;
+  mui->qwReader->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/reader.qml")));
+
+  setQmlLandscape(isTemp);
 
   if (!isLandscape) w = mui->qwReader->width();
 
-  // mui->qwReader->setSource(
-  //     QUrl(QStringLiteral("qrc:/src/qmlsrc/reader.qml")));
   if (isEpub) setQMLHtml(currentHtmlFile, "", "");
   if (isText) {
     QString txt1 = updateContent();
     setQMLText(txt1);
   }
 
+  vh = getVHeight();
+  vpos = vh * ra;
   setVPos(vpos);
-  if (isTemp) setQmlLandscape(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
