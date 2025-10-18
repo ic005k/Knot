@@ -2461,15 +2461,19 @@ void MainWindow::on_btnShareBook_clicked() { m_Reader->shareBook(); }
 void MainWindow::on_btnAutoRun_clicked() {
   if (mui->qwViewBookNote->isVisible()) return;
 
-  m_Reader->tmeAutoRun->start(50);
-  mui->btnAutoRun->hide();
-  mui->btnAutoStop->show();
+  if (!m_Reader->tmeAutoRun->isActive()) {
+    m_Reader->tmeAutoRun->start(50);
+    mui->btnAutoRun->hide();
+    mui->btnAutoStop->show();
+  }
 }
 
 void MainWindow::on_btnAutoStop_clicked() {
-  m_Reader->tmeAutoRun->stop();
-  mui->btnAutoStop->hide();
-  mui->btnAutoRun->show();
+  if (m_Reader->tmeAutoRun->isActive()) {
+    m_Reader->tmeAutoRun->stop();
+    mui->btnAutoStop->hide();
+    mui->btnAutoRun->show();
+  }
 }
 
 void MainWindow::on_btnLessen_clicked() { m_ReaderSet->on_btnLessen_clicked(); }

@@ -184,186 +184,175 @@ Rectangle {
 
             radius: 6
 
-            RowLayout {
-
-                id: idlistElemnet
+            ColumnLayout {
+                id: listCol
 
                 width: parent.width
                 spacing: 2
 
-                //Layout.fillWidth: true
-                ColumnLayout {
-                    id: listCol
+                anchors.leftMargin: 0
+                anchors.rightMargin: 0
 
-                    width: parent.width
-                    spacing: 2
-                    // Layout.fillWidth: true
-                    anchors.leftMargin: 0
-                    anchors.rightMargin: 0
+                RowLayout {
 
-                    RowLayout {
+                    id: row0
 
-                        id: row0
+                    Image {
+                        id: item0Img
 
-                        Image {
-                            id: item0Img
+                        width: iconW
+                        height: iconW
 
-                            width: iconW
-                            height: iconW
-                            //height: item0.contentHeight
-                            fillMode: Image.NoOption
-                            horizontalAlignment: Image.AlignHCenter
-                            verticalAlignment: Image.AlignVCenter
+                        fillMode: Image.NoOption
+                        horizontalAlignment: Image.AlignHCenter
+                        verticalAlignment: Image.AlignVCenter
 
-                            smooth: true
-                            sourceSize.height: iconW
-                            sourceSize.width: iconW
-                            source: "/res/time.svg"
+                        smooth: true
+                        sourceSize.height: iconW
+                        sourceSize.width: iconW
+                        source: "/res/time.svg"
 
-                            visible: false
-                        }
-
-                        Text {
-                            id: item0
-
-                            //width: parent.width
-                            Layout.preferredWidth: listItem.width - 0
-                            Layout.alignment: Qt.AlignHCenter
-                            horizontalAlignment: Text.AlignLeft
-                            verticalAlignment: Text.AlignVCenter
-                            wrapMode: TextArea.WordWrap
-                            font.bold: true
-                            text: text0
-                            color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-
-                            leftPadding: 5
-                            rightPadding: 5
-                        }
-                    }
-
-                    RowLayout {
-
-                        id: row1
-                        Layout.margins: rowSpace
-                        visible: item1.text.length ? true : false
-
-                        Image {
-                            id: item1Img
-
-                            width: iconW
-                            height: iconW
-                            //height: parent.height - 2
-                            fillMode: Image.NoOption
-                            horizontalAlignment: Image.AlignHCenter
-                            verticalAlignment: Image.AlignVCenter
-
-                            smooth: true
-                            sourceSize.height: iconW
-                            sourceSize.width: iconW
-                            source: listItem.ListView.isCurrentItem ? "/res/count.svg" : isDark ? "/res/count_l.svg" : "/res/count.svg"
-
-                            visible: item1.text.length ? true : false
-                        }
-
-                        Rectangle {
-                            height: 9
-                            width: 9
-                            radius: 0
-                            anchors.leftMargin: 1
-                            color: "gray"
-                            visible: false // item1.text.length ? true : false
-                        }
-
-                        Text {
-                            id: item1
-                            Layout.preferredWidth: listItem.width - iconW - rowSpace - 3
-
-                            Layout.alignment: Qt.AlignHCenter
-                            horizontalAlignment: Text.AlignLeft
-                            verticalAlignment: Text.AlignVCenter
-
-                            //width: parent.width
-                            wrapMode: TextArea.WrapAnywhere
-                            color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-                            font.bold: false
-                            text: text1
-
-                            leftPadding: 5
-                            rightPadding: 5
-
-                            visible: text.length > 0
-                        }
-                    }
-
-                    RowLayout {
-
-                        id: row2
-                        Layout.margins: rowSpace
-                        visible: item2.text.length ? true : false
-
-                        Image {
-                            id: item2Img
-
-                            width: iconW
-                            height: iconW
-                            //height: parent.height - 2
-                            fillMode: Image.NoOption
-                            horizontalAlignment: Image.AlignHCenter
-                            verticalAlignment: Image.AlignVCenter
-
-                            smooth: true
-                            sourceSize.height: iconW
-                            sourceSize.width: iconW
-                            source: listItem.ListView.isCurrentItem ? "/res/coin.svg" : isDark ? "/res/coin_l.svg" : "/res/coin.svg"
-
-                            visible: item2.text.length ? true : false
-                        }
-
-                        Rectangle {
-                            height: 9
-                            width: 9
-                            radius: 0
-                            anchors.leftMargin: 1
-                            color: "red"
-                            visible: false
-                        }
-
-                        Text {
-                            id: item2
-                            anchors.rightMargin: 0
-                            Layout.preferredWidth: listItem.width - iconW - rowSpace - 3
-                            Layout.alignment: Qt.AlignHCenter
-
-                            horizontalAlignment: Text.AlignLeft
-                            //width: parent.width
-                            wrapMode: TextArea.WrapAnywhere
-                            font.bold: false
-                            text: text2
-                            color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-
-                            leftPadding: 5
-                            rightPadding: 5
-
-                            visible: text.length > 0
-                        }
+                        visible: false
                     }
 
                     Text {
-                        id: item3
-                        anchors.rightMargin: 0
-                        width: parent.width
-                        wrapMode: Text.WordWrap
-                        elide: Text.ElideRight
+                        id: item0
 
-                        Layout.preferredWidth: listItem.width
+                        Layout.preferredWidth: listItem.width - 0
+                        Layout.alignment: Qt.AlignHCenter
+                        horizontalAlignment: Text.AlignLeft
+                        verticalAlignment: Text.AlignVCenter
+                        wrapMode: TextArea.WordWrap
+                        font.bold: true
+                        text: text0
+                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+
+                        leftPadding: 5
+                        rightPadding: 5
+                    }
+                }
+
+                RowLayout {
+
+                    id: row1
+                    Layout.margins: rowSpace
+                    visible: item1.text.length ? true : false
+
+                    Image {
+                        id: item1Img
+
+                        width: iconW
+                        height: iconW
+
+                        fillMode: Image.NoOption
+                        horizontalAlignment: Image.AlignHCenter
+                        verticalAlignment: Image.AlignVCenter
+
+                        smooth: true
+                        sourceSize.height: iconW
+                        sourceSize.width: iconW
+                        source: listItem.ListView.isCurrentItem ? "/res/count.svg" : isDark ? "/res/count_l.svg" : "/res/count.svg"
+
+                        visible: item1.text.length ? true : false
+                    }
+
+                    Rectangle {
+                        height: 9
+                        width: 9
+                        radius: 0
+                        anchors.leftMargin: 1
+                        color: "gray"
+                        visible: false // item1.text.length ? true : false
+                    }
+
+                    Text {
+                        id: item1
+                        Layout.preferredWidth: listItem.width - iconW - rowSpace - 3
+
+                        Layout.alignment: Qt.AlignHCenter
+                        horizontalAlignment: Text.AlignLeft
+                        verticalAlignment: Text.AlignVCenter
+
+                        wrapMode: TextArea.WrapAnywhere
+                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
                         font.bold: false
-                        text: text3
+                        text: text1
 
                         leftPadding: 5
                         rightPadding: 5
 
                         visible: text.length > 0
                     }
+                }
+
+                RowLayout {
+
+                    id: row2
+                    Layout.margins: rowSpace
+                    visible: item2.text.length ? true : false
+
+                    Image {
+                        id: item2Img
+
+                        width: iconW - 2
+                        height: iconW - 2
+
+                        fillMode: Image.NoOption
+                        horizontalAlignment: Image.AlignHCenter
+                        verticalAlignment: Image.AlignVCenter
+
+                        smooth: true
+                        sourceSize.height: iconW
+                        sourceSize.width: iconW
+                        source: listItem.ListView.isCurrentItem ? "/res/coin.svg" : isDark ? "/res/coin_l.svg" : "/res/coin.svg"
+
+                        visible: item2.text.length ? true : false
+                    }
+
+                    Rectangle {
+                        height: 9
+                        width: 9
+                        radius: 0
+                        anchors.leftMargin: 1
+                        color: "red"
+                        visible: false
+                    }
+
+                    Text {
+                        id: item2
+                        anchors.rightMargin: 0
+                        Layout.preferredWidth: listItem.width - iconW - rowSpace - 3
+                        Layout.alignment: Qt.AlignHCenter
+
+                        horizontalAlignment: Text.AlignLeft
+                        //width: parent.width
+                        wrapMode: TextArea.WrapAnywhere
+                        font.bold: false
+                        text: text2
+                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+
+                        leftPadding: 5
+                        rightPadding: 5
+
+                        visible: text.length > 0
+                    }
+                }
+
+                Text {
+                    id: item3
+                    anchors.rightMargin: 0
+                    width: parent.width
+                    wrapMode: Text.WordWrap
+                    elide: Text.ElideRight
+
+                    Layout.preferredWidth: listItem.width
+                    font.bold: false
+                    text: text3
+
+                    leftPadding: 5
+                    rightPadding: 5
+
+                    visible: text.length > 0
                 }
             }
 

@@ -365,6 +365,8 @@ class MainWindow : public QMainWindow {
   void hideEvent(QHideEvent *event) override;
 
  public slots:
+  void on_btnAutoStop_clicked();
+
   void on_btnSelText_clicked();
 
   void on_hSlider_sliderMoved(int position);
@@ -735,8 +737,6 @@ class MainWindow : public QMainWindow {
 
   void slotSetBookmark();
   void on_btnAutoRun_clicked();
-
-  void on_btnAutoStop_clicked();
 
   void on_btnLessen_clicked();
 

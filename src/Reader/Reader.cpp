@@ -1264,7 +1264,11 @@ QString Reader::getBookmarkTextFromQML() {
   QQuickItem *root = mui->qwReader->rootObject();
   QMetaObject::invokeMethod((QObject *)root, "getBookmarkText",
                             Q_RETURN_ARG(QVariant, item));
-  return item.toString() + "...";
+  QString txt = item.toString();
+  if (isZH_CN) {
+    txt = txt.left(50);
+  }
+  return txt + "...";
 }
 
 qreal Reader::getVHeight() {
@@ -2272,10 +2276,14 @@ void Reader::clickBookmarkList(int i) {
   if (isText) {
     currentPage =
         Reg.value("/Bookmark/currentPage" + QString::number(index)).toInt();
-    goNextPage();
     textPos = Reg.value("/Bookmark/VPos" + QString::number(index)).toReal();
     isLandscape =
         Reg.value("/Bookmark/isLandscape" + QString::number(index)).toBool();
+
+    if (currentPage <= totalPages) {
+      QString txt1 = updateContent();
+      setQMLText(txt1);
+    }
   }
 
   if (isEpub) {
@@ -2290,9 +2298,9 @@ void Reader::clickBookmarkList(int i) {
 
     currentHtmlFile = htmlFiles.at(htmlIndex);
     setQMLHtml(currentHtmlFile, "", "");
-
-    showInfo();
   }
+
+  showInfo();
 
   setQmlLandscape(isLandscape);
   setVPos(textPos);
