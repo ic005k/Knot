@@ -2389,6 +2389,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       mw_one->isMouseMove = false;
 
       // mw_one->timerMousePress->start(1300);
+      if (mui->btnAutoStop->isVisible()) tmeAutoRun->stop();
 
       // 映射到原有鼠标事件的坐标变量
       press_x = pressPos.x();
@@ -2405,6 +2406,8 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       mw_one->isMouseMove = true;
       relea_x = currentPos.x();
       relea_y = currentPos.y();
+
+      if (mui->btnAutoStop->isVisible()) tmeAutoRun->stop();
 
       if (mw_one->isMousePress) {
         if (!isLandscape) {
@@ -2433,6 +2436,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       return true;
     } else if (evn->type() == QEvent::TouchEnd) {
       // 触摸结束：对应鼠标释放
+
       mw_one->isMousePress = false;
       relea_x = currentPos.x();
       relea_y = currentPos.y();
@@ -2501,6 +2505,9 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
         QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
       }
       mw_one->curx = 0;
+
+      if (mui->btnAutoStop->isVisible()) tmeAutoRun->start(50);
+
       touchEvent->accept();
       return true;
     }
@@ -2516,15 +2523,27 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
         mw_one->isMousePress = true;
         mw_one->isMouseMove = false;
 
-        // if (!mw_one->isMouseMove) mw_one->timerMousePress->start(1300);
-      }
+        press_x =
+            event->position()
+                .x();  // 注意：Qt6中用position()获取相对位置，globalPosition()是全局位置
+        press_y = event->position().y();
+        x = 0;
+        y = 0;
+        w = mui->qwReader->width();
+        h = mui->qwReader->height();
 
-      if (event->type() == QEvent::MouseButtonRelease) {
-        mw_one->isMousePress = false;
+        // if (!mw_one->isMouseMove) mw_one->timerMousePress->start(1300);
+        if (mui->btnAutoStop->isVisible()) tmeAutoRun->stop();
       }
 
       if (event->type() == QEvent::MouseMove) {
-        mw_one->isMouseMove = true;
+        QPointF pos = event->position();
+        relea_x = pos.x();
+        relea_y = pos.y();
+        if (mw_one->isMousePress && qAbs(relea_x - press_x) > 20 &&
+            qAbs(relea_y - press_y) < 20) {
+          mw_one->isMouseMove = true;
+        }
 
         if (mw_one->isMousePress) {
           if (!isLandscape) {
@@ -2561,140 +2580,117 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
           }
         }
       }
-    }
 
-    if (event->type() == QEvent::MouseButtonPress) {
-      mw_one->isMousePress = true;
-
-      press_x =
-          event->position()
-              .x();  // 注意：Qt6中用position()获取相对位置，globalPosition()是全局位置
-      press_y = event->position().y();
-      x = 0;
-      y = 0;
-      w = mui->qwReader->width();
-      h = mui->qwReader->height();
-    }
-
-    /*if (event->type() == QEvent::MouseButtonDblClick) {
-      // 双击逻辑
-      if (m_Method->isClickLink) {
-        m_Method->isClickLink = false;
-      }
-
-      int h3 = mui->qwReader->height() / 3;
-      int mY = event->position().y();
-      int qwY = mui->qwReader->y();
-
-      if ((mY > qwY + h3) && (mY < qwY + h3 * 2)) {
-        on_SetReaderFunVisible();
-      }
-
-      if ((mY > qwY) && (mY < qwY + h3)) {
-        mw_one->m_Reader->setPageScroll0();
-      }
-
-      if (mY > qwY + h3 * 2) {
-        mw_one->m_Reader->setPageScroll1();
-      }
-    }*/
-
-    if (event->type() == QEvent::MouseButtonRelease) {
-      QPointF pos = event->position();
-      relea_x = pos.x();
-      relea_y = pos.y();
-      mui->lblTitle->hide();
-      QQuickItem *root = mui->qwReader->rootObject();
-
-      mw_one->isMousePress = false;
-
-      // 竖屏和横屏翻页逻辑
-      if (!isLandscape) {
-        if ((relea_x - press_x) > length && qAbs(relea_y - press_y) < 35) {
-          if (isText) {
-            if (currentPage == 0) {
-              QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
-              return QWidget::eventFilter(watch, evn);
-            }
-          } else if (isEpub) {
-            if (htmlIndex <= 0) {
-              QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
-              return QWidget::eventFilter(watch, evn);
-            }
-          }
-
-          mw_one->on_btnPageUp_clicked();
-          closeBookPage();
+      /*if (event->type() == QEvent::MouseButtonDblClick) {
+        // 双击逻辑
+        if (m_Method->isClickLink) {
+          m_Method->isClickLink = false;
         }
 
-        if ((press_x - relea_x) > length && qAbs(relea_y - press_y) < 35) {
-          if (isText) {
-            if (currentPage == totalPages - 1) {
-              QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
-              return QWidget::eventFilter(watch, evn);
-            }
-          } else if (isEpub) {
-            if (htmlIndex + 1 >= htmlFiles.count()) {
-              QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
-              return QWidget::eventFilter(watch, evn);
-            }
-          }
+        int h3 = mui->qwReader->height() / 3;
+        int mY = event->position().y();
+        int qwY = mui->qwReader->y();
 
-          mw_one->on_btnPageNext_clicked();
-          closeBookPage();
-        }
-      } else {
-        if ((press_y - relea_y) > length && qAbs(relea_x - press_x) < 35) {
-          if (isText) {
-            if (currentPage == totalPages - 1) {
-              QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
-              return QWidget::eventFilter(watch, evn);
-            }
-          } else if (isEpub) {
-            if (htmlIndex + 1 >= htmlFiles.count()) {
-              QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
-              return QWidget::eventFilter(watch, evn);
-            }
-          }
-
-          mw_one->on_btnPageNext_clicked();
-          closeBookPage();
+        if ((mY > qwY + h3) && (mY < qwY + h3 * 2)) {
+          on_SetReaderFunVisible();
         }
 
-        if ((relea_y - press_y) > length && qAbs(relea_x - press_x) < 35) {
-          if (isText) {
-            if (currentPage == 0) {
-              QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
-              return QWidget::eventFilter(watch, evn);
+        if ((mY > qwY) && (mY < qwY + h3)) {
+          mw_one->m_Reader->setPageScroll0();
+        }
+
+        if (mY > qwY + h3 * 2) {
+          mw_one->m_Reader->setPageScroll1();
+        }
+      }*/
+
+      if (event->type() == QEvent::MouseButtonRelease) {
+        QPointF pos = event->position();
+        relea_x = pos.x();
+        relea_y = pos.y();
+        mui->lblTitle->hide();
+        QQuickItem *root = mui->qwReader->rootObject();
+
+        mw_one->isMousePress = false;
+
+        // 竖屏和横屏翻页逻辑
+        if (!isLandscape) {
+          if ((relea_x - press_x) > length && qAbs(relea_y - press_y) < 35) {
+            if (isText) {
+              if (currentPage == 0) {
+                QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
+                return QWidget::eventFilter(watch, evn);
+              }
+            } else if (isEpub) {
+              if (htmlIndex <= 0) {
+                QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
+                return QWidget::eventFilter(watch, evn);
+              }
             }
-          } else if (isEpub) {
-            if (htmlIndex <= 0) {
-              QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
-              return QWidget::eventFilter(watch, evn);
-            }
+
+            mw_one->on_btnPageUp_clicked();
+            closeBookPage();
           }
 
-          mw_one->on_btnPageUp_clicked();
-          closeBookPage();
+          if ((press_x - relea_x) > length && qAbs(relea_y - press_y) < 35) {
+            if (isText) {
+              if (currentPage == totalPages - 1) {
+                QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
+                return QWidget::eventFilter(watch, evn);
+              }
+            } else if (isEpub) {
+              if (htmlIndex + 1 >= htmlFiles.count()) {
+                QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
+                return QWidget::eventFilter(watch, evn);
+              }
+            }
+
+            mw_one->on_btnPageNext_clicked();
+            closeBookPage();
+          }
+        } else {
+          if ((press_y - relea_y) > length && qAbs(relea_x - press_x) < 35) {
+            if (isText) {
+              if (currentPage == totalPages - 1) {
+                QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
+                return QWidget::eventFilter(watch, evn);
+              }
+            } else if (isEpub) {
+              if (htmlIndex + 1 >= htmlFiles.count()) {
+                QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
+                return QWidget::eventFilter(watch, evn);
+              }
+            }
+
+            mw_one->on_btnPageNext_clicked();
+            closeBookPage();
+          }
+
+          if ((relea_y - press_y) > length && qAbs(relea_x - press_x) < 35) {
+            if (isText) {
+              if (currentPage == 0) {
+                QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
+                return QWidget::eventFilter(watch, evn);
+              }
+            } else if (isEpub) {
+              if (htmlIndex <= 0) {
+                QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
+                return QWidget::eventFilter(watch, evn);
+              }
+            }
+
+            mw_one->on_btnPageUp_clicked();
+            closeBookPage();
+          }
         }
+
+        if (isText || isEpub)
+          QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
+
+        mw_one->curx = 0;
+
+        if (mui->btnAutoStop->isVisible()) tmeAutoRun->start(50);
       }
-
-      if (isText || isEpub)
-        QMetaObject::invokeMethod(root, "setX", Q_ARG(QVariant, 0));
-
-      mw_one->curx = 0;
-    }
-
-    if (event->type() == QEvent::MouseMove) {
-      QPointF pos = event->position();
-      relea_x = pos.x();
-      relea_y = pos.y();
-      if (mw_one->isMousePress && qAbs(relea_x - press_x) > 20 &&
-          qAbs(relea_y - press_y) < 20) {
-        mw_one->isMouseMove = true;
-      }
-
-      mw_one->isMouseMove = true;
     }
   }
 
