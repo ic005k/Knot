@@ -723,8 +723,6 @@ void Steps::updateGetGps() {
       }
 
       updateInfoText(str1, str3);
-
-      setInfoLabelToAndroid(str1 + " | " + str3);
     }
   }
 
@@ -888,6 +886,8 @@ void Steps::refreshMotionData() {
     }
 
     insertGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
+    strGpsMapDateTime = t00 + " " + t1;
+    setDateLabelToAndroid(strGpsMapDateTime);
 
     QSettings Reg1(iniDir + stry + "-gpslist.ini", QSettings::IniFormat);
 
@@ -1193,6 +1193,10 @@ void Steps::appendTrack(double lat, double lon) {
 }
 
 void Steps::updateInfoText(QString strDistance, QString strSpeed) {
+  setInfoLabelToAndroid(strDistance + " | " + strSpeed);
+
+  return;
+
   QQuickItem* root = mui->qwMap->rootObject();
   QMetaObject::invokeMethod((QObject*)root, "updateInfoText",
                             Q_ARG(QVariant, strDistance),
@@ -1759,6 +1763,9 @@ void Steps::appendTrackPointAndroid(double latitude, double longitude) {
 }
 
 void Steps::addTrackDataToAndroid(double latitude, double longitude) {
+  Q_UNUSED(latitude);
+  Q_UNUSED(longitude);
+
 #ifdef Q_OS_ANDROID
 
   try {
