@@ -257,8 +257,6 @@ void Steps::openStepsUI() {
     loadGpsList(nYear, nMonth);
     allGpsTotal();
   }
-
-  isNeedRestoreUI = false;
 }
 
 void Steps::addRecord(QString date, qlonglong steps, QString km) {

@@ -35,10 +35,6 @@ static void JavaNotify_0() {
 
   if (mw_one->initMain) return;
 
-  if (mw_one->m_Steps->isNeedRestoreUI) {
-    // mui->btnSteps->click();
-  }
-
   qDebug() << "C++ JavaNotify_0";
 }
 
@@ -46,11 +42,6 @@ static void JavaNotify_1() {
   // Lock screen or onPause
 
   if (mw_one->initMain) return;
-
-  if (!mui->frameSteps->isHidden()) {
-    // mui->btnBackSteps->click();
-    mw_one->m_Steps->isNeedRestoreUI = true;
-  }
 
   qDebug() << "C++ JavaNotify_1";
 }
@@ -112,11 +103,7 @@ static void JavaNotify_7() {
 
 static void JavaNotify_8() {
   if (isInitThemeEnd) {
-    if (mw_one->m_Steps->isNeedRestoreUI) {
-      QTimer::singleShot(1000, mw_one, []() { mw_one->execDeskShortcut(); });
-
-    } else
-      mw_one->execDeskShortcut();
+    QTimer::singleShot(100, mw_one, []() { mw_one->execDeskShortcut(); });
 
   } else {
     isNeedExecDeskShortcut = true;
