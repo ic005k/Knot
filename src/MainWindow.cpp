@@ -2461,8 +2461,10 @@ void MainWindow::on_btnShareBook_clicked() { m_Reader->shareBook(); }
 void MainWindow::on_btnAutoRun_clicked() {
   if (mui->qwViewBookNote->isVisible()) return;
 
-  if (!m_Reader->tmeAutoRun->isActive()) {
-    m_Reader->tmeAutoRun->start(50);
+  if (!m_Reader->isAutoRun) {
+    // m_Reader->tmeAutoRun->start(50);
+
+    mui->qwReader->rootContext()->setContextProperty("isAutoRun", true);
     mui->btnAutoRun->hide();
     mui->btnAutoStop->show();
     m_Reader->isAutoRun = true;
@@ -2470,8 +2472,11 @@ void MainWindow::on_btnAutoRun_clicked() {
 }
 
 void MainWindow::on_btnAutoStop_clicked() {
-  if (m_Reader->tmeAutoRun->isActive()) {
-    m_Reader->tmeAutoRun->stop();
+  if (m_Reader->isAutoRun) {
+    // m_Reader->tmeAutoRun->stop();
+
+    mui->qwReader->rootContext()->setContextProperty("isAutoRun",
+                                                     QVariant(false));
     mui->btnAutoStop->hide();
     mui->btnAutoRun->show();
     m_Reader->isAutoRun = false;

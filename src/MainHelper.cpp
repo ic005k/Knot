@@ -519,6 +519,7 @@ void MainHelper::initMainQW() {
   mui->qw_Img->rootContext()->setContextProperty("myW", mw_one->width());
   mui->qw_Img->rootContext()->setContextProperty("myH", mw_one->height());
 
+  // Reader
   mui->qwReader->rootContext()->setContextProperty("myW", mw_one->width());
   mui->qwReader->rootContext()->setContextProperty("myH", mw_one->height());
   mui->qwReader->rootContext()->setContextProperty("m_Reader",
@@ -528,6 +529,10 @@ void MainHelper::initMainQW() {
   mui->qwReader->rootContext()->setContextProperty("totalPages", totalPages);
   mui->qwReader->rootContext()->setContextProperty("myBackgroundColor",
                                                    "#FFFFFF");
+  mui->qwReader->rootContext()->setContextProperty("isAutoRun",
+                                                   QVariant(false));
+  mui->qwReader->rootContext()->setContextProperty(
+      "scrollValue", mw_one->m_Reader->scrollValue);
 }
 
 void MainHelper::initNotesQW() {

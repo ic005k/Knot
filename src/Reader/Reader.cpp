@@ -2389,7 +2389,8 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       mw_one->isMouseMove = false;
 
       // mw_one->timerMousePress->start(1300);
-      if (isAutoRun) tmeAutoRun->stop();
+      if (isAutoRun)
+        mui->qwReader->rootContext()->setContextProperty("isAutoRun", false);
 
       // 映射到原有鼠标事件的坐标变量
       press_x = pressPos.x();
@@ -2407,7 +2408,8 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       relea_x = currentPos.x();
       relea_y = currentPos.y();
 
-      if (isAutoRun) tmeAutoRun->stop();
+      if (isAutoRun)
+        mui->qwReader->rootContext()->setContextProperty("isAutoRun", false);
 
       if (mw_one->isMousePress) {
         if (!isLandscape) {
@@ -2506,7 +2508,8 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       }
       mw_one->curx = 0;
 
-      if (isAutoRun) tmeAutoRun->start(50);
+      if (isAutoRun)
+        mui->qwReader->rootContext()->setContextProperty("isAutoRun", true);
 
       touchEvent->accept();
       return true;
@@ -2533,7 +2536,8 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
         h = mui->qwReader->height();
 
         // if (!mw_one->isMouseMove) mw_one->timerMousePress->start(1300);
-        if (isAutoRun) tmeAutoRun->stop();
+        if (isAutoRun)
+          mui->qwReader->rootContext()->setContextProperty("isAutoRun", false);
       }
 
       if (event->type() == QEvent::MouseMove) {
@@ -2693,7 +2697,8 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
 
         mw_one->curx = 0;
 
-        if (isAutoRun) tmeAutoRun->start(50);
+        if (isAutoRun)
+          mui->qwReader->rootContext()->setContextProperty("isAutoRun", true);
       }
     }
   }

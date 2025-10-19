@@ -275,12 +275,18 @@ void ReaderSet::on_btnLessen_clicked() {
   mw_one->m_Reader->scrollValue = mw_one->m_Reader->scrollValue - 0.05;
   if (mw_one->m_Reader->scrollValue <= 0.1) mw_one->m_Reader->scrollValue = 0.1;
 
+  mui->qwReader->rootContext()->setContextProperty(
+      "scrollValue", mw_one->m_Reader->scrollValue);
+
   QString value = QString::number(mw_one->m_Reader->scrollValue, 'f', 2);
   mui->lblSpeed->setText(tr("Scroll Speed") + " : " + value);
 }
 
 void ReaderSet::on_btnDefault_clicked() {
   mw_one->m_Reader->scrollValue = 1.0;
+
+  mui->qwReader->rootContext()->setContextProperty(
+      "scrollValue", mw_one->m_Reader->scrollValue);
 
   QString value = QString::number(mw_one->m_Reader->scrollValue, 'f', 2);
   mui->lblSpeed->setText(tr("Scroll Speed") + " : " + value);
@@ -290,6 +296,9 @@ void ReaderSet::on_btnAdd_clicked() {
   mw_one->m_Reader->scrollValue = mw_one->m_Reader->scrollValue + 0.05;
 
   if (mw_one->m_Reader->scrollValue >= 2.0) mw_one->m_Reader->scrollValue = 2.0;
+
+  mui->qwReader->rootContext()->setContextProperty(
+      "scrollValue", mw_one->m_Reader->scrollValue);
 
   QString value = QString::number(mw_one->m_Reader->scrollValue, 'f', 2);
   mui->lblSpeed->setText(tr("Scroll Speed") + " : " + value);

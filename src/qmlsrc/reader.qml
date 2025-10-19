@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Timeline
 
 import MyModel2 1.0
 import EBook.Models 1.0
@@ -10,6 +11,10 @@ Item {
 
     id: root
     visible: true
+
+    // ===== 自动滚动控制变量 =====
+    property bool isAutoScrollRunning: isAutoRun // 是否正在自动滚动
+    property real scrollSpeed: scrollValue // 每帧滚动增量（调速核心，默认0.5px/帧）
 
     // 翻页属性
     property point pressPos: Qt.point(0, 0)
@@ -328,6 +333,7 @@ Item {
 
                 onDoubleClicked: {
                     if (!isMoving && !root.isBookPagePressHold) {
+
                         //m_Reader.on_SetReaderFunVisible()
                     }
                 }
@@ -376,6 +382,30 @@ Item {
                         isReadyEnd = true
                     }
                     isSwitching = false // 结束切换标记
+                }
+            }
+
+            // ===== 新增：帧同步滚动核心 =====
+            Timer {
+                id: autoScrollTimer
+                interval: 25
+                repeat: true
+                running: isAutoScrollRunning // 仅绑定核心状态，无多余条件
+
+                onTriggered: {
+                    Qt.callLater(() => {
+                                     // 1. 直接滚动，不用单独存 scrollMaxY（简化计算）
+                                     contentListView.contentY += root.scrollSpeed
+
+                                     // 2. 精准停止条件（直接计算边界，无多余变量）
+                                     const isAtEnd = contentListView.contentY
+                                     >= (contentListView.contentHeight - contentListView.height)
+                                     if (isAtEnd) {
+                                         contentListView.contentY = contentListView.contentHeight
+                                         - contentListView.height // 对齐末尾（可选，避免超界）
+                                         mw_one.on_btnAutoStop_clicked()
+                                     }
+                                 })
                 }
             }
 
