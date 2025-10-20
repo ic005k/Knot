@@ -37,5 +37,7 @@
         <file>src/qmlsrc/NoteDiffHtmlViewer.qml</file>
         <file>src/qmlsrc/viewbooknote.qml</file>
         <file>src/qmlsrc/test.qml</file>
+        <file>src/qmlsrc/DateTimePicker.qml</file>
+        <file>src/qmlsrc/SetTodoAlarm.qml</file>
     </qresource>
 </RCC>

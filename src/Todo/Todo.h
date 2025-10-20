@@ -146,7 +146,8 @@ class Todo : public QDialog {
   void closeTodo();
   void openTodoUI();
   void openTodo();
- private slots:
+  void showTodoAlarm();
+  private slots:
   void on_ShowRecordTime();
 
   void on_ShowPlayProgress();

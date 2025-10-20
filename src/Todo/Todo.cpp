@@ -434,6 +434,9 @@ void Todo::on_btnSetTime_clicked() {
 
   int row = getCurrentIndex();
 
+  showTodoAlarm();
+  return;
+
   delete mw_one->m_TodoAlarm;
   mw_one->m_TodoAlarm = new TodoAlarm(this);
 
@@ -1631,4 +1634,23 @@ void Todo::openTodo() {
 
   } else
     openTodoUI();
+}
+
+void Todo::showTodoAlarm() {
+  QQuickItem* root = mui->qwTodo->rootObject();
+  if (!root) {
+    qWarning() << "Failed to get QML root object!";
+    return;
+  }
+
+  bool success = QMetaObject::invokeMethod(
+      root,                 // 目标QML对象（这里是根对象）
+      "showTodoAlarm",      // 要调用的QML函数名
+      Qt::QueuedConnection  // 用队列连接，确保UI操作在主线程执行（安全）
+
+  );
+
+  if (!success) {
+    qWarning() << "Failed to call showTodoAlarm() in QML!";
+  }
 }

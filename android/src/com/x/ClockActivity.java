@@ -310,7 +310,11 @@ public class ClockActivity
     public void onBackPressed() {
         super.onBackPressed();
         MyActivity.stopPlayMyText();
-        if (player != null) player.stop();
+        // 停止播放时增加 null 检查和释放
+        if (player != null) {
+            player.stop();
+        }
+
         AnimationWhenClosed();
 
         if (!MyActivity.isBackMainUI) {
@@ -333,6 +337,17 @@ public class ClockActivity
         } else {
             CallJavaNotify_4();
         }
+
+        // 释放 MediaPlayer
+        if (player != null) {
+            player.stop();
+            player.release(); // 释放底层资源
+            player = null; // 置空避免后续调用
+        }
+
+        // 注销生命周期回调
+        Application application = this.getApplication();
+        application.unregisterActivityLifecycleCallbacks(this);
 
         super.onDestroy();
 

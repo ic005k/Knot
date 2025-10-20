@@ -16,6 +16,11 @@ Rectangle {
     property int itemCount: 0
     property bool isHighPriority: false
 
+    function showTodoAlarm() {
+
+        setTodoAlarm.open()
+    }
+
     function isAlarm(index) {
 
         return isHighPriority
@@ -492,6 +497,25 @@ Rectangle {
             return "#3498DB"
         default:
             return "black"
+        }
+    }
+
+    // 日期时间选择器弹窗
+    Popup {
+        id: setTodoAlarm
+        width: root.width
+
+        height: root.height
+        modal: true
+        focus: true
+        // 居中显示（替代x和y的手动偏移，避免超出屏幕）
+        anchors.centerIn: root
+
+        SetTodoAlarm {
+            id: picker
+            // 用Layout.fill而非anchors.fill，适配Popup的内边距
+            Layout.fillWidth: true
+            Layout.fillHeight: true
         }
     }
 }
