@@ -1636,18 +1636,64 @@ void Todo::openTodo() {
     openTodoUI();
 }
 
+#include <QDate>
+#include <QDebug>
+#include <QMetaObject>
+#include <QQuickItem>
+#include <QTime>
+
 void Todo::showTodoAlarm() {
-  QQuickItem* root = mui->qwTodo->rootObject();
-  if (!root) {
-    qWarning() << "Failed to get QML root object!";
+  // 1. 获取Popup根对象（你的原有逻辑）
+  QQuickItem* popupRoot = mui->qwTodo->rootObject();
+  if (!popupRoot) {
+    qWarning() << "Failed to get Popup root object!";
     return;
   }
 
-  bool success = QMetaObject::invokeMethod(
-      root,                 // 目标QML对象（这里是根对象）
-      "showTodoAlarm",      // 要调用的QML函数名
-      Qt::QueuedConnection  // 用队列连接，确保UI操作在主线程执行（安全）
+  // 2. 查找SetTodoAlarm组件（通过objectName）
+  QQuickItem* todoAlarmComponent =
+      popupRoot->findChild<QQuickItem*>("setTodoAlarmComponent");
+  if (!todoAlarmComponent) {
+    qWarning() << "Failed to find setTodoAlarmComponent in QML!";
+    return;
+  }
 
+  // 3. 查找DateTimePicker组件（通过objectName，在SetTodoAlarm内部）
+  QQuickItem* dateTimePicker =
+      todoAlarmComponent->findChild<QQuickItem*>("dateTimePicker");
+  if (!dateTimePicker) {
+    qWarning() << "Failed to find dateTimePicker in QML!";
+    return;
+  }
+
+  // 4. 传递初始化值（C++ → QML属性赋值）
+  // --------------------------
+  // 4.1 初始化周选择状态（示例：默认选中周一、周三，且"每天"开关关闭）
+  todoAlarmComponent->setProperty("selectAllDays", false);  // 每天：关闭
+  todoAlarmComponent->setProperty("week1Checked", true);    // 周一：选中
+  todoAlarmComponent->setProperty("week2Checked", false);   // 周二：未选中
+  todoAlarmComponent->setProperty("week3Checked", true);    // 周三：选中
+  todoAlarmComponent->setProperty("week4Checked", false);   // 周四：未选中
+  todoAlarmComponent->setProperty("week5Checked", false);   // 周五：未选中
+  todoAlarmComponent->setProperty("week6Checked", false);   // 周六：未选中
+  todoAlarmComponent->setProperty("week7Checked", false);   // 周日：未选中
+
+  // 4.2 初始化语音播报状态（示例：默认开启）
+  todoAlarmComponent->setProperty("voiceBroadcastEnabled", true);
+
+  // 4.3 初始化日期时间（示例：设置为2025-12-25 09:30）
+  dateTimePicker->setProperty("selectedYear", 2025);  // 年
+  dateTimePicker->setProperty("selectedMonth",
+                              12);  // 月（注意：你的DateTimePicker用的是1-12）
+  dateTimePicker->setProperty("selectedDay", 25);     // 日
+  dateTimePicker->setProperty("selectedHour", 9);     // 时
+  dateTimePicker->setProperty("selectedMinute", 30);  // 分
+
+  // --------------------------
+  // 5. 最后调用QML函数显示弹窗（此时初始化值已生效）
+  bool success = QMetaObject::invokeMethod(
+      popupRoot, "showTodoAlarm",
+      Qt::QueuedConnection  // 队列连接，确保UI在主线程更新
   );
 
   if (!success) {
