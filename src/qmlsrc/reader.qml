@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Timeline
 
 import MyModel2 1.0
 import EBook.Models 1.0

@@ -571,8 +571,9 @@ void Todo::startTimerAlarm(QString text, qlonglong minValue) {
   jo.callStaticMethod<int>("com.x/MyService", "startPreciseAlarmInMyService",
                            "(Ljava/lang/String;)I", javaText.object<jstring>());
 
-  jo.callStaticMethod<int>("com.x/ClockActivity", "setInfoText",
-                           "(Ljava/lang/String;)I", javaText.object<jstring>());
+  // jo.callStaticMethod<int>("com.x/ClockActivity", "setInfoText",
+  //                          "(Ljava/lang/String;)I",
+  //                          javaText.object<jstring>());
 
   // sendTodoAlarmMsg(minValue);
 
@@ -756,8 +757,8 @@ void Todo::refreshAlarm() {
   isToday = false;
   QString str;
 
-  QString ini_file = "/data/data/com.x/files/msg.ini";
-  QSettings Reg(ini_file, QSettings::IniFormat);
+  // QString ini_file = "/data/data/com.x/files/msg.ini";
+  // QSettings Reg(ini_file, QSettings::IniFormat);
 
   QStringList listAlarm;
   QList<qlonglong> listTotalS;
@@ -864,7 +865,6 @@ void Todo::refreshAlarm() {
       if (minValue == listTotalS.at(i)) {
         QString str1 = listAlarm.at(i);
         startTimerAlarm(str1, minValue);
-        Reg.setValue("msg", str1);
 
         // isToDay?
         QDate todayDate = QDate::currentDate();
@@ -907,15 +907,6 @@ void Todo::refreshAlarm() {
   }
 
   changeTodoIcon(isToday);
-
-  Reg.setValue("count", count);
-  QString strMute = "true";
-  Reg.setValue("mute", strMute);
-
-  if (!QFile(ini_file).exists())
-    qDebug() << "ini no exists";
-  else
-    qDebug() << "ini ok";
 }
 
 void Todo::changeTodoIcon(bool isToday) {

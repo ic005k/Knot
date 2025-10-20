@@ -1,86 +1,86 @@
 package com.x;
 
-import com.x.MyActivity;
-
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.IBinder;
-import android.util.Log;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
-import android.app.Notification;
-import android.app.PendingIntent;
-import android.graphics.BitmapFactory;
-import android.app.AlarmManager;
-import android.app.NotificationManager;
-import android.graphics.Color;
-import android.app.NotificationChannel;
-import android.net.Uri;
-import androidx.core.app.NotificationCompat;
 import android.provider.Settings;
-import android.annotation.TargetApi;
-
+import android.util.Log;
+import androidx.core.app.NotificationCompat;
+import com.x.MyActivity;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Locale;
-
-import android.content.pm.ResolveInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PackageInfo;
-import android.content.ComponentName;
 
 public class MyService extends Service {
+
     private static final String TAG = "MyService";
     private static final String ID = "channel_1";
     private static final String NAME = "F_SERVICE";
+
+    public static String strTodoAlarm = "";
 
     public static volatile boolean isReady = false;
 
     private static PersistService mySensorSerivece;
 
-    public native static void CallJavaNotify_0();
+    public static native void CallJavaNotify_0();
 
-    public native static void CallJavaNotify_1();
+    public static native void CallJavaNotify_1();
 
-    public native static void CallJavaNotify_2();
+    public static native void CallJavaNotify_2();
 
-    public native static void CallJavaNotify_3();
+    public static native void CallJavaNotify_3();
 
-    public native static void CallJavaNotify_4();
+    public static native void CallJavaNotify_4();
 
-    public native static void CallJavaNotify_5();
+    public static native void CallJavaNotify_5();
 
-    public native static void CallJavaNotify_6();
+    public static native void CallJavaNotify_6();
 
-    public native static void CallJavaNotify_7();
+    public static native void CallJavaNotify_7();
 
-    public native static void CallJavaNotify_8();
+    public static native void CallJavaNotify_8();
 
-    public native static void CallJavaNotify_9();
+    public static native void CallJavaNotify_9();
 
-    public native static void CallJavaNotify_10();
+    public static native void CallJavaNotify_10();
 
-    public native static void CallJavaNotify_11();
+    public static native void CallJavaNotify_11();
 
-    public native static void CallJavaNotify_12();
+    public static native void CallJavaNotify_12();
 
-    public native static void CallJavaNotify_13();
+    public static native void CallJavaNotify_13();
 
-    public native static void CallJavaNotify_14();
+    public static native void CallJavaNotify_14();
 
     private static SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
 
@@ -91,22 +91,20 @@ public class MyService extends Service {
 
     public static Runnable runnable = new Runnable() {
         @Override
-        public void run() {
-
-        }
+        public void run() {}
     };
 
     @Override
     public IBinder onBind(Intent arg0) {
         // Auto-generated method stub
-        Log.i(TAG, "Service on bind");// 服务被绑定
+        Log.i(TAG, "Service on bind"); // 服务被绑定
         return null;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(TAG, "Service on create");// 服务被创建
+        Log.i(TAG, "Service on create"); // 服务被创建
 
         // 权限设置页面需要在 Activity 的任务栈中启动，必须用 Activity 上下文,而不是getMyAppContext()
         Context context = MyActivity.m_instance;
@@ -116,7 +114,6 @@ public class MyService extends Service {
             strStatus = "Knot";
             strTodo = "待办事项";
             strPedometer = "倒计时";
-
         } else {
             strRun = "Running...";
             strStatus = "Knot";
@@ -130,13 +127,18 @@ public class MyService extends Service {
 
         // 计步器
         mySensorSerivece = new PersistService();
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mSensorManager = (SensorManager) getSystemService(
+            Context.SENSOR_SERVICE
+        );
         countSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         initStepSensor();
 
         // 定时闹钟
         // 检查并请求权限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !hasExactAlarmPermission(context)) {
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            !hasExactAlarmPermission(context)
+        ) {
             // 引导用户到设置页面授予权限
             requestExactAlarmPermission((Activity) context);
             return;
@@ -145,13 +147,11 @@ public class MyService extends Service {
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
         isReady = true;
-
     }
 
     // 服务在每次启动的时候调用的方法 如果某些行为在服务已启动的时候就执行，可以把处理逻辑写在这个方法里面
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         Log.d("MyService", "onStartCommand()-------");
 
         if (Build.VERSION.SDK_INT >= 26) {
@@ -159,15 +159,24 @@ public class MyService extends Service {
         } else {
             // android 8.0 以下
             Intent notificationIntent = new Intent(this, MyActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                    notificationIntent, 0);
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                notificationIntent,
+                0
+            );
             Notification notification = new NotificationCompat.Builder(this)
-                    .setSmallIcon(R.drawable.icon)
-                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon))
-                    .setContentTitle("Knot")
-                    .setContentText(strRun)
-                    .setContentIntent(pendingIntent) // 通知栏点击
-                    .build();
+                .setSmallIcon(R.drawable.icon)
+                .setLargeIcon(
+                    BitmapFactory.decodeResource(
+                        getResources(),
+                        R.drawable.icon
+                    )
+                )
+                .setContentTitle("Knot")
+                .setContentText(strRun)
+                .setContentIntent(pendingIntent) // 通知栏点击
+                .build();
 
             startForeground(1337, notification);
         }
@@ -192,14 +201,15 @@ public class MyService extends Service {
                 mSensorManager.unregisterListener(mySensorSerivece);
             }
         }
-
     }
 
     @TargetApi(26)
     private void setForeground() {
         // 创建点击意图
         Intent notificationIntent = new Intent(this, MyActivity.class);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        notificationIntent.setFlags(
+            Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP
+        );
 
         // 适配不同版本的PendingIntent标志
         int pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -208,37 +218,43 @@ public class MyService extends Service {
         }
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
-                this,
-                0,
-                notificationIntent,
-                pendingIntentFlags);
+            this,
+            0,
+            notificationIntent,
+            pendingIntentFlags
+        );
 
         // 创建通知渠道 (Android 8.0+)
         String channelId = ID;
         String channelName = "Knot Service";
         NotificationChannel channel = new NotificationChannel(
-                channelId,
-                channelName,
-                NotificationManager.IMPORTANCE_LOW);
+            channelId,
+            channelName,
+            NotificationManager.IMPORTANCE_LOW
+        );
         channel.setShowBadge(false);
         channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
 
-        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        NotificationManager manager = (NotificationManager) getSystemService(
+            NOTIFICATION_SERVICE
+        );
         if (manager != null) {
             manager.createNotificationChannel(channel);
         }
 
         // 构建通知
         Notification notification = new Notification.Builder(this, channelId)
-                .setContentTitle(strStatus)
-                .setContentText(strRun)
-                .setSmallIcon(R.drawable.icon)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon))
-                .setContentIntent(pendingIntent) // 关键：添加点击意图
-                .setAutoCancel(true) // 点击后自动清除
-                .setOnlyAlertOnce(true) // 避免重复提示
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .build();
+            .setContentTitle(strStatus)
+            .setContentText(strRun)
+            .setSmallIcon(R.drawable.icon)
+            .setLargeIcon(
+                BitmapFactory.decodeResource(getResources(), R.drawable.icon)
+            )
+            .setContentIntent(pendingIntent) // 关键：添加点击意图
+            .setAutoCancel(true) // 点击后自动清除
+            .setOnlyAlertOnce(true) // 避免重复提示
+            .setVisibility(Notification.VISIBILITY_PUBLIC)
+            .build();
 
         // 启动前台服务
         startForeground(1337, notification);
@@ -251,29 +267,44 @@ public class MyService extends Service {
 
     public static void notify(Context context, String message) {
         try {
-            m_notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            m_notificationManager =
+                (NotificationManager) context.getSystemService(
+                    Context.NOTIFICATION_SERVICE
+                );
 
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            if (
+                android.os.Build.VERSION.SDK_INT >=
+                android.os.Build.VERSION_CODES.O
+            ) {
                 // int importance = NotificationManager.IMPORTANCE_DEFAULT;
                 int importance = NotificationManager.IMPORTANCE_LOW; // 这个低频道不包含任何声音，达到静音的效果
-                NotificationChannel notificationChannel = new NotificationChannel("Knot", "Knot Notifier Steps",
-                        importance);
-                m_notificationManager.createNotificationChannel(notificationChannel);
+                NotificationChannel notificationChannel =
+                    new NotificationChannel(
+                        "Knot",
+                        "Knot Notifier Steps",
+                        importance
+                    );
+                m_notificationManager.createNotificationChannel(
+                    notificationChannel
+                );
 
-                m_builder = new Notification.Builder(context, notificationChannel.getId());
+                m_builder = new Notification.Builder(
+                    context,
+                    notificationChannel.getId()
+                );
                 // m_builder.setOnlyAlertOnce(true);
             } else {
                 m_builder = new Notification.Builder(context);
             }
 
-            m_builder.setContentTitle(strPedometer)
-                    .setContentText(message)
-                    .setSmallIcon(R.drawable.icon)
-                    .setColor(Color.GREEN)
-                    .setAutoCancel(true);
+            m_builder
+                .setContentTitle(strPedometer)
+                .setContentText(message)
+                .setSmallIcon(R.drawable.icon)
+                .setColor(Color.GREEN)
+                .setAutoCancel(true);
 
             m_notificationManager.notify(0, m_builder.build());
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -287,13 +318,18 @@ public class MyService extends Service {
     // 待办事项定时任务通知（使用 Full-Screen Intent）
     public static void notifyTodoAlarm(Context context, String message) {
         try {
-            m_notificationManagerAlarm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            m_notificationManagerAlarm =
+                (NotificationManager) context.getSystemService(
+                    Context.NOTIFICATION_SERVICE
+                );
 
             // 创建跳转 Activity 的 Intent
             Intent activityIntent = new Intent(context, ClockActivity.class);
 
             // 修改启动标志 (Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            activityIntent.setFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
+            );
 
             // 构建 PendingIntent（适配 Android 12+ 不可变性）
             int flags = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -303,7 +339,11 @@ public class MyService extends Service {
             // 为通知创建请求码
             int requestCode = (int) System.currentTimeMillis(); // 100;
             PendingIntent pendingIntent = PendingIntent.getActivity(
-                    context, requestCode, activityIntent, flags);
+                context,
+                requestCode,
+                activityIntent,
+                flags
+            );
 
             // 创建通知渠道（Android 8.0+）
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -311,7 +351,10 @@ public class MyService extends Service {
                 String channelName = "Knot Alarm";
                 int importance = NotificationManager.IMPORTANCE_HIGH; // 必须为 HIGH 才能触发全屏
                 NotificationChannel channel = new NotificationChannel(
-                        channelId, channelName, importance);
+                    channelId,
+                    channelName,
+                    importance
+                );
                 channel.setDescription("Alarm notifications");
                 channel.enableLights(true);
                 channel.setLightColor(Color.RED);
@@ -319,30 +362,33 @@ public class MyService extends Service {
 
                 // 构建通知（Android 8.0+）
                 m_builderAlarm = new Notification.Builder(context, channelId)
-                        .setContentTitle(strTodo)
-                        .setContentText(message)
-                        .setSmallIcon(R.drawable.alarm)
-                        .setColor(Color.GREEN)
-                        .setAutoCancel(true)
-                        .setContentIntent(pendingIntent) // 添加内容点击
-                        .setFullScreenIntent(pendingIntent, true) // 关键：启用全屏 Intent
-                        .setPriority(Notification.PRIORITY_MAX); // 最高优先级
+                    .setContentTitle(strTodo)
+                    .setContentText(message)
+                    .setSmallIcon(R.drawable.alarm)
+                    .setColor(Color.GREEN)
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent) // 添加内容点击
+                    .setFullScreenIntent(pendingIntent, true) // 关键：启用全屏 Intent
+                    .setPriority(Notification.PRIORITY_MAX); // 最高优先级
             } else {
                 // Android 7.1 及以下
                 m_builderAlarm = new Notification.Builder(context)
-                        .setContentTitle(strTodo)
-                        .setContentText(message)
-                        .setSmallIcon(R.drawable.alarm)
-                        .setColor(Color.GREEN)
-                        .setAutoCancel(true)
-                        .setContentIntent(pendingIntent) // 添加内容点击
-                        .setFullScreenIntent(pendingIntent, true)
-                        .setPriority(Notification.PRIORITY_MAX);
+                    .setContentTitle(strTodo)
+                    .setContentText(message)
+                    .setSmallIcon(R.drawable.alarm)
+                    .setColor(Color.GREEN)
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent) // 添加内容点击
+                    .setFullScreenIntent(pendingIntent, true)
+                    .setPriority(Notification.PRIORITY_MAX);
             }
 
             // 发送通知
-            m_notificationManagerAlarm.notify("knot_alarm_tag", 10, m_builderAlarm.build());
-
+            m_notificationManagerAlarm.notify(
+                "knot_alarm_tag",
+                10,
+                m_builderAlarm.build()
+            );
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -359,15 +405,20 @@ public class MyService extends Service {
     /////////////////////// Steps Sensor /////////////////////////////////////
 
     class PersistService extends Service implements SensorEventListener {
-        public BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
+        public BroadcastReceiver mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (mSensorManager != null) { // 取消监听后重写监听，以保持后台运行
+                if (mSensorManager != null) {
+                    // 取消监听后重写监听，以保持后台运行
                     mSensorManager.unregisterListener(PersistService.this);
-                    mSensorManager.registerListener(PersistService.this,
-                            mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER),
-                            SensorManager.SENSOR_DELAY_NORMAL);
+                    mSensorManager.registerListener(
+                        PersistService.this,
+                        mSensorManager.getDefaultSensor(
+                            Sensor.TYPE_STEP_COUNTER
+                        ),
+                        SensorManager.SENSOR_DELAY_NORMAL
+                    );
                 }
             }
         };
@@ -403,13 +454,13 @@ public class MyService extends Service {
             if (mSensorManager != null) {
                 mSensorManager.unregisterListener(mySensorSerivece);
                 mSensorManager.registerListener(
-                        mySensorSerivece,
-                        mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER),
-                        SensorManager.SENSOR_DELAY_NORMAL);
+                    mySensorSerivece,
+                    mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER),
+                    SensorManager.SENSOR_DELAY_NORMAL
+                );
             }
             isStepCounter = 1;
-        } else
-            isStepCounter = 0;
+        } else isStepCounter = 0;
     }
 
     public static int getHardStepCounter() {
@@ -430,8 +481,7 @@ public class MyService extends Service {
     public static int startAlarm(String str) {
         // 特殊转义字符，必须加"\\"（“.”和“|”都是转义字符）
         String[] array = str.split("\\|");
-        for (int i = 0; i < array.length; i++)
-            System.out.println(array[i]);
+        for (int i = 0; i < array.length; i++) System.out.println(array[i]);
 
         String strTime = array[0];
         String strText = array[1];
@@ -460,16 +510,18 @@ public class MyService extends Service {
         int requestCode = 0;
 
         pendingIntentAlarm = PendingIntent.getBroadcast(
-                appContext,
-                requestCode,
-                receiverIntent,
-                flags);
+            appContext,
+            requestCode,
+            receiverIntent,
+            flags
+        );
 
         // 设置闹钟
         alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                c.getTimeInMillis(),
-                pendingIntentAlarm);
+            AlarmManager.RTC_WAKEUP,
+            c.getTimeInMillis(),
+            pendingIntentAlarm
+        );
 
         Log.e("Alarm Manager", c.getTimeInMillis() + "");
         Log.e("Alarm Manager", str);
@@ -499,7 +551,9 @@ public class MyService extends Service {
             return true; // API 31 以下不需要此权限
         }
 
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(
+            Context.ALARM_SERVICE
+        );
         return alarmManager.canScheduleExactAlarms();
     }
 
@@ -517,8 +571,7 @@ public class MyService extends Service {
 
     public static int startPreciseAlarm(String str) {
         String[] array = str.split("\\|");
-        for (int i = 0; i < array.length; i++)
-            System.out.println(array[i]);
+        for (int i = 0; i < array.length; i++) System.out.println(array[i]);
 
         String strTime = array[0];
         String strText = array[1];
@@ -536,9 +589,16 @@ public class MyService extends Service {
         // 1. 使用 setAlarmClock() 提高优先级
         Intent showIntent = new Intent(appContext, MyActivity.class);
         PendingIntent showPending = PendingIntent.getActivity(
-                appContext, 0, showIntent, PendingIntent.FLAG_IMMUTABLE);
+            appContext,
+            0,
+            showIntent,
+            PendingIntent.FLAG_IMMUTABLE
+        );
 
-        AlarmManager.AlarmClockInfo clockInfo = new AlarmManager.AlarmClockInfo(c.getTimeInMillis(), showPending);
+        AlarmManager.AlarmClockInfo clockInfo = new AlarmManager.AlarmClockInfo(
+            c.getTimeInMillis(),
+            showPending
+        );
 
         // 2. 创建精确触发的广播Intent
         Intent receiverIntent = new Intent(appContext, AlarmReceiver.class);
@@ -547,19 +607,20 @@ public class MyService extends Service {
 
         int requestCode = 0;
         pendingIntentAlarm = PendingIntent.getBroadcast(
-                appContext,
-                requestCode,
-                receiverIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            appContext,
+            requestCode,
+            receiverIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
 
         // 3. 设置闹钟
         alarmManager.setAlarmClock(clockInfo, pendingIntentAlarm);
 
         return 1;
-
     }
 
     public static int startPreciseAlarmInMyService(String str) {
+        strTodoAlarm = str;
         String[] array = str.split("\\|");
         String strText = array[1];
         String strTotalS = array[2];
@@ -576,27 +637,37 @@ public class MyService extends Service {
 
         // 2：使用 PendingIntent.getBroadcast
         pendingIntentAlarm = PendingIntent.getBroadcast(
-                appContext,
-                0, // 用新的定时覆盖旧的定时
-                alarmIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            appContext,
+            0, // 用新的定时覆盖旧的定时
+            alarmIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
 
         // 使用系统级高优先级API
         Intent showIntent = new Intent(appContext, MyActivity.class);
         PendingIntent showPending = PendingIntent.getActivity(
-                appContext, 0, showIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            appContext,
+            0,
+            showIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
 
         AlarmManager.AlarmClockInfo clockInfo = new AlarmManager.AlarmClockInfo(
-                c.getTimeInMillis(),
-                showPending);
+            c.getTimeInMillis(),
+            showPending
+        );
 
         alarmManager.setAlarmClock(clockInfo, pendingIntentAlarm);
 
         // 添加详细日志
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        Log.d("AlarmManager", "闹钟设置成功: " + sdf.format(c.getTime()) +
-                " | 消息: " + strText);
+        SimpleDateFormat sdf = new SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss",
+            Locale.getDefault()
+        );
+        Log.d(
+            "AlarmManager",
+            "闹钟设置成功: " + sdf.format(c.getTime()) + " | 消息: " + strText
+        );
 
         return 1;
     }
@@ -613,9 +684,13 @@ public class MyService extends Service {
                 notifyTodoAlarm(context, message);
 
                 if (ClockActivity.isReady) {
-                    String oldTxt = ClockActivity.text_info.getText().toString();
+                    String oldTxt = ClockActivity.text_info
+                        .getText()
+                        .toString();
 
-                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    SimpleDateFormat formatter = new SimpleDateFormat(
+                        "yyyy-MM-dd HH:mm:ss"
+                    );
                     Date date = new Date(System.currentTimeMillis());
                     String strCurDT0 = formatter.format(date);
                     String strCurDT = " ( " + strCurDT0 + " ) ";
@@ -625,11 +700,9 @@ public class MyService extends Service {
 
                     CallJavaNotify_3();
                 }
-
             }
         }
     };
 
     //////////////////////////////////////////////////////////////////////
-
 }
