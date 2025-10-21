@@ -516,6 +516,12 @@ Rectangle {
         // 居中显示（替代x和y的手动偏移，避免超出屏幕）
         anchors.centerIn: root
 
+        background: Rectangle {
+            anchors.fill: parent // 填充整个Popup
+            color: isDark ? "#222222" : "#f9f9f9"
+            radius: 0
+        }
+
         SetTodoAlarm {
             id: picker
             // 用Layout.fill而非anchors.fill，适配Popup的内边距

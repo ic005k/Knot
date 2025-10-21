@@ -1795,3 +1795,21 @@ void Todo::setChkVoice(bool value) {
 
   Reg.setValue("voice", value);
 }
+
+void Todo::on_btnTestSpeech() {
+  int count = mw_one->m_Todo->getCount();
+  if (count == 0) return;
+  int row = mw_one->m_Todo->getCurrentIndex();
+  if (row < 0) return;
+
+  bool isVoice = mw_one->m_Todo->isVoice(row);
+
+  if (isVoice) {
+    QString voiceFile = mw_one->m_Todo->getVoiceFile(row);
+    m_Method->playRecord(voiceFile);
+  } else {
+    QString txt = mw_one->m_Todo->getItemTodoText(row);
+    m_Method->stopPlayMyText();
+    m_Method->playMyText(txt);
+  }
+}

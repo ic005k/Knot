@@ -5,14 +5,14 @@ import QtQuick.Layouts 6.2
 Rectangle {
     id: mainContainer
     objectName: "setTodoAlarmComponent"
-    color: "#f9f9f9"
+    color: isDark ? "#222222" : "#f9f9f9"
     border.width: 1
     border.color: "#e0e0e0"
     radius: 8
     width: parent.width
     height: parent.height
 
-    // 周选择状态（保持不变）
+    // 周选择状态
     property bool selectAllDays: false
     property bool week1Checked: false
     property bool week2Checked: false
@@ -22,140 +22,220 @@ Rectangle {
     property bool week6Checked: false
     property bool week7Checked: false
 
-    // 语音播报状态（保持不变）
+    // 语音播报状态
     property bool voiceBroadcastEnabled: false
 
-    // 主布局：使用ColumnLayout管理
+    // 主布局
     ColumnLayout {
         id: mainLayout
-        spacing: 3
+        spacing: 5
         anchors.fill: parent
-        anchors.margins: 2
+        anchors.margins: 5
         Layout.maximumWidth: parent.width
         Layout.preferredWidth: parent.width
 
-        // 1. 周选择区域（核心修改：改为3排RowLayout）
+        // 1. 周选择区域（核心修改：Switch+Text组合）
         ColumnLayout {
-            spacing: 2 // 排与排之间的垂直间距
+            spacing: 0 // 排与排之间的间距略增大，避免拥挤
             Layout.fillWidth: true
-            Layout.preferredHeight: 60 // 固定总高度，避免占用过多空间
+            Layout.preferredHeight: 50 // 适当增加高度，避免内容挤压
 
             Text {
                 text: qsTr("Select by Week")
                 font.pixelSize: 16
                 font.bold: true
-                color: "#333"
-                Layout.alignment: Qt.AlignLeft // 标题左对齐
+                color: isDark ? "#EEEEEE" : "#333"
+                Layout.alignment: Qt.AlignLeft
             }
 
-            // 第二排：1（周一）、2（周二）、3（周三）
+            // 第一排：1（周一）、2（周二）、3（周三）
             RowLayout {
-                spacing: 20 // 三个开关均匀分布，间距适中
+                spacing: 5 // 组与组之间的间距（均匀分布）
                 Layout.fillWidth: true
+                //Layout.alignment: Qt.AlignHCenter  // 整排居中
 
-                //Layout.alignment: Qt.AlignHCenter // 水平居中
-                Switch {
-                    text: "1"
-                    checked: week1Checked
+                // 周一：Switch+Text组合
+                RowLayout {
+                    spacing: 4 // 开关与文本的紧凑间距
                     Layout.alignment: Qt.AlignCenter
-                    onCheckedChanged: {
-                        week1Checked = checked
-                        updateSelectAllState()
-                    }
-                }
 
-                Switch {
-                    text: "2"
-                    checked: week2Checked
-                    Layout.alignment: Qt.AlignCenter
-                    onCheckedChanged: {
-                        week2Checked = checked
-                        updateSelectAllState()
-                    }
-                }
-
-                Switch {
-                    text: "3"
-                    checked: week3Checked
-                    Layout.alignment: Qt.AlignCenter
-                    onCheckedChanged: {
-                        week3Checked = checked
-                        updateSelectAllState()
-                    }
-                }
-            }
-
-            // 第三排：4（周四）、5（周五）、6（周六）
-            RowLayout {
-                spacing: 20 // 与第二排保持一致间距，视觉统一
-                Layout.fillWidth: true
-
-                //Layout.alignment: Qt.AlignHCenter // 水平居中
-                Switch {
-                    text: "4"
-                    checked: week4Checked
-                    Layout.alignment: Qt.AlignCenter
-                    onCheckedChanged: {
-                        week4Checked = checked
-                        updateSelectAllState()
-                    }
-                }
-
-                Switch {
-                    text: "5"
-                    checked: week5Checked
-                    Layout.alignment: Qt.AlignCenter
-                    onCheckedChanged: {
-                        week5Checked = checked
-                        updateSelectAllState()
-                    }
-                }
-
-                Switch {
-                    text: "6"
-                    checked: week6Checked
-                    Layout.alignment: Qt.AlignCenter
-                    onCheckedChanged: {
-                        week6Checked = checked
-                        updateSelectAllState()
-                    }
-                }
-            }
-
-            // 第一排：每天（全选） + 7（周日）
-            RowLayout {
-                spacing: 20 // 两个开关之间的水平间距
-                Layout.fillWidth: true // 填充宽度，方便居中
-
-                //Layout.alignment: Qt.AlignHCenter // 水平居中
-                Switch {
-                    text: "7"
-                    checked: week7Checked
-                    Layout.alignment: Qt.AlignCenter
-                    onCheckedChanged: {
-                        week7Checked = checked
-                        updateSelectAllState()
-                    }
-                }
-
-                Switch {
-                    id: selectAllSwitch
-                    text: qsTr("Everyday")
-                    checked: selectAllDays
-                    Layout.alignment: Qt.AlignCenter
-                    visible: true
-                    onCheckedChanged: {
-                        selectAllDays = checked
-                        if (checked) {
-                            week1Checked = week2Checked = week3Checked = week4Checked
-                                    = week5Checked = week6Checked = week7Checked = true
+                    Switch {
+                        id: weekSwitch1
+                        checked: week1Checked // 无text属性
+                        onCheckedChanged: {
+                            week1Checked = checked
+                            updateSelectAllState()
                         }
+                    }
+                    Text {
+                        text: "1"
+                        color: isDark ? "#EEEEEE" : "#333" // 文本颜色可控
+                        font.pixelSize: 14
+                        Layout.alignment: Qt.AlignVCenter // 与开关垂直居中
+                    }
+                }
+
+                // 周二：Switch+Text组合
+                RowLayout {
+                    spacing: 4
+                    Layout.alignment: Qt.AlignCenter
+
+                    Switch {
+                        checked: week2Checked
+                        onCheckedChanged: {
+                            week2Checked = checked
+                            updateSelectAllState()
+                        }
+                    }
+                    Text {
+                        text: "2"
+                        color: isDark ? "#EEEEEE" : "#333"
+                        font.pixelSize: 14
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+                }
+
+                // 周三：Switch+Text组合
+                RowLayout {
+                    spacing: 4
+                    Layout.alignment: Qt.AlignCenter
+
+                    Switch {
+                        checked: week3Checked
+                        onCheckedChanged: {
+                            week3Checked = checked
+                            updateSelectAllState()
+                        }
+                    }
+                    Text {
+                        text: "3"
+                        color: isDark ? "#EEEEEE" : "#333"
+                        font.pixelSize: 14
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+                }
+            }
+
+            // 第二排：4（周四）、5（周五）、6（周六）
+            RowLayout {
+                spacing: 5 // 与上一排保持一致间距
+                Layout.fillWidth: true
+                //Layout.alignment: Qt.AlignHCenter
+
+                // 周四
+                RowLayout {
+                    spacing: 4
+                    Layout.alignment: Qt.AlignCenter
+
+                    Switch {
+                        checked: week4Checked
+                        onCheckedChanged: {
+                            week4Checked = checked
+                            updateSelectAllState()
+                        }
+                    }
+                    Text {
+                        text: "4"
+                        color: isDark ? "#EEEEEE" : "#333"
+                        font.pixelSize: 14
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+                }
+
+                // 周五
+                RowLayout {
+                    spacing: 4
+                    Layout.alignment: Qt.AlignCenter
+
+                    Switch {
+                        checked: week5Checked
+                        onCheckedChanged: {
+                            week5Checked = checked
+                            updateSelectAllState()
+                        }
+                    }
+                    Text {
+                        text: "5"
+                        color: isDark ? "#EEEEEE" : "#333"
+                        font.pixelSize: 14
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+                }
+
+                // 周六
+                RowLayout {
+                    spacing: 4
+                    Layout.alignment: Qt.AlignCenter
+
+                    Switch {
+                        checked: week6Checked
+                        onCheckedChanged: {
+                            week6Checked = checked
+                            updateSelectAllState()
+                        }
+                    }
+                    Text {
+                        text: "6"
+                        color: isDark ? "#EEEEEE" : "#333"
+                        font.pixelSize: 14
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+                }
+            }
+
+            // 第三排：7（周日）、Everyday（全选）
+            RowLayout {
+                spacing: 5 // 与前两排保持一致
+                Layout.fillWidth: true
+                //Layout.alignment: Qt.AlignHCenter
+
+                // 周日
+                RowLayout {
+                    spacing: 4
+                    Layout.alignment: Qt.AlignCenter
+
+                    Switch {
+                        checked: week7Checked
+                        onCheckedChanged: {
+                            week7Checked = checked
+                            updateSelectAllState()
+                        }
+                    }
+                    Text {
+                        text: "7"
+                        color: isDark ? "#EEEEEE" : "#333"
+                        font.pixelSize: 14
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+                }
+
+                // 全选（Everyday）
+                RowLayout {
+                    spacing: 4
+                    Layout.alignment: Qt.AlignCenter
+
+                    Switch {
+                        id: selectAllSwitch
+                        checked: selectAllDays
+                        onCheckedChanged: {
+                            selectAllDays = checked
+                            if (checked) {
+                                week1Checked = week2Checked = week3Checked = week4Checked
+                                        = week5Checked = week6Checked = week7Checked = true
+                            }
+                        }
+                    }
+                    Text {
+                        text: qsTr("Everyday")
+                        color: isDark ? "#EEEEEE" : "#333"
+                        font.pixelSize: 14
+                        Layout.alignment: Qt.AlignVCenter
                     }
                 }
             }
         }
 
-        // 2. 日期时间选择器（保持宽度约束）
+        // 2. 日期时间选择器
         DateTimePicker {
             id: dateTimePicker
             objectName: "dateTimePicker"
@@ -163,7 +243,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.maximumWidth: parent.width - 10
             Layout.preferredWidth: parent.width - 10
-            Layout.preferredHeight: 300 // 固定总高度，避免占用过多空间
+            Layout.preferredHeight: 300
             Layout.alignment: Qt.AlignHCenter
         }
 
@@ -175,15 +255,25 @@ Rectangle {
             Layout.preferredHeight: 40
             spacing: 8
 
-            Switch {
-                id: voiceSwitch
-                text: qsTr("TTS Voice")
-                checked: voiceBroadcastEnabled
+            // 语音开关：同样改为Switch+Text组合
+            RowLayout {
+                spacing: 4
                 Layout.alignment: Qt.AlignVCenter
-                onCheckedChanged: {
-                    voiceBroadcastEnabled = checked
-                    m_Todo.setChkVoice(checked)
-                    console.log("Voice " + (checked ? "enabled" : "disabled"))
+
+                Switch {
+                    id: voiceSwitch
+                    checked: voiceBroadcastEnabled
+                    onCheckedChanged: {
+                        voiceBroadcastEnabled = checked
+                        m_Todo.setChkVoice(checked)
+                        console.log("Voice " + (checked ? "enabled" : "disabled"))
+                    }
+                }
+                Text {
+                    text: qsTr("TTS Voice")
+                    color: isDark ? "#EEEEEE" : "#333"
+                    font.pixelSize: 14
+                    Layout.alignment: Qt.AlignVCenter
                 }
             }
 
@@ -195,6 +285,7 @@ Rectangle {
                 id: testVoiceBtn
                 text: qsTr("Test")
                 onClicked: {
+                    m_Todo.on_btnTestSpeech()
                     console.log("Test voice clicked")
                 }
                 padding: 8
@@ -213,7 +304,7 @@ Rectangle {
             }
 
             Button {
-                text: qsTr("Close")
+                text: qsTr("Back")
                 onClicked: {
                     m_Todo.isTodoAlarmShow = false
                     setTodoAlarm.close()
@@ -226,9 +317,7 @@ Rectangle {
             Button {
                 text: qsTr("Del Alarm")
                 onClicked: {
-                    /* 删除逻辑 */
                     m_Todo.on_DelAlarm()
-
                     m_Todo.isTodoAlarmShow = false
                     setTodoAlarm.close()
                 }
@@ -240,7 +329,6 @@ Rectangle {
             Button {
                 text: qsTr("Set Alarm")
                 onClicked: {
-                    /* 设置逻辑 */
                     m_Todo.on_SetAlarm(week1Checked, week2Checked,
                                        week3Checked, week4Checked,
                                        week5Checked, week6Checked,
@@ -250,7 +338,6 @@ Rectangle {
                                        dateTimePicker.currentDay,
                                        dateTimePicker.currentHour,
                                        dateTimePicker.currentMinute)
-
                     m_Todo.isTodoAlarmShow = false
                     setTodoAlarm.close()
                 }
@@ -265,7 +352,7 @@ Rectangle {
         }
     }
 
-    // 联动更新"每天"开关状态
+    // 联动更新"每天"开关状态（保持不变）
     function updateSelectAllState() {
         selectAllDays = week1Checked && week2Checked && week3Checked
                 && week4Checked && week5Checked && week6Checked && week7Checked

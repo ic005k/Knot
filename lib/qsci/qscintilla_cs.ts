@@ -249,6 +249,19 @@
     </message>
 </context>
 <context>
+    <name>DateTimePicker</name>
+    <message>
+        <location filename="../../src/qmlsrc/DateTimePicker.qml" line="54"/>
+        <source>Date</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/DateTimePicker.qml" line="179"/>
+        <source>Time</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>DocumentHandler</name>
     <message>
         <location filename="../../src/Reader/DocumentHandler.cpp" line="257"/>
@@ -367,15 +380,15 @@
     </message>
     <message>
         <location filename="../../src/MainHelper.cpp" line="215"/>
-        <location filename="../../src/MainHelper.cpp" line="1356"/>
-        <location filename="../../src/MainHelper.cpp" line="1386"/>
+        <location filename="../../src/MainHelper.cpp" line="1361"/>
+        <location filename="../../src/MainHelper.cpp" line="1391"/>
         <source>Freq</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainHelper.cpp" line="216"/>
-        <location filename="../../src/MainHelper.cpp" line="1360"/>
-        <location filename="../../src/MainHelper.cpp" line="1390"/>
+        <location filename="../../src/MainHelper.cpp" line="1365"/>
+        <location filename="../../src/MainHelper.cpp" line="1395"/>
         <source>Amount</source>
         <translation type="unfinished"></translation>
     </message>
@@ -436,15 +449,15 @@
     </message>
     <message>
         <location filename="../../src/MainHelper.cpp" line="261"/>
-        <location filename="../../src/MainHelper.cpp" line="808"/>
-        <location filename="../../src/MainHelper.cpp" line="957"/>
+        <location filename="../../src/MainHelper.cpp" line="813"/>
+        <location filename="../../src/MainHelper.cpp" line="962"/>
         <source>Backup File List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainHelper.cpp" line="262"/>
         <location filename="../../src/MainHelper.cpp" line="444"/>
-        <location filename="../../src/MainHelper.cpp" line="989"/>
+        <location filename="../../src/MainHelper.cpp" line="994"/>
         <source>Tab Recycle</source>
         <translation type="unfinished"></translation>
     </message>
@@ -455,44 +468,44 @@
     </message>
     <message>
         <location filename="../../src/MainHelper.cpp" line="444"/>
-        <location filename="../../src/MainHelper.cpp" line="808"/>
-        <location filename="../../src/MainHelper.cpp" line="957"/>
-        <location filename="../../src/MainHelper.cpp" line="989"/>
+        <location filename="../../src/MainHelper.cpp" line="813"/>
+        <location filename="../../src/MainHelper.cpp" line="962"/>
+        <location filename="../../src/MainHelper.cpp" line="994"/>
         <source>Total</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="761"/>
+        <location filename="../../src/MainHelper.cpp" line="766"/>
         <source>Slide Right to Start or Stop.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="944"/>
-        <location filename="../../src/MainHelper.cpp" line="969"/>
+        <location filename="../../src/MainHelper.cpp" line="949"/>
+        <location filename="../../src/MainHelper.cpp" line="974"/>
         <source>Whether to remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="1004"/>
+        <location filename="../../src/MainHelper.cpp" line="1009"/>
         <source>Import this data?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="1241"/>
+        <location filename="../../src/MainHelper.cpp" line="1246"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="1351"/>
-        <location filename="../../src/MainHelper.cpp" line="1387"/>
-        <location filename="../../src/MainHelper.cpp" line="1391"/>
+        <location filename="../../src/MainHelper.cpp" line="1356"/>
+        <location filename="../../src/MainHelper.cpp" line="1392"/>
+        <location filename="../../src/MainHelper.cpp" line="1396"/>
         <source>Time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="1352"/>
         <location filename="../../src/MainHelper.cpp" line="1357"/>
-        <location filename="../../src/MainHelper.cpp" line="1361"/>
+        <location filename="../../src/MainHelper.cpp" line="1362"/>
+        <location filename="../../src/MainHelper.cpp" line="1366"/>
         <source>Days</source>
         <translation type="unfinished"></translation>
     </message>
@@ -576,7 +589,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="374"/>
-        <location filename="../../src/MainWindow.cpp" line="2540"/>
+        <location filename="../../src/MainWindow.cpp" line="2557"/>
         <source>Stop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -605,7 +618,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="520"/>
-        <location filename="../../src/MainWindow.cpp" line="1550"/>
+        <location filename="../../src/MainWindow.cpp" line="1556"/>
         <source>Reading Progress</source>
         <translation type="unfinished"></translation>
     </message>
@@ -732,15 +745,15 @@
         <location filename="../../src/MainWindow.ui" line="1607"/>
         <location filename="../../src/MainWindow.ui" line="2032"/>
         <location filename="../../src/MainWindow.ui" line="4797"/>
-        <location filename="../../src/MainHelper.cpp" line="1591"/>
-        <location filename="../../src/MainWindow.cpp" line="733"/>
+        <location filename="../../src/MainHelper.cpp" line="1596"/>
+        <location filename="../../src/MainWindow.cpp" line="739"/>
         <source>Month</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="1620"/>
         <location filename="../../src/MainWindow.ui" line="2061"/>
-        <location filename="../../src/MainWindow.cpp" line="734"/>
+        <location filename="../../src/MainWindow.cpp" line="740"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -766,7 +779,7 @@
     <message>
         <location filename="../../src/MainWindow.ui" line="1762"/>
         <location filename="../../src/MainWindow.ui" line="3125"/>
-        <location filename="../../src/MainWindow.cpp" line="974"/>
+        <location filename="../../src/MainWindow.cpp" line="980"/>
         <source>Modify</source>
         <translation type="unfinished"></translation>
     </message>
@@ -791,7 +804,7 @@
         <location filename="../../src/MainWindow.ui" line="1919"/>
         <location filename="../../src/MainWindow.ui" line="3677"/>
         <location filename="../../src/MainWindow.ui" line="3702"/>
-        <location filename="../../src/MainHelper.cpp" line="1542"/>
+        <location filename="../../src/MainHelper.cpp" line="1547"/>
         <source>Steps</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1144,8 +1157,8 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="4453"/>
-        <location filename="../../src/MainWindow.cpp" line="2537"/>
-        <location filename="../../src/MainWindow.cpp" line="2542"/>
+        <location filename="../../src/MainWindow.cpp" line="2554"/>
+        <location filename="../../src/MainWindow.cpp" line="2559"/>
         <source>Start</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1193,8 +1206,8 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="4855"/>
-        <location filename="../../src/MainWindow.cpp" line="683"/>
-        <location filename="../../src/MainWindow.cpp" line="1427"/>
+        <location filename="../../src/MainWindow.cpp" line="689"/>
+        <location filename="../../src/MainWindow.cpp" line="1433"/>
         <source>Total</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1466,19 +1479,19 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="7865"/>
-        <location filename="../../src/MainWindow.cpp" line="717"/>
+        <location filename="../../src/MainWindow.cpp" line="723"/>
         <source>Rename Tab</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="7870"/>
-        <location filename="../../src/MainWindow.cpp" line="744"/>
+        <location filename="../../src/MainWindow.cpp" line="750"/>
         <source>Add Tab</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="7875"/>
-        <location filename="../../src/MainWindow.cpp" line="759"/>
+        <location filename="../../src/MainWindow.cpp" line="765"/>
         <source>Del Tab</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1540,7 +1553,7 @@
     <message>
         <location filename="../../src/MainWindow.cpp" line="106"/>
         <location filename="../../src/MainWindow.cpp" line="117"/>
-        <location filename="../../src/MainWindow.cpp" line="726"/>
+        <location filename="../../src/MainWindow.cpp" line="732"/>
         <source>Tab</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1565,7 +1578,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="1542"/>
+        <location filename="../../src/MainHelper.cpp" line="1547"/>
         <source>Days</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1580,87 +1593,87 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="695"/>
+        <location filename="../../src/MainWindow.cpp" line="701"/>
         <source>Rename tab name : </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="695"/>
+        <location filename="../../src/MainWindow.cpp" line="701"/>
         <source>Tab name : </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="756"/>
+        <location filename="../../src/MainWindow.cpp" line="762"/>
         <source>Whether to remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="810"/>
+        <location filename="../../src/MainWindow.cpp" line="816"/>
         <source>Tab 1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="839"/>
+        <location filename="../../src/MainWindow.cpp" line="845"/>
         <source>Date</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="960"/>
+        <location filename="../../src/MainWindow.cpp" line="966"/>
         <source>Only the data of the current year can be modified.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1089"/>
+        <location filename="../../src/MainWindow.cpp" line="1095"/>
         <source>An error occurred while compressing the file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1103"/>
-        <location filename="../../src/MainWindow.cpp" line="1119"/>
-        <location filename="../../src/MainWindow.cpp" line="1122"/>
+        <location filename="../../src/MainWindow.cpp" line="1109"/>
+        <location filename="../../src/MainWindow.cpp" line="1125"/>
+        <location filename="../../src/MainWindow.cpp" line="1128"/>
         <source>KnotBak</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1103"/>
+        <location filename="../../src/MainWindow.cpp" line="1109"/>
         <source>File (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1109"/>
-        <location filename="../../src/MainWindow.cpp" line="2389"/>
-        <location filename="../../src/MainWindow.cpp" line="2706"/>
-        <location filename="../../src/MainWindow.cpp" line="2717"/>
+        <location filename="../../src/MainWindow.cpp" line="1115"/>
+        <location filename="../../src/MainWindow.cpp" line="2395"/>
+        <location filename="../../src/MainWindow.cpp" line="2723"/>
+        <location filename="../../src/MainWindow.cpp" line="2734"/>
         <source>Share to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1120"/>
+        <location filename="../../src/MainWindow.cpp" line="1126"/>
         <source>Zip File (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1123"/>
+        <location filename="../../src/MainWindow.cpp" line="1129"/>
         <source>Zip File (*.zip);;All(*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1130"/>
+        <location filename="../../src/MainWindow.cpp" line="1136"/>
         <source>Import this data?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1197"/>
+        <location filename="../../src/MainWindow.cpp" line="1203"/>
         <source>Startup Time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="1537"/>
+        <location filename="../../src/MainWindow.cpp" line="1543"/>
         <source>Total Reading: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="2500"/>
+        <location filename="../../src/MainWindow.cpp" line="2517"/>
         <source>Please enable permission to record audio!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2614,7 +2627,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="95"/>
+        <location filename="../../src/main.cpp" line="96"/>
         <source>The application is already running!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6920,40 +6933,40 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="1565"/>
+        <location filename="../../src/Reader/Reader.cpp" line="1569"/>
         <source>Clear all reading history</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="2015"/>
+        <location filename="../../src/Reader/Reader.cpp" line="2019"/>
         <source>Remove from list?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="2034"/>
+        <location filename="../../src/Reader/Reader.cpp" line="2038"/>
         <source>The EPUB file was opened with an error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="2351"/>
+        <location filename="../../src/Reader/Reader.cpp" line="2359"/>
         <source>Share to</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Reader/Reader.cpp" line="3316"/>
-        <location filename="../../src/Reader/Reader.cpp" line="3436"/>
-        <source>Note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Reader/Reader.cpp" line="3329"/>
         <location filename="../../src/Reader/Reader.cpp" line="3449"/>
+        <source>Note</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Reader/Reader.cpp" line="3342"/>
+        <location filename="../../src/Reader/Reader.cpp" line="3462"/>
         <source>Ok</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="3330"/>
-        <location filename="../../src/Reader/Reader.cpp" line="3450"/>
+        <location filename="../../src/Reader/Reader.cpp" line="3343"/>
+        <location filename="../../src/Reader/Reader.cpp" line="3463"/>
         <source>Cancel</source>
         <translation type="unfinished">Zrušit</translation>
     </message>
@@ -6967,7 +6980,7 @@
     </message>
     <message>
         <location filename="../../src/Reader/ReaderSet.cpp" line="169"/>
-        <location filename="../../src/Reader/ReaderSet.cpp" line="306"/>
+        <location filename="../../src/Reader/ReaderSet.cpp" line="315"/>
         <source>Font</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6982,9 +6995,9 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/ReaderSet.cpp" line="279"/>
-        <location filename="../../src/Reader/ReaderSet.cpp" line="286"/>
-        <location filename="../../src/Reader/ReaderSet.cpp" line="295"/>
+        <location filename="../../src/Reader/ReaderSet.cpp" line="282"/>
+        <location filename="../../src/Reader/ReaderSet.cpp" line="292"/>
+        <location filename="../../src/Reader/ReaderSet.cpp" line="304"/>
         <source>Scroll Speed</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7140,6 +7153,44 @@
     </message>
 </context>
 <context>
+    <name>SetTodoAlarm</name>
+    <message>
+        <location filename="../../src/qmlsrc/SetTodoAlarm.qml" line="44"/>
+        <source>Select by Week</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/SetTodoAlarm.qml" line="143"/>
+        <source>Everyday</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/SetTodoAlarm.qml" line="180"/>
+        <source>TTS Voice</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/SetTodoAlarm.qml" line="196"/>
+        <source>Test</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/SetTodoAlarm.qml" line="217"/>
+        <source>Back</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/SetTodoAlarm.qml" line="228"/>
+        <source>Del Alarm</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/SetTodoAlarm.qml" line="242"/>
+        <source>Set Alarm</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ShowMessage</name>
     <message>
         <location filename="../../src/Comm/ShowMessage.ui" line="14"/>
@@ -7200,7 +7251,7 @@
     <message>
         <location filename="../../src/Exercise/Steps.cpp" line="145"/>
         <location filename="../../src/Exercise/Steps.cpp" line="244"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="484"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="482"/>
         <source>KM</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7210,57 +7261,57 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="479"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="477"/>
         <source>Calorie</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="559"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="557"/>
         <source>No GPS signal...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="560"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="573"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="558"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="571"/>
         <source>Start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="618"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="616"/>
         <source>Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="779"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="775"/>
         <source>Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="856"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="919"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1163"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1173"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="852"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="917"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1161"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1171"/>
         <source>Cycling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="857"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="924"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1165"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1175"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="853"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="922"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1163"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1173"/>
         <source>Hiking</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="858"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="929"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1167"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1177"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="854"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="927"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1165"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1175"/>
         <source>Running</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="861"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="857"/>
         <source>Time</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7270,37 +7321,37 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="862"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="858"/>
         <source>Distance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="863"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="859"/>
         <source>Exercise Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="864"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="860"/>
         <source>Average Speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1161"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1159"/>
         <source>Month</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1171"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1169"/>
         <source>Year</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1660"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1662"/>
         <source>Today</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1661"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1663"/>
         <source>km</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7404,87 +7455,87 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="340"/>
-        <location filename="../../src/Todo/Todo.cpp" line="345"/>
-        <location filename="../../src/Todo/Todo.cpp" line="820"/>
+        <location filename="../../src/Todo/Todo.cpp" line="333"/>
+        <location filename="../../src/Todo/Todo.cpp" line="336"/>
+        <location filename="../../src/Todo/Todo.cpp" line="810"/>
         <source>Alarm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="531"/>
-        <location filename="../../src/Todo/Todo.cpp" line="614"/>
+        <location filename="../../src/Todo/Todo.cpp" line="522"/>
+        <location filename="../../src/Todo/Todo.cpp" line="604"/>
         <source>Todo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="587"/>
+        <location filename="../../src/Todo/Todo.cpp" line="577"/>
         <source>Todo Alarm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="783"/>
-        <location filename="../../src/Todo/Todo.cpp" line="850"/>
+        <location filename="../../src/Todo/Todo.cpp" line="773"/>
+        <location filename="../../src/Todo/Todo.cpp" line="840"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1147"/>
-        <location filename="../../src/Todo/Todo.cpp" line="1316"/>
-        <location filename="../../src/Todo/Todo.cpp" line="1363"/>
-        <location filename="../../src/Todo/Todo.cpp" line="1403"/>
-        <location filename="../../src/Todo/Todo.cpp" line="1415"/>
-        <location filename="../../src/Todo/Todo.cpp" line="1428"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1127"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1296"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1343"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1383"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1395"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1408"/>
         <source>Voice</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1180"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1160"/>
         <source>Editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1211"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1191"/>
         <source>Cancel</source>
         <translation type="unfinished">Zrušit</translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1212"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1192"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1213"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1193"/>
         <source>Share</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1214"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1194"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1263"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1243"/>
         <source>Share to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1299"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1279"/>
         <source>Done</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1326"/>
-        <location filename="../../src/Todo/Todo.cpp" line="1349"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1306"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1329"/>
         <source>Recording audio in progress...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1515"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1495"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1589"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1569"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7542,9 +7593,9 @@
         <location filename="../../src/Todo/TodoAlarm.cpp" line="250"/>
         <location filename="../../src/Todo/TodoAlarm.cpp" line="351"/>
         <location filename="../../src/Todo/TodoAlarm.cpp" line="393"/>
-        <location filename="../../src/Todo/TodoAlarm.cpp" line="444"/>
-        <location filename="../../src/Todo/TodoAlarm.cpp" line="453"/>
-        <location filename="../../src/Todo/TodoAlarm.cpp" line="460"/>
+        <location filename="../../src/Todo/TodoAlarm.cpp" line="439"/>
+        <location filename="../../src/Todo/TodoAlarm.cpp" line="448"/>
+        <location filename="../../src/Todo/TodoAlarm.cpp" line="455"/>
         <source>Hour</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7555,8 +7606,8 @@
         <location filename="../../src/Todo/TodoAlarm.cpp" line="250"/>
         <location filename="../../src/Todo/TodoAlarm.cpp" line="356"/>
         <location filename="../../src/Todo/TodoAlarm.cpp" line="396"/>
-        <location filename="../../src/Todo/TodoAlarm.cpp" line="450"/>
-        <location filename="../../src/Todo/TodoAlarm.cpp" line="465"/>
+        <location filename="../../src/Todo/TodoAlarm.cpp" line="445"/>
+        <location filename="../../src/Todo/TodoAlarm.cpp" line="460"/>
         <source>Minute</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7810,42 +7861,42 @@
 <context>
     <name>reader</name>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="651"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="680"/>
         <source>Note Content:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="702"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="731"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="716"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="745"/>
         <source>Del</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="724"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="753"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="753"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="782"/>
         <source>Delete Confirmation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="764"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="793"/>
         <source>Are you sure you want to delete this note?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="1361"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="1390"/>
         <source>Start:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="1440"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="1469"/>
         <source>End:</source>
         <translation type="unfinished"></translation>
     </message>

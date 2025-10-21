@@ -571,6 +571,12 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     return;
   }
 
+  if (m_Todo->isTodoAlarmShow) {
+    m_Todo->closeTodoAlarm();
+    event->ignore();
+    return;
+  }
+
   if (!mui->frameTodo->isHidden()) {
     on_btnBackTodo_clicked();
     event->ignore();
