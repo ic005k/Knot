@@ -421,9 +421,15 @@ void Todo::on_btnSetTime_clicked() {
   int count = getCount();
   if (count == 0) return;
 
-  showTodoAlarm();
-  return;
+  mui->qwTodo->rootContext()->setContextProperty("mainW",
+                                                 mw_one->geometry().width());
+  mui->qwTodo->rootContext()->setContextProperty("mainH",
+                                                 mw_one->geometry().height());
 
+  showTodoAlarm();
+
+  return;
+  ////////////////////////////////////////////////////////
   delete mw_one->m_TodoAlarm;
   mw_one->m_TodoAlarm = new TodoAlarm(this);
 
@@ -1477,6 +1483,10 @@ void Todo::openTodo() {
                                                    QVariant(false));
     mui->qwTodo->rootContext()->setContextProperty("m_Todo", mw_one->m_Todo);
     mui->qwTodo->rootContext()->setContextProperty("FontSize", fontSize);
+    mui->qwTodo->rootContext()->setContextProperty("mainW",
+                                                   mw_one->geometry().width());
+    mui->qwTodo->rootContext()->setContextProperty("mainH",
+                                                   mw_one->geometry().height());
     mui->qwTodo->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/todo.qml")));
 
     mui->qwRecycle->rootContext()->setContextProperty("FontSize", fontSize);

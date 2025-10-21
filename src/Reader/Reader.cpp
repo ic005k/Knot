@@ -467,6 +467,7 @@ void Reader::initReader() {
   scrollValue = Reg.value("/Reader/ScrollValue", "1").toReal();
   QString value = QString::number(scrollValue, 'f', 2);
   mui->lblSpeed->setText(tr("Scroll Speed") + " : " + value);
+  m_ReaderSet->setScrollValue();
 
   QFont font;
   int fsize = Reg.value("/Reader/FontSize", 18).toInt();

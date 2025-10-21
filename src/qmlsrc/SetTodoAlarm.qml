@@ -36,7 +36,7 @@ Rectangle {
 
         // 1. 周选择区域（核心修改：Switch+Text组合）
         ColumnLayout {
-            spacing: 0 // 排与排之间的间距略增大，避免拥挤
+            spacing: 2 // 排与排之间的间距略增大，避免拥挤
             Layout.fillWidth: true
             Layout.preferredHeight: 50 // 适当增加高度，避免内容挤压
 
@@ -307,7 +307,8 @@ Rectangle {
                 text: qsTr("Back")
                 onClicked: {
                     m_Todo.isTodoAlarmShow = false
-                    setTodoAlarm.close()
+                    //setTodoAlarm.close()
+                    closeTodoAlarm()
                 }
                 padding: 8
                 Layout.maximumWidth: Math.min(implicitWidth,
@@ -319,7 +320,8 @@ Rectangle {
                 onClicked: {
                     m_Todo.on_DelAlarm()
                     m_Todo.isTodoAlarmShow = false
-                    setTodoAlarm.close()
+                    //setTodoAlarm.close()
+                    closeTodoAlarm()
                 }
                 padding: 8
                 Layout.maximumWidth: Math.min(implicitWidth,
@@ -339,7 +341,8 @@ Rectangle {
                                        dateTimePicker.currentHour,
                                        dateTimePicker.currentMinute)
                     m_Todo.isTodoAlarmShow = false
-                    setTodoAlarm.close()
+                    //setTodoAlarm.close()
+                    closeTodoAlarm()
                 }
                 padding: 8
                 Layout.maximumWidth: Math.min(implicitWidth,

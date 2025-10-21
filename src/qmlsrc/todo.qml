@@ -508,9 +508,11 @@ Rectangle {
     // 日期时间选择器弹窗
     Popup {
         id: setTodoAlarm
-        width: root.width > 450 ? 450 : root.width
 
+        width: root.width > 450 ? 450 : root.width
         height: root.height
+        y: -20
+        x: 0
         modal: true
         focus: true
         // 居中显示（替代x和y的手动偏移，避免超出屏幕）

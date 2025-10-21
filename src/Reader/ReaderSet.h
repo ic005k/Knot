@@ -21,7 +21,8 @@ class ReaderSet : public QDialog {
 
   void saveScrollValue();
 
- protected:
+  void setScrollValue();
+  protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
  public slots:

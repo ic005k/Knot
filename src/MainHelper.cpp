@@ -531,8 +531,7 @@ void MainHelper::initMainQW() {
                                                    "#FFFFFF");
   mui->qwReader->rootContext()->setContextProperty("isAutoRun",
                                                    QVariant(false));
-  mui->qwReader->rootContext()->setContextProperty(
-      "scrollValue", mw_one->m_Reader->scrollValue);
+  m_ReaderSet->setScrollValue();
 }
 
 void MainHelper::initNotesQW() {
