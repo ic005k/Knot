@@ -384,6 +384,11 @@ static void JavaNotify_15() {
     return;
   }
 
+  if (mw_one->m_Todo->isTodoAlarmShow) {
+    QTimer::singleShot(100, mw_one, []() { mw_one->m_Todo->closeTodoAlarm(); });
+    return;
+  }
+
   if (!mui->frameTodo->isHidden()) {
     mui->btnBackTodo->click();
     return;

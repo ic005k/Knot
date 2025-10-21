@@ -269,8 +269,51 @@ Rectangle {
     }
 
     // 监听年份和月份变化，更新天数
-    onCurrentYearChanged: updateDayCount()
-    onCurrentMonthChanged: updateDayCount()
+    //onCurrentYearChanged: updateDayCount()
+    //onCurrentMonthChanged: updateDayCount()
+
+    // 1. 年份变化时，同步更新年滚轮
+    onCurrentYearChanged: {
+        const yearIndex = yearTumbler.model.indexOf(currentYear);
+        if (yearIndex !== -1) { // 确保索引有效
+            yearTumbler.currentIndex = yearIndex;
+        }
+    }
+
+    // 2. 月份变化时，同步更新月滚轮，并刷新天数
+    onCurrentMonthChanged: {
+        const monthIndex = currentMonth - 1; // 月份是1-12，滚轮索引是0-11
+        if (monthIndex >= 0 && monthIndex < 12) {
+            monthTumbler.currentIndex = monthIndex;
+        }
+        updateDayCount(); // 月份变了，重新计算当月天数
+    }
+
+    // 3. 日期变化时，同步更新日滚轮
+    onCurrentDayChanged: {
+        const dayIndex = currentDay - 1;
+        // 先检查model是否存在，再判断索引有效性
+        if (dayTumbler.model && dayIndex >= 0 && dayIndex < dayTumbler.model.length) {
+            dayTumbler.currentIndex = dayIndex;
+        } else {
+            // 可选：打印调试信息，确认问题场景
+            console.log("dayTumbler.model未初始化或dayIndex无效，currentDay:", currentDay);
+        }
+    }
+
+    // 4. 小时变化时，同步更新时滚轮
+    onCurrentHourChanged: {
+        if (currentHour >= 0 && currentHour < 24) {
+            hourTumbler.currentIndex = currentHour;
+        }
+    }
+
+    // 5. 分钟变化时，同步更新分滚轮
+    onCurrentMinuteChanged: {
+        if (currentMinute >= 0 && currentMinute < 60) {
+            minuteTumbler.currentIndex = currentMinute;
+        }
+    }
 
     // 组件完成时初始化
     Component.onCompleted: {

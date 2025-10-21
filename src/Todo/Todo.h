@@ -2,12 +2,14 @@
 #define TODO_H
 
 #include <QCheckBox>
+#include <QDate>
 #include <QDialog>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QListWidgetItem>
 #include <QSettings>
 #include <QTextEdit>
+#include <QTime>
 #include <QTimer>
 #include <QToolButton>
 
@@ -26,6 +28,8 @@ class Todo : public QDialog {
   ~Todo();
 
   QDialog *m_ReeditTodo = nullptr;
+
+  bool isTodoAlarmShow = false;
 
   bool isNeedAddToTodoList = false;
   QString strNeedAddToTodoText;
@@ -90,6 +94,14 @@ class Todo : public QDialog {
 
   void stopPlayVoice();
 
+  void setChkVoice(bool value);
+
+  void on_DelAlarm();
+  void on_SetAlarm(bool w1, bool w2, bool w3, bool w4, bool w5, bool w6,
+                   bool w7, int y, int mon, int d, int h, int m);
+
+  void closeTodoAlarm();
+
  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void closeEvent(QCloseEvent *event) override;
@@ -100,8 +112,7 @@ class Todo : public QDialog {
 
   bool isRecordVoice = false;
   QString currentTodoItem;
-  void on_SetAlarm();
-  void on_DelAlarm();
+
   void on_btnAdd_clicked();
 
   void on_btnHigh_clicked();
@@ -147,12 +158,14 @@ class Todo : public QDialog {
   void openTodoUI();
   void openTodo();
   void showTodoAlarm();
-  private slots:
+ private slots:
   void on_ShowRecordTime();
 
   void on_ShowPlayProgress();
 
  private:
+  QDate alarmDate;
+  QTime alarmTime;
   QListWidgetItem *editItem;
   QString audioFileName;
   QString audioFilePath;
@@ -176,5 +189,6 @@ class Todo : public QDialog {
   int nMSec = 0;
   void sendTodoAlarmMsg(qlonglong minValue);
   QString strVoiceTime;
+  bool getChkVoice();
 };
 #endif  // TODO_H

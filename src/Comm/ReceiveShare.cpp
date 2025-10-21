@@ -210,9 +210,10 @@ QObjectList ReceiveShare::getAllFrame(QObjectList lstUIControls) {
 void ReceiveShare::closeAllChildWindows() {
   mw_one->m_Reader->closeMyPDF();
 
-  if (mw_one->m_TodoAlarm->isVisible()) {
-    mw_one->m_TodoAlarm->ui->btnBack->click();
-    while (!mui->frameTodo->isVisible())
+  if (mw_one->m_Todo->isTodoAlarmShow) {
+    QTimer::singleShot(100, mw_one, []() { mw_one->m_Todo->closeTodoAlarm(); });
+
+    while (!mw_one->m_Todo->isTodoAlarmShow)
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     mui->btnBackTodo->click();
   }

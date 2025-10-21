@@ -21,6 +21,11 @@ Rectangle {
         setTodoAlarm.open()
     }
 
+    function closeTodoAlarm() {
+
+        setTodoAlarm.close()
+    }
+
     function isAlarm(index) {
 
         return isHighPriority
@@ -503,7 +508,7 @@ Rectangle {
     // 日期时间选择器弹窗
     Popup {
         id: setTodoAlarm
-        width: root.width
+        width: root.width > 450 ? 450 : root.width
 
         height: root.height
         modal: true

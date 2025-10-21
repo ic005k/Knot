@@ -400,14 +400,9 @@ void TodoAlarm::onBtnClick(QToolButton* btn, QString flag) {
   setBtnTitle();
 }
 
-void TodoAlarm::on_btnDelDT_clicked() { mw_one->m_Todo->on_DelAlarm(); }
+void TodoAlarm::on_btnDelDT_clicked() {}
 
-void TodoAlarm::on_btnSetDT_clicked() {
-  ui->dateTimeEdit->setDate(m_datePicker->date());
-  ui->dateTimeEdit->setTime(m_timePicker->time());
-
-  mw_one->m_Todo->on_SetAlarm();
-}
+void TodoAlarm::on_btnSetDT_clicked() {}
 
 void TodoAlarm::addDial(int min, int max, QString flag) {
   return;

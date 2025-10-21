@@ -311,46 +311,35 @@ void Todo::on_btnLow_clicked() {
   saveTodo();
 }
 
-void Todo::on_SetAlarm() {
+void Todo::on_SetAlarm(bool w1, bool w2, bool w3, bool w4, bool w5, bool w6,
+                       bool w7, int y, int mon, int d, int h, int m) {
   int row = getCurrentIndex();
   if (row < 0) return;
 
   QString strTodoText = getItemTodoText(row);
   QString strTime;
-
-  if (!mw_one->m_TodoAlarm->ui->chk1->isChecked() &&
-      !mw_one->m_TodoAlarm->ui->chk2->isChecked() &&
-      !mw_one->m_TodoAlarm->ui->chk3->isChecked() &&
-      !mw_one->m_TodoAlarm->ui->chk4->isChecked() &&
-      !mw_one->m_TodoAlarm->ui->chk5->isChecked() &&
-      !mw_one->m_TodoAlarm->ui->chk6->isChecked() &&
-      !mw_one->m_TodoAlarm->ui->chk7->isChecked()) {
-    mw_one->m_TodoAlarm->ui->chkDaily->setChecked(false);
-  }
+  alarmTime.setHMS(h, m, 0, 0);
+  alarmDate.setDate(y, mon, d);
 
   QString str;
-  if (mw_one->m_TodoAlarm->ui->chk1->isChecked()) str = str + "1";
-  if (mw_one->m_TodoAlarm->ui->chk2->isChecked()) str = str + "2";
-  if (mw_one->m_TodoAlarm->ui->chk3->isChecked()) str = str + "3";
-  if (mw_one->m_TodoAlarm->ui->chk4->isChecked()) str = str + "4";
-  if (mw_one->m_TodoAlarm->ui->chk5->isChecked()) str = str + "5";
-  if (mw_one->m_TodoAlarm->ui->chk6->isChecked()) str = str + "6";
-  if (mw_one->m_TodoAlarm->ui->chk7->isChecked()) str = str + "7";
+  if (w1) str = str + "1";
+  if (w2) str = str + "2";
+  if (w3) str = str + "3";
+  if (w4) str = str + "4";
+  if (w5) str = str + "5";
+  if (w6) str = str + "6";
+  if (w7) str = str + "7";
   if (str.length() > 0) {
-    strTime = tr("Alarm") + "  " + str + "  " +
-              mw_one->m_TodoAlarm->ui->dateTimeEdit->time().toString("HH:mm");
+    strTime = tr("Alarm") + "  " + str + "  " + alarmTime.toString("HH:mm");
 
   } else {
-    strTime =
-        tr("Alarm") + "  " + mw_one->m_TodoAlarm->ui->dateTimeEdit->text();
+    strTime = tr("Alarm") + "  " + alarmDate.toString("yyyy-M-d") + " " +
+              alarmTime.toString("HH:mm");
   }
 
   delItem(row);
   insertItem(strTime, 0, strTodoText, row);
   setCurrentIndex(row);
-
-  ui->frameSetTime->hide();
-  mw_one->m_TodoAlarm->close();
 
   refreshTableLists();
   refreshAlarm();
@@ -432,14 +421,13 @@ void Todo::on_btnSetTime_clicked() {
   int count = getCount();
   if (count == 0) return;
 
-  int row = getCurrentIndex();
-
   showTodoAlarm();
   return;
 
   delete mw_one->m_TodoAlarm;
   mw_one->m_TodoAlarm = new TodoAlarm(this);
 
+  int row = getCurrentIndex();
   QString str = getItemTime(row);
   QDate date;
   QTime time;
@@ -552,8 +540,6 @@ void Todo::on_DelAlarm() {
   if (str != "") str1 = str;
   modifyTime(row, str1);
   modifyType(row, 0);
-  ui->frameSetTime->hide();
-  mw_one->m_TodoAlarm->close();
 
   refreshTableLists();
   refreshAlarm();
@@ -1636,14 +1622,28 @@ void Todo::openTodo() {
     openTodoUI();
 }
 
-#include <QDate>
-#include <QDebug>
-#include <QMetaObject>
-#include <QQuickItem>
-#include <QTime>
+void Todo::closeTodoAlarm() {
+  // 1. 获取Popup根对象
+  QQuickItem* popupRoot = mui->qwTodo->rootObject();
+  if (!popupRoot) {
+    qWarning() << "Failed to get Popup root object!";
+    return;
+  }
+
+  bool success = QMetaObject::invokeMethod(
+      popupRoot, "closeTodoAlarm",
+      Qt::QueuedConnection  // 队列连接，确保UI在主线程更新
+  );
+
+  if (!success) {
+    qWarning() << "Failed to call closeTodoAlarm() in QML!";
+  }
+
+  isTodoAlarmShow = false;
+}
 
 void Todo::showTodoAlarm() {
-  // 1. 获取Popup根对象（你的原有逻辑）
+  // 1. 获取Popup根对象
   QQuickItem* popupRoot = mui->qwTodo->rootObject();
   if (!popupRoot) {
     qWarning() << "Failed to get Popup root object!";
@@ -1670,24 +1670,103 @@ void Todo::showTodoAlarm() {
   // --------------------------
   // 4.1 初始化周选择状态（示例：默认选中周一、周三，且"每天"开关关闭）
   todoAlarmComponent->setProperty("selectAllDays", false);  // 每天：关闭
-  todoAlarmComponent->setProperty("week1Checked", true);    // 周一：选中
+  todoAlarmComponent->setProperty("week1Checked", false);   // 周一：选中
   todoAlarmComponent->setProperty("week2Checked", false);   // 周二：未选中
-  todoAlarmComponent->setProperty("week3Checked", true);    // 周三：选中
+  todoAlarmComponent->setProperty("week3Checked", false);   // 周三：选中
   todoAlarmComponent->setProperty("week4Checked", false);   // 周四：未选中
   todoAlarmComponent->setProperty("week5Checked", false);   // 周五：未选中
   todoAlarmComponent->setProperty("week6Checked", false);   // 周六：未选中
   todoAlarmComponent->setProperty("week7Checked", false);   // 周日：未选中
 
   // 4.2 初始化语音播报状态（示例：默认开启）
-  todoAlarmComponent->setProperty("voiceBroadcastEnabled", true);
+  todoAlarmComponent->setProperty("voiceBroadcastEnabled", getChkVoice());
+
+  int row = getCurrentIndex();
+  QString str = getItemTime(row);
+  QDate date;
+  QTime time;
+
+  str = getTimeStr(str);
+
+  if (str != "") {
+    QStringList list = str.split(" ");
+    if (str.contains("-")) {
+      date = QDate::fromString(list.at(0), "yyyy-M-d");
+      time = QTime::fromString(list.at(1), "HH:mm");
+    } else {
+      QString s1 = list.at(0);
+      for (int i = 0; i < s1.length(); i++) {
+        QString s2 = s1.mid(i, 1);
+        if (s2 == "1") todoAlarmComponent->setProperty("week1Checked", true);
+        if (s2 == "2") todoAlarmComponent->setProperty("week2Checked", true);
+        if (s2 == "3") todoAlarmComponent->setProperty("week3Checked", true);
+        if (s2 == "4") todoAlarmComponent->setProperty("week4Checked", true);
+        if (s2 == "5") todoAlarmComponent->setProperty("week5Checked", true);
+        if (s2 == "6") todoAlarmComponent->setProperty("week6Checked", true);
+        if (s2 == "7") todoAlarmComponent->setProperty("week7Checked", true);
+      }
+      date = QDate::currentDate();
+
+      for (int i = 0; i < list.count(); i++) {
+        if (list.at(i).contains(":")) {
+          time = QTime::fromString(list.at(i), "HH:mm");
+          break;
+        }
+      }
+    }
+
+    alarmDate = date;
+    alarmTime = time;
+
+  } else {
+    str = getItemTime(row);
+    QStringList list = str.split(" ");
+    if (str.mid(0, 2) == "20" && str.contains("-")) {
+      date = QDate::fromString(list.at(0), "yyyy-M-d");
+      time = QTime::fromString(list.at(1), "HH:mm");
+    }
+
+    if (list.count() > 2) {
+      date = QDate::currentDate();
+      time = QTime::currentTime();
+    }
+
+    if ((str.mid(0, 1) == "1" || str.mid(0, 1) == "2" || str.mid(0, 1) == "3" ||
+         str.mid(0, 1) == "4" || str.mid(0, 1) == "5" || str.mid(0, 1) == "6" ||
+         str.mid(0, 1) == "7") &&
+        !str.contains("-")) {
+      QString s1 = list.at(0);
+      for (int i = 0; i < s1.length(); i++) {
+        QString s2 = s1.mid(i, 1);
+        if (s2 == "1") todoAlarmComponent->setProperty("week1Checked", true);
+        if (s2 == "2") todoAlarmComponent->setProperty("week2Checked", true);
+        if (s2 == "3") todoAlarmComponent->setProperty("week3Checked", true);
+        if (s2 == "4") todoAlarmComponent->setProperty("week4Checked", true);
+        if (s2 == "5") todoAlarmComponent->setProperty("week5Checked", true);
+        if (s2 == "6") todoAlarmComponent->setProperty("week6Checked", true);
+        if (s2 == "7") todoAlarmComponent->setProperty("week7Checked", true);
+      }
+      date = QDate::currentDate();
+      for (int i = 0; i < list.count(); i++) {
+        if (list.at(i).contains(":")) {
+          time = QTime::fromString(list.at(i), "HH:mm");
+          break;
+        }
+      }
+    }
+
+    alarmDate = date;
+    alarmTime = time;
+  }
 
   // 4.3 初始化日期时间（示例：设置为2025-12-25 09:30）
-  dateTimePicker->setProperty("selectedYear", 2025);  // 年
-  dateTimePicker->setProperty("selectedMonth",
-                              12);  // 月（注意：你的DateTimePicker用的是1-12）
-  dateTimePicker->setProperty("selectedDay", 25);     // 日
-  dateTimePicker->setProperty("selectedHour", 9);     // 时
-  dateTimePicker->setProperty("selectedMinute", 30);  // 分
+  dateTimePicker->setProperty("selectedYear", alarmDate.year());  // 年
+  dateTimePicker->setProperty(
+      "selectedMonth",
+      alarmDate.month());  // 月（注意：DateTimePicker用的是1-12）
+  dateTimePicker->setProperty("selectedDay", alarmDate.day());        // 日
+  dateTimePicker->setProperty("selectedHour", alarmTime.hour());      // 时
+  dateTimePicker->setProperty("selectedMinute", alarmTime.minute());  // 分
 
   // --------------------------
   // 5. 最后调用QML函数显示弹窗（此时初始化值已生效）
@@ -1699,4 +1778,20 @@ void Todo::showTodoAlarm() {
   if (!success) {
     qWarning() << "Failed to call showTodoAlarm() in QML!";
   }
+
+  isTodoAlarmShow = true;
+}
+
+bool Todo::getChkVoice() {
+  QString ini_file = privateDir + "msg.ini";
+  QSettings Reg(ini_file, QSettings::IniFormat);
+
+  return Reg.value("voice", false).toBool();
+}
+
+void Todo::setChkVoice(bool value) {
+  QString ini_file = privateDir + "msg.ini";
+  QSettings Reg(ini_file, QSettings::IniFormat);
+
+  Reg.setValue("voice", value);
 }
