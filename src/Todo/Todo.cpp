@@ -421,6 +421,9 @@ void Todo::on_btnSetTime_clicked() {
   int count = getCount();
   if (count == 0) return;
 
+  int row = getCurrentIndex();
+  currentTodoItem = getItemTodoText(row);
+
   mui->qwTodo->rootContext()->setContextProperty("mainW",
                                                  mw_one->geometry().width());
   mui->qwTodo->rootContext()->setContextProperty("mainH",
@@ -429,11 +432,13 @@ void Todo::on_btnSetTime_clicked() {
   showTodoAlarm();
 
   return;
+
   ////////////////////////////////////////////////////////
+
   delete mw_one->m_TodoAlarm;
   mw_one->m_TodoAlarm = new TodoAlarm(this);
 
-  int row = getCurrentIndex();
+  row = getCurrentIndex();
   QString str = getItemTime(row);
   QDate date;
   QTime time;

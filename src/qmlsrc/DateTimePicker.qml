@@ -12,7 +12,8 @@ Rectangle {
     clip: true
 
     // 内部状态属性
-    property int currentYear: new Date().getFullYear()
+    property int systemCurrentYear: new Date().getFullYear() // 系统当前年（固定）
+    property int currentYear: systemCurrentYear // 初始化为系统当前年（用户可修改）
     property int currentMonth: new Date().getMonth() + 1
     property int currentDay: new Date().getDate()
     property int currentHour: new Date().getHours()
@@ -74,7 +75,10 @@ Rectangle {
                 visibleItemCount: 3
                 model: {
                     var years = []
-                    for (var i = startYear - yearRange; i <= startYear + yearRange; i++) {
+                    // 结束年基于系统当前年+15（固定范围，不随用户选择变化）
+                    var endYear = systemCurrentYear + yearRange
+                    // 起始年固定为2022
+                    for (var i = startYear; i <= endYear; i++) {
                         years.push(i)
                     }
                     return years
