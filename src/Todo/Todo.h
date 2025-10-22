@@ -103,7 +103,13 @@ class Todo : public QDialog {
   void closeTodoAlarm();
 
   void on_btnTestSpeech();
-  protected:
+
+  void on_btnHigh_clicked();
+  void on_btnLow_clicked();
+  void on_btnSetTime_clicked();
+  void on_btnRecycle_clicked();
+
+ protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void closeEvent(QCloseEvent *event) override;
   bool eventFilter(QObject *watch, QEvent *evn) override;
@@ -115,14 +121,6 @@ class Todo : public QDialog {
   QString currentTodoItem;
 
   void on_btnAdd_clicked();
-
-  void on_btnHigh_clicked();
-
-  void on_btnLow_clicked();
-
-  void on_btnSetTime_clicked();
-
-  void on_btnRecycle_clicked();
 
   void on_btnReturn_clicked();
 

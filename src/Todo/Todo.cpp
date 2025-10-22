@@ -38,6 +38,7 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
   mui->btnPasteTodo->hide();
   mui->progAudioBar->hide();
   mui->sliderPlayAudio->hide();
+  mui->f_ToolBar->hide();
 
   f.setPointSize(fontSize);
   mui->editTodo->setFont(f);

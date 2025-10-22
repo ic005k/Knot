@@ -219,6 +219,34 @@ Rectangle {
                                                   })
             }
 
+            MouseArea {
+                anchors.fill: parent
+                onClicked: function (mouse) {
+                    if (actionButtons.visible && mouse.x > actionButtons.x
+                            && mouse.x < actionButtons.x + actionButtons.width
+                            && mouse.y > actionButtons.y
+                            && mouse.y < actionButtons.y + actionButtons.height) {
+
+                        mouse.accepted = false // 放行事件给按钮
+                        console.log("按钮被点击...")
+                    } else {
+                        view.currentIndex = index //实现item切换
+                        m_Todo.stopPlayVoice()
+                        console.log("index=" + index + "  c_index=" + ListView.isCurrentItem)
+                    }
+                }
+
+                onDoubleClicked: {
+                    m_Todo.reeditText()
+                    var data = view.model.get(view.currentIndex)
+                    console.log(data.time + "," + data.dototext + ", count=" + view.count)
+                }
+
+                onPressed: {
+                    donebtn.visible = true
+                }
+            }
+
             Rectangle {
 
                 id: rectan
@@ -406,28 +434,108 @@ Rectangle {
 
                         Rectangle {
                             width: view.width
-                            height: 5 // 空白高度
+                            height: 3 // 空白高度
                             color: "transparent"
                         }
-                    }
-                }
 
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        view.currentIndex = index //实现item切换
-                        m_Todo.stopPlayVoice()
-                        //console.log("index=" + index + "  c_index=" + ListView.isCurrentItem)
-                    }
+                        // 新增：按钮区域 - 仅在当前条目被选中时显示
+                        Row {
+                            id: actionButtons
+                            width: parent.width
+                            z: 10 // 提升层级，高于其他元素
+                            spacing: 15 // 按钮间距
+                            padding: 5 // 内边距
+                            visible: view.currentIndex === index // 选中时显示
 
-                    onDoubleClicked: {
-                        m_Todo.reeditText()
-                        var data = view.model.get(view.currentIndex)
-                        console.log(data.time + "," + data.dototext + ", count=" + view.count)
-                    }
+                            // 高优先级按钮
+                            ToolButton {
+                                icon.name: "high"
+                                icon.source: "qrc:/res/high.svg"
+                                icon.width: 20
+                                icon.height: 20
 
-                    onPressed: {
-                        donebtn.visible = true
+                                onClicked: {
+                                    m_Todo.on_btnHigh_clicked()
+                                    console.log("设置高优先级: " + index)
+                                }
+                                // 适配深色模式
+                                background: Rectangle {
+                                    color: "transparent"
+                                }
+                            }
+
+                            // 低优先级按钮
+                            ToolButton {
+                                icon.name: "low"
+                                icon.source: "qrc:/res/low.svg"
+                                icon.width: 20
+                                icon.height: 20
+
+                                onClicked: {
+                                    m_Todo.on_btnLow_clicked()
+                                    console.log("设置低优先级: " + index)
+                                }
+                                background: Rectangle {
+                                    color: "transparent"
+                                }
+                            }
+
+                            // 修改按钮
+                            ToolButton {
+                                icon.name: "modify"
+                                icon.source: "qrc:/res/edit.svg"
+                                icon.width: 20
+                                icon.height: 20
+
+                                onClicked: {
+                                    view.currentIndex = index
+                                    m_Todo.reeditText() // 调用现有修改函数
+                                    console.log("修改条目: " + index)
+                                }
+                                background: Rectangle {
+                                    color: "transparent"
+                                }
+                            }
+
+                            // 定时按钮
+                            ToolButton {
+                                icon.name: "setTime"
+                                icon.source: "qrc:/res/alarm.svg"
+                                icon.width: 20
+                                icon.height: 20
+
+                                onClicked: {
+                                    m_Todo.on_btnSetTime_clicked()
+                                    console.log("设置时间: " + index)
+                                }
+                                background: Rectangle {
+                                    color: "transparent"
+                                }
+                            }
+
+                            // 回收箱按钮
+                            ToolButton {
+                                icon.name: "recycle"
+                                icon.source: "qrc:/res/recycle.svg"
+                                icon.width: 20
+                                icon.height: 20
+
+                                onClicked: {
+                                    m_Todo.on_btnRecycle_clicked()
+                                    console.log("打开回收箱: " + index)
+                                }
+                                background: Rectangle {
+                                    color: "transparent"
+                                }
+                            }
+                        }
+
+                        // 底部空白
+                        Rectangle {
+                            width: view.width
+                            height: 5
+                            color: "transparent"
+                        }
                     }
                 }
 
