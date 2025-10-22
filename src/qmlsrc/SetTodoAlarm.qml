@@ -36,7 +36,8 @@ Rectangle {
 
         // 1. 周选择区域（核心修改：Switch+Text组合）
         ColumnLayout {
-            spacing: 2 // 排与排之间的间距略增大，避免拥挤
+            spacing: 3 // 排与排之间的间距略增大，避免拥挤
+
             Layout.fillWidth: true
             Layout.preferredHeight: 50 // 适当增加高度，避免内容挤压
 
