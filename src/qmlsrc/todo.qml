@@ -541,12 +541,11 @@ Rectangle {
 
                 Rectangle {
                     id: donebtn
-                    height: parent.height - 0
+                    height: parent.height
                     width: 55
-                    color: "red"
+                    color: isDark ? "#2D2D2D" : "#F5F5F5"
                     anchors.right: parent.right
 
-                    // 修改：使用透明度动画替代直接显示/隐藏
                     opacity: flack.contentX !== 0 ? 1 : 0
                     Behavior on opacity {
                         NumberAnimation {
@@ -555,42 +554,73 @@ Rectangle {
                     }
                     visible: opacity > 0
 
-                    Image {
-                        id: doneImg
-
-                        width: 35
-                        height: 35
-                        x: (donebtn.width - doneImg.width) / 2 - 1
-                        y: (donebtn.height - doneImg.height) / 2
-                        fillMode: Image.NoOption
-                        horizontalAlignment: Image.AlignHCenter
-                        verticalAlignment: Image.AlignVCenter
-
-                        smooth: true
-                        sourceSize.height: 35
-                        sourceSize.width: 35
-                        source: "/res/todo_done.png"
-
-                        visible: true
-                    }
-
-                    Text {
+                    CheckBox {
+                        id: todoCheckBox
                         anchors.centerIn: parent
+                        text: ""
+                        checked: false
+                        padding: 0
 
-                        color: "#ffffff"
-                    }
-                    MouseArea {
-                        anchors.fill: parent
+                        Timer {
+                            id: actionTimer
+                            interval: 300
+                            repeat: false
+                            onTriggered: {
+                                // 原删除逻辑不变
+                                view.currentIndex = index
+                                m_Todo.stopPlayVoice()
+                                m_Todo.addToRecycle()
+                                view.model.remove(index)
+                                m_Todo.refreshTableLists()
+                                m_Todo.refreshAlarm()
+                                m_Todo.saveTodo()
+                                springAnimation.to = 0
+                                springAnimation.start()
+                                todoCheckBox.checked = false
+                                todoCheckBox.indicator.scale = 1
+                            }
+                        }
+
+                        // 核心：用小矩形作为选中标记（无复杂属性，Qt6兼容）
+                        indicator: Rectangle {
+                            width: 26
+                            height: 26
+                            border.width: 2
+                            border.color: isDark ? "#666666" : "#CCCCCC" // 边框色适配暗黑
+                            // 检查盒背景：未选中时随模式变化，选中时保持中性色（突出红色标记）
+                            color: todoCheckBox.checked ? (isDark ? "#333333" : "#FFFFFF") // 选中时背景不变，靠红色矩形标记
+                                                        : (isDark ? "#333333" : "#FFFFFF")
+                            anchors.centerIn: parent
+                            antialiasing: true
+
+                            // 小矩形（选中标记）：居中显示，大小适中
+                            Rectangle {
+                                id: checkMark
+                                width: 14 // 矩形宽度
+                                height: 14 // 矩形高度
+                                color: isDark ? "#4CAF50" : "#8BC34A" // 暗黑模式深绿，亮色模式浅绿（与检查盒选中背景呼应）
+                                anchors.centerIn: parent // 完全居中
+                                visible: todoCheckBox.checked // 选中时显示
+                                opacity: todoCheckBox.checked ? 1 : 0 // 透明度过渡
+                                Behavior on opacity {
+                                    NumberAnimation {
+                                        duration: 100
+                                    }
+                                } // 淡入动画
+                                radius: 2 // 轻微圆角，避免生硬
+                            }
+
+                            // 点击缩放动画（保留反馈）
+                            Behavior on scale {
+                                NumberAnimation {
+                                    duration: 50
+                                }
+                            }
+                        }
+
                         onClicked: {
-                            view.currentIndex = index
-
-                            m_Todo.stopPlayVoice()
-                            m_Todo.addToRecycle()
-                            view.model.remove(index)
-                            m_Todo.refreshTableLists()
-                            m_Todo.refreshAlarm()
-                            m_Todo.saveTodo()
-                            console.log("Done isclick")
+                            todoCheckBox.indicator.scale = 0.9 // 按压缩放反馈
+                            actionTimer.start()
                         }
                     }
                 }
