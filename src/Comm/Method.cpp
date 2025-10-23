@@ -3212,7 +3212,10 @@ void Method::setLineEditToolBar(QObject *parent, EditEventFilter *editFilter) {
   for (int i = 0; i < btnList.count(); i++) {
     QLineEdit *btn = (QLineEdit *)btnList.at(i);
     if (btn != mw_one->m_Preferences->ui->editPassword &&
-        btn != mw_one->m_Preferences->ui->editValidate)
+        btn != mw_one->m_Preferences->ui->editValidate &&
+        btn != mw_one->m_StepsOptions->ui->editMapKey &&
+        btn != mw_one->m_StepsOptions->ui->editStepLength &&
+        btn != mw_one->m_StepsOptions->ui->editStepsThreshold)
       btn->installEventFilter(editFilter);
     // qDebug() << "QLineEdit" << i << "=" << btn->objectName();
   }

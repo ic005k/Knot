@@ -3670,7 +3670,7 @@ QSlider::handle:horizontal:disabled {
           <enum>QTabWidget::TabPosition::South</enum>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_Steps">
           <attribute name="title">
@@ -3865,32 +3865,6 @@ QSlider::handle:horizontal:disabled {
            </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_15">
-             <item>
-              <widget class="QToolButton" name="btnStepsOptions">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Options</string>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>:/res/options.png</normaloff>:/res/options.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>28</width>
-                 <height>28</height>
-                </size>
-               </property>
-               <property name="toolButtonStyle">
-                <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
-               </property>
-              </widget>
-             </item>
              <item>
               <widget class="QToolButton" name="btnReset">
                <property name="sizePolicy">
@@ -4665,6 +4639,32 @@ QRadioButton:disabled {
            <number>0</number>
           </property>
           <item>
+           <widget class="QToolButton" name="btnStepsOptions">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Options</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/set_l.svg</normaloff>:/res/set_l.svg</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>28</width>
+              <height>28</height>
+             </size>
+            </property>
+            <property name="toolButtonStyle">
+             <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QToolButton" name="btnMap">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -4674,6 +4674,16 @@ QRadioButton:disabled {
             </property>
             <property name="text">
              <string>Map</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/map_l.svg</normaloff>:/res/map_l.svg</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>28</width>
+              <height>28</height>
+             </size>
             </property>
            </widget>
           </item>

@@ -33,6 +33,7 @@ class StepsOptions : public QDialog {
   void on_editMapKey_textChanged(const QString &arg1);
 
  private:
+  EditEventFilter *editFilter = nullptr;
 };
 
 #endif  // STEPSOPTIONS_H

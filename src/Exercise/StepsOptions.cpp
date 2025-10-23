@@ -51,6 +51,16 @@ void StepsOptions::init() {
   m_Method->showGrayWindows();
   show();
   isTextChange = false;
+
+  // init edit toolbar
+  initTextToolbarDynamic(this);
+  if (editFilter != nullptr) {
+    ui->editMapKey->removeEventFilter(editFilter);
+    delete editFilter;
+    editFilter = nullptr;
+  }
+  editFilter = new EditEventFilter(textToolbarDynamic, this);
+  ui->editMapKey->installEventFilter(editFilter);
 }
 
 void StepsOptions::on_btnBack_clicked() {
