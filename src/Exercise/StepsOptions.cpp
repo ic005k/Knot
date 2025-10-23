@@ -72,3 +72,8 @@ void StepsOptions::on_editStepLength_textChanged(const QString &arg1) {
   Q_UNUSED(arg1);
   isTextChange = true;
 }
+
+void StepsOptions::on_editMapKey_textChanged(const QString &arg1) {
+  Q_UNUSED(arg1);
+  isTextChange = true;
+}

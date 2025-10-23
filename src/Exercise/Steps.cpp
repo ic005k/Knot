@@ -108,6 +108,34 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
             qDebug() << "天气获取错误:" << error;
             strCurrentTemp = "";
           });
+
+  addressResolver = new GeoAddressResolver(this);
+  addressResolver->setTencentApiKey("");
+  // 连接信号槽，获取结果
+  connect(addressResolver, &GeoAddressResolver::addressResolved, this,
+          [this](const QString& address) {
+            // 过滤完全相同的地址
+            if (address != m_lastAddress) {
+              qDebug() << "记录轨迹点：" << address;
+
+              m_lastAddress = address;
+            } else {
+              qDebug() << "位置未变化，跳过记录";
+            }
+          });
+  connect(addressResolver, &GeoAddressResolver::resolveFailed, this,
+          [](const QString& error) {
+            qDebug() << "地址解析失败：" << error;
+            // 处理错误（如提示用户检查网络或密钥）
+          });
+
+  // 测试云南腾冲和顺古镇（GCJ-02坐标）
+  addressResolver->getAddressFromCoord(25.0217, 98.4464);  // 未转换坐标系
+  // 一行调用转换，得到 GCJ02 坐标（腾讯云API可用）
+  QGeoCoordinate gcj02Coord = wgs84ToGcj02(25.0217, 98.4464);
+  // 后续调用地址解析API
+  addressResolver->getAddressFromCoord(gcj02Coord.latitude(),
+                                       gcj02Coord.longitude());
 }
 
 Steps::~Steps() {}
@@ -150,9 +178,12 @@ void Steps::saveSteps() {
       mw_one->m_StepsOptions->ui->editStepLength->text().trimmed();
   QString strThreshold =
       mw_one->m_StepsOptions->ui->editStepsThreshold->text().trimmed();
+  QString strMapKey = mw_one->m_StepsOptions->ui->editMapKey->text().trimmed();
+
   QJsonObject stepsObj = rootObj["Steps"].toObject();
   stepsObj["Length"] = strLength;
   stepsObj["Threshold"] = strThreshold;
+  stepsObj["MapKey"] = strMapKey;
 
   // 将Steps节点加入根对象
   rootObj["Steps"] = stepsObj;
@@ -349,9 +380,11 @@ void Steps::setTableSteps(qlonglong steps) {
   // 读取步长和阈值（对应原/Steps/Length和/Steps/Threshold）
   QString stepLength = stepsObj["Length"].toString("35");
   QString stepsThreshold = stepsObj["Threshold"].toString("10000");
+  QString mapKey = stepsObj["MapKey"].toString("");
 
   mw_one->m_StepsOptions->ui->editStepLength->setText(stepLength);
   mw_one->m_StepsOptions->ui->editStepsThreshold->setText(stepsThreshold);
+  mw_one->m_StepsOptions->ui->editMapKey->setText(mapKey);
   // 设置上下文属性
   mui->qwSteps->rootContext()->setContextProperty("nStepsThreshold",
                                                   stepsThreshold.toInt());
@@ -1836,4 +1869,67 @@ void Steps::setInfoLabelToAndroid(const QString& str) {
   }
 
 #endif
+}
+
+// 函数：WGS84 转 GCJ02
+QGeoCoordinate Steps::wgs84ToGcj02(double wgs84Lat, double wgs84Lon) {
+  // 1. 常量定义（国测局标准）
+  const double PI = 3.14159265358979323846;
+  const double EARTH_RADIUS = 6378245.0;
+  const double ECCENTRICITY_SQUARE = 0.00669342162296594323;
+
+  // 2. 判断坐标是否在国内（避免境外转换偏移）
+  bool isDomestic = (wgs84Lon >= 73.55 && wgs84Lon <= 135.08) &&
+                    (wgs84Lat >= 3.86 && wgs84Lat <= 53.55);
+  if (!isDomestic) {
+    return QGeoCoordinate(wgs84Lat, wgs84Lon);
+  }
+
+  // 3. 计算纬度偏移量（原 transformLatitude 逻辑）
+  double latOffset = -100.0 + 2.0 * (wgs84Lon - 105.0) +
+                     3.0 * (wgs84Lat - 35.0) + 0.2 * pow(wgs84Lat - 35.0, 2) +
+                     0.1 * (wgs84Lon - 105.0) * (wgs84Lat - 35.0) +
+                     0.2 * sqrt(fabs(wgs84Lon - 105.0));
+  latOffset += (20.0 * sin(6.0 * (wgs84Lon - 105.0) * PI) +
+                20.0 * sin(2.0 * (wgs84Lon - 105.0) * PI)) *
+               2.0 / 3.0;
+  latOffset += (20.0 * sin((wgs84Lat - 35.0) * PI) +
+                40.0 * sin((wgs84Lat - 35.0) / 3.0 * PI)) *
+               2.0 / 3.0;
+  latOffset += (160.0 * sin((wgs84Lat - 35.0) / 12.0 * PI) +
+                320.0 * sin((wgs84Lat - 35.0) * PI / 30.0)) *
+               2.0 / 3.0;
+
+  // 4. 计算经度偏移量（原 transformLongitude 逻辑）
+  double lonOffset = 300.0 + (wgs84Lon - 105.0) + 2.0 * (wgs84Lat - 35.0) +
+                     0.1 * pow(wgs84Lon - 105.0, 2) +
+                     0.1 * (wgs84Lon - 105.0) * (wgs84Lat - 35.0) +
+                     0.1 * sqrt(fabs(wgs84Lon - 105.0));
+  lonOffset += (20.0 * sin(6.0 * (wgs84Lon - 105.0) * PI) +
+                20.0 * sin(2.0 * (wgs84Lon - 105.0) * PI)) *
+               2.0 / 3.0;
+  lonOffset += (20.0 * sin((wgs84Lon - 105.0) * PI) +
+                40.0 * sin((wgs84Lon - 105.0) / 3.0 * PI)) *
+               2.0 / 3.0;
+  lonOffset += (150.0 * sin((wgs84Lon - 105.0) / 12.0 * PI) +
+                300.0 * sin((wgs84Lon - 105.0) / 30.0 * PI)) *
+               2.0 / 3.0;
+
+  // 5. 弧度转换与偏移修正
+  double latRad = wgs84Lat / 180.0 * PI;
+  double lonRad = wgs84Lon / 180.0 * PI;
+  double magic = sin(latRad);
+  magic = 1 - ECCENTRICITY_SQUARE * magic * magic;
+  double sqrtMagic = sqrt(magic);
+
+  latOffset =
+      (latOffset * 180.0) /
+      ((EARTH_RADIUS * (1 - ECCENTRICITY_SQUARE)) / (magic * sqrtMagic) * PI);
+  lonOffset =
+      (lonOffset * 180.0) / (EARTH_RADIUS / sqrtMagic * cos(latRad) * PI);
+
+  // 6. 生成并返回 GCJ02 坐标
+  double gcj02Lat = wgs84Lat + latOffset;
+  double gcj02Lon = wgs84Lon + lonOffset;
+  return QGeoCoordinate(gcj02Lat, gcj02Lon);
 }

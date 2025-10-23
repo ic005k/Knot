@@ -4,6 +4,7 @@
 #include <QAccelerometer>
 #include <QDialog>
 #include <QGeoCoordinate>
+#include <QGeoPositionInfo>
 #include <QGeoPositionInfoSource>
 #include <QGeoServiceProvider>
 #include <QJsonArray>
@@ -15,6 +16,7 @@
 #include <iostream>
 
 #include "Speedometer.h"
+#include "src/Comm/GeoAddressResolver.h"
 #include "src/Exercise/StepsOptions.h"
 #include "src/Exercise/WeatherFetcher.h"
 
@@ -30,6 +32,8 @@ class Steps : public QDialog {
   ~Steps();
   Ui::Steps *ui;
 
+  GeoAddressResolver *addressResolver;
+  QString m_lastAddress;
   Speedometer *m_speedometer;
   WeatherFetcher *weatherFetcher;
 
@@ -130,7 +134,8 @@ class Steps : public QDialog {
 
   QString getFullDate();
 
- public slots:
+  QGeoCoordinate wgs84ToGcj02(double wgs84Lat, double wgs84Lon);
+  public slots:
   void clearAllGpsList();
   void getGpsTrack();
   void openMapWindow();

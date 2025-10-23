@@ -364,6 +364,7 @@ SOURCES += \
     src/CategoryList.cpp \
     src/CloudBackup.cpp \
     src/Comm/DatePicker.cpp \
+    src/Comm/GeoAddressResolver.cpp \
     src/Comm/Method.cpp \
     src/Comm/ReceiveShare.cpp \
     src/Comm/ShowMessage.cpp \
@@ -602,6 +603,7 @@ HEADERS += \
     src/CategoryList.h \
     src/CloudBackup.h \
     src/Comm/DatePicker.h \
+    src/Comm/GeoAddressResolver.h \
     src/Comm/Method.h \
     src/Comm/ReceiveShare.h \
     src/Comm/ShowMessage.h \
