@@ -1829,3 +1829,5 @@ void Todo::on_btnTestSpeech() {
     m_Method->playMyText(txt);
   }
 }
+
+void Todo::setAlarmShowValue(bool value) { isTodoAlarmShow = value; }

@@ -307,8 +307,8 @@ Rectangle {
             Button {
                 text: qsTr("Back")
                 onClicked: {
-                    m_Todo.isTodoAlarmShow = false
-                    //setTodoAlarm.close()
+
+
                     closeTodoAlarm()
                 }
                 padding: 8
@@ -320,8 +320,8 @@ Rectangle {
                 text: qsTr("Del Alarm")
                 onClicked: {
                     m_Todo.on_DelAlarm()
-                    m_Todo.isTodoAlarmShow = false
-                    //setTodoAlarm.close()
+
+
                     closeTodoAlarm()
                 }
                 padding: 8
@@ -341,8 +341,8 @@ Rectangle {
                                        dateTimePicker.currentDay,
                                        dateTimePicker.currentHour,
                                        dateTimePicker.currentMinute)
-                    m_Todo.isTodoAlarmShow = false
-                    //setTodoAlarm.close()
+
+
                     closeTodoAlarm()
                 }
                 padding: 8

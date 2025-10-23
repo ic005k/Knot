@@ -109,7 +109,8 @@ class Todo : public QDialog {
   void on_btnSetTime_clicked();
   void on_btnRecycle_clicked();
 
- protected:
+  void setAlarmShowValue(bool value);
+  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void closeEvent(QCloseEvent *event) override;
   bool eventFilter(QObject *watch, QEvent *evn) override;
