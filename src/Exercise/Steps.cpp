@@ -128,8 +128,8 @@ bool Steps::eventFilter(QObject* watch, QEvent* evn) {
 
 void Steps::closeSteps() {
   saveMovementType();
-  mui->frameSteps->hide();
   mui->frameMain->show();
+  mui->frameSteps->hide();
 }
 
 void Steps::on_btnReset_clicked() {

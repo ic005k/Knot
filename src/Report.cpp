@@ -117,8 +117,8 @@ void Report::on_btnBack_clicked() {
   listCategory.clear();
   indexCategory = 0;
 
-  mui->frameReport->hide();
   mui->frameMain->show();
+  mui->frameReport->hide();
 }
 
 void Report::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }

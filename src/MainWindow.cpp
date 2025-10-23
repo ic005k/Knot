@@ -2000,8 +2000,9 @@ void MainWindow::on_btnEndDate_clicked() {
 
 void MainWindow::on_btnBackSearch_clicked() {
   clearWidgetFocus();
-  mui->frameSearch->hide();
+
   mui->frameMain->show();
+  mui->frameSearch->hide();
 }
 
 void MainWindow::on_btnClearSearchText_clicked() {
@@ -2018,8 +2019,8 @@ void MainWindow::on_btnStartSearch_clicked() {
 }
 
 void MainWindow::on_btnBackBakList_clicked() {
-  mui->frameBakList->hide();
   mui->frameMain->show();
+  mui->frameBakList->hide();
 }
 
 void MainWindow::on_btnImportBakList_clicked() {
@@ -2029,8 +2030,8 @@ void MainWindow::on_btnImportBakList_clicked() {
 void MainWindow::on_btnOkViewCate_clicked() { m_Report->on_CateOk(); }
 
 void MainWindow::on_btnBackTabRecycle_clicked() {
-  mui->frameTabRecycle->hide();
   mui->frameMain->show();
+  mui->frameTabRecycle->hide();
 }
 
 void MainWindow::on_btnDelTabRecycle_clicked() {
@@ -2045,8 +2046,10 @@ void MainWindow::on_btnDelBakFile_clicked() { m_MainHelper->delBakFile(); }
 
 void MainWindow::on_btnBackNoteList_clicked() {
   clearWidgetFocus();
-  mui->frameNoteList->hide();
+
   mui->frameMain->show();
+  mui->frameNoteList->hide();
+
   m_NotesList->saveCurrentNoteInfo();
   m_NotesList->saveNotesListIndex();
   m_Notes->updateMainnotesIniToSyncLists();
@@ -2141,8 +2144,8 @@ void MainWindow::on_btnRenameType_clicked() {
 }
 
 void MainWindow::on_btnBackSetTab_clicked() {
-  mui->frameSetTab->hide();
   mui->frameMain->show();
+  mui->frameSetTab->hide();
 
   if (mui->btnTabMoveDown->isHidden()) {
     mui->btnTabMoveDown->show();
@@ -2155,8 +2158,8 @@ void MainWindow::on_btnBackSetTab_clicked() {
 void MainWindow::on_btnBackEditRecord_clicked() {
   clearWidgetFocus();
 
-  mui->frameEditRecord->hide();
   mui->frameMain->show();
+  mui->frameEditRecord->hide();
 }
 
 void MainWindow::on_btnType_clicked() { m_EditRecord->on_btnCustom_clicked(); }
@@ -2220,12 +2223,12 @@ void MainWindow::on_btnDel_Number_clicked() {
 void MainWindow::on_btnBackBookList_clicked() {
   if (isPDF) {
     if (isAndroid) {
-      mui->frameBookList->hide();
       mui->frameMain->show();
+      mui->frameBookList->hide();
     }
   } else {
-    mui->frameBookList->hide();
     mui->frameReader->show();
+    mui->frameBookList->hide();
   }
 }
 

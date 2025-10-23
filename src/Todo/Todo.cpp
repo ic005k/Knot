@@ -228,8 +228,9 @@ void Todo::closeTodo() {
 
   stopPlayVoice();
   saveTodo();
-  mui->frameTodo->hide();
+
   mui->frameMain->show();
+  mui->frameTodo->hide();
 
   refreshTableLists();
   refreshAlarm();

@@ -997,8 +997,8 @@ void CloudBackup::backExit() {
 
   mw_one->m_Preferences->setEncSyncStatusTip();
 
-  mui->frameOne->hide();
   mui->frameMain->show();
+  mui->frameOne->hide();
 }
 
 void CloudBackup::init_CloudBacup() {
