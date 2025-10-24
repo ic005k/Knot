@@ -17,6 +17,14 @@ Rectangle {
     property string strGpsTime: ""
     property string strTitleColor: "lightgray"
 
+    function showRouteDialog() {
+        routeDialog.visible = true
+    }
+
+    function closeRouteDialog() {
+        routeDialog.visible = false
+    }
+
     function setItemHeight(h) {}
 
     function getGpsList() {
@@ -349,6 +357,7 @@ Rectangle {
                         visible: false
                     }
 
+
                     /*Button {
                         id: btnViewGpsTrack
                         Layout.alignment: Qt.AlignHCenter
@@ -398,8 +407,8 @@ Rectangle {
                             enabled: true
 
                             onClicked: {
-                                strGpsTime = item0.text + "-=-" + item1.text + "-=-"
-                                        + item2.text + "-=-" + item4.text
+                                strGpsTime = item0.text + "-=-" + item1.text
+                                        + "-=-" + item2.text + "-=-" + item4.text
                                 m_Steps.getGpsTrack()
                             }
 
@@ -420,7 +429,7 @@ Rectangle {
                             }
                         }
 
-                        // 新增 Route 按钮（样式与原按钮一致，点击事件留空）
+                        // 新增 Route 按钮（样式与原按钮一致）
                         Button {
                             id: btnRoute
                             text: qsTr("Route")
@@ -429,7 +438,10 @@ Rectangle {
                             enabled: true
 
                             onClicked: {
-                                // 留空点击事件，后续可添加逻辑
+
+                                strGpsTime = item0.text + "-=-" + item1.text
+                                        + "-=-" + item2.text + "-=-" + item4.text
+                                m_Steps.getRouteList(strGpsTime)
                             }
 
                             // 样式与原按钮统一，保持 UI 一致性
@@ -488,6 +500,135 @@ Rectangle {
         ScrollBar.vertical: ScrollBar {
             policy: ScrollBar.AsNeeded
             width: 8
+        }
+    }
+
+    // 弹出窗口：显示路由数据列表
+    Dialog {
+        id: routeDialog
+        objectName: "routeDialog"
+        title: qsTr("Route Data")
+        width: root.width * 0.8 // 宽度为父容器80%
+        height: root.height * 0.7 // 高度为父容器70%
+        modal: true // 模态窗口（禁止背景操作）
+        visible: false // 默认隐藏
+        x: (root.width - width) / 2 // 水平居中
+        y: (root.height - height) / 2 // 垂直居中
+
+        // 路由数据模型（接收C++传递的数据）
+        ListModel {
+            id: routeModel
+        }
+
+        // 窗口内容：滚动列表
+        ListView {
+            anchors.fill: parent
+            model: routeModel
+            spacing: 5
+            cacheBuffer: 50
+
+            // 列表条目样式（每个条目分三行）
+            delegate: Rectangle {
+                width: parent.width
+                height: 80 // 固定高度，适配三行文本
+                color: isDark ? "#333" : "#EEE"
+                radius: 5
+                border.color: isDark ? "#555" : "#CCC"
+                border.width: 1
+
+                ColumnLayout {
+                    anchors.fill: parent
+
+                    spacing: 5
+
+                    // 第一行：时间
+                    Text {
+                        Layout.fillWidth: true
+                        text: time
+                        font.bold: true
+                        color: isDark ? "#FFF" : "#000"
+                        horizontalAlignment: Text.AlignLeft
+                    }
+
+                    // 第二行：纬度 + 经度
+                    Text {
+                        Layout.fillWidth: true
+                        text: latLon
+                        color: isDark ? "#DDD" : "#333"
+                        horizontalAlignment: Text.AlignLeft
+                    }
+
+                    // 第三行：地址
+                    Text {
+                        Layout.fillWidth: true
+                        text: address
+                        color: isDark ? "#BBB" : "#666"
+                        horizontalAlignment: Text.AlignLeft
+                        wrapMode: Text.WordWrap // 地址过长时换行
+                        maximumLineCount: 2 // 最多显示2行，超出省略
+                        elide: Text.ElideTail
+                    }
+                }
+            }
+
+            // 垂直滚动条
+            ScrollBar.vertical: ScrollBar {
+                policy: ScrollBar.AsNeeded
+                width: 8
+            }
+        }
+
+        // 窗口底部按钮（清空数据 + 关闭）
+        footer: RowLayout {
+            spacing: 10
+            Layout.alignment: Qt.AlignHCenter
+
+            Button {
+                text: qsTr("Clear")
+                visible: false
+                onClicked: routeModel.clear() // 清空列表数据
+                background: Rectangle {
+                    color: isDark ? "#F44336" : "#FF5722"
+                    radius: 5
+                }
+                contentItem: Text {
+                    text: parent.text
+                    color: "white"
+                    horizontalAlignment: Text.AlignHCenter
+                }
+            }
+
+            Button {
+                text: qsTr("Close")
+                onClicked: routeDialog.visible = false // 关闭窗口
+                background: Rectangle {
+                    color: isDark ? "#4CAF50" : "#8BC34A"
+                    radius: 5
+                }
+                contentItem: Text {
+                    text: parent.text
+                    color: "white"
+                    horizontalAlignment: Text.AlignHCenter
+                }
+            }
+        }
+
+        // 暴露给C++的方法：添加路由条目到模型
+        function addRouteItem(timeStr, latLonStr, addressStr) {
+            routeModel.append({
+                                  "time": timeStr,
+                                  "latLon": latLonStr,
+                                  "address": addressStr
+                              })
+        }
+
+        // 暴露给C++的方法：清空模型（可选）
+        function clearRouteModel() {
+            routeModel.clear()
+        }
+
+        function setVisible(value) {
+            routeDialog.visible = value
         }
     }
 }

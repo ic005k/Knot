@@ -300,9 +300,7 @@ void Steps::openStepsUI() {
   setAddressResolverConnect();
 
   // test
-  QGeoCoordinate gcj02Coord = wgs84ToGcj02(25.0217, 98.4464);
-  addressResolver->getAddressFromCoord(gcj02Coord.latitude(),
-                                       gcj02Coord.longitude());
+  getAddress(25.0217, 98.4464);
 }
 
 void Steps::addRecord(QString date, qlonglong steps, QString km) {
@@ -854,6 +852,10 @@ void Steps::updateGetGps() {
 
       // Route
       if (isShowRoute) {
+        if (totalSeconds % 120 == 0) {
+          getAddress(latitude, longitude);
+        }
+
         if (totalSeconds % 180 == 0) {
           saveRoute(strJsonRouteFile, QTime::currentTime().toString(), latitude,
                     longitude, m_lastAddress);
@@ -1346,7 +1348,7 @@ void Steps::updateGpsTrack() {
     str_month = gpsdateList.at(1).trimmed();
   }
 
-  QString csvPath = iniDir + "/memo/gps/" + str_year + "/" + str_month + "/";
+  QString csvPath = iniDir + "memo/gps/" + str_year + "/" + str_month + "/";
   QString gpsFile = iniDir + "memo/gps/" + st1 + "-gps-" + st2 + ".csv";
   QString gpsOptimizedFile =
       iniDir + "memo/gps/" + st1 + "-gps-" + st2 + "-opt.csv";
@@ -2065,4 +2067,87 @@ QStringList Steps::readRoute(const QString& file) {
   qDebug() << "[readRoute] 读取完成：" << file << "（共" << routeList.size()
            << "条数据）";
   return routeList;
+}
+
+void Steps::getAddress(double lat, double lon) {
+  QGeoCoordinate gcj02Coord = wgs84ToGcj02(lat, lon);
+  addressResolver->getAddressFromCoord(gcj02Coord.latitude(),
+                                       gcj02Coord.longitude());
+}
+
+void Steps::getRouteList(const QString& strGpsTime) {
+  strGpsList = strGpsTime;
+
+  QStringList list = strGpsList.split("-=-");
+
+  QString st1 = list.at(0);
+  QString st2 = list.at(1);
+  strGpsMapDateTime = st1 + " " + st2;
+
+  QString st3 = list.at(2);
+  QString st4 = list.at(3);
+  QString st1_0 = st1.split(" ").at(0);
+  st1 = st1.replace(st1_0, "");
+  st1 = st1.replace(" ", "");
+  st2 = st2.split("-").at(0);
+  QStringList list2 = st2.split(":");
+  st2 = list2.at(1) + list2.at(2) + list2.at(3);
+  st1 = st1.trimmed();
+  st2 = st2.trimmed();
+  st3 = st3.split(":").at(1);
+  st3 = st3.trimmed();
+  st4 = st4.split(":").at(1);
+  st4 = st4.trimmed();
+  strGpsMapDistnce = st3;
+  strGpsMapSpeed = st4;
+
+  QString str_year, str_month, str_gpsdate;
+  str_gpsdate = mui->btnSelGpsDate->text();
+  QStringList gpsdateList = str_gpsdate.split("-");
+  if (gpsdateList.count() == 2) {
+    str_year = gpsdateList.at(0).trimmed();
+    str_month = gpsdateList.at(1).trimmed();
+  }
+
+  QString csvPath = iniDir + "memo/gps/" + str_year + "/" + str_month + "/";
+  QString routeFile = csvPath + st1 + "-gps-" + st2 + ".json";
+
+  qDebug() << "routeFile=" << routeFile;
+  if (!QFile::exists(routeFile)) return;
+
+  // 获取弹出窗口对象（routeDialog）
+  QQuickItem* root = mui->qwGpsList->rootObject();
+  QObject* routeDialog = root->findChild<QObject*>("routeDialog");
+  if (!routeDialog) {
+    qWarning() << "[C++] 未找到 routeDialog 对象";
+    return;
+  }
+
+  // 清空旧数据
+  QMetaObject::invokeMethod(routeDialog, "clearRouteModel");
+
+  QStringList routeList = readRoute(routeFile);
+  for (int i = 0; i < routeList.count(); i++) {
+    QString routeItem = routeList.at(i);
+    // 按 "===" 拆分条目（对应 readRoute 中的拼接格式）
+    QStringList parts = routeItem.split("===");
+    if (parts.size() != 3) {
+      qWarning() << "[C++] 无效路由数据（索引" << i << "）：" << routeItem;
+      continue;
+    }
+
+    // parts[0] = 时间，parts[1] = 纬度 经度，parts[2] = 地址
+    QString timeStr = parts[0];
+    QString latLonStr = parts[1];
+    QString addressStr = parts[2];
+
+    // 调用 QML 的 addRouteItem 方法添加数据到弹出窗口
+    // 参数顺序：timeStr, latLonStr, addressStr
+    QMetaObject::invokeMethod(
+        routeDialog, "addRouteItem", Q_ARG(QVariant, timeStr),
+        Q_ARG(QVariant, latLonStr), Q_ARG(QVariant, addressStr));
+  }
+
+  // 显示弹出窗口
+  QMetaObject::invokeMethod(routeDialog, "setVisible", Q_ARG(QVariant, true));
 }

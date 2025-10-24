@@ -141,6 +141,7 @@ class Steps : public QDialog {
   void clearAllGpsList();
   void getGpsTrack();
   void openMapWindow();
+  void getRouteList(const QString &strGpsTime);
  private slots:
   void positionUpdated(const QGeoPositionInfo &info);
 
@@ -240,7 +241,8 @@ class Steps : public QDialog {
   void setAddressResolverConnect();
   QString strJsonRouteFile;
   QStringList readRoute(const QString &file);
-  signals:
+  void getAddress(double lat, double lon);
+ signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();
