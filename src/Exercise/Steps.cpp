@@ -8,6 +8,18 @@
 #include "ui_MainWindow.h"
 #include "ui_StepsOptions.h"
 
+// GCJ02 转换常量（国测局标准）
+const double Steps::PI = 3.14159265358979323846;
+const double Steps::EARTH_RADIUS = 6378245.0;
+const double Steps::ECCENTRICITY_SQUARE = 0.00669342162296594323;
+const double Steps::GCJ02_LON_MIN = 73.55;
+const double Steps::GCJ02_LON_MAX = 135.08;
+const double Steps::GCJ02_LAT_MIN = 3.86;
+const double Steps::GCJ02_LAT_MAX = 53.55;
+inline double degreesToRadians(double degrees) {
+  return degrees * Steps::PI / 180.0;
+}
+
 struct GPSCoordinate {
   double latitude;
   double longitude;
@@ -141,6 +153,8 @@ void Steps::setAddressResolverConnect() {
               });
 
       isOne = true;
+      // test
+      getAddress(25.0217, 98.4464);
     }
   }
 }
@@ -300,11 +314,7 @@ void Steps::openStepsUI() {
   // 连接信号槽，获取结果
   setAddressResolverConnect();
 
-  // test
-  getAddress(25.0217, 98.4464);
   mui->qwGpsList->rootContext()->setContextProperty("isShowRoute", isShowRoute);
-
-  qDebug() << mw_one->m_StepsOptions->ui->editMapKey->toPlainText();
 }
 
 void Steps::addRecord(QString date, qlonglong steps, QString km) {
@@ -1906,7 +1916,7 @@ void Steps::setInfoLabelToAndroid(const QString& str) {
 }
 
 QGeoCoordinate Steps::wgs84ToGcj02(double wgs84Lat, double wgs84Lon) {
-  // 1. 输入合法性校验（新增）
+  // 输入校验
   if (wgs84Lon < -180.0 || wgs84Lon > 180.0 || wgs84Lat < -90.0 ||
       wgs84Lat > 90.0) {
     qWarning() << "[WGS84ToGCJ02] 无效 WGS84 坐标：lat=" << wgs84Lat
@@ -1914,64 +1924,72 @@ QGeoCoordinate Steps::wgs84ToGcj02(double wgs84Lat, double wgs84Lon) {
     return QGeoCoordinate();
   }
 
-  // 2. 判断坐标是否在国内（使用类内常量，优化可读性）
-  bool isDomestic = (wgs84Lon >= GCJ02_LON_MIN && wgs84Lon <= GCJ02_LON_MAX) &&
-                    (wgs84Lat >= GCJ02_LAT_MIN && wgs84Lat <= GCJ02_LAT_MAX);
-  if (!isDomestic) {
+  // 判断是否在国内
+  if (!isInChina(wgs84Lat, wgs84Lon)) {
     return QGeoCoordinate(wgs84Lat, wgs84Lon);
   }
 
-  // 3. 经纬度转为弧度
-  double latRad = wgs84Lat / 180.0 * PI;
-  double lonRad = wgs84Lon / 180.0 * PI;
-  const double lonBaseRad = 105.0 * PI / 180.0;  // 预计算基准弧度（新增优化）
-  const double latBaseRad = 35.0 * PI / 180.0;
+  // 计算与基准点(105,35)的差值（度数）
+  double deltaLon = wgs84Lon - 105.0;
+  double deltaLat = wgs84Lat - 35.0;
 
-  // 4. 计算纬度偏移量（修正为弧度计算，使用 Qt 数学函数）
-  double latOffset = -100.0 + 2.0 * (lonRad - lonBaseRad) +
-                     3.0 * (latRad - latBaseRad) +
-                     0.2 * qPow(latRad - latBaseRad, 2) +
-                     0.1 * (lonRad - lonBaseRad) * (latRad - latBaseRad) +
-                     0.2 * sqrt(fabs(lonRad - lonBaseRad));
-  latOffset += (20.0 * qSin(6.0 * (lonRad - lonBaseRad)) +
-                20.0 * qSin(2.0 * (lonRad - lonBaseRad))) *
-               2.0 / 3.0;
-  latOffset += (20.0 * qSin(latRad - latBaseRad) +
-                40.0 * qSin((latRad - latBaseRad) / 3.0)) *
-               2.0 / 3.0;
-  latOffset += (160.0 * qSin((latRad - latBaseRad) / 12.0) +
-                320.0 * qSin((latRad - latBaseRad) / 30.0)) *
-               2.0 / 3.0;
+  // 计算纬度偏移量
+  double latOffset =
+      -100.0 + 2.0 * deltaLon + 3.0 * deltaLat + 0.2 * deltaLat * deltaLat;
+  latOffset += 0.1 * deltaLon * deltaLat;
+  latOffset += 0.2 * sqrt(fabs(deltaLon));
 
-  // 5. 计算经度偏移量（同纬度修正逻辑）
-  double lonOffset = 300.0 + (lonRad - lonBaseRad) +
-                     2.0 * (latRad - latBaseRad) +
-                     0.1 * qPow(lonRad - lonBaseRad, 2) +
-                     0.1 * (lonRad - lonBaseRad) * (latRad - latBaseRad) +
-                     0.1 * sqrt(fabs(lonRad - lonBaseRad));
-  lonOffset += (20.0 * qSin(6.0 * (lonRad - lonBaseRad)) +
-                20.0 * qSin(2.0 * (lonRad - lonBaseRad))) *
+  // 修正：使用度数转弧度
+  latOffset += (20.0 * sin(6.0 * degreesToRadians(deltaLon)) +
+                20.0 * sin(2.0 * degreesToRadians(deltaLon))) *
                2.0 / 3.0;
-  lonOffset += (20.0 * qSin(lonRad - lonBaseRad) +
-                40.0 * qSin((lonRad - lonBaseRad) / 3.0)) *
+  latOffset += (20.0 * sin(degreesToRadians(deltaLat)) +
+                40.0 * sin(degreesToRadians(deltaLat) / 3.0)) *
                2.0 / 3.0;
-  lonOffset += (150.0 * qSin((lonRad - lonBaseRad) / 12.0) +
-                300.0 * qSin((lonRad - lonBaseRad) / 30.0)) *
+  latOffset += (160.0 * sin(degreesToRadians(deltaLat) / 12.0) +
+                320.0 * sin(degreesToRadians(deltaLat) / 30.0)) *
                2.0 / 3.0;
 
-  // 6. 弧度转换与偏移修正（使用类内常量）
-  double magic = 1 - ECCENTRICITY_SQUARE * qSin(latRad) * qSin(latRad);
+  // 计算经度偏移量
+  double lonOffset =
+      300.0 + deltaLon + 2.0 * deltaLat + 0.1 * deltaLon * deltaLon;
+  lonOffset += 0.1 * deltaLon * deltaLat;
+  lonOffset += 0.1 * sqrt(fabs(deltaLon));
+
+  // 修正：使用度数转弧度
+  lonOffset += (20.0 * sin(6.0 * degreesToRadians(deltaLon)) +
+                20.0 * sin(2.0 * degreesToRadians(deltaLon))) *
+               2.0 / 3.0;
+  lonOffset += (20.0 * sin(degreesToRadians(deltaLon)) +
+                40.0 * sin(degreesToRadians(deltaLon) / 3.0)) *
+               2.0 / 3.0;
+  lonOffset += (150.0 * sin(degreesToRadians(deltaLon) / 12.0) +
+                300.0 * sin(degreesToRadians(deltaLon) / 30.0)) *
+               2.0 / 3.0;
+
+  // 椭圆体参数修正
+  double radLat = degreesToRadians(wgs84Lat);
+  double magic = sin(radLat);
+  magic = 1 - ECCENTRICITY_SQUARE * magic * magic;
   double sqrtMagic = sqrt(magic);
+
   latOffset =
       (latOffset * 180.0) /
       ((EARTH_RADIUS * (1 - ECCENTRICITY_SQUARE)) / (magic * sqrtMagic) * PI);
   lonOffset =
-      (lonOffset * 180.0) / (EARTH_RADIUS / sqrtMagic * qCos(latRad) * PI);
+      (lonOffset * 180.0) / (EARTH_RADIUS / sqrtMagic * cos(radLat) * PI);
 
-  // 7. 生成并返回 GCJ02 坐标
+  // 生成并返回 GCJ02 坐标
   double gcj02Lat = wgs84Lat + latOffset;
   double gcj02Lon = wgs84Lon + lonOffset;
+
   return QGeoCoordinate(gcj02Lat, gcj02Lon);
+}
+
+// 辅助函数：判断坐标是否在中国境内
+bool Steps::isInChina(double lat, double lon) {
+  return (lon >= GCJ02_LON_MIN && lon <= GCJ02_LON_MAX) &&
+         (lat >= GCJ02_LAT_MIN && lat <= GCJ02_LAT_MAX);
 }
 
 void Steps::saveRoute(const QString& file, const QString& time, double lat,
@@ -2077,11 +2095,9 @@ QStringList Steps::readRoute(const QString& file) {
 }
 
 void Steps::getAddress(double lat, double lon) {
-  // QGeoCoordinate gcj02Coord = wgs84ToGcj02(lat, lon);
-  // addressResolver->getAddressFromCoord(gcj02Coord.latitude(),
-  //                                      gcj02Coord.longitude());
-
-  addressResolver->getAddressFromCoord(lat, lon);
+  QGeoCoordinate gcj02Coord = wgs84ToGcj02(lat, lon);
+  addressResolver->getAddressFromCoord(gcj02Coord.latitude(),
+                                       gcj02Coord.longitude());
 }
 
 void Steps::getRouteList(const QString& strGpsTime) {

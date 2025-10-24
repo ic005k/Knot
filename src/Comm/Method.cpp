@@ -3285,7 +3285,10 @@ bool Method::isInChina() {
   QThread::currentThread()->setPriority(QThread::NormalPriority);  // 线程优先级
   bool onlineResult = isInChinaOnline(3000);
   if (onlineResult) {
+    mw_one->m_StepsOptions->ui->f_mapkey->show();
     return true;
-  } else
+  } else {
+    mw_one->m_StepsOptions->ui->f_mapkey->hide();
     return false;
+  }
 }
