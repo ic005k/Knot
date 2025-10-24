@@ -3231,3 +3231,61 @@ void Method::setTextEditToolBar(QObject *parent, EditEventFilter *editFilter) {
     btn->viewport()->installEventFilter(editFilter);
   }
 }
+
+bool Method::isInChinaOnline(int timeout) {
+  // 国内公开 IP 接口（备选：https://api.ip.sb/geoip 、https://ipapi.co/json/）
+  QUrl url("https://ip.taobao.com/outGetIpInfo?ip=myip&accessKey=alibaba-inc");
+
+  QNetworkAccessManager manager;
+  QNetworkRequest request(url);
+  request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+  // 同步请求（避免异步回调复杂度，适合在子线程中调用）
+  QNetworkReply *reply = manager.get(request);
+  QEventLoop loop;
+  QTimer::singleShot(timeout, &loop, &QEventLoop::quit);  // 超时退出
+  QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+  loop.exec();
+
+  // 处理响应
+  if (reply->error() != QNetworkReply::NoError) {
+    reply->deleteLater();
+    return false;  // 网络错误/超时，返回 false（可根据需求调整为默认值）
+  }
+
+  // 解析 JSON 响应
+  QByteArray data = reply->readAll();
+  QJsonDocument doc = QJsonDocument::fromJson(data);
+  if (!doc.isObject()) {
+    reply->deleteLater();
+    return false;
+  }
+
+  QJsonObject obj = doc.object();
+  if (obj["code"].toInt() != 0) {  // 接口返回成功码（淘宝接口：0 成功）
+    reply->deleteLater();
+    return false;
+  }
+
+  QJsonObject dataObj = obj["data"].toObject();
+  QString country = dataObj["country"].toString().trimmed();
+  QString region = dataObj["region"].toString().trimmed();
+  reply->deleteLater();
+
+  qDebug() << "country=" << country << region;
+
+  // 判断：国家为中国，或地区为国内省份（容错处理）
+  return (country == "中国" || region.contains("省") || region.contains("市") ||
+          region.contains("自治区"));
+}
+
+bool Method::isInChina() {
+  // 在线 IP 检测（最准确）
+  QThread::currentThread()->setPriority(
+      QThread::LowPriority);  // 降低线程优先级
+  bool onlineResult = isInChinaOnline(3000);
+  if (onlineResult) {
+    return true;
+  } else
+    return false;
+}

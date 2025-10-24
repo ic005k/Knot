@@ -17,11 +17,17 @@
 #include <QDialog>
 #include <QDir>
 #include <QDirIterator>
+#include <QEventLoop>
 #include <QFile>
 #include <QFileInfo>
 #include <QFileInfoList>
 #include <QInputDialog>
 #include <QInputMethod>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QTimer>
 
 #ifdef Q_OS_ANDROID
 #include <QJniObject>
@@ -455,7 +461,8 @@ class Method : public QDialog {
   void setLineEditToolBar(QObject *parent, EditEventFilter *editFilter);
   void setTextEditToolBar(QObject *parent, EditEventFilter *editFilter);
 
- protected:
+  bool isInChina();
+  protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
  public slots:
@@ -493,6 +500,7 @@ class Method : public QDialog {
 
   static bool isUtf8(const QByteArray &data);
   static bool isValidText(const QString &text);
+  bool isInChinaOnline(int timeout = 3000);
 };
 
 class IOSCircularProgress : public QWidget {

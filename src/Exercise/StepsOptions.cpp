@@ -86,4 +86,9 @@ void StepsOptions::on_editStepLength_textChanged(const QString &arg1) {
 void StepsOptions::on_editMapKey_textChanged(const QString &arg1) {
   Q_UNUSED(arg1);
   isTextChange = true;
+  mw_one->m_Steps->addressResolver->setTencentApiKey(arg1);
+}
+
+void StepsOptions::on_btnWeb_clicked() {
+  QDesktopServices::openUrl(QUrl("https://lbs.qq.com/"));
 }

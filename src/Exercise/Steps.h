@@ -34,6 +34,8 @@ class Steps : public QDialog {
 
   GeoAddressResolver *addressResolver;
   QString m_lastAddress;
+  bool isShowRoute = true;
+
   Speedometer *m_speedometer;
   WeatherFetcher *weatherFetcher;
 
@@ -135,7 +137,7 @@ class Steps : public QDialog {
   QString getFullDate();
 
   QGeoCoordinate wgs84ToGcj02(double wgs84Lat, double wgs84Lon);
-  public slots:
+ public slots:
   void clearAllGpsList();
   void getGpsTrack();
   void openMapWindow();
@@ -145,6 +147,16 @@ class Steps : public QDialog {
   void updateGetGps();
 
  private:
+  // GCJ02 转换常量（国测局标准）
+  double PI = 3.14159265358979323846;
+  double EARTH_RADIUS = 6378245.0;
+  double ECCENTRICITY_SQUARE = 0.00669342162296594323;
+  double GCJ02_LON_MIN = 73.55;
+  double GCJ02_LON_MAX = 135.08;
+  double GCJ02_LAT_MIN = 3.86;
+  double GCJ02_LAT_MAX = 53.55;
+
+  bool isOne = false;
   QString strCurrentTemp, strCurrentWeatherIcon;
 
   double maxSpeed = 0.00;
@@ -222,6 +234,7 @@ class Steps : public QDialog {
   void clearTrackDataToAndroid();
   void setDateLabelToAndroid(const QString &str);
   void setInfoLabelToAndroid(const QString &str);
+
  signals:
   void distanceChanged(double distance);
   void timeChanged();

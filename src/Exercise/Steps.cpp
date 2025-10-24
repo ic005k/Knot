@@ -80,6 +80,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mui->f_speed->layout()->setContentsMargins(0, 0, 0, 0);
   mui->f_speed->layout()->addWidget(m_speedometer);
 
+  // Weather
   weatherFetcher = new WeatherFetcher(this);
   // 连接信号时，通过天气代码转换为Unicode符号
   connect(weatherFetcher,
@@ -109,33 +110,9 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
             strCurrentTemp = "";
           });
 
+  // Route
   addressResolver = new GeoAddressResolver(this);
-  addressResolver->setTencentApiKey("");
-  // 连接信号槽，获取结果
-  connect(addressResolver, &GeoAddressResolver::addressResolved, this,
-          [this](const QString& address) {
-            // 过滤完全相同的地址
-            if (address != m_lastAddress) {
-              qDebug() << "记录轨迹点：" << address;
-
-              m_lastAddress = address;
-            } else {
-              qDebug() << "位置未变化，跳过记录";
-            }
-          });
-  connect(addressResolver, &GeoAddressResolver::resolveFailed, this,
-          [](const QString& error) {
-            qDebug() << "地址解析失败：" << error;
-            // 处理错误（如提示用户检查网络或密钥）
-          });
-
-  // 测试云南腾冲和顺古镇（GCJ-02坐标）
-  addressResolver->getAddressFromCoord(25.0217, 98.4464);  // 未转换坐标系
-  // 一行调用转换，得到 GCJ02 坐标（腾讯云API可用）
-  QGeoCoordinate gcj02Coord = wgs84ToGcj02(25.0217, 98.4464);
-  // 后续调用地址解析API
-  addressResolver->getAddressFromCoord(gcj02Coord.latitude(),
-                                       gcj02Coord.longitude());
+  isShowRoute = m_Method->isInChina();
 }
 
 Steps::~Steps() {}
@@ -288,6 +265,38 @@ void Steps::openStepsUI() {
     loadGpsList(nYear, nMonth);
     allGpsTotal();
   }
+
+  // Route
+  isShowRoute = m_Method->isInChina();
+  // 连接信号槽，获取结果
+  if (!isOne) {
+    if (isShowRoute) {
+      connect(addressResolver, &GeoAddressResolver::addressResolved, this,
+              [this](const QString& address) {
+                // 过滤完全相同的地址
+                if (address != m_lastAddress) {
+                  qDebug() << "记录轨迹点：" << address;
+
+                  m_lastAddress = address;
+                } else {
+                  qDebug() << "位置未变化，跳过记录";
+                }
+              });
+      connect(addressResolver, &GeoAddressResolver::resolveFailed, this,
+              [this](const QString& error) {
+                qDebug() << "地址解析失败：" << error;
+                // 处理错误（如提示用户检查网络或密钥）
+                isShowRoute = false;
+              });
+
+      isOne = true;
+    }
+  }
+
+  // test
+  QGeoCoordinate gcj02Coord = wgs84ToGcj02(25.0217, 98.4464);
+  addressResolver->getAddressFromCoord(gcj02Coord.latitude(),
+                                       gcj02Coord.longitude());
 }
 
 void Steps::addRecord(QString date, qlonglong steps, QString km) {
@@ -1871,64 +1880,70 @@ void Steps::setInfoLabelToAndroid(const QString& str) {
 #endif
 }
 
-// 函数：WGS84 转 GCJ02
 QGeoCoordinate Steps::wgs84ToGcj02(double wgs84Lat, double wgs84Lon) {
-  // 1. 常量定义（国测局标准）
-  const double PI = 3.14159265358979323846;
-  const double EARTH_RADIUS = 6378245.0;
-  const double ECCENTRICITY_SQUARE = 0.00669342162296594323;
+  // 1. 输入合法性校验（新增）
+  if (wgs84Lon < -180.0 || wgs84Lon > 180.0 || wgs84Lat < -90.0 ||
+      wgs84Lat > 90.0) {
+    qWarning() << "[WGS84ToGCJ02] 无效 WGS84 坐标：lat=" << wgs84Lat
+               << ", lon=" << wgs84Lon;
+    return QGeoCoordinate();
+  }
 
-  // 2. 判断坐标是否在国内（避免境外转换偏移）
-  bool isDomestic = (wgs84Lon >= 73.55 && wgs84Lon <= 135.08) &&
-                    (wgs84Lat >= 3.86 && wgs84Lat <= 53.55);
+  // 2. 判断坐标是否在国内（使用类内常量，优化可读性）
+  bool isDomestic = (wgs84Lon >= GCJ02_LON_MIN && wgs84Lon <= GCJ02_LON_MAX) &&
+                    (wgs84Lat >= GCJ02_LAT_MIN && wgs84Lat <= GCJ02_LAT_MAX);
   if (!isDomestic) {
     return QGeoCoordinate(wgs84Lat, wgs84Lon);
   }
 
-  // 3. 计算纬度偏移量（原 transformLatitude 逻辑）
-  double latOffset = -100.0 + 2.0 * (wgs84Lon - 105.0) +
-                     3.0 * (wgs84Lat - 35.0) + 0.2 * pow(wgs84Lat - 35.0, 2) +
-                     0.1 * (wgs84Lon - 105.0) * (wgs84Lat - 35.0) +
-                     0.2 * sqrt(fabs(wgs84Lon - 105.0));
-  latOffset += (20.0 * sin(6.0 * (wgs84Lon - 105.0) * PI) +
-                20.0 * sin(2.0 * (wgs84Lon - 105.0) * PI)) *
-               2.0 / 3.0;
-  latOffset += (20.0 * sin((wgs84Lat - 35.0) * PI) +
-                40.0 * sin((wgs84Lat - 35.0) / 3.0 * PI)) *
-               2.0 / 3.0;
-  latOffset += (160.0 * sin((wgs84Lat - 35.0) / 12.0 * PI) +
-                320.0 * sin((wgs84Lat - 35.0) * PI / 30.0)) *
-               2.0 / 3.0;
-
-  // 4. 计算经度偏移量（原 transformLongitude 逻辑）
-  double lonOffset = 300.0 + (wgs84Lon - 105.0) + 2.0 * (wgs84Lat - 35.0) +
-                     0.1 * pow(wgs84Lon - 105.0, 2) +
-                     0.1 * (wgs84Lon - 105.0) * (wgs84Lat - 35.0) +
-                     0.1 * sqrt(fabs(wgs84Lon - 105.0));
-  lonOffset += (20.0 * sin(6.0 * (wgs84Lon - 105.0) * PI) +
-                20.0 * sin(2.0 * (wgs84Lon - 105.0) * PI)) *
-               2.0 / 3.0;
-  lonOffset += (20.0 * sin((wgs84Lon - 105.0) * PI) +
-                40.0 * sin((wgs84Lon - 105.0) / 3.0 * PI)) *
-               2.0 / 3.0;
-  lonOffset += (150.0 * sin((wgs84Lon - 105.0) / 12.0 * PI) +
-                300.0 * sin((wgs84Lon - 105.0) / 30.0 * PI)) *
-               2.0 / 3.0;
-
-  // 5. 弧度转换与偏移修正
+  // 3. 经纬度转为弧度
   double latRad = wgs84Lat / 180.0 * PI;
   double lonRad = wgs84Lon / 180.0 * PI;
-  double magic = sin(latRad);
-  magic = 1 - ECCENTRICITY_SQUARE * magic * magic;
-  double sqrtMagic = sqrt(magic);
+  const double lonBaseRad = 105.0 * PI / 180.0;  // 预计算基准弧度（新增优化）
+  const double latBaseRad = 35.0 * PI / 180.0;
 
+  // 4. 计算纬度偏移量（修正为弧度计算，使用 Qt 数学函数）
+  double latOffset = -100.0 + 2.0 * (lonRad - lonBaseRad) +
+                     3.0 * (latRad - latBaseRad) +
+                     0.2 * qPow(latRad - latBaseRad, 2) +
+                     0.1 * (lonRad - lonBaseRad) * (latRad - latBaseRad) +
+                     0.2 * sqrt(fabs(lonRad - lonBaseRad));
+  latOffset += (20.0 * qSin(6.0 * (lonRad - lonBaseRad)) +
+                20.0 * qSin(2.0 * (lonRad - lonBaseRad))) *
+               2.0 / 3.0;
+  latOffset += (20.0 * qSin(latRad - latBaseRad) +
+                40.0 * qSin((latRad - latBaseRad) / 3.0)) *
+               2.0 / 3.0;
+  latOffset += (160.0 * qSin((latRad - latBaseRad) / 12.0) +
+                320.0 * qSin((latRad - latBaseRad) / 30.0)) *
+               2.0 / 3.0;
+
+  // 5. 计算经度偏移量（同纬度修正逻辑）
+  double lonOffset = 300.0 + (lonRad - lonBaseRad) +
+                     2.0 * (latRad - latBaseRad) +
+                     0.1 * qPow(lonRad - lonBaseRad, 2) +
+                     0.1 * (lonRad - lonBaseRad) * (latRad - latBaseRad) +
+                     0.1 * sqrt(fabs(lonRad - lonBaseRad));
+  lonOffset += (20.0 * qSin(6.0 * (lonRad - lonBaseRad)) +
+                20.0 * qSin(2.0 * (lonRad - lonBaseRad))) *
+               2.0 / 3.0;
+  lonOffset += (20.0 * qSin(lonRad - lonBaseRad) +
+                40.0 * qSin((lonRad - lonBaseRad) / 3.0)) *
+               2.0 / 3.0;
+  lonOffset += (150.0 * qSin((lonRad - lonBaseRad) / 12.0) +
+                300.0 * qSin((lonRad - lonBaseRad) / 30.0)) *
+               2.0 / 3.0;
+
+  // 6. 弧度转换与偏移修正（使用类内常量）
+  double magic = 1 - ECCENTRICITY_SQUARE * qSin(latRad) * qSin(latRad);
+  double sqrtMagic = sqrt(magic);
   latOffset =
       (latOffset * 180.0) /
       ((EARTH_RADIUS * (1 - ECCENTRICITY_SQUARE)) / (magic * sqrtMagic) * PI);
   lonOffset =
-      (lonOffset * 180.0) / (EARTH_RADIUS / sqrtMagic * cos(latRad) * PI);
+      (lonOffset * 180.0) / (EARTH_RADIUS / sqrtMagic * qCos(latRad) * PI);
 
-  // 6. 生成并返回 GCJ02 坐标
+  // 7. 生成并返回 GCJ02 坐标
   double gcj02Lat = wgs84Lat + latOffset;
   double gcj02Lon = wgs84Lon + lonOffset;
   return QGeoCoordinate(gcj02Lat, gcj02Lon);
