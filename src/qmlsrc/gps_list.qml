@@ -357,52 +357,20 @@ Rectangle {
                         visible: false
                     }
 
-
-                    /*Button {
-                        id: btnViewGpsTrack
-                        Layout.alignment: Qt.AlignHCenter
-                        text: qsTr("View GPS Track")
-                        width: parent.width
-                        height: 35
-                        enabled: true
-
-                        onClicked: {
-                            strGpsTime = item0.text + "-=-" + item1.text + "-=-"
-                                    + item2.text + "-=-" + item4.text
-
-                            m_Steps.getGpsTrack()
-                        }
-
-                        // 设置按钮的背景颜色和边框
-                        background: Rectangle {
-                            width: parent.width
-                            color: btnViewGpsTrack.down ? "#4CAF50" : "#8BC34A" // 按下时颜色变深
-                            radius: 5 // 圆角
-                            border.color: "#4CAF50" // 边框颜色
-                            border.width: 2 // 边框宽度
-                        }
-
-                        // 设置按钮的文本样式
-                        contentItem: Text {
-                            text: btnViewGpsTrack.text
-                            font.pixelSize: 14
-                            color: "white"
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                    }*/
-
-                    // 替换原单独的 btnViewGpsTrack 按钮代码，改为 RowLayout 包裹两个按钮
                     RowLayout {
                         Layout.alignment: Qt.AlignHCenter // 整体水平居中
                         width: parent.width // 占满父容器宽度
                         spacing: 10 // 两个按钮之间的间距（可调整）
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 10 // 左边距
+                        Layout.rightMargin: 10 // 右边距
 
                         // 原 View GPS Track 按钮（保留原有逻辑和样式）
                         Button {
                             id: btnViewGpsTrack
-                            text: qsTr("View GPS Track")
-                            Layout.fillWidth: true // 两个按钮平分宽度
+                            text: qsTr("GPS Track")
+                            Layout.fillWidth: true // 关键：平分宽度
+                            Layout.preferredWidth: parent.width / 2 - spacing / 2
                             height: 35
                             enabled: true
 
@@ -433,7 +401,8 @@ Rectangle {
                         Button {
                             id: btnRoute
                             text: qsTr("Route")
-                            Layout.fillWidth: true // 两个按钮平分宽度
+                            Layout.fillWidth: true // 关键：平分宽度
+                            Layout.preferredWidth: parent.width / 2 - spacing / 2
                             height: 35
                             enabled: true
 
@@ -507,13 +476,13 @@ Rectangle {
     Dialog {
         id: routeDialog
         objectName: "routeDialog"
-        title: qsTr("Route Data")
-        width: root.width * 0.8 // 宽度为父容器80%
-        height: root.height * 0.7 // 高度为父容器70%
+        title: "" // qsTr("Route Data")
+        width: root.width * 0.9
+        height: root.height * 0.9
         modal: true // 模态窗口（禁止背景操作）
         visible: false // 默认隐藏
-        x: (root.width - width) / 2 // 水平居中
-        y: (root.height - height) / 2 // 垂直居中
+        x: (root.width - width) / 2
+        y: (root.height - height) / 2
 
         // 路由数据模型（接收C++传递的数据）
         ListModel {
@@ -526,19 +495,22 @@ Rectangle {
             model: routeModel
             spacing: 5
             cacheBuffer: 50
+            Layout.alignment: Qt.AlignHCenter
 
             // 列表条目样式（每个条目分三行）
             delegate: Rectangle {
-                width: parent.width
-                height: 80 // 固定高度，适配三行文本
+                width: routeDialog.width - 20
+                height: colLayout.implicitHeight + 20
                 color: isDark ? "#333" : "#EEE"
                 radius: 5
                 border.color: isDark ? "#555" : "#CCC"
                 border.width: 1
+                anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
 
                 ColumnLayout {
+                    id: colLayout
                     anchors.fill: parent
-
+                    anchors.margins: 5
                     spacing: 5
 
                     // 第一行：时间
@@ -565,8 +537,6 @@ Rectangle {
                         color: isDark ? "#BBB" : "#666"
                         horizontalAlignment: Text.AlignLeft
                         wrapMode: Text.WordWrap // 地址过长时换行
-                        maximumLineCount: 2 // 最多显示2行，超出省略
-                        elide: Text.ElideTail
                     }
                 }
             }
@@ -579,36 +549,46 @@ Rectangle {
         }
 
         // 窗口底部按钮（清空数据 + 关闭）
-        footer: RowLayout {
-            spacing: 10
-            Layout.alignment: Qt.AlignHCenter
+        footer: Item {
+            width: parent.width
+            implicitHeight: footerLayout.implicitHeight + 20
 
-            Button {
-                text: qsTr("Clear")
-                visible: false
-                onClicked: routeModel.clear() // 清空列表数据
-                background: Rectangle {
-                    color: isDark ? "#F44336" : "#FF5722"
-                    radius: 5
-                }
-                contentItem: Text {
-                    text: parent.text
-                    color: "white"
-                    horizontalAlignment: Text.AlignHCenter
-                }
-            }
+            RowLayout {
+                id: footerLayout
+                spacing: 10
+                Layout.fillWidth: true // 新增：占满footer宽度（关键修复）
+                anchors.centerIn: parent
+                anchors.margins: 10
 
-            Button {
-                text: qsTr("Close")
-                onClicked: routeDialog.visible = false // 关闭窗口
-                background: Rectangle {
-                    color: isDark ? "#4CAF50" : "#8BC34A"
-                    radius: 5
+                Button {
+                    text: qsTr("Clear")
+                    visible: false
+                    onClicked: routeModel.clear() // 清空列表数据
+                    background: Rectangle {
+                        color: isDark ? "#F44336" : "#FF5722"
+                        radius: 5
+                    }
+                    contentItem: Text {
+                        text: parent.text
+                        color: "white"
+                        horizontalAlignment: Text.AlignHCenter
+                    }
                 }
-                contentItem: Text {
-                    text: parent.text
-                    color: "white"
-                    horizontalAlignment: Text.AlignHCenter
+
+                Button {
+                    id: btnClose
+                    text: qsTr("Close")
+                    onClicked: routeDialog.visible = false // 关闭窗口
+                    background: Rectangle {
+                        //color: isDark ? "#4CAF50" : "#8BC34A"
+                        color: btnClose.down ? (isDark ? "#388E3C" : "#4CAF50") : (isDark ? "#4CAF50" : "#8BC34A")
+                        radius: 5
+                    }
+                    contentItem: Text {
+                        text: parent.text
+                        color: "white"
+                        horizontalAlignment: Text.AlignHCenter
+                    }
                 }
             }
         }

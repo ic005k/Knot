@@ -852,13 +852,16 @@ void Steps::updateGetGps() {
 
       // Route
       if (isShowRoute) {
-        if (totalSeconds % 120 == 0) {
+        if (totalSeconds % 150 == 0) {
           getAddress(latitude, longitude);
+          latRoute = latitude;
+          lonRoute = longitude;
+          timeRoute = QTime::currentTime().toString();
         }
 
         if (totalSeconds % 180 == 0) {
-          saveRoute(strJsonRouteFile, QTime::currentTime().toString(), latitude,
-                    longitude, m_lastAddress);
+          saveRoute(strJsonRouteFile, timeRoute, latRoute, lonRoute,
+                    m_lastAddress);
         }
       }
     }
@@ -2057,7 +2060,7 @@ QStringList Steps::readRoute(const QString& file) {
 
     // 格式化经纬度（保留6位小数，0值也会正常显示）
     QString latLonStr =
-        QString("%1 %2").arg(lat, 0, 'f', 6).arg(lon, 0, 'f', 6);
+        QString("%1 - %2").arg(lat, 0, 'f', 6).arg(lon, 0, 'f', 6);
     // 拼接格式：time===lat lon===address（缺失字段显示空字符串）
     QString routeItem = QString("%1===%2===%3").arg(time, latLonStr, address);
 

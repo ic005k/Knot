@@ -190,6 +190,8 @@ class Steps : public QDialog {
   QString strDurationTime;
   double latitude = 59.919023461273;
   double longitude = 10.752109237521;
+  double latRoute, lonRoute;
+  QString timeRoute;
   double oldLat;
   double oldLon;
   QString strGpsStatus;
