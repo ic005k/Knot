@@ -2176,3 +2176,38 @@ void Steps::getRouteList(const QString& strGpsTime) {
   // 显示弹出窗口
   QMetaObject::invokeMethod(routeDialog, "setVisible", Q_ARG(QVariant, true));
 }
+
+void Steps::closeRouteDialog() {
+  QQuickItem* root = mui->qwGpsList->rootObject();
+  QObject* routeDialog = root->findChild<QObject*>("routeDialog");
+  if (!routeDialog) {
+    qWarning() << "[C++] 未找到 routeDialog 对象";
+    return;
+  }
+  QMetaObject::invokeMethod(routeDialog, "setVisible", Q_ARG(QVariant, false));
+}
+
+bool Steps::isRouteShow() {
+  QQuickItem* root = mui->qwGpsList->rootObject();
+  QObject* routeDialog = root->findChild<QObject*>("routeDialog");
+  if (!routeDialog) {
+    qWarning() << "[C++] 未找到 routeDialog 对象";
+    return false;
+  }
+
+  // 调用isVisible()并获取返回值
+  QVariant result;
+  bool invokeSuccess = QMetaObject::invokeMethod(
+      routeDialog, "isVisible",
+      Qt::DirectConnection,           // 关键：强制同步调用，允许获取返回值
+      Q_RETURN_ARG(QVariant, result)  // 指定返回值的接收变量
+  );
+
+  if (!invokeSuccess) {
+    qWarning() << "[C++] 调用isVisible()失败";
+    return false;
+  }
+
+  // 将QVariant转换为bool并返回
+  return result.toBool();
+}

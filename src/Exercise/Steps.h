@@ -146,7 +146,9 @@ class Steps : public QDialog {
   QString getFullDate();
 
   QGeoCoordinate wgs84ToGcj02(double wgs84Lat, double wgs84Lon);
- public slots:
+  void closeRouteDialog();
+  bool isRouteShow();
+  public slots:
   void clearAllGpsList();
   void getGpsTrack();
   void openMapWindow();

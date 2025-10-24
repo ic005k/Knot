@@ -404,6 +404,11 @@ static void JavaNotify_15() {
     return;
   }
 
+  if (mw_one->m_Steps->isRouteShow()) {
+    mw_one->m_Steps->closeRouteDialog();
+    return;
+  }
+
   if (!mui->frameSteps->isHidden()) {
     mui->btnBackSteps->click();
     return;

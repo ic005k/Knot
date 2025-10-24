@@ -619,5 +619,9 @@ Rectangle {
         function setVisible(value) {
             routeDialog.visible = value
         }
+
+        function isVisible() {
+            return routeDialog.visible
+        }
     }
 }
