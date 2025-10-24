@@ -44,7 +44,7 @@ void StepsOptions::init() {
   x = mw_one->geometry().x();
   y = 0;
   w = mw_one->width();
-  h = this->height();
+  h = 320;
   setGeometry(x, y, w, h);
 
   m_Method->m_widget = new QWidget(mw_one);
@@ -61,6 +61,7 @@ void StepsOptions::init() {
   }
   editFilter = new EditEventFilter(textToolbarDynamic, this);
   ui->editMapKey->installEventFilter(editFilter);
+  ui->editMapKey->viewport()->installEventFilter(editFilter);
 }
 
 void StepsOptions::on_btnBack_clicked() {
@@ -83,12 +84,12 @@ void StepsOptions::on_editStepLength_textChanged(const QString &arg1) {
   isTextChange = true;
 }
 
-void StepsOptions::on_editMapKey_textChanged(const QString &arg1) {
-  Q_UNUSED(arg1);
-  isTextChange = true;
-  mw_one->m_Steps->addressResolver->setTencentApiKey(arg1);
-}
-
 void StepsOptions::on_btnWeb_clicked() {
   QDesktopServices::openUrl(QUrl("https://lbs.qq.com/"));
+}
+
+void StepsOptions::on_editMapKey_textChanged() {
+  isTextChange = true;
+  QString arg1 = ui->editMapKey->toPlainText().trimmed();
+  mw_one->m_Steps->addressResolver->setTencentApiKey(arg1);
 }

@@ -8546,12 +8546,12 @@
     <message>
         <location filename="Exercise/StepsOptions.ui" line="111"/>
         <source>Tencent Maps Key:</source>
-        <translation type="unfinished"></translation>
+        <translation>腾讯地图Key：</translation>
     </message>
     <message>
         <location filename="Exercise/StepsOptions.ui" line="131"/>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="Exercise/StepsOptions.ui" line="151"/>

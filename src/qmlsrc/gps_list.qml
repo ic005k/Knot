@@ -405,6 +405,7 @@ Rectangle {
                             Layout.preferredWidth: parent.width / 2 - spacing / 2
                             height: 35
                             enabled: true
+                            visible: isShowRoute
 
                             onClicked: {
 
@@ -483,6 +484,14 @@ Rectangle {
         visible: false // 默认隐藏
         x: (root.width - width) / 2
         y: (root.height - height) / 2
+
+        // 设置对话框背景颜色
+        background: Rectangle {
+            color: isDark ? "#333333" : "#F5F5F5" // 深色模式/浅色模式背景色
+            radius: 10 // 圆角半径
+            border.color: isDark ? "#555555" : "#CCCCCC" // 边框颜色
+            border.width: 1 // 边框宽度
+        }
 
         // 路由数据模型（接收C++传递的数据）
         ListModel {

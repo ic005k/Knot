@@ -183,7 +183,8 @@ void Steps::saveSteps() {
       mw_one->m_StepsOptions->ui->editStepLength->text().trimmed();
   QString strThreshold =
       mw_one->m_StepsOptions->ui->editStepsThreshold->text().trimmed();
-  QString strMapKey = mw_one->m_StepsOptions->ui->editMapKey->text().trimmed();
+  QString strMapKey =
+      mw_one->m_StepsOptions->ui->editMapKey->toPlainText().trimmed();
 
   QJsonObject stepsObj = rootObj["Steps"].toObject();
   stepsObj["Length"] = strLength;
@@ -301,6 +302,9 @@ void Steps::openStepsUI() {
 
   // test
   getAddress(25.0217, 98.4464);
+  mui->qwGpsList->rootContext()->setContextProperty("isShowRoute", isShowRoute);
+
+  qDebug() << mw_one->m_StepsOptions->ui->editMapKey->toPlainText();
 }
 
 void Steps::addRecord(QString date, qlonglong steps, QString km) {
@@ -397,7 +401,7 @@ void Steps::setTableSteps(qlonglong steps) {
 
   mw_one->m_StepsOptions->ui->editStepLength->setText(stepLength);
   mw_one->m_StepsOptions->ui->editStepsThreshold->setText(stepsThreshold);
-  mw_one->m_StepsOptions->ui->editMapKey->setText(mapKey);
+  mw_one->m_StepsOptions->ui->editMapKey->setPlainText(mapKey);
   // 设置上下文属性
   mui->qwSteps->rootContext()->setContextProperty("nStepsThreshold",
                                                   stepsThreshold.toInt());
@@ -2073,9 +2077,11 @@ QStringList Steps::readRoute(const QString& file) {
 }
 
 void Steps::getAddress(double lat, double lon) {
-  QGeoCoordinate gcj02Coord = wgs84ToGcj02(lat, lon);
-  addressResolver->getAddressFromCoord(gcj02Coord.latitude(),
-                                       gcj02Coord.longitude());
+  // QGeoCoordinate gcj02Coord = wgs84ToGcj02(lat, lon);
+  // addressResolver->getAddressFromCoord(gcj02Coord.latitude(),
+  //                                      gcj02Coord.longitude());
+
+  addressResolver->getAddressFromCoord(lat, lon);
 }
 
 void Steps::getRouteList(const QString& strGpsTime) {

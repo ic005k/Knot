@@ -30,9 +30,9 @@ class StepsOptions : public QDialog {
 
   void on_editStepLength_textChanged(const QString &arg1);
 
-  void on_editMapKey_textChanged(const QString &arg1);
-
   void on_btnWeb_clicked();
+
+  void on_editMapKey_textChanged();
 
  private:
   EditEventFilter *editFilter = nullptr;

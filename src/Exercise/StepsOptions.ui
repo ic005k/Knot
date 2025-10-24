@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>398</width>
-    <height>224</height>
+    <width>316</width>
+    <height>230</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -135,7 +135,7 @@
       </layout>
      </item>
      <item>
-      <widget class="QLineEdit" name="editMapKey"/>
+      <widget class="QTextEdit" name="editMapKey"/>
      </item>
     </layout>
    </item>

@@ -461,6 +461,8 @@ void MainHelper::initMainQW() {
     mui->qwSteps->rootContext()->setContextProperty("isDark", isDark);
 
     mui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwGpsList->rootContext()->setContextProperty(
+        "isShowRoute", mw_one->m_Steps->isShowRoute);
 
     mui->qwSteps->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/steps.qml")));
     mui->qwSteps->rootContext()->setContextProperty("maxFontSize", f_size);
