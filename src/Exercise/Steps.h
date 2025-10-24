@@ -235,7 +235,12 @@ class Steps : public QDialog {
   void setDateLabelToAndroid(const QString &str);
   void setInfoLabelToAndroid(const QString &str);
 
- signals:
+  void saveRoute(const QString &file, const QString &time, double lat,
+                 double lon, const QString &address);
+  void setAddressResolverConnect();
+  QString strJsonRouteFile;
+  QStringList readRoute(const QString &file);
+  signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();

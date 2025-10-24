@@ -349,7 +349,7 @@ Rectangle {
                         visible: false
                     }
 
-                    Button {
+                    /*Button {
                         id: btnViewGpsTrack
                         Layout.alignment: Qt.AlignHCenter
                         text: qsTr("View GPS Track")
@@ -380,6 +380,74 @@ Rectangle {
                             color: "white"
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
+                        }
+                    }*/
+
+                    // 替换原单独的 btnViewGpsTrack 按钮代码，改为 RowLayout 包裹两个按钮
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter // 整体水平居中
+                        width: parent.width // 占满父容器宽度
+                        spacing: 10 // 两个按钮之间的间距（可调整）
+
+                        // 原 View GPS Track 按钮（保留原有逻辑和样式）
+                        Button {
+                            id: btnViewGpsTrack
+                            text: qsTr("View GPS Track")
+                            Layout.fillWidth: true // 两个按钮平分宽度
+                            height: 35
+                            enabled: true
+
+                            onClicked: {
+                                strGpsTime = item0.text + "-=-" + item1.text + "-=-"
+                                        + item2.text + "-=-" + item4.text
+                                m_Steps.getGpsTrack()
+                            }
+
+                            background: Rectangle {
+                                width: parent.width
+                                color: btnViewGpsTrack.down ? "#4CAF50" : "#8BC34A"
+                                radius: 5
+                                border.color: "#4CAF50"
+                                border.width: 2
+                            }
+
+                            contentItem: Text {
+                                text: btnViewGpsTrack.text
+                                font.pixelSize: 14
+                                color: "white"
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                        }
+
+                        // 新增 Route 按钮（样式与原按钮一致，点击事件留空）
+                        Button {
+                            id: btnRoute
+                            text: qsTr("Route")
+                            Layout.fillWidth: true // 两个按钮平分宽度
+                            height: 35
+                            enabled: true
+
+                            onClicked: {
+                                // 留空点击事件，后续可添加逻辑
+                            }
+
+                            // 样式与原按钮统一，保持 UI 一致性
+                            background: Rectangle {
+                                width: parent.width
+                                color: btnRoute.down ? "#4CAF50" : "#8BC34A" // 同原按钮颜色
+                                radius: 5
+                                border.color: "#4CAF50"
+                                border.width: 2
+                            }
+
+                            contentItem: Text {
+                                text: btnRoute.text
+                                font.pixelSize: 14
+                                color: "white"
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
                         }
                     }
                 }

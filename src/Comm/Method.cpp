@@ -3281,8 +3281,7 @@ bool Method::isInChinaOnline(int timeout) {
 
 bool Method::isInChina() {
   // 在线 IP 检测（最准确）
-  QThread::currentThread()->setPriority(
-      QThread::LowPriority);  // 降低线程优先级
+  QThread::currentThread()->setPriority(QThread::NormalPriority);  // 线程优先级
   bool onlineResult = isInChinaOnline(3000);
   if (onlineResult) {
     return true;
