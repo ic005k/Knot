@@ -3331,6 +3331,7 @@ void Reader::addBookNote() {
 
   QTextEdit *textEdit = new QTextEdit(dlgAddBookNote);
   textEdit->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
+  textEdit->setAcceptRichText(false);
 
   initTextToolbarDynamic(dlgAddBookNote);
   EditEventFilter *editFilter =

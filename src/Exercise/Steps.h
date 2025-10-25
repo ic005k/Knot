@@ -41,7 +41,9 @@ class Steps : public QDialog {
   static const double GCJ02_LAT_MIN;
   static const double GCJ02_LAT_MAX;
 
-  GeoAddressResolver *addressResolver;
+  QString strMapKeyTestInfo;
+
+  GeoAddressResolver *addressResolver = nullptr;
   QString m_lastAddress;
   bool isShowRoute = true;
 
@@ -103,6 +105,8 @@ class Steps : public QDialog {
 
   void setScrollBarPos(double pos);
 
+  void getAddress(double lat, double lon);
+
  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
 
@@ -148,7 +152,8 @@ class Steps : public QDialog {
   QGeoCoordinate wgs84ToGcj02(double wgs84Lat, double wgs84Lon);
   void closeRouteDialog();
   bool isRouteShow();
-  public slots:
+  void setMapKey();
+ public slots:
   void clearAllGpsList();
   void getGpsTrack();
   void openMapWindow();
@@ -245,7 +250,7 @@ class Steps : public QDialog {
   void setAddressResolverConnect();
   QString strJsonRouteFile;
   QStringList readRoute(const QString &file);
-  void getAddress(double lat, double lon);
+
   bool isInChina(double lat, double lon);
  signals:
   void distanceChanged(double distance);

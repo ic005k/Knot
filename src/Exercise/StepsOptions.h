@@ -34,6 +34,8 @@ class StepsOptions : public QDialog {
 
   void on_editMapKey_textChanged();
 
+  void on_btnTestKey_clicked();
+
  private:
   EditEventFilter *editFilter = nullptr;
 };

@@ -145,6 +145,13 @@
          </spacer>
         </item>
         <item>
+         <widget class="QToolButton" name="btnTestKey">
+          <property name="text">
+           <string>Test</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QToolButton" name="btnWeb">
           <property name="text">
            <string>...</string>
@@ -154,7 +161,11 @@
        </layout>
       </item>
       <item>
-       <widget class="QTextEdit" name="editMapKey"/>
+       <widget class="QTextEdit" name="editMapKey">
+        <property name="acceptRichText">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

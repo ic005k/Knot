@@ -24,6 +24,10 @@ StepsOptions::~StepsOptions() { delete ui; }
 
 void StepsOptions::closeEvent(QCloseEvent *event) {
   Q_UNUSED(event);
+  QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
+  Reg.setValue("/Map/MapKey", ui->editMapKey->toPlainText().trimmed());
+  Reg.sync();
+  mw_one->m_Steps->setMapKey();
   m_Method->closeGrayWindows();
 }
 
@@ -51,6 +55,8 @@ void StepsOptions::init() {
   m_Method->showGrayWindows();
   show();
   isTextChange = false;
+
+  ui->btnWeb->setFixedHeight(ui->btnTestKey->height());
 
   // init edit toolbar
   initTextToolbarDynamic(this);
@@ -88,8 +94,19 @@ void StepsOptions::on_btnWeb_clicked() {
   QDesktopServices::openUrl(QUrl("https://lbs.qq.com/"));
 }
 
-void StepsOptions::on_editMapKey_textChanged() {
-  isTextChange = true;
+void StepsOptions::on_editMapKey_textChanged() {}
+
+void StepsOptions::on_btnTestKey_clicked() {
   QString arg1 = ui->editMapKey->toPlainText().trimmed();
-  mw_one->m_Steps->addressResolver->setTencentApiKey(arg1);
+  if (mw_one->m_Steps->addressResolver) {
+    mw_one->m_Steps->strMapKeyTestInfo = "";
+    mw_one->m_Steps->addressResolver->setTencentApiKey(arg1);
+    mw_one->m_Steps->getAddress(25.0217, 98.4464);
+
+    while (mw_one->m_Steps->strMapKeyTestInfo == "")
+      QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+
+    ShowMessage *msg = new ShowMessage(this);
+    msg->showMsg(appName, mw_one->m_Steps->strMapKeyTestInfo, 1);
+  }
 }

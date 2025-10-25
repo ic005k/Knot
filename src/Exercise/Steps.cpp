@@ -124,6 +124,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
 
   // Route
   addressResolver = new GeoAddressResolver(this);
+  setMapKey();
   isShowRoute = m_Method->isInChina();
   // 连接信号槽，获取结果
   setAddressResolverConnect();
@@ -141,15 +142,18 @@ void Steps::setAddressResolverConnect() {
                   qDebug() << "记录轨迹点：" << address;
 
                   m_lastAddress = address;
+
                 } else {
                   qDebug() << "位置未变化，跳过记录";
                 }
+                strMapKeyTestInfo = address;
               });
       connect(addressResolver, &GeoAddressResolver::resolveFailed, this,
               [this](const QString& error) {
                 qDebug() << "地址解析失败：" << error;
                 // 处理错误（如提示用户检查网络或密钥）
                 isShowRoute = false;
+                strMapKeyTestInfo = error;
               });
 
       isOne = true;
@@ -197,13 +201,10 @@ void Steps::saveSteps() {
       mw_one->m_StepsOptions->ui->editStepLength->text().trimmed();
   QString strThreshold =
       mw_one->m_StepsOptions->ui->editStepsThreshold->text().trimmed();
-  QString strMapKey =
-      mw_one->m_StepsOptions->ui->editMapKey->toPlainText().trimmed();
 
   QJsonObject stepsObj = rootObj["Steps"].toObject();
   stepsObj["Length"] = strLength;
   stepsObj["Threshold"] = strThreshold;
-  stepsObj["MapKey"] = strMapKey;
 
   // 将Steps节点加入根对象
   rootObj["Steps"] = stepsObj;
@@ -407,11 +408,10 @@ void Steps::setTableSteps(qlonglong steps) {
   // 读取步长和阈值（对应原/Steps/Length和/Steps/Threshold）
   QString stepLength = stepsObj["Length"].toString("35");
   QString stepsThreshold = stepsObj["Threshold"].toString("10000");
-  QString mapKey = stepsObj["MapKey"].toString("");
 
   mw_one->m_StepsOptions->ui->editStepLength->setText(stepLength);
   mw_one->m_StepsOptions->ui->editStepsThreshold->setText(stepsThreshold);
-  mw_one->m_StepsOptions->ui->editMapKey->setPlainText(mapKey);
+
   // 设置上下文属性
   mui->qwSteps->rootContext()->setContextProperty("nStepsThreshold",
                                                   stepsThreshold.toInt());
@@ -2100,6 +2100,13 @@ void Steps::getAddress(double lat, double lon) {
                                        gcj02Coord.longitude());
 }
 
+void Steps::setMapKey() {
+  QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
+  QString arg1 = Reg.value("/Map/MapKey", "").toString();
+  mw_one->m_StepsOptions->ui->editMapKey->setPlainText(arg1);
+  if (addressResolver) addressResolver->setTencentApiKey(arg1);
+}
+
 void Steps::getRouteList(const QString& strGpsTime) {
   strGpsList = strGpsTime;
 
@@ -2142,6 +2149,11 @@ void Steps::getRouteList(const QString& strGpsTime) {
 
   // 获取弹出窗口对象（routeDialog）
   QQuickItem* root = mui->qwGpsList->rootObject();
+  if (!root) {
+    qWarning() << "[C++] 未找到QML根对象";
+    return;
+  }
+
   QObject* routeDialog = root->findChild<QObject*>("routeDialog");
   if (!routeDialog) {
     qWarning() << "[C++] 未找到 routeDialog 对象";
@@ -2179,6 +2191,11 @@ void Steps::getRouteList(const QString& strGpsTime) {
 
 void Steps::closeRouteDialog() {
   QQuickItem* root = mui->qwGpsList->rootObject();
+  if (!root) {
+    qWarning() << "[C++] 未找到QML根对象";
+    return;
+  }
+
   QObject* routeDialog = root->findChild<QObject*>("routeDialog");
   if (!routeDialog) {
     qWarning() << "[C++] 未找到 routeDialog 对象";
@@ -2189,6 +2206,11 @@ void Steps::closeRouteDialog() {
 
 bool Steps::isRouteShow() {
   QQuickItem* root = mui->qwGpsList->rootObject();
+  if (!root) {
+    qWarning() << "[C++] 未找到QML根对象";
+    return false;
+  }
+
   QObject* routeDialog = root->findChild<QObject*>("routeDialog");
   if (!routeDialog) {
     qWarning() << "[C++] 未找到 routeDialog 对象";
