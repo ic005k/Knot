@@ -478,8 +478,8 @@ Rectangle {
         id: routeDialog
         objectName: "routeDialog"
         title: "" // qsTr("Route Data")
-        width: root.width * 0.9
-        height: root.height * 0.9
+        width: root.width * 1.0
+        height: root.height * 1.0
         modal: true // 模态窗口（禁止背景操作）
         visible: false // 默认隐藏
         x: (root.width - width) / 2
@@ -488,7 +488,7 @@ Rectangle {
         // 设置对话框背景颜色
         background: Rectangle {
             color: isDark ? "#333333" : "#F5F5F5" // 深色模式/浅色模式背景色
-            radius: 10 // 圆角半径
+            radius: 0 // 圆角半径
             border.color: isDark ? "#555555" : "#CCCCCC" // 边框颜色
             border.width: 1 // 边框宽度
         }
@@ -505,6 +505,8 @@ Rectangle {
             spacing: 5
             cacheBuffer: 50
             Layout.alignment: Qt.AlignHCenter
+
+            boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
 
             // 列表条目样式（每个条目分三行）
             delegate: Rectangle {

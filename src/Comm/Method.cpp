@@ -3234,61 +3234,58 @@ void Method::setTextEditToolBar(QObject *parent, EditEventFilter *editFilter) {
 }
 
 bool Method::isInChinaOnline(int timeout) {
-  // 国内公开 IP 接口（备选：https://api.ip.sb/geoip 、https://ipapi.co/json/）
-  QUrl url("https://ip.taobao.com/outGetIpInfo?ip=myip&accessKey=alibaba-inc");
+  // 选择国内稳定接口：ip.cn（返回格式："IP地址：xxx.xxx.xxx.xxx
+  // 来自：中国xx省xx市"）
+  // 备用接口：ip111.cn（返回格式：{"ip":"xxx","country":"中国"...}）
+  QList<QString> urls = {"https://ip.cn",
+                         "https://ip111.cn/api/index?type=ip&query="};
 
   QNetworkAccessManager manager;
-  QNetworkRequest request(url);
-  request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+  // 模拟浏览器UA，避免被拦截
+  QNetworkRequest request;
+  request.setHeader(QNetworkRequest::UserAgentHeader,
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
 
-  // 同步请求（避免异步回调复杂度，适合在子线程中调用）
-  QNetworkReply *reply = manager.get(request);
-  QEventLoop loop;
-  QTimer::singleShot(timeout, &loop, &QEventLoop::quit);  // 超时退出
-  QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-  loop.exec();
+  for (const QString &urlStr : urls) {  // 遍历接口，第一个成功的即返回结果
+    QUrl url(urlStr);
+    request.setUrl(url);
+    QNetworkReply *reply = manager.get(request);
 
-  // 处理响应
-  if (reply->error() != QNetworkReply::NoError) {
+    QEventLoop loop;
+    QTimer timer;
+    timer.setSingleShot(true);
+    // 超时或请求完成均退出循环
+    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    timer.start(timeout);
+    loop.exec();
+
+    // 处理超时或网络错误
+    if (!timer.isActive() || reply->error() != QNetworkReply::NoError) {
+      reply->deleteLater();
+      continue;  // 尝试下一个接口
+    }
+
+    // 读取响应并判断是否包含"中国"
+    QByteArray data = reply->readAll();
     reply->deleteLater();
-    return false;  // 网络错误/超时，返回 false（可根据需求调整为默认值）
+
+    // 简单判断：响应中包含"中国"字符串即视为国内（兼容不同接口格式）
+    // 对ip111.cn的JSON格式，也可通过字符串匹配"country":"中国"
+    if (data.contains("中国") || data.contains("CN")) {
+      return true;
+    } else {
+      return false;  // 明确返回非中国，无需尝试下一个接口
+    }
   }
 
-  // 解析 JSON 响应
-  QByteArray data = reply->readAll();
-  QJsonDocument doc = QJsonDocument::fromJson(data);
-  if (!doc.isObject()) {
-    reply->deleteLater();
-    return false;
-  }
-
-  QJsonObject obj = doc.object();
-  if (obj["code"].toInt() != 0) {  // 接口返回成功码（淘宝接口：0 成功）
-    reply->deleteLater();
-    return false;
-  }
-
-  QJsonObject dataObj = obj["data"].toObject();
-  QString country = dataObj["country"].toString().trimmed();
-  QString region = dataObj["region"].toString().trimmed();
-  reply->deleteLater();
-
-  qDebug() << "country=" << country << region;
-
-  // 判断：国家为中国，或地区为国内省份（容错处理）
-  return (country == "中国" || region.contains("省") || region.contains("市") ||
-          region.contains("自治区"));
+  // 所有接口失败（超时/无响应）
+  return false;
 }
 
 bool Method::isInChina() {
-  // 在线 IP 检测（最准确）
-  QThread::currentThread()->setPriority(QThread::NormalPriority);  // 线程优先级
-  bool onlineResult = isInChinaOnline(3000);
-  if (onlineResult) {
-    mw_one->m_StepsOptions->ui->f_mapkey->show();
-    return true;
-  } else {
-    mw_one->m_StepsOptions->ui->f_mapkey->hide();
-    return false;
-  }
+  // 直接走在线检测，无内网判断（避免国外内网误判）
+  bool onlineResult = isInChinaOnline(2000);
+  mw_one->m_StepsOptions->ui->f_mapkey->setVisible(onlineResult);
+  return onlineResult;
 }

@@ -650,7 +650,7 @@ Rectangle {
 
         width: root.width > 450 ? 450 : root.width
         height: root.height
-        y: -20
+        y: 0
         x: 0
         modal: true
         focus: true

@@ -10,9 +10,11 @@
 #include <openssl/rand.h>
 #include <zlib.h>
 
+#include <QAbstractSocket>
 #include <QByteArray>
 #include <QConicalGradient>
 #include <QCryptographicHash>
+#include <QDateTime>
 #include <QDebug>
 #include <QDialog>
 #include <QDir>
@@ -21,13 +23,17 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QFileInfoList>
+#include <QHostAddress>
 #include <QInputDialog>
 #include <QInputMethod>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QList>
 #include <QNetworkAccessManager>
+#include <QNetworkInterface>
 #include <QNetworkReply>
 #include <QTimer>
+#include <functional>
 
 #ifdef Q_OS_ANDROID
 #include <QJniObject>
@@ -462,7 +468,8 @@ class Method : public QDialog {
   void setTextEditToolBar(QObject *parent, EditEventFilter *editFilter);
 
   bool isInChina();
-  protected:
+
+ protected:
   bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
 
  public slots:
@@ -501,6 +508,7 @@ class Method : public QDialog {
   static bool isUtf8(const QByteArray &data);
   static bool isValidText(const QString &text);
   bool isInChinaOnline(int timeout = 3000);
+  QString getLocalIP();
 };
 
 class IOSCircularProgress : public QWidget {
