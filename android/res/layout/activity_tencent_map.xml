@@ -46,6 +46,12 @@
             android:layout_height="match_parent"
         /> <!-- 正确闭合：标签结尾是"/>", 而非">" -->
 
+        <FrameLayout
+            android:id="@+id/map_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+        />
+
         <!-- 地图切换按钮（可见，适配切换功能） -->
         <Button
             android:id="@+id/switchMapBtn"

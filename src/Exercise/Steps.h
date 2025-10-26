@@ -43,6 +43,8 @@ class Steps : public QDialog {
 
   QString strMapKeyTestInfo;
 
+  QTimer *timer;
+
   GeoAddressResolver *addressResolver = nullptr;
   QString m_lastAddress;
   bool isShowRoute = true;
@@ -192,7 +194,7 @@ class Steps : public QDialog {
   double m_speed;
   QDateTime m_startTime;
   QTime m_time;
-  QTimer *timer;
+
   QString strTotalDistance;
   QString strDurationTime;
   double latitude = 59.919023461273;
@@ -252,6 +254,8 @@ class Steps : public QDialog {
   QStringList readRoute(const QString &file);
 
   bool isInChina(double lat, double lon);
+  void setMapKeyError();
+  bool isChina = false;
  signals:
   void distanceChanged(double distance);
   void timeChanged();

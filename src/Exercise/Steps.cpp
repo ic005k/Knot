@@ -125,7 +125,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   // Route
   addressResolver = new GeoAddressResolver(this);
   setMapKey();
-  isShowRoute = m_Method->isInChina();
+  isChina = m_Method->isInChina();
   // 连接信号槽，获取结果
   setAddressResolverConnect();
 }
@@ -134,7 +134,7 @@ Steps::~Steps() {}
 
 void Steps::setAddressResolverConnect() {
   if (!isOne) {
-    if (isShowRoute) {
+    if (isChina) {
       connect(addressResolver, &GeoAddressResolver::addressResolved, this,
               [this](const QString& address) {
                 // 过滤完全相同的地址
@@ -147,6 +147,8 @@ void Steps::setAddressResolverConnect() {
                   qDebug() << "位置未变化，跳过记录";
                 }
                 strMapKeyTestInfo = address;
+                setMapKey();
+                isShowRoute = true;
               });
       connect(addressResolver, &GeoAddressResolver::resolveFailed, this,
               [this](const QString& error) {
@@ -154,6 +156,8 @@ void Steps::setAddressResolverConnect() {
                 // 处理错误（如提示用户检查网络或密钥）
                 isShowRoute = false;
                 strMapKeyTestInfo = error;
+                setMapKeyError();
+                isShowRoute = false;
               });
 
       isOne = true;
@@ -311,7 +315,7 @@ void Steps::openStepsUI() {
   }
 
   // Route
-  if (!isShowRoute) isShowRoute = m_Method->isInChina();
+  if (!isChina) isChina = m_Method->isInChina();
   // 连接信号槽，获取结果
   setAddressResolverConnect();
 
@@ -2103,6 +2107,7 @@ void Steps::getAddress(double lat, double lon) {
 void Steps::setMapKey() {
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
   QString arg1 = Reg.value("/Map/MapKey", "").toString();
+
   mw_one->m_StepsOptions->ui->editMapKey->setPlainText(arg1);
   if (addressResolver) addressResolver->setTencentApiKey(arg1);
 
@@ -2111,6 +2116,25 @@ void Steps::setMapKey() {
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
   if (activity.isValid()) {
     QString mapKey = arg1;
+    QJniObject jKey = QJniObject::fromString(mapKey);
+
+    // 调用Java的setMapKey方法，参数为String，返回值为void
+    activity.callMethod<void>(
+        "setMapKey",
+        "(Ljava/lang/String;)V",  // JNI签名：接收String参数，无返回值
+        jKey.object<jstring>());
+    qDebug() << "已调用Java层setMapKey方法";
+  }
+
+#endif
+}
+
+void Steps::setMapKeyError() {
+#ifdef Q_OS_ANDROID
+
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  if (activity.isValid()) {
+    QString mapKey = "error";
     QJniObject jKey = QJniObject::fromString(mapKey);
 
     // 调用Java的setMapKey方法，参数为String，返回值为void

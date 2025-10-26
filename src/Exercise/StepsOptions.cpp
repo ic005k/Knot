@@ -2,6 +2,7 @@
 
 #include "src/MainWindow.h"
 #include "src/defines.h"
+#include "ui_MainWindow.h"
 #include "ui_StepsOptions.h"
 
 StepsOptions::StepsOptions(QWidget *parent)
@@ -24,11 +25,18 @@ StepsOptions::~StepsOptions() { delete ui; }
 
 void StepsOptions::closeEvent(QCloseEvent *event) {
   Q_UNUSED(event);
+
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
   Reg.setValue("/Map/MapKey", ui->editMapKey->toPlainText().trimmed());
   Reg.sync();
+
   mw_one->m_Steps->setMapKey();
+  mw_one->m_Steps->getAddress(25.0217, 98.4464);
   m_Method->closeGrayWindows();
+
+  mui->btnBackSteps->click();
+  m_Method->Sleep(100);
+  mui->btnSteps->click();
 }
 
 bool StepsOptions::eventFilter(QObject *obj, QEvent *evn) {
@@ -44,6 +52,8 @@ bool StepsOptions::eventFilter(QObject *obj, QEvent *evn) {
 }
 
 void StepsOptions::init() {
+  if (mw_one->m_Steps->timer->isActive()) return;
+
   int x, y, w, h;
   x = mw_one->geometry().x();
   y = 0;

@@ -23,6 +23,7 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout; // 导入FrameLayout类
 import android.widget.TextView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -80,6 +81,7 @@ public class TencentMapActivity extends MapActivity {
 
         Log.d(TAG, "开始初始化腾讯地图Activity");
         TENCENT_MAP_KEY = MyActivity.MY_TENCENT_MAP_KEY;
+        Log.d(TAG, "当前使用的Key: " + TENCENT_MAP_KEY);
 
         setupTencentSDK();
 
@@ -95,66 +97,15 @@ public class TencentMapActivity extends MapActivity {
         initializeMap();
     }
 
-    /**
-     * 修复：移除TencentMapInitializer.initialize（适配您的SDK版本）
-     */
     private void setupTencentSDK() {
         try {
             Log.d(TAG, "开始设置腾讯地图SDK");
-
-            // 设置隐私协议状态
+            // 仅保留隐私协议设置，移除SDK初始化逻辑
             boolean agreed = hasAgreedPrivacy();
             setTencentPrivacyStatus(agreed);
             Log.d(TAG, "隐私协议状态设置: " + agreed);
-
-            // 初始化SDK（使用您原有逻辑，适配SDK版本）
-            initializeSDK();
-            Log.d(TAG, "SDK初始化完成");
         } catch (Exception e) {
             Log.e(TAG, "SDK设置失败", e);
-        }
-    }
-
-    /**
-     * 修复：使用原有SDK初始化方式（避免TencentMapInitializer冲突）
-     */
-    private void initializeSDK() {
-        try {
-            // 使用新版初始化方式
-            Class<?> initializerClass = Class.forName(
-                "com.tencent.tencentmap.mapsdk.maps.TencentMapInitializer"
-            );
-
-            // 新版初始化方法需要传入key
-            Method initializeMethod = initializerClass.getMethod(
-                "initialize",
-                Context.class,
-                String.class
-            );
-            initializeMethod.invoke(
-                null,
-                getApplicationContext(),
-                TENCENT_MAP_KEY
-            );
-
-            Log.d(TAG, "腾讯地图SDK初始化成功（新版TencentMapInitializer）");
-        } catch (Exception e) {
-            Log.e(TAG, "SDK初始化异常", e);
-
-            // 旧版兼容
-            try {
-                Class<?> sdkInitializerClass = Class.forName(
-                    "com.tencent.tencentmap.mapsdk.maps.SDKInitializer"
-                );
-                Method initializeMethod = sdkInitializerClass.getMethod(
-                    "initialize",
-                    Context.class
-                );
-                initializeMethod.invoke(null, getApplicationContext());
-                Log.d(TAG, "腾讯地图SDK初始化成功（旧版SDKInitializer）");
-            } catch (Exception ex) {
-                Log.e(TAG, "SDK初始化异常（旧版）", ex);
-            }
         }
     }
 
@@ -275,20 +226,23 @@ public class TencentMapActivity extends MapActivity {
         Log.d(TAG, "地图界面初始化完成");
     }
 
-    /**
-     * 修复：仅使用XML中的mapView（osmMapView），通过TencentMapOptions设置Key
-     */
     private void initMapViewWithKey() {
         try {
-            // 直接使用XML中的mapView
-            tencentMapView = findViewById(R.id.osmMapView);
-            if (tencentMapView == null) {
-                Log.e(TAG, "未找到osmMapView，请检查布局文件");
-                return;
-            }
+            // 1. 创建带Key的配置
+            TencentMapOptions options = new TencentMapOptions();
+            options.setMapKey(TENCENT_MAP_KEY); // 动态传入Key
+            Log.d(TAG, "通过代码创建MapView，已设置Key");
 
-            // 新版SDK不需要反射设置Key
-            Log.d(TAG, "成功获取MapView实例");
+            // 2. 代码创建MapView（替代XML的findViewById）
+            tencentMapView = new MapView(this, options);
+
+            // 3. 将MapView添加到布局容器（需在XML中添加一个容器，如FrameLayout）
+            FrameLayout mapContainer = findViewById(R.id.map_container);
+            if (mapContainer != null) {
+                mapContainer.addView(tencentMapView);
+            } else {
+                Log.e(TAG, "未找到地图容器");
+            }
         } catch (Exception e) {
             Log.e(TAG, "初始化mapView失败", e);
         }
@@ -299,40 +253,10 @@ public class TencentMapActivity extends MapActivity {
      */
     private TencentMapOptions createMapOptionsWithKey() {
         TencentMapOptions options = new TencentMapOptions();
-        try {
-            // 优先官方API
-            options.setMapKey(TENCENT_MAP_KEY);
-            Log.d(TAG, "通过TencentMapOptions.setMapKey设置Key成功");
-        } catch (Exception e) {
-            Log.e(TAG, "setMapKey调用失败，尝试反射", e);
-            // 反射备用
-            try {
-                Field mapKeyField = TencentMapOptions.class.getDeclaredField(
-                    "mMapKey"
-                );
-                mapKeyField.setAccessible(true);
-                mapKeyField.set(options, TENCENT_MAP_KEY);
-                Log.d(TAG, "反射设置mMapKey成功");
-            } catch (Exception ex) {
-                Log.e(TAG, "反射设置Key失败", ex);
-            }
-        }
+        // 直接使用官方API设置Key，移除反射备用逻辑
+        options.setMapKey(TENCENT_MAP_KEY);
+        Log.d(TAG, "通过TencentMapOptions.setMapKey设置Key成功");
         return options;
-    }
-
-    /**
-     * 为XML中的mapView补充设置Key
-     */
-    private void setMapViewKey(MapView mapView, TencentMapOptions options) {
-        if (mapView == null || options == null) return;
-        try {
-            Field optionsField = MapView.class.getDeclaredField("mOptions");
-            optionsField.setAccessible(true);
-            optionsField.set(mapView, options); // 替换为带Key的options
-            Log.d(TAG, "mapView的Key已补充设置");
-        } catch (Exception e) {
-            Log.e(TAG, "为mapView设置Key失败", e);
-        }
     }
 
     private void initViews() {
@@ -578,9 +502,12 @@ public class TencentMapActivity extends MapActivity {
             if (obj instanceof org.osmdroid.util.GeoPoint) {
                 org.osmdroid.util.GeoPoint osmPoint =
                     (org.osmdroid.util.GeoPoint) obj;
-                globalTrackPoints.add(
-                    new LatLng(osmPoint.getLatitude(), osmPoint.getLongitude())
+                // 关键修改：GPS坐标（WGS84）转GCJ02
+                LatLng gcjPoint = wgs84ToGcj02(
+                    osmPoint.getLatitude(),
+                    osmPoint.getLongitude()
                 );
+                globalTrackPoints.add(gcjPoint);
             }
         }
     }
@@ -638,7 +565,8 @@ public class TencentMapActivity extends MapActivity {
 
         runOnUiThread(() -> {
             try {
-                LatLng newPoint = new LatLng(latitude, longitude);
+                // 关键修改：GPS坐标（WGS84）转GCJ02
+                LatLng newPoint = wgs84ToGcj02(latitude, longitude);
                 trackPoints.add(newPoint);
                 trackPolyline.setPoints(trackPoints);
 
@@ -760,5 +688,102 @@ public class TencentMapActivity extends MapActivity {
                 }
             }
         }
+    }
+
+    /**
+     * WGS84（GPS标准坐标）转GCJ02（腾讯地图/高德地图适配坐标）
+     * @param wgsLat GPS纬度
+     * @param wgsLng GPS经度
+     * @return 转换后的GCJ02坐标（LatLng）
+     */
+    private LatLng wgs84ToGcj02(double wgsLat, double wgsLng) {
+        if (outOfChina(wgsLat, wgsLng)) {
+            return new LatLng(wgsLat, wgsLng);
+        }
+        double dLat = transformLat(wgsLng - 105.0, wgsLat - 35.0);
+        double dLng = transformLng(wgsLng - 105.0, wgsLat - 35.0);
+        double radLat = (wgsLat / 180.0) * Math.PI;
+        double magic = Math.sin(radLat);
+        magic = 1 - 0.00669342162296594323 * magic * magic;
+        double sqrtMagic = Math.sqrt(magic);
+        dLat =
+            (dLat * 180.0) /
+            (((6335552.717000417 +
+                        (20014120.176965646 - 3018127.966634887 * magic) *
+                        magic) /
+                    sqrtMagic /
+                    magic) *
+                Math.PI);
+        dLng =
+            (dLng * 180.0) /
+            ((6378245.0 / sqrtMagic) * Math.cos(radLat) * Math.PI);
+        double gcjLat = wgsLat + dLat;
+        double gcjLng = wgsLng + dLng;
+        return new LatLng(gcjLat, gcjLng);
+    }
+
+    /**
+     * 判断坐标是否在中国境外（境外坐标不转换，直接返回原坐标）
+     */
+    private boolean outOfChina(double lat, double lng) {
+        return !(lng > 73.66 && lng < 135.05 && lat > 3.86 && lat < 53.55);
+    }
+
+    /**
+     * 纬度转换辅助计算
+     */
+    private double transformLat(double x, double y) {
+        double ret =
+            -100.0 +
+            2.0 * x +
+            3.0 * y +
+            0.2 * y * y +
+            0.1 * x * y +
+            0.2 * Math.sqrt(Math.abs(x));
+        ret +=
+            ((20.0 * Math.sin(6.0 * x * Math.PI) +
+                    20.0 * Math.sin(2.0 * x * Math.PI)) *
+                2.0) /
+            3.0;
+        ret +=
+            ((20.0 * Math.sin(y * Math.PI) +
+                    40.0 * Math.sin((y / 3.0) * Math.PI)) *
+                2.0) /
+            3.0;
+        ret +=
+            ((160.0 * Math.sin((y / 12.0) * Math.PI) +
+                    320 * Math.sin((y * Math.PI) / 30.0)) *
+                2.0) /
+            3.0;
+        return ret;
+    }
+
+    /**
+     * 经度转换辅助计算
+     */
+    private double transformLng(double x, double y) {
+        double ret =
+            300.0 +
+            x +
+            2.0 * y +
+            0.1 * x * x +
+            0.1 * x * y +
+            0.1 * Math.sqrt(Math.abs(x));
+        ret +=
+            ((20.0 * Math.sin(6.0 * x * Math.PI) +
+                    20.0 * Math.sin(2.0 * x * Math.PI)) *
+                2.0) /
+            3.0;
+        ret +=
+            ((20.0 * Math.sin(x * Math.PI) +
+                    40.0 * Math.sin((x / 3.0) * Math.PI)) *
+                2.0) /
+            3.0;
+        ret +=
+            ((150.0 * Math.sin((x / 12.0) * Math.PI) +
+                    300.0 * Math.sin((x / 30.0) * Math.PI)) *
+                2.0) /
+            3.0;
+        return ret;
     }
 }

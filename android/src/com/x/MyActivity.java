@@ -158,7 +158,7 @@ public class MyActivity
     extends QtActivity
     implements Application.ActivityLifecycleCallbacks {
 
-    public static String MY_TENCENT_MAP_KEY;
+    public static String MY_TENCENT_MAP_KEY = "error";
 
     public static MapActivity mapActivityInstance = null;
     public static List<GeoPoint> osmTrackPoints = new ArrayList<>();
@@ -1447,8 +1447,12 @@ public class MyActivity
     }
 
     public void openMapWindow() {
-        //Intent i = new Intent(getMyAppContext(), MapActivity.class);
-        Intent i = new Intent(getMyAppContext(), TencentMapActivity.class);
+        Intent i;
+        if (MY_TENCENT_MAP_KEY.equals("error")) {
+            i = new Intent(getMyAppContext(), MapActivity.class);
+        } else {
+            i = new Intent(getMyAppContext(), TencentMapActivity.class);
+        }
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         getMyAppContext().startActivity(i);
     }
