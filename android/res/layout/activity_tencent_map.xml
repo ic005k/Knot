@@ -50,14 +50,15 @@
         <Button
             android:id="@+id/switchMapBtn"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
+            android:layout_height="25dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="2dp"
             android:background="#FFFFFF"
             android:text="切换标准/卫星地图"
-            android:textSize="14sp"
+            android:textSize="12sp"
             android:visibility="visible"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
+            android:paddingHorizontal="2dp"
+            android:paddingVertical="2dp"
         />
     </FrameLayout>
 
