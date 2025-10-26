@@ -100,7 +100,12 @@
         android:usesCleartextTraffic="true"
     >
 
-        <!-- android:windowSoftInputMode="adjustResize" -->
+    <!-- 2. 声明隐私协议已同意+已展示（满足SDK初始化要求） -->
+    <meta-data android:name="TencentMap_Privacy_Agreed" android:value="true" />
+        <meta-data
+            android:name="TencentMap_Privacy_Showed"
+            android:value="true"
+        />
 
         <!-- singleTop singleTask standard -->
         <activity
@@ -233,6 +238,14 @@
 
         <activity
             android:name="com.x.MapActivity"
+            android:label="Knot"
+            android:launchMode="standard"
+            android:screenOrientation="portrait"
+        >
+        </activity>
+
+        <activity
+            android:name="com.x.TencentMapActivity"
             android:label="Knot"
             android:launchMode="standard"
             android:screenOrientation="portrait"

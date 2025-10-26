@@ -23,6 +23,7 @@ buildscript {
 
         google()  // 确保 Google 仓库在最后（避免镜像失效时回退）
         mavenCentral()
+
     }
 
     dependencies {
@@ -34,11 +35,16 @@ buildscript {
 
 repositories {
     maven { url 'https://jitpack.io' }
+
+    maven { url 'https://maven.aliyun.com/repository/public/' }
+
     maven { url 'https://maven.aliyun.com/repository/google' }
     maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
 
     google()  // 确保 Google 仓库在最后（避免镜像失效时回退）
     mavenCentral()
+
+
 }
 
 dependencies {
@@ -76,6 +82,9 @@ dependencies {
     // 添加osmdroid依赖（最新版本可查官网）
     implementation 'org.osmdroid:osmdroid-android:6.1.20'
     implementation 'org.osmdroid:osmdroid-mapsforge:6.1.20'
+
+    // 腾讯地图SDK依赖
+    implementation 'com.tencent.map:tencent-map-vector-sdk:5.4.0'
 
     // Prism4j 语法高亮引擎
     implementation "io.noties:prism4j:2.0.0"

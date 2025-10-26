@@ -2105,6 +2105,23 @@ void Steps::setMapKey() {
   QString arg1 = Reg.value("/Map/MapKey", "").toString();
   mw_one->m_StepsOptions->ui->editMapKey->setPlainText(arg1);
   if (addressResolver) addressResolver->setTencentApiKey(arg1);
+
+#ifdef Q_OS_ANDROID
+
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  if (activity.isValid()) {
+    QString mapKey = arg1;
+    QJniObject jKey = QJniObject::fromString(mapKey);
+
+    // 调用Java的setMapKey方法，参数为String，返回值为void
+    activity.callMethod<void>(
+        "setMapKey",
+        "(Ljava/lang/String;)V",  // JNI签名：接收String参数，无返回值
+        jKey.object<jstring>());
+    qDebug() << "已调用Java层setMapKey方法";
+  }
+
+#endif
 }
 
 void Steps::getRouteList(const QString& strGpsTime) {

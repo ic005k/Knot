@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+>
+
+    <!-- 顶部信息栏（保持原有样式和功能） -->
+    <TextView
+        android:id="@+id/topDateLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="6dp"
+        android:background="#2196F3"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:gravity="center_horizontal"
+        android:text=""
+    />
+
+    <TextView
+        android:id="@+id/topInfoLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="6dp"
+        android:background="#98FB98"
+        android:textColor="@android:color/black"
+        android:textSize="10sp"
+        android:gravity="center_horizontal"
+        android:typeface="monospace"
+        android:text="加载中...腾讯地图"
+    />
+
+    <!-- 中间：腾讯地图容器（占满剩余空间） -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+    >
+
+        <!-- 修正核心：MapView标签改为自闭合（添加"/"），解决语法错误 -->
+        <com.tencent.tencentmap.mapsdk.maps.MapView
+            android:id="@+id/osmMapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+        /> <!-- 正确闭合：标签结尾是"/>", 而非">" -->
+
+        <!-- 地图切换按钮（可见，适配切换功能） -->
+        <Button
+            android:id="@+id/switchMapBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:background="#FFFFFF"
+            android:text="切换标准/卫星地图"
+            android:textSize="14sp"
+            android:visibility="visible"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+        />
+    </FrameLayout>
+
+    <!-- 底部信息栏（保持原有样式和默认文本） -->
+    <TextView
+        android:id="@+id/bottomInfoLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="6dp"
+        android:background="#2196F3"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:gravity="center_horizontal"
+        android:text="距离: 0.0km | 速度: 0.0km/h"
+    />
+
+</LinearLayout>

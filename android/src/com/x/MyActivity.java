@@ -119,6 +119,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
@@ -156,6 +157,8 @@ import org.qtproject.qt.android.bindings.QtActivity;
 public class MyActivity
     extends QtActivity
     implements Application.ActivityLifecycleCallbacks {
+
+    public static String MY_TENCENT_MAP_KEY;
 
     public static MapActivity mapActivityInstance = null;
     public static List<GeoPoint> osmTrackPoints = new ArrayList<>();
@@ -1444,7 +1447,8 @@ public class MyActivity
     }
 
     public void openMapWindow() {
-        Intent i = new Intent(getMyAppContext(), MapActivity.class);
+        //Intent i = new Intent(getMyAppContext(), MapActivity.class);
+        Intent i = new Intent(getMyAppContext(), TencentMapActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         getMyAppContext().startActivity(i);
     }
@@ -2302,5 +2306,9 @@ public class MyActivity
         if (mapActivityInstance != null) {
             MapActivity.bottomInfoLabel.setText(str);
         }
+    }
+
+    public void setMapKey(String key) {
+        MY_TENCENT_MAP_KEY = key;
     }
 }

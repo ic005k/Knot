@@ -1,0 +1,817 @@
+package com.x;
+
+import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.TextView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import com.tencent.tencentmap.mapsdk.maps.CameraUpdate;
+import com.tencent.tencentmap.mapsdk.maps.CameraUpdateFactory;
+import com.tencent.tencentmap.mapsdk.maps.MapView;
+import com.tencent.tencentmap.mapsdk.maps.TencentMap;
+import com.tencent.tencentmap.mapsdk.maps.UiSettings;
+import com.tencent.tencentmap.mapsdk.maps.model.BitmapDescriptor;
+import com.tencent.tencentmap.mapsdk.maps.model.BitmapDescriptorFactory;
+import com.tencent.tencentmap.mapsdk.maps.model.CameraPosition;
+import com.tencent.tencentmap.mapsdk.maps.model.LatLng;
+import com.tencent.tencentmap.mapsdk.maps.model.Marker;
+import com.tencent.tencentmap.mapsdk.maps.model.MarkerOptions;
+import com.tencent.tencentmap.mapsdk.maps.model.Polyline;
+import com.tencent.tencentmap.mapsdk.maps.model.PolylineOptions;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+public class TencentMapActivity extends MapActivity {
+
+    private static final String TAG = "TencentMap_Final";
+    private static String TENCENT_MAP_KEY =
+        "BBUBZ-U5R6L-WTDPP-MSDDH-HXXTO-OXFBJ";
+    private static final double OSLO_LATITUDE = 59.9139;
+    private static final double OSLO_LONGITUDE = 10.7522;
+    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
+    private static final int DEFAULT_ZOOM_LEVEL = 13;
+
+    private MapView tencentMapView;
+    private TencentMap tencentMap;
+    private UiSettings mapUiSettings;
+    private Polyline trackPolyline;
+    private Marker currentLocationMarker;
+
+    private List<LatLng> trackPoints = new ArrayList<>();
+    private List<LatLng> globalTrackPoints = new ArrayList<>();
+
+    public static TextView topDateLabel;
+    private TextView topInfoLabel;
+    public static TextView bottomInfoLabel;
+    private Button switchMapBtn;
+    private boolean usingStandardMap = true;
+
+    // 存储用户同意状态的key
+    private static final String KEY_PRIVACY_AGREED =
+        "tencent_map_privacy_agreed";
+    private boolean isInitialized = false;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        MyActivity.mapActivityInstance = this;
+
+        Log.d(TAG, "开始初始化腾讯地图Activity");
+
+        TENCENT_MAP_KEY = MyActivity.MY_TENCENT_MAP_KEY;
+
+        // 删除强制清除同意状态的测试代码
+        /*getSharedPreferences("app_settings", MODE_PRIVATE)
+            .edit()
+            .remove(KEY_PRIVACY_AGREED)
+            .apply();*/
+
+        // 关键修复1：先设置隐私协议状态，再初始化SDK
+        setupTencentSDK();
+
+        // 检查权限
+        checkPermissions();
+
+        // 检查用户是否已同意隐私协议
+        if (!hasAgreedPrivacy()) {
+            Log.d(TAG, "用户未同意隐私协议，显示弹窗");
+            showPrivacyDialog();
+            return; // 暂停后续初始化，直到用户同意
+        }
+
+        Log.d(TAG, "用户已同意隐私协议，继续初始化");
+        initializeMap();
+    }
+
+    /**
+     * 关键修复：正确设置腾讯地图SDK
+     */
+    private void setupTencentSDK() {
+        try {
+            Log.d(TAG, "开始设置腾讯地图SDK");
+
+            // 1. 设置隐私协议状态
+            boolean agreed = hasAgreedPrivacy();
+            setTencentPrivacyStatus(agreed);
+            Log.d(TAG, "隐私协议状态设置: " + agreed);
+
+            // 2. 设置Key
+            setTencentMapKey(TENCENT_MAP_KEY);
+            Log.d(TAG, "Key设置完成");
+
+            // 3. 初始化SDK（必须在setContentView之前）
+            initializeSDK();
+            Log.d(TAG, "SDK初始化完成");
+        } catch (Exception e) {
+            Log.e(TAG, "SDK设置失败", e);
+        }
+    }
+
+    /**
+     * 初始化腾讯地图SDK核心
+     */
+    private void initializeSDK() {
+        try {
+            // 使用标准的SDK初始化方法
+            Class<?> sdkInitializerClass = Class.forName(
+                "com.tencent.tencentmap.mapsdk.maps.SDKInitializer"
+            );
+            Method initializeMethod = sdkInitializerClass.getMethod(
+                "initialize",
+                Context.class
+            );
+            initializeMethod.invoke(null, getApplicationContext());
+            Log.d(TAG, "腾讯地图SDK初始化成功");
+        } catch (Exception e) {
+            Log.e(TAG, "SDK初始化异常", e);
+            // 尝试备选方案
+            //initializeSDKAlternative();
+        }
+    }
+
+    /**
+     * 设置隐私协议状态
+     */
+    private void setTencentPrivacyStatus(boolean agreed) {
+        try {
+            Class<?> initializerClass = Class.forName(
+                "com.tencent.tencentmap.mapsdk.maps.TencentMapInitializer"
+            );
+
+            // 尝试多个可能的方法名
+            String[] methodNames = {
+                "setAgreePrivacy",
+                "setUserAgreePrivacy",
+                "setPrivacyAgreed",
+                "agreePrivacy",
+            };
+            for (String methodName : methodNames) {
+                try {
+                    Method method = initializerClass.getMethod(
+                        methodName,
+                        boolean.class
+                    );
+                    method.invoke(null, agreed);
+                    Log.d(
+                        TAG,
+                        "隐私协议设置成功: " + methodName + " = " + agreed
+                    );
+                    break;
+                } catch (NoSuchMethodException e) {
+                    // 继续尝试下一个方法名
+                    continue;
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "隐私协议设置失败", e);
+            setPrivacyStatusSimple(agreed);
+        }
+    }
+
+    /**
+     * 简化的隐私协议设置
+     */
+    private void setPrivacyStatusSimple(boolean agreed) {
+        try {
+            // 直接设置系统属性
+            System.setProperty("tencent.map.agreed", String.valueOf(agreed));
+            System.setProperty("privacy.agreed", String.valueOf(agreed));
+
+            // 设置全局变量
+            SharedPreferences sp = getSharedPreferences(
+                "tencent_global_config",
+                MODE_PRIVATE
+            );
+            sp.edit().putBoolean("privacy_agreed", agreed).apply();
+
+            Log.d(TAG, "使用简单方式设置隐私状态: " + agreed);
+        } catch (Exception e) {
+            Log.e(TAG, "简单设置也失败", e);
+        }
+    }
+
+    /**
+     * 设置腾讯地图Key
+     */
+    private void setTencentMapKey(String key) {
+        try {
+            Class<?> initializerClass = Class.forName(
+                "com.tencent.tencentmap.mapsdk.maps.TencentMapInitializer"
+            );
+
+            // 尝试多个可能的设置Key的方法
+            String[] methodNames = {
+                "setApiKey",
+                "setKey",
+                "init",
+                "setMapKey",
+            };
+            for (String methodName : methodNames) {
+                try {
+                    Method method = initializerClass.getMethod(
+                        methodName,
+                        String.class
+                    );
+                    method.invoke(null, key);
+                    Log.d(TAG, "Key设置成功: " + methodName);
+                    return;
+                } catch (NoSuchMethodException e) {
+                    continue;
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Key设置失败", e);
+        }
+
+        // 如果反射方法都失败，使用系统属性
+        setKeyBySystemProperty(key);
+    }
+
+    /**
+     * 通过系统属性设置Key
+     */
+    private void setKeyBySystemProperty(String key) {
+        try {
+            System.setProperty("tencent.map.key", key);
+            System.setProperty("tencent.map.api.key", key);
+            SharedPreferences sp = getSharedPreferences(
+                "tencent_map_config",
+                MODE_PRIVATE
+            );
+            sp.edit().putString("api_key", key).apply();
+            Log.d(TAG, "通过系统属性设置Key");
+        } catch (Exception e) {
+            Log.e(TAG, "系统属性设置Key失败", e);
+        }
+    }
+
+    /**
+     * 初始化地图界面
+     */
+    private void initializeMap() {
+        if (isInitialized) {
+            Log.w(TAG, "地图已经初始化，跳过重复初始化");
+            return;
+        }
+
+        setContentView(R.layout.activity_tencent_map);
+        initViews();
+        initTencentMap();
+        initCenterMarker();
+
+        // 原有的布局监听代码
+        if (tencentMapView != null) {
+            ViewTreeObserver observer = tencentMapView.getViewTreeObserver();
+            observer.addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        if (
+                            Build.VERSION.SDK_INT >=
+                            Build.VERSION_CODES.JELLY_BEAN
+                        ) {
+                            tencentMapView
+                                .getViewTreeObserver()
+                                .removeOnGlobalLayoutListener(this);
+                        } else {
+                            tencentMapView
+                                .getViewTreeObserver()
+                                .removeGlobalOnLayoutListener(this);
+                        }
+
+                        new Handler(Looper.getMainLooper()).postDelayed(
+                            () -> {
+                                if (
+                                    tencentMapView != null &&
+                                    !isFinishing() &&
+                                    !isDestroyed()
+                                ) {
+                                    convertOsmTrackPoints();
+                                    drawAllTrackPoints();
+                                    if (topDateLabel != null) {
+                                        topDateLabel.setText(
+                                            MyActivity.lblDate
+                                        );
+                                    }
+                                    if (bottomInfoLabel != null) {
+                                        bottomInfoLabel.setText(
+                                            MyActivity.lblInfo
+                                        );
+                                    }
+                                }
+                            },
+                            100
+                        ); // 增加延迟确保布局完全加载
+                    }
+                }
+            );
+        }
+
+        isInitialized = true;
+        Log.d(TAG, "地图界面初始化完成");
+    }
+
+    private void initViews() {
+        try {
+            topDateLabel = findViewById(R.id.topDateLabel);
+            topInfoLabel = findViewById(R.id.topInfoLabel);
+            bottomInfoLabel = findViewById(R.id.bottomInfoLabel);
+            switchMapBtn = findViewById(R.id.switchMapBtn);
+            tencentMapView = findViewById(R.id.osmMapView);
+
+            if (topInfoLabel != null) {
+                topInfoLabel.setText("加载中...腾讯地图");
+            }
+            if (bottomInfoLabel != null) {
+                bottomInfoLabel.setText("距离: 0.0km | 速度: 0.0km/h");
+            }
+            if (switchMapBtn != null) {
+                switchMapBtn.setOnClickListener(v -> switchMapType());
+            }
+
+            Log.d(TAG, "视图初始化完成");
+        } catch (Exception e) {
+            Log.e(TAG, "视图初始化失败", e);
+        }
+    }
+
+    private void initTencentMap() {
+        try {
+            if (tencentMapView == null) {
+                Log.e(TAG, "MapView为null，无法初始化地图");
+                return;
+            }
+
+            tencentMap = tencentMapView.getMap();
+            if (tencentMap == null) {
+                Log.e(TAG, "地图初始化失败");
+                if (topInfoLabel != null) {
+                    topInfoLabel.setText("地图初始化失败");
+                }
+                return;
+            }
+
+            mapUiSettings = tencentMap.getUiSettings();
+            mapUiSettings.setZoomControlsEnabled(true);
+            mapUiSettings.setCompassEnabled(true);
+            tencentMap.setTrafficEnabled(false);
+
+            // 相机位置设置
+            LatLng osloCenter = new LatLng(OSLO_LATITUDE, OSLO_LONGITUDE);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(
+                new CameraPosition(osloCenter, DEFAULT_ZOOM_LEVEL, 0, 0)
+            );
+            tencentMap.moveCamera(cameraUpdate);
+
+            initTrackPolyline();
+            initMapListeners();
+
+            if (topInfoLabel != null) {
+                topInfoLabel.setText("地图加载完成 - 标准地图");
+            }
+
+            Log.d(TAG, "腾讯地图初始化成功");
+        } catch (Exception e) {
+            Log.e(TAG, "地图初始化异常", e);
+            if (topInfoLabel != null) {
+                topInfoLabel.setText("地图加载失败");
+            }
+        }
+    }
+
+    private void initMapListeners() {
+        if (tencentMap == null) return;
+
+        tencentMap.setOnCameraChangeListener(
+            new TencentMap.OnCameraChangeListener() {
+                @Override
+                public void onCameraChange(CameraPosition cameraPosition) {
+                    updateCameraInfo(cameraPosition);
+                    if (
+                        currentLocationMarker != null &&
+                        currentLocationMarker.isVisible()
+                    ) {
+                        currentLocationMarker.setPosition(
+                            cameraPosition.target
+                        );
+                    }
+                }
+
+                @Override
+                public void onCameraChangeFinished(
+                    CameraPosition cameraPosition
+                ) {
+                    updateCameraInfo(cameraPosition);
+                    if (
+                        currentLocationMarker != null &&
+                        currentLocationMarker.isVisible()
+                    ) {
+                        currentLocationMarker.setPosition(
+                            cameraPosition.target
+                        );
+                    }
+                }
+            }
+        );
+    }
+
+    private void initTrackPolyline() {
+        if (tencentMap == null) return;
+
+        PolylineOptions polylineOptions = new PolylineOptions()
+            .color(0xFFFF0000)
+            .width(5f);
+
+        trackPolyline = tencentMap.addPolyline(polylineOptions);
+    }
+
+    /*private void initCenterMarker() {
+        try {
+            LatLng initialPos = new LatLng(OSLO_LATITUDE, OSLO_LONGITUDE);
+            BitmapDescriptor markerIcon = BitmapDescriptorFactory.fromResource(
+                R.drawable.marker_center
+            );
+
+            MarkerOptions markerOptions = new MarkerOptions()
+                .position(initialPos)
+                .icon(markerIcon)
+                .anchor(0.5f, 0.5f)
+                .visible(true);
+
+            currentLocationMarker = tencentMap.addMarker(markerOptions);
+            Log.d(TAG, "中心标记初始化成功");
+        } catch (Exception e) {
+            Log.e(TAG, "标记初始化失败", e);
+        }
+    }*/
+
+    private void initCenterMarker() {
+        try {
+            LatLng initialPos = new LatLng(OSLO_LATITUDE, OSLO_LONGITUDE);
+
+            // 1. 参考OSM的实现：直接获取XML Shape对应的Drawable
+            Drawable markerDrawable = ContextCompat.getDrawable(
+                this,
+                R.drawable.marker_center
+            );
+            if (markerDrawable == null) {
+                Log.e(
+                    TAG,
+                    "XML Shape资源加载失败！请检查R.drawable.marker_center是否存在"
+                );
+                return;
+            }
+
+            // 2. 将Drawable转换为Bitmap（关键步骤，解决XML Shape不显示问题）
+            Bitmap bitmap = drawableToBitmap(markerDrawable);
+            if (bitmap == null) {
+                Log.e(TAG, "Drawable转Bitmap失败");
+                return;
+            }
+
+            // 3. 用Bitmap创建BitmapDescriptor
+            BitmapDescriptor markerIcon = BitmapDescriptorFactory.fromBitmap(
+                bitmap
+            );
+
+            // 4. 设置Marker，与OSM保持一致的锚点和层级
+            MarkerOptions markerOptions = new MarkerOptions()
+                .position(initialPos)
+                .icon(markerIcon)
+                .anchor(0.5f, 0.5f) // 锚点居中（与XML圆形中心对齐）
+                .visible(true) // 强制显示
+                .zIndex(1000); // 确保在最上层
+
+            currentLocationMarker = tencentMap.addMarker(markerOptions);
+            // 5. 强制刷新地图（类似OSM的invalidate()）
+            tencentMapView.invalidate();
+            Log.d(TAG, "XML Shape图标初始化成功");
+        } catch (Exception e) {
+            Log.e(TAG, "标记初始化失败", e);
+        }
+    }
+
+    // 辅助方法：将Drawable转换为Bitmap（适配XML Shape）
+    private Bitmap drawableToBitmap(Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+
+        // 处理XML Shape等非BitmapDrawable类型
+        int width = drawable.getIntrinsicWidth();
+        int height = drawable.getIntrinsicHeight();
+        // 若XML中未指定size，设置默认大小（30dp对应像素）
+        if (width <= 0) width = dpToPx(30);
+        if (height <= 0) height = dpToPx(30);
+
+        Bitmap bitmap = Bitmap.createBitmap(
+            width,
+            height,
+            Bitmap.Config.ARGB_8888
+        );
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
+    }
+
+    // 辅助方法：dp转px（确保图标大小与XML中一致）
+    private int dpToPx(int dp) {
+        return (int) (dp * getResources().getDisplayMetrics().density + 0.5f);
+    }
+
+    /**
+     * 弹出隐私协议弹窗
+     */
+    private void showPrivacyDialog() {
+        Log.d(TAG, "显示隐私协议弹窗");
+
+        new AlertDialog.Builder(this)
+            .setTitle("隐私协议同意")
+            .setMessage("为了提供地图服务，需要您同意腾讯地图隐私协议")
+            .setPositiveButton(
+                "同意并继续",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "用户同意隐私协议");
+                        savePrivacyAgreed();
+                        setTencentPrivacyStatus(true);
+                        dialog.dismiss();
+                        initializeMap();
+                    }
+                }
+            )
+            .setNegativeButton(
+                "拒绝",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "用户拒绝隐私协议");
+                        dialog.dismiss();
+                        finish();
+                    }
+                }
+            )
+            .setCancelable(false)
+            .show();
+    }
+
+    /**
+     * 检查用户是否已同意隐私协议
+     */
+    private boolean hasAgreedPrivacy() {
+        SharedPreferences sp = getSharedPreferences(
+            "app_settings",
+            MODE_PRIVATE
+        );
+        return sp.getBoolean(KEY_PRIVACY_AGREED, false);
+    }
+
+    /**
+     * 记录用户同意隐私协议的状态
+     */
+    private void savePrivacyAgreed() {
+        SharedPreferences sp = getSharedPreferences(
+            "app_settings",
+            MODE_PRIVATE
+        );
+        sp.edit().putBoolean(KEY_PRIVACY_AGREED, true).apply();
+        Log.d(TAG, "隐私协议同意状态已保存");
+    }
+
+    // 以下方法保持不变...
+    private void switchMapType() {
+        if (tencentMap == null) return;
+        usingStandardMap = !usingStandardMap;
+        tencentMap.setMapType(
+            usingStandardMap
+                ? TencentMap.MAP_TYPE_NORMAL
+                : TencentMap.MAP_TYPE_SATELLITE
+        );
+        if (topInfoLabel != null) {
+            topInfoLabel.setText(
+                usingStandardMap ? "已切换到标准地图" : "已切换到卫星地图"
+            );
+        }
+    }
+
+    private void convertOsmTrackPoints() {
+        globalTrackPoints.clear();
+        if (
+            MyActivity.osmTrackPoints == null ||
+            MyActivity.osmTrackPoints.isEmpty()
+        ) return;
+
+        for (Object obj : MyActivity.osmTrackPoints) {
+            if (obj instanceof org.osmdroid.util.GeoPoint) {
+                org.osmdroid.util.GeoPoint osmPoint =
+                    (org.osmdroid.util.GeoPoint) obj;
+                globalTrackPoints.add(
+                    new LatLng(osmPoint.getLatitude(), osmPoint.getLongitude())
+                );
+            }
+        }
+    }
+
+    private void updateCameraInfo(CameraPosition cameraPosition) {
+        if (cameraPosition == null || topInfoLabel == null) return;
+        LatLng target = cameraPosition.target;
+        topInfoLabel.setText(
+            String.format(
+                "Zoom: %d | Lat: %.4f | Lng: %.4f",
+                (int) cameraPosition.zoom,
+                target.latitude,
+                target.longitude
+            )
+        );
+    }
+
+    private void checkPermissions() {
+        List<String> permissionsNeeded = new ArrayList<>();
+        String[] permissions = new String[] {
+            Manifest.permission.INTERNET,
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+        };
+        for (String permission : permissions) {
+            if (
+                ContextCompat.checkSelfPermission(this, permission) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                permissionsNeeded.add(permission);
+            }
+        }
+        if (!permissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(
+                this,
+                permissionsNeeded.toArray(new String[0]),
+                REQUEST_PERMISSIONS_REQUEST_CODE
+            );
+        }
+    }
+
+    // ====================== 核心接口（保持原逻辑） ======================
+    @Override
+    public void appendTrackPoint(double latitude, double longitude) {
+        if (
+            latitude < -90.0 ||
+            latitude > 90.0 ||
+            longitude < -180.0 ||
+            longitude > 180.0
+        ) {
+            Log.w(TAG, "非法经纬度，跳过");
+            return;
+        }
+        if (tencentMap == null || trackPolyline == null) return;
+
+        runOnUiThread(() -> {
+            try {
+                LatLng newPoint = new LatLng(latitude, longitude);
+                trackPoints.add(newPoint);
+                trackPolyline.setPoints(trackPoints);
+
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(
+                    newPoint
+                );
+                tencentMap.animateCamera(cameraUpdate);
+
+                if (currentLocationMarker != null) {
+                    currentLocationMarker.setPosition(newPoint);
+                    currentLocationMarker.setVisible(true);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "添加轨迹点异常", e);
+            }
+        });
+    }
+
+    @Override
+    public void clearTrack() {
+        if (tencentMap == null || trackPolyline == null) return;
+        runOnUiThread(() -> {
+            trackPoints.clear();
+            globalTrackPoints.clear();
+            trackPolyline.setPoints(trackPoints);
+            if (currentLocationMarker != null) currentLocationMarker.setVisible(
+                false
+            );
+        });
+    }
+
+    private void drawAllTrackPoints() {
+        if (
+            globalTrackPoints.isEmpty() ||
+            tencentMap == null ||
+            trackPolyline == null
+        ) return;
+        trackPoints.clear();
+        trackPoints.addAll(globalTrackPoints);
+        trackPolyline.setPoints(trackPoints);
+
+        if (!trackPoints.isEmpty()) {
+            LatLng lastPoint = trackPoints.get(trackPoints.size() - 1);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                lastPoint,
+                DEFAULT_ZOOM_LEVEL
+            );
+            tencentMap.moveCamera(cameraUpdate);
+            if (currentLocationMarker != null) {
+                currentLocationMarker.setPosition(lastPoint);
+                currentLocationMarker.setVisible(true);
+            }
+        }
+    }
+
+    // ====================== 生命周期 ======================
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (tencentMapView != null) tencentMapView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (tencentMapView != null) tencentMapView.onPause();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (tencentMapView != null) {
+            tencentMapView.onDestroy();
+            tencentMapView = null;
+        }
+        trackPoints.clear();
+        globalTrackPoints.clear();
+        tencentMap = null;
+        mapUiSettings = null;
+        trackPolyline = null;
+        currentLocationMarker = null;
+        synchronized (MyActivity.class) {
+            if (MyActivity.mapActivityInstance == this) {
+                MyActivity.mapActivityInstance = null;
+            }
+        }
+        Log.d(TAG, "腾讯地图Activity已销毁");
+    }
+
+    @Override
+    public void onRequestPermissionsResult(
+        int requestCode,
+        String[] permissions,
+        int[] grantResults
+    ) {
+        super.onRequestPermissionsResult(
+            requestCode,
+            permissions,
+            grantResults
+        );
+        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
+            boolean allGranted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+            if (allGranted) {
+                Log.d(TAG, "所有权限已授予");
+            } else {
+                Log.w(TAG, "部分权限未授予");
+                if (topInfoLabel != null) {
+                    topInfoLabel.setText("部分权限未授予，地图功能可能受限");
+                }
+            }
+        }
+    }
+}
