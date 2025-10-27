@@ -2083,10 +2083,11 @@ QStringList Steps::readRoute(const QString& file) {
     QJsonObject obj = routeArray.at(i).toObject();
 
     // 读取字段：不存在则返回默认值（字符串空，数字0）
-    QString time = obj["time"].toString();        // 缺失 → ""
-    double lat = obj["lat"].toDouble();           // 缺失 → 0.0
-    double lon = obj["lon"].toDouble();           // 缺失 → 0.0
-    QString address = obj["address"].toString();  // 缺失 → ""
+    QString time =
+        QString::number(i + 1) + ". " + obj["time"].toString();  // 缺失 → ""
+    double lat = obj["lat"].toDouble();                          // 缺失 → 0.0
+    double lon = obj["lon"].toDouble();                          // 缺失 → 0.0
+    QString address = obj["address"].toString();                 // 缺失 → ""
 
     // 格式化经纬度（保留6位小数，0值也会正常显示）
     QString latLonStr =

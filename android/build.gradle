@@ -84,7 +84,7 @@ dependencies {
     implementation 'org.osmdroid:osmdroid-mapsforge:6.1.20'
 
     // 腾讯地图SDK依赖
-    implementation 'com.tencent.map:tencent-map-vector-sdk:5.4.0'
+    implementation 'com.tencent.map:tencent-map-vector-sdk:5.8.1' // 5.4.0
 
     // Prism4j 语法高亮引擎
     implementation "io.noties:prism4j:2.0.0"

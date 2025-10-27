@@ -107,7 +107,7 @@ void StepsOptions::on_btnTestKey_clicked() {
   if (mw_one->m_Steps->addressResolver) {
     mw_one->m_Steps->strMapKeyTestInfo = "";
     mw_one->m_Steps->addressResolver->setTencentApiKey(arg1);
-    mw_one->m_Steps->getAddress(25.0217, 98.4464);
+    mw_one->m_Steps->getAddress(22.543453, 113.933305);
 
     while (mw_one->m_Steps->strMapKeyTestInfo == "")
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);

@@ -1,6 +1,7 @@
 #ifndef GEOADDRESSRESOLVER_H
 #define GEOADDRESSRESOLVER_H
 
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
