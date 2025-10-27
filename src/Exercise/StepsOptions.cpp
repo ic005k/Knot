@@ -30,8 +30,8 @@ void StepsOptions::closeEvent(QCloseEvent *event) {
   Reg.setValue("/Map/MapKey", ui->editMapKey->toPlainText().trimmed());
   Reg.sync();
 
-  mw_one->m_Steps->setMapKey();
-  mw_one->m_Steps->getAddress(25.0217, 98.4464);
+  m_Steps->setMapKey();
+  m_Steps->getAddress(25.0217, 98.4464);
   m_Method->closeGrayWindows();
 }
 
@@ -48,7 +48,7 @@ bool StepsOptions::eventFilter(QObject *obj, QEvent *evn) {
 }
 
 void StepsOptions::init() {
-  if (mw_one->m_Steps->timer->isActive()) return;
+  if (m_Steps->timer->isActive()) return;
 
   int x, y, w, h;
   x = mw_one->geometry().x();
@@ -79,8 +79,8 @@ void StepsOptions::init() {
 void StepsOptions::on_btnBack_clicked() {
   mw_one->clearWidgetFocus();
   if (isTextChange) {
-    mw_one->m_Steps->saveSteps();
-    mw_one->m_Steps->loadStepsToTable();
+    m_Steps->saveSteps();
+    m_Steps->loadStepsToTable();
   }
 
   close();
@@ -104,16 +104,16 @@ void StepsOptions::on_editMapKey_textChanged() {}
 
 void StepsOptions::on_btnTestKey_clicked() {
   QString arg1 = ui->editMapKey->toPlainText().trimmed();
-  if (mw_one->m_Steps->addressResolver) {
-    mw_one->m_Steps->strMapKeyTestInfo = "";
-    mw_one->m_Steps->addressResolver->setTencentApiKey(arg1);
-    mw_one->m_Steps->getAddress(22.543453, 113.933305);
+  if (m_Steps->addressResolver) {
+    m_Steps->strMapKeyTestInfo = "";
+    m_Steps->addressResolver->setTencentApiKey(arg1);
+    m_Steps->getAddress(22.543453, 113.933305);
 
-    while (mw_one->m_Steps->strMapKeyTestInfo == "")
+    while (m_Steps->strMapKeyTestInfo == "")
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
     ShowMessage *msg = new ShowMessage(this);
-    msg->showMsg(appName, mw_one->m_Steps->strMapKeyTestInfo, 1);
+    msg->showMsg(appName, m_Steps->strMapKeyTestInfo, 1);
   }
 }
 

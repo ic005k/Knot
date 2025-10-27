@@ -3213,8 +3213,8 @@ void Method::setLineEditToolBar(QObject *parent, EditEventFilter *editFilter) {
     QLineEdit *btn = (QLineEdit *)btnList.at(i);
     if (btn != mw_one->m_Preferences->ui->editPassword &&
         btn != mw_one->m_Preferences->ui->editValidate &&
-        btn != mw_one->m_StepsOptions->ui->editStepLength &&
-        btn != mw_one->m_StepsOptions->ui->editStepsThreshold)
+        btn != m_StepsOptions->ui->editStepLength &&
+        btn != m_StepsOptions->ui->editStepsThreshold)
       btn->installEventFilter(editFilter);
     // qDebug() << "QLineEdit" << i << "=" << btn->objectName();
   }
@@ -3226,7 +3226,7 @@ void Method::setTextEditToolBar(QObject *parent, EditEventFilter *editFilter) {
   for (int i = 0; i < btnList.count(); i++) {
     QTextEdit *btn = (QTextEdit *)btnList.at(i);
 
-    if (btn != mw_one->m_StepsOptions->ui->editMapKey) {
+    if (btn != m_StepsOptions->ui->editMapKey) {
       btn->installEventFilter(editFilter);
       btn->viewport()->installEventFilter(editFilter);
     }
@@ -3286,16 +3286,17 @@ bool Method::isInChinaOnline(int timeout) {
 bool Method::isInChina() {
   // 直接走在线检测，无内网判断（避免国外内网误判）
   bool onlineResult = isInChinaOnline(2000);
-  mw_one->m_StepsOptions->ui->f_mapkey->setVisible(onlineResult);
+  m_StepsOptions->ui->f_mapkey->setVisible(onlineResult);
   if (!onlineResult) {
-    mw_one->m_StepsOptions->ui->rbOsm->setChecked(true);
-    mw_one->m_StepsOptions->ui->rbTencent->setChecked(false);
+    m_StepsOptions->ui->rbOsm->setChecked(true);
+    m_StepsOptions->ui->rbTencent->setChecked(false);
+
   } else {
     QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
     bool type1 = Reg.value("/Map/MapType1", true).toBool();
     bool type2 = Reg.value("/Map/MapType2", false).toBool();
-    mw_one->m_StepsOptions->ui->rbOsm->setChecked(type1);
-    mw_one->m_StepsOptions->ui->rbTencent->setChecked(type2);
+    m_StepsOptions->ui->rbOsm->setChecked(type1);
+    m_StepsOptions->ui->rbTencent->setChecked(type2);
   }
   return onlineResult;
 }

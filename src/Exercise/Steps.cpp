@@ -206,10 +206,9 @@ void Steps::on_btnReset_clicked() {
 }
 
 void Steps::saveSteps() {
-  QString strLength =
-      mw_one->m_StepsOptions->ui->editStepLength->text().trimmed();
+  QString strLength = m_StepsOptions->ui->editStepLength->text().trimmed();
   QString strThreshold =
-      mw_one->m_StepsOptions->ui->editStepsThreshold->text().trimmed();
+      m_StepsOptions->ui->editStepsThreshold->text().trimmed();
 
   QJsonObject stepsObj = rootObj["Steps"].toObject();
   stepsObj["Length"] = strLength;
@@ -273,10 +272,9 @@ void Steps::loadStepsToTable() {
 
     // 处理公里数（若为空则计算）
     if (str2.isEmpty()) {
-      double km = mw_one->m_StepsOptions->ui->editStepLength->text()
-                      .trimmed()
-                      .toDouble() *
-                  steps / 100 / 1000;
+      double km =
+          m_StepsOptions->ui->editStepLength->text().trimmed().toDouble() *
+          steps / 100 / 1000;
       str2 = QString("%1").arg(km, 0, 'f', 2);
     }
 
@@ -300,7 +298,7 @@ void Steps::openStepsUI() {
                  QString::number(QDate::currentDate().day());
   mui->lblNow->setText(date + " " + QTime::currentTime().toString());
   double d_km =
-      mw_one->m_StepsOptions->ui->editStepLength->text().trimmed().toDouble() *
+      m_StepsOptions->ui->editStepLength->text().trimmed().toDouble() *
       mui->lblSingle->text().toInt() / 100 / 1000;
   QString km = QString("%1").arg(d_km, 0, 'f', 2) + "  " + tr("KM");
   mui->lblKM->setText(km);
@@ -416,16 +414,15 @@ void Steps::setTableSteps(qlonglong steps) {
   QString stepLength = stepsObj["Length"].toString("35");
   QString stepsThreshold = stepsObj["Threshold"].toString("10000");
 
-  mw_one->m_StepsOptions->ui->editStepLength->setText(stepLength);
-  mw_one->m_StepsOptions->ui->editStepsThreshold->setText(stepsThreshold);
+  m_StepsOptions->ui->editStepLength->setText(stepLength);
+  m_StepsOptions->ui->editStepsThreshold->setText(stepsThreshold);
 
   // 设置上下文属性
   mui->qwSteps->rootContext()->setContextProperty("nStepsThreshold",
                                                   stepsThreshold.toInt());
 
-  double km =
-      mw_one->m_StepsOptions->ui->editStepLength->text().trimmed().toDouble() *
-      steps / 100 / 1000;
+  double km = m_StepsOptions->ui->editStepLength->text().trimmed().toDouble() *
+              steps / 100 / 1000;
   QString strKM = QString("%1").arg(km, 0, 'f', 2);
 
   QString date, c_date, full_date;
@@ -544,8 +541,8 @@ void Steps::appendSteps(QString date, int steps, QString km) {
       QString("%1").arg(dCalorie, 0, 'f', 2) + "  " + tr("Calorie");
 
   double d_km =
-      mw_one->m_StepsOptions->ui->editStepLength->text().trimmed().toDouble() *
-      steps / 100 / 1000;
+      m_StepsOptions->ui->editStepLength->text().trimmed().toDouble() * steps /
+      100 / 1000;
   km = QString("%1").arg(d_km, 0, 'f', 2) + "  " + tr("KM");
 
   QQuickItem* root = mui->qwSteps->rootObject();
@@ -1287,7 +1284,6 @@ void Steps::updateInfoText(QString strDistance, QString strSpeed) {
 
 void Steps::updateTrackData(double lat, double lon) {
   addTrackDataToAndroid(lat, lon);
-  // appendTrackPointAndroid(lat, lon);
 
   return;
 
@@ -1739,7 +1735,7 @@ void Steps::getHardStepSensor() {
 void Steps::sendMsg(int CurTableCount) {
   Q_UNUSED(CurTableCount);
 #ifdef Q_OS_ANDROID
-  double sl = mw_one->m_StepsOptions->ui->editStepLength->text().toDouble();
+  double sl = m_StepsOptions->ui->editStepLength->text().toDouble();
   double d0 = sl / 100;
   double x = CurTableCount * d0;
   double gl = x / 1000;
@@ -1923,7 +1919,7 @@ void Steps::setInfoLabelToAndroid(const QString& str) {
 #endif
 }
 
-QGeoCoordinate Steps::wgs84ToGcj02(double wgs84Lat, double wgs84Lon) {
+QGeoCoordinate Steps::wgs84ToGcj02_cpp(double wgs84Lat, double wgs84Lon) {
   // 输入校验
   if (wgs84Lon < -180.0 || wgs84Lon > 180.0 || wgs84Lat < -90.0 ||
       wgs84Lat > 90.0) {
@@ -2104,7 +2100,11 @@ QStringList Steps::readRoute(const QString& file) {
 }
 
 void Steps::getAddress(double lat, double lon) {
-  QGeoCoordinate gcj02Coord = wgs84ToGcj02(lat, lon);
+  QGeoCoordinate gcj02Coord;
+  if (isAndroid)
+    gcj02Coord = wgs84ToGcj02(lat, lon);
+  else
+    gcj02Coord = wgs84ToGcj02_cpp(lat, lon);
   addressResolver->getAddressFromCoord(gcj02Coord.latitude(),
                                        gcj02Coord.longitude());
 }
@@ -2113,7 +2113,7 @@ void Steps::setMapKey() {
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
   QString arg1 = Reg.value("/Map/MapKey", "").toString();
 
-  mw_one->m_StepsOptions->ui->editMapKey->setPlainText(arg1);
+  m_StepsOptions->ui->editMapKey->setPlainText(arg1);
   if (addressResolver) addressResolver->setTencentApiKey(arg1);
 
 #ifdef Q_OS_ANDROID
@@ -2158,8 +2158,8 @@ void Steps::setMapType() {
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
   if (activity.isValid()) {
     int mapKey = 1;
-    if (mw_one->m_StepsOptions->ui->rbOsm->isChecked()) mapKey = 1;
-    if (mw_one->m_StepsOptions->ui->rbTencent->isChecked()) mapKey = 2;
+    if (m_StepsOptions->ui->rbOsm->isChecked()) mapKey = 1;
+    if (m_StepsOptions->ui->rbTencent->isChecked()) mapKey = 2;
 
     // JNI调用：传递int参数，签名改为"(I)V"
     activity.callMethod<void>("setMapType",  // Java层方法名
@@ -2295,4 +2295,62 @@ bool Steps::isRouteShow() {
 
   // 将QVariant转换为bool并返回
   return result.toBool();
+}
+
+// 坐标转换：调用安卓端CoordinateConverterUtil工具类
+QGeoCoordinate Steps::wgs84ToGcj02(double wgs84Lat, double wgs84Lon) {
+  Q_UNUSED(wgs84Lat);
+  Q_UNUSED(wgs84Lon);
+
+#ifdef Q_OS_ANDROID
+
+  // Qt6中使用QJniEnvironment管理JNI环境
+  QJniEnvironment env;
+
+  try {
+    // 1. 调用Java工具类的静态方法：CoordinateConverterUtil.wgs84ToGcj02(double,
+    // double) 类路径："com/x/CoordinateConverterUtil"（注意用/分隔包名）
+    // 方法签名："(DD)Lcom/tencent/mapsdk/raster/model/LatLng;"（两个double参数，返回LatLng对象）
+    QJniObject gcjLatLng = QJniObject::callStaticObjectMethod(
+        "com/x/CoordinateConverterUtil",  // Java类全路径
+        "wgs84ToGcj02",                   // 静态方法名
+        "(DD)Lcom/tencent/tencentmap/mapsdk/maps/model/LatLng;",  // 方法签名
+        wgs84Lat,  // 参数1：WGS84纬度
+        wgs84Lon   // 参数2：WGS84经度
+    );
+
+    // 2. 检查返回的LatLng对象是否有效
+    if (!gcjLatLng.isValid()) {
+      qWarning() << "[Qt6 JNI] 坐标转换失败：返回无效LatLng对象";
+      return QGeoCoordinate(wgs84Lat, wgs84Lon);  // 失败时返回原坐标
+    }
+
+    // 3. 解析LatLng对象的纬度和经度（调用其getLatitude()和getLongitude()方法）
+    double gcjLat = gcjLatLng.callMethod<jdouble>("getLatitude", "()D");
+    double gcjLon = gcjLatLng.callMethod<jdouble>("getLongitude", "()D");
+
+    // 4. 检查JNI调用是否产生异常（Qt6需显式处理）
+    if (env->ExceptionCheck()) {
+      qWarning() << "[Qt6 JNI] 解析LatLng时发生异常";
+      env->ExceptionClear();  // 清除异常，避免崩溃
+      return QGeoCoordinate(wgs84Lat, wgs84Lon);
+    }
+
+    qDebug() << "[Qt6 JNI] 转换成功：WGS84(" << wgs84Lat << "," << wgs84Lon
+             << ") -> GCJ02(" << gcjLat << "," << gcjLon << ")";
+
+    return QGeoCoordinate(gcjLat, gcjLon);
+
+  } catch (const std::exception& e) {
+    qCritical() << "[Qt6 JNI] 转换过程异常：" << e.what();
+    // 清除可能的JNI异常
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
+  }
+
+#endif
+
+  // 所有异常情况均返回原坐标
+  return QGeoCoordinate(wgs84Lat, wgs84Lon);
 }

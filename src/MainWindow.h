@@ -249,12 +249,10 @@ class MainWindow : public QMainWindow {
   Report *m_Report;
   Preferences *m_Preferences;
 
-  Steps *m_Steps;
   Reader *m_Reader;
   TodoAlarm *m_TodoAlarm;
   DateSelector *m_DateSelector = nullptr;
 
-  StepsOptions *m_StepsOptions;
   ReceiveShare *m_ReceiveShare;
   MainHelper *m_MainHelper;
 

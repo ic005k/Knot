@@ -461,8 +461,8 @@ void MainHelper::initMainQW() {
     mui->qwSteps->rootContext()->setContextProperty("isDark", isDark);
 
     mui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwGpsList->rootContext()->setContextProperty(
-        "isShowRoute", mw_one->m_Steps->isShowRoute);
+    mui->qwGpsList->rootContext()->setContextProperty("isShowRoute",
+                                                      m_Steps->isShowRoute);
 
     mui->qwSteps->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/steps.qml")));
     mui->qwSteps->rootContext()->setContextProperty("maxFontSize", f_size);
@@ -478,8 +478,7 @@ void MainHelper::initMainQW() {
     mui->qwGpsList->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/gps_list.qml")));
     mui->qwGpsList->rootContext()->setContextProperty("myW", mw_one->width());
-    mui->qwGpsList->rootContext()->setContextProperty("m_Steps",
-                                                      mw_one->m_Steps);
+    mui->qwGpsList->rootContext()->setContextProperty("m_Steps", m_Steps);
 
     mui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mui->qwMap->setFocusPolicy(Qt::StrongFocus);  // 关键设置
@@ -757,7 +756,7 @@ void MainHelper::init_UIWidget() {
   mui->rbHiking->setChecked(Reg.value("/GPS/isHiking", 0).toBool());
   mui->rbRunning->setChecked(Reg.value("/GPS/isRunning", 0).toBool());
 
-  mui->btnGPS->setStyleSheet(mw_one->m_Steps->btnRoundStyle);
+  mui->btnGPS->setStyleSheet(m_Steps->btnRoundStyle);
   mui->btnGPS->hide();
   mui->frame_btnGps->setFixedHeight(80);
   QWidget *centralWidget = new QWidget(mw_one);

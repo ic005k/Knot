@@ -20,6 +20,11 @@
 #include "src/Exercise/StepsOptions.h"
 #include "src/Exercise/WeatherFetcher.h"
 
+#ifdef Q_OS_ANDROID
+#include <QJniEnvironment>
+#include <QJniObject>
+#endif
+
 namespace Ui {
 class Steps;
 }
@@ -47,7 +52,7 @@ class Steps : public QDialog {
 
   GeoAddressResolver *addressResolver = nullptr;
   QString m_lastAddress;
-  bool isShowRoute = true;
+  bool isShowRoute = false;
 
   Speedometer *m_speedometer;
   WeatherFetcher *weatherFetcher;
@@ -257,7 +262,8 @@ class Steps : public QDialog {
   void setMapKeyError();
   bool isChina = false;
   void setMapType();
-  signals:
+  QGeoCoordinate wgs84ToGcj02_cpp(double wgs84Lat, double wgs84Lon);
+ signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();

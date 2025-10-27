@@ -77,13 +77,13 @@ void MainWindow::saveDone() {
 
 UpdateGpsMapThread::UpdateGpsMapThread(QObject *parent) : QThread{parent} {}
 void UpdateGpsMapThread::run() {
-  mw_one->m_Steps->updateGpsTrack();
+  m_Steps->updateGpsTrack();
 
   emit isDone();
 }
 
 void MainWindow::updateGpsMapDone() {
-  mw_one->m_Steps->updateGpsMapUi();
+  m_Steps->updateGpsMapUi();
   closeProgress();
 }
 

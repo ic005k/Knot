@@ -135,7 +135,7 @@ void DateSelector::on_btnOk_clicked() {
   }
 
   if (!mui->frameSteps->isHidden()) {
-    mw_one->m_Steps->getGpsListDataFromYearMonth();
+    m_Steps->getGpsListDataFromYearMonth();
   }
 
   close();

@@ -255,8 +255,8 @@ void ReceiveShare::closeAllChildWindows() {
 
   if (mui->frameTodo->isVisible()) mui->btnBackTodo->click();
 
-  if (mw_one->m_StepsOptions->isVisible()) {
-    mw_one->m_StepsOptions->ui->btnBack->click();
+  if (m_StepsOptions->isVisible()) {
+    m_StepsOptions->ui->btnBack->click();
     mui->btnBackSteps->click();
   }
 

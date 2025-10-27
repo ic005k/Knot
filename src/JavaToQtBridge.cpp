@@ -49,7 +49,7 @@ static void JavaNotify_1() {
 static void JavaNotify_2() {
   // When the screen lights up.
   mw_one->m_Todo->refreshAlarm();
-  mw_one->m_Steps->updateHardSensorSteps();
+  m_Steps->updateHardSensorSteps();
 
   qDebug() << "C++ JavaNotify_2";
 }
@@ -276,8 +276,8 @@ static void JavaNotify_15() {
     return;
   }
 
-  if (mw_one->m_StepsOptions->isVisible()) {
-    mw_one->m_StepsOptions->ui->btnBack->click();
+  if (m_StepsOptions->isVisible()) {
+    m_StepsOptions->ui->btnBack->click();
     return;
   }
 
@@ -404,8 +404,8 @@ static void JavaNotify_15() {
     return;
   }
 
-  if (mw_one->m_Steps->isRouteShow()) {
-    mw_one->m_Steps->closeRouteDialog();
+  if (m_Steps->isRouteShow()) {
+    m_Steps->closeRouteDialog();
     return;
   }
 

@@ -2351,9 +2351,7 @@ void MainWindow::on_btnHideFind_clicked() {
   mui->f_FindNotes->hide();
 }
 
-void MainWindow::on_btnStepsOptions_clicked() {
-  mw_one->m_StepsOptions->init();
-}
+void MainWindow::on_btnStepsOptions_clicked() { m_StepsOptions->init(); }
 
 void MainWindow::on_btnRecentOpen_clicked() {
   m_NotesList->genRecentOpenMenu();
