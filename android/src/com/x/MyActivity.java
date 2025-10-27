@@ -159,6 +159,7 @@ public class MyActivity
     implements Application.ActivityLifecycleCallbacks {
 
     public static String MY_TENCENT_MAP_KEY = "error";
+    public static int MapType = 1;
 
     public static MapActivity mapActivityInstance = null;
     public static List<GeoPoint> osmTrackPoints = new ArrayList<>();
@@ -1448,7 +1449,7 @@ public class MyActivity
 
     public void openMapWindow() {
         Intent i;
-        if (MY_TENCENT_MAP_KEY.equals("error")) {
+        if (MapType == 1) {
             i = new Intent(getMyAppContext(), MapActivity.class);
         } else {
             i = new Intent(getMyAppContext(), TencentMapActivity.class);
@@ -2314,5 +2315,9 @@ public class MyActivity
 
     public void setMapKey(String key) {
         MY_TENCENT_MAP_KEY = key;
+    }
+
+    public void setMapType(int type) {
+        MapType = type;
     }
 }

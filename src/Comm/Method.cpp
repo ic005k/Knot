@@ -3287,5 +3287,15 @@ bool Method::isInChina() {
   // 直接走在线检测，无内网判断（避免国外内网误判）
   bool onlineResult = isInChinaOnline(2000);
   mw_one->m_StepsOptions->ui->f_mapkey->setVisible(onlineResult);
+  if (!onlineResult) {
+    mw_one->m_StepsOptions->ui->rbOsm->setChecked(true);
+    mw_one->m_StepsOptions->ui->rbTencent->setChecked(false);
+  } else {
+    QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
+    bool type1 = Reg.value("/Map/MapType1", true).toBool();
+    bool type2 = Reg.value("/Map/MapType2", false).toBool();
+    mw_one->m_StepsOptions->ui->rbOsm->setChecked(type1);
+    mw_one->m_StepsOptions->ui->rbTencent->setChecked(type2);
+  }
   return onlineResult;
 }

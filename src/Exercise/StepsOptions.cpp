@@ -33,10 +33,6 @@ void StepsOptions::closeEvent(QCloseEvent *event) {
   mw_one->m_Steps->setMapKey();
   mw_one->m_Steps->getAddress(25.0217, 98.4464);
   m_Method->closeGrayWindows();
-
-  mui->btnBackSteps->click();
-  m_Method->Sleep(100);
-  mui->btnSteps->click();
 }
 
 bool StepsOptions::eventFilter(QObject *obj, QEvent *evn) {
@@ -58,7 +54,7 @@ void StepsOptions::init() {
   x = mw_one->geometry().x();
   y = 0;
   w = mw_one->width();
-  h = 320;
+  h = 400;
   setGeometry(x, y, w, h);
 
   m_Method->m_widget = new QWidget(mw_one);
@@ -119,4 +115,18 @@ void StepsOptions::on_btnTestKey_clicked() {
     ShowMessage *msg = new ShowMessage(this);
     msg->showMsg(appName, mw_one->m_Steps->strMapKeyTestInfo, 1);
   }
+}
+
+void StepsOptions::on_rbOsm_clicked(bool checked) {
+  ui->rbTencent->setChecked(!checked);
+  QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
+  Reg.setValue("/Map/MapType1", checked);
+  Reg.sync();
+}
+
+void StepsOptions::on_rbTencent_clicked(bool checked) {
+  ui->rbOsm->setChecked(!checked);
+  QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
+  Reg.setValue("/Map/MapType2", checked);
+  Reg.sync();
 }

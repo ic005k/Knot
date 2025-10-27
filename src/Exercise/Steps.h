@@ -256,7 +256,8 @@ class Steps : public QDialog {
   bool isInChina(double lat, double lon);
   void setMapKeyError();
   bool isChina = false;
- signals:
+  void setMapType();
+  signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();

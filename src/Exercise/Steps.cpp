@@ -149,18 +149,23 @@ void Steps::setAddressResolverConnect() {
                 strMapKeyTestInfo = address;
                 setMapKey();
                 isShowRoute = true;
+                mui->qwGpsList->rootContext()->setContextProperty("isShowRoute",
+                                                                  isShowRoute);
               });
       connect(addressResolver, &GeoAddressResolver::resolveFailed, this,
               [this](const QString& error) {
                 qDebug() << "地址解析失败：" << error;
-                // 处理错误（如提示用户检查网络或密钥）
-                isShowRoute = false;
+                // 处理错误
+
                 strMapKeyTestInfo = error;
                 setMapKeyError();
                 isShowRoute = false;
+                mui->qwGpsList->rootContext()->setContextProperty("isShowRoute",
+                                                                  isShowRoute);
               });
 
       isOne = true;
+
       // test
       getAddress(25.0217, 98.4464);
     }
@@ -318,8 +323,6 @@ void Steps::openStepsUI() {
   if (!isChina) isChina = m_Method->isInChina();
   // 连接信号槽，获取结果
   setAddressResolverConnect();
-
-  mui->qwGpsList->rootContext()->setContextProperty("isShowRoute", isShowRoute);
 }
 
 void Steps::addRecord(QString date, qlonglong steps, QString km) {
@@ -1777,6 +1780,7 @@ QString Steps::getCurrentMonth() {
 
 void Steps::openMapWindow() {
 #ifdef Q_OS_ANDROID
+  setMapType();
 
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("openMapWindow", "()V");
@@ -2145,6 +2149,23 @@ void Steps::setMapKeyError() {
     qDebug() << "已调用Java层setMapKey方法";
   }
 
+#endif
+}
+
+void Steps::setMapType() {
+#ifdef Q_OS_ANDROID
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  if (activity.isValid()) {
+    int mapKey = 1;
+    if (mw_one->m_StepsOptions->ui->rbOsm->isChecked()) mapKey = 1;
+    if (mw_one->m_StepsOptions->ui->rbTencent->isChecked()) mapKey = 2;
+
+    // JNI调用：传递int参数，签名改为"(I)V"
+    activity.callMethod<void>("setMapType",  // Java层方法名
+                              "(I)V",        // JNI签名：接收int参数，无返回值
+                              mapKey         // 直接传递int值
+    );
+  }
 #endif
 }
 
