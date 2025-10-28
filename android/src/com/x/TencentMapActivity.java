@@ -221,7 +221,7 @@ public class TencentMapActivity extends MapActivity {
                                     }
                                 }
                             },
-                            100
+                            0 // 延迟
                         );
                     }
                 }
@@ -364,6 +364,11 @@ public class TencentMapActivity extends MapActivity {
                             cameraPosition.target
                         );
                     }
+
+                    // 新增：缩放/移动完成后重绘轨迹,备选
+                    //if (!globalTrackPoints.isEmpty()) {
+                    //drawAllTrackPoints();
+                    //}
                 }
             }
         );
@@ -610,10 +615,63 @@ public class TencentMapActivity extends MapActivity {
             tencentMap == null ||
             trackPolyline == null
         ) return;
+
+        // 避免重复绘制相同轨迹
+        if (trackPoints.equals(globalTrackPoints)) {
+            return;
+        }
+
         trackPoints.clear();
         trackPoints.addAll(globalTrackPoints);
         trackPolyline.setPoints(trackPoints);
 
+        if (!trackPoints.isEmpty()) {
+            LatLng lastPoint = trackPoints.get(trackPoints.size() - 1);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                lastPoint,
+                DEFAULT_ZOOM_LEVEL
+            );
+            tencentMap.moveCamera(cameraUpdate);
+            if (currentLocationMarker != null) {
+                currentLocationMarker.setPosition(lastPoint);
+                currentLocationMarker.setVisible(true);
+            }
+        }
+    }
+
+    // 方法2：实时转换坐标，直接绘制,备份
+    private void drawAllTrackPoints_bak() {
+        // 直接使用原始数据，跳过中间缓存
+        if (
+            MyActivity.osmTrackPoints == null ||
+            MyActivity.osmTrackPoints.isEmpty() ||
+            tencentMap == null ||
+            trackPolyline == null
+        ) {
+            return;
+        }
+
+        // 实时转换：遍历原始WGS84坐标，转成GCJ02后直接绘制
+        List<LatLng> gcjPoints = new ArrayList<>();
+        for (Object obj : MyActivity.osmTrackPoints) {
+            if (obj instanceof org.osmdroid.util.GeoPoint) {
+                org.osmdroid.util.GeoPoint osmPoint =
+                    (org.osmdroid.util.GeoPoint) obj;
+                // 关键：实时转换，确保每个点都是正确的GCJ02坐标
+                LatLng gcjPoint = wgs84ToGcj02(
+                    osmPoint.getLatitude(),
+                    osmPoint.getLongitude()
+                );
+                gcjPoints.add(gcjPoint);
+            }
+        }
+
+        // 绘制转换后的坐标
+        trackPoints.clear();
+        trackPoints.addAll(gcjPoints);
+        trackPolyline.setPoints(trackPoints);
+
+        // 定位到最后一个点（保持原有逻辑）
         if (!trackPoints.isEmpty()) {
             LatLng lastPoint = trackPoints.get(trackPoints.size() - 1);
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(

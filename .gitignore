@@ -16,3 +16,4 @@ Knot6.pro.user
 /bin/debug
 .scannerwork/.sonar_lock
 .scannerwork/report-task.txt
+android/src/com/x/.zed/settings.json
