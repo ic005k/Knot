@@ -526,15 +526,15 @@
     </message>
     <message>
         <location filename="MainHelper.cpp" line="215"/>
-        <location filename="MainHelper.cpp" line="1362"/>
-        <location filename="MainHelper.cpp" line="1392"/>
+        <location filename="MainHelper.cpp" line="1361"/>
+        <location filename="MainHelper.cpp" line="1391"/>
         <source>Freq</source>
         <translation>频次</translation>
     </message>
     <message>
         <location filename="MainHelper.cpp" line="216"/>
-        <location filename="MainHelper.cpp" line="1366"/>
-        <location filename="MainHelper.cpp" line="1396"/>
+        <location filename="MainHelper.cpp" line="1365"/>
+        <location filename="MainHelper.cpp" line="1395"/>
         <source>Amount</source>
         <translation>金额</translation>
     </message>
@@ -595,15 +595,15 @@
     </message>
     <message>
         <location filename="MainHelper.cpp" line="261"/>
-        <location filename="MainHelper.cpp" line="814"/>
-        <location filename="MainHelper.cpp" line="963"/>
+        <location filename="MainHelper.cpp" line="813"/>
+        <location filename="MainHelper.cpp" line="962"/>
         <source>Backup File List</source>
         <translation>备份文件列表</translation>
     </message>
     <message>
         <location filename="MainHelper.cpp" line="262"/>
         <location filename="MainHelper.cpp" line="444"/>
-        <location filename="MainHelper.cpp" line="995"/>
+        <location filename="MainHelper.cpp" line="994"/>
         <source>Tab Recycle</source>
         <translation>标签页回收箱</translation>
     </message>
@@ -614,44 +614,44 @@
     </message>
     <message>
         <location filename="MainHelper.cpp" line="444"/>
-        <location filename="MainHelper.cpp" line="814"/>
-        <location filename="MainHelper.cpp" line="963"/>
-        <location filename="MainHelper.cpp" line="995"/>
+        <location filename="MainHelper.cpp" line="813"/>
+        <location filename="MainHelper.cpp" line="962"/>
+        <location filename="MainHelper.cpp" line="994"/>
         <source>Total</source>
         <translation>总计</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="767"/>
+        <location filename="MainHelper.cpp" line="766"/>
         <source>Slide Right to Start or Stop.</source>
         <translation>滑动到右边启动或停止</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="950"/>
-        <location filename="MainHelper.cpp" line="975"/>
+        <location filename="MainHelper.cpp" line="949"/>
+        <location filename="MainHelper.cpp" line="974"/>
         <source>Whether to remove</source>
         <translation>是否删除</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="1010"/>
+        <location filename="MainHelper.cpp" line="1009"/>
         <source>Import this data?</source>
         <translation>是否导入这个数据？</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="1247"/>
+        <location filename="MainHelper.cpp" line="1246"/>
         <source>Add</source>
         <translation>增加</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="1357"/>
-        <location filename="MainHelper.cpp" line="1393"/>
-        <location filename="MainHelper.cpp" line="1397"/>
+        <location filename="MainHelper.cpp" line="1356"/>
+        <location filename="MainHelper.cpp" line="1392"/>
+        <location filename="MainHelper.cpp" line="1396"/>
         <source>Time</source>
         <translation>时间</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="1358"/>
-        <location filename="MainHelper.cpp" line="1363"/>
-        <location filename="MainHelper.cpp" line="1367"/>
+        <location filename="MainHelper.cpp" line="1357"/>
+        <location filename="MainHelper.cpp" line="1362"/>
+        <location filename="MainHelper.cpp" line="1366"/>
         <source>Days</source>
         <translation>天数</translation>
     </message>
@@ -718,8 +718,9 @@
         <translation type="vanished">下一页</translation>
     </message>
     <message>
+        <location filename="MainWindow.ui" line="4467"/>
         <source>List</source>
-        <translation type="vanished">目录</translation>
+        <translation>列表</translation>
     </message>
     <message>
         <source>Set Text</source>
@@ -1033,11 +1034,6 @@
         <translation>GPS信息</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4467"/>
-        <source>GPS List</source>
-        <translation>GPS列表</translation>
-    </message>
-    <message>
         <location filename="MainWindow.ui" line="4479"/>
         <source>Sel Date</source>
         <translation>选择年月</translation>
@@ -1272,7 +1268,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="374"/>
-        <location filename="MainWindow.cpp" line="2560"/>
+        <location filename="MainWindow.cpp" line="2558"/>
         <source>Stop</source>
         <translation>停止</translation>
     </message>
@@ -1775,7 +1771,7 @@
         <location filename="MainWindow.ui" line="1607"/>
         <location filename="MainWindow.ui" line="2032"/>
         <location filename="MainWindow.ui" line="4807"/>
-        <location filename="MainHelper.cpp" line="1597"/>
+        <location filename="MainHelper.cpp" line="1596"/>
         <location filename="MainWindow.cpp" line="739"/>
         <source>Month</source>
         <translation>月</translation>
@@ -1872,7 +1868,7 @@
         <translation type="vanished">只允许减少当天的记录。</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="1548"/>
+        <location filename="MainHelper.cpp" line="1547"/>
         <source>Days</source>
         <translation>天数</translation>
     </message>
@@ -1943,7 +1939,7 @@
         <location filename="MainWindow.ui" line="1919"/>
         <location filename="MainWindow.ui" line="3677"/>
         <location filename="MainWindow.ui" line="3702"/>
-        <location filename="MainHelper.cpp" line="1548"/>
+        <location filename="MainHelper.cpp" line="1547"/>
         <source>Steps</source>
         <translation>步数</translation>
     </message>
@@ -1980,8 +1976,8 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="4427"/>
-        <location filename="MainWindow.cpp" line="2557"/>
-        <location filename="MainWindow.cpp" line="2562"/>
+        <location filename="MainWindow.cpp" line="2555"/>
+        <location filename="MainWindow.cpp" line="2560"/>
         <source>Start</source>
         <translation>启动</translation>
     </message>
@@ -2179,7 +2175,7 @@
         <translation type="vanished">分享文件</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="2520"/>
+        <location filename="MainWindow.cpp" line="2518"/>
         <source>Please enable permission to record audio!</source>
         <translation>请开启录音权限！</translation>
     </message>
@@ -2195,9 +2191,9 @@
     </message>
     <message>
         <location filename="MainWindow.cpp" line="1115"/>
-        <location filename="MainWindow.cpp" line="2398"/>
-        <location filename="MainWindow.cpp" line="2726"/>
-        <location filename="MainWindow.cpp" line="2737"/>
+        <location filename="MainWindow.cpp" line="2396"/>
+        <location filename="MainWindow.cpp" line="2724"/>
+        <location filename="MainWindow.cpp" line="2735"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
@@ -8365,8 +8361,8 @@
         <translation type="vanished">暂停</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="625"/>
-        <location filename="Exercise/Steps.cpp" line="638"/>
+        <location filename="Exercise/Steps.cpp" line="647"/>
+        <location filename="Exercise/Steps.cpp" line="660"/>
         <source>Start</source>
         <translation>启动</translation>
     </message>
@@ -8375,72 +8371,72 @@
         <translation type="vanished">步数</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="544"/>
+        <location filename="Exercise/Steps.cpp" line="566"/>
         <source>Calorie</source>
         <translation>卡路里</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="624"/>
+        <location filename="Exercise/Steps.cpp" line="646"/>
         <source>No GPS signal...</source>
         <oldsource>Search the GPS...</oldsource>
         <translation>没有GPS信号...</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="936"/>
-        <location filename="Exercise/Steps.cpp" line="1001"/>
-        <location filename="Exercise/Steps.cpp" line="1245"/>
-        <location filename="Exercise/Steps.cpp" line="1255"/>
+        <location filename="Exercise/Steps.cpp" line="969"/>
+        <location filename="Exercise/Steps.cpp" line="1034"/>
+        <location filename="Exercise/Steps.cpp" line="1278"/>
+        <location filename="Exercise/Steps.cpp" line="1288"/>
         <source>Cycling</source>
         <translation>骑行</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="937"/>
-        <location filename="Exercise/Steps.cpp" line="1006"/>
-        <location filename="Exercise/Steps.cpp" line="1247"/>
-        <location filename="Exercise/Steps.cpp" line="1257"/>
+        <location filename="Exercise/Steps.cpp" line="970"/>
+        <location filename="Exercise/Steps.cpp" line="1039"/>
+        <location filename="Exercise/Steps.cpp" line="1280"/>
+        <location filename="Exercise/Steps.cpp" line="1290"/>
         <source>Hiking</source>
         <translation>徒步</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="938"/>
-        <location filename="Exercise/Steps.cpp" line="1011"/>
-        <location filename="Exercise/Steps.cpp" line="1249"/>
-        <location filename="Exercise/Steps.cpp" line="1259"/>
+        <location filename="Exercise/Steps.cpp" line="971"/>
+        <location filename="Exercise/Steps.cpp" line="1044"/>
+        <location filename="Exercise/Steps.cpp" line="1282"/>
+        <location filename="Exercise/Steps.cpp" line="1292"/>
         <source>Running</source>
         <translation>跑步</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="110"/>
+        <location filename="Exercise/Steps.cpp" line="135"/>
         <source>Weather</source>
         <translation>天气</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="943"/>
+        <location filename="Exercise/Steps.cpp" line="976"/>
         <source>Exercise Duration</source>
         <translation>运动时长</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="944"/>
+        <location filename="Exercise/Steps.cpp" line="977"/>
         <source>Average Speed</source>
         <translation>平均速度</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1243"/>
+        <location filename="Exercise/Steps.cpp" line="1276"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1253"/>
+        <location filename="Exercise/Steps.cpp" line="1286"/>
         <source>Year</source>
         <translation>年</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1746"/>
+        <location filename="Exercise/Steps.cpp" line="1778"/>
         <source>Today</source>
         <translation>今天</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1747"/>
+        <location filename="Exercise/Steps.cpp" line="1779"/>
         <source>km</source>
         <translation>公里</translation>
     </message>
@@ -8457,17 +8453,17 @@
         <translation type="vanished">总距离</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="942"/>
+        <location filename="Exercise/Steps.cpp" line="975"/>
         <source>Distance</source>
         <translation>距离</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="843"/>
+        <location filename="Exercise/Steps.cpp" line="868"/>
         <source>Duration</source>
         <translation>持续时间</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="308"/>
+        <location filename="Exercise/Steps.cpp" line="331"/>
         <source>GPS Info</source>
         <translation>GPS信息</translation>
     </message>
@@ -8500,7 +8496,7 @@
         <translation type="vanished">周日</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="684"/>
+        <location filename="Exercise/Steps.cpp" line="709"/>
         <source>Stop</source>
         <translation>停止</translation>
     </message>
@@ -8509,14 +8505,14 @@
         <translation type="vanished">速度</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="941"/>
+        <location filename="Exercise/Steps.cpp" line="974"/>
         <source>Time</source>
         <translation>时间</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="205"/>
-        <location filename="Exercise/Steps.cpp" line="305"/>
-        <location filename="Exercise/Steps.cpp" line="549"/>
+        <location filename="Exercise/Steps.cpp" line="230"/>
+        <location filename="Exercise/Steps.cpp" line="328"/>
+        <location filename="Exercise/Steps.cpp" line="571"/>
         <source>KM</source>
         <translation>公里</translation>
     </message>
