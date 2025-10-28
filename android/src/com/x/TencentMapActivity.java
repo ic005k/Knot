@@ -341,12 +341,27 @@ public class TencentMapActivity extends MapActivity {
                 @Override
                 public void onCameraChange(CameraPosition cameraPosition) {
                     updateCameraInfo(cameraPosition);
+
+                    // 防抖：只有位置变化超过阈值才更新
+                    LatLng currentPos = currentLocationMarker.getPosition();
                     if (
-                        currentLocationMarker != null &&
-                        currentLocationMarker.isVisible()
+                        Math.abs(
+                                currentPos.latitude -
+                                    cameraPosition.target.latitude
+                            ) >
+                            0.00001 ||
+                        Math.abs(
+                            currentPos.longitude -
+                                cameraPosition.target.longitude
+                        ) >
+                        0.00001
                     ) {
-                        currentLocationMarker.setPosition(
-                            cameraPosition.target
+                        new Handler(Looper.getMainLooper()).postDelayed(
+                            () ->
+                                currentLocationMarker.setPosition(
+                                    cameraPosition.target
+                                ),
+                            15
                         );
                     }
                 }
@@ -356,19 +371,6 @@ public class TencentMapActivity extends MapActivity {
                     CameraPosition cameraPosition
                 ) {
                     updateCameraInfo(cameraPosition);
-                    if (
-                        currentLocationMarker != null &&
-                        currentLocationMarker.isVisible()
-                    ) {
-                        currentLocationMarker.setPosition(
-                            cameraPosition.target
-                        );
-                    }
-
-                    // 新增：缩放/移动完成后重绘轨迹,备选
-                    //if (!globalTrackPoints.isEmpty()) {
-                    //drawAllTrackPoints();
-                    //}
                 }
             }
         );

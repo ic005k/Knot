@@ -37,15 +37,6 @@ class Steps : public QDialog {
   ~Steps();
   Ui::Steps *ui;
 
-  // GCJ02 转换常量（国测局标准）
-  static const double PI;
-  static const double EARTH_RADIUS;
-  static const double ECCENTRICITY_SQUARE;
-  static const double GCJ02_LON_MIN;
-  static const double GCJ02_LON_MAX;
-  static const double GCJ02_LAT_MIN;
-  static const double GCJ02_LAT_MAX;
-
   QString strMapKeyTestInfo;
 
   QTimer *timer;
@@ -171,6 +162,10 @@ class Steps : public QDialog {
   void updateGetGps();
 
  private:
+  QDateTime m_lastGetAddressTime;    // 上次获取地址的时间
+  QDateTime m_lastSaveRouteTime;     // 上次保存路线的时间
+  QDateTime m_lastFetchWeatherTime;  // 上次请求天气的时间
+
   bool isOne = false;
   QString strCurrentTemp, strCurrentWeatherIcon;
 

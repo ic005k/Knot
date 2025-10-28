@@ -8,16 +8,41 @@
 #include "ui_MainWindow.h"
 #include "ui_StepsOptions.h"
 
-// GCJ02 转换常量（国测局标准）
-const double Steps::PI = 3.14159265358979323846;
-const double Steps::EARTH_RADIUS = 6378245.0;
-const double Steps::ECCENTRICITY_SQUARE = 0.00669342162296594323;
-const double Steps::GCJ02_LON_MIN = 73.55;
-const double Steps::GCJ02_LON_MAX = 135.08;
-const double Steps::GCJ02_LAT_MIN = 3.86;
-const double Steps::GCJ02_LAT_MAX = 53.55;
-inline double degreesToRadians(double degrees) {
-  return degrees * Steps::PI / 180.0;
+// 常量完全同步Java优化版，无任何修改
+const double PI = 3.14159265358979323846;            // 与Java Math.PI一致
+const double EARTH_RADIUS_TENCENT = 6378137.0;       // 腾讯官方地球半径
+const double AXIS_TENCENT = 0.00669342162296594323;  // 官方轴长系数
+const double PRECISION_COMPENSATION = 0.0000001;     // 精度补偿值
+const double GCJ02_LON_MIN =
+    73.66;  // 同步Java的73.66（原C++是73.55，关键差异点）
+const double GCJ02_LON_MAX =
+    135.05;  // 同步Java的135.05（原C++是135.08，关键差异点）
+const double GCJ02_LAT_MIN = 3.86;
+const double GCJ02_LAT_MAX = 53.55;
+
+// 弧度转换函数
+inline double degreesToRadians(double degrees) { return degrees * PI / 180.0; }
+
+// 辅助函数：完全复刻Java的transformLat（逐行对齐）
+inline double transformLat(double x, double y) {
+  double ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y +
+               0.2 * sqrt(fabs(x));
+  ret += ((20.0 * sin(6.0 * x * PI) + 20.0 * sin(2.0 * x * PI)) * 2.0) / 3.0;
+  ret += ((20.0 * sin(y * PI) + 40.0 * sin((y / 3.0) * PI)) * 2.0) / 3.0;
+  ret += ((160.0 * sin((y / 12.0) * PI) + 320.0 * sin((y * PI) / 30.0)) * 2.0) /
+         3.0;
+  return ret;
+}
+
+// 辅助函数：完全复刻Java的transformLng（逐行对齐）
+inline double transformLng(double x, double y) {
+  double ret =
+      300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * sqrt(fabs(x));
+  ret += ((20.0 * sin(6.0 * x * PI) + 20.0 * sin(2.0 * x * PI)) * 2.0) / 3.0;
+  ret += ((20.0 * sin(x * PI) + 40.0 * sin((x / 3.0) * PI)) * 2.0) / 3.0;
+  ret += ((150.0 * sin((x / 12.0) * PI) + 300.0 * sin((x / 30.0) * PI)) * 2.0) /
+         3.0;
+  return ret;
 }
 
 struct GPSCoordinate {
@@ -673,6 +698,9 @@ void Steps::startRecordMotion() {
   strJsonRouteFile = csvPath + s0 + "-gps-" + s1 + ".json";
 
   timer->start(1000);
+  m_lastGetAddressTime = QDateTime::currentDateTime();
+  m_lastSaveRouteTime = QDateTime::currentDateTime();
+  m_lastFetchWeatherTime = QDateTime::currentDateTime();
   m_distance = 0;
   m_speed = 0;
   emit distanceChanged(m_distance);
@@ -863,23 +891,31 @@ void Steps::updateGetGps() {
           weatherFetcher->fetchWeather(latitude, longitude);
         }
       } else {
-        if (totalSeconds % 1800 == 0) {
+        QDateTime currentTime = QDateTime::currentDateTime();
+        if (m_lastFetchWeatherTime.secsTo(currentTime) >=
+            1800) {  // 30分钟=1800秒
           weatherFetcher->fetchWeather(latitude, longitude);
+          m_lastFetchWeatherTime = currentTime;  // 更新上次请求时间
         }
       }
 
       // Route
       if (isShowRoute) {
-        if (totalSeconds % 150 == 0) {
+        QDateTime currentTime = QDateTime::currentDateTime();
+        if (m_lastGetAddressTime.secsTo(currentTime) >=
+            150) {  // 距离上次超过150秒
           getAddress(latitude, longitude);
           latRoute = latitude;
           lonRoute = longitude;
-          timeRoute = QTime::currentTime().toString();
+          timeRoute = currentTime.time().toString();
+          m_lastGetAddressTime = currentTime;  // 更新上次执行时间
         }
 
-        if (totalSeconds % 180 == 0) {
+        if (m_lastSaveRouteTime.secsTo(currentTime) >=
+            180) {  // 距离上次超过180秒
           saveRoute(strJsonRouteFile, timeRoute, latRoute, lonRoute,
                     m_lastAddress);
+          m_lastSaveRouteTime = currentTime;  // 更新上次执行时间
         }
       }
     }
@@ -1919,8 +1955,9 @@ void Steps::setInfoLabelToAndroid(const QString& str) {
 #endif
 }
 
+// 核心转换方法：1:1复刻Java wgs84ToGcj02_bak（运算顺序、变量名完全对齐）
 QGeoCoordinate Steps::wgs84ToGcj02_cpp(double wgs84Lat, double wgs84Lon) {
-  // 输入校验
+  // 输入校验（保持原有）
   if (wgs84Lon < -180.0 || wgs84Lon > 180.0 || wgs84Lat < -90.0 ||
       wgs84Lat > 90.0) {
     qWarning() << "[WGS84ToGCJ02] 无效 WGS84 坐标：lat=" << wgs84Lat
@@ -1928,72 +1965,42 @@ QGeoCoordinate Steps::wgs84ToGcj02_cpp(double wgs84Lat, double wgs84Lon) {
     return QGeoCoordinate();
   }
 
-  // 判断是否在国内
+  // 判断是否在中国境内（同步Java的经纬度范围，关键差异点）
   if (!isInChina(wgs84Lat, wgs84Lon)) {
     return QGeoCoordinate(wgs84Lat, wgs84Lon);
   }
 
-  // 计算与基准点(105,35)的差值（度数）
-  double deltaLon = wgs84Lon - 105.0;
-  double deltaLat = wgs84Lat - 35.0;
+  double x = wgs84Lon - 105.0;  // 对应Java的wgsLng - 105.0
+  double y = wgs84Lat - 35.0;   // 对应Java的wgsLat - 35.0
 
-  // 计算纬度偏移量
-  double latOffset =
-      -100.0 + 2.0 * deltaLon + 3.0 * deltaLat + 0.2 * deltaLat * deltaLat;
-  latOffset += 0.1 * deltaLon * deltaLat;
-  latOffset += 0.2 * sqrt(fabs(deltaLon));
+  // 调用复刻的辅助函数，避免inline计算偏差
+  double dLat = transformLat(x, y);
+  double dLng = transformLng(x, y);
 
-  // 修正：使用度数转弧度
-  latOffset += (20.0 * sin(6.0 * degreesToRadians(deltaLon)) +
-                20.0 * sin(2.0 * degreesToRadians(deltaLon))) *
-               2.0 / 3.0;
-  latOffset += (20.0 * sin(degreesToRadians(deltaLat)) +
-                40.0 * sin(degreesToRadians(deltaLat) / 3.0)) *
-               2.0 / 3.0;
-  latOffset += (160.0 * sin(degreesToRadians(deltaLat) / 12.0) +
-                320.0 * sin(degreesToRadians(deltaLat) / 30.0)) *
-               2.0 / 3.0;
-
-  // 计算经度偏移量
-  double lonOffset =
-      300.0 + deltaLon + 2.0 * deltaLat + 0.1 * deltaLon * deltaLon;
-  lonOffset += 0.1 * deltaLon * deltaLat;
-  lonOffset += 0.1 * sqrt(fabs(deltaLon));
-
-  // 修正：使用度数转弧度
-  lonOffset += (20.0 * sin(6.0 * degreesToRadians(deltaLon)) +
-                20.0 * sin(2.0 * degreesToRadians(deltaLon))) *
-               2.0 / 3.0;
-  lonOffset += (20.0 * sin(degreesToRadians(deltaLon)) +
-                40.0 * sin(degreesToRadians(deltaLon) / 3.0)) *
-               2.0 / 3.0;
-  lonOffset += (150.0 * sin(degreesToRadians(deltaLon) / 12.0) +
-                300.0 * sin(degreesToRadians(deltaLon) / 30.0)) *
-               2.0 / 3.0;
-
-  // 椭圆体参数修正
-  double radLat = degreesToRadians(wgs84Lat);
-  double magic = sin(radLat);
-  magic = 1 - ECCENTRICITY_SQUARE * magic * magic;
+  // 完全同步Java的弧度计算逻辑
+  double radLat = (wgs84Lat / 180.0) * PI;
+  double sinRadLat = sin(radLat);
+  double magic = 1 - AXIS_TENCENT * sinRadLat * sinRadLat;
   double sqrtMagic = sqrt(magic);
 
-  latOffset =
-      (latOffset * 180.0) /
-      ((EARTH_RADIUS * (1 - ECCENTRICITY_SQUARE)) / (magic * sqrtMagic) * PI);
-  lonOffset =
-      (lonOffset * 180.0) / (EARTH_RADIUS / sqrtMagic * cos(radLat) * PI);
+  // 偏移量计算：括号位置、运算顺序完全复刻Java
+  dLat = (dLat * 180.0) /
+         (((EARTH_RADIUS_TENCENT * (1 - AXIS_TENCENT)) / (magic * sqrtMagic)) *
+          PI);
+  dLng =
+      (dLng * 180.0) / ((EARTH_RADIUS_TENCENT / sqrtMagic) * cos(radLat) * PI);
 
-  // 生成并返回 GCJ02 坐标
-  double gcj02Lat = wgs84Lat + latOffset;
-  double gcj02Lon = wgs84Lon + lonOffset;
+  // 精度补偿：完全同步Java的加法顺序和补偿值
+  double gcjLat = wgs84Lat + dLat + PRECISION_COMPENSATION;
+  double gcjLng = wgs84Lon + dLng + PRECISION_COMPENSATION;
 
-  return QGeoCoordinate(gcj02Lat, gcj02Lon);
+  return QGeoCoordinate(gcjLat, gcjLng);
 }
 
-// 辅助函数：判断坐标是否在中国境内
+// 判断境内函数：同步Java的经纬度范围
 bool Steps::isInChina(double lat, double lon) {
-  return (lon >= GCJ02_LON_MIN && lon <= GCJ02_LON_MAX) &&
-         (lat >= GCJ02_LAT_MIN && lat <= GCJ02_LAT_MAX);
+  return (lon > GCJ02_LON_MIN && lon < GCJ02_LON_MAX) &&
+         (lat > GCJ02_LAT_MIN && lat < GCJ02_LAT_MAX);
 }
 
 void Steps::saveRoute(const QString& file, const QString& time, double lat,
