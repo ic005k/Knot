@@ -2986,6 +2986,8 @@ void NotesList::clickNoteList() {
   tw->setCurrentItem(item);
 
   int indexNoteBook = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
+  if (indexNoteBook < 0) return;
+
   QString s_tr = QString::number(indexNoteBook) + "=" + QString::number(index);
   int count2 = mIndexList.count();
   int i = 0;
