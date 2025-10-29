@@ -698,9 +698,7 @@ void Steps::startRecordMotion() {
   strJsonRouteFile = csvPath + s0 + "-gps-" + s1 + ".json";
 
   timer->start(1000);
-  m_lastGetAddressTime = QDateTime::currentDateTime();
-  m_lastSaveRouteTime = QDateTime::currentDateTime();
-  m_lastFetchWeatherTime = QDateTime::currentDateTime();
+  isInitTime = false;
   m_distance = 0;
   m_speed = 0;
   emit distanceChanged(m_distance);
@@ -885,6 +883,13 @@ void Steps::updateGetGps() {
       // 无效坐标，不请求
 
     } else {
+      if (!isInitTime) {
+        m_lastGetAddressTime = QDateTime::currentDateTime();
+        m_lastSaveRouteTime = QDateTime::currentDateTime();
+        m_lastFetchWeatherTime = QDateTime::currentDateTime();
+        isInitTime = true;
+      }
+
       // Weather
       if (strCurrentTemp == "") {
         if (m_time.second() % 5 == 0) {

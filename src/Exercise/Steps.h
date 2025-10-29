@@ -165,6 +165,7 @@ class Steps : public QDialog {
   QDateTime m_lastGetAddressTime;    // 上次获取地址的时间
   QDateTime m_lastSaveRouteTime;     // 上次保存路线的时间
   QDateTime m_lastFetchWeatherTime;  // 上次请求天气的时间
+  bool isInitTime;
 
   bool isOne = false;
   QString strCurrentTemp, strCurrentWeatherIcon;
