@@ -1327,6 +1327,9 @@ void NotesList::on_btnDel_Recycle_clicked() {
 
 void NotesList::setDelNoteFlag(QString mdFile) {
   needDelFiles.insert(0, mdFile);
+  if (needDelFiles.count() > 500) {
+    needDelFiles.removeAt(500);  // 移除老的
+  }
 }
 
 void NotesList::needDelNotes() {
@@ -1366,10 +1369,6 @@ void NotesList::needDelNotes() {
       QString str1 = needDelArray[i].toString();
       if (str1.isEmpty()) continue;
       needDelFiles.append(str1);
-
-      if (needDelFiles.count() > 500) {
-        needDelFiles.removeAt(500);  // 移除老的
-      }
     }
 
     qDebug() << "needDelFiles=" << needDelFiles.count();
@@ -1386,10 +1385,6 @@ void NotesList::needDelNotes() {
               .toString();
       if (str1.isEmpty()) continue;
       needDelFiles.append(str1);
-
-      if (needDelFiles.count() > 500) {
-        needDelFiles.removeAt(500);  // 移除老的
-      }
     }
   }
 

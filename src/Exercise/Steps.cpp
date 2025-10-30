@@ -1388,18 +1388,16 @@ void Steps::writeGpsPos(double lat, double lon, int i, int count) {
 
 void Steps::getGpsTrack() {
   if (timer->isActive()) {
-    QTimer::singleShot(100, mw_one, [this]() { openMapWindow(); });
-
-    return;
+    openMapWindow();
+  } else {
+    mw_one->showProgress();
+    QQuickItem* root = mui->qwGpsList->rootObject();
+    QVariant item;
+    QMetaObject::invokeMethod((QObject*)root, "getGpsList",
+                              Q_RETURN_ARG(QVariant, item));
+    strGpsList = item.toString();
+    mw_one->myUpdateGpsMapThread->start();
   }
-
-  mw_one->showProgress();
-  QQuickItem* root = mui->qwGpsList->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "getGpsList",
-                            Q_RETURN_ARG(QVariant, item));
-  strGpsList = item.toString();
-  mw_one->myUpdateGpsMapThread->start();
 }
 
 void Steps::updateGpsTrack() {
