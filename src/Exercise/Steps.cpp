@@ -704,7 +704,7 @@ void Steps::startRecordMotion() {
   strCSVFile = csvPath + s0 + "-gps-" + s1 + ".csv";
   strJsonRouteFile = csvPath + s0 + "-gps-" + s1 + ".json";
 
-  timer->start(1000);
+  timer->start(3000);
   isInitTime = false;
   m_distance = 0;
   m_speed = 0;
@@ -739,7 +739,7 @@ void Steps::positionUpdated(const QGeoPositionInfo& info) {
 }
 
 void Steps::updateGetGps() {
-  m_time = m_time.addSecs(1);
+  m_time = m_time.addSecs(3);
   totalSeconds = static_cast<qlonglong>(m_time.hour()) * 3600 +
                  static_cast<qlonglong>(m_time.minute()) * 60 + m_time.second();
 
@@ -878,7 +878,7 @@ void Steps::updateGetGps() {
   mui->lblGpsInfo->setText(strGpsInfoShow);
   emit timeChanged();
 
-  if (m_time.second() % 5 == 0) {
+  if (m_time.second() % 6 == 0) {
     refreshMotionData();
   }
 
@@ -969,7 +969,6 @@ void Steps::stopRecordMotion() {
 
   mui->gboxMotionType->setEnabled(true);
   mui->btnSelGpsDate->setEnabled(true);
-  strCurrentTemp = "";
 }
 
 void Steps::refreshTotalDistance() {
@@ -2030,6 +2029,8 @@ void Steps::saveRoute(const QString& file, const QString& time, double lat,
                       double lon, const QString& address) {
   if (!timer->isActive()) return;
 
+  isWriteRouteJson = true;
+
   // 1. 初始化 JSON 数组（读取现有数据或创建新数组）
   QJsonArray routeArray;
   QFile jsonFile(file);
@@ -2083,6 +2084,8 @@ void Steps::saveRoute(const QString& file, const QString& time, double lat,
 
   qDebug() << "[saveRoute] 路由数据追加成功：" << file << "（累计"
            << routeArray.size() << "条）";
+
+  isWriteRouteJson = false;
 }
 
 QStringList Steps::readRoute(const QString& file) {
@@ -2203,6 +2206,8 @@ void Steps::setMapType() {
 }
 
 void Steps::getRouteList(const QString& strGpsTime) {
+  if (isWriteRouteJson) return;
+
   strGpsList = strGpsTime;
 
   QStringList list = strGpsList.split("-=-");

@@ -259,6 +259,8 @@ class Steps : public QDialog {
   bool isChina = false;
   void setMapType();
   QGeoCoordinate wgs84ToGcj02_cpp(double wgs84Lat, double wgs84Lon);
+  bool isWriteRouteJson = false;
+
  signals:
   void distanceChanged(double distance);
   void timeChanged();
