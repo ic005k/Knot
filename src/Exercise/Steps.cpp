@@ -697,7 +697,7 @@ void Steps::startRecordMotion() {
   QString sst = strStartTime;
   QString s1 = sst.replace(":", "");
   QString csvPath =
-      iniDir + "/memo/gps/" + getCurrentYear() + "/" + getCurrentMonth() + "/";
+      iniDir + "memo/gps/" + getCurrentYear() + "/" + getCurrentMonth() + "/";
   if (!QDir(csvPath).exists()) {
     QDir().mkpath(csvPath);
   }
@@ -705,6 +705,7 @@ void Steps::startRecordMotion() {
   strJsonRouteFile = csvPath + s0 + "-gps-" + s1 + ".json";
 
   timer->start(3000);
+  routeMemoryCache = QJsonArray();
   isInitTime = false;
   m_distance = 0;
   m_speed = 0;
@@ -2029,46 +2030,23 @@ void Steps::saveRoute(const QString& file, const QString& time, double lat,
                       double lon, const QString& address) {
   if (!timer->isActive()) return;
 
-  isWriteRouteJson = true;
-
-  // 1. 初始化 JSON 数组（读取现有数据或创建新数组）
+  // 初始化 JSON 数组（读取现有数据或创建新数组）
   QJsonArray routeArray;
   QFile jsonFile(file);
 
-  // 2. 读取现有文件（若存在且可读取）
-  if (jsonFile.exists()) {
-    if (!jsonFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      qWarning() << "[saveRoute] 无法打开文件（读取）：" << file
-                 << jsonFile.errorString();
-      return;
-    }
-
-    // 解析 JSON 内容
-    QByteArray jsonData = jsonFile.readAll();
-    jsonFile.close();  // 读取后关闭，避免占用
-    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
-
-    // 验证是否为数组（若格式错误，保留空数组重新创建）
-    if (doc.isArray()) {
-      routeArray = doc.array();
-    } else {
-      qWarning() << "[saveRoute] JSON 格式错误（非数组），将创建新文件："
-                 << file;
-      routeArray = QJsonArray();
-    }
-  }
-
-  // 3. 构造新的路由对象（字段类型严格匹配：字符串/数字）
+  // 构造新的路由对象（字段类型严格匹配：字符串/数字）
   QJsonObject newRoute;
   newRoute["time"] = time;        // 字符串类型
   newRoute["lat"] = lat;          // 数字类型（double）
   newRoute["lon"] = lon;          // 数字类型（double）
   newRoute["address"] = address;  // 字符串类型（支持中文，UTF-8 编码）
 
-  // 4. 追加新对象到数组
-  routeArray.append(newRoute);
+  // 追加新对象到数组
+  routeMemoryCache.append(newRoute);
 
-  // 5. 写入文件（覆盖原有内容，UTF-8 编码，格式化输出）
+  routeArray = routeMemoryCache;
+
+  // 写入文件（覆盖原有内容，UTF-8 编码，格式化输出）
   if (!jsonFile.open(QIODevice::WriteOnly | QIODevice::Text |
                      QIODevice::Truncate)) {
     qWarning() << "[saveRoute] 无法打开文件（写入）：" << file
@@ -2084,25 +2062,29 @@ void Steps::saveRoute(const QString& file, const QString& time, double lat,
 
   qDebug() << "[saveRoute] 路由数据追加成功：" << file << "（累计"
            << routeArray.size() << "条）";
-
-  isWriteRouteJson = false;
 }
 
 QStringList Steps::readRoute(const QString& file) {
+  QJsonArray routeArray;
   QStringList routeList;
-  QFile jsonFile(file);
 
-  // 1. 基础文件检查（不存在/打开失败直接返回空列表）
-  if (!jsonFile.exists() ||
-      !jsonFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    qWarning() << "[readRoute] 文件无法读取：" << file
-               << (jsonFile.exists() ? jsonFile.errorString() : "文件不存在");
-    return routeList;
+  if (!timer->isActive()) {
+    QFile jsonFile(file);
+
+    // 1. 基础文件检查（不存在/打开失败直接返回空列表）
+    if (!jsonFile.exists() ||
+        !jsonFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      qWarning() << "[readRoute] 文件无法读取：" << file
+                 << (jsonFile.exists() ? jsonFile.errorString() : "文件不存在");
+      return routeList;
+    }
+
+    // 2. 解析 JSON 数组（仅校验是否为数组，不校验内部字段）
+    routeArray = QJsonDocument::fromJson(jsonFile.readAll()).array();
+    jsonFile.close();  // 立即关闭文件
+  } else {
+    routeArray = routeMemoryCache;
   }
-
-  // 2. 解析 JSON 数组（仅校验是否为数组，不校验内部字段）
-  QJsonArray routeArray = QJsonDocument::fromJson(jsonFile.readAll()).array();
-  jsonFile.close();  // 立即关闭文件
 
   if (routeArray.isEmpty()) {
     qDebug() << "[readRoute] JSON 数组为空：" << file;
@@ -2206,8 +2188,6 @@ void Steps::setMapType() {
 }
 
 void Steps::getRouteList(const QString& strGpsTime) {
-  if (isWriteRouteJson) return;
-
   strGpsList = strGpsTime;
 
   QStringList list = strGpsList.split("-=-");
