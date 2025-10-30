@@ -80,19 +80,17 @@ void GeoAddressResolver::getAddressFromCoord(double latitude,
   m_netMgr->get(request);
 }
 
-// 解析腾讯云官方API响应数据
 QString GeoAddressResolver::parseTencentResponse(const QJsonObject &root) {
   int status = root["status"].toInt();
-  if (status != 0)  // status=0表示成功
-  {
+  if (status != 0) {
     qWarning() << "腾讯云API错误：" << root["message"].toString();
     return "";
   }
 
   QJsonObject result = root["result"].toObject();
-
-  // 1. 提取基础地址（省/市/区/街道，保留你的原有逻辑）
   QJsonObject addressObj = result["address_component"].toObject();
+
+  // 提取各层级地址字段
   QString country = addressObj["nation"].toString();
   QString province = addressObj["province"].toString();
   QString city = addressObj["city"].toString();
@@ -100,35 +98,77 @@ QString GeoAddressResolver::parseTencentResponse(const QJsonObject &root) {
   QString street = addressObj["street"].toString();
   QString streetNumber = addressObj["street_number"].toString();
 
-  // 基础地址字符串（如“广东省深圳市南山区高新中四道”）
   QString baseAddress;
   if (country == "中国") {
-    baseAddress = QString("%1%2%3%4%5")
-                      .arg(province)
-                      .arg(city)
-                      .arg(district)
-                      .arg(street)
-                      .arg(streetNumber);
+    // 第一步：预处理街道和门牌号，去除重复前缀
+    QString processedStreet = street;
+    QString processedStreetNumber = streetNumber;
+
+    // 仅当街道和门牌号都非空时，检查并去除重复前缀
+    if (!processedStreet.isEmpty() && !processedStreetNumber.isEmpty()) {
+      // 检查门牌号是否以街道名为完整前缀（完全匹配）
+      if (processedStreetNumber.startsWith(processedStreet)) {
+        // 提取前缀后的剩余部分（门牌号主体）
+        QString suffix = processedStreetNumber.mid(processedStreet.length());
+        // 确保剩余部分非空（避免门牌号丢失）
+        if (!suffix.isEmpty()) {
+          processedStreetNumber = suffix;
+        }
+      }
+    }
+
+    // 第二步：按层级拼接并去重连续重复项（整合省/市/区/街道/门牌号）
+    QStringList addressParts;
+
+    // 添加省份（非空则保留）
+    if (!province.isEmpty()) {
+      addressParts << province;
+    }
+
+    // 添加城市（非空且与上一层级不同）
+    if (!city.isEmpty() &&
+        (addressParts.isEmpty() || city != addressParts.last())) {
+      addressParts << city;
+    }
+
+    // 添加区（非空且与上一层级不同）
+    if (!district.isEmpty() &&
+        (addressParts.isEmpty() || district != addressParts.last())) {
+      addressParts << district;
+    }
+
+    // 添加处理后的街道（非空且与上一层级不同）
+    if (!processedStreet.isEmpty() &&
+        (addressParts.isEmpty() || processedStreet != addressParts.last())) {
+      addressParts << processedStreet;
+    }
+
+    // 添加处理后的门牌号（非空且与上一层级不同）
+    if (!processedStreetNumber.isEmpty() &&
+        (addressParts.isEmpty() ||
+         processedStreetNumber != addressParts.last())) {
+      addressParts << processedStreetNumber;
+    }
+
+    // 拼接所有非重复部分
+    baseAddress = addressParts.join("");
   } else {
-    baseAddress = QString("%1%2%3").arg(country).arg(province).arg(city);
+    // 国外地址逻辑（按需可复用国内的去重逻辑）
+    baseAddress = QString("%1%2%3").arg(country, province, city);
   }
 
-  // 2. 新增：提取POI（建筑/公司）信息（关键！）
-  QString poiName;                             // 建筑名称
-  QJsonArray pois = result["pois"].toArray();  // API返回的POI数组
+  // 提取POI信息（逻辑不变）
+  QString poiName;
+  QJsonArray pois = result["pois"].toArray();
   if (!pois.isEmpty()) {
-    // 取第一个POI（距离坐标最近的建筑）
     QJsonObject firstPoi = pois[0].toObject();
-    poiName = firstPoi["title"].toString();  // 建筑名称（如“高新科技园W1栋”）
+    poiName = firstPoi["title"].toString();
   }
 
-  // 3. 组合完整地址（建筑名 + 基础地址）
+  // 组合最终地址
   if (!poiName.isEmpty()) {
-    return QString("%1（%2）")
-        .arg(poiName)
-        .arg(
-            baseAddress);  // 如“高新科技园W1栋（广东省深圳市南山区高新中四道）”
+    return QString("%1（%2）").arg(poiName, baseAddress);
   } else {
-    return baseAddress;  // 若无POI，返回基础地址（兼容原有逻辑）
+    return baseAddress;
   }
 }

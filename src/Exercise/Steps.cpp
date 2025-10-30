@@ -890,10 +890,14 @@ void Steps::updateGetGps() {
       // 无效坐标，不请求
 
     } else {
+      QDateTime currentTime = QDateTime::currentDateTime();
+
       if (!isInitTime) {
-        m_lastGetAddressTime = QDateTime::currentDateTime();
-        m_lastSaveRouteTime = QDateTime::currentDateTime();
-        m_lastFetchWeatherTime = QDateTime::currentDateTime();
+        m_lastGetAddressTime = currentTime;
+        m_lastSaveRouteTime = currentTime;
+        m_lastFetchWeatherTime = currentTime;
+
+        weatherFetcher->fetchWeather(latitude, longitude);
 
         if (isShowRoute) {
           latRoute = latitude;
@@ -905,22 +909,14 @@ void Steps::updateGetGps() {
       }
 
       // Weather
-      if (strCurrentTemp == "") {
-        if (m_time.second() % 5 == 0) {
-          weatherFetcher->fetchWeather(latitude, longitude);
-        }
-      } else {
-        QDateTime currentTime = QDateTime::currentDateTime();
-        if (m_lastFetchWeatherTime.secsTo(currentTime) >=
-            1800) {  // 30分钟=1800秒
-          weatherFetcher->fetchWeather(latitude, longitude);
-          m_lastFetchWeatherTime = currentTime;  // 更新上次请求时间
-        }
+      if (m_lastFetchWeatherTime.secsTo(currentTime) >=
+          1800) {  // 30分钟=1800秒
+        weatherFetcher->fetchWeather(latitude, longitude);
+        m_lastFetchWeatherTime = currentTime;  // 更新上次请求时间
       }
 
       // Route
       if (isShowRoute) {
-        QDateTime currentTime = QDateTime::currentDateTime();
         if (m_lastGetAddressTime.secsTo(currentTime) >=
             150) {  // 距离上次超过150秒
           latRoute = latitude;

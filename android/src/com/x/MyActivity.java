@@ -2302,14 +2302,16 @@ public class MyActivity
         lblDate = str;
 
         if (mapActivityInstance != null) {
-            MapActivity.topDateLabel.setText(str);
+            if (MapType == 1) MapActivity.topDateLabel.setText(str);
+            else TencentMapActivity.topDateLabel.setText(str);
         }
     }
 
     public void setInfoTitle(String str) {
         lblInfo = str;
         if (mapActivityInstance != null) {
-            MapActivity.bottomInfoLabel.setText(str);
+            if (MapType == 1) MapActivity.bottomInfoLabel.setText(str);
+            else TencentMapActivity.bottomInfoLabel.setText(str);
         }
     }
 
