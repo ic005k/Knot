@@ -151,6 +151,10 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   addressResolver = new GeoAddressResolver(this);
   setMapKey();
   isChina = m_Method->isInChina();
+  if (isChina) {
+    latitude = 39.9042;
+    longitude = 116.4074;
+  }
   // 连接信号槽，获取结果
   setAddressResolverConnect();
 }
@@ -176,6 +180,9 @@ void Steps::setAddressResolverConnect() {
                 isShowRoute = true;
                 mui->qwGpsList->rootContext()->setContextProperty("isShowRoute",
                                                                   isShowRoute);
+
+                saveRoute(strJsonRouteFile, timeRoute, latRoute, lonRoute,
+                          m_lastAddress);
               });
       connect(addressResolver, &GeoAddressResolver::resolveFailed, this,
               [this](const QString& error) {
@@ -887,6 +894,13 @@ void Steps::updateGetGps() {
         m_lastGetAddressTime = QDateTime::currentDateTime();
         m_lastSaveRouteTime = QDateTime::currentDateTime();
         m_lastFetchWeatherTime = QDateTime::currentDateTime();
+
+        if (isShowRoute) {
+          latRoute = latitude;
+          lonRoute = longitude;
+          timeRoute = QDateTime::currentDateTime().time().toString();
+          getAddress(latitude, longitude);
+        }
         isInitTime = true;
       }
 
@@ -909,17 +923,16 @@ void Steps::updateGetGps() {
         QDateTime currentTime = QDateTime::currentDateTime();
         if (m_lastGetAddressTime.secsTo(currentTime) >=
             150) {  // 距离上次超过150秒
-          getAddress(latitude, longitude);
           latRoute = latitude;
           lonRoute = longitude;
           timeRoute = currentTime.time().toString();
+          getAddress(latitude, longitude);
           m_lastGetAddressTime = currentTime;  // 更新上次执行时间
         }
 
         if (m_lastSaveRouteTime.secsTo(currentTime) >=
-            180) {  // 距离上次超过180秒
-          saveRoute(strJsonRouteFile, timeRoute, latRoute, lonRoute,
-                    m_lastAddress);
+            180) {  // 距离上次超过180秒 （留给以后的逻辑）
+
           m_lastSaveRouteTime = currentTime;  // 更新上次执行时间
         }
       }
@@ -928,7 +941,14 @@ void Steps::updateGetGps() {
 }
 
 void Steps::stopRecordMotion() {
-  timer->stop();
+  if (isShowRoute) {
+    latRoute = latitude;
+    lonRoute = longitude;
+    timeRoute = QDateTime::currentDateTime().time().toString();
+    getAddress(latitude, longitude);
+  }
+
+  QTimer::singleShot(2000, mw_one, [this]() { timer->stop(); });
 
   mui->lblGpsInfo->setText(strGpsInfoShow);
 
@@ -1367,7 +1387,11 @@ void Steps::writeGpsPos(double lat, double lon, int i, int count) {
 }
 
 void Steps::getGpsTrack() {
-  if (timer->isActive()) return;
+  if (timer->isActive()) {
+    QTimer::singleShot(100, mw_one, [this]() { openMapWindow(); });
+
+    return;
+  }
 
   mw_one->showProgress();
   QQuickItem* root = mui->qwGpsList->rootObject();
@@ -2010,6 +2034,8 @@ bool Steps::isInChina(double lat, double lon) {
 
 void Steps::saveRoute(const QString& file, const QString& time, double lat,
                       double lon, const QString& address) {
+  if (!timer->isActive()) return;
+
   // 1. 初始化 JSON 数组（读取现有数据或创建新数组）
   QJsonArray routeArray;
   QFile jsonFile(file);

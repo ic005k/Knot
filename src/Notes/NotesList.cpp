@@ -1325,7 +1325,9 @@ void NotesList::on_btnDel_Recycle_clicked() {
   resetQML_Recycle();
 }
 
-void NotesList::setDelNoteFlag(QString mdFile) { needDelFiles.append(mdFile); }
+void NotesList::setDelNoteFlag(QString mdFile) {
+  needDelFiles.insert(0, mdFile);
+}
 
 void NotesList::needDelNotes() {
   QString jsonFile0 = iniDir + "mainnotes.json";
@@ -1366,7 +1368,7 @@ void NotesList::needDelNotes() {
       needDelFiles.append(str1);
 
       if (needDelFiles.count() > 500) {
-        needDelFiles.removeAt(0);  // 移除老的
+        needDelFiles.removeAt(500);  // 移除老的
       }
     }
 
@@ -1386,7 +1388,7 @@ void NotesList::needDelNotes() {
       needDelFiles.append(str1);
 
       if (needDelFiles.count() > 500) {
-        needDelFiles.removeAt(0);  // 移除老的
+        needDelFiles.removeAt(500);  // 移除老的
       }
     }
   }
