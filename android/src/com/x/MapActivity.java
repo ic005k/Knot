@@ -510,7 +510,7 @@ public class MapActivity extends Activity {
      * @param latitude  纬度（合法范围：-90.0 ~ 90.0）
      * @param longitude 经度（合法范围：-180.0 ~ 180.0）
      */
-    public void appendTrackPoint(double latitude, double longitude) {
+    /*public void appendTrackPoint(double latitude, double longitude) {
         // 1. 基础合法性校验
         if (
             latitude < -90.0 ||
@@ -550,6 +550,67 @@ public class MapActivity extends Activity {
                 // 强制刷新地图，确保标识立即显示
                 osmMapView.invalidate();
                 // Log.d(TAG, "轨迹点追加成功 | 总点数：" + osmTrackPoints.size());
+            } catch (Exception e) {
+                Log.e(TAG, "追加轨迹点异常", e);
+            }
+        });
+    }*/
+
+    public void appendTrackPoint(double latitude, double longitude) {
+        // 新增：1. 校验Activity状态（销毁则直接返回）
+        if (isFinishing() || isDestroyed()) {
+            Log.w(TAG, "Activity已销毁，跳过轨迹点添加");
+            return;
+        }
+
+        // 2. 基础合法性校验（保留原有）
+        if (
+            latitude < -90.0 ||
+            latitude > 90.0 ||
+            longitude < -180.0 ||
+            longitude > 180.0
+        ) {
+            Log.w(
+                TAG,
+                "非法经纬度，跳过该轨迹点 | 纬度：" +
+                    latitude +
+                    "，经度：" +
+                    longitude
+            );
+            return;
+        }
+
+        // 新增：3. 核心对象空判（补充完整）
+        if (
+            osmController == null ||
+            osmMapView == null ||
+            osmPolyline == null ||
+            currentLocationMarker == null
+        ) {
+            Log.e(TAG, "地图核心对象未初始化，无法追加轨迹点");
+            return;
+        }
+
+        // 新增：4. 校验静态引用是否为当前有效实例
+        if (MyActivity.mapActivityInstance != this) {
+            Log.w(TAG, "当前实例已失效，跳过轨迹点添加");
+            return;
+        }
+
+        runOnUiThread(() -> {
+            // 新增：5. UI线程内再次校验（避免线程切换中Activity销毁）
+            if (isFinishing() || isDestroyed() || osmMapView == null) {
+                return;
+            }
+            try {
+                GeoPoint newPoint = new GeoPoint(latitude, longitude);
+                osmTrackPoints.add(newPoint);
+                osmPolyline.setPoints(osmTrackPoints);
+
+                osmController.setCenter(newPoint);
+                currentLocationMarker.setPosition(newPoint);
+                currentLocationMarker.setEnabled(true);
+                osmMapView.invalidate();
             } catch (Exception e) {
                 Log.e(TAG, "追加轨迹点异常", e);
             }

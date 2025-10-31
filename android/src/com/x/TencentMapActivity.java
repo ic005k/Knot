@@ -566,7 +566,7 @@ public class TencentMapActivity extends MapActivity {
         }
     }
 
-    @Override
+    /*@Override
     public void appendTrackPoint(double latitude, double longitude) {
         if (
             latitude < -90.0 ||
@@ -582,6 +582,66 @@ public class TencentMapActivity extends MapActivity {
         runOnUiThread(() -> {
             try {
                 // 关键修改：GPS坐标（WGS84）转GCJ02
+                LatLng newPoint = wgs84ToGcj02(latitude, longitude);
+                trackPoints.add(newPoint);
+                trackPolyline.setPoints(trackPoints);
+
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(
+                    newPoint
+                );
+                tencentMap.animateCamera(cameraUpdate);
+
+                if (currentLocationMarker != null) {
+                    currentLocationMarker.setPosition(newPoint);
+                    currentLocationMarker.setVisible(true);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "添加轨迹点异常", e);
+            }
+        });
+        }*/
+
+    @Override
+    public void appendTrackPoint(double latitude, double longitude) {
+        // 新增：1. 校验Activity销毁状态
+        if (isFinishing() || isDestroyed()) {
+            Log.w(TAG, "Activity已销毁，跳过轨迹点添加");
+            return;
+        }
+
+        // 2. 基础合法性校验（保留原有）
+        if (
+            latitude < -90.0 ||
+            latitude > 90.0 ||
+            longitude < -180.0 ||
+            longitude > 180.0
+        ) {
+            Log.w(TAG, "非法经纬度，跳过");
+            return;
+        }
+
+        // 新增：3. 核心对象空判（补充完整）
+        if (
+            tencentMap == null ||
+            trackPolyline == null ||
+            tencentMapView == null
+        ) {
+            Log.e(TAG, "腾讯地图核心对象未初始化，无法追加轨迹点");
+            return;
+        }
+
+        // 新增：4. 校验静态引用有效性
+        if (MyActivity.mapActivityInstance != this) {
+            Log.w(TAG, "当前实例已失效，跳过轨迹点添加");
+            return;
+        }
+
+        runOnUiThread(() -> {
+            // 新增：5. UI线程内二次校验
+            if (isFinishing() || isDestroyed() || tencentMapView == null) {
+                return;
+            }
+            try {
                 LatLng newPoint = wgs84ToGcj02(latitude, longitude);
                 trackPoints.add(newPoint);
                 trackPolyline.setPoints(trackPoints);
@@ -715,8 +775,14 @@ public class TencentMapActivity extends MapActivity {
             tencentMapView.onDestroy();
             tencentMapView = null;
         }
-        trackPoints.clear();
-        globalTrackPoints.clear();
+
+        synchronized (trackPoints) {
+            trackPoints.clear();
+        }
+        synchronized (globalTrackPoints) {
+            globalTrackPoints.clear();
+        }
+
         tencentMap = null;
         mapUiSettings = null;
         trackPolyline = null;

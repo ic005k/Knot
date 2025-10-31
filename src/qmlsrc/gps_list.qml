@@ -176,8 +176,52 @@ Rectangle {
             color: isDark ? "#333" : "#DDD"
             border.color: "#ccc"
             border.width: 1
-
             radius: 3
+
+            // 选中状态红色竖条（带动画效果）
+            Rectangle {
+                width: listItem.ListView.isCurrentItem ? 4 : 0 // 选中时宽度3，未选中0
+                height: parent.height
+                color: isDark ? "#00BCD4" : "#FF9800"
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                z: 10
+
+                // 动画核心：宽度+透明度联动过渡
+                Behavior on width {
+                    NumberAnimation {
+                        duration: 300 // 动画时长（毫秒）
+                        easing.type: Easing.OutQuart // 缓动效果，先快后慢
+                    }
+                }
+
+                opacity: listItem.ListView.isCurrentItem ? 1 : 0 // 选中时不透明，未选中透明
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 250 // 透明度动画稍快于宽度
+                        easing.type: Easing.OutQuart
+                    }
+                }
+            }
+
+            // 新增：点击条目切换选中状态
+            MouseArea {
+                property point clickPos: "0,0"
+                anchors.fill: parent
+                onPressed: function (mouse) {
+                    clickPos = Qt.point(mouse.x, mouse.y)
+                }
+                onReleased: function (mouse) {
+                    var delta = Qt.point(mouse.x - clickPos.x,
+                                         mouse.y - clickPos.y)
+
+                }
+                onClicked: view.currentIndex = index // 核心：点击切换选中项
+                onDoubleClicked: {
+
+                    /* 双击逻辑 */ }
+            }
 
             RowLayout {
 
@@ -373,6 +417,7 @@ Rectangle {
                             Layout.preferredWidth: parent.width / 2 - spacing / 2
                             height: 35
                             enabled: true
+                            visible: listItem.ListView.isCurrentItem // 仅选中条目显示
 
                             onClicked: {
                                 strGpsTime = item0.text + "-=-" + item1.text
@@ -406,6 +451,7 @@ Rectangle {
                             height: 35
                             enabled: true
                             visible: isShowRoute
+                                     && listItem.ListView.isCurrentItem // 仅选中条目显示
 
                             onClicked: {
 
