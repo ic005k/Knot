@@ -50,6 +50,7 @@ void migrateOldDataIfNeeded();
 #endif
 
 void initAndroidGPU();
+int clearLockFiles(const QString& iniDir);
 
 QString strJBDict1 = "";
 QString strJBDict2 = "";
@@ -168,6 +169,8 @@ int main(int argc, char* argv[]) {
   p_dir.mkpath(privateDir + "KnotData/memo");
   p_dir.mkpath(privateDir + "KnotData/memo/images");
   p_dir.mkpath(privateDir + "KnotData/memo/gps");
+
+  clearLockFiles(iniDir);
 
   strJBDict1 = privateDir + "dict/jieba.dict.utf8";
   strJBDict2 = privateDir + "dict/hmm_model.utf8";
@@ -558,4 +561,47 @@ void initAndroidGPU() {
   format.setVersion(2, 0);                       // 仅使用OpenGL ES 2.0核心功能
   format.setProfile(QSurfaceFormat::NoProfile);  // 不使用核心模式
   QSurfaceFormat::setDefaultFormat(format);
+}
+
+int clearLockFiles(const QString& iniDir) {
+  // 1. 初始化目录对象并校验有效性
+  QDir dir(iniDir);
+  if (!dir.exists()) {
+    qWarning() << "清除.lock文件失败：目录不存在 ->" << iniDir;
+    return 0;  // 目录不存在，无需清理
+  }
+
+  // 2. 筛选目录中所有 .lock 后缀的文件（仅文件，不包含子目录）
+  // 过滤规则：后缀为 .lock（不区分大小写，如 .LOCK 也会被匹配）
+  QStringList nameFilters;
+  nameFilters << "*.lock" << "*.LOCK";  // 覆盖大小写情况
+  QFileInfoList fileInfos = dir.entryInfoList(nameFilters,
+                                              QDir::Files,  // 只处理文件
+                                              QDir::NoSort  // 无需排序
+  );
+
+  if (fileInfos.isEmpty()) {
+    qInfo() << "目录中无.lock文件 ->" << iniDir;
+    return 0;
+  }
+
+  // 3. 遍历并删除所有匹配的.lock文件
+  int deletedCount = 0;
+  // 使用const迭代器遍历，避免detach
+  for (QFileInfoList::const_iterator it = fileInfos.constBegin();
+       it != fileInfos.constEnd(); ++it) {
+    const QFileInfo& fileInfo = *it;
+
+    QFile file(fileInfo.absoluteFilePath());
+    if (file.remove()) {
+      deletedCount++;
+      qDebug() << "已删除.lock文件 ->" << fileInfo.absoluteFilePath();
+    } else {
+      qWarning() << "删除失败 ->" << fileInfo.absoluteFilePath();
+    }
+  }
+
+  qInfo() << "清除完成：目录" << iniDir << "共处理" << fileInfos.size()
+          << "个.lock文件，成功删除" << deletedCount << "个";
+  return deletedCount;
 }

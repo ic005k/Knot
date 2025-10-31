@@ -48,6 +48,9 @@ import java.util.List;
 
 public class TencentMapActivity extends MapActivity {
 
+    // 新增：子类专属的UI Handler，管理自身的绘制任务（与父类区分，避免冲突）
+    private Handler tencentUiHandler = new Handler(Looper.getMainLooper());
+
     private static final String TAG = "TencentMap_Final";
     private static String TENCENT_MAP_KEY;
     private static final double OSLO_LATITUDE = 39.9042;
@@ -566,50 +569,13 @@ public class TencentMapActivity extends MapActivity {
         }
     }
 
-    /*@Override
-    public void appendTrackPoint(double latitude, double longitude) {
-        if (
-            latitude < -90.0 ||
-            latitude > 90.0 ||
-            longitude < -180.0 ||
-            longitude > 180.0
-        ) {
-            Log.w(TAG, "非法经纬度，跳过");
-            return;
-        }
-        if (tencentMap == null || trackPolyline == null) return;
-
-        runOnUiThread(() -> {
-            try {
-                // 关键修改：GPS坐标（WGS84）转GCJ02
-                LatLng newPoint = wgs84ToGcj02(latitude, longitude);
-                trackPoints.add(newPoint);
-                trackPolyline.setPoints(trackPoints);
-
-                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(
-                    newPoint
-                );
-                tencentMap.animateCamera(cameraUpdate);
-
-                if (currentLocationMarker != null) {
-                    currentLocationMarker.setPosition(newPoint);
-                    currentLocationMarker.setVisible(true);
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "添加轨迹点异常", e);
-            }
-        });
-        }*/
-
     @Override
     public void appendTrackPoint(double latitude, double longitude) {
-        // 新增：1. 校验Activity销毁状态
+        // 原有校验逻辑不变...
         if (isFinishing() || isDestroyed()) {
             Log.w(TAG, "Activity已销毁，跳过轨迹点添加");
             return;
         }
-
-        // 2. 基础合法性校验（保留原有）
         if (
             latitude < -90.0 ||
             latitude > 90.0 ||
@@ -619,8 +585,6 @@ public class TencentMapActivity extends MapActivity {
             Log.w(TAG, "非法经纬度，跳过");
             return;
         }
-
-        // 新增：3. 核心对象空判（补充完整）
         if (
             tencentMap == null ||
             trackPolyline == null ||
@@ -629,15 +593,14 @@ public class TencentMapActivity extends MapActivity {
             Log.e(TAG, "腾讯地图核心对象未初始化，无法追加轨迹点");
             return;
         }
-
-        // 新增：4. 校验静态引用有效性
         if (MyActivity.mapActivityInstance != this) {
             Log.w(TAG, "当前实例已失效，跳过轨迹点添加");
             return;
         }
 
-        runOnUiThread(() -> {
-            // 新增：5. UI线程内二次校验
+        // 关键修改：用子类的tencentUiHandler发送任务（替代直接runOnUiThread）
+        Runnable drawRunnable = () -> {
+            // UI线程内二次校验
             if (isFinishing() || isDestroyed() || tencentMapView == null) {
                 return;
             }
@@ -645,12 +608,10 @@ public class TencentMapActivity extends MapActivity {
                 LatLng newPoint = wgs84ToGcj02(latitude, longitude);
                 trackPoints.add(newPoint);
                 trackPolyline.setPoints(trackPoints);
-
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(
                     newPoint
                 );
                 tencentMap.animateCamera(cameraUpdate);
-
                 if (currentLocationMarker != null) {
                     currentLocationMarker.setPosition(newPoint);
                     currentLocationMarker.setVisible(true);
@@ -658,7 +619,8 @@ public class TencentMapActivity extends MapActivity {
             } catch (Exception e) {
                 Log.e(TAG, "添加轨迹点异常", e);
             }
-        });
+        };
+        tencentUiHandler.post(drawRunnable);
     }
 
     @Override
@@ -769,24 +731,45 @@ public class TencentMapActivity extends MapActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        // 先清理子类的残留绘制任务（核心补充）
+        if (tencentUiHandler != null) {
+            tencentUiHandler.removeCallbacksAndMessages(null);
+            Log.d(TAG, "腾讯地图：已清除残留绘制任务");
+        }
+        // 调用父类逻辑：停止定时器、置空静态引用（父类已实现，无需重复）
+        super.onBackPressed();
+    }
+
+    @Override
     protected void onDestroy() {
+        // 第一步：清理子类残留绘制任务（双重保险）
+        if (tencentUiHandler != null) {
+            tencentUiHandler.removeCallbacksAndMessages(null);
+            tencentUiHandler = null; // 彻底释放
+            Log.d(TAG, "腾讯地图onDestroy：清除绘制任务");
+        }
+
+        // 第二步：调用父类onDestroy，确保定时器停止、父类资源清理（关键！）
         super.onDestroy();
+
+        // 第三步：清理腾讯地图特有资源（原有逻辑正确，保留）
         if (tencentMapView != null) {
             tencentMapView.onDestroy();
             tencentMapView = null;
         }
-
         synchronized (trackPoints) {
             trackPoints.clear();
         }
         synchronized (globalTrackPoints) {
             globalTrackPoints.clear();
         }
-
         tencentMap = null;
         mapUiSettings = null;
         trackPolyline = null;
         currentLocationMarker = null;
+
+        // 第四步：兜底置空静态引用（与父类逻辑一致，避免残留）
         synchronized (MyActivity.class) {
             if (MyActivity.mapActivityInstance == this) {
                 MyActivity.mapActivityInstance = null;

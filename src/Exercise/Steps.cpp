@@ -8,6 +8,8 @@
 #include "ui_MainWindow.h"
 #include "ui_StepsOptions.h"
 
+bool isGpsTest = false;
+
 // 常量完全同步Java优化版，无任何修改
 const double PI = 3.14159265358979323846;            // 与Java Math.PI一致
 const double EARTH_RADIUS_TENCENT = 6378137.0;       // 腾讯官方地球半径
@@ -810,8 +812,11 @@ void Steps::updateGetGps() {
         }
       } else {
         appendTrack(latitude, longitude);
-        latitude = latitude + 0.001;
-        longitude = longitude + 0.001;
+        quint64 randomInt =
+            QRandomGenerator::global()->generate64() % 10000000000ULL;
+        double randomDouble = static_cast<double>(randomInt) / 10000000000000.0;
+        latitude = latitude + randomDouble;
+        longitude = longitude + randomDouble;
 
         QStringList data_list;
         data_list.append(QString::number(latitude, 'f', 6));
@@ -981,6 +986,12 @@ void Steps::refreshTotalDistance() {
 }
 
 void Steps::refreshMotionData() {
+  // QQuickWidget 渲染状态无效 → 返回
+  if (mui->qwGpsList->status() != QQuickWidget::Ready) {
+    qWarning() << "QQuickWidget 未就绪，跳过刷新";
+    return;
+  }
+
   refreshTotalDistance();
 
   strEndTime = QTime::currentTime().toString();
@@ -1012,16 +1023,20 @@ void Steps::refreshMotionData() {
     }
 
     QString text0, text1, startTime1, startTime2;
-    text0 = m_Method->getText0(mui->qwGpsList, 0);
-    text1 = m_Method->getText1(mui->qwGpsList, 0);
+    int countList = m_Method->getCountFromQW(mui->qwGpsList);
+    if (countList > 0) {
+      text0 = m_Method->getText0(mui->qwGpsList, 0);
+      text1 = m_Method->getText1(mui->qwGpsList, 0);
+    }
     startTime1 = text1.split("-").at(0);
     startTime2 = t1.split("-").at(0);
 
     if (text0 == t00 && startTime1 == startTime2) {
-      m_Method->delItemFromQW(mui->qwGpsList, 0);
+      updateGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
+    } else {
+      insertGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
     }
 
-    insertGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
     strGpsMapDateTime = t00 + " " + t1;
     setDateLabelToAndroid(strGpsMapDateTime);
 
@@ -1090,6 +1105,16 @@ void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
       Q_ARG(QVariant, t0), Q_ARG(QVariant, t1), Q_ARG(QVariant, t2),
       Q_ARG(QVariant, t3), Q_ARG(QVariant, t4), Q_ARG(QVariant, t5),
       Q_ARG(QVariant, t6), Q_ARG(QVariant, 0));
+}
+
+void Steps::updateGpsList(int curIndex, QString t0, QString t1, QString t2,
+                          QString t3, QString t4, QString t5, QString t6) {
+  QQuickItem* root = mui->qwGpsList->rootObject();
+  QMetaObject::invokeMethod(
+      (QObject*)root, "updateItem",  // 调用QML的updateItem
+      Q_ARG(QVariant, curIndex), Q_ARG(QVariant, t0), Q_ARG(QVariant, t1),
+      Q_ARG(QVariant, t2), Q_ARG(QVariant, t3), Q_ARG(QVariant, t4),
+      Q_ARG(QVariant, t5), Q_ARG(QVariant, t6), Q_ARG(QVariant, 0));
 }
 
 int Steps::getGpsListCount() {
@@ -1321,7 +1346,7 @@ void Steps::allGpsTotal() {
 
 void Steps::appendTrack(double lat, double lon) {
   addTrackDataToAndroid(lat, lon);
-  appendTrackPointAndroid(lat, lon);
+  // appendTrackPointAndroid(lat, lon);
 
   return;
 
@@ -1870,9 +1895,6 @@ void Steps::clearTrackAndroid() {
 }
 
 void Steps::appendTrackPointAndroid(double latitude, double longitude) {
-  Q_UNUSED(latitude);
-  Q_UNUSED(longitude);
-
 #ifdef Q_OS_ANDROID
 
   try {
@@ -1888,6 +1910,17 @@ void Steps::appendTrackPointAndroid(double latitude, double longitude) {
       return;
     }
 
+    // 新增：调用MyActivity的isMapActivityInstance()判断地图实例是否存在
+    jboolean isInstanceValid = myActivity.callMethod<jboolean>(
+        "isMapActivityInstance",  // Java方法名
+        "()Z"  // 方法签名：无参数，返回boolean（Z表示boolean）
+    );
+    if (!isInstanceValid) {
+      qWarning()
+          << "地图实例不存在（isMapActivityInstance返回false），跳过追加轨迹点";
+      return;
+    }
+
     myActivity.callMethod<void>("forwardAppendTrackPoint", "(DD)V", latitude,
                                 longitude);
     qDebug() << "Qt调用MyActivity.forwardAppendTrackPoint()成功，轨迹点："
@@ -1899,6 +1932,9 @@ void Steps::appendTrackPointAndroid(double latitude, double longitude) {
     qCritical() << "追加轨迹点发生未知错误";
   }
 
+#else
+  Q_UNUSED(latitude);
+  Q_UNUSED(longitude);
 #endif
 }
 

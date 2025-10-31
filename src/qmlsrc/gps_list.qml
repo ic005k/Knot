@@ -7,9 +7,6 @@ import QtQuick.Controls.Fusion
 Rectangle {
     id: root
 
-    width: 500
-    height: 400
-
     color: isDark ? "#19232D" : "white"
 
     property int itemCount: 0
@@ -67,13 +64,19 @@ Rectangle {
     }
 
     function getText0(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text0
+
+        //var data = view.model.get(itemIndex)
+        //return data.text0
+        var existingItem = view.model.get(itemIndex)
+        return existingItem.text0
     }
 
     function getText1(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text1
+
+        //var data = view.model.get(itemIndex)
+        //return data.text1
+        var existingItem = view.model.get(itemIndex)
+        return existingItem.text1
     }
 
     function getText2(itemIndex) {
@@ -107,7 +110,6 @@ Rectangle {
     }
 
     function insertItem(curIndex, t0, t1, t2, t3, t4, t5, t6, height) {
-
         view.model.insert(curIndex, {
                               "text0": t0,
                               "text1": t1,
@@ -118,6 +120,27 @@ Rectangle {
                               "text6": t6,
                               "myh": height
                           })
+    }
+
+    function updateItem(curIndex, t0, t1, t2, t3, t4, t5, t6, height) {
+        // 仅当索引有效（存在该项）时才更新，避免误插入破坏历史数据
+        if (curIndex >= 0 && curIndex < view.model.count) {
+            var existingItem = view.model.get(curIndex)
+            // 只更新字段，不改变模型结构，保护历史数据
+            existingItem.text0 = t0
+            existingItem.text1 = t1
+            existingItem.text2 = t2
+            existingItem.text3 = t3
+            existingItem.text4 = t4
+            existingItem.text5 = t5
+            existingItem.text6 = t6
+            existingItem.myh = height
+            // 通知模型更新该索引（确保UI刷新）
+            view.model.set(curIndex, existingItem)
+        } else {
+            // 索引无效时，可选择不操作（保护历史数据）或打印警告
+            console.log("updateItem: 索引" + curIndex + "无效，不更新")
+        }
     }
 
     function delItem(currentIndex) {
@@ -215,7 +238,6 @@ Rectangle {
                 onReleased: function (mouse) {
                     var delta = Qt.point(mouse.x - clickPos.x,
                                          mouse.y - clickPos.y)
-
                 }
                 onClicked: view.currentIndex = index // 核心：点击切换选中项
                 onDoubleClicked: {

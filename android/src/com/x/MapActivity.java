@@ -2,6 +2,7 @@ package com.x;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
@@ -15,11 +16,14 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapListener;
@@ -33,6 +37,11 @@ import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
 public class MapActivity extends Activity {
+
+    private Timer pullNewTrackTimer; // 定时器
+    private int lastPullIndex = 0; // 记录上次拉取到的轨迹点索引（避免重复）
+    // 新增：用于管理 UI 线程绘制任务的 Handler（与 UI 线程绑定）
+    private Handler uiHandler = new Handler(Looper.getMainLooper());
 
     // 直接定义两个Thunderforest图层的URL数组（核心简化点）
     private static final String[] TILE_URLS_CYCLE = {
@@ -510,51 +519,6 @@ public class MapActivity extends Activity {
      * @param latitude  纬度（合法范围：-90.0 ~ 90.0）
      * @param longitude 经度（合法范围：-180.0 ~ 180.0）
      */
-    /*public void appendTrackPoint(double latitude, double longitude) {
-        // 1. 基础合法性校验
-        if (
-            latitude < -90.0 ||
-            latitude > 90.0 ||
-            longitude < -180.0 ||
-            longitude > 180.0
-        ) {
-            Log.w(
-                TAG,
-                "非法经纬度，跳过该轨迹点 | 纬度：" +
-                    latitude +
-                    "，经度：" +
-                    longitude
-            );
-            return;
-        }
-
-        // 增加 currentLocationMarker 的空值判断（关键）
-        // if (osmController == null || osmMapView == null || osmPolyline == null ||
-        // currentLocationMarker == null) {
-        // Log.e(TAG, "地图对象未初始化，无法追加轨迹点");
-        // return;
-        // }
-
-        runOnUiThread(() -> {
-            try {
-                GeoPoint newPoint = new GeoPoint(latitude, longitude);
-                osmTrackPoints.add(newPoint);
-                osmPolyline.setPoints(osmTrackPoints);
-
-                // 移动地图中心并更新标识
-                osmController.setCenter(newPoint);
-                currentLocationMarker.setPosition(newPoint);
-                currentLocationMarker.setEnabled(true); // 显示标识
-                // Log.d(TAG, "标识已更新到新轨迹点 | 可见性：" + currentLocationMarker.isEnabled());
-
-                // 强制刷新地图，确保标识立即显示
-                osmMapView.invalidate();
-                // Log.d(TAG, "轨迹点追加成功 | 总点数：" + osmTrackPoints.size());
-            } catch (Exception e) {
-                Log.e(TAG, "追加轨迹点异常", e);
-            }
-        });
-    }*/
 
     public void appendTrackPoint(double latitude, double longitude) {
         // 新增：1. 校验Activity状态（销毁则直接返回）
@@ -597,16 +561,22 @@ public class MapActivity extends Activity {
             return;
         }
 
-        runOnUiThread(() -> {
-            // 新增：5. UI线程内再次校验（避免线程切换中Activity销毁）
-            if (isFinishing() || isDestroyed() || osmMapView == null) {
-                return;
+        // 关键修改：用 uiHandler 发送绘制任务，并保存 Runnable 引用
+        Runnable drawRunnable = () -> {
+            // 原有绘制逻辑不变，但再次强化校验
+            if (
+                isFinishing() ||
+                isDestroyed() ||
+                osmMapView == null ||
+                osmPolyline == null ||
+                currentLocationMarker == null
+            ) {
+                return; // 即使任务执行，也先判断资源是否有效
             }
             try {
                 GeoPoint newPoint = new GeoPoint(latitude, longitude);
                 osmTrackPoints.add(newPoint);
                 osmPolyline.setPoints(osmTrackPoints);
-
                 osmController.setCenter(newPoint);
                 currentLocationMarker.setPosition(newPoint);
                 currentLocationMarker.setEnabled(true);
@@ -614,7 +584,10 @@ public class MapActivity extends Activity {
             } catch (Exception e) {
                 Log.e(TAG, "追加轨迹点异常", e);
             }
-        });
+        };
+
+        // 用 Handler 发送任务（替代 runOnUiThread）
+        uiHandler.post(drawRunnable);
     }
 
     /**
@@ -642,6 +615,11 @@ public class MapActivity extends Activity {
         if (osmMapView != null) {
             osmMapView.onResume();
         }
+
+        // 关键：GPS运行且当前是有效地图实例，启动定时拉取
+        if (MyActivity.isGpsRunning && MyActivity.mapActivityInstance == this) {
+            startPullNewTrackTimer(); //被动拉取
+        }
     }
 
     @Override
@@ -650,62 +628,70 @@ public class MapActivity extends Activity {
         if (osmMapView != null) {
             osmMapView.onPause();
         }
+
+        // 关键：不可见时停止定时器，避免无效操作和内存泄漏
+        stopPullNewTrackTimer();
     }
 
+    // 重写返回键逻辑：GPS运行时隐藏，否则关闭
     @Override
     public void onBackPressed() {
-        // 1. 优先清除静态引用（核心提前操作）
+        // 1. 优先清除所有未执行的绘制任务（核心！）
+        if (uiHandler != null) {
+            uiHandler.removeCallbacksAndMessages(null); // 清除 Handler 中所有任务
+            Log.d(TAG, "返回键：已清除所有未执行的绘制任务");
+        }
+
+        // 2. 置空静态引用
         synchronized (MyActivity.class) {
             if (MyActivity.mapActivityInstance == this) {
                 MyActivity.mapActivityInstance = null;
-                Log.d(TAG, "回退键触发，提前清除静态引用");
             }
         }
 
-        // 2. 执行正常的回退逻辑（关闭当前Activity）
-        super.onBackPressed(); // 或 finish();
+        // 3. 停止定时拉取（避免新任务入队）
+        stopPullNewTrackTimer();
+
+        super.onBackPressed();
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy(); // 优先调用父类销毁方法
-
-        // 1. 清理地图叠加层（避免视图层级引用泄漏）
-        if (osmMapView != null) {
-            // 移除所有叠加层（包括轨迹线、标记点）
-            osmMapView.getOverlays().clear();
-            // 清理瓦片缓存（释放磁盘/内存缓存，不影响渲染上下文）
-            if (osmMapView.getTileProvider() != null) {
-                osmMapView.getTileProvider().clearTileCache();
-            }
-            // 释放绘制缓存（纯Android视图资源，与Qt渲染无关）
-            osmMapView.destroyDrawingCache();
-            // 正常置空，无需延迟（已确认与地图渲染无关）
-            osmMapView = null;
+        // 1. 再次清除未执行任务（双重保险）
+        if (uiHandler != null) {
+            uiHandler.removeCallbacksAndMessages(null);
+            uiHandler = null; // 彻底释放
+            Log.d(TAG, "onDestroy：已清除所有未执行的绘制任务");
         }
 
-        // 2. 清理轨迹数据（避免集合引用导致的内存泄漏）
-        if (osmTrackPoints != null) {
-            synchronized (osmTrackPoints) {
-                // 确保线程安全
-                osmTrackPoints.clear();
-            }
-            osmTrackPoints = null; // 彻底释放引用
-        }
+        // 2. 停止定时拉取
+        stopPullNewTrackTimer();
 
-        // 3. 置空其他辅助对象（解除对象间引用）
-        currentLocationMarker = null;
-        osmController = null;
-        osmPolyline = null;
-
-        // 4. 解除静态引用（核心！避免Activity实例泄漏）
+        // 3. 置空静态引用
         synchronized (MyActivity.class) {
             if (MyActivity.mapActivityInstance == this) {
                 MyActivity.mapActivityInstance = null;
             }
         }
 
-        Log.d(TAG, "正常释放资源完成（与地图渲染无关场景）");
+        // 4. 最后清理资源（确保任务已清除再释放）
+        if (osmMapView != null) {
+            osmMapView.getOverlays().clear();
+            if (osmMapView.getTileProvider() != null) {
+                osmMapView.getTileProvider().clearTileCache();
+            }
+            osmMapView.destroyDrawingCache();
+            osmMapView = null;
+        }
+        if (osmTrackPoints != null) {
+            osmTrackPoints.clear();
+            osmTrackPoints = null;
+        }
+        currentLocationMarker = null;
+        osmController = null;
+        osmPolyline = null;
+
+        super.onDestroy();
     }
 
     private void drawAllTrackPoints() {
@@ -764,6 +750,56 @@ public class MapActivity extends Activity {
     public void setBottomInfo(String text) {
         if (bottomInfoLabel != null) {
             runOnUiThread(() -> bottomInfoLabel.setText(text)); // 确保UI线程操作
+        }
+    }
+
+    // 新增：启动3秒一次的定时拉取
+    private void startPullNewTrackTimer() {
+        stopPullNewTrackTimer();
+        pullNewTrackTimer = new Timer();
+        pullNewTrackTimer.scheduleAtFixedRate(
+            new TimerTask() {
+                @Override
+                public void run() {
+                    // 拉取前先判断是否已销毁，避免新增任务
+                    if (
+                        isFinishing() ||
+                        isDestroyed() ||
+                        MyActivity.mapActivityInstance != MapActivity.this
+                    ) {
+                        stopPullNewTrackTimer();
+                        return;
+                    }
+
+                    List<GeoPoint> newTrackPoints =
+                        MyActivity.getNewTrackPoints(lastPullIndex);
+                    if (newTrackPoints.isEmpty()) return;
+
+                    // 遍历新增点时，用 uiHandler 发送任务（确保任务可被清除）
+                    for (GeoPoint newPoint : newTrackPoints) {
+                        if (newPoint != null) {
+                            uiHandler.post(() -> {
+                                // 用 Handler 发送，而非直接调用
+                                appendTrackPoint(
+                                    newPoint.getLatitude(),
+                                    newPoint.getLongitude()
+                                );
+                            });
+                        }
+                    }
+                    lastPullIndex += newTrackPoints.size();
+                }
+            },
+            0,
+            3000
+        );
+    }
+
+    // 新增：停止定时拉取
+    private void stopPullNewTrackTimer() {
+        if (pullNewTrackTimer != null) {
+            pullNewTrackTimer.cancel();
+            pullNewTrackTimer = null;
         }
     }
 }

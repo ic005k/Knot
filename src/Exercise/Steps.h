@@ -228,7 +228,6 @@ class Steps : public QDialog {
   QString strGpsMapDateTime, strGpsMapDistnce, strGpsMapSpeed, strGpsList;
   bool isGpsMapTrackFile;
   double lastLat, lastLon;
-  bool isGpsTest = false;
 
   QString getGpsListText0(int index);
   void refreshMotionData();
@@ -262,7 +261,8 @@ class Steps : public QDialog {
 
   QJsonArray routeMemoryCache;
 
- signals:
+  void updateGpsList(int curIndex, QString t0, QString t1, QString t2, QString t3, QString t4, QString t5, QString t6);
+  signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();

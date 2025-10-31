@@ -162,6 +162,8 @@ public class MyActivity
     public static int MapType = 1;
 
     private long lastGpsUpdateTime = 0; //记录 GPS 最后更新时间
+    // 新增：标记GPS是否正在运行
+    public static boolean isGpsRunning = false;
 
     public static MapActivity mapActivityInstance = null;
     public static List<GeoPoint> osmTrackPoints = new ArrayList<>();
@@ -746,6 +748,8 @@ public class MyActivity
         movingTime = 0;
         previousAltitude = 0f;
 
+        isGpsRunning = true; // 标记GPS运行中
+
         // 初始化LocationManager
         locationManager = (LocationManager) getSystemService(
             Context.LOCATION_SERVICE
@@ -854,6 +858,7 @@ public class MyActivity
     // 在stopGpsUpdates中添加线程池关闭
     public double stopGpsUpdates() {
         setVibrate();
+        isGpsRunning = false;
         if (locationManager != null && locationListener1 != null) {
             try {
                 LocationManagerCompat.removeUpdates(
@@ -1487,14 +1492,20 @@ public class MyActivity
     }
 
     public void openMapWindow() {
-        Intent i;
-        if (MapType == 1) {
-            i = new Intent(getMyAppContext(), MapActivity.class);
-        } else {
-            i = new Intent(getMyAppContext(), TencentMapActivity.class);
-        }
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        getMyAppContext().startActivity(i);
+        // 1. 根据MapType选择目标地图Activity
+        Class<?> targetActivity = (MapType == 1)
+            ? MapActivity.class
+            : TencentMapActivity.class;
+
+        // 2. 创建Intent，核心添加"移到前台"标志
+        Intent intent = new Intent(getMyAppContext(), targetActivity);
+        intent.setFlags(
+            Intent.FLAG_ACTIVITY_NEW_TASK | // 非Activity上下文启动必须
+                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT // 关键：若Activity已存在，直接移到前台
+        );
+
+        // 3. 启动（若已存在则唤醒，不存在则新建）
+        getMyAppContext().startActivity(intent);
     }
 
     public void forwardClearTrack() {
@@ -2381,5 +2392,27 @@ public class MyActivity
 
     public void setMapType(int type) {
         MapType = type;
+    }
+
+    public boolean isMapActivityInstance() {
+        if (mapActivityInstance != null) return true;
+        else return false;
+    }
+
+    // 给地图提供“从lastIndex开始的新增轨迹点”
+    public static List<GeoPoint> getNewTrackPoints(int lastIndex) {
+        List<GeoPoint> newPoints = new ArrayList<>();
+        // 避免索引越界（lastIndex超过总长度则无新增）
+        if (lastIndex < 0 || lastIndex >= osmTrackPoints.size()) {
+            return newPoints;
+        }
+        // 从lastIndex遍历到最后，获取新增点（CopyOnWriteArrayList遍历安全）
+        for (int i = lastIndex; i < osmTrackPoints.size(); i++) {
+            GeoPoint point = osmTrackPoints.get(i);
+            if (point != null) {
+                newPoints.add(point);
+            }
+        }
+        return newPoints;
     }
 }
