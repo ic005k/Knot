@@ -59,9 +59,9 @@ public class MapActivity extends Activity {
     private IMapController osmController;
     private Polyline osmPolyline;
     private List<GeoPoint> osmTrackPoints = new ArrayList<>();
-    public static TextView topDateLabel;
+    private TextView topDateLabel;
     private TextView topInfoLabel;
-    public static TextView bottomInfoLabel;
+    private TextView bottomInfoLabel;
     private Button switchMapBtn;
     private boolean usingThunderforest = true; // 跟踪当前使用的瓦片源
 
@@ -675,6 +675,20 @@ public class MapActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
             );
             getWindow().setStatusBarColor(Color.parseColor(color));
+        }
+    }
+
+    // 新增：设置顶部日期文本的公开接口（父类统一定义）
+    public void setTopDate(String text) {
+        if (topDateLabel != null) {
+            runOnUiThread(() -> topDateLabel.setText(text)); // 确保UI线程操作
+        }
+    }
+
+    // 新增：设置底部信息文本的公开接口（父类统一定义）
+    public void setBottomInfo(String text) {
+        if (bottomInfoLabel != null) {
+            runOnUiThread(() -> bottomInfoLabel.setText(text)); // 确保UI线程操作
         }
     }
 }

@@ -2352,20 +2352,18 @@ public class MyActivity
         Log.d(TAG, "轨迹集合遍历完成");
     }
 
+    // 调用公开接口（兼容MapActivity和TencentMapActivity）
     public void setDateTitle(String str) {
         lblDate = str;
-
         if (mapActivityInstance != null) {
-            if (MapType == 1) mapActivityInstance.topDateLabel.setText(str);
-            else mapActivityInstance.topDateLabel.setText(str);
+            mapActivityInstance.setTopDate(str); // 调用父类公开接口
         }
     }
 
     public void setInfoTitle(String str) {
         lblInfo = str;
         if (mapActivityInstance != null) {
-            if (MapType == 1) mapActivityInstance.bottomInfoLabel.setText(str);
-            else mapActivityInstance.bottomInfoLabel.setText(str);
+            mapActivityInstance.setBottomInfo(str); // 调用父类公开接口
         }
     }
 
