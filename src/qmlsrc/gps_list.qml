@@ -182,7 +182,7 @@ Rectangle {
             Rectangle {
                 width: listItem.ListView.isCurrentItem ? 4 : 0 // 选中时宽度3，未选中0
                 height: parent.height
-                color: isDark ? "#00BCD4" : "#FF9800"
+                color: isDark ? "#BBBBBB" : "#666666"
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom

@@ -653,6 +653,20 @@ public class MapActivity extends Activity {
     }
 
     @Override
+    public void onBackPressed() {
+        // 1. 优先清除静态引用（核心提前操作）
+        synchronized (MyActivity.class) {
+            if (MyActivity.mapActivityInstance == this) {
+                MyActivity.mapActivityInstance = null;
+                Log.d(TAG, "回退键触发，提前清除静态引用");
+            }
+        }
+
+        // 2. 执行正常的回退逻辑（关闭当前Activity）
+        super.onBackPressed(); // 或 finish();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy(); // 优先调用父类销毁方法
 

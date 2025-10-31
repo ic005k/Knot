@@ -1509,9 +1509,17 @@ public class MyActivity
 
     public void forwardAppendTrackPoint(double latitude, double longitude) {
         if (mapActivityInstance != null) {
-            mapActivityInstance.appendTrackPoint(latitude, longitude); // 调用MapActivity的追加方法
+            // 额外判断：Activity是否未销毁且未处于 finishing 状态
+            if (
+                !mapActivityInstance.isDestroyed() &&
+                !mapActivityInstance.isFinishing()
+            ) {
+                mapActivityInstance.appendTrackPoint(latitude, longitude);
+            } else {
+                Log.w("MyActivity", "MapActivity已销毁，跳过追加轨迹点");
+            }
         } else {
-            // android.util.Log.w("MyActivity", "MapActivity未启动，无法追加轨迹点");
+            Log.w("MyActivity", "MapActivity未启动，无法追加轨迹点");
         }
     }
 

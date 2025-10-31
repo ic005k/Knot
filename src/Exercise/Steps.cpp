@@ -1077,6 +1077,8 @@ void Steps::refreshMotionData() {
                   s1 + "-=-" + s2 + "-=-" + s3 + "-=-" + s4);
 
     allGpsTotal();
+
+    m_Method->setCurrentIndexFromQW(mui->qwGpsList, 0);
   }
 }
 
