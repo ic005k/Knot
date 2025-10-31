@@ -64,9 +64,9 @@ public class TencentMapActivity extends MapActivity {
     private List<LatLng> trackPoints = new ArrayList<>();
     private List<LatLng> globalTrackPoints = new ArrayList<>();
 
-    public static TextView topDateLabel;
+    private TextView topDateLabel;
     private TextView topInfoLabel;
-    public static TextView bottomInfoLabel;
+    private TextView bottomInfoLabel;
     private Button switchMapBtn;
     private boolean usingStandardMap = true;
 
@@ -341,6 +341,9 @@ public class TencentMapActivity extends MapActivity {
                 @Override
                 public void onCameraChange(CameraPosition cameraPosition) {
                     updateCameraInfo(cameraPosition);
+
+                    // 增加 currentLocationMarker 非空判断
+                    if (currentLocationMarker == null) return;
 
                     // 防抖：只有位置变化超过阈值才更新
                     LatLng currentPos = currentLocationMarker.getPosition();

@@ -161,6 +161,8 @@ public class MyActivity
     public static String MY_TENCENT_MAP_KEY = "error";
     public static int MapType = 1;
 
+    private long lastGpsUpdateTime = 0; //记录 GPS 最后更新时间
+
     public static MapActivity mapActivityInstance = null;
     public static List<GeoPoint> osmTrackPoints = new ArrayList<>();
     public static String lblDate = "Date";
@@ -608,10 +610,35 @@ public class MyActivity
         new LocationListenerCompat() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
-                // 位置更新时触发
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
-                updateTrackingData(location);
+                // 按定位源优先级筛选：GPS > 网络定位
+                if (
+                    LocationManager.GPS_PROVIDER.equals(location.getProvider())
+                ) {
+                    // GPS结果：精度高，直接用
+                    latitude = location.getLatitude();
+                    longitude = location.getLongitude();
+                    updateTrackingData(location);
+                } else if (
+                    LocationManager.NETWORK_PROVIDER.equals(
+                        location.getProvider()
+                    )
+                ) {
+                    // 网络定位结果：仅当GPS长时间没更新（比如10秒）时使用
+                    long lastGpsTime =
+                        System.currentTimeMillis() - lastGpsUpdateTime;
+                    if (lastGpsTime > 10000) {
+                        // 10秒内没GPS数据，用网络定位补位
+                        latitude = location.getLatitude();
+                        longitude = location.getLongitude();
+                        updateTrackingData(location);
+                    }
+                }
+                // 记录当前定位源的更新时间
+                if (
+                    LocationManager.GPS_PROVIDER.equals(location.getProvider())
+                ) {
+                    lastGpsUpdateTime = System.currentTimeMillis();
+                }
             }
 
             @Override
@@ -769,14 +796,26 @@ public class MyActivity
             ) {
                 // 创建 LocationRequestCompat 对象
                 LocationRequestCompat locationRequest =
-                    new LocationRequestCompat.Builder(2000L) // 最小时间间隔
-                        .setMinUpdateDistanceMeters(1.0f) // 最小距离间隔
+                    new LocationRequestCompat.Builder(3000L) // 最小时间间隔
+                        .setMinUpdateDistanceMeters(2.0f) // 最小距离间隔
                         .build();
                 // 使用 LocationManagerCompat 请求位置更新（兼容 Android 6.0+）
                 LocationManagerCompat.requestLocationUpdates(
                     locationManager,
                     LocationManager.GPS_PROVIDER, // 使用 GPS 提供者
                     locationRequest,
+                    executor,
+                    locationListener1
+                );
+
+                // 新增网络定位请求（优先级低于GPS，仅作为补充）
+                LocationManagerCompat.requestLocationUpdates(
+                    locationManager,
+                    LocationManager.NETWORK_PROVIDER,
+                    // 网络定位间隔可更宽松，比如8秒，进一步节能
+                    new LocationRequestCompat.Builder(8000L)
+                        .setMinUpdateDistanceMeters(10.0f)
+                        .build(),
                     executor,
                     locationListener1
                 );
@@ -812,7 +851,7 @@ public class MyActivity
         return longitude;
     }
 
-    // 停止 GPS 更新
+    // 在stopGpsUpdates中添加线程池关闭
     public double stopGpsUpdates() {
         setVibrate();
         if (locationManager != null && locationListener1 != null) {
@@ -1958,6 +1997,21 @@ public class MyActivity
                 );
             }
         }
+
+        // 补充网络定位权限
+        if (
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                new String[] { Manifest.permission.ACCESS_COARSE_LOCATION },
+                2
+            );
+        }
     }
 
     private void requestSensorPermission() {
@@ -2302,16 +2356,16 @@ public class MyActivity
         lblDate = str;
 
         if (mapActivityInstance != null) {
-            if (MapType == 1) MapActivity.topDateLabel.setText(str);
-            else TencentMapActivity.topDateLabel.setText(str);
+            if (MapType == 1) mapActivityInstance.topDateLabel.setText(str);
+            else mapActivityInstance.topDateLabel.setText(str);
         }
     }
 
     public void setInfoTitle(String str) {
         lblInfo = str;
         if (mapActivityInstance != null) {
-            if (MapType == 1) MapActivity.bottomInfoLabel.setText(str);
-            else TencentMapActivity.bottomInfoLabel.setText(str);
+            if (MapType == 1) mapActivityInstance.bottomInfoLabel.setText(str);
+            else mapActivityInstance.bottomInfoLabel.setText(str);
         }
     }
 
