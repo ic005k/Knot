@@ -344,7 +344,7 @@ void Steps::openStepsUI() {
     mui->lblTotalDistance->setText(QString::number(m_td) + " km");
   }
 
-  if (getGpsListCount() == 0) {
+  if (getGpsListCount() == 0 && !timer->isActive()) {
     int nYear = QDate::currentDate().year();
     int nMonth = QDate::currentDate().month();
     loadGpsList(nYear, nMonth);
@@ -706,8 +706,9 @@ void Steps::startRecordMotion() {
   strCSVFile = csvPath + s0 + "-gps-" + s1 + ".csv";
   strJsonRouteFile = csvPath + s0 + "-gps-" + s1 + ".json";
 
-  timer->start(3000);
+  timer->start(1000);
   routeMemoryCache = QJsonArray();
+  m_lastAddress = "";
   isInitTime = false;
   m_distance = 0;
   m_speed = 0;
@@ -742,7 +743,7 @@ void Steps::positionUpdated(const QGeoPositionInfo& info) {
 }
 
 void Steps::updateGetGps() {
-  m_time = m_time.addSecs(3);
+  m_time = m_time.addSecs(1);
   totalSeconds = static_cast<qlonglong>(m_time.hour()) * 3600 +
                  static_cast<qlonglong>(m_time.minute()) * 60 + m_time.second();
 
@@ -950,7 +951,17 @@ void Steps::stopRecordMotion() {
     getAddress(latitude, longitude);
   }
 
-  QTimer::singleShot(2000, mw_one, [this]() { timer->stop(); });
+  QTimer::singleShot(2000, mw_one, [this]() {
+    timer->stop();
+
+    int nYear = QDate::currentDate().year();
+    int nMonth = QDate::currentDate().month();
+    clearAllGpsList();
+    loadGpsList(nYear, nMonth);
+    m_Method->setCurrentIndexFromQW(mui->qwGpsList, 0);
+
+    refreshMotionData();
+  });
 
   mui->lblGpsInfo->setText(strGpsInfoShow);
 
@@ -959,8 +970,6 @@ void Steps::stopRecordMotion() {
   mui->lblCurrentDistance->setStyleSheet(lblStyle);
   mui->lblGpsInfo->setStyleSheet(lblStyle);
   mui->btnGPS->setStyleSheet(btnRoundStyle);
-
-  refreshMotionData();
 
 #ifdef Q_OS_ANDROID
 
@@ -1032,9 +1041,9 @@ void Steps::refreshMotionData() {
     startTime2 = t1.split("-").at(0);
 
     if (text0 == t00 && startTime1 == startTime2) {
-      updateGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
+      // updateGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
     } else {
-      insertGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
+      // insertGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
     }
 
     strGpsMapDateTime = t00 + " " + t1;
@@ -1043,11 +1052,15 @@ void Steps::refreshMotionData() {
     QSettings Reg1(iniDir + stry + "-gpslist.ini", QSettings::IniFormat);
 
     int count = getGpsListCount();
+    if (timer->isActive()) count = getGpsListCount() + 1;
+
     QString strYearMonth = stry + "-" + strm;
     Reg1.setValue("/" + strYearMonth + "/Count", count);
     Reg1.setValue("/" + strYearMonth + "/" + QString::number(count),
                   t00 + "-=-" + t1 + "-=-" + t2 + "-=-" + t3 + "-=-" + t4 +
                       "-=-" + t5 + "-=-" + strCurrentWeatherIcon);
+
+    if (timer->isActive()) return;
 
     double dMonthTotal = 0;  // 里程月总计
     double dCycling = 0;
@@ -1092,8 +1105,6 @@ void Steps::refreshMotionData() {
                   s1 + "-=-" + s2 + "-=-" + s3 + "-=-" + s4);
 
     allGpsTotal();
-
-    m_Method->setCurrentIndexFromQW(mui->qwGpsList, 0);
   }
 }
 
@@ -2003,7 +2014,6 @@ void Steps::setDateLabelToAndroid(const QString& str) {
 }
 
 void Steps::setInfoLabelToAndroid(const QString& str) {
-  Q_UNUSED(str);
 #ifdef Q_OS_ANDROID
 
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
@@ -2013,6 +2023,8 @@ void Steps::setInfoLabelToAndroid(const QString& str) {
                               javaStr.object<jstring>());
   }
 
+#else
+  Q_UNUSED(str);
 #endif
 }
 
@@ -2067,6 +2079,12 @@ bool Steps::isInChina(double lat, double lon) {
 void Steps::saveRoute(const QString& file, const QString& time, double lat,
                       double lon, const QString& address) {
   if (!timer->isActive()) return;
+
+  bool latValid = (lat >= -90 && lat <= 90);
+  bool lonValid = (lon >= -180 && lon <= 180);
+  if (!latValid || !lonValid) return;
+
+  if (address == "") return;
 
   // 初始化 JSON 数组（读取现有数据或创建新数组）
   QJsonArray routeArray;

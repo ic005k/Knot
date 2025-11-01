@@ -608,38 +608,22 @@ public class MyActivity
     }
 
     // 使用LocationListenerCompat定义位置监听器
+    // 使用LocationListenerCompat定义位置监听器
     private final LocationListenerCompat locationListener1 =
         new LocationListenerCompat() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
-                // 按定位源优先级筛选：GPS > 网络定位
+                // 仅处理GPS定位数据，直接移除网络定位分支
                 if (
                     LocationManager.GPS_PROVIDER.equals(location.getProvider())
                 ) {
-                    // GPS结果：精度高，直接用
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
-                    updateTrackingData(location);
-                } else if (
-                    LocationManager.NETWORK_PROVIDER.equals(
-                        location.getProvider()
-                    )
-                ) {
-                    // 网络定位结果：仅当GPS长时间没更新（比如10秒）时使用
-                    long lastGpsTime =
-                        System.currentTimeMillis() - lastGpsUpdateTime;
-                    if (lastGpsTime > 10000) {
-                        // 10秒内没GPS数据，用网络定位补位
+                    // 保留精度过滤（≤10米），确保GPS数据可靠性
+                    if (location.getAccuracy() <= 10.0f) {
                         latitude = location.getLatitude();
                         longitude = location.getLongitude();
                         updateTrackingData(location);
+                        lastGpsUpdateTime = System.currentTimeMillis();
                     }
-                }
-                // 记录当前定位源的更新时间
-                if (
-                    LocationManager.GPS_PROVIDER.equals(location.getProvider())
-                ) {
-                    lastGpsUpdateTime = System.currentTimeMillis();
                 }
             }
 
@@ -665,12 +649,12 @@ public class MyActivity
 
             @Override
             public void onProviderEnabled(@NonNull String provider) {
-                Log.d(TAG, "Provider enabled: " + provider);
+                Log.d(TAG, "GPS Provider enabled: " + provider);
             }
 
             @Override
             public void onProviderDisabled(@NonNull String provider) {
-                Log.d(TAG, "Provider disabled: " + provider);
+                Log.d(TAG, "GPS Provider disabled: " + provider);
             }
         };
 
@@ -756,16 +740,13 @@ public class MyActivity
         );
         executor = Executors.newSingleThreadExecutor();
 
-        // 检查位置服务是否开启
+        // 仅检查GPS服务是否开启（移除网络定位检查）
         boolean isGpsEnabled = locationManager.isProviderEnabled(
             LocationManager.GPS_PROVIDER
         );
-        boolean isNetworkEnabled = locationManager.isProviderEnabled(
-            LocationManager.NETWORK_PROVIDER
-        );
-        if (!isGpsEnabled && !isNetworkEnabled) {
+        if (!isGpsEnabled) {
             new AlertDialog.Builder(this)
-                .setMessage("位置服务未开启，请开启位置服务以获取位置信息。")
+                .setMessage("GPS服务未开启，请开启GPS以获取位置信息。")
                 .setPositiveButton("去开启", (dialog, which) -> {
                     Intent intent = new Intent(
                         Settings.ACTION_LOCATION_SOURCE_SETTINGS
@@ -777,13 +758,12 @@ public class MyActivity
         }
 
         if (locationManager != null) {
-            // 检测是否有定位权限
+            // 检测是否有GPS定位权限（仅需ACCESS_FINE_LOCATION）
             int permission = ActivityCompat.checkSelfPermission(
                 this,
                 "android.permission.ACCESS_FINE_LOCATION"
             );
             if (permission != PackageManager.PERMISSION_GRANTED) {
-                // 没有定位权限，去申请定位权限，会弹出对话框
                 ActivityCompat.requestPermissions(
                     this,
                     new String[] { "android.permission.ACCESS_FINE_LOCATION" },
@@ -798,33 +778,21 @@ public class MyActivity
                 ) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
-                // 创建 LocationRequestCompat 对象
+                // 仅创建GPS定位请求
                 LocationRequestCompat locationRequest =
-                    new LocationRequestCompat.Builder(3000L) // 最小时间间隔
-                        .setMinUpdateDistanceMeters(2.0f) // 最小距离间隔
+                    new LocationRequestCompat.Builder(2000L) // 2秒更新一次
+                        .setMinUpdateDistanceMeters(1.0f) // 移动1米更新
                         .build();
-                // 使用 LocationManagerCompat 请求位置更新（兼容 Android 6.0+）
+                // 仅请求GPS定位更新
                 LocationManagerCompat.requestLocationUpdates(
                     locationManager,
-                    LocationManager.GPS_PROVIDER, // 使用 GPS 提供者
+                    LocationManager.GPS_PROVIDER,
                     locationRequest,
                     executor,
                     locationListener1
                 );
 
-                // 新增网络定位请求（优先级低于GPS，仅作为补充）
-                LocationManagerCompat.requestLocationUpdates(
-                    locationManager,
-                    LocationManager.NETWORK_PROVIDER,
-                    // 网络定位间隔可更宽松，比如8秒，进一步节能
-                    new LocationRequestCompat.Builder(8000L)
-                        .setMinUpdateDistanceMeters(10.0f)
-                        .build(),
-                    executor,
-                    locationListener1
-                );
-
-                // 添加GPS状态侦听
+                // 保留GPS状态侦听（可选，用于卫星数量/信号强度显示）
                 if (locationManager != null) {
                     // locationManager.addGpsStatusListener(gpsStatusListener);
                 }
@@ -2015,21 +1983,6 @@ public class MyActivity
                     REQUEST_CODE_POST_NOTIFICATIONS
                 );
             }
-        }
-
-        // 补充网络定位权限
-        if (
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) !=
-            PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                new String[] { Manifest.permission.ACCESS_COARSE_LOCATION },
-                2
-            );
         }
     }
 
