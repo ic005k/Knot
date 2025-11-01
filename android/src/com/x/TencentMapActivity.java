@@ -813,4 +813,20 @@ public class TencentMapActivity extends MapActivity {
         // 直接复用工具类的转换逻辑，避免重复代码
         return CoordinateConverterUtil.wgs84ToGcj02(wgsLat, wgsLng);
     }
+
+    // 新增：设置顶部日期文本的公开接口（父类统一定义）
+    @Override
+    public void setTopDate(String text) {
+        if (topDateLabel != null) {
+            runOnUiThread(() -> topDateLabel.setText(text)); // 确保UI线程操作
+        }
+    }
+
+    // 新增：设置底部信息文本的公开接口（父类统一定义）
+    @Override
+    public void setBottomInfo(String text) {
+        if (bottomInfoLabel != null) {
+            runOnUiThread(() -> bottomInfoLabel.setText(text)); // 确保UI线程操作
+        }
+    }
 }

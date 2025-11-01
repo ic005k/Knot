@@ -57,7 +57,6 @@ QVector<GPSCoordinate> detectAndCorrectOutliers(
     const QVector<GPSCoordinate>& data, double threshold);
 
 #ifdef Q_OS_ANDROID
-
 QJniObject m_activity;
 #endif
 
@@ -995,12 +994,6 @@ void Steps::refreshTotalDistance() {
 }
 
 void Steps::refreshMotionData() {
-  // QQuickWidget 渲染状态无效 → 返回
-  if (mui->qwGpsList->status() != QQuickWidget::Ready) {
-    qWarning() << "QQuickWidget 未就绪，跳过刷新";
-    return;
-  }
-
   refreshTotalDistance();
 
   strEndTime = QTime::currentTime().toString();
@@ -1040,11 +1033,11 @@ void Steps::refreshMotionData() {
     startTime1 = text1.split("-").at(0);
     startTime2 = t1.split("-").at(0);
 
-    if (text0 == t00 && startTime1 == startTime2) {
-      // updateGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
-    } else {
-      // insertGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
-    }
+    // if (text0 == t00 && startTime1 == startTime2) {
+    //  updateGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
+    //} else {
+    // insertGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
+    //}
 
     strGpsMapDateTime = t00 + " " + t1;
     setDateLabelToAndroid(strGpsMapDateTime);
