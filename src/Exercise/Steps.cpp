@@ -1168,6 +1168,8 @@ void Steps::loadGpsList(int nYear, int nMonth) {
 
     insertGpsList(0, t0, t1, t2, t3, t4, t5, t6);
   }
+
+  if (count > 0) m_Method->setCurrentIndexFromQW(mui->qwGpsList, 0);
 }
 
 void Steps::selGpsListYearMonth() {
