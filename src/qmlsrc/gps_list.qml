@@ -254,7 +254,7 @@ Rectangle {
                 anchors.bottomMargin: 5
 
                 Rectangle {
-                    width: parent.width
+                    Layout.fillWidth: true // 自动填充colLayout宽度，适配内边距
                     height: item0.contentHeight
                     color: item0.text.indexOf(
                                qsTr("Cycling")) ? (item0.text.indexOf(
@@ -414,79 +414,70 @@ Rectangle {
                 }
 
                 RowLayout {
-                    Layout.alignment: Qt.AlignHCenter // 整体水平居中
-                    width: parent.width // 占满父容器宽度
-                    spacing: 10 // 两个按钮之间的间距（可调整）
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 10 // 左边距
-                    Layout.rightMargin: 10 // 右边距
+                    id: buttonLayout
+                    Layout.alignment: Qt.AlignLeft // 左对齐
+                    spacing: 8 // 按钮间距
+                    Layout.leftMargin: 5 // 左边缘留白
+                    Layout.bottomMargin: 8 // 底部留白，避免压边界
 
-                    // 原 View GPS Track 按钮（保留原有逻辑和样式）
+                    // 轨迹图标按钮
                     Button {
                         id: btnViewGpsTrack
-                        text: qsTr("GPS Track")
-                        Layout.fillWidth: true // 自动平分父布局宽度
-                        Layout.minimumWidth: 80 // 最小宽度，避免过窄
-                        height: 35
+                        width: 40 // 固定宽度
+                        height: 40 // 固定高度
                         enabled: true
                         visible: listItem.ListView.isCurrentItem // 仅选中条目显示
+
+                        // 图标根据深色模式切换
+                        contentItem: Image {
+                            source: isDark ? "/res/track_l.svg" : "/res/track.svg"
+                            sourceSize: Qt.size(24, 24) // 图标大小
+                            fillMode: Image.PreserveAspectFit
+                        }
+
+                        // 简化背景，保持点击反馈
+                        background: Rectangle {
+                            color: btnViewGpsTrack.down ? "#4CAF50" : (isDark ? "#444" : "#CCC")
+                            radius: 4
+                            border.color: "#4CAF50"
+                            border.width: 1
+                        }
 
                         onClicked: {
                             strGpsTime = item0.text + "-=-" + item1.text + "-=-"
                                     + item2.text + "-=-" + item4.text
                             m_Steps.getGpsTrack()
                         }
-
-                        background: Rectangle {
-                            width: parent.width
-                            color: btnViewGpsTrack.down ? "#4CAF50" : "#8BC34A"
-                            radius: 5
-                            border.color: "#4CAF50"
-                            border.width: 2
-                        }
-
-                        contentItem: Text {
-                            text: btnViewGpsTrack.text
-                            font.pixelSize: 14
-                            color: "white"
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
                     }
 
-                    // 新增 Route 按钮（样式与原按钮一致）
+                    // 路线图标按钮
                     Button {
                         id: btnRoute
-                        text: qsTr("Route")
-                        Layout.fillWidth: true // 自动平分父布局宽度
-                        Layout.minimumWidth: 80 // 最小宽度，避免过窄
-                        height: 35
+                        width: 40 // 固定宽度
+                        height: 40 // 固定高度
                         enabled: true
                         visible: isShowRoute
                                  && listItem.ListView.isCurrentItem // 仅选中条目显示
 
-                        onClicked: {
+                        // 图标根据深色模式切换
+                        contentItem: Image {
+                            source: isDark ? "/res/route_l.svg" : "/res/route.svg"
+                            sourceSize: Qt.size(24, 24) // 图标大小
+                            fillMode: Image.PreserveAspectFit
+                        }
 
+                        // 与轨迹按钮保持一致的背景样式
+                        background: Rectangle {
+                            color: btnRoute.down ? "#4CAF50" : (isDark ? "#444" : "#CCC")
+                            radius: 4
+                            border.color: "#4CAF50"
+                            border.width: 1
+                        }
+
+                        onClicked: {
                             strGpsTime = item0.text + "-=-" + item1.text + "-=-"
                                     + item2.text + "-=-" + item4.text
                             m_Steps.getRouteList(strGpsTime)
-                        }
-
-                        // 样式与原按钮统一，保持 UI 一致性
-                        background: Rectangle {
-                            width: parent.width
-                            color: btnRoute.down ? "#4CAF50" : "#8BC34A" // 同原按钮颜色
-                            radius: 5
-                            border.color: "#4CAF50"
-                            border.width: 2
-                        }
-
-                        contentItem: Text {
-                            text: btnRoute.text
-                            font.pixelSize: 14
-                            color: "white"
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
                         }
                     }
                 }
