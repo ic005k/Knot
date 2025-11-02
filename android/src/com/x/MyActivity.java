@@ -135,14 +135,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Queue; // 导入Queue接口（属于java.util包）
 import java.util.Random;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentLinkedQueue; // 导入线程安全的队列实现（属于java.util.concurrent包）
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService; // 新增导入，解决ExecutorService找不到问题
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit; // 导入时间单位枚举类
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -161,6 +164,13 @@ public class MyActivity
 
     // 新增：标记GPS是否正在运行
     public static boolean isGpsRunning = false;
+    // 新增：GPS是否就绪（仅通过定位精度判定，无卫星检测）
+    private boolean isGpsReady = false;
+    // 滑动窗口队列（线程安全版）
+    private Queue<Float> accuracyHistory = new ConcurrentLinkedQueue<>();
+    private static final int ACCURACY_WINDOW_SIZE = 5; // 窗口大小：最近5次精度
+    private static final float GPS_GOOD_THRESHOLD = 20.0f; // 单次达标阈值
+    private static final float GPS_BAD_THRESHOLD = 30.0f; // 单次超标阈值
 
     public static MapActivity mapActivityInstance = null;
     public static List<GeoPoint> osmTrackPoints = new ArrayList<>();
@@ -257,7 +267,8 @@ public class MyActivity
     private LocationManager locationManager;
     private double latitude = 0;
     private double longitude = 0;
-    private Executor executor;
+    private Executor gpsExecutor; // GPS专用线程（高优先级）
+    private Executor networkExecutor; // 网络定位专用线程（低优先级）
 
     private boolean isTracking = false;
     private long startTime = 0L;
@@ -609,10 +620,40 @@ public class MyActivity
         new LocationListenerCompat() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
-                // 位置更新时触发
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
-                updateTrackingData(location);
+                if (
+                    LocationManager.GPS_PROVIDER.equals(location.getProvider())
+                ) {
+                    boolean stable = isGpsStable(location);
+                    boolean unstable = isGpsUnstable(location);
+
+                    // 稳定→切回GPS（停用网络）
+                    if (stable && !isGpsReady) {
+                        isGpsReady = true;
+                        stopNetworkLocationUpdates();
+                        Log.i(
+                            TAG,
+                            "GPS窗口内稳定（" +
+                                ACCURACY_WINDOW_SIZE +
+                                "次中多数达标），切回GPS"
+                        );
+                    }
+                    // 不稳定→切换到网络定位
+                    else if (unstable && isGpsReady) {
+                        isGpsReady = false;
+                        startNetworkLocationUpdates();
+                        Log.i(
+                            TAG,
+                            "GPS窗口内不稳定（" +
+                                ACCURACY_WINDOW_SIZE +
+                                "次中多数超标），切换到网络"
+                        );
+                    }
+
+                    // 正常更新轨迹（逻辑不变）
+                    latitude = location.getLatitude();
+                    longitude = location.getLongitude();
+                    updateTrackingData(location);
+                }
             }
 
             @Override
@@ -638,54 +679,42 @@ public class MyActivity
             @Override
             public void onProviderEnabled(@NonNull String provider) {
                 Log.d(TAG, "Provider enabled: " + provider);
+                if (
+                    LocationManager.GPS_PROVIDER.equals(provider) &&
+                    isGpsRunning
+                ) {
+                    // 关键修复：先移除已有监听，避免重复注册
+                    try {
+                        LocationManagerCompat.removeUpdates(
+                            locationManager,
+                            locationListener1
+                        );
+                        Log.i(TAG, "已移除旧的GPS监听器，准备重新注册");
+                    } catch (SecurityException e) {
+                        Log.e(TAG, "移除GPS监听器失败（权限问题）", e);
+                        return; // 权限不足时直接返回，避免无效注册
+                    }
+
+                    // 重新发起位置更新请求（复用配置）
+                    LocationRequestCompat locationRequest =
+                        new LocationRequestCompat.Builder(2000L)
+                            .setMinUpdateDistanceMeters(1.0f)
+                            .build();
+                    LocationManagerCompat.requestLocationUpdates(
+                        locationManager,
+                        LocationManager.GPS_PROVIDER,
+                        locationRequest,
+                        gpsExecutor,
+                        locationListener1
+                    );
+                    previousLocation = null; // 重置初始状态
+                    Log.i(TAG, "GPS已启用，重新注册监听器完成");
+                }
             }
 
             @Override
             public void onProviderDisabled(@NonNull String provider) {
                 Log.d(TAG, "Provider disabled: " + provider);
-            }
-        };
-
-    private final GpsStatus.Listener gpsStatusListener =
-        new GpsStatus.Listener() {
-            @Override
-            public void onGpsStatusChanged(int event) {
-                if (locationManager != null) {
-                    GpsStatus gpsStatus = locationManager.getGpsStatus(null);
-                    switch (event) {
-                        case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-                            Iterable<GpsSatellite> satellites =
-                                gpsStatus.getSatellites();
-                            Iterator<GpsSatellite> it = satellites.iterator();
-                            int satelliteCount = 0;
-                            StringBuilder statusText = new StringBuilder();
-                            while (it.hasNext()) {
-                                GpsSatellite satellite = it.next();
-                                satelliteCount++;
-                                statusText
-                                    .append("卫星 ")
-                                    .append(satelliteCount)
-                                    .append(" 强度: ")
-                                    .append(satellite.getSnr())
-                                    .append("\n");
-                            }
-                            statusText
-                                .insert(0, "可见卫星数量: ")
-                                .append(satelliteCount)
-                                .append("\n");
-                            strGpsStatus = statusText.toString();
-                            break;
-                        case GpsStatus.GPS_EVENT_FIRST_FIX:
-                            // 首次定位成功
-                            break;
-                        case GpsStatus.GPS_EVENT_STARTED:
-                            // GPS启动
-                            break;
-                        case GpsStatus.GPS_EVENT_STOPPED:
-                            // GPS停止
-                            break;
-                    }
-                }
             }
         };
 
@@ -736,8 +765,19 @@ public class MyActivity
             );
         }
 
-        // 重新创建线程池（确保每次启动都是新实例）
-        executor = Executors.newSingleThreadExecutor();
+        // 为GPS创建独立线程（命名线程名，方便调试）
+        gpsExecutor = Executors.newSingleThreadExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "GPS-Update-Thread");
+            thread.setPriority(Thread.MAX_PRIORITY); // 提高GPS线程优先级
+            return thread;
+        });
+
+        // 为网络定位创建独立线程
+        networkExecutor = Executors.newSingleThreadExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "Network-Update-Thread");
+            thread.setPriority(Thread.NORM_PRIORITY); // 普通优先级
+            return thread;
+        });
 
         // 强化状态校验：再次检查位置服务是否开启
         boolean isGpsEnabled = locationManager.isProviderEnabled(
@@ -775,30 +815,45 @@ public class MyActivity
         if (permission != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                 this,
-                new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
+                new String[] {
+                    Manifest.permission.ACCESS_FINE_LOCATION, // GPS定位（原有）
+                    Manifest.permission.ACCESS_COARSE_LOCATION, // 网络定位（新增，用于基站/WiFi辅助）
+                },
                 1
             );
             isGpsRunning = false;
             return 0;
         }
 
-        // 请求位置更新（与原逻辑一致，保留）
+        // 定义GPS定位请求配置（和原逻辑参数一致）
         LocationRequestCompat locationRequest =
-            new LocationRequestCompat.Builder(2000L)
-                .setMinUpdateDistanceMeters(1.0f)
+            new LocationRequestCompat.Builder(2000L) // 更新间隔2000ms（2秒）
+                .setMinUpdateDistanceMeters(1.0f) // 最小移动1米才更新
                 .build();
+
+        // 定义网络定位请求配置（和原逻辑参数一致）
+        LocationRequestCompat networkLocationRequest =
+            new LocationRequestCompat.Builder(2000L) // 更新间隔2000ms（2秒）
+                .setMinUpdateDistanceMeters(5.0f) // 最小移动5米才更新（降低网络定位功耗）
+                .build();
+
+        // GPS定位使用gpsExecutor
         LocationManagerCompat.requestLocationUpdates(
             locationManager,
             LocationManager.GPS_PROVIDER,
             locationRequest,
-            executor,
+            gpsExecutor, // 专用线程
             locationListener1
         );
 
-        // 启用GPS状态监听时需添加（可选）
-        // if (locationManager != null) {
-        //     locationManager.addGpsStatusListener(gpsStatusListener);
-        // }
+        // 网络定位使用networkExecutor
+        LocationManagerCompat.requestLocationUpdates(
+            locationManager,
+            LocationManager.NETWORK_PROVIDER,
+            networkLocationRequest,
+            networkExecutor, // 专用线程
+            networkLocationListener
+        );
 
         return 1;
     }
@@ -823,39 +878,71 @@ public class MyActivity
         return longitude;
     }
 
-    // 停止 GPS 更新
     public double stopGpsUpdates() {
         setVibrate();
         isGpsRunning = false;
+        isGpsReady = false;
+        stopNetworkLocationUpdates();
 
-        // 1. 移除位置监听器
-        if (locationManager != null && locationListener1 != null) {
-            try {
-                LocationManagerCompat.removeUpdates(
-                    locationManager,
-                    locationListener1
-                );
-            } catch (SecurityException e) {
-                e.printStackTrace();
+        // 1. 移除位置监听器（核心，先停数据来源）
+        if (locationManager != null) {
+            if (locationListener1 != null) {
+                try {
+                    LocationManagerCompat.removeUpdates(
+                        locationManager,
+                        locationListener1
+                    );
+                } catch (SecurityException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (networkLocationListener != null) {
+                try {
+                    LocationManagerCompat.removeUpdates(
+                        locationManager,
+                        networkLocationListener
+                    );
+                } catch (SecurityException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
-        // 2. 移除GPS状态监听器（即使当前注释，预留兼容）
-        if (locationManager != null && gpsStatusListener != null) {
-            locationManager.removeGpsStatusListener(gpsStatusListener);
+        // 2. 关闭GPS线程池（强制终止+等待）
+        if (gpsExecutor instanceof ExecutorService) {
+            ExecutorService gpsService = (ExecutorService) gpsExecutor;
+            gpsService.shutdownNow(); // 强制终止所有正在执行的任务
+            try {
+                // 等待1秒让线程池终止（超时后不再等待，避免阻塞主线程）
+                if (!gpsService.awaitTermination(1, TimeUnit.SECONDS)) {
+                    Log.w(TAG, "GPS线程池未在1秒内终止，可能残留任务");
+                }
+            } catch (InterruptedException e) {
+                // 等待被中断时，再次尝试终止
+                gpsService.shutdownNow();
+                Thread.currentThread().interrupt(); // 恢复中断状态
+            }
+            gpsExecutor = null;
         }
 
-        // 3. 关闭线程池（优雅关闭，避免线程泄漏）
-        if (executor != null) {
-            ((ExecutorService) executor).shutdown();
-            executor = null;
+        // 3. 关闭网络定位线程池（同上逻辑）
+        if (networkExecutor instanceof ExecutorService) {
+            ExecutorService networkService = (ExecutorService) networkExecutor;
+            networkService.shutdownNow();
+            try {
+                if (!networkService.awaitTermination(1, TimeUnit.SECONDS)) {
+                    Log.w(TAG, "网络定位线程池未在1秒内终止，可能残留任务");
+                }
+            } catch (InterruptedException e) {
+                networkService.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+            networkExecutor = null;
         }
 
-        // 4. 重置追踪数据，避免下次启动复用
+        // 4. 重置状态
         previousLocation = null;
         previousAltitude = 0f;
-
-        // 5. 置空核心实例，释放资源
         locationManager = null;
 
         return totalDistance;
@@ -2422,5 +2509,165 @@ public class MyActivity
             }
         }
         return newPoints;
+    }
+
+    // 网络定位监听器（仅辅助，不覆盖GPS数据）
+    private final LocationListenerCompat networkLocationListener =
+        new LocationListenerCompat() {
+            @Override
+            public void onLocationChanged(@NonNull Location location) {
+                // GPS未就绪时，网络定位正常生成轨迹（去掉初始位置限制）
+                if (!isGpsReady) {
+                    latitude = location.getLatitude();
+                    longitude = location.getLongitude();
+                    updateTrackingData(location); // 关键：调用轨迹计算方法
+                    Log.i(
+                        TAG,
+                        "网络定位更新（生成轨迹）：精度=" +
+                            location.getAccuracy() +
+                            "米"
+                    );
+                    updateUI(location); // 同步更新UI
+                } else {
+                    // GPS已就绪，忽略网络定位数据
+                    Log.d(TAG, "GPS已就绪，忽略网络定位数据");
+                }
+            }
+
+            @Override
+            public void onStatusChanged(
+                String provider,
+                int status,
+                Bundle extras
+            ) {
+                Log.d(
+                    TAG,
+                    "网络定位状态变化：" + provider + "，状态=" + status
+                );
+            }
+
+            @Override
+            public void onProviderEnabled(@NonNull String provider) {
+                Log.d(TAG, "网络定位已启用：" + provider);
+            }
+
+            @Override
+            public void onProviderDisabled(@NonNull String provider) {
+                Log.d(TAG, "网络定位已禁用：" + provider);
+            }
+        };
+
+    // 停止网络定位更新（GPS就绪后调用，既防数据冲突又省耗电）
+    private void stopNetworkLocationUpdates() {
+        if (locationManager != null && networkLocationListener != null) {
+            try {
+                LocationManagerCompat.removeUpdates(
+                    locationManager,
+                    networkLocationListener
+                );
+                Log.i(TAG, "GPS就绪，停止网络定位（省功耗+防干扰）");
+            } catch (SecurityException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // 重新启用网络定位（GPS信号差时调用）
+    private void startNetworkLocationUpdates() {
+        // 1. 基础条件校验（定位未启动或核心实例为空时直接返回）
+        if (
+            locationManager == null ||
+            networkLocationListener == null ||
+            !isGpsRunning
+        ) {
+            Log.w(TAG, "网络定位启动失败：定位未运行或核心实例为空");
+            return;
+        }
+
+        // 2. 新增：检查网络定位是否被用户启用（核心补充）
+        boolean isNetworkEnabled = locationManager.isProviderEnabled(
+            LocationManager.NETWORK_PROVIDER
+        );
+        if (!isNetworkEnabled) {
+            Log.w(
+                TAG,
+                "网络定位启动失败：用户已禁用网络定位（请在位置服务中开启）"
+            );
+            return;
+        }
+
+        // 3. 权限校验（确保有网络定位权限）
+        if (
+            ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            Log.w(TAG, "网络定位启动失败：缺少粗略定位权限");
+            return;
+        }
+
+        // 4. 复用配置，注册网络定位监听器
+        LocationRequestCompat networkLocationRequest =
+            new LocationRequestCompat.Builder(2000L)
+                .setMinUpdateDistanceMeters(5.0f)
+                .build();
+
+        LocationManagerCompat.requestLocationUpdates(
+            locationManager,
+            LocationManager.NETWORK_PROVIDER,
+            networkLocationRequest,
+            networkExecutor,
+            networkLocationListener
+        );
+        Log.i(TAG, "网络定位已成功启用（GPS信号差兜底）");
+    }
+
+    private boolean isGpsStable(Location location) {
+        // 1. 过滤无效定位（经纬度为0时不纳入统计）
+        if (location.getLatitude() == 0 || location.getLongitude() == 0) {
+            return false;
+        }
+
+        // 2. 添加当前精度到窗口，超出大小则移除最早的
+        accuracyHistory.offer(location.getAccuracy());
+        if (accuracyHistory.size() > ACCURACY_WINDOW_SIZE) {
+            accuracyHistory.poll();
+        }
+
+        // 3. 窗口未满时（刚开始定位），暂不判定为稳定（避免数据不足导致误判）
+        if (accuracyHistory.size() < ACCURACY_WINDOW_SIZE) {
+            return false;
+        }
+
+        // 4. 统计窗口内达标的次数（≤20米）
+        long goodCount = accuracyHistory
+            .stream()
+            .filter(acc -> acc <= GPS_GOOD_THRESHOLD)
+            .count();
+
+        // 5. 达标率≥80%则判定为稳定（5次中至少4次达标）
+        return goodCount >= ACCURACY_WINDOW_SIZE * 0.8;
+    }
+
+    private boolean isGpsUnstable(Location location) {
+        if (location.getLatitude() == 0 || location.getLongitude() == 0) {
+            return true; // 无效定位直接判定为差
+        }
+
+        // 复用同一个窗口（无需额外维护队列，避免冗余）
+        if (accuracyHistory.size() < ACCURACY_WINDOW_SIZE) {
+            return false; // 窗口未满时，不轻易判定为变差
+        }
+
+        // 统计窗口内超标的次数（>30米）
+        long badCount = accuracyHistory
+            .stream()
+            .filter(acc -> acc > GPS_BAD_THRESHOLD)
+            .count();
+
+        // 超标率≥80%则判定为不稳定
+        return badCount >= ACCURACY_WINDOW_SIZE * 0.8;
     }
 }

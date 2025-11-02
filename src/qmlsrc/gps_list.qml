@@ -191,9 +191,8 @@ Rectangle {
 
         Rectangle {
             id: listItem
-            width: ListView.view.width
-
-            height: colLayout.implicitHeight + 5
+            width: ListView.view.width // 仅依赖ListView宽度，无闭环
+            height: colLayout.implicitHeight + 15 // 高度由子元素内容决定
 
             //color: index % 2 === 0 ? "#f0f0f0" : "#e0e0e0"
             color: isDark ? "#333" : "#DDD"
@@ -245,259 +244,249 @@ Rectangle {
                     /* 双击逻辑 */ }
             }
 
-            RowLayout {
-
-                id: idlistElemnet
-
-                width: parent.width
+            ColumnLayout {
+                id: colLayout
+                anchors.fill: parent // 直接填充listItem
                 spacing: 2
-                Layout.fillWidth: true
+                anchors.leftMargin: 10 // 新增：左内边距10
+                anchors.rightMargin: 10 // 新增：右内边距10
+                anchors.topMargin: 5
+                anchors.bottomMargin: 5
 
-                ColumnLayout {
-                    id: colLayout
-                    height: parent.height
+                Rectangle {
                     width: parent.width
-                    spacing: 2
-                    Layout.fillWidth: true
-                    anchors.leftMargin: 0
-                    anchors.rightMargin: 0
+                    height: item0.contentHeight
+                    color: item0.text.indexOf(
+                               qsTr("Cycling")) ? (item0.text.indexOf(
+                                                       qsTr("Hiking")) ? (item0.text.indexOf(qsTr("Running")) ? strTitleColor : "#87CEFA") : "#98FB98") : "#FFA500"
 
-                    Rectangle {
-                        width: parent.width
-                        height: item0.contentHeight
-                        color: item0.text.indexOf(
-                                   qsTr("Cycling")) ? (item0.text.indexOf(
-                                                           qsTr("Hiking")) ? (item0.text.indexOf(qsTr("Running")) ? strTitleColor : "#87CEFA") : "#98FB98") : "#FFA500"
+                    Text {
+                        id: item0
 
-                        Text {
-                            id: item0
-
-                            width: parent.width
-                            Layout.preferredWidth: listItem.width
-                            Layout.alignment: Qt.AlignHCenter
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            wrapMode: TextArea.NoWrap
-                            font.bold: true
-                            text: text0
-
-                            color: isDark ? "#333" : "#333"
-
-                            leftPadding: 5
-                            rightPadding: 5
-                        }
-                    }
-
-                    RowLayout {
-                        id: weatherTextContainer
-                        Layout.preferredWidth: listItem.width
+                        Layout.fillWidth: true
                         Layout.alignment: Qt.AlignHCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        wrapMode: TextArea.NoWrap
+                        font.bold: true
+                        text: text0
 
-                        // 显示SVG图标的组件
-                        Image {
-                            id: weatherIcon
-                            source: item6.text
-                            sourceSize.height: 42
-                            sourceSize.width: 42
-                            fillMode: Image.PreserveAspectFit
-                            Layout.alignment: Qt.AlignVCenter
-                            Layout.leftMargin: 5
-                            visible: item6.text.length ? true : false
-                        }
+                        color: isDark ? "#333" : "#333"
 
-                        Text {
-                            id: item1
-                            Layout.preferredWidth: listItem.width
+                        leftPadding: 5
+                        rightPadding: 5
+                    }
+                }
 
-                            Layout.alignment: Qt.AlignHCenter
-                            horizontalAlignment: Text.AlignLeft
-                            verticalAlignment: Text.AlignVCenter
+                RowLayout {
+                    id: weatherTextContainer
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter
 
-                            width: parent.width
-                            wrapMode: TextArea.WordWrap
-
-                            font.pointSize: item0.font.pointSize - 1
-                            font.bold: false
-                            color: isDark ? "#BBB" : "#555"
-                            text: text1
-
-                            leftPadding: 5
-                            rightPadding: 5
-
-                            visible: item1.text.length ? true : false
-                        }
+                    // 显示SVG图标的组件
+                    Image {
+                        id: weatherIcon
+                        source: item6.text
+                        sourceSize.height: 42
+                        sourceSize.width: 42
+                        fillMode: Image.PreserveAspectFit
+                        Layout.alignment: Qt.AlignVCenter
+                        Layout.leftMargin: 5
+                        visible: item6.text.length ? true : false
                     }
 
                     Text {
-                        id: item2
-                        anchors.rightMargin: 0
-                        Layout.preferredWidth: listItem.width
-                        Layout.alignment: Qt.AlignHCenter
+                        id: item1
+                        Layout.fillWidth: true
 
+                        Layout.alignment: Qt.AlignHCenter
                         horizontalAlignment: Text.AlignLeft
+                        verticalAlignment: Text.AlignVCenter
+
                         width: parent.width
                         wrapMode: TextArea.WordWrap
+
+                        font.pointSize: item0.font.pointSize - 1
                         font.bold: false
-                        text: text2
-                        color: isDark ? "#FF6666" : "red"
+                        color: isDark ? "#BBB" : "#555"
+                        text: text1
 
                         leftPadding: 5
                         rightPadding: 5
 
-                        visible: item2.text.length ? true : false
+                        visible: item1.text.length ? true : false
                     }
+                }
 
-                    Text {
-                        id: item3
-                        anchors.rightMargin: 0
-                        width: parent.width
-                        wrapMode: Text.WrapAnywhere
-                        elide: Text.ElideRight
+                Text {
+                    id: item2
+                    anchors.rightMargin: 0
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter
 
-                        Layout.preferredWidth: listItem.width
-                        font.bold: false
-                        text: text3
+                    horizontalAlignment: Text.AlignLeft
+                    width: parent.width
+                    wrapMode: TextArea.WordWrap
+                    font.bold: false
+                    text: text2
+                    color: isDark ? "#FF6666" : "red"
 
-                        color: isDark ? "#DDD" : "#333"
+                    leftPadding: 5
+                    rightPadding: 5
 
-                        leftPadding: 5
-                        rightPadding: 5
+                    visible: item2.text.length ? true : false
+                }
 
-                        visible: item3.text.length ? true : false
-                    }
+                Text {
+                    id: item3
+                    anchors.rightMargin: 0
+                    Layout.fillWidth: true
+                    wrapMode: Text.WrapAnywhere
+                    elide: Text.ElideRight
 
-                    Text {
-                        id: item4
-                        anchors.rightMargin: 0
-                        width: parent.width
-                        wrapMode: Text.WrapAnywhere
-                        elide: Text.ElideRight
+                    Layout.preferredWidth: listItem.width
+                    font.bold: false
+                    text: text3
 
-                        Layout.preferredWidth: listItem.width
-                        font.bold: false
-                        text: text4
+                    color: isDark ? "#DDD" : "#333"
 
-                        color: isDark ? "#6666FF" : "blue"
+                    leftPadding: 5
+                    rightPadding: 5
 
-                        leftPadding: 5
-                        rightPadding: 5
+                    visible: item3.text.length ? true : false
+                }
 
-                        visible: item4.text.length ? true : false
-                    }
+                Text {
+                    id: item4
+                    anchors.rightMargin: 0
+                    Layout.fillWidth: true
+                    wrapMode: Text.WrapAnywhere
+                    elide: Text.ElideRight
 
-                    Text {
-                        id: item5
-                        anchors.rightMargin: 0
-                        width: parent.width
-                        wrapMode: Text.WrapAnywhere
-                        elide: Text.ElideRight
+                    Layout.preferredWidth: listItem.width
+                    font.bold: false
+                    text: text4
 
-                        Layout.preferredWidth: listItem.width
-                        font.bold: false
-                        text: text5
+                    color: isDark ? "#6666FF" : "blue"
 
-                        color: isDark ? "#DDD" : "#333"
+                    leftPadding: 5
+                    rightPadding: 5
 
-                        leftPadding: 5
-                        rightPadding: 5
+                    visible: item4.text.length ? true : false
+                }
 
-                        visible: item5.text.length ? true : false
-                    }
+                Text {
+                    id: item5
+                    anchors.rightMargin: 0
+                    Layout.fillWidth: true
+                    wrapMode: Text.WrapAnywhere
+                    elide: Text.ElideRight
 
-                    Text {
-                        id: item6
-                        anchors.rightMargin: 0
-                        width: parent.width
-                        wrapMode: Text.WrapAnywhere
-                        elide: Text.ElideRight
+                    Layout.preferredWidth: listItem.width
+                    font.bold: false
+                    text: text5
 
-                        Layout.preferredWidth: listItem.width
-                        font.bold: false
-                        text: text6
+                    color: isDark ? "#DDD" : "#333"
 
-                        color: isDark ? "#DDD" : "#333"
+                    leftPadding: 5
+                    rightPadding: 5
 
-                        leftPadding: 5
-                        rightPadding: 5
+                    visible: item5.text.length ? true : false
+                }
 
-                        visible: false
-                    }
+                Text {
+                    id: item6
+                    anchors.rightMargin: 0
+                    Layout.fillWidth: true
+                    wrapMode: Text.WrapAnywhere
+                    elide: Text.ElideRight
 
-                    RowLayout {
-                        Layout.alignment: Qt.AlignHCenter // 整体水平居中
-                        width: parent.width // 占满父容器宽度
-                        spacing: 10 // 两个按钮之间的间距（可调整）
-                        Layout.fillWidth: true
-                        Layout.leftMargin: 10 // 左边距
-                        Layout.rightMargin: 10 // 右边距
+                    Layout.preferredWidth: listItem.width
+                    font.bold: false
+                    text: text6
 
-                        // 原 View GPS Track 按钮（保留原有逻辑和样式）
-                        Button {
-                            id: btnViewGpsTrack
-                            text: qsTr("GPS Track")
-                            Layout.fillWidth: true // 关键：平分宽度
-                            Layout.preferredWidth: parent.width / 2 - spacing / 2
-                            height: 35
-                            enabled: true
-                            visible: listItem.ListView.isCurrentItem // 仅选中条目显示
+                    color: isDark ? "#DDD" : "#333"
 
-                            onClicked: {
-                                strGpsTime = item0.text + "-=-" + item1.text
-                                        + "-=-" + item2.text + "-=-" + item4.text
-                                m_Steps.getGpsTrack()
-                            }
+                    leftPadding: 5
+                    rightPadding: 5
 
-                            background: Rectangle {
-                                width: parent.width
-                                color: btnViewGpsTrack.down ? "#4CAF50" : "#8BC34A"
-                                radius: 5
-                                border.color: "#4CAF50"
-                                border.width: 2
-                            }
+                    visible: false
+                }
 
-                            contentItem: Text {
-                                text: btnViewGpsTrack.text
-                                font.pixelSize: 14
-                                color: "white"
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
-                            }
+                RowLayout {
+                    Layout.alignment: Qt.AlignHCenter // 整体水平居中
+                    width: parent.width // 占满父容器宽度
+                    spacing: 10 // 两个按钮之间的间距（可调整）
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 10 // 左边距
+                    Layout.rightMargin: 10 // 右边距
+
+                    // 原 View GPS Track 按钮（保留原有逻辑和样式）
+                    Button {
+                        id: btnViewGpsTrack
+                        text: qsTr("GPS Track")
+                        Layout.fillWidth: true // 自动平分父布局宽度
+                        Layout.minimumWidth: 80 // 最小宽度，避免过窄
+                        height: 35
+                        enabled: true
+                        visible: listItem.ListView.isCurrentItem // 仅选中条目显示
+
+                        onClicked: {
+                            strGpsTime = item0.text + "-=-" + item1.text + "-=-"
+                                    + item2.text + "-=-" + item4.text
+                            m_Steps.getGpsTrack()
                         }
 
-                        // 新增 Route 按钮（样式与原按钮一致）
-                        Button {
-                            id: btnRoute
-                            text: qsTr("Route")
-                            Layout.fillWidth: true // 关键：平分宽度
-                            Layout.preferredWidth: parent.width / 2 - spacing / 2
-                            height: 35
-                            enabled: true
-                            visible: isShowRoute
-                                     && listItem.ListView.isCurrentItem // 仅选中条目显示
+                        background: Rectangle {
+                            width: parent.width
+                            color: btnViewGpsTrack.down ? "#4CAF50" : "#8BC34A"
+                            radius: 5
+                            border.color: "#4CAF50"
+                            border.width: 2
+                        }
 
-                            onClicked: {
+                        contentItem: Text {
+                            text: btnViewGpsTrack.text
+                            font.pixelSize: 14
+                            color: "white"
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                    }
 
-                                strGpsTime = item0.text + "-=-" + item1.text
-                                        + "-=-" + item2.text + "-=-" + item4.text
-                                m_Steps.getRouteList(strGpsTime)
-                            }
+                    // 新增 Route 按钮（样式与原按钮一致）
+                    Button {
+                        id: btnRoute
+                        text: qsTr("Route")
+                        Layout.fillWidth: true // 自动平分父布局宽度
+                        Layout.minimumWidth: 80 // 最小宽度，避免过窄
+                        height: 35
+                        enabled: true
+                        visible: isShowRoute
+                                 && listItem.ListView.isCurrentItem // 仅选中条目显示
 
-                            // 样式与原按钮统一，保持 UI 一致性
-                            background: Rectangle {
-                                width: parent.width
-                                color: btnRoute.down ? "#4CAF50" : "#8BC34A" // 同原按钮颜色
-                                radius: 5
-                                border.color: "#4CAF50"
-                                border.width: 2
-                            }
+                        onClicked: {
 
-                            contentItem: Text {
-                                text: btnRoute.text
-                                font.pixelSize: 14
-                                color: "white"
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
-                            }
+                            strGpsTime = item0.text + "-=-" + item1.text + "-=-"
+                                    + item2.text + "-=-" + item4.text
+                            m_Steps.getRouteList(strGpsTime)
+                        }
+
+                        // 样式与原按钮统一，保持 UI 一致性
+                        background: Rectangle {
+                            width: parent.width
+                            color: btnRoute.down ? "#4CAF50" : "#8BC34A" // 同原按钮颜色
+                            radius: 5
+                            border.color: "#4CAF50"
+                            border.width: 2
+                        }
+
+                        contentItem: Text {
+                            text: btnRoute.text
+                            font.pixelSize: 14
+                            color: "white"
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
                         }
                     }
                 }
