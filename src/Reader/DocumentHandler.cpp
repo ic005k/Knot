@@ -236,7 +236,6 @@ QString DocumentHandler::fileType() const {
 QUrl DocumentHandler::fileUrl() const { return m_fileUrl; }
 
 void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
-  m_Method->isClickLink = true;
   mui->btnAutoStop->click();
 
   if (mw_one->curx != 0) return;

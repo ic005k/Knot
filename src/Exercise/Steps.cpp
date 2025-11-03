@@ -93,6 +93,8 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mui->lblRunTime->setStyleSheet(lblStyle);
   mui->lblAverageSpeed->setStyleSheet(lblStyle);
   mui->lblGpsInfo->setStyleSheet(lblStyle);
+  font1.setPointSize(12);
+  if (!isAndroid) mui->lblGpsInfo->setFont(font1);
 
   mui->lblYearTotal->setStyleSheet(mui->lblMonthTotal->styleSheet());
   mui->btnGetGpsListData->hide();
@@ -905,14 +907,8 @@ void Steps::updateGetGps() {
 
         weatherFetcher->fetchWeather(latitude, longitude);
 
-        if (isShowRoute) {
-          latRoute = latitude;
-          lonRoute = longitude;
-          timeRoute = currentTime.time().toString();
-          distanceRoute = str1;
-          speedRoute = str3;
-          getAddress(latitude, longitude);
-        }
+        refreshRoute();
+
         isInitTime = true;
       }
 
@@ -927,12 +923,7 @@ void Steps::updateGetGps() {
       if (isShowRoute) {
         if (m_lastGetAddressTime.secsTo(currentTime) >=
             150) {  // 距离上次超过150秒
-          latRoute = latitude;
-          lonRoute = longitude;
-          timeRoute = currentTime.time().toString();
-          distanceRoute = str1;
-          speedRoute = str3;
-          getAddress(latitude, longitude);
+          refreshRoute();
           m_lastGetAddressTime = currentTime;  // 更新上次执行时间
         }
 
@@ -947,12 +938,7 @@ void Steps::updateGetGps() {
 }
 
 void Steps::stopRecordMotion() {
-  if (isShowRoute) {
-    latRoute = latitude;
-    lonRoute = longitude;
-    timeRoute = QDateTime::currentDateTime().time().toString();
-    getAddress(latitude, longitude);
-  }
+  refreshRoute();
 
   QTimer::singleShot(2000, mw_one, [this]() {
     timer->stop();
@@ -987,6 +973,17 @@ void Steps::stopRecordMotion() {
 
   mui->gboxMotionType->setEnabled(true);
   mui->btnSelGpsDate->setEnabled(true);
+}
+
+void Steps::refreshRoute() {
+  if (isShowRoute) {
+    latRoute = latitude;
+    lonRoute = longitude;
+    timeRoute = QDateTime::currentDateTime().time().toString();
+    distanceRoute = str1;
+    speedRoute = str3;
+    getAddress(latitude, longitude);
+  }
 }
 
 void Steps::refreshTotalDistance() {

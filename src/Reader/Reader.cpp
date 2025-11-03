@@ -2391,7 +2391,8 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
 
       // mw_one->timerMousePress->start(1300);
       if (isAutoRun)
-        mui->qwReader->rootContext()->setContextProperty("isAutoRun", false);
+        mui->qwReader->rootContext()->setContextProperty("isAutoRun",
+                                                         QVariant(false));
 
       // 映射到原有鼠标事件的坐标变量
       press_x = pressPos.x();
@@ -2410,7 +2411,8 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       relea_y = currentPos.y();
 
       if (isAutoRun)
-        mui->qwReader->rootContext()->setContextProperty("isAutoRun", false);
+        mui->qwReader->rootContext()->setContextProperty("isAutoRun",
+                                                         QVariant(false));
 
       if (mw_one->isMousePress) {
         if (!isLandscape) {
@@ -2538,7 +2540,8 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
 
         // if (!mw_one->isMouseMove) mw_one->timerMousePress->start(1300);
         if (isAutoRun)
-          mui->qwReader->rootContext()->setContextProperty("isAutoRun", false);
+          mui->qwReader->rootContext()->setContextProperty("isAutoRun",
+                                                           QVariant(false));
       }
 
       if (event->type() == QEvent::MouseMove) {
@@ -2587,14 +2590,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       }
 
       if (event->type() == QEvent::MouseButtonDblClick) {
-        on_SetReaderFunVisible();
-
-        return true;
-
         // 双击逻辑
-        if (m_Method->isClickLink) {
-          m_Method->isClickLink = false;
-        }
 
         int h3 = mui->qwReader->height() / 3;
         int mY = event->position().y();
@@ -2605,11 +2601,15 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
         }
 
         if ((mY > qwY) && (mY < qwY + h3)) {
-          mw_one->m_Reader->setPageScroll0();
+          // mw_one->m_Reader->setPageScroll0();
         }
 
         if (mY > qwY + h3 * 2) {
-          mw_one->m_Reader->setPageScroll1();
+          // mw_one->m_Reader->setPageScroll1();
+          if (!isAutoRun)
+            mui->btnAutoRun->click();
+          else if (isAutoRun)
+            mui->btnAutoStop->click();
         }
       }
 
@@ -2743,15 +2743,6 @@ bool Reader::handleTouchPress(const QPointF &globalPos) {
 }
 
 void Reader::handleDoubleClick(const QPointF &globalPos) {
-  on_SetReaderFunVisible();
-
-  return;
-
-  // 处理链接点击状态
-  if (m_Method->isClickLink) {
-    m_Method->isClickLink = false;
-  }
-
   // 计算区域划分
   int h3 = mui->qwReader->height() / 3;
   int qwY = mui->qwReader->y();
@@ -2761,13 +2752,16 @@ void Reader::handleDoubleClick(const QPointF &globalPos) {
   if ((mY > qwY + h3) && (mY < qwY + h3 * 2)) {
     on_SetReaderFunVisible();
   }
-  // 上部分区域：滚动到顶部
+  // 上部分区域
   else if ((mY > qwY) && (mY < qwY + h3)) {
-    setPageScroll0();
+    // setPageScroll0();
   }
-  // 下部分区域：滚动到底部
+  // 下部分区域
   else if (mY > qwY + h3 * 2) {
-    setPageScroll1();
+    if (!isAutoRun)
+      mui->btnAutoRun->click();
+    else if (isAutoRun)
+      mui->btnAutoStop->click();
   }
 }
 

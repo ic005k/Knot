@@ -264,7 +264,8 @@ class Steps : public QDialog {
 
   void updateGpsList(int curIndex, QString t0, QString t1, QString t2,
                      QString t3, QString t4, QString t5, QString t6);
- signals:
+  void refreshRoute();
+  signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();

@@ -86,7 +86,6 @@ class Method : public QDialog {
 
   static QString getFileSize(const qint64 &size, int precision);
 
-  bool isClickLink = false;
   QWidget *m_widget;
   QString qssSlider;
   QString ColorToString(QColor v_color);
