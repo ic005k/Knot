@@ -202,6 +202,7 @@ class Steps : public QDialog {
   double longitude = 10.752109237521;
   double latRoute, lonRoute;
   QString timeRoute;
+  QString distanceRoute, speedRoute;
   double oldLat;
   double oldLon;
   QString strGpsStatus;
@@ -261,8 +262,9 @@ class Steps : public QDialog {
 
   QJsonArray routeMemoryCache;
 
-  void updateGpsList(int curIndex, QString t0, QString t1, QString t2, QString t3, QString t4, QString t5, QString t6);
-  signals:
+  void updateGpsList(int curIndex, QString t0, QString t1, QString t2,
+                     QString t3, QString t4, QString t5, QString t6);
+ signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();

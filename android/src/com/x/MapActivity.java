@@ -616,10 +616,10 @@ public class MapActivity extends Activity {
             osmMapView.onResume();
         }
 
-        // 关键：GPS运行且当前是有效地图实例，启动定时拉取
-        if (MyActivity.isGpsRunning && MyActivity.mapActivityInstance == this) {
-            startPullNewTrackTimer(); //被动拉取
-        }
+        // 暂时屏蔽定时获取轨迹,采用主动推送的方式
+        // if (MyActivity.isGpsRunning && MyActivity.mapActivityInstance == this) {
+        //     startPullNewTrackTimer(); //被动拉取
+        // }
     }
 
     @Override

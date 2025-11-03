@@ -908,7 +908,9 @@ void Steps::updateGetGps() {
         if (isShowRoute) {
           latRoute = latitude;
           lonRoute = longitude;
-          timeRoute = QDateTime::currentDateTime().time().toString();
+          timeRoute = currentTime.time().toString();
+          distanceRoute = str1;
+          speedRoute = str3;
           getAddress(latitude, longitude);
         }
         isInitTime = true;
@@ -928,6 +930,8 @@ void Steps::updateGetGps() {
           latRoute = latitude;
           lonRoute = longitude;
           timeRoute = currentTime.time().toString();
+          distanceRoute = str1;
+          speedRoute = str3;
           getAddress(latitude, longitude);
           m_lastGetAddressTime = currentTime;  // 更新上次执行时间
         }
@@ -1352,7 +1356,7 @@ void Steps::allGpsTotal() {
 
 void Steps::appendTrack(double lat, double lon) {
   addTrackDataToAndroid(lat, lon);
-  // appendTrackPointAndroid(lat, lon);
+  appendTrackPointAndroid(lat, lon);
 
   return;
 
@@ -2087,10 +2091,11 @@ void Steps::saveRoute(const QString& file, const QString& time, double lat,
 
   // 构造新的路由对象（字段类型严格匹配：字符串/数字）
   QJsonObject newRoute;
-  newRoute["time"] = time;        // 字符串类型
-  newRoute["lat"] = lat;          // 数字类型（double）
-  newRoute["lon"] = lon;          // 数字类型（double）
-  newRoute["address"] = address;  // 字符串类型（支持中文，UTF-8 编码）
+  newRoute["time"] = time;  // 字符串类型
+  newRoute["lat"] = lat;    // 数字类型（double）
+  newRoute["lon"] = lon;    // 数字类型（double）
+  newRoute["address"] = distanceRoute + " | " + speedRoute + "\n\n" +
+                        address;  // 字符串类型（支持中文，UTF-8 编码）
 
   // 追加新对象到数组
   routeMemoryCache.append(newRoute);
