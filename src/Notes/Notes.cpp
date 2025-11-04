@@ -2132,21 +2132,36 @@ void Notes::previewNote() {
  */
 bool Notes::openUrl(const QString &url) {
 #ifdef __linux__
-  // 仅 Linux 环境处理：保存-清除-恢复 LD_LIBRARY_PATH
+  // 获取系统默认浏览器（通过 xdg-mime 查询）
+  QProcess mimeProcess;
+  mimeProcess.start("xdg-mime", {"query", "default", "text/html"});
+  mimeProcess.waitForFinished();
+  QString browser =
+      mimeProcess.readAllStandardOutput().trimmed();  // 如 "firefox.desktop"
+
+  // 提取浏览器可执行文件名（去掉 .desktop 后缀）
+  if (browser.endsWith(".desktop")) {
+    browser = browser.left(browser.length() - 8);
+  }
+
+  // 保存并清除 LD_LIBRARY_PATH
   const char *originalLdPath = getenv("LD_LIBRARY_PATH");
   QString originalLdPathStr(originalLdPath ? originalLdPath : "");
-
-  // 清除环境变量，避免程序打包的库干扰系统工具
   unsetenv("LD_LIBRARY_PATH");
 
-  // 调用 Linux 通用工具 xdg-open
-  bool success = QProcess::startDetached("xdg-open", {url});
+  // 直接用浏览器打开文件
+  bool success = QProcess::startDetached(browser, {url});
 
-  // 恢复原始环境变量，不影响程序自身运行
+  // 恢复环境变量
   if (!originalLdPathStr.isEmpty()) {
     setenv("LD_LIBRARY_PATH", originalLdPathStr.toUtf8().constData(), 1);
   } else {
     unsetenv("LD_LIBRARY_PATH");
+  }
+
+  // 如果默认浏览器获取失败，fallback 到 xdg-open（但可能仍崩溃）
+  if (!success) {
+    success = QProcess::startDetached("xdg-open", {url});
   }
 
   return success;
