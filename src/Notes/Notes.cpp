@@ -2125,46 +2125,83 @@ void Notes::previewNote() {
   watcher->setFuture(future);
 }
 
-/**
- * @brief 跨Linux桌面环境的URL/文件打开工具
- * @param url 需要打开的URL或本地文件路径
- * @return true if the operation was successful, false otherwise
- */
 bool Notes::openUrl(const QString &url) {
 #ifdef __linux__
-  // 获取系统默认浏览器（通过 xdg-mime 查询）
+  // 方案 A：尝试直接调用默认浏览器（优先）
   QProcess mimeProcess;
   mimeProcess.start("xdg-mime", {"query", "default", "text/html"});
   mimeProcess.waitForFinished();
-  QString browser =
-      mimeProcess.readAllStandardOutput().trimmed();  // 如 "firefox.desktop"
+  QString browser = mimeProcess.readAllStandardOutput().trimmed();
+  bool browserSuccess = false;
 
-  // 提取浏览器可执行文件名（去掉 .desktop 后缀）
-  if (browser.endsWith(".desktop")) {
-    browser = browser.left(browser.length() - 8);
-  }
+  if (!browser.isEmpty()) {
+    // 提取浏览器可执行文件名（去掉 .desktop 后缀）
+    if (browser.endsWith(".desktop")) {
+      browser = browser.left(browser.length() - 8);
+    }
 
-  // 保存并清除 LD_LIBRARY_PATH
-  const char *originalLdPath = getenv("LD_LIBRARY_PATH");
-  QString originalLdPathStr(originalLdPath ? originalLdPath : "");
-  unsetenv("LD_LIBRARY_PATH");
-
-  // 直接用浏览器打开文件
-  bool success = QProcess::startDetached(browser, {url});
-
-  // 恢复环境变量
-  if (!originalLdPathStr.isEmpty()) {
-    setenv("LD_LIBRARY_PATH", originalLdPathStr.toUtf8().constData(), 1);
-  } else {
+    // 保存并清除环境变量
+    const char *originalLdPath = getenv("LD_LIBRARY_PATH");
+    QString originalLdPathStr(originalLdPath ? originalLdPath : "");
     unsetenv("LD_LIBRARY_PATH");
+    unsetenv("LD_PRELOAD");  // 额外清除可能的预加载库
+
+    // 直接用浏览器打开
+    browserSuccess = QProcess::startDetached(browser, {url});
+
+    // 恢复环境变量
+    if (!originalLdPathStr.isEmpty()) {
+      setenv("LD_LIBRARY_PATH", originalLdPathStr.toUtf8().constData(), 1);
+    } else {
+      unsetenv("LD_LIBRARY_PATH");
+    }
   }
 
-  // 如果默认浏览器获取失败，fallback 到 xdg-open（但可能仍崩溃）
-  if (!success) {
-    success = QProcess::startDetached("xdg-open", {url});
+  // 如果方案 A 失败，尝试方案 B：直接用系统库启动 kde-open
+  if (!browserSuccess) {
+    // 系统原生库路径（不同发行版可能略有差异，覆盖常见路径）
+    QStringList systemLibPaths = {"/usr/lib64",       "/usr/lib",
+                                  "/lib64",           "/lib",
+                                  "/usr/local/lib64", "/usr/local/lib"};
+    QString ldLibraryPath = systemLibPaths.join(":");
+
+    // 保存原始环境变量
+    const char *originalLdPath = getenv("LD_LIBRARY_PATH");
+    QString originalLdPathStr(originalLdPath ? originalLdPath : "");
+    const char *originalQtPluginPath = getenv("QT_PLUGIN_PATH");
+    QString originalQtPluginPathStr(originalQtPluginPath ? originalQtPluginPath
+                                                         : "");
+
+    // 强制设置为系统库路径，清除所有可能影响 Qt 的环境变量
+    setenv("LD_LIBRARY_PATH", ldLibraryPath.toUtf8().constData(), 1);
+    unsetenv("LD_PRELOAD");
+    unsetenv("QT_PLUGIN_PATH");
+    unsetenv("QT_QPA_PLATFORM_PLUGIN_PATH");
+
+    // 直接调用 kde-open（如果存在），否则用 xdg-open
+    bool success = false;
+    if (!QStandardPaths::findExecutable("kde-open").isEmpty()) {
+      success = QProcess::startDetached("kde-open", {url});
+    } else {
+      success = QProcess::startDetached("xdg-open", {url});
+    }
+
+    // 恢复原始环境变量
+    if (!originalLdPathStr.isEmpty()) {
+      setenv("LD_LIBRARY_PATH", originalLdPathStr.toUtf8().constData(), 1);
+    } else {
+      unsetenv("LD_LIBRARY_PATH");
+    }
+    if (!originalQtPluginPathStr.isEmpty()) {
+      setenv("QT_PLUGIN_PATH", originalQtPluginPathStr.toUtf8().constData(), 1);
+    } else {
+      unsetenv("QT_PLUGIN_PATH");
+    }
+
+    return success;
   }
 
-  return success;
+  return browserSuccess;
 #else
   Q_UNUSED(url);
 #endif
