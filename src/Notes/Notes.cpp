@@ -2006,7 +2006,10 @@ int Notes::getSearchMatchCount(const QString &text) {
 }
 
 void Notes::openBrowserOnce(const QString &htmlPath) {
-  QDesktopServices::openUrl(QUrl::fromLocalFile(htmlPath));
+  if (isLinux)
+    openUrl(htmlPath);
+  else
+    QDesktopServices::openUrl(QUrl::fromLocalFile(htmlPath));
 }
 
 void Notes::on_btnView_clicked() {
@@ -2120,6 +2123,53 @@ void Notes::previewNote() {
     watcher->deleteLater();
   });
   watcher->setFuture(future);
+}
+
+/**
+ * @brief 跨Linux桌面环境的URL/文件打开工具
+ * @param url 需要打开的URL或本地文件路径
+ * @return true if the operation was successful, false otherwise
+ */
+bool Notes::openUrl(const QString &url) {
+  // 1. 优先使用xdg-open（所有主流Linux桌面环境通用）
+  if (QStandardPaths::findExecutable("xdg-open").isEmpty()) {
+    // 2. 如果没有xdg-open，尝试各个桌面环境的专用工具
+    QString desktopEnv = qgetenv("XDG_CURRENT_DESKTOP").toLower();
+
+    if (desktopEnv.contains("kde")) {
+      // KDE桌面
+      if (!QStandardPaths::findExecutable("kde-open5").isEmpty()) {
+        return QProcess::startDetached("kde-open5", {url});
+      } else if (!QStandardPaths::findExecutable("kde-open").isEmpty()) {
+        return QProcess::startDetached("kde-open", {url});
+      }
+    } else if (desktopEnv.contains("gnome") || desktopEnv.contains("unity")) {
+      // GNOME或Unity桌面
+      if (!QStandardPaths::findExecutable("gio").isEmpty()) {
+        return QProcess::startDetached("gio", {"open", url});
+      } else if (!QStandardPaths::findExecutable("gvfs-open").isEmpty()) {
+        return QProcess::startDetached("gvfs-open", {url});
+      }
+    } else if (desktopEnv.contains("xfce")) {
+      // Xfce桌面
+      if (!QStandardPaths::findExecutable("exo-open").isEmpty()) {
+        return QProcess::startDetached("exo-open", {url});
+      }
+    } else if (desktopEnv.contains("mate")) {
+      // MATE桌面
+      if (!QStandardPaths::findExecutable("mate-open").isEmpty()) {
+        return QProcess::startDetached("mate-open", {url});
+      }
+    } else if (desktopEnv.contains("cinnamon")) {
+      // Cinnamon桌面
+      if (!QStandardPaths::findExecutable("xdg-open").isEmpty()) {
+        return QProcess::startDetached("xdg-open", {url});
+      }
+    }
+  }
+
+  // 3. 最终fallback到xdg-open（如果前面的检查有误）
+  return QProcess::startDetached("xdg-open", {url});
 }
 
 void Notes::appendToSyncList(QString file) {

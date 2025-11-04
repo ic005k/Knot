@@ -34,7 +34,10 @@
 #include <QPainter>
 #include <QPlainTextEdit>
 #include <QPrinter>
+#include <QProcess>
 #include <QSettings>
+#include <QStandardPaths>
+#include <QString>
 #include <QTextBlock>
 #include <QTextDocument>
 #include <QTextDocumentFragment>
@@ -190,7 +193,8 @@ class Notes : public QDialog {
 
   void delRemoteFile(const QStringList &Files);
 
- protected:
+  bool openUrl(const QString &url);
+  protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
   bool eventFilter(QObject *obj, QEvent *event) override;
