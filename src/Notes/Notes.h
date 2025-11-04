@@ -42,6 +42,10 @@
 #include <QTextDocument>
 #include <QTextDocumentFragment>
 #include <algorithm>
+#include <cstdlib>  // 用于 getenv
+#ifdef __linux__
+#include <unistd.h>  // Linux 下的 unsetenv/setenv
+#endif
 
 #ifndef Q_OS_ANDROID
 #include "lib/qsci/Qsci/qscilexercpp.h"
@@ -194,7 +198,8 @@ class Notes : public QDialog {
   void delRemoteFile(const QStringList &Files);
 
   bool openUrl(const QString &url);
-  protected:
+
+ protected:
   void keyReleaseEvent(QKeyEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
   bool eventFilter(QObject *obj, QEvent *event) override;

@@ -2131,45 +2131,30 @@ void Notes::previewNote() {
  * @return true if the operation was successful, false otherwise
  */
 bool Notes::openUrl(const QString &url) {
-  // 1. 优先使用xdg-open（所有主流Linux桌面环境通用）
-  if (QStandardPaths::findExecutable("xdg-open").isEmpty()) {
-    // 2. 如果没有xdg-open，尝试各个桌面环境的专用工具
-    QString desktopEnv = qgetenv("XDG_CURRENT_DESKTOP").toLower();
+#ifdef __linux__
+  // 仅 Linux 环境处理：保存-清除-恢复 LD_LIBRARY_PATH
+  const char *originalLdPath = getenv("LD_LIBRARY_PATH");
+  QString originalLdPathStr(originalLdPath ? originalLdPath : "");
 
-    if (desktopEnv.contains("kde")) {
-      // KDE桌面
-      if (!QStandardPaths::findExecutable("kde-open5").isEmpty()) {
-        return QProcess::startDetached("kde-open5", {url});
-      } else if (!QStandardPaths::findExecutable("kde-open").isEmpty()) {
-        return QProcess::startDetached("kde-open", {url});
-      }
-    } else if (desktopEnv.contains("gnome") || desktopEnv.contains("unity")) {
-      // GNOME或Unity桌面
-      if (!QStandardPaths::findExecutable("gio").isEmpty()) {
-        return QProcess::startDetached("gio", {"open", url});
-      } else if (!QStandardPaths::findExecutable("gvfs-open").isEmpty()) {
-        return QProcess::startDetached("gvfs-open", {url});
-      }
-    } else if (desktopEnv.contains("xfce")) {
-      // Xfce桌面
-      if (!QStandardPaths::findExecutable("exo-open").isEmpty()) {
-        return QProcess::startDetached("exo-open", {url});
-      }
-    } else if (desktopEnv.contains("mate")) {
-      // MATE桌面
-      if (!QStandardPaths::findExecutable("mate-open").isEmpty()) {
-        return QProcess::startDetached("mate-open", {url});
-      }
-    } else if (desktopEnv.contains("cinnamon")) {
-      // Cinnamon桌面
-      if (!QStandardPaths::findExecutable("xdg-open").isEmpty()) {
-        return QProcess::startDetached("xdg-open", {url});
-      }
-    }
+  // 清除环境变量，避免程序打包的库干扰系统工具
+  unsetenv("LD_LIBRARY_PATH");
+
+  // 调用 Linux 通用工具 xdg-open
+  bool success = QProcess::startDetached("xdg-open", {url});
+
+  // 恢复原始环境变量，不影响程序自身运行
+  if (!originalLdPathStr.isEmpty()) {
+    setenv("LD_LIBRARY_PATH", originalLdPathStr.toUtf8().constData(), 1);
+  } else {
+    unsetenv("LD_LIBRARY_PATH");
   }
 
-  // 3. 最终fallback到xdg-open（如果前面的检查有误）
-  return QProcess::startDetached("xdg-open", {url});
+  return success;
+#else
+  Q_UNUSED(url);
+#endif
+
+  return true;
 }
 
 void Notes::appendToSyncList(QString file) {
