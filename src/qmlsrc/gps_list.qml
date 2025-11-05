@@ -99,6 +99,80 @@ Rectangle {
         return data.type
     }
 
+    // 绘制绿-黄-橙-红色带
+    function drawColorRibbon(ctx, speedData, canvasWidth, canvasHeight) {
+        const vMin = Math.min(...speedData)
+        const vMax = Math.max(...speedData)
+        const vRange = vMax - vMin
+
+        if (vRange <= 0) {
+            ctx.fillStyle = "#FFFF00"
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+            return
+        }
+
+        const pointCount = speedData.length
+        const segmentWidth = canvasWidth / (pointCount - 1)
+
+        speedData.forEach((speed, index) => {
+                              const ratio = (speed - vMin) / vRange
+                              const hue = 120 - (ratio * 120)
+                              const rgb = hsvToRgb(hue, 0.8, 0.9)
+                              ctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`
+                              const x = index * segmentWidth
+                              ctx.fillRect(x, 0, segmentWidth, canvasHeight)
+                          })
+    }
+
+    // HSV转RGB工具函数
+    function hsvToRgb(h, s, v) {
+        let r, g, b
+        const i = Math.floor(h / 60)
+        const f = h / 60 - i
+        const p = v * (1 - s)
+        const q = v * (1 - f * s)
+        const t = v * (1 - (1 - f) * s)
+
+        switch (i % 6) {
+        case 0:
+            r = v
+            g = t
+            b = p
+            break
+        case 1:
+            r = q
+            g = v
+            b = p
+            break
+        case 2:
+            r = p
+            g = v
+            b = t
+            break
+        case 3:
+            r = p
+            g = q
+            b = v
+            break
+        case 4:
+            r = t
+            g = p
+            b = v
+            break
+        case 5:
+            r = v
+            g = p
+            b = q
+            break
+        }
+
+        return {
+            "r": Math.round(r * 255),
+            "g": Math.round(g * 255),
+            "b": Math.round(b * 255)
+        }
+    }
+
     function addItem(t0, t1, t2, t3, height) {
         view.model.append({
                               "text0": t0,
@@ -109,7 +183,34 @@ Rectangle {
                           })
     }
 
-    function insertItem(curIndex, t0, t1, t2, t3, t4, t5, t6, height) {
+    function insertItem(curIndex, t0, t1, t2, t3, t4, t5, t6, speedData) {
+        var speedArray = []
+        // （原有转换逻辑不变，确保speedArray是纯数字数组）
+        if (speedData && speedData.hasOwnProperty("count")
+                && typeof speedData.get === "function") {
+            for (var i = 0; i < speedData.count; i++) {
+                var item = speedData.get(i)
+                var value = typeof item
+                        === "object" ? (item.value !== undefined ? item.value : item) : item
+                value = Number(value)
+                if (!isNaN(value)) {
+                    speedArray.push(value)
+                }
+            }
+        } else if (Array.isArray(speedData)) {
+            for (var j = 0; j < speedData.length; j++) {
+                var val = Number(speedData[j])
+                if (!isNaN(val)) {
+                    speedArray.push(val)
+                }
+            }
+        }
+
+        console.log("insert阶段转换后的数组:", speedArray)
+
+        // 关键：将数组转为JSON字符串存储
+        var speedJson = JSON.stringify(speedArray)
+
         view.model.insert(curIndex, {
                               "text0": t0,
                               "text1": t1,
@@ -118,8 +219,12 @@ Rectangle {
                               "text4": t4,
                               "text5": t5,
                               "text6": t6,
-                              "myh": height
+                              "speedData": speedJson // 存储JSON字符串
                           })
+
+        // 验证模型是否正确保存
+        var insertedItem = view.model.get(curIndex)
+        console.log("模型中存储的JSON:", insertedItem.speedData)
     }
 
     function updateItem(curIndex, t0, t1, t2, t3, t4, t5, t6, height) {
@@ -275,6 +380,51 @@ Rectangle {
 
                         leftPadding: 5
                         rightPadding: 5
+                    }
+                }
+
+                // 速度色带（放在item0的Rectangle后面）
+                Canvas {
+                    id: speedRibbon
+                    Layout.fillWidth: true // 与item0同宽
+                    height: 5 // 固定高度5px
+                    Layout.topMargin: 2 // 与item0保持2px间距
+
+                    onPaint: {
+                        const ctx = getContext("2d")
+                        ctx.resetTransform()
+                        ctx.clearRect(0, 0, width, height)
+
+                        // 从模型获取JSON字符串
+                        const speedJson = model.speedData || "[]"
+                        let speedArray = []
+
+                        // 解析JSON为数组
+                        try {
+                            speedArray = JSON.parse(speedJson)
+                            // 确保是数组且元素为数字
+                            if (!Array.isArray(speedArray)) {
+                                speedArray = []
+                            } else {
+                                speedArray = speedArray.filter(
+                                            s => typeof s === "number"
+                                            && !isNaN(s))
+                            }
+                        } catch (e) {
+                            console.error("解析speedData失败:", e)
+                            speedArray = []
+                        }
+
+                        console.log("最终绘制数组:", speedArray)
+
+                        // 绘制逻辑
+                        if (speedArray.length < 2) {
+                            ctx.fillStyle = "#AAAAAA"
+                            ctx.fillRect(0, 0, width, height)
+                            return
+                        }
+
+                        drawColorRibbon(ctx, speedArray, width, height)
                     }
                 }
 

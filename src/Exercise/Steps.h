@@ -217,8 +217,10 @@ class Steps : public QDialog {
   QString t0, str1, str2, str3, str4, str5, str6, str7;
 
   void insertGpsList(int curIndex, QString t0, QString t1, QString t2,
-                     QString t3, QString t4, QString t5, QString t6);
+                     QString t3, QString t4, QString t5, QString t6,
+                     QVariantList speedData);
   QString strStartTime, strEndTime;
+  QDateTime startDt, endDt;
 
   QString getGpsListText2(int index);
 
@@ -265,7 +267,7 @@ class Steps : public QDialog {
   void updateGpsList(int curIndex, QString t0, QString t1, QString t2,
                      QString t3, QString t4, QString t5, QString t6);
   void refreshRoute();
-  signals:
+ signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();

@@ -682,7 +682,8 @@ void Steps::startRecordMotion() {
 
   m_time.setHMS(0, 0, 0, 0);
 
-  strStartTime = QTime::currentTime().toString();
+  startDt = QDateTime::currentDateTime();
+  strStartTime = startDt.time().toString();
 
   if (isZH_CN) {
     QLocale chineseLocale(QLocale::Chinese, QLocale::China);
@@ -997,7 +998,8 @@ void Steps::refreshTotalDistance() {
 void Steps::refreshMotionData() {
   refreshTotalDistance();
 
-  strEndTime = QTime::currentTime().toString();
+  endDt = QDateTime::currentDateTime();
+  strEndTime = endDt.time().toString();
 
   QString t00, t1, t2, t3, t4, t5, str_type;
 
@@ -1007,9 +1009,25 @@ void Steps::refreshMotionData() {
   t00 = str_type + " " + t0;
 
   t1 = tr("Time") + ": " + strStartTime + " - " + strEndTime + strCurrentTemp;
+
   t2 = tr("Distance") + ": " + str1;
-  t3 = tr("Exercise Duration") + ": " + str2;
-  t4 = tr("Average Speed") + ": " + str3;
+
+  qint64 secondsDiff = startDt.secsTo(endDt);
+  // 若 endDt 在 startDt 之后，返回正数；否则返回负数（取绝对值确保为正）
+  if (secondsDiff < 0) secondsDiff = -secondsDiff;
+  // 转换为“时:分:秒”格式
+  int h = secondsDiff / 3600;
+  int m = (secondsDiff % 3600) / 60;
+  int s = secondsDiff % 60;
+  QString my_duration = QString("%1:%2:%3")
+                            .arg(h, 2, 10, QChar('0'))
+                            .arg(m, 2, 10, QChar('0'))
+                            .arg(s, 2, 10, QChar('0'));
+  t3 = tr("Exercise Duration") + ": " + str2 + "\n" + tr("Duration") + ": " +
+       my_duration;
+
+  t4 = tr("Average Speed") + ": " + str3 + "\n" + tr("Max Speed") + ": " +
+       QString::number(maxSpeed, 'f', 2);
   t5 = str6;
 
   if (m_distance > 0 || isGpsTest) {
@@ -1103,13 +1121,26 @@ void Steps::refreshMotionData() {
 }
 
 void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
-                          QString t3, QString t4, QString t5, QString t6) {
+                          QString t3, QString t4, QString t5, QString t6,
+                          QVariantList speedData) {  // 接收速度数据
   QQuickItem* root = mui->qwGpsList->rootObject();
+  if (!root) {
+    qWarning() << "rootObject is null!";
+    return;
+  }
+
+  // 调用QML的insertItem，最后一个参数传入speedData
   QMetaObject::invokeMethod(
-      (QObject*)root, "insertItem", Q_ARG(QVariant, curIndex),
-      Q_ARG(QVariant, t0), Q_ARG(QVariant, t1), Q_ARG(QVariant, t2),
-      Q_ARG(QVariant, t3), Q_ARG(QVariant, t4), Q_ARG(QVariant, t5),
-      Q_ARG(QVariant, t6), Q_ARG(QVariant, 0));
+      root, "insertItem", Q_ARG(QVariant, curIndex),  // 参数1：索引
+      Q_ARG(QVariant, t0),                            // 参数2：text0
+      Q_ARG(QVariant, t1),                            // 参数3：text1
+      Q_ARG(QVariant, t2),                            // 参数4：text2
+      Q_ARG(QVariant, t3),                            // 参数5：text3
+      Q_ARG(QVariant, t4),                            // 参数6：text4
+      Q_ARG(QVariant, t5),                            // 参数7：text5
+      Q_ARG(QVariant, t6),                            // 参数8：text6
+      Q_ARG(QVariant, speedData)  // 参数9：新增的速度数据（QVariantList）
+  );
 }
 
 void Steps::updateGpsList(int curIndex, QString t0, QString t1, QString t2,
@@ -1167,7 +1198,11 @@ void Steps::loadGpsList(int nYear, int nMonth) {
       if (list.count() == 7) t6 = list.at(6);
     }
 
-    insertGpsList(0, t0, t1, t2, t3, t4, t5, t6);
+    QVariantList speedData;
+    speedData << QVariant(0.0) << QVariant(3.5) << QVariant(5.2)
+              << QVariant(7.8) << QVariant(10.1) << QVariant(8.5)
+              << QVariant(6.3) << QVariant(4.0);
+    insertGpsList(0, t0, t1, t2, t3, t4, t5, t6, speedData);
   }
 
   if (count > 0) m_Method->setCurrentIndexFromQW(mui->qwGpsList, 0);
