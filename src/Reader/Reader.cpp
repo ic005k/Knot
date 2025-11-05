@@ -1300,9 +1300,17 @@ void Reader::showInfo() {
   mui->progReader->setValue(cPage);
 
   m_ReaderSet->updateProgress();
+  updatePageProgress();
 
   updateReaderProperty(cPage, tPage);
   readReadNote(cPage);
+}
+
+void Reader::updatePageProgress() {
+  qreal cur = getVPos();
+  qreal h = getVHeight() - mui->qwReader->height();
+  mui->progPage->setMaximum(h);
+  mui->progPage->setValue(cur);
 }
 
 void Reader::updateReaderProperty(int currentPage, int totalPages) {

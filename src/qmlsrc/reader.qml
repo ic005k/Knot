@@ -639,11 +639,18 @@ Item {
             // 滚动条
             ScrollBar.vertical: ScrollBar {
                 policy: ScrollBar.AsNeeded
+                visible: false
                 width: 8
             }
         }
 
         // ==============================================
+        Connections {
+            target: contentListView // 直接访问同级的 contentListView
+            function onContentYChanged() {
+                m_Reader.updatePageProgress()
+            }
+        }
 
         // ==============================================
     }

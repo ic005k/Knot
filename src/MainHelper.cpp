@@ -696,6 +696,19 @@ void MainHelper::init_UIWidget() {
       "}");
   mui->progReader->setStyleSheet(mui->progBar->styleSheet());
   mui->progReader->setFixedHeight(4);
+  mui->progPage->setStyleSheet(
+      "QProgressBar{border:0px solid #FFFFFF;"
+      "height:30;"
+      "background:rgba(25,255,25,0);"
+      "text-align:right;"
+      "color:rgb(255,255,255);"
+      "border-radius:0px;}"
+
+      "QProgressBar:chunk{"
+      "border-radius:0px;"
+      "background-color:rgba(230, 150, 50, 255);"
+      "}");
+  mui->progPage->setFixedHeight(4);
 
   mui->tabCharts->tabBar()->hide();
   m_Method->setToolButtonQss(mui->btnChartMonth, 5, 3, "#FF0000", "#FFFFFF",

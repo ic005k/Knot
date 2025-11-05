@@ -24,7 +24,7 @@
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_8">
+   <layout class="QVBoxLayout" name="verticalLayout_37">
     <item>
      <widget class="QFrame" name="frameReader">
       <property name="minimumSize">
@@ -39,7 +39,7 @@
       <property name="frameShadow">
        <enum>QFrame::Shadow::Raised</enum>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_37">
+      <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>
         <widget class="QLabel" name="lblTitle">
          <property name="maximumSize">
@@ -1116,14 +1116,28 @@ border-radius: 4px;</string>
         </widget>
        </item>
        <item>
-        <widget class="QProgressBar" name="progReader">
-         <property name="value">
-          <number>0</number>
-         </property>
-         <property name="textVisible">
-          <bool>false</bool>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <item>
+          <widget class="QProgressBar" name="progReader">
+           <property name="value">
+            <number>0</number>
+           </property>
+           <property name="textVisible">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QProgressBar" name="progPage">
+           <property name="value">
+            <number>24</number>
+           </property>
+           <property name="textVisible">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>

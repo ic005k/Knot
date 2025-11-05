@@ -560,7 +560,33 @@ Rectangle {
             delegate: Rectangle {
                 width: routeDialog.width - 20
                 height: colLayout.implicitHeight + 20
-                color: isDark ? "#333" : "#EEE"
+
+                property bool hasSamePrev: {
+                    if (index <= 0)
+                        return false // 第一个条目没有上一个
+                    const prevItem = routeModel.get(index - 1)
+                    return prevItem.latLon === latLon
+                            && prevItem.address === address
+                }
+                property bool hasSameNext: {
+                    if (index >= routeModel.count - 1)
+                        return false // 最后一个条目没有下一个
+                    const nextItem = routeModel.get(index + 1)
+                    return nextItem.latLon === latLon
+                            && nextItem.address === address
+                }
+
+                // 核心：根据连续相同组判断底色
+                color: {
+                    if (hasSamePrev || hasSameNext) {
+                        // 休息时段的浅绿色（适配明暗模式）
+                        return isDark ? "#2E7D32" : "#E8F5E9"
+                    } else {
+                        // 默认底色
+                        return isDark ? "#333" : "#EEE"
+                    }
+                }
+
                 radius: 5
                 border.color: isDark ? "#555" : "#CCC"
                 border.width: 1
