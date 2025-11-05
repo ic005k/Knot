@@ -163,7 +163,7 @@ class Steps : public QDialog {
 
  private:
   QDateTime m_lastGetAddressTime;    // 上次获取地址的时间
-  QDateTime m_lastSaveRouteTime;     // 上次保存路线的时间
+  QDateTime m_lastSaveSpeedTime;     // 上次保存路线的时间
   QDateTime m_lastFetchWeatherTime;  // 上次请求天气的时间
   bool isInitTime;
 
@@ -253,7 +253,7 @@ class Steps : public QDialog {
   void saveRoute(const QString &file, const QString &time, double lat,
                  double lon, const QString &address);
   void setAddressResolverConnect();
-  QString strJsonRouteFile;
+  QString strJsonRouteFile, strJsonSpeedFile;
   QStringList readRoute(const QString &file);
 
   bool isInChina(double lat, double lon);
@@ -267,6 +267,9 @@ class Steps : public QDialog {
   void updateGpsList(int curIndex, QString t0, QString t1, QString t2,
                      QString t3, QString t4, QString t5, QString t6);
   void refreshRoute();
+  void saveSpeedData(const QString &jsonFile, double speed);
+  QVariantList getSpeedData(const QString &jsonFile);
+  QString getJsonRouteFile(const QString &strGpsList);
  signals:
   void distanceChanged(double distance);
   void timeChanged();

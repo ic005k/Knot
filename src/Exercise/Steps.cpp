@@ -707,6 +707,7 @@ void Steps::startRecordMotion() {
   }
   strCSVFile = csvPath + s0 + "-gps-" + s1 + ".csv";
   strJsonRouteFile = csvPath + s0 + "-gps-" + s1 + ".json";
+  strJsonSpeedFile = csvPath + s0 + "-gps-" + s1 + "_Speed.json";
 
   timer->start(1000);
   routeMemoryCache = QJsonArray();
@@ -832,6 +833,12 @@ void Steps::updateGetGps() {
   }
 
 #else
+  // test
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::default_random_engine generator(seed);
+  std::uniform_real_distribution<double> distribution(0.0, 5.0);
+  double len = distribution(generator);
+  m_distance = m_distance + len;
   if (m_time.second() != 0) {
     m_speed = m_distance / m_time.second();
     emit speedChanged();
@@ -903,7 +910,7 @@ void Steps::updateGetGps() {
 
       if (!isInitTime) {
         m_lastGetAddressTime = currentTime;
-        m_lastSaveRouteTime = currentTime;
+        m_lastSaveSpeedTime = currentTime;
         m_lastFetchWeatherTime = currentTime;
 
         weatherFetcher->fetchWeather(latitude, longitude);
@@ -928,10 +935,11 @@ void Steps::updateGetGps() {
           m_lastGetAddressTime = currentTime;  // 更新上次执行时间
         }
 
-        if (m_lastSaveRouteTime.secsTo(currentTime) >=
-            180) {  // 距离上次超过180秒 （留给以后的逻辑）
-
-          m_lastSaveRouteTime = currentTime;  // 更新上次执行时间
+        // Speed
+        if (m_lastSaveSpeedTime.secsTo(currentTime) >=
+            60) {  // 距离上次超过60秒 （留给以后的逻辑）
+          saveSpeedData(strJsonSpeedFile, m_speed);
+          m_lastSaveSpeedTime = currentTime;  // 更新上次执行时间
         }
       }
     }
@@ -1027,7 +1035,7 @@ void Steps::refreshMotionData() {
        my_duration;
 
   t4 = tr("Average Speed") + ": " + str3 + "\n" + tr("Max Speed") + ": " +
-       QString::number(maxSpeed, 'f', 2);
+       QString::number(maxSpeed, 'f', 2) + " km/h";
   t5 = str6;
 
   if (m_distance > 0 || isGpsTest) {
@@ -1198,10 +1206,16 @@ void Steps::loadGpsList(int nYear, int nMonth) {
       if (list.count() == 7) t6 = list.at(6);
     }
 
-    QVariantList speedData;
-    speedData << QVariant(0.0) << QVariant(3.5) << QVariant(5.2)
+    QString strGpsTime = t0 + "-=-" + t1 + "-=-" + t2 + "-=-" + t4;
+    QString speedFile = getJsonRouteFile(strGpsTime);
+    speedFile = speedFile.replace(".json", "_Speed.json");
+
+    QVariantList speedData = getSpeedData(speedFile);
+
+    /*speedData << QVariant(0.0) << QVariant(3.5) << QVariant(5.2)
               << QVariant(7.8) << QVariant(10.1) << QVariant(8.5)
-              << QVariant(6.3) << QVariant(4.0);
+              << QVariant(6.3) << QVariant(4.0);*/
+
     insertGpsList(0, t0, t1, t2, t3, t4, t5, t6, speedData);
   }
 
@@ -2275,9 +2289,7 @@ void Steps::setMapType() {
 #endif
 }
 
-void Steps::getRouteList(const QString& strGpsTime) {
-  strGpsList = strGpsTime;
-
+QString Steps::getJsonRouteFile(const QString& strGpsList) {
   QStringList list = strGpsList.split("-=-");
 
   QString st1 = list.at(0);
@@ -2311,6 +2323,13 @@ void Steps::getRouteList(const QString& strGpsTime) {
 
   QString csvPath = iniDir + "memo/gps/" + str_year + "/" + str_month + "/";
   QString routeFile = csvPath + st1 + "-gps-" + st2 + ".json";
+  return routeFile;
+}
+
+void Steps::getRouteList(const QString& strGpsTime) {
+  strGpsList = strGpsTime;
+
+  QString routeFile = getJsonRouteFile(strGpsList);
 
   qDebug() << "routeFile=" << routeFile;
   if (!QFile::exists(routeFile)) return;
@@ -2458,4 +2477,84 @@ QGeoCoordinate Steps::wgs84ToGcj02(double wgs84Lat, double wgs84Lon) {
 
   // 所有异常情况均返回原坐标
   return QGeoCoordinate(wgs84Lat, wgs84Lon);
+}
+
+// 保存速度数据（追加模式，每次调用添加一条带时间戳的速度记录）
+void Steps::saveSpeedData(const QString& jsonFile, double speed) {
+  // 1. 读取已有数据（若文件存在）
+  QJsonArray speedArray;
+  QFile file(jsonFile);
+
+  // 如果文件存在且可读取，解析现有数据
+  if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    QByteArray data = file.readAll();
+    file.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (doc.isArray()) {
+      speedArray = doc.array();  // 现有数据是数组，直接复用
+    } else {
+      qWarning() << "saveSpeedData: 文件" << jsonFile
+                 << "格式错误，将创建新文件";
+    }
+  }
+
+  // 2. 添加新的速度记录（包含时间戳，便于追溯采样时间）
+  QJsonObject newRecord;
+  // 替换原来的时间戳获取方式
+  newRecord["timestamp"] =
+      QDateTime::currentMSecsSinceEpoch();  // 直接调用静态方法，更高效
+  newRecord["speed"] = speed;               // 速度值（单位根据业务定，如km/h）
+  speedArray.append(newRecord);
+
+  // 3. 写入更新后的数据到文件
+  if (file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+    QJsonDocument doc(speedArray);
+    file.write(doc.toJson(QJsonDocument::Indented));  // 格式化输出，便于调试
+    file.close();
+  } else {
+    qWarning() << "saveSpeedData: 无法打开文件" << jsonFile << "进行写入";
+  }
+}
+
+// 读取所有速度数据，返回QVariantList（便于传递到QML）
+QVariantList Steps::getSpeedData(const QString& jsonFile) {
+  QVariantList speedList;
+  QFile file(jsonFile);
+
+  // 检查文件是否存在
+  if (!file.exists()) {
+    qWarning() << "getSpeedData: 文件" << jsonFile << "不存在";
+    return speedList;  // 返回空列表
+  }
+
+  // 打开并读取文件
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    qWarning() << "getSpeedData: 无法打开文件" << jsonFile;
+    return speedList;
+  }
+
+  QByteArray data = file.readAll();
+  file.close();
+
+  // 解析JSON
+  QJsonDocument doc = QJsonDocument::fromJson(data);
+  if (!doc.isArray()) {
+    qWarning() << "getSpeedData: 文件" << jsonFile << "不是有效的JSON数组";
+    return speedList;
+  }
+
+  QJsonArray speedArray = doc.array();
+  // 使用const迭代器遍历，避免容器分离
+  for (auto it = speedArray.constBegin(); it != speedArray.constEnd(); ++it) {
+    const QJsonValue& val = *it;  // 通过迭代器获取元素
+    if (val.isObject()) {
+      QJsonObject record = val.toObject();
+      if (record.contains("speed") && record["speed"].isDouble()) {
+        speedList.append(record["speed"].toDouble());
+      }
+    }
+  }
+
+  return speedList;
 }
