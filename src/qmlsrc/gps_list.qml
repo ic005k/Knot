@@ -517,7 +517,7 @@ Rectangle {
                     font.bold: false
                     text: text4
 
-                    color: isDark ? "#6666FF" : "blue"
+                    color: isDark ? "#1E90FF" : "blue"
 
                     leftPadding: 5
                     rightPadding: 5
