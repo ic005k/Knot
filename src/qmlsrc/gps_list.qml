@@ -99,7 +99,7 @@ Rectangle {
         return data.type
     }
 
-    // 绘制绿-黄-橙-红色带
+    // 绘制绿-黄-橙-红色带（相对映射算法）
     function drawColorRibbon(ctx, speedData, canvasWidth, canvasHeight) {
         const vMin = Math.min(...speedData)
         const vMax = Math.max(...speedData)
@@ -122,6 +122,76 @@ Rectangle {
                               const x = index * segmentWidth
                               ctx.fillRect(x, 0, segmentWidth, canvasHeight)
                           })
+    }
+
+    function drawSpeedSpectrum(ctx, speedData, canvasWidth, canvasHeight) {
+        if (speedData.length < 2) {
+            // 数据不足时，用浅灰色占位（不绘制背景，仅标记区域）
+            ctx.fillStyle = "rgba(150, 150, 150, 0.3)"
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+            return
+        }
+
+        // 1. 清除画布（不绘制额外背景，直接使用父容器背景）
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+
+        // 2. 计算速度范围（个人基准）
+        const vMin = Math.min(...speedData)
+        const vMax = Math.max(...speedData)
+        const vRange = vMax - vMin
+        const isUniform = vRange <= 0.1
+
+        // 3. 计算每个点的坐标
+        const pointCount = speedData.length
+        const points = []
+        const segmentWidth = canvasWidth / (pointCount - 1)
+
+        speedData.forEach((speed, index) => {
+                              const ratio = isUniform ? 0.5 : (speed - vMin) / vRange
+                              const x = index * segmentWidth
+                              const y = canvasHeight - (ratio * canvasHeight)
+                              // 速度越高，位置越靠上
+                              points.push({
+                                              "x": x,
+                                              "y": y,
+                                              "ratio": ratio
+                                          })
+                          })
+
+        // 4. 绘制平滑山丘轮廓（二次贝塞尔曲线）
+        ctx.beginPath()
+        ctx.moveTo(0, canvasHeight) // 起点：左下角
+        for (var i = 0; i < points.length; i++) {
+            const p = points[i]
+            if (i === 0) {
+                ctx.lineTo(p.x, p.y)
+            } else {
+                const prev = points[i - 1]
+                const controlX = (prev.x + p.x) / 2
+                ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y)
+            }
+        }
+        ctx.lineTo(canvasWidth, canvasHeight) // 闭合到右下角
+        ctx.closePath()
+
+        // 5. 蓝→红渐变填充（增强饱和度，确保无背景时清晰）
+        const gradient = ctx.createLinearGradient(0, 0, canvasWidth, 0)
+        points.forEach((p, i) => {
+                           const pos = i / (points.length - 1)
+                           const hue = 240 - (p.ratio * 240)
+                           // 240°蓝 → 0°红
+                           const rgb = hsvToRgb(hue, 0.85, 0.85)
+                           // 轻微提高饱和度，增强无背景时的辨识度
+                           gradient.addColorStop(
+                               pos, `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`)
+                       })
+        ctx.fillStyle = gradient
+        ctx.fill()
+
+        // 6. 边缘线（半透明，适配不同背景）
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.6)" // 白色半透，在亮色/暗色背景上均有一定对比度
+        ctx.lineWidth = 1.2
+        ctx.stroke()
     }
 
     // HSV转RGB工具函数
@@ -387,7 +457,7 @@ Rectangle {
                 Canvas {
                     id: speedRibbon
                     Layout.fillWidth: true // 与item0同宽
-                    height: 5 // 固定高度5px
+                    height: 20 // 固定高度
                     Layout.topMargin: 2 // 与item0保持2px间距
 
                     onPaint: {
@@ -424,7 +494,8 @@ Rectangle {
                             return
                         }
 
-                        drawColorRibbon(ctx, speedArray, width, height)
+                        //drawColorRibbon(ctx, speedArray, width, height)
+                        drawSpeedSpectrum(ctx, speedArray, width, height)
                     }
                 }
 
