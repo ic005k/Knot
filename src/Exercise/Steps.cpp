@@ -795,12 +795,12 @@ void Steps::updateGetGps() {
 
     if (m_time.second() % 3 == 0) {
       if (!isGpsTest) {
-        jdouble m_speed;
+        jdouble speed;
 
-        m_speed = m_activity.callMethod<jdouble>("getMySpeed", "()D");
+        speed = m_activity.callMethod<jdouble>("getMySpeed", "()D");
         maxSpeed = m_activity.callMethod<jdouble>("getMaxSpeed", "()D");
 
-        mySpeed = m_speed;
+        mySpeed = speed;
         if (m_distance > 0 & mySpeed > 0) {
           if (latitude + longitude != oldLat + oldLon) {
             appendTrack(latitude, longitude);
@@ -834,15 +834,6 @@ void Steps::updateGetGps() {
 
 #else
   // test
-  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-  std::default_random_engine generator(seed);
-  std::uniform_real_distribution<double> distribution(0.0, 5.0);
-  double len = distribution(generator);
-  m_distance = m_distance + len;
-  if (m_time.second() != 0) {
-    m_speed = m_distance / m_time.second();
-    emit speedChanged();
-  }
 
   if (isGpsTest) {
     if (m_time.second() % 3 == 0) {
@@ -858,6 +849,14 @@ void Steps::updateGetGps() {
       data_list.append(QString::number(latitude, 'f', 6));
       data_list.append(QString::number(longitude, 'f', 6));
       appendToCSV(strCSVFile, data_list);
+
+      unsigned seed =
+          std::chrono::system_clock::now().time_since_epoch().count();
+      std::default_random_engine generator(seed);
+      std::uniform_real_distribution<double> distribution(0.0, 50.0);
+      mySpeed = distribution(generator);
+      if (mySpeed > maxSpeed) maxSpeed = mySpeed;
+      setCurrentGpsSpeed(mySpeed, maxSpeed);
 
       qDebug() << "m_time%3=" << m_time.second();
     }
@@ -916,6 +915,7 @@ void Steps::updateGetGps() {
         weatherFetcher->fetchWeather(latitude, longitude);
 
         refreshRoute();
+        saveSpeedData(strJsonSpeedFile, mySpeed);
 
         isInitTime = true;
       }
@@ -928,17 +928,21 @@ void Steps::updateGetGps() {
       }
 
       // Route
+      int tr = 150;
+      if (isGpsTest) tr = 5;
       if (isShowRoute) {
         if (m_lastGetAddressTime.secsTo(currentTime) >=
-            150) {  // 距离上次超过150秒
+            tr) {  // 距离上次超过150秒
           refreshRoute();
           m_lastGetAddressTime = currentTime;  // 更新上次执行时间
         }
 
         // Speed
+        int ts = 60;
+        if (isGpsTest) ts = 3;
         if (m_lastSaveSpeedTime.secsTo(currentTime) >=
-            60) {  // 距离上次超过60秒 （留给以后的逻辑）
-          saveSpeedData(strJsonSpeedFile, m_speed);
+            ts) {  // 距离上次超过60秒
+          saveSpeedData(strJsonSpeedFile, mySpeed);
           m_lastSaveSpeedTime = currentTime;  // 更新上次执行时间
         }
       }
@@ -948,6 +952,7 @@ void Steps::updateGetGps() {
 
 void Steps::stopRecordMotion() {
   refreshRoute();
+  saveSpeedData(strJsonSpeedFile, mySpeed);
 
   QTimer::singleShot(2000, mw_one, [this]() {
     timer->stop();
@@ -990,7 +995,7 @@ void Steps::refreshRoute() {
     lonRoute = longitude;
     timeRoute = QDateTime::currentDateTime().time().toString();
     distanceRoute = str1;
-    speedRoute = str3;
+    speedRoute = QString::number(mySpeed, 'f', 2) + " km/h";
     getAddress(latitude, longitude);
   }
 }
