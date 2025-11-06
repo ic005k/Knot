@@ -13,9 +13,9 @@ static int press_y;
 static int relea_x;
 static int relea_y;
 
-EpubReader *reader = nullptr;
+EpubReader* reader = nullptr;
 
-Reader::Reader(QWidget *parent) : QDialog(parent) {
+Reader::Reader(QWidget* parent) : QDialog(parent) {
   qmlRegisterType<TextChunkModel>("EBook.Models", 1, 0, "TextChunkModel");
 
   this->installEventFilter(this);
@@ -61,9 +61,9 @@ Reader::~Reader() {
   }
 }
 
-bool Reader::eventFilter(QObject *obj, QEvent *evn) {
+bool Reader::eventFilter(QObject* obj, QEvent* evn) {
   if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
     }
   }
@@ -71,7 +71,7 @@ bool Reader::eventFilter(QObject *obj, QEvent *evn) {
   return QWidget::eventFilter(obj, evn);
 }
 
-void Reader::keyReleaseEvent(QKeyEvent *event) { Q_UNUSED(event); }
+void Reader::keyReleaseEvent(QKeyEvent* event) { Q_UNUSED(event); }
 
 void Reader::on_btnOpen_clicked() {
   if (isAndroid) {
@@ -526,8 +526,8 @@ void Reader::setQMLText(QString txt1) {
   qsShow = str1 + qsShow + strEndFlag + str2;
   currentTxt = qsShow;
 
-  QQuickItem *root = mui->qwReader->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "loadHtmlBuffer",
+  QQuickItem* root = mui->qwReader->rootObject();
+  QMetaObject::invokeMethod((QObject*)root, "loadHtmlBuffer",
                             Q_ARG(QVariant, currentTxt));
 
   setAni();
@@ -535,16 +535,15 @@ void Reader::setQMLText(QString txt1) {
 
 void Reader::loadQMLText(QString str) {
   if (isText || isEpub) {
-    QQuickItem *root = mui->qwReader->rootObject();
-    QMetaObject::invokeMethod((QObject *)root, "loadText",
-                              Q_ARG(QVariant, str));
+    QQuickItem* root = mui->qwReader->rootObject();
+    QMetaObject::invokeMethod((QObject*)root, "loadText", Q_ARG(QVariant, str));
   }
 }
 
 QString Reader::getQMLText() {
   QVariant str;
-  QQuickItem *root = mui->qwReader->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "getText",
+  QQuickItem* root = mui->qwReader->rootObject();
+  QMetaObject::invokeMethod((QObject*)root, "getText",
                             Q_RETURN_ARG(QVariant, str));
 
   return str.toString();
@@ -891,9 +890,9 @@ void Reader::setQMLHtml(QString htmlFile, QString htmlBuffer, QString skipID) {
   currentTxt = htmlBuffer;
 
   mui->qwReader->rootContext()->setContextProperty("isAni", QVariant(false));
-  QQuickItem *root = mui->qwReader->rootObject();
+  QQuickItem* root = mui->qwReader->rootObject();
 
-  QMetaObject::invokeMethod((QObject *)root, "loadHtmlBuffer",
+  QMetaObject::invokeMethod((QObject*)root, "loadHtmlBuffer",
                             Q_ARG(QVariant, htmlBuffer));
 
   QFileInfo fi(htmlFile);
@@ -977,9 +976,9 @@ QStringList Reader::readText(QByteArray data) {
   return list1;
 }
 
-void Reader::closeEvent(QCloseEvent *event) { Q_UNUSED(event); }
+void Reader::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }
 
-void Reader::paintEvent(QPaintEvent *event) { Q_UNUSED(event); }
+void Reader::paintEvent(QPaintEvent* event) { Q_UNUSED(event); }
 
 void Reader::goBookReadPosition() {
   if (isOpen) {
@@ -1026,8 +1025,8 @@ void Reader::setFontSize(int fontSize) {
   readReadNote(cPage);
 }
 
-void Reader::PlainTextEditToFile(QPlainTextEdit *txtEdit, QString fileName) {
-  QFile *file;
+void Reader::PlainTextEditToFile(QPlainTextEdit* txtEdit, QString fileName) {
+  QFile* file;
   file = new QFile;
   file->setFileName(fileName);
   bool ok = file->open(QIODevice::WriteOnly | QIODevice::Text);
@@ -1045,7 +1044,7 @@ bool Reader::getQmlReadyEnd() {
     return false;
   }
 
-  QObject *rootObject = mui->qwReader->rootObject();
+  QObject* rootObject = mui->qwReader->rootObject();
   QVariant resultVar;  // 先用QVariant接收（适配QML的类型传递）
 
   // 调用QML函数，用QVariant接收返回值
@@ -1062,7 +1061,7 @@ void Reader::setQmlLandscape(bool isValue) {
     return;
   }
 
-  QObject *rootObject = mui->qwReader->rootObject();
+  QObject* rootObject = mui->qwReader->rootObject();
   bool result = QMetaObject::invokeMethod(
       rootObject, "setLandscape",
       Qt::QueuedConnection,  // 推荐使用队列连接避免线程问题
@@ -1236,25 +1235,25 @@ void Reader::setPageVPos() {
 }
 
 void Reader::setVPos(qreal pos) {
-  QQuickItem *root;
+  QQuickItem* root;
   if (mui->qwCata->isVisible())
     root = mui->qwCata->rootObject();
   else
     root = mui->qwReader->rootObject();
 
-  QMetaObject::invokeMethod((QObject *)root, "setVPos", Q_ARG(QVariant, pos));
+  QMetaObject::invokeMethod((QObject*)root, "setVPos", Q_ARG(QVariant, pos));
 }
 
 qreal Reader::getVPos() {
   QVariant itemCount;
 
-  QQuickItem *root;
+  QQuickItem* root;
   if (mui->qwCata->isVisible())
     root = mui->qwCata->rootObject();
   else
     root = mui->qwReader->rootObject();
 
-  QMetaObject::invokeMethod((QObject *)root, "getVPos",
+  QMetaObject::invokeMethod((QObject*)root, "getVPos",
                             Q_RETURN_ARG(QVariant, itemCount));
   textPos = itemCount.toDouble();
   return textPos;
@@ -1262,8 +1261,8 @@ qreal Reader::getVPos() {
 
 QString Reader::getBookmarkTextFromQML() {
   QVariant item;
-  QQuickItem *root = mui->qwReader->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "getBookmarkText",
+  QQuickItem* root = mui->qwReader->rootObject();
+  QMetaObject::invokeMethod((QObject*)root, "getBookmarkText",
                             Q_RETURN_ARG(QVariant, item));
   QString txt = item.toString();
   if (isZH_CN) {
@@ -1274,8 +1273,8 @@ QString Reader::getBookmarkTextFromQML() {
 
 qreal Reader::getVHeight() {
   QVariant itemCount;
-  QQuickItem *root = mui->qwReader->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "getVHeight",
+  QQuickItem* root = mui->qwReader->rootObject();
+  QMetaObject::invokeMethod((QObject*)root, "getVHeight",
                             Q_RETURN_ARG(QVariant, itemCount));
   textHeight = itemCount.toDouble();
   return textHeight;
@@ -1300,17 +1299,22 @@ void Reader::showInfo() {
   mui->progReader->setValue(cPage);
 
   m_ReaderSet->updateProgress();
-  updatePageProgress();
+
+  qreal y = getVPos();
+  qreal h = getVHeight();
+  updatePageProgress(y, h);
 
   updateReaderProperty(cPage, tPage);
   readReadNote(cPage);
 }
 
-void Reader::updatePageProgress() {
-  qreal cur = getVPos();
-  qreal h = getVHeight() - mui->qwReader->height();
-  mui->progPage->setMaximum(h);
-  mui->progPage->setValue(cur);
+void Reader::updatePageProgress(qreal y, qreal h) {
+  qreal viewHeight = mui->qwReader->height();
+  qreal h1 = qMax(0.0, h - viewHeight);  // 确保h1非负
+  mui->progPage->setMaximum(h1);
+  // 确保value不超过最大/最小值
+  qreal validY = qBound(0.0, y, h1);
+  mui->progPage->setValue(validY);
 }
 
 void Reader::updateReaderProperty(int currentPage, int totalPages) {
@@ -1319,9 +1323,9 @@ void Reader::updateReaderProperty(int currentPage, int totalPages) {
 }
 
 void Reader::SplitFile(QString qfile) {
-  QTextEdit *text_edit = new QTextEdit;
-  QPlainTextEdit *plain_edit = new QPlainTextEdit;
-  QPlainTextEdit *plain_editHead = new QPlainTextEdit;
+  QTextEdit* text_edit = new QTextEdit;
+  QPlainTextEdit* plain_edit = new QPlainTextEdit;
+  QPlainTextEdit* plain_editHead = new QPlainTextEdit;
 
   QFileInfo fi(qfile);
 
@@ -1416,11 +1420,11 @@ void Reader::SplitFile(QString qfile) {
 }
 
 QString Reader::getNCX_File(QString path) {
-  QDir *dir = new QDir(path);
+  QDir* dir = new QDir(path);
   QStringList filter;
   filter << "*.ncx";
   dir->setNameFilters(filter);
-  QList<QFileInfo> *fileInfo = new QList<QFileInfo>(dir->entryInfoList(filter));
+  QList<QFileInfo>* fileInfo = new QList<QFileInfo>(dir->entryInfoList(filter));
   for (int i = 0; i < fileInfo->size(); i++) {
     if (fileInfo->at(i).exists()) {
       QString file = fileInfo->at(i).filePath();
@@ -1440,7 +1444,7 @@ void Reader::proceImg() {
   if (!dir1.exists()) imgdir = strOpfPath;
   qDebug() << "Image Dir : " << imgdir;
 
-  QDir *dir = new QDir(imgdir);
+  QDir* dir = new QDir(imgdir);
   QStringList filter;
   filter << "*.png"
          << "*.jpg"
@@ -1448,7 +1452,7 @@ void Reader::proceImg() {
          << "*.bmp"
          << "*.svg";
   dir->setNameFilters(filter);
-  QList<QFileInfo> *fileInfo = new QList<QFileInfo>(dir->entryInfoList(filter));
+  QList<QFileInfo>* fileInfo = new QList<QFileInfo>(dir->entryInfoList(filter));
   for (int i = 0; i < fileInfo->size(); i++) {
     if (fileInfo->at(i).exists()) {
       QString file = fileInfo->at(i).filePath();
@@ -1574,7 +1578,7 @@ void Reader::clearAllReaderRecords() {
   if (count == 0) return;
 
   m_Method->m_widget = new QWidget(mw_one);
-  ShowMessage *m_ShowMsg = new ShowMessage(this);
+  ShowMessage* m_ShowMsg = new ShowMessage(this);
   if (!m_ShowMsg->showMsg("Knot", tr("Clear all reading history") + " ? ", 2))
     return;
 
@@ -1650,7 +1654,7 @@ QString Reader::getCoverPicFile(QString htmlFile) {
 }
 
 // 拷贝文件夹：
-bool Reader::copyDirectoryFiles(const QString &fromDir, const QString &toDir,
+bool Reader::copyDirectoryFiles(const QString& fromDir, const QString& toDir,
                                 bool coverFileIfExist) {
   QDir sourceDir(fromDir);
   QDir targetDir(toDir);
@@ -1755,7 +1759,7 @@ void Reader::showCatalogue() {
   showInfo();
 }
 
-QString Reader::getNavFileInternalPath(const QByteArray &opfContent) {
+QString Reader::getNavFileInternalPath(const QByteArray& opfContent) {
   // 先将QByteArray转为QString（按UTF-8编码，EPUB标准编码）
   QString opfStr = QString::fromUtf8(opfContent);
 
@@ -1834,13 +1838,13 @@ QStringList Reader::ncx2html() {
     return htmlList;
   }
 
-  QPlainTextEdit *plain_edit = new QPlainTextEdit;
+  QPlainTextEdit* plain_edit = new QPlainTextEdit;
   plain_edit->appendPlainText("<html>");
   plain_edit->appendPlainText("<body>");
   plain_edit->appendPlainText("<style>.my-link {color: #336699;} </style>");
 
-  QTextEdit *text_edit = new QTextEdit;
-  QTextEdit *text_edit0 = new QTextEdit;
+  QTextEdit* text_edit = new QTextEdit;
+  QTextEdit* text_edit0 = new QTextEdit;
 
   QByteArray data = reader->readFile(ncxFile);
   QString strHtml0 = m_Method->convertDataToUnicode(data);
@@ -1939,7 +1943,7 @@ QStringList Reader::ncx2html() {
 }
 
 void Reader::setHtmlSkip(QString htmlFile, QString skipID) {
-  QTextBrowser *textBrowser = new QTextBrowser();
+  QTextBrowser* textBrowser = new QTextBrowser();
   textBrowser->setFixedHeight(mui->qwReader->height());
   textBrowser->setFixedWidth(mui->qwReader->width());
   QFont font = mui->qwReader->font();
@@ -2024,7 +2028,7 @@ void Reader::removeBookList() {
   int index = m_Method->getCurrentIndexFromQW(mui->qwBookList);
   if (index <= 0) return;
 
-  ShowMessage *msg = new ShowMessage(mw_one);
+  ShowMessage* msg = new ShowMessage(mw_one);
   if (!msg->showMsg("Knot", tr("Remove from list?"), 2)) return;
 
   bookList.removeAt(index);
@@ -2043,7 +2047,7 @@ void Reader::readBookDone() {
     mui->f_ReaderFun->setEnabled(true);
     mw_one->closeProgress();
 
-    ShowMessage *msg = new ShowMessage(mw_one);
+    ShowMessage* msg = new ShowMessage(mw_one);
     msg->showMsg("Knot", tr("The EPUB file was opened with an error."), 1);
 
     if (!isText) {
@@ -2369,7 +2373,7 @@ void Reader::shareBook() {
   }
 }
 
-bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
+bool Reader::eventFilterReader(QObject* watch, QEvent* evn) {
   if (isShowNote) return true;
   if (mui->f_ReaderNote->isVisible()) return true;
   if (dlgEditBookNote != nullptr) {
@@ -2383,12 +2387,12 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
   // 1. 处理触摸事件（安卓移动端）
   if (evn->type() == QEvent::TouchBegin || evn->type() == QEvent::TouchUpdate ||
       evn->type() == QEvent::TouchEnd) {
-    QTouchEvent *touchEvent = static_cast<QTouchEvent *>(evn);
+    QTouchEvent* touchEvent = static_cast<QTouchEvent*>(evn);
     const QList<QTouchEvent::TouchPoint> touchPoints = touchEvent->points();
     if (touchPoints.isEmpty()) return false;
 
     // 只处理单指触摸（翻页通常不需要多指）
-    const QTouchEvent::TouchPoint &touchPoint = touchPoints.first();
+    const QTouchEvent::TouchPoint& touchPoint = touchPoints.first();
     currentPos = touchPoint.position();  // 触摸点当前位置（相对控件）
 
     if (evn->type() == QEvent::TouchBegin) {
@@ -2454,7 +2458,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
       relea_x = currentPos.x();
       relea_y = currentPos.y();
       mui->lblTitle->hide();
-      QQuickItem *root = mui->qwReader->rootObject();
+      QQuickItem* root = mui->qwReader->rootObject();
 
       // 鼠标释放时的翻页逻辑
 
@@ -2528,7 +2532,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
   }
 
   // 2. 处理鼠标事件（PC端）
-  QMouseEvent *event = static_cast<QMouseEvent *>(evn);
+  QMouseEvent* event = static_cast<QMouseEvent*>(evn);
   if (watch == mui->qwReader) {
     int length = 75;
 
@@ -2626,7 +2630,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
         relea_x = pos.x();
         relea_y = pos.y();
         mui->lblTitle->hide();
-        QQuickItem *root = mui->qwReader->rootObject();
+        QQuickItem* root = mui->qwReader->rootObject();
 
         mw_one->isMousePress = false;
 
@@ -2715,7 +2719,7 @@ bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
   return QWidget::eventFilter(watch, evn);
 }
 
-bool Reader::handleTouchPress(const QPointF &globalPos) {
+bool Reader::handleTouchPress(const QPointF& globalPos) {
   // 记录按下位置和时间
   static qint64 lastPressTime = 0;
   qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
@@ -2750,7 +2754,7 @@ bool Reader::handleTouchPress(const QPointF &globalPos) {
   return true;
 }
 
-void Reader::handleDoubleClick(const QPointF &globalPos) {
+void Reader::handleDoubleClick(const QPointF& globalPos) {
   // 计算区域划分
   int h3 = mui->qwReader->height() / 3;
   int qwY = mui->qwReader->y();
@@ -2804,9 +2808,9 @@ void Reader::autoRun() {
 }
 
 void Reader::setTextAreaCursorPos(int nCursorPos) {
-  QQuickItem *root;
+  QQuickItem* root;
   root = mui->qwReader->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "setTextAreaCursorPos",
+  QMetaObject::invokeMethod((QObject*)root, "setTextAreaCursorPos",
                             Q_ARG(QVariant, nCursorPos));
 }
 
@@ -2864,12 +2868,12 @@ void Reader::on_SetReaderFunVisible() {
 ///////////////////////////////////////////////////////////////////////////////////
 
 // 1：正确初始化
-TextChunkModel::TextChunkModel(QObject *parent) : QAbstractListModel(parent) {
+TextChunkModel::TextChunkModel(QObject* parent) : QAbstractListModel(parent) {
   // 初始化角色名
   m_roleNames[TextRole] = "text";
 }
 
-void TextChunkModel::splitContent(const QString &fullText) {
+void TextChunkModel::splitContent(const QString& fullText) {
   beginResetModel();
   m_chunks.clear();
   m_chunks.append(fullText);
@@ -2916,7 +2920,7 @@ void TextChunkModel::splitContent(const QString &fullText) {
 }
 
 // 辅助方法：验证标签嵌套有效性
-bool TextChunkModel::isValidNesting(const QString &htmlBlock) {
+bool TextChunkModel::isValidNesting(const QString& htmlBlock) {
   QStack<QString> tagStack;
   QRegularExpression tagRegex(R"(<(/?)([a-zA-Z]+)[^>]*>)");
 
@@ -2936,7 +2940,7 @@ bool TextChunkModel::isValidNesting(const QString &htmlBlock) {
 }
 
 // 处理复杂结构（递归实现）
-void TextChunkModel::handleComplexStructure(QString &text, int &currentPos) {
+void TextChunkModel::handleComplexStructure(QString& text, int& currentPos) {
   QRegularExpression deepRegex(R"(<(div|section|article)\b[^>]*>)",
                                QRegularExpression::CaseInsensitiveOption);
   QRegularExpressionMatch match = deepRegex.match(text, currentPos);
@@ -2964,7 +2968,7 @@ QHash<int, QByteArray> TextChunkModel::roleNames() const {
 }
 
 // 4：正确实现数据访问
-QVariant TextChunkModel::data(const QModelIndex &index, int role) const {
+QVariant TextChunkModel::data(const QModelIndex& index, int role) const {
   if (!index.isValid() || index.row() >= m_chunks.size()) return QVariant();
 
   if (role == TextRole || role == Qt::DisplayRole)
@@ -2981,7 +2985,7 @@ void TextChunkModel::clear() {
 }
 
 // 6：正确实现追加方法
-void TextChunkModel::appendChunks(const QStringList &chunks) {
+void TextChunkModel::appendChunks(const QStringList& chunks) {
   if (chunks.isEmpty()) return;
 
   beginInsertRows(QModelIndex(), m_chunks.size(),
@@ -2990,7 +2994,7 @@ void TextChunkModel::appendChunks(const QStringList &chunks) {
   endInsertRows();
 }
 
-int TextChunkModel::rowCount(const QModelIndex &parent) const {
+int TextChunkModel::rowCount(const QModelIndex& parent) const {
   return parent.isValid() ? 0 : m_chunks.size();
 }
 
@@ -3012,7 +3016,7 @@ QVariantMap TextChunkModel::get(int index) const {
 //////////////////////////////////////////////////////////////////////////////////////
 
 // 解析nav文件内容，生成目录结构
-QList<TocItem> Reader::parseTocFromNavFile(const QByteArray &navContent) {
+QList<TocItem> Reader::parseTocFromNavFile(const QByteArray& navContent) {
   QList<TocItem> tocItems;  // 最终的目录列表
   QXmlStreamReader reader(navContent);
 
@@ -3047,7 +3051,7 @@ QList<TocItem> Reader::parseTocFromNavFile(const QByteArray &navContent) {
 }
 
 // 递归解析 <ol> 元素（提取章节列表）
-QList<TocItem> Reader::parseOlElement(QXmlStreamReader &reader) {
+QList<TocItem> Reader::parseOlElement(QXmlStreamReader& reader) {
   QList<TocItem> items;
 
   while (!reader.atEnd() && !reader.hasError()) {
@@ -3073,7 +3077,7 @@ QList<TocItem> Reader::parseOlElement(QXmlStreamReader &reader) {
 }
 
 // 解析 <li> 元素（提取单个章节的标题、链接和子章节）
-TocItem Reader::parseLiElement(QXmlStreamReader &reader) {
+TocItem Reader::parseLiElement(QXmlStreamReader& reader) {
   TocItem item;
 
   while (!reader.atEnd() && !reader.hasError()) {
@@ -3109,11 +3113,11 @@ TocItem Reader::parseLiElement(QXmlStreamReader &reader) {
 }
 
 // 递归打印目录项（辅助函数）
-void Reader::debugPrintTocItems(const QList<TocItem> &tocItems, int level) {
+void Reader::debugPrintTocItems(const QList<TocItem>& tocItems, int level) {
   // 层级缩进（每级缩进4个空格，方便区分层级）
   QString indent(level * 4, ' ');
 
-  for (const TocItem &item : tocItems) {
+  for (const TocItem& item : tocItems) {
     // 打印当前目录项的标题和链接
     qDebug() << indent << "标题：" << item.title << "，链接：" << item.href;
 
@@ -3124,7 +3128,7 @@ void Reader::debugPrintTocItems(const QList<TocItem> &tocItems, int level) {
   }
 }
 
-QString Reader::getEpub3Title(const QString &opfFile) {
+QString Reader::getEpub3Title(const QString& opfFile) {
   // 读取OPF文件内容
   QByteArray opfContent = reader->readFile(opfFile);
 
@@ -3166,7 +3170,7 @@ QString Reader::getEpub3Title(const QString &opfFile) {
   return QString();
 }
 
-bool Reader::isDcTitleElement(const QXmlStreamReader &xml) {
+bool Reader::isDcTitleElement(const QXmlStreamReader& xml) {
   // Dublin Core命名空间URI
   const QStringView dcNamespace = u"http://purl.org/dc/elements/1.1/"_qs;
 
@@ -3282,14 +3286,13 @@ void Reader::showTextFun() {
 }
 
 void Reader::showBookPageNext() {
-  QQuickItem *root = mui->qwReader->rootObject();
+  QQuickItem* root = mui->qwReader->rootObject();
   if (!root) {
     qWarning() << "[Reader] showBookPageNext: QML root object is null (QML not "
                   "loaded?)";
     return;
   }
-  bool invokeOk =
-      QMetaObject::invokeMethod((QObject *)root, "showBookPageNext");
+  bool invokeOk = QMetaObject::invokeMethod((QObject*)root, "showBookPageNext");
   if (!invokeOk) {
     qWarning() << "[Reader] showBookPageNext: invoke QML function failed "
                   "(function not found?)";
@@ -3297,13 +3300,13 @@ void Reader::showBookPageNext() {
 }
 
 void Reader::showBookPageUp() {
-  QQuickItem *root = mui->qwReader->rootObject();
+  QQuickItem* root = mui->qwReader->rootObject();
   if (!root) {
     qWarning()
         << "[Reader] showBookPageUp: QML root object is null (QML not loaded?)";
     return;
   }
-  bool invokeOk = QMetaObject::invokeMethod((QObject *)root, "showBookPageUp");
+  bool invokeOk = QMetaObject::invokeMethod((QObject*)root, "showBookPageUp");
   if (!invokeOk) {
     qWarning() << "[Reader] showBookPageUp: invoke QML function failed "
                   "(function not found?)";
@@ -3311,13 +3314,13 @@ void Reader::showBookPageUp() {
 }
 
 void Reader::closeBookPage() {
-  QQuickItem *root = mui->qwReader->rootObject();
+  QQuickItem* root = mui->qwReader->rootObject();
   if (!root) {
     qWarning()
         << "[Reader] closeBookPage: QML root object is null (QML not loaded?)";
     return;
   }
-  bool invokeOk = QMetaObject::invokeMethod((QObject *)root, "closeBookPage");
+  bool invokeOk = QMetaObject::invokeMethod((QObject*)root, "closeBookPage");
   if (!invokeOk) {
     qWarning() << "[Reader] closeBookPage: invoke QML function failed "
                   "(function not found?)";
@@ -3331,17 +3334,17 @@ void Reader::addBookNote() {
   dlgAddBookNote->setFixedSize(mw_one->geometry().width() - 2, 350);
   dlgAddBookNote->setWindowTitle(tr("Note"));
 
-  QTextEdit *textEdit = new QTextEdit(dlgAddBookNote);
+  QTextEdit* textEdit = new QTextEdit(dlgAddBookNote);
   textEdit->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
   textEdit->setAcceptRichText(false);
 
   initTextToolbarDynamic(dlgAddBookNote);
-  EditEventFilter *editFilter =
+  EditEventFilter* editFilter =
       new EditEventFilter(textToolbarDynamic, dlgAddBookNote);
   textEdit->installEventFilter(editFilter);
   textEdit->viewport()->installEventFilter(editFilter);
 
-  QDialogButtonBox *buttonBox = new QDialogButtonBox(
+  QDialogButtonBox* buttonBox = new QDialogButtonBox(
       QDialogButtonBox::Ok | QDialogButtonBox::Cancel, dlgAddBookNote);
   buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Ok"));
   buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
@@ -3356,8 +3359,8 @@ void Reader::addBookNote() {
     closeTextToolBar();
   });
 
-  QVBoxLayout *vlayout = new QVBoxLayout(dlgAddBookNote);
-  QHBoxLayout *layout = new QHBoxLayout(dlgAddBookNote);
+  QVBoxLayout* vlayout = new QVBoxLayout(dlgAddBookNote);
+  QHBoxLayout* layout = new QHBoxLayout(dlgAddBookNote);
   vlayout->addWidget(textEdit);
   vlayout->addLayout(layout);
   vlayout->addWidget(buttonBox);
@@ -3369,10 +3372,10 @@ void Reader::addBookNote() {
   layout->setSpacing(10);
 
   // 创建按钮组，设置互斥
-  QButtonGroup *btnGroup = new QButtonGroup(this);
+  QButtonGroup* btnGroup = new QButtonGroup(this);
   btnGroup->setExclusive(true);
 
-  QList<QPushButton *> colorButtons;
+  QList<QPushButton*> colorButtons;
 
   QStringList colorList = {
       "#8500FF00",  // 保留：半透明纯绿（基准色，辅助标记）
@@ -3383,8 +3386,8 @@ void Reader::addBookNote() {
       "#85FF00FF"   // 半透明纯洋红（个性化标记/主观标注，区分度拉满）
   };
 
-  for (const QString &colorStr : colorList) {
-    QPushButton *btn = new QPushButton(this);
+  for (const QString& colorStr : colorList) {
+    QPushButton* btn = new QPushButton(this);
     btn->setFixedSize(50, 50);
     btn->setCheckable(true);
 
@@ -3420,8 +3423,8 @@ void Reader::addBookNote() {
   // 连接信号槽（获取选中的颜色）
   strColor = "#8500FF00";  //(默认)
   connect(btnGroup,
-          QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked), this,
-          [=](QAbstractButton *btn) {
+          QOverload<QAbstractButton*>::of(&QButtonGroup::buttonClicked), this,
+          [=](QAbstractButton* btn) {
             strColor = btn->property("colorCode").toString();
           });
 
@@ -3447,21 +3450,21 @@ void Reader::addBookNote() {
   }
 }
 
-void Reader::editBookNote(int index, int page, const QString &content) {
+void Reader::editBookNote(int index, int page, const QString& content) {
   dlgEditBookNote = new QDialog(mw_one);
   dlgEditBookNote->setFixedSize(mw_one->geometry().width() - 2, 350);
   dlgEditBookNote->setWindowTitle(tr("Note"));
 
-  QTextEdit *textEdit = new QTextEdit(dlgEditBookNote);
+  QTextEdit* textEdit = new QTextEdit(dlgEditBookNote);
   textEdit->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
 
   initTextToolbarDynamic(dlgEditBookNote);
-  EditEventFilter *editFilter =
+  EditEventFilter* editFilter =
       new EditEventFilter(textToolbarDynamic, dlgEditBookNote);
   textEdit->installEventFilter(editFilter);
   textEdit->viewport()->installEventFilter(editFilter);
 
-  QDialogButtonBox *buttonBox = new QDialogButtonBox(
+  QDialogButtonBox* buttonBox = new QDialogButtonBox(
       QDialogButtonBox::Ok | QDialogButtonBox::Cancel, dlgEditBookNote);
   buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Ok"));
   buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
@@ -3476,8 +3479,8 @@ void Reader::editBookNote(int index, int page, const QString &content) {
     closeTextToolBar();
   });
 
-  QVBoxLayout *vlayout = new QVBoxLayout(dlgEditBookNote);
-  QHBoxLayout *layout = new QHBoxLayout(dlgEditBookNote);
+  QVBoxLayout* vlayout = new QVBoxLayout(dlgEditBookNote);
+  QHBoxLayout* layout = new QHBoxLayout(dlgEditBookNote);
   vlayout->addWidget(textEdit);
   vlayout->addLayout(layout);
   vlayout->addWidget(buttonBox);
@@ -3489,10 +3492,10 @@ void Reader::editBookNote(int index, int page, const QString &content) {
   layout->setSpacing(10);
 
   // 创建按钮组，设置互斥
-  QButtonGroup *btnGroup = new QButtonGroup(this);
+  QButtonGroup* btnGroup = new QButtonGroup(this);
   btnGroup->setExclusive(true);
 
-  QList<QPushButton *> colorButtons;
+  QList<QPushButton*> colorButtons;
 
   QStringList colorList = {
       "#8500FF00",  // 保留：半透明纯绿（基准色，辅助标记）
@@ -3503,8 +3506,8 @@ void Reader::editBookNote(int index, int page, const QString &content) {
       "#85FF00FF"   // 半透明纯洋红（个性化标记/主观标注，区分度拉满）
   };
 
-  for (const QString &colorStr : colorList) {
-    QPushButton *btn = new QPushButton(this);
+  for (const QString& colorStr : colorList) {
+    QPushButton* btn = new QPushButton(this);
     btn->setFixedSize(50, 50);
     btn->setCheckable(true);
 
@@ -3540,8 +3543,8 @@ void Reader::editBookNote(int index, int page, const QString &content) {
   // 连接信号槽（获取选中的颜色）
   strColor = "#8500FF00";  //(默认)
   connect(btnGroup,
-          QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked), this,
-          [=](QAbstractButton *btn) {
+          QOverload<QAbstractButton*>::of(&QButtonGroup::buttonClicked), this,
+          [=](QAbstractButton* btn) {
             strColor = btn->property("colorCode").toString();
           });
 
@@ -3641,7 +3644,7 @@ void Reader::appendNoteDataToQmlList() {
       QString quote = noteObj["quote"].toString();
 
       // 创建 item
-      QStandardItem *item = new QStandardItem();
+      QStandardItem* item = new QStandardItem();
 
       // 存三个字段到不同角色
       item->setData(quote, Qt::UserRole + 1);    // quote
@@ -3654,8 +3657,8 @@ void Reader::appendNoteDataToQmlList() {
   }
 }
 
-void Reader::saveReadNote(int page, int start, int end, const QString &color,
-                          const QString &content, const QString &quote) {
+void Reader::saveReadNote(int page, int start, int end, const QString& color,
+                          const QString& content, const QString& quote) {
   QString file = iniDir + "memo/readnote/" + currentBookName + ".json";
 
   // 确保目录存在
@@ -3829,8 +3832,8 @@ void Reader::delReadNote(int index) {
   // readReadNote(page);
 }
 
-void Reader::updateReadNote(int page, int index, const QString &content,
-                            const QString &color) {
+void Reader::updateReadNote(int page, int index, const QString& content,
+                            const QString& color) {
   QString file = iniDir + "memo/readnote/" + currentBookName + ".json";
 
   // 文件不存在则无法更新
@@ -3900,7 +3903,7 @@ void Reader::updateReadNote(int page, int index, const QString &content,
 }
 
 void Reader::initBookNoteValue(int cindex, int cpage) {
-  QQuickItem *root = mui->qwViewBookNote->rootObject();
+  QQuickItem* root = mui->qwViewBookNote->rootObject();
   if (!root) {
     qWarning("Error: QML root object not found!");
     return;
@@ -3918,8 +3921,8 @@ void Reader::setNoteListCurrentIndexValue(int value) {
   currentNoteListIndex = value;
 }
 
-void Reader::modifyText2(int currentIndex, const QString &text) {
-  QQuickItem *root = mui->qwViewBookNote->rootObject();
+void Reader::modifyText2(int currentIndex, const QString& text) {
+  QQuickItem* root = mui->qwViewBookNote->rootObject();
   if (!root) {
     qWarning("Error: QML root object not found!");
     return;
@@ -3966,7 +3969,7 @@ void Reader::cancelKeepScreenOn() {
 }
 
 void Reader::resetTextSelection() {
-  QQuickItem *root = mui->qwReader->rootObject();
+  QQuickItem* root = mui->qwReader->rootObject();
   if (!root) {
     qWarning() << "QML rootObject is null, cannot reset selection.";
     return;
@@ -3986,7 +3989,7 @@ void Reader::resetTextSelection() {
 }
 
 void Reader::setBookPagePressHold(bool value) {
-  QQuickItem *root = mui->qwReader->rootObject();
+  QQuickItem* root = mui->qwReader->rootObject();
   if (!root) {
     qWarning() << "QML rootObject is null, cannot set book page press hold.";
     return;
@@ -4005,7 +4008,7 @@ void Reader::setBookPagePressHold(bool value) {
   }
 }
 
-void Reader::setEditText(const QString &txt, const QString &direction) {
+void Reader::setEditText(const QString& txt, const QString& direction) {
   mui->editSetText->setText(txt);
   if (direction == "left")
     mui->editSetText->setCursorPosition(0);

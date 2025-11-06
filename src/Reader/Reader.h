@@ -51,12 +51,12 @@ class Reader : public QDialog {
   Q_OBJECT
 
  public:
-  explicit Reader(QWidget *parent = nullptr);
+  explicit Reader(QWidget* parent = nullptr);
   ~Reader();
-  Ui::Reader *ui;
+  Ui::Reader* ui;
 
-  QDialog *dlgAddBookNote = nullptr;
-  QDialog *dlgEditBookNote = nullptr;
+  QDialog* dlgAddBookNote = nullptr;
+  QDialog* dlgEditBookNote = nullptr;
 
   bool isAutoRun = false;
 
@@ -70,8 +70,8 @@ class Reader : public QDialog {
   bool isSelText = false;
   int pdfMethod = 2;
 
-  QTimer *tmeAutoRun;
-  QDialog *frame;
+  QTimer* tmeAutoRun;
+  QDialog* frame;
   QString openfile;
   QString readerStyle;
   QString strStyle2_0 =
@@ -86,7 +86,7 @@ class Reader : public QDialog {
   QString currentHtmlFile;
   bool isPageNext = false;
   int mainDirIndex = -1;
-  DocumentHandler *myDocHandler;
+  DocumentHandler* myDocHandler;
   QStringList bookList;
 
   QString currentBookName;
@@ -105,7 +105,7 @@ class Reader : public QDialog {
 
   void setQMLHtml(QString htmlFile, QString htmlBuffer, QString skipID);
   void setFontSize(int fontSize);
-  static void PlainTextEditToFile(QPlainTextEdit *txtEdit, QString fileName);
+  static void PlainTextEditToFile(QPlainTextEdit* txtEdit, QString fileName);
   void savePageVPos();
   void setPageVPos();
   void showInfo();
@@ -132,7 +132,7 @@ class Reader : public QDialog {
   void setAni();
   void loadQMLText(QString str);
 
-  static bool copyDirectoryFiles(const QString &fromDir, const QString &toDir,
+  static bool copyDirectoryFiles(const QString& fromDir, const QString& toDir,
                                  bool coverFileIfExist);
 
   void clearAllReaderRecords();
@@ -156,7 +156,7 @@ class Reader : public QDialog {
   void openMyPDF(QString uri);
   void closeMyPDF();
   void shareBook();
-  bool eventFilterReader(QObject *watch, QEvent *evn);
+  bool eventFilterReader(QObject* watch, QEvent* evn);
   bool getDefaultOpen();
 
   void setDefaultOpen(QString value);
@@ -198,17 +198,17 @@ class Reader : public QDialog {
   void initLink(QString htmlFile);
   void selectText();
   void openCataList(QString htmlFile);
-  void updatePageProgress();
+  void updatePageProgress(qreal y, qreal h);
   void clickBookmarkList(int i);
 
  protected:
-  bool eventFilter(QObject *obj, QEvent *evn) override;
-  void keyReleaseEvent(QKeyEvent *event) override;
-  void closeEvent(QCloseEvent *event) override;
-  void paintEvent(QPaintEvent *event) override;
+  bool eventFilter(QObject* obj, QEvent* evn) override;
+  void keyReleaseEvent(QKeyEvent* event) override;
+  void closeEvent(QCloseEvent* event) override;
+  void paintEvent(QPaintEvent* event) override;
 
  signals:
-  void notesLoaded(const QVariantList &notes);
+  void notesLoaded(const QVariantList& notes);
 
  public slots:
   void openBookListItem();
@@ -219,11 +219,11 @@ class Reader : public QDialog {
   void goUpPage();
 
   void delReadNote(int index);
-  void editBookNote(int index, int page, const QString &content);
+  void editBookNote(int index, int page, const QString& content);
   void closeViewBookNote();
   void setShowNoteValue(bool value);
   void setNoteListCurrentIndexValue(int value);
-  void setEditText(const QString &txt, const QString &direction);
+  void setEditText(const QString& txt, const QString& direction);
   void setStartEnd(int start, int end);
  private slots:
   void autoRun();
@@ -251,17 +251,17 @@ class Reader : public QDialog {
 
   QString updateContent();
 
-  void handleDoubleClick(const QPointF &globalPos);
+  void handleDoubleClick(const QPointF& globalPos);
 
-  bool handleTouchPress(const QPointF &globalPos);
+  bool handleTouchPress(const QPointF& globalPos);
 
-  static QString getNavFileInternalPath(const QByteArray &opfContent);
-  static QList<TocItem> parseTocFromNavFile(const QByteArray &navContent);
-  static QList<TocItem> parseOlElement(QXmlStreamReader &reader);
-  static TocItem parseLiElement(QXmlStreamReader &reader);
-  static void debugPrintTocItems(const QList<TocItem> &tocItems, int level);
-  static bool isDcTitleElement(const QXmlStreamReader &xml);
-  static QString getEpub3Title(const QString &opfFile);
+  static QString getNavFileInternalPath(const QByteArray& opfContent);
+  static QList<TocItem> parseTocFromNavFile(const QByteArray& navContent);
+  static QList<TocItem> parseOlElement(QXmlStreamReader& reader);
+  static TocItem parseLiElement(QXmlStreamReader& reader);
+  static void debugPrintTocItems(const QList<TocItem>& tocItems, int level);
+  static bool isDcTitleElement(const QXmlStreamReader& xml);
+  static QString getEpub3Title(const QString& opfFile);
 
   bool isGetBookmarkText = false;
 
@@ -269,15 +269,15 @@ class Reader : public QDialog {
   bool getQmlReadyEnd();
   double readTotalHours();
   bool writeTotalHours(double value);
-  void saveReadNote(int page, int start, int end, const QString &color,
-                    const QString &content, const QString &quote);
+  void saveReadNote(int page, int start, int end, const QString& color,
+                    const QString& content, const QString& quote);
 
-  void updateReadNote(int page, int index, const QString &content,
-                      const QString &color);
+  void updateReadNote(int page, int index, const QString& content,
+                      const QString& color);
   void appendNoteDataToQmlList();
-  QStandardItemModel *notesModel = nullptr;
+  QStandardItemModel* notesModel = nullptr;
   void initBookNoteValue(int cindex, int cpage);
-  void modifyText2(int currentIndex, const QString &text);
+  void modifyText2(int currentIndex, const QString& text);
 };
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -285,7 +285,7 @@ class Reader : public QDialog {
 class TextChunkModel : public QAbstractListModel {
   Q_OBJECT
  public:
-  explicit TextChunkModel(QObject *parent = nullptr);
+  explicit TextChunkModel(QObject* parent = nullptr);
 
   // 定义角色枚举
   enum CustomRoles {
@@ -293,24 +293,24 @@ class TextChunkModel : public QAbstractListModel {
   };
 
   // 必须实现的接口
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index, int role) const override;
+  int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  QVariant data(const QModelIndex& index, int role) const override;
   QHash<int, QByteArray> roleNames() const override;
 
   // 业务方法
-  Q_INVOKABLE void splitContent(const QString &fullText);
-  Q_INVOKABLE void appendChunks(const QStringList &chunks);
+  Q_INVOKABLE void splitContent(const QString& fullText);
+  Q_INVOKABLE void appendChunks(const QStringList& chunks);
   Q_INVOKABLE void clear();
   Q_INVOKABLE QVariantMap get(int index) const;
 
  signals:
-  void chunksChanged(const QVector<QString> &chunks);
+  void chunksChanged(const QVector<QString>& chunks);
 
  private:
   QHash<int, QByteArray> m_roleNames;  // 存储角色定义
   QStringList m_chunks;                // 存储分割后的文本块
-  void handleComplexStructure(QString &text, int &currentPos);
-  bool isValidNesting(const QString &htmlBlock);
+  void handleComplexStructure(QString& text, int& currentPos);
+  bool isValidNesting(const QString& htmlBlock);
 };
 ///////////////////////////////////////////////////////////////////////////////////////////
 

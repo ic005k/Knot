@@ -14,6 +14,7 @@ Item {
     // ===== 自动滚动控制变量 =====
     property bool isAutoScrollRunning: isAutoRun // 是否正在自动滚动
     property real scrollSpeed: scrollValue // 每帧滚动增量（调速核心，默认0.5px/帧）
+    property real lastUpdateTime: 0
 
     // 翻页属性
     property point pressPos: Qt.point(0, 0)
@@ -646,9 +647,14 @@ Item {
 
         // ==============================================
         Connections {
-            target: contentListView // 直接访问同级的 contentListView
+            target: contentListView
             function onContentYChanged() {
-                m_Reader.updatePageProgress()
+                // 更新频率ms，目前1秒
+                if (Date.now() - lastUpdateTime > 1000) {
+                    m_Reader.updatePageProgress(contentListView.contentY,
+                                                contentListView.contentHeight)
+                    lastUpdateTime = Date.now()
+                }
             }
         }
 
