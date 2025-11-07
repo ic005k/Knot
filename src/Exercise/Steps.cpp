@@ -787,10 +787,10 @@ void Steps::updateGetGps() {
       setCurrentGpsSpeed(mySpeed, maxSpeed);
 
       str4 = list.at(3);
-      str5 = list.at(4);
+      strAltitude = list.at(4);
       str6 = list.at(5);
       str7 = list.at(6);
-      strGpsStatus = str4 + "\n" + str5 + "\n" + str6 + "\n" + str7;
+      strGpsStatus = str4 + "\n" + strAltitude + "\n" + str6 + "\n" + str7;
     }
 
     if (m_time.second() % 3 == 0) {
@@ -857,6 +857,9 @@ void Steps::updateGetGps() {
       mySpeed = distribution(generator);
       if (mySpeed > maxSpeed) maxSpeed = mySpeed;
       setCurrentGpsSpeed(mySpeed, maxSpeed);
+
+      strAltitude =
+          "Altitude: " + QString::number(distribution(generator)) + " m";
 
       qDebug() << "m_time%3=" << m_time.second();
     }
@@ -2145,7 +2148,8 @@ void Steps::saveRoute(const QString& file, const QString& time, double lat,
   newRoute["time"] = time;  // 字符串类型
   newRoute["lat"] = lat;    // 数字类型（double）
   newRoute["lon"] = lon;    // 数字类型（double）
-  newRoute["address"] = distanceRoute + " | " + speedRoute + "\n\n" +
+  newRoute["address"] = distanceRoute + " | " + speedRoute + "\n" +
+                        strAltitude + "\n\n" +
                         address;  // 字符串类型（支持中文，UTF-8 编码）
 
   // 追加新对象到数组

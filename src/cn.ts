@@ -7915,40 +7915,40 @@
         <translation>滚动速度</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="901"/>
+        <location filename="Reader/Reader.cpp" line="900"/>
         <source>Info</source>
         <translation>信息</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="2028"/>
+        <location filename="Reader/Reader.cpp" line="2032"/>
         <source>Remove from list?</source>
         <translation>从列表中移除？</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="2047"/>
+        <location filename="Reader/Reader.cpp" line="2051"/>
         <source>The EPUB file was opened with an error.</source>
         <translation>EPUB文件打开出错</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="2368"/>
+        <location filename="Reader/Reader.cpp" line="2372"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="3332"/>
-        <location filename="Reader/Reader.cpp" line="3453"/>
+        <location filename="Reader/Reader.cpp" line="3335"/>
+        <location filename="Reader/Reader.cpp" line="3456"/>
         <source>Note</source>
         <translation>笔记</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="3346"/>
-        <location filename="Reader/Reader.cpp" line="3466"/>
+        <location filename="Reader/Reader.cpp" line="3349"/>
+        <location filename="Reader/Reader.cpp" line="3469"/>
         <source>Ok</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="3347"/>
-        <location filename="Reader/Reader.cpp" line="3467"/>
+        <location filename="Reader/Reader.cpp" line="3350"/>
+        <location filename="Reader/Reader.cpp" line="3470"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -7957,13 +7957,13 @@
         <translation type="vanished">页</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="930"/>
+        <location filename="Reader/Reader.cpp" line="929"/>
         <source>Cannot read file %1:
 %2.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="1578"/>
+        <location filename="Reader/Reader.cpp" line="1582"/>
         <source>Clear all reading history</source>
         <translation>清除所有的阅读记录</translation>
     </message>
@@ -8382,26 +8382,26 @@
         <translation>没有GPS信号...</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1006"/>
-        <location filename="Exercise/Steps.cpp" line="1095"/>
-        <location filename="Exercise/Steps.cpp" line="1351"/>
-        <location filename="Exercise/Steps.cpp" line="1361"/>
+        <location filename="Exercise/Steps.cpp" line="1022"/>
+        <location filename="Exercise/Steps.cpp" line="1111"/>
+        <location filename="Exercise/Steps.cpp" line="1390"/>
+        <location filename="Exercise/Steps.cpp" line="1400"/>
         <source>Cycling</source>
         <translation>骑行</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1007"/>
-        <location filename="Exercise/Steps.cpp" line="1100"/>
-        <location filename="Exercise/Steps.cpp" line="1353"/>
-        <location filename="Exercise/Steps.cpp" line="1363"/>
+        <location filename="Exercise/Steps.cpp" line="1023"/>
+        <location filename="Exercise/Steps.cpp" line="1116"/>
+        <location filename="Exercise/Steps.cpp" line="1392"/>
+        <location filename="Exercise/Steps.cpp" line="1402"/>
         <source>Hiking</source>
         <translation>徒步</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1008"/>
-        <location filename="Exercise/Steps.cpp" line="1105"/>
-        <location filename="Exercise/Steps.cpp" line="1355"/>
-        <location filename="Exercise/Steps.cpp" line="1365"/>
+        <location filename="Exercise/Steps.cpp" line="1024"/>
+        <location filename="Exercise/Steps.cpp" line="1121"/>
+        <location filename="Exercise/Steps.cpp" line="1394"/>
+        <location filename="Exercise/Steps.cpp" line="1404"/>
         <source>Running</source>
         <translation>跑步</translation>
     </message>
@@ -8411,37 +8411,37 @@
         <translation>天气</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1026"/>
+        <location filename="Exercise/Steps.cpp" line="1042"/>
         <source>Exercise Duration</source>
         <translation>运动时长</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1029"/>
+        <location filename="Exercise/Steps.cpp" line="1045"/>
         <source>Average Speed</source>
         <translation>平均速度</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1029"/>
+        <location filename="Exercise/Steps.cpp" line="1045"/>
         <source>Max Speed</source>
         <translation>最大速度</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1349"/>
+        <location filename="Exercise/Steps.cpp" line="1388"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1359"/>
+        <location filename="Exercise/Steps.cpp" line="1398"/>
         <source>Year</source>
         <translation>年</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1853"/>
+        <location filename="Exercise/Steps.cpp" line="1892"/>
         <source>Today</source>
         <translation>今天</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1854"/>
+        <location filename="Exercise/Steps.cpp" line="1893"/>
         <source>km</source>
         <translation>公里</translation>
     </message>
@@ -8458,13 +8458,13 @@
         <translation type="vanished">总距离</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1013"/>
+        <location filename="Exercise/Steps.cpp" line="1029"/>
         <source>Distance</source>
         <translation>距离</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="882"/>
-        <location filename="Exercise/Steps.cpp" line="1026"/>
+        <location filename="Exercise/Steps.cpp" line="891"/>
+        <location filename="Exercise/Steps.cpp" line="1042"/>
         <source>Duration</source>
         <translation>持续时间</translation>
     </message>
@@ -8502,7 +8502,7 @@
         <translation type="vanished">周日</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="720"/>
+        <location filename="Exercise/Steps.cpp" line="721"/>
         <source>Stop</source>
         <translation>停止</translation>
     </message>
@@ -8511,7 +8511,7 @@
         <translation type="vanished">速度</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1011"/>
+        <location filename="Exercise/Steps.cpp" line="1027"/>
         <source>Time</source>
         <translation>时间</translation>
     </message>
@@ -10389,20 +10389,25 @@
         <translation type="vanished">完成</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="260"/>
+        <location filename="qmlsrc/gps_list.qml" line="435"/>
         <source>Cycling</source>
         <oldsource>Clyling</oldsource>
         <translation>骑行</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="261"/>
+        <location filename="qmlsrc/gps_list.qml" line="436"/>
         <source>Hiking</source>
         <translation>徒步</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="261"/>
+        <location filename="qmlsrc/gps_list.qml" line="436"/>
         <source>Running</source>
         <translation>跑步</translation>
+    </message>
+    <message>
+        <location filename="qmlsrc/gps_list.qml" line="893"/>
+        <source>Total %1 items</source>
+        <translation>共 %1 条</translation>
     </message>
     <message>
         <source>GPS Track</source>
@@ -10413,12 +10418,12 @@
         <translation type="vanished">路线</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="649"/>
+        <location filename="qmlsrc/gps_list.qml" line="954"/>
         <source>Clear</source>
         <translation>清除</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="665"/>
+        <location filename="qmlsrc/gps_list.qml" line="970"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
@@ -10698,42 +10703,42 @@
         <translation type="vanished">粘贴</translation>
     </message>
     <message>
-        <location filename="qmlsrc/reader.qml" line="687"/>
+        <location filename="qmlsrc/reader.qml" line="693"/>
         <source>Note Content:</source>
         <translation>笔记内容：</translation>
     </message>
     <message>
-        <location filename="qmlsrc/reader.qml" line="738"/>
+        <location filename="qmlsrc/reader.qml" line="744"/>
         <source>Edit</source>
         <translation>编辑</translation>
     </message>
     <message>
-        <location filename="qmlsrc/reader.qml" line="752"/>
+        <location filename="qmlsrc/reader.qml" line="758"/>
         <source>Del</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="qmlsrc/reader.qml" line="760"/>
+        <location filename="qmlsrc/reader.qml" line="766"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="qmlsrc/reader.qml" line="789"/>
+        <location filename="qmlsrc/reader.qml" line="795"/>
         <source>Delete Confirmation</source>
         <translation>删除确认</translation>
     </message>
     <message>
-        <location filename="qmlsrc/reader.qml" line="800"/>
+        <location filename="qmlsrc/reader.qml" line="806"/>
         <source>Are you sure you want to delete this note?</source>
         <translation>确定要删除这条笔记？</translation>
     </message>
     <message>
-        <location filename="qmlsrc/reader.qml" line="1397"/>
+        <location filename="qmlsrc/reader.qml" line="1403"/>
         <source>Start:</source>
         <translation>起点：</translation>
     </message>
     <message>
-        <location filename="qmlsrc/reader.qml" line="1476"/>
+        <location filename="qmlsrc/reader.qml" line="1482"/>
         <source>End:</source>
         <translation>终点：</translation>
     </message>

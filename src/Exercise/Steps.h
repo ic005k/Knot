@@ -33,20 +33,20 @@ class Steps : public QDialog {
   Q_OBJECT
 
  public:
-  explicit Steps(QWidget *parent = nullptr);
+  explicit Steps(QWidget* parent = nullptr);
   ~Steps();
-  Ui::Steps *ui;
+  Ui::Steps* ui;
 
   QString strMapKeyTestInfo;
 
-  QTimer *timer;
+  QTimer* timer;
 
-  GeoAddressResolver *addressResolver = nullptr;
+  GeoAddressResolver* addressResolver = nullptr;
   QString m_lastAddress;
   bool isShowRoute = false;
 
-  Speedometer *m_speedometer;
-  WeatherFetcher *weatherFetcher;
+  Speedometer* m_speedometer;
+  WeatherFetcher* weatherFetcher;
 
   QString btnRoundStyle =
       "QToolButton {"
@@ -106,9 +106,9 @@ class Steps : public QDialog {
   void getAddress(double lat, double lon);
 
  protected:
-  void keyReleaseEvent(QKeyEvent *event) override;
+  void keyReleaseEvent(QKeyEvent* event) override;
 
-  bool eventFilter(QObject *watch, QEvent *evn) override;
+  bool eventFilter(QObject* watch, QEvent* evn) override;
 
  public:
   void closeSteps();
@@ -134,9 +134,9 @@ class Steps : public QDialog {
   void saveMovementType();
   void setVibrate();
 
-  void writeCSV(const QString &filePath, const QList<QStringList> &data);
+  void writeCSV(const QString& filePath, const QList<QStringList>& data);
 
-  void appendToCSV(const QString &filePath, const QStringList &data);
+  void appendToCSV(const QString& filePath, const QStringList& data);
   void updateInfoText(QString strDistance, QString strSpeed);
   QString getCurrentDate();
   void updateHardSensorSteps();
@@ -155,9 +155,9 @@ class Steps : public QDialog {
   void clearAllGpsList();
   void getGpsTrack();
   void openMapWindow();
-  void getRouteList(const QString &strGpsTime);
+  void getRouteList(const QString& strGpsTime);
  private slots:
-  void positionUpdated(const QGeoPositionInfo &info);
+  void positionUpdated(const QGeoPositionInfo& info);
 
   void updateGetGps();
 
@@ -188,7 +188,7 @@ class Steps : public QDialog {
   int maxCount = 90;
 
   double distance() const { return m_distance; }
-  QGeoPositionInfoSource *m_positionSource;
+  QGeoPositionInfoSource* m_positionSource;
   QGeoCoordinate lastPosition;
   double m_distance;
   double m_TotalDistance, oldTotalDistance;
@@ -214,7 +214,7 @@ class Steps : public QDialog {
       "#4C566A;border-radius: 10px;padding: 10px 20px;text-align: "
       "center;}";
 
-  QString t0, str1, str2, str3, str4, str5, str6, str7;
+  QString t0, str1, str2, str3, str4, strAltitude, str6, str7;
 
   void insertGpsList(int curIndex, QString t0, QString t1, QString t2,
                      QString t3, QString t4, QString t5, QString t6,
@@ -247,14 +247,14 @@ class Steps : public QDialog {
   void appendTrackPointAndroid(double latitude, double longitude);
   void addTrackDataToAndroid(double latitude, double longitude);
   void clearTrackDataToAndroid();
-  void setDateLabelToAndroid(const QString &str);
-  void setInfoLabelToAndroid(const QString &str);
+  void setDateLabelToAndroid(const QString& str);
+  void setInfoLabelToAndroid(const QString& str);
 
-  void saveRoute(const QString &file, const QString &time, double lat,
-                 double lon, const QString &address);
+  void saveRoute(const QString& file, const QString& time, double lat,
+                 double lon, const QString& address);
   void setAddressResolverConnect();
   QString strJsonRouteFile, strJsonSpeedFile;
-  QStringList readRoute(const QString &file);
+  QStringList readRoute(const QString& file);
 
   bool isInChina(double lat, double lon);
   void setMapKeyError();
@@ -267,9 +267,9 @@ class Steps : public QDialog {
   void updateGpsList(int curIndex, QString t0, QString t1, QString t2,
                      QString t3, QString t4, QString t5, QString t6);
   void refreshRoute();
-  void saveSpeedData(const QString &jsonFile, double speed);
-  QVariantList getSpeedData(const QString &jsonFile);
-  QString getJsonRouteFile(const QString &strGpsList);
+  void saveSpeedData(const QString& jsonFile, double speed);
+  QVariantList getSpeedData(const QString& jsonFile);
+  QString getJsonRouteFile(const QString& strGpsList);
  signals:
   void distanceChanged(double distance);
   void timeChanged();

@@ -782,30 +782,85 @@ Rectangle {
                 width: routeDialog.width - 20
                 height: colLayout.implicitHeight + 20
 
-                property bool hasSamePrev: {
-                    if (index <= 0)
-                        return false // 第一个条目没有上一个
-                    const prevItem = routeModel.get(index - 1)
-                    return prevItem.latLon === latLon
-                            && prevItem.address === address
-                }
-                property bool hasSameNext: {
-                    if (index >= routeModel.count - 1)
-                        return false // 最后一个条目没有下一个
-                    const nextItem = routeModel.get(index + 1)
-                    return nextItem.latLon === latLon
-                            && nextItem.address === address
+                // 1. 拆分地址获取最后一段（核心：取最后一项，无论总段数）
+                property string currentLastPart: {
+                    if (!address)
+                        return '' // 地址为空时直接返回空
+                    // 按换行符\n拆分地址为数组（支持任意段数）
+                    const parts = address.split('\n')
+                    // 取最后一段（索引为 parts.length - 1）
+                    return parts[parts.length - 1] || '' // 兼容空段的情况
                 }
 
-                // 核心：根据连续相同组判断底色
+                // 2. 判断当前条目与上一条目的最后一段是否相同
+                property bool hasSamePrev: {
+                    if (index <= 0)
+                        return false // 第一个条目无前置
+                    const prevItem = routeModel.get(index - 1)
+                    // 拆分上一条目的地址，取最后一段
+                    const prevParts = prevItem.address.split('\n')
+                    const prevLastPart = prevParts[prevParts.length - 1] || ''
+                    // 比较最后一段
+                    return prevLastPart === currentLastPart
+                }
+
+                // 3. 判断当前条目与下一条目的最后一段是否相同
+                property bool hasSameNext: {
+                    if (index >= routeModel.count - 1)
+                        return false // 最后一个条目无后置
+                    const nextItem = routeModel.get(index + 1)
+                    // 拆分下一条目的地址，取最后一段
+                    const nextParts = nextItem.address.split('\n')
+                    const nextLastPart = nextParts[nextParts.length - 1] || ''
+                    // 比较最后一段
+                    return nextLastPart === currentLastPart
+                }
+
+                // 4. 基于最后一段的连续性设置背景色
                 color: {
                     if (hasSamePrev || hasSameNext) {
-                        // 休息时段的浅绿色（适配明暗模式）
-                        return isDark ? "#2E7D32" : "#E8F5E9"
+                        return isDark ? "#2E7D32" : "#E8F5E9" // 连续相同的背景色
                     } else {
-                        // 默认底色
-                        return isDark ? "#333" : "#EEE"
+                        return isDark ? "#333" : "#EEE" // 默认背景色
                     }
+                }
+
+                // 新增：判断是否为当前组的首个条目（只在首个条目显示数量）
+                property bool isGroupFirst: !hasSamePrev
+                // 新增：计算当前组的总条目数
+                property int sameGroupCount: {
+                    if (!currentLastPart)
+                        return 1
+                    let count = 1
+                    // 向前遍历统计相同最后一段的条目
+                    let prevIdx = index - 1
+                    while (prevIdx >= 0) {
+                        const prevItem = routeModel.get(prevIdx)
+                        const prevParts = prevItem.address.split('\n')
+                        const prevLast = (prevParts[prevParts.length - 1]
+                                          || '').trim()
+                        if (prevLast === currentLastPart) {
+                            count++
+                            prevIdx--
+                        } else {
+                            break
+                        }
+                    }
+                    // 向后遍历统计相同最后一段的条目
+                    let nextIdx = index + 1
+                    while (nextIdx < routeModel.count) {
+                        const nextItem = routeModel.get(nextIdx)
+                        const nextParts = nextItem.address.split('\n')
+                        const nextLast = (nextParts[nextParts.length - 1]
+                                          || '').trim()
+                        if (nextLast === currentLastPart) {
+                            count++
+                            nextIdx++
+                        } else {
+                            break
+                        }
+                    }
+                    return count
                 }
 
                 radius: 5
@@ -818,6 +873,35 @@ Rectangle {
                     anchors.fill: parent
                     anchors.margins: 5
                     spacing: 5
+
+                    // 数量标记（适配布局管理器，消除锚点冲突警告）
+                    Rectangle {
+                        visible: isGroupFirst && sameGroupCount > 1
+                        // 布局中右对齐（替代anchors.right，由布局管理器控制位置）
+                        Layout.alignment: Qt.AlignRight
+                        // 与父容器右侧保持5px间距（布局内的边距，确保不超界）
+                        Layout.rightMargin: 5
+                        // 宽度自适应文本（文本宽度 + 左右内边距）
+                        width: textItem.implicitWidth + 4 // 4 = 左2px + 右2px
+                        // 高度自适应文本（文本高度 + 上下内边距）
+                        height: textItem.implicitHeight + 2 // 2 = 上1px + 下1px
+                        color: isDark ? "#1B5E20" : "#4CAF50"
+                        radius: 3
+
+                        Text {
+                            id: textItem
+                            text: qsTr("Total %1 items").arg(sameGroupCount)
+                            color: "white"
+                            font.pointSize: 12
+                            // 文本在矩形内右对齐（视觉更紧凑）
+                            horizontalAlignment: Text.AlignRight
+                            // 文本与矩形边框的内边距
+                            leftPadding: 2
+                            rightPadding: 2
+                            topPadding: 1
+                            bottomPadding: 1
+                        }
+                    }
 
                     // 第一行：时间
                     Text {

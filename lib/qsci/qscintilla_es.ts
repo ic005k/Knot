@@ -6922,51 +6922,51 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="901"/>
+        <location filename="../../src/Reader/Reader.cpp" line="900"/>
         <source>Info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="930"/>
+        <location filename="../../src/Reader/Reader.cpp" line="929"/>
         <source>Cannot read file %1:
 %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="1578"/>
+        <location filename="../../src/Reader/Reader.cpp" line="1582"/>
         <source>Clear all reading history</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="2028"/>
+        <location filename="../../src/Reader/Reader.cpp" line="2032"/>
         <source>Remove from list?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="2047"/>
+        <location filename="../../src/Reader/Reader.cpp" line="2051"/>
         <source>The EPUB file was opened with an error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="2368"/>
+        <location filename="../../src/Reader/Reader.cpp" line="2372"/>
         <source>Share to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="3332"/>
-        <location filename="../../src/Reader/Reader.cpp" line="3453"/>
+        <location filename="../../src/Reader/Reader.cpp" line="3335"/>
+        <location filename="../../src/Reader/Reader.cpp" line="3456"/>
         <source>Note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="3346"/>
-        <location filename="../../src/Reader/Reader.cpp" line="3466"/>
+        <location filename="../../src/Reader/Reader.cpp" line="3349"/>
+        <location filename="../../src/Reader/Reader.cpp" line="3469"/>
         <source>Ok</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="3347"/>
-        <location filename="../../src/Reader/Reader.cpp" line="3467"/>
+        <location filename="../../src/Reader/Reader.cpp" line="3350"/>
+        <location filename="../../src/Reader/Reader.cpp" line="3470"/>
         <source>Cancel</source>
         <translation type="unfinished">Cancelar</translation>
     </message>
@@ -7277,42 +7277,42 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="720"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="721"/>
         <source>Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="882"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1026"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="891"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1042"/>
         <source>Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1006"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1095"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1351"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1361"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1022"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1111"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1390"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1400"/>
         <source>Cycling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1007"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1100"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1353"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1363"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1023"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1116"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1392"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1402"/>
         <source>Hiking</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1008"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1105"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1355"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1365"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1024"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1121"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1394"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1404"/>
         <source>Running</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1011"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1027"/>
         <source>Time</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7322,42 +7322,42 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1013"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1029"/>
         <source>Distance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1026"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1042"/>
         <source>Exercise Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1029"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1045"/>
         <source>Average Speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1029"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1045"/>
         <source>Max Speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1349"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1388"/>
         <source>Month</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1359"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1398"/>
         <source>Year</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1853"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1892"/>
         <source>Today</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1854"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1893"/>
         <source>km</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7832,27 +7832,32 @@
 <context>
     <name>gps_list</name>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="260"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="435"/>
         <source>Cycling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="261"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="436"/>
         <source>Hiking</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="261"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="436"/>
         <source>Running</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="649"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="893"/>
+        <source>Total %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="954"/>
         <source>Clear</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="665"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="970"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7914,42 +7919,42 @@
 <context>
     <name>reader</name>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="687"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="693"/>
         <source>Note Content:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="738"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="744"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="752"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="758"/>
         <source>Del</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="760"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="766"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="789"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="795"/>
         <source>Delete Confirmation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="800"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="806"/>
         <source>Are you sure you want to delete this note?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="1397"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="1403"/>
         <source>Start:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/reader.qml" line="1476"/>
+        <location filename="../../src/qmlsrc/reader.qml" line="1482"/>
         <source>End:</source>
         <translation type="unfinished"></translation>
     </message>
