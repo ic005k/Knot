@@ -3684,7 +3684,7 @@ QSlider::handle:horizontal:disabled {
           <enum>QTabWidget::TabPosition::South</enum>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="tab_Steps">
           <attribute name="title">
@@ -4513,30 +4513,10 @@ QRadioButton:disabled {
                 </font>
                </property>
                <property name="styleSheet">
-                <string notr="true">QLabel {
-    /* 背景颜色 */
-    background-color: #2E3440; /* 深色背景 */
-    
-    /* 文字颜色 */
-    color: #ECEFF4; /* 浅色文字 */
-    
-    /* 字体设置 */
-    font-family: 'Segoe UI', sans-serif;  /* 现代字体 */
-    font-weight: bold;   /* 加粗 */
-    
-    /* 边框设置 */
-    border: 2px solid #4C566A; /* 浅色边框 */
-    border-radius: 10px; /* 圆角 */
-    
-    /* 内边距 */
-    padding: 0px 0px; /* 上下左右的内边距 */
-    
-    /* 文字对齐 */
-    text-align: center; /* 文字居中 */
-	    
-    /* 阴影效果 */
-    /* box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2); */ /* 轻微的阴影 */
-}</string>
+                <string notr="true"/>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::Shape::Panel</enum>
                </property>
                <property name="text">
                 <string>0</string>
@@ -4551,7 +4531,11 @@ QRadioButton:disabled {
                <property name="font">
                 <font>
                  <pointsize>12</pointsize>
+                 <bold>true</bold>
                 </font>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::Shape::Panel</enum>
                </property>
                <property name="text">
                 <string>0</string>
