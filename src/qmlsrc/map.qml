@@ -88,10 +88,11 @@ Rectangle {
         }
 
         // 可选：缓存设置
-        PluginParameter {
+        /*PluginParameter {
             name: "osm.mapping.cache.directory"
             value: "./map_cache"
-        }
+        }*/
+
         PluginParameter {
             name: "osm.mapping.cache.size"
             value: "102400" // 100MB
