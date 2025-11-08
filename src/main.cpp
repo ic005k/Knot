@@ -171,6 +171,7 @@ int main(int argc, char* argv[]) {
   p_dir.mkpath(privateDir + "KnotData/memo/gps");
 
   clearLockFiles(iniDir);
+  clearLockFiles(privateDir);
 
   strJBDict1 = privateDir + "dict/jieba.dict.utf8";
   strJBDict2 = privateDir + "dict/hmm_model.utf8";

@@ -478,45 +478,51 @@ static void JavaNotify_17() {
 
 static void JavaNotify_18() {
   // 屏幕熄了
-  QTimer::singleShot(100, mw_one, []() { mw_one->on_btnAutoStop_clicked(); });
+  QTimer::singleShot(100, mw_one, []() {
+    if (mui->frameReader->isVisible()) {
+      mw_one->on_btnAutoStop_clicked();
+      mw_one->m_Reader->saveReader("", false);
+      mw_one->m_Reader->savePageVPos();
+    }
+  });
   qDebug() << "C++ JavaNotify_18";
 }
 
 static const JNINativeMethod gMethods[] = {
-    {"CallJavaNotify_0", "()V", (void *)JavaNotify_0},
-    {"CallJavaNotify_1", "()V", (void *)JavaNotify_1},
-    {"CallJavaNotify_2", "()V", (void *)JavaNotify_2},
-    {"CallJavaNotify_3", "()V", (void *)JavaNotify_3},
-    {"CallJavaNotify_4", "()V", (void *)JavaNotify_4},
-    {"CallJavaNotify_5", "()V", (void *)JavaNotify_5},
-    {"CallJavaNotify_6", "()V", (void *)JavaNotify_6},
-    {"CallJavaNotify_7", "()V", (void *)JavaNotify_7},
-    {"CallJavaNotify_8", "()V", (void *)JavaNotify_8},
-    {"CallJavaNotify_9", "()V", (void *)JavaNotify_9},
-    {"CallJavaNotify_10", "()V", (void *)JavaNotify_10},
-    {"CallJavaNotify_11", "()V", (void *)JavaNotify_11},
-    {"CallJavaNotify_12", "()V", (void *)JavaNotify_12},
-    {"CallJavaNotify_13", "()V", (void *)JavaNotify_13},
-    {"CallJavaNotify_14", "()V", (void *)JavaNotify_14}
+    {"CallJavaNotify_0", "()V", (void*)JavaNotify_0},
+    {"CallJavaNotify_1", "()V", (void*)JavaNotify_1},
+    {"CallJavaNotify_2", "()V", (void*)JavaNotify_2},
+    {"CallJavaNotify_3", "()V", (void*)JavaNotify_3},
+    {"CallJavaNotify_4", "()V", (void*)JavaNotify_4},
+    {"CallJavaNotify_5", "()V", (void*)JavaNotify_5},
+    {"CallJavaNotify_6", "()V", (void*)JavaNotify_6},
+    {"CallJavaNotify_7", "()V", (void*)JavaNotify_7},
+    {"CallJavaNotify_8", "()V", (void*)JavaNotify_8},
+    {"CallJavaNotify_9", "()V", (void*)JavaNotify_9},
+    {"CallJavaNotify_10", "()V", (void*)JavaNotify_10},
+    {"CallJavaNotify_11", "()V", (void*)JavaNotify_11},
+    {"CallJavaNotify_12", "()V", (void*)JavaNotify_12},
+    {"CallJavaNotify_13", "()V", (void*)JavaNotify_13},
+    {"CallJavaNotify_14", "()V", (void*)JavaNotify_14}
 
 };
 
 static const JNINativeMethod gMethods15[] = {
-    {"CallJavaNotify_15", "()V", (void *)JavaNotify_15}};
+    {"CallJavaNotify_15", "()V", (void*)JavaNotify_15}};
 
 static const JNINativeMethod gMethods16[] = {
-    {"CallJavaNotify_16", "()V", (void *)JavaNotify_16}};
+    {"CallJavaNotify_16", "()V", (void*)JavaNotify_16}};
 
 static const JNINativeMethod gMethods17[] = {
-    {"CallJavaNotify_17", "()V", (void *)JavaNotify_17}};
+    {"CallJavaNotify_17", "()V", (void*)JavaNotify_17}};
 
 static const JNINativeMethod gMethods18[] = {
-    {"CallJavaNotify_18", "()V", (void *)JavaNotify_18}};
+    {"CallJavaNotify_18", "()V", (void*)JavaNotify_18}};
 
-void RegJni(const char *myClassName) {
+void RegJni(const char* myClassName) {
   QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
     QJniEnvironment Environment;
-    const char *mClassName = myClassName;
+    const char* mClassName = myClassName;
     jclass j_class;
     j_class = Environment->FindClass(mClassName);
     if (j_class == nullptr) {
@@ -535,10 +541,10 @@ void RegJni(const char *myClassName) {
   qDebug() << "++++++++++++++++++++++++";
 }
 
-void RegJni15(const char *myClassName) {
+void RegJni15(const char* myClassName) {
   QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
     QJniEnvironment Environment;
-    const char *mClassName = myClassName;
+    const char* mClassName = myClassName;
     jclass j_class;
     j_class = Environment->FindClass(mClassName);
     if (j_class == nullptr) {
@@ -557,10 +563,10 @@ void RegJni15(const char *myClassName) {
   qDebug() << "++++++++++++++++++++++++";
 }
 
-void RegJni16(const char *myClassName) {
+void RegJni16(const char* myClassName) {
   QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
     QJniEnvironment Environment;
-    const char *mClassName = myClassName;
+    const char* mClassName = myClassName;
     jclass j_class;
     j_class = Environment->FindClass(mClassName);
     if (j_class == nullptr) {
@@ -579,10 +585,10 @@ void RegJni16(const char *myClassName) {
   qDebug() << "++++++++++++++++++++++++";
 }
 
-void RegJni17(const char *myClassName) {
+void RegJni17(const char* myClassName) {
   QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
     QJniEnvironment Environment;
-    const char *mClassName = myClassName;
+    const char* mClassName = myClassName;
     jclass j_class;
     j_class = Environment->FindClass(mClassName);
     if (j_class == nullptr) {
@@ -601,10 +607,10 @@ void RegJni17(const char *myClassName) {
   qDebug() << "++++++++++++++++++++++++";
 }
 
-void RegJni18(const char *myClassName) {
+void RegJni18(const char* myClassName) {
   QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
     QJniEnvironment Environment;
-    const char *mClassName = myClassName;
+    const char* mClassName = myClassName;
     jclass j_class;
     j_class = Environment->FindClass(mClassName);
     if (j_class == nullptr) {

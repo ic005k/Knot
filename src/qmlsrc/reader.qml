@@ -649,8 +649,8 @@ Item {
         Connections {
             target: contentListView
             function onContentYChanged() {
-                // 更新频率ms，目前1秒
-                if (Date.now() - lastUpdateTime > 1000) {
+                // 更新频率ms，目前1.5秒
+                if (Date.now() - lastUpdateTime > 1500) {
                     m_Reader.updatePageProgress(contentListView.contentY,
                                                 contentListView.contentHeight)
                     lastUpdateTime = Date.now()
