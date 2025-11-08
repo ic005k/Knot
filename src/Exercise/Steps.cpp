@@ -1626,15 +1626,19 @@ void Steps::updateGpsMapUi() {
   if (isGpsMapTrackFile) {
     appendTrackPointAndroid(lastLat, lastLon);
     setDateLabelToAndroid(strGpsMapDateTime);
+
+    QStringList list = strGpsMapSpeed.split("\n");
+    if (list.count() > 1) strGpsMapSpeed = list.at(0);
     setInfoLabelToAndroid(strGpsMapDistnce + " | " + strGpsMapSpeed);
 
     openMapWindow();
 
     return;
 
+    /////////////////////////////////////////////////////
+
     updateMapTrackUi(lastLat, lastLon);
     mui->lblGpsDateTime->setText(strGpsMapDateTime);
-
     updateInfoText(strGpsMapDistnce, strGpsMapSpeed);
   }
 }
