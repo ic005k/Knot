@@ -175,6 +175,31 @@ Rectangle {
 
             radius: 0
 
+            // 核心改动：添加状态和过渡
+            states: [
+                State {
+                    name: "Pressed"
+                    when: mouseArea.pressed
+                          && !mouseArea.drag.active // 仅在按下且未拖动时激活
+                    PropertyChanges {
+                        target: listItem
+                        // 使用一个更柔和、符合预期的反馈色，比如深一点的蓝色或灰色
+                        color: ListView.isCurrentItem ? "#87CEEB" : (isDark ? "#2A3A4D" : "#E0E0E0")
+                    }
+                }
+            ]
+
+            transitions: Transition {
+                from: "*"
+                to: "Pressed"
+                reversible: true // 从 Pressed 状态回来时也应用过渡
+                ParallelAnimation {
+                    ColorAnimation {
+                        duration: 80
+                    } // 颜色变化动画
+                }
+            }
+
             function getItemHeight() {
                 var item0H
                 var item1H
@@ -219,7 +244,7 @@ Rectangle {
                     radius: 2
                     anchors.leftMargin: 1
                     color: "#3498DB"
-                    visible: true // item2.text.length ? true : false
+                    visible: true
                     Text {
                         anchors.centerIn: parent
                     }
@@ -268,7 +293,7 @@ Rectangle {
                         leftPadding: 5
                         rightPadding: 5
 
-                        visible: false // item1.text.length ? true : false
+                        visible: false
                     }
 
                     Text {
@@ -311,16 +336,11 @@ Rectangle {
             }
 
             MouseArea {
-
+                id: mouseArea
                 property point clickPos: "0,0"
 
                 anchors.fill: parent
-                onPressed: function (mouse) {
-                    clickPos = Qt.point(mouse.x, mouse.y)
-
-                    item0.color = "white"
-                    listItem.color = "red"
-                }
+                onPressed: function (mouse) {}
 
                 onReleased: function (mouse) {
 
