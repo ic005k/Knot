@@ -32,6 +32,7 @@ Reader::Reader(QWidget* parent) : QDialog(parent) {
 
   mui->lblTitle->hide();
   mui->f_ReaderNote->hide();
+  mui->progPage->hide();
 
   mui->lblCataInfo->hide();
   mui->btnBackReader->hide();
@@ -1300,21 +1301,8 @@ void Reader::showInfo() {
 
   m_ReaderSet->updateProgress();
 
-  qreal y = getVPos();
-  qreal h = getVHeight();
-  updatePageProgress(y, h);
-
   updateReaderProperty(cPage, tPage);
   readReadNote(cPage);
-}
-
-void Reader::updatePageProgress(qreal y, qreal h) {
-  qreal viewHeight = mui->qwReader->height();
-  qreal h1 = qMax(0.0, h - viewHeight);  // 确保h1非负
-  mui->progPage->setMaximum(h1);
-  // 确保value不超过最大/最小值
-  qreal validY = qBound(0.0, y, h1);
-  mui->progPage->setValue(validY);
 }
 
 void Reader::updateReaderProperty(int currentPage, int totalPages) {

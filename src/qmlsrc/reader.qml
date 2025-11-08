@@ -11,6 +11,37 @@ Item {
     id: root
     visible: true
 
+    // ===== 阅读进度条 =====
+    Item {
+        id: progressBarContainer
+        anchors.top: root.top
+        width: root.width
+        height: 2
+        z: 9999 // 确保在最顶层
+
+        // 背景
+        Rectangle {
+            anchors.fill: parent
+            color: "#EEEEEE" // 淡灰色背景
+        }
+
+        // 进度指示器
+        Rectangle {
+            id: progressIndicator
+            height: parent.height
+            color: isDark ? "#FF9500" : "#FFCC80" // 深色模式用稍深的橙，浅色模式用浅橙
+            width: {
+                // 计算进度百分比
+                if (contentListView.contentHeight <= contentListView.height) {
+                    return parent.width // 内容不足一屏时，进度条满
+                }
+                const progress = contentListView.contentY
+                               / (contentListView.contentHeight - contentListView.height)
+                return parent.width * Math.max(0, Math.min(1, progress))
+            }
+        }
+    }
+
     // ===== 自动滚动控制变量 =====
     property bool isAutoScrollRunning: isAutoRun // 是否正在自动滚动
     property real scrollSpeed: scrollValue // 每帧滚动增量（调速核心，默认0.5px/帧）
@@ -646,17 +677,6 @@ Item {
         }
 
         // ==============================================
-        Connections {
-            target: contentListView
-            function onContentYChanged() {
-                // 更新频率ms，目前1.5秒
-                if (Date.now() - lastUpdateTime > 1500) {
-                    m_Reader.updatePageProgress(contentListView.contentY,
-                                                contentListView.contentHeight)
-                    lastUpdateTime = Date.now()
-                }
-            }
-        }
 
         // ==============================================
     }

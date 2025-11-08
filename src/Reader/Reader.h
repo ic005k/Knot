@@ -198,7 +198,7 @@ class Reader : public QDialog {
   void initLink(QString htmlFile);
   void selectText();
   void openCataList(QString htmlFile);
-  void updatePageProgress(qreal y, qreal h);
+
   void clickBookmarkList(int i);
 
  protected:
