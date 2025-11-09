@@ -103,6 +103,8 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
     font1.setPointSize(9);
   mui->lblYearTotal->setFont(font1);
   mui->lblMonthTotal->setFont(font1);
+  mui->lblYearTotal->hide();
+  mui->lblMonthTotal->hide();
   mui->btnGetGpsListData->hide();
   mui->qwSpeed->setFixedHeight(90);
   mui->qwSpeed->hide();
@@ -1409,8 +1411,10 @@ void Steps::allGpsTotal() {
   s4_year = tr("Running") + ": " + QString::number(yearRunningKM) + " km  " +
             QString::number(yearRunningCount);
 
-  mui->lblMonthTotal->setText(s1_month + s2_month + s3_month + s4_month);
-  mui->lblYearTotal->setText(s1_year + s2_year + s3_year + s4_year);
+  m_monthlyStatsText = s1_month + s2_month + s3_month + s4_month;
+  mui->lblMonthTotal->setText(m_monthlyStatsText);
+  m_yearlyStatsText = s1_year + s2_year + s3_year + s4_year;
+  mui->lblYearTotal->setText(m_yearlyStatsText);
 }
 
 void Steps::appendTrack(double lat, double lon) {
@@ -2575,4 +2579,74 @@ QVariantList Steps::getSpeedData(const QString& jsonFile) {
   }
 
   return speedList;
+}
+
+void Steps::showSportsChart() {
+  if (statsDialog != nullptr) delete statsDialog;
+  statsDialog = new QDialog(this);
+  statsDialog->setWindowTitle(tr("Sports Statistics"));
+
+  if (this->parentWidget()) {
+    statsDialog->resize(this->parentWidget()->size());
+  } else {
+    statsDialog->resize(400, 300);
+  }
+
+  QVBoxLayout* mainLayout = new QVBoxLayout(statsDialog);
+  mainLayout->setContentsMargins(20, 20, 20, 20);
+  mainLayout->setSpacing(15);
+
+  QLabel* monthlyLabel = new QLabel(m_monthlyStatsText, statsDialog);
+  QFont labelFont = monthlyLabel->font();
+  // labelFont.setPointSize(16);
+  labelFont.setBold(true);
+  monthlyLabel->setFont(labelFont);
+  monthlyLabel->setAlignment(Qt::AlignLeft);
+
+  monthlyLabel->setWordWrap(true);
+
+  monthlyLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+  QLabel* yearlyLabel = new QLabel(m_yearlyStatsText, statsDialog);
+  yearlyLabel->setFont(labelFont);
+  yearlyLabel->setAlignment(Qt::AlignLeft);
+
+  yearlyLabel->setWordWrap(true);
+
+  yearlyLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+  QPushButton* closeButton = new QPushButton(tr("Close"), statsDialog);
+  closeButton->setFont(labelFont);
+  closeButton->setStyleSheet(R"(
+        QPushButton {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        QPushButton:hover {
+            background-color: #45a049;
+        }
+        QPushButton:pressed {
+            background-color: #3e8e41;
+        }
+    )");
+
+  connect(closeButton, &QPushButton::clicked, this, [=]() {
+    statsDialog->close();
+    delete this->statsDialog;
+    this->statsDialog = nullptr;
+  });
+
+  mainLayout->addWidget(monthlyLabel);
+  mainLayout->addWidget(yearlyLabel);
+
+  mainLayout->addStretch(1);
+
+  mainLayout->addWidget(closeButton, 0, Qt::AlignCenter);
+
+  statsDialog->setLayout(mainLayout);
+  statsDialog->setAttribute(Qt::WA_DeleteOnClose);
+  statsDialog->exec();
 }

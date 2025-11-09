@@ -113,6 +113,8 @@ class Steps : public QDialog {
  public:
   void closeSteps();
 
+  QDialog* statsDialog = nullptr;
+
   void on_btnReset_clicked();
 
   void setTableData(int index, QString date, int steps, QString km);
@@ -151,6 +153,7 @@ class Steps : public QDialog {
   void closeRouteDialog();
   bool isRouteShow();
   void setMapKey();
+  void showSportsChart();
  public slots:
   void clearAllGpsList();
   void getGpsTrack();
@@ -166,6 +169,9 @@ class Steps : public QDialog {
   QDateTime m_lastSaveSpeedTime;     // 上次保存路线的时间
   QDateTime m_lastFetchWeatherTime;  // 上次请求天气的时间
   bool isInitTime;
+
+  QString m_monthlyStatsText;
+  QString m_yearlyStatsText;
 
   bool isOne = false;
   QString strCurrentTemp, strCurrentWeatherIcon;

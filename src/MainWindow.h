@@ -120,15 +120,15 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
-  MainWindow(QWidget *parent = nullptr);
+  MainWindow(QWidget* parent = nullptr);
   ~MainWindow();
-  Ui::MainWindow *ui;
+  Ui::MainWindow* ui;
 
-  QMenu *mainMenu = nullptr;
+  QMenu* mainMenu = nullptr;
 
   int x, y, w, h;
 
-  QInputDialog *m_RenameDlg = nullptr;
+  QInputDialog* m_RenameDlg = nullptr;
 
   QString labelNormalStyleSheet = R"(/* 动态适配明暗模式 */
     QLabel {
@@ -168,13 +168,13 @@ class MainWindow : public QMainWindow {
 
   QString strLatestModify = tr("None");
 
-  QDialog *dlgProg = nullptr;
+  QDialog* dlgProg = nullptr;
 
   void setMini();
 
   int days = 45;
   int newHeight;
-  QInputMethod *pAndroidKeyboard = QApplication::inputMethod();
+  QInputMethod* pAndroidKeyboard = QApplication::inputMethod();
 
   bool isMemoVisible;
   bool isReaderVisible;
@@ -209,79 +209,79 @@ class MainWindow : public QMainWindow {
   int smallCount = 0;
 
   ulong timeCount = 0;
-  QChartView *chartview;
-  QChartView *chartview1;
-  QLabel *m_valueLabel;
-  QBarCategoryAxis *axisX;
-  QValueAxis *axisY;
-  QValueAxis *axisX2;
-  QValueAxis *axisY2;
+  QChartView* chartview;
+  QChartView* chartview1;
+  QLabel* m_valueLabel;
+  QBarCategoryAxis* axisX;
+  QValueAxis* axisY;
+  QValueAxis* axisX2;
+  QValueAxis* axisY2;
   int yScale = 3;
 
   qlonglong CurTableCount = 0;
 
-  QChart *chartMonth;
-  QChart *chartDay;
-  QBarSeries *barSeries;
-  QSplineSeries *series;
-  QScatterSeries *m_scatterSeries;
-  QSplineSeries *series2;
-  QScatterSeries *m_scatterSeries2;
-  QScatterSeries *m_scatterSeries2_1;
-  static void get_Today(QTreeWidget *);
-  SaveThread *mySaveThread;
-  ReadChartThread *myReadChartThread;
-  ReadTWThread *m_ReadTWThread;
-  ReadEBookThread *myReadEBookThread;
-  BakDataThread *myBakDataThread;
-  ImportDataThread *myImportDataThread;
-  SearchThread *mySearchThread;
-  UpdateGpsMapThread *myUpdateGpsMapThread;
+  QChart* chartMonth;
+  QChart* chartDay;
+  QBarSeries* barSeries;
+  QSplineSeries* series;
+  QScatterSeries* m_scatterSeries;
+  QSplineSeries* series2;
+  QScatterSeries* m_scatterSeries2;
+  QScatterSeries* m_scatterSeries2_1;
+  static void get_Today(QTreeWidget*);
+  SaveThread* mySaveThread;
+  ReadChartThread* myReadChartThread;
+  ReadTWThread* m_ReadTWThread;
+  ReadEBookThread* myReadEBookThread;
+  BakDataThread* myBakDataThread;
+  ImportDataThread* myImportDataThread;
+  SearchThread* mySearchThread;
+  UpdateGpsMapThread* myUpdateGpsMapThread;
   static void ReadChartData();
   static int get_Day(QString date);
   static QString get_Year(QString date);
   static QString get_Month(QString date);
   void init_Options();
 
-  AboutThis *m_AboutThis;
-  EditRecord *m_EditRecord;
-  Todo *m_Todo;
-  Report *m_Report;
-  Preferences *m_Preferences;
+  AboutThis* m_AboutThis;
+  EditRecord* m_EditRecord;
+  Todo* m_Todo;
+  Report* m_Report;
+  Preferences* m_Preferences;
 
-  Reader *m_Reader;
-  TodoAlarm *m_TodoAlarm;
-  DateSelector *m_DateSelector = nullptr;
+  Reader* m_Reader;
+  TodoAlarm* m_TodoAlarm;
+  DateSelector* m_DateSelector = nullptr;
 
-  ReceiveShare *m_ReceiveShare;
-  MainHelper *m_MainHelper;
+  ReceiveShare* m_ReceiveShare;
+  MainHelper* m_MainHelper;
 
-  QList<QTreeWidgetItem *> findItemList;
+  QList<QTreeWidgetItem*> findItemList;
   bool isFindTextChange = false;
   int findPos = 0;
 
-  QTimer *timer;
+  QTimer* timer;
 
-  QTimer *timerMousePress;
-  QTimer *timerSyncData;
-  QTimer *tmeStartRecordAudio;
+  QTimer* timerMousePress;
+  QTimer* timerSyncData;
+  QTimer* tmeStartRecordAudio;
 
-  static void readData(QTreeWidget *);
+  static void readData(QTreeWidget*);
 
   static void saveTab();
   bool isSlide = false;
   void init_TotalData();
   void modify_Data();
-  void add_Data(QTreeWidget *, QString, QString, QString);
-  bool del_Data(QTreeWidget *);
-  static QTreeWidget *get_tw(int tabIndex);
+  void add_Data(QTreeWidget*, QString, QString, QString);
+  bool del_Data(QTreeWidget*);
+  static QTreeWidget* get_tw(int tabIndex);
 
   static QStringList get_MonthList(QString strY, QString strM);
   static void drawMonthChart();
 
   static void SaveFile(QString);
 
-  static void init_Stats(QTreeWidget *);
+  static void init_Stats(QTreeWidget*);
 
   void startSave(QString);
   void startRead(QString);
@@ -354,13 +354,13 @@ class MainWindow : public QMainWindow {
   void on_btnDownload_clicked();
 
  protected:
-  void closeEvent(QCloseEvent *event) override;
-  bool eventFilter(QObject *watch, QEvent *evn) override;
-  void paintEvent(QPaintEvent *event) override;
-  void changeEvent(QEvent *event) override;
-  void resizeEvent(QResizeEvent *event) override;
+  void closeEvent(QCloseEvent* event) override;
+  bool eventFilter(QObject* watch, QEvent* evn) override;
+  void paintEvent(QPaintEvent* event) override;
+  void changeEvent(QEvent* event) override;
+  void resizeEvent(QResizeEvent* event) override;
 
-  void hideEvent(QHideEvent *event) override;
+  void hideEvent(QHideEvent* event) override;
 
  public slots:
   void on_btnAutoStop_clicked();
@@ -436,7 +436,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnSteps_clicked();
 
-  void slotPointHoverd(const QPointF &point, bool state);
+  void slotPointHoverd(const QPointF& point, bool state);
 
   void on_rbSteps_clicked();
 
@@ -633,9 +633,9 @@ class MainWindow : public QMainWindow {
 
   void on_btnClearAmount_clicked();
 
-  void on_editAmount_textChanged(const QString &arg1);
+  void on_editAmount_textChanged(const QString& arg1);
 
-  void on_editCategory_textChanged(const QString &arg1);
+  void on_editCategory_textChanged(const QString& arg1);
 
   void on_editDetails_textChanged();
 
@@ -715,9 +715,9 @@ class MainWindow : public QMainWindow {
 
   void on_btnForegroundColor_clicked();
 
-  void on_editBackgroundColor_textChanged(const QString &arg1);
+  void on_editBackgroundColor_textChanged(const QString& arg1);
 
-  void on_editForegroundColor_textChanged(const QString &arg1);
+  void on_editForegroundColor_textChanged(const QString& arg1);
 
   void on_btnStyle1_clicked();
 
@@ -788,7 +788,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnCopyNoteLink_clicked();
 
-  void on_cboxWebDAV_currentTextChanged(const QString &arg1);
+  void on_cboxWebDAV_currentTextChanged(const QString& arg1);
 
   void on_btnShowCboxList_clicked();
 
@@ -810,9 +810,11 @@ class MainWindow : public QMainWindow {
 
   void on_btnMap_clicked();
 
+  void on_btnSportsChart_clicked();
+
  private:
   bool isMoveEntry;
-  QTimer *tmeFlash;
+  QTimer* tmeFlash;
   int nFlashCount = 0;
   QString keyType;
   bool isShowDetails = false;

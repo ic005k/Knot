@@ -409,6 +409,13 @@ static void JavaNotify_15() {
     return;
   }
 
+  if (m_Steps->statsDialog != nullptr) {
+    m_Steps->statsDialog->close();
+    delete m_Steps->statsDialog;
+    m_Steps->statsDialog = nullptr;
+    return;
+  }
+
   if (!mui->frameSteps->isHidden()) {
     mui->btnBackSteps->click();
     return;
