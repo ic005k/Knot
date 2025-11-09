@@ -411,8 +411,7 @@ static void JavaNotify_15() {
 
   if (m_Steps->statsDialog != nullptr) {
     m_Steps->statsDialog->close();
-    delete m_Steps->statsDialog;
-    m_Steps->statsDialog = nullptr;
+
     return;
   }
 

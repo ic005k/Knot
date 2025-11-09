@@ -2633,8 +2633,11 @@ void Steps::showSportsChart() {
         }
     )");
 
-  connect(closeButton, &QPushButton::clicked, this, [=]() {
-    statsDialog->close();
+  connect(closeButton, &QPushButton::clicked, this,
+          [=]() { statsDialog->close(); });
+
+  connect(statsDialog, &QDialog::finished, this, [this](int result) {
+    Q_UNUSED(result);
     delete this->statsDialog;
     this->statsDialog = nullptr;
   });
@@ -2647,6 +2650,5 @@ void Steps::showSportsChart() {
   mainLayout->addWidget(closeButton, 0, Qt::AlignCenter);
 
   statsDialog->setLayout(mainLayout);
-  statsDialog->setAttribute(Qt::WA_DeleteOnClose);
   statsDialog->exec();
 }
