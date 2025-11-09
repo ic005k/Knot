@@ -939,15 +939,14 @@ void Steps::updateGetGps() {
           refreshRoute();
           m_lastGetAddressTime = currentTime;  // 更新上次执行时间
         }
+      }
 
-        // Speed
-        int ts = 60;
-        if (isGpsTest) ts = 3;
-        if (m_lastSaveSpeedTime.secsTo(currentTime) >=
-            ts) {  // 距离上次超过60秒
-          saveSpeedData(strJsonSpeedFile, mySpeed);
-          m_lastSaveSpeedTime = currentTime;  // 更新上次执行时间
-        }
+      // Speed
+      int ts = 60;
+      if (isGpsTest) ts = 3;
+      if (m_lastSaveSpeedTime.secsTo(currentTime) >= ts) {  // 距离上次超过60秒
+        saveSpeedData(strJsonSpeedFile, mySpeed);
+        m_lastSaveSpeedTime = currentTime;  // 更新上次执行时间
       }
     }
   }

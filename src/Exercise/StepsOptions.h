@@ -13,22 +13,22 @@ class StepsOptions : public QDialog {
   Q_OBJECT
 
  public:
-  explicit StepsOptions(QWidget *parent = nullptr);
+  explicit StepsOptions(QWidget* parent = nullptr);
   ~StepsOptions();
-  Ui::StepsOptions *ui;
+  Ui::StepsOptions* ui;
 
   void init();
   bool isTextChange;
 
  protected:
-  bool eventFilter(QObject *obj, QEvent *evn) override;
-  void closeEvent(QCloseEvent *event) override;
+  bool eventFilter(QObject* obj, QEvent* evn) override;
+  void closeEvent(QCloseEvent* event) override;
  private slots:
   void on_btnBack_clicked();
 
-  void on_editStepsThreshold_textChanged(const QString &arg1);
+  void on_editStepsThreshold_textChanged(const QString& arg1);
 
-  void on_editStepLength_textChanged(const QString &arg1);
+  void on_editStepLength_textChanged(const QString& arg1);
 
   void on_btnWeb_clicked();
 
@@ -41,7 +41,7 @@ class StepsOptions : public QDialog {
   void on_rbTencent_clicked(bool checked);
 
  private:
-  EditEventFilter *editFilter = nullptr;
+  EditEventFilter* editFilter = nullptr;
 };
 
 #endif  // STEPSOPTIONS_H

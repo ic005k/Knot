@@ -5,25 +5,25 @@
 #include "ui_MainWindow.h"
 #include "ui_StepsOptions.h"
 
-StepsOptions::StepsOptions(QWidget *parent)
+StepsOptions::StepsOptions(QWidget* parent)
     : QDialog(parent), ui(new Ui::StepsOptions) {
   ui->setupUi(this);
   this->installEventFilter(this);
   m_Method->set_ToolButtonStyle(this);
   setModal(true);
 
-  QValidator *validator1 =
+  QValidator* validator1 =
       new QRegularExpressionValidator(regxNumber, ui->editStepLength);
   ui->editStepLength->setValidator(validator1);
 
-  QValidator *validator2 =
+  QValidator* validator2 =
       new QRegularExpressionValidator(regxNumber, ui->editStepsThreshold);
   ui->editStepsThreshold->setValidator(validator2);
 }
 
 StepsOptions::~StepsOptions() { delete ui; }
 
-void StepsOptions::closeEvent(QCloseEvent *event) {
+void StepsOptions::closeEvent(QCloseEvent* event) {
   Q_UNUSED(event);
 
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
@@ -35,9 +35,9 @@ void StepsOptions::closeEvent(QCloseEvent *event) {
   m_Method->closeGrayWindows();
 }
 
-bool StepsOptions::eventFilter(QObject *obj, QEvent *evn) {
+bool StepsOptions::eventFilter(QObject* obj, QEvent* evn) {
   if (evn->type() == QEvent::KeyPress) {
-    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
       on_btnBack_clicked();
       return true;
@@ -86,12 +86,12 @@ void StepsOptions::on_btnBack_clicked() {
   close();
 }
 
-void StepsOptions::on_editStepsThreshold_textChanged(const QString &arg1) {
+void StepsOptions::on_editStepsThreshold_textChanged(const QString& arg1) {
   Q_UNUSED(arg1);
   isTextChange = true;
 }
 
-void StepsOptions::on_editStepLength_textChanged(const QString &arg1) {
+void StepsOptions::on_editStepLength_textChanged(const QString& arg1) {
   Q_UNUSED(arg1);
   isTextChange = true;
 }
@@ -112,8 +112,11 @@ void StepsOptions::on_btnTestKey_clicked() {
     while (m_Steps->strMapKeyTestInfo == "")
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
-    ShowMessage *msg = new ShowMessage(this);
+    ShowMessage* msg = new ShowMessage(this);
     msg->showMsg(appName, m_Steps->strMapKeyTestInfo, 1);
+
+    // 确保编辑框内容不丢失
+    ui->editMapKey->setPlainText(arg1);
   }
 }
 
