@@ -97,6 +97,12 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   if (!isAndroid) mui->lblGpsInfo->setFont(font1);
 
   mui->lblYearTotal->setStyleSheet(mui->lblMonthTotal->styleSheet());
+  if (isAndroid)
+    font1.setPointSize(13);
+  else
+    font1.setPointSize(9);
+  mui->lblYearTotal->setFont(font1);
+  mui->lblMonthTotal->setFont(font1);
   mui->btnGetGpsListData->hide();
   mui->qwSpeed->setFixedHeight(90);
   mui->qwSpeed->hide();
