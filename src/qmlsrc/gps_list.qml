@@ -428,28 +428,66 @@ Rectangle {
                 anchors.topMargin: 5
                 anchors.bottomMargin: 5
 
+                // item0 所在的 Rectangle（取消背景色抢戏，改为透明底色）
                 Rectangle {
                     Layout.fillWidth: true // 自动填充colLayout宽度，适配内边距
                     height: item0.contentHeight
-                    color: item0.text.indexOf(
-                               qsTr("Cycling")) ? (item0.text.indexOf(
-                                                       qsTr("Hiking")) ? (item0.text.indexOf(qsTr("Running")) ? strTitleColor : "#87CEFA") : "#98FB98") : "#FFA500"
+                    // 背景色改为和列表项一致，不再用运动色（避免抢戏）
+                    color: isDark ? "#333" : "#DDD"
+                    // 保留轻微边框，区分区域（可选，可删除）
+                    border.color: isDark ? "#444" : "#CCC"
+                    border.width: 1
 
-                    Text {
-                        id: item0
+                    // 新增：小方块+文字的水平布局（小方块在左，文字在右）
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 5
+                        anchors.rightMargin: 5
+                        anchors.verticalCenter: parent.verticalCenter // 垂直居中
+                        spacing: 8 // 小方块和文字的间距
 
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        wrapMode: TextArea.NoWrap
-                        font.bold: true
-                        text: text0
+                        // 核心：运动类型标记小方块（高度和item0一致，宽度固定）
+                        Rectangle {
+                            id: sportTypeBlock
+                            // 宽度固定，避免太宽抢戏
+                            width: item0.font.pixelSize
+                            // 高度和item0文字高度一致
+                            height: item0.font.pixelSize
+                            // 小方块背景色=运动类型色（沿用之前统一的颜色）
+                            color: {
+                                if (item0.text.indexOf(qsTr(
+                                                           "Cycling")) !== -1) {
+                                    isDark ? "#5ABD5E" : "#4CAF50"
+                                } else if (item0.text.indexOf(
+                                               qsTr("Hiking")) !== -1) {
+                                    isDark ? "#FFAB2C" : "#FF9800"
+                                } else if (item0.text.indexOf(
+                                               qsTr("Running")) !== -1) {
+                                    isDark ? "#B746C9" : "#9C27B0"
+                                } else {
+                                    // 其他文本：小方块透明，不显示
+                                    "transparent"
+                                }
+                            }
+                            // 小方块圆角，更美观
+                            radius: 3
+                        }
 
-                        color: isDark ? "#333" : "#333"
-
-                        leftPadding: 5
-                        rightPadding: 5
+                        // 原有item0文本（颜色逻辑不变，仅去掉背景色）
+                        Text {
+                            id: item0
+                            Layout.fillWidth: true // 文字占满剩余宽度
+                            Layout.alignment: Qt.AlignHCenter
+                            horizontalAlignment: Text.AlignLeft // 文字左对齐，贴近小方块
+                            verticalAlignment: Text.AlignVCenter
+                            wrapMode: TextArea.NoWrap
+                            font.bold: true
+                            text: text0
+                            // 文字颜色保持原有逻辑（暗模式白，亮模式深灰）
+                            color: isDark ? "#FFFFFF" : "#333333"
+                            leftPadding: 0 // 取消左内边距，贴近小方块
+                            rightPadding: 5
+                        }
                     }
                 }
 
