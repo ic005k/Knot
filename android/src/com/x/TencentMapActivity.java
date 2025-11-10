@@ -619,6 +619,62 @@ public class TencentMapActivity extends MapActivity {
                     currentLocationMarker.setPosition(newPoint);
                     currentLocationMarker.setVisible(true);
                 }
+
+                // 1. 更新终点标记
+                // 如果终点标记不存在，则创建它
+                if (endMarker == null) {
+                    Drawable endDrawable = ContextCompat.getDrawable(
+                        TencentMapActivity.this,
+                        R.drawable.marker_end
+                    );
+                    if (endDrawable == null) {
+                        Log.e(TAG, "终点图标资源加载失败！");
+                        return;
+                    }
+                    Bitmap endBitmap = drawableToBitmap(endDrawable);
+                    BitmapDescriptor endIcon =
+                        BitmapDescriptorFactory.fromBitmap(endBitmap);
+
+                    MarkerOptions endOptions = new MarkerOptions()
+                        .position(newPoint)
+                        .icon(endIcon)
+                        .anchor(0.5f, 0.5f)
+                        .zIndex(1001)
+                        .visible(true);
+
+                    endMarker = tencentMap.addMarker(endOptions);
+                    Log.d(TAG, "创建新的终点标记。");
+                } else {
+                    // 如果终点标记已存在，则直接更新其位置
+                    endMarker.setPosition(newPoint);
+                    endMarker.setVisible(true); // 确保它是可见的
+                    Log.d(TAG, "更新终点标记位置。");
+                }
+
+                // 2. 如果是第一个点，还需要创建起点标记
+                if (trackPoints.size() == 1) {
+                    Drawable startDrawable = ContextCompat.getDrawable(
+                        TencentMapActivity.this,
+                        R.drawable.marker_start
+                    );
+                    if (startDrawable == null) {
+                        Log.e(TAG, "起点图标资源加载失败！");
+                        return;
+                    }
+                    Bitmap startBitmap = drawableToBitmap(startDrawable);
+                    BitmapDescriptor startIcon =
+                        BitmapDescriptorFactory.fromBitmap(startBitmap);
+
+                    MarkerOptions startOptions = new MarkerOptions()
+                        .position(newPoint)
+                        .icon(startIcon)
+                        .anchor(0.5f, 0.5f)
+                        .zIndex(1001)
+                        .visible(true);
+
+                    startMarker = tencentMap.addMarker(startOptions);
+                    Log.d(TAG, "创建新的起点标记。");
+                }
             } catch (Exception e) {
                 Log.e(TAG, "添加轨迹点异常", e);
             }
