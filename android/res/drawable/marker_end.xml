@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<shape
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval"
+>
+    <!-- 绿色实心圆点（终点） -->
+    <solid android:color="#00FF00" />
+    <!-- 尺寸：20dp x 20dp（小于中心点 30dp） -->
+    <size android:width="15dp" android:height="15dp" />
+    <!-- 复用白色边框，保持视觉一致 -->
+    <stroke android:width="2dp" android:color="#FFFFFF" />
+</shape>

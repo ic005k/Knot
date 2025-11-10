@@ -64,6 +64,9 @@ public class TencentMapActivity extends MapActivity {
     private Polyline trackPolyline;
     private Marker currentLocationMarker;
 
+    private Marker startMarker; // 新增：起点标记
+    private Marker endMarker; // 新增：终点标记
+
     private List<LatLng> trackPoints = new ArrayList<>();
     private List<LatLng> globalTrackPoints = new ArrayList<>();
 
@@ -630,6 +633,16 @@ public class TencentMapActivity extends MapActivity {
             trackPoints.clear();
             globalTrackPoints.clear();
             trackPolyline.setPoints(trackPoints);
+
+            if (startMarker != null) {
+                startMarker.remove();
+                startMarker = null;
+            }
+            if (endMarker != null) {
+                endMarker.remove();
+                endMarker = null;
+            }
+
             if (currentLocationMarker != null) currentLocationMarker.setVisible(
                 false
             );
@@ -662,6 +675,66 @@ public class TencentMapActivity extends MapActivity {
             if (currentLocationMarker != null) {
                 currentLocationMarker.setPosition(lastPoint);
                 currentLocationMarker.setVisible(true);
+            }
+
+            // 1. 绘制起点标记
+            LatLng startPoint = trackPoints.get(0);
+            if (startMarker != null) {
+                startMarker.remove(); // 如果已存在，先移除旧的
+            }
+            // 使用与 OSM 地图相同的方式加载 XML 资源
+            Drawable startDrawable = ContextCompat.getDrawable(
+                this,
+                R.drawable.marker_start
+            );
+            if (startDrawable == null) {
+                Log.e(
+                    TAG,
+                    "起点图标资源加载失败！请检查 R.drawable.marker_start"
+                );
+            } else {
+                Bitmap startBitmap = drawableToBitmap(startDrawable);
+                BitmapDescriptor startIcon = BitmapDescriptorFactory.fromBitmap(
+                    startBitmap
+                );
+                MarkerOptions startOptions = new MarkerOptions()
+                    .position(startPoint)
+                    .icon(startIcon)
+                    .anchor(0.5f, 0.5f) // 锚点在中心
+                    .zIndex(1001) // 设置更高的层级，确保在中心标记之上
+                    .visible(true); // 明确设置为可见
+                startMarker = tencentMap.addMarker(startOptions);
+                Log.d(TAG, "起点标记已添加到位置: " + startPoint.toString());
+            }
+
+            // 2. 绘制终点标记 (如果点数大于1，避免起点和终点重叠)
+            if (trackPoints.size() > 1) {
+                if (endMarker != null) {
+                    endMarker.remove(); // 如果已存在，先移除旧的
+                }
+                // 使用与 OSM 地图相同的方式加载 XML 资源
+                Drawable endDrawable = ContextCompat.getDrawable(
+                    this,
+                    R.drawable.marker_end
+                );
+                if (endDrawable == null) {
+                    Log.e(
+                        TAG,
+                        "终点图标资源加载失败！请检查 R.drawable.marker_end"
+                    );
+                } else {
+                    Bitmap endBitmap = drawableToBitmap(endDrawable);
+                    BitmapDescriptor endIcon =
+                        BitmapDescriptorFactory.fromBitmap(endBitmap);
+                    MarkerOptions endOptions = new MarkerOptions()
+                        .position(lastPoint) // 终点就是最后一个点
+                        .icon(endIcon)
+                        .anchor(0.5f, 0.5f)
+                        .zIndex(1001) // 设置更高的层级
+                        .visible(true); // 明确设置为可见
+                    endMarker = tencentMap.addMarker(endOptions);
+                    Log.d(TAG, "终点标记已添加到位置: " + lastPoint.toString());
+                }
             }
         }
     }

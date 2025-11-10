@@ -75,6 +75,8 @@ public class MapActivity extends Activity {
     private boolean usingThunderforest = true; // 跟踪当前使用的瓦片源
 
     private Marker currentLocationMarker;
+    private Marker startMarker; // 起点（蓝色，引用 marker_start.xml）
+    private Marker endMarker; // 终点（绿色，引用 marker_end.xml）
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -484,33 +486,49 @@ public class MapActivity extends Activity {
 
     private void initCenterMarker() {
         if (osmMapView == null) {
-            Log.e(TAG, "地图未初始化，无法创建中心点标识");
+            Log.e(TAG, "地图未初始化，无法创建标识");
             return;
         }
 
+        // 1. 先确保轨迹线已添加（如果未添加，先添加）
+        if (!osmMapView.getOverlays().contains(osmPolyline)) {
+            osmMapView.getOverlays().add(osmPolyline);
+        }
+
+        // 2. 添加起点 Marker（蓝点）- 先于红点和终点，确保在轨迹线上层
+        startMarker = new Marker(osmMapView);
+        startMarker.setIcon(
+            ContextCompat.getDrawable(this, R.drawable.marker_start)
+        );
+        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
+        startMarker.setEnabled(false);
+        osmMapView.getOverlays().add(startMarker);
+
+        // 3. 添加终点 Marker（绿点）- 在起点之后，红点之前
+        endMarker = new Marker(osmMapView);
+        endMarker.setIcon(
+            ContextCompat.getDrawable(this, R.drawable.marker_end)
+        );
+        endMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
+        endMarker.setEnabled(false);
+        osmMapView.getOverlays().add(endMarker);
+
+        // 4. 添加红点（最后添加，确保在最上层）
         currentLocationMarker = new Marker(osmMapView);
-        // 引用自定义红色圆点图标（关键修改）
         currentLocationMarker.setIcon(
             ContextCompat.getDrawable(this, R.drawable.marker_center)
         );
-        // 锚点设置为图标中心，确保圆点中心与经纬度完全对齐
         currentLocationMarker.setAnchor(
             Marker.ANCHOR_CENTER,
             Marker.ANCHOR_CENTER
         );
-        // 初始隐藏，同时设置初始位置（避免位置为空）
         currentLocationMarker.setPosition(
             new GeoPoint(OSLO_LATITUDE, OSLO_LONGITUDE)
         );
         currentLocationMarker.setEnabled(false);
-
-        // 关键：调整覆盖层顺序，将标识放在最上层（避免被轨迹线遮挡）
-        osmMapView.getOverlays().add(currentLocationMarker);
-        // 移除后重新添加，确保在所有覆盖层最上方
-        osmMapView.getOverlays().remove(currentLocationMarker);
         osmMapView.getOverlays().add(currentLocationMarker);
 
-        Log.d(TAG, "中心点标识初始化完成，初始位置：奥斯陆");
+        Log.d(TAG, "标识初始化完成，覆盖层顺序：轨迹线 → 起点 → 终点 → 红点");
     }
 
     /**
@@ -580,6 +598,11 @@ public class MapActivity extends Activity {
                 osmController.setCenter(newPoint);
                 currentLocationMarker.setPosition(newPoint);
                 currentLocationMarker.setEnabled(true);
+
+                // 新增：更新终点位置（新点即为当前终点）
+                endMarker.setPosition(newPoint);
+                endMarker.setEnabled(true); // 确保终点可见
+
                 osmMapView.invalidate();
             } catch (Exception e) {
                 Log.e(TAG, "追加轨迹点异常", e);
@@ -604,6 +627,11 @@ public class MapActivity extends Activity {
             osmTrackPoints.clear();
             osmPolyline.setPoints(osmTrackPoints);
             currentLocationMarker.setEnabled(false);
+
+            // 新增：隐藏起点和终点
+            startMarker.setEnabled(false);
+            endMarker.setEnabled(false);
+
             osmMapView.invalidate();
             Log.d(TAG, "轨迹数据已清空");
         });
@@ -725,6 +753,44 @@ public class MapActivity extends Activity {
 
             appendTrackPoint(latitude, longitude);
         }
+
+        // 新增：设置起点和终点（UI线程）
+        runOnUiThread(() -> {
+            // 关键修改：用 MyActivity.osmTrackPoints（原始完整数据）替代 osmTrackPoints（异步填充中）
+            if (!MyActivity.osmTrackPoints.isEmpty()) {
+                // 起点：第一个轨迹点（从原始数据源获取）
+                GeoPoint startPoint = MyActivity.osmTrackPoints.get(0);
+                Log.d(
+                    TAG,
+                    "设置起点位置：lat=" +
+                        startPoint.getLatitude() +
+                        ", lng=" +
+                        startPoint.getLongitude()
+                );
+                startMarker.setPosition(startPoint);
+                startMarker.setEnabled(true);
+                startMarker.setVisible(true); // 强制可见
+
+                // 终点：最后一个轨迹点（从原始数据源获取，避免和实时更新冲突）
+                GeoPoint endPoint = MyActivity.osmTrackPoints.get(
+                    MyActivity.osmTrackPoints.size() - 1
+                );
+                Log.d(
+                    TAG,
+                    "设置终点位置：lat=" +
+                        endPoint.getLatitude() +
+                        ", lng=" +
+                        endPoint.getLongitude()
+                );
+                endMarker.setPosition(endPoint);
+                endMarker.setEnabled(true);
+                endMarker.setVisible(true);
+
+                osmMapView.invalidate(); // 刷新地图
+            } else {
+                Log.w(TAG, "MyActivity.osmTrackPoints 为空，无法设置起点/终点");
+            }
+        });
 
         Log.d(TAG, "轨迹集合遍历完成");
     }

@@ -5,10 +5,10 @@
 #include "ui_AboutThis.h"
 #include "ui_MainWindow.h"
 
-AboutThis::AboutThis(QWidget *parent) : QDialog(parent), ui(new Ui::AboutThis) {
+AboutThis::AboutThis(QWidget* parent) : QDialog(parent), ui(new Ui::AboutThis) {
   ui->setupUi(this);
 
-  ver = "2.1.52";
+  ver = "2.1.53";
 
   this->layout()->setContentsMargins(5, 5, 5, 5);
 
@@ -34,26 +34,26 @@ AboutThis::AboutThis(QWidget *parent) : QDialog(parent), ui(new Ui::AboutThis) {
       "}");
 
   manager = new QNetworkAccessManager(this);
-  connect(manager, SIGNAL(finished(QNetworkReply *)), this,
-          SLOT(replyFinished(QNetworkReply *)));
+  connect(manager, SIGNAL(finished(QNetworkReply*)), this,
+          SLOT(replyFinished(QNetworkReply*)));
 }
 
 AboutThis::~AboutThis() { delete ui; }
 
-bool AboutThis::eventFilter(QObject *obj, QEvent *evn) {
-  QMouseEvent *event = static_cast<QMouseEvent *>(evn);
+bool AboutThis::eventFilter(QObject* obj, QEvent* evn) {
+  QMouseEvent* event = static_cast<QMouseEvent*>(evn);
   if (obj == ui->lblLogo) {
     if (event->type() == QEvent::MouseButtonDblClick) {
       if (s_link == "") return true;
-      QClipboard *pClip = QApplication::clipboard();
+      QClipboard* pClip = QApplication::clipboard();
       pClip->setText(s_link);
-      ShowMessage *msg = new ShowMessage(this);
+      ShowMessage* msg = new ShowMessage(this);
       msg->showMsg("Knot", tr("Download link copied.") + "\n\n" + s_link, 1);
     }
   }
 
   if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
       on_btnBack_About_clicked();
       return true;
@@ -63,9 +63,9 @@ bool AboutThis::eventFilter(QObject *obj, QEvent *evn) {
   return QWidget::eventFilter(obj, evn);
 }
 
-void AboutThis::keyReleaseEvent(QKeyEvent *event) { Q_UNUSED(event); }
+void AboutThis::keyReleaseEvent(QKeyEvent* event) { Q_UNUSED(event); }
 
-void AboutThis::resizeEvent(QResizeEvent *event) { Q_UNUSED(event); }
+void AboutThis::resizeEvent(QResizeEvent* event) { Q_UNUSED(event); }
 
 void AboutThis::on_btnHomePage_clicked() {
   QString str;
@@ -82,7 +82,7 @@ void AboutThis::CheckUpdate() {
   manager->get(quest);
 }
 
-void AboutThis::replyFinished(QNetworkReply *reply) {
+void AboutThis::replyFinished(QNetworkReply* reply) {
   QString str = reply->readAll();
   parse_UpdateJSON(str);
   reply->deleteLater();
@@ -123,7 +123,7 @@ int AboutThis::parse_UpdateJSON(QString str) {
 
   if (err_rpt.error != QJsonParseError::NoError) {
     if (!blAutoCheckUpdate) {
-      ShowMessage *m_ShowMsg = new ShowMessage(this);
+      ShowMessage* m_ShowMsg = new ShowMessage(this);
       m_ShowMsg->showMsg(appName, tr("Network error!"), 1);
     }
     blAutoCheckUpdate = false;
@@ -170,7 +170,7 @@ int AboutThis::parse_UpdateJSON(QString str) {
                            tr("Published at: ") + UpdateTime + "\n" +
                            tr("Release Notes: ") + "\n" + ReleaseNote;
 
-      ShowMessage *m_ShowMsg = new ShowMessage(this);
+      ShowMessage* m_ShowMsg = new ShowMessage(this);
       m_ShowMsg->ui->btnOk->setText(tr("Download"));
       bool ret = m_ShowMsg->showMsg("Knot", warningStr, 2);
 
@@ -188,7 +188,7 @@ int AboutThis::parse_UpdateJSON(QString str) {
       }
     } else {
       if (!blAutoCheckUpdate) {
-        ShowMessage *m_ShowMsg = new ShowMessage(this);
+        ShowMessage* m_ShowMsg = new ShowMessage(this);
         m_ShowMsg->showMsg(tr("Upgrade Check"),
                            tr("You are currently using the latest version!"),
                            1);
@@ -259,8 +259,8 @@ void AboutThis::on_btnBack_About_clicked() { close(); }
 
 void AboutThis::on_btnCopyDownLoadLink_clicked() {
   if (s_link == "") return;
-  QClipboard *pClip = QApplication::clipboard();
+  QClipboard* pClip = QApplication::clipboard();
   pClip->setText(s_link);
-  ShowMessage *msg = new ShowMessage(this);
+  ShowMessage* msg = new ShowMessage(this);
   msg->showMsg("Knot", tr("Download link copied.") + "\n\n" + s_link, 1);
 }
