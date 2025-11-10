@@ -2664,7 +2664,7 @@ void Steps::showSportsChart() {
   if (this->parentWidget()) {
     statsDialog->resize(this->parentWidget()->size());
   } else {
-    statsDialog->resize(400, 700);  // 增加高度，给Y轴更多空间
+    statsDialog->resize(400, 710);  // 增加10px容纳频次曲线，保持紧凑
   }
 
   // 2. 读取 INI 文件（硬读1-12月，解决数据错乱）
@@ -2723,7 +2723,21 @@ void Steps::showSportsChart() {
   }
   reg.endGroup();
 
-  // 4. 创建水平条形图（解决月份显示...问题）
+  // ----------------------
+  // 新增：自定义频次曲线Widget（替换原有QChart代码）----------------------
+  // 提取三种运动的频次数据（直接复用monthDataList）
+  QVector<int> cyclingCounts, hikingCounts, runningCounts;
+  for (const auto& data : qAsConst(monthDataList)) {
+    cyclingCounts.append(data.cyclingCount);
+    hikingCounts.append(data.hikingCount);
+    runningCounts.append(data.runningCount);
+  }
+  // 创建自定义曲线Widget（传入数据、主题、父窗口）
+  FrequencyCurveWidget* countCurveWidget = new FrequencyCurveWidget(
+      cyclingCounts, hikingCounts, runningCounts, isDark, statsDialog);
+  // --------------------------------------------------------------------------------
+
+  // 4. 创建水平条形图（原有里程图表，保持不变）
   QChart* chart = new QChart();
   chart->setTitle(tr("%1 Monthly Sports Statistics").arg(stry));
   chart->legend()->setAlignment(Qt::AlignBottom);
@@ -2774,7 +2788,6 @@ void Steps::showSportsChart() {
     monthLabels << QString::number(i);  // 数字标签
   }
   for (int i = 0; i < monthLabels.size(); ++i) {
-    // 调整每个月份的范围宽度，避免标签拥挤
     axisY->append(monthLabels[i], i + 1);
   }
   axisY->setLabelsAngle(0);
@@ -2796,15 +2809,23 @@ void Steps::showSportsChart() {
   chartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   int mh = 600;
   if (!isAndroid) mh = 450;
-  chartView->setMinimumHeight(mh);  // 增加高度，确保12个标签垂直排列不拥挤
+  chartView->setMinimumHeight(mh);  // 原有高度逻辑不变
   chartView->setMaximumHeight(mh);
   chartView->setFrameStyle(QFrame::NoFrame);
   chartView->setContentsMargins(0, 0, 0, 0);  // 去除视图边距
 
-  // 5. 整合布局（优化整体空间）
+  // 5. 整合布局（用自定义曲线Widget替换原countChartView）
   QVBoxLayout* mainLayout = new QVBoxLayout(statsDialog);
   mainLayout->setContentsMargins(5, 5, 5, 5);  // 最小化整体边距
   mainLayout->setSpacing(5);
+
+  QFont font = this->font();
+  font.setBold(true);
+
+  QLabel* totalLabel =
+      new QLabel(mui->lblTitle1->text() + " : " + mui->lblTotalDistance->text(),
+                 statsDialog);
+  totalLabel->setFont(font);
 
   QLabel* monthlyLabel = new QLabel(m_monthlyStatsText, statsDialog);
   monthlyLabel->setAlignment(Qt::AlignLeft);
@@ -2816,12 +2837,11 @@ void Steps::showSportsChart() {
   yearlyLabel->setWordWrap(true);
   yearlyLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-  QFont font = this->font();
   if (isAndroid)
     font.setPointSize(13);
   else
     font.setPointSize(9);
-  font.setBold(true);
+
   monthlyLabel->setFont(font);
   yearlyLabel->setFont(font);
 
@@ -2867,8 +2887,11 @@ void Steps::showSportsChart() {
         QPushButton:pressed { background-color: #3e8e41; }
     )");
 
+  // 布局顺序：totalLabel → 标签横向布局 → 自定义频次曲线 → 里程图表 → 按钮
+  mainLayout->addWidget(totalLabel);
   mainLayout->addLayout(hboxLayout);
-  mainLayout->addWidget(chartView);  // 图表占据主要空间
+  mainLayout->addWidget(countCurveWidget);  // 替换为自定义曲线Widget
+  mainLayout->addWidget(chartView);         // 原有：里程图表
   mainLayout->addSpacing(3);
   mainLayout->addWidget(closeButton, 0, Qt::AlignCenter);
   closeButton->hide();

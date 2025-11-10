@@ -298,4 +298,139 @@ class Steps : public QDialog {
   void speedChanged();
 };
 
+// ----------------------
+// ---------------------- 自定义频次曲线Widget（必须定义在函数外部，Qt
+// MOC才能处理）----------------------
+class FrequencyCurveWidget : public QWidget {
+  Q_OBJECT
+ public:
+  explicit FrequencyCurveWidget(const QVector<int>& cycling,
+                                const QVector<int>& hiking,
+                                const QVector<int>& running, bool isDark,
+                                QWidget* parent = nullptr)
+      : QWidget(parent),
+        m_cycling(cycling),
+        m_hiking(hiking),
+        m_running(running),
+        m_isDark(isDark) {
+    setFixedHeight(20);  // 固定10px高度，核心需求
+    setSizePolicy(QSizePolicy::Expanding,
+                  QSizePolicy::Fixed);  // 宽度跟随父窗口
+    calculateMaxCount();                // 计算最大频次，用于比例映射
+  }
+
+ protected:
+  // 重写paintEvent，手动绘制曲线
+  void paintEvent(QPaintEvent*) override {
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);  // 平滑曲线，山丘感核心
+    painter.setPen(Qt::NoPen);  // 取消默认画笔，避免多余线条
+
+    // 1. 计算12个月份的水平坐标（平分父窗口宽度）
+    QVector<int> xPoints = calculateXPoints();
+
+    // 2. 绘制三条运动曲线（骑行、徒步、跑步）
+    drawSmoothCurve(painter, xPoints, m_cycling, getColor(0));
+    drawSmoothCurve(painter, xPoints, m_hiking, getColor(1));
+    drawSmoothCurve(painter, xPoints, m_running, getColor(2));
+  }
+
+ private:
+  // 计算12个月份的水平坐标（平分宽度）
+  QVector<int> calculateXPoints() const {
+    QVector<int> xPoints;
+    int totalWidth = width();
+    int monthSpacing = totalWidth / 12;  // 每个月占据的宽度
+    for (int i = 0; i < 12; ++i) {
+      // 取每个月的中心点作为曲线节点X坐标
+      xPoints.append(monthSpacing * i + monthSpacing / 2);
+    }
+    return xPoints;
+  }
+
+  // 计算所有运动的最大频次（用于垂直比例映射）
+  void calculateMaxCount() {
+    m_maxCount = 1;  // 避免除以0
+    for (int i = 0; i < 12; ++i) {
+      int currentMax = qMax(m_cycling[i], qMax(m_hiking[i], m_running[i]));
+      m_maxCount = qMax(m_maxCount, currentMax);
+    }
+  }
+
+  // 根据运动类型获取对应颜色（适配明暗主题）
+  QColor getColor(int type) const {
+    if (m_isDark) {
+      // 暗模式：亮一点的颜色，提高对比度
+      switch (type) {
+        case 0:
+          return QColor(90, 189, 94, 200);  // 骑行绿
+        case 1:
+          return QColor(255, 171, 44, 200);  // 徒步橙
+        case 2:
+          return QColor(183, 70, 201, 200);  // 跑步紫
+      }
+    } else {
+      // 亮模式：标准颜色
+      switch (type) {
+        case 0:
+          return QColor(76, 175, 80, 200);  // 骑行绿
+        case 1:
+          return QColor(255, 152, 0, 200);  // 徒步橙
+        case 2:
+          return QColor(156, 39, 176, 200);  // 跑步紫
+      }
+    }
+    return Qt::black;
+  }
+
+  // 绘制单条平滑曲线（贝塞尔插值，山丘状）
+  void drawSmoothCurve(QPainter& painter, const QVector<int>& xPoints,
+                       const QVector<int>& counts, const QColor& color) {
+    QPainterPath path;
+    int pointCount = xPoints.size();
+    if (pointCount <= 1) return;
+
+    // 1. 初始化曲线起点
+    int startX = xPoints[0];
+    double startY = mapCountToY(counts[0]);  // 频次→10px高度映射
+    path.moveTo(startX, startY);
+
+    // 2. 贝塞尔曲线插值，确保平滑
+    for (int i = 1; i < pointCount; ++i) {
+      int currentX = xPoints[i];
+      double currentY = mapCountToY(counts[i]);
+      int prevX = xPoints[i - 1];
+      double prevY = mapCountToY(counts[i - 1]);
+
+      // 控制点：取两个点的中点，确保曲线自然过渡
+      int ctrlX = (prevX + currentX) / 2;
+      double ctrlY = (prevY + currentY) / 2;
+
+      // 画二次贝塞尔曲线（平滑山丘核心）
+      path.quadTo(ctrlX, ctrlY, currentX, currentY);
+    }
+
+    // 3. 设置画笔样式（3px粗，半透明）
+    QPen pen(color);
+    pen.setWidth(3);  // 确保10px高度下清晰可见
+    painter.setPen(pen);
+    painter.drawPath(path);
+  }
+
+  // 频次→Y坐标映射（最大频次对应10px顶端，0频次对应底部）
+  double mapCountToY(int count) const {
+    if (m_maxCount == 0) return 10.0;
+    // Y轴向下为正，所以高频次→Y值小→向上凸
+    return 20.0 - (count * 20.0) / m_maxCount;  // 20.0为高度
+  }
+
+ private:
+  QVector<int> m_cycling;  // 骑行频次数据
+  QVector<int> m_hiking;   // 徒步频次数据
+  QVector<int> m_running;  // 跑步频次数据
+  int m_maxCount;          // 最大频次（用于比例映射）
+  bool m_isDark;           // 是否暗模式
+};
+// --------------------------------------------------------------------------------
+
 #endif  // STEPS_H
