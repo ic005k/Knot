@@ -8387,6 +8387,7 @@
         <location filename="Exercise/Steps.cpp" line="1118"/>
         <location filename="Exercise/Steps.cpp" line="1397"/>
         <location filename="Exercise/Steps.cpp" line="1407"/>
+        <location filename="Exercise/Steps.cpp" line="2739"/>
         <source>Cycling</source>
         <translation>骑行</translation>
     </message>
@@ -8395,6 +8396,7 @@
         <location filename="Exercise/Steps.cpp" line="1123"/>
         <location filename="Exercise/Steps.cpp" line="1399"/>
         <location filename="Exercise/Steps.cpp" line="1409"/>
+        <location filename="Exercise/Steps.cpp" line="2740"/>
         <source>Hiking</source>
         <translation>徒步</translation>
     </message>
@@ -8403,6 +8405,7 @@
         <location filename="Exercise/Steps.cpp" line="1128"/>
         <location filename="Exercise/Steps.cpp" line="1401"/>
         <location filename="Exercise/Steps.cpp" line="1411"/>
+        <location filename="Exercise/Steps.cpp" line="2741"/>
         <source>Running</source>
         <translation>跑步</translation>
     </message>
@@ -8428,6 +8431,7 @@
     </message>
     <message>
         <location filename="Exercise/Steps.cpp" line="1395"/>
+        <location filename="Exercise/Steps.cpp" line="2781"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
@@ -8447,12 +8451,27 @@
         <translation>公里</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="2589"/>
+        <location filename="Exercise/Steps.cpp" line="2662"/>
         <source>Sports Statistics</source>
         <translation>运动统计</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="2627"/>
+        <location filename="Exercise/Steps.cpp" line="2674"/>
+        <source>Date format error!</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Exercise/Steps.cpp" line="2728"/>
+        <source>%1 Monthly Sports Statistics</source>
+        <translation>%1 每月运动统计</translation>
+    </message>
+    <message>
+        <location filename="Exercise/Steps.cpp" line="2784"/>
+        <source>Distance (KM)</source>
+        <translation>里程（千米）</translation>
+    </message>
+    <message>
+        <location filename="Exercise/Steps.cpp" line="2843"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>

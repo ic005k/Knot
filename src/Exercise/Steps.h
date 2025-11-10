@@ -1,17 +1,33 @@
 #ifndef STEPS_H
 #define STEPS_H
 
+#include <QAbstractAxis>
+#include <QAbstractBarSeries>
 #include <QAccelerometer>
+#include <QBarSeries>
+#include <QBarSet>
+#include <QCategoryAxis>
+#include <QChart>
+#include <QChartView>
+#include <QDebug>
 #include <QDialog>
 #include <QGeoCoordinate>
 #include <QGeoPositionInfo>
 #include <QGeoPositionInfoSource>
 #include <QGeoServiceProvider>
+#include <QHorizontalBarSeries>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLabel>
+#include <QPainter>
+#include <QPushButton>
 #include <QQmlApplicationEngine>
 #include <QRegularExpressionValidator>
+#include <QSettings>
+#include <QStringList>
+#include <QVBoxLayout>
+#include <QValueAxis>
 #include <iomanip>  // 包含 std::setprecision
 #include <iostream>
 
