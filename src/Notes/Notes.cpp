@@ -9,9 +9,9 @@
 #include "ui_MainWindow.h"
 #include "ui_Notes.h"
 
-NoteIndexManager1::NoteIndexManager1(QObject *parent) : QObject{parent} {}
+NoteIndexManager1::NoteIndexManager1(QObject* parent) : QObject{parent} {}
 
-Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
+Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->setupUi(this);
   m_NoteIndexManager = new NoteIndexManager();
 
@@ -45,7 +45,7 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   m_Method->set_ToolButtonStyle(this);
 
   // 创建快捷键：绑定 Ctrl+F
-  QShortcut *shortcut1 = new QShortcut(QKeySequence("Ctrl+F"), this);
+  QShortcut* shortcut1 = new QShortcut(QKeySequence("Ctrl+F"), this);
   connect(shortcut1, &QShortcut::activated, this, [this]() {
     ui->editFind->setFocus();
     ui->editFind->selectAll();
@@ -54,7 +54,7 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   // 清理 memo 目录下的旧备份文件（仅保留最新）
   QDir memoDir(iniDir + "memo/");
   memoDir.setNameFilters(QStringList() << "*.md.bak" << "*.json.bak");
-  foreach (const QString &bakFile, memoDir.entryList()) {
+  foreach (const QString& bakFile, memoDir.entryList()) {
     memoDir.remove(bakFile);
   }
 }
@@ -80,7 +80,7 @@ void Notes::initEditor() {
 #endif
 }
 
-void Notes::showEvent(QShowEvent *event) {
+void Notes::showEvent(QShowEvent* event) {
   QWidget::showEvent(event);
   if (!m_initialized) {
     int btn_h = ui->btnNext->height();
@@ -103,18 +103,18 @@ void Notes::init() {
   this->setGeometry(this->x(), mw_one->geometry().y(), w, mw_one->height());
 }
 
-void Notes::wheelEvent(QWheelEvent *e) { Q_UNUSED(e); }
+void Notes::wheelEvent(QWheelEvent* e) { Q_UNUSED(e); }
 
 Notes::~Notes() {
   delete m_NoteIndexManager;
   delete ui;
 }
 
-void Notes::keyReleaseEvent(QKeyEvent *event) { event->accept(); }
+void Notes::keyReleaseEvent(QKeyEvent* event) { event->accept(); }
 
 void Notes::editVSBarValueChanged() {}
 
-void Notes::resizeEvent(QResizeEvent *event) { Q_UNUSED(event); }
+void Notes::resizeEvent(QResizeEvent* event) { Q_UNUSED(event); }
 
 void Notes::on_btnDone_clicked() { saveMainNotes(); }
 
@@ -128,7 +128,7 @@ void Notes::MD2Html(QString mdFile) {
   addImagePathToHtml(htmlString);
 }
 
-QString Notes::imageToBase64(const QString &path) {
+QString Notes::imageToBase64(const QString& path) {
   QFile file(path);
   if (!file.open(QIODevice::ReadOnly)) return "";
   QByteArray data = file.readAll();
@@ -174,7 +174,7 @@ void Notes::saveMainNotes() {
 #endif
 }
 
-void Notes::updateDiff(const QString &oldText, const QString &newText) {
+void Notes::updateDiff(const QString& oldText, const QString& newText) {
   if (oldText.isEmpty()) return;
 
   QString strDiff = m_NoteDiffManager.createPatchFromTexts(oldText, newText);
@@ -202,8 +202,8 @@ void Notes::updateDiff(const QString &oldText, const QString &newText) {
 
 void Notes::updateMDFileToSyncLists() { zipNoteToSyncList(); }
 
-bool Notes::eventFilter(QObject *obj, QEvent *evn) {
-  QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
+bool Notes::eventFilter(QObject* obj, QEvent* evn) {
+  QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
   if (evn->type() == QEvent::KeyRelease) {
     if (keyEvent->key() == Qt::Key_Back) {
     }
@@ -315,7 +315,7 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
     }
 
     if (!isAndroid) {
-      ShowMessage *msg = new ShowMessage(this);
+      ShowMessage* msg = new ShowMessage(this);
       msg->ui->btnCancel->setText(tr("No"));
       msg->ui->btnOk->setText(tr("Yes"));
       bool isYes = msg->showMsg(
@@ -359,8 +359,8 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
 }
 
 QString Notes::addImagePathToHtml(QString strhtml) {
-  QTextEdit *edit = new QTextEdit;
-  QPlainTextEdit *edit1 = new QPlainTextEdit;
+  QTextEdit* edit = new QTextEdit;
+  QPlainTextEdit* edit1 = new QPlainTextEdit;
   strhtml = strhtml.replace("><", ">\n<");
   edit->setPlainText(strhtml);
   QString str, str_2, str_3;
@@ -519,8 +519,8 @@ void Notes::on_btnS5_clicked() {
 void Notes::on_btnPaste_clicked() {
 #ifndef Q_OS_ANDROID
 
-  const QClipboard *clipboard = QApplication::clipboard();
-  const QMimeData *mimeData = clipboard->mimeData();
+  const QClipboard* clipboard = QApplication::clipboard();
+  const QMimeData* mimeData = clipboard->mimeData();
   if (mimeData->hasImage()) {
     QImage img = qvariant_cast<QImage>(mimeData->imageData());
     if (!img.isNull()) {
@@ -538,16 +538,16 @@ void Notes::on_btnPaste_clicked() {
 #endif
 }
 
-bool Notes::eventFilterQwNote(QObject *watch, QEvent *event) {
+bool Notes::eventFilterQwNote(QObject* watch, QEvent* event) {
   return QWidget::eventFilter(watch, event);
 }
 
-void Notes::paintEvent(QPaintEvent *event) {
+void Notes::paintEvent(QPaintEvent* event) {
   Q_UNUSED(event);
   return;
 }
 
-void Notes::closeEvent(QCloseEvent *event) {
+void Notes::closeEvent(QCloseEvent* event) {
   Q_UNUSED(event);
   saveEditorState(currentMDFile);
 
@@ -558,7 +558,7 @@ void Notes::closeEvent(QCloseEvent *event) {
   m_Method->Sleep(100);
 
   if (isTextChange) {
-    ShowMessage *msg = new ShowMessage(this);
+    ShowMessage* msg = new ShowMessage(this);
     msg->ui->btnOk->setText(tr("Yes") + " (Y)");
     msg->ui->btnCancel->setText(tr("No") + " (N)");
     if (msg->showMsg(tr("Notes"), tr("Do you want to save the notes?"), 2)) {
@@ -587,7 +587,7 @@ void Notes::syncToWebDAV() {
   }
 }
 
-void Notes::delRemoteFile(const QStringList &Files) {
+void Notes::delRemoteFile(const QStringList& Files) {
   QStringList delFiles;
   for (int j = 0; j < Files.count(); j++) {
     QString syncFile = Files.at(j);
@@ -642,13 +642,13 @@ void Notes::on_btnNext_clicked() {
 
 void Notes::on_editFind_returnPressed() { searchNext(); }
 
-void Notes::on_editFind_textChanged(const QString &arg1) {
+void Notes::on_editFind_textChanged(const QString& arg1) {
   searchText(arg1.trimmed(), true);
   // searchWithCount(arg1.trimmed());
   m_lastSearchText = arg1.trimmed();
 }
 
-bool Notes::selectPDFFormat(QPrinter *printer) {
+bool Notes::selectPDFFormat(QPrinter* printer) {
   QSettings settings;
 
   // select the page size
@@ -664,7 +664,7 @@ bool Notes::selectPDFFormat(QPrinter *printer) {
             << QPageSize::A4 << QPageSize::A5 << QPageSize::A6 << QPageSize::A7
             << QPageSize::A8 << QPageSize::A9 << QPageSize::Letter;
 
-  PrintPDF *idlg1 = new PrintPDF(this);
+  PrintPDF* idlg1 = new PrintPDF(this);
   idlg1->setFocus();
   QString pageSizeString =
       idlg1->getItem(tr("Page size"), tr("Page size"), pageSizeStrings, 4);
@@ -695,7 +695,7 @@ bool Notes::selectPDFFormat(QPrinter *printer) {
   QList<QPageLayout::Orientation> orientations;
   orientations << QPageLayout::Portrait << QPageLayout::Landscape;
 
-  PrintPDF *idlg2 = new PrintPDF(this);
+  PrintPDF* idlg2 = new PrintPDF(this);
   idlg2->setFocus();
   QString orientationString = idlg2->getItem(
       tr("Orientation"), tr("Orientation"), orientationStrings, 0);
@@ -759,14 +759,14 @@ void Notes::on_btnPDF_clicked() {
   auto doc = new QTextDocument(this);
   doc->setHtml(html);
 
-  auto *printer = new QPrinter(QPrinter::HighResolution);
+  auto* printer = new QPrinter(QPrinter::HighResolution);
 
   if (selectPDFFormat(printer)) {
     doc->print(printer);
 
     if (isAndroid) {
       m_Method->m_widget = new QWidget(this);
-      ShowMessage *msg1 = new ShowMessage(this);
+      ShowMessage* msg1 = new ShowMessage(this);
       msg1->ui->btnCancel->setText(tr("No"));
       msg1->ui->btnOk->setText(tr("Yes"));
       if (msg1->showMsg("PDF",
@@ -964,7 +964,7 @@ void Notes::zipNoteToSyncList() {
   if (!m_Method->compressFileWithZlib(currentMDFile, zipMD,
                                       Z_DEFAULT_COMPRESSION)) {
     errorInfo = tr("An error occurred while compressing the file.");
-    ShowMessage *msg = new ShowMessage(this);
+    ShowMessage* msg = new ShowMessage(this);
     msg->showMsg("Knot", errorInfo, 1);
     return;
   }
@@ -978,7 +978,7 @@ void Notes::zipNoteToSyncList() {
   if (QFile::exists(json)) {
     if (!m_Method->compressFileWithZlib(json, zipJSON, Z_DEFAULT_COMPRESSION)) {
       errorInfo = tr("An error occurred while compressing the file.");
-      ShowMessage *msg = new ShowMessage(this);
+      ShowMessage* msg = new ShowMessage(this);
       msg->showMsg("Knot", errorInfo, 1);
       return;
     }
@@ -990,7 +990,7 @@ void Notes::zipNoteToSyncList() {
   }
 }
 
-QString Notes::getCurrentJSON(const QString &md) {
+QString Notes::getCurrentJSON(const QString& md) {
   QFileInfo fi(md);
   return iniDir + "memo/" + fi.baseName() + ".json";
 }
@@ -1034,7 +1034,7 @@ void Notes::startBackgroundTaskDelAndClear() {
   });
 
   // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Database del and clear completed...";
     watcher->deleteLater();
@@ -1049,7 +1049,7 @@ void Notes::startBackgroundTaskUpdateNoteIndex(QString mdFile) {
       [=]() { m_NotesList->m_dbManager.updateFileIndex(fullPath); });
 
   // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Update note index completed:" + fullPath;
     watcher->deleteLater();
@@ -1064,7 +1064,7 @@ void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
       [=]() { m_NotesList->m_dbManager.updateFileIndexes(fullPathList); });
 
   // 可选：使用 QFutureWatcher 监控进度
-  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Update note index completed:" << fullPathList.count();
     watcher->deleteLater();
@@ -1114,7 +1114,7 @@ void Notes::openNotesUI() {
 
 /////////////////////////////////////////////////////////////////////
 
-bool NoteIndexManager1::loadIndex(const QString &indexPath) {
+bool NoteIndexManager1::loadIndex(const QString& indexPath) {
   QFile file(indexPath);
   if (!file.open(QIODevice::ReadOnly)) return false;
 
@@ -1131,7 +1131,7 @@ bool NoteIndexManager1::loadIndex(const QString &indexPath) {
   return true;
 }
 
-bool NoteIndexManager1::saveIndex(const QString &indexPath) {
+bool NoteIndexManager1::saveIndex(const QString& indexPath) {
   QJsonObject root;
   root["version"] = 1.0;
 
@@ -1148,13 +1148,13 @@ bool NoteIndexManager1::saveIndex(const QString &indexPath) {
   return true;
 }
 
-QString NoteIndexManager1::getNoteTitle(const QString &filePath) const {
+QString NoteIndexManager1::getNoteTitle(const QString& filePath) const {
   return m_index.value(QDir::cleanPath(filePath),
                        QFileInfo(filePath).baseName());
 }
 
-void NoteIndexManager1::setNoteTitle(const QString &filePath,
-                                     const QString &title) {
+void NoteIndexManager1::setNoteTitle(const QString& filePath,
+                                     const QString& title) {
   QString cleanPath = QDir::cleanPath(filePath);
   if (title.isEmpty()) {
     m_index.remove(cleanPath);
@@ -1171,7 +1171,7 @@ void Notes::openEditUI() {
 
   qDebug() << "currentMDFile=" << currentMDFile;
   if (!QFile::exists(currentMDFile)) {
-    ShowMessage *msg = new ShowMessage(mw_one);
+    ShowMessage* msg = new ShowMessage(mw_one);
     msg->showMsg(appName,
                  tr("The current note does not exist. Please select another "
                     "note or create a new note."),
@@ -1249,7 +1249,7 @@ void Notes::openNotes() {
     if (!m_CloudBackup->checkWebDAVConnection()) {
       m_Method->closeInfoWindow();
       isWebDAVError = true;
-      ShowMessage *msg = new ShowMessage(this);
+      ShowMessage* msg = new ShowMessage(this);
       msg->showMsg(appName,
                    tr("WebDAV connection failed. Please check the network, "
                       "website address or login information."),
@@ -1292,7 +1292,7 @@ void Notes::openNotes() {
       orgRemoteDateTime.append(m_CloudBackup->webdavDateTimeList.at(i));
     }
 
-    WebDavHelper *helper =
+    WebDavHelper* helper =
         listWebDavFiles(url + "KnotData/", m_CloudBackup->USERNAME,
                         m_CloudBackup->APP_PASSWORD);
     helper->setParent(this);
@@ -1302,7 +1302,7 @@ void Notes::openNotes() {
     // 连接信号
     QObject::connect(
         helper, &WebDavHelper::listCompleted, this,
-        [=](const QList<QPair<QString, QDateTime>> &files) {
+        [=](const QList<QPair<QString, QDateTime>>& files) {
           qDebug() << "获取到文件列表:";
           QString info = "found " + QString::number(files.size()) + " files";
           qDebug() << info;
@@ -1312,7 +1312,7 @@ void Notes::openNotes() {
             return;
           }
 
-          for (const auto &[path, mtime] : files) {
+          for (const auto& [path, mtime] : files) {
             qDebug() << "路径:" << path
                      << "修改时间:" << mtime.toString("yyyy-MM-dd hh:mm:ss");
             QString remote_f = path;
@@ -1368,7 +1368,7 @@ void Notes::openNotes() {
 
           if (remoteFiles.count() > 0) {
             // 初始化下载器
-            WebDavDownloader *downloader = new WebDavDownloader(
+            WebDavDownloader* downloader = new WebDavDownloader(
                 m_CloudBackup->USERNAME, m_CloudBackup->APP_PASSWORD, this);
 
             // 连接信号
@@ -1389,7 +1389,7 @@ void Notes::openNotes() {
                     startBackgroundProcessRemoteFiles();
                   } else {
                     qDebug() << "下载失败：" << error;
-                    ShowMessage *msg = new ShowMessage(this);
+                    ShowMessage* msg = new ShowMessage(this);
                     msg->showMsg(
                         appName,
                         tr("Synchronization failed. Please try again later."),
@@ -1410,7 +1410,7 @@ void Notes::openNotes() {
         });
 
     QObject::connect(helper, &WebDavHelper::errorOccurred, this,
-                     [=](const QString &error) {
+                     [=](const QString& error) {
                        qDebug() << "操作失败:" << error;
                        openNotesUI();
                      });
@@ -1424,7 +1424,7 @@ void Notes::startBackgroundProcessRemoteFiles() {
       QtConcurrent::run([=]() { processRemoteFiles(remoteFiles); });
 
   // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Remote files process completed";
 
@@ -1485,7 +1485,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
                "Preferences that the passwords are "
                "consistent across all platforms.");
 
-        ShowMessage *msg = new ShowMessage(this);
+        ShowMessage* msg = new ShowMessage(this);
         msg->showMsg("Knot", errorInfo, 1);
         isPasswordError = true;
         QFile::remove(zFile);
@@ -1531,7 +1531,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
                  "Preferences that the passwords are "
                  "consistent across all platforms.");
 
-          ShowMessage *msg = new ShowMessage(this);
+          ShowMessage* msg = new ShowMessage(this);
           msg->showMsg("Knot", errorInfo, 1);
           isPasswordError = true;
           QFile::remove(zFile);
@@ -1576,7 +1576,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
                  "Preferences that the passwords are "
                  "consistent across all platforms.");
 
-          ShowMessage *msg = new ShowMessage(this);
+          ShowMessage* msg = new ShowMessage(this);
           msg->showMsg("Knot", errorInfo, 1);
           isPasswordError = true;
           QFile::remove(zFile);
@@ -1673,7 +1673,7 @@ void Notes::updateMainnotesIniToSyncLists() {
     if (!m_Method->compressFileWithZlib(iniDir + "mainnotes.json", zipMainnotes,
                                         Z_DEFAULT_COMPRESSION)) {
       errorInfo = tr("An error occurred while compressing the file.");
-      ShowMessage *msg = new ShowMessage(this);
+      ShowMessage* msg = new ShowMessage(this);
       msg->showMsg("Knot", errorInfo, 1);
       return;
     }
@@ -1723,55 +1723,67 @@ void Notes::initMarkdownLexer() {
 void Notes::initMarkdownLexerDark() {
 #ifndef Q_OS_ANDROID
 
-  //  创建前确保清空原有 Lexer
+  // 清空原有 Lexer
   m_EditSource->setLexer(nullptr);
 
-  //  创建深色模式基础配置
+  // 创建深色模式基础配置
   markdownLexer = new QsciLexerMarkdown(m_EditSource);
 
-  //  设置全局默认颜色（必须首先配置）
-  markdownLexer->setDefaultPaper(QColor("#1E1E1E"));  // 全局背景色
-  markdownLexer->setDefaultColor(QColor("#D4D4D4"));  // 全局默认文本颜色
+  // --- 核心配置：提升对比度 ---
+  // 1. 全局默认颜色 (必须首先配置)
+  markdownLexer->setDefaultPaper(QColor(0x1E1E1E));  // 黑灰色背景 (#1E1E1E)
+  markdownLexer->setDefaultColor(
+      QColor(0xE0E0E0));  // 更亮的灰白，默认文本颜色 (#E0E0E0)
 
-  //  按样式类型逐个配置（覆盖所有 Markdown 元素）
-  markdownLexer->setColor(QColor("#569CD6"),
-                          QsciLexerMarkdown::Header1);  // H1 蓝色
-  markdownLexer->setColor(QColor("#4EC9B0"),
-                          QsciLexerMarkdown::Header2);  // H2 青蓝色
-  markdownLexer->setColor(QColor("#C586C0"),
-                          QsciLexerMarkdown::Header3);  // H3 粉紫色
-  markdownLexer->setColor(QColor("#9CDCFE"),
-                          QsciLexerMarkdown::Link);  // 链接 浅蓝
-  markdownLexer->setColor(QColor("#CE9178"),
-                          QsciLexerMarkdown::CodeBlock);  // 代码块文字
-  markdownLexer->setPaper(QColor("#2D2D2D"),
-                          QsciLexerMarkdown::CodeBlock);  // 代码块背景
+  // 2. 逐个配置 Markdown 元素样式 (重点：提高对比度)
+  // --- 标题 ---
+  // 使用高对比度的明亮颜色
+  markdownLexer->setColor(QColor(0x66CCFF),
+                          QsciLexerMarkdown::Header1);  // H1: 淡蓝
+  markdownLexer->setColor(QColor(0x66FFFF),
+                          QsciLexerMarkdown::Header2);  // H2: 淡青
+  markdownLexer->setColor(QColor(0xFF99FF),
+                          QsciLexerMarkdown::Header3);  // H3: 淡紫
 
-  markdownLexer->setColor(QColor("#D7BA7D"),
+  // --- 链接 ---
+  markdownLexer->setColor(QColor(0x66CCFF),
+                          QsciLexerMarkdown::Link);  // 链接: 淡蓝
+
+  // --- 代码块 ---
+  markdownLexer->setColor(
+      QColor(0xF0F0F0),
+      QsciLexerMarkdown::CodeBlock);  // 代码块文字: 更亮的灰白
+  markdownLexer->setPaper(
+      QColor(0x2B2B2B),
+      QsciLexerMarkdown::CodeBlock);  // 代码块背景: 稍浅一点的深灰
+
+  // --- 引用块 ---
+  markdownLexer->setColor(QColor(0xD7BA7D),
                           QsciLexerMarkdown::BlockQuote);  // 引用块
 
-  // 应用 Lexer
+  // --- 应用 Lexer ---
   m_EditSource->setLexer(markdownLexer);
 
-  // 禁止自动恢复默认样式（关键！）
-  // m_EditSource->SendScintilla(QsciScintilla::SCI_STYLERESETDEFAULT); //
-  // 不要调用这个！
+  // --- 视觉优化 ---
+  // 当前行高亮
+  m_EditSource->setCaretLineBackgroundColor(QColor(0x2D2D30));  // #2D2D30
+  // 光标颜色
+  m_EditSource->setCaretForegroundColor(QColor(0xFFFFFF));  // #FFFFFF
+  // 行号栏背景
+  m_EditSource->setMarginsBackgroundColor(QColor(0x1E1E1E));  // #1E1E1E
+  // 行号颜色
+  m_EditSource->setMarginsForegroundColor(QColor(0x858585));  // #858585
+  // 自动换行
+  m_EditSource->setWrapMode(QsciScintilla::WrapWord);
 
-  // 附加视觉优化
-  m_EditSource->setCaretLineBackgroundColor(QColor("#2D2D30"));  // 当前行高亮
-  m_EditSource->setCaretForegroundColor(QColor("#FFFFFF"));      // 光标颜色
-  m_EditSource->setMarginsBackgroundColor(QColor("#1E1E1E"));    // 行号栏背景
-  m_EditSource->setMarginsForegroundColor(QColor("#858585"));    // 行号颜色
-  m_EditSource->setWrapMode(QsciScintilla::WrapWord);            // 自动换行
-
-  // 强制刷新颜色
-  m_EditSource->recolor();
+  // --- 强制刷新颜色 ---
+  m_EditSource->recolor();  // 这一步很重要
 
 #endif
 }
 
 #ifndef Q_OS_ANDROID
-void Notes::initMarkdownEditor(QsciScintilla *editor) {
+void Notes::initMarkdownEditor(QsciScintilla* editor) {
   // 强制编码和默认样式
   // editor->setUtf8(true);
 
@@ -1884,7 +1896,7 @@ void Notes::initMarkdownEditor(QsciScintilla *editor) {
 #endif
 
 // 查找关键词
-void Notes::searchText(const QString &text, bool forward) {
+void Notes::searchText(const QString& text, bool forward) {
 #ifndef Q_OS_ANDROID
 
   m_lastSearchText = text;
@@ -1970,7 +1982,7 @@ void Notes::jumpToPrevMatch() {
 }
 
 // 获取搜索结果的匹配总数
-int Notes::getSearchMatchCount(const QString &text) {
+int Notes::getSearchMatchCount(const QString& text) {
   if (text.isEmpty()) return 0;
 
 #ifndef Q_OS_ANDROID
@@ -2005,7 +2017,7 @@ int Notes::getSearchMatchCount(const QString &text) {
 #endif
 }
 
-void Notes::openBrowserOnce(const QString &htmlPath) {
+void Notes::openBrowserOnce(const QString& htmlPath) {
   if (isLinux)
     openUrl(htmlPath);
   else
@@ -2035,7 +2047,7 @@ void Notes::init_md() {
 
 #include <QSettings>
 
-void Notes::saveEditorState(const QString &filePath) {
+void Notes::saveEditorState(const QString& filePath) {
 #ifndef Q_OS_ANDROID
 
   // 指定 INI 格式和文件路径
@@ -2059,7 +2071,7 @@ void Notes::saveEditorState(const QString &filePath) {
 #endif
 }
 
-void Notes::restoreEditorState(const QString &filePath) {
+void Notes::restoreEditorState(const QString& filePath) {
 #ifndef Q_OS_ANDROID
 
   QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);
@@ -2097,7 +2109,7 @@ void Notes::previewNote() {
   });
 
   // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     mw_one->closeProgress();
 
@@ -2125,7 +2137,7 @@ void Notes::previewNote() {
   watcher->setFuture(future);
 }
 
-bool Notes::openUrl(const QString &url) {
+bool Notes::openUrl(const QString& url) {
 #ifdef __linux__
   // 方案 A：尝试直接调用默认浏览器（优先）
   QProcess mimeProcess;
@@ -2141,7 +2153,7 @@ bool Notes::openUrl(const QString &url) {
     }
 
     // 保存并清除环境变量
-    const char *originalLdPath = getenv("LD_LIBRARY_PATH");
+    const char* originalLdPath = getenv("LD_LIBRARY_PATH");
     QString originalLdPathStr(originalLdPath ? originalLdPath : "");
     unsetenv("LD_LIBRARY_PATH");
     unsetenv("LD_PRELOAD");  // 额外清除可能的预加载库
@@ -2166,9 +2178,9 @@ bool Notes::openUrl(const QString &url) {
     QString ldLibraryPath = systemLibPaths.join(":");
 
     // 保存原始环境变量
-    const char *originalLdPath = getenv("LD_LIBRARY_PATH");
+    const char* originalLdPath = getenv("LD_LIBRARY_PATH");
     QString originalLdPathStr(originalLdPath ? originalLdPath : "");
-    const char *originalQtPluginPath = getenv("QT_PLUGIN_PATH");
+    const char* originalQtPluginPath = getenv("QT_PLUGIN_PATH");
     QString originalQtPluginPathStr(originalQtPluginPath ? originalQtPluginPath
                                                          : "");
 
@@ -2213,7 +2225,7 @@ void Notes::appendToSyncList(QString file) {
   QString baseFlag = m_Method->getBaseFlag(file);
 
   // 一次性移除所有包含相同 baseFlag 的文件
-  notes_sync_files.removeIf([&baseFlag](const QString &f) {
+  notes_sync_files.removeIf([&baseFlag](const QString& f) {
     return m_Method->getBaseFlag(f) == baseFlag;
   });
   notes_sync_files.append(file);
@@ -2240,7 +2252,7 @@ void Notes::openLocalHtmlFileInAndroid() {
 }
 
 // 工具函数：获取文件最后修改时间（作为版本标识）
-QString Notes::getFileVersion(const QString &filePath) {
+QString Notes::getFileVersion(const QString& filePath) {
   QFileInfo fileInfo(filePath);
   if (fileInfo.exists()) {
     // 返回ISO格式时间（如：2023-10-05T14:30:25），便于排序和解析
@@ -2252,10 +2264,10 @@ QString Notes::getFileVersion(const QString &filePath) {
 
 // 保存差异（追加模式）：若文件存在则添加到数组，不存在则创建新数组
 bool Notes::appendDiffToFile(
-    const QString &diffFilePath,  // 差异记录文件路径
-    const QString &noteFilePath,  // 被修改的笔记文件路径
-    const QString &strDiff,       // 补丁数据
-    const QString &diffHtml)      // 可视化HTML
+    const QString& diffFilePath,  // 差异记录文件路径
+    const QString& noteFilePath,  // 被修改的笔记文件路径
+    const QString& strDiff,       // 补丁数据
+    const QString& diffHtml)      // 可视化HTML
 {
   // 1. 准备当前版本信息（用笔记文件的最后修改时间作为版本）
   QString version = getFileVersion(noteFilePath);
@@ -2303,7 +2315,7 @@ bool Notes::appendDiffToFile(
   }
 
   QJsonArray newArr;
-  foreach (const QJsonObject &obj, diffList) {
+  foreach (const QJsonObject& obj, diffList) {
     newArr.append(obj);
   }
 
@@ -2314,7 +2326,7 @@ bool Notes::appendDiffToFile(
 }
 
 // 读取所有差异记录（供APP列表调用）
-QList<QJsonObject> Notes::loadAllDiffs(const QString &diffFilePath) {
+QList<QJsonObject> Notes::loadAllDiffs(const QString& diffFilePath) {
   QList<QJsonObject> diffList;
   QFile file(diffFilePath);
   if (!file.exists() || !file.open(QIODevice::ReadOnly | QIODevice::Text)) {
