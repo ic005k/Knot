@@ -3,6 +3,7 @@
 #include <QVector>
 #include <cmath>
 
+#include "src/Exercise/DrawSportsFreq.h"
 #include "src/MainWindow.h"
 #include "src/defines.h"
 #include "ui_MainWindow.h"
