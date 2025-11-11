@@ -8,7 +8,6 @@ Rectangle {
     objectName: "diffHtmlRoot"
     width: 300
 
-    color: isDark ? "#111" : "#ffffff"
     border.color: "#eee"
     border.width: 1
 
@@ -36,7 +35,7 @@ Rectangle {
             text: root.htmlContent
             textFormat: Text.RichText
             wrapMode: Text.Wrap // 自动换行（核心：确保文字不横向溢出）
-            color: isDark ? "#DDD" : "#333333"
+
             renderType: Text.QtRendering
             verticalAlignment: Text.AlignTop // 顶部对齐，符合阅读习惯
         }
@@ -46,7 +45,7 @@ Rectangle {
     Text {
         visible: root.htmlContent === ""
         text: qsTr("No differences")
-        color: isDark ? "#DDD" : "#999999"
+
         anchors.centerIn: parent
     }
 }

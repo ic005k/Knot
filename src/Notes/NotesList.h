@@ -37,10 +37,10 @@ struct MySearchResult {
   QList<int> lineNumbers;
 };
 using ResultsMap = QMap<QString, MySearchResult>;
-MySearchResult searchInFile(const QString &filePath,
-                            const QRegularExpression &regex);
-QStringList findMarkdownFiles(const QString &dirPath);
-void reduceResults(ResultsMap &result, const MySearchResult &partial);
+MySearchResult searchInFile(const QString& filePath,
+                            const QRegularExpression& regex);
+QStringList findMarkdownFiles(const QString& dirPath);
+void reduceResults(ResultsMap& result, const MySearchResult& partial);
 
 namespace Ui {
 class NotesList;
@@ -50,16 +50,16 @@ class NotesList : public QDialog {
   Q_OBJECT
 
  public:
-  explicit NotesList(QWidget *parent = nullptr);
+  explicit NotesList(QWidget* parent = nullptr);
   ~NotesList();
-  Ui::NotesList *ui;
+  Ui::NotesList* ui;
 
-  NoteGraphController *m_graphController;  // 图谱控制器
-  QDialog *m_RenameNotes = nullptr;
+  NoteGraphController* m_graphController;  // 图谱控制器
+  QDialog* m_RenameNotes = nullptr;
 
-  QMenu *menuRecentOpen = nullptr;
-  MoveTo *m_MoveTo = nullptr;
-  NewNoteBook *m_NewNoteBook = nullptr;
+  QMenu* menuRecentOpen = nullptr;
+  MoveTo* m_MoveTo = nullptr;
+  NewNoteBook* m_NewNoteBook = nullptr;
 
   void startBackgroundTaskUpdateFilesIndex();
 
@@ -67,7 +67,7 @@ class NotesList : public QDialog {
 
   void saveNotesListIndex();
 
-  NoteListModel *noteModel;
+  NoteListModel* noteModel;
 
   DatabaseManager m_dbManager;
 
@@ -80,11 +80,11 @@ class NotesList : public QDialog {
   QString getCurrentNoteNameFromMDFile(QString mdFile);
 
   QStringList listRecentOpen;
-  QList<QTreeWidgetItem *> pNoteBookItems;
-  QList<QTreeWidgetItem *> pNoteItems;
+  QList<QTreeWidgetItem*> pNoteBookItems;
+  QList<QTreeWidgetItem*> pNoteItems;
   QStringList findResult;
   int findCount;
-  QList<QTreeWidgetItem *> findResultList;
+  QList<QTreeWidgetItem*> findResultList;
 
   void set_memo_dir();
 
@@ -95,21 +95,21 @@ class NotesList : public QDialog {
 
   void setWinPos();
 
-  void addItem(QTreeWidget *tw, QTreeWidgetItem *item);
+  void addItem(QTreeWidget* tw, QTreeWidgetItem* item);
 
   void initRecycle();
   QStringList needDelFiles;
   bool isDelNoteRecycle = false;
   void clearFiles();
-  void getAllFiles(const QString &foldPath, QStringList &folds,
-                   const QStringList &formats);
+  void getAllFiles(const QString& foldPath, QStringList& folds,
+                   const QStringList& formats);
 
   void setNoteName(QString name);
   void moveBy(int ud);
 
   QString getCurrentMDFile();
-  void init_NotesListMenu(QMenu *mainMenu);
-  void init_NoteBookMenu(QMenu *mainMenu);
+  void init_NotesListMenu(QMenu* mainMenu);
+  void init_NoteBookMenu(QMenu* mainMenu);
 
   int getNoteBookCurrentIndex();
   int getNotesListCurrentIndex();
@@ -157,7 +157,7 @@ class NotesList : public QDialog {
   void genCursorText();
   void renameCurrentItem(QString title);
   bool setCurrentItemFromMDFile(QString mdFile);
-  QStringList extractLocalImagesFromMarkdown(const QString &filePath);
+  QStringList extractLocalImagesFromMarkdown(const QString& filePath);
 
   void showNotesSearchResult();
 
@@ -180,7 +180,7 @@ class NotesList : public QDialog {
 
   void initUnclassified();
 
-  void startBackgroundTaskDelFilesIndex(const QStringList &files);
+  void startBackgroundTaskDelFilesIndex(const QStringList& files);
   QStringList getRecycleNoteFiles();
 
   void on_btnNewNote_clicked();
@@ -192,9 +192,9 @@ class NotesList : public QDialog {
   void on_actionAdd_Note_triggered();
 
  protected:
-  bool eventFilter(QObject *watch, QEvent *evn) override;
+  bool eventFilter(QObject* watch, QEvent* evn) override;
 
-  void closeEvent(QCloseEvent *event) override;
+  void closeEvent(QCloseEvent* event) override;
 
  public slots:
   void mouseClickNoteBook();
@@ -207,7 +207,7 @@ class NotesList : public QDialog {
 
   void on_btnClose_clicked();
 
-  void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
+  void on_treeWidget_itemClicked(QTreeWidgetItem* item, int column);
 
   void on_btnRename_clicked();
 
@@ -244,13 +244,13 @@ class NotesList : public QDialog {
 
   void onSearchFinished();
 
-  void onSearchTextChanged(const QString &text);
+  void onSearchTextChanged(const QString& text);
 
   void on_actionSetColorFlag();
 
   void on_actionStatistics();
 
-  void onNoteNodeDoubleClicked(const QString &filePath);
+  void onNoteNodeDoubleClicked(const QString& filePath);
 
   void on_actionModificationHistory();
 
@@ -277,7 +277,7 @@ class NotesList : public QDialog {
 
   QStringList mIndexList;
 
-  QInputMethod *pAndroidKeyboard = QApplication::inputMethod();
+  QInputMethod* pAndroidKeyboard = QApplication::inputMethod();
 
   QStringList knot_all_files;
 
@@ -301,9 +301,9 @@ class NotesList : public QDialog {
 
   void goFindResult(int index);
 
-  bool moveItem(QTreeWidget *tw);
+  bool moveItem(QTreeWidget* tw);
 
-  QFutureWatcher<ResultsMap> *watcher;
+  QFutureWatcher<ResultsMap>* watcher;
 
   QDateTime m_lastIndexTime;  // 记录最后一次索引构建时间
   QMutex m_indexTimeMutex;    // 互斥锁
@@ -313,33 +313,33 @@ class NotesList : public QDialog {
   SearchModel m_searchModel;
 
   int getSavedNotesListIndex(int notebookIndex);
-  bool safeWriteFile(const QString &filePath, const QString &content);
+  bool safeWriteFile(const QString& filePath, const QString& content);
   void loadNotesListIndex();
-  void addItemToQW(QQuickWidget *qw, QString text0, QString text1,
+  void addItemToQW(QQuickWidget* qw, QString text0, QString text1,
                    QString text2, QString text3, QString text4, int itemH);
   void setColorFlag(QString strColor);
   void setDelNoteFlag(QString mdFile);
   void saveNotesListToFile();
 
   void initNoteGraphView();
-  void readyNotesData(QTreeWidgetItem *topItem);
+  void readyNotesData(QTreeWidgetItem* topItem);
   void initSerachDatabase();
   int getSelectedVersionIndex();
-  void setNoteDiffHtmlToQML(const QString &html);
+  void setNoteDiffHtmlToQML(const QString& html);
   void navigateFindResult(int step);
 
-  QFuture<ResultsMap> performSearchAsync(const QString &dirPath,
-                                         const QString &keyword);
-  void displayResults(const ResultsMap &results);
+  QFuture<ResultsMap> performSearchAsync(const QString& dirPath,
+                                         const QString& keyword);
+  void displayResults(const ResultsMap& results);
 };
 
 class SearchMapper {
  public:
   using result_type = MySearchResult;  // 必须声明result_type
 
-  explicit SearchMapper(const QRegularExpression &regex) : m_regex(regex) {}
+  explicit SearchMapper(const QRegularExpression& regex) : m_regex(regex) {}
 
-  MySearchResult operator()(const QString &filePath) const {
+  MySearchResult operator()(const QString& filePath) const {
     return searchInFile(filePath, m_regex);
   }
 

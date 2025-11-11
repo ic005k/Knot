@@ -8,7 +8,7 @@
 
 QString strNoteNameIndexFile = "";
 
-NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
+NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   ui->setupUi(this);
   this->installEventFilter(this);
 
@@ -94,7 +94,7 @@ void NotesList::startBackgroundTaskUpdateFilesIndex() {
   });
 
   // 可选：使用 QFutureWatcher 监控进度
-  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Database update completed.";
     mw_one->closeProgress();
@@ -107,7 +107,7 @@ void NotesList::startBackgroundTaskUpdateFilesIndex() {
   watcher->setFuture(future);
 }
 
-void NotesList::startBackgroundTaskDelFilesIndex(const QStringList &files) {
+void NotesList::startBackgroundTaskDelFilesIndex(const QStringList& files) {
   QStringList m_files = files;
 
   QFuture<void> future = QtConcurrent::run([=]() {
@@ -117,7 +117,7 @@ void NotesList::startBackgroundTaskDelFilesIndex(const QStringList &files) {
     }
   });
 
-  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Database del files completed.";
     watcher->deleteLater();
@@ -131,9 +131,9 @@ void NotesList::set_memo_dir() {
   if (!dir.exists()) dir.mkdir(path);
 }
 
-bool NotesList::eventFilter(QObject *watch, QEvent *evn) {
+bool NotesList::eventFilter(QObject* watch, QEvent* evn) {
   if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
       if (!ui->frame1->isHidden()) {
         on_btnBack_clicked();
@@ -147,7 +147,7 @@ bool NotesList::eventFilter(QObject *watch, QEvent *evn) {
     }
 
     if (keyEvent->key() == Qt::Key_Return) {
-      QTreeWidgetItem *item = tw->currentItem();
+      QTreeWidgetItem* item = tw->currentItem();
       on_treeWidget_itemClicked(item, 0);
       return true;
     }
@@ -159,7 +159,7 @@ bool NotesList::eventFilter(QObject *watch, QEvent *evn) {
 void NotesList::on_btnClose_clicked() { this->close(); }
 
 void NotesList::on_btnNewNoteBook_clicked() {
-  QTreeWidgetItem *item = new QTreeWidgetItem();
+  QTreeWidgetItem* item = new QTreeWidgetItem();
   item->setText(0, notebookName);
   item->setText(2, "#FF0000");
   item->setForeground(0, Qt::red);
@@ -169,7 +169,7 @@ void NotesList::on_btnNewNoteBook_clicked() {
     ui->treeWidget->addTopLevelItem(item);
     ui->treeWidget->setCurrentItem(item);
   } else {
-    QTreeWidgetItem *topItem = tw->topLevelItem(rootIndex - 1);
+    QTreeWidgetItem* topItem = tw->topLevelItem(rootIndex - 1);
     tw->setCurrentItem(topItem);
     topItem->addChild(item);
     tw->setCurrentItem(item);
@@ -184,14 +184,14 @@ void NotesList::on_btnNewNote_clicked() {
 
   QString noteFile =
       "memo/" + m_Notes->getDateTimeStr() + "_" + QString::number(rand) + ".md";
-  QTreeWidgetItem *parentitem = ui->treeWidget->currentItem();
+  QTreeWidgetItem* parentitem = ui->treeWidget->currentItem();
 
-  QTreeWidgetItem *item1 = new QTreeWidgetItem(parentitem);
+  QTreeWidgetItem* item1 = new QTreeWidgetItem(parentitem);
   item1->setText(0, "");
   item1->setText(1, noteFile);
   item1->setIcon(0, QIcon(":/res/n.png"));
 
-  QTextEdit *edit = new QTextEdit();
+  QTextEdit* edit = new QTextEdit();
   edit->append("");
   TextEditToFile(edit, iniDir + noteFile);
   delete edit;
@@ -206,7 +206,7 @@ void NotesList::on_btnNewNote_clicked() {
   }
 }
 
-void NotesList::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column) {
+void NotesList::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column) {
   Q_UNUSED(column);
 
   if (ui->treeWidget->topLevelItemCount() == 0) return;
@@ -244,42 +244,42 @@ QString NotesList::getCurrentMDFile() {
 }
 
 void NotesList::on_btnRename_clicked() {
-  QTreeWidgetItem *item = ui->treeWidget->currentItem();
+  QTreeWidgetItem* item = ui->treeWidget->currentItem();
   if (item == NULL) return;
 
   m_RenameNotes = new QDialog(this);
-  QVBoxLayout *vbox0 = new QVBoxLayout;
+  QVBoxLayout* vbox0 = new QVBoxLayout;
   m_RenameNotes->setLayout(vbox0);
   vbox0->setContentsMargins(5, 5, 5, 5);
   if (!isAndroid) m_RenameNotes->setModal(true);
   m_RenameNotes->setWindowFlag(Qt::FramelessWindowHint);
 
-  QFrame *frame = new QFrame(this);
+  QFrame* frame = new QFrame(this);
   vbox0->addWidget(frame);
 
-  QVBoxLayout *vbox = new QVBoxLayout;
+  QVBoxLayout* vbox = new QVBoxLayout;
 
   frame->setLayout(vbox);
   vbox->setContentsMargins(6, 6, 6, 10);
   vbox->setSpacing(10);
 
-  QLabel *lblTitle = new QLabel(this);
+  QLabel* lblTitle = new QLabel(this);
   lblTitle->adjustSize();
   lblTitle->setWordWrap(true);
   lblTitle->setText(tr("Rename"));
   vbox->addWidget(lblTitle);
 
-  QFrame *hframe = new QFrame(this);
+  QFrame* hframe = new QFrame(this);
   hframe->setFrameShape(QFrame::HLine);
   hframe->setStyleSheet("QFrame{background:red;min-height:2px}");
   vbox->addWidget(hframe);
   hframe->hide();
 
-  QTextEdit *edit = new QTextEdit(this);
+  QTextEdit* edit = new QTextEdit(this);
   edit->setAcceptRichText(false);
 
   initTextToolbarDynamic(m_RenameNotes);
-  EditEventFilter *editFilter =
+  EditEventFilter* editFilter =
       new EditEventFilter(textToolbarDynamic, m_RenameNotes);
   edit->installEventFilter(editFilter);
   edit->viewport()->installEventFilter(editFilter);
@@ -296,10 +296,10 @@ void NotesList::on_btnRename_clicked() {
     edit->setPlainText(m_Notes->new_title);
   }
 
-  QToolButton *btnCancel = new QToolButton(m_RenameNotes);
-  QToolButton *btnPaste = new QToolButton(m_RenameNotes);
-  QToolButton *btnCopy = new QToolButton(m_RenameNotes);
-  QToolButton *btnOk = new QToolButton(m_RenameNotes);
+  QToolButton* btnCancel = new QToolButton(m_RenameNotes);
+  QToolButton* btnPaste = new QToolButton(m_RenameNotes);
+  QToolButton* btnCopy = new QToolButton(m_RenameNotes);
+  QToolButton* btnOk = new QToolButton(m_RenameNotes);
   btnCancel->setText(tr("Cancel"));
   btnPaste->setText(tr("Paste"));
   btnCopy->setText(tr("Copy"));
@@ -310,7 +310,7 @@ void NotesList::on_btnRename_clicked() {
   btnCopy->setFixedHeight(35);
   btnPaste->setFixedHeight(35);
 
-  QHBoxLayout *hbox = new QHBoxLayout;
+  QHBoxLayout* hbox = new QHBoxLayout;
   hbox->addWidget(btnCancel);
   hbox->addWidget(btnPaste);
   hbox->addWidget(btnCopy);
@@ -320,7 +320,7 @@ void NotesList::on_btnRename_clicked() {
   btnCopy->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   btnOk->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-  QSpacerItem *sparcer_item =
+  QSpacerItem* sparcer_item =
       new QSpacerItem(0, 60, QSizePolicy::Fixed, QSizePolicy::Expanding);
   vbox->addItem(sparcer_item);
 
@@ -374,7 +374,7 @@ void NotesList::on_btnRename_clicked() {
 }
 
 void NotesList::renameCurrentItem(QString title) {
-  QTreeWidgetItem *item = ui->treeWidget->currentItem();
+  QTreeWidgetItem* item = ui->treeWidget->currentItem();
   if (item == NULL) return;
 
   item->setText(0, title.trimmed());
@@ -404,7 +404,7 @@ void NotesList::setNoteName(QString name) { noteTitle = name; }
 void NotesList::on_btnDel_clicked() {
   if (tw->topLevelItemCount() == 0) return;
 
-  QTreeWidgetItem *item = tw->currentItem();
+  QTreeWidgetItem* item = tw->currentItem();
 
   if (item == NULL) return;
 
@@ -415,7 +415,7 @@ void NotesList::on_btnDel_clicked() {
     strFlag = tr("Note");
 
   m_Method->m_widget = new QWidget(this);
-  ShowMessage *m_ShowMsg = new ShowMessage(this);
+  ShowMessage* m_ShowMsg = new ShowMessage(this);
   if (!m_ShowMsg->showMsg("Knot",
                           tr("Move to the recycle bin?") + "\n\n" + strFlag +
                               " : " + item->text(0),
@@ -431,7 +431,7 @@ void NotesList::on_btnDel_clicked() {
     int index = tw->currentIndex().row();
 
     for (int i = 0; i < count; i++) {
-      QTreeWidgetItem *childItem = new QTreeWidgetItem;
+      QTreeWidgetItem* childItem = new QTreeWidgetItem;
 
       str0 = item->child(i)->text(0);
       str1 = item->child(i)->text(1);
@@ -446,7 +446,7 @@ void NotesList::on_btnDel_clicked() {
 
         // Child NoteBook
       } else {
-        auto *child_Item = item->child(i);
+        auto* child_Item = item->child(i);
         int count1 = child_Item->childCount();
         delete childItem;
         childItem = nullptr;
@@ -454,7 +454,7 @@ void NotesList::on_btnDel_clicked() {
         for (int j = 0; j < count1; j++) {
           str0 = item->child(i)->child(j)->text(0);
           str1 = item->child(i)->child(j)->text(1);
-          QTreeWidgetItem *childItem = new QTreeWidgetItem;
+          QTreeWidgetItem* childItem = new QTreeWidgetItem;
           childItem->setText(0, str0);
           childItem->setText(1, str1);
           addItem(twrb, childItem);
@@ -470,7 +470,7 @@ void NotesList::on_btnDel_clicked() {
     if (!item->text(1).isEmpty()) {
       str0 = item->text(0);
       str1 = item->text(1);
-      QTreeWidgetItem *childItem = new QTreeWidgetItem;
+      QTreeWidgetItem* childItem = new QTreeWidgetItem;
       childItem->setText(0, str0);
       childItem->setText(1, str1);
       addItem(twrb, childItem);
@@ -483,7 +483,7 @@ void NotesList::on_btnDel_clicked() {
       for (int n = 0; n < count; n++) {
         str0 = item->child(n)->text(0);
         str1 = item->child(n)->text(1);
-        QTreeWidgetItem *childItem = new QTreeWidgetItem;
+        QTreeWidgetItem* childItem = new QTreeWidgetItem;
         childItem->setText(0, str0);
         childItem->setText(1, str1);
         addItem(twrb, childItem);
@@ -512,15 +512,15 @@ void NotesList::on_btnDel_clicked() {
   resetQML_List();
 }
 
-void NotesList::addItem(QTreeWidget *tw, QTreeWidgetItem *item) {
+void NotesList::addItem(QTreeWidget* tw, QTreeWidgetItem* item) {
   item->setIcon(0, QIcon(":/res/n.png"));
   tw->setFocus();
   if (tw == twrb) {
     tw->setCurrentItem(tw->topLevelItem(0));
-    QTreeWidgetItem *curItem = tw->currentItem();
+    QTreeWidgetItem* curItem = tw->currentItem();
     curItem->addChild(item);
   } else {
-    QTreeWidgetItem *curItem = tw->currentItem();
+    QTreeWidgetItem* curItem = tw->currentItem();
     curItem->addChild(item);
   }
 
@@ -557,7 +557,7 @@ int NotesList::on_btnImport_clicked() {
 
   QStringList MDFileList;
 
-  QTreeWidgetItem *item = ui->treeWidget->currentItem();
+  QTreeWidgetItem* item = ui->treeWidget->currentItem();
 
   for (int i = 0; i < fileNames.count(); i++) {
     QString fileName = fileNames.at(i);
@@ -580,7 +580,7 @@ int NotesList::on_btnImport_clicked() {
 
   if (MDFileList.count() > 1000) {
     MDFileList.resize(10);
-    ShowMessage *msg = new ShowMessage(this);
+    ShowMessage* msg = new ShowMessage(this);
     msg->showMsg(appName,
                  tr("A maximum of 10 files can be imported at a time."), 1);
   }
@@ -590,7 +590,7 @@ int NotesList::on_btnImport_clicked() {
       QString fileName = MDFileList.at(i);
 
       if (QFile(fileName).exists()) {
-        QTreeWidgetItem *item1;
+        QTreeWidgetItem* item1;
 
         QFileInfo fi(fileName);
         QString name = fi.baseName();
@@ -620,7 +620,7 @@ int NotesList::on_btnImport_clicked() {
   });
 
   // 可选：使用 QFutureWatcher 监控进度
-  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this,
           [this, watcher, MDFileList]() {
             qDebug() << "Import note completed:" +
@@ -640,7 +640,7 @@ int NotesList::on_btnImport_clicked() {
 void NotesList::on_btnExport_clicked() {
   if (ui->treeWidget->topLevelItemCount() == 0) return;
 
-  QTreeWidgetItem *item = tw->currentItem();
+  QTreeWidgetItem* item = tw->currentItem();
   if (item->parent() == NULL) return;
 
   QString name = item->text(0);
@@ -654,14 +654,14 @@ void NotesList::on_btnExport_clicked() {
   QString mdfile = iniDir + item->text(1);
 
   QString str = loadText(mdfile);
-  QTextEdit *edit = new QTextEdit();
+  QTextEdit* edit = new QTextEdit();
   edit->setAcceptRichText(false);
   edit->setPlainText(str);
 
   TextEditToFile(edit, fileName);
 }
 
-void NotesList::closeEvent(QCloseEvent *event) { Q_UNUSED(event); }
+void NotesList::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }
 
 void NotesList::resetQML_List() {
   if (tw->topLevelItemCount() == 0) {
@@ -673,9 +673,9 @@ void NotesList::resetQML_List() {
   loadAllNoteBook();
 
   int index = 0;
-  QTreeWidgetItem *item = tw->currentItem();
-  QTreeWidgetItem *pNoteBook = NULL;
-  QTreeWidgetItem *pNote = NULL;
+  QTreeWidgetItem* item = tw->currentItem();
+  QTreeWidgetItem* pNoteBook = NULL;
+  QTreeWidgetItem* pNote = NULL;
   if (item == NULL)
     index = 0;
   else {
@@ -737,7 +737,7 @@ void NotesList::resetQML_Recycle() {
   loadAllRecycle();
 
   int index = 0;
-  QTreeWidgetItem *item = twrb->currentItem();
+  QTreeWidgetItem* item = twrb->currentItem();
   if (item->parent() == NULL) {
     index = -1;
   } else {
@@ -802,7 +802,7 @@ void NotesList::saveNotesList() {
   QFuture<void> future = QtConcurrent::run([=]() { saveNotesListToFile(); });
 
   // 可选：使用 QFutureWatcher 监控进度
-  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     mw_one->strLatestModify = tr("Modi Notes List");
     m_Notes->isSaveNotesConfig = true;
@@ -828,7 +828,7 @@ void NotesList::saveNotesListToFile() {
   QJsonArray mainNotesArray;
   int count = tw->topLevelItemCount();
   for (int i = 0; i < count; i++) {
-    QTreeWidgetItem *topItem = tw->topLevelItem(i);
+    QTreeWidgetItem* topItem = tw->topLevelItem(i);
     QJsonObject topObj;
     topObj["name"] = topItem->text(0);
     topObj["colorFlag"] = topItem->text(2);
@@ -837,7 +837,7 @@ void NotesList::saveNotesListToFile() {
     int childCount = topItem->childCount();
     int n_less = 0;
     for (int j = 0; j < childCount; j++) {
-      QTreeWidgetItem *childItem = topItem->child(j);
+      QTreeWidgetItem* childItem = topItem->child(j);
       QString strChild1 = childItem->text(1);
       QString md_file = iniDir + strChild1;
 
@@ -858,10 +858,10 @@ void NotesList::saveNotesListToFile() {
   // 回收站
   QJsonArray recycleBinArray;
   if (twrb->topLevelItemCount() > 0) {
-    QTreeWidgetItem *rbTopItem = twrb->topLevelItem(0);
+    QTreeWidgetItem* rbTopItem = twrb->topLevelItem(0);
     int rbChildCount = rbTopItem->childCount();
     for (int j = 0; j < rbChildCount; j++) {
-      QTreeWidgetItem *childItem = rbTopItem->child(j);
+      QTreeWidgetItem* childItem = rbTopItem->child(j);
       QJsonObject rbObj;
       rbObj["name"] = childItem->text(0);
       rbObj["file"] = childItem->text(1);
@@ -873,7 +873,7 @@ void NotesList::saveNotesListToFile() {
   // 待删除文件
   needDelFiles.removeDuplicates();
   QJsonArray needDelArray;
-  for (const QString &file : std::as_const(needDelFiles)) {
+  for (const QString& file : std::as_const(needDelFiles)) {
     needDelArray.append(file);
   }
   rootObj["needDelNotes"] = needDelArray;
@@ -906,7 +906,7 @@ void NotesList::saveNotesListToFile() {
   int count1 = tw->topLevelItemCount();
   iniNotes.setValue("/MainNotes/topItemCount", count1);
   for (int i = 0; i < count1; i++) {
-    QTreeWidgetItem *topItem = tw->topLevelItem(i);
+    QTreeWidgetItem* topItem = tw->topLevelItem(i);
     QString strtop = topItem->text(0);
     QString strtopcolorflag = topItem->text(2);
     iniNotes.setValue("/MainNotes/strTopItem" + QString::number(i), strtop);
@@ -916,7 +916,7 @@ void NotesList::saveNotesListToFile() {
     int childCount = topItem->childCount();
     int n_less = 0;
     for (int j = 0; j < childCount; j++) {
-      QTreeWidgetItem *childItem = topItem->child(j);
+      QTreeWidgetItem* childItem = topItem->child(j);
       QString strChild0 = childItem->text(0);
       QString strChild1 = childItem->text(1);
 
@@ -940,13 +940,13 @@ void NotesList::saveNotesListToFile() {
 
   // save recycle
   int i = 0;
-  QTreeWidgetItem *topItem = twrb->topLevelItem(i);
+  QTreeWidgetItem* topItem = twrb->topLevelItem(i);
   int childCount1 = topItem->childCount();
   iniNotes.setValue("/MainNotes/rbchildCount" + QString::number(i),
                     childCount1);
 
   for (int j = 0; j < childCount1; j++) {
-    QTreeWidgetItem *childItem = twrb->topLevelItem(i)->child(j);
+    QTreeWidgetItem* childItem = twrb->topLevelItem(i)->child(j);
     QString strChild0 = childItem->text(0);
     QString strChild1 = childItem->text(1);
 
@@ -1008,7 +1008,7 @@ void NotesList::initNotesList() {
       QString strTop = topObj["name"].toString();
       QString strTopColorFlag = topObj["colorFlag"].toString("#FF0000");
 
-      QTreeWidgetItem *topItem = new QTreeWidgetItem;
+      QTreeWidgetItem* topItem = new QTreeWidgetItem;
       topItem->setText(0, strTop);
       topItem->setText(2, strTopColorFlag);
       topItem->setForeground(0, Qt::red);
@@ -1028,7 +1028,7 @@ void NotesList::initNotesList() {
         QString str1 = childObj["file"].toString();
 
         if (!str1.isEmpty()) {
-          QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
+          QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
           childItem->setText(0, str0);
           childItem->setText(1, str1);
           childItem->setIcon(0, QIcon(":/res/n.png"));
@@ -1050,7 +1050,7 @@ void NotesList::initNotesList() {
     tw->expandAll();
 
   } else {
-    QSettings *iniNotes =
+    QSettings* iniNotes =
         new QSettings(iniDir + "mainnotes.ini", QSettings::IniFormat, NULL);
 
     int topCount = iniNotes->value("/MainNotes/topItemCount").toInt();
@@ -1071,7 +1071,7 @@ void NotesList::initNotesList() {
           iniNotes->value("/MainNotes/childCount" + QString::number(i)).toInt();
       notesTotal = notesTotal + childCount;
 
-      QTreeWidgetItem *topItem = new QTreeWidgetItem;
+      QTreeWidgetItem* topItem = new QTreeWidgetItem;
       topItem->setText(0, strTop);
       topItem->setText(2, strTopColorFlag);
       topItem->setForeground(0, Qt::red);
@@ -1091,7 +1091,7 @@ void NotesList::initNotesList() {
                    .toString();
 
         if (!str1.isEmpty()) {
-          QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
+          QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
           childItem->setText(0, str0);
           childItem->setText(1, str1);
           childItem->setIcon(0, QIcon(":/res/n.png"));
@@ -1143,16 +1143,16 @@ void NotesList::initRecycle() {
     QJsonArray recycleBinArray = rootObj["recycleBin"].toArray();
 
     // 创建顶层项
-    QTreeWidgetItem *topItem = new QTreeWidgetItem;
+    QTreeWidgetItem* topItem = new QTreeWidgetItem;
     topItem->setText(0, tr("Notes Recycle Bin"));
 
     // 遍历回收站数组
-    for (const QJsonValue &val : recycleBinArray) {
+    for (const QJsonValue& val : recycleBinArray) {
       QJsonObject obj = val.toObject();
       QString str0 = obj["name"].toString();
       QString str1 = obj["file"].toString();
 
-      QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
+      QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
       childItem->setText(0, str0);
       childItem->setText(1, str1);
       childItem->setIcon(0, QIcon(":/res/n.png"));
@@ -1167,7 +1167,7 @@ void NotesList::initRecycle() {
     QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
 
     int i = 0;
-    QTreeWidgetItem *topItem = new QTreeWidgetItem;
+    QTreeWidgetItem* topItem = new QTreeWidgetItem;
     topItem->setText(0, tr("Notes Recycle Bin"));
 
     int childCount =
@@ -1183,7 +1183,7 @@ void NotesList::initRecycle() {
                         QString::number(j))
                  .toString();
 
-      QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
+      QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
       childItem->setText(0, str0);
       childItem->setText(1, str1);
       childItem->setIcon(0, QIcon(":/res/n.png"));
@@ -1203,7 +1203,7 @@ void NotesList::initUnclassified() {
   excludeFiles.removeDuplicates();
 
   QStringList result;
-  foreach (const QString &file, dirFiles) {
+  foreach (const QString& file, dirFiles) {
     if (!excludeFiles.contains(file)) {
       result.append(file);
     }
@@ -1214,7 +1214,7 @@ void NotesList::initUnclassified() {
 
   int topCount = tw->topLevelItemCount();
 
-  QTreeWidgetItem *topItem = new QTreeWidgetItem;
+  QTreeWidgetItem* topItem = new QTreeWidgetItem;
   topItem->setText(0, tr("Unclassified"));
   topItem->setText(2, "#FF0000");
   topItem->setForeground(0, Qt::red);
@@ -1231,7 +1231,7 @@ void NotesList::initUnclassified() {
     str0 = generator.genNewTitle(loadText(mdFile));
     str1 = mdFile;
     str1 = str1.replace(iniDir, "");
-    QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
+    QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
     childItem->setText(0, str0);
     childItem->setText(1, str1);
     childItem->setIcon(0, QIcon(":/res/n.png"));
@@ -1262,7 +1262,7 @@ void NotesList::on_btnBack_clicked() {
 }
 
 void NotesList::on_btnRestore_clicked() {
-  QTreeWidgetItem *curItem = twrb->currentItem();
+  QTreeWidgetItem* curItem = twrb->currentItem();
   if (curItem->parent() == NULL) return;
 
   if (moveItem(twrb)) {
@@ -1281,12 +1281,12 @@ void NotesList::on_btnRestore_clicked() {
 }
 
 void NotesList::on_btnDel_Recycle_clicked() {
-  QTreeWidgetItem *curItem = twrb->currentItem();
+  QTreeWidgetItem* curItem = twrb->currentItem();
   if (curItem->parent() == NULL) {
     return;
   } else {
     m_Method->m_widget = new QWidget(this);
-    ShowMessage *m_ShowMsg = new ShowMessage(this);
+    ShowMessage* m_ShowMsg = new ShowMessage(this);
     if (!m_ShowMsg->showMsg(
             "Knot", tr("Whether to remove") + "  " + curItem->text(0) + " ? ",
             2)) {
@@ -1427,7 +1427,7 @@ void NotesList::needDelNotes() {
 
     // 保存本次的删除列表到 JSON 文件
     QJsonArray newArr;
-    for (const QString &fileName : std::as_const(needDelFiles)) {
+    for (const QString& fileName : std::as_const(needDelFiles)) {
       newArr.append(fileName);
     }
 
@@ -1489,7 +1489,7 @@ void NotesList::clearMD_Pic() {
       QRegularExpression::CaseInsensitiveOption);
 
   // 1. 解析所有Markdown文件，提取引用的图片
-  foreach (const QString &mdFilePath, allmdFiles) {
+  foreach (const QString& mdFilePath, allmdFiles) {
     QFile mdFile(mdFilePath);
     if (!mdFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
       qWarning() << "无法打开Markdown文件:" << mdFilePath;
@@ -1520,7 +1520,7 @@ void NotesList::clearMD_Pic() {
   int deletedCount = 0;
   int failedCount = 0;
 
-  foreach (const QString &imgFilePath, allimgFiles) {
+  foreach (const QString& imgFilePath, allimgFiles) {
     QFileInfo imgInfo(imgFilePath);
     QString imgFileName = imgInfo.fileName();
 
@@ -1542,8 +1542,8 @@ void NotesList::clearMD_Pic() {
            << "个, 删除失败:" << failedCount << "个";
 }
 
-void NotesList::getAllFiles(const QString &foldPath, QStringList &folds,
-                            const QStringList &formats) {
+void NotesList::getAllFiles(const QString& foldPath, QStringList& folds,
+                            const QStringList& formats) {
   QDirIterator it(foldPath, QDir::Files | QDir::NoDotAndDotDot,
                   QDirIterator::Subdirectories);
   while (it.hasNext()) {
@@ -1556,13 +1556,13 @@ void NotesList::getAllFiles(const QString &foldPath, QStringList &folds,
 }
 
 // 文件搜索实现
-QStringList findMarkdownFiles(const QString &dirPath) {
+QStringList findMarkdownFiles(const QString& dirPath) {
   Q_UNUSED(dirPath);
 
   QList<QString> paths;
   QDir dir(iniDir + "memo/");
   const QStringList files = dir.entryList(QStringList() << "*.md", QDir::Files);
-  for (const QString &file : files) {
+  for (const QString& file : files) {
     QFileInfo info(dir.absoluteFilePath(file));
     QString canonicalPath = info.canonicalFilePath();  // 规范化路径
     if (!canonicalPath.isEmpty() && info.exists()) {
@@ -1573,8 +1573,8 @@ QStringList findMarkdownFiles(const QString &dirPath) {
   return QSet<QString>(paths.begin(), paths.end()).values();
 }
 
-MySearchResult searchInFile(const QString &filePath,
-                            const QRegularExpression &regex) {
+MySearchResult searchInFile(const QString& filePath,
+                            const QRegularExpression& regex) {
   MySearchResult result;
   QFile file(filePath);
   if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -1592,19 +1592,19 @@ MySearchResult searchInFile(const QString &filePath,
 }
 
 // 结果归并
-void reduceResults(ResultsMap &result, const MySearchResult &partial) {
+void reduceResults(ResultsMap& result, const MySearchResult& partial) {
   if (!partial.filePath.isEmpty()) {
     result[partial.filePath] = partial;
   }
 }
 
-QFuture<ResultsMap> NotesList::performSearchAsync(const QString &dirPath,
-                                                  const QString &keyword) {
+QFuture<ResultsMap> NotesList::performSearchAsync(const QString& dirPath,
+                                                  const QString& keyword) {
   return QtConcurrent::run([this, dirPath, keyword]() {
     QStringList files = findMarkdownFiles(dirPath);
     QStringList cycleFiles = m_NotesList->getRecycleNoteFiles();
 
-    files.removeIf([&cycleFiles](const QString &file) {
+    files.removeIf([&cycleFiles](const QString& file) {
       return cycleFiles.contains(file);
     });
 
@@ -1619,7 +1619,7 @@ QFuture<ResultsMap> NotesList::performSearchAsync(const QString &dirPath,
   });
 }
 
-void NotesList::displayResults(const ResultsMap &results) {
+void NotesList::displayResults(const ResultsMap& results) {
   for (auto it = results.begin(); it != results.end(); ++it) {
     qDebug() << "文件：" << it.key();
     qDebug() << "匹配行号：" << it.value().lineNumbers;
@@ -1671,7 +1671,7 @@ void NotesList::onSearchFinished() {
     mui->btnFindPreviousNote->setEnabled(false);
     mui->lblShowLineSn->setText("0");
     mui->lblFindNoteCount->setText("0");
-    ShowMessage *msg = new ShowMessage(this);
+    ShowMessage* msg = new ShowMessage(this);
     msg->showMsg("Knot", tr("No match was found."), 1);
 
     return;
@@ -1682,7 +1682,7 @@ void NotesList::onSearchFinished() {
   // ▶️ 处理搜索结果
 
   for (auto it = results.constBegin(); it != results.constEnd(); ++it) {
-    const QString &filePath = it.key();
+    const QString& filePath = it.key();
     const QList<int> lines = it.value().lineNumbers;
 
     qDebug() << "文件：" << it.key();
@@ -1798,7 +1798,7 @@ void NotesList::goFindResult(int index) {
 }
 
 void NotesList::localItem() {
-  QTreeWidgetItem *item = tw->currentItem();
+  QTreeWidgetItem* item = tw->currentItem();
   // NoteBook
 
   if (item->childCount() > 0) {
@@ -1811,7 +1811,7 @@ void NotesList::localItem() {
       int childCount = item->parent()->childCount();
       int newRow = 0;
       for (int i = 0; i < childCount; i++) {
-        QTreeWidgetItem *item1 = item->parent()->child(i);
+        QTreeWidgetItem* item1 = item->parent()->child(i);
         if (item1 == item) break;
 
         if (item1->text(1).isEmpty()) newRow++;
@@ -1825,7 +1825,7 @@ void NotesList::localItem() {
 
     // Notes
   } else {
-    QTreeWidgetItem *top_item = item->parent()->parent();
+    QTreeWidgetItem* top_item = item->parent()->parent();
     if (top_item == NULL) {
       int topIndex = tw->indexOfTopLevelItem(item->parent());
       int childIndex = tw->currentIndex().row();
@@ -1838,7 +1838,7 @@ void NotesList::localItem() {
       int childCount = top_item->childCount();
       int newRow = 0;
       for (int i = 0; i < childCount; i++) {
-        QTreeWidgetItem *item1 = top_item->child(i);
+        QTreeWidgetItem* item1 = top_item->child(i);
         if (item1 == item->parent()) break;
 
         if (item1->text(1).isEmpty()) newRow++;
@@ -1875,12 +1875,12 @@ void NotesList::on_KVChanged() {
 }
 
 void NotesList::moveBy(int ud) {
-  QTreeWidgetItem *item = tw->currentItem();
+  QTreeWidgetItem* item = tw->currentItem();
 
   if (item == NULL) return;
 
   if (item->parent() != NULL) {
-    QTreeWidgetItem *parentItem = item->parent();
+    QTreeWidgetItem* parentItem = item->parent();
     int index = parentItem->indexOfChild(item);
     if (ud == -1) {
       if (index - 1 >= 0) {
@@ -1972,7 +1972,7 @@ void NotesList::on_btnUp_clicked() {
   moveBy(-1);
 
   bool isParent = false;
-  QTreeWidgetItem *item = tw->currentItem();
+  QTreeWidgetItem* item = tw->currentItem();
   if (item->parent() == NULL) {
     isParent = true;
 
@@ -1992,7 +1992,7 @@ void NotesList::on_btnDown_clicked() {
   moveBy(1);
 
   bool isParent = false;
-  QTreeWidgetItem *item = tw->currentItem();
+  QTreeWidgetItem* item = tw->currentItem();
   if (item->parent() == NULL) {
     isParent = true;
 
@@ -2010,7 +2010,7 @@ void NotesList::on_btnDown_clicked() {
 
 void NotesList::setTWRBCurrentItem() {
   int index = m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
-  QTreeWidgetItem *topItem = twrb->topLevelItem(0);
+  QTreeWidgetItem* topItem = twrb->topLevelItem(0);
   twrb->setCurrentItem(topItem->child(index));
 }
 
@@ -2040,8 +2040,8 @@ void NotesList::setNoteBookCurrentItem() {
       indexMain = list.at(0).toInt();
       indexChild = list.at(1).toInt();
 
-      QTreeWidgetItem *topItem = tw->topLevelItem(indexMain);
-      QTreeWidgetItem *childItem = topItem->child(indexChild);
+      QTreeWidgetItem* topItem = tw->topLevelItem(indexMain);
+      QTreeWidgetItem* childItem = topItem->child(indexChild);
       tw->setCurrentItem(childItem);
     }
   }
@@ -2169,7 +2169,7 @@ void NotesList::on_actionMoveDown_NoteBook_triggered() {
 }
 
 int NotesList::getNoteBookIndex_twToqml() {
-  QTreeWidgetItem *item = tw->currentItem();
+  QTreeWidgetItem* item = tw->currentItem();
   int index = 0;
   if (item->parent() == NULL) {
     index = tw->indexOfTopLevelItem(item);
@@ -2178,7 +2178,7 @@ int NotesList::getNoteBookIndex_twToqml() {
     int index1 = 0;
     int count = item->parent()->childCount();
     for (int i = 0; i < count; i++) {
-      QTreeWidgetItem *item0 = item->parent()->child(i);
+      QTreeWidgetItem* item0 = item->parent()->child(i);
       if (item0 == item) break;
 
       if (item0->text(1).isEmpty()) index1++;
@@ -2197,7 +2197,7 @@ void NotesList::loadAllNoteBook() {
   m_Method->clearAllBakList(mui->qwNoteList);
   int count = tw->topLevelItemCount();
   for (int i = 0; i < count; i++) {
-    QTreeWidgetItem *topItem = tw->topLevelItem(i);
+    QTreeWidgetItem* topItem = tw->topLevelItem(i);
     QString str = topItem->text(0);
     QString strtopcolorflag = topItem->text(2);
 
@@ -2214,7 +2214,7 @@ void NotesList::loadAllNoteBook() {
 
     int childCount = topItem->childCount();
     for (int j = 0; j < childCount; j++) {
-      QTreeWidgetItem *childItem = topItem->child(j);
+      QTreeWidgetItem* childItem = topItem->child(j);
       if (childItem->text(1).isEmpty()) {
         addItemToQW(mui->qwNoteBook, childItem->text(0),
                     QString::number(i) + "===" + QString::number(j),
@@ -2227,32 +2227,32 @@ void NotesList::loadAllNoteBook() {
   }
 }
 
-void NotesList::addItemToQW(QQuickWidget *qw, QString text0, QString text1,
+void NotesList::addItemToQW(QQuickWidget* qw, QString text0, QString text1,
                             QString text2, QString text3, QString text4,
                             int itemH) {
-  QQuickItem *root = qw->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "addItem", Q_ARG(QVariant, text0),
+  QQuickItem* root = qw->rootObject();
+  QMetaObject::invokeMethod((QObject*)root, "addItem", Q_ARG(QVariant, text0),
                             Q_ARG(QVariant, text1), Q_ARG(QVariant, text2),
                             Q_ARG(QVariant, text3), Q_ARG(QVariant, text4),
                             Q_ARG(QVariant, itemH));
 }
 
 void NotesList::setColorFlag(QString strColor) {
-  QQuickItem *root = mui->qwNoteBook->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "setColorFlag",
+  QQuickItem* root = mui->qwNoteBook->rootObject();
+  QMetaObject::invokeMethod((QObject*)root, "setColorFlag",
                             Q_ARG(QVariant, strColor));
 }
 
-void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
-  QAction *actNew = new QAction(tr("New NoteBook"));
-  QAction *actDel = new QAction(tr("Del NoteBook"));
-  QAction *actRename = new QAction(tr("Rename NoteBook"));
-  QAction *actMoveUp = new QAction(tr("Move Up"));
-  QAction *actMoveDown = new QAction(tr("Move Down"));
-  QAction *actSetColorFlag = new QAction(tr("Set Color Marker"));
+void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
+  QAction* actNew = new QAction(tr("New NoteBook"));
+  QAction* actDel = new QAction(tr("Del NoteBook"));
+  QAction* actRename = new QAction(tr("Rename NoteBook"));
+  QAction* actMoveUp = new QAction(tr("Move Up"));
+  QAction* actMoveDown = new QAction(tr("Move Down"));
+  QAction* actSetColorFlag = new QAction(tr("Set Color Marker"));
   actSetColorFlag->setEnabled(isActColorFlagStatus);
-  QAction *actStatistics = new QAction(tr("Statistics"));
-  QAction *actRebuildSearchIndex =
+  QAction* actStatistics = new QAction(tr("Statistics"));
+  QAction* actRebuildSearchIndex =
       new QAction(tr("Rebuild Search Database Index"));
 
   connect(actNew, &QAction::triggered, this,
@@ -2273,7 +2273,7 @@ void NotesList::init_NoteBookMenu(QMenu *mainMenu) {
           &NotesList::on_actionStatistics);
 
   connect(actRebuildSearchIndex, &QAction::triggered, this, [this]() {
-    ShowMessage *msg = new ShowMessage(this);
+    ShowMessage* msg = new ShowMessage(this);
     if (msg->showMsg(
             appName,
             tr("Rebuilding the index will take some time. Click OK to start."),
@@ -2312,8 +2312,8 @@ void NotesList::on_actionSetColorFlag() {
   color_0 = m_Method->getCustomColor();
   if (color_0.isNull()) return;
 
-  QTreeWidgetItem *itemTop;
-  QTreeWidgetItem *item = tw->currentItem();
+  QTreeWidgetItem* itemTop;
+  QTreeWidgetItem* item = tw->currentItem();
   if (item->parent() == nullptr) itemTop = item;
   if (item->parent() != nullptr) itemTop = item->parent();
   if (item->parent()->parent() != nullptr) itemTop = item->parent()->parent();
@@ -2333,7 +2333,7 @@ void NotesList::on_actionStatistics() {
                            QString::number(m_Method->getAccessCount()) +
                            "t/30min";
 
-  ShowMessage *msg = new ShowMessage(this);
+  ShowMessage* msg = new ShowMessage(this);
   msg->showMsg(appName,
                tr("NoteBook") + ": " + QString::number(countNoteBook) + "    " +
                    tr("Notes") + ": " + QString::number(totalNotes) + "\n\n" +
@@ -2345,7 +2345,7 @@ void NotesList::on_actionAdd_Note_triggered() {
   int notebookIndex = getNoteBookCurrentIndex();
 
   if (notebookIndex < 0) {
-    ShowMessage *msg = new ShowMessage(this);
+    ShowMessage* msg = new ShowMessage(this);
     msg->showMsg(
         "Knot",
         tr("Please create a new notebook first, and then create new notes."),
@@ -2357,7 +2357,7 @@ void NotesList::on_actionAdd_Note_triggered() {
 
   on_btnNewNote_clicked();
 
-  QTreeWidgetItem *childItem = tw->currentItem();
+  QTreeWidgetItem* childItem = tw->currentItem();
   QString text3 = childItem->text(1);
   m_Method->addItemToQW(mui->qwNoteList, "", "", "", text3, 0);
 
@@ -2470,18 +2470,18 @@ void NotesList::on_actionExport_Note_triggered() {
   on_btnExport_clicked();
 }
 
-void NotesList::init_NotesListMenu(QMenu *mainMenu) {
-  QAction *actNew = new QAction(tr("New Note"));
-  QAction *actDel = new QAction(tr("Del Note"));
-  QAction *actRename = new QAction(tr("Rename Note"));
-  QAction *actMoveUp = new QAction(tr("Move Up"));
-  QAction *actMoveDown = new QAction(tr("Move Down"));
-  QAction *actImport = new QAction(tr("Import"));
-  QAction *actExport = new QAction(tr("Export"));
-  QAction *actShare = new QAction(tr("Share"));
-  QAction *actCopyLink = new QAction(tr("Copy Note Link"));
-  QAction *actRelationshipGraph = new QAction(tr("Relationship Graph"));
-  QAction *actModificationHistory = new QAction(tr("Modification History"));
+void NotesList::init_NotesListMenu(QMenu* mainMenu) {
+  QAction* actNew = new QAction(tr("New Note"));
+  QAction* actDel = new QAction(tr("Del Note"));
+  QAction* actRename = new QAction(tr("Rename Note"));
+  QAction* actMoveUp = new QAction(tr("Move Up"));
+  QAction* actMoveDown = new QAction(tr("Move Down"));
+  QAction* actImport = new QAction(tr("Import"));
+  QAction* actExport = new QAction(tr("Export"));
+  QAction* actShare = new QAction(tr("Share"));
+  QAction* actCopyLink = new QAction(tr("Copy Note Link"));
+  QAction* actRelationshipGraph = new QAction(tr("Relationship Graph"));
+  QAction* actModificationHistory = new QAction(tr("Modification History"));
 
   connect(actNew, &QAction::triggered, this,
           &NotesList::on_actionAdd_Note_triggered);
@@ -2544,7 +2544,7 @@ void NotesList::on_actionModificationHistory() {
 
   // 按修改时间排序（最新的在前面）
   std::sort(allDiffs.begin(), allDiffs.end(),
-            [](const QJsonObject &a, const QJsonObject &b) {
+            [](const QJsonObject& a, const QJsonObject& b) {
               return a["modifyTime"].toString() > b["modifyTime"].toString();
             });
 
@@ -2556,7 +2556,7 @@ void NotesList::on_actionModificationHistory() {
   }
 
   // 获取 QML 根对象（即 NoteVersionList.qml 中的 Rectangle）
-  QQuickItem *rootItem = mui->qwNoteVersion->rootObject();
+  QQuickItem* rootItem = mui->qwNoteVersion->rootObject();
   if (!rootItem) {
     qWarning() << "获取 QML 根对象失败";
     return;
@@ -2566,7 +2566,7 @@ void NotesList::on_actionModificationHistory() {
   mui->frameDiff->show();
 
   // 获取 QML 中的 ListModel（id: noteVersionModel）
-  QObject *versionModel = rootItem->findChild<QObject *>("noteVersionModel");
+  QObject* versionModel = rootItem->findChild<QObject*>("noteVersionModel");
   if (!versionModel) {
     qWarning() << "获取 noteVersionModel 失败";
     return;
@@ -2580,7 +2580,7 @@ void NotesList::on_actionModificationHistory() {
   noteDiffPatch.clear();
 
   // 遍历展示（例如在QListView中显示版本列表）
-  foreach (const QJsonObject &diff, allDiffs) {
+  foreach (const QJsonObject& diff, allDiffs) {
     QString version = diff["version"].toString();  // 版本（笔记修改时间）
     QString time = diff["modifyTime"].toString();  // 修改时间
     QString html = diff["htmlDiff"].toString();    // 可视化内容
@@ -2607,7 +2607,7 @@ void NotesList::getNoteDiffHtml() {
   setNoteDiffHtmlToQML(html);
 }
 
-void NotesList::setNoteDiffHtmlToQML(const QString &html) {
+void NotesList::setNoteDiffHtmlToQML(const QString& html) {
   if (mui->qwNoteDiff->source().isEmpty()) {
     mui->qwNoteDiff->rootContext()->setContextProperty("m_NotesList",
                                                        m_NotesList);
@@ -2616,7 +2616,7 @@ void NotesList::setNoteDiffHtmlToQML(const QString &html) {
     mui->qwNoteDiff->setResizeMode(
         QQuickWidget::SizeRootObjectToView);  // 自适应大小
   }
-  QQuickItem *rootItem = mui->qwNoteDiff->rootObject();
+  QQuickItem* rootItem = mui->qwNoteDiff->rootObject();
   if (!rootItem) {
     qWarning() << "获取 QML 根对象失败，无法更新 HTML 内容";
     return;
@@ -2627,7 +2627,7 @@ void NotesList::setNoteDiffHtmlToQML(const QString &html) {
 }
 
 int NotesList::getSelectedVersionIndex() {
-  QQuickItem *rootItem = mui->qwNoteVersion->rootObject();
+  QQuickItem* rootItem = mui->qwNoteVersion->rootObject();
   if (!rootItem) {
     qWarning() << "获取 QML 根对象失败，无法读取选中索引";
     return -1;
@@ -2670,9 +2670,9 @@ void NotesList::on_actionCopyNoteLink() {
   QString file = noteModel->getText3(index);
   QString name = noteModel->getText0(index);
   QString strlink = "[" + name + "](" + file + ")";
-  QClipboard *clipboard = QApplication::clipboard();
+  QClipboard* clipboard = QApplication::clipboard();
   clipboard->setText(strlink);
-  ShowMessage *msg = new ShowMessage(this);
+  ShowMessage* msg = new ShowMessage(this);
   msg->showMsg(appName, strlink, 1);
 }
 
@@ -2693,7 +2693,7 @@ void NotesList::setNoteLabel() {
 }
 
 void NotesList::on_btnMoveTo_clicked() {
-  QTreeWidgetItem *item = tw->currentItem();
+  QTreeWidgetItem* item = tw->currentItem();
   if (item == NULL) return;
 
   int count = item->childCount();
@@ -2710,8 +2710,8 @@ void NotesList::on_btnMoveTo_clicked() {
   }
 }
 
-bool NotesList::moveItem(QTreeWidget *twMain) {
-  QTreeWidgetItem *item = twMain->currentItem();
+bool NotesList::moveItem(QTreeWidget* twMain) {
+  QTreeWidgetItem* item = twMain->currentItem();
   if (item == NULL) return false;
 
   m_MoveTo = new MoveTo(this);
@@ -2720,7 +2720,7 @@ bool NotesList::moveItem(QTreeWidget *twMain) {
 
   // NoteBook
   if (item->text(1).isEmpty()) {
-    QTreeWidgetItem *new_item = item;
+    QTreeWidgetItem* new_item = item;
 
     if (m_MoveTo->strCurrentItem == tr("Main Root")) {
       if (item->parent() == NULL) return false;
@@ -2747,7 +2747,7 @@ bool NotesList::moveItem(QTreeWidget *twMain) {
   if (!item->text(1).isEmpty()) {
     if (m_MoveTo->strCurrentItem == tr("Main Root")) return false;
 
-    QTreeWidgetItem *new_item = item;
+    QTreeWidgetItem* new_item = item;
     item->parent()->removeChild(item);
     m_MoveTo->currentItem->addChild(new_item);
     tw->setCurrentItem(new_item);
@@ -2760,7 +2760,7 @@ void NotesList::loadAllRecycle() {
   m_Method->clearAllBakList(mui->qwNoteRecycle);
   int childCount = twrb->topLevelItem(0)->childCount();
   for (int i = 0; i < childCount; i++) {
-    QTreeWidgetItem *childItem = twrb->topLevelItem(0)->child(i);
+    QTreeWidgetItem* childItem = twrb->topLevelItem(0)->child(i);
     QString text0 = childItem->text(0);
     QString text3 = iniDir + childItem->text(1);
 
@@ -2769,9 +2769,9 @@ void NotesList::loadAllRecycle() {
 }
 
 QVariant NotesList::addQmlTreeTopItem(QString strItem) {
-  QQuickItem *root = mui->qwNotesTree->rootObject();
+  QQuickItem* root = mui->qwNotesTree->rootObject();
   QVariant item;
-  QMetaObject::invokeMethod((QObject *)root, "addTopItem",
+  QMetaObject::invokeMethod((QObject*)root, "addTopItem",
                             Q_RETURN_ARG(QVariant, item),
                             Q_ARG(QVariant, strItem));
   return item;
@@ -2780,18 +2780,18 @@ QVariant NotesList::addQmlTreeTopItem(QString strItem) {
 QVariant NotesList::addQmlTreeChildItem(QVariant parentItem,
                                         QString strChildItem,
                                         QString iconFile) {
-  QQuickItem *root = mui->qwNotesTree->rootObject();
+  QQuickItem* root = mui->qwNotesTree->rootObject();
   QVariant item;
   QMetaObject::invokeMethod(
-      (QObject *)root, "addChildItem", Q_RETURN_ARG(QVariant, item),
+      (QObject*)root, "addChildItem", Q_RETURN_ARG(QVariant, item),
       Q_ARG(QVariant, parentItem), Q_ARG(QVariant, strChildItem),
       Q_ARG(QVariant, iconFile));
   return item;
 }
 
 void NotesList::clearQmlTree() {
-  QQuickItem *root = mui->qwNotesTree->rootObject();
-  QMetaObject::invokeMethod((QObject *)root, "clearAll");
+  QQuickItem* root = mui->qwNotesTree->rootObject();
+  QMetaObject::invokeMethod((QObject*)root, "clearAll");
 }
 
 void NotesList::initQmlTree() {
@@ -2800,12 +2800,12 @@ void NotesList::initQmlTree() {
   QString strItem, strChildItem;
   int topcount = tw->topLevelItemCount();
   for (int i = 0; i < topcount; i++) {
-    QTreeWidgetItem *topItem = tw->topLevelItem(i);
+    QTreeWidgetItem* topItem = tw->topLevelItem(i);
     strItem = topItem->text(0);
     auto parentItem = addQmlTreeTopItem(strItem);
     int childcount = topItem->childCount();
     for (int j = 0; j < childcount; j++) {
-      QTreeWidgetItem *childItem = topItem->child(j);
+      QTreeWidgetItem* childItem = topItem->child(j);
       strChildItem = childItem->text(0);
       if (childItem->text(1).isEmpty()) {
         auto parentItem2 =
@@ -2822,13 +2822,13 @@ void NotesList::initQmlTree() {
   }
 }
 
-void NotesList::readyNotesData(QTreeWidgetItem *topItem) {
+void NotesList::readyNotesData(QTreeWidgetItem* topItem) {
   // 主线程预收集UI数据（按值捕获到后台线程，安全）
   QVector<QPair<QString, QString>> uiDataList;
-  QVector<QTreeWidgetItem *> childItems;
+  QVector<QTreeWidgetItem*> childItems;
   int child_count = topItem->childCount();
   for (int i = 0; i < child_count; ++i) {
-    QTreeWidgetItem *child = topItem->child(i);
+    QTreeWidgetItem* child = topItem->child(i);
     uiDataList.append({child->text(0), child->text(1)});
     childItems.append(child);
   }
@@ -2849,7 +2849,7 @@ void NotesList::readyNotesData(QTreeWidgetItem *topItem) {
     rawResults.reserve(child_count);
 
     for (int i = 0; i < child_count; ++i) {
-      const auto &uiData = uiDataList[i];
+      const auto& uiData = uiDataList[i];
       QString text0 = uiData.first;
       QString text3 = uiData.second;
 
@@ -2869,7 +2869,7 @@ void NotesList::readyNotesData(QTreeWidgetItem *topItem) {
   });
 
   // 主线程接收后台返回的结果
-  QFutureWatcher<QVector<RawResult>> *watcher =
+  QFutureWatcher<QVector<RawResult>>* watcher =
       new QFutureWatcher<QVector<RawResult>>(this);
   connect(watcher, &QFutureWatcher<QVector<RawResult>>::finished, this, [=]() {
     qDebug() << "主线程开始处理结果";
@@ -2883,7 +2883,7 @@ void NotesList::readyNotesData(QTreeWidgetItem *topItem) {
 
     // 迭代器循环
     for (auto it = rawResults.constBegin(); it != rawResults.constEnd(); ++it) {
-      const RawResult &result = *it;
+      const RawResult& result = *it;
       NoteItem item;
       item.text0 = result.text0;
       item.text1 = result.text1;
@@ -2943,7 +2943,7 @@ void NotesList::clickNoteBook() {
   QString text2 = m_Method->getText2(mui->qwNoteBook, index);
   if (text2.isEmpty()) {
     int index_top = text1.toInt();
-    QTreeWidgetItem *topItem = tw->topLevelItem(index_top);
+    QTreeWidgetItem* topItem = tw->topLevelItem(index_top);
 
     readyNotesData(topItem);
   }
@@ -2978,8 +2978,8 @@ void NotesList::clickNoteList() {
   QString noteName = m_Method->getText0(mui->qwNoteList, index);
   noteTitle = noteName;
 
-  QTreeWidgetItem *itemTop = tw->topLevelItem(indexTop);
-  QTreeWidgetItem *item = itemTop->child(index);
+  QTreeWidgetItem* itemTop = tw->topLevelItem(indexTop);
+  QTreeWidgetItem* item = itemTop->child(index);
   tw->setCurrentItem(item);
 
   int indexNoteBook = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
@@ -3007,7 +3007,7 @@ void NotesList::saveNotesListIndex() {
   QJsonObject root;
   QJsonArray array;
 
-  for (const QString &item : std::as_const(mIndexList)) {
+  for (const QString& item : std::as_const(mIndexList)) {
     array.append(item);
   }
 
@@ -3043,7 +3043,7 @@ void NotesList::loadNotesListIndex() {
   QJsonArray array = root["list"].toArray();
 
   mIndexList.clear();
-  for (const QJsonValue &value : std::as_const(array)) {
+  for (const QJsonValue& value : std::as_const(array)) {
     if (value.isString()) {
       mIndexList.append(value.toString());
     }
@@ -3091,7 +3091,7 @@ void NotesList::genRecentOpenMenu() {
       QString txt = QString::number(i + 1) + " . " + name;
       QString menuTitle =
           fm.elidedText(txt, Qt::ElideRight, mw_one->width() - 30);
-      QAction *act = new QAction(menuTitle, menuRecentOpen);
+      QAction* act = new QAction(menuTitle, menuRecentOpen);
       menuRecentOpen->addAction(act);
 
       connect(act, &QAction::triggered, this, [=]() {
@@ -3127,10 +3127,10 @@ void NotesList::updateNoteIndexManager(QString mdFile, int notebookIndex,
 void NotesList::updateAllNoteIndexManager() {
   int topCount = tw->topLevelItemCount();
   for (int i = 0; i < topCount; i++) {
-    QTreeWidgetItem *topItem = tw->topLevelItem(i);
+    QTreeWidgetItem* topItem = tw->topLevelItem(i);
     int childCount = topItem->childCount();
     for (int j = 0; j < childCount; j++) {
-      QTreeWidgetItem *childItem = topItem->child(j);
+      QTreeWidgetItem* childItem = topItem->child(j);
       QString mdFile = iniDir + childItem->text(1);
       QString title = childItem->text(0);
       m_Notes->m_NoteIndexManager->setNoteTitle(mdFile, title);
@@ -3201,7 +3201,7 @@ void NotesList::genCursorText() {
 }
 
 // 安全的文件写入函数
-bool NotesList::safeWriteFile(const QString &filePath, const QString &content) {
+bool NotesList::safeWriteFile(const QString& filePath, const QString& content) {
   QTemporaryFile tempFile;
   if (tempFile.open()) {
     QTextStream stream(&tempFile);
@@ -3214,7 +3214,7 @@ bool NotesList::safeWriteFile(const QString &filePath, const QString &content) {
   return false;
 }
 
-QStringList NotesList::extractLocalImagesFromMarkdown(const QString &filePath) {
+QStringList NotesList::extractLocalImagesFromMarkdown(const QString& filePath) {
   QStringList images;
   QFile file(filePath);
 
@@ -3253,7 +3253,7 @@ QStringList NotesList::extractLocalImagesFromMarkdown(const QString &filePath) {
   return images;
 }
 
-void NotesList::onSearchTextChanged(const QString &text) {
+void NotesList::onSearchTextChanged(const QString& text) {
   QTimer::singleShot(300, this, [this, text]() {  // 防抖处理
     auto results =
         m_dbManager.searchDocuments(text, m_Notes->m_NoteIndexManager);
@@ -3266,9 +3266,9 @@ void NotesList::onSearchTextChanged(const QString &text) {
 void NotesList::openSearch() { return; }
 
 QString NotesList::getSearchResultQmlFile() {
-  QQuickItem *root = mui->qwNotesSearchResult->rootObject();
+  QQuickItem* root = mui->qwNotesSearchResult->rootObject();
   QVariant item;
-  QMetaObject::invokeMethod((QObject *)root, "getQmlCurrentMDFile",
+  QMetaObject::invokeMethod((QObject*)root, "getQmlCurrentMDFile",
                             Q_RETURN_ARG(QVariant, item));
   return item.toString();
 }
@@ -3321,7 +3321,7 @@ void NotesList::initNoteGraphView() {
   // 这可以避免 QML 在引擎初始化早期阶段因访问未定义属性而报错
   // 使用 nullptr 作为初始值
   mui->qwNoteGraphView->rootContext()->setContextProperty(
-      "graphController", QVariant::fromValue<QObject *>(nullptr));
+      "graphController", QVariant::fromValue<QObject*>(nullptr));
   mui->qwNoteGraphView->rootContext()->setContextProperty("isDark", isDark);
 
   // 3. 加载 QML 源文件（这一步会触发 QML 引擎初始化）
@@ -3330,7 +3330,7 @@ void NotesList::initNoteGraphView() {
       QUrl(QStringLiteral("qrc:/src/qmlsrc/NoteGraphView.qml")));
 
   // 4. 获取 QML 引擎（此时引擎已初始化）
-  QQmlEngine *engine = mui->qwNoteGraphView->engine();
+  QQmlEngine* engine = mui->qwNoteGraphView->engine();
   if (!engine) {
     qWarning() << "无法获取 QML 引擎";
     // 即使引擎获取失败，我们也已经设置了占位符，避免 QML 报错
@@ -3338,9 +3338,9 @@ void NotesList::initNoteGraphView() {
   }
 
   // 5. 尝试获取 NoteGraphController 单例（Qt 6 正确写法）
-  NoteGraphController *controller =
-      engine->singletonInstance<NoteGraphController *>("NoteGraph",
-                                                       "NoteGraphController");
+  NoteGraphController* controller =
+      engine->singletonInstance<NoteGraphController*>("NoteGraph",
+                                                      "NoteGraphController");
   if (!controller) {
     qWarning() << "无法从引擎获取 NoteGraphController 单例";
     // 注意：这里不再 return，而是继续将 nullptr 设置给属性
@@ -3368,7 +3368,7 @@ void NotesList::initNoteGraphView() {
 }
 
 // 节点双击事件处理（打开对应的笔记）
-void NotesList::onNoteNodeDoubleClicked(const QString &filePath) {
+void NotesList::onNoteNodeDoubleClicked(const QString& filePath) {
   qDebug() << "打开笔记：" << filePath;
   QFileInfo fi(filePath);
   if (fi.exists()) {
@@ -3390,11 +3390,11 @@ void NotesList::moveToFirst() {
   int countNote = m_Method->getCountFromQW(mui->qwNoteList);
   if (countNote == 1) return;
 
-  QTreeWidgetItem *item = tw->currentItem();
+  QTreeWidgetItem* item = tw->currentItem();
   if (item == NULL) return;
 
   if (item->parent() != NULL) {
-    QTreeWidgetItem *parentItem = item->parent();
+    QTreeWidgetItem* parentItem = item->parent();
     parentItem->removeChild(item);
     parentItem->insertChild(0, item);
     tw->setCurrentItem(item);
@@ -3412,7 +3412,7 @@ void NotesList::qmlOpenEdit() { mui->btnEditNote->click(); }
 
 QStringList NotesList::getRecycleNoteFiles() {
   QStringList cycleFiles;
-  QTreeWidgetItem *cycleTopItem = twrb->topLevelItem(0);
+  QTreeWidgetItem* cycleTopItem = twrb->topLevelItem(0);
   int count = cycleTopItem->childCount();
   for (int i = 0; i < count; i++) {
     QString filePath = iniDir + cycleTopItem->child(i)->text(1);
@@ -3458,6 +3458,7 @@ void NotesList::newtextToOldtextFromDiffStr() {
   // 处理最终结果
   QString html = markdownToHtmlWithMath(currentText);
   html = html.replace("images/", "file:///" + iniDir + "memo/images/");
+
   if (allSuccess) {
     qDebug() << "成功反推到版本" << targetIndex;
     setNoteDiffHtmlToQML(html);
