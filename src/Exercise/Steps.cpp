@@ -109,6 +109,14 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mui->qwSpeed->setFixedHeight(90);
   mui->qwSpeed->hide();
 
+  QFontMetrics fm(this->font());
+  int textHeight = fm.height();
+  int iconSize = static_cast<int>(textHeight * 0.9);
+  // 确保图标大小是合理的 (不小于 20px)
+  iconSize = qMax(iconSize, 20);
+  mui->btnSelGpsDate->setIconSize(QSize(iconSize, iconSize));
+  mui->btnSportsChart->setIconSize(QSize(iconSize, iconSize));
+
   timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, &Steps::updateGetGps);
 
@@ -723,6 +731,7 @@ void Steps::startRecordMotion() {
   isInitTime = false;
   m_distance = 0;
   m_speed = 0;
+  mw_one->m_Reader->keepScreenOn();
   emit distanceChanged(m_distance);
   emit timeChanged();
 
@@ -966,6 +975,7 @@ void Steps::stopRecordMotion() {
 
   QTimer::singleShot(2000, mw_one, [this]() {
     timer->stop();
+    mw_one->m_Reader->cancelKeepScreenOn();
 
     int nYear = QDate::currentDate().year();
     int nMonth = QDate::currentDate().month();
@@ -2580,78 +2590,6 @@ QVariantList Steps::getSpeedData(const QString& jsonFile) {
 
   return speedList;
 }
-
-/*void Steps::showSportsChart() {
-  if (statsDialog != nullptr) delete statsDialog;
-  statsDialog = new QDialog(this);
-  statsDialog->setWindowTitle(tr("Sports Statistics"));
-
-  if (this->parentWidget()) {
-    statsDialog->resize(this->parentWidget()->size());
-  } else {
-    statsDialog->resize(400, 300);
-  }
-
-  QVBoxLayout* mainLayout = new QVBoxLayout(statsDialog);
-  mainLayout->setContentsMargins(20, 20, 20, 20);
-  mainLayout->setSpacing(15);
-
-  QLabel* monthlyLabel = new QLabel(m_monthlyStatsText, statsDialog);
-  QFont labelFont = monthlyLabel->font();
-  // labelFont.setPointSize(16);
-  labelFont.setBold(true);
-  monthlyLabel->setFont(labelFont);
-  monthlyLabel->setAlignment(Qt::AlignLeft);
-
-  monthlyLabel->setWordWrap(true);
-
-  monthlyLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-
-  QLabel* yearlyLabel = new QLabel(m_yearlyStatsText, statsDialog);
-  yearlyLabel->setFont(labelFont);
-  yearlyLabel->setAlignment(Qt::AlignLeft);
-
-  yearlyLabel->setWordWrap(true);
-
-  yearlyLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-
-  QPushButton* closeButton = new QPushButton(tr("Close"), statsDialog);
-  closeButton->setFont(labelFont);
-  closeButton->setStyleSheet(R"(
-        QPushButton {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        QPushButton:hover {
-            background-color: #45a049;
-        }
-        QPushButton:pressed {
-            background-color: #3e8e41;
-        }
-    )");
-
-  connect(closeButton, &QPushButton::clicked, this,
-          [=]() { statsDialog->close(); });
-
-  connect(statsDialog, &QDialog::finished, this, [this](int result) {
-    Q_UNUSED(result);
-    delete this->statsDialog;
-    this->statsDialog = nullptr;
-  });
-
-  mainLayout->addWidget(monthlyLabel);
-  mainLayout->addWidget(yearlyLabel);
-
-  mainLayout->addStretch(1);
-
-  mainLayout->addWidget(closeButton, 0, Qt::AlignCenter);
-
-  statsDialog->setLayout(mainLayout);
-  statsDialog->exec();
-}*/
 
 void Steps::showSportsChart() {
   // 1. 关闭已有对话框

@@ -3684,7 +3684,7 @@ QSlider::handle:horizontal:disabled {
           <enum>QTabWidget::TabPosition::South</enum>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="tab_Steps">
           <attribute name="title">
@@ -4488,6 +4488,13 @@ QRadioButton:disabled {
                <property name="text">
                 <string>Chart</string>
                </property>
+               <property name="icon">
+                <iconset resource="../res.qrc">
+                 <normaloff>:/res/chart_l.svg</normaloff>:/res/chart_l.svg</iconset>
+               </property>
+               <property name="toolButtonStyle">
+                <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
+               </property>
               </widget>
              </item>
              <item>
@@ -4500,6 +4507,13 @@ QRadioButton:disabled {
                </property>
                <property name="text">
                 <string>Sel Date</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../res.qrc">
+                 <normaloff>:/res/date_l.svg</normaloff>:/res/date_l.svg</iconset>
+               </property>
+               <property name="toolButtonStyle">
+                <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
                </property>
               </widget>
              </item>

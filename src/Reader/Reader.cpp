@@ -3194,7 +3194,7 @@ void Reader::closeReader() {
 
   closeViewBookNote();
 
-  cancelKeepScreenOn();
+  if (!m_Steps->timer->isActive()) cancelKeepScreenOn();
 
   mui->frameMain->show();
   mui->frameReader->hide();
@@ -3231,7 +3231,7 @@ void Reader::openReader() {
 
   startDateTime = QDateTime::currentDateTime();
   totalHours = readTotalHours();
-  keepScreenOn();
+  if (!m_Steps->timer->isActive()) keepScreenOn();
 }
 
 double Reader::readTotalHours() {
