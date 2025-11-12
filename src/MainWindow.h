@@ -365,6 +365,8 @@ class MainWindow : public QMainWindow {
  public slots:
   void on_btnAutoStop_clicked();
 
+  void on_btnMove_clicked();
+
   void on_btnSelText_clicked();
 
   void on_hSlider_sliderMoved(int position);
@@ -755,8 +757,6 @@ class MainWindow : public QMainWindow {
   void on_sliderPlayAudio_sliderPressed();
 
   void on_sliderPlayAudio_sliderReleased();
-
-  void on_btnMove_clicked();
 
   void on_btnGPS_clicked();
 

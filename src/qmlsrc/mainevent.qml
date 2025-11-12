@@ -221,6 +221,30 @@ Rectangle {
                 return item0H + item1H + item2H + item3H
             }
 
+            MouseArea {
+
+                anchors.fill: parent
+
+                onClicked: function (mouse) {
+                    if (actionButtons.visible && mouse.x > actionButtons.x
+                            && mouse.x < actionButtons.x + actionButtons.width
+                            && mouse.y > actionButtons.y
+                            && mouse.y < actionButtons.y + actionButtons.height) {
+
+                        mouse.accepted = false // 放行事件给按钮
+                        console.log("按钮被点击...")
+                    } else {
+                        view.currentIndex = index //实现item切换
+
+                        m_Method.clickMainEventData()
+                    }
+                }
+
+                onDoubleClicked: {
+                    m_Method.reeditMainEventData()
+                }
+            }
+
             RowLayout {
 
                 id: contentLayout
@@ -228,6 +252,8 @@ Rectangle {
                 width: parent.width
                 spacing: 2
                 Layout.fillWidth: true
+
+
 
                 Rectangle {
                     height: parent.height - 2
@@ -448,34 +474,53 @@ Rectangle {
                             visible: item3.text.length ? true : false
                         }
                     }
+
+                    // 水平按钮
+                    Row {
+                        id: actionButtons
+                        width: parent.width
+                        z: 10 // 提升层级，高于其他元素
+                        spacing: 15 // 按钮间距
+                        padding: 5 // 内边距
+                        visible: view.currentIndex === index // 选中时显示
+
+
+                        ToolButton {
+                            icon.name: "edit"
+                            icon.source: "qrc:/res/edit.svg"
+                            icon.width: 20
+                            icon.height: 20
+
+                            onClicked: {
+                                m_Method.reeditMainEventData()
+                                console.log("编辑数据: " + index)
+                            }
+                            // 适配深色模式
+                            background: Rectangle {
+                                color: "transparent"
+                            }
+                        }
+
+
+                        ToolButton {
+                            icon.name: "move"
+                            icon.source: "qrc:/res/move.svg"
+                            icon.width: 20
+                            icon.height: 20
+
+                            onClicked: {
+                                mw_one.on_btnMove_clicked()
+                                console.log("移动: " + index)
+                            }
+                            background: Rectangle {
+                                color: "transparent"
+                            }
+                        }
+                    }
                 }
             }
 
-            MouseArea {
 
-                anchors.fill: parent
-                onPressed: {
-
-                }
-                onReleased: {
-
-                }
-
-                onClicked: {
-
-                    view.currentIndex = index //实现item切换
-
-                    m_Method.clickMainEventData()
-                }
-
-                onPressAndHold: {
-
-                }
-
-                onDoubleClicked: {
-                    m_Method.reeditMainEventData()
-                }
-            }
 
             PropertyAnimation on x {
                 easing.type: Easing.Linear

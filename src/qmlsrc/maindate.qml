@@ -174,7 +174,7 @@ Rectangle {
             id: listItem
             width: ListView.view.width
 
-            height: Math.max(listCol.childrenRect.height, 40)
+            height: listCol.implicitHeight
 
             //选中颜色设置 #94caf7
             color: ListView.isCurrentItem ? "lightblue" : getColor()
@@ -183,6 +183,26 @@ Rectangle {
             border.color: "lightgray"
 
             radius: 6
+
+            MouseArea {
+                anchors.fill: parent
+
+                onClicked: function (mouse) {
+                    if (actionButtons.visible && mouse.x > actionButtons.x
+                            && mouse.x < actionButtons.x + actionButtons.width
+                            && mouse.y > actionButtons.y
+                            && mouse.y < actionButtons.y + actionButtons.height) {
+
+                        mouse.accepted = false // 放行事件给按钮
+                        console.log("按钮被点击...")
+                    } else {
+                        view.currentIndex = index
+
+                        m_Method.clickMainDate()
+                        m_Method.clickMainDateData()
+                    }
+                }
+            }
 
             ColumnLayout {
                 id: listCol
@@ -354,17 +374,46 @@ Rectangle {
 
                     visible: text.length > 0
                 }
-            }
 
-            MouseArea {
-                anchors.fill: parent
+                // 水平按钮
+                Row {
+                    id: actionButtons
+                    width: parent.width
+                    z: 10 // 提升层级，高于其他元素
+                    spacing: 15 // 按钮间距
+                    padding: 5 // 内边距
+                    visible: view.currentIndex === index // 选中时显示
 
-                onClicked: {
+                    ToolButton {
+                        icon.name: "report"
+                        icon.source: "qrc:/res/report.svg"
+                        icon.width: 20
+                        icon.height: 20
 
-                    view.currentIndex = index
+                        onClicked: {
+                            mw_one.on_btnReport_clicked()
+                            console.log("报表: " + index)
+                        }
+                        // 适配深色模式
+                        background: Rectangle {
+                            color: "transparent"
+                        }
+                    }
 
-                    m_Method.clickMainDate()
-                    m_Method.clickMainDateData()
+                    ToolButton {
+                        icon.name: "chart"
+                        icon.source: "qrc:/res/chart.svg"
+                        icon.width: 20
+                        icon.height: 20
+
+                        onClicked: {
+                            mw_one.on_btnChart_clicked()
+                            console.log("图表: " + index)
+                        }
+                        background: Rectangle {
+                            color: "transparent"
+                        }
+                    }
                 }
             }
 

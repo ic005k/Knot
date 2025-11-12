@@ -4,10 +4,10 @@
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
-MainHelper::MainHelper(QWidget *parent) : QDialog{parent} {}
+MainHelper::MainHelper(QWidget* parent) : QDialog{parent} {}
 
-bool MainHelper::mainEventFilter(QObject *watch, QEvent *evn) {
-  QMouseEvent *event = static_cast<QMouseEvent *>(evn);  // 将之转换为鼠标事件
+bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
+  QMouseEvent* event = static_cast<QMouseEvent*>(evn);  // 将之转换为鼠标事件
 
   if (evn->type() == QEvent::ToolTip) {
     QToolTip::hideText();
@@ -50,7 +50,7 @@ bool MainHelper::mainEventFilter(QObject *watch, QEvent *evn) {
   }
 
   if (evn->type() == QEvent::KeyPress) {
-    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
 
     if (watch == mui->editSearchText && keyEvent->key() == Qt::Key_Return) {
       mw_one->on_btnStartSearch_clicked();
@@ -82,11 +82,8 @@ void MainHelper::clickBtnChart() {
     mui->rbFreq->show();
     mui->rbSteps->show();
     mui->f_cw->show();
+    mui->btnChart->show();
 
-    mui->btnReport->hide();
-    mui->btnFind->hide();
-    mui->btnModifyRecord->hide();
-    mui->btnMove->hide();
   } else {
     mui->f_charts->setMaximumHeight(0);
     mui->f_charts->hide();
@@ -95,13 +92,10 @@ void MainHelper::clickBtnChart() {
     mui->rbSteps->hide();
     mui->btnChartDay->hide();
     mui->btnChartMonth->hide();
+    mui->f_cw->hide();
 
     mui->qwMainDate->show();
     mui->qwMainEvent->show();
-    mui->btnReport->show();
-    mui->btnFind->show();
-    mui->btnModifyRecord->show();
-    mui->btnMove->show();
   }
 }
 
@@ -167,7 +161,7 @@ void MainHelper::clickBtnRestoreTab() {
   }
 
   QString tab_name = m_Method->getText0(mui->qwTabRecycle, index);
-  QTreeWidget *tw = init_TreeWidget(twName);
+  QTreeWidget* tw = init_TreeWidget(twName);
   mui->tabWidget->addTab(tw, tab_name);
 
   mw_one->addItem(tab_name, "", "", "", 0);
@@ -197,8 +191,8 @@ void MainHelper::clickBtnRestoreTab() {
   mw_one->strLatestModify = tr("Restore Tab") + "(" + tab_name + ")";
 }
 
-QTreeWidget *MainHelper::init_TreeWidget(QString name) {
-  QTreeWidget *tw = new QTreeWidget(mw_one);
+QTreeWidget* MainHelper::init_TreeWidget(QString name) {
+  QTreeWidget* tw = new QTreeWidget(mw_one);
   tw->setFixedHeight(0);
   tw->setObjectName(name);
 
@@ -232,7 +226,7 @@ QTreeWidget *MainHelper::init_TreeWidget(QString name) {
 
   connect(tw->verticalScrollBar(), &QScrollBar::valueChanged, [=]() {});
 
-  QScrollBar *SB = tw->verticalScrollBar();
+  QScrollBar* SB = tw->verticalScrollBar();
   SB->setStyleSheet(m_Method->vsbarStyleSmall);
   tw->setStyleSheet(mw_one->treeStyle);
   tw->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
@@ -240,27 +234,27 @@ QTreeWidget *MainHelper::init_TreeWidget(QString name) {
   return tw;
 }
 
-void MainHelper::init_Menu(QMenu *mainMenu) {
-  QAction *actAddTab = new QAction(tr("Add Tab"));
-  QAction *actDelTab = new QAction(tr("Del Tab"));
-  QAction *actRenameTab = new QAction(tr("Rename Tab"));
+void MainHelper::init_Menu(QMenu* mainMenu) {
+  QAction* actAddTab = new QAction(tr("Add Tab"));
+  QAction* actDelTab = new QAction(tr("Del Tab"));
+  QAction* actRenameTab = new QAction(tr("Rename Tab"));
 
-  QAction *actOpenKnotBakDir = new QAction(tr("Open KnotBak Dir"));
+  QAction* actOpenKnotBakDir = new QAction(tr("Open KnotBak Dir"));
 
-  QAction *actReport = new QAction(tr("Report"));
+  QAction* actReport = new QAction(tr("Report"));
   actReport->setVisible(false);
 
-  QAction *actExportData = new QAction(tr("Export Data"));
-  QAction *actImportData = new QAction(tr("Import Data"));
+  QAction* actExportData = new QAction(tr("Export Data"));
+  QAction* actImportData = new QAction(tr("Import Data"));
 
-  QAction *actPreferences = new QAction(tr("Preferences"));
+  QAction* actPreferences = new QAction(tr("Preferences"));
 
-  QAction *actAbout = new QAction(tr("About") + " (" + ver + ")");
-  QAction *actOneDrive = new QAction(tr("Cloud Backup and Restore Data"));
+  QAction* actAbout = new QAction(tr("About") + " (" + ver + ")");
+  QAction* actOneDrive = new QAction(tr("Cloud Backup and Restore Data"));
 
-  QAction *actBakFileList = new QAction(tr("Backup File List"));
-  QAction *actTabRecycle = new QAction(tr("Tab Recycle"));
-  QAction *actShareFile = new QAction(tr("Share File"));
+  QAction* actBakFileList = new QAction(tr("Backup File List"));
+  QAction* actTabRecycle = new QAction(tr("Tab Recycle"));
+  QAction* actShareFile = new QAction(tr("Share File"));
 
   connect(actAddTab, &QAction::triggered, mw_one,
           &MainWindow::on_actionAdd_Tab_triggered);
@@ -344,7 +338,7 @@ void MainHelper::openTabRecycle() {
   m_Method->clearAllBakList(mui->qwTabRecycle);
 
   // 使用QFutureWatcher监控后台任务完成
-  QFutureWatcher<QStringList> *watcher = new QFutureWatcher<QStringList>(this);
+  QFutureWatcher<QStringList>* watcher = new QFutureWatcher<QStringList>(this);
 
   // 后台执行文件处理
   QFuture<QStringList> future = QtConcurrent::run([=]() -> QStringList {
@@ -501,6 +495,7 @@ void MainHelper::initMainQW() {
   mui->qwMainDate->rootContext()->setContextProperty("maindateWidth",
                                                      mui->qwMainDate->width());
   mui->qwMainDate->rootContext()->setContextProperty("m_Method", m_Method);
+  mui->qwMainDate->rootContext()->setContextProperty("mw_one", mw_one);
   mui->qwMainDate->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/maindate.qml")));
 
@@ -510,6 +505,7 @@ void MainHelper::initMainQW() {
   mui->qwMainEvent->rootContext()->setContextProperty(
       "maineventWidth", mui->qwMainEvent->width());
   mui->qwMainEvent->rootContext()->setContextProperty("m_Method", m_Method);
+  mui->qwMainEvent->rootContext()->setContextProperty("mw_one", mw_one);
   mui->qwMainEvent->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/mainevent.qml")));
 
@@ -598,7 +594,7 @@ void MainHelper::init_UIWidget() {
 
   // init textedit toolbar
   textToolbar = new TextEditToolbar(mw_one);
-  EditEventFilter *editFilter = new EditEventFilter(textToolbar, mw_one);
+  EditEventFilter* editFilter = new EditEventFilter(textToolbar, mw_one);
   m_Method->setLineEditToolBar(mw_one, editFilter);
   m_Method->setTextEditToolBar(mw_one, editFilter);
 
@@ -616,6 +612,12 @@ void MainHelper::init_UIWidget() {
   mui->frameReport->hide();
   mui->frameSearch->hide();
   mui->frameBakList->hide();
+
+  mui->btnReport->hide();
+  mui->btnChart->hide();
+  mui->btnModifyRecord->hide();
+  mui->btnMove->hide();
+  mui->f_cw->hide();
 
   mui->frameViewCate->hide();
   mui->frameTabRecycle->hide();
@@ -772,8 +774,8 @@ void MainHelper::init_UIWidget() {
   mui->btnGPS->setStyleSheet(m_Steps->btnRoundStyle);
   mui->btnGPS->hide();
   mui->frame_btnGps->setFixedHeight(80);
-  QWidget *centralWidget = new QWidget(mw_one);
-  QVBoxLayout *layout = new QVBoxLayout(centralWidget);
+  QWidget* centralWidget = new QWidget(mw_one);
+  QVBoxLayout* layout = new QVBoxLayout(centralWidget);
 
   sliderButton = new SliderButton(centralWidget);
   sliderButton->setTipText(tr("Slide Right to Start or Stop."));
@@ -807,7 +809,7 @@ void MainHelper::startBackgroundTaskUpdateBakFileList() {
   });
 
   // 可选：使用 QFutureWatcher 监控进度
-  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(mw_one);
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(mw_one);
   connect(watcher, &QFutureWatcher<void>::finished, mw_one, [=]() {
     m_Method->clearAllBakList(mui->qwBakList);
     int bakCount = bakFileList.count();
@@ -957,7 +959,7 @@ void MainHelper::delBakFile() {
   QString bak_file = m_Method->getText3(mui->qwBakList, index);
 
   m_Method->m_widget = new QWidget(mw_one);
-  ShowMessage *m_ShowMsg = new ShowMessage(mw_one);
+  ShowMessage* m_ShowMsg = new ShowMessage(mw_one);
   if (!m_ShowMsg->showMsg("Knot",
                           tr("Whether to remove") + "  " + bak_file + " ? ", 2))
     return;
@@ -982,7 +984,7 @@ void MainHelper::delTabRecycleFile() {
   QString tab_file = m_Method->getText3(mui->qwTabRecycle, index);
 
   m_Method->m_widget = new QWidget(mw_one);
-  ShowMessage *m_ShowMsg = new ShowMessage(mw_one);
+  ShowMessage* m_ShowMsg = new ShowMessage(mw_one);
   if (!m_ShowMsg->showMsg("Knot",
                           tr("Whether to remove") + "  " + tab_file + " ? ", 2))
     return;
@@ -1017,7 +1019,7 @@ void MainHelper::importBakFileList() {
 
   if (!zipfile.isNull()) {
     m_Method->m_widget = new QWidget(mw_one);
-    ShowMessage *m_ShowMsg = new ShowMessage(mw_one);
+    ShowMessage* m_ShowMsg = new ShowMessage(mw_one);
     if (!m_ShowMsg->showMsg("Kont",
                             tr("Import this data?") + "\n" +
                                 mw_one->m_Reader->getUriRealPath(zipfile),
@@ -1201,7 +1203,7 @@ void MainHelper::init_Theme() {
   init_ButtonStyle();
 }
 
-void MainHelper::sort_childItem(QTreeWidgetItem *item) {
+void MainHelper::sort_childItem(QTreeWidgetItem* item) {
   QStringList keys, list, keyTime, keysNew;
   int childCount = item->parent()->childCount();
 
@@ -1220,7 +1222,7 @@ void MainHelper::sort_childItem(QTreeWidgetItem *item) {
   }
 
   std::sort(keyTime.begin(), keyTime.end(),
-            [](const QString &s1, const QString &s2) { return s1 < s2; });
+            [](const QString& s1, const QString& s2) { return s1 < s2; });
 
   for (int i = 0; i < keyTime.count(); i++) {
     QString time = keyTime.at(i);
@@ -1235,7 +1237,7 @@ void MainHelper::sort_childItem(QTreeWidgetItem *item) {
   }
 
   for (int i = 0; i < childCount; i++) {
-    QTreeWidgetItem *childItem = item->parent()->child(i);
+    QTreeWidgetItem* childItem = item->parent()->child(i);
     QString str = keysNew.at(i);
     list.clear();
     list = str.split("|===|");
@@ -1286,7 +1288,7 @@ void MainHelper::initChartMonth() {
   mw_one->m_scatterSeries->clear();
   bool isOne = true;
 
-  QBarSet *setY = new QBarSet("Y");
+  QBarSet* setY = new QBarSet("Y");
   QStringList categories;
 
   for (int i = 0; i < count; i++) {
@@ -1490,7 +1492,7 @@ void MainWindow::reloadMain() {
                                                      mui->qwMainDate->width());
   m_Method->clearAllBakList(mui->qwMainDate);
 
-  QTreeWidget *tw = get_tw(tabData->currentIndex());
+  QTreeWidget* tw = get_tw(tabData->currentIndex());
 
   int total = tw->topLevelItemCount();
 
@@ -1508,7 +1510,7 @@ void MainWindow::reloadMain() {
 
   QString text0, text1, text2, text3, topitem;
   for (int i = a; i < total; i++) {
-    QTreeWidgetItem *topItem = tw->topLevelItem(i);
+    QTreeWidgetItem* topItem = tw->topLevelItem(i);
 
     text0 = topItem->text(0) + "  " + topItem->text(3);
     text1 = topItem->text(1);
@@ -1567,10 +1569,10 @@ QStringList MainWindow::get_MonthList(QString strY, QString strM) {
   PointList.clear();
   doubleList.clear();
 
-  QTreeWidget *tw = (QTreeWidget *)tabData->currentWidget();
+  QTreeWidget* tw = (QTreeWidget*)tabData->currentWidget();
   for (int i = 0; i < tw->topLevelItemCount(); i++) {
     if (isBreak) break;
-    QTreeWidgetItem *topItem = tw->topLevelItem(i);
+    QTreeWidgetItem* topItem = tw->topLevelItem(i);
     QString str0 = topItem->text(0) + " " + topItem->text(3);
     QString y, m, d;
     y = get_Year(str0);
@@ -1755,7 +1757,7 @@ void MainWindow::init_ChartWidget() {
   m_scatterSeries2_1->attachAxis(axisY2);
 }
 
-void MainWindow::readData(QTreeWidget *tw) {
+void MainWindow::readData(QTreeWidget* tw) {
   tw->clear();
   QString name = tw->objectName();
 
@@ -1769,7 +1771,7 @@ void MainWindow::readData(QTreeWidget *tw) {
   }
 
   if (isFileExists) {
-    DataManager *dataMgr = new DataManager(iniDir, nullptr);
+    DataManager* dataMgr = new DataManager(iniDir, nullptr);
     dataMgr->loadData(tw);
     delete dataMgr;
     dataMgr = nullptr;
@@ -1807,7 +1809,7 @@ void MainWindow::readData(QTreeWidget *tw) {
 
         // 不显示子项为0的数据
         if (childCount > 0) {
-          QTreeWidgetItem *topItem = new QTreeWidgetItem;
+          QTreeWidgetItem* topItem = new QTreeWidgetItem;
           QString strD0 =
               Reg.value("/" + group + "/" + QString::number(i + 1) + "-topDate")
                   .toString();
@@ -1838,7 +1840,7 @@ void MainWindow::readData(QTreeWidget *tw) {
           // 移除异项（时间相同，但频次处于累加的异常情况）
           int lastTopIndex = tw->topLevelItemCount() - 1;
           if (lastTopIndex >= 0) {
-            QTreeWidgetItem *lastTopItem = tw->topLevelItem(lastTopIndex);
+            QTreeWidgetItem* lastTopItem = tw->topLevelItem(lastTopIndex);
             // 时间相同但频次或金额不同
             if ((lastTopItem->text(0) == topItem->text(0)) &&
                 (lastTopItem->text(2) != topItem->text(2) ||
@@ -1863,7 +1865,7 @@ void MainWindow::readData(QTreeWidget *tw) {
                 tw->takeTopLevelItem(x);
                 tw->insertTopLevelItem(x, topItem);
                 for (int j = 0; j < childCount; j++) {
-                  QTreeWidgetItem *item11 = new QTreeWidgetItem(topItem);
+                  QTreeWidgetItem* item11 = new QTreeWidgetItem(topItem);
                   item11->setText(
                       0, Reg.value("/" + group + "/" + QString::number(i + 1) +
                                    "-childTime" + QString::number(j))
@@ -1894,7 +1896,7 @@ void MainWindow::readData(QTreeWidget *tw) {
             myTopStrList.append(topStr);
 
             for (int j = 0; j < childCount; j++) {
-              QTreeWidgetItem *item11 = new QTreeWidgetItem(topItem);
+              QTreeWidgetItem* item11 = new QTreeWidgetItem(topItem);
               item11->setText(
                   0, Reg.value("/" + group + "/" + QString::number(i + 1) +
                                "-childTime" + QString::number(j))
@@ -1928,7 +1930,7 @@ void MainWindow::drawMonthChart() {
 }
 
 void MainWindow::drawDayChart() {
-  QTreeWidget *tw = (QTreeWidget *)tabData->currentWidget();
+  QTreeWidget* tw = (QTreeWidget*)tabData->currentWidget();
   if (loading) return;
   PointList.clear();
 
@@ -1939,12 +1941,12 @@ void MainWindow::drawDayChart() {
 
   if (topCount > 0) {
     if (!tw->currentIndex().isValid()) {
-      QTreeWidgetItem *topItem = tw->topLevelItem(topCount - 1);
+      QTreeWidgetItem* topItem = tw->topLevelItem(topCount - 1);
       tw->setCurrentItem(topItem);
     }
   }
 
-  QTreeWidgetItem *item = tw->currentItem();
+  QTreeWidgetItem* item = tw->currentItem();
   bool child;
   int childCount;
   if (item->parent() == NULL)
