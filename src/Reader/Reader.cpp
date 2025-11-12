@@ -1566,7 +1566,7 @@ void Reader::clearAllReaderRecords() {
   if (count == 0) return;
 
   m_Method->m_widget = new QWidget(mw_one);
-  ShowMessage* m_ShowMsg = new ShowMessage(this);
+  auto m_ShowMsg = std::make_unique<ShowMessage>(this);
   if (!m_ShowMsg->showMsg("Knot", tr("Clear all reading history") + " ? ", 2))
     return;
 
@@ -2016,7 +2016,7 @@ void Reader::removeBookList() {
   int index = m_Method->getCurrentIndexFromQW(mui->qwBookList);
   if (index <= 0) return;
 
-  ShowMessage* msg = new ShowMessage(mw_one);
+  auto msg = std::make_unique<ShowMessage>(this);
   if (!msg->showMsg("Knot", tr("Remove from list?"), 2)) return;
 
   bookList.removeAt(index);
@@ -2035,7 +2035,7 @@ void Reader::readBookDone() {
     mui->f_ReaderFun->setEnabled(true);
     mw_one->closeProgress();
 
-    ShowMessage* msg = new ShowMessage(mw_one);
+    auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg("Knot", tr("The EPUB file was opened with an error."), 1);
 
     if (!isText) {

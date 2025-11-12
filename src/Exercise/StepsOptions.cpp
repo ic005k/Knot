@@ -112,7 +112,7 @@ void StepsOptions::on_btnTestKey_clicked() {
     while (m_Steps->strMapKeyTestInfo == "")
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
-    ShowMessage* msg = new ShowMessage(this);
+    auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg(appName, m_Steps->strMapKeyTestInfo, 1);
 
     // 确保编辑框内容不丢失

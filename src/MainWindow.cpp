@@ -404,7 +404,8 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
           strTip = tr("The last record of today will be moved.");
         else
           strTip = tr("The last record of today will be deleted.");
-        ShowMessage* m_ShowMsg = new ShowMessage(this);
+
+        auto m_ShowMsg = std::make_unique<ShowMessage>(this);
         if (!m_ShowMsg->showMsg(str, strTip + "\n\n" + str1, 2)) return false;
 
         strLatestModify = tr("Del Item") + " ( " + getTabText() + " ) ";
@@ -444,7 +445,8 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
       strTip = tr("Only the current day's records can be moved.");
     else
       strTip = tr("Only the current day's records can be deleted.");
-    ShowMessage* m_ShowMsg = new ShowMessage(this);
+
+    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
     m_ShowMsg->showMsg(str, strTip, 1);
 
     return false;
@@ -756,8 +758,7 @@ void MainWindow::on_actionDel_Tab_triggered() {
 
   QString tab_name = mui->tabWidget->tabText(index);
 
-  m_Method->m_widget = new QWidget(mw_one);
-  ShowMessage* m_ShowMsg = new ShowMessage(this);
+  auto m_ShowMsg = std::make_unique<ShowMessage>(this);
   if (!m_ShowMsg->showMsg("Knot",
                           tr("Whether to remove") + "  " + tab_name + " ? ", 2))
     return;
@@ -961,7 +962,7 @@ void MainWindow::on_twItemDoubleClicked() {
   QTreeWidgetItem* item = tw->currentItem();
   if (item->childCount() == 0 && item->parent()->childCount() > 0) {
     if (item->parent()->text(3).toInt() != QDate::currentDate().year()) {
-      ShowMessage* msg = new ShowMessage(this);
+      auto msg = std::make_unique<ShowMessage>(this);
       msg->showMsg("Knot",
                    tr("Only the data of the current year can be modified."), 1);
       return;
@@ -1131,7 +1132,7 @@ void MainWindow::on_actionImport_Data_triggered() {
 
   if (!zipfile.isNull()) {
     m_Method->m_widget = new QWidget(mw_one);
-    ShowMessage* m_ShowMsg = new ShowMessage(this);
+    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
     if (!m_ShowMsg->showMsg("Kont",
                             tr("Import this data?") + "\n" +
                                 mw_one->m_Reader->getUriRealPath(zipfile),
@@ -1325,7 +1326,6 @@ void MainWindow::init_Instance() {
   CurrentYear = QString::number(QDate::currentDate().year());
   if (defaultFontFamily == "") defaultFontFamily = this->font().family();
 
-  tabData = new QTabWidget;
   tabData = mui->tabWidget;
 
   tabChart = new QTabWidget;
@@ -2647,7 +2647,8 @@ void MainWindow::on_btnCopyNoteLink_clicked() {
   QString strlink = "[" + name + "](" + file + ")";
   QClipboard* clipboard = QApplication::clipboard();
   clipboard->setText(strlink);
-  ShowMessage* msg = new ShowMessage(this);
+
+  auto msg = std::make_unique<ShowMessage>(this);
   msg->showMsg(appName, strlink, 1);
 }
 

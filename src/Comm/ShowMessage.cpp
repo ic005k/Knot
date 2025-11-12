@@ -201,7 +201,7 @@ void ShowMessage::on_btnCopy_clicked() {
 
 void ShowMessage::on_btnDel_clicked() {
   close();
-  ShowMessage* msg = new ShowMessage(mw_one);
+  auto msg = std::make_unique<ShowMessage>(this);
   if (msg->showMsg("Knot", tr("Delete this link?"), 2)) {
     m_Notes->delLink(copyText);
   }

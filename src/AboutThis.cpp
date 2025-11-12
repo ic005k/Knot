@@ -47,7 +47,7 @@ bool AboutThis::eventFilter(QObject* obj, QEvent* evn) {
       if (s_link == "") return true;
       QClipboard* pClip = QApplication::clipboard();
       pClip->setText(s_link);
-      ShowMessage* msg = new ShowMessage(this);
+      auto msg = std::make_unique<ShowMessage>(this);
       msg->showMsg("Knot", tr("Download link copied.") + "\n\n" + s_link, 1);
     }
   }
@@ -123,7 +123,7 @@ int AboutThis::parse_UpdateJSON(QString str) {
 
   if (err_rpt.error != QJsonParseError::NoError) {
     if (!blAutoCheckUpdate) {
-      ShowMessage* m_ShowMsg = new ShowMessage(this);
+      auto m_ShowMsg = std::make_unique<ShowMessage>(this);
       m_ShowMsg->showMsg(appName, tr("Network error!"), 1);
     }
     blAutoCheckUpdate = false;
@@ -170,7 +170,7 @@ int AboutThis::parse_UpdateJSON(QString str) {
                            tr("Published at: ") + UpdateTime + "\n" +
                            tr("Release Notes: ") + "\n" + ReleaseNote;
 
-      ShowMessage* m_ShowMsg = new ShowMessage(this);
+      auto m_ShowMsg = std::make_unique<ShowMessage>(this);
       m_ShowMsg->ui->btnOk->setText(tr("Download"));
       bool ret = m_ShowMsg->showMsg("Knot", warningStr, 2);
 
@@ -188,7 +188,7 @@ int AboutThis::parse_UpdateJSON(QString str) {
       }
     } else {
       if (!blAutoCheckUpdate) {
-        ShowMessage* m_ShowMsg = new ShowMessage(this);
+        auto m_ShowMsg = std::make_unique<ShowMessage>(this);
         m_ShowMsg->showMsg(tr("Upgrade Check"),
                            tr("You are currently using the latest version!"),
                            1);
@@ -261,6 +261,6 @@ void AboutThis::on_btnCopyDownLoadLink_clicked() {
   if (s_link == "") return;
   QClipboard* pClip = QApplication::clipboard();
   pClip->setText(s_link);
-  ShowMessage* msg = new ShowMessage(this);
+  auto msg = std::make_unique<ShowMessage>(this);
   msg->showMsg("Knot", tr("Download link copied.") + "\n\n" + s_link, 1);
 }

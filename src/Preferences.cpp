@@ -403,7 +403,7 @@ void Preferences::on_chkZip_clicked() {
   if (ui->editPassword->text().trimmed() !=
       ui->editValidate->text().trimmed()) {
     ui->chkZip->setChecked(false);
-    ShowMessage* msg = new ShowMessage(this);
+    auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg("Knot", tr("Password validation error."), 1);
   }
 }

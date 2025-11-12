@@ -415,7 +415,7 @@ void NotesList::on_btnDel_clicked() {
     strFlag = tr("Note");
 
   m_Method->m_widget = new QWidget(this);
-  ShowMessage* m_ShowMsg = new ShowMessage(this);
+  auto m_ShowMsg = std::make_unique<ShowMessage>(this);
   if (!m_ShowMsg->showMsg("Knot",
                           tr("Move to the recycle bin?") + "\n\n" + strFlag +
                               " : " + item->text(0),
@@ -580,7 +580,7 @@ int NotesList::on_btnImport_clicked() {
 
   if (MDFileList.count() > 1000) {
     MDFileList.resize(10);
-    ShowMessage* msg = new ShowMessage(this);
+    auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg(appName,
                  tr("A maximum of 10 files can be imported at a time."), 1);
   }
@@ -1286,7 +1286,7 @@ void NotesList::on_btnDel_Recycle_clicked() {
     return;
   } else {
     m_Method->m_widget = new QWidget(this);
-    ShowMessage* m_ShowMsg = new ShowMessage(this);
+    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
     if (!m_ShowMsg->showMsg(
             "Knot", tr("Whether to remove") + "  " + curItem->text(0) + " ? ",
             2)) {
@@ -1671,7 +1671,7 @@ void NotesList::onSearchFinished() {
     mui->btnFindPreviousNote->setEnabled(false);
     mui->lblShowLineSn->setText("0");
     mui->lblFindNoteCount->setText("0");
-    ShowMessage* msg = new ShowMessage(this);
+    auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg("Knot", tr("No match was found."), 1);
 
     return;
@@ -2273,7 +2273,7 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
           &NotesList::on_actionStatistics);
 
   connect(actRebuildSearchIndex, &QAction::triggered, this, [this]() {
-    ShowMessage* msg = new ShowMessage(this);
+    auto msg = std::make_unique<ShowMessage>(this);
     if (msg->showMsg(
             appName,
             tr("Rebuilding the index will take some time. Click OK to start."),
@@ -2333,7 +2333,7 @@ void NotesList::on_actionStatistics() {
                            QString::number(m_Method->getAccessCount()) +
                            "t/30min";
 
-  ShowMessage* msg = new ShowMessage(this);
+  auto msg = std::make_unique<ShowMessage>(this);
   msg->showMsg(appName,
                tr("NoteBook") + ": " + QString::number(countNoteBook) + "    " +
                    tr("Notes") + ": " + QString::number(totalNotes) + "\n\n" +
@@ -2345,7 +2345,7 @@ void NotesList::on_actionAdd_Note_triggered() {
   int notebookIndex = getNoteBookCurrentIndex();
 
   if (notebookIndex < 0) {
-    ShowMessage* msg = new ShowMessage(this);
+    auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg(
         "Knot",
         tr("Please create a new notebook first, and then create new notes."),
@@ -2672,7 +2672,7 @@ void NotesList::on_actionCopyNoteLink() {
   QString strlink = "[" + name + "](" + file + ")";
   QClipboard* clipboard = QApplication::clipboard();
   clipboard->setText(strlink);
-  ShowMessage* msg = new ShowMessage(this);
+  auto msg = std::make_unique<ShowMessage>(this);
   msg->showMsg(appName, strlink, 1);
 }
 

@@ -245,7 +245,7 @@ void Todo::closeTodo() {
     if (!m_Method->compressFileWithZlib(todoFile, todoZipFile,
                                         Z_DEFAULT_COMPRESSION)) {
       errorInfo = tr("An error occurred while compressing the file.");
-      ShowMessage* msg = new ShowMessage(this);
+      auto msg = std::make_unique<ShowMessage>(this);
       msg->showMsg("Knot", errorInfo, 1);
       return;
     }
@@ -1507,7 +1507,7 @@ void Todo::openTodo() {
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     if (!m_CloudBackup->checkWebDAVConnection()) {
       mw_one->closeProgress();
-      ShowMessage* msg = new ShowMessage(this);
+      auto msg = std::make_unique<ShowMessage>(this);
       msg->showMsg(appName,
                    tr("WebDAV connection failed. Please check the network, "
                       "website address or login information."),
@@ -1587,7 +1587,7 @@ void Todo::openTodo() {
                                "Preferences that the passwords are consistent "
                                "across all platforms.");
 
-                        ShowMessage* msg = new ShowMessage(this);
+                        auto msg = std::make_unique<ShowMessage>(this);
                         msg->showMsg("Knot", errorInfo, 1);
                         isPasswordError = true;
                         QFile::remove(zFile);

@@ -315,7 +315,7 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
     }
 
     if (!isAndroid) {
-      ShowMessage* msg = new ShowMessage(this);
+      auto msg = std::make_unique<ShowMessage>(this);
       msg->ui->btnCancel->setText(tr("No"));
       msg->ui->btnOk->setText(tr("Yes"));
       bool isYes = msg->showMsg(
@@ -558,7 +558,7 @@ void Notes::closeEvent(QCloseEvent* event) {
   m_Method->Sleep(100);
 
   if (isTextChange) {
-    ShowMessage* msg = new ShowMessage(this);
+    auto msg = std::make_unique<ShowMessage>(this);
     msg->ui->btnOk->setText(tr("Yes") + " (Y)");
     msg->ui->btnCancel->setText(tr("No") + " (N)");
     if (msg->showMsg(tr("Notes"), tr("Do you want to save the notes?"), 2)) {
@@ -766,7 +766,7 @@ void Notes::on_btnPDF_clicked() {
 
     if (isAndroid) {
       m_Method->m_widget = new QWidget(this);
-      ShowMessage* msg1 = new ShowMessage(this);
+      auto msg1 = std::make_unique<ShowMessage>(this);
       msg1->ui->btnCancel->setText(tr("No"));
       msg1->ui->btnOk->setText(tr("Yes"));
       if (msg1->showMsg("PDF",
@@ -964,7 +964,7 @@ void Notes::zipNoteToSyncList() {
   if (!m_Method->compressFileWithZlib(currentMDFile, zipMD,
                                       Z_DEFAULT_COMPRESSION)) {
     errorInfo = tr("An error occurred while compressing the file.");
-    ShowMessage* msg = new ShowMessage(this);
+    auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg("Knot", errorInfo, 1);
     return;
   }
@@ -978,7 +978,7 @@ void Notes::zipNoteToSyncList() {
   if (QFile::exists(json)) {
     if (!m_Method->compressFileWithZlib(json, zipJSON, Z_DEFAULT_COMPRESSION)) {
       errorInfo = tr("An error occurred while compressing the file.");
-      ShowMessage* msg = new ShowMessage(this);
+      auto msg = std::make_unique<ShowMessage>(this);
       msg->showMsg("Knot", errorInfo, 1);
       return;
     }
@@ -1171,7 +1171,7 @@ void Notes::openEditUI() {
 
   qDebug() << "currentMDFile=" << currentMDFile;
   if (!QFile::exists(currentMDFile)) {
-    ShowMessage* msg = new ShowMessage(mw_one);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg(appName,
                  tr("The current note does not exist. Please select another "
                     "note or create a new note."),
@@ -1249,7 +1249,7 @@ void Notes::openNotes() {
     if (!m_CloudBackup->checkWebDAVConnection()) {
       m_Method->closeInfoWindow();
       isWebDAVError = true;
-      ShowMessage* msg = new ShowMessage(this);
+      auto msg = std::make_unique<ShowMessage>(this);
       msg->showMsg(appName,
                    tr("WebDAV connection failed. Please check the network, "
                       "website address or login information."),
@@ -1389,7 +1389,7 @@ void Notes::openNotes() {
                     startBackgroundProcessRemoteFiles();
                   } else {
                     qDebug() << "下载失败：" << error;
-                    ShowMessage* msg = new ShowMessage(this);
+                    auto msg = std::make_unique<ShowMessage>(this);
                     msg->showMsg(
                         appName,
                         tr("Synchronization failed. Please try again later."),
@@ -1485,7 +1485,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
                "Preferences that the passwords are "
                "consistent across all platforms.");
 
-        ShowMessage* msg = new ShowMessage(this);
+        auto msg = std::make_unique<ShowMessage>(this);
         msg->showMsg("Knot", errorInfo, 1);
         isPasswordError = true;
         QFile::remove(zFile);
@@ -1531,7 +1531,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
                  "Preferences that the passwords are "
                  "consistent across all platforms.");
 
-          ShowMessage* msg = new ShowMessage(this);
+          auto msg = std::make_unique<ShowMessage>(this);
           msg->showMsg("Knot", errorInfo, 1);
           isPasswordError = true;
           QFile::remove(zFile);
@@ -1576,7 +1576,7 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
                  "Preferences that the passwords are "
                  "consistent across all platforms.");
 
-          ShowMessage* msg = new ShowMessage(this);
+          auto msg = std::make_unique<ShowMessage>(this);
           msg->showMsg("Knot", errorInfo, 1);
           isPasswordError = true;
           QFile::remove(zFile);
@@ -1673,7 +1673,7 @@ void Notes::updateMainnotesIniToSyncLists() {
     if (!m_Method->compressFileWithZlib(iniDir + "mainnotes.json", zipMainnotes,
                                         Z_DEFAULT_COMPRESSION)) {
       errorInfo = tr("An error occurred while compressing the file.");
-      ShowMessage* msg = new ShowMessage(this);
+      auto msg = std::make_unique<ShowMessage>(this);
       msg->showMsg("Knot", errorInfo, 1);
       return;
     }
