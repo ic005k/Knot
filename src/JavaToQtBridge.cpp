@@ -238,13 +238,6 @@ static void JavaNotify_15() {
     return;
   }
 
-  if (m_ShowMessage != nullptr) {
-    if (m_ShowMessage->isVisible()) {
-      m_ShowMessage->close();
-      return;
-    }
-  }
-
   if (mw_one->m_RenameDlg != nullptr) {
     if (mw_one->m_RenameDlg->isVisible()) {
       mw_one->m_RenameDlg->close();

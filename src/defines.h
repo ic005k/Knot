@@ -38,26 +38,25 @@ class MainWindow;
 #define ANDROID_MAIN_ACTIVITY "com/x/MyActivity"
 #endif
 
-inline QSettings *iniPreferences;
-inline ReaderSet *m_ReaderSet;
-inline CloudBackup *m_CloudBackup;
-inline QTreeWidgetItem *parentItem;
-inline MainWindow *mw_one;
-inline Ui::MainWindow *mui;
-inline Method *m_Method;
-inline Notes *m_Notes;
-inline NotesList *m_NotesList;
-inline StepsOptions *m_StepsOptions;
-inline Steps *m_Steps;
+inline QSettings* iniPreferences;
+inline ReaderSet* m_ReaderSet;
+inline CloudBackup* m_CloudBackup;
+inline QTreeWidgetItem* parentItem;
+inline MainWindow* mw_one;
+inline Ui::MainWindow* mui;
+inline Method* m_Method;
+inline Notes* m_Notes;
+inline NotesList* m_NotesList;
+inline StepsOptions* m_StepsOptions;
+inline Steps* m_Steps;
 inline QTabWidget *tabData, *tabChart;
-inline ShowMessage *m_ShowMessage;
-inline CategoryList *m_CategoryList;
-inline ColorDialog *colorDlg;
-inline PrintPDF *m_PrintPDF;
+inline CategoryList* m_CategoryList;
+inline ColorDialog* colorDlg;
+inline PrintPDF* m_PrintPDF;
 inline QTreeWidget *twrb, *tw;
 
-inline TextEditToolbar *textToolbar = nullptr;
-inline TextEditToolbar *textToolbarDynamic = nullptr;
+inline TextEditToolbar* textToolbar = nullptr;
+inline TextEditToolbar* textToolbarDynamic = nullptr;
 
 inline QRegularExpression regxNumber("^-?[0-9.]*$");
 
@@ -114,18 +113,18 @@ inline bool isZH_CN = false;
 inline bool isNeedExecDeskShortcut = false;
 
 inline QString loadText(QString textFile);
-inline void TextEditToFile(QTextEdit *txtEdit, QString fileName);
+inline void TextEditToFile(QTextEdit* txtEdit, QString fileName);
 inline int deleteDirfile(QString dirName);
-inline QString getTextEditLineText(QTextEdit *txtEdit, int i);
+inline QString getTextEditLineText(QTextEdit* txtEdit, int i);
 inline bool StringToFile(QString buffers, QString fileName);
-inline bool unzipToDir(const QString &zipPath, const QString &destDir);
-inline QString markdownToHtmlWithMath(const QString &md);
+inline bool unzipToDir(const QString& zipPath, const QString& destDir);
+inline QString markdownToHtmlWithMath(const QString& md);
 inline int deleteDirfile(QString dirName);
-inline WebDavHelper *listWebDavFiles(const QString &url,
-                                     const QString &username,
-                                     const QString &password);
+inline WebDavHelper* listWebDavFiles(const QString& url,
+                                     const QString& username,
+                                     const QString& password);
 inline void closeTextToolBar();
-inline void initTextToolbarDynamic(QWidget *parent);
+inline void initTextToolbarDynamic(QWidget* parent);
 
 void closeTextToolBar() {
   if (textToolbar != nullptr && textToolbar->isVisible()) {
@@ -137,7 +136,7 @@ void closeTextToolBar() {
   }
 }
 
-void initTextToolbarDynamic(QWidget *parent) {
+void initTextToolbarDynamic(QWidget* parent) {
   if (textToolbarDynamic != nullptr) {
     delete textToolbarDynamic;
     textToolbarDynamic = nullptr;
@@ -165,7 +164,7 @@ QString loadText(QString textFile) {
 
 bool StringToFile(QString buffers, QString fileName) {
   bool isValue;
-  QFile *file;
+  QFile* file;
   file = new QFile;
   file->setFileName(fileName);
   bool ok = file->open(QIODevice::WriteOnly | QIODevice::Text);
@@ -183,8 +182,8 @@ bool StringToFile(QString buffers, QString fileName) {
   return isValue;
 }
 
-void TextEditToFile(QTextEdit *txtEdit, QString fileName) {
-  QFile *file;
+void TextEditToFile(QTextEdit* txtEdit, QString fileName) {
+  QFile* file;
   file = new QFile;
   file->setFileName(fileName);
   bool ok = file->open(QIODevice::WriteOnly | QIODevice::Text);
@@ -199,7 +198,7 @@ void TextEditToFile(QTextEdit *txtEdit, QString fileName) {
   delete file;
 }
 
-QString getTextEditLineText(QTextEdit *txtEdit, int i) {
+QString getTextEditLineText(QTextEdit* txtEdit, int i) {
   QTextBlock block = txtEdit->document()->findBlockByNumber(i);
   txtEdit->setTextCursor(QTextCursor(block));
   QString lineText = txtEdit->document()->findBlockByNumber(i).text();

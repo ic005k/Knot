@@ -8,8 +8,6 @@ ShowMessage::ShowMessage(QWidget* parent)
     : QDialog(parent), ui(new Ui::ShowMessage) {
   ui->setupUi(this);
 
-  m_ShowMessage = this;
-
   this->installEventFilter(this);
   ui->editMsg->viewport()->installEventFilter(this);
   ui->hframe->hide();
