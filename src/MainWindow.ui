@@ -1350,7 +1350,7 @@ border-radius: 4px;</string>
           <item>
            <widget class="QToolButton" name="btnFind">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -1363,8 +1363,8 @@ border-radius: 4px;</string>
             </property>
             <property name="maximumSize">
              <size>
-              <width>100</width>
-              <height>100</height>
+              <width>16777215</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="styleSheet">

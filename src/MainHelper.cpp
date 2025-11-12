@@ -738,6 +738,7 @@ void MainHelper::init_UIWidget() {
   mui->btnAdd->setFont(f);
   mui->btnDel->setFont(f);
   mui->btnSync->setFont(f);
+  mui->btnFind->setFont(f);
 
   mui->btnReport->setFont(f);
   mui->btnFind->setFont(f);
