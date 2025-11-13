@@ -1288,7 +1288,7 @@ qreal Reader::getVHeight() {
 
 void Reader::showInfo() {
   cPage = 0;
-  int tPage = 0;
+  tPage = 0;
   if (isText) {
     cPage = currentPage + 1;
     tPage = totalPages;
@@ -2756,6 +2756,11 @@ void Reader::on_SetReaderFunVisible() {
   vh = getVHeight();
   vpos = vh * ra;
   setVPos(vpos);
+
+  QTimer::singleShot(100, this, [this]() {
+    updateReaderProperty(cPage, tPage);
+    readReadNote(this->cPage);
+  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -3225,6 +3230,12 @@ void Reader::closeBookPage() {
 void Reader::addBookNote() {
   if (mui->editSetText->text().trimmed() == "") return;
 
+  if (dlgAddBookNote != nullptr) {
+    dlgAddBookNote->close();
+    dlgAddBookNote->deleteLater();
+    dlgAddBookNote = nullptr;
+  }
+
   dlgAddBookNote = new QDialog(mw_one);
   dlgAddBookNote->setFixedSize(mw_one->geometry().width() - 2, 350);
   dlgAddBookNote->setWindowTitle(tr("Note"));
@@ -3346,6 +3357,12 @@ void Reader::addBookNote() {
 }
 
 void Reader::editBookNote(int index, int page, const QString& content) {
+  if (dlgEditBookNote != nullptr) {
+    dlgEditBookNote->close();
+    dlgEditBookNote->deleteLater();
+    dlgEditBookNote = nullptr;
+  }
+
   dlgEditBookNote = new QDialog(mw_one);
   dlgEditBookNote->setFixedSize(mw_one->geometry().width() - 2, 350);
   dlgEditBookNote->setWindowTitle(tr("Note"));

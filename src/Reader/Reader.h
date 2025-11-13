@@ -180,7 +180,7 @@ class Reader : public QDialog {
   void closeBookPage();
   void addBookNote();
   void readReadNote(int page);
-  int cPage;
+  int cPage, tPage;
   void viewBookNote();
   void keepScreenOn();
   void cancelKeepScreenOn();
