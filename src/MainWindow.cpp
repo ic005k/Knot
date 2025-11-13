@@ -208,6 +208,21 @@ void MainWindow::startSyncData() {
 
 MainWindow::~MainWindow() {
   delete mui;
+
+  // 停止所有定时器
+  timer->stop();
+  timerSyncData->stop();
+  timerMousePress->stop();
+  tmeFlash->stop();
+  tmeStartRecordAudio->stop();
+
+  // 释放定时器
+  delete timer;
+  delete timerSyncData;
+  delete timerMousePress;
+  delete tmeFlash;
+  delete tmeStartRecordAudio;
+
   mySaveThread->quit();
   mySaveThread->wait();
 

@@ -12,6 +12,7 @@
 #include <QTextEdit>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
+#include <atomic>
 
 #include "src/CloudBackup.h"
 #include "src/Comm/Method.h"
@@ -93,8 +94,8 @@ inline int epubFileMethod = 2;
 
 inline double yMaxMonth, yMaxDay;
 
-inline bool isAndroid, isLinux, isMacOS, isReadEnd, isZipOK, isMenuImport,
-    isDownData, loading, isEncrypt, isIOS, isEpub, isEpubError, isText, isPDF,
+inline bool isAndroid, isLinux, isMacOS, isZipOK, isMenuImport, isDownData,
+    loading, isEncrypt, isIOS, isEpub, isEpubError, isText, isPDF,
     isInitThemeEnd, isUpData, isRemovedTopItem, isReport, isReadTWEnd,
     isWindows, isEBook;
 
@@ -102,8 +103,9 @@ inline bool isPasswordError = false;
 inline bool isrbFreq = true;
 inline bool isAdd = false;
 inline bool isReadEBookEnd = true;
-inline bool isSaveEnd = true;
-inline bool isBreak = false;
+inline std::atomic<bool> isSaveEnd = true;
+inline std::atomic<bool> isReadEnd = true;
+inline std::atomic<bool> isBreak = false;
 inline bool isDark = false;
 inline bool isDelData = false;
 inline bool isWholeMonth = true;

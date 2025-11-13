@@ -239,7 +239,7 @@ class Reader : public QDialog {
   bool isInitReader = false;
   QString strSpace = "";
   QString strEndFlag;
-  static void SplitFile(QString qfile);
+
   static QString get_href(QString idref, QStringList opfList);
   static void proceImg();
   void getLines();

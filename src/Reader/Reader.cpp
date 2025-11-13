@@ -457,6 +457,8 @@ void Reader::saveReader(QString BookmarkText, bool isSetBookmark) {
       Reg1.setValue("/Reader/BookSn" + QString::number(i), bookList.at(i));
     }
 
+    Reg1.setValue("/Reader/tabReaderIndex", mui->tabReader->currentIndex());
+
     Reg1.sync();
   }
 }
@@ -469,6 +471,9 @@ void Reader::initReader() {
   QString value = QString::number(scrollValue, 'f', 2);
   mui->lblSpeed->setText(tr("Scroll Speed") + " : " + value);
   m_ReaderSet->setScrollValue();
+
+  int tabindex = Reg.value("/Reader/tabReaderIndex", 0).toInt();
+  mui->tabReader->setCurrentIndex(tabindex);
 
   QFont font;
   int fsize = Reg.value("/Reader/FontSize", 18).toInt();
@@ -1308,103 +1313,6 @@ void Reader::showInfo() {
 void Reader::updateReaderProperty(int currentPage, int totalPages) {
   mui->qwReader->rootContext()->setContextProperty("currentPage", currentPage);
   mui->qwReader->rootContext()->setContextProperty("totalPages", totalPages);
-}
-
-void Reader::SplitFile(QString qfile) {
-  QTextEdit* text_edit = new QTextEdit;
-  QPlainTextEdit* plain_edit = new QPlainTextEdit;
-  QPlainTextEdit* plain_editHead = new QPlainTextEdit;
-
-  QFileInfo fi(qfile);
-
-  QString text = loadText(qfile);
-  text.replace("<", "\n<");
-  text.replace(">", ">\n");
-  text = text.trimmed();
-  text_edit->setPlainText(text);
-  int count = text_edit->document()->lineCount();
-  for (int i = 0; i < count; i++) {
-    QString str = getTextEditLineText(text_edit, i);
-    str = str.trimmed();
-    plain_editHead->appendPlainText(str);
-    if (str == "</head>") break;
-  }
-
-  int countHead = plain_editHead->document()->lineCount();
-  int countBody = count - countHead;
-  int n;
-  qint64 bb = fi.size();
-  if (bb > minBytes && bb < maxBytes)
-    n = 2;
-  else
-    n = bb / minBytes;
-
-  int split = countBody / n;
-  int breakLine = 0;
-  for (int x = 1; x < n + 1; x++) {
-    if (x == 1) {
-      // 1
-      for (int i = 0; i < count; i++) {
-        QString str = getTextEditLineText(text_edit, i);
-        plain_edit->appendPlainText(str);
-        if (i == countHead + split) {
-          plain_edit->appendPlainText("</body>");
-          plain_edit->appendPlainText("</html>");
-          breakLine = i;
-          break;
-        }
-      }
-
-      QString file1 = qfile;
-
-      PlainTextEditToFile(plain_edit, file1);
-      tempHtmlList.append(file1);
-    }
-
-    // 2...n-1
-    if (x > 1 && x < n) {
-      plain_edit->clear();
-      plain_edit->setPlainText(plain_editHead->toPlainText());
-      plain_edit->appendPlainText("<body>");
-      for (int i = breakLine + 1; i < count; i++) {
-        QString str = getTextEditLineText(text_edit, i);
-        plain_edit->appendPlainText(str);
-        if (i == countHead + split * x) {
-          plain_edit->appendPlainText("</body>");
-          plain_edit->appendPlainText("</html>");
-          breakLine = i;
-          break;
-        }
-      }
-
-      QString file2 = fi.path() + "/" + fi.baseName() + "_" +
-                      QString::number(x - 1) + "." + fi.suffix();
-
-      PlainTextEditToFile(plain_edit, file2);
-      tempHtmlList.append(file2);
-    }
-
-    if (x == n) {
-      // n
-      plain_edit->clear();
-      plain_edit->setPlainText(plain_editHead->toPlainText());
-      plain_edit->appendPlainText("<body>");
-      for (int i = breakLine + 1; i < count; i++) {
-        QString str = getTextEditLineText(text_edit, i);
-        plain_edit->appendPlainText(str);
-      }
-
-      QString filen = fi.path() + "/" + fi.baseName() + "_" +
-                      QString::number(x - 1) + "." + fi.suffix();
-
-      PlainTextEditToFile(plain_edit, filen);
-      tempHtmlList.append(filen);
-    }
-
-    strShowMsg = "SplitFile: " + m_Method->getFileSize(bb, 2) + "  " +
-                 QString::number(x) + "->" + QString::number(n) + "  " +
-                 fi.baseName();
-  }
 }
 
 QString Reader::getNCX_File(QString path) {
