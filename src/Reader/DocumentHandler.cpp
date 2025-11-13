@@ -69,16 +69,16 @@
 
 QString picfile;
 
-DocumentHandler::DocumentHandler(QObject *parent)
+DocumentHandler::DocumentHandler(QObject* parent)
     : QObject(parent),
       m_document(nullptr),
       m_cursorPosition(-1),
       m_selectionStart(0),
       m_selectionEnd(0) {}
 
-QQuickTextDocument *DocumentHandler::document() const { return m_document; }
+QQuickTextDocument* DocumentHandler::document() const { return m_document; }
 
-void DocumentHandler::setDocument(QQuickTextDocument *document) {
+void DocumentHandler::setDocument(QQuickTextDocument* document) {
   if (document == m_document) return;
 
   if (m_document) m_document->textDocument()->disconnect(this);
@@ -124,7 +124,7 @@ QString DocumentHandler::fontFamily() const {
   return format.font().family();
 }
 
-void DocumentHandler::setFontFamily(const QString &family) {
+void DocumentHandler::setFontFamily(const QString& family) {
   QTextCharFormat format;
   format.setFontFamily(family);
   mergeFormatOnWordOrSelection(format);
@@ -138,7 +138,7 @@ QColor DocumentHandler::textColor() const {
   return format.foreground().color();
 }
 
-void DocumentHandler::setTextColor(const QColor &color) {
+void DocumentHandler::setTextColor(const QColor& color) {
   QTextCharFormat format;
   format.setForeground(QBrush(color));
   mergeFormatOnWordOrSelection(format);
@@ -251,13 +251,13 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
 
     bool ok = false;
     if (qwName == "reader") {
-      ShowMessage *m_ShowMsg = new ShowMessage(mw_one);
+      ShowMessage* m_ShowMsg = new ShowMessage(mw_one);
       ok = m_ShowMsg->showMsg(
           appName, tr("Open this URL?") + "\n\n" + copyText + "\n", 3);
     }
 
     if (qwName == "note") {
-      ShowMessage *m_ShowMsg = new ShowMessage(mw_one);
+      ShowMessage* m_ShowMsg = new ShowMessage(mw_one);
       ok = m_ShowMsg->showMsg(
           appName, tr("Open this URL?") + "\n\n" + copyText + "\n", 4);
     }
@@ -270,8 +270,7 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
     QString str = linkFile;
     str.replace("mailto:", "");
 
-    m_Method->m_widget = new QWidget(mw_one);
-    ShowMessage *m_ShowMsg = new ShowMessage(mw_one);
+    ShowMessage* m_ShowMsg = new ShowMessage(mw_one);
     copyText = str;
     bool ok = m_ShowMsg->showMsg(
         appName, tr("Writing an email?") + "\n\n" + linkFile + "\n", 3);
@@ -325,7 +324,7 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
     }
 
     if (isOk) {
-      ShowMessage *msg = new ShowMessage(mw_one);
+      ShowMessage* msg = new ShowMessage(mw_one);
       msg->showMsg(str_id, s1 + " " + s2, 1);
     }
 
@@ -340,7 +339,7 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
 
     mui->btnDelImage->hide();
 
-    LoadPic *m_LoadPic = new LoadPic(mw_one);
+    LoadPic* m_LoadPic = new LoadPic(mw_one);
     m_LoadPic->initMain(linkFile);
   }
 }
@@ -360,7 +359,7 @@ void DocumentHandler::loadBuffer(QString str) {
   emit fileUrlChanged();
 }
 
-void DocumentHandler::load(const QUrl &fileUrl) {
+void DocumentHandler::load(const QUrl& fileUrl) {
   if (fileUrl == m_fileUrl) return;
 
   const QUrl path = fileUrl;
@@ -371,7 +370,7 @@ void DocumentHandler::load(const QUrl &fileUrl) {
     QFile file(fileName);
     if (file.open(QFile::ReadOnly)) {
       QByteArray data = file.readAll();
-      if (QTextDocument *doc = textDocument()) {
+      if (QTextDocument* doc = textDocument()) {
         doc->setBaseUrl(path.adjusted(QUrl::RemoveFilename));
         if (mime.inherits("text/markdown")) {
           emit loaded(QString::fromUtf8(data), Qt::MarkdownText);
@@ -396,8 +395,8 @@ void DocumentHandler::load(const QUrl &fileUrl) {
   emit fileUrlChanged();
 }
 
-void DocumentHandler::saveAs(const QUrl &fileUrl) {
-  QTextDocument *doc = textDocument();
+void DocumentHandler::saveAs(const QUrl& fileUrl) {
+  QTextDocument* doc = textDocument();
   if (!doc) return;
 
   const QString filePath = fileUrl.toLocalFile();
@@ -429,7 +428,7 @@ void DocumentHandler::reset() {
 }
 
 QTextCursor DocumentHandler::textCursor() const {
-  QTextDocument *doc = textDocument();
+  QTextDocument* doc = textDocument();
   if (!doc) return QTextCursor();
 
   QTextCursor cursor = QTextCursor(doc);
@@ -442,14 +441,14 @@ QTextCursor DocumentHandler::textCursor() const {
   return cursor;
 }
 
-QTextDocument *DocumentHandler::textDocument() const {
+QTextDocument* DocumentHandler::textDocument() const {
   if (!m_document) return nullptr;
 
   return m_document->textDocument();
 }
 
 void DocumentHandler::mergeFormatOnWordOrSelection(
-    const QTextCharFormat &format) {
+    const QTextCharFormat& format) {
   QTextCursor cursor = textCursor();
   if (!cursor.hasSelection()) cursor.select(QTextCursor::WordUnderCursor);
   cursor.mergeCharFormat(format);

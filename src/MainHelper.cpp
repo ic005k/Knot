@@ -959,7 +959,6 @@ void MainHelper::delBakFile() {
   int index = m_Method->getCurrentIndexFromQW(mui->qwBakList);
   QString bak_file = m_Method->getText3(mui->qwBakList, index);
 
-  m_Method->m_widget = new QWidget(mw_one);
   auto m_ShowMsg = std::make_unique<ShowMessage>(this);
   if (!m_ShowMsg->showMsg("Knot",
                           tr("Whether to remove") + "  " + bak_file + " ? ", 2))
@@ -984,7 +983,6 @@ void MainHelper::delTabRecycleFile() {
   int index = m_Method->getCurrentIndexFromQW(mui->qwTabRecycle);
   QString tab_file = m_Method->getText3(mui->qwTabRecycle, index);
 
-  m_Method->m_widget = new QWidget(mw_one);
   auto m_ShowMsg = std::make_unique<ShowMessage>(this);
   if (!m_ShowMsg->showMsg("Knot",
                           tr("Whether to remove") + "  " + tab_file + " ? ", 2))
@@ -1019,7 +1017,6 @@ void MainHelper::importBakFileList() {
   zipfile = str.trimmed();
 
   if (!zipfile.isNull()) {
-    m_Method->m_widget = new QWidget(mw_one);
     auto m_ShowMsg = std::make_unique<ShowMessage>(this);
     if (!m_ShowMsg->showMsg("Kont",
                             tr("Import this data?") + "\n" +

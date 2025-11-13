@@ -1473,7 +1473,6 @@ void Reader::clearAllReaderRecords() {
   int count = m_Method->getCountFromQW(mui->qwBookList);
   if (count == 0) return;
 
-  m_Method->m_widget = new QWidget(mw_one);
   auto m_ShowMsg = std::make_unique<ShowMessage>(this);
   if (!m_ShowMsg->showMsg("Knot", tr("Clear all reading history") + " ? ", 2))
     return;

@@ -67,26 +67,26 @@ class Method : public QDialog {
   Q_OBJECT
 
  public:
-  explicit Method(QWidget *parent = nullptr);
+  explicit Method(QWidget* parent = nullptr);
   ~Method();
-  Ui::Method *ui;
+  Ui::Method* ui;
 
-  QProgressBar *infoProgBar = nullptr;
-  QLabel *lblInfo = nullptr;
-  void showInfoWindow(const QString &info);
+  QProgressBar* infoProgBar = nullptr;
+  QLabel* lblInfo = nullptr;
+  void showInfoWindow(const QString& info);
   void closeInfoWindow();
-  void setInfoText(const QString &newText);
+  void setInfoText(const QString& newText);
 
-  EnhancedColorPicker *m_EnColorPicker = nullptr;
+  EnhancedColorPicker* m_EnColorPicker = nullptr;
 
-  QMenu *menuNoteBook = nullptr;
-  QMenu *menuNoteList = nullptr;
+  QMenu* menuNoteBook = nullptr;
+  QMenu* menuNoteList = nullptr;
 
   bool androidCopyFile(QString src, QString des);
 
-  static QString getFileSize(const qint64 &size, int precision);
+  static QString getFileSize(const qint64& size, int precision);
 
-  QWidget *m_widget;
+  QWidget* m_widget = nullptr;
   QString qssSlider;
   QString ColorToString(QColor v_color);
 
@@ -127,26 +127,26 @@ class Method : public QDialog {
       "#listWidget::item:selected {border-left: 5px solid #777777;}";
 
   QString setPushButtonQss(
-      QPushButton *btn,                              // 按钮对象
+      QPushButton* btn,                              // 按钮对象
       int radius = 5,                                // 圆角半径
       int padding = 8,                               // 间距
-      const QString &normalColor = "#34495E",        // 正常颜色
-      const QString &normalTextColor = "#FFFFFF",    // 文字颜色
-      const QString &hoverColor = "#4E6D8C",         // 悬停颜色
-      const QString &hoverTextColor = "#F0F0F0",     // 悬停文字颜色
-      const QString &pressedColor = "#2D3E50",       // 按下颜色
-      const QString &pressedTextColor = "#B8C6D1");  // 按下文字颜色
+      const QString& normalColor = "#34495E",        // 正常颜色
+      const QString& normalTextColor = "#FFFFFF",    // 文字颜色
+      const QString& hoverColor = "#4E6D8C",         // 悬停颜色
+      const QString& hoverTextColor = "#F0F0F0",     // 悬停文字颜色
+      const QString& pressedColor = "#2D3E50",       // 按下颜色
+      const QString& pressedTextColor = "#B8C6D1");  // 按下文字颜色
 
   QString setToolButtonQss(
-      QToolButton *btn,                              // 按钮对象
+      QToolButton* btn,                              // 按钮对象
       int radius = 5,                                // 圆角半径
       int padding = 8,                               // 间距
-      const QString &normalColor = "#34495E",        // 正常颜色
-      const QString &normalTextColor = "#FFFFFF",    // 文字颜色
-      const QString &hoverColor = "#4E6D8C",         // 悬停颜色
-      const QString &hoverTextColor = "#F0F0F0",     // 悬停文字颜色
-      const QString &pressedColor = "#2D3E50",       // 按下颜色
-      const QString &pressedTextColor = "#B8C6D1");  // 按下文字颜色
+      const QString& normalColor = "#34495E",        // 正常颜色
+      const QString& normalTextColor = "#FFFFFF",    // 文字颜色
+      const QString& hoverColor = "#4E6D8C",         // 悬停颜色
+      const QString& hoverTextColor = "#F0F0F0",     // 悬停文字颜色
+      const QString& pressedColor = "#2D3E50",       // 按下颜色
+      const QString& pressedTextColor = "#B8C6D1");  // 按下文字颜色
 
   QString lightScrollbarStyle =
       "/* Light Vertical Scrollbar */"
@@ -262,7 +262,7 @@ class Method : public QDialog {
       "QMenu::item:selected {"
       "background-color: rgb(62, 186, 231); }";
 
-  QDialog *getProgBar();
+  QDialog* getProgBar();
   void startSearch();
   void initSearchResults();
 
@@ -276,26 +276,26 @@ class Method : public QDialog {
   void addItem(QString text_tab, QString text0, QString text1, QString text2,
                QString text3, int itemH);
 
-  void setCurrentIndexFromQW(QQuickWidget *qw, int index);
-  void clearAllBakList(QQuickWidget *qw);
-  int getCountFromQW(QQuickWidget *qw);
-  void delItemFromQW(QQuickWidget *qw, int index);
-  void addItemToQW(QQuickWidget *qw, QString text0, QString text1,
+  void setCurrentIndexFromQW(QQuickWidget* qw, int index);
+  void clearAllBakList(QQuickWidget* qw);
+  int getCountFromQW(QQuickWidget* qw);
+  void delItemFromQW(QQuickWidget* qw, int index);
+  void addItemToQW(QQuickWidget* qw, QString text0, QString text1,
                    QString text2, QString text3, int itemH);
 
-  QString getText3(QQuickWidget *qw, int index);
-  int getCurrentIndexFromQW(QQuickWidget *qw);
-  QString getText0(QQuickWidget *qw, int index);
+  QString getText3(QQuickWidget* qw, int index);
+  int getCurrentIndexFromQW(QQuickWidget* qw);
+  QString getText0(QQuickWidget* qw, int index);
 
-  void modifyItemText2(QQuickWidget *qw, int index, QString strText);
+  void modifyItemText2(QQuickWidget* qw, int index, QString strText);
 
-  void modifyItemText0(QQuickWidget *qw, int index, QString strText);
-  void insertItem(QQuickWidget *qw, QString text0, QString text1, QString text2,
+  void modifyItemText0(QQuickWidget* qw, int index, QString strText);
+  void insertItem(QQuickWidget* qw, QString text0, QString text1, QString text2,
                   QString text3, int curIndex);
 
-  void gotoEnd(QQuickWidget *qw);
+  void gotoEnd(QQuickWidget* qw);
 
-  void setSCrollPro(QObject *obj);
+  void setSCrollPro(QObject* obj);
 
   void showDelMsgBox(QString title, QString info);
 
@@ -308,8 +308,8 @@ class Method : public QDialog {
 
   void closeQtKeyboard();
 
-  void modifyItemText3(QQuickWidget *qw, int index, QString strText);
-  QInputDialog *inputDialog(QString windowsTitle, QString lblEdit,
+  void modifyItemText3(QQuickWidget* qw, int index, QString strText);
+  QInputDialog* inputDialog(QString windowsTitle, QString lblEdit,
                             QString defaultValue);
 
   void showGrayWindows();
@@ -319,17 +319,17 @@ class Method : public QDialog {
 
   int getStrWidth(const QString str);
 
-  void set_ToolButtonStyle2(QObject *parent);
+  void set_ToolButtonStyle2(QObject* parent);
 
-  QString getText2(QQuickWidget *qw, int index);
-  QString getText1(QQuickWidget *qw, int index);
+  QString getText2(QQuickWidget* qw, int index);
+  QString getText1(QQuickWidget* qw, int index);
 
-  void setScrollBarPos(QQuickWidget *qw, double pos);
+  void setScrollBarPos(QQuickWidget* qw, double pos);
 
   QString getLastModified(QString file);
 
-  void setVPosForQW(QQuickWidget *qw, qreal pos);
-  qreal getVPosForQW(QQuickWidget *qw);
+  void setVPosForQW(QQuickWidget* qw, qreal pos);
+  qreal getVPosForQW(QQuickWidget* qw);
 
   QString getCustomColor();
 
@@ -348,7 +348,7 @@ class Method : public QDialog {
   QString getKeyType();
   void setAndroidProgressInfo(QString info);
 
-  void setQLabelImage(QLabel *lbl, int w, int h, QString imgFile);
+  void setQLabelImage(QLabel* lbl, int w, int h, QString imgFile);
 
   void playMyText(QString text);
   void stopPlayMyText();
@@ -384,47 +384,47 @@ class Method : public QDialog {
   void setMDFile(QString strMDFile);
   void setAndroidFontSize(int nSize);
 
-  bool decompressWithPassword(const QString &zipPath, const QString &extractDir,
-                              const QString &password);
+  bool decompressWithPassword(const QString& zipPath, const QString& extractDir,
+                              const QString& password);
 
-  bool compressFile(const QString &zipPath, const QString &filePath,
-                    const QString &password);
+  bool compressFile(const QString& zipPath, const QString& filePath,
+                    const QString& password);
 
-  bool encryptFile(const QString &inputPath, const QString &outputPath,
-                   const QString &password);
-  bool decryptFile(const QString &inputPath, const QString &outputPath,
-                   const QString &password);
+  bool encryptFile(const QString& inputPath, const QString& outputPath,
+                   const QString& password);
+  bool decryptFile(const QString& inputPath, const QString& outputPath,
+                   const QString& password);
   QString useDec(QString enc_file);
   QString useEnc(QString m_file);
 
-  bool encryptFile_Old(const QString &inputPath, const QString &outputPath,
-                       const QString &password);
+  bool encryptFile_Old(const QString& inputPath, const QString& outputPath,
+                       const QString& password);
 
-  bool decompressFileWithZlib(const QString &sourcePath,
-                              const QString &destPath);
-  bool compressFileWithZlib(const QString &sourcePath, const QString &destPath,
+  bool decompressFileWithZlib(const QString& sourcePath,
+                              const QString& destPath);
+  bool compressFileWithZlib(const QString& sourcePath, const QString& destPath,
                             int level);
 
-  bool compressDirectory(const QString &zipPath, const QString &sourceDir,
-                         const QString &password);
+  bool compressDirectory(const QString& zipPath, const QString& sourceDir,
+                         const QString& password);
 
   void setOSFlag();
 
   void setDark(bool dark);
 
-  void setEditLightMode(QTextEdit *textEdit);
-  void setEditDarkMode(QTextEdit *textEdit);
+  void setEditLightMode(QTextEdit* textEdit);
+  void setEditDarkMode(QTextEdit* textEdit);
 
-  bool createDatabase(const QString &dbFileName);
-  static void saveTreeToDB(QTreeWidget *tree, const QString &dbFileName);
-  static void loadTreeFromDB(QTreeWidget *tree, const QString &dbFileName);
+  bool createDatabase(const QString& dbFileName);
+  static void saveTreeToDB(QTreeWidget* tree, const QString& dbFileName);
+  static void loadTreeFromDB(QTreeWidget* tree, const QString& dbFileName);
 
-  void setToolButtonStyle(QToolButton *btn, bool isDark);
+  void setToolButtonStyle(QToolButton* btn, bool isDark);
 
   QString setCurrentDateValue();
 
   QString formatSecondsToHMS(qlonglong seconds);
-  QStringList removeDuplicatesFromQStringList(const QStringList &list);
+  QStringList removeDuplicatesFromQStringList(const QStringList& list);
   QString setCurrentDateTimeValue();
   bool getLockScreenStatus();
 
@@ -432,44 +432,44 @@ class Method : public QDialog {
 
   void callJavaForceDisconnectInputMethod();
 
-  void set_ToolButtonStyle(QObject *parent);
-  void set_PushButtonStyle(QObject *parent);
+  void set_ToolButtonStyle(QObject* parent);
+  void set_PushButtonStyle(QObject* parent);
   QObjectList getAllToolButton(QObjectList lstUIControls);
   QObjectList getAllPushButton(QObjectList lstUIControls);
   QObjectList getAllTreeWidget(QObjectList lstUIControls);
-  QObjectList getAllUIControls(QObject *parent);
+  QObjectList getAllUIControls(QObject* parent);
   QString secondsToTime(ulong totalTime);
   bool copyFileToPath(QString sourceDir, QString toDir, bool coverFileIfExist);
 
-  QString highlightTextInHtml(const QString &originalText,
-                              const QString &targetText,
-                              const QString &color = "red", bool bold = true);
+  QString highlightTextInHtml(const QString& originalText,
+                              const QString& targetText,
+                              const QString& color = "red", bool bold = true);
 
   QString convertDataToUnicode(QByteArray data);
 
   void upIniFile(QString tempFile, QString endFile);
-  QStringList getMdFilesInDir(const QString &dirPath,
+  QStringList getMdFilesInDir(const QString& dirPath,
                               bool includeFullPath = false);
 
-  int getFlagToday(QTreeWidget *tw);
-  QString getFileUTCString(const QString &file);
-  QString getBaseFlag(const QString &file);
+  int getFlagToday(QTreeWidget* tw);
+  QString getFileUTCString(const QString& file);
+  QString getBaseFlag(const QString& file);
 
   void setAccessCount(int count);
 
   int getAccessCount();
-  bool sendMailWithAttachment(const QString &recipient = "",
-                              const QString &filePath = "");
+  bool sendMailWithAttachment(const QString& recipient = "",
+                              const QString& filePath = "");
 
   QObjectList getAllTextEdit(QObjectList lstUIControls);
   QObjectList getAllLineEdit(QObjectList lstUIControls);
-  void setLineEditToolBar(QObject *parent, EditEventFilter *editFilter);
-  void setTextEditToolBar(QObject *parent, EditEventFilter *editFilter);
+  void setLineEditToolBar(QObject* parent, EditEventFilter* editFilter);
+  void setTextEditToolBar(QObject* parent, EditEventFilter* editFilter);
 
   bool isInChina();
 
  protected:
-  bool eventFilter(QObject *watchDlgSearch, QEvent *evn) override;
+  bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  public slots:
 
@@ -487,10 +487,10 @@ class Method : public QDialog {
  private:
   int count1 = 0;
   int count2 = 0;
-  QDialog *infoWindow = nullptr;
+  QDialog* infoWindow = nullptr;
   int secondCounter = 0;
 
-  void setCellText(int row, int column, QString str, QTableWidget *table);
+  void setCellText(int row, int column, QString str, QTableWidget* table);
   void generateData(int count);
   int nProgressBarType = 2;
 
@@ -498,14 +498,14 @@ class Method : public QDialog {
 
   void setMainTabCurrentIndex();
   QString quazipErrorString(int code);
-  bool addFilesToZip(void *zip_handle, const QString &currentDir,
-                     const QString &baseDir);
+  bool addFilesToZip(void* zip_handle, const QString& currentDir,
+                     const QString& baseDir);
   QByteArray generateRandomBytes(int length);
-  QByteArray deriveKey(const QString &password, const QByteArray &salt,
+  QByteArray deriveKey(const QString& password, const QByteArray& salt,
                        int keyLength);
 
-  static bool isUtf8(const QByteArray &data);
-  static bool isValidText(const QString &text);
+  static bool isUtf8(const QByteArray& data);
+  static bool isValidText(const QString& text);
   bool isInChinaOnline(int timeout = 3000);
   QString getLocalIP();
 };
@@ -515,7 +515,7 @@ class IOSCircularProgress : public QWidget {
   Q_PROPERTY(int rotationAngle READ rotationAngle WRITE setRotationAngle)
   Q_PROPERTY(qreal progress READ progress WRITE setProgress)
  public:
-  explicit IOSCircularProgress(QWidget *parent = nullptr)
+  explicit IOSCircularProgress(QWidget* parent = nullptr)
       : QWidget(parent),
         m_rotation(0),
         m_progress(0),
@@ -532,7 +532,7 @@ class IOSCircularProgress : public QWidget {
     m_rotateAnimation->start();
 
     // 进度动画（示例用）
-    QPropertyAnimation *progressAnim =
+    QPropertyAnimation* progressAnim =
         new QPropertyAnimation(this, "progress", this);
     progressAnim->setDuration(3000);
     progressAnim->setLoopCount(-1);
@@ -560,7 +560,7 @@ class IOSCircularProgress : public QWidget {
   }
 
  protected:
-  void paintEvent(QPaintEvent *) override {
+  void paintEvent(QPaintEvent*) override {
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
 
@@ -624,8 +624,8 @@ class IOSCircularProgress : public QWidget {
   }
 
  private:
-  QPropertyAnimation *m_rotateAnimation;
-  QTimer *m_timer;  // 计时器
+  QPropertyAnimation* m_rotateAnimation;
+  QTimer* m_timer;  // 计时器
   int m_rotation;
   qreal m_progress;
   int m_penWidth;
@@ -637,7 +637,7 @@ class IOSCircularProgress_NoTimer : public QWidget {
   Q_PROPERTY(int rotationAngle READ rotationAngle WRITE setRotationAngle)
   Q_PROPERTY(qreal progress READ progress WRITE setProgress)
  public:
-  explicit IOSCircularProgress_NoTimer(QWidget *parent = nullptr)
+  explicit IOSCircularProgress_NoTimer(QWidget* parent = nullptr)
       : QWidget(parent), m_rotation(0), m_progress(0), m_penWidth(5) {
     setFixedSize(60, 60);
 
@@ -650,7 +650,7 @@ class IOSCircularProgress_NoTimer : public QWidget {
     m_rotateAnimation->start();
 
     // 进度动画（示例用）
-    QPropertyAnimation *progressAnim =
+    QPropertyAnimation* progressAnim =
         new QPropertyAnimation(this, "progress", this);
     progressAnim->setDuration(3000);
     progressAnim->setLoopCount(-1);
@@ -672,7 +672,7 @@ class IOSCircularProgress_NoTimer : public QWidget {
   }
 
  protected:
-  void paintEvent(QPaintEvent *) override {
+  void paintEvent(QPaintEvent*) override {
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
 
@@ -717,7 +717,7 @@ class IOSCircularProgress_NoTimer : public QWidget {
   }
 
  private:
-  QPropertyAnimation *m_rotateAnimation;
+  QPropertyAnimation* m_rotateAnimation;
   int m_rotation;
   qreal m_progress;
   int m_penWidth;

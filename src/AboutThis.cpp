@@ -8,7 +8,7 @@
 AboutThis::AboutThis(QWidget* parent) : QDialog(parent), ui(new Ui::AboutThis) {
   ui->setupUi(this);
 
-  ver = "2.1.53";
+  ver = "2.1.54";
 
   this->layout()->setContentsMargins(5, 5, 5, 5);
 
@@ -203,7 +203,7 @@ void AboutThis::show_download() {
   int aver = getAndroidVer();
   // Android7.0及以上
   if (aver >= 24) {
-    m_AutoUpdate = new AutoUpdate(this);
+    m_AutoUpdate = std::make_unique<AutoUpdate>(this);
     int y = (mw_one->height() - m_AutoUpdate->height()) / 2;
     m_AutoUpdate->setGeometry(mw_one->geometry().x(), y, mw_one->width(),
                               m_AutoUpdate->height());

@@ -1151,6 +1151,12 @@ void Todo::reeditText() {
     }
   }
 
+  if (m_ReeditTodo != nullptr) {
+    m_ReeditTodo->close();
+    m_ReeditTodo->deleteLater();
+    m_ReeditTodo = nullptr;
+  }
+
   m_ReeditTodo = new QDialog(this);
   QVBoxLayout* vbox0 = new QVBoxLayout;
   m_ReeditTodo->setLayout(vbox0);

@@ -57,7 +57,6 @@ void StepsOptions::init() {
   h = 400;
   setGeometry(x, y, w, h);
 
-  m_Method->m_widget = new QWidget(mw_one);
   m_Method->showGrayWindows();
   show();
   isTextChange = false;

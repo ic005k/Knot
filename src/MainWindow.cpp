@@ -1146,7 +1146,6 @@ void MainWindow::on_actionImport_Data_triggered() {
 #endif
 
   if (!zipfile.isNull()) {
-    m_Method->m_widget = new QWidget(mw_one);
     auto m_ShowMsg = std::make_unique<ShowMessage>(this);
     if (!m_ShowMsg->showMsg("Kont",
                             tr("Import this data?") + "\n" +

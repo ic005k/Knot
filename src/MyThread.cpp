@@ -6,7 +6,7 @@
 
 MyThread::MyThread() {}
 
-ReadTWThread::ReadTWThread(QObject *parent) : QThread{parent} {}
+ReadTWThread::ReadTWThread(QObject* parent) : QThread{parent} {}
 void ReadTWThread::run() {
   isReadTWEnd = false;
   MainWindow::readDataInThread(currentTabIndex);
@@ -15,7 +15,7 @@ void ReadTWThread::run() {
 
 void MainWindow::readTWDone() {
   for (int i = 0; i < tabData->tabBar()->count(); i++) {
-    QTreeWidget *tw = (QTreeWidget *)tabData->widget(i);
+    QTreeWidget* tw = (QTreeWidget*)tabData->widget(i);
     tw->setCurrentItem(tw->topLevelItem(tw->topLevelItemCount() - 1));
   }
 
@@ -29,7 +29,7 @@ void MainWindow::readTWDone() {
   mui->progBar->setMaximum(100);
 }
 
-ReadChartThread::ReadChartThread(QObject *parent) : QThread{parent} {}
+ReadChartThread::ReadChartThread(QObject* parent) : QThread{parent} {}
 void ReadChartThread::run() {
   if (isBreak) {
     emit isDone();
@@ -55,7 +55,7 @@ void MainWindow::readChartDone() {
   isReadEnd = true;
 }
 
-SaveThread::SaveThread(QObject *parent) : QThread{parent} {}
+SaveThread::SaveThread(QObject* parent) : QThread{parent} {}
 void SaveThread::run() {
   isSaveEnd = false;
   MainWindow::SaveFile(SaveType);
@@ -75,7 +75,7 @@ void MainWindow::saveDone() {
   if (SaveType == "tab" || SaveType == "alltab") startRead(strDate);
 }
 
-UpdateGpsMapThread::UpdateGpsMapThread(QObject *parent) : QThread{parent} {}
+UpdateGpsMapThread::UpdateGpsMapThread(QObject* parent) : QThread{parent} {}
 void UpdateGpsMapThread::run() {
   m_Steps->updateGpsTrack();
 
@@ -87,7 +87,7 @@ void MainWindow::updateGpsMapDone() {
   closeProgress();
 }
 
-ReadEBookThread::ReadEBookThread(QObject *parent) : QThread{parent} {}
+ReadEBookThread::ReadEBookThread(QObject* parent) : QThread{parent} {}
 void ReadEBookThread::run() {
   isReadEBookEnd = false;
 
@@ -130,7 +130,7 @@ void MainWindow::readEBookDone() {
   isReadEBookEnd = true;
 }
 
-SearchThread::SearchThread(QObject *parent) : QThread{parent} {}
+SearchThread::SearchThread(QObject* parent) : QThread{parent} {}
 void SearchThread::run() {
   m_Method->startSearch();
 
@@ -142,7 +142,7 @@ void MainWindow::searchDone() {
   mw_one->closeProgress();
 }
 
-ImportDataThread::ImportDataThread(QObject *parent) : QThread{parent} {}
+ImportDataThread::ImportDataThread(QObject* parent) : QThread{parent} {}
 void ImportDataThread::run() {
   if (isMenuImport || isDownData) mw_one->importBakData(zipfile);
 
@@ -154,7 +154,7 @@ void MainWindow::importDataDone() {
 
   if (isPasswordError) {
     closeProgress();
-    ShowMessage *msg = new ShowMessage(this);
+    ShowMessage* msg = new ShowMessage(this);
     msg->showMsg("Knot", tr("The password of the encrypted file is wrong!"), 1);
     return;
   }
@@ -187,8 +187,7 @@ void MainWindow::importDataDone() {
 
   if (isMenuImport) {
     if (!isZipOK) {
-      m_Method->m_widget = new QWidget(mw_one);
-      ShowMessage *m_ShowMsg = new ShowMessage(this);
+      ShowMessage* m_ShowMsg = new ShowMessage(this);
       m_ShowMsg->showMsg("Knot",
                          tr("Invalid data file.") + "\n\n" +
                              tr("Or the operation is canceled by the user."),
@@ -197,7 +196,7 @@ void MainWindow::importDataDone() {
   }
 }
 
-BakDataThread::BakDataThread(QObject *parent) : QThread{parent} {}
+BakDataThread::BakDataThread(QObject* parent) : QThread{parent} {}
 void BakDataThread::run() {
   mw_one->bakData();
 
@@ -208,7 +207,7 @@ void MainWindow::bakDataDone() {
   closeProgress();
 
   if (errorInfo != "") {
-    ShowMessage *msg = new ShowMessage(this);
+    ShowMessage* msg = new ShowMessage(this);
     msg->showMsg("Knot", errorInfo, 1);
     return;
   }
@@ -223,7 +222,7 @@ void MainWindow::bakDataDone() {
               m_Method->getFileSize(QFile(zipfile).size(), 2),
           zipfile);
 
-      ShowMessage *m_ShowMsg = new ShowMessage(this);
+      ShowMessage* m_ShowMsg = new ShowMessage(this);
       m_ShowMsg->showMsg("Knot",
                          tr("The data was exported successfully.") + "\n\n" +
                              zipfile + "\n\n" +

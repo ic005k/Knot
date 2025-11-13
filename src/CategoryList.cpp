@@ -71,7 +71,6 @@ void CategoryList::on_btnDel_clicked() {
 
   ui->listWidget->setCurrentRow(row);
   if (row >= 0) {
-    m_Method->m_widget = new QWidget(mw_one);
     auto m_ShowMsg = std::make_unique<ShowMessage>(this);
     if (!m_ShowMsg->showMsg("Kont",
                             tr("Delete this category?") + "\n\n" +

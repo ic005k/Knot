@@ -75,10 +75,6 @@ bool ShowMessage::eventFilter(QObject* watch, QEvent* evn) {
 void ShowMessage::init() {
   isValue = false;
 
-  if (!m_Method->m_widget->isHidden()) {
-    m_Method->m_widget->close();
-  }
-
   m_Method->showGrayWindows();
 
   if (!isAndroid) show();

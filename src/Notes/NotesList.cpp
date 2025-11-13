@@ -367,7 +367,6 @@ void NotesList::on_btnRename_clicked() {
 
   m_Method->set_ToolButtonStyle(m_RenameNotes);
 
-  m_Method->m_widget = new QWidget(mw_one);
   m_Method->showGrayWindows();
 
   m_RenameNotes->show();
@@ -414,7 +413,6 @@ void NotesList::on_btnDel_clicked() {
   else
     strFlag = tr("Note");
 
-  m_Method->m_widget = new QWidget(this);
   auto m_ShowMsg = std::make_unique<ShowMessage>(this);
   if (!m_ShowMsg->showMsg("Knot",
                           tr("Move to the recycle bin?") + "\n\n" + strFlag +
@@ -1285,7 +1283,6 @@ void NotesList::on_btnDel_Recycle_clicked() {
   if (curItem->parent() == NULL) {
     return;
   } else {
-    m_Method->m_widget = new QWidget(this);
     auto m_ShowMsg = std::make_unique<ShowMessage>(this);
     if (!m_ShowMsg->showMsg(
             "Knot", tr("Whether to remove") + "  " + curItem->text(0) + " ? ",

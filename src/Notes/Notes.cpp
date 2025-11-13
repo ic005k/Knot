@@ -765,7 +765,6 @@ void Notes::on_btnPDF_clicked() {
     doc->print(printer);
 
     if (isAndroid) {
-      m_Method->m_widget = new QWidget(this);
       auto msg1 = std::make_unique<ShowMessage>(this);
       msg1->ui->btnCancel->setText(tr("No"));
       msg1->ui->btnOk->setText(tr("Yes"));

@@ -20,12 +20,12 @@ class AboutThis : public QDialog {
   Q_OBJECT
 
  public:
-  explicit AboutThis(QWidget *parent = nullptr);
+  explicit AboutThis(QWidget* parent = nullptr);
   ~AboutThis();
-  Ui::AboutThis *ui;
+  Ui::AboutThis* ui;
 
-  AutoUpdate *m_AutoUpdate;
-  QNetworkAccessManager *manager;
+  std::unique_ptr<AutoUpdate> m_AutoUpdate;
+  QNetworkAccessManager* manager;
   int parse_UpdateJSON(QString str);
   bool blAutoCheckUpdate = false;
 
@@ -39,15 +39,15 @@ class AboutThis : public QDialog {
   void on_btnBack_About_clicked();
 
  protected:
-  void keyReleaseEvent(QKeyEvent *event) override;
-  void resizeEvent(QResizeEvent *event) override;
-  bool eventFilter(QObject *obj, QEvent *evn) override;
+  void keyReleaseEvent(QKeyEvent* event) override;
+  void resizeEvent(QResizeEvent* event) override;
+  bool eventFilter(QObject* obj, QEvent* evn) override;
 
  private slots:
 
   void on_btnHomePage_clicked();
 
-  void replyFinished(QNetworkReply *reply);
+  void replyFinished(QNetworkReply* reply);
 
   void on_btnCheckUpdate_clicked();
 
