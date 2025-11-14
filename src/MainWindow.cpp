@@ -31,9 +31,9 @@ MainWindow::MainWindow(QWidget* parent)
 
   m_MainHelper->init_UIWidget();
 
-  init_ChartWidget();
-
   m_MainHelper->initMainQW();
+
+  initChartWidget();
 
   init_TotalData();
 
@@ -274,7 +274,6 @@ void MainWindow::startRead(QString Date) {
   if (isReadEnd) {
     isBreak = false;
     myReadChartThread->start();
-    if (mui->rbSteps->isChecked()) mui->rbFreq->click();
   }
 }
 
@@ -753,12 +752,6 @@ void MainWindow::on_actionAdd_Tab_triggered() {
   addItem(tabText, "", "", "", 0);
   setCurrentIndex(count);
 
-  mui->tabCharts->setTabText(0, tr("Month"));
-  mui->tabCharts->setTabText(1, tr("Day"));
-
-  mui->btnChartMonth->setText(tabChart->tabText(0));
-  mui->btnChartDay->setText(tabChart->tabText(1));
-
   on_actionRename_triggered();
   reloadMain();
 
@@ -859,11 +852,6 @@ void MainWindow::on_twItemClicked() {
     stra = item->parent()->text(0);
   }
   tw->headerItem()->setText(0, "" + tr("Date") + "  " + CurrentYear);
-  mui->tabCharts->setTabText(0, stra.split(" ").at(1));
-  mui->tabCharts->setTabText(1, stra.split(" ").at(2));
-
-  mui->btnChartMonth->setText(tabChart->tabText(0));
-  mui->btnChartDay->setText(tabChart->tabText(1));
 
   // top item
   if (item->childCount() > 0) {
@@ -885,17 +873,17 @@ void MainWindow::on_twItemClicked() {
     max_day = getMaxDay(sy, sm);
   }
 
-  if (tabChart->currentIndex() == 0) {
+  if (nMainChartType == 0) {
     QString str = stra + " " + CurrentYear;
     QString strYearMonth = get_Year(str) + get_Month(str);
     if (!isTabChanged) {
       if (strYearMonth == CurrentYearMonth) return;
     } else
       isTabChanged = false;
-    startRead(str);
+    startRead(strDate);
   }
 
-  if (tabChart->currentIndex() == 1) {
+  if (nMainChartType == 1) {
     if (!isTabChanged) {
       if (parentItem != pItem) {
         startRead(strDate);
@@ -1261,21 +1249,9 @@ void MainWindow::on_actionFind_triggered() { on_btnFind_clicked(); }
 
 void MainWindow::on_btnTodo_clicked() { m_Todo->openTodo(); }
 
-void MainWindow::on_rbFreq_clicked() {
-  tabChart->setTabEnabled(1, true);
-  isrbFreq = true;
-  CurrentYearMonth = "";
-  parentItem = NULL;
-  m_Method->clickMainDateData();
-}
+void MainWindow::on_rbFreq_clicked() {}
 
-void MainWindow::on_rbAmount_clicked() {
-  tabChart->setTabEnabled(1, true);
-  isrbFreq = false;
-  CurrentYearMonth = "";
-  parentItem = NULL;
-  m_Method->clickMainDateData();
-}
+void MainWindow::on_rbAmount_clicked() {}
 
 void MainWindow::paintEvent(QPaintEvent* event) {
   Q_UNUSED(event);
@@ -1319,11 +1295,7 @@ void MainWindow::on_actionPreferences_triggered() {
   m_Preferences->openPreferences();
 }
 
-void MainWindow::on_tabCharts_currentChanged(int index) {
-  if (mui->rbSteps->isChecked() || loading || index < 0) return;
-
-  m_Method->clickMainDateData();
-}
+void MainWindow::on_tabCharts_currentChanged(int index) {}
 
 void MainWindow::on_btnSteps_clicked() { m_Steps->openStepsUI(); }
 
@@ -1341,9 +1313,6 @@ void MainWindow::init_Instance() {
   if (defaultFontFamily == "") defaultFontFamily = this->font().family();
 
   tabData = mui->tabWidget;
-
-  tabChart = new QTabWidget;
-  tabChart = mui->tabCharts;
 
   m_Method = new Method(this);
 
@@ -2258,23 +2227,9 @@ void MainWindow::on_btnClear_clicked() { mui->editTodo->clear(); }
 
 void MainWindow::on_btnModify_clicked() { m_Todo->reeditText(); }
 
-void MainWindow::on_btnChartMonth_clicked() {
-  isTabChanged = true;
-  tabChart->setCurrentIndex(0);
-  m_Method->setToolButtonQss(mui->btnChartMonth, 5, 3, "#FF0000", "#FFFFFF",
-                             "#FF0000", "#FFFFFF", "#FF5555", "#FFFFFF");
-  m_Method->setToolButtonQss(mui->btnChartDay, 5, 3, "#455364", "#FFFFFF",
-                             "#455364", "#FFFFFF", "#555364", "#FFFFFF");
-}
+void MainWindow::on_btnChartMonth_clicked() {}
 
-void MainWindow::on_btnChartDay_clicked() {
-  isTabChanged = true;
-  tabChart->setCurrentIndex(1);
-  m_Method->setToolButtonQss(mui->btnChartDay, 5, 3, "#FF0000", "#FFFFFF",
-                             "#FF0000", "#FFFFFF", "#FF5555", "#FFFFFF");
-  m_Method->setToolButtonQss(mui->btnChartMonth, 5, 3, "#455364", "#FFFFFF",
-                             "#455364", "#FFFFFF", "#555364", "#FFFFFF");
-}
+void MainWindow::on_btnChartDay_clicked() {}
 
 void MainWindow::on_btnTabMoveUp_clicked() {
   if (tabData->count() == 0) return;
@@ -2694,12 +2649,13 @@ void MainWindow::ReadChartData() {
   strY = get_Year(readDate);
   strM = get_Month(readDate);
 
-  if (tabChart->currentIndex() == 0) {
+  if (nMainChartType == 0) {
     drawMonthChart();
   }
-  if (tabChart->currentIndex() == 1) {
+  if (nMainChartType == 1) {
     drawDayChart();
   }
+
   get_Today(tw);
   init_Stats(tw);
 }

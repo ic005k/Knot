@@ -238,18 +238,15 @@ void Preferences::initOptions() {
 #else
 
   if (!devMode) {
-    mui->f_charts->hide();
     mui->qwMainDate->hide();
     mui->qwMainEvent->hide();
     mui->btnSteps->hide();
-    mui->btnChart->hide();
+
     mui->btnReader->hide();
     mui->btnAdd->hide();
     mui->btnDel->hide();
     mui->btnFind->hide();
-    mui->btnModifyRecord->hide();
-    mui->btnReport->hide();
-    mui->f_cw->hide();
+
     mui->qwMainTab->hide();
     mui->btnSelTab->hide();
     mui->lblStats->hide();

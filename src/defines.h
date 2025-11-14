@@ -50,7 +50,7 @@ inline Notes* m_Notes;
 inline NotesList* m_NotesList;
 inline StepsOptions* m_StepsOptions;
 inline Steps* m_Steps;
-inline QTabWidget *tabData, *tabChart;
+inline QTabWidget* tabData;
 inline CategoryList* m_CategoryList;
 inline ColorDialog* colorDlg;
 inline PrintPDF* m_PrintPDF;
@@ -81,6 +81,8 @@ inline QList<double> doubleList;
 inline int fontSize, red, iPage, sPos, totallines, s_y1, s_m1, s_d1, s_y2, s_m2,
     s_d2, totalPages, currentPage, infoProgBarValue, infoProgBarMax,
     currentTabIndex, today;
+
+inline int nMainChartType = 0;
 
 inline int chartMax = 5;
 inline int baseLines = 50;

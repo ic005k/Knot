@@ -39,5 +39,6 @@
         <file>src/qmlsrc/test.qml</file>
         <file>src/qmlsrc/DateTimePicker.qml</file>
         <file>src/qmlsrc/SetTodoAlarm.qml</file>
+        <file>src/qmlsrc/mainchart.qml</file>
     </qresource>
 </RCC>

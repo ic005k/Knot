@@ -327,8 +327,8 @@ static void JavaNotify_15() {
   }
 
   if (!mui->frameMain->isHidden()) {
-    if (!mui->f_charts->isHidden()) {
-      mui->btnChart->click();
+    if (!mui->qwMainChart->isHidden()) {
+      QTimer::singleShot(100, mw_one, []() { mw_one->on_btnChart_clicked(); });
       return;
     }
 

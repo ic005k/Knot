@@ -555,6 +555,8 @@ Rectangle {
             margins: 4
         }
 
+        boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
+
         model: ListModel {
             id: listmain
 

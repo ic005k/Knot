@@ -405,6 +405,7 @@ Rectangle {
                         icon.source: "qrc:/res/chart.svg"
                         icon.width: 20
                         icon.height: 20
+                        visible: true
 
                         onClicked: {
                             mw_one.on_btnChart_clicked()
@@ -449,6 +450,8 @@ Rectangle {
             fill: parent
             margins: 4
         }
+
+        boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
 
         model: ListModel {
             id: listmain

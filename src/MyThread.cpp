@@ -41,11 +41,11 @@ void ReadChartThread::run() {
 }
 
 void MainWindow::readChartDone() {
-  if (tabChart->currentIndex() == 0) {
-    m_MainHelper->initChartMonth();
+  if (nMainChartType == 0) {
+    // m_MainHelper->initChartMonth();
   }
-  if (tabChart->currentIndex() == 1) {
-    m_MainHelper->initChartDay();
+  if (nMainChartType == 1) {
+    // m_MainHelper->initChartDay();
   }
 
   if (isShowDetails)
@@ -53,6 +53,8 @@ void MainWindow::readChartDone() {
   else
     mui->lblStats->setText(strStats);
   isReadEnd = true;
+
+  qDebug() << "Read Chart End ..." << PointList;
 }
 
 SaveThread::SaveThread(QObject* parent) : QThread{parent} {}

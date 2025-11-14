@@ -827,7 +827,7 @@ class MainWindow : public QMainWindow {
   int countOne = 0;
 
   void on_btnHideKey_clicked();
-  void init_ChartWidget();
+  void initChartWidget();
 
   void resetWinPos();
 
@@ -838,6 +838,8 @@ class MainWindow : public QMainWindow {
   QString strTime, strAmount, strCategory, strDetails;
 
   void init_Thread_Timer();
+
+ signals:
 };
 
 #endif  // MAINWINDOW_H

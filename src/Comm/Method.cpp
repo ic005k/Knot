@@ -568,8 +568,8 @@ void Method::clickMainDate() {
 
   QTreeWidget* tw = mw_one->get_tw(mui->tabWidget->currentIndex());
   int maindateIndex = getCurrentIndexFromQW(mui->qwMainDate);
-  int maindateCount = getCountFromQW(mui->qwMainDate);
-  int topIndex = tw->topLevelItemCount() - maindateCount + maindateIndex;
+  // int maindateCount = getCountFromQW(mui->qwMainDate);
+  int topIndex = tw->topLevelItemCount() - maindateIndex - 1;
 
   if (topIndex < 0) return;
 

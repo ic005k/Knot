@@ -70,30 +70,13 @@ void MainHelper::clickBtnChart() {
   mw_one->axisY->setTickCount(7);
   mw_one->axisY2->setTickCount(7);
 
-  if (mui->f_charts->isHidden()) {
+  if (mui->qwMainChart->isHidden()) {
     mui->qwMainDate->hide();
     mui->qwMainEvent->hide();
-
-    mui->f_charts->setMaximumHeight(mw_one->height());
-    mui->f_charts->show();
-    mui->btnChartDay->show();
-    mui->btnChartMonth->show();
-    mui->rbAmount->show();
-    mui->rbFreq->show();
-    mui->rbSteps->show();
-    mui->f_cw->show();
-    mui->btnChart->show();
+    mui->qwMainChart->show();
 
   } else {
-    mui->f_charts->setMaximumHeight(0);
-    mui->f_charts->hide();
-    mui->rbAmount->hide();
-    mui->rbFreq->hide();
-    mui->rbSteps->hide();
-    mui->btnChartDay->hide();
-    mui->btnChartMonth->hide();
-    mui->f_cw->hide();
-
+    mui->qwMainChart->hide();
     mui->qwMainDate->show();
     mui->qwMainEvent->show();
   }
@@ -509,6 +492,13 @@ void MainHelper::initMainQW() {
   mui->qwMainEvent->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/mainevent.qml")));
 
+  // MainChart
+  mui->qwMainChart->hide();
+  mui->qwMainChart->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwMainChart->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwMainChart->setSource(
+      QUrl(QStringLiteral("qrc:/src/qmlsrc/mainchart.qml")));
+
   mui->qwNotesTree->rootContext()->setContextProperty("fontSize", fontSize);
   mui->qwNotesTree->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/tree_main.qml")));
@@ -580,7 +570,7 @@ void MainHelper::init_UIWidget() {
   int nFontHeight = fontMetrics.height();
   int nHeight = nFontHeight * 1.5;
   mui->tabWidget->tabBar()->setFixedHeight(nHeight);
-  mui->tabWidget->setStyleSheet(mui->tabCharts->styleSheet());
+
   mui->tabWidget->setFixedHeight(mui->tabWidget->tabBar()->height() + 0);
   if (nHeight <= 36) nHeight = 36;
   mui->qwMainTab->setFixedHeight(nHeight);
@@ -612,12 +602,6 @@ void MainHelper::init_UIWidget() {
   mui->frameReport->hide();
   mui->frameSearch->hide();
   mui->frameBakList->hide();
-
-  mui->btnReport->hide();
-  mui->btnChart->hide();
-  mui->btnModifyRecord->hide();
-  mui->btnMove->hide();
-  mui->f_cw->hide();
 
   mui->frameViewCate->hide();
   mui->frameTabRecycle->hide();
@@ -712,12 +696,6 @@ void MainHelper::init_UIWidget() {
       "}");
   mui->progPage->setFixedHeight(4);
 
-  mui->tabCharts->tabBar()->hide();
-  m_Method->setToolButtonQss(mui->btnChartMonth, 5, 3, "#FF0000", "#FFFFFF",
-                             "#FF0000", "#FFFFFF", "#FF5555", "#FFFFFF");
-  m_Method->setToolButtonQss(mui->btnChartDay, 5, 3, "#455364", "#FFFFFF",
-                             "#455364", "#FFFFFF", "#555364", "#FFFFFF");
-
   int nIConFontSize;
 #ifdef Q_OS_ANDROID
   nIConFontSize = 12;
@@ -728,7 +706,7 @@ void MainHelper::init_UIWidget() {
   f.setPointSize(nIConFontSize);
   mui->btnTodo->setFont(f);
   mui->btnSteps->setFont(f);
-  mui->btnChart->setFont(f);
+
   mui->btnReader->setFont(f);
   mui->btnNotes->setFont(f);
   mui->btnSelTab->setFont(f);
@@ -740,10 +718,7 @@ void MainHelper::init_UIWidget() {
   mui->btnSync->setFont(f);
   mui->btnFind->setFont(f);
 
-  mui->btnReport->setFont(f);
   mui->btnFind->setFont(f);
-  mui->btnModifyRecord->setFont(f);
-  mui->btnMove->setFont(f);
 
   f.setBold(true);
   mui->lblSyncNote->setFont(f);
@@ -840,12 +815,10 @@ void MainHelper::startBackgroundTaskUpdateBakFileList() {
 void MainHelper::init_ButtonStyle() {
   m_Method->set_ToolButtonStyle(mw_one);
   mui->btnMenu->setStyleSheet("border:none");
-  mui->btnModifyRecord->setStyleSheet("border:none");
-  mui->btnMove->setStyleSheet("border:none");
 
   mui->btnTodo->setStyleSheet("border:none");
   mui->btnSteps->setStyleSheet("border:none");
-  mui->btnChart->setStyleSheet("border:none");
+
   mui->btnReader->setStyleSheet("border:none");
   mui->btnNotes->setStyleSheet("border:none");
   mui->btnAdd->setStyleSheet("border:none");
@@ -853,7 +826,7 @@ void MainHelper::init_ButtonStyle() {
   mui->btnPasteTodo->setStyleSheet("border:none");
   mui->btnSync->setStyleSheet("border:none");
   mui->btnFind->setStyleSheet("border:none");
-  mui->btnReport->setStyleSheet("border:none");
+
   mui->btnSelTab->setStyleSheet("border:none");
 
   // Todo
@@ -1078,8 +1051,6 @@ void MainHelper::init_Theme() {
   if (!isDark) {
     mui->f_Menu->setStyleSheet("background-color: rgb(243,243,243);");
     mui->f_Btn->setStyleSheet("background-color: rgb(243,243,243);");
-    mui->f_cw->setStyleSheet("background-color: rgb(243,243,243);");
-    mui->f_charts->setStyleSheet("background-color: rgb(243,243,243);");
 
     mw_one->chartMonth->setTheme(QChart::ChartThemeLight);
     mw_one->chartDay->setTheme(QChart::ChartThemeLight);
@@ -1087,16 +1058,13 @@ void MainHelper::init_Theme() {
     mui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
     mui->btnClear->setIcon(QIcon(":/res/clear.png"));
 
-    mui->btnModifyRecord->setIcon(QIcon(":/res/edit.svg"));
-    mui->btnMove->setIcon(QIcon(":/res/move.svg"));
-
     mui->btnReader->setIcon(QIcon(":/res/reader.svg"));
     mui->btnTodo->setIcon(QIcon(":/res/todo.svg"));
     mui->btnSteps->setIcon(QIcon(":/res/steps.svg"));
     mui->btnNotes->setIcon(QIcon(":/res/note.svg"));
-    mui->btnChart->setIcon(QIcon(":/res/chart.svg"));
+
     mui->btnFind->setIcon(QIcon(":/res/find.svg"));
-    mui->btnReport->setIcon(QIcon(":/res/report.svg"));
+
     mui->btnSelTab->setIcon(QIcon(":/res/tab.svg"));
 
     mui->btnMenu->setIcon(QIcon(":/res/mainmenu.svg"));
@@ -1114,8 +1082,6 @@ void MainHelper::init_Theme() {
   } else {
     mui->f_Menu->setStyleSheet("background-color: #19232D;");
     mui->f_Btn->setStyleSheet("background-color: #19232D;");
-    mui->f_cw->setStyleSheet("background-color: #19232D;");
-    mui->f_charts->setStyleSheet("background-color: #19232D;");
 
     mw_one->chartMonth->setTheme(QChart::ChartThemeDark);
     mw_one->chartDay->setTheme(QChart::ChartThemeDark);
@@ -1123,16 +1089,13 @@ void MainHelper::init_Theme() {
     mui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
     mui->btnClear->setIcon(QIcon(":/res/clear.png"));
 
-    mui->btnReport->setIcon(QIcon(":/res/report_l.svg"));
     mui->btnFind->setIcon(QIcon(":/res/find_l.png"));
-    mui->btnModifyRecord->setIcon(QIcon(":/res/edit_l.svg"));
-    mui->btnMove->setIcon(QIcon(":/res/move_l.svg"));
 
     mui->btnReader->setIcon(QIcon(":/res/reader_l.svg"));
     mui->btnTodo->setIcon(QIcon(":/res/todo_l.png"));
     mui->btnSteps->setIcon(QIcon(":/res/steps_l.svg"));
     mui->btnNotes->setIcon(QIcon(":/res/note_l.svg"));
-    mui->btnChart->setIcon(QIcon(":/res/chart_l.svg"));
+
     mui->btnSelTab->setIcon(QIcon(":/res/tab_l.svg"));
 
     mui->btnMenu->setIcon(QIcon(":/res/mainmenu_l.svg"));
@@ -1370,14 +1333,10 @@ void MainHelper::initChartMonth() {
                                  "    X:" + tr("Days"));
   } else {
     mw_one->axisY->setRange(0, yMaxMonth);
-    if (mui->rbFreq->isChecked())
-      mw_one->chartMonth->setTitle(mw_one->CurrentYear + "  Y:" + tr("Freq") +
-                                   "    X:" + tr("Days"));
-
-    if (mui->rbAmount->isChecked())
-      mw_one->chartMonth->setTitle(mw_one->CurrentYear + "  Y:" + tr("Amount") +
-                                   "    X:" + tr("Days"));
   }
+
+  qDebug() << "月份范围：" << 1 << "-" << yMaxMonth;
+  qDebug() << "数据：" << PointList;
 }
 
 void MainHelper::initChartDay() {
@@ -1399,14 +1358,6 @@ void MainHelper::initChartDay() {
   mw_one->axisX2->setTickCount(7);
 
   mw_one->axisY2->setRange(0, yMaxDay + 1);
-
-  if (mui->rbFreq->isChecked())
-    mw_one->chartDay->setTitle(mw_one->CurrentYear + "  Y:" + tr("Freq") +
-                               "    X:" + tr("Time"));
-
-  if (mui->rbAmount->isChecked())
-    mw_one->chartDay->setTitle(mw_one->CurrentYear + "  Y:" + tr("Amount") +
-                               "    X:" + tr("Time"));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1516,13 +1467,15 @@ void MainWindow::reloadMain() {
 
     topitem = text0;
 
-    m_Method->addItemToQW(mui->qwMainDate, text0, text1, text2, text3, 0);
+    m_Method->insertItem(mui->qwMainDate, text0, text1, text2, text3, 0);
   }
 
-  m_Method->gotoEnd(mui->qwMainDate);
+  m_Method->setCurrentIndexFromQW(mui->qwMainDate, 0);
+
+  /*m_Method->gotoEnd(mui->qwMainDate);
   int count = m_Method->getCountFromQW(mui->qwMainDate);
   m_Method->setCurrentIndexFromQW(mui->qwMainDate, count - 1);
-  m_Method->setScrollBarPos(mui->qwMainDate, 1.0);
+  m_Method->setScrollBarPos(mui->qwMainDate, 1.0);*/
 
   m_Method->clickMainDate();
 }
@@ -1530,9 +1483,6 @@ void MainWindow::reloadMain() {
 void MainWindow::on_rbSteps_clicked() {
   int count = m_Steps->getCount();
   if (count <= 0) return;
-
-  tabChart->setCurrentIndex(0);
-  tabChart->setTabEnabled(1, false);
 
   PointList.clear();
   doubleList.clear();
@@ -1646,28 +1596,11 @@ void MainWindow::init_Options() {
   m_Preferences->ui->btnReStart->hide();
 }
 
-void MainWindow::init_ChartWidget() {
+void MainWindow::initChartWidget() {
   mui->centralwidget->layout()->setContentsMargins(1, 0, 1, 2);
   mui->centralwidget->layout()->setSpacing(1);
-  mui->f_charts->setContentsMargins(0, 0, 0, 0);
 
-  mui->f_charts->layout()->setContentsMargins(0, 0, 0, 0);
-  mui->f_charts->layout()->setSpacing(0);
   frameChartHeight = 105;
-  mui->f_charts->setFixedHeight(frameChartHeight);
-  tabChart->setCurrentIndex(0);
-
-  mui->glMonth->layout()->setContentsMargins(0, 0, 0, 0);
-  mui->glMonth->layout()->setSpacing(0);
-  mui->glDay->layout()->setContentsMargins(0, 0, 0, 0);
-  mui->glDay->layout()->setSpacing(0);
-
-  mui->f_charts->hide();
-  mui->btnChartDay->hide();
-  mui->btnChartMonth->hide();
-  mui->rbAmount->hide();
-  mui->rbFreq->hide();
-  mui->rbSteps->hide();
 
   int a0 = 0;
   int a1 = -2;
@@ -1675,7 +1608,7 @@ void MainWindow::init_ChartWidget() {
   chartMonth = new QChart();
   chartview = new QChartView(chartMonth);
   chartview->installEventFilter(this);
-  mui->glMonth->addWidget(chartview);
+
   chartview->setRenderHint(QPainter::Antialiasing);
   chartMonth->legend()->hide();
   chartMonth->setMargins(QMargins(a0, a0, a0, a0));
@@ -1696,7 +1629,7 @@ void MainWindow::init_ChartWidget() {
   chartDay = new QChart();
   chartview1 = new QChartView(chartDay);
   chartview1->installEventFilter(this);
-  mui->glDay->addWidget(chartview1);
+
   chartview1->setRenderHint(QPainter::Antialiasing);
   chartDay->legend()->hide();
   chartDay->setMargins(QMargins(a0, a0, a0, a0));
@@ -1708,19 +1641,22 @@ void MainWindow::init_ChartWidget() {
   m_scatterSeries2 = new QScatterSeries();
   m_scatterSeries2_1 = new QScatterSeries();
 
+  chartview->hide();
+  chartview1->hide();
+
   // 散点图(用于边框)
   m_scatterSeries2->setMarkerShape(
       QScatterSeries::MarkerShapeCircle);                 // 圆形的点
   m_scatterSeries2->setBorderColor(QColor(255, 0, 0));    // 边框颜色
   m_scatterSeries2->setBrush(QBrush(QColor(255, 0, 0)));  // 背景颜色
-  m_scatterSeries2->setMarkerSize(5);                     // 点大小
+  m_scatterSeries2->setMarkerSize(9);                     // 点大小
 
   // 散点图(用于中心)
   m_scatterSeries2_1->setMarkerShape(
       QScatterSeries::MarkerShapeCircle);         // 圆形的点
   m_scatterSeries2_1->setBorderColor(Qt::red);    // 边框颜色
   m_scatterSeries2_1->setBrush(QBrush(Qt::red));  // 背景颜色
-  m_scatterSeries2_1->setMarkerSize(4);           // 点大小
+  m_scatterSeries2_1->setMarkerSize(8);           // 点大小
   connect(m_scatterSeries2_1, &QScatterSeries::hovered, this,
           &MainWindow::slotPointHoverd);  // 用于鼠标移动到点上显示数值
   m_valueLabel = new QLabel(this);
