@@ -208,26 +208,8 @@ class MainWindow : public QMainWindow {
   int testCount = 0;
   int smallCount = 0;
 
-  ulong timeCount = 0;
-  QChartView* chartview;
-  QChartView* chartview1;
-  QLabel* m_valueLabel;
-  QBarCategoryAxis* axisX;
-  QValueAxis* axisY;
-  QValueAxis* axisX2;
-  QValueAxis* axisY2;
-  int yScale = 3;
-
   qlonglong CurTableCount = 0;
 
-  QChart* chartMonth;
-  QChart* chartDay;
-  QBarSeries* barSeries;
-  QSplineSeries* series;
-  QScatterSeries* m_scatterSeries;
-  QSplineSeries* series2;
-  QScatterSeries* m_scatterSeries2;
-  QScatterSeries* m_scatterSeries2_1;
   static void get_Today(QTreeWidget*);
   SaveThread* mySaveThread;
   ReadChartThread* myReadChartThread;
@@ -441,8 +423,6 @@ class MainWindow : public QMainWindow {
   void on_tabCharts_currentChanged(int index);
 
   void on_btnSteps_clicked();
-
-  void slotPointHoverd(const QPointF& point, bool state);
 
   void on_rbSteps_clicked();
 
@@ -831,7 +811,6 @@ class MainWindow : public QMainWindow {
   int countOne = 0;
 
   void on_btnHideKey_clicked();
-  void initChartWidget();
 
   void resetWinPos();
 

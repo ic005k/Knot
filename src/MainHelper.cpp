@@ -43,12 +43,6 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
 
   m_Notes->eventFilterQwNote(watch, evn);
 
-  if (watch == mw_one->chartview || watch == mw_one->chartview1) {
-    if (event->type() == QEvent::MouseButtonDblClick) {
-      mw_one->on_btnChart_clicked();
-    }
-  }
-
   if (evn->type() == QEvent::KeyPress) {
     QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
 
@@ -67,9 +61,6 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
 }
 
 void MainHelper::clickBtnChart() {
-  mw_one->axisY->setTickCount(7);
-  mw_one->axisY2->setTickCount(7);
-
   if (mui->qwMainChart->isHidden()) {
     mui->qwMainDate->hide();
     mui->qwMainEvent->hide();
@@ -1060,9 +1051,6 @@ void MainHelper::init_Theme() {
     mui->f_Menu->setStyleSheet("background-color: rgb(243,243,243);");
     mui->f_Btn->setStyleSheet("background-color: rgb(243,243,243);");
 
-    mw_one->chartMonth->setTheme(QChart::ChartThemeLight);
-    mw_one->chartDay->setTheme(QChart::ChartThemeLight);
-
     mui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
     mui->btnClear->setIcon(QIcon(":/res/clear.png"));
 
@@ -1084,15 +1072,9 @@ void MainHelper::init_Theme() {
 
     mui->editDetails->setStyleSheet(mui->editTodo->styleSheet());
 
-    mw_one->chartMonth->setTheme(QChart::ChartThemeLight);
-    mw_one->chartDay->setTheme(QChart::ChartThemeLight);
-
   } else {
     mui->f_Menu->setStyleSheet("background-color: #19232D;");
     mui->f_Btn->setStyleSheet("background-color: #19232D;");
-
-    mw_one->chartMonth->setTheme(QChart::ChartThemeDark);
-    mw_one->chartDay->setTheme(QChart::ChartThemeDark);
 
     mui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
     mui->btnClear->setIcon(QIcon(":/res/clear.png"));
@@ -1114,9 +1096,6 @@ void MainHelper::init_Theme() {
     m_Method->setEditDarkMode(mui->editTodo);
 
     mui->editDetails->setStyleSheet(mui->editTodo->styleSheet());
-
-    mw_one->chartMonth->setTheme(QChart::ChartThemeDark);
-    mw_one->chartDay->setTheme(QChart::ChartThemeDark);
   }
 
   mui->editTodo->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
@@ -1149,23 +1128,6 @@ void MainHelper::init_Theme() {
 
   // Notes ToolsBar
   mui->qwNoteTools->rootContext()->setContextProperty("isDark", isDark);
-
-  // Chart
-  QFont font1;
-#ifdef Q_OS_ANDROID
-  font1.setPointSize(10);
-#else
-  font1.setPointSize(10);
-#endif
-  font1.setBold(true);
-  mw_one->chartMonth->setTitleFont(font1);
-  mw_one->chartDay->setTitleFont(font1);
-  mw_one->axisX->setLabelsFont(font1);
-  mw_one->axisY->setLabelsFont(font1);
-  mw_one->axisY->setTickCount(mw_one->yScale);
-  mw_one->axisX2->setLabelsFont(font1);
-  mw_one->axisY2->setLabelsFont(font1);
-  mw_one->axisY2->setTickCount(mw_one->yScale);
 
   mui->lblNoteGraphView->setWordWrap(true);
   mui->lblNoteGraphView->adjustSize();
@@ -1242,130 +1204,6 @@ void MainHelper::on_AddRecord() {
   mui->frameEditRecord->show();
 
   // tmeFlash->start(300);
-}
-
-void MainHelper::initChartMonth() {
-  if (loading) return;
-
-  int count = freqPointList.count();
-  if (count == 0) {
-    return;
-  }
-
-  mw_one->barSeries->clear();
-  mw_one->series->clear();
-  mw_one->m_scatterSeries->clear();
-  bool isOne = true;
-
-  QBarSet* setY = new QBarSet("Y");
-  QStringList categories;
-
-  for (int i = 0; i < count; i++) {
-    if (freqPointList.at(i).y() != 1) isOne = false;
-  }
-
-  if (isOne) {
-    mw_one->series->clear();
-    mw_one->m_scatterSeries->clear();
-    QList<QPointF> tempfreqPointList;
-    for (int i = 0; i < count; i++) {
-      double y0 = 0.0;
-      QString str = listM.at(i);
-      QStringList list1 = str.split(".");
-      if (list1.count() == 2) {
-        QStringList list = list1.at(1).split(":");
-        int t = 0;
-        if (list.count() == 3) {
-          QString a, b, c;
-          a = list.at(0);
-          b = list.at(1);
-          c = list.at(2);
-          int a1, b1;
-          a1 = a.toInt();
-          b1 = b.toInt();
-          t = a1 * 3600 + b1 * 60 + c.toInt();
-        }
-        y0 = (double)t / 3600;
-      }
-
-      tempfreqPointList.append(QPointF(freqPointList.at(i).x(), y0));
-    }
-    freqPointList.clear();
-    freqPointList = tempfreqPointList;
-  }
-
-  double maxValue = *std::max_element(doubleList.begin(), doubleList.end());
-  double max;
-  if (isrbFreq) {
-    max = chartMax;
-    if (maxValue >= max) {
-      max = maxValue;
-    }
-
-  } else {
-    max = 50.00;
-    if (maxValue >= max) max = maxValue;
-  }
-
-  yMaxMonth = max;
-
-  QList<double> dList, tempDList;
-  for (int i = 0; i < freqPointList.count(); i++) {
-    tempDList.append(freqPointList.at(i).y());
-    categories.append(QString::number(freqPointList.at(i).x()));
-  }
-  for (int i = 0; i < mw_one->max_day; i++) {
-    dList.append(0);
-  }
-  for (int i = 0; i < categories.count(); i++) {
-    for (int n = 0; n < mw_one->max_day; n++) {
-      if (categories.at(i) == QString::number(n + 1)) {
-        dList.removeAt(n);
-        dList.insert(n, freqPointList.at(i).y());
-      }
-    }
-  }
-
-  for (int i = 0; i < mw_one->max_day; i++) setY->append(dList.at(i));
-  categories.clear();
-  for (int i = 0; i < mw_one->max_day; i++)
-    categories.append(QString::number(i + 1));
-  mw_one->barSeries->append(setY);
-  mw_one->axisX->setRange("", QString::number(mw_one->max_day));
-  mw_one->axisX->append(categories);
-  mw_one->axisY->setRange(0, yMaxMonth);
-
-  if (isOne) {
-    mw_one->axisY->setRange(0, 24);
-    mw_one->chartMonth->setTitle(mw_one->CurrentYear + "  Y:" + tr("Time") +
-                                 "    X:" + tr("Days"));
-  } else {
-    mw_one->axisY->setRange(0, yMaxMonth);
-  }
-
-  qDebug() << "月份范围：" << 1 << "-" << yMaxMonth;
-  qDebug() << "数据：" << freqPointList;
-}
-
-void MainHelper::initChartDay() {
-  if (loading) return;
-  mw_one->series2->clear();
-  mw_one->m_scatterSeries2->clear();
-  mw_one->m_scatterSeries2_1->clear();
-
-  int count = freqPointList.count();
-  if (count == 0) return;
-  for (int i = 0; i < count; i++) {
-    mw_one->series2->append(freqPointList.at(i));
-    mw_one->m_scatterSeries2->append(freqPointList.at(i));
-    mw_one->m_scatterSeries2_1->append(freqPointList.at(i));
-  }
-
-  mw_one->axisX2->setRange(0, 24);
-  mw_one->axisX2->setTickType(QValueAxis::TicksFixed);
-  mw_one->axisX2->setTickCount(7);
-
-  mw_one->axisY2->setRange(0, yMaxDay + 1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1513,9 +1351,6 @@ void MainWindow::on_rbSteps_clicked() {
       doubleList.append(steps);
     }
   }
-
-  m_MainHelper->initChartMonth();
-  chartMonth->setTitle("Y:" + tr("Steps") + "    X:" + tr("Days"));
 }
 
 QStringList MainWindow::get_MonthList(QString strY, QString strM) {
@@ -1605,101 +1440,6 @@ void MainWindow::init_Options() {
 
   m_Preferences->initOptions();
   m_Preferences->ui->btnReStart->hide();
-}
-
-void MainWindow::initChartWidget() {
-  mui->centralwidget->layout()->setContentsMargins(1, 0, 1, 2);
-  mui->centralwidget->layout()->setSpacing(1);
-
-  frameChartHeight = 105;
-
-  int a0 = 0;
-  int a1 = -2;
-  // Month
-  chartMonth = new QChart();
-  chartview = new QChartView(chartMonth);
-  chartview->installEventFilter(this);
-
-  chartview->setRenderHint(QPainter::Antialiasing);
-  chartMonth->legend()->hide();
-  chartMonth->setMargins(QMargins(a0, a0, a0, a0));
-  chartMonth->setContentsMargins(a1, a1, a1, a1);
-  chartMonth->setAnimationOptions(QChart::SeriesAnimations);
-
-  barSeries = new QBarSeries();
-  series = new QSplineSeries();
-  series->setPen(QPen(Qt::blue, 3, Qt::SolidLine));
-  m_scatterSeries = new QScatterSeries();
-  m_scatterSeries->setMarkerShape(QScatterSeries::MarkerShapeCircle);
-  m_scatterSeries->setMarkerSize(10);
-  chartMonth->addSeries(barSeries);
-  chartMonth->addSeries(series);
-  chartMonth->addSeries(m_scatterSeries);
-
-  // Day
-  chartDay = new QChart();
-  chartview1 = new QChartView(chartDay);
-  chartview1->installEventFilter(this);
-
-  chartview1->setRenderHint(QPainter::Antialiasing);
-  chartDay->legend()->hide();
-  chartDay->setMargins(QMargins(a0, a0, a0, a0));
-  chartDay->setContentsMargins(a1, a1, a1, a1);
-  chartDay->setAnimationOptions(QChart::SeriesAnimations);
-
-  series2 = new QSplineSeries(chartDay);
-  series2->setPen(QPen(Qt::blue, 2, Qt::SolidLine));
-  m_scatterSeries2 = new QScatterSeries();
-  m_scatterSeries2_1 = new QScatterSeries();
-
-  chartview->hide();
-  chartview1->hide();
-
-  // 散点图(用于边框)
-  m_scatterSeries2->setMarkerShape(
-      QScatterSeries::MarkerShapeCircle);                 // 圆形的点
-  m_scatterSeries2->setBorderColor(QColor(255, 0, 0));    // 边框颜色
-  m_scatterSeries2->setBrush(QBrush(QColor(255, 0, 0)));  // 背景颜色
-  m_scatterSeries2->setMarkerSize(9);                     // 点大小
-
-  // 散点图(用于中心)
-  m_scatterSeries2_1->setMarkerShape(
-      QScatterSeries::MarkerShapeCircle);         // 圆形的点
-  m_scatterSeries2_1->setBorderColor(Qt::red);    // 边框颜色
-  m_scatterSeries2_1->setBrush(QBrush(Qt::red));  // 背景颜色
-  m_scatterSeries2_1->setMarkerSize(8);           // 点大小
-  connect(m_scatterSeries2_1, &QScatterSeries::hovered, this,
-          &MainWindow::slotPointHoverd);  // 用于鼠标移动到点上显示数值
-  m_valueLabel = new QLabel(this);
-  m_valueLabel->adjustSize();
-  m_valueLabel->setHidden(true);
-
-  chartDay->addSeries(series2);
-  chartDay->addSeries(m_scatterSeries2);
-  chartDay->addSeries(m_scatterSeries2_1);
-
-  // chartMonth->createDefaultAxes();
-  axisX = new QBarCategoryAxis();
-  chartMonth->addAxis(axisX, Qt::AlignBottom);
-  barSeries->attachAxis(axisX);
-
-  axisY = new QValueAxis();
-  chartMonth->addAxis(axisY, Qt::AlignLeft);
-  barSeries->attachAxis(axisY);
-
-  // chartDay->createDefaultAxes();
-  axisX2 = new QValueAxis();
-  chartDay->addAxis(axisX2, Qt::AlignBottom);
-  series2->attachAxis(axisX2);
-
-  axisY2 = new QValueAxis();
-  chartDay->addAxis(axisY2, Qt::AlignLeft);
-  series2->attachAxis(axisY2);
-
-  m_scatterSeries2->attachAxis(axisX2);
-  m_scatterSeries2->attachAxis(axisY2);
-  m_scatterSeries2_1->attachAxis(axisX2);
-  m_scatterSeries2_1->attachAxis(axisY2);
 }
 
 void MainWindow::readData(QTreeWidget* tw) {

@@ -33,8 +33,6 @@ MainWindow::MainWindow(QWidget* parent)
 
   m_MainHelper->initMainQW();
 
-  initChartWidget();
-
   init_TotalData();
 
   loading = false;
@@ -67,19 +65,6 @@ MainWindow::MainWindow(QWidget* parent)
   m_Preferences->setEncSyncStatusTip();
 
   initMain = false;
-}
-
-void MainWindow::slotPointHoverd(const QPointF& point, bool state) {
-  if (state) {
-    m_valueLabel->setText(QString::asprintf("%1.0f", point.y()));
-
-    QPoint curPos = mapFromGlobal(QCursor::pos());
-    m_valueLabel->move(curPos.x() - m_valueLabel->width() / 2,
-                       curPos.y() - m_valueLabel->height() * 1.5);  // 移动数值
-
-    m_valueLabel->show();
-  } else
-    m_valueLabel->hide();
 }
 
 void MainWindow::init_TotalData() {
@@ -1033,14 +1018,6 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 
   reloadMain();
 
-  series->clear();
-  m_scatterSeries->clear();
-  barSeries->clear();
-
-  series2->clear();
-  m_scatterSeries2->clear();
-  m_scatterSeries2_1->clear();
-
   isTabChanged = true;
 
   m_Method->clickMainDateData();
@@ -1264,13 +1241,9 @@ void MainWindow::paintEvent(QPaintEvent* event) {
   if (c_red != red) {
     red = c_red;
     if (red < 55) {
-      chartMonth->setTheme(QChart::ChartThemeDark);
-      chartDay->setTheme(QChart::ChartThemeDark);
     }
 
     else {
-      chartMonth->setTheme(QChart::ChartThemeLight);
-      chartDay->setTheme(QChart::ChartThemeLight);
     }
   }
 }

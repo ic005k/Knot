@@ -41,13 +41,6 @@ void ReadChartThread::run() {
 }
 
 void MainWindow::readChartDone() {
-  if (nMainChartType == 0) {
-    // m_MainHelper->initChartMonth();
-  }
-  if (nMainChartType == 1) {
-    // m_MainHelper->initChartDay();
-  }
-
   if (isShowDetails)
     mui->lblStats->setText(strShowDetails);
   else
@@ -56,6 +49,8 @@ void MainWindow::readChartDone() {
 
   // qDebug() << "Read Chart End ..." << freqPointList << amountList;
 
+  max_day = getMaxDay(QString::number(QDate::currentDate().year()),
+                      QString::number(QDate::currentDate().month()));
   // 1. 初始化完整数组（补0）
   QList<double> freqValues(max_day, 0.0);  // 长度max_day，全0
   QList<double> amountValues(max_day, 0.0);

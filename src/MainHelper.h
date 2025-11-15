@@ -17,9 +17,9 @@ class SliderButton;
 class MainHelper : public QDialog {
   Q_OBJECT
  public:
-  explicit MainHelper(QWidget *parent = nullptr);
+  explicit MainHelper(QWidget* parent = nullptr);
 
-  SliderButton *sliderButton;
+  SliderButton* sliderButton;
 
   QString lightPCScrollbarStyle = R"(
         /* Light Vertical Scrollbar */
@@ -73,9 +73,9 @@ class MainHelper : public QDialog {
 
   void clickBtnChart();
   void clickBtnRestoreTab();
-  bool mainEventFilter(QObject *watch, QEvent *evn);
-  QTreeWidget *init_TreeWidget(QString name);
-  void init_Menu(QMenu *mainMenu);
+  bool mainEventFilter(QObject* watch, QEvent* evn);
+  QTreeWidget* init_TreeWidget(QString name);
+  void init_Menu(QMenu* mainMenu);
   void openTabRecycle();
   void initNotesQW();
   void init_UIWidget();
@@ -87,10 +87,8 @@ class MainHelper : public QDialog {
   void importBakFileList();
   void init_Theme();
 
-  void sort_childItem(QTreeWidgetItem *item);
+  void sort_childItem(QTreeWidgetItem* item);
   void on_AddRecord();
-  void initChartDay();
-  void initChartMonth();
 
   void initMainQW();
 
@@ -134,7 +132,7 @@ class SliderButton : public QWidget {
   Q_OBJECT
   Q_PROPERTY(int sliderPosition READ getSliderPosition WRITE setSliderPosition)
  public:
-  explicit SliderButton(QWidget *parent = nullptr) : QWidget(parent) {
+  explicit SliderButton(QWidget* parent = nullptr) : QWidget(parent) {
     m_sliderPosition = 0;
     m_isDragging = false;
     m_animation = new QPropertyAnimation(this, "sliderPosition");
@@ -143,7 +141,7 @@ class SliderButton : public QWidget {
     m_tipText = tr("Slide Right to Start.");
   }
 
-  void setTipText(const QString &text) {
+  void setTipText(const QString& text) {
     m_tipText = text;
     update();
   }
@@ -152,7 +150,7 @@ class SliderButton : public QWidget {
   void sliderMovedToEnd();
 
  protected:
-  void paintEvent(QPaintEvent *event) override {
+  void paintEvent(QPaintEvent* event) override {
     Q_UNUSED(event);
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
@@ -179,7 +177,7 @@ class SliderButton : public QWidget {
     painter.drawText(backgroundRect, Qt::AlignCenter, m_tipText);
   }
 
-  void mousePressEvent(QMouseEvent *event) override {
+  void mousePressEvent(QMouseEvent* event) override {
     if (event->button() == Qt::LeftButton) {
       int sliderWidth = height();
       QRect sliderRect(m_sliderPosition, 0, sliderWidth, height());
@@ -190,7 +188,7 @@ class SliderButton : public QWidget {
     }
   }
 
-  void mouseMoveEvent(QMouseEvent *event) override {
+  void mouseMoveEvent(QMouseEvent* event) override {
     if (m_isDragging) {
       int deltaX = static_cast<int>(event->position().x()) - m_dragStartX;
       int newPosition = m_sliderPosition + deltaX;
@@ -212,7 +210,7 @@ class SliderButton : public QWidget {
     }
   }
 
-  void mouseReleaseEvent(QMouseEvent *event) override {
+  void mouseReleaseEvent(QMouseEvent* event) override {
     Q_UNUSED(event);
     if (m_isDragging) {
       isOne = false;
@@ -242,7 +240,7 @@ class SliderButton : public QWidget {
   int m_sliderPosition;
   bool m_isDragging;
   int m_dragStartX;
-  QPropertyAnimation *m_animation;
+  QPropertyAnimation* m_animation;
   QString m_tipText;
   bool isOne = false;
 };

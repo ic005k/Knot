@@ -85,8 +85,8 @@ Item {
             legend.alignment: Qt.AlignBottom
             antialiasing: true
             theme: isDark ? ChartView.ChartThemeDark : ChartView.ChartThemeLight
-            backgroundColor: isDark ? "#1e1e1e" : "#ffffff"
-            titleColor: isDark ? "#ffffff" : "#000000"
+            //backgroundColor: isDark ? "#1e1e1e" : "#ffffff"
+            //titleColor: isDark ? "#ffffff" : "#000000"
             animationOptions: ChartView.NoAnimation // 禁用动画提高性能
 
             margins {
