@@ -243,6 +243,10 @@ class MainWindow : public QMainWindow {
   static QString get_Month(QString date);
   void init_Options();
 
+  QStringList chartCategories;
+  QList<QVariant> qmlFreqValues;
+  QList<QVariant> qmlAmountValues;
+
   AboutThis* m_AboutThis;
   EditRecord* m_EditRecord;
   Todo* m_Todo;

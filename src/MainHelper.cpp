@@ -496,6 +496,12 @@ void MainHelper::initMainQW() {
   mui->qwMainChart->hide();
   mui->qwMainChart->rootContext()->setContextProperty("isDark", isDark);
   mui->qwMainChart->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwMainChart->rootContext()->setContextProperty("chartCategories",
+                                                      mw_one->chartCategories);
+  mui->qwMainChart->rootContext()->setContextProperty("chartFreqValues",
+                                                      mw_one->qmlFreqValues);
+  mui->qwMainChart->rootContext()->setContextProperty("chartAmountValues",
+                                                      mw_one->qmlAmountValues);
   mui->qwMainChart->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/mainchart.qml")));
 
@@ -1239,7 +1245,7 @@ void MainHelper::on_AddRecord() {
 void MainHelper::initChartMonth() {
   if (loading) return;
 
-  int count = PointList.count();
+  int count = freqPointList.count();
   if (count == 0) {
     return;
   }
@@ -1253,13 +1259,13 @@ void MainHelper::initChartMonth() {
   QStringList categories;
 
   for (int i = 0; i < count; i++) {
-    if (PointList.at(i).y() != 1) isOne = false;
+    if (freqPointList.at(i).y() != 1) isOne = false;
   }
 
   if (isOne) {
     mw_one->series->clear();
     mw_one->m_scatterSeries->clear();
-    QList<QPointF> tempPointList;
+    QList<QPointF> tempfreqPointList;
     for (int i = 0; i < count; i++) {
       double y0 = 0.0;
       QString str = listM.at(i);
@@ -1280,10 +1286,10 @@ void MainHelper::initChartMonth() {
         y0 = (double)t / 3600;
       }
 
-      tempPointList.append(QPointF(PointList.at(i).x(), y0));
+      tempfreqPointList.append(QPointF(freqPointList.at(i).x(), y0));
     }
-    PointList.clear();
-    PointList = tempPointList;
+    freqPointList.clear();
+    freqPointList = tempfreqPointList;
   }
 
   double maxValue = *std::max_element(doubleList.begin(), doubleList.end());
@@ -1302,9 +1308,9 @@ void MainHelper::initChartMonth() {
   yMaxMonth = max;
 
   QList<double> dList, tempDList;
-  for (int i = 0; i < PointList.count(); i++) {
-    tempDList.append(PointList.at(i).y());
-    categories.append(QString::number(PointList.at(i).x()));
+  for (int i = 0; i < freqPointList.count(); i++) {
+    tempDList.append(freqPointList.at(i).y());
+    categories.append(QString::number(freqPointList.at(i).x()));
   }
   for (int i = 0; i < mw_one->max_day; i++) {
     dList.append(0);
@@ -1313,7 +1319,7 @@ void MainHelper::initChartMonth() {
     for (int n = 0; n < mw_one->max_day; n++) {
       if (categories.at(i) == QString::number(n + 1)) {
         dList.removeAt(n);
-        dList.insert(n, PointList.at(i).y());
+        dList.insert(n, freqPointList.at(i).y());
       }
     }
   }
@@ -1336,7 +1342,7 @@ void MainHelper::initChartMonth() {
   }
 
   qDebug() << "月份范围：" << 1 << "-" << yMaxMonth;
-  qDebug() << "数据：" << PointList;
+  qDebug() << "数据：" << freqPointList;
 }
 
 void MainHelper::initChartDay() {
@@ -1345,12 +1351,12 @@ void MainHelper::initChartDay() {
   mw_one->m_scatterSeries2->clear();
   mw_one->m_scatterSeries2_1->clear();
 
-  int count = PointList.count();
+  int count = freqPointList.count();
   if (count == 0) return;
   for (int i = 0; i < count; i++) {
-    mw_one->series2->append(PointList.at(i));
-    mw_one->m_scatterSeries2->append(PointList.at(i));
-    mw_one->m_scatterSeries2_1->append(PointList.at(i));
+    mw_one->series2->append(freqPointList.at(i));
+    mw_one->m_scatterSeries2->append(freqPointList.at(i));
+    mw_one->m_scatterSeries2_1->append(freqPointList.at(i));
   }
 
   mw_one->axisX2->setRange(0, 24);
@@ -1484,7 +1490,7 @@ void MainWindow::on_rbSteps_clicked() {
   int count = m_Steps->getCount();
   if (count <= 0) return;
 
-  PointList.clear();
+  freqPointList.clear();
   doubleList.clear();
 
   QString sm = get_Month(m_Method->setCurrentDateValue());
@@ -1501,7 +1507,7 @@ void MainWindow::on_rbSteps_clicked() {
       int day = strday.toInt();
       int steps = m_Steps->getSteps(i);
 
-      PointList.append(QPointF(day, steps));
+      freqPointList.append(QPointF(day, steps));
       doubleList.append(steps);
     }
   }
@@ -1514,7 +1520,8 @@ QStringList MainWindow::get_MonthList(QString strY, QString strM) {
   QStringList listMonth;
   if (loading) return listMonth;
   // 格式：记录第一个子项的时间
-  PointList.clear();
+  freqPointList.clear();
+  amountList.clear();
   doubleList.clear();
 
   QTreeWidget* tw = (QTreeWidget*)tabData->currentWidget();
@@ -1536,13 +1543,15 @@ QStringList MainWindow::get_MonthList(QString strY, QString strM) {
 
           double y0 = topItem->text(1).toDouble();
           doubleList.append(y0);
+          freqPointList.append(QPointF(x0, y0));
 
-          PointList.append(QPointF(x0, y0));
+          double y1 = topItem->text(2).toDouble();
+          amountList.append(QPointF(x0, y1));
         } else {
           double y0 = topItem->text(2).toDouble();
           doubleList.append(y0);
 
-          PointList.append(QPointF(x0, y0));
+          freqPointList.append(QPointF(x0, y0));
         }
       }
     }
@@ -1866,7 +1875,7 @@ void MainWindow::drawMonthChart() {
 void MainWindow::drawDayChart() {
   QTreeWidget* tw = (QTreeWidget*)tabData->currentWidget();
   if (loading) return;
-  PointList.clear();
+  freqPointList.clear();
 
   int topCount = tw->topLevelItemCount();
   if (topCount == 0) {
@@ -1938,7 +1947,7 @@ void MainWindow::drawDayChart() {
       dList.append(y);
     }
 
-    PointList.append(QPointF(x, y));
+    freqPointList.append(QPointF(x, y));
   }
 
   if (isrbFreq) {

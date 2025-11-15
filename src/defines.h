@@ -75,7 +75,8 @@ inline QString appName = "Knot";
 inline QStringList readTextList, htmlFiles, listCategory, ncxList, tempHtmlList,
     listM, ymdList;
 
-inline QList<QPointF> PointList;
+inline QList<QPointF> freqPointList;
+inline QList<QPointF> amountList;
 inline QList<double> doubleList;
 
 inline int fontSize, red, iPage, sPos, totallines, s_y1, s_m1, s_d1, s_y2, s_m2,

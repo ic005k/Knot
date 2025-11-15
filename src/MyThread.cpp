@@ -54,7 +54,54 @@ void MainWindow::readChartDone() {
     mui->lblStats->setText(strStats);
   isReadEnd = true;
 
-  qDebug() << "Read Chart End ..." << PointList;
+  qDebug() << "Read Chart End ..." << freqPointList << amountList;
+
+  // 1. 初始化完整数组（补0）
+  QList<double> freqValues(max_day, 0.0);  // 长度max_day，全0
+  QList<double> amountValues(max_day, 0.0);
+
+  // 2. 填充频次数据（有数据的日期替换0）
+  // 频次循环
+  for (int i = 0; i < freqPointList.count(); ++i) {
+    const QPointF& p = freqPointList[i];
+    int day = qRound(p.x());
+    if (day >= 1 && day <= max_day) {
+      freqValues[day - 1] = p.y();
+    }
+  }
+
+  // 3. 金额循环
+  for (int i = 0; i < amountList.count(); ++i) {
+    const QPointF& p = amountList[i];
+    int day = qRound(p.x());
+    if (day >= 1 && day <= max_day) {
+      amountValues[day - 1] = p.y();
+    }
+  }
+
+  // 4. 准备x轴分类（1~max_day的字符串列表，比如["1","2",..."31"]）
+  chartCategories.clear();
+  for (int i = 1; i <= max_day; ++i) {
+    chartCategories.append(QString::number(i));
+  }
+
+  // 5. 转成QML兼容的QList<QVariant>（BarSet.values需要这个类型）
+  qmlFreqValues.clear();
+  qmlAmountValues.clear();
+  qmlFreqValues = QVariant::fromValue(freqValues).toList();
+  qmlAmountValues = QVariant::fromValue(amountValues).toList();
+
+  // 6. 直接暴露给QML
+  mui->qwMainChart->rootContext()->setContextProperty("chartCategories",
+                                                      chartCategories);
+  mui->qwMainChart->rootContext()->setContextProperty("chartFreqValues",
+                                                      qmlFreqValues);
+  mui->qwMainChart->rootContext()->setContextProperty("chartAmountValues",
+                                                      qmlAmountValues);
+
+  qDebug() << "chartCategories=" << chartCategories
+           << "qmlFreqValues=" << qmlFreqValues
+           << "qmlAmountValues=" << qmlAmountValues;
 }
 
 SaveThread::SaveThread(QObject* parent) : QThread{parent} {}
