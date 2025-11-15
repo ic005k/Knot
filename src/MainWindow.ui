@@ -1665,6 +1665,12 @@ selection-background-color: lightblue;
        </item>
        <item>
         <widget class="QQuickWidget" name="qwMainChart">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="resizeMode">
           <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
          </property>

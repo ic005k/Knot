@@ -530,6 +530,12 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     return;
   }
 
+  if (mui->qwMainChart->isVisible()) {
+    on_btnChart_clicked();
+    event->ignore();
+    return;
+  }
+
   if (!mui->frameImgView->isHidden()) {
     on_btnBackImg_clicked();
     event->ignore();
