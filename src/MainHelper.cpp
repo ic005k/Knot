@@ -1027,6 +1027,8 @@ void MainHelper::init_Theme() {
   mui->qwMainTab->rootContext()->setContextProperty("isDark", isDark);
   mui->qwMainDate->rootContext()->setContextProperty("isDark", isDark);
   mui->qwMainEvent->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwMainChart->rootContext()->setContextProperty("isDark", isDark);
+
   mui->qwTodo->rootContext()->setContextProperty("isDark", isDark);
   mui->qwRecycle->rootContext()->setContextProperty("isDark", isDark);
   mui->qwNoteBook->rootContext()->setContextProperty("isDark", isDark);

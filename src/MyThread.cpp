@@ -54,7 +54,7 @@ void MainWindow::readChartDone() {
     mui->lblStats->setText(strStats);
   isReadEnd = true;
 
-  qDebug() << "Read Chart End ..." << freqPointList << amountList;
+  // qDebug() << "Read Chart End ..." << freqPointList << amountList;
 
   // 1. 初始化完整数组（补0）
   QList<double> freqValues(max_day, 0.0);  // 长度max_day，全0
@@ -99,9 +99,9 @@ void MainWindow::readChartDone() {
   mui->qwMainChart->rootContext()->setContextProperty("chartAmountValues",
                                                       qmlAmountValues);
 
-  qDebug() << "chartCategories=" << chartCategories
-           << "qmlFreqValues=" << qmlFreqValues
-           << "qmlAmountValues=" << qmlAmountValues;
+  // qDebug() << "chartCategories=" << chartCategories
+  //          << "qmlFreqValues=" << qmlFreqValues
+  //          << "qmlAmountValues=" << qmlAmountValues;
 }
 
 SaveThread::SaveThread(QObject* parent) : QThread{parent} {}
