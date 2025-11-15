@@ -1048,9 +1048,6 @@ void MainHelper::init_Theme() {
   mui->qwViewBookNote->rootContext()->setContextProperty("isDark", isDark);
 
   if (!isDark) {
-    mui->f_Menu->setStyleSheet("background-color: rgb(243,243,243);");
-    mui->f_Btn->setStyleSheet("background-color: rgb(243,243,243);");
-
     mui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
     mui->btnClear->setIcon(QIcon(":/res/clear.png"));
 
@@ -1073,9 +1070,6 @@ void MainHelper::init_Theme() {
     mui->editDetails->setStyleSheet(mui->editTodo->styleSheet());
 
   } else {
-    mui->f_Menu->setStyleSheet("background-color: #19232D;");
-    mui->f_Btn->setStyleSheet("background-color: #19232D;");
-
     mui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
     mui->btnClear->setIcon(QIcon(":/res/clear.png"));
 

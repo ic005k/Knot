@@ -369,7 +369,7 @@ QPalette createDarkPalette() {
   QPalette darkPalette;
 
   // 基础颜色设置
-  darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
+  darkPalette.setColor(QPalette::Window, QColor(25, 35, 45));  // "#19232D"
   darkPalette.setColor(QPalette::WindowText, Qt::white);
   darkPalette.setColor(QPalette::Base, QColor(25, 25, 25));
 
@@ -388,6 +388,9 @@ QPalette createDarkPalette() {
 // 创建亮色调色板
 QPalette createLightPalette() {
   QPalette lightPalette;
+
+  // 基础颜色设置
+  lightPalette.setColor(QPalette::Window, QColor(243, 243, 243));
 
   // 使用系统默认的亮色调色板作为基础
   lightPalette = QApplication::style()->standardPalette();
