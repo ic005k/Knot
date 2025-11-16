@@ -1,6 +1,7 @@
 import QtQuick
 import QtCharts
 import QtQuick.Controls
+import QtQuick.Layouts
 
 Item {
     id: root
@@ -74,16 +75,22 @@ Item {
 
         ChartView {
             id: chartView
-            title: qsTr("Frequency + Amount Bar Chart")
+            //title: qsTr("Frequency + Amount Bar Chart")
             width: calculatedContentWidth
             height: flickable.height
             legend.alignment: Qt.AlignBottom
             antialiasing: true
+
             //theme: isDark ? ChartView.ChartThemeDark : ChartView.ChartThemeLight
             backgroundColor: isDark ? "#1e1e1e" : "#ffffff"
             legend.labelColor: isDark ? "#ffffff" : "#000000"
+            legend.font.pixelSize: 15
+            legend.opacity: 1
+
             titleColor: isDark ? "#ffffff" : "#000000"
-            animationOptions: ChartView.NoAnimation // 禁用动画提高性能
+            titleFont.pixelSize: 15
+
+            animationOptions: ChartView.NoAnimation // 动画效果
 
             margins {
                 top: 10
@@ -92,7 +99,9 @@ Item {
                 right: 10
             }
 
-            onPlotAreaChanged: flickable.updateClickAreas()
+            onPlotAreaChanged: {
+                flickable.updateClickAreas()
+            }
 
             BarCategoryAxis {
                 id: xAxis

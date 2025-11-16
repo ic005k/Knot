@@ -226,16 +226,8 @@ void Steps::setAddressResolverConnect() {
 
 void Steps::keyReleaseEvent(QKeyEvent* event) { Q_UNUSED(event) }
 
-bool Steps::eventFilter(QObject* watch, QEvent* evn) {
-  if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
-    if (keyEvent->key() == Qt::Key_Back) {
-      closeSteps();
-      return true;
-    }
-  }
-
-  return QWidget::eventFilter(watch, evn);
+bool Steps::eventFilter(QObject* obj, QEvent* event) {
+  return QWidget::eventFilter(obj, event);
 }
 
 void Steps::closeSteps() {
@@ -2624,14 +2616,7 @@ void Steps::showSportsChart() {
   QSettings reg(iniDir + stry + "-gpslist.ini", QSettings::IniFormat);
 
   // 3. 数据处理（硬读1-12月，确保顺序和完整性）
-  struct MonthData {
-    double cyclingDist = 0.0;
-    int cyclingCount = 0;
-    double hikingDist = 0.0;
-    int hikingCount = 0;
-    double runningDist = 0.0;
-    int runningCount = 0;
-  };
+
   QVector<MonthData> monthDataList(12);  // 索引0-11对应1-12月
 
   // 核心修正：硬读1-12月，不依赖childKeys，确保每个月都被处理
@@ -2666,7 +2651,7 @@ void Steps::showSportsChart() {
   // 新增：自定义频次曲线Widget（替换原有QChart代码）----------------------
   // 提取三种运动的频次数据（直接复用monthDataList）
   QVector<int> cyclingCounts, hikingCounts, runningCounts;
-  for (const auto& data : qAsConst(monthDataList)) {
+  for (const auto& data : std::as_const(monthDataList)) {
     cyclingCounts.append(data.cyclingCount);
     hikingCounts.append(data.hikingCount);
     runningCounts.append(data.runningCount);
@@ -2743,7 +2728,11 @@ void Steps::showSportsChart() {
   chart->createDefaultAxes();
 
   // 4.5 图表视图配置（增加高度，去除边框）
-  QChartView* chartView = new QChartView(chart);
+  // QChartView* chartView = new QChartView(chart);
+  CustomChartView* chartView = new CustomChartView();
+  chartView->setChart(chart);
+  chartView->setMonthData(monthDataList);
+
   chartView->setRenderHint(QPainter::Antialiasing);
   chartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   int mh = 600;

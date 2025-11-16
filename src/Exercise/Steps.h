@@ -26,6 +26,7 @@
 #include <QRegularExpressionValidator>
 #include <QSettings>
 #include <QStringList>
+#include <QToolTip>
 #include <QVBoxLayout>
 #include <QValueAxis>
 #include <iomanip>  // 包含 std::setprecision
@@ -52,6 +53,15 @@ class Steps : public QDialog {
   explicit Steps(QWidget* parent = nullptr);
   ~Steps();
   Ui::Steps* ui;
+
+  struct MonthData {
+    double cyclingDist = 0.0;
+    int cyclingCount = 0;
+    double hikingDist = 0.0;
+    int hikingCount = 0;
+    double runningDist = 0.0;
+    int runningCount = 0;
+  };
 
   QString strMapKeyTestInfo;
 
@@ -124,7 +134,7 @@ class Steps : public QDialog {
  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
 
-  bool eventFilter(QObject* watch, QEvent* evn) override;
+  bool eventFilter(QObject* obj, QEvent* event) override;
 
  public:
   void closeSteps();
@@ -292,10 +302,103 @@ class Steps : public QDialog {
   void saveSpeedData(const QString& jsonFile, double speed);
   QVariantList getSpeedData(const QString& jsonFile);
   QString getJsonRouteFile(const QString& strGpsList);
+
  signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();
+};
+
+//////////////////////////////////
+class CustomChartView : public QChartView {
+  Q_OBJECT
+ public:
+  explicit CustomChartView(QWidget* parent = nullptr) : QChartView(parent) {
+    // 启用鼠标跟踪，确保能捕获所有鼠标事件
+    setMouseTracking(true);
+  }
+
+  void setMonthData(const QVector<Steps::MonthData>& data) {
+    m_monthData = data;
+  }
+
+ protected:
+  void mousePressEvent(QMouseEvent* event) override {
+    // 首先调用基类实现
+    QChartView::mousePressEvent(event);
+
+    // 处理所有区域的点击事件，包括空白区域
+    handleChartClick(event);
+
+    // 接受事件，防止事件继续传播
+    event->accept();
+  }
+
+  void mouseReleaseEvent(QMouseEvent* event) override {
+    QChartView::mouseReleaseEvent(event);
+    // 移除 handleChartClick 调用，避免重复处理
+  }
+
+ private:
+  void handleChartClick(QMouseEvent* event) {
+    if (!chart()) return;
+
+    // 获取鼠标位置和绘图区域
+    QPoint mousePos = event->pos();
+    QRectF plotArea = chart()->plotArea();
+
+    // 计算月份
+    int month = -1;
+
+    // 检查点击是否在绘图区域内
+    if (plotArea.contains(mousePos)) {
+      // 在绘图区域内，计算月份
+      double relativeY = mousePos.y() - plotArea.y();
+      double totalHeight = plotArea.height();
+      double monthHeight = totalHeight / 12.0;
+      int monthIndex = static_cast<int>(relativeY / monthHeight);
+      month = 12 - monthIndex;  // 底部是1月，顶部是12月
+      month = qBound(1, month, 12);
+    } else if (mousePos.x() < plotArea.left()) {
+      // 在Y轴区域（左侧），计算月份
+      // 使用整个视图高度来计算，而不是绘图区域高度
+      int viewHeight = height();
+      double monthHeight = viewHeight / 12.0;
+      int monthIndex = static_cast<int>(mousePos.y() / monthHeight);
+      month = 12 - monthIndex;  // 底部是1月，顶部是12月
+      month = qBound(1, month, 12);
+    }
+
+    // 如果月份有效，显示提示信息
+    if (month >= 1 && month <= m_monthData.size()) {
+      const Steps::MonthData& data = m_monthData[month - 1];
+
+      // 使用统一的提示信息生成逻辑
+      QString tooltip = QString(
+          tr("Month") + ": " + QString::number(month) + "\n" + tr("Cycling") +
+          ": " + QString::number(data.cyclingDist, 'f', 1) + " km (" +
+          QString::number(data.cyclingCount) + " " + tr("times") + ")\n" +
+          tr("Hiking") + ": " + QString::number(data.hikingDist, 'f', 1) +
+          " km (" + QString::number(data.hikingCount) + " " + tr("times") +
+          ")\n" + tr("Running") + ": " +
+          QString::number(data.runningDist, 'f', 1) + " km (" +
+          QString::number(data.runningCount) + " " + tr("times") + ")");
+
+      // 计算提示框显示位置（鼠标上方）
+      // 计算提示框的大致高度（基于行数和字体大小）
+      QFontMetrics fm(QToolTip::font());
+      int lineHeight = fm.height();
+      int tooltipHeight = lineHeight * 5 + 10;  // 大约5行高度
+
+      QPoint globalPos = event->globalPos();
+      QPoint showPos = globalPos - QPoint(0, tooltipHeight);  // 向上偏移30像素
+
+      QToolTip::showText(showPos, tooltip);
+    }
+  }
+
+ private:
+  QVector<Steps::MonthData> m_monthData;
 };
 
 #endif  // STEPS_H
