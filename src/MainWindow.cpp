@@ -942,10 +942,12 @@ void MainWindow::modify_Data() {
     isEditItem = true;
     reloadMain();
 
-    m_Method->setCurrentIndexFromQW(mui->qwMainDate, maindateIndex);
-    isEditItem = true;
-    m_Method->clickMainDate();
-    m_Method->setCurrentIndexFromQW(mui->qwMainEvent, newrow);
+    QTimer::singleShot(100, mw_one, [this, maindateIndex, newrow]() {
+      m_Method->setCurrentIndexFromQW(mui->qwMainDate, maindateIndex);
+      isEditItem = true;
+      m_Method->clickMainDate();
+      m_Method->setCurrentIndexFromQW(mui->qwMainEvent, newrow);
+    });
   }
 }
 

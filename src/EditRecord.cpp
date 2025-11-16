@@ -8,7 +8,7 @@
 
 QStringList c_list;
 
-EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {
+EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
   m_CategoryList = new CategoryList(this);
 
   this->installEventFilter(this);
@@ -45,7 +45,7 @@ EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {
   font.setBold(true);
   mui->lblTitleEditRecord->setFont(font);
 
-  QValidator *validator =
+  QValidator* validator =
       new QRegularExpressionValidator(regxNumber, mui->editAmount);
   mui->editAmount->setValidator(validator);
   mui->editAmount->setAttribute(Qt::WA_InputMethodEnabled, false);
@@ -79,7 +79,7 @@ void EditRecord::init() {
 
 EditRecord::~EditRecord() { delete m_CategoryList; }
 
-void EditRecord::keyReleaseEvent(QKeyEvent *event) { Q_UNUSED(event); }
+void EditRecord::keyReleaseEvent(QKeyEvent* event) { Q_UNUSED(event); }
 
 void EditRecord::on_btnOk_clicked() {
   mw_one->on_btnBackEditRecord_clicked();
@@ -99,8 +99,6 @@ void EditRecord::on_btnOk_clicked() {
         tr("Add Item") + " ( " + mw_one->getTabText() + " ) ";
   }
 
-  mw_one->clickData();
-
   // Save Category Text
   QString str = mui->editCategory->text().trimmed();
   int count = m_CategoryList->ui->listWidget->count();
@@ -113,7 +111,7 @@ void EditRecord::on_btnOk_clicked() {
   }
 
   if (str.length() > 0) {
-    QListWidgetItem *item = new QListWidgetItem(str);
+    QListWidgetItem* item = new QListWidgetItem(str);
     m_CategoryList->ui->listWidget->insertItem(0, item);
   }
 
@@ -229,14 +227,14 @@ void EditRecord::saveMyClassification() {
   Reg.setValue("/CustomDesc/Count", c_list.count());
 }
 
-int EditRecord::removeDuplicates(QStringList *that) {
+int EditRecord::removeDuplicates(QStringList* that) {
   int n = that->size();
   int j = 0;
   QSet<QString> seen;
   seen.reserve(n);
   int setSize = 0;
   for (int i = 0; i < n; ++i) {
-    const QString &s = that->at(i);
+    const QString& s = that->at(i);
     seen.insert(s);
     if (setSize == seen.size())  // unchanged size => was already seen
       continue;
@@ -265,7 +263,7 @@ void EditRecord::init_MyCategory() {
   for (int i = 0; i < descCount; i++) {
     QString str =
         RegDesc.value("/CustomDesc/Item" + QString::number(i)).toString();
-    QListWidgetItem *item = new QListWidgetItem(str);
+    QListWidgetItem* item = new QListWidgetItem(str);
 
     m_CategoryList->ui->listWidget->addItem(item);
     c_list.append(str);
@@ -292,7 +290,7 @@ void EditRecord::getTime(int h, int m) {
   mui->lblTime->setText(strh + ":" + strm + ":" + strs);
 }
 
-bool EditRecord::eventFilter(QObject *watch, QEvent *evn) {
+bool EditRecord::eventFilter(QObject* watch, QEvent* evn) {
   return QWidget::eventFilter(watch, evn);
 }
 
@@ -300,7 +298,7 @@ void EditRecord::on_btnClearAmount_clicked() { mui->editAmount->clear(); }
 
 void EditRecord::on_btnClearDesc_clicked() { mui->editCategory->clear(); }
 
-void EditRecord::on_editAmount_textChanged(const QString &arg1) {
+void EditRecord::on_editAmount_textChanged(const QString& arg1) {
   int count = 0;
   for (int i = 0; i < arg1.length(); i++) {
     if (arg1.mid(i, 1) == ".") count++;
@@ -335,7 +333,7 @@ void EditRecord::on_hsM_valueChanged(int value) {
 
 void EditRecord::on_btnClearDetails_clicked() { mui->editDetails->clear(); }
 
-void EditRecord::on_editCategory_textChanged(const QString &arg1) {
+void EditRecord::on_editCategory_textChanged(const QString& arg1) {
   if (arg1.length() > 0) {
     mui->lblCategory->setStyleSheet(lblStyleHighLight);
     if (!isDark) {
@@ -348,7 +346,7 @@ void EditRecord::on_editCategory_textChanged(const QString &arg1) {
     }
   }
 
-  QCompleter *completer = new QCompleter(c_list);
+  QCompleter* completer = new QCompleter(c_list);
   completer->setFilterMode(Qt::MatchContains);
   mui->editCategory->setCompleter(completer);
 }
@@ -369,12 +367,12 @@ void EditRecord::on_editDetails_textChanged() {
 }
 
 void EditRecord::saveCurrentYearData() {
-  QTreeWidget *tw = (QTreeWidget *)tabData->currentWidget();
+  QTreeWidget* tw = (QTreeWidget*)tabData->currentWidget();
   if (!tw) {
     return;
   }
 
-  DataManager *dataMgr = new DataManager(iniDir, nullptr);
+  DataManager* dataMgr = new DataManager(iniDir, nullptr);
 
   QString name = tw->objectName();
   QList<int> listAllYear = getExistingYears(tw);
@@ -414,7 +412,7 @@ void EditRecord::saveCurrentYearData() {
 
   int Sn = 0;
   for (int i = 0; i < count; i++) {
-    QTreeWidgetItem *topItem = tw->topLevelItem(i);
+    QTreeWidgetItem* topItem = tw->topLevelItem(i);
     Sn = i + 1;
     if (topItem->text(3) == strCurrentYear) {
       Reg.setValue(flag + QString::number(Sn) + "-topDate", topItem->text(0));
@@ -492,10 +490,10 @@ void EditRecord::monthSum() {
   isDateSection = b2;
 }
 
-QList<int> EditRecord::getExistingYears(QTreeWidget *tw) {
+QList<int> EditRecord::getExistingYears(QTreeWidget* tw) {
   QSet<int> yearsSet;  // 先用QSet自动去重
   for (int i = 0; i < tw->topLevelItemCount(); ++i) {
-    QTreeWidgetItem *item = tw->topLevelItem(i);
+    QTreeWidgetItem* item = tw->topLevelItem(i);
     bool isNumber;
     int year = item->text(3).toInt(&isNumber);
     if (isNumber && year >= DataManager::kDataStartYear) {

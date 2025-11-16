@@ -640,8 +640,13 @@ void Method::clickMainEventData() {
 void Method::reeditMainEventData() {
   QTreeWidget* tw = mw_one->get_tw(mui->tabWidget->currentIndex());
   int maindateIndex = getCurrentIndexFromQW(mui->qwMainDate);
-  int maindateCount = getCountFromQW(mui->qwMainDate);
-  int topIndex = tw->topLevelItemCount() - maindateCount + maindateIndex;
+  int maineventIndex = getCurrentIndexFromQW(mui->qwMainEvent);
+
+  if (maindateIndex < 0) return;
+  if (maineventIndex < 0) return;
+
+  // int maindateCount = getCountFromQW(mui->qwMainDate);
+  int topIndex = tw->topLevelItemCount() - 1 - maindateIndex;
   int childIndex = getCurrentIndexFromQW(mui->qwMainEvent);
 
   if (topIndex < 0) return;
