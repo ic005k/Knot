@@ -420,8 +420,6 @@ class MainWindow : public QMainWindow {
 
   void on_actionPreferences_triggered();
 
-  void on_tabCharts_currentChanged(int index);
-
   void on_btnSteps_clicked();
 
   void on_rbSteps_clicked();

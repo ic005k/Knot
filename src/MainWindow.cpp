@@ -1276,8 +1276,6 @@ void MainWindow::on_actionPreferences_triggered() {
   m_Preferences->openPreferences();
 }
 
-void MainWindow::on_tabCharts_currentChanged(int index) {}
-
 void MainWindow::on_btnSteps_clicked() { m_Steps->openStepsUI(); }
 
 void MainWindow::changeEvent(QEvent* event) {

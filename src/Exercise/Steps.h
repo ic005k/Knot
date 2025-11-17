@@ -391,7 +391,7 @@ class CustomChartView : public QChartView {
       int lineHeight = fm.height();
       int tooltipHeight = lineHeight * 5 + 10;  // 大约5行高度
 
-      QPoint globalPos = event->globalPos();
+      QPoint globalPos = event->globalPosition().toPoint();
       QPoint showPos = globalPos - QPoint(0, tooltipHeight);  // 向上偏移30像素
 
       QToolTip::showText(showPos, tooltip);
