@@ -2598,6 +2598,12 @@ void Steps::showSportsChart() {
     statsDialog->resize(400, 710);  // 增加10px容纳频次曲线，保持紧凑
   }
 
+  QFont font = this->font();
+  if (isAndroid)
+    font.setPointSize(13);
+  else
+    font.setPointSize(9);
+
   // 2. 读取 INI 文件（硬读1-12月，解决数据错乱）
   QString title = mui->btnSelGpsDate->text();
   QStringList list = title.split("-");
@@ -2619,7 +2625,7 @@ void Steps::showSportsChart() {
 
   QVector<MonthData> monthDataList(12);  // 索引0-11对应1-12月
 
-  // 核心修正：硬读1-12月，不依赖childKeys，确保每个月都被处理
+  // 硬读1-12月，不依赖childKeys，确保每个月都被处理
   reg.beginGroup(yearGroup);
   for (int month = 1; month <= 12; ++month) {  // 从1到12循环
     QString monthKey = QString::number(month);
@@ -2647,8 +2653,8 @@ void Steps::showSportsChart() {
   }
   reg.endGroup();
 
-  // ----------------------
-  // 新增：自定义频次曲线Widget（替换原有QChart代码）----------------------
+  // ------------------------------------------------------------------------------
+  // 新增：自定义频次曲线Widget
   // 提取三种运动的频次数据（直接复用monthDataList）
   QVector<int> cyclingCounts, hikingCounts, runningCounts;
   for (const auto& data : std::as_const(monthDataList)) {
@@ -2747,7 +2753,6 @@ void Steps::showSportsChart() {
   mainLayout->setContentsMargins(5, 5, 5, 5);  // 最小化整体边距
   mainLayout->setSpacing(5);
 
-  QFont font = this->font();
   font.setBold(true);
 
   QLabel* totalLabel =
@@ -2764,11 +2769,6 @@ void Steps::showSportsChart() {
   yearlyLabel->setAlignment(Qt::AlignLeft);
   yearlyLabel->setWordWrap(true);
   yearlyLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-
-  if (isAndroid)
-    font.setPointSize(13);
-  else
-    font.setPointSize(9);
 
   monthlyLabel->setFont(font);
   yearlyLabel->setFont(font);
