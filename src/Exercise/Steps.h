@@ -328,7 +328,7 @@ class CustomChartView : public QChartView {
     QChartView::mousePressEvent(event);
 
     // 处理所有区域的点击事件，包括空白区域
-    handleChartClick(event);
+    // handleChartClick(event);
 
     // 接受事件，防止事件继续传播
     event->accept();
@@ -337,6 +337,7 @@ class CustomChartView : public QChartView {
   void mouseReleaseEvent(QMouseEvent* event) override {
     QChartView::mouseReleaseEvent(event);
     // 移除 handleChartClick 调用，避免重复处理
+    handleChartClick(event);
   }
 
  private:
