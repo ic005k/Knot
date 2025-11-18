@@ -468,7 +468,8 @@ class Method : public QDialog {
 
   bool isInChina();
 
- protected:
+  void gotoBegin(QQuickWidget *qw);
+  protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  public slots:

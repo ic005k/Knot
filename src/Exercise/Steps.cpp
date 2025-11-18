@@ -974,6 +974,7 @@ void Steps::stopRecordMotion() {
     int nMonth = QDate::currentDate().month();
     clearAllGpsList();
     loadGpsList(nYear, nMonth);
+    m_Method->gotoBegin(mui->qwGpsList);
     m_Method->setCurrentIndexFromQW(mui->qwGpsList, 0);
 
     refreshMotionData();
@@ -2598,12 +2599,6 @@ void Steps::showSportsChart() {
     statsDialog->resize(400, 710);  // 增加10px容纳频次曲线，保持紧凑
   }
 
-  QFont font = this->font();
-  if (isAndroid)
-    font.setPointSize(13);
-  else
-    font.setPointSize(9);
-
   // 2. 读取 INI 文件（硬读1-12月，解决数据错乱）
   QString title = mui->btnSelGpsDate->text();
   QStringList list = title.split("-");
@@ -2753,11 +2748,18 @@ void Steps::showSportsChart() {
   mainLayout->setContentsMargins(5, 5, 5, 5);  // 最小化整体边距
   mainLayout->setSpacing(5);
 
+  QFont font = this->font();
   font.setBold(true);
 
   QLabel* totalLabel =
       new QLabel(mui->lblTitle1->text() + " : " + mui->lblTotalDistance->text(),
                  statsDialog);
+  totalLabel->setFrameShape(QFrame::Box);
+  totalLabel->setFrameShadow(QFrame::Plain);
+  totalLabel->setLineWidth(1);
+  totalLabel->setContentsMargins(5, 5, 5, 5);
+  totalLabel->setAlignment(Qt::AlignCenter);
+
   totalLabel->setFont(font);
 
   QLabel* monthlyLabel = new QLabel(m_monthlyStatsText, statsDialog);
@@ -2770,14 +2772,17 @@ void Steps::showSportsChart() {
   yearlyLabel->setWordWrap(true);
   yearlyLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
+  if (isAndroid)
+    font.setPointSize(13);
+  else
+    font.setPointSize(9);
   monthlyLabel->setFont(font);
   yearlyLabel->setFont(font);
 
   monthlyLabel->setFrameShape(QFrame::Box);     // 边框形状：矩形框
   monthlyLabel->setFrameShadow(QFrame::Plain);  // 边框阴影：无阴影（简洁风格）
   monthlyLabel->setLineWidth(1);                // 边框线宽：1px
-  monthlyLabel->setContentsMargins(5, 5, 5,
-                                   5);  // 文本与边框的内边距（避免紧贴）
+  monthlyLabel->setContentsMargins(5, 5, 5, 5);
   yearlyLabel->setFrameShape(QFrame::Box);
   yearlyLabel->setFrameShadow(QFrame::Plain);
   yearlyLabel->setLineWidth(1);
@@ -2826,7 +2831,9 @@ void Steps::showSportsChart() {
 
   // 6. 信号连接
   connect(closeButton, &QPushButton::clicked, statsDialog, &QDialog::close);
-  connect(statsDialog, &QDialog::finished, this, [this](int) {
+  connect(statsDialog, &QDialog::finished, this, [this, chartView, chart](int) {
+    chartView->deleteLater();
+    chart->deleteLater();
     delete this->statsDialog;
     this->statsDialog = nullptr;
   });
