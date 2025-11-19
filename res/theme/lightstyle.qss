@@ -1,23 +1,23 @@
-/* lightstyle.qss */
-[color-scheme="light"] {
-    --disabled-text: #808080;
+
+
+/* 亮模式 QTextEdit 样式（完全对齐暗模式结构，极简无冗余） */
+QTextEdit {
+    border: 1px solid #CCCCCC; /* 亮模式基础浅灰边框（替换暗模式的#404040） */
+    background: #FFFFFF;       /* 亮模式基础白色背景（替换暗模式的#1E1E1E） */
 }
 
-QMenu::item:disabled {
-    color: var(--disabled-text, #808080);
-    font: normal;
-    background-color: transparent;
-    opacity: 0.7;
-}
-
-/* 明亮主题选中项样式 */
-QListWidget::item:selected {
-    background-color: #4FC3F7;   /* 浅蓝-适合亮背景 */
-    color: #212121;             /* 深灰文字提高可读性 */
-    border-radius: 4px;
-}
-
-/* 窗口非活动状态 */
-QListView::item:selected:!active {
-    background-color: #B3E5FC;  /* 更浅的非活动蓝 */
+QTextEdit:focus { /* 只保留focus（暗模式没加focus-visible，避免版本兼容问题） */
+    border: 1px solid #42A5F5 !important; /* 明显淡蓝色（比之前#64B5F6更醒目） */
+    outline: none !important;
+}
+
+/* 亮模式 QLineEdit 样式（同步简化，和暗模式结构一致） */
+QLineEdit {
+    border: 1px solid #CCCCCC;
+    background: #FFFFFF;
+}
+
+QLineEdit:focus {
+    border: 1px solid #42A5F5 !important;
+    outline: none !important;
 }

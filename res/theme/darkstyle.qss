@@ -37,16 +37,37 @@ QMenu::separator {
     height: 1px;
     background: #404040;
     margin: 3px 10px;
-}
-
-/* 暗黑主题选中项样式 */
-QListWidget::item:selected {
-    background-color: #2A82DA;  /* 深蓝-适合暗背景 */
-    color: white;
-    border-radius: 4px;
-}
-
-/* 窗口非活动状态 */
-QListView::item:selected:!active {
-    background-color: #1A5276;  /* 更深的非活动蓝 */
+}
+
+/* 暗黑主题选中项样式 */
+QListWidget::item:selected {
+    background-color: #2A82DA;  /* 深蓝-适合暗背景 */
+    color: white;
+    border-radius: 4px;
+}
+
+/* 窗口非活动状态 */
+QListView::item:selected:!active {
+    background-color: #1A5276;  /* 更深的非活动蓝 */
+}
+
+/* QLineEdit 暗黑样式 */
+QLineEdit {border: 1px solid #404040;background: #1E1E1E;}
+
+
+/* QTextEdit 暗黑样式 */
+QTextEdit {border: 1px solid #404040;background: #1E1E1E;}
+
+/* QLineEdit 焦点样式 */
+QLineEdit:focus,
+QLineEdit:focus-visible {
+    border: 1px solid #64B5F6 !important; /* 明显淡蓝色，强制生效 */
+    outline: none !important; /* 清除默认轮廓 */
+}
+
+/* QTextEdit 焦点样式 */
+QTextEdit:focus,
+QTextEdit:focus-visible {
+    border: 1px solid #64B5F6 !important; /* 明显淡蓝色，强制生效 */
+    outline: none !important; /* 清除默认轮廓 */
 }
