@@ -18,14 +18,12 @@ void ReceiveShare::closeEvent(QCloseEvent* event) {
 
 bool ReceiveShare::eventFilter(QObject* watch, QEvent* evn) {
   if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
-    if (keyEvent->key() == Qt::Key_Back) {
+    QKeyEvent* keyEvent = dynamic_cast<QKeyEvent*>(evn);  // 安全转换
+    if (keyEvent && keyEvent->key() == Qt::Key_Back) {
       Close();
-
       return true;
     }
   }
-
   return QWidget::eventFilter(watch, evn);
 }
 
@@ -155,6 +153,8 @@ void ReceiveShare::addToNote(bool isInsert) {
   }
 
   TextEditToFile(edit, currentMDFile);
+
+  delete edit;
 
   qDebug() << "strReceiveShareData=" << strReceiveShareData;
 }
@@ -419,8 +419,11 @@ void ReceiveShare::goReceiveShare() {
         QString imgFile =
             "/storage/emulated/0/.Knot/img" + QString::number(i) + ".png";
         QImage* image = new QImage();
-        image->load(imgFile);
-        clip->setPixmap(QPixmap::fromImage(*image));
+        if (image->load(imgFile)) {
+          clip->setPixmap(QPixmap::fromImage(*image));
+        }
+        delete image;
+
         qDebug() << "imgFile=" << imgFile;
       }
     }

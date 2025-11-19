@@ -165,10 +165,11 @@ Rectangle {
 
         delegate: Flickable {
             id: flack
-            property int myw: m_width - 18
-            width: myw
+
+            width: view.width
             height: m_col.implicitHeight + 0
-            contentWidth: myw + donebtn.width + flagColor.width
+
+            contentWidth: view.width + donebtn.width
 
             interactive: true
 
