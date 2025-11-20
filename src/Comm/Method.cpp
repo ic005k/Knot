@@ -2705,7 +2705,7 @@ void Method::set_ToolButtonStyle(QObject* parent) {
     if (btn != mui->btnStyle1 && btn != mui->btnStyle2 &&
         btn != mui->btnStyle3 && btn != mui->btnGPS) {
       setToolButtonQss(btn, 4, 5, "#3B82F6", "#FFFFFF", "#3B82F6", "#FFFFFF",
-                       "#FF0000", "#FFFFFF");
+                       "#2563EB", "#FFFFFF");
     }
   }
 }

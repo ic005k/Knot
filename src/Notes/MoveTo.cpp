@@ -20,6 +20,10 @@ MoveTo::MoveTo(QWidget* parent) : QDialog(parent), ui(new Ui::MoveTo) {
   ui->listWidget->setVerticalScrollMode(QListWidget::ScrollPerPixel);
   QScroller::grabGesture(ui->listWidget, QScroller::LeftMouseButtonGesture);
 
+  ui->listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  ui->listWidget->setWordWrap(true);
+  ui->listWidget->setUniformItemSizes(false);
+
   m_Method->set_ToolButtonStyle(this);
 
   QTreeWidgetItem* item = NULL;

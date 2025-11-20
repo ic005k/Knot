@@ -431,17 +431,6 @@ Rectangle {
 
         model: ListModel {
             id: listmain
-
-            // debug
-
-
-            /*ListElement {
-                text0: '<span style="background-color: #ff6600;">Hello</span>'
-                text1: "123456  <b>Hello</b> <i>World!</i>  123456"
-                text2: '123456 <font color="red"><b>TEST</b></font>  123456'
-                text3: "str3 1234567890 1234567890  1234567890 1234567890"
-                myh: 0
-            }*/
         }
         delegate: dragDelegate
 

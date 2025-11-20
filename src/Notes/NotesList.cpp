@@ -3142,9 +3142,10 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
   int indexNoteBook, indexNote, countNoteBook, countNotes;
   indexNoteBook = m_Notes->m_NoteIndexManager->getNotebookIndex(mdFile);
   indexNote = m_Notes->m_NoteIndexManager->getNoteIndex(mdFile);
-
   countNoteBook = m_Method->getCountFromQW(mui->qwNoteBook);
-  if (indexNoteBook < 0 || indexNoteBook >= countNoteBook) return false;
+
+  if (indexNoteBook < 0) return false;
+  if (indexNoteBook >= countNoteBook) return false;
 
   setNoteBookCurrentIndex(indexNoteBook);
 

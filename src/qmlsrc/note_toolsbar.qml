@@ -6,7 +6,7 @@ Rectangle {
     id: root
     height: 40
     width: 300
-    color: isDark ? "#333333" : "#f0f0f0"
+    color: isDark ? "#19232D" : "#f0f0f0"
     border.color: "#cccccc"
     border.width: 0
 
@@ -62,7 +62,7 @@ Rectangle {
                         icon.color: isDark ? "white" : "black"
 
                         background: Rectangle {
-                            color: toolButton.hovered ? (isDark ? "#444444" : "#e0e0e0") : "transparent"
+                            color: toolButton.hovered ? (isDark ? "#333333" : "#e0e0e0") : "transparent"
                             radius: 6
                         }
 
