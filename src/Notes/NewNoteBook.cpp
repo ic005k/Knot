@@ -14,6 +14,10 @@ NewNoteBook::NewNoteBook(QWidget* parent)
   QScroller::grabGesture(ui->listWidget, QScroller::LeftMouseButtonGesture);
   m_Method->setSCrollPro(ui->listWidget);
 
+  ui->listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  ui->listWidget->setWordWrap(true);
+  ui->listWidget->setUniformItemSizes(false);
+
   QStringList list;
   list.append(tr("Main Root"));
   int count = m_NotesList->ui->treeWidget->topLevelItemCount();

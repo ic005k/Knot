@@ -185,24 +185,6 @@ void EditRecord::on_btnCustom_clicked() {
 
   int count = m_Method->getCountFromQW(mui->qwCategory);
   mui->lblTypeInfo->setText(tr("Total") + " : " + QString::number(count));
-
-  return;
-
-  m_CategoryList->close();
-  m_CategoryList = new CategoryList(mw_one->m_EditRecord);
-
-  int h = mw_one->height();
-  int w = mw_one->width();
-  m_CategoryList->setGeometry(mw_one->geometry().x(), mw_one->geometry().y(), w,
-                              h);
-
-  init_MyCategory();
-  m_CategoryList->ui->listWidget->setFocus();
-  if (m_CategoryList->ui->listWidget->count() > 0)
-    m_CategoryList->ui->listWidget->setCurrentRow(0);
-  m_CategoryList->ui->editRename->clear();
-
-  m_CategoryList->show();
 }
 
 void EditRecord::saveMyClassification() {
