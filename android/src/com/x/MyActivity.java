@@ -93,7 +93,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.location.LocationListenerCompat;
@@ -158,6 +157,13 @@ import org.qtproject.qt.android.bindings.QtActivity;
 public class MyActivity
     extends QtActivity
     implements Application.ActivityLifecycleCallbacks {
+
+    private static final int REQ_LOCATION = 1;
+    private static final int REQ_RECORD_AUDIO = 2;
+    private static final int REQ_CAMERA = 3;
+    private static final int REQ_NOTIFICATION = 4;
+    private static final int REQ_ACTIVITY_RECOGNITION = 5;
+    private static final int REQ_STORAGE = 6;
 
     public static String MY_TENCENT_MAP_KEY = "error";
     public static int MapType = 1;
@@ -545,6 +551,8 @@ public class MyActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        isZh(this);
+
         requestPermission();
         requestSensorPermission();
 
@@ -570,8 +578,6 @@ public class MyActivity
         }
         m_instance = this;
         Log.d(TAG, "Android activity created");
-
-        isZh(m_instance);
 
         registSreenStatusReceiver();
         // registAlarmReceiver();
@@ -819,7 +825,7 @@ public class MyActivity
                     Manifest.permission.ACCESS_FINE_LOCATION, // GPS定位（原有）
                     Manifest.permission.ACCESS_COARSE_LOCATION, // 网络定位（新增，用于基站/WiFi辅助）
                 },
-                1
+                REQ_LOCATION
             );
             isGpsRunning = false;
             return 0;
@@ -1173,24 +1179,129 @@ public class MyActivity
             permissions,
             grantResults
         );
-        if (requestCode == 1) {
-            // 定位权限请求码
-            if (
-                grantResults.length > 0 &&
-                grantResults[0] == PackageManager.PERMISSION_GRANTED
-            ) {
-                // 权限授予后，自动启动GPS
-                if (!isGpsRunning) {
-                    startGpsUpdates();
+        // 校验：权限结果数组为空直接返回（避免崩溃）
+        if (grantResults == null || grantResults.length == 0) return;
+
+        switch (requestCode) {
+            // 1. 定位权限（原有逻辑保留，无需改）
+            case REQ_LOCATION:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (!isGpsRunning) {
+                        startGpsUpdates();
+                    }
+                } else {
+                    Toast.makeText(
+                        this,
+                        zh_cn
+                            ? "定位权限被拒绝，GPS功能无法使用"
+                            : "Location permission denied, GPS function unavailable",
+                        Toast.LENGTH_SHORT
+                    ).show();
+                    isGpsRunning = false;
                 }
-            } else {
-                Toast.makeText(
-                    this,
-                    "定位权限被拒绝，GPS功能无法使用",
-                    Toast.LENGTH_SHORT
-                ).show();
-                isGpsRunning = false;
-            }
+                break;
+            // 2. 录音权限（新增处理）
+            case REQ_RECORD_AUDIO:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(
+                        this,
+                        zh_cn
+                            ? "录音权限已授予，可正常录音"
+                            : "Microphone permission granted, recording available",
+                        Toast.LENGTH_SHORT
+                    ).show();
+                    // 可选：如果用户是在点击录音按钮时申请的，这里可以自动启动录音
+                    // 比如：if (isWaitingForRecord) startRecord(xxx);
+                } else {
+                    Toast.makeText(
+                        this,
+                        zh_cn
+                            ? "录音权限被拒绝，无法使用录音功能"
+                            : "Microphone permission denied, recording unavailable",
+                        Toast.LENGTH_SHORT
+                    ).show();
+                }
+                break;
+            // 3. 相机权限（新增处理）
+            case REQ_CAMERA:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(
+                        this,
+                        zh_cn ? "相机权限已授予" : "Camera permission granted",
+                        Toast.LENGTH_SHORT
+                    ).show();
+                    // 若后续添加相机功能，这里可触发相机初始化
+                } else {
+                    Toast.makeText(
+                        this,
+                        zh_cn
+                            ? "相机权限被拒绝，无法使用相机功能"
+                            : "Camera permission denied, camera function unavailable",
+                        Toast.LENGTH_SHORT
+                    ).show();
+                }
+                break;
+            // 4. 通知权限（新增处理）
+            case REQ_NOTIFICATION:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(
+                        this,
+                        zh_cn
+                            ? "通知权限已授予，可接收提醒"
+                            : "Notification permission granted, alerts available",
+                        Toast.LENGTH_SHORT
+                    ).show();
+                } else {
+                    Toast.makeText(
+                        this,
+                        zh_cn
+                            ? "通知权限被拒绝，将无法接收闹钟、提醒等通知"
+                            : "Notification permission denied, unable to receive alarms, alerts, etc.",
+                        Toast.LENGTH_LONG
+                    ).show();
+                }
+                break;
+            // 5. 运动传感器权限（新增处理）
+            case REQ_ACTIVITY_RECOGNITION:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(
+                        this,
+                        zh_cn
+                            ? "运动权限已授予，可统计步数"
+                            : "Activity recognition permission granted, step counting available",
+                        Toast.LENGTH_SHORT
+                    ).show();
+                    // 若后续添加步数统计，这里可初始化传感器
+                } else {
+                    Toast.makeText(
+                        this,
+                        zh_cn
+                            ? "运动权限被拒绝，无法统计步数"
+                            : "Activity recognition permission denied, step counting unavailable",
+                        Toast.LENGTH_SHORT
+                    ).show();
+                }
+                break;
+            // 6. 存储权限（修复语法错误，移到switch内部）
+            case REQ_STORAGE:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(
+                        this,
+                        zh_cn
+                            ? "存储权限已授予，可读写文件"
+                            : "Storage permission granted, file read/write available",
+                        Toast.LENGTH_SHORT
+                    ).show();
+                } else {
+                    Toast.makeText(
+                        this,
+                        zh_cn
+                            ? "存储权限被拒绝，无法读写文件"
+                            : "Storage permission denied, file read/write unavailable",
+                        Toast.LENGTH_SHORT
+                    ).show();
+                }
+                break;
         }
     }
 
@@ -1387,7 +1498,6 @@ public class MyActivity
     }
 
     // 动态获取权限需要添加的常量
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
@@ -1406,7 +1516,7 @@ public class MyActivity
                 ActivityCompat.requestPermissions(
                     activity,
                     PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
+                    REQ_STORAGE
                 );
             }
 
@@ -1419,7 +1529,7 @@ public class MyActivity
                 ActivityCompat.requestPermissions(
                     activity,
                     new String[] { "android.permission.RECORD_AUDIO" },
-                    2000
+                    REQ_RECORD_AUDIO
                 );
             }
 
@@ -1432,7 +1542,7 @@ public class MyActivity
                 ActivityCompat.requestPermissions(
                     activity,
                     new String[] { "android.permission.CAMERA" },
-                    2000
+                    REQ_CAMERA
                 );
             } else {}
         } catch (Exception e) {
@@ -1933,21 +2043,21 @@ public class MyActivity
     }
 
     public void startRecord(String outputFile) {
+        MediaRecorder tempRecorder = new MediaRecorder(); // 临时变量避免空指针
         try {
-            recorder = new MediaRecorder();
-            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            recorder.setOutputFile(outputFile);
-            recorder.prepare();
-            recorder.start();
-
+            tempRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            tempRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+            tempRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            tempRecorder.setOutputFile(outputFile);
+            tempRecorder.prepare();
+            tempRecorder.start();
+            recorder = tempRecorder; // 初始化成功后赋值给成员变量
             updateMicStatus();
         } catch (Exception ex) {
             ex.printStackTrace();
+            tempRecorder.release(); // 异常时立即释放临时对象
+            recorder = null;
         }
-
-        Log.i("audioRecord", "开始录音");
     }
 
     public double updateMicStatus() {
@@ -2055,11 +2165,20 @@ public class MyActivity
     }
 
     public static boolean isZh(Context context) {
-        Locale locale = context.getResources().getConfiguration().locale;
+        Locale locale;
+        // 适配 API 24+ 多语言获取方式
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            locale = context
+                .getResources()
+                .getConfiguration()
+                .getLocales()
+                .get(0);
+        } else {
+            locale = context.getResources().getConfiguration().locale;
+        }
         String language = locale.getLanguage();
-        if (language.endsWith("zh")) zh_cn = true;
-        else zh_cn = false;
-
+        // 更严谨：兼容 "zh-CN"、"zh-TW" 等所有中文变体
+        zh_cn = language.equalsIgnoreCase("zh");
         return zh_cn;
     }
 
@@ -2110,8 +2229,6 @@ public class MyActivity
 
         // 请求通知权限 Android 12+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // 定义权限请求的 Request Code（需唯一）
-            int REQUEST_CODE_POST_NOTIFICATIONS = 100;
             if (
                 ContextCompat.checkSelfPermission(
                     this,
@@ -2122,7 +2239,7 @@ public class MyActivity
                 // 请求权限
                 requestPermissions(
                     new String[] { Manifest.permission.POST_NOTIFICATIONS },
-                    REQUEST_CODE_POST_NOTIFICATIONS
+                    REQ_NOTIFICATION
                 );
             }
         }
@@ -2140,7 +2257,7 @@ public class MyActivity
                 ActivityCompat.requestPermissions(
                     this,
                     new String[] { Manifest.permission.ACTIVITY_RECOGNITION },
-                    1997
+                    REQ_ACTIVITY_RECOGNITION
                 );
             }
         }
