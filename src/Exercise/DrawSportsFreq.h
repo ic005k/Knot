@@ -30,8 +30,7 @@ class FrequencyCurveWidget : public QWidget {
   QList<int> calculateXPoints() const;  // QVector → QList（统一类型）
   void calculateMaxCount();
   QColor getColor(int type) const;
-  void drawFrequencyBlocks(QPainter& painter, int monthLeft, int monthRight,
-                           int monthWidth, int monthIndex);
+
   QRect getTextRect(int monthLeft, int monthRight) const;
   QLine getTickLine(int tickX) const;
 
@@ -44,6 +43,11 @@ class FrequencyCurveWidget : public QWidget {
   bool m_isDark;
   int mh = 25;
   TextPosition m_textPosition;  // 新增成员（最后声明）
+  void drawFrequencyBlocks(QPainter& painter, int monthLeft, int monthWidth,
+                           int monthIndex);
+
+  int m_fontSize = 10;    // 字体大小（默认10，与你cpp中setPointSize(10)一致）
+  int m_textHeight = 12;  // 文本高度（适配10号字，可根据字体大小调整）
 };
 
 #endif  // FREQUENCYCURVEWIDGET_H

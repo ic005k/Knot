@@ -8,7 +8,7 @@
 #include <QString>
 #include <algorithm>
 
-// --- Constructor（核心修复：初始化列表按声明顺序，不重复初始化）---
+// --- Constructor（初始化列表按声明顺序，不重复初始化）---
 FrequencyCurveWidget::FrequencyCurveWidget(const QList<int>& cycling,
                                            const QList<int>& hiking,
                                            const QList<int>& running,
@@ -48,7 +48,7 @@ void FrequencyCurveWidget::paintEvent(QPaintEvent*) {
       monthRight = (xPoints[i] + xPoints[i + 1]) / 2;
     }
     int monthWidth = monthRight - monthLeft;
-    drawFrequencyBlocks(painter, monthLeft, monthRight, monthWidth, i);
+    drawFrequencyBlocks(painter, monthLeft, monthWidth, i);
   }
 
   QFont font;
@@ -158,52 +158,61 @@ QLine FrequencyCurveWidget::getTickLine(int tickX) const {
 
 // --- Draw Frequency Blocks（QList 适配，逻辑不变）---
 void FrequencyCurveWidget::drawFrequencyBlocks(QPainter& painter, int monthLeft,
-                                               int monthRight, int monthWidth,
-                                               int monthIndex) {
-  Q_UNUSED(monthRight);
-  const int textHeight = 12;
+                                               int monthWidth, int monthIndex) {
   const int bottomMargin = 2;
   const int outerGap = 2;
   const int innerGap = 1;
 
-  int availableHeight, blockStartY;
+  // 1. 统一底部固定基准（所有矩形的底部都对齐到这个Y值）
+  int fixedBottomY;  // 固定底部Y坐标（所有矩形共用）
+  int availableHeight;
   if (m_textPosition == Top) {
-    blockStartY = textHeight + 1;
-    availableHeight = mh - blockStartY - bottomMargin;
+    fixedBottomY = mh - bottomMargin;  // 文本在顶部：底部贴控件底部-边距
+    availableHeight =
+        fixedBottomY - (m_textHeight + 1);  // 可用高度=底部基准 - 顶部起始位置
   } else {
-    blockStartY = 1;
-    availableHeight = (mh - textHeight) - blockStartY - bottomMargin;
+    fixedBottomY = mh - m_textHeight - 1;  // 文本在底部：底部贴文本顶部-1px间隙
+    availableHeight = fixedBottomY - 1;  // 可用高度=底部基准 - 顶部间隙（1px）
   }
-  if (availableHeight < 3) availableHeight = 3;
+  if (availableHeight < 3) availableHeight = 3;  // 最小可用高度，避免过窄
 
+  // 2. 计算单个矩形宽度（逻辑不变）
   int totalBlockWidth = monthWidth - 2 * outerGap;
   if (totalBlockWidth <= 0) return;
   int singleBlockWidth = (totalBlockWidth - 2 * innerGap) / 3;
   if (singleBlockWidth <= 0) singleBlockWidth = 1;
 
-  // QList 索引访问（和 QVector 一致，无需修改）
+  // 3. 获取当前月份频次（逻辑不变）
   int cyclingCount =
       (monthIndex < m_cycling.size()) ? m_cycling[monthIndex] : 0;
   int hikingCount = (monthIndex < m_hiking.size()) ? m_hiking[monthIndex] : 0;
   int runningCount =
       (monthIndex < m_running.size()) ? m_running[monthIndex] : 0;
 
+  // 4. 绘制三个矩形（核心修改：底部固定，仅调顶部）
   QList<int> counts = {cyclingCount, hikingCount, runningCount};
   for (int i = 0; i < 3; ++i) {
     int count = counts[i];
     if (count <= 0) continue;
 
+    // 计算矩形X坐标（逻辑不变）
     int blockX = monthLeft + outerGap + i * (singleBlockWidth + innerGap);
-    double blockHeight =
-        (static_cast<double>(count) / m_maxCount) * availableHeight;
-    if (blockHeight < 1) blockHeight = 1;
 
-    int blockY = blockStartY + (availableHeight - blockHeight);
-    int blockBottom = mh - bottomMargin - (m_textPosition == Top ? 0 : 1);
-    Q_UNUSED(blockBottom);
+    // 计算矩形高度（四舍五入为整数，避免浮点数偏移）
+    double heightRatio = static_cast<double>(count) / m_maxCount;
+    int blockHeight =
+        qRound(heightRatio * availableHeight);  // 四舍五入到整数像素
+    if (blockHeight < 1) blockHeight = 1;       // 最小高度1px
+    if (blockHeight > availableHeight)
+      blockHeight = availableHeight;  // 最大不超过可用高度
 
-    QRectF blockRect(blockX, blockY, singleBlockWidth, blockHeight);
+    // 计算矩形顶部Y坐标（底部固定=fixedBottomY，顶部=底部 - 高度）
+    int blockY = fixedBottomY - blockHeight;
+
+    // 绘制矩形（用整数坐标，避免浮点偏移）
+    QRect blockRect(blockX, blockY, singleBlockWidth,
+                    blockHeight);  // 改用QRect（整数像素）
     painter.setBrush(getColor(i));
-    painter.drawRoundedRect(blockRect, 1, 1);
+    painter.drawRoundedRect(blockRect, 1, 1);  // 圆角保持1px，美观
   }
 }
