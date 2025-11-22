@@ -1,163 +1,207 @@
 #include "src/Exercise/DrawSportsFreq.h"
 
 #include <QFont>
+#include <QList>  // 改为 QList
 #include <QPainter>
 #include <QPen>
 #include <QRect>
 #include <QString>
-#include <QVector>
-#include <algorithm>  // For std::max (or qMax if Qt headers handle it)
+#include <algorithm>
 
-// --- Constructor ---
-FrequencyCurveWidget::FrequencyCurveWidget(const QVector<int>& cycling,
-                                           const QVector<int>& hiking,
-                                           const QVector<int>& running,
-                                           bool isDark, QWidget* parent)
-    : QWidget(parent),
-      m_cycling(cycling),
+// --- Constructor（核心修复：初始化列表按声明顺序，不重复初始化）---
+FrequencyCurveWidget::FrequencyCurveWidget(const QList<int>& cycling,
+                                           const QList<int>& hiking,
+                                           const QList<int>& running,
+                                           bool isDark, QWidget* parent,
+                                           TextPosition textPosition)
+    : QWidget(parent),  // 先初始化父类
+      m_cycling(
+          cycling),  // 按 h 文件声明顺序：m_cycling → m_hiking → m_running
       m_hiking(hiking),
       m_running(running),
-      m_isDark(isDark) {
-  setFixedHeight(mh);  // 固定高度
-  setSizePolicy(QSizePolicy::Expanding,
-                QSizePolicy::Fixed);  // 宽度跟随父窗口
-  calculateMaxCount();                // 计算最大频次，用于比例映射
+      m_isDark(isDark),
+      m_textPosition(textPosition) {  // 最后初始化新增成员
+  setFixedHeight(mh);
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  calculateMaxCount();
 }
 
-// --- Paint Event ---
+// --- Paint Event（不变，仅类型适配 QList）---
 void FrequencyCurveWidget::paintEvent(QPaintEvent*) {
   QPainter painter(this);
-  painter.setRenderHint(QPainter::Antialiasing);  // 平滑曲线，山丘感核心
-  painter.setPen(Qt::NoPen);                      // 取消默认画笔，避免多余线条
+  painter.setRenderHint(QPainter::Antialiasing);
+  painter.setPen(Qt::NoPen);
 
-  // 1. 计算12个月份的水平坐标（平分父窗口宽度）
-  QVector<int> xPoints = calculateXPoints();
+  QList<int> xPoints = calculateXPoints();  // QVector → QList
 
-  // 2. 绘制三条运动曲线（骑行、徒步、跑步）
-  drawSmoothCurve(painter, xPoints, m_cycling, getColor(0));
-  drawSmoothCurve(painter, xPoints, m_hiking, getColor(1));
-  drawSmoothCurve(painter, xPoints, m_running, getColor(2));
+  int totalWidth = width();
+  for (int i = 0; i < 12; ++i) {
+    int monthLeft, monthRight;
+    if (i == 0) {
+      monthLeft = 0;
+      monthRight = (xPoints[0] + xPoints[1]) / 2;
+    } else if (i == 11) {
+      monthLeft = (xPoints[10] + xPoints[11]) / 2;
+      monthRight = totalWidth;
+    } else {
+      monthLeft = (xPoints[i - 1] + xPoints[i]) / 2;
+      monthRight = (xPoints[i] + xPoints[i + 1]) / 2;
+    }
+    int monthWidth = monthRight - monthLeft;
+    drawFrequencyBlocks(painter, monthLeft, monthRight, monthWidth, i);
+  }
 
-  // 设置字体和颜色
   QFont font;
-  font.setPointSize(6);  // 将字体大小设置为6 (已按要求修改)
+  font.setPointSize(6);
   painter.setFont(font);
-  QPen pen;
-  pen.setColor(m_isDark ? Qt::white : Qt::black);  // 根据模式选择颜色
+  QPen pen(m_isDark ? Qt::white : Qt::black);
   painter.setPen(pen);
 
-  // 绘制月份刻度尺及标记
-  int totalWidth = width();
-  int segmentWidth = totalWidth / 12;  // 每个分段（包含块和间隙）的宽度
-
   for (int i = 0; i < 12; ++i) {
-    // 计算第 i+1 个月份标记的X坐标（即第 i+1 个块的中心）
-    // 修正：使用 i 而不是 (i+0) 以保持一致性 (i 从0开始)
-    int xPoint =
-        segmentWidth * i + segmentWidth / 2;  // 第 i 个块的中心 (i 从0开始)
-
-    // 绘制月份数字于分块中央的上方
-    // 使用 QRect(xPoint - segmentWidth/2, 0, segmentWidth, 15) 来定位文本区域
-    painter.drawText(QRect(xPoint - segmentWidth / 2, 0, segmentWidth, 15),
-                     Qt::AlignCenter, QString::number(i + 1));  // 显示月份 1-12
-
-    // 不绘制最后一个标记 (i == 11 对应月份 12)
-    if (i == 11) {
-      continue;  // 跳过最后一个刻度线的绘制
+    int monthLeft, monthRight;
+    if (i == 0) {
+      monthLeft = 0;
+      monthRight = (xPoints[0] + xPoints[1]) / 2;
+    } else if (i == 11) {
+      monthLeft = (xPoints[10] + xPoints[11]) / 2;
+      monthRight = totalWidth;
+    } else {
+      monthLeft = (xPoints[i - 1] + xPoints[i]) / 2;
+      monthRight = (xPoints[i] + xPoints[i + 1]) / 2;
     }
-    // 绘制刻度线于分块的底部
-    // 刻度线绘制在块的边界上（即第 i+1 个分段的起点）
-    painter.drawLine(segmentWidth * (i + 1), height() - 5,
-                     segmentWidth * (i + 1), height());
+
+    QRect textRect = getTextRect(monthLeft, monthRight);
+    painter.drawText(textRect, Qt::AlignCenter, QString::number(i + 1));
+
+    if (i < 11) {
+      int tickX = monthRight;
+      QLine tickLine = getTickLine(tickX);
+      painter.drawLine(tickLine);
+    }
   }
 }
 
-// --- Calculate X Points ---
-QVector<int> FrequencyCurveWidget::calculateXPoints() const {
-  QVector<int> xPoints;
+// --- Calculate X Points（QVector → QList，逻辑不变）---
+QList<int> FrequencyCurveWidget::calculateXPoints() const {
+  QList<int> xPoints;
   int totalWidth = width();
-  int monthSpacing = totalWidth / 12;
   for (int i = 0; i < 12; ++i) {
-    // 取每个月的中心点作为曲线节点X坐标
-    xPoints.append(monthSpacing * i + monthSpacing / 2);
+    qreal x = (2 * i + 1) * totalWidth / 24.0;
+    xPoints.append(qRound(x));
   }
   return xPoints;
 }
 
-// --- Calculate Max Count ---
+// --- Calculate Max Count（QVector → QList，逻辑不变）---
 void FrequencyCurveWidget::calculateMaxCount() {
-  m_maxCount = 1;  // 避免除以0
+  QList<int> allCounts;
   for (int i = 0; i < 12; ++i) {
-    int currentMax = qMax(m_cycling[i], qMax(m_hiking[i], m_running[i]));
-    m_maxCount = qMax(m_maxCount, currentMax);
+    allCounts.append(m_cycling[i]);
+    allCounts.append(m_hiking[i]);
+    allCounts.append(m_running[i]);
   }
+  if (allCounts.isEmpty()) {
+    m_maxCount = 1;
+    return;
+  }
+  std::sort(allCounts.begin(), allCounts.end());
+  int quantileIndex =
+      qMin(qRound(allCounts.size() * 0.95), allCounts.size() - 1);
+  m_maxCount = qMax(1, allCounts[quantileIndex]);
 }
 
-// --- Get Color ---
+// --- Get Color（不变）---
 QColor FrequencyCurveWidget::getColor(int type) const {
   if (m_isDark) {
-    // 暗模式：亮一点的颜色，提高对比度
     switch (type) {
       case 0:
-        return QColor(90, 189, 94, 200);  // 骑行绿
+        return QColor(90, 189, 94, 220);
       case 1:
-        return QColor(255, 171, 44, 200);  // 徒步橙
+        return QColor(255, 171, 44, 220);
       case 2:
-        return QColor(183, 70, 201, 200);  // 跑步紫
+        return QColor(183, 70, 201, 220);
     }
   } else {
-    // 亮模式：标准颜色
     switch (type) {
       case 0:
-        return QColor(76, 175, 80, 200);  // 骑行绿
+        return QColor(76, 175, 80, 220);
       case 1:
-        return QColor(255, 152, 0, 200);  // 徒步橙
+        return QColor(255, 152, 0, 220);
       case 2:
-        return QColor(156, 39, 176, 200);  // 跑步紫
+        return QColor(156, 39, 176, 220);
     }
   }
   return Qt::black;
 }
 
-// --- Draw Smooth Curve ---
-void FrequencyCurveWidget::drawSmoothCurve(QPainter& painter,
-                                           const QVector<int>& xPoints,
-                                           const QVector<int>& counts,
-                                           const QColor& color) {
-  QPainterPath path;
-  int pointCount = xPoints.size();
-  if (pointCount <= 1) return;
-
-  // 1. 初始化曲线起点
-  int startX = xPoints[0];
-  double startY = mapCountToY(counts[0]);  // 频次→10px高度映射
-  path.moveTo(startX, startY);
-
-  // 2. 贝塞尔曲线插值，确保平滑
-  for (int i = 1; i < pointCount; ++i) {
-    int currentX = xPoints[i];
-    double currentY = mapCountToY(counts[i]);
-    int prevX = xPoints[i - 1];
-    double prevY = mapCountToY(counts[i - 1]);
-
-    // 控制点：取两个点的中点，确保曲线自然过渡
-    int ctrlX = (prevX + currentX) / 2;
-    double ctrlY = (prevY + currentY) / 2;
-
-    // 画二次贝塞尔曲线（平滑山丘核心）
-    path.quadTo(ctrlX, ctrlY, currentX, currentY);
+// --- Get Text Rect（不变）---
+QRect FrequencyCurveWidget::getTextRect(int monthLeft, int monthRight) const {
+  const int textHeight = 12;
+  if (m_textPosition == Top) {
+    return QRect(monthLeft, 0, monthRight - monthLeft, textHeight);
+  } else {
+    return QRect(monthLeft, mh - textHeight, monthRight - monthLeft,
+                 textHeight);
   }
-
-  // 3. 设置画笔样式（3px粗，半透明）
-  QPen pen(color);
-  pen.setWidth(3);  // 确保10px高度下清晰可见
-  painter.setPen(pen);
-  painter.drawPath(path);
 }
 
-// --- Map Count to Y ---
-double FrequencyCurveWidget::mapCountToY(int count) const {
-  if (m_maxCount == 0) return 10.0;
-  // Y轴向下为正，所以高频次→Y值小→向上凸
-  return mh - (count * mh) / m_maxCount;  // mh为高度
+// --- Get Tick Line（不变）---
+QLine FrequencyCurveWidget::getTickLine(int tickX) const {
+  const int textHeight = 12;
+  const int tickLength = 5;
+  if (m_textPosition == Top) {
+    return QLine(tickX, textHeight, tickX, textHeight + tickLength);
+  } else {
+    return QLine(tickX, mh - textHeight - tickLength, tickX, mh - textHeight);
+  }
+}
+
+// --- Draw Frequency Blocks（QList 适配，逻辑不变）---
+void FrequencyCurveWidget::drawFrequencyBlocks(QPainter& painter, int monthLeft,
+                                               int monthRight, int monthWidth,
+                                               int monthIndex) {
+  const int textHeight = 12;
+  const int bottomMargin = 2;
+  const int outerGap = 2;
+  const int innerGap = 1;
+
+  int availableHeight, blockStartY;
+  if (m_textPosition == Top) {
+    blockStartY = textHeight + 1;
+    availableHeight = mh - blockStartY - bottomMargin;
+  } else {
+    blockStartY = 1;
+    availableHeight = (mh - textHeight) - blockStartY - bottomMargin;
+  }
+  if (availableHeight < 3) availableHeight = 3;
+
+  int totalBlockWidth = monthWidth - 2 * outerGap;
+  if (totalBlockWidth <= 0) return;
+  int singleBlockWidth = (totalBlockWidth - 2 * innerGap) / 3;
+  if (singleBlockWidth <= 0) singleBlockWidth = 1;
+
+  // QList 索引访问（和 QVector 一致，无需修改）
+  int cyclingCount =
+      (monthIndex < m_cycling.size()) ? m_cycling[monthIndex] : 0;
+  int hikingCount = (monthIndex < m_hiking.size()) ? m_hiking[monthIndex] : 0;
+  int runningCount =
+      (monthIndex < m_running.size()) ? m_running[monthIndex] : 0;
+
+  QList<int> counts = {cyclingCount, hikingCount, runningCount};
+  for (int i = 0; i < 3; ++i) {
+    int count = counts[i];
+    if (count <= 0) continue;
+
+    int blockX = monthLeft + outerGap + i * (singleBlockWidth + innerGap);
+    double blockHeight =
+        (static_cast<double>(count) / m_maxCount) * availableHeight;
+    if (blockHeight < 1) blockHeight = 1;
+
+    int blockY = blockStartY + (availableHeight - blockHeight);
+    int blockBottom = mh - bottomMargin - (m_textPosition == Top ? 0 : 1);
+
+    QRectF blockRect(blockX, blockY, singleBlockWidth, blockHeight);
+    painter.setBrush(getColor(i));
+    painter.drawRoundedRect(blockRect, 1, 1);
+  }
 }

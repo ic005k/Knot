@@ -815,16 +815,98 @@ Item {
         title: qsTr("Delete Confirmation")
 
         modal: true
-        standardButtons: Dialog.Ok | Dialog.Cancel
+        standardButtons: Dialog.NoButton
 
         // 确保对话框居中显示
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
 
-        Label {
-            font.pointSize: FontSize
-            text: qsTr("Are you sure you want to delete this note?")
-            anchors.centerIn: parent
+        // 暗黑模式样式设置
+        background: Rectangle {
+            color: isDark ? "#2D2D2D" : "#FFFFFF"
+            border.color: isDark ? "#555555" : "#CCCCCC"
+            border.width: 1
+            radius: 6
+        }
+
+        // 标题栏样式
+        header: Label {
+            text: deleteConfirmDialog.title
+            font.bold: true
+            font.pointSize: FontSize + 1
+            color: isDark ? "#FFFFFF" : "#333333"
+            padding: 12
+            background: Rectangle {
+                color: isDark ? "#404040" : "#F0F0F0"
+                border.color: isDark ? "#555555" : "#CCCCCC"
+                border.width: 1
+            }
+        }
+
+        // 内容区域
+        contentItem: Column {
+            spacing: 20
+            padding: 20
+
+            Label {
+                font.pointSize: FontSize
+                text: qsTr("Are you sure you want to delete this note?")
+                color: isDark ? "#E0E0E0" : "#333333"
+                wrapMode: Text.Wrap
+                horizontalAlignment: Text.AlignHCenter
+                width: parent.width
+            }
+        }
+
+        // 按钮样式
+        footer: DialogButtonBox {
+            alignment: Qt.AlignRight
+            spacing: 10
+            padding: 12
+
+            background: Rectangle {
+                color: isDark ? "#404040" : "#F8F8F8"
+                border.color: isDark ? "#555555" : "#CCCCCC"
+                border.width: 1
+            }
+
+            // 自定义OK按钮
+            Button {
+                text: qsTr("Delete")
+                DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
+
+                background: Rectangle {
+                    color: parent.pressed ? "#D32F2F" : (parent.hovered ? "#F44336" : "#E53935")
+                    radius: 4
+                }
+                contentItem: Text {
+                    text: parent.text
+                    color: "#FFFFFF"
+                    font.pointSize: FontSize
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
+
+            // 自定义Cancel按钮
+            Button {
+                text: qsTr("Cancel")
+                DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
+
+                background: Rectangle {
+                    color: parent.pressed ? (isDark ? "#666666" : "#E0E0E0") : (parent.hovered ? (isDark ? "#555555" : "#F0F0F0") : (isDark ? "#404040" : "#FFFFFF"))
+                    border.color: isDark ? "#666666" : "#CCCCCC"
+                    border.width: 1
+                    radius: 4
+                }
+                contentItem: Text {
+                    text: parent.text
+                    color: isDark ? "#E0E0E0" : "#333333"
+                    font.pointSize: FontSize
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
         }
     }
 
