@@ -52,7 +52,7 @@ void FrequencyCurveWidget::paintEvent(QPaintEvent*) {
   }
 
   QFont font;
-  font.setPointSize(6);
+  font.setPointSize(10);
   painter.setFont(font);
   QPen pen(m_isDark ? Qt::white : Qt::black);
   painter.setPen(pen);
@@ -160,6 +160,7 @@ QLine FrequencyCurveWidget::getTickLine(int tickX) const {
 void FrequencyCurveWidget::drawFrequencyBlocks(QPainter& painter, int monthLeft,
                                                int monthRight, int monthWidth,
                                                int monthIndex) {
+  Q_UNUSED(monthRight);
   const int textHeight = 12;
   const int bottomMargin = 2;
   const int outerGap = 2;
@@ -199,6 +200,7 @@ void FrequencyCurveWidget::drawFrequencyBlocks(QPainter& painter, int monthLeft,
 
     int blockY = blockStartY + (availableHeight - blockHeight);
     int blockBottom = mh - bottomMargin - (m_textPosition == Top ? 0 : 1);
+    Q_UNUSED(blockBottom);
 
     QRectF blockRect(blockX, blockY, singleBlockWidth, blockHeight);
     painter.setBrush(getColor(i));

@@ -61,7 +61,9 @@
 | Storage          | Local data storage           | Auto-request on first launch|
 | Microphone       | Voice memo functionality     | Long-press add button in Todo UI |
 | Camera           | Note photography             | Attachment menu in note editor |
-| GPS              | Exercise trajectory recording| Activated in fitness module |
+| GPS              | Exercise trajectory recording| Activated in location services module |
+| Notification     | Todo reminder                | Auto-request on first launch |
+| Step Counter     | Step counting                | Activated in fitness module |
 
 ---
 
