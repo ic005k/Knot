@@ -672,13 +672,76 @@ void Steps::startRecordMotion() {
 
   m_activity = QJniObject(QNativeInterface::QAndroidApplication::context());
 
+  // 1. 定义Java端返回值的枚举（对应不同失败场景，便于维护）
+  enum GpsStartResult {
+    GPS_START_SUCCESS = 1,                 // 启动成功
+    GPS_START_PERMISSION_DENIED = 0,       // 权限问题（未获取/用户拒绝）
+    GPS_START_SERVICE_DISABLED = -1,       // 位置服务未开启
+    GPS_START_LOCATION_MANAGER_NULL = -2,  // LocationManager初始化失败
+    GPS_START_UNKNOWN_ERROR = -3           // 未知异常
+  };
+
+  // 2. 优化后的调用逻辑
   if (m_activity.isValid()) {
-    if (m_activity.callMethod<jdouble>("startGpsUpdates", "()D") == 0) {
-      qWarning() << "LocationManager is null";
-      mui->lblGpsInfo->setText("LocationManager is null...");
-      mui->btnGPS->setText(tr("Start"));
+    jdouble result = 0;
+    try {
+      // 捕获JNI调用的异常（避免崩溃）
+      result = m_activity.callMethod<jdouble>("startGpsUpdates", "()D");
+    } catch (const std::exception& e) {
+      qWarning() << "JNI call startGpsUpdates exception：" << e.what();
+      result = GPS_START_UNKNOWN_ERROR;
+    } catch (...) {
+      qWarning() << "JNI call startGpsUpdates occurred unknown exception";
+      result = GPS_START_UNKNOWN_ERROR;
+    }
+
+    // 3. 根据返回值区分失败场景，给出精准提示（英文基准）
+    QString tipText;
+    if (result == GPS_START_SUCCESS) {
+      tipText = tr("GPS started successfully...");
+
+    } else {
+      switch (static_cast<GpsStartResult>(result)) {
+        case GPS_START_PERMISSION_DENIED:
+          tipText =
+              tr("Location permission not obtained, please grant permission "
+                 "and try again");
+          qWarning() << "GPS start failed：Location permission denied";
+          break;
+        case GPS_START_SERVICE_DISABLED:
+          tipText =
+              tr("Location service is disabled, please enable it in settings");
+          qWarning() << "GPS start failed：Location service disabled";
+          break;
+        case GPS_START_LOCATION_MANAGER_NULL:
+          tipText = tr(
+              "Location service initialization failed, please restart the app");
+          qWarning() << "GPS start failed：LocationManager is null";
+          break;
+        case GPS_START_UNKNOWN_ERROR:
+          tipText = tr("GPS start failed, unknown error");
+          qWarning() << "GPS start failed：Unknown exception";
+          break;
+        default:  // 原返回0的兜底（兼容旧逻辑）
+          tipText = tr(
+              "GPS start failed, please check permission and location service");
+          qWarning() << "GPS start failed：Unknown reason (return value="
+                     << result << ")";
+          break;
+      }
+      // ====== 仅失败场景执行：显示Toast + return ======
+      m_Method->showToastMessage(tipText);
       return;
     }
+
+    // ====== 成功场景执行：显示Toast，不return ======
+    m_Method->showToastMessage(tipText);
+
+  } else {
+    qWarning() << "Android Activity is invalid, cannot start GPS";
+    m_Method->showToastMessage(tr("Activity is invalid, GPS start failed"));
+    // Activity无效的失败场景，保留return
+    return;
   }
 
 #else

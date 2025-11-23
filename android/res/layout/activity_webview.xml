@@ -1,8 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+>
 
     <!-- android:background="?attr/colorSurface" -->
     <!-- 标题栏（包含按钮） -->
@@ -10,44 +12,58 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+    >
 
         <Button
             android:id="@+id/close_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="关闭" />
+            android:text="关闭"
+        />
 
         <Button
             android:id="@+id/back_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="后退" />
+            android:text="后退"
+        />
 
         <Button
             android:id="@+id/forward_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="前进" />
+            android:text="前进"
+        />
 
         <Button
             android:id="@+id/edit_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="编辑" />
+            android:text="编辑"
+        />
 
     </LinearLayout>
+
+    <!-- 新增：WebView加载进度条 -->
+        <ProgressBar
+        android:id="@+id/web_loading_progress"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:visibility="gone"
+        android:progressTint="#2196F3"
+    />
 
     <!-- WebView主体 -->
     <WebView
         android:id="@+id/webview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+    />
 
 </LinearLayout>
-    

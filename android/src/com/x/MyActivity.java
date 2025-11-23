@@ -749,6 +749,84 @@ public class MyActivity
             return 1;
         }
 
+        // ======================================
+        //前置校验定位权限（核心优化部分）
+        // ======================================
+        // 所需定位权限：精确GPS + 粗略网络定位（覆盖GPS/网络两种定位场景）
+        String fineLocPermission = Manifest.permission.ACCESS_FINE_LOCATION;
+        String coarseLocPermission = Manifest.permission.ACCESS_COARSE_LOCATION;
+        boolean hasFinePerm =
+            ContextCompat.checkSelfPermission(this, fineLocPermission) ==
+            PackageManager.PERMISSION_GRANTED;
+        boolean hasCoarsePerm =
+            ContextCompat.checkSelfPermission(this, coarseLocPermission) ==
+            PackageManager.PERMISSION_GRANTED;
+
+        // 1. 无任何定位权限时，发起权限请求
+        if (!hasFinePerm && !hasCoarsePerm) {
+            // 检查是否需要解释权限用途（用户之前拒绝过，但未勾选「不再询问」）
+            boolean shouldExplain =
+                ActivityCompat.shouldShowRequestPermissionRationale(
+                    this,
+                    fineLocPermission
+                );
+
+            if (shouldExplain) {
+                // 解释权限用途后，再请求
+                new AlertDialog.Builder(this)
+                    .setMessage(
+                        zh_cn
+                            ? "需要定位权限才能记录轨迹、获取位置信息"
+                            : "Location permission is required to record tracks and get location info"
+                    )
+                    .setPositiveButton(
+                        zh_cn ? "同意" : "Allow",
+                        (dialog, which) -> {
+                            // 请求权限（同时申请精确+粗略定位，覆盖所有定位场景）
+                            ActivityCompat.requestPermissions(
+                                this,
+                                new String[] {
+                                    fineLocPermission,
+                                    coarseLocPermission,
+                                },
+                                REQ_LOCATION
+                            );
+                        }
+                    )
+                    .setNegativeButton(
+                        zh_cn ? "拒绝" : "Deny",
+                        (dialog, which) -> isGpsRunning = false
+                    )
+                    .show();
+            } else {
+                // 用户之前永久拒绝（勾选「不再询问」），引导跳转到应用设置页
+                new AlertDialog.Builder(this)
+                    .setMessage(
+                        zh_cn
+                            ? "定位权限已被拒绝，请在设置中开启"
+                            : "Location permission is denied, please enable it in settings"
+                    )
+                    .setPositiveButton(
+                        zh_cn ? "去设置" : "Go to Settings",
+                        (dialog, which) -> {
+                            Intent intent = new Intent(
+                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                            );
+                            intent.setData(
+                                Uri.fromParts("package", getPackageName(), null)
+                            );
+                            startActivity(intent);
+                        }
+                    )
+                    .setNegativeButton(
+                        zh_cn ? "取消" : "Cancel",
+                        (dialog, which) -> isGpsRunning = false
+                    )
+                    .show();
+            }
+            return 0; // 权限未获取，直接返回
+        }
+
         setVibrate();
         // 彻底重置追踪数据
         latitude = 0;
@@ -794,40 +872,28 @@ public class MyActivity
         );
         if (!isGpsEnabled && !isNetworkEnabled) {
             new AlertDialog.Builder(this)
-                .setMessage("位置服务未开启，请开启位置服务以获取位置信息。")
-                .setPositiveButton("去开启", (dialog, which) -> {
-                    Intent intent = new Intent(
-                        Settings.ACTION_LOCATION_SOURCE_SETTINGS
-                    );
-                    startActivity(intent);
-                    // 开启后自动重试（可选优化）
-                    new Handler(Looper.getMainLooper()).postDelayed(
-                        this::startGpsUpdates,
-                        2000
-                    );
-                })
-                .setNegativeButton("取消", (dialog, which) ->
+                .setMessage(
+                    zh_cn
+                        ? "位置服务未开启，请开启位置服务以获取位置信息"
+                        : "Location service is disabled, please enable it to get location info"
+                )
+                .setPositiveButton(
+                    zh_cn ? "去开启" : "Enable",
+                    (dialog, which) -> {
+                        Intent intent = new Intent(
+                            Settings.ACTION_LOCATION_SOURCE_SETTINGS
+                        );
+                        startActivity(intent);
+                        new Handler(Looper.getMainLooper()).postDelayed(
+                            this::startGpsUpdates,
+                            2000
+                        );
+                    }
+                )
+                .setNegativeButton(zh_cn ? "取消" : "Cancel", (dialog, which) ->
                     isGpsRunning = false
                 )
                 .show();
-            return 0;
-        }
-
-        // 权限校验（与原逻辑一致，保留）
-        int permission = ActivityCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        );
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                this,
-                new String[] {
-                    Manifest.permission.ACCESS_FINE_LOCATION, // GPS定位（原有）
-                    Manifest.permission.ACCESS_COARSE_LOCATION, // 网络定位（新增，用于基站/WiFi辅助）
-                },
-                REQ_LOCATION
-            );
-            isGpsRunning = false;
             return 0;
         }
 
@@ -852,14 +918,19 @@ public class MyActivity
             locationListener1
         );
 
-        // 网络定位使用networkExecutor
-        LocationManagerCompat.requestLocationUpdates(
-            locationManager,
-            LocationManager.NETWORK_PROVIDER,
-            networkLocationRequest,
-            networkExecutor, // 专用线程
-            networkLocationListener
-        );
+        // 网络定位使用networkExecutor（仅当有粗略定位权限时）
+        if (hasCoarsePerm) {
+            LocationManagerCompat.requestLocationUpdates(
+                locationManager,
+                LocationManager.NETWORK_PROVIDER,
+                networkLocationRequest,
+                networkExecutor, // 专用线程
+                networkLocationListener
+            );
+            Log.i(TAG, "网络定位已启动（已获取粗略定位权限）");
+        } else {
+            Log.i(TAG, "未获取粗略定位权限，跳过网络定位");
+        }
 
         return 1;
     }
@@ -2043,7 +2114,30 @@ public class MyActivity
     }
 
     public void startRecord(String outputFile) {
-        MediaRecorder tempRecorder = new MediaRecorder(); // 临时变量避免空指针
+        // 第一步：再次检查录音权限
+        int recordPermission = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.RECORD_AUDIO
+        );
+        if (recordPermission != PackageManager.PERMISSION_GRANTED) {
+            // 权限缺失，主动请求录音权限
+            ActivityCompat.requestPermissions(
+                this,
+                new String[] { Manifest.permission.RECORD_AUDIO },
+                REQ_RECORD_AUDIO
+            );
+            Toast.makeText(
+                this,
+                zh_cn
+                    ? "需要录音权限才能开始录制"
+                    : "Recording permission is required to start recording",
+                Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
+        // 第二步：原有录制逻辑（保留临时变量和异常捕获）
+        MediaRecorder tempRecorder = new MediaRecorder();
         try {
             tempRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             tempRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
@@ -2053,9 +2147,26 @@ public class MyActivity
             tempRecorder.start();
             recorder = tempRecorder; // 初始化成功后赋值给成员变量
             updateMicStatus();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            tempRecorder.release(); // 异常时立即释放临时对象
+            Log.i(TAG, "音频录制已开始：" + outputFile);
+        } catch (IOException e) {
+            Log.e(TAG, "录制初始化失败（IO异常）", e);
+            Toast.makeText(
+                this,
+                zh_cn ? "录制文件创建失败" : "Failed to create recording file",
+                Toast.LENGTH_SHORT
+            ).show();
+            tempRecorder.release();
+            recorder = null;
+        } catch (RuntimeException e) {
+            Log.e(TAG, "录制启动失败（运行时异常）", e);
+            Toast.makeText(
+                this,
+                zh_cn
+                    ? "录音功能启动失败，请检查权限或设备"
+                    : "Failed to start recording, check permission or device",
+                Toast.LENGTH_SHORT
+            ).show();
+            tempRecorder.release();
             recorder = null;
         }
     }

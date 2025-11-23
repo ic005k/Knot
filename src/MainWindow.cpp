@@ -2462,10 +2462,7 @@ void MainWindow::on_btnClearReaderFont_clicked() {
 
 void MainWindow::on_StartRecordAudio() {
   tmeStartRecordAudio->stop();
-  if (m_Method->checkRecordAudio() == 0) {
-    m_Method->showToastMessage(tr("Please enable permission to record audio!"));
-    return;
-  }
+
   m_Todo->startRecordVoice();
 }
 
