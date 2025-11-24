@@ -39,16 +39,24 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.Editable;
+import android.text.InputType;
+import android.text.Spannable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.BackgroundColorSpan;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.ActionMode;
+import android.view.ActionMode.Callback;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -85,6 +93,7 @@ import com.flask.colorpicker.OnColorChangedListener;
 import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
+import com.x.DefaultGrammars;
 import com.x.LargeTextEditor;
 import com.x.LineNumberedEditText;
 import com.x.MDActivity;
@@ -92,14 +101,20 @@ import com.x.MyActivity;
 import com.x.PopupMenuCustomLayout;
 import com.x.TextViewUndoRedo;
 import io.noties.markwon.AbstractMarkwonPlugin;
+import io.noties.markwon.LinkResolver;
 import io.noties.markwon.Markwon;
+import io.noties.markwon.MarkwonSpansFactory;
+import io.noties.markwon.core.CorePlugin;
+import io.noties.markwon.core.spans.LinkSpan;
 import io.noties.markwon.editor.MarkwonEditor;
+import io.noties.markwon.editor.MarkwonEditorTextWatcher;
 import io.noties.markwon.editor.MarkwonEditorTextWatcher;
 import io.noties.markwon.ext.latex.JLatexMathPlugin;
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
 import io.noties.markwon.ext.tables.TablePlugin;
 import io.noties.markwon.ext.tasklist.TaskListPlugin;
 import io.noties.markwon.html.HtmlPlugin;
+import io.noties.markwon.image.ImageProps;
 import io.noties.markwon.image.ImagesPlugin;
 import io.noties.markwon.image.glide.GlideImagesPlugin;
 import io.noties.markwon.inlineparser.InlineProcessor;
@@ -153,6 +168,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.*;
+import org.commonmark.node.Image;
 // 读写ini文件的三方开源库
 import org.ini4j.Wini;
 
@@ -282,21 +298,9 @@ public class NoteEditor
 
         String str_file = MyActivity.strMDFile;
         File file = new File(str_file);
-        if (getFileSizeInKB(file) < 200) {
-            final ExecutorService executor = Executors.newCachedThreadPool();
 
-            // 初始化 Markwon
-            final Markwon markwon = Markwon.create(context);
-            // 初始化 MarkwonEditor
-            final MarkwonEditor editor = MarkwonEditor.create(markwon);
-            // 添加 MarkwonEditorTextWatcher 到 EditText
-            editNote.addTextChangedListener(
-                MarkwonEditorTextWatcher.withPreRender(
-                    editor,
-                    executor, // 使用全局线程池
-                    editNote
-                )
-            );
+        if (getFileSizeInKB(file) < 200) {
+            setupMarkwonSyntaxHighlighting();
         }
 
         btn_cancel = (Button) findViewById(R.id.btn_cancel);
@@ -2914,5 +2918,25 @@ public class NoteEditor
                 startActivity(intent);
             }
         }
+    }
+
+    private void setupMarkwonSyntaxHighlighting() {
+        final ExecutorService executor = Executors.newCachedThreadPool();
+
+        // 增强的基础配置 - 只添加最必要的插件
+        final Markwon markwon = Markwon.builder(context)
+            .usePlugin(CorePlugin.create()) // 核心Markdown语法
+            .usePlugin(StrikethroughPlugin.create()) // 删除线
+            .usePlugin(LinkifyPlugin.create()) // 自动链接
+            .usePlugin(SimpleExtPlugin.create()) // 简单扩展
+            .build();
+
+        // 初始化 MarkwonEditor
+        final MarkwonEditor editor = MarkwonEditor.create(markwon);
+
+        // 添加 MarkwonEditorTextWatcher 到 EditText
+        editNote.addTextChangedListener(
+            MarkwonEditorTextWatcher.withPreRender(editor, executor, editNote)
+        );
     }
 }

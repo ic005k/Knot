@@ -1,17 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="#000000"
     android:layout_weight="1"
-    android:orientation="vertical">
+    android:orientation="vertical"
+>
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="top"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+    >
 
         <Button
             android:id="@+id/btn_cancel"
@@ -54,7 +57,8 @@
             android:background="#3498DB"
             android:textColor="#FFFFFF"
             android:layout_weight="1"
-            android:text="Undo" />
+            android:text="Undo"
+        />
 
         <Button
             android:id="@+id/btnRedo"
@@ -64,7 +68,8 @@
             android:background="#3498DB"
             android:textColor="#FFFFFF"
             android:layout_weight="1"
-            android:text="Redo" />
+            android:text="Redo"
+        />
 
         <View
             android:id="@+id/preview_selected_color"
@@ -82,7 +87,8 @@
             android:background="#3498DB"
             android:textColor="#FFFFFF"
             android:layout_weight="1"
-            android:text="Menu" />
+            android:text="Menu"
+        />
 
     </LinearLayout>
 
@@ -90,7 +96,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="top"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+    >
 
         <Button
             android:id="@+id/btnPrev"
@@ -167,7 +174,8 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+    >
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
@@ -200,7 +208,7 @@
                 android:textColor="#FFFFFF"
                 android:text="Loading, please wait..."
                 android:theme="@style/MyEditText"
-                android:textColorHighlight="#FF2222"
+                android:textColorHighlight="#FF9800"
                 android:inputType="textMultiLine"
                 android:layout_weight="1"
             />
@@ -225,7 +233,8 @@
             android:background="@drawable/progress_card_bg"
             android:elevation="8dp"
             android:visibility="gone"
-            android:padding="24dp">
+            android:padding="24dp"
+        >
 
             <!-- 放大后的圆圈进度 -->
             <ProgressBar
@@ -233,7 +242,8 @@
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:indeterminateTint="#FF4081"
-                android:theme="@style/CircularProgressStyle" />
+                android:theme="@style/CircularProgressStyle"
+            />
 
         </FrameLayout>
 
@@ -241,5 +251,4 @@
 
 
 </LinearLayout>
-
 <!-- android:textCursorDrawable="@drawable/shape_edit_cursor"-->
