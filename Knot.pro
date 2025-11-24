@@ -37,6 +37,12 @@ TRANSLATIONS += src/cn.ts \
 ICON = res/icon.icns
 RC_FILE += win.rc
 
+# 设置QML模块导入路径
+QML_IMPORT_PATH += $$PWD/src/qmlsrc
+
+# 可选：如果需要在Qt Creator的设计器中也能识别模块，可添加此配置
+QML_DESIGNER_IMPORT_PATH += $$PWD/src/qmlsrc
+
 ##################### 隔离第三方库的编译警告 ################################
 # 1. 为第三方库创建单独的变量
 THIRD_PARTY_PATH = $$PWD/lib

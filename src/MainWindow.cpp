@@ -531,7 +531,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
   }
 
   if (mui->qwMainChart->isVisible()) {
-    on_btnChart_clicked();
+    on_btnChart();
     event->ignore();
     return;
   }
@@ -1031,9 +1031,7 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
   m_Method->clickMainDateData();
 }
 
-void MainWindow::on_btnModifyRecord_clicked() {
-  m_Method->reeditMainEventData();
-}
+void MainWindow::on_btnModifyRecord() { m_Method->reeditMainEventData(); }
 
 bool MainWindow::eventFilter(QObject* watch, QEvent* evn) {
   if (loading) return QWidget::eventFilter(watch, evn);
@@ -1233,10 +1231,6 @@ void MainWindow::on_btnFind_clicked() {
 void MainWindow::on_actionFind_triggered() { on_btnFind_clicked(); }
 
 void MainWindow::on_btnTodo_clicked() { m_Todo->openTodo(); }
-
-void MainWindow::on_rbFreq_clicked() {}
-
-void MainWindow::on_rbAmount_clicked() {}
 
 void MainWindow::paintEvent(QPaintEvent* event) {
   Q_UNUSED(event);
@@ -1597,7 +1591,7 @@ void MainWindow::refreshMainUI() {
   qApp->processEvents();
 }
 
-void MainWindow::on_btnSelText_clicked() {
+void MainWindow::on_btnSelText() {
   if (mui->f_ReaderSet->isVisible()) {
     on_btnBackReaderSet_clicked();
   }
@@ -1658,7 +1652,7 @@ void MainWindow::on_btnCancelSel_clicked() {
 }
 
 void MainWindow::on_timerMousePress() {
-  if (!isMouseMove && isMousePress) on_btnSelText_clicked();
+  if (!isMouseMove && isMousePress) on_btnSelText();
 }
 
 void MainWindow::on_btnBackImg_clicked() {
@@ -1677,7 +1671,7 @@ void MainWindow::on_btnZoomOut_clicked() {
   QMetaObject::invokeMethod((QObject*)root, "zoomout");
 }
 
-void MainWindow::on_btnReport_clicked() {
+void MainWindow::on_btnReport() {
   if (mui->qwReport->source().isEmpty()) {
     int f_size = 19;
     if (fontSize <= f_size) f_size = fontSize;
@@ -1734,13 +1728,13 @@ void MainWindow::on_btnAddTodo_clicked() { m_Todo->on_btnAdd_clicked(); }
 
 void MainWindow::on_btnBackTodo_clicked() { m_Todo->closeTodo(); }
 
-void MainWindow::on_btnHigh_clicked() { m_Todo->on_btnHigh_clicked(); }
+void MainWindow::on_btnHigh() { m_Todo->on_btnHigh(); }
 
-void MainWindow::on_btnLow_clicked() { m_Todo->on_btnLow_clicked(); }
+void MainWindow::on_btnLow() { m_Todo->on_btnLow(); }
 
-void MainWindow::on_btnSetTime_clicked() { m_Todo->on_btnSetTime_clicked(); }
+void MainWindow::on_btnSetTime() { m_Todo->on_btnSetTime(); }
 
-void MainWindow::on_btnRecycle_clicked() { m_Todo->on_btnRecycle_clicked(); }
+void MainWindow::on_btnRecycle() { m_Todo->on_btnRecycle(); }
 
 void MainWindow::on_btnReturnRecycle_clicked() {
   m_Todo->on_btnReturn_clicked();
@@ -2206,10 +2200,6 @@ void MainWindow::on_btnClear_clicked() { mui->editTodo->clear(); }
 
 void MainWindow::on_btnModify_clicked() { m_Todo->reeditText(); }
 
-void MainWindow::on_btnChartMonth_clicked() {}
-
-void MainWindow::on_btnChartDay_clicked() {}
-
 void MainWindow::on_btnTabMoveUp_clicked() {
   if (tabData->count() == 0) return;
   int curIndex = tabData->currentIndex();
@@ -2243,7 +2233,7 @@ void MainWindow::updateMainTab() {
   setCurrentIndex(tabData->currentIndex());
 }
 
-void MainWindow::on_btnChart_clicked() { m_MainHelper->clickBtnChart(); }
+void MainWindow::on_btnChart() { m_MainHelper->clickBtnChart(); }
 
 void MainWindow::on_btnManagement_clicked() {
   int x, y, w, h;
@@ -2478,7 +2468,7 @@ void MainWindow::on_sliderPlayAudio_sliderReleased() {
   m_Todo->tmePlayProgress->start(m_Todo->nInterval);
 }
 
-void MainWindow::on_btnMove_clicked() {
+void MainWindow::on_btnMove() {
   isMoveEntry = true;
   if (del_Data((QTreeWidget*)mui->tabWidget->currentWidget())) {
     mui->btnTabMoveDown->hide();
@@ -2649,7 +2639,7 @@ void MainWindow::SaveFile(QString SaveType) {
   }
 }
 
-void MainWindow::on_btnSendEmail_clicked() {
+void MainWindow::on_btnSendEmail() {
   if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
 
   int cur_index = m_Method->getCurrentIndexFromQW(mui->qwBakList);

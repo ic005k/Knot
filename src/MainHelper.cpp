@@ -1316,7 +1316,7 @@ void MainWindow::reloadMain() {
   m_Method->clickMainDate();
 }
 
-void MainWindow::on_rbSteps_clicked() {
+void MainWindow::on_rbSteps() {
   int count = m_Steps->getCount();
   if (count <= 0) return;
 

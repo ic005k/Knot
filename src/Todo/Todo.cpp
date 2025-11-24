@@ -270,7 +270,7 @@ bool Todo::eventFilter(QObject* watch, QEvent* evn) {
   return QWidget::eventFilter(watch, evn);
 }
 
-void Todo::on_btnHigh_clicked() {
+void Todo::on_btnHigh() {
   int count = getCount();
   if (count == 0) return;
 
@@ -291,7 +291,7 @@ void Todo::on_btnHigh_clicked() {
   saveTodo();
 }
 
-void Todo::on_btnLow_clicked() {
+void Todo::on_btnLow() {
   int count = getCount();
   if (count == 0) return;
 
@@ -419,7 +419,7 @@ qlonglong Todo::getSecond(QString strDateTime) {
   return seconds;
 }
 
-void Todo::on_btnSetTime_clicked() {
+void Todo::on_btnSetTime() {
   int count = getCount();
   if (count == 0) return;
 
@@ -626,7 +626,7 @@ void Todo::sendMsgAlarm(QString text) {
 #endif
 }
 
-void Todo::on_btnRecycle_clicked() {
+void Todo::on_btnRecycle() {
   mui->frameTodo->hide();
   mui->frameTodoRecycle->show();
 }

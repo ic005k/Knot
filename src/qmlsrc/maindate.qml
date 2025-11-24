@@ -391,7 +391,7 @@ Rectangle {
                         icon.height: 20
 
                         onClicked: {
-                            mw_one.on_btnReport_clicked()
+                            mw_one.on_btnReport()
                             console.log("报表: " + index)
                         }
                         // 适配深色模式
@@ -408,7 +408,7 @@ Rectangle {
                         visible: true
 
                         onClicked: {
-                            mw_one.on_btnChart_clicked()
+                            mw_one.on_btnChart()
                             console.log("图表: " + index)
                         }
                         background: Rectangle {

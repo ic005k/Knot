@@ -372,7 +372,7 @@ Item {
                 onPressAndHold: function (mouse) {
 
                     if (!isMoving && !root.isBookPagePressHold) {
-                        mw_one.on_btnSelText_clicked()
+                        mw_one.on_btnSelText()
                         root.isBookPagePressHold = true
                     }
                     mouse.accepted = false
@@ -684,12 +684,17 @@ Item {
     // 笔记详情弹窗
     Popup {
         id: notePopup
-        width: 320
-        height: 360
+        width: parent.width - 20
+        height: parent.height * (2 / 3)
+
         font.pointSize: FontSize
         modal: true
         focus: true
         anchors.centerIn: Overlay.overlay
+
+        // 确保对话框居中显示
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
 
         background: Rectangle {
             color: isDark ? "#333333" : "#DDDDDD"
@@ -809,8 +814,10 @@ Item {
         }
     }
 
+    // 删除对话框
     Dialog {
         id: deleteConfirmDialog
+        width: parent.width - 30
         font.pointSize: FontSize
         title: qsTr("Delete Confirmation")
 

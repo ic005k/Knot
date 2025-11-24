@@ -457,7 +457,7 @@ Rectangle {
                                 icon.height: 20
 
                                 onClicked: {
-                                    m_Todo.on_btnHigh_clicked()
+                                    m_Todo.on_btnHigh()
                                     console.log("设置高优先级: " + index)
                                 }
                                 // 适配深色模式
@@ -474,7 +474,7 @@ Rectangle {
                                 icon.height: 20
 
                                 onClicked: {
-                                    m_Todo.on_btnLow_clicked()
+                                    m_Todo.on_btnLow()
                                     console.log("设置低优先级: " + index)
                                 }
                                 background: Rectangle {
@@ -507,7 +507,7 @@ Rectangle {
                                 icon.height: 20
 
                                 onClicked: {
-                                    m_Todo.on_btnSetTime_clicked()
+                                    m_Todo.on_btnSetTime()
                                     console.log("设置时间: " + index)
                                 }
                                 background: Rectangle {
@@ -523,7 +523,7 @@ Rectangle {
                                 icon.height: 20
 
                                 onClicked: {
-                                    m_Todo.on_btnRecycle_clicked()
+                                    m_Todo.on_btnRecycle()
                                     console.log("打开回收箱: " + index)
                                 }
                                 background: Rectangle {

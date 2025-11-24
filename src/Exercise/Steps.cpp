@@ -1427,7 +1427,6 @@ void Steps::allGpsTotal() {
     }
 
     yt += mt;
-    ycount += mcount;
 
     yearCyclingKM += monthCyclingKM;
     yearCyclingCount += monthCyclingCount;
@@ -1469,6 +1468,7 @@ void Steps::allGpsTotal() {
              QString::number(cmCount_Running);
 
   QString s1_year, s2_year, s3_year, s4_year;
+  ycount = yearCyclingCount + yearHikingCount + yearRunningCount;
   s1_year = stry + " " + tr("Year") + ": \n" + QString::number(yt) + " km  " +
             QString::number(ycount) + "\n";
   s2_year = tr("Cycling") + ": " + QString::number(yearCyclingKM) + " km  " +

@@ -217,7 +217,7 @@ class NotesList : public QDialog {
 
   void on_btnExport_clicked();
 
-  void on_btnRecycle_clicked();
+  void on_btnRecycle();
 
   void on_btnRestore_clicked();
 

@@ -351,9 +351,9 @@ class MainWindow : public QMainWindow {
  public slots:
   void on_btnAutoStop_clicked();
 
-  void on_btnMove_clicked();
+  void on_btnMove();
 
-  void on_btnSelText_clicked();
+  void on_btnSelText();
 
   void on_hSlider_sliderMoved(int position);
   void clickMainTab();
@@ -386,7 +386,7 @@ class MainWindow : public QMainWindow {
 
   void on_tabWidget_currentChanged(int index);
 
-  void on_btnModifyRecord_clicked();
+  void on_btnModifyRecord();
 
   void on_actionExport_Data_triggered();
 
@@ -401,10 +401,6 @@ class MainWindow : public QMainWindow {
   void on_btnFind_clicked();
 
   void on_actionFind_triggered();
-
-  void on_rbFreq_clicked();
-
-  void on_rbAmount_clicked();
 
   void saveDone();
 
@@ -422,7 +418,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnSteps_clicked();
 
-  void on_rbSteps_clicked();
+  void on_rbSteps();
 
   void on_btnSelTab_clicked();
 
@@ -456,7 +452,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnStartSearch_clicked();
 
-  void on_btnChart_clicked();
+  void on_btnChart();
 
   void on_btnBack_NotesSearchResult_clicked();
 
@@ -490,7 +486,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnBackImg_clicked();
 
-  void on_btnReport_clicked();
+  void on_btnReport();
 
   void on_btnAdd_clicked();
 
@@ -502,13 +498,13 @@ class MainWindow : public QMainWindow {
 
   void on_btnBackTodo_clicked();
 
-  void on_btnHigh_clicked();
+  void on_btnHigh();
 
-  void on_btnLow_clicked();
+  void on_btnLow();
 
-  void on_btnSetTime_clicked();
+  void on_btnSetTime();
 
-  void on_btnRecycle_clicked();
+  void on_btnRecycle();
 
   void on_btnReturnRecycle_clicked();
 
@@ -661,10 +657,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnModify_clicked();
 
-  void on_btnChartMonth_clicked();
-
-  void on_btnChartDay_clicked();
-
   void on_btnTabMoveUp_clicked();
 
   void on_btnTabMoveDown_clicked();
@@ -778,7 +770,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnBackNoteDiff_clicked();
 
-  void on_btnSendEmail_clicked();
+  void on_btnSendEmail();
 
   void on_btnShareBakFile_clicked();
 

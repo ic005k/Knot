@@ -509,7 +509,7 @@ Rectangle {
                             icon.height: 20
 
                             onClicked: {
-                                mw_one.on_btnMove_clicked()
+                                mw_one.on_btnMove()
                                 console.log("移动: " + index)
                             }
                             background: Rectangle {

@@ -23,18 +23,18 @@ class Todo : public QDialog {
   Q_OBJECT
 
  public:
-  explicit Todo(QWidget *parent = nullptr);
-  Ui::Todo *ui;
+  explicit Todo(QWidget* parent = nullptr);
+  Ui::Todo* ui;
   ~Todo();
 
-  QDialog *m_ReeditTodo = nullptr;
+  QDialog* m_ReeditTodo = nullptr;
 
   bool isTodoAlarmShow = false;
 
   bool isNeedAddToTodoList = false;
   QString strNeedAddToTodoText;
   int nInterval = 500;
-  QTimer *tmePlayProgress;
+  QTimer* tmePlayProgress;
   bool isNeedSave = false;
   bool isToday = false;
   QStringList tableLists;
@@ -62,7 +62,7 @@ class Todo : public QDialog {
 
   qlonglong getSecond(QString strDateTime);
 
-  int getEditTextHeight(QTextEdit *edit);
+  int getEditTextHeight(QTextEdit* edit);
 
   void insertItem(QString strTime, int type, QString strText, int curIndex);
   int getCurrentIndex();
@@ -104,16 +104,17 @@ class Todo : public QDialog {
 
   void on_btnTestSpeech();
 
-  void on_btnHigh_clicked();
-  void on_btnLow_clicked();
-  void on_btnSetTime_clicked();
-  void on_btnRecycle_clicked();
+  void on_btnHigh();
+  void on_btnLow();
+  void on_btnSetTime();
+  void on_btnRecycle();
 
   void setAlarmShowValue(bool value);
-  protected:
-  void keyReleaseEvent(QKeyEvent *event) override;
-  void closeEvent(QCloseEvent *event) override;
-  bool eventFilter(QObject *watch, QEvent *evn) override;
+
+ protected:
+  void keyReleaseEvent(QKeyEvent* event) override;
+  void closeEvent(QCloseEvent* event) override;
+  bool eventFilter(QObject* watch, QEvent* evn) override;
 
  public:
   void changeTodoIcon(bool isToday);
@@ -166,24 +167,24 @@ class Todo : public QDialog {
  private:
   QDate alarmDate;
   QTime alarmTime;
-  QListWidgetItem *editItem;
+  QListWidgetItem* editItem;
   QString audioFileName;
   QString audioFilePath;
   bool isAudioRecordOne = false;
   QString todotxt;
-  QLabel *lblModi;
-  QTextEdit *editModi;
+  QLabel* lblModi;
+  QTextEdit* editModi;
   bool isModi = false;
   bool isWeekValid(QString lblDateTime, QString strDate);
   bool isTomorrow = false;
 
-  QSettings *iniTodo;
+  QSettings* iniTodo;
   void delVoiceFile(int row);
   QString editStyle;
 
   bool isRestore = false;
   QString getNumber(QString str);
-  QTimer *tmeRecordTime;
+  QTimer* tmeRecordTime;
 
   int nRecordSec = 0;
   int nMSec = 0;

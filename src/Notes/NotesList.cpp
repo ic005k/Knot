@@ -1244,7 +1244,7 @@ void NotesList::initUnclassified() {
   qDebug() << result;
 }
 
-void NotesList::on_btnRecycle_clicked() {
+void NotesList::on_btnRecycle() {
   ui->frame0->hide();
   ui->frame1->show();
   setWinPos();
