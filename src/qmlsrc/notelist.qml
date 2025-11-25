@@ -333,7 +333,7 @@ Rectangle {
                             leftPadding: 5
                             rightPadding: 5
 
-                            visible:true;// item2.text.length ? true : false
+                            visible: true // item2.text.length ? true : false
                         }
                     }
 
@@ -390,6 +390,10 @@ Rectangle {
                                 console.log("View按钮被点击")
                                 mw_one.on_btnOpenNote_clicked()
                             }
+
+                            background: Rectangle {
+                                color: "transparent"
+                            }
                         }
 
                         // 第二个工具按钮
@@ -404,6 +408,10 @@ Rectangle {
                             onClicked: {
                                 console.log("编辑按钮被点击")
                                 m_NotesList.qmlOpenEdit()
+                            }
+
+                            background: Rectangle {
+                                color: "transparent"
                             }
                         }
 
@@ -420,6 +428,10 @@ Rectangle {
                                 console.log("链接按钮被点击")
                                 m_NotesList.on_actionCopyNoteLink()
                             }
+
+                            background: Rectangle {
+                                color: "transparent"
+                            }
                         }
 
                         // 第四个工具按钮
@@ -434,6 +446,10 @@ Rectangle {
                             onClicked: {
                                 console.log("图谱按钮被点击")
                                 m_NotesList.on_actionRelationshipGraph()
+                            }
+
+                            background: Rectangle {
+                                color: "transparent"
                             }
                         }
                     }

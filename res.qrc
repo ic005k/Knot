@@ -199,5 +199,7 @@
         <file>res/track_l.svg</file>
         <file>res/date.svg</file>
         <file>res/date_l.svg</file>
+        <file>res/graph_l.svg</file>
+        <file>res/link_l.svg</file>
     </qresource>
 </RCC>

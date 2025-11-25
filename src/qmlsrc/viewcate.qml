@@ -209,7 +209,7 @@ Rectangle {
                         leftPadding: 5
                         rightPadding: 5
 
-                        visible: item1.text.length ? true : false
+                        visible: false
                     }
 
                     Text {
@@ -248,6 +248,53 @@ Rectangle {
 
                         visible: item3.text.length ? true : false
                     }
+
+                    Rectangle {
+                        id: progressBar
+                        width: parent.width - 10 // 减去左右内边距
+                        height: 15
+                        Layout.preferredWidth: parent.width - 10
+                        Layout.alignment: Qt.AlignHCenter
+                        radius: 4
+                        color: isDark ? "#2D3A48" : "#F0F0F0"
+
+                        visible: item1.text.trim() !== "" && !isNaN(
+                                     parseFloat(item1.text.match(
+                                                    /\d+(\.\d+)?/)))
+
+                        // 进度填充层
+                        Rectangle {
+                            width: progressBar.width * Math.min(
+                                       1,
+                                       Math.max(0,
+                                                parseFloat(item1.text.match(
+                                                               /\d+(\.\d+)?/)[0]
+                                                           || 0) / 100))
+                            height: parent.height
+                            radius: 3
+                            color: isDark ? "#4A90E2" : "#64B5F6" // 亮模式用更柔和的浅蓝
+                        }
+
+                        // 百分比文本叠加
+                        Text {
+                            anchors.centerIn: parent
+                            text: item1.text.match(
+                                      /\d+(\.\d+)?/)[0] ? (parseFloat(
+                                                               item1.text.match(
+                                                                   /\d+(\.\d+)?/)[0]).toFixed(
+                                                               2) + "%") : ""
+
+                            color: isDark ? "white" : "#444444" // 亮模式改为深灰色
+                            font.pixelSize: 12
+                            font.bold: true
+                        }
+                    }
+
+                    Rectangle {
+                        width: view.width
+                        height: 5 // 空白高度
+                        color: "transparent"
+                    }
                 }
             }
 
@@ -263,79 +310,12 @@ Rectangle {
                     var delta = Qt.point(mouse.x - clickPos.x,
                                          mouse.y - clickPos.y)
                     console.debug("delta.x: " + delta.x)
-                    if ((delta.x < 0) && (aBtnShow.running === false)
-                            && (delBtn.width == 0)) {
-                        aBtnShow.start()
-                    } else if (aBtnHide.running === false
-                               && (delBtn.width > 0)) {
-                        aBtnHide.start()
-                    }
                 }
 
                 onClicked: {
 
                     view.currentIndex = index //实现item切换
-                    //mw_one.clickData()
                 }
-
-                onDoubleClicked: {
-
-                    //mw_one.reeditData()
-                    //var data = view.model.get(view.currentIndex)
-                    //console.log(data.text0 + "," + data.type + ", count=" + view.count)
-                }
-            }
-
-            Rectangle {
-                color: "#AAAAAA"
-                height: 0
-                width: parent.width
-                anchors.bottom: parent.bottom
-            }
-
-            Rectangle {
-                id: delBtn
-                visible: false
-                height: parent.height
-                width: 0
-                color: "#FF0000"
-
-                anchors.right: parent.right
-                anchors.rightMargin: -30
-                radius: 0
-
-                Text {
-                    width: 56
-                    anchors.centerIn: parent
-
-                    text: qsTr("Done")
-                    color: "#ffffff"
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        m_Todo.addToRecycle()
-                        view.model.remove(index)
-                    }
-                }
-            }
-
-            PropertyAnimation {
-                id: aBtnShow
-                target: delBtn
-                property: "width"
-                duration: 100
-                from: 0
-                to: 80
-            }
-            PropertyAnimation {
-                id: aBtnHide
-                target: delBtn
-                property: "width"
-                duration: 100
-                from: 80
-                to: 0
             }
         }
     }
@@ -350,15 +330,6 @@ Rectangle {
 
         model: ListModel {
             id: listmain
-
-            // debug
-            ListElement {
-                text0: '<span style="background-color: #ff6600;">Hello</span>'
-                text1: "123456  <b>Hello</b> <i>World!</i>  123456"
-                text2: '123456 <font color="red"><b>TEST</b></font>  123456'
-                text3: "str3 1234567890 1234567890  1234567890 1234567890"
-                myh: 0
-            }
         }
         delegate: dragDelegate
 
@@ -369,21 +340,6 @@ Rectangle {
         ScrollBar.vertical: ScrollBar {
             policy: ScrollBar.AsNeeded
             width: 8
-        }
-    }
-
-    function getListEleHeadColor(ntype) {
-        switch (ntype) {
-        case 0:
-            return "lightgray"
-        case 1:
-            return "red"
-        case 2:
-            return "yellow"
-        case 3:
-            return "lightblue"
-        default:
-            return "black"
         }
     }
 }
