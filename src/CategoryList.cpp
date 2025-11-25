@@ -165,6 +165,10 @@ void CategoryList::on_btnRename_clicked() {
     mui->editCategory->setText(ui->editRename->text().trimmed());
 
     mw_one->reloadMain();
+
+    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+    m_ShowMsg->showMsg("Kont", oldName + " -> " + text + " " + tr("Success"),
+                       1);
   }
 }
 
