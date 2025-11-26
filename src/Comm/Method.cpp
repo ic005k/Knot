@@ -578,6 +578,9 @@ void Method::clickMainDate() {
 
   if (topIndex < 0) return;
 
+  QString mainDate = getText0(mui->qwMainDate, maindateIndex);
+  mui->qwMainEvent->rootContext()->setContextProperty("main_date", mainDate);
+
   clearAllBakList(mui->qwMainEvent);
   QTreeWidgetItem* topItem = tw->topLevelItem(topIndex);
   int childCount = topItem->childCount();

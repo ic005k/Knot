@@ -201,5 +201,9 @@
         <file>res/date_l.svg</file>
         <file>res/graph_l.svg</file>
         <file>res/link_l.svg</file>
+        <file>res/reader/speak.svg</file>
+        <file>res/reader/speak_l.svg</file>
+        <file>res/reader/stopspeak.svg</file>
+        <file>res/reader/stopspeak_l.svg</file>
     </qresource>
 </RCC>

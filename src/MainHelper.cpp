@@ -480,6 +480,7 @@ void MainHelper::initMainQW() {
       "maineventWidth", mui->qwMainEvent->width());
   mui->qwMainEvent->rootContext()->setContextProperty("m_Method", m_Method);
   mui->qwMainEvent->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwMainEvent->rootContext()->setContextProperty("main_date", "");
   mui->qwMainEvent->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/mainevent.qml")));
 
@@ -618,6 +619,7 @@ void MainHelper::init_UIWidget() {
   mui->frameEditRecord->hide();
   mui->frameBookList->hide();
   mui->f_ReaderSet->hide();
+  mui->btnStopSpeak->hide();
 
   mui->frameReader->layout()->setContentsMargins(0, 0, 0, 1);
   mui->frameReader->setContentsMargins(0, 0, 0, 1);
@@ -844,6 +846,8 @@ void MainHelper::init_ButtonStyle() {
   mui->btnOpen->setStyleSheet("border:none;");
   mui->btnReadList->setStyleSheet("border:none; ");
   mui->btnRotation->setStyleSheet("border:none; ");
+  mui->btnSpeak->setStyleSheet("border:none;");
+  mui->btnStopSpeak->setStyleSheet("border:none;");
   // mui->f_ReaderFun->setStyleSheet("QFrame{background-color: #595959;}");
 
   // Notes
@@ -864,6 +868,8 @@ void MainHelper::init_ButtonStyle() {
     mui->btnOpen->setIcon(QIcon(":/res/reader/open_l.svg"));
     mui->btnReadList->setIcon(QIcon(":/res/reader/booklist_l.svg"));
     mui->btnPages->setIcon(QIcon(":/res/set_l.svg"));
+    mui->btnSpeak->setIcon(QIcon(":/res/reader/speak_l.svg"));
+    mui->btnStopSpeak->setIcon(QIcon(":/res/reader/stopspeak_l.svg"));
 
     // Todo
     mui->btnBackTodo->setIcon(QIcon(":/res/back_l.svg"));
@@ -891,6 +897,8 @@ void MainHelper::init_ButtonStyle() {
     mui->btnOpen->setIcon(QIcon(":/res/reader/open.svg"));
     mui->btnReadList->setIcon(QIcon(":/res/reader/booklist.svg"));
     mui->btnPages->setIcon(QIcon(":/res/set.svg"));
+    mui->btnSpeak->setIcon(QIcon(":/res/reader/speak.svg"));
+    mui->btnStopSpeak->setIcon(QIcon(":/res/reader/stopspeak.svg"));
 
     // Todo
     mui->btnBackTodo->setIcon(QIcon(":/res/back.svg"));

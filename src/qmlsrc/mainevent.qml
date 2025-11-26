@@ -17,6 +17,43 @@ Rectangle {
     property int i: 0
     property int itemCount: 0
     property bool isHighPriority: false
+    property string mainDate: main_date
+
+    // 1. 获取当前系统的年月日（统一格式：年4位、月2位、日2位，补零避免格式不匹配）
+    function getCurrentDate() {
+        const now = new Date();
+        return {
+            year: now.getFullYear().toString(), // 例："2025"
+            month: (now.getMonth() + 1).toString().padStart(2, '0'), // 月份0-11，+1后补零→"11"（而非"11"，1月→"01"）
+            day: now.getDate().toString().padStart(2, '0') // 日期补零→"14"（5日→"05"）
+        };
+    }
+
+    // 2. 解析 mainDate（格式"周五 11 14  2025"）为 年/月/日（统一补零格式）
+    function parseMainDate() {
+        if (!mainDate) return { year: "", month: "", day: "" };
+        const parts = mainDate.trim().split(/\s+/); // 按任意空格分割（兼容多空格）
+        return {
+            year: parts[3] || "", // 第4段是年（例："2025"）
+            month: (parts[1] || "").padStart(2, '0'), // 第2段是月（例："11"→"11"，"3"→"03"）
+            day: (parts[2] || "").padStart(2, '0') // 第3段是日（例："14"→"14"，"5"→"05"）
+        };
+    }
+
+    // 3. 核心函数：判断是否显示move按钮
+    function isShowMoveButton(index) {
+        // 条件1：模型有数据，且是最后一条记录
+        const isLastItem = view.model.count > 0 && index === view.model.count - 1;
+        if (!isLastItem) return false;
+
+        // 条件2：解析后的 mainDate 与当前系统日期一致（当天记录）
+        const current = getCurrentDate();
+        const recordDate = parseMainDate();
+        return recordDate.year === current.year
+            && recordDate.month === current.month
+            && recordDate.day === current.day;
+    }
+
 
     function setScrollBarPos(pos) {
         view.ScrollBar.vertical.position = 1.0 - view.ScrollBar.vertical.size
@@ -507,6 +544,7 @@ Rectangle {
                             icon.source: "qrc:/res/move.svg"
                             icon.width: 20
                             icon.height: 20
+                            visible: view.currentIndex === index && root.isShowMoveButton(index)
 
                             onClicked: {
                                 mw_one.on_btnMove()

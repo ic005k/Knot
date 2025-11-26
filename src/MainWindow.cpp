@@ -2680,3 +2680,13 @@ void MainWindow::on_btnViewBookNote_clicked() { m_Reader->viewBookNote(); }
 void MainWindow::on_btnMap_clicked() { m_Steps->openMapWindow(); }
 
 void MainWindow::on_btnSportsChart_clicked() { m_Steps->showSportsChart(); }
+
+void MainWindow::on_btnSpeak_clicked() {
+  mui->btnSpeak->hide();
+  mui->btnStopSpeak->show();
+}
+
+void MainWindow::on_btnStopSpeak_clicked() {
+  mui->btnStopSpeak->hide();
+  mui->btnSpeak->show();
+}

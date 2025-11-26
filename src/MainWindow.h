@@ -786,6 +786,10 @@ class MainWindow : public QMainWindow {
 
   void on_btnSportsChart_clicked();
 
+  void on_btnSpeak_clicked();
+
+  void on_btnStopSpeak_clicked();
+
  private:
   bool isMoveEntry;
   QTimer* tmeFlash;
