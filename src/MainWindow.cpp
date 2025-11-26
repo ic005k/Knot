@@ -2684,9 +2684,11 @@ void MainWindow::on_btnSportsChart_clicked() { m_Steps->showSportsChart(); }
 void MainWindow::on_btnSpeak_clicked() {
   mui->btnSpeak->hide();
   mui->btnStopSpeak->show();
+  m_Reader->startSpeak();
 }
 
 void MainWindow::on_btnStopSpeak_clicked() {
   mui->btnStopSpeak->hide();
   mui->btnSpeak->show();
+  m_Reader->stopSpeak();
 }

@@ -187,7 +187,9 @@ class Reader : public QDialog {
   void resetTextSelection();
   void setBookPagePressHold(bool value);
 
- public slots:
+  void startSpeak();
+  void stopSpeak();
+  public slots:
   void on_SetReaderFunVisible();
 
   void setPageScroll0();
@@ -278,6 +280,7 @@ class Reader : public QDialog {
   QStandardItemModel* notesModel = nullptr;
   void initBookNoteValue(int cindex, int cpage);
   void modifyText2(int currentIndex, const QString& text);
+  QString getBookSpeakTextFromQML();
 };
 //////////////////////////////////////////////////////////////////////////////////
 

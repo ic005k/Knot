@@ -1277,6 +1277,16 @@ QString Reader::getBookmarkTextFromQML() {
   return txt + "...";
 }
 
+QString Reader::getBookSpeakTextFromQML() {
+  QVariant item;
+  QQuickItem* root = mui->qwReader->rootObject();
+  QMetaObject::invokeMethod((QObject*)root, "getBookSpeakText",
+                            Q_RETURN_ARG(QVariant, item));
+  QString txt = item.toString();
+
+  return txt;
+}
+
 qreal Reader::getVHeight() {
   QVariant itemCount;
   QQuickItem* root = mui->qwReader->rootObject();
@@ -3932,3 +3942,12 @@ void Reader::setStartEnd(int start, int end) {
   startNote = start;
   endNote = end;
 }
+
+void Reader::startSpeak() {
+  stopSpeak();
+
+  QString text = getBookSpeakTextFromQML();
+  m_Method->playMyText(text);
+}
+
+void Reader::stopSpeak() { m_Method->stopPlayMyText(); }

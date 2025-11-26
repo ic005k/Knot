@@ -209,6 +209,40 @@ Item {
         return result
     }
 
+    function getBookSpeakText() {
+        if (contentListView.count === 0)
+            return "" // TTS播放用空字符串更合适，也可保留"Bookmark"
+
+        console.log("===== 开始获取TTS播放文本 =====")
+        console.log("当前模式:", root.isLandscape ? "横屏" : "竖屏")
+
+        // 获取唯一的文本块
+        let delegateItem = contentListView.itemAtIndex(0)
+        if (!delegateItem) {
+            console.log("无法获取文本块")
+            return ""
+        }
+
+        // 获取屏幕顶部位置对应的字符索引（当前页面起始位置）
+        let charPos = getCharPositionAtScreenTopLeft(delegateItem)
+        console.log("当前屏幕顶部字符位置:", charPos)
+
+        if (charPos === -1 || charPos >= delegateItem.text.length) {
+            console.log("字符位置无效或已到文本末尾")
+            return ""
+        }
+
+        // 获取完整文本，从当前字符位置截取到末尾（去掉100字符限制）
+        let text = getRenderedText(delegateItem)
+        let result = text.substring(charPos)
+
+        // 直接取到文本末尾
+        console.log(`获取到后续文本长度: ${result.length} 字符`)
+        console.log("TTS文本预览:", result.substring(0, 200) + "...") // 仅预览前200字符
+
+        return result
+    }
+
     function getCharPositionAtScreenTopLeft(delegateItem) {
         // 使用屏幕左上角(0,0)作为模拟点击位置
         let mousePoint = Qt.point(0, 0)
