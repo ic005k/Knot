@@ -263,6 +263,8 @@ public class MyActivity
 
     public static native void CallJavaNotify_18();
 
+    public static native void CallJavaNotify_19();
+
     // 添加服务绑定状态标记
     private boolean mServiceBound = false;
 
@@ -598,19 +600,30 @@ public class MyActivity
 
         addDeskShortcuts();
 
+        // 初始化TTS时设置监听器
         mytts = TTSUtils.getInstance(this);
-        // 初始化TTS
         mytts.initialize(
             new TTSUtils.InitCallback() {
                 @Override
                 public void onSuccess() {
-                    // 使用系统默认语言
-                    // mytts.speak("TTS initialized successfully");
-
-                    // 使用特定语言
-                    // mytts.speak("Bonjour", Locale.FRENCH);
-
                     Log.w("TTS", "TTS initialized successfully");
+                    // ========== 新增：设置播放完成监听器 ==========
+                    mytts.setOnPlayCompleteListener(
+                        new TTSUtils.OnPlayCompleteListener() {
+                            @Override
+                            public void onPlayComplete() {
+                                Log.d("TTS", "长文本播放完成！");
+                                // 调用Qt Native方法，通知C++端播放完成
+                                CallJavaNotify_19();
+                            }
+
+                            @Override
+                            public void onPlayStopped() {
+                                Log.d("TTS", "播放被手动停止！");
+                            }
+                        }
+                    );
+                    // ==========================================
                 }
 
                 @Override

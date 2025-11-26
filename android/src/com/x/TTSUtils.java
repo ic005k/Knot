@@ -37,6 +37,27 @@ public class TTSUtils {
     private boolean isPlayingSegment = false; // 是否正在播放分段
     private static final int SEGMENT_MAX_LENGTH = 100; // 每段最大字符数（可根据测试调整）
 
+    // ========== 新增：播放完成回调接口 ==========
+    public interface OnPlayCompleteListener {
+        /**
+         * 长文本分段播放完成时触发
+         */
+        void onPlayComplete();
+
+        /**
+         * 播放被停止时触发（可选）
+         */
+        void onPlayStopped();
+    }
+
+    // 播放完成监听器实例
+    private OnPlayCompleteListener playCompleteListener;
+
+    // 对外提供设置监听器的方法
+    public void setOnPlayCompleteListener(OnPlayCompleteListener listener) {
+        this.playCompleteListener = listener;
+    }
+
     // ==========================================
 
     // 单例模式
@@ -100,41 +121,6 @@ public class TTSUtils {
                                 return;
                             }
                         }
-
-                        // 设置合成回调
-                        /*textToSpeech.setOnUtteranceProgressListener(
-                            new UtteranceProgressListener() {
-                                @Override
-                                public void onStart(String utteranceId) {
-                                    Log.d(
-                                        TAG,
-                                        "Speech started: " + utteranceId
-                                    );
-                                }
-
-                                @Override
-                                public void onDone(String utteranceId) {
-                                    Log.d(
-                                        TAG,
-                                        "Speech completed: " + utteranceId
-                                    );
-                                    releaseAudioFocus();
-                                }
-
-                                @Override
-                                public void onError(String utteranceId) {
-                                    Log.e(TAG, "Speech error: " + utteranceId);
-                                    releaseAudioFocus();
-                                    mainHandler.post(() ->
-                                        Toast.makeText(
-                                            context,
-                                            "Speech error",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    );
-                                }
-                            }
-                            );*/
 
                         // ========== 修改：重写UtteranceProgressListener，添加分段续播逻辑 ==========
                         textToSpeech.setOnUtteranceProgressListener(
@@ -262,6 +248,11 @@ public class TTSUtils {
     private void playNextSegment() {
         if (playQueue.isEmpty()) {
             Log.d(TAG, "分段播放队列已空，结束播放");
+            // ========== 新增：触发播放完成回调 ==========
+            if (playCompleteListener != null) {
+                mainHandler.post(() -> playCompleteListener.onPlayComplete());
+            }
+            // ==========================================
             return;
         }
 
@@ -271,7 +262,6 @@ public class TTSUtils {
             return;
         }
 
-        // 复用原有speak逻辑，但不重新请求音频焦点（分段播放时保持焦点）
         Log.d(
             TAG,
             "播放下一段：" +
@@ -346,96 +336,6 @@ public class TTSUtils {
     public void speak(String text) {
         speak(text, Locale.getDefault());
     }
-
-    /*public void speak(String text, Locale locale) {
-        if (!isInitialized) {
-            Log.w(TAG, "Trying to speak before initialization");
-            Toast.makeText(
-                context,
-                "TTS not initialized",
-                Toast.LENGTH_SHORT
-            ).show();
-            initialize(
-                new InitCallback() {
-                    @Override
-                    public void onSuccess() {
-                        speak(text, locale);
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        Toast.makeText(
-                            context,
-                            "Initialization failed: " + error,
-                            Toast.LENGTH_SHORT
-                        ).show();
-                    }
-                }
-            );
-            return;
-        }
-
-        // 设置语言
-        int result = textToSpeech.setLanguage(locale);
-        if (
-            result == TextToSpeech.LANG_MISSING_DATA ||
-            result == TextToSpeech.LANG_NOT_SUPPORTED
-        ) {
-            // 尝试英语作为备选
-            result = textToSpeech.setLanguage(Locale.ENGLISH);
-            if (
-                result == TextToSpeech.LANG_MISSING_DATA ||
-                result == TextToSpeech.LANG_NOT_SUPPORTED
-            ) {
-                Toast.makeText(
-                    context,
-                    "Language not supported",
-                    Toast.LENGTH_SHORT
-                ).show();
-                return;
-            }
-        }
-
-        // 如果之前丢失了焦点，先尝试重新获取
-        if (audioFocusRestoreNeeded) {
-            Log.d(TAG, "Restoring lost audio focus");
-            releaseAudioFocus();
-            if (
-                requestAudioFocus() != AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-            ) {
-                Log.w(TAG, "Failed to restore audio focus");
-                return;
-            }
-        }
-
-        // 请求音频焦点
-        int focusResult = requestAudioFocus();
-
-        if (focusResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            Log.d(TAG, "Speaking: " + text);
-
-            String utteranceId = "tts_" + System.currentTimeMillis();
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                Bundle params = new Bundle();
-                textToSpeech.speak(
-                    text,
-                    TextToSpeech.QUEUE_ADD,
-                    params,
-                    utteranceId
-                );
-            } else {
-                textToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null);
-            }
-        } else {
-            Log.w(TAG, "Audio focus denied");
-            Toast.makeText(
-                context,
-                "Audio focus denied",
-                Toast.LENGTH_SHORT
-            ).show();
-        }
-        }*/
 
     // ========== 修改：speak方法，新增长文本分段逻辑 ==========
     public void speak(String text, Locale locale) {

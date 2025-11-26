@@ -35,6 +35,7 @@ extern void RegJni15(const char* myClassName);
 extern void RegJni16(const char* myClassName);
 extern void RegJni17(const char* myClassName);
 extern void RegJni18(const char* myClassName);
+extern void RegJni19(const char* myClassName);
 
 void loadTheme(bool isDark);
 void loadLocal();
@@ -124,6 +125,7 @@ int main(int argc, char* argv[]) {
   RegJni(ANDROID_MAIN_ACTIVITY);
   RegJni15(ANDROID_MAIN_ACTIVITY);
   RegJni18(ANDROID_MAIN_ACTIVITY);
+  RegJni19(ANDROID_MAIN_ACTIVITY);
   RegJni("com/x/ClockActivity");
   RegJni("com/x/ShareReceiveActivity");
   RegJni("com/x/NoteEditor");
