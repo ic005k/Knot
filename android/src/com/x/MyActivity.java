@@ -158,6 +158,11 @@ public class MyActivity
     extends QtActivity
     implements Application.ActivityLifecycleCallbacks {
 
+    // TTS相关状态标记（新增）
+    private boolean isTtsInitialized = false; // 是否已初始化完成
+    private boolean isTtsInitializing = false; // 是否正在初始化中
+    private String pendingTtsText = null; // 初始化完成后需要播放的待处理文本
+
     private static final int REQ_LOCATION = 1;
     private static final int REQ_RECORD_AUDIO = 2;
     private static final int REQ_CAMERA = 3;
@@ -601,7 +606,7 @@ public class MyActivity
         addDeskShortcuts();
 
         // 初始化TTS时设置监听器
-        mytts = TTSUtils.getInstance(this);
+        /*mytts = TTSUtils.getInstance(this);
         mytts.initialize(
             new TTSUtils.InitCallback() {
                 @Override
@@ -631,7 +636,7 @@ public class MyActivity
                     Log.w("TTS", "TTS init failed: " + error);
                 }
             }
-        );
+        );*/
     }
 
     // 使用LocationListenerCompat定义位置监听器
@@ -1217,7 +1222,10 @@ public class MyActivity
 
         super.onDestroy();
         m_instance = null;
-        mytts.shutdown();
+        if (mytts != null) {
+            mytts.shutdown(); // 释放TTS资源
+            mytts = null;
+        }
         alarmWindows.remove(this); // 防止 Activity 泄漏
         mapActivityInstance = null;
     }
@@ -2032,7 +2040,82 @@ public class MyActivity
         getMyAppContext().startActivity(i);
     }
 
+    /*public static void playMyText(String text) {
+        mytts.speak(text);
+    }*/
+
     public static void playMyText(String text) {
+        if (TextUtils.isEmpty(text)) {
+            Log.w("TTS", "播放文本为空，跳过");
+            return;
+        }
+
+        // 1. 初始化TTS实例（若未初始化）
+        if (mytts == null) {
+            mytts = TTSUtils.getInstance(m_instance);
+        }
+
+        // 2. 正在初始化中：缓存文本，等待初始化完成后播放
+        if (m_instance.isTtsInitializing) {
+            m_instance.pendingTtsText = text;
+            Log.d("TTS", "TTS正在初始化，缓存待播放文本：" + text);
+            return;
+        }
+
+        // 3. 未初始化：触发初始化，缓存文本
+        if (!m_instance.isTtsInitialized) {
+            m_instance.isTtsInitializing = true;
+            m_instance.pendingTtsText = text;
+            Log.d("TTS", "开始初始化TTS，待播放文本：" + text);
+
+            mytts.initialize(
+                new TTSUtils.InitCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.w("TTS", "TTS初始化成功");
+                        m_instance.isTtsInitialized = true;
+                        m_instance.isTtsInitializing = false;
+
+                        // 恢复监听器设置
+                        mytts.setOnPlayCompleteListener(
+                            new TTSUtils.OnPlayCompleteListener() {
+                                @Override
+                                public void onPlayComplete() {
+                                    Log.d("TTS", "长文本播放完成！");
+                                    CallJavaNotify_19();
+                                }
+
+                                @Override
+                                public void onPlayStopped() {
+                                    Log.d("TTS", "播放被手动停止！");
+                                }
+                            }
+                        );
+
+                        // 播放缓存的文本
+                        if (!TextUtils.isEmpty(m_instance.pendingTtsText)) {
+                            mytts.speak(m_instance.pendingTtsText);
+                            Log.d(
+                                "TTS",
+                                "播放缓存文本：" + m_instance.pendingTtsText
+                            );
+                            m_instance.pendingTtsText = null; // 清空缓存
+                        }
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Log.e("TTS", "TTS初始化失败：" + error);
+                        m_instance.isTtsInitializing = false;
+                        m_instance.pendingTtsText = null;
+                    }
+                }
+            );
+            return;
+        }
+
+        // 4. 已初始化：直接播放
+        Log.d("TTS", "TTS已初始化，直接播放：" + text);
         mytts.speak(text);
     }
 
