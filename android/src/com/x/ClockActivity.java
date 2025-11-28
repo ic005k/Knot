@@ -53,14 +53,11 @@ public class ClockActivity
     extends Activity
     implements View.OnClickListener, Application.ActivityLifecycleCallbacks {
 
-    private MediaPlayer mediaPlayer;
     private MediaPlayer player;
-    private static int curVol;
+
     private static String strInfo =
         "Todo|There are currently timed tasks pending.|0|Close";
-    private static String strEnInfo =
-        "Todo|There are currently timed tasks pending.|0|Close";
-    private String strMute = "false";
+
     private boolean isRefreshAlarm = true;
     private AudioManager mAudioManager;
     private InternalConfigure internalConfigure;
@@ -136,6 +133,10 @@ public class ClockActivity
                 String iniFile = "/storage/emulated/0/.Knot/alarm.ini";
                 try {
                     File file = new File(iniFile);
+                    File parentDir = file.getParentFile();
+                    if (!parentDir.exists()) {
+                        parentDir.mkdirs(); // 创建多级父目录
+                    }
                     if (!file.exists()) file.createNewFile();
                     Wini ini = new Wini(file);
                     ini.put("action", "backMain", "true");
@@ -207,9 +208,9 @@ public class ClockActivity
         System.out.println("Info Text: " + strInfo);
 
         String[] array = strInfo.split("\\|");
-        String str1 = array[0];
-        String str2 = array[1];
-        String str3 = array[3];
+        String str1 = array.length > 0 ? array[0] : "Todo";
+        String str2 = array.length > 1 ? array[1] : "No content";
+        String str3 = array.length > 3 ? array[3] : "Close";
         String strTodo;
         if (MyActivity.zh_cn) strTodo = "待办事项：\n";
         else strTodo = "Todo: \n";
@@ -237,10 +238,16 @@ public class ClockActivity
                 btn_play_voice.setVisibility(View.VISIBLE);
             } else {
                 // TTS
-                String filename = "/data/data/com.x/files/msg.ini";
+                String filename = "/storage/emulated/0/.Knot/msg.ini";
                 internalConfigure = new InternalConfigure(this);
                 try {
-                    internalConfigure.readFrom(filename);
+                    File iniFile = new File(filename);
+                    if (iniFile.exists()) {
+                        // 先判断文件存在
+                        internalConfigure.readFrom(filename);
+                    } else {
+                        Log.w("ClockActivity", "msg.ini不存在，使用默认配置");
+                    }
                 } catch (Exception e) {
                     System.err.println("Error : reading msg.ini");
                     e.printStackTrace();
@@ -248,10 +255,9 @@ public class ClockActivity
                 String strVoice = internalConfigure.getIniKey("voice");
                 String strValue = "true";
                 if (strVoice != null && strVoice.equals(strValue)) {
-                    TTSUtils m_tts = TTSUtils.getInstance(
-                        getApplicationContext()
-                    );
-                    m_tts.speak(str2);
+                    MyActivity.stopPlayMyText();
+                    MyActivity.playMyText(str2);
+                    System.out.println("播放文本：" + str2);
                 }
             }
         }
@@ -308,11 +314,12 @@ public class ClockActivity
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         MyActivity.stopPlayMyText();
-        // 停止播放时增加 null 检查和释放
-        if (player != null) {
+
+        // 安全停止MediaPlayer：判断状态+重置
+        if (player != null && player.isPlaying()) {
             player.stop();
+            player.reset(); // 重置状态，避免后续操作异常
         }
 
         AnimationWhenClosed();
@@ -320,13 +327,15 @@ public class ClockActivity
         if (!MyActivity.isBackMainUI) {
             MyActivity.setMini();
         }
+
+        super.onBackPressed();
     }
 
     @Override
     protected void onDestroy() {
         isReady = false;
 
-        if (!isHomeKey) MyActivity.alarmWindows.remove(context);
+        if (!isHomeKey) MyActivity.alarmWindows.remove(m_instance);
 
         unregisterReceiver(mHomeKeyEvent);
 
@@ -338,11 +347,13 @@ public class ClockActivity
             CallJavaNotify_4();
         }
 
-        // 释放 MediaPlayer
+        // 释放MediaPlayer（补充完整状态判断）
         if (player != null) {
-            player.stop();
-            player.release(); // 释放底层资源
-            player = null; // 置空避免后续调用
+            if (player.isPlaying()) {
+                player.stop();
+            }
+            player.release();
+            player = null;
         }
 
         // 注销生命周期回调
@@ -350,6 +361,8 @@ public class ClockActivity
         application.unregisterActivityLifecycleCallbacks(this);
 
         super.onDestroy();
+
+        m_instance = null; // 释放静态引用
 
         System.out.println("ClockActivity onDestroy...");
     }
@@ -368,6 +381,7 @@ public class ClockActivity
         public InternalConfigure(Context context) {
             super();
             this.context = context;
+            this.properties = new Properties(); // 提前初始化，避免null
         }
 
         /**
@@ -393,8 +407,6 @@ public class ClockActivity
          * 读取文件
          */
         public void readFrom(String filename) throws Exception {
-            properties = new Properties();
-
             FileInputStream fileInputStream;
 
             File file = new File(filename);
@@ -501,17 +513,38 @@ public class ClockActivity
     public void onActivityDestroyed(Activity activity) {}
 
     private void playRecord(String outputFile) {
+        // 先释放旧实例，避免状态冲突
         if (player != null) {
-            player.stop();
+            if (player.isPlaying()) {
+                player.stop();
+            }
+            player.reset();
+            player.release();
+            player = null;
         }
-
+        // 空值校验：避免传入null路径
+        if (TextUtils.isEmpty(outputFile)) return;
         try {
             player = new MediaPlayer();
             player.setDataSource(outputFile);
             player.prepare();
             player.start();
+            // 监听播放完成，自动释放资源
+            player.setOnCompletionListener(
+                new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        mp.reset();
+                    }
+                }
+            );
         } catch (Exception ex) {
             ex.printStackTrace();
+            // 异常时确保释放资源
+            if (player != null) {
+                player.release();
+                player = null;
+            }
         }
     }
 

@@ -2040,10 +2040,6 @@ public class MyActivity
         getMyAppContext().startActivity(i);
     }
 
-    /*public static void playMyText(String text) {
-        mytts.speak(text);
-    }*/
-
     public static void playMyText(String text) {
         if (TextUtils.isEmpty(text)) {
             Log.w("TTS", "播放文本为空，跳过");
@@ -2120,7 +2116,10 @@ public class MyActivity
     }
 
     public static void stopPlayMyText() {
-        mytts.stop();
+        if (mytts != null) {
+            // 避免空指针调用
+            mytts.stop();
+        }
     }
 
     public void speakText(String text) {
