@@ -631,6 +631,7 @@ void MainHelper::init_UIWidget() {
   mui->frameMain->layout()->setSpacing(1);
 
   mui->frameOne->hide();
+  mui->btnDel->hide();
 
   mui->frameNotesGraph->hide();
   mui->frameNotesGraph->layout()->setContentsMargins(1, 1, 1, 1);

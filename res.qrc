@@ -205,5 +205,7 @@
         <file>res/reader/speak_l.svg</file>
         <file>res/reader/stopspeak.svg</file>
         <file>res/reader/stopspeak_l.svg</file>
+        <file>res/del.svg</file>
+        <file>res/del_l.svg</file>
     </qresource>
 </RCC>
