@@ -759,9 +759,6 @@ void Todo::refreshAlarm() {
   isToday = false;
   QString str;
 
-  // QString ini_file = "/data/data/com.x/files/msg.ini";
-  // QSettings Reg(ini_file, QSettings::IniFormat);
-
   QStringList listAlarm;
   QList<qlonglong> listTotalS;
 

@@ -530,7 +530,7 @@ void TodoAlarm::on_btnTestSpeech_clicked() {
 }
 
 void TodoAlarm::on_chkSpeech_clicked() {
-  QString ini_file = "/data/data/com.x/files/msg.ini";
+  QString ini_file = privateDir + "msg.ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
 
   if (ui->chkSpeech->isChecked())
@@ -540,7 +540,7 @@ void TodoAlarm::on_chkSpeech_clicked() {
 }
 
 void TodoAlarm::getChkVoice() {
-  QString ini_file = "/data/data/com.x/files/msg.ini";
+  QString ini_file = privateDir + "msg.ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
 
   QString strVoice = Reg.value("voice").toString();

@@ -555,8 +555,8 @@ Rectangle {
                                      && root.isShowMoveButton(index)
 
                             onClicked: {
-                                mw_one.on_btnMove()
                                 console.log("移动: " + index)
+                                mw_one.on_btnMove()
                             }
                             background: Rectangle {
                                 color: "transparent"
@@ -572,8 +572,8 @@ Rectangle {
                                      && root.isShowMoveButton(index)
 
                             onClicked: {
-                                mw_one.on_btnDel_clicked()
                                 console.log("删除: " + index)
+                                mw_one.on_btnDel_clicked()
                             }
                             background: Rectangle {
                                 color: "transparent"
