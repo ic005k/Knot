@@ -214,16 +214,22 @@
        </item>
        <item>
         <widget class="QFrame" name="f_ReaderFun">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>42</height>
+           <height>0</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>100</height>
+           <height>16777215</height>
           </size>
          </property>
          <property name="frameShape">
@@ -277,8 +283,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>24</width>
-                <height>24</height>
+                <width>20</width>
+                <height>20</height>
                </size>
               </property>
               <property name="toolButtonStyle">
@@ -299,8 +305,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>24</width>
-                <height>24</height>
+                <width>20</width>
+                <height>20</height>
                </size>
               </property>
              </widget>
@@ -318,8 +324,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>24</width>
-                <height>24</height>
+                <width>20</width>
+                <height>20</height>
                </size>
               </property>
              </widget>
@@ -337,8 +343,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>24</width>
-                <height>24</height>
+                <width>20</width>
+                <height>20</height>
                </size>
               </property>
              </widget>
@@ -356,8 +362,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>24</width>
-                <height>24</height>
+                <width>20</width>
+                <height>20</height>
                </size>
               </property>
              </widget>
@@ -375,8 +381,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>24</width>
-                <height>24</height>
+                <width>20</width>
+                <height>20</height>
                </size>
               </property>
               <property name="toolButtonStyle">
@@ -397,8 +403,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>24</width>
-                <height>24</height>
+                <width>20</width>
+                <height>20</height>
                </size>
               </property>
              </widget>
@@ -416,8 +422,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>24</width>
-                <height>24</height>
+                <width>20</width>
+                <height>20</height>
                </size>
               </property>
              </widget>
@@ -446,8 +452,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>24</width>
-                <height>24</height>
+                <width>20</width>
+                <height>20</height>
                </size>
               </property>
               <property name="toolButtonStyle">
@@ -474,8 +480,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>24</width>
-                <height>24</height>
+                <width>20</width>
+                <height>20</height>
                </size>
               </property>
               <property name="toolButtonStyle">
@@ -496,8 +502,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>24</width>
-                <height>24</height>
+                <width>20</width>
+                <height>20</height>
                </size>
               </property>
               <property name="toolButtonStyle">
@@ -3300,7 +3306,7 @@ QSlider::handle:horizontal:disabled {
           <enum>QTabWidget::TabPosition::South</enum>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_Steps">
           <attribute name="title">

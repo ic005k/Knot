@@ -44,7 +44,7 @@ Reader::Reader(QWidget* parent) : QDialog(parent) {
   mui->qwViewBookNote->hide();
 
   QFont f = this->font();
-  f.setPointSize(10);
+  f.setPointSize(8);
   f.setBold(true);
   mui->btnPages->setFont(f);
 

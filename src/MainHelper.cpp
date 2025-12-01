@@ -849,7 +849,6 @@ void MainHelper::init_ButtonStyle() {
   mui->btnRotation->setStyleSheet("border:none; ");
   mui->btnSpeak->setStyleSheet("border:none;");
   mui->btnStopSpeak->setStyleSheet("border:none;");
-  // mui->f_ReaderFun->setStyleSheet("QFrame{background-color: #595959;}");
 
   // Notes
   mui->btnNoteBookMenu->setStyleSheet("border:none; ");
