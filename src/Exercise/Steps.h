@@ -42,6 +42,15 @@
 #include <QJniObject>
 #endif
 
+struct GPSCoordinate {
+  double latitude;
+  double longitude;
+  double altitude;
+
+  GPSCoordinate(double lat = 0, double lon = 0, double alt = 0)
+      : latitude(lat), longitude(lon), altitude(alt) {}
+};
+
 namespace Ui {
 class Steps;
 }
@@ -237,6 +246,8 @@ class Steps : public QDialog {
   QString distanceRoute, speedRoute;
   double oldLat;
   double oldLon;
+  double oldAlt = 0.00;
+  double altitude = 0.00;
   QString strGpsStatus;
   QString strGpsInfoShow;
   QString lblStyle;
@@ -247,6 +258,17 @@ class Steps : public QDialog {
       "center;}";
 
   QString t0, str1, str2, str3, str4, strAltitude, str6, str7;
+  QString dAltitude = "0.00";
+
+  // 地形距离统计
+  double m_uphillDistance = 0.0;    // 上坡总距离（公里）
+  double m_flatDistance = 0.0;      // 平路总距离（公里）
+  double m_downhillDistance = 0.0;  // 下坡总距离（公里）
+
+  // 海拔差阈值（单位：米），可根据实际场景调整
+  const double UPHILL_THRESHOLD = 0.5;  // 海拔差 > 0.5m 视为上坡
+  const double DOWNHILL_THRESHOLD =
+      -0.5;  // 海拔差 < -0.5m 视为下坡 介于两者之间视为平路
 
   void insertGpsList(int curIndex, QString t0, QString t1, QString t2,
                      QString t3, QString t4, QString t5, QString t6,
@@ -260,7 +282,8 @@ class Steps : public QDialog {
   void writeGpsPos(double lat, double lon, int i, int count);
 
   double mySpeed;
-  QString strGpsMapDateTime, strGpsMapDistnce, strGpsMapSpeed, strGpsList;
+  QString strGpsMapDateTime, strGpsMapDistnce, strGpsMapSpeed, strGpsTerrain,
+      strGpsList;
   bool isGpsMapTrackFile;
   double lastLat, lastLon;
 
@@ -303,6 +326,9 @@ class Steps : public QDialog {
   QVariantList getSpeedData(const QString& jsonFile);
   QString getJsonRouteFile(const QString& strGpsList);
 
+  void updateTerrainUI();
+  void calculateTerrainDistance(const QVector<GPSCoordinate>& optimizedData);
+  void resetTerrainDistance();
  signals:
   void distanceChanged(double distance);
   void timeChanged();

@@ -1105,11 +1105,11 @@ public class MyActivity
 
         // 海拔
         if (zh_cn) strAltitude = String.format(
-            "海拔: %.2f 米",
+            "海拔: %.2f",
             location.getAltitude()
         );
         else strAltitude = String.format(
-            "Altitude: %.2f 米",
+            "Altitude: %.2f",
             location.getAltitude()
         );
 
