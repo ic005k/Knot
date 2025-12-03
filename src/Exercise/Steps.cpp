@@ -791,6 +791,9 @@ void Steps::startRecordMotion() {
   isInitTime = false;
   m_distance = 0;
   m_speed = 0;
+  oldAlt = 0;
+  oldLat = 0;
+  oldLon = 0;
   mw_one->m_Reader->keepScreenOn();
   emit distanceChanged(m_distance);
   emit timeChanged();
@@ -829,11 +832,9 @@ void Steps::updateGetGps() {
 
 #ifdef Q_OS_ANDROID
 
-  // 获取当前运动距离
+  // 获取当前运动距离（目前通过c++端计算）
   // jdouble distance;
-
   // distance = m_activity.callMethod<jdouble>("getTotalDistance", "()D");
-
   // QString str_distance = QString::number(distance, 'f', 2);
   // m_distance = str_distance.toDouble();
 
@@ -846,7 +847,6 @@ void Steps::updateGetGps() {
   }
 
   QJniObject jstrGpsStatus;
-
   jstrGpsStatus =
       m_activity.callMethod<jstring>("getGpsStatus", "()Ljava/lang/String;");
 
@@ -876,6 +876,10 @@ void Steps::updateGetGps() {
       str7 = list.at(6);
       strGpsStatus =
           str4 + "\n" + strAltitude + " m" + "\n" + str6 + "\n" + str7;
+
+      if (oldAlt == 0) oldAlt = altitude;
+      if (oldLat == 0) oldLat = latitude;
+      if (oldLon == 0) oldLon = longitude;
     }
 
     if (m_time.second() % 3 == 0) {
@@ -1094,8 +1098,8 @@ void Steps::stopRecordMotion() {
   mui->btnGPS->setStyleSheet(btnRoundStyle);
 
 #ifdef Q_OS_ANDROID
-
-  // m_distance = m_activity.callMethod<jdouble>("stopGpsUpdates", "()D");
+  // 返回值为总距离
+  m_activity.callMethod<jdouble>("stopGpsUpdates", "()D");
 
 #else
   if (m_positionSource) {
@@ -1160,7 +1164,7 @@ void Steps::refreshMotionData() {
 
   t4 = tr("Average Speed") + ": " + str3 + "\n" + tr("Max Speed") + ": " +
        QString::number(maxSpeed, 'f', 2) + " km/h";
-  t5 = str6;
+  t5 = str6 + "\n" + str7;
 
   if (m_distance > 0 || isGpsTest) {
     int nYear = QDate::currentDate().year();
@@ -1343,7 +1347,10 @@ void Steps::loadGpsList(int nYear, int nMonth) {
     insertGpsList(0, t0, t1, t2, t3, t4, t5, t6, speedData);
   }
 
-  if (count > 0) m_Method->setCurrentIndexFromQW(mui->qwGpsList, 0);
+  if (count > 0) {
+    m_Method->gotoBegin(mui->qwGpsList);
+    m_Method->setCurrentIndexFromQW(mui->qwGpsList, 0);
+  }
 }
 
 void Steps::selGpsListYearMonth() {

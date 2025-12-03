@@ -290,6 +290,7 @@ public class MyActivity
     private float maxSpeed = 0f;
     private float mySpeed = 0f;
     private float totalClimb = 0f;
+    private float totalDescent = 0f; // 累计下降（单位：米）
     private Location previousLocation;
     private double previousAltitude;
 
@@ -299,6 +300,7 @@ public class MyActivity
     private String strTotalDistance = "0 km";
     private String strMaxSpeed = "Max Speed";
     private String strTotalClimb = "Total Climb";
+    private String strTotalDescent = "Total Descent";
     private String strAverageSpeed = "0 km/h";
 
     public class VibrateUtils {
@@ -756,6 +758,8 @@ public class MyActivity
             "\n" +
             strTotalClimb +
             "\n" +
+            strTotalDescent +
+            "\n" +
             strGpsStatus
         );
     }
@@ -854,6 +858,7 @@ public class MyActivity
         maxSpeed = 0f;
         mySpeed = 0f;
         totalClimb = 0f;
+        totalDescent = 0f;
         previousLocation = null;
         movingTime = 0;
         previousAltitude = 0f;
@@ -1067,12 +1072,17 @@ public class MyActivity
                 if (previousAltitude != 0) {
                     // 过滤明显异常的海拔（比如低于-100米或高于9000米，按需调整）
                     if (currentAltitude > -100 && currentAltitude < 9000) {
-                        if (currentAltitude > previousAltitude) {
-                            totalClimb += currentAltitude - previousAltitude;
+                        double altitudeDiff =
+                            currentAltitude - previousAltitude;
+                        if (altitudeDiff > 0) {
+                            totalClimb += altitudeDiff; // 爬升
+                        } else if (altitudeDiff < 0) {
+                            totalDescent += Math.abs(altitudeDiff); // 下降（取绝对值）
                         }
-
-                        previousAltitude = currentAltitude;
                     }
+                    previousAltitude = currentAltitude;
+                } else {
+                    previousAltitude = currentAltitude;
                 }
             } else {
                 // 静止状态，更新开始时间
@@ -1125,6 +1135,16 @@ public class MyActivity
             totalClimb
         );
         else strTotalClimb = String.format("Total Climb: %.2f m", totalClimb);
+
+        // 累计下降
+        if (zh_cn) strTotalDescent = String.format(
+            "累计下降: %.2f m",
+            totalDescent
+        );
+        else strTotalDescent = String.format(
+            "Total Descent: %.2f m",
+            totalDescent
+        );
     }
 
     private static ServiceConnection mCon = new ServiceConnection() {

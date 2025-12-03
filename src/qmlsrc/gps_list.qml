@@ -13,6 +13,11 @@ Rectangle {
     property bool isHighPriority: false
     property string strGpsTime: ""
     property string strTitleColor: "lightgray"
+    property bool isShowRoute: true // 补充缺失的属性
+
+    // 新增：获取设备像素比（安卓/iOS关键）
+    property real pixelRatio: Screen.pixelRatio > 0 ? Screen.pixelRatio : 1
+    property real baseFontSize: 20 * pixelRatio // 基准字体（按像素比缩放）
 
     function showRouteDialog() {
         routeDialog.visible = true
@@ -37,7 +42,7 @@ Rectangle {
     }
 
     function gotoIndex(index) {
-        view.positionViewAtIndex(index, Tumbler.Center)
+        view.positionViewAtIndex(index, ListView.Center) // 改为ListView.Center
     }
 
     function setHighPriority(isFalse) {
@@ -54,7 +59,6 @@ Rectangle {
 
     function getItemCount() {
         itemCount = view.count
-
         return itemCount
     }
 
@@ -64,17 +68,11 @@ Rectangle {
     }
 
     function getText0(itemIndex) {
-
-        //var data = view.model.get(itemIndex)
-        //return data.text0
         var existingItem = view.model.get(itemIndex)
         return existingItem.text0
     }
 
     function getText1(itemIndex) {
-
-        //var data = view.model.get(itemIndex)
-        //return data.text1
         var existingItem = view.model.get(itemIndex)
         return existingItem.text1
     }
@@ -119,29 +117,24 @@ Rectangle {
                               const hue = 120 - (ratio * 120)
                               const rgb = hsvToRgb(hue, 0.8, 0.9)
                               ctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`
-                              const x = index * segmentWidth
                               ctx.fillRect(x, 0, segmentWidth, canvasHeight)
                           })
     }
 
     function drawSpeedSpectrum(ctx, speedData, canvasWidth, canvasHeight) {
         if (speedData.length < 2) {
-            // 数据不足时，用浅灰色占位（不绘制背景，仅标记区域）
             ctx.fillStyle = "rgba(150, 150, 150, 0.3)"
             ctx.fillRect(0, 0, canvasWidth, canvasHeight)
             return
         }
 
-        // 1. 清除画布（不绘制额外背景，直接使用父容器背景）
         ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 
-        // 2. 计算速度范围（个人基准）
         const vMin = Math.min(...speedData)
         const vMax = Math.max(...speedData)
         const vRange = vMax - vMin
         const isUniform = vRange <= 0.1
 
-        // 3. 计算每个点的坐标
         const pointCount = speedData.length
         const points = []
         const segmentWidth = canvasWidth / (pointCount - 1)
@@ -150,7 +143,6 @@ Rectangle {
                               const ratio = isUniform ? 0.5 : (speed - vMin) / vRange
                               const x = index * segmentWidth
                               const y = canvasHeight - (ratio * canvasHeight)
-                              // 速度越高，位置越靠上
                               points.push({
                                               "x": x,
                                               "y": y,
@@ -158,9 +150,8 @@ Rectangle {
                                           })
                           })
 
-        // 4. 绘制平滑山丘轮廓（二次贝塞尔曲线）
         ctx.beginPath()
-        ctx.moveTo(0, canvasHeight) // 起点：左下角
+        ctx.moveTo(0, canvasHeight)
         for (var i = 0; i < points.length; i++) {
             const p = points[i]
             if (i === 0) {
@@ -171,25 +162,21 @@ Rectangle {
                 ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y)
             }
         }
-        ctx.lineTo(canvasWidth, canvasHeight) // 闭合到右下角
+        ctx.lineTo(canvasWidth, canvasHeight)
         ctx.closePath()
 
-        // 5. 蓝→红渐变填充（增强饱和度，确保无背景时清晰）
         const gradient = ctx.createLinearGradient(0, 0, canvasWidth, 0)
         points.forEach((p, i) => {
                            const pos = i / (points.length - 1)
                            const hue = 240 - (p.ratio * 240)
-                           // 240°蓝 → 0°红
                            const rgb = hsvToRgb(hue, 0.85, 0.85)
-                           // 轻微提高饱和度，增强无背景时的辨识度
                            gradient.addColorStop(
                                pos, `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`)
                        })
         ctx.fillStyle = gradient
         ctx.fill()
 
-        // 6. 边缘线（半透明，适配不同背景）
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.6)" // 白色半透，在亮色/暗色背景上均有一定对比度
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.6)"
         ctx.lineWidth = 1.2
         ctx.stroke()
     }
@@ -255,7 +242,6 @@ Rectangle {
 
     function insertItem(curIndex, t0, t1, t2, t3, t4, t5, t6, speedData) {
         var speedArray = []
-        // （原有转换逻辑不变，确保speedArray是纯数字数组）
         if (speedData && speedData.hasOwnProperty("count")
                 && typeof speedData.get === "function") {
             for (var i = 0; i < speedData.count; i++) {
@@ -278,7 +264,6 @@ Rectangle {
 
         console.log("insert阶段转换后的数组:", speedArray)
 
-        // 关键：将数组转为JSON字符串存储
         var speedJson = JSON.stringify(speedArray)
 
         view.model.insert(curIndex, {
@@ -289,19 +274,16 @@ Rectangle {
                               "text4": t4,
                               "text5": t5,
                               "text6": t6,
-                              "speedData": speedJson // 存储JSON字符串
+                              "speedData": speedJson
                           })
 
-        // 验证模型是否正确保存
         var insertedItem = view.model.get(curIndex)
         console.log("模型中存储的JSON:", insertedItem.speedData)
     }
 
     function updateItem(curIndex, t0, t1, t2, t3, t4, t5, t6, height) {
-        // 仅当索引有效（存在该项）时才更新，避免误插入破坏历史数据
         if (curIndex >= 0 && curIndex < view.model.count) {
             var existingItem = view.model.get(curIndex)
-            // 只更新字段，不改变模型结构，保护历史数据
             existingItem.text0 = t0
             existingItem.text1 = t1
             existingItem.text2 = t2
@@ -310,10 +292,8 @@ Rectangle {
             existingItem.text5 = t5
             existingItem.text6 = t6
             existingItem.myh = height
-            // 通知模型更新该索引（确保UI刷新）
             view.model.set(curIndex, existingItem)
         } else {
-            // 索引无效时，可选择不操作（保护历史数据）或打印警告
             console.log("updateItem: 索引" + curIndex + "无效，不更新")
         }
     }
@@ -323,18 +303,15 @@ Rectangle {
     }
 
     function modifyItem(currentIndex, strTime, strText) {
-
         view.model.setProperty(currentIndex, "time", strTime)
         view.model.setProperty(currentIndex, "dototext", strText)
     }
 
     function modifyItemTime(currentIndex, strTime) {
-
         view.model.setProperty(currentIndex, "time", strTime)
     }
 
     function modifyItemType(currentIndex, type) {
-
         view.model.setProperty(currentIndex, "type", type)
     }
 
@@ -343,22 +320,12 @@ Rectangle {
     }
 
     function getColor() {
-        var strColor
-
-        if (isDark)
-            strColor = "#455364"
-        else
-            strColor = "#ffffff"
-
+        var strColor = isDark ? "#455364" : "#ffffff"
         return strColor
     }
 
     function getFontColor() {
-
-        if (isDark)
-            return "white"
-        else
-            return "black"
+        return isDark ? "white" : "black"
     }
 
     Component {
@@ -366,335 +333,296 @@ Rectangle {
 
         Rectangle {
             id: listItem
-            width: ListView.view.width // 仅依赖ListView宽度，无闭环
-            height: colLayout.implicitHeight + 15 // 高度由子元素内容决定
-
-            //color: index % 2 === 0 ? "#f0f0f0" : "#e0e0e0"
+            width: ListView.view.width // 宽度=ListView可视宽度（一屏宽）
+            height: ListView.view.height // 高度=ListView可视高度（一屏高）
             color: isDark ? "#333" : "#DDD"
             border.color: "#ccc"
             border.width: 1
             radius: 3
 
-            // 选中状态红色竖条（带动画效果）
+            // 选中状态红色竖条
             Rectangle {
-                width: listItem.ListView.isCurrentItem ? 4 : 0 // 选中时宽度3，未选中0
+                width: listItem.ListView.isCurrentItem ? 4 : 0
                 height: parent.height
                 color: isDark ? "#BBBBBB" : "#666666"
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 z: 10
+                visible: false
 
-                // 动画核心：宽度+透明度联动过渡
                 Behavior on width {
                     NumberAnimation {
-                        duration: 300 // 动画时长（毫秒）
-                        easing.type: Easing.OutQuart // 缓动效果，先快后慢
+                        duration: 300
+                        easing.type: Easing.OutQuart
                     }
                 }
 
-                opacity: listItem.ListView.isCurrentItem ? 1 : 0 // 选中时不透明，未选中透明
+                opacity: listItem.ListView.isCurrentItem ? 1 : 0
                 Behavior on opacity {
                     NumberAnimation {
-                        duration: 250 // 透明度动画稍快于宽度
+                        duration: 250
                         easing.type: Easing.OutQuart
                     }
                 }
             }
 
-            // 新增：点击条目切换选中状态
+            // 点击切换选中
             MouseArea {
                 property point clickPos: "0,0"
                 anchors.fill: parent
-                onPressed: function (mouse) {
-                    clickPos = Qt.point(mouse.x, mouse.y)
-                }
-                onReleased: function (mouse) {
-                    var delta = Qt.point(mouse.x - clickPos.x,
-                                         mouse.y - clickPos.y)
-                }
-                onClicked: view.currentIndex = index // 核心：点击切换选中项
+                // 使用箭头函数显式接收mouse参数
+                onPressed: mouse => {
+                               clickPos = Qt.point(mouse.x, mouse.y)
+                           }
+                onReleased: mouse => {
+                                var delta = Qt.point(mouse.x - clickPos.x,
+                                                     mouse.y - clickPos.y)
+                            }
+                onClicked: view.currentIndex = index
                 onDoubleClicked: {
 
-                    /* 双击逻辑 */ }
+                }
             }
 
+            // 全屏布局容器
             ColumnLayout {
                 id: colLayout
-                anchors.fill: parent // 直接填充listItem
-                spacing: 2
-                anchors.leftMargin: 10 // 新增：左内边距10
-                anchors.rightMargin: 10 // 新增：右内边距10
-                anchors.topMargin: 5
-                anchors.bottomMargin: 5
+                anchors.fill: parent
+                anchors.margins: 10
+                spacing: 8
 
-                // item0 所在的 Rectangle（取消背景色抢戏，改为透明底色）
+                // 标题行（带运动类型标记）
                 Rectangle {
-                    Layout.fillWidth: true // 自动填充colLayout宽度，适配内边距
-                    height: item0.contentHeight
-                    // 背景色改为和列表项一致，不再用运动色（避免抢戏）
+                    id: m_caption
+                    //Layout.fillWidth: true
+                    width: listItem.width - 20
+                    Layout.preferredHeight: 40
                     color: isDark ? "#333" : "#DDD"
-                    // 保留轻微边框，区分区域（可选，可删除）
                     border.color: isDark ? "#444" : "#CCC"
                     border.width: 1
 
-                    // 新增：小方块+文字的水平布局（小方块在左，文字在右）
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 5
-                        anchors.rightMargin: 5
-                        anchors.verticalCenter: parent.verticalCenter // 垂直居中
-                        spacing: 8 // 小方块和文字的间距
+                        anchors.margins: 5
+                        spacing: 8
 
-                        // 核心：运动类型标记小方块（高度和item0一致，宽度固定）
                         Rectangle {
                             id: sportTypeBlock
-                            // 宽度固定，避免太宽抢戏
-                            width: item0.font.pixelSize
-                            // 高度和item0文字高度一致
-                            height: item0.font.pixelSize
-                            // 小方块背景色=运动类型色（沿用之前统一的颜色）
+                            width: 24
+                            height: 24
                             color: {
-                                if (item0.text.indexOf(qsTr(
-                                                           "Cycling")) !== -1) {
+                                if (item0.text.indexOf(qsTr("Cycling")) !== -1)
                                     isDark ? "#5ABD5E" : "#4CAF50"
-                                } else if (item0.text.indexOf(
-                                               qsTr("Hiking")) !== -1) {
+                                else if (item0.text.indexOf(
+                                             qsTr("Hiking")) !== -1)
                                     isDark ? "#FFAB2C" : "#FF9800"
-                                } else if (item0.text.indexOf(
-                                               qsTr("Running")) !== -1) {
+                                else if (item0.text.indexOf(
+                                             qsTr("Running")) !== -1)
                                     isDark ? "#B746C9" : "#9C27B0"
-                                } else {
-                                    // 其他文本：小方块透明，不显示
+                                else
                                     "transparent"
-                                }
                             }
-                            // 小方块圆角，更美观
                             radius: 3
                         }
 
-                        // 原有item0文本（颜色逻辑不变，仅去掉背景色）
                         Text {
                             id: item0
-                            Layout.fillWidth: true // 文字占满剩余宽度
-                            Layout.alignment: Qt.AlignHCenter
-                            horizontalAlignment: Text.AlignLeft // 文字左对齐，贴近小方块
+                            Layout.fillWidth: true
+                            horizontalAlignment: Text.AlignLeft
                             verticalAlignment: Text.AlignVCenter
-                            wrapMode: TextArea.NoWrap
+                            wrapMode: Text.NoWrap
                             font.bold: true
+                            font.pointSize: baseFontSize * 1.0 // 标题字体放大1.2倍
                             text: text0
-                            // 文字颜色保持原有逻辑（暗模式白，亮模式深灰）
                             color: isDark ? "#FFFFFF" : "#333333"
-                            leftPadding: 0 // 取消左内边距，贴近小方块
-                            rightPadding: 5
                         }
                     }
                 }
 
-                // 速度色带（放在item0的Rectangle后面）
+                // 速度图谱标签（新增）
+                Text {
+                    id: speedLabel
+                    Layout.fillWidth: true
+                    text: qsTr("Speed Curve")
+                    font.bold: true
+                    font.pointSize: baseFontSize * 0.8 // 基于基准字体缩放，适配移动端
+                    color: isDark ? "#FFFFFF" : "#333333"
+                    horizontalAlignment: Text.AlignLeft // 左对齐，与内容呼应
+                    Layout.bottomMargin: 4 // 与下方Canvas保持间距
+                }
+
+                // 速度图谱（放大高度）
                 Canvas {
                     id: speedRibbon
-                    Layout.fillWidth: true // 与item0同宽
-                    height: 20 // 固定高度
-                    Layout.topMargin: 2 // 与item0保持2px间距
+                    // 与标题宽度一致
+                    //Layout.fillWidth: true
+                    width: m_caption.width
+
+                    Layout.preferredHeight: 80 // 适配全屏高度，增大显示区域
+                    Layout.topMargin: 4
 
                     onPaint: {
                         const ctx = getContext("2d")
                         ctx.resetTransform()
                         ctx.clearRect(0, 0, width, height)
 
-                        // 从模型获取JSON字符串
                         const speedJson = model.speedData || "[]"
                         let speedArray = []
-
-                        // 解析JSON为数组
                         try {
                             speedArray = JSON.parse(speedJson)
-                            // 确保是数组且元素为数字
-                            if (!Array.isArray(speedArray)) {
-                                speedArray = []
-                            } else {
-                                speedArray = speedArray.filter(
-                                            s => typeof s === "number"
-                                            && !isNaN(s))
-                            }
+                            speedArray = speedArray.filter(
+                                        s => typeof s === "number" && !isNaN(s))
                         } catch (e) {
                             console.error("解析speedData失败:", e)
                             speedArray = []
                         }
 
-                        console.log("最终绘制数组:", speedArray)
-
-                        // 绘制逻辑
                         if (speedArray.length < 2) {
                             ctx.fillStyle = "#AAAAAA"
                             ctx.fillRect(0, 0, width, height)
                             return
                         }
 
-                        //drawColorRibbon(ctx, speedArray, width, height)
                         drawSpeedSpectrum(ctx, speedArray, width, height)
                     }
                 }
 
+                // 天气+文本行
                 RowLayout {
                     id: weatherTextContainer
                     Layout.fillWidth: true
-                    Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredHeight: 60
 
-                    // 显示SVG图标的组件
                     Image {
                         id: weatherIcon
                         source: item6.text
-                        sourceSize.height: 42
-                        sourceSize.width: 42
+                        sourceSize: Qt.size(42, 42)
                         fillMode: Image.PreserveAspectFit
                         Layout.alignment: Qt.AlignVCenter
-                        Layout.leftMargin: 5
-                        visible: item6.text.length ? true : false
+                        visible: item6.text.length > 0
                     }
 
                     Text {
                         id: item1
                         Layout.fillWidth: true
-
-                        Layout.alignment: Qt.AlignHCenter
                         horizontalAlignment: Text.AlignLeft
                         verticalAlignment: Text.AlignVCenter
-
-                        width: parent.width
-                        wrapMode: TextArea.WordWrap
-
-                        font.pointSize: item0.font.pointSize - 1
-                        font.bold: false
+                        wrapMode: Text.WordWrap
+                        font.pointSize: baseFontSize
                         color: isDark ? "#BBB" : "#555"
                         text: text1
-
-                        leftPadding: 5
-                        rightPadding: 5
-
-                        visible: item1.text.length ? true : false
+                        visible: text1.length > 0
                     }
                 }
 
-                Text {
-                    id: item2
-                    anchors.rightMargin: 0
-                    Layout.fillWidth: true
-                    Layout.alignment: Qt.AlignHCenter
-
-                    horizontalAlignment: Text.AlignLeft
-                    width: parent.width
-                    wrapMode: TextArea.WordWrap
-                    font.bold: false
-                    text: text2
-                    color: isDark ? "#FF6666" : "red"
-
-                    leftPadding: 5
-                    rightPadding: 5
-
-                    visible: item2.text.length ? true : false
+                Rectangle {
+                    width: view.width
+                    height: 5 // 空白高度
+                    color: "transparent"
                 }
 
-                Text {
-                    id: item3
-                    anchors.rightMargin: 0
+                // 内容文本区（自适应剩余空间）
+                ColumnLayout {
                     Layout.fillWidth: true
-                    wrapMode: Text.WrapAnywhere
-                    elide: Text.ElideRight
+                    Layout.fillHeight: true // 填充剩余高度
+                    spacing: 4
 
-                    Layout.preferredWidth: listItem.width
-                    font.bold: false
-                    text: text3
+                    Text {
+                        id: item2
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignLeft
+                        wrapMode: Text.WordWrap
+                        font.pointSize: baseFontSize
+                        color: isDark ? "#FF6666" : "red"
+                        text: text2
+                        visible: text2.length > 0
+                    }
 
-                    color: isDark ? "#DDD" : "#333"
+                    Rectangle {
+                        width: view.width
+                        height: 5 // 空白高度
+                        color: "transparent"
+                    }
 
-                    leftPadding: 5
-                    rightPadding: 5
+                    Text {
+                        id: item3
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignLeft
+                        wrapMode: Text.WordWrap
+                        font.pointSize: baseFontSize
+                        color: isDark ? "#DDD" : "#333"
+                        text: text3
+                        visible: text3.length > 0
+                    }
 
-                    visible: item3.text.length ? true : false
+                    Rectangle {
+                        width: view.width
+                        height: 5 // 空白高度
+                        color: "transparent"
+                    }
+
+                    Text {
+                        id: item4
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignLeft
+                        wrapMode: Text.WordWrap
+                        font.pointSize: baseFontSize
+                        color: isDark ? "#1E90FF" : "blue"
+                        text: text4
+                        visible: text4.length > 0
+                    }
+
+                    Rectangle {
+                        width: view.width
+                        height: 5 // 空白高度
+                        color: "transparent"
+                    }
+
+                    Text {
+                        id: item5
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignLeft
+                        wrapMode: Text.WordWrap
+                        font.pointSize: baseFontSize
+                        color: isDark ? "#DDD" : "#333"
+                        text: text5
+                        visible: text5.length > 0
+                    }
+
+                    Rectangle {
+                        width: view.width
+                        height: 5 // 空白高度
+                        color: "transparent"
+                    }
+
+                    Text {
+                        id: item6
+                        text: text6
+                        visible: false
+                    }
                 }
 
-                Text {
-                    id: item4
-                    anchors.rightMargin: 0
-                    Layout.fillWidth: true
-                    wrapMode: Text.WrapAnywhere
-                    elide: Text.ElideRight
-
-                    Layout.preferredWidth: listItem.width
-                    font.bold: false
-                    text: text4
-
-                    color: isDark ? "#1E90FF" : "blue"
-
-                    leftPadding: 5
-                    rightPadding: 5
-
-                    visible: item4.text.length ? true : false
-                }
-
-                Text {
-                    id: item5
-                    anchors.rightMargin: 0
-                    Layout.fillWidth: true
-                    wrapMode: Text.WrapAnywhere
-                    elide: Text.ElideRight
-
-                    Layout.preferredWidth: listItem.width
-                    font.bold: false
-                    text: text5
-
-                    color: isDark ? "#DDD" : "#333"
-
-                    leftPadding: 5
-                    rightPadding: 5
-
-                    visible: item5.text.length ? true : false
-                }
-
-                Text {
-                    id: item6
-                    anchors.rightMargin: 0
-                    Layout.fillWidth: true
-                    wrapMode: Text.WrapAnywhere
-                    elide: Text.ElideRight
-
-                    Layout.preferredWidth: listItem.width
-                    font.bold: false
-                    text: text6
-
-                    color: isDark ? "#DDD" : "#333"
-
-                    leftPadding: 5
-                    rightPadding: 5
-
-                    visible: false
-                }
-
+                // 按钮区（底部固定）
                 RowLayout {
                     id: buttonLayout
-                    Layout.alignment: Qt.AlignLeft // 左对齐
-                    spacing: 8 // 按钮间距
-                    Layout.leftMargin: 5 // 左边缘留白
-                    Layout.bottomMargin: 8 // 底部留白，避免压边界
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignBottom
+                    spacing: 8
+                    Layout.topMargin: 10
 
-                    // 轨迹图标按钮
                     Button {
                         id: btnViewGpsTrack
-                        width: 40 // 固定宽度
-                        height: 40 // 固定高度
-                        enabled: true
-                        visible: listItem.ListView.isCurrentItem // 仅选中条目显示
+                        width: 40
+                        height: 40
 
-                        // 图标根据深色模式切换
+                        //visible: listItem.ListView.isCurrentItem
                         contentItem: Image {
                             source: isDark ? "/res/track_l.svg" : "/res/track.svg"
-                            sourceSize: Qt.size(24, 24) // 图标大小
+                            sourceSize: Qt.size(24, 24)
                             fillMode: Image.PreserveAspectFit
                         }
 
-                        // 简化背景，保持点击反馈
                         background: Rectangle {
                             color: btnViewGpsTrack.down ? "#4CAF50" : (isDark ? "#444" : "#CCC")
                             radius: 4
@@ -705,27 +633,22 @@ Rectangle {
                         onClicked: {
                             strGpsTime = item0.text + "-=-" + item1.text + "-=-"
                                     + item2.text + "-=-" + item4.text
-                            m_Steps.getGpsTrack()
+                            m_Steps.getGpsTrack() // 假设外部对象已定义
                         }
                     }
 
-                    // 路线图标按钮
                     Button {
                         id: btnRoute
-                        width: 40 // 固定宽度
-                        height: 40 // 固定高度
-                        enabled: true
-                        visible: isShowRoute
-                                 && listItem.ListView.isCurrentItem // 仅选中条目显示
+                        width: 40
+                        height: 40
+                        visible: isShowRoute && listItem.ListView.isCurrentItem
 
-                        // 图标根据深色模式切换
                         contentItem: Image {
                             source: isDark ? "/res/route_l.svg" : "/res/route.svg"
-                            sourceSize: Qt.size(24, 24) // 图标大小
+                            sourceSize: Qt.size(24, 24)
                             fillMode: Image.PreserveAspectFit
                         }
 
-                        // 与轨迹按钮保持一致的背景样式
                         background: Rectangle {
                             color: btnRoute.down ? "#4CAF50" : (isDark ? "#444" : "#CCC")
                             radius: 4
@@ -736,7 +659,7 @@ Rectangle {
                         onClicked: {
                             strGpsTime = item0.text + "-=-" + item1.text + "-=-"
                                     + item2.text + "-=-" + item4.text
-                            m_Steps.getRouteList(strGpsTime)
+                            m_Steps.getRouteList(strGpsTime) // 假设外部对象已定义
                         }
                     }
                 }
@@ -744,39 +667,31 @@ Rectangle {
         }
     }
 
+    // 水平滚动ListView（核心修改）
     ListView {
         id: view
-
         anchors {
             fill: parent
             margins: 4
         }
-
         model: ListModel {
             id: listmain
-
-            // debug
-
-
-            /*  ListElement {
-                text0: "1"
-                text1: "2"
-                text2: "3"
-                text3: "4"
-                text4: "5"
-                text5: "6"
-                myh: 0
-            }*/
         }
         delegate: dragDelegate
-
         spacing: 5
-        cacheBuffer: 50
+        cacheBuffer: 100 // 增大缓存，优化滑动体验
+        orientation: ListView.Horizontal // 水平滚动
+        snapMode: ListView.SnapOneItem // 滚动对齐到单个条目（一屏一个）
+        highlightRangeMode: ListView.StrictlyEnforceRange // 严格限制滚动范围
+        currentIndex: 0 // 默认选中第一个条目
 
-        // 滚动条
-        ScrollBar.vertical: ScrollBar {
+        // 水平滚动条
+        ScrollBar.horizontal: ScrollBar {
             policy: ScrollBar.AsNeeded
-            width: 8
+            height: 8
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
         }
     }
 
@@ -784,93 +699,66 @@ Rectangle {
     Dialog {
         id: routeDialog
         objectName: "routeDialog"
-        title: "" // qsTr("Route Data")
+        title: ""
         width: root.width * 1.0
         height: root.height * 1.0
-        modal: true // 模态窗口（禁止背景操作）
-        visible: false // 默认隐藏
+        modal: true
+        visible: false
         x: (root.width - width) / 2
         y: (root.height - height) / 2
 
-        // 设置对话框背景颜色
         background: Rectangle {
-            color: isDark ? "#333333" : "#F5F5F5" // 深色模式/浅色模式背景色
-            radius: 0 // 圆角半径
-            border.color: isDark ? "#555555" : "#CCCCCC" // 边框颜色
-            border.width: 1 // 边框宽度
+            color: isDark ? "#333333" : "#F5F5F5"
+            radius: 0
+            border.color: isDark ? "#555555" : "#CCCCCC"
+            border.width: 1
         }
 
-        // 路由数据模型（接收C++传递的数据）
         ListModel {
             id: routeModel
         }
 
-        // 窗口内容：滚动列表
         ListView {
             anchors.fill: parent
             model: routeModel
             spacing: 5
             cacheBuffer: 50
-            Layout.alignment: Qt.AlignHCenter
+            boundsBehavior: Flickable.StopAtBounds
 
-            boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
-
-            // 列表条目样式（每个条目分三行）
             delegate: Rectangle {
                 width: routeDialog.width - 20
                 height: colLayout.implicitHeight + 20
 
-                // 1. 拆分地址获取最后一段（核心：取最后一项，无论总段数）
                 property string currentLastPart: {
                     if (!address)
-                        return '' // 地址为空时直接返回空
-                    // 按换行符\n拆分地址为数组（支持任意段数）
+                        return ''
                     const parts = address.split('\n')
-                    // 取最后一段（索引为 parts.length - 1）
-                    return parts[parts.length - 1] || '' // 兼容空段的情况
+                    return parts[parts.length - 1] || ''
                 }
 
-                // 2. 判断当前条目与上一条目的最后一段是否相同
                 property bool hasSamePrev: {
                     if (index <= 0)
-                        return false // 第一个条目无前置
+                        return false
                     const prevItem = routeModel.get(index - 1)
-                    // 拆分上一条目的地址，取最后一段
                     const prevParts = prevItem.address.split('\n')
                     const prevLastPart = prevParts[prevParts.length - 1] || ''
-                    // 比较最后一段
                     return prevLastPart === currentLastPart
                 }
 
-                // 3. 判断当前条目与下一条目的最后一段是否相同
                 property bool hasSameNext: {
                     if (index >= routeModel.count - 1)
-                        return false // 最后一个条目无后置
+                        return false
                     const nextItem = routeModel.get(index + 1)
-                    // 拆分下一条目的地址，取最后一段
                     const nextParts = nextItem.address.split('\n')
                     const nextLastPart = nextParts[nextParts.length - 1] || ''
-                    // 比较最后一段
                     return nextLastPart === currentLastPart
                 }
 
-                // 4. 基于最后一段的连续性设置背景色
-                color: {
-                    if (hasSamePrev || hasSameNext) {
-                        return isDark ? "#2E7D32" : "#E8F5E9" // 连续相同的背景色
-                    } else {
-                        return isDark ? "#333" : "#EEE" // 默认背景色
-                    }
-                }
-
-                // 新增：判断是否为当前组的首个条目（只在首个条目显示数量）
                 property bool isGroupFirst: !hasSamePrev
-                // 新增：计算当前组的总条目数
                 property int sameGroupCount: {
                     if (!currentLastPart)
                         return 1
                     let count = 1
-                    // 向前遍历统计相同最后一段的条目
                     let prevIdx = index - 1
                     while (prevIdx >= 0) {
                         const prevItem = routeModel.get(prevIdx)
@@ -880,11 +768,9 @@ Rectangle {
                         if (prevLast === currentLastPart) {
                             count++
                             prevIdx--
-                        } else {
+                        } else
                             break
-                        }
                     }
-                    // 向后遍历统计相同最后一段的条目
                     let nextIdx = index + 1
                     while (nextIdx < routeModel.count) {
                         const nextItem = routeModel.get(nextIdx)
@@ -894,35 +780,31 @@ Rectangle {
                         if (nextLast === currentLastPart) {
                             count++
                             nextIdx++
-                        } else {
+                        } else
                             break
-                        }
                     }
                     return count
                 }
 
+                color: (hasSamePrev
+                        || hasSameNext) ? (isDark ? "#2E7D32" : "#E8F5E9") : (isDark ? "#333" : "#EEE")
                 radius: 5
                 border.color: isDark ? "#555" : "#CCC"
                 border.width: 1
-                anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
 
+                //anchors.horizontalCenter: parent.horizontalCenter
                 ColumnLayout {
                     id: colLayout
                     anchors.fill: parent
                     anchors.margins: 5
                     spacing: 5
 
-                    // 数量标记（适配布局管理器，消除锚点冲突警告）
                     Rectangle {
                         visible: isGroupFirst && sameGroupCount > 1
-                        // 布局中右对齐（替代anchors.right，由布局管理器控制位置）
                         Layout.alignment: Qt.AlignRight
-                        // 与父容器右侧保持5px间距（布局内的边距，确保不超界）
                         Layout.rightMargin: 5
-                        // 宽度自适应文本（文本宽度 + 左右内边距）
-                        width: textItem.implicitWidth + 4 // 4 = 左2px + 右2px
-                        // 高度自适应文本（文本高度 + 上下内边距）
-                        height: textItem.implicitHeight + 2 // 2 = 上1px + 下1px
+                        width: textItem.implicitWidth + 4
+                        height: textItem.implicitHeight + 2
                         color: isDark ? "#1B5E20" : "#4CAF50"
                         radius: 3
 
@@ -931,9 +813,7 @@ Rectangle {
                             text: qsTr("Total %1 items").arg(sameGroupCount)
                             color: "white"
                             font.pointSize: 12
-                            // 文本在矩形内右对齐（视觉更紧凑）
                             horizontalAlignment: Text.AlignRight
-                            // 文本与矩形边框的内边距
                             leftPadding: 2
                             rightPadding: 2
                             topPadding: 1
@@ -941,7 +821,6 @@ Rectangle {
                         }
                     }
 
-                    // 第一行：时间
                     Text {
                         Layout.fillWidth: true
                         text: time
@@ -950,7 +829,6 @@ Rectangle {
                         horizontalAlignment: Text.AlignLeft
                     }
 
-                    // 第二行：纬度 + 经度
                     Text {
                         Layout.fillWidth: true
                         text: latLon
@@ -958,25 +836,22 @@ Rectangle {
                         horizontalAlignment: Text.AlignLeft
                     }
 
-                    // 第三行：地址
                     Text {
                         Layout.fillWidth: true
                         text: address
                         color: isDark ? "#BBB" : "#666"
                         horizontalAlignment: Text.AlignLeft
-                        wrapMode: Text.WordWrap // 地址过长时换行
+                        wrapMode: Text.WordWrap
                     }
                 }
             }
 
-            // 垂直滚动条
             ScrollBar.vertical: ScrollBar {
                 policy: ScrollBar.AsNeeded
                 width: 8
             }
         }
 
-        // 窗口底部按钮（清空数据 + 关闭）
         footer: Item {
             width: parent.width
             implicitHeight: footerLayout.implicitHeight + 20
@@ -984,14 +859,14 @@ Rectangle {
             RowLayout {
                 id: footerLayout
                 spacing: 10
-                Layout.fillWidth: true // 新增：占满footer宽度（关键修复）
+                Layout.fillWidth: true
                 anchors.centerIn: parent
                 anchors.margins: 10
 
                 Button {
                     text: qsTr("Clear")
                     visible: false
-                    onClicked: routeModel.clear() // 清空列表数据
+                    onClicked: routeModel.clear()
                     background: Rectangle {
                         color: isDark ? "#F44336" : "#FF5722"
                         radius: 5
@@ -1006,9 +881,8 @@ Rectangle {
                 Button {
                     id: btnClose
                     text: qsTr("Close")
-                    onClicked: routeDialog.visible = false // 关闭窗口
+                    onClicked: routeDialog.visible = false
                     background: Rectangle {
-                        //color: isDark ? "#4CAF50" : "#8BC34A"
                         color: btnClose.down ? (isDark ? "#388E3C" : "#4CAF50") : (isDark ? "#4CAF50" : "#8BC34A")
                         radius: 5
                     }
@@ -1021,7 +895,6 @@ Rectangle {
             }
         }
 
-        // 暴露给C++的方法：添加路由条目到模型
         function addRouteItem(timeStr, latLonStr, addressStr) {
             routeModel.append({
                                   "time": timeStr,
@@ -1030,7 +903,6 @@ Rectangle {
                               })
         }
 
-        // 暴露给C++的方法：清空模型（可选）
         function clearRouteModel() {
             routeModel.clear()
         }

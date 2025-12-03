@@ -254,7 +254,7 @@ class Steps : public QDialog {
   QString lblStartStyle =
       "QLabel {background-color: #FF0000;color: #ECEFF4;font-family: 'Segoe "
       "UI', sans-serif;font-weight: bold;border: 2px solid "
-      "#4C566A;border-radius: 10px;padding: 10px 20px;text-align: "
+      "#FFFFFF;border-radius: 10px;padding: 10px 20px;text-align: "
       "center;}";
 
   QString t0, str1, str2, str3, str4, strAltitude, str6, str7;
