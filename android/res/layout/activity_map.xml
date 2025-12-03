@@ -14,7 +14,7 @@
         android:padding="6dp"
         android:background="#2196F3"
         android:textColor="@android:color/white"
-        android:textSize="12sp"
+        android:textSize="11sp"
         android:gravity="center_horizontal"
         android:text=""
     />
@@ -67,7 +67,7 @@
         android:padding="6dp"
         android:background="#2196F3"
         android:textColor="@android:color/white"
-        android:textSize="12sp"
+        android:textSize="11sp"
         android:gravity="center_horizontal"
         android:text="距离: 0.0km | 速度: 0.0km/h"
     />

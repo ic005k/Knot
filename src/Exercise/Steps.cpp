@@ -754,6 +754,7 @@ void Steps::startRecordMotion() {
 #endif
 
   clearTrack();
+  resetTerrainDistance();
 
   m_time.setHMS(0, 0, 0, 0);
 
@@ -829,12 +830,12 @@ void Steps::updateGetGps() {
 #ifdef Q_OS_ANDROID
 
   // 获取当前运动距离
-  jdouble distance;
+  // jdouble distance;
 
-  distance = m_activity.callMethod<jdouble>("getTotalDistance", "()D");
+  // distance = m_activity.callMethod<jdouble>("getTotalDistance", "()D");
 
-  QString str_distance = QString::number(distance, 'f', 2);
-  m_distance = str_distance.toDouble();
+  // QString str_distance = QString::number(distance, 'f', 2);
+  // m_distance = str_distance.toDouble();
 
   if (!isGpsTest) {
     latitude = m_activity.callMethod<jdouble>("getLatitude", "()D");
@@ -864,7 +865,7 @@ void Steps::updateGetGps() {
 
       str4 = list.at(3);
 
-      strAltitude = list.at(4) + " m";
+      strAltitude = list.at(4);
       QStringList altiList = strAltitude.split(":");
       if (altiList.count() > 0) {
         dAltitude = altiList.at(1).trimmed();
@@ -873,7 +874,8 @@ void Steps::updateGetGps() {
 
       str6 = list.at(5);
       str7 = list.at(6);
-      strGpsStatus = str4 + "\n" + strAltitude + "\n" + str6 + "\n" + str7;
+      strGpsStatus =
+          str4 + "\n" + strAltitude + " m" + "\n" + str6 + "\n" + str7;
     }
 
     if (m_time.second() % 3 == 0) {
@@ -884,7 +886,7 @@ void Steps::updateGetGps() {
         maxSpeed = m_activity.callMethod<jdouble>("getMaxSpeed", "()D");
 
         mySpeed = speed;
-        if (m_distance > 0 & mySpeed > 0) {
+        if (mySpeed > 0) {
           const double COORD_CHANGE_THRESHOLD = 1e-6;  // 约0.1米的变化阈值
           bool coordChanged =
               (qAbs(latitude - oldLat) > COORD_CHANGE_THRESHOLD) ||
@@ -911,6 +913,10 @@ void Steps::updateGetGps() {
 
               // 3. 根据阈值累加地形距离
               if (horizontalDistanceKm > 0) {  // 避免无效移动
+
+                // 累加总距离
+                m_distance += horizontalDistanceKm;
+
                 if (altitudeDiff > UPHILL_THRESHOLD) {
                   m_uphillDistance += horizontalDistanceKm;
                 } else if (altitudeDiff < DOWNHILL_THRESHOLD) {
@@ -929,18 +935,6 @@ void Steps::updateGetGps() {
             oldAlt = altitude;
           }
         }
-      } else {  // test
-        appendTrack(latitude, longitude);
-        quint64 randomInt =
-            QRandomGenerator::global()->generate64() % 10000000000ULL;
-        double randomDouble = static_cast<double>(randomInt) / 10000000000000.0;
-        latitude = latitude + randomDouble;
-        longitude = longitude + randomDouble;
-
-        QStringList data_list;
-        data_list.append(QString::number(latitude, 'f', 6));
-        data_list.append(QString::number(longitude, 'f', 6));
-        appendToCSV(strCSVFile, data_list);
       }
 
       updateInfoText(str1, str3);
@@ -948,7 +942,7 @@ void Steps::updateGetGps() {
   }
 
 #else
-  // test
+  //  test
 
   if (isGpsTest) {
     if (m_time.second() % 3 == 0) {
@@ -963,6 +957,12 @@ void Steps::updateGetGps() {
       QStringList data_list;
       data_list.append(QString::number(latitude, 'f', 6));
       data_list.append(QString::number(longitude, 'f', 6));
+
+      double baseRandom = QRandomGenerator::global()->generateDouble();
+      double randomInRange = baseRandom * 50 + 50;  // 0*50+50=50，1*50+50=100
+      altitude = qRound(randomInRange * 100) / 100.0;
+      dAltitude = QString::number(altitude, 'f', 2);
+      data_list.append(dAltitude);
       appendToCSV(strCSVFile, data_list);
 
       unsigned seed =
@@ -1095,7 +1095,7 @@ void Steps::stopRecordMotion() {
 
 #ifdef Q_OS_ANDROID
 
-  m_distance = m_activity.callMethod<jdouble>("stopGpsUpdates", "()D");
+  // m_distance = m_activity.callMethod<jdouble>("stopGpsUpdates", "()D");
 
 #else
   if (m_positionSource) {
@@ -1653,7 +1653,7 @@ void Steps::updateGpsTrack() {
   if (QFile::exists(gpsFile)) {
     QVector<GPSCoordinate> rawGPSData;
 
-    clearTrack();
+    // clearTrack();
 
     QFile file(gpsFile);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -1684,7 +1684,7 @@ void Steps::updateGpsTrack() {
 
     int gaussianWindowSize = 3;
     double gaussianSigma = 1.0;
-    double outlierThreshold = 0.001;   // 距离阈值，可根据实际情况调整
+    double outlierThreshold = 5.0;     // 距离阈值，可根据实际情况调整
     double outlierAltThreshold = 5.0;  // 海拔变化阈值（比如超过5米视为异常）
 
     // 应用高斯滤波
@@ -1696,15 +1696,15 @@ void Steps::updateGpsTrack() {
         filteredData, outlierThreshold, outlierAltThreshold);
 
     // 新增：计算地形距离（先重置，再计算）
-    resetTerrainDistance();
-    calculateTerrainDistance(optimizedData);
+    // resetTerrainDistance();
+    // calculateTerrainDistance(optimizedData);
 
     for (int i = 0; i < optimizedData.count(); i++) {
       lat = optimizedData.at(i).latitude;
       lon = optimizedData.at(i).longitude;
       alt = optimizedData.at(i).altitude;  // 获取优化后的海拔
 
-      updateTrackData(lat, lon);
+      // updateTrackData(lat, lon);
 
       QStringList m_data;
       m_data.append(QString::number(lat, 'f', 6));
@@ -1753,9 +1753,11 @@ void Steps::updateGpsTrack() {
     file1.close();
 
     // 新增：计算地形距离（先重置，再计算）
+    resetTerrainDistance();
     if (optimizedData.count() > 0) {
-      resetTerrainDistance();
       calculateTerrainDistance(optimizedData);
+    } else {
+      updateTerrainUI();
     }
 
     isGpsMapTrackFile = true;
@@ -1789,7 +1791,7 @@ void Steps::updateGpsMapUi() {
   }
 }
 
-// 修改后的高斯滤波函数（支持海拔）
+// 高斯滤波函数（支持海拔）
 QVector<GPSCoordinate> gaussianFilter(const QVector<GPSCoordinate>& data,
                                       int windowSize, double sigma) {
   if (data.isEmpty() || windowSize % 2 == 0) return data;  // 窗口必须是奇数
@@ -1830,9 +1832,6 @@ QVector<GPSCoordinate> gaussianFilter(const QVector<GPSCoordinate>& data,
 
 double calculateHaversineDistance(double lat1, double lon1, double lat2,
                                   double lon2) {
-  // 地球半径（米）
-  const double EARTH_RADIUS = 6371000.0;
-
   // 转换为弧度
   double radLat1 = lat1 * M_PI / 180.0;
   double radLon1 = lon1 * M_PI / 180.0;
@@ -1849,10 +1848,10 @@ double calculateHaversineDistance(double lat1, double lon1, double lat2,
   double c = 2 * atan2(sqrt(a), sqrt(1 - a));
 
   // 返回距离（米）
-  return EARTH_RADIUS * c;
+  return EARTH_RADIUS_TENCENT * c;
 }
 
-// 修改后的异常点检测函数（支持海拔）
+// 异常点检测函数（支持海拔）
 QVector<GPSCoordinate> detectAndCorrectOutliers(
     const QVector<GPSCoordinate>& data, double distThreshold,
     double altThreshold) {
@@ -2338,7 +2337,7 @@ void Steps::saveRoute(const QString& file, const QString& time, double lat,
   newRoute["lat"] = lat;    // 数字类型（double）
   newRoute["lon"] = lon;    // 数字类型（double）
   newRoute["address"] = distanceRoute + " | " + speedRoute + "\n" +
-                        strAltitude + "\n\n" +
+                        strAltitude + " m" + "\n\n" +
                         address;  // 字符串类型（支持中文，UTF-8 编码）
 
   // 追加新对象到数组
@@ -3062,4 +3061,6 @@ void Steps::updateTerrainUI() {
   QString downhillStr = tr("Downhill: ") +
                         QString::number(m_downhillDistance, 'f', 2) + tr(" km");
   strGpsTerrain = uphillStr + " " + flatStr + " " + downhillStr;
+
+  qDebug() << "Gps Terrain=" << strGpsTerrain;
 }

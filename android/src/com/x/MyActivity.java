@@ -1064,10 +1064,16 @@ public class MyActivity
 
                 // 计算爬升
                 double currentAltitude = currentLocation.getAltitude();
-                if (currentAltitude > previousAltitude) {
-                    totalClimb += currentAltitude - previousAltitude;
+                if (previousAltitude != 0) {
+                    // 过滤明显异常的海拔（比如低于-100米或高于9000米，按需调整）
+                    if (currentAltitude > -100 && currentAltitude < 9000) {
+                        if (currentAltitude > previousAltitude) {
+                            totalClimb += currentAltitude - previousAltitude;
+                        }
+
+                        previousAltitude = currentAltitude;
+                    }
                 }
-                previousAltitude = currentAltitude;
             } else {
                 // 静止状态，更新开始时间
                 startTime = System.currentTimeMillis();
@@ -1115,10 +1121,10 @@ public class MyActivity
 
         // 爬升
         if (zh_cn) strTotalClimb = String.format(
-            "累计爬升: %.2f 米",
+            "累计爬升: %.2f m",
             totalClimb
         );
-        else strTotalClimb = String.format("Total Climb: %.2f 米", totalClimb);
+        else strTotalClimb = String.format("Total Climb: %.2f m", totalClimb);
     }
 
     private static ServiceConnection mCon = new ServiceConnection() {
