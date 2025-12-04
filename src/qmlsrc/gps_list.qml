@@ -249,9 +249,11 @@ Rectangle {
         const points = []
         const segmentWidth = canvasWidth / (pointCount - 1)
 
+        // 1. 计算所有海拔点的坐标（逻辑不变，确保y值由海拔值决定）
         altitudeData.forEach((altitude, index) => {
                                  const ratio = isUniform ? 0.5 : (altitude - altMin) / altRange
                                  const x = index * segmentWidth
+                                 // 核心映射：altMin → canvasHeight（底部），altMax → 0（顶部）
                                  const y = canvasHeight - (ratio * canvasHeight)
                                  points.push({
                                                  "x": x,
@@ -259,40 +261,45 @@ Rectangle {
                                              })
                              })
 
-        // 填充区域（单色）
+        // 2. 填充区域（修复路径起始逻辑）
         ctx.beginPath()
-        ctx.moveTo(0, canvasHeight)
-        for (var i = 0; i < points.length; i++) {
+        // 从第一个海拔点开始，而非画布底部
+        ctx.moveTo(points[0].x, points[0].y)
+        // 绘制平滑曲线（二次贝塞尔）
+        for (var i = 1; i < points.length; i++) {
             const p = points[i]
-            if (i === 0) {
-                ctx.lineTo(p.x, p.y)
-            } else {
-                const prev = points[i - 1]
-                const controlX = (prev.x + p.x) / 2
-                ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y)
-            }
+            const prev = points[i - 1]
+            const controlX = (prev.x + p.x) / 2
+            ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y)
         }
+        // 从最后一个点连接到画布右下角，再回到左下角，最后闭合到第一个点
         ctx.lineTo(canvasWidth, canvasHeight)
+        ctx.lineTo(0, canvasHeight)
         ctx.closePath()
 
         // 单色填充（适配深浅色模式）
         ctx.fillStyle = isDark ? "rgba(76, 175, 255, 0.5)" : "rgba(33, 150, 243, 0.4)"
         ctx.fill()
 
-        // 绘制轮廓线
+        // 3. 绘制轮廓线（仅绘制海拔曲线，无多余竖线）
         ctx.beginPath()
-        for (var i = 0; i < points.length; i++) {
+        ctx.moveTo(points[0].x, points[0].y) // 从第一个海拔点开始
+        for (var i = 1; i < points.length; i++) {
             const p = points[i]
-            if (i === 0) {
-                ctx.moveTo(p.x, p.y)
-            } else {
-                const prev = points[i - 1]
-                const controlX = (prev.x + p.x) / 2
-                ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y)
-            }
+            const prev = points[i - 1]
+            const controlX = (prev.x + p.x) / 2
+            ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y)
         }
         ctx.strokeStyle = isDark ? "#2196F3" : "#1976D2"
         ctx.lineWidth = 1.5
+        ctx.stroke()
+
+        // 可选：绘制基线（便于参考海拔最小值）
+        ctx.beginPath()
+        ctx.moveTo(0, canvasHeight)
+        ctx.lineTo(canvasWidth, canvasHeight)
+        ctx.strokeStyle = isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)"
+        ctx.lineWidth = 1
         ctx.stroke()
     }
 
@@ -490,8 +497,8 @@ Rectangle {
                 // 标题行（带运动类型标记）
                 Rectangle {
                     id: m_caption
-                    //Layout.fillWidth: true
-                    width: listItem.width - 20
+                    implicitWidth: Math.min(listItem.width - 20,
+                                            parent.width) // 动态计算隐式宽度
                     Layout.preferredHeight: 40
                     color: isDark ? "#333" : "#DDD"
                     border.color: isDark ? "#444" : "#CCC"
@@ -535,52 +542,10 @@ Rectangle {
                     }
                 }
 
-                // 速度图谱标签（新增）
-                Text {
-                    id: speedLabel
-                    Layout.fillWidth: true
-                    text: qsTr("Speed Curve")
-                    font.bold: true
-                    font.pointSize: baseFontSize * 0.8 // 基于基准字体缩放，适配移动端
-                    color: isDark ? "#FFFFFF" : "#333333"
-                    horizontalAlignment: Text.AlignLeft // 左对齐，与内容呼应
-                    Layout.bottomMargin: 4 // 与下方Canvas保持间距
-                }
-
-                // 速度图谱（放大高度）
-                Canvas {
-                    id: speedRibbon
-                    // 与标题宽度一致
-                    //Layout.fillWidth: true
-                    width: m_caption.width
-
-                    Layout.preferredHeight: 80 // 适配全屏高度，增大显示区域
-                    Layout.topMargin: 4
-
-                    onPaint: {
-                        const ctx = getContext("2d")
-                        ctx.resetTransform()
-                        ctx.clearRect(0, 0, width, height)
-
-                        const speedJson = model.speedData || "[]"
-                        let speedArray = []
-                        try {
-                            speedArray = JSON.parse(speedJson)
-                            speedArray = speedArray.filter(
-                                        s => typeof s === "number" && !isNaN(s))
-                        } catch (e) {
-                            console.error("解析speedData失败:", e)
-                            speedArray = []
-                        }
-
-                        if (speedArray.length < 2) {
-                            ctx.fillStyle = "#AAAAAA"
-                            ctx.fillRect(0, 0, width, height)
-                            return
-                        }
-
-                        drawSpeedSpectrum(ctx, speedArray, width, height)
-                    }
+                Rectangle {
+                    width: view.width
+                    height: 5 // 空白高度
+                    color: "transparent"
                 }
 
                 // 天气+文本行
@@ -668,6 +633,56 @@ Rectangle {
                         visible: text4.length > 0
                     }
 
+                    // 速度图谱标签
+                    Text {
+                        id: speedLabel
+                        Layout.fillWidth: true
+                        text: qsTr("Speed Curve")
+                        font.bold: true
+                        font.pointSize: baseFontSize * 0.8 // 基于基准字体缩放，适配移动端
+                        color: isDark ? "#FFFFFF" : "#333333"
+                        horizontalAlignment: Text.AlignLeft // 左对齐，与内容呼应
+                        Layout.bottomMargin: 4 // 与下方Canvas保持间距
+                    }
+
+                    // 速度图谱（放大高度）
+                    Canvas {
+                        id: speedRibbon
+
+                        // 与标题宽度一致
+                        //Layout.fillWidth: true
+                        implicitWidth: Math.min(listItem.width - 20,
+                                                parent.width) // 动态计算隐式宽度
+                        Layout.preferredHeight: 80 // 适配全屏高度，增大显示区域
+                        Layout.topMargin: 4
+
+                        onPaint: {
+                            const ctx = getContext("2d")
+                            ctx.resetTransform()
+                            ctx.clearRect(0, 0, width, height)
+
+                            const speedJson = model.speedData || "[]"
+                            let speedArray = []
+                            try {
+                                speedArray = JSON.parse(speedJson)
+                                speedArray = speedArray.filter(
+                                            s => typeof s === "number"
+                                            && !isNaN(s))
+                            } catch (e) {
+                                console.error("解析speedData失败:", e)
+                                speedArray = []
+                            }
+
+                            if (speedArray.length < 2) {
+                                ctx.fillStyle = "#AAAAAA"
+                                ctx.fillRect(0, 0, width, height)
+                                return
+                            }
+
+                            drawSpeedSpectrum(ctx, speedArray, width, height)
+                        }
+                    }
+
                     Rectangle {
                         width: view.width
                         height: 5 // 空白高度
@@ -700,7 +715,9 @@ Rectangle {
                     // 海拔图谱Canvas（新增）
                     Canvas {
                         id: altitudeCanvas
-                        width: m_caption.width
+                        implicitWidth: Math.min(listItem.width - 20,
+                                                parent.width) // 动态计算隐式宽度
+                        //Layout.fillWidth: true
                         Layout.preferredHeight: 60
                         Layout.topMargin: 4
 
