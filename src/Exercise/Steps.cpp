@@ -963,7 +963,7 @@ void Steps::updateGetGps() {
       data_list.append(QString::number(longitude, 'f', 6));
 
       double baseRandom = QRandomGenerator::global()->generateDouble();
-      double randomInRange = baseRandom * 50 + 50;  // 0*50+50=50，1*50+50=100
+      double randomInRange = baseRandom * (50 - (-50)) + (-50);
       altitude = qRound(randomInRange * 100) / 100.0;
       dAltitude = QString::number(altitude, 'f', 2);
       data_list.append(dAltitude);
