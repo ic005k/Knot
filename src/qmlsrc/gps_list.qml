@@ -118,11 +118,12 @@ Rectangle {
                               const hue = 120 - (ratio * 120)
                               const rgb = hsvToRgb(hue, 0.8, 0.9)
                               ctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`
+                              const x = index * segmentWidth // 修复：补充x变量定义
                               ctx.fillRect(x, 0, segmentWidth, canvasHeight)
                           })
     }
 
-    function drawSpeedSpectrum(ctx, speedData, canvasWidth, canvasHeight) {
+    function drawSpeedSpectrum_old(ctx, speedData, canvasWidth, canvasHeight) {
         if (speedData.length < 2) {
             ctx.fillStyle = "rgba(150, 150, 150, 0.3)"
             ctx.fillRect(0, 0, canvasWidth, canvasHeight)
@@ -182,6 +183,157 @@ Rectangle {
         ctx.stroke()
     }
 
+    // 融合降采样的速度曲线绘制函数
+    function drawSpeedSpectrum(ctx, speedData, canvasWidth, canvasHeight) {
+        if (speedData.length < 2) {
+            ctx.fillStyle = "rgba(150, 150, 150, 0.3)"
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+            return
+        }
+
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+
+        // 1. 基于原始数据计算极值（必须用原始数据，避免降采样导致isUniform判断错误）
+        const vMin = Math.min(...speedData)
+        const vMax = Math.max(...speedData)
+        const vRange = vMax - vMin
+        const isUniform = vRange <= 0.1
+
+        const pointCount = speedData.length
+        const segmentWidth = canvasWidth / (pointCount - 1)
+
+        // 2. 生成原始坐标点（保留speed/ratio，供降采样用）
+        const originalPoints = []
+        speedData.forEach((speed, index) => {
+                              const ratio = isUniform ? 0.5 : (speed - vMin) / vRange
+                              const x = index * segmentWidth
+                              const y = canvasHeight - (ratio * canvasHeight)
+                              originalPoints.push({
+                                                      "x": x,
+                                                      "y": y,
+                                                      "ratio": ratio,
+                                                      "speed": speed // 保留原始速度值，供后续扩展（比如标注极值）
+                                                  })
+                          })
+
+        // 3. 核心：降采样逻辑（复用已定义的算法，和海拔曲线保持一致）
+        const MAX_DRAW_POINTS = 200
+        let drawPoints = originalPoints
+
+        if (originalPoints.length > MAX_DRAW_POINTS) {
+            const epsilon = canvasWidth / 200
+            drawPoints = douglasPeucker(originalPoints, epsilon)
+            if (drawPoints.length > MAX_DRAW_POINTS) {
+                drawPoints = intervalSample(drawPoints, MAX_DRAW_POINTS)
+            }
+        }
+
+        // 4. 绘制速度曲线（全部改用drawPoints）
+        ctx.beginPath()
+        ctx.moveTo(0, canvasHeight)
+        for (var i = 0; i < drawPoints.length; i++) {
+            const p = drawPoints[i]
+            if (i === 0) {
+                ctx.lineTo(p.x, p.y)
+            } else {
+                const prev = drawPoints[i - 1]
+                const controlX = (prev.x + p.x) / 2
+                ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y)
+            }
+        }
+        ctx.lineTo(canvasWidth, canvasHeight)
+        ctx.closePath()
+
+        // 5. 生成渐变（基于降采样后的点，保证渐变和曲线匹配）
+        const gradient = ctx.createLinearGradient(0, 0, canvasWidth, 0)
+        drawPoints.forEach((p, i) => {
+                               const pos = i / (drawPoints.length - 1)
+                               const hue = 240 - (p.ratio * 240)
+                               const rgb = hsvToRgb(hue, 0.85, 0.85)
+                               gradient.addColorStop(
+                                   pos, `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`)
+                           })
+        ctx.fillStyle = gradient
+        ctx.fill()
+
+        // 6. 绘制轮廓线
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.6)"
+        ctx.lineWidth = 1.2
+        ctx.stroke()
+
+        // 可选：标注最大/最小速度
+        let maxSpeed = speedData[0], maxSpeedIdx = 0
+        let minSpeed = speedData[0], minSpeedIdx = 0
+        speedData.forEach((speed, idx) => {
+                              if (speed > maxSpeed) {
+                                  maxSpeed = speed
+                                  maxSpeedIdx = idx
+                              }
+                              if (speed < minSpeed) {
+                                  minSpeed = speed
+                                  minSpeedIdx = idx
+                              }
+                          })
+
+        // 匹配降采样后的坐标点（补全大括号，避免逻辑错误）
+        let maxSpeedPoint = drawPoints[0], minSpeedPoint = drawPoints[0]
+        const targetMaxPoint = originalPoints[maxSpeedIdx]
+        const targetMinPoint = originalPoints[minSpeedIdx]
+        drawPoints.forEach(p => {
+                               // 补全大括号，确保条件判断完整
+                               if (Math.abs(p.x - targetMaxPoint.x) <= 1) {
+                                   maxSpeedPoint = p
+                               }
+                               if (Math.abs(p.x - targetMinPoint.x) <= 1) {
+                                   minSpeedPoint = p
+                               }
+                           })
+
+        // 绘制标注点（提前绘制，避免被文本覆盖）
+        ctx.fillStyle = "#FF9800" // 橙色标注最大速度
+        ctx.fillRect(maxSpeedPoint.x - 2, maxSpeedPoint.y - 2, 4, 4)
+        ctx.fillStyle = "#F44336" // 红色标注最小速度
+        ctx.fillRect(minSpeedPoint.x - 2, minSpeedPoint.y - 2, 4, 4)
+
+        // ========== 文本标签容错+增强显示 ==========
+        /*
+        ctx.save()
+        // 1. 确保pixelRatio有效（兜底值，避免undefined）
+        const effectivePixelRatio = pixelRatio || 1
+        // 2. 增大字体（12px更醒目，适配像素比）
+        const fontSize = 12 * effectivePixelRatio
+        // 3. 规范字体格式（加粗+无衬线，确保安卓兼容）
+        ctx.font = `bold ${fontSize}px sans-serif`
+        // 4. 增强文本对比度（加黑色描边，避免被渐变覆盖）
+        ctx.strokeStyle = isDark ? "#000000" : "#000000" // 黑色描边
+        ctx.lineWidth = 1.5 * effectivePixelRatio // 细描边，不突兀
+        // 5. 文本填充色（高对比度）
+        ctx.fillStyle = isDark ? "#FFFFFF" : "#FFFFFF" // 白色填充，无论深浅色都醒目
+
+        // ========== 文本坐标容错（避免越界） ==========
+        // 最大速度文本坐标（确保在画布内）
+        const maxTextX = Math.max(5, Math.min(canvasWidth - 60,
+                                              maxSpeedPoint.x + 5))
+        const maxTextY = Math.max(fontSize + 2, Math.min(canvasHeight - 2,
+                                                         maxSpeedPoint.y - 5))
+        // 最小速度文本坐标（确保在画布内）
+        const minTextX = Math.max(5, Math.min(canvasWidth - 60,
+                                              minSpeedPoint.x + 5))
+        const minTextY = Math.max(fontSize + 2, Math.min(canvasHeight - 2,
+                                                         minSpeedPoint.y + 15))
+
+        // 绘制文本（先描边后填充，增强可读性）
+        // 最大速度
+        ctx.strokeText(`${maxSpeed.toFixed(1)}km/h`, maxTextX, maxTextY)
+        ctx.fillText(`${maxSpeed.toFixed(1)}km/h`, maxTextX, maxTextY)
+        // 最小速度
+        ctx.strokeText(`${minSpeed.toFixed(1)}km/h`, minTextX, minTextY)
+        ctx.fillText(`${minSpeed.toFixed(1)}km/h`, minTextX, minTextY)
+
+        ctx.restore()
+        */
+    }
+
     // HSV转RGB工具函数
     function hsvToRgb(h, s, v) {
         let r, g, b
@@ -231,7 +383,7 @@ Rectangle {
         }
     }
 
-    function drawAltitudeCurve(ctx, altitudeData, canvasWidth, canvasHeight) {
+    function drawAltitudeCurve_old(ctx, altitudeData, canvasWidth, canvasHeight) {
         if (altitudeData.length < 2) {
             ctx.fillStyle = "rgba(150, 150, 150, 0.3)"
             ctx.fillRect(0, 0, canvasWidth, canvasHeight)
@@ -415,6 +567,250 @@ Rectangle {
             ctx.fillStyle = isDark ? "#FF9800" : "#F57C00"
             ctx.fillRect(maxAltPoint.x + 3, maxAltPoint.y - 2, 4, 4) // 右移3像素
         }
+    }
+
+    // ===================== 原有绘制函数（融合降采样） =====================
+    function drawAltitudeCurve(ctx, altitudeData, canvasWidth, canvasHeight) {
+        if (altitudeData.length < 2) {
+            ctx.fillStyle = "rgba(150, 150, 150, 0.3)"
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+            return
+        }
+
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+
+        // 1. 计算海拔极值，确定绝对映射范围
+        const altMin = Math.min(...altitudeData)
+        const altMax = Math.max(...altitudeData)
+        const maxAbsAlt = Math.max(Math.abs(altMin), Math.abs(altMax))
+        const zeroAltY = canvasHeight / 2
+
+        const pointCount = altitudeData.length
+        const segmentWidth = canvasWidth / (pointCount - 1)
+
+        // 2. 计算原始坐标点（保留海拔值，供降采样用）
+        const originalPoints = []
+        // 重命名为originalPoints，区分降采样后的点
+        altitudeData.forEach((altitude, index) => {
+                                 const x = index * segmentWidth
+                                 const ratio = altitude / maxAbsAlt
+                                 const y = zeroAltY - (ratio * zeroAltY)
+                                 const clampedY = Math.max(0, Math.min(
+                                                               canvasHeight, y))
+                                 originalPoints.push({
+                                                         "x": x,
+                                                         "y": clampedY,
+                                                         "originalY": y,
+                                                         "alt": altitude // 保留原始海拔值，供降采样后找极值用
+                                                     })
+                             })
+
+        // ===================== 核心新增：降采样逻辑 =====================
+        const MAX_DRAW_POINTS = 200
+        // 最多绘制200个点（可根据需求调整）
+        let drawPoints = originalPoints
+        // 最终用于绘制的点
+
+        // 仅当点数超过阈值时降采样
+        if (originalPoints.length > MAX_DRAW_POINTS) {
+            // 道格拉斯-普克降采样（容差适配画布宽度，越大降采样越狠）
+            const epsilon = canvasWidth / 200
+            drawPoints = douglasPeucker(originalPoints, epsilon)
+
+            // 兜底：如果降采样后仍超量，用等间隔采样
+            if (drawPoints.length > MAX_DRAW_POINTS) {
+                drawPoints = intervalSample(drawPoints, MAX_DRAW_POINTS)
+            }
+        }
+
+        // 3. 绘制0海拔基准线（X轴）
+        ctx.beginPath()
+        ctx.moveTo(0, zeroAltY)
+        ctx.lineTo(canvasWidth, zeroAltY)
+        ctx.strokeStyle = isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)"
+        ctx.lineWidth = 1
+        ctx.stroke()
+
+        // 4. 填充海拔区域（区分正负海拔）→ 改用drawPoints绘制
+        ctx.beginPath()
+        ctx.moveTo(drawPoints[0].x, drawPoints[0].y)
+        // 绘制平滑曲线（仅遍历降采样后的点）
+        for (var i = 1; i < drawPoints.length; i++) {
+            const p = drawPoints[i]
+            const prev = drawPoints[i - 1]
+            const controlX = (prev.x + p.x) / 2
+            ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y)
+        }
+
+        // 分两种情况闭合路径（保证正负海拔填充正确）
+        const lastPoint = drawPoints[drawPoints.length - 1]
+        if (lastPoint.y >= zeroAltY) {
+            ctx.lineTo(canvasWidth, lastPoint.y)
+            ctx.lineTo(canvasWidth, canvasHeight)
+            ctx.lineTo(0, canvasHeight)
+            ctx.lineTo(drawPoints[0].x, drawPoints[0].y)
+        } else {
+            ctx.lineTo(canvasWidth, lastPoint.y)
+            ctx.lineTo(canvasWidth, 0)
+            ctx.lineTo(0, 0)
+            ctx.lineTo(drawPoints[0].x, drawPoints[0].y)
+        }
+        ctx.closePath()
+
+        // 填充色：正海拔偏蓝，负海拔偏红
+        ctx.fillStyle = isDark ? "rgba(76, 175, 255, 0.4)" : "rgba(33, 150, 243, 0.3)"
+        ctx.fill()
+
+        // 5. 绘制负海拔区域补充填充 → 改用drawPoints
+        ctx.beginPath()
+        ctx.moveTo(drawPoints[0].x, drawPoints[0].y)
+        for (var i = 1; i < drawPoints.length; i++) {
+            const p = drawPoints[i]
+            const prev = drawPoints[i - 1]
+            const controlX = (prev.x + p.x) / 2
+            ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y)
+        }
+        // 仅闭合到0海拔线
+        ctx.lineTo(lastPoint.x, zeroAltY)
+        ctx.lineTo(drawPoints[0].x, zeroAltY)
+        ctx.closePath()
+        ctx.fillStyle = isDark ? "rgba(255, 102, 102, 0.4)" : "rgba(255, 87, 34, 0.3)"
+        ctx.fill()
+
+        // 6. 绘制海拔轮廓线（主曲线）→ 改用drawPoints
+        ctx.beginPath()
+        ctx.moveTo(drawPoints[0].x, drawPoints[0].y)
+        for (var i = 1; i < drawPoints.length; i++) {
+            const p = drawPoints[i]
+            const prev = drawPoints[i - 1]
+            const controlX = (prev.x + p.x) / 2
+            ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y)
+        }
+        ctx.strokeStyle = isDark ? "#2196F3" : "#1976D2"
+        ctx.lineWidth = 1.5
+        ctx.stroke()
+
+        // 7. 绘制最大/最小海拔标注（兼容降采样，保留原始极值）
+        // 第一步：找原始数据的最大/最小海拔（避免降采样丢失极值）
+        let maxAlt = altitudeData[0]
+        let maxAltIdx = 0
+        let minAlt = altitudeData[0]
+        let minAltIdx = 0
+
+        altitudeData.forEach((alt, idx) => {
+                                 if (alt > maxAlt) {
+                                     maxAlt = alt
+                                     maxAltIdx = idx
+                                 }
+                                 if (alt < minAlt) {
+                                     minAlt = alt
+                                     minAltIdx = idx
+                                 }
+                             })
+
+        // 第二步：从drawPoints中匹配对应极值点（优先找原始索引最近的点）
+        let maxAltPoint = drawPoints[0]
+        let minAltPoint = drawPoints[0]
+
+        // 方案1：如果原始极值点在drawPoints中，直接用
+        const targetMaxPoint = originalPoints[maxAltIdx]
+        const targetMinPoint = originalPoints[minAltIdx]
+
+        drawPoints.forEach(p => {
+                               // 匹配坐标（误差≤1px）
+                               if (Math.abs(p.x - targetMaxPoint.x) <= 1)
+                               maxAltPoint = p
+                               if (Math.abs(p.x - targetMinPoint.x) <= 1)
+                               minAltPoint = p
+                           })
+
+        // 标注最大海拔（橙色，醒目）
+        ctx.fillStyle = isDark ? "#FF9800" : "#F57C00"
+        ctx.fillRect(maxAltPoint.x - 2, maxAltPoint.y - 2, 4, 4)
+
+        // 给最大海拔点加文本标签（优化版）
+        ctx.save()
+        const fontSize = 10 * pixelRatio
+        ctx.font = `bold ${fontSize}px sans-serif`
+        ctx.fillStyle = isDark ? "#FFFFFF" : "#000000"
+        const textX = Math.max(5, Math.min(canvasWidth - 50, maxAltPoint.x + 5))
+        const textY = Math.max(fontSize + 2, Math.min(canvasHeight - 2,
+                                                      maxAltPoint.y - 5))
+        ctx.fillText(`${maxAlt.toFixed(1)}m`, textX, textY)
+        ctx.restore()
+
+        // 给最小海拔加文本标签
+        ctx.fillStyle = isDark ? "#F44336" : "#D32F2F"
+        ctx.fillRect(minAltPoint.x - 2, minAltPoint.y - 2, 4, 4)
+
+        ctx.save()
+        ctx.font = `bold ${fontSize}px sans-serif`
+        ctx.fillStyle = isDark ? "#FFFFFF" : "#000000"
+        const minTextX = Math.max(5, Math.min(canvasWidth - 50,
+                                              minAltPoint.x + 5))
+        const minTextY = Math.max(fontSize + 2, Math.min(canvasHeight - 2,
+                                                         minAltPoint.y + 10))
+        ctx.fillText(`${minAlt.toFixed(1)}m`, minTextX, minTextY)
+        ctx.restore()
+
+        // 可选：如果最大/最小点重合，偏移最大点避免覆盖
+        if (maxAltIdx === minAltIdx) {
+            ctx.fillStyle = isDark ? "#FF9800" : "#F57C00"
+            ctx.fillRect(maxAltPoint.x + 3, maxAltPoint.y - 2, 4, 4)
+        }
+    }
+
+    // 道格拉斯-普克算法：降采样数组，保留曲线关键特征
+    // points: 原始[{x: 像素x, y: 像素y, alt: 海拔值}]
+    // epsilon: 容差（越大降采样越狠，建议0.5~2，根据Canvas宽度调整）
+    function douglasPeucker(points, epsilon) {
+        if (points.length <= 2)
+            return points
+
+        // 计算点到线段的垂直距离
+        function distanceToSegment(p, p1, p2) {
+            const dx = p2.x - p1.x
+            const dy = p2.y - p1.y
+            if (dx === 0 && dy === 0)
+                return Math.hypot(p.x - p1.x, p.y - p1.y)
+
+            const t = ((p.x - p1.x) * dx + (p.y - p1.y) * dy) / (dx * dx + dy * dy)
+            const closestX = t < 0 ? p1.x : (t > 1 ? p2.x : p1.x + t * dx)
+            const closestY = t < 0 ? p1.y : (t > 1 ? p2.y : p1.y + t * dy)
+            return Math.hypot(p.x - closestX, p.y - closestY)
+        }
+
+        let maxDist = 0
+        let index = 0
+        const start = 0
+        const end = points.length - 1
+
+        // 找到离首尾线段最远的点
+        for (var i = start + 1; i < end; i++) {
+            const dist = distanceToSegment(points[i], points[start],
+                                           points[end])
+            if (dist > maxDist) {
+                maxDist = dist
+                index = i
+            }
+        }
+
+        // 递归保留关键节点
+        if (maxDist > epsilon) {
+            const left = douglasPeucker(points.slice(start, index + 1), epsilon)
+            const right = douglasPeucker(points.slice(index, end + 1), epsilon)
+            return left.slice(0, -1).concat(right)
+        } else {
+            return [points[start], points[end]]
+        }
+    }
+
+    // 简化版：等间隔采样（备用，适合极致性能场景）
+    function intervalSample(points, maxCount) {
+        if (points.length <= maxCount)
+            return points
+        const step = Math.ceil(points.length / maxCount)
+        return points.filter((_, idx) => idx % step === 0)
     }
 
     function addItem(t0, t1, t2, t3, height) {
