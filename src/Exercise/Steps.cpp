@@ -1037,7 +1037,7 @@ void Steps::updateGetGps() {
         weatherFetcher->fetchWeather(latitude, longitude);
 
         refreshRoute();
-        saveSpeedData(strJsonSpeedFile, mySpeed);
+        saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
 
         isInitTime = true;
       }
@@ -1060,11 +1060,11 @@ void Steps::updateGetGps() {
         }
       }
 
-      // Speed
-      int ts = 60;
+      // Speed and Altitude
+      int ts = 30;
       if (isGpsTest) ts = 3;
       if (m_lastSaveSpeedTime.secsTo(currentTime) >= ts) {  // 距离上次超过60秒
-        saveSpeedData(strJsonSpeedFile, mySpeed);
+        saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
         m_lastSaveSpeedTime = currentTime;  // 更新上次执行时间
       }
     }
@@ -1073,7 +1073,7 @@ void Steps::updateGetGps() {
 
 void Steps::stopRecordMotion() {
   refreshRoute();
-  saveSpeedData(strJsonSpeedFile, mySpeed);
+  saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
 
   QTimer::singleShot(2000, mw_one, [this]() {
     timer->stop();
@@ -1258,7 +1258,7 @@ void Steps::refreshMotionData() {
 
 void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
                           QString t3, QString t4, QString t5, QString t6,
-                          QVariantList speedData) {  // 接收速度数据
+                          QVariantList speedData, QVariantList altitudeData) {
   QQuickItem* root = mui->qwGpsList->rootObject();
   if (!root) {
     qWarning() << "rootObject is null!";
@@ -1275,7 +1275,8 @@ void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
       Q_ARG(QVariant, t4),                            // 参数6：text4
       Q_ARG(QVariant, t5),                            // 参数7：text5
       Q_ARG(QVariant, t6),                            // 参数8：text6
-      Q_ARG(QVariant, speedData)  // 参数9：新增的速度数据（QVariantList）
+      Q_ARG(QVariant, speedData),    // 参数9：新增的速度数据（QVariantList）
+      Q_ARG(QVariant, altitudeData)  // 海拔数据
   );
 }
 
@@ -1339,12 +1340,13 @@ void Steps::loadGpsList(int nYear, int nMonth) {
     speedFile = speedFile.replace(".json", "_Speed.json");
 
     QVariantList speedData = getSpeedData(speedFile);
+    QVariantList altitudeData = getAltitudeData(speedFile);
 
     /*speedData << QVariant(0.0) << QVariant(3.5) << QVariant(5.2)
               << QVariant(7.8) << QVariant(10.1) << QVariant(8.5)
               << QVariant(6.3) << QVariant(4.0);*/
 
-    insertGpsList(0, t0, t1, t2, t3, t4, t5, t6, speedData);
+    insertGpsList(0, t0, t1, t2, t3, t4, t5, t6, speedData, altitudeData);
   }
 
   if (count > 0) {
@@ -2684,7 +2686,8 @@ QGeoCoordinate Steps::wgs84ToGcj02(double wgs84Lat, double wgs84Lon) {
 }
 
 // 保存速度数据（追加模式，每次调用添加一条带时间戳的速度记录）
-void Steps::saveSpeedData(const QString& jsonFile, double speed) {
+void Steps::saveSpeedData(const QString& jsonFile, double speed,
+                          double altitude) {
   // 1. 读取已有数据（若文件存在）
   QJsonArray speedArray;
   QFile file(jsonFile);
@@ -2709,6 +2712,7 @@ void Steps::saveSpeedData(const QString& jsonFile, double speed) {
   newRecord["timestamp"] =
       QDateTime::currentMSecsSinceEpoch();  // 直接调用静态方法，更高效
   newRecord["speed"] = speed;               // 速度值（单位根据业务定，如km/h）
+  newRecord["altitude"] = altitude;
   speedArray.append(newRecord);
 
   // 3. 写入更新后的数据到文件
@@ -2761,6 +2765,49 @@ QVariantList Steps::getSpeedData(const QString& jsonFile) {
   }
 
   return speedList;
+}
+
+// 读取所有海拔数据，返回QVariantList（便于传递到QML）
+QVariantList Steps::getAltitudeData(const QString& jsonFile) {
+  QVariantList altitudeList;
+  QFile file(jsonFile);
+
+  // 检查文件是否存在
+  if (!file.exists()) {
+    qWarning() << "getAltitudeData: 文件" << jsonFile << "不存在";
+    return altitudeList;  // 返回空列表
+  }
+
+  // 打开并读取文件
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    qWarning() << "getSpeedData: 无法打开文件" << jsonFile;
+    return altitudeList;
+  }
+
+  QByteArray data = file.readAll();
+  file.close();
+
+  // 解析JSON
+  QJsonDocument doc = QJsonDocument::fromJson(data);
+  if (!doc.isArray()) {
+    qWarning() << "getAltitudeData: 文件" << jsonFile << "不是有效的JSON数组";
+    return altitudeList;
+  }
+
+  QJsonArray altitudeArray = doc.array();
+  // 使用const迭代器遍历，避免容器分离
+  for (auto it = altitudeArray.constBegin(); it != altitudeArray.constEnd();
+       ++it) {
+    const QJsonValue& val = *it;  // 通过迭代器获取元素
+    if (val.isObject()) {
+      QJsonObject record = val.toObject();
+      if (record.contains("altitude") && record["altitude"].isDouble()) {
+        altitudeList.append(record["altitude"].toDouble());
+      }
+    }
+  }
+
+  return altitudeList;
 }
 
 void Steps::showSportsChart() {

@@ -17,7 +17,8 @@ Rectangle {
 
     // 新增：获取设备像素比（安卓/iOS关键）
     property real pixelRatio: Screen.pixelRatio > 0 ? Screen.pixelRatio : 1
-    property real baseFontSize: 20 * pixelRatio // 基准字体（按像素比缩放）
+    property real baseFontSize: (Qt.platform.os
+                                 === "android") ? (20 * pixelRatio) : (10 * pixelRatio)
 
     function showRouteDialog() {
         routeDialog.visible = true
@@ -230,6 +231,71 @@ Rectangle {
         }
     }
 
+    function drawAltitudeCurve(ctx, altitudeData, canvasWidth, canvasHeight) {
+        if (altitudeData.length < 2) {
+            ctx.fillStyle = "rgba(150, 150, 150, 0.3)"
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+            return
+        }
+
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+
+        const altMin = Math.min(...altitudeData)
+        const altMax = Math.max(...altitudeData)
+        const altRange = altMax - altMin
+        const isUniform = altRange <= 0.1
+
+        const pointCount = altitudeData.length
+        const points = []
+        const segmentWidth = canvasWidth / (pointCount - 1)
+
+        altitudeData.forEach((altitude, index) => {
+                                 const ratio = isUniform ? 0.5 : (altitude - altMin) / altRange
+                                 const x = index * segmentWidth
+                                 const y = canvasHeight - (ratio * canvasHeight)
+                                 points.push({
+                                                 "x": x,
+                                                 "y": y
+                                             })
+                             })
+
+        // 填充区域（单色）
+        ctx.beginPath()
+        ctx.moveTo(0, canvasHeight)
+        for (var i = 0; i < points.length; i++) {
+            const p = points[i]
+            if (i === 0) {
+                ctx.lineTo(p.x, p.y)
+            } else {
+                const prev = points[i - 1]
+                const controlX = (prev.x + p.x) / 2
+                ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y)
+            }
+        }
+        ctx.lineTo(canvasWidth, canvasHeight)
+        ctx.closePath()
+
+        // 单色填充（适配深浅色模式）
+        ctx.fillStyle = isDark ? "rgba(76, 175, 255, 0.5)" : "rgba(33, 150, 243, 0.4)"
+        ctx.fill()
+
+        // 绘制轮廓线
+        ctx.beginPath()
+        for (var i = 0; i < points.length; i++) {
+            const p = points[i]
+            if (i === 0) {
+                ctx.moveTo(p.x, p.y)
+            } else {
+                const prev = points[i - 1]
+                const controlX = (prev.x + p.x) / 2
+                ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y)
+            }
+        }
+        ctx.strokeStyle = isDark ? "#2196F3" : "#1976D2"
+        ctx.lineWidth = 1.5
+        ctx.stroke()
+    }
+
     function addItem(t0, t1, t2, t3, height) {
         view.model.append({
                               "text0": t0,
@@ -240,7 +306,8 @@ Rectangle {
                           })
     }
 
-    function insertItem(curIndex, t0, t1, t2, t3, t4, t5, t6, speedData) {
+    function insertItem(curIndex, t0, t1, t2, t3, t4, t5, t6, speedData, altitudeData) {
+        // 处理速度数据（原有逻辑保持不变）
         var speedArray = []
         if (speedData && speedData.hasOwnProperty("count")
                 && typeof speedData.get === "function") {
@@ -262,10 +329,36 @@ Rectangle {
             }
         }
 
-        console.log("insert阶段转换后的数组:", speedArray)
+        // 新增：处理海拔数据（完全复用速度数据的格式逻辑）
+        var altitudeArray = []
+        if (altitudeData && altitudeData.hasOwnProperty("count")
+                && typeof altitudeData.get === "function") {
+            for (var k = 0; k < altitudeData.count; k++) {
+                var altItem = altitudeData.get(k)
+                var altValue = typeof altItem
+                        === "object" ? (altItem.value
+                                        !== undefined ? altItem.value : altItem) : altItem
+                altValue = Number(altValue)
+                if (!isNaN(altValue)) {
+                    altitudeArray.push(altValue)
+                }
+            }
+        } else if (Array.isArray(altitudeData)) {
+            for (var l = 0; l < altitudeData.length; l++) {
+                var altVal = Number(altitudeData[l])
+                if (!isNaN(altVal)) {
+                    altitudeArray.push(altVal)
+                }
+            }
+        }
+
+        console.log("insert阶段转换后的速度数组:", speedArray)
+        console.log("insert阶段转换后的海拔数组:", altitudeArray) // 新增日志
 
         var speedJson = JSON.stringify(speedArray)
+        var altitudeJson = JSON.stringify(altitudeArray) // 新增：海拔数据序列化
 
+        // 模型插入时新增altitudeData字段
         view.model.insert(curIndex, {
                               "text0": t0,
                               "text1": t1,
@@ -274,11 +367,13 @@ Rectangle {
                               "text4": t4,
                               "text5": t5,
                               "text6": t6,
-                              "speedData": speedJson
+                              "speedData": speedJson,
+                              "altitudeData": altitudeJson // 新增：海拔数据字段
                           })
 
         var insertedItem = view.model.get(curIndex)
-        console.log("模型中存储的JSON:", insertedItem.speedData)
+        console.log("模型中存储的速度JSON:", insertedItem.speedData)
+        console.log("模型中存储的海拔JSON:", insertedItem.altitudeData) // 新增日志
     }
 
     function updateItem(curIndex, t0, t1, t2, t3, t4, t5, t6, height) {
@@ -492,7 +587,7 @@ Rectangle {
                 RowLayout {
                     id: weatherTextContainer
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 60
+                    Layout.preferredHeight: 40
 
                     Image {
                         id: weatherIcon
@@ -525,7 +620,7 @@ Rectangle {
                 // 内容文本区（自适应剩余空间）
                 ColumnLayout {
                     Layout.fillWidth: true
-                    Layout.fillHeight: true // 填充剩余高度
+                    //Layout.fillHeight: true // 填充剩余高度
                     spacing: 4
 
                     Text {
@@ -588,6 +683,46 @@ Rectangle {
                         color: isDark ? "#DDD" : "#333"
                         text: text5
                         visible: text5.length > 0
+                    }
+
+                    // 海拔图谱标签（新增）
+                    Text {
+                        id: altiLabel
+                        Layout.fillWidth: true
+                        text: qsTr("Terrain Curve")
+                        font.bold: true
+                        font.pointSize: baseFontSize * 0.8 // 基于基准字体缩放，适配移动端
+                        color: isDark ? "#FFFFFF" : "#333333"
+                        horizontalAlignment: Text.AlignLeft // 左对齐，与内容呼应
+                        Layout.bottomMargin: 4 // 与下方Canvas保持间距
+                    }
+
+                    // 海拔图谱Canvas（新增）
+                    Canvas {
+                        id: altitudeCanvas
+                        width: m_caption.width
+                        Layout.preferredHeight: 60
+                        Layout.topMargin: 4
+
+                        onPaint: {
+                            const ctx = getContext("2d")
+                            ctx.resetTransform()
+                            ctx.clearRect(0, 0, width, height)
+
+                            const altitudeJson = model.altitudeData || "[]"
+                            let altitudeArray = []
+                            try {
+                                altitudeArray = JSON.parse(altitudeJson)
+                                altitudeArray = altitudeArray.filter(
+                                            a => typeof a === "number"
+                                            && !isNaN(a))
+                            } catch (e) {
+                                console.error("解析altitudeData失败:", e)
+                                altitudeArray = []
+                            }
+
+                            drawAltitudeCurve(ctx, altitudeArray, width, height)
+                        }
                     }
 
                     Rectangle {

@@ -314,29 +314,29 @@
 <context>
     <name>CustomChartView</name>
     <message>
-        <location filename="Exercise/Steps.h" line="405"/>
+        <location filename="Exercise/Steps.h" line="406"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.h" line="405"/>
+        <location filename="Exercise/Steps.h" line="406"/>
         <source>Cycling</source>
         <translation>骑行</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.h" line="407"/>
-        <location filename="Exercise/Steps.h" line="409"/>
-        <location filename="Exercise/Steps.h" line="412"/>
+        <location filename="Exercise/Steps.h" line="408"/>
+        <location filename="Exercise/Steps.h" line="410"/>
+        <location filename="Exercise/Steps.h" line="413"/>
         <source>times</source>
         <translation>次</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.h" line="408"/>
+        <location filename="Exercise/Steps.h" line="409"/>
         <source>Hiking</source>
         <translation>徒步</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.h" line="410"/>
+        <location filename="Exercise/Steps.h" line="411"/>
         <source>Running</source>
         <translation>跑步</translation>
     </message>
@@ -8403,27 +8403,27 @@
     <message>
         <location filename="Exercise/Steps.cpp" line="1142"/>
         <location filename="Exercise/Steps.cpp" line="1231"/>
-        <location filename="Exercise/Steps.cpp" line="1512"/>
-        <location filename="Exercise/Steps.cpp" line="1523"/>
-        <location filename="Exercise/Steps.cpp" line="2856"/>
+        <location filename="Exercise/Steps.cpp" line="1514"/>
+        <location filename="Exercise/Steps.cpp" line="1525"/>
+        <location filename="Exercise/Steps.cpp" line="2903"/>
         <source>Cycling</source>
         <translation>骑行</translation>
     </message>
     <message>
         <location filename="Exercise/Steps.cpp" line="1143"/>
         <location filename="Exercise/Steps.cpp" line="1236"/>
-        <location filename="Exercise/Steps.cpp" line="1514"/>
-        <location filename="Exercise/Steps.cpp" line="1525"/>
-        <location filename="Exercise/Steps.cpp" line="2857"/>
+        <location filename="Exercise/Steps.cpp" line="1516"/>
+        <location filename="Exercise/Steps.cpp" line="1527"/>
+        <location filename="Exercise/Steps.cpp" line="2904"/>
         <source>Hiking</source>
         <translation>徒步</translation>
     </message>
     <message>
         <location filename="Exercise/Steps.cpp" line="1144"/>
         <location filename="Exercise/Steps.cpp" line="1241"/>
-        <location filename="Exercise/Steps.cpp" line="1516"/>
-        <location filename="Exercise/Steps.cpp" line="1527"/>
-        <location filename="Exercise/Steps.cpp" line="2858"/>
+        <location filename="Exercise/Steps.cpp" line="1518"/>
+        <location filename="Exercise/Steps.cpp" line="1529"/>
+        <location filename="Exercise/Steps.cpp" line="2905"/>
         <source>Running</source>
         <translation>跑步</translation>
     </message>
@@ -8483,70 +8483,70 @@
         <translation>最大速度</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1510"/>
-        <location filename="Exercise/Steps.cpp" line="2897"/>
+        <location filename="Exercise/Steps.cpp" line="1512"/>
+        <location filename="Exercise/Steps.cpp" line="2944"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1521"/>
+        <location filename="Exercise/Steps.cpp" line="1523"/>
         <source>Year</source>
         <translation>年</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="2087"/>
+        <location filename="Exercise/Steps.cpp" line="2089"/>
         <source>Today</source>
         <translation>今天</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="2088"/>
+        <location filename="Exercise/Steps.cpp" line="2090"/>
         <source>km</source>
         <translation>公里</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="2772"/>
+        <location filename="Exercise/Steps.cpp" line="2819"/>
         <source>Sports Statistics</source>
         <translation>运动统计</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="2784"/>
+        <location filename="Exercise/Steps.cpp" line="2831"/>
         <source>Date format error!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="2845"/>
+        <location filename="Exercise/Steps.cpp" line="2892"/>
         <source>%1 Monthly Sports Statistics</source>
         <translation>%1 每月运动统计</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="2900"/>
+        <location filename="Exercise/Steps.cpp" line="2947"/>
         <source>Distance (KM)</source>
         <translation>里程（千米）</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="2974"/>
+        <location filename="Exercise/Steps.cpp" line="3021"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3065"/>
+        <location filename="Exercise/Steps.cpp" line="3112"/>
         <source>Uphill: </source>
         <translation>上坡：</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3065"/>
-        <location filename="Exercise/Steps.cpp" line="3067"/>
-        <location filename="Exercise/Steps.cpp" line="3069"/>
+        <location filename="Exercise/Steps.cpp" line="3112"/>
+        <location filename="Exercise/Steps.cpp" line="3114"/>
+        <location filename="Exercise/Steps.cpp" line="3116"/>
         <source> km</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3067"/>
+        <location filename="Exercise/Steps.cpp" line="3114"/>
         <source>Flat: </source>
         <translation>平路：</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3068"/>
+        <location filename="Exercise/Steps.cpp" line="3115"/>
         <source>Downhill: </source>
         <translation>下坡：</translation>
     </message>
@@ -10493,28 +10493,33 @@
         <translation type="vanished">完成</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="415"/>
+        <location filename="qmlsrc/gps_list.qml" line="510"/>
         <source>Cycling</source>
         <oldsource>Clyling</oldsource>
         <translation>骑行</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="418"/>
+        <location filename="qmlsrc/gps_list.qml" line="513"/>
         <source>Hiking</source>
         <translation>徒步</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="421"/>
+        <location filename="qmlsrc/gps_list.qml" line="516"/>
         <source>Running</source>
         <translation>跑步</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="447"/>
+        <location filename="qmlsrc/gps_list.qml" line="542"/>
         <source>Speed Curve</source>
         <translation>速度曲线</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="813"/>
+        <location filename="qmlsrc/gps_list.qml" line="692"/>
+        <source>Terrain Curve</source>
+        <translation>地形曲线</translation>
+    </message>
+    <message>
+        <location filename="qmlsrc/gps_list.qml" line="948"/>
         <source>Total %1 items</source>
         <translation>共 %1 条</translation>
     </message>
@@ -10527,12 +10532,12 @@
         <translation type="vanished">路线</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="867"/>
+        <location filename="qmlsrc/gps_list.qml" line="1002"/>
         <source>Clear</source>
         <translation>清除</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="883"/>
+        <location filename="qmlsrc/gps_list.qml" line="1018"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>

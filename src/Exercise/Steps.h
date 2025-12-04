@@ -272,7 +272,7 @@ class Steps : public QDialog {
 
   void insertGpsList(int curIndex, QString t0, QString t1, QString t2,
                      QString t3, QString t4, QString t5, QString t6,
-                     QVariantList speedData);
+                     QVariantList speedData, QVariantList altitudeData);
   QString strStartTime, strEndTime;
   QDateTime startDt, endDt;
 
@@ -322,13 +322,14 @@ class Steps : public QDialog {
   void updateGpsList(int curIndex, QString t0, QString t1, QString t2,
                      QString t3, QString t4, QString t5, QString t6);
   void refreshRoute();
-  void saveSpeedData(const QString& jsonFile, double speed);
+  void saveSpeedData(const QString& jsonFile, double speed, double altitude);
   QVariantList getSpeedData(const QString& jsonFile);
   QString getJsonRouteFile(const QString& strGpsList);
 
   void updateTerrainUI();
   void calculateTerrainDistance(const QVector<GPSCoordinate>& optimizedData);
   void resetTerrainDistance();
+  QVariantList getAltitudeData(const QString& jsonFile);
  signals:
   void distanceChanged(double distance);
   void timeChanged();
