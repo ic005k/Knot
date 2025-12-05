@@ -267,8 +267,14 @@ class Steps : public QDialog {
 
   // 海拔差阈值（单位：米），可根据实际场景调整
   const double UPHILL_THRESHOLD = 0.5;  // 海拔差 > 0.5m 视为上坡
-  const double DOWNHILL_THRESHOLD =
-      -0.5;  // 海拔差 < -0.5m 视为下坡 介于两者之间视为平路
+  // 海拔差 < -0.5m 视为下坡 介于两者之间视为平路
+  const double DOWNHILL_THRESHOLD = -0.5;
+  const double EPS = 1e-6;  // 浮点数容差
+
+  int gaussianWindowSize = 3;
+  double gaussianSigma = 1.0;
+  double outlierThreshold = 5.0;     // 距离阈值，可根据实际情况调整
+  double outlierAltThreshold = 5.0;  // 海拔变化阈值（比如超过5米视为异常）
 
   void insertGpsList(int curIndex, QString t0, QString t1, QString t2,
                      QString t3, QString t4, QString t5, QString t6, QString t7,
@@ -330,6 +336,7 @@ class Steps : public QDialog {
   void calculateTerrainDistance(const QVector<GPSCoordinate>& optimizedData);
   void resetTerrainDistance();
   QVariantList getAltitudeData(const QString& jsonFile);
+  void getTerrain();
  signals:
   void distanceChanged(double distance);
   void timeChanged();

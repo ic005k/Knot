@@ -1005,7 +1005,7 @@ Rectangle {
                 id: colLayout
                 anchors.fill: parent
                 anchors.margins: 10
-                spacing: 8
+                spacing: 5
 
                 // 标题行（带运动类型标记）
                 Rectangle {
@@ -1169,7 +1169,7 @@ Rectangle {
                         //Layout.fillWidth: true
                         implicitWidth: Math.min(listItem.width - 20,
                                                 parent.width) // 动态计算隐式宽度
-                        Layout.preferredHeight: (Qt.platform.os === "android") ? (60) : (20)
+                        Layout.preferredHeight: (Qt.platform.os === "android") ? (40) : (20)
                         Layout.topMargin: 4
 
                         onPaint: {
@@ -1235,7 +1235,7 @@ Rectangle {
                         implicitWidth: Math.min(listItem.width - 20,
                                                 parent.width) // 动态计算隐式宽度
                         //Layout.fillWidth: true
-                        Layout.preferredHeight: (Qt.platform.os === "android") ? (50) : (40)
+                        Layout.preferredHeight: (Qt.platform.os === "android") ? (50) : (30)
                         Layout.topMargin: 4
 
                         onPaint: {
@@ -1456,9 +1456,9 @@ Rectangle {
                                     radius: 2
                                 }
                                 Text {
-                                    //text: qsTr("Uphill: ") + terrainColumn.uphillKm.toFixed(
-                                    //          2) + "km"
-                                    text: qsTr("Uphill")
+                                    text: qsTr("Uphill: ") + "\n"+terrainColumn.uphillKm.toFixed(
+                                              2) + "km"
+                                    //text: qsTr("Uphill")
                                     font.pointSize: baseFontSize * 0.7
                                     color: isDark ? "#E2E8F0" : "#424242"
                                 }
@@ -1475,9 +1475,9 @@ Rectangle {
                                     radius: 2
                                 }
                                 Text {
-                                    text: qsTr("Flat")
-                                    //text: qsTr("Flat: ") + terrainColumn.flatKm.toFixed(
-                                    //          2) + "km"
+                                    //text: qsTr("Flat")
+                                    text: qsTr("Flat: ") + "\n"+ terrainColumn.flatKm.toFixed(
+                                              2) + "km"
                                     font.pointSize: baseFontSize * 0.7
                                     color: isDark ? "#E2E8F0" : "#424242"
                                 }
@@ -1494,9 +1494,9 @@ Rectangle {
                                     radius: 2
                                 }
                                 Text {
-                                    text: qsTr("Downhill")
-                                    //text: qsTr("Downhill: ") + terrainColumn.downhillKm.toFixed(
-                                    //          2) + "km"
+                                    //text: qsTr("Downhill")
+                                    text: qsTr("Downhill: ") + "\n"+ terrainColumn.downhillKm.toFixed(
+                                              2) + "km"
                                     font.pointSize: baseFontSize * 0.7
                                     color: isDark ? "#E2E8F0" : "#424242"
                                 }
@@ -1558,8 +1558,8 @@ Rectangle {
 
                         onClicked: {
                             strGpsTime = item0.text + "-=-" + item1.text + "-=-"
-                                    + item2.text + "-=-" + item4.text
-                            m_Steps.getGpsTrack() // 假设外部对象已定义
+                                    + item2.text + "-=-" + item4.text + "-=-" + item7.text
+                            m_Steps.getGpsTrack()
                         }
                     }
 
@@ -1585,7 +1585,7 @@ Rectangle {
                         onClicked: {
                             strGpsTime = item0.text + "-=-" + item1.text + "-=-"
                                     + item2.text + "-=-" + item4.text
-                            m_Steps.getRouteList(strGpsTime) // 假设外部对象已定义
+                            m_Steps.getRouteList(strGpsTime)
                         }
                     }
                 }
