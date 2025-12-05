@@ -271,7 +271,7 @@ class Steps : public QDialog {
       -0.5;  // 海拔差 < -0.5m 视为下坡 介于两者之间视为平路
 
   void insertGpsList(int curIndex, QString t0, QString t1, QString t2,
-                     QString t3, QString t4, QString t5, QString t6,
+                     QString t3, QString t4, QString t5, QString t6, QString t7,
                      QVariantList speedData, QVariantList altitudeData);
   QString strStartTime, strEndTime;
   QDateTime startDt, endDt;

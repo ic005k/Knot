@@ -980,6 +980,8 @@ void Steps::updateGetGps() {
       strAltitude =
           "Altitude: " + QString::number(distribution(generator)) + " m";
 
+      strGpsTerrain = "上坡：33.83 km 平路：4.53 km 下坡：34.62 km";
+
       qDebug() << "m_time%3=" << m_time.second();
     }
 
@@ -1206,7 +1208,8 @@ void Steps::refreshMotionData() {
     Reg1.setValue("/" + strYearMonth + "/Count", count);
     Reg1.setValue("/" + strYearMonth + "/" + QString::number(count),
                   t00 + "-=-" + t1 + "-=-" + t2 + "-=-" + t3 + "-=-" + t4 +
-                      "-=-" + t5 + "-=-" + strCurrentWeatherIcon);
+                      "-=-" + t5 + "-=-" + strCurrentWeatherIcon + "-=-" +
+                      strGpsTerrain);
 
     if (timer->isActive()) return;
 
@@ -1258,7 +1261,8 @@ void Steps::refreshMotionData() {
 
 void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
                           QString t3, QString t4, QString t5, QString t6,
-                          QVariantList speedData, QVariantList altitudeData) {
+                          QString t7, QVariantList speedData,
+                          QVariantList altitudeData) {
   QQuickItem* root = mui->qwGpsList->rootObject();
   if (!root) {
     qWarning() << "rootObject is null!";
@@ -1275,7 +1279,8 @@ void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
       Q_ARG(QVariant, t4),                            // 参数6：text4
       Q_ARG(QVariant, t5),                            // 参数7：text5
       Q_ARG(QVariant, t6),                            // 参数8：text6
-      Q_ARG(QVariant, speedData),    // 参数9：新增的速度数据（QVariantList）
+      Q_ARG(QVariant, t7),                            // 参数9：text7
+      Q_ARG(QVariant, speedData),    // 速度数据（QVariantList）
       Q_ARG(QVariant, altitudeData)  // 海拔数据
   );
 }
@@ -1324,7 +1329,7 @@ void Steps::loadGpsList(int nYear, int nMonth) {
         Reg.value("/" + strYearMonth + "/" + QString::number(i + 1), "")
             .toString();
     QStringList list = str.split("-=-");
-    QString t0, t1, t2, t3, t4, t5, t6;
+    QString t0, t1, t2, t3, t4, t5, t6, t7;
     if (list.count() > 0) {
       t0 = list.at(0);
       t1 = list.at(1);
@@ -1332,7 +1337,8 @@ void Steps::loadGpsList(int nYear, int nMonth) {
       t3 = list.at(3);
       t4 = list.at(4);
       t5 = list.at(5);
-      if (list.count() == 7) t6 = list.at(6);
+      if (list.count() == 7) t6 = list.at(6);  // 天气图标
+      if (list.count() == 8) t7 = list.at(7);  // 地形距离汇总
     }
 
     QString strGpsTime = t0 + "-=-" + t1 + "-=-" + t2 + "-=-" + t4;
@@ -1346,7 +1352,7 @@ void Steps::loadGpsList(int nYear, int nMonth) {
               << QVariant(7.8) << QVariant(10.1) << QVariant(8.5)
               << QVariant(6.3) << QVariant(4.0);*/
 
-    insertGpsList(0, t0, t1, t2, t3, t4, t5, t6, speedData, altitudeData);
+    insertGpsList(0, t0, t1, t2, t3, t4, t5, t6, t7, speedData, altitudeData);
   }
 
   if (count > 0) {

@@ -384,7 +384,10 @@ Item {
             width: rotateContainer.width
             height: rotateContainer.height
             spacing: 5
-            cacheBuffer: 500
+
+            // 优化缓存配置
+            cacheBuffer: Math.max(Screen.height * 4, contentHeight * 0.3)
+
             model: TextChunkModel {
                 id: textModel
             }
@@ -481,12 +484,12 @@ Item {
                 rightPadding: 10
                 textFormat: Text.RichText
                 text: model.text || "测试文本：检查宽度是否填满"
-                wrapMode: Text.Wrap
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere // 比Wrap更快的换行逻辑
                 font.pixelSize: FontSize
                 font.family: FontName
                 color: myTextColor
                 renderType: Text.QtRendering
-
+                //renderType: Text.NativeRendering //字体发虚
                 readOnly: true
                 selectByMouse: false
 

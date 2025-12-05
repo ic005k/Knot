@@ -296,6 +296,8 @@ Rectangle {
         ctx.fillRect(minSpeedPoint.x - 2, minSpeedPoint.y - 2, 4, 4)
 
         // ========== 文本标签容错+增强显示 ==========
+
+
         /*
         ctx.save()
         // 1. 确保pixelRatio有效（兜底值，避免undefined）
@@ -823,7 +825,7 @@ Rectangle {
                           })
     }
 
-    function insertItem(curIndex, t0, t1, t2, t3, t4, t5, t6, speedData, altitudeData) {
+    function insertItem(curIndex, t0, t1, t2, t3, t4, t5, t6, t7, speedData, altitudeData) {
         // 处理速度数据（原有逻辑保持不变）
         var speedArray = []
         if (speedData && speedData.hasOwnProperty("count")
@@ -884,6 +886,7 @@ Rectangle {
                               "text4": t4,
                               "text5": t5,
                               "text6": t6,
+                              "text7": t7,
                               "speedData": speedJson,
                               "altitudeData": altitudeJson // 新增：海拔数据字段
                           })
@@ -1054,7 +1057,7 @@ Rectangle {
 
                 Rectangle {
                     width: view.width
-                    height: 5 // 空白高度
+                    height: 0 // 空白高度
                     color: "transparent"
                 }
 
@@ -1062,8 +1065,8 @@ Rectangle {
                 RowLayout {
                     id: weatherTextContainer
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 40
 
+                    //Layout.preferredHeight: (Qt.platform.os === "android") ? (30) : (10)
                     Image {
                         id: weatherIcon
                         source: item6.text
@@ -1095,9 +1098,10 @@ Rectangle {
                 // 内容文本区（自适应剩余空间）
                 ColumnLayout {
                     Layout.fillWidth: true
-                    //Layout.fillHeight: true // 填充剩余高度
+                    Layout.fillHeight: true // 填充剩余高度
                     spacing: 4
 
+                    // 总距离
                     Text {
                         id: item2
                         Layout.fillWidth: true
@@ -1115,6 +1119,7 @@ Rectangle {
                         color: "transparent"
                     }
 
+                    // 运动时长
                     Text {
                         id: item3
                         Layout.fillWidth: true
@@ -1132,6 +1137,7 @@ Rectangle {
                         color: "transparent"
                     }
 
+                    // 平均速度
                     Text {
                         id: item4
                         Layout.fillWidth: true
@@ -1163,7 +1169,7 @@ Rectangle {
                         //Layout.fillWidth: true
                         implicitWidth: Math.min(listItem.width - 20,
                                                 parent.width) // 动态计算隐式宽度
-                        Layout.preferredHeight: (Qt.platform.os === "android") ? (80) : (50)
+                        Layout.preferredHeight: (Qt.platform.os === "android") ? (60) : (20)
                         Layout.topMargin: 4
 
                         onPaint: {
@@ -1199,6 +1205,7 @@ Rectangle {
                         color: "transparent"
                     }
 
+                    // 累计爬升和下降
                     Text {
                         id: item5
                         Layout.fillWidth: true
@@ -1228,7 +1235,7 @@ Rectangle {
                         implicitWidth: Math.min(listItem.width - 20,
                                                 parent.width) // 动态计算隐式宽度
                         //Layout.fillWidth: true
-                        Layout.preferredHeight: (Qt.platform.os === "android") ? (60) : (40)
+                        Layout.preferredHeight: (Qt.platform.os === "android") ? (50) : (40)
                         Layout.topMargin: 4
 
                         onPaint: {
@@ -1252,12 +1259,269 @@ Rectangle {
                         }
                     }
 
+                    // 地形距离分布可视化
+                    ColumnLayout {
+                        id: terrainColumn
+                        //Layout.fillWidth: true
+                        implicitWidth: Math.min(listItem.width - 20,
+                                                parent.width)
+                        Layout.topMargin: 4
+                        spacing: 4
+
+                        // 标题
+                        Text {
+                            Layout.fillWidth: true
+                            text: qsTr("Terrain Distance Distribution")
+                            font.bold: true
+                            font.pointSize: baseFontSize * 0.8
+                            color: isDark ? "#FFFFFF" : "#333333"
+                            horizontalAlignment: Text.AlignLeft
+                            visible: false
+                        }
+
+                        // 1. 数据源 + 就绪标记
+                        Text {
+                            id: item7
+                            text: text7 // 模型动态赋值的text7
+                            visible: false
+                            // 标记：item7组件是否真正初始化完成
+                            property bool isReady: false
+                            Component.onCompleted: {
+                                isReady = true
+                                console.log("item7 组件初始化完成，初始文本:", text)
+                            }
+                            // 仅保留日志，移除无效的forceLayout
+                            onTextChanged: {
+                                console.log("item7.text 动态更新:", text)
+                            }
+                        }
+
+                        // 2. 核心：仅在item7就绪后计算，无多余刷新
+                        property var terrainValues: {
+                            try {
+                                if (!item7 || !item7.isReady) {
+                                    return []
+                                }
+
+                                const rawText = (item7.text || "").trim()
+                                if (rawText === "") {
+                                    console.log("item7.text 为空，无地形数据")
+                                    return []
+                                }
+
+                                const reg = /(\d+\.?\d*) ?km/gi
+                                const matches = rawText.match(reg) || []
+                                if (matches.length === 0) {
+                                    console.log("未匹配到任何km数值，文本：", rawText)
+                                    return []
+                                }
+
+                                const values = matches.map(m => {
+                                                               const numStr = m.replace(
+                                                                   /km/gi,
+                                                                   '').trim()
+                                                               const num = parseFloat(
+                                                                   numStr)
+                                                               return isNaN(
+                                                                   num) ? 0 : num
+                                                           })
+                                console.log("地形数值解析成功:", values)
+                                return values
+                            } catch (e) {
+                                console.error("地形数值解析异常:", e)
+                                return []
+                            }
+                        }
+
+                        // 3. 动态绑定的地形数值
+                        property real uphillKm: terrainValues.length > 0 ? terrainValues[0] : 0
+                        property real flatKm: terrainValues.length > 1 ? terrainValues[1] : 0
+                        property real downhillKm: terrainValues.length > 2 ? terrainValues[2] : 0
+                        property real totalTerrainKm: uphillKm + flatKm + downhillKm
+
+                        // ========== 条形图容器（加明确ID，移除自定义forceUpdate） ==========
+                        Rectangle {
+                            id: terrainBar // 明确ID，避免children索引
+                            //Layout.fillWidth: true
+                            implicitWidth: Math.min(listItem.width - 20,
+                                                    parent.width)
+
+                            Layout.preferredHeight: 15
+                            color: isDark ? "#2D3748" : "#F5F5F5"
+                            radius: 0
+                            border.color: isDark ? "#4A5568" : "#E0E0E0"
+                            border.width: 1
+
+                            Row {
+                                anchors.fill: parent
+                                anchors.margins: 2
+                                spacing: 0
+
+                                // 上坡段（宽度绑定自动响应数值变化）
+                                Rectangle {
+                                    width: terrainColumn.totalTerrainKm
+                                           > 0 ? (terrainColumn.uphillKm
+                                                  / terrainColumn.totalTerrainKm) * parent.width : 0
+                                    height: parent.height
+                                    color: isDark ? "#ED8936" : "#FF9800"
+                                    radius: 0
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: terrainColumn.uphillKm.toFixed(
+                                                  2) + "km"
+                                        font.pointSize: baseFontSize * 0.7
+                                        color: "#FFFFFF"
+                                        font.bold: true
+                                        visible: false // terrainColumn.uphillKm>0 //width > 30
+                                    }
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: qsTr("Up")
+                                        font.pointSize: baseFontSize * 0.6
+                                        color: "#FFFFFF"
+                                        visible: false
+                                    }
+                                }
+
+                                // 平路段
+                                Rectangle {
+                                    width: terrainColumn.totalTerrainKm
+                                           > 0 ? (terrainColumn.flatKm
+                                                  / terrainColumn.totalTerrainKm) * parent.width : 0
+                                    height: parent.height
+                                    color: isDark ? "#718096" : "#9E9E9E"
+                                    radius: 0
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: terrainColumn.flatKm.toFixed(
+                                                  2) + "km"
+                                        font.pointSize: baseFontSize * 0.7
+                                        color: "#FFFFFF"
+                                        font.bold: true
+                                        visible: false // terrainColumn.flatKm>0 //width > 30
+                                    }
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: qsTr("Flat")
+                                        font.pointSize: baseFontSize * 0.6
+                                        color: "#FFFFFF"
+                                        visible: false
+                                    }
+                                }
+
+                                // 下坡段
+                                Rectangle {
+                                    width: terrainColumn.totalTerrainKm
+                                           > 0 ? (terrainColumn.downhillKm
+                                                  / terrainColumn.totalTerrainKm) * parent.width : 0
+                                    height: parent.height
+                                    color: isDark ? "#4299E1" : "#2196F3"
+                                    radius: 0
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: terrainColumn.downhillKm.toFixed(
+                                                  2) + "km"
+                                        font.pointSize: baseFontSize * 0.7
+                                        color: "#FFFFFF"
+                                        font.bold: true
+                                        visible: false //terrainColumn.downhillKm>0// width > 30
+                                    }
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: qsTr("Down")
+                                        font.pointSize: baseFontSize * 0.6
+                                        color: "#FFFFFF"
+                                        visible: false
+                                    }
+                                }
+                            }
+                        }
+
+                        // ========== 图例+总计行（不变） ==========
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 16
+
+                            // 上坡图例
+                            RowLayout {
+                                spacing: 4
+                                Layout.alignment: Qt.AlignLeft
+                                Rectangle {
+                                    width: 12
+                                    height: 12
+                                    color: isDark ? "#ED8936" : "#FF9800"
+                                    radius: 2
+                                }
+                                Text {
+                                    //text: qsTr("Uphill: ") + terrainColumn.uphillKm.toFixed(
+                                    //          2) + "km"
+                                    text: qsTr("Uphill")
+                                    font.pointSize: baseFontSize * 0.7
+                                    color: isDark ? "#E2E8F0" : "#424242"
+                                }
+                            }
+
+                            // 平路图例
+                            RowLayout {
+                                spacing: 4
+                                Layout.alignment: Qt.AlignLeft
+                                Rectangle {
+                                    width: 12
+                                    height: 12
+                                    color: isDark ? "#718096" : "#9E9E9E"
+                                    radius: 2
+                                }
+                                Text {
+                                    text: qsTr("Flat")
+                                    //text: qsTr("Flat: ") + terrainColumn.flatKm.toFixed(
+                                    //          2) + "km"
+                                    font.pointSize: baseFontSize * 0.7
+                                    color: isDark ? "#E2E8F0" : "#424242"
+                                }
+                            }
+
+                            // 下坡图例
+                            RowLayout {
+                                spacing: 4
+                                Layout.alignment: Qt.AlignLeft
+                                Rectangle {
+                                    width: 12
+                                    height: 12
+                                    color: isDark ? "#4299E1" : "#2196F3"
+                                    radius: 2
+                                }
+                                Text {
+                                    text: qsTr("Downhill")
+                                    //text: qsTr("Downhill: ") + terrainColumn.downhillKm.toFixed(
+                                    //          2) + "km"
+                                    font.pointSize: baseFontSize * 0.7
+                                    color: isDark ? "#E2E8F0" : "#424242"
+                                }
+                            }
+
+                            // 总计
+                            Text {
+                                Layout.alignment: Qt.AlignRight
+                                text: qsTr("Total: ") + terrainColumn.totalTerrainKm.toFixed(
+                                          2) + "km"
+                                font.pointSize: baseFontSize * 0.7
+                                font.bold: true
+                                color: isDark ? "#FFFFFF" : "#212121"
+                                visible: false
+                            }
+                        }
+                    }
+
                     Rectangle {
                         width: view.width
                         height: 5 // 空白高度
                         color: "transparent"
                     }
 
+                    // 天气图标路径文件
                     Text {
                         id: item6
                         text: text6
