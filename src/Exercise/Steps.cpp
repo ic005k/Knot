@@ -908,6 +908,10 @@ void Steps::updateGetGps() {
 
             // 计算地形距离：仅当old数据有效（避免初始值）
             getTerrain();
+
+            const double bearing1 =
+                calculateBearing(oldLat, oldLon, latitude, longitude);
+            mui->lblDirection->setText(bearingToDirection(bearing1));
           }
 
           oldLat = latitude;
@@ -956,6 +960,10 @@ void Steps::updateGetGps() {
           "Altitude: " + QString::number(distribution(generator)) + " m";
 
       getTerrain();
+
+      const double bearing1 =
+          calculateBearing(oldLat, oldLon, latitude, longitude);
+      mui->lblDirection->setText(bearingToDirection(bearing1));
 
       oldLat = latitude;
       oldLon = longitude;
@@ -3133,4 +3141,82 @@ void Steps::getTerrain() {
       updateTerrainUI();
     }
   }
+}
+
+/**
+ * @brief 计算两点GPS坐标的方位角（正北为0°，顺时针）
+ * @param lat1 起点纬度（十进制度）
+ * @param lon1 起点经度（十进制度）
+ * @param lat2 终点纬度（十进制度）
+ * @param lon2 终点经度（十进制度）
+ * @return 方位角（0~360°），两点重合返回-1
+ */
+double Steps::calculateBearing(double lat1, double lon1, double lat2,
+                               double lon2) {
+  // 两点重合，无法计算方向
+  if (qFuzzyCompare(lat1, lat2) && qFuzzyCompare(lon1, lon2)) {
+    return -1.0;
+  }
+
+  // 转换为弧度
+  const double radLat1 = lat1 * DEG_TO_RAD;
+  const double radLon1 = lon1 * DEG_TO_RAD;
+  const double radLat2 = lat2 * DEG_TO_RAD;
+  const double radLon2 = lon2 * DEG_TO_RAD;
+
+  // 球面几何方位角核心公式（WGS84坐标系适配）
+  const double dLon = radLon2 - radLon1;
+  const double y = sin(dLon) * cos(radLat2);
+  const double x =
+      cos(radLat1) * sin(radLat2) - sin(radLat1) * cos(radLat2) * cos(dLon);
+  double bearingRad = atan2(y, x);
+  double bearingDeg = bearingRad * RAD_TO_DEG;
+
+  // 转换为0~360°范围
+  bearingDeg = fmod(bearingDeg + 360.0, 360.0);
+  return bearingDeg;
+}
+
+/**
+ * @brief 将方位角转换为可读的方向描述（支持国际化）
+ * @param bearing 方位角（0~360°）
+ * @return 本地化的方向字符串（如"South by East 10 degrees"）
+ */
+QString Steps::bearingToDirection(double bearing) {
+  if (bearing < 0 || bearing > 360) {
+    return tr("Invalid Direction");
+  }
+
+  // 基础方向定义（通过tr标记，支持翻译）
+  QString mainDir;
+  double offset = 0.0;
+
+  // 象限划分
+  if (bearing >= 0 && bearing < 90) {  // 东北象限
+    mainDir = tr("North by East");
+    offset = bearing;
+  } else if (bearing >= 90 && bearing < 180) {  // 东南象限
+    mainDir = tr("East by South");
+    offset = bearing - 90;
+  } else if (bearing >= 180 && bearing < 270) {  // 西南象限
+    mainDir = tr("South by West");
+    offset = bearing - 180;
+  } else {  // 西北象限
+    mainDir = tr("West by North");
+    offset = bearing - 270;
+  }
+
+  // 特殊正方向处理（精准匹配）
+  if (qFuzzyCompare(bearing, 0.0) || qFuzzyCompare(bearing, 360.0)) {
+    return tr("Due North");
+  } else if (qFuzzyCompare(bearing, 90.0)) {
+    return tr("Due East");
+  } else if (qFuzzyCompare(bearing, 180.0)) {
+    return tr("Due South");
+  } else if (qFuzzyCompare(bearing, 270.0)) {
+    return tr("Due West");
+  }
+
+  // 四舍五入到整数度，格式化为“方向+角度”
+  return mainDir + " " + QString::number(qRound(offset)) + " " + tr("degrees");
 }

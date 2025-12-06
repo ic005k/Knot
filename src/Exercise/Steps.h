@@ -337,6 +337,11 @@ class Steps : public QDialog {
   void resetTerrainDistance();
   QVariantList getAltitudeData(const QString& jsonFile);
   void getTerrain();
+  QString bearingToDirection(double bearing);
+  double calculateBearing(double lat1, double lon1, double lat2, double lon2);
+  // 弧度/角度转换常量（全局常量，避免宏定义的副作用）
+  const double RAD_TO_DEG = 180.0 / M_PI;
+  const double DEG_TO_RAD = M_PI / 180.0;
  signals:
   void distanceChanged(double distance);
   void timeChanged();

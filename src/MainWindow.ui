@@ -3306,7 +3306,7 @@ QSlider::handle:horizontal:disabled {
           <enum>QTabWidget::TabPosition::South</enum>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tab_Steps">
           <attribute name="title">
@@ -3666,7 +3666,7 @@ QSlider::handle:horizontal:disabled {
 }</string>
                   </property>
                   <property name="text">
-                   <string>0</string>
+                   <string>0 km</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -3775,6 +3775,21 @@ QSlider::handle:horizontal:disabled {
               </size>
              </property>
             </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblDirection">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Direction</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QFrame" name="f_speed">
