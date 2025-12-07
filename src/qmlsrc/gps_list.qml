@@ -1343,8 +1343,9 @@ Rectangle {
                         Rectangle {
                             id: terrainBar // 明确ID，避免children索引
                             //Layout.fillWidth: true
-                            implicitWidth: Math.min(listItem.width - 20,
-                                                    parent.width)
+                            //implicitWidth: Math.min(listItem.width - 20,
+                            //                        parent.width)
+                            implicitWidth: listItem.width - 20
 
                             Layout.preferredHeight: 15
                             color: isDark ? "#2D3748" : "#F5F5F5"

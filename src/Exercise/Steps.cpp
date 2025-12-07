@@ -916,6 +916,8 @@ void Steps::updateGetGps() {
             getTerrain();
 
             bearing1 = calculateBearing(oldLat, oldLon, latitude, longitude);
+            mui->lblDirection->setText(bearingToDirection(bearing1));
+            compass->setBearing(bearing1);
           }
 
           oldLat = latitude;
@@ -935,11 +937,19 @@ void Steps::updateGetGps() {
     if (m_time.second() % 3 == 0) {
       appendTrack(latitude, longitude);
 
-      quint64 randomInt =
-          QRandomGenerator::global()->generate64() % 10000000000ULL;
-      double randomDouble = static_cast<double>(randomInt) / 10000000000000.0;
-      latitude = latitude + randomDouble;
-      longitude = longitude + randomDouble;
+      // 生成有符号64位随机数（qint64），范围：-9999999999 ~ 9999999999
+      qint64 randomInt1 =
+          static_cast<qint64>(QRandomGenerator::global()->generate64()) %
+          10000000000LL;
+      qint64 randomInt2 =
+          static_cast<qint64>(QRandomGenerator::global()->generate64()) %
+          10000000000LL;
+      // 转换为正负小数（范围：-0.009999999999 ~ 0.009999999999）
+      double randomDouble1 = static_cast<double>(randomInt1) / 10000000000000.0;
+      double randomDouble2 = static_cast<double>(randomInt2) / 10000000000000.0;
+      latitude = latitude + randomDouble1;
+      longitude = longitude + randomDouble2;
+      qDebug() << randomDouble1 << randomDouble2;
 
       QStringList data_list;
       data_list.append(QString::number(latitude, 'f', 6));
@@ -965,6 +975,8 @@ void Steps::updateGetGps() {
       getTerrain();
 
       bearing1 = calculateBearing(oldLat, oldLon, latitude, longitude);
+      mui->lblDirection->setText(bearingToDirection(bearing1));
+      compass->setBearing(bearing1);
 
       oldLat = latitude;
       oldLon = longitude;
@@ -981,8 +993,6 @@ void Steps::updateGetGps() {
   if (mySpeed > 0) setCurrentGpsSpeed(mySpeed, maxSpeed);
   str1 = QString::number(m_distance, 'f', 2) + " km";
   strTotalDistance = QString::number(m_TotalDistance) + " km";
-  mui->lblDirection->setText(bearingToDirection(bearing1));
-  compass->setBearing(bearing1);
 
   endDT = QDateTime::currentDateTime();
   qint64 secondsDiff = startDT.secsTo(endDT);
@@ -1015,7 +1025,7 @@ void Steps::updateGetGps() {
     refreshMotionData();
   }
 
-  if (m_time.second() % 10 == 0) {
+  if (m_time.second() % 12 == 0) {
     if (mui->chkPlayRunVoice->isChecked()) {
       if (mySpeed > 0) {
         if (mySpeed != oldMySpeed) {
