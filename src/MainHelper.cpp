@@ -1076,7 +1076,8 @@ void MainHelper::init_Theme() {
     mui->btnDel->setIcon(QIcon(":/res/delitem.svg"));
     mui->btnSync->setIcon(QIcon(":/res/upload.svg"));
 
-    // m_Method->setEditLightMode(mui->editTodo);
+    m_Steps->m_speedometer->setBackgroundColor("#F0F0F0");
+    m_Steps->m_speedometer->updateThemeColors();
 
   } else {
     mui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
@@ -1096,7 +1097,8 @@ void MainHelper::init_Theme() {
     mui->btnDel->setIcon(QIcon(":/res/delitem_l.svg"));
     mui->btnSync->setIcon(QIcon(":/res/upload_l.svg"));
 
-    // m_Method->setEditDarkMode(mui->editTodo);
+    m_Steps->m_speedometer->setBackgroundColor("#323232");
+    m_Steps->m_speedometer->updateThemeColors();
   }
 
   mui->editTodo->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);

@@ -87,9 +87,9 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mui->lblGpsInfo->setStyleSheet(lblStyle);
 
   if (!isAndroid)
-    font1.setPointSize(9);
+    font1.setPointSize(8);
   else
-    font1.setPointSize(19);
+    font1.setPointSize(17);
   mui->lblGpsInfo->setFont(font1);
 
   mui->lblYearTotal->setStyleSheet(mui->lblMonthTotal->styleSheet());
@@ -124,7 +124,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
 
   // Speed
   m_speedometer = new Speedometer(this);
-  mui->f_speed->setFixedHeight(130);
+  mui->f_speed->setFixedHeight(120);
   m_speedometer->setMaxSpeed(10.00);  // 最高时速(km/h)
   m_speedometer->setMinSpeed(0);      // 最低时速(km/h)
   m_speedometer->setCurrentSpeed(0.0);
@@ -134,9 +134,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mui->f_speed->layout()->addWidget(m_speedometer);
 
   // Compass
-
   compass = new CompassWidget();
-  compass->setFixedHeight(mui->frame_3->height());
   mui->vboxCompass->addWidget(compass);
   mui->vboxCompass->setContentsMargins(0, 0, 0, 0);
   mui->frame_3->setContentsMargins(0, 0, 0, 0);

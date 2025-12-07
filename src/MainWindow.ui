@@ -3598,7 +3598,7 @@ QSlider::handle:horizontal:disabled {
              <property name="minimumSize">
               <size>
                <width>0</width>
-               <height>100</height>
+               <height>150</height>
               </size>
              </property>
              <property name="frameShape">
@@ -3640,18 +3640,18 @@ QSlider::handle:horizontal:disabled {
              <property name="minimumSize">
               <size>
                <width>0</width>
-               <height>150</height>
+               <height>100</height>
               </size>
              </property>
              <property name="frameShape">
-              <enum>QFrame::Shape::StyledPanel</enum>
+              <enum>QFrame::Shape::NoFrame</enum>
              </property>
              <property name="frameShadow">
               <enum>QFrame::Shadow::Raised</enum>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_54">
               <item>
-               <layout class="QVBoxLayout" name="verticalLayout_53"/>
+               <layout class="QHBoxLayout" name="horizontalLayout_12"/>
               </item>
              </layout>
             </widget>

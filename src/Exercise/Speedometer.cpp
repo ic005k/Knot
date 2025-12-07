@@ -6,11 +6,56 @@
 #include <QResizeEvent>
 #include <cmath>
 
-Speedometer::Speedometer(QWidget *parent) : QWidget(parent) {
+Speedometer::Speedometer(QWidget* parent) : QWidget(parent) {
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   setMinimumSize(300, 120);
+
+  // 初始化主题适配颜色
+  updateThemeColors();
+
   createSpeedTextAnimation();
   updateGradient();
+}
+
+// 新增：计算颜色亮度（ITU-R BT.709 标准）
+int Speedometer::colorLuminance(const QColor& color) {
+  return static_cast<int>(0.2126 * color.red() + 0.7152 * color.green() +
+                          0.0722 * color.blue());
+}
+
+// 新增：根据背景色自动生成高对比度的前景色
+QColor Speedometer::getContrastColor(const QColor& bgColor) const {
+  int luminance = colorLuminance(bgColor);
+  // 背景亮度 < 128（深色）→ 浅色文字；反之→深色文字
+  return luminance < 128 ? QColor(220, 220, 220) : QColor(50, 50, 60);
+}
+
+// 新增：更新主题配色（暗黑/亮色模式）
+void Speedometer::updateThemeColors(bool autoAdaptForeground /* = true */,
+                                    bool forceReset /* = false */) {
+  // ===== 1. 背景色处理 =====
+  if (forceReset || !m_backgroundColor.isValid()) {
+    m_backgroundColor = isDark ? QColor(30, 30, 40) : QColor(245, 245, 248);
+  }
+
+  // ===== 2. 前景色处理（自动适配背景色）=====
+  if (forceReset || !m_foregroundColor.isValid() || autoAdaptForeground) {
+    // 如果用户手动设了背景色，自动计算前景色；否则按isDark设置
+    m_foregroundColor = getContrastColor(m_backgroundColor);
+  }
+
+  // ===== 3. 其他颜色处理（可选：也可适配背景色）=====
+  if (forceReset || !m_accentColor.isValid()) {
+    m_accentColor = isDark ? QColor(65, 150, 250) : QColor(45, 130, 240);
+  }
+
+  if (forceReset || !m_needleColor.isValid()) {
+    m_needleColor = isDark ? QColor(255, 100, 100) : QColor(240, 80, 80);
+  }
+
+  // 更新渐变和UI
+  updateGradient();
+  update();
 }
 
 void Speedometer::createSpeedTextAnimation() {
@@ -22,9 +67,17 @@ void Speedometer::createSpeedTextAnimation() {
 void Speedometer::updateGradient() {
   m_gaugeGradient = QLinearGradient(0, 0, 1, 0);
   m_gaugeGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
-  m_gaugeGradient.setColorAt(0.0, QColor(65, 150, 250));  // 蓝色
-  m_gaugeGradient.setColorAt(0.7, QColor(255, 200, 50));  // 黄色
-  m_gaugeGradient.setColorAt(1.0, QColor(255, 70, 70));   // 红色
+
+  // 适配暗黑/亮色模式的渐变颜色
+  if (isDark) {
+    m_gaugeGradient.setColorAt(0.0, QColor(65, 150, 250));  // 蓝色
+    m_gaugeGradient.setColorAt(0.7, QColor(255, 200, 50));  // 黄色
+    m_gaugeGradient.setColorAt(1.0, QColor(255, 70, 70));   // 红色
+  } else {
+    m_gaugeGradient.setColorAt(0.0, QColor(45, 130, 240));  // 浅蓝
+    m_gaugeGradient.setColorAt(0.7, QColor(240, 180, 40));  // 浅黄
+    m_gaugeGradient.setColorAt(1.0, QColor(240, 60, 60));   // 浅红
+  }
 }
 
 void Speedometer::setCurrentSpeed(double speed) {
@@ -89,15 +142,18 @@ void Speedometer::setAspectRatio(double ratio) {
 
 QColor Speedometer::backgroundColor() const { return m_backgroundColor; }
 
-void Speedometer::setBackgroundColor(const QColor &color) {
+void Speedometer::setBackgroundColor(const QColor& color) {
   if (m_backgroundColor == color) return;
   m_backgroundColor = color;
+  // 关键：设置背景后，自动更新前景色（刻度/文字颜色）
+  m_foregroundColor = getContrastColor(m_backgroundColor);
+  updateGradient();
   update();
 }
 
 QColor Speedometer::foregroundColor() const { return m_foregroundColor; }
 
-void Speedometer::setForegroundColor(const QColor &color) {
+void Speedometer::setForegroundColor(const QColor& color) {
   if (m_foregroundColor == color) return;
   m_foregroundColor = color;
   update();
@@ -105,7 +161,7 @@ void Speedometer::setForegroundColor(const QColor &color) {
 
 QColor Speedometer::accentColor() const { return m_accentColor; }
 
-void Speedometer::setAccentColor(const QColor &color) {
+void Speedometer::setAccentColor(const QColor& color) {
   if (m_accentColor == color) return;
   m_accentColor = color;
   updateGradient();
@@ -114,13 +170,13 @@ void Speedometer::setAccentColor(const QColor &color) {
 
 QColor Speedometer::needleColor() const { return m_needleColor; }
 
-void Speedometer::setNeedleColor(const QColor &color) {
+void Speedometer::setNeedleColor(const QColor& color) {
   if (m_needleColor == color) return;
   m_needleColor = color;
   update();
 }
 
-void Speedometer::resizeEvent(QResizeEvent *event) {
+void Speedometer::resizeEvent(QResizeEvent* event) {
   Q_UNUSED(event)
   calculateMetrics();
   update();
@@ -156,7 +212,7 @@ void Speedometer::calculateMetrics() {
   m_scaleFont = QFont("Arial", qMin(m_tickTextRect.height() * 0.8, 12.0));
 }
 
-void Speedometer::paintEvent(QPaintEvent *event) {
+void Speedometer::paintEvent(QPaintEvent* event) {
   Q_UNUSED(event)
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing);
@@ -171,30 +227,31 @@ void Speedometer::paintEvent(QPaintEvent *event) {
 
   // ===================== 速度文本区域 =====================
   painter.save();
-  painter.setPen(m_foregroundColor);
+  painter.setPen(m_foregroundColor);  // 现在用适配后的前景色
   painter.setFont(m_speedFont);
 
-  // 创建速度文本
-  QString speedText =
-      QString("%1 km/h").arg(QString::number(m_currentSpeed, 'f', 2));
+  // 修复：原代码写死了2位小数，改为用m_decimalPlaces
+  QString speedText = QString("%1 km/h").arg(
+      QString::number(m_currentSpeed, 'f', m_decimalPlaces));
 
-  // 绘制速度文本
   painter.drawText(m_speedRect, Qt::AlignCenter, speedText);
   painter.restore();
 
   // ===================== 刻度区域 =====================
   painter.save();
 
-  // 绘制刻度线背景
+  // 修复：刻度背景色根据背景色亮度适配（不再依赖isDark）
   int cornerRadius = m_scaleRect.height() / 2;
   painter.setPen(Qt::NoPen);
-  painter.setBrush(QColor(60, 60, 70));
+  int bgLuminance = colorLuminance(m_backgroundColor);
+  QColor scaleBgColor =
+      bgLuminance < 128 ? QColor(60, 60, 70) : QColor(220, 220, 225);
+  painter.setBrush(scaleBgColor);
   painter.drawRoundedRect(m_scaleRect, cornerRadius, cornerRadius);
 
   // 绘制进度条前景
   QRect progressRect(m_scaleRect);
   progressRect.setWidth(static_cast<int>(m_scaleRect.width() * progress));
-
   painter.setBrush(m_gaugeGradient);
   painter.drawRoundedRect(progressRect, cornerRadius, cornerRadius);
 
@@ -205,21 +262,21 @@ void Speedometer::paintEvent(QPaintEvent *event) {
   int pointerX = m_scaleRect.left() + progress * m_scaleRect.width();
   int pointerSize = m_scaleRect.height() * 1.2;
 
-  // 指针中心圆点
-  painter.setBrush(QColor(240, 240, 240));
+  // 修复：指针圆点颜色也根据背景色适配
+  QColor pointerDotColor =
+      bgLuminance < 128 ? QColor(240, 240, 240) : QColor(50, 50, 60);
+  painter.setBrush(pointerDotColor);
   painter.drawEllipse(QPoint(pointerX, m_scaleRect.center().y()),
                       pointerSize / 6, pointerSize / 6);
 
   // ===================== 刻度文本 =====================
-  painter.setPen(m_foregroundColor);
+  painter.setPen(m_foregroundColor);  // 适配后的前景色
   painter.setFont(m_scaleFont);
 
-  // 绘制刻度值
+  // 绘制刻度值（原有逻辑不变）
   const int tickCount = 6;
   for (int i = 0; i <= tickCount; i++) {
     double value = m_minSpeed + (i * (m_maxSpeed - m_minSpeed) / tickCount);
-
-    // 格式化文本
     QString text;
     if (m_decimalPlaces == 0) {
       text = QString::number(static_cast<int>(value));
@@ -227,15 +284,13 @@ void Speedometer::paintEvent(QPaintEvent *event) {
       text = QString::number(value, 'f', m_decimalPlaces);
     }
 
-    // 计算位置
     int x = m_scaleRect.left() + (i * m_scaleRect.width() / tickCount);
     QRect textRect(x - 20, m_tickTextRect.top(), 40, m_tickTextRect.height());
-
     painter.drawText(textRect, Qt::AlignCenter, text);
 
-    // 绘制刻度标记
+    // 绘制刻度标记（线宽也根据背景色适配）
     if (i > 0 && i < tickCount) {
-      painter.setPen(QPen(m_foregroundColor, 1));
+      painter.setPen(QPen(m_foregroundColor, bgLuminance < 128 ? 1 : 1.5));
       painter.drawLine(x, m_scaleRect.top() + 5, x, m_scaleRect.bottom() - 5);
     }
   }

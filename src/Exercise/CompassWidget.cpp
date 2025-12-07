@@ -6,7 +6,7 @@
 #include <QPen>
 #include <QtMath>
 
-#include "src/defines.h"  // 包含全局变量定义
+#include "src/defines.h"  // 包含全局变量isDark定义
 
 CompassWidget::CompassWidget(QWidget* parent) : QWidget(parent) {
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -41,34 +41,40 @@ void CompassWidget::paintEvent(QPaintEvent* event) {
     return;
   }
 
-  // 计算罗盘和指针的大小
-  int maxCompassSize =
-      qMin(totalWidth * 0.7, totalHeight * 0.9);   // 罗盘占70%宽度或90%高度
-  int compassDiameter = qMax(20, maxCompassSize);  // 确保最小尺寸
+  // 计算罗盘大小 - 基于父控件尺寸
+  int compassDiameter =
+      qMin(totalWidth, totalHeight) * 0.8;      // 取宽高中的较小值
+  compassDiameter = qMax(20, compassDiameter);  // 确保最小尺寸
   int compassRadius = compassDiameter / 2;
 
-  // 计算指针宽度（罗盘直径的40%）
+  // 计算指针大小（基于罗盘尺寸）
   int pointerWidth = qMax(20, static_cast<int>(compassDiameter * 0.4));
   int pointerHeight = qMax(20, static_cast<int>(compassDiameter * 0.5));
 
   // 计算总内容宽度
   int contentWidth = pointerWidth + compassDiameter;
-  int contentHeight = compassDiameter;
+  int contentHeight = qMax(compassDiameter, pointerHeight);
 
-  // 确保内容尺寸不超过可用空间
+  // 计算文本区域高度
+  QFont indicatorFont;
+  indicatorFont.setPointSize(9);
+  indicatorFont.setBold(true);
+  painter.setFont(indicatorFont);
+  int textHeight = painter.fontMetrics().height();
+  contentHeight += textHeight + 10;  // 为"Forward"文本预留空间
+
+  // 检查是否超过可用空间
   if (contentWidth > totalWidth) {
-    // 按比例缩小
     float scale = static_cast<float>(totalWidth) / contentWidth;
     contentWidth = totalWidth;
-    pointerWidth = static_cast<int>(pointerWidth * scale);
     compassDiameter = static_cast<int>(compassDiameter * scale);
     compassRadius = compassDiameter / 2;
-    contentHeight = compassDiameter;
+    pointerWidth = static_cast<int>(pointerWidth * scale);
     pointerHeight = static_cast<int>(pointerHeight * scale);
+    contentHeight = qMax(compassDiameter, pointerHeight) + textHeight + 10;
   }
 
   if (contentHeight > totalHeight) {
-    // 按比例缩小
     float scale = static_cast<float>(totalHeight) / contentHeight;
     contentHeight = totalHeight;
     compassDiameter = static_cast<int>(compassDiameter * scale);
@@ -82,30 +88,24 @@ void CompassWidget::paintEvent(QPaintEvent* event) {
   int startX = (totalWidth - contentWidth) / 2;
   int startY = (totalHeight - contentHeight) / 2;
 
-  // 指针位置（左侧）
+  // 计算指针中心位置
   int pointerCenterX = startX + pointerWidth / 2;
-  int pointerCenterY = startY + compassRadius;
+  int pointerCenterY = startY + (contentHeight - textHeight - 10) / 2;
 
-  // 罗盘位置（右侧）
+  // 计算罗盘中心位置
   int compassCenterX = startX + pointerWidth + compassRadius;
-  int compassCenterY = startY + compassRadius;
+  int compassCenterY = startY + (contentHeight - textHeight - 10) / 2;
 
-  // 罗盘内部半径定义
-  int scaleOuterRadius = qMax(5, compassRadius - 5);     // 刻度外半径
-  int scaleInnerRadius = qMax(10, compassRadius - 20);   // 刻度内半径
-  int textRadius = qMax(15, compassRadius - 30);         // 文字半径
-  int centerCircleRadius = qMax(5, compassRadius - 40);  // 中心圆半径
+  // 计算罗盘内部半径
+  int scaleOuterRadius = qMax(5, compassRadius - 5);
+  int scaleInnerRadius = qMax(10, compassRadius - 20);
+  int textRadius = qMax(15, compassRadius - 30);
+  int centerCircleRadius = qMax(5, compassRadius - 40);
 
-  // 确保内部半径合理
-  if (scaleInnerRadius <= scaleOuterRadius) {
-    scaleInnerRadius = scaleOuterRadius - 5;
-  }
-  if (textRadius <= scaleInnerRadius) {
-    textRadius = scaleInnerRadius - 5;
-  }
-  if (centerCircleRadius <= 0) {
-    centerCircleRadius = compassRadius / 2;
-  }
+  // 确保半径值有效
+  scaleInnerRadius = qMin(scaleInnerRadius, scaleOuterRadius - 5);
+  textRadius = qMin(textRadius, scaleInnerRadius - 5);
+  centerCircleRadius = qMax(3, qMin(centerCircleRadius, textRadius - 5));
 
   // ========== 2. 根据暗黑模式选择颜色 ==========
   QColor backgroundColor, borderColor, centerColor, textColor,
@@ -265,11 +265,6 @@ void CompassWidget::paintEvent(QPaintEvent* event) {
   painter.restore();
 
   // ========== 7. 绘制前进方向指示文本 ==========
-  QFont indicatorFont;
-  indicatorFont.setPointSize(9);
-  indicatorFont.setBold(true);
-  painter.setFont(indicatorFont);
-
   QString forwardText = tr("Forward");
   int textW = painter.fontMetrics().horizontalAdvance(forwardText);
   int textH = painter.fontMetrics().height();
