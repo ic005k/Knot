@@ -76,10 +76,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mui->lblCurrent->setFont(font0);
   mui->lblToNow->setFont(font0);
   mui->lblNow->setFont(font0);
-  mui->lblTitle1->setFont(font0);
-  mui->lblTitle2->setFont(font0);
-  mui->lblTitle3->setFont(font0);
-  mui->lblTitle4->setFont(font0);
+
   mui->tabMotion->setTabVisible(3, false);
 
   QFont font1 = m_Method->getNewFont(17);
@@ -87,13 +84,13 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mui->lblKM->setFont(font1);
   mui->lblSingle->setFont(font1);
 
-  lblStyle = mui->lblCurrentDistance->styleSheet();
-  mui->lblCurrentDistance->setStyleSheet(lblStyle);
-  mui->lblRunTime->setStyleSheet(lblStyle);
-  mui->lblAverageSpeed->setStyleSheet(lblStyle);
   mui->lblGpsInfo->setStyleSheet(lblStyle);
-  font1.setPointSize(12);
-  if (!isAndroid) mui->lblGpsInfo->setFont(font1);
+
+  if (!isAndroid)
+    font1.setPointSize(9);
+  else
+    font1.setPointSize(19);
+  mui->lblGpsInfo->setFont(font1);
 
   mui->lblYearTotal->setStyleSheet(mui->lblMonthTotal->styleSheet());
   if (isAndroid)
@@ -125,6 +122,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
 
   getHardStepSensor();
 
+  // Speed
   m_speedometer = new Speedometer(this);
   mui->f_speed->setFixedHeight(130);
   m_speedometer->setMaxSpeed(10.00);  // 最高时速(km/h)
@@ -134,6 +132,14 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mui->f_speed->layout()->setSpacing(0);
   mui->f_speed->layout()->setContentsMargins(0, 0, 0, 0);
   mui->f_speed->layout()->addWidget(m_speedometer);
+
+  // Compass
+
+  compass = new CompassWidget();
+  compass->setFixedHeight(mui->frame_3->height());
+  mui->vboxCompass->addWidget(compass);
+  mui->vboxCompass->setContentsMargins(0, 0, 0, 0);
+  mui->frame_3->setContentsMargins(0, 0, 0, 0);
 
   // Weather
   weatherFetcher = new WeatherFetcher(this);
@@ -182,6 +188,7 @@ Steps::~Steps() {
   delete addressResolver;
   delete m_speedometer;
   delete weatherFetcher;
+  delete compass;
 }
 
 void Steps::setAddressResolverConnect() {
@@ -350,11 +357,18 @@ void Steps::openStepsUI() {
   QString km = QString("%1").arg(d_km, 0, 'f', 2) + "  " + tr("KM");
   mui->lblKM->setText(km);
 
-  if (mui->lblGpsInfo->text() == tr("GPS Info")) {
+  if (mui->lblGpsInfo->text() == tr("GPS Info") ||
+      mui->lblGpsInfo->text() == "GPS Info") {
     QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
 
     double m_td = Reg.value("/GPS/TotalDistance", 0).toDouble();
-    mui->lblTotalDistance->setText(QString::number(m_td) + " km");
+
+    strTotalDistance = QString::number(m_td) + " km";
+
+    strGpsInfoShow = QString(" \n") + " \n" + " \n" + " \n" + " \n" + " \n" +
+                     " \n" + " \n" + " \n" + tr("Total Distance") + " : " +
+                     strTotalDistance;
+    mui->lblGpsInfo->setText(strGpsInfoShow);
   }
 
   if (getGpsListCount() == 0 && !timer->isActive()) {
@@ -803,9 +817,6 @@ void Steps::startRecordMotion() {
   mui->btnGPS->setText(tr("Stop"));
   mui->tabMotion->setCurrentIndex(1);
 
-  mui->lblRunTime->setStyleSheet(lblStartStyle);
-  mui->lblAverageSpeed->setStyleSheet(lblStartStyle);
-  mui->lblCurrentDistance->setStyleSheet(lblStartStyle);
   mui->lblGpsInfo->setStyleSheet(lblStartStyle);
   mui->btnGPS->setStyleSheet(btnRoundStyleRed);
   mui->gboxMotionType->setEnabled(false);
@@ -853,17 +864,12 @@ void Steps::updateGetGps() {
       m_activity.callMethod<jstring>("getGpsStatus", "()Ljava/lang/String;");
 
   if (jstrGpsStatus.isValid()) {
-    strGpsStatus = jstrGpsStatus.toString();
-    QStringList list = strGpsStatus.split("\n");
-    if (list.count() > 2) {
+    QString strStatus = jstrGpsStatus.toString();
+    QStringList list = strStatus.split("\n");
+    if (list.count() == 8) {
       // str1 = list.at(0);
       str2 = list.at(1);
       str3 = list.at(2);
-
-      mui->lblRunTime->setText(str2);
-      mui->lblAverageSpeed->setText(str3);
-
-      setCurrentGpsSpeed(mySpeed, maxSpeed);
 
       str4 = list.at(3);
 
@@ -876,8 +882,8 @@ void Steps::updateGetGps() {
 
       str6 = list.at(5);
       str7 = list.at(6);
-      strGpsStatus =
-          str4 + "\n" + strAltitude + " m" + "\n" + str6 + "\n" + str7;
+      strGpsStatus = tr("Average Speed") + " : " + str3 + "\n" + str4 + "\n" +
+                     strAltitude + " m" + "\n" + str6 + "\n" + str7;
 
       if (std::isnan(oldAlt)) oldAlt = altitude;
       if (oldLat == 0) oldLat = latitude;
@@ -909,9 +915,7 @@ void Steps::updateGetGps() {
             // 计算地形距离：仅当old数据有效（避免初始值）
             getTerrain();
 
-            const double bearing1 =
-                calculateBearing(oldLat, oldLon, latitude, longitude);
-            mui->lblDirection->setText(bearingToDirection(bearing1));
+            bearing1 = calculateBearing(oldLat, oldLon, latitude, longitude);
           }
 
           oldLat = latitude;
@@ -954,16 +958,13 @@ void Steps::updateGetGps() {
       std::uniform_real_distribution<double> distribution(0.0, 50.0);
       mySpeed = distribution(generator);
       if (mySpeed > maxSpeed) maxSpeed = mySpeed;
-      setCurrentGpsSpeed(mySpeed, maxSpeed);
 
       strAltitude =
           "Altitude: " + QString::number(distribution(generator)) + " m";
 
       getTerrain();
 
-      const double bearing1 =
-          calculateBearing(oldLat, oldLon, latitude, longitude);
-      mui->lblDirection->setText(bearingToDirection(bearing1));
+      bearing1 = calculateBearing(oldLat, oldLon, latitude, longitude);
 
       oldLat = latitude;
       oldLon = longitude;
@@ -977,10 +978,11 @@ void Steps::updateGetGps() {
 /////////////////////////////////////////////////////////////////////////////
 #endif
 
+  if (mySpeed > 0) setCurrentGpsSpeed(mySpeed, maxSpeed);
   str1 = QString::number(m_distance, 'f', 2) + " km";
-  mui->lblCurrentDistance->setText(str1);
   strTotalDistance = QString::number(m_TotalDistance) + " km";
-  mui->lblTotalDistance->setText(strTotalDistance);
+  mui->lblDirection->setText(bearingToDirection(bearing1));
+  compass->setBearing(bearing1);
 
   endDT = QDateTime::currentDateTime();
   qint64 secondsDiff = startDT.secsTo(endDT);
@@ -1000,14 +1002,30 @@ void Steps::updateGetGps() {
                         .arg(seconds, 2, 10, QLatin1Char('0'));
   strDurationTime = tr("Duration") + " : " + timeStr;
 
-  strGpsInfoShow = strDurationTime +
+  strGpsInfoShow = tr("Current Distance") + " : " + str1 + "\n" +
+                   tr("Exercise Duration") + " : " + str2 + "\n" +
+                   strDurationTime +
                    "\nLon.-Lat.: " + QString::number(longitude) + " - " +
-                   QString::number(latitude) + "\n" + strGpsStatus;
+                   QString::number(latitude) + "\n" + strGpsStatus + "\n" +
+                   tr("Total Distance") + " : " + strTotalDistance;
   mui->lblGpsInfo->setText(strGpsInfoShow);
   emit timeChanged();
 
   if (m_time.second() % 6 == 0) {
     refreshMotionData();
+  }
+
+  if (m_time.second() % 10 == 0) {
+    if (mui->chkPlayRunVoice->isChecked()) {
+      if (mySpeed > 0) {
+        if (mySpeed != oldMySpeed) {
+          m_Method->stopPlayMyText();
+          m_Method->playMyText(mui->lblDirection->text() + " " +
+                               QString::number(mySpeed, 'f', 2));
+          oldMySpeed = mySpeed;
+        }
+      }
+    }
   }
 
   if (m_distance > 0 || isGpsTest) {
@@ -1082,9 +1100,6 @@ void Steps::stopRecordMotion() {
 
   mui->lblGpsInfo->setText(strGpsInfoShow);
 
-  mui->lblRunTime->setStyleSheet(lblStyle);
-  mui->lblAverageSpeed->setStyleSheet(lblStyle);
-  mui->lblCurrentDistance->setStyleSheet(lblStyle);
   mui->lblGpsInfo->setStyleSheet(lblStyle);
   mui->btnGPS->setStyleSheet(btnRoundStyle);
 
@@ -1117,7 +1132,7 @@ void Steps::refreshRoute() {
 void Steps::refreshTotalDistance() {
   m_TotalDistance = oldTotalDistance + m_distance;
   strTotalDistance = QString::number(m_TotalDistance) + " km";
-  mui->lblTotalDistance->setText(strTotalDistance);
+
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
   Reg.setValue("/GPS/TotalDistance", m_TotalDistance);
 }
@@ -1886,12 +1901,14 @@ void Steps::saveMovementType() {
   bool b1 = mui->rbCycling->isChecked();
   bool b2 = mui->rbHiking->isChecked();
   bool b3 = mui->rbRunning->isChecked();
+  bool b4 = mui->chkPlayRunVoice->isChecked();
 
   QFuture<void> future = QtConcurrent::run([=]() {
     QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
     Reg.setValue("/GPS/isCycling", b1);
     Reg.setValue("/GPS/isHiking", b2);
     Reg.setValue("/GPS/isRunning", b3);
+    Reg.setValue("/GPS/isPlayRunVoice", b4);
     Reg.sync();
   });
 
@@ -2964,8 +2981,7 @@ void Steps::showSportsChart() {
   font.setBold(true);
 
   QLabel* totalLabel =
-      new QLabel(mui->lblTitle1->text() + " : " + mui->lblTotalDistance->text(),
-                 statsDialog);
+      new QLabel(tr("Total Distance") + " : " + strTotalDistance, statsDialog);
   totalLabel->setFrameShape(QFrame::Box);
   totalLabel->setFrameShadow(QFrame::Plain);
   totalLabel->setLineWidth(1);

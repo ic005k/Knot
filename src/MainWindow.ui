@@ -24,7 +24,7 @@
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_37">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QFrame" name="frameReader">
       <property name="minimumSize">
@@ -3543,256 +3543,100 @@ QSlider::handle:horizontal:disabled {
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_46">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_17">
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
-              <widget class="QFrame" name="frame">
-               <property name="frameShape">
-                <enum>QFrame::Shape::StyledPanel</enum>
+              <widget class="QLabel" name="lblDirection">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
                </property>
-               <property name="frameShadow">
-                <enum>QFrame::Shadow::Raised</enum>
+               <property name="font">
+                <font>
+                 <bold>true</bold>
+                </font>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_41">
-                <item>
-                 <widget class="QLabel" name="lblTitle1">
-                  <property name="text">
-                   <string>Total Distance</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="lblTotalDistance">
-                  <property name="font">
-                   <font>
-                    <family>Segoe UI</family>
-                    <pointsize>20</pointsize>
-                    <bold>true</bold>
-                    <strikeout>false</strikeout>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">QLabel {
-    /* 背景颜色 */
-    background-color: #2E3440; /* 深色背景 */
-    
-    /* 文字颜色 */
-    color: #00FF00;
-    
-    /* 字体设置 */
-    font-family: 'Segoe UI', sans-serif;  /* 现代字体 */
-    font-weight: bold;   /* 加粗 */
-    
-    /* 边框设置 */
-    border: 2px solid #4C566A; /* 浅色边框 */
-    border-radius: 10px; /* 圆角 */
-    
-    /* 内边距 */
-    padding: 10px 20px; /* 上下左右的内边距 */
-    
-    /* 文字对齐 */
-    text-align: center; /* 文字居中 */
-	    
-    /* 阴影效果 */
-    /* box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2); */ /* 轻微的阴影 */
-}</string>
-                  </property>
-                  <property name="text">
-                   <string>100.00</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+               <property name="text">
+                <string>Direction</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
               </widget>
              </item>
              <item>
-              <widget class="QFrame" name="frame_2">
-               <property name="frameShape">
-                <enum>QFrame::Shape::StyledPanel</enum>
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
                </property>
-               <property name="frameShadow">
-                <enum>QFrame::Shadow::Raised</enum>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_43">
-                <item>
-                 <widget class="QLabel" name="lblTitle2">
-                  <property name="text">
-                   <string>Current Distance</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="lblCurrentDistance">
-                  <property name="font">
-                   <font>
-                    <family>Segoe UI</family>
-                    <pointsize>20</pointsize>
-                    <bold>true</bold>
-                    <strikeout>false</strikeout>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">QLabel {
-    /* 背景颜色 */
-    background-color: #2E3440; /* 深色背景 */
-    
-    /* 文字颜色 */
-    color: #ECEFF4; /* 浅色文字 */
-    
-    /* 字体设置 */
-    font-family: 'Segoe UI', sans-serif;  /* 现代字体 */
-    font-weight: bold;   /* 加粗 */
-    
-    /* 边框设置 */
-    border: 2px solid #4C566A; /* 浅色边框 */
-    border-radius: 10px; /* 圆角 */
-    
-    /* 内边距 */
-    padding: 10px 20px; /* 上下左右的内边距 */
-    
-    /* 文字对齐 */
-    text-align: center; /* 文字居中 */
-	    
-    /* 阴影效果 */
-    /* box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2); */ /* 轻微的阴影 */
-}</string>
-                  </property>
-                  <property name="text">
-                   <string>0 km</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="chkPlayRunVoice">
+               <property name="text">
+                <string>Play Voice</string>
+               </property>
               </widget>
              </item>
             </layout>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_18">
-             <item>
-              <widget class="QFrame" name="frame_3">
-               <property name="frameShape">
-                <enum>QFrame::Shape::StyledPanel</enum>
-               </property>
-               <property name="frameShadow">
-                <enum>QFrame::Shadow::Raised</enum>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_44">
-                <item>
-                 <widget class="QLabel" name="lblTitle3">
-                  <property name="text">
-                   <string>Exercise Duration</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="lblRunTime">
-                  <property name="font">
-                   <font>
-                    <pointsize>20</pointsize>
-                    <bold>true</bold>
-                    <strikeout>false</strikeout>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true"/>
-                  </property>
-                  <property name="text">
-                   <string>00:00:00</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QFrame" name="frame_4">
-               <property name="frameShape">
-                <enum>QFrame::Shape::StyledPanel</enum>
-               </property>
-               <property name="frameShadow">
-                <enum>QFrame::Shadow::Raised</enum>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_45">
-                <item>
-                 <widget class="QLabel" name="lblTitle4">
-                  <property name="text">
-                   <string>Average Speed</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="lblAverageSpeed">
-                  <property name="font">
-                   <font>
-                    <pointsize>20</pointsize>
-                    <bold>true</bold>
-                    <strikeout>false</strikeout>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>0 km/h</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <spacer name="verticalSpacer">
-             <property name="orientation">
-              <enum>Qt::Orientation::Vertical</enum>
+            <widget class="QFrame" name="frame_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
-             <property name="sizeHint" stdset="0">
+             <property name="minimumSize">
               <size>
-               <width>20</width>
-               <height>40</height>
+               <width>0</width>
+               <height>100</height>
               </size>
              </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QLabel" name="lblDirection">
-             <property name="font">
-              <font>
-               <bold>true</bold>
-              </font>
+             <property name="frameShape">
+              <enum>QFrame::Shape::NoFrame</enum>
              </property>
-             <property name="text">
-              <string>Direction</string>
+             <property name="frameShadow">
+              <enum>QFrame::Shadow::Raised</enum>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
-             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_44">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <layout class="QVBoxLayout" name="vboxCompass"/>
+              </item>
+             </layout>
             </widget>
            </item>
            <item>
             <widget class="QFrame" name="f_speed">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -3814,6 +3658,12 @@ QSlider::handle:horizontal:disabled {
            </item>
            <item>
             <widget class="QQuickWidget" name="qwSpeed">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -3832,20 +3682,13 @@ QSlider::handle:horizontal:disabled {
             </widget>
            </item>
            <item>
-            <spacer name="verticalSpacer_7">
-             <property name="orientation">
-              <enum>Qt::Orientation::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
             <widget class="QGroupBox" name="gboxMotionType">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="title">
               <string/>
              </property>
@@ -4053,6 +3896,12 @@ QRadioButton:disabled {
            </item>
            <item>
             <widget class="QFrame" name="frame_btnGps">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -4083,19 +3932,6 @@ QRadioButton:disabled {
             </widget>
            </item>
            <item>
-            <spacer name="verticalSpacer_5">
-             <property name="orientation">
-              <enum>Qt::Orientation::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
             <widget class="QLabel" name="lblGpsInfo">
              <property name="font">
               <font>
@@ -4107,7 +3943,7 @@ QRadioButton:disabled {
               <string>GPS Info</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
              </property>
             </widget>
            </item>

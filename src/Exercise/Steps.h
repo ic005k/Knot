@@ -34,6 +34,7 @@
 
 #include "Speedometer.h"
 #include "src/Comm/GeoAddressResolver.h"
+#include "src/Exercise/CompassWidget.h"
 #include "src/Exercise/StepsOptions.h"
 #include "src/Exercise/WeatherFetcher.h"
 
@@ -51,9 +52,15 @@ struct GPSCoordinate {
       : latitude(lat), longitude(lon), altitude(alt) {}
 };
 
+// 弧度/角度转换常量（全局常量，避免宏定义的副作用）
+const double RAD_TO_DEG = 180.0 / M_PI;
+const double DEG_TO_RAD = M_PI / 180.0;
+
 namespace Ui {
 class Steps;
 }
+
+class CompassWidget;
 
 class Steps : public QDialog {
   Q_OBJECT
@@ -148,6 +155,9 @@ class Steps : public QDialog {
  public:
   void closeSteps();
 
+  QString bearingToDirection(double bearing);
+  double calculateBearing(double lat1, double lon1, double lat2, double lon2);
+
   QDialog* statsDialog = nullptr;
 
   void on_btnReset_clicked();
@@ -205,6 +215,8 @@ class Steps : public QDialog {
   QDateTime m_lastFetchWeatherTime;  // 上次请求天气的时间
   bool isInitTime;
 
+  double bearing1;
+
   QString m_monthlyStatsText;
   QString m_yearlyStatsText;
 
@@ -250,7 +262,11 @@ class Steps : public QDialog {
   double altitude = 0.00;
   QString strGpsStatus;
   QString strGpsInfoShow;
-  QString lblStyle;
+  QString lblStyle =
+      "QLabel {background-color: #000000;color: #ECEFF4;font-family: 'Segoe "
+      "UI', sans-serif;font-weight: bold;border: 2px solid "
+      "#FFFFFF;border-radius: 10px;padding: 10px 20px;text-align: "
+      "center;}";
   QString lblStartStyle =
       "QLabel {background-color: #FF0000;color: #ECEFF4;font-family: 'Segoe "
       "UI', sans-serif;font-weight: bold;border: 2px solid "
@@ -287,7 +303,7 @@ class Steps : public QDialog {
   void clearTrack();
   void writeGpsPos(double lat, double lon, int i, int count);
 
-  double mySpeed;
+  double mySpeed = 0, oldMySpeed = 0;
   QString strGpsMapDateTime, strGpsMapDistnce, strGpsMapSpeed, strGpsTerrain,
       strGpsList;
   bool isGpsMapTrackFile;
@@ -337,11 +353,8 @@ class Steps : public QDialog {
   void resetTerrainDistance();
   QVariantList getAltitudeData(const QString& jsonFile);
   void getTerrain();
-  QString bearingToDirection(double bearing);
-  double calculateBearing(double lat1, double lon1, double lat2, double lon2);
-  // 弧度/角度转换常量（全局常量，避免宏定义的副作用）
-  const double RAD_TO_DEG = 180.0 / M_PI;
-  const double DEG_TO_RAD = M_PI / 180.0;
+  CompassWidget* compass;
+
  signals:
   void distanceChanged(double distance);
   void timeChanged();
@@ -440,5 +453,7 @@ class CustomChartView : public QChartView {
  private:
   QVector<Steps::MonthData> m_monthData;
 };
+
+//////////////////////////////////////////////////////////////////////////////////
 
 #endif  // STEPS_H

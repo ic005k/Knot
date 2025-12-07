@@ -2692,3 +2692,5 @@ void MainWindow::on_btnStopSpeak_clicked() {
   mui->btnSpeak->show();
   m_Reader->stopSpeak();
 }
+
+void MainWindow::on_chkPlayRunVoice_clicked(bool checked) {}

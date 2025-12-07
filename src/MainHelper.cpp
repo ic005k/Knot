@@ -638,6 +638,7 @@ void MainHelper::init_UIWidget() {
 
   mui->chkWebDAV->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mui->chkAutoSync->setStyleSheet(mw_one->m_Preferences->chkStyle);
+  mui->chkPlayRunVoice->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mui->twCloudBackup->setCurrentIndex(1);
   mui->twCloudBackup->setTabVisible(0, false);
   mui->chkWebDAV->hide();
@@ -746,6 +747,8 @@ void MainHelper::init_UIWidget() {
   mui->rbCycling->setChecked(Reg.value("/GPS/isCycling", 0).toBool());
   mui->rbHiking->setChecked(Reg.value("/GPS/isHiking", 0).toBool());
   mui->rbRunning->setChecked(Reg.value("/GPS/isRunning", 0).toBool());
+  mui->chkPlayRunVoice->setChecked(
+      Reg.value("/GPS/isPlayRunVoice", 0).toBool());
 
   mui->btnGPS->setStyleSheet(m_Steps->btnRoundStyle);
   mui->btnGPS->hide();

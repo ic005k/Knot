@@ -790,6 +790,8 @@ class MainWindow : public QMainWindow {
 
   void on_btnStopSpeak_clicked();
 
+  void on_chkPlayRunVoice_clicked(bool checked);
+
  private:
   bool isMoveEntry;
   QTimer* tmeFlash;

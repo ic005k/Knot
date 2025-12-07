@@ -337,8 +337,6 @@ void loadTheme(bool isDark) {
         widget != mui->btn9 && widget != mui->btnDot &&
         widget != mui->btnDel_Number && widget != mui->lblMonthSum &&
         widget != mui->lblTime && widget != mui->lblGpsInfo &&
-        widget != mui->lblTotalDistance && widget != mui->lblCurrentDistance &&
-        widget != mui->lblAverageSpeed && widget != mui->lblRunTime &&
         widget != m_Steps->m_speedometer &&
         widget != mw_one->m_MainHelper->sliderButton &&
         widget != mui->lblGpsDateTime && widget != mui->btnPages &&
