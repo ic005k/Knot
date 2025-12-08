@@ -681,7 +681,8 @@
     </message>
     <message>
         <location filename="MainHelper.cpp" line="760"/>
-        <source>Slide Right to Start or Stop.</source>
+        <source>Slide Right to Start or Stop</source>
+        <oldsource>Slide Right to Start or Stop.</oldsource>
         <translation>滑动到右边启动或停止</translation>
     </message>
     <message>
@@ -10579,63 +10580,60 @@
         <translation type="vanished">完成</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1030"/>
         <source>Cycling</source>
         <oldsource>Clyling</oldsource>
-        <translation>骑行</translation>
+        <translation type="vanished">骑行</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1033"/>
         <source>Hiking</source>
-        <translation>徒步</translation>
+        <translation type="vanished">徒步</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1036"/>
         <source>Running</source>
-        <translation>跑步</translation>
+        <translation type="vanished">跑步</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1156"/>
+        <location filename="qmlsrc/gps_list.qml" line="1158"/>
         <source>Speed Curve</source>
         <translation>速度曲线</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1224"/>
+        <location filename="qmlsrc/gps_list.qml" line="1226"/>
         <source>Terrain Curve</source>
         <translation>地形曲线</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1274"/>
+        <location filename="qmlsrc/gps_list.qml" line="1276"/>
         <source>Terrain Distance Distribution</source>
         <translation>地形距离分布</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1381"/>
+        <location filename="qmlsrc/gps_list.qml" line="1383"/>
         <source>Up</source>
         <translation>上移</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1408"/>
+        <location filename="qmlsrc/gps_list.qml" line="1410"/>
         <source>Flat</source>
         <translation>平路</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1435"/>
+        <location filename="qmlsrc/gps_list.qml" line="1437"/>
         <source>Down</source>
         <translation>下移</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1460"/>
+        <location filename="qmlsrc/gps_list.qml" line="1462"/>
         <source>Uphill: </source>
         <translation>上坡：</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1480"/>
+        <location filename="qmlsrc/gps_list.qml" line="1482"/>
         <source>Flat: </source>
         <translation>平路：</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1499"/>
+        <location filename="qmlsrc/gps_list.qml" line="1501"/>
         <source>Downhill: </source>
         <translation>下坡：</translation>
     </message>
@@ -10648,12 +10646,12 @@
         <translation type="vanished">下坡</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1509"/>
+        <location filename="qmlsrc/gps_list.qml" line="1512"/>
         <source>Total: </source>
         <translation>总计：</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1740"/>
+        <location filename="qmlsrc/gps_list.qml" line="1743"/>
         <source>Total %1 items</source>
         <translation>共 %1 条</translation>
     </message>
@@ -10666,12 +10664,12 @@
         <translation type="vanished">路线</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1794"/>
+        <location filename="qmlsrc/gps_list.qml" line="1797"/>
         <source>Clear</source>
         <translation>清除</translation>
     </message>
     <message>
-        <location filename="qmlsrc/gps_list.qml" line="1810"/>
+        <location filename="qmlsrc/gps_list.qml" line="1813"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>

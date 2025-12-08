@@ -972,8 +972,7 @@ void Steps::updateGetGps() {
       mySpeed = distribution(generator);
       if (mySpeed > maxSpeed) maxSpeed = mySpeed;
 
-      strAltitude =
-          "Altitude: " + QString::number(distribution(generator)) + " m";
+      strAltitude = "Altitude: " + QString::number(distribution(generator));
 
       getTerrain();
 
@@ -1141,6 +1140,7 @@ void Steps::refreshRoute() {
     timeRoute = QDateTime::currentDateTime().time().toString();
     distanceRoute = str1;
     speedRoute = QString::number(mySpeed, 'f', 2) + " km/h";
+    directionRoute = mui->lblDirection->text();
     getAddress(latitude, longitude);
   }
 }
@@ -2365,9 +2365,9 @@ void Steps::saveRoute(const QString& file, const QString& time, double lat,
   newRoute["time"] = time;  // 字符串类型
   newRoute["lat"] = lat;    // 数字类型（double）
   newRoute["lon"] = lon;    // 数字类型（double）
-  newRoute["address"] = distanceRoute + " | " + speedRoute + "\n" +
-                        strAltitude + " m" + "\n\n" +
-                        address;  // 字符串类型（支持中文，UTF-8 编码）
+  newRoute["address"] = directionRoute + "\n" + distanceRoute + " | " +
+                        speedRoute + "\n" + strAltitude + " m" + "\n\n" +
+                        address;
 
   // 追加新对象到数组
   routeMemoryCache.append(newRoute);

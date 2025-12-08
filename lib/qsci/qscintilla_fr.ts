@@ -535,7 +535,7 @@
     </message>
     <message>
         <location filename="../../src/MainHelper.cpp" line="760"/>
-        <source>Slide Right to Start or Stop.</source>
+        <source>Slide Right to Start or Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -7971,82 +7971,67 @@
 <context>
     <name>gps_list</name>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1030"/>
-        <source>Cycling</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1033"/>
-        <source>Hiking</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1036"/>
-        <source>Running</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1156"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1158"/>
         <source>Speed Curve</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1224"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1226"/>
         <source>Terrain Curve</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1274"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1276"/>
         <source>Terrain Distance Distribution</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1381"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1383"/>
         <source>Up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1408"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1410"/>
         <source>Flat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1435"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1437"/>
         <source>Down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1460"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1462"/>
         <source>Uphill: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1480"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1482"/>
         <source>Flat: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1499"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1501"/>
         <source>Downhill: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1509"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1512"/>
         <source>Total: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1740"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1743"/>
         <source>Total %1 items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1794"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1797"/>
         <source>Clear</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/gps_list.qml" line="1810"/>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1813"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>

@@ -255,7 +255,7 @@ class Steps : public QDialog {
   double longitude = 10.752109237521;
   double latRoute, lonRoute;
   QString timeRoute;
-  QString distanceRoute, speedRoute;
+  QString distanceRoute, speedRoute, directionRoute;
   double oldLat;
   double oldLon;
   double oldAlt = 0.00;

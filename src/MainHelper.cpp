@@ -757,7 +757,7 @@ void MainHelper::init_UIWidget() {
   QVBoxLayout* layout = new QVBoxLayout(centralWidget);
 
   sliderButton = new SliderButton(centralWidget);
-  sliderButton->setTipText(tr("Slide Right to Start or Stop."));
+  sliderButton->setTipText(tr("Slide Right to Start or Stop"));
   layout->addWidget(sliderButton);
 
   QObject::connect(sliderButton, &SliderButton::sliderMovedToEnd, mw_one,

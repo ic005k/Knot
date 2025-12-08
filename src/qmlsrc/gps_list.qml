@@ -1027,13 +1027,15 @@ Rectangle {
                             width: 24
                             height: 24
                             color: {
-                                if (item0.text.indexOf(qsTr("Cycling")) !== -1)
+                                if (item0.text.indexOf("骑行") !== -1
+                                        || item0.text.indexOf("Cycling") !== -1)
                                     isDark ? "#5ABD5E" : "#4CAF50"
-                                else if (item0.text.indexOf(
-                                             qsTr("Hiking")) !== -1)
+                                else if (item0.text.indexOf("徒步") !== -1
+                                         || item0.text.indexOf("Hiking") !== -1)
                                     isDark ? "#FFAB2C" : "#FF9800"
-                                else if (item0.text.indexOf(
-                                             qsTr("Running")) !== -1)
+                                else if (item0.text.indexOf("跑步") !== -1
+                                         || item0.text.indexOf(
+                                             "Running") !== -1)
                                     isDark ? "#B746C9" : "#9C27B0"
                                 else
                                     "transparent"
@@ -1457,7 +1459,7 @@ Rectangle {
                                     radius: 2
                                 }
                                 Text {
-                                    text: qsTr("Uphill: ") + "\n"+terrainColumn.uphillKm.toFixed(
+                                    text: qsTr("Uphill: ") + "\n" + terrainColumn.uphillKm.toFixed(
                                               2) + "km"
                                     //text: qsTr("Uphill")
                                     font.pointSize: baseFontSize * 0.7
@@ -1477,7 +1479,7 @@ Rectangle {
                                 }
                                 Text {
                                     //text: qsTr("Flat")
-                                    text: qsTr("Flat: ") + "\n"+ terrainColumn.flatKm.toFixed(
+                                    text: qsTr("Flat: ") + "\n" + terrainColumn.flatKm.toFixed(
                                               2) + "km"
                                     font.pointSize: baseFontSize * 0.7
                                     color: isDark ? "#E2E8F0" : "#424242"
@@ -1496,7 +1498,8 @@ Rectangle {
                                 }
                                 Text {
                                     //text: qsTr("Downhill")
-                                    text: qsTr("Downhill: ") + "\n"+ terrainColumn.downhillKm.toFixed(
+                                    text: qsTr("Downhill: ") + "\n"
+                                          + terrainColumn.downhillKm.toFixed(
                                               2) + "km"
                                     font.pointSize: baseFontSize * 0.7
                                     color: isDark ? "#E2E8F0" : "#424242"
