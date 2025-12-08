@@ -2693,4 +2693,9 @@ void MainWindow::on_btnStopSpeak_clicked() {
   m_Reader->stopSpeak();
 }
 
-void MainWindow::on_chkPlayRunVoice_clicked(bool checked) {}
+void MainWindow::on_chkPlayRunVoice_clicked(bool checked) {
+  if (checked) {
+    m_Method->stopPlayMyText();
+    m_Method->playMyText(mui->lblDirection->text());
+  }
+}

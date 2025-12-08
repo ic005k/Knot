@@ -132,12 +132,17 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mui->f_speed->layout()->setSpacing(0);
   mui->f_speed->layout()->setContentsMargins(0, 0, 0, 0);
   mui->f_speed->layout()->addWidget(m_speedometer);
+  mui->f_speed->hide();
 
   // Compass
   compass = new CompassWidget();
   mui->vboxCompass->addWidget(compass);
   mui->vboxCompass->setContentsMargins(0, 0, 0, 0);
   mui->frame_3->setContentsMargins(0, 0, 0, 0);
+  if (isAndroid)
+    mui->frame_3->setFixedHeight(300);
+  else
+    mui->frame_3->setFixedHeight(200);
 
   // Weather
   weatherFetcher = new WeatherFetcher(this);
@@ -988,7 +993,10 @@ void Steps::updateGetGps() {
 /////////////////////////////////////////////////////////////////////////////
 #endif
 
-  if (mySpeed > 0) setCurrentGpsSpeed(mySpeed, maxSpeed);
+  if (mySpeed > 0) {
+    // setCurrentGpsSpeed(mySpeed, maxSpeed);
+    compass->setSpeed(mySpeed);
+  }
   str1 = QString::number(m_distance, 'f', 2) + " km";
   strTotalDistance = QString::number(m_TotalDistance) + " km";
 

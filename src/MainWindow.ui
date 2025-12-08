@@ -3563,6 +3563,9 @@ QSlider::handle:horizontal:disabled {
                <property name="alignment">
                 <set>Qt::AlignmentFlag::AlignCenter</set>
                </property>
+               <property name="wordWrap">
+                <bool>true</bool>
+               </property>
               </widget>
              </item>
              <item>
@@ -3581,7 +3584,7 @@ QSlider::handle:horizontal:disabled {
              <item>
               <widget class="QCheckBox" name="chkPlayRunVoice">
                <property name="text">
-                <string>Play Voice</string>
+                <string>Voice</string>
                </property>
               </widget>
              </item>

@@ -6,18 +6,35 @@
 #include <QPen>
 #include <QtMath>
 
-#include "src/defines.h"  // 包含全局变量isDark定义
+#include "src/defines.h"
 
 CompassWidget::CompassWidget(QWidget* parent) : QWidget(parent) {
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   setMinimumSize(150, 120);
   setContentsMargins(0, 0, 0, 0);
+
+  // 初始化默认值
+  m_speed = 0.0;
+  m_speedUnit = "km/h";
 }
 
 void CompassWidget::setBearing(double bearing) {
   if (std::fabs(m_bearing - bearing) < 0.1) return;
   m_bearing = bearing;
   update();
+}
+
+void CompassWidget::setSpeed(double speed) {
+  if (std::fabs(m_speed - speed) < 0.1) return;
+  m_speed = speed;
+  update();
+}
+
+void CompassWidget::setSpeedUnit(const QString& unit) {
+  if (m_speedUnit != unit) {
+    m_speedUnit = unit;
+    update();
+  }
 }
 
 void CompassWidget::paintEvent(QPaintEvent* event) {
@@ -36,84 +53,36 @@ void CompassWidget::paintEvent(QPaintEvent* event) {
   int totalWidth = drawRect.width();
   int totalHeight = drawRect.height();
 
-  // 如果调整后的绘制区域太小，不绘制
   if (totalWidth < 20 || totalHeight < 20) {
     return;
   }
 
-  // 计算罗盘大小 - 基于父控件尺寸
-  int compassDiameter =
-      qMin(totalWidth, totalHeight) * 0.8;      // 取宽高中的较小值
-  compassDiameter = qMax(20, compassDiameter);  // 确保最小尺寸
+  // 计算罗盘大小
+  int compassDiameter = qMin(totalWidth, totalHeight) * 0.8;
+  compassDiameter = qMax(20, compassDiameter);
   int compassRadius = compassDiameter / 2;
 
-  // 计算指针大小（基于罗盘尺寸）
-  int pointerWidth = qMax(20, static_cast<int>(compassDiameter * 0.4));
-  int pointerHeight = qMax(20, static_cast<int>(compassDiameter * 0.5));
-
-  // 计算总内容宽度
-  int contentWidth = pointerWidth + compassDiameter;
-  int contentHeight = qMax(compassDiameter, pointerHeight);
-
-  // 计算文本区域高度
-  QFont indicatorFont;
-  indicatorFont.setPointSize(9);
-  indicatorFont.setBold(true);
-  painter.setFont(indicatorFont);
-  int textHeight = painter.fontMetrics().height();
-  contentHeight += textHeight + 10;  // 为"Forward"文本预留空间
-
-  // 检查是否超过可用空间
-  if (contentWidth > totalWidth) {
-    float scale = static_cast<float>(totalWidth) / contentWidth;
-    contentWidth = totalWidth;
-    compassDiameter = static_cast<int>(compassDiameter * scale);
-    compassRadius = compassDiameter / 2;
-    pointerWidth = static_cast<int>(pointerWidth * scale);
-    pointerHeight = static_cast<int>(pointerHeight * scale);
-    contentHeight = qMax(compassDiameter, pointerHeight) + textHeight + 10;
-  }
-
-  if (contentHeight > totalHeight) {
-    float scale = static_cast<float>(totalHeight) / contentHeight;
-    contentHeight = totalHeight;
-    compassDiameter = static_cast<int>(compassDiameter * scale);
-    compassRadius = compassDiameter / 2;
-    pointerWidth = static_cast<int>(pointerWidth * scale);
-    pointerHeight = static_cast<int>(pointerHeight * scale);
-    contentWidth = pointerWidth + compassDiameter;
-  }
-
-  // 计算居中位置
-  int startX = (totalWidth - contentWidth) / 2;
-  int startY = (totalHeight - contentHeight) / 2;
-
-  // 计算指针中心位置
-  int pointerCenterX = startX + pointerWidth / 2;
-  int pointerCenterY = startY + (contentHeight - textHeight - 10) / 2;
-
   // 计算罗盘中心位置
-  int compassCenterX = startX + pointerWidth + compassRadius;
-  int compassCenterY = startY + (contentHeight - textHeight - 10) / 2;
+  int compassCenterX = totalWidth / 2;
+  int compassCenterY = totalHeight / 2;
 
-  // 计算罗盘内部半径
+  // 罗盘底部Y坐标
+  int compassBottomY = compassCenterY + compassRadius;
+
+  // 罗盘内部半径
   int scaleOuterRadius = qMax(5, compassRadius - 5);
   int scaleInnerRadius = qMax(10, compassRadius - 20);
   int textRadius = qMax(15, compassRadius - 30);
   int centerCircleRadius = qMax(5, compassRadius - 40);
 
-  // 确保半径值有效
-  scaleInnerRadius = qMin(scaleInnerRadius, scaleOuterRadius - 5);
-  textRadius = qMin(textRadius, scaleInnerRadius - 5);
-  centerCircleRadius = qMax(3, qMin(centerCircleRadius, textRadius - 5));
-
-  // ========== 2. 根据暗黑模式选择颜色 ==========
+  // 2. 颜色设置
   QColor backgroundColor, borderColor, centerColor, textColor,
       textBackgroundColor;
   QColor scaleMajorColor, scaleMinorColor, pointerColor, pointerOutlineColor;
   QColor pointerCenterColor, pointerCenterBrush, forwardTextColor;
+  QColor speedTextColor, unitTextColor;
 
-  if (isDark) {  // 使用全局变量 isDark
+  if (isDark) {
     // 暗黑模式颜色
     backgroundColor = QColor(40, 40, 40);
     borderColor = QColor(100, 100, 100);
@@ -127,6 +96,8 @@ void CompassWidget::paintEvent(QPaintEvent* event) {
     pointerCenterColor = QColor(220, 220, 220);
     pointerCenterBrush = QColor(180, 180, 180);
     forwardTextColor = QColor(255, 150, 150);
+    speedTextColor = QColor(100, 200, 255);
+    unitTextColor = QColor(180, 180, 180);
   } else {
     // 明亮模式颜色
     backgroundColor = QColor(240, 240, 240);
@@ -141,64 +112,54 @@ void CompassWidget::paintEvent(QPaintEvent* event) {
     pointerCenterColor = QColor(0, 0, 0);
     pointerCenterBrush = QColor(0, 0, 0);
     forwardTextColor = QColor(200, 0, 0);
+    speedTextColor = QColor(0, 100, 255);
+    unitTextColor = QColor(100, 100, 100);
   }
 
-  // ========== 3. 绘制罗盘背景和外框 ==========
-  // 绘制罗盘外圆
+  // 3. 绘制罗盘
   painter.setPen(QPen(borderColor, 2));
   painter.setBrush(backgroundColor);
-  painter.drawEllipse(QPoint(compassCenterX, compassCenterY), compassRadius,
-                      compassRadius);
+  painter.drawEllipse(QRect(compassCenterX - compassRadius,
+                            compassCenterY - compassRadius, 2 * compassRadius,
+                            2 * compassRadius));
 
-  // 绘制罗盘中心区
+  // 中心圆
   painter.setPen(QPen(centerColor, 1));
   painter.setBrush(isDark ? QColor(50, 50, 50) : Qt::white);
-  if (centerCircleRadius > 0) {
-    painter.drawEllipse(QPoint(compassCenterX, compassCenterY),
-                        centerCircleRadius, centerCircleRadius);
-  }
+  painter.drawEllipse(QRect(compassCenterX - centerCircleRadius,
+                            compassCenterY - centerCircleRadius,
+                            2 * centerCircleRadius, 2 * centerCircleRadius));
 
-  // ========== 4. 绘制旋转的罗盘刻度盘 ==========
+  // 4. 绘制旋转的刻度盘
   painter.save();
   painter.translate(compassCenterX, compassCenterY);
-
-  // 罗盘刻度盘旋转，使当前航向指向正上方
   painter.rotate(-m_bearing);
 
-  // 简化刻度：只绘制主刻度（每30度）和中等刻度（每10度）
   for (int angle = 0; angle < 360; angle += 10) {
     double rad = qDegreesToRadians(static_cast<double>(angle));
-
     double sinVal = qSin(rad);
     double cosVal = qCos(rad);
 
-    // 计算刻度线端点
     int x1 = static_cast<int>(scaleInnerRadius * sinVal);
     int y1 = static_cast<int>(-scaleInnerRadius * cosVal);
     int x2, y2;
 
-    // 主刻度（每30度）
     if (angle % 30 == 0) {
       x2 = static_cast<int>(scaleOuterRadius * sinVal);
       y2 = static_cast<int>(-scaleOuterRadius * cosVal);
-
-      // 绘制主刻度线
       painter.setPen(QPen(scaleMajorColor, 2));
       painter.drawLine(x1, y1, x2, y2);
-    }
-    // 中等刻度（每10度）
-    else {
+    } else {
       int midRadius =
           scaleInnerRadius + (scaleOuterRadius - scaleInnerRadius) * 0.7;
       x2 = static_cast<int>(midRadius * sinVal);
       y2 = static_cast<int>(-midRadius * cosVal);
-
       painter.setPen(QPen(scaleMinorColor, 1));
       painter.drawLine(x1, y1, x2, y2);
     }
   }
 
-  // ========== 5. 在罗盘内部绘制方向文字 ==========
+  // 方向文字
   QFont dirFont;
   dirFont.setFamily("Arial");
   dirFont.setPointSize(10);
@@ -206,29 +167,27 @@ void CompassWidget::paintEvent(QPaintEvent* event) {
   painter.setFont(dirFont);
   QFontMetrics fm(dirFont);
 
-  // 四个主要方向
   QString directions[4] = {tr("N"), tr("E"), tr("S"), tr("W")};
   int directionAngles[4] = {0, 90, 180, 270};
 
   for (int i = 0; i < 4; i++) {
     double angle = directionAngles[i];
     double rad = qDegreesToRadians(angle);
-
-    // 计算文字位置
     int x = static_cast<int>(textRadius * qSin(rad));
     int y = static_cast<int>(-textRadius * qCos(rad));
-
     QString text = directions[i];
     int textW = fm.horizontalAdvance(text);
     int textH = fm.height();
 
-    // 绘制文字背景（确保清晰）
     painter.save();
     painter.setPen(Qt::NoPen);
     painter.setBrush(textBackgroundColor);
-    painter.drawEllipse(QPoint(x, y), textW / 2 + 2, textH / 2 + 2);
 
-    // 绘制文字
+    int ellipseWidth = textW / 2 + 2;
+    int ellipseHeight = textH / 2 + 2;
+    painter.drawEllipse(QRect(x - ellipseWidth, y - ellipseHeight,
+                              2 * ellipseWidth, 2 * ellipseHeight));
+
     painter.setPen(textColor);
     painter.drawText(QRect(x - textW / 2, y - textH / 2, textW, textH),
                      Qt::AlignCenter, text);
@@ -237,41 +196,125 @@ void CompassWidget::paintEvent(QPaintEvent* event) {
 
   painter.restore();
 
-  // ========== 6. 在左侧绘制独立的指针 ==========
-  painter.save();
-  painter.translate(pointerCenterX, pointerCenterY);
+  // 5. 在中心显示速度
+  if (centerCircleRadius > 10) {
+    painter.save();
 
-  // 绘制指针主体（指向正上方）
-  QPolygonF pointer;
-  pointer << QPointF(0, -pointerHeight / 2)                 // 箭头顶端
-          << QPointF(-pointerWidth / 2, pointerHeight / 2)  // 左下角
-          << QPointF(0, pointerHeight / 4)                  // 中间底部
-          << QPointF(pointerWidth / 2, pointerHeight / 2)   // 右下角
-          << QPointF(0, -pointerHeight / 2);                // 回到顶端
+    // 格式化速度文本，保留一位小数
+    QString speedStr = QString::number(m_speed, 'f', 1);
 
-  painter.setPen(QPen(pointerOutlineColor, 2));
-  painter.setBrush(pointerColor);
-  painter.drawPolygon(pointer);
+    // 获取速度文本的尺寸
+    QFont speedFont;
+    speedFont.setFamily("Arial");
+    speedFont.setPointSize(qMax(8, centerCircleRadius / 2));
+    speedFont.setBold(true);
+    painter.setFont(speedFont);
+    painter.setPen(speedTextColor);
 
-  // 绘制指针中心线
-  painter.setPen(QPen(pointerOutlineColor, 1));
-  painter.drawLine(0, -pointerHeight / 2, 0, pointerHeight / 2);
+    int speedTextHeight = painter.fontMetrics().height();
+    int speedTextWidth = painter.fontMetrics().horizontalAdvance(speedStr);
 
-  // 绘制指针中心圆点
-  painter.setPen(QPen(pointerCenterColor, 2));
-  painter.setBrush(pointerCenterBrush);
-  painter.drawEllipse(QPointF(0, 0), 3, 3);
+    // 获取单位文本的尺寸
+    QFont unitFont;
+    unitFont.setFamily("Arial");
+    unitFont.setPointSize(qMax(6, centerCircleRadius / 4));
+    unitFont.setBold(false);
+    painter.setFont(unitFont);
+    int unitTextHeight = painter.fontMetrics().height();
+    int unitTextWidth = painter.fontMetrics().horizontalAdvance(m_speedUnit);
 
-  painter.restore();
+    // 计算文本垂直布局
+    int textSpacing = unitFont.pointSize() / 2;  // 速度和单位之间的间距
+    int totalTextHeight = speedTextHeight + textSpacing + unitTextHeight;
 
-  // ========== 7. 绘制前进方向指示文本 ==========
+    // 计算起始Y坐标，使整体垂直居中
+    int speedTextY = compassCenterY - totalTextHeight / 2;
+    int unitTextY = speedTextY + speedTextHeight + textSpacing;
+
+    // 绘制速度值
+    painter.setFont(speedFont);
+    painter.setPen(speedTextColor);
+    painter.drawText(QRect(compassCenterX - speedTextWidth / 2, speedTextY,
+                           speedTextWidth, speedTextHeight),
+                     Qt::AlignCenter, speedStr);
+
+    // 绘制单位
+    painter.setFont(unitFont);
+    painter.setPen(unitTextColor);
+    painter.drawText(QRect(compassCenterX - unitTextWidth / 2, unitTextY,
+                           unitTextWidth, unitTextHeight),
+                     Qt::AlignCenter, m_speedUnit);
+
+    painter.restore();
+  }
+
+  // 6. 在右下角绘制小的方向指示箭头
+  int arrowSize = compassRadius * 0.18;      // 箭头大小为罗盘半径的18%
+  arrowSize = qMax(6, qMin(arrowSize, 20));  // 限制大小范围
+
+  // 计算箭头高度
+  int arrowHeight = arrowSize;
+  int arrowWidth = arrowSize * 0.6;  // 箭头宽度为高度的0.6倍
+
+  // 计算文本尺寸
+  QFont indicatorFont;
+  indicatorFont.setFamily("Arial");
+  indicatorFont.setPointSize(7);
+  indicatorFont.setBold(true);
+  painter.setFont(indicatorFont);
   QString forwardText = tr("Forward");
   int textW = painter.fontMetrics().horizontalAdvance(forwardText);
   int textH = painter.fontMetrics().height();
 
-  QRect textRect(pointerCenterX - textW / 2,
-                 pointerCenterY + pointerHeight / 2 + 5, textW, textH);
+  // 文本与箭头之间的间距
+  int arrowTextSpacing = 3;
 
+  // 计算箭头和文本的整体高度
+  int arrowAndTextHeight = arrowHeight + arrowTextSpacing + textH;
+
+  // 箭头中心X位置 - 罗盘右侧外部
+  int arrowCenterX = compassCenterX + compassRadius + arrowWidth;
+  arrowCenterX = qMin(arrowCenterX, totalWidth - arrowWidth / 2 - 5);
+
+  // 计算箭头中心Y位置，使文本底部与罗盘底部对齐
+  int arrowCenterY = compassBottomY - arrowAndTextHeight + arrowHeight / 2;
+
+  // 计算文本底部位置
+  int textBottomY = arrowCenterY + arrowHeight / 2 + arrowTextSpacing + textH;
+
+  // 如果文本底部低于罗盘底部，调整箭头位置
+  if (textBottomY > compassBottomY) {
+    int diff = textBottomY - compassBottomY;
+    arrowCenterY -= diff;
+  }
+
+  // 确保箭头不超出控件边界
+  arrowCenterY = qMax(
+      arrowHeight / 2 + 5,
+      qMin(arrowCenterY, totalHeight - arrowAndTextHeight + arrowHeight / 2));
+
+  painter.save();
+  painter.translate(arrowCenterX, arrowCenterY);
+
+  // 绘制小的方向指示箭头
+  QPolygonF arrow;
+  arrow << QPointF(0, -arrowHeight / 2.0)                 // 箭头尖端
+        << QPointF(-arrowWidth / 2.0, arrowHeight / 2.0)  // 左下角
+        << QPointF(0, arrowHeight / 4.0)                  // 中间底部
+        << QPointF(arrowWidth / 2.0, arrowHeight / 2.0)   // 右下角
+        << QPointF(0, -arrowHeight / 2.0);                // 回到顶端
+
+  painter.setPen(QPen(pointerOutlineColor, 1));
+  painter.setBrush(pointerColor);
+  painter.drawPolygon(arrow);
+
+  painter.restore();
+
+  // 7. 在箭头下方绘制"Forward"文本
+  int textX = arrowCenterX - textW / 2;
+  int textY = arrowCenterY + arrowHeight / 2 + arrowTextSpacing;
+
+  QRect textRect(textX, textY, textW, textH);
   painter.setPen(forwardTextColor);
   painter.drawText(textRect, Qt::AlignCenter, forwardText);
 }
