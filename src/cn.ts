@@ -8495,7 +8495,7 @@
         <translation>Activity无效，GPS启动失败</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1022"/>
+        <location filename="Exercise/Steps.cpp" line="1021"/>
         <location filename="Exercise/Steps.cpp" line="1184"/>
         <source>Exercise Duration</source>
         <translation>运动时长</translation>
@@ -8507,7 +8507,7 @@
         <translation>平均速度</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1021"/>
+        <location filename="Exercise/Steps.cpp" line="1020"/>
         <source>Current Distance</source>
         <translation>当前距离</translation>
     </message>
@@ -8585,52 +8585,92 @@
         <translation>下坡：</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3219"/>
+        <location filename="Exercise/Steps.cpp" line="3318"/>
         <source>Invalid Direction</source>
         <translation>无效方向</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3228"/>
+        <location filename="Exercise/Steps.cpp" line="3339"/>
+        <source>Northeast</source>
+        <translation>东北</translation>
+    </message>
+    <message>
+        <location filename="Exercise/Steps.cpp" line="3341"/>
+        <source>Southeast</source>
+        <translation>东南</translation>
+    </message>
+    <message>
+        <location filename="Exercise/Steps.cpp" line="3343"/>
+        <source>Southwest</source>
+        <translation>西南</translation>
+    </message>
+    <message>
+        <location filename="Exercise/Steps.cpp" line="3345"/>
+        <source>Northwest</source>
+        <translation>西北</translation>
+    </message>
+    <message>
+        <location filename="Exercise/Steps.cpp" line="3358"/>
+        <source>East by North</source>
+        <translation>东偏北</translation>
+    </message>
+    <message>
+        <location filename="Exercise/Steps.cpp" line="3355"/>
         <source>North by East</source>
         <translation>北偏东</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3231"/>
+        <location filename="Exercise/Steps.cpp" line="3366"/>
+        <source>South by East</source>
+        <translation>南偏东</translation>
+    </message>
+    <message>
+        <location filename="Exercise/Steps.cpp" line="3363"/>
         <source>East by South</source>
         <translation>东偏南</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3234"/>
+        <location filename="Exercise/Steps.cpp" line="3374"/>
+        <source>West by South</source>
+        <translation>西偏南</translation>
+    </message>
+    <message>
+        <location filename="Exercise/Steps.cpp" line="3371"/>
         <source>South by West</source>
         <translation>南偏西</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3237"/>
+        <location filename="Exercise/Steps.cpp" line="3382"/>
+        <source>North by West</source>
+        <translation>北偏西</translation>
+    </message>
+    <message>
+        <location filename="Exercise/Steps.cpp" line="3379"/>
         <source>West by North</source>
         <translation>西偏北</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3243"/>
+        <location filename="Exercise/Steps.cpp" line="3329"/>
         <source>Due North</source>
         <translation>正北方向</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3245"/>
+        <location filename="Exercise/Steps.cpp" line="3331"/>
         <source>Due East</source>
         <translation>正东方向</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3247"/>
+        <location filename="Exercise/Steps.cpp" line="3333"/>
         <source>Due South</source>
         <translation>正南方</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3249"/>
+        <location filename="Exercise/Steps.cpp" line="3335"/>
         <source>Due West</source>
         <translation>正西方</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3253"/>
+        <location filename="Exercise/Steps.cpp" line="3395"/>
         <source>degrees</source>
         <translation>度</translation>
     </message>
@@ -8644,7 +8684,7 @@
     </message>
     <message>
         <location filename="Exercise/Steps.cpp" line="372"/>
-        <location filename="Exercise/Steps.cpp" line="1026"/>
+        <location filename="Exercise/Steps.cpp" line="1025"/>
         <location filename="Exercise/Steps.cpp" line="3000"/>
         <source>Total Distance</source>
         <translation>总距离</translation>
@@ -8655,7 +8695,7 @@
         <translation>距离</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1019"/>
+        <location filename="Exercise/Steps.cpp" line="1018"/>
         <location filename="Exercise/Steps.cpp" line="1184"/>
         <source>Duration</source>
         <translation>持续时间</translation>

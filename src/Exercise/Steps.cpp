@@ -3215,40 +3215,83 @@ double Steps::calculateBearing(double lat1, double lon1, double lat2,
  * @return 本地化的方向字符串（如"South by East 10 degrees"）
  */
 QString Steps::bearingToDirection(double bearing) {
-  if (bearing < 0 || bearing > 360) {
+  // 1. 校验角度范围
+  if (bearing < 0.0 || bearing > 360.0) {
     return tr("Invalid Direction");
   }
 
-  // 基础方向定义（通过tr标记，支持翻译）
+  // 规范化角度到[0, 360)
+  bearing = fmod(bearing, 360.0);
+  if (bearing < 0.0) bearing += 360.0;
+
+  const double EPSILON = 0.001;
+
+  // 2. 处理精准方向
+  if (fabs(bearing) < EPSILON || fabs(bearing - 360.0) < EPSILON) {
+    return tr("Due North");
+  } else if (fabs(bearing - 90.0) < EPSILON) {
+    return tr("Due East");
+  } else if (fabs(bearing - 180.0) < EPSILON) {
+    return tr("Due South");
+  } else if (fabs(bearing - 270.0) < EPSILON) {
+    return tr("Due West");
+  }
+  // 添加中间方向
+  else if (fabs(bearing - 45.0) < EPSILON) {
+    return tr("Northeast");
+  } else if (fabs(bearing - 135.0) < EPSILON) {
+    return tr("Southeast");
+  } else if (fabs(bearing - 225.0) < EPSILON) {
+    return tr("Southwest");
+  } else if (fabs(bearing - 315.0) < EPSILON) {
+    return tr("Northwest");
+  }
+
   QString mainDir;
   double offset = 0.0;
 
-  // 象限划分
-  if (bearing >= 0 && bearing < 90) {  // 东北象限
-    mainDir = tr("North by East");
-    offset = bearing;
-  } else if (bearing >= 90 && bearing < 180) {  // 东南象限
-    mainDir = tr("East by South");
-    offset = bearing - 90;
-  } else if (bearing >= 180 && bearing < 270) {  // 西南象限
-    mainDir = tr("South by West");
-    offset = bearing - 180;
-  } else {  // 西北象限
-    mainDir = tr("West by North");
-    offset = bearing - 270;
+  // 3. 象限划分
+  if (bearing > 0 && bearing < 90) {  // 东北象限
+    if (bearing <= 45) {
+      mainDir = tr("North by East");
+      offset = bearing;
+    } else {
+      mainDir = tr("East by North");
+      offset = 90.0 - bearing;
+    }
+  } else if (bearing > 90 && bearing < 180) {  // 东南象限
+    if (bearing <= 135) {
+      mainDir = tr("East by South");
+      offset = bearing - 90.0;
+    } else {
+      mainDir = tr("South by East");
+      offset = 180.0 - bearing;
+    }
+  } else if (bearing > 180 && bearing < 270) {  // 西南象限
+    if (bearing <= 225) {
+      mainDir = tr("South by West");
+      offset = bearing - 180.0;
+    } else {
+      mainDir = tr("West by South");
+      offset = 270.0 - bearing;
+    }
+  } else {  // 西北象限 270~360
+    if (bearing <= 315) {
+      mainDir = tr("West by North");
+      offset = bearing - 270.0;
+    } else {
+      mainDir = tr("North by West");
+      offset = 360.0 - bearing;
+    }
   }
 
-  // 特殊正方向处理（精准匹配）
-  if (qFuzzyCompare(bearing, 0.0) || qFuzzyCompare(bearing, 360.0)) {
-    return tr("Due North");
-  } else if (qFuzzyCompare(bearing, 90.0)) {
-    return tr("Due East");
-  } else if (qFuzzyCompare(bearing, 180.0)) {
-    return tr("Due South");
-  } else if (qFuzzyCompare(bearing, 270.0)) {
-    return tr("Due West");
+  // 4. 格式化输出
+  int roundedOffset = static_cast<int>(std::round(offset));
+
+  // 处理偏移为0的情况（理论上不会发生，因为已处理了精准方向）
+  if (roundedOffset == 0) {
+    return mainDir;
   }
 
-  // 四舍五入到整数度，格式化为“方向+角度”
-  return mainDir + " " + QString::number(qRound(offset)) + " " + tr("degrees");
+  return mainDir + " " + QString::number(roundedOffset) + " " + tr("degrees");
 }
