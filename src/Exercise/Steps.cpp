@@ -102,8 +102,6 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mui->lblYearTotal->hide();
   mui->lblMonthTotal->hide();
   mui->btnGetGpsListData->hide();
-  mui->qwSpeed->setFixedHeight(90);
-  mui->qwSpeed->hide();
 
   QFontMetrics fm(this->font());
   int textHeight = fm.height();
@@ -2123,14 +2121,6 @@ void Steps::sendMsg(int CurTableCount) {
 void Steps::setCurrentGpsSpeed(double speed, double maxSpeed) {
   m_speedometer->setCurrentSpeed(speed);
   m_speedometer->setMaxSpeed(maxSpeed);
-  return;
-
-  QObject* rootObject = mui->qwSpeed->rootObject();
-  if (rootObject) {
-    rootObject->setProperty("currentSpeed",
-                            QString::number(speed, 'f', 2).toDouble());
-    rootObject->setProperty("myMaxSpeed", maxSpeed);
-  }
 }
 
 QString Steps::getCurrentYear() {

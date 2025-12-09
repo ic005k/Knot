@@ -440,9 +440,6 @@ void MainHelper::initMainQW() {
     mui->qwSteps->rootContext()->setContextProperty("text2", "");
     mui->qwSteps->rootContext()->setContextProperty("text3", "");
 
-    mui->qwSpeed->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/Speedometer.qml")));
-
     mui->qwGpsList->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/gps_list.qml")));
     mui->qwGpsList->rootContext()->setContextProperty("myW", mw_one->width());
@@ -1076,7 +1073,7 @@ void MainHelper::init_Theme() {
     mui->btnDel->setIcon(QIcon(":/res/delitem.svg"));
     mui->btnSync->setIcon(QIcon(":/res/upload.svg"));
 
-    m_Steps->m_speedometer->setBackgroundColor("#F0F0F0");
+    m_Steps->m_speedometer->setBackgroundColor(QColor(0xF0, 0xF0, 0xF0));
     m_Steps->m_speedometer->updateThemeColors();
 
   } else {
@@ -1097,7 +1094,7 @@ void MainHelper::init_Theme() {
     mui->btnDel->setIcon(QIcon(":/res/delitem_l.svg"));
     mui->btnSync->setIcon(QIcon(":/res/upload_l.svg"));
 
-    m_Steps->m_speedometer->setBackgroundColor("#323232");
+    m_Steps->m_speedometer->setBackgroundColor(QColor(0x32, 0x32, 0x32));
     m_Steps->m_speedometer->updateThemeColors();
   }
 

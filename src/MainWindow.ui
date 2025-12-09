@@ -3660,31 +3660,6 @@ QSlider::handle:horizontal:disabled {
             </widget>
            </item>
            <item>
-            <widget class="QQuickWidget" name="qwSpeed">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>150</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>150</height>
-              </size>
-             </property>
-             <property name="resizeMode">
-              <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
-             </property>
-            </widget>
-           </item>
-           <item>
             <widget class="QGroupBox" name="gboxMotionType">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
