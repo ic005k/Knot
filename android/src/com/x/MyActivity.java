@@ -67,6 +67,8 @@ import android.os.Vibrator;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.speech.tts.TextToSpeech;
+import android.text.TextUtils;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -162,6 +164,8 @@ public class MyActivity
     private boolean isTtsInitialized = false; // 是否已初始化完成
     private boolean isTtsInitializing = false; // 是否正在初始化中
     private String pendingTtsText = null; // 初始化完成后需要播放的待处理文本
+    private final Object ttsLock = new Object(); // 新增：TTS状态锁
+    private TTSUtils currentPlayingTts; // 新增：记录当前播放的TTS实例（用于停止）
 
     private static final int REQ_LOCATION = 1;
     private static final int REQ_RECORD_AUDIO = 2;
@@ -221,7 +225,6 @@ public class MyActivity
     }
 
     private ShortcutManager shortcutManager;
-    public static TTSUtils mytts;
 
     private AudioRecord audioRecord = null;
     private int recordBufsize = 0;
@@ -606,39 +609,6 @@ public class MyActivity
         }
 
         addDeskShortcuts();
-
-        // 初始化TTS时设置监听器
-        /*mytts = TTSUtils.getInstance(this);
-        mytts.initialize(
-            new TTSUtils.InitCallback() {
-                @Override
-                public void onSuccess() {
-                    Log.w("TTS", "TTS initialized successfully");
-                    // ========== 新增：设置播放完成监听器 ==========
-                    mytts.setOnPlayCompleteListener(
-                        new TTSUtils.OnPlayCompleteListener() {
-                            @Override
-                            public void onPlayComplete() {
-                                Log.d("TTS", "长文本播放完成！");
-                                // 调用Qt Native方法，通知C++端播放完成
-                                CallJavaNotify_19();
-                            }
-
-                            @Override
-                            public void onPlayStopped() {
-                                Log.d("TTS", "播放被手动停止！");
-                            }
-                        }
-                    );
-                    // ==========================================
-                }
-
-                @Override
-                public void onError(String error) {
-                    Log.w("TTS", "TTS init failed: " + error);
-                }
-            }
-        );*/
     }
 
     // 使用LocationListenerCompat定义位置监听器
@@ -1248,10 +1218,14 @@ public class MyActivity
 
         super.onDestroy();
         m_instance = null;
-        if (mytts != null) {
-            mytts.shutdown(); // 释放TTS资源
-            mytts = null;
+
+        synchronized (ttsLock) {
+            if (currentPlayingTts != null) {
+                currentPlayingTts.shutdown();
+                currentPlayingTts = null;
+            }
         }
+
         alarmWindows.remove(this); // 防止 Activity 泄漏
         mapActivityInstance = null;
     }
@@ -2072,86 +2046,150 @@ public class MyActivity
             return;
         }
 
-        // 1. 初始化TTS实例（若未初始化）
-        if (mytts == null) {
-            mytts = TTSUtils.getInstance(m_instance);
-        }
+        // ========== 新增：检测系统TTS引擎是否安装（可选优化） ==========
+        // 1. 检查TTS引擎是否存在
+        Intent checkIntent = new Intent(
+            TextToSpeech.Engine.ACTION_CHECK_TTS_DATA
+        );
+        ComponentName comp = checkIntent.resolveActivity(
+            m_instance.getPackageManager()
+        );
+        if (comp == null) {
+            Log.w("TTS", "系统未安装TTS引擎，引导用户安装");
+            // 2. 跳转到TTS引擎安装页面
+            Intent installIntent = new Intent(
+                TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA
+            );
+            installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // 非Activity环境需加此标记
+            try {
+                m_instance.startActivity(installIntent);
+            } catch (Exception e) {
+                Log.e("TTS", "跳转TTS引擎安装页面失败", e);
+                // 兜底提示
+                String tipText = zh_cn
+                    ? "请手动安装TTS语音引擎"
+                    : "Please install the TTS voice engine manually";
 
-        // 2. 正在初始化中：缓存文本，等待初始化完成后播放
-        if (m_instance.isTtsInitializing) {
-            m_instance.pendingTtsText = text;
-            Log.d("TTS", "TTS正在初始化，缓存待播放文本：" + text);
+                // 显示Toast
+                Toast.makeText(m_instance, tipText, Toast.LENGTH_LONG).show();
+            }
             return;
         }
+        // ==============================================================
 
-        // 3. 未初始化：触发初始化，缓存文本
-        if (!m_instance.isTtsInitialized) {
+        // 加锁保护状态变量，避免多线程错乱
+        synchronized (m_instance.ttsLock) {
+            // 正在初始化中：缓存文本
+            if (m_instance.isTtsInitializing) {
+                m_instance.pendingTtsText = text;
+                Log.d("TTS", "TTS正在初始化，缓存待播放文本：" + text);
+                return;
+            }
+
+            // 标记为初始化中
             m_instance.isTtsInitializing = true;
             m_instance.pendingTtsText = text;
-            Log.d("TTS", "开始初始化TTS，待播放文本：" + text);
+            Log.d("TTS", "开始创建全新TTS实例，待播放文本：" + text);
 
-            mytts.initialize(
+            // 核心：每次都新建TTSUtils实例
+            TTSUtils newTts = new TTSUtils(m_instance);
+            // 记录当前播放的实例（用于停止）
+            m_instance.currentPlayingTts = newTts;
+
+            newTts.initialize(
                 new TTSUtils.InitCallback() {
                     @Override
                     public void onSuccess() {
-                        Log.w("TTS", "TTS初始化成功");
-                        m_instance.isTtsInitialized = true;
-                        m_instance.isTtsInitializing = false;
+                        Log.w("TTS", "全新TTS实例初始化成功");
+                        // 重置初始化状态（加锁）
+                        synchronized (m_instance.ttsLock) {
+                            m_instance.isTtsInitializing = false;
+                        }
 
-                        // 恢复监听器设置
-                        mytts.setOnPlayCompleteListener(
+                        // 设置播放完成监听器
+                        newTts.setOnPlayCompleteListener(
                             new TTSUtils.OnPlayCompleteListener() {
                                 @Override
                                 public void onPlayComplete() {
                                     Log.d("TTS", "长文本播放完成！");
                                     CallJavaNotify_19();
+                                    // 播放完成后释放当前实例（关键：避免内存泄漏）
+                                    newTts.shutdown();
+                                    // 清空当前实例引用
+                                    synchronized (m_instance.ttsLock) {
+                                        if (
+                                            m_instance.currentPlayingTts ==
+                                            newTts
+                                        ) {
+                                            m_instance.currentPlayingTts = null;
+                                        }
+                                    }
                                 }
 
                                 @Override
                                 public void onPlayStopped() {
                                     Log.d("TTS", "播放被手动停止！");
+                                    newTts.shutdown();
+                                    synchronized (m_instance.ttsLock) {
+                                        if (
+                                            m_instance.currentPlayingTts ==
+                                            newTts
+                                        ) {
+                                            m_instance.currentPlayingTts = null;
+                                        }
+                                    }
                                 }
                             }
                         );
 
                         // 播放缓存的文本
-                        if (!TextUtils.isEmpty(m_instance.pendingTtsText)) {
-                            mytts.speak(m_instance.pendingTtsText);
-                            Log.d(
-                                "TTS",
-                                "播放缓存文本：" + m_instance.pendingTtsText
-                            );
+                        String playText = null;
+                        synchronized (m_instance.ttsLock) {
+                            playText = m_instance.pendingTtsText;
                             m_instance.pendingTtsText = null; // 清空缓存
+                        }
+                        if (!TextUtils.isEmpty(playText)) {
+                            newTts.speak(playText);
+                            Log.d("TTS", "播放缓存文本：" + playText);
                         }
                     }
 
                     @Override
                     public void onError(String error) {
                         Log.e("TTS", "TTS初始化失败：" + error);
-                        m_instance.isTtsInitializing = false;
-                        m_instance.pendingTtsText = null;
+                        // 初始化失败：重置状态 + 释放实例
+                        synchronized (m_instance.ttsLock) {
+                            m_instance.isTtsInitializing = false;
+                            m_instance.pendingTtsText = null;
+                            // 清空当前实例引用
+                            if (m_instance.currentPlayingTts == newTts) {
+                                m_instance.currentPlayingTts = null;
+                            }
+                        }
+                        newTts.shutdown();
                     }
                 }
             );
-            return;
         }
-
-        // 4. 已初始化：直接播放
-        Log.d("TTS", "TTS已初始化，直接播放：" + text);
-        mytts.speak(text);
     }
 
     public static void stopPlayMyText() {
-        if (mytts != null) {
-            // 避免空指针调用
-            mytts.stop();
+        synchronized (m_instance.ttsLock) {
+            // 重置状态
+            m_instance.isTtsInitializing = false;
+            m_instance.pendingTtsText = null;
+
+            // 停止当前播放的实例
+            if (m_instance.currentPlayingTts != null) {
+                m_instance.currentPlayingTts.stop();
+                m_instance.currentPlayingTts.shutdown();
+                m_instance.currentPlayingTts = null;
+                Log.d("TTS", "已停止并释放当前TTS实例");
+            }
         }
     }
 
     public void speakText(String text) {
-        // 简短播报直接使用
-        // TTSUtils.getInstance(this).speak(text);
-
         // 长时间播报使用前台服务
         Intent serviceIntent = new Intent(this, TTSForegroundService.class);
         serviceIntent.putExtra("tts_text", text);

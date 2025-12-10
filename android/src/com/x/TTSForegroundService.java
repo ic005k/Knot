@@ -1,18 +1,19 @@
 package com.x;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
-import androidx.core.app.NotificationCompat;
+import android.os.Looper;
 import android.util.Log;
+import androidx.core.app.NotificationCompat;
 
 public class TTSForegroundService extends Service {
+
     private static final String TAG = "TTSForegroundService";
     private static final String CHANNEL_ID = "tts_foreground_service_channel";
     private static final int NOTIFICATION_ID = 1234;
@@ -29,7 +30,8 @@ public class TTSForegroundService extends Service {
         // 保存当前运行实例
         runningInstance = this;
         handler = new Handler(Looper.getMainLooper());
-        ttsUtils = TTSUtils.getInstance(getApplicationContext());
+
+        ttsUtils = new TTSUtils(getApplicationContext());
         createNotificationChannel();
     }
 
@@ -53,20 +55,23 @@ public class TTSForegroundService extends Service {
 
     private Notification createNotification() {
         return new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("Voice Broadcast Service")
-                .setContentText("Running...")
-                .setSmallIcon(android.R.drawable.ic_lock_silent_mode_off) // 使用系统图标或替换为应用图标
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .build();
+            .setContentTitle("Voice Broadcast Service")
+            .setContentText("Running...")
+            .setSmallIcon(android.R.drawable.ic_lock_silent_mode_off) // 使用系统图标或替换为应用图标
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .build();
     }
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel serviceChannel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "Voice Broadcast Service",
-                    NotificationManager.IMPORTANCE_LOW);
-            NotificationManager manager = getSystemService(NotificationManager.class);
+                CHANNEL_ID,
+                "Voice Broadcast Service",
+                NotificationManager.IMPORTANCE_LOW
+            );
+            NotificationManager manager = getSystemService(
+                NotificationManager.class
+            );
             if (manager != null) {
                 manager.createNotificationChannel(serviceChannel);
             }
@@ -99,5 +104,4 @@ public class TTSForegroundService extends Service {
             runningInstance.speak(text);
         }
     }
-
 }
