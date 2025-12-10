@@ -403,6 +403,12 @@ static void JavaNotify_15() {
     return;
   }
 
+  if (m_Steps->m_remarksDialog != nullptr) {
+    m_Steps->m_remarksDialog->close();
+
+    return;
+  }
+
   if (m_Steps->statsDialog != nullptr) {
     m_Steps->statsDialog->close();
 

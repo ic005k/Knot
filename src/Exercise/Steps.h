@@ -79,6 +79,8 @@ class Steps : public QDialog {
     int runningCount = 0;
   };
 
+  QDialog* m_remarksDialog = nullptr;
+
   QString strMapKeyTestInfo;
 
   QTimer* timer;
@@ -204,8 +206,8 @@ class Steps : public QDialog {
   void getGpsTrack();
   void openMapWindow();
   void getRouteList(const QString& strGpsTime);
-  void getRemarks(const QString &strGpsTime);
-  private slots:
+  void getRemarks(const QString& strGpsTime);
+ private slots:
   void positionUpdated(const QGeoPositionInfo& info);
 
   void updateGetGps();
@@ -356,8 +358,8 @@ class Steps : public QDialog {
   void getTerrain();
   CompassWidget* compass;
 
-  QString getGpsListFilePath(const QString &strGpsList);
-  signals:
+  QString getGpsListFilePath(const QString& strGpsList);
+ signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();
