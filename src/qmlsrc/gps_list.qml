@@ -1346,6 +1346,32 @@ Rectangle {
                             m_Steps.getRouteList(strGpsTime)
                         }
                     }
+
+                    Button {
+                        id: btnRemarks
+                        width: 40
+                        height: 40
+                        visible: isShowRoute && listItem.ListView.isCurrentItem
+
+                        contentItem: Image {
+                            source: isDark ? "/res/remarks_l.svg" : "/res/remarks.svg"
+                            sourceSize: Qt.size(24, 24)
+                            fillMode: Image.PreserveAspectFit
+                        }
+
+                        background: Rectangle {
+                            color: btnRemarks.down ? "#4CAF50" : (isDark ? "#444" : "#CCC")
+                            radius: 4
+                            border.color: "#4CAF50"
+                            border.width: 1
+                        }
+
+                        onClicked: {
+                            strGpsTime = item0.text + "-=-" + item1.text + "-=-"
+                                    + item2.text + "-=-" + item4.text
+                            m_Steps.getRemarks(strGpsTime)
+                        }
+                    }
                 }
             }
         }

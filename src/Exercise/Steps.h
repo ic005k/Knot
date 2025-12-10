@@ -204,7 +204,8 @@ class Steps : public QDialog {
   void getGpsTrack();
   void openMapWindow();
   void getRouteList(const QString& strGpsTime);
- private slots:
+  void getRemarks(const QString &strGpsTime);
+  private slots:
   void positionUpdated(const QGeoPositionInfo& info);
 
   void updateGetGps();
@@ -355,7 +356,8 @@ class Steps : public QDialog {
   void getTerrain();
   CompassWidget* compass;
 
- signals:
+  QString getGpsListFilePath(const QString &strGpsList);
+  signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();

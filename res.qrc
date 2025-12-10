@@ -207,5 +207,7 @@
         <file>res/reader/stopspeak_l.svg</file>
         <file>res/del.svg</file>
         <file>res/del_l.svg</file>
+        <file>res/remarks.svg</file>
+        <file>res/remarks_l.svg</file>
     </qresource>
 </RCC>

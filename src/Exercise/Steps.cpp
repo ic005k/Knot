@@ -2506,6 +2506,11 @@ void Steps::setMapType() {
 }
 
 QString Steps::getJsonRouteFile(const QString& strGpsList) {
+  QString routeFile = getGpsListFilePath(strGpsList) + ".json";
+  return routeFile;
+}
+
+QString Steps::getGpsListFilePath(const QString& strGpsList) {
   QStringList list = strGpsList.split("-=-");
 
   QString st1 = list.at(0);
@@ -2538,7 +2543,7 @@ QString Steps::getJsonRouteFile(const QString& strGpsList) {
   }
 
   QString csvPath = iniDir + "memo/gps/" + str_year + "/" + str_month + "/";
-  QString routeFile = csvPath + st1 + "-gps-" + st2 + ".json";
+  QString routeFile = csvPath + st1 + "-gps-" + st2;
   return routeFile;
 }
 
@@ -3284,4 +3289,167 @@ QString Steps::bearingToDirection(double bearing) {
   }
 
   return mainDir + " " + QString::number(roundedOffset) + " " + tr("degrees");
+}
+
+void Steps::getRemarks(const QString& strGpsTime) {
+  // 构建备注文件路径
+  QString file = getGpsListFilePath(strGpsTime) + "_Remarks.json";
+
+  // 1. 创建对话框主窗口
+  QDialog dlg;
+  dlg.setWindowTitle(tr("Edit Remarks"));    // 国际化标题
+  dlg.setMinimumSize(mw_one->width(), 300);  // 设置最小尺寸，保证编辑体验
+  dlg.setGeometry(mw_one->geometry().x(), mw_one->geometry().y() + 20,
+                  mw_one->width(), 350);
+
+  // 2. 创建文本编辑框（支持多行备注）
+  QTextEdit* textEdit = new QTextEdit(&dlg);
+  textEdit->setPlaceholderText(
+      tr("Please enter remarks here..."));  // 占位提示（国际化）
+
+  // 读取已有备注内容（如果文件存在）
+  QFile existingFile(file);
+  if (existingFile.open(QIODevice::ReadOnly)) {
+    QJsonParseError parseError;
+    QJsonDocument doc =
+        QJsonDocument::fromJson(existingFile.readAll(), &parseError);
+    if (parseError.error == QJsonParseError::NoError) {
+      if (doc.isObject()) {
+        QJsonObject obj = doc.object();
+        // 填充已有备注文本
+        if (obj.contains("remarks")) {
+          textEdit->setText(obj["remarks"].toString());
+        }
+      }
+    } else {
+      qWarning()
+          << tr("Parse remarks file failed: %1").arg(parseError.errorString());
+    }
+    existingFile.close();
+  }
+
+  // 3. 创建功能按钮（国际化文本）
+  QPushButton* okBtn = new QPushButton(tr("OK"), &dlg);
+  QPushButton* cancelBtn = new QPushButton(tr("Cancel"), &dlg);
+
+  // 4. 布局管理
+  // 按钮水平布局（右对齐）
+  QHBoxLayout* btnLayout = new QHBoxLayout;
+  btnLayout->addStretch();  // 左侧拉伸，按钮右对齐
+  btnLayout->addWidget(okBtn);
+  btnLayout->addSpacing(10);  // 按钮间距
+  btnLayout->addWidget(cancelBtn);
+
+  // 主垂直布局
+  QVBoxLayout* mainLayout = new QVBoxLayout(&dlg);
+  mainLayout->setContentsMargins(20, 20, 20, 20);  // 对话框内边距
+  mainLayout->addWidget(textEdit);
+  mainLayout->addSpacing(15);  // 编辑框与按钮间距
+  mainLayout->addLayout(btnLayout);
+
+  dlg.setLayout(mainLayout);
+
+  // 5. 明暗主题样式适配
+  QString dlgStyle, textEditStyle, btnStyle;
+  if (isDark) {  // 暗色主题
+    dlgStyle = "QDialog { background-color: #2b2b2b; color: #ffffff; }";
+    textEditStyle =
+        "QTextEdit { "
+        "background-color: #3c3f41; "
+        "color: #ffffff; "
+        "border: 1px solid #555555; "
+        "border-radius: 4px; "
+        "padding: 8px; "
+        "font-size: 14px; "
+        "} "
+        "QTextEdit::placeholder { color: #999999; }";  // 占位文本颜色
+    btnStyle =
+        "QPushButton { "
+        "background-color: #4a4a4a; "
+        "color: #ffffff; "
+        "border: 1px solid #666666; "
+        "border-radius: 4px; "
+        "padding: 8px 20px; "
+        "font-size: 14px; "
+        "} "
+        "QPushButton:hover { background-color: #555555; } "
+        "QPushButton:pressed { background-color: #666666; } "
+        "QPushButton:disabled { background-color: #333333; color: #666666; }";
+  } else {  // 亮色主题
+    dlgStyle = "QDialog { background-color: #ffffff; color: #000000; }";
+    textEditStyle =
+        "QTextEdit { "
+        "background-color: #f8f8f8; "
+        "color: #000000; "
+        "border: 1px solid #cccccc; "
+        "border-radius: 4px; "
+        "padding: 8px; "
+        "font-size: 14px; "
+        "} "
+        "QTextEdit::placeholder { color: #666666; }";
+    btnStyle =
+        "QPushButton { "
+        "background-color: #e0e0e0; "
+        "color: #000000; "
+        "border: 1px solid #cccccc; "
+        "border-radius: 4px; "
+        "padding: 8px 20px; "
+        "font-size: 14px; "
+        "} "
+        "QPushButton:hover { background-color: #f0f0f0; } "
+        "QPushButton:pressed { background-color: #d0d0d0; } "
+        "QPushButton:disabled { background-color: #f0f0f0; color: #999999; }";
+  }
+
+  // 应用样式表
+  dlg.setStyleSheet(dlgStyle);
+  textEdit->setStyleSheet(textEditStyle);
+  okBtn->setStyleSheet(btnStyle);
+  cancelBtn->setStyleSheet(btnStyle);
+
+  // 6. 信号槽连接
+  QObject::connect(okBtn, &QPushButton::clicked, &dlg, &QDialog::accept);
+  QObject::connect(cancelBtn, &QPushButton::clicked, &dlg, &QDialog::reject);
+
+  // 7. 执行对话框并处理确认逻辑
+  if (dlg.exec() == QDialog::Accepted) {
+    // 获取编辑框文本
+    QString remarksContent = textEdit->toPlainText().trimmed();
+
+    // 构建JSON对象（包含扩展信息，便于后续维护）
+    QJsonObject remarkObj;
+    remarkObj["remarks"] = remarksContent;  // 备注内容
+    remarkObj["gps_time"] = strGpsTime;     // 关联的GPS时间
+    remarkObj["update_time"] =
+        QDateTime::currentDateTime().toString(Qt::ISODate);  // 更新时间
+    remarkObj["version"] = "1.0";                            // 版本标识
+
+    // 写入JSON文件
+    QFile saveFile(file);
+    if (!saveFile.open(QIODevice::WriteOnly | QIODevice::Truncate |
+                       QIODevice::Text)) {
+      // 文件打开失败，弹出提示
+      QMessageBox::warning(
+          nullptr, tr("Warning"),
+          tr("Failed to save remarks: %1").arg(saveFile.errorString()));
+      return;
+    }
+
+    // 格式化JSON输出（缩进排版，便于阅读）
+    QJsonDocument jsonDoc(remarkObj);
+    QByteArray jsonData = jsonDoc.toJson(QJsonDocument::Indented);
+
+    // 写入文件并检查结果
+    if (saveFile.write(jsonData) == -1) {
+      QMessageBox::warning(
+          nullptr, tr("Warning"),
+          tr("Write remarks to file failed: %1").arg(saveFile.errorString()));
+    } else {
+      // 可选：保存成功提示（可根据需求注释）
+      // QMessageBox::information(nullptr, tr("Information"),
+      //                          tr("Remarks saved successfully!"));
+    }
+
+    saveFile.close();
+  }
 }
