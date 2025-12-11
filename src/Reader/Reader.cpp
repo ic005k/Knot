@@ -3257,6 +3257,7 @@ void Reader::addBookNote() {
   initTextToolbarDynamic(dlgAddBookNote);
   EditEventFilter* editFilter =
       new EditEventFilter(textToolbarDynamic, dlgAddBookNote);
+  editFilter->setParent(dlgAddBookNote);
   textEdit->installEventFilter(editFilter);
   textEdit->viewport()->installEventFilter(editFilter);
 
@@ -3383,6 +3384,7 @@ void Reader::editBookNote(int index, int page, const QString& content) {
   initTextToolbarDynamic(dlgEditBookNote);
   EditEventFilter* editFilter =
       new EditEventFilter(textToolbarDynamic, dlgEditBookNote);
+  editFilter->setParent(dlgEditBookNote);
   textEdit->installEventFilter(editFilter);
   textEdit->viewport()->installEventFilter(editFilter);
 

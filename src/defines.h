@@ -143,7 +143,7 @@ void closeTextToolBar() {
 
 void initTextToolbarDynamic(QWidget* parent) {
   if (textToolbarDynamic != nullptr) {
-    delete textToolbarDynamic;
+    textToolbarDynamic->deleteLater();
     textToolbarDynamic = nullptr;
   }
   textToolbarDynamic = new TextEditToolbar(parent);

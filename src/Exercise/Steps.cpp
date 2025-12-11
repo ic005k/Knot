@@ -3296,21 +3296,31 @@ void Steps::getRemarks(const QString& strGpsTime) {
   QString file = getGpsListFilePath(strGpsTime) + "_Remarks.json";
 
   if (m_remarksDialog != nullptr) {
-    delete m_remarksDialog;
-    m_remarksDialog = nullptr;
+    m_remarksDialog->close();        // 先关闭对话框
+    m_remarksDialog->deleteLater();  // 异步销毁（避免同步delete的坑）
+    m_remarksDialog = nullptr;       // 立即置空，防止野指针
   }
   // 1. 创建对话框主窗口
-  QDialog* dlg = new QDialog();  // 堆创建（关键：避免栈对象野指针）
-  m_remarksDialog = dlg;
-  dlg->setWindowTitle(tr("Edit Remarks"));    // 国际化标题
-  dlg->setMinimumSize(mw_one->width(), 300);  // 设置最小尺寸，保证编辑体验
-  dlg->setGeometry(mw_one->geometry().x(), mw_one->geometry().y() + 20,
-                   mw_one->width(), 350);
+  m_remarksDialog = new QDialog(mw_one);
+
+  m_remarksDialog->setWindowTitle(tr("Edit Remarks"));  // 国际化标题
+  m_remarksDialog->setGeometry(mw_one->geometry().x() + 10,
+                               mw_one->geometry().y() + 0,
+                               mw_one->geometry().width() - 20, 350);
 
   // 2. 创建文本编辑框（支持多行备注）
-  QTextEdit* textEdit = new QTextEdit(dlg);
+  QTextEdit* textEdit = new QTextEdit(m_remarksDialog);
   textEdit->setPlaceholderText(
       tr("Please enter remarks here..."));  // 占位提示（国际化）
+  textEdit->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
+  textEdit->setAcceptRichText(false);
+
+  initTextToolbarDynamic(m_remarksDialog);
+  EditEventFilter* editFilter =
+      new EditEventFilter(textToolbarDynamic, m_remarksDialog);
+  editFilter->setParent(m_remarksDialog);
+  textEdit->installEventFilter(editFilter);
+  textEdit->viewport()->installEventFilter(editFilter);
 
   // 读取已有备注内容（如果文件存在）
   QFile existingFile(file);
@@ -3334,8 +3344,8 @@ void Steps::getRemarks(const QString& strGpsTime) {
   }
 
   // 3. 创建功能按钮（国际化文本）
-  QPushButton* okBtn = new QPushButton(tr("OK"), dlg);
-  QPushButton* cancelBtn = new QPushButton(tr("Cancel"), dlg);
+  QPushButton* okBtn = new QPushButton(tr("OK"), m_remarksDialog);
+  QPushButton* cancelBtn = new QPushButton(tr("Cancel"), m_remarksDialog);
 
   // 4. 布局管理
   // 按钮水平布局（右对齐）
@@ -3346,13 +3356,13 @@ void Steps::getRemarks(const QString& strGpsTime) {
   btnLayout->addWidget(cancelBtn);
 
   // 主垂直布局
-  QVBoxLayout* mainLayout = new QVBoxLayout(dlg);
+  QVBoxLayout* mainLayout = new QVBoxLayout(m_remarksDialog);
   mainLayout->setContentsMargins(20, 20, 20, 20);  // 对话框内边距
   mainLayout->addWidget(textEdit);
   mainLayout->addSpacing(15);  // 编辑框与按钮间距
   mainLayout->addLayout(btnLayout);
 
-  dlg->setLayout(mainLayout);
+  m_remarksDialog->setLayout(mainLayout);
 
   // 5. 明暗主题样式适配
   QString dlgStyle, textEditStyle, btnStyle;
@@ -3407,25 +3417,24 @@ void Steps::getRemarks(const QString& strGpsTime) {
   }
 
   // 应用样式表
-  dlg->setStyleSheet(dlgStyle);
+  m_remarksDialog->setStyleSheet(dlgStyle);
   textEdit->setStyleSheet(textEditStyle);
   okBtn->setStyleSheet(btnStyle);
   cancelBtn->setStyleSheet(btnStyle);
 
   // 6. 信号槽连接
-  QObject::connect(okBtn, &QPushButton::clicked, dlg, &QDialog::accept);
-  QObject::connect(cancelBtn, &QPushButton::clicked, dlg, &QDialog::reject);
+  QObject::connect(okBtn, &QPushButton::clicked, m_remarksDialog,
+                   &QDialog::accept);
+  QObject::connect(cancelBtn, &QPushButton::clicked, m_remarksDialog,
+                   &QDialog::reject);
 
-  connect(dlg, &QDialog::finished, this, [this](int result) {
+  connect(m_remarksDialog, &QDialog::finished, this, [this](int result) {
     Q_UNUSED(result);
-    if (m_remarksDialog) {
-      m_remarksDialog->deleteLater();
-      m_remarksDialog = nullptr;
-    }
+    closeTextToolBar();
   });
 
   // 7. 执行对话框并处理确认逻辑
-  if (dlg->exec() == QDialog::Accepted) {
+  if (m_remarksDialog->exec() == QDialog::Accepted) {
     // 获取编辑框文本
     QString remarksContent = textEdit->toPlainText().trimmed();
 

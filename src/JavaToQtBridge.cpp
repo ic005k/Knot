@@ -404,9 +404,10 @@ static void JavaNotify_15() {
   }
 
   if (m_Steps->m_remarksDialog != nullptr) {
-    m_Steps->m_remarksDialog->close();
-
-    return;
+    if (m_Steps->m_remarksDialog->isVisible()) {
+      m_Steps->m_remarksDialog->close();
+      return;
+    }
   }
 
   if (m_Steps->statsDialog != nullptr) {

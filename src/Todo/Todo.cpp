@@ -1189,6 +1189,7 @@ void Todo::reeditText() {
   initTextToolbarDynamic(m_ReeditTodo);
   EditEventFilter* editFilter =
       new EditEventFilter(textToolbarDynamic, m_ReeditTodo);
+  editFilter->setParent(m_ReeditTodo);
   edit->installEventFilter(editFilter);
   edit->viewport()->installEventFilter(editFilter);
 

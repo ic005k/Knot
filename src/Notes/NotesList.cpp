@@ -281,6 +281,7 @@ void NotesList::on_btnRename_clicked() {
   initTextToolbarDynamic(m_RenameNotes);
   EditEventFilter* editFilter =
       new EditEventFilter(textToolbarDynamic, m_RenameNotes);
+  editFilter->setParent(m_RenameNotes);
   edit->installEventFilter(editFilter);
   edit->viewport()->installEventFilter(editFilter);
 

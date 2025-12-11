@@ -580,6 +580,7 @@ void MainHelper::init_UIWidget() {
   // init textedit toolbar
   textToolbar = new TextEditToolbar(mw_one);
   EditEventFilter* editFilter = new EditEventFilter(textToolbar, mw_one);
+  editFilter->setParent(mw_one);
   m_Method->setLineEditToolBar(mw_one, editFilter);
   m_Method->setTextEditToolBar(mw_one, editFilter);
 
