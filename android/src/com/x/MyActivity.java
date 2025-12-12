@@ -211,6 +211,7 @@ public class MyActivity
 
     public static boolean isDark = false;
     public static MyActivity m_instance = null;
+    private static Application sAppContext;
     private static SensorManager mSensorManager;
 
     private static final int DELAY = SensorManager.SENSOR_DELAY_NORMAL;
@@ -219,10 +220,6 @@ public class MyActivity
     public static int keyBoardHeight;
 
     private static final String TAG = "QtKnot";
-
-    public static Context getMyAppContext() {
-        return m_instance != null ? m_instance.getApplicationContext() : null;
-    }
 
     private ShortcutManager shortcutManager;
 
@@ -588,6 +585,8 @@ public class MyActivity
             finish();
             return;
         }
+
+        sAppContext = getApplication(); // 应用上下文，生命周期和App一致
         m_instance = this;
         Log.d(TAG, "Android activity created");
 
@@ -3056,5 +3055,14 @@ public class MyActivity
 
         // 超标率≥80%则判定为不稳定
         return badCount >= ACCURACY_WINDOW_SIZE * 0.8;
+    }
+
+    public static Context getMyAppContext() {
+        if (sAppContext != null) {
+            return sAppContext;
+        } else if (m_instance != null) {
+            return m_instance.getApplicationContext();
+        }
+        return null;
     }
 }

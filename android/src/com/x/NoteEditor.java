@@ -855,8 +855,6 @@ public class NoteEditor
             CallJavaNotify_16();
         }
 
-        MyService.clearNotify();
-
         getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
 
         super.onDestroy();

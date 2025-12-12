@@ -46,6 +46,8 @@ public class MyService extends Service {
     private static final String ID = "channel_1";
     private static final String NAME = "F_SERVICE";
 
+    private static final int ALARM_REQUEST_CODE = 10086;
+
     public static String strTodoAlarm = "";
 
     public static volatile boolean isReady = false;
@@ -107,7 +109,7 @@ public class MyService extends Service {
         Log.i(TAG, "Service on create"); // 服务被创建
 
         // 权限设置页面需要在 Activity 的任务栈中启动，必须用 Activity 上下文,而不是getMyAppContext()
-        Context context = MyActivity.m_instance;
+        Context context = MyActivity.getMyAppContext();
 
         if (MyActivity.zh_cn) {
             strRun = "运行中...";
@@ -194,7 +196,11 @@ public class MyService extends Service {
         super.onDestroy();
 
         // 取消注册接收器
-        unregisterReceiver(myalarmReceiver);
+        try {
+            unregisterReceiver(myalarmReceiver);
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "广播已注销，无需重复操作", e);
+        }
 
         if (isStepCounter == 1) {
             if (mySensorSerivece != null) {
@@ -311,14 +317,10 @@ public class MyService extends Service {
     }
 
     // ------------------------------------------------------------------------------
-    // 待办事项定时任务通知
-    private static NotificationManager m_notificationManagerAlarm;
-    private static Notification.Builder m_builderAlarm;
-
     // 待办事项定时任务通知（使用 Full-Screen Intent）
     public static void notifyTodoAlarm(Context context, String message) {
         try {
-            m_notificationManagerAlarm =
+            NotificationManager m_notificationManagerAlarm =
                 (NotificationManager) context.getSystemService(
                     Context.NOTIFICATION_SERVICE
                 );
@@ -344,6 +346,8 @@ public class MyService extends Service {
                 activityIntent,
                 flags
             );
+
+            Notification.Builder m_builderAlarm = null;
 
             // 创建通知渠道（Android 8.0+）
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -394,11 +398,19 @@ public class MyService extends Service {
         }
     }
 
-    public static void clearNotify() {
-        if (m_notificationManagerAlarm != null) {
-            // 使用和发送通知时相同的标签 "knot_alarm_tag"
-            m_notificationManagerAlarm.cancel("knot_alarm_tag", 10);
-            System.out.println("MyService Clear Notiry...");
+    // 不依赖静态变量，每次重新获取NotificationManager
+    public static void clearNotify(Context context) {
+        try {
+            NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(
+                    Context.NOTIFICATION_SERVICE
+                );
+            if (notificationManager != null) {
+                notificationManager.cancel("knot_alarm_tag", 10);
+                Log.d(TAG, "待办通知已清除");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "清除待办通知失败", e);
         }
     }
 
@@ -507,11 +519,9 @@ public class MyService extends Service {
         receiverIntent.putExtra("alarmMessage", strText);
 
         // 唯一请求码（不考虑 PendingIntent 复用，业务逻辑：新定时覆盖旧定时）
-        int requestCode = 0;
-
         pendingIntentAlarm = PendingIntent.getBroadcast(
             appContext,
-            requestCode,
+            ALARM_REQUEST_CODE,
             receiverIntent,
             flags
         );
@@ -533,15 +543,12 @@ public class MyService extends Service {
     }
 
     public static int stopAlarm() {
-        if (alarmManager != null) {
-            if (pendingIntentAlarm != null) {
-                alarmManager.cancel(pendingIntentAlarm);
-                pendingIntentAlarm = null;
-            }
-
-            System.out.println("stopAlarm+++++++++++++++++++++++");
+        if (alarmManager != null && pendingIntentAlarm != null) {
+            alarmManager.cancel(pendingIntentAlarm);
+            // 必须手动取消PendingIntent，避免残留
+            pendingIntentAlarm.cancel();
+            pendingIntentAlarm = null;
         }
-
         return 1;
     }
 
@@ -605,10 +612,9 @@ public class MyService extends Service {
         receiverIntent.setAction(ACTION_TODO_ALARM);
         receiverIntent.putExtra("alarmMessage", strText);
 
-        int requestCode = 0;
         pendingIntentAlarm = PendingIntent.getBroadcast(
             appContext,
-            requestCode,
+            ALARM_REQUEST_CODE,
             receiverIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
@@ -638,7 +644,7 @@ public class MyService extends Service {
         // 2：使用 PendingIntent.getBroadcast
         pendingIntentAlarm = PendingIntent.getBroadcast(
             appContext,
-            0, // 用新的定时覆盖旧的定时
+            ALARM_REQUEST_CODE, // 用新的定时覆盖旧的定时
             alarmIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
@@ -684,7 +690,7 @@ public class MyService extends Service {
                 notifyTodoAlarm(context, message);
 
                 if (ClockActivity.isReady) {
-                    String oldTxt = ClockActivity.text_info
+                    /*String oldTxt = ClockActivity.text_info
                         .getText()
                         .toString();
 
@@ -695,8 +701,9 @@ public class MyService extends Service {
                     String strCurDT0 = formatter.format(date);
                     String strCurDT = " ( " + strCurDT0 + " ) ";
 
-                    String newTxt = message + "\n" + strCurDT + "\n\n" + oldTxt;
-                    ClockActivity.text_info.setText(newTxt);
+                    String newTxt = message + "\n" + strCurDT + "\n\n" + oldTxt;*/
+
+                    ClockActivity.safeUpdateTodoText(message);
 
                     CallJavaNotify_3();
                 }

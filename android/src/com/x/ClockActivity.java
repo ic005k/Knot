@@ -20,6 +20,7 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -64,7 +65,7 @@ public class ClockActivity
 
     private Button btn_cancel;
     private Button btn_play_voice;
-    public static TextView text_info, text_title;
+    public TextView text_info, text_title;
     private String voiceFile;
 
     private static Context context;
@@ -339,7 +340,7 @@ public class ClockActivity
 
         unregisterReceiver(mHomeKeyEvent);
 
-        MyService.clearNotify();
+        MyService.clearNotify(getApplicationContext()); // 传入上下文
 
         if (!isRefreshAlarm) {
             android.os.Process.killProcess(android.os.Process.myPid());
@@ -363,6 +364,8 @@ public class ClockActivity
         super.onDestroy();
 
         m_instance = null; // 释放静态引用
+        text_info = null; // 释放静态控件引用
+        text_title = null;
 
         System.out.println("ClockActivity onDestroy...");
     }
@@ -554,5 +557,55 @@ public class ClockActivity
             if (!Character.isDigit(c)) return false;
         }
         return true;
+    }
+
+    /**
+     * 内部UI更新逻辑（仅内部调用，已做前置校验）
+     */
+    private void updateTextInternal(String message) {
+        // 移除static
+        try {
+            // 3. 校验：text_info控件是否为空
+            if (text_info == null) {
+                Log.w("ClockActivity", "text_info控件未初始化，跳过更新");
+                return;
+            }
+
+            // 拼接文本（复用原有逻辑）
+            String oldTxt = text_info.getText().toString();
+            SimpleDateFormat formatter = new SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss"
+            );
+            Date date = new Date(System.currentTimeMillis());
+            String strCurDT0 = formatter.format(date);
+            String strCurDT = " ( " + strCurDT0 + " ) ";
+            String newTxt = message + "\n" + strCurDT + "\n\n" + oldTxt;
+
+            // 安全更新文本
+            text_info.setText(newTxt);
+            Log.d("ClockActivity", "UI文本更新成功：" + message);
+        } catch (Exception e) {
+            Log.e("ClockActivity", "UI更新异常", e);
+        }
+    }
+
+    public static void safeUpdateTodoText(String message) {
+        // 1. 校验：ClockActivity实例是否存活
+        if (m_instance == null || !isReady) {
+            Log.d("ClockActivity", "实例未就绪，跳过UI更新");
+            return;
+        }
+
+        // 2. 校验：是否在主线程（UI操作必须在主线程）
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            // 非主线程：通过Handler切换到主线程
+            m_instance.runOnUiThread(() ->
+                m_instance.updateTextInternal(message)
+            ); // 改为m_instance调用
+            return;
+        }
+
+        // 主线程：直接更新
+        m_instance.updateTextInternal(message); // 改为m_instance调用
     }
 }

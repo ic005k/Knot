@@ -573,31 +573,6 @@ void Todo::startTimerAlarm(QString text, qlonglong minValue) {
   jo.callStaticMethod<int>("com.x/MyService", "startPreciseAlarmInMyService",
                            "(Ljava/lang/String;)I", javaText.object<jstring>());
 
-  // jo.callStaticMethod<int>("com.x/ClockActivity", "setInfoText",
-  //                          "(Ljava/lang/String;)I",
-  //                          javaText.object<jstring>());
-
-  // sendTodoAlarmMsg(minValue);
-
-#endif
-}
-
-void Todo::sendTodoAlarmMsg(qlonglong minValue) {
-  Q_UNUSED(minValue);
-#ifdef Q_OS_ANDROID
-  QString strNotify;
-  if (minValue > 0)
-    strNotify = tr("Todo Alarm") + " " + m_Method->formatSecondsToHMS(minValue);
-  else
-    return;
-
-  QJniObject javaNotification = QJniObject::fromString(strNotify);
-  QJniObject::callStaticMethod<void>(
-      "com/x/MyService", "notify",
-      "(Landroid/content/Context;Ljava/lang/String;)V",
-      QNativeInterface::QAndroidApplication::context(),
-      javaNotification.object<jstring>());
-
 #endif
 }
 
