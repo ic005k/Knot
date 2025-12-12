@@ -385,6 +385,7 @@ SOURCES += \
     src/EditRecord.cpp \
     src/Exercise/CompassWidget.cpp \
     src/Exercise/DrawSportsFreq.cpp \
+    src/Exercise/StepHillChart.cpp \
     src/JavaToQtBridge.cpp \
     src/LoadPic.cpp \
     src/MainHelper.cpp \
@@ -627,6 +628,7 @@ HEADERS += \
     src/EditRecord.h \
     src/Exercise/CompassWidget.h \
     src/Exercise/DrawSportsFreq.h \
+    src/Exercise/StepHillChart.h \
     src/Exercise/WeatherFetcher.h \
     src/LoadPic.h \
     src/MainHelper.h \

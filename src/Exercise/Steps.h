@@ -35,6 +35,7 @@
 #include "Speedometer.h"
 #include "src/Comm/GeoAddressResolver.h"
 #include "src/Exercise/CompassWidget.h"
+#include "src/Exercise/StepHillChart.h"
 #include "src/Exercise/StepsOptions.h"
 #include "src/Exercise/WeatherFetcher.h"
 
@@ -217,6 +218,9 @@ class Steps : public QDialog {
   QDateTime m_lastSaveSpeedTime;     // 上次保存路线的时间
   QDateTime m_lastFetchWeatherTime;  // 上次请求天气的时间
   bool isInitTime;
+
+  std::vector<int> m_stepData;
+  StepHillChart* m_stepChart;
 
   double bearing1;
 

@@ -118,6 +118,12 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   QString gpspath = iniDir + "/memo/gps/";
   if (!gpsdir.exists(gpspath)) gpsdir.mkpath(gpspath);
 
+  // Steps Chart
+  m_stepChart = new StepHillChart(this);
+  m_stepChart->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+  mui->tab_Steps->layout()->addWidget(m_stepChart);
+  m_stepChart->setStepData(m_stepData);
+
   getHardStepSensor();
 
   // Speed
@@ -299,6 +305,7 @@ void Steps::saveSteps() {
 
 void Steps::loadStepsToTable() {
   clearAll();
+  m_stepData.clear();
 
   // 获取Steps对象（对应原INI的/Steps节点）
   QJsonObject stepsObj = rootObj["Steps"].toObject();
@@ -323,6 +330,8 @@ void Steps::loadStepsToTable() {
       str0 = rowArray.size() > 0 ? rowArray[0].toString("") : "";
       steps = rowArray.size() > 1 ? rowArray[1].toVariant().toLongLong(0) : 0;
       str2 = rowArray.size() > 2 ? rowArray[2].toString("") : "";
+
+      m_stepData.push_back(steps);
     }
 
     // 处理公里数（若为空则计算）
@@ -338,6 +347,8 @@ void Steps::loadStepsToTable() {
       addRecord(str0, steps, str2);
     }
   }
+
+  m_stepChart->setStepData(m_stepData);
 
   m_Method->setCurrentIndexFromQW(mui->qwSteps, getCount() - 1);
   m_Method->setScrollBarPos(mui->qwSteps, 1.0);
