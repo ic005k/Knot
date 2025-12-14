@@ -423,6 +423,10 @@ void Todo::on_btnSetTime() {
   int count = getCount();
   if (count == 0) return;
 
+  mui->btnAddTodo->hide();
+  mui->editTodo->hide();
+  mui->btnClear->hide();
+
   int row = getCurrentIndex();
   currentTodoItem = getItemTodoText(row);
 
@@ -1811,3 +1815,9 @@ void Todo::on_btnTestSpeech() {
 }
 
 void Todo::setAlarmShowValue(bool value) { isTodoAlarmShow = value; }
+
+void Todo::showInputPanel() {
+  mui->btnAddTodo->show();
+  mui->editTodo->show();
+  mui->btnClear->show();
+}

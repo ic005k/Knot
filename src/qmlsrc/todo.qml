@@ -25,6 +25,7 @@ Rectangle {
 
         setTodoAlarm.close()
         m_Todo.setAlarmShowValue(false)
+        m_Todo.showInputPanel()
     }
 
     function isAlarm(index) {

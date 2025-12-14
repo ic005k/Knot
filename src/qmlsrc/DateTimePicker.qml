@@ -1,10 +1,11 @@
 import QtQuick 6.2
 import QtQuick.Controls 6.2
+import QtQuick.Layouts 6.2
 
 Rectangle {
     id: pickerRoot
-    width: parent.width - 0
-    height: 320
+    width: parent.width
+    height: parent.height
     color: isDark ? "#333333" : "#f5f5f7"
     radius: 16
     border.width: 1
@@ -12,8 +13,8 @@ Rectangle {
     clip: true
 
     // 内部状态属性
-    property int systemCurrentYear: new Date().getFullYear() // 系统当前年（固定）
-    property int currentYear: systemCurrentYear // 初始化为系统当前年（用户可修改）
+    property int systemCurrentYear: new Date().getFullYear()
+    property int currentYear: systemCurrentYear
     property int currentMonth: new Date().getMonth() + 1
     property int currentDay: new Date().getDate()
     property int currentHour: new Date().getHours()
@@ -44,11 +45,10 @@ Rectangle {
         dayTumbler.currentIndex = currentDay - 1
     }
 
-    Column {
+    ColumnLayout {
         anchors.fill: parent
+        anchors.margins: 15
         spacing: 10
-        topPadding: 15
-        bottomPadding: 10
 
         // 日期标签
         Text {
@@ -56,28 +56,29 @@ Rectangle {
             font.pixelSize: 18
             font.bold: true
             color: isDark ? "#EEEEEE" : "#000000"
-            anchors.horizontalCenter: parent.horizontalCenter
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredHeight: 30
         }
 
-        // 日期选择区域 - 简洁布局
-        Row {
-            width: parent.width - 40
-            height: 90
-            anchors.horizontalCenter: parent.horizontalCenter
+        // 日期选择区域
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.minimumHeight: 80
+            Layout.preferredHeight: parent.height * 0.35
             spacing: 0
 
             // 年选择器
             Tumbler {
                 id: yearTumbler
-                width: parent.width / 3
-                height: parent.height
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredWidth: parent.width / 3 + 50
                 wrap: true
-                visibleItemCount: 3
+                visibleItemCount: 3  // Tumbler的visibleItemCount属性
                 model: {
                     var years = []
-                    // 结束年基于系统当前年+15（固定范围，不随用户选择变化）
                     var endYear = systemCurrentYear + yearRange
-                    // 起始年固定为2022
                     for (var i = startYear; i <= endYear; i++) {
                         years.push(i)
                     }
@@ -87,9 +88,10 @@ Rectangle {
 
                 delegate: Text {
                     width: yearTumbler.width
-                    height: 40
+                    // 修复：通过Tumbler.tumbler访问visibleItemCount
+                    height: Tumbler.tumbler.height / Tumbler.tumbler.visibleItemCount
                     text: modelData
-                    font.pixelSize: 20
+                    font.pixelSize: yearTumbler.height * 0.25
                     color: Tumbler.tumbler.currentIndex === index ? "#007aff" : "#999999"
                     font.bold: Tumbler.tumbler.currentIndex === index
                     horizontalAlignment: Text.AlignHCenter
@@ -108,8 +110,9 @@ Rectangle {
             // 月选择器
             Tumbler {
                 id: monthTumbler
-                width: parent.width / 3
-                height: parent.height
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredWidth: parent.width / 3 - 25
                 wrap: true
                 visibleItemCount: 3
                 model: Array.from({
@@ -119,9 +122,10 @@ Rectangle {
 
                 delegate: Text {
                     width: monthTumbler.width
-                    height: 40
+                    // 修复：通过Tumbler.tumbler访问visibleItemCount
+                    height: Tumbler.tumbler.height / Tumbler.tumbler.visibleItemCount
                     text: modelData
-                    font.pixelSize: 20
+                    font.pixelSize: monthTumbler.height * 0.25
                     color: Tumbler.tumbler.currentIndex === index ? "#007aff" : "#999999"
                     font.bold: Tumbler.tumbler.currentIndex === index
                     horizontalAlignment: Text.AlignHCenter
@@ -140,8 +144,9 @@ Rectangle {
             // 日选择器
             Tumbler {
                 id: dayTumbler
-                width: parent.width / 3
-                height: parent.height
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredWidth: parent.width / 3 - 25
                 wrap: true
                 visibleItemCount: 3
                 model: Array.from({
@@ -152,9 +157,10 @@ Rectangle {
 
                 delegate: Text {
                     width: dayTumbler.width
-                    height: 40
+                    // 修复：通过Tumbler.tumbler访问visibleItemCount
+                    height: Tumbler.tumbler.height / Tumbler.tumbler.visibleItemCount
                     text: modelData
-                    font.pixelSize: 20
+                    font.pixelSize: dayTumbler.height * 0.25
                     color: Tumbler.tumbler.currentIndex === index ? "#007aff" : "#999999"
                     font.bold: Tumbler.tumbler.currentIndex === index
                     horizontalAlignment: Text.AlignHCenter
@@ -172,10 +178,11 @@ Rectangle {
 
         // 分隔线
         Rectangle {
-            width: parent.width - 40
-            height: 1
+            Layout.fillWidth: true
+            Layout.preferredHeight: 1
+            Layout.maximumWidth: parent.width - 40
+            Layout.alignment: Qt.AlignHCenter
             color: "#e0e0e0"
-            anchors.horizontalCenter: parent.horizontalCenter
         }
 
         // 时间标签
@@ -184,21 +191,24 @@ Rectangle {
             font.pixelSize: 18
             font.bold: true
             color: isDark ? "#EEEEEE" : "#000000"
-            anchors.horizontalCenter: parent.horizontalCenter
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredHeight: 30
         }
 
-        // 时间选择区域 - 简洁布局
-        Row {
-            width: parent.width - 40
-            height: 90
-            anchors.horizontalCenter: parent.horizontalCenter
+        // 时间选择区域
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.minimumHeight: 80
+            Layout.preferredHeight: parent.height * 0.35
             spacing: 0
 
             // 时选择器
             Tumbler {
                 id: hourTumbler
-                width: parent.width * 0.4
-                height: parent.height
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredWidth: parent.width * 0.4
                 wrap: true
                 visibleItemCount: 3
                 model: Array.from({
@@ -208,9 +218,10 @@ Rectangle {
 
                 delegate: Text {
                     width: hourTumbler.width
-                    height: 40
+                    // 修复：通过Tumbler.tumbler访问visibleItemCount
+                    height: Tumbler.tumbler.height / Tumbler.tumbler.visibleItemCount
                     text: modelData.toString().padStart(2, "0")
-                    font.pixelSize: 20
+                    font.pixelSize: hourTumbler.height * 0.25
                     color: Tumbler.tumbler.currentIndex === index ? "#007aff" : "#999999"
                     font.bold: Tumbler.tumbler.currentIndex === index
                     horizontalAlignment: Text.AlignHCenter
@@ -227,13 +238,14 @@ Rectangle {
 
             // 冒号分隔符
             Item {
-                width: parent.width * 0.2
-                height: parent.height
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredWidth: parent.width * 0.2
 
                 Text {
                     anchors.centerIn: parent
+                    font.pixelSize: parent.height * 0.3
                     text: ":"
-                    font.pixelSize: 24
                     color: "#666666"
                     font.bold: true
                 }
@@ -242,8 +254,9 @@ Rectangle {
             // 分选择器
             Tumbler {
                 id: minuteTumbler
-                width: parent.width * 0.4
-                height: parent.height
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredWidth: parent.width * 0.4
                 wrap: true
                 visibleItemCount: 3
                 model: Array.from({
@@ -253,9 +266,10 @@ Rectangle {
 
                 delegate: Text {
                     width: minuteTumbler.width
-                    height: 40
+                    // 修复：通过Tumbler.tumbler访问visibleItemCount
+                    height: Tumbler.tumbler.height / Tumbler.tumbler.visibleItemCount
                     text: modelData
-                    font.pixelSize: 20
+                    font.pixelSize: minuteTumbler.height * 0.25
                     color: Tumbler.tumbler.currentIndex === index ? "#007aff" : "#999999"
                     font.bold: Tumbler.tumbler.currentIndex === index
                     horizontalAlignment: Text.AlignHCenter
@@ -272,58 +286,43 @@ Rectangle {
         }
     }
 
-    // 监听年份和月份变化，更新天数
-    //onCurrentYearChanged: updateDayCount()
-    //onCurrentMonthChanged: updateDayCount()
-
-    // 1. 年份变化时，同步更新年滚轮
+    // 监听逻辑保持不变
     onCurrentYearChanged: {
         const yearIndex = yearTumbler.model.indexOf(currentYear)
         if (yearIndex !== -1) {
-            // 确保索引有效
             yearTumbler.currentIndex = yearIndex
         }
     }
 
-    // 2. 月份变化时，同步更新月滚轮，并刷新天数
     onCurrentMonthChanged: {
         const monthIndex = currentMonth - 1
-        // 月份是1-12，滚轮索引是0-11
         if (monthIndex >= 0 && monthIndex < 12) {
             monthTumbler.currentIndex = monthIndex
         }
-        updateDayCount() // 月份变了，重新计算当月天数
+        updateDayCount()
     }
 
-    // 3. 日期变化时，同步更新日滚轮
     onCurrentDayChanged: {
         const dayIndex = currentDay - 1
-        // 先检查model是否存在，再判断索引有效性
-        if (dayTumbler.model && dayIndex >= 0
-                && dayIndex < dayTumbler.model.length) {
+        if (dayTumbler.model && dayIndex >= 0 && dayIndex < dayTumbler.model.length) {
             dayTumbler.currentIndex = dayIndex
         } else {
-            // 可选：打印调试信息，确认问题场景
-            console.log("dayTumbler.model未初始化或dayIndex无效，currentDay:",
-                        currentDay)
+            console.log("dayTumbler.model未初始化或dayIndex无效，currentDay:", currentDay)
         }
     }
 
-    // 4. 小时变化时，同步更新时滚轮
     onCurrentHourChanged: {
         if (currentHour >= 0 && currentHour < 24) {
             hourTumbler.currentIndex = currentHour
         }
     }
 
-    // 5. 分钟变化时，同步更新分滚轮
     onCurrentMinuteChanged: {
         if (currentMinute >= 0 && currentMinute < 60) {
             minuteTumbler.currentIndex = currentMinute
         }
     }
 
-    // 组件完成时初始化
     Component.onCompleted: {
         const years = yearTumbler.model
         const yearIndex = years.indexOf(currentYear)

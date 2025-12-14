@@ -3306,7 +3306,7 @@ QSlider::handle:horizontal:disabled {
           <enum>QTabWidget::TabPosition::South</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tab_Steps">
           <attribute name="title">
@@ -3579,6 +3579,9 @@ QSlider::handle:horizontal:disabled {
              </item>
              <item>
               <widget class="QCheckBox" name="chkPlayRunVoice">
+               <property name="styleSheet">
+                <string notr="true"/>
+               </property>
                <property name="text">
                 <string>Voice</string>
                </property>

@@ -39,7 +39,8 @@ Rectangle {
             spacing: 3 // 排与排之间的间距略增大，避免拥挤
 
             Layout.fillWidth: true
-            Layout.preferredHeight: 50 // 适当增加高度，避免内容挤压
+            //Layout.preferredHeight: 50 // 适当增加高度，避免内容挤压
+            //Layout.minimumHeight: 120  // 适配三行开关+标题的最小高度
 
             Text {
                 text: qsTr("Select by Week")
@@ -244,7 +245,8 @@ Rectangle {
             Layout.fillWidth: true
             Layout.maximumWidth: parent.width - 10
             Layout.preferredWidth: parent.width - 10
-            Layout.preferredHeight: 300
+            // Layout.preferredHeight: 300
+            Layout.fillHeight: true // 高度填充剩余空间（核心）
             Layout.alignment: Qt.AlignHCenter
         }
 
@@ -308,7 +310,6 @@ Rectangle {
                 text: qsTr("Back")
                 onClicked: {
 
-
                     closeTodoAlarm()
                 }
                 padding: 8
@@ -320,7 +321,6 @@ Rectangle {
                 text: qsTr("Del Alarm")
                 onClicked: {
                     m_Todo.on_DelAlarm()
-
 
                     closeTodoAlarm()
                 }
@@ -341,7 +341,6 @@ Rectangle {
                                        dateTimePicker.currentDay,
                                        dateTimePicker.currentHour,
                                        dateTimePicker.currentMinute)
-
 
                     closeTodoAlarm()
                 }
