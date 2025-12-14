@@ -209,5 +209,6 @@
         <file>res/del_l.svg</file>
         <file>res/remarks.svg</file>
         <file>res/remarks_l.svg</file>
+        <file>res/sound/tumbler_click.wav</file>
     </qresource>
 </RCC>

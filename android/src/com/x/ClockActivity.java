@@ -204,7 +204,24 @@ public class ClockActivity
         String strCurDT0 = formatter.format(date);
         String strCurDT = " ( " + strCurDT0 + " ) ";
 
-        strInfo = MyService.strTodoAlarm;
+        // 原有代码
+        // strInfo = MyService.strTodoAlarm;
+
+        // 替换为（条件分支，不影响原有逻辑）
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("SAVED_CLOCK_CONTENT")) {
+            // 仅在「切换主题恢复打开」时生效（有传参）
+            String savedContent = intent.getStringExtra("SAVED_CLOCK_CONTENT");
+            if (!TextUtils.isEmpty(savedContent)) {
+                this.strInfo = savedContent;
+            } else {
+                // 无有效保存内容，仍走原有逻辑
+                this.strInfo = MyService.strTodoAlarm;
+            }
+        } else {
+            // 日常正常打开ClockActivity（无传参），完全走原有逻辑
+            this.strInfo = MyService.strTodoAlarm;
+        }
 
         System.out.println("Info Text: " + strInfo);
 
@@ -362,6 +379,17 @@ public class ClockActivity
         application.unregisterActivityLifecycleCallbacks(this);
 
         super.onDestroy();
+
+        // 若不是「主题切换关闭」（即正常关闭），清空恢复标记
+        synchronized (MyActivity.clockLock) {
+            // 检查当前是否是“需要恢复”的状态，且当前窗口是被正常关闭（而非主题切换）
+            if (MyActivity.isNeedRestoreClock) {
+                // 正常关闭时，清空标记（避免误恢复）
+                MyActivity.isNeedRestoreClock = false;
+                MyActivity.savedClockContent = "";
+                Log.d("ClockActivity", "正常关闭，清空恢复标记");
+            }
+        }
 
         m_instance = null; // 释放静态引用
         text_info = null; // 释放静态控件引用
@@ -607,5 +635,10 @@ public class ClockActivity
 
         // 主线程：直接更新
         m_instance.updateTextInternal(message); // 改为m_instance调用
+    }
+
+    // 暴露strInfo给MyActivity（原有strInfo为private，需添加getter）
+    public String getStrInfo() {
+        return this.strInfo;
     }
 }

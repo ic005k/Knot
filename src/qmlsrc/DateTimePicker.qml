@@ -1,7 +1,9 @@
 import QtQuick 6.2
 import QtQuick.Controls 6.2
 import QtQuick.Layouts 6.2
+import QtMultimedia 6.2
 
+// 导入多媒体模块用于播放音效
 Rectangle {
     id: pickerRoot
     width: parent.width
@@ -30,6 +32,21 @@ Rectangle {
     // 年份范围设置
     property int startYear: 2022
     property int yearRange: 15
+
+    // 滚动音效组件（模拟安卓哒哒声）
+    SoundEffect {
+        id: tumblerSound
+        source: "/res/sound/tumbler_click.wav" // 音效文件路径（建议用WAV格式）
+        volume: 0.7 // 音量（0-1）
+        loops: 1 // 仅播放一次
+    }
+
+    // 防抖播放音效（避免滚动时频繁触发）
+    function playTumblerSound() {
+        // 停止当前可能正在播放的音效，避免叠加
+        tumblerSound.stop()
+        tumblerSound.play()
+    }
 
     function getDaysInMonth(year, month) {
         return new Date(year, month, 0).getDate()
@@ -75,7 +92,7 @@ Rectangle {
                 Layout.fillHeight: true
                 Layout.preferredWidth: parent.width / 3 + 50
                 wrap: true
-                visibleItemCount: 3  // Tumbler的visibleItemCount属性
+                visibleItemCount: 3
                 model: {
                     var years = []
                     var endYear = systemCurrentYear + yearRange
@@ -88,7 +105,6 @@ Rectangle {
 
                 delegate: Text {
                     width: yearTumbler.width
-                    // 修复：通过Tumbler.tumbler访问visibleItemCount
                     height: Tumbler.tumbler.height / Tumbler.tumbler.visibleItemCount
                     text: modelData
                     font.pixelSize: yearTumbler.height * 0.25
@@ -103,6 +119,7 @@ Rectangle {
                     if (currentIndex >= 0 && currentIndex < model.length) {
                         currentYear = model[currentIndex]
                         updateDayCount()
+                        playTumblerSound() // 播放滚动音效
                     }
                 }
             }
@@ -122,7 +139,6 @@ Rectangle {
 
                 delegate: Text {
                     width: monthTumbler.width
-                    // 修复：通过Tumbler.tumbler访问visibleItemCount
                     height: Tumbler.tumbler.height / Tumbler.tumbler.visibleItemCount
                     text: modelData
                     font.pixelSize: monthTumbler.height * 0.25
@@ -137,6 +153,7 @@ Rectangle {
                     if (currentIndex >= 0 && currentIndex < model.length) {
                         currentMonth = model[currentIndex]
                         updateDayCount()
+                        playTumblerSound() // 播放滚动音效
                     }
                 }
             }
@@ -157,7 +174,6 @@ Rectangle {
 
                 delegate: Text {
                     width: dayTumbler.width
-                    // 修复：通过Tumbler.tumbler访问visibleItemCount
                     height: Tumbler.tumbler.height / Tumbler.tumbler.visibleItemCount
                     text: modelData
                     font.pixelSize: dayTumbler.height * 0.25
@@ -171,6 +187,7 @@ Rectangle {
                 onCurrentIndexChanged: {
                     if (currentIndex >= 0 && currentIndex < model.length) {
                         currentDay = model[currentIndex]
+                        playTumblerSound() // 播放滚动音效
                     }
                 }
             }
@@ -218,7 +235,6 @@ Rectangle {
 
                 delegate: Text {
                     width: hourTumbler.width
-                    // 修复：通过Tumbler.tumbler访问visibleItemCount
                     height: Tumbler.tumbler.height / Tumbler.tumbler.visibleItemCount
                     text: modelData.toString().padStart(2, "0")
                     font.pixelSize: hourTumbler.height * 0.25
@@ -232,6 +248,7 @@ Rectangle {
                 onCurrentIndexChanged: {
                     if (currentIndex >= 0 && currentIndex < model.length) {
                         currentHour = model[currentIndex]
+                        playTumblerSound() // 播放滚动音效
                     }
                 }
             }
@@ -266,7 +283,6 @@ Rectangle {
 
                 delegate: Text {
                     width: minuteTumbler.width
-                    // 修复：通过Tumbler.tumbler访问visibleItemCount
                     height: Tumbler.tumbler.height / Tumbler.tumbler.visibleItemCount
                     text: modelData
                     font.pixelSize: minuteTumbler.height * 0.25
@@ -280,6 +296,7 @@ Rectangle {
                 onCurrentIndexChanged: {
                     if (currentIndex >= 0 && currentIndex < model.length) {
                         currentMinute = currentIndex
+                        playTumblerSound() // 播放滚动音效
                     }
                 }
             }
@@ -304,10 +321,12 @@ Rectangle {
 
     onCurrentDayChanged: {
         const dayIndex = currentDay - 1
-        if (dayTumbler.model && dayIndex >= 0 && dayIndex < dayTumbler.model.length) {
+        if (dayTumbler.model && dayIndex >= 0
+                && dayIndex < dayTumbler.model.length) {
             dayTumbler.currentIndex = dayIndex
         } else {
-            console.log("dayTumbler.model未初始化或dayIndex无效，currentDay:", currentDay)
+            console.log("dayTumbler.model未初始化或dayIndex无效，currentDay:",
+                        currentDay)
         }
     }
 
