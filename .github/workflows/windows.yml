@@ -56,7 +56,7 @@ jobs:
           arch: ${{ matrix.qt_arch }}
           cached: 'false'
           # qtwebengine
-          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning
+          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
           
       # 拉取代码
       - uses: actions/checkout@v2

@@ -42,6 +42,14 @@ Preferences::Preferences(QWidget* parent)
   ui->lblZipTip->setWordWrap(true);
   ui->editPassword->setEchoMode(QLineEdit::EchoMode::Password);
   ui->editValidate->setEchoMode(QLineEdit::EchoMode::Password);
+
+  if (isAndroid) {
+    ui->sliderFontSize->setMinimum(15);
+    ui->sliderFontSize->setMaximum(21);
+  } else {
+    ui->sliderFontSize->setMinimum(9);
+    ui->sliderFontSize->setMaximum(21);
+  }
 }
 
 Preferences::~Preferences() { delete ui; }

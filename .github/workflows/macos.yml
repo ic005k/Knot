@@ -50,7 +50,7 @@ jobs:
           target: desktop
           arch: clang_64 
           # qtwebengine
-          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning
+          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
           install-deps: true
           source: false
           dir: ${{ env.QT_DIR }}  # 关键：指定安装到正确路径
