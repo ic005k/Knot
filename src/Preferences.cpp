@@ -290,16 +290,27 @@ void Preferences::on_btnReStart_clicked() {
   saveOptions();
 
 #ifdef Q_OS_ANDROID
-
+  // 1. 获取MyActivity实例（关键：用自己的Activity，而非QtActivity）
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  activity.callMethod<int>("setReOpen", "()I");
-
+  if (activity.isValid()) {
+    // 标记需要重启（兜底）
+    activity.callMethod<void>("markNeedRestart");
+    // 主动触发重启（核心：直接调用Android侧重启方法）
+    activity.callMethod<void>("triggerRestart");
+  }
+  // 2. 仅关闭Qt窗口，不强制exit（避免Qt析构崩溃）
+  if (mw_one) {
+    mw_one->close();
+  }
 #else
-  QProcess::startDetached(qApp->applicationFilePath(), QStringList());
 
-#endif
+  QTimer::singleShot(1000, mw_one, []() {
+    QProcess::startDetached(qApp->applicationFilePath(), QStringList());
+  });
 
   mw_one->close();
+
+#endif
 }
 
 void Preferences::setBakStatus(bool status) {

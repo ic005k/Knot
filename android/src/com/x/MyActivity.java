@@ -160,6 +160,10 @@ public class MyActivity
     extends QtActivity
     implements Application.ActivityLifecycleCallbacks {
 
+    // 新增：持久化重启标记的Key
+    private static final String PREFS_RESTART = "restart_prefs";
+    private static final String KEY_NEED_RESTART = "need_restart";
+
     // ========== 新增：保存ClockActivity内容的静态变量 ==========
     public static String savedClockContent = ""; // 存储ClockActivity的原始内容
     public static final Object clockLock = new Object(); // 同步锁，保证线程安全
@@ -1197,9 +1201,9 @@ public class MyActivity
 
         if (isGpsRunning) stopGpsUpdates();
 
-        if (ReOpen) {
-            openAppFromPackageName("com.x");
-            Log.i(TAG, "reopen = done...");
+        if (checkNeedRestart()) {
+            restartApp(); // 调用重构后的重启方法
+            Log.i(TAG, "触发应用重启...");
         }
 
         getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
@@ -1512,64 +1516,6 @@ public class MyActivity
         }
         intent.setDataAndType(uri, type);
         getMyAppContext().startActivity(intent);
-    }
-
-    private boolean ReOpen = false;
-
-    public int setReOpen() {
-        ReOpen = true;
-
-        return 1;
-    }
-
-    public void openAppFromPackageName(String pname) {
-        PackageManager packageManager = getPackageManager();
-        Intent it = packageManager.getLaunchIntentForPackage(pname);
-        startActivity(it);
-    }
-
-    private void doStartApplicationWithPackageName(String packagename) {
-        Log.i(TAG, "自启动开始...");
-        // 通过包名获取此APP详细信息，包括Activities、services、versioncode、name等等
-        PackageInfo packageinfo = null;
-        try {
-            packageinfo = getPackageManager().getPackageInfo(packagename, 0);
-        } catch (NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        if (packageinfo == null) {
-            return;
-        }
-
-        // 创建一个类别为CATEGORY_LAUNCHER的该包名的Intent
-        Intent resolveIntent = new Intent(Intent.ACTION_MAIN, null);
-        resolveIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        resolveIntent.setPackage(packageinfo.packageName);
-
-        // 通过getPackageManager()的queryIntentActivities方法遍历
-        List<ResolveInfo> resolveinfoList =
-            getPackageManager().queryIntentActivities(resolveIntent, 0);
-
-        ResolveInfo resolveinfo = resolveinfoList.iterator().next();
-        if (resolveinfo != null) {
-            // packagename = 参数packname
-            String packageName = resolveinfo.activityInfo.packageName;
-            // 这个就是我们要找的该APP的LAUNCHER的Activity[组织形式：packagename.mainActivityname]
-            String className = resolveinfo.activityInfo.name;
-            // LAUNCHER Intent
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_LAUNCHER);
-
-            // 设置ComponentName参数1:packagename参数2:MainActivity路径
-            ComponentName cn = new ComponentName(packageName, className);
-
-            intent.setComponent(cn);
-            startActivity(intent);
-
-            Log.i(TAG, "启动自己已完成...");
-        }
-
-        Log.i(TAG, "过程完成...");
     }
 
     // ==============================================================================================
@@ -3148,5 +3094,125 @@ public class MyActivity
             isNeedRestoreClock = false;
             savedClockContent = "";
         }
+    }
+
+    // 新增：标记需要重启（替代原setReOpen）
+    public void markNeedRestart() {
+        SharedPreferences sp = getSharedPreferences(
+            PREFS_RESTART,
+            Context.MODE_PRIVATE
+        );
+        sp.edit().putBoolean(KEY_NEED_RESTART, true).apply();
+    }
+
+    // 新增：检查并清除重启标记
+    private boolean checkNeedRestart() {
+        SharedPreferences sp = getSharedPreferences(
+            PREFS_RESTART,
+            Context.MODE_PRIVATE
+        );
+        boolean needRestart = sp.getBoolean(KEY_NEED_RESTART, false);
+        // 清除标记，避免重复重启
+        if (needRestart) {
+            sp.edit().putBoolean(KEY_NEED_RESTART, false).apply();
+        }
+        return needRestart;
+    }
+
+    // 重构：彻底重启应用的核心方法
+    private void restartApp() {
+        try {
+            // 1. 获取应用启动Intent（确保启动主Activity）
+            PackageManager pm = getPackageManager();
+            Intent launchIntent = pm.getLaunchIntentForPackage(
+                getPackageName()
+            );
+            if (launchIntent == null) {
+                Log.e(TAG, "获取启动Intent失败");
+                return;
+            }
+
+            // 2. 添加关键标记：清空任务栈+新建任务+清除顶部
+            launchIntent.addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK | // 新建任务栈
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK | // 清空原有任务栈
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP | // 清除顶部Activity
+                    Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED // 必要时重置任务
+            );
+
+            // 3. 主线程延迟启动（避开onDestroy的销毁状态）
+            new Handler(Looper.getMainLooper()).postDelayed(
+                () -> {
+                    startActivity(launchIntent);
+                    Log.i(TAG, "启动新应用实例成功");
+
+                    // 4. 强制终止旧进程（关键：确保旧进程退出）
+                    Process.killProcess(Process.myPid());
+                    System.exit(0);
+                },
+                300
+            ); // 300ms延迟，给系统留足处理时间
+        } catch (Exception e) {
+            Log.e(TAG, "重启应用失败", e);
+        }
+    }
+
+    // 核心：主动触发重启（无广播接收器）
+    public void triggerRestart() {
+        new Handler(Looper.getMainLooper()).post(() -> {
+            try {
+                // 1. 获取应用启动Intent（确保启动主Activity）
+                PackageManager pm = getPackageManager();
+                Intent launchIntent = pm.getLaunchIntentForPackage(
+                    getPackageName()
+                );
+                if (launchIntent == null) {
+                    Log.e(TAG, "获取启动Intent失败，使用备用方式");
+                    // 备用方式：直接指定MyActivity
+                    launchIntent = new Intent(this, MyActivity.class);
+                    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                }
+
+                // 2. 关键标记：确保全新启动（兼容所有Android版本）
+                launchIntent.addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK | // 新建任务栈
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK | // 清空旧任务栈
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP | // 清除顶部Activity
+                        Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED // 重置任务栈
+                );
+
+                // 3. Android 10+ 后台启动兼容（可选，增强稳定性）
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    ActivityManager am = (ActivityManager) getSystemService(
+                        Context.ACTIVITY_SERVICE
+                    );
+                    if (am != null) {
+                        am.moveTaskToFront(
+                            getTaskId(),
+                            ActivityManager.MOVE_TASK_NO_USER_ACTION
+                        );
+                    }
+                }
+
+                // 4. 启动新实例（先启动，再终止旧进程）
+                startActivity(launchIntent);
+                Log.i(TAG, "已触发应用重启，等待旧进程终止");
+
+                // 5. 延迟终止旧进程（给系统留足时间处理启动Intent）
+                new Handler(Looper.getMainLooper()).postDelayed(
+                    () -> {
+                        finish(); // 关闭当前Activity
+                        Process.killProcess(Process.myPid()); // 终止旧进程
+                        System.exit(0);
+                    },
+                    500
+                ); // 500ms延迟，确保启动Intent已生效
+            } catch (Exception e) {
+                Log.e(TAG, "重启失败，使用兜底方案", e);
+                // 兜底：仅终止进程，依赖onDestroy中的兜底逻辑
+                finish();
+                Process.killProcess(Process.myPid());
+            }
+        });
     }
 }
