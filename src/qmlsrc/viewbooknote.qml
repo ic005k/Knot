@@ -54,7 +54,7 @@ Rectangle {
                 Rectangle {
                     color: "#FF0000"
                     radius: 0
-                    width: 5
+                    width: 2
                     height: parent.height
 
                     opacity: cIndex === index ? 1 : 0
