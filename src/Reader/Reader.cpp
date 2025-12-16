@@ -513,6 +513,8 @@ void Reader::getBookList() {
     QStringList list = str.split("|");
     if (QFile(list.at(1)).exists()) bookList.append(str);
   }
+
+  qDebug() << "BookList=" << bookList;
 }
 
 void Reader::setQMLText(QString txt1) {

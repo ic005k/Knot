@@ -1546,14 +1546,6 @@ void MainWindow::on_hSlider_sliderMoved(int position) {
 void MainWindow::on_btnReadList_clicked() {
   if (mui->qwViewBookNote->isVisible()) return;
 
-  if (mui->qwBookList->source().isEmpty()) {
-    mui->qwBookList->rootContext()->setContextProperty("fontSize", fontSize);
-    mui->qwBookList->rootContext()->setContextProperty("m_Reader",
-                                                       mw_one->m_Reader);
-    mui->qwBookList->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/booklist.qml")));
-  }
-
   mui->btnAutoStop->click();
 
   m_Reader->saveReader("", false);

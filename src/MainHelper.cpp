@@ -514,6 +514,15 @@ void MainHelper::initMainQW() {
   mui->qwReader->rootContext()->setContextProperty("isAutoRun",
                                                    QVariant(false));
   m_ReaderSet->setScrollValue();
+
+  // Book List
+  if (mui->qwBookList->source().isEmpty()) {
+    mui->qwBookList->rootContext()->setContextProperty("fontSize", fontSize);
+    mui->qwBookList->rootContext()->setContextProperty("m_Reader",
+                                                       mw_one->m_Reader);
+    mui->qwBookList->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/booklist.qml")));
+  }
 }
 
 void MainHelper::initNotesQW() {
