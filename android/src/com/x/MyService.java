@@ -128,7 +128,7 @@ public class MyService extends Service {
         registerReceiver(myalarmReceiver, filter);
 
         // 计步器
-        mySensorSerivece = new PersistService();
+        mySensorSerivece = new PersistService(MyService.this); // 传入Service上下文
         mSensorManager = (SensorManager) getSystemService(
             Context.SENSOR_SERVICE
         );
@@ -142,7 +142,7 @@ public class MyService extends Service {
             !hasExactAlarmPermission(context)
         ) {
             // 引导用户到设置页面授予权限
-            requestExactAlarmPermission((Activity) context);
+            requestExactAlarmPermission(context); // 直接传Context，不再强转
             return;
         }
 
@@ -415,14 +415,20 @@ public class MyService extends Service {
     }
 
     /////////////////////// Steps Sensor /////////////////////////////////////
+    class PersistService implements SensorEventListener {
 
-    class PersistService extends Service implements SensorEventListener {
+        // 去掉extends Service
+        private final Context mContext; // 持有Service上下文，避免内存泄漏
+
+        // 构造方法传入上下文
+        public PersistService(Context context) {
+            this.mContext = context;
+        }
 
         public BroadcastReceiver mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (mSensorManager != null) {
-                    // 取消监听后重写监听，以保持后台运行
                     mSensorManager.unregisterListener(PersistService.this);
                     mSensorManager.registerListener(
                         PersistService.this,
@@ -442,17 +448,9 @@ public class MyService extends Service {
 
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
-            // 做个判断传感器类型很重要，这可以过滤掉杂音（比如可能来自其它传感器的值）
             if (sensorEvent.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
-                // float[] values = sensorEvent.values;
                 stepCounts = (long) sensorEvent.values[0];
             }
-        }
-
-        @Override
-        public IBinder onBind(Intent intent) {
-            // Auto-generated method stub
-            return null;
         }
     }
 
@@ -462,17 +460,18 @@ public class MyService extends Service {
     private static SensorManager mSensorManager;
 
     public void initStepSensor() {
-        if (countSensor != null) {
-            if (mSensorManager != null) {
-                mSensorManager.unregisterListener(mySensorSerivece);
-                mSensorManager.registerListener(
-                    mySensorSerivece,
-                    mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER),
-                    SensorManager.SENSOR_DELAY_NORMAL
-                );
-            }
+        if (countSensor != null && mSensorManager != null) {
+            // 增加mSensorManager空判
+            mSensorManager.unregisterListener(mySensorSerivece);
+            mSensorManager.registerListener(
+                mySensorSerivece,
+                countSensor, // 直接用已获取的countSensor，无需重复getDefaultSensor
+                SensorManager.SENSOR_DELAY_NORMAL
+            );
             isStepCounter = 1;
-        } else isStepCounter = 0;
+        } else {
+            isStepCounter = 0;
+        }
     }
 
     public static int getHardStepCounter() {
@@ -565,15 +564,17 @@ public class MyService extends Service {
     }
 
     // 请求精确闹钟权限
-    private void requestExactAlarmPermission(Activity activity) {
+    private void requestExactAlarmPermission(Context context) {
+        // 参数改为Context
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            return; // API 31 以下不需要此权限
+            return;
         }
-
-        Intent intent = new Intent();
-        intent.setAction(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-        intent.setData(Uri.parse("package:" + activity.getPackageName()));
-        activity.startActivityForResult(intent, 1001); // 1001 是请求码，可自定义
+        Intent intent = new Intent(
+            Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+        );
+        intent.setData(Uri.parse("package:" + context.getPackageName()));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // Service启动Activity必须加此标志
+        context.startActivity(intent); // 直接用Context启动，放弃startActivityForResult
     }
 
     public static int startPreciseAlarm(String str) {
@@ -690,19 +691,6 @@ public class MyService extends Service {
                 notifyTodoAlarm(context, message);
 
                 if (ClockActivity.isReady) {
-                    /*String oldTxt = ClockActivity.text_info
-                        .getText()
-                        .toString();
-
-                    SimpleDateFormat formatter = new SimpleDateFormat(
-                        "yyyy-MM-dd HH:mm:ss"
-                    );
-                    Date date = new Date(System.currentTimeMillis());
-                    String strCurDT0 = formatter.format(date);
-                    String strCurDT = " ( " + strCurDT0 + " ) ";
-
-                    String newTxt = message + "\n" + strCurDT + "\n\n" + oldTxt;*/
-
                     ClockActivity.safeUpdateTodoText(message);
 
                     CallJavaNotify_3();

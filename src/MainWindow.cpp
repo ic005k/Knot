@@ -2290,6 +2290,8 @@ void MainWindow::on_btnRecentOpen_clicked() {
 void MainWindow::on_btnMenuReport_clicked() { m_Report->genReportMenu(); }
 
 void MainWindow::on_btnCatalogue_clicked() {
+  if (mui->lblBookName->text() == "Book Name") return;
+
   if (mui->qwViewBookNote->isVisible()) return;
 
   if (mui->qwCata->source().isEmpty()) {
@@ -2586,6 +2588,8 @@ void MainWindow::on_cboxWebDAV_currentTextChanged(const QString& arg1) {
 void MainWindow::on_btnShowCboxList_clicked() { mui->cboxWebDAV->showPopup(); }
 
 void MainWindow::on_btnRotation_clicked() {
+  if (mui->lblBookName->text() == "Book Name") return;
+
   if (mui->qwViewBookNote->isVisible()) return;
 
   QQuickItem* rootItem = mui->qwReader->rootObject();

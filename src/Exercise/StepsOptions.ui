@@ -35,7 +35,7 @@
      <item>
       <widget class="QLineEdit" name="editStepsThreshold">
        <property name="text">
-        <string/>
+        <string>10000</string>
        </property>
       </widget>
      </item>

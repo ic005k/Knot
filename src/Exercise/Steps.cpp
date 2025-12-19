@@ -191,11 +191,23 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
 }
 
 Steps::~Steps() {
+  // 停止定时器并释放
+  if (timer->isActive()) {
+    timer->stop();
+  }
   delete timer;
+
   delete addressResolver;
   delete m_speedometer;
   delete weatherFetcher;
   delete compass;
+
+// 安卓端额外清理
+#ifdef Q_OS_ANDROID
+  if (m_activity.isValid()) {
+    m_activity.callMethod<void>("stopGpsUpdates", "()D");
+  }
+#endif
 }
 
 void Steps::setAddressResolverConnect() {
@@ -2095,7 +2107,6 @@ void Steps::getHardStepSensor() {
       "com.x/MyService", "getHardStepCounter", "()I");
 
   if (isHardStepSensor == 0) {
-    mui->btnStepsOptions->setHidden(true);
     mui->btnReset->setHidden(true);
     mui->tabMotion->setTabEnabled(0, false);
     mui->tabMotion->setCurrentIndex(1);

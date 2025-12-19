@@ -620,7 +620,7 @@ public class MyActivity
     }
 
     // 使用LocationListenerCompat定义位置监听器
-    private final LocationListenerCompat locationListener1 =
+    private LocationListenerCompat locationListener1 =
         new LocationListenerCompat() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
@@ -1201,11 +1201,6 @@ public class MyActivity
 
         if (isGpsRunning) stopGpsUpdates();
 
-        if (checkNeedRestart()) {
-            restartApp(); // 调用重构后的重启方法
-            Log.i(TAG, "触发应用重启...");
-        }
-
         getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
 
         if (mScreenStatusReceiver != null) {
@@ -1225,6 +1220,11 @@ public class MyActivity
         }
 
         super.onDestroy();
+
+        // 兜底置空所有监听器引用（防止残留）
+        locationListener1 = null;
+        networkLocationListener = null;
+
         m_instance = null;
 
         synchronized (ttsLock) {
@@ -1236,6 +1236,11 @@ public class MyActivity
 
         alarmWindows.remove(this); // 防止 Activity 泄漏
         mapActivityInstance = null;
+
+        if (checkNeedRestart()) {
+            restartApp(); // 调用重构后的重启方法
+            Log.i(TAG, "触发应用重启...");
+        }
     }
 
     @Override
@@ -2849,7 +2854,7 @@ public class MyActivity
     }
 
     // 网络定位监听器（仅辅助，不覆盖GPS数据）
-    private final LocationListenerCompat networkLocationListener =
+    private LocationListenerCompat networkLocationListener =
         new LocationListenerCompat() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
