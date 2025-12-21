@@ -56,7 +56,7 @@ double calculateHaversineDistance(double lat1, double lon1, double lat2,
                                   double lon2);
 
 #ifdef Q_OS_ANDROID
-QJniObject m_activity;
+QJniObject gm_activity;
 #endif
 
 Steps::Steps(QWidget* parent) : QDialog(parent) {
@@ -204,8 +204,8 @@ Steps::~Steps() {
 
 // 安卓端额外清理
 #ifdef Q_OS_ANDROID
-  if (m_activity.isValid()) {
-    m_activity.callMethod<void>("stopGpsUpdates", "()D");
+  if (gm_activity.isValid()) {
+    gm_activity.callMethod<void>("stopGpsUpdates", "()D");
   }
 #endif
 }
@@ -711,7 +711,7 @@ void Steps::startRecordMotion() {
 
 #ifdef Q_OS_ANDROID
 
-  m_activity = QJniObject(QNativeInterface::QAndroidApplication::context());
+  gm_activity = QJniObject(QNativeInterface::QAndroidApplication::context());
 
   // 1. 定义Java端返回值的枚举（对应不同失败场景，便于维护）
   enum GpsStartResult {
@@ -723,11 +723,11 @@ void Steps::startRecordMotion() {
   };
 
   // 2. 优化后的调用逻辑
-  if (m_activity.isValid()) {
+  if (gm_activity.isValid()) {
     jdouble result = 0;
     try {
       // 捕获JNI调用的异常（避免崩溃）
-      result = m_activity.callMethod<jdouble>("startGpsUpdates", "()D");
+      result = gm_activity.callMethod<jdouble>("startGpsUpdates", "()D");
     } catch (const std::exception& e) {
       qWarning() << "JNI call startGpsUpdates exception：" << e.what();
       result = GPS_START_UNKNOWN_ERROR;
@@ -823,7 +823,6 @@ void Steps::startRecordMotion() {
   strJsonRouteFile = csvPath + s0 + "-gps-" + s1 + ".json";
   strJsonSpeedFile = csvPath + s0 + "-gps-" + s1 + "_Speed.json";
 
-  timer->start(1000);
   routeMemoryCache = QJsonArray();
   m_lastAddress = "";
   isInitTime = false;
@@ -845,6 +844,8 @@ void Steps::startRecordMotion() {
   mui->btnGPS->setStyleSheet(btnRoundStyleRed);
   mui->gboxMotionType->setEnabled(false);
   mui->btnSelGpsDate->setEnabled(false);
+
+  QTimer::singleShot(1000, mw_one, [this]() { timer->start(1000); });
 }
 
 void Steps::positionUpdated(const QGeoPositionInfo& info) {
@@ -871,13 +872,13 @@ void Steps::updateGetGps() {
 
   // 获取当前运动距离（目前通过c++端计算）
   // jdouble distance;
-  // distance = m_activity.callMethod<jdouble>("getTotalDistance", "()D");
+  // distance = gm_activity.callMethod<jdouble>("getTotalDistance", "()D");
   // QString str_distance = QString::number(distance, 'f', 2);
   // m_distance = str_distance.toDouble();
 
   if (!isGpsTest) {
-    latitude = m_activity.callMethod<jdouble>("getLatitude", "()D");
-    longitude = m_activity.callMethod<jdouble>("getLongitude", "()D");
+    latitude = gm_activity.callMethod<jdouble>("getLatitude", "()D");
+    longitude = gm_activity.callMethod<jdouble>("getLongitude", "()D");
 
     latitude = QString::number(latitude, 'f', 6).toDouble();
     longitude = QString::number(longitude, 'f', 6).toDouble();
@@ -885,7 +886,7 @@ void Steps::updateGetGps() {
 
   QJniObject jstrGpsStatus;
   jstrGpsStatus =
-      m_activity.callMethod<jstring>("getGpsStatus", "()Ljava/lang/String;");
+      gm_activity.callMethod<jstring>("getGpsStatus", "()Ljava/lang/String;");
 
   if (jstrGpsStatus.isValid()) {
     QString strStatus = jstrGpsStatus.toString();
@@ -899,9 +900,14 @@ void Steps::updateGetGps() {
 
       strAltitude = list.at(4);
       QStringList altiList = strAltitude.split(":");
-      if (altiList.count() > 0) {
+      if (altiList.count() == 2) {
         dAltitude = altiList.at(1).trimmed();
         altitude = dAltitude.toDouble();
+      } else {
+        // 异常处理：赋值默认值或打印日志
+        dAltitude = "0.00";
+        altitude = 0.0;
+        qWarning() << "Invalid Altitude format:" << strAltitude;
       }
 
       str6 = list.at(5);
@@ -918,8 +924,8 @@ void Steps::updateGetGps() {
       if (!isGpsTest) {
         jdouble speed;
 
-        speed = m_activity.callMethod<jdouble>("getMySpeed", "()D");
-        maxSpeed = m_activity.callMethod<jdouble>("getMaxSpeed", "()D");
+        speed = gm_activity.callMethod<jdouble>("getMySpeed", "()D");
+        maxSpeed = gm_activity.callMethod<jdouble>("getMaxSpeed", "()D");
 
         mySpeed = speed;
         if (mySpeed > 0) {
@@ -1141,7 +1147,7 @@ void Steps::stopRecordMotion() {
 
 #ifdef Q_OS_ANDROID
   // 返回值为总距离
-  m_activity.callMethod<jdouble>("stopGpsUpdates", "()D");
+  gm_activity.callMethod<jdouble>("stopGpsUpdates", "()D");
 
 #else
   if (m_positionSource) {
