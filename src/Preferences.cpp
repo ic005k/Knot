@@ -8,6 +8,7 @@
 #include "ui_Preferences.h"
 
 QFont::Weight readerFontWeight;
+extern void loadTheme(bool isDark);
 
 Preferences::Preferences(QWidget* parent)
     : QDialog(parent), ui(new Ui::Preferences) {
@@ -111,6 +112,11 @@ void Preferences::on_sliderFontSize_sliderMoved(int position) {
     ui->lblFontSize->setFont(font);
     isFontChange = true;
 
+    qApp->setFont(font);
+
+    iniPreferences->setValue("/Options/FontSize", position);
+    fontSize = position;
+
     getCheckStatusChange();
   }
 }
@@ -121,10 +127,16 @@ void Preferences::on_btnCustomFont_clicked() {
                                           tr("Font Files (*.*)"));
   if (fileName == "") return;
 
-  setFontDemoUI(fileName, ui->btnCustomFont, ui->sliderFontSize->value());
+  QString fontName =
+      setFontDemoUI(fileName, ui->btnCustomFont, ui->sliderFontSize->value());
   isFontChange = true;
 
   iniPreferences->setValue("/Options/CustomFont", fileName);
+  iniPreferences->setValue("/Options/CustomFontName", fontName);
+
+  QFont font = this->font();
+  font.setFamily(fontName);
+  if (ui->chkUIFont->isChecked()) qApp->setFont(font);
 
   getCheckStatusChange();
 }
@@ -183,9 +195,7 @@ void Preferences::on_chkUIFont_clicked() {
     ui->chkUIFont->setChecked(false);
     return;
   }
-
   isFontChange = true;
-
   getCheckStatusChange();
 }
 
@@ -392,7 +402,7 @@ void Preferences::initCheckStatus() {
 }
 
 void Preferences::getCheckStatusChange() {
-  bool isChanged = false;
+  isChanged = false;
   if (ui->chkUIFont->isChecked() != static_cast<bool>(listCheckStatus.at(0)))
     isChanged = true;
 
@@ -405,7 +415,7 @@ void Preferences::getCheckStatusChange() {
     isChanged = true;
 
   if (isChanged)
-    ui->btnReStart->show();
+    ui->btnReStart->hide();
   else
     ui->btnReStart->hide();
 }
@@ -437,6 +447,10 @@ void Preferences::closeEvent(QCloseEvent* event) {
   closeTextToolBar();
   saveOptions();
   setEncSyncStatusTip();
+
+  if (isChanged && isVisible()) {
+    loadTheme(isDark);
+  }
 }
 
 void Preferences::on_btnShowPassword_pressed() {
@@ -524,4 +538,22 @@ void Preferences::openPreferences() {
 
   ui->editPassword->installEventFilter(editFilter);
   ui->editValidate->installEventFilter(editFilter);
+
+  isChanged = false;
+}
+
+void Preferences::on_chkUIFont_clicked(bool checked) {
+  QFont font = this->font();
+  if (!checked) {
+    font.setFamily(defaultFontFamily);
+    qApp->setFont(font);
+    ui->chkUIFont->setChecked(false);
+  } else {
+    QString fontName =
+        iniPreferences->value("/Options/CustomFontName", defaultFontFamily)
+            .toString();
+    font.setFamily(fontName);
+    qApp->setFont(font);
+    ui->chkUIFont->setChecked(true);
+  }
 }

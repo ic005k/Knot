@@ -2654,37 +2654,6 @@ public class MyActivity
         });
     }
 
-    // 新增：重启应用的方法
-    private void restartAppAfterPermission() {
-        // 延迟1秒执行重启（让Toast有时间显示）
-        new Handler(Looper.getMainLooper()).postDelayed(
-            () -> {
-                try {
-                    // 获取应用启动意图
-                    Intent intent =
-                        getPackageManager().getLaunchIntentForPackage(
-                            getPackageName()
-                        );
-                    if (intent != null) {
-                        // 清除旧任务栈，确保重启后是全新状态
-                        intent.addFlags(
-                            Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                                Intent.FLAG_ACTIVITY_NEW_TASK |
-                                Intent.FLAG_ACTIVITY_CLEAR_TOP
-                        );
-                        startActivity(intent);
-                    }
-                    // 终止当前进程（确保旧进程退出）
-                    Process.killProcess(Process.myPid());
-                    System.exit(0);
-                } catch (Exception e) {
-                    Log.e(TAG, "重启应用失败: " + e.getMessage());
-                }
-            },
-            1000
-        ); // 1秒延迟
-    }
-
     public static void setQtMainEnd(boolean isEnd) {
         isQtMainEnd = isEnd;
     }

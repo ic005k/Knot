@@ -16,9 +16,9 @@ class Preferences : public QDialog {
   Q_OBJECT
 
  public:
-  explicit Preferences(QWidget *parent = nullptr);
+  explicit Preferences(QWidget* parent = nullptr);
   ~Preferences();
-  Ui::Preferences *ui;
+  Ui::Preferences* ui;
 
   bool devMode = false;
   QString chkStyle;
@@ -42,17 +42,17 @@ class Preferences : public QDialog {
   void setDefaultFont(QString fontFamily);
   QString getDefaultFont();
 
-  QString setFontDemoUI(QString customFontPath, QToolButton *btn, int fontSize);
+  QString setFontDemoUI(QString customFontPath, QToolButton* btn, int fontSize);
 
   void setEncSyncStatusTip();
 
   void openPreferences();
 
  protected:
-  void keyReleaseEvent(QKeyEvent *event) override;
+  void keyReleaseEvent(QKeyEvent* event) override;
 
-  bool eventFilter(QObject *watch, QEvent *evn) override;
-  void closeEvent(QCloseEvent *event) override;
+  bool eventFilter(QObject* watch, QEvent* evn) override;
+  void closeEvent(QCloseEvent* event) override;
  public slots:
 
  private slots:
@@ -72,9 +72,9 @@ class Preferences : public QDialog {
 
   void on_chkZip_clicked();
 
-  void on_editPassword_textChanged(const QString &arg1);
+  void on_editPassword_textChanged(const QString& arg1);
 
-  void on_editValidate_textChanged(const QString &arg1);
+  void on_editValidate_textChanged(const QString& arg1);
 
   void on_btnShowPassword_pressed();
 
@@ -86,8 +86,12 @@ class Preferences : public QDialog {
 
   void on_chkDark_clicked();
 
+  void on_chkUIFont_clicked(bool checked);
+
  private:
-  EditEventFilter *editFilter = nullptr;
+  bool isChanged;
+
+  EditEventFilter* editFilter = nullptr;
 
   QString iniBakFiles = "BakFiles.ini";
   void getCheckStatusChange();
