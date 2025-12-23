@@ -517,6 +517,7 @@ void MainHelper::initMainQW() {
 
   // Book List
   if (mui->qwBookList->source().isEmpty()) {
+    mui->qwBookList->rootContext()->setContextProperty("isDark", isDark);
     mui->qwBookList->rootContext()->setContextProperty("fontSize", fontSize);
     mui->qwBookList->rootContext()->setContextProperty("m_Reader",
                                                        mw_one->m_Reader);

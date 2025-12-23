@@ -43,9 +43,11 @@ Rectangle {
 
     // 防抖播放音效（避免滚动时频繁触发）
     function playTumblerSound() {
-        // 停止当前可能正在播放的音效，避免叠加
-        tumblerSound.stop()
-        tumblerSound.play()
+        if (Qt.platform.os === "android") {
+            // 停止当前可能正在播放的音效，避免叠加
+            tumblerSound.stop()
+            tumblerSound.play()
+        }
     }
 
     function getDaysInMonth(year, month) {
@@ -103,6 +105,30 @@ Rectangle {
                 }
                 currentIndex: model.indexOf(currentYear)
 
+                // 添加鼠标滚轮支持
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    acceptedButtons: Qt.NoButton
+                    onWheel: (wheel) => {
+                        if (wheel.angleDelta.y > 0) {
+                            // 向上滚动
+                            if (yearTumbler.currentIndex > 0) {
+                                yearTumbler.currentIndex--
+                            } else if (yearTumbler.wrap) {
+                                yearTumbler.currentIndex = yearTumbler.model.length - 1
+                            }
+                        } else {
+                            // 向下滚动
+                            if (yearTumbler.currentIndex < yearTumbler.model.length - 1) {
+                                yearTumbler.currentIndex++
+                            } else if (yearTumbler.wrap) {
+                                yearTumbler.currentIndex = 0
+                            }
+                        }
+                    }
+                }
+
                 delegate: Text {
                     width: yearTumbler.width
                     height: Tumbler.tumbler.height / Tumbler.tumbler.visibleItemCount
@@ -136,6 +162,30 @@ Rectangle {
                                       "length": 12
                                   }, (_, i) => i + 1)
                 currentIndex: currentMonth - 1
+
+                // 添加鼠标滚轮支持
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    acceptedButtons: Qt.NoButton
+                    onWheel: (wheel) => {
+                        if (wheel.angleDelta.y > 0) {
+                            // 向上滚动
+                            if (monthTumbler.currentIndex > 0) {
+                                monthTumbler.currentIndex--
+                            } else if (monthTumbler.wrap) {
+                                monthTumbler.currentIndex = monthTumbler.model.length - 1
+                            }
+                        } else {
+                            // 向下滚动
+                            if (monthTumbler.currentIndex < monthTumbler.model.length - 1) {
+                                monthTumbler.currentIndex++
+                            } else if (monthTumbler.wrap) {
+                                monthTumbler.currentIndex = 0
+                            }
+                        }
+                    }
+                }
 
                 delegate: Text {
                     width: monthTumbler.width
@@ -171,6 +221,30 @@ Rectangle {
                                                                currentMonth)
                                   }, (_, i) => i + 1)
                 currentIndex: currentDay - 1
+
+                // 添加鼠标滚轮支持
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    acceptedButtons: Qt.NoButton
+                    onWheel: (wheel) => {
+                        if (wheel.angleDelta.y > 0) {
+                            // 向上滚动
+                            if (dayTumbler.currentIndex > 0) {
+                                dayTumbler.currentIndex--
+                            } else if (dayTumbler.wrap) {
+                                dayTumbler.currentIndex = dayTumbler.model.length - 1
+                            }
+                        } else {
+                            // 向下滚动
+                            if (dayTumbler.currentIndex < dayTumbler.model.length - 1) {
+                                dayTumbler.currentIndex++
+                            } else if (dayTumbler.wrap) {
+                                dayTumbler.currentIndex = 0
+                            }
+                        }
+                    }
+                }
 
                 delegate: Text {
                     width: dayTumbler.width
@@ -233,6 +307,30 @@ Rectangle {
                                   }, (_, i) => i)
                 currentIndex: currentHour
 
+                // 添加鼠标滚轮支持
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    acceptedButtons: Qt.NoButton
+                    onWheel: (wheel) => {
+                        if (wheel.angleDelta.y > 0) {
+                            // 向上滚动
+                            if (hourTumbler.currentIndex > 0) {
+                                hourTumbler.currentIndex--
+                            } else if (hourTumbler.wrap) {
+                                hourTumbler.currentIndex = hourTumbler.model.length - 1
+                            }
+                        } else {
+                            // 向下滚动
+                            if (hourTumbler.currentIndex < hourTumbler.model.length - 1) {
+                                hourTumbler.currentIndex++
+                            } else if (hourTumbler.wrap) {
+                                hourTumbler.currentIndex = 0
+                            }
+                        }
+                    }
+                }
+
                 delegate: Text {
                     width: hourTumbler.width
                     height: Tumbler.tumbler.height / Tumbler.tumbler.visibleItemCount
@@ -280,6 +378,30 @@ Rectangle {
                                       "length": 60
                                   }, (_, i) => i.toString().padStart(2, "0"))
                 currentIndex: currentMinute
+
+                // 添加鼠标滚轮支持
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    acceptedButtons: Qt.NoButton
+                    onWheel: (wheel) => {
+                        if (wheel.angleDelta.y > 0) {
+                            // 向上滚动
+                            if (minuteTumbler.currentIndex > 0) {
+                                minuteTumbler.currentIndex--
+                            } else if (minuteTumbler.wrap) {
+                                minuteTumbler.currentIndex = minuteTumbler.model.length - 1
+                            }
+                        } else {
+                            // 向下滚动
+                            if (minuteTumbler.currentIndex < minuteTumbler.model.length - 1) {
+                                minuteTumbler.currentIndex++
+                            } else if (minuteTumbler.wrap) {
+                                minuteTumbler.currentIndex = 0
+                            }
+                        }
+                    }
+                }
 
                 delegate: Text {
                     width: minuteTumbler.width
