@@ -295,7 +295,7 @@ int main(int argc, char* argv[]) {
 }
 
 void loadTheme(bool isDark) {
-  callSaveAndCloseClockWindow();
+  // callSaveAndCloseClockWindow();
 
   isInitThemeEnd = false;
   // 设置调色板
@@ -369,7 +369,7 @@ void loadTheme(bool isDark) {
     QTimer::singleShot(1000, nullptr, []() { mw_one->execDeskShortcut(); });
   }
 
-  QTimer::singleShot(100, nullptr, []() { callReopenClockWindow(); });
+  // QTimer::singleShot(100, nullptr, []() { callReopenClockWindow(); });
 }
 
 QPalette createDarkPalette() {
