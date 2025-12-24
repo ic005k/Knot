@@ -1970,7 +1970,7 @@ selection-background-color: lightblue;
              <property name="frameShadow">
               <enum>QFrame::Shadow::Raised</enum>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_47">
+             <layout class="QVBoxLayout" name="verticalLayout_2">
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_72">
                 <item>
@@ -2037,16 +2037,47 @@ selection-background-color: lightblue;
                </spacer>
               </item>
               <item>
-               <widget class="QLabel" name="label_6">
-                <property name="font">
-                 <font>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>WebDAV Url:</string>
-                </property>
-               </widget>
+               <layout class="QHBoxLayout" name="horizontalLayout_15">
+                <item>
+                 <widget class="QLabel" name="label_6">
+                  <property name="font">
+                   <font>
+                    <bold>true</bold>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>WebDAV Url:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_2">
+                  <property name="orientation">
+                   <enum>Qt::Orientation::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QToolButton" name="btnShowCboxList">
+                  <property name="text">
+                   <string>Select</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../res.qrc">
+                    <normaloff>:/res/combo.svg</normaloff>:/res/combo.svg</iconset>
+                  </property>
+                  <property name="toolButtonStyle">
+                   <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_68">
@@ -2101,17 +2132,6 @@ QComboBox {
                     <string>https://app.koofr.net/dav/Koofr/</string>
                    </property>
                   </item>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QToolButton" name="btnShowCboxList">
-                  <property name="text">
-                   <string>...</string>
-                  </property>
-                  <property name="icon">
-                   <iconset resource="../res.qrc">
-                    <normaloff>:/res/combo.svg</normaloff>:/res/combo.svg</iconset>
-                  </property>
                  </widget>
                 </item>
                </layout>
