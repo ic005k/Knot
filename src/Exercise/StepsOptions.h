@@ -40,6 +40,8 @@ class StepsOptions : public QDialog {
 
   void on_rbTencent_clicked(bool checked);
 
+  void on_btnCorrection_clicked();
+
  private:
   EditEventFilter* editFilter = nullptr;
 };

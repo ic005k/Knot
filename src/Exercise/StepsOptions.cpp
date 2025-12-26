@@ -19,6 +19,10 @@ StepsOptions::StepsOptions(QWidget* parent)
   QValidator* validator2 =
       new QRegularExpressionValidator(regxNumber, ui->editStepsThreshold);
   ui->editStepsThreshold->setValidator(validator2);
+
+  QValidator* validator3 =
+      new QRegularExpressionValidator(regxNumber, ui->editTotalDistance);
+  ui->editTotalDistance->setValidator(validator3);
 }
 
 StepsOptions::~StepsOptions() { delete ui; }
@@ -73,6 +77,10 @@ void StepsOptions::init() {
   editFilter = new EditEventFilter(textToolbarDynamic, this);
   ui->editMapKey->installEventFilter(editFilter);
   ui->editMapKey->viewport()->installEventFilter(editFilter);
+
+  QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
+  double m_td = Reg.value("/GPS/TotalDistance", 0).toDouble();
+  ui->editTotalDistance->setText(QString::number(m_td));
 }
 
 void StepsOptions::on_btnBack_clicked() {
@@ -131,4 +139,16 @@ void StepsOptions::on_rbTencent_clicked(bool checked) {
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
   Reg.setValue("/Map/MapType2", checked);
   Reg.sync();
+}
+
+void StepsOptions::on_btnCorrection_clicked() {
+  QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
+  Reg.setValue("/GPS/TotalDistance", ui->editTotalDistance->text().trimmed());
+  Reg.sync();
+
+  m_Steps->strTotalDistance = ui->editTotalDistance->text().trimmed() + " km";
+  m_Steps->strGpsInfoShow =
+      QString(" \n") + " \n" + " \n" + " \n" + " \n" + " \n" + " \n" + " \n" +
+      " \n" + tr("Total Distance") + " : " + m_Steps->strTotalDistance;
+  mui->lblGpsInfo->setText(m_Steps->strGpsInfoShow);
 }

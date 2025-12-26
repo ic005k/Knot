@@ -158,6 +158,9 @@ class Steps : public QDialog {
  public:
   void closeSteps();
 
+  QString strTotalDistance;
+  QString strGpsInfoShow;
+
   QString bearingToDirection(double bearing);
   double calculateBearing(double lat1, double lon1, double lat2, double lon2);
 
@@ -256,7 +259,6 @@ class Steps : public QDialog {
   QDateTime m_startTime;
   QTime m_time;
 
-  QString strTotalDistance;
   QString strDurationTime;
   double latitude = 59.919023461273;
   double longitude = 10.752109237521;
@@ -268,7 +270,7 @@ class Steps : public QDialog {
   double oldAlt = 0.00;
   double altitude = 0.00;
   QString strGpsStatus;
-  QString strGpsInfoShow;
+
   QString lblStyle =
       "QLabel {background-color: #000000;color: #ECEFF4;font-family: 'Segoe "
       "UI', sans-serif;font-weight: bold;border: 2px solid "

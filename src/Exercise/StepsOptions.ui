@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>376</width>
-    <height>334</height>
+    <height>359</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -82,6 +82,27 @@
        </property>
        <property name="text">
         <string>cm  </string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="lblTotalDistance">
+     <property name="text">
+      <string>Total distance of exercise:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLineEdit" name="editTotalDistance"/>
+     </item>
+     <item>
+      <widget class="QToolButton" name="btnCorrection">
+       <property name="text">
+        <string>Correction</string>
        </property>
       </widget>
      </item>

@@ -384,7 +384,6 @@ void Steps::openStepsUI() {
   if (mui->lblGpsInfo->text() == tr("GPS Info") ||
       mui->lblGpsInfo->text() == "GPS Info") {
     QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
-
     double m_td = Reg.value("/GPS/TotalDistance", 0).toDouble();
 
     strTotalDistance = QString::number(m_td) + " km";
