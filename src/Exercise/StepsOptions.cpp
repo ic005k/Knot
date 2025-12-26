@@ -12,6 +12,8 @@ StepsOptions::StepsOptions(QWidget* parent)
   m_Method->set_ToolButtonStyle(this);
   setModal(true);
 
+  ui->editMapKey->setFixedHeight(100);
+
   QValidator* validator1 =
       new QRegularExpressionValidator(regxNumber, ui->editStepLength);
   ui->editStepLength->setValidator(validator1);
