@@ -62,35 +62,6 @@
          <number>9</number>
         </property>
         <item>
-         <widget class="QToolButton" name="btnRename">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Ctrl + R</string>
-          </property>
-          <property name="text">
-           <string>Rename</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../../res.qrc">
-            <normaloff>:/res/rename.png</normaloff>:/res/rename.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>28</width>
-            <height>28</height>
-           </size>
-          </property>
-          <property name="shortcut">
-           <string>Ctrl+R</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QToolButton" name="btnImport">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">

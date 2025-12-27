@@ -91,7 +91,7 @@ static void JavaNotify_5() {
 }
 
 static void JavaNotify_6() {
-  m_Notes->javaNoteToQMLNote();
+  QTimer::singleShot(100, mw_one, []() { m_Notes->javaNoteToQMLNote(); });
 
   qDebug() << "C++ JavaNotify_6";
 }
@@ -194,16 +194,16 @@ static void JavaNotify_15() {
     }
   }
 
-  if (m_Method->menuNoteBook != nullptr) {
-    if (m_Method->menuNoteBook->isVisible()) {
-      m_Method->menuNoteBook->close();
+  if (m_NotesList->menuNoteBook != nullptr) {
+    if (m_NotesList->menuNoteBook->isVisible()) {
+      m_NotesList->menuNoteBook->close();
       return;
     }
   }
 
-  if (m_Method->menuNoteList != nullptr) {
-    if (m_Method->menuNoteList->isVisible()) {
-      m_Method->menuNoteList->close();
+  if (m_NotesList->menuNoteList != nullptr) {
+    if (m_NotesList->menuNoteList->isVisible()) {
+      m_NotesList->menuNoteList->close();
       return;
     }
   }

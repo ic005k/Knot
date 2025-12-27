@@ -2068,11 +2068,11 @@ void MainWindow::on_btnClearNoteFindText_clicked() {
 void MainWindow::on_btnShowFindNotes_clicked() { m_NotesList->showFindNotes(); }
 
 void MainWindow::on_btnNoteBookMenu_clicked() {
-  m_Method->showNoteBookMenu(mui->qwNoteBook->x(), mui->qwNoteBook->y());
+  m_NotesList->showNoteBookMenu(mui->qwNoteBook->x(), mui->qwNoteBook->y());
 }
 
 void MainWindow::on_btnNoteMenu_clicked() {
-  m_Method->showNotsListMenu(mui->qwNoteList->x(), mui->qwNoteList->y());
+  m_NotesList->showNotsListMenu(mui->qwNoteList->x(), mui->qwNoteList->y());
 }
 
 void MainWindow::on_btnCancelType_clicked() {
@@ -2269,12 +2269,7 @@ void MainWindow::on_btnBack_Tree_clicked() {
   mui->frameNoteList->show();
 }
 
-void MainWindow::on_btnRename_clicked() {
-  if (m_NotesList->getNoteBookCurrentIndex() < 0) return;
-
-  m_NotesList->setTWCurrentItem();
-  m_NotesList->on_btnRename_clicked();
-}
+void MainWindow::on_btnRename_clicked() { m_Notes->renameTitle(false); }
 
 void MainWindow::on_btnHideFind_clicked() {
   closeTextToolBar();

@@ -79,9 +79,6 @@ class Method : public QDialog {
 
   EnhancedColorPicker* m_EnColorPicker = nullptr;
 
-  QMenu* menuNoteBook = nullptr;
-  QMenu* menuNoteList = nullptr;
-
   bool androidCopyFile(QString src, QString des);
 
   static QString getFileSize(const qint64& size, int precision);
@@ -468,14 +465,13 @@ class Method : public QDialog {
 
   bool isInChina();
 
-  void gotoBegin(QQuickWidget *qw);
-  protected:
+  void gotoBegin(QQuickWidget* qw);
+
+ protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  public slots:
 
-  void showNoteBookMenu(int x, int y);
-  void showNotsListMenu(int x, int y);
   void clickMainDate();
 
   void clickMainDateData();

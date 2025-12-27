@@ -664,22 +664,6 @@ void Method::reeditMainEventData() {
   mw_one->on_twItemDoubleClicked();
 }
 
-void Method::showNoteBookMenu(int x, int y) {
-  menuNoteBook = new QMenu(this);
-  m_NotesList->init_NoteBookMenu(menuNoteBook);
-
-  QPoint pos(mw_one->geometry().x() + x, mw_one->geometry().y() + y);
-  menuNoteBook->exec(pos);
-}
-
-void Method::showNotsListMenu(int x, int y) {
-  menuNoteList = new QMenu(this);
-  m_NotesList->init_NotesListMenu(menuNoteList);
-
-  QPoint pos(mw_one->geometry().x() + x, mw_one->geometry().y() + y);
-  menuNoteList->exec(pos);
-}
-
 void Method::setTypeRenameText() {
   int index = getCurrentIndexFromQW(mui->qwCategory);
   QString str = getText0(mui->qwCategory, index);

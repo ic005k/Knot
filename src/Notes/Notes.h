@@ -73,9 +73,9 @@ class Notes : public QDialog {
   Q_OBJECT
 
  public:
-  explicit Notes(QWidget *parent = nullptr);
+  explicit Notes(QWidget* parent = nullptr);
   ~Notes();
-  Ui::Notes *ui;
+  Ui::Notes* ui;
 
   NoteDiffManager m_NoteDiffManager;
 
@@ -89,22 +89,22 @@ class Notes : public QDialog {
 
   bool isRequestOpenNoteEditor = false;
 
-  NoteIndexManager *m_NoteIndexManager;
+  NoteIndexManager* m_NoteIndexManager;
 
   QString new_title;
 
 #ifndef Q_OS_ANDROID
-  QsciScintilla *m_EditSource = nullptr;
+  QsciScintilla* m_EditSource = nullptr;
 #endif
 
-  QTimer *timerEditNote;
+  QTimer* timerEditNote;
   int px, py, mx, my;
 
   bool isTextChange;
 
   QString htmlBuffer;
-  QTextEdit *byTextEdit;
-  QLineEdit *byLineEdit;
+  QTextEdit* byTextEdit;
+  QLineEdit* byLineEdit;
   int androidKeyH;
   int start;
   int end;
@@ -132,12 +132,12 @@ class Notes : public QDialog {
   void findText();
   void show_findTextBack();
 
-  bool selectPDFFormat(QPrinter *printer);
+  bool selectPDFFormat(QPrinter* printer);
   void on_btnPDF_clicked();
 
   QString insertImage(QString fileName, bool isToAndroidView);
 
-  bool eventFilterQwNote(QObject *watch, QEvent *event);
+  bool eventFilterQwNote(QObject* watch, QEvent* event);
 
   void openAndroidNoteEditor();
 
@@ -174,7 +174,7 @@ class Notes : public QDialog {
 
   void initEditor();
 
-  void openBrowserOnce(const QString &htmlPath);
+  void openBrowserOnce(const QString& htmlPath);
 
   void init_md();
 
@@ -188,24 +188,26 @@ class Notes : public QDialog {
 
   QStringList orgRemoteFiles;
 
-  QList<QJsonObject> loadAllDiffs(const QString &diffFilePath);
+  QList<QJsonObject> loadAllDiffs(const QString& diffFilePath);
 
-  bool appendDiffToFile(const QString &diffFilePath,
-                        const QString &noteFilePath, const QString &strDiff,
-                        const QString &diffHtml);
-  QString getCurrentJSON(const QString &md);
+  bool appendDiffToFile(const QString& diffFilePath,
+                        const QString& noteFilePath, const QString& strDiff,
+                        const QString& diffHtml);
+  QString getCurrentJSON(const QString& md);
 
-  void delRemoteFile(const QStringList &Files);
+  void delRemoteFile(const QStringList& Files);
 
-  bool openUrl(const QString &url);
+  bool openUrl(const QString& url);
+
+  void renameTitle(bool isOk);
 
  protected:
-  void keyReleaseEvent(QKeyEvent *event) override;
-  void resizeEvent(QResizeEvent *event) override;
-  bool eventFilter(QObject *obj, QEvent *event) override;
-  void paintEvent(QPaintEvent *pEvent) override;
-  void closeEvent(QCloseEvent *event) override;
-  void showEvent(QShowEvent *event) override;
+  void keyReleaseEvent(QKeyEvent* event) override;
+  void resizeEvent(QResizeEvent* event) override;
+  bool eventFilter(QObject* obj, QEvent* event) override;
+  void paintEvent(QPaintEvent* pEvent) override;
+  void closeEvent(QCloseEvent* event) override;
+  void showEvent(QShowEvent* event) override;
 
  public slots:
   void on_btnNext_clicked();
@@ -252,7 +254,7 @@ class Notes : public QDialog {
 
   void on_editFind_returnPressed();
 
-  void on_editFind_textChanged(const QString &arg1);
+  void on_editFind_textChanged(const QString& arg1);
 
   void on_btnView_clicked();
 
@@ -283,45 +285,45 @@ class Notes : public QDialog {
 
   int newHeight = 0;
 
-  QInputMethod *pAndroidKeyboard = QApplication::inputMethod();
-  void wheelEvent(QWheelEvent *e) override;
+  QInputMethod* pAndroidKeyboard = QApplication::inputMethod();
+  void wheelEvent(QWheelEvent* e) override;
 
   QColor StringToColor(QString mRgbStr);
 
   void setOpenSearchResultForAndroid(bool isValue, QString strSearchText);
 
 #ifndef Q_OS_ANDROID
-  void initMarkdownEditor(QsciScintilla *editor);
+  void initMarkdownEditor(QsciScintilla* editor);
 #endif
 
-  void searchText(const QString &text, bool forward);
+  void searchText(const QString& text, bool forward);
   void searchNext();
   void searchPrevious();
 
-  int getSearchMatchCount(const QString &text);
-  void searchWithCount(const QString &text);
+  int getSearchMatchCount(const QString& text);
+  void searchWithCount(const QString& text);
   QList<QPair<int, int>> m_matchPositions;
   int m_currentMatchIndex = -1;
   void jumpToNextMatch();
   void jumpToPrevMatch();
 
 #ifndef Q_OS_ANDROID
-  QsciLexerMarkdown *markdownLexer;
+  QsciLexerMarkdown* markdownLexer;
 #endif
 
   void initMarkdownLexer();
-  QString imageToBase64(const QString &path);
+  QString imageToBase64(const QString& path);
   QString addImagePathToHtml(QString strhtml);
   void initMarkdownLexerDark();
 
   void initEditorScrollBars();
-  void saveEditorState(const QString &filePath);
-  void restoreEditorState(const QString &filePath);
+  void saveEditorState(const QString& filePath);
+  void restoreEditorState(const QString& filePath);
   void processRemoteFiles(QStringList remoteFiles);
   void startBackgroundProcessRemoteFiles();
 
-  QString getFileVersion(const QString &filePath);
-  void updateDiff(const QString &oldText, const QString &newText);
+  QString getFileVersion(const QString& filePath);
+  void updateDiff(const QString& oldText, const QString& newText);
 
   void zipNoteToSyncList();
 };
@@ -330,14 +332,14 @@ class LimitedTextEdit : public QTextEdit {
   Q_OBJECT
 
  public:
-  explicit LimitedTextEdit(QWidget *parent = nullptr)
+  explicit LimitedTextEdit(QWidget* parent = nullptr)
       : QTextEdit(parent), maxLength(1000) {}
 
   void setMaxLength(int length) { maxLength = length; }
   int getMaxLength() const { return maxLength; }
 
  protected:
-  void insertFromMimeData(const QMimeData *source) override {
+  void insertFromMimeData(const QMimeData* source) override {
     if (source->hasText()) {
       QString pasteText = source->text();
       int currentLength = toPlainText().length();
@@ -354,7 +356,7 @@ class LimitedTextEdit : public QTextEdit {
       }
 
       // 创建新的MIME数据并插入
-      QMimeData *newData = new QMimeData();
+      QMimeData* newData = new QMimeData();
       newData->setText(pasteText);
       QTextEdit::insertFromMimeData(newData);
       delete newData;
@@ -372,15 +374,15 @@ class LimitedTextEdit : public QTextEdit {
 class NoteIndexManager1 : public QObject {
   Q_OBJECT
  public:
-  explicit NoteIndexManager1(QObject *parent = nullptr);
+  explicit NoteIndexManager1(QObject* parent = nullptr);
 
   // 加载/保存索引
-  bool loadIndex(const QString &indexPath);
-  bool saveIndex(const QString &indexPath);
+  bool loadIndex(const QString& indexPath);
+  bool saveIndex(const QString& indexPath);
 
   // 名称操作
-  QString getNoteTitle(const QString &filePath) const;
-  void setNoteTitle(const QString &filePath, const QString &title);
+  QString getNoteTitle(const QString& filePath) const;
+  void setNoteTitle(const QString& filePath, const QString& title);
 
  private:
   QHash<QString, QString> m_index;  // 内存哈希表加速查询

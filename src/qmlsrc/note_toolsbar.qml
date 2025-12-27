@@ -11,19 +11,9 @@ Rectangle {
     border.width: 0
 
     // 定义图标数组，避免重复代码
-    property var lightIcons: [
-        "qrc:/res/back.svg", "qrc:/res/view.svg", "qrc:/res/edit.svg",
-        "qrc:/res/find.svg", "qrc:/res/up.svg", "qrc:/res/down.svg",
-        "qrc:/res/delitem.svg", "qrc:/res/move.svg", "qrc:/res/topdf.svg",
-        "qrc:/res/rename.svg", "qrc:/res/recycle.svg"
-    ]
+    property var lightIcons: ["qrc:/res/back.svg", "qrc:/res/view.svg", "qrc:/res/edit.svg", "qrc:/res/find.svg", "qrc:/res/up.svg", "qrc:/res/down.svg", "qrc:/res/delitem.svg", "qrc:/res/move.svg", "qrc:/res/topdf.svg", "qrc:/res/rename.svg", "qrc:/res/recycle.svg"]
 
-    property var darkIcons: [
-        "qrc:/res/back_l.svg", "qrc:/res/view_l.svg", "qrc:/res/edit_l.svg",
-        "qrc:/res/find_l.svg", "qrc:/res/up_l.svg", "qrc:/res/down_l.svg",
-        "qrc:/res/delitem_l.svg", "qrc:/res/move_l.svg", "qrc:/res/topdf_l.svg",
-        "qrc:/res/rename_l.svg", "qrc:/res/recycle_l.svg"
-    ]
+    property var darkIcons: ["qrc:/res/back_l.svg", "qrc:/res/view_l.svg", "qrc:/res/edit_l.svg", "qrc:/res/find_l.svg", "qrc:/res/up_l.svg", "qrc:/res/down_l.svg", "qrc:/res/delitem_l.svg", "qrc:/res/move_l.svg", "qrc:/res/topdf_l.svg", "qrc:/res/rename_l.svg", "qrc:/res/recycle_l.svg"]
 
     Rectangle {
         id: rect
@@ -60,6 +50,8 @@ Rectangle {
                         icon.source: isDark ? darkIcons[index] : lightIcons[index]
                         // 显式设置图标颜色，避免系统自动着色
                         icon.color: isDark ? "white" : "black"
+
+                        visible: index !== 1 && index !== 2
 
                         background: Rectangle {
                             color: toolButton.hovered ? (isDark ? "#333333" : "#e0e0e0") : "transparent"
@@ -110,11 +102,13 @@ Rectangle {
 
             WheelHandler {
                 onWheel: event => {
-                    let newX = flick.contentX - event.angleDelta.y / 3
-                    newX = Math.max(0, Math.min(newX, flick.contentWidth - flick.width))
-                    flick.contentX = newX
-                    event.accepted = true
-                }
+                             let newX = flick.contentX - event.angleDelta.y / 3
+                             newX = Math.max(
+                                 0, Math.min(newX,
+                                             flick.contentWidth - flick.width))
+                             flick.contentX = newX
+                             event.accepted = true
+                         }
             }
         }
     }

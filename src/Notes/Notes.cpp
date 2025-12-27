@@ -569,7 +569,7 @@ void Notes::closeEvent(QCloseEvent* event) {
   if (isSetNewNoteTitle()) {
     TitleGenerator generator;
     new_title = generator.genNewTitle(newText);
-    mui->btnRename->click();
+    renameTitle(true);
   }
 }
 
@@ -920,10 +920,8 @@ void Notes::javaNoteToQMLNote() {
 
   if (isSetNewNoteTitle()) {
     TitleGenerator generator;
-    if (isAndroid) {
-    }
     new_title = generator.genNewTitle(newText);
-    mui->btnRename->click();
+    renameTitle(true);
   }
 
   zipNoteToSyncList();
@@ -2346,4 +2344,16 @@ QList<QJsonObject> Notes::loadAllDiffs(const QString& diffFilePath) {
     }
   }
   return diffList;
+}
+
+void Notes::renameTitle(bool isOk) {
+  if (m_NotesList->getNoteBookCurrentIndex() < 0) return;
+
+  m_NotesList->setTWCurrentItem();
+  if (!isOk) {
+    m_NotesList->on_btnRename_clicked();
+  } else {
+    m_NotesList->renameCurrentItem(new_title);
+    m_NotesList->saveNotesList();
+  }
 }

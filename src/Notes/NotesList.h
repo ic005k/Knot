@@ -54,6 +54,9 @@ class NotesList : public QDialog {
   ~NotesList();
   Ui::NotesList* ui;
 
+  QMenu* menuNoteBook = nullptr;
+  QMenu* menuNoteList = nullptr;
+
   NoteGraphController* m_graphController;  // 图谱控制器
   QDialog* m_RenameNotes = nullptr;
 
@@ -197,6 +200,9 @@ class NotesList : public QDialog {
   void closeEvent(QCloseEvent* event) override;
 
  public slots:
+  void showNoteBookMenu(int x, int y);
+  void showNotsListMenu(int x, int y);
+
   void mouseClickNoteBook();
 
   void on_actionCopyNoteLink();

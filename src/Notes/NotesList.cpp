@@ -260,7 +260,7 @@ void NotesList::on_btnRename_clicked() {
   QVBoxLayout* vbox = new QVBoxLayout;
 
   frame->setLayout(vbox);
-  vbox->setContentsMargins(6, 6, 6, 10);
+  vbox->setContentsMargins(25, 6, 25, 10);
   vbox->setSpacing(10);
 
   QLabel* lblTitle = new QLabel(this);
@@ -316,6 +316,10 @@ void NotesList::on_btnRename_clicked() {
   hbox->addWidget(btnPaste);
   hbox->addWidget(btnCopy);
   hbox->addWidget(btnOk);
+
+  btnPaste->hide();
+  btnCopy->hide();
+
   btnCancel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   btnPaste->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   btnCopy->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
@@ -369,7 +373,6 @@ void NotesList::on_btnRename_clicked() {
   m_Method->set_ToolButtonStyle(m_RenameNotes);
 
   m_Method->showGrayWindows();
-
   m_RenameNotes->show();
 }
 
@@ -1146,7 +1149,9 @@ void NotesList::initRecycle() {
     topItem->setText(0, tr("Notes Recycle Bin"));
 
     // 遍历回收站数组
-    for (const QJsonValue& val : recycleBinArray) {
+    for (QJsonArray::const_iterator it = recycleBinArray.cbegin();
+         it != recycleBinArray.cend(); ++it) {
+      const QJsonValue& val = *it;  // 明确使用const引用
       QJsonObject obj = val.toObject();
       QString str0 = obj["name"].toString();
       QString str1 = obj["file"].toString();
@@ -3473,4 +3478,20 @@ void NotesList::closeNoteDiff() {
   noteDiffTime.clear();
   mui->frameDiff->hide();
   mui->frameNoteList->show();
+}
+
+void NotesList::showNoteBookMenu(int x, int y) {
+  menuNoteBook = new QMenu(this);
+  init_NoteBookMenu(menuNoteBook);
+
+  QPoint pos(mw_one->geometry().x() + x, mw_one->geometry().y() + y);
+  menuNoteBook->exec(pos);
+}
+
+void NotesList::showNotsListMenu(int x, int y) {
+  menuNoteList = new QMenu(this);
+  init_NotesListMenu(menuNoteList);
+
+  QPoint pos(mw_one->geometry().x() + x, mw_one->geometry().y() + y);
+  menuNoteList->exec(pos);
 }
