@@ -201,7 +201,8 @@ class Notes : public QDialog {
 
   void renameTitle(bool isOk);
 
- protected:
+  void refreshNote();
+  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;
@@ -326,6 +327,7 @@ class Notes : public QDialog {
   void updateDiff(const QString& oldText, const QString& newText);
 
   void zipNoteToSyncList();
+  void refreshLocalHtmlFileInAndroid();
 };
 
 class LimitedTextEdit : public QTextEdit {

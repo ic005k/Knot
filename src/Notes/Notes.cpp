@@ -2091,6 +2091,20 @@ void Notes::restoreEditorState(const QString& filePath) {
 #endif
 }
 
+void Notes::refreshNote() {
+  QFuture<void> future = QtConcurrent::run([=]() { MD2Html(currentMDFile); });
+
+  // 使用 QFutureWatcher 监控进度
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+    refreshLocalHtmlFileInAndroid();
+
+    qDebug() << "Refresh note completed";
+    watcher->deleteLater();
+  });
+  watcher->setFuture(future);
+}
+
 void Notes::previewNote() {
   int count = m_NotesList->getNoteBookCount();
   if (count == 0) return;
@@ -2124,7 +2138,6 @@ void Notes::previewNote() {
       setAndroidNoteConfig("/cpos/currentMDFile",
                            QFileInfo(currentMDFile).baseName());
 
-      return;
     } else {
       openBrowserOnce(htmlFileName);
     }
@@ -2244,6 +2257,19 @@ void Notes::openLocalHtmlFileInAndroid() {
   QJniEnvironment env;
   if (env->ExceptionCheck()) {
     qDebug() << "启动WebView失败";
+    env->ExceptionClear();
+  }
+#endif
+}
+
+void Notes::refreshLocalHtmlFileInAndroid() {
+#ifdef Q_OS_ANDROID
+  QJniObject::callStaticMethod<void>("com/x/WebViewActivity",
+                                     "refreshWebViewContent", "()V");
+
+  QJniEnvironment env;
+  if (env->ExceptionCheck()) {
+    qDebug() << "刷新本地HTML失败，WebViewActivity实例不存在或已销毁";
     env->ExceptionClear();
   }
 #endif

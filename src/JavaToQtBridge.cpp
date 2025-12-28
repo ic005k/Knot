@@ -473,7 +473,7 @@ static void JavaNotify_15() {
 }
 
 static void JavaNotify_16() {
-  mui->btnOpenNote->click();
+  QTimer::singleShot(100, mw_one, []() { m_Notes->refreshNote(); });
 
   qDebug() << "C++ JavaNotify_16";
 }

@@ -850,9 +850,8 @@ public class NoteEditor
         if (MyActivity.isEdit && isSaved) {
             MyActivity.isEdit = false;
             if (WebViewActivity.getInstance() != null) {
-                WebViewActivity.getInstance().finish();
+                CallJavaNotify_16();
             }
-            CallJavaNotify_16();
         }
 
         getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调

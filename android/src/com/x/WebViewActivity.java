@@ -327,6 +327,50 @@ public class WebViewActivity extends Activity {
         startActivityForResult(i, REQUEST_EDIT);
     }
 
+    public static void refreshWebViewContent() {
+        // 防护1：获取当前WebViewActivity实例，判空
+        final WebViewActivity instance = getInstance();
+        if (instance == null) {
+            Log.d(
+                TAG,
+                "refreshWebViewContent: WebViewActivity实例为空，无需刷新"
+            );
+            return;
+        }
+
+        // 防护2：判断页面是否已经销毁/正在销毁，避免空指针（核心必需防护）
+        if (instance.isDestroyed() || instance.isFinishing()) {
+            Log.d(
+                TAG,
+                "refreshWebViewContent: WebViewActivity已销毁，跳过刷新"
+            );
+            return;
+        }
+
+        // ========== 核心关键：强制切换到 Android 主线程执行WebView操作 【解决线程报错的核心代码】 ==========
+        instance.runOnUiThread(
+            new Runnable() {
+                @Override
+                public void run() {
+                    // 防护3：只保留WebView实例判空即可，删除低版本不兼容的 isDestroyed()
+                    if (instance.mWebView != null) {
+                        Log.d(
+                            TAG,
+                            "refreshWebViewContent: 主线程执行刷新，调用loadLocalHtmlFile"
+                        );
+                        // 最终执行刷新，此时100%在Android主线程，无线程报错，刷新必生效
+                        instance.loadLocalHtmlFile();
+                    } else {
+                        Log.e(
+                            TAG,
+                            "refreshWebViewContent: WebView实例为空，刷新失败"
+                        );
+                    }
+                }
+            }
+        );
+    }
+
     @Override
     public void onRequestPermissionsResult(
         int requestCode,
