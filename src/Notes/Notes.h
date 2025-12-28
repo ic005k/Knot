@@ -61,7 +61,6 @@
 #include "titlegenerator.h"
 #include "ui_PrintPDF.h"
 
-class LimitedTextEdit;
 class NoteIndexManager1;
 class MiniMap;
 
@@ -202,7 +201,8 @@ class Notes : public QDialog {
   void renameTitle(bool isOk);
 
   void refreshNote();
-  protected:
+
+ protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;
@@ -328,48 +328,6 @@ class Notes : public QDialog {
 
   void zipNoteToSyncList();
   void refreshLocalHtmlFileInAndroid();
-};
-
-class LimitedTextEdit : public QTextEdit {
-  Q_OBJECT
-
- public:
-  explicit LimitedTextEdit(QWidget* parent = nullptr)
-      : QTextEdit(parent), maxLength(1000) {}
-
-  void setMaxLength(int length) { maxLength = length; }
-  int getMaxLength() const { return maxLength; }
-
- protected:
-  void insertFromMimeData(const QMimeData* source) override {
-    if (source->hasText()) {
-      QString pasteText = source->text();
-      int currentLength = toPlainText().length();
-      int available = maxLength - currentLength;
-
-      if (available <= 0) {
-        // 无可用空间，拒绝粘贴
-        return;
-      }
-
-      if (pasteText.length() > available) {
-        // 截断文本至可用长度
-        pasteText = pasteText.left(available);
-      }
-
-      // 创建新的MIME数据并插入
-      QMimeData* newData = new QMimeData();
-      newData->setText(pasteText);
-      QTextEdit::insertFromMimeData(newData);
-      delete newData;
-    } else {
-      // 非文本内容，按默认处理
-      QTextEdit::insertFromMimeData(source);
-    }
-  }
-
- private:
-  int maxLength;
 };
 
 ///////////////////////////////////////////////////////////////////////
