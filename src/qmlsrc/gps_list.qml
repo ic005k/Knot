@@ -123,7 +123,7 @@ Rectangle {
                           })
     }
 
-    // 融合降采样的速度曲线绘制函数
+    // 融合降采样的速度曲线绘制函数【明暗模式描边统一+无覆盖+抗锯齿+像素比适配】
     function drawSpeedSpectrum(ctx, speedData, canvasWidth, canvasHeight) {
         if (speedData.length < 2) {
             ctx.fillStyle = "rgba(150, 150, 150, 0.3)"
@@ -168,7 +168,7 @@ Rectangle {
             }
         }
 
-        // 4. 绘制速度曲线（全部改用drawPoints）
+        // 4. 绘制速度曲线填充路径【独立路径-仅做填充，不会覆盖后续描边】
         ctx.beginPath()
         ctx.moveTo(0, canvasHeight)
         for (var i = 0; i < drawPoints.length; i++) {
@@ -196,9 +196,25 @@ Rectangle {
         ctx.fillStyle = gradient
         ctx.fill()
 
-        // 6. 绘制轮廓线
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.6)"
-        ctx.lineWidth = 1.2
+        // 6. 绘制轮廓线【独立路径-仅做描边，明暗模式差异化+全修复项，无任何覆盖】
+        ctx.beginPath()
+        ctx.moveTo(0, canvasHeight)
+        for (var i = 0; i < drawPoints.length; i++) {
+            const p = drawPoints[i]
+            if (i === 0) {
+                ctx.lineTo(p.x, p.y)
+            } else {
+                const prev = drawPoints[i - 1]
+                const controlX = (prev.x + p.x) / 2
+                ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y)
+            }
+        }
+        ctx.lineTo(canvasWidth, canvasHeight)
+        ctx.closePath()
+        ctx.strokeStyle = isDark ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.1)"
+        ctx.lineWidth = 1.2 * pixelRatio
+        ctx.lineCap = "round"
+        ctx.lineJoin = "round"
         ctx.stroke()
 
         // 可选：标注最大/最小速度
@@ -215,12 +231,11 @@ Rectangle {
                               }
                           })
 
-        // 匹配降采样后的坐标点（补全大括号，避免逻辑错误）
+        // 匹配降采样后的坐标点
         let maxSpeedPoint = drawPoints[0], minSpeedPoint = drawPoints[0]
         const targetMaxPoint = originalPoints[maxSpeedIdx]
         const targetMinPoint = originalPoints[minSpeedIdx]
         drawPoints.forEach(p => {
-                               // 补全大括号，确保条件判断完整
                                if (Math.abs(p.x - targetMaxPoint.x) <= 1) {
                                    maxSpeedPoint = p
                                }
@@ -235,7 +250,7 @@ Rectangle {
         ctx.fillStyle = "#F44336" // 红色标注最小速度
         ctx.fillRect(minSpeedPoint.x - 2, minSpeedPoint.y - 2, 4, 4)
 
-        // ========== 文本标签容错+增强显示 ==========
+        // ========== 文本标签容错+增强显示(可选) ==========
 
 
         /*
@@ -254,15 +269,11 @@ Rectangle {
 
         // ========== 文本坐标容错（避免越界） ==========
         // 最大速度文本坐标（确保在画布内）
-        const maxTextX = Math.max(5, Math.min(canvasWidth - 60,
-                                              maxSpeedPoint.x + 5))
-        const maxTextY = Math.max(fontSize + 2, Math.min(canvasHeight - 2,
-                                                         maxSpeedPoint.y - 5))
+        const maxTextX = Math.max(5, Math.min(canvasWidth - 60, maxSpeedPoint.x + 5))
+        const maxTextY = Math.max(fontSize + 2, Math.min(canvasHeight - 2, maxSpeedPoint.y - 5))
         // 最小速度文本坐标（确保在画布内）
-        const minTextX = Math.max(5, Math.min(canvasWidth - 60,
-                                              minSpeedPoint.x + 5))
-        const minTextY = Math.max(fontSize + 2, Math.min(canvasHeight - 2,
-                                                         minSpeedPoint.y + 15))
+        const minTextX = Math.max(5, Math.min(canvasWidth - 60, minSpeedPoint.x + 5))
+        const minTextY = Math.max(fontSize + 2, Math.min(canvasHeight - 2, minSpeedPoint.y + 15))
 
         // 绘制文本（先描边后填充，增强可读性）
         // 最大速度
