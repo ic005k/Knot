@@ -1283,7 +1283,6 @@ void MainWindow::init_Instance() {
   mw_one = this;
   m_MainHelper = new MainHelper(this);
   CurrentYear = QString::number(QDate::currentDate().year());
-  if (defaultFontFamily == "") defaultFontFamily = this->font().family();
 
   tabData = mui->tabWidget;
 

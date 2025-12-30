@@ -220,7 +220,8 @@ int main(int argc, char* argv[]) {
 #endif
 
 #ifdef Q_OS_ANDROID
-  defaultFontFamily = "";  // "DroidSansFallback";
+  defaultFontFamily = "sans-serif";
+  //"Noto Sans CJK SC, DroidSansFallback";  // "DroidSansFallback";
 
 #endif
 

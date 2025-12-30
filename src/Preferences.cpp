@@ -225,6 +225,7 @@ bool Preferences::isOverReaderFont() {
 void Preferences::initOptions() {
   bool chkUIFont = iniPreferences->value("/Options/chkUIFont", false).toBool();
   ui->chkUIFont->setChecked(chkUIFont);
+
   ui->chkDark->setChecked(
       iniPreferences->value("/Options/Dark", false).toBool());
 

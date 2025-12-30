@@ -2933,7 +2933,7 @@ void Steps::showSportsChart() {
   QChart* chart = new QChart();
   chart->setTitle(tr("%1 Monthly Sports Statistics").arg(stry));
   chart->legend()->setAlignment(Qt::AlignBottom);
-  chart->setMargins(QMargins(0, 0, 0, 5));  // 彻底去除图表内边距，给Y轴腾空间
+  chart->setMargins(QMargins(5, 0, 0, 5));  // 彻底去除图表内边距，给Y轴腾空间
   if (isDark) {
     chart->setTheme(QChart::ChartThemeDark);
   } else {
@@ -2968,35 +2968,46 @@ void Steps::showSportsChart() {
   barSeries->append(cyclingSet);
   barSeries->append(hikingSet);
   barSeries->append(runningSet);
-  barSeries->setBarWidth(0.9);  // 最大化条形宽度，减少垂直方向空隙
+  barSeries->setBarWidth(0.85);  // 最大化条形宽度，减少垂直方向空隙
 
   // 隐藏图表文字标签
   barSeries->setLabelsVisible(false);
 
-  // 4.3 配置坐标轴（确保数字月份完整显示）
-  QCategoryAxis* axisY = new QCategoryAxis();
+  // 4.3 配置坐标轴（✅ 根治：显示...+字体不生效+刻度错位半格
+  QBarCategoryAxis* axisY =
+      new QBarCategoryAxis();  // 柱状图专属分类轴，根治错位
   QStringList monthLabels;
   for (int i = 1; i <= 12; ++i) {
-    monthLabels << QString::number(i);  // 数字标签
+    monthLabels << QString::number(i);  // 数字标签 1-12月
   }
-  for (int i = 0; i < monthLabels.size(); ++i) {
-    axisY->append(monthLabels[i], i + 1);
-  }
+
+  // 直接追加标签列表，无需手动指定坐标，天然对齐0-11
+  axisY->append(monthLabels);
+
   axisY->setLabelsAngle(0);
   axisY->setTitleText(tr("Month"));
+  axisY->setTitleVisible(false);
 
+  QFont yAxisFont;
+  yAxisFont.setPointSize(isAndroid ? 15 : 8);  // 字体大小
+  axisY->setLabelsFont(yAxisFont);             // 月份文字字体
+  axisY->setTitleFont(yAxisFont);              // Y轴标题字体
+
+  // X轴配置
   QValueAxis* axisX = new QValueAxis();
   axisX->setTitleText(tr("Distance (KM)"));
   axisX->setTickCount(5);
 
   // 4.4 添加系列和轴到图表
   chart->addSeries(barSeries);
-  barSeries->attachAxis(axisY);  // 水平条形系列关联Y轴（月份）
-  barSeries->attachAxis(axisX);  // 水平条形系列关联X轴（里程）
-  chart->createDefaultAxes();
+  // 把【手动配置好的坐标轴】添加到图表中
+  chart->addAxis(axisY, Qt::AlignLeft);  // Y轴(月份)靠左显示，固定写法
+  chart->addAxis(axisX, Qt::AlignBottom);  // X轴(里程)靠下显示，固定写法
+  // 让条形系列 绑定 坐标轴
+  barSeries->attachAxis(axisY);
+  barSeries->attachAxis(axisX);
 
   // 4.5 图表视图配置（增加高度，去除边框）
-  // QChartView* chartView = new QChartView(chart);
   CustomChartView* chartView = new CustomChartView();
   chartView->setChart(chart);
   chartView->setMonthData(monthDataList);
@@ -3005,7 +3016,7 @@ void Steps::showSportsChart() {
   chartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   int mh = 600;
   if (!isAndroid) mh = 450;
-  chartView->setMinimumHeight(mh);  // 原有高度逻辑不变
+  chartView->setMinimumHeight(mh);
   chartView->setMaximumHeight(mh);
   chartView->setFrameStyle(QFrame::NoFrame);
   chartView->setContentsMargins(0, 0, 0, 0);  // 去除视图边距
