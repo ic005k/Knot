@@ -802,16 +802,12 @@ void WebDavDownloader::startNextDownload() {
             qDebug() << "bytesReceived=" << bytesReceived << "->"
                      << "bytesTotal=" << bytesTotal;
 
-            if (m_Method->lblInfo != nullptr) {
-              QString rece = m_Method->getFileSize(bytesReceived, 2);
-              m_Method->lblInfo->setText("[" + QString::number(completedFiles) +
-                                         "/" + QString::number(totalFiles) +
-                                         "] [" + rece + "] " +
-                                         activeDownloads[reply]);
-
-              infoProgBarMax = totalFiles;
-              infoProgBarValue = completedFiles;
-            }
+            QString rece = m_Method->getFileSize(bytesReceived, 2);
+            QString showText = "[" + QString::number(completedFiles) + "/" +
+                               QString::number(totalFiles) + "] [" + rece +
+                               "] " + activeDownloads[reply];
+            m_Method->emit sigUpdateProgressAndText(showText, totalFiles,
+                                                    completedFiles);
 
             emit progressChanged(completedFiles, totalFiles,
                                  activeDownloads[reply]);

@@ -72,7 +72,7 @@ class Method : public QDialog {
   Ui::Method* ui;
 
   QProgressBar* infoProgBar = nullptr;
-  QLabel* lblInfo = nullptr;
+  QTextEdit* lblInfo = nullptr;
   void showInfoWindow(const QString& info);
   void closeInfoWindow();
   void setInfoText(const QString& newText);
@@ -469,6 +469,10 @@ class Method : public QDialog {
 
  protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
+
+ signals:
+  void sigUpdateProgressAndText(const QString& showText, int progMax,
+                                int progVal);
 
  public slots:
 

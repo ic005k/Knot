@@ -1082,8 +1082,6 @@ void Notes::openNotesUI() {
 
   init_all_notes();
 
-  m_Method->closeInfoWindow();
-
   isSaveNotesConfig = false;
 
   mw_one->isMemoVisible = true;
@@ -1103,6 +1101,8 @@ void Notes::openNotesUI() {
     m_NotesList->clickNoteBook();
   }
   m_NotesList->setNoteLabel();
+
+  QTimer::singleShot(100, mw_one, []() { m_Method->closeInfoWindow(); });
 
   if (isRequestOpenNoteEditor) {
     isRequestOpenNoteEditor = false;
@@ -1612,12 +1612,9 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
       }
     }
 
-    if (m_Method->lblInfo != nullptr) {
-      m_Method->lblInfo->setText("[" + QString::number(n_Files) + "/" +
-                                 QString::number(totalFiles) + "] " + pFile);
-      infoProgBarMax = totalFiles;
-      infoProgBarValue = n_Files;
-    }
+    QString showText = "[" + QString::number(n_Files) + "/" +
+                       QString::number(totalFiles) + "] " + pFile;
+    m_Method->emit sigUpdateProgressAndText(showText, totalFiles, n_Files);
   }
 
   QString jsonFile = iniDir + "mainnotes.json";

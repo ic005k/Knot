@@ -16,6 +16,15 @@ Method::Method(QWidget* parent) : QDialog(parent) {
   count2 = Reg.value("/AccessWebDAV/count2", 0).toInt();
 
   m_EnColorPicker = new EnhancedColorPicker(this);
+
+  connect(
+      this, &Method::sigUpdateProgressAndText, this,
+      [this](const QString& text, int max, int val) {
+        this->setInfoText(text);             // 刷新文本
+        this->infoProgBar->setMaximum(max);  // 刷新进度条最大值
+        this->infoProgBar->setValue(val);    // 刷新进度条当前值
+      },
+      Qt::QueuedConnection);  // 线程绝对安全
 }
 
 void Method::init() {
@@ -2983,9 +2992,11 @@ void Method::showInfoWindow(const QString& info) {
   infoWindow->setModal(true);
 
   // 创建信息标签（保持原有属性）
-  lblInfo = new QLabel(info, infoWindow);
-  lblInfo->setWordWrap(true);
-  lblInfo->setMargin(10);
+  lblInfo = new QTextEdit(info, infoWindow);
+  lblInfo->setReadOnly(true);
+  lblInfo->setFrameShape(QFrame::NoFrame);
+  lblInfo->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  lblInfo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   lblInfo->setMinimumWidth(100);
 
   // --------------------------
@@ -3006,14 +3017,8 @@ void Method::showInfoWindow(const QString& info) {
   topLayout->addStretch();           // 右侧留白，使组件居中
   mainLayout->addLayout(topLayout);  // 将顶部布局加入主布局
 
-  QFrame* frame = new QFrame(infoWindow);
-
-  QVBoxLayout* v_box = new QVBoxLayout();
-  frame->setLayout(v_box);
-  v_box->addWidget(lblInfo);
-
   // 中间：原有信息标签
-  mainLayout->addWidget(frame);
+  mainLayout->addWidget(lblInfo);
 
   // 底部：进度条（保持原有逻辑）
   QHBoxLayout* bottomLayout = new QHBoxLayout();
@@ -3030,7 +3035,9 @@ void Method::showInfoWindow(const QString& info) {
   else
     infoWindow->setFixedWidth(350);
 
-  int win_h = 230;
+  lblInfo->setMaximumWidth(infoWindow->width() - 10);
+
+  int win_h = 240;
   QFont font = this->font();
   if (!isAndroid) {
     win_h = 225;
@@ -3056,18 +3063,6 @@ void Method::showInfoWindow(const QString& info) {
   }
   infoWindow->move(x, y);
 
-  // 进度条更新计时器（保持原有逻辑）
-  infoProgBarMax = 0;
-  infoProgBarValue = 0;
-  QTimer* timerProg = new QTimer(infoWindow);
-  connect(timerProg, &QTimer::timeout, this, [this]() {
-    if (infoProgBarMax > 0 && infoProgBarValue > 0) {
-      infoProgBar->setValue(infoProgBarValue);
-      infoProgBar->setMaximum(infoProgBarMax);
-    }
-  });
-  timerProg->start(250);
-
   // 显示窗口（保持原有逻辑）
   infoWindow->show();
   infoWindow->raise();
@@ -3077,8 +3072,9 @@ void Method::showInfoWindow(const QString& info) {
 void Method::closeInfoWindow() {
   if (infoWindow) {
     infoWindow->close();
+    infoWindow->deleteLater();
     infoWindow = nullptr;
-    lblInfo = nullptr;
+    lblInfo = nullptr;  // 子控件已被自动销毁，置空即可
     infoProgBar = nullptr;
   }
 }
