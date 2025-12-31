@@ -1143,7 +1143,8 @@ void MainWindow::showProgress() {
 
 void MainWindow::closeProgress() {
   if (!initMain && dlgProg) {
-    dlgProg->close();  // 自动销毁，不需要 delete
+    dlgProg->close();
+    dlgProg->deleteLater();
     dlgProg = nullptr;
   }
 }
@@ -1413,6 +1414,7 @@ void MainWindow::on_openKnotBakDir() {
 void MainWindow::on_actionOneDriveBackupData() {
   mui->frameMain->hide();
   mui->frameReader->hide();
+  if (isAndroid) mui->f_WebDAV->setFixedWidth(mw_one->width() - 40);
   mui->frameOne->show();
 }
 

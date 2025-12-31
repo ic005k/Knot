@@ -71,6 +71,7 @@ class Method : public QDialog {
   ~Method();
   Ui::Method* ui;
 
+  QDialog* infoWindow = nullptr;
   QProgressBar* infoProgBar = nullptr;
   QTextEdit* lblInfo = nullptr;
   void showInfoWindow(const QString& info);
@@ -488,7 +489,7 @@ class Method : public QDialog {
  private:
   int count1 = 0;
   int count2 = 0;
-  QDialog* infoWindow = nullptr;
+
   int secondCounter = 0;
 
   void setCellText(int row, int column, QString str, QTableWidget* table);

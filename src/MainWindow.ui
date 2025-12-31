@@ -2162,7 +2162,14 @@ QComboBox {
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="editWebDAVUsername"/>
+               <widget class="QLineEdit" name="editWebDAVUsername">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
               </item>
               <item>
                <spacer name="verticalSpacer_3">
@@ -2190,7 +2197,14 @@ QComboBox {
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="editWebDAVPassword"/>
+               <widget class="QLineEdit" name="editWebDAVPassword">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
               </item>
               <item>
                <spacer name="verticalSpacer_4">
