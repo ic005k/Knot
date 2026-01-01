@@ -353,6 +353,7 @@ void loadTheme(bool isDark) {
       font.setBold(true);
       mui->lblViewCate1->setFont(font);
       mui->lblTitleEditRecord->setFont(font);
+      mui->lblSyncNote->setFont(font);
       widget->updateGeometry();
       widget->repaint();
     }

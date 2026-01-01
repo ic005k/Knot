@@ -730,7 +730,6 @@ void MainHelper::init_UIWidget() {
   mui->btnFind->setFont(f);
 
   f.setBold(true);
-  mui->lblSyncNote->setFont(f);
   mui->lblShowLineSn->setFont(f);
   mui->lblShowLineSn->setWordWrap(true);
   mui->lblShowLineSn->adjustSize();
