@@ -5,7 +5,7 @@
     package="com.x"
     android:installLocation="auto"
     android:versionCode="1"
-    android:versionName="2.1.67"
+    android:versionName="2.1.68"
 >
 
     <!-- The following comment will be replaced upon deployment with default permissions based on

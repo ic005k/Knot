@@ -1092,6 +1092,7 @@ void Notes::openNotesUI() {
   if (tw->topLevelItemCount() == 0) {
     mui->lblNoteBook->setText(tr("Note Book"));
     mui->lblNoteList->setText(tr("Note List"));
+    QTimer::singleShot(100, mw_one, []() { m_Method->closeInfoWindow(); });
     return;
   }
 
