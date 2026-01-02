@@ -80,8 +80,6 @@ class Notes : public QDialog {
 
   bool isWebDAVError = false;
 
-  bool isDelLocalNoteEnd;
-
   void openLocalHtmlFileInAndroid();
 
   QString htmlFileName;
@@ -328,6 +326,7 @@ class Notes : public QDialog {
 
   void zipNoteToSyncList();
   void refreshLocalHtmlFileInAndroid();
+  void openNotesUI_1();
 };
 
 ///////////////////////////////////////////////////////////////////////

@@ -10,13 +10,13 @@
 
 extern std::unique_ptr<cppjieba::Jieba> jieba;
 
-DatabaseManager::DatabaseManager(QObject *parent)
+DatabaseManager::DatabaseManager(QObject* parent)
     : QObject(parent),
       m_defaultDir(
           QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)) {
 }
 
-bool DatabaseManager::initDatabase(const QString &path) {
+bool DatabaseManager::initDatabase(const QString& path) {
   m_db = QSqlDatabase::addDatabase("QSQLITE");
   m_db.setDatabaseName(path);
 
@@ -51,7 +51,7 @@ void DatabaseManager::setupDatabaseSchema() {
   }
 }
 
-void DatabaseManager::updateFilesIndex(const QString &directory) {
+void DatabaseManager::updateFilesIndex(const QString& directory) {
   if (directory.isEmpty()) {
     emit errorOccurred("Invalid directory path");
     return;
@@ -71,7 +71,7 @@ void DatabaseManager::updateFilesIndex(const QString &directory) {
   query.exec("DELETE FROM documents");
   query.exec("DELETE FROM fts_documents");
 
-  foreach (const QString &file, files) {
+  foreach (const QString& file, files) {
     processFile(dir.filePath(file));
   }
 
@@ -84,7 +84,7 @@ void DatabaseManager::updateFilesIndex(const QString &directory) {
   qInfo() << "重建索引耗时:" << timer.elapsed() << "ms";
 }
 
-void DatabaseManager::processFile(const QString &filePath) {
+void DatabaseManager::processFile(const QString& filePath) {
   QString m_filePath = QFileInfo(filePath).canonicalFilePath();
 
   QFile file(m_filePath);
@@ -115,7 +115,7 @@ void DatabaseManager::processFile(const QString &filePath) {
   q.exec();
 }
 
-QStringList DatabaseManager::tokenize(const QString &text) {
+QStringList DatabaseManager::tokenize(const QString& text) {
   std::vector<std::string> words;
   QStringList result;
 
@@ -123,7 +123,7 @@ QStringList DatabaseManager::tokenize(const QString &text) {
   QString chinesePart;
   QString westernPart;
 
-  for (const QChar &c : text) {
+  for (const QChar& c : text) {
     if (c.unicode() >= 0x4E00 && c.unicode() <= 0x9FA5) {
       chinesePart.append(c);
     } else {
@@ -142,7 +142,7 @@ QStringList DatabaseManager::tokenize(const QString &text) {
   QStringList westernWords = westernPart.split(re, Qt::SkipEmptyParts);
 
   // 合并结果
-  for (const auto &w : words) {
+  for (const auto& w : words) {
     result << QString::fromStdString(w);
   }
   result.append(westernWords);
@@ -159,12 +159,12 @@ QStringList DatabaseManager::tokenize(const QString &text) {
 }
 
 QVector<DatabaseManager::SearchResult> DatabaseManager::searchDocuments(
-    const QString &query, NoteIndexManager *indexManager, int limit) {
+    const QString& query, NoteIndexManager* indexManager, int limit) {
   Q_UNUSED(limit);
   QStringList keywords = tokenize(query);
 
   QStringList conditions;
-  for (const QString &kw : std::as_const(keywords)) {
+  for (const QString& kw : std::as_const(keywords)) {
     QString escaped = kw;
     escaped.replace("'", "''");
     conditions << QString("(content MATCH '\"%1\"' OR terms MATCH '\"%1\"')")
@@ -206,13 +206,13 @@ QVector<DatabaseManager::SearchResult> DatabaseManager::searchDocuments(
   return results;
 }
 
-QString DatabaseManager::extractPreview(const QString &content,
-                                        const QStringList &keywords) {
+QString DatabaseManager::extractPreview(const QString& content,
+                                        const QStringList& keywords) {
   const int CONTEXT_LEN = 80;
   QString simplified = content.simplified();
 
   int firstPos = -1;
-  for (const QString &kw : keywords) {
+  for (const QString& kw : keywords) {
     int pos = simplified.indexOf(kw, 0, Qt::CaseInsensitive);
     if (pos != -1 && (firstPos == -1 || pos < firstPos)) {
       firstPos = pos;
@@ -225,7 +225,7 @@ QString DatabaseManager::extractPreview(const QString &content,
   int end = qMin(simplified.length(), start + CONTEXT_LEN);
   QString preview = simplified.mid(start, end - start);
 
-  for (const QString &kw : keywords) {
+  for (const QString& kw : keywords) {
     QRegularExpression re(QString("(%1)").arg(QRegularExpression::escape(kw)),
                           QRegularExpression::CaseInsensitiveOption);
 
@@ -241,7 +241,7 @@ QString DatabaseManager::extractPreview(const QString &content,
          (end < simplified.length() ? "..." : "");
 }
 
-void DatabaseManager::updateFileIndex(const QString &filePath) {
+void DatabaseManager::updateFileIndex(const QString& filePath) {
   QFileInfo fi(filePath);
   if (!fi.exists()) return;
 
@@ -256,12 +256,12 @@ void DatabaseManager::updateFileIndex(const QString &filePath) {
 }
 
 // 添加批量处理方法，一次性处理多个文件
-void DatabaseManager::updateFileIndexes(const QStringList &filePaths) {
+void DatabaseManager::updateFileIndexes(const QStringList& filePaths) {
   if (filePaths.isEmpty()) return;
 
   // 先收集所有存在的文件路径（过滤无效文件）
   QStringList validFilePaths;
-  for (const QString &filePath : filePaths) {
+  for (const QString& filePath : filePaths) {
     if (QFile::exists(filePath)) {
       validFilePaths << filePath;
     }
@@ -273,7 +273,7 @@ void DatabaseManager::updateFileIndexes(const QStringList &filePaths) {
   executeTransactionWithRetry(
       [this, validFilePaths]() -> bool {
         // 在一个事务中处理所有文件，减少数据库操作开销
-        for (const QString &filePath : validFilePaths) {
+        for (const QString& filePath : validFilePaths) {
           // 先删除旧索引
           deleteFileIndex(filePath);
           // 再处理新索引
@@ -284,7 +284,7 @@ void DatabaseManager::updateFileIndexes(const QStringList &filePaths) {
       1);
 }
 
-void DatabaseManager::deleteFileIndex(const QString &filePath) {
+void DatabaseManager::deleteFileIndex(const QString& filePath) {
   QFileInfo fi(filePath);
   if (!fi.exists()) return;
 
@@ -338,7 +338,7 @@ bool DatabaseManager::executeTransactionWithRetry(std::function<bool()> ops,
           return true;
         }
         m_db.rollback();
-      } catch (const std::exception &e) {
+      } catch (const std::exception& e) {
         m_db.rollback();
         qCritical() << "事务异常:" << e.what();
       }
@@ -359,13 +359,13 @@ void DatabaseManager::validateIndex() {
   }
 }
 
-QStringList DatabaseManager::scanMarkdownFiles(const QString &directory) const {
+QStringList DatabaseManager::scanMarkdownFiles(const QString& directory) const {
   QDir dir(directory);
   return dir.entryList({"*.md"}, QDir::Files | QDir::NoDotAndDotDot);
 }
 
 // 核心功能：清理指定目录下，本地已删除但数据库中仍存在的MD文件记录
-void DatabaseManager::cleanMissingFileRecords(const QString &directory) {
+void DatabaseManager::cleanMissingFileRecords(const QString& directory) {
   if (directory.isEmpty()) {
     emit errorOccurred("Invalid directory path (cleanMissingFileRecords)");
     return;
@@ -375,17 +375,30 @@ void DatabaseManager::cleanMissingFileRecords(const QString &directory) {
   timer.start();
   QDir targetDir(directory);
 
-  // 步骤1：获取本地实际存在的MD文件（完整规范路径，确保与数据库路径一致）
+  // ✅ 原有防御1：目录不存在直接返回
+  if (!targetDir.exists()) {
+    qInfo() << "Directory not exist, no clean needed (directory:" << directory
+            << ")";
+    return;
+  }
+
+  // 步骤1：获取本地实际存在的MD文件
   QSet<QString> localExistedFiles;
   const QStringList localMdFiles =
       targetDir.entryList({"*.md"}, QDir::Files | QDir::NoDotAndDotDot);
-  for (const QString &fileName : localMdFiles) {
-    // 转成规范路径（避免相对路径/绝对路径不一致导致误删）
+  for (const QString& fileName : localMdFiles) {
     const QString canonicalPath =
         QFileInfo(targetDir.filePath(fileName)).canonicalFilePath();
     if (!canonicalPath.isEmpty()) {
       localExistedFiles.insert(canonicalPath);
     }
+  }
+
+  // ✅ 新增【本次边缘场景专属防御】：本地文件全部被删除，日志标注，提前预警
+  bool isLocalFilesAllDeleted = localExistedFiles.isEmpty();
+  if (isLocalFilesAllDeleted) {
+    qWarning() << "=== Edge Case: All local MD files are deleted! Will clean "
+                  "all db records ===";
   }
 
   // 步骤2：获取数据库中所有存储的MD文件路径
@@ -400,59 +413,79 @@ void DatabaseManager::cleanMissingFileRecords(const QString &directory) {
     dbStoredFiles.append(query.value(0).toString());
   }
 
+  // ✅ 原有防御2：数据库为空直接返回
+  if (dbStoredFiles.isEmpty()) {
+    qInfo() << "Database is empty, no clean needed (directory:" << directory
+            << ")";
+    return;
+  }
+
   // 步骤3：筛选出“数据库有但本地无”的无效路径
   QList<QString> invalidDbPaths;
-  for (const QString &dbPath : dbStoredFiles) {
+  for (const QString& dbPath : dbStoredFiles) {
     if (!dbPath.isEmpty() && !localExistedFiles.contains(dbPath)) {
       invalidDbPaths.append(dbPath);
     }
   }
 
-  // 步骤4：批量删除无效记录（用事务提高效率，避免多次IO）
+  // ✅ 原有防御3：无无效记录直接返回
   if (invalidDbPaths.isEmpty()) {
     qInfo() << "No missing file records to clean (directory:" << directory
             << ")";
     return;
   }
 
-  // 开启事务批量删除（复用已有事务重试逻辑，保证可靠性）
+  // ===================== ✅ 核心修改：批量删除 替代 循环逐条删除
+  // =====================
+  // 不管是「少量无效记录」还是「全量无效记录（本地全删）」，全部批量删除
   const bool cleanSuccess = executeTransactionWithRetry(
       [&]() -> bool {
-        for (const QString &invalidPath : invalidDbPaths) {
-          // 删除主表记录
-          QSqlQuery delMain(m_db);
-          delMain.prepare("DELETE FROM documents WHERE path = ?");
-          delMain.addBindValue(invalidPath);
-          if (!delMain.exec()) {
-            throw std::runtime_error(
-                QString("Delete documents table failed: %1 (path:%2)")
-                    .arg(delMain.lastError().text())
-                    .arg(invalidPath)
-                    .toStdString());
-          }
-
-          // 删除FTS全文索引表记录（与主表同步）
-          QSqlQuery delFts(m_db);
-          delFts.prepare("DELETE FROM fts_documents WHERE path = ?");
-          delFts.addBindValue(invalidPath);
-          if (!delFts.exec()) {
-            throw std::runtime_error(
-                QString("Delete fts_documents table failed: %1 (path:%2)")
-                    .arg(delFts.lastError().text())
-                    .arg(invalidPath)
-                    .toStdString());
-          }
+        // 拼接批量删除的IN条件：?占位符，防止SQL注入，安全高效
+        QStringList placeholders;
+        for (int i = 0; i < invalidDbPaths.size(); ++i) {
+          placeholders.append("?");
         }
-        return true;  // 所有删除操作完成
+        QString inCondition = placeholders.join(",");
+
+        // 1. 批量删除主表 documents 所有无效记录 【1次IO 替代 N次IO】
+        QSqlQuery delMain(m_db);
+        delMain.prepare(QString("DELETE FROM documents WHERE path IN (%1)")
+                            .arg(inCondition));
+        for (const QString& path : invalidDbPaths) {
+          delMain.addBindValue(path);
+        }
+        if (!delMain.exec()) {
+          throw std::runtime_error(QString("Batch delete documents failed: %1")
+                                       .arg(delMain.lastError().text())
+                                       .toStdString());
+        }
+
+        // 2. 批量删除FTS索引表 fts_documents 所有无效记录 【1次IO 替代 N次IO】
+        QSqlQuery delFts(m_db);
+        delFts.prepare(QString("DELETE FROM fts_documents WHERE path IN (%1)")
+                           .arg(inCondition));
+        for (const QString& path : invalidDbPaths) {
+          delFts.addBindValue(path);
+        }
+        if (!delFts.exec()) {
+          throw std::runtime_error(
+              QString("Batch delete fts_documents failed: %1")
+                  .arg(delFts.lastError().text())
+                  .toStdString());
+        }
+
+        return true;
       },
-      3  // 重试3次（应对临时数据库锁等问题）
+      3  // 保留3次重试，足够应对临时锁问题
   );
 
-  // 输出结果日志
+  // 输出结果日志（保留原有日志）
   if (cleanSuccess) {
-    qInfo() << "Clean missing file records success! "
-            << "Count:" << invalidDbPaths.size() << "Time:" << timer.elapsed()
-            << "ms (directory:" << directory << ")";
+    qInfo() << "Clean missing file records success! Count:"
+            << invalidDbPaths.size()
+            << "LocalAllDeleted:" << isLocalFilesAllDeleted
+            << "Time:" << timer.elapsed() << "ms (directory:" << directory
+            << ")";
   } else {
     qWarning() << "Clean missing file records failed (directory:" << directory
                << ")";
@@ -474,7 +507,7 @@ void DatabaseManager::closeDatabase() {
 }
 
 // 实现删除数据库文件的函数
-bool DatabaseManager::deleteDatabaseFile(const QString &dbPath) {
+bool DatabaseManager::deleteDatabaseFile(const QString& dbPath) {
   // 步骤1：先关闭所有数据库连接
   closeDatabase();
 

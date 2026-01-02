@@ -62,6 +62,7 @@ Rectangle {
     }
 
     function getTodoText(itemIndex) {
+        if(itemIndex < 0 || itemIndex >= view.count) return ""; // 索引校验
         var data = view.model.get(itemIndex)
         return data.dototext
     }

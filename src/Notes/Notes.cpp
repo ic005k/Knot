@@ -1023,10 +1023,10 @@ void Notes::loadEmptyNote() {
 
 void Notes::startBackgroundTaskDelAndClear() {
   QString fullPath = iniDir + "memo";  // 先构造完整路径
-  isDelLocalNoteEnd = false;
+
   QFuture<void> future = QtConcurrent::run([=]() {
     m_NotesList->needDelNotes();
-    isDelLocalNoteEnd = true;
+
     m_NotesList->m_dbManager.cleanMissingFileRecords(fullPath);
   });
 
@@ -1034,6 +1034,7 @@ void Notes::startBackgroundTaskDelAndClear() {
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Database del and clear completed...";
+    openNotesUI_1();
     watcher->deleteLater();
   });
   watcher->setFuture(future);
@@ -1076,10 +1077,9 @@ void Notes::openNotesUI() {
   mui->frameNoteList->show();
 
   startBackgroundTaskDelAndClear();
+}
 
-  while (!isDelLocalNoteEnd)
-    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-
+void Notes::openNotesUI_1() {
   init_all_notes();
 
   isSaveNotesConfig = false;
@@ -1092,18 +1092,20 @@ void Notes::openNotesUI() {
   if (tw->topLevelItemCount() == 0) {
     mui->lblNoteBook->setText(tr("Note Book"));
     mui->lblNoteList->setText(tr("Note List"));
-    QTimer::singleShot(100, mw_one, []() { m_Method->closeInfoWindow(); });
+    m_Method->closeInfoWindow();
     return;
   }
 
   m_NotesList->loadAllNoteBook();
-  if (!m_NotesList->setCurrentItemFromMDFile(currentMDFile)) {
-    m_NotesList->setNoteBookCurrentIndex(0);
-    m_NotesList->clickNoteBook();
+  if (m_NotesList->getNoteBookCount() > 0) {
+    if (!m_NotesList->setCurrentItemFromMDFile(currentMDFile)) {
+      m_NotesList->setNoteBookCurrentIndex(0);
+      m_NotesList->clickNoteBook();
+    }
+    m_NotesList->setNoteLabel();
   }
-  m_NotesList->setNoteLabel();
 
-  QTimer::singleShot(100, mw_one, []() { m_Method->closeInfoWindow(); });
+  m_Method->closeInfoWindow();
 
   if (isRequestOpenNoteEditor) {
     isRequestOpenNoteEditor = false;
@@ -1242,6 +1244,7 @@ void Notes::openNotes() {
 
   isPasswordError = false;
   isWebDAVError = false;
+
   m_Method->showInfoWindow(tr("Processing..."));
 
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
