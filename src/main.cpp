@@ -1,4 +1,5 @@
 
+
 #include <QApplication>
 #include <QDir>
 
@@ -62,8 +63,6 @@ QString strJBDict3 = "";
 QString strJBDict4 = "";
 QString strJBDict5 = "";
 
-const QString uniqueKey = "MyUniqueApplicationKey_12345";
-
 #define Cross_Origin
 
 int main(int argc, char* argv[]) {
@@ -95,7 +94,7 @@ int main(int argc, char* argv[]) {
   loadLocal();
 
 #ifndef Q_OS_ANDROID
-  QSharedMemory sharedMemory(uniqueKey);
+  sharedMemory.setKey(uniqueKey);
   if (!sharedMemory.create(1)) {
     QMessageBox::information(nullptr, "Knot",
                              QObject::tr("The application is already running!"),

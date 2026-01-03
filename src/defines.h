@@ -7,6 +7,7 @@
 #include <QQmlEngine>
 #include <QRegularExpression>
 #include <QSettings>
+#include <QSharedMemory>
 #include <QTabWidget>
 #include <QTextBlock>
 #include <QTextEdit>
@@ -37,6 +38,11 @@ class MainWindow;
 
 #ifdef Q_OS_ANDROID
 #define ANDROID_MAIN_ACTIVITY "com/x/MyActivity"
+#endif
+
+#ifndef Q_OS_ANDROID
+inline const QString uniqueKey = "KnotMyUniqueApplicationKey_12345";
+inline QSharedMemory sharedMemory;
 #endif
 
 inline QSettings* iniPreferences;

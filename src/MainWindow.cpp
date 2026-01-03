@@ -618,6 +618,13 @@ void MainWindow::closeEvent(QCloseEvent* event) {
   Reg.setValue("w", this->geometry().width());
   Reg.setValue("h", this->geometry().height());
 
+// ===== 主动释放共享内存 =====
+#ifndef Q_OS_ANDROID
+  sharedMemory.setKey(uniqueKey);
+  if (sharedMemory.attach()) {
+    sharedMemory.detach();
+  }
+#endif
   event->accept();
 #endif
 }
