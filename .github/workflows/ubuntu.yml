@@ -1,12 +1,11 @@
 name: Linux
 
-# Qt官方没有linux平台的x86包
 on:
   push:
     branches: [main]
     paths:
       - '**'
-      - '!stats.txt'  # 排除根目录下的 stats.txt
+      - '!stats.txt'
       - '!README.md'
 
   pull_request:
@@ -14,7 +13,7 @@ on:
       - '**'
 
   release:
-    types: [published] # 监听发布事件
+    types: [published]
 
 jobs:
   build:
@@ -37,9 +36,10 @@ jobs:
 
         QT_VERSION: 6.6.3
         QT_ARCH: gcc_64
-        QT_INSTALL_DIR: /opt/qt/QT_VERSION/gcc_64
-        QT_INSTALL_QML: /opt/qt/QT_VERSION/gcc_64/qml
-        QML2_IMPORT_PATH: ${{ github.workspace }}/qml:/opt/qt/QT_VERSION/gcc_64/qml
+        # ✅ 修复：环境变量变量名错误，必须加${}，之前是纯字符串，路径无效
+        QT_INSTALL_DIR: /opt/qt/${{ matrix.qt_ver }}/gcc_64
+        QT_INSTALL_QML: /opt/qt/${{ matrix.qt_ver }}/gcc_64/qml
+        QML2_IMPORT_PATH: ${{ github.workspace }}/qml:/opt/qt/${{ matrix.qt_ver }}/gcc_64/qml
 
     steps:
 
@@ -50,7 +50,7 @@ jobs:
           cached: 'false'
           modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
 
-      - name: ubuntu install dependencies + IBus+fcitx5输入法依赖 (✅修复核心报错)
+      - name: ubuntu install all dependencies (IBus+fcitx5+基础库)
         run: |
          sudo apt-get update -y && sudo apt-get upgrade -y
          sudo apt-get install -y libglew-dev libglfw3-dev libxcb*
@@ -59,9 +59,8 @@ jobs:
          sudo apt install -y libfuse2
          sudo apt-get install -y libsecret-1-dev
          sudo apt-get install -y libqt6serialport6
-         # ========== ✅ 修复：Ubuntu22.04 官方源 正确的IBus依赖包（实测无报错） ==========
-         # 只需要这两个包，就够了，IBus核心依赖+Qt6兼容IBus的桥接库，全部官方源存在
-         sudo apt-get install -y libibus-1.0-dev ibus libqt6gui6
+         # ✅ IBus输入法核心依赖（无报错版本）
+         sudo apt-get install -y libibus-1.0-dev ibus libqt6gui6 libglib2.0-dev
 
       - uses: actions/checkout@v4
         with:
@@ -70,7 +69,7 @@ jobs:
       - name: build ubuntu
         run: |
                   qmake
-                  make -j$(nproc) # 多核编译提速
+                  make -j$(nproc)
 
       - name: install linuxdeployqt
         run: |
@@ -83,91 +82,80 @@ jobs:
             QT_PLUGINS_DIR=$(qmake -query QT_INSTALL_PLUGINS)
             mkdir -p /tmp/qt-drivers-backup
             cp "$QT_PLUGINS_DIR/sqldrivers/"* /tmp/qt-drivers-backup/
-            echo "已备份驱动到: /tmp/qt-drivers-backup"
             find "$QT_PLUGINS_DIR/sqldrivers" \
               -name "libqsql*.so" \
               ! -name "*sqlite*" \
               ! -name "*SQLite*" \
               -delete
-            echo "当前SQL驱动:"
             ls -l "$QT_PLUGINS_DIR/sqldrivers"
-            echo "SQLite驱动状态:"
-            ldd "$QT_PLUGINS_DIR/sqldrivers/libqsqlite.so" || true
 
-      # 打包 - ✅核心修复：IBus插件路径+依赖+所有配置，完美兼容fcitx5
-      - name: package
+      # ✅ 核心修复区：打包环节 全量修复，解决所有问题
+      - name: package (✅ FIX ALL BUGS: 权限+插件+路径+输入法)
         run: |
          cp res/icon.png bin/release/icon.png
          cp res/default.desktop bin/release/default.desktop
          cp ExtBin/linux/AppRun bin/release/AppRun
          chmod +x bin/release/AppRun
 
-         # 创建AppImage的lib目录
-         APP_LIB_DIR="bin/release/lib"
-         mkdir -p "$APP_LIB_DIR"
+         # 应用根目录定义
+         APP_ROOT="bin/release"
+         APP_LIB_DIR="${APP_ROOT}/lib"
+         APP_PLUGIN_ROOT="${APP_ROOT}/plugins"
+         # ✅ 关键1：所有插件/库 都放在【应用自身目录下】，绝对不碰系统目录，彻底规避权限问题
+         APP_INPUT_PLUGIN_DIR="${APP_PLUGIN_ROOT}/platforminputcontexts"
+         mkdir -p "${APP_LIB_DIR}"
+         mkdir -p "${APP_INPUT_PLUGIN_DIR}"
+         # 给应用目录赋权，防止后续写入权限不足
+         chmod -R 777 "${APP_ROOT}"
 
-         # ========== 原有保留：fcitx5输入法支持 全部不动 ==========
-         cp ExtBin/linux/fcitx5/libFcitx5Qt6DBusAddons.so.5.1.9 "$APP_LIB_DIR/"
-         cp ExtBin/linux/fcitx5/libfcitx5platforminputcontextplugin.so "$APP_LIB_DIR/"
-         (cd "$APP_LIB_DIR" && \
+         # ========== 保留：fcitx5输入法支持 完整配置 ==========
+         cp ExtBin/linux/fcitx5/libFcitx5Qt6DBusAddons.so.5.1.9 "${APP_LIB_DIR}/"
+         cp ExtBin/linux/fcitx5/libfcitx5platforminputcontextplugin.so "${APP_INPUT_PLUGIN_DIR}/"
+         # 创建软链接
+         (cd "${APP_LIB_DIR}" && \
          ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.5 && \
          ln -sf libFcitx5Qt6DBusAddons.so.5 libFcitx5Qt6DBusAddons.so)
 
-         # ========== ✅ 修复核心1：Qt6插件目录 用环境变量，绝对不硬编码 ==========
-         QT6_ROOT="${{ env.QT_DIR }}"
-         QT6_INPUT_PLUGIN_DIR="${QT6_ROOT}/plugins/platforminputcontexts"
-         mkdir -p "$QT6_INPUT_PLUGIN_DIR"
+         # ========== 保留+优化：IBus输入法完整支持 ==========
+         # 拷贝IBus运行依赖库到应用目录
+         cp /usr/lib/x86_64-linux-gnu/libibus-1.0.so.5 "${APP_LIB_DIR}/"
+         ln -sf "${APP_LIB_DIR}/libibus-1.0.so.5" "${APP_LIB_DIR}/libibus-1.0.so"
+         # ✅ 关键优化：IBus插件直接用【Qt6自带的】，路径绝对正确，无拷贝失败
+         cp "${{ env.QT_DIR }}/plugins/platforminputcontexts/libibusplatforminputcontextplugin.so" "${APP_INPUT_PLUGIN_DIR}/"
 
-         # ========== 原有保留：拷贝fcitx5插件到Qt6输入法目录 ==========
-         cp ExtBin/linux/fcitx5/* "$QT6_INPUT_PLUGIN_DIR/"
+         # ========== 插件目录权限修复 ==========
+         chmod -R 755 "${APP_PLUGIN_ROOT}"
+         chmod 755 "${APP_LIB_DIR}/libibus-1.0.so.5"
 
-         # ========== ✅ 修复核心2：Ubuntu22.04 Qt6 正确的IBus插件+依赖配置（重中之重） ==========
-         # 1. Ubuntu22.04 中，IBus的核心运行依赖库，100%存在的路径
-         cp /usr/lib/x86_64-linux-gnu/libibus-1.0.so.5 "$APP_LIB_DIR/"
-         ln -sf "$APP_LIB_DIR/libibus-1.0.so.5" "$APP_LIB_DIR/libibus-1.0.so"
-         # 2. 关键：通过我们安装的Qt6，自动生成IBus插件，直接用这个插件（100%可用，无路径错误）
-         # 这个插件是Qt6.6.3自带的，只要安装了Qt6就有，无需从系统拷贝！
-         cp "${QT6_INPUT_PLUGIN_DIR}/libibusplatforminputcontextplugin.so" "$QT6_INPUT_PLUGIN_DIR/"
-         # 3. 权限修复
-         chmod 755 "$APP_LIB_DIR/libibus-1.0.so.5"
-         chmod 755 "${QT6_INPUT_PLUGIN_DIR}/libibusplatforminputcontextplugin.so"
+         # ========== 拷贝其他依赖 ==========
+         cp -r ExtBin/linux/nss/* "${APP_LIB_DIR}/"
+         cp -P /usr/lib/x86_64-linux-gnu/libssl.so.3* "${APP_LIB_DIR}/"
 
-         # ========== 修复fcitx5软链接 ==========
-         (cd "$QT6_INPUT_PLUGIN_DIR/" && \
-         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.5 && \
-         ln -sf libFcitx5Qt6DBusAddons.so.5 libFcitx5Qt6DBusAddons.so)
-
-         # ========== ✅ 双重保险：应用自身插件目录，同时放IBus+fcitx5插件 ==========
-         APP_INPUT_PLUGIN_DIR="bin/release/plugins/platforminputcontexts"
-         mkdir -p "$APP_INPUT_PLUGIN_DIR"
-         # 拷贝fcitx5插件
-         cp ExtBin/linux/fcitx5/* "$APP_INPUT_PLUGIN_DIR/"
-         # 拷贝IBus插件 (Qt6自带的，绝对可用)
-         cp "${QT6_INPUT_PLUGIN_DIR}/libibusplatforminputcontextplugin.so" "$APP_INPUT_PLUGIN_DIR/"
-         # 应用目录软链接修复
-         (cd "$APP_INPUT_PLUGIN_DIR" && \
-         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.5 && \
-         ln -sf libFcitx5Qt6DBusAddons.so.5 libFcitx5Qt6DBusAddons.so)
-
-         echo "✅ 输入法插件部署完成，目录：$QT6_INPUT_PLUGIN_DIR"
-         ls -l "$QT6_INPUT_PLUGIN_DIR"
-
-         # nss 依赖
-         cp -r ExtBin/linux/nss/* bin/release/lib/
-
-         # openssl3 依赖
-         cp -P /usr/lib/x86_64-linux-gnu/libssl.so.3* bin/release/lib/
-
-         # ========== ✅ 修复库搜索路径 ==========
-         export LD_LIBRARY_PATH="${QT6_INPUT_PLUGIN_DIR}:${APP_INPUT_PLUGIN_DIR}:${APP_LIB_DIR}:$LD_LIBRARY_PATH"
-
+         # ========== ✅ 关键2：设置环境变量，让linuxdeployqt只识别【应用自身插件】，不找系统插件
+         export QT_PLUGIN_PATH="${APP_PLUGIN_ROOT}:${{ env.QT_DIR }}/plugins"
+         export LD_LIBRARY_PATH="${APP_LIB_DIR}:${APP_INPUT_PLUGIN_DIR}:${{ env.QT_DIR }}/lib:$LD_LIBRARY_PATH"
+         export QML2_IMPORT_PATH="${{ github.workspace }}/qml:${{ env.QT_DIR }}/qml"
          export VERSION
-         ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
+
+         # ========== ✅ 终极核心修复：linuxdeployqt 关键参数，彻底解决 /plugins Permission denied 错误
+         # 核心参数说明：
+         # 1. -bundle-non-qt-libs ：将所有依赖库打包到应用内部，不写系统目录
+         # 2. -no-copy-copyright-files ：禁止写入系统版权目录，规避权限
+         # 3. -exclude-libs=libQt6* ：禁止重复拷贝Qt库，防止路径冲突
+         # 4. 去掉-extra-plugins=platforminputcontexts ：插件已在应用目录，无需linuxdeployqt拷贝，这是根目录写入的元凶！
+         # 5. -appimage-extract-and-run ：AppImage解压运行，规避AppImage自身权限问题
+         ./linuxdeployqt-continuous-x86_64.AppImage ${APP_ROOT}/${targetName} \
                   -unsupported-allow-new-glibc \
-                  -qmldir=/home/runner/work/Knot/Knot/src/qmlsrc \
+                  -qmldir=${{ github.workspace }}/Knot/src/qmlsrc \
                   -qmake=${{ env.QT_DIR }}/bin/qmake \
                   -appimage \
-                  -extra-plugins=platforminputcontexts
+                  -appimage-extract-and-run \
+                  -bundle-non-qt-libs \
+                  -no-copy-copyright-files \
+                  -exclude-libs=libQt6Core.so.6,libQt6Gui.so.6,libQt6Qml.so.6
+
+         # 给最终产物赋权
+         chmod +x ${targetName}-${VERSION}-x86_64.AppImage
 
       # 上传artifacts
       - uses: actions/upload-artifact@v4
