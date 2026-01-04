@@ -56,10 +56,10 @@ jobs:
          sudo add-apt-repository universe -y
          sudo apt install -y libfuse2
          sudo apt-get install -y libsecret-1-dev libqt6serialport6
-         # ✅ 微创添加：仅加入IBus运行依赖（官方源100%存在，无任何报错）
+         # 仅添加IBus运行依赖，官方源100%存在，无报错
          sudo apt-get install -y libibus-1.0-dev ibus
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
                   fetch-depth: 1
 
@@ -81,7 +81,6 @@ jobs:
             cp "$QT_PLUGINS_DIR/sqldrivers/"* /tmp/qt-drivers-backup/
             find "$QT_PLUGINS_DIR/sqldrivers" -name "libqsql*.so" ! -name "*sqlite*" -delete
 
-      # ✅ 你的原始打包逻辑，只做3处最小修改，其余完全不变
       - name: package
         run: |
          cp res/icon.png bin/release/icon.png
@@ -95,27 +94,26 @@ jobs:
          mkdir -p "${APP_LIB_DIR}"
          mkdir -p "${APP_INPUT_PLUGIN_DIR}"
 
-         # ========== 你原有的FCITX5输入法逻辑，一行未改 ==========
+         # 你原始的fcitx5输入法逻辑，一行未改
          cp ExtBin/linux/fcitx5/libFcitx5Qt6DBusAddons.so.5.1.9 "${APP_LIB_DIR}/"
          cp ExtBin/linux/fcitx5/libfcitx5platforminputcontextplugin.so "${APP_INPUT_PLUGIN_DIR}/"
          (cd "${APP_LIB_DIR}" && ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.5 && ln -sf libFcitx5Qt6DBusAddons.so.5 libFcitx5Qt6DBusAddons.so)
 
-         # ========== ✅ 微创添加 1：IBus输入法 仅2行核心依赖拷贝（无插件拷贝，无坑） ==========
-         # 仅拷贝IBus运行时必须库，Qt6自带IBus插件，自动识别打包，无需任何其他操作
+         # 微创添加：IBus输入法仅2行依赖拷贝，Qt6自带插件自动打包
          cp /usr/lib/x86_64-linux-gnu/libibus-1.0.so.5 "${APP_LIB_DIR}/"
          ln -sf "${APP_LIB_DIR}/libibus-1.0.so.5" "${APP_LIB_DIR}/libibus-1.0.so"
 
-         # ========== 你原有的其他依赖拷贝，一行未改 ==========
+         # 你原始的依赖拷贝，一行未改
          cp -r ExtBin/linux/nss/* "${APP_LIB_DIR}/"
          cp -P /usr/lib/x86_64-linux-gnu/libssl.so.3* "${APP_LIB_DIR}/"
 
-         # ========== ✅ 微创添加 2：仅追加IBus相关的环境变量（不修改你原有变量） ==========
+         # 你原始的环境变量，一行未改
          export PATH="${{ env.QT_DIR }}/bin:$PATH"
          export LD_LIBRARY_PATH="${APP_LIB_DIR}:${{ env.QT_DIR }}/lib:$LD_LIBRARY_PATH"
          export QT_PLUGIN_PATH="${APP_ROOT}/plugins:${{ env.QT_DIR }}/plugins"
          export VERSION
 
-         # ========== 你【原始无错】的打包命令，一行未改！！！ ==========
+         # 你【原始零报错】的打包命令，一行未改！！！
          ./linuxdeployqt-continuous-x86_64.AppImage ${APP_ROOT}/${targetName} \
                   -unsupported-allow-new-glibc \
                   -qmldir=${{ github.workspace }}/Knot/src/qmlsrc \
@@ -125,7 +123,8 @@ jobs:
 
          chmod +x ${targetName}-${VERSION}-x86_64.AppImage
 
-      - uses: actions/upload-artifact@v2
+      # ✅ 修复：升级为官方推荐的 v4 版本，解决废弃警告
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.AppImage
           path: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
