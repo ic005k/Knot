@@ -26,14 +26,10 @@ jobs:
 
     strategy:
       matrix:
-        #os: [ubuntu-18.04,ubuntu-20.04]
-        # qt_ver: [5.9.9,5.12.10,5.15.2]
-        
         os: [ubuntu-22.04]
         qt_ver: [6.6.3]
-        
         qt_arch: [gcc_64]
-        
+
     env:
         targetName: Knot
         VERSION: Linux
@@ -45,73 +41,60 @@ jobs:
         QT_INSTALL_DIR: /opt/qt/QT_VERSION/gcc_64
         QT_INSTALL_QML: /opt/qt/QT_VERSION/gcc_64/qml
         QML2_IMPORT_PATH: ${{ github.workspace }}/qml:/opt/qt/QT_VERSION/gcc_64/qml
-      
+
     steps:
-      
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ matrix.qt_ver }}
-          #host: linux
           cached: 'false'
-          # qtwebengine
           modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
-      
-      - name: ubuntu install GL library
+
+      - name: ubuntu install GL library + IBus依赖(关键新增)
         run: |
+         sudo apt-get update -y
          sudo apt-get install -y libglew-dev libglfw3-dev libxcb*
-         
          sudo apt-get install libxkbcommon-dev
-         
-         sudo add-apt-repository universe
-         sudo apt install libfuse2
-         sudo apt-get install libsecret-1-dev
-
+         sudo add-apt-repository universe -y
+         sudo apt install libfuse2 -y
+         sudo apt-get install libsecret-1-dev -y
          sudo apt-get install -y libqt6serialport6
+         # ========== 关键新增：安装IBus输入法的所有依赖库 ==========
+         sudo apt-get install -y libibus-1.0-dev libqt6ibusplatforminputcontextplugin6 qt6-ibase-platforminputcontext-plugin
 
-
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
                   fetch-depth: 1
-                  
+
       - name: build ubuntu
         run: |
                   qmake
-                  make
+                  make -j$(nproc) # 优化：多核编译提速
 
-
-      - name: install linuxdeployqt 
+      - name: install linuxdeployqt
         run: |
           wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
           chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 
       - name: Remove unused SQL drivers (SAFE MODE)
         run: |
-            # 确保 qmake 可用
             export PATH="${{ env.QT_DIR }}/bin:$PATH"
-
-            # 获取插件目录
             QT_PLUGINS_DIR=$(qmake -query QT_INSTALL_PLUGINS)
-
-            # 创建备份目录（以防万一）
             mkdir -p /tmp/qt-drivers-backup
             cp "$QT_PLUGINS_DIR/sqldrivers/"* /tmp/qt-drivers-backup/
             echo "已备份驱动到: /tmp/qt-drivers-backup"
-
-            # 安全删除非SQLite驱动
             find "$QT_PLUGINS_DIR/sqldrivers" \
               -name "libqsql*.so" \
               ! -name "*sqlite*" \
               ! -name "*SQLite*" \
               -delete
-
-            # 最终验证
             echo "当前SQL驱动:"
             ls -l "$QT_PLUGINS_DIR/sqldrivers"
             echo "SQLite驱动状态:"
             ldd "$QT_PLUGINS_DIR/sqldrivers/libqsqlite.so" || true
-          
-      # 打包
+
+      # 打包 - 核心修改区：保留fcitx5 + 新增完整IBus支持
       - name: package
         run: |
          cp res/icon.png bin/release/icon.png
@@ -123,89 +106,85 @@ jobs:
          APP_LIB_DIR="bin/release/lib"
          mkdir -p "$APP_LIB_DIR"
 
-         # 复制fcitx5依赖库到AppImage的lib目录（关键！）
+         # ========== 原有保留：复制fcitx5依赖库到AppImage的lib目录 ==========
          cp ExtBin/linux/fcitx5/libFcitx5Qt6DBusAddons.so.5.1.9 "$APP_LIB_DIR/"
          cp ExtBin/linux/fcitx5/libfcitx5platforminputcontextplugin.so "$APP_LIB_DIR/"
 
-         # 创建库的符号链接（在lib目录中）
+         # 创建fcitx5库的符号链接
          (cd "$APP_LIB_DIR" && \
-         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
-         ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
+         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.5 && \
+         ln -sf libFcitx5Qt6DBusAddons.so.5 libFcitx5Qt6DBusAddons.so)
 
-
-         # 获取 Qt6 插件目录
-          #QT6_PLUGINS_DIR="${{ env.Qt6_DIR }}/../../plugins/platforminputcontexts"
-          QT6_PLUGINS_DIR="/home/runner/work/Knot/Qt/$QT_VERSION/gcc_64/plugins/platforminputcontexts"
-
-         # 拷贝并设置权限
+         # ========== 关键1：定义QT6插件根目录（修复原脚本硬编码问题，推荐写法） ==========
+         QT6_ROOT="${{ env.QT_DIR }}"
+         QT6_PLUGINS_DIR="${QT6_ROOT}/plugins/platforminputcontexts"
          mkdir -p "$QT6_PLUGINS_DIR"
+         echo "Qt6输入法插件目录: $QT6_PLUGINS_DIR"
+
+         # ========== 原有保留：拷贝fcitx5插件到Qt6输入法插件目录 ==========
          cp ExtBin/linux/fcitx5/* "$QT6_PLUGINS_DIR/"
-         chmod 755 "$QT6_PLUGINS_DIR/"
 
+         # ========== 关键2：新增IBUS输入法核心插件拷贝（完整支持IBus） ==========
+         # 从系统安装的Qt6目录拷贝官方IBus插件，这是IBus输入的核心文件，缺一不可
+         cp /usr/lib/x86_64-linux-gnu/qt6/plugins/platforminputcontexts/libibusplatforminputcontextplugin.so "$QT6_PLUGINS_DIR/"
+         # 拷贝IBus依赖库，防止打包后缺失依赖
+         cp /usr/lib/x86_64-linux-gnu/libibus-1.0.so.5 "$APP_LIB_DIR/"
+         ln -sf "$APP_LIB_DIR/libibus-1.0.so.5" "$APP_LIB_DIR/libibus-1.0.so"
+
+         # ========== 修复原脚本fcitx5的符号链接（目录修正） ==========
          (cd "$QT6_PLUGINS_DIR/" && \
-         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
-         ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
+         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.5 && \
+         ln -sf libFcitx5Qt6DBusAddons.so.5 libFcitx5Qt6DBusAddons.so)
 
-         echo "Copied to: $QT6_PLUGINS_DIR"
+         # ========== 关键3：新增IBUS插件的权限配置 ==========
+         chmod -R 755 "$QT6_PLUGINS_DIR"
+         chmod 755 "$APP_LIB_DIR/libibus-1.0.so.5"
+
+         # ========== 关键4：创建应用自身的插件目录，双输入法插件都拷贝（双重保险） ==========
+         APP_PLUGINS_DIR="bin/release/plugins/platforminputcontexts"
+         mkdir -p "$APP_PLUGINS_DIR"
+         # 拷贝fcitx5插件
+         cp ExtBin/linux/fcitx5/* "$APP_PLUGINS_DIR/"
+         # 拷贝ibus插件
+         cp /usr/lib/x86_64-linux-gnu/qt6/plugins/platforminputcontexts/libibusplatforminputcontextplugin.so "$APP_PLUGINS_DIR/"
+         # 应用插件目录的符号链接
+         (cd "$APP_PLUGINS_DIR" && \
+         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.5 && \
+         ln -sf libFcitx5Qt6DBusAddons.so.5 libFcitx5Qt6DBusAddons.so)
+
+         echo "Copied all input plugins to: $QT6_PLUGINS_DIR and $APP_PLUGINS_DIR"
          ls -l "$QT6_PLUGINS_DIR"
 
          # nss
-         #mkdir bin/release/lib/
          cp -r ExtBin/linux/nss/* bin/release/lib/
 
          # openssl3
-         #cp ExtBin/linux/openssl3/* bin/release/lib/
          cp -P /usr/lib/x86_64-linux-gnu/libssl.so.3* bin/release/lib/
 
-         # 复制fcitx5插件到应用自身的plugins目录
-         APP_PLUGINS_DIR="bin/release/plugins/platforminputcontexts"
-         mkdir -p "$APP_PLUGINS_DIR"
-         cp ExtBin/linux/fcitx5/* "$APP_PLUGINS_DIR/"  # 从ExtBin复制插件
+         # 运行 linuxdeployqt 前，添加完整的库搜索路径
+         export LD_LIBRARY_PATH="${QT6_PLUGINS_DIR}:${APP_PLUGINS_DIR}:${APP_LIB_DIR}:$LD_LIBRARY_PATH"
 
-         # 修复插件的符号链接
-         (cd "$APP_PLUGINS_DIR" && \
-         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
-         ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
-
-         # 在运行 linuxdeployqt 前，将 Qt 插件目录添加到库搜索路径
-         export LD_LIBRARY_PATH="/home/runner/work/Knot/Qt/$QT_VERSION/gcc_64/plugins/platforminputcontexts:$LD_LIBRARY_PATH"
-
-         export VERSION # linuxdeployqt uses this for naming the file
+         export VERSION
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
                   -unsupported-allow-new-glibc \
                   -qmldir=/home/runner/work/Knot/Knot/src/qmlsrc \
-                  -qmake=/home/runner/work/Knot/Qt/6.6.3/gcc_64/bin/qmake \
+                  -qmake=${{ env.QT_DIR }}/bin/qmake \
                   -appimage \
-                  -extra-plugins=platforminputcontexts
-                  #-plugin-dir=/home/runner/work/Knot/Qt/6.6.3/gcc_64/plugins/platforminputcontexts
-         #chmod +x ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
+                  -extra-plugins=platforminputcontexts # 强制打包输入法插件，关键参数
 
-      # 上传artifacts          
+      # 上传artifacts
       - uses: actions/upload-artifact@v4
         with:
-          
           name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.AppImage
           path: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
-          
-          #name: ${{ env.orgName }}-${{ matrix.os }}-${{ matrix.qt_ver }}-${{ env.VERSION }}-x86_64.AppImage
-          #path: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
-          
+
      # tag 上传Release
       - name: uploadRelease
-        #if: startsWith(github.event.ref, 'refs/tags/')
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          
           file: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
           asset_name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.AppImage
-          
-          #file: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
-          #asset_name: ${{ env.orgName }}-${{ matrix.os }}-${{ matrix.qt_ver }}-${{ env.VERSION }}-x86_64.AppImage
-          
           tag: ${{ github.ref }}
-          overwrite: true     
-          
-          
-    
+          overwrite: true
