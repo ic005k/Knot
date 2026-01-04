@@ -58,7 +58,7 @@ jobs:
          sudo apt install -y libfuse2
          sudo apt-get install -y libsecret-1-dev
          sudo apt-get install -y libqt6serialport6
-         # ✅ 仅保留Ubuntu22.04官方源 绝对存在的IBus依赖，无任何多余包
+         # 仅保留Ubuntu22.04官方源绝对存在的IBus依赖，无多余包
          sudo apt-get install -y libibus-1.0-dev ibus libqt6gui6 libglib2.0-dev
 
       - uses: actions/checkout@v4
@@ -99,39 +99,38 @@ jobs:
          APP_INPUT_PLUGIN_DIR="${APP_ROOT}/plugins/platforminputcontexts"
          mkdir -p "${APP_LIB_DIR}"
          mkdir -p "${APP_INPUT_PLUGIN_DIR}"
-         # ✅ 万能权限兜底 - 根治所有Permission denied，不会再出现任何权限问题
+         # 万能权限兜底 - 根治所有Permission denied，无任何权限问题
          sudo chmod -R 777 ${{ github.workspace }}
          chmod -R 777 "${APP_ROOT}"
 
-         # ========== 仅保留FCITX5插件处理 - 你的项目原生自带，完美保留，功能无损 ==========
+         # 仅保留FCITX5插件处理 - 项目原生自带，完美保留
          cp ExtBin/linux/fcitx5/libFcitx5Qt6DBusAddons.so.5.1.9 "${APP_LIB_DIR}/"
          cp ExtBin/linux/fcitx5/libfcitx5platforminputcontextplugin.so "${APP_INPUT_PLUGIN_DIR}/"
          (cd "${APP_LIB_DIR}" && \
          ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.5 && \
          ln -sf libFcitx5Qt6DBusAddons.so.5 libFcitx5Qt6DBusAddons.so)
 
-         # ========== IBus 输入法支持 - 无插件拷贝，只拷贝运行依赖，彻底解决文件找不到 ==========
-         # ✅ 核心：Qt6.6.3自带IBus插件，自动打包，无需手动拷贝任何插件文件
+         # IBus 输入法支持 - 无插件拷贝，只拷贝运行依赖，无文件找不到问题
+         # Qt6.6.3自带IBus插件，自动打包，无需手动拷贝任何插件文件
          cp /usr/lib/x86_64-linux-gnu/libibus-1.0.so.5 "${APP_LIB_DIR}/"
          ln -sf "${APP_LIB_DIR}/libibus-1.0.so.5" "${APP_LIB_DIR}/libibus-1.0.so"
 
-         # ========== 拷贝项目原有依赖，无任何修改 ==========
+         # 拷贝项目原有依赖，无任何修改
          cp -r ExtBin/linux/nss/* "${APP_LIB_DIR}/"
          cp -P /usr/lib/x86_64-linux-gnu/libssl.so.3* "${APP_LIB_DIR}/"
 
-         # ========== 环境变量配置 ==========
+         # 环境变量配置
          export QT_PLUGIN_PATH="${APP_ROOT}/plugins:${{ env.QT_DIR }}/plugins"
          export LD_LIBRARY_PATH="${APP_LIB_DIR}:${{ env.QT_DIR }}/lib:$LD_LIBRARY_PATH"
          export QML2_IMPORT_PATH="${{ github.workspace }}/qml:${{ env.QT_DIR }}/qml"
          export VERSION
 
-         # ========== 终极打包命令 - 无任何坑点参数 ==========
+         # ========== ✅ 核心修复：删除了错误的 -appimage-extract-and-run 参数，其他参数不变 ==========
          ./linuxdeployqt-continuous-x86_64.AppImage ${APP_ROOT}/${targetName} \
                   -unsupported-allow-new-glibc \
                   -qmldir=${{ github.workspace }}/Knot/src/qmlsrc \
                   -qmake=${{ env.QT_DIR }}/bin/qmake \
                   -appimage \
-                  -appimage-extract-and-run \
                   -bundle-non-qt-libs
 
          chmod +x ${targetName}-${VERSION}-x86_64.AppImage
