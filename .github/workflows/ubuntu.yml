@@ -90,7 +90,7 @@ jobs:
             ls -l "$QT_PLUGINS_DIR/sqldrivers"
 
       # ✅ 核心修复区：打包环节 全量修复，解决所有问题
-      - name: package (FIX ALL BUGS: 权限+插件+路径+输入法)
+      - name: package - fix all bugs (permission, plugin, path, input method)
         run: |
          cp res/icon.png bin/release/icon.png
          cp res/default.desktop bin/release/default.desktop
