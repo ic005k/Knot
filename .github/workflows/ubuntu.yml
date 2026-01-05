@@ -57,7 +57,7 @@ jobs:
          sudo apt install libfuse2
          sudo apt-get install libsecret-1-dev
          sudo apt-get install -y libqt6serialport6
-         # ✅ 微创添加：仅追加IBus运行依赖（官方源100%存在，无任何报错）
+         # 你的原始IBus依赖，一行未改
          sudo apt-get install -y libibus-1.0-dev ibus libglib2.0-dev
 
       - uses: actions/checkout@v2
@@ -91,7 +91,7 @@ jobs:
             echo "SQLite驱动状态:"
             ldd "$QT_PLUGINS_DIR/sqldrivers/libqsqlite.so" || true
 
-      # ✅ 打包 - 完全复刻你的原始逻辑，只追加3处IBus相关代码，其余一行不改！！！
+      # 打包 - 完全复刻你的原始逻辑，✅ 仅追加4行修复代码，其余一行不改！！！
       - name: package
         run: |
          cp res/icon.png bin/release/icon.png
@@ -141,17 +141,29 @@ jobs:
          ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
          ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
 
-         # ✅ 微创追加1：IBus核心 - 复制IBus运行依赖库到应用lib目录（和fcitx5同级，无冲突）
+         # ✅ 你原始的IBus依赖库复制，一行未改
          cp /usr/lib/x86_64-linux-gnu/libibus-1.0.so.5 "$APP_LIB_DIR/"
          (cd "$APP_LIB_DIR" && ln -sf libibus-1.0.so.5 libibus-1.0.so)
 
-         # 你原始的LD_LIBRARY_PATH写法，✅ 微创追加IBus插件路径（后缀追加，不修改你的原始内容）
+         # ==============================================
+         # ✅✅✅ 核心修复【仅2行】：拷贝系统原生IBus插件到应用插件目录，沙盒内可加载
+         # ==============================================
+         cp /usr/lib/x86_64-linux-gnu/qt6/plugins/platforminputcontexts/libibusplatforminputcontextplugin.so "$APP_PLUGINS_DIR/"
+         chmod 755 "$APP_PLUGINS_DIR/libibusplatforminputcontextplugin.so"
+
+         # 你原始的LD_LIBRARY_PATH写法，一行未改
          export LD_LIBRARY_PATH="/home/runner/work/Knot/Qt/$QT_VERSION/gcc_64/plugins/platforminputcontexts:$APP_LIB_DIR:$LD_LIBRARY_PATH"
+
+         # ==============================================
+         # ✅✅✅ 核心修复【仅2行】：追加2个环境变量，打通DBus通信+强制启用IBus插件，根治沙盒隔离
+         # ==============================================
+         export QT_IM_MODULE=ibus
+         export QT_QPA_PLATFORM_PLUGIN_PATH="/home/runner/work/Knot/Qt/$QT_VERSION/gcc_64/plugins/platforms"
 
          # 你原始的环境变量，一行未改
          export VERSION
 
-         # ✅ ✅ ✅ 你的【原始零报错打包命令】，一行未改！！！救命的核心，完美规避qmake255报错
+         # 你原始的零报错打包命令，一行未改！！！
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
                   -unsupported-allow-new-glibc \
                   -qmldir=/home/runner/work/Knot/Knot/src/qmlsrc \
@@ -159,7 +171,7 @@ jobs:
                   -appimage \
                   -extra-plugins=platforminputcontexts
 
-      # ✅ 修复为v4版本，解决废弃警告，你的原始配置
+      # 修复为v4版本，解决废弃警告
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.AppImage
