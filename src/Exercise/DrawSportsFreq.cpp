@@ -1,218 +1,117 @@
 #include "src/Exercise/DrawSportsFreq.h"
 
-#include <QFont>
-#include <QList>  // 改为 QList
+#include <QBrush>
 #include <QPainter>
 #include <QPen>
-#include <QRect>
-#include <QString>
 #include <algorithm>
 
-// --- Constructor（初始化列表按声明顺序，不重复初始化）---
-FrequencyCurveWidget::FrequencyCurveWidget(const QList<int>& cycling,
-                                           const QList<int>& hiking,
-                                           const QList<int>& running,
-                                           bool isDark, QWidget* parent,
-                                           TextPosition textPosition)
-    : QWidget(parent),  // 先初始化父类
-      m_cycling(
-          cycling),  // 按 h 文件声明顺序：m_cycling → m_hiking → m_running
-      m_hiking(hiking),
-      m_running(running),
-      m_isDark(isDark),
-      m_textPosition(textPosition) {  // 最后初始化新增成员
-  setFixedHeight(mh);
-  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-  calculateMaxCount();
+FrequencyCurveWidget::FrequencyCurveWidget(const QVector<int>& cyclingCnt,
+                                           const QVector<int>& hikingCnt,
+                                           const QVector<int>& runningCnt,
+                                           bool isDarkTheme, QWidget* parent)
+    : QWidget{parent},
+      m_cyclingCounts(cyclingCnt),
+      m_hikingCounts(hikingCnt),
+      m_runningCounts(runningCnt),
+      m_isDark(isDarkTheme) {
+  // ✅ 永久锁死高度 50px 极致紧凑，频次次要信息，绝不挤压下方里程图
+  const int FIX_WIDGET_HEIGHT = 50;
+  this->setMinimumHeight(FIX_WIDGET_HEIGHT);
+  this->setMaximumHeight(FIX_WIDGET_HEIGHT);
+  this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 }
 
-// --- Paint Event（不变，仅类型适配 QList）---
-void FrequencyCurveWidget::paintEvent(QPaintEvent*) {
+void FrequencyCurveWidget::paintEvent(QPaintEvent* event) {
+  Q_UNUSED(event);
   QPainter painter(this);
-  painter.setRenderHint(QPainter::Antialiasing);
-  painter.setPen(Qt::NoPen);
+  painter.setRenderHint(QPainter::Antialiasing, true);  // 抗锯齿，边缘平滑
 
-  QList<int> xPoints = calculateXPoints();  // QVector → QList
+  // ==============================================================
+  // ✅ ✅ ✅ 核心算法【完全按你的思路实现：全局真实最大值为唯一基准】✅ ✅ ✅
+  // 遍历所有月份+三种运动的全部数据，获取【唯一的全局真实最大值】，无封顶、无阈值、无折中
+  // ==============================================================
+  int maxGlobal = 0;
+  for (int val : m_cyclingCounts) maxGlobal = qMax(maxGlobal, val);
+  for (int val : m_hikingCounts) maxGlobal = qMax(maxGlobal, val);
+  for (int val : m_runningCounts) maxGlobal = qMax(maxGlobal, val);
+  if (maxGlobal <= 0) maxGlobal = 1;  // 防除零异常，仅当所有数据都是0时生效
 
-  int totalWidth = width();
-  for (int i = 0; i < 12; ++i) {
-    int monthLeft, monthRight;
-    if (i == 0) {
-      monthLeft = 0;
-      monthRight = (xPoints[0] + xPoints[1]) / 2;
-    } else if (i == 11) {
-      monthLeft = (xPoints[10] + xPoints[11]) / 2;
-      monthRight = totalWidth;
-    } else {
-      monthLeft = (xPoints[i - 1] + xPoints[i]) / 2;
-      monthRight = (xPoints[i] + xPoints[i + 1]) / 2;
-    }
-    int monthWidth = monthRight - monthLeft;
-    drawFrequencyBlocks(painter, monthLeft, monthWidth, i);
+  // ===================== 极简紧凑的绘图边距，适配50px高度，无任何空间浪费
+  // =====================
+  const int marginLeft = 12;
+  const int marginRight = 12;
+  const int marginTop = 2;
+  const int marginBottom = 18;
+  const int drawW = this->width() - marginLeft - marginRight;  // X轴可用宽度
+  const int drawH =
+      this->height() - marginTop - marginBottom;  // Y轴柱子可用高度【固定值】
+  const double yScale =
+      (double)drawH / maxGlobal;  // ✅ 唯一映射比例：数值/最大值 = 高度/总高度
+
+  // 12个月份均分宽度，每月一个柱子分组
+  const double groupWidth = (double)drawW / 12.0;
+  const double barWidth = groupWidth / 4.0;   // 每组3根柱子的宽度，紧凑不拥挤
+  const double barSpace = groupWidth / 20.0;  // 柱子之间的微小间距，区分明显
+
+  // ===================== 配色和下方里程图完全一致，无需图例
+  // =====================
+  QColor cyclingColor =
+      m_isDark ? QColor(90, 189, 94) : QColor(76, 175, 80);  // 骑行绿
+  QColor hikingColor =
+      m_isDark ? QColor(255, 171, 44) : QColor(255, 152, 0);  // 徒步橙
+  QColor runningColor =
+      m_isDark ? QColor(183, 70, 201) : QColor(156, 39, 176);  // 跑步紫
+  QColor textColor = m_isDark ? QColor(230, 230, 230) : QColor(60, 60, 60);
+
+  // ===================== 绘制单根柱子的极简函数 =====================
+  auto drawBar = [&](double x, double y, double w, double h, QColor color) {
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(QBrush(color));
+    painter.drawRect(x, y, w, h);
+  };
+
+  // ===================== ✅ 小数值保底修复：非0值强制画1px，防止像素吞掉
+  // =====================
+  auto getRealHeight = [&](int count) -> double {
+    double realH = count * yScale;
+    if (count > 0 && realH < 1.0)
+      realH = 1.0;  // 频次>0但高度<1px时，强制画1px，确保可见
+    return realH;
+  };
+
+  // ===================== 遍历1-12月，绘制分组柱状图 =====================
+  const int baseY = this->height() - marginBottom;  // X轴基线，柱子从下往上绘制
+  for (int monthIdx = 0; monthIdx < 12; ++monthIdx) {
+    const double groupX = marginLeft + monthIdx * groupWidth;
+    // 获取当月三种运动的真实频次
+    int cyc = m_cyclingCounts[monthIdx];
+    int hik = m_hikingCounts[monthIdx];
+    int run = m_runningCounts[monthIdx];
+    // 计算精准高度（比例绝对真实）
+    double h_cyc = getRealHeight(cyc);
+    double h_hik = getRealHeight(hik);
+    double h_run = getRealHeight(run);
+
+    // 绘制：骑行 → 徒步 → 跑步 三根柱子
+    drawBar(groupX + barSpace, baseY - h_cyc, barWidth, h_cyc, cyclingColor);
+    drawBar(groupX + barSpace + barWidth, baseY - h_hik, barWidth, h_hik,
+            hikingColor);
+    drawBar(groupX + barSpace + barWidth * 2, baseY - h_run, barWidth, h_run,
+            runningColor);
   }
 
-  QFont font;
-  font.setPointSize(10);
-  painter.setFont(font);
-  QPen pen(m_isDark ? Qt::white : Qt::black);
-  painter.setPen(pen);
+  // ===================== 绘制X轴基线 + 1-12月文字标签（紧凑适配50px高度）
+  // =====================
+  painter.setPen(QPen(textColor, 1));
+  painter.drawLine(marginLeft, baseY, this->width() - marginRight, baseY);
+  QFont ft = painter.font();
+  ft.setPointSize(7);  // 小字体，不拥挤，清晰可见
+  painter.setFont(ft);
 
-  for (int i = 0; i < 12; ++i) {
-    int monthLeft, monthRight;
-    if (i == 0) {
-      monthLeft = 0;
-      monthRight = (xPoints[0] + xPoints[1]) / 2;
-    } else if (i == 11) {
-      monthLeft = (xPoints[10] + xPoints[11]) / 2;
-      monthRight = totalWidth;
-    } else {
-      monthLeft = (xPoints[i - 1] + xPoints[i]) / 2;
-      monthRight = (xPoints[i] + xPoints[i + 1]) / 2;
-    }
-
-    QRect textRect = getTextRect(monthLeft, monthRight);
-    painter.drawText(textRect, Qt::AlignCenter, QString::number(i + 1));
-
-    if (i < 11) {
-      int tickX = monthRight;
-      QLine tickLine = getTickLine(tickX);
-      painter.drawLine(tickLine);
-    }
-  }
-}
-
-// --- Calculate X Points（QVector → QList，逻辑不变）---
-QList<int> FrequencyCurveWidget::calculateXPoints() const {
-  QList<int> xPoints;
-  int totalWidth = width();
-  for (int i = 0; i < 12; ++i) {
-    qreal x = (2 * i + 1) * totalWidth / 24.0;
-    xPoints.append(qRound(x));
-  }
-  return xPoints;
-}
-
-// --- Calculate Max Count（QVector → QList，逻辑不变）---
-void FrequencyCurveWidget::calculateMaxCount() {
-  QList<int> allCounts;
-  for (int i = 0; i < 12; ++i) {
-    allCounts.append(m_cycling[i]);
-    allCounts.append(m_hiking[i]);
-    allCounts.append(m_running[i]);
-  }
-  if (allCounts.isEmpty()) {
-    m_maxCount = 1;
-    return;
-  }
-  std::sort(allCounts.begin(), allCounts.end());
-  int quantileIndex =
-      qMin(qRound(allCounts.size() * 0.95), allCounts.size() - 1);
-  m_maxCount = qMax(1, allCounts[quantileIndex]);
-}
-
-// --- Get Color（不变）---
-QColor FrequencyCurveWidget::getColor(int type) const {
-  if (m_isDark) {
-    switch (type) {
-      case 0:
-        return QColor(90, 189, 94, 220);
-      case 1:
-        return QColor(255, 171, 44, 220);
-      case 2:
-        return QColor(183, 70, 201, 220);
-    }
-  } else {
-    switch (type) {
-      case 0:
-        return QColor(76, 175, 80, 220);
-      case 1:
-        return QColor(255, 152, 0, 220);
-      case 2:
-        return QColor(156, 39, 176, 220);
-    }
-  }
-  return Qt::black;
-}
-
-// --- Get Text Rect（不变）---
-QRect FrequencyCurveWidget::getTextRect(int monthLeft, int monthRight) const {
-  const int textHeight = 12;
-  if (m_textPosition == Top) {
-    return QRect(monthLeft, 0, monthRight - monthLeft, textHeight);
-  } else {
-    return QRect(monthLeft, mh - textHeight, monthRight - monthLeft,
-                 textHeight);
-  }
-}
-
-// --- Get Tick Line（不变）---
-QLine FrequencyCurveWidget::getTickLine(int tickX) const {
-  const int textHeight = 12;
-  const int tickLength = 5;
-  if (m_textPosition == Top) {
-    return QLine(tickX, textHeight, tickX, textHeight + tickLength);
-  } else {
-    return QLine(tickX, mh - textHeight - tickLength, tickX, mh - textHeight);
-  }
-}
-
-// --- Draw Frequency Blocks（QList 适配，逻辑不变）---
-void FrequencyCurveWidget::drawFrequencyBlocks(QPainter& painter, int monthLeft,
-                                               int monthWidth, int monthIndex) {
-  const int bottomMargin = 2;
-  const int outerGap = 2;
-  const int innerGap = 1;
-
-  // 1. 统一底部固定基准（所有矩形的底部都对齐到这个Y值）
-  int fixedBottomY;  // 固定底部Y坐标（所有矩形共用）
-  int availableHeight;
-  if (m_textPosition == Top) {
-    fixedBottomY = mh - bottomMargin;  // 文本在顶部：底部贴控件底部-边距
-    availableHeight =
-        fixedBottomY - (m_textHeight + 1);  // 可用高度=底部基准 - 顶部起始位置
-  } else {
-    fixedBottomY = mh - m_textHeight - 1;  // 文本在底部：底部贴文本顶部-1px间隙
-    availableHeight = fixedBottomY - 1;  // 可用高度=底部基准 - 顶部间隙（1px）
-  }
-  if (availableHeight < 3) availableHeight = 3;  // 最小可用高度，避免过窄
-
-  // 2. 计算单个矩形宽度（逻辑不变）
-  int totalBlockWidth = monthWidth - 2 * outerGap;
-  if (totalBlockWidth <= 0) return;
-  int singleBlockWidth = (totalBlockWidth - 2 * innerGap) / 3;
-  if (singleBlockWidth <= 0) singleBlockWidth = 1;
-
-  // 3. 获取当前月份频次（逻辑不变）
-  int cyclingCount =
-      (monthIndex < m_cycling.size()) ? m_cycling[monthIndex] : 0;
-  int hikingCount = (monthIndex < m_hiking.size()) ? m_hiking[monthIndex] : 0;
-  int runningCount =
-      (monthIndex < m_running.size()) ? m_running[monthIndex] : 0;
-
-  // 4. 绘制三个矩形（核心修改：底部固定，仅调顶部）
-  QList<int> counts = {cyclingCount, hikingCount, runningCount};
-  for (int i = 0; i < 3; ++i) {
-    int count = counts[i];
-    if (count <= 0) continue;
-
-    // 计算矩形X坐标（逻辑不变）
-    int blockX = monthLeft + outerGap + i * (singleBlockWidth + innerGap);
-
-    // 计算矩形高度（四舍五入为整数，避免浮点数偏移）
-    double heightRatio = static_cast<double>(count) / m_maxCount;
-    int blockHeight =
-        qRound(heightRatio * availableHeight);  // 四舍五入到整数像素
-    if (blockHeight < 1) blockHeight = 1;       // 最小高度1px
-    if (blockHeight > availableHeight)
-      blockHeight = availableHeight;  // 最大不超过可用高度
-
-    // 计算矩形顶部Y坐标（底部固定=fixedBottomY，顶部=底部 - 高度）
-    int blockY = fixedBottomY - blockHeight;
-
-    // 绘制矩形（用整数坐标，避免浮点偏移）
-    QRect blockRect(blockX, blockY, singleBlockWidth,
-                    blockHeight);  // 改用QRect（整数像素）
-    painter.setBrush(getColor(i));
-    painter.drawRoundedRect(blockRect, 1, 1);  // 圆角保持1px，美观
+  // X轴月份标签 精准居中对齐每个月的柱子组
+  for (int monthIdx = 0; monthIdx < 12; ++monthIdx) {
+    double groupX = marginLeft + monthIdx * groupWidth;
+    painter.drawText(groupX + groupWidth / 2 - 4, baseY + 12,
+                     QString::number(monthIdx + 1));
   }
 }
