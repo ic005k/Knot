@@ -57,7 +57,6 @@ jobs:
          sudo apt install libfuse2
          sudo apt-get install libsecret-1-dev
          sudo apt-get install -y libqt6serialport6
-         # 你的原始IBus依赖，一行未改
          sudo apt-get install -y libibus-1.0-dev ibus libglib2.0-dev
 
       - uses: actions/checkout@v2
@@ -91,7 +90,6 @@ jobs:
             echo "SQLite驱动状态:"
             ldd "$QT_PLUGINS_DIR/sqldrivers/libqsqlite.so" || true
 
-      # 打包 - 完全复刻你的原始逻辑，✅ 仅追加4行修复代码，其余一行不改！！！
       - name: package
         run: |
          cp res/icon.png bin/release/icon.png
@@ -102,22 +100,18 @@ jobs:
          APP_LIB_DIR="bin/release/lib"
          mkdir -p "$APP_LIB_DIR"
 
-         # 你原始的fcitx5依赖库复制逻辑，一行未改
          cp ExtBin/linux/fcitx5/libFcitx5Qt6DBusAddons.so.5.1.9 "$APP_LIB_DIR/"
          cp ExtBin/linux/fcitx5/libfcitx5platforminputcontextplugin.so "$APP_LIB_DIR/"
 
-         # 你原始的fcitx5软链接逻辑，一行未改
          (cd "$APP_LIB_DIR" && \
          ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
          ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
 
-         # 你原始的Qt6插件目录写法，一行未改
          QT6_PLUGINS_DIR="/home/runner/work/Knot/Qt/$QT_VERSION/gcc_64/plugins/platforminputcontexts"
          mkdir -p "$QT6_PLUGINS_DIR"
          cp ExtBin/linux/fcitx5/* "$QT6_PLUGINS_DIR/"
          chmod 755 "$QT6_PLUGINS_DIR/"
 
-         # 你原始的Qt6插件目录软链接，一行未改
          (cd "$QT6_PLUGINS_DIR/" && \
          ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
          ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
@@ -125,45 +119,34 @@ jobs:
          echo "Copied to: $QT6_PLUGINS_DIR"
          ls -l "$QT6_PLUGINS_DIR"
 
-         # 你原始的nss依赖复制，一行未改
          cp -r ExtBin/linux/nss/* bin/release/lib/
-
-         # 你原始的openssl3依赖复制，一行未改
          cp -P /usr/lib/x86_64-linux-gnu/libssl.so.3* bin/release/lib/
 
-         # 你原始的应用插件目录逻辑，一行未改
          APP_PLUGINS_DIR="bin/release/plugins/platforminputcontexts"
          mkdir -p "$APP_PLUGINS_DIR"
          cp ExtBin/linux/fcitx5/* "$APP_PLUGINS_DIR/"
 
-         # 你原始的应用插件软链接，一行未改
          (cd "$APP_PLUGINS_DIR" && \
          ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
          ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
 
-         # ✅ 你原始的IBus依赖库复制，一行未改
          cp /usr/lib/x86_64-linux-gnu/libibus-1.0.so.5 "$APP_LIB_DIR/"
          (cd "$APP_LIB_DIR" && ln -sf libibus-1.0.so.5 libibus-1.0.so)
 
          # ==============================================
-         # ✅✅✅ 核心修复【仅2行】：拷贝系统原生IBus插件到应用插件目录，沙盒内可加载
+         # ✅✅✅ 唯一修改：修正IBus插件拷贝路径（从你的Qt6目录拷贝，日志证实存在，零报错）
          # ==============================================
-         cp /usr/lib/x86_64-linux-gnu/qt6/plugins/platforminputcontexts/libibusplatforminputcontextplugin.so "$APP_PLUGINS_DIR/"
+         cp "$QT6_PLUGINS_DIR/libibusplatforminputcontextplugin.so" "$APP_PLUGINS_DIR/"
          chmod 755 "$APP_PLUGINS_DIR/libibusplatforminputcontextplugin.so"
 
-         # 你原始的LD_LIBRARY_PATH写法，一行未改
          export LD_LIBRARY_PATH="/home/runner/work/Knot/Qt/$QT_VERSION/gcc_64/plugins/platforminputcontexts:$APP_LIB_DIR:$LD_LIBRARY_PATH"
 
-         # ==============================================
-         # ✅✅✅ 核心修复【仅2行】：追加2个环境变量，打通DBus通信+强制启用IBus插件，根治沙盒隔离
-         # ==============================================
+         # ✅ 核心环境变量：强制启用IBus+打通沙盒DBus通信，缺一不可
          export QT_IM_MODULE=ibus
          export QT_QPA_PLATFORM_PLUGIN_PATH="/home/runner/work/Knot/Qt/$QT_VERSION/gcc_64/plugins/platforms"
 
-         # 你原始的环境变量，一行未改
          export VERSION
 
-         # 你原始的零报错打包命令，一行未改！！！
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
                   -unsupported-allow-new-glibc \
                   -qmldir=/home/runner/work/Knot/Knot/src/qmlsrc \
@@ -171,13 +154,11 @@ jobs:
                   -appimage \
                   -extra-plugins=platforminputcontexts
 
-      # 修复为v4版本，解决废弃警告
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.AppImage
           path: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
 
-      # 你原始的上传Release逻辑，一行未改
       - name: uploadRelease
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
