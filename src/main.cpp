@@ -104,7 +104,6 @@ int main(int argc, char* argv[]) {
   }
 #endif
 
-  // showSplash();
   SplashTimer splash(isAndroid, 320, 100);
   splash.show();
 
