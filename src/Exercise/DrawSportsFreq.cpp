@@ -105,7 +105,7 @@ void FrequencyCurveWidget::paintEvent(QPaintEvent* event) {
   painter.setPen(QPen(textColor, 1));
   painter.drawLine(marginLeft, baseY, this->width() - marginRight, baseY);
   QFont ft = painter.font();
-  ft.setPointSize(7);  // 小字体，不拥挤，清晰可见
+  ft.setPointSize(12);  // 小字体，不拥挤，清晰可见
   painter.setFont(ft);
 
   // X轴月份标签 精准居中对齐每个月的柱子组
