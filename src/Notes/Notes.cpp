@@ -1082,8 +1082,6 @@ void Notes::openNotesUI() {
 void Notes::openNotesUI_1() {
   init_all_notes();
 
-  isSaveNotesConfig = false;
-
   mw_one->isMemoVisible = true;
   mw_one->isReaderVisible = false;
 
@@ -1681,6 +1679,8 @@ void Notes::updateMainnotesIniToSyncLists() {
     if (enc_file != "") zipMainnotes = enc_file;
 
     appendToSyncList(zipMainnotes);
+
+    isSaveNotesConfig = false;
   }
 }
 
