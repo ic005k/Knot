@@ -45,12 +45,13 @@ class SplashTimer : public QSplashScreen {
   const qreal m_maxFontRatio = 0.25;
   int m_animationFrame = 0;
   QTimer* m_animationTimer = nullptr;
+  // 安卓垂直偏移修正值（可根据设备微调）
+  const qreal m_androidYOffset = 10.0;
 
   void init() {
     initSizeAndDpi();
     initStyle();
-    drawBaseBackground();
-
+    drawBaseBackground();  // 恢复整体背景绘制（渐变+网格）
     setFixedSize(m_targetSize / m_dpr);
     setAttribute(Qt::WA_TranslucentBackground);
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
@@ -66,7 +67,6 @@ class SplashTimer : public QSplashScreen {
       updateDisplay();
     });
     m_animationTimer->start(100);
-
     updateDisplay();
   }
 
@@ -91,24 +91,29 @@ class SplashTimer : public QSplashScreen {
   }
 
   void initStyle() {
+    // 恢复整体背景色
     m_bgColor = QColor(240, 242, 245);
+    // 文字配色适配整体背景
     m_textColor = QColor(52, 73, 94);
     m_highlightColor = QColor(41, 128, 185);
     m_shadowColor = QColor(44, 62, 80, 120);
   }
 
+  // 恢复整体渐变+网格背景绘制（仅去掉文字下的圆角背景）
   void drawBaseBackground() {
     m_basePixmap = QPixmap(m_targetSize);
-    m_basePixmap.fill(m_bgColor);
+    m_basePixmap.fill(m_bgColor);  // 填充整体背景色，避免黑条
 
     QPainter painter(&m_basePixmap);
     painter.setRenderHint(QPainter::Antialiasing);
 
+    // 渐变背景
     QLinearGradient gradient(0, 0, 0, m_targetSize.height());
     gradient.setColorAt(0, QColor(240, 242, 245));
     gradient.setColorAt(1, QColor(220, 225, 235));
     painter.fillRect(m_basePixmap.rect(), gradient);
 
+    // 微妙网格背景
     painter.setPen(QPen(QColor(200, 205, 215, 30), 1));
     int gridSize = 20 * m_dpr;
     for (int x = 0; x < m_targetSize.width(); x += gridSize) {
@@ -152,7 +157,6 @@ class SplashTimer : public QSplashScreen {
     painter.drawEllipse(QPointF(rect.center()), radiusX, radiusY);
   }
 
-  // 核心修复1：单字母精准居中（水平+垂直）
   void drawTextLetter(QPainter& painter, QChar letter,
                       const QRectF& letterRect) {
     QFont font;
@@ -165,40 +169,35 @@ class SplashTimer : public QSplashScreen {
     font.setPixelSize(m_fontSize);
     painter.setFont(font);
 
-    QFontMetrics fm(font);
-    // 1. 水平居中：使用字符实际宽度，而非字体默认宽度
-    int charWidth = fm.horizontalAdvance(letter);
-    qreal charX = letterRect.center().x() - charWidth / 2.0;
-
-    // 2. 垂直居中：基于基线精准计算，避免截断+保证居中
-    int charAscent = fm.ascent();
-    int charDescent = fm.descent();
-    // 基线Y坐标 = 字母区域中心Y + (上伸高度 - 下伸高度)/2 → 完美垂直居中
-    qreal charBaseY =
-        letterRect.center().y() + (charAscent - charDescent) / 2.0;
-
-    // 动画参数（幅度缩小，避免干扰居中视觉）
     qreal scale = 1.0;
     qreal opacity = 1.0;
     if (m_animationTimer) {
       qreal phase = (m_animationFrame + letter.unicode() * 0.5) * 0.1;
-      scale = 0.99 + 0.01 * std::sin(phase);  // 极小幅度缩放
-      opacity = 0.98 + 0.02 * std::cos(phase);
+      scale = 0.99 + 0.01 * std::sin(phase);
+      opacity = 0.95 + 0.05 * std::cos(phase);
     }
 
+    QFontMetrics fm(font);
+    int charWidth = fm.horizontalAdvance(letter);
+    int charAscent = fm.ascent();
+    int charDescent = fm.descent();
+
+    qreal charX = letterRect.center().x() - charWidth / 2.0;
+    qreal charBaseY =
+        letterRect.center().y() + (charAscent - charDescent) / 2.0;
+
     painter.save();
-    // 变换中心为字母区域中心，避免缩放导致偏移
     painter.translate(letterRect.center());
     painter.scale(scale, scale);
     painter.translate(-letterRect.center());
     painter.setOpacity(opacity);
 
-    // 绘制阴影
+    // 文字阴影（适配整体背景，强度适中）
     painter.setPen(QPen(m_shadowColor, 1));
     painter.setBrush(Qt::NoBrush);
     painter.drawText(QPointF(charX + 2 * m_dpr, charBaseY + 2 * m_dpr), letter);
 
-    // 绘制主文字
+    // 渐变文字
     QLinearGradient textGradient(letterRect.topLeft(),
                                  letterRect.bottomRight());
     textGradient.setColorAt(0, m_highlightColor);
@@ -210,22 +209,17 @@ class SplashTimer : public QSplashScreen {
     painter.restore();
   }
 
-  // 核心修复2：水平排列 KNOT 整体居中
   void drawHorizontalKNOT(QPainter& painter, const QPixmap& displayPix) {
     const QString text = "KNOT";
     int letterCount = text.length();
     QRectF canvasRect = displayPix.rect();
 
-    // 单个字母区域尺寸（留足余量，避免挤压）
     qreal letterWidth = m_fontSize * 2.0;
     qreal letterHeight = m_fontSize * 2.5;
-    qreal spacing = letterWidth * 0.5;  // 字母间距
-
-    // 计算文字组总宽度（精准无误差）
+    qreal spacing = letterWidth * 0.5;
     qreal totalWidth = letterCount * letterWidth + (letterCount - 1) * spacing;
     qreal totalHeight = letterHeight;
 
-    // 边界校验：文字组不超出画布 90% 区域
     if (totalWidth > canvasRect.width() * 0.9) {
       qreal scaleRatio = (canvasRect.width() * 0.9) / totalWidth;
       letterWidth *= scaleRatio;
@@ -233,18 +227,11 @@ class SplashTimer : public QSplashScreen {
       totalWidth = canvasRect.width() * 0.9;
     }
 
-    // 整体居中：起始坐标基于画布中心计算
     qreal startX = canvasRect.center().x() - totalWidth / 2.0;
     qreal startY = canvasRect.center().y() - totalHeight / 2.0;
 
-    // 背景矩形与文字组完全对齐
-    painter.setPen(QPen(QColor(255, 255, 255, 100), 2 * m_dpr));
-    painter.setBrush(QBrush(QColor(255, 255, 255, 30)));
-    painter.drawRoundedRect(startX - 20 * m_dpr, startY - 20 * m_dpr,
-                            totalWidth + 40 * m_dpr, totalHeight + 40 * m_dpr,
-                            20 * m_dpr, 20 * m_dpr);
-
-    // 逐个绘制字母
+    // 移除文字下方的圆角背景绘制（仅删除这部分代码）
+    // 直接绘制文字，无圆角背景
     for (int i = 0; i < letterCount; ++i) {
       QRectF letterRect(startX + i * (letterWidth + spacing), startY,
                         letterWidth, letterHeight);
@@ -252,23 +239,18 @@ class SplashTimer : public QSplashScreen {
     }
   }
 
-  // 核心修复3：垂直排列 KNOT 整体居中
   void drawVerticalKNOT(QPainter& painter, const QPixmap& displayPix) {
     const QString text = "KNOT";
     int letterCount = text.length();
     QRectF canvasRect = displayPix.rect();
 
-    // 单个字母区域尺寸
     qreal letterWidth = m_fontSize * 2.5;
     qreal letterHeight = m_fontSize * 2.0;
     qreal spacing = letterHeight * 0.5;
-
-    // 计算文字组总高度（精准无误差）
     qreal totalHeight =
         letterCount * letterHeight + (letterCount - 1) * spacing;
     qreal totalWidth = letterWidth;
 
-    // 边界校验
     if (totalHeight > canvasRect.height() * 0.9) {
       qreal scaleRatio = (canvasRect.height() * 0.9) / totalHeight;
       letterHeight *= scaleRatio;
@@ -276,18 +258,13 @@ class SplashTimer : public QSplashScreen {
       totalHeight = canvasRect.height() * 0.9;
     }
 
-    // 整体居中：起始坐标基于画布中心计算
+    // 安卓端垂直偏移修正，解决整体靠下问题
     qreal startX = canvasRect.center().x() - totalWidth / 2.0;
-    qreal startY = canvasRect.center().y() - totalHeight / 2.0;
+    qreal startY = canvasRect.center().y() - totalHeight / 2.0 -
+                   (m_androidYOffset * m_dpr);
 
-    // 背景矩形与文字组完全对齐
-    painter.setPen(QPen(QColor(255, 255, 255, 100), 2 * m_dpr));
-    painter.setBrush(QBrush(QColor(255, 255, 255, 30)));
-    painter.drawRoundedRect(startX - 20 * m_dpr, startY - 20 * m_dpr,
-                            totalWidth + 40 * m_dpr, totalHeight + 40 * m_dpr,
-                            20 * m_dpr, 20 * m_dpr);
-
-    // 逐个绘制字母
+    // 移除文字下方的圆角背景绘制（仅删除这部分代码）
+    // 直接绘制文字，无圆角背景
     for (int i = 0; i < letterCount; ++i) {
       QRectF letterRect(startX, startY + i * (letterHeight + spacing),
                         letterWidth, letterHeight);
