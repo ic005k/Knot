@@ -5,7 +5,7 @@
 #include "ui_DateSelector.h"
 #include "ui_MainWindow.h"
 
-DateSelector::DateSelector(QWidget *parent)
+DateSelector::DateSelector(QWidget* parent)
     : QDialog(parent), ui(new Ui::DateSelector) {
   ui->setupUi(this);
   this->installEventFilter(this);
@@ -20,9 +20,9 @@ DateSelector::DateSelector(QWidget *parent)
 
 DateSelector::~DateSelector() { delete ui; }
 
-bool DateSelector::eventFilter(QObject *watch, QEvent *evn) {
+bool DateSelector::eventFilter(QObject* watch, QEvent* evn) {
   if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
       close();
       return true;
@@ -32,7 +32,7 @@ bool DateSelector::eventFilter(QObject *watch, QEvent *evn) {
   return QWidget::eventFilter(watch, evn);
 }
 
-void DateSelector::closeEvent(QCloseEvent *event) {
+void DateSelector::closeEvent(QCloseEvent* event) {
   Q_UNUSED(event)
   m_Method->closeGrayWindows();
 }
@@ -108,6 +108,10 @@ void DateSelector::on_btnOk_clicked() {
       mui->btnYear->setText(y);
 
       int value = m.toInt();
+      if (mw_one->m_Report->isSingleYear) {
+        value = 13;
+        mw_one->m_Report->isSingleYear = false;
+      }
       if (value == 13)
         mui->btnMonth->setText(tr("Year-Round"));
       else {

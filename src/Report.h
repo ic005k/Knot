@@ -20,10 +20,11 @@ class Report : public QDialog {
   Q_OBJECT
 
  public:
-  explicit Report(QWidget *parent = nullptr);
+  explicit Report(QWidget* parent = nullptr);
   ~Report();
-  Ui::Report *ui;
+  Ui::Report* ui;
 
+  bool isSingleYear = false;
   static void saveYMD();
 
   void getCategoryData(QString strCategory, bool appendTable);
@@ -33,7 +34,7 @@ class Report : public QDialog {
   void updateTable();
   void init();
 
-  static void setTWImgData(QTreeWidgetItem *item);
+  static void setTWImgData(QTreeWidgetItem* item);
   void clearAll();
   void delItem(int index);
   int getCount();
@@ -54,7 +55,7 @@ class Report : public QDialog {
 
   void setScrollBarPos_xx(double pos);
 
-  static int cmp(const void *a, const void *b);
+  static int cmp(const void* a, const void* b);
 
   void startReport1(QString year, QString month);
   void startReport2();
@@ -63,17 +64,20 @@ class Report : public QDialog {
   void appendTable(QString date, QString freq, QString amount);
 
   void genReportMenu();
-  QMenu *m_Menu = nullptr;
+  QMenu* m_Menu = nullptr;
 
   QString Out2Img(bool isShowMessage);
 
  protected:
-  void keyReleaseEvent(QKeyEvent *event) override;
-  bool eventFilter(QObject *watch, QEvent *evn) override;
-  void closeEvent(QCloseEvent *event) override;
+  void keyReleaseEvent(QKeyEvent* event) override;
+  bool eventFilter(QObject* watch, QEvent* evn) override;
+  void closeEvent(QCloseEvent* event) override;
  public slots:
 
   void loadDetailsQml();
+
+ private slots:
+  void on_btnSingleYear_clicked();
 
  private:
   double t_amount = 0;

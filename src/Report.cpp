@@ -123,6 +123,27 @@ void Report::on_btnBack_clicked() {
 
 void Report::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }
 
+void Report::on_btnSingleYear_clicked() {
+  mw_one->m_DateSelector->dateFlag = 1;
+  isSingleYear = true;
+
+  if (isAndroid) {
+    int y, m;
+    y = mui->btnYear->text().toInt();
+    m = mui->btnMonth->text().toInt();
+    m_Method->setDateTimePickerFlag("ym", y, m, 0, 0, 0, "");
+    m_Method->openDateTimePicker();
+    return;
+  }
+
+  mui->lblDetails->setText(tr("Details"));
+
+  QDate date(mui->btnYear->text().toInt(), mui->btnMonth->text().toInt(), 1);
+  mw_one->m_DateSelector->m_datePickerYM->setDate(date);
+
+  mw_one->m_DateSelector->init();
+}
+
 void Report::on_btnYear_clicked() {
   mw_one->m_DateSelector->dateFlag = 1;
 
@@ -785,16 +806,16 @@ void Report::genReportMenu() {
   });
 #endif
 
-  QAction* actSetYear = new QAction(tr("Year Month"));
+  QAction* actSetYear = new QAction(tr("Year"));
   m_Menu->addAction(actSetYear);
+  actSetYear->setVisible(true);
   connect(actSetYear, &QAction::triggered, this,
-          [=]() { mw_one->on_btnYear_clicked(); });
+          [=]() { on_btnSingleYear_clicked(); });
 
-  QAction* actSetMonth = new QAction(tr("Month"));
-  m_Menu->addAction(actSetMonth);
-  actSetMonth->setVisible(false);
-  connect(actSetMonth, &QAction::triggered, this,
-          [=]() { mw_one->on_btnMonth_clicked(); });
+  QAction* actSetYearMonth = new QAction(tr("Year Month"));
+  m_Menu->addAction(actSetYearMonth);
+  connect(actSetYearMonth, &QAction::triggered, this,
+          [=]() { mw_one->on_btnYear_clicked(); });
 
   QAction* actStartDate = new QAction(tr("Start Date"));
   m_Menu->addAction(actStartDate);
