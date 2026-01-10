@@ -806,7 +806,7 @@ void Report::genReportMenu() {
   });
 #endif
 
-  QAction* actSetYear = new QAction(tr("Year"));
+  QAction* actSetYear = new QAction(tr("Year-Round"));
   m_Menu->addAction(actSetYear);
   actSetYear->setVisible(true);
   connect(actSetYear, &QAction::triggered, this,
