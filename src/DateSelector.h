@@ -14,24 +14,24 @@ class DateSelector : public QDialog {
   Q_OBJECT
 
  public:
-  explicit DateSelector(QWidget *parent = nullptr);
+  explicit DateSelector(QWidget* parent = nullptr);
   ~DateSelector();
-  Ui::DateSelector *ui;
+  Ui::DateSelector* ui;
 
-  DatePicker *m_datePickerYM = nullptr;
+  DatePicker* m_datePickerYM = nullptr;
 
-  DatePicker *m_datePickerYMD = nullptr;
+  DatePicker* m_datePickerYMD = nullptr;
 
-  int dateFlag = 0; /*1=btnYeat 2=btnMonth 3=btnStartDate 4=btnEnDate*/
+  int dateFlag = 0; /*1=btnYear 2=btnMonth 3=btnStartDate 4=btnEnDate*/
 
   void init();
 
   void initStartEndDate(QString flag);
 
  protected:
-  bool eventFilter(QObject *watch, QEvent *evn) override;
+  bool eventFilter(QObject* watch, QEvent* evn) override;
 
-  void closeEvent(QCloseEvent *event) override;
+  void closeEvent(QCloseEvent* event) override;
 
  private slots:
 

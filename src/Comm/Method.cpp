@@ -1297,6 +1297,10 @@ void Method::setDateTimePickerFlag(QString flag, int y, int m, int d, int h,
     Reg.setValue("/DateTime/flag", "ym");
   }
 
+  if (flag == "y") {
+    Reg.setValue("/DateTime/flag", "y");
+  }
+
   if (flag == "hm") {
     Reg.setValue("/DateTime/flag", "hm");
   }

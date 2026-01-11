@@ -131,7 +131,7 @@ void Report::on_btnSingleYear_clicked() {
     int y, m;
     y = mui->btnYear->text().toInt();
     m = mui->btnMonth->text().toInt();
-    m_Method->setDateTimePickerFlag("ym", y, m, 0, 0, 0, "");
+    m_Method->setDateTimePickerFlag("y", y, m, 0, 0, 0, "");
     m_Method->openDateTimePicker();
     return;
   }
