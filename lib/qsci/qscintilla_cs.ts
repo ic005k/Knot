@@ -1739,7 +1739,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="3195"/>
+        <location filename="../../src/Comm/Method.cpp" line="3199"/>
         <source>Please check the attachment.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2121,7 +2121,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2396"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2528"/>
         <source>New Note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2148,13 +2148,13 @@
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.ui" line="73"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2401"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2533"/>
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.ui" line="86"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2402"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2534"/>
         <source>Export</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2216,7 +2216,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2295"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2427"/>
         <source>Untitled Note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2242,7 +2242,7 @@
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.cpp" line="416"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2260"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2311"/>
         <source>NoteBook</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2294,7 +2294,7 @@
     <message>
         <location filename="../../src/Notes/NotesList.cpp" line="970"/>
         <location filename="../../src/Notes/NotesList.cpp" line="1032"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2261"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2312"/>
         <source>Notes</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2336,13 +2336,13 @@
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.cpp" line="2172"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2399"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2531"/>
         <source>Move Up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.cpp" line="2173"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2400"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2532"/>
         <source>Move Down</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2367,64 +2367,69 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2254"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2303"/>
         <source>Access WebDAV:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2273"/>
-        <source>Please create a new notebook first, and then create new notes.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2397"/>
-        <source>Del Note</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2398"/>
-        <source>Rename Note</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2403"/>
-        <source>Share</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2404"/>
-        <source>Copy Note Link</source>
+        <location filename="../../src/Notes/NotesList.cpp" line="2313"/>
+        <source>Images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Notes/NotesList.cpp" line="2405"/>
+        <source>Please create a new notebook first, and then create new notes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/NotesList.cpp" line="2529"/>
+        <source>Del Note</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/NotesList.cpp" line="2530"/>
+        <source>Rename Note</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/NotesList.cpp" line="2535"/>
+        <source>Share</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/NotesList.cpp" line="2536"/>
+        <source>Copy Note Link</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/NotesList.cpp" line="2537"/>
         <source>Relationship Graph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2406"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2538"/>
         <source>Modification History</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2603"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2735"/>
         <source>Share to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2647"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2655"/>
-        <location filename="../../src/Notes/NotesList.cpp" line="2670"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2779"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2787"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2802"/>
         <source>Main Root</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="2784"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="2916"/>
         <source>File does not exist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList.cpp" line="3184"/>
+        <location filename="../../src/Notes/NotesList.cpp" line="3316"/>
         <source>Note Search Results:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2562,55 +2567,55 @@
     <name>QInstaller</name>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="230"/>
-        <location filename="../../src/Comm/Method.cpp" line="2380"/>
+        <location filename="../../src/Comm/Method.cpp" line="2384"/>
         <source>bytes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="231"/>
-        <location filename="../../src/Comm/Method.cpp" line="2381"/>
+        <location filename="../../src/Comm/Method.cpp" line="2385"/>
         <source>KiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="232"/>
-        <location filename="../../src/Comm/Method.cpp" line="2382"/>
+        <location filename="../../src/Comm/Method.cpp" line="2386"/>
         <source>MiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="233"/>
-        <location filename="../../src/Comm/Method.cpp" line="2383"/>
+        <location filename="../../src/Comm/Method.cpp" line="2387"/>
         <source>GiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="234"/>
-        <location filename="../../src/Comm/Method.cpp" line="2384"/>
+        <location filename="../../src/Comm/Method.cpp" line="2388"/>
         <source>TiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="235"/>
-        <location filename="../../src/Comm/Method.cpp" line="2385"/>
+        <location filename="../../src/Comm/Method.cpp" line="2389"/>
         <source>PiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="236"/>
-        <location filename="../../src/Comm/Method.cpp" line="2386"/>
+        <location filename="../../src/Comm/Method.cpp" line="2390"/>
         <source>EiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="237"/>
-        <location filename="../../src/Comm/Method.cpp" line="2387"/>
+        <location filename="../../src/Comm/Method.cpp" line="2391"/>
         <source>ZiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="238"/>
-        <location filename="../../src/Comm/Method.cpp" line="2388"/>
+        <location filename="../../src/Comm/Method.cpp" line="2392"/>
         <source>YiB</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7016,6 +7021,7 @@
     </message>
     <message>
         <location filename="../../src/Report.cpp" line="274"/>
+        <location filename="../../src/Report.cpp" line="809"/>
         <source>Year-Round</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7118,11 +7124,6 @@
     <message>
         <location filename="../../src/Report.cpp" line="805"/>
         <source>Share to</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Report.cpp" line="809"/>
-        <source>Year</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

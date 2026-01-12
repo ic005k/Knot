@@ -337,6 +337,7 @@ class NotesList : public QDialog {
   QFuture<ResultsMap> performSearchAsync(const QString& dirPath,
                                          const QString& keyword);
   void displayResults(const ResultsMap& results);
+  int countMdFilesImages(const QString& dirPath);
 };
 
 class SearchMapper {

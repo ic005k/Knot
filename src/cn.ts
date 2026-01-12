@@ -2450,7 +2450,7 @@
         <translation>详细</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="3195"/>
+        <location filename="Comm/Method.cpp" line="3199"/>
         <source>Please check the attachment.</source>
         <translation>请查收附件</translation>
     </message>
@@ -2948,7 +2948,7 @@
         <translation>笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2396"/>
+        <location filename="Notes/NotesList.cpp" line="2528"/>
         <source>New Note</source>
         <translation>新建笔记</translation>
     </message>
@@ -2979,13 +2979,13 @@
     </message>
     <message>
         <location filename="Notes/NotesList.ui" line="73"/>
-        <location filename="Notes/NotesList.cpp" line="2401"/>
+        <location filename="Notes/NotesList.cpp" line="2533"/>
         <source>Import</source>
         <translation>导入</translation>
     </message>
     <message>
         <location filename="Notes/NotesList.ui" line="86"/>
-        <location filename="Notes/NotesList.cpp" line="2402"/>
+        <location filename="Notes/NotesList.cpp" line="2534"/>
         <source>Export</source>
         <translation>导出</translation>
     </message>
@@ -3063,7 +3063,7 @@
     </message>
     <message>
         <location filename="Notes/NotesList.cpp" line="416"/>
-        <location filename="Notes/NotesList.cpp" line="2260"/>
+        <location filename="Notes/NotesList.cpp" line="2311"/>
         <source>NoteBook</source>
         <translation>笔记本</translation>
     </message>
@@ -3109,7 +3109,7 @@
     <message>
         <location filename="Notes/NotesList.cpp" line="970"/>
         <location filename="Notes/NotesList.cpp" line="1032"/>
-        <location filename="Notes/NotesList.cpp" line="2261"/>
+        <location filename="Notes/NotesList.cpp" line="2312"/>
         <source>Notes</source>
         <translation>笔记</translation>
     </message>
@@ -3150,50 +3150,55 @@
         <translation>重建索引需要一些时间，点击“确定”后开始。</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2254"/>
+        <location filename="Notes/NotesList.cpp" line="2303"/>
         <source>Access WebDAV:</source>
         <translation>访问WebDAV：</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2273"/>
+        <location filename="Notes/NotesList.cpp" line="2313"/>
+        <source>Images</source>
+        <translation>图片</translation>
+    </message>
+    <message>
+        <location filename="Notes/NotesList.cpp" line="2405"/>
         <source>Please create a new notebook first, and then create new notes.</source>
         <translation>请先新建笔记本，再新建笔记。</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2403"/>
+        <location filename="Notes/NotesList.cpp" line="2535"/>
         <source>Share</source>
         <translation>分享</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2404"/>
+        <location filename="Notes/NotesList.cpp" line="2536"/>
         <source>Copy Note Link</source>
         <translation>拷贝笔记链接</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2405"/>
+        <location filename="Notes/NotesList.cpp" line="2537"/>
         <source>Relationship Graph</source>
         <translation>关系图谱</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2406"/>
+        <location filename="Notes/NotesList.cpp" line="2538"/>
         <source>Modification History</source>
         <translation>修改历史</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2603"/>
+        <location filename="Notes/NotesList.cpp" line="2735"/>
         <source>Share to</source>
         <oldsource>Shart to</oldsource>
         <translation>分享到</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2647"/>
-        <location filename="Notes/NotesList.cpp" line="2655"/>
-        <location filename="Notes/NotesList.cpp" line="2670"/>
+        <location filename="Notes/NotesList.cpp" line="2779"/>
+        <location filename="Notes/NotesList.cpp" line="2787"/>
+        <location filename="Notes/NotesList.cpp" line="2802"/>
         <source>Main Root</source>
         <translation>主根</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2784"/>
+        <location filename="Notes/NotesList.cpp" line="2916"/>
         <source>File does not exist</source>
         <translation>文件不存在</translation>
     </message>
@@ -3202,7 +3207,7 @@
         <translation type="vanished">当前笔记不存在。请选择其它笔记或新建笔记。</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="3184"/>
+        <location filename="Notes/NotesList.cpp" line="3316"/>
         <source>Note Search Results:</source>
         <translation>笔记搜索结果：</translation>
     </message>
@@ -3249,13 +3254,13 @@
     </message>
     <message>
         <location filename="Notes/NotesList.cpp" line="2172"/>
-        <location filename="Notes/NotesList.cpp" line="2399"/>
+        <location filename="Notes/NotesList.cpp" line="2531"/>
         <source>Move Up</source>
         <translation>上移</translation>
     </message>
     <message>
         <location filename="Notes/NotesList.cpp" line="2173"/>
-        <location filename="Notes/NotesList.cpp" line="2400"/>
+        <location filename="Notes/NotesList.cpp" line="2532"/>
         <source>Move Down</source>
         <translation>下移</translation>
     </message>
@@ -3264,17 +3269,17 @@
         <translation type="vanished">新建笔记名称</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2398"/>
+        <location filename="Notes/NotesList.cpp" line="2530"/>
         <source>Rename Note</source>
         <translation>重命名笔记</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2397"/>
+        <location filename="Notes/NotesList.cpp" line="2529"/>
         <source>Del Note</source>
         <translation>删除笔记</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2295"/>
+        <location filename="Notes/NotesList.cpp" line="2427"/>
         <source>Untitled Note</source>
         <translation>无标题笔记</translation>
     </message>
@@ -3518,55 +3523,55 @@
     <name>QInstaller</name>
     <message>
         <location filename="AutoUpdate.cpp" line="230"/>
-        <location filename="Comm/Method.cpp" line="2380"/>
+        <location filename="Comm/Method.cpp" line="2384"/>
         <source>bytes</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="231"/>
-        <location filename="Comm/Method.cpp" line="2381"/>
+        <location filename="Comm/Method.cpp" line="2385"/>
         <source>KiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="232"/>
-        <location filename="Comm/Method.cpp" line="2382"/>
+        <location filename="Comm/Method.cpp" line="2386"/>
         <source>MiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="233"/>
-        <location filename="Comm/Method.cpp" line="2383"/>
+        <location filename="Comm/Method.cpp" line="2387"/>
         <source>GiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="234"/>
-        <location filename="Comm/Method.cpp" line="2384"/>
+        <location filename="Comm/Method.cpp" line="2388"/>
         <source>TiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="235"/>
-        <location filename="Comm/Method.cpp" line="2385"/>
+        <location filename="Comm/Method.cpp" line="2389"/>
         <source>PiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="236"/>
-        <location filename="Comm/Method.cpp" line="2386"/>
+        <location filename="Comm/Method.cpp" line="2390"/>
         <source>EiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="237"/>
-        <location filename="Comm/Method.cpp" line="2387"/>
+        <location filename="Comm/Method.cpp" line="2391"/>
         <source>ZiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="238"/>
-        <location filename="Comm/Method.cpp" line="2388"/>
+        <location filename="Comm/Method.cpp" line="2392"/>
         <source>YiB</source>
         <translation></translation>
     </message>
@@ -8174,6 +8179,7 @@
     </message>
     <message>
         <location filename="Report.cpp" line="274"/>
+        <location filename="Report.cpp" line="809"/>
         <source>Year-Round</source>
         <translation>全年</translation>
     </message>
@@ -8239,11 +8245,6 @@
         <location filename="Report.cpp" line="815"/>
         <source>Year Month</source>
         <translation>年  月</translation>
-    </message>
-    <message>
-        <location filename="Report.cpp" line="809"/>
-        <source>Year</source>
-        <translation>年</translation>
     </message>
     <message>
         <source>Month</source>

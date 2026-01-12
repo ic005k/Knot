@@ -2245,22 +2245,72 @@ void NotesList::on_actionSetColorFlag() {
 }
 
 void NotesList::on_actionStatistics() {
-  int totalNotes = 0;
+  // 1. UI线程：显示进度条
+  mw_one->showProgress();
+
+  // 2. 提前计算所有需要的变量（UI线程非耗时操作，值捕获给后台Lambda）
   int countNoteBook = tw->topLevelItemCount();
+  int totalNotes = 0;
   for (int i = 0; i < countNoteBook; i++) {
-    totalNotes = totalNotes + tw->topLevelItem(i)->childCount();
+    totalNotes += tw->topLevelItem(i)->childCount();
+  }
+  int webDAVCount = m_Method->getAccessCount();
+  QString memoDir = iniDir + "memo/images/";
+  QString localAppName = appName;  // 单独赋值，便于值捕获
+
+  // 3. 【核心】后台任务：极简Lambda，仅执行耗时的图片统计，用局部变量存储结果
+  // 定义一个可被Lambda捕获的变量（用于存储后台统计结果）
+  int* imgCountPtr = new int(0);  // 用堆内存存储，避免栈变量生命周期问题
+
+  QFuture<void> future = QtConcurrent::run([=]() {
+    // 【后台线程执行】仅做耗时操作，不操作任何UI，结果存入堆内存指针
+    *imgCountPtr = countMdFilesImages(memoDir);
+  });
+
+  // 4. 【核心】监控任务完成：与你的参考示例结构完全一致
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+    qDebug() << "Statistics task completed.";
+
+    // 【UI线程执行】处理结果，安全操作UI
+    QString strAccessCount =
+        tr("Access WebDAV:") + QString::number(webDAVCount) + "t/30min";
+
+    // 关闭进度条
+    mw_one->closeProgress();
+
+    // 弹出统计消息框（使用后台统计的结果）
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(localAppName,
+                 tr("NoteBook") + ": " + QString::number(countNoteBook) +
+                     "    " + tr("Notes") + ": " + QString::number(totalNotes) +
+                     "\n\n" + tr("Images") + ": " +
+                     QString::number(*imgCountPtr) + "\n\n" + strAccessCount,
+                 1);
+
+    // 【关键】释放资源：避免内存泄漏（堆内存指针+watcher）
+    delete imgCountPtr;
+    watcher->deleteLater();
+  });
+  watcher->setFuture(future);
+}
+
+int NotesList::countMdFilesImages(const QString& dirPath) {
+  // 1. 构造QDir对象，指定目标目录路径
+  QDir targetDir(dirPath);
+
+  // 2. 仅需调用QDir::exists()，即可校验目录是否存在且为有效目录
+  // （QDir::exists() 对目录路径返回true，对文件/无效路径返回false）
+  if (!targetDir.exists()) {
+    return 0;  // 无效目录（或文件、不存在路径）返回0个文件
   }
 
-  QString strAccessCount = tr("Access WebDAV:") +
-                           QString::number(m_Method->getAccessCount()) +
-                           "t/30min";
+  // 3. 设置文件筛选规则：仅获取文件（排除子目录、符号链接等）
+  QFileInfoList fileInfoList =
+      targetDir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
 
-  auto msg = std::make_unique<ShowMessage>(this);
-  msg->showMsg(appName,
-               tr("NoteBook") + ": " + QString::number(countNoteBook) + "    " +
-                   tr("Notes") + ": " + QString::number(totalNotes) + "\n\n" +
-                   strAccessCount,
-               1);
+  // 4. 返回文件列表的长度，即该目录下直接文件的数量
+  return fileInfoList.count();
 }
 
 void NotesList::on_actionAdd_Note_triggered() {
