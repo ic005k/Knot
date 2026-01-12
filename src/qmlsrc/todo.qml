@@ -460,7 +460,7 @@ Rectangle {
 
                                 onClicked: {
                                     m_Todo.on_btnHigh()
-                                    console.log("设置高优先级: " + index)
+                                    console.log("设置高优先级")
                                 }
                                 // 适配深色模式
                                 background: Rectangle {
@@ -477,7 +477,7 @@ Rectangle {
 
                                 onClicked: {
                                     m_Todo.on_btnLow()
-                                    console.log("设置低优先级: " + index)
+                                    console.log("设置低优先级")
                                 }
                                 background: Rectangle {
                                     color: "transparent"
