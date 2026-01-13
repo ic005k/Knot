@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
@@ -52,9 +53,12 @@ import org.ini4j.Wini;
 
 public class ClockActivity
     extends Activity
-    implements View.OnClickListener, Application.ActivityLifecycleCallbacks {
+    implements View.OnClickListener, Application.ActivityLifecycleCallbacks
+{
 
     private MediaPlayer player;
+
+    private int mOriginalRingerMode; // 保存原始铃声模式
 
     private static String strInfo =
         "Todo|There are currently timed tasks pending.|0|Close";
@@ -69,7 +73,8 @@ public class ClockActivity
     private String voiceFile;
 
     private static Context context;
-    private static ClockActivity m_instance;
+    // 静态弱引用（泛型指定 ClockActivity，初始化为 null）
+    private static WeakReference<ClockActivity> m_instance_weak;
     private boolean isHomeKey = false;
 
     public static Context getContext() {
@@ -170,15 +175,18 @@ public class ClockActivity
 
         context = getApplicationContext();
 
-        m_instance = this;
+        m_instance_weak = new WeakReference<>(this);
 
-        MyActivity.alarmWindows.add(m_instance);
+        MyActivity.alarmWindows.add(this);
 
         Application application = this.getApplication();
         application.registerActivityLifecycleCallbacks(this);
         mAudioManager = (AudioManager) context.getSystemService(
             Service.AUDIO_SERVICE
         );
+
+        // 保存用户原始铃声模式（关键：在闹钟启动时立即保存）
+        mOriginalRingerMode = mAudioManager.getRingerMode();
 
         // 去除title(App Name)
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -321,6 +329,8 @@ public class ClockActivity
     public void onPause() {
         System.out.println("ClockActivity onPause...");
         super.onPause();
+        restoreOriginalRingerMode(); // 提前还原，双重保障
+        Log.d("ClockActivity", "MIUI 适配：onPause 还原铃声模式");
     }
 
     @Override
@@ -340,6 +350,8 @@ public class ClockActivity
             player.reset(); // 重置状态，避免后续操作异常
         }
 
+        restoreOriginalRingerMode(); // 还原铃声模式
+
         AnimationWhenClosed();
 
         if (!MyActivity.isBackMainUI) {
@@ -353,7 +365,7 @@ public class ClockActivity
     protected void onDestroy() {
         isReady = false;
 
-        if (!isHomeKey) MyActivity.alarmWindows.remove(m_instance);
+        if (!isHomeKey) MyActivity.alarmWindows.remove(this);
 
         unregisterReceiver(mHomeKeyEvent);
 
@@ -374,6 +386,8 @@ public class ClockActivity
             player = null;
         }
 
+        restoreOriginalRingerMode(); // 还原铃声模式（双重保障，避免遗漏）
+
         // 注销生命周期回调
         Application application = this.getApplication();
         application.unregisterActivityLifecycleCallbacks(this);
@@ -391,7 +405,12 @@ public class ClockActivity
             }
         }
 
-        m_instance = null; // 释放静态引用
+        // 弱引用置空，释放引用
+        if (m_instance_weak != null) {
+            m_instance_weak.clear();
+            m_instance_weak = null;
+        }
+
         text_info = null; // 释放静态控件引用
         text_title = null;
 
@@ -399,8 +418,15 @@ public class ClockActivity
     }
 
     public static void close() {
-        if (m_instance != null) {
-            m_instance.finish();
+        // 从弱引用中获取实例，增加非空校验（避免空指针）
+        ClockActivity instance =
+            m_instance_weak != null ? m_instance_weak.get() : null;
+        if (
+            instance != null &&
+            !instance.isFinishing() &&
+            !instance.isDestroyed()
+        ) {
+            instance.finish();
         }
     }
 
@@ -618,27 +644,36 @@ public class ClockActivity
     }
 
     public static void safeUpdateTodoText(String message) {
-        // 1. 校验：ClockActivity实例是否存活
-        if (m_instance == null || !isReady) {
-            Log.d("ClockActivity", "实例未就绪，跳过UI更新");
+        // 从弱引用中获取有效实例
+        ClockActivity instance =
+            m_instance_weak != null ? m_instance_weak.get() : null;
+        if (instance == null || !isReady) {
+            Log.d("ClockActivity", "实例未就绪或已被回收，跳过UI更新");
             return;
         }
 
-        // 2. 校验：是否在主线程（UI操作必须在主线程）
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            // 非主线程：通过Handler切换到主线程
-            m_instance.runOnUiThread(() ->
-                m_instance.updateTextInternal(message)
-            ); // 改为m_instance调用
+            instance.runOnUiThread(() -> instance.updateTextInternal(message));
             return;
         }
-
-        // 主线程：直接更新
-        m_instance.updateTextInternal(message); // 改为m_instance调用
+        instance.updateTextInternal(message);
     }
 
     // 暴露strInfo给MyActivity（原有strInfo为private，需添加getter）
     public String getStrInfo() {
         return this.strInfo;
+    }
+
+    private void restoreOriginalRingerMode() {
+        if (mAudioManager != null) {
+            // 仅当当前铃声模式与原始模式不一致时，才还原（避免不必要的系统操作）
+            if (mAudioManager.getRingerMode() != mOriginalRingerMode) {
+                mAudioManager.setRingerMode(mOriginalRingerMode);
+                Log.d(
+                    "ClockActivity",
+                    "已还原铃声模式为：" + mOriginalRingerMode
+                );
+            }
+        }
     }
 }
