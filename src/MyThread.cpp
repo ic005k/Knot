@@ -198,7 +198,7 @@ void MainWindow::importDataDone() {
 
   if (isPasswordError) {
     closeProgress();
-    ShowMessage* msg = new ShowMessage(this);
+    auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg("Knot", tr("The password of the encrypted file is wrong!"), 1);
     return;
   }
@@ -231,11 +231,11 @@ void MainWindow::importDataDone() {
 
   if (isMenuImport) {
     if (!isZipOK) {
-      ShowMessage* m_ShowMsg = new ShowMessage(this);
-      m_ShowMsg->showMsg("Knot",
-                         tr("Invalid data file.") + "\n\n" +
-                             tr("Or the operation is canceled by the user."),
-                         1);
+      auto msg = std::make_unique<ShowMessage>(this);
+      msg->showMsg("Knot",
+                   tr("Invalid data file.") + "\n\n" +
+                       tr("Or the operation is canceled by the user."),
+                   1);
     }
   }
 }
@@ -251,7 +251,7 @@ void MainWindow::bakDataDone() {
   closeProgress();
 
   if (errorInfo != "") {
-    ShowMessage* msg = new ShowMessage(this);
+    auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg("Knot", errorInfo, 1);
     return;
   }
@@ -266,12 +266,12 @@ void MainWindow::bakDataDone() {
               m_Method->getFileSize(QFile(zipfile).size(), 2),
           zipfile);
 
-      ShowMessage* m_ShowMsg = new ShowMessage(this);
-      m_ShowMsg->showMsg("Knot",
-                         tr("The data was exported successfully.") + "\n\n" +
-                             zipfile + "\n\n" +
-                             m_Method->getFileSize(QFile(zipfile).size(), 2),
-                         1);
+      auto msg = std::make_unique<ShowMessage>(this);
+      msg->showMsg("Knot",
+                   tr("The data was exported successfully.") + "\n\n" +
+                       zipfile + "\n\n" +
+                       m_Method->getFileSize(QFile(zipfile).size(), 2),
+                   1);
     }
   }
 

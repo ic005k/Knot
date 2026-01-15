@@ -251,15 +251,15 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
 
     bool ok = false;
     if (qwName == "reader") {
-      ShowMessage* m_ShowMsg = new ShowMessage(mw_one);
-      ok = m_ShowMsg->showMsg(
-          appName, tr("Open this URL?") + "\n\n" + copyText + "\n", 3);
+      auto msg = std::make_unique<ShowMessage>(mw_one);
+      ok = msg->showMsg(appName,
+                        tr("Open this URL?") + "\n\n" + copyText + "\n", 3);
     }
 
     if (qwName == "note") {
-      ShowMessage* m_ShowMsg = new ShowMessage(mw_one);
-      ok = m_ShowMsg->showMsg(
-          appName, tr("Open this URL?") + "\n\n" + copyText + "\n", 4);
+      auto msg = std::make_unique<ShowMessage>(mw_one);
+      ok = msg->showMsg(appName,
+                        tr("Open this URL?") + "\n\n" + copyText + "\n", 4);
     }
 
     if (ok) QDesktopServices::openUrl(url);
@@ -270,9 +270,9 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
     QString str = linkFile;
     str.replace("mailto:", "");
 
-    ShowMessage* m_ShowMsg = new ShowMessage(mw_one);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     copyText = str;
-    bool ok = m_ShowMsg->showMsg(
+    bool ok = msg->showMsg(
         appName, tr("Writing an email?") + "\n\n" + linkFile + "\n", 3);
     if (ok) QDesktopServices::openUrl(QUrl(linkFile));
 
@@ -324,7 +324,7 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
     }
 
     if (isOk) {
-      ShowMessage* msg = new ShowMessage(mw_one);
+      auto msg = std::make_unique<ShowMessage>(mw_one);
       msg->showMsg(str_id, s1 + " " + s2, 1);
     }
 
