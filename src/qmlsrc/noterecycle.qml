@@ -11,19 +11,38 @@ Rectangle {
 
     function resetQMLToNewState() {
         console.debug("QML端：一键重置为全新状态，清空所有历史痕迹")
-        // 1. 清空选中状态数据（核心，删除历史选中索引）
+
+        // ********** 第一层：全局核心对象判空（避免view未初始化导致崩溃） **********
+        if (!view) {
+            console.warn("QML端：view未初始化，跳过重置操作")
+            return
+        }
+
+        // 1. 清空选中状态数据（核心，删除历史选中索引）—— selectedItems是ListModel，无需额外判空（clear()对空模型安全）
         selectedItems.clear()
-        // 2. 清空列表数据（可选，若外部加载新数据前需清空原有列表）
-        view.model.clear()
-        // 3. 重置所有复选框为未勾选（清空视觉残留）
-        for (var i = 0; i < view.count; i++) {
-            var listItem = view.itemAtIndex(i)
-            if (listItem && listItem.itemCheckBox) {
-                listItem.itemCheckBox.checked = false
+
+        // 2. 清空列表数据（可选，安全判空：避免view.model未初始化）
+        if (view.model) {
+            view.model.clear()
+        }
+
+        // 3. 重置所有复选框为未勾选（清空视觉残留）—— 多层判空，避免列表为空时越界
+        // 先判空：列表数量>0才执行遍历，直接跳过空列表场景
+        if (view.count > 0) {
+            for (var i = 0; i < view.count; i++) {
+                // 安全获取列表项：避免索引越界返回null
+                var listItem = view.itemAtIndex(i)
+                // 双层判空：listItem存在 且 itemCheckBox存在，才修改勾选状态
+                if (listItem && listItem.itemCheckBox) {
+                    listItem.itemCheckBox.checked = false
+                }
             }
         }
-        // 4. 强制刷新ListView，确保视觉状态同步
-        view.forceLayout()
+
+        // 4. 强制刷新ListView（安全判空：仅当列表非空时执行，避免空列表无意义刷新）
+        if (view.count > 0) {
+            view.forceLayout()
+        }
     }
 
     // ========== QML组件加载完成回调（核心初始化逻辑） ==========

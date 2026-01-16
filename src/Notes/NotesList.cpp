@@ -737,6 +737,9 @@ void NotesList::resetQML_List() {
 }
 
 void NotesList::resetQML_Recycle() {
+  int childCount = twrb->topLevelItem(0)->childCount();
+  if (childCount == 0) return;
+
   loadAllRecycle();
 
   int index = 0;
