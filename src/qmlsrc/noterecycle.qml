@@ -9,11 +9,34 @@ Rectangle {
     width: 500
     height: 400
 
+    function resetQMLToNewState() {
+        console.debug("QML端：一键重置为全新状态，清空所有历史痕迹")
+        // 1. 清空选中状态数据（核心，删除历史选中索引）
+        selectedItems.clear()
+        // 2. 清空列表数据（可选，若外部加载新数据前需清空原有列表）
+        view.model.clear()
+        // 3. 重置所有复选框为未勾选（清空视觉残留）
+        for (var i = 0; i < view.count; i++) {
+            var listItem = view.itemAtIndex(i)
+            if (listItem && listItem.itemCheckBox) {
+                listItem.itemCheckBox.checked = false
+            }
+        }
+        // 4. 强制刷新ListView，确保视觉状态同步
+        view.forceLayout()
+    }
+
+    // ========== QML组件加载完成回调（核心初始化逻辑） ==========
+    Component.onCompleted: {
+        console.debug("QML端：组件加载完成，清空所有选中状态")
+        resetQMLToNewState()
+    }
+
     // ========== 多选功能核心属性 ==========
     ListModel {
         id: selectedItems // 存储选中项索引，去重管理
         onCountChanged: {
-            console.debug("QML端：selectedItems数量变化，当前count =", count);
+            console.debug("QML端：selectedItems数量变化，当前count =", count)
         }
     }
 
@@ -26,14 +49,24 @@ Rectangle {
             indexes.push(selectedItems.get(i).index)
         }
         // 关键调试：打印数组内容和长度（在Qt Creator的「应用程序输出」面板查看）
-        console.debug("QML端：selectedItems.count =", selectedItems.count);
-        console.debug("QML端：返回的索引数组 =", indexes);
-        console.debug("QML端：索引数组长度 =", indexes.length);
+        console.debug("QML端：selectedItems.count =", selectedItems.count)
+        console.debug("QML端：返回的索引数组 =", indexes)
+        console.debug("QML端：索引数组长度 =", indexes.length)
         return indexes
     }
 
     function clearAllSelectedItems() {
         selectedItems.clear()
+        console.debug("QML端：已清空所有选中索引")
+
+        // ========== 遍历所有列表项，取消复选框勾选（清空视觉残留） ==========
+        for (var i = 0; i < view.count; i++) {
+            // 获取列表项的复选框组件，重置勾选状态
+            var listItem = view.itemAtIndex(i)
+            if (listItem && listItem.itemCheckBox) {
+                listItem.itemCheckBox.checked = false
+            }
+        }
     }
 
     // ========== 原有工具方法（保持不变，直接依赖isDark变量） ==========
@@ -173,15 +206,19 @@ Rectangle {
                 return
             }
         }
-        selectedItems.append({"index": index})
-        console.debug("QML端：添加选中索引", index, "，当前selectedItems.count =", selectedItems.count);
+        selectedItems.append({
+                                 "index": index
+                             })
+        console.debug("QML端：添加选中索引", index, "，当前selectedItems.count =",
+                      selectedItems.count)
     }
 
     function removeSelectedItem(index) {
         for (var i = 0; i < selectedItems.count; i++) {
             if (selectedItems.get(i).index === index) {
                 selectedItems.remove(i)
-                console.debug("QML端：移除选中索引", index, "，当前selectedItems.count =", selectedItems.count);
+                console.debug("QML端：移除选中索引", index, "，当前selectedItems.count =",
+                              selectedItems.count)
                 break
             }
         }
@@ -248,18 +285,24 @@ Rectangle {
                     Layout.leftMargin: 5
                     // 步骤1：移除与isItemSelected的直接绑定，初始化为false（无绑定，可手动修改）
                     checked: false
+
+                    // ========== 复选框初始化，同步选中状态 ==========
+                    Component.onCompleted: {
+                        itemCheckBox.checked = isItemSelected(index)
+                    }
+
                     // 步骤2：修改onClicked逻辑，先更新selectedItems，再同步自身checked状态（避免反转）
                     onClicked: {
-                        console.debug("QML端：复选框被点击，点击后目标状态 =", checked);
+                        console.debug("QML端：复选框被点击，点击后目标状态 =", checked)
                         if (checked) {
                             // 复选框勾选 → 添加选中索引
-                            addSelectedItem(index);
+                            addSelectedItem(index)
                         } else {
                             // 复选框取消勾选 → 移除选中索引
-                            removeSelectedItem(index);
+                            removeSelectedItem(index)
                         }
                         // 可选：同步复选框状态与selectedItems（确保视觉与数据一致）
-                        itemCheckBox.checked = isItemSelected(index);
+                        itemCheckBox.checked = isItemSelected(index)
                     }
 
                     // 保留原有复选框指示器样式，无修改
@@ -389,23 +432,24 @@ Rectangle {
                 }
 
                 onReleased: function (mouse) {
-                    var delta = Qt.point(mouse.x - clickPos.x, mouse.y - clickPos.y)
+                    var delta = Qt.point(mouse.x - clickPos.x,
+                                         mouse.y - clickPos.y)
                     console.debug("QML端：条目释放，delta.x =", delta.x)
                 }
 
                 // 步骤1：点击条目，直接切换选中状态（不修改checked，避免反转）
                 onClicked: {
-                    var isCurrentlySelected = isItemSelected(index);
-                    console.debug("QML端：条目被点击，当前是否选中 =", isCurrentlySelected);
+                    var isCurrentlySelected = isItemSelected(index)
+                    console.debug("QML端：条目被点击，当前是否选中 =", isCurrentlySelected)
 
                     if (isCurrentlySelected) {
                         // 已选中 → 取消选中（移除索引+同步复选框）
-                        removeSelectedItem(index);
-                        itemCheckBox.checked = false;
+                        removeSelectedItem(index)
+                        itemCheckBox.checked = false
                     } else {
                         // 未选中 → 选中（添加索引+同步复选框）
-                        addSelectedItem(index);
-                        itemCheckBox.checked = true;
+                        addSelectedItem(index)
+                        itemCheckBox.checked = true
                     }
                 }
             }

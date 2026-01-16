@@ -1204,7 +1204,6 @@ void NotesList::on_btnRestore_clicked() {
   saveNotesList();
 }
 
-// 函数名改为on_btnBatchRestore_clicked（兼容Qt 6，编译无错误）
 void NotesList::on_btnBatchRestore_clicked() {
   // ***************** 第一步：完整复用QML选中索引获取逻辑 *****************
   if (!mui || !mui->qwNoteRecycle) {
@@ -1232,13 +1231,12 @@ void NotesList::on_btnBatchRestore_clicked() {
 
   QVariantList selectedIndexes = selectedIndexesVar.toList();
   if (selectedIndexes.isEmpty()) {
-    QMessageBox::information(this, "Knot",
-                             tr("Please select at least one item to restore"));
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg("Knot", tr("Please select at least one item to restore."), 1);
     return;
   }
 
-  // ***************** 第二步：Qt 6兼容版，设置twrb多选状态（方案1，最简洁）
-  // *****************
+  // ***************** 第二步：Qt 6兼容版，设置twrb多选状态（最简洁）
   // 1. 清空twrb原有选中状态，避免残留干扰
   twrb->clearSelection();
 
@@ -1249,13 +1247,13 @@ void NotesList::on_btnBatchRestore_clicked() {
     return;
   }
 
-  // 3. 遍历QML选中索引，一一映射设置twrb子项目的多选状态（核心修正）
+  // 3. 遍历QML选中索引，一一映射设置twrb子项目的多选状态
   foreach (QVariant indexVar, selectedIndexes) {
     int qmlIndex = indexVar.toInt();
     if (qmlIndex >= 0 && qmlIndex < twrbTopItem->childCount()) {
       QTreeWidgetItem* targetTWRBItem = twrbTopItem->child(qmlIndex);
       if (targetTWRBItem) {
-        // 直接操作QTreeWidgetItem，兼容Qt 5/6，无编译错误
+        // 直接操作QTreeWidgetItem，兼容Qt 5/6
         targetTWRBItem->setSelected(true);
       }
     }
@@ -1281,6 +1279,12 @@ void NotesList::on_btnBatchRestore_clicked() {
   }
 
   if (allMoveSuccess) {
+    // 清空QML选中状态
+    QObject* qmlRootObj = quickWidget->rootObject();
+    if (qmlRootObj) {
+      QMetaObject::invokeMethod(qmlRootObj, "resetQMLToNewState",
+                                Qt::DirectConnection);
+    }
     resetQML_List();
     clickNoteList();
     if (!ui->frame1->isHidden()) {
@@ -1321,8 +1325,8 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
 
   QVariantList selectedIndexes = selectedIndexesVar.toList();
   if (selectedIndexes.isEmpty()) {
-    QMessageBox::information(this, "Knot",
-                             tr("Please select at least one item to delete"));
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg("Knot", tr("Please select at least one item to delete."), 1);
     return;
   }
 
@@ -1338,7 +1342,9 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
 
   // 4. 解决QVariant无>运算符问题：转换为QList<int>并倒序排序
   QList<int> selectedIntIndexes;
-  for (const QVariant& indexVar : selectedIndexes) {
+  // 核心修改：将遍历对象改为const QVariantList&，明确只读属性
+  const QVariantList& constSelectedIndexes = selectedIndexes;
+  for (const QVariant& indexVar : constSelectedIndexes) {
     if (indexVar.canConvert<int>()) {
       selectedIntIndexes.append(indexVar.toInt());
     }
@@ -1392,15 +1398,18 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
 
   // 6. 收尾流程
   saveNotesList();
-  resetQML_Recycle();
 
   // 7. 清空QML选中状态
-  QMetaObject::invokeMethod(qmlRootObj, "clearAllSelectedItems");
+  QMetaObject::invokeMethod(qmlRootObj, "resetQMLToNewState",
+                            Qt::DirectConnection);
+  resetQML_Recycle();
 
   // 8. 完成提示
-  QMessageBox::information(this, "Knot",
-                           tr("Batch delete %1 items completed successfully")
-                               .arg(selectedIntIndexes.count()));
+  auto msg = std::make_unique<ShowMessage>(this);
+  msg->showMsg("Knot",
+               tr("Batch delete %1 items completed successfully.")
+                   .arg(selectedIntIndexes.count()),
+               1);
 }
 
 void NotesList::on_btnDel_Recycle_clicked() {
