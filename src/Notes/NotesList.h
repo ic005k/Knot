@@ -12,6 +12,7 @@
 #include <QKeyEvent>
 #include <QListWidget>
 #include <QListWidgetItem>
+#include <QMetaObject>
 #include <QQmlContext>
 #include <QQuickWidget>
 #include <QRandomGenerator>
@@ -19,8 +20,10 @@
 #include <QStringList>
 #include <QTextStream>
 #include <QTreeWidgetItem>
+#include <QVariantList>
 #include <QtConcurrent/QtConcurrent>
 #include <QtConcurrent/QtConcurrentRun>
+#include <algorithm>
 #include <utility>  // for std::as_const
 
 #include "database_manager.h"
@@ -194,7 +197,10 @@ class NotesList : public QDialog {
 
   void on_actionAdd_Note_triggered();
 
- protected:
+  void on_btnBatchDel_Recycle_clicked();
+
+  void on_btnBatchRestore_clicked();
+  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
   void closeEvent(QCloseEvent* event) override;

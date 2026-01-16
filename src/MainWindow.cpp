@@ -2048,7 +2048,7 @@ void MainWindow::on_btnDelNoteRecycle_clicked() {
   if (index < 0) return;
 
   m_NotesList->setTWRBCurrentItem();
-  m_NotesList->on_btnDel_Recycle_clicked();
+  m_NotesList->on_btnBatchDel_Recycle_clicked();
 }
 
 void MainWindow::on_btnRestoreNoteRecycle_clicked() {
