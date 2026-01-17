@@ -9,6 +9,10 @@ Rectangle {
     width: 500
     height: 400
 
+    color: isDark ? "#19232D" : "white"
+
+    property int m_space: 15
+
     function resetQMLToNewState() {
         console.debug("QML端：一键重置为全新状态，清空所有历史痕迹")
 
@@ -279,7 +283,7 @@ Rectangle {
         Rectangle {
             id: listItem
             width: ListView.view.width
-            // 修复绑定循环：依赖外层布局固有高度，避免父子双向依赖
+            // 依赖外层布局固有高度，避免父子双向依赖
             height: idlistElemnet.implicitHeight + 10
             // 直接基于isDark+选中状态适配背景色，Qt端赋值后自动生效
             color: isItemSelected(
@@ -352,22 +356,22 @@ Rectangle {
                 ColumnLayout {
                     id: listCol
                     // 永久预留复选框空间，布局稳定
-                    width: parent.width - itemCheckBox.width - 10
+                    width: parent.width - itemCheckBox.width - m_space
                     spacing: 2
                     Layout.fillWidth: true
                     anchors.leftMargin: 0
                     anchors.rightMargin: 0
 
                     Rectangle {
-                        width: view.width - itemCheckBox.width - 10
+                        width: view.width - itemCheckBox.width - m_space
                         height: 5
                         color: "transparent"
                     }
 
                     Text {
                         id: item0
-                        width: parent.width
-                        Layout.preferredWidth: listItem.width
+                        width: parent.width - itemCheckBox.width - m_space
+                        Layout.preferredWidth: listItem.width - itemCheckBox.width - m_space
                         Layout.alignment: Qt.AlignHCenter
                         horizontalAlignment: Text.AlignLeft
                         verticalAlignment: Text.AlignVCenter
@@ -375,19 +379,18 @@ Rectangle {
                         font.bold: true
                         text: text0
                         // 直接基于isDark+选中状态适配文本颜色
-                        color: isItemSelected(index) ? "white" : getFontColor(
-                                                           ) // 方法内部依赖isDark
-                        leftPadding: 5
-                        rightPadding: 5
+                        color: isItemSelected(index) ? "white" : getFontColor()
+                        leftPadding: 0
+                        rightPadding: 0
                     }
 
                     Text {
                         id: item1
-                        Layout.preferredWidth: listItem.width
+                        Layout.preferredWidth: listItem.width - itemCheckBox.width - m_space
                         Layout.alignment: Qt.AlignHCenter
                         horizontalAlignment: Text.AlignLeft
                         verticalAlignment: Text.AlignVCenter
-                        width: parent.width
+                        width: parent.width - itemCheckBox.width - m_space
                         wrapMode: TextArea.WordWrap
                         color: isItemSelected(index) ? "white" : getFontColor()
                         font.bold: false
@@ -400,10 +403,10 @@ Rectangle {
                     Text {
                         id: item2
                         anchors.rightMargin: 0
-                        Layout.preferredWidth: listItem.width
+                        Layout.preferredWidth: listItem.width - itemCheckBox.width - m_space
                         Layout.alignment: Qt.AlignHCenter
                         horizontalAlignment: Text.AlignLeft
-                        width: parent.width
+                        width: parent.width - itemCheckBox.width - m_space
                         wrapMode: TextArea.WordWrap
                         font.bold: false
                         text: text2
@@ -416,10 +419,10 @@ Rectangle {
                     Text {
                         id: item3
                         anchors.rightMargin: 0
-                        width: parent.width
+                        width: parent.width - itemCheckBox.width - m_space
                         wrapMode: Text.WordWrap
                         elide: Text.ElideRight
-                        Layout.preferredWidth: listItem.width
+                        Layout.preferredWidth: listItem.width - itemCheckBox.width - m_space
                         font.bold: false
                         font.italic: true
                         font.pointSize: item0.font.pointSize - 2
@@ -434,7 +437,7 @@ Rectangle {
                     }
 
                     Rectangle {
-                        width: view.width - itemCheckBox.width - 10
+                        width: view.width - itemCheckBox.width - m_space
                         height: 5
                         color: "transparent"
                     }
@@ -482,6 +485,9 @@ Rectangle {
             fill: parent
             margins: 4
         }
+
+        boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
+
         model: ListModel {
             id: listmain
             ListElement {
@@ -515,9 +521,9 @@ Rectangle {
             policy: ScrollBar.AsNeeded
             width: 8
             // 仅保留背景色适配，滑块使用Qt默认样式，无视觉bug
-            background: Rectangle {
-                color: isDark ? "#2D3748" : "#F0F0F0"
-            }
+            //background: Rectangle {
+            //    color: isDark ? "#2D3748" : "#F0F0F0"
+            //}
         }
     }
 }
