@@ -213,6 +213,8 @@ Steps::~Steps() {
 void Steps::setAddressResolverConnect() {
   if (!isOne) {
     if (isChina) {
+      setMapKey();
+
       connect(addressResolver, &GeoAddressResolver::addressResolved, this,
               [this](const QString& address) {
                 // 过滤完全相同的地址
@@ -225,10 +227,6 @@ void Steps::setAddressResolverConnect() {
                   qDebug() << "位置未变化，跳过记录";
                 }
                 strMapKeyTestInfo = address;
-                setMapKey();
-                isShowRoute = true;
-                mui->qwGpsList->rootContext()->setContextProperty("isShowRoute",
-                                                                  isShowRoute);
 
                 saveRoute(strJsonRouteFile, timeRoute, latRoute, lonRoute,
                           m_lastAddress);
@@ -239,15 +237,20 @@ void Steps::setAddressResolverConnect() {
                 // 处理错误
 
                 strMapKeyTestInfo = error;
-                isShowRoute = false;
-                mui->qwGpsList->rootContext()->setContextProperty("isShowRoute",
-                                                                  isShowRoute);
               });
 
       isOne = true;
 
+      isShowRoute = true;
+      mui->qwGpsList->rootContext()->setContextProperty("isShowRoute",
+                                                        isShowRoute);
+
       // test
       getAddress(25.0217, 98.4464);
+    } else {
+      isShowRoute = false;
+      mui->qwGpsList->rootContext()->setContextProperty("isShowRoute",
+                                                        isShowRoute);
     }
   }
 }
@@ -402,7 +405,7 @@ void Steps::openStepsUI() {
 
   // Route
   if (!isChina) isChina = m_Method->isInChina();
-  // 连接信号槽，获取结果
+  // 再次连接信号槽，防止初始化时连接出现问题
   setAddressResolverConnect();
 }
 
