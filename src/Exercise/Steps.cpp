@@ -239,7 +239,6 @@ void Steps::setAddressResolverConnect() {
                 // 处理错误
 
                 strMapKeyTestInfo = error;
-                setMapKeyError();
                 isShowRoute = false;
                 mui->qwGpsList->rootContext()->setContextProperty("isShowRoute",
                                                                   isShowRoute);
@@ -1113,7 +1112,7 @@ void Steps::updateGetGps() {
       // Speed and Altitude
       int ts = 30;
       if (isGpsTest) ts = 3;
-      if (m_lastSaveSpeedTime.secsTo(currentTime) >= ts) {  // 距离上次超过60秒
+      if (m_lastSaveSpeedTime.secsTo(currentTime) >= ts) {  // 距离上次超过ts秒
         saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
         m_lastSaveSpeedTime = currentTime;  // 更新上次执行时间
       }
@@ -2159,6 +2158,8 @@ QString Steps::getCurrentMonth() {
 }
 
 void Steps::openMapWindow() {
+  setMapKey();
+
 #ifdef Q_OS_ANDROID
   setMapType();
 
@@ -2483,25 +2484,6 @@ void Steps::setMapKey() {
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
   if (activity.isValid()) {
     QString mapKey = arg1;
-    QJniObject jKey = QJniObject::fromString(mapKey);
-
-    // 调用Java的setMapKey方法，参数为String，返回值为void
-    activity.callMethod<void>(
-        "setMapKey",
-        "(Ljava/lang/String;)V",  // JNI签名：接收String参数，无返回值
-        jKey.object<jstring>());
-    qDebug() << "已调用Java层setMapKey方法";
-  }
-
-#endif
-}
-
-void Steps::setMapKeyError() {
-#ifdef Q_OS_ANDROID
-
-  QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  if (activity.isValid()) {
-    QString mapKey = "error";
     QJniObject jKey = QJniObject::fromString(mapKey);
 
     // 调用Java的setMapKey方法，参数为String，返回值为void
@@ -3001,7 +2983,7 @@ void Steps::showSportsChart() {
   // 4.4 添加系列和轴到图表
   chart->addSeries(barSeries);
   // 把【手动配置好的坐标轴】添加到图表中
-  chart->addAxis(axisY, Qt::AlignLeft);  // Y轴(月份)靠左显示，固定写法
+  chart->addAxis(axisY, Qt::AlignLeft);    // Y轴(月份)靠左显示，固定写法
   chart->addAxis(axisX, Qt::AlignBottom);  // X轴(里程)靠下显示，固定写法
   // 让条形系列 绑定 坐标轴
   barSeries->attachAxis(axisY);

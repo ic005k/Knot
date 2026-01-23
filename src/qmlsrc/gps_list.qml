@@ -13,7 +13,6 @@ Rectangle {
     property bool isHighPriority: false
     property string strGpsTime: ""
     property string strTitleColor: "lightgray"
-    property bool isShowRoute: true // 补充缺失的属性
 
     // 新增：获取设备像素比（安卓/iOS关键）
     property real pixelRatio: Screen.pixelRatio > 0 ? Screen.pixelRatio : 1
@@ -1059,7 +1058,7 @@ Rectangle {
                             }
                             // 仅保留日志，移除无效的forceLayout
                             onTextChanged: {
-                                console.log("item7.text 动态更新:", text)
+                                console.log("item7.text 动态更新.")
                             }
                         }
 
@@ -1362,7 +1361,7 @@ Rectangle {
                         id: btnRemarks
                         width: 40
                         height: 40
-                        visible: isShowRoute && listItem.ListView.isCurrentItem
+                        visible: listItem.ListView.isCurrentItem
 
                         contentItem: Image {
                             source: isDark ? "/res/remarks_l.svg" : "/res/remarks.svg"

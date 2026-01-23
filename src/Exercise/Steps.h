@@ -343,7 +343,7 @@ class Steps : public QDialog {
   QStringList readRoute(const QString& file);
 
   bool isInChina(double lat, double lon);
-  void setMapKeyError();
+
   bool isChina = false;
   void setMapType();
   QGeoCoordinate wgs84ToGcj02_cpp(double wgs84Lat, double wgs84Lon);
