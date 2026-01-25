@@ -8,205 +8,183 @@ ShowMessage::ShowMessage(QWidget* parent)
     : QDialog(parent), ui(new Ui::ShowMessage) {
   ui->setupUi(this);
 
-  this->installEventFilter(this);
-  ui->editMsg->viewport()->installEventFilter(this);
-  ui->hframe->hide();
-
+  // 基础设置：无边框+原生模态
   setWindowFlag(Qt::FramelessWindowHint);
-
   setModal(true);
+  setWindowModality(Qt::ApplicationModal);
 
+  // 文本控件设置
   QFont font = this->font();
   font.setBold(true);
   ui->lblTitle->setFont(font);
-  ui->lblTitle->adjustSize();
   ui->lblTitle->setWordWrap(true);
 
-  ui->editMsg->adjustSize();
   ui->editMsg->setReadOnly(true);
-
+  ui->editMsg->setLineWrapMode(QTextEdit::WidgetWidth);
   QScroller::grabGesture(ui->editMsg, QScroller::LeftMouseButtonGesture);
-  m_Method->setSCrollPro(ui->editMsg);
 
-  ui->hframe->setFrameShape(QFrame::HLine);
+  // 主窗口指针初始化
+  mw_one = dynamic_cast<MainWindow*>(parent);
+  if (mw_one == nullptr) {
+    qWarning() << "MainWindow pointer is null!";
+  }
 
-  QString strBtnStyle = ui->btnOk->styleSheet();
-  ui->btnCancel->setStyleSheet(strBtnStyle);
-  ui->btnCopy->setStyleSheet(strBtnStyle);
-  ui->btnDel->setStyleSheet(strBtnStyle);
+  // 移除标题栏下的分割线（彻底隐藏）
+  ui->hframe->hide();
+  ui->hframe->setVisible(false);
+
+  // 按钮样式（保留原逻辑）
+  QString btnStyle = ui->btnOk->styleSheet();
+  ui->btnCancel->setStyleSheet(btnStyle);
+  ui->btnCopy->setStyleSheet(btnStyle);
+  ui->btnDel->setStyleSheet(btnStyle);
+
+  // ========== 核心：恢复最初的事件过滤（确保快捷键生效） ==========
+  // 给消息框自身安装事件过滤器
+  this->installEventFilter(this);
+  // 给文本控件安装事件过滤器（最初的逻辑，确保按键能被捕获）
+  ui->editMsg->viewport()->installEventFilter(this);
+
+  // 初始隐藏
+  this->hide();
 }
 
 ShowMessage::~ShowMessage() { delete ui; }
 
-void ShowMessage::closeEvent(QCloseEvent* event) {
-  Q_UNUSED(event)
-  m_Method->closeGrayWindows();
-}
-
-bool ShowMessage::eventFilter(QObject* watch, QEvent* evn) {
-  if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
-    if (keyEvent->key() == Qt::Key_Back) {
-      on_btnCancel_clicked();
-    }
-
-    if (keyEvent->key() == Qt::Key_Y) {
-      on_btnOk_clicked();
-    }
-
-    if (keyEvent->key() == Qt::Key_N) {
-      on_btnCancel_clicked();
-    }
-
-    return true;
-  }
-
-  if (evn->type() == QEvent::MouseButtonPress) {
-    if (btn_count == 0) {
-      on_btnCancel_clicked();
-    }
-
-    return true;
-  }
-
-  return QWidget::eventFilter(watch, evn);
-}
-
-void ShowMessage::init() {
+void ShowMessage::init(int btnCount) {
   isValue = false;
+  btn_count = btnCount;
 
-  m_Method->showGrayWindows();
-
-  if (!isAndroid) show();
-
-  int x, y, w, h;
-
-#ifdef Q_OS_ANDROID
-  w = mw_one->geometry().width();
-
-#else
-  w = 360;
-  if (w >= mw_one->geometry().width()) {
-    w = mw_one->geometry().width();
+  // 空指针保护：主窗口为空则用默认尺寸
+  int mainW = 360, mainH = 600;
+  if (mw_one) {
+    mainW = mw_one->geometry().width();
+    mainH = mw_one->geometry().height();
   }
 
+  // 1. 宽度逻辑（保留现有规则）
+  int dlgW = 0;
+#ifdef Q_OS_ANDROID
+  dlgW = mainW;
+#else
+  dlgW = 360;
+  if (dlgW >= mainW) dlgW = mainW;
 #endif
+  dlgW -= 20;
 
-  int nEditH = mw_one->m_Todo->getEditTextHeight(ui->editMsg);
+  // 2. 高度逻辑（固定为主窗口2/3）
+  int dlgH = mainH * 2 / 3;
+  if (dlgH < 200) dlgH = 200;
 
-  // 彻底重置布局
-  setFixedSize(0, 0);
-  ui->verticalLayout->invalidate();
-  ui->verticalLayout->activate();
-  ui->horizontalLayout->invalidate();
-  ui->horizontalLayout->activate();
+  // 3. 设置消息框尺寸
+  setFixedSize(dlgW, dlgH);
 
-  int nH = 0;
-  nH = nEditH + ui->btnCancel->height() + ui->lblTitle->height() +
-       ui->hframe->height() + 70;
+  // 4. 居中计算
+  int x = 0, y = 0;
+  if (mw_one) {
+    x = mw_one->geometry().x() + (mainW - dlgW) / 2;
+    y = mw_one->geometry().y() + (mainH - dlgH) / 2;
+  } else {
+    QScreen* primaryScreen = QGuiApplication::primaryScreen();
+    if (primaryScreen) {
+      QRect screenRect = primaryScreen->availableGeometry();
+      x = (screenRect.width() - dlgW) / 2;
+      y = (screenRect.height() - dlgH) / 2;
+    } else {
+      x = 100;
+      y = 100;
+    }
+  }
+  setGeometry(x, y, dlgW, dlgH);
 
-  if (nH > mw_one->height()) nH = mw_one->height() - 10;
-
-  setFixedHeight(nH);
-  setFixedWidth(w - 20);
-
-  w = width();
-  h = nH;
-
-  x = mw_one->geometry().x() + (mw_one->geometry().width() - w) / 2;
-  y = mw_one->geometry().y() + (mw_one->geometry().height() - h) / 2;
-  setGeometry(x, y, w, h);
-
-  if (isAndroid) show();
+  // 滚动条设置
+  ui->editMsg->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 }
 
 bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
-  // btnCount 1:Ok 2:Cancel + Ok
-
+  // 按钮数量处理
   if (btnCount == 2 || btnCount == 3) {
-    msgtxt = msgtxt + "\n\n";
+    msgtxt += "\n\n";
   }
-
   if (btnCount == 1) btnCount = 0;
 
-  if (btnCount == 0) {
-    ui->btnCancel->hide();
-    ui->btnCopy->hide();
-    ui->btnOk->show();
-    ui->btnDel->hide();
-  }
-  if (btnCount == 1) {
-    ui->btnCancel->hide();
-    ui->btnOk->show();
-    ui->btnCopy->hide();
-    ui->btnDel->hide();
-  }
-  if (btnCount == 2) {
-    ui->btnCancel->show();
-    ui->btnOk->show();
-    ui->btnCopy->hide();
-    ui->btnDel->hide();
+  // 按钮显示控制
+  ui->btnCancel->hide();
+  ui->btnOk->hide();
+  ui->btnCopy->hide();
+  ui->btnDel->hide();
+
+  switch (btnCount) {
+    case 0:
+      ui->btnOk->show();
+      break;
+    case 2:
+      ui->btnOk->show();
+      ui->btnCancel->show();
+      break;
+    case 3:
+      ui->btnOk->show();
+      ui->btnCancel->show();
+      ui->btnCopy->show();
+      break;
+    case 4:
+      ui->btnOk->show();
+      ui->btnCancel->show();
+      ui->btnCopy->show();
+      ui->btnDel->show();
+      break;
+    default:
+      ui->btnOk->show();
+      break;
   }
 
-  if (btnCount == 3) {
-    ui->btnCancel->show();
-    ui->btnOk->show();
-    ui->btnCopy->show();
-    ui->btnDel->hide();
-  }
-
-  if (btnCount == 4) {
-    ui->btnCancel->show();
-    ui->btnOk->show();
-    ui->btnCopy->show();
-    ui->btnDel->show();
-  }
-
-  btn_count = btnCount;
-
+  // 设置标题和文本
   ui->lblTitle->setText(title);
   ui->editMsg->setText(msgtxt);
 
-  show();
-  on_btnCancel_clicked();
-  init();
+  // 初始化尺寸+居中
+  init(btnCount);
 
-  while (!isHidden()) QCoreApplication::processEvents();
+  // 全程用exec()
+  this->exec();
 
   return isValue;
 }
 
+// 按钮点击逻辑
 void ShowMessage::on_btnCancel_clicked() {
   isValue = false;
-  close();
+  close();  // 回归最初的close()，而非reject()，确保逻辑一致
 }
 
 void ShowMessage::on_btnOk_clicked() {
   isValue = true;
-  close();
+  close();  // 回归最初的close()
 }
 
 void ShowMessage::on_btnCopy_clicked() {
   QClipboard* clipboard = QApplication::clipboard();
-  clipboard->setText(copyText);
+  if (clipboard) {
+    clipboard->setText(copyText);
+  }
   isValue = false;
-  close();
+  close();  // 回归最初的close()
 }
 
 void ShowMessage::on_btnDel_clicked() {
   close();
-  auto msg = std::make_unique<ShowMessage>(this);
-  if (msg->showMsg("Knot", tr("Delete this link?"), 2)) {
+  auto delMsg = std::make_unique<ShowMessage>(mw_one);
+  if (delMsg->showMsg("Knot", tr("Delete this link?"), 2) && m_Notes) {
     m_Notes->delLink(copyText);
   }
 }
 
+// 保留AutoFeed方法
 QString ShowMessage::AutoFeed(QString text, int nCharCount) {
   QString strText = text;
   int AntoIndex = 1;
   if (!strText.isEmpty()) {
-    for (int i = 1; i < strText.size() + 1; i++)  // 25个字符换一行
-    {
+    for (int i = 1; i < strText.size() + 1; i++) {
       if (i == nCharCount * AntoIndex + AntoIndex - 1) {
         strText.insert(i, "\n");
         AntoIndex++;
@@ -216,4 +194,39 @@ QString ShowMessage::AutoFeed(QString text, int nCharCount) {
   return strText;
 }
 
+// ========== 完全回归最初的eventFilter逻辑（快捷键核心） ==========
+bool ShowMessage::eventFilter(QObject* watch, QEvent* evn) {
+  // 最初的按键释放事件处理（100%复刻）
+  if (evn->type() == QEvent::KeyRelease) {
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
+    // Y键 → 确认
+    if (keyEvent->key() == Qt::Key_Y) {
+      on_btnOk_clicked();
+      return true;  // 拦截事件，防止穿透
+    }
+    // N键 → 取消
+    if (keyEvent->key() == Qt::Key_N) {
+      on_btnCancel_clicked();
+      return true;
+    }
+    // Back键 → 取消
+    if (keyEvent->key() == Qt::Key_Back) {
+      on_btnCancel_clicked();
+      return true;
+    }
+  }
+
+  // 最初的鼠标点击事件处理（保留）
+  if (evn->type() == QEvent::MouseButtonPress) {
+    if (btn_count == 0) {
+      on_btnCancel_clicked();
+      return true;
+    }
+  }
+
+  // 传递未处理的事件
+  return QWidget::eventFilter(watch, evn);
+}
+
+// 空实现
 void ShowMessage::on_editMsg_textChanged() {}
