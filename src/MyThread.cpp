@@ -236,8 +236,13 @@ void MainWindow::importDataDone() {
                    tr("Invalid data file.") + "\n\n" +
                        tr("Or the operation is canceled by the user."),
                    1);
+
+      return;
     }
   }
+
+  auto msg = std::make_unique<ShowMessage>(this);
+  msg->showMsg("Knot", tr("Data import was successful."), 1);
 }
 
 BakDataThread::BakDataThread(QObject* parent) : QThread{parent} {}
@@ -248,30 +253,42 @@ void BakDataThread::run() {
 }
 
 void MainWindow::bakDataDone() {
+  // 适配 Qt 6.6.3：替换 uiThread() 为兼容写法
+  QThread* mainThread = QCoreApplication::instance()->thread();
+  if (QThread::currentThread() != mainThread) {
+    QMetaObject::invokeMethod(this, &MainWindow::bakDataDone,
+                              Qt::QueuedConnection);
+    return;
+  }
+
   closeProgress();
 
-  if (errorInfo != "") {
-    auto msg = std::make_unique<ShowMessage>(this);
+  if (!errorInfo.isEmpty()) {
+    ShowMessage* msg = new ShowMessage(this);
     msg->showMsg("Knot", errorInfo, 1);
+    msg->setAttribute(Qt::WA_DeleteOnClose);
     return;
   }
 
   if (isUpData) {
     m_CloudBackup->uploadData();
   } else {
-    if (QFile(zipfile).exists()) {
-      m_Preferences->appendBakFile(
-          QDateTime::currentDateTime().toString("yyyy-M-d HH:mm:ss") + "\n" +
-              strLatestModify + "\n" +
-              m_Method->getFileSize(QFile(zipfile).size(), 2),
-          zipfile);
+    QFile zipFile(zipfile);
+    if (zipFile.exists()) {
+      QString fileSize = m_Method->getFileSize(zipFile.size(), 2);
+      // 使用多参数版 arg()
+      QString bakInfo =
+          QString("%1\n%2\n%3")
+              .arg(QDateTime::currentDateTime().toString("yyyy-M-d HH:mm:ss"),
+                   strLatestModify, fileSize);
 
-      auto msg = std::make_unique<ShowMessage>(this);
-      msg->showMsg("Knot",
-                   tr("The data was exported successfully.") + "\n\n" +
-                       zipfile + "\n\n" +
-                       m_Method->getFileSize(QFile(zipfile).size(), 2),
-                   1);
+      m_Preferences->appendBakFile(bakInfo, zipfile);
+
+      ShowMessage* msg = new ShowMessage(this);
+      QString msgContent = tr("The data was exported successfully.") + "\n\n" +
+                           zipfile + "\n\n" + fileSize;
+      msg->showMsg("Knot", msgContent, 1);
+      msg->setAttribute(Qt::WA_DeleteOnClose);
     }
   }
 

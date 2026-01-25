@@ -116,6 +116,9 @@ void CloudBackup::uploadData() {
           2))
     return;
 
+  mui->btnWebDAVBackup->setEnabled(false);
+  mui->btnWebDAVRestore->setEnabled(false);
+
   if (mui->chkWebDAV->isChecked()) {
     QString url = getWebDAVArgument();
     createDirectory(url, "Knot/");
@@ -218,6 +221,9 @@ void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
     file->close();
     reply->deleteLater();
     manager->deleteLater();
+
+    mui->btnWebDAVBackup->setEnabled(true);
+    mui->btnWebDAVRestore->setEnabled(true);
   });
 }
 
@@ -384,6 +390,8 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
 void CloudBackup::resetProgBar() {
   mui->progressBar->setMinimum(0);
   mui->progressBar->setMaximum(100);
+  mui->btnWebDAVRestore->setEnabled(true);
+  mui->btnWebDAVBackup->setEnabled(true);
 }
 
 // 加密函数（返回Base64编码字符串）
@@ -1057,7 +1065,10 @@ void CloudBackup::webDAVRestoreData() {
   USERNAME = mui->editWebDAVUsername->text().trimmed();
   APP_PASSWORD = mui->editWebDAVPassword->text().trimmed();
   downloadFile("Knot/memo.zip", filePath);
+
   mui->progressBar->setValue(0);
+  mui->btnWebDAVRestore->setEnabled(false);
+  mui->btnWebDAVBackup->setEnabled(false);
 }
 
 bool CloudBackup::checkWebDAVConnection() {

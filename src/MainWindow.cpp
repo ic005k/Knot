@@ -1599,7 +1599,10 @@ void MainWindow::on_btnSelText() {
 }
 
 void MainWindow::on_btnUpload_clicked() {
-  if (!mui->btnReader->isEnabled()) return;
+  if (!mui->btnReader->isEnabled() || !mui->btnWebDAVBackup->isEnabled() ||
+      !mui->btnWebDAVRestore->isEnabled())
+    return;
+
   m_CloudBackup->startBakData();
 }
 
