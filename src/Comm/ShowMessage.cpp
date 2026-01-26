@@ -21,6 +21,7 @@ ShowMessage::ShowMessage(QWidget* parent)
 
   ui->editMsg->setReadOnly(true);
   ui->editMsg->setLineWrapMode(QTextEdit::WidgetWidth);
+  ui->editMsg->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleSmall);
   QScroller::grabGesture(ui->editMsg, QScroller::LeftMouseButtonGesture);
 
   // 主窗口指针初始化
@@ -72,8 +73,12 @@ void ShowMessage::init(int btnCount) {
 #endif
   dlgW -= 20;
 
-  // 2. 高度逻辑（固定为主窗口2/3）
-  int dlgH = mainH * 2 / 3;
+  // 2. 高度逻辑（固定为主窗口3/4）
+  int dlgH;
+  if (isAndroid)
+    dlgH = mainH * 3 / 4;
+  else
+    dlgH = mainH * 2 / 3;
   if (dlgH < 200) dlgH = 200;
 
   // 3. 设置消息框尺寸
