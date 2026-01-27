@@ -651,7 +651,7 @@ void Notes::on_editFind_textChanged(const QString& arg1) {
 bool Notes::selectPDFFormat(QPrinter* printer) {
   QSettings settings;
 
-  // select the page size
+  // 选择纸张尺寸
   QStringList pageSizeStrings;
   pageSizeStrings << QStringLiteral("A0") << QStringLiteral("A1")
                   << QStringLiteral("A2") << QStringLiteral("A3")
@@ -664,23 +664,24 @@ bool Notes::selectPDFFormat(QPrinter* printer) {
             << QPageSize::A4 << QPageSize::A5 << QPageSize::A6 << QPageSize::A7
             << QPageSize::A8 << QPageSize::A9 << QPageSize::Letter;
 
-  PrintPDF* idlg1 = new PrintPDF(this);
-  idlg1->setFocus();
+  // 关键：使用局部对象，执行完自动析构
+  PrintPDF dlg1(this);
   QString pageSizeString =
-      idlg1->getItem(tr("Page size"), tr("Page size"), pageSizeStrings, 4);
-
-  /*QString pageSizeString = QInputDialog::getItem(
-      this, tr("Page size"), tr("Page size:"), pageSizeStrings,
-      settings.value(QStringLiteral("Printer/NotePDFExportPageSize"), 4)
-          .toInt(),
-      false, &ok);*/
+      dlg1.getItem(tr("Page size"), tr("Page size"), pageSizeStrings, 4);
 
   if (pageSizeString.isEmpty()) {
+    // 取消时主动清理遮罩层
+    if (m_Method) {
+      m_Method->closeGrayWindows();
+    }
     return false;
   }
 
   int pageSizeIndex = pageSizeStrings.indexOf(pageSizeString);
   if (pageSizeIndex == -1) {
+    if (m_Method) {
+      m_Method->closeGrayWindows();
+    }
     return false;
   }
 
@@ -689,29 +690,28 @@ bool Notes::selectPDFFormat(QPrinter* printer) {
                     pageSizeIndex);
   printer->setPageSize(pageSize);
 
-  // select the orientation
+  // 选择打印方向
   QStringList orientationStrings;
   orientationStrings << tr("Portrait") << tr("Landscape");
   QList<QPageLayout::Orientation> orientations;
   orientations << QPageLayout::Portrait << QPageLayout::Landscape;
 
-  PrintPDF* idlg2 = new PrintPDF(this);
-  idlg2->setFocus();
-  QString orientationString = idlg2->getItem(
-      tr("Orientation"), tr("Orientation"), orientationStrings, 0);
-
-  /*QString orientationString = QInputDialog::getItem(
-      this, tr("Orientation"), tr("Orientation:"), orientationStrings,
-      settings.value(QStringLiteral("Printer/NotePDFExportOrientation"), 0)
-          .toInt(),
-      false, &ok);*/
+  PrintPDF dlg2(this);
+  QString orientationString =
+      dlg2.getItem(tr("Orientation"), tr("Orientation"), orientationStrings, 0);
 
   if (orientationString.isEmpty()) {
+    if (m_Method) {
+      m_Method->closeGrayWindows();
+    }
     return false;
   }
 
   int orientationIndex = orientationStrings.indexOf(orientationString);
   if (orientationIndex == -1) {
+    if (m_Method) {
+      m_Method->closeGrayWindows();
+    }
     return false;
   }
 
@@ -732,6 +732,9 @@ bool Notes::selectPDFFormat(QPrinter* printer) {
   int ret = dialog.exec();
 
   if (ret != QDialog::Accepted) {
+    if (m_Method) {
+      m_Method->closeGrayWindows();
+    }
     return false;
   }
 
@@ -739,15 +742,23 @@ bool Notes::selectPDFFormat(QPrinter* printer) {
 #endif
 
   if (pdfFileName.isEmpty()) {
+    if (m_Method) {
+      m_Method->closeGrayWindows();
+    }
     return false;
   }
 
   if (QFileInfo(pdfFileName).suffix().isEmpty()) {
-    fileName.append(QLatin1String(".pdf"));
+    pdfFileName.append(QLatin1String(".pdf"));
   }
 
   printer->setOutputFormat(QPrinter::PdfFormat);
   printer->setOutputFileName(pdfFileName);
+
+  // 最终兜底：确保遮罩层被清理
+  if (m_Method) {
+    m_Method->closeGrayWindows();
+  }
 
   return true;
 }

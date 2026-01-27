@@ -413,7 +413,8 @@ Rectangle {
                 }
 
                 onDoubleClicked: {
-                    mw_one.on_btnRename_clicked()
+
+                    // mw_one.on_btnRename_clicked()
                 }
             }
         }
