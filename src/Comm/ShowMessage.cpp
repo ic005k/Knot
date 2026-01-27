@@ -8,6 +8,8 @@ ShowMessage::ShowMessage(QWidget* parent)
     : QDialog(parent), ui(new Ui::ShowMessage) {
   ui->setupUi(this);
 
+  m_MsgBox = this;
+
   // 基础设置：无边框+原生模态
   setWindowFlag(Qt::FramelessWindowHint);
   setModal(true);
@@ -50,7 +52,12 @@ ShowMessage::ShowMessage(QWidget* parent)
   this->hide();
 }
 
-ShowMessage::~ShowMessage() { delete ui; }
+ShowMessage::~ShowMessage() {
+  delete ui;
+  if (m_MsgBox != nullptr) {
+    m_MsgBox = nullptr;
+  }
+}
 
 void ShowMessage::init(int btnCount) {
   isValue = false;

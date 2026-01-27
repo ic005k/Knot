@@ -61,6 +61,7 @@ inline CategoryList* m_CategoryList;
 inline ColorDialog* colorDlg;
 inline PrintPDF* m_PrintPDF;
 inline QTreeWidget *twrb, *tw;
+inline ShowMessage* m_MsgBox = nullptr;
 
 inline TextEditToolbar* textToolbar = nullptr;
 inline TextEditToolbar* textToolbarDynamic = nullptr;

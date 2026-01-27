@@ -166,6 +166,13 @@ static void JavaNotify_15() {
     }
   }
 
+  if (m_MsgBox != nullptr) {
+    if (m_MsgBox->isVisible()) {
+      m_MsgBox->close();
+      return;
+    }
+  }
+
   if (m_Method->m_EnColorPicker != nullptr) {
     if (m_Method->m_EnColorPicker->isVisible()) {
       m_Method->m_EnColorPicker->close();
