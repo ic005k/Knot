@@ -32,7 +32,6 @@ class PrintPDF : public QDialog {
 
  private:
   QString strValue;
-  static PrintPDF* m_PrintPDF;
 };
 
 #endif  // PRINTPDF_H

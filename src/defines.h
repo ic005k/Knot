@@ -59,7 +59,7 @@ inline Steps* m_Steps;
 inline QTabWidget* tabData;
 inline CategoryList* m_CategoryList;
 inline ColorDialog* colorDlg;
-inline PrintPDF* m_PrintPDF;
+inline PrintPDF* m_PrintPDF = nullptr;
 inline QTreeWidget *twrb, *tw;
 inline ShowMessage* m_MsgBox = nullptr;
 

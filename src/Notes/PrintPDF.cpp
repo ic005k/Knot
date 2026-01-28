@@ -8,8 +8,6 @@
 #include <QApplication>
 #include <QScreen>
 
-PrintPDF* PrintPDF::m_PrintPDF = nullptr;
-
 PrintPDF::PrintPDF(QWidget* parent) : QDialog(parent), ui(new Ui::PrintPDF) {
   ui->setupUi(this);
   setWindowFlag(Qt::FramelessWindowHint);
@@ -19,7 +17,7 @@ PrintPDF::PrintPDF(QWidget* parent) : QDialog(parent), ui(new Ui::PrintPDF) {
 
   m_PrintPDF = this;
 
-  // 修复：Qt 6 获取屏幕可用尺寸（替代QApplication::desktop()）
+  // Qt 6 获取屏幕可用尺寸（替代QApplication::desktop()）
   QScreen* screen = this->screen();  // 获取当前窗口所在屏幕
   if (!screen) {
     screen = QGuiApplication::primaryScreen();  // 兜底：使用主屏
@@ -49,6 +47,8 @@ PrintPDF::~PrintPDF() {
   if (m_Method) {
     m_Method->closeGrayWindows();
   }
+
+  if (m_PrintPDF != nullptr) m_PrintPDF = nullptr;
 }
 
 // 重写hideEvent：确保隐藏时清理遮罩层
