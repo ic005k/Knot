@@ -1500,6 +1500,8 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
         msg->showMsg("Knot", errorInfo, 1);
         isPasswordError = true;
         QFile::remove(zFile);
+
+        break;
         return;
       }
 
@@ -1547,6 +1549,8 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
           isPasswordError = true;
           QFile::remove(zFile);
           QFile::remove(privateDir + "KnotData/mainnotes.json.zip");
+
+          break;
           return;
         }
       }
@@ -1592,6 +1596,8 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
           isPasswordError = true;
           QFile::remove(zFile);
           QFile::remove(privateDir + "KnotData/mainnotes.json.zip");
+
+          break;
           return;
         }
       }

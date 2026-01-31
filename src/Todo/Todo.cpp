@@ -1574,6 +1574,7 @@ void Todo::openTodo() {
                         msg->showMsg("Knot", errorInfo, 1);
                         isPasswordError = true;
                         QFile::remove(zFile);
+
                         return;
                       }
 
