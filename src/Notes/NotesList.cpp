@@ -1664,12 +1664,22 @@ void NotesList::clearMD_Pic() {
       if (imgFile.remove()) {
         qDebug() << "已删除未使用的图片:" << imgFilePath;
         deletedCount++;
+
+        QString image_file;
+        image_file = "KnotData/memo/images/" + imgFileName;
+        needDelWebDAVFiles.append(image_file);
       } else {
         qWarning() << "删除失败:" << imgFilePath
                    << "原因:" << imgFile.errorString();
         failedCount++;
       }
     }
+  }
+
+  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+    int count = needDelWebDAVFiles.count();
+    if (count > 0) m_Notes->delRemoteFile(needDelWebDAVFiles);
+    m_Method->setAccessCount(needDelWebDAVFiles.count());
   }
 
   qDebug() << "图片清理完成 - 已删除:" << deletedCount

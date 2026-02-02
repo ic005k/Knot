@@ -9,6 +9,8 @@ import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.BroadcastReceiver;
+// 导入ClipData类（处理多选数据）
+import android.content.ClipData;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -174,7 +176,8 @@ import org.ini4j.Wini;
 
 public class NoteEditor
     extends Activity
-    implements View.OnClickListener, Application.ActivityLifecycleCallbacks {
+    implements View.OnClickListener, Application.ActivityLifecycleCallbacks
+{
 
     private static final int REQUEST_CAMERA_PERMISSION = 1001;
 
@@ -1335,7 +1338,17 @@ public class NoteEditor
 
     private void openFilePicker() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.setType("image/*"); // "text/plain" 只显示 txt 文件
+        intent.setType("image/*");
+        // 关键：添加多选标记
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        // 可选：指定文件类型为图片（更精准）
+        String[] mimeTypes = {
+            "image/jpeg",
+            "image/png",
+            "image/gif",
+            "image/bmp",
+        };
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
         startActivityForResult(intent, REQUEST_PICK_IMAGE);
     }
 
@@ -1348,26 +1361,53 @@ public class NoteEditor
         super.onActivityResult(requestCode, resultCode, data);
 
         // 区分拍照和文件选择的请求码
-        if (
-            resultCode == RESULT_OK &&
-            (requestCode == REQUEST_PICK_IMAGE ||
-                requestCode == REQUEST_TAKE_PHOTO)
-        ) {
-            Uri selectedFileUri;
+        if (resultCode == RESULT_OK) {
+            // 1. 本地选择图片（单张/多选）
             if (requestCode == REQUEST_PICK_IMAGE) {
-                selectedFileUri = data.getData();
-            } else {
-                selectedFileUri = photoUri;
+                // 核心修改：只定义一次固定路径（多选/单选共享）
+                final String fixedImagePath =
+                    "/storage/emulated/0/.Knot/receive_share_pic.png";
+
+                // 情况1：多选模式（ClipData有值）
+                if (data.getClipData() != null) {
+                    ClipData clipData = data.getClipData();
+                    int count = clipData.getItemCount();
+                    // 循环处理每张选中的图片
+                    for (int i = 0; i < count; i++) {
+                        Uri selectedFileUri = clipData.getItemAt(i).getUri();
+
+                        // 关键：先删除旧的固定路径文件（避免残留）
+                        File oldFile = new File(fixedImagePath);
+                        if (oldFile.exists()) {
+                            oldFile.delete();
+                        }
+
+                        // 拷贝当前图片到固定路径（覆盖/新建）
+                        readFileFromUriToLocal(selectedFileUri, fixedImagePath);
+                        // 校正图片方向（复用原有逻辑）
+                        correctImageOrientation(fixedImagePath);
+                        // 处理路径并触发Native方法（逐张触发）
+                        handleFilePath(fixedImagePath);
+                    }
+                }
+                // 情况2：单选模式（兼容原始逻辑，直接使用已定义的fixedImagePath）
+                else if (data.getData() != null) {
+                    Uri selectedFileUri = data.getData();
+                    // 不再重新定义，直接使用外层的fixedImagePath
+                    readFileFromUriToLocal(selectedFileUri, fixedImagePath);
+                    correctImageOrientation(fixedImagePath);
+                    handleFilePath(fixedImagePath);
+                }
             }
-
-            String filePath = "/storage/emulated/0/.Knot/receive_share_pic.png";
-            readFileFromUriToLocal(selectedFileUri, filePath);
-
-            // 新增：校正图片方向
-            correctImageOrientation(filePath);
-
-            // 处理文件路径
-            handleFilePath(filePath);
+            // 2. 拍照逻辑（原始逻辑完全保留，无变化）
+            else if (requestCode == REQUEST_TAKE_PHOTO) {
+                Uri selectedFileUri = photoUri;
+                String fixedImagePath =
+                    "/storage/emulated/0/.Knot/receive_share_pic.png";
+                readFileFromUriToLocal(selectedFileUri, fixedImagePath);
+                correctImageOrientation(fixedImagePath);
+                handleFilePath(fixedImagePath);
+            }
         }
     }
 
