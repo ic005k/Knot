@@ -14,7 +14,7 @@ Rectangle {
     property string strGpsTime: ""
     property string strTitleColor: "lightgray"
 
-    // 新增：获取设备像素比（安卓/iOS关键）
+    // 获取设备像素比（安卓/iOS关键）
     property real pixelRatio: Screen.pixelRatio > 0 ? Screen.pixelRatio : 1
     property real baseFontSize: (Qt.platform.os
                                  === "android") ? (20 * pixelRatio) : (9 * pixelRatio)
@@ -589,7 +589,7 @@ Rectangle {
                           })
     }
 
-    function insertItem(curIndex, t0, t1, t2, t3, t4, t5, t6, t7, speedData, altitudeData) {
+    function insertItem_663(curIndex, t0, t1, t2, t3, t4, t5, t6, t7, speedData, altitudeData) {
         // 处理速度数据（原有逻辑保持不变）
         var speedArray = []
         if (speedData && speedData.hasOwnProperty("count")
@@ -658,6 +658,95 @@ Rectangle {
         var insertedItem = view.model.get(curIndex)
         console.log("模型中存储的速度JSON:", insertedItem.speedData)
         console.log("模型中存储的海拔JSON:", insertedItem.altitudeData) // 新增日志
+    }
+
+    function insertItem(curIndex, t0, t1, t2, t3, t4, t5, t6, t7, speedData, altitudeData) {
+        // ========== 完全保留旧实现的兼容逻辑（count+get 对象 + 普通数组） ==========
+        // 处理速度数据（复用 663 逻辑，仅优化变量命名和类型校验）
+        var speedArray = []
+        if (speedData) {
+            // 兼容 Qt 模型对象（有 count 属性 + get 方法）
+            if (speedData.hasOwnProperty("count")
+                    && typeof speedData.get === "function") {
+                for (var i = 0; i < speedData.count; i++) {
+                    var item = speedData.get(i)
+                    var value = typeof item
+                            === "object" ? (item.value !== undefined ? item.value : item) : item
+                    value = Number(value)
+                    if (!isNaN(value)) {
+                        speedArray.push(value)
+                    }
+                }
+            } // 兼容普通数组 / QJSValue 数组
+            else if (Array.isArray(speedData)
+                     || (speedData.length > 0
+                         && typeof speedData !== "string")) {
+                for (var j = 0; j < speedData.length; j++) {
+                    var val = Number(speedData[j])
+                    if (!isNaN(val)) {
+                        speedArray.push(val)
+                    }
+                }
+            }
+        }
+
+        // 处理海拔数据（完全复用速度数据的兼容逻辑）
+        var altitudeArray = []
+        if (altitudeData) {
+            if (altitudeData.hasOwnProperty("count")
+                    && typeof altitudeData.get === "function") {
+                for (var k = 0; k < altitudeData.count; k++) {
+                    var altItem = altitudeData.get(k)
+                    var altValue = typeof altItem
+                            === "object" ? (altItem.value
+                                            !== undefined ? altItem.value : altItem) : altItem
+                    altValue = Number(altValue)
+                    if (!isNaN(altValue)) {
+                        altitudeArray.push(altValue)
+                    }
+                }
+            } else if (Array.isArray(altitudeData)
+                       || (altitudeData.length > 0
+                           && typeof altitudeData !== "string")) {
+                for (var l = 0; l < altitudeData.length; l++) {
+                    var altVal = Number(altitudeData[l])
+                    if (!isNaN(altVal)) {
+                        altitudeArray.push(altVal)
+                    }
+                }
+            }
+        }
+
+        // ========== 保留旧实现的日志和 JSON 序列化逻辑（适配 Canvas 渲染） ==========
+        console.log("insert阶段转换后的速度数组:", speedArray)
+        console.log("insert阶段转换后的海拔数组:", altitudeArray)
+
+        var speedJson = JSON.stringify(speedArray)
+        var altitudeJson = JSON.stringify(altitudeArray)
+        console.log("模型中存储的速度JSON:", speedJson)
+        console.log("模型中存储的海拔JSON:", altitudeJson)
+
+        // ========== 修复模型引用 + 字段名（完全对齐旧实现） ==========
+        // 1. 模型改为 view.model（和旧实现一致，对应 ListView 的实际模型）
+        // 2. 文本字段保留 text0-text7（和代理中的 text0/text1 等绑定）
+        // 3. 数据字段保留 speedData/altitudeData（和 Canvas onPaint 解析逻辑一致）
+        view.model.insert(curIndex, {
+                              "text0": t0,
+                              "text1": t1,
+                              "text2": t2,
+                              "text3": t3,
+                              "text4": t4,
+                              "text5": t5,
+                              "text6": t6,
+                              "text7": t7,
+                              "speedData": speedJson,
+                              "altitudeData": altitudeJson
+                          })
+
+        // 验证插入结果（可选，便于调试）
+        var insertedItem = view.model.get(curIndex)
+        console.log("插入后验证 - speedData:", insertedItem.speedData,
+                    "altitudeData:", insertedItem.altitudeData)
     }
 
     function updateItem(curIndex, t0, t1, t2, t3, t4, t5, t6, height) {
@@ -932,7 +1021,7 @@ Rectangle {
                         id: speedRibbon
 
                         // 与标题宽度一致
-                        //Layout.fillWidth: true
+                        //Layout.fillWidth: true // 新增：强制占满父布局宽度
                         implicitWidth: Math.min(listItem.width - 20,
                                                 parent.width) // 动态计算隐式宽度
                         Layout.preferredHeight: (Qt.platform.os === "android") ? (40) : (20)
@@ -946,6 +1035,10 @@ Rectangle {
                             const speedJson = model.speedData || "[]"
                             let speedArray = []
                             try {
+                                // 新增：先清理无效字符，再解析 去掉末尾逗号
+                                const cleanJson = speedJson.replace(/,\s*$/,
+                                                                    "").trim()
+
                                 speedArray = JSON.parse(speedJson)
                                 speedArray = speedArray.filter(
                                             s => typeof s === "number"

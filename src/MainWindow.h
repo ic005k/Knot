@@ -72,7 +72,6 @@
 #include "src/Comm/ReceiveShare.h"
 #include "src/Comm/ShowMessage.h"
 #include "src/Comm/TextEditToolbar.h"
-#include "src/Comm/inputmethodreset.h"
 #include "src/EditRecord.h"
 #include "src/Exercise/Steps.h"
 #include "src/Exercise/StepsOptions.h"

@@ -1307,7 +1307,8 @@ void Steps::refreshMotionData() {
   }
 }
 
-void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
+// Qt6.6.3的旧有实现
+/*void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
                           QString t3, QString t4, QString t5, QString t6,
                           QString t7, QVariantList speedData,
                           QVariantList altitudeData) {
@@ -1331,6 +1332,73 @@ void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
       Q_ARG(QVariant, speedData),    // 速度数据（QVariantList）
       Q_ARG(QVariant, altitudeData)  // 海拔数据
   );
+}*/
+
+// Qt6.10.2的实现
+void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
+                          QString t3, QString t4, QString t5, QString t6,
+                          QString t7, QVariantList speedData,
+                          QVariantList altitudeData) {
+  QQuickItem* root = mui->qwGpsList->rootObject();
+  if (!root) {
+    qWarning() << "rootObject is null!";
+    return;
+  }
+
+  // ==========
+  // 关键修改1：获取QML引擎，将QVariantList转为QJSValue（6.10.2兼容）====
+  QQmlEngine* engine = qmlEngine(root);  // 从QQuickItem获取所属的QML引擎
+  if (!engine) {
+    qCritical() << "无法获取QML引擎！";
+    return;
+  }
+
+  // 速度数据转QJSValue数组（QML可识别）
+  QJSValue speedJsArray = engine->newArray();
+  for (int i = 0; i < speedData.size(); ++i) {
+    // 显式转double，避免类型兼容问题
+    speedJsArray.setProperty(i, engine->toScriptValue(speedData[i].toDouble()));
+  }
+
+  // 海拔数据转QJSValue数组
+  QJSValue altitudeJsArray = engine->newArray();
+  for (int i = 0; i < altitudeData.size(); ++i) {
+    altitudeJsArray.setProperty(
+        i, engine->toScriptValue(altitudeData[i].toDouble()));
+  }
+
+  // ========== 关键修改2：补充Qt::DirectConnection，校验调用结果 ==========
+  // 调用QML的insertItem，参数要和QML完全匹配（11个）
+  bool invokeSuccess = QMetaObject::invokeMethod(
+      root, "insertItem",
+      Qt::DirectConnection,       // 强制同步调用，避免异步导致的问题
+      Q_ARG(QVariant, curIndex),  // 参数1：索引
+      Q_ARG(QVariant, t0),        // 参数2：text0
+      Q_ARG(QVariant, t1),        // 参数3：text1
+      Q_ARG(QVariant, t2),        // 参数4：text2
+      Q_ARG(QVariant, t3),        // 参数5：text3
+      Q_ARG(QVariant, t4),        // 参数6：text4
+      Q_ARG(QVariant, t5),        // 参数7：text5
+      Q_ARG(QVariant, t6),        // 参数8：text6
+      Q_ARG(QVariant, t7),        // 参数9：text7
+      Q_ARG(QVariant,
+            speedJsArray.toVariant()),  // 修正：QJSValue调用toVariant()
+      Q_ARG(QVariant, altitudeJsArray.toVariant())  // 修正：同上
+  );
+
+  // ========== 关键修改3：打印日志，定位问题 ==========
+  if (invokeSuccess) {
+    qDebug() << "✅ 调用QML insertItem成功！";
+    qDebug() << "   传入速度数据长度：" << speedData.size() << "数据："
+             << speedData;
+    qDebug() << "   传入海拔数据长度：" << altitudeData.size() << "数据："
+             << altitudeData;
+  } else {
+    qCritical() << "❌ 调用QML insertItem失败！请检查：";
+    qCritical() << "   1. QML中insertItem函数名是否拼写正确（大小写敏感）";
+    qCritical() << "   2. 参数个数是否匹配（需要11个参数）";
+    qCritical() << "   3. rootObject是否正确指向包含insertItem的QML对象";
+  }
 }
 
 void Steps::updateGpsList(int curIndex, QString t0, QString t1, QString t2,
@@ -1969,8 +2037,31 @@ void Steps::saveMovementType() {
 void Steps::setVibrate() {
 #ifdef Q_OS_ANDROID
 
-  QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  activity.callMethod<void>("com.x/MyActivity", "setVibrate", "()V");
+  // QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  // activity.callMethod<void>("com.x/MyActivity", "setVibrate", "()V");
+
+  // 1. 获取当前Android Activity的JNI对象
+  QJniObject activity = QJniObject::callStaticObjectMethod(
+      "org/qtproject/qt/android/QtNative", "activity",
+      "()Landroid/app/Activity;");
+
+  if (activity.isValid()) {
+    // 关键修改：Qt 6 使用 QJniEnvironment 替代 QAndroidJniEnvironment
+    QJniEnvironment env;
+
+    // 调用目标方法（修正后的参数格式）
+    activity.callMethod<void>("setVibrate",  // 方法名
+                              "()V"          // 方法签名（无参无返回值）
+    );
+
+    // 检查JNI调用异常（逻辑不变）
+    if (env->ExceptionCheck()) {
+      env->ExceptionDescribe();  // 打印异常详情
+      env->ExceptionClear();     // 清除异常状态
+    }
+  } else {
+    qWarning() << "获取Android Activity JNI对象失败！";
+  }
 
 #endif
 }
