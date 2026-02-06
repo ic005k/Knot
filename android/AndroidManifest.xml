@@ -107,6 +107,11 @@
             android:value="true"
         />
 
+        <meta-data
+            android:name="android.app.extractStyle"
+            android:value="false"
+        />
+
         <!-- singleTop singleTask standard -->
         <activity
             android:name="com.x.MyActivity"

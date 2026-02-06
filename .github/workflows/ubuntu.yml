@@ -34,7 +34,7 @@ jobs:
         orgName: Knot
         ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
 
-        QT_VERSION: 6.6.3
+        QT_VERSION: 6.10.2
         QT_ARCH: gcc_64
         QT_INSTALL_DIR: /opt/qt/QT_VERSION/gcc_64
         QT_INSTALL_QML: /opt/qt/QT_VERSION/gcc_64/qml
@@ -150,7 +150,7 @@ jobs:
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
                   -unsupported-allow-new-glibc \
                   -qmldir=/home/runner/work/Knot/Knot/src/qmlsrc \
-                  -qmake=/home/runner/work/Knot/Qt/6.6.3/gcc_64/bin/qmake \
+                  -qmake=/home/runner/work/Knot/Qt/6.10.2/gcc_64/bin/qmake \
                   -appimage \
                   -extra-plugins=platforminputcontexts
 
