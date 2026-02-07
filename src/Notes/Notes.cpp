@@ -797,7 +797,9 @@ void Notes::on_btnPDF_clicked() {
 
 void Notes::editNote() { openEditUI(); }
 
-void Notes::showNoteList() { openNotesUI(); }
+void Notes::showNoteList() {
+  QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
+}
 
 void Notes::on_editNote() {
   timerEditNote->stop();
@@ -1266,7 +1268,7 @@ void Notes::openNotes() {
                       "website address or login information."),
                    1);
 
-      openNotesUI();
+      QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
       return;
     }
 
@@ -1319,7 +1321,7 @@ void Notes::openNotes() {
           qDebug() << info;
 
           if (files.size() == 0) {
-            openNotesUI();
+            QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
             return;
           }
 
@@ -1405,7 +1407,8 @@ void Notes::openNotes() {
                         appName,
                         tr("Synchronization failed. Please try again later."),
                         1);
-                    openNotesUI();
+                    QTimer::singleShot(100, mw_one,
+                                       [this]() { openNotesUI(); });
                   }
                 });
 
@@ -1417,17 +1420,18 @@ void Notes::openNotes() {
             m_Method->setAccessCount(remoteFiles.count());
           }
 
-          if (remoteFiles.count() == 0) openNotesUI();
+          if (remoteFiles.count() == 0)
+            QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
         });
 
-    QObject::connect(helper, &WebDavHelper::errorOccurred, this,
-                     [=](const QString& error) {
-                       qDebug() << "操作失败:" << error;
-                       openNotesUI();
-                     });
+    QObject::connect(
+        helper, &WebDavHelper::errorOccurred, this, [=](const QString& error) {
+          qDebug() << "操作失败:" << error;
+          QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
+        });
   } else
 
-    openNotesUI();
+    QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
 }
 
 void Notes::startBackgroundProcessRemoteFiles() {
@@ -1439,7 +1443,7 @@ void Notes::startBackgroundProcessRemoteFiles() {
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Remote files process completed";
 
-    openNotesUI();
+    QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
     watcher->deleteLater();
   });
   watcher->setFuture(future);

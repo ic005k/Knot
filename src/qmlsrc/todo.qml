@@ -15,21 +15,28 @@ Rectangle {
     property int iconW: 12
     property int itemCount: 0
     property bool isHighPriority: false
+    property bool isRenderValid: true
+
+    function checkRenderContext() {
+        if (Qt.application.platformName === "android" && !isRenderValid) {
+            console.log("渲染上下文无效，跳过操作");
+            return false;
+        }
+        return true;
+    }
 
     function showTodoAlarm() {
-
-        setTodoAlarm.open()
+        if(checkRenderContext()) setTodoAlarm.open()
     }
 
     function closeTodoAlarm() {
-
+        if(!checkRenderContext()) return;
         setTodoAlarm.close()
         m_Todo.setAlarmShowValue(false)
         m_Todo.showInputPanel()
     }
 
     function isAlarm(index) {
-
         return isHighPriority
     }
 
@@ -38,7 +45,7 @@ Rectangle {
     }
 
     function setCurrentItem(currentIndex) {
-        view.currentIndex = currentIndex
+        if(checkRenderContext()) view.currentIndex = currentIndex
     }
 
     function getCurrentIndex() {
@@ -46,33 +53,37 @@ Rectangle {
     }
 
     function getItemCount() {
+        if(!checkRenderContext()) return 0;
         itemCount = view.count
-
         return itemCount
     }
 
     function getItemText(itemIndex) {
+        if(!checkRenderContext()) return "";
         var data = view.model.get(itemIndex)
         return data.time + "|=|" + data.dototext
     }
 
     function getTime(itemIndex) {
+        if(!checkRenderContext()) return "";
         var data = view.model.get(itemIndex)
         return data.time
     }
 
     function getTodoText(itemIndex) {
-        if(itemIndex < 0 || itemIndex >= view.count) return ""; // 索引校验
+        if(!checkRenderContext() || itemIndex < 0 || itemIndex >= view.count) return "";
         var data = view.model.get(itemIndex)
         return data.dototext
     }
 
     function getType(itemIndex) {
+        if(!checkRenderContext()) return 0;
         var data = view.model.get(itemIndex)
         return data.type
     }
 
     function addItem(strTime, type, strText, height) {
+        if(!checkRenderContext()) return;
         view.model.append({
                               "time": strTime,
                               "type": type,
@@ -82,6 +93,7 @@ Rectangle {
     }
 
     function insertItem(strTime, type, strText, height, curIndex) {
+        if(!checkRenderContext()) return;
         view.model.insert(curIndex, {
                               "time": strTime,
                               "type": type,
@@ -91,26 +103,28 @@ Rectangle {
     }
 
     function delItem(currentIndex) {
+        if(!checkRenderContext()) return;
         view.model.remove(currentIndex)
     }
 
     function modifyItem(currentIndex, strTime, strText) {
-
+        if(!checkRenderContext()) return;
         view.model.setProperty(currentIndex, "time", strTime)
         view.model.setProperty(currentIndex, "dototext", strText)
     }
 
     function modifyItemTime(currentIndex, strTime) {
-
+        if(!checkRenderContext()) return;
         view.model.setProperty(currentIndex, "time", strTime)
     }
 
     function modifyItemType(currentIndex, type) {
-
+        if(!checkRenderContext()) return;
         view.model.setProperty(currentIndex, "type", type)
     }
 
     function modifyItemText(currentIndex, strText) {
+        if(!checkRenderContext()) return;
         view.model.setProperty(currentIndex, "dototext", strText)
     }
 
@@ -126,7 +140,6 @@ Rectangle {
     }
 
     function getText1FontColor() {
-
         if (isDark)
             return "#bbbbbb"
         else
@@ -134,7 +147,6 @@ Rectangle {
     }
 
     function getFontColor() {
-
         if (isDark)
             return "white"
         else
@@ -145,64 +157,65 @@ Rectangle {
         id: view
         width: parent.width
         height: parent.height
-        boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
+        boundsBehavior: Flickable.StopAtBounds
 
         anchors {
             fill: parent
             margins: 0
         }
 
-        // 条目和条目之间的间隔
         spacing: 4
-        anchors.rightMargin: 0 // 确保右侧无留白
+        anchors.rightMargin: 0
 
         cacheBuffer: 50
         model: TodoModel {}
 
-        // 滚动条
+        // ========== 移除无效的renderType属性，保留其他渲染优化 ==========
+        reuseItems: false
+
+
         ScrollBar.vertical: ScrollBar {
             policy: ScrollBar.AsNeeded
             width: 8
+            layer.enabled: false
         }
 
         delegate: Flickable {
             id: flack
 
             width: view.width
-            height: m_col.implicitHeight + 0
+            height: m_col.implicitHeight > 0 ? m_col.implicitHeight : 80
 
             contentWidth: view.width + donebtn.width
 
             interactive: true
 
-            // 新增：启用水平滑动和边界限制
             flickableDirection: Flickable.HorizontalFlick
             boundsBehavior: Flickable.StopAtBounds
 
-            // 新增：弹性动画
+            // ========== 移除无效的renderType属性，保留layer.enabled=false ==========
+            layer.enabled: false
+
             SpringAnimation {
                 id: springAnimation
                 target: flack
                 property: "contentX"
-                spring: 4 // 增强弹性强度
-                damping: 0.3 // 增加阻尼系数
-                epsilon: 0.5 // 放宽停止阈值
+                spring: 4
+                damping: 0.3
+                epsilon: 0.5
             }
-            // 增加状态标记
             property bool autoAnimation: false
-            // 增加速度跟踪支持
-            flickDeceleration: 1500 // 增加滑动减速度
-            maximumFlickVelocity: 2000 // 限制最大滑动速度
+            flickDeceleration: 1500
+            maximumFlickVelocity: 2000
 
-            // 新增：滑动结束处理
             onMovementEnded: {
+                if(!checkRenderContext()) return;
                 autoAnimation = true
                 const speedThreshold = 100
                 const posThreshold = donebtn.width * 0.3
 
-                // 使用正确的速度获取方式
                 const currentVelocity = flack.horizontalVelocity
-                console.log("当前速度:", currentVelocity) // 调试用
+                console.log("当前速度:", currentVelocity)
 
                 if (contentX > posThreshold || Math.abs(
                             currentVelocity) > speedThreshold) {
@@ -213,7 +226,6 @@ Rectangle {
                 springAnimation.start()
             }
 
-            // 增加动画完成回调
             Component.onCompleted: {
                 springAnimation.onStopped.connect(() => {
                                                       if (autoAnimation) {
@@ -226,33 +238,34 @@ Rectangle {
             MouseArea {
                 anchors.fill: parent
                 onClicked: function (mouse) {
+                    if(!checkRenderContext()) return;
                     if (actionButtons.visible && mouse.x > actionButtons.x
                             && mouse.x < actionButtons.x + actionButtons.width
                             && mouse.y > actionButtons.y
                             && mouse.y < actionButtons.y + actionButtons.height) {
 
-                        mouse.accepted = false // 放行事件给按钮
+                        mouse.accepted = false
                         console.log("按钮被点击...")
                     } else {
-                        view.currentIndex = index //实现item切换
+                        view.currentIndex = index
                         m_Todo.stopPlayVoice()
                         console.log("index=" + index + "  c_index=" + ListView.isCurrentItem)
                     }
                 }
 
                 onDoubleClicked: {
+                    if(!checkRenderContext()) return;
                     m_Todo.reeditText()
                     var data = view.model.get(view.currentIndex)
                     console.log(data.time + "," + data.dototext + ", count=" + view.count)
                 }
 
                 onPressed: {
-                    donebtn.visible = true
+                    if(checkRenderContext()) donebtn.visible = true
                 }
             }
 
             Rectangle {
-
                 id: rectan
 
                 anchors.fill: parent
@@ -261,7 +274,6 @@ Rectangle {
                 border.width: isDark ? 0 : 1
                 border.color: "lightgray"
                 radius: 0
-                //选中颜色设置
                 color: view.currentIndex === index ? "lightblue" : getColor()
 
                 Rectangle {
@@ -295,16 +307,14 @@ Rectangle {
 
                         Rectangle {
                             width: view.width
-                            height: 5 // 空白高度
+                            height: 5
                             color: "transparent"
                         }
 
                         RowLayout {
-
                             id: row1
 
                             function showImg() {
-
                                 var str1 = text1.text.substring(0, 5)
                                 var str2 = text1.text.substring(0, 4)
                                 if (str1 === "Alarm" || str2 === "定时提醒")
@@ -334,6 +344,7 @@ Rectangle {
                                 source: "/res/time.svg"
 
                                 visible: row1.showImg()
+                                layer.enabled: false
                             }
                             Text {
                                 id: text1
@@ -342,8 +353,7 @@ Rectangle {
                                                           - 5 : parent.width
                                 Layout.preferredWidth: rectan.width - flagColor.width
                                 color: view.currentIndex === index ? "black" : getText1FontColor()
-                                font.pointSize: FontSize - 2
-                                                > maxFontSize ? maxFontSize : FontSize - 2
+                                font.pointSize: FontSize - 2 > maxFontSize ? maxFontSize : FontSize - 2
                                 font.bold: true
                                 wrapMode: Text.WrapAnywhere
                                 horizontalAlignment: Text.AlignLeft
@@ -355,6 +365,7 @@ Rectangle {
                                 rightPadding: 10
                                 topPadding: 5
                                 bottomPadding: 5
+                                renderType: Text.NativeRendering // Text的renderType有效，保留
                             }
                         }
 
@@ -368,11 +379,9 @@ Rectangle {
                         }
 
                         RowLayout {
-
                             id: row3
 
                             function showImg3() {
-
                                 var str1 = text3.text.substring(0, 5)
                                 var str2 = text3.text.substring(0, 2)
                                 if (str1 === "Voice" || str2 === "语音")
@@ -402,6 +411,7 @@ Rectangle {
                                 source: "/res/audio.svg"
 
                                 visible: row3.showImg3()
+                                layer.enabled: false
                             }
 
                             Text {
@@ -424,6 +434,7 @@ Rectangle {
                                 rightPadding: 10
                                 topPadding: 5
                                 bottomPadding: 5
+                                renderType: Text.NativeRendering // Text的renderType有效，保留
                             }
                         }
 
@@ -438,20 +449,18 @@ Rectangle {
 
                         Rectangle {
                             width: view.width
-                            height: 3 // 空白高度
+                            height: 3
                             color: "transparent"
                         }
 
-                        // 新增：按钮区域 - 仅在当前条目被选中时显示
                         Row {
                             id: actionButtons
                             width: parent.width
-                            z: 10 // 提升层级，高于其他元素
-                            spacing: 15 // 按钮间距
-                            padding: 5 // 内边距
-                            visible: view.currentIndex === index // 选中时显示
+                            z: 10
+                            spacing: 15
+                            padding: 5
+                            visible: view.currentIndex === index
 
-                            // 高优先级按钮
                             ToolButton {
                                 icon.name: "high"
                                 icon.source: "qrc:/res/high.svg"
@@ -459,16 +468,16 @@ Rectangle {
                                 icon.height: 20
 
                                 onClicked: {
-                                    m_Todo.on_btnHigh()
-                                    console.log("设置高优先级")
+                                    if(checkRenderContext()) {
+                                        m_Todo.on_btnHigh()
+                                        console.log("设置高优先级")
+                                    }
                                 }
-                                // 适配深色模式
                                 background: Rectangle {
                                     color: "transparent"
                                 }
                             }
 
-                            // 低优先级按钮
                             ToolButton {
                                 icon.name: "low"
                                 icon.source: "qrc:/res/low.svg"
@@ -476,15 +485,16 @@ Rectangle {
                                 icon.height: 20
 
                                 onClicked: {
-                                    m_Todo.on_btnLow()
-                                    console.log("设置低优先级")
+                                    if(checkRenderContext()) {
+                                        m_Todo.on_btnLow()
+                                        console.log("设置低优先级")
+                                    }
                                 }
                                 background: Rectangle {
                                     color: "transparent"
                                 }
                             }
 
-                            // 修改按钮
                             ToolButton {
                                 icon.name: "modify"
                                 icon.source: "qrc:/res/edit.svg"
@@ -492,16 +502,17 @@ Rectangle {
                                 icon.height: 20
 
                                 onClicked: {
-                                    view.currentIndex = index
-                                    m_Todo.reeditText() // 调用现有修改函数
-                                    console.log("修改条目: " + index)
+                                    if(checkRenderContext()) {
+                                        view.currentIndex = index
+                                        m_Todo.reeditText()
+                                        console.log("修改条目: " + index)
+                                    }
                                 }
                                 background: Rectangle {
                                     color: "transparent"
                                 }
                             }
 
-                            // 定时按钮
                             ToolButton {
                                 icon.name: "setTime"
                                 icon.source: "qrc:/res/alarm.svg"
@@ -509,15 +520,16 @@ Rectangle {
                                 icon.height: 20
 
                                 onClicked: {
-                                    m_Todo.on_btnSetTime()
-                                    console.log("设置时间: " + index)
+                                    if(checkRenderContext()) {
+                                        m_Todo.on_btnSetTime()
+                                        console.log("设置时间: " + index)
+                                    }
                                 }
                                 background: Rectangle {
                                     color: "transparent"
                                 }
                             }
 
-                            // 回收箱按钮
                             ToolButton {
                                 icon.name: "recycle"
                                 icon.source: "qrc:/res/recycle.svg"
@@ -525,8 +537,10 @@ Rectangle {
                                 icon.height: 20
 
                                 onClicked: {
-                                    m_Todo.on_btnRecycle()
-                                    console.log("打开回收箱: " + index)
+                                    if(checkRenderContext()) {
+                                        m_Todo.on_btnRecycle()
+                                        console.log("打开回收箱: " + index)
+                                    }
                                 }
                                 background: Rectangle {
                                     color: "transparent"
@@ -534,7 +548,6 @@ Rectangle {
                             }
                         }
 
-                        // 底部空白
                         Rectangle {
                             width: view.width
                             height: 5
@@ -564,13 +577,46 @@ Rectangle {
                         text: ""
                         checked: false
                         padding: 0
+                        // 直接自定义indicator，无CheckBoxStyle（Qt6.10.2兼容）
+                        indicator: Rectangle {
+                            width: 26
+                            height: 26
+                            border.width: 2
+                            border.color: isDark ? "#666666" : "#CCCCCC"
+                            color: todoCheckBox.checked ? (isDark ? "#333333" : "#FFFFFF")
+                                                        : (isDark ? "#333333" : "#FFFFFF")
+                            anchors.centerIn: parent
+                            antialiasing: true
+
+                            Rectangle {
+                                id: checkMark
+                                width: 14
+                                height: 14
+                                color: isDark ? "#4CAF50" : "#8BC34A"
+                                anchors.centerIn: parent
+                                visible: todoCheckBox.checked
+                                opacity: todoCheckBox.checked ? 1 : 0
+                                Behavior on opacity {
+                                    NumberAnimation {
+                                        duration: 100
+                                    }
+                                }
+                                radius: 2
+                            }
+
+                            Behavior on scale {
+                                NumberAnimation {
+                                    duration: 50
+                                }
+                            }
+                        }
 
                         Timer {
                             id: actionTimer
                             interval: 300
                             repeat: false
                             onTriggered: {
-                                // 原删除逻辑不变
+                                if(!checkRenderContext()) return;
                                 view.currentIndex = index
                                 m_Todo.stopPlayVoice()
                                 m_Todo.addToRecycle()
@@ -585,45 +631,9 @@ Rectangle {
                             }
                         }
 
-                        // 核心：用小矩形作为选中标记（无复杂属性，Qt6兼容）
-                        indicator: Rectangle {
-                            width: 26
-                            height: 26
-                            border.width: 2
-                            border.color: isDark ? "#666666" : "#CCCCCC" // 边框色适配暗黑
-                            // 检查盒背景：未选中时随模式变化，选中时保持中性色（突出红色标记）
-                            color: todoCheckBox.checked ? (isDark ? "#333333" : "#FFFFFF") // 选中时背景不变，靠红色矩形标记
-                                                        : (isDark ? "#333333" : "#FFFFFF")
-                            anchors.centerIn: parent
-                            antialiasing: true
-
-                            // 小矩形（选中标记）：居中显示，大小适中
-                            Rectangle {
-                                id: checkMark
-                                width: 14 // 矩形宽度
-                                height: 14 // 矩形高度
-                                color: isDark ? "#4CAF50" : "#8BC34A" // 暗黑模式深绿，亮色模式浅绿（与检查盒选中背景呼应）
-                                anchors.centerIn: parent // 完全居中
-                                visible: todoCheckBox.checked // 选中时显示
-                                opacity: todoCheckBox.checked ? 1 : 0 // 透明度过渡
-                                Behavior on opacity {
-                                    NumberAnimation {
-                                        duration: 100
-                                    }
-                                } // 淡入动画
-                                radius: 2 // 轻微圆角，避免生硬
-                            }
-
-                            // 点击缩放动画（保留反馈）
-                            Behavior on scale {
-                                NumberAnimation {
-                                    duration: 50
-                                }
-                            }
-                        }
-
                         onClicked: {
-                            todoCheckBox.indicator.scale = 0.9 // 按压缩放反馈
+                            if(!checkRenderContext()) return;
+                            todoCheckBox.indicator.scale = 0.9
                             actionTimer.start()
                         }
                     }
@@ -647,7 +657,6 @@ Rectangle {
         }
     }
 
-    // 日期时间选择器弹窗
     Popup {
         id: setTodoAlarm
 
@@ -657,20 +666,23 @@ Rectangle {
         x: 0
         modal: true
         focus: true
-        // 居中显示（替代x和y的手动偏移，避免超出屏幕）
         anchors.centerIn: root
 
         background: Rectangle {
-            anchors.fill: parent // 填充整个Popup
+            anchors.fill: parent
             color: isDark ? "#222222" : "#f9f9f9"
             radius: 0
         }
 
         SetTodoAlarm {
             id: picker
-            // 用Layout.fill而非anchors.fill，适配Popup的内边距
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
+    }
+
+    Connections {
+        target: Qt.application
+        function onAboutToQuit() { root.isRenderValid = false }
     }
 }

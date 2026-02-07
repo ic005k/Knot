@@ -161,7 +161,14 @@ void MainWindow::readEBookDone() {
   }
 
   if (isReport) {
-    m_Report->updateTable();
+    QTimer::singleShot(100, this,  // 上下文直接用this（等价于mw_one）
+                       [this]() {  // 仅捕获this（MainWindow的指针）
+                         // 空指针检查：确保m_Report不为空
+                         if (this->m_Report) {
+                           this->m_Report->updateTable();
+                         }
+                       });
+
     mui->lblTitle->setText(tabData->tabText(tabData->currentIndex()));
 
     mui->btnCategory->hide();

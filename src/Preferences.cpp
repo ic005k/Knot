@@ -450,7 +450,9 @@ void Preferences::closeEvent(QCloseEvent* event) {
   setEncSyncStatusTip();
 
   if (isChanged && isVisible()) {
+    mui->frameMain->hide();
     loadTheme(isDark);
+    mui->frameMain->show();
   }
 }
 

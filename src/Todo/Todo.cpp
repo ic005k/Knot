@@ -1495,7 +1495,8 @@ void Todo::openTodo() {
                    tr("WebDAV connection failed. Please check the network, "
                       "website address or login information."),
                    1);
-      openTodoUI();
+
+      QTimer::singleShot(100, mw_one, [this]() { openTodoUI(); });
       return;
     }
 
@@ -1515,7 +1516,7 @@ void Todo::openTodo() {
           qDebug() << "共找到" << files.size() << "个文件:";
 
           if (files.size() == 0) {
-            mw_one->m_Todo->openTodoUI();
+            QTimer::singleShot(100, mw_one, [this]() { openTodoUI(); });
             return;
           }
 
@@ -1593,7 +1594,8 @@ void Todo::openTodo() {
                         QFile::remove(zFile);
                       }
 
-                      mw_one->m_Todo->openTodoUI();
+                      QTimer::singleShot(100, mw_one,
+                                         [this]() { openTodoUI(); });
                     });
 
                 // 需要下载的文件列表
@@ -1605,22 +1607,24 @@ void Todo::openTodo() {
                 downloader->downloadFiles(remoteFiles, lf, 1);
               }
 
-              if (mtime <= localModi) mw_one->m_Todo->openTodoUI();
+              if (mtime <= localModi)
+                QTimer::singleShot(100, mw_one, [this]() { openTodoUI(); });
               break;
             }
           }
 
-          if (isTodoFile == false) mw_one->m_Todo->openTodoUI();
+          if (isTodoFile == false)
+            QTimer::singleShot(100, mw_one, [this]() { openTodoUI(); });
         });
 
     QObject::connect(helper, &WebDavHelper::errorOccurred, this,
-                     [](const QString& error) {
+                     [this](const QString& error) {
                        qDebug() << "操作失败:" << error;
-                       mw_one->m_Todo->openTodoUI();
+                       QTimer::singleShot(100, [this]() { openTodoUI(); });
                      });
 
   } else
-    openTodoUI();
+    QTimer::singleShot(100, mw_one, [this]() { openTodoUI(); });
 }
 
 void Todo::closeTodoAlarm() {
