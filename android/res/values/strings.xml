@@ -23,8 +23,10 @@
     </string-->
 
     <!-- 新增这一行，解决资源缺失 -->
-        <string
+    <!-- 暂时注释掉，避免与Qt自带资源重复 - 后续如需启用可取消注释
+    <string
         name="unsupported_android_version"
     >Unsupported Android version</string>
+    -->
 
 </resources>
