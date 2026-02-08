@@ -116,6 +116,7 @@ inline std::atomic<bool> isSaveEnd = true;
 inline std::atomic<bool> isReadEnd = true;
 inline std::atomic<bool> isBreak = false;
 inline bool isDark = false;
+inline bool g_currentIsDark = false;
 inline bool isDelData = false;
 inline bool isWholeMonth = true;
 inline bool isDateSection = false;

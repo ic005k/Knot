@@ -208,10 +208,6 @@ int main(int argc, char* argv[]) {
   QString customFontPath =
       iniPreferences->value("/Options/CustomFont").toString();
 
-  // Qt>=6.5.0
-  isDark =
-      QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
-
 #ifdef Q_OS_WIN
   defaultFontFamily = "Microsoft YaHei UI";
 
@@ -262,14 +258,27 @@ int main(int argc, char* argv[]) {
 #endif
 
   MainWindow w;
+
+  // 1. 先初始化当前主题状态（替代原有的isDark直接赋值）
+  g_currentIsDark =
+      (QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark);
+  isDark = g_currentIsDark;  // 兼容原有代码对isDark的依赖
+
+  // 2. 重构信号绑定逻辑：增加主题状态校验
   QObject::connect(QGuiApplication::styleHints(),
                    &QStyleHints::colorSchemeChanged, &w,
                    [](Qt::ColorScheme scheme) {
-                     isDark = (scheme == Qt::ColorScheme::Dark);
-
-                     loadTheme(isDark);
+                     bool newIsDark = (scheme == Qt::ColorScheme::Dark);
+                     // 核心优化：只有主题真的变化时，才执行加载逻辑
+                     if (newIsDark != g_currentIsDark) {
+                       isDark = newIsDark;           // 同步原有全局isDark
+                       g_currentIsDark = newIsDark;  // 更新当前状态
+                       loadTheme(isDark);            // 仅在主题变化时执行
+                     }
                    });
-  loadTheme(isDark);
+
+  // 3. 初始加载（确保MainWindow初始化完成后执行，避免空指针）
+  loadTheme(g_currentIsDark);
 
   w.show();
 
@@ -310,63 +319,81 @@ void loadTheme(bool isDark) {
   QFile f(themePath);
   if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
     QString styleSheet = QTextStream(&f).readAll();
-
-    // 动态添加颜色方案标识
     styleSheet.prepend(
         QString("[color-scheme=\"%1\"] ").arg(isDark ? "dark" : "light"));
-
     qApp->setStyleSheet(styleSheet);
-    mw_one->m_MainHelper->init_Theme();
 
-    // 强制窗口重绘
-    QEvent updateEvent(QEvent::UpdateRequest);
-    QApplication::sendEvent(mw_one, &updateEvent);
-  }
+    // 增加空指针校验：避免mw_one未初始化导致崩溃
+    if (mw_one && mw_one->m_MainHelper) {
+      mw_one->m_MainHelper->init_Theme();
+    }
 
-  QFont font = qApp->font();
-  font.setPointSize(fontSize);
-  qApp->setFont(font);
-
-  // 强制所有窗口和部件刷新字体
-  foreach (QWidget* widget, qApp->allWidgets()) {
-    if (widget != mui->btnMenu && widget != mui->btnAdd &&
-        widget != mui->btnDel && widget != mui->btnSync &&
-        widget != mui->btnFind && widget != mui->btnSelTab &&
-        widget != mui->btnReader && widget != mui->btnTodo &&
-        widget != mui->btnNotes && widget != mui->btnSteps &&
-        widget != mui->lblMonthTotal && widget != mui->lblYearTotal &&
-        widget != mui->btn0 && widget != mui->btn1 && widget != mui->btn2 &&
-        widget != mui->btn3 && widget != mui->btn4 && widget != mui->btn5 &&
-        widget != mui->btn6 && widget != mui->btn7 && widget != mui->btn8 &&
-        widget != mui->btn9 && widget != mui->btnDot &&
-        widget != mui->btnDel_Number && widget != mui->lblMonthSum &&
-        widget != mui->lblTime && widget != mui->lblGpsInfo &&
-        widget != m_Steps->m_speedometer &&
-        widget != mw_one->m_MainHelper->sliderButton &&
-        widget != mui->lblGpsDateTime && widget != mui->btnPages &&
-        widget != mui->lblBookName && widget != mui->lblShowLineSn &&
-
-        widget != mui->lblNoteBook && widget != mui->lblNoteList) {
-      widget->setFont(qApp->font());
-      font.setBold(true);
-      mui->lblViewCate1->setFont(font);
-      mui->lblTitleEditRecord->setFont(font);
-      mui->lblSyncNote->setFont(font);
-      widget->updateGeometry();
-      widget->repaint();
+    // 强制窗口重绘（仅当mw_one有效时执行）
+    if (mw_one) {
+      QEvent updateEvent(QEvent::UpdateRequest);
+      QApplication::sendEvent(mw_one, &updateEvent);
     }
   }
 
-  mw_one->m_Reader->initInfoShowFont();
+  // 优化：仅当字体大小真的变化时，才重新设置字体（避免冗余）
+  static int lastFontSize = -1;
+  if (fontSize != lastFontSize) {
+    QFont font = qApp->font();
+    font.setPointSize(fontSize);
+    qApp->setFont(font);
+    lastFontSize = fontSize;
 
-  mw_one->m_Todo->refreshTableListsFromIni();
-  mw_one->m_Todo->refreshAlarm();
+    // 遍历控件刷新字体（仅字体大小变化时执行）
+    if (qApp) {
+      foreach (QWidget* widget, qApp->allWidgets()) {
+        // 你的原有过滤逻辑保持不变
+        if (widget != mui->btnMenu && widget != mui->btnAdd &&
+            widget != mui->btnDel && widget != mui->btnSync &&
+            widget != mui->btnFind && widget != mui->btnSelTab &&
+            widget != mui->btnReader && widget != mui->btnTodo &&
+            widget != mui->btnNotes && widget != mui->btnSteps &&
+            widget != mui->lblMonthTotal && widget != mui->lblYearTotal &&
+            widget != mui->btn0 && widget != mui->btn1 && widget != mui->btn2 &&
+            widget != mui->btn3 && widget != mui->btn4 && widget != mui->btn5 &&
+            widget != mui->btn6 && widget != mui->btn7 && widget != mui->btn8 &&
+            widget != mui->btn9 && widget != mui->btnDot &&
+            widget != mui->btnDel_Number && widget != mui->lblMonthSum &&
+            widget != mui->lblTime && widget != mui->lblGpsInfo &&
+            widget != m_Steps->m_speedometer &&
+            widget != mw_one->m_MainHelper->sliderButton &&
+            widget != mui->lblGpsDateTime && widget != mui->btnPages &&
+            widget != mui->lblBookName && widget != mui->lblShowLineSn &&
+            widget != mui->lblNoteBook && widget != mui->lblNoteList) {
+          widget->setFont(qApp->font());
+          // 字体加粗逻辑保持不变
+          font.setBold(true);
+          if (mui && mui->lblViewCate1) mui->lblViewCate1->setFont(font);
+          if (mui && mui->lblTitleEditRecord)
+            mui->lblTitleEditRecord->setFont(font);
+          if (mui && mui->lblSyncNote) mui->lblSyncNote->setFont(font);
+          widget->updateGeometry();
+          widget->repaint();
+        }
+      }
+    }
+  }
+
+  // 空指针校验：避免崩溃
+  if (mw_one) {
+    if (mw_one->m_Reader) mw_one->m_Reader->initInfoShowFont();
+    if (mw_one->m_Todo) {
+      mw_one->m_Todo->refreshTableListsFromIni();
+      mw_one->m_Todo->refreshAlarm();
+    }
+  }
 
   isInitThemeEnd = true;
 
   if (isNeedExecDeskShortcut) {
     isNeedExecDeskShortcut = false;
-    QTimer::singleShot(1000, nullptr, []() { mw_one->execDeskShortcut(); });
+    QTimer::singleShot(1000, nullptr, []() {
+      if (mw_one) mw_one->execDeskShortcut();  // 空指针校验
+    });
   }
 
   // QTimer::singleShot(100, nullptr, []() { callReopenClockWindow(); });

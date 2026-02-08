@@ -366,7 +366,8 @@ static void JavaNotify_15() {
   }
 
   if (!mui->frameNoteList->isHidden()) {
-    mui->btnBackNoteList->click();
+    QTimer::singleShot(100, mw_one,
+                       []() { mw_one->on_btnBackNoteList_clicked(); });
     return;
   }
 
