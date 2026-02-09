@@ -335,45 +335,41 @@ void loadTheme(bool isDark) {
     }
   }
 
-  // 优化：仅当字体大小真的变化时，才重新设置字体（避免冗余）
-  static int lastFontSize = -1;
-  if (fontSize != lastFontSize) {
-    QFont font = qApp->font();
-    font.setPointSize(fontSize);
-    qApp->setFont(font);
-    lastFontSize = fontSize;
+  // 字体大小
+  QFont font = qApp->font();
+  font.setPointSize(fontSize);
+  qApp->setFont(font);
 
-    // 遍历控件刷新字体（仅字体大小变化时执行）
-    if (qApp) {
-      foreach (QWidget* widget, qApp->allWidgets()) {
-        // 你的原有过滤逻辑保持不变
-        if (widget != mui->btnMenu && widget != mui->btnAdd &&
-            widget != mui->btnDel && widget != mui->btnSync &&
-            widget != mui->btnFind && widget != mui->btnSelTab &&
-            widget != mui->btnReader && widget != mui->btnTodo &&
-            widget != mui->btnNotes && widget != mui->btnSteps &&
-            widget != mui->lblMonthTotal && widget != mui->lblYearTotal &&
-            widget != mui->btn0 && widget != mui->btn1 && widget != mui->btn2 &&
-            widget != mui->btn3 && widget != mui->btn4 && widget != mui->btn5 &&
-            widget != mui->btn6 && widget != mui->btn7 && widget != mui->btn8 &&
-            widget != mui->btn9 && widget != mui->btnDot &&
-            widget != mui->btnDel_Number && widget != mui->lblMonthSum &&
-            widget != mui->lblTime && widget != mui->lblGpsInfo &&
-            widget != m_Steps->m_speedometer &&
-            widget != mw_one->m_MainHelper->sliderButton &&
-            widget != mui->lblGpsDateTime && widget != mui->btnPages &&
-            widget != mui->lblBookName && widget != mui->lblShowLineSn &&
-            widget != mui->lblNoteBook && widget != mui->lblNoteList) {
-          widget->setFont(qApp->font());
-          // 字体加粗逻辑保持不变
-          font.setBold(true);
-          if (mui && mui->lblViewCate1) mui->lblViewCate1->setFont(font);
-          if (mui && mui->lblTitleEditRecord)
-            mui->lblTitleEditRecord->setFont(font);
-          if (mui && mui->lblSyncNote) mui->lblSyncNote->setFont(font);
-          widget->updateGeometry();
-          widget->repaint();
-        }
+  // 遍历控件刷新字体（仅字体大小变化时执行）
+  if (qApp) {
+    foreach (QWidget* widget, qApp->allWidgets()) {
+      // 你的原有过滤逻辑保持不变
+      if (widget != mui->btnMenu && widget != mui->btnAdd &&
+          widget != mui->btnDel && widget != mui->btnSync &&
+          widget != mui->btnFind && widget != mui->btnSelTab &&
+          widget != mui->btnReader && widget != mui->btnTodo &&
+          widget != mui->btnNotes && widget != mui->btnSteps &&
+          widget != mui->lblMonthTotal && widget != mui->lblYearTotal &&
+          widget != mui->btn0 && widget != mui->btn1 && widget != mui->btn2 &&
+          widget != mui->btn3 && widget != mui->btn4 && widget != mui->btn5 &&
+          widget != mui->btn6 && widget != mui->btn7 && widget != mui->btn8 &&
+          widget != mui->btn9 && widget != mui->btnDot &&
+          widget != mui->btnDel_Number && widget != mui->lblMonthSum &&
+          widget != mui->lblTime && widget != mui->lblGpsInfo &&
+          widget != m_Steps->m_speedometer &&
+          widget != mw_one->m_MainHelper->sliderButton &&
+          widget != mui->lblGpsDateTime && widget != mui->btnPages &&
+          widget != mui->lblBookName && widget != mui->lblShowLineSn &&
+          widget != mui->lblNoteBook && widget != mui->lblNoteList) {
+        widget->setFont(qApp->font());
+        // 字体加粗逻辑保持不变
+        font.setBold(true);
+        if (mui && mui->lblViewCate1) mui->lblViewCate1->setFont(font);
+        if (mui && mui->lblTitleEditRecord)
+          mui->lblTitleEditRecord->setFont(font);
+        if (mui && mui->lblSyncNote) mui->lblSyncNote->setFont(font);
+        widget->updateGeometry();
+        widget->repaint();
       }
     }
   }
