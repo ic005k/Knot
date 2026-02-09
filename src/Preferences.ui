@@ -215,6 +215,9 @@ QLabel {
         <property name="text">
          <string>Font Size</string>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
        </widget>
       </item>
       <item>

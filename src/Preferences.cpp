@@ -107,8 +107,7 @@ void Preferences::on_sliderFontSize_sliderMoved(int position) {
   if (isVisible()) {
     QFont font;
     font.setPointSize(position);
-    ui->lblFontSize->setText(tr("Font Size") + " : " +
-                             QString::number(position));
+
     ui->lblFontSize->setFont(font);
     isFontChange = true;
 
@@ -119,6 +118,42 @@ void Preferences::on_sliderFontSize_sliderMoved(int position) {
 
     getCheckStatusChange();
   }
+
+#ifdef Q_OS_ANDROID
+  // 安卓端：映射为对应的等级文本（支持国际化）
+  QString sizeLevel;
+  switch (position) {
+    case 15:
+      sizeLevel = tr("ExtraSmall");  // 极小
+      break;
+    case 16:
+      sizeLevel = tr("Small");  // 小
+      break;
+    case 17:
+      sizeLevel = tr("Default");  // 正常/默认
+      break;
+    case 18:
+      sizeLevel = tr("Large");  // 大
+      break;
+    case 19:
+      sizeLevel = tr("XLarge");  // 超大
+      break;
+    case 20:
+      sizeLevel = tr("XXLarge");  // 特大
+      break;
+    case 21:
+      sizeLevel = tr("XXXLarge");  // 最大
+      break;
+    default:
+      // 容错：超出15-21范围时，默认显示正常+数值，避免空文本
+      sizeLevel = tr("Default") + " (" + QString::number(position) + ")";
+      break;
+  }
+  ui->lblFontSize->setText(tr("Font Size") + " : " + sizeLevel);
+
+#else
+  ui->lblFontSize->setText(tr("Font Size") + " : " + QString::number(position));
+#endif
 }
 
 void Preferences::on_btnCustomFont_clicked() {
