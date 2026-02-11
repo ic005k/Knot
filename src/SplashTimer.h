@@ -2,6 +2,7 @@
 #define SPLASHTIMER_H
 
 #include <QApplication>
+#include <QCloseEvent>  // 新增：处理窗口关闭事件
 #include <QColor>
 #include <QFont>
 #include <QFontMetrics>
@@ -24,11 +25,31 @@ class SplashTimer : public QSplashScreen {
       : QSplashScreen(QPixmap(), flags),
         m_isAndroid(isAndroid),
         m_width(width),
-        m_height(height) {
+        m_height(height),
+        m_animationTimer(nullptr),  // 初始化置空
+        m_contextValid(true)        // 标记上下文是否有效
+  {
     init();
   }
 
-  ~SplashTimer() override {}
+  // 核心修改1：析构函数彻底清理定时器
+  ~SplashTimer() override {
+    stopAnimation();  // 停止定时器
+    if (m_animationTimer) {
+      m_animationTimer->deleteLater();  // 安全释放
+      m_animationTimer = nullptr;
+    }
+  }
+
+  // 新增：主动停止动画的接口（供外部调用，比如应用启动完成后）
+  void stopAnimation() {
+    if (m_animationTimer && m_animationTimer->isActive()) {
+      m_animationTimer->stop();  // 停止定时器
+      disconnect(m_animationTimer, &QTimer::timeout, this,
+                 nullptr);  // 断开所有信号槽
+    }
+    m_contextValid = false;  // 标记上下文失效
+  }
 
  private:
   bool m_isAndroid;
@@ -45,13 +66,13 @@ class SplashTimer : public QSplashScreen {
   const qreal m_maxFontRatio = 0.25;
   int m_animationFrame = 0;
   QTimer* m_animationTimer = nullptr;
-  // 安卓垂直偏移修正值（可根据设备微调）
   const qreal m_androidYOffset = 10.0;
+  bool m_contextValid;  // 新增：标记绘制上下文是否有效
 
   void init() {
     initSizeAndDpi();
     initStyle();
-    drawBaseBackground();  // 恢复整体背景绘制（渐变+网格）
+    drawBaseBackground();
     setFixedSize(m_targetSize / m_dpr);
     setAttribute(Qt::WA_TranslucentBackground);
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
@@ -61,12 +82,16 @@ class SplashTimer : public QSplashScreen {
       setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
     }
 
+    // 核心修改2：安全创建定时器，避免空指针
     m_animationTimer = new QTimer(this);
+    m_animationTimer->setInterval(100);  // 明确设置间隔
     connect(m_animationTimer, &QTimer::timeout, this, [this]() {
+      // 加一层判断：上下文无效则直接返回
+      if (!m_contextValid) return;
       m_animationFrame = (m_animationFrame + 1) % 60;
       updateDisplay();
     });
-    m_animationTimer->start(100);
+    m_animationTimer->start();
     updateDisplay();
   }
 
@@ -91,29 +116,24 @@ class SplashTimer : public QSplashScreen {
   }
 
   void initStyle() {
-    // 恢复整体背景色
     m_bgColor = QColor(240, 242, 245);
-    // 文字配色适配整体背景
     m_textColor = QColor(52, 73, 94);
     m_highlightColor = QColor(41, 128, 185);
     m_shadowColor = QColor(44, 62, 80, 120);
   }
 
-  // 恢复整体渐变+网格背景绘制（仅去掉文字下的圆角背景）
   void drawBaseBackground() {
     m_basePixmap = QPixmap(m_targetSize);
-    m_basePixmap.fill(m_bgColor);  // 填充整体背景色，避免黑条
+    m_basePixmap.fill(m_bgColor);
 
     QPainter painter(&m_basePixmap);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    // 渐变背景
     QLinearGradient gradient(0, 0, 0, m_targetSize.height());
     gradient.setColorAt(0, QColor(240, 242, 245));
     gradient.setColorAt(1, QColor(220, 225, 235));
     painter.fillRect(m_basePixmap.rect(), gradient);
 
-    // 微妙网格背景
     painter.setPen(QPen(QColor(200, 205, 215, 30), 1));
     int gridSize = 20 * m_dpr;
     for (int x = 0; x < m_targetSize.width(); x += gridSize) {
@@ -125,8 +145,18 @@ class SplashTimer : public QSplashScreen {
   }
 
   void updateDisplay() {
+    // 核心修改3：绘制前先检查上下文有效性，无效则直接返回
+    if (!m_contextValid || m_basePixmap.isNull()) {
+      return;
+    }
+
     QPixmap displayPix = m_basePixmap.copy();
     QPainter painter(&displayPix);
+    // 核心修改4：检查painter是否有效（避免上下文失效后的绘制）
+    if (!painter.isActive()) {
+      return;
+    }
+
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.setRenderHint(QPainter::TextAntialiasing, true);
 
@@ -141,7 +171,8 @@ class SplashTimer : public QSplashScreen {
 
     displayPix.setDevicePixelRatio(m_dpr);
     setPixmap(displayPix);
-    repaint();
+    // 替换repaint()为update()：update是异步绘制，更安全，避免强制同步绘制触发崩溃
+    update();
   }
 
   void drawGlowEffect(QPainter& painter, const QRect& rect) {
@@ -171,7 +202,7 @@ class SplashTimer : public QSplashScreen {
 
     qreal scale = 1.0;
     qreal opacity = 1.0;
-    if (m_animationTimer) {
+    if (m_animationTimer && m_animationTimer->isActive()) {
       qreal phase = (m_animationFrame + letter.unicode() * 0.5) * 0.1;
       scale = 0.99 + 0.01 * std::sin(phase);
       opacity = 0.95 + 0.05 * std::cos(phase);
@@ -192,12 +223,10 @@ class SplashTimer : public QSplashScreen {
     painter.translate(-letterRect.center());
     painter.setOpacity(opacity);
 
-    // 文字阴影（适配整体背景，强度适中）
     painter.setPen(QPen(m_shadowColor, 1));
     painter.setBrush(Qt::NoBrush);
     painter.drawText(QPointF(charX + 2 * m_dpr, charBaseY + 2 * m_dpr), letter);
 
-    // 渐变文字
     QLinearGradient textGradient(letterRect.topLeft(),
                                  letterRect.bottomRight());
     textGradient.setColorAt(0, m_highlightColor);
@@ -230,8 +259,6 @@ class SplashTimer : public QSplashScreen {
     qreal startX = canvasRect.center().x() - totalWidth / 2.0;
     qreal startY = canvasRect.center().y() - totalHeight / 2.0;
 
-    // 移除文字下方的圆角背景绘制（仅删除这部分代码）
-    // 直接绘制文字，无圆角背景
     for (int i = 0; i < letterCount; ++i) {
       QRectF letterRect(startX + i * (letterWidth + spacing), startY,
                         letterWidth, letterHeight);
@@ -258,18 +285,22 @@ class SplashTimer : public QSplashScreen {
       totalHeight = canvasRect.height() * 0.9;
     }
 
-    // 安卓端垂直偏移修正，解决整体靠下问题
     qreal startX = canvasRect.center().x() - totalWidth / 2.0;
     qreal startY = canvasRect.center().y() - totalHeight / 2.0 -
                    (m_androidYOffset * m_dpr);
 
-    // 移除文字下方的圆角背景绘制（仅删除这部分代码）
-    // 直接绘制文字，无圆角背景
     for (int i = 0; i < letterCount; ++i) {
       QRectF letterRect(startX, startY + i * (letterHeight + spacing),
                         letterWidth, letterHeight);
       drawTextLetter(painter, text.at(i), letterRect);
     }
+  }
+
+  // 核心修改5：重写窗口关闭事件，停止定时器
+  void closeEvent(QCloseEvent* event) override {
+    stopAnimation();  // 关闭窗口时立即停止动画
+    m_contextValid = false;
+    QSplashScreen::closeEvent(event);  // 调用父类方法
   }
 };
 

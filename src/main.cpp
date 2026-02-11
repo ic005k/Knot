@@ -1,5 +1,4 @@
 
-
 #include <QApplication>
 #include <QDir>
 
@@ -93,7 +92,9 @@ int main(int argc, char* argv[]) {
 
   loadLocal();
 
-#ifndef Q_OS_ANDROID
+#ifdef Q_OS_ANDROID
+
+#else
   sharedMemory.setKey(uniqueKey);
   if (!sharedMemory.create(1)) {
     QMessageBox::information(nullptr, "Knot",
@@ -104,8 +105,9 @@ int main(int argc, char* argv[]) {
   }
 #endif
 
-  SplashTimer splash(isAndroid, 320, 100);
-  splash.show();
+  // ========== 闪屏改为堆对象（new创建），避免栈对象生命周期问题 =====
+  SplashTimer* splash = new SplashTimer(isAndroid, 320, 100);
+  splash->show();
 
   // 设置应用程序标识（为QML里面使用Settings做准备）
   app.setOrganizationName("KnotCompany");
@@ -288,16 +290,22 @@ int main(int argc, char* argv[]) {
                                      "(Z)V", true);
 #endif
 
+  // ========== 停止闪屏的逻辑放到事件循环中，异步执行 ==========
+  // QTimer::singleShot(0)：确保在事件循环启动后执行
   QTimer::singleShot(0, &app, [&]() {
     qint64 totalElapsedMs = totalTimer.elapsed();
     double totalElapsedSec = totalElapsedMs / 1000.0;
-
     strStartTotalTime = QString::number(totalElapsedSec, 'f', 2);
-
     qDebug() << "整体启动总耗时：" << strStartTotalTime << "秒";
-  });
 
-  splash.close();
+    // ========== 堆对象的安全停止+释放 ==========
+    if (splash) {
+      splash->stopAnimation();  // 停止动画
+      splash->close();          // 关闭窗口
+      splash->deleteLater();    // 异步释放堆对象（正确用法）
+      splash = nullptr;         // 置空，避免野指针
+    }
+  });
 
   return app.exec();
 }

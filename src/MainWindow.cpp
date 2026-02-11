@@ -651,14 +651,16 @@ void MainWindow::execNeedSyncNotes() {
   qDebug() << "==================================";
   qDebug() << "Need exec sync >>" << count;
   qDebug() << "==================================";
-  for (int i = 0; i < count; i++) {
-    QString note = RegSync.value("note" + QString::number(i), "").toString();
-    if (QFile::exists(note)) {
-      m_Notes->appendToSyncList(note);
+  if (count > 0) {
+    for (int i = 0; i < count; i++) {
+      QString note = RegSync.value("note" + QString::number(i), "").toString();
+      if (QFile::exists(note)) {
+        m_Notes->appendToSyncList(note);
+      }
     }
-  }
 
-  m_Notes->syncToWebDAV();
+    m_Notes->syncToWebDAV();
+  }
 }
 
 void MainWindow::setMini() {
