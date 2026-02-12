@@ -2212,7 +2212,6 @@ void Steps::getHardStepSensor() {
   if (isHardStepSensor == 1) {
     mui->lblSteps->hide();
     resetSteps = getAndroidSteps();
-    initTodayInitSteps();
   }
 #endif
 }

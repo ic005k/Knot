@@ -3292,15 +3292,14 @@ void NotesList::genRecentOpenMenu() {
         currentMDFile = file;
         noteTitle = name;
 
+        saveCurrentNoteInfo();
+        setCurrentItemFromMDFile(currentMDFile);
+
 #ifdef Q_OS_ANDROID
         mw_one->on_btnOpenNote_clicked();
 #else
         mw_one->on_btnEditNote_clicked();
 #endif
-
-        saveCurrentNoteInfo();
-
-        setCurrentItemFromMDFile(currentMDFile);
       });
     }
   }
