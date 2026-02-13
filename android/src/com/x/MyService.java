@@ -1,5 +1,6 @@
 package com.x;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -14,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.graphics.BitmapFactory;
@@ -30,6 +32,7 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import com.x.MyActivity;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
@@ -454,23 +457,66 @@ public class MyService extends Service {
         }
     }
 
-    private Sensor countSensor;
+    private static Sensor countSensor;
     public static int isStepCounter = -1;
     public static float stepCounts;
     private static SensorManager mSensorManager;
 
-    public void initStepSensor() {
-        if (countSensor != null && mSensorManager != null) {
-            // 增加mSensorManager空判
+    public static void initStepSensor() {
+        // 1. 权限校验
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Context context = MyActivity.getMyAppContext();
+            if (
+                context != null &&
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACTIVITY_RECOGNITION
+                ) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                // 现在能找到PackageManager了
+                Log.w(
+                    TAG,
+                    "initStepSensor: 无ACTIVITY_RECOGNITION权限，跳过传感器注册"
+                );
+                isStepCounter = 0;
+                return;
+            }
+        }
+
+        // 2. 补充空判 + 重新获取传感器（静态变量countSensor）
+        if (mSensorManager == null) {
+            Context context = MyActivity.getMyAppContext();
+            if (context != null) {
+                mSensorManager = (SensorManager) context.getSystemService(
+                    Context.SENSOR_SERVICE
+                );
+            }
+        }
+        if (countSensor == null && mSensorManager != null) {
+            // 现在countSensor是静态的，可访问
+            countSensor = mSensorManager.getDefaultSensor(
+                Sensor.TYPE_STEP_COUNTER
+            );
+        }
+
+        // 3. 原有逻辑（静态变量引用）
+        if (
+            countSensor != null &&
+            mSensorManager != null &&
+            mySensorSerivece != null
+        ) {
             mSensorManager.unregisterListener(mySensorSerivece);
             mSensorManager.registerListener(
                 mySensorSerivece,
-                countSensor, // 直接用已获取的countSensor，无需重复getDefaultSensor
+                countSensor, // 静态变量
                 SensorManager.SENSOR_DELAY_NORMAL
             );
             isStepCounter = 1;
+            Log.i(TAG, "initStepSensor: 步数传感器注册成功（权限已授予）");
         } else {
             isStepCounter = 0;
+            Log.w(TAG, "initStepSensor: 传感器/管理器/服务为空，注册失败");
         }
     }
 

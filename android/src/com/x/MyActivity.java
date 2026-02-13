@@ -158,7 +158,8 @@ import org.qtproject.qt.android.bindings.QtActivity;
 
 public class MyActivity
     extends QtActivity
-    implements Application.ActivityLifecycleCallbacks {
+    implements Application.ActivityLifecycleCallbacks
+{
 
     // 新增：持久化重启标记的Key
     private static final String PREFS_RESTART = "restart_prefs";
@@ -1377,6 +1378,7 @@ public class MyActivity
                         Toast.LENGTH_SHORT
                     ).show();
                     // 若后续添加步数统计，这里可初始化传感器
+                    MyService.initStepSensor(); // 权限授予后，立即重新初始化传感器
                 } else {
                     Toast.makeText(
                         this,
@@ -1591,7 +1593,8 @@ public class MyActivity
                     new String[] { "android.permission.CAMERA" },
                     REQ_CAMERA
                 );
-            } else {}
+            } else {
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

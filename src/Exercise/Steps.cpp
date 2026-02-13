@@ -125,6 +125,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   m_stepChart->setStepData(m_stepData);
 
   getHardStepSensor();
+  if (isHardStepSensor == 1) resetSteps = getAndroidSteps();
 
   // Speed
   m_speedometer = new Speedometer(this);
@@ -2098,6 +2099,7 @@ void Steps::appendToCSV(const QString& filePath, const QStringList& data) {
 
 void Steps::updateHardSensorSteps() {
   if (isAndroid) {
+    getHardStepSensor();
     if (isHardStepSensor != 1) return;
   }
 
@@ -2112,7 +2114,7 @@ void Steps::updateHardSensorSteps() {
   steps = ts - initTodaySteps;
   if (steps < 0) return;
   if (steps > 100000000) return;
-  CurrentSteps = ts - resetSteps + getOldSteps();
+  CurrentSteps = ts - resetSteps;
   mui->lcdNumber->display(QString::number(steps));
   mui->lblSingle->setText(QString::number(CurrentSteps));
 
@@ -2166,10 +2168,13 @@ void Steps::initTodayInitSteps() {
   } else {
     //  从JSON中读取InitValue，默认值0，转换为qlonglong
     initTodaySteps = jsonObj["InitValue"].toVariant().toLongLong(0);
+    if (initTodaySteps == 0) initTodaySteps = a;
 
     if (a - initTodaySteps <= 0) {
+      initTodaySteps = a - (double)getTodaySteps();
+
       // 更新JSON键值
-      jsonObj["InitValue"] = (double)a;               // 存储InitValue
+      jsonObj["InitValue"] = (double)initTodaySteps;  // 存储InitValue
       jsonObj["oldSteps"] = (double)getTodaySteps();  // 存储oldSteps
 
       // 写入文件（同步操作，对应Reg.sync()）
@@ -2177,8 +2182,6 @@ void Steps::initTodayInitSteps() {
         file.write(QJsonDocument(jsonObj).toJson(QJsonDocument::Indented));
         file.close();
       }
-
-      initTodaySteps = a;
     }
   }
 }
@@ -2211,7 +2214,6 @@ void Steps::getHardStepSensor() {
   }
   if (isHardStepSensor == 1) {
     mui->lblSteps->hide();
-    resetSteps = getAndroidSteps();
   }
 #endif
 }
