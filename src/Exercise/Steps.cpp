@@ -915,7 +915,7 @@ void Steps::updateGetGps() {
       str6 = list.at(5);
       str7 = list.at(6);
       strGpsStatus = tr("Average Speed") + " : " + str3 + "\n" + str4 + "\n" +
-                     strAltitude + " m" + "\n" + str6 + "\n" + str7;
+                     strAltitude + "\n" + str6 + "\n" + str7;
 
       if (std::isnan(oldAlt)) oldAlt = altitude;
       if (oldLat == 0) oldLat = latitude;

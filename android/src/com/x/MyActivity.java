@@ -293,23 +293,9 @@ public class MyActivity
 
     private boolean isTracking = false;
 
-    ///////////////////////
-    /*private long startTime = 0L;
-    private long movingTime;
-    private double latitude = 0;
-    private double longitude = 0;
-    private float totalDistance = 0f;
-    private float maxSpeed = 0f;
-    private float mySpeed = 0f;
-    private float totalClimb = 0f;
-    private float totalDescent = 0f; // 累计下降（单位：米）
-    private Location previousLocation;
-    private double previousAltitude;*/
-    /////////////////
-
     private String strGpsStatus = "GPS Status";
     private String strRunTime = "00:00:00";
-    private String strAltitude = "Altitude";
+    private String strAltitude = "Altitude: 0.00 m";
     private String strTotalDistance = "0 km";
     private String strMaxSpeed = "Max Speed";
     private String strTotalClimb = "Total Climb";
@@ -643,22 +629,77 @@ public class MyActivity
         );
     }
 
-    // MyActivity.java 的 startGpsUpdates 方法中
     public double startGpsUpdates() {
         setVibrate();
+        isGpsRunning = true; // 先标记为运行中，避免重复调用
+
+        // 第一步：启动GPS服务（确保服务先启动）
         Intent intent = new Intent(this, MyService.class);
         intent.setAction("com.x.ACTION_START_GPS");
         startService(intent);
-        isGpsRunning = true;
 
-        // 设置GPSManager的回调（现在有了setUpdateListener方法）
-        MyService service = MyService.getInstance();
-        if (service != null && service.gpsManager != null) {
-            // 先停止GPS（避免重复运行），再重新启动并设置回调
+        // 第二步：使用Handler延迟重试获取服务实例（解决服务未就绪问题）
+        new Handler(Looper.getMainLooper()).postDelayed(
+            new Runnable() {
+                private int retryCount = 0; // 重试次数
+                private static final int MAX_RETRY = 5; // 最大重试5次
+                private static final int RETRY_DELAY = 300; // 每次重试间隔300ms
+
+                @Override
+                public void run() {
+                    MyService service = MyService.getInstance();
+                    if (service != null && service.gpsManager != null) {
+                        // 服务就绪，设置GPS回调
+                        setupGpsCallback(service);
+                        return;
+                    }
+
+                    // 服务未就绪，重试
+                    retryCount++;
+                    if (retryCount < MAX_RETRY) {
+                        new Handler(Looper.getMainLooper()).postDelayed(
+                            this,
+                            RETRY_DELAY
+                        );
+                        Log.w(
+                            "MyActivity",
+                            "GPS服务未就绪，重试第" + retryCount + "次"
+                        );
+                    } else {
+                        // 重试失败，给出提示
+                        runOnUiThread(() -> {
+                            Toast.makeText(
+                                MyActivity.this,
+                                zh_cn
+                                    ? "GPS服务启动失败，请重试"
+                                    : "GPS service start failed, please retry",
+                                Toast.LENGTH_SHORT
+                            ).show();
+                            isGpsRunning = false;
+                        });
+                        Log.e(
+                            "MyActivity",
+                            "GPS服务启动失败，已达最大重试次数"
+                        );
+                    }
+                }
+            },
+            200
+        ); // 首次延迟200ms，给服务启动时间
+
+        return 1;
+    }
+
+    // 抽离GPS回调设置逻辑，提高复用性
+    private void setupGpsCallback(MyService service) {
+        // 线程安全：同步块保护GPSManager操作
+        synchronized (service) {
+            // 先停止重复的GPS监听
             if (service.gpsManager.isGpsRunning()) {
                 service.gpsManager.stopGPS();
             }
-            // 启动GPS并设置回调（推荐：直接通过startGPS方法传回调）
+
+            // 设置GPS回调，确保UI更新在主线程
             service.gpsManager.startGPS(
                 new GPSManager.OnLocationUpdateListener() {
                     @Override
@@ -668,9 +709,8 @@ public class MyActivity
                         float speed,
                         float distance
                     ) {
-                        // 在UI线程更新UI（关键：避免子线程更新UI崩溃）
                         runOnUiThread(() -> {
-                            // 构造临时Location对象用于updateUI
+                            // 构造临时Location对象，确保数据完整性
                             Location tempLocation = new Location(
                                 LocationManager.GPS_PROVIDER
                             );
@@ -679,39 +719,31 @@ public class MyActivity
                             tempLocation.setAltitude(
                                 service.gpsManager.getPreviousAltitude()
                             );
+                            tempLocation.setSpeed(speed);
+
+                            // 强制更新UI，即使数据无变化
                             updateUI(tempLocation);
+                            Log.d(
+                                "MyActivity",
+                                "GPS位置更新，触发UI刷新：" + lat + "," + lng
+                            );
                         });
                     }
 
                     @Override
                     public void onGPSStatusChanged(String status) {
                         runOnUiThread(() -> {
-                            // 可选：更新GPS状态文本
                             Log.i("MyActivity", "GPS状态变化：" + status);
+                            // 状态变化时也更新UI（比如GPS从无信号到有信号）
+                            updateUI(null); // 传null时updateUI会用GPSManager的缓存数据
                         });
                     }
                 }
             );
-
-            // 备选：如果需要后续动态更新回调，使用setUpdateListener
-            // service.gpsManager.setUpdateListener(new GPSManager.OnLocationUpdateListener() {
-            //     @Override
-            //     public void onLocationUpdated(double lat, double lng, float speed, float distance) {
-            //         runOnUiThread(() -> {
-            //             Location tempLocation = new Location(LocationManager.GPS_PROVIDER);
-            //             tempLocation.setAltitude(service.gpsManager.getPreviousAltitude());
-            //             updateUI(tempLocation);
-            //         });
-            //     }
-            //
-            //     @Override
-            //     public void onGPSStatusChanged(String status) {
-            //         // 处理状态变化
-            //     }
-            // });
         }
 
-        return 1;
+        // 立即触发一次UI更新（显示初始状态）
+        runOnUiThread(() -> updateUI(null));
     }
 
     // MyActivity.java 替换原有报错的方法
@@ -781,6 +813,13 @@ public class MyActivity
     }
 
     private void updateUI(Location location) {
+        // 先更新GPS运行状态到UI（即使无位置数据）
+        if (isGpsRunning) {
+            strGpsStatus = zh_cn ? "GPS正在运行中..." : "GPS is running...";
+        } else {
+            strGpsStatus = zh_cn ? "GPS已停止" : "GPS stopped";
+        }
+
         // 第一步：获取GPSManager实例（做空指针防护）
         GPSManager gpsManager = null;
         MyService service = MyService.getInstance();
