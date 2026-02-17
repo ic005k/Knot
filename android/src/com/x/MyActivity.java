@@ -288,21 +288,24 @@ public class MyActivity
     public static boolean zh_cn;
 
     private LocationManager locationManager;
-    private double latitude = 0;
-    private double longitude = 0;
     private Executor gpsExecutor; // GPS专用线程（高优先级）
     private Executor networkExecutor; // 网络定位专用线程（低优先级）
 
     private boolean isTracking = false;
-    private long startTime = 0L;
+
+    ///////////////////////
+    /*private long startTime = 0L;
     private long movingTime;
+    private double latitude = 0;
+    private double longitude = 0;
     private float totalDistance = 0f;
     private float maxSpeed = 0f;
     private float mySpeed = 0f;
     private float totalClimb = 0f;
     private float totalDescent = 0f; // 累计下降（单位：米）
     private Location previousLocation;
-    private double previousAltitude;
+    private double previousAltitude;*/
+    /////////////////
 
     private String strGpsStatus = "GPS Status";
     private String strRunTime = "00:00:00";
@@ -620,109 +623,6 @@ public class MyActivity
         addDeskShortcuts();
     }
 
-    // 使用LocationListenerCompat定义位置监听器
-    private LocationListenerCompat locationListener1 =
-        new LocationListenerCompat() {
-            @Override
-            public void onLocationChanged(@NonNull Location location) {
-                if (
-                    LocationManager.GPS_PROVIDER.equals(location.getProvider())
-                ) {
-                    boolean stable = isGpsStable(location);
-                    boolean unstable = isGpsUnstable(location);
-
-                    // 稳定→切回GPS（停用网络）
-                    if (stable && !isGpsReady) {
-                        isGpsReady = true;
-                        stopNetworkLocationUpdates();
-                        Log.i(
-                            TAG,
-                            "GPS窗口内稳定（" +
-                                ACCURACY_WINDOW_SIZE +
-                                "次中多数达标），切回GPS"
-                        );
-                    }
-                    // 不稳定→切换到网络定位
-                    else if (unstable && isGpsReady) {
-                        isGpsReady = false;
-                        startNetworkLocationUpdates();
-                        Log.i(
-                            TAG,
-                            "GPS窗口内不稳定（" +
-                                ACCURACY_WINDOW_SIZE +
-                                "次中多数超标），切换到网络"
-                        );
-                    }
-
-                    // 正常更新轨迹（逻辑不变）
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
-                    updateTrackingData(location);
-                }
-            }
-
-            @Override
-            public void onStatusChanged(
-                String provider,
-                int status,
-                Bundle extras
-            ) {
-                switch (status) {
-                    case LocationProvider.AVAILABLE:
-                        strGpsStatus = "GPS: Available";
-                        break;
-                    case LocationProvider.OUT_OF_SERVICE:
-                        strGpsStatus = "GPS: Out of Service";
-                        break;
-                    case LocationProvider.TEMPORARILY_UNAVAILABLE:
-                        strGpsStatus = "GPS: Temporarily Unavailable";
-                        break;
-                }
-                Log.i(TAG, "GPS Status: " + strGpsStatus);
-            }
-
-            @Override
-            public void onProviderEnabled(@NonNull String provider) {
-                Log.d(TAG, "Provider enabled: " + provider);
-                if (
-                    LocationManager.GPS_PROVIDER.equals(provider) &&
-                    isGpsRunning
-                ) {
-                    // 关键修复：先移除已有监听，避免重复注册
-                    try {
-                        LocationManagerCompat.removeUpdates(
-                            locationManager,
-                            locationListener1
-                        );
-                        Log.i(TAG, "已移除旧的GPS监听器，准备重新注册");
-                    } catch (SecurityException e) {
-                        Log.e(TAG, "移除GPS监听器失败（权限问题）", e);
-                        return; // 权限不足时直接返回，避免无效注册
-                    }
-
-                    // 重新发起位置更新请求（复用配置）
-                    LocationRequestCompat locationRequest =
-                        new LocationRequestCompat.Builder(2000L)
-                            .setMinUpdateDistanceMeters(1.0f)
-                            .build();
-                    LocationManagerCompat.requestLocationUpdates(
-                        locationManager,
-                        LocationManager.GPS_PROVIDER,
-                        locationRequest,
-                        gpsExecutor,
-                        locationListener1
-                    );
-                    previousLocation = null; // 重置初始状态
-                    Log.i(TAG, "GPS已启用，重新注册监听器完成");
-                }
-            }
-
-            @Override
-            public void onProviderDisabled(@NonNull String provider) {
-                Log.d(TAG, "Provider disabled: " + provider);
-            }
-        };
-
     public String getGpsStatus() {
         return (
             strTotalDistance +
@@ -743,345 +643,174 @@ public class MyActivity
         );
     }
 
+    // MyActivity.java 的 startGpsUpdates 方法中
     public double startGpsUpdates() {
-        // 防止重复启动
-        if (isGpsRunning) {
-            Log.w(TAG, "GPS is already running");
-            return 1;
-        }
-
-        // ======================================
-        //前置校验定位权限（核心优化部分）
-        // ======================================
-        // 所需定位权限：精确GPS + 粗略网络定位（覆盖GPS/网络两种定位场景）
-        String fineLocPermission = Manifest.permission.ACCESS_FINE_LOCATION;
-        String coarseLocPermission = Manifest.permission.ACCESS_COARSE_LOCATION;
-        boolean hasFinePerm =
-            ContextCompat.checkSelfPermission(this, fineLocPermission) ==
-            PackageManager.PERMISSION_GRANTED;
-        boolean hasCoarsePerm =
-            ContextCompat.checkSelfPermission(this, coarseLocPermission) ==
-            PackageManager.PERMISSION_GRANTED;
-
-        // 1. 无任何定位权限时，发起权限请求
-        if (!hasFinePerm && !hasCoarsePerm) {
-            // 检查是否需要解释权限用途（用户之前拒绝过，但未勾选「不再询问」）
-            boolean shouldExplain =
-                ActivityCompat.shouldShowRequestPermissionRationale(
-                    this,
-                    fineLocPermission
-                );
-
-            if (shouldExplain) {
-                // 解释权限用途后，再请求
-                new AlertDialog.Builder(this)
-                    .setMessage(
-                        zh_cn
-                            ? "需要定位权限才能记录轨迹、获取位置信息"
-                            : "Location permission is required to record tracks and get location info"
-                    )
-                    .setPositiveButton(
-                        zh_cn ? "同意" : "Allow",
-                        (dialog, which) -> {
-                            // 请求权限（同时申请精确+粗略定位，覆盖所有定位场景）
-                            ActivityCompat.requestPermissions(
-                                this,
-                                new String[] {
-                                    fineLocPermission,
-                                    coarseLocPermission,
-                                },
-                                REQ_LOCATION
-                            );
-                        }
-                    )
-                    .setNegativeButton(
-                        zh_cn ? "拒绝" : "Deny",
-                        (dialog, which) -> isGpsRunning = false
-                    )
-                    .show();
-            } else {
-                // 用户之前永久拒绝（勾选「不再询问」），引导跳转到应用设置页
-                new AlertDialog.Builder(this)
-                    .setMessage(
-                        zh_cn
-                            ? "定位权限已被拒绝，请在设置中开启"
-                            : "Location permission is denied, please enable it in settings"
-                    )
-                    .setPositiveButton(
-                        zh_cn ? "去设置" : "Go to Settings",
-                        (dialog, which) -> {
-                            Intent intent = new Intent(
-                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                            );
-                            intent.setData(
-                                Uri.fromParts("package", getPackageName(), null)
-                            );
-                            startActivity(intent);
-                        }
-                    )
-                    .setNegativeButton(
-                        zh_cn ? "取消" : "Cancel",
-                        (dialog, which) -> isGpsRunning = false
-                    )
-                    .show();
-            }
-            return 0; // 权限未获取，直接返回
-        }
-
         setVibrate();
-        // 彻底重置追踪数据
-        latitude = 0;
-        longitude = 0;
-        startTime = System.currentTimeMillis();
-        totalDistance = 0f;
-        maxSpeed = 0f;
-        mySpeed = 0f;
-        totalClimb = 0f;
-        totalDescent = 0f;
-        previousLocation = null;
-        movingTime = 0;
-        previousAltitude = 0f;
-
+        Intent intent = new Intent(this, MyService.class);
+        intent.setAction("com.x.ACTION_START_GPS");
+        startService(intent);
         isGpsRunning = true;
 
-        // 复用或创建LocationManager（避免重复实例）
-        if (locationManager == null) {
-            locationManager = (LocationManager) getSystemService(
-                Context.LOCATION_SERVICE
-            );
-        }
-
-        // 为GPS创建独立线程（命名线程名，方便调试）
-        gpsExecutor = Executors.newSingleThreadExecutor(runnable -> {
-            Thread thread = new Thread(runnable, "GPS-Update-Thread");
-            thread.setPriority(Thread.MAX_PRIORITY); // 提高GPS线程优先级
-            return thread;
-        });
-
-        // 为网络定位创建独立线程
-        networkExecutor = Executors.newSingleThreadExecutor(runnable -> {
-            Thread thread = new Thread(runnable, "Network-Update-Thread");
-            thread.setPriority(Thread.NORM_PRIORITY); // 普通优先级
-            return thread;
-        });
-
-        // 强化状态校验：再次检查位置服务是否开启
-        boolean isGpsEnabled = locationManager.isProviderEnabled(
-            LocationManager.GPS_PROVIDER
-        );
-        boolean isNetworkEnabled = locationManager.isProviderEnabled(
-            LocationManager.NETWORK_PROVIDER
-        );
-        if (!isGpsEnabled && !isNetworkEnabled) {
-            new AlertDialog.Builder(this)
-                .setMessage(
-                    zh_cn
-                        ? "位置服务未开启，请开启位置服务以获取位置信息"
-                        : "Location service is disabled, please enable it to get location info"
-                )
-                .setPositiveButton(
-                    zh_cn ? "去开启" : "Enable",
-                    (dialog, which) -> {
-                        Intent intent = new Intent(
-                            Settings.ACTION_LOCATION_SOURCE_SETTINGS
-                        );
-                        startActivity(intent);
-                        new Handler(Looper.getMainLooper()).postDelayed(
-                            this::startGpsUpdates,
-                            2000
-                        );
+        // 设置GPSManager的回调（现在有了setUpdateListener方法）
+        MyService service = MyService.getInstance();
+        if (service != null && service.gpsManager != null) {
+            // 先停止GPS（避免重复运行），再重新启动并设置回调
+            if (service.gpsManager.isGpsRunning()) {
+                service.gpsManager.stopGPS();
+            }
+            // 启动GPS并设置回调（推荐：直接通过startGPS方法传回调）
+            service.gpsManager.startGPS(
+                new GPSManager.OnLocationUpdateListener() {
+                    @Override
+                    public void onLocationUpdated(
+                        double lat,
+                        double lng,
+                        float speed,
+                        float distance
+                    ) {
+                        // 在UI线程更新UI（关键：避免子线程更新UI崩溃）
+                        runOnUiThread(() -> {
+                            // 构造临时Location对象用于updateUI
+                            Location tempLocation = new Location(
+                                LocationManager.GPS_PROVIDER
+                            );
+                            tempLocation.setLatitude(lat);
+                            tempLocation.setLongitude(lng);
+                            tempLocation.setAltitude(
+                                service.gpsManager.getPreviousAltitude()
+                            );
+                            updateUI(tempLocation);
+                        });
                     }
-                )
-                .setNegativeButton(zh_cn ? "取消" : "Cancel", (dialog, which) ->
-                    isGpsRunning = false
-                )
-                .show();
-            return 0;
-        }
 
-        // 定义GPS定位请求配置（和原逻辑参数一致）
-        LocationRequestCompat locationRequest =
-            new LocationRequestCompat.Builder(2000L) // 更新间隔2000ms（2秒）
-                .setMinUpdateDistanceMeters(1.0f) // 最小移动1米才更新
-                .build();
-
-        // 定义网络定位请求配置（和原逻辑参数一致）
-        LocationRequestCompat networkLocationRequest =
-            new LocationRequestCompat.Builder(2000L) // 更新间隔2000ms（2秒）
-                .setMinUpdateDistanceMeters(5.0f) // 最小移动5米才更新（降低网络定位功耗）
-                .build();
-
-        // GPS定位使用gpsExecutor
-        LocationManagerCompat.requestLocationUpdates(
-            locationManager,
-            LocationManager.GPS_PROVIDER,
-            locationRequest,
-            gpsExecutor, // 专用线程
-            locationListener1
-        );
-
-        // 网络定位使用networkExecutor（仅当有粗略定位权限时）
-        if (hasCoarsePerm) {
-            LocationManagerCompat.requestLocationUpdates(
-                locationManager,
-                LocationManager.NETWORK_PROVIDER,
-                networkLocationRequest,
-                networkExecutor, // 专用线程
-                networkLocationListener
+                    @Override
+                    public void onGPSStatusChanged(String status) {
+                        runOnUiThread(() -> {
+                            // 可选：更新GPS状态文本
+                            Log.i("MyActivity", "GPS状态变化：" + status);
+                        });
+                    }
+                }
             );
-            Log.i(TAG, "网络定位已启动（已获取粗略定位权限）");
-        } else {
-            Log.i(TAG, "未获取粗略定位权限，跳过网络定位");
+
+            // 备选：如果需要后续动态更新回调，使用setUpdateListener
+            // service.gpsManager.setUpdateListener(new GPSManager.OnLocationUpdateListener() {
+            //     @Override
+            //     public void onLocationUpdated(double lat, double lng, float speed, float distance) {
+            //         runOnUiThread(() -> {
+            //             Location tempLocation = new Location(LocationManager.GPS_PROVIDER);
+            //             tempLocation.setAltitude(service.gpsManager.getPreviousAltitude());
+            //             updateUI(tempLocation);
+            //         });
+            //     }
+            //
+            //     @Override
+            //     public void onGPSStatusChanged(String status) {
+            //         // 处理状态变化
+            //     }
+            // });
         }
 
         return 1;
     }
 
+    // MyActivity.java 替换原有报错的方法
     public double getTotalDistance() {
-        return totalDistance;
+        // 双层空指针防护：先检查服务实例，再检查gpsManager
+        MyService service = MyService.getInstance();
+        if (service == null || service.gpsManager == null) {
+            Log.w("MyActivity", "服务未启动或gpsManager未初始化，返回0");
+            return 0;
+        }
+        // 改为调用getTotalDistance()方法（而非直接访问字段）
+        return service.gpsManager.getTotalDistance();
     }
 
     public double getMySpeed() {
-        return mySpeed;
+        MyService service = MyService.getInstance();
+        if (service == null || service.gpsManager == null) {
+            Log.w("MyActivity", "服务未启动或gpsManager未初始化，返回0");
+            return 0;
+        }
+        // 改为调用getMySpeed()方法
+        return service.gpsManager.getMySpeed();
     }
 
     public double getMaxSpeed() {
-        return maxSpeed;
+        MyService service = MyService.getInstance();
+        if (service == null || service.gpsManager == null) {
+            Log.w("MyActivity", "服务未启动或gpsManager未初始化，返回0");
+            return 0;
+        }
+        // 改为调用getMaxSpeed()方法
+        return service.gpsManager.getMaxSpeed();
     }
 
     public double getLatitude() {
-        return latitude;
+        MyService service = MyService.getInstance();
+        if (service == null || service.gpsManager == null) {
+            Log.w("MyActivity", "服务未启动或gpsManager未初始化，返回0");
+            return 0;
+        }
+        // GPSManager已有getLatitude()方法，直接调用
+        return service.gpsManager.getLatitude();
     }
 
     public double getLongitude() {
-        return longitude;
+        MyService service = MyService.getInstance();
+        if (service == null || service.gpsManager == null) {
+            Log.w("MyActivity", "服务未启动或gpsManager未初始化，返回0");
+            return 0;
+        }
+        // 改为调用getLongitude()方法（而非直接访问longitude字段）
+        return service.gpsManager.getLongitude();
     }
 
     public double stopGpsUpdates() {
+        // ========== 原有震动逻辑 ==========
         setVibrate();
-        isGpsRunning = false;
-        isGpsReady = false;
-        stopNetworkLocationUpdates();
+        // =================================
 
-        // 1. 移除位置监听器（核心，先停数据来源）
-        if (locationManager != null) {
-            if (locationListener1 != null) {
-                try {
-                    LocationManagerCompat.removeUpdates(
-                        locationManager,
-                        locationListener1
-                    );
-                } catch (SecurityException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (networkLocationListener != null) {
-                try {
-                    LocationManagerCompat.removeUpdates(
-                        locationManager,
-                        networkLocationListener
-                    );
-                } catch (SecurityException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        // 转发到MyService停止GPS
+        Intent intent = new Intent(this, MyService.class);
+        intent.setAction("com.x.ACTION_STOP_GPS");
+        startService(intent);
 
-        // 2. 关闭GPS线程池（强制终止+等待）
-        if (gpsExecutor instanceof ExecutorService) {
-            ExecutorService gpsService = (ExecutorService) gpsExecutor;
-            gpsService.shutdownNow(); // 强制终止所有正在执行的任务
-            try {
-                // 等待1秒让线程池终止（超时后不再等待，避免阻塞主线程）
-                if (!gpsService.awaitTermination(1, TimeUnit.SECONDS)) {
-                    Log.w(TAG, "GPS线程池未在1秒内终止，可能残留任务");
-                }
-            } catch (InterruptedException e) {
-                // 等待被中断时，再次尝试终止
-                gpsService.shutdownNow();
-                Thread.currentThread().interrupt(); // 恢复中断状态
-            }
-            gpsExecutor = null;
-        }
-
-        // 3. 关闭网络定位线程池（同上逻辑）
-        if (networkExecutor instanceof ExecutorService) {
-            ExecutorService networkService = (ExecutorService) networkExecutor;
-            networkService.shutdownNow();
-            try {
-                if (!networkService.awaitTermination(1, TimeUnit.SECONDS)) {
-                    Log.w(TAG, "网络定位线程池未在1秒内终止，可能残留任务");
-                }
-            } catch (InterruptedException e) {
-                networkService.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
-            networkExecutor = null;
-        }
-
-        // 4. 重置状态
-        previousLocation = null;
-        previousAltitude = 0f;
-        locationManager = null;
-
-        return totalDistance;
-    }
-
-    // 更新运动数据
-    private void updateTrackingData(Location currentLocation) {
-        if (previousLocation != null) {
-            if (currentLocation.getSpeed() > 0) {
-                // 运动状态
-                long currentTime = System.currentTimeMillis();
-                movingTime += currentTime - startTime;
-                startTime = currentTime;
-
-                // 计算距离
-                totalDistance +=
-                    previousLocation.distanceTo(currentLocation) / 1000; // 转换为公里
-
-                // 计算最大速度
-                mySpeed = currentLocation.getSpeed() * 3.6f; // 转换为 km/h
-                if (mySpeed > maxSpeed) {
-                    maxSpeed = mySpeed;
-                }
-
-                // 计算爬升
-                double currentAltitude = currentLocation.getAltitude();
-                if (previousAltitude != 0) {
-                    // 过滤明显异常的海拔（比如低于-100米或高于9000米，按需调整）
-                    if (currentAltitude > -100 && currentAltitude < 9000) {
-                        double altitudeDiff =
-                            currentAltitude - previousAltitude;
-                        if (altitudeDiff > 0) {
-                            totalClimb += altitudeDiff; // 爬升
-                        } else if (altitudeDiff < 0) {
-                            totalDescent += Math.abs(altitudeDiff); // 下降（取绝对值）
-                        }
-                    }
-                    previousAltitude = currentAltitude;
-                } else {
-                    previousAltitude = currentAltitude;
-                }
-            } else {
-                // 静止状态，更新开始时间
-                startTime = System.currentTimeMillis();
-            }
-        } else {
-            previousAltitude = currentLocation.getAltitude();
-        }
-
-        // 更新 UI
-        updateUI(currentLocation);
-
-        previousLocation = currentLocation;
+        // 返回当前总距离（保持原有返回值类型）
+        return getTotalDistance();
     }
 
     private void updateUI(Location location) {
-        // 运动距离
+        // 第一步：获取GPSManager实例（做空指针防护）
+        GPSManager gpsManager = null;
+        MyService service = MyService.getInstance();
+        if (service != null) {
+            gpsManager = service.gpsManager;
+        }
+        if (gpsManager == null) {
+            Log.w(TAG, "updateUI失败：GPSManager未初始化");
+            // 显示默认值，避免UI空白
+            strTotalDistance = "0.00 km";
+            strRunTime = "00:00:00";
+            strAverageSpeed = "0.00 km/h";
+            strMaxSpeed = zh_cn
+                ? "最大速度: 0.00 km/h"
+                : "Max Speed: 0.00 km/h";
+            strAltitude = zh_cn ? "海拔: 0.00 m" : "Altitude: 0.00 m";
+            strTotalClimb = zh_cn ? "累计爬升: 0.00 m" : "Total Climb: 0.00 m";
+            strTotalDescent = zh_cn
+                ? "累计下降: 0.00 m"
+                : "Total Descent: 0.00 m";
+            return;
+        }
+
+        // 第二步：从GPSManager获取实时运动数据（替换所有本地变量）
+        // 运动距离（从GPSManager获取）
+        float totalDistance = gpsManager.getTotalDistance();
         strTotalDistance = String.format("%.2f km", totalDistance);
 
-        // 运动时间
+        // 运动时间（从GPSManager获取movingTime）
+        long movingTime = gpsManager.getMovingTime();
         long seconds = movingTime / 1000;
         strRunTime = String.format(
             "%02d:%02d:%02d",
@@ -1090,39 +819,62 @@ public class MyActivity
             seconds % 60
         );
 
-        // 平均速度
-        double avgSpeed = totalDistance / (movingTime / 3600000f);
+        // 平均速度（基于GPSManager的总距离和运动时间计算）
+        double avgSpeed = 0;
+        if (movingTime > 0) {
+            // 避免除以0
+            avgSpeed = totalDistance / (movingTime / 3600000f);
+        }
         strAverageSpeed = String.format("%.2f km/h", avgSpeed);
 
-        // 最大速度
-        if (zh_cn) strMaxSpeed = String.format("最大速度: %.2f km/h", maxSpeed);
-        else strMaxSpeed = String.format("Max Speed: %.2f km/h", maxSpeed);
+        // 最大速度（从GPSManager获取）
+        float maxSpeed = gpsManager.getMaxSpeed();
+        if (zh_cn) {
+            strMaxSpeed = String.format("最大速度: %.2f km/h", maxSpeed);
+        } else {
+            strMaxSpeed = String.format("Max Speed: %.2f km/h", maxSpeed);
+        }
 
-        // 海拔
-        if (zh_cn) strAltitude = String.format(
-            "海拔: %.2f",
-            location.getAltitude()
-        );
-        else strAltitude = String.format(
-            "Altitude: %.2f",
-            location.getAltitude()
-        );
+        // 海拔（从Location或GPSManager获取，优先Location）
+        double altitude =
+            location != null
+                ? location.getAltitude()
+                : gpsManager.getPreviousAltitude();
+        if (zh_cn) {
+            strAltitude = String.format("海拔: %.2f m", altitude);
+        } else {
+            strAltitude = String.format("Altitude: %.2f m", altitude);
+        }
 
-        // 爬升
-        if (zh_cn) strTotalClimb = String.format(
-            "累计爬升: %.2f m",
-            totalClimb
-        );
-        else strTotalClimb = String.format("Total Climb: %.2f m", totalClimb);
+        // 累计爬升（从GPSManager获取）
+        float totalClimb = gpsManager.getTotalClimb();
+        if (zh_cn) {
+            strTotalClimb = String.format("累计爬升: %.2f m", totalClimb);
+        } else {
+            strTotalClimb = String.format("Total Climb: %.2f m", totalClimb);
+        }
 
-        // 累计下降
-        if (zh_cn) strTotalDescent = String.format(
-            "累计下降: %.2f m",
-            totalDescent
-        );
-        else strTotalDescent = String.format(
-            "Total Descent: %.2f m",
-            totalDescent
+        // 累计下降（从GPSManager获取）
+        float totalDescent = gpsManager.getTotalDescent();
+        if (zh_cn) {
+            strTotalDescent = String.format("累计下降: %.2f m", totalDescent);
+        } else {
+            strTotalDescent = String.format(
+                "Total Descent: %.2f m",
+                totalDescent
+            );
+        }
+
+        // 可选：更新GPS状态文本（从GPSManager获取就绪状态）
+        strGpsStatus = gpsManager.isGpsReady()
+            ? (zh_cn ? "GPS已就绪（高精度）" : "GPS Ready (High Precision)")
+            : (zh_cn
+                  ? "GPS未就绪（网络定位）"
+                  : "GPS Not Ready (Network Location)");
+
+        Log.d(
+            TAG,
+            "UI已更新：距离=" + strTotalDistance + "，速度=" + strMaxSpeed
         );
     }
 
@@ -1200,8 +952,6 @@ public class MyActivity
     protected void onDestroy() {
         Log.i(TAG, "Main onDestroy...");
 
-        if (isGpsRunning) stopGpsUpdates();
-
         getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
 
         if (mScreenStatusReceiver != null) {
@@ -1221,10 +971,6 @@ public class MyActivity
         }
 
         super.onDestroy();
-
-        // 兜底置空所有监听器引用（防止残留）
-        locationListener1 = null;
-        networkLocationListener = null;
 
         m_instance = null;
 
@@ -2823,166 +2569,6 @@ public class MyActivity
             }
         }
         return newPoints;
-    }
-
-    // 网络定位监听器（仅辅助，不覆盖GPS数据）
-    private LocationListenerCompat networkLocationListener =
-        new LocationListenerCompat() {
-            @Override
-            public void onLocationChanged(@NonNull Location location) {
-                // GPS未就绪时，网络定位正常生成轨迹（去掉初始位置限制）
-                if (!isGpsReady) {
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
-                    updateTrackingData(location); // 关键：调用轨迹计算方法
-                    Log.i(
-                        TAG,
-                        "网络定位更新（生成轨迹）：精度=" +
-                            location.getAccuracy() +
-                            "米"
-                    );
-                    updateUI(location); // 同步更新UI
-                } else {
-                    // GPS已就绪，忽略网络定位数据
-                    Log.d(TAG, "GPS已就绪，忽略网络定位数据");
-                }
-            }
-
-            @Override
-            public void onStatusChanged(
-                String provider,
-                int status,
-                Bundle extras
-            ) {
-                Log.d(
-                    TAG,
-                    "网络定位状态变化：" + provider + "，状态=" + status
-                );
-            }
-
-            @Override
-            public void onProviderEnabled(@NonNull String provider) {
-                Log.d(TAG, "网络定位已启用：" + provider);
-            }
-
-            @Override
-            public void onProviderDisabled(@NonNull String provider) {
-                Log.d(TAG, "网络定位已禁用：" + provider);
-            }
-        };
-
-    // 停止网络定位更新（GPS就绪后调用，既防数据冲突又省耗电）
-    private void stopNetworkLocationUpdates() {
-        if (locationManager != null && networkLocationListener != null) {
-            try {
-                LocationManagerCompat.removeUpdates(
-                    locationManager,
-                    networkLocationListener
-                );
-                Log.i(TAG, "GPS就绪，停止网络定位（省功耗+防干扰）");
-            } catch (SecurityException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    // 重新启用网络定位（GPS信号差时调用）
-    private void startNetworkLocationUpdates() {
-        // 1. 基础条件校验（定位未启动或核心实例为空时直接返回）
-        if (
-            locationManager == null ||
-            networkLocationListener == null ||
-            !isGpsRunning
-        ) {
-            Log.w(TAG, "网络定位启动失败：定位未运行或核心实例为空");
-            return;
-        }
-
-        // 2. 新增：检查网络定位是否被用户启用（核心补充）
-        boolean isNetworkEnabled = locationManager.isProviderEnabled(
-            LocationManager.NETWORK_PROVIDER
-        );
-        if (!isNetworkEnabled) {
-            Log.w(
-                TAG,
-                "网络定位启动失败：用户已禁用网络定位（请在位置服务中开启）"
-            );
-            return;
-        }
-
-        // 3. 权限校验（确保有网络定位权限）
-        if (
-            ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) !=
-            PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.w(TAG, "网络定位启动失败：缺少粗略定位权限");
-            return;
-        }
-
-        // 4. 复用配置，注册网络定位监听器
-        LocationRequestCompat networkLocationRequest =
-            new LocationRequestCompat.Builder(2000L)
-                .setMinUpdateDistanceMeters(5.0f)
-                .build();
-
-        LocationManagerCompat.requestLocationUpdates(
-            locationManager,
-            LocationManager.NETWORK_PROVIDER,
-            networkLocationRequest,
-            networkExecutor,
-            networkLocationListener
-        );
-        Log.i(TAG, "网络定位已成功启用（GPS信号差兜底）");
-    }
-
-    private boolean isGpsStable(Location location) {
-        // 1. 过滤无效定位（经纬度为0时不纳入统计）
-        if (location.getLatitude() == 0 || location.getLongitude() == 0) {
-            return false;
-        }
-
-        // 2. 添加当前精度到窗口，超出大小则移除最早的
-        accuracyHistory.offer(location.getAccuracy());
-        if (accuracyHistory.size() > ACCURACY_WINDOW_SIZE) {
-            accuracyHistory.poll();
-        }
-
-        // 3. 窗口未满时（刚开始定位），暂不判定为稳定（避免数据不足导致误判）
-        if (accuracyHistory.size() < ACCURACY_WINDOW_SIZE) {
-            return false;
-        }
-
-        // 4. 统计窗口内达标的次数（≤20米）
-        long goodCount = accuracyHistory
-            .stream()
-            .filter(acc -> acc <= GPS_GOOD_THRESHOLD)
-            .count();
-
-        // 5. 达标率≥80%则判定为稳定（5次中至少4次达标）
-        return goodCount >= ACCURACY_WINDOW_SIZE * 0.8;
-    }
-
-    private boolean isGpsUnstable(Location location) {
-        if (location.getLatitude() == 0 || location.getLongitude() == 0) {
-            return true; // 无效定位直接判定为差
-        }
-
-        // 复用同一个窗口（无需额外维护队列，避免冗余）
-        if (accuracyHistory.size() < ACCURACY_WINDOW_SIZE) {
-            return false; // 窗口未满时，不轻易判定为变差
-        }
-
-        // 统计窗口内超标的次数（>30米）
-        long badCount = accuracyHistory
-            .stream()
-            .filter(acc -> acc > GPS_BAD_THRESHOLD)
-            .count();
-
-        // 超标率≥80%则判定为不稳定
-        return badCount >= ACCURACY_WINDOW_SIZE * 0.8;
     }
 
     public static Context getMyAppContext() {

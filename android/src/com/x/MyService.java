@@ -1,6 +1,7 @@
 package com.x;
 
 import android.Manifest;
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -33,6 +34,8 @@ import android.provider.Settings;
 import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+// ========== 新增：导入GPSManager相关 ==========
+import androidx.core.content.ContextCompat;
 import com.x.MyActivity;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
@@ -44,6 +47,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MyService extends Service {
+
+    // ========== 新增GPS逻辑：核心变量 ==========
+    public volatile GPSManager gpsManager; // GPS管理器实例
+    private static MyService instance;
+    private boolean isGpsRunning = false; // GPS运行状态标记
+    // ==========================================
 
     private static final String TAG = "MyService";
     private static final String ID = "channel_1";
@@ -111,6 +120,8 @@ public class MyService extends Service {
         super.onCreate();
         Log.i(TAG, "Service on create"); // 服务被创建
 
+        instance = this; // 保存服务实例
+
         // 权限设置页面需要在 Activity 的任务栈中启动，必须用 Activity 上下文,而不是getMyAppContext()
         Context context = MyActivity.getMyAppContext();
 
@@ -151,6 +162,10 @@ public class MyService extends Service {
 
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
+        // ========== 新增GPS逻辑：初始化GPSManager ==========
+        gpsManager = GPSManager.getInstance(getApplicationContext());
+        // ==========================================
+
         isReady = true;
     }
 
@@ -158,6 +173,17 @@ public class MyService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("MyService", "onStartCommand()-------");
+
+        // ========== 新增GPS逻辑：处理GPS启停指令 ==========
+        if (intent != null) {
+            String action = intent.getAction();
+            if ("com.x.ACTION_START_GPS".equals(action)) {
+                startGPS(); // 启动GPS
+            } else if ("com.x.ACTION_STOP_GPS".equals(action)) {
+                stopGPS(); // 停止GPS
+            }
+        }
+        // ==========================================
 
         if (Build.VERSION.SDK_INT >= 26) {
             setForeground();
@@ -196,6 +222,10 @@ public class MyService extends Service {
 
         Log.d("MyService", "onDestroy()-------");
 
+        // ========== 新增GPS逻辑：服务销毁时停止GPS ==========
+        stopGPS();
+        // ==========================================
+
         super.onDestroy();
 
         // 取消注册接收器
@@ -210,6 +240,8 @@ public class MyService extends Service {
                 mSensorManager.unregisterListener(mySensorSerivece);
             }
         }
+
+        instance = null; // 服务销毁时清空实例
     }
 
     @TargetApi(26)
@@ -744,6 +776,94 @@ public class MyService extends Service {
             }
         }
     };
+
+    // ========== 新增GPS逻辑：启动GPS方法（供C++调用） ==========
+    public boolean startGPS() {
+        if (isGpsRunning) {
+            Log.w(TAG, "GPS已在运行，无需重复启动");
+            return true;
+        }
+
+        // 检查定位权限
+        Context context = getApplicationContext();
+        String finePerm = Manifest.permission.ACCESS_FINE_LOCATION;
+        String coarsePerm = Manifest.permission.ACCESS_COARSE_LOCATION;
+        boolean hasFine =
+            ContextCompat.checkSelfPermission(context, finePerm) ==
+            PackageManager.PERMISSION_GRANTED;
+        boolean hasCoarse =
+            ContextCompat.checkSelfPermission(context, coarsePerm) ==
+            PackageManager.PERMISSION_GRANTED;
+
+        if (!hasFine && !hasCoarse) {
+            Log.e(TAG, "缺少定位权限，启动GPS失败");
+            return false;
+        }
+
+        // 启动GPSManager
+        boolean success = gpsManager.startGPS(
+            new GPSManager.OnLocationUpdateListener() {
+                @Override
+                public void onLocationUpdated(
+                    double lat,
+                    double lng,
+                    float speed,
+                    float distance
+                ) {
+                    // GPS数据更新回调
+                    // 这里可以：
+                    // 1. 直接调用native方法把数据传给C++层
+                    // 2. 保存到全局变量供C++读取
+                    // 示例：假设你有native方法CallJavaNotify_GPS更新数据
+                    // CallJavaNotify_GPS(lat, lng, speed, distance);
+
+                    Log.d(
+                        TAG,
+                        "GPS更新：纬度=" +
+                            lat +
+                            " 经度=" +
+                            lng +
+                            " 速度=" +
+                            speed +
+                            " 距离=" +
+                            distance
+                    );
+                }
+
+                @Override
+                public void onGPSStatusChanged(String status) {
+                    Log.d(TAG, "GPS状态：" + status);
+                }
+            }
+        );
+
+        if (success) {
+            isGpsRunning = true;
+            Log.i(TAG, "GPS启动成功（前台服务托管）");
+        } else {
+            Log.e(TAG, "GPS启动失败");
+        }
+
+        return success;
+    }
+
+    // ==========================================
+
+    // ========== 新增GPS逻辑：停止GPS方法（供C++调用） ==========
+    public void stopGPS() {
+        if (!isGpsRunning) {
+            return;
+        }
+
+        gpsManager.stopGPS();
+        isGpsRunning = false;
+        Log.i(TAG, "GPS已停止（前台服务托管）");
+    }
+
+    // ==========================================
+    public static MyService getInstance() {
+        return instance;
+    }
 
     //////////////////////////////////////////////////////////////////////
 }
