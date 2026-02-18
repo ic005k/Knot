@@ -240,7 +240,6 @@ public class MyActivity
 
     private MediaRecorder recorder;
     private MediaPlayer player;
-    public static ArrayList<Activity> alarmWindows = new ArrayList<Activity>();
 
     private AlarmReceiver mAlarmReceiver;
 
@@ -1020,7 +1019,6 @@ public class MyActivity
             }
         }
 
-        alarmWindows.remove(this); // 防止 Activity 泄漏
         mapActivityInstance = null;
 
         if (checkNeedRestart()) {
@@ -2168,15 +2166,6 @@ public class MyActivity
         }
     }
 
-    public static void closeAllAlarmWindows() {
-        int count = alarmWindows.size();
-        for (int i = 0; i < count; i++) {
-            Activity mActivity = alarmWindows.get(count - 1 - i);
-            mActivity.finish();
-        }
-        alarmWindows.clear();
-    }
-
     public static boolean isZh(Context context) {
         Locale locale;
         // 适配 API 24+ 多语言获取方式
@@ -2617,85 +2606,6 @@ public class MyActivity
             return m_instance.getApplicationContext();
         }
         return null;
-    }
-
-    /**
-     * 函数1：保存打开状态的ClockActivity内容并关闭窗口（Qt6可调用）
-     * 遍历alarmWindows，找到ClockActivity实例，保存其内容后关闭
-     */
-    public static void saveAndCloseClockWindow() {
-        synchronized (clockLock) {
-            if (alarmWindows == null || alarmWindows.isEmpty()) {
-                Log.d(TAG, "无打开的ClockActivity窗口，无需保存关闭");
-                isNeedRestoreClock = false; // 无窗口，无需恢复
-                return;
-            }
-
-            // 遍历alarmWindows，筛选ClockActivity实例
-            boolean hasClockActivity = false;
-            for (Activity activity : alarmWindows) {
-                if (
-                    activity instanceof ClockActivity && !activity.isFinishing()
-                ) {
-                    ClockActivity clockActivity = (ClockActivity) activity;
-                    // 保存内容 + 标记需要恢复
-                    savedClockContent = clockActivity.getStrInfo();
-                    isNeedRestoreClock = true; // 关键：标记为需要恢复
-                    Log.d(
-                        TAG,
-                        "主题切换关闭ClockActivity，标记为需要恢复，内容：" +
-                            savedClockContent
-                    );
-
-                    // 关闭窗口
-                    clockActivity.finish();
-                    alarmWindows.remove(activity);
-                    hasClockActivity = true;
-                    break;
-                }
-            }
-
-            // 若没有ClockActivity，清空标记
-            if (!hasClockActivity) {
-                isNeedRestoreClock = false;
-            }
-        }
-    }
-
-    /**
-     * 函数2：重新打开ClockActivity并恢复上次保存的内容（Qt6可调用）
-     */
-    public static void reopenClockWindow() {
-        synchronized (clockLock) {
-            // 核心判断：仅标记为需要恢复时，才执行恢复
-            if (!isNeedRestoreClock) {
-                Log.d(
-                    TAG,
-                    "无需要恢复的ClockActivity（非主题切换关闭），跳过恢复"
-                );
-                return;
-            }
-
-            if (m_instance == null) {
-                Log.e(TAG, "MyActivity实例为空，无法启动ClockActivity");
-                isNeedRestoreClock = false; // 清空标记
-                return;
-            }
-
-            // 启动ClockActivity并传递保存的内容
-            Intent intent = new Intent(getMyAppContext(), ClockActivity.class);
-            intent.putExtra("SAVED_CLOCK_CONTENT", savedClockContent);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            getMyAppContext().startActivity(intent);
-            Log.d(
-                TAG,
-                "恢复主题切换关闭的ClockActivity，内容：" + savedClockContent
-            );
-
-            // 恢复后清空标记 + 清空保存的内容（避免重复恢复）
-            isNeedRestoreClock = false;
-            savedClockContent = "";
-        }
     }
 
     // 新增：标记需要重启（替代原setReOpen）

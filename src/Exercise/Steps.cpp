@@ -904,6 +904,8 @@ void Steps::updateGetGps() {
       QStringList altiList = strAltitude.split(":");
       if (altiList.count() == 2) {
         dAltitude = altiList.at(1).trimmed();
+        dAltitude = dAltitude.replace("m", "");
+        dAltitude = dAltitude.trimmed();
         altitude = dAltitude.toDouble();
       } else {
         // 异常处理：赋值默认值或打印日志

@@ -56,31 +56,25 @@ static void JavaNotify_2() {
 }
 
 static void JavaNotify_3() {
-  mw_one->alertWindowsCount++;
   mw_one->m_Todo->refreshAlarm();
 
   qDebug() << "C++ JavaNotify_3";
 }
 
 static void JavaNotify_4() {
-  mw_one->alertWindowsCount--;
-
-  if (mw_one->alertWindowsCount == 0) {
-    bool isBackMain = false;
-    QJniObject activity =
-        QJniObject(QNativeInterface::QAndroidApplication::context());
-    if (activity.isValid()) {
-      jboolean result = activity.callMethod<jboolean>("getIsBackMainUI", "()Z");
-      activity.callMethod<void>("setIsBackMainUI", "(Z)V", false);
-      isBackMain = result;
-    }
-
-    if (!isBackMain) {
-      mw_one->setMini();
-    }
+  bool isBackMain = false;
+  QJniObject activity =
+      QJniObject(QNativeInterface::QAndroidApplication::context());
+  if (activity.isValid()) {
+    jboolean result = activity.callMethod<jboolean>("getIsBackMainUI", "()Z");
+    activity.callMethod<void>("setIsBackMainUI", "(Z)V", false);
+    isBackMain = result;
   }
 
-  qDebug() << "alertWindowsCount=" << mw_one->alertWindowsCount;
+  if (!isBackMain) {
+    mw_one->setMini();
+  }
+
   qDebug() << "C++ JavaNotify_4";
 }
 

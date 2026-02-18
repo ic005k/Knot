@@ -180,7 +180,6 @@ class MainWindow : public QMainWindow {
   QString treeStyle = "QTreeWidget::item {height: 28;}";
   int mainHeight = 0;
 
-  int alertWindowsCount = 0;
   QString strText;
   QString strRefreshUrl;
   QString CurrentYear = "20xx";

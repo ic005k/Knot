@@ -40,9 +40,6 @@ extern void RegJni19(const char* myClassName);
 void loadTheme(bool isDark);
 void loadLocal();
 
-void callSaveAndCloseClockWindow();
-void callReopenClockWindow();
-
 QPalette createDarkPalette();
 QPalette createLightPalette();
 
@@ -311,8 +308,6 @@ int main(int argc, char* argv[]) {
 }
 
 void loadTheme(bool isDark) {
-  // callSaveAndCloseClockWindow();
-
   isInitThemeEnd = false;
   // 设置调色板
   if (isDark) {
@@ -399,8 +394,6 @@ void loadTheme(bool isDark) {
       if (mw_one) mw_one->execDeskShortcut();  // 空指针校验
     });
   }
-
-  // QTimer::singleShot(100, nullptr, []() { callReopenClockWindow(); });
 }
 
 QPalette createDarkPalette() {
@@ -647,51 +640,4 @@ int clearLockFiles(const QString& iniDir) {
   qInfo() << "清除完成：目录" << iniDir << "共处理" << fileInfos.size()
           << "个.lock文件，成功删除" << deletedCount << "个";
   return deletedCount;
-}
-
-/**
- * 调用MyActivity的saveAndCloseClockWindow()方法
- * 功能：保存并关闭ClockActivity窗口
- */
-void callSaveAndCloseClockWindow() {
-#if defined(Q_OS_ANDROID)
-  QJniEnvironment env;
-  try {
-    // 调用Java静态方法：com.x.MyActivity.saveAndCloseClockWindow()
-    QJniObject::callStaticMethod<void>("com/x/MyActivity",
-                                       "saveAndCloseClockWindow", "()V");
-
-    qDebug() << "[Qt6] 调用  保存并关闭ClockActivity  成功";
-  } catch (...) {
-    qDebug() << "[Qt6] 保存并关闭ClockActivity失败";
-    // 清除JNI环境异常（避免后续调用受影响）
-    if (env->ExceptionCheck()) {
-      env->ExceptionDescribe();
-      env->ExceptionClear();
-    }
-  }
-#endif
-}
-
-/**
- * 调用MyActivity的reopenClockWindow()方法
- * 功能：重新打开ClockActivity并恢复上次内容
- */
-void callReopenClockWindow() {
-#if defined(Q_OS_ANDROID)
-  QJniEnvironment env;
-  try {
-    // 调用Java静态方法：com.x.MyActivity.reopenClockWindow()
-    QJniObject::callStaticMethod<void>("com/x/MyActivity", "reopenClockWindow",
-                                       "()V");
-
-    qDebug() << "[Qt6] 调用  重新打开ClockActivity  成功";
-  } catch (...) {
-    qDebug() << "[Qt6] 重新打开ClockActivity失败";
-    if (env->ExceptionCheck()) {
-      env->ExceptionDescribe();
-      env->ExceptionClear();
-    }
-  }
-#endif
 }

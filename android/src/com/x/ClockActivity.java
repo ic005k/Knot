@@ -177,8 +177,6 @@ public class ClockActivity
 
         m_instance_weak = new WeakReference<>(this);
 
-        MyActivity.alarmWindows.add(this);
-
         Application application = this.getApplication();
         application.registerActivityLifecycleCallbacks(this);
         mAudioManager = (AudioManager) context.getSystemService(
@@ -364,8 +362,6 @@ public class ClockActivity
     @Override
     protected void onDestroy() {
         isReady = false;
-
-        if (!isHomeKey) MyActivity.alarmWindows.remove(this);
 
         unregisterReceiver(mHomeKeyEvent);
 
