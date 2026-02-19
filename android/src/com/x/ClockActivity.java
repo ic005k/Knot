@@ -672,4 +672,9 @@ public class ClockActivity
             }
         }
     }
+
+    public static ClockActivity getInstance() {
+        // 安全获取弱引用中的实例
+        return m_instance_weak != null ? m_instance_weak.get() : null;
+    }
 }

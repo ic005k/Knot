@@ -373,7 +373,7 @@ public class GPSManager {
         isGpsRunning = false;
         isGpsReady = false;
         updateListener = null;
-        resetTrackingData();
+        //resetTrackingData();
         Log.i(TAG, "GPS已停止（线程池保留，可复用）");
     }
 
@@ -412,9 +412,8 @@ public class GPSManager {
 
     // 重置运动数据
     private void resetTrackingData() {
-        // 注释掉这两行，保留最后一次的经纬度
-        //latitude = 0;
-        //longitude = 0;
+        latitude = 0;
+        longitude = 0;
 
         startTime = System.currentTimeMillis();
         movingTime = 0;

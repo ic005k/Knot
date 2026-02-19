@@ -1,7 +1,6 @@
 package com.x;
 
 import android.Manifest;
-import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -31,10 +30,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.provider.Settings;
+import android.text.TextUtils; // ✅ 正确的导入位置
 import android.util.Log;
 import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
-// ========== 新增：导入GPSManager相关 ==========
 import androidx.core.content.ContextCompat;
 import com.x.MyActivity;
 import java.sql.Time;
@@ -47,6 +45,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MyService extends Service {
+
+    // ========== 新增：主题切换相关变量 ==========
+    private static final String TAG_THEME = "ThemeChange";
+    private BroadcastReceiver themeChangeReceiver;
+    private Handler themeHandler = new Handler(Looper.getMainLooper());
+    private String savedClockContent = ""; // 保存切换前的提醒内容
+    // ==========================================
 
     // ========== 新增GPS逻辑：核心变量 ==========
     public volatile GPSManager gpsManager; // GPS管理器实例
@@ -110,7 +115,6 @@ public class MyService extends Service {
 
     @Override
     public IBinder onBind(Intent arg0) {
-        // Auto-generated method stub
         Log.i(TAG, "Service on bind"); // 服务被绑定
         return null;
     }
@@ -155,7 +159,6 @@ public class MyService extends Service {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
             !hasExactAlarmPermission(context)
         ) {
-            // 引导用户到设置页面授予权限
             requestExactAlarmPermission(context); // 直接传Context，不再强转
             return;
         }
@@ -166,8 +169,103 @@ public class MyService extends Service {
         gpsManager = GPSManager.getInstance(getApplicationContext());
         // ==========================================
 
+        // ========== 新增：注册主题切换广播接收器 ==========
+        registerThemeChangeReceiver();
+        // ==========================================
+
         isReady = true;
     }
+
+    // ========== 新增：注册主题切换广播接收器 ==========
+    private void registerThemeChangeReceiver() {
+        themeChangeReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                Log.d(TAG_THEME, "收到广播：" + action);
+
+                // 监听系统主题切换相关广播
+                if (
+                    Intent.ACTION_CONFIGURATION_CHANGED.equals(action) ||
+                    "android.intent.action.THEME_CHANGED".equals(action)
+                ) {
+                    handleThemeChange();
+                }
+            }
+        };
+
+        // 注册配置变化广播（包含主题切换）
+        IntentFilter themeFilter = new IntentFilter();
+        themeFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+        themeFilter.addAction("android.intent.action.THEME_CHANGED"); // 部分厂商自定义的主题切换广播
+        registerReceiver(themeChangeReceiver, themeFilter);
+    }
+
+    // ========== 新增：处理主题切换逻辑 ==========
+    private void handleThemeChange() {
+        Log.d(TAG_THEME, "检测到主题切换，开始处理ClockActivity");
+
+        // 1. 检查ClockActivity是否正在显示
+        if (ClockActivity.isReady) {
+            Log.d(TAG_THEME, "ClockActivity正在显示，准备关闭并重启");
+
+            // 2. 保存当前ClockActivity的内容
+            try {
+                // ✅ 修正：使用公共方法获取实例，不再直接访问私有变量
+                ClockActivity instance = ClockActivity.getInstance();
+                if (instance != null) {
+                    savedClockContent = instance.getStrInfo();
+                    Log.d(TAG_THEME, "保存的提醒内容：" + savedClockContent);
+                }
+            } catch (Exception e) {
+                Log.e(TAG_THEME, "保存ClockActivity内容失败", e);
+                savedClockContent = strTodoAlarm; // 备用方案：使用全局的提醒内容
+            }
+
+            // 3. 先关闭当前的ClockActivity
+            ClockActivity.close();
+
+            // 4. 延迟500ms（等待主题切换完成）后重新打开ClockActivity
+            themeHandler.postDelayed(
+                () -> {
+                    restartClockActivity();
+                },
+                500
+            );
+        } else {
+            Log.d(TAG_THEME, "ClockActivity未显示，无需处理");
+        }
+    }
+
+    // ==========================================
+
+    // ========== 新增：重启ClockActivity ==========
+    private void restartClockActivity() {
+        Log.d(TAG_THEME, "准备重启ClockActivity，内容：" + savedClockContent);
+
+        if (TextUtils.isEmpty(savedClockContent)) {
+            Log.w(TAG_THEME, "无保存的提醒内容，使用默认值");
+            savedClockContent = strTodoAlarm;
+        }
+
+        try {
+            Context context = getApplicationContext();
+            Intent intent = new Intent(context, ClockActivity.class);
+            intent.setFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
+            );
+            intent.putExtra("SAVED_CLOCK_CONTENT", savedClockContent); // 传递保存的内容
+            context.startActivity(intent);
+            Log.d(TAG_THEME, "ClockActivity重启成功");
+        } catch (Exception e) {
+            Log.e(TAG_THEME, "重启ClockActivity失败", e);
+
+            // 备用方案：通过通知重新打开
+            notifyTodoAlarm(getApplicationContext(), savedClockContent);
+        }
+    }
+
+    // ==========================================
 
     // 服务在每次启动的时候调用的方法 如果某些行为在服务已启动的时候就执行，可以把处理逻辑写在这个方法里面
     @Override
@@ -224,6 +322,19 @@ public class MyService extends Service {
 
         // ========== 新增GPS逻辑：服务销毁时停止GPS ==========
         stopGPS();
+        // ==========================================
+
+        // ========== 新增：注销主题切换广播接收器 ==========
+        if (themeChangeReceiver != null) {
+            try {
+                unregisterReceiver(themeChangeReceiver);
+            } catch (Exception e) {
+                Log.w(TAG_THEME, "注销主题切换广播失败", e);
+            }
+            themeChangeReceiver = null;
+        }
+        // 清空Handler中的延迟任务
+        themeHandler.removeCallbacksAndMessages(null);
         // ==========================================
 
         super.onDestroy();
@@ -317,8 +428,7 @@ public class MyService extends Service {
                 android.os.Build.VERSION.SDK_INT >=
                 android.os.Build.VERSION_CODES.O
             ) {
-                // int importance = NotificationManager.IMPORTANCE_DEFAULT;
-                int importance = NotificationManager.IMPORTANCE_LOW; // 这个低频道不包含任何声音，达到静音的效果
+                int importance = NotificationManager.IMPORTANCE_LOW;
                 NotificationChannel notificationChannel =
                     new NotificationChannel(
                         "Knot",
@@ -333,7 +443,6 @@ public class MyService extends Service {
                     context,
                     notificationChannel.getId()
                 );
-                // m_builder.setOnlyAlertOnce(true);
             } else {
                 m_builder = new Notification.Builder(context);
             }
@@ -374,7 +483,7 @@ public class MyService extends Service {
                 flags |= PendingIntent.FLAG_IMMUTABLE;
             }
             // 为通知创建请求码
-            int requestCode = (int) System.currentTimeMillis(); // 100;
+            int requestCode = (int) System.currentTimeMillis();
             PendingIntent pendingIntent = PendingIntent.getActivity(
                 context,
                 requestCode,
@@ -388,7 +497,7 @@ public class MyService extends Service {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 String channelId = "knot_alarm_channel";
                 String channelName = "Knot Alarm";
-                int importance = NotificationManager.IMPORTANCE_HIGH; // 必须为 HIGH 才能触发全屏
+                int importance = NotificationManager.IMPORTANCE_HIGH;
                 NotificationChannel channel = new NotificationChannel(
                     channelId,
                     channelName,
@@ -452,7 +561,6 @@ public class MyService extends Service {
     /////////////////////// Steps Sensor /////////////////////////////////////
     class PersistService implements SensorEventListener {
 
-        // 去掉extends Service
         private final Context mContext; // 持有Service上下文，避免内存泄漏
 
         // 构造方法传入上下文
@@ -506,7 +614,6 @@ public class MyService extends Service {
                 ) !=
                 PackageManager.PERMISSION_GRANTED
             ) {
-                // 现在能找到PackageManager了
                 Log.w(
                     TAG,
                     "initStepSensor: 无ACTIVITY_RECOGNITION权限，跳过传感器注册"
@@ -526,7 +633,6 @@ public class MyService extends Service {
             }
         }
         if (countSensor == null && mSensorManager != null) {
-            // 现在countSensor是静态的，可访问
             countSensor = mSensorManager.getDefaultSensor(
                 Sensor.TYPE_STEP_COUNTER
             );
@@ -541,7 +647,7 @@ public class MyService extends Service {
             mSensorManager.unregisterListener(mySensorSerivece);
             mSensorManager.registerListener(
                 mySensorSerivece,
-                countSensor, // 静态变量
+                countSensor,
                 SensorManager.SENSOR_DELAY_NORMAL
             );
             isStepCounter = 1;
@@ -568,7 +674,6 @@ public class MyService extends Service {
     private static PendingIntent pendingIntentAlarm = null;
 
     public static int startAlarm(String str) {
-        // 特殊转义字符，必须加"\\"（“.”和“|”都是转义字符）
         String[] array = str.split("\\|");
         for (int i = 0; i < array.length; i++) System.out.println(array[i]);
 
@@ -622,7 +727,6 @@ public class MyService extends Service {
     public static int stopAlarm() {
         if (alarmManager != null && pendingIntentAlarm != null) {
             alarmManager.cancel(pendingIntentAlarm);
-            // 必须手动取消PendingIntent，避免残留
             pendingIntentAlarm.cancel();
             pendingIntentAlarm = null;
         }
@@ -643,7 +747,6 @@ public class MyService extends Service {
 
     // 请求精确闹钟权限
     private void requestExactAlarmPermission(Context context) {
-        // 参数改为Context
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             return;
         }
@@ -652,7 +755,7 @@ public class MyService extends Service {
         );
         intent.setData(Uri.parse("package:" + context.getPackageName()));
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // Service启动Activity必须加此标志
-        context.startActivity(intent); // 直接用Context启动，放弃startActivityForResult
+        context.startActivity(intent);
     }
 
     public static int startPreciseAlarm(String str) {
@@ -723,7 +826,7 @@ public class MyService extends Service {
         // 2：使用 PendingIntent.getBroadcast
         pendingIntentAlarm = PendingIntent.getBroadcast(
             appContext,
-            ALARM_REQUEST_CODE, // 用新的定时覆盖旧的定时
+            ALARM_REQUEST_CODE,
             alarmIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
@@ -770,7 +873,6 @@ public class MyService extends Service {
 
                 if (ClockActivity.isReady) {
                     ClockActivity.safeUpdateTodoText(message);
-
                     CallJavaNotify_3();
                 }
             }
@@ -810,13 +912,6 @@ public class MyService extends Service {
                     float speed,
                     float distance
                 ) {
-                    // GPS数据更新回调
-                    // 这里可以：
-                    // 1. 直接调用native方法把数据传给C++层
-                    // 2. 保存到全局变量供C++读取
-                    // 示例：假设你有native方法CallJavaNotify_GPS更新数据
-                    // CallJavaNotify_GPS(lat, lng, speed, distance);
-
                     Log.d(
                         TAG,
                         "GPS更新：纬度=" +
@@ -847,8 +942,6 @@ public class MyService extends Service {
         return success;
     }
 
-    // ==========================================
-
     // ========== 新增GPS逻辑：停止GPS方法（供C++调用） ==========
     public void stopGPS() {
         if (!isGpsRunning) {
@@ -860,10 +953,7 @@ public class MyService extends Service {
         Log.i(TAG, "GPS已停止（前台服务托管）");
     }
 
-    // ==========================================
     public static MyService getInstance() {
         return instance;
     }
-
-    //////////////////////////////////////////////////////////////////////
 }
