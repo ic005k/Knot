@@ -161,6 +161,9 @@ public class MyActivity
     implements Application.ActivityLifecycleCallbacks
 {
 
+    // 新增：标记Service是否已启动（静态，跨Activity实例共享）
+    private static boolean isServiceStarted = false;
+
     // 新增：持久化重启标记的Key
     private static final String PREFS_RESTART = "restart_prefs";
     private static final String KEY_NEED_RESTART = "need_restart";
@@ -278,9 +281,6 @@ public class MyActivity
     public static native void CallJavaNotify_18();
 
     public static native void CallJavaNotify_19();
-
-    // 添加服务绑定状态标记
-    private boolean mServiceBound = false;
 
     private InternalConfigure internalConfigure;
     public static boolean isReadShareData = false;
@@ -594,15 +594,15 @@ public class MyActivity
         Application application = this.getApplication();
         application.registerActivityLifecycleCallbacks(this);
 
-        // 服务
-        Intent bindIntent = new Intent(MyActivity.this, MyService.class);
-        if (Build.VERSION.SDK_INT >= 26) {
-            startForegroundService(bindIntent);
-            mServiceBound = false; // 注意：这是启动服务而非绑定
-        } else {
-            bindService(bindIntent, mCon, Context.BIND_AUTO_CREATE);
-            startService(new Intent(bindIntent));
-            mServiceBound = true;
+        // 仅在Service未启动时，启动前台服务（取消绑定）
+        if (!isServiceStarted) {
+            Intent serviceIntent = new Intent(this, MyService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent);
+            } else {
+                startService(serviceIntent);
+            }
+            isServiceStarted = true;
         }
 
         addDeskShortcuts();
@@ -992,6 +992,32 @@ public class MyActivity
 
         getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
 
+        // ========== 新增：注销Qt框架内部的广播接收器 ==========
+        try {
+            // 注销Qt音频设备接收器
+            Class<?> qtAudioDeviceManagerClass = Class.forName(
+                "org.qtproject.qt.android.multimedia.QtAudioDeviceManager"
+            );
+            Method unregisterMethod = qtAudioDeviceManagerClass.getMethod(
+                "unregisterAudioHeadsetStateReceiver",
+                Context.class
+            );
+            unregisterMethod.invoke(null, this); // 静态方法，第一个参数为null
+
+            // 注销Qt网络代理接收器
+            Class<?> qtNetworkClass = Class.forName(
+                "org.qtproject.qt.android.network.QtNetwork"
+            );
+            Method unregisterNetworkMethod = qtNetworkClass.getMethod(
+                "unregisterReceiver",
+                Context.class
+            );
+            unregisterNetworkMethod.invoke(null, this); // 静态方法
+        } catch (Exception e) {
+            Log.w(TAG, "注销Qt接收器时出现异常（非致命）", e);
+        }
+
+        // ========== 原有逻辑：注销自己的接收器 ==========
         if (mScreenStatusReceiver != null) {
             unregisterReceiver(mScreenStatusReceiver);
             mScreenStatusReceiver = null;
@@ -1002,16 +1028,27 @@ public class MyActivity
             mAlarmReceiver = null;
         }
 
-        if (mServiceBound && mCon != null) {
-            unbindService(mCon); // 解绑服务
-            mServiceBound = false;
-            mCon = null;
+        // ========== 仅在应用真退出时停止Service ==========
+        // 核心判断：当前Activity是任务栈根Activity（主Activity） + 是用户主动关闭（而非重建）
+        boolean isAppExit = isTaskRoot() && isFinishing();
+
+        // 仅应用真退出时，才停止Service
+        if (isAppExit) {
+            Intent serviceIntent = new Intent(this, MyService.class);
+            stopService(serviceIntent);
+            isServiceStarted = false;
+            Log.d(TAG, "应用已退出，停止MyService");
+        } else {
+            Log.d(TAG, "仅Activity重建，不停止MyService");
         }
 
-        super.onDestroy();
+        // ========== 新增：兜底释放所有资源 ==========
+        // 停止录音/播放
+        stopRecord();
+        stopRecord_pcm();
+        stopPlayRecord();
 
-        m_instance = null;
-
+        // 释放TTS资源（原有逻辑保留）
         synchronized (ttsLock) {
             if (currentPlayingTts != null) {
                 currentPlayingTts.shutdown();
@@ -1019,10 +1056,16 @@ public class MyActivity
             }
         }
 
+        // 清空静态引用（关键：避免内存泄漏）
         mapActivityInstance = null;
+        m_instance = null;
+        sAppContext = null;
 
+        super.onDestroy();
+
+        // 重启逻辑（原有保留）
         if (checkNeedRestart()) {
-            restartApp(); // 调用重构后的重启方法
+            restartApp();
             Log.i(TAG, "触发应用重启...");
         }
     }
@@ -1160,8 +1203,12 @@ public class MyActivity
                             : "Activity recognition permission granted, step counting available",
                         Toast.LENGTH_SHORT
                     ).show();
-                    // 若后续添加步数统计，这里可初始化传感器
-                    MyService.initStepSensor(); // 权限授予后，立即重新初始化传感器
+
+                    // 权限授予后初始化传感器
+                    MyService service = MyService.getInstance();
+                    if (service != null) {
+                        service.initStepSensor(); // 改为实例调用，而非静态
+                    }
                 } else {
                     Toast.makeText(
                         this,
