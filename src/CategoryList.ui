@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>357</width>
-    <height>522</height>
+    <height>349</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,28 +20,12 @@
    <item>
     <widget class="QFrame" name="frame">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QListWidget" name="listWidget">
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="dragDropMode">
-         <enum>QAbstractItemView::NoDragDrop</enum>
-        </property>
-        <property name="defaultDropAction">
-         <enum>Qt::CopyAction</enum>
-        </property>
-        <property name="viewMode">
-         <enum>QListView::ListMode</enum>
-        </property>
-       </widget>
-      </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
@@ -61,6 +45,22 @@
          <widget class="QLineEdit" name="editRename"/>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QListWidget" name="listWidget">
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="dragDropMode">
+         <enum>QAbstractItemView::DragDropMode::NoDragDrop</enum>
+        </property>
+        <property name="defaultDropAction">
+         <enum>Qt::DropAction::CopyAction</enum>
+        </property>
+        <property name="viewMode">
+         <enum>QListView::ViewMode::ListMode</enum>
+        </property>
+       </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">

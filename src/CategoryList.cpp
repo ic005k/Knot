@@ -169,6 +169,8 @@ void CategoryList::on_btnRename_clicked() {
     auto m_ShowMsg = std::make_unique<ShowMessage>(this);
     m_ShowMsg->showMsg("Kont", oldName + " -> " + text + " " + tr("Success"),
                        1);
+    mui->btnCancelType->click();
+    mui->btnType->click();
   }
 }
 

@@ -5860,26 +5860,6 @@ QRadioButton:disabled {
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_29">
        <item>
-        <widget class="QQuickWidget" name="qwCategory">
-         <property name="resizeMode">
-          <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="lblTypeInfo">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Info</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_36">
          <item>
           <widget class="QToolButton" name="btnRenameType">
@@ -5898,6 +5878,26 @@ QRadioButton:disabled {
           <widget class="QLineEdit" name="editRenameType"/>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QQuickWidget" name="qwCategory">
+         <property name="resizeMode">
+          <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblTypeInfo">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Info</string>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_37">
