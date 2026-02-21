@@ -163,6 +163,7 @@ class Todo : public QDialog {
   void openTodoUI();
   void openTodo();
   void showTodoAlarm();
+  void showAlarmWindow(const QString& strTime, const QString& strText);
  private slots:
   void on_ShowRecordTime();
 

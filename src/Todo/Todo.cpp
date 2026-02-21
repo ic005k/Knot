@@ -1813,3 +1813,102 @@ void Todo::showInputPanel() {
   mui->editTodo->show();
   mui->btnClear->show();
 }
+
+void Todo::showAlarmWindow(const QString& strTime, const QString& strText) {
+  // 安全校验：防止mw_one为空指针导致崩溃
+  if (!mw_one) {
+    qWarning() << "主窗口指针mw_one为空，无法创建提醒窗口！";
+    return;
+  }
+
+  // 1. 创建提醒窗口（无父对象，无边框+置顶）
+  QWidget* alarmWindow = new QWidget();
+  alarmWindow->setWindowFlags(Qt::FramelessWindowHint |
+                              Qt::WindowStaysOnTopHint);
+  alarmWindow->setAttribute(Qt::WA_DeleteOnClose);  // 关闭时自动释放内存
+
+  // 2. 匹配主窗口尺寸和位置
+  alarmWindow->resize(mw_one->size());
+  alarmWindow->move(mw_one->pos());
+
+  // 3. 极简样式表：仅控制颜色和反馈，无布局干扰
+  alarmWindow->setStyleSheet(R"(
+        QWidget { background-color: #f0f8ff; }
+        QLabel#titleLabel {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        QLabel#contentLabel {
+            font-size: 22px;
+            color: #34495e;
+            line-height: 1.6;
+        }
+        QPushButton {
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+        }
+        QPushButton#playBtn { background-color: #3498db; }
+        QPushButton#playBtn:hover { background-color: #2980b9; }
+        QPushButton#closeBtn { background-color: #e74c3c; }
+        QPushButton#closeBtn:hover { background-color: #c0392b; }
+    )");
+
+  // 4. 整体垂直布局（标题栏 + 内容栏 + 按钮区）
+  QVBoxLayout* mainLayout = new QVBoxLayout(alarmWindow);
+  mainLayout->setContentsMargins(0, 0, 0, 0);
+  mainLayout->setSpacing(0);
+
+  // ---------------------- 标题栏 ----------------------
+  QLabel* titleLabel = new QLabel(strTime);
+  titleLabel->setObjectName("titleLabel");
+  titleLabel->setAlignment(Qt::AlignCenter);
+  titleLabel->setContentsMargins(0, 20, 0, 20);
+  mainLayout->addWidget(titleLabel);
+
+  // ---------------------- 内容栏 ----------------------
+  QLabel* contentLabel = new QLabel(strText);
+  contentLabel->setObjectName("contentLabel");
+  contentLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+  contentLabel->setWordWrap(true);
+  contentLabel->setContentsMargins(40, 0, 40, 0);
+  mainLayout->addWidget(contentLabel, 1);
+
+  // ---------------------- 按钮区（核心优化：平分空间） ----------------------
+  QWidget* btnWidget = new QWidget();
+  QHBoxLayout* btnLayout = new QHBoxLayout(btnWidget);
+  // 1. 统一左右边距（对称），上下留白
+  btnLayout->setContentsMargins(50, 20, 50, 40);
+  // 2. 按钮之间保留固定间距
+  btnLayout->setSpacing(20);
+
+  // 播放按钮：水平拉伸，垂直固定
+  QPushButton* playBtn = new QPushButton(tr("Play"));
+  playBtn->setObjectName("playBtn");
+  // 关键：Expanding表示水平方向尽可能拉伸，平分空间
+  playBtn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  // 按钮垂直高度固定（避免拉伸）
+  playBtn->setMinimumHeight(48);
+  btnLayout->addWidget(playBtn);
+
+  // 关闭按钮：和播放按钮尺寸策略完全一致（平分空间）
+  QPushButton* closeBtn = new QPushButton(tr("Close"));
+  closeBtn->setObjectName("closeBtn");
+  closeBtn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  closeBtn->setMinimumHeight(48);
+  btnLayout->addWidget(closeBtn);
+
+  mainLayout->addWidget(btnWidget);
+
+  // 5. 按钮点击事件绑定
+  connect(closeBtn, &QPushButton::clicked, alarmWindow, &QWidget::close);
+  connect(playBtn, &QPushButton::clicked, this,
+          [=]() { qDebug() << "触发播放提醒：" << strText; });
+
+  // 6. 显示窗口
+  alarmWindow->show();
+  alarmWindow->raise();
+  alarmWindow->activateWindow();
+}

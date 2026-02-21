@@ -66,8 +66,7 @@ static void JavaNotify_3() {
   mw_one->m_ReceiveShare->moveTaskToFront();
 
   QTimer::singleShot(100, mw_one, [strTime, strText]() {
-    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-    m_ShowMsg->showMsg(strTime, strText, 1);
+    mw_one->m_Todo->showAlarmWindow(strTime, strText);
   });
 }
 
