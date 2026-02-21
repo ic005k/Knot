@@ -372,10 +372,15 @@ void ReceiveShare::shareImages(const QString& title,
 
 void ReceiveShare::moveTaskToFront() {
 #ifdef Q_OS_ANDROID
+  // 获取当前Activity实例（非静态）
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  if (activity.isValid()) {
+    // 1. 先调用唤醒屏幕的方法
+    activity.callMethod<void>("wakeUpScreen", "()V");
 
-  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callStaticMethod<void>("com.x/MyActivity", "bringToFront", "()V");
-
+    // 2. 再将Activity移到前台（改为实例方法调用）
+    activity.callMethod<void>("bringToFront", "()V");
+  }
 #endif
 }
 

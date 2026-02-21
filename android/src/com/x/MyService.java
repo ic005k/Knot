@@ -206,7 +206,7 @@ public class MyService extends Service {
         Log.d(TAG_THEME, "检测到主题切换，开始处理ClockActivity");
 
         // 1. 检查ClockActivity是否正在显示
-        if (ClockActivity.isReady) {
+        if (ClockActivity.isClockActivityReady()) {
             Log.d(TAG_THEME, "ClockActivity正在显示，准备关闭并重启");
 
             // 2. 保存当前ClockActivity的内容
@@ -869,12 +869,14 @@ public class MyService extends Service {
                 Log.d("MyAlarmReceiver", "Alarm received: " + message);
 
                 // 直接在前台服务中处理闹钟事件
-                notifyTodoAlarm(context, message);
+                /*notifyTodoAlarm(context, message);
 
-                if (ClockActivity.isReady) {
+                if (ClockActivity.isClockActivityReady()) {
                     ClockActivity.safeUpdateTodoText(message);
                     CallJavaNotify_3();
-                }
+                    }*/
+
+                CallJavaNotify_3();
             }
         }
     };

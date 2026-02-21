@@ -49,6 +49,9 @@
         android:name="android.permission.REQUEST_INSTALL_PACKAGES"
     />
 
+    <!-- Android 10+ 前台显示权限 -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
     <!-- Android 12+ 设置精确闹钟所需权限 -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
@@ -201,12 +204,14 @@
             android:foregroundServiceType="mediaPlayback"
         />
 
+        <!-- ClockActivity仅作为提醒的“详情页”，不再作为弹窗 -->
         <activity
-            android:name="com.x.ClockActivity"
-            android:label="Knot"
-            android:launchMode="standard"
-            android:screenOrientation="portrait"
-            android:theme="@style/splashScreenTheme"
+            android:name=".ClockActivity"
+            android:configChanges="uiMode|orientation|screenSize|screenLayout|keyboardHidden"
+            android:launchMode="singleTask"
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
         >
 
             <meta-data

@@ -28,7 +28,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.TextView;
 import com.x.MyActivity;
 import com.x.NoteEditor;
 import java.io.BufferedReader;
@@ -46,7 +45,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import org.ini4j.Wini;
@@ -63,7 +61,6 @@ public class ClockActivity
     private static String strInfo =
         "Todo|There are currently timed tasks pending.|0|Close";
 
-    private boolean isRefreshAlarm = true;
     private AudioManager mAudioManager;
     private InternalConfigure internalConfigure;
 
@@ -72,16 +69,11 @@ public class ClockActivity
     public TextView text_info, text_title;
     private String voiceFile;
 
-    private static Context context;
     // 静态弱引用（泛型指定 ClockActivity，初始化为 null）
     private static WeakReference<ClockActivity> m_instance_weak;
     private boolean isHomeKey = false;
 
-    public static Context getContext() {
-        return context;
-    }
-
-    public static volatile boolean isReady = false;
+    private boolean isReady = false; // 非静态成员变量
 
     public static native void CallJavaNotify_0();
 
@@ -162,10 +154,6 @@ public class ClockActivity
     }
 
     private void AnimationWhenClosed() {
-        // 淡出效果
-        // overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-
-        // 或者使用底部滑出效果(自定义文件exit_anim.xml)
         overridePendingTransition(0, R.anim.exit_anim);
     }
 
@@ -173,30 +161,28 @@ public class ClockActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        context = getApplicationContext();
-
         m_instance_weak = new WeakReference<>(this);
 
         Application application = this.getApplication();
         application.registerActivityLifecycleCallbacks(this);
-        mAudioManager = (AudioManager) context.getSystemService(
+        mAudioManager = (AudioManager) getApplicationContext().getSystemService(
             Service.AUDIO_SERVICE
         );
 
-        // 保存用户原始铃声模式（关键：在闹钟启动时立即保存）
+        // 保存用户原始铃声模式
         mOriginalRingerMode = mAudioManager.getRingerMode();
 
-        // 去除title(App Name)
+        // 去除title
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         if (MyActivity.isDark) {
-            this.setStatusBarColor("#19232D"); // 深色
+            this.setStatusBarColor("#19232D");
             getWindow()
                 .getDecorView()
                 .setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             setContentView(R.layout.activity_clock_dark);
         } else {
-            this.setStatusBarColor("#F3F3F3"); // 灰
+            this.setStatusBarColor("#F3F3F3");
             getWindow()
                 .getDecorView()
                 .setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
@@ -210,22 +196,16 @@ public class ClockActivity
         String strCurDT0 = formatter.format(date);
         String strCurDT = " ( " + strCurDT0 + " ) ";
 
-        // 原有代码
-        // strInfo = MyService.strTodoAlarm;
-
-        // 替换为（条件分支，不影响原有逻辑）
+        // 读取Intent参数
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("SAVED_CLOCK_CONTENT")) {
-            // 仅在「切换主题恢复打开」时生效（有传参）
             String savedContent = intent.getStringExtra("SAVED_CLOCK_CONTENT");
             if (!TextUtils.isEmpty(savedContent)) {
                 this.strInfo = savedContent;
             } else {
-                // 无有效保存内容，仍走原有逻辑
                 this.strInfo = MyService.strTodoAlarm;
             }
         } else {
-            // 日常正常打开ClockActivity（无传参），完全走原有逻辑
             this.strInfo = MyService.strTodoAlarm;
         }
 
@@ -241,9 +221,7 @@ public class ClockActivity
 
         bindViews(str1, str2 + "\n" + strCurDT + "\n");
 
-        if (isRefreshAlarm) {
-            CallJavaNotify_3();
-        }
+        CallJavaNotify_3();
 
         String mystr = str2;
         boolean isVoice = false;
@@ -261,13 +239,12 @@ public class ClockActivity
                 playRecord(voiceFile);
                 btn_play_voice.setVisibility(View.VISIBLE);
             } else {
-                // TTS
+                // TTS逻辑
                 String filename = "/storage/emulated/0/.Knot/msg.ini";
                 internalConfigure = new InternalConfigure(this);
                 try {
                     File iniFile = new File(filename);
                     if (iniFile.exists()) {
-                        // 先判断文件存在
                         internalConfigure.readFrom(filename);
                     } else {
                         Log.w("ClockActivity", "msg.ini不存在，使用默认配置");
@@ -288,7 +265,7 @@ public class ClockActivity
 
         System.out.println("闹钟已开始+++++++++++++++++++++++");
 
-        // HomeKey
+        // 注册Home键广播
         registerReceiver(
             mHomeKeyEvent,
             new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
@@ -309,14 +286,10 @@ public class ClockActivity
             if (action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
                 String reason = intent.getStringExtra(SYSTEM_REASON);
                 if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
-                    // 表示按了home键,程序直接进入到后台
                     isHomeKey = true;
-
                     System.out.println("ClockActivity HOME键被按下...");
                 } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
-                    // 表示长按home键,显示最近使用的程序
                     isHomeKey = true;
-
                     System.out.println("ClockActivity 长按HOME键...");
                 }
             }
@@ -327,14 +300,13 @@ public class ClockActivity
     public void onPause() {
         System.out.println("ClockActivity onPause...");
         super.onPause();
-        restoreOriginalRingerMode(); // 提前还原，双重保障
+        restoreOriginalRingerMode();
         Log.d("ClockActivity", "MIUI 适配：onPause 还原铃声模式");
     }
 
     @Override
     public void onStop() {
         System.out.println("ClockActivity onStop...");
-
         super.onStop();
     }
 
@@ -342,13 +314,13 @@ public class ClockActivity
     public void onBackPressed() {
         MyActivity.stopPlayMyText();
 
-        // 安全停止MediaPlayer：判断状态+重置
+        // 停止MediaPlayer
         if (player != null && player.isPlaying()) {
             player.stop();
-            player.reset(); // 重置状态，避免后续操作异常
+            player.reset();
         }
 
-        restoreOriginalRingerMode(); // 还原铃声模式
+        restoreOriginalRingerMode();
 
         AnimationWhenClosed();
 
@@ -365,15 +337,11 @@ public class ClockActivity
 
         unregisterReceiver(mHomeKeyEvent);
 
-        MyService.clearNotify(getApplicationContext()); // 传入上下文
+        MyService.clearNotify(getApplicationContext());
 
-        if (!isRefreshAlarm) {
-            android.os.Process.killProcess(android.os.Process.myPid());
-        } else {
-            CallJavaNotify_4();
-        }
+        CallJavaNotify_4();
 
-        // 释放MediaPlayer（补充完整状态判断）
+        // 释放MediaPlayer
         if (player != null) {
             if (player.isPlaying()) {
                 player.stop();
@@ -382,7 +350,7 @@ public class ClockActivity
             player = null;
         }
 
-        restoreOriginalRingerMode(); // 还原铃声模式（双重保障，避免遗漏）
+        restoreOriginalRingerMode();
 
         // 注销生命周期回调
         Application application = this.getApplication();
@@ -390,31 +358,28 @@ public class ClockActivity
 
         super.onDestroy();
 
-        // 若不是「主题切换关闭」（即正常关闭），清空恢复标记
+        // 清空恢复标记
         synchronized (MyActivity.clockLock) {
-            // 检查当前是否是“需要恢复”的状态，且当前窗口是被正常关闭（而非主题切换）
             if (MyActivity.isNeedRestoreClock) {
-                // 正常关闭时，清空标记（避免误恢复）
                 MyActivity.isNeedRestoreClock = false;
                 MyActivity.savedClockContent = "";
                 Log.d("ClockActivity", "正常关闭，清空恢复标记");
             }
         }
 
-        // 弱引用置空，释放引用
+        // 释放弱引用
         if (m_instance_weak != null) {
             m_instance_weak.clear();
             m_instance_weak = null;
         }
 
-        text_info = null; // 释放静态控件引用
+        text_info = null;
         text_title = null;
 
         System.out.println("ClockActivity onDestroy...");
     }
 
     public static void close() {
-        // 从弱引用中获取实例，增加非空校验（避免空指针）
         ClockActivity instance =
             m_instance_weak != null ? m_instance_weak.get() : null;
         if (
@@ -434,20 +399,14 @@ public class ClockActivity
         public InternalConfigure(Context context) {
             super();
             this.context = context;
-            this.properties = new Properties(); // 提前初始化，避免null
+            this.properties = new Properties();
         }
 
-        /**
-         * 保存文件filename为文件名，filecontent为存入的文件内容
-         * 例:configureActivity.saveFiletoSD("text.ini","");
-         */
         public void saveFile(String filename, Properties properties)
             throws Exception {
-            // 设置Context.MODE_PRIVATE表示每次调用该方法会覆盖原来的文件数据
-            FileOutputStream fileOutputStream; // = context.openFileOutput(filename, Context.MODE_PRIVATE);
+            FileOutputStream fileOutputStream;
             File file = new File(filename);
             fileOutputStream = new FileOutputStream(file);
-            // 通过properties.stringPropertyNames()获得所有key的集合Set，里面是String对象
             for (String key : properties.stringPropertyNames()) {
                 String s = key + " = " + properties.getProperty(key) + "\n";
                 System.out.println(s);
@@ -456,9 +415,6 @@ public class ClockActivity
             fileOutputStream.close();
         }
 
-        /**
-         * 读取文件
-         */
         public void readFrom(String filename) throws Exception {
             FileInputStream fileInputStream;
 
@@ -478,9 +434,6 @@ public class ClockActivity
             fileInputStream.close();
         }
 
-        /**
-         * 返回指定key对应的value
-         */
         public String getIniKey(String key) {
             if (properties.containsKey(key) == false) {
                 return null;
@@ -489,7 +442,6 @@ public class ClockActivity
         }
     }
 
-    // fileName 为文件名称 返回true为存在
     public boolean fileIsExists(String fileName) {
         try {
             File f = new File(fileName);
@@ -507,27 +459,23 @@ public class ClockActivity
         }
     }
 
-    // 获取最大多媒体音量
     public int getMediaMaxVolume() {
         return mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
     }
 
-    // 获取当前多媒体音量
     public int getMediaVolume() {
         return mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
     }
 
-    // 设置多媒体音量
     public void setMediaVolume(int volume) {
         mAudioManager.setStreamVolume(
-            AudioManager.STREAM_MUSIC, // 音量类型
+            AudioManager.STREAM_MUSIC,
             volume,
             AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI
         );
     }
 
     private void setStatusBarColor(String color) {
-        // 需要安卓版本大于5.0以上
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             getWindow().addFlags(
                 WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
@@ -566,7 +514,7 @@ public class ClockActivity
     public void onActivityDestroyed(Activity activity) {}
 
     private void playRecord(String outputFile) {
-        // 先释放旧实例，避免状态冲突
+        // 释放旧的MediaPlayer
         if (player != null) {
             if (player.isPlaying()) {
                 player.stop();
@@ -575,14 +523,12 @@ public class ClockActivity
             player.release();
             player = null;
         }
-        // 空值校验：避免传入null路径
         if (TextUtils.isEmpty(outputFile)) return;
         try {
             player = new MediaPlayer();
             player.setDataSource(outputFile);
             player.prepare();
             player.start();
-            // 监听播放完成，自动释放资源
             player.setOnCompletionListener(
                 new MediaPlayer.OnCompletionListener() {
                     @Override
@@ -593,7 +539,6 @@ public class ClockActivity
             );
         } catch (Exception ex) {
             ex.printStackTrace();
-            // 异常时确保释放资源
             if (player != null) {
                 player.release();
                 player = null;
@@ -609,19 +554,13 @@ public class ClockActivity
         return true;
     }
 
-    /**
-     * 内部UI更新逻辑（仅内部调用，已做前置校验）
-     */
     private void updateTextInternal(String message) {
-        // 移除static
         try {
-            // 3. 校验：text_info控件是否为空
             if (text_info == null) {
                 Log.w("ClockActivity", "text_info控件未初始化，跳过更新");
                 return;
             }
 
-            // 拼接文本（复用原有逻辑）
             String oldTxt = text_info.getText().toString();
             SimpleDateFormat formatter = new SimpleDateFormat(
                 "yyyy-MM-dd HH:mm:ss"
@@ -631,7 +570,6 @@ public class ClockActivity
             String strCurDT = " ( " + strCurDT0 + " ) ";
             String newTxt = message + "\n" + strCurDT + "\n\n" + oldTxt;
 
-            // 安全更新文本
             text_info.setText(newTxt);
             Log.d("ClockActivity", "UI文本更新成功：" + message);
         } catch (Exception e) {
@@ -640,10 +578,11 @@ public class ClockActivity
     }
 
     public static void safeUpdateTodoText(String message) {
-        // 从弱引用中获取有效实例
+        // 1. 修复错误1：通过实例访问非静态的isReady
         ClockActivity instance =
             m_instance_weak != null ? m_instance_weak.get() : null;
-        if (instance == null || !isReady) {
+        if (instance == null || !instance.isReady) {
+            // 关键修改：instance.isReady
             Log.d("ClockActivity", "实例未就绪或已被回收，跳过UI更新");
             return;
         }
@@ -655,14 +594,12 @@ public class ClockActivity
         instance.updateTextInternal(message);
     }
 
-    // 暴露strInfo给MyActivity（原有strInfo为private，需添加getter）
     public String getStrInfo() {
         return this.strInfo;
     }
 
     private void restoreOriginalRingerMode() {
         if (mAudioManager != null) {
-            // 仅当当前铃声模式与原始模式不一致时，才还原（避免不必要的系统操作）
             if (mAudioManager.getRingerMode() != mOriginalRingerMode) {
                 mAudioManager.setRingerMode(mOriginalRingerMode);
                 Log.d(
@@ -674,7 +611,22 @@ public class ClockActivity
     }
 
     public static ClockActivity getInstance() {
-        // 安全获取弱引用中的实例
-        return m_instance_weak != null ? m_instance_weak.get() : null;
+        if (m_instance_weak == null) {
+            return null;
+        }
+        ClockActivity instance = m_instance_weak.get();
+        // 增加实例有效性判断
+        if (
+            instance == null || instance.isFinishing() || instance.isDestroyed()
+        ) {
+            return null;
+        }
+        return instance;
+    }
+
+    // 提供公共的静态方法，让外部类（如MyService）获取isReady状态
+    public static boolean isClockActivityReady() {
+        ClockActivity instance = getInstance();
+        return instance != null && instance.isReady;
     }
 }

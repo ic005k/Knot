@@ -56,9 +56,19 @@ static void JavaNotify_2() {
 }
 
 static void JavaNotify_3() {
+  QString strTime, strText;
+  strTime = mw_one->m_Todo->strAlarmTime;
+  strText = mw_one->m_Todo->strAlarmText;
   mw_one->m_Todo->refreshAlarm();
 
   qDebug() << "C++ JavaNotify_3";
+
+  mw_one->m_ReceiveShare->moveTaskToFront();
+
+  QTimer::singleShot(100, mw_one, [strTime, strText]() {
+    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
+    m_ShowMsg->showMsg(strTime, strText, 1);
+  });
 }
 
 static void JavaNotify_4() {

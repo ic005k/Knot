@@ -27,6 +27,8 @@ class Todo : public QDialog {
   Ui::Todo* ui;
   ~Todo();
 
+  QString strAlarmTime, strAlarmText;
+
   QDialog* m_ReeditTodo = nullptr;
 
   bool isTodoAlarmShow = false;
@@ -112,7 +114,8 @@ class Todo : public QDialog {
   void setAlarmShowValue(bool value);
 
   void showInputPanel();
-  protected:
+
+ protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;

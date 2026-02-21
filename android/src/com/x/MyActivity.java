@@ -333,14 +333,98 @@ public class MyActivity
         m_instance.moveTaskToBack(true);
     }
 
-    public static void bringToFront() {
-        Intent intent = new Intent(getMyAppContext(), MyActivity.class);
-        // 关键标志组合
-        intent.addFlags(
-            Intent.FLAG_ACTIVITY_NEW_TASK |
-                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+    // 唤醒屏幕方法
+    public void wakeUpScreen() {
+        // 获取电源管理器
+        PowerManager pm = (PowerManager) getSystemService(
+            Context.POWER_SERVICE
         );
-        getMyAppContext().startActivity(intent);
+        if (pm != null) {
+            // 唤醒屏幕（兼容所有Android版本）
+            int wakeLockFlags;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                wakeLockFlags =
+                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK |
+                    PowerManager.ACQUIRE_CAUSES_WAKEUP |
+                    PowerManager.ON_AFTER_RELEASE;
+            } else {
+                // 兼容低版本
+                wakeLockFlags =
+                    PowerManager.FULL_WAKE_LOCK |
+                    PowerManager.ACQUIRE_CAUSES_WAKEUP |
+                    PowerManager.ON_AFTER_RELEASE;
+            }
+
+            PowerManager.WakeLock wakeLock = pm.newWakeLock(
+                wakeLockFlags,
+                "MyApp:WakeLockTag"
+            );
+            wakeLock.acquire(10000); // 持有10秒，确保屏幕唤醒
+            wakeLock.release();
+        }
+
+        // 设置窗口属性，强制显示在锁屏上层（兼容所有版本）
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+        window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    // 将Activity移到前台（完全重构，避开有问题的moveTaskToFront方法）
+    public void bringToFront() {
+        // 确保Activity未被销毁
+        if (!isFinishing() && !isDestroyed()) {
+            // 方案1：优先通过ActivityManager移动任务（最稳定的兼容方案）
+            try {
+                ActivityManager am = (ActivityManager) getSystemService(
+                    Context.ACTIVITY_SERVICE
+                );
+                if (am != null) {
+                    // 获取当前应用的任务列表
+                    List<ActivityManager.RunningTaskInfo> taskList =
+                        am.getRunningTasks(10);
+                    for (ActivityManager.RunningTaskInfo task : taskList) {
+                        // 找到当前应用的任务
+                        if (
+                            task.topActivity
+                                .getPackageName()
+                                .equals(getPackageName())
+                        ) {
+                            // 关键：使用单参数的moveTaskToFront（低版本API支持）
+                            if (
+                                Build.VERSION.SDK_INT >=
+                                Build.VERSION_CODES.HONEYCOMB
+                            ) {
+                                am.moveTaskToFront(
+                                    task.id,
+                                    ActivityManager.MOVE_TASK_NO_USER_ACTION
+                                );
+                            } else {
+                                // API < 11 降级方案
+                                am.moveTaskToFront(task.id, 0);
+                            }
+                            return; // 成功则直接返回
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // 方案2：降级为重启Activity（保底方案，兼容所有版本）
+            Intent intent = new Intent(this, MyActivity.class);
+            // 添加启动标志，确保移到前台而非新建实例
+            intent.addFlags(
+                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT |
+                    Intent.FLAG_ACTIVITY_NEW_TASK |
+                    Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+            );
+            startActivity(intent);
+
+            // 激活窗口，确保显示
+            getWindow().getDecorView().requestFocus();
+        }
     }
 
     // ------------------------------------------------------------------------

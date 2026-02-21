@@ -865,6 +865,12 @@ void Todo::refreshAlarm() {
         qDebug() << "Min Time: " << listTotalS << minValue << str1
                  << "curVol: ";
 
+        QStringList t_list = str1.split("|");
+        if (t_list.count() >= 3) {
+          strAlarmTime = t_list.at(0);
+          strAlarmText = t_list.at(1);
+        }
+
         // to top
         int listcount = getCount();
         for (int m = 0; m < listcount; m++) {
