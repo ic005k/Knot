@@ -164,7 +164,9 @@ class Todo : public QDialog {
   void openTodo();
   void showTodoAlarm();
   void showAlarmWindow(const QString& strTime, const QString& strText);
- private slots:
+  QString getVoiceFile(const QString &strTodoText);
+  bool isVoice(const QString &strTodoText);
+  private slots:
   void on_ShowRecordTime();
 
   void on_ShowPlayProgress();

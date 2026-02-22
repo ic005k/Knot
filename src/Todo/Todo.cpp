@@ -1389,8 +1389,33 @@ bool Todo::isVoice(int row) {
   return false;
 }
 
+bool Todo::isVoice(const QString& strTodoText) {
+  QString strItem = strTodoText.trimmed();
+  QStringList list0 = strItem.split(" ");
+  if (list0.count() > 0) {
+    QString str = list0.at(0);
+    if (str == tr("Voice")) {
+      return true;
+    }
+  }
+  return false;
+}
+
 QString Todo::getVoiceFile(int row) {
   QString strItem = getItemTodoText(row).trimmed();
+  QStringList list0 = strItem.split(" ");
+  if (list0.count() > 0) {
+    QString str = list0.at(0);
+    if (str == tr("Voice")) {
+      QString voiceFile = iniDir + "memo/voice/" + strItem.split("\n").at(1);
+      if (QFile::exists(voiceFile)) return voiceFile;
+    }
+  }
+  return "";
+}
+
+QString Todo::getVoiceFile(const QString& strTodoText) {
+  QString strItem = strTodoText.trimmed();
   QStringList list0 = strItem.split(" ");
   if (list0.count() > 0) {
     QString str = list0.at(0);
@@ -1831,30 +1856,33 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText) {
   alarmWindow->resize(mw_one->size());
   alarmWindow->move(mw_one->pos());
 
-  // 3. 极简样式表：仅控制颜色和反馈，无布局干扰
-  alarmWindow->setStyleSheet(R"(
-        QWidget { background-color: #f0f8ff; }
-        QLabel#titleLabel {
-            font-size: 28px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        QLabel#contentLabel {
-            font-size: 22px;
-            color: #34495e;
-            line-height: 1.6;
-        }
-        QPushButton {
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-        }
-        QPushButton#playBtn { background-color: #3498db; }
-        QPushButton#playBtn:hover { background-color: #2980b9; }
-        QPushButton#closeBtn { background-color: #e74c3c; }
-        QPushButton#closeBtn:hover { background-color: #c0392b; }
-    )");
+  // 3. 根据暗黑模式切换样式表
+  QString styleSheet;
+
+  styleSheet = R"(
+    QPushButton {
+        color: white;          /* 按钮文字颜色 */
+        border: none;          /* 去掉默认边框 */
+        border-radius: 8px;    /* 圆角效果 */
+        font-size: 18px;       /* 文字大小 */
+        padding: 8px 16px;     /* 内边距，扩大点击区域，适配触屏 */
+        outline: none;         /* 去掉点击后的虚线边框 */
+    }
+    /* 播放按钮样式 - 适配安卓触屏 */
+    QPushButton#playBtn {
+        background-color: #3498db; /* 正常状态背景色 */
+    }
+    QPushButton#playBtn:pressed {
+        background-color: #1f618d; /* 按下状态背景色（触屏反馈核心） */
+    }
+    /* 关闭按钮样式 - 适配安卓触屏 */
+    QPushButton#closeBtn {
+        background-color: #e74c3c; /* 正常状态背景色 */
+    }
+    QPushButton#closeBtn:pressed {
+        background-color: #a93226; /* 按下状态背景色（触屏反馈核心） */
+    }
+)";
 
   // 4. 整体垂直布局（标题栏 + 内容栏 + 按钮区）
   QVBoxLayout* mainLayout = new QVBoxLayout(alarmWindow);
@@ -1862,10 +1890,15 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText) {
   mainLayout->setSpacing(0);
 
   // ---------------------- 标题栏 ----------------------
+  QFont font = this->font();
+  font.setBold(true);
+  font.setPointSize(26);
+
   QLabel* titleLabel = new QLabel(strTime);
   titleLabel->setObjectName("titleLabel");
   titleLabel->setAlignment(Qt::AlignCenter);
   titleLabel->setContentsMargins(0, 20, 0, 20);
+  titleLabel->setFont(font);
   mainLayout->addWidget(titleLabel);
 
   // ---------------------- 内容栏 ----------------------
@@ -1876,24 +1909,24 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText) {
   contentLabel->setContentsMargins(40, 0, 40, 0);
   mainLayout->addWidget(contentLabel, 1);
 
-  // ---------------------- 按钮区（核心优化：平分空间） ----------------------
+  font.setBold(false);
+  font.setPointSize(25);
+  contentLabel->setFont(font);
+
+  // ---------------------- 按钮区 ----------------------
   QWidget* btnWidget = new QWidget();
   QHBoxLayout* btnLayout = new QHBoxLayout(btnWidget);
-  // 1. 统一左右边距（对称），上下留白
   btnLayout->setContentsMargins(50, 20, 50, 40);
-  // 2. 按钮之间保留固定间距
   btnLayout->setSpacing(20);
 
   // 播放按钮：水平拉伸，垂直固定
   QPushButton* playBtn = new QPushButton(tr("Play"));
   playBtn->setObjectName("playBtn");
-  // 关键：Expanding表示水平方向尽可能拉伸，平分空间
   playBtn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-  // 按钮垂直高度固定（避免拉伸）
   playBtn->setMinimumHeight(48);
   btnLayout->addWidget(playBtn);
 
-  // 关闭按钮：和播放按钮尺寸策略完全一致（平分空间）
+  // 关闭按钮：和播放按钮尺寸策略完全一致
   QPushButton* closeBtn = new QPushButton(tr("Close"));
   closeBtn->setObjectName("closeBtn");
   closeBtn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -1902,13 +1935,34 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText) {
 
   mainLayout->addWidget(btnWidget);
 
+  playBtn->setStyleSheet(styleSheet);
+  closeBtn->setStyleSheet(styleSheet);
+
   // 5. 按钮点击事件绑定
   connect(closeBtn, &QPushButton::clicked, alarmWindow, &QWidget::close);
-  connect(playBtn, &QPushButton::clicked, this,
-          [=]() { qDebug() << "触发播放提醒：" << strText; });
+  connect(playBtn, &QPushButton::clicked, this, [=]() {
+    qDebug() << "触发播放提醒：" << strText;
+    bool isVoice = mw_one->m_Todo->isVoice(strText);
+
+    if (isVoice) {
+      QString voiceFile = mw_one->m_Todo->getVoiceFile(strText);
+      m_Method->playRecord(voiceFile);
+    } else {
+      QString ini_file = privateDir + "msg.ini";
+      QSettings Reg(ini_file, QSettings::IniFormat);
+
+      bool isPlayText = Reg.value("voice", 0).toBool();
+      if (isPlayText) {
+        QString txt = strText;
+        m_Method->stopPlayMyText();
+        m_Method->playMyText(txt);
+      }
+    }
+  });
 
   // 6. 显示窗口
   alarmWindow->show();
   alarmWindow->raise();
   alarmWindow->activateWindow();
+  playBtn->click();
 }
