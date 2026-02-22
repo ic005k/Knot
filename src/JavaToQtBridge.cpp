@@ -61,9 +61,30 @@ static void JavaNotify_3() {
   strText = mw_one->m_Todo->strAlarmText;
   mw_one->m_Todo->refreshAlarm();
 
-  qDebug() << "C++ JavaNotify_3";
-
   mw_one->m_ReceiveShare->moveTaskToFront();
+
+  mw_one->m_Todo->startLedBlink(0xFFFFFF, 500, 500);
+
+  mw_one->m_Todo->playAlarmVoice();
+
+  bool isVoice = mw_one->m_Todo->isVoice(strText);
+
+  QString ini_file = privateDir + "msg.ini";
+  QSettings Reg(ini_file, QSettings::IniFormat);
+  bool isPlayText = Reg.value("voice", 0).toBool();
+
+  if (isVoice || isPlayText) {
+    if (isVoice) {
+      QString voiceFile = mw_one->m_Todo->getVoiceFile(strText);
+      m_Method->playRecord(voiceFile);
+    } else {
+      QString txt = strText;
+      m_Method->stopPlayMyText();
+      m_Method->playMyText(txt);
+    }
+  }
+
+  qDebug() << "C++ JavaNotify_3";
 
   QTimer::singleShot(100, mw_one, [strTime, strText]() {
     mw_one->m_Todo->showAlarmWindow(strTime, strText);

@@ -110,23 +110,23 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                     acceptedButtons: Qt.NoButton
-                    onWheel: (wheel) => {
-                        if (wheel.angleDelta.y > 0) {
-                            // 向上滚动
-                            if (yearTumbler.currentIndex > 0) {
-                                yearTumbler.currentIndex--
-                            } else if (yearTumbler.wrap) {
-                                yearTumbler.currentIndex = yearTumbler.model.length - 1
-                            }
-                        } else {
-                            // 向下滚动
-                            if (yearTumbler.currentIndex < yearTumbler.model.length - 1) {
-                                yearTumbler.currentIndex++
-                            } else if (yearTumbler.wrap) {
-                                yearTumbler.currentIndex = 0
-                            }
-                        }
-                    }
+                    onWheel: wheel => {
+                                 if (wheel.angleDelta.y > 0) {
+                                     // 向上滚动
+                                     if (yearTumbler.currentIndex > 0) {
+                                         yearTumbler.currentIndex--
+                                     } else if (yearTumbler.wrap) {
+                                         yearTumbler.currentIndex = yearTumbler.model.length - 1
+                                     }
+                                 } else {
+                                     // 向下滚动
+                                     if (yearTumbler.currentIndex < yearTumbler.model.length - 1) {
+                                         yearTumbler.currentIndex++
+                                     } else if (yearTumbler.wrap) {
+                                         yearTumbler.currentIndex = 0
+                                     }
+                                 }
+                             }
                 }
 
                 delegate: Text {
@@ -168,23 +168,24 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                     acceptedButtons: Qt.NoButton
-                    onWheel: (wheel) => {
-                        if (wheel.angleDelta.y > 0) {
-                            // 向上滚动
-                            if (monthTumbler.currentIndex > 0) {
-                                monthTumbler.currentIndex--
-                            } else if (monthTumbler.wrap) {
-                                monthTumbler.currentIndex = monthTumbler.model.length - 1
-                            }
-                        } else {
-                            // 向下滚动
-                            if (monthTumbler.currentIndex < monthTumbler.model.length - 1) {
-                                monthTumbler.currentIndex++
-                            } else if (monthTumbler.wrap) {
-                                monthTumbler.currentIndex = 0
-                            }
-                        }
-                    }
+                    onWheel: wheel => {
+                                 if (wheel.angleDelta.y > 0) {
+                                     // 向上滚动
+                                     if (monthTumbler.currentIndex > 0) {
+                                         monthTumbler.currentIndex--
+                                     } else if (monthTumbler.wrap) {
+                                         monthTumbler.currentIndex = monthTumbler.model.length - 1
+                                     }
+                                 } else {
+                                     // 向下滚动
+                                     if (monthTumbler.currentIndex
+                                         < monthTumbler.model.length - 1) {
+                                         monthTumbler.currentIndex++
+                                     } else if (monthTumbler.wrap) {
+                                         monthTumbler.currentIndex = 0
+                                     }
+                                 }
+                             }
                 }
 
                 delegate: Text {
@@ -227,23 +228,23 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                     acceptedButtons: Qt.NoButton
-                    onWheel: (wheel) => {
-                        if (wheel.angleDelta.y > 0) {
-                            // 向上滚动
-                            if (dayTumbler.currentIndex > 0) {
-                                dayTumbler.currentIndex--
-                            } else if (dayTumbler.wrap) {
-                                dayTumbler.currentIndex = dayTumbler.model.length - 1
-                            }
-                        } else {
-                            // 向下滚动
-                            if (dayTumbler.currentIndex < dayTumbler.model.length - 1) {
-                                dayTumbler.currentIndex++
-                            } else if (dayTumbler.wrap) {
-                                dayTumbler.currentIndex = 0
-                            }
-                        }
-                    }
+                    onWheel: wheel => {
+                                 if (wheel.angleDelta.y > 0) {
+                                     // 向上滚动
+                                     if (dayTumbler.currentIndex > 0) {
+                                         dayTumbler.currentIndex--
+                                     } else if (dayTumbler.wrap) {
+                                         dayTumbler.currentIndex = dayTumbler.model.length - 1
+                                     }
+                                 } else {
+                                     // 向下滚动
+                                     if (dayTumbler.currentIndex < dayTumbler.model.length - 1) {
+                                         dayTumbler.currentIndex++
+                                     } else if (dayTumbler.wrap) {
+                                         dayTumbler.currentIndex = 0
+                                     }
+                                 }
+                             }
                 }
 
                 delegate: Text {
@@ -312,23 +313,23 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                     acceptedButtons: Qt.NoButton
-                    onWheel: (wheel) => {
-                        if (wheel.angleDelta.y > 0) {
-                            // 向上滚动
-                            if (hourTumbler.currentIndex > 0) {
-                                hourTumbler.currentIndex--
-                            } else if (hourTumbler.wrap) {
-                                hourTumbler.currentIndex = hourTumbler.model.length - 1
-                            }
-                        } else {
-                            // 向下滚动
-                            if (hourTumbler.currentIndex < hourTumbler.model.length - 1) {
-                                hourTumbler.currentIndex++
-                            } else if (hourTumbler.wrap) {
-                                hourTumbler.currentIndex = 0
-                            }
-                        }
-                    }
+                    onWheel: wheel => {
+                                 if (wheel.angleDelta.y > 0) {
+                                     // 向上滚动
+                                     if (hourTumbler.currentIndex > 0) {
+                                         hourTumbler.currentIndex--
+                                     } else if (hourTumbler.wrap) {
+                                         hourTumbler.currentIndex = hourTumbler.model.length - 1
+                                     }
+                                 } else {
+                                     // 向下滚动
+                                     if (hourTumbler.currentIndex < hourTumbler.model.length - 1) {
+                                         hourTumbler.currentIndex++
+                                     } else if (hourTumbler.wrap) {
+                                         hourTumbler.currentIndex = 0
+                                     }
+                                 }
+                             }
                 }
 
                 delegate: Text {
@@ -384,23 +385,24 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                     acceptedButtons: Qt.NoButton
-                    onWheel: (wheel) => {
-                        if (wheel.angleDelta.y > 0) {
-                            // 向上滚动
-                            if (minuteTumbler.currentIndex > 0) {
-                                minuteTumbler.currentIndex--
-                            } else if (minuteTumbler.wrap) {
-                                minuteTumbler.currentIndex = minuteTumbler.model.length - 1
-                            }
-                        } else {
-                            // 向下滚动
-                            if (minuteTumbler.currentIndex < minuteTumbler.model.length - 1) {
-                                minuteTumbler.currentIndex++
-                            } else if (minuteTumbler.wrap) {
-                                minuteTumbler.currentIndex = 0
-                            }
-                        }
-                    }
+                    onWheel: wheel => {
+                                 if (wheel.angleDelta.y > 0) {
+                                     // 向上滚动
+                                     if (minuteTumbler.currentIndex > 0) {
+                                         minuteTumbler.currentIndex--
+                                     } else if (minuteTumbler.wrap) {
+                                         minuteTumbler.currentIndex = minuteTumbler.model.length - 1
+                                     }
+                                 } else {
+                                     // 向下滚动
+                                     if (minuteTumbler.currentIndex
+                                         < minuteTumbler.model.length - 1) {
+                                         minuteTumbler.currentIndex++
+                                     } else if (minuteTumbler.wrap) {
+                                         minuteTumbler.currentIndex = 0
+                                     }
+                                 }
+                             }
                 }
 
                 delegate: Text {

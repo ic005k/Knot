@@ -868,7 +868,8 @@ public class MyService extends Service {
                 String message = intent.getStringExtra("alarmMessage");
                 Log.d("MyAlarmReceiver", "Alarm received: " + message);
 
-                // 直接在前台服务中处理闹钟事件
+                //========目前已弃用,但保留了旧有的全套逻辑2026.2.22=====
+                // 直接在前台服务中处理闹钟事件并显示提醒窗口ClockActivity
                 /*notifyTodoAlarm(context, message);
 
                 if (ClockActivity.isClockActivityReady()) {
@@ -876,6 +877,9 @@ public class MyService extends Service {
                     CallJavaNotify_3();
                     }*/
 
+                //==================================================
+
+                // =========全面采用C++端来实现全屏提醒窗口==============
                 CallJavaNotify_3();
             }
         }

@@ -1939,24 +1939,22 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText) {
   closeBtn->setStyleSheet(styleSheet);
 
   // 5. 按钮点击事件绑定
-  connect(closeBtn, &QPushButton::clicked, alarmWindow, &QWidget::close);
+  bool isVoice = mw_one->m_Todo->isVoice(strText);
+  connect(closeBtn, &QPushButton::clicked, this, [=]() {
+    stopLedBlink();
+    alarmWindow->close();
+  });
+
   connect(playBtn, &QPushButton::clicked, this, [=]() {
     qDebug() << "触发播放提醒：" << strText;
-    bool isVoice = mw_one->m_Todo->isVoice(strText);
 
     if (isVoice) {
       QString voiceFile = mw_one->m_Todo->getVoiceFile(strText);
       m_Method->playRecord(voiceFile);
     } else {
-      QString ini_file = privateDir + "msg.ini";
-      QSettings Reg(ini_file, QSettings::IniFormat);
-
-      bool isPlayText = Reg.value("voice", 0).toBool();
-      if (isPlayText) {
-        QString txt = strText;
-        m_Method->stopPlayMyText();
-        m_Method->playMyText(txt);
-      }
+      QString txt = strText;
+      m_Method->stopPlayMyText();
+      m_Method->playMyText(txt);
     }
   });
 
@@ -1964,5 +1962,44 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText) {
   alarmWindow->show();
   alarmWindow->raise();
   alarmWindow->activateWindow();
-  playBtn->click();
+}
+
+void Todo::playAlarmVoice() {
+  QQuickItem* root;
+  root = mui->qwTodo->rootObject();
+
+  bool invokeSuccess = QMetaObject::invokeMethod(
+      root,                 // 要调用的QML对象
+      "playTumblerSound",   // QML无参函数名（和QML完全一致）
+      Qt::QueuedConnection  // 队列连接：跨线程安全
+
+  );
+
+  if (invokeSuccess) {
+    qDebug() << "[Todo] Alarm voice play function called successfully";
+  } else {
+    qWarning() << "[Todo] Failed to invoke playTumblerSound function in QML";
+  }
+}
+
+// 启动呼吸灯：参数（颜色，亮时长ms，灭时长ms）
+// 示例：startLedBlink(0xFFFFFFFF, 500, 500) → 白色，500ms亮/500ms灭
+void Todo::startLedBlink(int color, int onMs, int offMs) {
+#ifdef Q_OS_ANDROID
+  QJniObject::callStaticMethod<void>(
+      "com/x/MyActivity",  // 你的Activity完整路径
+      "qtStartLedBlink",   // 对应Java静态方法名
+      "(III)V",            // 方法签名：3个int参数，无返回值
+      color, onMs, offMs   // 传入参数
+  );
+#endif
+}
+
+// 停止呼吸灯
+void Todo::stopLedBlink() {
+#ifdef Q_OS_ANDROID
+  QJniObject::callStaticMethod<void>("com/x/MyActivity", "qtStopLedBlink",
+                                     "()V"  // 无参数，无返回值
+  );
+#endif
 }

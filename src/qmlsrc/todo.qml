@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Controls.Fusion
 import QtQuick.Window
+import QtMultimedia
 
 Rectangle {
     id: root
@@ -17,20 +18,39 @@ Rectangle {
     property bool isHighPriority: false
     property bool isRenderValid: true
 
+    // 音效组件（消息提示音）
+    SoundEffect {
+        id: tumblerSound
+        source: "/res/sound/alarm.wav" // 音效文件路径（建议用WAV格式）
+        volume: 1 // 音量（0-1）
+        loops: 1 // 仅播放一次
+    }
+
+    // 防抖播放音效（避免滚动时频繁触发）
+    function playTumblerSound() {
+        if (Qt.platform.os === "android") {
+            // 停止当前可能正在播放的音效，避免叠加
+            tumblerSound.stop()
+            tumblerSound.play()
+        }
+    }
+
     function checkRenderContext() {
         if (Qt.application.platformName === "android" && !isRenderValid) {
-            console.log("渲染上下文无效，跳过操作");
-            return false;
+            console.log("渲染上下文无效，跳过操作")
+            return false
         }
-        return true;
+        return true
     }
 
     function showTodoAlarm() {
-        if(checkRenderContext()) setTodoAlarm.open()
+        if (checkRenderContext())
+            setTodoAlarm.open()
     }
 
     function closeTodoAlarm() {
-        if(!checkRenderContext()) return;
+        if (!checkRenderContext())
+            return
         setTodoAlarm.close()
         m_Todo.setAlarmShowValue(false)
         m_Todo.showInputPanel()
@@ -45,7 +65,8 @@ Rectangle {
     }
 
     function setCurrentItem(currentIndex) {
-        if(checkRenderContext()) view.currentIndex = currentIndex
+        if (checkRenderContext())
+            view.currentIndex = currentIndex
     }
 
     function getCurrentIndex() {
@@ -53,37 +74,43 @@ Rectangle {
     }
 
     function getItemCount() {
-        if(!checkRenderContext()) return 0;
+        if (!checkRenderContext())
+            return 0
         itemCount = view.count
         return itemCount
     }
 
     function getItemText(itemIndex) {
-        if(!checkRenderContext()) return "";
+        if (!checkRenderContext())
+            return ""
         var data = view.model.get(itemIndex)
         return data.time + "|=|" + data.dototext
     }
 
     function getTime(itemIndex) {
-        if(!checkRenderContext()) return "";
+        if (!checkRenderContext())
+            return ""
         var data = view.model.get(itemIndex)
         return data.time
     }
 
     function getTodoText(itemIndex) {
-        if(!checkRenderContext() || itemIndex < 0 || itemIndex >= view.count) return "";
+        if (!checkRenderContext() || itemIndex < 0 || itemIndex >= view.count)
+            return ""
         var data = view.model.get(itemIndex)
         return data.dototext
     }
 
     function getType(itemIndex) {
-        if(!checkRenderContext()) return 0;
+        if (!checkRenderContext())
+            return 0
         var data = view.model.get(itemIndex)
         return data.type
     }
 
     function addItem(strTime, type, strText, height) {
-        if(!checkRenderContext()) return;
+        if (!checkRenderContext())
+            return
         view.model.append({
                               "time": strTime,
                               "type": type,
@@ -93,7 +120,8 @@ Rectangle {
     }
 
     function insertItem(strTime, type, strText, height, curIndex) {
-        if(!checkRenderContext()) return;
+        if (!checkRenderContext())
+            return
         view.model.insert(curIndex, {
                               "time": strTime,
                               "type": type,
@@ -103,28 +131,33 @@ Rectangle {
     }
 
     function delItem(currentIndex) {
-        if(!checkRenderContext()) return;
+        if (!checkRenderContext())
+            return
         view.model.remove(currentIndex)
     }
 
     function modifyItem(currentIndex, strTime, strText) {
-        if(!checkRenderContext()) return;
+        if (!checkRenderContext())
+            return
         view.model.setProperty(currentIndex, "time", strTime)
         view.model.setProperty(currentIndex, "dototext", strText)
     }
 
     function modifyItemTime(currentIndex, strTime) {
-        if(!checkRenderContext()) return;
+        if (!checkRenderContext())
+            return
         view.model.setProperty(currentIndex, "time", strTime)
     }
 
     function modifyItemType(currentIndex, type) {
-        if(!checkRenderContext()) return;
+        if (!checkRenderContext())
+            return
         view.model.setProperty(currentIndex, "type", type)
     }
 
     function modifyItemText(currentIndex, strText) {
-        if(!checkRenderContext()) return;
+        if (!checkRenderContext())
+            return
         view.model.setProperty(currentIndex, "dototext", strText)
     }
 
@@ -173,7 +206,6 @@ Rectangle {
         // ========== 移除无效的renderType属性，保留其他渲染优化 ==========
         reuseItems: false
 
-
         ScrollBar.vertical: ScrollBar {
             policy: ScrollBar.AsNeeded
             width: 8
@@ -209,7 +241,8 @@ Rectangle {
             maximumFlickVelocity: 2000
 
             onMovementEnded: {
-                if(!checkRenderContext()) return;
+                if (!checkRenderContext())
+                    return
                 autoAnimation = true
                 const speedThreshold = 100
                 const posThreshold = donebtn.width * 0.3
@@ -238,7 +271,8 @@ Rectangle {
             MouseArea {
                 anchors.fill: parent
                 onClicked: function (mouse) {
-                    if(!checkRenderContext()) return;
+                    if (!checkRenderContext())
+                        return
                     if (actionButtons.visible && mouse.x > actionButtons.x
                             && mouse.x < actionButtons.x + actionButtons.width
                             && mouse.y > actionButtons.y
@@ -254,14 +288,16 @@ Rectangle {
                 }
 
                 onDoubleClicked: {
-                    if(!checkRenderContext()) return;
+                    if (!checkRenderContext())
+                        return
                     m_Todo.reeditText()
                     var data = view.model.get(view.currentIndex)
                     console.log(data.time + "," + data.dototext + ", count=" + view.count)
                 }
 
                 onPressed: {
-                    if(checkRenderContext()) donebtn.visible = true
+                    if (checkRenderContext())
+                        donebtn.visible = true
                 }
             }
 
@@ -353,7 +389,8 @@ Rectangle {
                                                           - 5 : parent.width
                                 Layout.preferredWidth: rectan.width - flagColor.width
                                 color: view.currentIndex === index ? "black" : getText1FontColor()
-                                font.pointSize: FontSize - 2 > maxFontSize ? maxFontSize : FontSize - 2
+                                font.pointSize: FontSize - 2
+                                                > maxFontSize ? maxFontSize : FontSize - 2
                                 font.bold: true
                                 wrapMode: Text.WrapAnywhere
                                 horizontalAlignment: Text.AlignLeft
@@ -468,7 +505,7 @@ Rectangle {
                                 icon.height: 20
 
                                 onClicked: {
-                                    if(checkRenderContext()) {
+                                    if (checkRenderContext()) {
                                         m_Todo.on_btnHigh()
                                         console.log("设置高优先级")
                                     }
@@ -485,7 +522,7 @@ Rectangle {
                                 icon.height: 20
 
                                 onClicked: {
-                                    if(checkRenderContext()) {
+                                    if (checkRenderContext()) {
                                         m_Todo.on_btnLow()
                                         console.log("设置低优先级")
                                     }
@@ -502,7 +539,7 @@ Rectangle {
                                 icon.height: 20
 
                                 onClicked: {
-                                    if(checkRenderContext()) {
+                                    if (checkRenderContext()) {
                                         view.currentIndex = index
                                         m_Todo.reeditText()
                                         console.log("修改条目: " + index)
@@ -520,7 +557,7 @@ Rectangle {
                                 icon.height: 20
 
                                 onClicked: {
-                                    if(checkRenderContext()) {
+                                    if (checkRenderContext()) {
                                         m_Todo.on_btnSetTime()
                                         console.log("设置时间: " + index)
                                     }
@@ -537,7 +574,7 @@ Rectangle {
                                 icon.height: 20
 
                                 onClicked: {
-                                    if(checkRenderContext()) {
+                                    if (checkRenderContext()) {
                                         m_Todo.on_btnRecycle()
                                         console.log("打开回收箱: " + index)
                                     }
@@ -583,8 +620,7 @@ Rectangle {
                             height: 26
                             border.width: 2
                             border.color: isDark ? "#666666" : "#CCCCCC"
-                            color: todoCheckBox.checked ? (isDark ? "#333333" : "#FFFFFF")
-                                                        : (isDark ? "#333333" : "#FFFFFF")
+                            color: todoCheckBox.checked ? (isDark ? "#333333" : "#FFFFFF") : (isDark ? "#333333" : "#FFFFFF")
                             anchors.centerIn: parent
                             antialiasing: true
 
@@ -616,7 +652,8 @@ Rectangle {
                             interval: 300
                             repeat: false
                             onTriggered: {
-                                if(!checkRenderContext()) return;
+                                if (!checkRenderContext())
+                                    return
                                 view.currentIndex = index
                                 m_Todo.stopPlayVoice()
                                 m_Todo.addToRecycle()
@@ -632,7 +669,8 @@ Rectangle {
                         }
 
                         onClicked: {
-                            if(!checkRenderContext()) return;
+                            if (!checkRenderContext())
+                                return
                             todoCheckBox.indicator.scale = 0.9
                             actionTimer.start()
                         }
@@ -683,6 +721,8 @@ Rectangle {
 
     Connections {
         target: Qt.application
-        function onAboutToQuit() { root.isRenderValid = false }
+        function onAboutToQuit() {
+            root.isRenderValid = false
+        }
     }
 }

@@ -210,5 +210,6 @@
         <file>res/remarks.svg</file>
         <file>res/remarks_l.svg</file>
         <file>res/sound/tumbler_click.wav</file>
+        <file>res/sound/alarm.wav</file>
     </qresource>
 </RCC>
