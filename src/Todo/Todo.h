@@ -170,7 +170,8 @@ class Todo : public QDialog {
   bool isVoice(const QString& strTodoText);
   void stopLedBlink();
   void startLedBlink(int color = 0xFFFFFFFF, int onMs = 500, int offMs = 500);
-  private slots:
+  void clearJavaNotify();
+ private slots:
   void on_ShowRecordTime();
 
   void on_ShowPlayProgress();

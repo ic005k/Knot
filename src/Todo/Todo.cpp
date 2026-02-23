@@ -1902,7 +1902,8 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText) {
   mainLayout->addWidget(titleLabel);
 
   // ---------------------- 内容栏 ----------------------
-  QLabel* contentLabel = new QLabel(strText);
+  QLabel* contentLabel =
+      new QLabel(strText + "\n\n(" + QTime::currentTime().toString() + ")");
   contentLabel->setObjectName("contentLabel");
   contentLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
   contentLabel->setWordWrap(true);
@@ -1941,7 +1942,8 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText) {
   // 5. 按钮点击事件绑定
   bool isVoice = mw_one->m_Todo->isVoice(strText);
   connect(closeBtn, &QPushButton::clicked, this, [=]() {
-    stopLedBlink();
+    // stopLedBlink();
+    clearJavaNotify();
     alarmWindow->close();
   });
 
@@ -2001,5 +2003,39 @@ void Todo::stopLedBlink() {
   QJniObject::callStaticMethod<void>("com/x/MyActivity", "qtStopLedBlink",
                                      "()V"  // 无参数，无返回值
   );
+#endif
+}
+
+void Todo::clearJavaNotify() {
+#ifdef Q_OS_ANDROID
+  try {
+    // ========== 使用Qt6标准方式获取上下文 ==========
+    jobject context = QNativeInterface::QAndroidApplication::context();
+    if (context == nullptr) {
+      qDebug() << "[清除通知] 获取Android上下文失败（context=null）！";
+      return;
+    }
+
+    // ========== 传递context参数 ==========
+    QJniObject::callStaticMethod<void>(
+        "com/x/MyService",  // Java类完整路径（和你sendMsgAlarm一致）
+        "clearNotify",      // 方法名
+        "(Landroid/content/Context;)V",  // 方法签名（带Context参数）
+        context  // 传递上下文（和你sendMsgAlarm的写法一致）
+    );
+
+    // ========== 可选：检查Java异常（调试用） ==========
+    QJniEnvironment env;
+    if (env->ExceptionCheck()) {
+      env->ExceptionDescribe();  // 打印Java端异常（比如方法名写错）
+      env->ExceptionClear();     // 清除异常
+      qDebug() << "[清除通知] 调用Java方法失败，捕获异常！";
+      return;
+    }
+
+    qDebug() << "[清除通知] 调用clearNotify成功！";
+  } catch (...) {
+    qDebug() << "[清除通知] C++端捕获未知异常！";
+  }
 #endif
 }

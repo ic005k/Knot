@@ -677,7 +677,7 @@ public class MyActivity
         Log.d(TAG, "Android activity created");
 
         registSreenStatusReceiver();
-        initLedChannel(); // ← 添加这行，初始化呼吸灯通道
+        //initLedChannel(); // ← 添加这行，初始化呼吸灯通道
         // registAlarmReceiver();
 
         Application application = this.getApplication();

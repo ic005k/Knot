@@ -63,9 +63,9 @@ static void JavaNotify_3() {
 
   mw_one->m_ReceiveShare->moveTaskToFront();
 
-  mw_one->m_Todo->startLedBlink(0xFFFFFF, 500, 500);
+  // mw_one->m_Todo->startLedBlink(0xFFFFFF, 500, 500);
 
-  mw_one->m_Todo->playAlarmVoice();
+  // mw_one->m_Todo->playAlarmVoice();
 
   bool isVoice = mw_one->m_Todo->isVoice(strText);
 
