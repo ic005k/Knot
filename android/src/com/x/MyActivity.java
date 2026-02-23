@@ -677,7 +677,7 @@ public class MyActivity
         Log.d(TAG, "Android activity created");
 
         registSreenStatusReceiver();
-        //initLedChannel(); // ← 添加这行，初始化呼吸灯通道
+
         // registAlarmReceiver();
 
         Application application = this.getApplication();
@@ -2862,90 +2862,5 @@ public class MyActivity
                 Process.killProcess(Process.myPid());
             }
         });
-    }
-
-    // ===================== 呼吸灯（通知LED）核心功能 =====================
-    private static final String LED_CHANNEL_ID = "led_background_channel";
-    private static final int LED_NOTIFICATION_ID = 0x1001; // 唯一ID
-
-    // 初始化呼吸灯通道（仅适配 Android 12+）
-    private void initLedChannel() {
-        // 只处理 Android 12+（API 31），无需兼容低版本
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            NotificationManager nm = (NotificationManager) getSystemService(
-                Context.NOTIFICATION_SERVICE
-            );
-            if (nm == null) return;
-
-            // 核心：创建「完全无通知」的通道
-            NotificationChannel channel = new NotificationChannel(
-                LED_CHANNEL_ID,
-                "Todo Alarm",
-                NotificationManager.IMPORTANCE_NONE // 彻底无通知，仅保留LED功能
-            );
-            // 仅启用LED，禁用所有其他特性
-            channel.enableLights(true); // 必须：开启LED控制
-            channel.enableVibration(false);
-            channel.setSound(null, null);
-            channel.setShowBadge(false); // 无角标
-            channel.setBypassDnd(false); // 不绕过免打扰
-            nm.createNotificationChannel(channel);
-        }
-    }
-
-    // 供Qt调用：启动呼吸灯闪烁（仅适配 Android 12+，完全无痕）
-    public static void qtStartLedBlink(int color, int onMs, int offMs) {
-        if (m_instance == null) return;
-
-        // 仅处理 Android 12+
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            return;
-        }
-
-        NotificationManager nm =
-            (NotificationManager) m_instance.getSystemService(
-                Context.NOTIFICATION_SERVICE
-            );
-        if (nm == null) return;
-
-        // 构建100%无痕的通知（仅控制LED）
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(
-            m_instance,
-            LED_CHANNEL_ID
-        )
-            // 1. 优先级：最低（Android 12+ 优先遵循通道的IMPORTANCE_NONE）
-            .setPriority(NotificationCompat.PRIORITY_MIN)
-            // 2. 关键：使用系统透明图标，无任何视觉显示
-            .setSmallIcon(android.R.color.transparent)
-            // 3. LED核心配置
-            .setLights(color, onMs, offMs)
-            // 4. 清空所有文本/交互，彻底隐身
-            .setContentTitle("Todo Alarm")
-            .setContentText("")
-            .setSubText("")
-            .setTicker("")
-            .setShowWhen(false)
-            .setOngoing(false)
-            // 5. Android 12+ 专属：锁屏完全隐藏
-            .setVisibility(NotificationCompat.VISIBILITY_SECRET);
-
-        Notification notification = builder.build();
-        // 发送通知（仅控制LED，无任何视觉痕迹）
-        nm.notify(LED_CHANNEL_ID, LED_NOTIFICATION_ID, notification);
-    }
-
-    // 供Qt调用：停止呼吸灯
-    public static void qtStopLedBlink() {
-        if (m_instance == null) return;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            NotificationManager nm =
-                (NotificationManager) m_instance.getSystemService(
-                    Context.NOTIFICATION_SERVICE
-                );
-            if (nm != null) {
-                nm.cancel(LED_CHANNEL_ID, LED_NOTIFICATION_ID); // 取消通知 = 停止LED
-            }
-        }
     }
 }

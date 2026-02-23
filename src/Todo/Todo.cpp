@@ -1903,7 +1903,7 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText) {
 
   // ---------------------- 内容栏 ----------------------
   QLabel* contentLabel =
-      new QLabel(strText + "\n\n(" + QTime::currentTime().toString() + ")");
+      new QLabel(strText + "\n\n(" + strTodoAlarmActiveTime + ")");
   contentLabel->setObjectName("contentLabel");
   contentLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
   contentLabel->setWordWrap(true);
@@ -1982,28 +1982,6 @@ void Todo::playAlarmVoice() {
   } else {
     qWarning() << "[Todo] Failed to invoke playTumblerSound function in QML";
   }
-}
-
-// 启动呼吸灯：参数（颜色，亮时长ms，灭时长ms）
-// 示例：startLedBlink(0xFFFFFFFF, 500, 500) → 白色，500ms亮/500ms灭
-void Todo::startLedBlink(int color, int onMs, int offMs) {
-#ifdef Q_OS_ANDROID
-  QJniObject::callStaticMethod<void>(
-      "com/x/MyActivity",  // 你的Activity完整路径
-      "qtStartLedBlink",   // 对应Java静态方法名
-      "(III)V",            // 方法签名：3个int参数，无返回值
-      color, onMs, offMs   // 传入参数
-  );
-#endif
-}
-
-// 停止呼吸灯
-void Todo::stopLedBlink() {
-#ifdef Q_OS_ANDROID
-  QJniObject::callStaticMethod<void>("com/x/MyActivity", "qtStopLedBlink",
-                                     "()V"  // 无参数，无返回值
-  );
-#endif
 }
 
 void Todo::clearJavaNotify() {

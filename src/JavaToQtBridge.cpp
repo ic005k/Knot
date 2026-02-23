@@ -59,13 +59,15 @@ static void JavaNotify_3() {
   QString strTime, strText;
   strTime = mw_one->m_Todo->strAlarmTime;
   strText = mw_one->m_Todo->strAlarmText;
+
+  QDateTime now = QDateTime::currentDateTime();
+  QString datePart = now.toString("yyyy-MM-dd");
+  QString timePart = now.toString("HH:mm:ss");
+  strTodoAlarmActiveTime = datePart + "  " + timePart;
+
   mw_one->m_Todo->refreshAlarm();
 
   mw_one->m_ReceiveShare->moveTaskToFront();
-
-  // mw_one->m_Todo->startLedBlink(0xFFFFFF, 500, 500);
-
-  // mw_one->m_Todo->playAlarmVoice();
 
   bool isVoice = mw_one->m_Todo->isVoice(strText);
 

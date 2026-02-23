@@ -546,99 +546,6 @@ public class MyService extends Service {
         }
     }
 
-    public static void notifyTodoAlarm_New(Context context, String message) {
-        try {
-            NotificationManager m_notificationManagerAlarm =
-                (NotificationManager) context.getSystemService(
-                    Context.NOTIFICATION_SERVICE
-                );
-
-            String channelId = "knot_alarm_channel";
-            // ========== 1. 通道配置（和旧实现一致） ==========
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel channel =
-                    m_notificationManagerAlarm.getNotificationChannel(
-                        channelId
-                    );
-                if (channel == null) {
-                    channel = new NotificationChannel(
-                        channelId,
-                        "Knot Alarm",
-                        NotificationManager.IMPORTANCE_HIGH
-                    );
-                    channel.enableLights(true);
-                    channel.setLightColor(Color.RED);
-                    channel.enableVibration(true);
-                    channel.setVibrationPattern(new long[] { 0, 500, 1000 });
-                    channel.setSound(
-                        Settings.System.DEFAULT_NOTIFICATION_URI,
-                        null
-                    );
-                    channel.setBypassDnd(true);
-                    channel.setLockscreenVisibility(
-                        Notification.VISIBILITY_PUBLIC
-                    );
-                    m_notificationManagerAlarm.createNotificationChannel(
-                        channel
-                    );
-                }
-            }
-
-            // ========== 2. 关键：保留PendingIntent（强交互），但屏蔽弹窗 ==========
-            // 创建空的PendingIntent（点击无反应，避免跳转到ClockActivity）
-            PendingIntent emptyPendingIntent = PendingIntent.getBroadcast(
-                context,
-                (int) System.currentTimeMillis(),
-                new Intent(), // 空Intent，点击无跳转
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                    ? PendingIntent.FLAG_IMMUTABLE
-                    : 0
-            );
-
-            // ========== 3. 通知构建（还原旧实现的核心配置） ==========
-            Notification.Builder m_builderAlarm = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                m_builderAlarm = new Notification.Builder(context, channelId)
-                    .setContentTitle(strTodo) // 保留title
-                    .setContentText(" ") // 关键：非空文本（MIUI强制要求，空格即可）
-                    .setSmallIcon(R.drawable.icon) // 必须有小图标
-                    .setColor(Color.GREEN)
-                    .setAutoCancel(true)
-                    // ========== 还原旧实现的强交互配置 ==========
-                    .setContentIntent(emptyPendingIntent) // 保留ContentIntent（强交互）
-                    .setFullScreenIntent(emptyPendingIntent, false) // 保留但禁用全屏（避免弹窗）
-                    .setLights(Color.RED, 1000, 1000) // 呼吸灯
-                    .setSound(Settings.System.DEFAULT_NOTIFICATION_URI) // 提示音
-                    .setVibrate(new long[] { 0, 500, 1000 }) // 震动
-                    .setPriority(Notification.PRIORITY_MAX)
-                    .setDefaults(Notification.DEFAULT_ALL);
-            } else {
-                m_builderAlarm = new Notification.Builder(context)
-                    .setContentTitle(strTodo)
-                    .setContentText(" ") // 非空文本
-                    .setSmallIcon(R.drawable.icon)
-                    .setColor(Color.GREEN)
-                    .setAutoCancel(true)
-                    .setContentIntent(emptyPendingIntent)
-                    .setFullScreenIntent(emptyPendingIntent, false)
-                    .setLights(Color.RED, 1000, 1000)
-                    .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
-                    .setVibrate(new long[] { 0, 500, 1000 })
-                    .setPriority(Notification.PRIORITY_MAX)
-                    .setDefaults(Notification.DEFAULT_ALL);
-            }
-
-            // 发送通知
-            m_notificationManagerAlarm.notify(
-                "knot_alarm_tag",
-                10,
-                m_builderAlarm.build()
-            );
-        } catch (Exception e) {
-            Log.e(TAG, "发送通知失败", e);
-        }
-    }
-
     public static void notifyTodoAlarm(Context context, String message) {
         try {
             NotificationManager m_notificationManagerAlarm =
@@ -696,7 +603,7 @@ public class MyService extends Service {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 m_builderAlarm = new Notification.Builder(context, channelId)
                     .setContentTitle(strTodo)
-                    .setContentText("")
+                    .setContentText(message)
                     .setSmallIcon(R.drawable.icon)
                     .setColor(Color.GREEN)
                     .setAutoCancel(true)
@@ -710,7 +617,7 @@ public class MyService extends Service {
             } else {
                 m_builderAlarm = new Notification.Builder(context)
                     .setContentTitle(strTodo)
-                    .setContentText("")
+                    .setContentText(message)
                     .setSmallIcon(R.drawable.icon)
                     .setColor(Color.GREEN)
                     .setAutoCancel(true)
