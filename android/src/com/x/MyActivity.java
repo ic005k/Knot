@@ -431,6 +431,57 @@ public class MyActivity
         }
     }
 
+    // 复用原函数名，零窗口修改、零UI干扰、仅移前台、不影响GPS
+    public void bringAppToForeground() {
+        try {
+            // ===================== 核心：仅做「任务栈移前台」，不碰任何窗口属性 =====================
+            // 彻底不修改任何Window标志，避免状态栏变色、QML黑屏
+            bringTaskToFrontUltraSafely();
+
+            // 【可选】如果解锁后交互有问题，再打开这行（仅解锁，不影响状态栏），否则注释掉
+            // Window window = getWindow();
+            // if (window != null) window.addFlags(android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 超安全移前台：仅调整任务栈，不修改任何Window属性，零UI干扰
+    private void bringTaskToFrontUltraSafely() {
+        try {
+            ActivityManager am = (ActivityManager) getSystemService(
+                Context.ACTIVITY_SERVICE
+            );
+            if (am == null) return;
+
+            // 仅获取当前App的任务栈，不修改任何系统属性
+            List<ActivityManager.RunningTaskInfo> taskList = am.getRunningTasks(
+                1
+            );
+            for (ActivityManager.RunningTaskInfo task : taskList) {
+                if (
+                    task.topActivity.getPackageName().equals(getPackageName())
+                ) {
+                    // 用「无操作标志」移前台，避免触发任何UI/状态栏变化
+                    am.moveTaskToFront(
+                        task.id,
+                        ActivityManager.MOVE_TASK_NO_USER_ACTION
+                    );
+                    return;
+                }
+            }
+
+            // 保底方案：仅移前台，不新建实例，无动画，不影响状态栏
+            Intent intent = new Intent(this, getClass());
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); // 不新建，仅移前台
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION); // 无动画，避免UI闪屏
+            intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT); // 明确仅移前台，不触发主题变化
+            startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     // ------------------------------------------------------------------------
 
     // 全透状态栏

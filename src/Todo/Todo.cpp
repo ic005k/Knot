@@ -1846,17 +1846,22 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText) {
     return;
   }
 
-  // 1. 创建提醒窗口（无父对象，无边框+置顶）
-  QWidget* alarmWindow = new QWidget();
+  // 1. 创建提醒窗口（关联主窗口为父对象，避免独立窗口抢占系统资源）
+  QWidget* alarmWindow = new QWidget(mw_one);  // 关键修改：设置父窗口
+  // 关键修改：调整窗口标志，移除强制置顶，改用系统级提示
   alarmWindow->setWindowFlags(Qt::FramelessWindowHint |
-                              Qt::WindowStaysOnTopHint);
+                              Qt::Tool |  // 工具窗口，优先级更低
+                              Qt::WindowDoesNotAcceptFocus);  // 不获取焦点
   alarmWindow->setAttribute(Qt::WA_DeleteOnClose);  // 关闭时自动释放内存
+  // 关键修改：设置窗口为后台友好型
+  alarmWindow->setAttribute(Qt::WA_ShowWithoutActivating);  // 显示时不激活窗口
+  alarmWindow->setAttribute(Qt::WA_InputMethodEnabled, false);  // 禁用输入法
 
   // 2. 匹配主窗口尺寸和位置
   alarmWindow->resize(mw_one->size());
   alarmWindow->move(mw_one->pos());
 
-  // 3. 根据暗黑模式切换样式表
+  // 3. 根据暗黑模式切换样式表（保持不变）
   QString styleSheet;
 
   styleSheet = R"(
@@ -1884,7 +1889,7 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText) {
     }
 )";
 
-  // 4. 整体垂直布局（标题栏 + 内容栏 + 按钮区）
+  // 4. 整体垂直布局（标题栏 + 内容栏 + 按钮区）（保持不变）
   QVBoxLayout* mainLayout = new QVBoxLayout(alarmWindow);
   mainLayout->setContentsMargins(0, 0, 0, 0);
   mainLayout->setSpacing(0);
@@ -1939,7 +1944,7 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText) {
   playBtn->setStyleSheet(styleSheet);
   closeBtn->setStyleSheet(styleSheet);
 
-  // 5. 按钮点击事件绑定
+  // 5. 按钮点击事件绑定（保持不变）
   bool isVoice = mw_one->m_Todo->isVoice(strText);
   connect(closeBtn, &QPushButton::clicked, this, [=]() {
     // stopLedBlink();
@@ -1960,10 +1965,11 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText) {
     }
   });
 
-  // 6. 显示窗口
+  // 6. 显示窗口（优化显示方式，避免激活窗口）
   alarmWindow->show();
   alarmWindow->raise();
-  alarmWindow->activateWindow();
+  // 关键修改：移除activateWindow()，避免抢占系统焦点
+  // alarmWindow->activateWindow();
 }
 
 void Todo::playAlarmVoice() {

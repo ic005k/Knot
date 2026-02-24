@@ -384,6 +384,17 @@ void ReceiveShare::moveTaskToFront() {
 #endif
 }
 
+void ReceiveShare::bringAppToForeground() {
+#ifdef Q_OS_ANDROID
+  // 获取当前Activity实例
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  if (activity.isValid()) {
+    // 调用Android原生的「仅唤醒+置顶显示」方法（核心修改）
+    activity.callMethod<void>("bringAppToForeground", "()V");
+  }
+#endif
+}
+
 void ReceiveShare::goReceiveShare() {
   m_Method->showTempActivity();
   QString method = mw_one->m_ReceiveShare->getShareMethod();

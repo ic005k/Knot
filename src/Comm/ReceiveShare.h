@@ -15,20 +15,20 @@ class ReceiveShare : public QDialog {
   Q_OBJECT
 
  public:
-  explicit ReceiveShare(QWidget *parent = nullptr);
+  explicit ReceiveShare(QWidget* parent = nullptr);
   ~ReceiveShare();
-  Ui::ReceiveShare *ui;
+  Ui::ReceiveShare* ui;
 
   QString shareType;
   QString strReceiveShareData = "test data...";
 
   QObjectList getAllFrame(QObjectList lstUIControls);
 
-  void shareImages(const QString &title, const QStringList &imagesPathList);
-  void shareString(const QString &title, const QString &content);
+  void shareImages(const QString& title, const QStringList& imagesPathList);
+  void shareString(const QString& title, const QString& content);
 
-  void shareImage(const QString &title, const QString &path,
-                  const QString &fileType);
+  void shareImage(const QString& title, const QString& path,
+                  const QString& fileType);
 
   QString getShareType();
   QString getShareString();
@@ -46,10 +46,12 @@ class ReceiveShare : public QDialog {
 
   void callJavaNotify9();
 
- protected:
-  bool eventFilter(QObject *watch, QEvent *evn) override;
+  void bringAppToForeground();
 
-  void closeEvent(QCloseEvent *event) override;
+ protected:
+  bool eventFilter(QObject* watch, QEvent* evn) override;
+
+  void closeEvent(QCloseEvent* event) override;
 
  public slots:
 

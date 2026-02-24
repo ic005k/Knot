@@ -67,7 +67,7 @@ static void JavaNotify_3() {
 
   mw_one->m_Todo->refreshAlarm();
 
-  mw_one->m_ReceiveShare->moveTaskToFront();
+  mw_one->m_ReceiveShare->bringAppToForeground();
 
   bool isVoice = mw_one->m_Todo->isVoice(strText);
 
