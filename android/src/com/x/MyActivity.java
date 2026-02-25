@@ -30,6 +30,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -431,54 +432,67 @@ public class MyActivity
         }
     }
 
-    // 复用原函数名，零窗口修改、零UI干扰、仅移前台、不影响GPS
     public void bringAppToForeground() {
         try {
-            // ===================== 核心：仅做「任务栈移前台」，不碰任何窗口属性 =====================
-            // 彻底不修改任何Window标志，避免状态栏变色、QML黑屏
-            bringTaskToFrontUltraSafely();
+            // 1. 先记录GPS状态（解决GPS受影响问题，仅新增）
+            boolean gpsWasRunning = isGpsRunning; // 你的GPS运行状态标记
 
-            // 【可选】如果解锁后交互有问题，再打开这行（仅解锁，不影响状态栏），否则注释掉
-            // Window window = getWindow();
-            // if (window != null) window.addFlags(android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+            // 2. 调用你原有稳定的亮屏+移前台方法（完全复用，不修改）
+            wakeUpScreen();
+            bringToFront();
+
+            // 3. 补充UI激活（解决欢迎界面卡死，仅新增这几行）
+            runOnUiThread(() -> {
+                if (!isFinishing() && !isDestroyed()) {
+                    // 强制刷新UI，解决欢迎界面卡死
+                    getWindow().getDecorView().postInvalidate();
+                    // 可选：如果有Qt层激活方法，加这行（根据你的实际情况）
+                    // CallJavaNotify_0();
+                }
+            });
+
+            // 4. 补充GPS恢复（解决GPS受影响，仅新增这几行）
+            new Handler(Looper.getMainLooper()).postDelayed(
+                () -> {
+                    // 若GPS被中断，重新启动（复用你的GPS启动方法）
+                    if (gpsWasRunning && !isGpsRunning) {
+                        startGpsUpdates(); // 你的GPS启动方法，无需修改
+                    }
+                },
+                300
+            );
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // 超安全移前台：仅调整任务栈，不修改任何Window属性，零UI干扰
-    private void bringTaskToFrontUltraSafely() {
+    // 兼容版：移Activity到前台（替代废弃的moveTaskToFront(int, int)）
+    private void moveTaskToFront() {
         try {
             ActivityManager am = (ActivityManager) getSystemService(
                 Context.ACTIVITY_SERVICE
             );
-            if (am == null) return;
-
-            // 仅获取当前App的任务栈，不修改任何系统属性
-            List<ActivityManager.RunningTaskInfo> taskList = am.getRunningTasks(
-                1
-            );
-            for (ActivityManager.RunningTaskInfo task : taskList) {
-                if (
-                    task.topActivity.getPackageName().equals(getPackageName())
-                ) {
-                    // 用「无操作标志」移前台，避免触发任何UI/状态栏变化
-                    am.moveTaskToFront(
-                        task.id,
-                        ActivityManager.MOVE_TASK_NO_USER_ACTION
-                    );
-                    return;
-                }
+            if (am != null) {
+                // 高版本兼容写法
+                am.getAppTasks().get(0).moveToFront();
             }
-
-            // 保底方案：仅移前台，不新建实例，无动画，不影响状态栏
-            Intent intent = new Intent(this, getClass());
-            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); // 不新建，仅移前台
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION); // 无动画，避免UI闪屏
-            intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT); // 明确仅移前台，不触发主题变化
-            startActivity(intent);
         } catch (Exception e) {
-            e.printStackTrace();
+            // 低版本兜底
+            try {
+                // 反射调用旧方法（避免编译错误）
+                Method moveMethod = Activity.class.getMethod(
+                    "moveTaskToFront",
+                    int.class,
+                    int.class
+                );
+                moveMethod.invoke(
+                    this,
+                    getTaskId(),
+                    ActivityManager.MOVE_TASK_WITH_HOME
+                );
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -1132,27 +1146,28 @@ public class MyActivity
 
         getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
 
-        // ========== 新增：注销Qt框架内部的广播接收器 ==========
+        // ========== 优化Qt接收器注销逻辑 ==========
         try {
             // 注销Qt音频设备接收器
             Class<?> qtAudioDeviceManagerClass = Class.forName(
                 "org.qtproject.qt.android.multimedia.QtAudioDeviceManager"
             );
-            Method unregisterMethod = qtAudioDeviceManagerClass.getMethod(
-                "unregisterAudioHeadsetStateReceiver",
+            // 先判断是否已注册（通过反射获取状态）
+            Method isRegisteredMethod = qtAudioDeviceManagerClass.getMethod(
+                "isAudioHeadsetStateReceiverRegistered",
                 Context.class
             );
-            unregisterMethod.invoke(null, this); // 静态方法，第一个参数为null
-
-            // 注销Qt网络代理接收器
-            Class<?> qtNetworkClass = Class.forName(
-                "org.qtproject.qt.android.network.QtNetwork"
+            boolean isRegistered = (boolean) isRegisteredMethod.invoke(
+                null,
+                this
             );
-            Method unregisterNetworkMethod = qtNetworkClass.getMethod(
-                "unregisterReceiver",
-                Context.class
-            );
-            unregisterNetworkMethod.invoke(null, this); // 静态方法
+            if (isRegistered) {
+                Method unregisterMethod = qtAudioDeviceManagerClass.getMethod(
+                    "unregisterAudioHeadsetStateReceiver",
+                    Context.class
+                );
+                unregisterMethod.invoke(null, this);
+            }
         } catch (Exception e) {
             Log.w(TAG, "注销Qt接收器时出现异常（非致命）", e);
         }
@@ -2911,6 +2926,19 @@ public class MyActivity
                 // 兜底：仅终止进程，依赖onDestroy中的兜底逻辑
                 finish();
                 Process.killProcess(Process.myPid());
+            }
+        });
+    }
+
+    // 配置变更处理：仅补充UI刷新，解决暗黑模式切换后卡死
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // 仅新增这几行，无其他改动
+        runOnUiThread(() -> {
+            if (!isFinishing() && !isDestroyed()) {
+                getWindow().getDecorView().invalidate();
             }
         });
     }

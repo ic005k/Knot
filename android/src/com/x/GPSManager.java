@@ -173,33 +173,8 @@ public class GPSManager {
 
             @Override
             public void onProviderEnabled(String provider) {
-                Log.d(TAG, "Provider enabled: " + provider);
-                if (
-                    LocationManager.GPS_PROVIDER.equals(provider) &&
-                    isGpsRunning
-                ) {
-                    try {
-                        LocationManagerCompat.removeUpdates(
-                            locationManager,
-                            gpsLocationListener
-                        );
-                        LocationRequestCompat locationRequest =
-                            new LocationRequestCompat.Builder(2000L)
-                                .setMinUpdateDistanceMeters(1.0f)
-                                .build();
-                        LocationManagerCompat.requestLocationUpdates(
-                            locationManager,
-                            LocationManager.GPS_PROVIDER,
-                            locationRequest,
-                            gpsExecutor,
-                            gpsLocationListener
-                        );
-                        previousLocation = null;
-                        Log.i(TAG, "GPS重新启用，重新注册监听器");
-                    } catch (SecurityException e) {
-                        Log.e(TAG, "重新注册GPS监听器失败", e);
-                    }
-                }
+                // 输出日志，记录定位提供者启用事件（方便排查）
+                Log.d("GPSManager", "定位提供者[" + provider + "]已启用");
             }
 
             @Override
