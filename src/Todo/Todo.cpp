@@ -1839,7 +1839,8 @@ void Todo::showInputPanel() {
   mui->btnClear->show();
 }
 
-void Todo::showAlarmWindow(const QString& strTime, const QString& strText) {
+void Todo::showAlarmWindow(const QString& strTime, const QString& strText,
+                           const QString& strTodoAlarmActiveTime) {
   // 安全校验：防止mw_one为空指针导致崩溃
   if (!mw_one) {
     qWarning() << "主窗口指针mw_one为空，无法创建提醒窗口！";

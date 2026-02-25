@@ -63,7 +63,7 @@ static void JavaNotify_3() {
   QDateTime now = QDateTime::currentDateTime();
   QString datePart = now.toString("yyyy-MM-dd");
   QString timePart = now.toString("HH:mm:ss");
-  strTodoAlarmActiveTime = datePart + "  " + timePart;
+  QString strTodoAlarmActiveTime = datePart + "  " + timePart;
 
   mw_one->m_Todo->refreshAlarm();
 
@@ -88,8 +88,8 @@ static void JavaNotify_3() {
 
   qDebug() << "C++ JavaNotify_3";
 
-  QTimer::singleShot(100, mw_one, [strTime, strText]() {
-    mw_one->m_Todo->showAlarmWindow(strTime, strText);
+  QTimer::singleShot(100, mw_one, [strTime, strText, strTodoAlarmActiveTime]() {
+    mw_one->m_Todo->showAlarmWindow(strTime, strText, strTodoAlarmActiveTime);
   });
 }
 

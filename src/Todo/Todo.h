@@ -165,7 +165,8 @@ class Todo : public QDialog {
   void openTodoUI();
   void openTodo();
   void showTodoAlarm();
-  void showAlarmWindow(const QString& strTime, const QString& strText);
+  void showAlarmWindow(const QString& strTime, const QString& strText,
+                       const QString& strTodoAlarmActiveTime);
   QString getVoiceFile(const QString& strTodoText);
   bool isVoice(const QString& strTodoText);
 
