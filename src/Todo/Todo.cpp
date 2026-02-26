@@ -1841,61 +1841,84 @@ void Todo::showInputPanel() {
 
 void Todo::showAlarmWindow(const QString& strTime, const QString& strText,
                            const QString& strTodoAlarmActiveTime) {
-  // 安全校验：防止mw_one为空指针导致崩溃
   if (!mw_one) {
     qWarning() << "主窗口指针mw_one为空，无法创建提醒窗口！";
     return;
   }
 
-  // ========== 关键修改1：自定义提醒窗口类，重写paintEvent ==========
-  // 用匿名子类的方式，直接在内部实现paintEvent，无需单独定义头文件
-  class AlarmWindow : public QWidget {
+  // ========== 核心：自定义QDialog，重写paintEvent保留字体大小 ==========
+  class AlarmDialog : public QDialog {
    public:
-    explicit AlarmWindow(QWidget* parent = nullptr) : QWidget(parent) {}
-    // 保存标题/内容标签的引用，方便paintEvent中重置字体
+    explicit AlarmDialog(QWidget* parent = nullptr) : QDialog(parent) {
+      setModal(true);                      // 模态
+      setWindowTitle("");                  // 去掉标题栏
+      setAttribute(Qt::WA_DeleteOnClose);  // 内存管理
+      // 固定字体大小（初始化）
+      m_titleFontSize = 26;
+      m_contentFontSize = 25;
+    }
+
+    // 保存需要固定的字体大小（成员变量）
+    int m_titleFontSize;
+    int m_contentFontSize;
+    // 保存标签引用
     QLabel* titleLabel = nullptr;
     QLabel* contentLabel = nullptr;
-    // 保存自定义字体大小（可根据需求调整）
-    int titleFontSize = 26;
-    int contentFontSize = 25;
 
    protected:
+    // 重写paintEvent：每次重绘（包括暗黑模式切换）强制重置字体大小
     void paintEvent(QPaintEvent* event) override {
-      // 第一步：强制重置标题/内容字体（核心逻辑）
+      // ========== 核心逻辑：强制恢复自定义字体大小 ==========
       if (titleLabel) {
         QFont font = titleLabel->font();
         font.setBold(true);
-        font.setPointSize(titleFontSize);  // 强制恢复自定义大小
+        font.setPointSize(m_titleFontSize);  // 强制固定大小，不被系统篡改
         titleLabel->setFont(font);
       }
       if (contentLabel) {
         QFont font = contentLabel->font();
         font.setBold(false);
-        font.setPointSize(contentFontSize);  // 强制恢复自定义大小
+        font.setPointSize(m_contentFontSize);  // 强制固定大小
         contentLabel->setFont(font);
       }
 
-      // 第二步：执行原生重绘逻辑（必须保留，否则窗口内容空白）
-      QStyleOption opt;
-      opt.initFrom(this);
-      QPainter painter(this);
-      style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
-      QWidget::paintEvent(event);
+      // 执行QDialog原生重绘逻辑（必须保留）
+      QDialog::paintEvent(event);
+    }
+
+   private:
+    // 可选优化：拦截字体变更事件，从源头阻止系统修改
+    bool event(QEvent* e) override {
+      // 拦截字体变更/样式变更事件（暗黑模式切换会触发）
+      if (e->type() == QEvent::FontChange || e->type() == QEvent::StyleChange) {
+        // 不阻断事件，仅在事件后重置字体（避免系统覆盖）
+        QTimer::singleShot(0, this, [=]() {
+          if (titleLabel) {
+            QFont font = titleLabel->font();
+            font.setPointSize(m_titleFontSize);
+            titleLabel->setFont(font);
+          }
+          if (contentLabel) {
+            QFont font = contentLabel->font();
+            font.setPointSize(m_contentFontSize);
+            contentLabel->setFont(font);
+          }
+        });
+      }
+      return QDialog::event(e);
     }
   };
 
-  // ========== 关键修改2：创建自定义AlarmWindow实例 ==========
-  AlarmWindow* alarmWindow = new AlarmWindow();
-  alarmWindow->setWindowFlags(Qt::FramelessWindowHint |
-                              Qt::WindowStaysOnTopHint);
-  alarmWindow->setAttribute(Qt::WA_DeleteOnClose);  // 关闭时自动释放内存
+  // 创建自定义QDialog实例
+  AlarmDialog* alarmDialog = new AlarmDialog(mw_one);
+  alarmDialog->resize(mw_one->size());
+  alarmDialog->move(mw_one->pos());
 
-  // 2. 匹配主窗口尺寸和位置
-  alarmWindow->resize(mw_one->size());
-  alarmWindow->move(mw_one->pos());
-
-  // 3. 样式表
+  // 样式表（背景/文字跟随主题，按钮样式不变）
   QString styleSheet = R"(
+    QDialog {
+        color: palette(window-text);
+    }
     QPushButton {
         color: white;
         border: none;
@@ -1916,43 +1939,41 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText,
     QPushButton#closeBtn:pressed {
         background-color: #a93226;
     }
-)";
+    QLabel {
+        color: palette(window-text);
+    }
+  )";
+  alarmDialog->setStyleSheet(styleSheet);
 
-  // 4. 整体垂直布局（原有逻辑不变）
-  QVBoxLayout* mainLayout = new QVBoxLayout(alarmWindow);
+  // ========== 布局逻辑 ==========
+  QVBoxLayout* mainLayout = new QVBoxLayout(alarmDialog);
   mainLayout->setContentsMargins(0, 0, 0, 0);
   mainLayout->setSpacing(0);
 
-  // ---------------------- 标题栏 ----------------------
-  QFont font = this->font();
+  // 标题栏
+  QFont font = alarmDialog->font();
   font.setBold(true);
-  font.setPointSize(26);
-
+  font.setPointSize(alarmDialog->m_titleFontSize);  // 初始化字体
   QLabel* titleLabel = new QLabel(strTime);
-  titleLabel->setObjectName("titleLabel");
   titleLabel->setAlignment(Qt::AlignCenter);
   titleLabel->setContentsMargins(0, 20, 0, 20);
   titleLabel->setFont(font);
   mainLayout->addWidget(titleLabel);
-  // ========== 关键修改3：将标题标签绑定到自定义窗口 ==========
-  alarmWindow->titleLabel = titleLabel;
+  alarmDialog->titleLabel = titleLabel;  // 绑定标签引用
 
-  // ---------------------- 内容栏 ----------------------
+  // 内容栏
+  font.setBold(false);
+  font.setPointSize(alarmDialog->m_contentFontSize);  // 初始化字体
   QLabel* contentLabel =
       new QLabel(strText + "\n\n(" + strTodoAlarmActiveTime + ")");
-  contentLabel->setObjectName("contentLabel");
   contentLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
   contentLabel->setWordWrap(true);
   contentLabel->setContentsMargins(40, 0, 40, 0);
-  mainLayout->addWidget(contentLabel, 1);
-
-  font.setBold(false);
-  font.setPointSize(25);
   contentLabel->setFont(font);
-  // ========== 关键修改4：将内容标签绑定到自定义窗口 ==========
-  alarmWindow->contentLabel = contentLabel;
+  mainLayout->addWidget(contentLabel, 1);
+  alarmDialog->contentLabel = contentLabel;  // 绑定标签引用
 
-  // ---------------------- 按钮区 ----------------------
+  // 按钮区
   QWidget* btnWidget = new QWidget();
   QHBoxLayout* btnLayout = new QHBoxLayout(btnWidget);
   btnLayout->setContentsMargins(50, 20, 50, 40);
@@ -1972,33 +1993,24 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText,
 
   mainLayout->addWidget(btnWidget);
 
-  playBtn->setStyleSheet(styleSheet);
-  closeBtn->setStyleSheet(styleSheet);
-
-  // 5. 按钮点击事件绑定
+  // ========== 事件绑定 ==========
   bool isVoice = mw_one->m_Todo->isVoice(strText);
-  connect(closeBtn, &QPushButton::clicked, this, [=]() {
-    clearJavaNotify();
-    alarmWindow->close();
-  });
+  connect(closeBtn, &QPushButton::clicked, alarmDialog, &QDialog::close);
+  connect(closeBtn, &QPushButton::clicked, this, &Todo::clearJavaNotify);
 
   connect(playBtn, &QPushButton::clicked, this, [=]() {
     qDebug() << "触发播放提醒：" << strText;
-
     if (isVoice) {
       QString voiceFile = mw_one->m_Todo->getVoiceFile(strText);
       m_Method->playRecord(voiceFile);
     } else {
-      QString txt = strText;
       m_Method->stopPlayMyText();
-      m_Method->playMyText(txt);
+      m_Method->playMyText(strText);
     }
   });
 
-  // 6. 显示窗口
-  alarmWindow->show();
-  alarmWindow->raise();
-  alarmWindow->activateWindow();
+  // ========== 显示窗口 ==========
+  alarmDialog->show();
 }
 
 void Todo::playAlarmVoice() {

@@ -546,7 +546,7 @@ public class MyService extends Service {
         }
     }
 
-    public static void notifyTodoAlarm(Context context, String message) {
+    public static void notifyTodoAlarm_New(Context context, String message) {
         try {
             NotificationManager m_notificationManagerAlarm =
                 (NotificationManager) context.getSystemService(
@@ -644,6 +644,124 @@ public class MyService extends Service {
             Log.d(
                 TAG,
                 "通知发送成功（ID：" + randomId + "），呼吸灯/提示音已触发"
+            );
+        } catch (Exception e) {
+            Log.e(TAG, "发送通知失败", e);
+            e.printStackTrace();
+        }
+    }
+
+    public static void notifyTodoAlarm(Context context, String message) {
+        try {
+            NotificationManager m_notificationManagerAlarm =
+                (NotificationManager) context.getSystemService(
+                    Context.NOTIFICATION_SERVICE
+                );
+            Notification.Builder m_builderAlarm = null;
+
+            String channelId = "knot_alarm_channel";
+            // 通道配置 + 强制刷新灯光
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel =
+                    m_notificationManagerAlarm.getNotificationChannel(
+                        channelId
+                    );
+                if (channel == null) {
+                    channel = new NotificationChannel(
+                        channelId,
+                        "Knot Alarm",
+                        NotificationManager.IMPORTANCE_HIGH
+                    );
+                    channel.enableLights(true);
+                    channel.setLightColor(Color.RED);
+                    channel.enableVibration(true);
+                    channel.setVibrationPattern(new long[] { 0, 500, 1000 });
+                    channel.setSound(
+                        Settings.System.DEFAULT_NOTIFICATION_URI,
+                        null
+                    );
+                    channel.setBypassDnd(true);
+                    channel.setLockscreenVisibility(
+                        Notification.VISIBILITY_PUBLIC
+                    );
+                    m_notificationManagerAlarm.createNotificationChannel(
+                        channel
+                    );
+                }
+                // 强制刷新通道配置
+                channel.enableLights(true);
+                channel.setLightColor(Color.RED);
+                m_notificationManagerAlarm.createNotificationChannel(channel);
+            }
+
+            // ========== 关键修改：指向主Activity MyActivity ==========
+            // 1. 创建跳转到MyActivity的Intent（主Activity）
+            Intent activityIntent = new Intent(context, MyActivity.class);
+            activityIntent.setFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK | // 后台启动Activity必须加
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP | // 避免创建多个实例
+                    Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED // 重置任务栈，确保在前台
+            );
+            activityIntent.putExtra("ALARM_MESSAGE", message); // 传递提醒内容（自定义key）
+
+            // 2. 构建PendingIntent（适配Android 12+不可变性）
+            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flags |= PendingIntent.FLAG_IMMUTABLE;
+            }
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                (int) System.currentTimeMillis(), // 随机请求码避免冲突
+                activityIntent,
+                flags
+            );
+            // ==============================================
+
+            // 构建通知
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                m_builderAlarm = new Notification.Builder(context, channelId)
+                    .setContentTitle(strTodo)
+                    .setContentText(message)
+                    .setSmallIcon(R.drawable.icon)
+                    .setColor(Color.GREEN)
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent) // 使用唤起MyActivity的PendingIntent
+                    .setFullScreenIntent(pendingIntent, true) // 全屏唤起（高优先级）
+                    .setLights(Color.RED, 1000, 1000)
+                    .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
+                    .setVibrate(new long[] { 0, 500, 1000 })
+                    .setPriority(Notification.PRIORITY_MAX)
+                    .setDefaults(Notification.DEFAULT_ALL);
+            } else {
+                m_builderAlarm = new Notification.Builder(context)
+                    .setContentTitle(strTodo)
+                    .setContentText(message)
+                    .setSmallIcon(R.drawable.icon)
+                    .setColor(Color.GREEN)
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent) // 使用唤起MyActivity的PendingIntent
+                    .setFullScreenIntent(pendingIntent, true)
+                    .setLights(Color.RED, 1000, 1000)
+                    .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
+                    .setVibrate(new long[] { 0, 500, 1000 })
+                    .setPriority(Notification.PRIORITY_MAX)
+                    .setDefaults(Notification.DEFAULT_ALL);
+            }
+
+            // 先清旧通知，再发新通知（随机ID）
+            m_notificationManagerAlarm.cancel("knot_alarm_tag", 10);
+            int randomId = (int) (System.currentTimeMillis() % 10000);
+            m_notificationManagerAlarm.notify(
+                "knot_alarm_tag",
+                randomId,
+                m_builderAlarm.build()
+            );
+
+            // 播放锁屏提示音
+            playLockScreenSound(context);
+            Log.d(
+                TAG,
+                "通知发送成功（ID：" + randomId + "），点击可唤起MyActivity"
             );
         } catch (Exception e) {
             Log.e(TAG, "发送通知失败", e);

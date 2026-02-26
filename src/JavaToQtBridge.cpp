@@ -40,7 +40,7 @@ static void JavaNotify_0() {
 }
 
 static void JavaNotify_1() {
-  // Lock screen or onPause
+  // onPause
 
   if (mw_one->initMain) return;
 
@@ -48,8 +48,8 @@ static void JavaNotify_1() {
 }
 
 static void JavaNotify_2() {
-  // When the screen lights up.
-  mw_one->m_Todo->refreshAlarm();
+  // When the screen lights up
+
   m_Steps->updateHardSensorSteps();
 
   qDebug() << "C++ JavaNotify_2";
@@ -66,8 +66,6 @@ static void JavaNotify_3() {
   QString strTodoAlarmActiveTime = datePart + "  " + timePart;
 
   mw_one->m_Todo->refreshAlarm();
-
-  mw_one->m_ReceiveShare->bringAppToForeground();
 
   bool isVoice = mw_one->m_Todo->isVoice(strText);
 
@@ -88,7 +86,7 @@ static void JavaNotify_3() {
 
   qDebug() << "C++ JavaNotify_3";
 
-  QTimer::singleShot(100, mw_one, [strTime, strText, strTodoAlarmActiveTime]() {
+  QTimer::singleShot(200, mw_one, [strTime, strText, strTodoAlarmActiveTime]() {
     mw_one->m_Todo->showAlarmWindow(strTime, strText, strTodoAlarmActiveTime);
   });
 }
@@ -526,6 +524,7 @@ static void JavaNotify_18() {
       mw_one->m_Reader->savePageVPos();
     }
   });
+
   qDebug() << "C++ JavaNotify_18";
 }
 
