@@ -220,7 +220,7 @@ Rectangle {
 
             contentWidth: view.width + donebtn.width
 
-            interactive: true
+            interactive: false //屏蔽向左滑动
 
             flickableDirection: Flickable.HorizontalFlick
             boundsBehavior: Flickable.StopAtBounds
@@ -495,7 +495,7 @@ Rectangle {
                             width: parent.width
                             z: 10
                             spacing: 15
-                            padding: 5
+                            //padding: 5
                             visible: view.currentIndex === index
 
                             ToolButton {
@@ -581,6 +581,43 @@ Rectangle {
                                 }
                                 background: Rectangle {
                                     color: "transparent"
+                                }
+                            }
+
+                            Item {
+                                Layout.fillWidth: true
+                            }
+
+                            Button {
+                                id: doneBtn
+                                text: qsTr("Done") // 国际化
+                                width: 56
+                                height: 24
+
+                                // 核心：让按钮在Row中垂直居中
+                                anchors.verticalCenter: parent.verticalCenter
+
+                                background: Rectangle {
+                                    color: "#f44336"
+                                    radius: 3
+                                }
+                                contentItem: Text {
+                                    text: doneBtn.text
+                                    color: "white"
+                                    font.bold: true
+                                    font.pointSize: Qt.platform.os === "android" ? 15 : 9
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter // 文字在按钮内部也垂直居中（可选）
+                                }
+                                onClicked: {
+                                    // 完成逻辑（不变）
+                                    view.currentIndex = index
+                                    m_Todo.stopPlayVoice()
+                                    m_Todo.addToRecycle()
+                                    view.model.remove(index)
+                                    m_Todo.refreshTableLists()
+                                    m_Todo.refreshAlarm()
+                                    m_Todo.saveTodo()
                                 }
                             }
                         }

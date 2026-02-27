@@ -319,7 +319,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/DateTimePicker.qml" line="281"/>
+        <location filename="../../src/qmlsrc/DateTimePicker.qml" line="282"/>
         <source>Time</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7819,7 +7819,7 @@
     <message>
         <location filename="../../src/Todo/Todo.cpp" line="762"/>
         <location filename="../../src/Todo/Todo.cpp" line="829"/>
-        <location filename="../../src/Todo/Todo.cpp" line="1897"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1988"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7829,7 +7829,9 @@
         <location filename="../../src/Todo/Todo.cpp" line="1345"/>
         <location filename="../../src/Todo/Todo.cpp" line="1385"/>
         <location filename="../../src/Todo/Todo.cpp" line="1397"/>
-        <location filename="../../src/Todo/Todo.cpp" line="1410"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1409"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1422"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1435"/>
         <source>Voice</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7875,17 +7877,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1482"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1507"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1557"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1582"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1888"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1982"/>
         <source>Play</source>
         <translation type="unfinished"></translation>
     </message>
@@ -8341,6 +8343,14 @@
     <message>
         <location filename="../../src/qmlsrc/report.qml" line="78"/>
         <source>Amount</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>todo</name>
+    <message>
+        <location filename="../../src/qmlsrc/todo.qml" line="589"/>
+        <source>Done</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

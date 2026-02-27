@@ -84,11 +84,11 @@ static void JavaNotify_3() {
     }
   }
 
-  qDebug() << "C++ JavaNotify_3";
-
   QTimer::singleShot(200, mw_one, [strTime, strText, strTodoAlarmActiveTime]() {
     mw_one->m_Todo->showAlarmWindow(strTime, strText, strTodoAlarmActiveTime);
   });
+
+  qDebug() << "C++ JavaNotify_3";
 }
 
 static void JavaNotify_4() {

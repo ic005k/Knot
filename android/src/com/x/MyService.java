@@ -50,13 +50,6 @@ import java.util.TimerTask;
 
 public class MyService extends Service {
 
-    // ========== 新增：主题切换相关变量 ==========
-    private static final String TAG_THEME = "ThemeChange";
-    private BroadcastReceiver themeChangeReceiver;
-    private Handler themeHandler = new Handler(Looper.getMainLooper());
-    private String savedClockContent = ""; // 保存切换前的提醒内容
-    // ==========================================
-
     // ========== 新增GPS逻辑：核心变量 ==========
     public volatile GPSManager gpsManager; // GPS管理器实例
     private static MyService instance;
@@ -173,103 +166,8 @@ public class MyService extends Service {
         gpsManager = GPSManager.getInstance(getApplicationContext());
         // ==========================================
 
-        // ========== 新增：注册主题切换广播接收器 ==========
-        registerThemeChangeReceiver();
-        // ==========================================
-
         isReady = true;
     }
-
-    // ========== 新增：注册主题切换广播接收器 ==========
-    private void registerThemeChangeReceiver() {
-        themeChangeReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                Log.d(TAG_THEME, "收到广播：" + action);
-
-                // 监听系统主题切换相关广播
-                if (
-                    Intent.ACTION_CONFIGURATION_CHANGED.equals(action) ||
-                    "android.intent.action.THEME_CHANGED".equals(action)
-                ) {
-                    handleThemeChange();
-                }
-            }
-        };
-
-        // 注册配置变化广播（包含主题切换）
-        IntentFilter themeFilter = new IntentFilter();
-        themeFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        themeFilter.addAction("android.intent.action.THEME_CHANGED"); // 部分厂商自定义的主题切换广播
-        registerReceiver(themeChangeReceiver, themeFilter);
-    }
-
-    // ========== 新增：处理主题切换逻辑 ==========
-    private void handleThemeChange() {
-        Log.d(TAG_THEME, "检测到主题切换，开始处理ClockActivity");
-
-        // 1. 检查ClockActivity是否正在显示
-        if (ClockActivity.isClockActivityReady()) {
-            Log.d(TAG_THEME, "ClockActivity正在显示，准备关闭并重启");
-
-            // 2. 保存当前ClockActivity的内容
-            try {
-                // ✅ 修正：使用公共方法获取实例，不再直接访问私有变量
-                ClockActivity instance = ClockActivity.getInstance();
-                if (instance != null) {
-                    savedClockContent = instance.getStrInfo();
-                    Log.d(TAG_THEME, "保存的提醒内容：" + savedClockContent);
-                }
-            } catch (Exception e) {
-                Log.e(TAG_THEME, "保存ClockActivity内容失败", e);
-                savedClockContent = strTodoAlarm; // 备用方案：使用全局的提醒内容
-            }
-
-            // 3. 先关闭当前的ClockActivity
-            ClockActivity.close();
-
-            // 4. 延迟500ms（等待主题切换完成）后重新打开ClockActivity
-            themeHandler.postDelayed(
-                () -> {
-                    restartClockActivity();
-                },
-                500
-            );
-        } else {
-            Log.d(TAG_THEME, "ClockActivity未显示，无需处理");
-        }
-    }
-
-    // ==========================================
-
-    // ========== 新增：重启ClockActivity ==========
-    private void restartClockActivity() {
-        Log.d(TAG_THEME, "准备重启ClockActivity，内容：" + savedClockContent);
-
-        if (TextUtils.isEmpty(savedClockContent)) {
-            Log.w(TAG_THEME, "无保存的提醒内容，使用默认值");
-            savedClockContent = strTodoAlarm;
-        }
-
-        try {
-            Context context = getApplicationContext();
-            Intent intent = new Intent(context, ClockActivity.class);
-            intent.setFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
-            );
-            intent.putExtra("SAVED_CLOCK_CONTENT", savedClockContent); // 传递保存的内容
-            context.startActivity(intent);
-            Log.d(TAG_THEME, "ClockActivity重启成功");
-        } catch (Exception e) {
-            Log.e(TAG_THEME, "重启ClockActivity失败", e);
-
-            // 备用方案：通过通知重新打开
-            notifyTodoAlarm(getApplicationContext(), savedClockContent);
-        }
-    }
-
-    // ==========================================
 
     // 服务在每次启动的时候调用的方法 如果某些行为在服务已启动的时候就执行，可以把处理逻辑写在这个方法里面
     @Override
@@ -327,21 +225,13 @@ public class MyService extends Service {
         // ========== 新增GPS逻辑：服务销毁时停止GPS ==========
         stopGPS();
         // ==========================================
-
-        // ========== 新增：注销主题切换广播接收器 ==========
-        if (themeChangeReceiver != null) {
-            try {
-                unregisterReceiver(themeChangeReceiver);
-            } catch (Exception e) {
-                Log.w(TAG_THEME, "注销主题切换广播失败", e);
-            }
-            themeChangeReceiver = null;
+        // 新增：取消闹钟并清空变量
+        if (alarmManager != null && pendingIntentAlarm != null) {
+            alarmManager.cancel(pendingIntentAlarm);
+            pendingIntentAlarm.cancel();
         }
-        // 清空Handler中的延迟任务
-        themeHandler.removeCallbacksAndMessages(null);
-        // ==========================================
-
-        super.onDestroy();
+        alarmManager = null;
+        pendingIntentAlarm = null;
 
         // 取消注册接收器
         try {
@@ -357,6 +247,8 @@ public class MyService extends Service {
         }
 
         instance = null; // 服务销毁时清空实例
+
+        super.onDestroy();
     }
 
     @TargetApi(26)
@@ -465,191 +357,6 @@ public class MyService extends Service {
     }
 
     // ------------------------------------------------------------------------------
-    // 待办事项定时任务通知（使用 Full-Screen Intent）
-    public static void notifyTodoAlarm_Old(Context context, String message) {
-        try {
-            NotificationManager m_notificationManagerAlarm =
-                (NotificationManager) context.getSystemService(
-                    Context.NOTIFICATION_SERVICE
-                );
-
-            // 创建跳转 Activity 的 Intent
-            Intent activityIntent = new Intent(context, ClockActivity.class);
-
-            // 修改启动标志 (Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            activityIntent.setFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
-            );
-
-            // 构建 PendingIntent（适配 Android 12+ 不可变性）
-            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                flags |= PendingIntent.FLAG_IMMUTABLE;
-            }
-            // 为通知创建请求码
-            int requestCode = (int) System.currentTimeMillis();
-            PendingIntent pendingIntent = PendingIntent.getActivity(
-                context,
-                requestCode,
-                activityIntent,
-                flags
-            );
-
-            Notification.Builder m_builderAlarm = null;
-
-            // 创建通知渠道（Android 8.0+）
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                String channelId = "knot_alarm_channel";
-                String channelName = "Knot Alarm";
-                int importance = NotificationManager.IMPORTANCE_HIGH;
-                NotificationChannel channel = new NotificationChannel(
-                    channelId,
-                    channelName,
-                    importance
-                );
-                channel.setDescription("Alarm notifications");
-                channel.enableLights(true);
-                channel.setLightColor(Color.RED);
-                m_notificationManagerAlarm.createNotificationChannel(channel);
-
-                // 构建通知（Android 8.0+）
-                m_builderAlarm = new Notification.Builder(context, channelId)
-                    .setContentTitle(strTodo)
-                    .setContentText(message)
-                    .setSmallIcon(R.drawable.alarm)
-                    .setColor(Color.GREEN)
-                    .setAutoCancel(true)
-                    .setContentIntent(pendingIntent) // 添加内容点击
-                    .setFullScreenIntent(pendingIntent, true) // 关键：启用全屏 Intent
-                    .setPriority(Notification.PRIORITY_MAX); // 最高优先级
-            } else {
-                // Android 7.1 及以下
-                m_builderAlarm = new Notification.Builder(context)
-                    .setContentTitle(strTodo)
-                    .setContentText(message)
-                    .setSmallIcon(R.drawable.alarm)
-                    .setColor(Color.GREEN)
-                    .setAutoCancel(true)
-                    .setContentIntent(pendingIntent) // 添加内容点击
-                    .setFullScreenIntent(pendingIntent, true)
-                    .setPriority(Notification.PRIORITY_MAX);
-            }
-
-            // 发送通知
-            m_notificationManagerAlarm.notify(
-                "knot_alarm_tag",
-                10,
-                m_builderAlarm.build()
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void notifyTodoAlarm_New(Context context, String message) {
-        try {
-            NotificationManager m_notificationManagerAlarm =
-                (NotificationManager) context.getSystemService(
-                    Context.NOTIFICATION_SERVICE
-                );
-            Notification.Builder m_builderAlarm = null;
-
-            String channelId = "knot_alarm_channel";
-            // 通道配置 + 强制刷新灯光
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel channel =
-                    m_notificationManagerAlarm.getNotificationChannel(
-                        channelId
-                    );
-                if (channel == null) {
-                    channel = new NotificationChannel(
-                        channelId,
-                        "Knot Alarm",
-                        NotificationManager.IMPORTANCE_HIGH
-                    );
-                    channel.enableLights(true);
-                    channel.setLightColor(Color.RED);
-                    channel.enableVibration(true);
-                    channel.setVibrationPattern(new long[] { 0, 500, 1000 });
-                    channel.setSound(
-                        Settings.System.DEFAULT_NOTIFICATION_URI,
-                        null
-                    );
-                    channel.setBypassDnd(true);
-                    channel.setLockscreenVisibility(
-                        Notification.VISIBILITY_PUBLIC
-                    );
-                    m_notificationManagerAlarm.createNotificationChannel(
-                        channel
-                    );
-                }
-                // 强制刷新通道配置
-                channel.enableLights(true);
-                channel.setLightColor(Color.RED);
-                m_notificationManagerAlarm.createNotificationChannel(channel);
-            }
-
-            // 空PendingIntent
-            PendingIntent emptyPendingIntent = PendingIntent.getBroadcast(
-                context,
-                (int) System.currentTimeMillis(),
-                new Intent(),
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                    ? PendingIntent.FLAG_IMMUTABLE
-                    : 0
-            );
-
-            // 构建通知
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                m_builderAlarm = new Notification.Builder(context, channelId)
-                    .setContentTitle(strTodo)
-                    .setContentText(message)
-                    .setSmallIcon(R.drawable.icon)
-                    .setColor(Color.GREEN)
-                    .setAutoCancel(true)
-                    .setContentIntent(emptyPendingIntent)
-                    .setFullScreenIntent(emptyPendingIntent, false)
-                    .setLights(Color.RED, 1000, 1000) // 每次都显式设置灯光
-                    .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
-                    .setVibrate(new long[] { 0, 500, 1000 })
-                    .setPriority(Notification.PRIORITY_MAX)
-                    .setDefaults(Notification.DEFAULT_ALL);
-            } else {
-                m_builderAlarm = new Notification.Builder(context)
-                    .setContentTitle(strTodo)
-                    .setContentText(message)
-                    .setSmallIcon(R.drawable.icon)
-                    .setColor(Color.GREEN)
-                    .setAutoCancel(true)
-                    .setContentIntent(emptyPendingIntent)
-                    .setFullScreenIntent(emptyPendingIntent, false)
-                    .setLights(Color.RED, 1000, 1000)
-                    .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
-                    .setVibrate(new long[] { 0, 500, 1000 })
-                    .setPriority(Notification.PRIORITY_MAX)
-                    .setDefaults(Notification.DEFAULT_ALL);
-            }
-
-            // 先清旧通知，再发新通知（随机ID）
-            m_notificationManagerAlarm.cancel("knot_alarm_tag", 10);
-            int randomId = (int) (System.currentTimeMillis() % 10000);
-            m_notificationManagerAlarm.notify(
-                "knot_alarm_tag",
-                randomId,
-                m_builderAlarm.build()
-            );
-
-            // 播放锁屏提示音
-            playLockScreenSound(context);
-            Log.d(
-                TAG,
-                "通知发送成功（ID：" + randomId + "），呼吸灯/提示音已触发"
-            );
-        } catch (Exception e) {
-            Log.e(TAG, "发送通知失败", e);
-            e.printStackTrace();
-        }
-    }
 
     public static void notifyTodoAlarm(Context context, String message) {
         try {
@@ -1004,8 +711,8 @@ public class MyService extends Service {
         }
 
         // 创建定时触发的 BroadcastReceiver Intent
-        Intent receiverIntent = new Intent(appContext, AlarmReceiver.class);
-        receiverIntent.setAction(ACTION_TODO_ALARM); // 显式设置 Action
+        Intent receiverIntent = new Intent(ACTION_TODO_ALARM);
+        receiverIntent.setPackage(appContext.getPackageName()); // 限定本应用，避免广播泄漏
         receiverIntent.putExtra("alarmMessage", strText);
 
         // 唯一请求码（不考虑 PendingIntent 复用，业务逻辑：新定时覆盖旧定时）
@@ -1098,8 +805,8 @@ public class MyService extends Service {
         );
 
         // 2. 创建精确触发的广播Intent
-        Intent receiverIntent = new Intent(appContext, AlarmReceiver.class);
-        receiverIntent.setAction(ACTION_TODO_ALARM);
+        Intent receiverIntent = new Intent(ACTION_TODO_ALARM);
+        receiverIntent.setPackage(appContext.getPackageName()); // 限定本应用，避免广播泄漏
         receiverIntent.putExtra("alarmMessage", strText);
 
         pendingIntentAlarm = PendingIntent.getBroadcast(
@@ -1176,16 +883,7 @@ public class MyService extends Service {
                 String message = intent.getStringExtra("alarmMessage");
                 Log.d("MyAlarmReceiver", "Alarm received: " + message);
 
-                //========目前已弃用,但保留了旧有的全套逻辑2026.2.22=====
-                // 直接在前台服务中处理闹钟事件并显示提醒窗口ClockActivity
                 notifyTodoAlarm(context, message);
-
-                /*if (ClockActivity.isClockActivityReady()) {
-                    ClockActivity.safeUpdateTodoText(message);
-                    CallJavaNotify_3();
-                    }*/
-
-                //==================================================
 
                 // =========全面采用C++端来实现全屏提醒窗口==============
                 CallJavaNotify_3();

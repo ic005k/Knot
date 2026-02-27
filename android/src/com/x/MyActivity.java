@@ -105,7 +105,6 @@ import androidx.core.content.FileProvider;
 import androidx.core.location.LocationListenerCompat;
 import androidx.core.location.LocationManagerCompat;
 import androidx.core.location.LocationRequestCompat;
-import com.x.AlarmReceiver;
 import com.x.FilePicker;
 import com.x.MyService;
 import com.x.ShareReceiveActivity;
@@ -165,6 +164,9 @@ public class MyActivity
     extends QtActivity
     implements Application.ActivityLifecycleCallbacks
 {
+
+    // 新增：标记是否是配置变更导致的重构 =====
+    private boolean isConfigChangeRecreate = false;
 
     // 新增：标记Service是否已启动（静态，跨Activity实例共享）
     private static boolean isServiceStarted = false;
@@ -248,8 +250,6 @@ public class MyActivity
 
     private MediaRecorder recorder;
     private MediaPlayer player;
-
-    private AlarmReceiver mAlarmReceiver;
 
     public static native void CallJavaNotify_0();
 
@@ -536,14 +536,6 @@ public class MyActivity
 
     // ----------------------------------------------------------------------
 
-    private void registAlarmReceiver() {
-        // 动态注册 AlarmReceiver
-        mAlarmReceiver = new AlarmReceiver();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_TODO_ALARM); // 定义要监听的广播 Action
-        registerReceiver(mAlarmReceiver, filter); // 注册接收器
-    }
-
     ///////////////// 屏幕唤醒相关 ////////////////////////////
     private ScreenStatusReceiver mScreenStatusReceiver = null;
     private Handler mHandler = new Handler(Looper.getMainLooper());
@@ -711,45 +703,97 @@ public class MyActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // ===== 关键优化1：判断是否是配置变更导致的重构 =====
+        if (savedInstanceState != null) {
+            // 配置变更（如暗黑模式）导致的重构，标记并跳过非必要初始化
+            isConfigChangeRecreate = true;
+            Log.d(TAG, "检测到配置变更导致的Activity重构，跳过非必要初始化");
+        }
+
+        // 1. 轻量初始化（必须在主线程且立即执行的操作）
         isZh(this);
+        m_instance = this;
+        sAppContext = getApplication();
+        Log.d(
+            TAG,
+            "Android activity created (config change: " +
+                isConfigChangeRecreate +
+                ")"
+        );
 
-        requestPermission();
-        requestSensorPermission();
-
-        if (m_instance != null) {
-            Log.d(TAG, "App is already running... this won't work");
-            Intent intent = getIntent();
-            if (intent != null) {
-                Log.d(TAG, "There's an intent waiting...");
-                String sharedData = processViewIntent(intent);
-                if (sharedData != null) {
-                    Log.d(TAG, "It's a view intent");
-                    Intent viewIntent = new Intent(
-                        getApplicationContext(),
-                        MyActivity.class
-                    );
-                    viewIntent.setAction(Intent.ACTION_VIEW);
-                    viewIntent.putExtra("sharedData", sharedData);
-                    startActivity(viewIntent);
-                }
-            }
-            finish();
+        // 2. 静态实例校验（简化逻辑，减少耗时）
+        if (checkDuplicateInstance()) {
             return;
         }
 
-        sAppContext = getApplication(); // 应用上下文，生命周期和App一致
-        m_instance = this;
-        Log.d(TAG, "Android activity created");
+        // 3. 异步执行耗时初始化（核心优化：避免阻塞主线程）
+        new Handler(Looper.getMainLooper()).post(() -> {
+            try {
+                // 权限请求（仅首次创建执行，配置变更重构时跳过）
+                if (!isConfigChangeRecreate) {
+                    requestPermission();
+                    requestSensorPermission();
+                }
 
-        registSreenStatusReceiver();
+                // 注册广播接收器（配置变更重构时重新注册）
+                registSreenStatusReceiver();
 
-        // registAlarmReceiver();
+                // 注册Activity生命周期回调
+                getApplication().registerActivityLifecycleCallbacks(this);
 
-        Application application = this.getApplication();
-        application.registerActivityLifecycleCallbacks(this);
+                // 启动服务（仅首次创建执行，配置变更重构时跳过）
+                if (!isConfigChangeRecreate && !isServiceStarted) {
+                    startMyService();
+                }
 
-        // 仅在Service未启动时，启动前台服务（取消绑定）
-        if (!isServiceStarted) {
+                // 创建快捷方式（仅首次创建执行，配置变更重构时跳过）
+                if (!isConfigChangeRecreate) {
+                    addDeskShortcuts();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "异步初始化异常", e);
+            }
+        });
+    }
+
+    // ===== 新增：简化的实例重复校验方法 =====
+    private boolean checkDuplicateInstance() {
+        if (m_instance != null && m_instance != this) {
+            Log.d(TAG, "App is already running... this won't work");
+            // 处理Intent（简化逻辑）
+            Intent intent = getIntent();
+            if (intent != null && intent.getDataString() != null) {
+                handleSharedIntent(intent);
+            }
+            finish();
+            return true;
+        }
+        return false;
+    }
+
+    // ===== 新增：处理共享Intent的简化方法 =====
+    private void handleSharedIntent(Intent intent) {
+        try {
+            String sharedData = processViewIntent(intent);
+            if (sharedData != null) {
+                Log.d(TAG, "It's a view intent: " + sharedData);
+                Intent viewIntent = new Intent(
+                    getApplicationContext(),
+                    MyActivity.class
+                );
+                viewIntent.setAction(Intent.ACTION_VIEW);
+                viewIntent.putExtra("sharedData", sharedData);
+                viewIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(viewIntent);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "处理共享Intent异常", e);
+        }
+    }
+
+    // ===== 新增：启动服务的封装方法 =====
+    private void startMyService() {
+        try {
             Intent serviceIntent = new Intent(this, MyService.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(serviceIntent);
@@ -757,9 +801,33 @@ public class MyActivity
                 startService(serviceIntent);
             }
             isServiceStarted = true;
+            Log.d(TAG, "MyService启动成功");
+        } catch (Exception e) {
+            Log.e(TAG, "启动MyService异常", e);
         }
+    }
 
-        addDeskShortcuts();
+    // ===== 重写onConfigurationChanged：处理暗黑模式切换 =====
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // 1. 立即更新暗黑模式状态
+        isDark =
+            (newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK) ==
+            Configuration.UI_MODE_NIGHT_YES;
+        updateStatusBarColor();
+
+        // 2. 强制刷新UI，避免卡顿
+        runOnUiThread(() -> {
+            if (!isFinishing() && !isDestroyed()) {
+                getWindow().getDecorView().postInvalidate();
+                // 通知Qt层更新UI（如果需要）
+                // CallJavaNotify_0();
+            }
+        });
+
+        Log.d(TAG, "暗黑模式切换完成，已更新UI状态");
     }
 
     public String getGpsStatus() {
@@ -1142,11 +1210,17 @@ public class MyActivity
 
     @Override
     protected void onDestroy() {
-        Log.i(TAG, "Main onDestroy...");
+        Log.i(
+            TAG,
+            "Main onDestroy (config change: " + isConfigChangeRecreate + ")"
+        );
 
-        getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
+        // ========== 优化点1：仅在非配置变更销毁时，注销Activity生命周期回调 ==========
+        if (!isConfigChangeRecreate) {
+            getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
+        }
 
-        // ========== 优化Qt接收器注销逻辑 ==========
+        // ========== 优化Qt接收器注销逻辑（原有逻辑保留） ==========
         try {
             // 注销Qt音频设备接收器
             Class<?> qtAudioDeviceManagerClass = Class.forName(
@@ -1172,32 +1246,29 @@ public class MyActivity
             Log.w(TAG, "注销Qt接收器时出现异常（非致命）", e);
         }
 
-        // ========== 原有逻辑：注销自己的接收器 ==========
-        if (mScreenStatusReceiver != null) {
-            unregisterReceiver(mScreenStatusReceiver);
-            mScreenStatusReceiver = null;
+        // ========== 优化点2：仅在非配置变更销毁时，注销自己的广播接收器 ==========
+        if (!isConfigChangeRecreate) {
+            if (mScreenStatusReceiver != null) {
+                unregisterReceiver(mScreenStatusReceiver);
+                mScreenStatusReceiver = null;
+            }
         }
 
-        if (mAlarmReceiver != null) {
-            unregisterReceiver(mAlarmReceiver);
-            mAlarmReceiver = null;
-        }
-
-        // ========== 仅在应用真退出时停止Service ==========
+        // ========== 优化点3：仅在非配置变更+应用真退出时，停止Service ==========
         // 核心判断：当前Activity是任务栈根Activity（主Activity） + 是用户主动关闭（而非重建）
         boolean isAppExit = isTaskRoot() && isFinishing();
 
-        // 仅应用真退出时，才停止Service
-        if (isAppExit) {
+        // 仅应用真退出 + 非配置变更时，才停止Service
+        if (isAppExit && !isConfigChangeRecreate) {
             Intent serviceIntent = new Intent(this, MyService.class);
             stopService(serviceIntent);
             isServiceStarted = false;
             Log.d(TAG, "应用已退出，停止MyService");
         } else {
-            Log.d(TAG, "仅Activity重建，不停止MyService");
+            Log.d(TAG, "仅Activity重建（配置变更），不停止MyService");
         }
 
-        // ========== 新增：兜底释放所有资源 ==========
+        // ========== 新增：兜底释放所有资源（原有逻辑保留） ==========
         // 停止录音/播放
         stopRecord();
         stopRecord_pcm();
@@ -1211,15 +1282,20 @@ public class MyActivity
             }
         }
 
-        // 清空静态引用（关键：避免内存泄漏）
-        mapActivityInstance = null;
-        m_instance = null;
-        sAppContext = null;
+        // ========== 优化点4：仅在非配置变更时，清空静态引用（避免重构后引用丢失） ==========
+        if (!isConfigChangeRecreate) {
+            mapActivityInstance = null;
+            m_instance = null;
+            sAppContext = null;
+        }
+
+        // 新增：重置配置变更标记（避免后续复用实例时状态异常）
+        isConfigChangeRecreate = false;
 
         super.onDestroy();
 
-        // 重启逻辑（原有保留）
-        if (checkNeedRestart()) {
+        // ========== 优化点5：仅在非配置变更时，执行重启逻辑 ==========
+        if (!isConfigChangeRecreate && checkNeedRestart()) {
             restartApp();
             Log.i(TAG, "触发应用重启...");
         }
@@ -2926,19 +3002,6 @@ public class MyActivity
                 // 兜底：仅终止进程，依赖onDestroy中的兜底逻辑
                 finish();
                 Process.killProcess(Process.myPid());
-            }
-        });
-    }
-
-    // 配置变更处理：仅补充UI刷新，解决暗黑模式切换后卡死
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        // 仅新增这几行，无其他改动
-        runOnUiThread(() -> {
-            if (!isFinishing() && !isDestroyed()) {
-                getWindow().getDecorView().invalidate();
             }
         });
     }

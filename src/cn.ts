@@ -429,7 +429,7 @@
         <translation>日期</translation>
     </message>
     <message>
-        <location filename="qmlsrc/DateTimePicker.qml" line="281"/>
+        <location filename="qmlsrc/DateTimePicker.qml" line="282"/>
         <source>Time</source>
         <translation>时间</translation>
     </message>
@@ -9161,14 +9161,16 @@
         <location filename="Todo/Todo.cpp" line="1345"/>
         <location filename="Todo/Todo.cpp" line="1385"/>
         <location filename="Todo/Todo.cpp" line="1397"/>
-        <location filename="Todo/Todo.cpp" line="1410"/>
+        <location filename="Todo/Todo.cpp" line="1409"/>
+        <location filename="Todo/Todo.cpp" line="1422"/>
+        <location filename="Todo/Todo.cpp" line="1435"/>
         <source>Voice</source>
         <translation>语音</translation>
     </message>
     <message>
         <location filename="Todo/Todo.cpp" line="762"/>
         <location filename="Todo/Todo.cpp" line="829"/>
-        <location filename="Todo/Todo.cpp" line="1897"/>
+        <location filename="Todo/Todo.cpp" line="1988"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
@@ -9223,17 +9225,17 @@
         <translation>音频记录进行中...</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1482"/>
+        <location filename="Todo/Todo.cpp" line="1507"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1557"/>
+        <location filename="Todo/Todo.cpp" line="1582"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation>解压文件不成功，请在偏好设置里面检查各平台的密码是否一致。</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1888"/>
+        <location filename="Todo/Todo.cpp" line="1982"/>
         <source>Play</source>
         <translation>播放</translation>
     </message>
@@ -11273,8 +11275,9 @@ Amount: %3</source>
 <context>
     <name>todo</name>
     <message>
+        <location filename="qmlsrc/todo.qml" line="589"/>
         <source>Done</source>
-        <translation type="vanished">完成</translation>
+        <translation>完成</translation>
     </message>
 </context>
 <context>
