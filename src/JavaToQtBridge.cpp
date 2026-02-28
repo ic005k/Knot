@@ -56,39 +56,80 @@ static void JavaNotify_2() {
 }
 
 static void JavaNotify_3() {
-  QString strTime, strText;
-  strTime = mw_one->m_Todo->strAlarmTime;
-  strText = mw_one->m_Todo->strAlarmText;
+#ifdef Q_OS_ANDROID
+  // 1. 先切到Qt主线程执行所有逻辑（核心修复！）
+  QMetaObject::invokeMethod(
+      QCoreApplication::instance(),
+      []() {
+        // ========== 所有逻辑移到Qt主线程内执行 ==========
+        // 2. 空指针校验（避免野指针访问）
+        if (mw_one == nullptr || mw_one->m_Todo == nullptr) {
+          qDebug() << "JavaNotify_3: mw_one/m_Todo 为空，跳过执行";
+          return;
+        }
 
-  QDateTime now = QDateTime::currentDateTime();
-  QString datePart = now.toString("yyyy-MM-dd");
-  QString timePart = now.toString("HH:mm:ss");
-  QString strTodoAlarmActiveTime = datePart + "  " + timePart;
+        // Android唤醒屏幕（可选，保留原有逻辑）
+        QJniObject activity = QNativeInterface::QAndroidApplication::context();
+        if (activity.isValid()) {
+          // activity.callMethod<void>("wakeUpScreen", "()V");
+        }
 
-  mw_one->m_Todo->refreshAlarm();
+        // 3. 读取UI属性（主线程安全）
+        QString strTime = mw_one->m_Todo->strAlarmTime;
+        QString strText = mw_one->m_Todo->strAlarmText;
 
-  bool isVoice = mw_one->m_Todo->isVoice(strText);
+        // 4. 时间处理（无风险）
+        QDateTime now = QDateTime::currentDateTime();
+        QString datePart = now.toString("yyyy-MM-dd");
+        QString timePart = now.toString("HH:mm:ss");
+        QString strTodoAlarmActiveTime = datePart + "  " + timePart;
 
-  QString ini_file = privateDir + "msg.ini";
-  QSettings Reg(ini_file, QSettings::IniFormat);
-  bool isPlayText = Reg.value("voice", 0).toBool();
+        try {
+          // 5. UI方法调用（主线程安全）
+          mw_one->m_Todo->refreshAlarm();
 
-  if (isVoice || isPlayText) {
-    if (isVoice) {
-      QString voiceFile = mw_one->m_Todo->getVoiceFile(strText);
-      m_Method->playRecord(voiceFile);
-    } else {
-      QString txt = strText;
-      m_Method->stopPlayMyText();
-      m_Method->playMyText(txt);
-    }
-  }
+          // 6. 音频/文件操作（加异常捕获）
+          bool isVoice = mw_one->m_Todo->isVoice(strText);
+          QString ini_file = privateDir + "msg.ini";
+          QSettings Reg(ini_file, QSettings::IniFormat);
+          bool isPlayText = Reg.value("voice", 0).toBool();
 
-  QTimer::singleShot(200, mw_one, [strTime, strText, strTodoAlarmActiveTime]() {
-    mw_one->m_Todo->showAlarmWindow(strTime, strText, strTodoAlarmActiveTime);
-  });
+          if (isVoice || isPlayText) {
+            if (isVoice) {
+              QString voiceFile = mw_one->m_Todo->getVoiceFile(strText);
+              // 音频播放建议异步（如果playRecord是同步的，改用线程/信号槽）
+              if (m_Method != nullptr) {
+                m_Method->playRecord(voiceFile);
+              }
+            } else {
+              QString txt = strText;
+              if (m_Method != nullptr) {
+                m_Method->stopPlayMyText();
+                m_Method->playMyText(txt);
+              }
+            }
+          }
 
-  qDebug() << "C++ JavaNotify_3";
+          // 7. 弹窗显示（主线程+空指针校验）
+          QTimer::singleShot(
+              200, mw_one, [strTime, strText, strTodoAlarmActiveTime]() {
+                // 再次校验mw_one，避免定时器触发时窗口已销毁
+                if (mw_one != nullptr && mw_one->m_Todo != nullptr) {
+                  mw_one->m_Todo->showAlarmWindow(strTime, strText,
+                                                  strTodoAlarmActiveTime);
+                }
+              });
+
+          qDebug() << "C++ JavaNotify_3 执行完成";
+        } catch (const std::exception& e) {
+          // 捕获所有异常，避免卡死
+          qDebug() << "JavaNotify_3 执行异常：" << e.what();
+        } catch (...) {
+          qDebug() << "JavaNotify_3 执行未知异常";
+        }
+      },
+      Qt::QueuedConnection);  // 关键：QueuedConnection 确保在Qt主线程执行
+#endif
 }
 
 static void JavaNotify_4() {

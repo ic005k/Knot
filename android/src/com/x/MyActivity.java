@@ -73,7 +73,6 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ActionMode;
@@ -232,12 +231,8 @@ public class MyActivity
     public static boolean isDark = false;
     public static MyActivity m_instance = null;
     private static Application sAppContext;
-    private static SensorManager mSensorManager;
-
-    private static final int DELAY = SensorManager.SENSOR_DELAY_NORMAL;
 
     public static boolean isScreenOff = false;
-    public static int keyBoardHeight;
 
     private static final String TAG = "QtKnot";
 
@@ -287,15 +282,8 @@ public class MyActivity
 
     public static native void CallJavaNotify_19();
 
-    private InternalConfigure internalConfigure;
     public static boolean isReadShareData = false;
     public static boolean zh_cn;
-
-    private LocationManager locationManager;
-    private Executor gpsExecutor; // GPS专用线程（高优先级）
-    private Executor networkExecutor; // 网络定位专用线程（低优先级）
-
-    private boolean isTracking = false;
 
     private String strGpsStatus = "GPS Status";
     private String strRunTime = "00:00:00";
@@ -434,29 +422,30 @@ public class MyActivity
 
     public void bringAppToForeground() {
         try {
-            // 1. 先记录GPS状态（解决GPS受影响问题，仅新增）
-            boolean gpsWasRunning = isGpsRunning; // 你的GPS运行状态标记
-
-            // 2. 调用你原有稳定的亮屏+移前台方法（完全复用，不修改）
+            boolean gpsWasRunning = isGpsRunning;
             wakeUpScreen();
             bringToFront();
 
-            // 3. 补充UI激活（解决欢迎界面卡死，仅新增这几行）
+            // 核心强化：强制激活窗口 + 清除输入法焦点（避免界面卡死）
             runOnUiThread(() -> {
                 if (!isFinishing() && !isDestroyed()) {
-                    // 强制刷新UI，解决欢迎界面卡死
-                    getWindow().getDecorView().postInvalidate();
-                    // 可选：如果有Qt层激活方法，加这行（根据你的实际情况）
-                    // CallJavaNotify_0();
+                    Window window = getWindow();
+                    // 强制激活窗口
+                    window.getDecorView().requestFocus();
+                    window.getDecorView().requestFocusFromTouch();
+                    // 清除输入法焦点（避免输入法阻塞UI）
+                    hideSoftInput();
+                    forceDisconnectInputMethod();
+                    // 强制刷新UI
+                    window.getDecorView().postInvalidate();
                 }
             });
 
-            // 4. 补充GPS恢复（解决GPS受影响，仅新增这几行）
+            // 恢复GPS（原有逻辑保留）
             new Handler(Looper.getMainLooper()).postDelayed(
                 () -> {
-                    // 若GPS被中断，重新启动（复用你的GPS启动方法）
                     if (gpsWasRunning && !isGpsRunning) {
-                        startGpsUpdates(); // 你的GPS启动方法，无需修改
+                        startGpsUpdates();
                     }
                 },
                 300
@@ -466,62 +455,7 @@ public class MyActivity
         }
     }
 
-    // 兼容版：移Activity到前台（替代废弃的moveTaskToFront(int, int)）
-    private void moveTaskToFront() {
-        try {
-            ActivityManager am = (ActivityManager) getSystemService(
-                Context.ACTIVITY_SERVICE
-            );
-            if (am != null) {
-                // 高版本兼容写法
-                am.getAppTasks().get(0).moveToFront();
-            }
-        } catch (Exception e) {
-            // 低版本兜底
-            try {
-                // 反射调用旧方法（避免编译错误）
-                Method moveMethod = Activity.class.getMethod(
-                    "moveTaskToFront",
-                    int.class,
-                    int.class
-                );
-                moveMethod.invoke(
-                    this,
-                    getTaskId(),
-                    ActivityManager.MOVE_TASK_WITH_HOME
-                );
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
-
     // ------------------------------------------------------------------------
-
-    // 全透状态栏
-    private void setStatusBarFullTransparent() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // 透明状态栏
-            getWindow().addFlags(
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-            );
-            // 状态栏字体设置为深色，SYSTEM_UI_FLAG_LIGHT_STATUS_BAR 为SDK23增加
-            getWindow()
-                .getDecorView()
-                .setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                );
-            // 部分机型的statusbar会有半透明的黑色背景
-            getWindow().addFlags(
-                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-            );
-            getWindow().clearFlags(
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-            );
-            getWindow().setStatusBarColor(Color.TRANSPARENT); // SDK21
-        }
-    }
 
     // 非全透,带颜色的状态栏,需要指定颜色（目前采用）
     private void setStatusBarColor(String color) {
@@ -636,65 +570,6 @@ public class MyActivity
         }
     }
 
-    /**
-     * 读取文件内容并压缩，既支持文件也支持文件夹
-     *
-     * @param filePath 文件路径
-     */
-    private static void compressFileToZip(String filePath, String zipFilePath) {
-        try (
-            ZipOutputStream zos = new ZipOutputStream(
-                new FileOutputStream(zipFilePath)
-            )
-        ) {
-            // 递归的压缩文件夹和文件
-            doCompress("", filePath, zos);
-            // 必须
-            zos.finish();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void doCompress(
-        String parentFilePath,
-        String filePath,
-        ZipOutputStream zos
-    ) {
-        File sourceFile = new File(filePath);
-        if (!sourceFile.exists()) {
-            return;
-        }
-        String zipEntryName = parentFilePath + "/" + sourceFile.getName();
-        if (parentFilePath.isEmpty()) {
-            zipEntryName = sourceFile.getName();
-        }
-        if (sourceFile.isDirectory()) {
-            File[] childFiles = sourceFile.listFiles();
-            if (Objects.isNull(childFiles)) {
-                return;
-            }
-            for (File childFile : childFiles) {
-                doCompress(zipEntryName, childFile.getAbsolutePath(), zos);
-            }
-        } else {
-            int len = -1;
-            byte[] buf = new byte[1024];
-            try (
-                InputStream input = new BufferedInputStream(
-                    new FileInputStream(sourceFile)
-                )
-            ) {
-                zos.putNextEntry(new ZipEntry(zipEntryName));
-                while ((len = input.read(buf)) != -1) {
-                    zos.write(buf, 0, len);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     private String processViewIntent(Intent intent) {
         return intent.getDataString();
     }
@@ -703,14 +578,13 @@ public class MyActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // ===== 关键优化1：判断是否是配置变更导致的重构 =====
+        // 原有配置变更标记逻辑保留（完全不动你的原始逻辑）
         if (savedInstanceState != null) {
-            // 配置变更（如暗黑模式）导致的重构，标记并跳过非必要初始化
             isConfigChangeRecreate = true;
             Log.d(TAG, "检测到配置变更导致的Activity重构，跳过非必要初始化");
         }
 
-        // 1. 轻量初始化（必须在主线程且立即执行的操作）
+        // 1. 轻量初始化（必须同步执行，确保JNI环境基础就绪）
         isZh(this);
         m_instance = this;
         sAppContext = getApplication();
@@ -721,39 +595,58 @@ public class MyActivity
                 ")"
         );
 
-        // 2. 静态实例校验（简化逻辑，减少耗时）
+        // 2. 静态实例校验（保留你的原始逻辑）
         if (checkDuplicateInstance()) {
             return;
         }
 
-        // 3. 异步执行耗时初始化（核心优化：避免阻塞主线程）
-        new Handler(Looper.getMainLooper()).post(() -> {
-            try {
-                // 权限请求（仅首次创建执行，配置变更重构时跳过）
-                if (!isConfigChangeRecreate) {
-                    requestPermission();
-                    requestSensorPermission();
+        // 3. 关键修复：放弃HandlerThread异步，改用延迟post（避免JNI环境未就绪）
+        // 核心：等待Qt层初始化完成（延迟500ms，适配你的mw_one创建时机）
+        new Handler(Looper.getMainLooper()).postDelayed(
+            () -> {
+                // 仅在主线程执行初始化（避免JNI跨线程问题）
+                try {
+                    // 权限请求（仅首次创建执行）
+                    if (!isConfigChangeRecreate) {
+                        requestPermission();
+                        requestSensorPermission();
+                    }
+
+                    // 注册广播接收器（配置变更重构时重新注册）
+                    if (mScreenStatusReceiver != null) {
+                        try {
+                            unregisterReceiver(mScreenStatusReceiver);
+                        } catch (Exception e) {}
+                        mScreenStatusReceiver = null;
+                    }
+                    registSreenStatusReceiver();
+
+                    // 注册Activity生命周期回调
+                    getApplication().registerActivityLifecycleCallbacks(
+                        MyActivity.this
+                    );
+
+                    // 启动服务（仅首次创建执行）
+                    if (!isConfigChangeRecreate && !isServiceStarted) {
+                        startMyService();
+                    }
+
+                    // 创建快捷方式（仅首次创建执行）
+                    if (!isConfigChangeRecreate) {
+                        addDeskShortcuts();
+                    }
+
+                    if (isConfigChangeRecreate && isQtMainEnd) {
+                        // 确保mw_one已创建完成后再调用
+
+                        Log.d(TAG, "配置变更初始化完成，Qt已就绪，可以调用C++");
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "初始化异常", e);
                 }
-
-                // 注册广播接收器（配置变更重构时重新注册）
-                registSreenStatusReceiver();
-
-                // 注册Activity生命周期回调
-                getApplication().registerActivityLifecycleCallbacks(this);
-
-                // 启动服务（仅首次创建执行，配置变更重构时跳过）
-                if (!isConfigChangeRecreate && !isServiceStarted) {
-                    startMyService();
-                }
-
-                // 创建快捷方式（仅首次创建执行，配置变更重构时跳过）
-                if (!isConfigChangeRecreate) {
-                    addDeskShortcuts();
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "异步初始化异常", e);
-            }
-        });
+            },
+            500
+        ); // 延迟500ms：适配你的Qt层mw_one实例创建时间（可根据实际调整）
     }
 
     // ===== 新增：简化的实例重复校验方法 =====
@@ -807,27 +700,17 @@ public class MyActivity
         }
     }
 
-    // ===== 重写onConfigurationChanged：处理暗黑模式切换 =====
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-
-        // 1. 立即更新暗黑模式状态
-        isDark =
-            (newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK) ==
-            Configuration.UI_MODE_NIGHT_YES;
-        updateStatusBarColor();
-
-        // 2. 强制刷新UI，避免卡顿
-        runOnUiThread(() -> {
-            if (!isFinishing() && !isDestroyed()) {
-                getWindow().getDecorView().postInvalidate();
-                // 通知Qt层更新UI（如果需要）
-                // CallJavaNotify_0();
-            }
-        });
-
-        Log.d(TAG, "暗黑模式切换完成，已更新UI状态");
+        // 只做一件事：暗黑模式切换时，锁定Qt交互
+        int nightMode = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        if (
+            nightMode == Configuration.UI_MODE_NIGHT_YES ||
+            nightMode == Configuration.UI_MODE_NIGHT_NO
+        ) {
+            QtStateManager.getInstance().lockQtInteraction();
+        }
     }
 
     public String getGpsStatus() {
@@ -1198,8 +1081,26 @@ public class MyActivity
     protected void onResume() {
         System.out.println("onResume...");
         super.onResume();
+
+        new Handler(Looper.getMainLooper()).postDelayed(
+            () -> {
+                if (!isFinishing() && !isDestroyed()) {
+                    // 1. 强制刷新窗口
+                    getWindow().getDecorView().postInvalidate();
+
+                    // 2. 触发UI线程重新布局
+                    runOnUiThread(() -> {
+                        getWindowManager().updateViewLayout(
+                            getWindow().getDecorView(),
+                            getWindow().getDecorView().getLayoutParams()
+                        );
+                    });
+                }
+            },
+            100
+        );
+
         updateStatusBarColor();
-        if (MyService.isReady && isQtMainEnd) CallJavaNotify_0();
     }
 
     @Override
@@ -1220,36 +1121,57 @@ public class MyActivity
             getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
         }
 
-        // ========== 优化Qt接收器注销逻辑（原有逻辑保留） ==========
+        // ========== Qt接收器注销逻辑 ==========
         try {
-            // 注销Qt音频设备接收器
+            // 处理音频接收器：跳过不存在的方法，直接尝试注销
             Class<?> qtAudioDeviceManagerClass = Class.forName(
                 "org.qtproject.qt.android.multimedia.QtAudioDeviceManager"
             );
-            // 先判断是否已注册（通过反射获取状态）
-            Method isRegisteredMethod = qtAudioDeviceManagerClass.getMethod(
-                "isAudioHeadsetStateReceiverRegistered",
-                Context.class
-            );
-            boolean isRegistered = (boolean) isRegisteredMethod.invoke(
-                null,
-                this
-            );
-            if (isRegistered) {
-                Method unregisterMethod = qtAudioDeviceManagerClass.getMethod(
+            // 直接调用注销方法，不先判断是否注册（避免依赖不存在的方法）
+            Method unregisterAudioMethod = null;
+            try {
+                unregisterAudioMethod = qtAudioDeviceManagerClass.getMethod(
                     "unregisterAudioHeadsetStateReceiver",
                     Context.class
                 );
-                unregisterMethod.invoke(null, this);
+                unregisterAudioMethod.invoke(null, this);
+                Log.d(TAG, "Qt音频接收器注销成功");
+            } catch (NoSuchMethodException e) {
+                Log.w(TAG, "Qt音频接收器注销方法不存在，跳过", e);
+            } catch (Exception e) {
+                Log.w(TAG, "Qt音频接收器注销失败（非致命）", e);
             }
-        } catch (Exception e) {
-            Log.w(TAG, "注销Qt接收器时出现异常（非致命）", e);
+
+            // 新增：处理网络代理接收器（修复第二个泄漏）
+            Class<?> qtNetworkClass = Class.forName(
+                "org.qtproject.qt.android.network.QtNetwork"
+            );
+            Method unregisterNetworkMethod = null;
+            try {
+                unregisterNetworkMethod = qtNetworkClass.getMethod(
+                    "unregisterReceiver",
+                    Context.class
+                );
+                unregisterNetworkMethod.invoke(null, this);
+                Log.d(TAG, "Qt网络接收器注销成功");
+            } catch (NoSuchMethodException e) {
+                Log.w(TAG, "Qt网络接收器注销方法不存在，跳过", e);
+            } catch (Exception e) {
+                Log.w(TAG, "Qt网络接收器注销失败（非致命）", e);
+            }
+        } catch (ClassNotFoundException e) {
+            Log.w(TAG, "Qt相关类未找到，跳过接收器注销", e);
         }
 
         // ========== 优化点2：仅在非配置变更销毁时，注销自己的广播接收器 ==========
-        if (!isConfigChangeRecreate) {
-            if (mScreenStatusReceiver != null) {
+        // 移除原有的 if (!isConfigChangeRecreate) 判断，无条件注销
+        if (mScreenStatusReceiver != null) {
+            try {
                 unregisterReceiver(mScreenStatusReceiver);
+                Log.d(TAG, "屏幕状态接收器已注销");
+            } catch (Exception e) {
+                Log.w(TAG, "注销屏幕状态接收器失败", e);
+            } finally {
                 mScreenStatusReceiver = null;
             }
         }
@@ -3002,6 +2924,45 @@ public class MyActivity
                 // 兜底：仅终止进程，依赖onDestroy中的兜底逻辑
                 finish();
                 Process.killProcess(Process.myPid());
+            }
+        });
+    }
+
+    /**
+     * 强制刷新Qt渲染状态（解决暗黑模式切换+锁屏导致的卡死）
+     * 被QtStateManager调用，用于重置Qt渲染线程
+     */
+    public void forceQtRefresh() {
+        runOnUiThread(() -> {
+            // 安全校验：确保Activity未销毁
+            if (isFinishing() || isDestroyed()) {
+                return;
+            }
+
+            try {
+                // 1. 强制刷新Android层UI布局
+                View decorView = getWindow().getDecorView();
+                decorView.forceLayout();
+                decorView.invalidate();
+                decorView.requestLayout();
+
+                // 2. 触发窗口属性刷新（唤醒Qt渲染线程）
+                getWindow().addFlags(
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                );
+                getWindow().clearFlags(
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                );
+
+                // 3. 可选：如果你的项目有Qt界面刷新方法，可在此调用
+                // 比如：QtNative.invokeMethod("refreshUI"); // 根据你的实际Qt方法调整
+
+                android.util.Log.d("MyActivity", "已强制刷新Qt渲染状态");
+            } catch (Exception e) {
+                android.util.Log.e(
+                    "MyActivity",
+                    "刷新Qt状态失败：" + e.getMessage()
+                );
             }
         });
     }

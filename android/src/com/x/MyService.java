@@ -33,9 +33,13 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.provider.Settings;
 import android.text.TextUtils; // ✅ 正确的导入位置
 import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import com.x.MyActivity;
@@ -885,8 +889,23 @@ public class MyService extends Service {
 
                 notifyTodoAlarm(context, message);
 
-                // =========全面采用C++端来实现全屏提醒窗口==============
-                CallJavaNotify_3();
+                // 切换到Android主线程调用C++方法（避免广播子线程）
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (QtStateManager.getInstance().canInteractWithQt()) {
+                        CallJavaNotify_3();
+                    } else {
+                        new Handler(Looper.getMainLooper()).postDelayed(
+                            () -> {
+                                Log.w(
+                                    TAG,
+                                    "Qt未就绪，延迟3秒执行CallJavaNotify_3"
+                                );
+                                CallJavaNotify_3();
+                            },
+                            3000
+                        );
+                    }
+                });
             }
         }
     };
