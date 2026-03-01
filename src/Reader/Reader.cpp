@@ -3118,8 +3118,7 @@ void Reader::closeReader() {
 
   closeViewBookNote();
 
-  // if (!m_Steps->timer->isActive())
-  if (!mw_one->myGetGpsDataThread->isRunning()) cancelKeepScreenOn();
+  if (!isGpsRun) cancelKeepScreenOn();
 
   mui->frameMain->show();
   mui->frameReader->hide();
@@ -3156,8 +3155,8 @@ void Reader::openReader() {
 
   startDateTime = QDateTime::currentDateTime();
   totalHours = readTotalHours();
-  // if (!m_Steps->timer->isActive())
-  if (!mw_one->myGetGpsDataThread->isRunning()) keepScreenOn();
+
+  if (!isGpsRun) keepScreenOn();
 }
 
 double Reader::readTotalHours() {

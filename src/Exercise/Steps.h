@@ -206,13 +206,13 @@ class Steps : public QDialog {
   void setMapKey();
   void showSportsChart();
   void getGpsDataInThread();
-  public slots:
+ public slots:
   void clearAllGpsList();
   void getGpsTrack();
   void openMapWindow();
   void getRouteList(const QString& strGpsTime);
   void getRemarks(const QString& strGpsTime);
-  void updateGetGps();
+  void updateGetGpsData();
  private slots:
   void positionUpdated(const QGeoPositionInfo& info);
 
@@ -370,7 +370,10 @@ class Steps : public QDialog {
   double getGpsLongitude();
   double getGpsMySpeed();
   double getGpsMaxSpeed();
- signals:
+  QString getGpsStatus();
+  bool startGPSFromService();
+  void stopGPSFromService();
+  signals:
   void distanceChanged(double distance);
   void timeChanged();
   void speedChanged();

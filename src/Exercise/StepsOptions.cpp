@@ -54,8 +54,7 @@ bool StepsOptions::eventFilter(QObject* obj, QEvent* evn) {
 }
 
 void StepsOptions::init() {
-  // if (m_Steps->timer->isActive())
-  if (mw_one->myGetGpsDataThread->isRunning()) return;
+  if (isGpsRun) return;
 
   int x, y, w, h;
   x = mw_one->geometry().x();

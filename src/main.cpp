@@ -343,10 +343,12 @@ void loadTheme(bool isDark) {
   font.setPointSize(fontSize);
   qApp->setFont(font);
 
+  mui->qwTodo->rootContext()->setContextProperty("FontSize", fontSize);
+  mui->qwRecycle->rootContext()->setContextProperty("FontSize", fontSize);
+
   // 遍历控件刷新字体（仅字体大小变化时执行）
   if (qApp) {
     foreach (QWidget* widget, qApp->allWidgets()) {
-      // 你的原有过滤逻辑保持不变
       if (widget != mui->btnMenu && widget != mui->btnAdd &&
           widget != mui->btnDel && widget != mui->btnSync &&
           widget != mui->btnFind && widget != mui->btnSelTab &&
@@ -365,7 +367,7 @@ void loadTheme(bool isDark) {
           widget != mui->lblBookName && widget != mui->lblShowLineSn &&
           widget != mui->lblNoteBook && widget != mui->lblNoteList) {
         widget->setFont(qApp->font());
-        // 字体加粗逻辑保持不变
+
         font.setBold(true);
         if (mui && mui->lblViewCate1) mui->lblViewCate1->setFont(font);
         if (mui && mui->lblTitleEditRecord)

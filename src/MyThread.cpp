@@ -150,7 +150,7 @@ void GetGpsDataThread::run() {
   }
 }
 
-void MainWindow::GetGpsDataThreadDone() { m_Steps->updateGetGps(); }
+void MainWindow::GetGpsDataThreadDone() { m_Steps->updateGetGpsData(); }
 
 ReadEBookThread::ReadEBookThread(QObject* parent) : QThread{parent} {}
 void ReadEBookThread::run() {

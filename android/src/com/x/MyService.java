@@ -40,6 +40,7 @@ import android.text.TextUtils; // ✅ 正确的导入位置
 import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import com.x.MyActivity;
@@ -58,6 +59,15 @@ public class MyService extends Service {
     public volatile GPSManager gpsManager; // GPS管理器实例
     private static MyService instance;
     private boolean isGpsRunning = false; // GPS运行状态标记
+
+    private String strGpsStatus = "GPS Status";
+    private String strRunTime = "00:00:00";
+    private String strAltitude = "Altitude: 0.00 m";
+    private String strTotalDistance = "0 km";
+    private String strMaxSpeed = "Max Speed";
+    private String strTotalClimb = "Total Climb";
+    private String strTotalDescent = "Total Descent";
+    private String strAverageSpeed = "0 km/h";
     // ==========================================
 
     private static final String TAG = "MyService";
@@ -911,7 +921,9 @@ public class MyService extends Service {
     };
 
     // ========== 新增GPS逻辑：启动GPS方法（供C++调用） ==========
-    public boolean startGPS() {
+    public boolean startGPS_Old() {
+        MyActivity.setVibrate();
+
         if (isGpsRunning) {
             Log.w(TAG, "GPS已在运行，无需重复启动");
             return true;
@@ -973,8 +985,106 @@ public class MyService extends Service {
         return success;
     }
 
+    public boolean startGPS() {
+        MyActivity.setVibrate(); // 保留你的震动逻辑
+
+        if (isGpsRunning) {
+            Log.w(TAG, "GPS已在运行，无需重复启动");
+            // 提示用户GPS已在运行
+            showToast(
+                MyActivity.zh_cn ? "GPS已在运行中" : "GPS is already running"
+            );
+            return true;
+        }
+
+        // 检查定位权限
+        Context context = getApplicationContext();
+        String finePerm = Manifest.permission.ACCESS_FINE_LOCATION;
+        String coarsePerm = Manifest.permission.ACCESS_COARSE_LOCATION;
+        boolean hasFine =
+            ContextCompat.checkSelfPermission(context, finePerm) ==
+            PackageManager.PERMISSION_GRANTED;
+        boolean hasCoarse =
+            ContextCompat.checkSelfPermission(context, coarsePerm) ==
+            PackageManager.PERMISSION_GRANTED;
+
+        if (!hasFine && !hasCoarse) {
+            Log.e(TAG, "缺少定位权限，启动GPS失败");
+            // 提示用户缺少权限
+            showToast(
+                MyActivity.zh_cn
+                    ? "缺少定位权限，GPS启动失败"
+                    : "Missing location permission, GPS startup failed"
+            );
+            return false;
+        }
+
+        // 启动GPSManager
+        boolean success = gpsManager.startGPS(
+            new GPSManager.OnLocationUpdateListener() {
+                @Override
+                public void onLocationUpdated(
+                    double lat,
+                    double lng,
+                    float speed,
+                    float distance
+                ) {
+                    Log.d(
+                        TAG,
+                        "GPS更新：纬度=" +
+                            lat +
+                            " 经度=" +
+                            lng +
+                            " 速度=" +
+                            speed +
+                            " 距离=" +
+                            distance
+                    );
+                }
+
+                @Override
+                public void onGPSStatusChanged(String status) {
+                    Log.d(TAG, "GPS状态：" + status);
+                }
+            }
+        );
+
+        if (success) {
+            isGpsRunning = true;
+            Log.i(TAG, "GPS启动成功（前台服务托管）");
+            // 提示用户GPS启动成功
+            showToast(
+                MyActivity.zh_cn ? "GPS启动成功" : "GPS started successfully"
+            );
+        } else {
+            Log.e(TAG, "GPS启动失败");
+            // 提示用户GPS启动失败
+            showToast(
+                MyActivity.zh_cn
+                    ? "GPS启动失败，请检查定位服务是否开启"
+                    : "GPS startup failed, check if location service is enabled"
+            );
+        }
+
+        return success;
+    }
+
+    // 新增：极简的吐司提示方法（适配中英文，运行在主线程）
+    private void showToast(String message) {
+        // 确保吐司在主线程显示（服务中调用需切换线程）
+        new Handler(Looper.getMainLooper()).post(() -> {
+            Toast.makeText(
+                getApplicationContext(),
+                message,
+                Toast.LENGTH_SHORT
+            ).show();
+        });
+    }
+
     // ========== 新增GPS逻辑：停止GPS方法（供C++调用） ==========
     public void stopGPS() {
+        MyActivity.setVibrate();
+
         if (!isGpsRunning) {
             return;
         }
@@ -1031,5 +1141,135 @@ public class MyService extends Service {
         }
         // 调用gpsManager的getMaxSpeed()方法
         return instance.gpsManager.getMaxSpeed();
+    }
+
+    private void updateGpsData() {
+        // 1. 基础状态更新（优先标记GPS运行状态）
+        if (isGpsRunning) {
+            strGpsStatus = MyActivity.zh_cn
+                ? "GPS正在运行中..."
+                : "GPS is running...";
+        } else {
+            strGpsStatus = MyActivity.zh_cn ? "GPS已停止" : "GPS stopped";
+            // GPS未运行时，重置所有数据为默认值，避免显示旧数据
+            // resetGpsDataToDefault();
+            return;
+        }
+
+        // 2. 空指针防护：检查GPSManager是否有效
+        if (gpsManager == null) {
+            Log.w(TAG, "updateGpsData: GPSManager未初始化，使用默认值");
+            resetGpsDataToDefault();
+            return;
+        }
+
+        // 3. 直接从GPSManager获取所有核心数据（单一数据源，无冗余）
+        // 3.1 距离相关（GPSManager返回的是公里，无需额外转换）
+        float totalDistance = gpsManager.getTotalDistance();
+        strTotalDistance = String.format(Locale.US, "%.2f km", totalDistance);
+
+        // 3.2 运动时间（毫秒转时分秒）
+        long movingTimeMs = gpsManager.getMovingTime();
+        long totalSeconds = movingTimeMs / 1000;
+        long hours = totalSeconds / 3600;
+        long minutes = (totalSeconds % 3600) / 60;
+        long seconds = totalSeconds % 60;
+        strRunTime = String.format(
+            Locale.US,
+            "%02d:%02d:%02d",
+            hours,
+            minutes,
+            seconds
+        );
+
+        // 3.3 平均速度（避免除以0，单位：km/h）
+        double avgSpeed = 0.0;
+        if (movingTimeMs > 0) {
+            avgSpeed = totalDistance / (movingTimeMs / 3600000.0); // 毫秒转小时
+        }
+        strAverageSpeed = String.format(Locale.US, "%.2f km/h", avgSpeed);
+
+        // 3.4 最大速度（直接从GPSManager获取，单位：km/h）
+        float maxSpeed = gpsManager.getMaxSpeed();
+        strMaxSpeed = MyActivity.zh_cn
+            ? String.format(Locale.US, "最大速度: %.2f km/h", maxSpeed)
+            : String.format(Locale.US, "Max Speed: %.2f km/h", maxSpeed);
+
+        // 3.5 海拔：直接从GPSManager获取previousAltitude（最新海拔）
+        double altitude = gpsManager.getPreviousAltitude();
+        strAltitude = MyActivity.zh_cn
+            ? String.format(Locale.US, "海拔: %.2f m", altitude)
+            : String.format(Locale.US, "Altitude: %.2f m", altitude);
+
+        // 3.6 累计爬升/下降（直接从GPSManager获取，单位：米）
+        float totalClimb = gpsManager.getTotalClimb();
+        strTotalClimb = MyActivity.zh_cn
+            ? String.format(Locale.US, "累计爬升: %.2f m", totalClimb)
+            : String.format(Locale.US, "Total Climb: %.2f m", totalClimb);
+
+        float totalDescent = gpsManager.getTotalDescent();
+        strTotalDescent = MyActivity.zh_cn
+            ? String.format(Locale.US, "累计下降: %.2f m", totalDescent)
+            : String.format(Locale.US, "Total Descent: %.2f m", totalDescent);
+
+        // 3.7 精细化GPS状态（基于GPSManager的就绪状态）
+        strGpsStatus = gpsManager.isGpsReady()
+            ? (MyActivity.zh_cn
+                  ? "GPS已就绪（高精度）"
+                  : "GPS Ready (High Precision)")
+            : (MyActivity.zh_cn
+                  ? "GPS未就绪（网络定位）"
+                  : "GPS Not Ready (Network Location)");
+
+        // 日志输出（便于调试）
+        Log.d(
+            TAG,
+            String.format(
+                Locale.US,
+                "updateGpsData完成：距离=%.2fkm | 平均速度=%.2fkm/h | 最大速度=%.2fkm/h | 海拔=%.2fm",
+                totalDistance,
+                avgSpeed,
+                maxSpeed,
+                altitude
+            )
+        );
+    }
+
+    // ========== 辅助方法：重置GPS数据为默认值 ==========
+    private void resetGpsDataToDefault() {
+        strTotalDistance = MyActivity.zh_cn ? "0.00 公里" : "0.00 km";
+        strRunTime = "00:00:00";
+        strAverageSpeed = MyActivity.zh_cn ? "0.00 公里/小时" : "0.00 km/h";
+        strMaxSpeed = MyActivity.zh_cn
+            ? "最大速度: 0.00 公里/小时"
+            : "Max Speed: 0.00 km/h";
+        strAltitude = MyActivity.zh_cn ? "海拔: 0.00 米" : "Altitude: 0.00 m";
+        strTotalClimb = MyActivity.zh_cn
+            ? "累计爬升: 0.00 米"
+            : "Total Climb: 0.00 m";
+        strTotalDescent = MyActivity.zh_cn
+            ? "累计下降: 0.00 米"
+            : "Total Descent: 0.00 m";
+    }
+
+    public String getGpsStatus() {
+        updateGpsData();
+        return (
+            strTotalDistance +
+            "\n" +
+            strRunTime +
+            "\n" +
+            strAverageSpeed +
+            "\n" +
+            strMaxSpeed +
+            "\n" +
+            strAltitude +
+            "\n" +
+            strTotalClimb +
+            "\n" +
+            strTotalDescent +
+            "\n" +
+            strGpsStatus
+        );
     }
 }

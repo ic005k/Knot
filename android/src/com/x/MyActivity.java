@@ -310,8 +310,8 @@ public class MyActivity
         }
     }
 
-    public void setVibrate() {
-        VibrateUtils.vibrate(this, 50);
+    public static void setVibrate() {
+        VibrateUtils.vibrate(m_instance, 50);
     }
 
     // ------------------------------------------------------------------------
@@ -850,7 +850,6 @@ public class MyActivity
         runOnUiThread(() -> updateUI(null));
     }
 
-    // MyActivity.java 替换原有报错的方法
     public double getTotalDistance() {
         // 双层空指针防护：先检查服务实例，再检查gpsManager
         MyService service = MyService.getInstance();
@@ -860,46 +859,6 @@ public class MyActivity
         }
         // 改为调用getTotalDistance()方法（而非直接访问字段）
         return service.gpsManager.getTotalDistance();
-    }
-
-    public double getMySpeed() {
-        MyService service = MyService.getInstance();
-        if (service == null || service.gpsManager == null) {
-            Log.w("MyActivity", "服务未启动或gpsManager未初始化，返回0");
-            return 0;
-        }
-        // 改为调用getMySpeed()方法
-        return service.gpsManager.getMySpeed();
-    }
-
-    public double getMaxSpeed() {
-        MyService service = MyService.getInstance();
-        if (service == null || service.gpsManager == null) {
-            Log.w("MyActivity", "服务未启动或gpsManager未初始化，返回0");
-            return 0;
-        }
-        // 改为调用getMaxSpeed()方法
-        return service.gpsManager.getMaxSpeed();
-    }
-
-    public double getLatitude() {
-        MyService service = MyService.getInstance();
-        if (service == null || service.gpsManager == null) {
-            Log.w("MyActivity", "服务未启动或gpsManager未初始化，返回0");
-            return 0;
-        }
-        // GPSManager已有getLatitude()方法，直接调用
-        return service.gpsManager.getLatitude();
-    }
-
-    public double getLongitude() {
-        MyService service = MyService.getInstance();
-        if (service == null || service.gpsManager == null) {
-            Log.w("MyActivity", "服务未启动或gpsManager未初始化，返回0");
-            return 0;
-        }
-        // 改为调用getLongitude()方法（而非直接访问longitude字段）
-        return service.gpsManager.getLongitude();
     }
 
     public double stopGpsUpdates() {

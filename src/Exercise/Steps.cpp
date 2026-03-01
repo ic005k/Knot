@@ -112,7 +112,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mui->btnSportsChart->setIconSize(QSize(iconSize, iconSize));
 
   timer = new QTimer(this);
-  connect(timer, &QTimer::timeout, this, &Steps::updateGetGps);
+  connect(timer, &QTimer::timeout, this, &Steps::updateGetGpsData);
 
   QDir gpsdir;
   QString gpspath = iniDir + "/memo/gps/";
@@ -205,9 +205,11 @@ Steps::~Steps() {
 
 // 安卓端额外清理
 #ifdef Q_OS_ANDROID
-  if (gm_activity.isValid()) {
-    gm_activity.callMethod<void>("stopGpsUpdates", "()D");
-  }
+  // if (gm_activity.isValid()) {
+  //   gm_activity.callMethod<void>("stopGpsUpdates", "()D");
+  // }
+
+  stopGPSFromService();
 #endif
 }
 
@@ -397,8 +399,7 @@ void Steps::openStepsUI() {
     mui->lblGpsInfo->setText(strGpsInfoShow);
   }
 
-  // if (getGpsListCount() == 0 && !timer->isActive())
-  if (getGpsListCount() == 0 && !mw_one->myGetGpsDataThread->isRunning()) {
+  if (getGpsListCount() == 0 && !isGpsRun) {
     int nYear = QDate::currentDate().year();
     int nMonth = QDate::currentDate().month();
     loadGpsList(nYear, nMonth);
@@ -716,6 +717,7 @@ void Steps::startRecordMotion() {
 
   gm_activity = QJniObject(QNativeInterface::QAndroidApplication::context());
 
+  /*
   // 1. 定义Java端返回值的枚举（对应不同失败场景，便于维护）
   enum GpsStartResult {
     GPS_START_SUCCESS = 1,                 // 启动成功
@@ -786,7 +788,9 @@ void Steps::startRecordMotion() {
     m_Method->showToastMessage(tr("Activity is invalid, GPS start failed"));
     // Activity无效的失败场景，保留return
     return;
-  }
+  }*/
+
+  startGPSFromService();
 
 #else
   if (m_positionSource) {
@@ -849,9 +853,12 @@ void Steps::startRecordMotion() {
   mui->btnSelGpsDate->setEnabled(false);
 
   QTimer::singleShot(1000, mw_one, [this]() {
-    // timer->start(1000);
-    if (!mw_one->myGetGpsDataThread->isRunning())
-      mw_one->myGetGpsDataThread->start();
+    timer->start(1000);
+
+    // if (!mw_one->myGetGpsDataThread->isRunning())
+    //   mw_one->myGetGpsDataThread->start();
+
+    isGpsRun = true;
   });
 }
 
@@ -872,7 +879,6 @@ void Steps::positionUpdated(const QGeoPositionInfo& info) {
 
 double Steps::getGpsLatitude() {
 #ifdef Q_OS_ANDROID
-
   jdouble lat = QJniObject::callStaticMethod<jdouble>(
       "com/x/MyService",
       "getLatitude",  // 方法名
@@ -930,6 +936,82 @@ double Steps::getGpsMaxSpeed() {
   return 0;
 }
 
+QString Steps::getGpsStatus() {
+#ifdef Q_OS_ANDROID
+  // 1. 第一步：获取 MyService 实例（调用静态方法 getInstance()）
+  QJniObject serviceInstance = QJniObject::callStaticObjectMethod(
+      "com/x/MyService",     // Java类名（包名+类名）
+      "getInstance",         // 静态方法名：获取服务实例
+      "()Lcom/x/MyService;"  // 方法签名：无参，返回 MyService 实例
+  );
+
+  // 检查服务实例是否有效（服务未启动时会为空）
+  if (!serviceInstance.isValid()) {
+    qWarning() << "MyService 实例为空（GPS服务未启动）";
+    return "";  // 返回空字符串作为无效值，和你的-999逻辑一致
+  }
+
+  // 2. 第二步：调用非静态方法 getGpsStatus()
+  QJniObject jGpsStatus = serviceInstance.callObjectMethod(
+      "getGpsStatus",         // 非静态方法名
+      "()Ljava/lang/String;"  // 方法签名：无参，返回 String 类型
+  );
+
+  // 3. 转换并返回结果
+  if (jGpsStatus.isValid()) {
+    QString status = jGpsStatus.toString();
+    qInfo() << "获取GPS状态成功：" << status;
+    return status;
+  } else {
+    qWarning() << "GPS状态获取失败（方法返回空）";
+    return "";
+  }
+#endif
+  // 非Android平台返回空
+  return "";
+}
+
+bool Steps::startGPSFromService() {
+#ifdef Q_OS_ANDROID
+  // 1. 先获取 MyService 实例（确保服务已启动）
+  QJniObject serviceInstance = QJniObject::callStaticObjectMethod(
+      "com/x/MyService", "getInstance", "()Lcom/x/MyService;");
+
+  // 2. 调用 MyService 的 startGPS() 方法（非静态）
+  jboolean success = serviceInstance.callMethod<jboolean>(
+      "startGPS",
+      "()Z"  // 方法签名：无参，返回 boolean
+  );
+
+  if (success) {
+    qInfo() << "GPS 启动成功（前台服务托管）";
+    return true;
+  } else {
+    qWarning() << "GPS 启动失败（权限不足/定位服务未开启）";
+    return false;
+  }
+#endif
+  return false;
+}
+
+void Steps::stopGPSFromService() {
+#ifdef Q_OS_ANDROID
+  // 获取 MyService 实例
+  QJniObject serviceInstance = QJniObject::callStaticObjectMethod(
+      "com/x/MyService", "getInstance", "()Lcom/x/MyService;");
+  if (!serviceInstance.isValid()) {
+    qWarning() << "MyService 实例为空，无需停止GPS";
+    return;
+  }
+
+  // 调用 MyService 的 stopGPS() 方法（无返回值）
+  serviceInstance.callMethod<void>("stopGPS",
+                                   "()V"  // 方法签名：无参，无返回值
+  );
+  qInfo() << "GPS 已停止（前台服务托管）";
+#endif
+}
+
 void Steps::getGpsDataInThread() {
 #ifdef Q_OS_ANDROID
   latitude = getGpsLatitude();
@@ -940,7 +1022,7 @@ void Steps::getGpsDataInThread() {
 #endif
 }
 
-void Steps::updateGetGps() {
+void Steps::updateGetGpsData() {
   m_time = m_time.addSecs(1);
   totalSeconds = static_cast<qlonglong>(m_time.hour()) * 3600 +
                  static_cast<qlonglong>(m_time.minute()) * 60 + m_time.second();
@@ -954,24 +1036,27 @@ void Steps::updateGetGps() {
   // m_distance = str_distance.toDouble();
 
   if (!isGpsTest) {
-    // 通过主Activity进行转接（间接获取）
-    // latitude = gm_activity.callMethod<jdouble>("getLatitude", "()D");
-    // longitude = gm_activity.callMethod<jdouble>("getLongitude", "()D");
-
     // 通过前台服务直接获取
-    // latitude = getGpsLatitude();
-    // longitude = getGpsLongitude();
+    if (!mw_one->myGetGpsDataThread->isRunning()) {
+      latitude = getGpsLatitude();
+      longitude = getGpsLongitude();
+    }
 
     latitude = QString::number(latitude, 'f', 6).toDouble();
     longitude = QString::number(longitude, 'f', 6).toDouble();
   }
 
-  QJniObject jstrGpsStatus;
-  jstrGpsStatus =
-      gm_activity.callMethod<jstring>("getGpsStatus", "()Ljava/lang/String;");
+  // QJniObject jstrGpsStatus;
+  //  jstrGpsStatus =
+  //      gm_activity.callMethod<jstring>("getGpsStatus",
+  //      "()Ljava/lang/String;");
 
-  if (jstrGpsStatus.isValid()) {
-    QString strStatus = jstrGpsStatus.toString();
+  // 从前台服务获取
+  QString jstrGpsStatus = getGpsStatus();
+
+  // if (jstrGpsStatus.isValid()) {
+  if (jstrGpsStatus.length() > 0) {
+    QString strStatus = jstrGpsStatus;
     QStringList list = strStatus.split("\n");
     if (list.count() == 8) {
       // str1 = list.at(0);
@@ -1006,19 +1091,13 @@ void Steps::updateGetGps() {
 
     if (m_time.second() % 3 == 0) {
       if (!isGpsTest) {
-        jdouble speed;
-
-        // 通过主Activity转接，间接获取
-        // speed = gm_activity.callMethod<jdouble>("getMySpeed", "()D");
-        // maxSpeed = gm_activity.callMethod<jdouble>("getMaxSpeed", "()D");
-
         // 通过前台服务直接获取
-        // speed = getGpsMySpeed();
-        // maxSpeed = getGpsMaxSpeed();
+        if (!mw_one->myGetGpsDataThread->isRunning()) {
+          Speed = getGpsMySpeed();
+          maxSpeed = getGpsMaxSpeed();
+        }
 
-        speed = Speed;
-
-        mySpeed = speed;
+        mySpeed = Speed;
         if (mySpeed > 0) {
           const double COORD_CHANGE_THRESHOLD = 1e-6;  // 约0.1米的变化阈值
           bool coordChanged =
@@ -1218,8 +1297,11 @@ void Steps::stopRecordMotion() {
   saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
 
   QTimer::singleShot(2000, mw_one, [this]() {
-    // timer->stop();
-    mw_one->myGetGpsDataThread->stop();
+    isGpsRun = false;
+
+    timer->stop();
+
+    // mw_one->myGetGpsDataThread->stop();
 
     mw_one->m_Reader->cancelKeepScreenOn();
 
@@ -1239,8 +1321,10 @@ void Steps::stopRecordMotion() {
   mui->btnGPS->setStyleSheet(btnRoundStyle);
 
 #ifdef Q_OS_ANDROID
-  // 返回值为总距离
-  gm_activity.callMethod<jdouble>("stopGpsUpdates", "()D");
+
+  // gm_activity.callMethod<jdouble>("stopGpsUpdates", "()D");
+
+  stopGPSFromService();
 
 #else
   if (m_positionSource) {
@@ -1342,8 +1426,8 @@ void Steps::refreshMotionData() {
     QSettings Reg1(iniDir + stry + "-gpslist.ini", QSettings::IniFormat);
 
     int count = getGpsListCount();
-    // if (timer->isActive())
-    if (mw_one->myGetGpsDataThread->isRunning()) {
+
+    if (isGpsRun) {
       count = getGpsListCount() + 1;
     }
 
@@ -1354,8 +1438,7 @@ void Steps::refreshMotionData() {
                       "-=-" + t5 + "-=-" + strCurrentWeatherIcon + "-=-" +
                       strGpsTerrain);
 
-    // if (timer->isActive())
-    if (mw_one->myGetGpsDataThread->isRunning()) return;
+    if (isGpsRun) return;
 
     double dMonthTotal = 0;  // 里程月总计
     double dCycling = 0;
@@ -1794,8 +1877,7 @@ void Steps::updateMapTrackUi(double lat, double lon) {
 void Steps::clearTrack() {
   clearTrackAndroid();
 
-  // if (!timer->isActive())
-  if (!mw_one->myGetGpsDataThread->isRunning()) clearTrackDataToAndroid();
+  if (!isGpsRun) clearTrackDataToAndroid();
 
   return;
 
@@ -1820,8 +1902,7 @@ void Steps::writeGpsPos(double lat, double lon, int i, int count) {
 }
 
 void Steps::getGpsTrack() {
-  // if (timer->isActive())
-  if (mw_one->myGetGpsDataThread->isRunning()) {
+  if (isGpsRun) {
     openMapWindow();
   } else {
     mw_one->showProgress();
@@ -2134,7 +2215,6 @@ void Steps::saveMovementType() {
 
 void Steps::setVibrate() {
 #ifdef Q_OS_ANDROID
-
   // QJniObject activity = QNativeInterface::QAndroidApplication::context();
   // activity.callMethod<void>("com.x/MyActivity", "setVibrate", "()V");
 
@@ -2300,7 +2380,6 @@ qlonglong Steps::getOldSteps() {
 
 void Steps::getHardStepSensor() {
 #ifdef Q_OS_ANDROID
-
   isHardStepSensor = QJniObject::callStaticMethod<int>(
       "com.x/MyService", "getHardStepCounter", "()I");
 
@@ -2363,7 +2442,6 @@ void Steps::openMapWindow() {
 
 void Steps::clearTrackAndroid() {
 #ifdef Q_OS_ANDROID
-
   try {
     // 步骤1：获取主活动MyActivity实例（Qt默认获取的是主活动）
     QJniObject myActivity = QNativeInterface::QAndroidApplication::context();
@@ -2387,7 +2465,6 @@ void Steps::clearTrackAndroid() {
 
 void Steps::appendTrackPointAndroid(double latitude, double longitude) {
 #ifdef Q_OS_ANDROID
-
   try {
     if (latitude < -90.0 || latitude > 90.0 || longitude < -180.0 ||
         longitude > 180.0) {
@@ -2407,8 +2484,8 @@ void Steps::appendTrackPointAndroid(double latitude, double longitude) {
         "()Z"  // 方法签名：无参数，返回boolean（Z表示boolean）
     );
     if (!isInstanceValid) {
-      qWarning()
-          << "地图实例不存在（isMapActivityInstance返回false），跳过追加轨迹点";
+      qWarning() << "地图实例不存在（isMapActivityInstance返回false），跳过追"
+                    "加轨迹点";
       return;
     }
 
@@ -2458,7 +2535,6 @@ void Steps::addTrackDataToAndroid(double latitude, double longitude) {
 
 void Steps::clearTrackDataToAndroid() {
 #ifdef Q_OS_ANDROID
-
   try {
     QJniObject activity = QNativeInterface::QAndroidApplication::context();
 
@@ -2495,7 +2571,6 @@ void Steps::setDateLabelToAndroid(const QString& str) {
 
 void Steps::setInfoLabelToAndroid(const QString& str) {
 #ifdef Q_OS_ANDROID
-
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
   if (activity.isValid()) {
     QJniObject javaStr = QJniObject::fromString(str);
@@ -2558,8 +2633,7 @@ bool Steps::isInChina(double lat, double lon) {
 
 void Steps::saveRoute(const QString& file, const QString& time, double lat,
                       double lon, const QString& address) {
-  // if (!timer->isActive())
-  if (!mw_one->myGetGpsDataThread->isRunning()) return;
+  if (!isGpsRun) return;
 
   bool latValid = (lat >= -90 && lat <= 90);
   bool lonValid = (lon >= -180 && lon <= 180);
@@ -2607,8 +2681,7 @@ QStringList Steps::readRoute(const QString& file) {
   QJsonArray routeArray;
   QStringList routeList;
 
-  // if (!timer->isActive())
-  if (!mw_one->myGetGpsDataThread->isRunning()) {
+  if (!isGpsRun) {
     QFile jsonFile(file);
 
     // 1. 基础文件检查（不存在/打开失败直接返回空列表）
@@ -2856,7 +2929,8 @@ QGeoCoordinate Steps::wgs84ToGcj02(double wgs84Lat, double wgs84Lon) {
   QJniEnvironment env;
 
   try {
-    // 1. 调用Java工具类的静态方法：CoordinateConverterUtil.wgs84ToGcj02(double,
+    // 1.
+    // 调用Java工具类的静态方法：CoordinateConverterUtil.wgs84ToGcj02(double,
     // double) 类路径："com/x/CoordinateConverterUtil"（注意用/分隔包名）
     // 方法签名："(DD)Lcom/tencent/mapsdk/raster/model/LatLng;"（两个double参数，返回LatLng对象）
     QJniObject gcjLatLng = QJniObject::callStaticObjectMethod(
@@ -2873,7 +2947,8 @@ QGeoCoordinate Steps::wgs84ToGcj02(double wgs84Lat, double wgs84Lon) {
       return QGeoCoordinate(wgs84Lat, wgs84Lon);  // 失败时返回原坐标
     }
 
-    // 3. 解析LatLng对象的纬度和经度（调用其getLatitude()和getLongitude()方法）
+    // 3.
+    // 解析LatLng对象的纬度和经度（调用其getLatitude()和getLongitude()方法）
     double gcjLat = gcjLatLng.callMethod<jdouble>("getLatitude", "()D");
     double gcjLon = gcjLatLng.callMethod<jdouble>("getLongitude", "()D");
 
