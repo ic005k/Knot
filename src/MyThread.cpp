@@ -131,6 +131,27 @@ void MainWindow::updateGpsMapDone() {
   closeProgress();
 }
 
+void GetGpsDataThread::stop() { m_running = false; }
+
+GetGpsDataThread::GetGpsDataThread(QObject* parent) : QThread{parent} {}
+void GetGpsDataThread::run() {
+  m_running = true;  // 启动循环标记
+
+  // 核心循环：每隔1秒执行一次，直到调用stop()
+  while (m_running) {
+    // 1. 执行GPS数据获取
+    m_Steps->getGpsDataInThread();
+
+    // 2. 发送完成信号
+    emit isDone();
+
+    // 3. 休眠1秒
+    m_Method->Sleep(1000);  // 也可以用QThread::msleep(1000)，Qt原生接口
+  }
+}
+
+void MainWindow::GetGpsDataThreadDone() { m_Steps->updateGetGps(); }
+
 ReadEBookThread::ReadEBookThread(QObject* parent) : QThread{parent} {}
 void ReadEBookThread::run() {
   isReadEBookEnd = false;

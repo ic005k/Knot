@@ -9,10 +9,27 @@ class MyThread {
   MyThread();
 };
 
+class GetGpsDataThread : public QThread {
+  Q_OBJECT
+ public:
+  explicit GetGpsDataThread(QObject* parent = nullptr);
+  void stop();
+
+ protected:
+  void run();
+ signals:
+  void isDone();
+
+ private:
+  volatile bool m_running = false;
+
+ public slots:
+};
+
 class UpdateGpsMapThread : public QThread {
   Q_OBJECT
  public:
-  explicit UpdateGpsMapThread(QObject *parent = nullptr);
+  explicit UpdateGpsMapThread(QObject* parent = nullptr);
 
  protected:
   void run();
@@ -27,7 +44,7 @@ class UpdateGpsMapThread : public QThread {
 class ImportDataThread : public QThread {
   Q_OBJECT
  public:
-  explicit ImportDataThread(QObject *parent = nullptr);
+  explicit ImportDataThread(QObject* parent = nullptr);
 
  protected:
   void run();
@@ -42,7 +59,7 @@ class ImportDataThread : public QThread {
 class SearchThread : public QThread {
   Q_OBJECT
  public:
-  explicit SearchThread(QObject *parent = nullptr);
+  explicit SearchThread(QObject* parent = nullptr);
 
  protected:
   void run();
@@ -57,7 +74,7 @@ class SearchThread : public QThread {
 class ReadEBookThread : public QThread {
   Q_OBJECT
  public:
-  explicit ReadEBookThread(QObject *parent = nullptr);
+  explicit ReadEBookThread(QObject* parent = nullptr);
 
  protected:
   void run();
@@ -72,7 +89,7 @@ class ReadEBookThread : public QThread {
 class BakDataThread : public QThread {
   Q_OBJECT
  public:
-  explicit BakDataThread(QObject *parent = nullptr);
+  explicit BakDataThread(QObject* parent = nullptr);
 
  protected:
   void run();
@@ -87,7 +104,7 @@ class BakDataThread : public QThread {
 class ReadChartThread : public QThread {
   Q_OBJECT
  public:
-  explicit ReadChartThread(QObject *parent = nullptr);
+  explicit ReadChartThread(QObject* parent = nullptr);
 
  protected:
   void run();
@@ -102,7 +119,7 @@ class ReadChartThread : public QThread {
 class ReadTWThread : public QThread {
   Q_OBJECT
  public:
-  explicit ReadTWThread(QObject *parent = nullptr);
+  explicit ReadTWThread(QObject* parent = nullptr);
 
  protected:
   void run();
@@ -117,7 +134,7 @@ class ReadTWThread : public QThread {
 class SaveThread : public QThread {
   Q_OBJECT
  public:
-  explicit SaveThread(QObject *parent = nullptr);
+  explicit SaveThread(QObject* parent = nullptr);
 
  protected:
   void run();

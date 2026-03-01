@@ -205,16 +205,16 @@ class Steps : public QDialog {
   bool isRouteShow();
   void setMapKey();
   void showSportsChart();
- public slots:
+  void getGpsDataInThread();
+  public slots:
   void clearAllGpsList();
   void getGpsTrack();
   void openMapWindow();
   void getRouteList(const QString& strGpsTime);
   void getRemarks(const QString& strGpsTime);
+  void updateGetGps();
  private slots:
   void positionUpdated(const QGeoPositionInfo& info);
-
-  void updateGetGps();
 
  private:
   QDateTime m_lastGetAddressTime;    // 上次获取地址的时间
@@ -234,6 +234,7 @@ class Steps : public QDialog {
   QString strCurrentTemp, strCurrentWeatherIcon;
 
   double maxSpeed = 0.00;
+  double Speed = 0.00;
   qlonglong totalSeconds;
 
   int isHardStepSensor = -1;
@@ -365,6 +366,10 @@ class Steps : public QDialog {
   CompassWidget* compass;
 
   QString getGpsListFilePath(const QString& strGpsList);
+  double getGpsLatitude();
+  double getGpsLongitude();
+  double getGpsMySpeed();
+  double getGpsMaxSpeed();
  signals:
   void distanceChanged(double distance);
   void timeChanged();

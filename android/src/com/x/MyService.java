@@ -987,4 +987,49 @@ public class MyService extends Service {
     public static MyService getInstance() {
         return instance;
     }
+
+    public static double getLatitude() {
+        MyService service = MyService.getInstance();
+        if (service == null || service.gpsManager == null) {
+            Log.w("MyActivity", "服务未启动或gpsManager未初始化，返回0");
+            return Double.NaN;
+        }
+
+        return service.gpsManager.getLatitude();
+    }
+
+    public static double getLongitude() {
+        MyService service = MyService.getInstance();
+        if (service == null || service.gpsManager == null) {
+            Log.w("MyActivity", "服务未启动或gpsManager未初始化，返回0");
+            return Double.NaN;
+        }
+
+        return service.gpsManager.getLongitude();
+    }
+
+    public static double getMySpeed() {
+        // 检查服务实例和GPSManager是否有效
+        if (instance == null || instance.gpsManager == null) {
+            Log.w(
+                "MyService",
+                "服务未启动或GPSManager未初始化，无法获取当前速度"
+            );
+            return Double.NaN; // 返回NaN，明确表示获取失败
+        }
+        // 调用gpsManager的getMySpeed()方法
+        return instance.gpsManager.getMySpeed();
+    }
+
+    public static double getMaxSpeed() {
+        if (instance == null || instance.gpsManager == null) {
+            Log.w(
+                "MyService",
+                "服务未启动或GPSManager未初始化，无法获取最大速度"
+            );
+            return Double.NaN;
+        }
+        // 调用gpsManager的getMaxSpeed()方法
+        return instance.gpsManager.getMaxSpeed();
+    }
 }

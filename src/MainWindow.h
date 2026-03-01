@@ -105,6 +105,7 @@ class BakDataThread;
 class ImportDataThread;
 class SearchThread;
 class UpdateGpsMapThread;
+class GetGpsDataThread;
 class SliderButton;
 
 #include <QMetaType>
@@ -217,6 +218,7 @@ class MainWindow : public QMainWindow {
   ImportDataThread* myImportDataThread;
   SearchThread* mySearchThread;
   UpdateGpsMapThread* myUpdateGpsMapThread;
+  GetGpsDataThread* myGetGpsDataThread;
   static void ReadChartData();
   static int get_Day(QString date);
   static QString get_Year(QString date);
@@ -347,6 +349,8 @@ class MainWindow : public QMainWindow {
   void hideEvent(QHideEvent* event) override;
 
  public slots:
+  void GetGpsDataThreadDone();
+
   void on_btnAutoStop_clicked();
 
   void on_btnMove();

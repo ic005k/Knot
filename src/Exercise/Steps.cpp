@@ -397,7 +397,8 @@ void Steps::openStepsUI() {
     mui->lblGpsInfo->setText(strGpsInfoShow);
   }
 
-  if (getGpsListCount() == 0 && !timer->isActive()) {
+  // if (getGpsListCount() == 0 && !timer->isActive())
+  if (getGpsListCount() == 0 && !mw_one->myGetGpsDataThread->isRunning()) {
     int nYear = QDate::currentDate().year();
     int nMonth = QDate::currentDate().month();
     loadGpsList(nYear, nMonth);
@@ -847,7 +848,10 @@ void Steps::startRecordMotion() {
   mui->gboxMotionType->setEnabled(false);
   mui->btnSelGpsDate->setEnabled(false);
 
-  QTimer::singleShot(1000, mw_one, [this]() { timer->start(1000); });
+  QTimer::singleShot(1000, mw_one, [this]() {
+    // timer->start(1000);
+    mw_one->myGetGpsDataThread->start();
+  });
 }
 
 void Steps::positionUpdated(const QGeoPositionInfo& info) {
@@ -865,6 +869,76 @@ void Steps::positionUpdated(const QGeoPositionInfo& info) {
   }
 }
 
+double Steps::getGpsLatitude() {
+#ifdef Q_OS_ANDROID
+
+  jdouble lat = QJniObject::callStaticMethod<jdouble>(
+      "com/x/MyService",
+      "getLatitude",  // 方法名
+      "()D"           // 方法签名：无参数，返回double
+  );
+
+  // 判读是否获取失败（NaN != NaN，这是NaN的特性）
+  if (lat != lat) {
+    qWarning() << "GPS服务未启动或GPS未初始化";
+    return -999;  // 用自定义无效值，而非0
+  }
+  return lat;
+#endif
+  return 0;
+}
+
+double Steps::getGpsLongitude() {
+#ifdef Q_OS_ANDROID
+  jdouble lon = QJniObject::callStaticMethod<jdouble>("com/x/MyService",
+                                                      "getLongitude", "()D");
+  if (lon != lon) {
+    qWarning() << "GPS服务未启动或GPS未初始化";
+    return -999;
+  }
+  return lon;
+#endif
+  return 0;
+}
+
+double Steps::getGpsMySpeed() {
+#ifdef Q_OS_ANDROID
+  jdouble speed = QJniObject::callStaticMethod<jdouble>("com/x/MyService",
+                                                        "getMySpeed", "()D");
+
+  // 判断是否获取失败（利用NaN != NaN的特性）
+  if (speed != speed) {
+    qWarning() << "GPS服务未启动或未获取到当前速度";
+    return -999;  // 自定义无效值，方便业务层判断
+  }
+  return speed;
+#endif
+  return 0;
+}
+
+double Steps::getGpsMaxSpeed() {
+#ifdef Q_OS_ANDROID
+  jdouble maxSpeed = QJniObject::callStaticMethod<jdouble>(
+      "com/x/MyService", "getMaxSpeed", "()D");
+  if (maxSpeed != maxSpeed) {
+    qWarning() << "GPS服务未启动或未获取到最大速度";
+    return -999;
+  }
+  return maxSpeed;
+#endif
+  return 0;
+}
+
+void Steps::getGpsDataInThread() {
+#ifdef Q_OS_ANDROID
+  latitude = getGpsLatitude();
+  longitude = getGpsLongitude();
+
+  Speed = getGpsMySpeed();
+  maxSpeed = getGpsMaxSpeed();
+#endif
+}
+
 void Steps::updateGetGps() {
   m_time = m_time.addSecs(1);
   totalSeconds = static_cast<qlonglong>(m_time.hour()) * 3600 +
@@ -879,8 +953,13 @@ void Steps::updateGetGps() {
   // m_distance = str_distance.toDouble();
 
   if (!isGpsTest) {
-    latitude = gm_activity.callMethod<jdouble>("getLatitude", "()D");
-    longitude = gm_activity.callMethod<jdouble>("getLongitude", "()D");
+    // 通过主Activity进行转接（间接获取）
+    // latitude = gm_activity.callMethod<jdouble>("getLatitude", "()D");
+    // longitude = gm_activity.callMethod<jdouble>("getLongitude", "()D");
+
+    // 通过前台服务直接获取
+    // latitude = getGpsLatitude();
+    // longitude = getGpsLongitude();
 
     latitude = QString::number(latitude, 'f', 6).toDouble();
     longitude = QString::number(longitude, 'f', 6).toDouble();
@@ -928,8 +1007,15 @@ void Steps::updateGetGps() {
       if (!isGpsTest) {
         jdouble speed;
 
-        speed = gm_activity.callMethod<jdouble>("getMySpeed", "()D");
-        maxSpeed = gm_activity.callMethod<jdouble>("getMaxSpeed", "()D");
+        // 通过主Activity转接，间接获取
+        // speed = gm_activity.callMethod<jdouble>("getMySpeed", "()D");
+        // maxSpeed = gm_activity.callMethod<jdouble>("getMaxSpeed", "()D");
+
+        // 通过前台服务直接获取
+        // speed = getGpsMySpeed();
+        // maxSpeed = getGpsMaxSpeed();
+
+        speed = Speed;
 
         mySpeed = speed;
         if (mySpeed > 0) {
@@ -1131,7 +1217,9 @@ void Steps::stopRecordMotion() {
   saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
 
   QTimer::singleShot(2000, mw_one, [this]() {
-    timer->stop();
+    // timer->stop();
+    mw_one->myGetGpsDataThread->stop();
+
     mw_one->m_Reader->cancelKeepScreenOn();
 
     int nYear = QDate::currentDate().year();
@@ -1253,7 +1341,10 @@ void Steps::refreshMotionData() {
     QSettings Reg1(iniDir + stry + "-gpslist.ini", QSettings::IniFormat);
 
     int count = getGpsListCount();
-    if (timer->isActive()) count = getGpsListCount() + 1;
+    // if (timer->isActive())
+    if (mw_one->myGetGpsDataThread->isRunning()) {
+      count = getGpsListCount() + 1;
+    }
 
     QString strYearMonth = stry + "-" + strm;
     Reg1.setValue("/" + strYearMonth + "/Count", count);
@@ -1262,7 +1353,8 @@ void Steps::refreshMotionData() {
                       "-=-" + t5 + "-=-" + strCurrentWeatherIcon + "-=-" +
                       strGpsTerrain);
 
-    if (timer->isActive()) return;
+    // if (timer->isActive())
+    if (mw_one->myGetGpsDataThread->isRunning()) return;
 
     double dMonthTotal = 0;  // 里程月总计
     double dCycling = 0;
@@ -1701,7 +1793,8 @@ void Steps::updateMapTrackUi(double lat, double lon) {
 void Steps::clearTrack() {
   clearTrackAndroid();
 
-  if (!timer->isActive()) clearTrackDataToAndroid();
+  // if (!timer->isActive())
+  if (!mw_one->myGetGpsDataThread->isRunning()) clearTrackDataToAndroid();
 
   return;
 
@@ -1726,7 +1819,8 @@ void Steps::writeGpsPos(double lat, double lon, int i, int count) {
 }
 
 void Steps::getGpsTrack() {
-  if (timer->isActive()) {
+  // if (timer->isActive())
+  if (mw_one->myGetGpsDataThread->isRunning()) {
     openMapWindow();
   } else {
     mw_one->showProgress();
@@ -2463,7 +2557,8 @@ bool Steps::isInChina(double lat, double lon) {
 
 void Steps::saveRoute(const QString& file, const QString& time, double lat,
                       double lon, const QString& address) {
-  if (!timer->isActive()) return;
+  // if (!timer->isActive())
+  if (!mw_one->myGetGpsDataThread->isRunning()) return;
 
   bool latValid = (lat >= -90 && lat <= 90);
   bool lonValid = (lon >= -180 && lon <= 180);
@@ -2511,7 +2606,8 @@ QStringList Steps::readRoute(const QString& file) {
   QJsonArray routeArray;
   QStringList routeList;
 
-  if (!timer->isActive()) {
+  // if (!timer->isActive())
+  if (!mw_one->myGetGpsDataThread->isRunning()) {
     QFile jsonFile(file);
 
     // 1. 基础文件检查（不存在/打开失败直接返回空列表）

@@ -1366,6 +1366,10 @@ void MainWindow::init_Thread_Timer() {
   connect(myUpdateGpsMapThread, &UpdateGpsMapThread::isDone, this,
           &MainWindow::updateGpsMapDone);
 
+  myGetGpsDataThread = new GetGpsDataThread();
+  connect(myGetGpsDataThread, &GetGpsDataThread::isDone, this,
+          &MainWindow::GetGpsDataThreadDone);
+
   connect(pAndroidKeyboard, &QInputMethod::visibleChanged, this,
           &MainWindow::on_KVChanged);
 }
