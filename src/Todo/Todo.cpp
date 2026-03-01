@@ -1850,7 +1850,7 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText,
   class AlarmDialog : public QDialog {
    public:
     explicit AlarmDialog(QWidget* parent = nullptr) : QDialog(parent) {
-      setModal(true);                      // 模态
+      setModal(false);                     // 模态
       setWindowTitle("");                  // 去掉标题栏
       setAttribute(Qt::WA_DeleteOnClose);  // 内存管理
       // 固定字体大小（初始化）

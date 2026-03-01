@@ -850,7 +850,8 @@ void Steps::startRecordMotion() {
 
   QTimer::singleShot(1000, mw_one, [this]() {
     // timer->start(1000);
-    mw_one->myGetGpsDataThread->start();
+    if (!mw_one->myGetGpsDataThread->isRunning())
+      mw_one->myGetGpsDataThread->start();
   });
 }
 

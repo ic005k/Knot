@@ -210,6 +210,7 @@ class MainWindow : public QMainWindow {
   qlonglong CurTableCount = 0;
 
   static void get_Today(QTreeWidget*);
+
   SaveThread* mySaveThread;
   ReadChartThread* myReadChartThread;
   ReadTWThread* m_ReadTWThread;
@@ -219,6 +220,7 @@ class MainWindow : public QMainWindow {
   SearchThread* mySearchThread;
   UpdateGpsMapThread* myUpdateGpsMapThread;
   GetGpsDataThread* myGetGpsDataThread;
+
   static void ReadChartData();
   static int get_Day(QString date);
   static QString get_Year(QString date);

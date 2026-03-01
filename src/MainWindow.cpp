@@ -208,17 +208,37 @@ MainWindow::~MainWindow() {
   delete tmeFlash;
   delete tmeStartRecordAudio;
 
-  mySaveThread->quit();
-  mySaveThread->wait();
+  // ========== 1. 处理一次性线程（仅执行一次，自动退出） ==========
+  // 模板函数：统一处理一次性非子对象线程（wait()等待完成 + delete释放）
+  auto releaseOneShotThread = [](auto& thread) {  // 用auto&替代QThread*&
+    if (thread) {
+      if (thread->isRunning()) {
+        thread->wait();
+      }
+      delete thread;
+      thread = nullptr;
+    }
+  };
 
-  myReadChartThread->quit();
-  myReadChartThread->wait();
+  // 逐个处理所有一次性线程
+  releaseOneShotThread(mySaveThread);
+  releaseOneShotThread(myReadChartThread);
+  releaseOneShotThread(m_ReadTWThread);
+  releaseOneShotThread(myReadEBookThread);
+  releaseOneShotThread(myBakDataThread);
+  releaseOneShotThread(myImportDataThread);
+  releaseOneShotThread(mySearchThread);
+  releaseOneShotThread(myUpdateGpsMapThread);
 
-  m_ReadTWThread->quit();
-  m_ReadTWThread->wait();
-
-  myReadEBookThread->quit();
-  myReadEBookThread->wait();
+  // ========== 2. 处理循环线程（GetGpsDataThread，已有stop()） ==========
+  if (myGetGpsDataThread) {
+    if (myGetGpsDataThread->isRunning()) {
+      myGetGpsDataThread->stop();  // 停止循环
+      myGetGpsDataThread->wait();  // 等待退出
+    }
+    delete myGetGpsDataThread;  // 释放内存
+    myGetGpsDataThread = nullptr;
+  }
 
   delete iniPreferences;
 }

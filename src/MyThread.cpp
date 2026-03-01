@@ -146,7 +146,7 @@ void GetGpsDataThread::run() {
     emit isDone();
 
     // 3. 休眠1秒
-    m_Method->Sleep(1000);  // 也可以用QThread::msleep(1000)，Qt原生接口
+    QThread::msleep(1000);
   }
 }
 
@@ -164,7 +164,7 @@ void ReadEBookThread::run() {
     mw_one->m_Report->getMonthData();
   }
 
-  m_Method->Sleep(100);
+  QThread::msleep(100);
 
   emit isDone();
 }
