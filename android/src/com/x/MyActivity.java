@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.Application;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -196,16 +197,6 @@ public class MyActivity
     public static String MY_TENCENT_MAP_KEY = "error";
     public static int MapType = 1;
 
-    // 新增：标记GPS是否正在运行
-    public static boolean isGpsRunning = false;
-    // 新增：GPS是否就绪（仅通过定位精度判定，无卫星检测）
-    private boolean isGpsReady = false;
-    // 滑动窗口队列（线程安全版）
-    private Queue<Float> accuracyHistory = new ConcurrentLinkedQueue<>();
-    private static final int ACCURACY_WINDOW_SIZE = 5; // 窗口大小：最近5次精度
-    private static final float GPS_GOOD_THRESHOLD = 20.0f; // 单次达标阈值
-    private static final float GPS_BAD_THRESHOLD = 30.0f; // 单次超标阈值
-
     public static MapActivity mapActivityInstance = null;
     public static List<GeoPoint> osmTrackPoints = new ArrayList<>();
     public static String lblDate = "Date";
@@ -285,15 +276,6 @@ public class MyActivity
     public static boolean isReadShareData = false;
     public static boolean zh_cn;
 
-    private String strGpsStatus = "GPS Status";
-    private String strRunTime = "00:00:00";
-    private String strAltitude = "Altitude: 0.00 m";
-    private String strTotalDistance = "0 km";
-    private String strMaxSpeed = "Max Speed";
-    private String strTotalClimb = "Total Climb";
-    private String strTotalDescent = "Total Descent";
-    private String strAverageSpeed = "0 km/h";
-
     public class VibrateUtils {
 
         // 产生震动
@@ -327,7 +309,7 @@ public class MyActivity
     }
 
     // 唤醒屏幕方法
-    public void wakeUpScreen() {
+    public void wakeUpScreen_Old() {
         // 获取电源管理器
         PowerManager pm = (PowerManager) getSystemService(
             Context.POWER_SERVICE
@@ -361,6 +343,58 @@ public class MyActivity
         window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
         window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    /**
+     * 唤醒屏幕并让当前Activity窗口显示在锁屏上层（仅适配Android 8.0+）
+     * 注意：1. 需在Activity中调用；2. 需在Manifest声明WAKE_LOCK权限
+     */
+    public void wakeUpScreen() {
+        // ========== 1. 核心修复：WakeLock 正确使用（移除多余的release） ==========
+        PowerManager pm = (PowerManager) getSystemService(
+            Context.POWER_SERVICE
+        );
+        if (pm != null) {
+            // Android 8.0+ 统一使用 SCREEN_BRIGHT_WAKE_LOCK（FULL_WAKE_LOCK已废弃）
+            int wakeLockFlags =
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK |
+                PowerManager.ACQUIRE_CAUSES_WAKEUP |
+                PowerManager.ON_AFTER_RELEASE;
+
+            PowerManager.WakeLock wakeLock = pm.newWakeLock(
+                wakeLockFlags,
+                "MyApp:WakeLockTag"
+            );
+            // 仅超时自动释放，不手动release（核心修复点）
+            if (!wakeLock.isHeld()) {
+                wakeLock.acquire(10000); // 持有10秒，确保屏幕唤醒
+            }
+        }
+
+        // ========== 2. 窗口Flag优化（适配Android 8.0+，移除冗余/废弃逻辑） ==========
+        Window window = getWindow();
+        if (window == null) return;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // Android 9.0+：使用官方推荐的新API替代废弃Flag
+            setTurnScreenOn(true); // 替代 FLAG_TURN_SCREEN_ON
+            setShowWhenLocked(true); // 替代 FLAG_SHOW_WHEN_LOCKED
+            // 解除锁屏（Android 9.0+ 推荐用requestDismissKeyguard）
+            KeyguardManager kgm = (KeyguardManager) getSystemService(
+                Context.KEYGUARD_SERVICE
+            );
+            if (kgm.isKeyguardLocked()) {
+                kgm.requestDismissKeyguard(this, null); // 无需回调时传null
+            }
+        } else {
+            // Android 8.0-8.1：保留传统Flag（最后兼容版本）
+            window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+            window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+        }
+
+        // 按需保留常亮Flag（仅在当前页面需要时添加，销毁时清理）
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
@@ -422,7 +456,6 @@ public class MyActivity
 
     public void bringAppToForeground() {
         try {
-            boolean gpsWasRunning = isGpsRunning;
             wakeUpScreen();
             bringToFront();
 
@@ -442,14 +475,7 @@ public class MyActivity
             });
 
             // 恢复GPS（原有逻辑保留）
-            new Handler(Looper.getMainLooper()).postDelayed(
-                () -> {
-                    if (gpsWasRunning && !isGpsRunning) {
-                        startGpsUpdates();
-                    }
-                },
-                300
-            );
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {}, 300);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -713,273 +739,6 @@ public class MyActivity
         }
     }
 
-    public String getGpsStatus() {
-        return (
-            strTotalDistance +
-            "\n" +
-            strRunTime +
-            "\n" +
-            strAverageSpeed +
-            "\n" +
-            strMaxSpeed +
-            "\n" +
-            strAltitude +
-            "\n" +
-            strTotalClimb +
-            "\n" +
-            strTotalDescent +
-            "\n" +
-            strGpsStatus
-        );
-    }
-
-    public double startGpsUpdates() {
-        setVibrate();
-        isGpsRunning = true; // 先标记为运行中，避免重复调用
-
-        // 第一步：启动GPS服务（确保服务先启动）
-        Intent intent = new Intent(this, MyService.class);
-        intent.setAction("com.x.ACTION_START_GPS");
-        startService(intent);
-
-        // 第二步：使用Handler延迟重试获取服务实例（解决服务未就绪问题）
-        new Handler(Looper.getMainLooper()).postDelayed(
-            new Runnable() {
-                private int retryCount = 0; // 重试次数
-                private static final int MAX_RETRY = 5; // 最大重试5次
-                private static final int RETRY_DELAY = 300; // 每次重试间隔300ms
-
-                @Override
-                public void run() {
-                    MyService service = MyService.getInstance();
-                    if (service != null && service.gpsManager != null) {
-                        // 服务就绪，设置GPS回调
-                        setupGpsCallback(service);
-                        return;
-                    }
-
-                    // 服务未就绪，重试
-                    retryCount++;
-                    if (retryCount < MAX_RETRY) {
-                        new Handler(Looper.getMainLooper()).postDelayed(
-                            this,
-                            RETRY_DELAY
-                        );
-                        Log.w(
-                            "MyActivity",
-                            "GPS服务未就绪，重试第" + retryCount + "次"
-                        );
-                    } else {
-                        // 重试失败，给出提示
-                        runOnUiThread(() -> {
-                            Toast.makeText(
-                                MyActivity.this,
-                                zh_cn
-                                    ? "GPS服务启动失败，请重试"
-                                    : "GPS service start failed, please retry",
-                                Toast.LENGTH_SHORT
-                            ).show();
-                            isGpsRunning = false;
-                        });
-                        Log.e(
-                            "MyActivity",
-                            "GPS服务启动失败，已达最大重试次数"
-                        );
-                    }
-                }
-            },
-            200
-        ); // 首次延迟200ms，给服务启动时间
-
-        return 1;
-    }
-
-    // 抽离GPS回调设置逻辑，提高复用性
-    private void setupGpsCallback(MyService service) {
-        // 线程安全：同步块保护GPSManager操作
-        synchronized (service) {
-            // 先停止重复的GPS监听
-            if (service.gpsManager.isGpsRunning()) {
-                service.gpsManager.stopGPS();
-            }
-
-            // 设置GPS回调，确保UI更新在主线程
-            service.gpsManager.startGPS(
-                new GPSManager.OnLocationUpdateListener() {
-                    @Override
-                    public void onLocationUpdated(
-                        double lat,
-                        double lng,
-                        float speed,
-                        float distance
-                    ) {
-                        runOnUiThread(() -> {
-                            // 构造临时Location对象，确保数据完整性
-                            Location tempLocation = new Location(
-                                LocationManager.GPS_PROVIDER
-                            );
-                            tempLocation.setLatitude(lat);
-                            tempLocation.setLongitude(lng);
-                            tempLocation.setAltitude(
-                                service.gpsManager.getPreviousAltitude()
-                            );
-                            tempLocation.setSpeed(speed);
-
-                            // 强制更新UI，即使数据无变化
-                            updateUI(tempLocation);
-                            Log.d(
-                                "MyActivity",
-                                "GPS位置更新，触发UI刷新：" + lat + "," + lng
-                            );
-                        });
-                    }
-
-                    @Override
-                    public void onGPSStatusChanged(String status) {
-                        runOnUiThread(() -> {
-                            Log.i("MyActivity", "GPS状态变化：" + status);
-                            // 状态变化时也更新UI（比如GPS从无信号到有信号）
-                            updateUI(null); // 传null时updateUI会用GPSManager的缓存数据
-                        });
-                    }
-                }
-            );
-        }
-
-        // 立即触发一次UI更新（显示初始状态）
-        runOnUiThread(() -> updateUI(null));
-    }
-
-    public double getTotalDistance() {
-        // 双层空指针防护：先检查服务实例，再检查gpsManager
-        MyService service = MyService.getInstance();
-        if (service == null || service.gpsManager == null) {
-            Log.w("MyActivity", "服务未启动或gpsManager未初始化，返回0");
-            return 0;
-        }
-        // 改为调用getTotalDistance()方法（而非直接访问字段）
-        return service.gpsManager.getTotalDistance();
-    }
-
-    public double stopGpsUpdates() {
-        // ========== 原有震动逻辑 ==========
-        setVibrate();
-        // =================================
-
-        // 转发到MyService停止GPS
-        Intent intent = new Intent(this, MyService.class);
-        intent.setAction("com.x.ACTION_STOP_GPS");
-        startService(intent);
-
-        // 返回当前总距离（保持原有返回值类型）
-        return getTotalDistance();
-    }
-
-    private void updateUI(Location location) {
-        // 先更新GPS运行状态到UI（即使无位置数据）
-        if (isGpsRunning) {
-            strGpsStatus = zh_cn ? "GPS正在运行中..." : "GPS is running...";
-        } else {
-            strGpsStatus = zh_cn ? "GPS已停止" : "GPS stopped";
-        }
-
-        // 第一步：获取GPSManager实例（做空指针防护）
-        GPSManager gpsManager = null;
-        MyService service = MyService.getInstance();
-        if (service != null) {
-            gpsManager = service.gpsManager;
-        }
-        if (gpsManager == null) {
-            Log.w(TAG, "updateUI失败：GPSManager未初始化");
-            // 显示默认值，避免UI空白
-            strTotalDistance = "0.00 km";
-            strRunTime = "00:00:00";
-            strAverageSpeed = "0.00 km/h";
-            strMaxSpeed = zh_cn
-                ? "最大速度: 0.00 km/h"
-                : "Max Speed: 0.00 km/h";
-            strAltitude = zh_cn ? "海拔: 0.00 m" : "Altitude: 0.00 m";
-            strTotalClimb = zh_cn ? "累计爬升: 0.00 m" : "Total Climb: 0.00 m";
-            strTotalDescent = zh_cn
-                ? "累计下降: 0.00 m"
-                : "Total Descent: 0.00 m";
-            return;
-        }
-
-        // 第二步：从GPSManager获取实时运动数据（替换所有本地变量）
-        // 运动距离（从GPSManager获取）
-        float totalDistance = gpsManager.getTotalDistance();
-        strTotalDistance = String.format("%.2f km", totalDistance);
-
-        // 运动时间（从GPSManager获取movingTime）
-        long movingTime = gpsManager.getMovingTime();
-        long seconds = movingTime / 1000;
-        strRunTime = String.format(
-            "%02d:%02d:%02d",
-            seconds / 3600,
-            (seconds % 3600) / 60,
-            seconds % 60
-        );
-
-        // 平均速度（基于GPSManager的总距离和运动时间计算）
-        double avgSpeed = 0;
-        if (movingTime > 0) {
-            // 避免除以0
-            avgSpeed = totalDistance / (movingTime / 3600000f);
-        }
-        strAverageSpeed = String.format("%.2f km/h", avgSpeed);
-
-        // 最大速度（从GPSManager获取）
-        float maxSpeed = gpsManager.getMaxSpeed();
-        if (zh_cn) {
-            strMaxSpeed = String.format("最大速度: %.2f km/h", maxSpeed);
-        } else {
-            strMaxSpeed = String.format("Max Speed: %.2f km/h", maxSpeed);
-        }
-
-        // 海拔（从Location或GPSManager获取，优先Location）
-        double altitude =
-            location != null
-                ? location.getAltitude()
-                : gpsManager.getPreviousAltitude();
-        if (zh_cn) {
-            strAltitude = String.format("海拔: %.2f m", altitude);
-        } else {
-            strAltitude = String.format("Altitude: %.2f m", altitude);
-        }
-
-        // 累计爬升（从GPSManager获取）
-        float totalClimb = gpsManager.getTotalClimb();
-        if (zh_cn) {
-            strTotalClimb = String.format("累计爬升: %.2f m", totalClimb);
-        } else {
-            strTotalClimb = String.format("Total Climb: %.2f m", totalClimb);
-        }
-
-        // 累计下降（从GPSManager获取）
-        float totalDescent = gpsManager.getTotalDescent();
-        if (zh_cn) {
-            strTotalDescent = String.format("累计下降: %.2f m", totalDescent);
-        } else {
-            strTotalDescent = String.format(
-                "Total Descent: %.2f m",
-                totalDescent
-            );
-        }
-
-        // 可选：更新GPS状态文本（从GPSManager获取就绪状态）
-        strGpsStatus = gpsManager.isGpsReady()
-            ? (zh_cn ? "GPS已就绪（高精度）" : "GPS Ready (High Precision)")
-            : (zh_cn
-                  ? "GPS未就绪（网络定位）"
-                  : "GPS Not Ready (Network Location)");
-
-        Log.d(
-            TAG,
-            "UI已更新：距离=" + strTotalDistance + "，速度=" + strMaxSpeed
-        );
-    }
-
     private static ServiceConnection mCon = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder arg1) {
@@ -1180,6 +939,24 @@ public class MyActivity
             restartApp();
             Log.i(TAG, "触发应用重启...");
         }
+
+        // ========== 补充：Activity销毁时清理资源（避免隐性问题） ==========
+        Window window = getWindow();
+        if (window == null) return;
+
+        // 清理屏幕常亮Flag，避免影响其他页面
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        // Android 9.0+ 重置屏幕唤醒/锁屏显示状态
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            setTurnScreenOn(false);
+            setShowWhenLocked(false);
+        } else {
+            // Android 8.0-8.1 清理废弃Flag
+            window.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+        }
     }
 
     @Override
@@ -1230,9 +1007,6 @@ public class MyActivity
             // 1. 定位权限（原有逻辑保留，无需改）
             case REQ_LOCATION:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (!isGpsRunning) {
-                        startGpsUpdates();
-                    }
                 } else {
                     Toast.makeText(
                         this,
@@ -1241,7 +1015,6 @@ public class MyActivity
                             : "Location permission denied, GPS function unavailable",
                         Toast.LENGTH_SHORT
                     ).show();
-                    isGpsRunning = false;
                 }
                 break;
             // 2. 录音权限（新增处理）

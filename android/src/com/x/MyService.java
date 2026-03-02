@@ -550,22 +550,6 @@ public class MyService extends Service {
         }
     }
 
-    // 不依赖静态变量，每次重新获取NotificationManager
-    public static void clearNotify_Old(Context context) {
-        try {
-            NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(
-                    Context.NOTIFICATION_SERVICE
-                );
-            if (notificationManager != null) {
-                notificationManager.cancel("knot_alarm_tag", 10);
-                Log.d(TAG, "待办通知已清除");
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "清除待办通知失败", e);
-        }
-    }
-
     // 清除所有相关通知（包括新改造的通知）
     public static void clearNotify(Context context) {
         try {
@@ -920,73 +904,8 @@ public class MyService extends Service {
         }
     };
 
-    // ========== 新增GPS逻辑：启动GPS方法（供C++调用） ==========
-    public boolean startGPS_Old() {
-        MyActivity.setVibrate();
-
-        if (isGpsRunning) {
-            Log.w(TAG, "GPS已在运行，无需重复启动");
-            return true;
-        }
-
-        // 检查定位权限
-        Context context = getApplicationContext();
-        String finePerm = Manifest.permission.ACCESS_FINE_LOCATION;
-        String coarsePerm = Manifest.permission.ACCESS_COARSE_LOCATION;
-        boolean hasFine =
-            ContextCompat.checkSelfPermission(context, finePerm) ==
-            PackageManager.PERMISSION_GRANTED;
-        boolean hasCoarse =
-            ContextCompat.checkSelfPermission(context, coarsePerm) ==
-            PackageManager.PERMISSION_GRANTED;
-
-        if (!hasFine && !hasCoarse) {
-            Log.e(TAG, "缺少定位权限，启动GPS失败");
-            return false;
-        }
-
-        // 启动GPSManager
-        boolean success = gpsManager.startGPS(
-            new GPSManager.OnLocationUpdateListener() {
-                @Override
-                public void onLocationUpdated(
-                    double lat,
-                    double lng,
-                    float speed,
-                    float distance
-                ) {
-                    Log.d(
-                        TAG,
-                        "GPS更新：纬度=" +
-                            lat +
-                            " 经度=" +
-                            lng +
-                            " 速度=" +
-                            speed +
-                            " 距离=" +
-                            distance
-                    );
-                }
-
-                @Override
-                public void onGPSStatusChanged(String status) {
-                    Log.d(TAG, "GPS状态：" + status);
-                }
-            }
-        );
-
-        if (success) {
-            isGpsRunning = true;
-            Log.i(TAG, "GPS启动成功（前台服务托管）");
-        } else {
-            Log.e(TAG, "GPS启动失败");
-        }
-
-        return success;
-    }
-
     public boolean startGPS() {
-        MyActivity.setVibrate(); // 保留你的震动逻辑
+        MyActivity.setVibrate();
 
         if (isGpsRunning) {
             Log.w(TAG, "GPS已在运行，无需重复启动");

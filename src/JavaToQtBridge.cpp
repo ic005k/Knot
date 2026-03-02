@@ -71,7 +71,7 @@ static void JavaNotify_3() {
         // Android唤醒屏幕（可选，保留原有逻辑）
         QJniObject activity = QNativeInterface::QAndroidApplication::context();
         if (activity.isValid()) {
-          // activity.callMethod<void>("wakeUpScreen", "()V");
+          activity.callMethod<void>("wakeUpScreen", "()V");
         }
 
         // 3. 读取UI属性（主线程安全）

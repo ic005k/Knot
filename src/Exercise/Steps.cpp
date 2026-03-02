@@ -2651,8 +2651,7 @@ void Steps::saveRoute(const QString& file, const QString& time, double lat,
   newRoute["lat"] = lat;    // 数字类型（double）
   newRoute["lon"] = lon;    // 数字类型（double）
   newRoute["address"] = directionRoute + "\n" + distanceRoute + " | " +
-                        speedRoute + "\n" + strAltitude + " m" + "\n\n" +
-                        address;
+                        speedRoute + "\n" + strAltitude + "\n\n" + address;
 
   // 追加新对象到数组
   routeMemoryCache.append(newRoute);
@@ -3717,7 +3716,7 @@ void Steps::getRemarks(const QString& strGpsTime) {
   QObject::connect(cancelBtn, &QPushButton::clicked, m_remarksDialog,
                    &QDialog::reject);
 
-  connect(m_remarksDialog, &QDialog::finished, this, [this](int result) {
+  connect(m_remarksDialog, &QDialog::finished, this, [](int result) {
     Q_UNUSED(result);
     closeTextToolBar();
   });
