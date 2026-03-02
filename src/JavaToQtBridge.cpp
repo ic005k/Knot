@@ -68,10 +68,12 @@ static void JavaNotify_3() {
           return;
         }
 
+        mw_one->m_ReceiveShare->bringAppToForeground();
+
         // Android唤醒屏幕（可选，保留原有逻辑）
         QJniObject activity = QNativeInterface::QAndroidApplication::context();
         if (activity.isValid()) {
-          activity.callMethod<void>("wakeUpScreen", "()V");
+          // activity.callMethod<void>("wakeUpScreen", "()V");
         }
 
         // 3. 读取UI属性（主线程安全）
@@ -117,6 +119,10 @@ static void JavaNotify_3() {
                 if (mw_one != nullptr && mw_one->m_Todo != nullptr) {
                   mw_one->m_Todo->showAlarmWindow(strTime, strText,
                                                   strTodoAlarmActiveTime);
+
+                  // mw_one->m_Todo->openClockActivity(
+                  //     strTime + "|" + strText + "|" +
+                  //     strTodoAlarmActiveTime);
                 }
               });
 

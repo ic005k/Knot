@@ -1839,6 +1839,19 @@ void Todo::showInputPanel() {
   mui->btnClear->show();
 }
 
+void Todo::openClockActivity(const QString& content) {
+#ifdef Q_OS_ANDROID
+  QJniObject activity =
+      QJniObject(QNativeInterface::QAndroidApplication::context());
+  if (activity.isValid()) {
+    QJniObject jContent = QJniObject::fromString(content);
+    activity.callMethod<void>("openClockActivityWithContent",
+                              "(Ljava/lang/String;)V",
+                              jContent.object<jstring>());
+  }
+#endif
+}
+
 void Todo::showAlarmWindow(const QString& strTime, const QString& strText,
                            const QString& strTodoAlarmActiveTime) {
   if (!mw_one) {

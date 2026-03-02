@@ -25,6 +25,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.UriMatcher;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -34,6 +35,7 @@ import android.content.pm.ShortcutManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.hardware.Sensor;
@@ -60,6 +62,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -84,6 +87,8 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsetsController;
+import android.view.WindowManager;
+import android.view.WindowManager;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSession.EventCallback;
@@ -308,44 +313,6 @@ public class MyActivity
         m_instance.moveTaskToBack(true);
     }
 
-    // 唤醒屏幕方法
-    public void wakeUpScreen_Old() {
-        // 获取电源管理器
-        PowerManager pm = (PowerManager) getSystemService(
-            Context.POWER_SERVICE
-        );
-        if (pm != null) {
-            // 唤醒屏幕（兼容所有Android版本）
-            int wakeLockFlags;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                wakeLockFlags =
-                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK |
-                    PowerManager.ACQUIRE_CAUSES_WAKEUP |
-                    PowerManager.ON_AFTER_RELEASE;
-            } else {
-                // 兼容低版本
-                wakeLockFlags =
-                    PowerManager.FULL_WAKE_LOCK |
-                    PowerManager.ACQUIRE_CAUSES_WAKEUP |
-                    PowerManager.ON_AFTER_RELEASE;
-            }
-
-            PowerManager.WakeLock wakeLock = pm.newWakeLock(
-                wakeLockFlags,
-                "MyApp:WakeLockTag"
-            );
-            wakeLock.acquire(10000); // 持有10秒，确保屏幕唤醒
-            wakeLock.release();
-        }
-
-        // 设置窗口属性，强制显示在锁屏上层（兼容所有版本）
-        Window window = getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
-        window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-    }
-
     /**
      * 唤醒屏幕并让当前Activity窗口显示在锁屏上层（仅适配Android 8.0+）
      * 注意：1. 需在Activity中调用；2. 需在Manifest声明WAKE_LOCK权限
@@ -398,65 +365,58 @@ public class MyActivity
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
-    // 将Activity移到前台（完全重构，避开有问题的moveTaskToFront方法）
     public void bringToFront() {
-        // 确保Activity未被销毁
-        if (!isFinishing() && !isDestroyed()) {
-            // 方案1：优先通过ActivityManager移动任务（最稳定的兼容方案）
-            try {
-                ActivityManager am = (ActivityManager) getSystemService(
-                    Context.ACTIVITY_SERVICE
-                );
-                if (am != null) {
-                    // 获取当前应用的任务列表
-                    List<ActivityManager.RunningTaskInfo> taskList =
-                        am.getRunningTasks(10);
-                    for (ActivityManager.RunningTaskInfo task : taskList) {
-                        // 找到当前应用的任务
-                        if (
-                            task.topActivity
-                                .getPackageName()
-                                .equals(getPackageName())
-                        ) {
-                            // 关键：使用单参数的moveTaskToFront（低版本API支持）
-                            if (
-                                Build.VERSION.SDK_INT >=
-                                Build.VERSION_CODES.HONEYCOMB
-                            ) {
-                                am.moveTaskToFront(
-                                    task.id,
-                                    ActivityManager.MOVE_TASK_NO_USER_ACTION
-                                );
-                            } else {
-                                // API < 11 降级方案
-                                am.moveTaskToFront(task.id, 0);
-                            }
-                            return; // 成功则直接返回
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+        // 确保Activity未被销毁（保留你的原始校验）
+        if (isFinishing() || isDestroyed()) {
+            Log.w("QtKnot", "Activity已销毁，跳过bringToFront");
+            return;
+        }
+
+        // ========== 彻底简化：只保留方案二（你最初能生效的逻辑） ==========
+        try {
+            Intent intent = new Intent(this, MyActivity.class);
+            // 核心标志：保证生效+不重复创建Activity（关键！）
+            intent.addFlags(
+                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | // 复用已有实例，不移除
+                    Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | // 标记为前台，保留
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP | // 关键：避免重复创建
+                    Intent.FLAG_ACTIVITY_NO_USER_ACTION // 锁屏下静默操作，不亮屏
+            );
+
+            // 仅在非Activity上下文加NEW_TASK（避免干扰）
+            if (!(this instanceof Activity)) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             }
 
-            // 方案2：降级为重启Activity（保底方案，兼容所有版本）
-            Intent intent = new Intent(this, MyActivity.class);
-            // 添加启动标志，确保移到前台而非新建实例
-            intent.addFlags(
-                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT |
-                    Intent.FLAG_ACTIVITY_NEW_TASK |
-                    Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-            );
             startActivity(intent);
+            Log.d("QtKnot", "方案二：Intent唤醒前台成功");
 
-            // 激活窗口，确保显示
-            getWindow().getDecorView().requestFocus();
+            // ========== 仅保留必要的窗口激活（你最初的逻辑） ==========
+            new Handler(Looper.getMainLooper()).postDelayed(
+                () -> {
+                    if (!isFinishing() && !isDestroyed()) {
+                        Window window = getWindow();
+                        if (window != null) {
+                            // 仅保留锁屏显示的基础标志，删所有干扰项
+                            window.addFlags(
+                                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                            );
+                            window.getDecorView().requestFocus();
+                            window.getDecorView().postInvalidate();
+                        }
+                    }
+                },
+                200
+            );
+        } catch (Exception e) {
+            Log.e("QtKnot", "移前台失败", e);
+            e.printStackTrace();
         }
     }
 
     public void bringAppToForeground() {
         try {
-            wakeUpScreen();
+            // wakeUpScreen();
             bringToFront();
 
             // 核心强化：强制激活窗口 + 清除输入法焦点（避免界面卡死）
@@ -473,9 +433,6 @@ public class MyActivity
                     window.getDecorView().postInvalidate();
                 }
             });
-
-            // 恢复GPS（原有逻辑保留）
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {}, 300);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -666,6 +623,8 @@ public class MyActivity
                         // 确保mw_one已创建完成后再调用
 
                         Log.d(TAG, "配置变更初始化完成，Qt已就绪，可以调用C++");
+
+                        //hideQtSplashScreen(); // 主动隐藏闪屏
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "初始化异常", e);
@@ -799,24 +758,6 @@ public class MyActivity
     protected void onResume() {
         System.out.println("onResume...");
         super.onResume();
-
-        new Handler(Looper.getMainLooper()).postDelayed(
-            () -> {
-                if (!isFinishing() && !isDestroyed()) {
-                    // 1. 强制刷新窗口
-                    getWindow().getDecorView().postInvalidate();
-
-                    // 2. 触发UI线程重新布局
-                    runOnUiThread(() -> {
-                        getWindowManager().updateViewLayout(
-                            getWindow().getDecorView(),
-                            getWindow().getDecorView().getLayoutParams()
-                        );
-                    });
-                }
-            },
-            100
-        );
 
         updateStatusBarColor();
     }
@@ -2660,41 +2601,73 @@ public class MyActivity
         });
     }
 
-    /**
-     * 强制刷新Qt渲染状态（解决暗黑模式切换+锁屏导致的卡死）
-     * 被QtStateManager调用，用于重置Qt渲染线程
-     */
-    public void forceQtRefresh() {
-        runOnUiThread(() -> {
-            // 安全校验：确保Activity未销毁
-            if (isFinishing() || isDestroyed()) {
-                return;
-            }
+    public void openClockActivityWithContent(String customContent) {
+        Intent intent = new Intent(this, ClockActivity.class);
+        // 传递自定义内容（对应ClockActivity中读取的"SAVED_CLOCK_CONTENT"）
+        intent.putExtra("SAVED_CLOCK_CONTENT", customContent);
+        // 可选：设置窗口启动模式，避免重复创建
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent); // 更新 Activity 的 Intent
+        handleAlarmIntent(intent);
+    }
+
+    private void handleAlarmIntent(Intent intent) {
+        if (intent != null && intent.hasExtra("ALARM_MESSAGE")) {
+            String message = intent.getStringExtra("ALARM_MESSAGE");
+            // 这里可以通知 Qt 层显示提醒内容，或执行相关操作
+            // CallJavaNotify_3();
+        }
+    }
+
+    private void hideQtSplashScreen() {
+        try {
+            // 方案1：尝试调用带参数的新版方法
+            Method hideMethod = getClass().getMethod(
+                "hideSplashScreen",
+                boolean.class
+            );
+            hideMethod.invoke(this, false); // false = 不保持在顶部
+            Log.d("QtKnot", "新版Qt hideSplashScreen(boolean)调用成功");
+        } catch (NoSuchMethodException e) {
             try {
-                // 1. 强制刷新Android层UI布局
-                View decorView = getWindow().getDecorView();
-                decorView.forceLayout();
-                decorView.invalidate();
-                decorView.requestLayout();
+                // 方案2：降级调用无参的旧版方法
+                Method hideMethod = getClass().getMethod("hideSplashScreen");
+                hideMethod.invoke(this);
+                Log.d("QtKnot", "旧版Qt hideSplashScreen()调用成功");
+            } catch (Exception ex) {
+                // 方案3：终极备用方案 - 直接隐藏闪屏View
+                View splashView = getWindow()
+                    .getDecorView()
+                    .findViewById(android.R.id.content)
+                    .findViewWithTag("qt_splash_view");
+                if (splashView != null) {
+                    splashView.setVisibility(View.GONE);
+                    Log.d("QtKnot", "备用方案：直接隐藏闪屏View成功");
+                } else {
+                    Log.e("QtKnot", "所有隐藏闪屏方案均失败");
+                }
+                ex.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-                // 2. 触发窗口属性刷新（唤醒Qt渲染线程）
-                getWindow().addFlags(
-                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                );
-                getWindow().clearFlags(
-                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                );
-
-                // 3. 可选：如果你的项目有Qt界面刷新方法，可在此调用
-                // 比如：QtNative.invokeMethod("refreshUI"); // 根据你的实际Qt方法调整
-
-                android.util.Log.d("MyActivity", "已强制刷新Qt渲染状态");
-            } catch (Exception e) {
-                android.util.Log.e(
-                    "MyActivity",
-                    "刷新Qt状态失败：" + e.getMessage()
-                );
+        runOnUiThread(() -> {
+            // 强制整个窗口重绘
+            getWindow().getDecorView().invalidate();
+            // 请求布局
+            getWindow().getDecorView().requestLayout();
+            // 如果 Qt 使用了 SurfaceView，可以尝试显式请求
+            View content = findViewById(android.R.id.content);
+            if (content != null) {
+                content.invalidate();
             }
         });
     }

@@ -171,6 +171,7 @@ class Todo : public QDialog {
   bool isVoice(const QString& strTodoText);
 
   void clearJavaNotify();
+  void openClockActivity(const QString& content);
  private slots:
   void on_ShowRecordTime();
 

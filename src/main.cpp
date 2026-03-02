@@ -384,7 +384,6 @@ void loadTheme(bool isDark) {
     if (mw_one->m_Reader) mw_one->m_Reader->initInfoShowFont();
     if (mw_one->m_Todo) {
       mw_one->m_Todo->refreshTableListsFromIni();
-      mw_one->m_Todo->refreshAlarm();
     }
   }
 

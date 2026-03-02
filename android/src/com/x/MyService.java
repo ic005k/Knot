@@ -36,7 +36,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.provider.Settings;
-import android.text.TextUtils; // ✅ 正确的导入位置
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
@@ -418,10 +418,13 @@ public class MyService extends Service {
             // ========== 关键修改：指向主Activity MyActivity ==========
             // 1. 创建跳转到MyActivity的Intent（主Activity）
             Intent activityIntent = new Intent(context, MyActivity.class);
-            activityIntent.setFlags(
+            /*activityIntent.setFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK | // 后台启动Activity必须加
                     Intent.FLAG_ACTIVITY_SINGLE_TOP | // 避免创建多个实例
                     Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED // 重置任务栈，确保在前台
+                    );*/
+            activityIntent.setFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
             );
             activityIntent.putExtra("ALARM_MESSAGE", message); // 传递提醒内容（自定义key）
 
@@ -447,7 +450,7 @@ public class MyService extends Service {
                     .setColor(Color.GREEN)
                     .setAutoCancel(true)
                     .setContentIntent(pendingIntent) // 使用唤起MyActivity的PendingIntent
-                    .setFullScreenIntent(pendingIntent, true) // 全屏唤起（高优先级）
+                    //.setFullScreenIntent(pendingIntent, true) // 全屏唤起（高优先级）
                     .setLights(Color.RED, 1000, 1000)
                     .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
                     .setVibrate(new long[] { 0, 500, 1000 })
@@ -461,7 +464,7 @@ public class MyService extends Service {
                     .setColor(Color.GREEN)
                     .setAutoCancel(true)
                     .setContentIntent(pendingIntent) // 使用唤起MyActivity的PendingIntent
-                    .setFullScreenIntent(pendingIntent, true)
+                    //.setFullScreenIntent(pendingIntent, true)
                     .setLights(Color.RED, 1000, 1000)
                     .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
                     .setVibrate(new long[] { 0, 500, 1000 })

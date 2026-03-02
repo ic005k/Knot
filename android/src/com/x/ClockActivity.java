@@ -221,7 +221,7 @@ public class ClockActivity
 
         bindViews(str1, str2 + "\n" + strCurDT + "\n");
 
-        CallJavaNotify_3();
+        //CallJavaNotify_3();
 
         String mystr = str2;
         boolean isVoice = false;
@@ -256,8 +256,8 @@ public class ClockActivity
                 String strVoice = internalConfigure.getIniKey("voice");
                 String strValue = "true";
                 if (strVoice != null && strVoice.equals(strValue)) {
-                    MyActivity.stopPlayMyText();
-                    MyActivity.playMyText(str2);
+                    //MyActivity.stopPlayMyText();
+                    //MyActivity.playMyText(str2);
                     System.out.println("播放文本：" + str2);
                 }
             }
