@@ -186,8 +186,8 @@ public class MyService extends Service {
     }
 
     // 服务在每次启动的时候调用的方法 如果某些行为在服务已启动的时候就执行，可以把处理逻辑写在这个方法里面
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    //@Override
+    public int onStartCommand_Old(Intent intent, int flags, int startId) {
         Log.d("MyService", "onStartCommand()-------");
 
         // ========== 新增GPS逻辑：处理GPS启停指令 ==========
@@ -231,6 +231,25 @@ public class MyService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("MyService", "onStartCommand()-------");
+
+        if (intent != null) {
+            String action = intent.getAction();
+            if ("com.x.ACTION_START_GPS".equals(action)) {
+                startGPS();
+            } else if ("com.x.ACTION_STOP_GPS".equals(action)) {
+                stopGPS();
+            }
+        }
+
+        // 只走 Android 8.0+ 逻辑
+        setForeground();
+
+        return super.onStartCommand(intent, flags, startId);
+    }
+
     // 服务销毁的时候调用的方法 可以回收部分不再使用的资源
     @Override
     public void onDestroy() {
@@ -267,8 +286,8 @@ public class MyService extends Service {
         super.onDestroy();
     }
 
-    @TargetApi(26)
-    private void setForeground() {
+    //@TargetApi(26)
+    private void setForeground_Old() {
         // 创建点击意图
         Intent notificationIntent = new Intent(this, MyActivity.class);
         notificationIntent.setFlags(
@@ -321,6 +340,62 @@ public class MyService extends Service {
             .build();
 
         // 启动前台服务
+        startForeground(1337, notification);
+    }
+
+    @TargetApi(26)
+    private void setForeground() {
+        Intent notificationIntent = new Intent(this, MyActivity.class);
+        notificationIntent.setFlags(
+            Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP
+        );
+
+        int pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            pendingIntentFlags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            notificationIntent,
+            pendingIntentFlags
+        );
+
+        // 前台服务渠道：最低优先级、安静、只显示图标
+        String channelId = ID;
+        NotificationChannel channel = new NotificationChannel(
+            channelId,
+            "Knot Service",
+            NotificationManager.IMPORTANCE_MIN // 所有8.0+都支持的最低优先级
+        );
+
+        // ========== 仅保留所有版本兼容的核心配置 ==========
+        channel.setShowBadge(false); // 无角标（8.0+支持）
+        channel.enableLights(false); // 无灯光（8.0+支持）
+        channel.enableVibration(false); // 无震动（8.0+支持）
+        channel.setSound(null, null); // 无声音（8.0+支持）
+        channel.setBypassDnd(false); // 不绕过免打扰（8.0+支持）
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE); // 8.0+支持
+        // ==============================================
+
+        NotificationManager manager = (NotificationManager) getSystemService(
+            NOTIFICATION_SERVICE
+        );
+        if (manager != null) {
+            manager.createNotificationChannel(channel);
+        }
+
+        // 极简前台通知：只留图标 + 点击跳转
+        Notification notification = new Notification.Builder(this, channelId)
+            .setContentTitle(strStatus)
+            .setContentText(strRun)
+            .setSmallIcon(R.drawable.icon)
+            .setContentIntent(pendingIntent)
+            .setOnlyAlertOnce(true)
+            .setDefaults(0) // 无任何默认提醒（所有版本兼容）
+            .build();
+
         startForeground(1337, notification);
     }
 
@@ -590,7 +665,7 @@ public class MyService extends Service {
                 m_builderAlarm.build()
             );
 
-            playLockScreenSound(context);
+            if (MyActivity.getLockScreenStatus()) playLockScreenSound(context);
         } catch (Exception e) {
             e.printStackTrace();
         }
