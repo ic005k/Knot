@@ -483,6 +483,7 @@ void MainHelper::initMainQW() {
   mui->qwMainTab->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/maintab.qml")));
 
+  mui->qwMainDate->rootContext()->setContextProperty("FontSize", fontSize);
   mui->qwMainDate->rootContext()->setContextProperty("isDark", isDark);
   mui->qwMainDate->rootContext()->setContextProperty("isAniEffects", true);
   mui->qwMainDate->rootContext()->setContextProperty("maindateWidth",

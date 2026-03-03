@@ -186,51 +186,6 @@ public class MyService extends Service {
     }
 
     // 服务在每次启动的时候调用的方法 如果某些行为在服务已启动的时候就执行，可以把处理逻辑写在这个方法里面
-    //@Override
-    public int onStartCommand_Old(Intent intent, int flags, int startId) {
-        Log.d("MyService", "onStartCommand()-------");
-
-        // ========== 新增GPS逻辑：处理GPS启停指令 ==========
-        if (intent != null) {
-            String action = intent.getAction();
-            if ("com.x.ACTION_START_GPS".equals(action)) {
-                startGPS(); // 启动GPS
-            } else if ("com.x.ACTION_STOP_GPS".equals(action)) {
-                stopGPS(); // 停止GPS
-            }
-        }
-        // ==========================================
-
-        if (Build.VERSION.SDK_INT >= 26) {
-            setForeground();
-        } else {
-            // android 8.0 以下
-            Intent notificationIntent = new Intent(this, MyActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(
-                this,
-                0,
-                notificationIntent,
-                0
-            );
-            Notification notification = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.icon)
-                .setLargeIcon(
-                    BitmapFactory.decodeResource(
-                        getResources(),
-                        R.drawable.icon
-                    )
-                )
-                .setContentTitle("Knot")
-                .setContentText(strRun)
-                .setContentIntent(pendingIntent) // 通知栏点击
-                .build();
-
-            startForeground(1337, notification);
-        }
-
-        return super.onStartCommand(intent, flags, startId);
-    }
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("MyService", "onStartCommand()-------");
@@ -284,63 +239,6 @@ public class MyService extends Service {
         instance = null; // 服务销毁时清空实例
 
         super.onDestroy();
-    }
-
-    //@TargetApi(26)
-    private void setForeground_Old() {
-        // 创建点击意图
-        Intent notificationIntent = new Intent(this, MyActivity.class);
-        notificationIntent.setFlags(
-            Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP
-        );
-
-        // 适配不同版本的PendingIntent标志
-        int pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            pendingIntentFlags |= PendingIntent.FLAG_IMMUTABLE;
-        }
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            notificationIntent,
-            pendingIntentFlags
-        );
-
-        // 创建通知渠道 (Android 8.0+)
-        String channelId = ID;
-        String channelName = "Knot Service";
-        NotificationChannel channel = new NotificationChannel(
-            channelId,
-            channelName,
-            NotificationManager.IMPORTANCE_LOW
-        );
-        channel.setShowBadge(false);
-        channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-
-        NotificationManager manager = (NotificationManager) getSystemService(
-            NOTIFICATION_SERVICE
-        );
-        if (manager != null) {
-            manager.createNotificationChannel(channel);
-        }
-
-        // 构建通知
-        Notification notification = new Notification.Builder(this, channelId)
-            .setContentTitle(strStatus)
-            .setContentText(strRun)
-            .setSmallIcon(R.drawable.icon)
-            .setLargeIcon(
-                BitmapFactory.decodeResource(getResources(), R.drawable.icon)
-            )
-            .setContentIntent(pendingIntent) // 关键：添加点击意图
-            .setAutoCancel(true) // 点击后自动清除
-            .setOnlyAlertOnce(true) // 避免重复提示
-            .setVisibility(Notification.VISIBILITY_PUBLIC)
-            .build();
-
-        // 启动前台服务
-        startForeground(1337, notification);
     }
 
     @TargetApi(26)
@@ -449,7 +347,7 @@ public class MyService extends Service {
 
     // ------------------------------------------------------------------------------
 
-    public static void notifyTodoAlarm_Old(Context context, String message) {
+    public static void notifyTodoAlarm(Context context, String message) {
         try {
             NotificationManager m_notificationManagerAlarm =
                 (NotificationManager) context.getSystemService(
@@ -458,7 +356,7 @@ public class MyService extends Service {
             Notification.Builder m_builderAlarm = null;
 
             String channelId = "knot_alarm_channel";
-            // 通道配置 + 强制刷新灯光
+            // 通道配置（保留你原来的呼吸灯逻辑，仅静音）
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 NotificationChannel channel =
                     m_notificationManagerAlarm.getNotificationChannel(
@@ -474,10 +372,7 @@ public class MyService extends Service {
                     channel.setLightColor(Color.RED);
                     channel.enableVibration(true);
                     channel.setVibrationPattern(new long[] { 0, 500, 1000 });
-                    channel.setSound(
-                        Settings.System.DEFAULT_NOTIFICATION_URI,
-                        null
-                    );
+                    channel.setSound(null, null); // 渠道静音
                     channel.setBypassDnd(true);
                     channel.setLockscreenVisibility(
                         Notification.VISIBILITY_PUBLIC
@@ -486,127 +381,12 @@ public class MyService extends Service {
                         channel
                     );
                 }
-                // 强制刷新通道配置
                 channel.enableLights(true);
                 channel.setLightColor(Color.RED);
                 m_notificationManagerAlarm.createNotificationChannel(channel);
             }
 
-            // ========== 关键修改：指向主Activity MyActivity ==========
-            // 1. 创建跳转到MyActivity的Intent（主Activity）
-            Intent activityIntent = new Intent(context, MyActivity.class);
-            /*activityIntent.setFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK | // 后台启动Activity必须加
-                    Intent.FLAG_ACTIVITY_SINGLE_TOP | // 避免创建多个实例
-                    Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED // 重置任务栈，确保在前台
-                    );*/
-            activityIntent.setFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
-            );
-            activityIntent.putExtra("ALARM_MESSAGE", message); // 传递提醒内容（自定义key）
-
-            // 2. 构建PendingIntent（适配Android 12+不可变性）
-            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                flags |= PendingIntent.FLAG_IMMUTABLE;
-            }
-            PendingIntent pendingIntent = PendingIntent.getActivity(
-                context,
-                (int) System.currentTimeMillis(), // 随机请求码避免冲突
-                activityIntent,
-                flags
-            );
-            // ==============================================
-
-            // 构建通知
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                m_builderAlarm = new Notification.Builder(context, channelId)
-                    .setContentTitle(strTodo)
-                    .setContentText(message)
-                    .setSmallIcon(R.drawable.icon)
-                    .setColor(Color.GREEN)
-                    .setAutoCancel(true)
-                    .setContentIntent(pendingIntent) // 使用唤起MyActivity的PendingIntent
-                    //.setFullScreenIntent(pendingIntent, true) // 全屏唤起（高优先级）
-                    .setLights(Color.RED, 1000, 1000)
-                    .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
-                    .setVibrate(new long[] { 0, 500, 1000 })
-                    .setPriority(Notification.PRIORITY_MAX)
-                    .setDefaults(Notification.DEFAULT_ALL);
-            } else {
-                m_builderAlarm = new Notification.Builder(context)
-                    .setContentTitle(strTodo)
-                    .setContentText(message)
-                    .setSmallIcon(R.drawable.icon)
-                    .setColor(Color.GREEN)
-                    .setAutoCancel(true)
-                    .setContentIntent(pendingIntent) // 使用唤起MyActivity的PendingIntent
-                    //.setFullScreenIntent(pendingIntent, true)
-                    .setLights(Color.RED, 1000, 1000)
-                    .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
-                    .setVibrate(new long[] { 0, 500, 1000 })
-                    .setPriority(Notification.PRIORITY_MAX)
-                    .setDefaults(Notification.DEFAULT_ALL);
-            }
-
-            // 先清旧通知，再发新通知（随机ID）
-            m_notificationManagerAlarm.cancel("knot_alarm_tag", 10);
-            int randomId = (int) (System.currentTimeMillis() % 10000);
-            m_notificationManagerAlarm.notify(
-                "knot_alarm_tag",
-                randomId,
-                m_builderAlarm.build()
-            );
-
-            // 播放锁屏提示音
-            playLockScreenSound(context);
-            Log.d(
-                TAG,
-                "通知发送成功（ID：" + randomId + "），点击可唤起MyActivity"
-            );
-        } catch (Exception e) {
-            Log.e(TAG, "发送通知失败", e);
-            e.printStackTrace();
-        }
-    }
-
-    public static void notifyTodoAlarm(Context context, String message) {
-        try {
-            NotificationManager m_notificationManagerAlarm =
-                (NotificationManager) context.getSystemService(
-                    Context.NOTIFICATION_SERVICE
-                );
-            Notification.Builder m_builderAlarm;
-
-            String channelId = "knot_alarm_channel";
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel channel =
-                    m_notificationManagerAlarm.getNotificationChannel(
-                        channelId
-                    );
-                if (channel == null) {
-                    channel = new NotificationChannel(
-                        channelId,
-                        "Knot Alarm",
-                        NotificationManager.IMPORTANCE_HIGH
-                    );
-                    channel.enableLights(true);
-                    channel.setLightColor(Color.RED);
-                    channel.enableVibration(true);
-                    channel.setVibrationPattern(new long[] { 0, 500, 1000 });
-
-                    // 不设置声音！让系统通知设置自己管
-                    channel.setBypassDnd(true);
-                    channel.setLockscreenVisibility(
-                        Notification.VISIBILITY_PUBLIC
-                    );
-                    m_notificationManagerAlarm.createNotificationChannel(
-                        channel
-                    );
-                }
-            }
-
+            // 保留你原来的Intent/PendingIntent逻辑
             Intent activityIntent = new Intent(context, MyActivity.class);
             activityIntent.setFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -624,6 +404,7 @@ public class MyService extends Service {
                 flags
             );
 
+            // 构建通知（保留呼吸灯，静音系统声音）
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 m_builderAlarm = new Notification.Builder(context, channelId)
                     .setContentTitle(strTodo)
@@ -635,7 +416,6 @@ public class MyService extends Service {
                     .setLights(Color.RED, 1000, 1000)
                     .setVibrate(new long[] { 0, 500, 1000 })
                     .setPriority(Notification.PRIORITY_MAX)
-                    // 关键：不覆盖声音！只震动+灯光
                     .setDefaults(
                         Notification.DEFAULT_VIBRATE |
                             Notification.DEFAULT_LIGHTS
@@ -657,6 +437,7 @@ public class MyService extends Service {
                     );
             }
 
+            // 发送通知
             m_notificationManagerAlarm.cancel("knot_alarm_tag", 10);
             int randomId = (int) (System.currentTimeMillis() % 10000);
             m_notificationManagerAlarm.notify(
@@ -665,69 +446,42 @@ public class MyService extends Service {
                 m_builderAlarm.build()
             );
 
-            if (MyActivity.getLockScreenStatus()) playLockScreenSound(context);
+            // ========== 核心修改：使用你现成的锁屏判断方法 ==========
+            boolean isMIUI = isMIUI(); // 判断是否是小米/MIUI系统
+            boolean isLockScreen = MyActivity.getLockScreenStatus(); // 你的锁屏判断实现
+
+            // 播放规则：
+            // 1. 非MIUI机型：无论锁屏/亮屏，都手动播放（系统通知已静音，不会双声）
+            // 2. MIUI机型：锁屏时手动播放，亮屏时跳过（系统通知会自动播，避免双声）
+            if (!isMIUI || (isMIUI && isLockScreen)) {
+                playLockScreenSound(context);
+            }
+            // ======================================================
+
+            Log.d(
+                TAG,
+                "通知发送成功（ID：" +
+                    randomId +
+                    "），MIUI:" +
+                    isMIUI +
+                    "，锁屏:" +
+                    isLockScreen
+            );
         } catch (Exception e) {
+            Log.e(TAG, "发送通知失败", e);
             e.printStackTrace();
         }
     }
 
-    // ========== 新增：锁屏提示音播放方法（突破MIUI限制） ==========
-    private static void playLockScreenSound_Old(Context context) {
+    // 新增：判断是否是MIUI系统（精准识别小米/红米）
+    private static boolean isMIUI() {
         try {
-            // 1. 获取系统默认提示音Uri
-            Uri soundUri = Settings.System.DEFAULT_NOTIFICATION_URI;
-            if (soundUri == null || soundUri.toString().isEmpty()) {
-                soundUri = RingtoneManager.getDefaultUri(
-                    RingtoneManager.TYPE_ALARM
-                );
-            }
-
-            // 2. 初始化MediaPlayer（闹钟流，锁屏也能播放）
-            MediaPlayer mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(context, soundUri);
-
-            // 关键：设置音频流为闹钟（MIUI不锁屏静音）
-            AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ALARM)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build();
-            mediaPlayer.setAudioAttributes(audioAttributes);
-
-            mediaPlayer.setLooping(false);
-            mediaPlayer.prepareAsync();
-
-            // 3. 播放完成后释放资源
-            mediaPlayer.setOnPreparedListener(
-                new MediaPlayer.OnPreparedListener() {
-                    @Override
-                    public void onPrepared(MediaPlayer mp) {
-                        mp.start();
-                    }
-                }
-            );
-            mediaPlayer.setOnCompletionListener(
-                new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mp) {
-                        mp.release();
-                    }
-                }
-            );
-            mediaPlayer.setOnErrorListener(
-                new MediaPlayer.OnErrorListener() {
-                    @Override
-                    public boolean onError(
-                        MediaPlayer mp,
-                        int what,
-                        int extra
-                    ) {
-                        mp.release();
-                        return false;
-                    }
-                }
-            );
+            Class<?> clazz = Class.forName("android.os.SystemProperties");
+            java.lang.reflect.Method get = clazz.getMethod("get", String.class);
+            String miui = (String) get.invoke(null, "ro.miui.ui.version.name");
+            return miui != null && !miui.isEmpty();
         } catch (Exception e) {
-            Log.e(TAG, "播放锁屏提示音失败", e);
+            return false;
         }
     }
 

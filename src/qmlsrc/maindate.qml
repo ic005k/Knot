@@ -367,6 +367,7 @@ Rectangle {
 
                     Layout.preferredWidth: listItem.width
                     font.bold: false
+                    font.pointSize: FontSize - 3
                     text: text3
 
                     leftPadding: 5
