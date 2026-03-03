@@ -717,79 +717,6 @@ void Steps::startRecordMotion() {
 
   gm_activity = QJniObject(QNativeInterface::QAndroidApplication::context());
 
-  /*
-  // 1. 定义Java端返回值的枚举（对应不同失败场景，便于维护）
-  enum GpsStartResult {
-    GPS_START_SUCCESS = 1,                 // 启动成功
-    GPS_START_PERMISSION_DENIED = 0,       // 权限问题（未获取/用户拒绝）
-    GPS_START_SERVICE_DISABLED = -1,       // 位置服务未开启
-    GPS_START_LOCATION_MANAGER_NULL = -2,  // LocationManager初始化失败
-    GPS_START_UNKNOWN_ERROR = -3           // 未知异常
-  };
-
-  // 2. 优化后的调用逻辑
-  if (gm_activity.isValid()) {
-    jdouble result = 0;
-    try {
-      // 捕获JNI调用的异常（避免崩溃）
-      result = gm_activity.callMethod<jdouble>("startGpsUpdates", "()D");
-    } catch (const std::exception& e) {
-      qWarning() << "JNI call startGpsUpdates exception：" << e.what();
-      result = GPS_START_UNKNOWN_ERROR;
-    } catch (...) {
-      qWarning() << "JNI call startGpsUpdates occurred unknown exception";
-      result = GPS_START_UNKNOWN_ERROR;
-    }
-
-    // 3. 根据返回值区分失败场景，给出精准提示（英文基准）
-    QString tipText;
-    if (result == GPS_START_SUCCESS) {
-      tipText = tr("GPS started successfully...");
-
-    } else {
-      switch (static_cast<GpsStartResult>(result)) {
-        case GPS_START_PERMISSION_DENIED:
-          tipText =
-              tr("Location permission not obtained, please grant permission "
-                 "and try again");
-          qWarning() << "GPS start failed：Location permission denied";
-          break;
-        case GPS_START_SERVICE_DISABLED:
-          tipText =
-              tr("Location service is disabled, please enable it in settings");
-          qWarning() << "GPS start failed：Location service disabled";
-          break;
-        case GPS_START_LOCATION_MANAGER_NULL:
-          tipText = tr(
-              "Location service initialization failed, please restart the app");
-          qWarning() << "GPS start failed：LocationManager is null";
-          break;
-        case GPS_START_UNKNOWN_ERROR:
-          tipText = tr("GPS start failed, unknown error");
-          qWarning() << "GPS start failed：Unknown exception";
-          break;
-        default:  // 原返回0的兜底（兼容旧逻辑）
-          tipText = tr(
-              "GPS start failed, please check permission and location service");
-          qWarning() << "GPS start failed：Unknown reason (return value="
-                     << result << ")";
-          break;
-      }
-      // ====== 仅失败场景执行：显示Toast + return ======
-      m_Method->showToastMessage(tipText);
-      return;
-    }
-
-    // ====== 成功场景执行：显示Toast，不return ======
-    m_Method->showToastMessage(tipText);
-
-  } else {
-    qWarning() << "Android Activity is invalid, cannot start GPS";
-    m_Method->showToastMessage(tr("Activity is invalid, GPS start failed"));
-    // Activity无效的失败场景，保留return
-    return;
-  }*/
-
   startGPSFromService();
 
 #else
@@ -842,7 +769,6 @@ void Steps::startRecordMotion() {
 
   mw_one->m_Reader->keepScreenOn();
   emit distanceChanged(m_distance);
-  emit timeChanged();
 
   mui->btnGPS->setText(tr("Stop"));
   mui->tabMotion->setCurrentIndex(1);
@@ -853,10 +779,10 @@ void Steps::startRecordMotion() {
   mui->btnSelGpsDate->setEnabled(false);
 
   QTimer::singleShot(1000, mw_one, [this]() {
-    timer->start(1000);
+    // timer->start(1000);
 
-    // if (!mw_one->myGetGpsDataThread->isRunning())
-    //   mw_one->myGetGpsDataThread->start();
+    if (!mw_one->myGetGpsDataThread->isRunning())
+      mw_one->myGetGpsDataThread->start();
 
     isGpsRun = true;
   });
@@ -1012,14 +938,76 @@ void Steps::stopGPSFromService() {
 #endif
 }
 
-void Steps::getGpsDataInThread() {
-#ifdef Q_OS_ANDROID
-  latitude = getGpsLatitude();
-  longitude = getGpsLongitude();
+void Steps::updateGpsUI() {
+  mui->lblGpsInfo->setText(strGpsInfoShow);
 
-  Speed = getGpsMySpeed();
-  maxSpeed = getGpsMaxSpeed();
-#endif
+  if (m_time.second() % 6 == 0) {
+    refreshMotionData();
+  }
+
+  if (m_time.second() % 12 == 0) {
+    if (mui->chkPlayRunVoice->isChecked()) {
+      if (mySpeed > 0) {
+        if (mySpeed != oldMySpeed) {
+          m_Method->stopPlayMyText();
+          m_Method->playMyText(mui->lblDirection->text() + " " +
+                               QString::number(mySpeed, 'f', 2));
+          oldMySpeed = mySpeed;
+        }
+      }
+    }
+  }
+
+  if (m_distance > 0 || isGpsTest) {
+    // 先校验经纬度是否在有效范围（-90~90纬度，-180~180经度）
+    bool latValid = (latitude >= -90 && latitude <= 90);
+    bool lonValid = (longitude >= -180 && longitude <= 180);
+    if (!latValid || !lonValid) {
+      // 无效坐标，不请求
+
+    } else {
+      QDateTime currentTime = QDateTime::currentDateTime();
+
+      if (!isInitTime) {
+        m_lastGetAddressTime = currentTime;
+        m_lastSaveSpeedTime = currentTime;
+        m_lastFetchWeatherTime = currentTime;
+
+        weatherFetcher->fetchWeather(latitude, longitude);
+
+        refreshRoute();
+        saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
+
+        isInitTime = true;
+      }
+
+      // Weather
+      if (m_lastFetchWeatherTime.secsTo(currentTime) >=
+          1800) {  // 30分钟=1800秒
+        weatherFetcher->fetchWeather(latitude, longitude);
+        m_lastFetchWeatherTime = currentTime;  // 更新上次请求时间
+      }
+
+      // Route
+      int tr = 150;
+      if (isGpsTest) tr = 5;
+      if (isShowRoute) {
+        if (m_lastGetAddressTime.secsTo(currentTime) >=
+            tr) {  // 距离上次超过150秒
+          refreshRoute();
+          m_lastGetAddressTime = currentTime;  // 更新上次执行时间
+        }
+      }
+
+      // Speed and Altitude
+      int ts = 30;
+      if (isGpsTest) ts = 3;
+      if (m_lastSaveSpeedTime.secsTo(currentTime) >= ts) {  // 距离上次超过ts秒
+        saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
+        m_lastSaveSpeedTime = currentTime;  // 更新上次执行时间
+      }
+    }
+  }
 }
 
 void Steps::updateGetGpsData() {
@@ -1029,37 +1017,23 @@ void Steps::updateGetGpsData() {
 
 #ifdef Q_OS_ANDROID
 
-  // 获取当前运动距离（目前通过c++端计算）
-  // jdouble distance;
-  // distance = gm_activity.callMethod<jdouble>("getTotalDistance", "()D");
-  // QString str_distance = QString::number(distance, 'f', 2);
-  // m_distance = str_distance.toDouble();
-
   if (!isGpsTest) {
-    // 通过前台服务直接获取
-    if (!mw_one->myGetGpsDataThread->isRunning()) {
-      latitude = getGpsLatitude();
-      longitude = getGpsLongitude();
-    }
+    latitude = getGpsLatitude();
+    longitude = getGpsLongitude();
 
     latitude = QString::number(latitude, 'f', 6).toDouble();
     longitude = QString::number(longitude, 'f', 6).toDouble();
   }
 
-  // QJniObject jstrGpsStatus;
-  //  jstrGpsStatus =
-  //      gm_activity.callMethod<jstring>("getGpsStatus",
-  //      "()Ljava/lang/String;");
-
   // 从前台服务获取
   QString jstrGpsStatus = getGpsStatus();
-
-  // if (jstrGpsStatus.isValid()) {
   if (jstrGpsStatus.length() > 0) {
     QString strStatus = jstrGpsStatus;
     QStringList list = strStatus.split("\n");
     if (list.count() == 8) {
+      // 运动距离 0.00 km（目前通过c++端计算）
       // str1 = list.at(0);
+
       str2 = list.at(1);
       str3 = list.at(2);
 
@@ -1092,17 +1066,14 @@ void Steps::updateGetGpsData() {
     if (m_time.second() % 3 == 0) {
       if (!isGpsTest) {
         // 通过前台服务直接获取
-        if (!mw_one->myGetGpsDataThread->isRunning()) {
-          Speed = getGpsMySpeed();
-          maxSpeed = getGpsMaxSpeed();
-        }
+        Speed = getGpsMySpeed();
+        maxSpeed = getGpsMaxSpeed();
 
         mySpeed = Speed;
         if (mySpeed > 0) {
           const double COORD_CHANGE_THRESHOLD = 1e-6;  // 约0.1米的变化阈值
-          bool coordChanged =
-              (qAbs(latitude - oldLat) > COORD_CHANGE_THRESHOLD) ||
-              (qAbs(longitude - oldLon) > COORD_CHANGE_THRESHOLD);
+          coordChanged = (qAbs(latitude - oldLat) > COORD_CHANGE_THRESHOLD) ||
+                         (qAbs(longitude - oldLon) > COORD_CHANGE_THRESHOLD);
           if (coordChanged) {
             appendTrack(latitude, longitude);
 
@@ -1112,7 +1083,7 @@ void Steps::updateGetGpsData() {
             data_list.append(dAltitude);
             appendToCSV(strCSVFile, data_list);
 
-            // 计算地形距离：仅当old数据有效（避免初始值）
+            // 计算地形、运动距离：仅当old数据有效（避免初始值）
             getTerrain();
 
             bearing1 = calculateBearing(oldLat, oldLon, latitude, longitude);
@@ -1190,7 +1161,6 @@ void Steps::updateGetGpsData() {
 #endif
 
   if (mySpeed > 0) {
-    // setCurrentGpsSpeed(mySpeed, maxSpeed);
     compass->setSpeed(mySpeed);
   }
   str1 = QString::number(m_distance, 'f', 2) + " km";
@@ -1220,76 +1190,6 @@ void Steps::updateGetGpsData() {
                    "\nLon.-Lat.: " + QString::number(longitude) + " - " +
                    QString::number(latitude) + "\n" + strGpsStatus + "\n" +
                    tr("Total Distance") + " : " + strTotalDistance;
-  mui->lblGpsInfo->setText(strGpsInfoShow);
-  emit timeChanged();
-
-  if (m_time.second() % 6 == 0) {
-    refreshMotionData();
-  }
-
-  if (m_time.second() % 12 == 0) {
-    if (mui->chkPlayRunVoice->isChecked()) {
-      if (mySpeed > 0) {
-        if (mySpeed != oldMySpeed) {
-          m_Method->stopPlayMyText();
-          m_Method->playMyText(mui->lblDirection->text() + " " +
-                               QString::number(mySpeed, 'f', 2));
-          oldMySpeed = mySpeed;
-        }
-      }
-    }
-  }
-
-  if (m_distance > 0 || isGpsTest) {
-    // 先校验经纬度是否在有效范围（-90~90纬度，-180~180经度）
-    bool latValid = (latitude >= -90 && latitude <= 90);
-    bool lonValid = (longitude >= -180 && longitude <= 180);
-    if (!latValid || !lonValid) {
-      // 无效坐标，不请求
-
-    } else {
-      QDateTime currentTime = QDateTime::currentDateTime();
-
-      if (!isInitTime) {
-        m_lastGetAddressTime = currentTime;
-        m_lastSaveSpeedTime = currentTime;
-        m_lastFetchWeatherTime = currentTime;
-
-        weatherFetcher->fetchWeather(latitude, longitude);
-
-        refreshRoute();
-        saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
-
-        isInitTime = true;
-      }
-
-      // Weather
-      if (m_lastFetchWeatherTime.secsTo(currentTime) >=
-          1800) {  // 30分钟=1800秒
-        weatherFetcher->fetchWeather(latitude, longitude);
-        m_lastFetchWeatherTime = currentTime;  // 更新上次请求时间
-      }
-
-      // Route
-      int tr = 150;
-      if (isGpsTest) tr = 5;
-      if (isShowRoute) {
-        if (m_lastGetAddressTime.secsTo(currentTime) >=
-            tr) {  // 距离上次超过150秒
-          refreshRoute();
-          m_lastGetAddressTime = currentTime;  // 更新上次执行时间
-        }
-      }
-
-      // Speed and Altitude
-      int ts = 30;
-      if (isGpsTest) ts = 3;
-      if (m_lastSaveSpeedTime.secsTo(currentTime) >= ts) {  // 距离上次超过ts秒
-        saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
-        m_lastSaveSpeedTime = currentTime;  // 更新上次执行时间
-      }
-    }
-  }
 }
 
 void Steps::stopRecordMotion() {
@@ -1299,9 +1199,9 @@ void Steps::stopRecordMotion() {
   QTimer::singleShot(2000, mw_one, [this]() {
     isGpsRun = false;
 
-    timer->stop();
+    // timer->stop();
 
-    // mw_one->myGetGpsDataThread->stop();
+    mw_one->myGetGpsDataThread->stop();
 
     mw_one->m_Reader->cancelKeepScreenOn();
 
@@ -1321,11 +1221,7 @@ void Steps::stopRecordMotion() {
   mui->btnGPS->setStyleSheet(btnRoundStyle);
 
 #ifdef Q_OS_ANDROID
-
-  // gm_activity.callMethod<jdouble>("stopGpsUpdates", "()D");
-
   stopGPSFromService();
-
 #else
   if (m_positionSource) {
     m_positionSource->stopUpdates();

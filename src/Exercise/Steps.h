@@ -205,7 +205,7 @@ class Steps : public QDialog {
   bool isRouteShow();
   void setMapKey();
   void showSportsChart();
-  void getGpsDataInThread();
+  void updateGpsUI();
  public slots:
   void clearAllGpsList();
   void getGpsTrack();
@@ -217,6 +217,8 @@ class Steps : public QDialog {
   void positionUpdated(const QGeoPositionInfo& info);
 
  private:
+  bool coordChanged = false;
+
   QDateTime m_lastGetAddressTime;    // 上次获取地址的时间
   QDateTime m_lastSaveSpeedTime;     // 上次保存路线的时间
   QDateTime m_lastFetchWeatherTime;  // 上次请求天气的时间
@@ -373,9 +375,9 @@ class Steps : public QDialog {
   QString getGpsStatus();
   bool startGPSFromService();
   void stopGPSFromService();
-  signals:
+ signals:
   void distanceChanged(double distance);
-  void timeChanged();
+
   void speedChanged();
 };
 

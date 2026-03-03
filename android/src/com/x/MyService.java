@@ -14,6 +14,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -372,7 +374,7 @@ public class MyService extends Service {
 
     // ------------------------------------------------------------------------------
 
-    public static void notifyTodoAlarm(Context context, String message) {
+    public static void notifyTodoAlarm_Old(Context context, String message) {
         try {
             NotificationManager m_notificationManagerAlarm =
                 (NotificationManager) context.getSystemService(
@@ -493,8 +495,109 @@ public class MyService extends Service {
         }
     }
 
+    public static void notifyTodoAlarm(Context context, String message) {
+        try {
+            NotificationManager m_notificationManagerAlarm =
+                (NotificationManager) context.getSystemService(
+                    Context.NOTIFICATION_SERVICE
+                );
+            Notification.Builder m_builderAlarm;
+
+            String channelId = "knot_alarm_channel";
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel =
+                    m_notificationManagerAlarm.getNotificationChannel(
+                        channelId
+                    );
+                if (channel == null) {
+                    channel = new NotificationChannel(
+                        channelId,
+                        "Knot Alarm",
+                        NotificationManager.IMPORTANCE_HIGH
+                    );
+                    channel.enableLights(true);
+                    channel.setLightColor(Color.RED);
+                    channel.enableVibration(true);
+                    channel.setVibrationPattern(new long[] { 0, 500, 1000 });
+
+                    // 不设置声音！让系统通知设置自己管
+                    channel.setBypassDnd(true);
+                    channel.setLockscreenVisibility(
+                        Notification.VISIBILITY_PUBLIC
+                    );
+                    m_notificationManagerAlarm.createNotificationChannel(
+                        channel
+                    );
+                }
+            }
+
+            Intent activityIntent = new Intent(context, MyActivity.class);
+            activityIntent.setFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
+            );
+            activityIntent.putExtra("ALARM_MESSAGE", message);
+
+            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flags |= PendingIntent.FLAG_IMMUTABLE;
+            }
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                (int) System.currentTimeMillis(),
+                activityIntent,
+                flags
+            );
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                m_builderAlarm = new Notification.Builder(context, channelId)
+                    .setContentTitle(strTodo)
+                    .setContentText(message)
+                    .setSmallIcon(R.drawable.icon)
+                    .setColor(Color.GREEN)
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent)
+                    .setLights(Color.RED, 1000, 1000)
+                    .setVibrate(new long[] { 0, 500, 1000 })
+                    .setPriority(Notification.PRIORITY_MAX)
+                    // 关键：不覆盖声音！只震动+灯光
+                    .setDefaults(
+                        Notification.DEFAULT_VIBRATE |
+                            Notification.DEFAULT_LIGHTS
+                    );
+            } else {
+                m_builderAlarm = new Notification.Builder(context)
+                    .setContentTitle(strTodo)
+                    .setContentText(message)
+                    .setSmallIcon(R.drawable.icon)
+                    .setColor(Color.GREEN)
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent)
+                    .setLights(Color.RED, 1000, 1000)
+                    .setVibrate(new long[] { 0, 500, 1000 })
+                    .setPriority(Notification.PRIORITY_MAX)
+                    .setDefaults(
+                        Notification.DEFAULT_VIBRATE |
+                            Notification.DEFAULT_LIGHTS
+                    );
+            }
+
+            m_notificationManagerAlarm.cancel("knot_alarm_tag", 10);
+            int randomId = (int) (System.currentTimeMillis() % 10000);
+            m_notificationManagerAlarm.notify(
+                "knot_alarm_tag",
+                randomId,
+                m_builderAlarm.build()
+            );
+
+            playLockScreenSound(context);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     // ========== 新增：锁屏提示音播放方法（突破MIUI限制） ==========
-    private static void playLockScreenSound(Context context) {
+    private static void playLockScreenSound_Old(Context context) {
         try {
             // 1. 获取系统默认提示音Uri
             Uri soundUri = Settings.System.DEFAULT_NOTIFICATION_URI;
@@ -548,6 +651,66 @@ public class MyService extends Service {
                     }
                 }
             );
+        } catch (Exception e) {
+            Log.e(TAG, "播放锁屏提示音失败", e);
+        }
+    }
+
+    private static void playLockScreenSound(Context context) {
+        try {
+            Uri soundUri = null;
+            String channelId = "knot_alarm_channel"; // 和你通知的通道ID保持一致
+
+            // 1. Android 8.0+：优先读取用户为当前通知通道设置的声音
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationManager nm =
+                    (NotificationManager) context.getSystemService(
+                        Context.NOTIFICATION_SERVICE
+                    );
+                NotificationChannel channel = nm.getNotificationChannel(
+                    channelId
+                );
+                if (channel != null) {
+                    soundUri = channel.getSound(); // 读取系统设置里该通道的声音
+                }
+            }
+
+            // 2. 兜底逻辑（8.0以下/通道声音为空时）：读取系统通知设置里的默认音
+            if (soundUri == null || soundUri.toString().isEmpty()) {
+                // 先读系统为当前App设置的通知音
+                soundUri = RingtoneManager.getActualDefaultRingtoneUri(
+                    context,
+                    RingtoneManager.TYPE_NOTIFICATION
+                );
+                // 仍为空则用闹钟音兜底
+                if (soundUri == null || soundUri.toString().isEmpty()) {
+                    soundUri = RingtoneManager.getDefaultUri(
+                        RingtoneManager.TYPE_ALARM
+                    );
+                }
+            }
+
+            // 3. 初始化MediaPlayer（闹钟流，锁屏也能播放）
+            MediaPlayer mediaPlayer = new MediaPlayer();
+            mediaPlayer.setDataSource(context, soundUri);
+
+            // 关键：设置音频流为闹钟（MIUI不锁屏静音）
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+            mediaPlayer.setAudioAttributes(audioAttributes);
+
+            mediaPlayer.setLooping(false);
+            mediaPlayer.prepareAsync();
+
+            // 4. 播放完成后释放资源
+            mediaPlayer.setOnPreparedListener(mp -> mp.start());
+            mediaPlayer.setOnCompletionListener(mp -> mp.release());
+            mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+                mp.release();
+                return false;
+            });
         } catch (Exception e) {
             Log.e(TAG, "播放锁屏提示音失败", e);
         }

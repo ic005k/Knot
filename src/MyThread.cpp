@@ -140,7 +140,7 @@ void GetGpsDataThread::run() {
   // 核心循环：每隔1秒执行一次，直到调用stop()
   while (m_running) {
     // 1. 执行GPS数据获取
-    m_Steps->getGpsDataInThread();
+    m_Steps->updateGetGpsData();
 
     // 2. 发送完成信号
     emit isDone();
@@ -150,7 +150,7 @@ void GetGpsDataThread::run() {
   }
 }
 
-void MainWindow::GetGpsDataThreadDone() { m_Steps->updateGetGpsData(); }
+void MainWindow::GetGpsDataThreadDone() { m_Steps->updateGpsUI(); }
 
 ReadEBookThread::ReadEBookThread(QObject* parent) : QThread{parent} {}
 void ReadEBookThread::run() {
