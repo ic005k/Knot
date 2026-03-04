@@ -717,7 +717,7 @@ void Steps::startRecordMotion() {
 
   gm_activity = QJniObject(QNativeInterface::QAndroidApplication::context());
 
-  startGPSFromService();
+  if (!startGPSFromService()) return;
 
 #else
   if (m_positionSource) {

@@ -461,7 +461,7 @@ public class TencentMapActivity extends MapActivity {
         return (int) (dp * getResources().getDisplayMetrics().density + 0.5f);
     }
 
-    private void showPrivacyDialog() {
+    private void showPrivacyDialog_Old() {
         new AlertDialog.Builder(this)
             .setTitle("隐私协议同意")
             .setMessage("为了提供地图服务，需要您同意腾讯地图隐私协议")
@@ -471,6 +471,46 @@ public class TencentMapActivity extends MapActivity {
                 setTencentPrivacyStatus(true);
                 dialog.dismiss();
                 initializeMap();
+            })
+            .setNegativeButton("拒绝", (dialog, which) -> {
+                Log.d(TAG, "用户拒绝隐私协议");
+                dialog.dismiss();
+                finish();
+            })
+            .setCancelable(false)
+            .show();
+    }
+
+    private void showPrivacyDialog() {
+        new AlertDialog.Builder(this)
+            .setTitle("隐私协议同意")
+            .setMessage("为了提供地图服务，需要您同意腾讯地图隐私协议")
+            .setPositiveButton("同意并继续", (dialog, which) -> {
+                Log.d(TAG, "用户同意隐私协议");
+                // 1. 保留原版核心逻辑（保存隐私状态+设置SDK隐私）
+                savePrivacyAgreed();
+                setTencentPrivacyStatus(true);
+                dialog.dismiss();
+
+                // 2. 核心修改：关闭当前地图窗口 + 调用MyActivity的openMapWindow()
+                // 第一步：关闭当前TencentMapActivity
+                finish();
+
+                // 第二步：调用MyActivity的openMapWindow()（使用真实的m_instance变量）
+                if (MyActivity.m_instance != null) {
+                    // 调用MyActivity中真实存在的openMapWindow()方法
+                    MyActivity.m_instance.openMapWindow();
+                    Log.d(TAG, "已调用MyActivity.openMapWindow()重新打开地图");
+                } else {
+                    Log.w(TAG, "MyActivity.m_instance为空，无法重新打开地图");
+                    // 兜底方案：直接启动TencentMapActivity（避免完全失效）
+                    Intent intent = new Intent(
+                        TencentMapActivity.this,
+                        TencentMapActivity.class
+                    );
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                }
             })
             .setNegativeButton("拒绝", (dialog, which) -> {
                 Log.d(TAG, "用户拒绝隐私协议");

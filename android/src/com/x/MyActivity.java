@@ -1033,7 +1033,8 @@ public class MyActivity
                     // 权限授予后初始化传感器
                     MyService service = MyService.getInstance();
                     if (service != null) {
-                        service.initStepSensor(); // 改为实例调用，而非静态
+                        //service.initStepSensor(); // 改为实例调用，而非静态
+                        service.initStepSensor(getApplicationContext());
                     }
                 } else {
                     Toast.makeText(

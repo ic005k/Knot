@@ -132,7 +132,7 @@ public class MyService extends Service {
         return null;
     }
 
-    @Override
+    /*@Override
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "Service on create"); // 服务被创建
@@ -183,10 +183,77 @@ public class MyService extends Service {
         // ==========================================
 
         isReady = true;
+        }*/
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.i(TAG, "Service on create"); // 服务被创建
+
+        instance = this; // 保存服务实例
+
+        // 优先使用Service自身的上下文，而非依赖MyActivity
+        Context serviceContext = getApplicationContext();
+        if (serviceContext == null) {
+            Log.e(TAG, "Service上下文为空，初始化失败");
+            stopSelf();
+            return;
+        }
+
+        // 初始化多语言文本（你的原有逻辑，仅换上下文）
+        if (MyActivity.zh_cn) {
+            strRun = "运行中...";
+            strStatus = "Knot";
+            strTodo = "待办事项";
+            strPedometer = "倒计时";
+        } else {
+            strRun = "Running...";
+            strStatus = "Knot";
+            strTodo = "Todo";
+            strPedometer = "Countdown";
+        }
+
+        try {
+            // 注册闹钟接收器（你的原有逻辑）
+            IntentFilter filter = new IntentFilter(ACTION_TODO_ALARM);
+            registerReceiver(myalarmReceiver, filter);
+
+            // 计步器初始化（仅换上下文为serviceContext）
+            mySensorSerivece = new PersistService(serviceContext);
+            mSensorManager = (SensorManager) serviceContext.getSystemService(
+                Context.SENSOR_SERVICE
+            );
+            if (mSensorManager != null) {
+                countSensor = mSensorManager.getDefaultSensor(
+                    Sensor.TYPE_STEP_COUNTER
+                );
+            }
+            initStepSensor(serviceContext); // 传入上下文，避免依赖MyActivity
+
+            // 先初始化AlarmManager，再检查权限（核心修复：解决NPE）
+            alarmManager = (AlarmManager) serviceContext.getSystemService(
+                Context.ALARM_SERVICE
+            );
+            // 检查并请求精确闹钟权限（你的原有逻辑，仅加alarmManager空判）
+            if (
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                alarmManager != null &&
+                !alarmManager.canScheduleExactAlarms()
+            ) {
+                requestExactAlarmPermission(serviceContext);
+            }
+
+            // GPS初始化（仅换上下文为serviceContext）
+            gpsManager = GPSManager.getInstance(serviceContext);
+
+            isReady = true;
+        } catch (Exception e) {
+            Log.e(TAG, "Service初始化异常", e);
+        }
     }
 
     // 服务在每次启动的时候调用的方法 如果某些行为在服务已启动的时候就执行，可以把处理逻辑写在这个方法里面
-    @Override
+    /*@Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("MyService", "onStartCommand()-------");
 
@@ -203,6 +270,25 @@ public class MyService extends Service {
         setForeground();
 
         return super.onStartCommand(intent, flags, startId);
+    }*/
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("MyService", "onStartCommand()-------");
+
+        if (intent != null) {
+            String action = intent.getAction();
+            if ("com.x.ACTION_START_GPS".equals(action)) {
+                startGPS();
+            } else if ("com.x.ACTION_STOP_GPS".equals(action)) {
+                stopGPS();
+            }
+        }
+
+        // 只走 Android 8.0+ 逻辑
+        setForeground();
+
+        return START_STICKY; // 仅把super.onStartCommand(...)改为START_STICKY，提升服务稳定性
     }
 
     // 服务销毁的时候调用的方法 可以回收部分不再使用的资源
@@ -610,7 +696,7 @@ public class MyService extends Service {
     public static float stepCounts;
     private static SensorManager mSensorManager;
 
-    public static void initStepSensor() {
+    /*public static void initStepSensor() {
         // 1. 权限校验
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             Context context = MyActivity.getMyAppContext();
@@ -639,6 +725,64 @@ public class MyService extends Service {
                     Context.SENSOR_SERVICE
                 );
             }
+        }
+        if (countSensor == null && mSensorManager != null) {
+            countSensor = mSensorManager.getDefaultSensor(
+                Sensor.TYPE_STEP_COUNTER
+            );
+        }
+
+        // 3. 原有逻辑（静态变量引用）
+        if (
+            countSensor != null &&
+            mSensorManager != null &&
+            mySensorSerivece != null
+        ) {
+            mSensorManager.unregisterListener(mySensorSerivece);
+            mSensorManager.registerListener(
+                mySensorSerivece,
+                countSensor,
+                SensorManager.SENSOR_DELAY_NORMAL
+            );
+            isStepCounter = 1;
+            Log.i(TAG, "initStepSensor: 步数传感器注册成功（权限已授予）");
+        } else {
+            isStepCounter = 0;
+            Log.w(TAG, "initStepSensor: 传感器/管理器/服务为空，注册失败");
+        }
+        }*/
+
+    // 仅新增context参数，其余逻辑不变
+    public static void initStepSensor(Context context) {
+        if (context == null) {
+            Log.e(TAG, "initStepSensor: 上下文为空，初始化失败");
+            isStepCounter = 0;
+            return;
+        }
+
+        // 1. 权限校验（你的原有逻辑）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACTIVITY_RECOGNITION
+                ) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                Log.w(
+                    TAG,
+                    "initStepSensor: 无ACTIVITY_RECOGNITION权限，跳过传感器注册"
+                );
+                isStepCounter = 0;
+                return;
+            }
+        }
+
+        // 2. 补充空判 + 重新获取传感器（你的原有逻辑）
+        if (mSensorManager == null) {
+            mSensorManager = (SensorManager) context.getSystemService(
+                Context.SENSOR_SERVICE
+            );
         }
         if (countSensor == null && mSensorManager != null) {
             countSensor = mSensorManager.getDefaultSensor(
@@ -742,7 +886,7 @@ public class MyService extends Service {
     }
 
     // 检查是否有设置精确闹钟的权限
-    private boolean hasExactAlarmPermission(Context context) {
+    /*private boolean hasExactAlarmPermission(Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             return true; // API 31 以下不需要此权限
         }
@@ -751,6 +895,22 @@ public class MyService extends Service {
             Context.ALARM_SERVICE
         );
         return alarmManager.canScheduleExactAlarms();
+        }*/
+
+    private boolean hasExactAlarmPermission(Context context) {
+        if (context == null) {
+            // 仅新增这行空判
+            Log.e(TAG, "hasExactAlarmPermission: 上下文为空");
+            return false;
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return true; // API 31 以下不需要此权限
+        }
+
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(
+            Context.ALARM_SERVICE
+        );
+        return alarmManager != null && alarmManager.canScheduleExactAlarms(); // 仅加alarmManager空判
     }
 
     // 请求精确闹钟权限
