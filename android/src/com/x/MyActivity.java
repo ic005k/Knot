@@ -198,6 +198,7 @@ public class MyActivity
     private static final int REQ_NOTIFICATION = 4;
     private static final int REQ_ACTIVITY_RECOGNITION = 5;
     private static final int REQ_STORAGE = 6;
+    private static final int REQ_BACKGROUND_LOCATION = 7;
 
     public static String MY_TENCENT_MAP_KEY = "error";
     public static int MapType = 1;
@@ -578,7 +579,7 @@ public class MyActivity
                 ")"
         );
 
-        // 2. 静态实例校验（保留你的原始逻辑）
+        // 2. 静态实例校验（保留原始逻辑）
         if (checkDuplicateInstance()) {
             return;
         }
@@ -947,17 +948,65 @@ public class MyActivity
         switch (requestCode) {
             // 1. 定位权限（原有逻辑保留，无需改）
             case REQ_LOCATION:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                } else {
+                boolean isGranted =
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                if (isGranted) {
                     Toast.makeText(
                         this,
-                        zh_cn
+                        MyActivity.zh_cn
+                            ? "定位权限已授予，正在启动GPS"
+                            : "Location permission granted, starting GPS",
+                        Toast.LENGTH_SHORT
+                    ).show();
+
+                    // Android 10+ 直接申请后台定位权限
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        requestBackgroundLocationPermission();
+                    }
+
+                    // 直接启动GPS（服务已提前启动，无需兜底）
+                    if (
+                        getIntent().getBooleanExtra(
+                            "START_GPS_AFTER_PERMISSION",
+                            false
+                        )
+                    ) {
+                        MyService.getInstance().startGPS();
+                    }
+                } else {
+                    // 仅基础提示，依赖系统原生引导
+                    Toast.makeText(
+                        this,
+                        MyActivity.zh_cn
                             ? "定位权限被拒绝，GPS功能无法使用"
                             : "Location permission denied, GPS function unavailable",
                         Toast.LENGTH_SHORT
                     ).show();
                 }
                 break;
+            // 后台定位权限回调
+            case REQ_BACKGROUND_LOCATION:
+                boolean isBgGranted =
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                if (isBgGranted) {
+                    Toast.makeText(
+                        this,
+                        MyActivity.zh_cn
+                            ? "后台定位权限已授予"
+                            : "Background location permission granted",
+                        Toast.LENGTH_SHORT
+                    ).show();
+                } else {
+                    Toast.makeText(
+                        this,
+                        MyActivity.zh_cn
+                            ? "后台定位权限被拒绝，仅前台可使用GPS"
+                            : "Background location permission denied, GPS only available in foreground",
+                        Toast.LENGTH_SHORT
+                    ).show();
+                }
+                break;
+            // ========== 后台定位权限回调分支结束 ==========
             // 2. 录音权限（新增处理）
             case REQ_RECORD_AUDIO:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -1046,7 +1095,7 @@ public class MyActivity
                     ).show();
                 }
                 break;
-            // 6. 存储权限（修复语法错误，移到switch内部）
+            // 6. 存储权限
             case REQ_STORAGE:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(
@@ -2617,6 +2666,8 @@ public class MyActivity
         super.onNewIntent(intent);
         setIntent(intent); // 更新 Activity 的 Intent
         handleAlarmIntent(intent);
+
+        handleLocationPermissionRequest(intent);
     }
 
     private void handleAlarmIntent(Intent intent) {
@@ -2624,6 +2675,57 @@ public class MyActivity
             String message = intent.getStringExtra("ALARM_MESSAGE");
             // 这里可以通知 Qt 层显示提醒内容，或执行相关操作
             // CallJavaNotify_3();
+        }
+    }
+
+    // 处理定位权限请求
+    private void handleLocationPermissionRequest(Intent intent) {
+        if (
+            intent != null &&
+            intent.getBooleanExtra("REQUEST_LOCATION_PERMISSION", false)
+        ) {
+            requestLocationPermission();
+        }
+    }
+
+    public void requestLocationPermission() {
+        if (
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            // 先申请精确定位
+            ActivityCompat.requestPermissions(
+                this,
+                new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
+                REQ_LOCATION
+            );
+        } else {
+            // 已有前台定位 → 申请后台定位
+            requestBackgroundLocationPermission();
+        }
+    }
+
+    // 单独申请后台定位（Android 10+ 才需要）
+    private void requestBackgroundLocationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    new String[] {
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                    },
+                    REQ_BACKGROUND_LOCATION
+                );
+            }
         }
     }
 

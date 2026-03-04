@@ -903,7 +903,7 @@ public class MyService extends Service {
         }
     };
 
-    public boolean startGPS() {
+    public boolean startGPS_Old() {
         MyActivity.setVibrate();
 
         if (isGpsRunning) {
@@ -977,6 +977,107 @@ public class MyService extends Service {
         } else {
             Log.e(TAG, "GPS启动失败");
             // 提示用户GPS启动失败
+            showToast(
+                MyActivity.zh_cn
+                    ? "GPS启动失败，请检查定位服务是否开启"
+                    : "GPS startup failed, check if location service is enabled"
+            );
+        }
+
+        return success;
+    }
+
+    public boolean startGPS() {
+        MyActivity.setVibrate();
+
+        if (isGpsRunning) {
+            Log.w(TAG, "GPS已在运行，无需重复启动");
+            showToast(
+                MyActivity.zh_cn ? "GPS已在运行中" : "GPS is already running"
+            );
+            return true;
+        }
+
+        // 检查定位权限
+        Context context = getApplicationContext();
+        String finePerm = Manifest.permission.ACCESS_FINE_LOCATION;
+        String coarsePerm = Manifest.permission.ACCESS_COARSE_LOCATION;
+        // 新增：适配Android 12+后台定位权限
+        String bgPerm = Manifest.permission.ACCESS_BACKGROUND_LOCATION;
+        boolean hasFine =
+            ContextCompat.checkSelfPermission(context, finePerm) ==
+            PackageManager.PERMISSION_GRANTED;
+        boolean hasCoarse =
+            ContextCompat.checkSelfPermission(context, coarsePerm) ==
+            PackageManager.PERMISSION_GRANTED;
+        boolean hasBg =
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+            ContextCompat.checkSelfPermission(context, bgPerm) ==
+            PackageManager.PERMISSION_GRANTED;
+
+        // 权限判断：前台定位需要fine/coarse，后台定位需要bg（12+）
+        if (!hasFine || !hasBg) {
+            Log.e(TAG, "缺少定位权限，跳转到Activity申请");
+            try {
+                Intent intent = new Intent(context, MyActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("REQUEST_LOCATION_PERMISSION", true);
+                intent.putExtra("START_GPS_AFTER_PERMISSION", true);
+                // 新增：传递后台定位权限标记
+                intent.putExtra(
+                    "REQUEST_BACKGROUND_LOCATION",
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                );
+                context.startActivity(intent);
+            } catch (Exception e) {
+                Log.e(TAG, "跳转到Activity申请权限失败", e);
+                showToast(
+                    MyActivity.zh_cn
+                        ? "缺少定位权限，GPS启动失败"
+                        : "Missing location permission, GPS startup failed"
+                );
+            }
+            return false;
+        }
+
+        // 有权限，正常启动GPS
+        boolean success = gpsManager.startGPS(
+            new GPSManager.OnLocationUpdateListener() {
+                @Override
+                public void onLocationUpdated(
+                    double lat,
+                    double lng,
+                    float speed,
+                    float distance
+                ) {
+                    Log.d(
+                        TAG,
+                        "GPS更新：纬度=" +
+                            lat +
+                            " 经度=" +
+                            lng +
+                            " 速度=" +
+                            speed +
+                            " 距离=" +
+                            distance
+                    );
+                }
+
+                @Override
+                public void onGPSStatusChanged(String status) {
+                    Log.d(TAG, "GPS状态：" + status);
+                }
+            }
+        );
+
+        if (success) {
+            isGpsRunning = true;
+            Log.i(TAG, "GPS启动成功（前台服务托管）");
+            showToast(
+                MyActivity.zh_cn ? "GPS启动成功" : "GPS started successfully"
+            );
+        } else {
+            Log.e(TAG, "GPS启动失败");
             showToast(
                 MyActivity.zh_cn
                     ? "GPS启动失败，请检查定位服务是否开启"
