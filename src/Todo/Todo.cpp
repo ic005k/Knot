@@ -666,7 +666,7 @@ void Todo::refreshTableLists() {
   }
 }
 
-void Todo::refreshTableListsFromIni() {
+void Todo::refreshTableListsFromFile() {
   tableLists.clear();
 
   QString filePath = iniDir + "todo.json";

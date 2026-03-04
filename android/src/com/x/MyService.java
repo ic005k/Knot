@@ -132,59 +132,6 @@ public class MyService extends Service {
         return null;
     }
 
-    /*@Override
-    public void onCreate() {
-        super.onCreate();
-        Log.i(TAG, "Service on create"); // 服务被创建
-
-        instance = this; // 保存服务实例
-
-        // 权限设置页面需要在 Activity 的任务栈中启动，必须用 Activity 上下文,而不是getMyAppContext()
-        Context context = MyActivity.getMyAppContext();
-
-        if (MyActivity.zh_cn) {
-            strRun = "运行中...";
-            strStatus = "Knot";
-            strTodo = "待办事项";
-            strPedometer = "倒计时";
-        } else {
-            strRun = "Running...";
-            strStatus = "Knot";
-            strTodo = "Todo";
-            strPedometer = "Countdown";
-        }
-
-        // 注册闹钟接收器
-        IntentFilter filter = new IntentFilter(ACTION_TODO_ALARM);
-        registerReceiver(myalarmReceiver, filter);
-
-        // 计步器
-        mySensorSerivece = new PersistService(MyService.this); // 传入Service上下文
-        mSensorManager = (SensorManager) getSystemService(
-            Context.SENSOR_SERVICE
-        );
-        countSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        initStepSensor();
-
-        // 定时闹钟
-        // 检查并请求权限
-        if (
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            !hasExactAlarmPermission(context)
-        ) {
-            requestExactAlarmPermission(context); // 直接传Context，不再强转
-            return;
-        }
-
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-        // ========== 新增GPS逻辑：初始化GPSManager ==========
-        gpsManager = GPSManager.getInstance(getApplicationContext());
-        // ==========================================
-
-        isReady = true;
-        }*/
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -200,7 +147,7 @@ public class MyService extends Service {
             return;
         }
 
-        // 初始化多语言文本（你的原有逻辑，仅换上下文）
+        // 初始化多语言文本（原有逻辑，仅换上下文）
         if (MyActivity.zh_cn) {
             strRun = "运行中...";
             strStatus = "Knot";
@@ -214,7 +161,7 @@ public class MyService extends Service {
         }
 
         try {
-            // 注册闹钟接收器（你的原有逻辑）
+            // 注册闹钟接收器（原有逻辑）
             IntentFilter filter = new IntentFilter(ACTION_TODO_ALARM);
             registerReceiver(myalarmReceiver, filter);
 
@@ -234,7 +181,7 @@ public class MyService extends Service {
             alarmManager = (AlarmManager) serviceContext.getSystemService(
                 Context.ALARM_SERVICE
             );
-            // 检查并请求精确闹钟权限（你的原有逻辑，仅加alarmManager空判）
+            // 检查并请求精确闹钟权限（原有逻辑，仅加alarmManager空判）
             if (
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
                 alarmManager != null &&
@@ -253,25 +200,6 @@ public class MyService extends Service {
     }
 
     // 服务在每次启动的时候调用的方法 如果某些行为在服务已启动的时候就执行，可以把处理逻辑写在这个方法里面
-    /*@Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("MyService", "onStartCommand()-------");
-
-        if (intent != null) {
-            String action = intent.getAction();
-            if ("com.x.ACTION_START_GPS".equals(action)) {
-                startGPS();
-            } else if ("com.x.ACTION_STOP_GPS".equals(action)) {
-                stopGPS();
-            }
-        }
-
-        // 只走 Android 8.0+ 逻辑
-        setForeground();
-
-        return super.onStartCommand(intent, flags, startId);
-    }*/
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("MyService", "onStartCommand()-------");
@@ -472,7 +400,7 @@ public class MyService extends Service {
                 m_notificationManagerAlarm.createNotificationChannel(channel);
             }
 
-            // 保留你原来的Intent/PendingIntent逻辑
+            // 保留原来的Intent/PendingIntent逻辑
             Intent activityIntent = new Intent(context, MyActivity.class);
             activityIntent.setFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -532,9 +460,9 @@ public class MyService extends Service {
                 m_builderAlarm.build()
             );
 
-            // ========== 核心修改：使用你现成的锁屏判断方法 ==========
+            // ========== 核心修改：使用现成的锁屏判断方法 ==========
             boolean isMIUI = isMIUI(); // 判断是否是小米/MIUI系统
-            boolean isLockScreen = MyActivity.getLockScreenStatus(); // 你的锁屏判断实现
+            boolean isLockScreen = MyActivity.getLockScreenStatus();
 
             // 播放规则：
             // 1. 非MIUI机型：无论锁屏/亮屏，都手动播放（系统通知已静音，不会双声）
@@ -574,7 +502,7 @@ public class MyService extends Service {
     private static void playLockScreenSound(Context context) {
         try {
             Uri soundUri = null;
-            String channelId = "knot_alarm_channel"; // 和你通知的通道ID保持一致
+            String channelId = "knot_alarm_channel"; // 和通知的通道ID保持一致
 
             // 1. Android 8.0+：优先读取用户为当前通知通道设置的声音
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -696,62 +624,6 @@ public class MyService extends Service {
     public static float stepCounts;
     private static SensorManager mSensorManager;
 
-    /*public static void initStepSensor() {
-        // 1. 权限校验
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            Context context = MyActivity.getMyAppContext();
-            if (
-                context != null &&
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACTIVITY_RECOGNITION
-                ) !=
-                PackageManager.PERMISSION_GRANTED
-            ) {
-                Log.w(
-                    TAG,
-                    "initStepSensor: 无ACTIVITY_RECOGNITION权限，跳过传感器注册"
-                );
-                isStepCounter = 0;
-                return;
-            }
-        }
-
-        // 2. 补充空判 + 重新获取传感器（静态变量countSensor）
-        if (mSensorManager == null) {
-            Context context = MyActivity.getMyAppContext();
-            if (context != null) {
-                mSensorManager = (SensorManager) context.getSystemService(
-                    Context.SENSOR_SERVICE
-                );
-            }
-        }
-        if (countSensor == null && mSensorManager != null) {
-            countSensor = mSensorManager.getDefaultSensor(
-                Sensor.TYPE_STEP_COUNTER
-            );
-        }
-
-        // 3. 原有逻辑（静态变量引用）
-        if (
-            countSensor != null &&
-            mSensorManager != null &&
-            mySensorSerivece != null
-        ) {
-            mSensorManager.unregisterListener(mySensorSerivece);
-            mSensorManager.registerListener(
-                mySensorSerivece,
-                countSensor,
-                SensorManager.SENSOR_DELAY_NORMAL
-            );
-            isStepCounter = 1;
-            Log.i(TAG, "initStepSensor: 步数传感器注册成功（权限已授予）");
-        } else {
-            isStepCounter = 0;
-            Log.w(TAG, "initStepSensor: 传感器/管理器/服务为空，注册失败");
-        }
-        }*/
-
     // 仅新增context参数，其余逻辑不变
     public static void initStepSensor(Context context) {
         if (context == null) {
@@ -760,7 +632,7 @@ public class MyService extends Service {
             return;
         }
 
-        // 1. 权限校验（你的原有逻辑）
+        // 1. 权限校验（原有逻辑）
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (
                 ContextCompat.checkSelfPermission(
@@ -778,7 +650,7 @@ public class MyService extends Service {
             }
         }
 
-        // 2. 补充空判 + 重新获取传感器（你的原有逻辑）
+        // 2. 补充空判 + 重新获取传感器（原有逻辑）
         if (mSensorManager == null) {
             mSensorManager = (SensorManager) context.getSystemService(
                 Context.SENSOR_SERVICE
@@ -883,34 +755,6 @@ public class MyService extends Service {
             pendingIntentAlarm = null;
         }
         return 1;
-    }
-
-    // 检查是否有设置精确闹钟的权限
-    /*private boolean hasExactAlarmPermission(Context context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            return true; // API 31 以下不需要此权限
-        }
-
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(
-            Context.ALARM_SERVICE
-        );
-        return alarmManager.canScheduleExactAlarms();
-        }*/
-
-    private boolean hasExactAlarmPermission(Context context) {
-        if (context == null) {
-            // 仅新增这行空判
-            Log.e(TAG, "hasExactAlarmPermission: 上下文为空");
-            return false;
-        }
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            return true; // API 31 以下不需要此权限
-        }
-
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(
-            Context.ALARM_SERVICE
-        );
-        return alarmManager != null && alarmManager.canScheduleExactAlarms(); // 仅加alarmManager空判
     }
 
     // 请求精确闹钟权限

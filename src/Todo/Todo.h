@@ -148,7 +148,7 @@ class Todo : public QDialog {
   QString getItemTimeRecycle(int index);
   void addItemRecycle(QString strTime, int type, QString strText);
 
-  void refreshTableListsFromIni();
+  void refreshTableListsFromFile();
 
   QString getTimeStr(QString str);
 
