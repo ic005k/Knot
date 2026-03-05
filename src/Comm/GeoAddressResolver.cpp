@@ -2,21 +2,22 @@
 
 #include <QDateTime>
 #include <QJsonDocument>
+#include <QThread>  // 新增：用于线程判断
 #include <QUrlQuery>
 
-GeoAddressResolver::GeoAddressResolver(QObject *parent) : QObject(parent) {
+GeoAddressResolver::GeoAddressResolver(QObject* parent) : QObject(parent) {
   m_netMgr = new QNetworkAccessManager(this);
   connect(m_netMgr, &QNetworkAccessManager::finished, this,
           &GeoAddressResolver::onReplyFinished);
 }
 
 // 设置腾讯云官方API密钥
-void GeoAddressResolver::setTencentApiKey(const QString &apiKey) {
+void GeoAddressResolver::setTencentApiKey(const QString& apiKey) {
   m_tencentApiKey = apiKey;
 }
 
-// 解析网络响应
-void GeoAddressResolver::onReplyFinished(QNetworkReply *reply) {
+// 解析网络响应（完全保留你的原有逻辑）
+void GeoAddressResolver::onReplyFinished(QNetworkReply* reply) {
   if (reply->error() != QNetworkReply::NoError) {
     emit resolveFailed(QString("网络错误：%1").arg(reply->errorString()));
     reply->deleteLater();
@@ -42,9 +43,10 @@ void GeoAddressResolver::onReplyFinished(QNetworkReply *reply) {
   reply->deleteLater();
 }
 
-// 发起逆地理编码请求（输入WGS84经纬度）
-void GeoAddressResolver::getAddressFromCoord(double latitude,
-                                             double longitude) {
+// 新增：真正执行网络请求的槽函数（完全复用你的原有逻辑）
+void GeoAddressResolver::doGetAddressFromCoord(double latitude,
+                                               double longitude) {
+  // ===== 以下是你原有的全部业务逻辑，一字未改 =====
   // 校验坐标有效性
   if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
     emit resolveFailed("无效经纬度");
@@ -78,9 +80,26 @@ void GeoAddressResolver::getAddressFromCoord(double latitude,
   QNetworkRequest request(url);
   request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
   m_netMgr->get(request);
+  // ===== 以上是你原有的全部业务逻辑，一字未改 =====
 }
 
-QString GeoAddressResolver::parseTencentResponse(const QJsonObject &root) {
+// 原接口改为“线程转发函数”（仅新增这部分逻辑）
+void GeoAddressResolver::getAddressFromCoord(double latitude,
+                                             double longitude) {
+  // 核心：判断当前线程是否为主线程（对象所属线程）
+  if (QThread::currentThread() != this->thread()) {
+    // 子线程调用：转发到主线程执行doGetAddressFromCoord
+    QMetaObject::invokeMethod(this, "doGetAddressFromCoord",
+                              Qt::QueuedConnection, Q_ARG(double, latitude),
+                              Q_ARG(double, longitude));
+    return;
+  }
+  // 主线程调用：直接执行（兼容原有逻辑）
+  doGetAddressFromCoord(latitude, longitude);
+}
+
+// 解析腾讯云响应（完全保留你的原有逻辑）
+QString GeoAddressResolver::parseTencentResponse(const QJsonObject& root) {
   int status = root["status"].toInt();
   if (status != 0) {
     qWarning() << "腾讯云API错误：" << root["message"].toString();

@@ -180,7 +180,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
           });
 
   // Route
-  addressResolver = new GeoAddressResolver(this);
+  addressResolver = new GeoAddressResolver(mw_one);
   setMapKey();
   isChina = m_Method->isInChina();
   if (isChina) {
@@ -218,29 +218,33 @@ void Steps::setAddressResolverConnect() {
     if (isChina) {
       setMapKey();
 
-      connect(addressResolver, &GeoAddressResolver::addressResolved, this,
-              [this](const QString& address) {
-                // 过滤完全相同的地址
-                if (address != m_lastAddress) {
-                  qDebug() << "记录轨迹点：" << address;
+      connect(
+          addressResolver, &GeoAddressResolver::addressResolved, mw_one,
+          [this](const QString& address) {
+            // 过滤完全相同的地址
+            if (address != m_lastAddress) {
+              qDebug() << "记录轨迹点：" << address;
 
-                  m_lastAddress = address;
+              m_lastAddress = address;
 
-                } else {
-                  qDebug() << "位置未变化，跳过记录";
-                }
-                strMapKeyTestInfo = address;
+            } else {
+              qDebug() << "位置未变化，跳过记录";
+            }
+            strMapKeyTestInfo = address;
 
-                saveRoute(strJsonRouteFile, timeRoute, latRoute, lonRoute,
-                          m_lastAddress);
-              });
-      connect(addressResolver, &GeoAddressResolver::resolveFailed, this,
-              [this](const QString& error) {
-                qDebug() << "地址解析失败：" << error;
-                // 处理错误
+            saveRoute(strJsonRouteFile, timeRoute, latRoute, lonRoute,
+                      m_lastAddress);
+          },
+          Qt::QueuedConnection);  // 强制在 mw_one（主线程）执行
+      connect(
+          addressResolver, &GeoAddressResolver::resolveFailed, mw_one,
+          [this](const QString& error) {
+            qDebug() << "地址解析失败：" << error;
+            // 处理错误
 
-                strMapKeyTestInfo = error;
-              });
+            strMapKeyTestInfo = error;
+          },
+          Qt::QueuedConnection);
 
       isOne = true;
 
@@ -959,26 +963,12 @@ void Steps::updateGpsUI() {
   }
 
   if (m_distance > 0 || isGpsTest) {
-    // 先校验经纬度是否在有效范围（-90~90纬度，-180~180经度）
-    bool latValid = (latitude >= -90 && latitude <= 90);
-    bool lonValid = (longitude >= -180 && longitude <= 180);
     if (!latValid || !lonValid) {
       // 无效坐标，不请求
 
     } else {
-      QDateTime currentTime = QDateTime::currentDateTime();
-
       if (!isInitTime) {
-        m_lastGetAddressTime = currentTime;
-        m_lastSaveSpeedTime = currentTime;
-        m_lastFetchWeatherTime = currentTime;
-
         weatherFetcher->fetchWeather(latitude, longitude);
-
-        refreshRoute();
-        saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
-
-        isInitTime = true;
       }
 
       // Weather
@@ -986,25 +976,6 @@ void Steps::updateGpsUI() {
           1800) {  // 30分钟=1800秒
         weatherFetcher->fetchWeather(latitude, longitude);
         m_lastFetchWeatherTime = currentTime;  // 更新上次请求时间
-      }
-
-      // Route
-      int tr = 150;
-      if (isGpsTest) tr = 5;
-      if (isShowRoute) {
-        if (m_lastGetAddressTime.secsTo(currentTime) >=
-            tr) {  // 距离上次超过150秒
-          refreshRoute();
-          m_lastGetAddressTime = currentTime;  // 更新上次执行时间
-        }
-      }
-
-      // Speed and Altitude
-      int ts = 30;
-      if (isGpsTest) ts = 3;
-      if (m_lastSaveSpeedTime.secsTo(currentTime) >= ts) {  // 距离上次超过ts秒
-        saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
-        m_lastSaveSpeedTime = currentTime;  // 更新上次执行时间
       }
     }
   }
@@ -1157,7 +1128,7 @@ void Steps::updateGetGpsData() {
 
     qDebug() << "m_time=" << m_time.second() << totalSeconds;
   }
-/////////////////////////////////////////////////////////////////////////////
+
 #endif
 
   if (mySpeed > 0) {
@@ -1190,6 +1161,48 @@ void Steps::updateGetGpsData() {
                    "\nLon.-Lat.: " + QString::number(longitude) + " - " +
                    QString::number(latitude) + "\n" + strGpsStatus + "\n" +
                    tr("Total Distance") + " : " + strTotalDistance;
+
+  if (m_distance > 0 || isGpsTest) {
+    // 先校验经纬度是否在有效范围（-90~90纬度，-180~180经度）
+    latValid = (latitude >= -90 && latitude <= 90);
+    lonValid = (longitude >= -180 && longitude <= 180);
+    if (!latValid || !lonValid) {
+      // 无效坐标，不请求
+
+    } else {
+      currentTime = QDateTime::currentDateTime();
+
+      if (!isInitTime) {
+        m_lastGetAddressTime = currentTime;
+        m_lastSaveSpeedTime = currentTime;
+        m_lastFetchWeatherTime = currentTime;
+
+        saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
+        refreshRoute();
+
+        isInitTime = true;
+      }
+
+      // Speed and Altitude
+      int ts = 30;
+      if (isGpsTest) ts = 3;
+      if (m_lastSaveSpeedTime.secsTo(currentTime) >= ts) {  // 距离上次超过ts秒
+        saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
+        m_lastSaveSpeedTime = currentTime;  // 更新上次执行时间
+      }
+
+      // Route
+      int tr = 150;
+      if (isGpsTest) tr = 5;
+      if (isShowRoute) {
+        if (m_lastGetAddressTime.secsTo(currentTime) >=
+            tr) {  // 距离上次超过150秒
+          refreshRoute();
+          m_lastGetAddressTime = currentTime;  // 更新上次执行时间
+        }
+      }
+    }
+  }
 }
 
 void Steps::stopRecordMotion() {

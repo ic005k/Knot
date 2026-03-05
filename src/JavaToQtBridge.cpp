@@ -57,10 +57,16 @@ static void JavaNotify_2() {
 
 static void JavaNotify_3() {
 #ifdef Q_OS_ANDROID
-  // 1. 先切到Qt主线程执行所有逻辑（核心修复！）
+  // 时间处理（无风险）
+  QDateTime now = QDateTime::currentDateTime();
+  QString datePart = now.toString("yyyy-MM-dd");
+  QString timePart = now.toString("HH:mm:ss");
+  QString strTodoAlarmActiveTime = datePart + "  " + timePart;
+
+  // 1. 先切到Qt主线程执行所有逻辑
   QMetaObject::invokeMethod(
       QCoreApplication::instance(),
-      []() {
+      [strTodoAlarmActiveTime]() {
         // ========== 所有逻辑移到Qt主线程内执行 ==========
         // 2. 空指针校验（避免野指针访问）
         if (mw_one == nullptr || mw_one->m_Todo == nullptr) {
@@ -79,12 +85,6 @@ static void JavaNotify_3() {
         // 3. 读取UI属性（主线程安全）
         QString strTime = mw_one->m_Todo->strAlarmTime;
         QString strText = mw_one->m_Todo->strAlarmText;
-
-        // 4. 时间处理（无风险）
-        QDateTime now = QDateTime::currentDateTime();
-        QString datePart = now.toString("yyyy-MM-dd");
-        QString timePart = now.toString("HH:mm:ss");
-        QString strTodoAlarmActiveTime = datePart + "  " + timePart;
 
         try {
           // 5. UI方法调用（主线程安全）

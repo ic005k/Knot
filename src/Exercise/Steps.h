@@ -217,6 +217,9 @@ class Steps : public QDialog {
   void positionUpdated(const QGeoPositionInfo& info);
 
  private:
+  bool latValid = false;
+  bool lonValid = false;
+  QDateTime currentTime;
   bool coordChanged = false;
 
   QDateTime m_lastGetAddressTime;    // 上次获取地址的时间
