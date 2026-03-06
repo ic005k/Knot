@@ -20,6 +20,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QLabel>
+#include <QMutex>
 #include <QPainter>
 #include <QPushButton>
 #include <QQmlApplicationEngine>
@@ -222,6 +223,7 @@ class Steps : public QDialog {
   QDateTime currentTime;
   bool coordChanged = false;
   bool isGetAddressSuccess;
+  QMutex m_dataMutex;  // 保护所有共享变量的锁
 
   QDateTime m_lastGetAddressTime;    // 上次获取地址的时间
   QDateTime m_lastSaveSpeedTime;     // 上次保存路线的时间

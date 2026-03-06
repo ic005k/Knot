@@ -181,7 +181,6 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
           });
 
   // Route
-  // addressResolver = new GeoAddressResolver(mw_one);
   // 1. 创建独立线程（必须手动启动，且不依赖主线程）
   QThread* geoThread = new QThread();
   geoThread->setObjectName("GeoAddressThread");
@@ -229,8 +228,11 @@ void Steps::setAddressResolverConnect() {
       setMapKey();
 
       connect(
-          addressResolver, &GeoAddressResolver::addressResolved, this,
+          addressResolver, &GeoAddressResolver::addressResolved,
+          addressResolver,
           [this](const QString& address) {
+            QMutexLocker locker(&m_dataMutex);  // 一次加锁，覆盖所有变量操作
+
             // 过滤完全相同的地址
             if (address != m_lastAddress) {
               qDebug() << "记录轨迹点：" << address;
@@ -240,17 +242,18 @@ void Steps::setAddressResolverConnect() {
             } else {
               qDebug() << "位置未变化，跳过记录";
             }
+
             strMapKeyTestInfo = address;
 
             isGetAddressSuccess = true;
           },
-          Qt::QueuedConnection);  // 强制在 mw_one（主线程）执行
+          Qt::QueuedConnection);
       connect(
-          addressResolver, &GeoAddressResolver::resolveFailed, this,
+          addressResolver, &GeoAddressResolver::resolveFailed, addressResolver,
           [this](const QString& error) {
             qDebug() << "地址解析失败：" << error;
             // 处理错误
-
+            QMutexLocker locker(&m_dataMutex);
             strMapKeyTestInfo = error;
           },
           Qt::QueuedConnection);
