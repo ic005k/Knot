@@ -80,7 +80,6 @@ void GeoAddressResolver::doGetAddressFromCoord(double latitude,
   QNetworkRequest request(url);
   request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
   m_netMgr->get(request);
-  // ===== 以上是你原有的全部业务逻辑，一字未改 =====
 }
 
 // 原接口改为“线程转发函数”（仅新增这部分逻辑）
@@ -88,7 +87,7 @@ void GeoAddressResolver::getAddressFromCoord(double latitude,
                                              double longitude) {
   // 核心：判断当前线程是否为主线程（对象所属线程）
   if (QThread::currentThread() != this->thread()) {
-    // 子线程调用：转发到主线程执行doGetAddressFromCoord
+    // 子线程调用：转发到对象所属线程执行doGetAddressFromCoord
     QMetaObject::invokeMethod(this, "doGetAddressFromCoord",
                               Qt::QueuedConnection, Q_ARG(double, latitude),
                               Q_ARG(double, longitude));

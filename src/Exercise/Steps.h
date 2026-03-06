@@ -221,6 +221,7 @@ class Steps : public QDialog {
   bool lonValid = false;
   QDateTime currentTime;
   bool coordChanged = false;
+  bool isGetAddressSuccess;
 
   QDateTime m_lastGetAddressTime;    // 上次获取地址的时间
   QDateTime m_lastSaveSpeedTime;     // 上次保存路线的时间

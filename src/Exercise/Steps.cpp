@@ -148,6 +148,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
     mui->frame_3->setFixedHeight(300);
   else
     mui->frame_3->setFixedHeight(200);
+  directionRoute = tr("Direction");
 
   // Weather
   weatherFetcher = new WeatherFetcher(this);
@@ -180,7 +181,20 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
           });
 
   // Route
-  addressResolver = new GeoAddressResolver(mw_one);
+  // addressResolver = new GeoAddressResolver(mw_one);
+  // 1. 创建独立线程（必须手动启动，且不依赖主线程）
+  QThread* geoThread = new QThread();
+  geoThread->setObjectName("GeoAddressThread");
+  // 线程退出时自动销毁
+  connect(geoThread, &QThread::finished, geoThread, &QObject::deleteLater);
+
+  // 2. 创建 resolver，绝对不设置父对象
+  addressResolver = new GeoAddressResolver(nullptr);
+  addressResolver->moveToThread(geoThread);
+
+  // 3. 启动线程（必须先start，再调用接口）
+  geoThread->start();
+
   setMapKey();
   isChina = m_Method->isInChina();
   if (isChina) {
@@ -205,10 +219,6 @@ Steps::~Steps() {
 
 // 安卓端额外清理
 #ifdef Q_OS_ANDROID
-  // if (gm_activity.isValid()) {
-  //   gm_activity.callMethod<void>("stopGpsUpdates", "()D");
-  // }
-
   stopGPSFromService();
 #endif
 }
@@ -219,7 +229,7 @@ void Steps::setAddressResolverConnect() {
       setMapKey();
 
       connect(
-          addressResolver, &GeoAddressResolver::addressResolved, mw_one,
+          addressResolver, &GeoAddressResolver::addressResolved, this,
           [this](const QString& address) {
             // 过滤完全相同的地址
             if (address != m_lastAddress) {
@@ -232,12 +242,11 @@ void Steps::setAddressResolverConnect() {
             }
             strMapKeyTestInfo = address;
 
-            saveRoute(strJsonRouteFile, timeRoute, latRoute, lonRoute,
-                      m_lastAddress);
+            isGetAddressSuccess = true;
           },
           Qt::QueuedConnection);  // 强制在 mw_one（主线程）执行
       connect(
-          addressResolver, &GeoAddressResolver::resolveFailed, mw_one,
+          addressResolver, &GeoAddressResolver::resolveFailed, this,
           [this](const QString& error) {
             qDebug() << "地址解析失败：" << error;
             // 处理错误
@@ -732,6 +741,8 @@ void Steps::startRecordMotion() {
   clearTrack();
   resetTerrainDistance();
 
+  isGetAddressSuccess = false;
+
   m_time.setHMS(0, 0, 0, 0);
 
   startDt = QDateTime::currentDateTime();
@@ -945,6 +956,15 @@ void Steps::stopGPSFromService() {
 void Steps::updateGpsUI() {
   mui->lblGpsInfo->setText(strGpsInfoShow);
 
+  if (m_time.second() % 3 == 0) {
+    compass->setBearing(bearing1);
+    mui->lblDirection->setText(directionRoute);
+
+    if (mySpeed > 0) {
+      compass->setSpeed(mySpeed);
+    }
+  }
+
   if (m_time.second() % 6 == 0) {
     refreshMotionData();
   }
@@ -1058,8 +1078,7 @@ void Steps::updateGetGpsData() {
             getTerrain();
 
             bearing1 = calculateBearing(oldLat, oldLon, latitude, longitude);
-            mui->lblDirection->setText(bearingToDirection(bearing1));
-            compass->setBearing(bearing1);
+            directionRoute = bearingToDirection(bearing1);
           }
 
           oldLat = latitude;
@@ -1116,8 +1135,7 @@ void Steps::updateGetGpsData() {
       getTerrain();
 
       bearing1 = calculateBearing(oldLat, oldLon, latitude, longitude);
-      mui->lblDirection->setText(bearingToDirection(bearing1));
-      compass->setBearing(bearing1);
+      directionRoute = bearingToDirection(bearing1);
 
       oldLat = latitude;
       oldLon = longitude;
@@ -1131,9 +1149,6 @@ void Steps::updateGetGpsData() {
 
 #endif
 
-  if (mySpeed > 0) {
-    compass->setSpeed(mySpeed);
-  }
   str1 = QString::number(m_distance, 'f', 2) + " km";
   strTotalDistance = QString::number(m_TotalDistance) + " km";
 
@@ -1200,6 +1215,12 @@ void Steps::updateGetGpsData() {
           refreshRoute();
           m_lastGetAddressTime = currentTime;  // 更新上次执行时间
         }
+
+        if (isGetAddressSuccess) {
+          isGetAddressSuccess = false;
+          saveRoute(strJsonRouteFile, timeRoute, latRoute, lonRoute,
+                    m_lastAddress);
+        }
       }
     }
   }
@@ -1253,7 +1274,6 @@ void Steps::refreshRoute() {
     timeRoute = QDateTime::currentDateTime().time().toString();
     distanceRoute = str1;
     speedRoute = QString::number(mySpeed, 'f', 2) + " km/h";
-    directionRoute = mui->lblDirection->text();
     getAddress(latitude, longitude);
   }
 }
@@ -2643,6 +2663,7 @@ void Steps::getAddress(double lat, double lon) {
     gcj02Coord = wgs84ToGcj02(lat, lon);
   else
     gcj02Coord = wgs84ToGcj02_cpp(lat, lon);
+
   addressResolver->getAddressFromCoord(gcj02Coord.latitude(),
                                        gcj02Coord.longitude());
 }
