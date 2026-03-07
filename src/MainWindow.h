@@ -796,6 +796,8 @@ class MainWindow : public QMainWindow {
 
   void on_chkPlayRunVoice_clicked(bool checked);
 
+  void on_tabMotion_currentChanged(int index);
+
  private:
   bool isMoveEntry;
   QTimer* tmeFlash;

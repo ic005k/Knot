@@ -2727,3 +2727,10 @@ void MainWindow::on_chkPlayRunVoice_clicked(bool checked) {
     m_Method->playMyText(mui->lblDirection->text());
   }
 }
+
+void MainWindow::on_tabMotion_currentChanged(int index) {
+  if (index == 0)
+    m_Steps->tmeRefreshSteps->start(3000);
+  else
+    m_Steps->tmeRefreshSteps->stop();
+}

@@ -114,6 +114,9 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, &Steps::updateGetGpsData);
 
+  tmeRefreshSteps = new QTimer(this);
+  connect(tmeRefreshSteps, &QTimer::timeout, this, &Steps::refreshSteps);
+
   QDir gpsdir;
   QString gpspath = iniDir + "/memo/gps/";
   if (!gpsdir.exists(gpspath)) gpsdir.mkpath(gpspath);
@@ -281,6 +284,7 @@ bool Steps::eventFilter(QObject* obj, QEvent* event) {
 }
 
 void Steps::closeSteps() {
+  tmeRefreshSteps->stop();
   saveMovementType();
   mui->frameMain->show();
   mui->frameSteps->hide();
@@ -426,6 +430,10 @@ void Steps::openStepsUI() {
   if (!isChina) isChina = m_Method->isInChina();
   // 再次连接信号槽，防止初始化时连接出现问题
   setAddressResolverConnect();
+
+  if (mui->tabMotion->currentIndex() == 0) {
+    tmeRefreshSteps->start(3000);
+  }
 }
 
 void Steps::addRecord(QString date, qlonglong steps, QString km) {
@@ -3696,3 +3704,5 @@ void Steps::getRemarks(const QString& strGpsTime) {
     saveFile.close();
   }
 }
+
+void Steps::refreshSteps() { updateHardSensorSteps(); }

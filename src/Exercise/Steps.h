@@ -159,6 +159,8 @@ class Steps : public QDialog {
  public:
   void closeSteps();
 
+  QTimer* tmeRefreshSteps;
+
   QString strTotalDistance;
   QString strGpsInfoShow;
 
@@ -216,6 +218,8 @@ class Steps : public QDialog {
   void updateGetGpsData();
  private slots:
   void positionUpdated(const QGeoPositionInfo& info);
+
+  void refreshSteps();
 
  private:
   bool latValid = false;
