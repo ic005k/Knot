@@ -214,6 +214,9 @@ Steps::~Steps() {
   }
   delete timer;
 
+  if (tmeRefreshSteps->isActive()) tmeRefreshSteps->stop();
+  delete tmeRefreshSteps;
+
   delete addressResolver;
   delete m_speedometer;
   delete weatherFetcher;
@@ -341,6 +344,8 @@ void Steps::saveSteps() {
 }
 
 void Steps::loadStepsToTable() {
+  if (tmeRefreshSteps->isActive()) return;
+
   clearAll();
   m_stepData.clear();
 
