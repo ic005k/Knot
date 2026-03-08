@@ -761,23 +761,45 @@ void MainWindow::on_actionRename_triggered() {
 
 void MainWindow::on_actionAdd_Tab_triggered() {
   int count = mui->tabWidget->tabBar()->count();
-  QString twName = m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
+  QString defaultTabName = tr("Tab") + " " + QString::number(count + 1);
 
-  QTreeWidget* tw = m_MainHelper->init_TreeWidget(twName);
+  // 1. 创建可自定义样式的 QInputDialog 实例
+  QInputDialog inputDialog(this);
+  inputDialog.setWindowTitle(tr("New Tab"));
+  inputDialog.setLabelText(tr("Please enter tab name:"));
+  inputDialog.setTextValue(defaultTabName);
+  inputDialog.setInputMode(QInputDialog::TextInput);
 
-  QString tabText = tr("Tab") + " " + QString::number(count + 1);
-  mui->tabWidget->addTab(tw, tabText);
-  mui->tabWidget->setCurrentIndex(count);
+  // 2. 适配移动端/桌面端的样式
+  int dialogWidth =
+      qMin(300, mw_one->width() - 40);  // 主窗口宽度减边距，最大300px
+  inputDialog.setFixedSize(dialogWidth, 200);
 
-  addItem(tabText, "", "", "", 0);
-  setCurrentIndex(count);
+  // 适配安卓/桌面端按钮文本
+  inputDialog.setOkButtonText(tr("Done"));
+  inputDialog.setCancelButtonText(tr("Cancel"));
 
-  on_actionRename_triggered();
-  reloadMain();
+  // 3. 显示对话框并处理结果
+  if (inputDialog.exec() == QDialog::Accepted) {
+    QString customTabText = inputDialog.textValue().trimmed();
+    if (customTabText.isEmpty()) {
+      return;
+    }
 
-  saveTab();
+    // 后续创建标签页的逻辑
+    QString twName =
+        m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
+    QTreeWidget* tw = m_MainHelper->init_TreeWidget(twName);
 
-  strLatestModify = tr("Add Tab") + " ( " + getTabText() + " ) ";
+    mui->tabWidget->addTab(tw, customTabText);
+    mui->tabWidget->setCurrentIndex(count);
+    addItem(customTabText, "", "", "", 0);
+    setCurrentIndex(count);
+
+    reloadMain();
+    saveTab();
+    strLatestModify = tr("Add Tab") + " ( " + customTabText + " ) ";
+  }
 }
 
 void MainWindow::on_actionDel_Tab_triggered() {
