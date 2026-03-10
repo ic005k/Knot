@@ -148,7 +148,7 @@ public class MyService extends Service {
         }
 
         // 初始化多语言文本（原有逻辑，仅换上下文）
-        if (MyActivity.zh_cn) {
+        if (MyActivity.isZh(this)) {
             strRun = "运行中...";
             strStatus = "Knot";
             strTodo = "待办事项";

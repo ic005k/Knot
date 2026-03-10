@@ -161,6 +161,8 @@ class Steps : public QDialog {
 
   QTimer* tmeRefreshSteps;
 
+  bool isChkPlayRunVoice = false;
+
   QString strTotalDistance;
   QString strGpsInfoShow;
 

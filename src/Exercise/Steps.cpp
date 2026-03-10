@@ -985,19 +985,6 @@ void Steps::updateGpsUI() {
     refreshMotionData();
   }
 
-  if (m_time.second() % 12 == 0) {
-    if (mui->chkPlayRunVoice->isChecked()) {
-      if (mySpeed > 0) {
-        if (mySpeed != oldMySpeed) {
-          m_Method->stopPlayMyText();
-          m_Method->playMyText(mui->lblDirection->text() + " " +
-                               QString::number(mySpeed, 'f', 2));
-          oldMySpeed = mySpeed;
-        }
-      }
-    }
-  }
-
   if (m_distance > 0 || isGpsTest) {
     if (!latValid || !lonValid) {
       // 无效坐标，不请求
@@ -1209,7 +1196,6 @@ void Steps::updateGetGpsData() {
         m_lastFetchWeatherTime = currentTime;
 
         saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
-        refreshRoute();
 
         isInitTime = true;
       }
@@ -1236,6 +1222,20 @@ void Steps::updateGetGpsData() {
           isGetAddressSuccess = false;
           saveRoute(strJsonRouteFile, timeRoute, latRoute, lonRoute,
                     m_lastAddress);
+        }
+      }
+
+      // Play Voice
+      if (m_time.second() % 12 == 0) {
+        if (isChkPlayRunVoice) {
+          if (mySpeed > 0) {
+            if (mySpeed != oldMySpeed) {
+              m_Method->stopPlayMyText();
+              m_Method->playMyText(directionRoute + " " +
+                                   QString::number(mySpeed, 'f', 2));
+              oldMySpeed = mySpeed;
+            }
+          }
         }
       }
     }

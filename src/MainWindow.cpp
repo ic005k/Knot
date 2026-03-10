@@ -2744,6 +2744,7 @@ void MainWindow::on_btnStopSpeak_clicked() {
 }
 
 void MainWindow::on_chkPlayRunVoice_clicked(bool checked) {
+  m_Steps->isChkPlayRunVoice = checked;
   if (checked) {
     m_Method->stopPlayMyText();
     m_Method->playMyText(mui->lblDirection->text());

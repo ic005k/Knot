@@ -779,6 +779,7 @@ void MainHelper::init_UIWidget() {
   mui->rbRunning->setChecked(Reg.value("/GPS/isRunning", 0).toBool());
   mui->chkPlayRunVoice->setChecked(
       Reg.value("/GPS/isPlayRunVoice", 0).toBool());
+  m_Steps->isChkPlayRunVoice = mui->chkPlayRunVoice->isChecked();
 
   mui->btnGPS->setStyleSheet(m_Steps->btnRoundStyle);
   mui->btnGPS->hide();
