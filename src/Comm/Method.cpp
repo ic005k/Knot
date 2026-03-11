@@ -1145,27 +1145,79 @@ void Method::setQLabelImage(QLabel* lbl, int w, int h, QString imgFile) {
   lbl->setPixmap(*pixmap);
 }
 
+#include <QJniObject>
+
+/**
+ * @brief 调用Android端TTS服务播放文本
+ * @param text 待播放的文本内容
+ * @note 仅在Android平台生效，空文本会直接返回
+ * @throw std::exception JNI调用过程中可能抛出的标准异常
+ */
 void Method::playMyText(QString text) {
   Q_UNUSED(text);
 
 #ifdef Q_OS_ANDROID
+  try {
+    // 空文本校验：避免无效JNI调用
+    if (text.isEmpty()) {
+      qDebug() << "[TTS] Play failed: text is empty";
+      return;
+    }
 
-  QJniObject jText = QJniObject::fromString(text);
-  // QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  QJniObject::callStaticMethod<void>("com.x/MyActivity", "playMyText",
-                                     "(Ljava/lang/String;)V",
-                                     jText.object<jstring>());
+    // 转换Qt字符串为JNI字符串
+    QJniObject jText = QJniObject::fromString(text);
 
+    // JNI调用：com.x.MyService.playText(String)
+    // 方法签名：(Ljava/lang/String;)V 无返回值，单个String参数
+    QJniObject::callStaticMethod<void>("com/x/MyService", "playText",
+                                       "(Ljava/lang/String;)V",
+                                       jText.object<jstring>());
+
+    qDebug() << "[TTS] Play command sent: " << text;
+  } catch (const std::exception& e) {
+    qDebug() << "[TTS] Play exception: " << e.what();
+    // 清理JNI环境未处理异常，避免影响后续调用
+    QJniEnvironment env;
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
+  } catch (...) {
+    qDebug() << "[TTS] Play unknown exception occurred";
+    QJniEnvironment env;
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
+  }
 #endif
 }
 
+/**
+ * @brief 调用Android端TTS服务停止文本播放
+ * @note 仅在Android平台生效
+ * @throw std::exception JNI调用过程中可能抛出的标准异常
+ */
 void Method::stopPlayMyText() {
 #ifdef Q_OS_ANDROID
+  try {
+    // JNI调用：com.x.MyService.stopTextPlay()
+    // 方法签名：()V 无参数无返回值
+    QJniObject::callStaticMethod<void>("com/x/MyService", "stopTextPlay",
+                                       "()V");
 
-  // QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  QJniObject::callStaticMethod<void>("com.x/MyActivity", "stopPlayMyText",
-                                     "()V");
-
+    qDebug() << "[TTS] Stop command sent";
+  } catch (const std::exception& e) {
+    qDebug() << "[TTS] Stop exception: " << e.what();
+    QJniEnvironment env;
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
+  } catch (...) {
+    qDebug() << "[TTS] Stop unknown exception occurred";
+    QJniEnvironment env;
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
+  }
 #endif
 }
 

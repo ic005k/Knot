@@ -38,6 +38,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.provider.Settings;
+import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Window;
@@ -56,6 +57,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MyService extends Service {
+
+    // ========== MyService 中新增 TTS 相关逻辑 ==========
+    private boolean isTtsInitialized = false;
+    private boolean isTtsInitializing = false;
+    private String pendingTtsText = null;
+    private final Object ttsLock = new Object();
+    private TTSUtils currentPlayingTts;
 
     // ========== 新增GPS逻辑：核心变量 ==========
     public volatile GPSManager gpsManager; // GPS管理器实例
@@ -161,7 +169,7 @@ public class MyService extends Service {
         }
 
         try {
-            // 注册闹钟接收器（原有逻辑）
+            // 注册闹钟接收器
             IntentFilter filter = new IntentFilter(ACTION_TODO_ALARM);
             registerReceiver(myalarmReceiver, filter);
 
@@ -181,7 +189,7 @@ public class MyService extends Service {
             alarmManager = (AlarmManager) serviceContext.getSystemService(
                 Context.ALARM_SERVICE
             );
-            // 检查并请求精确闹钟权限（原有逻辑，仅加alarmManager空判）
+            // 检查并请求精确闹钟权限（alarmManager空判）
             if (
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
                 alarmManager != null &&
@@ -226,10 +234,10 @@ public class MyService extends Service {
 
         Log.d("MyService", "onDestroy()-------");
 
-        // ========== 新增GPS逻辑：服务销毁时停止GPS ==========
+        // ========== 服务销毁时停止GPS ==========
         stopGPS();
         // ==========================================
-        // 新增：取消闹钟并清空变量
+        // 取消闹钟并清空变量
         if (alarmManager != null && pendingIntentAlarm != null) {
             alarmManager.cancel(pendingIntentAlarm);
             pendingIntentAlarm.cancel();
@@ -487,7 +495,7 @@ public class MyService extends Service {
         }
     }
 
-    // 新增：判断是否是MIUI系统（精准识别小米/红米）
+    // 判断是否是MIUI系统（精准识别小米/红米）
     private static boolean isMIUI() {
         try {
             Class<?> clazz = Class.forName("android.os.SystemProperties");
@@ -903,90 +911,6 @@ public class MyService extends Service {
         }
     };
 
-    public boolean startGPS_Old() {
-        MyActivity.setVibrate();
-
-        if (isGpsRunning) {
-            Log.w(TAG, "GPS已在运行，无需重复启动");
-            // 提示用户GPS已在运行
-            showToast(
-                MyActivity.zh_cn ? "GPS已在运行中" : "GPS is already running"
-            );
-            return true;
-        }
-
-        // 检查定位权限
-        Context context = getApplicationContext();
-        String finePerm = Manifest.permission.ACCESS_FINE_LOCATION;
-        String coarsePerm = Manifest.permission.ACCESS_COARSE_LOCATION;
-        boolean hasFine =
-            ContextCompat.checkSelfPermission(context, finePerm) ==
-            PackageManager.PERMISSION_GRANTED;
-        boolean hasCoarse =
-            ContextCompat.checkSelfPermission(context, coarsePerm) ==
-            PackageManager.PERMISSION_GRANTED;
-
-        if (!hasFine && !hasCoarse) {
-            Log.e(TAG, "缺少定位权限，启动GPS失败");
-            // 提示用户缺少权限
-            showToast(
-                MyActivity.zh_cn
-                    ? "缺少定位权限，GPS启动失败"
-                    : "Missing location permission, GPS startup failed"
-            );
-            return false;
-        }
-
-        // 启动GPSManager
-        boolean success = gpsManager.startGPS(
-            new GPSManager.OnLocationUpdateListener() {
-                @Override
-                public void onLocationUpdated(
-                    double lat,
-                    double lng,
-                    float speed,
-                    float distance
-                ) {
-                    Log.d(
-                        TAG,
-                        "GPS更新：纬度=" +
-                            lat +
-                            " 经度=" +
-                            lng +
-                            " 速度=" +
-                            speed +
-                            " 距离=" +
-                            distance
-                    );
-                }
-
-                @Override
-                public void onGPSStatusChanged(String status) {
-                    Log.d(TAG, "GPS状态：" + status);
-                }
-            }
-        );
-
-        if (success) {
-            isGpsRunning = true;
-            Log.i(TAG, "GPS启动成功（前台服务托管）");
-            // 提示用户GPS启动成功
-            showToast(
-                MyActivity.zh_cn ? "GPS启动成功" : "GPS started successfully"
-            );
-        } else {
-            Log.e(TAG, "GPS启动失败");
-            // 提示用户GPS启动失败
-            showToast(
-                MyActivity.zh_cn
-                    ? "GPS启动失败，请检查定位服务是否开启"
-                    : "GPS startup failed, check if location service is enabled"
-            );
-        }
-
-        return success;
-    }
-
     public boolean startGPS() {
         MyActivity.setVibrate();
 
@@ -1100,7 +1024,7 @@ public class MyService extends Service {
         });
     }
 
-    // ========== 新增GPS逻辑：停止GPS方法（供C++调用） ==========
+    // ========== 停止GPS方法（供C++调用） ==========
     public void stopGPS() {
         MyActivity.setVibrate();
 
@@ -1290,5 +1214,168 @@ public class MyService extends Service {
             "\n" +
             strGpsStatus
         );
+    }
+
+    /**
+     * 服务内播放TTS文本（对外暴露的核心方法）
+     */
+    public void playMyTextInService(String text) {
+        if (TextUtils.isEmpty(text)) {
+            Log.w("TTS", "播放文本为空，跳过");
+            return;
+        }
+
+        // 检查TTS引擎是否安装
+        checkTTSEngine();
+
+        synchronized (ttsLock) {
+            if (isTtsInitializing) {
+                pendingTtsText = text;
+                Log.d("TTS", "TTS正在初始化，缓存待播放文本：" + text);
+                return;
+            }
+
+            isTtsInitializing = true;
+            pendingTtsText = text;
+
+            // 新建TTSUtils实例（使用服务上下文）
+            TTSUtils newTts = new TTSUtils(getApplicationContext());
+            currentPlayingTts = newTts;
+
+            newTts.initialize(
+                new TTSUtils.InitCallback() {
+                    @Override
+                    public void onSuccess() {
+                        synchronized (ttsLock) {
+                            isTtsInitializing = false;
+                            isTtsInitialized = true;
+                        }
+
+                        // 设置播放完成监听
+                        newTts.setOnPlayCompleteListener(
+                            new TTSUtils.OnPlayCompleteListener() {
+                                @Override
+                                public void onPlayComplete() {
+                                    Log.d("TTS", "服务内TTS播放完成！");
+                                    // 播放完成后释放资源
+                                    newTts.shutdown();
+                                    synchronized (ttsLock) {
+                                        if (currentPlayingTts == newTts) {
+                                            currentPlayingTts = null;
+                                        }
+                                    }
+                                }
+
+                                @Override
+                                public void onPlayStopped() {
+                                    Log.d("TTS", "服务内TTS播放被停止！");
+                                    newTts.shutdown();
+                                    synchronized (ttsLock) {
+                                        if (currentPlayingTts == newTts) {
+                                            currentPlayingTts = null;
+                                        }
+                                    }
+                                }
+                            }
+                        );
+
+                        // 播放缓存文本
+                        String playText = null;
+                        synchronized (ttsLock) {
+                            playText = pendingTtsText;
+                            pendingTtsText = null;
+                        }
+                        if (!TextUtils.isEmpty(playText)) {
+                            newTts.speak(playText);
+                            Log.d("TTS", "服务内播放文本：" + playText);
+                        }
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Log.e("TTS", "服务内TTS初始化失败：" + error);
+                        synchronized (ttsLock) {
+                            isTtsInitializing = false;
+                            pendingTtsText = null;
+                            if (currentPlayingTts == newTts) {
+                                currentPlayingTts = null;
+                            }
+                        }
+                        newTts.shutdown();
+                    }
+                }
+            );
+        }
+    }
+
+    /**
+     * 停止服务内的TTS播放
+     */
+    public void stopPlayMyTextInService() {
+        synchronized (ttsLock) {
+            isTtsInitializing = false;
+            pendingTtsText = null;
+
+            if (currentPlayingTts != null) {
+                currentPlayingTts.stop();
+                currentPlayingTts.shutdown();
+                currentPlayingTts = null;
+                Log.d("TTS", "服务内已停止并释放TTS实例");
+            }
+        }
+    }
+
+    /**
+     * 检查系统TTS引擎是否安装，未安装则引导用户安装
+     */
+    private void checkTTSEngine() {
+        Intent checkIntent = new Intent(
+            TextToSpeech.Engine.ACTION_CHECK_TTS_DATA
+        );
+        ComponentName comp = checkIntent.resolveActivity(getPackageManager());
+        if (comp == null) {
+            Log.w("TTS", "系统未安装TTS引擎，引导用户安装");
+            Intent installIntent = new Intent(
+                TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA
+            );
+            installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            try {
+                startActivity(installIntent);
+            } catch (Exception e) {
+                Log.e("TTS", "跳转TTS引擎安装页面失败", e);
+                String tipText = MyActivity.zh_cn
+                    ? "请手动安装TTS语音引擎"
+                    : "Please install the TTS voice engine manually";
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    Toast.makeText(
+                        getApplicationContext(),
+                        tipText,
+                        Toast.LENGTH_LONG
+                    ).show();
+                });
+            }
+        }
+    }
+
+    /**
+     * 对外提供的静态调用方法（供Activity/其他组件调用）
+     */
+    public static void playText(String text) {
+        MyService service = getInstance();
+        if (service != null) {
+            service.playMyTextInService(text);
+        } else {
+            Log.e("TTS", "MyService未启动，无法播放TTS");
+        }
+    }
+
+    /**
+     * 对外提供的静态停止方法
+     */
+    public static void stopTextPlay() {
+        MyService service = getInstance();
+        if (service != null) {
+            service.stopPlayMyTextInService();
+        }
     }
 }
