@@ -234,6 +234,10 @@ public class MyService extends Service {
 
         Log.d("MyService", "onDestroy()-------");
 
+        // ========== TTS 资源最终兜底释放 ==========
+        stopPlayMyTextInService(); // 停止并释放TTS资源
+        // =======================================
+
         // ========== 服务销毁时停止GPS ==========
         stopGPS();
         // ==========================================
