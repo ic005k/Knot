@@ -1145,8 +1145,6 @@ void Method::setQLabelImage(QLabel* lbl, int w, int h, QString imgFile) {
   lbl->setPixmap(*pixmap);
 }
 
-#include <QJniObject>
-
 /**
  * @brief 调用Android端TTS服务播放文本
  * @param text 待播放的文本内容
