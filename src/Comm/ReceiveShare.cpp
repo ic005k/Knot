@@ -386,11 +386,22 @@ void ReceiveShare::moveTaskToFront() {
 
 void ReceiveShare::bringAppToForeground() {
 #ifdef Q_OS_ANDROID
-  // 获取当前Activity实例
-  QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  if (activity.isValid()) {
-    // 调用Android原生的「仅唤醒+置顶显示」方法（核心修改）
-    activity.callMethod<void>("bringAppToForeground", "()V");
+  try {
+    QJniObject::callStaticMethod<void>(
+        "com/x/MyService", "bringAppToForegroundFromService", "()V");
+
+  } catch (const std::exception& e) {
+    qDebug() << "Bring App to foreground exception: " << e.what();
+    QJniEnvironment env;
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
+  } catch (...) {
+    qDebug() << "Bring App to foreground unknown exception occurred";
+    QJniEnvironment env;
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
   }
 #endif
 }
@@ -457,7 +468,8 @@ void ReceiveShare::callJavaNotify9() {
   if (QFile::exists(file)) {
     if (type == "defaultopen") {
       closeAllChildWindows();
-      moveTaskToFront();
+      // moveTaskToFront();
+      bringAppToForeground();
     }
     mw_one->m_Reader->startOpenFile(file);
   }

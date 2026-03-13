@@ -41,8 +41,11 @@ import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodSession.EventCallback;
 import android.widget.Toast;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
@@ -1382,4 +1385,188 @@ public class MyService extends Service {
             service.stopPlayMyTextInService();
         }
     }
+
+    // ========== 新增：将Activity的前台唤醒逻辑迁移到Service ==========
+    /**
+     * 唤醒屏幕并让应用显示在锁屏上层（Service中适配）
+     */
+    private void wakeUpScreen() {
+        // 1. 获取PowerManager并唤醒屏幕
+        PowerManager pm = (PowerManager) getSystemService(
+            Context.POWER_SERVICE
+        );
+        if (pm != null) {
+            int wakeLockFlags =
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK |
+                PowerManager.ACQUIRE_CAUSES_WAKEUP |
+                PowerManager.ON_AFTER_RELEASE;
+            PowerManager.WakeLock wakeLock = pm.newWakeLock(
+                wakeLockFlags,
+                "MyApp:WakeLockTag"
+            );
+            if (!wakeLock.isHeld()) {
+                wakeLock.acquire(10000); // 持有10秒
+            }
+        }
+
+        // 2. 适配Service中无法直接操作Window的问题，通过启动Activity来设置Window Flag
+        Intent intent = new Intent(this, MyActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // Android 9.0+ 新API
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+            try {
+                pendingIntent.send();
+            } catch (PendingIntent.CanceledException e) {
+                Log.e(TAG, "唤醒屏幕PendingIntent发送失败", e);
+            }
+        } else {
+            startActivity(intent);
+        }
+    }
+
+    /**
+     * 将应用移到前台（Service中实现）
+     */
+    private void bringToFront() {
+        try {
+            Intent intent = new Intent(this, MyActivity.class);
+            // 核心Flag：保证复用已有实例，不重复创建
+            intent.addFlags(
+                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT |
+                    Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP |
+                    Intent.FLAG_ACTIVITY_NO_USER_ACTION |
+                    Intent.FLAG_ACTIVITY_NEW_TASK
+            ); // Service启动Activity必须加NEW_TASK
+
+            startActivity(intent);
+            Log.d(TAG, "Service中通过Intent唤醒应用前台成功");
+
+            // 延迟激活窗口
+            new Handler(Looper.getMainLooper()).postDelayed(
+                () -> {
+                    // 尝试获取Activity实例并激活窗口
+                    if (
+                        MyActivity.m_instance != null &&
+                        !MyActivity.m_instance.isFinishing() &&
+                        !MyActivity.m_instance.isDestroyed()
+                    ) {
+                        Window window = MyActivity.m_instance.getWindow();
+                        if (window != null) {
+                            window.addFlags(
+                                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                            );
+                            window.getDecorView().requestFocus();
+                            window.getDecorView().postInvalidate();
+                        }
+                    }
+                },
+                200
+            );
+        } catch (Exception e) {
+            Log.e(TAG, "Service中移应用到前台失败", e);
+        }
+    }
+
+    /**
+     * Service中核心方法：将应用带到前台
+     */
+    public void bringAppToForeground() {
+        try {
+            //wakeUpScreen();
+            bringToFront();
+
+            // 强制激活窗口 + 清除输入法焦点
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (
+                    MyActivity.m_instance != null &&
+                    !MyActivity.m_instance.isFinishing() &&
+                    !MyActivity.m_instance.isDestroyed()
+                ) {
+                    hideSoftInput();
+                    forceDisconnectInputMethod();
+                    // 强制刷新UI
+                    MyActivity.m_instance
+                        .getWindow()
+                        .getDecorView()
+                        .postInvalidate();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 隐藏软键盘（适配Service）
+     */
+    private void hideSoftInput() {
+        if (MyActivity.m_instance == null) {
+            Log.e(TAG, "hideSoftInput失败：MyActivity实例为空");
+            return;
+        }
+
+        InputMethodManager imm = (InputMethodManager) getSystemService(
+            Context.INPUT_METHOD_SERVICE
+        );
+        if (imm == null) return;
+
+        View currentFocus = MyActivity.m_instance.getCurrentFocus();
+        if (currentFocus != null) {
+            imm.hideSoftInputFromWindow(
+                currentFocus.getWindowToken(),
+                InputMethodManager.HIDE_NOT_ALWAYS
+            );
+        }
+    }
+
+    /**
+     * 强制断开输入法连接（适配Service）
+     */
+    // 正确：安卓官方的“断开输入法+隐藏键盘”方法
+    // 优化：去掉Context参数，直接用MyService的上下文
+    public static void forceDisconnectInputMethod() {
+        try {
+            // 直接用MyService的上下文（this.getApplicationContext()）
+            Context context = instance.getApplicationContext();
+            InputMethodManager imm =
+                (InputMethodManager) context.getSystemService(
+                    Context.INPUT_METHOD_SERVICE
+                );
+
+            // 隐藏软键盘+清除焦点
+            if (context instanceof Activity) {
+                // 兼容Activity/Service场景
+                View focusView = ((Activity) context).getCurrentFocus();
+                if (focusView != null) {
+                    imm.hideSoftInputFromWindow(focusView.getWindowToken(), 0);
+                    focusView.clearFocus();
+                }
+            }
+
+            // 兜底关闭输入法
+            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+        } catch (Exception e) {
+            Log.e("MyService", "强制断开输入法失败", e);
+        }
+    }
+
+    /**
+     * 对外提供的静态方法：从任意地方调用，将应用带到前台
+     */
+    public static void bringAppToForegroundFromService() {
+        MyService service = getInstance();
+        if (service != null) {
+            service.bringAppToForeground();
+        } else {
+            Log.e(TAG, "MyService未启动，无法执行bringAppToForeground");
+        }
+    }
+    // ========== 前台唤醒逻辑迁移结束 ==========
 }
