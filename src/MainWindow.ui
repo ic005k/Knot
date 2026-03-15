@@ -1225,6 +1225,9 @@ border-radius: 4px;</string>
           <enum>QFrame::Shadow::Plain</enum>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="spacing">
+           <number>30</number>
+          </property>
           <property name="leftMargin">
            <number>0</number>
           </property>
@@ -1268,14 +1271,27 @@ border-radius: 4px;</string>
             </property>
             <property name="iconSize">
              <size>
-              <width>20</width>
-              <height>20</height>
+              <width>32</width>
+              <height>32</height>
              </size>
             </property>
             <property name="toolButtonStyle">
-             <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
+             <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
             </property>
            </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <widget class="QToolButton" name="btnAdd">
@@ -1358,6 +1374,43 @@ border-radius: 4px;</string>
            </widget>
           </item>
           <item>
+           <widget class="QToolButton" name="btnFind">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">/*border:none*/</string>
+            </property>
+            <property name="text">
+             <string>Find</string>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="toolButtonStyle">
+             <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QToolButton" name="btnSync">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -1385,43 +1438,6 @@ border-radius: 4px;</string>
             <property name="icon">
              <iconset resource="../res.qrc">
               <normaloff>:/res/upload.svg</normaloff>:/res/upload.svg</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>20</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="toolButtonStyle">
-             <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="btnFind">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">/*border:none*/</string>
-            </property>
-            <property name="text">
-             <string>Find</string>
             </property>
             <property name="iconSize">
              <size>
