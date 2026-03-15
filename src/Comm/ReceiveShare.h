@@ -35,8 +35,6 @@ class ReceiveShare : public QDialog {
   QString getShareDone();
   void setShareDone(QString strDone);
 
-  void moveTaskToFront();
-
   int getCursorPos();
   void setCursorPos(int pos);
   QString getShareMethod();

@@ -370,20 +370,6 @@ void ReceiveShare::shareImages(const QString& title,
 #endif
 }
 
-void ReceiveShare::moveTaskToFront() {
-#ifdef Q_OS_ANDROID
-  // 获取当前Activity实例（非静态）
-  QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  if (activity.isValid()) {
-    // 1. 先调用唤醒屏幕的方法
-    activity.callMethod<void>("wakeUpScreen", "()V");
-
-    // 2. 再将Activity移到前台（改为实例方法调用）
-    activity.callMethod<void>("bringToFront", "()V");
-  }
-#endif
-}
-
 void ReceiveShare::bringAppToForeground() {
 #ifdef Q_OS_ANDROID
   try {
@@ -468,7 +454,7 @@ void ReceiveShare::callJavaNotify9() {
   if (QFile::exists(file)) {
     if (type == "defaultopen") {
       closeAllChildWindows();
-      // moveTaskToFront();
+
       bringAppToForeground();
     }
     mw_one->m_Reader->startOpenFile(file);

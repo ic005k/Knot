@@ -76,12 +76,6 @@ static void JavaNotify_3() {
 
         mw_one->m_ReceiveShare->bringAppToForeground();
 
-        // Android唤醒屏幕（可选，保留原有逻辑）
-        QJniObject activity = QNativeInterface::QAndroidApplication::context();
-        if (activity.isValid()) {
-          // activity.callMethod<void>("wakeUpScreen", "()V");
-        }
-
         // 3. 读取UI属性（主线程安全）
         QString strTime = mw_one->m_Todo->strAlarmTime;
         QString strText = mw_one->m_Todo->strAlarmText;
