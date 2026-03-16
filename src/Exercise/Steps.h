@@ -92,7 +92,6 @@ class Steps : public QDialog {
   bool isShowRoute = false;
 
   Speedometer* m_speedometer;
-  WeatherFetcher* weatherFetcher;
 
   QString btnRoundStyle =
       "QToolButton {"

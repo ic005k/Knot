@@ -154,9 +154,8 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   directionRoute = tr("Direction");
 
   // Weather
-  weatherFetcher = new WeatherFetcher(this);
-  // 连接信号时，通过天气代码转换为Unicode符号
-  connect(weatherFetcher,
+  // 直接连接单例的信号（无需创建对象）
+  connect(WeatherFetcher::instance(),
           static_cast<void (WeatherFetcher::*)(double, int, const QString&)>(
               &WeatherFetcher::weatherUpdated),
           this, [this](double temp, int code, const QString& desc) {
@@ -168,19 +167,21 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
             strCurrentWeatherIcon = weatherIcon;
 
             // 3. 组合显示（符号+温度+描述）
-            strCurrentTemp = "\n" + tr("Weather") + ": " +
-                             QString("%1℃  %2")  // 只保留温度和描述的占位符
-                                 .arg(temp)      // 体感温度
-                                 .arg(desc);     // 天气描述（中文/英文）
+            strCurrentTemp =
+                "\n" + tr("Weather") + ": " +
+                QString("%1℃  %2")         // 只保留温度和描述的占位符
+                    .arg(temp, 0, 'f', 1)  // 优化：温度保留1位小数更友好
+                    .arg(desc);            // 天气描述（中文/英文）
 
             qDebug() << strCurrentTemp << strCurrentWeatherIcon;
           });
 
-  connect(weatherFetcher, &WeatherFetcher::errorOccurred, this,
+  connect(WeatherFetcher::instance(), &WeatherFetcher::errorOccurred, this,
           [this](const QString& error) {
             // 处理错误
             qDebug() << "天气获取错误:" << error;
             strCurrentTemp = "";
+            strCurrentWeatherIcon = "";  // 补充：错误时清空图标变量，避免脏数据
           });
 
   // Route
@@ -219,7 +220,7 @@ Steps::~Steps() {
 
   delete addressResolver;
   delete m_speedometer;
-  delete weatherFetcher;
+
   delete compass;
 
 // 安卓端额外清理
@@ -990,16 +991,6 @@ void Steps::updateGpsUI() {
       // 无效坐标，不请求
 
     } else {
-      if (!isInitTime) {
-        weatherFetcher->fetchWeather(latitude, longitude);
-      }
-
-      // Weather
-      if (m_lastFetchWeatherTime.secsTo(currentTime) >=
-          1800) {  // 30分钟=1800秒
-        weatherFetcher->fetchWeather(latitude, longitude);
-        m_lastFetchWeatherTime = currentTime;  // 更新上次请求时间
-      }
     }
   }
 }
@@ -1196,6 +1187,7 @@ void Steps::updateGetGpsData() {
         m_lastFetchWeatherTime = currentTime;
 
         saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
+        WeatherFetcher::instance()->fetchWeather(latitude, longitude);
 
         isInitTime = true;
       }
@@ -1223,6 +1215,14 @@ void Steps::updateGetGpsData() {
           saveRoute(strJsonRouteFile, timeRoute, latRoute, lonRoute,
                     m_lastAddress);
         }
+      }
+
+      // Weather
+      int ti_w = 1800;  // 30分钟=1800秒
+      if (isGpsTest) ti_w = 16;
+      if (m_lastFetchWeatherTime.secsTo(currentTime) >= ti_w) {
+        WeatherFetcher::instance()->fetchWeather(latitude, longitude);
+        m_lastFetchWeatherTime = currentTime;  // 更新上次请求时间
       }
 
       // Play Voice
@@ -1430,33 +1430,6 @@ void Steps::refreshMotionData() {
     allGpsTotal();
   }
 }
-
-// Qt6.6.3的旧有实现
-/*void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
-                          QString t3, QString t4, QString t5, QString t6,
-                          QString t7, QVariantList speedData,
-                          QVariantList altitudeData) {
-  QQuickItem* root = mui->qwGpsList->rootObject();
-  if (!root) {
-    qWarning() << "rootObject is null!";
-    return;
-  }
-
-  // 调用QML的insertItem，最后一个参数传入speedData
-  QMetaObject::invokeMethod(
-      root, "insertItem", Q_ARG(QVariant, curIndex),  // 参数1：索引
-      Q_ARG(QVariant, t0),                            // 参数2：text0
-      Q_ARG(QVariant, t1),                            // 参数3：text1
-      Q_ARG(QVariant, t2),                            // 参数4：text2
-      Q_ARG(QVariant, t3),                            // 参数5：text3
-      Q_ARG(QVariant, t4),                            // 参数6：text4
-      Q_ARG(QVariant, t5),                            // 参数7：text5
-      Q_ARG(QVariant, t6),                            // 参数8：text6
-      Q_ARG(QVariant, t7),                            // 参数9：text7
-      Q_ARG(QVariant, speedData),    // 速度数据（QVariantList）
-      Q_ARG(QVariant, altitudeData)  // 海拔数据
-  );
-}*/
 
 // Qt6.10.2的实现
 void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
