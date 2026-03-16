@@ -1233,29 +1233,23 @@ QTreeWidget* MainWindow::get_tw(int tabIndex) {
 }
 
 void MainWindow::on_actionAbout() {
-  QTextBrowser* textBrowser = new QTextBrowser;
-  textBrowser->append("");
-  textBrowser->append(appName + "  Ver: " + ver);
+  QString str = "\n" + appName + "  Ver: " + ver + "\n\n" + tr("Startup Time") +
+                ": " + strStartTotalTime + " s" + "\n" + loginTime + "\n" +
+                "(c) 2022-" + QString::number(QDate::currentDate().year()) +
+                " The Knot Authors\n";
 
-  textBrowser->append("");
-  textBrowser->append(tr("Startup Time") + ": " + strStartTotalTime + " s" +
-                      "\n" + loginTime + "\n" + "(c) 2022-" +
-                      QString::number(QDate::currentDate().year()) +
-                      " The Knot Authors");
-  textBrowser->append("");
-  textBrowser->setHidden(true);
-
-  m_AboutThis->ui->lblAbout->setText(textBrowser->toPlainText());
+  m_AboutThis->ui->lblAbout->setText(str);
   m_AboutThis->ui->frameAbout->show();
 
   int x, y;
   if (!isAndroid) {
     m_AboutThis->setMaximumWidth(320);
+    m_AboutThis->setFixedHeight(mw_one->geometry().height() - 30);
 
-    x = this->geometry().x() +
-        (this->geometry().width() - m_AboutThis->width()) / 2;
-    y = this->geometry().y() +
-        (this->geometry().height() - m_AboutThis->height()) / 2;
+    x = mw_one->geometry().x() +
+        (mw_one->geometry().width() - m_AboutThis->width()) / 2;
+    y = mw_one->geometry().y() +
+        (mw_one->geometry().height() - m_AboutThis->height()) / 2;
   } else {
     m_AboutThis->setFixedWidth(this->width());
     m_AboutThis->setFixedHeight(this->height());
