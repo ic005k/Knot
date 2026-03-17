@@ -2751,3 +2751,15 @@ void MainWindow::on_tabMotion_currentChanged(int index) {
   else
     m_Steps->tmeRefreshSteps->stop();
 }
+
+void MainWindow::on_btnPause_clicked() {
+  if (!isRunPaused) {
+    isRunPaused = true;
+    mui->btnPause->setIcon(QIcon(":/res/erun.svg"));
+    mui->lblGpsInfo->setStyleSheet(m_Steps->lblPausedStyle);
+  } else {
+    isRunPaused = false;
+    mui->btnPause->setIcon(QIcon(":/res/epaused.svg"));
+    mui->lblGpsInfo->setStyleSheet(m_Steps->lblStartStyle);
+  }
+}

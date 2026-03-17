@@ -793,7 +793,16 @@ void MainHelper::init_UIWidget() {
 
   QObject::connect(sliderButton, &SliderButton::sliderMovedToEnd, mw_one,
                    [&]() { mui->btnGPS->click(); });
+
   mui->frame_btnGps->layout()->addWidget(centralWidget);
+
+  int fh = mui->frame_btnGps->height() / 2;
+  mui->btnPause->setFixedHeight(fh);
+  mui->btnPause->setFixedWidth(fh);
+  mui->btnPause->setIcon(QIcon(":/res/epaused.svg"));
+  mui->frame_btnGps->layout()->removeWidget(mui->btnPause);
+  mui->frame_btnGps->layout()->addWidget(mui->btnPause);
+  mui->btnPause->setEnabled(false);
 }
 
 void MainHelper::startBackgroundTaskUpdateBakFileList() {

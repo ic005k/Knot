@@ -813,8 +813,11 @@ void Steps::startRecordMotion() {
   QTimer::singleShot(1000, mw_one, [this]() {
     // timer->start(1000);
 
-    if (!mw_one->myGetGpsDataThread->isRunning())
+    if (!mw_one->myGetGpsDataThread->isRunning()) {
+      isRunPaused = false;
       mw_one->myGetGpsDataThread->start();
+      mui->btnPause->setEnabled(true);
+    }
 
     isGpsRun = true;
   });
@@ -1250,6 +1253,9 @@ void Steps::stopRecordMotion() {
     isGpsRun = false;
 
     // timer->stop();
+
+    mui->btnPause->setEnabled(false);
+    mui->btnPause->setIcon(QIcon(":/res/epaused.svg"));
 
     mw_one->myGetGpsDataThread->stop();
 

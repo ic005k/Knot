@@ -798,6 +798,8 @@ class MainWindow : public QMainWindow {
 
   void on_tabMotion_currentChanged(int index);
 
+  void on_btnPause_clicked();
+
  private:
   bool isMoveEntry;
   QTimer* tmeFlash;

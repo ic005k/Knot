@@ -211,5 +211,7 @@
         <file>res/remarks_l.svg</file>
         <file>res/sound/tumbler_click.wav</file>
         <file>res/sound/alarm.wav</file>
+        <file>res/epaused.svg</file>
+        <file>res/erun.svg</file>
     </qresource>
 </RCC>

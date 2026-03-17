@@ -1840,6 +1840,7 @@ void Todo::showInputPanel() {
 }
 
 void Todo::openClockActivity(const QString& content) {
+  Q_UNUSED(content);
 #ifdef Q_OS_ANDROID
   QJniObject activity =
       QJniObject(QNativeInterface::QAndroidApplication::context());

@@ -3955,6 +3955,23 @@ QRadioButton:disabled {
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QToolButton" name="btnPause">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../res.qrc">
+                  <normaloff>:/res/epaused.svg</normaloff>:/res/epaused.svg</iconset>
+                </property>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>

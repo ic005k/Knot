@@ -106,7 +106,7 @@ inline double yMaxMonth, yMaxDay;
 inline bool isAndroid, isLinux, isMacOS, isZipOK, isMenuImport, isDownData,
     loading, isEncrypt, isIOS, isEpub, isEpubError, isText, isPDF,
     isInitThemeEnd, isUpData, isRemovedTopItem, isReport, isReadTWEnd,
-    isWindows, isEBook, isGpsRun;
+    isWindows, isEBook, isGpsRun, isRunPaused;
 
 inline bool isPasswordError = false;
 inline bool isrbFreq = true;
