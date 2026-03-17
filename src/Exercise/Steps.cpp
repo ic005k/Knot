@@ -111,9 +111,6 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   mui->btnSelGpsDate->setIconSize(QSize(iconSize, iconSize));
   mui->btnSportsChart->setIconSize(QSize(iconSize, iconSize));
 
-  timer = new QTimer(this);
-  connect(timer, &QTimer::timeout, this, &Steps::updateGetGpsData);
-
   tmeRefreshSteps = new QTimer(this);
   connect(tmeRefreshSteps, &QTimer::timeout, this, &Steps::refreshSteps);
 
@@ -209,12 +206,6 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
 }
 
 Steps::~Steps() {
-  // 停止定时器并释放
-  if (timer->isActive()) {
-    timer->stop();
-  }
-  delete timer;
-
   if (tmeRefreshSteps->isActive()) tmeRefreshSteps->stop();
   delete tmeRefreshSteps;
 
@@ -811,8 +802,6 @@ void Steps::startRecordMotion() {
   mui->btnSelGpsDate->setEnabled(false);
 
   QTimer::singleShot(1000, mw_one, [this]() {
-    // timer->start(1000);
-
     if (!mw_one->myGetGpsDataThread->isRunning()) {
       isRunPaused = false;
       mw_one->myGetGpsDataThread->start();
@@ -1249,13 +1238,11 @@ void Steps::stopRecordMotion() {
   refreshRoute();
   saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
 
+  mui->btnPause->setEnabled(false);
+  mui->btnPause->setIcon(QIcon(":/res/epaused.svg"));
+
   QTimer::singleShot(2000, mw_one, [this]() {
     isGpsRun = false;
-
-    // timer->stop();
-
-    mui->btnPause->setEnabled(false);
-    mui->btnPause->setIcon(QIcon(":/res/epaused.svg"));
 
     mw_one->myGetGpsDataThread->stop();
 

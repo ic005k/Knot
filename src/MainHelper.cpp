@@ -783,6 +783,7 @@ void MainHelper::init_UIWidget() {
 
   mui->btnGPS->setStyleSheet(m_Steps->btnRoundStyle);
   mui->btnGPS->hide();
+
   mui->frame_btnGps->setFixedHeight(80);
   QWidget* centralWidget = new QWidget(mw_one);
   QVBoxLayout* layout = new QVBoxLayout(centralWidget);
@@ -796,13 +797,18 @@ void MainHelper::init_UIWidget() {
 
   mui->frame_btnGps->layout()->addWidget(centralWidget);
 
-  int fh = mui->frame_btnGps->height() / 2;
+  int fh = 80 - mui->frame_btnGps->contentsMargins().top() * 2 -
+           layout->contentsMargins().top() * 2 -
+           sliderButton->contentsMargins().top() * 2 -
+           centralWidget->contentsMargins().top() * 2 - 10;
   mui->btnPause->setFixedHeight(fh);
   mui->btnPause->setFixedWidth(fh);
   mui->btnPause->setIcon(QIcon(":/res/epaused.svg"));
+  mui->btnPause->setIconSize(QSize(fh - 10, fh - 10));
   mui->frame_btnGps->layout()->removeWidget(mui->btnPause);
   mui->frame_btnGps->layout()->addWidget(mui->btnPause);
   mui->btnPause->setEnabled(false);
+  mui->btnPause->hide();
 }
 
 void MainHelper::startBackgroundTaskUpdateBakFileList() {

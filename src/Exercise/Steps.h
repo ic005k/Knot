@@ -85,8 +85,6 @@ class Steps : public QDialog {
 
   QString strMapKeyTestInfo;
 
-  QTimer* timer;
-
   GeoAddressResolver* addressResolver = nullptr;
   QString m_lastAddress;
   bool isShowRoute = false;
