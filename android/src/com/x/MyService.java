@@ -402,7 +402,7 @@ public class MyService extends Service {
                     channel.enableVibration(true);
                     channel.setVibrationPattern(new long[] { 0, 500, 1000 });
                     channel.setSound(null, null); // 渠道静音
-                    channel.setBypassDnd(true);
+                    channel.setBypassDnd(false); // 不是强需求闹钟，建议关掉
                     channel.setLockscreenVisibility(
                         Notification.VISIBILITY_PUBLIC
                     );
@@ -552,12 +552,16 @@ public class MyService extends Service {
             MediaPlayer mediaPlayer = new MediaPlayer();
             mediaPlayer.setDataSource(context, soundUri);
 
-            // 关键：设置音频流为闹钟（MIUI不锁屏静音）
+            // USAGE_ALARM + 通知通道配置，似乎容易和系统音频抢占冲突？
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ALARM)
+                //.setUsage(AudioAttributes.USAGE_ALARM)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build();
             mediaPlayer.setAudioAttributes(audioAttributes);
+
+            // 手动设置音量（最大音量的80%，可调整）
+            mediaPlayer.setVolume(1.0f, 1.0f); // 左右声道都设为80%
 
             mediaPlayer.setLooping(false);
             mediaPlayer.prepareAsync();

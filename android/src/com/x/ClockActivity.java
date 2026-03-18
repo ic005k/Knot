@@ -312,7 +312,7 @@ public class ClockActivity
 
     @Override
     public void onBackPressed() {
-        MyActivity.stopPlayMyText();
+        MyService.stopTextPlay();
 
         // 停止MediaPlayer
         if (player != null && player.isPlaying()) {
