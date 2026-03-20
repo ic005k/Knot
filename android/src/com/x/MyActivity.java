@@ -468,7 +468,12 @@ public class MyActivity
                     if (mScreenStatusReceiver != null) {
                         try {
                             unregisterReceiver(mScreenStatusReceiver);
-                        } catch (Exception e) {}
+                        } catch (IllegalArgumentException e) {
+                            // 未注册时的异常直接忽略，避免日志告警
+                            Log.d(TAG, "ScreenStatusReceiver未注册，无需注销");
+                        } catch (Exception e) {
+                            Log.w(TAG, "注销ScreenStatusReceiver异常", e);
+                        }
                         mScreenStatusReceiver = null;
                     }
                     registSreenStatusReceiver();
@@ -644,6 +649,18 @@ public class MyActivity
             "Main onDestroy (config change: " + isConfigChangeRecreate + ")"
         );
 
+        // ========== 无论是否配置变更，都移除Handler回调 ==========
+        // 1. 处理屏幕状态的mHandler
+        if (mHandler != null) {
+            mHandler.removeCallbacksAndMessages(null); // 移除所有未执行任务（关键）
+            // 注意：这里先不置null，后续根据是否配置变更决定
+        }
+
+        // 2. 处理静态的m_handler（Toast用）
+        if (m_handler != null) {
+            m_handler.removeCallbacksAndMessages(null); // 仅清理回调，不置null
+        }
+
         // ========== 优化点1：仅在非配置变更销毁时，注销Activity生命周期回调 ==========
         if (!isConfigChangeRecreate) {
             getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
@@ -710,6 +727,11 @@ public class MyActivity
 
         // 仅应用真退出 + 非配置变更时，才停止Service
         if (isAppExit && !isConfigChangeRecreate) {
+            // 真正退出时：清空引用，加速GC
+            if (mHandler != null) {
+                mHandler = null;
+            }
+
             Intent serviceIntent = new Intent(this, MyService.class);
             stopService(serviceIntent);
             isServiceStarted = false;
@@ -1533,8 +1555,10 @@ public class MyActivity
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 1:
+                    // 使用应用上下文，彻底避免Activity引用泄漏
+                    Context appContext = getMyAppContext();
                     Toast toast = Toast.makeText(
-                        m_instance,
+                        appContext,
                         (String) msg.obj,
                         Toast.LENGTH_LONG
                     );
@@ -1775,10 +1799,8 @@ public class MyActivity
     }
 
     public int isPlaying() {
-        int a = 0;
-        if (player.isPlaying()) a = 1;
-        else a = 0;
-        return a;
+        if (player == null) return 0;
+        return player.isPlaying() ? 1 : 0;
     }
 
     public void seekTo(String strPos) {

@@ -236,23 +236,14 @@ void AboutThis::on_btnDownloadUP_clicked() {
 }
 
 int AboutThis::getAndroidVer() {
-  int a = 0;
-#ifdef Q_OS_UNIX
-  a = 24;
-#endif
-
-#ifdef Q_OS_WIN
-  a = 24;
-#endif
-
 #ifdef Q_OS_ANDROID
-
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  a = activity.callStaticMethod<int>("com.x/MyActivity", "getAndroidVer",
-                                     "()I");
-
+  return activity.callStaticMethod<int>("com.x/MyActivity", "getAndroidVer",
+                                        "()I");
+#else
+  // 非Android平台返回24
+  return 24;
 #endif
-  return a;
 }
 
 void AboutThis::on_btnBack_About_clicked() { close(); }
