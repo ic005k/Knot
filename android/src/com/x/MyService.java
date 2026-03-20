@@ -27,6 +27,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -402,7 +403,7 @@ public class MyService extends Service {
                     channel.enableVibration(true);
                     channel.setVibrationPattern(new long[] { 0, 500, 1000 });
                     channel.setSound(null, null); // 渠道静音
-                    channel.setBypassDnd(false); // 不是强需求闹钟，建议关掉
+                    channel.setBypassDnd(true); // 不是强需求闹钟，建议关掉
                     channel.setLockscreenVisibility(
                         Notification.VISIBILITY_PUBLIC
                     );
@@ -475,15 +476,30 @@ public class MyService extends Service {
                 m_builderAlarm.build()
             );
 
-            // ========== 核心修改：使用现成的锁屏判断方法 ==========
+            // ========== 使用现成的锁屏判断方法 ==========
             boolean isMIUI = isMIUI(); // 判断是否是小米/MIUI系统
             boolean isLockScreen = MyActivity.getLockScreenStatus();
 
             // 播放规则：
             // 1. 非MIUI机型：无论锁屏/亮屏，都手动播放（系统通知已静音，不会双声）
             // 2. MIUI机型：锁屏时手动播放，亮屏时跳过（系统通知会自动播，避免双声）
-            if (!isMIUI || (isMIUI && isLockScreen)) {
-                playLockScreenSound(context);
+            // 检测音频服务是否存活，异常则跳过通知音播放
+            if (!isAudioServiceAlive(context)) {
+                Log.w(TAG, "音频服务已崩溃，跳过通知音播放");
+                // 仅显示通知，不播放声音，保证后续逻辑执行
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    Toast.makeText(
+                        context,
+                        MyActivity.zh_cn
+                            ? "系统音频异常，通知音暂无法播放"
+                            : "System audio error, notification sound unavailable",
+                        Toast.LENGTH_SHORT
+                    ).show();
+                });
+            } else {
+                if (!isMIUI || (isMIUI && isLockScreen)) {
+                    playLockScreenSound(context);
+                }
             }
             // ======================================================
 
@@ -509,6 +525,20 @@ public class MyService extends Service {
             java.lang.reflect.Method get = clazz.getMethod("get", String.class);
             String miui = (String) get.invoke(null, "ro.miui.ui.version.name");
             return miui != null && !miui.isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // 检测音频服务是否存活
+    private static boolean isAudioServiceAlive(Context context) {
+        try {
+            AudioManager audioManager = (AudioManager) context.getSystemService(
+                Context.AUDIO_SERVICE
+            );
+            // 尝试获取音量，能获取则服务正常
+            audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION);
+            return true;
         } catch (Exception e) {
             return false;
         }
@@ -554,8 +584,8 @@ public class MyService extends Service {
 
             // USAGE_ALARM + 通知通道配置，似乎容易和系统音频抢占冲突？
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                //.setUsage(AudioAttributes.USAGE_ALARM)
-                .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                //.setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build();
             mediaPlayer.setAudioAttributes(audioAttributes);
