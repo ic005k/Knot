@@ -130,13 +130,6 @@ void Method::closeAndroidKeyboard() {
 #endif
 }
 
-void Method::callJavaForceDisconnectInputMethod() {
-#ifdef Q_OS_ANDROID
-  QJniObject::callStaticMethod<void>(ANDROID_MAIN_ACTIVITY,
-                                     "forceDisconnectInputMethod", "()V");
-#endif
-}
-
 int Method::getFontHeight() {
   QFontMetrics fontMetrics(font());
   int nFontHeight = fontMetrics.height();

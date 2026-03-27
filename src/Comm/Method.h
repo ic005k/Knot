@@ -428,8 +428,6 @@ class Method : public QDialog {
 
   void closeAndroidKeyboard();
 
-  void callJavaForceDisconnectInputMethod();
-
   void set_ToolButtonStyle(QObject* parent);
   void set_PushButtonStyle(QObject* parent);
   QObjectList getAllToolButton(QObjectList lstUIControls);
