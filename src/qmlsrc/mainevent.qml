@@ -599,7 +599,7 @@ Rectangle {
                 NumberAnimation {
                     from: 0
                     to: 1
-                    duration: 500
+                    duration: 200
                 } //淡出效果
                 PauseAnimation {
                     duration: 0
