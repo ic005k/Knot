@@ -1175,8 +1175,8 @@ void Steps::updateGetGpsData() {
 
       if (!isInitTime) {
         m_lastGetAddressTime = currentTime;
-        m_lastSaveSpeedTime = currentTime;
         m_lastFetchWeatherTime = currentTime;
+        m_lastSaveDistance = 0;
 
         saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
         WeatherFetcher::instance()->fetchWeather(latitude, longitude);
@@ -1185,11 +1185,18 @@ void Steps::updateGetGpsData() {
       }
 
       // Speed and Altitude
-      int ts = 30;
-      if (isGpsTest) ts = 3;
-      if (m_lastSaveSpeedTime.secsTo(currentTime) >= ts) {  // 距离上次超过ts秒
+      // ===================== 定距离采样（8米）=====================
+      float saveInterval = 0.008f;  // 每8米记录一次（徒步/跑步/骑车通用）
+
+      // 计算：当前总距离 - 上次记录的距离 = 本次走了多少米
+      float deltaDistance = m_distance - m_lastSaveDistance;
+
+      // 走够8米 → 记录速度+海拔
+      if (deltaDistance >= saveInterval) {
         saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
-        m_lastSaveSpeedTime = currentTime;  // 更新上次执行时间
+
+        // 更新：上次记录的距离 = 当前总距离
+        m_lastSaveDistance = m_distance;
       }
 
       // Route

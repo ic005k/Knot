@@ -245,7 +245,6 @@ class Steps : public QDialog {
   QMutex m_dataMutex;  // 保护所有共享变量的锁
 
   QDateTime m_lastGetAddressTime;    // 上次获取地址的时间
-  QDateTime m_lastSaveSpeedTime;     // 上次保存路线的时间
   QDateTime m_lastFetchWeatherTime;  // 上次请求天气的时间
   bool isInitTime;
 
@@ -284,6 +283,7 @@ class Steps : public QDialog {
   double m_distance;
   double m_TotalDistance, oldTotalDistance;
   double m_speed;
+  float m_lastSaveDistance = 0.0f;  // 上次记录数据时的总距离
   QDateTime m_startTime;
   QTime m_time;
 
