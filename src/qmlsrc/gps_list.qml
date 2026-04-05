@@ -19,6 +19,8 @@ Rectangle {
     property real baseFontSize: (Qt.platform.os
                                  === "android") ? (20 * pixelRatio) : (9 * pixelRatio)
 
+     property int drawPointSize: 160
+
     function showRouteDialog() {
         routeDialog.visible = true
     }
@@ -156,11 +158,11 @@ Rectangle {
                           })
 
         // 3. 核心：降采样逻辑（复用已定义的算法，和海拔曲线保持一致）
-        const MAX_DRAW_POINTS = 200
+        const MAX_DRAW_POINTS = drawPointSize
         let drawPoints = originalPoints
 
         if (originalPoints.length > MAX_DRAW_POINTS) {
-            const epsilon = canvasWidth / 200
+            const epsilon = canvasWidth / drawPointSize
             drawPoints = douglasPeucker(originalPoints, epsilon)
             if (drawPoints.length > MAX_DRAW_POINTS) {
                 drawPoints = intervalSample(drawPoints, MAX_DRAW_POINTS)
@@ -335,7 +337,7 @@ Rectangle {
         }
     }
 
-    // ===================== 原有绘制函数（融合降采样） =====================
+    // ===================== 绘制海拔函数（融合降采样） =====================
     function drawAltitudeCurve(ctx, altitudeData, canvasWidth, canvasHeight) {
         if (altitudeData.length < 2) {
             ctx.fillStyle = "rgba(150, 150, 150, 0.3)"
@@ -372,15 +374,15 @@ Rectangle {
                              })
 
         // ===================== 核心新增：降采样逻辑 =====================
-        const MAX_DRAW_POINTS = 200
-        // 最多绘制200个点（可根据需求调整）
+        const MAX_DRAW_POINTS = drawPointSize
+        // 最多绘制200个点（可根据需求调整drawPointSize的值）
         let drawPoints = originalPoints
         // 最终用于绘制的点
 
         // 仅当点数超过阈值时降采样
         if (originalPoints.length > MAX_DRAW_POINTS) {
             // 道格拉斯-普克降采样（容差适配画布宽度，越大降采样越狠）
-            const epsilon = canvasWidth / 200
+            const epsilon = canvasWidth / drawPointSize
             drawPoints = douglasPeucker(originalPoints, epsilon)
 
             // 兜底：如果降采样后仍超量，用等间隔采样

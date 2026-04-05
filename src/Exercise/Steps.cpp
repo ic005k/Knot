@@ -801,6 +801,10 @@ void Steps::startRecordMotion() {
   mui->gboxMotionType->setEnabled(false);
   mui->btnSelGpsDate->setEnabled(false);
 
+  if (mui->rbCycling->isChecked()) saveInterval = 0.016f;
+  if (mui->rbHiking->isChecked()) saveInterval = 0.008f;
+  if (mui->rbRunning->isChecked()) saveInterval = 0.008f;
+
   QTimer::singleShot(1000, mw_one, [this]() {
     if (!mw_one->myGetGpsDataThread->isRunning()) {
       isRunPaused = false;
@@ -1186,7 +1190,6 @@ void Steps::updateGetGpsData() {
 
       // Speed and Altitude
       // ===================== 定距离采样（8米）=====================
-      float saveInterval = 0.008f;  // 每8米记录一次（徒步/跑步/骑车通用）
 
       // 计算：当前总距离 - 上次记录的距离 = 本次走了多少米
       float deltaDistance = m_distance - m_lastSaveDistance;

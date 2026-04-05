@@ -248,6 +248,8 @@ class Steps : public QDialog {
   QDateTime m_lastFetchWeatherTime;  // 上次请求天气的时间
   bool isInitTime;
 
+  float saveInterval = 0.008f;  // 每8米记录一次（徒步/跑步）
+
   std::vector<int> m_stepData;
   StepHillChart* m_stepChart;
 
