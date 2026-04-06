@@ -805,7 +805,7 @@ void Steps::startRecordMotion() {
   if (mui->rbHiking->isChecked()) saveInterval = 0.008f;
   if (mui->rbRunning->isChecked()) saveInterval = 0.008f;
 
-  QTimer::singleShot(1000, mw_one, [this]() {
+  QTimer::singleShot(1000, mw_one, []() {
     if (!mw_one->myGetGpsDataThread->isRunning()) {
       isRunPaused = false;
       mw_one->myGetGpsDataThread->start();
