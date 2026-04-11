@@ -489,7 +489,7 @@ Rectangle {
     }
 
     // ===================== 绘制海拔函数（融合降采样） =====================
-    function drawAltitudeCurve(ctx, altitudeData, canvasWidth, canvasHeight) {
+    function drawAltitudeCurve_old(ctx, altitudeData, canvasWidth, canvasHeight) {
         // 现在的科学逻辑
         altitudeData = adaptiveResample(altitudeData, drawPointSize);
 
@@ -676,6 +676,207 @@ Rectangle {
             ctx.fillStyle = isDark ? "#FF9800" : "#F57C00";
             ctx.fillRect(maxAltPoint.x + 3, maxAltPoint.y - 2, 4, 4);
         }
+    }
+
+    // ===================== 绘制海拔函数（融合降采样） =====================
+    function drawAltitudeCurve(ctx, altitudeData, canvasWidth, canvasHeight) {
+        // 现在的科学逻辑
+        altitudeData = adaptiveResample(altitudeData, drawPointSize);
+
+        if (altitudeData.length < 2) {
+            ctx.fillStyle = "rgba(150, 150, 150, 0.3)";
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            return;
+        }
+
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+        // 1. 计算海拔极值，确定绝对映射范围
+        const altMin = Math.min(...altitudeData);
+        const altMax = Math.max(...altitudeData);
+        const maxAbsAlt = Math.max(Math.abs(altMin), Math.abs(altMax));
+        const zeroAltY = canvasHeight / 2;
+
+        const pointCount = altitudeData.length;
+        const segmentWidth = canvasWidth / (pointCount - 1);
+
+        // 2. 计算原始坐标点（保留海拔值，供降采样用）
+        const originalPoints = [];
+        // 重命名为originalPoints，区分降采样后的点
+        altitudeData.forEach((altitude, index) => {
+            const x = index * segmentWidth;
+            const ratio = altitude / maxAbsAlt;
+            const y = zeroAltY - (ratio * zeroAltY);
+            const clampedY = Math.max(0, Math.min(canvasHeight, y));
+            originalPoints.push({
+                "x": x,
+                "y": clampedY,
+                "originalY": y,
+                "alt": altitude // 保留原始海拔值，供降采样后找极值用
+            });
+        });
+
+        // ===================== 核心新增：降采样逻辑 =====================
+        const MAX_DRAW_POINTS = drawPointSize;
+        // 最多绘制200个点（可根据需求调整drawPointSize的值）
+        let drawPoints = originalPoints;
+        // 最终用于绘制的点
+
+        // 仅当点数超过阈值时降采样
+        if (originalPoints.length > MAX_DRAW_POINTS) {
+            // 道格拉斯-普克降采样（容差适配画布宽度，越大降采样越狠）
+            const epsilon = canvasWidth / drawPointSize;
+            drawPoints = douglasPeucker(originalPoints, epsilon);
+
+            // 兜底：如果降采样后仍超量，用等间隔采样
+            if (drawPoints.length > MAX_DRAW_POINTS) {
+                drawPoints = intervalSample(drawPoints, MAX_DRAW_POINTS);
+            }
+        }
+
+        // 3. 绘制0海拔基准线（X轴）
+        ctx.beginPath();
+        ctx.moveTo(0, zeroAltY);
+        ctx.lineTo(canvasWidth, zeroAltY);
+        ctx.strokeStyle = isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // 4. 填充海拔区域（区分正负海拔）→ 改用drawPoints绘制
+        ctx.beginPath();
+        ctx.moveTo(drawPoints[0].x, drawPoints[0].y);
+        // 绘制平滑曲线（仅遍历降采样后的点）
+        for (var i = 1; i < drawPoints.length; i++) {
+            const p = drawPoints[i];
+            const prev = drawPoints[i - 1];
+            const controlX = (prev.x + p.x) / 2;
+            ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y);
+        }
+
+        // 分两种情况闭合路径（保证正负海拔填充正确）
+        const lastPoint = drawPoints[drawPoints.length - 1];
+        if (lastPoint.y >= zeroAltY) {
+            ctx.lineTo(canvasWidth, lastPoint.y);
+            ctx.lineTo(canvasWidth, canvasHeight);
+            ctx.lineTo(0, canvasHeight);
+            ctx.lineTo(drawPoints[0].x, drawPoints[0].y);
+        } else {
+            ctx.lineTo(canvasWidth, lastPoint.y);
+            ctx.lineTo(canvasWidth, 0);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(drawPoints[0].x, drawPoints[0].y);
+        }
+        ctx.closePath();
+
+        // 填充色：正海拔偏蓝，负海拔偏红
+        ctx.fillStyle = isDark ? "rgba(76, 175, 255, 0.4)" : "rgba(33, 150, 243, 0.3)";
+        ctx.fill();
+
+        // 5. 绘制负海拔区域补充填充 → 改用drawPoints
+        ctx.beginPath();
+        ctx.moveTo(drawPoints[0].x, drawPoints[0].y);
+        for (var i = 1; i < drawPoints.length; i++) {
+            const p = drawPoints[i];
+            const prev = drawPoints[i - 1];
+            const controlX = (prev.x + p.x) / 2;
+            ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y);
+        }
+        // 仅闭合到0海拔线
+        ctx.lineTo(lastPoint.x, zeroAltY);
+        ctx.lineTo(drawPoints[0].x, zeroAltY);
+        ctx.closePath();
+        ctx.fillStyle = isDark ? "rgba(255, 102, 102, 0.4)" : "rgba(255, 87, 34, 0.3)";
+        ctx.fill();
+
+        // 6. 绘制海拔轮廓线（主曲线）→ 改用drawPoints
+        ctx.beginPath();
+        ctx.moveTo(drawPoints[0].x, drawPoints[0].y);
+        for (var i = 1; i < drawPoints.length; i++) {
+            const p = drawPoints[i];
+            const prev = drawPoints[i - 1];
+            const controlX = (prev.x + p.x) / 2;
+            ctx.quadraticCurveTo(controlX, (prev.y + p.y) / 2, p.x, p.y);
+        }
+        ctx.strokeStyle = isDark ? "#2196F3" : "#1976D2";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // 7. 绘制最大/最小海拔标注（兼容降采样，保留原始极值）
+        let maxAlt = altitudeData[0];
+        let minAlt = altitudeData[0];
+        let maxIdx = 0;
+        let minIdx = 0;
+
+        altitudeData.forEach((alt, idx) => {
+            if (alt > maxAlt) {
+                maxAlt = alt;
+                maxIdx = idx;
+            }
+            if (alt < minAlt) {
+                minAlt = alt;
+                minIdx = idx;
+            }
+        });
+
+        // 找到绘制后的点
+        let pMax = drawPoints[0];
+        let pMin = drawPoints[0];
+        const txMax = originalPoints[maxIdx].x;
+        const txMin = originalPoints[minIdx].x;
+
+        drawPoints.forEach(p => {
+            if (Math.abs(p.x - txMax) <= 1)
+                pMax = p;
+            if (Math.abs(p.x - txMin) <= 1)
+                pMin = p;
+        });
+
+        // ===================== 永久安全方案：左点 ↔ 左文字，右点 ↔ 右文字 =====================
+        ctx.save();
+        const fontSize = 10 * pixelRatio;
+        ctx.font = `bold ${fontSize}px sans-serif`;
+        const padding = 12 * pixelRatio;
+
+        // 判断：谁在左，谁在右
+        const leftPoint = pMax.x < pMin.x ? pMax : pMin;
+        const rightPoint = pMax.x < pMin.x ? pMin : pMax;
+        const leftText = leftPoint === pMax ? `${maxAlt.toFixed(1)}m` : `${minAlt.toFixed(1)}m`;
+        const rightText = rightPoint === pMax ? `${maxAlt.toFixed(1)}m` : `${minAlt.toFixed(1)}m`;
+
+        // 固定文字位置
+        const textY = canvasHeight / 2;
+        const leftLabelX = padding;
+        const rightLabelX = canvasWidth - ctx.measureText(rightText).width - padding;
+
+        // 绘制点
+        ctx.fillStyle = isDark ? "#FF9800" : "#F57C00";
+        ctx.fillRect(pMax.x - 2, pMax.y - 2, 4, 4);
+        ctx.fillStyle = isDark ? "#F44336" : "#D32F2F";
+        ctx.fillRect(pMin.x - 2, pMin.y - 2, 4, 4);
+
+        // 绘制引线
+        ctx.strokeStyle = isDark ? "#ffffff" : "#000000";
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.4;
+
+        ctx.beginPath();
+        ctx.moveTo(leftPoint.x, leftPoint.y);
+        ctx.lineTo(leftLabelX + 10, textY - 4);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(rightPoint.x, rightPoint.y);
+        ctx.lineTo(rightLabelX - 10 + ctx.measureText(rightText).width, textY - 4);
+        ctx.stroke();
+
+        ctx.globalAlpha = 1;
+
+        // 绘制文字
+        ctx.fillStyle = isDark ? "#FFFFFF" : "#000000";
+        ctx.fillText(leftText, leftLabelX, textY + fontSize / 2);
+        ctx.fillText(rightText, rightLabelX, textY + fontSize / 2);
+
+        ctx.restore();
     }
 
     // 道格拉斯-普克算法：降采样数组，保留曲线关键特征
