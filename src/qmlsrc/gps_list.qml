@@ -801,7 +801,7 @@ Rectangle {
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // 7. 绘制最大/最小海拔标注（兼容降采样，保留原始极值）
+        // 7. 全新最终版：极简海拔范围标注（无引线 + 暗黑适配 + 居中显示）
         let maxAlt = altitudeData[0];
         let minAlt = altitudeData[0];
         let maxIdx = 0;
@@ -818,7 +818,7 @@ Rectangle {
             }
         });
 
-        // 找到绘制后的点
+        // 找到绘制后的极值点
         let pMax = drawPoints[0];
         let pMin = drawPoints[0];
         const txMax = originalPoints[maxIdx].x;
@@ -831,50 +831,27 @@ Rectangle {
                 pMin = p;
         });
 
-        // ===================== 永久安全方案：左点 ↔ 左文字，右点 ↔ 右文字 =====================
         ctx.save();
         const fontSize = 10 * pixelRatio;
         ctx.font = `bold ${fontSize}px sans-serif`;
-        const padding = 12 * pixelRatio;
 
-        // 判断：谁在左，谁在右
-        const leftPoint = pMax.x < pMin.x ? pMax : pMin;
-        const rightPoint = pMax.x < pMin.x ? pMin : pMax;
-        const leftText = leftPoint === pMax ? `${maxAlt.toFixed(1)}m` : `${minAlt.toFixed(1)}m`;
-        const rightText = rightPoint === pMax ? `${maxAlt.toFixed(1)}m` : `${minAlt.toFixed(1)}m`;
+        // ===================== 1. 绘制极值点：亮黑暗白 =====================
+        //ctx.fillStyle = isDark ? "#FFFFFF" : "#000000";
+        //ctx.fillRect(pMax.x - 2, pMax.y - 2, 4, 4);
+        //ctx.fillRect(pMin.x - 2, pMin.y - 2, 4, 4);
 
-        // 固定文字位置
-        const textY = canvasHeight / 2;
-        const leftLabelX = padding;
-        const rightLabelX = canvasWidth - ctx.measureText(rightText).width - padding;
+        // ===================== 2. 中央显示海拔范围：min - max =====================
+        const prefix = qsTr("Altitude");
+        const rangeText = `${prefix}: ${minAlt.toFixed(1)}m - ${maxAlt.toFixed(1)}m`;
+        const textWidth = ctx.measureText(rangeText).width;
 
-        // 绘制点
-        ctx.fillStyle = isDark ? "#FF9800" : "#F57C00";
-        ctx.fillRect(pMax.x - 2, pMax.y - 2, 4, 4);
-        ctx.fillStyle = isDark ? "#F44336" : "#D32F2F";
-        ctx.fillRect(pMin.x - 2, pMin.y - 2, 4, 4);
+        // 水平垂直居中
+        const x = (canvasWidth - textWidth) / 2;
+        const y = canvasHeight / 2 + fontSize / 2;
 
-        // 绘制引线
-        ctx.strokeStyle = isDark ? "#ffffff" : "#000000";
-        ctx.lineWidth = 1;
-        ctx.globalAlpha = 0.4;
-
-        ctx.beginPath();
-        ctx.moveTo(leftPoint.x, leftPoint.y);
-        ctx.lineTo(leftLabelX + 10, textY - 4);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(rightPoint.x, rightPoint.y);
-        ctx.lineTo(rightLabelX - 10 + ctx.measureText(rightText).width, textY - 4);
-        ctx.stroke();
-
-        ctx.globalAlpha = 1;
-
-        // 绘制文字
+        // 文字颜色：亮黑暗白
         ctx.fillStyle = isDark ? "#FFFFFF" : "#000000";
-        ctx.fillText(leftText, leftLabelX, textY + fontSize / 2);
-        ctx.fillText(rightText, rightLabelX, textY + fontSize / 2);
+        ctx.fillText(rangeText, x, y);
 
         ctx.restore();
     }
