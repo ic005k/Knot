@@ -156,9 +156,16 @@ static void JavaNotify_5() {
 }
 
 static void JavaNotify_6() {
-  QTimer::singleShot(100, mw_one, []() { m_Notes->javaNoteToQMLNote(); });
+  // 延迟到Qt主线程空闲时执行，解决QML不可视崩溃问题
+  QTimer::singleShot(100, mw_one, [=]() {
+    // 双重安全校验，杜绝空指针
+    if (m_Notes != nullptr && m_NotesList != nullptr &&
+        m_NotesList->getNoteBookCurrentIndex() >= 0) {
+      m_Notes->javaNoteToQMLNote();
+    }
+  });
 
-  qDebug() << "C++ JavaNotify_6";
+  qDebug() << "C++ JavaNotify_6 executed safely";
 }
 
 static void JavaNotify_7() {

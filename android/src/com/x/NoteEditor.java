@@ -215,7 +215,6 @@ public class NoteEditor
     private View mColorPreview;
 
     private boolean isAddImage = false;
-    private boolean isExit = false;
 
     private String currentMDFile;
     private static Context context;
@@ -382,7 +381,6 @@ public class NoteEditor
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_cancel:
-                isExit = true;
                 btn_cancel.setBackgroundColor(
                     getResources().getColor(R.color.red)
                 );
@@ -811,9 +809,11 @@ public class NoteEditor
 
     @Override
     public void onBackPressed() {
-        isExit = true;
         if (isTextChanged) showNormalDialog();
         else {
+            if (isSaved) {
+                CallJavaNotify_6();
+            }
             super.onBackPressed();
         }
     }
@@ -1261,7 +1261,6 @@ public class NoteEditor
                             // 执行重命名（关键的原子操作）
                             if (tempFile.renameTo(targetFile)) {
                                 success[0] = true; // 修改数组中的值
-                                CallJavaNotify_6();
                             } else {
                                 throw new IOException("重命名临时文件失败");
                             }
@@ -1285,47 +1284,6 @@ public class NoteEditor
                                     if (success[0] && MyActivity.isEdit) {
                                         setResult(MDActivity.RESULT_SAVE);
                                     }
-
-                                    if (isExit) {
-                                        finish();
-                                    }
-                                }
-                            }
-                        );
-                    }
-                }
-            }
-        )
-            .start();
-    }
-
-    private void saveNote_Non_atomic() {
-        final String mContent = editNote.getText().toString();
-        final String filename = MyActivity.strMDFile;
-
-        findViewById(R.id.progressContainer).setVisibility(View.VISIBLE);
-
-        new Thread(
-            new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        writeTextFile(mContent, filename);
-
-                        CallJavaNotify_6();
-                    } finally {
-                        runOnUiThread(
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    findViewById(
-                                        R.id.progressContainer
-                                    ).setVisibility(View.GONE);
-
-                                    if (MyActivity.isEdit) {
-                                        setResult(MDActivity.RESULT_SAVE);
-                                    }
-                                    finish();
                                 }
                             }
                         );
@@ -1768,6 +1726,8 @@ public class NoteEditor
                 public void onClick(DialogInterface dialog, int which) {
                     // ...To-do
                     saveNote();
+                    CallJavaNotify_6();
+                    finish();
                 }
             }
         );
@@ -1777,7 +1737,7 @@ public class NoteEditor
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     // ...To-do
-                    isSaved = false;
+
                     finish();
                 }
             }
