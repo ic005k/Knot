@@ -467,7 +467,7 @@ void Reader::initReader() {
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
 
   readerStyle = Reg.value("/Reader/Style", "1").toString();
-  scrollValue = Reg.value("/Reader/ScrollValue", "1").toReal();
+  scrollValue = Reg.value("/Reader/ScrollValue", "0.25").toReal();
   QString value = QString::number(scrollValue, 'f', 2);
   mui->lblSpeed->setText(tr("Scroll Speed") + " : " + value);
   m_ReaderSet->setScrollValue();

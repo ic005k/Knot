@@ -6,7 +6,7 @@
 
 extern QFont::Weight readerFontWeight;
 
-ReaderSet::ReaderSet(QWidget *parent) : QDialog(parent) {
+ReaderSet::ReaderSet(QWidget* parent) : QDialog(parent) {
   QPalette pal = palette();
 
   pal.setColor(QPalette::Window, QColor(10, 10, 10, 200));
@@ -38,7 +38,7 @@ ReaderSet::ReaderSet(QWidget *parent) : QDialog(parent) {
   mui->lblInfo->adjustSize();
   mui->lblInfo->setWordWrap(true);
 
-  QValidator *validator =
+  QValidator* validator =
       new QRegularExpressionValidator(regxNumber, mui->editPage);
   mui->editPage->setValidator(validator);
 
@@ -85,10 +85,10 @@ void ReaderSet::init() {
   show();
 }
 
-bool ReaderSet::eventFilter(QObject *watch, QEvent *evn) {
-  QMouseEvent *event = static_cast<QMouseEvent *>(evn);
+bool ReaderSet::eventFilter(QObject* watch, QEvent* evn) {
+  QMouseEvent* event = static_cast<QMouseEvent*>(evn);
   if (evn->type() == QEvent::KeyPress) {
-    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
       on_btnBack_clicked();
       return true;
@@ -252,12 +252,12 @@ void ReaderSet::on_btnForegroundColor_clicked() {
   mw_one->m_Reader->setReaderStyle();
 }
 
-void ReaderSet::on_editBackgroundColor_textChanged(const QString &arg1) {
+void ReaderSet::on_editBackgroundColor_textChanged(const QString& arg1) {
   Q_UNUSED(arg1);
   if (!mw_one->initMain) on_btnStyle2_clicked();
 }
 
-void ReaderSet::on_editForegroundColor_textChanged(const QString &arg1) {
+void ReaderSet::on_editForegroundColor_textChanged(const QString& arg1) {
   Q_UNUSED(arg1);
   if (!mw_one->initMain) on_btnStyle2_clicked();
 }
@@ -273,7 +273,8 @@ void ReaderSet::on_btnSetBookmark_clicked() {
 
 void ReaderSet::on_btnLessen_clicked() {
   mw_one->m_Reader->scrollValue = mw_one->m_Reader->scrollValue - 0.05;
-  if (mw_one->m_Reader->scrollValue <= 0.1) mw_one->m_Reader->scrollValue = 0.1;
+  if (mw_one->m_Reader->scrollValue <= 0.05)
+    mw_one->m_Reader->scrollValue = 0.05;
 
   setScrollValue();
 
@@ -282,7 +283,7 @@ void ReaderSet::on_btnLessen_clicked() {
 }
 
 void ReaderSet::on_btnDefault_clicked() {
-  mw_one->m_Reader->scrollValue = 1.0;
+  mw_one->m_Reader->scrollValue = 0.25;
 
   setScrollValue();
 
@@ -293,7 +294,7 @@ void ReaderSet::on_btnDefault_clicked() {
 void ReaderSet::on_btnAdd_clicked() {
   mw_one->m_Reader->scrollValue = mw_one->m_Reader->scrollValue + 0.05;
 
-  if (mw_one->m_Reader->scrollValue >= 2.0) mw_one->m_Reader->scrollValue = 2.0;
+  if (mw_one->m_Reader->scrollValue >= 1.5) mw_one->m_Reader->scrollValue = 1.5;
 
   setScrollValue();
 

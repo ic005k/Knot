@@ -65,7 +65,7 @@ class Reader : public QDialog {
 
   bool isLandscape = false;
 
-  qreal scrollValue = 1;
+  qreal scrollValue = 0.25;
   bool isOpenBookListClick = false;
   bool isSelText = false;
   int pdfMethod = 2;
@@ -189,7 +189,7 @@ class Reader : public QDialog {
 
   void startSpeak();
   void stopSpeak();
-  public slots:
+ public slots:
   void on_SetReaderFunVisible();
 
   void setPageScroll0();
