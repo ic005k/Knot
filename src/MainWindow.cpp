@@ -1735,7 +1735,7 @@ void MainWindow::on_btnReport() {
 }
 
 void MainWindow::on_btnAdd_clicked() {
-  m_EditRecord->monthSum();
+  // m_EditRecord->monthSum();
 
   m_MainHelper->on_AddRecord();
 }
