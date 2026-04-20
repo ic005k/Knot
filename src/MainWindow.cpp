@@ -1003,7 +1003,7 @@ void MainWindow::modify_Data() {
 }
 
 void MainWindow::on_twItemDoubleClicked() {
-  m_EditRecord->monthSum();
+  // m_EditRecord->monthSum();
 
   QTreeWidget* tw = (QTreeWidget*)mui->tabWidget->currentWidget();
   QTreeWidgetItem* item = tw->currentItem();
