@@ -1565,7 +1565,7 @@ public class MyService extends Service {
      */
     // 正确：安卓官方的“断开输入法+隐藏键盘”方法
     // 优化：去掉Context参数，直接用MyService的上下文
-    public static void forceDisconnectInputMethod() {
+    public static void forceDisconnectInputMethod_Old() {
         try {
             // 直接用MyService的上下文（this.getApplicationContext()）
             Context context = instance.getApplicationContext();
@@ -1588,6 +1588,45 @@ public class MyService extends Service {
             imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
         } catch (Exception e) {
             Log.e("MyService", "强制断开输入法失败", e);
+        }
+    }
+
+    /**
+     * 强制隐藏输入法 + 清除焦点（真正有效版本）
+     * 专门用于：通知弹窗、闹钟提醒、前台唤醒时 不弹出键盘
+     */
+    public static void forceDisconnectInputMethod() {
+        if (
+            MyActivity.m_instance == null ||
+            MyActivity.m_instance.isFinishing() ||
+            MyActivity.m_instance.isDestroyed()
+        ) {
+            return;
+        }
+
+        try {
+            InputMethodManager imm =
+                (InputMethodManager) MyActivity.m_instance.getSystemService(
+                    Context.INPUT_METHOD_SERVICE
+                );
+            if (imm == null) return;
+
+            // 1. 清除当前输入框焦点（最关键！）
+            View focusView = MyActivity.m_instance.getCurrentFocus();
+            if (focusView != null) {
+                focusView.clearFocus();
+            }
+
+            // 2. 强制隐藏键盘
+            View decorView = MyActivity.m_instance.getWindow().getDecorView();
+            imm.hideSoftInputFromWindow(
+                decorView.getWindowToken(),
+                InputMethodManager.HIDE_NOT_ALWAYS
+            );
+
+            Log.d("InputMethod", "✅ 输入法已强制关闭");
+        } catch (Exception e) {
+            Log.e("InputMethod", "❌ 关闭输入法失败", e);
         }
     }
 

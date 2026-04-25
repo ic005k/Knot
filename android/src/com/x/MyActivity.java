@@ -506,6 +506,11 @@ public class MyActivity
             },
             500
         ); // 延迟500ms：适配你的Qt层mw_one实例创建时间（可根据实际调整）
+
+        // 页面刚打开 / 被唤醒 / 从后台回来时，不自动弹出输入法
+        getWindow().setSoftInputMode(
+            WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+        );
     }
 
     // ===== 新增：简化的实例重复校验方法 =====
