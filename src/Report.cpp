@@ -146,6 +146,7 @@ void Report::on_btnSingleYear_clicked() {
 
 void Report::on_btnYear_clicked() {
   mw_one->m_DateSelector->dateFlag = 1;
+  isSingleYear = false;
 
   if (isAndroid) {
     int y, m;

@@ -34,6 +34,7 @@ bool DateSelector::eventFilter(QObject* watch, QEvent* evn) {
 
 void DateSelector::closeEvent(QCloseEvent* event) {
   Q_UNUSED(event)
+
   m_Method->closeGrayWindows();
 }
 
