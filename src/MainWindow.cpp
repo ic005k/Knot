@@ -1409,11 +1409,13 @@ void MainWindow::init_Thread_Timer() {
   connect(m_workerThread, &QThread::finished, m_workerThread,
           &QObject::deleteLater);
   // 搜索结束 → 主线程更新UI
-  connect(m_searchWorker, &SearchWorker::searchFinished, this, [=]() {
-    resultsList = m_searchWorker->resultsList;
-    m_Method->initSearchResults();
-    mw_one->closeProgress();
-  });
+  connect(m_searchWorker, &SearchWorker::searchFinished, this,
+          [this](const QList<QString>& results) {
+            // 主线程安全更新
+            resultsList = results;
+            m_Method->initSearchResults();
+            mw_one->closeProgress();
+          });
   m_workerThread->start();
 
   myUpdateGpsMapThread = new UpdateGpsMapThread();
@@ -2032,6 +2034,8 @@ void MainWindow::on_btnClearSearchText_clicked() {
 void MainWindow::on_btnStartSearch_clicked() {
   mui->editSearchText->clearFocus();
 
+  // m_Method->closeAndroidKeyboard();
+
   searchStr = mui->editSearchText->text().trimmed();
   if (searchStr.length() == 0) return;
 
@@ -2050,11 +2054,15 @@ void MainWindow::on_btnStartSearch_clicked() {
 
   // mySearchThread->start();
 
-  auto data = m_Method->exportAllDataForSearch();
+  // auto data = m_Method->exportAllDataForSearch();
 
   // ✅ 安卓唯一安全的跨线程调用
+
   QMetaObject::invokeMethod(
-      m_searchWorker, [=]() { m_searchWorker->startSearch(data, searchStr); },
+      m_searchWorker,
+      [=]() {
+        m_searchWorker->startSearch(m_Method->data_for_search, searchStr);
+      },
       Qt::QueuedConnection);
 }
 

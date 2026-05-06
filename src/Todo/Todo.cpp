@@ -2050,11 +2050,12 @@ void Todo::clearJavaNotify() {
   try {
     // ========== 使用Qt6标准方式获取上下文 ==========
     // Qt6.6.3
-    // jobject context = QNativeInterface::QAndroidApplication::context();
+    jobject context = QNativeInterface::QAndroidApplication::context();
 
     // Qt6.10.2
-    jobject context =
-        QNativeInterface::QAndroidApplication::context().object<jobject>();
+    // jobject context =
+    //    QNativeInterface::QAndroidApplication::context().object<jobject>();
+
     if (context == nullptr) {
       qDebug() << "[清除通知] 获取Android上下文失败（context=null）！";
       return;

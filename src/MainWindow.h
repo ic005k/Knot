@@ -115,7 +115,9 @@ class SearchWorker : public QObject {
 
  public slots:
   void startSearch(QList<SearchItem> data, const QString& searchStr) {
-    resultsList.clear();
+    // resultsList.clear();
+
+    QList<QString> localResults;
 
     for (const SearchItem& item : data) {
       QString tabStr = item.tabName;
@@ -218,16 +220,16 @@ class SearchWorker : public QObject {
       }
 
       if (isYes) {
-        resultsList.append(tabStr + "=|=" + txt0 + "=|=" + txt1 + "=|=" + txt2 +
-                           "=|=" + txt3);
+        localResults.append(tabStr + "=|=" + txt0 + "=|=" + txt1 +
+                            "=|=" + txt2 + "=|=" + txt3);
       }
     }
 
-    emit searchFinished();
+    emit searchFinished(localResults);
   }
 
  signals:
-  void searchFinished();
+  void searchFinished(const QList<QString>& results);
 };
 
 #include <QMetaType>
