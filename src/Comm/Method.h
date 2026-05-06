@@ -59,6 +59,18 @@
 #include "src/Comm/TextEditToolbar.h"
 #include "src/Comm/enhancedcolorpicker.h"
 
+struct SearchItem {
+  QString tabName;
+  QString strYear;
+  QString strMonthDay;
+  QString weeks;
+  QString day;
+  QString strTime;
+  QString txt1;
+  QString txt2;
+  QString txt3;
+};
+
 namespace Ui {
 class Method;
 }
@@ -465,6 +477,10 @@ class Method : public QDialog {
   bool isInChina();
 
   void gotoBegin(QQuickWidget* qw);
+
+  QList<SearchItem> exportAllDataForSearch();
+  QList<SearchItem> data_for_search;
+  void startSearch(QList<SearchItem> data, const QString& searchStr);
 
  protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;

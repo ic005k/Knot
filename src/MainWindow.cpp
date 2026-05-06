@@ -1396,7 +1396,25 @@ void MainWindow::init_Thread_Timer() {
           &MainWindow::importDataDone);
 
   mySearchThread = new SearchThread();
-  connect(mySearchThread, &SearchThread::isDone, this, &MainWindow::searchDone);
+  // connect(mySearchThread, &SearchThread::isDone, this,
+  // &MainWindow::searchDone);
+  connect(mySearchThread, &QThread::finished, this, &MainWindow::searchDone,
+          Qt::QueuedConnection);  // 强制切主线程
+
+  m_workerThread = new QThread(this);
+  m_searchWorker = new SearchWorker();
+  m_searchWorker->moveToThread(m_workerThread);
+  connect(m_workerThread, &QThread::finished, m_searchWorker,
+          &QObject::deleteLater);
+  connect(m_workerThread, &QThread::finished, m_workerThread,
+          &QObject::deleteLater);
+  // 搜索结束 → 主线程更新UI
+  connect(m_searchWorker, &SearchWorker::searchFinished, this, [=]() {
+    resultsList = m_searchWorker->resultsList;
+    m_Method->initSearchResults();
+    mw_one->closeProgress();
+  });
+  m_workerThread->start();
 
   myUpdateGpsMapThread = new UpdateGpsMapThread();
   connect(myUpdateGpsMapThread, &UpdateGpsMapThread::isDone, this,
@@ -2012,11 +2030,32 @@ void MainWindow::on_btnClearSearchText_clicked() {
 }
 
 void MainWindow::on_btnStartSearch_clicked() {
+  mui->editSearchText->clearFocus();
+
   searchStr = mui->editSearchText->text().trimmed();
   if (searchStr.length() == 0) return;
 
   showProgress();
-  mySearchThread->start();
+  m_Method->data_for_search = m_Method->exportAllDataForSearch();
+
+  qDebug() << "ExportAllDataForSearch:" << m_Method->data_for_search.size();
+
+  /*for (int i = 0; i < data_for_search.size(); i++) {
+    auto& item = data_for_search[i];
+    qDebug() << "索引" << i << "| 标签页：" << item.tabName << "| 年份："
+             << item.strYear << "| 月日：" << item.strMonthDay << "| 时间："
+             << item.strTime << "| 文本1："
+             << item.txt1.left(20);  // 只显示前20字符，避免刷屏
+  }*/
+
+  // mySearchThread->start();
+
+  auto data = m_Method->exportAllDataForSearch();
+
+  // ✅ 安卓唯一安全的跨线程调用
+  QMetaObject::invokeMethod(
+      m_searchWorker, [=]() { m_searchWorker->startSearch(data, searchStr); },
+      Qt::QueuedConnection);
 }
 
 void MainWindow::on_btnBackBakList_clicked() {

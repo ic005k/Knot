@@ -80,7 +80,7 @@ inline QString ver;
 inline QString appName = "Knot";
 
 inline QStringList readTextList, htmlFiles, listCategory, ncxList, tempHtmlList,
-    listM, ymdList;
+    listM, ymdList, resultsList;
 
 inline QList<QPointF> freqPointList;
 inline QList<QPointF> amountList;

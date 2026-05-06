@@ -81,6 +81,7 @@ int main(int argc, char* argv[]) {
   isIOS = true;
 #elif defined(Q_OS_ANDROID)
   isAndroid = true;
+
 #elif defined(Q_OS_LINUX)
   isLinux = true;
 #endif

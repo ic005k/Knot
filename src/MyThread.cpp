@@ -206,9 +206,11 @@ void MainWindow::readEBookDone() {
 
 SearchThread::SearchThread(QObject* parent) : QThread{parent} {}
 void SearchThread::run() {
-  m_Method->startSearch();
+  // m_Method->startSearch();
 
-  emit isDone();
+  m_Method->startSearch(m_Method->data_for_search, searchStr);
+
+  // emit isDone();
 }
 
 void MainWindow::searchDone() {

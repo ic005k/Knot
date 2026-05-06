@@ -22,12 +22,12 @@
         Unsupported Android version. This app requires Android 6.0 or higher.
     </string-->
 
-    <!-- 新增这一行，解决资源缺失 -->
-    <!-- 暂时注释掉，避免与Qt自带资源重复 - 后续如需启用可取消注释
+    <!-- 解决 Qt 6.10.2 资源缺失，已注释关闭 -->
+
     <string
         name="unsupported_android_version"
     >Unsupported Android version</string>
-    -->
+
 
 
 

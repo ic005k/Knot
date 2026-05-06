@@ -6,8 +6,6 @@
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
-QStringList resultsList;
-
 Method::Method(QWidget* parent) : QDialog(parent) {
   this->installEventFilter(this);
 
@@ -310,6 +308,116 @@ bool Method::eventFilter(QObject* watchDlgSearch, QEvent* evn) {
   return QWidget::eventFilter(watchDlgSearch, evn);
 }
 
+void Method::startSearch(QList<SearchItem> data, const QString& searchStr) {
+  resultsList.clear();
+
+  for (const SearchItem& item : data) {
+    QString tabStr = item.tabName;
+    QString strYear = item.strYear;
+    QString weeks = item.weeks;
+    QString day = item.day;
+    QString strTime = item.strTime;
+    QString txt1 = item.txt1;
+    QString txt2 = item.txt2;
+    QString txt3 = item.txt3;
+
+    QString txt0;
+    if (strTime.split(".").count() == 2) {
+      txt0 = strYear + " " + day + " " + weeks + " " +
+             strTime.split(".").at(1).trimmed();
+    }
+
+    QStringList list;
+    bool isYes = false;
+
+    if (searchStr.contains("&")) {
+      list = searchStr.split("&");
+      bool is0 = false, is1 = false, is2 = false, is3 = false;
+
+      for (int n = 0; n < list.count(); n++) {
+        QString str = list.at(n);
+        str = str.trimmed();
+
+        if (str.length() > 0) {
+          if (strYear.contains(str) || day.contains(str) ||
+              weeks.contains(str)) {
+            is0 = true;
+            txt0 = m_Method->highlightTextInHtml(txt0, str);
+          }
+          if (txt1.contains(str)) {
+            is1 = true;
+            txt1 = m_Method->highlightTextInHtml(txt1, str);
+          }
+          if (txt2.contains(str)) {
+            is2 = true;
+            txt2 = m_Method->highlightTextInHtml(txt2, str);
+          }
+          if (txt3.contains(str)) {
+            is3 = true;
+            txt3 = m_Method->highlightTextInHtml(txt3, str);
+          }
+        }
+      }
+
+      if (list.count() == 2) {
+        if (is0 && is1) isYes = true;
+        if (is0 && is2) isYes = true;
+        if (is0 && is3) isYes = true;
+        if (is1 && is2) isYes = true;
+        if (is1 && is3) isYes = true;
+        if (is2 && is3) isYes = true;
+      }
+
+      if (list.count() == 3) {
+        if (is0 && is1 && is2) isYes = true;
+        if (is0 && is1 && is3) isYes = true;
+        if (is0 && is2 && is3) isYes = true;
+        if (is1 && is2 && is3) isYes = true;
+      }
+
+      if (list.count() >= 4) {
+        if (is0 && is1 && is2 && is3) isYes = true;
+      }
+
+      QString s_total = txt0 + txt1 + txt2 + txt3;
+      int n_count = 0;
+      for (int x = 0; x < list.count(); x++) {
+        QString str = list.at(x);
+        if (str.length() > 0) {
+          if (s_total.contains(str)) {
+            n_count++;
+          }
+        }
+      }
+
+      if (isYes) {
+        if (n_count < list.count()) isYes = false;
+      }
+
+    } else {
+      if (txt1.contains(searchStr) || txt2.contains(searchStr) ||
+          txt3.contains(searchStr)) {
+        isYes = true;
+
+        if (txt1.contains(searchStr)) {
+          txt1 = m_Method->highlightTextInHtml(txt1, searchStr);
+        }
+        if (txt2.contains(searchStr)) {
+          txt2 = m_Method->highlightTextInHtml(txt2, searchStr);
+        }
+        if (txt3.contains(searchStr)) {
+          txt3 = m_Method->highlightTextInHtml(txt3, searchStr);
+        }
+      }
+    }
+
+    if (isYes) {
+      resultsList.append(tabStr + "=|=" + txt0 + "=|=" + txt1 + "=|=" + txt2 +
+                         "=|=" + txt3);
+    }
+  }
+}
+
 void Method::startSearch() {
   resultsList.clear();
   int tabCount = tabData->count();
@@ -486,7 +594,7 @@ QString Method::highlightTextInHtml(const QString& originalText,
 }
 
 void Method::initSearchResults() {
-  // qDebug() << resultsList;
+  qDebug() << "Search Results:" << resultsList.count();
 
   clearAll();
   int count = resultsList.count();
@@ -3346,4 +3454,47 @@ bool Method::isInChina() {
     m_StepsOptions->ui->rbTencent->setChecked(type2);
   }
   return onlineResult;
+}
+
+QList<SearchItem> Method::exportAllDataForSearch() {
+  QList<SearchItem> dataList;
+
+  int tabCount = tabData->count();
+
+  for (int j = 0; j < tabCount; j++) {
+    QTreeWidget* tw = mw_one->get_tw(j);
+    QString tabStr = tabData->tabText(j);
+
+    for (int i = 0; i < tw->topLevelItemCount(); i++) {
+      QTreeWidgetItem* topItem = tw->topLevelItem(i);
+
+      QString strYear = topItem->text(3);
+      QString strMonthDay = topItem->text(0);
+      QStringList mdParts = strMonthDay.split(" ");
+      if (mdParts.size() < 3) continue;
+
+      QString weeks = mdParts[0];
+      QString day = mdParts[1] + " " + mdParts[2];
+
+      int childCount = topItem->childCount();
+      for (int c = 0; c < childCount; c++) {
+        QTreeWidgetItem* childItem = topItem->child(c);
+
+        SearchItem item;
+        item.tabName = tabStr;
+        item.strYear = strYear;
+        item.strMonthDay = strMonthDay;
+        item.weeks = weeks;
+        item.day = day;
+        item.strTime = childItem->text(0);
+        item.txt1 = childItem->text(1);
+        item.txt2 = childItem->text(2);
+        item.txt3 = childItem->text(3);
+
+        dataList.append(item);
+      }
+    }
+  }
+
+  return dataList;
 }

@@ -108,6 +108,128 @@ class UpdateGpsMapThread;
 class GetGpsDataThread;
 class SliderButton;
 
+class SearchWorker : public QObject {
+  Q_OBJECT
+ public:
+  QList<QString> resultsList;
+
+ public slots:
+  void startSearch(QList<SearchItem> data, const QString& searchStr) {
+    resultsList.clear();
+
+    for (const SearchItem& item : data) {
+      QString tabStr = item.tabName;
+      QString strYear = item.strYear;
+      QString weeks = item.weeks;
+      QString day = item.day;
+      QString strTime = item.strTime;
+      QString txt1 = item.txt1;
+      QString txt2 = item.txt2;
+      QString txt3 = item.txt3;
+
+      QString txt0;
+      if (strTime.split(".").count() == 2) {
+        txt0 = strYear + " " + day + " " + weeks + " " +
+               strTime.split(".").at(1).trimmed();
+      }
+
+      QStringList list;
+      bool isYes = false;
+
+      if (searchStr.contains("&")) {
+        list = searchStr.split("&");
+        bool is0 = false, is1 = false, is2 = false, is3 = false;
+
+        for (int n = 0; n < list.count(); n++) {
+          QString str = list.at(n);
+          str = str.trimmed();
+
+          if (str.length() > 0) {
+            if (strYear.contains(str) || day.contains(str) ||
+                weeks.contains(str)) {
+              is0 = true;
+              txt0 = m_Method->highlightTextInHtml(txt0, str);
+            }
+            if (txt1.contains(str)) {
+              is1 = true;
+              txt1 = m_Method->highlightTextInHtml(txt1, str);
+            }
+            if (txt2.contains(str)) {
+              is2 = true;
+              txt2 = m_Method->highlightTextInHtml(txt2, str);
+            }
+            if (txt3.contains(str)) {
+              is3 = true;
+              txt3 = m_Method->highlightTextInHtml(txt3, str);
+            }
+          }
+        }
+
+        if (list.count() == 2) {
+          if (is0 && is1) isYes = true;
+          if (is0 && is2) isYes = true;
+          if (is0 && is3) isYes = true;
+          if (is1 && is2) isYes = true;
+          if (is1 && is3) isYes = true;
+          if (is2 && is3) isYes = true;
+        }
+
+        if (list.count() == 3) {
+          if (is0 && is1 && is2) isYes = true;
+          if (is0 && is1 && is3) isYes = true;
+          if (is0 && is2 && is3) isYes = true;
+          if (is1 && is2 && is3) isYes = true;
+        }
+
+        if (list.count() >= 4) {
+          if (is0 && is1 && is2 && is3) isYes = true;
+        }
+
+        QString s_total = txt0 + txt1 + txt2 + txt3;
+        int n_count = 0;
+        for (int x = 0; x < list.count(); x++) {
+          QString str = list.at(x);
+          if (str.length() > 0) {
+            if (s_total.contains(str)) {
+              n_count++;
+            }
+          }
+        }
+
+        if (isYes) {
+          if (n_count < list.count()) isYes = false;
+        }
+
+      } else {
+        if (txt1.contains(searchStr) || txt2.contains(searchStr) ||
+            txt3.contains(searchStr)) {
+          isYes = true;
+
+          if (txt1.contains(searchStr)) {
+            txt1 = m_Method->highlightTextInHtml(txt1, searchStr);
+          }
+          if (txt2.contains(searchStr)) {
+            txt2 = m_Method->highlightTextInHtml(txt2, searchStr);
+          }
+          if (txt3.contains(searchStr)) {
+            txt3 = m_Method->highlightTextInHtml(txt3, searchStr);
+          }
+        }
+      }
+
+      if (isYes) {
+        resultsList.append(tabStr + "=|=" + txt0 + "=|=" + txt1 + "=|=" + txt2 +
+                           "=|=" + txt3);
+      }
+    }
+
+    emit searchFinished();
+  }
+
+ signals:
+  void searchFinished();
+};
+
 #include <QMetaType>
 
 QT_BEGIN_NAMESPACE
@@ -220,6 +342,9 @@ class MainWindow : public QMainWindow {
   SearchThread* mySearchThread;
   UpdateGpsMapThread* myUpdateGpsMapThread;
   GetGpsDataThread* myGetGpsDataThread;
+
+  QThread* m_workerThread;
+  SearchWorker* m_searchWorker;
 
   static void ReadChartData();
   static int get_Day(QString date);
