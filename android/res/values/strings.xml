@@ -22,13 +22,11 @@
         Unsupported Android version. This app requires Android 6.0 or higher.
     </string-->
 
-    <!-- 解决 Qt 6.10.2 资源缺失，已注释关闭 -->
+    <!-- 解决 Qt 6.10.x 资源缺失，已注释关闭 -->
     <!--
     <string
         name="unsupported_android_version"
     >Unsupported Android version</string>
-
     -->
-
 
 </resources>

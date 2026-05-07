@@ -2034,8 +2034,6 @@ void MainWindow::on_btnClearSearchText_clicked() {
 void MainWindow::on_btnStartSearch_clicked() {
   mui->editSearchText->clearFocus();
 
-  // m_Method->closeAndroidKeyboard();
-
   searchStr = mui->editSearchText->text().trimmed();
   if (searchStr.length() == 0) return;
 
@@ -2054,10 +2052,7 @@ void MainWindow::on_btnStartSearch_clicked() {
 
   // mySearchThread->start();
 
-  // auto data = m_Method->exportAllDataForSearch();
-
-  // ✅ 安卓唯一安全的跨线程调用
-
+  // 安卓安全的跨线程调用
   QMetaObject::invokeMethod(
       m_searchWorker,
       [=]() {
