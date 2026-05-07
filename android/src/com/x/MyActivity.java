@@ -1962,7 +1962,59 @@ public class MyActivity
 
     public static void launchWebView() {
         if (m_instance != null) {
-            WebViewActivity.openLocalHtml(m_instance);
+            // 检测系统是否支持 WebView
+            if (isWebViewAvailable()) {
+                WebViewActivity.openLocalHtml(m_instance);
+            } else {
+                // 根据 zh_cn 变量自动显示中文/英文提示
+                String tip =
+                    "Please install Android System WebView to view Markdown";
+                if (zh_cn) {
+                    tip = "请安装 Android System WebView 以查看 Markdown 文件";
+                }
+                Toast.makeText(m_instance, tip, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    public static void launchWebView_InBrowser() {
+        if (m_instance == null) return;
+
+        m_instance.runOnUiThread(() -> {
+            try {
+                // 你的文件
+                File htmlFile = new File(
+                    "/storage/emulated/0/KnotData/memo.html"
+                );
+                Uri uri = Uri.fromFile(htmlFile);
+
+                // 强制打开浏览器（真正能看见的那种）
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                intent.setDataAndType(uri, "text/html");
+                intent.addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK |
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP
+                );
+
+                // 关键：让系统一定显示选择浏览器
+                Intent chooser = Intent.createChooser(
+                    intent,
+                    MyActivity.zh_cn ? "打开方式" : "Open with"
+                );
+                m_instance.startActivity(chooser);
+            } catch (Exception e) {
+                // 不弹任何Toast，避免干扰
+            }
+        });
+    }
+
+    // 轻量检测 WebView 是否可用（不会崩溃）
+    private static boolean isWebViewAvailable() {
+        try {
+            Class.forName("android.webkit.WebView");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
         }
     }
 

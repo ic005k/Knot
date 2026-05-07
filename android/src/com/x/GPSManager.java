@@ -251,7 +251,7 @@ public class GPSManager {
             return false;
         }
 
-        // 2. 关键修复：启动前重新初始化线程池（避免stop后线程池为空）
+        // 2. 关键：启动前重新初始化线程池（避免stop后线程池为空）
         initExecutors();
 
         // 3. 重置运动数据
@@ -291,23 +291,36 @@ public class GPSManager {
             return false;
         }
 
-        // 7. 启动网络定位（若有粗定位权限）
+        // 7. 启动网络定位（先判断系统是否真的存在 network）
         if (hasCoarse) {
-            try {
-                LocationRequestCompat networkRequest =
-                    new LocationRequestCompat.Builder(2000L)
-                        .setMinUpdateDistanceMeters(5.0f)
-                        .build();
-                LocationManagerCompat.requestLocationUpdates(
-                    locationManager,
-                    LocationManager.NETWORK_PROVIDER,
-                    networkRequest,
-                    networkExecutor,
-                    networkLocationListener
-                );
-                Log.i(TAG, "网络定位已启动");
-            } catch (SecurityException e) {
-                Log.e(TAG, "启动网络定位失败", e);
+            // 关键：先判断 provider 是否存在
+            boolean networkExists = locationManager
+                .getAllProviders()
+                .contains(LocationManager.NETWORK_PROVIDER);
+            networkEnabled = locationManager.isProviderEnabled(
+                LocationManager.NETWORK_PROVIDER
+            );
+
+            if (networkExists && networkEnabled) {
+                // 只有存在+启用，才启动
+                try {
+                    LocationRequestCompat networkRequest =
+                        new LocationRequestCompat.Builder(2000L)
+                            .setMinUpdateDistanceMeters(5.0f)
+                            .build();
+                    LocationManagerCompat.requestLocationUpdates(
+                        locationManager,
+                        LocationManager.NETWORK_PROVIDER,
+                        networkRequest,
+                        networkExecutor,
+                        networkLocationListener
+                    );
+                    Log.i(TAG, "网络定位已启动");
+                } catch (Exception e) {
+                    Log.w(TAG, "启动网络定位失败（已忽略）", e);
+                }
+            } else {
+                Log.i(TAG, "无网络定位提供者，跳过启动");
             }
         }
 
@@ -441,11 +454,14 @@ public class GPSManager {
 
     // 启动网络定位
     private void startNetworkLocationUpdates() {
-        if (
-            locationManager == null ||
-            networkLocationListener == null ||
-            !isGpsRunning
-        ) {
+        if (locationManager == null || !isGpsRunning) return;
+
+        // 关键：先判断 network 是否存在
+        boolean networkExists = locationManager
+            .getAllProviders()
+            .contains(LocationManager.NETWORK_PROVIDER);
+        if (!networkExists) {
+            Log.w(TAG, "无 network 定位，跳过切换");
             return;
         }
 
