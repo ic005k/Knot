@@ -1914,7 +1914,7 @@ public class MyActivity
         }
     }
 
-    private void updateStatusBarColor() {
+    private void updateStatusBarColor_Old() {
         Window window = getWindow();
         WindowInsetsController insetsController = window.getInsetsController();
 
@@ -1952,6 +1952,66 @@ public class MyActivity
                         window.getDecorView().getSystemUiVisibility() |
                             View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                     );
+            }
+        }
+    }
+
+    private void updateStatusBarColor() {
+        Window window = getWindow();
+        WindowInsetsController insetsController = window.getInsetsController();
+
+        // 设置状态栏颜色
+        if (isDark) {
+            window.setStatusBarColor(Color.parseColor("#19232D")); // 深色背景
+
+            // 设置状态栏文本和图标为白色（亮色）
+            if (insetsController != null) {
+                insetsController.setSystemBarsAppearance(
+                    0,
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                );
+            } else {
+                window
+                    .getDecorView()
+                    .setSystemUiVisibility(
+                        window.getDecorView().getSystemUiVisibility() &
+                            ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                    );
+            }
+
+            // ========== 修复底部导航栏：暗黑模式 ==========
+            window.setNavigationBarColor(Color.parseColor("#19232D"));
+            if (insetsController != null) {
+                insetsController.setSystemBarsAppearance(
+                    0,
+                    WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+                );
+            }
+        } else {
+            window.setStatusBarColor(Color.parseColor("#F3F3F3")); // 浅色背景
+
+            // 设置状态栏文本和图标为黑色（暗色）
+            if (insetsController != null) {
+                insetsController.setSystemBarsAppearance(
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                );
+            } else {
+                window
+                    .getDecorView()
+                    .setSystemUiVisibility(
+                        window.getDecorView().getSystemUiVisibility() |
+                            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                    );
+            }
+
+            // ========== 修复底部导航栏：正常模式 ==========
+            window.setNavigationBarColor(Color.parseColor("#F3F3F3"));
+            if (insetsController != null) {
+                insetsController.setSystemBarsAppearance(
+                    WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
+                    WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+                );
             }
         }
     }

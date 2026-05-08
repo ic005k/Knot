@@ -53,6 +53,7 @@ public class WebViewActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //让 WebView 脱离 Qt 的绘制上下文，不抢 Surface，不冲突
         getWindow().setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN
