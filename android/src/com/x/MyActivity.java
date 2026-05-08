@@ -1960,7 +1960,7 @@ public class MyActivity
         isQtMainEnd = isEnd;
     }
 
-    public static void launchWebView() {
+    public static void launchWebView_Old() {
         if (m_instance != null) {
             // 检测系统是否支持 WebView
             if (isWebViewAvailable()) {
@@ -1975,6 +1975,19 @@ public class MyActivity
                 Toast.makeText(m_instance, tip, Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    public static void launchWebView() {
+        if (m_instance == null) return;
+
+        m_instance.runOnUiThread(() -> {
+            Intent intent = new Intent(m_instance, WebViewActivity.class);
+            // 加这一行，让系统认为这是正常APP页面
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            // 再加这一行，让WebView获取合法令牌
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            m_instance.startActivity(intent);
+        });
     }
 
     public static void launchWebView_InBrowser() {

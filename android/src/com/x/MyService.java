@@ -175,7 +175,12 @@ public class MyService extends Service {
         try {
             // 注册闹钟接收器
             IntentFilter filter = new IntentFilter(ACTION_TODO_ALARM);
-            registerReceiver(myalarmReceiver, filter);
+            //registerReceiver(myalarmReceiver, filter);
+            registerReceiver(
+                myalarmReceiver,
+                filter,
+                Context.RECEIVER_NOT_EXPORTED
+            );
 
             // 计步器初始化（仅换上下文为serviceContext）
             mySensorSerivece = new PersistService(serviceContext);
@@ -324,7 +329,12 @@ public class MyService extends Service {
             .setDefaults(0) // 无任何默认提醒（所有版本兼容）
             .build();
 
-        startForeground(1337, notification);
+        // startForeground(1337, notification);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(1337, notification, 1);
+        } else {
+            startForeground(1337, notification);
+        }
     }
 
     // ----------------------------------------------

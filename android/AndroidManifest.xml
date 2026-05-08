@@ -36,6 +36,12 @@
     />
 
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"
+    />
+
     <uses-feature
         android:name="android.hardware.sensor.stepcounter"
         android:required="true"
@@ -190,7 +196,11 @@
         </activity>
 
         <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
-        <service android:name="com.x.MyService">
+        <service
+            android:name="com.x.MyService"
+            android:foregroundServiceType="connectedDevice|dataSync"
+            android:exported="false"
+        >
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="-- %%INSERT_APP_LIB_NAME%% --"

@@ -53,6 +53,13 @@ public class WebViewActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        getWindow().setFlags(
+            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
+        );
+        getWindow().setFormat(android.graphics.PixelFormat.TRANSLUCENT);
+        getWindow().setBackgroundDrawable(null);
+
         super.onCreate(savedInstanceState);
         instance = this;
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -83,7 +90,7 @@ public class WebViewActivity extends Activity {
         initWebView();
 
         // 检查存储权限，若已授予则直接加载
-        if (
+        /*if (
             ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.READ_EXTERNAL_STORAGE
@@ -93,7 +100,10 @@ public class WebViewActivity extends Activity {
             loadLocalHtmlFile();
         } else {
             verifyStoragePermissions(this); // 未授予则申请权限
-        }
+        }*/
+
+        // 修复LineageOS权限误判，直接加载
+        loadLocalHtmlFile();
 
         // 关闭按钮逻辑
         Button closeButton = findViewById(R.id.close_button);
