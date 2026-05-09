@@ -536,6 +536,12 @@ void MainHelper::initMainQW() {
                                                    "#FFFFFF");
   mui->qwReader->rootContext()->setContextProperty("isAutoRun",
                                                    QVariant(false));
+
+  mui->qwReader->rootContext()->setContextProperty("FontSize", fontSize);
+  mui->qwReader->rootContext()->setContextProperty("uiFontSize", fontSize);
+  mui->qwReader->rootContext()->setContextProperty("backImgFile", "/res/b.png");
+  mui->qwReader->rootContext()->setContextProperty("myTextColor", "#664E30");
+
   m_ReaderSet->setScrollValue();
 
   // Book List
