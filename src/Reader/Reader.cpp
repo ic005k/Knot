@@ -3126,7 +3126,7 @@ void Reader::closeReader() {
 
 void Reader::openReader() {
   if (!isOne) {
-    initReader();
+    // initReader();
   }
 
   if (isPDF) {

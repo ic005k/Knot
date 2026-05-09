@@ -44,6 +44,8 @@ MainWindow::MainWindow(QWidget* parent)
 
   resetWinPos();
 
+  m_Reader->initReader();
+
   QTimer::singleShot(10, this, [this]() {
     reloadMain();
     clickData();
