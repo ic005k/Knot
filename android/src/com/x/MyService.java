@@ -507,7 +507,8 @@ public class MyService extends Service {
                     ).show();
                 });
             } else {
-                if (!isMIUI || (isMIUI && isLockScreen)) {
+                // 只允许 MIUI 且锁屏时 才手动播放，其他全部跳过
+                if (isMIUI && isLockScreen) {
                     playLockScreenSound(context);
                 }
             }
