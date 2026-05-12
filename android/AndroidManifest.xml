@@ -5,7 +5,7 @@
     package="com.x"
     android:installLocation="auto"
     android:versionCode="1"
-    android:versionName="2.1.87"
+    android:versionName="2.1.88"
 >
 
     <!-- The following comment will be replaced upon deployment with default permissions based on
@@ -198,7 +198,7 @@
         <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
         <service
             android:name="com.x.MyService"
-            android:foregroundServiceType="connectedDevice|dataSync"
+            android:foregroundServiceType="mediaPlayback|connectedDevice|dataSync"
             android:exported="false"
         >
             <meta-data
