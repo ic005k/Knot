@@ -149,6 +149,18 @@ public class MyService extends Service {
         super.onCreate();
         Log.i(TAG, "Service on create"); // 服务被创建
 
+        // ========= 提升进程优先级，保住 Activity 不被清理 =========
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                // 提高进程优先级，系统极低概率回收
+                android.os.Process.setThreadPriority(
+                    android.os.Process.THREAD_PRIORITY_FOREGROUND
+                );
+            }
+        } catch (Exception e) {
+            // 低于4.1版本忽略，不崩溃
+        }
+
         instance = this; // 保存服务实例
 
         // 优先使用Service自身的上下文，而非依赖MyActivity
