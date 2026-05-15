@@ -93,6 +93,7 @@ jobs:
       - name: package
         run: |
          cp res/icon.png bin/release/icon.png
+         cp res/default.desktop bin/release/Knot.desktop
 
          mkdir -p bin/release/usr/share/applications
          cp res/default.desktop bin/release/usr/share/applications/Knot.desktop

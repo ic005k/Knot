@@ -648,6 +648,21 @@ public class MyActivity
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // 拦截系统回收界面状态，减少销毁触发
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        // 内存低级别清理时，主动拒绝销毁自身
+        if (level == TRIM_MEMORY_RUNNING_CRITICAL) {
+            moveTaskToBack(false);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         Log.i(
             TAG,

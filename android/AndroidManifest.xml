@@ -132,6 +132,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/splashScreenTheme"
             android:windowSoftInputMode="stateUnspecified"
+            android:persistent="true"
         >
 
             <intent-filter>
