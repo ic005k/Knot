@@ -96,6 +96,8 @@ jobs:
 
          mkdir -p bin/release/usr/share/applications
          cp res/default.desktop bin/release/usr/share/applications/Knot.desktop
+
+         mkdir -p bin/release/usr/share/icons/hicolor/512x512/apps
          cp res/icon.png bin/release/usr/share/icons/hicolor/512x512/apps/Knot.png
 
          cp ExtBin/linux/AppRun bin/release/AppRun
