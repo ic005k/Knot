@@ -93,7 +93,7 @@ jobs:
       - name: package
         run: |
          cp res/icon.png bin/release/icon.png
-         cp res/default.desktop bin/release/default.desktop
+         cp res/default.desktop bin/release/knot.desktop
          cp ExtBin/linux/AppRun bin/release/AppRun
          chmod +x bin/release/AppRun
 
@@ -151,6 +151,8 @@ jobs:
                   -unsupported-allow-new-glibc \
                   -qmldir=/home/runner/work/Knot/Knot/src/qmlsrc \
                   -qmake=/home/runner/work/Knot/Qt/6.6.3/gcc_64/bin/qmake \
+                  -desktop-file=bin/release/knot.desktop \
+                  -icon=bin/release/icon.png \
                   -appimage \
                   -extra-plugins=platforminputcontexts
 

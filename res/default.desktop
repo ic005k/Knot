@@ -6,3 +6,4 @@ Icon=icon
 Comment=Knot
 Categories=Application;
 Terminal=true
+StartupWMClass=Knot
