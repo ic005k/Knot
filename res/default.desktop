@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=Knot
-Exec=Knot
+Exec=AppRun
 Icon=Knot
 Comment=Knot
 Categories=Application;
