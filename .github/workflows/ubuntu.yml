@@ -92,14 +92,14 @@ jobs:
 
       - name: package
         run: |
-         cp res/icon.png bin/release/Knot.png
+         cp res/icon.png bin/release/icon.png
          cp res/default.desktop bin/release/Knot.desktop
 
          mkdir -p bin/release/usr/share/applications
          cp res/default.desktop bin/release/usr/share/applications/Knot.desktop
 
          mkdir -p bin/release/usr/share/icons/hicolor/512x512/apps
-         cp res/icon.png bin/release/usr/share/icons/hicolor/512x512/apps/Knot.png
+         cp res/icon.png bin/release/usr/share/icons/hicolor/512x512/apps/icon.png
 
          cp ExtBin/linux/AppRun bin/release/AppRun
          chmod +x bin/release/AppRun
