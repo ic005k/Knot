@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
   app.setOrganizationName("KnotCompany");
   app.setOrganizationDomain("knotcompany.com");
   app.setApplicationName("Knot");
-  app.setDesktopFileName("Knot");
+  app.setDesktopFileName("default");
 
   QDir dir;
   QString path;
