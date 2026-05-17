@@ -349,7 +349,7 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
 
   QString lastModi = m_Method->getFileUTCString(tarImageFile);
   QString zipImg = privateDir + "KnotData/memo/images/" + lastModi + "_" +
-                   QFileInfo(tarImageFile).fileName();
+                   QFileInfo(tarImageFile).fileName() + ".zip";
   QFile::copy(tarImageFile, zipImg);
   zipImg = m_Method->useEnc(zipImg);
 
@@ -1680,6 +1680,13 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
       pFile = m_Method->useDec(pFile);
       kFile = iniDir + asFile.replace("KnotData/", "");
       kFile = kFile.replace(remoteLastModi + "_", "");
+
+      // ==========================================
+      // 下载后自动还原：去掉 .zip 后缀
+      // ==========================================
+      if (kFile.endsWith(".png.zip")) {
+        kFile.replace(".png.zip", ".png");
+      }
 
       qDebug() << "file=" << file;
       qDebug() << "pFile=" << pFile;

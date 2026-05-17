@@ -235,6 +235,8 @@ public class NoteEditor
     // 拍照请求码
     private static final int REQUEST_TAKE_PHOTO = 1;
     private static final int REQUEST_PICK_IMAGE = 2;
+    // 图片读取权限请求码
+    private static final int REQUEST_READ_MEDIA_IMAGES = 3;
 
     boolean isImageFile = true;
 
@@ -1915,9 +1917,10 @@ public class NoteEditor
         }
 
         // Photo Shooting
-        // 拍照逻辑中的权限处理
         if (strTitle.equals(listMenuTitle.get(2))) {
-            // 检查相机权限
+            List<String> permissions = new ArrayList<>();
+
+            // 相机权限
             if (
                 ContextCompat.checkSelfPermission(
                     this,
@@ -1925,19 +1928,36 @@ public class NoteEditor
                 ) !=
                 PackageManager.PERMISSION_GRANTED
             ) {
-                // 未授权，发起权限申请
+                permissions.add(Manifest.permission.CAMERA);
+            }
+
+            // Android 13+ 图片存储权限
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (
+                    ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.READ_MEDIA_IMAGES
+                    ) !=
+                    PackageManager.PERMISSION_GRANTED
+                ) {
+                    permissions.add(Manifest.permission.READ_MEDIA_IMAGES);
+                }
+            }
+
+            // 缺少权限 → 一次性申请
+            if (!permissions.isEmpty()) {
                 ActivityCompat.requestPermissions(
                     this,
-                    new String[] { Manifest.permission.CAMERA },
-                    REQUEST_CAMERA_PERMISSION
+                    permissions.toArray(new String[0]),
+                    100
                 );
                 return;
-            } else {
-                // 已授权，执行拍照
-                isImageFile = false;
-                dispatchTakePictureIntent();
-                isAddImage = true;
             }
+
+            // 权限全有 → 拍照
+            isImageFile = false;
+            dispatchTakePictureIntentAndroid13Plus();
+            isAddImage = true;
         }
 
         // Table
@@ -2891,28 +2911,24 @@ public class NoteEditor
             permissions,
             grantResults
         );
-        if (requestCode == REQUEST_CAMERA_PERMISSION) {
-            if (
-                grantResults.length > 0 &&
-                grantResults[0] == PackageManager.PERMISSION_GRANTED
-            ) {
-                // 用户授权，执行拍照
+
+        if (requestCode == 100) {
+            boolean ok = true;
+            for (int r : grantResults) {
+                if (r != PackageManager.PERMISSION_GRANTED) ok = false;
+            }
+
+            if (ok) {
+                // 权限全部允许 → 拍照
                 isImageFile = false;
-                dispatchTakePictureIntent();
+                dispatchTakePictureIntentAndroid13Plus();
                 isAddImage = true;
             } else {
-                // 用户拒绝，提示权限缺失
-                String strInfo = MyActivity.zh_cn
-                    ? "请开启摄像头权限！"
-                    : "Please enable camera permissions!";
-                Toast.makeText(this, strInfo, Toast.LENGTH_SHORT).show();
-                // 可选：引导用户到系统设置开启权限
-                Intent intent = new Intent(
-                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                );
-                Uri uri = Uri.fromParts("package", getPackageName(), null);
-                intent.setData(uri);
-                startActivity(intent);
+                // 拒绝
+                String tip = MyActivity.zh_cn
+                    ? "权限已拒绝，无法拍照"
+                    : "Permission denied";
+                Toast.makeText(this, tip, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -2935,5 +2951,113 @@ public class NoteEditor
         editNote.addTextChangedListener(
             MarkwonEditorTextWatcher.withPreRender(editor, executor, editNote)
         );
+    }
+
+    /**
+     * Android 13+ (Android 13/14/15/16) 专用拍照
+     */
+    private void dispatchTakePictureIntentAndroid13Plus() {
+        // 1. 检查相机硬件
+        if (
+            !getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_CAMERA_ANY
+            )
+        ) {
+            String tip = MyActivity.zh_cn
+                ? "设备不支持相机"
+                : "No camera support";
+            Toast.makeText(this, tip, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 2. 创建 Intent
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        // 3. 确保有相机应用
+        if (takePictureIntent.resolveActivity(getPackageManager()) == null) {
+            String tip = MyActivity.zh_cn ? "未找到相机应用" : "No camera app";
+            Toast.makeText(this, tip, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 4. 创建临时文件（Android 13+ 专用）
+        File photoFile = createImageFileAndroid13Plus();
+        if (photoFile == null) {
+            String tip = MyActivity.zh_cn
+                ? "无法创建图片文件"
+                : "Cannot create image";
+            Toast.makeText(this, tip, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 5. 生成 FileProvider Uri（关键）
+        try {
+            photoUri = FileProvider.getUriForFile(
+                this,
+                "com.x", // 必须和你 manifest 里的 authorities 一致
+                photoFile
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(
+                this,
+                "FileProvider 错误",
+                Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
+        // 6. 🔥🔥🔥 Android 13+ 必须加这 3 个 Flag 🔥🔥🔥
+        takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        takePictureIntent.addFlags(
+            Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+        );
+
+        // 7. 输出到 Uri
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+
+        // 8. 启动相机
+        startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+    }
+
+    private File createImageFileAndroid13Plus() {
+        String timeStamp = new SimpleDateFormat(
+            "yyyyMMdd_HHmmss",
+            Locale.getDefault()
+        ).format(new Date());
+        String fileName = "Knot_Photo_" + timeStamp;
+
+        // Android 13+ 优先使用 MediaStore 目录
+        File storageDir;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Android 10+：公共目录
+            storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES
+            );
+        } else {
+            // 旧版：App 私有目录
+            storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        }
+
+        // 确保目录存在
+        if (storageDir != null) {
+            storageDir.mkdirs();
+        } else {
+            return null;
+        }
+
+        // 创建文件
+        File image = new File(storageDir, fileName + ".jpg");
+
+        try {
+            image.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return image;
     }
 }

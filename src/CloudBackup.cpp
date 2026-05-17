@@ -438,93 +438,6 @@ QString CloudBackup::aesDecrypt(QString cipherText, QByteArray key,
   return QString::fromUtf8(decrypted);
 }
 
-void CloudBackup::uploadFilesToWebDAV_old(QStringList files) {
-  QNetworkAccessManager* manager = new QNetworkAccessManager();
-  QString url = getWebDAVArgument();
-
-  // 使用QAtomicInt确保线程安全
-  QAtomicInt* activeReplyCount = new QAtomicInt(files.size());
-
-  // 处理空文件列表的情况
-  if (files.isEmpty()) {
-    manager->deleteLater();
-    delete activeReplyCount;
-    return;
-  }
-
-  foreach (QString m_file, files) {
-    QString localFile = m_file;
-    QString remoteFile = m_file;
-    remoteFile = remoteFile.replace(privateDir, "");
-
-    // 规范URL拼接
-    QUrl baseUrl(url);
-    QUrl fullUrl = baseUrl.resolved(remoteFile);
-
-    QFile* file = new QFile(localFile);
-    if (!file->open(QIODevice::ReadOnly)) {
-      qDebug() << "Failed to open file:" << localFile;
-      delete file;
-
-      // 安全处理计数器
-      if (activeReplyCount->fetchAndSubRelaxed(1) == 1) {
-        manager->deleteLater();
-        delete activeReplyCount;
-      }
-      continue;
-    }
-
-    QNetworkRequest request;
-    request.setUrl(fullUrl);
-    QString auth = QString("%1:%2").arg(USERNAME, APP_PASSWORD);
-    request.setRawHeader("Authorization",
-                         "Basic " + auth.toLocal8Bit().toBase64());
-
-    QNetworkReply* reply = manager->put(request, file);
-    file->setParent(reply);  // 文件随reply释放
-
-    // 弱引用this指针，避免悬垂指针
-    QPointer<CloudBackup> thisPtr(this);
-
-    // 上传进度跟踪
-    QObject::connect(reply, &QNetworkReply::uploadProgress,
-                     [=](qint64 bytesSent, qint64 bytesTotal) {
-                       Q_UNUSED(bytesSent);
-                       Q_UNUSED(bytesTotal);
-
-                       // qDebug() << "Uploading" << m_file << bytesSent << "/"
-                       //          << bytesTotal;
-                     });
-
-    // 处理完成/错误
-    QObject::connect(reply, &QNetworkReply::finished, this, [=]() {
-      if (!thisPtr) {  // 检查对象是否已销毁
-        reply->deleteLater();
-        return;
-      }
-
-      if (reply->error() == QNetworkReply::NoError) {
-        m_Notes->notes_sync_files.removeOne(m_file);
-        qDebug() << "Upload succeeded:" << m_file
-                 << "Rema:" << m_Notes->notes_sync_files.count();
-
-        mw_one->saveNeedSyncNotes();
-      } else {
-        qDebug() << "Error uploading" << m_file << ":" << reply->errorString();
-      }
-      reply->deleteLater();
-
-      // 原子操作减少计数器并检查是否为最后一个任务
-      if (activeReplyCount->fetchAndSubRelaxed(1) == 1) {
-        mw_one->closeProgress();
-
-        manager->deleteLater();
-        delete activeReplyCount;
-      }
-    });
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////////
 
 void CloudBackup::uploadFilesToWebDAV(const QStringList& files) {
@@ -544,6 +457,7 @@ void CloudBackup::startNextUpload() {
     QString filePath = uploadQueue.dequeue();
     QString remoteFile = filePath;
     remoteFile.replace(privateDir, "");
+
     QUrl fullUrl = QUrl(getWebDAVArgument()).resolved(remoteFile);
 
     QFile* file = new QFile(filePath);
