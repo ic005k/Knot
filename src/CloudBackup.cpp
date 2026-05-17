@@ -165,6 +165,9 @@ void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
   QString auth = USERNAME + ":" + APP_PASSWORD;
   request.setRawHeader("Authorization", "Basic " + auth.toUtf8().toBase64());
 
+  // 🔥 必须加这一行：伪装成 Zotero
+  request.setRawHeader("User-Agent", "Zotero/5.0");
+
   // 调试输出
   qDebug() << "上传URL：" << url.toString();
   qDebug() << "认证头：" << request.rawHeader("Authorization");
@@ -245,6 +248,9 @@ void CloudBackup::createDirectory(QString webdavUrl, QString remoteDirPath) {
   QString auth = USERNAME + ":" + APP_PASSWORD;
   request.setRawHeader("Authorization", "Basic " + auth.toUtf8().toBase64());
 
+  // 🔥 必须加这一行：伪装成 Zotero
+  request.setRawHeader("User-Agent", "Zotero/5.0");
+
   QNetworkReply* reply = m_manager->sendCustomRequest(request, "MKCOL");
 
   QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
@@ -273,6 +279,8 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
   // 设置认证头
   QString auth = QString("%1:%2").arg(USERNAME).arg(APP_PASSWORD);
   request.setRawHeader("Authorization", "Basic " + auth.toUtf8().toBase64());
+
+  request.setRawHeader("User-Agent", "Zotero/5.0");
 
   QFile* localFile = new QFile(localSavePath);
   if (!localFile->open(QIODevice::WriteOnly)) {
@@ -550,6 +558,8 @@ void CloudBackup::startNextUpload() {
     request.setRawHeader("Authorization",
                          "Basic " + auth.toLocal8Bit().toBase64());
 
+    request.setRawHeader("User-Agent", "Zotero/5.0");
+
     QNetworkAccessManager* manager = new QNetworkAccessManager(this);
     QNetworkReply* reply = manager->put(request, file);
     file->setParent(reply);
@@ -597,7 +607,7 @@ void CloudBackup::handleUploadFinished(QNetworkReply* reply,
 /// /////////////////////////////////////////////////////////////////////////////////
 
 // 核心函数：列出目录文件（支持坚果云分页）
-WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
+/*WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
                               const QString& password) {
   WebDavHelper* helper = new WebDavHelper();
   QNetworkAccessManager* manager = new QNetworkAccessManager(helper);
@@ -653,7 +663,105 @@ WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
   });
 
   return helper;
+}*/
+
+// 核心函数：列出目录文件（100% 兼容 坚果云 + 中科院 + 所有标准WebDAV）
+WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
+                              const QString& password) {
+  WebDavHelper* helper = new WebDavHelper();
+  QNetworkAccessManager* manager = new QNetworkAccessManager(helper);
+
+  // ==============================================
+  // 精准判断：是否为 中科院数据胶囊
+  // ==============================================
+  bool isCstCloud = url.contains("data.cstcloud.cn", Qt::CaseInsensitive);
+  QString fixedUrl = url;
+
+  // 🔥 中科院专属：强制 URL 以 / 结尾（不影响其他网盘）
+  if (isCstCloud && !fixedUrl.endsWith("/")) {
+    fixedUrl += "/";
+  }
+
+  QNetworkRequest request;
+  request.setUrl(QUrl(fixedUrl));
+
+  // ==============================================
+  // 🔥 中科院专属：直接手动加 Basic 认证
+  // 其他网盘继续使用自动认证，保持原有逻辑不变
+  // ==============================================
+  if (isCstCloud) {
+    QString auth = username + ":" + password;
+    request.setRawHeader("Authorization", "Basic " + auth.toUtf8().toBase64());
+  } else {
+    // 原有逻辑：其他网盘使用 Qt 自动认证（完全不动）
+    QObject::connect(
+        manager, &QNetworkAccessManager::authenticationRequired,
+        [username, password](QNetworkReply* reply, QAuthenticator* auth) {
+          Q_UNUSED(reply);
+          auth->setUser(username);
+          auth->setPassword(password);
+        });
+  }
+
+  // 标准请求头
+  request.setRawHeader("Depth", "1");
+
+  // ==============================================
+  // Brief 头：保持原有逻辑
+  // 坚果云 = t
+  // 中科院 = t（兼容）
+  // 其他 = 不加
+  // ==============================================
+  if (url.contains("jianguoyun.com") || isCstCloud) {
+    request.setRawHeader("Brief", "t");
+  }
+
+  // ==============================================
+  // 🔥 中科院专属：强制 Zotero UA
+  // 其他网盘：不设置，使用 Qt 默认（完全不影响原有行为）
+  // ==============================================
+  if (isCstCloud) {
+    request.setRawHeader("User-Agent", "Zotero/5.0");
+  }
+
+  request.setHeader(QNetworkRequest::ContentTypeHeader,
+                    "text/xml; charset=utf-8");
+
+  // 标准 PROPFIND XML（完全不动）
+  const QByteArray body = R"(<?xml version="1.0" encoding="utf-8"?>
+        <d:propfind xmlns:d="DAV:">
+            <d:prop>
+                <d:displayname/>
+                <d:getlastmodified/>
+                <d:resourcetype/>
+            </d:prop>
+        </d:propfind>)";
+
+  QNetworkReply* reply = manager->sendCustomRequest(request, "PROPFIND", body);
+
+  QObject::connect(reply, &QNetworkReply::finished, [manager, helper, reply]() {
+    if (reply->error() != QNetworkReply::NoError) {
+      const QString error =
+          QString("[HTTP %1] %2")
+              .arg(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute)
+                       .toInt())
+              .arg(reply->errorString());
+      emit helper->errorOccurred(error);
+    } else {
+      helper->setResponseHeaders(reply->rawHeaderPairs());
+      QByteArray responseData = reply->readAll();
+      QList<QPair<QString, QDateTime>> files =
+          parseWebDavResponse(responseData);
+      emit helper->listCompleted(files);
+    }
+
+    reply->deleteLater();
+    manager->deleteLater();
+  });
+
+  return helper;
 }
+
 // 解析函数
 QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray& data) {
   QList<QPair<QString, QDateTime>> files;
@@ -795,6 +903,9 @@ void WebDavDownloader::startNextDownload() {
   }
 
   QNetworkRequest request(url);
+
+  request.setRawHeader("User-Agent", "Zotero/5.0");
+
   QNetworkReply* reply = manager.get(request);
 
   // 记录活动下载
@@ -1071,12 +1182,14 @@ void CloudBackup::webDAVRestoreData() {
   mui->btnWebDAVBackup->setEnabled(false);
 }
 
-bool CloudBackup::checkWebDAVConnection() {
+/*bool CloudBackup::checkWebDAVConnection() {
   // 获取并处理URL
   QString urlText = mui->cboxWebDAV->currentText().trimmed();
-  if (!urlText.endsWith("/")) {
-    urlText += "/";  // 确保URL以斜杠结尾，符合WebDAV规范
-  }
+
+  // if (!urlText.endsWith("/")) {
+  //   urlText += "/";  // 确保URL以斜杠结尾，符合WebDAV规范
+  // }
+
   QUrl url(urlText);
 
   QString m_errorMsg;
@@ -1183,9 +1296,59 @@ bool CloudBackup::checkWebDAVConnection() {
     reply->deleteLater();
     return false;
   }
+}*/
+
+bool CloudBackup::checkWebDAVConnection() {
+  QString urlText = mui->cboxWebDAV->currentText().trimmed();
+  QUrl url(urlText);
+
+  if (!url.isValid() || url.scheme() != "https") {
+    qDebug() << "URL无效，必须使用https协议";
+    return false;
+  }
+
+  QString username = mui->editWebDAVUsername->text().trimmed();
+  QString password = mui->editWebDAVPassword->text().trimmed();
+
+  QNetworkAccessManager manager;
+  QNetworkRequest request(url);
+
+  // 🔥 关键：中科院必须直接带认证，不等待401
+  QByteArray auth = username.toUtf8() + ":" + password.toUtf8();
+  request.setRawHeader("Authorization", "Basic " + auth.toBase64());
+
+  request.setRawHeader("User-Agent", "Zotero/5.0");
+  request.setRawHeader("Depth", "0");
+
+  // 🔥 关键：极简 PROPFIND，中科院只认这个
+  QString xml =
+      "<?xml version=\"1.0\"?>"
+      "<d:propfind xmlns:d=\"DAV:\">"
+      "<d:allprop/>"
+      "</d:propfind>";
+
+  QNetworkReply* reply =
+      manager.sendCustomRequest(request, "PROPFIND", xml.toUtf8());
+
+  QEventLoop loop;
+  connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+  loop.exec();
+
+  int status =
+      reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+  bool ok = (reply->error() == QNetworkReply::NoError &&
+             (status == 207 || status == 200));
+
+  QString strError =
+      ok ? "连接成功" : QString("连接失败，状态码：%1").arg(status);
+  qDebug() << strError;
+  reply->deleteLater();
+  return ok;
 }
 
 QString CloudBackup::unifyWebDAVBaseUrlToDavEnd(QString url) {
+  return url;
+
   int davIndex = url.lastIndexOf("/dav/");
   if (davIndex != -1) {
     url = url.left(davIndex + 4);

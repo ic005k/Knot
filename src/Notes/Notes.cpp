@@ -587,7 +587,7 @@ void Notes::syncToWebDAV() {
   }
 }
 
-void Notes::delRemoteFile(const QStringList& Files) {
+/*void Notes::delRemoteFile(const QStringList& Files) {
   QStringList delFiles;
   for (int j = 0; j < Files.count(); j++) {
     QString syncFile = Files.at(j);
@@ -602,6 +602,39 @@ void Notes::delRemoteFile(const QStringList& Files) {
   }
   qDebug() << "delWebDAVFiles=" << delFiles;
   m_CloudBackup->deleteWebDAVFiles(delFiles);
+}*/
+
+void Notes::delRemoteFile(const QStringList& Files) {
+  QStringList delFiles;
+  for (int j = 0; j < Files.count(); j++) {
+    QString syncFile = Files.at(j);
+    QString baseFlag = m_Method->getBaseFlag(syncFile);
+    if (!baseFlag.isEmpty()) {
+      for (int i = 0; i < orgRemoteFiles.count(); i++) {
+        QString orgFile = orgRemoteFiles.at(i);
+        if (orgFile.contains(baseFlag)) {
+          delFiles.append(orgFile);
+        }
+      }
+    }
+  }
+
+  // ==========================
+  // 🔥 终极正确清洗
+  // 去掉开头的 mydata/
+  // 解决双 mydata 问题
+  // ==========================
+  QStringList cleanedDelFiles;
+  for (QString file : delFiles) {
+    if (file.startsWith("mydata/")) {
+      file = file.mid(7);  // 删除 "mydata/"
+    }
+    cleanedDelFiles.append(file);
+  }
+
+  qDebug() << "最终删除路径(无重复) = " << cleanedDelFiles;
+
+  m_CloudBackup->deleteWebDAVFiles(cleanedDelFiles);
 }
 
 bool Notes::isSetNewNoteTitle() {
@@ -1329,7 +1362,19 @@ void Notes::openNotes() {
             qDebug() << "路径:" << path
                      << "修改时间:" << mtime.toString("yyyy-MM-dd hh:mm:ss");
             QString remote_f = path;
-            remote_f = remote_f.replace("/dav/", "");  // 此处需注意
+
+            // remote_f = remote_f.replace("/dav/", "");  // 此处需注意
+            // ==============================
+            // 通用 WebDAV 路径清洗
+            // 自动移除 /dav/xxx/ 前缀，不写死任何桶名
+            // ==============================
+            int davIndex = remote_f.indexOf("/dav/");
+            if (davIndex >= 0) {
+              int start = remote_f.indexOf('/', davIndex + 5);
+              if (start >= 0) {
+                remote_f = remote_f.mid(start + 1);
+              }
+            }
 
             if (path.contains("mainnotes.json.zip")) {
               orgRemoteFiles.append(remote_f);
@@ -1371,6 +1416,12 @@ void Notes::openNotes() {
               localLastModi = m_Method->getFileUTCString(local_realfile);
 
               if (remoteLastModi > localLastModi) {
+                // 通用清洗：自动删除【桶名/】前缀，只保留 KnotData/ 开始的路径
+                int pos = or_file.indexOf("/KnotData/");
+                if (pos != -1) {
+                  or_file = or_file.mid(pos + 1);  // 从 /KnotData/ 后面开始截取
+                }
+
                 remoteFiles.append(or_file);
                 qDebug() << "Remote time: " << remoteLastModi
                          << "Local time: " << localLastModi << or_file
@@ -1460,9 +1511,10 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
     QString file = remoteFiles.at(i);
 
     QString temp_f = file;
+
     if (!dataDir.isEmpty()) {
       qDebug() << "WebDAV 数据目录是:" << dataDir;
-      temp_f = temp_f.replace(dataDir + "/", "");
+      //   temp_f = temp_f.replace(dataDir + "/", "");
     }
 
     QString pDir, pFile, kFile, asFile, zFile;

@@ -14,16 +14,16 @@
 class CloudDeleter : public QObject {
   Q_OBJECT
  public:
-  explicit CloudDeleter(const QString &user, const QString &appPassword,
-                        QObject *parent = nullptr)
+  explicit CloudDeleter(const QString& user, const QString& appPassword,
+                        QObject* parent = nullptr)
       : QObject(parent), username(user), password(appPassword) {}
 
   QString baseUrl = "https://dav.jianguoyun.com/dav/";
 
   // maxConcurrent=1 表示串行删除
-  void deleteFiles(const QList<QString> &filePaths, int maxConcurrent = 1) {
+  void deleteFiles(const QList<QString>& filePaths, int maxConcurrent = 1) {
     QEventLoop loop;
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    QNetworkAccessManager* manager = new QNetworkAccessManager(this);
 
     QMutex mutex;
     int active = 0;
@@ -35,13 +35,15 @@ class CloudDeleter : public QObject {
       QMutexLocker locker(&mutex);
       while (active < maxConcurrent && index < total) {
         int i = index++;
-        const QString &path = filePaths.at(i);
+        const QString& path = filePaths.at(i);
         QUrl url(baseUrl + path);
         QNetworkRequest request(url);
 
-        QNetworkReply *reply = manager->deleteResource(request);
+        request.setRawHeader("User-Agent", "Zotero/5.0");
+
+        QNetworkReply* reply = manager->deleteResource(request);
         connect(reply, &QNetworkReply::sslErrors,
-                [](const QList<QSslError> &errors) {
+                [](const QList<QSslError>& errors) {
                   qWarning() << "SSL Errors:" << errors;
                 });
 
@@ -75,7 +77,7 @@ class CloudDeleter : public QObject {
     };
 
     connect(manager, &QNetworkAccessManager::authenticationRequired,
-            [this](QNetworkReply *, QAuthenticator *auth) {
+            [this](QNetworkReply*, QAuthenticator* auth) {
               auth->setUser(this->username);
               auth->setPassword(this->password);
             });

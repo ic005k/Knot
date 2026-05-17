@@ -1542,7 +1542,21 @@ void Todo::openTodo() {
                      << remoteTime.toString("yyyy-MM-dd hh:mm:ss");
 
             QString remoteFile = path;
-            remoteFile = remoteFile.replace("/dav/", "");  // 此处需注意
+
+            // remoteFile = remoteFile.replace("/dav/", "");  // 此处需注意
+            // ==============================
+            // 通用 WebDAV 路径清洗（兼容所有网盘，无任何硬编码）
+            // 自动截取 /KnotData 开始的路径
+            // ==============================
+            int knotIndex = remoteFile.indexOf("/KnotData");
+            if (knotIndex != -1) {
+              // 从 /KnotData 开始截取，自动去掉前面所有前缀（bucket名）
+              remoteFile = remoteFile.mid(knotIndex + 1);
+            } else {
+              // 标准清洗规则
+              remoteFile = remoteFile.replace("/dav/", "");
+            }
+
             if (remoteFile.contains("todo.json.zip")) {
               isTodoFile = true;
               QString localFile = privateDir + "KnotData/todo.json.zip";
@@ -1609,6 +1623,9 @@ void Todo::openTodo() {
                       QTimer::singleShot(100, mw_one,
                                          [this]() { openTodoUI(); });
                     });
+
+                // 安全通用清洗：只删除 dav 前缀，不删除完整路径结构
+                remoteFile = remoteFile.replace("/dav/", "");
 
                 // 需要下载的文件列表
                 QList<QString> remoteFiles = {remoteFile};
