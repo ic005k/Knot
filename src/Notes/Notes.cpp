@@ -587,23 +587,6 @@ void Notes::syncToWebDAV() {
   }
 }
 
-/*void Notes::delRemoteFile(const QStringList& Files) {
-  QStringList delFiles;
-  for (int j = 0; j < Files.count(); j++) {
-    QString syncFile = Files.at(j);
-
-    QString baseFlag = m_Method->getBaseFlag(syncFile);
-    if (!baseFlag.isEmpty()) {
-      for (int i = 0; i < orgRemoteFiles.count(); i++) {
-        QString orgFile = orgRemoteFiles.at(i);
-        if (orgFile.contains(baseFlag)) delFiles.append(orgFile);
-      }
-    }
-  }
-  qDebug() << "delWebDAVFiles=" << delFiles;
-  m_CloudBackup->deleteWebDAVFiles(delFiles);
-}*/
-
 void Notes::delRemoteFile(const QStringList& Files) {
   QStringList delFiles;
   for (int j = 0; j < Files.count(); j++) {
@@ -620,19 +603,44 @@ void Notes::delRemoteFile(const QStringList& Files) {
   }
 
   // ==========================
-  // 🔥 终极正确清洗
-  // 去掉开头的 mydata/
-  // 解决双 mydata 问题
+  // ✅ 安全规则：
+  // 只有 中科院样式 (dav/后是自定义根目录) 才清洗
+  // 其他如 Koofr / 坚果云 一律不清洗！
   // ==========================
   QStringList cleanedDelFiles;
-  for (QString file : delFiles) {
-    if (file.startsWith("mydata/")) {
-      file = file.mid(7);  // 删除 "mydata/"
+  QString webdavUrl = mui->cboxWebDAV->currentText();
+  bool needClean = false;
+  QString davSuffix;
+
+  int davPos = webdavUrl.indexOf("/dav/");
+  if (davPos != -1) {
+    davSuffix = webdavUrl.mid(davPos + 5);
+    // 判断：是否是中科院这种“根目录映射”场景
+    // 规则：dav/ 后面有内容，且路径里出现 重复前缀（xxx/xxx/）
+    // 最安全：你可以用 网址 来判断，最稳！
+    if (webdavUrl.contains("iscas") ||
+        webdavUrl.contains("dav/") && davSuffix.contains("/")) {
+      needClean = true;
     }
-    cleanedDelFiles.append(file);
   }
 
-  qDebug() << "最终删除路径(无重复) = " << cleanedDelFiles;
+  // 只有需要清洗时，才执行删除（保护 Koofr / 坚果云）
+  if (needClean && !davSuffix.isEmpty()) {
+    for (const QString& file : delFiles) {
+      QString f = file;
+      if (f.startsWith(davSuffix)) {
+        f = f.mid(davSuffix.length());
+      }
+      cleanedDelFiles.append(f);
+    }
+  } else {
+    // 标准 WebDAV：不清洗，直接用！
+    cleanedDelFiles = delFiles;
+  }
+
+  qDebug() << "=== 自动提取 ===";
+  qDebug() << "WebDAV地址:" << webdavUrl;
+  qDebug() << "清洗后路径:" << cleanedDelFiles;
 
   m_CloudBackup->deleteWebDAVFiles(cleanedDelFiles);
 }

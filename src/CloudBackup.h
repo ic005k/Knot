@@ -115,6 +115,7 @@ class CloudBackup : public QDialog {
   void fetchNextPage();
   void processFileList();
   QString parseNextPageUrl(const QList<QNetworkReply::RawHeaderPair> &headers);
+  void save_WebDav();
 };
 
 // 声明一个轻量级信号发射器,列出WebDAV上某个目录下的所有文件

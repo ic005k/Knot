@@ -606,65 +606,6 @@ void CloudBackup::handleUploadFinished(QNetworkReply* reply,
 }
 /// /////////////////////////////////////////////////////////////////////////////////
 
-// 核心函数：列出目录文件（支持坚果云分页）
-/*WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
-                              const QString& password) {
-  WebDavHelper* helper = new WebDavHelper();
-  QNetworkAccessManager* manager = new QNetworkAccessManager(helper);
-
-  // 连接认证信号
-  QObject::connect(
-      manager, &QNetworkAccessManager::authenticationRequired,
-      [username, password](QNetworkReply* reply, QAuthenticator* auth) {
-        Q_UNUSED(reply);
-        auth->setUser(username);
-        auth->setPassword(password);
-      });
-
-  QNetworkRequest request;
-  request.setUrl(QUrl(url));
-  request.setRawHeader("Depth", "1");
-  if (url.contains("jianguoyun.com"))  // 坚果云特定头
-    request.setRawHeader("Brief", "t");
-  request.setHeader(QNetworkRequest::ContentTypeHeader,
-                    "text/xml; charset=utf-8");
-
-  const QByteArray body = R"(<?xml version="1.0" encoding="utf-8"?>
-        <d:propfind xmlns:d="DAV:">
-            <d:prop>
-                <d:displayname/>
-                <d:getlastmodified/>
-                <d:resourcetype/>
-            </d:prop>
-        </d:propfind>)";
-
-  QNetworkReply* reply = manager->sendCustomRequest(request, "PROPFIND", body);
-
-  QObject::connect(reply, &QNetworkReply::finished, [manager, helper, reply]() {
-    if (reply->error() != QNetworkReply::NoError) {
-      const QString error =
-          QString("[HTTP %1] %2")
-              .arg(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute)
-                       .toInt())
-              .arg(reply->errorString());
-      emit helper->errorOccurred(error);
-    } else {
-      // 保存响应头
-      helper->setResponseHeaders(reply->rawHeaderPairs());
-
-      QByteArray responseData = reply->readAll();
-      QList<QPair<QString, QDateTime>> files =
-          parseWebDavResponse(responseData);
-      emit helper->listCompleted(files);
-    }
-
-    reply->deleteLater();
-    manager->deleteLater();
-  });
-
-  return helper;
-}*/
-
 // 核心函数：列出目录文件（100% 兼容 坚果云 + 中科院 + 所有标准WebDAV）
 WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
                               const QString& password) {
@@ -1088,31 +1029,69 @@ void CloudBackup::deleteWebDAVFiles(QStringList filesToDelete) {
 void CloudBackup::backExit() {
   mw_one->clearWidgetFocus();
 
-  QString strWebDAV = mui->cboxWebDAV->currentText().trimmed();
-  QString strUserName = mui->editWebDAVUsername->text().trimmed();
-  iniPreferences->setValue("/webdav/url", strWebDAV);
-  iniPreferences->setValue("/webdav/username", strUserName);
-  QString password = mui->editWebDAVPassword->text().trimmed();
-  QString aesStr = aesEncrypt(password, aes_key, aes_iv);
-  iniPreferences->setValue("/webdav/password", aesStr);
-
-  iniPreferences->setValue("/webdav/username_" + strWebDAV, strUserName);
-  iniPreferences->setValue("/webdav/password_" + strWebDAV, aesStr);
-
-  int count = mui->cboxWebDAV->count();
-  iniPreferences->setValue("/webdav/count", count);
-  for (int i = 0; i < count; i++) {
-    iniPreferences->setValue("/webdav/text" + QString::number(i),
-                             mui->cboxWebDAV->itemText(i));
-  }
-
-  iniPreferences->setValue("/cloudbak/webdav", mui->chkWebDAV->isChecked());
-  iniPreferences->setValue("/cloudbak/autosync", mui->chkAutoSync->isChecked());
+  save_WebDav();
 
   mw_one->m_Preferences->setEncSyncStatusTip();
 
   mui->frameMain->show();
   mui->frameOne->hide();
+}
+
+void CloudBackup::save_WebDav() {
+  QString strWebDAV = mui->cboxWebDAV->currentText().trimmed();
+  QString strUserName = mui->editWebDAVUsername->text().trimmed();
+  QString password = mui->editWebDAVPassword->text().trimmed();
+  QString aesStr = aesEncrypt(password, aes_key, aes_iv);
+
+  // ==========================
+  // 1. 保存当前默认账号
+  // ==========================
+  iniPreferences->setValue("/webdav/url", strWebDAV);
+  iniPreferences->setValue("/webdav/username", strUserName);
+  iniPreferences->setValue("/webdav/password", aesStr);
+
+  // ==========================
+  // 2. 按网址独立保存账号密码
+  // ==========================
+  iniPreferences->setValue("/webdav/username_" + strWebDAV, strUserName);
+  iniPreferences->setValue("/webdav/password_" + strWebDAV, aesStr);
+
+  // ==========================
+  // 3. 先把当前地址添加到ComboBox（自动去重）
+  // ==========================
+  int idx = mui->cboxWebDAV->findText(strWebDAV);
+  if (idx == -1) {
+    mui->cboxWebDAV->addItem(strWebDAV);
+  }
+
+  // ==========================
+  // 4. 去重并保存最终列表
+  // ==========================
+  QStringList items;
+  for (int i = 0; i < mui->cboxWebDAV->count(); ++i) {
+    QString text = mui->cboxWebDAV->itemText(i).trimmed();
+    if (!text.isEmpty()) {
+      items.append(text);
+    }
+  }
+  items.removeDuplicates();  // 强制去重
+
+  // 清空旧配置，重新保存
+  iniPreferences->remove("/webdav/count");
+  iniPreferences->remove("/webdav/text");
+  iniPreferences->setValue("/webdav/count", items.size());
+  for (int i = 0; i < items.size(); ++i) {
+    iniPreferences->setValue("/webdav/text" + QString::number(i), items[i]);
+  }
+
+  // ==========================
+  // 5. 保存选项
+  // ==========================
+  iniPreferences->setValue("/cloudbak/webdav", mui->chkWebDAV->isChecked());
+  iniPreferences->setValue("/cloudbak/autosync", mui->chkAutoSync->isChecked());
+
+  // 立即写入磁盘
+  iniPreferences->sync();
 }
 
 void CloudBackup::init_CloudBacup() {
@@ -1182,122 +1161,6 @@ void CloudBackup::webDAVRestoreData() {
   mui->btnWebDAVBackup->setEnabled(false);
 }
 
-/*bool CloudBackup::checkWebDAVConnection() {
-  // 获取并处理URL
-  QString urlText = mui->cboxWebDAV->currentText().trimmed();
-
-  // if (!urlText.endsWith("/")) {
-  //   urlText += "/";  // 确保URL以斜杠结尾，符合WebDAV规范
-  // }
-
-  QUrl url(urlText);
-
-  QString m_errorMsg;
-  // 检查URL有效性
-  if (!url.isValid() || url.scheme() != "https") {
-    m_errorMsg = "URL无效，必须使用https协议";
-    return false;
-  }
-
-  QString username = mui->editWebDAVUsername->text().trimmed();
-  QString password = mui->editWebDAVPassword->text().trimmed();
-
-  // 创建网络管理器和请求
-  QNetworkAccessManager manager;
-  QNetworkRequest request(url);
-
-  // 设置必要的请求头
-  request.setRawHeader("User-Agent", "MyApp/1.0");
-  request.setRawHeader("Depth", "0");  // PROPFIND需要的深度头
-  request.setRawHeader("Content-Type", "application/xml");
-
-  // 准备PROPFIND请求的XML内容
-  QString xml =
-      "<?xml version=\"1.0\"?>"
-      "<propfind xmlns=\"DAV:\">"
-      "  <prop>"
-      "    <current-user-principal />"
-      "  </prop>"
-      "</propfind>";
-  QByteArray data = xml.toUtf8();
-
-  // 发送PROPFIND请求（WebDAV标准方法）
-  QNetworkReply* reply = manager.sendCustomRequest(request, "PROPFIND", data);
-
-  // 等待响应
-  QEventLoop loop;
-  QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-  loop.exec();
-
-  // 处理可能的认证挑战
-  QVariant statusCode =
-      reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-  int status = statusCode.toInt();
-
-  if (status == 401) {  // 需要认证
-    // 提取认证挑战信息
-    QByteArray authHeader = reply->rawHeader("WWW-Authenticate");
-    reply->deleteLater();
-
-    // 构建认证信息
-    if (!authHeader.isEmpty() && authHeader.contains("Basic")) {
-      QByteArray auth = username.toUtf8() + ":" + password.toUtf8();
-      QNetworkRequest authRequest(url);
-
-      // 设置认证头和其他必要头信息
-      authRequest.setRawHeader("Authorization", "Basic " + auth.toBase64());
-      authRequest.setRawHeader("User-Agent", "MyApp/1.0");
-      authRequest.setRawHeader("Depth", "0");
-      authRequest.setRawHeader("Content-Type", "application/xml");
-
-      // 重新发送带认证信息的请求
-      QNetworkReply* authReply =
-          manager.sendCustomRequest(authRequest, "PROPFIND", data);
-      QEventLoop authLoop;
-      QObject::connect(authReply, &QNetworkReply::finished, &authLoop,
-                       &QEventLoop::quit);
-      authLoop.exec();
-
-      // 检查认证后的响应
-      QVariant authStatusCode =
-          authReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-      int authStatus = authStatusCode.toInt();
-
-      if (authReply->error() == QNetworkReply::NoError &&
-          (authStatus == 207 ||
-           authStatus == 200)) {  // 207是WebDAV的多状态响应
-        m_errorMsg = "连接成功";
-        authReply->deleteLater();
-        return true;
-      } else {
-        m_errorMsg = QString("认证失败: %1 (状态码: %2)")
-                         .arg(authReply->errorString())
-                         .arg(authStatus);
-        authReply->deleteLater();
-        return false;
-      }
-    } else {
-      m_errorMsg = "不支持的认证方式";
-      return false;
-    }
-  }
-  // 处理无需认证或直接成功的情况
-  else if (reply->error() == QNetworkReply::NoError &&
-           (status == 207 || status == 200)) {
-    m_errorMsg = "连接成功";
-    reply->deleteLater();
-    return true;
-  }
-  // 处理其他错误
-  else {
-    m_errorMsg = QString("连接失败: %1 (状态码: %2)")
-                     .arg(reply->errorString())
-                     .arg(status);
-    reply->deleteLater();
-    return false;
-  }
-}*/
-
 bool CloudBackup::checkWebDAVConnection() {
   QString urlText = mui->cboxWebDAV->currentText().trimmed();
   QUrl url(urlText);
@@ -1343,6 +1206,9 @@ bool CloudBackup::checkWebDAVConnection() {
       ok ? "连接成功" : QString("连接失败，状态码：%1").arg(status);
   qDebug() << strError;
   reply->deleteLater();
+
+  if (ok) save_WebDav();
+
   return ok;
 }
 
