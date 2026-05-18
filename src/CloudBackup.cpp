@@ -498,6 +498,14 @@ void CloudBackup::handleUploadFinished(QNetworkReply* reply,
       qDebug() << "Upload succeeded:" << filePath
                << "Remaining:" << m_Notes->notes_sync_files.count();
       mw_one->saveNeedSyncNotes();
+
+      // 延迟 100 毫秒删除，确保文件句柄已释放
+      QTimer::singleShot(100, [=]() {
+        bool ok = QFile::remove(filePath);
+        if (!ok) {
+          qDebug() << "延迟删除失败：" << QFile(filePath).errorString();
+        }
+      });
     }
   } else {
     qWarning() << "Error uploading" << filePath << ":" << reply->errorString();
@@ -582,8 +590,10 @@ WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
   request.setHeader(QNetworkRequest::ContentTypeHeader,
                     "text/xml; charset=utf-8");
 
-  // 标准 PROPFIND XML（完全不动）
-  const QByteArray body = R"(<?xml version="1.0" encoding="utf-8"?>
+  // 标准 PROPFIND XML
+  QByteArray body;
+  if (isGetWebDavModiTime) {
+    body = R"(<?xml version="1.0" encoding="utf-8"?>
         <d:propfind xmlns:d="DAV:">
             <d:prop>
                 <d:displayname/>
@@ -591,6 +601,15 @@ WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
                 <d:resourcetype/>
             </d:prop>
         </d:propfind>)";
+  } else {
+    body = R"(<?xml version="1.0" encoding="utf-8"?>
+      <d:propfind xmlns:d="DAV:">
+          <d:prop>
+              <d:displayname/>
+              <d:resourcetype/>
+          </d:prop>
+      </d:propfind>)";
+  }
 
   QNetworkReply* reply = manager->sendCustomRequest(request, "PROPFIND", body);
 
@@ -643,7 +662,8 @@ QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray& data) {
         currentHref = QString::fromUtf8(
             QByteArray::fromPercentEncoding(currentHref.toLatin1()));
 
-      } else if (xml.name() == QLatin1String("getlastmodified")) {
+      } else if (isGetWebDavModiTime &&
+                 xml.name() == QLatin1String("getlastmodified")) {
         QString rawTime = xml.readElementText();
 
         // Qt5

@@ -1497,6 +1497,8 @@ void Todo::openTodoUI() {
 
 void Todo::openTodo() {
   isPasswordError = false;
+  isGetWebDavModiTime = true;
+
   mw_one->showProgress();
 
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {

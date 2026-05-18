@@ -1296,6 +1296,7 @@ void Notes::openNotes() {
 
   isPasswordError = false;
   isWebDAVError = false;
+  isGetWebDavModiTime = false;
 
   m_Method->showInfoWindow(tr("Processing..."));
 
