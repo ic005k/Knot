@@ -3498,3 +3498,13 @@ QList<SearchItem> Method::exportAllDataForSearch() {
 
   return dataList;
 }
+
+void Method::delayDelFile(const QString& filePath) {
+  // 延迟删除，确保文件句柄释放
+  QTimer::singleShot(100, this, [=]() {
+    bool ok = QFile::remove(filePath);
+    if (!ok) {
+      qDebug() << "删除失败：" << QFile(filePath).errorString();
+    }
+  });
+}

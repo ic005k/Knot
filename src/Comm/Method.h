@@ -482,7 +482,8 @@ class Method : public QDialog {
   QList<SearchItem> data_for_search;
   void startSearch(QList<SearchItem> data, const QString& searchStr);
 
- protected:
+  void delayDelFile(const QString &filePath);
+  protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

@@ -1579,6 +1579,9 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
           if (QFile::copy(pFile, tempFile)) {
             m_Method->upIniFile(tempFile, kFile);
             qDebug() << "kFile:" << kFile << " Update successfully. ";
+
+            m_Method->delayDelFile(pFile);
+            m_Method->delayDelFile(zFile);
           }
         }
       }
@@ -1627,6 +1630,9 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
           QFile::remove(kFile);
           QFile::copy(pFile, kFile);
           m_NotesList->m_dbManager.updateFileIndex(kFile);
+
+          m_Method->delayDelFile(pFile);
+          m_Method->delayDelFile(zFile);
         }
       }
     }
@@ -1673,6 +1679,9 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
         if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
           QFile::remove(kFile);
           QFile::copy(pFile, kFile);
+
+          m_Method->delayDelFile(pFile);
+          m_Method->delayDelFile(zFile);
         }
       }
     }
@@ -1700,6 +1709,8 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
       if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
         QFile::remove(kFile);
         QFile::copy(pFile, kFile);
+
+        m_Method->delayDelFile(pFile);
       }
     }
 

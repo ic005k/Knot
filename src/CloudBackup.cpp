@@ -499,13 +499,7 @@ void CloudBackup::handleUploadFinished(QNetworkReply* reply,
                << "Remaining:" << m_Notes->notes_sync_files.count();
       mw_one->saveNeedSyncNotes();
 
-      // 延迟 100 毫秒删除，确保文件句柄已释放
-      QTimer::singleShot(100, [=]() {
-        bool ok = QFile::remove(filePath);
-        if (!ok) {
-          qDebug() << "延迟删除失败：" << QFile(filePath).errorString();
-        }
-      });
+      m_Method->delayDelFile(filePath);
     }
   } else {
     qWarning() << "Error uploading" << filePath << ":" << reply->errorString();
