@@ -2807,3 +2807,15 @@ void MainWindow::on_btnPause_clicked() {
     mui->lblGpsInfo->setStyleSheet(m_Steps->lblStartStyle);
   }
 }
+
+void MainWindow::on_btnTestWebDav_clicked() {
+  auto msg = std::make_unique<ShowMessage>(this);
+  if (!m_CloudBackup->checkWebDAVConnection()) {
+    msg->showMsg(appName,
+                 tr("WebDAV connection failed. Please check the network, "
+                    "website address or login information."),
+                 1);
+  } else {
+    msg->showMsg(appName, tr("WebDav connection successful."), 1);
+  }
+}

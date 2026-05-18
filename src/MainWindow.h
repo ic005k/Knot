@@ -927,6 +927,8 @@ class MainWindow : public QMainWindow {
 
   void on_btnPause_clicked();
 
+  void on_btnTestWebDav_clicked();
+
  private:
   bool isMoveEntry;
   QTimer* tmeFlash;

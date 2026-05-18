@@ -2093,6 +2093,13 @@ selection-background-color: lightblue;
                   </property>
                  </widget>
                 </item>
+                <item>
+                 <widget class="QToolButton" name="btnTestWebDav">
+                  <property name="text">
+                   <string>Test</string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </item>
               <item>
