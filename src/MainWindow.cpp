@@ -2819,3 +2819,29 @@ void MainWindow::on_btnTestWebDav_clicked() {
     msg->showMsg(appName, tr("WebDav connection successful."), 1);
   }
 }
+
+void MainWindow::on_btnShowPassword_pressed() {
+  m_Preferences->on_btnShowPassword_pressed();
+}
+
+void MainWindow::on_btnShowPassword_released() {
+  m_Preferences->on_btnShowPassword_released();
+}
+
+void MainWindow::on_btnShowValidate_pressed() {
+  m_Preferences->on_btnShowValidate_pressed();
+}
+
+void MainWindow::on_btnShowValidate_released() {
+  m_Preferences->on_btnShowValidate_released();
+}
+
+void MainWindow::on_chkZip_clicked() { m_Preferences->on_chkZip_clicked(); }
+
+void MainWindow::on_editPassword_textChanged(const QString& arg1) {
+  m_Preferences->on_editPassword_textChanged(arg1);
+}
+
+void MainWindow::on_editValidate_textChanged(const QString& arg1) {
+  m_Preferences->on_editValidate_textChanged(arg1);
+}

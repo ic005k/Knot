@@ -53,7 +53,21 @@ class Preferences : public QDialog {
 
   bool eventFilter(QObject* watch, QEvent* evn) override;
   void closeEvent(QCloseEvent* event) override;
+
  public slots:
+  void on_btnShowPassword_pressed();
+
+  void on_btnShowPassword_released();
+
+  void on_btnShowValidate_pressed();
+
+  void on_btnShowValidate_released();
+
+  void on_chkZip_clicked();
+
+  void on_editPassword_textChanged(const QString& arg1);
+
+  void on_editValidate_textChanged(const QString& arg1);
 
  private slots:
   void on_btnBack_clicked();
@@ -69,20 +83,6 @@ class Preferences : public QDialog {
   void on_btnReStart_clicked();
 
   void on_chkDark_clicked(bool checked);
-
-  void on_chkZip_clicked();
-
-  void on_editPassword_textChanged(const QString& arg1);
-
-  void on_editValidate_textChanged(const QString& arg1);
-
-  void on_btnShowPassword_pressed();
-
-  void on_btnShowPassword_released();
-
-  void on_btnShowValidate_pressed();
-
-  void on_btnShowValidate_released();
 
   void on_chkDark_clicked();
 

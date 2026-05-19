@@ -958,7 +958,7 @@ void CloudBackup::backExit() {
   mw_one->clearWidgetFocus();
 
   save_WebDav();
-
+  mw_one->m_Preferences->saveOptions();
   mw_one->m_Preferences->setEncSyncStatusTip();
 
   mui->frameMain->show();

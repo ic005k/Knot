@@ -929,6 +929,20 @@ class MainWindow : public QMainWindow {
 
   void on_btnTestWebDav_clicked();
 
+  void on_btnShowPassword_pressed();
+
+  void on_btnShowPassword_released();
+
+  void on_btnShowValidate_pressed();
+
+  void on_btnShowValidate_released();
+
+  void on_chkZip_clicked();
+
+  void on_editPassword_textChanged(const QString& arg1);
+
+  void on_editValidate_textChanged(const QString& arg1);
+
  private:
   bool isMoveEntry;
   QTimer* tmeFlash;

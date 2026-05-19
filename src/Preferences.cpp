@@ -19,7 +19,6 @@ Preferences::Preferences(QWidget* parent)
   this->installEventFilter(this);
   ui->lblFontSize->installEventFilter(this);
 
-  ui->lblZipTip->hide();
   ui->gboxAdditional->hide();
   ui->lblAdditional->hide();
 
@@ -27,22 +26,21 @@ Preferences::Preferences(QWidget* parent)
   isFontChange = false;
 
   chkStyle = ui->chkDark->styleSheet();
-  ui->chkZip->setStyleSheet(chkStyle);
+  mui->chkZip->setStyleSheet(chkStyle);
   ui->chkUIFont->setStyleSheet(chkStyle);
   ui->lblFontSize->setFixedHeight(40);
 
   QString lbl_style = ui->lbl1->styleSheet();
   ui->lblAdditional->setStyleSheet(lbl_style);
-  ui->lbl3->setStyleSheet(lbl_style);
+  mui->lblDataEnc->setStyleSheet(lbl_style);
+  mui->lblWebDAVUrl->setStyleSheet(lbl_style);
 
   ui->btnCustomFont->adjustSize();
   int hei = m_Method->getFontHeight();
   ui->btnCustomFont->setFixedHeight(4 * hei);
 
-  ui->lblZipTip->adjustSize();
-  ui->lblZipTip->setWordWrap(true);
-  ui->editPassword->setEchoMode(QLineEdit::EchoMode::Password);
-  ui->editValidate->setEchoMode(QLineEdit::EchoMode::Password);
+  mui->editPassword->setEchoMode(QLineEdit::EchoMode::Password);
+  mui->editValidate->setEchoMode(QLineEdit::EchoMode::Password);
 
   if (isAndroid) {
     ui->sliderFontSize->setMinimum(15);
@@ -89,14 +87,14 @@ void Preferences::on_btnBack_clicked() {
 void Preferences::saveOptions() {
   iniPreferences->setValue("/Options/FontSize", ui->sliderFontSize->value());
   iniPreferences->setValue("/Options/Dark", ui->chkDark->isChecked());
-  iniPreferences->setValue("/Options/Zip", ui->chkZip->isChecked());
+  iniPreferences->setValue("/Options/Zip", mui->chkZip->isChecked());
   iniPreferences->setValue("/Options/chkUIFont", ui->chkUIFont->isChecked());
 
-  QString password = ui->editPassword->text().trimmed();
+  QString password = mui->editPassword->text().trimmed();
   QString aesStr = m_CloudBackup->aesEncrypt(password, aes_key0, aes_iv0);
   iniPreferences->setValue("/zip/password", aesStr);
 
-  isEncrypt = ui->chkZip->isChecked();
+  isEncrypt = mui->chkZip->isChecked();
   if (isEncrypt)
     encPassword = password;
   else
@@ -302,11 +300,11 @@ void Preferences::initOptions() {
 
   QString aesStr = iniPreferences->value("/zip/password").toString();
   QString password = m_CloudBackup->aesDecrypt(aesStr, aes_key0, aes_iv0);
-  ui->editPassword->setText(password);
-  ui->editValidate->setText(password);
+  mui->editPassword->setText(password);
+  mui->editValidate->setText(password);
 
   bool isZip = iniPreferences->value("/Options/Zip", false).toBool();
-  ui->chkZip->setChecked(isZip);
+  mui->chkZip->setChecked(isZip);
   isEncrypt = isZip;
   if (isEncrypt)
     encPassword = password;
@@ -483,21 +481,21 @@ void Preferences::getCheckStatusChange() {
 }
 
 void Preferences::on_chkZip_clicked() {
-  if (ui->editPassword->text().trimmed() == "" ||
-      ui->editValidate->text().trimmed() == "") {
-    ui->chkZip->setChecked(false);
+  if (mui->editPassword->text().trimmed() == "" ||
+      mui->editValidate->text().trimmed() == "") {
+    mui->chkZip->setChecked(false);
   }
 
-  if (ui->editPassword->text().trimmed() !=
-      ui->editValidate->text().trimmed()) {
-    ui->chkZip->setChecked(false);
+  if (mui->editPassword->text().trimmed() !=
+      mui->editValidate->text().trimmed()) {
+    mui->chkZip->setChecked(false);
     auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg("Knot", tr("Password validation error."), 1);
   }
 }
 
 void Preferences::on_editPassword_textChanged(const QString& arg1) {
-  if (arg1.length() > 0) ui->chkZip->setChecked(false);
+  if (arg1.length() > 0) mui->chkZip->setChecked(false);
 }
 
 void Preferences::on_editValidate_textChanged(const QString& arg1) {
@@ -518,19 +516,19 @@ void Preferences::closeEvent(QCloseEvent* event) {
 }
 
 void Preferences::on_btnShowPassword_pressed() {
-  ui->editPassword->setEchoMode(QLineEdit::EchoMode::Normal);
+  mui->editPassword->setEchoMode(QLineEdit::EchoMode::Normal);
 }
 
 void Preferences::on_btnShowPassword_released() {
-  ui->editPassword->setEchoMode(QLineEdit::EchoMode::Password);
+  mui->editPassword->setEchoMode(QLineEdit::EchoMode::Password);
 }
 
 void Preferences::on_btnShowValidate_pressed() {
-  ui->editValidate->setEchoMode(QLineEdit::EchoMode::Normal);
+  mui->editValidate->setEchoMode(QLineEdit::EchoMode::Normal);
 }
 
 void Preferences::on_btnShowValidate_released() {
-  ui->editValidate->setEchoMode(QLineEdit::EchoMode::Password);
+  mui->editValidate->setEchoMode(QLineEdit::EchoMode::Password);
 }
 
 void Preferences::on_chkDark_clicked() {}
@@ -538,23 +536,23 @@ void Preferences::on_chkDark_clicked() {}
 void Preferences::setEncSyncStatusTip() {
   mui->lblStats->setStyleSheet(mw_one->labelNormalStyleSheet);
 
-  if (ui->chkZip->isChecked() && mui->chkAutoSync->isChecked() &&
+  if (mui->chkZip->isChecked() && mui->chkAutoSync->isChecked() &&
       mui->chkWebDAV->isChecked())
     mui->lblStats->setStyleSheet(mw_one->labelEnSyncStyleSheet);
 
-  if (ui->chkZip->isChecked() && !mui->chkAutoSync->isChecked() &&
+  if (mui->chkZip->isChecked() && !mui->chkAutoSync->isChecked() &&
       !mui->chkWebDAV->isChecked())
     mui->lblStats->setStyleSheet(mw_one->labelEncStyleSheet);
 
-  if (ui->chkZip->isChecked() && !mui->chkAutoSync->isChecked() &&
+  if (mui->chkZip->isChecked() && !mui->chkAutoSync->isChecked() &&
       mui->chkWebDAV->isChecked())
     mui->lblStats->setStyleSheet(mw_one->labelEncStyleSheet);
 
-  if (ui->chkZip->isChecked() && mui->chkAutoSync->isChecked() &&
+  if (mui->chkZip->isChecked() && mui->chkAutoSync->isChecked() &&
       !mui->chkWebDAV->isChecked())
     mui->lblStats->setStyleSheet(mw_one->labelEncStyleSheet);
 
-  if (!ui->chkZip->isChecked() && mui->chkAutoSync->isChecked() &&
+  if (!mui->chkZip->isChecked() && mui->chkAutoSync->isChecked() &&
       mui->chkWebDAV->isChecked())
     mui->lblStats->setStyleSheet(mw_one->labelSyncStyleSheet);
 
@@ -593,15 +591,15 @@ void Preferences::openPreferences() {
   // init edit toolbar
   initTextToolbarDynamic(this);
   if (editFilter != nullptr) {
-    ui->editPassword->removeEventFilter(editFilter);
-    ui->editValidate->removeEventFilter(editFilter);
+    mui->editPassword->removeEventFilter(editFilter);
+    mui->editValidate->removeEventFilter(editFilter);
     delete editFilter;
     editFilter = nullptr;
   }
   editFilter = new EditEventFilter(textToolbarDynamic, this);
 
-  ui->editPassword->installEventFilter(editFilter);
-  ui->editValidate->installEventFilter(editFilter);
+  mui->editPassword->installEventFilter(editFilter);
+  mui->editValidate->installEventFilter(editFilter);
 
   isChanged = false;
 }

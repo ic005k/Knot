@@ -367,14 +367,22 @@ void loadTheme(bool isDark) {
           widget != mw_one->m_MainHelper->sliderButton &&
           widget != mui->lblGpsDateTime && widget != mui->btnPages &&
           widget != mui->lblBookName && widget != mui->lblShowLineSn &&
-          widget != mui->lblNoteBook && widget != mui->lblNoteList) {
+          widget != mui->lblNoteBook && widget != mui->lblNoteList &&
+          widget != mui->lblSyncNote) {
         widget->setFont(qApp->font());
 
         font.setBold(true);
         if (mui && mui->lblViewCate1) mui->lblViewCate1->setFont(font);
         if (mui && mui->lblTitleEditRecord)
           mui->lblTitleEditRecord->setFont(font);
-        if (mui && mui->lblSyncNote) mui->lblSyncNote->setFont(font);
+        if (mui && mui->lblSyncNote) {
+          QFont mFont = font;
+          if (!isAndroid)
+            mFont.setPointSize(9);
+          else
+            mFont.setPointSize(12);
+          mui->lblSyncNote->setFont(mFont);
+        }
         widget->updateGeometry();
         widget->repaint();
       }
