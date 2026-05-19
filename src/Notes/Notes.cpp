@@ -602,47 +602,8 @@ void Notes::delRemoteFile(const QStringList& Files) {
     }
   }
 
-  // ==========================
-  // ✅ 安全规则：
-  // 只有 中科院样式 (dav/后是自定义根目录) 才清洗
-  // 其他如 Koofr / 坚果云 一律不清洗！
-  // ==========================
-  QStringList cleanedDelFiles;
-  QString webdavUrl = mui->cboxWebDAV->currentText();
-  bool needClean = false;
-  QString davSuffix;
-
-  int davPos = webdavUrl.indexOf("/dav/");
-  if (davPos != -1) {
-    davSuffix = webdavUrl.mid(davPos + 5);
-    // 判断：是否是中科院这种“根目录映射”场景
-    // 规则：dav/ 后面有内容，且路径里出现 重复前缀（xxx/xxx/）
-    // 最安全：你可以用 网址 来判断，最稳！
-    if (webdavUrl.contains("iscas") ||
-        webdavUrl.contains("dav/") && davSuffix.contains("/")) {
-      needClean = true;
-    }
-  }
-
-  // 只有需要清洗时，才执行删除（保护 Koofr / 坚果云）
-  if (needClean && !davSuffix.isEmpty()) {
-    for (const QString& file : delFiles) {
-      QString f = file;
-      if (f.startsWith(davSuffix)) {
-        f = f.mid(davSuffix.length());
-      }
-      cleanedDelFiles.append(f);
-    }
-  } else {
-    // 标准 WebDAV：不清洗，直接用！
-    cleanedDelFiles = delFiles;
-  }
-
-  qDebug() << "=== 自动提取 ===";
-  qDebug() << "WebDAV地址:" << webdavUrl;
-  qDebug() << "清洗后路径:" << cleanedDelFiles;
-
-  m_CloudBackup->deleteWebDAVFiles(cleanedDelFiles);
+  qDebug() << "delWebDAVFiles=" << delFiles;
+  m_CloudBackup->deleteWebDAVFiles(delFiles);
 }
 
 bool Notes::isSetNewNoteTitle() {
@@ -1372,18 +1333,7 @@ void Notes::openNotes() {
                      << "修改时间:" << mtime.toString("yyyy-MM-dd hh:mm:ss");
             QString remote_f = path;
 
-            // remote_f = remote_f.replace("/dav/", "");  // 此处需注意
-            // ==============================
-            // 通用 WebDAV 路径清洗
-            // 自动移除 /dav/xxx/ 前缀，不写死任何桶名
-            // ==============================
-            int davIndex = remote_f.indexOf("/dav/");
-            if (davIndex >= 0) {
-              int start = remote_f.indexOf('/', davIndex + 5);
-              if (start >= 0) {
-                remote_f = remote_f.mid(start + 1);
-              }
-            }
+            remote_f = remote_f.replace("/dav/", "");  // 此处需注意
 
             if (path.contains("mainnotes.json.zip")) {
               orgRemoteFiles.append(remote_f);
@@ -1425,12 +1375,6 @@ void Notes::openNotes() {
               localLastModi = m_Method->getFileUTCString(local_realfile);
 
               if (remoteLastModi > localLastModi) {
-                // 通用清洗：自动删除【桶名/】前缀，只保留 KnotData/ 开始的路径
-                int pos = or_file.indexOf("/KnotData/");
-                if (pos != -1) {
-                  or_file = or_file.mid(pos + 1);  // 从 /KnotData/ 后面开始截取
-                }
-
                 remoteFiles.append(or_file);
                 qDebug() << "Remote time: " << remoteLastModi
                          << "Local time: " << localLastModi << or_file

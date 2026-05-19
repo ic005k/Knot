@@ -2247,6 +2247,11 @@ QComboBox {
                   </property>
                   <item>
                    <property name="text">
+                    <string>https://data.cstcloud.cn/dav/</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
                     <string>https://dav.jianguoyun.com/dav/</string>
                    </property>
                   </item>

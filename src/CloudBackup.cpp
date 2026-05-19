@@ -127,6 +127,7 @@ void CloudBackup::uploadData() {
 
 QString CloudBackup::getWebDAVArgument() {
   QString url = mui->cboxWebDAV->currentText().trimmed();
+  url = unifyWebDAVBaseUrlToDavEnd(url);
   USERNAME = mui->editWebDAVUsername->text().trimmed();
   APP_PASSWORD = mui->editWebDAVPassword->text().trimmed();
   return url;
@@ -755,8 +756,7 @@ void WebDavDownloader::startNextDownload() {
   }
 
   // 构造请求URL
-  QString strUrl = mui->cboxWebDAV->currentText().trimmed();
-  strUrl = m_CloudBackup->unifyWebDAVBaseUrlToDavEnd(strUrl);
+  QString strUrl = m_CloudBackup->getWebDAVArgument();
   QUrl url(strUrl + remotePath);
   if (!url.isValid()) {
     qWarning() << "无效的URL:" << url.toString();
@@ -939,7 +939,6 @@ void CloudBackup::createRemoteWebDAVDir() {
 void CloudBackup::deleteWebDAVFiles(QStringList filesToDelete) {
   if (filesToDelete.count() > 0) {
     QString url = getWebDAVArgument();
-    url = unifyWebDAVBaseUrlToDavEnd(url);
     CloudDeleter deleter(USERNAME, APP_PASSWORD);
     deleter.baseUrl = url;
     deleter.deleteFiles(filesToDelete);
@@ -1071,7 +1070,7 @@ void CloudBackup::webDAVRestoreData() {
               tr("This action overwrites local files with files in the cloud."),
           2))
     return;
-  WEBDAV_URL = mui->cboxWebDAV->currentText().trimmed();
+  WEBDAV_URL = m_CloudBackup->getWebDAVArgument();
   USERNAME = mui->editWebDAVUsername->text().trimmed();
   APP_PASSWORD = mui->editWebDAVPassword->text().trimmed();
   downloadFile("Knot/memo.zip", filePath);
@@ -1082,7 +1081,7 @@ void CloudBackup::webDAVRestoreData() {
 }
 
 bool CloudBackup::checkWebDAVConnection() {
-  QString urlText = mui->cboxWebDAV->currentText().trimmed();
+  QString urlText = m_CloudBackup->getWebDAVArgument();
   QUrl url(urlText);
 
   if (!url.isValid() || url.scheme() != "https") {
@@ -1133,30 +1132,33 @@ bool CloudBackup::checkWebDAVConnection() {
 }
 
 QString CloudBackup::unifyWebDAVBaseUrlToDavEnd(QString url) {
-  return url;
-
+  // 找到最后一个 /dav/
   int davIndex = url.lastIndexOf("/dav/");
+
+  // 统一截取到 /dav/ 为止（关键：+5 才是完整的 /dav/）
   if (davIndex != -1) {
-    url = url.left(davIndex + 4);
-    if (!url.endsWith("/")) {
-      url += "/";
-    }
+    url = url.left(davIndex + 5);
+  }
+
+  // 无论如何，最后必须以 / 结尾（WebDAV 强制要求）
+  if (!url.endsWith("/")) {
+    url += "/";
   }
 
   return url;
 }
 
 QString CloudBackup::getWebDAVDataDir(const QString& url) {
-  // 1. 找到最后一个 "/dav/" 的位置
+  // 找到最后一个 "/dav/" 的位置
   int davIndex = url.lastIndexOf("/dav/");
   if (davIndex == -1) {
     return QString();  // 没有 /dav/，返回空
   }
 
-  // 2. 提取 "/dav/" 之后的全部内容
+  // 提取 "/dav/" 之后的全部内容
   QString afterDav = url.mid(davIndex + 5);  // "/dav/" 长度为 5
 
-  // 3. 去掉前后的空白和斜杠
+  // 去掉前后的空白和斜杠
   afterDav = afterDav.trimmed();
   while (!afterDav.isEmpty() && afterDav.front() == '/') {
     afterDav.remove(0, 1);
