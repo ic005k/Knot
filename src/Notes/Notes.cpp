@@ -1472,10 +1472,10 @@ void Notes::openNotes() {
                   }
                 });
 
-            // 开始下载（1并发,根据文件的下载个数）
+            // 开始下载（2并发,根据webdav供应商，一般2会很安全）
             QString lf = privateDir;
             qDebug() << "lf=" << lf;
-            int maxConcurrentDownloads = 1;
+            int maxConcurrentDownloads = 2;
             downloader->downloadFiles(remoteFiles, lf, maxConcurrentDownloads);
             m_Method->setAccessCount(remoteFiles.count());
           }

@@ -92,6 +92,11 @@ class CloudBackup : public QDialog {
   void handleUploadFinished(QNetworkReply* reply, const QString& filePath);
 
  private:
+  QNetworkAccessManager* m_networkManager;  // 全局唯一
+  QQueue<QString> uploadQueue;
+  QSet<QNetworkReply*> activeReplies;
+  int maxConcurrentUploads;  // 并发数，默认=2
+
   QtOneDrive* oneDrive = nullptr;
   QString initUserInfo(QString info);
 
@@ -101,11 +106,6 @@ class CloudBackup : public QDialog {
   QByteArray aes_key = "MySuperSecretKey1234567890";  // 长度不足32会自动处理
   QByteArray aes_iv = "InitializationVe";             // 16字节
   void resetProgBar();
-
-  QNetworkAccessManager* manager = nullptr;
-  QQueue<QString> uploadQueue;
-  QSet<QNetworkReply*> activeReplies;
-  int maxConcurrentUploads = 1;  // 并发数
 
   QString nextPageUrl;
   QList<QPair<QString, QDateTime>> allFiles;

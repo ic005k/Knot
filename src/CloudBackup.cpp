@@ -30,6 +30,9 @@ CloudBackup::CloudBackup(QWidget* parent)
 
   init();
 
+  m_networkManager = new QNetworkAccessManager(this);  // 只创建一次！
+  maxConcurrentUploads = 2;                            // 默认并发 2，全平台兼容
+
   QString secret;
   // 先从环境变量读取，便于CI运行
   secret = qEnvironmentVariable("ONEDRIVE_SECRET");
@@ -82,10 +85,6 @@ CloudBackup::~CloudBackup() {
   delete ui;
   if (m_manager) {
     m_manager->deleteLater();  // 释放成员变量m_manager
-  }
-
-  if (manager) {
-    manager->deleteLater();  // 释放成员变量manager
   }
 }
 
@@ -154,7 +153,7 @@ void CloudBackup::startBakData() {
   mw_one->myBakDataThread->start();
 }
 
-// 上传文件到WebDAV,默认坚果云
+// 上传文件到WebDAV
 void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
                                      QString remoteFileName) {
   QNetworkAccessManager* manager = new QNetworkAccessManager();
@@ -451,7 +450,7 @@ void CloudBackup::uploadFilesToWebDAV(const QStringList& files) {
 }
 
 void CloudBackup::startNextUpload() {
-  // 检查是否达到最大并发数
+  // 核心：严格控制并发数量
   while (activeReplies.size() < maxConcurrentUploads &&
          !uploadQueue.isEmpty()) {
     QString filePath = uploadQueue.dequeue();
@@ -474,12 +473,11 @@ void CloudBackup::startNextUpload() {
 
     request.setRawHeader("User-Agent", "Zotero/5.0");
 
-    QNetworkAccessManager* manager = new QNetworkAccessManager(this);
-    QNetworkReply* reply = manager->put(request, file);
+    // ✅ 关键修复：全局唯一 m_networkManager
+    QNetworkReply* reply = m_networkManager->put(request, file);
     file->setParent(reply);
     activeReplies.insert(reply);
 
-    // 使用 Qt 的信号槽机制安全处理完成事件
     connect(reply, &QNetworkReply::finished, this, [this, reply, filePath]() {
       handleUploadFinished(reply, filePath);
     });
@@ -488,38 +486,32 @@ void CloudBackup::startNextUpload() {
 
 void CloudBackup::handleUploadFinished(QNetworkReply* reply,
                                        const QString& filePath) {
-  // 确保从活动集合中移除
   activeReplies.remove(reply);
 
   if (reply->error() == QNetworkReply::NoError) {
-    // 处理成功上传
     if (mw_one && m_Notes) {
       m_Notes->notes_sync_files.removeOne(filePath);
-      qDebug() << "Upload succeeded:" << filePath
-               << "Remaining:" << m_Notes->notes_sync_files.count();
       mw_one->saveNeedSyncNotes();
-
       m_Method->delayDelFile(filePath);
     }
   } else {
-    qWarning() << "Error uploading" << filePath << ":" << reply->errorString();
-    // 可选：将失败的文件重新加入队列重试
-    // uploadQueue.enqueue(filePath);
+    qWarning() << "Upload error:" << filePath << reply->errorString();
+    // 失败重试可在这里加
   }
 
-  // 清理资源
   reply->deleteLater();
 
-  // 检查是否所有上传都已完成
+  // ✅ 一个任务完成，立即启动下一个 → 严格保持并发数
+  startNextUpload();
+
+  // 全部完成
   if (activeReplies.isEmpty() && uploadQueue.isEmpty()) {
     if (mw_one) {
       mw_one->closeProgress();
     }
-  } else {
-    // 启动下一个上传
-    startNextUpload();
   }
 }
+
 /// /////////////////////////////////////////////////////////////////////////////////
 
 // 核心函数：列出目录文件（100% 兼容 坚果云 + 中科院 + 所有标准WebDAV）
