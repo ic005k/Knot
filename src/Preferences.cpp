@@ -85,11 +85,13 @@ void Preferences::on_btnBack_clicked() {
 }
 
 void Preferences::saveOptions() {
-  iniPreferences->setValue("/Options/FontSize", ui->sliderFontSize->value());
-  iniPreferences->setValue("/Options/Dark", ui->chkDark->isChecked());
-  iniPreferences->setValue("/Options/Zip", mui->chkZip->isChecked());
-  iniPreferences->setValue("/Options/chkUIFont", ui->chkUIFont->isChecked());
+  if (this->isVisible()) {
+    iniPreferences->setValue("/Options/FontSize", ui->sliderFontSize->value());
+    iniPreferences->setValue("/Options/Dark", ui->chkDark->isChecked());
+    iniPreferences->setValue("/Options/chkUIFont", ui->chkUIFont->isChecked());
+  }
 
+  iniPreferences->setValue("/Options/Zip", mui->chkZip->isChecked());
   QString password = mui->editPassword->text().trimmed();
   QString aesStr = m_CloudBackup->aesEncrypt(password, aes_key0, aes_iv0);
   iniPreferences->setValue("/zip/password", aesStr);
