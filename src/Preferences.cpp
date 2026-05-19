@@ -30,7 +30,7 @@ Preferences::Preferences(QWidget* parent)
   ui->chkUIFont->setStyleSheet(chkStyle);
   ui->lblFontSize->setFixedHeight(40);
 
-  QString lbl_style = ui->lbl1->styleSheet();
+  QString lbl_style = ui->lblFontSet->styleSheet();
   ui->lblAdditional->setStyleSheet(lbl_style);
   mui->lblDataEnc->setStyleSheet(lbl_style);
   mui->lblWebDAVUrl->setStyleSheet(lbl_style);
