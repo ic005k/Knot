@@ -3097,7 +3097,9 @@ QComboBox {
               </size>
              </property>
              <property name="styleSheet">
-              <string notr="true">QSlider::groove:horizontal {
+              <string notr="true">/*
+
+QSlider::groove:horizontal {
   border: 0px solid #bbb;
 }
  
@@ -3149,7 +3151,7 @@ QSlider::handle:horizontal:disabled {
   border-radius: 4px; 
 }
 
-</string>
+*/</string>
              </property>
              <property name="value">
               <number>20</number>
@@ -7508,7 +7510,7 @@ QSlider::handle:horizontal:disabled {
      <x>0</x>
      <y>0</y>
      <width>698</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="styleSheet">

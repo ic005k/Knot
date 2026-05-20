@@ -3304,6 +3304,8 @@ void NotesList::genRecentOpenMenu() {
     }
   }
 
+  menuRecentOpen->setStyleSheet(m_Method->qssMenu);
+
   int x = 0;
   x = mw_one->geometry().x() + 2;
   int y = mw_one->geometry().y() + mui->btnRecentOpen->height() + 4;
