@@ -2092,9 +2092,6 @@ void MainWindow::on_btnDelBakFile_clicked() { m_MainHelper->delBakFile(); }
 void MainWindow::on_btnBackNoteList_clicked() {
   clearWidgetFocus();
 
-  mui->frameMain->show();
-  mui->frameNoteList->hide();
-
   m_NotesList->saveCurrentNoteInfo();
   m_NotesList->saveNotesListIndex();
   m_Notes->updateMainnotesIniToSyncLists();
@@ -2108,6 +2105,9 @@ void MainWindow::on_btnBackNoteList_clicked() {
     if (count > 0) m_Notes->delRemoteFile(m_NotesList->needDelWebDAVFiles);
     m_Method->setAccessCount(m_NotesList->needDelWebDAVFiles.count());
   }
+
+  mui->frameMain->show();
+  mui->frameNoteList->hide();
 }
 
 void MainWindow::on_btnBackNoteRecycle_clicked() {

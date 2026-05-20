@@ -1398,7 +1398,8 @@ void Notes::openNotes() {
                 [=](bool success, QString error) {
                   qDebug() << (success ? "下载成功" : "下载失败: " + error);
                   if (success) {
-                    startBackgroundProcessRemoteFiles();
+                    // startBackgroundProcessRemoteFiles();
+                    startBackgroundProcessRemoteFiles_MultiThread();
                   } else {
                     qDebug() << "下载失败：" << error;
                     auto msg = std::make_unique<ShowMessage>(this);
@@ -1414,7 +1415,7 @@ void Notes::openNotes() {
             // 开始下载（2并发,根据webdav供应商，一般2会很安全）
             QString lf = privateDir;
             qDebug() << "lf=" << lf;
-            int maxConcurrentDownloads = 2;
+            int maxConcurrentDownloads = maxNetConcurrent;
             downloader->downloadFiles(remoteFiles, lf, maxConcurrentDownloads);
             m_Method->setAccessCount(remoteFiles.count());
           }
@@ -1696,6 +1697,207 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
       qDebug() << "远程md文件=" << md;
     }
   }
+}
+
+void Notes::startBackgroundProcessRemoteFiles_MultiThread() {
+  if (remoteFiles.isEmpty()) {
+    QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
+    return;
+  }
+
+  // 后台异步，但 串行执行本地处理（安全、稳定、不崩溃）
+  QtConcurrent::run([this]() {
+    for (const QString& file : std::as_const(remoteFiles)) {
+      processSingleRemoteFile(file);
+    }
+
+    QMetaObject::invokeMethod(this, [this]() { openNotesUI(); });
+  });
+}
+
+void Notes::processSingleRemoteFile(const QString& file) {
+  QString temp_f = file;
+  QString baseUrl = m_CloudBackup->getWebDAVArgument();
+  QString dataDir = m_CloudBackup->getWebDAVDataDir(baseUrl);
+
+  if (!dataDir.isEmpty()) {
+    // temp_f = temp_f.replace(dataDir + "/", "");
+  }
+
+  QString pDir, pFile, kFile, asFile, zFile;
+  pFile = privateDir + temp_f;
+  zFile = pFile;
+  asFile = temp_f;
+
+  QFileInfo fi(file);
+  QString fn = fi.fileName();
+  QStringList list = fn.split("_");
+  QString remoteLastModi;
+  if (list.count() == 4 || list.count() == 2)
+    remoteLastModi = list.at(0).trimmed();
+
+  // ================================
+  // 处理 mainnotes.json.zip
+  // ================================
+  if (file.contains("mainnotes.json.zip")) {
+    pDir = privateDir + "KnotData";
+    pFile = pFile.replace(".zip", "");
+    kFile = iniDir + asFile.replace("KnotData/", "");
+    kFile = kFile.replace(".zip", "");
+    kFile = kFile.replace(remoteLastModi + "_", "");
+
+    QString dec_file = m_Method->useDec(zFile);
+    if (dec_file != "") zFile = dec_file;
+
+    if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
+      mw_one->closeProgress();
+      errorInfo =
+          tr("Decompression failed. Please check in Preferences that the "
+             "passwords are consistent across all platforms.");
+
+      QMetaObject::invokeMethod(mw_one, [this]() {
+        auto msg = std::make_unique<ShowMessage>(this);
+        msg->showMsg("Knot", errorInfo, 1);
+      });
+
+      isPasswordError = true;
+      QFile::remove(zFile);
+      return;
+    }
+
+    if (!isPasswordError) {
+      QFileInfo pFileInfo(pFile);
+      QFileInfo kFileInfo(kFile);
+      if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
+        QString tempFile = iniDir + "temp_notes_ini.tmp";
+        if (QFile::exists(tempFile)) QFile::remove(tempFile);
+        if (QFile::copy(pFile, tempFile)) {
+          m_Method->upIniFile(tempFile, kFile);
+          m_Method->delayDelFile(pFile);
+          m_Method->delayDelFile(zFile);
+        }
+      }
+    }
+  }
+
+  // ================================
+  // 处理 .md.zip
+  // ================================
+  else if (file.contains(".md.zip")) {
+    pDir = privateDir + "KnotData/memo";
+    pFile = pFile.replace(".zip", "");
+    kFile = iniDir + asFile.replace("KnotData/", "");
+    kFile = kFile.replace(".zip", "");
+    kFile = kFile.replace(remoteLastModi + "_", "");
+
+    QString dec_file = m_Method->useDec(zFile);
+    if (dec_file != "") zFile = dec_file;
+
+    if (QFile::exists(zFile)) {
+      if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
+        mw_one->closeProgress();
+        errorInfo =
+            tr("Decompression failed. Please check in Preferences that the "
+               "passwords are consistent across all platforms.");
+
+        QMetaObject::invokeMethod(mw_one, [this]() {
+          auto msg = std::make_unique<ShowMessage>(this);
+          msg->showMsg("Knot", errorInfo, 1);
+        });
+
+        isPasswordError = true;
+        QFile::remove(zFile);
+        QFile::remove(privateDir + "KnotData/mainnotes.json.zip");
+        return;
+      }
+    }
+
+    if (!isPasswordError) {
+      QFileInfo pFileInfo(pFile);
+      QFileInfo kFileInfo(kFile);
+      if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
+        QFile::remove(kFile);
+        QFile::copy(pFile, kFile);
+        m_NotesList->m_dbManager.updateFileIndex(kFile);
+        m_Method->delayDelFile(pFile);
+        m_Method->delayDelFile(zFile);
+      }
+    }
+  }
+
+  // ================================
+  // 处理 .json.zip（非 mainnotes）
+  // ================================
+  else if (file.contains(".json.zip") && !file.contains("mainnotes.json.zip")) {
+    pDir = privateDir + "KnotData/memo";
+    pFile = pFile.replace(".zip", "");
+    kFile = iniDir + asFile.replace("KnotData/", "");
+    kFile = kFile.replace(".zip", "");
+    kFile = kFile.replace(remoteLastModi + "_", "");
+
+    QString dec_file = m_Method->useDec(zFile);
+    if (dec_file != "") zFile = dec_file;
+
+    if (QFile::exists(zFile)) {
+      if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
+        mw_one->closeProgress();
+        errorInfo =
+            tr("Decompression failed. Please check in Preferences that the "
+               "passwords are consistent across all platforms.");
+
+        QMetaObject::invokeMethod(mw_one, [this]() {
+          auto msg = std::make_unique<ShowMessage>(this);
+          msg->showMsg("Knot", errorInfo, 1);
+        });
+
+        isPasswordError = true;
+        QFile::remove(zFile);
+        QFile::remove(privateDir + "KnotData/mainnotes.json.zip");
+        return;
+      }
+    }
+
+    if (!isPasswordError) {
+      QFileInfo pFileInfo(pFile);
+      QFileInfo kFileInfo(kFile);
+      if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
+        QFile::remove(kFile);
+        QFile::copy(pFile, kFile);
+        m_Method->delayDelFile(pFile);
+        m_Method->delayDelFile(zFile);
+      }
+    }
+  }
+
+  // ================================
+  // 处理 .png 图片
+  // ================================
+  else if (file.contains(".png")) {
+    pFile = m_Method->useDec(pFile);
+    kFile = iniDir + asFile.replace("KnotData/", "");
+    kFile = kFile.replace(remoteLastModi + "_", "");
+
+    if (kFile.endsWith(".png.zip")) {
+      kFile.replace(".png.zip", ".png");
+    }
+
+    QFileInfo pFileInfo(pFile);
+    QFileInfo kFileInfo(kFile);
+    if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
+      QFile::remove(kFile);
+      QFile::copy(pFile, kFile);
+      m_Method->delayDelFile(pFile);
+    }
+  }
+
+  // 进度更新（安全跨线程）
+  static QAtomicInt n_Files = 0;
+  QString showText = "[" + QString::number(n_Files.fetchAndAddOrdered(1) + 1) +
+                     "/" + QString::number(remoteFiles.size()) + "] " + pFile;
+  QMetaObject::invokeMethod(m_Method, [=]() {
+    m_Method->emit sigUpdateProgressAndText(showText, remoteFiles.size(),
+                                            n_Files);
+  });
 }
 
 void Notes::updateMainnotesIniToSyncLists() {

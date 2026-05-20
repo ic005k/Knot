@@ -95,7 +95,6 @@ class CloudBackup : public QDialog {
   QNetworkAccessManager* m_networkManager;  // 全局唯一
   QQueue<QString> uploadQueue;
   QSet<QNetworkReply*> activeReplies;
-  int maxConcurrentUploads;  // 并发数，默认=2
 
   QtOneDrive* oneDrive = nullptr;
   QString initUserInfo(QString info);

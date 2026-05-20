@@ -87,7 +87,7 @@ inline QList<QPointF> amountList;
 inline QList<double> doubleList;
 
 inline int fontSize, red, iPage, sPos, totallines, s_y1, s_m1, s_d1, s_y2, s_m2,
-    s_d2, totalPages, currentPage, currentTabIndex, today;
+    s_d2, totalPages, currentPage, currentTabIndex, today, maxNetConcurrent;
 
 inline int nMainChartType = 0;
 

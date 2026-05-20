@@ -31,7 +31,7 @@ CloudBackup::CloudBackup(QWidget* parent)
   init();
 
   m_networkManager = new QNetworkAccessManager(this);  // 只创建一次！
-  maxConcurrentUploads = 2;                            // 默认并发 2，全平台兼容
+                                                       // 默认并发 2，全平台兼容
 
   QString secret;
   // 先从环境变量读取，便于CI运行
@@ -452,8 +452,7 @@ void CloudBackup::uploadFilesToWebDAV(const QStringList& files) {
 
 void CloudBackup::startNextUpload() {
   // 核心：严格控制并发数量
-  while (activeReplies.size() < maxConcurrentUploads &&
-         !uploadQueue.isEmpty()) {
+  while (activeReplies.size() < maxNetConcurrent && !uploadQueue.isEmpty()) {
     QString filePath = uploadQueue.dequeue();
     QString remoteFile = filePath;
     remoteFile.replace(privateDir, "");

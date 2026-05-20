@@ -39,6 +39,15 @@ Preferences::Preferences(QWidget* parent)
   int hei = m_Method->getFontHeight();
   ui->btnCustomFont->setFixedHeight(4 * hei);
 
+  // 只能输入 1~50 的整数，彻底禁止输入超过 50 的数字
+  QRegularExpression rx("^(?:[1-9]|[1-4][0-9]|50)$");
+  QRegularExpressionValidator* validator =
+      new QRegularExpressionValidator(rx, this);
+  ui->editConcurrency->setValidator(validator);
+
+  // 多语言占位提示
+  ui->editConcurrency->setPlaceholderText(tr("Enter 1~50"));
+
   mui->editPassword->setEchoMode(QLineEdit::EchoMode::Password);
   mui->editValidate->setEchoMode(QLineEdit::EchoMode::Password);
 
@@ -89,6 +98,7 @@ void Preferences::saveOptions() {
     iniPreferences->setValue("/Options/FontSize", ui->sliderFontSize->value());
     iniPreferences->setValue("/Options/Dark", ui->chkDark->isChecked());
     iniPreferences->setValue("/Options/chkUIFont", ui->chkUIFont->isChecked());
+    iniPreferences->setValue("/Options/maxcon", ui->editConcurrency->text());
   }
 
   iniPreferences->setValue("/Options/Zip", mui->chkZip->isChecked());
@@ -304,6 +314,9 @@ void Preferences::initOptions() {
   QString password = m_CloudBackup->aesDecrypt(aesStr, aes_key0, aes_iv0);
   mui->editPassword->setText(password);
   mui->editValidate->setText(password);
+
+  maxNetConcurrent = iniPreferences->value("/Options/maxcon", 10).toInt();
+  ui->editConcurrency->setText(QString::number(maxNetConcurrent));
 
   bool isZip = iniPreferences->value("/Options/Zip", false).toBool();
   mui->chkZip->setChecked(isZip);

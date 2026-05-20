@@ -327,6 +327,8 @@ class Notes : public QDialog {
   void zipNoteToSyncList();
   void refreshLocalHtmlFileInAndroid();
   void openNotesUI_1();
+  void processSingleRemoteFile(const QString &file);
+  void startBackgroundProcessRemoteFiles_MultiThread();
 };
 
 ///////////////////////////////////////////////////////////////////////
