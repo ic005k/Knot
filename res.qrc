@@ -213,5 +213,7 @@
         <file>res/sound/alarm.wav</file>
         <file>res/epaused.svg</file>
         <file>res/erun.svg</file>
+        <file>res/theme/MaterialDark.qss</file>
+        <file>res/theme/MaterialLight.qss</file>
     </qresource>
 </RCC>

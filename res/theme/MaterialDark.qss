@@ -1,0 +1,110 @@
+/* Material Design Dark Theme for Qt Widgets */
+* {
+    font-family: "sans-serif";
+    font-size: 14px;
+    color: #e0e0e0;
+}
+
+QMainWindow, QWidget {
+    background-color: #121212;
+}
+
+/* 按钮 */
+QPushButton {
+    background-color: #2196F3;
+    border: none;
+    border-radius: 18px;
+    padding: 8px 16px;
+    color: white;
+    font-weight: 500;
+}
+QPushButton:hover {
+    background-color: #1976D2;
+}
+QPushButton:pressed {
+    background-color: #0D47A1;
+}
+QPushButton:disabled {
+    background-color: #424242;
+    color: #757575;
+}
+
+/* 输入框 */
+QLineEdit {
+    background-color: #1e1e1e;
+    border: none;
+    border-bottom: 2px solid #2196F3;
+    padding: 6px 0;
+    color: #e0e0e0;
+}
+QLineEdit:focus {
+    border-bottom: 2px solid #64B5F6;
+}
+
+/* 复选框 */
+QCheckBox {
+    spacing: 8px;
+}
+QCheckBox::indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 2px solid #757575;
+    background-color: transparent;
+}
+QCheckBox::indicator:checked {
+    background-color: #2196F3;
+    border: 2px solid #2196F3;
+}
+
+/* 单选框 */
+QRadioButton {
+    spacing: 8px;
+}
+QRadioButton::indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    border: 2px solid #757575;
+    background-color: transparent;
+}
+QRadioButton::indicator:checked {
+    background-color: #2196F3;
+    border: 2px solid #2196F3;
+}
+
+/* 滑块 - 深色主题 */
+QSlider::groove:horizontal {
+    height: 10px;        /* 扩大点击区域，超级灵敏 */
+    background: #424242;
+    border-radius: 5px;
+}
+QSlider::sub-page:horizontal {
+    background: #1976D2; /* 已滑动过的轨道颜色 */
+    border-radius: 5px;
+}
+QSlider::handle:horizontal {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background: #ffffff;  /* 白色圆点更像安卓原生 */
+    border: 2px solid #2196F3;
+    margin: -5px 0;      /* 完美居中 */
+}
+
+
+/* 表格 */
+QTableWidget {
+    background-color: #1e1e1e;
+    gridline-color: #333333;
+}
+QTableWidget::item {
+    padding: 6px;
+}
+QHeaderView::section {
+    background-color: #212121;
+    padding: 8px;
+    border: none;
+    border-bottom: 1px solid #333333;
+}
+
