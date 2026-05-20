@@ -1319,14 +1319,9 @@ void Notes::openNotes() {
     QObject::connect(
         helper, &WebDavHelper::listCompleted, this,
         [=](const QList<QPair<QString, QDateTime>>& files) {
-          qDebug() << "获取到文件列表:";
-          QString info = "found " + QString::number(files.size()) + " files";
+          qDebug() << "获取KnotData根目录文件列表:" << url + "KnotData/";
+          QString info = "共找到 " + QString::number(files.size()) + " 文件";
           qDebug() << info;
-
-          if (files.size() == 0) {
-            QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
-            return;
-          }
 
           for (const auto& [path, mtime] : files) {
             qDebug() << "路径:" << path

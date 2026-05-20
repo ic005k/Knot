@@ -1525,8 +1525,8 @@ void Todo::openTodo() {
     // 连接信号
     QObject::connect(
         helper, &WebDavHelper::listCompleted, this,
-        [this](const QList<QPair<QString, QDateTime>>& files) {
-          qDebug() << "获取到文件列表:";
+        [=](const QList<QPair<QString, QDateTime>>& files) {
+          qDebug() << "获取到文件列表:" << url + "KnotData/";
           qDebug() << "共找到" << files.size() << "个文件:";
 
           if (files.size() == 0) {

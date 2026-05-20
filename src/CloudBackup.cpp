@@ -850,6 +850,8 @@ void CloudBackup::getRemoteFileList(QString url) {
   nextPageUrl = url;
   allFiles.clear();
 
+  qDebug() << "获取文件列表：" << url;
+
   // 开始获取第一页
   fetchNextPage();
 }
@@ -912,7 +914,6 @@ QString CloudBackup::parseNextPageUrl(
 }
 
 void CloudBackup::processFileList() {
-  qDebug() << "获取到文件列表:";
   qDebug() << "共找到" << allFiles.size() << "个文件:";
 
   for (const auto& [path, mtime] : allFiles) {
@@ -924,7 +925,6 @@ void CloudBackup::processFileList() {
   }
 
   isGetRemoteFileListEnd = true;
-  // emit fileListReady();  // 通知其他部分文件列表已准备好
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
