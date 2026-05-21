@@ -2778,8 +2778,7 @@ void MainWindow::on_btnSpeak_clicked() {
   mui->btnStopSpeak->show();
 
   isPlayBook = true;
-  m_Reader->m_autoStopDeadline = QDateTime::currentDateTime().addSecs(
-      mui->editAutoStopTTS->text().toInt() * 60);
+  m_Reader->setAutoStopPlayTime();
   m_Reader->startSpeak();
 }
 
@@ -2855,4 +2854,13 @@ void MainWindow::on_editValidate_textChanged(const QString& arg1) {
   m_Preferences->on_editValidate_textChanged(arg1);
 }
 
-void MainWindow::on_chkAutoStopTTS_clicked() {}
+void MainWindow::on_editAutoStopTTS_textChanged(const QString& arg1) {
+  if (arg1.length() > 0) m_Reader->setAutoStopPlayTime();
+}
+
+void MainWindow::on_chkAutoStopTTS_clicked(bool checked) {
+  if (checked)
+    m_Reader->setAutoStopPlayTime();
+  else
+    m_Reader->m_autoStopDeadline = QDateTime();
+}

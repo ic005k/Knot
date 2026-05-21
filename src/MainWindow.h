@@ -943,7 +943,9 @@ class MainWindow : public QMainWindow {
 
   void on_editValidate_textChanged(const QString& arg1);
 
-  void on_chkAutoStopTTS_clicked();
+  void on_editAutoStopTTS_textChanged(const QString& arg1);
+
+  void on_chkAutoStopTTS_clicked(bool checked);
 
  private:
   bool isMoveEntry;

@@ -4008,3 +4008,8 @@ void Reader::startSpeak() {
 }
 
 void Reader::stopSpeak() { m_Method->stopPlayMyText(); }
+
+void Reader::setAutoStopPlayTime() {
+  m_autoStopDeadline = QDateTime::currentDateTime().addSecs(
+      mui->editAutoStopTTS->text().toInt() * 60);
+}
