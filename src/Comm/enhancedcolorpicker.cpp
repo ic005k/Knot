@@ -70,7 +70,7 @@ QString simpleLargeSliderStyle = R"(
     )";
 
 // HueWheelWidget 实现
-void HueWheelWidget::paintEvent(QPaintEvent *event) {
+void HueWheelWidget::paintEvent(QPaintEvent* event) {
   Q_UNUSED(event);
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing);
@@ -105,19 +105,19 @@ void HueWheelWidget::paintEvent(QPaintEvent *event) {
   painter.restore();
 }
 
-void HueWheelWidget::mousePressEvent(QMouseEvent *event) {
+void HueWheelWidget::mousePressEvent(QMouseEvent* event) {
   if (event->button() == Qt::LeftButton) {
     calculateHue(event->pos());
   }
 }
 
-void HueWheelWidget::mouseMoveEvent(QMouseEvent *event) {
+void HueWheelWidget::mouseMoveEvent(QMouseEvent* event) {
   if (event->buttons() & Qt::LeftButton) {
     calculateHue(event->pos());
   }
 }
 
-void HueWheelWidget::calculateHue(const QPoint &pos) {
+void HueWheelWidget::calculateHue(const QPoint& pos) {
   QPoint center = rect().center();
   QPoint relativePos = pos - center;
 
@@ -131,7 +131,7 @@ void HueWheelWidget::calculateHue(const QPoint &pos) {
 }
 
 // SVSelectorWidget 实现
-void SVSelectorWidget::paintEvent(QPaintEvent *event) {
+void SVSelectorWidget::paintEvent(QPaintEvent* event) {
   Q_UNUSED(event);
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing);
@@ -160,19 +160,19 @@ void SVSelectorWidget::paintEvent(QPaintEvent *event) {
   painter.drawEllipse(QPoint(x, y), 5, 5);
 }
 
-void SVSelectorWidget::mousePressEvent(QMouseEvent *event) {
+void SVSelectorWidget::mousePressEvent(QMouseEvent* event) {
   if (event->button() == Qt::LeftButton) {
     calculateSV(event->pos());
   }
 }
 
-void SVSelectorWidget::mouseMoveEvent(QMouseEvent *event) {
+void SVSelectorWidget::mouseMoveEvent(QMouseEvent* event) {
   if (event->buttons() & Qt::LeftButton) {
     calculateSV(event->pos());
   }
 }
 
-void SVSelectorWidget::calculateSV(const QPoint &pos) {
+void SVSelectorWidget::calculateSV(const QPoint& pos) {
   QRect rect = this->rect();
   int s = qBound(0, pos.x() * 255 / rect.width(), 255);
   int v = 255 - qBound(0, pos.y() * 255 / rect.height(), 255);
@@ -184,8 +184,8 @@ void SVSelectorWidget::calculateSV(const QPoint &pos) {
 }
 
 // EnhancedColorPicker 实现
-EnhancedColorPicker::EnhancedColorPicker(QWidget *parent,
-                                         const QColor &initialColor)
+EnhancedColorPicker::EnhancedColorPicker(QWidget* parent,
+                                         const QColor& initialColor)
     : QDialog(parent), m_currentColor(initialColor) {
   setWindowTitle(tr("Select Color"));
   resize(500, 600);
@@ -201,7 +201,7 @@ EnhancedColorPicker::EnhancedColorPicker(QWidget *parent,
   initPresetColors();
 
   // 创建主布局
-  QVBoxLayout *mainLayout = new QVBoxLayout(this);
+  QVBoxLayout* mainLayout = new QVBoxLayout(this);
   mainLayout->setSpacing(10);
 
   // 颜色预览
@@ -212,7 +212,7 @@ EnhancedColorPicker::EnhancedColorPicker(QWidget *parent,
   mainLayout->addWidget(m_colorPreview, 0, Qt::AlignHCenter);
 
   // 颜色选择区域
-  QVBoxLayout *colorSelectorLayout = new QVBoxLayout();
+  QVBoxLayout* colorSelectorLayout = new QVBoxLayout();
   mainLayout->addLayout(colorSelectorLayout, Qt::AlignHCenter);
 
   // 色相环
@@ -224,16 +224,16 @@ EnhancedColorPicker::EnhancedColorPicker(QWidget *parent,
   colorSelectorLayout->addWidget(m_svSelector, 0, Qt::AlignHCenter);
 
   // 预设颜色
-  QLabel *presetLabel = new QLabel(tr("常用颜色:"));
+  QLabel* presetLabel = new QLabel(tr("常用颜色:"));
   mainLayout->addWidget(presetLabel);
   presetLabel->hide();
 
   m_presetColorsWidget = new QWidget();
-  QGridLayout *presetLayout = new QGridLayout(m_presetColorsWidget);
+  QGridLayout* presetLayout = new QGridLayout(m_presetColorsWidget);
   presetLayout->setSpacing(5);
 
   for (int i = 0; i < m_presetColors.size(); ++i) {
-    QPushButton *colorBtn = new QPushButton();
+    QPushButton* colorBtn = new QPushButton();
     colorBtn->setFixedSize(30, 30);
     colorBtn->setStyleSheet(
         QString("background-color: %1; border: 1px solid #aaaaaa;")
@@ -249,7 +249,7 @@ EnhancedColorPicker::EnhancedColorPicker(QWidget *parent,
   m_presetColorsWidget->hide();
 
   // 颜色控制滑块
-  QGridLayout *controlsLayout = new QGridLayout();
+  QGridLayout* controlsLayout = new QGridLayout();
   mainLayout->addLayout(controlsLayout);
 
   // HSV控制
@@ -272,6 +272,7 @@ EnhancedColorPicker::EnhancedColorPicker(QWidget *parent,
   m_valueSlider->hide();
 
   // RGB控制
+  simpleLargeSliderStyle = mui->hsH->styleSheet();
   controlsLayout->addWidget(new QLabel(tr("Red:")), 3, 0);
   m_redSlider = new QSlider(Qt::Horizontal);
   m_redSlider->setRange(0, 255);
@@ -314,11 +315,11 @@ EnhancedColorPicker::EnhancedColorPicker(QWidget *parent,
   controlsLayout->addWidget(m_hexEdit, 7, 1);
 
   // 按钮
-  QHBoxLayout *buttonLayout = new QHBoxLayout();
+  QHBoxLayout* buttonLayout = new QHBoxLayout();
   mainLayout->addLayout(buttonLayout);
 
-  QPushButton *okBtn = new QPushButton(tr("Ok"));
-  QPushButton *cancelBtn = new QPushButton(tr("Cancel"));
+  QPushButton* okBtn = new QPushButton(tr("Ok"));
+  QPushButton* cancelBtn = new QPushButton(tr("Cancel"));
 
   m_Method->setPushButtonQss(okBtn, 4, 8, "#165DFF", "#FFFFFF", "#4080FF",
                              "#FFFFFF", "#0E42D2", "#FFFFFF");
@@ -370,8 +371,8 @@ void EnhancedColorPicker::initPresetColors() {
       Qt::darkRed,    Qt::darkGreen,   Qt::darkYellow, Qt::darkCyan};
 }
 
-QColor EnhancedColorPicker::getColor(QWidget *parent, const QColor &initial,
-                                     const QString &title) {
+QColor EnhancedColorPicker::getColor(QWidget* parent, const QColor& initial,
+                                     const QString& title) {
   EnhancedColorPicker dialog(parent, initial);
   dialog.setWindowTitle(title);
   if (dialog.exec() == QDialog::Accepted) {
@@ -417,7 +418,7 @@ void EnhancedColorPicker::onAlphaChanged(int alpha) {
   m_hexEdit->setText(m_currentColor.name(QColor::HexArgb));
 }
 
-void EnhancedColorPicker::onHexInputChanged(const QString &text) {
+void EnhancedColorPicker::onHexInputChanged(const QString& text) {
   if (text.isEmpty()) return;
 
   QColor color(text);
@@ -442,7 +443,7 @@ void EnhancedColorPicker::onSvChanged(int saturation, int value) {
 }
 
 void EnhancedColorPicker::onPresetColorClicked() {
-  QPushButton *btn = qobject_cast<QPushButton *>(sender());
+  QPushButton* btn = qobject_cast<QPushButton*>(sender());
   if (btn) {
     QColor color(btn->property("color").toString());
     m_currentColor = color;

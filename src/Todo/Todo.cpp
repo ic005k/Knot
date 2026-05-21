@@ -40,6 +40,8 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
   mui->sliderPlayAudio->hide();
   mui->f_ToolBar->hide();
 
+  mui->sliderPlayAudio->setStyleSheet(mui->hsH->styleSheet());
+
   f.setPointSize(fontSize);
   mui->editTodo->setFont(f);
   mui->editTodo->setFixedHeight(getEditTextHeight(mui->editTodo) + 4);

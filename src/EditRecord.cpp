@@ -52,6 +52,7 @@ EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
   mui->editAmount->setReadOnly(true);
 
   mui->editCategory->setPlaceholderText(tr("Please enter a category"));
+  mui->editDetails->setPlaceholderText(tr("Enter notes"));
 
   lblStyle = mui->lblCategory->styleSheet();
 
