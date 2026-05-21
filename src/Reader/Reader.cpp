@@ -1289,6 +1289,44 @@ QString Reader::getBookSpeakTextFromQML() {
   return txt;
 }
 
+void Reader::setTtsCurrentSentence(const QString& currentSentence) {
+  // 清理空白字符（避免换行/空格导致匹配失败）
+  QString sentence = currentSentence.trimmed();
+
+  if (sentence == "__TTS_PLAY_FINISHED__") {
+    qDebug() << "🎉 TTS 全部文本播放完成！";
+
+    // 1. 清空高亮
+    QQuickItem* root = mui->qwReader->rootObject();
+    if (root) {
+      QMetaObject::invokeMethod(root, "highlightTtsSentence",
+                                Q_ARG(QVariant, "")  // 传空字符串 = 清空高亮
+      );
+    }
+
+    // 2. 可以在这里做：
+    // - 恢复UI状态
+    // - 自动播放下一章
+    // - 记录播放完成状态
+    stopSpeak();
+
+    return;  // 直接返回，不执行后面的高亮
+  }
+
+  // 获取 QML 根对象
+  QQuickItem* root = mui->qwReader->rootObject();
+  if (!root) return;
+
+  // C++ 直接调用 QML 的高亮方法：highlightCurrentSentence(string)
+  QMetaObject::invokeMethod((QObject*)root,
+                            "highlightTtsSentence",    // QML函数名
+                            Q_ARG(QVariant, sentence)  // 把当前朗读句子传给 QML
+  );
+
+  qDebug() << "✅ 已通知 QML 高亮句子：" << sentence;
+  savePageVPos();
+}
+
 qreal Reader::getVHeight() {
   QVariant itemCount;
   QQuickItem* root = mui->qwReader->rootObject();

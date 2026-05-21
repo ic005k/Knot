@@ -476,6 +476,12 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
 
                         if (playQueue.isEmpty()) {
                             releaseAudioFocus();
+
+                            // ==============================
+                            // 发【结束标记】给 C++
+                            // ==============================
+                            MyService.CallJavaNotify_20("__TTS_PLAY_FINISHED__");
+
                             if (playCompleteListener != null) {
                                 mainHandler.post(() ->
                                     playCompleteListener.onPlayComplete()

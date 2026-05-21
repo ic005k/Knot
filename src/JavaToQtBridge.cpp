@@ -598,7 +598,9 @@ static void JavaNotify_20(JNIEnv* env, jclass clazz, jstring sentence) {
   qDebug() << "TTS 朗读句子：" << currentSentence;
 
   if (mw_one && mw_one->m_Reader) {
-    // mw_one->m_Reader->setTtsCurrentSentence(currentSentence);
+    if (mui->btnStopSpeak->isVisible()) {
+      mw_one->m_Reader->setTtsCurrentSentence(currentSentence);
+    }
   }
 }
 

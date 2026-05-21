@@ -189,6 +189,7 @@ class Reader : public QDialog {
 
   void startSpeak();
   void stopSpeak();
+  void setTtsCurrentSentence(const QString& currentSentence);
  public slots:
   void on_SetReaderFunVisible();
 

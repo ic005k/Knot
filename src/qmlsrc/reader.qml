@@ -7,7 +7,6 @@ import EBook.Models 1.0
 import QtQuick.Controls.Fusion
 
 Item {
-
     id: root
     visible: true
 
@@ -33,11 +32,10 @@ Item {
             width: {
                 // 计算进度百分比
                 if (contentListView.contentHeight <= contentListView.height) {
-                    return parent.width // 内容不足一屏时，进度条满
+                    return parent.width; // 内容不足一屏时，进度条满
                 }
-                const progress = contentListView.contentY
-                               / (contentListView.contentHeight - contentListView.height)
-                return parent.width * Math.max(0, Math.min(1, progress))
+                const progress = contentListView.contentY / (contentListView.contentHeight - contentListView.height);
+                return parent.width * Math.max(0, Math.min(1, progress));
             }
         }
     }
@@ -91,250 +89,272 @@ Item {
     function resetTextSelection() {
         // 1. 取消“当前有选择的 TextEdit”的选择（通过记录的实例）
         if (root.currentSelectedTextEdit) {
-            root.currentSelectedTextEdit.deselect() // 取消高亮
-            root.currentSelectedTextEdit.cursorPosition
-                    = root.currentSelectedTextEdit.selectionStart
-            console.log("已取消当前文本块的选择")
+            root.currentSelectedTextEdit.deselect(); // 取消高亮
+            root.currentSelectedTextEdit.cursorPosition = root.currentSelectedTextEdit.selectionStart;
+            console.log("已取消当前文本块的选择");
         }
 
         // 2. 清空所有记录（实例 + 选择位置）
-        root.currentSelectedTextEdit = null // 清空实例引用
-        root.selectionStart = -1
-        root.selectionEnd = -1
+        root.currentSelectedTextEdit = null; // 清空实例引用
+        root.selectionStart = -1;
+        root.selectionEnd = -1;
 
-        console.log("文本选择已完全重置")
+        console.log("文本选择已完全重置");
     }
 
     function setBookPagePressHold(value) {
-        root.isBookPagePressHold = value
+        root.isBookPagePressHold = value;
     }
 
     function setLandscape(isValue) {
-        isLandscape = isValue
+        isLandscape = isValue;
     }
 
     function getReadyEnd() {
-        return isReadyEnd
+        return isReadyEnd;
     }
 
     // 原有功能函数（完整保留）
     function getText() {
-        return m_text.text
+        return m_text.text;
     }
     function setText(str) {
-        textModel.splitContent(str)
+        textModel.splitContent(str);
     }
     function loadText(str) {
-        textModel.splitContent(str)
-        isPDF = false
-        isEPUBText = true
+        textModel.splitContent(str);
+        isPDF = false;
+        isEPUBText = true;
     }
     function loadHtml(htmlFile, skipID) {
-        document.load("file://" + htmlFile)
-        isPDF = false
-        isEPUBText = true
-        if (skipID !== "") {
-
-        }
+        document.load("file://" + htmlFile);
+        isPDF = false;
+        isEPUBText = true;
+        if (skipID !== "") {}
     }
     function loadHtmlStr(str) {
-        textModel.splitContent(str)
-        isPDF = false
-        isEPUBText = true
+        textModel.splitContent(str);
+        isPDF = false;
+        isEPUBText = true;
     }
     function loadPDF(pdffile) {
-        pdfFile = "file:///" + pdffile
-        isPDF = true
-        isEPUBText = false
-        console.debug(pdfFile)
+        pdfFile = "file:///" + pdffile;
+        isPDF = true;
+        isEPUBText = false;
+        console.debug(pdfFile);
     }
     function loadHtmlBuffer(strhtml) {
-        textModel.splitContent(strhtml)
-        isEPUBText = true
-        strText = strhtml
+        textModel.splitContent(strhtml);
+        isEPUBText = true;
+        strText = strhtml;
     }
     function setVPos(vpos) {
-        contentListView.contentY = vpos
+        contentListView.contentY = vpos;
     }
     function getVPos() {
-        return contentListView.contentY
+        return contentListView.contentY;
     }
     function getVHeight() {
-        return contentListView.contentHeight
+        return contentListView.contentHeight;
     }
     function getSelectedText() {
-        console.log("selectedText=" + textArea.selectedText)
-        return textArea.selectedText
+        console.log("selectedText=" + textArea.selectedText);
+        return textArea.selectedText;
     }
     function move(x0) {
-        x = x + x0
-        file.curX = x
-        console.log(file.curX)
+        x = x + x0;
+        file.curX = x;
+        console.log(file.curX);
     }
     function setX(x0) {
-        x = 0
+        x = 0;
     }
 
     ///////////////////////////////////////////////////////////////
     function getBookmarkText() {
         if (contentListView.count === 0)
-            return "Bookmark"
+            return "Bookmark";
 
-        console.log("===== 开始获取书签文本 =====")
-        console.log("当前模式:", root.isLandscape ? "横屏" : "竖屏")
+        console.log("===== 开始获取书签文本 =====");
+        console.log("当前模式:", root.isLandscape ? "横屏" : "竖屏");
 
         // 获取第一个文本块（也是唯一一个）
-        let delegateItem = contentListView.itemAtIndex(0)
+        let delegateItem = contentListView.itemAtIndex(0);
         if (!delegateItem) {
-            console.log("无法获取文本块")
-            return "Bookmark"
+            console.log("无法获取文本块");
+            return "Bookmark";
         }
 
         // 获取屏幕左上角在文本块中的位置
-        let charPos = getCharPositionAtScreenTopLeft(delegateItem)
-        console.log("屏幕左上角字符位置:", charPos)
+        let charPos = getCharPositionAtScreenTopLeft(delegateItem);
+        console.log("屏幕左上角字符位置:", charPos);
 
         if (charPos === -1)
-            return "Bookmark"
+            return "Bookmark";
 
         // 获取实际显示的文本
-        let text = getRenderedText(delegateItem)
-        console.log("文本长度:", text.length)
+        let text = getRenderedText(delegateItem);
+        console.log("文本长度:", text.length);
 
         // 从该位置开始向后获取文本
-        let result = text.substring(charPos, Math.min(charPos + 100,
-                                                      text.length))
-        console.log("书签文本:", result)
+        let result = text.substring(charPos, Math.min(charPos + 100, text.length));
+        console.log("书签文本:", result);
 
-        return result
+        return result;
+    }
+
+    // ==============================
+    // TTS 朗读高亮（C++ 调用）
+    // ==============================
+    function highlightTtsSentence(sentence) {
+        // 兼容 QVariant 转字符串
+        var textStr = String(sentence).trim();
+        if (!textStr || contentListView.count === 0) return;
+
+        // 1. 获取文本块
+        let textEdit = contentListView.itemAtIndex(0);
+        if (!textEdit) return;
+
+        // 2. 清除之前所有高亮
+        textEdit.deselect();
+
+        // 3. 查找句子位置
+        let text = getRenderedText(textEdit);
+        let start = text.indexOf(textStr);
+
+        if (start >= 0) {
+            let end = start + textStr.length;
+
+            // 4. 选中高亮
+            textEdit.select(start, end);
+
+            // 5. 自动滚动
+            let rect = textEdit.positionToRectangle(start);
+            if (rect) {
+                contentListView.contentY = rect.y - 50;
+            }
+            console.log("✅ QML 高亮成功：", textStr);
+        } else {
+            console.log("⚠️ QML 未找到句子：", textStr);
+        }
     }
 
     function getBookSpeakText() {
         if (contentListView.count === 0)
-            return "" // TTS播放用空字符串更合适，也可保留"Bookmark"
+            return ""; // TTS播放用空字符串更合适，也可保留"Bookmark"
 
-        console.log("===== 开始获取TTS播放文本 =====")
-        console.log("当前模式:", root.isLandscape ? "横屏" : "竖屏")
+        console.log("===== 开始获取TTS播放文本 =====");
+        console.log("当前模式:", root.isLandscape ? "横屏" : "竖屏");
 
         // 获取唯一的文本块
-        let delegateItem = contentListView.itemAtIndex(0)
+        let delegateItem = contentListView.itemAtIndex(0);
         if (!delegateItem) {
-            console.log("无法获取文本块")
-            return ""
+            console.log("无法获取文本块");
+            return "";
         }
 
         // 获取屏幕顶部位置对应的字符索引（当前页面起始位置）
-        let charPos = getCharPositionAtScreenTopLeft(delegateItem)
-        console.log("当前屏幕顶部字符位置:", charPos)
+        let charPos = getCharPositionAtScreenTopLeft(delegateItem);
+        console.log("当前屏幕顶部字符位置:", charPos);
 
         if (charPos === -1 || charPos >= delegateItem.text.length) {
-            console.log("字符位置无效或已到文本末尾")
-            return ""
+            console.log("字符位置无效或已到文本末尾");
+            return "";
         }
 
         // 获取完整文本，从当前字符位置截取到末尾（去掉100字符限制）
-        let text = getRenderedText(delegateItem)
-        let result = text.substring(charPos)
+        let text = getRenderedText(delegateItem);
+        let result = text.substring(charPos);
 
         // 直接取到文本末尾
-        console.log(`获取到后续文本长度: ${result.length} 字符`)
-        console.log("TTS文本预览:", result.substring(0, 200) + "...") // 仅预览前200字符
+        console.log(`获取到后续文本长度: ${result.length} 字符`);
+        console.log("TTS文本预览:", result.substring(0, 200) + "..."); // 仅预览前200字符
 
-        return result
+        return result;
     }
 
     function getCharPositionAtScreenTopLeft(delegateItem) {
         // 使用屏幕左上角(0,0)作为模拟点击位置
-        let mousePoint = Qt.point(0, 0)
-        console.log("模拟点击位置:", mousePoint.x, mousePoint.y)
+        let mousePoint = Qt.point(0, 0);
+        console.log("模拟点击位置:", mousePoint.x, mousePoint.y);
 
         // 将屏幕坐标映射到旋转容器坐标系
-        let pointInRotateContainer = rotateContainer.mapFromItem(null,
-                                                                 mousePoint.x,
-                                                                 mousePoint.y)
-        console.log("在旋转容器中的坐标:", pointInRotateContainer.x,
-                    pointInRotateContainer.y)
+        let pointInRotateContainer = rotateContainer.mapFromItem(null, mousePoint.x, mousePoint.y);
+        console.log("在旋转容器中的坐标:", pointInRotateContainer.x, pointInRotateContainer.y);
 
         // 在横屏模式下补偿Y坐标偏移
         if (root.isLandscape) {
-            pointInRotateContainer.y = pointInRotateContainer.y - rotateContainer.height
-            console.log("横屏模式 - 补偿后坐标:", pointInRotateContainer.x,
-                        pointInRotateContainer.y)
+            pointInRotateContainer.y = pointInRotateContainer.y - rotateContainer.height;
+            console.log("横屏模式 - 补偿后坐标:", pointInRotateContainer.x, pointInRotateContainer.y);
         }
 
         // 将旋转容器坐标映射到ListView坐标系
-        let pointInListView = contentListView.mapFromItem(
-                rotateContainer, pointInRotateContainer.x,
-                pointInRotateContainer.y)
-        console.log("在ListView中的坐标:", pointInListView.x, pointInListView.y)
+        let pointInListView = contentListView.mapFromItem(rotateContainer, pointInRotateContainer.x, pointInRotateContainer.y);
+        console.log("在ListView中的坐标:", pointInListView.x, pointInListView.y);
 
         // 在横屏模式下，进一步调整ListView坐标
         if (root.isLandscape) {
             // 减去文本块的Y位置，确保局部坐标从0开始
-            pointInListView.y = pointInListView.y - delegateItem.y
-            console.log("横屏模式 - 调整后ListView坐标:", pointInListView.x,
-                        pointInListView.y)
+            pointInListView.y = pointInListView.y - delegateItem.y;
+            console.log("横屏模式 - 调整后ListView坐标:", pointInListView.x, pointInListView.y);
         }
 
         // 将ListView坐标映射到文本块的局部坐标
-        let pointInItem = delegateItem.mapFromItem(contentListView,
-                                                   pointInListView.x,
-                                                   pointInListView.y)
-        console.log("在文本块内的局部坐标:", pointInItem.x, pointInItem.y)
+        let pointInItem = delegateItem.mapFromItem(contentListView, pointInListView.x, pointInListView.y);
+        console.log("在文本块内的局部坐标:", pointInItem.x, pointInItem.y);
 
         // 获取该位置对应的字符索引
-        return delegateItem.positionAt(pointInItem.x, pointInItem.y)
+        return delegateItem.positionAt(pointInItem.x, pointInItem.y);
     }
 
     function getRenderedText(textEdit) {
         // 优先使用 getText 方法
         if (typeof textEdit.getText === "function") {
-            return textEdit.getText(0, textEdit.length)
+            return textEdit.getText(0, textEdit.length);
         }
 
         // 其次使用 Accessible.text
         if (textEdit.Accessible && textEdit.Accessible.text) {
-            return textEdit.Accessible.text
+            return textEdit.Accessible.text;
         }
 
         // 最后使用正则表达式去除HTML标签
-        return textEdit.text.replace(/<[^>]*>/g, '')
+        return textEdit.text.replace(/<[^>]*>/g, '');
     }
 
     ///////////////////////////////////////////////////////
     function setTextAreaCursorPos(nCursorPos) {
-        textArea.cursorPosition = nCursorPos
+        textArea.cursorPosition = nCursorPos;
     }
 
     function handleLinkClicked(link) {
-        document.setBackDir(link)
-        document.parsingLink(link, "reader")
+        document.setBackDir(link);
+        document.parsingLink(link, "reader");
     }
 
     // 横屏模式变化处理（集成面积法核心逻辑）
     onIsLandscapeChanged: {
-        isReadyEnd = false
+        isReadyEnd = false;
         // 1. 切换前保存当前状态
-        prevContentY = contentListView.contentY
-        prevContentHeight = contentListView.contentHeight
-        isSwitching = true
+        prevContentY = contentListView.contentY;
+        prevContentHeight = contentListView.contentHeight;
+        isSwitching = true;
 
         // 2. 更新容器尺寸
-        rotateContainer.width = isLandscape ? root.height : root.width
-        rotateContainer.height = isLandscape ? root.width : root.height
-        console.log("横屏模式更新 - 旋转容器尺寸:", rotateContainer.width, "x",
-                    rotateContainer.height)
+        rotateContainer.width = isLandscape ? root.height : root.width;
+        rotateContainer.height = isLandscape ? root.width : root.height;
+        console.log("横屏模式更新 - 旋转容器尺寸:", rotateContainer.width, "x", rotateContainer.height);
     }
 
     DocumentHandler {
         id: document
         objectName: "dochandler"
         onLoaded: {
-            textModel.splitContent(text)
+            textModel.splitContent(text);
         }
         onError: {
-            errorDialog.text = message
-            errorDialog.visible = true
+            errorDialog.text = message;
+            errorDialog.visible = true;
         }
     }
 
@@ -407,23 +427,22 @@ Item {
                 }
 
                 onPressAndHold: function (mouse) {
-
                     if (!isMoving && !root.isBookPagePressHold) {
-                        mw_one.on_btnSelText()
-                        root.isBookPagePressHold = true
+                        mw_one.on_btnSelText();
+                        root.isBookPagePressHold = true;
                     }
-                    mouse.accepted = false
+                    mouse.accepted = false;
                 }
                 onPositionChanged: {
-                    isMoving = true
+                    isMoving = true;
                 }
 
                 onReleased: {
-                    isMoving = false
+                    isMoving = false;
                 }
 
                 onCanceled: {
-                    isMoving = false
+                    isMoving = false;
                 }
             }
 
@@ -431,25 +450,22 @@ Item {
             onContentHeightChanged: {
                 if (isSwitching) {
                     // 确保内容高度有效
-                    if (prevContentHeight > 0
-                            && contentListView.contentHeight > 0) {
+                    if (prevContentHeight > 0 && contentListView.contentHeight > 0) {
                         // 核心公式：新位置 = 旧比例 × 新总高度
-                        const scrollRatio = prevContentY / prevContentHeight
-                        let newContentY = scrollRatio * contentListView.contentHeight
+                        const scrollRatio = prevContentY / prevContentHeight;
+                        let newContentY = scrollRatio * contentListView.contentHeight;
 
                         // 边界处理：不超过可滚动范围
-                        const maxY = Math.max(
-                                       0,
-                                       contentListView.contentHeight - contentListView.height)
-                        newContentY = Math.min(newContentY, maxY)
-                        newContentY = Math.max(newContentY, 0)
+                        const maxY = Math.max(0, contentListView.contentHeight - contentListView.height);
+                        newContentY = Math.min(newContentY, maxY);
+                        newContentY = Math.max(newContentY, 0);
 
                         // 应用新位置
-                        contentListView.contentY = newContentY
-                        console.log(`面积法映射: 旧位置=${prevContentY}, 旧总高=${prevContentHeight}, 新总高=${contentListView.contentHeight}, 新位置=${newContentY}`)
-                        isReadyEnd = true
+                        contentListView.contentY = newContentY;
+                        console.log(`面积法映射: 旧位置=${prevContentY}, 旧总高=${prevContentHeight}, 新总高=${contentListView.contentHeight}, 新位置=${newContentY}`);
+                        isReadyEnd = true;
                     }
-                    isSwitching = false // 结束切换标记
+                    isSwitching = false; // 结束切换标记
                 }
             }
 
@@ -462,18 +478,16 @@ Item {
 
                 onTriggered: {
                     Qt.callLater(() => {
-                                     // 1. 直接滚动，不用单独存 scrollMaxY（简化计算）
-                                     contentListView.contentY += root.scrollSpeed
+                        // 1. 直接滚动，不用单独存 scrollMaxY（简化计算）
+                        contentListView.contentY += root.scrollSpeed;
 
-                                     // 2. 精准停止条件（直接计算边界，无多余变量）
-                                     const isAtEnd = contentListView.contentY
-                                     >= (contentListView.contentHeight - contentListView.height)
-                                     if (isAtEnd) {
-                                         contentListView.contentY = contentListView.contentHeight
-                                         - contentListView.height // 对齐末尾（可选，避免超界）
-                                         mw_one.on_btnAutoStop_clicked()
-                                     }
-                                 })
+                        // 2. 精准停止条件（直接计算边界，无多余变量）
+                        const isAtEnd = contentListView.contentY >= (contentListView.contentHeight - contentListView.height);
+                        if (isAtEnd) {
+                            contentListView.contentY = contentListView.contentHeight - contentListView.height; // 对齐末尾（可选，避免超界）
+                            mw_one.on_btnAutoStop_clicked();
+                        }
+                    });
                 }
             }
 
@@ -491,7 +505,10 @@ Item {
                 renderType: Text.QtRendering
                 //renderType: Text.NativeRendering //字体发虚
                 readOnly: true
-                selectByMouse: false
+
+                selectByMouse: true
+                selectedTextColor: "#FFFFFF"
+                selectionColor: "#FF5722"
 
                 // 笔记高亮渲染 - 仅渲染，不添加交互
                 Repeater {
@@ -503,15 +520,12 @@ Item {
 
                         property int noteStart: model.start
                         property int noteEnd: model.end
-                        property bool isValidPosition: noteStart >= 0
-                                                       && noteEnd <= m_text.length
+                        property bool isValidPosition: noteStart >= 0 && noteEnd <= m_text.length
                         property color noteColor: model.color ? model.color : "#FFFF0080"
 
                         // 计算 start/end 矩形（用于点击判断）
-                        property var startRect: isValidPosition ? m_text.positionToRectangle(
-                                                                      noteStart) : null
-                        property var endRect: isValidPosition ? m_text.positionToRectangle(
-                                                                    noteEnd) : null
+                        property var startRect: isValidPosition ? m_text.positionToRectangle(noteStart) : null
+                        property var endRect: isValidPosition ? m_text.positionToRectangle(noteEnd) : null
 
                         visible: isValidPosition
 
@@ -521,46 +535,41 @@ Item {
 
                             delegate: Rectangle {
                                 property int charIndex: noteStart + index
-                                property var leftCursorRect: m_text.positionToRectangle(
-                                                                 charIndex)
-                                property var rightCursorRect: m_text.positionToRectangle(
-                                                                  charIndex + 1)
+                                property var leftCursorRect: m_text.positionToRectangle(charIndex)
+                                property var rightCursorRect: m_text.positionToRectangle(charIndex + 1)
 
                                 property real charWidth: {
                                     if (!leftCursorRect)
-                                        return 0
+                                        return 0;
                                     if (!rightCursorRect)
-                                        return leftCursorRect.width
+                                        return leftCursorRect.width;
 
-                                    var w = rightCursorRect.x - leftCursorRect.x
+                                    var w = rightCursorRect.x - leftCursorRect.x;
 
                                     // 宽度有效
                                     if (w > 0) {
-                                        return w
+                                        return w;
                                     }
 
                                     // 宽度无效时，取前一个字符的宽度
                                     if (charIndex > 0) {
-                                        var prevLeft = m_text.positionToRectangle(
-                                                    charIndex - 1)
-                                        var prevRight = m_text.positionToRectangle(
-                                                    charIndex)
+                                        var prevLeft = m_text.positionToRectangle(charIndex - 1);
+                                        var prevRight = m_text.positionToRectangle(charIndex);
                                         if (prevLeft && prevRight) {
-                                            var prevW = prevRight.x - prevLeft.x
+                                            var prevW = prevRight.x - prevLeft.x;
                                             if (prevW > 0) {
-                                                return prevW
+                                                return prevW;
                                             }
                                         }
                                     }
 
                                     // 兜底
-                                    return leftCursorRect.width
+                                    return leftCursorRect.width;
                                 }
 
                                 property real charHeight: leftCursorRect ? leftCursorRect.height : 0
 
-                                visible: leftCursorRect !== null
-                                         && charWidth > 0
+                                visible: leftCursorRect !== null && charWidth > 0
 
                                 x: leftCursorRect.x
                                 y: leftCursorRect.y
@@ -581,73 +590,68 @@ Item {
                     propagateComposedEvents: true
 
                     onPressAndHold: function (mouse) {
-                        console.log("文本长按已经启动...")
+                        console.log("文本长按已经启动...");
 
                         // 1. 获取长按位置对应的字符索引（相对于 m_text）
-                        var pressCharPos = m_text.positionAt(mouse.x, mouse.y)
+                        var pressCharPos = m_text.positionAt(mouse.x, mouse.y);
 
                         // 2. 边界判断：确保位置有效（避免 -1 等错误值）
-                        if (pressCharPos >= 0
-                                && pressCharPos < m_text.text.length) {
+                        if (pressCharPos >= 0 && pressCharPos < m_text.text.length) {
                             // 3. 计算选择范围（当前位置 + 2 个字符，不超过文本总长）
-                            var selectStart = pressCharPos
-                            var selectEnd = Math.min(pressCharPos + 2,
-                                                     m_text.text.length)
+                            var selectStart = pressCharPos;
+                            var selectEnd = Math.min(pressCharPos + 2, m_text.text.length);
 
-                            root.currentSelectedTextEdit = m_text
+                            root.currentSelectedTextEdit = m_text;
 
                             // 4. 存储位置到全局属性（供后续自绘手柄使用）
-                            root.selectionStart = selectStart
-                            root.selectionEnd = selectEnd
+                            root.selectionStart = selectStart;
+                            root.selectionEnd = selectEnd;
 
                             // 5. 触发 TextEdit 自身的选择（显示默认文本高亮，可选）
-                            m_text.select(selectStart, selectEnd)
+                            m_text.select(selectStart, selectEnd);
 
-                            root.selectionText = root.currentSelectedTextEdit.selectedText
-                            m_Reader.setEditText(root.selectionText, "right")
-                            m_Reader.setStartEnd(root.selectionStart,
-                                                 root.selectionEnd)
+                            root.selectionText = root.currentSelectedTextEdit.selectedText;
+                            m_Reader.setEditText(root.selectionText, "right");
+                            m_Reader.setStartEnd(root.selectionStart, root.selectionEnd);
 
-                            console.log("长按选择存储：start=" + root.selectionStart
-                                        + ", end=" + root.selectionEnd)
+                            console.log("长按选择存储：start=" + root.selectionStart + ", end=" + root.selectionEnd);
                         } else {
                             // 6. 位置无效时，重置全局属性
-                            root.currentSelectedTextEdit = null
-                            root.selectionStart = -1
-                            root.selectionEnd = -1
-                            console.log("长按位置无效，重置选择")
+                            root.currentSelectedTextEdit = null;
+                            root.selectionStart = -1;
+                            root.selectionEnd = -1;
+                            console.log("长按位置无效，重置选择");
                         }
                     }
 
                     onClicked: function (mouse) {
 
                         // 检查是否点击了笔记区域
-                        var clickedNote = false
-                        var noteContent = ""
-                        var noteIndex = -1
+                        var clickedNote = false;
+                        var noteContent = "";
+                        var noteIndex = -1;
 
                         for (var i = 0; i < notesModel.count; i++) {
                             if (isPointInNote(mouse.x, mouse.y, i)) {
-                                clickedNote = true
-                                noteIndex = i
-                                noteContent = notesModel.get(i).content
-                                console.log("点击了笔记区域")
-                                break
+                                clickedNote = true;
+                                noteIndex = i;
+                                noteContent = notesModel.get(i).content;
+                                console.log("点击了笔记区域");
+                                break;
                             }
                         }
 
                         if (clickedNote) {
-                            console.log("显示笔记内容:", noteContent)
-                            m_Reader.setShowNoteValue(true)
-                            notePopup.showNote(noteContent, noteIndex) // 传递索引
-                            mouse.accepted = true
+                            console.log("显示笔记内容:", noteContent);
+                            m_Reader.setShowNoteValue(true);
+                            notePopup.showNote(noteContent, noteIndex); // 传递索引
+                            mouse.accepted = true;
                         } else if (!root.isMoving) {
-
-                            var link = m_text.linkAt(mouse.x, mouse.y)
+                            var link = m_text.linkAt(mouse.x, mouse.y);
                             if (link) {
-                                root.handleLinkClicked(link)
+                                root.handleLinkClicked(link);
                             } else {
-                                console.log("点击了非链接区域（文本块：" + index + "）")
+                                console.log("点击了非链接区域（文本块：" + index + "）");
                             }
                         }
                     }
@@ -655,40 +659,37 @@ Item {
                     // 检查点是否在笔记区域内
                     function isPointInNote(x, y, noteIndex) {
                         // 获取笔记委托项
-                        var noteItem = notesRepeater.itemAt(noteIndex)
+                        var noteItem = notesRepeater.itemAt(noteIndex);
                         if (!noteItem || !noteItem.isValidPosition)
-                            return false
+                            return false;
 
-                        var startRect = noteItem.startRect
-                        var endRect = noteItem.endRect
+                        var startRect = noteItem.startRect;
+                        var endRect = noteItem.endRect;
 
                         if (!startRect || !endRect)
-                            return false
+                            return false;
 
                         // 检查点是否在笔记区域内
                         if (startRect.y === endRect.y) {
-                            return x >= startRect.x
-                                    && x <= endRect.x + endRect.width
-                                    && y >= startRect.y
-                                    && y <= startRect.y + startRect.height
+                            return x >= startRect.x && x <= endRect.x + endRect.width && y >= startRect.y && y <= startRect.y + startRect.height;
                         } else {
                             // 跨行笔记处理
-                            var lineHeight = startRect.height
-                            var startY = startRect.y
-                            var endY = endRect.y
+                            var lineHeight = startRect.height;
+                            var startY = startRect.y;
+                            var endY = endRect.y;
 
                             // 检查点是否在笔记区域内
                             if (y >= startY && y <= endY + lineHeight) {
                                 if (y === startY) {
-                                    return x >= startRect.x
+                                    return x >= startRect.x;
                                 } else if (y === endY) {
-                                    return x <= endRect.x + endRect.width
+                                    return x <= endRect.x + endRect.width;
                                 } else {
-                                    return true
+                                    return true;
                                 }
                             }
                         }
-                        return false
+                        return false;
                     }
                 }
 
@@ -741,9 +742,9 @@ Item {
         }
 
         function showNote(content, index) {
-            noteContent.text = content
-            currentNoteIndex = index
-            open()
+            noteContent.text = content;
+            currentNoteIndex = index;
+            open();
         }
 
         ColumnLayout {
@@ -781,10 +782,10 @@ Item {
                     // 确保文本区域高度正确
                     onTextChanged: {
                         // 强制更新布局
-                        noteContent.forceActiveFocus()
+                        noteContent.forceActiveFocus();
                         Qt.callLater(() => {
-                                         flickable.contentHeight = noteContent.implicitHeight
-                                     })
+                            flickable.contentHeight = noteContent.implicitHeight;
+                        });
                     }
                 }
 
@@ -807,37 +808,34 @@ Item {
                     onClicked: {
                         // 打开编辑弹窗，修改后更新模型
                         notesModel.set(currentNoteIndex, {
-                                           "content": noteContent.text
-                                       })
-                        notePopup.close()
-                        m_Reader.setShowNoteValue(false)
-                        m_Reader.editBookNote(currentNoteIndex, -1,
-                                              noteContent.text)
+                            "content": noteContent.text
+                        });
+                        notePopup.close();
+                        m_Reader.setShowNoteValue(false);
+                        m_Reader.editBookNote(currentNoteIndex, -1, noteContent.text);
                     }
                 }
                 Button {
                     font.pointSize: FontSize
                     text: qsTr("Del")
                     onClicked: {
-
-                        deleteConfirmDialog.open()
+                        deleteConfirmDialog.open();
                     }
                 }
                 Button {
                     font.pointSize: FontSize
                     text: qsTr("Close")
                     onClicked: {
-                        notePopup.close()
-                        m_Reader.setShowNoteValue(false)
+                        notePopup.close();
+                        m_Reader.setShowNoteValue(false);
                     }
                 }
             }
         }
 
         onClosed: {
-
-            console.log("弹窗已关闭，等待 500ms 后执行")
-            timer.start()
+            console.log("弹窗已关闭，等待 500ms 后执行");
+            timer.start();
         }
 
         Timer {
@@ -846,7 +844,7 @@ Item {
             running: false
             repeat: false
             onTriggered: {
-                m_Reader.setShowNoteValue(false)
+                m_Reader.setShowNoteValue(false);
             }
         }
     }
@@ -958,21 +956,21 @@ Item {
     Connections {
         target: deleteConfirmDialog
         function onAccepted() {
-            notesModel.remove(currentNoteIndex)
-            m_Reader.delReadNote(currentNoteIndex)
-            notePopup.close()
-            m_Reader.setShowNoteValue(false)
+            notesModel.remove(currentNoteIndex);
+            m_Reader.delReadNote(currentNoteIndex);
+            notePopup.close();
+            m_Reader.setShowNoteValue(false);
         }
     }
 
     // 添加新笔记的函数
     function addNote(start, end, color, content) {
         notesModel.append({
-                              "start": start,
-                              "end": end,
-                              "color": color,
-                              "content": content
-                          })
+            "start": start,
+            "end": end,
+            "color": color,
+            "content": content
+        });
     }
 
     // 横屏切换按钮
@@ -983,85 +981,74 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         visible: false
         onClicked: {
-            isLandscape = !isLandscape
-            console.log("QQuickWidget尺寸:", root.width, "x", root.height)
+            isLandscape = !isLandscape;
+            console.log("QQuickWidget尺寸:", root.width, "x", root.height);
         }
     }
 
     function updatePageIndicator(deltaX, deltaY, currentMouseX, currentMouseY) {
         if (!root.isPressing)
-            return
+            return;
         if (!root.isMoving)
-            return
+            return;
 
         // 右滑 → 上一页
-        if (deltaX > root.scrollThreshold && Math.abs(
-                    deltaY) < root.offsetLimit) {
+        if (deltaX > root.scrollThreshold && Math.abs(deltaY) < root.offsetLimit) {
             if (currentPage > 1) {
-
-                pageIndicator.showPage(currentPage - 1, totalPages)
-                root.needSwipePage = true
-                root.swipeToNextPage = false // 上一页
+                pageIndicator.showPage(currentPage - 1, totalPages);
+                root.needSwipePage = true;
+                root.swipeToNextPage = false; // 上一页
             } else {
-
-                root.needSwipePage = false
+                root.needSwipePage = false;
             }
         } // 左滑 → 下一页
-        else if (deltaX < -root.scrollThreshold && Math.abs(
-                     deltaY) < root.offsetLimit) {
+        else if (deltaX < -root.scrollThreshold && Math.abs(deltaY) < root.offsetLimit) {
             if (currentPage <= totalPages - 1) {
-
-                pageIndicator.showPage(currentPage + 1, totalPages)
-                root.needSwipePage = true
-                root.swipeToNextPage = true // 下一页
+                pageIndicator.showPage(currentPage + 1, totalPages);
+                root.needSwipePage = true;
+                root.swipeToNextPage = true; // 下一页
             } else {
-
-                root.needSwipePage = false
+                root.needSwipePage = false;
             }
         } // 不满足条件
         else {
-            pageIndicator.visible = false
-            root.needSwipePage = false
+            pageIndicator.visible = false;
+            root.needSwipePage = false;
         }
 
-        console.log("needSwipePage=" + needSwipePage)
+        console.log("needSwipePage=" + needSwipePage);
     }
 
     function handleSwipeGesture() {
-
         if (root.needSwipePage) {
             if (root.swipeToNextPage) {
-
-                m_Reader.goNextPage()
-                console.log("释放：触发下一页")
+                m_Reader.goNextPage();
+                console.log("释放：触发下一页");
             } else {
-
-                m_Reader.goUpPage()
-                console.log("释放：触发上一页")
+                m_Reader.goUpPage();
+                console.log("释放：触发上一页");
             }
-            isPressing = false
-            isMoving = false
-            pageIndicator.visible = false
+            isPressing = false;
+            isMoving = false;
+            pageIndicator.visible = false;
         } else {
-            root.setX(0)
+            root.setX(0);
         }
 
         // 重置翻页意图
-        root.needSwipePage = false
+        root.needSwipePage = false;
     }
 
     function showBookPageNext() {
-
-        pageIndicator.showPage(currentPage + 1, totalPages)
+        pageIndicator.showPage(currentPage + 1, totalPages);
     }
 
     function showBookPageUp() {
-
-        pageIndicator.showPage(currentPage - 1, totalPages)
+        pageIndicator.showPage(currentPage - 1, totalPages);
     }
 
     function closeBookPage() {
-        pageIndicator.hide()
+        pageIndicator.hide();
     }
 
     Item {
@@ -1118,18 +1105,18 @@ Item {
         }
 
         function show() {
-            fadeOutAnim.stop() // 防止淡出中突然淡入
-            fadeInAnim.start()
+            fadeOutAnim.stop(); // 防止淡出中突然淡入
+            fadeInAnim.start();
         }
 
         function hide() {
-            fadeInAnim.stop() // 防止淡入中突然淡出
-            fadeOutAnim.start()
+            fadeInAnim.stop(); // 防止淡入中突然淡出
+            fadeOutAnim.start();
         }
 
         function showPage(current, total) {
-            mytext.text = current
-            show()
+            mytext.text = current;
+            show();
         }
     }
 
@@ -1141,15 +1128,15 @@ Item {
     Connections {
         target: m_Reader
         function onNotesLoaded(notes) {
-            notesModel.clear()
+            notesModel.clear();
             for (var i = 0; i < notes.length; i++) {
-                var n = notes[i]
+                var n = notes[i];
                 notesModel.append({
-                                      "start": n.start,
-                                      "end": n.end,
-                                      "color": n.color,
-                                      "content": n.content
-                                  })
+                    "start": n.start,
+                    "end": n.end,
+                    "color": n.color,
+                    "content": n.content
+                });
             }
         }
     }
@@ -1161,8 +1148,7 @@ Item {
         width: 24
         height: 24
         z: 10001
-        visible: root.selectionStart !== -1 && root.selectionEnd !== -1
-                 && !isLandscape
+        visible: root.selectionStart !== -1 && root.selectionEnd !== -1 && !isLandscape
 
         Rectangle {
             anchors.fill: parent
@@ -1187,69 +1173,55 @@ Item {
             property int logCounter: 0
 
             onPressed: {
-                console.log("起点手柄按下")
-                startHandle.z = 10001
-                lastX = startHandle.x
-                lastY = startHandle.y
-                logCounter = 0
+                console.log("起点手柄按下");
+                startHandle.z = 10001;
+                lastX = startHandle.x;
+                lastY = startHandle.y;
+                logCounter = 0;
             }
 
             onPositionChanged: function (mouse) {
-                logCounter++
+                logCounter++;
                 if (logCounter % 5 === 0) {
-                    console.log("起点手柄拖动中 - X:", startHandle.x.toFixed(1), "Y:",
-                                startHandle.y.toFixed(1),
-                                "ΔX:", (startHandle.x - lastX).toFixed(1),
-                                "ΔY:", (startHandle.y - lastY).toFixed(1))
-                    lastX = startHandle.x
-                    lastY = startHandle.y
+                    console.log("起点手柄拖动中 - X:", startHandle.x.toFixed(1), "Y:", startHandle.y.toFixed(1), "ΔX:", (startHandle.x - lastX).toFixed(1), "ΔY:", (startHandle.y - lastY).toFixed(1));
+                    lastX = startHandle.x;
+                    lastY = startHandle.y;
 
                     // 严格遵循可拖动矩形的方法获取字符位置
                     // 1. 将手柄位置映射到 contentListView
-                    var listViewPos = contentListView.mapFromItem(startHandle,
-                                                                  mouse.x,
-                                                                  mouse.y)
+                    var listViewPos = contentListView.mapFromItem(startHandle, mouse.x, mouse.y);
 
                     // 2. 考虑滚动偏移
-                    var contentYPos = listViewPos.y + contentListView.contentY
+                    var contentYPos = listViewPos.y + contentListView.contentY;
 
                     // 3. 获取列表项索引
-                    var itemIndex = contentListView.indexAt(listViewPos.x,
-                                                            contentYPos)
-                    console.log("列表项索引:", itemIndex)
+                    var itemIndex = contentListView.indexAt(listViewPos.x, contentYPos);
+                    console.log("列表项索引:", itemIndex);
 
                     if (itemIndex >= 0) {
-                        var item = contentListView.itemAtIndex(itemIndex)
+                        var item = contentListView.itemAtIndex(itemIndex);
                         if (item) {
                             // 4. 将鼠标位置映射到该 item
-                            var itemPos = item.mapFromItem(startHandle,
-                                                           mouse.x, mouse.y)
+                            var itemPos = item.mapFromItem(startHandle, mouse.x, mouse.y);
 
                             // 5. 获取字符索引
-                            var charIndex = item.positionAt(itemPos.x,
-                                                            itemPos.y)
-                            console.log("起点手柄位置 - 字符索引:", charIndex)
+                            var charIndex = item.positionAt(itemPos.x, itemPos.y);
+                            console.log("起点手柄位置 - 字符索引:", charIndex);
 
                             // 确保新位置在有效范围内
-                            if (charIndex >= 0
-                                    && charIndex <= root.selectionEnd) {
-                                console.log("更新 selectionStart 前:",
-                                            root.selectionStart)
-                                root.selectionStart = charIndex
-                                console.log("更新 selectionStart 后:",
-                                            root.selectionStart)
+                            if (charIndex >= 0 && charIndex <= root.selectionEnd) {
+                                console.log("更新 selectionStart 前:", root.selectionStart);
+                                root.selectionStart = charIndex;
+                                console.log("更新 selectionStart 后:", root.selectionStart);
 
                                 // 刷新文本选择
-                                item.select(root.selectionStart,
-                                            root.selectionEnd)
-                                root.selectionText = item.selectedText
+                                item.select(root.selectionStart, root.selectionEnd);
+                                root.selectionText = item.selectedText;
 
                                 // 通知外部组件更新
                                 if (root.hasOwnProperty("selectionText")) {
-                                    m_Reader.setEditText(root.selectionText,
-                                                         "left")
-                                    m_Reader.setStartEnd(root.selectionStart,
-                                                         root.selectionEnd)
+                                    m_Reader.setEditText(root.selectionText, "left");
+                                    m_Reader.setStartEnd(root.selectionStart, root.selectionEnd);
                                 }
                             }
                         }
@@ -1258,8 +1230,8 @@ Item {
             }
 
             onReleased: {
-                updateHandlePositions()
-                console.log("起点手柄释放")
+                updateHandlePositions();
+                console.log("起点手柄释放");
             }
         }
     }
@@ -1270,8 +1242,7 @@ Item {
         width: 24
         height: 24
         z: 10001
-        visible: root.selectionStart !== -1 && root.selectionEnd !== -1
-                 && !isLandscape
+        visible: root.selectionStart !== -1 && root.selectionEnd !== -1 && !isLandscape
 
         Rectangle {
             anchors.fill: parent
@@ -1296,69 +1267,55 @@ Item {
             property int logCounter: 0
 
             onPressed: {
-                console.log("终点手柄按下")
-                endHandle.z = 10001
-                lastX = endHandle.x
-                lastY = endHandle.y
-                logCounter = 0
+                console.log("终点手柄按下");
+                endHandle.z = 10001;
+                lastX = endHandle.x;
+                lastY = endHandle.y;
+                logCounter = 0;
             }
 
             onPositionChanged: function (mouse) {
-                logCounter++
+                logCounter++;
                 if (logCounter % 5 === 0) {
-                    console.log("终点手柄拖动中 - X:", endHandle.x.toFixed(1), "Y:",
-                                endHandle.y.toFixed(1),
-                                "ΔX:", (endHandle.x - lastX).toFixed(1),
-                                "ΔY:", (endHandle.y - lastY).toFixed(1))
-                    lastX = endHandle.x
-                    lastY = endHandle.y
+                    console.log("终点手柄拖动中 - X:", endHandle.x.toFixed(1), "Y:", endHandle.y.toFixed(1), "ΔX:", (endHandle.x - lastX).toFixed(1), "ΔY:", (endHandle.y - lastY).toFixed(1));
+                    lastX = endHandle.x;
+                    lastY = endHandle.y;
 
                     // 严格遵循可拖动矩形的方法获取字符位置
                     // 1. 将手柄位置映射到 contentListView
-                    var listViewPos = contentListView.mapFromItem(endHandle,
-                                                                  mouse.x,
-                                                                  mouse.y)
+                    var listViewPos = contentListView.mapFromItem(endHandle, mouse.x, mouse.y);
 
                     // 2. 考虑滚动偏移
-                    var contentYPos = listViewPos.y + contentListView.contentY
+                    var contentYPos = listViewPos.y + contentListView.contentY;
 
                     // 3. 获取列表项索引
-                    var itemIndex = contentListView.indexAt(listViewPos.x,
-                                                            contentYPos)
-                    console.log("列表项索引:", itemIndex)
+                    var itemIndex = contentListView.indexAt(listViewPos.x, contentYPos);
+                    console.log("列表项索引:", itemIndex);
 
                     if (itemIndex >= 0) {
-                        var item = contentListView.itemAtIndex(itemIndex)
+                        var item = contentListView.itemAtIndex(itemIndex);
                         if (item) {
                             // 4. 将鼠标位置映射到该 item
-                            var itemPos = item.mapFromItem(endHandle,
-                                                           mouse.x, mouse.y)
+                            var itemPos = item.mapFromItem(endHandle, mouse.x, mouse.y);
 
                             // 5. 获取字符索引
-                            var charIndex = item.positionAt(itemPos.x,
-                                                            itemPos.y)
-                            console.log("终点手柄位置 - 字符索引:", charIndex)
+                            var charIndex = item.positionAt(itemPos.x, itemPos.y);
+                            console.log("终点手柄位置 - 字符索引:", charIndex);
 
                             // 确保新位置在有效范围内
-                            if (charIndex >= root.selectionStart
-                                    && charIndex <= item.text.length) {
-                                console.log("更新 selectionEnd 前:",
-                                            root.selectionEnd)
-                                root.selectionEnd = charIndex
-                                console.log("更新 selectionEnd 后:",
-                                            root.selectionEnd)
+                            if (charIndex >= root.selectionStart && charIndex <= item.text.length) {
+                                console.log("更新 selectionEnd 前:", root.selectionEnd);
+                                root.selectionEnd = charIndex;
+                                console.log("更新 selectionEnd 后:", root.selectionEnd);
 
                                 // 刷新文本选择
-                                item.select(root.selectionStart,
-                                            root.selectionEnd)
-                                root.selectionText = item.selectedText
+                                item.select(root.selectionStart, root.selectionEnd);
+                                root.selectionText = item.selectedText;
 
                                 // 通知外部组件更新
                                 if (root.hasOwnProperty("selectionText")) {
-                                    m_Reader.setEditText(root.selectionText,
-                                                         "right")
-                                    m_Reader.setStartEnd(root.selectionStart,
-                                                         root.selectionEnd)
+                                    m_Reader.setEditText(root.selectionText, "right");
+                                    m_Reader.setStartEnd(root.selectionStart, root.selectionEnd);
                                 }
                             }
                         }
@@ -1367,40 +1324,37 @@ Item {
             }
 
             onReleased: {
-                updateHandlePositions()
-                console.log("终点手柄释放")
+                updateHandlePositions();
+                console.log("终点手柄释放");
             }
         }
     }
 
     // ==================== 手柄位置更新函数 ====================
     function updateHandlePositions() {
-        if (!root.currentSelectedTextEdit || root.selectionStart === -1
-                || root.selectionEnd === -1)
-            return
-
-        var textEdit = root.currentSelectedTextEdit
+        if (!root.currentSelectedTextEdit || root.selectionStart === -1 || root.selectionEnd === -1)
+            return;
+        var textEdit = root.currentSelectedTextEdit;
 
         // 更新起点手柄位置
-        var startRect = textEdit.positionToRectangle(root.selectionStart)
+        var startRect = textEdit.positionToRectangle(root.selectionStart);
         if (startRect) {
             // 起点手柄显示在 selectionStart 前一个字符位置（解决压字问题）
             if (root.selectionStart > 0) {
-                var prevRect = textEdit.positionToRectangle(
-                            root.selectionStart - 1)
-                startHandle.x = prevRect.x
-                startHandle.y = prevRect.y - contentListView.contentY
+                var prevRect = textEdit.positionToRectangle(root.selectionStart - 1);
+                startHandle.x = prevRect.x;
+                startHandle.y = prevRect.y - contentListView.contentY;
             } else {
-                startHandle.x = startRect.x
-                startHandle.y = startRect.y - contentListView.contentY
+                startHandle.x = startRect.x;
+                startHandle.y = startRect.y - contentListView.contentY;
             }
         }
 
         // 更新终点手柄位置
-        var endRect = textEdit.positionToRectangle(root.selectionEnd)
+        var endRect = textEdit.positionToRectangle(root.selectionEnd);
         if (endRect) {
-            endHandle.x = endRect.x
-            endHandle.y = endRect.y - contentListView.contentY
+            endHandle.x = endRect.x;
+            endHandle.y = endRect.y - contentListView.contentY;
         }
     }
 
@@ -1408,17 +1362,17 @@ Item {
     Connections {
         target: root
         function onSelectionStartChanged() {
-            updateHandlePositions()
+            updateHandlePositions();
         }
         function onSelectionEndChanged() {
-            updateHandlePositions()
+            updateHandlePositions();
         }
     }
 
     Connections {
         target: contentListView
         function onContentYChanged() {
-            updateHandlePositions()
+            updateHandlePositions();
         }
     }
 
@@ -1465,50 +1419,41 @@ Item {
             property int logCounter: 0
 
             onPressed: {
-                console.log("开始拖动 movableItem")
-                movableItem.z = 10001
+                console.log("开始拖动 movableItem");
+                movableItem.z = 10001;
                 // 记录初始位置
-                lastX = movableItem.x
-                lastY = movableItem.y
-                logCounter = 0
+                lastX = movableItem.x;
+                lastY = movableItem.y;
+                logCounter = 0;
             }
 
             onPositionChanged: function (mouse) {
                 // 减少日志输出频率，每5次位置变化记录一次
-                logCounter++
+                logCounter++;
                 if (logCounter % 5 === 0) {
-                    console.log("拖动中 - X:", movableItem.x.toFixed(1), "Y:",
-                                movableItem.y.toFixed(1),
-                                "ΔX:", (movableItem.x - lastX).toFixed(1),
-                                "ΔY:", (movableItem.y - lastY).toFixed(1))
-                    lastX = movableItem.x
-                    lastY = movableItem.y
+                    console.log("拖动中 - X:", movableItem.x.toFixed(1), "Y:", movableItem.y.toFixed(1), "ΔX:", (movableItem.x - lastX).toFixed(1), "ΔY:", (movableItem.y - lastY).toFixed(1));
+                    lastX = movableItem.x;
+                    lastY = movableItem.y;
 
                     // 新增：获取鼠标在 m_text 中的位置
-                    var listViewPos = contentListView.mapFromItem(movableItem,
-                                                                  mouse.x,
-                                                                  mouse.y)
-                    var contentYPos = listViewPos.y + contentListView.contentY
-                    var itemIndex = contentListView.indexAt(listViewPos.x,
-                                                            contentYPos)
+                    var listViewPos = contentListView.mapFromItem(movableItem, mouse.x, mouse.y);
+                    var contentYPos = listViewPos.y + contentListView.contentY;
+                    var itemIndex = contentListView.indexAt(listViewPos.x, contentYPos);
 
                     if (itemIndex >= 0) {
-                        var item = contentListView.itemAtIndex(itemIndex)
+                        var item = contentListView.itemAtIndex(itemIndex);
                         if (item) {
                             // 将鼠标位置映射到该 item
-                            var itemPos = item.mapFromItem(movableItem,
-                                                           mouse.x, mouse.y)
-                            var charIndex = item.positionAt(itemPos.x,
-                                                            itemPos.y)
-                            console.log("当前字符位置:", charIndex)
+                            var itemPos = item.mapFromItem(movableItem, mouse.x, mouse.y);
+                            var charIndex = item.positionAt(itemPos.x, itemPos.y);
+                            console.log("当前字符位置:", charIndex);
                         }
                     }
                 }
             }
 
             onReleased: {
-                console.log("拖动结束 - 最终位置: X:", movableItem.x.toFixed(1), "Y:",
-                            movableItem.y.toFixed(1))
+                console.log("拖动结束 - 最终位置: X:", movableItem.x.toFixed(1), "Y:", movableItem.y.toFixed(1));
             }
         }
     }
@@ -1516,8 +1461,7 @@ Item {
     ////////////////////////////////////////////////////////////////////////////
     Item {
         id: selectionControlPanel
-        visible: root.currentSelectedTextEdit && root.selectionStart !== -1
-                 && root.selectionEnd !== -1
+        visible: root.currentSelectedTextEdit && root.selectionStart !== -1 && root.selectionEnd !== -1
         z: 3000
 
         width: 300
@@ -1571,16 +1515,13 @@ Item {
                     autoRepeatInterval: 100
 
                     onClicked: {
-                        if (root.currentSelectedTextEdit
-                                && root.selectionStart > 0) {
-                            root.selectionStart -= 1
-                            root.currentSelectedTextEdit.select(
-                                        root.selectionStart, root.selectionEnd)
+                        if (root.currentSelectedTextEdit && root.selectionStart > 0) {
+                            root.selectionStart -= 1;
+                            root.currentSelectedTextEdit.select(root.selectionStart, root.selectionEnd);
                             if (root.hasOwnProperty("selectionText")) {
-                                root.selectionText = root.currentSelectedTextEdit.selectedText
-                                m_Reader.setEditText(root.selectionText, "left")
-                                m_Reader.setStartEnd(root.selectionStart,
-                                                     root.selectionEnd)
+                                root.selectionText = root.currentSelectedTextEdit.selectedText;
+                                m_Reader.setEditText(root.selectionText, "left");
+                                m_Reader.setStartEnd(root.selectionStart, root.selectionEnd);
                             }
                         }
                     }
@@ -1603,16 +1544,13 @@ Item {
                     autoRepeatInterval: 100
 
                     onClicked: {
-                        if (root.currentSelectedTextEdit
-                                && root.selectionStart < root.selectionEnd - 1) {
-                            root.selectionStart += 1
-                            root.currentSelectedTextEdit.select(
-                                        root.selectionStart, root.selectionEnd)
+                        if (root.currentSelectedTextEdit && root.selectionStart < root.selectionEnd - 1) {
+                            root.selectionStart += 1;
+                            root.currentSelectedTextEdit.select(root.selectionStart, root.selectionEnd);
                             if (root.hasOwnProperty("selectionText")) {
-                                root.selectionText = root.currentSelectedTextEdit.selectedText
-                                m_Reader.setEditText(root.selectionText, "left")
-                                m_Reader.setStartEnd(root.selectionStart,
-                                                     root.selectionEnd)
+                                root.selectionText = root.currentSelectedTextEdit.selectedText;
+                                m_Reader.setEditText(root.selectionText, "left");
+                                m_Reader.setStartEnd(root.selectionStart, root.selectionEnd);
                             }
                         }
                     }
@@ -1650,17 +1588,13 @@ Item {
                     autoRepeatInterval: 100
 
                     onClicked: {
-                        if (root.currentSelectedTextEdit
-                                && root.selectionEnd > root.selectionStart + 1) {
-                            root.selectionEnd -= 1
-                            root.currentSelectedTextEdit.select(
-                                        root.selectionStart, root.selectionEnd)
+                        if (root.currentSelectedTextEdit && root.selectionEnd > root.selectionStart + 1) {
+                            root.selectionEnd -= 1;
+                            root.currentSelectedTextEdit.select(root.selectionStart, root.selectionEnd);
                             if (root.hasOwnProperty("selectionText")) {
-                                root.selectionText = root.currentSelectedTextEdit.selectedText
-                                m_Reader.setEditText(root.selectionText,
-                                                     "right")
-                                m_Reader.setStartEnd(root.selectionStart,
-                                                     root.selectionEnd)
+                                root.selectionText = root.currentSelectedTextEdit.selectedText;
+                                m_Reader.setEditText(root.selectionText, "right");
+                                m_Reader.setStartEnd(root.selectionStart, root.selectionEnd);
                             }
                         }
                     }
@@ -1683,17 +1617,13 @@ Item {
                     autoRepeatInterval: 100
 
                     onClicked: {
-                        if (root.currentSelectedTextEdit
-                                && root.selectionEnd < root.currentSelectedTextEdit.text.length) {
-                            root.selectionEnd += 1
-                            root.currentSelectedTextEdit.select(
-                                        root.selectionStart, root.selectionEnd)
+                        if (root.currentSelectedTextEdit && root.selectionEnd < root.currentSelectedTextEdit.text.length) {
+                            root.selectionEnd += 1;
+                            root.currentSelectedTextEdit.select(root.selectionStart, root.selectionEnd);
                             if (root.hasOwnProperty("selectionText")) {
-                                root.selectionText = root.currentSelectedTextEdit.selectedText
-                                m_Reader.setEditText(root.selectionText,
-                                                     "right")
-                                m_Reader.setStartEnd(root.selectionStart,
-                                                     root.selectionEnd)
+                                root.selectionText = root.currentSelectedTextEdit.selectedText;
+                                m_Reader.setEditText(root.selectionText, "right");
+                                m_Reader.setStartEnd(root.selectionStart, root.selectionEnd);
                             }
                         }
                     }
@@ -1706,28 +1636,20 @@ Item {
             target: root
             function onSelectionStartChanged() {
                 if (root.currentSelectedTextEdit) {
-                    root.currentSelectedTextEdit.select(root.selectionStart,
-                                                        root.selectionEnd)
+                    root.currentSelectedTextEdit.select(root.selectionStart, root.selectionEnd);
                 }
-                selectionControlPanel.visible = (root.currentSelectedTextEdit
-                                                 && root.selectionStart !== -1
-                                                 && root.selectionEnd !== -1)
+                selectionControlPanel.visible = (root.currentSelectedTextEdit && root.selectionStart !== -1 && root.selectionEnd !== -1);
             }
 
             function onSelectionEndChanged() {
                 if (root.currentSelectedTextEdit) {
-                    root.currentSelectedTextEdit.select(root.selectionStart,
-                                                        root.selectionEnd)
+                    root.currentSelectedTextEdit.select(root.selectionStart, root.selectionEnd);
                 }
-                selectionControlPanel.visible = (root.currentSelectedTextEdit
-                                                 && root.selectionStart !== -1
-                                                 && root.selectionEnd !== -1)
+                selectionControlPanel.visible = (root.currentSelectedTextEdit && root.selectionStart !== -1 && root.selectionEnd !== -1);
             }
 
             function onCurrentSelectedTextEditChanged() {
-                selectionControlPanel.visible = (root.currentSelectedTextEdit
-                                                 && root.selectionStart !== -1
-                                                 && root.selectionEnd !== -1)
+                selectionControlPanel.visible = (root.currentSelectedTextEdit && root.selectionStart !== -1 && root.selectionEnd !== -1);
             }
         }
     }
