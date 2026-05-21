@@ -557,6 +557,8 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
                 return;
             }
 
+            MyService.CallJavaNotify_20(nextSegment);
+
             Log.d(
                 TAG,
                 "播放下一段：" +

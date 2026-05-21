@@ -347,7 +347,7 @@
     <name>EditRecord</name>
     <message>
         <location filename="../../src/EditRecord.cpp" line="54"/>
-        <source>Please enter a category</source>
+        <source>Enter a category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

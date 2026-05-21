@@ -28,6 +28,7 @@ static void JavaNotify_16();
 static void JavaNotify_17();
 static void JavaNotify_18();
 static void JavaNotify_19();
+static void JavaNotify_20(JNIEnv* env, jclass clazz, jstring sentence);
 #endif
 
 #ifdef Q_OS_ANDROID
@@ -582,6 +583,25 @@ static void JavaNotify_19() {
   qDebug() << "C++ JavaNotify_19";
 }
 
+static void JavaNotify_20(JNIEnv* env, jclass clazz, jstring sentence) {
+  Q_UNUSED(clazz);
+  if (!sentence) {
+    qDebug() << "JavaNotify_20: 空句子";
+    return;
+  }
+
+  // 直接转 QByteArray，再转 QString
+  const char* utf8 = env->GetStringUTFChars(sentence, nullptr);
+  QString currentSentence = QString::fromUtf8(utf8);
+  env->ReleaseStringUTFChars(sentence, utf8);
+
+  qDebug() << "TTS 朗读句子：" << currentSentence;
+
+  if (mw_one && mw_one->m_Reader) {
+    // mw_one->m_Reader->setTtsCurrentSentence(currentSentence);
+  }
+}
+
 static const JNINativeMethod gMethods[] = {
     {"CallJavaNotify_0", "()V", (void*)JavaNotify_0},
     {"CallJavaNotify_1", "()V", (void*)JavaNotify_1},
@@ -615,6 +635,9 @@ static const JNINativeMethod gMethods18[] = {
 
 static const JNINativeMethod gMethods19[] = {
     {"CallJavaNotify_19", "()V", (void*)JavaNotify_19}};
+
+static const JNINativeMethod gMethods20[] = {
+    {"CallJavaNotify_20", "(Ljava/lang/String;)V", (void*)JavaNotify_20}};
 
 void RegJni(const char* myClassName) {
   QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
@@ -746,6 +769,14 @@ void RegJni19(const char* myClassName) {
     }
   });
   qDebug() << "++++++++++++++++++++++++";
+}
+
+void RegJni20(const char* myClassName) {
+  QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
+    QJniEnvironment env;
+    jclass cls = env->FindClass(myClassName);
+    env->RegisterNatives(cls, gMethods20, 1);
+  });
 }
 
 #endif

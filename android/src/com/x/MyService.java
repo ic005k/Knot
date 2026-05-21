@@ -126,6 +126,9 @@ public class MyService extends Service {
 
     public static native void CallJavaNotify_14();
 
+    // 注意：这个方法带 String 参数！用来把当前朗读的句子传给 Qt
+    public static native void CallJavaNotify_20(String sentence);
+
     private static SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
 
     public static String strRun;

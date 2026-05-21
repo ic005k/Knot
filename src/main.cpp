@@ -36,6 +36,7 @@ extern void RegJni16(const char* myClassName);
 extern void RegJni17(const char* myClassName);
 extern void RegJni18(const char* myClassName);
 extern void RegJni19(const char* myClassName);
+extern void RegJni20(const char* myClassName);
 
 void loadTheme(bool isDark);
 void loadLocal();
@@ -124,6 +125,7 @@ int main(int argc, char* argv[]) {
   defaultFontSize = 17;
 
   RegJni("com/x/MyService");
+  RegJni20("com/x/MyService");
   RegJni(ANDROID_MAIN_ACTIVITY);
   RegJni15(ANDROID_MAIN_ACTIVITY);
   RegJni18(ANDROID_MAIN_ACTIVITY);

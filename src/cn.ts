@@ -493,13 +493,14 @@
     </message>
     <message>
         <location filename="EditRecord.cpp" line="54"/>
-        <source>Please enter a category</source>
-        <translation>请输入分类</translation>
+        <source>Enter a category</source>
+        <oldsource>Please enter a category</oldsource>
+        <translation type="unfinished">输入分类</translation>
     </message>
     <message>
         <location filename="EditRecord.cpp" line="55"/>
         <source>Enter notes</source>
-        <translation>输入备忘</translation>
+        <translation>输入备注</translation>
     </message>
     <message>
         <location filename="EditRecord.cpp" line="92"/>
