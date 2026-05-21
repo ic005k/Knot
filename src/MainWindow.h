@@ -943,6 +943,8 @@ class MainWindow : public QMainWindow {
 
   void on_editValidate_textChanged(const QString& arg1);
 
+  void on_chkAutoStopTTS_clicked();
+
  private:
   bool isMoveEntry;
   QTimer* tmeFlash;

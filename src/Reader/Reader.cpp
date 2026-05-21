@@ -1290,6 +1290,16 @@ QString Reader::getBookSpeakTextFromQML() {
 }
 
 void Reader::setTtsCurrentSentence(const QString& currentSentence) {
+  if (mui->chkAutoStopTTS->isChecked()) {
+    if (m_autoStopDeadline.isValid() &&
+        QDateTime::currentDateTime() > m_autoStopDeadline) {
+      mui->btnStopSpeak->click();
+      m_autoStopDeadline = QDateTime();  // 清空超时时间
+      savePageVPos();
+      return;
+    }
+  }
+
   // 清理空白字符（避免换行/空格导致匹配失败）
   QString sentence = currentSentence.trimmed();
 
@@ -1304,13 +1314,13 @@ void Reader::setTtsCurrentSentence(const QString& currentSentence) {
       );
     }
 
-    mui->btnStopSpeak->click();
+    stopSpeak();
 
     // 自动播放下一章
     if (isPlayBook) {
       if (cPage < tPage) {
         goNextPage();
-        mui->btnSpeak->click();
+        startSpeak();
       }
     }
 

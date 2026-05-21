@@ -533,7 +533,7 @@
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>0</height>
+           <height>200</height>
           </size>
          </property>
          <property name="frameShape">
@@ -548,7 +548,7 @@
             <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="tab">
+            <widget class="QWidget" name="tab_1">
              <attribute name="title">
               <string>Misc</string>
              </attribute>
@@ -708,6 +708,31 @@ QSlider::handle:vertical
                   </property>
                   <property name="text">
                    <string>+</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_50">
+                <item>
+                 <widget class="QCheckBox" name="chkAutoStopTTS">
+                  <property name="text">
+                   <string>Auto Stop Playback</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="editAutoStopTTS">
+                  <property name="text">
+                   <string>90</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="lblAutoStopTTS">
+                  <property name="text">
+                   <string>Minutes</string>
                   </property>
                  </widget>
                 </item>

@@ -42,6 +42,10 @@ ReaderSet::ReaderSet(QWidget* parent) : QDialog(parent) {
       new QRegularExpressionValidator(regxNumber, mui->editPage);
   mui->editPage->setValidator(validator);
 
+  QRegularExpressionValidator* validator1 =
+      new QRegularExpressionValidator(QRegularExpression("^[1-9]\\d*$"), this);
+  mui->editAutoStopTTS->setValidator(validator1);
+
   f = m_Method->getNewFont(15);
   mui->editBackgroundColor->setFont(f);
   mui->editForegroundColor->setFont(f);
@@ -63,6 +67,11 @@ ReaderSet::ReaderSet(QWidget* parent) : QDialog(parent) {
                                   ";border: 2px "
                                   "solid "
                                   "rgb(255,0,0);border-radius: 4px;";
+
+  mui->editAutoStopTTS->setText(
+      Reg.value("/Reader/editAutoStopTTS", 90).toString());
+  mui->chkAutoStopTTS->setChecked(
+      Reg.value("/Reader/chkAutoStopTTS", false).toBool());
 }
 
 ReaderSet::~ReaderSet() {}

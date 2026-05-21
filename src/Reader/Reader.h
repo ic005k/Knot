@@ -58,6 +58,8 @@ class Reader : public QDialog {
   QDialog* dlgAddBookNote = nullptr;
   QDialog* dlgEditBookNote = nullptr;
 
+  QDateTime m_autoStopDeadline;  // 自动停止的截止时间（带日期，跨天也没问题）
+
   bool isAutoRun = false;
 
   bool isShowNote = false;

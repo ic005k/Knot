@@ -2429,6 +2429,10 @@ void MainWindow::on_btnBackReaderSet_clicked() {
   mui->f_ReaderSet->hide();
   qreal pos = m_Reader->getVPos();
   m_Reader->setVPos(pos + 0.01);
+
+  QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
+  Reg.setValue("/Reader/editAutoStopTTS", mui->editAutoStopTTS->text());
+  Reg.setValue("/Reader/chkAutoStopTTS", mui->chkAutoStopTTS->isChecked());
 }
 
 void MainWindow::on_btnSetBookmark_clicked() {
@@ -2774,6 +2778,8 @@ void MainWindow::on_btnSpeak_clicked() {
   mui->btnStopSpeak->show();
 
   isPlayBook = true;
+  m_Reader->m_autoStopDeadline = QDateTime::currentDateTime().addSecs(
+      mui->editAutoStopTTS->text().toInt() * 60);
   m_Reader->startSpeak();
 }
 
@@ -2848,3 +2854,5 @@ void MainWindow::on_editPassword_textChanged(const QString& arg1) {
 void MainWindow::on_editValidate_textChanged(const QString& arg1) {
   m_Preferences->on_editValidate_textChanged(arg1);
 }
+
+void MainWindow::on_chkAutoStopTTS_clicked() {}
