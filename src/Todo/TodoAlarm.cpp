@@ -524,6 +524,7 @@ void TodoAlarm::on_btnTestSpeech_clicked() {
     m_Method->playRecord(voiceFile);
   } else {
     QString txt = mw_one->m_Todo->getItemTodoText(row);
+    isPlayBook = false;
     m_Method->stopPlayMyText();
     m_Method->playMyText(txt);
   }

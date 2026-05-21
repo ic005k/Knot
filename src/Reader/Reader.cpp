@@ -1296,7 +1296,7 @@ void Reader::setTtsCurrentSentence(const QString& currentSentence) {
   if (sentence == "__TTS_PLAY_FINISHED__") {
     qDebug() << "🎉 TTS 全部文本播放完成！";
 
-    // 1. 清空高亮
+    // 清空高亮
     QQuickItem* root = mui->qwReader->rootObject();
     if (root) {
       QMetaObject::invokeMethod(root, "highlightTtsSentence",
@@ -1304,11 +1304,15 @@ void Reader::setTtsCurrentSentence(const QString& currentSentence) {
       );
     }
 
-    // 2. 可以在这里做：
-    // - 恢复UI状态
-    // - 自动播放下一章
-    // - 记录播放完成状态
-    stopSpeak();
+    mui->btnStopSpeak->click();
+
+    // 自动播放下一章
+    if (isPlayBook) {
+      if (cPage < tPage) {
+        goNextPage();
+        mui->btnSpeak->click();
+      }
+    }
 
     return;  // 直接返回，不执行后面的高亮
   }

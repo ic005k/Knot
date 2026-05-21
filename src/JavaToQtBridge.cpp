@@ -101,6 +101,7 @@ static void JavaNotify_3() {
             } else {
               QString txt = strText;
               if (m_Method != nullptr) {
+                isPlayBook = false;
                 m_Method->stopPlayMyText();
                 m_Method->playMyText(txt);
               }
@@ -585,23 +586,25 @@ static void JavaNotify_19() {
 
 static void JavaNotify_20(JNIEnv* env, jclass clazz, jstring sentence) {
   Q_UNUSED(clazz);
+
+  // 👇 【安全第一步】先在当前JNI线程把字符串转好
   if (!sentence) {
     qDebug() << "JavaNotify_20: 空句子";
     return;
   }
 
-  // 直接转 QByteArray，再转 QString
   const char* utf8 = env->GetStringUTFChars(sentence, nullptr);
   QString currentSentence = QString::fromUtf8(utf8);
   env->ReleaseStringUTFChars(sentence, utf8);
 
-  qDebug() << "TTS 朗读句子：" << currentSentence;
+  // 👇 【安全第二步】只把 QString 抛到主线程
+  QTimer::singleShot(100, mw_one, [=]() {
+    qDebug() << "TTS 朗读句子：" << currentSentence;
 
-  if (mw_one && mw_one->m_Reader) {
-    if (mui->btnStopSpeak->isVisible()) {
+    if (mw_one && mw_one->m_Reader) {
       mw_one->m_Reader->setTtsCurrentSentence(currentSentence);
     }
-  }
+  });
 }
 
 static const JNINativeMethod gMethods[] = {

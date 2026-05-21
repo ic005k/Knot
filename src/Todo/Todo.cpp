@@ -1847,6 +1847,7 @@ void Todo::on_btnTestSpeech() {
     m_Method->playRecord(voiceFile);
   } else {
     QString txt = mw_one->m_Todo->getItemTodoText(row);
+    isPlayBook = false;
     m_Method->stopPlayMyText();
     m_Method->playMyText(txt);
   }
@@ -2039,6 +2040,7 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText,
       QString voiceFile = mw_one->m_Todo->getVoiceFile(strText);
       m_Method->playRecord(voiceFile);
     } else {
+      isPlayBook = false;
       m_Method->stopPlayMyText();
       m_Method->playMyText(strText);
     }

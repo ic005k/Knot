@@ -1232,6 +1232,7 @@ void Steps::updateGetGpsData() {
         if (isChkPlayRunVoice) {
           if (mySpeed > 0) {
             if (mySpeed != oldMySpeed) {
+              isPlayBook = false;
               m_Method->stopPlayMyText();
               m_Method->playMyText(directionRoute + " " +
                                    QString::number(mySpeed, 'f', 2));
