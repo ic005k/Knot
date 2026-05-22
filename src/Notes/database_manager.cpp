@@ -17,7 +17,11 @@ DatabaseManager::DatabaseManager(QObject* parent)
 }
 
 bool DatabaseManager::initDatabase(const QString& path) {
-  m_db = QSqlDatabase::addDatabase("QSQLITE");
+  // 给每个连接生成一个独一无二的名字
+  static int connectionId = 0;
+  QString connectionName = QString("db_connection_%1").arg(connectionId++);
+
+  m_db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
   m_db.setDatabaseName(path);
 
   if (!m_db.open()) return false;

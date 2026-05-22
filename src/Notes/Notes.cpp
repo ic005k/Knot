@@ -9,6 +9,8 @@
 #include "ui_MainWindow.h"
 #include "ui_Notes.h"
 
+static QAtomicInt n_Files = 0;
+
 NoteIndexManager1::NoteIndexManager1(QObject* parent) : QObject{parent} {}
 
 Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
@@ -1036,7 +1038,7 @@ void Notes::loadEmptyNote() {
   m_NotesList->noteTitle = "";
 }
 
-void Notes::startBackgroundTaskDelAndClear() {
+/*void Notes::startBackgroundTaskDelAndClear() {
   QString fullPath = iniDir + "memo";  // 先构造完整路径
 
   QFuture<void> future = QtConcurrent::run([=]() {
@@ -1051,6 +1053,39 @@ void Notes::startBackgroundTaskDelAndClear() {
     qDebug() << "Database del and clear completed...";
     loadNotesToUI();
     watcher->deleteLater();
+  });
+  watcher->setFuture(future);
+}*/
+
+void Notes::startBackgroundTaskDelAndClear() {
+  mw_one->showProgress();
+
+  QString fullPath = iniDir + "memo";
+
+  // 【重要】把数据库路径也一起传给子线程
+  QString dbFile = privateDir + "md_database_v3.db";
+
+  QFuture<void> future = QtConcurrent::run([=]() {
+    m_NotesList->needDelNotes();
+
+    // ==================== 核心修复 ====================
+    // 子线程自己创建、自己连接、自己用！不共享！不崩溃！
+    DatabaseManager localDbManager;
+    localDbManager.initDatabase(dbFile);  // 打开同一个真实数据库
+
+    // 执行清理
+    localDbManager.cleanMissingFileRecords(fullPath);
+
+    localDbManager.closeDatabase();  // 用完立刻关闭！释放文件！
+  });
+
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+    qDebug() << "Database del and clear completed...";
+    loadNotesToUI();
+    watcher->deleteLater();
+
+    mw_one->closeProgress();
   });
   watcher->setFuture(future);
 }
@@ -1709,6 +1744,8 @@ void Notes::startBackgroundProcessRemoteFiles_MultiThread() {
     return;
   }
 
+  n_Files = 0;
+
   // 后台异步，但 串行执行本地处理（安全、稳定、不崩溃）
   QtConcurrent::run([this]() {
     for (const QString& file : std::as_const(remoteFiles)) {
@@ -1895,7 +1932,7 @@ void Notes::processSingleRemoteFile(const QString& file) {
   }
 
   // 进度更新（安全跨线程）
-  static QAtomicInt n_Files = 0;
+
   QString showText = "[" + QString::number(n_Files.fetchAndAddOrdered(1) + 1) +
                      "/" + QString::number(remoteFiles.size()) + "] " + pFile;
   QMetaObject::invokeMethod(m_Method, [=]() {

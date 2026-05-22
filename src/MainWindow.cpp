@@ -1745,7 +1745,8 @@ void MainWindow::on_btnZoomOut_clicked() {
 void MainWindow::on_btnReport() {
   if (mui->qwReport->source().isEmpty()) {
     int f_size = 19;
-    if (fontSize <= f_size) f_size = fontSize;
+    // if (fontSize <= f_size)
+    f_size = fontSize;
     mui->qwReport->rootContext()->setContextProperty("maxFontSize", f_size);
     mui->qwReportSub->rootContext()->setContextProperty("maxFontSize", f_size);
     mui->qwReport->rootContext()->setContextProperty("m_Report",
@@ -2102,6 +2103,9 @@ void MainWindow::on_btnBackNoteList_clicked() {
 
   saveNeedSyncNotes();
 
+  mui->frameMain->show();
+  mui->frameNoteList->hide();
+
   m_Notes->syncToWebDAV();
 
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
@@ -2109,9 +2113,6 @@ void MainWindow::on_btnBackNoteList_clicked() {
     if (count > 0) m_Notes->delRemoteFile(m_NotesList->needDelWebDAVFiles);
     m_Method->setAccessCount(m_NotesList->needDelWebDAVFiles.count());
   }
-
-  mui->frameMain->show();
-  mui->frameNoteList->hide();
 }
 
 void MainWindow::on_btnBackNoteRecycle_clicked() {
