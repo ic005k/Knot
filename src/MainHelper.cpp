@@ -449,24 +449,22 @@ void MainHelper::initMainQW() {
     if (fontSize <= f_size) f_size = fontSize;
 
     mui->qwSteps->rootContext()->setContextProperty("isDark", isDark);
-
-    mui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwGpsList->rootContext()->setContextProperty("isShowRoute",
-                                                      m_Steps->isShowRoute);
-
-    mui->qwSteps->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/steps.qml")));
     mui->qwSteps->rootContext()->setContextProperty("maxFontSize", f_size);
     mui->qwSteps->rootContext()->setContextProperty("myW", mw_one->width());
     mui->qwSteps->rootContext()->setContextProperty("text0", "");
     mui->qwSteps->rootContext()->setContextProperty("text1", "");
     mui->qwSteps->rootContext()->setContextProperty("text2", "");
     mui->qwSteps->rootContext()->setContextProperty("text3", "");
+    mui->qwSteps->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/steps.qml")));
 
-    mui->qwGpsList->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/gps_list.qml")));
+    mui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwGpsList->rootContext()->setContextProperty("isShowRoute",
+                                                      m_Steps->isShowRoute);
     mui->qwGpsList->rootContext()->setContextProperty("myW", mw_one->width());
     mui->qwGpsList->rootContext()->setContextProperty("m_Steps", m_Steps);
     mui->qwGpsList->rootContext()->setContextProperty("FontSize", fontSize);
+    mui->qwGpsList->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/gps_list.qml")));
 
     mui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mui->qwMap->setFocusPolicy(Qt::StrongFocus);  // 关键设置

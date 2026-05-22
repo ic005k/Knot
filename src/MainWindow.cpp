@@ -2121,7 +2121,6 @@ void MainWindow::on_btnBackNoteRecycle_clicked() {
 
   if (m_NotesList->isDelNoteRecycle) {
     m_Notes->startBackgroundTaskDelAndClear();
-    m_NotesList->isDelNoteRecycle = false;
   }
 }
 

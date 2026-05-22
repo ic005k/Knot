@@ -1547,8 +1547,8 @@ void NotesList::needDelNotes() {
       isDelMDOk = delFile(mdFile);
       isDelJSONOk = delFile(strFile);
 
-      qDebug() << "Need Del Note: " << mdFile << isDelMDOk;
-      qDebug() << "Need Del Note: " << strFile << isDelJSONOk;
+      // qDebug() << "Need Del Note: " << mdFile << isDelMDOk;
+      // qDebug() << "Need Del Note: " << strFile << isDelJSONOk;
     }
 
     // 保存本次的删除列表到 JSON 文件

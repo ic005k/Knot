@@ -1038,27 +1038,8 @@ void Notes::loadEmptyNote() {
   m_NotesList->noteTitle = "";
 }
 
-/*void Notes::startBackgroundTaskDelAndClear() {
-  QString fullPath = iniDir + "memo";  // 先构造完整路径
-
-  QFuture<void> future = QtConcurrent::run([=]() {
-    m_NotesList->needDelNotes();
-
-    m_NotesList->m_dbManager.cleanMissingFileRecords(fullPath);
-  });
-
-  // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    qDebug() << "Database del and clear completed...";
-    loadNotesToUI();
-    watcher->deleteLater();
-  });
-  watcher->setFuture(future);
-}*/
-
 void Notes::startBackgroundTaskDelAndClear() {
-  mw_one->showProgress();
+  if (m_NotesList->isDelNoteRecycle) mw_one->showProgress();
 
   QString fullPath = iniDir + "memo";
 
@@ -1068,7 +1049,6 @@ void Notes::startBackgroundTaskDelAndClear() {
   QFuture<void> future = QtConcurrent::run([=]() {
     m_NotesList->needDelNotes();
 
-    // ==================== 核心修复 ====================
     // 子线程自己创建、自己连接、自己用！不共享！不崩溃！
     DatabaseManager localDbManager;
     localDbManager.initDatabase(dbFile);  // 打开同一个真实数据库
@@ -1082,7 +1062,12 @@ void Notes::startBackgroundTaskDelAndClear() {
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Database del and clear completed...";
-    loadNotesToUI();
+
+    if (!m_NotesList->isDelNoteRecycle)
+      loadNotesToUI();
+    else
+      m_NotesList->isDelNoteRecycle = false;
+
     watcher->deleteLater();
 
     mw_one->closeProgress();
