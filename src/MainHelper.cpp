@@ -466,6 +466,7 @@ void MainHelper::initMainQW() {
         QUrl(QStringLiteral("qrc:/src/qmlsrc/gps_list.qml")));
     mui->qwGpsList->rootContext()->setContextProperty("myW", mw_one->width());
     mui->qwGpsList->rootContext()->setContextProperty("m_Steps", m_Steps);
+    mui->qwGpsList->rootContext()->setContextProperty("FontSize", fontSize);
 
     mui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mui->qwMap->setFocusPolicy(Qt::StrongFocus);  // 关键设置

@@ -3509,3 +3509,19 @@ void Method::delayDelFile(const QString& filePath) {
     }
   });
 }
+
+float Method::getSystemFontScale() {
+#ifdef Q_OS_ANDROID
+
+  QJniObject ctx = QNativeInterface::QAndroidApplication::context();
+  if (!ctx.isValid()) return 1.0f;
+
+  jfloat scale = QJniObject::callStaticMethod<jfloat>(
+      "com/x/MyActivity", "getSystemFontScale", "(Landroid/content/Context;)F",
+      ctx.object());
+  return static_cast<qreal>(scale);
+#else
+  // 桌面端固定缩放系数1.0
+  return 1.0f;
+#endif
+}

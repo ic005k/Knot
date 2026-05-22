@@ -2445,4 +2445,9 @@ public class MyActivity
             }
         });
     }
+
+    public static float getSystemFontScale(Context context) {
+        Configuration cfg = context.getResources().getConfiguration();
+        return cfg.fontScale;
+    }
 }

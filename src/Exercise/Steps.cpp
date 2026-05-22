@@ -416,6 +416,8 @@ void Steps::openStepsUI() {
     mui->lblGpsInfo->setText(strGpsInfoShow);
   }
 
+  mui->qwGpsList->rootContext()->setContextProperty("FontSize", fontSize);
+
   if (getGpsListCount() == 0 && !isGpsRun) {
     int nYear = QDate::currentDate().year();
     int nMonth = QDate::currentDate().month();

@@ -484,7 +484,8 @@ class Method : public QDialog {
 
   void delayDelFile(const QString& filePath);
 
- protected:
+  float getSystemFontScale();
+  protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

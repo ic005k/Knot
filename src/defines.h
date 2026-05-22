@@ -86,8 +86,9 @@ inline QList<QPointF> freqPointList;
 inline QList<QPointF> amountList;
 inline QList<double> doubleList;
 
-inline int fontSize, red, iPage, sPos, totallines, s_y1, s_m1, s_d1, s_y2, s_m2,
-    s_d2, totalPages, currentPage, currentTabIndex, today, maxNetConcurrent;
+inline int fontSize, defaultFontSize, red, iPage, sPos, totallines, s_y1, s_m1,
+    s_d1, s_y2, s_m2, s_d2, totalPages, currentPage, currentTabIndex, today,
+    maxNetConcurrent;
 
 inline int nMainChartType = 0;
 
@@ -102,6 +103,8 @@ inline int readerFontSize = 18;
 inline int epubFileMethod = 2;
 
 inline double yMaxMonth, yMaxDay;
+
+inline qreal fontScale = 1.0f;
 
 inline bool isAndroid, isLinux, isMacOS, isZipOK, isMenuImport, isDownData,
     loading, isEncrypt, isIOS, isEpub, isEpubError, isText, isPDF,

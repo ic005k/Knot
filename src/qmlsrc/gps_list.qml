@@ -16,7 +16,7 @@ Rectangle {
 
     // 获取设备像素比（安卓/iOS关键）
     property real pixelRatio: Screen.pixelRatio > 0 ? Screen.pixelRatio : 1
-    property real baseFontSize: (Qt.platform.os === "android") ? (20 * pixelRatio) : (9 * pixelRatio)
+    property real baseFontSize: FontSize //(Qt.platform.os === "android") ? (20 * pixelRatio) : (9 * pixelRatio)
 
     property int drawPointSize: 160
 

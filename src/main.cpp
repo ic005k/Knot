@@ -119,10 +119,8 @@ int main(int argc, char* argv[]) {
   path = dir.currentPath();
   qDebug() << "Path:" << path;
 
-  int defaultFontSize;
-
 #ifdef Q_OS_ANDROID
-  defaultFontSize = 17;
+  defaultFontSize = 12;
 
   RegJni("com/x/MyService");
   RegJni20("com/x/MyService");
@@ -204,8 +202,10 @@ int main(int argc, char* argv[]) {
   iniPreferences =
       new QSettings(privateDir + "options.ini", QSettings::IniFormat, NULL);
 
-  fontSize =
+  fontScale = m_Method->getSystemFontScale();
+  int m_fontSize =
       iniPreferences->value("/Options/FontSize", defaultFontSize).toInt();
+  fontSize = m_fontSize * fontScale;
   bool isOverUIFont =
       iniPreferences->value("/Options/chkUIFont", false).toBool();
   QString customFontPath =

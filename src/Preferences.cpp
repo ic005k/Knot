@@ -52,11 +52,13 @@ Preferences::Preferences(QWidget* parent)
   mui->editValidate->setEchoMode(QLineEdit::EchoMode::Password);
 
   if (isAndroid) {
-    ui->sliderFontSize->setMinimum(15);
-    ui->sliderFontSize->setMaximum(21);
+    ui->sliderFontSize->setMinimum(10);
+    ui->sliderFontSize->setMaximum(16);
+    ui->sliderFontSize->setValue(12);
   } else {
     ui->sliderFontSize->setMinimum(8);
     ui->sliderFontSize->setMaximum(14);
+    ui->sliderFontSize->setValue(10);
   }
 }
 
@@ -116,7 +118,8 @@ void Preferences::saveOptions() {
 void Preferences::on_sliderFontSize_sliderMoved(int position) {
   if (isVisible()) {
     QFont font;
-    font.setPointSize(position);
+
+    font.setPointSize(position * fontScale);
 
     ui->lblFontSize->setFont(font);
     isFontChange = true;
@@ -124,71 +127,32 @@ void Preferences::on_sliderFontSize_sliderMoved(int position) {
     qApp->setFont(font);
 
     iniPreferences->setValue("/Options/FontSize", position);
-    fontSize = position;
+    fontSize = position * fontScale;
 
     getCheckStatusChange();
   }
 
-  QString sizeLevel;
-#ifdef Q_OS_ANDROID
-  // 安卓端：映射为对应的等级文本（支持国际化）
-  switch (position) {
-    case 15:
-      sizeLevel = tr("ExtraSmall");  // 极小
-      break;
-    case 16:
-      sizeLevel = tr("Small");  // 小
-      break;
-    case 17:
-      sizeLevel = tr("Default");  // 正常/默认
-      break;
-    case 18:
-      sizeLevel = tr("Large");  // 大
-      break;
-    case 19:
-      sizeLevel = tr("XLarge");  // 超大
-      break;
-    case 20:
-      sizeLevel = tr("XXLarge");  // 特大
-      break;
-    case 21:
-      sizeLevel = tr("XXXLarge");  // 最大
-      break;
-    default:
-      // 容错：超出15-21范围时，默认显示正常+数值，避免空文本
-      sizeLevel = tr("Default") + " (" + QString::number(position) + ")";
-      break;
+  // ======================= 超级简化版 =======================
+  // 自动计算 0~6 级：0=极小 1=小 2=默认 3=大 4=超大 5=特大 6=最大
+  int min = ui->sliderFontSize->minimum();
+  int max = ui->sliderFontSize->maximum();
+  int totalLevels = 7;  // 固定7档：极小~最大
+
+  // 自动计算当前是第几档
+  int level = 0;
+  if (max > min) {
+    level = (position - min) * totalLevels / (max - min);
+    level = qBound(0, level, totalLevels - 1);  // 限制 0~6
   }
 
-#else
-  switch (position) {
-    case 8:
-      sizeLevel = tr("ExtraSmall");  // 极小
-      break;
-    case 9:
-      sizeLevel = tr("Small");  // 小
-      break;
-    case 10:
-      sizeLevel = tr("Default");  // 正常/默认
-      break;
-    case 11:
-      sizeLevel = tr("Large");  // 大
-      break;
-    case 12:
-      sizeLevel = tr("XLarge");  // 超大
-      break;
-    case 13:
-      sizeLevel = tr("XXLarge");  // 特大
-      break;
-    case 14:
-      sizeLevel = tr("XXXLarge");  // 最大
-      break;
-    default:
-      // 容错：超出范围时，默认显示正常+数值，避免空文本
-      sizeLevel = tr("Default") + " (" + QString::number(position) + ")";
-      break;
-  }
-#endif
+  // 自动匹配文字
+  QStringList levels = {tr("ExtraSmall"), tr("Small"),  tr("Default"),
+                        tr("Large"),      tr("XLarge"), tr("XXLarge"),
+                        tr("XXXLarge")};
+
+  QString sizeLevel = levels[level];
+  // ==========================================================
+
   ui->lblFontSize->setText(tr("Font Size") + " : " + sizeLevel);
 }
 
@@ -598,8 +562,13 @@ void Preferences::openPreferences() {
 
   setGeometry(x, y, width(), height());
   setModal(true);
+
   ui->sliderFontSize->setStyleSheet(mui->hsM->styleSheet());
-  ui->sliderFontSize->setValue(fontSize);
+
+  int savedPosition =
+      iniPreferences->value("/Options/FontSize", defaultFontSize).toInt();
+  ui->sliderFontSize->setValue(savedPosition);
+
   show();
   initCheckStatus();
 
