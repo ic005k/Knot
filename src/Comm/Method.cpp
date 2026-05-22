@@ -1156,8 +1156,10 @@ void Method::Delay_MSec(unsigned int msec) {
 
 void Method::Sleep(int msec) {
   QTime dieTime = QTime::currentTime().addMSecs(msec);
-  while (QTime::currentTime() < dieTime)
+  while (QTime::currentTime() < dieTime) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    QThread::msleep(1);
+  }
 }
 
 void Method::showToastMessage(QString msg) {

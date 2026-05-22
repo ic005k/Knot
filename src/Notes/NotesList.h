@@ -200,7 +200,8 @@ class NotesList : public QDialog {
   void on_btnBatchDel_Recycle_clicked();
 
   void on_btnBatchRestore_clicked();
-  protected:
+
+ protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
   void closeEvent(QCloseEvent* event) override;
@@ -266,6 +267,9 @@ class NotesList : public QDialog {
 
   void on_actionModificationHistory();
 
+ signals:
+  void isReadyNoteDataEndChanged();
+
  private:
   QStringList noteDiffTime, noteDiffHtml, noteDiffPatch;
 
@@ -278,8 +282,6 @@ class NotesList : public QDialog {
   bool isImportFilesEnd;
 
   bool isImportNotes = false;
-
-  bool isReadyNoteDataEnd;
 
   bool isMouseClick = false;
 

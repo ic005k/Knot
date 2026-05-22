@@ -307,19 +307,6 @@ public class MyActivity
         m_instance.moveTaskToBack(true);
     }
 
-    // ------------------------------------------------------------------------
-
-    // 非全透,带颜色的状态栏,需要指定颜色（目前采用）
-    private void setStatusBarColor(String color) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // 需要安卓版本大于5.0以上
-            getWindow().addFlags(
-                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-            );
-            getWindow().setStatusBarColor(Color.parseColor(color));
-        }
-    }
-
     // ----------------------------------------------------------------------
 
     ///////////////// 屏幕唤醒相关 ////////////////////////////
@@ -345,17 +332,14 @@ public class MyActivity
                 isScreenOff = false;
 
                 // 延迟调用确保服务已初始化
-                mHandler.postDelayed(
-                    () -> {
-                        if (MyService.isReady) {
-                            CallJavaNotify_2();
-                            Log.w("Knot", "成功获取步数");
-                        } else {
-                            Log.e("Knot", "服务未准备好，无法获取步数");
-                        }
-                    },
-                    500
-                ); // 延迟 500 毫秒
+                mHandler.postDelayed(() -> {
+                    if (MyService.isReady) {
+                        CallJavaNotify_2();
+                        Log.w("Knot", "成功获取步数");
+                    } else {
+                        Log.e("Knot", "服务未准备好，无法获取步数");
+                    }
+                }, 500); // 延迟 500 毫秒
 
                 Log.w("Knot", "屏幕亮了");
             } else if (SCREEN_OFF.equals(intent.getAction())) {
@@ -454,58 +438,55 @@ public class MyActivity
 
         // 3. 关键修复：放弃HandlerThread异步，改用延迟post（避免JNI环境未就绪）
         // 核心：等待Qt层初始化完成（延迟500ms，适配你的mw_one创建时机）
-        new Handler(Looper.getMainLooper()).postDelayed(
-            () -> {
-                // 仅在主线程执行初始化（避免JNI跨线程问题）
-                try {
-                    // 权限请求（仅首次创建执行）
-                    if (!isConfigChangeRecreate) {
-                        requestPermission();
-                        requestSensorPermission();
-                    }
-
-                    // 注册广播接收器（配置变更重构时重新注册）
-                    if (mScreenStatusReceiver != null) {
-                        try {
-                            unregisterReceiver(mScreenStatusReceiver);
-                        } catch (IllegalArgumentException e) {
-                            // 未注册时的异常直接忽略，避免日志告警
-                            Log.d(TAG, "ScreenStatusReceiver未注册，无需注销");
-                        } catch (Exception e) {
-                            Log.w(TAG, "注销ScreenStatusReceiver异常", e);
-                        }
-                        mScreenStatusReceiver = null;
-                    }
-                    registSreenStatusReceiver();
-
-                    // 注册Activity生命周期回调
-                    getApplication().registerActivityLifecycleCallbacks(
-                        MyActivity.this
-                    );
-
-                    // 启动服务（仅首次创建执行）
-                    if (!isConfigChangeRecreate && !isServiceStarted) {
-                        startMyService();
-                    }
-
-                    // 创建快捷方式（仅首次创建执行）
-                    if (!isConfigChangeRecreate) {
-                        addDeskShortcuts();
-                    }
-
-                    if (isConfigChangeRecreate && isQtMainEnd) {
-                        // 确保mw_one已创建完成后再调用
-
-                        Log.d(TAG, "配置变更初始化完成，Qt已就绪，可以调用C++");
-
-                        //hideQtSplashScreen(); // 主动隐藏闪屏
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "初始化异常", e);
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            // 仅在主线程执行初始化（避免JNI跨线程问题）
+            try {
+                // 权限请求（仅首次创建执行）
+                if (!isConfigChangeRecreate) {
+                    requestPermission();
+                    requestSensorPermission();
                 }
-            },
-            500
-        ); // 延迟500ms：适配你的Qt层mw_one实例创建时间（可根据实际调整）
+
+                // 注册广播接收器（配置变更重构时重新注册）
+                if (mScreenStatusReceiver != null) {
+                    try {
+                        unregisterReceiver(mScreenStatusReceiver);
+                    } catch (IllegalArgumentException e) {
+                        // 未注册时的异常直接忽略，避免日志告警
+                        Log.d(TAG, "ScreenStatusReceiver未注册，无需注销");
+                    } catch (Exception e) {
+                        Log.w(TAG, "注销ScreenStatusReceiver异常", e);
+                    }
+                    mScreenStatusReceiver = null;
+                }
+                registSreenStatusReceiver();
+
+                // 注册Activity生命周期回调
+                getApplication().registerActivityLifecycleCallbacks(
+                    MyActivity.this
+                );
+
+                // 启动服务（仅首次创建执行）
+                if (!isConfigChangeRecreate && !isServiceStarted) {
+                    startMyService();
+                }
+
+                // 创建快捷方式（仅首次创建执行）
+                if (!isConfigChangeRecreate) {
+                    addDeskShortcuts();
+                }
+
+                if (isConfigChangeRecreate && isQtMainEnd) {
+                    // 确保mw_one已创建完成后再调用
+
+                    Log.d(TAG, "配置变更初始化完成，Qt已就绪，可以调用C++");
+
+                    //hideQtSplashScreen(); // 主动隐藏闪屏
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "初始化异常", e);
+            }
+        }, 500); // 延迟500ms：适配你的Qt层mw_one实例创建时间（可根据实际调整）
 
         // 页面刚打开 / 被唤醒 / 从后台回来时，不自动弹出输入法
         getWindow().setSoftInputMode(
@@ -1899,8 +1880,7 @@ public class MyActivity
                 ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
-                ) !=
-                PackageManager.PERMISSION_GRANTED
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
                 // 请求权限
                 requestPermissions(
@@ -1917,56 +1897,13 @@ public class MyActivity
                 ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.ACTIVITY_RECOGNITION
-                ) !=
-                PackageManager.PERMISSION_GRANTED
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
                 ActivityCompat.requestPermissions(
                     this,
                     new String[] { Manifest.permission.ACTIVITY_RECOGNITION },
                     REQ_ACTIVITY_RECOGNITION
                 );
-            }
-        }
-    }
-
-    private void updateStatusBarColor_Old() {
-        Window window = getWindow();
-        WindowInsetsController insetsController = window.getInsetsController();
-
-        // 设置状态栏颜色
-        if (isDark) {
-            window.setStatusBarColor(Color.parseColor("#121212")); // 深色背景
-
-            // 设置状态栏文本和图标为白色（亮色）
-            if (insetsController != null) {
-                insetsController.setSystemBarsAppearance(
-                    0,
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                );
-            } else {
-                window
-                    .getDecorView()
-                    .setSystemUiVisibility(
-                        window.getDecorView().getSystemUiVisibility() &
-                            ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                    );
-            }
-        } else {
-            window.setStatusBarColor(Color.parseColor("#F3F3F3")); // 浅色背景
-
-            // 设置状态栏文本和图标为黑色（暗色）
-            if (insetsController != null) {
-                insetsController.setSystemBarsAppearance(
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                );
-            } else {
-                window
-                    .getDecorView()
-                    .setSystemUiVisibility(
-                        window.getDecorView().getSystemUiVisibility() |
-                            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                    );
             }
         }
     }
@@ -2318,17 +2255,14 @@ public class MyActivity
             );
 
             // 3. 主线程延迟启动（避开onDestroy的销毁状态）
-            new Handler(Looper.getMainLooper()).postDelayed(
-                () -> {
-                    startActivity(launchIntent);
-                    Log.i(TAG, "启动新应用实例成功");
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                startActivity(launchIntent);
+                Log.i(TAG, "启动新应用实例成功");
 
-                    // 4. 强制终止旧进程（关键：确保旧进程退出）
-                    Process.killProcess(Process.myPid());
-                    System.exit(0);
-                },
-                300
-            ); // 300ms延迟，给系统留足处理时间
+                // 4. 强制终止旧进程（关键：确保旧进程退出）
+                Process.killProcess(Process.myPid());
+                System.exit(0);
+            }, 300); // 300ms延迟，给系统留足处理时间
         } catch (Exception e) {
             Log.e(TAG, "重启应用失败", e);
         }
@@ -2376,14 +2310,11 @@ public class MyActivity
                 Log.i(TAG, "已触发应用重启，等待旧进程终止");
 
                 // 5. 延迟终止旧进程（给系统留足时间处理启动Intent）
-                new Handler(Looper.getMainLooper()).postDelayed(
-                    () -> {
-                        finish(); // 关闭当前Activity
-                        Process.killProcess(Process.myPid()); // 终止旧进程
-                        System.exit(0);
-                    },
-                    500
-                ); // 500ms延迟，确保启动Intent已生效
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    finish(); // 关闭当前Activity
+                    Process.killProcess(Process.myPid()); // 终止旧进程
+                    System.exit(0);
+                }, 500); // 500ms延迟，确保启动Intent已生效
             } catch (Exception e) {
                 Log.e(TAG, "重启失败，使用兜底方案", e);
                 // 兜底：仅终止进程，依赖onDestroy中的兜底逻辑
@@ -2435,8 +2366,7 @@ public class MyActivity
             ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
-            ) !=
-            PackageManager.PERMISSION_GRANTED
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
             // 先申请精确定位
             ActivityCompat.requestPermissions(
@@ -2457,8 +2387,7 @@ public class MyActivity
                 ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                ) !=
-                PackageManager.PERMISSION_GRANTED
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
                 ActivityCompat.requestPermissions(
                     this,

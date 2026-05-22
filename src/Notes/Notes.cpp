@@ -1049,7 +1049,7 @@ void Notes::startBackgroundTaskDelAndClear() {
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Database del and clear completed...";
-    openNotesUI_1();
+    loadNotesToUI();
     watcher->deleteLater();
   });
   watcher->setFuture(future);
@@ -1094,7 +1094,7 @@ void Notes::openNotesUI() {
   startBackgroundTaskDelAndClear();
 }
 
-void Notes::openNotesUI_1() {
+void Notes::loadNotesToUI() {
   init_all_notes();
 
   mw_one->isMemoVisible = true;
@@ -1284,8 +1284,10 @@ void Notes::openNotes() {
 
     // get md files
     m_CloudBackup->getRemoteFileList(url + "KnotData/memo/");
-    while (!m_CloudBackup->isGetRemoteFileListEnd)
+    while (!m_CloudBackup->isGetRemoteFileListEnd) {
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+      QThread::msleep(1);
+    }
 
     // qDebug() << m_CloudBackup->webdavFileList
     //          << m_CloudBackup->webdavDateTimeList;
@@ -1297,8 +1299,10 @@ void Notes::openNotes() {
 
     // get md image files
     m_CloudBackup->getRemoteFileList(url + "KnotData/memo/images/");
-    while (!m_CloudBackup->isGetRemoteFileListEnd)
+    while (!m_CloudBackup->isGetRemoteFileListEnd) {
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+      QThread::msleep(1);
+    }
 
     // qDebug() << m_CloudBackup->webdavFileList
     //          << m_CloudBackup->webdavDateTimeList;

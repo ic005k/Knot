@@ -541,17 +541,13 @@ public class NoteEditor
         // 去除title(App Name)
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
+        // ========== 统一状态栏导航栏 ==========
+        updateSystemBars();
+
+        // ========== 统一布局 ==========
         if (MyActivity.isDark) {
-            this.setStatusBarColor("#19232D"); // 深色
-            getWindow()
-                .getDecorView()
-                .setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             setContentView(R.layout.noteeditor_dark);
         } else {
-            this.setStatusBarColor("#F3F3F3"); // 灰
-            getWindow()
-                .getDecorView()
-                .setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             setContentView(R.layout.noteeditor);
         }
 
@@ -954,16 +950,6 @@ public class NoteEditor
             Log.i("测试", "出现异常！");
             e.printStackTrace();
             return false;
-        }
-    }
-
-    private void setStatusBarColor(String color) {
-        // 需要安卓版本大于5.0以上
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            getWindow().addFlags(
-                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-            );
-            getWindow().setStatusBarColor(Color.parseColor(color));
         }
     }
 
@@ -3059,5 +3045,29 @@ public class NoteEditor
         }
 
         return image;
+    }
+
+    // 统一刷新：状态栏 + 导航栏（和 WebViewActivity 完全一致）
+    private void updateSystemBars() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+            if (MyActivity.isDark) {
+                // 暗黑模式
+                window.setStatusBarColor(Color.parseColor("#19232D"));
+                window.setNavigationBarColor(Color.parseColor("#121212"));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    window.getDecorView().setSystemUiVisibility(0);
+                }
+            } else {
+                // 浅色模式
+                window.setStatusBarColor(Color.parseColor("#F3F3F3"));
+                window.setNavigationBarColor(Color.parseColor("#FFFFFF"));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+                }
+            }
+        }
     }
 }

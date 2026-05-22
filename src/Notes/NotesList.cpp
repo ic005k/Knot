@@ -17,8 +17,9 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   connect(pAndroidKeyboard, &QInputMethod::visibleChanged, this,
           &NotesList::on_KVChanged);
 
-  tw = ui->treeWidget;
-  twrb = ui->treeWidgetRecycle;
+  tw = new QTreeWidget(nullptr);
+  twrb = new QTreeWidget(nullptr);
+
   twrb->setSelectionMode(QAbstractItemView::MultiSelection);
 
   noteModel = new NoteListModel(this);
@@ -76,7 +77,11 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   initNoteGraphView();  // 关键：注册控制器到QML引擎
 }
 
-NotesList::~NotesList() { delete ui; }
+NotesList::~NotesList() {
+  delete ui;
+  delete tw;
+  delete twrb;
+}
 
 void NotesList::initSerachDatabase() {
   QString databaseFile = privateDir + "md_database_v3.db";
@@ -167,8 +172,8 @@ void NotesList::on_btnNewNoteBook_clicked() {
   item->setIcon(0, QIcon(":/res/nb.png"));
 
   if (rootIndex == 0) {
-    ui->treeWidget->addTopLevelItem(item);
-    ui->treeWidget->setCurrentItem(item);
+    tw->addTopLevelItem(item);
+    tw->setCurrentItem(item);
   } else {
     QTreeWidgetItem* topItem = tw->topLevelItem(rootIndex - 1);
     tw->setCurrentItem(topItem);
@@ -178,14 +183,14 @@ void NotesList::on_btnNewNoteBook_clicked() {
 }
 
 void NotesList::on_btnNewNote_clicked() {
-  if (ui->treeWidget->topLevelItemCount() == 0) return;
+  if (tw->topLevelItemCount() == 0) return;
 
   int rand = QRandomGenerator::global()->generate();
   if (rand < 0) rand = 0 - rand;
 
   QString noteFile =
       "memo/" + m_Notes->getDateTimeStr() + "_" + QString::number(rand) + ".md";
-  QTreeWidgetItem* parentitem = ui->treeWidget->currentItem();
+  QTreeWidgetItem* parentitem = tw->currentItem();
 
   QTreeWidgetItem* item1 = new QTreeWidgetItem(parentitem);
   item1->setText(0, "");
@@ -197,7 +202,7 @@ void NotesList::on_btnNewNote_clicked() {
   TextEditToFile(edit, iniDir + noteFile);
   delete edit;
 
-  ui->treeWidget->setCurrentItem(item1);
+  tw->setCurrentItem(item1);
   on_treeWidget_itemClicked(item1, 0);
 
   pNoteItems.clear();
@@ -210,7 +215,7 @@ void NotesList::on_btnNewNote_clicked() {
 void NotesList::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column) {
   Q_UNUSED(column);
 
-  if (ui->treeWidget->topLevelItemCount() == 0) return;
+  if (tw->topLevelItemCount() == 0) return;
 
   noteName = item->text(0);
 
@@ -245,7 +250,7 @@ QString NotesList::getCurrentMDFile() {
 }
 
 void NotesList::on_btnRename_clicked() {
-  QTreeWidgetItem* item = ui->treeWidget->currentItem();
+  QTreeWidgetItem* item = tw->currentItem();
   if (item == NULL) return;
 
   m_RenameNotes = new QDialog(this);
@@ -378,7 +383,7 @@ void NotesList::on_btnRename_clicked() {
 }
 
 void NotesList::renameCurrentItem(QString title) {
-  QTreeWidgetItem* item = ui->treeWidget->currentItem();
+  QTreeWidgetItem* item = tw->currentItem();
   if (item == NULL) return;
 
   item->setText(0, title.trimmed());
@@ -545,7 +550,7 @@ bool NotesList::delFile(QString file) {
 }
 
 int NotesList::on_btnImport_clicked() {
-  if (ui->treeWidget->topLevelItemCount() == 0) return 0;
+  if (tw->topLevelItemCount() == 0) return 0;
 
   QStringList fileNames;
   fileNames =
@@ -560,7 +565,7 @@ int NotesList::on_btnImport_clicked() {
 
   QStringList MDFileList;
 
-  QTreeWidgetItem* item = ui->treeWidget->currentItem();
+  QTreeWidgetItem* item = tw->currentItem();
 
   for (int i = 0; i < fileNames.count(); i++) {
     QString fileName = fileNames.at(i);
@@ -641,7 +646,7 @@ int NotesList::on_btnImport_clicked() {
 }
 
 void NotesList::on_btnExport_clicked() {
-  if (ui->treeWidget->topLevelItemCount() == 0) return;
+  if (tw->topLevelItemCount() == 0) return;
 
   QTreeWidgetItem* item = tw->currentItem();
   if (item->parent() == NULL) return;
@@ -936,12 +941,6 @@ void NotesList::initNotesList() {
       QTreeWidgetItem* topItem = new QTreeWidgetItem;
       topItem->setText(0, strTop);
       topItem->setText(2, strTopColorFlag);
-      topItem->setForeground(0, Qt::red);
-
-      QFont font = this->font();
-      font.setBold(true);
-      topItem->setFont(0, font);
-      topItem->setIcon(0, QIcon(":/res/nb.png"));
 
       // 子节点
       QJsonArray childrenArray = topObj["children"].toArray();
@@ -956,7 +955,6 @@ void NotesList::initNotesList() {
           QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
           childItem->setText(0, str0);
           childItem->setText(1, str1);
-          childItem->setIcon(0, QIcon(":/res/n.png"));
 
           QString md = iniDir + str1;
           m_Notes->m_NoteIndexManager->setNoteTitle(md, str0);
@@ -1082,7 +1080,6 @@ void NotesList::initRecycle() {
       QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
       childItem->setText(0, str0);
       childItem->setText(1, str1);
-      childItem->setIcon(0, QIcon(":/res/n.png"));
 
       recycleFiles.append(iniDir + str1);
     }
@@ -1145,10 +1142,6 @@ void NotesList::initUnclassified() {
   topItem->setText(0, tr("Unclassified"));
   topItem->setText(2, "#FF0000");
   topItem->setForeground(0, Qt::red);
-  QFont font = this->font();
-  font.setBold(true);
-  topItem->setFont(0, font);
-  topItem->setIcon(0, QIcon(":/res/nb.png"));
 
   TitleGenerator generator;
 
@@ -1161,7 +1154,6 @@ void NotesList::initUnclassified() {
     QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
     childItem->setText(0, str0);
     childItem->setText(1, str1);
-    childItem->setIcon(0, QIcon(":/res/n.png"));
 
     m_Notes->m_NoteIndexManager->setNoteTitle(mdFile, str0);
     updateNoteIndexManager(mdFile, topCount, i);
@@ -2636,8 +2628,10 @@ void NotesList::on_actionImport_Note_triggered() {
   setNoteBookCurrentItem();
   int fileCount = on_btnImport_clicked();
 
-  while (!isImportFilesEnd)
+  while (!isImportFilesEnd) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    QThread::msleep(1);
+  }
 
   mw_one->closeProgress();
 
@@ -3109,7 +3103,7 @@ void NotesList::readyNotesData(QTreeWidgetItem* topItem) {
       isMouseClick = false;
     }
 
-    isReadyNoteDataEnd = true;
+    emit isReadyNoteDataEndChanged();
 
     watcher->deleteLater();
 
@@ -3347,11 +3341,12 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
 
   setNoteBookCurrentIndex(indexNoteBook);
 
-  isReadyNoteDataEnd = false;
   clickNoteBook();
 
-  while (!isReadyNoteDataEnd)
-    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+  QEventLoop loop;
+  connect(this, &NotesList::isReadyNoteDataEndChanged, &loop, &QEventLoop::quit,
+          Qt::QueuedConnection);
+  loop.exec();
 
   countNotes = m_Method->getCountFromQW(mui->qwNoteList);
   if (indexNote < 0 || indexNote >= countNotes) return false;
@@ -3474,10 +3469,9 @@ template class QFutureWatcher<ResultsMap>;
 
 void NotesList::showFindNotes() {
   recycleNotesList.clear();
-  int count = ui->treeWidgetRecycle->topLevelItem(0)->childCount();
+  int count = twrb->topLevelItem(0)->childCount();
   for (int i = 0; i < count; i++) {
-    QString file =
-        iniDir + ui->treeWidgetRecycle->topLevelItem(0)->child(i)->text(1);
+    QString file = iniDir + twrb->topLevelItem(0)->child(i)->text(1);
     recycleNotesList.append(file);
   }
   qDebug() << "recycle notes = " << recycleNotesList;

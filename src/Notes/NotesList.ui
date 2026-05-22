@@ -6,23 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>565</width>
-    <height>759</height>
+    <width>444</width>
+    <height>184</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Notes List</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QDialog{	
-	/*background-color: rgb(255, 25, 25);*/	
-	/*border-image:url(:/res/b.png);	*/
-
-	/*border-style:solid;						
-	border-width:2px;						
-	border-color:rgb(251, 51, 51); */		
-
-}</string>
+   <string notr="true"/>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
@@ -37,25 +29,6 @@
       <property name="spacing">
        <number>9</number>
       </property>
-      <item>
-       <widget class="QTreeWidget" name="treeWidget">
-        <column>
-         <property name="text">
-          <string notr="true">1</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>2</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>3</string>
-         </property>
-        </column>
-       </widget>
-      </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_5">
         <property name="spacing">
@@ -252,20 +225,6 @@
       <property name="spacing">
        <number>9</number>
       </property>
-      <item>
-       <widget class="QTreeWidget" name="treeWidgetRecycle">
-        <column>
-         <property name="text">
-          <string>1</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>2</string>
-         </property>
-        </column>
-       </widget>
-      </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <property name="spacing">

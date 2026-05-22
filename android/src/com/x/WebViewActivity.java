@@ -54,10 +54,11 @@ public class WebViewActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //让 WebView 脱离 Qt 的绘制上下文，不抢 Surface，不冲突
-        getWindow().setFlags(
+        /*getWindow().setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN
-        );
+        );*/
+
         getWindow().setFormat(android.graphics.PixelFormat.TRANSLUCENT);
         getWindow().setBackgroundDrawable(null);
 
@@ -69,17 +70,9 @@ public class WebViewActivity extends Activity {
         // 初始化进度条（新增）
         mLoadingProgress = findViewById(R.id.web_loading_progress);
 
-        if (MyActivity.isDark) {
-            this.setStatusBarColor("#19232D"); // 深色
-            getWindow()
-                .getDecorView()
-                .setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-        } else {
-            this.setStatusBarColor("#F3F3F3"); // 灰
-            getWindow()
-                .getDecorView()
-                .setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        }
+
+
+        updateSystemBars();
 
         // 初始化SharedPreferences
         scrollPositionPrefs = getSharedPreferences(
@@ -503,15 +496,7 @@ public class WebViewActivity extends Activity {
         return instance;
     }
 
-    private void setStatusBarColor(String color) {
-        // 需要安卓版本大于5.0以上
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            getWindow().addFlags(
-                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-            );
-            getWindow().setStatusBarColor(Color.parseColor(color));
-        }
-    }
+
 
     private void initWebView() {
         mWebView = findViewById(R.id.webview);
@@ -544,5 +529,31 @@ public class WebViewActivity extends Activity {
                 }
             }
         );
+    }
+
+    // 统一刷新：状态栏 + 导航栏（完全复用主Activity逻辑）
+    private void updateSystemBars() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+            if (MyActivity.isDark) {
+                // 暗黑模式
+                window.setStatusBarColor(Color.parseColor("#121212"));
+                window.setNavigationBarColor(Color.parseColor("#121212"));
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    window.getDecorView().setSystemUiVisibility(0);
+                }
+            } else {
+                // 普通模式
+                window.setStatusBarColor(Color.parseColor("#F3F3F3"));
+                window.setNavigationBarColor(Color.parseColor("#F3F3F3"));
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+                }
+            }
+        }
     }
 }

@@ -20,10 +20,9 @@ NewNoteBook::NewNoteBook(QWidget* parent)
 
   QStringList list;
   list.append(tr("Main Root"));
-  int count = m_NotesList->ui->treeWidget->topLevelItemCount();
+  int count = tw->topLevelItemCount();
   for (int i = 0; i < count; i++) {
-    list.append(
-        m_NotesList->ui->treeWidget->topLevelItem(i)->text(0).trimmed());
+    list.append(tw->topLevelItem(i)->text(0).trimmed());
   }
   ui->listWidget->addItems(list);
   ui->listWidget->setCurrentRow(0);

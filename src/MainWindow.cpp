@@ -251,8 +251,10 @@ void MainWindow::startSave(QString str_type) {
     mySaveThread->quit();
     mySaveThread->wait();
 
-    while (!isSaveEnd)
+    while (!isSaveEnd) {
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+      QThread::msleep(1);
+    }
   }
   if (isSaveEnd) {
     isBreak = false;
@@ -274,8 +276,10 @@ void MainWindow::startRead(QString Date) {
     myReadChartThread->quit();
     myReadChartThread->wait();
 
-    while (!isReadEnd)
+    while (!isReadEnd) {
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+      QThread::msleep(1);
+    }
   }
 
   if (isReadEnd) {
@@ -2565,8 +2569,10 @@ void MainWindow::on_btnMove() {
     mui->btnTabMoveUp->hide();
     on_btnSelTab_clicked();
 
-    while (mui->frameEditRecord->isHidden())
+    while (mui->frameEditRecord->isHidden()) {
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+      QThread::msleep(1);
+    }
 
     mui->editCategory->setText(strCategory);
     mui->editDetails->setText(strDetails);

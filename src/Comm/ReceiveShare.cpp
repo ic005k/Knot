@@ -213,8 +213,10 @@ void ReceiveShare::closeAllChildWindows() {
   if (mw_one->m_Todo->isTodoAlarmShow) {
     QTimer::singleShot(100, mw_one, []() { mw_one->m_Todo->closeTodoAlarm(); });
 
-    while (!mw_one->m_Todo->isTodoAlarmShow)
+    while (!mw_one->m_Todo->isTodoAlarmShow) {
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+      QThread::msleep(1);
+    }
     mui->btnBackTodo->click();
   }
 

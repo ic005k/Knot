@@ -1226,8 +1226,10 @@ void Reader::setPageVPos() {
   if (oldLandscape != newLandscape) {
     isLandscape = newLandscape;
     setQmlLandscape(isLandscape);
-    while (!getQmlReadyEnd())
+    while (!getQmlReadyEnd()) {
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+      QThread::msleep(1);
+    }
   }
 
   m_Method->Sleep(200);
@@ -2131,8 +2133,10 @@ void Reader::readBookDone() {
 
   if (!isInitReader) {
     if (!isPDF) {
-      while (!mui->btnReader->isEnabled())
+      while (!mui->btnReader->isEnabled()) {
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+        QThread::msleep(1);
+      }
       mui->btnReader->click();
       setDefaultOpen("none");
     }
@@ -2291,8 +2295,10 @@ void Reader::showBookmarkList() {
 }
 
 void Reader::ContinueReading() {
-  while (!mui->btnReader->isEnabled())
+  while (!mui->btnReader->isEnabled()) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    QThread::msleep(1);
+  }
 
   mui->btnReader->click();
 }

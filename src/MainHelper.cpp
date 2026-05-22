@@ -1284,8 +1284,6 @@ bool MainWindow::importBakData(QString fileName) {
     result = m_Method->decryptFile(zipPath, dec_file, encPassword);
 
     while (result == false && isPasswordError == false) {
-      // QThread::msleep(100);
-      // QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
       QEventLoop loop;
       QTimer::singleShot(100, &loop, &QEventLoop::quit);  // 非阻塞延时
       loop.exec();
@@ -1299,8 +1297,6 @@ bool MainWindow::importBakData(QString fileName) {
       m_Method->decompressWithPassword(dec_file, bakfileDir, encPassword);
 
   while (unzipResult == false && isPasswordError == false) {
-    // QThread::msleep(100);
-    // QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     QEventLoop loop;
     QTimer::singleShot(100, &loop, &QEventLoop::quit);  // 非阻塞延时
     loop.exec();

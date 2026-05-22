@@ -243,11 +243,15 @@ void MainWindow::importDataDone() {
     init_TotalData();
     loading = false;
 
-    while (!isReadTWEnd)
+    while (!isReadTWEnd) {
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+      QThread::msleep(1);
+    }
 
-    while (!isSaveEnd)
+    while (!isSaveEnd) {
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+      QThread::msleep(1);
+    }
 
     on_tabWidget_currentChanged(tabData->currentIndex());
 

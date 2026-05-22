@@ -1,129 +1,128 @@
 package com.x;
 
-import org.ini4j.Wini;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.net.Uri;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Toast;
+import android.app.Activity;
 import android.app.Application;
-import android.content.Context;
-import android.content.ContentUris;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.widget.AdapterView;
-import org.apache.http.entity.FileEntity;
-
-import androidx.appcompat.view.ContextThemeWrapper;
-import androidx.core.content.ContextCompat;
-import android.graphics.Typeface;
-import android.widget.ProgressBar;
-import androidx.appcompat.app.AlertDialog;
-import android.os.AsyncTask;
-import android.view.LayoutInflater;
-import android.view.Gravity;
-import android.content.IntentFilter;
-import android.content.Intent;
-import android.content.BroadcastReceiver;
+import android.app.Application;
 import android.app.PendingIntent;
-import android.text.TextUtils;
-import java.lang.CharSequence;
 import android.app.Service;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentUris;
+import android.content.Context;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.net.Uri;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.app.Activity;
-import android.appwidget.AppWidgetManager;
-import android.content.Context;
-import android.appwidget.AppWidgetProvider;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.TextView;
-import android.view.WindowManager;
-import android.view.Window;
-import android.widget.EditText;
-import android.text.Editable;
-import android.net.Uri;
-import java.io.OutputStreamWriter;
-import java.io.BufferedWriter;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.io.IOException;
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import android.text.TextWatcher;
-import android.os.Handler;
-import android.media.AudioManager;
-import android.widget.TextView;
-import android.content.DialogInterface;
-import java.util.Locale;
-import android.app.Application;
-import android.os.Looper;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import android.provider.MediaStore;
-import android.provider.DocumentsContract;
-import android.database.Cursor;
-import android.content.ContentUris;
+import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.text.method.ScrollingMovementMethod;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ContextThemeWrapper;
+import androidx.core.content.ContextCompat;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.File;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
+import java.lang.CharSequence;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.Time;
-import android.text.SpannableStringBuilder;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.Spannable;
-import android.text.Spanned;
-import android.view.MenuItem;
-import android.net.Uri;
-import android.text.method.ScrollingMovementMethod;
-import android.view.inputmethod.EditorInfo;
-import android.view.KeyEvent;
-import android.widget.TextView.OnEditorActionListener;
-import android.view.inputmethod.InputMethodManager;
-import java.util.regex.*;
-
-import android.widget.ImageView;
-import android.media.MediaScannerConnection;
-import android.widget.LinearLayout;
-import android.view.LayoutInflater;
-import android.widget.PopupWindow;
-import android.graphics.drawable.ColorDrawable;
-import java.lang.reflect.Field;
-import android.annotation.SuppressLint;
-import android.content.ContentResolver;
-import android.widget.ListView;
-import java.io.File;
 import java.net.URISyntaxException;
+import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.regex.*;
+import org.apache.http.entity.FileEntity;
+import org.ini4j.Wini;
 
-public class FilePicker extends Activity implements View.OnClickListener, Application.ActivityLifecycleCallbacks {
+public class FilePicker
+    extends Activity
+    implements View.OnClickListener, Application.ActivityLifecycleCallbacks
+{
 
     public static Context MyContex;
     private ContentResolver mContentResolver;
@@ -140,35 +139,35 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
     public static FilePicker MyFilepicker;
     private boolean isDark = false;
 
-    public native static void CallJavaNotify_0();
+    public static native void CallJavaNotify_0();
 
-    public native static void CallJavaNotify_1();
+    public static native void CallJavaNotify_1();
 
-    public native static void CallJavaNotify_2();
+    public static native void CallJavaNotify_2();
 
-    public native static void CallJavaNotify_3();
+    public static native void CallJavaNotify_3();
 
-    public native static void CallJavaNotify_4();
+    public static native void CallJavaNotify_4();
 
-    public native static void CallJavaNotify_5();
+    public static native void CallJavaNotify_5();
 
-    public native static void CallJavaNotify_6();
+    public static native void CallJavaNotify_6();
 
-    public native static void CallJavaNotify_7();
+    public static native void CallJavaNotify_7();
 
-    public native static void CallJavaNotify_8();
+    public static native void CallJavaNotify_8();
 
-    public native static void CallJavaNotify_9();
+    public static native void CallJavaNotify_9();
 
-    public native static void CallJavaNotify_10();
+    public static native void CallJavaNotify_10();
 
-    public native static void CallJavaNotify_11();
+    public static native void CallJavaNotify_11();
 
-    public native static void CallJavaNotify_12();
+    public static native void CallJavaNotify_12();
 
-    public native static void CallJavaNotify_13();
+    public static native void CallJavaNotify_13();
 
-    public native static void CallJavaNotify_14();
+    public static native void CallJavaNotify_14();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,14 +176,15 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
         MyFilepicker = this;
         mContentResolver = MyContex.getContentResolver();
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        // ========== 统一状态栏、导航栏 ==========
+        updateSystemBars();
+
+        // ========== 布局不变 ==========
         isDark = MyActivity.isDark;
         if (isDark) {
-            this.setStatusBarColor("#19232D"); // 深色
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             setContentView(R.layout.myfilepicker_dark);
         } else {
-            this.setStatusBarColor("#F3F3F3"); // 灰
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             setContentView(R.layout.myfilepicker);
         }
 
@@ -205,19 +205,20 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
         btnFind.setVisibility(View.GONE);
 
         // HomeKey
-        registerReceiver(mHomeKeyEvent, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+        registerReceiver(
+            mHomeKeyEvent,
+            new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+        );
         initEditTextChangedListener();
 
         MyAsyncTask myAsyncTask = new MyAsyncTask();
         myAsyncTask.execute();
-
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         CallJavaNotify_12();
-
     }
 
     @Override
@@ -230,24 +231,19 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
     }
 
     @Override
-    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-
-    }
-
-    @Override
-    public void onActivityStarted(Activity activity) {
-
-    }
+    public void onActivityCreated(
+        Activity activity,
+        Bundle savedInstanceState
+    ) {}
 
     @Override
-    public void onActivityResumed(Activity activity) {
-
-    }
+    public void onActivityStarted(Activity activity) {}
 
     @Override
-    public void onActivityPaused(Activity activity) {
+    public void onActivityResumed(Activity activity) {}
 
-    }
+    @Override
+    public void onActivityPaused(Activity activity) {}
 
     @Override
     public void onActivityStopped(Activity activity) {
@@ -255,14 +251,13 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
     }
 
     @Override
-    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-
-    }
+    public void onActivitySaveInstanceState(
+        Activity activity,
+        Bundle outState
+    ) {}
 
     @Override
-    public void onActivityDestroyed(Activity activity) {
-
-    }
+    public void onActivityDestroyed(Activity activity) {}
 
     /**
      * 获取所有文件
@@ -273,16 +268,40 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
         // 扫描files文件库
         Cursor c = null;
         try {
-            String select = "(" + MediaStore.Files.FileColumns.DATA + " LIKE '%.txt'" + " or "
-                    + MediaStore.Files.FileColumns.DATA + " LIKE '%.epub'" + " or " + MediaStore.Files.FileColumns.DATA
-                    + " LIKE '%.pdf'" + ")";
-            c = mContentResolver.query(MediaStore.Files.getContentUri("external"), null, select, null, null);
-            int columnIndexOrThrow_ID = c.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID);
-            int columnIndexOrThrow_MIME_TYPE = c.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE);
-            int columnIndexOrThrow_DATA = c.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA);
-            int columnIndexOrThrow_SIZE = c.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE);
+            String select =
+                "(" +
+                MediaStore.Files.FileColumns.DATA +
+                " LIKE '%.txt'" +
+                " or " +
+                MediaStore.Files.FileColumns.DATA +
+                " LIKE '%.epub'" +
+                " or " +
+                MediaStore.Files.FileColumns.DATA +
+                " LIKE '%.pdf'" +
+                ")";
+            c = mContentResolver.query(
+                MediaStore.Files.getContentUri("external"),
+                null,
+                select,
+                null,
+                null
+            );
+            int columnIndexOrThrow_ID = c.getColumnIndexOrThrow(
+                MediaStore.Files.FileColumns._ID
+            );
+            int columnIndexOrThrow_MIME_TYPE = c.getColumnIndexOrThrow(
+                MediaStore.Files.FileColumns.MIME_TYPE
+            );
+            int columnIndexOrThrow_DATA = c.getColumnIndexOrThrow(
+                MediaStore.Files.FileColumns.DATA
+            );
+            int columnIndexOrThrow_SIZE = c.getColumnIndexOrThrow(
+                MediaStore.Files.FileColumns.SIZE
+            );
             // 更改时间
-            int columnIndexOrThrow_DATE_MODIFIED = c.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED);
+            int columnIndexOrThrow_DATE_MODIFIED = c.getColumnIndexOrThrow(
+                MediaStore.Files.FileColumns.DATE_MODIFIED
+            );
 
             int tempId = 0;
             while (c.moveToNext()) {
@@ -297,12 +316,19 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
                 if (position_x == -1) {
                     continue;
                 }
-                String displayName = path.substring(position_x + 1, path.length());
+                String displayName = path.substring(
+                    position_x + 1,
+                    path.length()
+                );
                 long size = c.getLong(columnIndexOrThrow_SIZE);
-                long modified_date = c.getLong(columnIndexOrThrow_DATE_MODIFIED);
+                long modified_date = c.getLong(
+                    columnIndexOrThrow_DATE_MODIFIED
+                );
                 File file = new File(path);
                 String strFileSize = ShowLongFileSzie(size);
-                String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(file.lastModified()));
+                String time = new SimpleDateFormat(
+                    "yyyy-MM-dd HH:mm:ss"
+                ).format(new Date(file.lastModified()));
                 String fileInfo = time + "  " + strFileSize;
 
                 /*
@@ -315,7 +341,9 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
                  * files.add(info);
                  */
 
-                System.out.println("FileManager" + " path:" + path + "  size:" + strFileSize);
+                System.out.println(
+                    "FileManager" + " path:" + path + "  size:" + strFileSize
+                );
 
                 if (path.endsWith(".epub")) {
                     files.add(path);
@@ -327,7 +355,6 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
                     files.add(path);
                     filesInfo.add(fileInfo);
                 }
-
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -338,14 +365,6 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
         }
         System.out.println(files);
         return files;
-    }
-
-    private void setStatusBarColor(String color) {
-        // 需要安卓版本大于5.0以上
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            getWindow().setStatusBarColor(Color.parseColor(color));
-        }
     }
 
     private BroadcastReceiver mHomeKeyEvent = new BroadcastReceiver() {
@@ -361,11 +380,9 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
                 if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
                     // 表示按了home键,程序直接进入到后台
                     System.out.println("NoteEditor HOME键被按下...");
-
                 } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
                     // 表示长按home键,显示最近使用的程序
                     System.out.println("NoteEditor 长按HOME键...");
-
                 }
             }
         }
@@ -378,18 +395,21 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
             // 在这里执行需要等待的操作
             // 刷新媒体库
             MediaScannerConnection.scanFile(
-                    MyContex,
-                    new String[] { "/storage/emulated/0/" },
-                    new String[] { "text/plain", "application/epub+zip", "application/pdf" },
-                    new MediaScannerConnection.OnScanCompletedListener() {
-                        public void onMediaScannerConnected() {
-                        }
+                MyContex,
+                new String[] { "/storage/emulated/0/" },
+                new String[] {
+                    "text/plain",
+                    "application/epub+zip",
+                    "application/pdf",
+                },
+                new MediaScannerConnection.OnScanCompletedListener() {
+                    public void onMediaScannerConnected() {}
 
-                        public void onScanCompleted(String path, Uri uri) {
-                            System.out.println("Scan done...");
-
-                        }
-                    });
+                    public void onScanCompleted(String path, Uri uri) {
+                        System.out.println("Scan done...");
+                    }
+                }
+            );
             getFilesByType();
 
             return null;
@@ -397,7 +417,6 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
 
         @Override
         protected void onPostExecute(Void aVoid) {
-
             // 在这里执行完成后的操作
             addToListView(files, filesInfo);
 
@@ -419,73 +438,76 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
     }
 
     public static void closeFilePickerView() {
-        if (MyFilepicker != null)
-            MyFilepicker.finish();
+        if (MyFilepicker != null) MyFilepicker.finish();
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-
             case R.id.btnFind:
-                btnFind.setBackgroundColor(getResources().getColor(R.color.red));
+                btnFind.setBackgroundColor(
+                    getResources().getColor(R.color.red)
+                );
 
-                btnFind.setBackgroundColor(getResources().getColor(R.color.normal));
+                btnFind.setBackgroundColor(
+                    getResources().getColor(R.color.normal)
+                );
 
                 break;
-
             case R.id.btn_clear:
                 editFind.setText("");
                 editFind.requestFocus();
 
                 break;
-
         }
     }
 
     private void initEditTextChangedListener() {
+        editFind.addTextChangedListener(
+            new TextWatcher() {
+                @Override
+                public void beforeTextChanged(
+                    CharSequence s,
+                    int start,
+                    int count,
+                    int after
+                ) {}
 
-        editFind.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                @Override
+                public void onTextChanged(
+                    CharSequence s,
+                    int start,
+                    int before,
+                    int count
+                ) {}
 
-            }
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    if (files.size() == 0) return;
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (files.size() == 0)
-                    return;
-
-                List<String> findResult = new ArrayList<>();
-                List<String> findResultInfo = new ArrayList<>();
-                String strFind = editFind.getText().toString();
-                for (int i = 0; i < files.size(); i++) {
-                    String strItem = files.get(i);
-                    String strInfo = filesInfo.get(i);
-                    String a, b;
-                    a = strItem.toLowerCase();
-                    b = strFind.toLowerCase();
-                    if (a.contains(b)) {
-                        findResult.add(strItem);
-                        findResultInfo.add(strInfo);
-
+                    List<String> findResult = new ArrayList<>();
+                    List<String> findResultInfo = new ArrayList<>();
+                    String strFind = editFind.getText().toString();
+                    for (int i = 0; i < files.size(); i++) {
+                        String strItem = files.get(i);
+                        String strInfo = filesInfo.get(i);
+                        String a, b;
+                        a = strItem.toLowerCase();
+                        b = strFind.toLowerCase();
+                        if (a.contains(b)) {
+                            findResult.add(strItem);
+                            findResultInfo.add(strInfo);
+                        }
                     }
 
+                    addToListView(findResult, findResultInfo);
+
+                    if (strFind == "") {
+                        addToListView(files, filesInfo);
+                    }
                 }
-
-                addToListView(findResult, findResultInfo);
-
-                if (strFind == "") {
-                    addToListView(files, filesInfo);
-                }
-
             }
-        });
+        );
     }
 
     private void addToListView(List<String> files, List<String> filesInfo) {
@@ -510,48 +532,63 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
         }
 
         FruitAdapter adapter;
-        if (isDark)
-            adapter = new FruitAdapter(MyContex, R.layout.fruit_item_dark, fruitlist);
-        else
-            adapter = new FruitAdapter(MyContex, R.layout.fruit_item, fruitlist);
+        if (isDark) adapter = new FruitAdapter(
+            MyContex,
+            R.layout.fruit_item_dark,
+            fruitlist
+        );
+        else adapter = new FruitAdapter(
+            MyContex,
+            R.layout.fruit_item,
+            fruitlist
+        );
         m_ListView.setAdapter(adapter);
 
         mProgressBar.setVisibility(View.GONE);
 
         // listview 的点击事件
-        m_ListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            // @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                Fruit fruit = fruitlist.get(position);
+        m_ListView.setOnItemClickListener(
+            new AdapterView.OnItemClickListener() {
+                // @Override
+                public void onItemClick(
+                    AdapterView<?> adapterView,
+                    View view,
+                    int position,
+                    long id
+                ) {
+                    Fruit fruit = fruitlist.get(position);
 
-                filePath = fruit.getName();
-                String strFileSize = fruit.getPrice();
+                    filePath = fruit.getName();
+                    String strFileSize = fruit.getPrice();
 
-                File file_path = new File(filePath);
-                if (file_path.exists()) {
-                    String filename = "/storage/emulated/0/.Knot/choice_book.ini";
-                    try {
-                        File file = new File(filename);
-                        if (!file.exists())
-                            file.createNewFile();
-                        Wini ini = new Wini(file);
-                        ini.put("book", "file", filePath);
-                        ini.put("book", "type", "filepicker");
-                        ini.store();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    File file_path = new File(filePath);
+                    if (file_path.exists()) {
+                        String filename =
+                            "/storage/emulated/0/.Knot/choice_book.ini";
+                        try {
+                            File file = new File(filename);
+                            if (!file.exists()) file.createNewFile();
+                            Wini ini = new Wini(file);
+                            ini.put("book", "file", filePath);
+                            ini.put("book", "type", "filepicker");
+                            ini.store();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        Toast.makeText(
+                            MyContex,
+                            filePath + "   Size:" + strFileSize,
+                            Toast.LENGTH_LONG
+                        ).show();
+                        CallJavaNotify_9();
                     }
-                    Toast.makeText(MyContex, filePath + "   Size:" + strFileSize, Toast.LENGTH_LONG).show();
-                    CallJavaNotify_9();
+
+                    FilePicker.this.finish();
                 }
-
-                FilePicker.this.finish();
-
             }
-        });
+        );
 
         lblResult.setText(String.valueOf(files.size()));
-
     }
 
     /**
@@ -559,16 +596,50 @@ public class FilePicker extends Activity implements View.OnClickListener, Applic
      */
     public static void hideKeyBoard(Activity activity) {
         // 拿到InputMethodManager
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(
+            Context.INPUT_METHOD_SERVICE
+        );
         // 如果window上view获取焦点 && view不为空
         if (imm.isActive() && activity.getCurrentFocus() != null) {
             // 拿到view的token 不为空
             if (activity.getCurrentFocus().getWindowToken() != null) {
                 // 表示软键盘窗口总是隐藏，除非开始时以SHOW_FORCED显示。
-                imm.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(),
-                        InputMethodManager.HIDE_NOT_ALWAYS);
+                imm.hideSoftInputFromWindow(
+                    activity.getCurrentFocus().getWindowToken(),
+                    InputMethodManager.HIDE_NOT_ALWAYS
+                );
             }
         }
     }
 
+    // 统一状态栏 + 导航栏（和你所有界面完全一致）
+    private void updateSystemBars() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+            );
+
+            if (MyActivity.isDark) {
+                // 暗黑模式
+                window.setStatusBarColor(Color.parseColor("#19232D"));
+                window.setNavigationBarColor(Color.parseColor("#121212"));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    window.getDecorView().setSystemUiVisibility(0);
+                }
+            } else {
+                // 浅色模式
+                window.setStatusBarColor(Color.parseColor("#F3F3F3"));
+                window.setNavigationBarColor(Color.parseColor("#FFFFFF"));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    window
+                        .getDecorView()
+                        .setSystemUiVisibility(
+                            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR |
+                                View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                        );
+                }
+            }
+        }
+    }
 }
