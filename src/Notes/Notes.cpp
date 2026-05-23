@@ -583,6 +583,9 @@ void Notes::syncToWebDAV() {
       // 先删除旧文件
       delRemoteFile(notes_sync_files);
 
+      qDebug() << "需要上传的文件：" << notes_sync_files;
+      qDebug() << "maxNetConcurrent=" << maxNetConcurrent;
+
       m_CloudBackup->uploadFilesToWebDAV(notes_sync_files);
       m_Method->setAccessCount(notes_sync_files.count());
     }

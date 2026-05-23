@@ -3681,3 +3681,15 @@ void NotesList::showNotsListMenu(int x, int y) {
   QPoint pos(mw_one->geometry().x() + x, mw_one->geometry().y() + y);
   menuNoteList->exec(pos);
 }
+
+void NotesList::delRemoteWebDAVFiles() {
+  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+    int count = needDelWebDAVFiles.count();
+    if (count > 0)
+      m_Notes->delRemoteFile(needDelWebDAVFiles);
+    else
+      qDebug() << "无须删除远程文件";
+
+    m_Method->setAccessCount(needDelWebDAVFiles.count());
+  }
+}

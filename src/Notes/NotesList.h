@@ -201,7 +201,8 @@ class NotesList : public QDialog {
 
   void on_btnBatchRestore_clicked();
 
- protected:
+  void delRemoteWebDAVFiles();
+  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
   void closeEvent(QCloseEvent* event) override;

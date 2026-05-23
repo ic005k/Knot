@@ -450,7 +450,8 @@ void CloudBackup::uploadFilesToWebDAV(const QStringList& files) {
   startNextUpload();
 }
 
-void CloudBackup::startNextUpload() {
+// 采用全局网络管理变量
+/*void CloudBackup::startNextUpload() {
   // 核心：严格控制并发数量
   while (activeReplies.size() < maxNetConcurrent && !uploadQueue.isEmpty()) {
     QString filePath = uploadQueue.dequeue();
@@ -473,7 +474,7 @@ void CloudBackup::startNextUpload() {
 
     request.setRawHeader("User-Agent", "Zotero/5.0");
 
-    // ✅ 关键修复：全局唯一 m_networkManager
+    // ✅ 全局唯一 m_networkManager
     QNetworkReply* reply = m_networkManager->put(request, file);
     file->setParent(reply);
     activeReplies.insert(reply);
@@ -481,6 +482,63 @@ void CloudBackup::startNextUpload() {
     connect(reply, &QNetworkReply::finished, this, [this, reply, filePath]() {
       handleUploadFinished(reply, filePath);
     });
+  }
+}*/
+
+// 使用局部网络管理变量
+void CloudBackup::startNextUpload() {
+  while (activeReplies.size() < maxNetConcurrent && !uploadQueue.isEmpty()) {
+    QString filePath = uploadQueue.dequeue();
+    QFileInfo fileInfo(filePath);
+    QString remoteFile = fileInfo.fileName();
+    QString remotePath = "KnotData/memo/" + remoteFile;
+    QUrl fullUrl = QUrl(getWebDAVArgument() + remotePath);
+
+    QFile* file = new QFile(filePath);
+    if (!file->open(QIODevice::ReadOnly)) {
+      qWarning() << "Failed to open file:" << filePath;
+      delete file;
+      continue;
+    }
+
+    QNetworkRequest request(fullUrl);
+    QString auth = QString("%1:%2").arg(USERNAME, APP_PASSWORD);
+    request.setRawHeader("Authorization",
+                         "Basic " + auth.toLocal8Bit().toBase64());
+    request.setRawHeader("User-Agent", "Zotero/5.0");
+
+    // ==============================
+    // ✅ 【终极稳定】局部独立 QNAM
+    // ==============================
+    QNetworkAccessManager* nam = new QNetworkAccessManager();
+    QNetworkReply* reply = nam->put(request, file);
+
+    // 绑定上传进度
+    connect(reply, &QNetworkReply::uploadProgress, this,
+            [this, filePath](qint64 sent, qint64 total) {
+              if (total > 0) {
+                int percent = static_cast<int>(sent * 100.0 / total);
+                qDebug() << "上传进度：" << filePath << percent << "%";
+                // 同步更新界面进度条
+                mui->progBar->show();
+                mui->progBar->setMinimum(0);
+                mui->progBar->setMaximum(100);
+                mui->progBar->setValue(percent);
+              }
+            });
+
+    // 信号连接
+    connect(reply, &QNetworkReply::finished, this, [=]() {
+      handleUploadFinished(reply, filePath);
+      reply->deleteLater();
+      nam->deleteLater();  // 用完释放
+      file->close();
+      file->deleteLater();
+
+      mui->progBar->setValue(0);
+    });
+
+    activeReplies.insert(reply);
   }
 }
 
@@ -508,6 +566,7 @@ void CloudBackup::handleUploadFinished(QNetworkReply* reply,
   if (activeReplies.isEmpty() && uploadQueue.isEmpty()) {
     if (mw_one) {
       mw_one->closeProgress();
+      mui->progBar->hide();
     }
   }
 }

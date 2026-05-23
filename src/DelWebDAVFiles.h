@@ -11,6 +11,9 @@
 #include <QUrl>
 #include <functional>
 
+#include "mainwindow.h"
+#include "src/defines.h"
+
 class CloudDeleter : public QObject {
   Q_OBJECT
  public:
@@ -52,9 +55,11 @@ class CloudDeleter : public QObject {
 
         connect(reply, &QNetworkReply::finished, reply, [&, reply]() mutable {
           if (reply->error() == QNetworkReply::NoError) {
-            qInfo() << "Deleted:" << reply->request().url().path();
+            QString file = reply->request().url().path();
+            qInfo() << "Deleted:" << file;
+
           } else {
-            qWarning() << "Failed to delete" << reply->request().url().path()
+            qWarning() << "Failed to delete:" << reply->request().url().path()
                        << ":" << reply->errorString();
           }
           reply->deleteLater();

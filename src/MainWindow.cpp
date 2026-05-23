@@ -689,6 +689,50 @@ void MainWindow::execNeedSyncNotes() {
   }
 }
 
+void MainWindow::saveNeedDelWebDAVFiles(const QString& file) {
+  int m_count = m_NotesList->needDelWebDAVFiles.count();
+  if (file.length() > 0) {
+    for (int i = 0; i < m_count; i++) {
+      QString localFile = m_NotesList->needDelWebDAVFiles.at(i);
+      QFileInfo fi(localFile);
+      QString fn = fi.fileName();
+
+      if (file.contains(fn)) {
+        m_NotesList->needDelWebDAVFiles.removeOne(localFile);
+        qDebug() << "已从webdav的删除列表中移除：" << localFile;
+      }
+    }
+  }
+
+  m_count = m_NotesList->needDelWebDAVFiles.count();
+  QString tempFile = privateDir + "need_delwebdav_" +
+                     QUuid::createUuid().toString(QUuid::WithoutBraces) +
+                     ".tmp";
+  QString endFile = privateDir + "need_delwebdav.ini";
+  QSettings RegSync(tempFile, QSettings::IniFormat);
+  RegSync.setValue("count", m_count);
+  for (int i = 0; i < m_count; i++) {
+    RegSync.setValue("note" + QString::number(i),
+                     m_NotesList->needDelWebDAVFiles.at(i));
+  }
+  RegSync.sync();
+  m_Method->upIniFile(tempFile, endFile);
+}
+
+QStringList MainWindow::getNeedDelWebDAVFiles() {
+  int m_count;
+  QStringList list;
+  QString endFile = privateDir + "need_delwebdav.ini";
+  QSettings RegSync(endFile, QSettings::IniFormat);
+  m_count = RegSync.value("count", 0).toInt();
+  for (int i = 0; i < m_count; i++) {
+    QString file = RegSync.value("note" + QString::number(i), "").toString();
+    if (file.length() > 0) list.append(file);
+  }
+
+  return list;
+}
+
 void MainWindow::setMini() {
 #ifdef Q_OS_ANDROID
 
@@ -2108,11 +2152,7 @@ void MainWindow::on_btnBackNoteList_clicked() {
 
   m_Notes->syncToWebDAV();
 
-  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
-    int count = m_NotesList->needDelWebDAVFiles.count();
-    if (count > 0) m_Notes->delRemoteFile(m_NotesList->needDelWebDAVFiles);
-    m_Method->setAccessCount(m_NotesList->needDelWebDAVFiles.count());
-  }
+  m_NotesList->delRemoteWebDAVFiles();
 }
 
 void MainWindow::on_btnBackNoteRecycle_clicked() {
