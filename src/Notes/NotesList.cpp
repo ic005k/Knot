@@ -2895,55 +2895,84 @@ void NotesList::on_btnMoveTo_clicked() {
     saveNotesList();
     updateAllNoteIndexManager();
 
+    m_NotesList->loadAllNoteBook();
+
     QTimer::singleShot(10, this,
                        [this]() { setCurrentItemFromMDFile(currentMDFile); });
   }
 }
 
 bool NotesList::moveItem(QTreeWidget* twMain) {
-  QTreeWidgetItem* item = twMain->currentItem();
-  if (item == NULL) return false;
+  QTreeWidgetItem* srcFolder = twMain->currentItem();
+  if (!srcFolder) return false;
+
+  // 空笔记本（无子项）禁止移动
+  if (srcFolder->text(1).isEmpty() && srcFolder->childCount() == 0) {
+    return false;
+  }
 
   m_MoveTo = new MoveTo(this);
   m_MoveTo->showDialog();
   if (!m_MoveTo->isOk) return false;
 
-  // NoteBook
-  if (item->text(1).isEmpty()) {
-    QTreeWidgetItem* new_item = item;
+  QTreeWidgetItem* targetFolder = m_MoveTo->currentItem;
+  bool isTargetRoot = (m_MoveTo->strCurrentItem == tr("Main Root"));
 
-    if (m_MoveTo->strCurrentItem == tr("Main Root")) {
-      if (item->parent() == NULL) return false;
+  // 禁止移动到自己
+  if (srcFolder == targetFolder) {
+    return false;
+  }
 
-      item->parent()->removeChild(item);
-      tw->addTopLevelItem(new_item);
-      tw->setCurrentItem(new_item);
-    }
+  // 目标无效禁止移动
+  if (!isTargetRoot && !targetFolder) {
+    return false;
+  }
 
-    if (m_MoveTo->strCurrentItem != tr("Main Root")) {
-      if (m_MoveTo->currentItem != item) {
-        if (item->parent() == NULL)
-          tw->takeTopLevelItem(tw->currentIndex().row());
-        else
-          item->parent()->removeChild(item);
+  // 移动笔记本（父条目）
+  if (srcFolder->text(1).isEmpty()) {
+    QList<QTreeWidgetItem*> children = srcFolder->takeChildren();
 
-        m_MoveTo->currentItem->addChild(new_item);
-        tw->setCurrentItem(new_item);
+    if (isTargetRoot) {
+      // 传统 for 循环
+      for (int i = 0; i < children.size(); i++) {
+        QTreeWidgetItem* child = children.at(i);
+        tw->addTopLevelItem(child);
       }
+
+      if (!children.isEmpty()) {
+        tw->setCurrentItem(children.first());
+      }
+    } else {
+      // 传统 for 循环
+      for (int i = 0; i < children.size(); i++) {
+        QTreeWidgetItem* child = children.at(i);
+        targetFolder->addChild(child);
+      }
+
+      tw->setCurrentItem(targetFolder);
     }
+
+    // 安全删除原笔记本
+    delete srcFolder;
+    srcFolder = nullptr;
+
+    return true;
   }
 
-  // Notes
-  if (!item->text(1).isEmpty()) {
-    if (m_MoveTo->strCurrentItem == tr("Main Root")) return false;
+  // 移动单条笔记
+  if (!srcFolder->text(1).isEmpty()) {
+    if (isTargetRoot) return false;
 
-    QTreeWidgetItem* new_item = item;
-    item->parent()->removeChild(item);
-    m_MoveTo->currentItem->addChild(new_item);
-    tw->setCurrentItem(new_item);
+    QTreeWidgetItem* parent = srcFolder->parent();
+    if (parent) {
+      parent->removeChild(srcFolder);
+      targetFolder->addChild(srcFolder);
+      tw->setCurrentItem(srcFolder);
+    }
+    return true;
   }
 
-  return true;
+  return false;
 }
 
 void NotesList::loadAllRecycle() {

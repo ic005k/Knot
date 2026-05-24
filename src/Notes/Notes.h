@@ -76,6 +76,8 @@ class Notes : public QDialog {
   ~Notes();
   Ui::Notes* ui;
 
+  void loadNotesToUI();
+
   NoteDiffManager m_NoteDiffManager;
 
   bool isWebDAVError = false;
@@ -326,7 +328,7 @@ class Notes : public QDialog {
 
   void zipNoteToSyncList();
   void refreshLocalHtmlFileInAndroid();
-  void loadNotesToUI();
+
   void processSingleRemoteFile(const QString& file);
   void startBackgroundProcessRemoteFiles_MultiThread();
 };

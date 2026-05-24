@@ -489,10 +489,10 @@ void CloudBackup::uploadFilesToWebDAV(const QStringList& files) {
 void CloudBackup::startNextUpload() {
   while (activeReplies.size() < maxNetConcurrent && !uploadQueue.isEmpty()) {
     QString filePath = uploadQueue.dequeue();
-    QFileInfo fileInfo(filePath);
-    QString remoteFile = fileInfo.fileName();
-    QString remotePath = "KnotData/memo/" + remoteFile;
-    QUrl fullUrl = QUrl(getWebDAVArgument() + remotePath);
+    QString remoteFile = filePath;
+    remoteFile.replace(privateDir, "");
+
+    QUrl fullUrl = QUrl(getWebDAVArgument() + remoteFile);
 
     QFile* file = new QFile(filePath);
     if (!file->open(QIODevice::ReadOnly)) {
