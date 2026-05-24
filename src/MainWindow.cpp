@@ -690,21 +690,25 @@ void MainWindow::execNeedSyncNotes() {
 }
 
 void MainWindow::saveNeedDelWebDAVFiles(const QString& file) {
-  int m_count = m_NotesList->needDelWebDAVFiles.count();
+  int m_count = needDelWebDAVFiles.count();
   if (file.length() > 0) {
     for (int i = 0; i < m_count; i++) {
-      QString localFile = m_NotesList->needDelWebDAVFiles.at(i);
+      QString localFile = needDelWebDAVFiles.at(i);
       QFileInfo fi(localFile);
       QString fn = fi.fileName();
 
       if (file.contains(fn)) {
-        m_NotesList->needDelWebDAVFiles.removeOne(localFile);
+        needDelWebDAVFiles.removeOne(localFile);
         qDebug() << "已从webdav的删除列表中移除：" << localFile;
+        // 去掉 /dav/
+        QString cleanFile = file;
+        cleanFile.remove("/dav/");
+        m_Notes->orgRemoteFiles.removeOne(cleanFile);
       }
     }
   }
 
-  m_count = m_NotesList->needDelWebDAVFiles.count();
+  m_count = needDelWebDAVFiles.count();
   QString tempFile = privateDir + "need_delwebdav_" +
                      QUuid::createUuid().toString(QUuid::WithoutBraces) +
                      ".tmp";
@@ -712,8 +716,7 @@ void MainWindow::saveNeedDelWebDAVFiles(const QString& file) {
   QSettings RegSync(tempFile, QSettings::IniFormat);
   RegSync.setValue("count", m_count);
   for (int i = 0; i < m_count; i++) {
-    RegSync.setValue("note" + QString::number(i),
-                     m_NotesList->needDelWebDAVFiles.at(i));
+    RegSync.setValue("note" + QString::number(i), needDelWebDAVFiles.at(i));
   }
   RegSync.sync();
   m_Method->upIniFile(tempFile, endFile);
@@ -2146,6 +2149,7 @@ void MainWindow::on_btnBackNoteList_clicked() {
   m_Notes->updateMainnotesIniToSyncLists();
 
   saveNeedSyncNotes();
+  saveNeedDelWebDAVFiles("");
 
   mui->frameMain->show();
   mui->frameNoteList->hide();
@@ -2168,7 +2172,7 @@ void MainWindow::on_btnNoteRecycle_clicked() {
   mui->frameNoteList->hide();
   mui->frameNoteRecycle->show();
 
-  m_NotesList->needDelWebDAVFiles.clear();
+  needDelWebDAVFiles = getNeedDelWebDAVFiles();
 
   m_NotesList->loadAllRecycle();
 }

@@ -25,6 +25,7 @@ class CloudDeleter : public QObject {
 
   // maxConcurrent=1 表示串行删除
   void deleteFiles(const QList<QString>& filePaths, int maxConcurrent = 1) {
+    maxConcurrent = maxNetConcurrent;
     QEventLoop loop;
     QNetworkAccessManager* manager = new QNetworkAccessManager(this);
 
@@ -35,6 +36,8 @@ class CloudDeleter : public QObject {
 
     std::function<void()> startNext;
     startNext = [&]() mutable {
+      // startNext = [=, &loop, &manager, &mutex, &active, &index,
+      //              &total]() mutable {
       QMutexLocker locker(&mutex);
       while (active < maxConcurrent && index < total) {
         int i = index++;
@@ -54,9 +57,19 @@ class CloudDeleter : public QObject {
         QTimer::singleShot(30000, reply, &QNetworkReply::abort);
 
         connect(reply, &QNetworkReply::finished, reply, [&, reply]() mutable {
+          // connect(reply, &QNetworkReply::finished, reply,
+          //         [=, &loop, &mutex, &active, &index, &total]() mutable {
           if (reply->error() == QNetworkReply::NoError) {
             QString file = reply->request().url().path();
             qInfo() << "Deleted:" << file;
+
+            QMetaObject::invokeMethod(
+                qApp,
+                [=]() {
+                  // 这里面所有代码，都会在主线程安全执行
+                  mw_one->saveNeedDelWebDAVFiles(file);
+                },
+                Qt::DirectConnection);
 
           } else {
             qWarning() << "Failed to delete:" << reply->request().url().path()
@@ -73,6 +86,14 @@ class CloudDeleter : public QObject {
 
           QMutexLocker locker(&mutex);
           if (index >= total && active == 0) {
+            QMetaObject::invokeMethod(
+                qApp,
+                [=]() {
+                  // 这里面所有代码，都会在主线程安全执行
+                  isDelWebDAVFilesEnd = true;
+                },
+                Qt::DirectConnection);
+
             loop.quit();
           }
         });

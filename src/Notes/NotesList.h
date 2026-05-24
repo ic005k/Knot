@@ -77,8 +77,6 @@ class NotesList : public QDialog {
 
   DatabaseManager m_dbManager;
 
-  QStringList needDelWebDAVFiles;
-
   QStringList searchResultList;
 
   QStringList recycleNotesList;

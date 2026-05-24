@@ -80,7 +80,7 @@ inline QString ver;
 inline QString appName = "Knot";
 
 inline QStringList readTextList, htmlFiles, listCategory, ncxList, tempHtmlList,
-    listM, ymdList, resultsList;
+    listM, ymdList, resultsList, needDelWebDAVFiles;
 
 inline QList<QPointF> freqPointList;
 inline QList<QPointF> amountList;
@@ -109,7 +109,8 @@ inline qreal fontScale = 1.0f;
 inline bool isAndroid, isLinux, isMacOS, isZipOK, isMenuImport, isDownData,
     loading, isEncrypt, isIOS, isEpub, isEpubError, isText, isPDF,
     isInitThemeEnd, isUpData, isRemovedTopItem, isReport, isReadTWEnd,
-    isWindows, isEBook, isGpsRun, isRunPaused, isGetWebDavModiTime, isPlayBook;
+    isWindows, isEBook, isGpsRun, isRunPaused, isGetWebDavModiTime, isPlayBook,
+    isDelWebDAVFilesEnd;
 
 inline bool isPasswordError = false;
 inline bool isrbFreq = true;

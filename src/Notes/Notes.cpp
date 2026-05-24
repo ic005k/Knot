@@ -610,6 +610,12 @@ void Notes::delRemoteFile(const QStringList& Files) {
   }
 
   qDebug() << "delWebDAVFiles=" << delFiles;
+  if (delFiles.count() == 0) {
+    needDelWebDAVFiles.clear();
+    mw_one->saveNeedDelWebDAVFiles("");
+    isDelWebDAVFilesEnd = true;
+  }
+
   m_CloudBackup->deleteWebDAVFiles(delFiles);
 }
 
@@ -1333,6 +1339,18 @@ void Notes::openNotes() {
     for (int i = 0; i < m_CloudBackup->webdavFileList.count(); i++) {
       orgRemoteFiles.append(m_CloudBackup->webdavFileList.at(i));
       orgRemoteDateTime.append(m_CloudBackup->webdavDateTimeList.at(i));
+    }
+
+    // 先执行由于某些原因导致未删除的远程文件
+    needDelWebDAVFiles = mw_one->getNeedDelWebDAVFiles();
+    if (needDelWebDAVFiles.count() > 0) {
+      isDelWebDAVFilesEnd = false;
+      m_NotesList->delRemoteWebDAVFiles();
+
+      while (!isDelWebDAVFilesEnd) {
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
+        QThread::msleep(1);
+      }
     }
 
     WebDavHelper* helper =
