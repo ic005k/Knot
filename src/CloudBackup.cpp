@@ -909,6 +909,7 @@ void CloudBackup::getRemoteFileList(QString url) {
   allFiles.clear();
 
   qDebug() << "获取文件列表：" << url;
+  m_Method->setInfoText(">>" + url);
 
   m_currentRemoteDir = url;
 

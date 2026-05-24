@@ -580,6 +580,8 @@ void Notes::syncToWebDAV() {
     if (notes_sync_files.count() > 0) {
       mw_one->showProgress();
 
+      m_CloudBackup->createRemoteWebDAVDir();
+
       // 先删除旧文件
       delRemoteFile(notes_sync_files);
 
@@ -1298,8 +1300,6 @@ void Notes::openNotes() {
       return;
     }
 
-    m_CloudBackup->createRemoteWebDAVDir();
-
     orgRemoteDateTime.clear();
     orgRemoteFiles.clear();
     remoteFiles.clear();
@@ -1347,6 +1347,7 @@ void Notes::openNotes() {
         helper, &WebDavHelper::listCompleted, this,
         [=](const QList<QPair<QString, QDateTime>>& files) {
           qDebug() << "获取KnotData根目录文件列表:" << url + "KnotData/";
+          m_Method->setInfoText(">>" + url + "KnotData/");
           QString info = "共找到 " + QString::number(files.size()) + " 文件";
           qDebug() << info;
 

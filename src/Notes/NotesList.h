@@ -273,6 +273,8 @@ class NotesList : public QDialog {
   void isReadyNoteDataEndChanged();
 
  private:
+  int m_autoJumpNoteIndex = -1;  // 自动跳转的笔记索引
+
   QStringList noteDiffTime, noteDiffHtml, noteDiffPatch;
 
   QString notebookName;

@@ -3134,6 +3134,20 @@ void NotesList::readyNotesData(QTreeWidgetItem* topItem) {
       isMouseClick = false;
     }
 
+    // ==============================
+    // 【优化】自动跳转到保存的笔记索引
+    // ==============================
+    if (m_autoJumpNoteIndex >= 0) {
+      int targetIndex = m_autoJumpNoteIndex;
+      m_autoJumpNoteIndex = -1;  // 立即清空，防止重复执行
+
+      int countNotes = m_Method->getCountFromQW(mui->qwNoteList);
+      if (targetIndex >= 0 && targetIndex < countNotes) {
+        setNotesListCurrentIndex(targetIndex);
+        clickNoteList();
+      }
+    }
+
     emit isReadyNoteDataEndChanged();
 
     watcher->deleteLater();
@@ -3370,9 +3384,18 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
   if (indexNoteBook < 0) return false;
   if (indexNoteBook >= countNoteBook) return false;
 
+  // ==============================
+  // 【关键】记录要自动定位的笔记索引
+  // ==============================
+  m_autoJumpNoteIndex = indexNote;
+
   setNoteBookCurrentIndex(indexNoteBook);
 
   clickNoteBook();
+
+  qDebug() << "已切换笔记本，等待加载完成后自动定位笔记：" << mdFile;
+
+  return true;
 
   QEventLoop loop;
   connect(this, &NotesList::isReadyNoteDataEndChanged, &loop, &QEventLoop::quit,

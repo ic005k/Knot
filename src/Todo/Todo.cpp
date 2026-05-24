@@ -257,6 +257,7 @@ void Todo::closeTodo() {
 
     m_Notes->appendToSyncList(todoZipFile);
     mw_one->showProgress();
+    m_CloudBackup->createRemoteWebDAVDir();
     m_CloudBackup->uploadFilesToWebDAV(m_Notes->notes_sync_files);
     isNeedSync = false;
   }
@@ -1515,8 +1516,6 @@ void Todo::openTodo() {
       QTimer::singleShot(100, mw_one, [this]() { openTodoUI(); });
       return;
     }
-
-    m_CloudBackup->createRemoteWebDAVDir();
 
     QString url = m_CloudBackup->getWebDAVArgument();
 
