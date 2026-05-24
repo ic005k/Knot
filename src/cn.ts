@@ -227,7 +227,7 @@
         <translation type="vanished">下载文件成功</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1068"/>
+        <location filename="CloudBackup.cpp" line="1138"/>
         <source>Downloading data?</source>
         <translation>下载数据？</translation>
     </message>
@@ -278,7 +278,7 @@
         <translation type="vanished">最终大小：</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1069"/>
+        <location filename="CloudBackup.cpp" line="1139"/>
         <source>This action overwrites local files with files in the cloud.</source>
         <translation>此操作将会用云端的文件覆盖本地文件</translation>
     </message>
@@ -660,15 +660,15 @@
     </message>
     <message>
         <location filename="MainHelper.cpp" line="229"/>
-        <location filename="MainHelper.cpp" line="861"/>
-        <location filename="MainHelper.cpp" line="1012"/>
+        <location filename="MainHelper.cpp" line="860"/>
+        <location filename="MainHelper.cpp" line="1011"/>
         <source>Backup File List</source>
         <translation>备份文件列表</translation>
     </message>
     <message>
         <location filename="MainHelper.cpp" line="230"/>
         <location filename="MainHelper.cpp" line="412"/>
-        <location filename="MainHelper.cpp" line="1043"/>
+        <location filename="MainHelper.cpp" line="1042"/>
         <source>Tab Recycle</source>
         <translation>标签页回收箱</translation>
     </message>
@@ -679,31 +679,31 @@
     </message>
     <message>
         <location filename="MainHelper.cpp" line="412"/>
-        <location filename="MainHelper.cpp" line="861"/>
-        <location filename="MainHelper.cpp" line="1012"/>
-        <location filename="MainHelper.cpp" line="1043"/>
+        <location filename="MainHelper.cpp" line="860"/>
+        <location filename="MainHelper.cpp" line="1011"/>
+        <location filename="MainHelper.cpp" line="1042"/>
         <source>Total</source>
         <translation>总计</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="800"/>
+        <location filename="MainHelper.cpp" line="799"/>
         <source>Slide Right to Start or Stop</source>
         <oldsource>Slide Right to Start or Stop.</oldsource>
         <translation>滑动到右边启动或停止</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="999"/>
-        <location filename="MainHelper.cpp" line="1023"/>
+        <location filename="MainHelper.cpp" line="998"/>
+        <location filename="MainHelper.cpp" line="1022"/>
         <source>Whether to remove</source>
         <translation>是否删除</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="1057"/>
+        <location filename="MainHelper.cpp" line="1056"/>
         <source>Import this data?</source>
         <translation>是否导入这个数据？</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="1249"/>
+        <location filename="MainHelper.cpp" line="1248"/>
         <source>Add</source>
         <translation>增加</translation>
     </message>
@@ -1389,7 +1389,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="380"/>
-        <location filename="MainWindow.cpp" line="2583"/>
+        <location filename="MainWindow.cpp" line="2629"/>
         <source>Stop</source>
         <translation>停止</translation>
     </message>
@@ -1607,7 +1607,7 @@
     <message>
         <location filename="MainWindow.ui" line="4557"/>
         <location filename="MainWindow.ui" line="6436"/>
-        <location filename="MainWindow.cpp" line="420"/>
+        <location filename="MainWindow.cpp" line="424"/>
         <source>Details</source>
         <translation>详细</translation>
     </message>
@@ -1833,7 +1833,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="7548"/>
-        <location filename="MainWindow.cpp" line="761"/>
+        <location filename="MainWindow.cpp" line="809"/>
         <source>Rename Tab</source>
         <translation>重命名标签页</translation>
     </message>
@@ -1852,7 +1852,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="6498"/>
-        <location filename="MainWindow.cpp" line="418"/>
+        <location filename="MainWindow.cpp" line="422"/>
         <source>Amount</source>
         <translation>金额</translation>
     </message>
@@ -1886,7 +1886,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="4458"/>
-        <location filename="MainHelper.cpp" line="1472"/>
+        <location filename="MainHelper.cpp" line="1467"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
@@ -1895,7 +1895,7 @@
         <translation type="vanished">数据</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="418"/>
+        <location filename="MainWindow.cpp" line="422"/>
         <source>Time</source>
         <translation>时间</translation>
     </message>
@@ -1910,13 +1910,13 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="7553"/>
-        <location filename="MainWindow.cpp" line="803"/>
+        <location filename="MainWindow.cpp" line="851"/>
         <source>Add Tab</source>
         <translation>增加标签页</translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="7558"/>
-        <location filename="MainWindow.cpp" line="818"/>
+        <location filename="MainWindow.cpp" line="866"/>
         <source>Del Tab</source>
         <translation>删除标签页</translation>
     </message>
@@ -1965,7 +1965,7 @@
     <message>
         <location filename="MainWindow.ui" line="6057"/>
         <location filename="MainWindow.ui" line="6280"/>
-        <location filename="MainWindow.cpp" line="782"/>
+        <location filename="MainWindow.cpp" line="830"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -2000,8 +2000,8 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="4522"/>
-        <location filename="MainWindow.cpp" line="727"/>
-        <location filename="MainWindow.cpp" line="1460"/>
+        <location filename="MainWindow.cpp" line="775"/>
+        <location filename="MainWindow.cpp" line="1508"/>
         <source>Total</source>
         <translation>总计</translation>
     </message>
@@ -2034,12 +2034,12 @@
         <translation type="vanished">第一个标签页不允许删除。</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="815"/>
+        <location filename="MainWindow.cpp" line="863"/>
         <source>Whether to remove</source>
         <translation>是否删除</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="898"/>
+        <location filename="MainWindow.cpp" line="946"/>
         <source>Date</source>
         <translation>日期</translation>
     </message>
@@ -2055,7 +2055,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="2914"/>
-        <location filename="MainWindow.cpp" line="1030"/>
+        <location filename="MainWindow.cpp" line="1078"/>
         <source>Modify</source>
         <translation>修改</translation>
     </message>
@@ -2085,27 +2085,27 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="4059"/>
-        <location filename="MainWindow.cpp" line="2580"/>
-        <location filename="MainWindow.cpp" line="2585"/>
+        <location filename="MainWindow.cpp" line="2626"/>
+        <location filename="MainWindow.cpp" line="2631"/>
         <source>Start</source>
         <translation>启动</translation>
     </message>
     <message>
         <location filename="MainWindow.cpp" line="93"/>
         <location filename="MainWindow.cpp" line="104"/>
-        <location filename="MainWindow.cpp" line="766"/>
+        <location filename="MainWindow.cpp" line="814"/>
         <source>Tab</source>
         <translation>标签页</translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="6305"/>
         <location filename="MainWindow.ui" line="6353"/>
-        <location filename="MainWindow.cpp" line="419"/>
+        <location filename="MainWindow.cpp" line="423"/>
         <source>Category</source>
         <translation>分类</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="432"/>
+        <location filename="MainWindow.cpp" line="436"/>
         <source>Del Item</source>
         <translation>删除条目</translation>
     </message>
@@ -2118,12 +2118,12 @@
         <translation type="vanished">标签页名称：</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="739"/>
+        <location filename="MainWindow.cpp" line="787"/>
         <source>Rename tab name : </source>
         <translation>重命名标签页：</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="739"/>
+        <location filename="MainWindow.cpp" line="787"/>
         <source>Tab name : </source>
         <translation>标签页名称：</translation>
     </message>
@@ -2132,9 +2132,9 @@
         <translation type="vanished">分类：</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="1149"/>
-        <location filename="MainWindow.cpp" line="1165"/>
-        <location filename="MainWindow.cpp" line="1168"/>
+        <location filename="MainWindow.cpp" line="1197"/>
+        <location filename="MainWindow.cpp" line="1213"/>
+        <location filename="MainWindow.cpp" line="1216"/>
         <source>KnotBak</source>
         <translation></translation>
     </message>
@@ -2147,7 +2147,7 @@
         <translation type="vanished">请开启APP的存储权限！</translation>
     </message>
     <message>
-        <location filename="MyThread.cpp" line="320"/>
+        <location filename="MyThread.cpp" line="324"/>
         <source>The data was exported successfully.</source>
         <translation>数据导出成功。</translation>
     </message>
@@ -2173,12 +2173,12 @@
         <translation>加密文件的密码错误！</translation>
     </message>
     <message>
-        <location filename="MyThread.cpp" line="269"/>
+        <location filename="MyThread.cpp" line="273"/>
         <source>Or the operation is canceled by the user.</source>
         <translation>或者此操作被用户取消</translation>
     </message>
     <message>
-        <location filename="MyThread.cpp" line="277"/>
+        <location filename="MyThread.cpp" line="281"/>
         <source>Data import was successful.</source>
         <translation>数据导入成功。</translation>
     </message>
@@ -2191,82 +2191,82 @@
         <translation type="vanished">最后一条记录将被删除</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="425"/>
+        <location filename="MainWindow.cpp" line="429"/>
         <source>The last record of today will be moved.</source>
         <translation>今天的最后一条记录将被移动</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="427"/>
+        <location filename="MainWindow.cpp" line="431"/>
         <source>The last record of today will be deleted.</source>
         <translation>今天的最后一条记录将被删除</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="466"/>
+        <location filename="MainWindow.cpp" line="470"/>
         <source>Only the current day&apos;s records can be moved.</source>
         <translation>只能移动当天的记录</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="468"/>
+        <location filename="MainWindow.cpp" line="472"/>
         <source>Only the current day&apos;s records can be deleted.</source>
         <translation>只能删除当天的记录</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="770"/>
+        <location filename="MainWindow.cpp" line="818"/>
         <source>New Tab</source>
         <translation>新建标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="771"/>
+        <location filename="MainWindow.cpp" line="819"/>
         <source>Please enter tab name:</source>
         <translation>请输入标签页名称：</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="869"/>
+        <location filename="MainWindow.cpp" line="917"/>
         <source>Tab 1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="1016"/>
+        <location filename="MainWindow.cpp" line="1064"/>
         <source>Only the data of the current year can be modified.</source>
         <translation>只允许修改当前年的数据。</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="1135"/>
+        <location filename="MainWindow.cpp" line="1183"/>
         <source>An error occurred while compressing the file.</source>
         <translation>压缩文件时发生错误。</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="1149"/>
+        <location filename="MainWindow.cpp" line="1197"/>
         <source>File (*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="1166"/>
+        <location filename="MainWindow.cpp" line="1214"/>
         <source>Zip File (*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="1169"/>
+        <location filename="MainWindow.cpp" line="1217"/>
         <source>Zip File (*.zip);;All(*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="1175"/>
+        <location filename="MainWindow.cpp" line="1223"/>
         <source>Import this data?</source>
         <translation>是否导入这个数据？</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="1571"/>
+        <location filename="MainWindow.cpp" line="1619"/>
         <source>Total Reading: </source>
         <translation>总阅读时间：</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="2824"/>
+        <location filename="MainWindow.cpp" line="2869"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="2828"/>
+        <location filename="MainWindow.cpp" line="2873"/>
         <source>WebDav connection successful.</source>
         <translation>WebDav连接成功</translation>
     </message>
@@ -2275,7 +2275,7 @@
         <translation type="vanished">应用启动</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="1238"/>
+        <location filename="MainWindow.cpp" line="1286"/>
         <source>Startup Time</source>
         <translation>启动时间</translation>
     </message>
@@ -2313,7 +2313,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="564"/>
-        <location filename="MainWindow.cpp" line="1584"/>
+        <location filename="MainWindow.cpp" line="1632"/>
         <source>Reading Progress</source>
         <translation>阅读进度</translation>
     </message>
@@ -2322,10 +2322,10 @@
         <translation type="vanished">当前笔记不存在。请选择其它笔记或新建笔记。</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="1155"/>
-        <location filename="MainWindow.cpp" line="2420"/>
-        <location filename="MainWindow.cpp" line="2753"/>
-        <location filename="MainWindow.cpp" line="2764"/>
+        <location filename="MainWindow.cpp" line="1203"/>
+        <location filename="MainWindow.cpp" line="2464"/>
+        <location filename="MainWindow.cpp" line="2799"/>
+        <location filename="MainWindow.cpp" line="2810"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
@@ -2365,7 +2365,7 @@
         <translation type="vanished">路径</translation>
     </message>
     <message>
-        <location filename="MyThread.cpp" line="268"/>
+        <location filename="MyThread.cpp" line="272"/>
         <source>Invalid data file.</source>
         <translation>无效的数据文件</translation>
     </message>
@@ -2423,7 +2423,7 @@
         <translation type="vanished">密码设置成功</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="781"/>
+        <location filename="MainWindow.cpp" line="829"/>
         <source>Done</source>
         <translation>完成</translation>
     </message>
@@ -2527,7 +2527,7 @@
         <translation>详细</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="3350"/>
+        <location filename="Comm/Method.cpp" line="3352"/>
         <source>Please check the attachment.</source>
         <translation>请查收附件</translation>
     </message>
@@ -2661,7 +2661,7 @@
     <name>Notes</name>
     <message>
         <location filename="Notes/Notes.ui" line="14"/>
-        <location filename="Notes/Notes.cpp" line="564"/>
+        <location filename="Notes/Notes.cpp" line="566"/>
         <source>Notes</source>
         <translation>笔记</translation>
     </message>
@@ -2795,43 +2795,43 @@
         <translation type="vanished">列</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="141"/>
+        <location filename="Notes/Notes.cpp" line="143"/>
         <source>Modi Notes</source>
         <translation>修改笔记</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="978"/>
-        <location filename="Notes/Notes.cpp" line="992"/>
-        <location filename="Notes/Notes.cpp" line="1913"/>
+        <location filename="Notes/Notes.cpp" line="983"/>
+        <location filename="Notes/Notes.cpp" line="997"/>
+        <location filename="Notes/Notes.cpp" line="1942"/>
         <source>An error occurred while compressing the file.</source>
         <translation>压缩文件时发生错误。</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="279"/>
+        <location filename="Notes/Notes.cpp" line="281"/>
         <source>Knot</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="280"/>
+        <location filename="Notes/Notes.cpp" line="282"/>
         <source>Picture Files (*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="319"/>
-        <location filename="Notes/Notes.cpp" line="563"/>
-        <location filename="Notes/Notes.cpp" line="782"/>
+        <location filename="Notes/Notes.cpp" line="321"/>
+        <location filename="Notes/Notes.cpp" line="565"/>
+        <location filename="Notes/Notes.cpp" line="787"/>
         <source>No</source>
         <translation>否</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="320"/>
-        <location filename="Notes/Notes.cpp" line="562"/>
-        <location filename="Notes/Notes.cpp" line="783"/>
+        <location filename="Notes/Notes.cpp" line="322"/>
+        <location filename="Notes/Notes.cpp" line="564"/>
+        <location filename="Notes/Notes.cpp" line="788"/>
         <source>Yes</source>
         <translation>是</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="322"/>
+        <location filename="Notes/Notes.cpp" line="324"/>
         <source>Is the original size of the image used?</source>
         <translation>是否使用图像的原始尺寸？</translation>
     </message>
@@ -2840,52 +2840,52 @@
         <translation type="vanished">标题</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="786"/>
+        <location filename="Notes/Notes.cpp" line="791"/>
         <source>Want to share this PDF file?</source>
         <translation>是否分享此PDF文件？</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="790"/>
+        <location filename="Notes/Notes.cpp" line="795"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1106"/>
+        <location filename="Notes/Notes.cpp" line="1129"/>
         <source>Note Book</source>
         <translation>笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1107"/>
+        <location filename="Notes/Notes.cpp" line="1130"/>
         <source>Note List</source>
         <translation>笔记列表</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1190"/>
+        <location filename="Notes/Notes.cpp" line="1213"/>
         <source>The current note does not exist. Please select another note or create a new note.</source>
         <translation>当前笔记不存在。请选择其它笔记或新建笔记。</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1270"/>
+        <location filename="Notes/Notes.cpp" line="1293"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1262"/>
+        <location filename="Notes/Notes.cpp" line="1285"/>
         <source>Processing...</source>
         <translation>处理中...</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1408"/>
+        <location filename="Notes/Notes.cpp" line="1435"/>
         <source>Synchronization failed. Please try again later.</source>
         <translation>同步失败，请稍后再试。</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="1500"/>
-        <location filename="Notes/Notes.cpp" line="1551"/>
-        <location filename="Notes/Notes.cpp" line="1601"/>
-        <location filename="Notes/Notes.cpp" line="1755"/>
-        <location filename="Notes/Notes.cpp" line="1800"/>
-        <location filename="Notes/Notes.cpp" line="1845"/>
+        <location filename="Notes/Notes.cpp" line="1527"/>
+        <location filename="Notes/Notes.cpp" line="1578"/>
+        <location filename="Notes/Notes.cpp" line="1628"/>
+        <location filename="Notes/Notes.cpp" line="1784"/>
+        <location filename="Notes/Notes.cpp" line="1829"/>
+        <location filename="Notes/Notes.cpp" line="1874"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation>解压文件不成功，请在偏好设置里面检查各平台的密码是否一致。</translation>
     </message>
@@ -2895,29 +2895,29 @@
     </message>
     <message>
         <location filename="Notes/Notes.ui" line="70"/>
-        <location filename="Notes/Notes.cpp" line="438"/>
+        <location filename="Notes/Notes.cpp" line="440"/>
         <source>Bold Italic</source>
         <translation>粗斜体</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="451"/>
+        <location filename="Notes/Notes.cpp" line="453"/>
         <source>Italic</source>
         <translation>斜体</translation>
     </message>
     <message>
         <location filename="Notes/Notes.ui" line="179"/>
-        <location filename="Notes/Notes.cpp" line="464"/>
+        <location filename="Notes/Notes.cpp" line="466"/>
         <source>Underline</source>
         <translation>下划线</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="478"/>
+        <location filename="Notes/Notes.cpp" line="480"/>
         <source>Strickout</source>
         <translation>删除线</translation>
     </message>
     <message>
         <location filename="Notes/Notes.ui" line="217"/>
-        <location filename="Notes/Notes.cpp" line="495"/>
+        <location filename="Notes/Notes.cpp" line="497"/>
         <source>Color</source>
         <translation>颜色</translation>
     </message>
@@ -2931,12 +2931,12 @@
     </message>
     <message>
         <location filename="Notes/Notes.ui" line="366"/>
-        <location filename="Notes/Notes.cpp" line="510"/>
+        <location filename="Notes/Notes.cpp" line="512"/>
         <source>Bold</source>
         <translation>粗体</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="564"/>
+        <location filename="Notes/Notes.cpp" line="566"/>
         <source>Do you want to save the notes?</source>
         <translation>您想保存笔记吗？</translation>
     </message>
@@ -2953,7 +2953,7 @@
         <translation type="vanished">已到达文档的开头</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="663"/>
+        <location filename="Notes/Notes.cpp" line="668"/>
         <source>Letter</source>
         <translation>信函</translation>
     </message>
@@ -2966,7 +2966,7 @@
         <translation type="vanished">取消</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="672"/>
+        <location filename="Notes/Notes.cpp" line="677"/>
         <source>Page size</source>
         <translation>页面尺寸</translation>
     </message>
@@ -2975,17 +2975,17 @@
         <translation type="vanished">页面尺寸：</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="697"/>
+        <location filename="Notes/Notes.cpp" line="702"/>
         <source>Portrait</source>
         <translation>纵向</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="697"/>
+        <location filename="Notes/Notes.cpp" line="702"/>
         <source>Landscape</source>
         <translation>横向</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="703"/>
+        <location filename="Notes/Notes.cpp" line="708"/>
         <source>Orientation</source>
         <translation>方向</translation>
     </message>
@@ -2994,17 +2994,17 @@
         <translation type="vanished">方向：</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="785"/>
+        <location filename="Notes/Notes.cpp" line="790"/>
         <source>The PDF file is successfully exported.</source>
         <translation>PDF文件导出成功</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="731"/>
+        <location filename="Notes/Notes.cpp" line="736"/>
         <source>PDF files</source>
         <translation>PDF文件</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="732"/>
+        <location filename="Notes/Notes.cpp" line="737"/>
         <source>Export current note as PDF</source>
         <translation>输出当前笔记到PDF</translation>
     </message>
@@ -3021,24 +3021,44 @@
         <translation type="vanished">新建笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="50"/>
-        <location filename="Notes/NotesList.cpp" line="973"/>
-        <location filename="Notes/NotesList.cpp" line="1035"/>
+        <location filename="Notes/NotesList.cpp" line="51"/>
+        <location filename="Notes/NotesList.cpp" line="971"/>
+        <location filename="Notes/NotesList.cpp" line="1033"/>
         <source>Notebook</source>
         <translation>笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2668"/>
+        <location filename="Notes/NotesList.cpp" line="2499"/>
+        <source>NoteBook:</source>
+        <translation>笔记本：</translation>
+    </message>
+    <message>
+        <location filename="Notes/NotesList.cpp" line="2500"/>
+        <source>Local Notes:</source>
+        <translation>本地笔记：</translation>
+    </message>
+    <message>
+        <location filename="Notes/NotesList.cpp" line="2501"/>
+        <source>Remote Notes:</source>
+        <translation>远程笔记：</translation>
+    </message>
+    <message>
+        <location filename="Notes/NotesList.cpp" line="2503"/>
+        <source>Images:</source>
+        <translation>图片：</translation>
+    </message>
+    <message>
+        <location filename="Notes/NotesList.cpp" line="2664"/>
         <source>New Note</source>
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="419"/>
+        <location filename="Notes/NotesList.cpp" line="424"/>
         <source>Note</source>
         <translation>笔记</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="270"/>
+        <location filename="Notes/NotesList.cpp" line="275"/>
         <source>Rename</source>
         <translation>重命名</translation>
     </message>
@@ -3047,83 +3067,67 @@
         <translation type="vanished">查找</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.ui" line="49"/>
-        <location filename="Notes/NotesList.ui" line="264"/>
-        <source>2</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="Notes/NotesList.ui" line="54"/>
-        <source>3</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="Notes/NotesList.ui" line="73"/>
-        <location filename="Notes/NotesList.cpp" line="2673"/>
+        <location filename="Notes/NotesList.ui" line="46"/>
+        <location filename="Notes/NotesList.cpp" line="2669"/>
         <source>Import</source>
         <translation>导入</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.ui" line="86"/>
-        <location filename="Notes/NotesList.cpp" line="2674"/>
+        <location filename="Notes/NotesList.ui" line="59"/>
+        <location filename="Notes/NotesList.cpp" line="2670"/>
         <source>Export</source>
         <translation>导出</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.ui" line="99"/>
+        <location filename="Notes/NotesList.ui" line="72"/>
         <source>Up</source>
         <translation>上移</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.ui" line="122"/>
+        <location filename="Notes/NotesList.ui" line="95"/>
         <source>Down</source>
         <translation>下移</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.ui" line="145"/>
+        <location filename="Notes/NotesList.ui" line="118"/>
         <source>MoveTo</source>
         <translation>移动到</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.ui" line="175"/>
+        <location filename="Notes/NotesList.ui" line="148"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.ui" line="188"/>
-        <location filename="Notes/NotesList.ui" line="296"/>
+        <location filename="Notes/NotesList.ui" line="161"/>
+        <location filename="Notes/NotesList.ui" line="255"/>
         <source>Esc</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.ui" line="201"/>
-        <location filename="Notes/NotesList.ui" line="332"/>
+        <location filename="Notes/NotesList.ui" line="174"/>
+        <location filename="Notes/NotesList.ui" line="291"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.ui" line="224"/>
+        <location filename="Notes/NotesList.ui" line="197"/>
         <source>Recycle</source>
         <translation>回收箱</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.ui" line="259"/>
-        <source>1</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="Notes/NotesList.ui" line="283"/>
+        <location filename="Notes/NotesList.ui" line="242"/>
         <source>Back</source>
         <translation>返回</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.ui" line="309"/>
+        <location filename="Notes/NotesList.ui" line="268"/>
         <source>RestoreTo</source>
         <oldsource>Restore</oldsource>
         <translation>恢复到</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="240"/>
+        <location filename="Notes/NotesList.cpp" line="245"/>
         <source>Note Name</source>
         <translation>笔记名称</translation>
     </message>
@@ -3132,53 +3136,52 @@
         <translation type="vanished">编辑</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="307"/>
+        <location filename="Notes/NotesList.cpp" line="312"/>
         <source>Copy</source>
         <translation>拷贝</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="308"/>
+        <location filename="Notes/NotesList.cpp" line="313"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="417"/>
-        <location filename="Notes/NotesList.cpp" line="2507"/>
+        <location filename="Notes/NotesList.cpp" line="422"/>
         <source>NoteBook</source>
         <translation>笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="423"/>
+        <location filename="Notes/NotesList.cpp" line="428"/>
         <source>Move to the recycle bin?</source>
         <translation>移到回收箱？</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="552"/>
+        <location filename="Notes/NotesList.cpp" line="557"/>
         <source>Knot</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="552"/>
+        <location filename="Notes/NotesList.cpp" line="557"/>
         <source>MD File (*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="574"/>
+        <location filename="Notes/NotesList.cpp" line="579"/>
         <source>Invalid Markdown file.</source>
         <translation>无效的Markdown文件</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="588"/>
+        <location filename="Notes/NotesList.cpp" line="593"/>
         <source>A maximum of 10 files can be imported at a time.</source>
         <translation>一次性最多只能导入10个文件</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="653"/>
+        <location filename="Notes/NotesList.cpp" line="658"/>
         <source>MD File(*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="813"/>
+        <location filename="Notes/NotesList.cpp" line="818"/>
         <source>Modi Notes List</source>
         <translation>修改笔记列表</translation>
     </message>
@@ -3187,118 +3190,116 @@
         <translation type="vanished">修改笔记回收箱</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="974"/>
-        <location filename="Notes/NotesList.cpp" line="1036"/>
-        <location filename="Notes/NotesList.cpp" line="2508"/>
+        <location filename="Notes/NotesList.cpp" line="972"/>
+        <location filename="Notes/NotesList.cpp" line="1034"/>
         <source>Notes</source>
         <translation>笔记</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="1072"/>
-        <location filename="Notes/NotesList.cpp" line="1098"/>
+        <location filename="Notes/NotesList.cpp" line="1070"/>
+        <location filename="Notes/NotesList.cpp" line="1095"/>
         <source>Notes Recycle Bin</source>
         <translation>笔记回收箱</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="1145"/>
+        <location filename="Notes/NotesList.cpp" line="1142"/>
         <source>Unclassified</source>
         <translation>未分类</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="1238"/>
+        <location filename="Notes/NotesList.cpp" line="1230"/>
         <source>Please select at least one item to restore.</source>
         <translation>请至少选择一个条目进行恢复。</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="1332"/>
+        <location filename="Notes/NotesList.cpp" line="1324"/>
         <source>Please select at least one item to delete.</source>
         <translation>请至少选择一个条目进行删除。</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="1340"/>
+        <location filename="Notes/NotesList.cpp" line="1332"/>
         <source>Whether to delete the selected %1 items permanently?</source>
         <translation>是否永久删除选中的 %1 个条目？</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="1413"/>
+        <location filename="Notes/NotesList.cpp" line="1405"/>
         <source>Batch delete %1 items completed successfully.</source>
         <translation>批量删除%1个条目，操作成功完成。</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="1819"/>
+        <location filename="Notes/NotesList.cpp" line="1811"/>
         <source>No match was found.</source>
         <translation>没找到匹配结果。</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2396"/>
+        <location filename="Notes/NotesList.cpp" line="2388"/>
         <source>Set Color Marker</source>
         <translation>设置颜色标识</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2398"/>
+        <location filename="Notes/NotesList.cpp" line="2390"/>
         <source>Statistics</source>
         <translation>统计</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2400"/>
+        <location filename="Notes/NotesList.cpp" line="2392"/>
         <source>Rebuild Search Database Index</source>
         <translation>重建搜索数据库索引</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2423"/>
+        <location filename="Notes/NotesList.cpp" line="2415"/>
         <source>Rebuilding the index will take some time. Click OK to start.</source>
         <translation>重建索引需要一些时间，点击“确定”后开始。</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2499"/>
+        <location filename="Notes/NotesList.cpp" line="2491"/>
         <source>Access WebDAV:</source>
         <translation>访问WebDAV：</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2509"/>
         <source>Images</source>
-        <translation>图片</translation>
+        <translation type="vanished">图片</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2545"/>
+        <location filename="Notes/NotesList.cpp" line="2539"/>
         <source>Please create a new notebook first, and then create new notes.</source>
         <translation>请先新建笔记本，再新建笔记。</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2675"/>
+        <location filename="Notes/NotesList.cpp" line="2671"/>
         <source>Share</source>
         <translation>分享</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2676"/>
+        <location filename="Notes/NotesList.cpp" line="2672"/>
         <source>Copy Note Link</source>
         <translation>拷贝笔记链接</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2677"/>
+        <location filename="Notes/NotesList.cpp" line="2673"/>
         <source>Relationship Graph</source>
         <translation>关系图谱</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2678"/>
+        <location filename="Notes/NotesList.cpp" line="2674"/>
         <source>Modification History</source>
         <translation>修改历史</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2875"/>
+        <location filename="Notes/NotesList.cpp" line="2871"/>
         <source>Share to</source>
         <oldsource>Shart to</oldsource>
         <translation>分享到</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2919"/>
-        <location filename="Notes/NotesList.cpp" line="2927"/>
-        <location filename="Notes/NotesList.cpp" line="2942"/>
+        <location filename="Notes/NotesList.cpp" line="2915"/>
+        <location filename="Notes/NotesList.cpp" line="2923"/>
+        <location filename="Notes/NotesList.cpp" line="2938"/>
         <source>Main Root</source>
         <translation>主根</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="3056"/>
+        <location filename="Notes/NotesList.cpp" line="3052"/>
         <source>File does not exist</source>
         <translation>文件不存在</translation>
     </message>
@@ -3307,7 +3308,7 @@
         <translation type="vanished">当前笔记不存在。请选择其它笔记或新建笔记。</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="3457"/>
+        <location filename="Notes/NotesList.cpp" line="3454"/>
         <source>Note Search Results:</source>
         <translation>笔记搜索结果：</translation>
     </message>
@@ -3316,12 +3317,12 @@
         <translation type="vanished">确定</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="305"/>
+        <location filename="Notes/NotesList.cpp" line="310"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2391"/>
+        <location filename="Notes/NotesList.cpp" line="2383"/>
         <source>New NoteBook</source>
         <translation>新建笔记本</translation>
     </message>
@@ -3334,12 +3335,12 @@
         <translation type="vanished">笔记本名称</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="1425"/>
+        <location filename="Notes/NotesList.cpp" line="1417"/>
         <source>Whether to remove</source>
         <translation>是否删除</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2393"/>
+        <location filename="Notes/NotesList.cpp" line="2385"/>
         <source>Rename NoteBook</source>
         <translation>重命名笔记本</translation>
     </message>
@@ -3348,19 +3349,19 @@
         <translation type="vanished">总和</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2392"/>
+        <location filename="Notes/NotesList.cpp" line="2384"/>
         <source>Del NoteBook</source>
         <translation>删除笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2394"/>
-        <location filename="Notes/NotesList.cpp" line="2671"/>
+        <location filename="Notes/NotesList.cpp" line="2386"/>
+        <location filename="Notes/NotesList.cpp" line="2667"/>
         <source>Move Up</source>
         <translation>上移</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2395"/>
-        <location filename="Notes/NotesList.cpp" line="2672"/>
+        <location filename="Notes/NotesList.cpp" line="2387"/>
+        <location filename="Notes/NotesList.cpp" line="2668"/>
         <source>Move Down</source>
         <translation>下移</translation>
     </message>
@@ -3369,32 +3370,32 @@
         <translation type="vanished">新建笔记名称</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2670"/>
+        <location filename="Notes/NotesList.cpp" line="2666"/>
         <source>Rename Note</source>
         <translation>重命名笔记</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2669"/>
+        <location filename="Notes/NotesList.cpp" line="2665"/>
         <source>Del Note</source>
         <translation>删除笔记</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="2567"/>
+        <location filename="Notes/NotesList.cpp" line="2561"/>
         <source>Untitled Note</source>
         <translation>无标题笔记</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="306"/>
+        <location filename="Notes/NotesList.cpp" line="311"/>
         <source>Paste</source>
         <translation>粘贴</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="505"/>
+        <location filename="Notes/NotesList.cpp" line="510"/>
         <source>Note Book</source>
         <translation>笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList.cpp" line="506"/>
+        <location filename="Notes/NotesList.cpp" line="511"/>
         <source>Note List</source>
         <translation>笔记列表</translation>
     </message>
@@ -3454,58 +3455,49 @@
         <translation>输入1-50</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="137"/>
-        <location filename="Preferences.cpp" line="166"/>
+        <location filename="Preferences.cpp" line="149"/>
         <source>ExtraSmall</source>
         <translation>极小</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="140"/>
-        <location filename="Preferences.cpp" line="169"/>
+        <location filename="Preferences.cpp" line="149"/>
         <source>Small</source>
         <translation>小</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="143"/>
-        <location filename="Preferences.cpp" line="159"/>
-        <location filename="Preferences.cpp" line="172"/>
-        <location filename="Preferences.cpp" line="188"/>
+        <location filename="Preferences.cpp" line="149"/>
         <source>Default</source>
         <translation>正常（默认）</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="146"/>
-        <location filename="Preferences.cpp" line="175"/>
+        <location filename="Preferences.cpp" line="150"/>
         <source>Large</source>
         <translation>大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="149"/>
-        <location filename="Preferences.cpp" line="178"/>
+        <location filename="Preferences.cpp" line="150"/>
         <source>XLarge</source>
         <translation>超大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="152"/>
-        <location filename="Preferences.cpp" line="181"/>
+        <location filename="Preferences.cpp" line="150"/>
         <source>XXLarge</source>
         <translation>特大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="155"/>
-        <location filename="Preferences.cpp" line="184"/>
+        <location filename="Preferences.cpp" line="151"/>
         <source>XXXLarge</source>
         <translation>最大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="197"/>
+        <location filename="Preferences.cpp" line="161"/>
         <source>Font</source>
         <translation>字体</translation>
     </message>
     <message>
         <location filename="Preferences.ui" line="69"/>
         <location filename="Preferences.cpp" line="25"/>
-        <location filename="Preferences.cpp" line="192"/>
+        <location filename="Preferences.cpp" line="156"/>
         <source>Font Size</source>
         <translation>字体大小</translation>
     </message>
@@ -3515,8 +3507,8 @@
     </message>
     <message>
         <location filename="Preferences.ui" line="128"/>
-        <location filename="Preferences.cpp" line="259"/>
-        <location filename="Preferences.cpp" line="265"/>
+        <location filename="Preferences.cpp" line="223"/>
+        <location filename="Preferences.cpp" line="229"/>
         <source>Custom Font</source>
         <translation>自选字体</translation>
     </message>
@@ -3623,7 +3615,7 @@
         <translation>返回</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="198"/>
+        <location filename="Preferences.cpp" line="162"/>
         <source>Font Files (*.*)</source>
         <translation>字体文件 (*.*)</translation>
     </message>
@@ -3632,7 +3624,7 @@
         <translation type="vanished">自动备份</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="508"/>
+        <location filename="Preferences.cpp" line="472"/>
         <source>Password validation error.</source>
         <translation>密码验证错误</translation>
     </message>
@@ -3671,55 +3663,55 @@
     <name>QInstaller</name>
     <message>
         <location filename="AutoUpdate.cpp" line="230"/>
-        <location filename="Comm/Method.cpp" line="2535"/>
+        <location filename="Comm/Method.cpp" line="2537"/>
         <source>bytes</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="231"/>
-        <location filename="Comm/Method.cpp" line="2536"/>
+        <location filename="Comm/Method.cpp" line="2538"/>
         <source>KiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="232"/>
-        <location filename="Comm/Method.cpp" line="2537"/>
+        <location filename="Comm/Method.cpp" line="2539"/>
         <source>MiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="233"/>
-        <location filename="Comm/Method.cpp" line="2538"/>
+        <location filename="Comm/Method.cpp" line="2540"/>
         <source>GiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="234"/>
-        <location filename="Comm/Method.cpp" line="2539"/>
+        <location filename="Comm/Method.cpp" line="2541"/>
         <source>TiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="235"/>
-        <location filename="Comm/Method.cpp" line="2540"/>
+        <location filename="Comm/Method.cpp" line="2542"/>
         <source>PiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="236"/>
-        <location filename="Comm/Method.cpp" line="2541"/>
+        <location filename="Comm/Method.cpp" line="2543"/>
         <source>EiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="237"/>
-        <location filename="Comm/Method.cpp" line="2542"/>
+        <location filename="Comm/Method.cpp" line="2544"/>
         <source>ZiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="238"/>
-        <location filename="Comm/Method.cpp" line="2543"/>
+        <location filename="Comm/Method.cpp" line="2545"/>
         <source>YiB</source>
         <translation></translation>
     </message>
@@ -8118,35 +8110,35 @@
         <translation>信息</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="1991"/>
+        <location filename="Reader/Reader.cpp" line="1993"/>
         <source>Remove from list?</source>
         <translation>从列表中移除？</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="2010"/>
+        <location filename="Reader/Reader.cpp" line="2012"/>
         <source>The EPUB file was opened with an error.</source>
         <translation>EPUB文件打开出错</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="2331"/>
+        <location filename="Reader/Reader.cpp" line="2337"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="3306"/>
-        <location filename="Reader/Reader.cpp" line="3434"/>
+        <location filename="Reader/Reader.cpp" line="3312"/>
+        <location filename="Reader/Reader.cpp" line="3440"/>
         <source>Note</source>
         <translation>笔记</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="3321"/>
-        <location filename="Reader/Reader.cpp" line="3448"/>
+        <location filename="Reader/Reader.cpp" line="3327"/>
+        <location filename="Reader/Reader.cpp" line="3454"/>
         <source>Ok</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="3322"/>
-        <location filename="Reader/Reader.cpp" line="3449"/>
+        <location filename="Reader/Reader.cpp" line="3328"/>
+        <location filename="Reader/Reader.cpp" line="3455"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -8161,7 +8153,7 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="1541"/>
+        <location filename="Reader/Reader.cpp" line="1543"/>
         <source>Clear all reading history</source>
         <translation>清除所有的阅读记录</translation>
     </message>
@@ -8556,7 +8548,7 @@
         <translation type="vanished">暂停</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="732"/>
+        <location filename="Exercise/Steps.cpp" line="734"/>
         <source>Start</source>
         <translation>启动</translation>
     </message>
@@ -8565,40 +8557,40 @@
         <translation type="vanished">步数</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="651"/>
+        <location filename="Exercise/Steps.cpp" line="653"/>
         <source>Calorie</source>
         <translation>卡路里</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="731"/>
+        <location filename="Exercise/Steps.cpp" line="733"/>
         <source>No GPS signal...</source>
         <oldsource>Search the GPS...</oldsource>
         <translation>没有GPS信号...</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1317"/>
-        <location filename="Exercise/Steps.cpp" line="1410"/>
-        <location filename="Exercise/Steps.cpp" line="1737"/>
-        <location filename="Exercise/Steps.cpp" line="1748"/>
-        <location filename="Exercise/Steps.cpp" line="3118"/>
+        <location filename="Exercise/Steps.cpp" line="1319"/>
+        <location filename="Exercise/Steps.cpp" line="1412"/>
+        <location filename="Exercise/Steps.cpp" line="1739"/>
+        <location filename="Exercise/Steps.cpp" line="1750"/>
+        <location filename="Exercise/Steps.cpp" line="3120"/>
         <source>Cycling</source>
         <translation>骑行</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1318"/>
-        <location filename="Exercise/Steps.cpp" line="1415"/>
-        <location filename="Exercise/Steps.cpp" line="1739"/>
-        <location filename="Exercise/Steps.cpp" line="1750"/>
-        <location filename="Exercise/Steps.cpp" line="3119"/>
+        <location filename="Exercise/Steps.cpp" line="1320"/>
+        <location filename="Exercise/Steps.cpp" line="1417"/>
+        <location filename="Exercise/Steps.cpp" line="1741"/>
+        <location filename="Exercise/Steps.cpp" line="1752"/>
+        <location filename="Exercise/Steps.cpp" line="3121"/>
         <source>Hiking</source>
         <translation>徒步</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1319"/>
-        <location filename="Exercise/Steps.cpp" line="1420"/>
-        <location filename="Exercise/Steps.cpp" line="1741"/>
-        <location filename="Exercise/Steps.cpp" line="1752"/>
-        <location filename="Exercise/Steps.cpp" line="3120"/>
+        <location filename="Exercise/Steps.cpp" line="1321"/>
+        <location filename="Exercise/Steps.cpp" line="1422"/>
+        <location filename="Exercise/Steps.cpp" line="1743"/>
+        <location filename="Exercise/Steps.cpp" line="1754"/>
+        <location filename="Exercise/Steps.cpp" line="3122"/>
         <source>Running</source>
         <translation>跑步</translation>
     </message>
@@ -8636,14 +8628,14 @@
         <translation type="vanished">Activity无效，GPS启动失败</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1164"/>
-        <location filename="Exercise/Steps.cpp" line="1337"/>
+        <location filename="Exercise/Steps.cpp" line="1166"/>
+        <location filename="Exercise/Steps.cpp" line="1339"/>
         <source>Exercise Duration</source>
         <translation>运动时长</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1039"/>
-        <location filename="Exercise/Steps.cpp" line="1340"/>
+        <location filename="Exercise/Steps.cpp" line="1041"/>
+        <location filename="Exercise/Steps.cpp" line="1342"/>
         <source>Average Speed</source>
         <translation>平均速度</translation>
     </message>
@@ -8653,211 +8645,211 @@
         <translation>方向</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1163"/>
+        <location filename="Exercise/Steps.cpp" line="1165"/>
         <source>Current Distance</source>
         <translation>当前距离</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1340"/>
+        <location filename="Exercise/Steps.cpp" line="1342"/>
         <source>Max Speed</source>
         <translation>最大速度</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1735"/>
-        <location filename="Exercise/Steps.cpp" line="3161"/>
+        <location filename="Exercise/Steps.cpp" line="1737"/>
+        <location filename="Exercise/Steps.cpp" line="3163"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1746"/>
+        <location filename="Exercise/Steps.cpp" line="1748"/>
         <source>Year</source>
         <translation>年</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="2326"/>
+        <location filename="Exercise/Steps.cpp" line="2328"/>
         <source>Today</source>
         <translation>今天</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="2327"/>
+        <location filename="Exercise/Steps.cpp" line="2329"/>
         <source>km</source>
         <translation>公里</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3034"/>
+        <location filename="Exercise/Steps.cpp" line="3036"/>
         <source>Sports Statistics</source>
         <translation>运动统计</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3046"/>
+        <location filename="Exercise/Steps.cpp" line="3048"/>
         <source>Date format error!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3107"/>
+        <location filename="Exercise/Steps.cpp" line="3109"/>
         <source>%1 Monthly Sports Statistics</source>
         <translation>%1 每月运动统计</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3171"/>
+        <location filename="Exercise/Steps.cpp" line="3173"/>
         <source>Distance (KM)</source>
         <translation>里程（千米）</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3246"/>
+        <location filename="Exercise/Steps.cpp" line="3248"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3337"/>
+        <location filename="Exercise/Steps.cpp" line="3339"/>
         <source>Uphill: </source>
         <translation>上坡：</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3337"/>
         <location filename="Exercise/Steps.cpp" line="3339"/>
         <location filename="Exercise/Steps.cpp" line="3341"/>
+        <location filename="Exercise/Steps.cpp" line="3343"/>
         <source> km</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3339"/>
+        <location filename="Exercise/Steps.cpp" line="3341"/>
         <source>Flat: </source>
         <translation>平路：</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3340"/>
+        <location filename="Exercise/Steps.cpp" line="3342"/>
         <source>Downhill: </source>
         <translation>下坡：</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3426"/>
+        <location filename="Exercise/Steps.cpp" line="3428"/>
         <source>Invalid Direction</source>
         <translation>无效方向</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3447"/>
+        <location filename="Exercise/Steps.cpp" line="3449"/>
         <source>Northeast</source>
         <translation>东北</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3449"/>
+        <location filename="Exercise/Steps.cpp" line="3451"/>
         <source>Southeast</source>
         <translation>东南</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3451"/>
+        <location filename="Exercise/Steps.cpp" line="3453"/>
         <source>Southwest</source>
         <translation>西南</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3453"/>
+        <location filename="Exercise/Steps.cpp" line="3455"/>
         <source>Northwest</source>
         <translation>西北</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3465"/>
+        <location filename="Exercise/Steps.cpp" line="3467"/>
         <source>East by North</source>
         <translation>东偏北</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3517"/>
+        <location filename="Exercise/Steps.cpp" line="3519"/>
         <source>Edit Remarks</source>
         <translation>编辑备注</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3525"/>
+        <location filename="Exercise/Steps.cpp" line="3527"/>
         <source>Please enter remarks here...</source>
         <translation>请在这里输入备注...</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3552"/>
+        <location filename="Exercise/Steps.cpp" line="3554"/>
         <source>Parse remarks file failed: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3558"/>
+        <location filename="Exercise/Steps.cpp" line="3560"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3559"/>
+        <location filename="Exercise/Steps.cpp" line="3561"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3666"/>
-        <location filename="Exercise/Steps.cpp" line="3678"/>
+        <location filename="Exercise/Steps.cpp" line="3668"/>
+        <location filename="Exercise/Steps.cpp" line="3680"/>
         <source>Warning</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3667"/>
+        <location filename="Exercise/Steps.cpp" line="3669"/>
         <source>Failed to save remarks: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3679"/>
+        <location filename="Exercise/Steps.cpp" line="3681"/>
         <source>Write remarks to file failed: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3462"/>
+        <location filename="Exercise/Steps.cpp" line="3464"/>
         <source>North by East</source>
         <translation>北偏东</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3473"/>
+        <location filename="Exercise/Steps.cpp" line="3475"/>
         <source>South by East</source>
         <translation>南偏东</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3470"/>
+        <location filename="Exercise/Steps.cpp" line="3472"/>
         <source>East by South</source>
         <translation>东偏南</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3481"/>
+        <location filename="Exercise/Steps.cpp" line="3483"/>
         <source>West by South</source>
         <translation>西偏南</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3478"/>
+        <location filename="Exercise/Steps.cpp" line="3480"/>
         <source>South by West</source>
         <translation>南偏西</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3489"/>
+        <location filename="Exercise/Steps.cpp" line="3491"/>
         <source>North by West</source>
         <translation>北偏西</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3486"/>
+        <location filename="Exercise/Steps.cpp" line="3488"/>
         <source>West by North</source>
         <translation>西偏北</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3437"/>
+        <location filename="Exercise/Steps.cpp" line="3439"/>
         <source>Due North</source>
         <translation>正北方向</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3439"/>
+        <location filename="Exercise/Steps.cpp" line="3441"/>
         <source>Due East</source>
         <translation>正东方向</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3441"/>
+        <location filename="Exercise/Steps.cpp" line="3443"/>
         <source>Due South</source>
         <translation>正南方</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3443"/>
+        <location filename="Exercise/Steps.cpp" line="3445"/>
         <source>Due West</source>
         <translation>正西方</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3502"/>
+        <location filename="Exercise/Steps.cpp" line="3504"/>
         <source>degrees</source>
         <translation>度</translation>
     </message>
@@ -8871,19 +8863,19 @@
     </message>
     <message>
         <location filename="Exercise/Steps.cpp" line="414"/>
-        <location filename="Exercise/Steps.cpp" line="1168"/>
-        <location filename="Exercise/Steps.cpp" line="3206"/>
+        <location filename="Exercise/Steps.cpp" line="1170"/>
+        <location filename="Exercise/Steps.cpp" line="3208"/>
         <source>Total Distance</source>
         <translation>总距离</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1324"/>
+        <location filename="Exercise/Steps.cpp" line="1326"/>
         <source>Distance</source>
         <translation>距离</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1161"/>
-        <location filename="Exercise/Steps.cpp" line="1337"/>
+        <location filename="Exercise/Steps.cpp" line="1163"/>
+        <location filename="Exercise/Steps.cpp" line="1339"/>
         <source>Duration</source>
         <translation>持续时间</translation>
     </message>
@@ -8921,7 +8913,7 @@
         <translation type="vanished">周日</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="796"/>
+        <location filename="Exercise/Steps.cpp" line="798"/>
         <source>Stop</source>
         <translation>停止</translation>
     </message>
@@ -8930,14 +8922,14 @@
         <translation type="vanished">速度</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1322"/>
+        <location filename="Exercise/Steps.cpp" line="1324"/>
         <source>Time</source>
         <translation>时间</translation>
     </message>
     <message>
         <location filename="Exercise/Steps.cpp" line="298"/>
         <location filename="Exercise/Steps.cpp" line="403"/>
-        <location filename="Exercise/Steps.cpp" line="656"/>
+        <location filename="Exercise/Steps.cpp" line="658"/>
         <source>KM</source>
         <translation>公里</translation>
     </message>
@@ -9015,7 +9007,7 @@
         <translation>返回</translation>
     </message>
     <message>
-        <location filename="Exercise/StepsOptions.cpp" line="154"/>
+        <location filename="Exercise/StepsOptions.cpp" line="156"/>
         <source>Total Distance</source>
         <translation>总距离</translation>
     </message>

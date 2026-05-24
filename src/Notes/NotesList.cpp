@@ -601,7 +601,7 @@ int NotesList::on_btnImport_clicked() {
         QTreeWidgetItem* item1;
 
         QFileInfo fi(fileName);
-        QString name = fi.baseName();
+        QString name = fi.completeBaseName();
 
         item1 = new QTreeWidgetItem(item);
         item1->setText(0, name);
@@ -2496,10 +2496,12 @@ void NotesList::on_actionStatistics() {
     // 弹出统计消息框（使用后台统计的结果）
     auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg(localAppName,
-                 tr("NoteBook") + ": " + QString::number(countNoteBook) +
-                     "    " + tr("Notes") + ": " + QString::number(totalNotes) +
-                     "\n\n" + tr("Images") + ": " +
-                     QString::number(*imgCountPtr) + "\n\n" + strAccessCount,
+                 tr("NoteBook:") + QString::number(countNoteBook) + "\n" +
+                     tr("Local Notes:") + QString::number(totalNotes) + "\n" +
+                     tr("Remote Notes:") +
+                     QString::number(m_CloudBackup->m_currentRemoteNotesCount) +
+                     "\n\n" + tr("Images:") + QString::number(*imgCountPtr) +
+                     "\n\n" + strAccessCount,
                  1);
 
     // 【关键】释放资源：避免内存泄漏（堆内存指针+watcher）

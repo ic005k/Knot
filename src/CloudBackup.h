@@ -34,6 +34,7 @@ class CloudBackup : public QDialog {
   ~CloudBackup();
   Ui::CloudBackup* ui;
 
+  int m_currentRemoteNotesCount;
   bool isGetRemoteFileListEnd = false;
   QStringList webdavFileList;
   QList<QDateTime> webdavDateTimeList;
@@ -106,6 +107,7 @@ class CloudBackup : public QDialog {
   QByteArray aes_iv = "InitializationVe";             // 16字节
   void resetProgBar();
 
+  QString m_currentRemoteDir;
   QString nextPageUrl;
   QList<QPair<QString, QDateTime>> allFiles;
 

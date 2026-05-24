@@ -910,6 +910,8 @@ void CloudBackup::getRemoteFileList(QString url) {
 
   qDebug() << "获取文件列表：" << url;
 
+  m_currentRemoteDir = url;
+
   // 开始获取第一页
   fetchNextPage();
 }
@@ -974,9 +976,18 @@ QString CloudBackup::parseNextPageUrl(
 void CloudBackup::processFileList() {
   qDebug() << "共找到" << allFiles.size() << "个文件:";
 
-  for (const auto& [path, mtime] : allFiles) {
+  if (m_currentRemoteDir.contains("KnotData/memo") &&
+      !m_currentRemoteDir.contains("images")) {
+    m_currentRemoteNotesCount = allFiles.size();
+  }
+
+  for (int i = 0; i < allFiles.size(); ++i) {
+    const auto& filePair = allFiles.at(i);  // .at() 绝对安全，不触发 detach
+    const QString& path = filePair.first;
+    const QDateTime& mtime = filePair.second;
+
     QString remoteFile = path;
-    remoteFile = remoteFile.replace("/dav/", "");  // 坚果云路径处理
+    remoteFile = remoteFile.replace("/dav/", "");
 
     webdavFileList.append(remoteFile);
     webdavDateTimeList.append(mtime);
