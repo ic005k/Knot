@@ -33,7 +33,9 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
 
       mw_one->m_EditRecord->saveCurrentValue();
       mw_one->on_btnBackEditRecord_clicked();
-      mw_one->on_btnSelTab_clicked();
+      // mw_one->on_btnSelTab_clicked();
+      mui->btnHome->click();
+      isSelectTab = true;
 
       return true;
     }
@@ -474,7 +476,8 @@ void MainHelper::initMainQW() {
     mui->qwMap->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/map.qml")));
   }
 
-  mui->qwMainTab->setFixedHeight(50);
+  // mui->qwMainTab->setFixedHeight(50);
+  mui->qwMainTab->rootContext()->setContextProperty("FontSize", fontSize);
   mui->qwMainTab->rootContext()->setContextProperty("isDark", isDark);
   mui->qwMainTab->rootContext()->setContextProperty("maintabHeight",
                                                     mui->qwMainTab->height());
@@ -605,8 +608,8 @@ void MainHelper::init_UIWidget() {
   mui->tabWidget->tabBar()->setFixedHeight(nHeight);
 
   mui->tabWidget->setFixedHeight(mui->tabWidget->tabBar()->height() + 0);
-  if (nHeight <= 36) nHeight = 36;
-  mui->qwMainTab->setFixedHeight(nHeight);
+  // if (nHeight <= 36) nHeight = 36;
+  //  mui->qwMainTab->setFixedHeight(nHeight);
   mui->tabWidget->hide();
 
   mw_one->loginTime = m_Method->setCurrentDateTimeValue();
@@ -626,6 +629,12 @@ void MainHelper::init_UIWidget() {
   } else {
     mui->btnShareBakFile->hide();
   }
+
+  mui->qwMainDate->hide();
+  mui->qwMainEvent->hide();
+  mui->lblStats->hide();
+  mui->lblTabTitle->hide();
+  mui->btnSelTab->hide();
 
   mui->menubar->hide();
   mui->statusbar->hide();
@@ -871,6 +880,7 @@ void MainHelper::startBackgroundTaskUpdateBakFileList() {
 void MainHelper::init_ButtonStyle() {
   m_Method->set_ToolButtonStyle(mw_one);
   mui->btnMenu->setStyleSheet("border:none");
+  mui->btnHome->setStyleSheet("border:none");
 
   mui->btnTodo->setStyleSheet("border:none");
   mui->btnSteps->setStyleSheet("border:none");
@@ -1125,6 +1135,7 @@ void MainHelper::init_Theme() {
     mui->btnSelTab->setIcon(QIcon(":/res/tab.svg"));
 
     mui->btnMenu->setIcon(QIcon(":/res/mainmenu.svg"));
+    mui->btnHome->setIcon(QIcon(":/res/home.svg"));
     mui->btnAdd->setIcon(QIcon(":/res/additem.svg"));
     mui->btnDel->setIcon(QIcon(":/res/delitem.svg"));
     mui->btnSync->setIcon(QIcon(":/res/upload.svg"));
@@ -1146,6 +1157,7 @@ void MainHelper::init_Theme() {
     mui->btnSelTab->setIcon(QIcon(":/res/tab_l.svg"));
 
     mui->btnMenu->setIcon(QIcon(":/res/mainmenu_l.svg"));
+    mui->btnHome->setIcon(QIcon(":/res/home_l.svg"));
     mui->btnAdd->setIcon(QIcon(":/res/additem_l.svg"));
     mui->btnDel->setIcon(QIcon(":/res/delitem_l.svg"));
     mui->btnSync->setIcon(QIcon(":/res/upload_l.svg"));

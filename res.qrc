@@ -215,5 +215,7 @@
         <file>res/erun.svg</file>
         <file>res/theme/MaterialDark.qss</file>
         <file>res/theme/MaterialLight.qss</file>
+        <file>res/home.svg</file>
+        <file>res/home_l.svg</file>
     </qresource>
 </RCC>

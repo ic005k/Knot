@@ -1110,6 +1110,22 @@ void MainWindow::on_twItemDoubleClicked() {
 void MainWindow::clickMainTab() {
   int index = getCurrentIndex();
   tabData->setCurrentIndex(index);
+
+  mui->qwMainDate->show();
+  mui->qwMainEvent->show();
+  mui->lblStats->show();
+
+  mui->lblTabTitle->setStyleSheet(mui->lblTitle->styleSheet());
+  mui->lblTabTitle->setText(mui->tabWidget->tabBar()->tabText(index));
+  mui->lblTabTitle->show();
+
+  mui->qwMainTab->hide();
+
+  if (isSelectTab) {
+    on_btnAdd_clicked();
+    m_EditRecord->setCurrentValue();
+    isSelectTab = false;
+  }
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index) {
@@ -1127,6 +1143,8 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 
     Reg.setValue("CurrentIndex", index);
   }
+
+  mui->lblTabTitle->setText(mui->tabWidget->tabBar()->tabText(index));
 
   reloadMain();
 
@@ -2913,4 +2931,13 @@ void MainWindow::on_chkAutoStopTTS_clicked(bool checked) {
     m_Reader->setAutoStopPlayTime();
   else
     m_Reader->m_autoStopDeadline = QDateTime();
+}
+
+void MainWindow::on_btnHome_clicked() {
+  mui->qwMainDate->hide();
+  mui->qwMainEvent->hide();
+  mui->lblStats->hide();
+  mui->lblTabTitle->hide();
+
+  mui->qwMainTab->show();
 }

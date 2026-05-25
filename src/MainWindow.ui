@@ -1306,6 +1306,19 @@ border-radius: 4px;</string>
            </widget>
           </item>
           <item>
+           <widget class="QToolButton" name="btnHome">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_5">
             <property name="orientation">
              <enum>Qt::Orientation::Horizontal</enum>
@@ -1481,7 +1494,7 @@ border-radius: 4px;</string>
        <item>
         <widget class="QQuickWidget" name="qwMainTab">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -1489,7 +1502,7 @@ border-radius: 4px;</string>
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>35</height>
+           <height>50</height>
           </size>
          </property>
          <property name="maximumSize">
@@ -1524,6 +1537,12 @@ border-radius: 4px;</string>
        </item>
        <item>
         <widget class="QTabWidget" name="tabWidget">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -1660,6 +1679,21 @@ border-radius: 4px;</string>
          </property>
          <property name="movable">
           <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblTabTitle">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Tab Title</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
         </widget>
        </item>

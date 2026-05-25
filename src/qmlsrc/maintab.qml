@@ -2,12 +2,10 @@
 import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Controls.Fusion
 
 Rectangle {
     id: root
-
-    width: 500
-    height: 400
 
     color: isDark ? "#19232D" : "white"
 
@@ -15,341 +13,165 @@ Rectangle {
     property int itemCount: 0
     property int isFlagToday: 1
     property bool isHighPriority: false
+    property int maintabHeight: 50
 
-    function setItemHeight(h) {}
+    // ✅ 强制固定3列，永远不变
+    readonly property int columns: 3
+    readonly property real spacing: 8
 
+    // ✅ 真正自适应父宽度，自动计算每个卡片宽度
+    readonly property real cardWidth: (width - (spacing) * (columns)) / columns
+
+    function setItemHeight(h) {
+    }
     function gotoEnd() {
-        view.positionViewAtEnd()
+        grid.positionViewAtEnd();
     }
-
     function gotoBeginning() {
-        view.positionViewAtBeginning()
+        grid.positionViewAtBeginning();
     }
-
     function gotoIndex(index) {
-        view.positionViewAtIndex(index, Tumbler.Center)
+        grid.currentIndex = index;
     }
-
     function setHighPriority(isFalse) {
-        isHighPriority = isFalse
+        isHighPriority = isFalse;
     }
-
     function setCurrentItem(currentIndex) {
-        view.currentIndex = currentIndex
+        grid.currentIndex = currentIndex;
     }
-
     function getCurrentIndex() {
-        return view.currentIndex
+        return grid.currentIndex;
     }
-
     function getItemCount() {
-        itemCount = view.count
-
-        return itemCount
+        return grid.count;
     }
 
     function getItemText(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.time + "|=|" + data.dototext
+        var data = grid.model.get(itemIndex);
+        return data.time + "|=|" + data.dototext;
     }
 
     function getText0(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text0
+        return grid.model.get(itemIndex).text0;
     }
-
     function getText1(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text1
+        return grid.model.get(itemIndex).text1;
     }
-
     function getText2(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text2
+        return grid.model.get(itemIndex).text2;
     }
-
     function getText3(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text3
+        return grid.model.get(itemIndex).text3;
     }
-
     function getTop(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text_top
+        return grid.model.get(itemIndex).text_top;
     }
-
     function getType(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.type
+        return grid.model.get(itemIndex).type;
     }
 
     function addItem(t0, t1, t2, t3, height) {
-        isFlagToday = height
-        view.model.append({
-                              "text0": t0,
-                              "text1": t1,
-                              "text2": t2,
-                              "text3": t3,
-                              "isFlagToday": height
-                          })
-        console.log("isToday:" + isFlagToday)
+        isFlagToday = height;
+        grid.model.append({
+            "text0": t0,
+            "text1": t1,
+            "text2": t2,
+            "text3": t3,
+            "isFlagToday": height
+        });
     }
 
     function insertItem(text0, text1, text2, text3, curIndex) {
-        view.model.insert(curIndex, {
-                              "text0": text0,
-                              "text1": text1,
-                              "text2": text2,
-                              "text3": text3
-                          })
+        grid.model.insert(curIndex, {
+            "text0": text0,
+            "text1": text1,
+            "text2": text2,
+            "text3": text3
+        });
     }
 
     function delItem(currentIndex) {
-        view.model.remove(currentIndex)
+        grid.model.remove(currentIndex);
     }
 
     function modifyItem(currentIndex, strTime, strText) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
-        view.model.setProperty(currentIndex, "dototext", strText)
+        grid.model.setProperty(currentIndex, "time", strTime);
+        grid.model.setProperty(currentIndex, "dototext", strText);
     }
-
     function modifyItemTime(currentIndex, strTime) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
+        grid.model.setProperty(currentIndex, "time", strTime);
     }
-
     function modifyItemType(currentIndex, type) {
-
-        view.model.setProperty(currentIndex, "type", type)
+        grid.model.setProperty(currentIndex, "type", type);
     }
-
     function modifyItemText0(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text0", strText)
+        grid.model.setProperty(currentIndex, "text0", strText);
     }
-
     function modifyItemText2(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text2", strText)
+        grid.model.setProperty(currentIndex, "text2", strText);
     }
 
     function getColor() {
-        var strColor
-
-        if (isDark)
-            strColor = "#455364"
-        else
-            strColor = "#ffffff"
-
-        return strColor
+        return isDark ? "#455364" : "#ffffff";
     }
-
     function getFontColor() {
-
-        if (isDark)
-            return "white"
-        else
-            return "black"
+        return isDark ? "white" : "black";
     }
 
     Component {
-        id: dragDelegate
-
+        id: gridDelegate
         Rectangle {
-            id: listItem
+            width: cardWidth
+            height: 75
+            color: GridView.isCurrentItem ? "#4FC3F7" : getColor()
+            radius: 10
+            border.color: isDark ? "transparent" : "#DDDDDD"
+            border.width: 1
+            clip: true
 
-            width: item0.contentWidth + 32 < 60 ? 60 : item0.contentWidth + 32
-            height: maintabHeight - 4
-            color: ListView.isCurrentItem ? "lightblue" : getColor()
-
-            border.width: isDark ? 0 : 1
-            border.color: "lightgray" //"lightsteelblue"
-
-            radius: 6
-
-            RowLayout {
-
-                id: myrow
-                height: parent.height
-                width: parent.width
-                spacing: 2
-                Layout.fillWidth: true
-
-                Rectangle {
-                    id: spaceRect
-                    width: 3
-                    height: 0
-                }
-
-                Rectangle {
-                    id: flagRect
-                    height: 12
-                    width: 12
-                    radius: 6
-                    anchors.leftMargin: 0
-                    color: listItem.ListView.isCurrentItem ? "red" : "gray"
-                    visible: true
-                    Text {
-                        anchors.centerIn: parent
-                    }
-                }
-
-                RowLayout {
-                    id: colLayout
-                    height: parent.height
-                    width: parent.width
-                    spacing: 2
-                    Layout.fillWidth: true
-                    anchors.leftMargin: 0
-                    anchors.rightMargin: 0
-
-                    Text {
-                        id: item0
-
-                        Layout.preferredWidth: listItem.width
-                        Layout.alignment: Qt.AlignHCenter
-                        horizontalAlignment: Text.AlignLeft
-                        verticalAlignment: Text.AlignVCenter
-                        wrapMode: TextArea.WordWrap
-                        font.bold: false
-                        text: text0
-                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-
-                        leftPadding: 5
-                        rightPadding: 5
-                    }
-
-                    Text {
-                        id: item1
-                        Layout.preferredWidth: listItem.width
-
-                        Layout.alignment: Qt.AlignHCenter
-                        horizontalAlignment: Text.AlignLeft
-                        verticalAlignment: Text.AlignVCenter
-
-                        width: parent.width
-                        wrapMode: TextArea.WordWrap
-                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-                        font.bold: false
-                        text: text1
-
-                        leftPadding: 5
-                        rightPadding: 5
-
-                        visible: item1.text.length ? true : false
-                    }
-
-                    Text {
-                        id: item2
-                        anchors.rightMargin: 0
-                        Layout.preferredWidth: listItem.width
-                        Layout.alignment: Qt.AlignHCenter
-
-                        horizontalAlignment: Text.AlignLeft
-                        width: parent.width
-                        wrapMode: TextArea.WordWrap
-                        font.bold: false
-                        text: text2
-                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-
-                        leftPadding: 5
-                        rightPadding: 5
-
-                        visible: item2.text.length ? true : false
-                    }
-
-                    Text {
-                        id: item3
-                        anchors.rightMargin: 0
-                        wrapMode: Text.WordWrap
-                        elide: Text.ElideRight
-
-                        Layout.preferredWidth: listItem.width
-                        font.bold: false
-                        text: text3
-                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-
-                        leftPadding: 5
-                        rightPadding: 5
-
-                        visible: item3.text.length ? true : false
-                    }
-                }
-            }
-
-            Rectangle {
-                id: flagToday
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width - 6
-                height: 2
-                color: "#ff5588"
-                visible: model.isFlagToday === 1
+            Text {
+                anchors.fill: parent
+                anchors.margins: 6
+                text: text0
+                color: GridView.isCurrentItem ? "black" : getFontColor()
+                font.bold: true
+                font.pointSize: FontSize
+                wrapMode: Text.Wrap
+                elide: Text.ElideRight
+                maximumLineCount: 2
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
             }
 
             MouseArea {
-
                 anchors.fill: parent
-
                 onClicked: {
-
-                    view.currentIndex = index //实现item切换
-
-                    mw_one.clickMainTab()
-                }
-            }
-
-            SequentialAnimation on opacity {
-                //应用于透明度上的序列动画
-                running: true // isAniEffects
-                loops: 1 //Animation.Infinite //无限循环
-                NumberAnimation {
-                    from: 0
-                    to: 1
-                    duration: 500
-                } //淡出效果
-                PauseAnimation {
-                    //暂停400ms
-                    duration: 0
+                    grid.currentIndex = index;
+                    mw_one.clickMainTab();
                 }
             }
         }
     }
 
-    ListView {
-        id: view
+    // ✅ 关键：强制固定3列，自适应宽度
+    GridView {
+        id: grid
+        anchors.fill: parent
+        model: listmain
+        delegate: gridDelegate
 
-        orientation: ListView.Horizontal
+        // ✅ 强制3列
+        cellWidth: cardWidth + spacing
+        cellHeight: 85
 
-        anchors {
-            fill: parent
-            margins: 4
-        }
-
-        model: ListModel {
-            id: listmain
-
-            // debug
-
-
-            /*ListElement {
-                text0: "Tab 1"
-            }
-
-            ListElement {
-                text0: "Tab 2"
-            }
-
-            ListElement {
-                text0: "Tab 3"
-            }*/
-        }
-        delegate: dragDelegate
-
-        spacing: 4
-        cacheBuffer: 50
-
+        clip: true
         ScrollBar.vertical: ScrollBar {
             width: 8
             policy: ScrollBar.AsNeeded
         }
+    }
+
+    ListModel {
+        id: listmain
     }
 }

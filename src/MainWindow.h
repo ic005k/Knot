@@ -468,9 +468,10 @@ class MainWindow : public QMainWindow {
   void on_btnUpload_clicked();
   void on_btnDownload_clicked();
 
-  void saveNeedDelWebDAVFiles(const QString &file);
+  void saveNeedDelWebDAVFiles(const QString& file);
   QStringList getNeedDelWebDAVFiles();
-  protected:
+
+ protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
   void paintEvent(QPaintEvent* event) override;
@@ -948,6 +949,8 @@ class MainWindow : public QMainWindow {
   void on_editAutoStopTTS_textChanged(const QString& arg1);
 
   void on_chkAutoStopTTS_clicked(bool checked);
+
+  void on_btnHome_clicked();
 
  private:
   bool isMoveEntry;

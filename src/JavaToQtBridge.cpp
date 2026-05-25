@@ -414,6 +414,18 @@ static void JavaNotify_15() {
       return;
     }
 
+    if (!mui->qwMainDate->isHidden()) {
+      QTimer::singleShot(100, mw_one, []() {
+        mui->qwMainDate->hide();
+        mui->qwMainEvent->hide();
+        mui->lblStats->hide();
+        mui->lblTabTitle->hide();
+        mui->qwMainTab->show();
+      });
+
+      return;
+    }
+
     mw_one->setMini();
 
     return;
