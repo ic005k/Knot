@@ -206,9 +206,7 @@ QString ShowMessage::AutoFeed(QString text, int nCharCount) {
   return strText;
 }
 
-// ========== 完全回归最初的eventFilter逻辑（快捷键核心） ==========
 bool ShowMessage::eventFilter(QObject* watch, QEvent* evn) {
-  // 最初的按键释放事件处理（100%复刻）
   if (evn->type() == QEvent::KeyRelease) {
     QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
     // Y键 → 确认
@@ -228,10 +226,10 @@ bool ShowMessage::eventFilter(QObject* watch, QEvent* evn) {
     }
   }
 
-  // 最初的鼠标点击事件处理（保留）
+  // 鼠标点击事件处理
   if (evn->type() == QEvent::MouseButtonPress) {
     if (btn_count == 0) {
-      on_btnCancel_clicked();
+      // on_btnCancel_clicked();
       return true;
     }
   }

@@ -15,12 +15,9 @@ Rectangle {
     property bool isHighPriority: false
     property int maintabHeight: 50
 
-    // ✅ 强制固定3列，永远不变
     readonly property int columns: 3
     readonly property real spacing: 8
-
-    // ✅ 真正自适应父宽度，自动计算每个卡片宽度
-    readonly property real cardWidth: (width - (spacing) * (columns)) / columns
+    readonly property real cardWidth: (width - spacing * (columns)) / columns
 
     function setItemHeight(h) {
     }
@@ -123,18 +120,40 @@ Rectangle {
         Rectangle {
             width: cardWidth
             height: 75
-            color: GridView.isCurrentItem ? "#4FC3F7" : getColor()
             radius: 10
-            border.color: isDark ? "transparent" : "#DDDDDD"
-            border.width: 1
             clip: true
+
+            // ======================
+            // ✅ 核心：根据 isFlagToday 高亮标识
+            // ======================
+            color: {
+                if (isFlagToday === 1) {
+                    // 今天标识：浅橙色/主题色
+                    if (isDark)
+                        GridView.isCurrentItem ? "#4FC3F7" : "#3C2A10";
+                    else
+                        // 暗黑今日 深色底
+                        GridView.isCurrentItem ? "#4FC3F7" : "#FFE0B2";   // 白天今日 橙色底
+                } else {
+                    GridView.isCurrentItem ? "#4FC3F7" : getColor();
+                }
+            }
+
+            border.width: isFlagToday === 1 && GridView.isCurrentItem ? 3 : 1
+            border.color: {
+                if (isFlagToday === 1) {
+                    "#FF9800"; // 今日标识边框
+                } else {
+                    isDark ? "transparent" : "#DDD";
+                }
+            }
 
             Text {
                 anchors.fill: parent
                 anchors.margins: 6
                 text: text0
                 color: GridView.isCurrentItem ? "black" : getFontColor()
-                font.bold: true
+                font.bold: isFlagToday === 1 ? true : false
                 font.pointSize: FontSize
                 wrapMode: Text.Wrap
                 elide: Text.ElideRight
@@ -153,18 +172,15 @@ Rectangle {
         }
     }
 
-    // ✅ 关键：强制固定3列，自适应宽度
     GridView {
         id: grid
         anchors.fill: parent
         model: listmain
         delegate: gridDelegate
-
-        // ✅ 强制3列
         cellWidth: cardWidth + spacing
         cellHeight: 85
-
         clip: true
+
         ScrollBar.vertical: ScrollBar {
             width: 8
             policy: ScrollBar.AsNeeded
