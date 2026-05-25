@@ -2213,7 +2213,9 @@ void MainWindow::on_btnRestoreNoteRecycle_clicked() {
 }
 
 void MainWindow::on_btnFindNotes_clicked() {
-  m_NotesList->startFind(mui->editFindNote->text().trimmed());
+  QString str = mui->editFindNote->text().trimmed();
+  if (str.length() == 0) return;
+  m_NotesList->startFind(str);
 }
 
 void MainWindow::on_btnFindPreviousNote_clicked() { m_NotesList->goPrevious(); }

@@ -6,12 +6,10 @@ import QtQuick.Controls.Fusion
 
 Rectangle {
     id: root
-
     color: isDark ? "#19232D" : "white"
 
     property int i: 0
     property int itemCount: 0
-    property int isFlagToday: 1
     property bool isHighPriority: false
     property int maintabHeight: 50
 
@@ -67,14 +65,13 @@ Rectangle {
         return grid.model.get(itemIndex).type;
     }
 
-    function addItem(t0, t1, t2, t3, height) {
-        isFlagToday = height;
+    function addItem(t0, t1, t2, t3, isToday) {
         grid.model.append({
             "text0": t0,
             "text1": t1,
             "text2": t2,
             "text3": t3,
-            "isFlagToday": height
+            "isFlagToday": isToday  // 放进 model！不全局
         });
     }
 
@@ -90,7 +87,6 @@ Rectangle {
     function delItem(currentIndex) {
         grid.model.remove(currentIndex);
     }
-
     function modifyItem(currentIndex, strTime, strText) {
         grid.model.setProperty(currentIndex, "time", strTime);
         grid.model.setProperty(currentIndex, "dototext", strText);
@@ -119,55 +115,72 @@ Rectangle {
         id: gridDelegate
         Rectangle {
             width: cardWidth
-            height: 75
+            height: grid.cellHeight - 10
             radius: 10
-            clip: true
+            clip: false
 
-            // ======================
-            // ✅ 核心：根据 isFlagToday 高亮标识
-            // ======================
+            // 缩放
+            property real scaleFactor: 1.0
+            transform: Scale {
+                origin.x: width / 2
+                origin.y: height / 2
+                xScale: scaleFactor
+                yScale: scaleFactor
+            }
+
+            // 动画
+            Behavior on scaleFactor {
+                NumberAnimation {
+                    duration: 80
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            // ✅ 正确方案：只用 onClicked，不要在 onReleased 里写业务逻辑
+            MouseArea {
+                anchors.fill: parent
+
+                onPressed: {
+                    scaleFactor = 0.95;
+                }
+                onReleased: {
+                    scaleFactor = 1.0;
+                }
+                onCanceled: {
+                    scaleFactor = 1.0;
+                }
+
+                // ✅ 核心：点击事件必须放这里！
+                onClicked: {
+                    console.log("点击触发成功！"); // 你可以看到日志
+                    grid.currentIndex = index;
+                    mw_one.clickMainTab();
+                }
+            }
+
             color: {
-                if (isFlagToday === 1) {
-                    // 今天标识：浅橙色/主题色
-                    if (isDark)
-                        GridView.isCurrentItem ? "#4FC3F7" : "#3C2A10";
-                    else
-                        // 暗黑今日 深色底
-                        GridView.isCurrentItem ? "#4FC3F7" : "#FFE0B2";   // 白天今日 橙色底
+                if (isFlagToday) {
+                    isDark ? (GridView.isCurrentItem ? "#4FC3F7" : "#3C2A10") : (GridView.isCurrentItem ? "#4FC3F7" : "#FFE0B2");
                 } else {
                     GridView.isCurrentItem ? "#4FC3F7" : getColor();
                 }
             }
 
-            border.width: isFlagToday === 1 && GridView.isCurrentItem ? 3 : 1
-            border.color: {
-                if (isFlagToday === 1) {
-                    "#FF9800"; // 今日标识边框
-                } else {
-                    isDark ? "transparent" : "#DDD";
-                }
-            }
+            border.width: GridView.isCurrentItem ? (isFlagToday ? 3 : 2) : 1
+            border.color: isFlagToday ? "#FF9800" : (isDark ? "transparent" : "#DDD")
 
             Text {
                 anchors.fill: parent
                 anchors.margins: 6
                 text: text0
                 color: GridView.isCurrentItem ? "black" : getFontColor()
-                font.bold: isFlagToday === 1 ? true : false
+                font.bold: isFlagToday
                 font.pointSize: FontSize
                 wrapMode: Text.Wrap
                 elide: Text.ElideRight
                 maximumLineCount: 2
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    grid.currentIndex = index;
-                    mw_one.clickMainTab();
-                }
             }
         }
     }
@@ -179,7 +192,12 @@ Rectangle {
         delegate: gridDelegate
         cellWidth: cardWidth + spacing
         cellHeight: 85
-        clip: true
+        clip: false
+
+        // 👇 Lineage 必加，触摸丝滑
+        flickableDirection: Flickable.VerticalFlick
+        interactive: true
+        cacheBuffer: 3000
 
         ScrollBar.vertical: ScrollBar {
             width: 8

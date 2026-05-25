@@ -377,9 +377,9 @@ void loadTheme(bool isDark) {
         widget->setFont(qApp->font());
 
         font.setBold(true);
-        if (mui && mui->lblViewCate1) mui->lblViewCate1->setFont(font);
-        if (mui && mui->lblTitleEditRecord)
-          mui->lblTitleEditRecord->setFont(font);
+        mui->lblViewCate1->setFont(font);
+        mui->lblTabTitle->setFont(font);
+        mui->lblTitleEditRecord->setFont(font);
         if (mui && mui->lblSyncNote) {
           QFont mFont = font;
           if (!isAndroid)
