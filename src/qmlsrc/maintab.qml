@@ -142,6 +142,8 @@ Rectangle {
 
                 onPressed: {
                     scaleFactor = 0.95;
+                    grid.currentIndex = index;
+                    mw_one.clickMainTab();
                 }
                 onReleased: {
                     scaleFactor = 1.0;
@@ -153,8 +155,8 @@ Rectangle {
                 // ✅ 核心：点击事件必须放这里！
                 onClicked: {
                     console.log("点击触发成功！"); // 你可以看到日志
-                    grid.currentIndex = index;
-                    mw_one.clickMainTab();
+                    //grid.currentIndex = index;
+                    //mw_one.clickMainTab();
                 }
             }
 

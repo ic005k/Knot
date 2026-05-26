@@ -2030,10 +2030,10 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText,
 
   // ========== 事件绑定 ==========
   bool isVoice = mw_one->m_Todo->isVoice(strText);
-  connect(closeBtn, &QPushButton::clicked, alarmDialog, &QDialog::close);
-  connect(closeBtn, &QPushButton::clicked, this, &Todo::clearJavaNotify);
+  connect(closeBtn, &QPushButton::pressed, alarmDialog, &QDialog::close);
+  connect(closeBtn, &QPushButton::pressed, this, &Todo::clearJavaNotify);
 
-  connect(playBtn, &QPushButton::clicked, this, [=]() {
+  connect(playBtn, &QPushButton::pressed, this, [=]() {
     qDebug() << "触发播放提醒：" << strText;
     if (isVoice) {
       QString voiceFile = mw_one->m_Todo->getVoiceFile(strText);
@@ -2047,6 +2047,11 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText,
 
   // ========== 显示窗口 ==========
   alarmDialog->show();
+
+  // ✅ 解决安卓弹窗焦点丢失
+  alarmDialog->raise();
+  alarmDialog->activateWindow();
+  alarmDialog->setFocus();
 }
 
 void Todo::playAlarmVoice() {

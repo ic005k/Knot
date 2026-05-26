@@ -2942,4 +2942,6 @@ void MainWindow::on_btnHome_clicked() {
   mui->lblTabTitle->hide();
 
   mui->qwMainTab->show();
+  //  **强制刷新 QML 触摸区域**
+  mui->qwMainTab->update();
 }

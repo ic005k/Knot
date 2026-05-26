@@ -481,6 +481,8 @@ class MainWindow : public QMainWindow {
   void hideEvent(QHideEvent* event) override;
 
  public slots:
+  void on_btnHome_clicked();
+
   void GetGpsDataThreadDone();
 
   void on_btnAutoStop_clicked();
@@ -949,8 +951,6 @@ class MainWindow : public QMainWindow {
   void on_editAutoStopTTS_textChanged(const QString& arg1);
 
   void on_chkAutoStopTTS_clicked(bool checked);
-
-  void on_btnHome_clicked();
 
  private:
   bool isMoveEntry;

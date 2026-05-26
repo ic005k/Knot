@@ -108,19 +108,16 @@ static void JavaNotify_3() {
             }
           }
 
-          // 7. 弹窗显示（主线程+空指针校验）
-          QTimer::singleShot(
-              200, mw_one, [strTime, strText, strTodoAlarmActiveTime]() {
-                // 再次校验mw_one，避免定时器触发时窗口已销毁
-                if (mw_one != nullptr && mw_one->m_Todo != nullptr) {
+          // 7. 弹窗显示（✅ 安卓Qt终极安全方案，不崩溃+不丢点击）
+          QMetaObject::invokeMethod(
+              mw_one->m_Todo,
+              [=]() {
+                if (mw_one && mw_one->m_Todo) {
                   mw_one->m_Todo->showAlarmWindow(strTime, strText,
                                                   strTodoAlarmActiveTime);
-
-                  // mw_one->m_Todo->openClockActivity(
-                  //     strTime + "|" + strText + "|" +
-                  //     strTodoAlarmActiveTime);
                 }
-              });
+              },
+              Qt::QueuedConnection);
 
           qDebug() << "C++ JavaNotify_3 执行完成";
         } catch (const std::exception& e) {
@@ -415,13 +412,8 @@ static void JavaNotify_15() {
     }
 
     if (!mui->qwMainDate->isHidden()) {
-      QTimer::singleShot(100, mw_one, []() {
-        mui->qwMainDate->hide();
-        mui->qwMainEvent->hide();
-        mui->lblStats->hide();
-        mui->lblTabTitle->hide();
-        mui->qwMainTab->show();
-      });
+      QMetaObject::invokeMethod(
+          mui->btnHome, [=]() { mui->btnHome->click(); }, Qt::QueuedConnection);
 
       return;
     }
