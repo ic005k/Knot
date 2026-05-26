@@ -1160,6 +1160,15 @@ bool MainWindow::eventFilter(QObject* watch, QEvent* evn) {
 
   m_MainHelper->mainEventFilter(watch, evn);
 
+  if (evn->type() == QEvent::KeyPress) {
+    QKeyEvent* key = static_cast<QKeyEvent*>(evn);
+    if (key->key() == Qt::Key_Back) {
+      onAndroidBackHandle();
+
+      return true;
+    }
+  }
+
   return QWidget::eventFilter(watch, evn);
 }
 
@@ -1427,6 +1436,9 @@ void MainWindow::init_Instance() {
     m_Preferences->setDefaultFont(this->font().family());
 
   m_Method->setOSFlag();
+
+  connect(this, &MainWindow::androidBackSignal, this,
+          &MainWindow::onAndroidBackHandle, Qt::QueuedConnection);
 }
 
 void MainWindow::init_Thread_Timer() {
@@ -2565,8 +2577,6 @@ void MainWindow::on_btnAutoRun_clicked() {
   if (mui->qwViewBookNote->isVisible()) return;
 
   if (!m_Reader->isAutoRun) {
-    // m_Reader->tmeAutoRun->start(50);
-
     mui->qwReader->rootContext()->setContextProperty("isAutoRun", true);
     mui->btnAutoRun->hide();
     mui->btnAutoStop->show();
@@ -2576,8 +2586,6 @@ void MainWindow::on_btnAutoRun_clicked() {
 
 void MainWindow::on_btnAutoStop_clicked() {
   if (m_Reader->isAutoRun) {
-    // m_Reader->tmeAutoRun->stop();
-
     mui->qwReader->rootContext()->setContextProperty("isAutoRun",
                                                      QVariant(false));
     mui->btnAutoStop->hide();
@@ -2936,12 +2944,355 @@ void MainWindow::on_chkAutoStopTTS_clicked(bool checked) {
 }
 
 void MainWindow::on_btnHome_clicked() {
+  mui->qwMainTab->show();
+  //  **强制刷新 QML 触摸区域**
+  mui->qwMainTab->update();
+
   mui->qwMainDate->hide();
   mui->qwMainEvent->hide();
   mui->lblStats->hide();
   mui->lblTabTitle->hide();
-
-  mui->qwMainTab->show();
-  //  **强制刷新 QML 触摸区域**
-  mui->qwMainTab->update();
 }
+
+void MainWindow::onAndroidBackHandle() {
+  QTimer::singleShot(0, this, [] {
+    QWidget* w = qApp->activeWindow();
+    if (w) {
+      w->activateWindow();
+      w->setFocus();
+    }
+  });
+
+  if (colorDlg != nullptr) {
+    if (colorDlg->isVisible()) {
+      colorDlg->close();
+      return;
+    }
+  }
+
+  if (m_MsgBox != nullptr) {
+    if (m_MsgBox->isVisible()) {
+      m_MsgBox->close();
+      return;
+    }
+  }
+
+  if (m_Method->m_EnColorPicker != nullptr) {
+    if (m_Method->m_EnColorPicker->isVisible()) {
+      m_Method->m_EnColorPicker->close();
+      return;
+    }
+  }
+
+  if (m_PrintPDF != nullptr) {
+    if (m_PrintPDF->isVisible()) {
+      m_PrintPDF->close();
+      return;
+    }
+  }
+
+  if (mw_one->mainMenu != nullptr) {
+    if (mw_one->mainMenu->isVisible()) {
+      mw_one->mainMenu->close();
+      return;
+    }
+  }
+
+  if (mw_one->m_Report->m_Menu != nullptr) {
+    if (mw_one->m_Report->m_Menu->isVisible()) {
+      mw_one->m_Report->m_Menu->close();
+      return;
+    }
+  }
+
+  if (m_NotesList->menuNoteBook != nullptr) {
+    if (m_NotesList->menuNoteBook->isVisible()) {
+      m_NotesList->menuNoteBook->close();
+      return;
+    }
+  }
+
+  if (m_NotesList->menuNoteList != nullptr) {
+    if (m_NotesList->menuNoteList->isVisible()) {
+      m_NotesList->menuNoteList->close();
+      return;
+    }
+  }
+
+  if (m_NotesList->menuRecentOpen != nullptr) {
+    if (m_NotesList->menuRecentOpen->isVisible()) {
+      m_NotesList->menuRecentOpen->close();
+      return;
+    }
+  }
+
+  if (m_NotesList->m_MoveTo != nullptr) {
+    if (m_NotesList->m_MoveTo->isVisible()) {
+      m_NotesList->m_MoveTo->ui->btnCancel->click();
+      return;
+    }
+  }
+
+  if (m_NotesList->m_NewNoteBook != nullptr) {
+    if (m_NotesList->m_NewNoteBook->isVisible()) {
+      m_NotesList->m_NewNoteBook->ui->btnCancel->click();
+      return;
+    }
+  }
+
+  if (textToolbarDynamic != nullptr && textToolbarDynamic->isVisible()) {
+    closeTextToolBar();
+    return;
+  }
+
+  if (textToolbar != nullptr && textToolbar->isVisible()) {
+    closeTextToolBar();
+    return;
+  }
+
+  if (mw_one->m_RenameDlg != nullptr) {
+    if (mw_one->m_RenameDlg->isVisible()) {
+      mw_one->m_RenameDlg->close();
+      return;
+    }
+  }
+
+  if (mw_one->m_Todo->m_ReeditTodo != nullptr) {
+    if (mw_one->m_Todo->m_ReeditTodo->isVisible()) {
+      mw_one->m_Todo->m_ReeditTodo->close();
+      return;
+    }
+  }
+
+  if (m_NotesList->m_RenameNotes != nullptr) {
+    if (m_NotesList->m_RenameNotes->isVisible()) {
+      m_NotesList->m_RenameNotes->close();
+      return;
+    }
+  }
+
+  if (mw_one->m_Preferences->isVisible()) {
+    mw_one->m_Preferences->ui->btnBack->click();
+    return;
+  }
+
+  if (mw_one->m_AboutThis->isVisible()) {
+    mw_one->m_AboutThis->ui->btnBack_About->click();
+    return;
+  }
+
+  if (m_StepsOptions->isVisible()) {
+    m_StepsOptions->ui->btnBack->click();
+    return;
+  }
+
+  if (mw_one->m_Reader->dlgAddBookNote != nullptr) {
+    if (mw_one->m_Reader->dlgAddBookNote->isVisible()) {
+      mw_one->m_Reader->dlgAddBookNote->close();
+      return;
+    }
+  }
+
+  if (mw_one->m_Reader->dlgEditBookNote != nullptr) {
+    if (mw_one->m_Reader->dlgEditBookNote->isVisible()) {
+      mw_one->m_Reader->dlgEditBookNote->close();
+      return;
+    }
+  }
+
+  if (mui->qwViewBookNote->isVisible()) {
+    QTimer::singleShot(100, mw_one,
+                       []() { mw_one->m_Reader->closeViewBookNote(); });
+
+    return;
+  }
+
+  if (mui->f_ReaderNote->isVisible()) {
+    mw_one->on_btnCancelSel_clicked();
+    return;
+  }
+
+  if (mui->f_ReaderSet->isVisible()) {
+    mw_one->on_btnBackReaderSet_clicked();
+    return;
+  }
+
+  if (!mui->frameReader->isHidden()) {
+    if (mui->qwCata->isVisible()) {
+      mw_one->on_btnCatalogue_clicked();
+      return;
+
+    } else if (mui->qwBookmark->isVisible()) {
+      mw_one->on_btnShowBookmark_clicked();
+      return;
+
+    } else {
+      mui->btnBackReader->click();
+      this->setFocus();
+
+      return;
+    }
+  }
+
+  if (!mui->frameImgView->isHidden()) {
+    mui->btnBackImg->click();
+    return;
+  }
+
+  if (!mui->frameMain->isHidden()) {
+    if (!mui->qwMainChart->isHidden()) {
+      QTimer::singleShot(100, mw_one, []() { mw_one->on_btnChart(); });
+      return;
+    }
+
+    if (!mui->qwMainDate->isHidden()) {
+      mui->btnHome->click();
+
+      // 再次对QML端进行刷新
+      QQuickItem* root = mui->qwMainTab->rootObject();
+      QMetaObject::invokeMethod((QObject*)root, "forceActivateUI");
+
+      return;
+    }
+
+    mw_one->setMini();
+
+    return;
+  }
+
+  if (!mui->frameOne->isHidden()) {
+    mui->btnBack_One->click();
+    return;
+  }
+
+  if (!mui->frameNoteRecycle->isHidden()) {
+    mui->btnBackNoteRecycle->click();
+    return;
+  }
+
+  if (!mui->frameNotesSearchResult->isHidden()) {
+    mui->btnBack_NotesSearchResult->click();
+    return;
+  }
+
+  if (mui->f_FindNotes->isVisible()) {
+    mui->f_FindNotes->hide();
+    return;
+  }
+
+  if (!mui->frameNoteList->isHidden()) {
+    QTimer::singleShot(100, mw_one,
+                       []() { mw_one->on_btnBackNoteList_clicked(); });
+    return;
+  }
+
+  if (!mui->frameDiff->isHidden()) {
+    mui->btnBackNoteDiff->click();
+    return;
+  }
+
+  if (!mui->frameNotesGraph->isHidden()) {
+    mui->btnBackNotesGraph->click();
+    return;
+  }
+
+  if (mw_one->m_TodoAlarm->isVisible()) {
+    mw_one->m_TodoAlarm->ui->btnBack->click();
+    return;
+  }
+
+  if (mw_one->m_Todo->isTodoAlarmShow) {
+    QTimer::singleShot(100, mw_one, []() { mw_one->m_Todo->closeTodoAlarm(); });
+    return;
+  }
+
+  if (!mui->frameTodo->isHidden()) {
+    mui->btnBackTodo->click();
+    return;
+  }
+
+  if (!mui->frameTodoRecycle->isHidden()) {
+    mui->btnReturnRecycle->click();
+    return;
+  }
+
+  if (!mui->frameTabRecycle->isHidden()) {
+    mui->btnBackTabRecycle->click();
+    return;
+  }
+
+  if (m_Steps->isRouteShow()) {
+    m_Steps->closeRouteDialog();
+    return;
+  }
+
+  if (m_Steps->m_remarksDialog != nullptr) {
+    if (m_Steps->m_remarksDialog->isVisible()) {
+      m_Steps->m_remarksDialog->close();
+      return;
+    }
+  }
+
+  if (m_Steps->statsDialog != nullptr) {
+    m_Steps->statsDialog->close();
+
+    return;
+  }
+
+  if (!mui->frameSteps->isHidden()) {
+    mui->btnBackSteps->click();
+    return;
+  }
+
+  if (!mui->frameViewCate->isHidden()) {
+    QTimer::singleShot(100, mw_one, []() {
+      mui->frameViewCate->hide();
+      mui->frameReport->show();
+    });
+
+    return;
+  }
+
+  if (!mui->frameReport->isHidden()) {
+    mui->btnBack_Report->click();
+    return;
+  }
+
+  if (!mui->frameSearch->isHidden()) {
+    mui->btnBackSearch->click();
+    return;
+  }
+
+  if (!mui->frameBakList->isHidden()) {
+    mui->btnBackBakList->click();
+    return;
+  }
+
+  if (!mui->frameCategory->isHidden()) {
+    mui->btnCancelType->click();
+    return;
+  }
+
+  if (!mui->frameSetTab->isHidden()) {
+    mui->btnBackSetTab->click();
+    return;
+  }
+
+  if (!mui->frameEditRecord->isHidden()) {
+    mui->btnBackEditRecord->click();
+
+    return;
+  }
+
+  if (!mui->frameBookList->isHidden()) {
+    mui->btnBackBookList->click();
+    return;
+  }
+
+  if (!mui->frameNotesTree->isHidden()) {
+    mui->btnBack_Tree->click();
+    return;
+  }
+}
+
+void MainWindow::showEvent(QShowEvent* event) { QMainWindow::showEvent(event); }

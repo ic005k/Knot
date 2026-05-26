@@ -570,7 +570,7 @@ public class MyActivity
         }
     };
 
-    @Override
+    /*@Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             // 检查当前是否有对话框正在显示
@@ -584,7 +584,20 @@ public class MyActivity
             }
         }
         return super.onKeyDown(keyCode, event);
-    }
+    }*/
+
+    /*@Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (isDialogShowing()) {
+                return super.onKeyUp(keyCode, event);
+            } else {
+                CallJavaNotify_15();
+                return true;
+            }
+        }
+        return super.onKeyUp(keyCode, event);
+    }*/
 
     // 辅助方法：判断当前是否有对话框显示
     private boolean isDialogShowing() {
@@ -602,10 +615,44 @@ public class MyActivity
         );
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
+    // 成员变量
+    // private boolean m_backConsumedByAndroid = false;
+
+    /*@Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                // --------------------------
+                // 第一步：让系统先处理返回（关闭输入法、悬浮窗、弹窗、菜单...）
+                // --------------------------
+                boolean handledBySystem = super.dispatchKeyEvent(event);
+
+                // 如果系统处理了（关闭了东西）
+                if (handledBySystem) {
+                    m_backConsumedByAndroid = true;
+                    return true; // 吃掉 DOWN
+                }
+
+                // 系统没东西可关 → 放行
+                m_backConsumedByAndroid = false;
+            }
+
+            if (event.getAction() == KeyEvent.ACTION_UP) {
+                if (m_backConsumedByAndroid) {
+                    m_backConsumedByAndroid = false;
+                    return true; // 吃掉 UP → Qt 收不到
+                }
+            }
+        }
+
+        // 无处理 → 正常给 Qt
+        return super.dispatchKeyEvent(event);
+    }*/
+
+    //@Override
+    //public void onBackPressed() {
+    //super.onBackPressed();
+    //}
 
     @Override
     public void onPause() {

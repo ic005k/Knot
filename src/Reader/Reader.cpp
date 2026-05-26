@@ -3162,7 +3162,8 @@ void Reader::closeReader() {
   QString time = getReadTotalTime();
   qDebug() << time;
 
-  mui->btnAutoStop->click();
+  mw_one->on_btnAutoStop_clicked();
+
   m_ReaderSet->close();
   if (mui->f_ReaderNote->isVisible()) {
     mw_one->on_btnCancelSel_clicked();

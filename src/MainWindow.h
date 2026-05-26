@@ -248,6 +248,8 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
   Ui::MainWindow* ui;
 
+  void emitAndroidBackSignal() { emit androidBackSignal(); }
+
   QMenu* mainMenu = nullptr;
 
   int x, y, w, h;
@@ -480,7 +482,10 @@ class MainWindow : public QMainWindow {
 
   void hideEvent(QHideEvent* event) override;
 
+  void showEvent(QShowEvent* event) override;
  public slots:
+  void on_btnCatalogue_clicked();
+
   void on_btnHome_clicked();
 
   void GetGpsDataThreadDone();
@@ -701,6 +706,8 @@ class MainWindow : public QMainWindow {
   void on_btnNoteRecycle_clicked();
 
  private slots:
+  void onAndroidBackHandle();
+
   void on_btnMenu_clicked();
 
   void on_btnSync_clicked();
@@ -804,8 +811,6 @@ class MainWindow : public QMainWindow {
   void on_btnRecentOpen_clicked();
 
   void on_btnMenuReport_clicked();
-
-  void on_btnCatalogue_clicked();
 
   void on_btnRemoveBookList_clicked();
 
@@ -979,6 +984,7 @@ class MainWindow : public QMainWindow {
   void init_Thread_Timer();
 
  signals:
+  void androidBackSignal();
 };
 
 #endif  // MAINWINDOW_H

@@ -33,6 +33,8 @@
 #include <QNetworkInterface>
 #include <QNetworkReply>
 #include <QTimer>
+#include <QtGui/QEventPoint>
+#include <QtGui/QTouchEvent>
 #include <functional>
 
 #ifdef Q_OS_ANDROID
@@ -485,6 +487,8 @@ class Method : public QDialog {
   void delayDelFile(const QString& filePath);
 
   float getSystemFontScale();
+
+  void sendTouch();
   protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 

@@ -283,8 +283,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>20</width>
-                <height>20</height>
+                <width>25</width>
+                <height>25</height>
                </size>
               </property>
               <property name="toolButtonStyle">
@@ -305,8 +305,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>20</width>
-                <height>20</height>
+                <width>25</width>
+                <height>25</height>
                </size>
               </property>
              </widget>
@@ -324,8 +324,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>20</width>
-                <height>20</height>
+                <width>25</width>
+                <height>25</height>
                </size>
               </property>
              </widget>
@@ -343,8 +343,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>20</width>
-                <height>20</height>
+                <width>25</width>
+                <height>25</height>
                </size>
               </property>
              </widget>
@@ -362,8 +362,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>20</width>
-                <height>20</height>
+                <width>25</width>
+                <height>25</height>
                </size>
               </property>
              </widget>
@@ -381,8 +381,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>20</width>
-                <height>20</height>
+                <width>25</width>
+                <height>25</height>
                </size>
               </property>
               <property name="toolButtonStyle">
@@ -403,8 +403,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>20</width>
-                <height>20</height>
+                <width>25</width>
+                <height>25</height>
                </size>
               </property>
              </widget>
@@ -422,8 +422,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>20</width>
-                <height>20</height>
+                <width>25</width>
+                <height>25</height>
                </size>
               </property>
              </widget>
@@ -452,8 +452,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>20</width>
-                <height>20</height>
+                <width>25</width>
+                <height>25</height>
                </size>
               </property>
               <property name="toolButtonStyle">
@@ -480,8 +480,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>20</width>
-                <height>20</height>
+                <width>25</width>
+                <height>25</height>
                </size>
               </property>
               <property name="toolButtonStyle">
@@ -502,8 +502,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>20</width>
-                <height>20</height>
+                <width>25</width>
+                <height>25</height>
                </size>
               </property>
               <property name="toolButtonStyle">

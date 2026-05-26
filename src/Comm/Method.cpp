@@ -3525,3 +3525,35 @@ float Method::getSystemFontScale() {
   return 1.0f;
 #endif
 }
+
+void Method::sendTouch() {
+  if (isAndroid) {
+    // ==============================
+    // Qt6 安卓专用：模拟触摸 (0,0) 清除系统遮罩
+    // ==============================
+    QQuickWindow* window =
+        qobject_cast<QQuickWindow*>(QGuiApplication::focusWindow());
+    if (window) {
+      // 1. 获取系统默认触摸设备（Qt6 必须传这个）
+      const QPointingDevice* device = QPointingDevice::primaryPointingDevice();
+
+      // 2. 构造触摸点（Qt6 唯一正确写法）
+      QEventPoint point(0,                     // 触摸点 ID = 0
+                        QEventPoint::Pressed,  // 状态
+                        QPointF(1, 1),         // 局部坐标
+                        QPointF(1, 1)          // 全局坐标
+      );
+
+      QList<QEventPoint> points;
+      points << point;
+
+      // 3. 发送 触摸按下
+      QTouchEvent press(QEvent::TouchBegin, device, Qt::NoModifier, points);
+      QGuiApplication::sendEvent(window, &press);
+
+      // 4. 发送 触摸抬起
+      QTouchEvent release(QEvent::TouchEnd, device, Qt::NoModifier, points);
+      QGuiApplication::sendEvent(window, &release);
+    }
+  }
+}
