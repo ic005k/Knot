@@ -111,6 +111,18 @@ Rectangle {
         return isDark ? "white" : "black";
     }
 
+    // ✅ 终极兜底：强制激活 UI，用户看不见任何变化
+    function forceActivateUI() {
+        // 微小移动 1px 再还原 = 彻底唤醒 QML 触摸/滚动系统
+        grid.contentY += 1;
+        grid.contentY -= 1;
+
+        // 如果有滚动条卡住，也一起刷新
+        grid.flick(0, 0);
+
+        console.log("【UI激活】forceActivateUI 执行成功 >>> 清除Android遮罩")
+    }
+
     Component {
         id: gridDelegate
         Rectangle {
@@ -136,27 +148,38 @@ Rectangle {
                 }
             }
 
-            // ✅ 正确方案：只用 onClicked，不要在 onReleased 里写业务逻辑
             MouseArea {
                 anchors.fill: parent
 
+                // ========== Qt6 专用：滚动时不触发点击 ==========
+                property bool isMove: false
+                property real startX: 0
+                property real startY: 0
+
                 onPressed: {
+                    isMove = false;
+                    startX = mouseX;
+                    startY = mouseY;
+
+                    // 按下动画
                     scaleFactor = 0.95;
-                    grid.currentIndex = index;
-                    mw_one.clickMainTab();
-                }
-                onReleased: {
-                    scaleFactor = 1.0;
-                }
-                onCanceled: {
-                    scaleFactor = 1.0;
                 }
 
-                // ✅ 核心：点击事件必须放这里！
-                onClicked: {
-                    console.log("点击触发成功！"); // 你可以看到日志
-                    //grid.currentIndex = index;
-                    //mw_one.clickMainTab();
+                onPositionChanged: {
+                    // 如果移动超过 5 像素，判定为滚动，不触发点击
+                    if (Math.abs(mouseY - startY) > 5 || Math.abs(mouseX - startX) > 5) {
+                        isMove = true;
+                    }
+                }
+
+                onReleased: {
+                    scaleFactor = 1.0;
+
+                    // ========== 只有【不是滚动】才执行 ==========
+                    if (!isMove) {
+                        grid.currentIndex = index;
+                        mw_one.clickMainTab();
+                    }
                 }
             }
 

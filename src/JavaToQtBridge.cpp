@@ -413,7 +413,30 @@ static void JavaNotify_15() {
 
     if (!mui->qwMainDate->isHidden()) {
       QMetaObject::invokeMethod(
-          mui->btnHome, [=]() { mui->btnHome->click(); }, Qt::QueuedConnection);
+          mui->btnHome, [=]() { mw_one->on_btnHome_clicked(); },
+          Qt::QueuedConnection);
+
+      // 【Qt6 新版】模拟 (0,0) 点击，清除安卓全局系统遮罩
+      QQuickWindow* window =
+          qobject_cast<QQuickWindow*>(QGuiApplication::focusWindow());
+      if (window) {
+        // ==============================
+        // Qt 6.6.3 正确版本
+        // ==============================
+        QMouseEvent press(QEvent::MouseButtonPress, QPointF(0, 0),
+                          QPointF(0, 0), Qt::LeftButton, Qt::LeftButton,
+                          Qt::NoModifier);
+        QGuiApplication::sendEvent(window, &press);
+
+        QMouseEvent release(QEvent::MouseButtonRelease, QPointF(0, 0),
+                            QPointF(0, 0), Qt::LeftButton, Qt::LeftButton,
+                            Qt::NoModifier);
+        QGuiApplication::sendEvent(window, &release);
+      }
+
+      // 再次对QML端进行刷新
+      QQuickItem* root = mui->qwMainTab->rootObject();
+      QMetaObject::invokeMethod((QObject*)root, "forceActivateUI");
 
       return;
     }
