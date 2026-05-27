@@ -39,7 +39,7 @@ jobs:
         path: 'src'
 
     - name: Setup JDK
-      uses: setup-java@v3
+    - uses: setup-java@v3
       with:
         distribution: 'zulu'
         java-version: ${{ env.JAVA_VERSION }}
