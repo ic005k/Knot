@@ -109,6 +109,9 @@ public class PDFPreviewActivity
         lblTitle = findViewById(R.id.lblTitle);
         if (MyActivity.zh_cn) lblTitle.setText("缩略图");
         else lblTitle.setText("Thumbnails");
+
+        btn_back.setVisibility(View.GONE);
+        lblTitle.setVisibility(View.GONE);
     }
 
     /**

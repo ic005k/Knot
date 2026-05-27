@@ -104,6 +104,9 @@ public class PDFCatelogueActivity
         lblTitle = findViewById(R.id.lblTitle);
         if (MyActivity.zh_cn) lblTitle.setText("目录");
         else lblTitle.setText("Catalogue");
+
+        btn_back.setVisibility(View.GONE);
+        lblTitle.setVisibility(View.GONE);
     }
 
     /**

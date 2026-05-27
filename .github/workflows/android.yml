@@ -18,11 +18,7 @@ on:
 env:
   QT_VERSION: "6.11.1"
   QT_ARCH: "android_arm64_v8a"
-
-  # ====================== 这里只改了这一行 ======================
-  DESKTOP_ARCH: "win64_mingw13_64"  # Qt6.11+ 新名称，必须改
-  # ==============================================================
-
+  DESKTOP_ARCH: "win64_mingw13_64"
   NDK_VERSION: "27.2.12479018"
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
@@ -39,7 +35,7 @@ jobs:
         path: 'src'
 
     - name: Setup JDK
-    - uses: setup-java@v3
+      uses: setup-java@v3
       with:
         distribution: 'zulu'
         java-version: ${{ env.JAVA_VERSION }}
@@ -53,13 +49,11 @@ jobs:
         echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
         echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-    # ====================== 自动升级 aqt 到最新版 ======================
     - name: Install & Upgrade aqtinstall
       run: |
         python -m pip install --upgrade pip
         python -m pip install --upgrade aqtinstall
         aqt --version
-    # ==================================================================
 
     - name: Install Desktop Qt
       run: |
@@ -73,7 +67,6 @@ jobs:
           -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
           --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
-    # ====================== 以下完全保持你原来的代码，一字未改 ======================
     - name: Build
       shell: cmd
       run: |
