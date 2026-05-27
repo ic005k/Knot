@@ -1,230 +1,212 @@
 package com.x;
 
-import com.x.MyActivity;
-import com.x.NoteEditor;
+import static io.noties.prism4j.Prism4j.grammar;
+import static io.noties.prism4j.Prism4j.pattern;
+import static io.noties.prism4j.Prism4j.token;
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import static java.util.regex.Pattern.compile;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.Application;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.BroadcastReceiver;
+import android.content.ContentUris;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
+import android.text.method.MovementMethod;
+import android.text.method.ScrollingMovementMethod;
+import android.text.method.Touch;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ClickableSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.util.Linkify;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
+import android.widget.PopupWindow;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.TextView;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ContextThemeWrapper;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.x.DefaultGrammars;
 import com.x.ImageViewerActivity;
 import com.x.MDActivity.MarkdownAdapter;
-import com.x.DefaultGrammars;
-
-import android.os.Bundle;
-import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.annotation.NonNull;
-import android.text.style.ClickableSpan;
-
+import com.x.MyActivity;
+import com.x.NoteEditor;
+import io.noties.markwon.AbstractMarkwonPlugin;
+import io.noties.markwon.LinkResolver;
 import io.noties.markwon.Markwon;
+import io.noties.markwon.Markwon;
+import io.noties.markwon.MarkwonConfiguration;
+import io.noties.markwon.MarkwonConfiguration;
+import io.noties.markwon.MarkwonConfiguration;
+import io.noties.markwon.MarkwonConfiguration;
+import io.noties.markwon.MarkwonSpansFactory;
+import io.noties.markwon.SpanFactory;
+import io.noties.markwon.core.CoreProps;
+import io.noties.markwon.core.MarkwonTheme;
+import io.noties.markwon.core.spans.LinkSpan;
+import io.noties.markwon.ext.latex.JLatexMathPlugin;
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
 import io.noties.markwon.ext.tables.TablePlugin;
 import io.noties.markwon.ext.tasklist.TaskListPlugin;
 import io.noties.markwon.html.HtmlPlugin;
-import io.noties.markwon.linkify.LinkifyPlugin;
-import io.noties.markwon.simple.ext.SimpleExtPlugin;
-import io.noties.markwon.image.glide.GlideImagesPlugin;
-import io.noties.markwon.image.ImagesPlugin;
-import io.noties.markwon.ext.latex.JLatexMathPlugin;
-import io.noties.markwon.AbstractMarkwonPlugin;
-import io.noties.markwon.inlineparser.MarkwonInlineParser;
-import io.noties.markwon.inlineparser.InlineProcessor;
-
-import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
-
-import io.noties.markwon.MarkwonConfiguration;
-import io.noties.markwon.MarkwonSpansFactory;
-import io.noties.markwon.MarkwonConfiguration;
-import io.noties.markwon.core.MarkwonTheme;
+import io.noties.markwon.html.HtmlTag;
+import io.noties.markwon.html.tag.SimpleTagHandler;
+import io.noties.markwon.image.AsyncDrawable;
 import io.noties.markwon.image.AsyncDrawable;
 import io.noties.markwon.image.AsyncDrawableLoader;
 import io.noties.markwon.image.AsyncDrawableSpan;
+import io.noties.markwon.image.ImageItem;
 import io.noties.markwon.image.ImageProps;
 import io.noties.markwon.image.ImageSize;
 import io.noties.markwon.image.ImageSizeResolver;
+import io.noties.markwon.image.ImageSizeResolver;
+import io.noties.markwon.image.ImageSizeResolverDef;
+import io.noties.markwon.image.ImagesPlugin;
+import io.noties.markwon.image.ImagesPlugin;
+import io.noties.markwon.image.SchemeHandler;
 import io.noties.markwon.image.destination.ImageDestinationProcessor;
 import io.noties.markwon.image.destination.ImageDestinationProcessorRelativeToAbsolute;
 import io.noties.markwon.image.gif.GifMediaDecoder;
+import io.noties.markwon.image.glide.GlideImagesPlugin;
 import io.noties.markwon.image.network.NetworkSchemeHandler;
 import io.noties.markwon.image.svg.SvgMediaDecoder;
-import io.noties.markwon.image.ImageSizeResolverDef;
-import io.noties.markwon.image.ImageItem;
-import io.noties.markwon.image.SchemeHandler;
-
-import io.noties.markwon.Markwon;
-import io.noties.markwon.MarkwonConfiguration;
-import io.noties.markwon.image.AsyncDrawable;
-import io.noties.markwon.image.ImagesPlugin;
-
-import io.noties.markwon.image.ImageSizeResolver;
-import io.noties.markwon.SpanFactory;
-
-import io.noties.markwon.core.spans.LinkSpan;
-import io.noties.markwon.LinkResolver;
-
+import io.noties.markwon.inlineparser.InlineProcessor;
+import io.noties.markwon.inlineparser.MarkwonInlineParser;
+import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
+import io.noties.markwon.linkify.LinkifyPlugin;
+import io.noties.markwon.simple.ext.SimpleExtPlugin;
+import io.noties.markwon.syntax.Prism4jSyntaxHighlight;
 import io.noties.markwon.syntax.Prism4jSyntaxHighlight;
 import io.noties.markwon.syntax.Prism4jTheme;
-import io.noties.prism4j.Prism4j;
-import io.noties.markwon.syntax.Prism4jThemeDefault;
+import io.noties.markwon.syntax.Prism4jTheme;
+import io.noties.markwon.syntax.Prism4jThemeBase;
 import io.noties.markwon.syntax.Prism4jThemeDarkula;
+import io.noties.markwon.syntax.Prism4jThemeDarkula;
+import io.noties.markwon.syntax.Prism4jThemeDefault;
+import io.noties.markwon.syntax.Prism4jThemeDefault;
 import io.noties.markwon.syntax.SyntaxHighlightPlugin;
-
+import io.noties.markwon.syntax.SyntaxHighlightPlugin;
+import io.noties.prism4j.GrammarLocator;
+import io.noties.prism4j.Prism4j;
 import io.noties.prism4j.annotations.PrismBundle;
-
+import java.io.BufferedReader;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.IOException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
+import java.lang.CharSequence;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.sql.Time;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.regex.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.commonmark.node.*;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
-import java.util.Iterator;
-import java.util.List;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import androidx.appcompat.view.ContextThemeWrapper;
-import androidx.core.content.ContextCompat;
-import android.graphics.Typeface;
-
-import androidx.appcompat.app.AlertDialog;
-
-import android.view.LayoutInflater;
-import android.view.Gravity;
-import android.content.IntentFilter;
-import android.content.Intent;
-import android.content.BroadcastReceiver;
-import android.app.PendingIntent;
-import android.text.TextUtils;
-import java.lang.CharSequence;
-import android.app.Service;
-import android.content.DialogInterface;
-import android.graphics.Color;
-import android.media.MediaPlayer;
-import android.os.Build;
-import android.os.Bundle;
-import android.app.Activity;
-import android.appwidget.AppWidgetManager;
-import android.content.Context;
-import android.appwidget.AppWidgetProvider;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-import android.view.WindowManager;
-import android.view.Window;
-import android.widget.EditText;
-import android.text.Editable;
-import android.net.Uri;
-import java.io.OutputStreamWriter;
-import java.io.BufferedWriter;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileInputStream;
-
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.io.IOException;
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import android.text.TextWatcher;
-import android.os.Handler;
-import android.media.AudioManager;
-import android.widget.TextView;
-import android.content.DialogInterface;
-import java.util.Locale;
-import android.app.Application;
-import android.os.Looper;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import android.provider.MediaStore;
-import android.provider.DocumentsContract;
-import android.database.Cursor;
-import android.content.ContentUris;
-import android.os.Environment;
-import android.os.Message;
-import android.view.Menu;
-import android.widget.Toast;
-import java.lang.reflect.Method;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.sql.Time;
-import android.text.SpannableStringBuilder;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.Spannable;
-import android.text.Spanned;
-import android.view.MenuItem;
-import android.net.Uri;
-import android.text.method.ScrollingMovementMethod;
-import android.view.inputmethod.EditorInfo;
-import android.view.KeyEvent;
-import android.widget.TextView.OnEditorActionListener;
-import android.view.inputmethod.InputMethodManager;
-import java.util.regex.*;
-import android.widget.ProgressBar;
-
-import android.widget.LinearLayout;
-import android.view.LayoutInflater;
-import android.widget.PopupWindow;
-import android.graphics.drawable.ColorDrawable;
-import java.lang.reflect.Field;
-import android.annotation.SuppressLint;
-import androidx.core.content.FileProvider;
-import android.widget.PopupMenu;
-import android.widget.ImageButton;
-import android.content.SharedPreferences;
-import android.widget.ScrollView;
-import android.text.method.LinkMovementMethod;
-
-import android.text.method.MovementMethod;
-import android.text.method.Touch;
-import android.view.MotionEvent;
-import android.view.ViewTreeObserver;
-import android.widget.ImageView;
-import android.util.DisplayMetrics;
-import android.view.ViewGroup;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import android.text.util.Linkify;
-import android.util.TypedValue;
-
-import io.noties.markwon.syntax.Prism4jSyntaxHighlight;
-import io.noties.markwon.syntax.Prism4jTheme;
-import io.noties.markwon.syntax.Prism4jThemeBase;
-import io.noties.markwon.syntax.Prism4jThemeDarkula;
-import io.noties.markwon.syntax.Prism4jThemeDefault;
-import io.noties.markwon.syntax.SyntaxHighlightPlugin;
-import io.noties.prism4j.GrammarLocator;
-
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
-import static java.util.regex.Pattern.compile;
-import static io.noties.prism4j.Prism4j.grammar;
-import static io.noties.prism4j.Prism4j.pattern;
-import static io.noties.prism4j.Prism4j.token;
-
-import android.graphics.Color;
-import android.text.style.ForegroundColorSpan;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import io.noties.markwon.core.CoreProps;
-import io.noties.markwon.html.HtmlTag;
-import io.noties.markwon.html.tag.SimpleTagHandler;
-import io.noties.markwon.MarkwonConfiguration;
-
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-public class MDActivity extends Activity implements View.OnClickListener, Application.ActivityLifecycleCallbacks {
+public class MDActivity
+    extends Activity
+    implements View.OnClickListener, Application.ActivityLifecycleCallbacks
+{
 
     private TextView markdownView;
     private TextView titleView;
@@ -241,35 +223,35 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
     private static final int REQUEST_EDIT = 1; // 可以是任意整数（建议从 1 开始）
     public static final int RESULT_SAVE = 1001;
 
-    public native static void CallJavaNotify_0();
+    public static native void CallJavaNotify_0();
 
-    public native static void CallJavaNotify_1();
+    public static native void CallJavaNotify_1();
 
-    public native static void CallJavaNotify_2();
+    public static native void CallJavaNotify_2();
 
-    public native static void CallJavaNotify_3();
+    public static native void CallJavaNotify_3();
 
-    public native static void CallJavaNotify_4();
+    public static native void CallJavaNotify_4();
 
-    public native static void CallJavaNotify_5();
+    public static native void CallJavaNotify_5();
 
-    public native static void CallJavaNotify_6();
+    public static native void CallJavaNotify_6();
 
-    public native static void CallJavaNotify_7();
+    public static native void CallJavaNotify_7();
 
-    public native static void CallJavaNotify_8();
+    public static native void CallJavaNotify_8();
 
-    public native static void CallJavaNotify_9();
+    public static native void CallJavaNotify_9();
 
-    public native static void CallJavaNotify_10();
+    public static native void CallJavaNotify_10();
 
-    public native static void CallJavaNotify_11();
+    public static native void CallJavaNotify_11();
 
-    public native static void CallJavaNotify_12();
+    public static native void CallJavaNotify_12();
 
-    public native static void CallJavaNotify_13();
+    public static native void CallJavaNotify_13();
 
-    public native static void CallJavaNotify_14();
+    public static native void CallJavaNotify_14();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -287,11 +269,15 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
 
         if (MyActivity.isDark) {
             this.setStatusBarColor("#19232D"); // 深色
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            getWindow()
+                .getDecorView()
+                .setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             setContentView(R.layout.activity_md_dark);
         } else {
             this.setStatusBarColor("#F3F3F3"); // 灰
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            getWindow()
+                .getDecorView()
+                .setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             setContentView(R.layout.activity_md);
         }
 
@@ -303,16 +289,13 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
         titleView.setText(MyActivity.strMDTitle);
 
         btnEdit = (Button) findViewById(R.id.btnEdit);
-        if (MyActivity.zh_cn)
-            btnEdit.setText("编辑");
-        else
-            btnEdit.setText("Edit");
+        if (MyActivity.zh_cn) btnEdit.setText("编辑");
+        else btnEdit.setText("Edit");
         btnEdit.setOnClickListener(this);
 
         loadMD();
 
         MyActivity.isEdit = false;
-
     }
 
     private void initMarkdwon() {
@@ -320,66 +303,106 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
 
         // 将 sp 转换为像素（JLatexMathPlugin 需要像素值）
         float textSizeInPx = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_SP,
-                fixedTextSize,
-                getResources().getDisplayMetrics());
+            TypedValue.COMPLEX_UNIT_SP,
+            fixedTextSize,
+            getResources().getDisplayMetrics()
+        );
         final Prism4j prism4j = new Prism4j(new MyGrammarLocator());
 
         // 初始化 Markwon
         Context appContext = getApplicationContext();
         if (!MyActivity.isDark) {
             markwon = Markwon.builder(appContext)
-                    .usePlugin(StrikethroughPlugin.create())
-                    .usePlugin(TablePlugin.create(appContext))
-                    .usePlugin(TaskListPlugin.create(appContext))
-                    .usePlugin(LinkifyPlugin.create())
-                    .usePlugin(SimpleExtPlugin.create())
-                    .usePlugin(GlideImagesPlugin.create(appContext))
-                    .usePlugin(MarkwonInlineParserPlugin.create())
-                    .usePlugin(JLatexMathPlugin.create(textSizeInPx, builder -> {
+                .usePlugin(StrikethroughPlugin.create())
+                .usePlugin(TablePlugin.create(appContext))
+                .usePlugin(TaskListPlugin.create(appContext))
+                .usePlugin(LinkifyPlugin.create())
+                .usePlugin(SimpleExtPlugin.create())
+                .usePlugin(GlideImagesPlugin.create(appContext))
+                .usePlugin(MarkwonInlineParserPlugin.create())
+                .usePlugin(
+                    JLatexMathPlugin.create(textSizeInPx, builder -> {
                         builder.inlinesEnabled(true); // 启用行内公式
-                    }))
-                    .usePlugin(new AbstractMarkwonPlugin() {
-                        @Override
-                        public void configureSpansFactory(MarkwonSpansFactory.Builder builder) {
-                            builder.appendFactory(Image.class, (configuration, props) -> {
-                                String url = ImageProps.DESTINATION.require(props);
-                                return new LinkSpan(configuration.theme(), url, new ImageLinkResolver());
-                            });
-                        }
                     })
-                    .usePlugin(SyntaxHighlightPlugin.create(prism4j, Prism4jThemeDefault.create()))
-                    .usePlugin(HtmlPlugin.create())
-                    .build();
+                )
+                .usePlugin(
+                    new AbstractMarkwonPlugin() {
+                        @Override
+                        public void configureSpansFactory(
+                            MarkwonSpansFactory.Builder builder
+                        ) {
+                            builder.appendFactory(
+                                Image.class,
+                                (configuration, props) -> {
+                                    String url = ImageProps.DESTINATION.require(
+                                        props
+                                    );
+                                    return new LinkSpan(
+                                        configuration.theme(),
+                                        url,
+                                        new ImageLinkResolver()
+                                    );
+                                }
+                            );
+                        }
+                    }
+                )
+                .usePlugin(
+                    SyntaxHighlightPlugin.create(
+                        prism4j,
+                        Prism4jThemeDefault.create()
+                    )
+                )
+                .usePlugin(HtmlPlugin.create())
+                .build();
         } else {
             markwon = Markwon.builder(appContext)
-                    .usePlugin(StrikethroughPlugin.create())
-                    .usePlugin(TablePlugin.create(appContext))
-                    .usePlugin(TaskListPlugin.create(appContext))
-                    .usePlugin(LinkifyPlugin.create())
-                    .usePlugin(SimpleExtPlugin.create())
-                    .usePlugin(GlideImagesPlugin.create(appContext))
-                    .usePlugin(MarkwonInlineParserPlugin.create())
-                    .usePlugin(JLatexMathPlugin.create(textSizeInPx, builder -> {
+                .usePlugin(StrikethroughPlugin.create())
+                .usePlugin(TablePlugin.create(appContext))
+                .usePlugin(TaskListPlugin.create(appContext))
+                .usePlugin(LinkifyPlugin.create())
+                .usePlugin(SimpleExtPlugin.create())
+                .usePlugin(GlideImagesPlugin.create(appContext))
+                .usePlugin(MarkwonInlineParserPlugin.create())
+                .usePlugin(
+                    JLatexMathPlugin.create(textSizeInPx, builder -> {
                         builder.inlinesEnabled(true); // 启用行内公式
-                    }))
-                    .usePlugin(new AbstractMarkwonPlugin() {
-                        @Override
-                        public void configureSpansFactory(MarkwonSpansFactory.Builder builder) {
-                            builder.appendFactory(Image.class, (configuration, props) -> {
-                                String url = ImageProps.DESTINATION.require(props);
-                                return new LinkSpan(configuration.theme(), url, new ImageLinkResolver());
-                            });
-                        }
                     })
-                    .usePlugin(SyntaxHighlightPlugin.create(prism4j, Prism4jThemeDarkula.create()))
-                    .usePlugin(HtmlPlugin.create())
-                    .build();
-
+                )
+                .usePlugin(
+                    new AbstractMarkwonPlugin() {
+                        @Override
+                        public void configureSpansFactory(
+                            MarkwonSpansFactory.Builder builder
+                        ) {
+                            builder.appendFactory(
+                                Image.class,
+                                (configuration, props) -> {
+                                    String url = ImageProps.DESTINATION.require(
+                                        props
+                                    );
+                                    return new LinkSpan(
+                                        configuration.theme(),
+                                        url,
+                                        new ImageLinkResolver()
+                                    );
+                                }
+                            );
+                        }
+                    }
+                )
+                .usePlugin(
+                    SyntaxHighlightPlugin.create(
+                        prism4j,
+                        Prism4jThemeDarkula.create()
+                    )
+                )
+                .usePlugin(HtmlPlugin.create())
+                .build();
         }
     }
 
-    @Override
+    /*@Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnEdit:
@@ -392,10 +415,24 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
 
                 break;
         }
+    }*/
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        if (id == R.id.btnEdit) {
+            MyActivity.isEdit = true;
+            Intent i = new Intent(this, NoteEditor.class);
+            startActivityForResult(i, REQUEST_EDIT);
+        }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(
+        int requestCode,
+        int resultCode,
+        Intent data
+    ) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_EDIT && resultCode == RESULT_SAVE) {
             // 1. 关闭当前
@@ -403,15 +440,12 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
 
             // 2. 启动新的实例
             MyActivity.openMDWindow();
-
         }
     }
 
     @Override
     public void onResume() {
-
         super.onResume();
-
     }
 
     @Override
@@ -419,23 +453,22 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
         System.out.println("NoteEditor onPause...");
         super.onPause();
 
-        int position = ((LinearLayoutManager) recyclerView.getLayoutManager())
-                .findFirstVisibleItemPosition();
+        int position = (
+            (LinearLayoutManager) recyclerView.getLayoutManager()
+        ).findFirstVisibleItemPosition();
         View view = recyclerView.getChildAt(0);
         int offset = (view != null) ? view.getTop() : 0;
 
         getSharedPreferences(strmdFileName + "scroll_position", MODE_PRIVATE)
-                .edit()
-                .putInt("scrollPosition", position)
-                .putInt("scrollOffset", offset)
-                .apply();
-
+            .edit()
+            .putInt("scrollPosition", position)
+            .putInt("scrollOffset", offset)
+            .apply();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
     }
 
     @Override
@@ -443,7 +476,6 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
         System.out.println("NoteEditor onStop...");
 
         super.onStop();
-
     }
 
     @Override
@@ -451,7 +483,6 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
         MyActivity.closeAndroidProgressBar();
         super.onBackPressed();
         // AnimationWhenClosed();
-
     }
 
     @Override
@@ -459,28 +490,22 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
         getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
 
         super.onDestroy();
-
     }
 
     @Override
-    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-
-    }
-
-    @Override
-    public void onActivityStarted(Activity activity) {
-
-    }
+    public void onActivityCreated(
+        Activity activity,
+        Bundle savedInstanceState
+    ) {}
 
     @Override
-    public void onActivityResumed(Activity activity) {
-
-    }
+    public void onActivityStarted(Activity activity) {}
 
     @Override
-    public void onActivityPaused(Activity activity) {
+    public void onActivityResumed(Activity activity) {}
 
-    }
+    @Override
+    public void onActivityPaused(Activity activity) {}
 
     @Override
     public void onActivityStopped(Activity activity) {
@@ -488,25 +513,22 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
     }
 
     @Override
-    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-
-    }
+    public void onActivitySaveInstanceState(
+        Activity activity,
+        Bundle outState
+    ) {}
 
     @Override
-    public void onActivityDestroyed(Activity activity) {
-
-    }
+    public void onActivityDestroyed(Activity activity) {}
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
     }
 
     private void AnimationWhenClosed() {
@@ -532,33 +554,29 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
 
         @Override
         public void resolve(android.view.View view, String link) {
-
             // Toast.makeText(MDActivity.this, link,
             // Toast.LENGTH_LONG).show();
 
             callImageView(link);
             // callThirdPartyImageViewer(link);
-
         }
     }
 
     private void callImageView(String link) {
-
         MyActivity.strImageFile = link;
         Intent i = new Intent(this, ImageViewerActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         this.startActivity(i);
-
     }
 
     private void callThirdPartyImageViewer(String link) {
-
         Uri photoUri;
         if (Build.VERSION.SDK_INT >= 24) {
             photoUri = FileProvider.getUriForFile(
-                    MyActivity.getMyAppContext(),
-                    "com.x",
-                    new File(link));
+                MyActivity.getMyAppContext(),
+                "com.x",
+                new File(link)
+            );
         } else {
             photoUri = Uri.fromFile(new File(link));
         }
@@ -571,13 +589,14 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);
         }
-
     }
 
     private void setStatusBarColor(String color) {
         // 需要安卓版本大于5.0以上
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            getWindow().addFlags(
+                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+            );
             getWindow().setStatusBarColor(Color.parseColor(color));
         }
     }
@@ -591,30 +610,36 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
 
     // 滚动位置恢复/保存
     private void restoreScrollPosition() {
-        SharedPreferences prefs = getSharedPreferences(strmdFileName + "scroll_position", MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(
+            strmdFileName + "scroll_position",
+            MODE_PRIVATE
+        );
         recyclerView.post(() -> {
             int position = prefs.getInt("scrollPosition", 0);
             int offset = prefs.getInt("scrollOffset", 0);
-            ((LinearLayoutManager) recyclerView.getLayoutManager())
-                    .scrollToPositionWithOffset(position, offset);
+            (
+                (LinearLayoutManager) recyclerView.getLayoutManager()
+            ).scrollToPositionWithOffset(position, offset);
         });
     }
 
     // ViewHolder 类
     static class MarkdownViewHolder extends RecyclerView.ViewHolder {
+
         TextView textView;
 
         public MarkdownViewHolder(View itemView) {
             super(itemView);
-            if (!MyActivity.isDark)
-                textView = itemView.findViewById(R.id.markdown_view);
-            else
-                textView = itemView.findViewById(R.id.markdown_view_dark);
+            if (!MyActivity.isDark) textView = itemView.findViewById(
+                R.id.markdown_view
+            );
+            else textView = itemView.findViewById(R.id.markdown_view_dark);
         }
     }
 
     // 自定义 RecyclerView 适配器
     class MarkdownAdapter extends RecyclerView.Adapter<MarkdownViewHolder> {
+
         private final List<String> chunks;
         private final float textSize; // 单位：sp
 
@@ -624,14 +649,19 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
         }
 
         @Override
-        public MarkdownViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public MarkdownViewHolder onCreateViewHolder(
+            ViewGroup parent,
+            int viewType
+        ) {
             View view;
-            if (!MyActivity.isDark)
-                view = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.item_markdown, parent, false);
-            else
-                view = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.item_markdown_dark, parent, false);
+            if (!MyActivity.isDark) view = LayoutInflater.from(
+                parent.getContext()
+            ).inflate(R.layout.item_markdown, parent, false);
+            else view = LayoutInflater.from(parent.getContext()).inflate(
+                R.layout.item_markdown_dark,
+                parent,
+                false
+            );
 
             return new MarkdownViewHolder(view);
         }
@@ -657,15 +687,25 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         new Thread(() -> {
-            try (BufferedReader reader = new BufferedReader(new FileReader(MyActivity.strMDFile))) {
+            try (
+                BufferedReader reader = new BufferedReader(
+                    new FileReader(MyActivity.strMDFile)
+                )
+            ) {
                 List<String> tempChunks = new ArrayList<>();
                 StringBuilder chunk = new StringBuilder();
                 int lineCount = 0;
 
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    chunk.append(line.replace("images/", "/storage/emulated/0/KnotData/memo/images/"))
-                            .append("\n");
+                    chunk
+                        .append(
+                            line.replace(
+                                "images/",
+                                "/storage/emulated/0/KnotData/memo/images/"
+                            )
+                        )
+                        .append("\n");
                     if (++lineCount % CHUNK_SIZE == 0) {
                         tempChunks.add(chunk.toString());
                         chunk.setLength(0);
@@ -686,5 +726,4 @@ public class MDActivity extends Activity implements View.OnClickListener, Applic
             }
         }).start();
     }
-
 }

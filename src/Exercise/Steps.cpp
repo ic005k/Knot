@@ -183,7 +183,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
 
   // Route
   // 1. 创建独立线程（必须手动启动，且不依赖主线程）
-  QThread* geoThread = new QThread();
+  geoThread = new QThread();
   geoThread->setObjectName("GeoAddressThread");
   // 线程退出时自动销毁
   connect(geoThread, &QThread::finished, geoThread, &QObject::deleteLater);
@@ -213,6 +213,14 @@ Steps::~Steps() {
   delete m_speedometer;
 
   delete compass;
+
+  // 退出地址解析线程
+  if (geoThread) {
+    geoThread->quit();
+    geoThread->wait();
+    delete geoThread;
+    geoThread = nullptr;
+  }
 
 // 安卓端额外清理
 #ifdef Q_OS_ANDROID

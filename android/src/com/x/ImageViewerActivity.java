@@ -204,10 +204,24 @@ public class ImageViewerActivity
         );
 
         // HomeKey
-        registerReceiver(
+        /*registerReceiver(
             mHomeKeyEvent,
             new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+        );*/
+
+        // 修复 Android 14 崩溃
+        IntentFilter filter = new IntentFilter(
+            Intent.ACTION_CLOSE_SYSTEM_DIALOGS
         );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            registerReceiver(
+                mHomeKeyEvent,
+                filter,
+                Context.RECEIVER_NOT_EXPORTED
+            );
+        } else {
+            registerReceiver(mHomeKeyEvent, filter);
+        }
     }
 
     private BroadcastReceiver mHomeKeyEvent = new BroadcastReceiver() {

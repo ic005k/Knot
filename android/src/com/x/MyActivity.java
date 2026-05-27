@@ -100,6 +100,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
+import androidx.annotation.NonNull;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -169,6 +172,9 @@ public class MyActivity
     extends QtActivity
     implements Application.ActivityLifecycleCallbacks
 {
+
+    private OnBackInvokedCallback mBackCallback;
+    private boolean mIsQtActive = true;
 
     // 新增：标记是否是配置变更导致的重构 =====
     private boolean isConfigChangeRecreate = false;
@@ -492,6 +498,34 @@ public class MyActivity
         getWindow().setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
         );
+
+        // 拦截手势返回回调
+        if (
+            android.os.Build.VERSION.SDK_INT >=
+            android.os.Build.VERSION_CODES.TIRAMISU
+        ) {
+            OnBackInvokedDispatcher dispatcher = getOnBackInvokedDispatcher();
+            mBackCallback = new OnBackInvokedCallback() {
+                @Override
+                public void onBackInvoked() {
+                    // 关键：不写空！让系统先处理（关闭输入法/弹窗）
+                    // 自己不消费，让给下层处理
+                    dispatchKeyEvent(
+                        new KeyEvent(
+                            KeyEvent.ACTION_DOWN,
+                            KeyEvent.KEYCODE_BACK
+                        )
+                    );
+                    dispatchKeyEvent(
+                        new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK)
+                    );
+                }
+            };
+            dispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, // 必须是 DEFAULT，不是 OVERLAY！
+                mBackCallback
+            );
+        }
     }
 
     // ===== 新增：简化的实例重复校验方法 =====
@@ -599,6 +633,23 @@ public class MyActivity
         return super.onKeyUp(keyCode, event);
     }*/
 
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            // 正确判断：是否有对话框/弹窗正在显示
+            if (
+                getWindow().peekDecorView().getWindowToken() !=
+                getWindow().peekDecorView().getApplicationWindowToken()
+            ) {
+                return super.onKeyUp(keyCode, event);
+            } else {
+                CallJavaNotify_15();
+                return true;
+            }
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
     // 辅助方法：判断当前是否有对话框显示
     private boolean isDialogShowing() {
         // 获取当前Activity的顶层窗口
@@ -649,10 +700,10 @@ public class MyActivity
         return super.dispatchKeyEvent(event);
     }*/
 
-    //@Override
-    //public void onBackPressed() {
-    //super.onBackPressed();
-    //}
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 
     @Override
     public void onPause() {

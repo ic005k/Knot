@@ -2078,13 +2078,13 @@ void Todo::clearJavaNotify() {
     // ========== 使用Qt6标准方式获取上下文 ==========
     jobject context;
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
-    // Qt 6.6.x ~ 6.9.x 版本
-    context = QNativeInterface::QAndroidApplication::context();
-#else
-    // Qt 6.10.0 及以上版本（包括 6.10.2 / 6.10.3 / 6.11）
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+    // Qt 6.10.0 及以上版本（6.10.x / 6.11+）
     context =
         QNativeInterface::QAndroidApplication::context().object<jobject>();
+#else
+    // Qt 6.6.x ~ 6.9.x 版本
+    context = QNativeInterface::QAndroidApplication::context();
 #endif
 
     if (context == nullptr) {

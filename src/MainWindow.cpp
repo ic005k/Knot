@@ -1160,14 +1160,14 @@ bool MainWindow::eventFilter(QObject* watch, QEvent* evn) {
 
   m_MainHelper->mainEventFilter(watch, evn);
 
-  if (evn->type() == QEvent::KeyPress) {
+  /*if (evn->type() == QEvent::KeyPress) {
     QKeyEvent* key = static_cast<QKeyEvent*>(evn);
     if (key->key() == Qt::Key_Back) {
       onAndroidBackHandle();
 
       return true;
     }
-  }
+  }*/
 
   return QWidget::eventFilter(watch, evn);
 }
@@ -2955,13 +2955,13 @@ void MainWindow::on_btnHome_clicked() {
 }
 
 void MainWindow::onAndroidBackHandle() {
-  QTimer::singleShot(0, this, [] {
+  /*QTimer::singleShot(0, this, [] {
     QWidget* w = qApp->activeWindow();
     if (w) {
       w->activateWindow();
       w->setFocus();
     }
-  });
+  });*/
 
   if (colorDlg != nullptr) {
     if (colorDlg->isVisible()) {
@@ -3128,7 +3128,6 @@ void MainWindow::onAndroidBackHandle() {
 
     } else {
       mui->btnBackReader->click();
-      this->setFocus();
 
       return;
     }

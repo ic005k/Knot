@@ -30,7 +30,8 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.1' //7.4.0
+        //classpath 'com.android.tools.build:gradle:7.4.1' //7.4.0
+        classpath 'com.android.tools.build:gradle:8.7.3'
 
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
      }
@@ -154,6 +155,9 @@ android {
 
     lintOptions {
         abortOnError false
+        checkReleaseBuilds false
+        disable 'Deprecation', 'NewApi', 'GradlePathTooLong'
+
     }
 
     // Do not compress Qt binary resources file

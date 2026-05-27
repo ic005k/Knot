@@ -237,6 +237,8 @@ class Steps : public QDialog {
   void refreshSteps();
 
  private:
+  QThread* geoThread;
+
   bool latValid = false;
   bool lonValid = false;
   QDateTime currentTime;

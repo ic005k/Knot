@@ -1,95 +1,85 @@
 package com.x;
 
-import org.ini4j.Wini;
-
-import com.x.MyActivity;
-import com.x.NoteEditor;
-
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlertDialog;
+import android.app.Application;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.TextView;
-import android.net.Uri;
-import android.os.FileObserver;
-import android.os.AsyncTask;
-import android.text.method.ScrollingMovementMethod;
-import java.util.List;
-import java.util.ArrayList;
-
-import android.content.IntentFilter;
-import android.content.Intent;
-import android.content.BroadcastReceiver;
-import android.app.PendingIntent;
-import android.text.TextUtils;
-import android.app.AlertDialog;
-import android.app.Service;
-import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.media.AudioManager;
+import android.media.ExifInterface;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.app.Activity;
-import android.appwidget.AppWidgetManager;
-import android.content.Context;
-import android.appwidget.AppWidgetProvider;
+import android.os.Bundle;
+import android.os.FileObserver;
+import android.os.Handler;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
-import android.view.WindowManager;
-import android.view.Window;
-
+import android.widget.TextView;
+import android.widget.TextView;
+import android.widget.Toast;
+import com.x.MyActivity;
+import com.x.NoteEditor;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
-import java.io.BufferedWriter;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.io.IOException;
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import android.os.Handler;
-import android.media.AudioManager;
-import android.widget.TextView;
-
-import java.util.Locale;
-
-import android.app.Application;
-import android.app.ActivityManager;
-import android.content.pm.ApplicationInfo;
-
 import java.util.logging.Logger;
+import org.ini4j.Wini;
 
-import android.widget.Toast;
+public class ShareReceiveActivity
+    extends Activity
+    implements View.OnClickListener
+{
 
-import android.text.SpannableStringBuilder;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.Spannable;
-import android.text.Spanned;
-
-import android.graphics.Bitmap;
-import android.media.ExifInterface;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-
-public class ShareReceiveActivity extends Activity
-        implements View.OnClickListener {
     private TextView tv;
     private Button btnAddToTodo;
     private Button btnAppendNote;
@@ -101,35 +91,35 @@ public class ShareReceiveActivity extends Activity
     private InternalConfigure internalConfigure;
     private static Context context;
 
-    public native static void CallJavaNotify_0();
+    public static native void CallJavaNotify_0();
 
-    public native static void CallJavaNotify_1();
+    public static native void CallJavaNotify_1();
 
-    public native static void CallJavaNotify_2();
+    public static native void CallJavaNotify_2();
 
-    public native static void CallJavaNotify_3();
+    public static native void CallJavaNotify_3();
 
-    public native static void CallJavaNotify_4();
+    public static native void CallJavaNotify_4();
 
-    public native static void CallJavaNotify_5();
+    public static native void CallJavaNotify_5();
 
-    public native static void CallJavaNotify_6();
+    public static native void CallJavaNotify_6();
 
-    public native static void CallJavaNotify_7();
+    public static native void CallJavaNotify_7();
 
-    public native static void CallJavaNotify_8();
+    public static native void CallJavaNotify_8();
 
-    public native static void CallJavaNotify_9();
+    public static native void CallJavaNotify_9();
 
-    public native static void CallJavaNotify_10();
+    public static native void CallJavaNotify_10();
 
-    public native static void CallJavaNotify_11();
+    public static native void CallJavaNotify_11();
 
-    public native static void CallJavaNotify_12();
+    public static native void CallJavaNotify_12();
 
-    public native static void CallJavaNotify_13();
+    public static native void CallJavaNotify_13();
 
-    public native static void CallJavaNotify_14();
+    public static native void CallJavaNotify_14();
 
     private String type;
     private String action;
@@ -180,7 +170,12 @@ public class ShareReceiveActivity extends Activity
         type = intent.getType();
         System.out.println("type=" + type + "  action=" + action);
 
-        tv.setText(type + "\n\n" + action + "\n\nSorry, this feature is not currently supported.");
+        tv.setText(
+            type +
+                "\n\n" +
+                action +
+                "\n\nSorry, this feature is not currently supported."
+        );
 
         if (type.startsWith("image/")) {
             btnAddToTodo.setVisibility(View.GONE);
@@ -194,19 +189,27 @@ public class ShareReceiveActivity extends Activity
             if ("text/plain".equals(type)) {
                 handlerText(intent);
                 System.out.println("strData=" + strData);
-                tv.setText(type + "\n\n" + action + "\n\ncursor pos: " + cursorText + "\n\n" + strData);
+                tv.setText(
+                    type +
+                        "\n\n" +
+                        action +
+                        "\n\ncursor pos: " +
+                        cursorText +
+                        "\n\n" +
+                        strData
+                );
                 setInsertFlag();
-
-            } else
-
-            if (type.startsWith("image/")) {
+            } else if (type.startsWith("image/")) {
                 MyAsyncTask myAsyncTask = new MyAsyncTask();
                 myAsyncTask.execute();
-
-            } else
-
-            if (type.startsWith("*/*") || type.startsWith("application/")) {
-                Toast.makeText(this, "Sorry, this feature is not currently supported.", 9000).show();
+            } else if (
+                type.startsWith("*/*") || type.startsWith("application/")
+            ) {
+                Toast.makeText(
+                    this,
+                    "Sorry, this feature is not currently supported.",
+                    9000
+                ).show();
                 ShareReceiveActivity.this.finish();
             }
         }
@@ -216,18 +219,23 @@ public class ShareReceiveActivity extends Activity
             if (type.startsWith("image/")) {
                 MyAsyncTask myAsyncTask = new MyAsyncTask();
                 myAsyncTask.execute();
-
-            } else
-
-            if (type.startsWith("*/*") || type.startsWith("application/")) {
-                Toast.makeText(this, "Sorry, this feature is not currently supported.", 9000).show();
+            } else if (
+                type.startsWith("*/*") || type.startsWith("application/")
+            ) {
+                Toast.makeText(
+                    this,
+                    "Sorry, this feature is not currently supported.",
+                    9000
+                ).show();
                 ShareReceiveActivity.this.finish();
             }
         }
 
         // HomeKey
-        registerReceiver(mHomeKeyEvent, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-
+        registerReceiver(
+            mHomeKeyEvent,
+            new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+        );
     }
 
     private BroadcastReceiver mHomeKeyEvent = new BroadcastReceiver() {
@@ -255,7 +263,7 @@ public class ShareReceiveActivity extends Activity
         }
     };
 
-    @Override
+    /*@Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnAddToTodo:
@@ -354,17 +362,101 @@ public class ShareReceiveActivity extends Activity
                 onBackPressed();
                 break;
         }
+    }*/
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+
+        if (id == R.id.btnAddToTodo) {
+            NoteEditor.closeNoteEditorView();
+            try {
+                File file = new File(share_ini);
+                if (!file.exists()) file.createNewFile();
+                Wini ini = new Wini(file);
+                ini.put("share", "method", "todo");
+                ini.store();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (type.startsWith("text/")) {
+                goReceiveString();
+            }
+
+            onBackPressed();
+        } else if (id == R.id.btnAppendNote) {
+            NoteEditor.closeNoteEditorView();
+            try {
+                File file = new File(share_ini);
+                if (!file.exists()) file.createNewFile();
+                Wini ini = new Wini(file);
+                ini.put("share", "method", "appendNote");
+                ini.store();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (type.startsWith("text/")) {
+                goReceiveString();
+            }
+
+            if (type.startsWith("image/")) {
+                goReceiveImage();
+            }
+
+            onBackPressed();
+        } else if (id == R.id.btnInsertNote) {
+            NoteEditor.closeNoteEditorView();
+            try {
+                File file = new File(share_ini);
+                if (!file.exists()) file.createNewFile();
+                Wini ini = new Wini(file);
+                ini.put("share", "method", "insertNote");
+                ini.store();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (type.startsWith("text/")) {
+                goReceiveString();
+            }
+
+            if (type.startsWith("image/")) {
+                goReceiveImage();
+            }
+
+            onBackPressed();
+        } else if (id == R.id.btnFreePaste) {
+            NoteEditor.closeNoteEditorView();
+            try {
+                File file = new File(share_ini);
+                if (!file.exists()) file.createNewFile();
+                Wini ini = new Wini(file);
+                ini.put("share", "method", "freePaste");
+                ini.store();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (type.startsWith("text/")) {
+                goReceiveString();
+            }
+
+            if (type.startsWith("image/")) {
+                goReceiveImage();
+            }
+
+            onBackPressed();
+        }
     }
 
     // 该方法用于获取intent所包含的文本信息，并显示到APP的Activity界面上
     public void handlerText(Intent intent) {
         String mainTxt = intent.getStringExtra(Intent.EXTRA_TEXT);
-        String title = "";// = intent.getStringExtra(Intent.EXTRA_TITLE);
-        if (title.length() > 0)
-            strData = title + "\n\n" + mainTxt;
-        else
-            strData = mainTxt;
-
+        String title = ""; // = intent.getStringExtra(Intent.EXTRA_TITLE);
+        if (title.length() > 0) strData = title + "\n\n" + mainTxt;
+        else strData = mainTxt;
     }
 
     void dealPicStream(Intent intent) {
@@ -372,59 +464,67 @@ public class ShareReceiveActivity extends Activity
     }
 
     void dealMultiplePicStream(Intent intent) {
-        ArrayList<Uri> arrayList = intent.getParcelableArrayListExtra(intent.EXTRA_STREAM);
+        ArrayList<Uri> arrayList = intent.getParcelableArrayListExtra(
+            intent.EXTRA_STREAM
+        );
     }
 
     void goReceiveString() {
         System.out.println("strData=" + strData);
 
-        boolean isRun = MyService.isReady;// isAppRun("com.x");
+        boolean isRun = MyService.isReady; // isAppRun("com.x");
 
         if (!isRun) {
             saveReceiveShare("text/plain", strData, "false");
 
-            if (isZh())
-                Toast.makeText(this, getString(R.string.strTip_zh), Toast.LENGTH_LONG).show();
-            else
-                Toast.makeText(this, getString(R.string.strTip), Toast.LENGTH_LONG).show();
+            if (isZh()) Toast.makeText(
+                this,
+                getString(R.string.strTip_zh),
+                Toast.LENGTH_LONG
+            ).show();
+            else Toast.makeText(
+                this,
+                getString(R.string.strTip),
+                Toast.LENGTH_LONG
+            ).show();
 
             // reopen app
             openAppFromPackageName("com.x");
-
         } else {
             saveReceiveShare("text/plain", strData, "true");
             CallJavaNotify_5();
         }
-
     }
 
     void goReceiveImage() {
-        boolean isRun = MyService.isReady;// isAppRun("com.x");
+        boolean isRun = MyService.isReady; // isAppRun("com.x");
 
         if (!isRun) {
             saveReceiveShare("image/*", "", "false");
 
-            if (isZh())
-                Toast.makeText(this, getString(R.string.strTip_zh), Toast.LENGTH_LONG).show();
-            else
-                Toast.makeText(this, getString(R.string.strTip), Toast.LENGTH_LONG).show();
+            if (isZh()) Toast.makeText(
+                this,
+                getString(R.string.strTip_zh),
+                Toast.LENGTH_LONG
+            ).show();
+            else Toast.makeText(
+                this,
+                getString(R.string.strTip),
+                Toast.LENGTH_LONG
+            ).show();
 
             // reopen app
             openAppFromPackageName("com.x");
-
         } else {
             saveReceiveShare("image/*", "", "true");
             CallJavaNotify_5();
-
         }
-
     }
 
     void saveReceiveShare(String shareType, String strData, String shareDone) {
         try {
             File file = new File(share_ini);
-            if (!file.exists())
-                file.createNewFile();
+            if (!file.exists()) file.createNewFile();
             Wini ini = new Wini(file);
 
             ini.put("share", "shareType", shareType);
@@ -437,7 +537,6 @@ public class ShareReceiveActivity extends Activity
 
         String filename = "/storage/emulated/0/.Knot/share_text.txt";
         writeTextFile(strData, filename);
-
     }
 
     @Override
@@ -453,7 +552,6 @@ public class ShareReceiveActivity extends Activity
         unregisterReceiver(mHomeKeyEvent);
         // android.os.Process.killProcess(android.os.Process.myPid());
         super.onDestroy();
-
     }
 
     public void openAppFromPackageName(String pname) {
@@ -481,8 +579,8 @@ public class ShareReceiveActivity extends Activity
         resolveIntent.setPackage(packageinfo.packageName);
 
         // 通过getPackageManager()的queryIntentActivities方法遍历
-        List<ResolveInfo> resolveinfoList = getPackageManager()
-                .queryIntentActivities(resolveIntent, 0);
+        List<ResolveInfo> resolveinfoList =
+            getPackageManager().queryIntentActivities(resolveIntent, 0);
 
         ResolveInfo resolveinfo = resolveinfoList.iterator().next();
         if (resolveinfo != null) {
@@ -507,12 +605,20 @@ public class ShareReceiveActivity extends Activity
     }
 
     private void startLocalApp(String packageNameTarget) {
-        Log.i("Wmx logs::", "-----------------------开始启动第三方 APP=" + packageNameTarget);
+        Log.i(
+            "Wmx logs::",
+            "-----------------------开始启动第三方 APP=" + packageNameTarget
+        );
 
         PackageManager packageManager = getPackageManager();
-        Intent intent = packageManager.getLaunchIntentForPackage(packageNameTarget);
+        Intent intent = packageManager.getLaunchIntentForPackage(
+            packageNameTarget
+        );
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        intent.setFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setFlags(
+            Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED |
+                Intent.FLAG_ACTIVITY_NEW_TASK
+        );
 
         /**
          * android.intent.action.MAIN：打开另一程序
@@ -524,10 +630,10 @@ public class ShareReceiveActivity extends Activity
          */
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
-
     }
 
     public class InternalConfigure {
+
         private final Context context;
         private Properties properties;
 
@@ -540,9 +646,10 @@ public class ShareReceiveActivity extends Activity
          * 保存文件filename为文件名，filecontent为存入的文件内容
          * 例:configureActivity.saveFiletoSD("text.ini","");
          */
-        public void saveFile(String filename, Properties properties) throws Exception {
+        public void saveFile(String filename, Properties properties)
+            throws Exception {
             // 设置Context.MODE_PRIVATE表示每次调用该方法会覆盖原来的文件数据
-            FileOutputStream fileOutputStream;// = context.openFileOutput(filename, Context.MODE_PRIVATE);
+            FileOutputStream fileOutputStream; // = context.openFileOutput(filename, Context.MODE_PRIVATE);
             File file = new File(filename);
             fileOutputStream = new FileOutputStream(file);
             // 通过properties.stringPropertyNames()获得所有key的集合Set，里面是String对象
@@ -560,12 +667,15 @@ public class ShareReceiveActivity extends Activity
         public void readFrom(String filename) throws Exception {
             properties = new Properties();
 
-            FileInputStream fileInputStream;// = context.openFileInput(filename);
+            FileInputStream fileInputStream; // = context.openFileInput(filename);
 
             File file = new File(filename);
             fileInputStream = new FileInputStream(file);
 
-            InputStreamReader reader = new InputStreamReader(fileInputStream, "UTF-8");
+            InputStreamReader reader = new InputStreamReader(
+                fileInputStream,
+                "UTF-8"
+            );
             BufferedReader br = new BufferedReader(reader);
 
             // debug:
@@ -615,7 +725,9 @@ public class ShareReceiveActivity extends Activity
     }
 
     public static boolean isAppRunning(Context context, String packageName) {
-        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        ActivityManager am = (ActivityManager) context.getSystemService(
+            Context.ACTIVITY_SERVICE
+        );
         List<ActivityManager.RunningTaskInfo> list = am.getRunningTasks(100);
         if (list.size() <= 0) {
             return false;
@@ -631,7 +743,9 @@ public class ShareReceiveActivity extends Activity
     // 获取已安装应用的 uid，-1 表示未安装此应用或程序异常
     public static int getPackageUid(Context context, String packageName) {
         try {
-            ApplicationInfo applicationInfo = context.getPackageManager().getApplicationInfo(packageName, 0);
+            ApplicationInfo applicationInfo = context
+                .getPackageManager()
+                .getApplicationInfo(packageName, 0);
             if (applicationInfo != null) {
                 Log.e("share", String.valueOf(applicationInfo.uid));
                 return applicationInfo.uid;
@@ -643,8 +757,11 @@ public class ShareReceiveActivity extends Activity
     }
 
     public static boolean isProcessRunning(Context context, int uid) {
-        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningServiceInfo> runningServiceInfos = am.getRunningServices(200);
+        ActivityManager am = (ActivityManager) context.getSystemService(
+            Context.ACTIVITY_SERVICE
+        );
+        List<ActivityManager.RunningServiceInfo> runningServiceInfos =
+            am.getRunningServices(200);
         if (runningServiceInfos.size() > 0) {
             for (ActivityManager.RunningServiceInfo appProcess : runningServiceInfos) {
                 if (uid == appProcess.uid) {
@@ -673,12 +790,14 @@ public class ShareReceiveActivity extends Activity
         for (int i = 0; i < uris.size(); i++) {
             Uri uri = uris.get(i);
             strUri = strUri + "\n\n" + uri;
-            filename = "/storage/emulated/0/.Knot/img" + String.valueOf(i) + ".png";
+            filename =
+                "/storage/emulated/0/.Knot/img" + String.valueOf(i) + ".png";
 
             if (uri != null) {
                 try {
                     File outFile = new File(filename);
-                    InputStream inputStream = getContentResolver().openInputStream(uri);
+                    InputStream inputStream =
+                        getContentResolver().openInputStream(uri);
                     FileOutputStream fos = new FileOutputStream(outFile);
                     byte[] buf = new byte[1024];
                     int readCount = 0;
@@ -691,7 +810,6 @@ public class ShareReceiveActivity extends Activity
 
                     // 新增：校正图片方向
                     correctImageOrientation(filename);
-
                 } catch (IOException e) {
                     e.printStackTrace();
                     return false;
@@ -701,8 +819,7 @@ public class ShareReceiveActivity extends Activity
 
         try {
             File file = new File(share_ini);
-            if (!file.exists())
-                file.createNewFile();
+            if (!file.exists()) file.createNewFile();
             Wini ini = new Wini(file);
             ini.put("share", "imgCount", uris.size());
             ini.store();
@@ -727,11 +844,18 @@ public class ShareReceiveActivity extends Activity
         @Override
         protected void onPostExecute(Void aVoid) {
             // 在这里执行完成后的操作
-            tv.setText(type + "\n\n" + action + "\n\ncursor pos: " + cursorText + "\n\n" + strUri);
+            tv.setText(
+                type +
+                    "\n\n" +
+                    action +
+                    "\n\ncursor pos: " +
+                    cursorText +
+                    "\n\n" +
+                    strUri
+            );
             setInsertFlag();
             btnAppendNote.setEnabled(true);
             btnInsertNote.setEnabled(true);
-
         }
     }
 
@@ -740,7 +864,8 @@ public class ShareReceiveActivity extends Activity
             File file = new File(filename);
             StringBuffer strBuf = new StringBuffer();
             BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(file), "UTF-8"));
+                new InputStreamReader(new FileInputStream(file), "UTF-8")
+            );
             int tempchar;
             while ((tempchar = bufferedReader.read()) != -1) {
                 strBuf.append((char) tempchar);
@@ -763,11 +888,12 @@ public class ShareReceiveActivity extends Activity
             file.createNewFile();
             // 获取该文件的缓冲输出流
             BufferedWriter bufferedWriter = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
+                new OutputStreamWriter(new FileOutputStream(file), "UTF-8")
+            );
             // 写入信息
             bufferedWriter.write(content);
-            bufferedWriter.flush();// 清空缓冲区
-            bufferedWriter.close();// 关闭输出流
+            bufferedWriter.flush(); // 清空缓冲区
+            bufferedWriter.close(); // 关闭输出流
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -777,23 +903,46 @@ public class ShareReceiveActivity extends Activity
         // Set insert flag
         String strTV = tv.getText().toString();
         int indexTV = strTV.indexOf(cursorText);
-        System.out.println("strTV=" + strTV + " cursorText=" + cursorText + "  indexTV=" + String.valueOf(indexTV));
+        System.out.println(
+            "strTV=" +
+                strTV +
+                " cursorText=" +
+                cursorText +
+                "  indexTV=" +
+                String.valueOf(indexTV)
+        );
         if (indexTV >= 0) {
             int start = indexTV;
             int end = indexTV + cursorText.length();
             SpannableStringBuilder style = new SpannableStringBuilder(strTV);
-            style.setSpan(new BackgroundColorSpan(Color.parseColor("#FFE4C4")), start, end,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            style.setSpan(new ForegroundColorSpan(Color.parseColor("#000000")), start, end,
-                    Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+            style.setSpan(
+                new BackgroundColorSpan(Color.parseColor("#FFE4C4")),
+                start,
+                end,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+            style.setSpan(
+                new ForegroundColorSpan(Color.parseColor("#000000")),
+                start,
+                end,
+                Spannable.SPAN_EXCLUSIVE_INCLUSIVE
+            );
 
             indexTV = strTV.indexOf("|");
             start = indexTV;
             end = indexTV + 1;
-            style.setSpan(new BackgroundColorSpan(Color.parseColor("#FFE4C4")), start, end,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            style.setSpan(new ForegroundColorSpan(Color.parseColor("#FF0000")), start, end,
-                    Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+            style.setSpan(
+                new BackgroundColorSpan(Color.parseColor("#FFE4C4")),
+                start,
+                end,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+            style.setSpan(
+                new ForegroundColorSpan(Color.parseColor("#FF0000")),
+                start,
+                end,
+                Spannable.SPAN_EXCLUSIVE_INCLUSIVE
+            );
 
             tv.setText(style);
         }
@@ -802,18 +951,18 @@ public class ShareReceiveActivity extends Activity
     public boolean isZh() {
         Locale locale = this.getResources().getConfiguration().locale;
         String language = locale.getLanguage();
-        if (language.endsWith("zh"))
-            return true;
-        else
-            return false;
-
+        if (language.endsWith("zh")) return true;
+        else return false;
     }
 
     // 新增方法：校正图片方向
     private void correctImageOrientation(String imagePath) {
         try {
             ExifInterface exif = new ExifInterface(imagePath);
-            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+            int orientation = exif.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_UNDEFINED
+            );
 
             // 根据方向信息旋转图片
             Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
@@ -821,7 +970,6 @@ public class ShareReceiveActivity extends Activity
 
             // 保存校正后的图片
             saveBitmapToFile(rotatedBitmap, imagePath);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -859,7 +1007,15 @@ public class ShareReceiveActivity extends Activity
         }
 
         try {
-            return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+            return Bitmap.createBitmap(
+                bitmap,
+                0,
+                0,
+                bitmap.getWidth(),
+                bitmap.getHeight(),
+                matrix,
+                true
+            );
         } catch (OutOfMemoryError e) {
             e.printStackTrace();
             return bitmap;
@@ -876,5 +1032,4 @@ public class ShareReceiveActivity extends Activity
             bitmap.recycle();
         }
     }
-
 }

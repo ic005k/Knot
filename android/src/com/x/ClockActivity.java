@@ -126,30 +126,27 @@ public class ClockActivity
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btn_cancel:
-                String iniFile = "/storage/emulated/0/.Knot/alarm.ini";
-                try {
-                    File file = new File(iniFile);
-                    File parentDir = file.getParentFile();
-                    if (!parentDir.exists()) {
-                        parentDir.mkdirs(); // 创建多级父目录
-                    }
-                    if (!file.exists()) file.createNewFile();
-                    Wini ini = new Wini(file);
-                    ini.put("action", "backMain", "true");
-                    ini.store();
-                } catch (IOException e) {
-                    e.printStackTrace();
+        int id = v.getId();
+        if (id == R.id.btn_cancel) {
+            String iniFile = "/storage/emulated/0/.Knot/alarm.ini";
+            try {
+                File file = new File(iniFile);
+                File parentDir = file.getParentFile();
+                if (!parentDir.exists()) {
+                    parentDir.mkdirs(); // 创建多级父目录
                 }
+                if (!file.exists()) file.createNewFile();
+                Wini ini = new Wini(file);
+                ini.put("action", "backMain", "true");
+                ini.store();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-                MyActivity.isBackMainUI = true;
-
-                onBackPressed();
-                break;
-            case R.id.btn_play_voice:
-                playRecord(voiceFile);
-                break;
+            MyActivity.isBackMainUI = true;
+            onBackPressed();
+        } else if (id == R.id.btn_play_voice) {
+            playRecord(voiceFile);
         }
     }
 

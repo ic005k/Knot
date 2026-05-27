@@ -3159,28 +3159,20 @@ QString Reader::getReadTotalTime() {
 }
 
 void Reader::closeReader() {
+  mui->frameMain->show();
+  mui->frameReader->hide();
+
   QString time = getReadTotalTime();
-  qDebug() << time;
+  qDebug() << "getReadTotalTime=" << time;
 
   mw_one->on_btnAutoStop_clicked();
-
-  m_ReaderSet->close();
-  if (mui->f_ReaderNote->isVisible()) {
-    mw_one->on_btnCancelSel_clicked();
-  }
-  if (mui->f_ReaderSet->isVisible()) {
-    mw_one->on_btnBackReaderSet_clicked();
-  }
 
   saveReader("", false);
   savePageVPos();
 
-  closeViewBookNote();
-
   if (!isGpsRun) cancelKeepScreenOn();
 
-  mui->frameMain->show();
-  mui->frameReader->hide();
+  AndroidTouchFixer::wakeup();
 }
 
 void Reader::openReader() {

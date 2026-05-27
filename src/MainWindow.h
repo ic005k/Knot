@@ -108,6 +108,25 @@ class UpdateGpsMapThread;
 class GetGpsDataThread;
 class SliderButton;
 
+class AndroidTouchFixer : public QObject {
+  Q_OBJECT
+ public:
+  explicit AndroidTouchFixer(QObject* parent = nullptr) : QObject(parent) {}
+
+  static void wakeup() {
+#ifdef Q_OS_ANDROID
+    QTimer::singleShot(0, [] {
+      if (auto* w = QApplication::activeWindow()) {
+        QPoint p(1, 1);
+        QMouseEvent e(QEvent::MouseMove, p, Qt::NoButton, Qt::NoButton,
+                      Qt::NoModifier);
+        QApplication::sendEvent(w, &e);
+      }
+    });
+#endif
+  }
+};
+
 class SearchWorker : public QObject {
   Q_OBJECT
  public:

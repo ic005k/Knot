@@ -379,7 +379,7 @@ public class NoteEditor
         btnStartFind.setOnClickListener(this);
     }
 
-    @Override
+    /*@Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_cancel:
@@ -512,6 +512,100 @@ public class NoteEditor
 
                 break;
         }
+    }*/
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        if (id == R.id.btn_cancel) {
+            btn_cancel.setBackgroundColor(getResources().getColor(R.color.red));
+            hideKeyBoard(m_instance);
+            onBackPressed();
+            btn_cancel.setBackgroundColor(
+                getResources().getColor(R.color.normal)
+            );
+        } else if (id == R.id.btn_save) {
+            if (isTextChanged) {
+                saveNote();
+                isTextChanged = false;
+            }
+        } else if (id == R.id.btnUndo) {
+            btnUndo.setBackgroundColor(getResources().getColor(R.color.red));
+            helper.undo(); // perform undo
+            btnUndo.setBackgroundColor(getResources().getColor(R.color.normal));
+        } else if (id == R.id.btnRedo) {
+            btnRedo.setBackgroundColor(getResources().getColor(R.color.red));
+            helper.redo(); // perform redo
+            btnRedo.setBackgroundColor(getResources().getColor(R.color.normal));
+        } else if (id == R.id.btnMenu) {
+            btnMenu.setBackgroundColor(getResources().getColor(R.color.red));
+
+            start = editNote.getSelectionStart();
+            end = editNote.getSelectionEnd();
+            editNote.clearFocus();
+            editNote.setSelection(start);
+            editNote.setSelection(start, end);
+
+            showPopupMenu(btnMenu);
+
+            editNote.requestFocus();
+            btnMenu.setBackgroundColor(getResources().getColor(R.color.normal));
+        } else if (id == R.id.btnFind) {
+            btnFind.setBackgroundColor(getResources().getColor(R.color.red));
+            if (btnPrev.getVisibility() == View.VISIBLE) {
+                editFind.setVisibility(View.GONE);
+                btnPrev.setVisibility(View.GONE);
+                btnNext.setVisibility(View.GONE);
+                btnStartFind.setVisibility(View.GONE);
+                lblResult.setVisibility(View.GONE);
+            } else {
+                editFind.setVisibility(View.VISIBLE);
+                btnPrev.setVisibility(View.VISIBLE);
+                btnNext.setVisibility(View.VISIBLE);
+                btnStartFind.setVisibility(View.VISIBLE);
+                lblResult.setVisibility(View.VISIBLE);
+                editFind.requestFocus();
+            }
+            btnFind.setBackgroundColor(getResources().getColor(R.color.normal));
+        } else if (id == R.id.btnPrev) {
+            btnPrev.setBackgroundColor(getResources().getColor(R.color.red));
+            goFindResult(-1);
+            int count = arrayFindResult.size();
+            if (count > 0) {
+                String strInfo =
+                    String.valueOf(curIndexForResult + 1) +
+                    "/" +
+                    String.valueOf(count);
+                lblResult.setText(strInfo);
+
+                editNote.requestFocus();
+            }
+
+            btnPrev.setBackgroundColor(getResources().getColor(R.color.normal));
+        } else if (id == R.id.btnNext) {
+            btnNext.setBackgroundColor(getResources().getColor(R.color.red));
+            goFindResult(1);
+            int count = arrayFindResult.size();
+            if (count > 0) {
+                String strInfo =
+                    String.valueOf(curIndexForResult + 1) +
+                    "/" +
+                    String.valueOf(count);
+                lblResult.setText(strInfo);
+
+                editNote.requestFocus();
+            }
+
+            btnNext.setBackgroundColor(getResources().getColor(R.color.normal));
+        } else if (id == R.id.btnStartFind) {
+            btnStartFind.setBackgroundColor(
+                getResources().getColor(R.color.red)
+            );
+            on_editFindTextChanged();
+            btnStartFind.setBackgroundColor(
+                getResources().getColor(R.color.normal)
+            );
+        }
     }
 
     private void AnimationWhenClosed() {
@@ -610,8 +704,7 @@ public class NoteEditor
                     );
                 }
             }
-        )
-            .start();
+        ).start();
     }
 
     private void loadMDFileChunks() {
@@ -666,8 +759,7 @@ public class NoteEditor
                     );
                 }
             }
-        )
-            .start();
+        ).start();
     }
 
     private void loadMDFileChunks_old() {
@@ -746,8 +838,7 @@ public class NoteEditor
                     );
                 }
             }
-        )
-            .start();
+        ).start();
     }
 
     private void setCursorPos() {
@@ -1278,8 +1369,7 @@ public class NoteEditor
                     }
                 }
             }
-        )
-            .start();
+        ).start();
     }
 
     private void openFilePicker() {
@@ -1770,7 +1860,7 @@ public class NoteEditor
 
     // 该方法对菜单的item进行监听
 
-    @Override
+    /*@Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // mTextView.setText(item.getTitle());
         switch (item.getItemId()) {
@@ -1811,9 +1901,46 @@ public class NoteEditor
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }*/
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.menu1) {
+            Toast.makeText(
+                this,
+                "点击了第" + 1 + "个",
+                Toast.LENGTH_SHORT
+            ).show();
+        } else if (id == R.id.menu2) {
+            Toast.makeText(
+                this,
+                "点击了第" + 2 + "个",
+                Toast.LENGTH_SHORT
+            ).show();
+        } else if (id == R.id.menu3) {
+            Toast.makeText(
+                this,
+                "点击了第" + 3 + "个",
+                Toast.LENGTH_SHORT
+            ).show();
+        } else if (id == R.id.menu4) {
+            Toast.makeText(
+                this,
+                "点击了第" + 4 + "个",
+                Toast.LENGTH_SHORT
+            ).show();
+        } else if (id == R.id.menu5) {
+            Toast.makeText(
+                this,
+                "点击了第" + 5 + "个",
+                Toast.LENGTH_SHORT
+            ).show();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
-    private void showCustomPopupMenu() {
+    /*private void showCustomPopupMenu() {
         PopupMenuCustomLayout popupMenu = new PopupMenuCustomLayout(
             this,
             R.layout.popup_menu_custom_layout,
@@ -1831,7 +1958,11 @@ public class NoteEditor
         );
 
         popupMenu.show();
-    }
+    }*/
+
+    //if (itemId == R.id.format) {
+    //    System.out.println("Item A was clicked!");
+    //}
 
     // 当前正在使用 main.xml main_cn.xml
     private void showPopupMenu(View view) {
@@ -1855,7 +1986,7 @@ public class NoteEditor
         // menu的item点击事件
         popupMenu.setOnMenuItemClickListener(
             new PopupMenu.OnMenuItemClickListener() {
-                @Override
+                /*@Override
                 public boolean onMenuItemClick(MenuItem item) {
                     // test
                     switch (item.getItemId()) {
@@ -1867,6 +1998,17 @@ public class NoteEditor
 
                     // Toast.makeText(getApplicationContext(), item.getTitle(),
                     // Toast.LENGTH_SHORT).show();
+                    return false;
+                }*/
+
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    int id = item.getItemId();
+                    if (id == R.id.s1) {
+                        // 你原来的逻辑
+                    }
+
+                    onClickMenuTitle(item.getTitle());
                     return false;
                 }
             }
@@ -1911,8 +2053,7 @@ public class NoteEditor
                 ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.CAMERA
-                ) !=
-                PackageManager.PERMISSION_GRANTED
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
                 permissions.add(Manifest.permission.CAMERA);
             }
@@ -1923,8 +2064,7 @@ public class NoteEditor
                     ContextCompat.checkSelfPermission(
                         this,
                         Manifest.permission.READ_MEDIA_IMAGES
-                    ) !=
-                    PackageManager.PERMISSION_GRANTED
+                    ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     permissions.add(Manifest.permission.READ_MEDIA_IMAGES);
                 }
@@ -3051,7 +3191,9 @@ public class NoteEditor
     private void updateSystemBars() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+            );
 
             if (MyActivity.isDark) {
                 // 暗黑模式
@@ -3065,7 +3207,12 @@ public class NoteEditor
                 window.setStatusBarColor(Color.parseColor("#F3F3F3"));
                 window.setNavigationBarColor(Color.parseColor("#FFFFFF"));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+                    window
+                        .getDecorView()
+                        .setSystemUiVisibility(
+                            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR |
+                                View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                        );
                 }
             }
         }

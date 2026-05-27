@@ -441,7 +441,7 @@ public class FilePicker
         if (MyFilepicker != null) MyFilepicker.finish();
     }
 
-    @Override
+    /*@Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnFind:
@@ -459,6 +459,19 @@ public class FilePicker
                 editFind.requestFocus();
 
                 break;
+        }
+    }*/
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        if (id == R.id.btnFind) {
+            btnFind.setBackgroundColor(getResources().getColor(R.color.red));
+
+            btnFind.setBackgroundColor(getResources().getColor(R.color.normal));
+        } else if (id == R.id.btn_clear) {
+            editFind.setText("");
+            editFind.requestFocus();
         }
     }
 
