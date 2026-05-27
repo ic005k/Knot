@@ -49,10 +49,11 @@ jobs:
         echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
         echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-    - name: Install & Upgrade aqtinstall
+    # 🔥 🔥 🔥 这里是关键修复 🔥 🔥 🔥
+    - name: Install LATEST aqtinstall (dev version with Qt 6.11 support)
       run: |
         python -m pip install --upgrade pip
-        python -m pip install --upgrade aqtinstall
+        python -m pip install -U git+https://github.com/miurahr/aqtinstall.git
 
     - name: Install Desktop Qt
       run: |
