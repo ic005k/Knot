@@ -217,8 +217,6 @@ class Notes : public QDialog {
 
   void on_btnDone_clicked();
 
-  void on_KVChanged();
-
   void on_btnPic_clicked();
 
   void on_btnInsertTable_clicked();
@@ -286,7 +284,6 @@ class Notes : public QDialog {
 
   int newHeight = 0;
 
-  QInputMethod* pAndroidKeyboard = QApplication::inputMethod();
   void wheelEvent(QWheelEvent* e) override;
 
   QColor StringToColor(QString mRgbStr);

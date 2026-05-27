@@ -318,8 +318,6 @@ class Method : public QDialog {
 
   int getFontHeight();
 
-  void closeQtKeyboard();
-
   void modifyItemText3(QQuickWidget* qw, int index, QString strText);
   QInputDialog* inputDialog(QString windowsTitle, QString lblEdit,
                             QString defaultValue);
@@ -489,7 +487,8 @@ class Method : public QDialog {
   float getSystemFontScale();
 
   void sendTouch();
-  protected:
+
+ protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

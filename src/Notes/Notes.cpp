@@ -235,18 +235,6 @@ bool Notes::eventFilter(QObject* obj, QEvent* evn) {
   return QWidget::eventFilter(obj, evn);
 }
 
-void Notes::on_KVChanged() {
-  if (!pAndroidKeyboard->isVisible()) {
-    this->setGeometry(mw_one->geometry().x(), mw_one->geometry().y(),
-                      mw_one->width(), mw_one->mainHeight);
-  } else {
-    if (newHeight > 0) {
-      this->setGeometry(mw_one->geometry().x(), mw_one->geometry().y(),
-                        mw_one->width(), newHeight);
-    }
-  }
-}
-
 QString Notes::getDateTimeStr() {
   int y, m, d, hh, mm, s;
   y = QDate::currentDate().year();

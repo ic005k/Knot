@@ -1508,9 +1508,6 @@ void MainWindow::init_Thread_Timer() {
   myGetGpsDataThread = new GetGpsDataThread();
   connect(myGetGpsDataThread, &GetGpsDataThread::isDone, this,
           &MainWindow::GetGpsDataThreadDone);
-
-  connect(pAndroidKeyboard, &QInputMethod::visibleChanged, this,
-          &MainWindow::on_KVChanged);
 }
 
 void MainWindow::selTab() {
@@ -1870,8 +1867,6 @@ void MainWindow::resizeEvent(QResizeEvent* event) {
   }
 #endif
 }
-
-void MainWindow::on_KVChanged() {}
 
 void MainWindow::on_btnAddTodo_clicked() { m_Todo->on_btnAdd_clicked(); }
 
@@ -2499,8 +2494,6 @@ void MainWindow::on_btnShowBookmark_clicked() {
 void MainWindow::on_btnShareImage_clicked() {
   m_ReceiveShare->shareImage(tr("Share to"), imgFileName, "image/png");
 }
-
-void MainWindow::on_btnHideKey_clicked() { pAndroidKeyboard->hide(); }
 
 void MainWindow::on_btnDelImage_clicked() {}
 

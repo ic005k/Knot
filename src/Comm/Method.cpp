@@ -115,12 +115,6 @@ QInputDialog* Method::inputDialog(QString windowsTitle, QString lblEdit,
   return idlg;
 }
 
-void Method::closeQtKeyboard() {
-  if (mw_one->pAndroidKeyboard->isVisible()) {
-    mw_one->pAndroidKeyboard->hide();
-  }
-}
-
 void Method::closeAndroidKeyboard() {
 #ifdef Q_OS_ANDROID
   QJniObject::callStaticMethod<void>(ANDROID_MAIN_ACTIVITY, "hideSoftInput",

@@ -236,8 +236,6 @@ class NotesList : public QDialog {
 
   void on_btnDel_Recycle_clicked();
 
-  void on_KVChanged();
-
   void on_btnUp_clicked();
 
   void on_btnDown_clicked();

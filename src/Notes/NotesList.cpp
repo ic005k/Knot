@@ -14,9 +14,6 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
 
   strNoteNameIndexFile = privateDir + "MyNoteNameIndex";
 
-  connect(pAndroidKeyboard, &QInputMethod::visibleChanged, this,
-          &NotesList::on_KVChanged);
-
   tw = new QTreeWidget(nullptr);
   twrb = new QTreeWidget(nullptr);
 
@@ -2002,12 +1999,6 @@ void NotesList::modifyNoteBookText0(QString text0, int index) {
 
 void NotesList::modifyNotesListText0(QString text0, int index) {
   m_Method->modifyItemText0(mui->qwNoteList, index, text0);
-}
-
-void NotesList::on_KVChanged() {
-  if (!pAndroidKeyboard->isVisible()) {
-  } else {
-  }
 }
 
 void NotesList::moveBy(int ud) {

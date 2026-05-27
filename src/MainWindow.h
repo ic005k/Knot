@@ -115,7 +115,7 @@ class AndroidTouchFixer : public QObject {
 
   static void wakeup() {
 #ifdef Q_OS_ANDROID
-    QTimer::singleShot(0, [] {
+    QTimer::singleShot(100, [] {
       if (auto* w = QApplication::activeWindow()) {
         QPoint p(1, 1);
         QMouseEvent e(QEvent::MouseMove, p, Qt::NoButton, Qt::NoButton,
@@ -123,6 +123,7 @@ class AndroidTouchFixer : public QObject {
         QApplication::sendEvent(w, &e);
       }
     });
+
 #endif
   }
 };
@@ -319,7 +320,6 @@ class MainWindow : public QMainWindow {
 
   int days = 45;
   int newHeight;
-  QInputMethod* pAndroidKeyboard = QApplication::inputMethod();
 
   bool isMemoVisible;
   bool isReaderVisible;
@@ -651,8 +651,6 @@ class MainWindow : public QMainWindow {
   void on_btnAdd_clicked();
 
   void on_btnDel_clicked();
-
-  void on_KVChanged();
 
   void on_btnAddTodo_clicked();
 
@@ -989,8 +987,6 @@ class MainWindow : public QMainWindow {
 
   qreal aoldX, aoldY, aoldZ;
   int countOne = 0;
-
-  void on_btnHideKey_clicked();
 
   void resetWinPos();
 
