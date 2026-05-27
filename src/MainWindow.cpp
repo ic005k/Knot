@@ -2955,13 +2955,13 @@ void MainWindow::on_btnHome_clicked() {
 }
 
 void MainWindow::onAndroidBackHandle() {
-  /*QTimer::singleShot(0, this, [] {
+  QTimer::singleShot(0, this, [] {
     QWidget* w = qApp->activeWindow();
     if (w) {
       w->activateWindow();
       w->setFocus();
     }
-  });*/
+  });
 
   if (colorDlg != nullptr) {
     if (colorDlg->isVisible()) {

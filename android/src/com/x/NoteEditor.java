@@ -625,6 +625,45 @@ public class NoteEditor
         setTheme(R.style.AppThemeprice);
         super.onCreate(savedInstanceState);
 
+        // ========== 统一沉浸模式（和腾讯地图逻辑完全一样 · 全页面通用） ==========
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+            );
+
+            // 状态栏 + 导航栏 透明（和地图一样）
+            window.setStatusBarColor(Color.TRANSPARENT);
+            window.setNavigationBarColor(Color.TRANSPARENT);
+
+            // 布局延伸到系统栏（和地图一样）
+            window
+                .getDecorView()
+                .setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                );
+        }
+
+        // ========== 自动避让系统栏（和地图逻辑一样 · 通用不报错版） ==========
+        View decorView = getWindow().getDecorView();
+        decorView.setOnApplyWindowInsetsListener((v, insets) -> {
+            int statusBarHeight = insets.getSystemWindowInsetTop();
+            int navBarHeight = insets.getSystemWindowInsetBottom();
+
+            // --------------------------
+            // 通用方式：给 最外层布局 加 padding（所有页面都能用）
+            // --------------------------
+            View contentView = findViewById(android.R.id.content);
+            if (contentView != null) {
+                contentView.setPadding(0, statusBarHeight, 0, navBarHeight);
+            }
+
+            return insets;
+        });
+
         context = NoteEditor.this;
 
         m_instance = this;

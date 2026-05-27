@@ -162,9 +162,48 @@ public class ImageViewerActivity
         }
     };
 
-    @Override
+    /*@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // ========== 统一沉浸模式（和腾讯地图逻辑完全一样 · 全页面通用） ==========
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+            );
+
+            // 状态栏 + 导航栏 透明（和地图一样）
+            window.setStatusBarColor(Color.TRANSPARENT);
+            window.setNavigationBarColor(Color.TRANSPARENT);
+
+            // 布局延伸到系统栏（和地图一样）
+            window
+                .getDecorView()
+                .setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                );
+        }
+
+        // ========== 自动避让系统栏（和地图逻辑一样 · 通用不报错版） ==========
+        View decorView = getWindow().getDecorView();
+        decorView.setOnApplyWindowInsetsListener((v, insets) -> {
+            int statusBarHeight = insets.getSystemWindowInsetTop();
+            int navBarHeight = insets.getSystemWindowInsetBottom();
+
+            // --------------------------
+            // 通用方式：给 最外层布局 加 padding（所有页面都能用）
+            // --------------------------
+            View contentView = findViewById(android.R.id.content);
+            if (contentView != null) {
+                contentView.setPadding(0, statusBarHeight, 0, navBarHeight);
+            }
+
+            return insets;
+        });
 
         Application application = this.getApplication();
         application.registerActivityLifecycleCallbacks(this);
@@ -203,11 +242,97 @@ public class ImageViewerActivity
             }
         );
 
-        // HomeKey
-        /*registerReceiver(
-            mHomeKeyEvent,
-            new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-        );*/
+        // 修复 Android 14 崩溃
+        IntentFilter filter = new IntentFilter(
+            Intent.ACTION_CLOSE_SYSTEM_DIALOGS
+        );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            registerReceiver(
+                mHomeKeyEvent,
+                filter,
+                Context.RECEIVER_NOT_EXPORTED
+            );
+        } else {
+            registerReceiver(mHomeKeyEvent, filter);
+        }
+        }*/
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // 1. 最先：去掉标题
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        // 2. 先加载布局（必须先加载！）
+        if (MyActivity.isDark) {
+            setContentView(R.layout.activity_image_viewer_dark);
+        } else {
+            setContentView(R.layout.activity_image_viewer);
+        }
+
+        // 3. ✅ 沉浸模式 + 自动正确状态栏文字（永久修复！）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+            );
+
+            // 透明沉浸（和地图一样）
+            window.setStatusBarColor(Color.TRANSPARENT);
+            window.setNavigationBarColor(Color.TRANSPARENT);
+
+            // ✅ 关键修复：浅色模式 = 黑色文字，深色模式 = 白色文字
+            int flags =
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+
+            if (!MyActivity.isDark) {
+                // 浅色模式 → 状态栏文字变黑
+                flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                }
+            }
+            window.getDecorView().setSystemUiVisibility(flags);
+        }
+
+        // 4. ✅ 系统栏避让（不报错、不吞内容）
+        getWindow()
+            .getDecorView()
+            .setOnApplyWindowInsetsListener((v, insets) -> {
+                int status = insets.getSystemWindowInsetTop();
+                int navi = insets.getSystemWindowInsetBottom();
+                View view = findViewById(android.R.id.content);
+                if (view != null) {
+                    view.setPadding(0, status, 0, navi);
+                }
+                return insets;
+            });
+
+        // ========================
+        // 你原来的代码
+        // ========================
+        Application application = this.getApplication();
+        application.registerActivityLifecycleCallbacks(this);
+
+        imageView = findViewById(R.id.image_view);
+        filePathTextView = findViewById(R.id.file_path_text_view);
+        shareButton = findViewById(R.id.share_button);
+        if (MyActivity.zh_cn) shareButton.setText("分享");
+        else shareButton.setText("Share");
+
+        imagePath = MyActivity.strImageFile;
+        if (imagePath != null) {
+            filePathTextView.setText(imagePath);
+            loadImage(imagePath);
+        }
+
+        shareButton.setOnClickListener(v ->
+            shareImage(MyActivity.strImageFile)
+        );
 
         // 修复 Android 14 崩溃
         IntentFilter filter = new IntentFilter(

@@ -169,9 +169,49 @@ public class FilePicker
 
     public static native void CallJavaNotify_14();
 
-    @Override
+    /*@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // ========== 统一沉浸模式（和腾讯地图逻辑完全一样 · 全页面通用） ==========
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+            );
+
+            // 状态栏 + 导航栏 透明（和地图一样）
+            window.setStatusBarColor(Color.TRANSPARENT);
+            window.setNavigationBarColor(Color.TRANSPARENT);
+
+            // 布局延伸到系统栏（和地图一样）
+            window
+                .getDecorView()
+                .setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                );
+        }
+
+        // ========== 自动避让系统栏（和地图逻辑一样 · 通用不报错版） ==========
+        View decorView = getWindow().getDecorView();
+        decorView.setOnApplyWindowInsetsListener((v, insets) -> {
+            int statusBarHeight = insets.getSystemWindowInsetTop();
+            int navBarHeight = insets.getSystemWindowInsetBottom();
+
+            // --------------------------
+            // 通用方式：给 最外层布局 加 padding（所有页面都能用）
+            // --------------------------
+            View contentView = findViewById(android.R.id.content);
+            if (contentView != null) {
+                contentView.setPadding(0, statusBarHeight, 0, navBarHeight);
+            }
+
+            return insets;
+        });
+
         MyContex = FilePicker.this;
         MyFilepicker = this;
         mContentResolver = MyContex.getContentResolver();
@@ -204,15 +244,115 @@ public class FilePicker
 
         btnFind.setVisibility(View.GONE);
 
-        // HomeKey
-        registerReceiver(
-            mHomeKeyEvent,
-            new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+        // 修复 Android 14 崩溃
+        IntentFilter filter = new IntentFilter(
+            Intent.ACTION_CLOSE_SYSTEM_DIALOGS
         );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            registerReceiver(
+                mHomeKeyEvent,
+                filter,
+                Context.RECEIVER_NOT_EXPORTED
+            );
+        } else {
+            registerReceiver(mHomeKeyEvent, filter);
+        }
+
         initEditTextChangedListener();
 
         MyAsyncTask myAsyncTask = new MyAsyncTask();
         myAsyncTask.execute();
+    }*/
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // 1. 先去掉标题
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        // 2. 加载布局（必须先加载）
+        MyContex = FilePicker.this;
+        MyFilepicker = this;
+        mContentResolver = MyContex.getContentResolver();
+        isDark = MyActivity.isDark;
+        if (isDark) {
+            setContentView(R.layout.myfilepicker_dark);
+        } else {
+            setContentView(R.layout.myfilepicker);
+        }
+
+        // 3. ✅ 统一沉浸 + 正确状态栏文字颜色（完美！）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+            );
+
+            // 透明沉浸（和地图一样）
+            window.setStatusBarColor(Color.TRANSPARENT);
+            window.setNavigationBarColor(Color.TRANSPARENT);
+
+            // ✅ 关键：浅色模式 = 状态栏文字黑色 / 深色 = 白色
+            int flags =
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+
+            if (!MyActivity.isDark) {
+                // 浅色背景 → 文字黑色（你现在要的就是这个！）
+                flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                }
+            }
+            window.getDecorView().setSystemUiVisibility(flags);
+        }
+
+        // 4. ✅ 系统栏避让（不报错、不吞内容）
+        getWindow()
+            .getDecorView()
+            .setOnApplyWindowInsetsListener((v, insets) -> {
+                int status = insets.getSystemWindowInsetTop();
+                int navi = insets.getSystemWindowInsetBottom();
+                View view = findViewById(android.R.id.content);
+                if (view != null) {
+                    view.setPadding(0, status, 0, navi);
+                }
+                return insets;
+            });
+
+        // ========================
+        // 你原来的代码
+        // ========================
+        btn_clear = findViewById(R.id.btn_clear);
+        btn_clear.setOnClickListener(this);
+        btnFind = findViewById(R.id.btnFind);
+        btnFind.setOnClickListener(this);
+        lblResult = findViewById(R.id.lblResult);
+        editFind = findViewById(R.id.editFind);
+        m_ListView = findViewById(R.id.listView);
+        mProgressBar = findViewById(R.id.progBar);
+        mProgressBar.setVisibility(View.VISIBLE);
+        btnFind.setVisibility(View.GONE);
+
+        IntentFilter filter = new IntentFilter(
+            Intent.ACTION_CLOSE_SYSTEM_DIALOGS
+        );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            registerReceiver(
+                mHomeKeyEvent,
+                filter,
+                Context.RECEIVER_NOT_EXPORTED
+            );
+        } else {
+            registerReceiver(mHomeKeyEvent, filter);
+        }
+
+        initEditTextChangedListener();
+        new MyAsyncTask().execute();
+        getApplication().registerActivityLifecycleCallbacks(this);
     }
 
     @Override

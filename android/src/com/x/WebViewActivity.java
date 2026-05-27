@@ -53,24 +53,56 @@ public class WebViewActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //让 WebView 脱离 Qt 的绘制上下文，不抢 Surface，不冲突
-        /*getWindow().setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN
-        );*/
-
         getWindow().setFormat(android.graphics.PixelFormat.TRANSLUCENT);
         getWindow().setBackgroundDrawable(null);
 
         super.onCreate(savedInstanceState);
+
+        // ========== 统一沉浸模式（和腾讯地图逻辑完全一样 · 全页面通用） ==========
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+            );
+
+            // 状态栏 + 导航栏 透明（和地图一样）
+            window.setStatusBarColor(Color.TRANSPARENT);
+            window.setNavigationBarColor(Color.TRANSPARENT);
+
+            // 布局延伸到系统栏（和地图一样）
+            window
+                .getDecorView()
+                .setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                );
+        }
+
+        // ========== 自动避让系统栏（和地图逻辑一样 · 通用不报错版） ==========
+        View decorView = getWindow().getDecorView();
+        decorView.setOnApplyWindowInsetsListener((v, insets) -> {
+            int statusBarHeight = insets.getSystemWindowInsetTop();
+            int navBarHeight = insets.getSystemWindowInsetBottom();
+
+            // --------------------------
+            // 通用方式：给 最外层布局 加 padding（所有页面都能用）
+            // --------------------------
+            View contentView = findViewById(android.R.id.content);
+            if (contentView != null) {
+                contentView.setPadding(0, statusBarHeight, 0, navBarHeight);
+            }
+
+            return insets;
+        });
+
         instance = this;
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_webview);
 
         // 初始化进度条（新增）
         mLoadingProgress = findViewById(R.id.web_loading_progress);
-
-
 
         updateSystemBars();
 
@@ -310,8 +342,7 @@ public class WebViewActivity extends Activity {
             ContextCompat.checkSelfPermission(
                 parentActivity,
                 Manifest.permission.READ_EXTERNAL_STORAGE
-            ) !=
-            PackageManager.PERMISSION_GRANTED
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
                 parentActivity,
@@ -447,8 +478,7 @@ public class WebViewActivity extends Activity {
             ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.CALL_PHONE
-            ) !=
-            PackageManager.PERMISSION_GRANTED
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
             verifyCallPermissions(this);
         }
@@ -496,8 +526,6 @@ public class WebViewActivity extends Activity {
         return instance;
     }
 
-
-
     private void initWebView() {
         mWebView = findViewById(R.id.webview);
         WebSettings webSettings = mWebView.getSettings();
@@ -535,7 +563,9 @@ public class WebViewActivity extends Activity {
     private void updateSystemBars() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+            );
 
             if (MyActivity.isDark) {
                 // 暗黑模式
@@ -551,7 +581,12 @@ public class WebViewActivity extends Activity {
                 window.setNavigationBarColor(Color.parseColor("#F3F3F3"));
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+                    window
+                        .getDecorView()
+                        .setSystemUiVisibility(
+                            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR |
+                                View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                        );
                 }
             }
         }
