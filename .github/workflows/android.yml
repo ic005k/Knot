@@ -18,7 +18,11 @@ on:
 env:
   QT_VERSION: "6.11.1"
   QT_ARCH: "android_arm64_v8a"
-  DESKTOP_ARCH: "win64_mingw13_64"
+
+  # ====================== 必须改成这个 ======================
+  DESKTOP_ARCH: "win64_msvc2022_64"
+  # ==========================================================
+
   NDK_VERSION: "27.2.12479018"
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
@@ -49,8 +53,7 @@ jobs:
         echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
         echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-    # 🔥 🔥 🔥 这里是关键修复 🔥 🔥 🔥
-    - name: Install LATEST aqtinstall (dev version with Qt 6.11 support)
+    - name: Install latest aqt dev
       run: |
         python -m pip install --upgrade pip
         python -m pip install -U git+https://github.com/miurahr/aqtinstall.git
@@ -59,14 +62,15 @@ jobs:
       run: |
         aqt install-qt windows desktop $env:QT_VERSION $env:DESKTOP_ARCH `
           -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
-          --outputdir "$env:GITHUB_WORKSPACE\Qt"
+          --outputdir "$env:GITHUB_WORKSPACE\Qt" --keep-updates-xml
 
     - name: Install Android Qt
       run: |
         aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
           -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
-          --outputdir "$env:GITHUB_WORKSPACE\Qt"
+          --outputdir "$env:GITHUB_WORKSPACE\Qt" --keep-updates-xml
 
+    # ====================== 以下完全不动你的代码 ======================
     - name: Build
       shell: cmd
       run: |
