@@ -1,33 +1,28 @@
 package com.xhh.pdfui;
 
-import com.x.MyActivity;
-import com.x.MyService;
-import com.x.R;
-
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
-
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
-import android.view.WindowManager;
+import android.text.TextUtils;
+import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-
+import com.x.MyActivity;
+import com.x.MyService;
+import com.x.R;
 import com.xhh.pdfui.tree.TreeAdapter;
 import com.xhh.pdfui.tree.TreeNodeData;
-
 import java.util.List;
-
-import android.text.TextUtils;
-import android.content.IntentFilter;
-import android.content.Intent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 
 /**
  * UI页面：PDF目录
@@ -40,8 +35,10 @@ import android.content.Context;
  */
 
 @SuppressWarnings("unchecked")
-
-public class PDFCatelogueActivity extends AppCompatActivity implements TreeAdapter.TreeEvent {
+public class PDFCatelogueActivity
+    extends AppCompatActivity
+    implements TreeAdapter.TreeEvent
+{
 
     RecyclerView recyclerView;
     Button btn_back;
@@ -55,12 +52,25 @@ public class PDFCatelogueActivity extends AppCompatActivity implements TreeAdapt
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_catelogue);
 
-        initView();// 初始化控件
-        setEvent();// 设置事件
-        loadData();// 加载数据
+        initView(); // 初始化控件
+        setEvent(); // 设置事件
+        loadData(); // 加载数据
 
         // HomeKey
-        registerReceiver(mHomeKeyEvent, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+        //registerReceiver(mHomeKeyEvent, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+        // 修复 Android 14 崩溃
+        IntentFilter filter = new IntentFilter(
+            Intent.ACTION_CLOSE_SYSTEM_DIALOGS
+        );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            registerReceiver(
+                mHomeKeyEvent,
+                filter,
+                Context.RECEIVER_NOT_EXPORTED
+            );
+        } else {
+            registerReceiver(mHomeKeyEvent, filter);
+        }
     }
 
     private BroadcastReceiver mHomeKeyEvent = new BroadcastReceiver() {
@@ -76,11 +86,9 @@ public class PDFCatelogueActivity extends AppCompatActivity implements TreeAdapt
                 if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
                     // 表示按了home键,程序直接进入到后台
                     System.out.println("NoteEditor HOME键被按下...");
-
                 } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
                     // 表示长按home键,显示最近使用的程序
                     System.out.println("NoteEditor 长按HOME键...");
-
                 }
             }
         }
@@ -94,22 +102,22 @@ public class PDFCatelogueActivity extends AppCompatActivity implements TreeAdapt
         recyclerView = findViewById(R.id.rv_tree);
 
         lblTitle = findViewById(R.id.lblTitle);
-        if (MyActivity.zh_cn)
-            lblTitle.setText("目录");
-        else
-            lblTitle.setText("Catalogue");
+        if (MyActivity.zh_cn) lblTitle.setText("目录");
+        else lblTitle.setText("Catalogue");
     }
 
     /**
      * 设置事件
      */
     private void setEvent() {
-        btn_back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PDFCatelogueActivity.this.finish();
+        btn_back.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PDFCatelogueActivity.this.finish();
+                }
             }
-        });
+        );
     }
 
     /**
@@ -118,7 +126,9 @@ public class PDFCatelogueActivity extends AppCompatActivity implements TreeAdapt
     private void loadData() {
         // 从intent中获得传递的数据
         Intent intent = getIntent();
-        List<TreeNodeData> catelogues = (List<TreeNodeData>) intent.getSerializableExtra("catelogues");
+        List<TreeNodeData> catelogues = (List<
+            TreeNodeData
+        >) intent.getSerializableExtra("catelogues");
 
         // 使用RecyclerView加载数据
         LinearLayoutManager llm = new LinearLayoutManager(this);
@@ -146,6 +156,5 @@ public class PDFCatelogueActivity extends AppCompatActivity implements TreeAdapt
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mHomeKeyEvent);
-
     }
 }

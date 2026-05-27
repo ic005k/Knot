@@ -634,20 +634,20 @@ public class MyActivity
     }*/
 
     @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             // 正确判断：是否有对话框/弹窗正在显示
             if (
                 getWindow().peekDecorView().getWindowToken() !=
                 getWindow().peekDecorView().getApplicationWindowToken()
             ) {
-                return super.onKeyUp(keyCode, event);
+                return super.onKeyDown(keyCode, event);
             } else {
                 CallJavaNotify_15();
                 return true;
             }
         }
-        return super.onKeyUp(keyCode, event);
+        return super.onKeyDown(keyCode, event);
     }
 
     // 辅助方法：判断当前是否有对话框显示

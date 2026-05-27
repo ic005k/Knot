@@ -84,56 +84,11 @@ public class TencentMapActivity extends MapActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // 1. 沉浸式：系统栏透明、背景和界面一致
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
-            window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-            );
-            window.setStatusBarColor(Color.TRANSPARENT); // 状态栏透明
-            window.setNavigationBarColor(Color.TRANSPARENT); // 导航栏透明
-            window
-                .getDecorView()
-                .setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                );
-        }
-
-        setContentView(R.layout.activity_tencent_map);
-        initViews();
-
-        // 2. 关键：获取系统栏高度，给顶部/底部文字加 padding，避免叠加
-        View decor = getWindow().getDecorView();
-        decor.setOnApplyWindowInsetsListener((v, insets) -> {
-            int statusBarH = insets.getSystemWindowInsetTop(); // 状态栏高度
-            int navBarH = insets.getSystemWindowInsetBottom(); // 导航栏高度
-
-            // 顶部文字向下避开状态栏
-            if (topDateLabel != null) {
-                topDateLabel.setPadding(0, statusBarH, 0, 0);
-            }
-            // 底部文字向上避开导航栏
-            if (bottomInfoLabel != null) {
-                bottomInfoLabel.setPadding(0, 0, 0, navBarH);
-            }
-
-            return insets;
-        });
-
         MyActivity.mapActivityInstance = this;
 
         Log.d(TAG, "开始初始化腾讯地图Activity");
         TENCENT_MAP_KEY = MyActivity.MY_TENCENT_MAP_KEY;
         Log.d(TAG, "当前使用的Key: " + TENCENT_MAP_KEY);
-
-        // 删除强制清除同意状态的测试代码
-        /*getSharedPreferences("app_settings", MODE_PRIVATE)
-                    .edit()
-                    .remove(KEY_PRIVACY_AGREED)
-                    .apply();*/
 
         setupTencentSDK();
 

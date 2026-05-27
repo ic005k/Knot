@@ -1,38 +1,34 @@
 package com.xhh.pdfui;
 
-import com.x.MyActivity;
-import com.x.MyService;
-import com.x.R;
-
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.ActionBar;
-
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import android.view.WindowManager;
-import android.view.Window;
+import android.text.TextUtils;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
-
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.github.barteksc.pdfviewer.util.FileUtils;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
+import com.x.MyActivity;
+import com.x.MyService;
+import com.x.R;
 import com.xhh.pdfui.preview.GridAdapter;
 import com.xhh.pdfui.preview.PreviewUtils;
-
 import java.io.File;
-
-import android.text.TextUtils;
-import android.content.IntentFilter;
-import android.content.Intent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 
 /**
  * UI页面：PDF预览缩略图（注意：此页面，需多关注内存管控）
@@ -43,7 +39,10 @@ import android.content.Context;
  * 作者：齐行超
  * 日期：2019.08.07
  */
-public class PDFPreviewActivity extends AppCompatActivity implements GridAdapter.GridEvent {
+public class PDFPreviewActivity
+    extends AppCompatActivity
+    implements GridAdapter.GridEvent
+{
 
     RecyclerView recyclerView;
     Button btn_back;
@@ -60,12 +59,23 @@ public class PDFPreviewActivity extends AppCompatActivity implements GridAdapter
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_preview);
 
-        initView();// 初始化控件
+        initView(); // 初始化控件
         setEvent();
         loadData();
 
-        // HomeKey
-        registerReceiver(mHomeKeyEvent, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+        // 修复 Android 14 崩溃
+        IntentFilter filter = new IntentFilter(
+            Intent.ACTION_CLOSE_SYSTEM_DIALOGS
+        );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            registerReceiver(
+                mHomeKeyEvent,
+                filter,
+                Context.RECEIVER_NOT_EXPORTED
+            );
+        } else {
+            registerReceiver(mHomeKeyEvent, filter);
+        }
     }
 
     private BroadcastReceiver mHomeKeyEvent = new BroadcastReceiver() {
@@ -81,11 +91,9 @@ public class PDFPreviewActivity extends AppCompatActivity implements GridAdapter
                 if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
                     // 表示按了home键,程序直接进入到后台
                     System.out.println("NoteEditor HOME键被按下...");
-
                 } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
                     // 表示长按home键,显示最近使用的程序
                     System.out.println("NoteEditor 长按HOME键...");
-
                 }
             }
         }
@@ -99,26 +107,25 @@ public class PDFPreviewActivity extends AppCompatActivity implements GridAdapter
         recyclerView = findViewById(R.id.rv_grid);
 
         lblTitle = findViewById(R.id.lblTitle);
-        if (MyActivity.zh_cn)
-            lblTitle.setText("缩略图");
-        else
-            lblTitle.setText("Thumbnails");
+        if (MyActivity.zh_cn) lblTitle.setText("缩略图");
+        else lblTitle.setText("Thumbnails");
     }
 
     /**
      * 设置事件
      */
     private void setEvent() {
-        btn_back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 回收内存
-                recycleMemory();
+        btn_back.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // 回收内存
+                    recycleMemory();
 
-                PDFPreviewActivity.this.finish();
+                    PDFPreviewActivity.this.finish();
+                }
             }
-        });
-
+        );
     }
 
     /**
@@ -132,7 +139,13 @@ public class PDFPreviewActivity extends AppCompatActivity implements GridAdapter
         int totalCount = pdfiumCore.getPageCount(pdfDocument);
 
         // 绑定列表数据
-        GridAdapter adapter = new GridAdapter(this, pdfiumCore, pdfDocument, assetsFileName, totalCount);
+        GridAdapter adapter = new GridAdapter(
+            this,
+            pdfiumCore,
+            pdfDocument,
+            assetsFileName,
+            totalCount
+        );
         adapter.setGridEvent(this);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
         recyclerView.setAdapter(adapter);
@@ -162,7 +175,10 @@ public class PDFPreviewActivity extends AppCompatActivity implements GridAdapter
     void loadAssetsPdfFile(String assetsFileName) {
         try {
             File f = FileUtils.fileFromAsset(this, assetsFileName);
-            ParcelFileDescriptor pfd = ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
+            ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
+                f,
+                ParcelFileDescriptor.MODE_READ_ONLY
+            );
             pdfiumCore = new PdfiumCore(this);
             pdfDocument = pdfiumCore.newDocument(pfd);
         } catch (Exception ex) {
@@ -175,7 +191,10 @@ public class PDFPreviewActivity extends AppCompatActivity implements GridAdapter
      */
     void loadUriPdfFile(Uri uri) {
         try {
-            ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r");
+            ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(
+                uri,
+                "r"
+            );
             pdfiumCore = new PdfiumCore(this);
             pdfDocument = pdfiumCore.newDocument(pfd);
         } catch (Exception ex) {
@@ -217,6 +236,5 @@ public class PDFPreviewActivity extends AppCompatActivity implements GridAdapter
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mHomeKeyEvent);
-
     }
 }

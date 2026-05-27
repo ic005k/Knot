@@ -1,20 +1,23 @@
 package com.xhh.pdfui;
 
-import org.ini4j.Wini;
-
-import com.x.MyActivity;
-import com.x.MyPDF;
-import com.x.MyProgBar;
-import com.x.R;
-
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Color;
 import android.net.Uri;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
+import android.text.TextUtils;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
-
+import androidx.appcompat.app.AppCompatActivity;
 import com.github.barteksc.pdfviewer.PDFView;
 import com.github.barteksc.pdfviewer.PDFView.Configurator;
 import com.github.barteksc.pdfviewer.listener.Callbacks;
@@ -24,25 +27,17 @@ import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 import com.github.barteksc.pdfviewer.util.FitPolicy;
 import com.shockwave.pdfium.PdfDocument;
+import com.x.MyActivity;
+import com.x.MyPDF;
+import com.x.MyProgBar;
+import com.x.R;
 import com.xhh.pdfui.tree.TreeNodeData;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import android.view.WindowManager;
-import android.view.Window;
-
-import android.text.TextUtils;
-import android.content.IntentFilter;
-import android.content.Intent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.net.Uri;
-
-import android.view.MotionEvent;
+import org.ini4j.Wini;
 
 /**
  * UI页面：PDF阅读
@@ -55,10 +50,11 @@ import android.view.MotionEvent;
  * 作者：齐行超
  * 日期：2019.08.07
  */
-public class PDFActivity extends AppCompatActivity implements
-        OnPageChangeListener,
-        OnLoadCompleteListener,
-        OnPageErrorListener {
+public class PDFActivity
+    extends AppCompatActivity
+    implements OnPageChangeListener, OnLoadCompleteListener, OnPageErrorListener
+{
+
     // PDF控件
     PDFView pdfView;
     // 按钮控件：返回、目录、缩略图
@@ -81,41 +77,41 @@ public class PDFActivity extends AppCompatActivity implements
     private static PDFActivity instance;
     private boolean isNightMode = false;
 
-    public native static void CallJavaNotify_0();
+    public static native void CallJavaNotify_0();
 
-    public native static void CallJavaNotify_1();
+    public static native void CallJavaNotify_1();
 
-    public native static void CallJavaNotify_2();
+    public static native void CallJavaNotify_2();
 
-    public native static void CallJavaNotify_3();
+    public static native void CallJavaNotify_3();
 
-    public native static void CallJavaNotify_4();
+    public static native void CallJavaNotify_4();
 
-    public native static void CallJavaNotify_5();
+    public static native void CallJavaNotify_5();
 
-    public native static void CallJavaNotify_6();
+    public static native void CallJavaNotify_6();
 
-    public native static void CallJavaNotify_7();
+    public static native void CallJavaNotify_7();
 
-    public native static void CallJavaNotify_8();
+    public static native void CallJavaNotify_8();
 
-    public native static void CallJavaNotify_9();
+    public static native void CallJavaNotify_9();
 
-    public native static void CallJavaNotify_10();
+    public static native void CallJavaNotify_10();
 
-    public native static void CallJavaNotify_11();
+    public static native void CallJavaNotify_11();
 
-    public native static void CallJavaNotify_12();
+    public static native void CallJavaNotify_12();
 
-    public native static void CallJavaNotify_13();
+    public static native void CallJavaNotify_13();
 
-    public native static void CallJavaNotify_14();
+    public static native void CallJavaNotify_14();
 
     public static PDFActivity mPdfActivity;
     public static Context context;
     private static float f_zoom = 1.25f;
 
-    @Override
+    /*@Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppThemeprice);
         super.onCreate(savedInstanceState);
@@ -129,13 +125,75 @@ public class PDFActivity extends AppCompatActivity implements
 
         setContentView(R.layout.activity_pdf);
 
-        initView();// 初始化view
-        setEvent();// 设置事件
-        loadPdf();// 加载PDF文件
+        initView(); // 初始化view
+        setEvent(); // 设置事件
+        loadPdf(); // 加载PDF文件
 
         // HomeKey
-        registerReceiver(mHomeKeyEvent, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+        //registerReceiver(mHomeKeyEvent, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 
+        // 修复 Android 14 崩溃
+        IntentFilter filter = new IntentFilter(
+            Intent.ACTION_CLOSE_SYSTEM_DIALOGS
+        );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            registerReceiver(
+                mHomeKeyEvent,
+                filter,
+                Context.RECEIVER_NOT_EXPORTED
+            );
+        } else {
+            registerReceiver(mHomeKeyEvent, filter);
+        }
+    }*/
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppThemeprice);
+        super.onCreate(savedInstanceState);
+
+        // 隐藏标题栏
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        Window window = getWindow();
+        // 关键：LAYOUT_FULLSCREEN + FULLSCREEN
+        window.getDecorView().setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | // 布局顶上去
+                View.SYSTEM_UI_FLAG_FULLSCREEN // 隐藏状态栏
+        );
+
+        // 状态栏透明（必须）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.setStatusBarColor(0x00000000);
+        }
+
+        // 关键：不让系统自动给你加 padding（否则顶部又被推下去）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            window.getAttributes().layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        }
+
+        // =======================
+        setContentView(R.layout.activity_pdf);
+
+        initView();
+        setEvent();
+        loadPdf();
+
+        // 你原来的广播注册代码 ↓ 保持不变
+        IntentFilter filter = new IntentFilter(
+            Intent.ACTION_CLOSE_SYSTEM_DIALOGS
+        );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            registerReceiver(
+                mHomeKeyEvent,
+                filter,
+                Context.RECEIVER_NOT_EXPORTED
+            );
+        } else {
+            registerReceiver(mHomeKeyEvent, filter);
+        }
     }
 
     private BroadcastReceiver mHomeKeyEvent = new BroadcastReceiver() {
@@ -151,11 +209,9 @@ public class PDFActivity extends AppCompatActivity implements
                 if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
                     // 表示按了home键,程序直接进入到后台
                     System.out.println("NoteEditor HOME键被按下...");
-
                 } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
                     // 表示长按home键,显示最近使用的程序
                     System.out.println("NoteEditor 长按HOME键...");
-
                 }
             }
         }
@@ -164,13 +220,11 @@ public class PDFActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
     }
 
     @Override
@@ -221,64 +275,77 @@ public class PDFActivity extends AppCompatActivity implements
      */
     private void setEvent() {
         // 返回
-        btn_back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PDFActivity.this.finish();
+        btn_back.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PDFActivity.this.finish();
+                }
             }
-        });
-        btn_dark.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isNightMode)
-                    isNightMode = false;
-                else
-                    isNightMode = true;
+        );
+        btn_dark.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (isNightMode) isNightMode = false;
+                    else isNightMode = true;
 
-                savePDFInfo();
-                PDFActivity.this.finish();
+                    savePDFInfo();
+                    PDFActivity.this.finish();
 
-                CallJavaNotify_13();
-
+                    CallJavaNotify_13();
+                }
             }
-        });
+        );
         // 跳转目录页面
-        btn_catalogue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(PDFActivity.this, PDFCatelogueActivity.class);
-                intent.putExtra("catelogues", (Serializable) catelogues);
-                PDFActivity.this.startActivityForResult(intent, 200);
+        btn_catalogue.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(
+                        PDFActivity.this,
+                        PDFCatelogueActivity.class
+                    );
+                    intent.putExtra("catelogues", (Serializable) catelogues);
+                    PDFActivity.this.startActivityForResult(intent, 200);
+                }
             }
-        });
+        );
         // 跳转缩略图页面
-        btn_preview.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(PDFActivity.this, PDFPreviewActivity.class);
-                intent.putExtra("AssetsPdf", assetsFileName);
-                intent.setData(uri);
-                PDFActivity.this.startActivityForResult(intent, 201);
+        btn_preview.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(
+                        PDFActivity.this,
+                        PDFPreviewActivity.class
+                    );
+                    intent.putExtra("AssetsPdf", assetsFileName);
+                    intent.setData(uri);
+                    PDFActivity.this.startActivityForResult(intent, 201);
+                }
             }
-        });
+        );
 
-        btn_open.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PDFActivity.this.finish();
-                CallJavaNotify_10();
-
+        btn_open.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PDFActivity.this.finish();
+                    CallJavaNotify_10();
+                }
             }
-        });
+        );
 
-        btn_books.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PDFActivity.this.finish();
-                // CallJavaNotify_11();
+        btn_books.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PDFActivity.this.finish();
+                    // CallJavaNotify_11();
+                }
             }
-        });
-
+        );
     }
 
     /**
@@ -311,40 +378,35 @@ public class PDFActivity extends AppCompatActivity implements
                             String strHorizontal = ini.get("positionX", name); // 获取水平位置
                             System.out.print("strPage:" + strPage);
 
-                            if (strPage != null)
-                                pageNumber = Integer.parseInt(strPage);
-                            else
-                                pageNumber = 0;
+                            if (strPage != null) pageNumber = Integer.parseInt(
+                                strPage
+                            );
+                            else pageNumber = 0;
 
-                            if (strZoom != null)
-                                f_zoom = Float.parseFloat(strZoom);
-                            else
-                                f_zoom = 1.0f;
+                            if (strZoom != null) f_zoom = Float.parseFloat(
+                                strZoom
+                            );
+                            else f_zoom = 1.0f;
 
                             // 解析水平位置
-                            if (strHorizontal != null)
-                                horizontalPosition = Float.parseFloat(strHorizontal);
-                            else
-                                horizontalPosition = 0; // 默认水平位置（左对齐）
+                            if (strHorizontal != null) horizontalPosition =
+                                Float.parseFloat(strHorizontal);
+                            else horizontalPosition = 0; // 默认水平位置（左对齐）
 
                             // 解析垂直位置
-                            if (strVertical != null)
-                                verticalPosition = Float.parseFloat(strVertical);
-                            else
-                                verticalPosition = 0; // 默认垂直位置（顶部）
+                            if (strVertical != null) verticalPosition =
+                                Float.parseFloat(strVertical);
+                            else verticalPosition = 0; // 默认垂直位置（顶部）
 
-                            if (strNight != null)
-                                isNightMode = Boolean.parseBoolean(strNight);
-                            else
-                                isNightMode = false;
-
+                            if (strNight != null) isNightMode =
+                                Boolean.parseBoolean(strNight);
+                            else isNightMode = false;
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
                     displayFromUri(uri);
-
                 }
             }
         }
@@ -356,18 +418,18 @@ public class PDFActivity extends AppCompatActivity implements
      * @param fileName 文件名称
      */
     private void displayFromAssets(String fileName) {
-        pdfView.fromAsset(fileName)
-                .defaultPage(pageNumber)
-                .onPageChange(this)
-                .enableAnnotationRendering(true)
-                .onLoad(this)
-                .scrollHandle(new DefaultScrollHandle(this))
-                .spacing(10) // 单位 dp
-                .onPageError(this)
-                .pageFitPolicy(FitPolicy.BOTH)
-                .nightMode(isNightMode)
-                .load();
-
+        pdfView
+            .fromAsset(fileName)
+            .defaultPage(pageNumber)
+            .onPageChange(this)
+            .enableAnnotationRendering(true)
+            .onLoad(this)
+            .scrollHandle(new DefaultScrollHandle(this))
+            .spacing(10) // 单位 dp
+            .onPageError(this)
+            .pageFitPolicy(FitPolicy.BOTH)
+            .nightMode(isNightMode)
+            .load();
     }
 
     /**
@@ -376,17 +438,17 @@ public class PDFActivity extends AppCompatActivity implements
      * @param uri 文件路径
      */
     private void displayFromUri(Uri uri) {
-        pdfView.fromUri(uri)
-                .defaultPage(pageNumber)
-                .onPageChange(this)
-                .enableAnnotationRendering(true)
-                .onLoad(this)
-                .scrollHandle(new DefaultScrollHandle(this))
-                .spacing(10) // 单位 dp
-                .onPageError(this)
-                .nightMode(isNightMode)
-                .load();
-
+        pdfView
+            .fromUri(uri)
+            .defaultPage(pageNumber)
+            .onPageChange(this)
+            .enableAnnotationRendering(true)
+            .onLoad(this)
+            .scrollHandle(new DefaultScrollHandle(this))
+            .spacing(10) // 单位 dp
+            .onPageError(this)
+            .nightMode(isNightMode)
+            .load();
     }
 
     /**
@@ -417,7 +479,6 @@ public class PDFActivity extends AppCompatActivity implements
         pdfView.postDelayed(() -> {
             pdfView.moveTo(horizontalPosition, verticalPosition);
         }, 50); // 延迟时间可根据实际测试调整（一般50ms足够）
-
     }
 
     /**
@@ -427,7 +488,11 @@ public class PDFActivity extends AppCompatActivity implements
      * @param bookmarks  书签数据
      * @param level      目录树级别（用于控制树节点位置偏移）
      */
-    private void bookmarkToCatelogues(List<TreeNodeData> catelogues, List<PdfDocument.Bookmark> bookmarks, int level) {
+    private void bookmarkToCatelogues(
+        List<TreeNodeData> catelogues,
+        List<PdfDocument.Bookmark> bookmarks,
+        int level
+    ) {
         for (PdfDocument.Bookmark bookmark : bookmarks) {
             TreeNodeData nodeData = new TreeNodeData();
             nodeData.setName(bookmark.getTitle());
@@ -435,10 +500,17 @@ public class PDFActivity extends AppCompatActivity implements
             nodeData.setTreeLevel(level);
             nodeData.setExpanded(false);
             catelogues.add(nodeData);
-            if (bookmark.getChildren() != null && bookmark.getChildren().size() > 0) {
+            if (
+                bookmark.getChildren() != null &&
+                bookmark.getChildren().size() > 0
+            ) {
                 List<TreeNodeData> treeNodeDatas = new ArrayList<>();
                 nodeData.setSubset(treeNodeDatas);
-                bookmarkToCatelogues(treeNodeDatas, bookmark.getChildren(), level + 1);
+                bookmarkToCatelogues(
+                    treeNodeDatas,
+                    bookmark.getChildren(),
+                    level + 1
+                );
             }
         }
     }
@@ -449,8 +521,7 @@ public class PDFActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onPageError(int page, Throwable t) {
-    }
+    public void onPageError(int page, Throwable t) {}
 
     /**
      * 从缩略图、目录页面带回页码，跳转到指定PDF页面
@@ -460,7 +531,11 @@ public class PDFActivity extends AppCompatActivity implements
      * @param data
      */
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(
+        int requestCode,
+        int resultCode,
+        Intent data
+    ) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             int pageNum = data.getIntExtra("pageNum", 0);
@@ -485,13 +560,11 @@ public class PDFActivity extends AppCompatActivity implements
             pdfView.recycle();
         }
 
-        if (instance == this)
-            instance = null;
+        if (instance == this) instance = null;
     }
 
     public static void closeMyPDF() {
-        if (mPdfActivity != null)
-            mPdfActivity.finish();
+        if (mPdfActivity != null) mPdfActivity.finish();
     }
 
     public static void staticHideOrShowToolBar() {
@@ -521,19 +594,15 @@ public class PDFActivity extends AppCompatActivity implements
         }
 
         pdfView.postDelayed(() -> {
-
             pdfView.moveTo(currentX, currentY);
-
         }, 100);
-
     }
 
     private void savePDFInfo() {
         String filename = "/storage/emulated/0/.Knot/mypdf.ini";
         try {
             File file = new File(filename);
-            if (!file.exists())
-                file.createNewFile();
+            if (!file.exists()) file.createNewFile();
             Wini ini = new Wini(file);
             String name = uri.toString();
             name = name.replace(":", "");
@@ -543,13 +612,20 @@ public class PDFActivity extends AppCompatActivity implements
             ini.put("zoom", name, String.valueOf(pdfView.getZoom()));
             ini.put("night", name, String.valueOf(isNightMode));
             // 保存垂直位置
-            ini.put("positionY", name, String.valueOf(pdfView.getCurrentYOffset()));
+            ini.put(
+                "positionY",
+                name,
+                String.valueOf(pdfView.getCurrentYOffset())
+            );
             // 保存水平位置
-            ini.put("positionX", name, String.valueOf(pdfView.getCurrentXOffset()));
+            ini.put(
+                "positionX",
+                name,
+                String.valueOf(pdfView.getCurrentXOffset())
+            );
             ini.store();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 }
