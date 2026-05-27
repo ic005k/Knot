@@ -82,8 +82,12 @@ import android.widget.TextView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -175,7 +179,7 @@ import org.commonmark.node.Image;
 import org.ini4j.Wini;
 
 public class NoteEditor
-    extends Activity
+    extends AppCompatActivity
     implements View.OnClickListener, Application.ActivityLifecycleCallbacks
 {
 
@@ -520,7 +524,12 @@ public class NoteEditor
         if (id == R.id.btn_cancel) {
             btn_cancel.setBackgroundColor(getResources().getColor(R.color.red));
             hideKeyBoard(m_instance);
-            onBackPressed();
+            //onBackPressed();
+            if (isTextChanged) {
+                showNormalDialog();
+            } else {
+                finish();
+            }
             btn_cancel.setBackgroundColor(
                 getResources().getColor(R.color.normal)
             );
@@ -622,10 +631,16 @@ public class NoteEditor
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setTheme(R.style.AppThemeprice);
         super.onCreate(savedInstanceState);
 
-        // ========== 统一沉浸模式（和腾讯地图逻辑完全一样 · 全页面通用） ==========
+        // ========== 隐藏标题栏 ==========
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+
+        // ========== 统一沉浸模式 ==========
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
             window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
@@ -672,7 +687,7 @@ public class NoteEditor
         application.registerActivityLifecycleCallbacks(this);
 
         // 去除title(App Name)
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         // ========== 统一状态栏导航栏 ==========
         updateSystemBars();
@@ -700,6 +715,25 @@ public class NoteEditor
                 openFile();
             }
         });
+
+        // ========== 安卓官方安全返回拦截（兼容所有版本，不崩溃，不影响输入法） ==========
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // 重点：系统会自动先关闭 输入法 / 复制粘贴 / 悬浮菜单
+                // 等所有系统界面都关闭后，才会走到这里！
+
+                if (isTextChanged) {
+                    // 有修改 → 弹框
+                    showNormalDialog();
+                } else {
+                    // 没修改 → 关闭页面
+                    finish();
+                }
+            }
+        };
+        // 注册到当前 Activity
+        getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
     private void openFile() {
@@ -937,13 +971,14 @@ public class NoteEditor
 
     @Override
     public void onBackPressed() {
-        if (isTextChanged) showNormalDialog();
+        /*if (isTextChanged) showNormalDialog();
         else {
             if (isSaved) {
                 CallJavaNotify_6();
             }
             super.onBackPressed();
-        }
+        }*/
+        super.onBackPressed();
     }
 
     @Override
