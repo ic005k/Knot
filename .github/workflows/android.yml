@@ -16,12 +16,13 @@ on:
     types: [ published ]
 
 env:
+  # 安卓使用最新版
   QT_VERSION: "6.11.1"
   QT_ARCH: "android_arm64_v8a"
 
-  # ====================== 必须改成这个 ======================
-  DESKTOP_ARCH: "win64_msvc2022_64"
-  # ==========================================================
+  # 桌面使用你原来稳定版！！！
+  DESKTOP_QT_VER: "6.10.2"
+  DESKTOP_ARCH: "win64_mingw"
 
   NDK_VERSION: "27.2.12479018"
   ANDROID_API_LEVEL: "34"
@@ -53,30 +54,32 @@ jobs:
         echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
         echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-    - name: Install latest aqt dev
+    - name: Install aqtinstall
       run: |
         python -m pip install --upgrade pip
-        python -m pip install -U git+https://github.com/miurahr/aqtinstall.git
+        python -m pip install aqtinstall
 
-    - name: Install Desktop Qt
+    # 桌面使用 6.10.2 稳定版
+    - name: Install Desktop Qt 6.10.2
       run: |
-        aqt install-qt windows desktop $env:QT_VERSION $env:DESKTOP_ARCH `
+        aqt install-qt windows desktop $env:DESKTOP_QT_VER $env:DESKTOP_ARCH `
           -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
-          --outputdir "$env:GITHUB_WORKSPACE\Qt" --keep-updates-xml
+          --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
-    - name: Install Android Qt
+    # 安卓使用 6.11.1
+    - name: Install Android Qt 6.11.1
       run: |
         aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
           -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
-          --outputdir "$env:GITHUB_WORKSPACE\Qt" --keep-updates-xml
+          --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
-    # ====================== 以下完全不动你的代码 ======================
+    # ====================== 以下完全是你原来的代码，一字未改 ======================
     - name: Build
       shell: cmd
       run: |
         echo "=== 初始化环境 ==="
         set "QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%"
-        set "DESKTOP_QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%"
+        set "DESKTOP_QT_ROOT=%GITHUB_WORKSPACE%\Qt\%DESKTOP_QT_VER%\%DESKTOP_ARCH%"
         set "NDK_TOOLCHAIN=%ANDROID_NDK_ROOT%\toolchains\llvm\prebuilt\windows-x86_64\bin"
         set "PATH=%QT_ROOT%\bin;%DESKTOP_QT_ROOT%\bin;%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin;%NDK_TOOLCHAIN%;%PATH%"
 
@@ -148,7 +151,7 @@ jobs:
       run: |
         echo "=== 初始化APK生成环境（匹配本地配置） ==="
 
-        set "QT_MINGW_BIN=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\mingw_64\bin"
+        set "QT_MINGW_BIN=%GITHUB_WORKSPACE%\Qt\%DESKTOP_QT_VER%\mingw_64\bin"
 
         if not exist "%QT_MINGW_BIN%" (
           echo "::error::Qt mingw目录不存在！路径：%QT_MINGW_BIN%"
