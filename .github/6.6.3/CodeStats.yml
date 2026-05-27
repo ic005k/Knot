@@ -1,0 +1,34 @@
+name: Code Stats
+on:
+  push:
+    branches: [main]
+    # 排除由 github-actions 账户推送的提交
+    #if: github.actor != 'github-actions[bot]'
+    paths-ignore:  # 排除这些路径的变更触发
+      - 'stats.txt'  # 根目录下的 stats.txt 文件
+      - 'README.md'
+
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 必须添加写权限才能 push
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cloc
+        run: sudo apt-get install cloc
+      - name: Count lines
+        run: |
+          cloc . --out=stats.txt
+          cat stats.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: code-stats
+          path: stats.txt
+      - name: Commit stats to repo
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add stats.txt
+          git commit -m "Update code stats [skip ci]" || echo "No changes to commit"
+          git push

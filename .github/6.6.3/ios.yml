@@ -1,0 +1,75 @@
+name: IOS
+on: 
+  push:
+    paths:
+      - '*.pro'
+      - 'src/**'
+      - '.github/workflows/ios.yml'
+      - '*.cpp'
+      - '*.h'
+  pull_request:
+    paths:
+      - '*.pro'
+      - 'src/**'
+      - '.github/workflows/ios.yml' 
+      - '*.cpp'
+      - '*.h'
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-10.15]
+        qt_ver: [5.12.10]
+        qt_target: [ios]
+    env:
+      targetName: Xcounter
+      VERSION: IOS
+      
+    steps:
+      - name: Install Qt
+        # if: steps.cacheqt.outputs.cache-hit != 'true'
+        uses: jurplel/install-qt-action@v2
+        with:
+          modules: 'qtcharts'
+          # Version of Qt to install
+          version: ${{ matrix.qt_ver }}
+          # Target platform for build
+          target: ${{ matrix.qt_target }}
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: build ios
+        run: |
+          qmake -r -spec macx-ios-clang CONFIG+=release CONFIG+=iphoneos
+          make
+          
+      # 打包
+      - name: package
+        run: |
+          # 拷贝依赖
+          # cp -f Info.plist bin/release/${targetName}.app/Contents/Info.plist
+          # macdeployqt bin/release/${targetName}.app -qmldir=. -verbose=1 -dmg
+          
+      # 上传artifacts          
+      - uses: actions/upload-artifact@v2
+        with:
+          #name:  ${{ env.targetName }}_${{ matrix.os }}_${{ matrix.qt_ver }} # .zip
+          #name:  ${{ env.targetName }}-${{ env.VERSION }}
+          path: bin/release/${{ env.targetName }}.app
+          
+          
+      # tag 上传Release
+      #- name: uploadRelease
+      #  if: startsWith(github.event.ref, 'refs/tags/')
+      #  uses: svenstaro/upload-release-action@v2
+      #  with:
+      #    repo_token: ${{ secrets.GITHUB_TOKEN }}
+      #    file: bin/release/${{ env.targetName }}.dmg
+          
+          #asset_name: ${{ env.targetName }}_${{ matrix.os }}_${{ matrix.qt_ver }}.dmg
+      #    asset_name: ${{ env.targetName }}-${{ env.VERSION }}.dmg
+          
+      #    tag: ${{ github.ref }}
+      #    overwrite: true    
