@@ -1,0 +1,127 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  release:
+    types: [ published ]
+
+env:
+  QT_VERSION: "6.11.1"       # 安卓：你开发的版本
+  QT_ARCH: "android_arm64_v8a"
+
+  DESKTOP_QT_VER: "6.10.2"  # 桌面：仅用来打包，不影响你的代码
+  DESKTOP_ARCH: "win64_mingw"
+
+  NDK_VERSION: "27.2.12479018"
+  ANDROID_API_LEVEL: "34"
+  JAVA_VERSION: "17"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        path: 'src'
+
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: ${{ env.JAVA_VERSION }}
+
+    - name: Install NDK
+      run: |
+        $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
+        Invoke-WebRequest -Uri $ndkUrl -OutFile "ndk.zip"
+        Expand-Archive -Path "ndk.zip" -DestinationPath "android-sdk\ndk"
+        Rename-Item -Path "android-sdk\ndk\android-ndk-r26b" -NewName $env:NDK_VERSION
+        echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
+        echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
+
+    - name: Install aqtinstall
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install aqtinstall
+
+    # 桌面端 6.10.2 只提供打包工具，不影响你的APP版本
+    - name: Install Desktop Qt 6.10.2
+      run: |
+        aqt install-qt windows desktop $env:DESKTOP_QT_VER $env:DESKTOP_ARCH `
+          -m qtcharts qtmultimedia qt5compat `
+          --outputdir "$env:GITHUB_WORKSPACE\Qt"
+
+    # 安卓端 6.11.1 → 你的APK完全是这个版本 ✅
+    - name: Install Android Qt 6.11.1
+      run: |
+        aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
+          -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
+          --outputdir "$env:GITHUB_WORKSPACE\Qt"
+
+    # ====================== 以下全是你的逻辑 ======================
+    - name: Build
+      shell: cmd
+      run: |
+        echo "=== 初始化环境 ==="
+        set "QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%"
+        set "DESKTOP_QT_ROOT=%GITHUB_WORKSPACE%\Qt\%DESKTOP_QT_VER%\%DESKTOP_ARCH%"
+        set "NDK_TOOLCHAIN=%ANDROID_NDK_ROOT%\toolchains\llvm\prebuilt\windows-x86_64\bin"
+        set "PATH=%QT_ROOT%\bin;%DESKTOP_QT_ROOT%\bin;%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin;%NDK_TOOLCHAIN%;%PATH%"
+
+        cd "%GITHUB_WORKSPACE%\src"
+
+        echo "=== 生成Makefile ==="
+        call qmake.bat Knot.pro -spec android-clang CONFIG+=release ANDROID_ABIS=arm64-v8a
+        if errorlevel 1 (exit 1)
+
+        echo "=== 执行make ==="
+        "%ANDROID_NDK_ROOT%\prebuilt\windows-x86_64\bin\make.exe" -j8 V=1
+        if errorlevel 1 (exit 1)
+
+    - name: Generate and Sign APK
+      shell: cmd
+      env:
+        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: |
+        cd "%GITHUB_WORKSPACE%\src"
+        set "QT_MINGW_BIN=%GITHUB_WORKSPACE%\Qt\%DESKTOP_QT_VER%\mingw_64\bin"
+        set "ANDROID_DEPLOY_QT=%QT_MINGW_BIN%\androiddeployqt.exe"
+        set "PATH=%QT_MINGW_BIN%;%PATH%"
+
+        mkdir signing 2>nul
+        cd signing
+        PowerShell -Command "$base64 = $env:KEYSTORE_BASE64; [System.Convert]::FromBase64String($base64) | Set-Content -Path 'release.keystore' -Encoding Byte"
+        set "KEYSTORE_PATH=%cd%\release.keystore"
+        cd ..
+
+        "%ANDROID_DEPLOY_QT%" ^
+        --input android-Knot-deployment-settings.json ^
+        --output build\android-build ^
+        --android-platform android-%ANDROID_API_LEVEL% ^
+        --jdk "%JAVA_HOME%" --gradle --release ^
+        --sign "%KEYSTORE_PATH%" "%KEY_ALIAS%" ^
+        --storepass "%KEYSTORE_PASSWORD%" --keypass "%KEY_PASSWORD%"
+
+    - name: Upload signed APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: Knot-APK-signed
+        path: src/build/android-build/build/outputs/apk/release/android-build-release-signed.apk
+
+    - name: Upload to GitHub Release
+      if: github.event_name == 'release'
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: src/build/android-build/build/outputs/apk/release/android-build-release-signed.apk
+        asset_name: android-build-release-signed.apk
+        tag: ${{ github.ref }}
+        overwrite: true
