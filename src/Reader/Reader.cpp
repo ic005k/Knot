@@ -3162,7 +3162,7 @@ void Reader::closeReader() {
   QString time = getReadTotalTime();
   qDebug() << "getReadTotalTime=" << time;
 
-  mw_one->on_btnAutoStop_clicked();
+  mw_one->on_btnAutoStop_pressed();
 
   saveReader("", false);
   savePageVPos();

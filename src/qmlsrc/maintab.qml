@@ -120,7 +120,7 @@ Rectangle {
         // 如果有滚动条卡住，也一起刷新
         grid.flick(0, 0);
 
-        console.log("【UI激活】forceActivateUI 执行成功 >>> 清除Android遮罩")
+        console.log("【UI激活】forceActivateUI 执行成功 >>> 清除Android遮罩");
     }
 
     Component {
@@ -156,6 +156,17 @@ Rectangle {
                 property real startX: 0
                 property real startY: 0
 
+                Timer {
+                    id: clickDelayTimer
+                    interval: 120
+                    onTriggered: {
+                        if (!parent.isMove) {
+                            grid.currentIndex = index;
+                            mw_one.clickMainTab();
+                        }
+                    }
+                }
+
                 onPressed: {
                     isMove = false;
                     startX = mouseX;
@@ -163,6 +174,8 @@ Rectangle {
 
                     // 按下动画
                     scaleFactor = 0.95;
+
+                    clickDelayTimer.start();
                 }
 
                 onPositionChanged: {
@@ -176,10 +189,10 @@ Rectangle {
                     scaleFactor = 1.0;
 
                     // ========== 只有【不是滚动】才执行 ==========
-                    if (!isMove) {
-                        grid.currentIndex = index;
-                        mw_one.clickMainTab();
-                    }
+                    //if (!isMove) {
+                    //grid.currentIndex = index;
+                    //mw_one.clickMainTab();
+                    //}
                 }
             }
 

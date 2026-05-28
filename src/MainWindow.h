@@ -115,15 +115,31 @@ class AndroidTouchFixer : public QObject {
 
   static void wakeup() {
 #ifdef Q_OS_ANDROID
-    QTimer::singleShot(100, [] {
-      if (auto* w = QApplication::activeWindow()) {
-        QPoint p(1, 1);
-        QMouseEvent e(QEvent::MouseMove, p, Qt::NoButton, Qt::NoButton,
-                      Qt::NoModifier);
-        QApplication::sendEvent(w, &e);
-      }
-    });
+    // 延迟150ms，等界面完全稳定
+    QTimer::singleShot(150, []() {
+      QWidget* window = QApplication::activeWindow();
+      if (!window) return;
 
+      // =========================================
+      // 正确写法：清理鼠标捕获（修复Qt内部状态卡死）
+      // =========================================
+      QWidget* grabber = QWidget::mouseGrabber();
+      if (grabber) {
+        grabber->releaseMouse();
+      }
+
+      // 发送一组无害的点击，强制重置Qt点击状态机
+      // 坐标(1,1)绝对不会点到任何按钮
+      QPoint p(1, 1);
+
+      QMouseEvent evtPress(QEvent::MouseButtonPress, p, Qt::LeftButton,
+                           Qt::LeftButton, Qt::NoModifier);
+      QApplication::sendEvent(window, &evtPress);
+
+      QMouseEvent evtRelease(QEvent::MouseButtonRelease, p, Qt::LeftButton,
+                             Qt::LeftButton, Qt::NoModifier);
+      QApplication::sendEvent(window, &evtRelease);
+    });
 #endif
   }
 };
@@ -503,13 +519,13 @@ class MainWindow : public QMainWindow {
 
   void showEvent(QShowEvent* event) override;
  public slots:
-  void on_btnCatalogue_clicked();
+  void on_btnCatalogue_pressed();
 
   void on_btnHome_clicked();
 
   void GetGpsDataThreadDone();
 
-  void on_btnAutoStop_clicked();
+  void on_btnAutoStop_pressed();
 
   void on_btnMove();
 
@@ -630,7 +646,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnFindNotes_clicked();
 
-  void on_btnShowBookmark_clicked();
+  void on_btnShowBookmark_pressed();
 
   void on_btnBackBookList_clicked();
 
@@ -725,7 +741,7 @@ class MainWindow : public QMainWindow {
  private slots:
   void onAndroidBackHandle();
 
-  void on_btnMenu_clicked();
+  void on_btnMenu_pressed();
 
   void on_btnSync_clicked();
 
@@ -868,7 +884,7 @@ class MainWindow : public QMainWindow {
   void on_btnShareBook_clicked();
 
   void slotSetBookmark();
-  void on_btnAutoRun_clicked();
+  void on_btnAutoRun_pressed();
 
   void on_btnLessen_clicked();
 
@@ -924,7 +940,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnShowCboxList_clicked();
 
-  void on_btnRotation_clicked();
+  void on_btnRotation_pressed();
 
   void on_btnBackNoteDiff_clicked();
 
@@ -973,6 +989,8 @@ class MainWindow : public QMainWindow {
   void on_editAutoStopTTS_textChanged(const QString& arg1);
 
   void on_chkAutoStopTTS_clicked(bool checked);
+
+  void on_btnReader_pressed();
 
  private:
   bool isMoveEntry;

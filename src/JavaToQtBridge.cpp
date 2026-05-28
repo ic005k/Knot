@@ -250,7 +250,7 @@ static void JavaNotify_18() {
   // 屏幕熄了
   QTimer::singleShot(100, mw_one, []() {
     if (mui->frameReader->isVisible()) {
-      mw_one->on_btnAutoStop_clicked();
+      mw_one->on_btnAutoStop_pressed();
       mw_one->m_Reader->saveReader("", false);
       mw_one->m_Reader->savePageVPos();
     }

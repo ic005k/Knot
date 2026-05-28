@@ -539,7 +539,7 @@ void MainWindow::get_Today(QTreeWidget* tw) {
 
 void MainWindow::closeEvent(QCloseEvent* event) {
   if (mui->qwCata->isVisible()) {
-    on_btnCatalogue_clicked();
+    on_btnCatalogue_pressed();
     event->ignore();
     return;
   }
@@ -1579,7 +1579,7 @@ void MainWindow::on_actionBakFileList() {
   m_MainHelper->startBackgroundTaskUpdateBakFileList();
 }
 
-void MainWindow::on_btnMenu_clicked() {
+void MainWindow::on_btnMenu_pressed() {
   mainMenu = new QMenu(this);
   m_MainHelper->init_Menu(mainMenu);
   int x = 0;
@@ -1611,7 +1611,8 @@ QString MainWindow::getYMD(QString date) {
   return str;
 }
 
-void MainWindow::on_btnReader_clicked() { m_Reader->openReader(); }
+void MainWindow::on_btnReader_clicked() {  // m_Reader->openReader();
+}
 
 void MainWindow::on_btnBackReader_clicked() { m_Reader->closeReader(); }
 
@@ -1627,7 +1628,7 @@ void MainWindow::on_btnOpen_clicked() {
     on_btnBackReaderSet_clicked();
   }
   if (mui->qwBookmark->isVisible()) {
-    on_btnShowBookmark_clicked();
+    on_btnShowBookmark_pressed();
   }
   m_ReaderSet->close();
   m_Reader->closeSelText();
@@ -1652,7 +1653,7 @@ void MainWindow::on_btnPages_clicked() {
 
     m_Reader->closeSelText();
     if (mui->qwBookmark->isVisible()) {
-      on_btnShowBookmark_clicked();
+      on_btnShowBookmark_pressed();
     }
 
     QStringList list = mui->btnPages->text().split("\n");
@@ -1708,7 +1709,7 @@ void MainWindow::on_btnReadList_clicked() {
   }
 
   if (mui->qwBookmark->isVisible()) {
-    mw_one->on_btnShowBookmark_clicked();
+    mw_one->on_btnShowBookmark_pressed();
   }
 
   m_ReaderSet->close();
@@ -2456,7 +2457,7 @@ void MainWindow::on_btnRecentOpen_clicked() {
 
 void MainWindow::on_btnMenuReport_clicked() { m_Report->genReportMenu(); }
 
-void MainWindow::on_btnCatalogue_clicked() {
+void MainWindow::on_btnCatalogue_pressed() {
   if (mui->lblBookName->text() == "Book Name") return;
 
   if (mui->qwViewBookNote->isVisible()) return;
@@ -2478,7 +2479,7 @@ void MainWindow::on_btnCatalogue_clicked() {
 
 void MainWindow::on_btnRemoveBookList_clicked() { m_Reader->removeBookList(); }
 
-void MainWindow::on_btnShowBookmark_clicked() {
+void MainWindow::on_btnShowBookmark_pressed() {
   if (mui->qwViewBookNote->isVisible()) return;
 
   if (mui->qwBookmark->source().isEmpty()) {
@@ -2566,7 +2567,7 @@ void MainWindow::on_CloseProgressBar() {
 
 void MainWindow::on_btnShareBook_clicked() { m_Reader->shareBook(); }
 
-void MainWindow::on_btnAutoRun_clicked() {
+void MainWindow::on_btnAutoRun_pressed() {
   if (mui->qwViewBookNote->isVisible()) return;
 
   if (!m_Reader->isAutoRun) {
@@ -2577,7 +2578,7 @@ void MainWindow::on_btnAutoRun_clicked() {
   }
 }
 
-void MainWindow::on_btnAutoStop_clicked() {
+void MainWindow::on_btnAutoStop_pressed() {
   if (m_Reader->isAutoRun) {
     mui->qwReader->rootContext()->setContextProperty("isAutoRun",
                                                      QVariant(false));
@@ -2754,7 +2755,7 @@ void MainWindow::on_cboxWebDAV_currentTextChanged(const QString& arg1) {
 
 void MainWindow::on_btnShowCboxList_clicked() { mui->cboxWebDAV->showPopup(); }
 
-void MainWindow::on_btnRotation_clicked() {
+void MainWindow::on_btnRotation_pressed() {
   if (mui->lblBookName->text() == "Book Name") return;
 
   if (mui->qwViewBookNote->isVisible()) return;
@@ -3112,12 +3113,12 @@ void MainWindow::onAndroidBackHandle() {
   }
 
   if (mui->qwCata->isVisible()) {
-    mw_one->on_btnCatalogue_clicked();
+    mw_one->on_btnCatalogue_pressed();
     return;
   }
 
   if (mui->qwBookmark->isVisible()) {
-    mw_one->on_btnShowBookmark_clicked();
+    mw_one->on_btnShowBookmark_pressed();
     return;
   }
 
@@ -3284,3 +3285,5 @@ void MainWindow::onAndroidBackHandle() {
 }
 
 void MainWindow::showEvent(QShowEvent* event) { QMainWindow::showEvent(event); }
+
+void MainWindow::on_btnReader_pressed() { m_Reader->openReader(); }
