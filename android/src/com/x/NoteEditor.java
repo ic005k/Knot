@@ -100,6 +100,7 @@ import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.x.DefaultGrammars;
+import com.x.ImmersiveUtil;
 import com.x.LargeTextEditor;
 import com.x.LineNumberedEditText;
 import com.x.MDActivity;
@@ -640,58 +641,6 @@ public class NoteEditor
             getSupportActionBar().hide();
         }
 
-        // ========== 统一沉浸模式 ==========
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
-            window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-            );
-
-            // 状态栏 + 导航栏 透明（和地图一样）
-            window.setStatusBarColor(Color.TRANSPARENT);
-            window.setNavigationBarColor(Color.TRANSPARENT);
-
-            // 布局延伸到系统栏（和地图一样）
-            window
-                .getDecorView()
-                .setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                );
-        }
-
-        // ========== 自动避让系统栏（和地图逻辑一样 · 通用不报错版） ==========
-        View decorView = getWindow().getDecorView();
-        decorView.setOnApplyWindowInsetsListener((v, insets) -> {
-            int statusBarHeight = insets.getSystemWindowInsetTop();
-            int navBarHeight = insets.getSystemWindowInsetBottom();
-
-            // --------------------------
-            // 通用方式：给 最外层布局 加 padding（所有页面都能用）
-            // --------------------------
-            View contentView = findViewById(android.R.id.content);
-            if (contentView != null) {
-                contentView.setPadding(0, statusBarHeight, 0, navBarHeight);
-            }
-
-            return insets;
-        });
-
-        context = NoteEditor.this;
-
-        m_instance = this;
-
-        Application application = this.getApplication();
-        application.registerActivityLifecycleCallbacks(this);
-
-        // 去除title(App Name)
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        // ========== 统一状态栏导航栏 ==========
-        updateSystemBars();
-
         // ========== 统一布局 ==========
         if (MyActivity.isDark) {
             setContentView(R.layout.noteeditor_dark);
@@ -699,9 +648,21 @@ public class NoteEditor
             setContentView(R.layout.noteeditor);
         }
 
-        progressBar = findViewById(R.id.progressBar);
+        // ========== 真正沉浸式 ==========
+        ImmersiveUtil.applyRealImmersive(this);
 
+        progressBar = findViewById(R.id.progressBar);
+        context = NoteEditor.this;
         bindViews();
+
+        /////////////////////////
+
+        m_instance = this;
+        Application application = this.getApplication();
+        application.registerActivityLifecycleCallbacks(this);
+
+        // ========== 统一状态栏导航栏 ==========
+        //updateSystemBars();
 
         if (MyActivity.zh_cn) editNote.setText("加载中, 请稍候...");
         else editNote.setText("Loading, please wait...");
@@ -3290,5 +3251,16 @@ public class NoteEditor
                 }
             }
         }
+    }
+
+    // 判断颜色是深色还是浅色（自动决定文字颜色）
+    private boolean isDarkColor(int color) {
+        float r = Color.red(color) / 255f;
+        float g = Color.green(color) / 255f;
+        float b = Color.blue(color) / 255f;
+
+        // 亮度公式
+        float luminance = (0.299f * r) + (0.587f * g) + (0.114f * b);
+        return luminance <= 0.5f;
     }
 }

@@ -3079,6 +3079,7 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
+  // Reader
   if (mw_one->m_Reader->dlgAddBookNote != nullptr) {
     if (mw_one->m_Reader->dlgAddBookNote->isVisible()) {
       mw_one->m_Reader->dlgAddBookNote->close();
@@ -3110,20 +3111,19 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
+  if (mui->qwCata->isVisible()) {
+    mw_one->on_btnCatalogue_clicked();
+    return;
+  }
+
+  if (mui->qwBookmark->isVisible()) {
+    mw_one->on_btnShowBookmark_clicked();
+    return;
+  }
+
   if (!mui->frameReader->isHidden()) {
-    if (mui->qwCata->isVisible()) {
-      mw_one->on_btnCatalogue_clicked();
-      return;
-
-    } else if (mui->qwBookmark->isVisible()) {
-      mw_one->on_btnShowBookmark_clicked();
-      return;
-
-    } else {
-      mui->btnBackReader->click();
-
-      return;
-    }
+    mui->btnBackReader->click();
+    return;
   }
 
   if (!mui->frameImgView->isHidden()) {
@@ -3131,24 +3131,14 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (!mui->frameMain->isHidden()) {
-    if (!mui->qwMainChart->isHidden()) {
-      QTimer::singleShot(100, mw_one, []() { mw_one->on_btnChart(); });
-      return;
-    }
+  if (!mui->qwMainDate->isHidden()) {
+    mui->btnHome->click();
 
-    if (!mui->qwMainDate->isHidden()) {
-      mui->btnHome->click();
+    return;
+  }
 
-      // 再次对QML端进行刷新
-      QQuickItem* root = mui->qwMainTab->rootObject();
-      QMetaObject::invokeMethod((QObject*)root, "forceActivateUI");
-
-      return;
-    }
-
-    mw_one->setMini();
-
+  if (!mui->qwMainChart->isHidden()) {
+    QTimer::singleShot(100, mw_one, []() { mw_one->on_btnChart(); });
     return;
   }
 
@@ -3198,13 +3188,13 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (!mui->frameTodo->isHidden()) {
-    mui->btnBackTodo->click();
+  if (!mui->frameTodoRecycle->isHidden()) {
+    mui->btnReturnRecycle->click();
     return;
   }
 
-  if (!mui->frameTodoRecycle->isHidden()) {
-    mui->btnReturnRecycle->click();
+  if (!mui->frameTodo->isHidden()) {
+    mui->btnBackTodo->click();
     return;
   }
 
@@ -3283,6 +3273,12 @@ void MainWindow::onAndroidBackHandle() {
 
   if (!mui->frameNotesTree->isHidden()) {
     mui->btnBack_Tree->click();
+    return;
+  }
+
+  if (!mui->frameMain->isHidden()) {
+    mw_one->setMini();
+
     return;
   }
 }

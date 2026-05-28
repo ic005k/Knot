@@ -60,11 +60,12 @@ void StepsOptions::init() {
   x = mw_one->geometry().x();
   y = 0;
   w = mw_one->width();
-  h = 400;
-  setGeometry(x, y, w, h);
+  h = 600;
 
   m_Method->showGrayWindows();
   show();
+  setGeometry(x, y, w, h);
+
   isTextChange = false;
 
   ui->btnWeb->setFixedHeight(ui->btnTestKey->height());

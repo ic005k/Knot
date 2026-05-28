@@ -713,8 +713,7 @@ public class MyService extends Service {
                 ContextCompat.checkSelfPermission(
                     context,
                     Manifest.permission.ACTIVITY_RECOGNITION
-                ) !=
-                PackageManager.PERMISSION_GRANTED
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
                 Log.w(
                     TAG,
@@ -962,16 +961,10 @@ public class MyService extends Service {
                     if (QtStateManager.getInstance().canInteractWithQt()) {
                         CallJavaNotify_3();
                     } else {
-                        new Handler(Looper.getMainLooper()).postDelayed(
-                            () -> {
-                                Log.w(
-                                    TAG,
-                                    "Qt未就绪，延迟3秒执行CallJavaNotify_3"
-                                );
-                                CallJavaNotify_3();
-                            },
-                            3000
-                        );
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            Log.w(TAG, "Qt未就绪，延迟3秒执行CallJavaNotify_3");
+                            CallJavaNotify_3();
+                        }, 3000);
                     }
                 });
             }
@@ -1004,7 +997,7 @@ public class MyService extends Service {
         boolean hasBg =
             Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
             ContextCompat.checkSelfPermission(context, bgPerm) ==
-            PackageManager.PERMISSION_GRANTED;
+                PackageManager.PERMISSION_GRANTED;
 
         // 权限判断：前台定位需要fine/coarse，后台定位需要bg（12+）
         if (!hasFine || !hasBg) {
@@ -1509,26 +1502,23 @@ public class MyService extends Service {
             Log.d(TAG, "Service中通过Intent唤醒应用前台成功");
 
             // 延迟激活窗口
-            new Handler(Looper.getMainLooper()).postDelayed(
-                () -> {
-                    // 尝试获取Activity实例并激活窗口
-                    if (
-                        MyActivity.m_instance != null &&
-                        !MyActivity.m_instance.isFinishing() &&
-                        !MyActivity.m_instance.isDestroyed()
-                    ) {
-                        Window window = MyActivity.m_instance.getWindow();
-                        if (window != null) {
-                            window.addFlags(
-                                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                            );
-                            window.getDecorView().requestFocus();
-                            window.getDecorView().postInvalidate();
-                        }
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                // 尝试获取Activity实例并激活窗口
+                if (
+                    MyActivity.m_instance != null &&
+                    !MyActivity.m_instance.isFinishing() &&
+                    !MyActivity.m_instance.isDestroyed()
+                ) {
+                    Window window = MyActivity.m_instance.getWindow();
+                    if (window != null) {
+                        window.addFlags(
+                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                        );
+                        window.getDecorView().requestFocus();
+                        window.getDecorView().postInvalidate();
                     }
-                },
-                200
-            );
+                }
+            }, 200);
         } catch (Exception e) {
             Log.e(TAG, "Service中移应用到前台失败", e);
         }

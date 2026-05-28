@@ -3159,9 +3159,6 @@ QString Reader::getReadTotalTime() {
 }
 
 void Reader::closeReader() {
-  mui->frameMain->show();
-  mui->frameReader->hide();
-
   QString time = getReadTotalTime();
   qDebug() << "getReadTotalTime=" << time;
 
@@ -3171,6 +3168,9 @@ void Reader::closeReader() {
   savePageVPos();
 
   if (!isGpsRun) cancelKeepScreenOn();
+
+  mui->frameMain->show();
+  mui->frameReader->hide();
 
   AndroidTouchFixer::wakeup();
 }

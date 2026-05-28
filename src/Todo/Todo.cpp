@@ -2076,16 +2076,8 @@ void Todo::clearJavaNotify() {
 #ifdef Q_OS_ANDROID
   try {
     // ========== 使用Qt6标准方式获取上下文 ==========
-    jobject context;
-
-#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
-    // Qt 6.10.0 及以上版本（6.10.x / 6.11+）
-    context =
-        QNativeInterface::QAndroidApplication::context().object<jobject>();
-#else
-    // Qt 6.6.x ~ 6.9.x 版本
+    QJniObject context;
     context = QNativeInterface::QAndroidApplication::context();
-#endif
 
     if (context == nullptr) {
       qDebug() << "[清除通知] 获取Android上下文失败（context=null）！";
@@ -2093,18 +2085,15 @@ void Todo::clearJavaNotify() {
     }
 
     // ========== 传递context参数 ==========
-    QJniObject::callStaticMethod<void>(
-        "com/x/MyService",  // Java类完整路径（和你sendMsgAlarm一致）
-        "clearNotify",      // 方法名
-        "(Landroid/content/Context;)V",  // 方法签名（带Context参数）
-        context  // 传递上下文（和你sendMsgAlarm的写法一致）
-    );
+    QJniObject::callStaticMethod<void>("com/x/MyService", "clearNotify",
+                                       "(Landroid/content/Context;)V",
+                                       context.object());
 
     // ========== 可选：检查Java异常（调试用） ==========
     QJniEnvironment env;
     if (env->ExceptionCheck()) {
-      env->ExceptionDescribe();  // 打印Java端异常（比如方法名写错）
-      env->ExceptionClear();     // 清除异常
+      env->ExceptionDescribe();
+      env->ExceptionClear();
       qDebug() << "[清除通知] 调用Java方法失败，捕获异常！";
       return;
     }
