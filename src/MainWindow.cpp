@@ -1583,12 +1583,18 @@ void MainWindow::on_btnMenu_pressed() {
   mainMenu = new QMenu(this);
   m_MainHelper->init_Menu(mainMenu);
   int x = 0;
+  int y = 0;
+
 #ifdef Q_OS_ANDROID
+  int statusBarHeight = 36;
+
   x = mw_one->geometry().x() + 2;
+  y = geometry().y() + mui->f_Menu->height() + 2 + statusBarHeight;
 #else
-  x = mw_one->geometry().x() + mui->btnMenu->x();
+  x = mw_one->geometry().x() + mui->btnMenu->x() + 2;
+  y = geometry().y() + mui->f_Menu->height() + 2;
 #endif
-  int y = geometry().y() + mui->f_Menu->height() + 2;
+
   QPoint pos(x, y);
   mainMenu->exec(pos);
 }

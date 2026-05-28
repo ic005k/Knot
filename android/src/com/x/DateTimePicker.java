@@ -172,11 +172,19 @@ public class DateTimePicker extends Activity {
         context = DateTimePicker.this;
         isZh(context);
         isDark = MyActivity.isDark;
-        // HomeKey
-        registerReceiver(
-            mHomeKeyEvent,
-            new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+
+        IntentFilter filter = new IntentFilter(
+            Intent.ACTION_CLOSE_SYSTEM_DIALOGS
         );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            registerReceiver(
+                mHomeKeyEvent,
+                filter,
+                Context.RECEIVER_NOT_EXPORTED
+            );
+        } else {
+            registerReceiver(mHomeKeyEvent, filter);
+        }
 
         String strFlag = "";
         try {

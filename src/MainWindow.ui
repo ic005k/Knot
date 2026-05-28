@@ -269,8 +269,14 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>0</width>
-                <height>0</height>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
                </size>
               </property>
               <property name="font">
@@ -283,8 +289,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>25</width>
-                <height>25</height>
+                <width>24</width>
+                <height>24</height>
                </size>
               </property>
               <property name="toolButtonStyle">
@@ -300,13 +306,25 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="minimumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
               <property name="text">
                <string>Rotation</string>
               </property>
               <property name="iconSize">
                <size>
-                <width>25</width>
-                <height>25</height>
+                <width>24</width>
+                <height>24</height>
                </size>
               </property>
              </widget>
@@ -319,13 +337,25 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="minimumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
               <property name="text">
                <string>Cata</string>
               </property>
               <property name="iconSize">
                <size>
-                <width>25</width>
-                <height>25</height>
+                <width>24</width>
+                <height>24</height>
                </size>
               </property>
              </widget>
@@ -338,13 +368,25 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="minimumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
               <property name="text">
                <string>BookMark</string>
               </property>
               <property name="iconSize">
                <size>
-                <width>25</width>
-                <height>25</height>
+                <width>24</width>
+                <height>24</height>
                </size>
               </property>
              </widget>
@@ -357,13 +399,25 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="minimumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
               <property name="text">
                <string>Run</string>
               </property>
               <property name="iconSize">
                <size>
-                <width>25</width>
-                <height>25</height>
+                <width>24</width>
+                <height>24</height>
                </size>
               </property>
              </widget>
@@ -376,13 +430,25 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="minimumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
               <property name="text">
                <string>Stop</string>
               </property>
               <property name="iconSize">
                <size>
-                <width>25</width>
-                <height>25</height>
+                <width>24</width>
+                <height>24</height>
                </size>
               </property>
               <property name="toolButtonStyle">
@@ -398,13 +464,25 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="minimumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
               <property name="text">
                <string>Speak</string>
               </property>
               <property name="iconSize">
                <size>
-                <width>25</width>
-                <height>25</height>
+                <width>24</width>
+                <height>24</height>
                </size>
               </property>
              </widget>
@@ -417,13 +495,25 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="minimumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
               <property name="text">
                <string>StopSpeak</string>
               </property>
               <property name="iconSize">
                <size>
-                <width>25</width>
-                <height>25</height>
+                <width>24</width>
+                <height>24</height>
                </size>
               </property>
              </widget>
@@ -438,8 +528,14 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>0</width>
-                <height>0</height>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
                </size>
               </property>
               <property name="text">
@@ -452,8 +548,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>25</width>
-                <height>25</height>
+                <width>24</width>
+                <height>24</height>
                </size>
               </property>
               <property name="toolButtonStyle">
@@ -471,8 +567,14 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>0</width>
-                <height>0</height>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
                </size>
               </property>
               <property name="text">
@@ -480,8 +582,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>25</width>
-                <height>25</height>
+                <width>24</width>
+                <height>24</height>
                </size>
               </property>
               <property name="toolButtonStyle">
@@ -497,13 +599,25 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="minimumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
               <property name="text">
                <string>BookList</string>
               </property>
               <property name="iconSize">
                <size>
-                <width>25</width>
-                <height>25</height>
+                <width>24</width>
+                <height>24</height>
                </size>
               </property>
               <property name="toolButtonStyle">
@@ -1263,7 +1377,7 @@ border-radius: 4px;</string>
            <number>0</number>
           </property>
           <property name="bottomMargin">
-           <number>10</number>
+           <number>5</number>
           </property>
           <item>
            <widget class="QToolButton" name="btnMenu">
@@ -1275,8 +1389,14 @@ border-radius: 4px;</string>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
-              <height>0</height>
+              <width>48</width>
+              <height>48</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>48</width>
+              <height>48</height>
              </size>
             </property>
             <property name="font">
@@ -1290,19 +1410,35 @@ border-radius: 4px;</string>
             <property name="text">
              <string>Menu</string>
             </property>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/mainmenu_l.svg</normaloff>:/res/mainmenu_l.svg</iconset>
+            </property>
             <property name="iconSize">
              <size>
-              <width>32</width>
-              <height>32</height>
+              <width>24</width>
+              <height>24</height>
              </size>
             </property>
             <property name="toolButtonStyle">
-             <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
+             <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QToolButton" name="btnHome">
+            <property name="minimumSize">
+             <size>
+              <width>48</width>
+              <height>48</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>48</width>
+              <height>48</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <pointsize>11</pointsize>
@@ -1313,9 +1449,12 @@ border-radius: 4px;</string>
             </property>
             <property name="iconSize">
              <size>
-              <width>32</width>
-              <height>32</height>
+              <width>24</width>
+              <height>24</height>
              </size>
+            </property>
+            <property name="toolButtonStyle">
+             <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
             </property>
            </widget>
           </item>
@@ -1342,8 +1481,14 @@ border-radius: 4px;</string>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
-              <height>28</height>
+              <width>48</width>
+              <height>48</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>48</width>
+              <height>48</height>
              </size>
             </property>
             <property name="font">
@@ -1359,8 +1504,8 @@ border-radius: 4px;</string>
             </property>
             <property name="iconSize">
              <size>
-              <width>20</width>
-              <height>20</height>
+              <width>24</width>
+              <height>24</height>
              </size>
             </property>
             <property name="toolButtonStyle">
@@ -1378,8 +1523,14 @@ border-radius: 4px;</string>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
-              <height>28</height>
+              <width>48</width>
+              <height>48</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>48</width>
+              <height>48</height>
              </size>
             </property>
             <property name="font">
@@ -1395,8 +1546,8 @@ border-radius: 4px;</string>
             </property>
             <property name="iconSize">
              <size>
-              <width>20</width>
-              <height>20</height>
+              <width>24</width>
+              <height>24</height>
              </size>
             </property>
             <property name="toolButtonStyle">
@@ -1414,14 +1565,14 @@ border-radius: 4px;</string>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
-              <height>0</height>
+              <width>48</width>
+              <height>48</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>16777215</width>
-              <height>16777215</height>
+              <width>48</width>
+              <height>48</height>
              </size>
             </property>
             <property name="font">
@@ -1437,8 +1588,8 @@ border-radius: 4px;</string>
             </property>
             <property name="iconSize">
              <size>
-              <width>20</width>
-              <height>20</height>
+              <width>24</width>
+              <height>24</height>
              </size>
             </property>
             <property name="toolButtonStyle">
@@ -1456,8 +1607,14 @@ border-radius: 4px;</string>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
-              <height>28</height>
+              <width>48</width>
+              <height>48</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>48</width>
+              <height>48</height>
              </size>
             </property>
             <property name="font">
@@ -1473,8 +1630,8 @@ border-radius: 4px;</string>
             </property>
             <property name="iconSize">
              <size>
-              <width>20</width>
-              <height>20</height>
+              <width>24</width>
+              <height>24</height>
              </size>
             </property>
             <property name="toolButtonStyle">
@@ -1866,14 +2023,14 @@ selection-background-color: lightblue;
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
-              <height>0</height>
+              <width>48</width>
+              <height>48</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>100</width>
-              <height>100</height>
+              <width>48</width>
+              <height>48</height>
              </size>
             </property>
             <property name="text">
@@ -1885,8 +2042,8 @@ selection-background-color: lightblue;
             </property>
             <property name="iconSize">
              <size>
-              <width>22</width>
-              <height>22</height>
+              <width>24</width>
+              <height>24</height>
              </size>
             </property>
             <property name="toolButtonStyle">
@@ -1902,6 +2059,18 @@ selection-background-color: lightblue;
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>48</width>
+              <height>48</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>48</width>
+              <height>48</height>
+             </size>
+            </property>
             <property name="text">
              <string>Reader</string>
             </property>
@@ -1911,8 +2080,8 @@ selection-background-color: lightblue;
             </property>
             <property name="iconSize">
              <size>
-              <width>22</width>
-              <height>22</height>
+              <width>24</width>
+              <height>24</height>
              </size>
             </property>
             <property name="toolButtonStyle">
@@ -1928,6 +2097,18 @@ selection-background-color: lightblue;
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>48</width>
+              <height>48</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>48</width>
+              <height>48</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Ctrl + T</string>
             </property>
@@ -1940,8 +2121,8 @@ selection-background-color: lightblue;
             </property>
             <property name="iconSize">
              <size>
-              <width>22</width>
-              <height>22</height>
+              <width>24</width>
+              <height>24</height>
              </size>
             </property>
             <property name="shortcut">
@@ -1960,6 +2141,18 @@ selection-background-color: lightblue;
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>48</width>
+              <height>48</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>48</width>
+              <height>48</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Ctrl + N</string>
             </property>
@@ -1972,8 +2165,8 @@ selection-background-color: lightblue;
             </property>
             <property name="iconSize">
              <size>
-              <width>22</width>
-              <height>22</height>
+              <width>24</width>
+              <height>24</height>
              </size>
             </property>
             <property name="shortcut">
@@ -1992,6 +2185,18 @@ selection-background-color: lightblue;
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>48</width>
+              <height>48</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>48</width>
+              <height>48</height>
+             </size>
+            </property>
             <property name="text">
              <string>Exercise</string>
             </property>
@@ -2001,8 +2206,8 @@ selection-background-color: lightblue;
             </property>
             <property name="iconSize">
              <size>
-              <width>22</width>
-              <height>22</height>
+              <width>24</width>
+              <height>24</height>
              </size>
             </property>
             <property name="toolButtonStyle">

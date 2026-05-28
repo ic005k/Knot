@@ -745,7 +745,7 @@ void MainHelper::init_UIWidget() {
 
   int nIConFontSize;
 #ifdef Q_OS_ANDROID
-  nIConFontSize = 12;
+  nIConFontSize = 13;
 #else
   nIConFontSize = 9;
 #endif
@@ -760,6 +760,7 @@ void MainHelper::init_UIWidget() {
 
   f.setPointSize(nIConFontSize + 0);
   mui->btnMenu->setFont(f);
+  mui->btnHome->setFont(f);
   mui->btnAdd->setFont(f);
   mui->btnDel->setFont(f);
   mui->btnSync->setFont(f);
