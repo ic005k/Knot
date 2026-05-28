@@ -192,7 +192,7 @@ static void JavaNotify_9() {
 
 static void JavaNotify_10() {
   // Open Book
-  mw_one->on_btnOpen_clicked();
+  mw_one->on_btnOpen_pressed();
 
   qDebug() << "C++ JavaNotify_10";
 }

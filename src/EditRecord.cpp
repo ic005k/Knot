@@ -83,7 +83,7 @@ EditRecord::~EditRecord() { delete m_CategoryList; }
 void EditRecord::keyReleaseEvent(QKeyEvent* event) { Q_UNUSED(event); }
 
 void EditRecord::on_btnOk_clicked() {
-  mw_one->on_btnBackEditRecord_clicked();
+  mw_one->on_btnBackEditRecord_pressed();
 
   if (!isAdd) {
     mw_one->modify_Data();

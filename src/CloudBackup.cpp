@@ -369,7 +369,7 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
               isDownData = true;
               mw_one->myImportDataThread->start();
 
-              if (isZipOK) mw_one->on_btnBack_One_clicked();
+              if (isZipOK) mw_one->on_btnBack_One_pressed();
             }
           } else {
             resetProgBar();

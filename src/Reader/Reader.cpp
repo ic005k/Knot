@@ -1999,7 +1999,7 @@ void Reader::removeBookList() {
 
 void Reader::readBookDone() {
   if (isOpenBookListClick) {
-    mw_one->on_btnBackBookList_clicked();
+    mw_one->on_btnBackBookList_pressed();
     isOpenBookListClick = false;
   }
 
@@ -2438,7 +2438,7 @@ bool Reader::eventFilterReader(QObject* watch, QEvent* evn) {
             return true;
           }
 
-          mw_one->on_btnPageUp_clicked();
+          mw_one->on_btnPageUp_pressed();
           closeBookPage();
         }
         if ((press_x - relea_x) > 75 && qAbs(relea_y - press_y) < 35) {
@@ -2451,7 +2451,7 @@ bool Reader::eventFilterReader(QObject* watch, QEvent* evn) {
             return true;
           }
 
-          mw_one->on_btnPageNext_clicked();
+          mw_one->on_btnPageNext_pressed();
           closeBookPage();
         }
       } else {
@@ -2465,7 +2465,7 @@ bool Reader::eventFilterReader(QObject* watch, QEvent* evn) {
             return true;
           }
 
-          mw_one->on_btnPageNext_clicked();
+          mw_one->on_btnPageNext_pressed();
           closeBookPage();
         }
         if ((relea_y - press_y) > 75 && qAbs(relea_x - press_x) < 35) {
@@ -2478,7 +2478,7 @@ bool Reader::eventFilterReader(QObject* watch, QEvent* evn) {
             return true;
           }
 
-          mw_one->on_btnPageUp_clicked();
+          mw_one->on_btnPageUp_pressed();
           closeBookPage();
         }
       }
@@ -2614,7 +2614,7 @@ bool Reader::eventFilterReader(QObject* watch, QEvent* evn) {
               }
             }
 
-            mw_one->on_btnPageUp_clicked();
+            mw_one->on_btnPageUp_pressed();
             closeBookPage();
           }
 
@@ -2631,7 +2631,7 @@ bool Reader::eventFilterReader(QObject* watch, QEvent* evn) {
               }
             }
 
-            mw_one->on_btnPageNext_clicked();
+            mw_one->on_btnPageNext_pressed();
             closeBookPage();
           }
         } else {
@@ -2648,7 +2648,7 @@ bool Reader::eventFilterReader(QObject* watch, QEvent* evn) {
               }
             }
 
-            mw_one->on_btnPageNext_clicked();
+            mw_one->on_btnPageNext_pressed();
             closeBookPage();
           }
 
@@ -2665,7 +2665,7 @@ bool Reader::eventFilterReader(QObject* watch, QEvent* evn) {
               }
             }
 
-            mw_one->on_btnPageUp_clicked();
+            mw_one->on_btnPageUp_pressed();
             closeBookPage();
           }
         }
@@ -2783,7 +2783,7 @@ void Reader::showOrHideBookmark() {
   mui->btnAutoStop->click();
 
   if (mui->f_ReaderSet->isVisible()) {
-    mw_one->on_btnBackReaderSet_clicked();
+    mw_one->on_btnBackReaderSet_pressed();
   }
   if (mui->qwBookmark->isHidden()) {
     mui->qwReader->hide();

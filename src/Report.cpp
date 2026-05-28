@@ -816,17 +816,17 @@ void Report::genReportMenu() {
   QAction* actSetYearMonth = new QAction(tr("Year Month"));
   m_Menu->addAction(actSetYearMonth);
   connect(actSetYearMonth, &QAction::triggered, this,
-          [=]() { mw_one->on_btnYear_clicked(); });
+          [=]() { mw_one->on_btnYear_pressed(); });
 
   QAction* actStartDate = new QAction(tr("Start Date"));
   m_Menu->addAction(actStartDate);
   connect(actStartDate, &QAction::triggered, this,
-          [=]() { mw_one->on_btnStartDate_clicked(); });
+          [=]() { mw_one->on_btnStartDate_pressed(); });
 
   QAction* actEndDate = new QAction(tr("End Date"));
   m_Menu->addAction(actEndDate);
   connect(actEndDate, &QAction::triggered, this,
-          [=]() { mw_one->on_btnEndDate_clicked(); });
+          [=]() { mw_one->on_btnEndDate_pressed(); });
 
   int x = 0;
   x = mw_one->geometry().x() + 2;

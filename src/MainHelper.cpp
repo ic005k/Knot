@@ -17,7 +17,7 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
 
   if (watch == mui->lblStats) {
     if (event->type() == QEvent::MouseButtonDblClick) {
-      mw_one->on_btnSelTab_clicked();
+      mw_one->on_btnSelTab_pressed();
       return true;
     }
   }
@@ -32,8 +32,7 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
       mui->btnTabMoveUp->hide();
 
       mw_one->m_EditRecord->saveCurrentValue();
-      mw_one->on_btnBackEditRecord_clicked();
-      // mw_one->on_btnSelTab_clicked();
+      mw_one->on_btnBackEditRecord_pressed();
       mui->btnHome->click();
       isSelectTab = true;
 
@@ -49,12 +48,12 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
     QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
 
     if (watch == mui->editSearchText && keyEvent->key() == Qt::Key_Return) {
-      mw_one->on_btnStartSearch_clicked();
+      mw_one->on_btnStartSearch_pressed();
       return true;
     }
 
     if (keyEvent->key() == Qt::Key_Escape) {
-      if (mui->frameReader->isVisible()) mw_one->on_btnBackReader_clicked();
+      if (mui->frameReader->isVisible()) mw_one->on_btnBackReader_pressed();
       return true;
     }
   }
@@ -155,7 +154,7 @@ void MainHelper::clickBtnRestoreTab() {
     recycle_file.remove();
   }
 
-  mw_one->on_btnBackTabRecycle_clicked();
+  mw_one->on_btnBackTabRecycle_pressed();
 
   mw_one->saveTab();
 
@@ -1778,6 +1777,8 @@ void MainWindow::drawDayChart() {
 void MainHelper::setToolButtonAnimation(QToolButton* btn) {
   // 固定样式
   btn->setStyleSheet("border:none; background:transparent;");
+
+  return;
 
   // 保存原始大小（永久基准）
   QSize originalSize = btn->iconSize();

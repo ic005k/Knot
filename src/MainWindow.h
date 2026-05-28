@@ -498,12 +498,12 @@ class MainWindow : public QMainWindow {
 
   void updateMainTab();
 
-  void on_btnPageUp_clicked();
-  void on_btnPageNext_clicked();
-  void on_btnBackDir_clicked();
+  void on_btnPageUp_pressed();
+  void on_btnPageNext_pressed();
+  void on_btnBackDir_pressed();
 
-  void on_btnUpload_clicked();
-  void on_btnDownload_clicked();
+  void on_btnUpload_pressed();
+  void on_btnDownload_pressed();
 
   void saveNeedDelWebDAVFiles(const QString& file);
   QStringList getNeedDelWebDAVFiles();
@@ -521,7 +521,7 @@ class MainWindow : public QMainWindow {
  public slots:
   void on_btnCatalogue_pressed();
 
-  void on_btnHome_clicked();
+  void on_btnHome_pressed();
 
   void GetGpsDataThreadDone();
 
@@ -534,22 +534,22 @@ class MainWindow : public QMainWindow {
   void on_hSlider_sliderMoved(int position);
   void clickMainTab();
 
-  void on_btnTodo_clicked();
+  void on_btnTodo_pressed();
   void readEBookDone();
 
-  void on_btnShowFindNotes_clicked();
+  void on_btnShowFindNotes_pressed();
 
-  void on_btnRename_clicked();
+  void on_btnRename_pressed();
 
   void on_actionOneDriveBackupData();
 
   void on_actionReport_triggered();
 
-  void on_btnCopy_clicked();
+  void on_btnCopy_pressed();
 
-  void on_btnSearch_clicked();
+  void on_btnSearch_pressed();
 
-  void on_btnCancelSel_clicked();
+  void on_btnCancelSel_pressed();
 
   void on_timerSyncData();
   void timerUpdate();
@@ -574,7 +574,7 @@ class MainWindow : public QMainWindow {
 
   void on_actionAbout();
 
-  void on_btnFind_clicked();
+  void on_btnFind_pressed();
 
   void on_actionFind_triggered();
 
@@ -592,33 +592,35 @@ class MainWindow : public QMainWindow {
 
   void on_actionPreferences_triggered();
 
-  void on_btnSteps_clicked();
+  void on_btnSteps_pressed();
 
   void on_rbSteps();
 
-  void on_btnSelTab_clicked();
+  void on_btnSelTab_pressed();
 
-  void on_btnReader_clicked();
+  void on_btnBackReader_pressed();
 
-  void on_btnBackReader_clicked();
+  void on_btnAddTodo_clicked();
+  void on_btnAddTodo_pressed();
+  void on_btnReader_pressed();
 
-  void on_btnOpen_clicked();
+  void on_btnOpen_pressed();
 
-  void on_btnPages_clicked();
+  void on_btnPages_pressed();
 
-  void on_btnReadList_clicked();
+  void on_btnReadList_pressed();
 
   void on_actionBakFileList();
 
-  void on_btnBack_One_clicked();
+  void on_btnBack_One_pressed();
 
-  void on_btnBackNotesGraph_clicked();
+  void on_btnBackNotesGraph_pressed();
 
-  void on_btnNotes_clicked();
+  void on_btnNotes_pressed();
 
-  void on_btnZoomIn_clicked();
+  void on_btnZoomIn_pressed();
 
-  void on_btnZoomOut_clicked();
+  void on_btnZoomOut_pressed();
 
   void on_openKnotBakDir();
 
@@ -626,51 +628,49 @@ class MainWindow : public QMainWindow {
 
   void clickData();
 
-  void on_btnStartSearch_clicked();
+  void on_btnStartSearch_pressed();
 
   void on_btnChart();
 
-  void on_btnBack_NotesSearchResult_clicked();
+  void on_btnBack_NotesSearchResult_pressed();
 
-  void on_btnOpenSearchResult_clicked();
+  void on_btnOpenSearchResult_pressed();
 
-  void on_btnEditNote_clicked();
+  void on_btnEditNote_pressed();
 
-  void on_btnOpenNote_clicked();
+  void on_btnOpenNote_pressed();
 
-  void on_btnStartDate_clicked();
+  void on_btnStartDate_pressed();
 
-  void on_btnEndDate_clicked();
+  void on_btnEndDate_pressed();
 
   void on_ExecShortcut();
 
-  void on_btnFindNotes_clicked();
+  void on_btnFindNotes_pressed();
 
   void on_btnShowBookmark_pressed();
 
-  void on_btnBackBookList_clicked();
+  void on_btnBackBookList_pressed();
 
-  void on_btnBackEditRecord_clicked();
+  void on_btnBackEditRecord_pressed();
 
-  void on_btnBackNoteList_clicked();
+  void on_btnBackNoteList_pressed();
 
-  void on_btnBackReaderSet_clicked();
+  void on_btnBackReaderSet_pressed();
 
-  void on_btnBackNoteRecycle_clicked();
+  void on_btnBackNoteRecycle_pressed();
 
   void on_timerMousePress();
 
-  void on_btnBackImg_clicked();
+  void on_btnBackImg_pressed();
 
   void on_btnReport();
 
-  void on_btnAdd_clicked();
+  void on_btnAdd_pressed();
 
-  void on_btnDel_clicked();
+  void on_btnDel_pressed();
 
-  void on_btnAddTodo_clicked();
-
-  void on_btnBackTodo_clicked();
+  void on_btnBackTodo_pressed();
 
   void on_btnHigh();
 
@@ -680,27 +680,27 @@ class MainWindow : public QMainWindow {
 
   void on_btnRecycle();
 
-  void on_btnReturnRecycle_clicked();
+  void on_btnReturnRecycle_pressed();
 
-  void on_btnClearRecycle_clicked();
+  void on_btnClearRecycle_pressed();
 
-  void on_btnDelRecycle_clicked();
+  void on_btnDelRecycle_pressed();
 
-  void on_btnRestoreRecycle_clicked();
+  void on_btnRestoreRecycle_pressed();
 
   void on_editTodo_textChanged();
 
-  void on_btnBackSteps_clicked();
+  void on_btnBackSteps_pressed();
 
-  void on_btnReset_clicked();
+  void on_btnReset_pressed();
 
-  void on_btnBack_Report_clicked();
+  void on_btnBack_Report_pressed();
 
-  void on_btnYear_clicked();
+  void on_btnYear_pressed();
 
-  void on_btnMonth_clicked();
+  void on_btnMonth_pressed();
 
-  void on_btnCategory_clicked();
+  void on_btnCategory_pressed();
 
   void closeProgress();
 
@@ -708,86 +708,86 @@ class MainWindow : public QMainWindow {
 
   void updateGpsMapDone();
 
-  void on_btnBackTabRecycle_clicked();
+  void on_btnBackTabRecycle_pressed();
 
-  void on_btnBackSearch_clicked();
+  void on_btnBackSearch_pressed();
 
-  void on_btnBackBakList_clicked();
+  void on_btnBackBakList_pressed();
 
-  void on_btnBackSetTab_clicked();
+  void on_btnBackSetTab_pressed();
 
-  void on_btnBack_Tree_clicked();
+  void on_btnBack_Tree_pressed();
 
-  void on_btnCancelType_clicked();
+  void on_btnCancelType_pressed();
 
   void on_actionTabRecycle();
 
   void on_actionShareFile();
 
-  void on_btnUpMove_clicked();
+  void on_btnUpMove_pressed();
 
-  void on_btnDownMove_clicked();
+  void on_btnDownMove_pressed();
 
-  void on_btnDelNote_NoteBook_clicked();
+  void on_btnDelNote_NoteBook_pressed();
 
-  void on_btnMoveTo_clicked();
+  void on_btnMoveTo_pressed();
 
-  void on_btnToPDF_clicked();
+  void on_btnToPDF_pressed();
 
-  void on_btnManagement_clicked();
+  void on_btnManagement_pressed();
 
-  void on_btnNoteRecycle_clicked();
+  void on_btnNoteRecycle_pressed();
 
  private slots:
   void onAndroidBackHandle();
 
   void on_btnMenu_pressed();
 
-  void on_btnSync_clicked();
+  void on_btnSync_pressed();
 
-  void on_btnPasteTodo_clicked();
+  void on_btnPasteTodo_pressed();
 
-  void on_btnClearSearchText_clicked();
+  void on_btnClearSearchText_pressed();
 
-  void on_btnImportBakList_clicked();
+  void on_btnImportBakList_pressed();
 
-  void on_btnOkViewCate_clicked();
+  void on_btnOkViewCate_pressed();
 
-  void on_btnDelTabRecycle_clicked();
+  void on_btnDelTabRecycle_pressed();
 
-  void on_btnRestoreTab_clicked();
+  void on_btnRestoreTab_pressed();
 
-  void on_btnDelBakFile_clicked();
+  void on_btnDelBakFile_pressed();
 
-  void on_btnDelNoteRecycle_clicked();
+  void on_btnDelNoteRecycle_pressed();
 
-  void on_btnRestoreNoteRecycle_clicked();
+  void on_btnRestoreNoteRecycle_pressed();
 
-  void on_btnFindPreviousNote_clicked();
+  void on_btnFindPreviousNote_pressed();
 
-  void on_btnFindNextNote_clicked();
+  void on_btnFindNextNote_pressed();
 
-  void on_btnClearNoteFindText_clicked();
+  void on_btnClearNoteFindText_pressed();
 
-  void on_btnNoteBookMenu_clicked();
+  void on_btnNoteBookMenu_pressed();
 
-  void on_btnNoteMenu_clicked();
+  void on_btnNoteMenu_pressed();
 
-  void on_btnOkType_clicked();
+  void on_btnOkType_pressed();
 
-  void on_btnDelType_clicked();
+  void on_btnDelType_pressed();
 
-  void on_btnRenameType_clicked();
+  void on_btnRenameType_pressed();
 
-  void on_btnType_clicked();
+  void on_btnType_pressed();
 
-  void on_btnOkEditRecord_clicked();
+  void on_btnOkEditRecord_pressed();
 
-  void on_btnClearType_clicked();
+  void on_btnClearType_pressed();
 
-  void on_btnClearDetails_clicked();
+  void on_btnClearDetails_pressed();
 
-  void on_btnClearAmount_clicked();
+  void on_btnClearAmount_pressed();
 
   void on_editAmount_textChanged(const QString& arg1);
 
@@ -799,106 +799,104 @@ class MainWindow : public QMainWindow {
 
   void on_hsM_valueChanged(int value);
 
-  void on_btn7_clicked();
+  void on_btn7_pressed();
 
-  void on_btn8_clicked();
+  void on_btn8_pressed();
 
-  void on_btn9_clicked();
+  void on_btn9_pressed();
 
-  void on_btn4_clicked();
+  void on_btn4_pressed();
 
-  void on_btn5_clicked();
+  void on_btn5_pressed();
 
-  void on_btn6_clicked();
+  void on_btn6_pressed();
 
-  void on_btn1_clicked();
+  void on_btn1_pressed();
 
-  void on_btn2_clicked();
+  void on_btn2_pressed();
 
-  void on_btn3_clicked();
+  void on_btn3_pressed();
 
-  void on_btn0_clicked();
+  void on_btn0_pressed();
 
-  void on_btnDot_clicked();
+  void on_btnDot_pressed();
 
-  void on_btnDel_Number_clicked();
+  void on_btnDel_Number_pressed();
 
-  void on_btnOkBookList_clicked();
+  void on_btnOkBookList_pressed();
 
-  void on_btnClearAllRecords_clicked();
+  void on_btnClearAllRecords_pressed();
 
-  void on_btnAnd_clicked();
+  void on_btnAnd_pressed();
 
-  void on_btnClear_clicked();
+  void on_btnClear_pressed();
 
-  void on_btnModify_clicked();
+  void on_btnModify_pressed();
 
-  void on_btnTabMoveUp_clicked();
+  void on_btnTabMoveUp_pressed();
 
-  void on_btnTabMoveDown_clicked();
+  void on_btnTabMoveDown_pressed();
 
-  void on_btnHideFind_clicked();
+  void on_btnHideFind_pressed();
 
-  void on_btnStepsOptions_clicked();
+  void on_btnStepsOptions_pressed();
 
-  void on_btnRecentOpen_clicked();
+  void on_btnRecentOpen_pressed();
 
-  void on_btnMenuReport_clicked();
+  void on_btnMenuReport_pressed();
 
-  void on_btnRemoveBookList_clicked();
+  void on_btnRemoveBookList_pressed();
 
   void on_ReceiveShare();
 
-  void on_btnShareImage_clicked();
+  void on_btnShareImage_pressed();
 
-  void on_btnDelImage_clicked();
+  void on_btnDelImage_pressed();
 
-  void on_btnSetBookmark_clicked();
+  void on_btnSetBookmark_pressed();
 
-  void on_btnFontLess_clicked();
+  void on_btnFontLess_pressed();
 
-  void on_btnFontPlus_clicked();
+  void on_btnFontPlus_pressed();
 
-  void on_btnFont_clicked();
+  void on_btnFont_pressed();
 
-  void on_btnBackgroundColor_clicked();
+  void on_btnBackgroundColor_pressed();
 
-  void on_btnForegroundColor_clicked();
+  void on_btnForegroundColor_pressed();
 
   void on_editBackgroundColor_textChanged(const QString& arg1);
 
   void on_editForegroundColor_textChanged(const QString& arg1);
 
-  void on_btnStyle1_clicked();
+  void on_btnStyle1_pressed();
 
-  void on_btnStyle2_clicked();
+  void on_btnStyle2_pressed();
 
-  void on_btnStyle3_clicked();
+  void on_btnStyle3_pressed();
 
-  void on_btnGoPage_clicked();
+  void on_btnGoPage_pressed();
 
   void on_hSlider_sliderReleased();
 
   void on_CloseProgressBar();
 
-  void on_btnShareBook_clicked();
+  void on_btnShareBook_pressed();
 
   void slotSetBookmark();
   void on_btnAutoRun_pressed();
 
-  void on_btnLessen_clicked();
+  void on_btnLessen_pressed();
 
-  void on_btnDefault_clicked();
+  void on_btnDefault_pressed();
 
-  void on_btnPlus_clicked();
-
-  void on_btnAddTodo_pressed();
+  void on_btnPlus_pressed();
 
   void on_btnAddTodo_released();
 
   void on_tmeFlash();
 
-  void on_btnClearReaderFont_clicked();
+  void on_btnClearReaderFont_pressed();
 
   void on_StartRecordAudio();
 
@@ -906,71 +904,71 @@ class MainWindow : public QMainWindow {
 
   void on_sliderPlayAudio_sliderReleased();
 
-  void on_btnGPS_clicked();
+  void on_btnGPS_pressed();
 
-  void on_btnSelGpsDate_clicked();
+  void on_btnSelGpsDate_pressed();
 
-  void on_btnGetGpsListData_clicked();
+  void on_btnGetGpsListData_pressed();
 
-  void on_rbCycling_clicked();
+  void on_rbCycling_pressed();
 
-  void on_rbHiking_clicked();
+  void on_rbHiking_pressed();
 
-  void on_rbRunning_clicked();
+  void on_rbRunning_pressed();
 
-  void on_btnWebDAVBackup_clicked();
+  void on_btnWebDAVBackup_pressed();
 
-  void on_btnWebDAVRestore_clicked();
+  void on_btnWebDAVRestore_pressed();
 
-  void on_chkWebDAV_clicked();
+  void on_chkWebDAV_pressed();
 
   void on_editFindNote_returnPressed();
 
-  void on_btnClearSearchResults_clicked();
+  void on_btnClearSearchResults_pressed();
 
-  void on_btnFindNotes2_clicked();
+  void on_btnFindNotes2_pressed();
 
-  void on_btnOpenEditFind_clicked();
+  void on_btnOpenEditFind_pressed();
 
-  void on_btnTools_clicked();
+  void on_btnTools_pressed();
 
-  void on_btnCopyNoteLink_clicked();
+  void on_btnCopyNoteLink_pressed();
 
   void on_cboxWebDAV_currentTextChanged(const QString& arg1);
 
-  void on_btnShowCboxList_clicked();
+  void on_btnShowCboxList_pressed();
 
   void on_btnRotation_pressed();
 
-  void on_btnBackNoteDiff_clicked();
+  void on_btnBackNoteDiff_pressed();
 
   void on_btnSendEmail();
 
-  void on_btnShareBakFile_clicked();
+  void on_btnShareBakFile_pressed();
 
-  void on_btnNewNote_clicked();
+  void on_btnNewNote_pressed();
 
-  void on_btnShareBookText_clicked();
+  void on_btnShareBookText_pressed();
 
-  void on_btnAddBookNote_clicked();
+  void on_btnAddBookNote_pressed();
 
-  void on_btnViewBookNote_clicked();
+  void on_btnViewBookNote_pressed();
 
-  void on_btnMap_clicked();
+  void on_btnMap_pressed();
 
-  void on_btnSportsChart_clicked();
+  void on_btnSportsChart_pressed();
 
-  void on_btnSpeak_clicked();
+  void on_btnSpeak_pressed();
 
-  void on_btnStopSpeak_clicked();
+  void on_btnStopSpeak_pressed();
 
   void on_chkPlayRunVoice_clicked(bool checked);
 
   void on_tabMotion_currentChanged(int index);
 
-  void on_btnPause_clicked();
+  void on_btnPause_pressed();
 
-  void on_btnTestWebDav_clicked();
+  void on_btnTestWebDav_pressed();
 
   void on_btnShowPassword_pressed();
 
@@ -980,7 +978,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnShowValidate_released();
 
-  void on_chkZip_clicked();
+  void on_chkZip_pressed();
 
   void on_editPassword_textChanged(const QString& arg1);
 
@@ -989,8 +987,6 @@ class MainWindow : public QMainWindow {
   void on_editAutoStopTTS_textChanged(const QString& arg1);
 
   void on_chkAutoStopTTS_clicked(bool checked);
-
-  void on_btnReader_pressed();
 
  private:
   bool isMoveEntry;

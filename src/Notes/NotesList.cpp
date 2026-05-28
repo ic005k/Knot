@@ -1188,7 +1188,7 @@ void NotesList::on_btnRestore_clicked() {
       on_btnBack_clicked();
     }
     if (!mui->frameNoteRecycle->isHidden()) {
-      mw_one->on_btnBackNoteRecycle_clicked();
+      mw_one->on_btnBackNoteRecycle_pressed();
     }
   } else
     return;
@@ -1283,7 +1283,7 @@ void NotesList::on_btnBatchRestore_clicked() {
       on_btnBack_clicked();
     }
     if (!mui->frameNoteRecycle->isHidden()) {
-      mw_one->on_btnBackNoteRecycle_clicked();
+      mw_one->on_btnBackNoteRecycle_pressed();
     }
   }
 
@@ -2545,7 +2545,7 @@ void NotesList::on_actionAdd_Note_triggered() {
 
   clickNoteList();
   m_Notes->updateMDFileToSyncLists();
-  mw_one->on_btnEditNote_clicked();
+  mw_one->on_btnEditNote_pressed();
 
   setNoteLabel();
 
@@ -3326,9 +3326,9 @@ void NotesList::genRecentOpenMenu() {
         setCurrentItemFromMDFile(currentMDFile);
 
 #ifdef Q_OS_ANDROID
-        mw_one->on_btnOpenNote_clicked();
+        mw_one->on_btnOpenNote_pressed();
 #else
-        mw_one->on_btnEditNote_clicked();
+        mw_one->on_btnEditNote_pressed();
 #endif
       });
     }

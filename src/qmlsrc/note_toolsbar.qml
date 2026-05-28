@@ -62,37 +62,37 @@ Rectangle {
                             console.log("Button", index + 1, "clicked")
                             switch (index) {
                             case 0:
-                                mw_one.on_btnBackNoteList_clicked()
+                                mw_one.on_btnBackNoteList_pressed()
                                 break
                             case 1:
-                                mw_one.on_btnOpenNote_clicked()
+                                mw_one.on_btnOpenNote_pressed()
                                 break
                             case 2:
-                                mw_one.on_btnEditNote_clicked()
+                                mw_one.on_btnEditNote_pressed()
                                 break
                             case 3:
-                                mw_one.on_btnShowFindNotes_clicked()
+                                mw_one.on_btnShowFindNotes_pressed()
                                 break
                             case 4:
-                                mw_one.on_btnUpMove_clicked()
+                                mw_one.on_btnUpMove_pressed()
                                 break
                             case 5:
-                                mw_one.on_btnDownMove_clicked()
+                                mw_one.on_btnDownMove_pressed()
                                 break
                             case 6:
-                                mw_one.on_btnDelNote_NoteBook_clicked()
+                                mw_one.on_btnDelNote_NoteBook_pressed()
                                 break
                             case 7:
-                                mw_one.on_btnMoveTo_clicked()
+                                mw_one.on_btnMoveTo_pressed()
                                 break
                             case 8:
-                                mw_one.on_btnToPDF_clicked()
+                                mw_one.on_btnToPDF_pressed()
                                 break
                             case 9:
-                                mw_one.on_btnRename_clicked()
+                                mw_one.on_btnRename_pressed()
                                 break
                             case 10:
-                                mw_one.on_btnNoteRecycle_clicked()
+                                mw_one.on_btnNoteRecycle_pressed()
                                 break
                             }
                         }
