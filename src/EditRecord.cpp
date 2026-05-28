@@ -129,6 +129,10 @@ void EditRecord::on_btnOk_clicked() {
 
   mw_one->updateMainTab();
   mw_one->startSave("tab");
+
+  if (mui->qwMainDate->isHidden()) {
+    mw_one->clickMainTab();
+  }
 }
 
 void EditRecord::on_btn7_clicked() { set_Amount("7"); }

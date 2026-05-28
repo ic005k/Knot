@@ -2,12 +2,14 @@
 #define MAINHELPER_H
 
 #include <QDialog>
+#include <QGraphicsOpacityEffect>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QObject>
 #include <QPainter>
 #include <QPropertyAnimation>
 #include <QSettings>
+#include <QToolButton>
 #include <QTreeWidget>
 #include <QWidget>
 
@@ -94,6 +96,8 @@ class MainHelper : public QDialog {
 
  private:
   QStringList bakFileList;
+
+  void setToolButtonAnimation(QToolButton* btn);
 
   QString clickableLabelButtonStyle = R"(
         /* 模拟按钮样式：中蓝底+白字，适配明暗主题 */

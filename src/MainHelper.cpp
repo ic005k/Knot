@@ -879,49 +879,47 @@ void MainHelper::startBackgroundTaskUpdateBakFileList() {
 
 void MainHelper::init_ButtonStyle() {
   m_Method->set_ToolButtonStyle(mw_one);
-  mui->btnMenu->setStyleSheet("border:none");
-  mui->btnHome->setStyleSheet("border:none");
 
-  mui->btnTodo->setStyleSheet("border:none");
-  mui->btnSteps->setStyleSheet("border:none");
-
-  mui->btnReader->setStyleSheet("border:none");
-  mui->btnNotes->setStyleSheet("border:none");
-  mui->btnAdd->setStyleSheet("border:none");
-  mui->btnDel->setStyleSheet("border:none");
-  mui->btnPasteTodo->setStyleSheet("border:none");
-  mui->btnSync->setStyleSheet("border:none");
-  mui->btnFind->setStyleSheet("border:none");
-
-  mui->btnSelTab->setStyleSheet("border:none");
+  setToolButtonAnimation(mui->btnMenu);
+  setToolButtonAnimation(mui->btnHome);
+  setToolButtonAnimation(mui->btnReader);
+  setToolButtonAnimation(mui->btnTodo);
+  setToolButtonAnimation(mui->btnSteps);
+  setToolButtonAnimation(mui->btnNotes);
+  setToolButtonAnimation(mui->btnAdd);
+  setToolButtonAnimation(mui->btnDel);
+  setToolButtonAnimation(mui->btnPasteTodo);
+  setToolButtonAnimation(mui->btnSync);
+  setToolButtonAnimation(mui->btnFind);
+  setToolButtonAnimation(mui->btnSelTab);
 
   // Todo
-  mui->btnBackTodo->setStyleSheet("border:none; ");
-  mui->btnHigh->setStyleSheet("border:none; ");
-  mui->btnLow->setStyleSheet("border:none; ");
-  mui->btnModify->setStyleSheet("border:none; ");
-  mui->btnSetTime->setStyleSheet("border:none; ");
-  mui->btnRecycle->setStyleSheet("border:none; ");
+  setToolButtonAnimation(mui->btnBackTodo);
+  setToolButtonAnimation(mui->btnHigh);
+  setToolButtonAnimation(mui->btnLow);
+  setToolButtonAnimation(mui->btnModify);
+  setToolButtonAnimation(mui->btnSetTime);
+  setToolButtonAnimation(mui->btnRecycle);
 
   // Reader
-  mui->btnBackReader->setStyleSheet("border:none; ");
-  mui->btnCatalogue->setStyleSheet("border:none; ");
-  mui->btnShowBookmark->setStyleSheet("border:none; ");
-  mui->btnAutoRun->setStyleSheet("border:none; ");
-  mui->btnAutoStop->setStyleSheet("border:none; ");
-  mui->btnPages->setStyleSheet("border:none; ");
-  mui->btnOpen->setStyleSheet("border:none;");
-  mui->btnReadList->setStyleSheet("border:none; ");
-  mui->btnRotation->setStyleSheet("border:none; ");
-  mui->btnSpeak->setStyleSheet("border:none;");
-  mui->btnStopSpeak->setStyleSheet("border:none;");
+  setToolButtonAnimation(mui->btnBackReader);
+  setToolButtonAnimation(mui->btnCatalogue);
+  setToolButtonAnimation(mui->btnShowBookmark);
+  setToolButtonAnimation(mui->btnAutoRun);
+  setToolButtonAnimation(mui->btnAutoStop);
+  setToolButtonAnimation(mui->btnPages);
+  setToolButtonAnimation(mui->btnOpen);
+  setToolButtonAnimation(mui->btnReadList);
+  setToolButtonAnimation(mui->btnRotation);
+  setToolButtonAnimation(mui->btnSpeak);
+  setToolButtonAnimation(mui->btnStopSpeak);
 
   // Notes
-  mui->btnNoteBookMenu->setStyleSheet("border:none; ");
-  mui->btnNewNote->setStyleSheet("border:none; ");
-  mui->btnFindNotes2->setStyleSheet("border:none; ");
-  mui->btnNoteMenu->setStyleSheet("border:none; ");
-  mui->btnRecentOpen->setStyleSheet("border:none; ");
+  setToolButtonAnimation(mui->btnNoteBookMenu);
+  setToolButtonAnimation(mui->btnNewNote);
+  setToolButtonAnimation(mui->btnFindNotes2);
+  setToolButtonAnimation(mui->btnNoteMenu);
+  setToolButtonAnimation(mui->btnRecentOpen);
 
   if (isDark) {
     // Reader
@@ -1775,4 +1773,33 @@ void MainWindow::drawDayChart() {
   } else {
     yMaxDay = *std::max_element(dList.begin(), dList.end());
   }
+}
+
+void MainHelper::setToolButtonAnimation(QToolButton* btn) {
+  // 固定样式
+  btn->setStyleSheet("border:none; background:transparent;");
+
+  // 保存原始大小（永久基准）
+  QSize originalSize = btn->iconSize();
+
+  // 按下
+  connect(btn, &QToolButton::pressed, this, [=]() {
+    // 每次都重置回原始大小，再播放缩小动画
+    btn->setIconSize(originalSize);
+
+    QPropertyAnimation* anim = new QPropertyAnimation(btn, "iconSize", btn);
+    anim->setDuration(110);
+    anim->setStartValue(originalSize);
+    anim->setEndValue(originalSize * 0.9);
+    anim->start(QAbstractAnimation::DeleteWhenStopped);
+  });
+
+  // 松开
+  connect(btn, &QToolButton::released, this, [=]() {
+    QPropertyAnimation* anim = new QPropertyAnimation(btn, "iconSize", btn);
+    anim->setDuration(110);
+    anim->setStartValue(btn->iconSize());
+    anim->setEndValue(originalSize);
+    anim->start(QAbstractAnimation::DeleteWhenStopped);
+  });
 }

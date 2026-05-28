@@ -295,6 +295,7 @@ void Preferences::initOptions() {
 #else
 
   if (!devMode) {
+    mui->btnHome->hide();
     mui->qwMainDate->hide();
     mui->qwMainEvent->hide();
     mui->btnSteps->hide();

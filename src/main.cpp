@@ -356,7 +356,7 @@ void loadTheme(bool isDark) {
   // 遍历控件刷新字体（仅字体大小变化时执行）
   if (qApp) {
     foreach (QWidget* widget, qApp->allWidgets()) {
-      if (widget != mui->btnMenu && widget != mui->btnMenu &&
+      if (widget != mui->btnMenu && widget != mui->btnHome &&
           widget != mui->btnAdd && widget != mui->btnDel &&
           widget != mui->btnSync && widget != mui->btnFind &&
           widget != mui->btnSelTab && widget != mui->btnReader &&
