@@ -141,7 +141,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ImageViewerActivity
-    extends Activity
+    extends AppCompatActivity
     implements View.OnClickListener, Application.ActivityLifecycleCallbacks
 {
 
@@ -220,7 +220,10 @@ public class ImageViewerActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        // ========== 隐藏标题栏 ==========
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
 
         // 加载布局
         if (MyActivity.isDark) {
@@ -229,44 +232,8 @@ public class ImageViewerActivity
             setContentView(R.layout.activity_image_viewer);
         }
 
-        // ==============================================
-        // 兼容 Android 12+ ~ 16 + Qt6.6.3
-        // 只改状态栏文字：亮=黑，暗=白
-        // ==============================================
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            View decorView = getWindow().getDecorView();
-            int uiFlags = decorView.getSystemUiVisibility();
+        ImmersiveUtil.applyRealImmersive(this);
 
-            if (!MyActivity.isDark) {
-                // 亮模式 → 黑字
-                uiFlags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            } else {
-                // 暗模式 → 白字
-                //uiFlags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-                uiFlags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            }
-
-            decorView.setSystemUiVisibility(uiFlags);
-        }
-
-        // 系统栏间距（兼容 Qt6.6.3 / 低版本 API）
-        getWindow()
-            .getDecorView()
-            .setOnApplyWindowInsetsListener((v, insets) -> {
-                View content = findViewById(android.R.id.content);
-                if (content != null) {
-                    content.setPadding(
-                        0,
-                        insets.getSystemWindowInsetTop(), // 正确方法
-                        0,
-                        insets.getSystemWindowInsetBottom() // 正确方法
-                    );
-                }
-                return insets;
-            });
-
-        // ============================
-        // 原来的代码完全不变
         // ============================
         Application application = this.getApplication();
         application.registerActivityLifecycleCallbacks(this);

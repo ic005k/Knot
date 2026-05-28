@@ -632,8 +632,6 @@ public class NoteEditor
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        setTheme(R.style.AppThemeprice);
         super.onCreate(savedInstanceState);
 
         // ========== 隐藏标题栏 ==========

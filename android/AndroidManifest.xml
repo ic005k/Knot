@@ -127,6 +127,7 @@
         tools:replace="android:appComponentFactory"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true"
+        android:theme="@style/AppTheme"
     >
 
     <!-- 2. 声明隐私协议已同意+已展示（满足SDK初始化要求） -->

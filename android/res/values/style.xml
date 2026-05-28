@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!-- 设置出现，消失动画 -->
 <resources>
     <style name="WindowAnim" parent="android:Animation" mce_bogus="1">
@@ -52,8 +52,12 @@
     </style>
 
     <!-- 直接继承系统的日夜切换主题 -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:buttonStyle">@style/Widget.AppCompat.Button</item>
+        <item name="colorButtonNormal">@android:color/transparent</item>
+        <item name="android:textAllCaps">false</item>
     </style>
 
 
