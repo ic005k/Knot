@@ -94,10 +94,10 @@ class MainHelper : public QDialog {
 
   void initMainQW();
 
+  void setToolButtonAnimation(QToolButton* btn, bool setMyStyle);
+
  private:
   QStringList bakFileList;
-
-  void setToolButtonAnimation(QToolButton* btn);
 
   QString clickableLabelButtonStyle = R"(
         /* 模拟按钮样式：中蓝底+白字，适配明暗主题 */

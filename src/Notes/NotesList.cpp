@@ -808,7 +808,7 @@ void NotesList::saveCurrentNoteInfo() {
   Reg.sync();
 }
 
-void NotesList::saveNotesList() {
+/*void NotesList::saveNotesList() {
   QFuture<void> future = QtConcurrent::run([=]() { saveNotesListToFile(); });
 
   // 可选：使用 QFutureWatcher 监控进度
@@ -818,6 +818,30 @@ void NotesList::saveNotesList() {
     m_Notes->isSaveNotesConfig = true;
     qDebug() << "NotesList save completed.";
 
+    watcher->deleteLater();
+  });
+  watcher->setFuture(future);
+}*/
+
+void NotesList::saveNotesList() {
+  // 【高频防抖】如果正在保存，直接跳过，不允许重复触发
+  if (m_isSaving) return;
+
+  m_isSaving = true;
+
+  QFuture<void> future = QtConcurrent::run([=]() {
+    // 【全局互斥锁】同一时间只能有一个线程执行保存
+    QMutexLocker locker(&m_saveMutex);
+
+    // 保存函数
+    saveNotesListToFile();
+  });
+
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+    mw_one->strLatestModify = tr("Modi Notes List");
+    m_Notes->isSaveNotesConfig = true;
+    m_isSaving = false;  // 保存完成，解锁
     watcher->deleteLater();
   });
   watcher->setFuture(future);
@@ -2323,7 +2347,7 @@ void NotesList::loadAllNoteBook() {
   pNoteBookItems.clear();
 
   m_Method->clearAllBakList(mui->qwNoteBook);
-  m_Method->clearAllBakList(mui->qwNoteList);
+
   int count = tw->topLevelItemCount();
   for (int i = 0; i < count; i++) {
     QTreeWidgetItem* topItem = tw->topLevelItem(i);
@@ -3167,8 +3191,6 @@ void NotesList::clickNoteBook() {
 
   pNoteItems.clear();
   isActColorFlagStatus = true;
-
-  // m_Method->clearAllNotesList(mui->qwNoteList);
 
   QString text1 = m_Method->getText1(mui->qwNoteBook, index);
   QString text2 = m_Method->getText2(mui->qwNoteBook, index);

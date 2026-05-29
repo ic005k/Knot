@@ -13,6 +13,7 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QMetaObject>
+#include <QMutex>
 #include <QQmlContext>
 #include <QQuickWidget>
 #include <QRandomGenerator>
@@ -269,6 +270,9 @@ class NotesList : public QDialog {
   void isReadyNoteDataEndChanged();
 
  private:
+  QMutex m_saveMutex;       // 保存锁
+  bool m_isSaving = false;  // 保存状态
+
   int m_autoJumpNoteIndex = -1;  // 自动跳转的笔记索引
 
   QStringList noteDiffTime, noteDiffHtml, noteDiffPatch;

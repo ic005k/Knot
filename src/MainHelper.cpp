@@ -880,46 +880,47 @@ void MainHelper::startBackgroundTaskUpdateBakFileList() {
 void MainHelper::init_ButtonStyle() {
   m_Method->set_ToolButtonStyle(mw_one);
 
-  setToolButtonAnimation(mui->btnMenu);
-  setToolButtonAnimation(mui->btnHome);
-  setToolButtonAnimation(mui->btnReader);
-  setToolButtonAnimation(mui->btnTodo);
-  setToolButtonAnimation(mui->btnSteps);
-  setToolButtonAnimation(mui->btnNotes);
-  setToolButtonAnimation(mui->btnAdd);
-  setToolButtonAnimation(mui->btnDel);
-  setToolButtonAnimation(mui->btnPasteTodo);
-  setToolButtonAnimation(mui->btnSync);
-  setToolButtonAnimation(mui->btnFind);
-  setToolButtonAnimation(mui->btnSelTab);
+  // 主按钮
+  setToolButtonAnimation(mui->btnMenu, true);
+  setToolButtonAnimation(mui->btnHome, true);
+  setToolButtonAnimation(mui->btnReader, true);
+  setToolButtonAnimation(mui->btnTodo, true);
+  setToolButtonAnimation(mui->btnSteps, true);
+  setToolButtonAnimation(mui->btnNotes, true);
+  setToolButtonAnimation(mui->btnAdd, true);
+  setToolButtonAnimation(mui->btnDel, true);
+  setToolButtonAnimation(mui->btnPasteTodo, true);
+  setToolButtonAnimation(mui->btnSync, true);
+  setToolButtonAnimation(mui->btnFind, true);
+  setToolButtonAnimation(mui->btnSelTab, true);
 
   // Todo
-  setToolButtonAnimation(mui->btnBackTodo);
-  setToolButtonAnimation(mui->btnHigh);
-  setToolButtonAnimation(mui->btnLow);
-  setToolButtonAnimation(mui->btnModify);
-  setToolButtonAnimation(mui->btnSetTime);
-  setToolButtonAnimation(mui->btnRecycle);
+  setToolButtonAnimation(mui->btnBackTodo, true);
+  setToolButtonAnimation(mui->btnHigh, true);
+  setToolButtonAnimation(mui->btnLow, true);
+  setToolButtonAnimation(mui->btnModify, true);
+  setToolButtonAnimation(mui->btnSetTime, true);
+  setToolButtonAnimation(mui->btnRecycle, true);
 
   // Reader
-  setToolButtonAnimation(mui->btnBackReader);
-  setToolButtonAnimation(mui->btnCatalogue);
-  setToolButtonAnimation(mui->btnShowBookmark);
-  setToolButtonAnimation(mui->btnAutoRun);
-  setToolButtonAnimation(mui->btnAutoStop);
-  setToolButtonAnimation(mui->btnPages);
-  setToolButtonAnimation(mui->btnOpen);
-  setToolButtonAnimation(mui->btnReadList);
-  setToolButtonAnimation(mui->btnRotation);
-  setToolButtonAnimation(mui->btnSpeak);
-  setToolButtonAnimation(mui->btnStopSpeak);
+  setToolButtonAnimation(mui->btnBackReader, true);
+  setToolButtonAnimation(mui->btnCatalogue, true);
+  setToolButtonAnimation(mui->btnShowBookmark, true);
+  setToolButtonAnimation(mui->btnAutoRun, true);
+  setToolButtonAnimation(mui->btnAutoStop, true);
+  setToolButtonAnimation(mui->btnPages, true);
+  setToolButtonAnimation(mui->btnOpen, true);
+  setToolButtonAnimation(mui->btnReadList, true);
+  setToolButtonAnimation(mui->btnRotation, true);
+  setToolButtonAnimation(mui->btnSpeak, true);
+  setToolButtonAnimation(mui->btnStopSpeak, true);
 
   // Notes
-  setToolButtonAnimation(mui->btnNoteBookMenu);
-  setToolButtonAnimation(mui->btnNewNote);
-  setToolButtonAnimation(mui->btnFindNotes2);
-  setToolButtonAnimation(mui->btnNoteMenu);
-  setToolButtonAnimation(mui->btnRecentOpen);
+  setToolButtonAnimation(mui->btnNoteBookMenu, true);
+  setToolButtonAnimation(mui->btnNewNote, true);
+  setToolButtonAnimation(mui->btnFindNotes2, true);
+  setToolButtonAnimation(mui->btnNoteMenu, true);
+  setToolButtonAnimation(mui->btnRecentOpen, true);
 
   if (isDark) {
     // Reader
@@ -1775,33 +1776,69 @@ void MainWindow::drawDayChart() {
   }
 }
 
-void MainHelper::setToolButtonAnimation(QToolButton* btn) {
-  // 固定样式
-  btn->setStyleSheet("border:none; background:transparent;");
+void MainHelper::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
+  if (setMyStyle) {
+    btn->setStyleSheet("border:none; background:transparent;");
+  }
 
-  return;
-
-  // 保存原始大小（永久基准）
   QSize originalSize = btn->iconSize();
 
-  // 按下
-  connect(btn, &QToolButton::pressed, this, [=]() {
-    // 每次都重置回原始大小，再播放缩小动画
-    btn->setIconSize(originalSize);
+  // 防止重复安装
+  if (btn->property("__anim_installed").toBool()) {
+    return;
+  }
+  btn->setProperty("__anim_installed", true);
 
-    QPropertyAnimation* anim = new QPropertyAnimation(btn, "iconSize", btn);
-    anim->setDuration(110);
-    anim->setStartValue(originalSize);
-    anim->setEndValue(originalSize * 0.9);
-    anim->start(QAbstractAnimation::DeleteWhenStopped);
-  });
+  // ================================
+  // 核心：给按钮安装事件过滤器
+  // ================================
+  class ButtonAnimFilter : public QObject {
+   public:
+    QSize originalSize;
+    explicit ButtonAnimFilter(QObject* parent = nullptr) : QObject(parent) {}
 
-  // 松开
-  connect(btn, &QToolButton::released, this, [=]() {
-    QPropertyAnimation* anim = new QPropertyAnimation(btn, "iconSize", btn);
-    anim->setDuration(110);
-    anim->setStartValue(btn->iconSize());
-    anim->setEndValue(originalSize);
-    anim->start(QAbstractAnimation::DeleteWhenStopped);
-  });
+    bool eventFilter(QObject* obj, QEvent* event) override {
+      QToolButton* btn = qobject_cast<QToolButton*>(obj);
+      if (!btn) return false;
+
+      // 拦截 鼠标左键按下
+      if (event->type() == QEvent::MouseButtonPress) {
+        QMouseEvent* me = static_cast<QMouseEvent*>(event);
+        if (me->button() == Qt::LeftButton) {
+          // 1. 立即播放缩小动画（必现反馈）
+          btn->setIconSize(originalSize);
+          QPropertyAnimation* anim =
+              new QPropertyAnimation(btn, "iconSize", btn);
+          anim->setDuration(100);
+          anim->setStartValue(originalSize);
+          anim->setEndValue(originalSize * 0.9);
+
+          // 2. 动画结束 → 恢复大小 → 手动触发 pressed 业务
+          connect(anim, &QPropertyAnimation::finished, btn, [=]() {
+            btn->setIconSize(originalSize);
+            // 关键：动画完成后才触发业务
+            emit btn->pressed();
+          });
+
+          anim->start(QAbstractAnimation::DeleteWhenStopped);
+
+          // 拦截原生事件，不让按钮自己触发 pressed
+          return true;
+        }
+      }
+
+      return false;
+    }
+  };
+
+  // 创建过滤器并绑定到按钮
+  ButtonAnimFilter* filter = new ButtonAnimFilter(btn);
+  filter->originalSize = originalSize;
+  btn->installEventFilter(filter);
+
+  // ================================
+  // 安卓兜底：防止按钮卡住不回弹
+  // ================================
+  connect(btn, &QToolButton::released, this,
+          [=]() { btn->setIconSize(originalSize); });
 }
