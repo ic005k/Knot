@@ -1,6 +1,7 @@
 #ifndef TEXTEDITTOOLBAR_H
 #define TEXTEDITTOOLBAR_H
 
+#include <QDateTime>
 #include <QHBoxLayout>
 #include <QInputMethodEvent>
 #include <QKeyEvent>
@@ -19,18 +20,18 @@
 class HandleWidget : public QWidget {
   Q_OBJECT
  public:
-  explicit HandleWidget(QWidget *parent = nullptr);
+  explicit HandleWidget(QWidget* parent = nullptr);
 
  signals:
-  void moved(const QPoint &globalPos);
+  void moved(const QPoint& globalPos);
   void released();
   void pressed();
 
  protected:
-  void paintEvent(QPaintEvent *event) override;
-  void mousePressEvent(QMouseEvent *event) override;
-  void mouseMoveEvent(QMouseEvent *event) override;
-  void mouseReleaseEvent(QMouseEvent *event) override;
+  void paintEvent(QPaintEvent* event) override;
+  void mousePressEvent(QMouseEvent* event) override;
+  void mouseMoveEvent(QMouseEvent* event) override;
+  void mouseReleaseEvent(QMouseEvent* event) override;
 
  private:
   QPoint m_dragStart;
@@ -44,15 +45,15 @@ class HandleWidget : public QWidget {
 class TextEditToolbar : public QWidget {
   Q_OBJECT
  public:
-  explicit TextEditToolbar(QWidget *parent = nullptr);
-  void bindEditWidget(QWidget *editWidget);
+  explicit TextEditToolbar(QWidget* parent = nullptr);
+  void bindEditWidget(QWidget* editWidget);
   void showAtSelection();
   void hide();  // 重写隐藏逻辑（无override，因QWidget::hide非虚函数）
 
  protected:
-  void keyPressEvent(QKeyEvent *event) override;
-  void showEvent(QShowEvent *event) override;
-  bool eventFilter(QObject *obj, QEvent *event) override;
+  void keyPressEvent(QKeyEvent* event) override;
+  void showEvent(QShowEvent* event) override;
+  bool eventFilter(QObject* obj, QEvent* event) override;
 
  private slots:
   void onMinusClicked();
@@ -61,8 +62,8 @@ class TextEditToolbar : public QWidget {
   void onCutClicked();
   void onPasteClicked();
   void onSelectAllClicked();
-  void onStartHandleMoved(const QPoint &globalPos);
-  void onEndHandleMoved(const QPoint &globalPos);
+  void onStartHandleMoved(const QPoint& globalPos);
+  void onEndHandleMoved(const QPoint& globalPos);
   void onSelectionChanged();
 
   void onHandleReleased();
@@ -91,31 +92,31 @@ class TextEditToolbar : public QWidget {
   void setupMinimumSize();  // 原私有函数声明
 
   // 手柄与选择同步函数声明
-  void updateSelectionFromHandle(const QPoint &globalPos, bool isStartHandle);
+  void updateSelectionFromHandle(const QPoint& globalPos, bool isStartHandle);
   void updateSelection(int start, int end);
   void updateHandlesPosition();
 
   // 成员变量声明
   // 按钮
-  QPushButton *btnMinus = nullptr;
-  QPushButton *btnPlus = nullptr;
-  QPushButton *btnCopy = nullptr;
-  QPushButton *btnCut = nullptr;
-  QPushButton *btnPaste = nullptr;
-  QPushButton *btnSelectAll = nullptr;
+  QPushButton* btnMinus = nullptr;
+  QPushButton* btnPlus = nullptr;
+  QPushButton* btnCopy = nullptr;
+  QPushButton* btnCut = nullptr;
+  QPushButton* btnPaste = nullptr;
+  QPushButton* btnSelectAll = nullptr;
 
-  QPushButton *btnCursorLeft;
-  QPushButton *btnCursorRight;
-  QPushButton *btnDel;
-  QPushButton *btnClose;
+  QPushButton* btnCursorLeft;
+  QPushButton* btnCursorRight;
+  QPushButton* btnDel;
+  QPushButton* btnClose;
 
   // 选择手柄
-  HandleWidget *m_startHandle = nullptr;
-  HandleWidget *m_endHandle = nullptr;
+  HandleWidget* m_startHandle = nullptr;
+  HandleWidget* m_endHandle = nullptr;
 
   // 绑定的编辑控件
-  QTextEdit *m_textEdit = nullptr;
-  QLineEdit *m_lineEdit = nullptr;
+  QTextEdit* m_textEdit = nullptr;
+  QLineEdit* m_lineEdit = nullptr;
 
   // 当前选择位置
   int m_startPos = 0;
@@ -135,7 +136,7 @@ class TextEditToolbar : public QWidget {
   bool isOne = false;
   void updateTextEditHandlesPosition(int startPos, int endPos);
   void updateLineEditHandlesPosition(int startPos, int endPos);
-  int getTextPositionFromGlobal(const QPoint &globalPos);
+  int getTextPositionFromGlobal(const QPoint& globalPos);
   int getTextLength();
 
   void updateLineEditHandlesPositionForNormalMode(int startPos, int endPos);
@@ -148,19 +149,19 @@ class TextEditToolbar : public QWidget {
 class EditEventFilter : public QObject {
   Q_OBJECT
  public:
-  explicit EditEventFilter(TextEditToolbar *toolbar, QObject *parent = nullptr);
+  explicit EditEventFilter(TextEditToolbar* toolbar, QObject* parent = nullptr);
 
  protected:
-  bool eventFilter(QObject *obj, QEvent *event) override;
+  bool eventFilter(QObject* obj, QEvent* event) override;
 
  private slots:
   void onTimeout();
 
  private:
-  TextEditToolbar *m_toolbar = nullptr;
+  TextEditToolbar* m_toolbar = nullptr;
   QTimer m_timer;
   QPoint m_pressPos;
-  QObject *m_target = nullptr;
+  QObject* m_target = nullptr;
 };
 
 #endif  // TEXTEDITTOOLBAR_H

@@ -3135,12 +3135,6 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (!mui->qwMainDate->isHidden()) {
-    on_btnHome_pressed();
-
-    return;
-  }
-
   if (!mui->qwMainChart->isHidden()) {
     QTimer::singleShot(100, mw_one, []() { mw_one->on_btnChart(); });
     return;
@@ -3277,6 +3271,17 @@ void MainWindow::onAndroidBackHandle() {
 
   if (!mui->frameNotesTree->isHidden()) {
     mui->btnBack_Tree->click();
+
+    return;
+  }
+
+  if (!mui->qwMainDate->isHidden()) {
+    mui->btnHome->pressed();
+
+    QQuickItem* root = mui->qwMainTab->rootObject();
+    if (root) {
+      QMetaObject::invokeMethod(root, "forceActivateUI", Qt::QueuedConnection);
+    }
 
     return;
   }

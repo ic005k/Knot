@@ -745,7 +745,7 @@ void MainHelper::init_UIWidget() {
 
   int nIConFontSize;
 #ifdef Q_OS_ANDROID
-  nIConFontSize = 13;
+  nIConFontSize = 12;
 #else
   nIConFontSize = 9;
 #endif

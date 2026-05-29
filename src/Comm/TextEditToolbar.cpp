@@ -13,9 +13,12 @@
 #include <QTouchEvent>
 
 // ========================== HandleWidget 实现 ==========================
-HandleWidget::HandleWidget(QWidget *parent)
+HandleWidget::HandleWidget(QWidget* parent)
     : QWidget(parent,
               Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool) {
+  setAttribute(Qt::WA_AlwaysStackOnTop);
+  setAttribute(Qt::WA_TransparentForMouseEvents, false);
+
 #ifdef Q_OS_ANDROID
   setFixedSize(32, 32);
 #else
@@ -26,7 +29,7 @@ HandleWidget::HandleWidget(QWidget *parent)
   setCursor(Qt::OpenHandCursor);
 }
 
-void HandleWidget::paintEvent(QPaintEvent *event) {
+void HandleWidget::paintEvent(QPaintEvent* event) {
   Q_UNUSED(event);
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing);  // 抗锯齿保持，让矩形边角平滑
@@ -43,7 +46,7 @@ void HandleWidget::paintEvent(QPaintEvent *event) {
 
 // ========================== HandleWidget 修复实现 ==========================
 
-void HandleWidget::mousePressEvent(QMouseEvent *event) {
+void HandleWidget::mousePressEvent(QMouseEvent* event) {
   if (event->button() == Qt::LeftButton) {
     m_dragOffset = event->pos();
     m_isDragging = true;
@@ -59,7 +62,7 @@ void HandleWidget::mousePressEvent(QMouseEvent *event) {
   }
 }
 
-void HandleWidget::mouseReleaseEvent(QMouseEvent *event) {
+void HandleWidget::mouseReleaseEvent(QMouseEvent* event) {
   if (event->button() == Qt::LeftButton) {
     m_isDragging = false;
     setCursor(Qt::OpenHandCursor);
@@ -76,7 +79,7 @@ void HandleWidget::mouseReleaseEvent(QMouseEvent *event) {
   }
 }
 
-void HandleWidget::mouseMoveEvent(QMouseEvent *event) {
+void HandleWidget::mouseMoveEvent(QMouseEvent* event) {
   if (m_isDragging) {
     // 确保只有左键拖动时才处理
     if (event->buttons() & Qt::LeftButton) {
@@ -100,10 +103,15 @@ void HandleWidget::mouseMoveEvent(QMouseEvent *event) {
 
 // ========================== TextEditToolbar 实现 ==========================
 
-TextEditToolbar::TextEditToolbar(QWidget *parent) : QWidget(parent) {
+TextEditToolbar::TextEditToolbar(QWidget* parent) : QWidget(parent) {
   // 窗口属性设置
-  setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Tool);
-  // setAttribute(Qt::WA_TranslucentBackground);
+  // setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint |
+  // Qt::Tool);
+  setWindowFlags(Qt::FramelessWindowHint);  // 👈 只留无边框
+
+  setAttribute(Qt::WA_AlwaysStackOnTop);
+  setAttribute(Qt::WA_NoSystemBackground);
+
   installEventFilter(this);
   setFocusPolicy(Qt::StrongFocus);
 
@@ -112,12 +120,12 @@ TextEditToolbar::TextEditToolbar(QWidget *parent) : QWidget(parent) {
   initHandles();
 
   // ===================== 布局重构开始 =====================
-  QVBoxLayout *mainVLayout = new QVBoxLayout(this);
+  QVBoxLayout* mainVLayout = new QVBoxLayout(this);
   mainVLayout->setSpacing(5);                   // 两排垂直间距（不变）
   mainVLayout->setContentsMargins(8, 8, 8, 8);  // 主布局边距（不变）
 
   // 第一排：上排按钮 - 明确左对齐，间距5
-  QHBoxLayout *topHLayout = new QHBoxLayout();
+  QHBoxLayout* topHLayout = new QHBoxLayout();
   topHLayout->setSpacing(5);  // 统一间距为5（与adjustButtonSizes一致）
   topHLayout->setAlignment(
       Qt::AlignLeft);  // 明确左对齐，确保第一个按钮起始位置统一
@@ -128,7 +136,7 @@ TextEditToolbar::TextEditToolbar(QWidget *parent) : QWidget(parent) {
   topHLayout->addWidget(btnPaste);
 
   // 第二排：下排按钮 - 同样左对齐，间距5（与上排完全一致）
-  QHBoxLayout *bottomHLayout = new QHBoxLayout();
+  QHBoxLayout* bottomHLayout = new QHBoxLayout();
   bottomHLayout->setSpacing(5);  // 与上排统一间距
   bottomHLayout->setAlignment(
       Qt::AlignLeft);  // 明确左对齐，与上排第一个按钮对齐
@@ -250,7 +258,7 @@ void TextEditToolbar::adjustButtonSizes() {
   const int TOOLBAR_HEIGHT = 108;
 
   // 统一设置按钮大小
-  QList<QPushButton *> buttons = {
+  QList<QPushButton*> buttons = {
       btnMinus,     btnPlus,       btnCopy,        btnCut, btnPaste,
       btnSelectAll, btnCursorLeft, btnCursorRight, btnDel, btnClose};
   for (auto btn : buttons) {
@@ -261,21 +269,21 @@ void TextEditToolbar::adjustButtonSizes() {
   setFixedSize(TOOLBAR_WIDTH, TOOLBAR_HEIGHT);
 
   // 仅保留「边距清零」逻辑，删除重复的spacing设置
-  if (QVBoxLayout *mainVLayout = qobject_cast<QVBoxLayout *>(layout())) {
+  if (QVBoxLayout* mainVLayout = qobject_cast<QVBoxLayout*>(layout())) {
     // 第一排布局：仅清零边距
-    if (QHBoxLayout *topHLayout =
-            qobject_cast<QHBoxLayout *>(mainVLayout->itemAt(0)->layout())) {
+    if (QHBoxLayout* topHLayout =
+            qobject_cast<QHBoxLayout*>(mainVLayout->itemAt(0)->layout())) {
       topHLayout->setContentsMargins(0, 0, 0, 0);
     }
     // 第二排布局：仅清零边距
-    if (QHBoxLayout *bottomHLayout =
-            qobject_cast<QHBoxLayout *>(mainVLayout->itemAt(1)->layout())) {
+    if (QHBoxLayout* bottomHLayout =
+            qobject_cast<QHBoxLayout*>(mainVLayout->itemAt(1)->layout())) {
       bottomHLayout->setContentsMargins(0, 0, 0, 0);
     }
   }
 }
 
-void TextEditToolbar::bindEditWidget(QWidget *editWidget) {
+void TextEditToolbar::bindEditWidget(QWidget* editWidget) {
   // 先解绑旧的
   if (m_textEdit) {
     disconnect(m_textEdit, &QTextEdit::selectionChanged, this,
@@ -290,8 +298,8 @@ void TextEditToolbar::bindEditWidget(QWidget *editWidget) {
     m_lineEdit = nullptr;
   }
 
-  m_textEdit = qobject_cast<QTextEdit *>(editWidget);
-  m_lineEdit = qobject_cast<QLineEdit *>(editWidget);
+  m_textEdit = qobject_cast<QTextEdit*>(editWidget);
+  m_lineEdit = qobject_cast<QLineEdit*>(editWidget);
 
   if (!m_textEdit && !m_lineEdit) {
     qWarning() << "绑定失败，目标不是 QTextEdit 或 QLineEdit";
@@ -384,8 +392,8 @@ void TextEditToolbar::onSelectionChanged() {
 void TextEditToolbar::showAtSelection() {
   if (!m_textEdit && !m_lineEdit) return;
 
-  QWidget *editWidget = m_textEdit ? static_cast<QWidget *>(m_textEdit)
-                                   : static_cast<QWidget *>(m_lineEdit);
+  QWidget* editWidget = m_textEdit ? static_cast<QWidget*>(m_textEdit)
+                                   : static_cast<QWidget*>(m_lineEdit);
   QRect screenRect = QApplication::primaryScreen()->availableGeometry();
 
   bool hasSelection = false;
@@ -493,7 +501,10 @@ void TextEditToolbar::selectEditText(int start, int end) {
     QTextCursor cursor = m_textEdit->textCursor();
     cursor.setPosition(start, QTextCursor::MoveAnchor);
     cursor.setPosition(end, QTextCursor::KeepAnchor);
+
+    m_textEdit->setUpdatesEnabled(false);
     m_textEdit->setTextCursor(cursor);
+    m_textEdit->setUpdatesEnabled(true);
 
     // 让起点可见（不改变选区）
     QTextCursor startCursor = m_textEdit->textCursor();
@@ -511,15 +522,15 @@ void TextEditToolbar::selectEditText(int start, int end) {
 }
 
 // ========================== 手柄与选择同步实现 ==========================
-void TextEditToolbar::onStartHandleMoved(const QPoint &globalPos) {
+void TextEditToolbar::onStartHandleMoved(const QPoint& globalPos) {
   updateSelectionFromHandle(globalPos, true);
 }
 
-void TextEditToolbar::onEndHandleMoved(const QPoint &globalPos) {
+void TextEditToolbar::onEndHandleMoved(const QPoint& globalPos) {
   updateSelectionFromHandle(globalPos, false);
 }
 
-void TextEditToolbar::updateSelectionFromHandle(const QPoint &globalPos,
+/*void TextEditToolbar::updateSelectionFromHandle(const QPoint& globalPos,
                                                 bool isStartHandle) {
   if (!m_textEdit && !m_lineEdit) return;
 
@@ -559,6 +570,44 @@ void TextEditToolbar::updateSelectionFromHandle(const QPoint &globalPos,
 
   qDebug() << "[updateSelectionFromHandle] 手柄拖动，新位置:" << newPos
            << "选择范围:" << m_startPos << "-" << m_endPos;
+}*/
+
+void TextEditToolbar::updateSelectionFromHandle(const QPoint& globalPos,
+                                                bool isStartHandle) {
+  if (!m_textEdit && !m_lineEdit) return;
+
+  // 👇 加一个简单节流，防止 Qt6.11 疯狂重绘导致闪烁
+  static qint64 lastUpdate = 0;
+  qint64 now = QDateTime::currentMSecsSinceEpoch();
+  if (now - lastUpdate < 8) {  // 小于8ms不更新，过滤掉多余刷新
+    return;
+  }
+  lastUpdate = now;
+
+  int newPos = getTextPositionFromGlobal(globalPos);
+  int textLength = getTextLength();
+
+  newPos = qMax(0, qMin(newPos, textLength));
+
+  if (isStartHandle) {
+    m_startPos = qMin(newPos, m_endPos);
+    if (m_startPos == m_endPos) {
+      if (m_endPos > 0)
+        m_startPos = m_endPos - 1;
+      else if (textLength > 1)
+        m_endPos = m_startPos + 1;
+    }
+  } else {
+    m_endPos = qMax(newPos, m_startPos);
+    if (m_startPos == m_endPos) {
+      if (m_endPos < textLength)
+        m_endPos = m_startPos + 1;
+      else if (m_startPos > 0)
+        m_startPos = m_endPos - 1;
+    }
+  }
+
+  selectEditText(m_startPos, m_endPos);
 }
 
 int TextEditToolbar::getTextLength() {
@@ -570,7 +619,7 @@ int TextEditToolbar::getTextLength() {
   return 0;
 }
 
-int TextEditToolbar::getTextPositionFromGlobal(const QPoint &globalPos) {
+int TextEditToolbar::getTextPositionFromGlobal(const QPoint& globalPos) {
   if (m_textEdit) {
     QPoint localPos = m_textEdit->viewport()->mapFromGlobal(globalPos);
     return m_textEdit->cursorForPosition(localPos).position();
@@ -662,8 +711,8 @@ void TextEditToolbar::updateHandlesPosition() {
 }
 
 // 改进的 QTextEdit 手柄定位函数
-void TextEditToolbar::updateTextEditHandlesPosition(int startPos, int endPos) {
-  if (!m_textEdit) return;
+/*void TextEditToolbar::updateTextEditHandlesPosition(int startPos, int endPos)
+{ if (!m_textEdit) return;
 
   // 获取视口的可见区域
   QRect viewportRect = m_textEdit->viewport()->rect();
@@ -734,6 +783,46 @@ void TextEditToolbar::updateTextEditHandlesPosition(int startPos, int endPos) {
            << "EndPos:" << endPos << "StartRect:" << startRect
            << "EndRect:" << endRect << "StartGlobal:" << startGlobal
            << "EndGlobal:" << endGlobal;
+}*/
+
+void TextEditToolbar::updateTextEditHandlesPosition(int startPos, int endPos) {
+  if (!m_textEdit) return;
+
+  QTextCursor startCursor = m_textEdit->textCursor();
+  startCursor.setPosition(startPos);
+  QRect startRect = m_textEdit->cursorRect(startCursor);
+
+  QTextCursor endCursor = m_textEdit->textCursor();
+  endCursor.setPosition(endPos);
+  QRect endRect = m_textEdit->cursorRect(endCursor);
+
+  // -------- 核心修复：直接用 0,0 对齐，不做额外偏移 --------
+  // 起始手柄：右边缘贴 startRect.left()，手柄竖直居中
+  QPoint startGlobal = m_textEdit->viewport()->mapToGlobal(startRect.topLeft());
+  startGlobal += QPoint(-m_startHandle->width(),
+                        startRect.height() / 2 - m_startHandle->height() / 2);
+
+  // 结束手柄：左边缘贴 endRect.right()，手柄竖直居中
+  QPoint endGlobal = m_textEdit->viewport()->mapToGlobal(endRect.topRight());
+  endGlobal += QPoint(0, endRect.height() / 2 - m_endHandle->height() / 2);
+
+  // 屏幕边界（安卓高密度屏更需要）
+  QRect screenRect = QApplication::primaryScreen()->availableGeometry();
+  startGlobal.setX(qMax(screenRect.left(), startGlobal.x()));
+  startGlobal.setY(qMax(
+      screenRect.top(),
+      qMin(startGlobal.y(), screenRect.bottom() - m_startHandle->height())));
+  endGlobal.setX(
+      qMin(screenRect.right() - m_endHandle->width(), endGlobal.x()));
+  endGlobal.setY(
+      qMax(screenRect.top(),
+           qMin(endGlobal.y(), screenRect.bottom() - m_endHandle->height())));
+
+  m_startHandle->move(startGlobal);
+  m_endHandle->move(endGlobal);
+
+  m_startHandle->show();
+  m_endHandle->show();
 }
 
 void TextEditToolbar::updateLineEditHandlesPosition(int startPos, int endPos) {
@@ -998,7 +1087,7 @@ void TextEditToolbar::showHandlesAtSelection() {
 }
 
 // ========================== 事件处理实现 ==========================
-void TextEditToolbar::keyPressEvent(QKeyEvent *event) {
+void TextEditToolbar::keyPressEvent(QKeyEvent* event) {
   if (event->key() == Qt::Key_Back) {
     hide();
     event->accept();
@@ -1007,17 +1096,17 @@ void TextEditToolbar::keyPressEvent(QKeyEvent *event) {
   }
 }
 
-void TextEditToolbar::showEvent(QShowEvent *event) {
+void TextEditToolbar::showEvent(QShowEvent* event) {
   QWidget::showEvent(event);
   setFocus();  // 显示时获取焦点，确保能接收返回键
 }
 
-bool TextEditToolbar::eventFilter(QObject *obj, QEvent *event) {
+bool TextEditToolbar::eventFilter(QObject* obj, QEvent* event) {
   if (obj == this) {
     // 拦截返回键（KeyPress/KeyRelease 都处理）
     if (event->type() == QEvent::KeyPress ||
         event->type() == QEvent::KeyRelease) {
-      QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+      QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
       if (keyEvent->key() == Qt::Key_Back) {
         hide();
         return true;
@@ -1045,8 +1134,8 @@ void TextEditToolbar::onMinusClicked() {
 
 // 按下按钮时模拟键盘按下
 void TextEditToolbar::onMinusPressed() {
-  QWidget *editor = m_textEdit ? static_cast<QWidget *>(m_textEdit)
-                               : static_cast<QWidget *>(m_lineEdit);
+  QWidget* editor = m_textEdit ? static_cast<QWidget*>(m_textEdit)
+                               : static_cast<QWidget*>(m_lineEdit);
   if (!editor) return;
 
   // 保存当前终点
@@ -1070,8 +1159,8 @@ void TextEditToolbar::onMinusPressed() {
 
 // 松开按钮时用保存的终点重新选中
 void TextEditToolbar::onMinusReleased() {
-  QWidget *editor = m_textEdit ? static_cast<QWidget *>(m_textEdit)
-                               : static_cast<QWidget *>(m_lineEdit);
+  QWidget* editor = m_textEdit ? static_cast<QWidget*>(m_textEdit)
+                               : static_cast<QWidget*>(m_lineEdit);
   if (!editor) return;
 
   isOne = false;
@@ -1207,17 +1296,24 @@ void TextEditToolbar::onCloseClicked() { hide(); }
 void TextEditToolbar::onStartHandlePressed() {
   m_dragging = true;
   m_dragAnchorEnd = m_endPos;  // 拖动起始手柄时，end 固定
+
+  m_textEdit->blockSignals(true);
 }
 
 // 按下结束手柄：记录固定的另一端（start）
 void TextEditToolbar::onEndHandlePressed() {
   m_dragging = true;
   m_dragAnchorEnd = m_startPos;  // 拖动结束手柄时，start 固定
+
+  m_textEdit->blockSignals(true);
 }
 
 // 释放手柄：重置拖动状态
 void TextEditToolbar::onHandleReleased() {
   m_dragging = false;
+
+  // 👇 解锁！
+  if (m_textEdit) m_textEdit->blockSignals(false);
 
   // 确保手柄的拖动状态被重置
   if (m_startHandle) {
@@ -1236,7 +1332,7 @@ void TextEditToolbar::onHandleReleased() {
            << "-" << m_originalEndPos;
 }
 // ========================== EditEventFilter 实现 ==========================
-EditEventFilter::EditEventFilter(TextEditToolbar *toolbar, QObject *parent)
+EditEventFilter::EditEventFilter(TextEditToolbar* toolbar, QObject* parent)
     : QObject(parent), m_toolbar(toolbar) {
   // 连接定时器信号槽（单次触发）
   bool isConnected =
@@ -1245,15 +1341,15 @@ EditEventFilter::EditEventFilter(TextEditToolbar *toolbar, QObject *parent)
   m_timer.setSingleShot(true);
 }
 
-bool EditEventFilter::eventFilter(QObject *obj, QEvent *event) {
+bool EditEventFilter::eventFilter(QObject* obj, QEvent* event) {
   // 识别目标控件（QTextEdit/viewport 或 QLineEdit）
-  QTextEdit *textEdit = nullptr;
-  QLineEdit *lineEdit = nullptr;
-  if (QWidget *viewport = qobject_cast<QWidget *>(obj)) {
-    textEdit = qobject_cast<QTextEdit *>(viewport->parent());
+  QTextEdit* textEdit = nullptr;
+  QLineEdit* lineEdit = nullptr;
+  if (QWidget* viewport = qobject_cast<QWidget*>(obj)) {
+    textEdit = qobject_cast<QTextEdit*>(viewport->parent());
   }
-  if (!textEdit) textEdit = qobject_cast<QTextEdit *>(obj);
-  if (!textEdit) lineEdit = qobject_cast<QLineEdit *>(obj);
+  if (!textEdit) textEdit = qobject_cast<QTextEdit*>(obj);
+  if (!textEdit) lineEdit = qobject_cast<QLineEdit*>(obj);
 
   // 跳过 Paint 事件（减少日志冗余）
   if (event->type() == QEvent::Paint) return false;
@@ -1267,7 +1363,7 @@ bool EditEventFilter::eventFilter(QObject *obj, QEvent *event) {
   // 处理返回键（隐藏工具栏）
   if (event->type() == QEvent::KeyPress ||
       event->type() == QEvent::KeyRelease) {
-    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
     if (keyEvent->key() == Qt::Key_Back && m_toolbar &&
         m_toolbar->isVisible()) {
       m_toolbar->hide();
@@ -1277,23 +1373,23 @@ bool EditEventFilter::eventFilter(QObject *obj, QEvent *event) {
 
   // 处理长按（鼠标/触摸）
   if (event->type() == QEvent::MouseButtonPress) {
-    QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+    QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
     if (mouseEvent->button() == Qt::LeftButton) {
       m_pressPos = mouseEvent->pos();
       m_timer.start(500);  // 500ms 长按触发
-      m_target = textEdit ? static_cast<QObject *>(textEdit)
-                          : static_cast<QObject *>(lineEdit);
+      m_target = textEdit ? static_cast<QObject*>(textEdit)
+                          : static_cast<QObject*>(lineEdit);
       qDebug() << "EditEventFilter: Mouse press - timer started";
       return false;
     }
   } else if (event->type() == QEvent::TouchBegin) {
-    QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
-    const auto &touchPoints = touchEvent->points();
+    QTouchEvent* touchEvent = static_cast<QTouchEvent*>(event);
+    const auto& touchPoints = touchEvent->points();
     if (!touchPoints.isEmpty()) {
       m_pressPos = touchPoints.first().position().toPoint();
       m_timer.start(500);
-      m_target = textEdit ? static_cast<QObject *>(textEdit)
-                          : static_cast<QObject *>(lineEdit);
+      m_target = textEdit ? static_cast<QObject*>(textEdit)
+                          : static_cast<QObject*>(lineEdit);
       qDebug() << "EditEventFilter: Touch begin - timer started";
       return false;
     }
@@ -1305,14 +1401,14 @@ bool EditEventFilter::eventFilter(QObject *obj, QEvent *event) {
     if (m_timer.isActive()) {
       qDebug() << "EditEventFilter: Move detected - check threshold";
       if (event->type() == QEvent::MouseMove) {
-        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
         if ((mouseEvent->pos() - m_pressPos).manhattanLength() > 10) {
           m_timer.stop();
           qDebug() << "EditEventFilter: Move exceeds threshold - timer stopped";
         }
       } else if (event->type() == QEvent::TouchUpdate) {
-        QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
-        const auto &touchPoints = touchEvent->points();
+        QTouchEvent* touchEvent = static_cast<QTouchEvent*>(event);
+        const auto& touchPoints = touchEvent->points();
         if (!touchPoints.isEmpty()) {
           if ((touchPoints.first().position() - QPointF(m_pressPos))
                   .manhattanLength() > 10) {
@@ -1341,7 +1437,7 @@ void EditEventFilter::onTimeout() {
   qDebug() << "EditEventFilter: Long press detected - show toolbar";
   if (m_target && m_toolbar) {
     // 关键：将 QLineEdit 光标定位到长按的鼠标位置
-    QLineEdit *lineEdit = qobject_cast<QLineEdit *>(m_target);
+    QLineEdit* lineEdit = qobject_cast<QLineEdit*>(m_target);
     if (lineEdit) {
       // 将鼠标按下位置（m_pressPos）转换为 QLineEdit 的光标位置
       int cursorPos = lineEdit->cursorPositionAt(m_pressPos);
@@ -1357,7 +1453,7 @@ void EditEventFilter::onTimeout() {
     }
 
     // 绑定控件并显示工具栏（原有逻辑）
-    m_toolbar->bindEditWidget(static_cast<QWidget *>(m_target));
+    m_toolbar->bindEditWidget(static_cast<QWidget*>(m_target));
     m_toolbar->showAtSelection();
   }
 }

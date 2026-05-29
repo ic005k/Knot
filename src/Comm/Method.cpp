@@ -206,6 +206,11 @@ void Method::clearAllBakList(QQuickWidget* qw) {
   }
 }
 
+void Method::clearAllNotesList(QQuickWidget* qw) {
+  QQuickItem* root = qw->rootObject();
+  QMetaObject::invokeMethod(root, "clearAllItems");
+}
+
 void Method::gotoBegin(QQuickWidget* qw) {
   QQuickItem* root = qw->rootObject();
   QMetaObject::invokeMethod((QObject*)root, "gotoBeginning");

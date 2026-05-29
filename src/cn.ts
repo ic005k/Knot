@@ -721,7 +721,7 @@
     <message>
         <location filename="MainWindow.ui" line="2075"/>
         <source>Reader</source>
-        <translation>阅读器</translation>
+        <translation>阅读</translation>
     </message>
     <message>
         <source>Max</source>
@@ -1880,7 +1880,7 @@
     <message>
         <location filename="MainWindow.ui" line="2116"/>
         <source>ToDo</source>
-        <translation>待办事项</translation>
+        <translation>待办</translation>
     </message>
     <message>
         <source>Txt Reader</source>

@@ -488,7 +488,8 @@ class Method : public QDialog {
 
   void sendTouch();
 
- protected:
+  void clearAllNotesList(QQuickWidget *qw);
+  protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

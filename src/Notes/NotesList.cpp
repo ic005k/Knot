@@ -3103,7 +3103,8 @@ void NotesList::readyNotesData(QTreeWidgetItem* topItem) {
       batchItems.append(item);
     }
 
-    noteModel->addBatchItems(batchItems);
+    // noteModel->addBatchItems(batchItems);
+    noteModel->replaceAll(batchItems);  // 直接替换！
     pNoteItems.append(childItems.begin(), childItems.end());
 
     // 其他UI操作
@@ -3161,7 +3162,7 @@ void NotesList::clickNoteBook() {
   pNoteItems.clear();
   isActColorFlagStatus = true;
 
-  m_Method->clearAllBakList(mui->qwNoteList);
+  // m_Method->clearAllNotesList(mui->qwNoteList);
 
   QString text1 = m_Method->getText1(mui->qwNoteBook, index);
   QString text2 = m_Method->getText2(mui->qwNoteBook, index);

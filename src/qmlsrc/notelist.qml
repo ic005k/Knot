@@ -20,6 +20,10 @@ Rectangle {
     property int btnH: 32
     property int iconSize: 30
 
+    function clearAllItems() {
+        noteModel.clear();  // 直接清空 C++ 模型！！！
+    }
+
     function setScrollBarPos(pos) {
         view.ScrollBar.vertical.position = 1.0 - view.ScrollBar.vertical.size
     }

@@ -17,7 +17,9 @@
         name="strTip"
     >The Knot is not open, it will be opened for you at this time, please wait...</string>
 
+
     <string
         name="unsupported_android_version"
     >Unsupported Android version</string>
+
 </resources>
