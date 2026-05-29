@@ -1208,6 +1208,11 @@ void Todo::reeditText() {
   btnShare->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   btnOk->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
+  btnCancel->setFixedHeight(50);
+  btnCopy->setFixedHeight(50);
+  btnShare->setFixedHeight(50);
+  btnOk->setFixedHeight(50);
+
   QSpacerItem* sparcer_item =
       new QSpacerItem(0, 2, QSizePolicy::Fixed, QSizePolicy::Fixed);
   vbox->addItem(sparcer_item);
@@ -1260,8 +1265,11 @@ void Todo::reeditText() {
     m_ReeditTodo->close();
   });
 
+  edit->setFixedHeight(280);
+
   int x, y, w, h;
-  h = mw_one->height() / 2;
+  h = 500;
+
   if (isAndroid) {
     w = mw_one->width() - 2;
     y = mw_one->geometry().y();

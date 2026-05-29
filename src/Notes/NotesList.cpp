@@ -309,10 +309,10 @@ void NotesList::on_btnRename_clicked() {
   btnCopy->setText(tr("Copy"));
   btnOk->setText(tr("OK"));
 
-  btnOk->setFixedHeight(35);
-  btnCancel->setFixedHeight(35);
-  btnCopy->setFixedHeight(35);
-  btnPaste->setFixedHeight(35);
+  btnOk->setFixedHeight(50);
+  btnCancel->setFixedHeight(50);
+  btnCopy->setFixedHeight(50);
+  btnPaste->setFixedHeight(50);
 
   QHBoxLayout* hbox = new QHBoxLayout;
   hbox->addWidget(btnCancel);
@@ -360,8 +360,10 @@ void NotesList::on_btnRename_clicked() {
     m_Method->closeGrayWindows();
   });
 
+  edit->setFixedHeight(280);
+
   int x, y, w, h;
-  h = 300;
+  h = 500;
   if (isAndroid) {
     w = mw_one->width() - 2;
     y = mw_one->geometry().y();
@@ -2894,72 +2896,76 @@ void NotesList::on_btnMoveTo_clicked() {
 }
 
 bool NotesList::moveItem(QTreeWidget* twMain) {
-  QTreeWidgetItem* srcFolder = twMain->currentItem();
-  if (!srcFolder) return false;
+  // 1. 获取当前选中项
+  QTreeWidgetItem* srcItem = twMain->currentItem();
+  if (!srcItem) return false;
 
-  // 空笔记本（无子项）禁止移动
-  if (srcFolder->text(1).isEmpty() && srcFolder->childCount() == 0) {
+  // 空笔记本禁止移动（无子项的顶级笔记本）
+  if (srcItem->text(1).isEmpty() && srcItem->childCount() == 0) {
     return false;
   }
 
+  // 2. 弹出目标选择对话框
   m_MoveTo = new MoveTo(this);
   m_MoveTo->showDialog();
   if (!m_MoveTo->isOk) return false;
 
+  // 目标笔记本
   QTreeWidgetItem* targetFolder = m_MoveTo->currentItem;
-  bool isTargetRoot = (m_MoveTo->strCurrentItem == tr("Main Root"));
+  if (!targetFolder) return false;
 
-  // 禁止移动到自己
-  if (srcFolder == targetFolder) {
+  // ==============================================
+  // 共同规则：不能移动到自己
+  // ==============================================
+  if (srcItem == targetFolder) {
     return false;
   }
 
-  // 目标无效禁止移动
-  if (!isTargetRoot && !targetFolder) {
-    return false;
-  }
+  // ==============================================
+  // 【功能 1】移动整个笔记本（顶级笔记本）
+  // ==============================================
+  if (srcItem->text(1).isEmpty()) {
+    // 唯一禁止：自己不能移到自己
+    if (srcItem == targetFolder) return false;
 
-  // 移动笔记本（父条目）
-  if (srcFolder->text(1).isEmpty()) {
-    QList<QTreeWidgetItem*> children = srcFolder->takeChildren();
-
-    if (isTargetRoot) {
-      // 传统 for 循环
-      for (int i = 0; i < children.size(); i++) {
-        QTreeWidgetItem* child = children.at(i);
-        tw->addTopLevelItem(child);
-      }
-
-      if (!children.isEmpty()) {
-        tw->setCurrentItem(children.first());
-      }
-    } else {
-      // 传统 for 循环
-      for (int i = 0; i < children.size(); i++) {
-        QTreeWidgetItem* child = children.at(i);
-        targetFolder->addChild(child);
-      }
-
-      tw->setCurrentItem(targetFolder);
+    // 安全取出所有子项（保证顺序、不乱索引）
+    QList<QTreeWidgetItem*> children;
+    while (srcItem->childCount() > 0) {
+      children.append(srcItem->takeChild(0));
     }
 
-    // 安全删除原笔记本
-    delete srcFolder;
-    srcFolder = nullptr;
+    // 移动到目标顶级笔记本
+    for (QTreeWidgetItem* child : children) {
+      targetFolder->addChild(child);
+    }
 
+    // 删除原来的旧笔记本
+    delete srcItem;
+    srcItem = nullptr;
+
+    twMain->setCurrentItem(targetFolder);
     return true;
   }
 
-  // 移动单条笔记
-  if (!srcFolder->text(1).isEmpty()) {
-    if (isTargetRoot) return false;
-
-    QTreeWidgetItem* parent = srcFolder->parent();
-    if (parent) {
-      parent->removeChild(srcFolder);
-      targetFolder->addChild(srcFolder);
-      tw->setCurrentItem(srcFolder);
+  // ==============================================
+  // 【功能 2】移动单条笔记（原来正常的逻辑完整保留）
+  // ==============================================
+  else {
+    // 笔记不能移动到自己所在的笔记本
+    QTreeWidgetItem* parentNotebook = srcItem->parent();
+    if (parentNotebook == targetFolder) {
+      return false;
     }
+
+    // 从原笔记本移除
+    if (parentNotebook) {
+      parentNotebook->removeChild(srcItem);
+    }
+
+    // 添加到目标笔记本
+    targetFolder->addChild(srcItem);
+    twMain->setCurrentItem(srcItem);
+
     return true;
   }
 

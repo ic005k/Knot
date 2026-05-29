@@ -19,7 +19,7 @@ NewNoteBook::NewNoteBook(QWidget* parent)
   ui->listWidget->setUniformItemSizes(false);
 
   QStringList list;
-  list.append(tr("Main Root"));
+  // list.append(tr("Main Root"));
   int count = tw->topLevelItemCount();
   for (int i = 0; i < count; i++) {
     list.append(tw->topLevelItem(i)->text(0).trimmed());

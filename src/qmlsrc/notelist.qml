@@ -16,9 +16,9 @@ Rectangle {
     property int i: 0
     property int itemCount: 0
     property bool isHighPriority: false
-    property int btnW: 32
-    property int btnH: 32
-    property int iconSize: 30
+    property int btnW: 48
+    property int btnH: 48
+    property int iconSize: 24
 
     function clearAllItems() {
         noteModel.clear();  // 直接清空 C++ 模型！！！

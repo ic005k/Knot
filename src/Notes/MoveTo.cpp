@@ -113,7 +113,7 @@ void MoveTo::on_btnCancel_clicked() {
 void MoveTo::on_btnOk_clicked() {
   isOk = true;
   strCurrentItem = ui->listWidget->currentItem()->text();
-  if (isNoteBook) currentItem = listItems.at(ui->listWidget->currentRow() - 1);
+  if (isNoteBook) currentItem = listItems.at(ui->listWidget->currentRow());
   if (isNote) currentItem = listItems.at(ui->listWidget->currentRow());
 
   close();
@@ -124,7 +124,7 @@ void MoveTo::initTopNoteBook() {
   ui->listWidget->clear();
   listItems.clear();
   QStringList itemList;
-  itemList.append(tr("Main Root"));
+
   int count = tw->topLevelItemCount();
   for (int i = 0; i < count; i++) {
     QTreeWidgetItem* topItem = tw->topLevelItem(i);
