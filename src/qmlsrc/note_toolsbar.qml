@@ -17,7 +17,7 @@ Rectangle {
 
     Rectangle {
         id: rect
-        height: 40
+        height: 50
         border.color: "#cccccc"
         border.width: 0
         width: Math.min(buttonRow.implicitWidth, root.width)
@@ -42,10 +42,10 @@ Rectangle {
                     model: 11
                     ToolButton {
                         id: toolButton
-                        width: 38
-                        height: 38
-                        icon.width: 25
-                        icon.height: 25
+                        width: 48
+                        height: 48
+                        icon.width: 24
+                        icon.height: 24
                         // 根据主题选择图标
                         icon.source: isDark ? darkIcons[index] : lightIcons[index]
                         // 显式设置图标颜色，避免系统自动着色

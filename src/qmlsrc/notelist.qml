@@ -16,173 +16,168 @@ Rectangle {
     property int i: 0
     property int itemCount: 0
     property bool isHighPriority: false
-    property int btnW: 48
-    property int btnH: 48
-    property int iconSize: 24
+
+    property int btnW0: 32
+    property int btnH0: 32
+    property int iconSize0: 30
 
     function clearAllItems() {
         noteModel.clear();  // 直接清空 C++ 模型！！！
     }
 
     function setScrollBarPos(pos) {
-        view.ScrollBar.vertical.position = 1.0 - view.ScrollBar.vertical.size
+        view.ScrollBar.vertical.position = 1.0 - view.ScrollBar.vertical.size;
     }
 
-    function setItemHeight(h) {}
+    function setItemHeight(h) {
+    }
 
     function gotoEnd() {
-        view.positionViewAtEnd()
+        view.positionViewAtEnd();
     }
 
     function gotoBeginning() {
-        view.positionViewAtBeginning()
+        view.positionViewAtBeginning();
     }
 
     function gotoIndex(index) {
-        view.positionViewAtIndex(index, Tumbler.Center)
+        view.positionViewAtIndex(index, Tumbler.Center);
     }
 
     function setHighPriority(isFalse) {
-        isHighPriority = isFalse
+        isHighPriority = isFalse;
     }
 
     function setCurrentItem(currentIndex) {
-        view.currentIndex = currentIndex
-        view.positionViewAtIndex(currentIndex, ListView.Center)
+        view.currentIndex = currentIndex;
+        view.positionViewAtIndex(currentIndex, ListView.Center);
     }
 
     function getCurrentIndex() {
-        return view.currentIndex
+        return view.currentIndex;
     }
 
     function getItemCount() {
-        itemCount = view.count
+        itemCount = view.count;
 
-        return itemCount
+        return itemCount;
     }
 
     function getItemText(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.time + "|=|" + data.dototext
+        var data = view.model.get(itemIndex);
+        return data.time + "|=|" + data.dototext;
     }
 
     function getText0(itemIndex) {
-        const text0 = noteModel.getText0(itemIndex)
+        const text0 = noteModel.getText0(itemIndex);
         //console.log("[QML] 从C++接口获取text0：", text0)
-        return text0
+        return text0;
     }
 
     function getText00(itemIndex) {
-
-        var data = view.model.get(itemIndex)
-        return data.text0
+        var data = view.model.get(itemIndex);
+        return data.text0;
     }
 
     function getText1(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text1
+        var data = view.model.get(itemIndex);
+        return data.text1;
     }
 
     function getText2(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text2
+        var data = view.model.get(itemIndex);
+        return data.text2;
     }
 
     function getText3(itemIndex) {
-        const text3 = noteModel.getText3(itemIndex)
+        const text3 = noteModel.getText3(itemIndex);
         //console.log("[QML] 从C++接口获取text3：", text3)
-        return text3
+        return text3;
     }
 
     function getText33(itemIndex) {
-
-        var data = view.model.get(itemIndex)
-        return data.text3
+        var data = view.model.get(itemIndex);
+        return data.text3;
     }
 
     function getTop(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text_top
+        var data = view.model.get(itemIndex);
+        return data.text_top;
     }
 
     function getType(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.type
+        var data = view.model.get(itemIndex);
+        return data.type;
     }
 
     function addItem(t0, t1, t2, t3, height) {
-        noteModel.addItem(t0, t1, t2, t3, height) // 调用C++模型的addItem
+        noteModel.addItem(t0, t1, t2, t3, height); // 调用C++模型的addItem
     }
 
     function addItem_old(t0, t1, t2, t3, height) {
-
         view.model.append({
-                              "text0": t0,
-                              "text1": t1,
-                              "text2": t2,
-                              "text3": t3,
-                              "myh": height
-                          })
+            "text0": t0,
+            "text1": t1,
+            "text2": t2,
+            "text3": t3,
+            "myh": height
+        });
     }
 
     function insertItem(text0, text1, text2, text3, curIndex) {
         view.model.insert(curIndex, {
-                              "text0": text0,
-                              "text1": text1,
-                              "text2": text2,
-                              "text3": text3
-                          })
+            "text0": text0,
+            "text1": text1,
+            "text2": text2,
+            "text3": text3
+        });
     }
 
     function delItem_old(currentIndex) {
-        view.model.remove(currentIndex)
+        view.model.remove(currentIndex);
     }
 
     function delItem(currentIndex) {
-        noteModel.removeItem(currentIndex) // 调用C++接口
+        noteModel.removeItem(currentIndex); // 调用C++接口
     }
 
     function modifyItem(currentIndex, strTime, strText) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
-        view.model.setProperty(currentIndex, "dototext", strText)
+        view.model.setProperty(currentIndex, "time", strTime);
+        view.model.setProperty(currentIndex, "dototext", strText);
     }
 
     function modifyItemTime(currentIndex, strTime) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
+        view.model.setProperty(currentIndex, "time", strTime);
     }
 
     function modifyItemType(currentIndex, type) {
-
-        view.model.setProperty(currentIndex, "type", type)
+        view.model.setProperty(currentIndex, "type", type);
     }
 
     function modifyItemText0(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text0", strText)
+        view.model.setProperty(currentIndex, "text0", strText);
     }
 
     function modifyItemText2(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text2", strText)
+        view.model.setProperty(currentIndex, "text2", strText);
     }
 
     function getColor() {
-        var strColor
+        var strColor;
 
         if (isDark)
-            strColor = "#333333"
+            strColor = "#333333";
         else
-            strColor = "#ffffff"
+            strColor = "#ffffff";
 
-        return strColor
+        return strColor;
     }
 
     function getFontColor() {
-
         if (isDark)
-            return "#EEEEEE"
+            return "#EEEEEE";
         else
-            return "black"
+            return "black";
     }
 
     Component {
@@ -208,27 +203,21 @@ Rectangle {
                 anchors.fill: parent
 
                 onPressed: function (mouse) {
-                    clickPos = Qt.point(mouse.x, mouse.y)
+                    clickPos = Qt.point(mouse.x, mouse.y);
                 }
                 onReleased: function (mouse) {
-                    var delta = Qt.point(mouse.x - clickPos.x,
-                                         mouse.y - clickPos.y)
+                    var delta = Qt.point(mouse.x - clickPos.x, mouse.y - clickPos.y);
                 }
 
                 onClicked: function (mouse) {
+                    view.currentIndex = index; //实现item切换
 
-                    view.currentIndex = index //实现item切换
+                    for (i = 0; i < view.count; i++) {}
 
-                    for (i = 0; i < view.count; i++) {
-
-                    }
-
-                    m_NotesList.clickNoteList()
+                    m_NotesList.clickNoteList();
                 }
 
-                onPressAndHold: {
-
-                }
+                onPressAndHold: {}
 
                 onDoubleClicked: {
 
@@ -238,7 +227,6 @@ Rectangle {
 
             //RowLayout {
             ColumnLayout {
-
                 id: idlistElemnet
 
                 width: parent.width
@@ -384,13 +372,13 @@ Rectangle {
                             icon.source: "qrc:/res/view.svg"
                             text: "view"
 
-                            width: btnW // 固定宽度
-                            height: btnH // 固定高度
-                            icon.width: iconSize - 13
-                            icon.height: iconSize - 13
+                            width: btnW0 // 固定宽度
+                            height: btnH0 // 固定高度
+                            icon.width: iconSize0 - 13
+                            icon.height: iconSize0 - 13
                             onClicked: {
-                                console.log("View按钮被点击")
-                                mw_one.on_btnOpenNote_pressed()
+                                console.log("View按钮被点击");
+                                mw_one.on_btnOpenNote_pressed();
                             }
 
                             background: Rectangle {
@@ -403,13 +391,13 @@ Rectangle {
                             id: btn2
                             icon.source: "qrc:/res/edit.svg"
 
-                            width: btnW
-                            height: btnH
-                            icon.width: iconSize
-                            icon.height: iconSize
+                            width: btnW0
+                            height: btnH0
+                            icon.width: iconSize0
+                            icon.height: iconSize0
                             onClicked: {
-                                console.log("编辑按钮被点击")
-                                m_NotesList.qmlOpenEdit()
+                                console.log("编辑按钮被点击");
+                                m_NotesList.qmlOpenEdit();
                             }
 
                             background: Rectangle {
@@ -422,13 +410,13 @@ Rectangle {
                             id: btn3
                             icon.source: "qrc:/res/link.svg"
 
-                            width: btnW
-                            height: btnH
-                            icon.width: iconSize
-                            icon.height: iconSize
+                            width: btnW0
+                            height: btnH0
+                            icon.width: iconSize0
+                            icon.height: iconSize0
                             onClicked: {
-                                console.log("链接按钮被点击")
-                                m_NotesList.on_actionCopyNoteLink()
+                                console.log("链接按钮被点击");
+                                m_NotesList.on_actionCopyNoteLink();
                             }
 
                             background: Rectangle {
@@ -441,13 +429,13 @@ Rectangle {
                             id: btn4
                             icon.source: "qrc:/res/graph.svg"
 
-                            width: btnW
-                            height: btnH
-                            icon.width: iconSize - 13
-                            icon.height: iconSize - 13
+                            width: btnW0
+                            height: btnH0
+                            icon.width: iconSize0 - 13
+                            icon.height: iconSize0 - 13
                             onClicked: {
-                                console.log("图谱按钮被点击")
-                                m_NotesList.on_actionRelationshipGraph()
+                                console.log("图谱按钮被点击");
+                                m_NotesList.on_actionRelationshipGraph();
                             }
 
                             background: Rectangle {
