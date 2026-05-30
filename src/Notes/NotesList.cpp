@@ -409,7 +409,7 @@ void NotesList::renameCurrentItem(QString title) {
 
 void NotesList::setNoteName(QString name) { noteTitle = name; }
 
-void NotesList::on_btnDel_clicked() {
+/*void NotesList::on_btnDel_clicked() {
   if (tw->topLevelItemCount() == 0) return;
 
   QTreeWidgetItem* item = tw->currentItem();
@@ -517,6 +517,90 @@ void NotesList::on_btnDel_clicked() {
   saveNotesList();
 
   resetQML_List();
+}*/
+
+void NotesList::on_btnDel_clicked() {
+  if (tw->topLevelItemCount() == 0) return;
+
+  QTreeWidgetItem* item = tw->currentItem();
+  if (item == NULL) return;
+
+  // 判断：笔记本 / 笔记
+  QString strFlag = (item->parent() == NULL) ? tr("NoteBook") : tr("Note");
+
+  auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+  if (!m_ShowMsg->showMsg("Knot",
+                          tr("Move to the recycle bin?") + "\n\n" + strFlag +
+                              " : " + item->text(0),
+                          2)) {
+    return;
+  }
+
+  QStringList delFilesIndex;
+  QString str0, str1;
+
+  // ==========================================
+  // 【删除笔记本】：先移所有笔记 → 最后删 TOP
+  // ==========================================
+  if (item->parent() == NULL) {
+    int totalNotes = item->childCount();
+
+    // 遍历所有笔记，全部移入回收站
+    for (int i = 0; i < totalNotes; i++) {
+      QTreeWidgetItem* note = item->child(i);
+      str0 = note->text(0);
+      str1 = note->text(1);
+
+      // 加入回收箱
+      QTreeWidgetItem* recycleItem = new QTreeWidgetItem;
+      recycleItem->setText(0, str0);
+      recycleItem->setText(1, str1);
+      addItem(twrb, recycleItem);
+
+      // 记录要删除的文件
+      delFilesIndex.append(iniDir + str1);
+    }
+
+    // ✅ 关键：只有删除笔记本时，才删除 TOP ITEM
+    int topIndex = tw->indexOfTopLevelItem(item);
+    if (topIndex >= 0) {
+      delete tw->takeTopLevelItem(topIndex);
+    }
+  }
+
+  // ==========================================
+  // 【删除单条笔记】：只删自己，不碰笔记本
+  // ==========================================
+  else {
+    str0 = item->text(0);
+    str1 = item->text(1);
+
+    // 只移当前这一条笔记
+    QTreeWidgetItem* recycleItem = new QTreeWidgetItem;
+    recycleItem->setText(0, str0);
+    recycleItem->setText(1, str1);
+    addItem(twrb, recycleItem);
+
+    delFilesIndex.append(iniDir + str1);
+
+    // ✅ 只删除笔记，不删笔记本
+    delete item;
+  }
+
+  // 安全刷新界面
+  if (tw->topLevelItemCount() == 0) {
+    m_Notes->loadEmptyNote();
+    mui->lblNoteBook->setText(tr("Note Book"));
+    mui->lblNoteList->setText(tr("Note List"));
+  } else {
+    if (tw->currentItem() != nullptr) {
+      m_Notes->loadEmptyNote();
+    }
+  }
+
+  startBackgroundTaskDelFilesIndex(delFilesIndex);
+  saveNotesList();
+  resetQML_List();
 }
 
 void NotesList::addItem(QTreeWidget* tw, QTreeWidgetItem* item) {
@@ -548,7 +632,7 @@ bool NotesList::delFile(QString file) {
   return isOk;
 }
 
-int NotesList::on_btnImport_clicked() {
+/*int NotesList::on_btnImport_clicked() {
   if (tw->topLevelItemCount() == 0) return 0;
 
   QStringList fileNames;
@@ -642,6 +726,97 @@ int NotesList::on_btnImport_clicked() {
   watcher->setFuture(future);
 
   return MDFileList.count();
+}*/
+
+int NotesList::on_btnImport_clicked() {
+  if (tw->topLevelItemCount() == 0) return 0;
+
+#ifdef Q_OS_ANDROID
+  // 安卓：点击即显示进度条，锁定界面
+  mw_one->showProgress();
+#endif
+
+  QStringList fileNames =
+      QFileDialog::getOpenFileNames(this, tr("Knot"), "", tr("MD File (*.*)"));
+  qDebug() << "Import Files:" << fileNames;
+
+  if (fileNames.isEmpty()) {
+#ifdef Q_OS_ANDROID
+    mw_one->closeProgress();
+#endif
+    isImportFilesEnd = true;
+    return 0;
+  }
+
+  QStringList MDFileList;
+  QTreeWidgetItem* item = tw->currentItem();
+
+  for (const QString& fileName : fileNames) {
+    QString strFile = fileName.toLower();
+    if (strFile.contains(".md") || strFile.contains(".txt")) {
+      MDFileList.append(fileName);
+    } else {
+      qDebug() << tr("Invalid Markdown file.") << fileName;
+    }
+  }
+
+#ifndef Q_OS_ANDROID
+  // 桌面：选择完成后显示进度条
+  mw_one->showProgress();
+#endif
+
+  isImportFilesEnd = false;
+
+  if (MDFileList.size() > 1000) {
+    MDFileList.resize(10);
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(appName,
+                 tr("A maximum of 10 files can be imported at a time."), 1);
+  }
+
+  // 后台线程处理所有文件（全部完成才会进入 finished）
+  QFuture<void> future = QtConcurrent::run([this, MDFileList, item]() {
+    for (int i = 0; i < MDFileList.size(); ++i) {
+      const QString& fileName = MDFileList[i];
+      if (QFile::exists(fileName)) {
+        QFileInfo fi(fileName);
+        QString name = fi.completeBaseName();
+
+        QTreeWidgetItem* item1 = new QTreeWidgetItem(item);
+        item1->setText(0, name);
+
+        QString a = "memo/" + m_Notes->getDateTimeStr() + "_" +
+                    QString::number(i) + ".md";
+        currentMDFile = iniDir + a;
+
+        QFile::copy(fileName, currentMDFile);
+        item1->setText(1, a);
+
+        m_Notes->updateMDFileToSyncLists();
+      }
+    }
+  });
+
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this,
+          [this, watcher, MDFileList]() {
+            // ==============================================
+            // 重点：这里一定是【所有文件全部导入完成】才执行！
+            // ==============================================
+            qDebug() << "All files imported, count:" << MDFileList.size();
+
+            m_Notes->startBackgroundTaskUpdateNoteIndexes(MDFileList);
+            isImportNotes = true;
+            isImportFilesEnd = true;
+
+            // 统一关闭进度条（双端都在这里关闭）
+            mw_one->closeProgress();
+
+            watcher->deleteLater();
+          });
+
+  watcher->setFuture(future);
+  return MDFileList.size();
 }
 
 void NotesList::on_btnExport_clicked() {
