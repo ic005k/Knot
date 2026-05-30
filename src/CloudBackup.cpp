@@ -575,7 +575,7 @@ void CloudBackup::handleUploadFinished(QNetworkReply* reply,
 /// /////////////////////////////////////////////////////////////////////////////////
 
 // 核心函数：列出目录文件（100% 兼容 坚果云 + 中科院 + 所有标准WebDAV）
-WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
+/*WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
                               const QString& password) {
   WebDavHelper* helper = new WebDavHelper();
   QNetworkAccessManager* manager = new QNetworkAccessManager(helper);
@@ -611,6 +611,106 @@ WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
           auth->setPassword(password);
         });
   }
+
+  // 标准请求头
+  request.setRawHeader("Depth", "1");
+
+  // ==============================================
+  // Brief 头：保持原有逻辑
+  // 坚果云 = t
+  // 中科院 = t（兼容）
+  // 其他 = 不加
+  // ==============================================
+  if (url.contains("jianguoyun.com") || isCstCloud) {
+    request.setRawHeader("Brief", "t");
+  }
+
+  // ==============================================
+  // 🔥 中科院专属：强制 Zotero UA
+  // 其他网盘：不设置，使用 Qt 默认（完全不影响原有行为）
+  // ==============================================
+  if (isCstCloud) {
+    request.setRawHeader("User-Agent", "Zotero/5.0");
+  }
+
+  request.setHeader(QNetworkRequest::ContentTypeHeader,
+                    "text/xml; charset=utf-8");
+
+  // 标准 PROPFIND XML
+  QByteArray body;
+  if (isGetWebDavModiTime) {
+    body = R"(<?xml version="1.0" encoding="utf-8"?>
+        <d:propfind xmlns:d="DAV:">
+            <d:prop>
+                <d:displayname/>
+                <d:getlastmodified/>
+                <d:resourcetype/>
+            </d:prop>
+        </d:propfind>)";
+  } else {
+    body = R"(<?xml version="1.0" encoding="utf-8"?>
+      <d:propfind xmlns:d="DAV:">
+          <d:prop>
+              <d:displayname/>
+              <d:resourcetype/>
+          </d:prop>
+      </d:propfind>)";
+  }
+
+  QNetworkReply* reply = manager->sendCustomRequest(request, "PROPFIND", body);
+
+  QObject::connect(reply, &QNetworkReply::finished, [manager, helper, reply]() {
+    if (reply->error() != QNetworkReply::NoError) {
+      const QString error =
+          QString("[HTTP %1] %2")
+              .arg(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute)
+                       .toInt())
+              .arg(reply->errorString());
+      emit helper->errorOccurred(error);
+    } else {
+      helper->setResponseHeaders(reply->rawHeaderPairs());
+      QByteArray responseData = reply->readAll();
+      QList<QPair<QString, QDateTime>> files =
+          parseWebDavResponse(responseData);
+      emit helper->listCompleted(files);
+    }
+
+    reply->deleteLater();
+    manager->deleteLater();
+  });
+
+  return helper;
+}*/
+
+// 核心函数：列出目录文件（100% 兼容 坚果云 + 中科院 + 所有标准WebDAV）
+WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
+                              const QString& password) {
+  WebDavHelper* helper = new WebDavHelper();
+  QNetworkAccessManager* manager = new QNetworkAccessManager(helper);
+
+  // ==============================================
+  // 精准判断：是否为 中科院数据胶囊
+  // ==============================================
+  bool isCstCloud = url.contains("data.cstcloud.cn", Qt::CaseInsensitive);
+  QString fixedUrl = url;
+
+  // 🔥 中科院专属：强制 URL 以 / 结尾（不影响其他网盘）
+  if (isCstCloud && !fixedUrl.endsWith("/")) {
+    fixedUrl += "/";
+  }
+
+  QNetworkRequest request;
+  request.setUrl(QUrl(fixedUrl));
+
+  // ==============================================
+  // 核心认证优化
+  // 所有网盘统一：直接预生成并发送 Basic 认证头
+  // 每次都是最新账号密码，无缓存，支持换服务器
+  // ==============================================
+  QString auth = username + ":" + password;
+  request.setRawHeader("Authorization", "Basic " + auth.toUtf8().toBase64());
+
+  // 【删除了旧的 authenticationRequired 连接，彻底消除 401 往返】
 
   // 标准请求头
   request.setRawHeader("Depth", "1");
@@ -941,7 +1041,8 @@ void CloudBackup::fetchNextPage() {
 
         if (!nextPageUrl.isEmpty()) {
           // 继续获取下一页
-          QTimer::singleShot(100, this, &CloudBackup::fetchNextPage);
+          // QTimer::singleShot(100, this, &CloudBackup::fetchNextPage);
+          fetchNextPage();
         } else {
           // 所有页面处理完成
           processFileList();

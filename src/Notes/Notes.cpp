@@ -1318,6 +1318,10 @@ void Notes::openNotes() {
     for (int i = 0; i < m_CloudBackup->webdavFileList.count(); i++) {
       orgRemoteFiles.append(m_CloudBackup->webdavFileList.at(i));
       orgRemoteDateTime.append(m_CloudBackup->webdavDateTimeList.at(i));
+
+      if (i == 0) {
+        qDebug() << "远程原始文件取样：orgRemoteFiles=" << orgRemoteFiles.at(0);
+      }
     }
 
     // get md image files
@@ -2665,5 +2669,79 @@ void Notes::renameTitle(bool isOk) {
   } else {
     m_NotesList->renameCurrentItem(new_title);
     m_NotesList->saveNotesList();
+  }
+}
+
+//===========================================================
+// 检查是否需要清理 + 自动更新下次清理日期（二合一）
+// 返回：true=需要清理  false=不需要
+//===========================================================
+bool Notes::checkAndUpdateCleanDate() {
+  QSettings cfg(iniDir + "config.ini", QSettings::IniFormat);
+  QDate today = QDate::currentDate();
+
+  QString lastDateStr = cfg.value("Clean/LastCleanDate", "").toString();
+  QDate lastClean = QDate::fromString(lastDateStr, "yyyyMMdd");
+
+  // 无记录/无效日期 → 初始化，不清理
+  if (!lastClean.isValid()) {
+    cfg.setValue("Clean/LastCleanDate", today.toString("yyyyMMdd"));
+    cfg.sync();
+    return false;
+  }
+
+  QDate nextClean = lastClean.addDays(90);
+  bool needClean = (today >= nextClean);
+
+  // 需要清理 → 立即更新日期
+  if (needClean) {
+    cfg.setValue("Clean/LastCleanDate", today.toString("yyyyMMdd"));
+    cfg.sync();
+  }
+
+  if (needClean) buildCleanFileList();
+
+  return needClean;
+}
+
+//===========================================================
+// 构建自动清理列表（追加模式，不清空原有列表）
+// 传统at(i)遍历，无clazy警告，最安全
+//===========================================================
+void Notes::buildCleanFileList() {
+  QDate today = QDate::currentDate();
+  // 匹配开头 14 位数字，提取前 8 位日期数字
+  QRegularExpression reg("^(\\d{8})\\d{6}_");
+
+  // 传统下标遍历，无detach，无clazy警告
+  int count = orgRemoteFiles.size();
+  for (int i = 0; i < count; ++i) {
+    const QString& fullPath = orgRemoteFiles.at(i);
+
+    // 跳过包含 mainnotes / todo 的备份文件（永不删除）
+    if (fullPath.contains("mainnotes") || fullPath.contains("todo")) {
+      continue;
+    }
+
+    bool istest = false;
+    if (istest) {
+      // test
+      if (i == 0) {
+        needDelWebDAVFiles.append(fullPath);
+        qDebug() << "测试自动清理服务器文件：" << fullPath;
+      }
+    }
+
+    // 提取日期
+    QRegularExpressionMatch match = reg.match(fullPath);
+    if (!match.hasMatch()) continue;
+
+    QDate fileDate = QDate::fromString(match.captured(1), "yyyyMMdd");
+    if (!fileDate.isValid()) continue;
+
+    // 超过90天 → 追加到删除列表
+    if (fileDate.daysTo(today) > 90) {
+      needDelWebDAVFiles.append(fullPath);
+    }
   }
 }

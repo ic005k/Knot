@@ -2181,8 +2181,10 @@ void MainWindow::on_btnBackNoteList_pressed() {
   mui->frameMain->show();
   mui->frameNoteList->hide();
 
-  // m_Notes->syncToWebDAV();
-  // m_NotesList->delRemoteWebDAVFiles();
+  if (m_Notes->checkAndUpdateCleanDate())
+    qDebug() << "已到自动清理服务器文件时间，过去3个月内的文件将被清理";
+  else
+    qDebug() << "不到日期，不用自动清理服务器上的旧文件";
 
   // 先清空旧连接，避免重复触发
   disconnect(m_Notes, &Notes::syncFinished, this, nullptr);

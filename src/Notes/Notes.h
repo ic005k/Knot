@@ -202,7 +202,8 @@ class Notes : public QDialog {
 
   void refreshNote();
 
- protected:
+  bool checkAndUpdateCleanDate();
+  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;
@@ -329,6 +330,7 @@ class Notes : public QDialog {
 
   void processSingleRemoteFile(const QString& file);
   void startBackgroundProcessRemoteFiles_MultiThread();
+  void buildCleanFileList();
 };
 
 ///////////////////////////////////////////////////////////////////////
