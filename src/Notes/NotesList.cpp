@@ -1389,7 +1389,7 @@ void NotesList::on_btnRestore_clicked() {
       on_btnBack_clicked();
     }
     if (!mui->frameNoteRecycle->isHidden()) {
-      mw_one->on_btnBackNoteRecycle_pressed();
+      mw_one->on_btnBackNoteRecycle_clicked();
     }
   } else
     return;
@@ -1484,7 +1484,7 @@ void NotesList::on_btnBatchRestore_clicked() {
       on_btnBack_clicked();
     }
     if (!mui->frameNoteRecycle->isHidden()) {
-      mw_one->on_btnBackNoteRecycle_pressed();
+      mw_one->on_btnBackNoteRecycle_clicked();
     }
   }
 

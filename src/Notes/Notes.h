@@ -242,6 +242,7 @@ class Notes : public QDialog {
   void delLink(QString link);
 
  signals:
+  void syncFinished();
 
  private slots:
 

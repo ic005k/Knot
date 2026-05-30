@@ -81,6 +81,7 @@ class CloudBackup : public QDialog {
 
   QString getWebDAVDataDir(const QString& url);
  signals:
+  void uploadAllFinished();  // 所有上传完成
 
  protected:
   bool eventFilter(QObject* obj, QEvent* evn) override;

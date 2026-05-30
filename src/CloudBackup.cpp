@@ -567,6 +567,7 @@ void CloudBackup::handleUploadFinished(QNetworkReply* reply,
     if (mw_one) {
       mw_one->closeProgress();
       mui->progBar->hide();
+      emit uploadAllFinished();
     }
   }
 }

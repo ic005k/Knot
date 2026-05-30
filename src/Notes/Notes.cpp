@@ -576,6 +576,12 @@ void Notes::syncToWebDAV() {
       qDebug() << "需要上传的文件：" << notes_sync_files;
       qDebug() << "maxNetConcurrent=" << maxNetConcurrent;
 
+      // ✅ 等待【全部上传完成】再发送 syncFinished
+      connect(
+          m_CloudBackup, &CloudBackup::uploadAllFinished, this,
+          [this]() { emit syncFinished(); },
+          Qt::ConnectionType(Qt::QueuedConnection | Qt::SingleShotConnection));
+
       m_CloudBackup->uploadFilesToWebDAV(notes_sync_files);
       m_Method->setAccessCount(notes_sync_files.count());
     }

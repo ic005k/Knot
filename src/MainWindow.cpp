@@ -569,7 +569,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
   }
 
   if (!mui->frameNoteRecycle->isHidden()) {
-    on_btnBackNoteRecycle_pressed();
+    on_btnBackNoteRecycle_clicked();
     event->ignore();
     return;
   }
@@ -2181,12 +2181,25 @@ void MainWindow::on_btnBackNoteList_pressed() {
   mui->frameMain->show();
   mui->frameNoteList->hide();
 
-  m_Notes->syncToWebDAV();
+  // m_Notes->syncToWebDAV();
+  // m_NotesList->delRemoteWebDAVFiles();
 
-  m_NotesList->delRemoteWebDAVFiles();
+  // 先清空旧连接，避免重复触发
+  disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
+
+  // 绑定：等 sync 全部结束 → 再删除
+  disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
+
+  connect(
+      m_Notes, &Notes::syncFinished, this,
+      [this]() { m_NotesList->delRemoteWebDAVFiles(); },
+      Qt::ConnectionType(Qt::QueuedConnection | Qt::SingleShotConnection));
+
+  // 现在才开始同步
+  m_Notes->syncToWebDAV();
 }
 
-void MainWindow::on_btnBackNoteRecycle_pressed() {
+void MainWindow::on_btnBackNoteRecycle_clicked() {
   mui->frameNoteRecycle->hide();
   mui->frameNoteList->show();
 
@@ -2204,7 +2217,7 @@ void MainWindow::on_btnNoteRecycle_pressed() {
   m_NotesList->loadAllRecycle();
 }
 
-void MainWindow::on_btnDelNoteRecycle_pressed() {
+void MainWindow::on_btnDelNoteRecycle_clicked() {
   int count = m_Method->getCountFromQW(mui->qwNoteRecycle);
   if (count == 0) return;
 
@@ -2215,7 +2228,7 @@ void MainWindow::on_btnDelNoteRecycle_pressed() {
   m_NotesList->on_btnBatchDel_Recycle_clicked();
 }
 
-void MainWindow::on_btnRestoreNoteRecycle_pressed() {
+void MainWindow::on_btnRestoreNoteRecycle_clicked() {
   m_NotesList->restoreNoteFromRecycle();
 
   m_NotesList->updateAllNoteIndexManager();
@@ -2756,7 +2769,7 @@ void MainWindow::on_cboxWebDAV_currentTextChanged(const QString& arg1) {
   m_CloudBackup->changeComBoxWebDAV(arg1);
 }
 
-void MainWindow::on_btnShowCboxList_pressed() { mui->cboxWebDAV->showPopup(); }
+void MainWindow::on_btnShowCboxList_clicked() { mui->cboxWebDAV->showPopup(); }
 
 void MainWindow::on_btnRotation_pressed() {
   if (mui->lblBookName->text() == "Book Name") return;
@@ -3146,7 +3159,7 @@ void MainWindow::onAndroidBackHandle() {
   }
 
   if (!mui->frameNoteRecycle->isHidden()) {
-    on_btnBackNoteRecycle_pressed();
+    on_btnBackNoteRecycle_clicked();
     return;
   }
 

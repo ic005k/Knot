@@ -658,7 +658,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnBackReaderSet_pressed();
 
-  void on_btnBackNoteRecycle_pressed();
+  void on_btnBackNoteRecycle_clicked();
 
   void on_timerMousePress();
 
@@ -759,9 +759,9 @@ class MainWindow : public QMainWindow {
 
   void on_btnDelBakFile_pressed();
 
-  void on_btnDelNoteRecycle_pressed();
+  void on_btnDelNoteRecycle_clicked();
 
-  void on_btnRestoreNoteRecycle_pressed();
+  void on_btnRestoreNoteRecycle_clicked();
 
   void on_btnFindPreviousNote_pressed();
 
@@ -936,7 +936,7 @@ class MainWindow : public QMainWindow {
 
   void on_cboxWebDAV_currentTextChanged(const QString& arg1);
 
-  void on_btnShowCboxList_pressed();
+  void on_btnShowCboxList_clicked();
 
   void on_btnRotation_pressed();
 
