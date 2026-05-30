@@ -2739,8 +2739,11 @@ void Notes::buildCleanFileList() {
     QDate fileDate = QDate::fromString(match.captured(1), "yyyyMMdd");
     if (!fileDate.isValid()) continue;
 
-    // 超过90天 → 追加到删除列表
-    if (fileDate.daysTo(today) > 90) {
+    // ==============================
+    // ✅ 新安全策略：只删除超过 60 天的旧文件
+    // ✅ 90 天触发一次清理
+    // ✅ 保留最近 30 天，给足多端同步时间
+    if (fileDate.daysTo(today) > 60) {
       needDelWebDAVFiles.append(fullPath);
     }
   }
