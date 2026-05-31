@@ -79,6 +79,7 @@ class CloudBackup : public QDialog {
 
   QString unifyWebDAVBaseUrlToDavEnd(QString url);
 
+  QString getRemoteKnotDataFullPath(const QString& remoteFile);
  signals:
   void uploadAllFinished();  // 所有上传完成
 

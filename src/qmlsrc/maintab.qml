@@ -148,7 +148,7 @@ Rectangle {
                 }
             }
 
-            MouseArea {
+            /*MouseArea {
                 anchors.fill: parent
 
                 // ========== Qt6 专用：滚动时不触发点击 ==========
@@ -193,6 +193,48 @@ Rectangle {
                     //grid.currentIndex = index;
                     //mw_one.clickMainTab();
                     //}
+                }
+            }*/
+
+            MouseArea {
+                id: mouse
+                anchors.fill: parent
+
+                // ===== 点击缩放动画 =====
+                scale: scaleFactor
+                Behavior on scale {
+                    NumberAnimation { duration: 100; easing.type: Easing.OutCubic }
+                }
+
+                // ===== 滚动防误触 =====
+                property bool isMove: false
+                property real pressX
+                property real pressY
+
+                onPressed: {
+                    pressX = mouseX;
+                    pressY = mouseY;
+                    isMove = false;
+                    scaleFactor = 0.95;
+                }
+
+                onPositionChanged: {
+                    if (Math.abs(mouseX - pressX) > 5 ||
+                        Math.abs(mouseY - pressY) > 5) {
+                        isMove = true;
+                    }
+                }
+
+                onReleased: {
+                    scaleFactor = 1.0;
+                    if (!isMove) {
+                        grid.currentIndex = index;
+                        mw_one.clickMainTab();
+                    }
+                }
+
+                onCanceled: {
+                    scaleFactor = 1.0;
                 }
             }
 

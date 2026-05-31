@@ -1372,12 +1372,7 @@ void Notes::openNotes() {
                      << "修改时间:" << mtime.toString("yyyy-MM-dd hh:mm:ss");
             QString remote_f = path;
 
-            //  找到 KnotData 的位置
-            int idx = remote_f.indexOf("KnotData/");
-            // 从 KnotData 开始截取，前面所有内容全部丢掉！
-            if (idx != -1) {
-              remote_f = remote_f.mid(idx);
-            }
+            remote_f = m_CloudBackup->getRemoteKnotDataFullPath(remote_f);
 
             qDebug() << "处理之后的远程文件：" << remote_f;
 

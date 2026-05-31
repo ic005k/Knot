@@ -1554,15 +1554,7 @@ void Todo::openTodo() {
 
             QString remoteFile = path;
 
-            // ==============================
-            // 通用 WebDAV 路径清洗（兼容所有网盘，无任何硬编码）
-            // 自动截取 /KnotData 开始的路径
-            // ==============================
-            int knotIndex = remoteFile.indexOf("/KnotData");
-            if (knotIndex != -1) {
-              // 从 /KnotData 开始截取，自动去掉前面所有前缀（bucket名）
-              remoteFile = remoteFile.mid(knotIndex + 1);
-            }
+            remoteFile = m_CloudBackup->getRemoteKnotDataFullPath(remoteFile);
 
             qDebug() << "处理之后的远程文件：" << remoteFile;
 

@@ -1169,6 +1169,13 @@ bool MainWindow::eventFilter(QObject* watch, QEvent* evn) {
     }
   }*/
 
+  if (watch == mui->qwMainTab && evn->type() == QEvent::Show) {
+    QQuickItem* root = mui->qwMainTab->rootObject();
+    if (root) {
+      QMetaObject::invokeMethod(root, "forceActivateUI", Qt::QueuedConnection);
+    }
+  }
+
   return QWidget::eventFilter(watch, evn);
 }
 

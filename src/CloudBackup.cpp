@@ -1087,12 +1087,7 @@ void CloudBackup::processFileList() {
 
     QString remoteFile = path;
 
-    // 获取KnotData开头的路径
-    int idx = remoteFile.indexOf("KnotData/");
-    // 从 KnotData 开始截取，前面所有内容全部丢掉！
-    if (idx != -1) {
-      remoteFile = remoteFile.mid(idx);
-    }
+    remoteFile = getRemoteKnotDataFullPath(remoteFile);
 
     webdavFileList.append(remoteFile);
     webdavDateTimeList.append(mtime);
@@ -1102,6 +1097,18 @@ void CloudBackup::processFileList() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+QString CloudBackup::getRemoteKnotDataFullPath(const QString& remoteFile) {
+  QString path;
+  // 获取KnotData开头的路径
+  int idx = remoteFile.indexOf("KnotData/");
+  // 从 KnotData 开始截取，前面所有内容全部丢掉！
+  if (idx != -1) {
+    path = remoteFile.mid(idx);
+  }
+
+  return path;
+}
 
 void CloudBackup::createRemoteWebDAVDir() {
   QString url = getWebDAVArgument();

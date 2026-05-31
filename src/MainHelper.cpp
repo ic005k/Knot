@@ -607,8 +607,11 @@ void MainHelper::init_UIWidget() {
   mui->tabWidget->tabBar()->setFixedHeight(nHeight);
 
   mui->tabWidget->setFixedHeight(mui->tabWidget->tabBar()->height() + 0);
+
   // if (nHeight <= 36) nHeight = 36;
   //  mui->qwMainTab->setFixedHeight(nHeight);
+  mui->qwMainTab->installEventFilter(mw_one);
+
   mui->tabWidget->hide();
 
   mw_one->loginTime = m_Method->setCurrentDateTimeValue();
