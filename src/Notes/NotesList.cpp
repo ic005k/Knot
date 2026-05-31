@@ -2398,9 +2398,9 @@ void NotesList::on_actionAdd_NoteBook_triggered() {
     }
     setNoteBookCurrentIndex(index);
     clickNoteBook();
-  }
 
-  saveNotesList();
+    saveNotesList();
+  }
 }
 
 void NotesList::on_actionDel_NoteBook_triggered() {

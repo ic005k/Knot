@@ -1372,7 +1372,14 @@ void Notes::openNotes() {
                      << "修改时间:" << mtime.toString("yyyy-MM-dd hh:mm:ss");
             QString remote_f = path;
 
-            remote_f = remote_f.replace("/dav/", "");  // 此处需注意
+            //  找到 KnotData 的位置
+            int idx = remote_f.indexOf("KnotData/");
+            // 从 KnotData 开始截取，前面所有内容全部丢掉！
+            if (idx != -1) {
+              remote_f = remote_f.mid(idx);
+            }
+
+            qDebug() << "处理之后的远程文件：" << remote_f;
 
             if (path.contains("mainnotes.json.zip")) {
               orgRemoteFiles.append(remote_f);
@@ -1497,18 +1504,10 @@ void Notes::processRemoteFiles(QStringList remoteFiles) {
   int totalFiles = remoteFiles.count();
   int n_Files = 0;
 
-  QString baseUrl = m_CloudBackup->getWebDAVArgument();
-  QString dataDir = m_CloudBackup->getWebDAVDataDir(baseUrl);
-
   for (int i = 0; i < remoteFiles.count(); i++) {
     QString file = remoteFiles.at(i);
 
     QString temp_f = file;
-
-    if (!dataDir.isEmpty()) {
-      qDebug() << "WebDAV 数据目录是:" << dataDir;
-      //   temp_f = temp_f.replace(dataDir + "/", "");
-    }
 
     QString pDir, pFile, kFile, asFile, zFile;
     pFile = privateDir + temp_f;
@@ -1763,12 +1762,6 @@ void Notes::startBackgroundProcessRemoteFiles_MultiThread() {
 
 void Notes::processSingleRemoteFile(const QString& file) {
   QString temp_f = file;
-  QString baseUrl = m_CloudBackup->getWebDAVArgument();
-  QString dataDir = m_CloudBackup->getWebDAVDataDir(baseUrl);
-
-  if (!dataDir.isEmpty()) {
-    // temp_f = temp_f.replace(dataDir + "/", "");
-  }
 
   QString pDir, pFile, kFile, asFile, zFile;
   pFile = privateDir + temp_f;

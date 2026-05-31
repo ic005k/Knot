@@ -79,7 +79,6 @@ class CloudBackup : public QDialog {
 
   QString unifyWebDAVBaseUrlToDavEnd(QString url);
 
-  QString getWebDAVDataDir(const QString& url);
  signals:
   void uploadAllFinished();  // 所有上传完成
 

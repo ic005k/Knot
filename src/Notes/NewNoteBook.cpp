@@ -87,6 +87,8 @@ void NewNoteBook::on_btnCancel_clicked() {
 }
 
 void NewNoteBook::on_btnOk_clicked() {
+  if (ui->editName->text().trimmed().length() == 0) return;
+
   isOk = true;
   rootIndex = 0;  // ui->listWidget->currentRow();
   notebookName = ui->editName->text().trimmed();

@@ -867,16 +867,12 @@ void WebDavDownloader::downloadFiles(const QList<QString>& remotePaths,
   activeDownloads.clear();
 
   // 初始化队列
-  QString baseUrl = m_CloudBackup->getWebDAVArgument();
-  QString dataDir = m_CloudBackup->getWebDAVDataDir(baseUrl);
-
   for (const QString& remotePath : remotePaths) {
-    QString localPath = QDir(localBaseDir).absoluteFilePath(remotePath);
+    QString localPath;  // = QDir(localBaseDir).absoluteFilePath(remotePath);
+    localPath = localBaseDir + remotePath;
 
-    if (!dataDir.isEmpty()) {
-      qDebug() << "WebDAV 数据目录是:" << dataDir;
-      localPath = localPath.replace("/" + dataDir + "/", "/");
-    }
+    qDebug() << "需要下载的远程文件：" << remotePath << "下载到本地："
+             << localPath;
 
     downloadQueue.enqueue({remotePath, localPath});
   }
@@ -1090,7 +1086,13 @@ void CloudBackup::processFileList() {
     const QDateTime& mtime = filePair.second;
 
     QString remoteFile = path;
-    remoteFile = remoteFile.replace("/dav/", "");
+
+    // 获取KnotData开头的路径
+    int idx = remoteFile.indexOf("KnotData/");
+    // 从 KnotData 开始截取，前面所有内容全部丢掉！
+    if (idx != -1) {
+      remoteFile = remoteFile.mid(idx);
+    }
 
     webdavFileList.append(remoteFile);
     webdavDateTimeList.append(mtime);
@@ -1304,40 +1306,10 @@ bool CloudBackup::checkWebDAVConnection() {
 }
 
 QString CloudBackup::unifyWebDAVBaseUrlToDavEnd(QString url) {
-  // 找到最后一个 /dav/
-  int davIndex = url.lastIndexOf("/dav/");
-
-  // 统一截取到 /dav/ 为止（关键：+5 才是完整的 /dav/）
-  if (davIndex != -1) {
-    url = url.left(davIndex + 5);
-  }
-
   // 无论如何，最后必须以 / 结尾（WebDAV 强制要求）
   if (!url.endsWith("/")) {
     url += "/";
   }
 
   return url;
-}
-
-QString CloudBackup::getWebDAVDataDir(const QString& url) {
-  // 找到最后一个 "/dav/" 的位置
-  int davIndex = url.lastIndexOf("/dav/");
-  if (davIndex == -1) {
-    return QString();  // 没有 /dav/，返回空
-  }
-
-  // 提取 "/dav/" 之后的全部内容
-  QString afterDav = url.mid(davIndex + 5);  // "/dav/" 长度为 5
-
-  // 去掉前后的空白和斜杠
-  afterDav = afterDav.trimmed();
-  while (!afterDav.isEmpty() && afterDav.front() == '/') {
-    afterDav.remove(0, 1);
-  }
-  while (!afterDav.isEmpty() && afterDav.back() == '/') {
-    afterDav.chop(1);
-  }
-
-  return afterDav;
 }
