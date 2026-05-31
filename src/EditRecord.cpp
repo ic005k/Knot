@@ -21,7 +21,23 @@ EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
   QFont font = this->font();
   font.setPointSize(22);
   mui->editCategory->setFont(font);
-  font.setPointSize(40);
+  if (isAndroid)
+    font.setPointSize(40);
+  else {
+    font.setPointSize(12);
+    mui->btn0->setMinimumHeight(0);
+    mui->btn1->setMinimumHeight(0);
+    mui->btn2->setMinimumHeight(0);
+    mui->btn3->setMinimumHeight(0);
+    mui->btn4->setMinimumHeight(0);
+    mui->btn5->setMinimumHeight(0);
+    mui->btn6->setMinimumHeight(0);
+    mui->btn7->setMinimumHeight(0);
+    mui->btn8->setMinimumHeight(0);
+    mui->btn9->setMinimumHeight(0);
+    mui->btnDot->setMinimumHeight(0);
+    mui->btnDel_Number->setMinimumHeight(0);
+  }
   font.setBold(true);
 
   mui->editAmount->setFont(font);
