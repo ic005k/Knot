@@ -6575,7 +6575,7 @@ QRadioButton:disabled {
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>35</height>
+           <height>42</height>
           </size>
          </property>
          <property name="maximumSize">
@@ -6618,7 +6618,7 @@ QRadioButton:disabled {
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>35</height>
+             <height>38</height>
             </size>
            </property>
            <property name="text">
@@ -6637,7 +6637,7 @@ QRadioButton:disabled {
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>35</height>
+             <height>38</height>
             </size>
            </property>
            <property name="maximumSize">
@@ -6662,7 +6662,7 @@ QRadioButton:disabled {
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>35</height>
+             <height>38</height>
             </size>
            </property>
            <property name="text">
@@ -6849,7 +6849,7 @@ QRadioButton:disabled {
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>40</height>
+             <height>50</height>
             </size>
            </property>
            <property name="maximumSize">
@@ -6934,8 +6934,8 @@ QRadioButton:disabled {
               </property>
               <property name="minimumSize">
                <size>
-                <width>45</width>
-                <height>45</height>
+                <width>32</width>
+                <height>50</height>
                </size>
               </property>
               <property name="text">
@@ -6953,8 +6953,8 @@ QRadioButton:disabled {
               </property>
               <property name="minimumSize">
                <size>
-                <width>45</width>
-                <height>45</height>
+                <width>32</width>
+                <height>50</height>
                </size>
               </property>
               <property name="text">
@@ -6972,8 +6972,8 @@ QRadioButton:disabled {
               </property>
               <property name="minimumSize">
                <size>
-                <width>45</width>
-                <height>45</height>
+                <width>32</width>
+                <height>50</height>
                </size>
               </property>
               <property name="text">
@@ -6995,8 +6995,8 @@ QRadioButton:disabled {
               </property>
               <property name="minimumSize">
                <size>
-                <width>45</width>
-                <height>45</height>
+                <width>32</width>
+                <height>50</height>
                </size>
               </property>
               <property name="text">
@@ -7014,8 +7014,8 @@ QRadioButton:disabled {
               </property>
               <property name="minimumSize">
                <size>
-                <width>45</width>
-                <height>45</height>
+                <width>32</width>
+                <height>50</height>
                </size>
               </property>
               <property name="text">
@@ -7033,8 +7033,8 @@ QRadioButton:disabled {
               </property>
               <property name="minimumSize">
                <size>
-                <width>45</width>
-                <height>45</height>
+                <width>32</width>
+                <height>50</height>
                </size>
               </property>
               <property name="text">
@@ -7056,8 +7056,8 @@ QRadioButton:disabled {
               </property>
               <property name="minimumSize">
                <size>
-                <width>45</width>
-                <height>45</height>
+                <width>32</width>
+                <height>50</height>
                </size>
               </property>
               <property name="text">
@@ -7075,8 +7075,8 @@ QRadioButton:disabled {
               </property>
               <property name="minimumSize">
                <size>
-                <width>45</width>
-                <height>45</height>
+                <width>32</width>
+                <height>50</height>
                </size>
               </property>
               <property name="text">
@@ -7094,8 +7094,8 @@ QRadioButton:disabled {
               </property>
               <property name="minimumSize">
                <size>
-                <width>45</width>
-                <height>45</height>
+                <width>32</width>
+                <height>50</height>
                </size>
               </property>
               <property name="text">
@@ -7117,8 +7117,8 @@ QRadioButton:disabled {
               </property>
               <property name="minimumSize">
                <size>
-                <width>45</width>
-                <height>45</height>
+                <width>32</width>
+                <height>50</height>
                </size>
               </property>
               <property name="text">
@@ -7136,8 +7136,8 @@ QRadioButton:disabled {
               </property>
               <property name="minimumSize">
                <size>
-                <width>45</width>
-                <height>45</height>
+                <width>32</width>
+                <height>50</height>
                </size>
               </property>
               <property name="text">
@@ -7155,8 +7155,8 @@ QRadioButton:disabled {
               </property>
               <property name="minimumSize">
                <size>
-                <width>45</width>
-                <height>45</height>
+                <width>32</width>
+                <height>50</height>
                </size>
               </property>
               <property name="text">

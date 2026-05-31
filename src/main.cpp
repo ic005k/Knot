@@ -363,12 +363,13 @@ void loadTheme(bool isDark) {
           widget != mui->btnTodo && widget != mui->btnNotes &&
           widget != mui->btnSteps && widget != mui->lblMonthTotal &&
           widget != mui->lblYearTotal && widget != mui->btn0 &&
-          widget != mui->btn1 && widget != mui->btn2 && widget != mui->btn3 &&
-          widget != mui->btn4 && widget != mui->btn5 && widget != mui->btn6 &&
-          widget != mui->btn7 && widget != mui->btn8 && widget != mui->btn9 &&
-          widget != mui->btnDot && widget != mui->btnDel_Number &&
-          widget != mui->lblMonthSum && widget != mui->lblTime &&
-          widget != mui->lblGpsInfo && widget != m_Steps->m_speedometer &&
+          widget != mui->editAmount && widget != mui->btn1 &&
+          widget != mui->btn2 && widget != mui->btn3 && widget != mui->btn4 &&
+          widget != mui->btn5 && widget != mui->btn6 && widget != mui->btn7 &&
+          widget != mui->btn8 && widget != mui->btn9 && widget != mui->btnDot &&
+          widget != mui->btnDel_Number && widget != mui->lblMonthSum &&
+          widget != mui->lblTime && widget != mui->lblGpsInfo &&
+          widget != m_Steps->m_speedometer &&
           widget != mw_one->m_MainHelper->sliderButton &&
           widget != mui->lblGpsDateTime && widget != mui->btnPages &&
           widget != mui->lblBookName && widget != mui->lblShowLineSn &&

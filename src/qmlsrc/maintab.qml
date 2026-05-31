@@ -187,12 +187,6 @@ Rectangle {
 
                 onReleased: {
                     scaleFactor = 1.0;
-
-                    // ========== 只有【不是滚动】才执行 ==========
-                    //if (!isMove) {
-                    //grid.currentIndex = index;
-                    //mw_one.clickMainTab();
-                    //}
                 }
             }*/
 

@@ -1170,13 +1170,42 @@ bool MainWindow::eventFilter(QObject* watch, QEvent* evn) {
   }*/
 
   if (watch == mui->qwMainTab && evn->type() == QEvent::Show) {
-    QQuickItem* root = mui->qwMainTab->rootObject();
-    if (root) {
-      QMetaObject::invokeMethod(root, "forceActivateUI", Qt::QueuedConnection);
-    }
+    QTimer::singleShot(200, this, [this]() {
+      sendFakeTouch();
+
+      QQuickItem* root = mui->qwMainTab->rootObject();
+      if (root) {
+        QMetaObject::invokeMethod(root, "forceActivateUI",
+                                  Qt::QueuedConnection);
+      }
+    });
   }
 
   return QWidget::eventFilter(watch, evn);
+}
+
+void MainWindow::sendFakeTouch() {
+  QWidget* w = mui->frameMain;
+  if (!w) return;
+
+  auto send = [&](const QPoint& p) {
+    const QPointF pf(p);
+
+    QMouseEvent press(QEvent::MouseButtonPress, pf, pf, Qt::LeftButton,
+                      Qt::LeftButton, Qt::NoModifier,
+                      QPointingDevice::primaryPointingDevice());
+    QApplication::sendEvent(w, &press);
+
+    QMouseEvent release(QEvent::MouseButtonRelease, pf, pf, Qt::LeftButton,
+                        Qt::LeftButton, Qt::NoModifier,
+                        QPointingDevice::primaryPointingDevice());
+    QApplication::sendEvent(w, &release);
+
+    qDebug() << pf << "被点击";
+  };
+
+  send(QPoint(0, 0));
+  send(QPoint(1, 1));
 }
 
 void MainWindow::clearWidgetFocus() {
@@ -2067,7 +2096,7 @@ bool MainWindow::setTWCurrentItem() {
   return isSel;
 }
 
-void MainWindow::on_btnBackSteps_pressed() { m_Steps->closeSteps(); }
+void MainWindow::on_btnBackSteps_clicked() { m_Steps->closeSteps(); }
 
 void MainWindow::on_btnReset_pressed() { m_Steps->on_btnReset_clicked(); }
 
@@ -2472,7 +2501,7 @@ void MainWindow::on_btnHideFind_pressed() {
   mui->f_FindNotes->hide();
 }
 
-void MainWindow::on_btnStepsOptions_pressed() { m_StepsOptions->init(); }
+void MainWindow::on_btnStepsOptions_clicked() { m_StepsOptions->init(); }
 
 void MainWindow::on_btnRecentOpen_pressed() {
   m_NotesList->genRecentOpenMenu();
@@ -2866,7 +2895,7 @@ void MainWindow::on_btnAddBookNote_pressed() { m_Reader->addBookNote(); }
 
 void MainWindow::on_btnViewBookNote_pressed() { m_Reader->viewBookNote(); }
 
-void MainWindow::on_btnMap_pressed() { m_Steps->openMapWindow(); }
+void MainWindow::on_btnMap_clicked() { m_Steps->openMapWindow(); }
 
 void MainWindow::on_btnSportsChart_pressed() { m_Steps->showSportsChart(); }
 
@@ -3242,7 +3271,7 @@ void MainWindow::onAndroidBackHandle() {
   }
 
   if (!mui->frameSteps->isHidden()) {
-    on_btnBackSteps_pressed();
+    on_btnBackSteps_clicked();
     return;
   }
 

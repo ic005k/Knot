@@ -21,7 +21,7 @@ EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
   QFont font = this->font();
   font.setPointSize(22);
   mui->editCategory->setFont(font);
-  font.setPointSize(23);
+  font.setPointSize(40);
   font.setBold(true);
 
   mui->editAmount->setFont(font);

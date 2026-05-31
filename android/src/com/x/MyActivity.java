@@ -499,6 +499,22 @@ public class MyActivity
             WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
         );
 
+        // ================== 尝试解决 Qt Android 第一次点击失效 ==================
+        getWindow().getDecorView().setFocusableInTouchMode(true);
+        getWindow().getDecorView().requestFocus();
+
+        // Android 12+ 明确声明：这个窗口可以接收触摸
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            );
+            getWindow().clearFlags(
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            );
+        }
+        // ================================================================
+
         // 拦截手势返回回调
         if (
             android.os.Build.VERSION.SDK_INT >=
@@ -526,6 +542,11 @@ public class MyActivity
                 mBackCallback
             );
         }
+
+        //确保 Qt 的 QQuickWindow 已 attach 不依赖 timing race,尝试解决第一次点击失效
+        new Handler(Looper.getMainLooper()).post(() -> {
+            getWindow().getDecorView().requestFocus();
+        });
     }
 
     // ===== 新增：简化的实例重复校验方法 =====

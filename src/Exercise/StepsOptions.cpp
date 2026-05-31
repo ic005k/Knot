@@ -61,10 +61,9 @@ void StepsOptions::init() {
   y = 0;
   w = mw_one->width();
   h = 600;
-
+  setGeometry(x, y, w, h);
   m_Method->showGrayWindows();
   show();
-  setGeometry(x, y, w, h);
 
   isTextChange = false;
 

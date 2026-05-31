@@ -10,6 +10,7 @@
 #include <QGeoServiceProvider>
 #include <QGeoServiceProviderFactory>
 #include <QInputMethod>
+#include <QPointingDevice>
 #include <QSplashScreen>
 #include <QtConcurrent/QtConcurrentRun>
 
@@ -508,6 +509,8 @@ class MainWindow : public QMainWindow {
   void saveNeedDelWebDAVFiles(const QString& file);
   QStringList getNeedDelWebDAVFiles();
 
+  void sendFakeTouch();
+
  protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
@@ -690,7 +693,7 @@ class MainWindow : public QMainWindow {
 
   void on_editTodo_textChanged();
 
-  void on_btnBackSteps_pressed();
+  void on_btnBackSteps_clicked();
 
   void on_btnReset_pressed();
 
@@ -839,7 +842,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnHideFind_pressed();
 
-  void on_btnStepsOptions_pressed();
+  void on_btnStepsOptions_clicked();
 
   void on_btnRecentOpen_pressed();
 
@@ -954,7 +957,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnViewBookNote_pressed();
 
-  void on_btnMap_pressed();
+  void on_btnMap_clicked();
 
   void on_btnSportsChart_pressed();
 
