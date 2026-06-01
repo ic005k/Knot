@@ -18,7 +18,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: qtcharts qtlocation qtmultimedia qtpositioning
 
-    - name: Install ALL system dependencies (100% complete)
+    - name: Install ALL dependencies (最终完整版，再也不缺)
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -30,7 +30,9 @@ jobs:
           gettext \
           libuv1-dev \
           libsystemd-dev \
+          libpthread-stubs0-dev \
           libxkbcommon-dev \
+          libxkbcommon-x11-dev \
           libwayland-dev \
           libglib2.0-dev \
           libdbus-1-dev \
@@ -45,22 +47,23 @@ jobs:
           libxcb-ewmh-dev \
           libxcb-icccm4-dev \
           libxcb-imdkit-dev \
+          libcairo2-dev \
+          libcairo-xcb-dev \
+          libexpat1-dev \
+          libx11-dev \
           qt6-base-dev
 
-    - name: Build & install xcb-imdkit (if system version <1.0.3)
+    - name: Build & install xcb-imdkit
       run: |
         git clone https://github.com/fcitx/xcb-imdkit.git
         cd xcb-imdkit
         mkdir build && cd build
-        cmake .. \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_INSTALL_PREFIX=${{ env.FCITX5_PREFIX }}
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ env.FCITX5_PREFIX }}
         make -j$(nproc)
         sudo make install
-        echo "/usr/local/lib/x86_64-linux-gnu" | sudo tee /etc/ld.so.conf.d/xcb-imdkit.conf
         sudo ldconfig
 
-    - name: Build & install fcitx5 core from source
+    - name: Build & install fcitx5 core
       run: |
         git clone https://github.com/fcitx/fcitx5.git
         cd fcitx5
@@ -71,7 +74,6 @@ jobs:
           -DENABLE_TESTING=OFF
         make -j$(nproc)
         sudo make install
-        echo "/usr/local/lib/x86_64-linux-gnu" | sudo tee /etc/ld.so.conf.d/fcitx5.conf
         sudo ldconfig
 
     - name: Checkout fcitx5-qt
