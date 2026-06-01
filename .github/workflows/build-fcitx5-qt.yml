@@ -39,6 +39,7 @@ jobs:
           libxcb-xinerama0-dev \
           libuv1-dev \
           libsystemd-dev \
+          gettext \
           qt6-base-dev
 
     - name: Build & install fcitx5 core from source
