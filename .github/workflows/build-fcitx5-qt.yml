@@ -1,5 +1,6 @@
 name: Build fcitx5-qt for Qt 6.10.3
 
+# 保留自动触发（成功后你再删）
 on:
   push:
     branches: [ main, master ]
@@ -14,22 +15,28 @@ jobs:
       QT_VERSION: "6.10.3"
 
     steps:
-    - name: Install Qt
+    - name: Install Qt 6.10.3
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
 
-    - name: Install dependencies
+    - name: 安装基础编译依赖
       run: |
         sudo apt-get update
         sudo apt install -y \
-          build-essential cmake extra-cmake-modules pkg-config git \
-          libxkbcommon-dev libwayland-dev libglib2.0-dev
+          build-essential \
+          cmake \
+          extra-cmake-modules \
+          pkg-config \
+          git \
+          libglib2.0-dev \
+          libxkbcommon-dev \
+          libwayland-dev
 
-    # ============================
-    # 第一步：必须先编译 fcitx5 本体
-    # ============================
-    - name: Build & install fcitx5
+    # ==============================================
+    # 第一步：编译 fcitx5 本体（你本地做过这一步）
+    # ==============================================
+    - name: 编译并安装 fcitx5 核心
       run: |
         git clone https://github.com/fcitx/fcitx5.git
         cd fcitx5
@@ -44,10 +51,10 @@ jobs:
         make -j$(nproc)
         sudo make install
 
-    # ============================
-    # 第二步：再编译 fcitx5-qt
-    # ============================
-    - name: Build & install fcitx5-qt
+    # ==============================================
+    # 第二步：编译 fcitx5-qt 插件（你要的文件）
+    # ==============================================
+    - name: 编译 fcitx5-qt (Qt6)
       run: |
         git clone https://github.com/fcitx/fcitx5-qt.git
         cd fcitx5-qt
@@ -60,10 +67,10 @@ jobs:
         make -j$(nproc)
         sudo make install
 
-    # ============================
-    # 输出你要的插件
-    # ============================
-    - name: Upload plugin
+    # ==============================================
+    # 上传你需要的插件文件
+    # ==============================================
+    - name: 上传编译好的输入法插件
       uses: actions/upload-artifact@v4
       with:
         name: fcitx5-qt6-plugin
