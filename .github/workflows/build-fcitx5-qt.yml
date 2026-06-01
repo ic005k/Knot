@@ -17,7 +17,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: qtcharts qtlocation qtmultimedia qtpositioning
 
-    - name: Install ALL dependencies 终极完整版
+    - name: Install ALL dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -49,9 +49,7 @@ jobs:
           libexpat1-dev \
           libx11-dev \
           qt6-base-dev \
-          nlohmann-json3-dev \
-          libpango1.0-dev \
-          libgtest-dev
+          nlohmann-json3-dev
 
     - name: Build & install xcb-imdkit
       run: |
@@ -63,7 +61,7 @@ jobs:
         sudo make install
         sudo ldconfig
 
-    - name: Build & install fcitx5 core 【关闭 yoga + wayland 版本检查】
+    - name: Build & install fcitx5 core 【全关闭，零报错】
       run: |
         git clone https://github.com/fcitx/fcitx5.git
         cd fcitx5
@@ -78,7 +76,9 @@ jobs:
           -DENABLE_GTK3=OFF \
           -DENABLE_QT6=OFF \
           -DENABLE_QT5=OFF \
-          -DUSE_YOGA=OFF
+          -DUSE_YOGA=OFF \
+          -DENABLE_ENCHANT=OFF \
+          -DENABLE_X11=ON
         make -j$(nproc)
         sudo make install
         sudo ldconfig
@@ -103,6 +103,7 @@ jobs:
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
+      actions/upload-artifact
       with:
         name: fcitx5-qt6-qt-6.10.3
         path: |
