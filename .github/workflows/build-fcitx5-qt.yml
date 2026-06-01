@@ -37,6 +37,8 @@ jobs:
           libxcb-util0-dev \
           libxcb-keysyms1-dev \
           libxcb-xinerama0-dev \
+          libuv1-dev \
+          libsystemd-dev \
           qt6-base-dev
 
     - name: Build & install fcitx5 core from source
