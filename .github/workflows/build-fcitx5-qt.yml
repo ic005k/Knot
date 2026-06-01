@@ -1,6 +1,5 @@
 name: Build fcitx5-qt for Qt 6.10.3
 
-# 保留自动触发（成功后你再删除）
 on:
   push:
     branches: [ main, master ]
@@ -15,44 +14,57 @@ jobs:
       QT_VERSION: "6.10.3"
 
     steps:
-    - name: Install Qt 6.10.3
+    - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
-        modules: qtcharts qtlocation qtmultimedia qtpositioning
 
-    - name: Install base dependencies
+    - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt install -y \
-          build-essential \
-          cmake \
-          extra-cmake-modules \
-          pkg-config \
-          git \
-          libxkbcommon-dev \
-          libwayland-dev
+          build-essential cmake extra-cmake-modules pkg-config git \
+          libxkbcommon-dev libwayland-dev libglib2.0-dev
 
-    # ==============================
-    # 关键：直接源码编译 fcitx5-qt
-    # 完全和你本地成功方式一样！
-    # ==============================
+    # ============================
+    # 第一步：必须先编译 fcitx5 本体
+    # ============================
+    - name: Build & install fcitx5
+      run: |
+        git clone https://github.com/fcitx/fcitx5.git
+        cd fcitx5
+        mkdir build && cd build
+        cmake .. \
+          -DENABLE_TESTING=OFF \
+          -DENABLE_WAYLAND=OFF \
+          -DENABLE_PANGO=OFF \
+          -DENABLE_GTK=OFF \
+          -DUSE_YOGA=OFF \
+          -Wno-dev
+        make -j$(nproc)
+        sudo make install
+
+    # ============================
+    # 第二步：再编译 fcitx5-qt
+    # ============================
     - name: Build & install fcitx5-qt
       run: |
         git clone https://github.com/fcitx/fcitx5-qt.git
         cd fcitx5-qt
         mkdir build && cd build
         cmake .. \
-          -DCMAKE_PREFIX_PATH="$Qt6_DIR" \
+          -DCMAKE_PREFIX_PATH="$Qt6_DIR;/usr/local" \
           -DENABLE_QT6=ON \
           -DENABLE_QT5=OFF \
           -DBUILD_TESTING=OFF
         make -j$(nproc)
         sudo make install
 
-    - name: Upload compiled plugin
+    # ============================
+    # 输出你要的插件
+    # ============================
+    - name: Upload plugin
       uses: actions/upload-artifact@v4
       with:
         name: fcitx5-qt6-plugin
-        path: |
-          /usr/local/lib/qt6/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
+        path: /usr/local/lib/qt6/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
