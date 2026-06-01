@@ -1,6 +1,5 @@
 name: Build fcitx5-qt for Qt 6.10.3
 
-# 保留自动触发（成功后你再删）
 on:
   push:
     branches: [ main, master ]
@@ -15,28 +14,26 @@ jobs:
       QT_VERSION: "6.10.3"
 
     steps:
-    - name: Install Qt 6.10.3
+    - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
 
-    - name: 安装基础编译依赖
+    - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt install -y \
-          build-essential \
-          cmake \
-          extra-cmake-modules \
-          pkg-config \
-          git \
-          libglib2.0-dev \
-          libxkbcommon-dev \
-          libwayland-dev
+          build-essential cmake extra-cmake-modules pkg-config git \
+          libxkbcommon-dev libwayland-dev libglib2.0-dev \
+          libdbus-1-dev libuv1-dev libevent-dev libfmt-dev \
+          libxcb-util0-dev libxcb-ewmh-dev libxcb-icccm4-dev \
+          libxcb-keysyms1-dev libxcb-xinerama0-dev libxcb-xkb-dev \
+          libx11-dev libxkbfile-dev libxfixes-dev \
+          libjson-c-dev libcairo2-dev libpango1.0-dev \
+          libenchant-2-dev libsystemd-dev
 
-    # ==============================================
-    # 第一步：编译 fcitx5 本体（你本地做过这一步）
-    # ==============================================
-    - name: 编译并安装 fcitx5 核心
+    # 第一步：编译 fcitx5 本体
+    - name: Build & install fcitx5
       run: |
         git clone https://github.com/fcitx/fcitx5.git
         cd fcitx5
@@ -51,10 +48,8 @@ jobs:
         make -j$(nproc)
         sudo make install
 
-    # ==============================================
-    # 第二步：编译 fcitx5-qt 插件（你要的文件）
-    # ==============================================
-    - name: 编译 fcitx5-qt (Qt6)
+    # 第二步：编译 fcitx5-qt
+    - name: Build & install fcitx5-qt
       run: |
         git clone https://github.com/fcitx/fcitx5-qt.git
         cd fcitx5-qt
@@ -67,10 +62,8 @@ jobs:
         make -j$(nproc)
         sudo make install
 
-    # ==============================================
-    # 上传你需要的插件文件
-    # ==============================================
-    - name: 上传编译好的输入法插件
+    # 上传插件
+    - name: Upload plugin
       uses: actions/upload-artifact@v4
       with:
         name: fcitx5-qt6-plugin
