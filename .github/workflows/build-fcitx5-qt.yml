@@ -1,19 +1,18 @@
 name: Build fcitx5-qt for Qt 6.10.3
 
-# 🔥 自动触发：push 或 PR 都会自动运行
+# 暂时保留自动触发，成功后你自己删除 push / pull_request 即可
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch: # 保留手动运行（可选）
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-22.04
     env:
       QT_VERSION: "6.10.3"
-      FCITX5_PREFIX: "/usr/local"
 
     steps:
     - name: Install Qt
@@ -22,72 +21,25 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: qtcharts qtlocation qtmultimedia qtpositioning
 
-    - name: Install ALL dependencies
+    - name: Install dependencies (完全按你本地成功的版本)
       run: |
         sudo apt-get update
-        sudo apt-get install -y \
+        sudo apt install -y \
           build-essential \
           cmake \
           extra-cmake-modules \
           pkg-config \
-          git \
-          gettext \
-          libuv1-dev \
-          libsystemd-dev \
-          libxkbcommon-dev \
-          libxkbcommon-x11-dev \
+          libfcitx5-dev \
+          libfcitx5-qt-dev \
           libwayland-dev \
-          libglib2.0-dev \
-          libdbus-1-dev \
-          libxcb1-dev \
-          libxcb-randr0-dev \
-          libxcb-image0-dev \
-          libxcb-util0-dev \
-          libxcb-keysyms1-dev \
-          libxcb-xinerama0-dev \
-          libxcb-shape0-dev \
-          libxcb-xfixes0-dev \
-          libxcb-ewmh-dev \
-          libxcb-icccm4-dev \
-          libxcb-imdkit-dev \
-          libcairo2-dev \
-          libexpat1-dev \
-          libx11-dev \
-          qt6-base-dev \
-          nlohmann-json3-dev
-
-    - name: Build & install xcb-imdkit
-      run: |
-        git clone https://github.com/fcitx/xcb-imdkit.git
-        cd xcb-imdkit
-        mkdir build && cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ env.FCITX5_PREFIX }}
-        make -j$(nproc)
-        sudo make install
-        sudo ldconfig
-
-    - name: Build & install fcitx5 core
-      run: |
-        git clone https://github.com/fcitx/fcitx5.git
-        cd fcitx5
-        mkdir build && cd build
-        cmake .. \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_INSTALL_PREFIX=${{ env.FCITX5_PREFIX }} \
-          -DENABLE_TESTING=OFF \
-          -DENABLE_WAYLAND=OFF \
-          -DENABLE_PANGO=OFF \
-          -DENABLE_GTK2=OFF \
-          -DENABLE_GTK3=OFF \
-          -DENABLE_QT6=OFF \
-          -DENABLE_QT5=OFF \
-          -DUSE_YOGA=OFF \
-          -DENABLE_ENCHANT=OFF \
-          -DENABLE_X11=ON \
-          -W no-dev
-        make -j$(nproc)
-        sudo make install
-        sudo ldconfig
+          libwayland-egl-backend-dev \
+          libwayland-cursor-dev \
+          libwayland-egl-dev \
+          libwayland-server-dev \
+          libxkbcommon-dev \
+          libvulkan-dev \
+          mesa-common-dev \
+          vulkan-validationlayers-dev
 
     - name: Checkout fcitx5-qt
       uses: actions/checkout@v4
@@ -95,17 +47,17 @@ jobs:
         repository: fcitx/fcitx5-qt
         path: fcitx5-qt
 
-    - name: Build fcitx5-qt (Qt6 only)
+    - name: Build fcitx5-qt (和你本地命令完全一致)
       working-directory: fcitx5-qt
       run: |
-        mkdir build && cd build
+        mkdir -p build && cd build
+        rm -rf *
         cmake .. \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_PREFIX_PATH=$Qt6_DIR \
-          -DENABLE_QT5=OFF \
+          -DCMAKE_INSTALL_RPATH="$ORIGIN" \
+          -DCMAKE_PREFIX_PATH="$Qt6_DIR;/usr" \
           -DENABLE_QT6=ON \
-          -DBUILD_TESTING=OFF \
-          -W no-dev
+          -DENABLE_QT5=OFF \
+          -DBUILD_SHARED_LIBS=OFF
         make -j$(nproc)
 
     - name: Upload artifact
