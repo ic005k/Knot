@@ -17,7 +17,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: qtcharts qtlocation qtmultimedia qtpositioning
 
-    - name: Install ALL dependencies 最终完整版
+    - name: Install ALL dependencies 终极完整版
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -49,7 +49,9 @@ jobs:
           libexpat1-dev \
           libx11-dev \
           qt6-base-dev \
-          nlohmann-json3-dev
+          nlohmann-json3-dev \
+          libpango1.0-dev \
+          libgtest-dev
 
     - name: Build & install xcb-imdkit
       run: |
@@ -61,7 +63,7 @@ jobs:
         sudo make install
         sudo ldconfig
 
-    - name: Build & install fcitx5 core
+    - name: Build & install fcitx5 core 【关闭 yoga + wayland 版本检查】
       run: |
         git clone https://github.com/fcitx/fcitx5.git
         cd fcitx5
@@ -69,7 +71,14 @@ jobs:
         cmake .. \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_INSTALL_PREFIX=${{ env.FCITX5_PREFIX }} \
-          -DENABLE_TESTING=OFF
+          -DENABLE_TESTING=OFF \
+          -DENABLE_WAYLAND=OFF \
+          -DENABLE_PANGO=OFF \
+          -DENABLE_GTK2=OFF \
+          -DENABLE_GTK3=OFF \
+          -DENABLE_QT6=OFF \
+          -DENABLE_QT5=OFF \
+          -DUSE_YOGA=OFF
         make -j$(nproc)
         sudo make install
         sudo ldconfig
