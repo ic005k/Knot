@@ -15,10 +15,13 @@ EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
 
   // ========== 自定义下拉补全（安卓不崩溃） ==========
   m_suggestList = new QListWidget(this);
-  m_suggestList->setWindowFlags(Qt::FramelessWindowHint | Qt::Window |
-                                Qt::WindowDoesNotAcceptFocus);
+  m_suggestList->setWindowFlags(Qt::FramelessWindowHint |
+                                Qt::WindowStaysOnTopHint | Qt::Tool);
   m_suggestList->setFocusPolicy(Qt::NoFocus);
   m_suggestList->setHidden(true);
+  // m_suggestList->setVerticalScrollMode(QListWidget::ScrollPerPixel);
+  // QScroller::grabGesture(m_suggestList->viewport(), QScroller::TouchGesture);
+  m_suggestList->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
 
   // 样式：看起来像系统下拉
   m_suggestList->setStyleSheet(R"(
@@ -70,6 +73,8 @@ EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
     // 把完整匹配列表设置给补全器 ✔️
     m_completerModel->setStringList(matchList);
   });
+
+  //------------------------------------------------
 
   mui->editCategory->setFocus();
   mui->editDetails->setAcceptRichText(false);
@@ -133,10 +138,6 @@ EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
   mui->hsM->setStyleSheet(mui->hsH->styleSheet());
 
   m_Method->qssSlider = mui->hsH->styleSheet();
-
-  // QScroller::grabGesture(mui->editDetails,
-  // QScroller::LeftMouseButtonGesture);
-  // m_Method->setSCrollPro(mui->editDetails);
 }
 
 void EditRecord::init() {
@@ -396,6 +397,11 @@ void EditRecord::on_hsM_valueChanged(int value) {
 void EditRecord::on_btnClearDetails_clicked() { mui->editDetails->clear(); }
 
 void EditRecord::on_editCategory_textChanged(const QString& arg1) {
+  if (m_isUpdatingList) {
+    m_isUpdatingList = false;
+    return;
+  }
+
   if (arg1.length() > 0) {
     mui->lblCategory->setStyleSheet(lblStyleHighLight);
     if (!isDark) {
@@ -417,7 +423,7 @@ void EditRecord::on_editCategory_textChanged(const QString& arg1) {
     return;
   }
 
-  showSuggestions();
+  QTimer::singleShot(0, this, [this]() { showSuggestions(); });
 }
 
 void EditRecord::on_editDetails_textChanged() {
@@ -627,6 +633,8 @@ void EditRecord::hideSuggestions() {
 
 // 点击条目 → 填入输入框
 void EditRecord::onSuggestionClicked(QListWidgetItem* item) {
+  m_isUpdatingList = true;
+
   mui->editCategory->setText(item->text());
   hideSuggestions();  // ✅ 只需要这个
 }
