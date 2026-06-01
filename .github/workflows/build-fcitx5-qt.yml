@@ -1,6 +1,5 @@
 name: Build fcitx5-qt for Qt 6.10.3
 
-# 暂时保留自动触发，成功后你自己删除 push / pull_request 即可
 on:
   push:
     branches: [ main, master ]
@@ -21,7 +20,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: qtcharts qtlocation qtmultimedia qtpositioning
 
-    - name: Install dependencies (完全按你本地成功的版本)
+    - name: Install dependencies (Ubuntu 22.04 官方源 100% 存在)
       run: |
         sudo apt-get update
         sudo apt install -y \
@@ -29,17 +28,10 @@ jobs:
           cmake \
           extra-cmake-modules \
           pkg-config \
-          libfcitx5-dev \
-          libfcitx5-qt-dev \
-          libwayland-dev \
-          libwayland-egl-backend-dev \
-          libwayland-cursor-dev \
-          libwayland-egl-dev \
-          libwayland-server-dev \
+          fcitx5-libdev \
+          fcitx5-qt-libdev \
           libxkbcommon-dev \
-          libvulkan-dev \
-          mesa-common-dev \
-          vulkan-validationlayers-dev
+          libwayland-dev
 
     - name: Checkout fcitx5-qt
       uses: actions/checkout@v4
@@ -47,17 +39,15 @@ jobs:
         repository: fcitx/fcitx5-qt
         path: fcitx5-qt
 
-    - name: Build fcitx5-qt (和你本地命令完全一致)
+    - name: Build fcitx5-qt
       working-directory: fcitx5-qt
       run: |
         mkdir -p build && cd build
-        rm -rf *
         cmake .. \
-          -DCMAKE_INSTALL_RPATH="$ORIGIN" \
-          -DCMAKE_PREFIX_PATH="$Qt6_DIR;/usr" \
+          -DCMAKE_PREFIX_PATH="$Qt6_DIR" \
           -DENABLE_QT6=ON \
           -DENABLE_QT5=OFF \
-          -DBUILD_SHARED_LIBS=OFF
+          -DBUILD_TESTING=OFF
         make -j$(nproc)
 
     - name: Upload artifact
