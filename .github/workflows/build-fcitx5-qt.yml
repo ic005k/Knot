@@ -1,0 +1,60 @@
+name: Build fcitx5-qt for Qt 6.10.3
+
+on:
+  workflow_dispatch:   # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    env:
+      QT_VERSION: "6.10.3"
+      QT_ARCH: "gcc_64"
+      FCITX5QT_BRANCH: "master"
+
+    steps:
+    - name: Checkout fcitx5-qt
+      uses: actions/checkout@v4
+      with:
+        repository: fcitx/fcitx5-qt
+        ref: ${{ env.FCITX5QT_BRANCH }}
+        path: fcitx5-qt
+
+    - name: Install system deps
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential cmake extra-cmake-modules \
+          libfcitx5-dev libxkbcommon-dev \
+          libwayland-dev pkg-config
+
+    - name: Install aqtinstall & Qt
+      run: |
+        pip3 install aqtinstall
+        aqt install-qt linux desktop ${{ env.QT_VERSION }} ${{ env.QT_ARCH }} \
+          --outputdir /opt/Qt
+        echo "/opt/Qt/${{ env.QT_VERSION }}/${{ env.QT_ARCH }}/bin" >> $GITHUB_PATH
+
+    - name: Build fcitx5-qt (Qt6 only)
+      working-directory: fcitx5-qt
+      run: |
+        mkdir build && cd build
+        cmake .. \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_PREFIX_PATH=/opt/Qt/${{ env.QT_VERSION }}/${{ env.QT_ARCH }} \
+          -DENABLE_QT5=OFF \
+          -DENABLE_QT6=ON \
+          -DBUILD_TESTING=OFF
+        make -j$(nproc)
+
+    - name: Collect artifacts
+      run: |
+        mkdir -p dist
+        cp fcitx5-qt/build/qt6/platforminputcontext/libfcitx5platforminputcontextplugin.so dist/
+        cp fcitx5-qt/build/qt6/dbusaddons/libFcitx5Qt6DBusAddons.so* dist/
+        ls -lh dist/
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: fcitx5-qt6-qt-6.10.3
+        path: dist/
