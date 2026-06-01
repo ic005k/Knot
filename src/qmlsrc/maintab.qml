@@ -148,7 +148,7 @@ Rectangle {
                 }
             }
 
-            /*MouseArea {
+            MouseArea {
                 anchors.fill: parent
 
                 // ========== Qt6 专用：滚动时不触发点击 ==========
@@ -188,9 +188,9 @@ Rectangle {
                 onReleased: {
                     scaleFactor = 1.0;
                 }
-            }*/
+            }
 
-            MouseArea {
+            /*MouseArea {
                 id: mouse
                 anchors.fill: parent
 
@@ -230,7 +230,7 @@ Rectangle {
                 onCanceled: {
                     scaleFactor = 1.0;
                 }
-            }
+            }*/
 
             color: {
                 if (isFlagToday) {

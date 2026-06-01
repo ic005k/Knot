@@ -8,7 +8,6 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       QT_VERSION: "6.10.3"
-      QT_ARCH: "gcc_64"
       FCITX5_PREFIX: "/usr/local"
 
     steps:
@@ -18,7 +17,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: qtcharts qtlocation qtmultimedia qtpositioning
 
-    - name: Install ALL dependencies (最终完整版，再也不缺)
+    - name: Install ALL dependencies (最终完整版)
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -30,7 +29,6 @@ jobs:
           gettext \
           libuv1-dev \
           libsystemd-dev \
-          libpthread-stubs0-dev \
           libxkbcommon-dev \
           libxkbcommon-x11-dev \
           libwayland-dev \
@@ -48,7 +46,6 @@ jobs:
           libxcb-icccm4-dev \
           libxcb-imdkit-dev \
           libcairo2-dev \
-          libcairo-xcb-dev \
           libexpat1-dev \
           libx11-dev \
           qt6-base-dev
