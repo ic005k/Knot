@@ -20,23 +20,18 @@ jobs:
     - name: Install system deps
       run: |
         sudo apt-get update
-        # 添加 fcitx5 官方PPA（获取最新完整依赖）
-        sudo add-apt-repository ppa:fcitx-team/nightly -y
-        sudo apt-get update
-        # 安装 Ubuntu 22.04 支持的正确依赖包
         sudo apt-get install -y \
           build-essential \
           cmake \
           extra-cmake-modules \
           pkg-config \
-          fcitx5 \
-          fcitx5-libdev \
-          libfcitx5-qt-dev \
+          fcitx5-modules-dev \
           libxkbcommon-dev \
           libwayland-dev \
           libglib2.0-dev \
           libdbus-1-dev \
-          qt6-base-dev
+          qt6-base-dev \
+          libqt6core5compat6-dev
 
     - name: Checkout fcitx5-qt
       uses: actions/checkout@v4
