@@ -20,12 +20,20 @@ jobs:
     - name: Install system deps
       run: |
         sudo apt-get update
+        # 添加 fcitx5 官方稳定源（支持 jammy，不会404）
+        echo "deb https://download.fcitx-im.org/fcitx5/ubuntu-jammy/ ./" | sudo tee /etc/apt/sources.list.d/fcitx5.list
+        curl -https://download.fcitx-im.org/fcitx5/fcitx5.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/fcitx5.gpg > /dev/null
+        sudo apt-get update
+
+        # 安装新版依赖（满足 Fcitx5Utils >=5.0.16）
         sudo apt-get install -y \
           build-essential \
           cmake \
           extra-cmake-modules \
           pkg-config \
-          fcitx5-modules-dev \
+          fcitx5 \
+          libfcitx5-dev \
+          libfcitx5-qt-dev \
           libxkbcommon-dev \
           libwayland-dev \
           libglib2.0-dev \
