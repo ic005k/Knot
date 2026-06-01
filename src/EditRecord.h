@@ -44,6 +44,7 @@ class EditRecord : public QDialog {
   void keyReleaseEvent(QKeyEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
+  void mousePressEvent(QMouseEvent* event) override;
  public slots:
   void on_btnOk_clicked();
 
@@ -83,6 +84,9 @@ class EditRecord : public QDialog {
 
   void monthSum();
 
+ private slots:
+  void onSuggestionClicked(QListWidgetItem* item);
+
  private:
   void set_Amount(QString Number);
 
@@ -90,10 +94,15 @@ class EditRecord : public QDialog {
   QStringListModel* m_completerModel = nullptr;
   QTimer* m_completerTimer = nullptr;
 
+  QListWidget* m_suggestList;  // 自定义下拉列表
+  bool m_isUpdatingList = false;
+
   QString lblStyle;
   int nH;
 
   static QList<int> getExistingYears(QTreeWidget* tw);
+  void showSuggestions();
+  void hideSuggestions();
 };
 
 #endif  // EDITRECORD_H

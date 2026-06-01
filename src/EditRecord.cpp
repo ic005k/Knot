@@ -13,18 +13,62 @@ EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
 
   this->installEventFilter(this);
 
+  // ========== 自定义下拉补全（安卓不崩溃） ==========
+  m_suggestList = new QListWidget(this);
+  m_suggestList->setWindowFlags(Qt::FramelessWindowHint | Qt::Window |
+                                Qt::WindowDoesNotAcceptFocus);
+  m_suggestList->setFocusPolicy(Qt::NoFocus);
+  m_suggestList->setHidden(true);
+
+  // 样式：看起来像系统下拉
+  m_suggestList->setStyleSheet(R"(
+    QListWidget {
+        background-color: #ffffff;
+        border: 1px solid #cccccc;
+        font-size: 16px;
+        color: #333333;
+    }
+    QListWidget::item {
+        padding: 10px 14px;
+    }
+    QListWidget::item:selected {
+        background-color: #007bff;
+        color: white;
+    }
+)");
+
+  // 点击条目自动填入输入框
+  connect(m_suggestList, &QListWidget::itemClicked, this,
+          &EditRecord::onSuggestionClicked);
+
+  //====================================================
+
   m_completer = new QCompleter(this);
   m_completer->setFilterMode(Qt::MatchContains);
   m_completerModel = new QStringListModel(this);
   m_completer->setModel(m_completerModel);
+  m_completer->setCompletionMode(QCompleter::InlineCompletion);
   mui->editCategory->setCompleter(m_completer);
 
   m_completerTimer = new QTimer(this);
   m_completerTimer->setSingleShot(true);
   m_completerTimer->setInterval(50);
   connect(m_completerTimer, &QTimer::timeout, this, [this] {
-    if (m_completerModel->stringList() != c_list)
-      m_completerModel->setStringList(c_list);
+    // 获取输入的文字
+    QString input = mui->editCategory->text().trimmed();
+
+    // 存储匹配到的完整分类
+    QStringList matchList;
+
+    // 遍历所有分类，筛选包含输入文字的项
+    for (const QString& item : std::as_const(c_list)) {
+      if (item.contains(input, Qt::CaseInsensitive)) {  // 不区分大小写
+        matchList << item;
+      }
+    }
+
+    // 把完整匹配列表设置给补全器 ✔️
+    m_completerModel->setStringList(matchList);
   });
 
   mui->editCategory->setFocus();
@@ -109,8 +153,6 @@ void EditRecord::init() {
 }
 
 EditRecord::~EditRecord() { delete m_CategoryList; }
-
-void EditRecord::keyReleaseEvent(QKeyEvent* event) { Q_UNUSED(event); }
 
 void EditRecord::on_btnOk_clicked() {
   mw_one->on_btnBackEditRecord_pressed();
@@ -313,7 +355,10 @@ bool EditRecord::eventFilter(QObject* watch, QEvent* evn) {
 
 void EditRecord::on_btnClearAmount_clicked() { mui->editAmount->clear(); }
 
-void EditRecord::on_btnClearDesc_clicked() { mui->editCategory->clear(); }
+void EditRecord::on_btnClearDesc_clicked() {
+  mui->editCategory->clear();
+  hideSuggestions();
+}
 
 void EditRecord::on_editAmount_textChanged(const QString& arg1) {
   int count = 0;
@@ -364,7 +409,15 @@ void EditRecord::on_editCategory_textChanged(const QString& arg1) {
   }
 
   // 防抖：避免 IME 高频触发
-  m_completerTimer->start();
+  // m_completerTimer->start();
+
+  // 空内容就隐藏
+  if (arg1.trimmed().isEmpty()) {
+    hideSuggestions();
+    return;
+  }
+
+  showSuggestions();
 }
 
 void EditRecord::on_editDetails_textChanged() {
@@ -528,4 +581,65 @@ QList<int> EditRecord::getExistingYears(QTreeWidget* tw) {
   std::sort(yearsList.begin(), yearsList.end());
 
   return yearsList;
+}
+
+void EditRecord::showSuggestions() {
+  QString input = mui->editCategory->text().trimmed().toLower();
+  if (input.isEmpty()) {
+    hideSuggestions();
+    return;
+  }
+
+  m_suggestList->clear();
+  QStringList matches;
+
+  for (const QString& item : std::as_const(c_list)) {
+    if (item.toLower().contains(input)) {
+      matches << item;
+    }
+  }
+
+  if (matches.isEmpty()) {
+    m_suggestList->hide();
+    return;
+  }
+
+  for (int i = 0; i < qMin(8, matches.size()); ++i) {
+    m_suggestList->addItem(matches[i]);
+  }
+
+  // ==============================================
+  // ✅ 绝对全局坐标，永远不飘，永远在输入框正下方
+  // ==============================================
+  QPoint globalPos =
+      mui->editCategory->mapToGlobal(QPoint(0, mui->editCategory->height()));
+  int w = mui->editCategory->width();
+  int h = qMin(200, m_suggestList->sizeHint().height());
+
+  m_suggestList->setGeometry(globalPos.x(), globalPos.y(), w, h);
+  m_suggestList->show();
+}
+
+void EditRecord::hideSuggestions() {
+  m_suggestList->hide();
+  m_suggestList->clear();
+}
+
+// 点击条目 → 填入输入框
+void EditRecord::onSuggestionClicked(QListWidgetItem* item) {
+  mui->editCategory->setText(item->text());
+  hideSuggestions();  // ✅ 只需要这个
+}
+
+void EditRecord::mousePressEvent(QMouseEvent* event) {
+  if (!m_suggestList->geometry().contains(event->pos())) {
+    hideSuggestions();
+  }
+  QDialog::mousePressEvent(event);
+}
+
+void EditRecord::keyReleaseEvent(QKeyEvent* event) {
+  if (event->key() == Qt::Key_Back || event->key() == Qt::Key_Return) {
+    hideSuggestions();
+  }
 }
