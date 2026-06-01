@@ -1,7 +1,12 @@
 name: Build fcitx5-qt for Qt 6.10.3
 
+# 🔥 自动触发：push 或 PR 都会自动运行
 on:
-  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: # 保留手动运行（可选）
 
 jobs:
   build:
@@ -78,7 +83,8 @@ jobs:
           -DENABLE_QT5=OFF \
           -DUSE_YOGA=OFF \
           -DENABLE_ENCHANT=OFF \
-          -DENABLE_X11=ON
+          -DENABLE_X11=ON \
+          -W no-dev
         make -j$(nproc)
         sudo make install
         sudo ldconfig
@@ -98,7 +104,8 @@ jobs:
           -DCMAKE_PREFIX_PATH=$Qt6_DIR \
           -DENABLE_QT5=OFF \
           -DENABLE_QT6=ON \
-          -DBUILD_TESTING=OFF
+          -DBUILD_TESTING=OFF \
+          -W no-dev
         make -j$(nproc)
 
     - name: Upload artifact
