@@ -14,46 +14,52 @@ jobs:
       QT_VERSION: "6.10.3"
 
     steps:
-    - name: Install Qt
+    - name: Install Qt 6.10.3
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         modules: qtcharts qtlocation qtmultimedia qtpositioning
 
-    - name: Install dependencies (Ubuntu 22.04 官方源 100% 存在)
+    - name: 添加 fcitx 官方 PPA + 安装全部依赖
       run: |
+        sudo apt-get update
+        sudo add-apt-repository -y ppa:fcitx-team/nightly
         sudo apt-get update
         sudo apt install -y \
           build-essential \
           cmake \
           extra-cmake-modules \
           pkg-config \
-          fcitx5-libdev \
-          fcitx5-qt-libdev \
+          libfcitx5core-dev \
+          libfcitx5config-dev \
+          libfcitx5utils-dev \
+          libfcitx5-qt-dev \
           libxkbcommon-dev \
           libwayland-dev
 
-    - name: Checkout fcitx5-qt
+    - name: 拉取 fcitx5-qt 源码
       uses: actions/checkout@v4
       with:
         repository: fcitx/fcitx5-qt
         path: fcitx5-qt
 
-    - name: Build fcitx5-qt
+    - name: 编译 fcitx5-qt (Qt6 专用)
       working-directory: fcitx5-qt
       run: |
         mkdir -p build && cd build
+        rm -rf *
         cmake .. \
-          -DCMAKE_PREFIX_PATH="$Qt6_DIR" \
+          -DCMAKE_INSTALL_RPATH="$ORIGIN" \
+          -DCMAKE_PREFIX_PATH="$Qt6_DIR;/usr" \
           -DENABLE_QT6=ON \
           -DENABLE_QT5=OFF \
-          -DBUILD_TESTING=OFF
+          -DBUILD_SHARED_LIBS=OFF
         make -j$(nproc)
 
-    - name: Upload artifact
+    - name: 上传编译好的插件文件
       uses: actions/upload-artifact@v4
       with:
-        name: fcitx5-qt6-qt-6.10.3
+        name: fcitx5-qt6-plugin
         path: |
-          fcitx5-qt/build/qt6/platforminputcontext/libfcitx5platforminputcontextplugin.so
-          fcitx5-qt/build/qt6/dbusaddons/libFcitx5Qt6DBusAddons.so*
+          fcitx5-qt/build/qt/platforminputcontext/libfcitx5platforminputcontextplugin.so
+          fcitx5-qt/build/qt/addons/fcitx5-qt6-immodule.so
