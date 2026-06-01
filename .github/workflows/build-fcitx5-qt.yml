@@ -26,7 +26,6 @@ jobs:
         extra-cmake-modules \
         pkg-config \
         fcitx5 \
-        fcitx5\
         libfcitx5-dev \
         libfcitx5-qt-dev \
         libxkbcommon-dev \
