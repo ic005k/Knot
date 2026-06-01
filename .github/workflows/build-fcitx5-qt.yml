@@ -18,7 +18,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: qtcharts qtlocation qtmultimedia qtpositioning
 
-    - name: Install system base deps (apt official)
+    - name: Install ALL system dependencies (100% complete)
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -27,6 +27,9 @@ jobs:
           extra-cmake-modules \
           pkg-config \
           git \
+          gettext \
+          libuv1-dev \
+          libsystemd-dev \
           libxkbcommon-dev \
           libwayland-dev \
           libglib2.0-dev \
@@ -37,9 +40,10 @@ jobs:
           libxcb-util0-dev \
           libxcb-keysyms1-dev \
           libxcb-xinerama0-dev \
-          libuv1-dev \
-          libsystemd-dev \
-          gettext \
+          libxcb-shape0-dev \
+          libxcb-xfixes0-dev \
+          libxcb-ewmh-dev \
+          libxcb-icccm4-dev \
           qt6-base-dev
 
     - name: Build & install fcitx5 core from source
@@ -53,8 +57,7 @@ jobs:
           -DENABLE_TESTING=OFF
         make -j$(nproc)
         sudo make install
-        # 让后续 cmake 能找到 fcitx5
-        echo "${{ env.FCITX5_PREFIX }}/lib/x86_64-linux-gnu" | sudo tee /etc/ld.so.conf.d/fcitx5.conf
+        echo "/usr/local/lib/x86_64-linux-gnu" | sudo tee /etc/ld.so.conf.d/fcitx5.conf
         sudo ldconfig
 
     - name: Checkout fcitx5-qt
@@ -63,14 +66,13 @@ jobs:
         repository: fcitx/fcitx5-qt
         path: fcitx5-qt
 
-    - name: Build fcitx5-qt (Qt6 only, link to self-built fcitx5)
+    - name: Build fcitx5-qt (Qt6 only)
       working-directory: fcitx5-qt
       run: |
         mkdir build && cd build
         cmake .. \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_PREFIX_PATH=$Qt6_DIR \
-          -DCMAKE_INSTALL_PREFIX=${{ env.FCITX5_PREFIX }} \
           -DENABLE_QT5=OFF \
           -DENABLE_QT6=ON \
           -DBUILD_TESTING=OFF
