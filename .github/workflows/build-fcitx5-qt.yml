@@ -1,3 +1,13 @@
+name: Build fcitx5-qt for Qt 6.10.3
+
+# 保留自动触发（成功后你再删除）
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -5,32 +15,44 @@ jobs:
       QT_VERSION: "6.10.3"
 
     steps:
-    - name: Install Qt
+    - name: Install Qt 6.10.3
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
+        modules: qtcharts qtlocation qtmultimedia qtpositioning
 
-    - name: Install system dependencies (no PPA)
+    - name: Install base dependencies
       run: |
         sudo apt-get update
         sudo apt install -y \
-          build-essential cmake extra-cmake-modules pkg-config \
-          libxkbcommon-dev libwayland-dev git
+          build-essential \
+          cmake \
+          extra-cmake-modules \
+          pkg-config \
+          git \
+          libxkbcommon-dev \
+          libwayland-dev
 
-    - name: Build fcitx5-qt from source (Qt6)
+    # ==============================
+    # 关键：直接源码编译 fcitx5-qt
+    # 完全和你本地成功方式一样！
+    # ==============================
+    - name: Build & install fcitx5-qt
       run: |
         git clone https://github.com/fcitx/fcitx5-qt.git
         cd fcitx5-qt
         mkdir build && cd build
         cmake .. \
-          -DCMAKE_PREFIX_PATH="$Qt6_DIR;/usr" \
-          -DENABLE_QT6=ON -DENABLE_QT5=OFF
+          -DCMAKE_PREFIX_PATH="$Qt6_DIR" \
+          -DENABLE_QT6=ON \
+          -DENABLE_QT5=OFF \
+          -DBUILD_TESTING=OFF
         make -j$(nproc)
         sudo make install
 
-    - name: Build Knot
-      run: |
-        # 你的 Knot 编译命令，直接用，现在系统里已经有 fcitx5-qt 的头文件和库了
-        mkdir build && cd build
-        cmake .. -DCMAKE_PREFIX_PATH="$Qt6_DIR"
-        make -j$(nproc)
+    - name: Upload compiled plugin
+      uses: actions/upload-artifact@v4
+      with:
+        name: fcitx5-qt6-plugin
+        path: |
+          /usr/local/lib/qt6/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so
