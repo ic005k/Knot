@@ -17,7 +17,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: qtcharts qtlocation qtmultimedia qtpositioning
 
-    - name: Install ALL dependencies (最终完整版)
+    - name: Install ALL dependencies 最终完整版
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -48,7 +48,8 @@ jobs:
           libcairo2-dev \
           libexpat1-dev \
           libx11-dev \
-          qt6-base-dev
+          qt6-base-dev \
+          nlohmann-json3-dev
 
     - name: Build & install xcb-imdkit
       run: |
