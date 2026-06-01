@@ -19,7 +19,7 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
 
-    - name: Install dependencies
+    - name: Install all dependencies (最后补全 gettext)
       run: |
         sudo apt-get update
         sudo apt install -y \
@@ -30,9 +30,10 @@ jobs:
           libxcb-keysyms1-dev libxcb-xinerama0-dev libxcb-xkb-dev \
           libx11-dev libxkbfile-dev libxfixes-dev \
           libjson-c-dev libcairo2-dev libpango1.0-dev \
-          libenchant-2-dev libsystemd-dev
+          libenchant-2-dev libsystemd-dev \
+          gettext gettext-dev
 
-    # 第一步：编译 fcitx5 本体
+    # 编译 fcitx5 本体
     - name: Build & install fcitx5
       run: |
         git clone https://github.com/fcitx/fcitx5.git
@@ -48,7 +49,7 @@ jobs:
         make -j$(nproc)
         sudo make install
 
-    # 第二步：编译 fcitx5-qt
+    # 编译 fcitx5-qt
     - name: Build & install fcitx5-qt
       run: |
         git clone https://github.com/fcitx/fcitx5-qt.git
