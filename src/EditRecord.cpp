@@ -13,6 +13,8 @@ EditRecord::EditRecord() {
 
   mw_one->installEventFilter(mw_one);
 
+  initSuggestList();
+
   mui->editCategory->setFocus();
   mui->editDetails->setAcceptRichText(false);
 
@@ -513,8 +515,6 @@ QList<int> EditRecord::getExistingYears(QTreeWidget* tw) {
 }
 
 void EditRecord::showSuggestions() {
-  initSuggestList();
-
   QString input = mui->editCategory->text().trimmed().toLower();
   if (input.isEmpty()) {
     hideSuggestions();
@@ -612,7 +612,13 @@ void EditRecord::initSuggestList() {
 
   // ========== 自定义下拉补全（安卓不崩溃） ==========
   m_suggestList = new QListWidget(mw_one);
-  m_suggestList->setWindowFlags(Qt::Widget | Qt::FramelessWindowHint);
+
+  if (isAndroid)
+    m_suggestList->setWindowFlags(Qt::Widget | Qt::FramelessWindowHint);
+  else {
+    m_suggestList->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
+  }
+
   m_suggestList->setFocusPolicy(Qt::NoFocus);
   m_suggestList->setHidden(true);
   m_suggestList->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);

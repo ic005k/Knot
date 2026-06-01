@@ -2336,8 +2336,6 @@ void MainWindow::on_btnBackSetTab_pressed() {
 void MainWindow::on_btnBackEditRecord_pressed() {
   clearWidgetFocus();
 
-  mw_one->m_EditRecord->delSuggestions();
-
   mui->frameMain->show();
   mui->frameEditRecord->hide();
 }
