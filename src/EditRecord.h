@@ -6,6 +6,7 @@
 #include <QList>
 #include <QListWidget>
 #include <QSet>
+#include <QStringListModel>
 #include <QTabWidget>
 #include <QTextEdit>
 #include <QWidgetAction>
@@ -22,14 +23,14 @@ class EditRecord : public QDialog {
   Q_OBJECT
 
  public:
-  explicit EditRecord(QWidget *parent = nullptr);
+  explicit EditRecord(QWidget* parent = nullptr);
   ~EditRecord();
-  Ui::EditRecord *ui;
+  Ui::EditRecord* ui;
 
   static void saveMyClassification();
   QString lblStyleHighLight =
       "QLabel{background: rgb(45,182,116); color:white;}";
-  static int removeDuplicates(QStringList *that);
+  static int removeDuplicates(QStringList* that);
 
   void init_MyCategory();
 
@@ -40,8 +41,8 @@ class EditRecord : public QDialog {
   static void saveCurrentYearData();
 
  protected:
-  void keyReleaseEvent(QKeyEvent *event) override;
-  bool eventFilter(QObject *watch, QEvent *evn) override;
+  void keyReleaseEvent(QKeyEvent* event) override;
+  bool eventFilter(QObject* watch, QEvent* evn) override;
 
  public slots:
   void on_btnOk_clicked();
@@ -65,7 +66,7 @@ class EditRecord : public QDialog {
 
   void on_btnClearDesc_clicked();
 
-  void on_editAmount_textChanged(const QString &arg1);
+  void on_editAmount_textChanged(const QString& arg1);
 
   void on_hsH_valueChanged(int value);
 
@@ -73,7 +74,7 @@ class EditRecord : public QDialog {
 
   void on_btnClearDetails_clicked();
 
-  void on_editCategory_textChanged(const QString &arg1);
+  void on_editCategory_textChanged(const QString& arg1);
 
   void on_editDetails_textChanged();
 
@@ -85,10 +86,14 @@ class EditRecord : public QDialog {
  private:
   void set_Amount(QString Number);
 
+  QCompleter* m_completer = nullptr;
+  QStringListModel* m_completerModel = nullptr;
+  QTimer* m_completerTimer = nullptr;
+
   QString lblStyle;
   int nH;
 
-  static QList<int> getExistingYears(QTreeWidget *tw);
+  static QList<int> getExistingYears(QTreeWidget* tw);
 };
 
 #endif  // EDITRECORD_H

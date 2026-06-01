@@ -13,6 +13,20 @@ EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
 
   this->installEventFilter(this);
 
+  m_completer = new QCompleter(this);
+  m_completer->setFilterMode(Qt::MatchContains);
+  m_completerModel = new QStringListModel(this);
+  m_completer->setModel(m_completerModel);
+  mui->editCategory->setCompleter(m_completer);
+
+  m_completerTimer = new QTimer(this);
+  m_completerTimer->setSingleShot(true);
+  m_completerTimer->setInterval(50);
+  connect(m_completerTimer, &QTimer::timeout, this, [this] {
+    if (m_completerModel->stringList() != c_list)
+      m_completerModel->setStringList(c_list);
+  });
+
   mui->editCategory->setFocus();
   mui->editDetails->setAcceptRichText(false);
 
@@ -349,9 +363,8 @@ void EditRecord::on_editCategory_textChanged(const QString& arg1) {
     }
   }
 
-  QCompleter* completer = new QCompleter(c_list);
-  completer->setFilterMode(Qt::MatchContains);
-  mui->editCategory->setCompleter(completer);
+  // 防抖：避免 IME 高频触发
+  m_completerTimer->start();
 }
 
 void EditRecord::on_editDetails_textChanged() {
