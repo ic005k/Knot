@@ -545,7 +545,7 @@ void EditRecord::showSuggestions() {
         QListWidget {
             background-color: #1E1E1E;
             border: 1px solid #444444;
-            font-size: 16px;
+            font-size: 18px;
             color: #EEEEEE;
         }
         QListWidget::item {
@@ -561,7 +561,7 @@ void EditRecord::showSuggestions() {
         QListWidget {
             background-color: #ffffff;
             border: 1px solid #cccccc;
-            font-size: 16px;
+            font-size: 18px;
             color: #333333;
         }
         QListWidget::item {
@@ -587,10 +587,12 @@ void EditRecord::showSuggestions() {
 }
 
 void EditRecord::delSuggestions() {
-  if (m_suggestList != nullptr) {
-    delete m_suggestList;
-    m_suggestList = nullptr;
-  }
+  if (!m_suggestList) return;
+
+  m_suggestList->setParent(nullptr);
+  m_suggestList->hide();
+  delete m_suggestList;
+  m_suggestList = nullptr;
 }
 
 // 点击条目 → 填入输入框
@@ -627,5 +629,8 @@ void EditRecord::initSuggestList() {
 }
 
 void EditRecord::hideSuggestions() {
-  if (m_suggestList) m_suggestList->close();
+  if (m_suggestList) {
+    m_suggestList->setGeometry(0, 0, 1, 1);
+    m_suggestList->close();
+  }
 }

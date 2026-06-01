@@ -404,6 +404,9 @@ void loadTheme(bool isDark) {
     }
   }
 
+  // 消除潜在的补全列表窗口
+  mui->editCategory->setText("");
+
   isInitThemeEnd = true;
 
   if (isNeedExecDeskShortcut) {
