@@ -196,6 +196,11 @@ void MainWindow::startSyncData() {
 MainWindow::~MainWindow() {
   delete mui;
 
+  if (m_EditRecord != nullptr) {
+    delete m_EditRecord;
+    m_EditRecord = nullptr;
+  }
+
   // 停止所有定时器
   timer->stop();
   timerSyncData->stop();
@@ -1452,7 +1457,7 @@ void MainWindow::init_Instance() {
 
   m_AboutThis = new AboutThis(this);
   m_Preferences = new Preferences(this);
-  m_EditRecord = new EditRecord(this);
+  m_EditRecord = new EditRecord();
   m_Todo = new Todo(this);
   m_Report = new Report(this);
   m_Notes = new Notes(this);
@@ -2330,6 +2335,8 @@ void MainWindow::on_btnBackSetTab_pressed() {
 
 void MainWindow::on_btnBackEditRecord_pressed() {
   clearWidgetFocus();
+
+  mw_one->m_EditRecord->delSuggestions();
 
   mui->frameMain->show();
   mui->frameEditRecord->hide();

@@ -19,11 +19,9 @@ namespace Ui {
 class EditRecord;
 }
 
-class EditRecord : public QDialog {
-  Q_OBJECT
-
+class EditRecord {
  public:
-  explicit EditRecord(QWidget* parent = nullptr);
+  explicit EditRecord();
   ~EditRecord();
   Ui::EditRecord* ui;
 
@@ -41,11 +39,7 @@ class EditRecord : public QDialog {
   static void saveCurrentYearData();
 
  protected:
-  void keyReleaseEvent(QKeyEvent* event) override;
-  bool eventFilter(QObject* watch, QEvent* evn) override;
-
-  void mousePressEvent(QMouseEvent* event) override;
- public slots:
+ public:
   void on_btnOk_clicked();
 
   void on_btn7_clicked();
@@ -84,17 +78,14 @@ class EditRecord : public QDialog {
 
   void monthSum();
 
- private slots:
-  void onSuggestionClicked(QListWidgetItem* item);
+  void delSuggestions();
 
  private:
+  void onSuggestionClicked(QListWidgetItem* item);
+
   void set_Amount(QString Number);
 
-  QCompleter* m_completer = nullptr;
-  QStringListModel* m_completerModel = nullptr;
-  QTimer* m_completerTimer = nullptr;
-
-  QListWidget* m_suggestList;  // 自定义下拉列表
+  QListWidget* m_suggestList = nullptr;  // 自定义下拉列表
   bool m_isUpdatingList = false;
 
   QString lblStyle;
@@ -102,6 +93,7 @@ class EditRecord : public QDialog {
 
   static QList<int> getExistingYears(QTreeWidget* tw);
   void showSuggestions();
+  void initSuggestList();
   void hideSuggestions();
 };
 
