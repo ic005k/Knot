@@ -95,6 +95,7 @@ class MainHelper : public QDialog {
   void initMainQW();
 
   void setToolButtonAnimation(QToolButton* btn, bool setMyStyle);
+  void setToolButtonAnimation_iconsize(QToolButton* btn, bool setMyStyle);
 
  private:
   QStringList bakFileList;

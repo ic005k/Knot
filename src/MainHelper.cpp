@@ -1779,7 +1779,8 @@ void MainWindow::drawDayChart() {
   }
 }
 
-void MainHelper::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
+void MainHelper::setToolButtonAnimation_iconsize(QToolButton* btn,
+                                                 bool setMyStyle) {
   if (setMyStyle) {
     btn->setStyleSheet("border:none; background:transparent;");
   }
@@ -1844,4 +1845,56 @@ void MainHelper::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
   // ================================
   connect(btn, &QToolButton::released, this,
           [=]() { btn->setIconSize(originalSize); });
+}
+
+void MainHelper::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
+  if (setMyStyle) {
+    btn->setStyleSheet("border:none; background:transparent;");
+  }
+
+  if (btn->property("__anim_installed").toBool()) return;
+  btn->setProperty("__anim_installed", true);
+
+  QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(btn);
+  effect->setOpacity(1);
+  btn->setGraphicsEffect(effect);
+
+  class ButtonAnimFilter : public QObject {
+   public:
+    explicit ButtonAnimFilter(QObject* parent) : QObject(parent) {}
+
+    bool eventFilter(QObject* obj, QEvent* event) override {
+      QToolButton* btn = qobject_cast<QToolButton*>(obj);
+      if (!btn) return false;
+
+      if (event->type() == QEvent::MouseButtonPress) {
+        QMouseEvent* me = static_cast<QMouseEvent*>(event);
+        if (me->button() == Qt::LeftButton) {
+          // 按下变暗
+          QPropertyAnimation* anim =
+              new QPropertyAnimation(btn->graphicsEffect(), "opacity", btn);
+          anim->setDuration(80);
+          anim->setStartValue(1);
+          anim->setEndValue(0.65);
+
+          connect(anim, &QPropertyAnimation::finished, btn, [=]() {
+            QPropertyAnimation* back =
+                new QPropertyAnimation(btn->graphicsEffect(), "opacity", btn);
+            back->setDuration(80);
+            back->setStartValue(0.65);
+            back->setEndValue(1);
+            back->start(QAbstractAnimation::DeleteWhenStopped);
+            emit btn->pressed();
+          });
+
+          anim->start(QAbstractAnimation::DeleteWhenStopped);
+          return true;
+        }
+      }
+      return false;
+    }
+  };
+
+  ButtonAnimFilter* filter = new ButtonAnimFilter(btn);
+  btn->installEventFilter(filter);
 }
