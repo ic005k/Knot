@@ -1279,7 +1279,7 @@ public class MyService extends Service {
     /**
      * 服务内播放TTS文本（对外暴露的核心方法）
      */
-    public void playMyTextInService(String text) {
+    /*public void playMyTextInService(String text) {
         if (TextUtils.isEmpty(text)) {
             Log.w("TTS", "播放文本为空，跳过");
             return;
@@ -1361,6 +1361,64 @@ public class MyService extends Service {
                                 currentPlayingTts = null;
                             }
                         }
+                        newTts.shutdown();
+                    }
+                }
+            );
+        }
+    }*/
+
+    /**
+     * 最终版：只点一次 → 等待就绪 → 自动播放
+     * 完全不常驻，每次都 new，不被抢
+     */
+    public void playMyTextInService(String text) {
+        if (TextUtils.isEmpty(text)) {
+            return;
+        }
+
+        synchronized (ttsLock) {
+            // 缓存本次要播放的文本
+            pendingTtsText = text;
+
+            // 每次都 NEW 全新实例
+            TTSUtils newTts = new TTSUtils(getApplicationContext());
+            currentPlayingTts = newTts;
+
+            // 初始化 → 就绪自动播放
+            newTts.initialize(
+                new TTSUtils.InitCallback() {
+                    @Override
+                    public void onSuccess() {
+                        synchronized (ttsLock) {
+                            // 引擎就绪！直接播放缓存的文本
+                            if (pendingTtsText != null) {
+                                newTts.speak(pendingTtsText);
+                                pendingTtsText = null;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        synchronized (ttsLock) {
+                            pendingTtsText = null;
+                            newTts.shutdown();
+                        }
+                    }
+                }
+            );
+
+            // 播放完立刻销毁（不常驻）
+            newTts.setOnPlayCompleteListener(
+                new TTSUtils.OnPlayCompleteListener() {
+                    @Override
+                    public void onPlayComplete() {
+                        newTts.shutdown();
+                    }
+
+                    @Override
+                    public void onPlayStopped() {
                         newTts.shutdown();
                     }
                 }
