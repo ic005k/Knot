@@ -292,7 +292,6 @@ void TextEditToolbar::bindEditWidget(QWidget* editWidget) {
                &TextEditToolbar::onSelectionChanged);
     m_textEdit = nullptr;
   }
-
   if (m_lineEdit) {
     disconnect(m_lineEdit, &QLineEdit::selectionChanged, this,
                &TextEditToolbar::onSelectionChanged);
@@ -326,14 +325,6 @@ void TextEditToolbar::bindEditWidget(QWidget* editWidget) {
             &TextEditToolbar::onSelectionChanged);
     connect(m_lineEdit, &QLineEdit::cursorPositionChanged, this,
             &TextEditToolbar::onCursorPositionChanged);
-  }
-
-  // 在 bindEditWidget 成功后调用
-  if (m_textEdit) {
-    // 原生只留光标，不要选区
-    QTextCursor c = m_textEdit->textCursor();
-    c.clearSelection();
-    m_textEdit->setTextCursor(c);
   }
 }
 
@@ -538,7 +529,7 @@ void TextEditToolbar::onEndHandleMoved(const QPoint& globalPos) {
   updateSelectionFromHandle(globalPos, false);
 }
 
-/*void TextEditToolbar::updateSelectionFromHandle(const QPoint& globalPos,
+void TextEditToolbar::updateSelectionFromHandle(const QPoint& globalPos,
                                                 bool isStartHandle) {
   if (!m_textEdit && !m_lineEdit) return;
 
@@ -578,30 +569,6 @@ void TextEditToolbar::onEndHandleMoved(const QPoint& globalPos) {
 
   qDebug() << "[updateSelectionFromHandle] 手柄拖动，新位置:" << newPos
            << "选择范围:" << m_startPos << "-" << m_endPos;
-}*/
-
-void TextEditToolbar::updateSelectionFromHandle(const QPoint& globalPos,
-                                                bool isStartHandle) {
-  if (!m_textEdit) return;
-  int newPos = getTextPositionFromGlobal(globalPos);
-  int len = getTextLength();
-  newPos = qMax(0, qMin(newPos, len));
-
-  if (isStartHandle)
-    m_tempStartPos = newPos;
-  else
-    m_tempEndPos = newPos;
-
-  int a = m_tempStartPos, b = m_tempEndPos;
-  if (a > b) qSwap(a, b);
-  m_tempStartPos = a;
-  m_tempEndPos = b;
-
-  updateExtraSelection();
-  // 同步界面手柄位置
-  m_startPos = m_tempStartPos;
-  m_endPos = m_tempEndPos;
-  updateHandlesPosition();
 }
 
 int TextEditToolbar::getTextLength() {
@@ -1247,7 +1214,7 @@ void TextEditToolbar::onDelClicked() {
 void TextEditToolbar::onCloseClicked() { hide(); }
 
 // 按下起始手柄：记录固定的另一端（end）
-/*void TextEditToolbar::onStartHandlePressed() {
+void TextEditToolbar::onStartHandlePressed() {
   m_dragging = true;
   m_dragAnchorEnd = m_endPos;  // 拖动起始手柄时，end 固定
 }
@@ -1256,43 +1223,10 @@ void TextEditToolbar::onCloseClicked() { hide(); }
 void TextEditToolbar::onEndHandlePressed() {
   m_dragging = true;
   m_dragAnchorEnd = m_startPos;  // 拖动结束手柄时，start 固定
-}*/
-
-void TextEditToolbar::onStartHandlePressed() {
-  m_dragging = true;
-  // 拖动开始：保存当前真实选区，清空原生选中，切换虚拟预览
-  QTextCursor cur = m_textEdit->textCursor();
-  m_selBackupStart = cur.selectionStart();
-  m_selBackupEnd = cur.selectionEnd();
-
-  // 初始化临时预览值
-  m_tempStartPos = m_startPos;
-  m_tempEndPos = m_endPos;
-
-  // 清除原生蓝色选区，进入虚拟绘制模式
-  cur.clearSelection();
-  m_textEdit->setTextCursor(cur);
-
-  updateExtraSelection();
-}
-
-void TextEditToolbar::onEndHandlePressed() {
-  m_dragging = true;
-  QTextCursor cur = m_textEdit->textCursor();
-  m_selBackupStart = cur.selectionStart();
-  m_selBackupEnd = cur.selectionEnd();
-
-  m_tempStartPos = m_startPos;
-  m_tempEndPos = m_endPos;
-
-  cur.clearSelection();
-  m_textEdit->setTextCursor(cur);
-
-  updateExtraSelection();
 }
 
 // 释放手柄：重置拖动状态
-/*void TextEditToolbar::onHandleReleased() {
+void TextEditToolbar::onHandleReleased() {
   m_dragging = false;
 
   // 确保手柄的拖动状态被重置
@@ -1310,28 +1244,7 @@ void TextEditToolbar::onEndHandlePressed() {
 
   qDebug() << "[HandleReleased] 手柄释放，基准更新为：" << m_originalStartPos
            << "-" << m_originalEndPos;
-}*/
-
-void TextEditToolbar::onHandleReleased() {
-  m_dragging = false;
-  // 临时预览值转正正式坐标
-  m_startPos = m_tempStartPos;
-  m_endPos = m_tempEndPos;
-
-  // 写入真实Cursor，生成系统原生选中（可复制）
-  QTextCursor c = m_textEdit->textCursor();
-  c.setPosition(m_startPos, QTextCursor::MoveAnchor);
-  c.setPosition(m_endPos, QTextCursor::KeepAnchor);
-  m_textEdit->setTextCursor(c);
-
-  // 清空自定义Extra预览，此时由系统原生选区接管高亮
-  m_textEdit->setExtraSelections({});
-
-  m_originalStartPos = m_startPos;
-  m_originalEndPos = m_endPos;
-  updateHandlesPosition();
 }
-
 // ========================== EditEventFilter 实现 ==========================
 EditEventFilter::EditEventFilter(TextEditToolbar* toolbar, QObject* parent)
     : QObject(parent), m_toolbar(toolbar) {
@@ -1457,23 +1370,4 @@ void EditEventFilter::onTimeout() {
     m_toolbar->bindEditWidget(static_cast<QWidget*>(m_target));
     m_toolbar->showAtSelection();
   }
-}
-
-void TextEditToolbar::updateExtraSelection() {
-  if (!m_textEdit || !m_dragging) return;
-
-  QList<QTextEdit::ExtraSelection> list;
-  QTextEdit::ExtraSelection es;
-  int s = m_tempStartPos;
-  int e = m_tempEndPos;
-
-  QTextCharFormat fmt;
-  fmt.setBackground(QColor(0, 120, 255, 160));
-  fmt.setForeground(Qt::white);
-  es.format = fmt;
-  es.cursor = m_textEdit->textCursor();
-  es.cursor.setPosition(s);
-  es.cursor.setPosition(e, QTextCursor::KeepAnchor);
-  list << es;
-  m_textEdit->setExtraSelections(list);
 }
