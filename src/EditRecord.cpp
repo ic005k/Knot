@@ -79,8 +79,6 @@ EditRecord::EditRecord() {
   m_Method->qssSlider = mui->hsH->styleSheet();
 }
 
-void EditRecord::init() {}
-
 EditRecord::~EditRecord() {
   delete m_CategoryList;
 

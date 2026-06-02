@@ -34,8 +34,6 @@ class EditRecord {
 
   void getTime(int h, int m);
 
-  void init();
-
   static void saveCurrentYearData();
 
  protected:

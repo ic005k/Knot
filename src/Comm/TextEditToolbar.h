@@ -1,7 +1,6 @@
 #ifndef TEXTEDITTOOLBAR_H
 #define TEXTEDITTOOLBAR_H
 
-#include <QDateTime>
 #include <QHBoxLayout>
 #include <QInputMethodEvent>
 #include <QKeyEvent>
@@ -84,6 +83,13 @@ class TextEditToolbar : public QWidget {
   void onScrollChanged();
 
  private:
+  int m_selBackupStart = 0;
+  int m_selBackupEnd = 0;
+  int m_tempStartPos;  // 拖动临时起点
+  int m_tempEndPos;    // 拖动临时终点
+  int m_selStart = 0;
+  int m_selEnd = 0;
+
   // 初始化函数声明
   void initButtons();
   void initHandles();
@@ -141,6 +147,7 @@ class TextEditToolbar : public QWidget {
 
   void updateLineEditHandlesPositionForNormalMode(int startPos, int endPos);
   void updateLineEditHandlesPositionForPasswordMode(int startPos, int endPos);
+  void updateExtraSelection();
 };
 
 /////////////////////////////////////////////////////////////////////////////

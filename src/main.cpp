@@ -218,7 +218,6 @@ int main(int argc, char* argv[]) {
 
 #ifdef Q_OS_ANDROID
   defaultFontFamily = "sans-serif";
-  //"Noto Sans CJK SC, DroidSansFallback";  // "DroidSansFallback";
 
 #endif
 
@@ -319,9 +318,6 @@ void loadTheme(bool isDark) {
   } else {
     qApp->setPalette(createLightPalette());
   }
-
-  // QString themePath =
-  //     isDark ? ":/res/theme/darkstyle.qss" : ":/res/theme/lightstyle.qss";
 
   QString themePath =
       isDark ? ":/res/theme/MaterialDark.qss" : ":/res/theme/MaterialLight.qss";
