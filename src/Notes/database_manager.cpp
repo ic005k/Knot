@@ -440,7 +440,7 @@ void DatabaseManager::cleanMissingFileRecords(const QString& directory) {
   }
 
   // ===================== ✅ 核心修改：批量删除 替代 循环逐条删除
-  // =====================
+
   // 不管是「少量无效记录」还是「全量无效记录（本地全删）」，全部批量删除
   const bool cleanSuccess = executeTransactionWithRetry(
       [&]() -> bool {
@@ -554,4 +554,39 @@ bool DatabaseManager::deleteDatabaseFile(const QString& dbPath) {
     qWarning() << "数据库文件删除后仍存在，可能被其他进程占用";
     return false;
   }
+}
+
+void DatabaseManager::batchDeleteFileIndexes(const QStringList& filePaths) {
+  if (filePaths.isEmpty()) return;
+
+  QElapsedTimer timer;
+  timer.start();
+
+  bool success = executeTransactionWithRetry(
+      [&]() {
+        QStringList placeholders;
+        for (int i = 0; i < filePaths.size(); ++i) placeholders << "?";
+
+        // 批量删除 documents
+        QSqlQuery q1(m_db);
+        q1.prepare(QString("DELETE FROM documents WHERE path IN (%1)")
+                       .arg(placeholders.join(",")));
+        for (const auto& f : filePaths) q1.addBindValue(f);
+        if (!q1.exec())
+          throw std::runtime_error(q1.lastError().text().toStdString());
+
+        // 批量删除 fts_documents
+        QSqlQuery q2(m_db);
+        q2.prepare(QString("DELETE FROM fts_documents WHERE path IN (%1)")
+                       .arg(placeholders.join(",")));
+        for (const auto& f : filePaths) q2.addBindValue(f);
+        if (!q2.exec())
+          throw std::runtime_error(q2.lastError().text().toStdString());
+
+        return true;
+      },
+      1);
+
+  qInfo() << "批量删除索引完成：" << filePaths.count() << "条，耗时"
+          << timer.elapsed() << "ms，结果：" << success;
 }

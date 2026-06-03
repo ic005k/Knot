@@ -111,14 +111,16 @@ void NotesList::startBackgroundTaskUpdateFilesIndex() {
 }
 
 void NotesList::startBackgroundTaskDelFilesIndex(const QStringList& files) {
-  QStringList m_files = files;
-
+  /* QStringList m_files = files;
   QFuture<void> future = QtConcurrent::run([=]() {
     for (int i = 0; i < m_files.count(); i++) {
       QString filePath = m_files.at(i);
       m_dbManager.deleteFileIndex(filePath);
     }
-  });
+  });*/
+
+  QFuture<void> future = QtConcurrent::run(
+      [this, files]() { m_dbManager.batchDeleteFileIndexes(files); });
 
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
