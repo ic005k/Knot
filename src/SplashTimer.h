@@ -166,7 +166,7 @@ class SplashTimer : public QSplashScreen {
       drawHorizontalKNOT(painter, displayPix);
     }
 
-    drawGlowEffect(painter, displayPix.rect());
+    // drawGlowEffect(painter, displayPix.rect());
     painter.end();
 
     displayPix.setDevicePixelRatio(m_dpr);

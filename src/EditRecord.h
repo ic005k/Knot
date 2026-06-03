@@ -53,7 +53,7 @@ class EditRecord {
   void on_btnDot_clicked();
   void on_btnDel_clicked();
 
-  bool m_isUpdatingList = false;
+  bool isNoShowSuggestions = false;
 
   void on_btnCustom_clicked();
 

@@ -1267,9 +1267,9 @@ void MainHelper::on_AddRecord() {
   mw_one->m_EditRecord->getTime(mui->hsH->value(), mui->hsM->value());
 
   mui->editDetails->clear();
-  mw_one->m_EditRecord->m_isUpdatingList = true;
+  mw_one->m_EditRecord->isNoShowSuggestions = true;
   mui->editCategory->setText("");
-  mw_one->m_EditRecord->m_isUpdatingList = false;
+  mw_one->m_EditRecord->isNoShowSuggestions = false;
   mui->editAmount->setText("");
 
   mui->frameMain->hide();
