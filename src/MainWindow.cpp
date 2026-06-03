@@ -1098,7 +1098,9 @@ void MainWindow::on_twItemDoubleClicked() {
     else
       mui->editAmount->setText(str);
 
+    mw_one->m_EditRecord->m_isUpdatingList = true;
     mui->editCategory->setText(item->text(2));
+    mw_one->m_EditRecord->m_isUpdatingList = false;
     mui->editDetails->setText(item->text(3));
     mui->f_Number->setFocus();
 
@@ -2336,6 +2338,8 @@ void MainWindow::on_btnBackSetTab_pressed() {
 void MainWindow::on_btnBackEditRecord_pressed() {
   clearWidgetFocus();
 
+  m_EditRecord->hideSuggestions();
+
   mui->frameMain->show();
   mui->frameEditRecord->hide();
 }
@@ -2699,6 +2703,7 @@ void MainWindow::on_btnMove() {
       QThread::msleep(1);
     }
 
+    mw_one->m_EditRecord->m_isUpdatingList = true;
     mui->editCategory->setText(strCategory);
     mui->editDetails->setText(strDetails);
     mui->editAmount->setText(strAmount);

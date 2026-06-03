@@ -21,14 +21,14 @@ Rectangle {
 
     // 1. 获取当前系统的年月日（统一格式：年4位、月2位、日2位，补零避免格式不匹配）
     function getCurrentDate() {
-        const now = new Date()
+        const now = new Date();
         return {
             "year": now.getFullYear().toString(),
             "month"// 例："2025"
             : (now.getMonth() + 1).toString().padStart(2, '0'),
             "day"// 月份0-11，+1后补零→"11"（而非"11"，1月→"01"）
             : now.getDate().toString().padStart(2, '0') // 日期补零→"14"（5日→"05"）
-        }
+        };
     }
 
     // 2. 解析 mainDate（格式"周五 11 14  2025"）为 年/月/日（统一补零格式）
@@ -38,8 +38,8 @@ Rectangle {
                 "year": "",
                 "month": "",
                 "day": ""
-            }
-        const parts = mainDate.trim().split(/\s+/)
+            };
+        const parts = mainDate.trim().split(/\s+/);
         // 按任意空格分割（兼容多空格）
         return {
             "year": parts[3] || "",
@@ -47,180 +47,173 @@ Rectangle {
             : (parts[1] || "").padStart(2, '0'),
             "day"// 第2段是月（例："11"→"11"，"3"→"03"）
             : (parts[2] || "").padStart(2, '0') // 第3段是日（例："14"→"14"，"5"→"05"）
-        }
+        };
     }
 
     // 3. 核心函数：判断是否显示move按钮
     function isShowMoveButton(index) {
         // 条件1：模型有数据，且是最后一条记录
-        const isLastItem = view.model.count > 0
-                         && index === view.model.count - 1
+        const isLastItem = view.model.count > 0 && index === view.model.count - 1;
         if (!isLastItem)
-            return false
+            return false;
 
         // 条件2：解析后的 mainDate 与当前系统日期一致（当天记录）
-        const current = getCurrentDate()
-        const recordDate = parseMainDate()
-        return recordDate.year === current.year
-                && recordDate.month === current.month
-                && recordDate.day === current.day
+        const current = getCurrentDate();
+        const recordDate = parseMainDate();
+        return recordDate.year === current.year && recordDate.month === current.month && recordDate.day === current.day;
     }
 
     function setScrollBarPos(pos) {
-        view.ScrollBar.vertical.position = 1.0 - view.ScrollBar.vertical.size
+        view.ScrollBar.vertical.position = 1.0 - view.ScrollBar.vertical.size;
     }
 
-    function setItemHeight(h) {}
+    function setItemHeight(h) {
+    }
 
     function gotoEnd() {
-        view.positionViewAtEnd()
+        view.positionViewAtEnd();
     }
 
     function gotoBeginning() {
-        view.positionViewAtBeginning()
+        view.positionViewAtBeginning();
     }
 
     function gotoIndex(index) {
-        view.positionViewAtIndex(index, Tumbler.Center)
+        view.positionViewAtIndex(index, Tumbler.Center);
     }
 
     function setHighPriority(isFalse) {
-        isHighPriority = isFalse
+        isHighPriority = isFalse;
     }
 
     function setCurrentItem(currentIndex) {
-        view.currentIndex = currentIndex
-        view.positionViewAtIndex(currentIndex, ListView.Beginning)
+        view.currentIndex = currentIndex;
+        view.positionViewAtIndex(currentIndex, ListView.Beginning);
     }
 
     function getCurrentIndex() {
-        return view.currentIndex
+        return view.currentIndex;
     }
 
     function getItemCount() {
-        itemCount = view.count
+        itemCount = view.count;
 
-        return itemCount
+        return itemCount;
     }
 
     function getItemText(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.time + "|=|" + data.dototext
+        var data = view.model.get(itemIndex);
+        return data.time + "|=|" + data.dototext;
     }
 
     function getText0(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text0
+        var data = view.model.get(itemIndex);
+        return data.text0;
     }
 
     function getText1(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text1
+        var data = view.model.get(itemIndex);
+        return data.text1;
     }
 
     function getText2(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text2
+        var data = view.model.get(itemIndex);
+        return data.text2;
     }
 
     function getText3(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text3
+        var data = view.model.get(itemIndex);
+        return data.text3;
     }
 
     function getTop(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text_top
+        var data = view.model.get(itemIndex);
+        return data.text_top;
     }
 
     function getType(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.type
+        var data = view.model.get(itemIndex);
+        return data.type;
     }
 
     function addItem(t0, t1, t2, t3, height) {
         view.model.append({
-                              "text0": t0,
-                              "text1": t1,
-                              "text2": t2,
-                              "text3": t3,
-                              "myh": height
-                          })
+            "text0": t0,
+            "text1": t1,
+            "text2": t2,
+            "text3": t3,
+            "myh": height
+        });
     }
 
     function insertItem(text0, text1, text2, text3, curIndex) {
         view.model.insert(curIndex, {
-                              "text0": text0,
-                              "text1": text1,
-                              "text2": text2,
-                              "text3": text3
-                          })
+            "text0": text0,
+            "text1": text1,
+            "text2": text2,
+            "text3": text3
+        });
     }
 
     function delItem(currentIndex) {
-        view.model.remove(currentIndex)
+        view.model.remove(currentIndex);
     }
 
     function modifyItem(currentIndex, strTime, strText) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
-        view.model.setProperty(currentIndex, "dototext", strText)
+        view.model.setProperty(currentIndex, "time", strTime);
+        view.model.setProperty(currentIndex, "dototext", strText);
     }
 
     function modifyItemTime(currentIndex, strTime) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
+        view.model.setProperty(currentIndex, "time", strTime);
     }
 
     function modifyItemType(currentIndex, type) {
-
-        view.model.setProperty(currentIndex, "type", type)
+        view.model.setProperty(currentIndex, "type", type);
     }
 
     function modifyItemText0(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text0", strText)
+        view.model.setProperty(currentIndex, "text0", strText);
     }
 
     function modifyItemText2(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text2", strText)
+        view.model.setProperty(currentIndex, "text2", strText);
     }
 
     function setVPos(vpos) {
-        vscrollbar.position = vpos
-        console.log("qwMainEvent:set " + vpos)
+        vscrollbar.position = vpos;
+        console.log("qwMainEvent:set " + vpos);
     }
 
     function getVPos() {
-        var vpos = vscrollbar.position
-        console.log("qwMainEvent:get " + vpos)
-        return vpos
+        var vpos = vscrollbar.position;
+        console.log("qwMainEvent:get " + vpos);
+        return vpos;
     }
 
     function getColor() {
-        var strColor
+        var strColor;
 
         if (isDark)
-            strColor = "#333333"
+            strColor = "#333333";
         else
-            strColor = "#ffffff"
+            strColor = "#ffffff";
 
-        return strColor
+        return strColor;
     }
 
     function getFontColor() {
-
         if (isDark)
-            return "#EEEEEE"
+            return "#EEEEEE";
         else
-            return "black"
+            return "black";
     }
 
     function getFontColor3() {
-
         if (isDark)
-            return "lightgray"
+            return "lightgray";
         else
-            return "gray"
+            return "gray";
     }
 
     Component {
@@ -230,7 +223,7 @@ Rectangle {
             id: listItem
             width: ListView.view.width
 
-            // ✅ 关键修改：绑定到 ColumnLayout 的 implicitHeight
+            // ✅ 关键：绑定到 ColumnLayout 的 implicitHeight
             height: colLayout.implicitHeight + 0 // 10 为上下边距（可根据需求调整）
 
             color: ListView.isCurrentItem ? "lightblue" : getColor()
@@ -241,32 +234,32 @@ Rectangle {
             radius: 6
 
             function getItemHeight() {
-                var item0H
-                var item1H
-                var item2H
-                var item3H
+                var item0H;
+                var item1H;
+                var item2H;
+                var item3H;
 
                 if (item0.text.length === 0)
-                    item0H = 0
+                    item0H = 0;
                 else
-                    item0H = item0.contentHeight
+                    item0H = item0.contentHeight;
 
                 if (item1.text.length === 0)
-                    item1H = 0
+                    item1H = 0;
                 else
-                    item1H = item1.contentHeight
+                    item1H = item1.contentHeight;
 
                 if (item2.text.length === 0)
-                    item2H = 0
+                    item2H = 0;
                 else
-                    item2H = item2.contentHeight
+                    item2H = item2.contentHeight;
 
                 if (item3.text.length === 0)
-                    item3H = 0
+                    item3H = 0;
                 else
-                    item3H = item3.contentHeight
+                    item3H = item3.contentHeight;
 
-                return item0H + item1H + item2H + item3H
+                return item0H + item1H + item2H + item3H;
             }
 
             MouseArea {
@@ -274,27 +267,22 @@ Rectangle {
                 anchors.fill: parent
 
                 onClicked: function (mouse) {
-                    if (actionButtons.visible && mouse.x > actionButtons.x
-                            && mouse.x < actionButtons.x + actionButtons.width
-                            && mouse.y > actionButtons.y
-                            && mouse.y < actionButtons.y + actionButtons.height) {
-
-                        mouse.accepted = false // 放行事件给按钮
-                        console.log("按钮被点击...")
+                    if (actionButtons.visible && mouse.x > actionButtons.x && mouse.x < actionButtons.x + actionButtons.width && mouse.y > actionButtons.y && mouse.y < actionButtons.y + actionButtons.height) {
+                        mouse.accepted = false; // 放行事件给按钮
+                        console.log("按钮被点击...");
                     } else {
-                        view.currentIndex = index //实现item切换
+                        view.currentIndex = index; //实现item切换
 
-                        m_Method.clickMainEventData()
+                        m_Method.clickMainEventData();
                     }
                 }
 
                 onDoubleClicked: {
-                    m_Method.reeditMainEventData()
+                    m_Method.reeditMainEventData();
                 }
             }
 
             RowLayout {
-
                 id: contentLayout
 
                 width: parent.width
@@ -323,7 +311,6 @@ Rectangle {
                     anchors.rightMargin: 0
 
                     RowLayout {
-
                         id: row0
 
                         Image {
@@ -362,7 +349,6 @@ Rectangle {
                     }
 
                     RowLayout {
-
                         id: row1
                         Layout.margins: rowSpace
                         visible: item1.text.length ? true : false
@@ -416,7 +402,6 @@ Rectangle {
                     }
 
                     RowLayout {
-
                         id: row2
                         Layout.margins: rowSpace
                         visible: item2.text.length ? true : false
@@ -468,7 +453,6 @@ Rectangle {
                     }
 
                     RowLayout {
-
                         id: row3
                         Layout.margins: rowSpace
                         visible: item3.text.length ? true : false
@@ -537,8 +521,8 @@ Rectangle {
                             icon.height: 20
 
                             onClicked: {
-                                m_Method.reeditMainEventData()
-                                console.log("编辑数据: " + index)
+                                m_Method.reeditMainEventData();
+                                console.log("编辑数据: " + index);
                             }
 
                             background: Rectangle {
@@ -551,12 +535,11 @@ Rectangle {
                             icon.source: "qrc:/res/move.svg"
                             icon.width: 20
                             icon.height: 20
-                            visible: view.currentIndex === index
-                                     && root.isShowMoveButton(index)
+                            visible: view.currentIndex === index && root.isShowMoveButton(index)
 
                             onClicked: {
-                                console.log("移动: " + index)
-                                mw_one.on_btnMove()
+                                console.log("移动: " + index);
+                                mw_one.on_btnMove();
                             }
                             background: Rectangle {
                                 color: "transparent"
@@ -568,12 +551,11 @@ Rectangle {
                             icon.source: "qrc:/res/del.svg"
                             icon.width: 20
                             icon.height: 20
-                            visible: view.currentIndex === index
-                                     && root.isShowMoveButton(index)
+                            visible: view.currentIndex === index && root.isShowMoveButton(index)
 
                             onClicked: {
-                                console.log("删除: " + index)
-                                mw_one.on_btnDel_clicked()
+                                console.log("删除: " + index);
+                                mw_one.on_btnDel_clicked();
                             }
                             background: Rectangle {
                                 color: "transparent"

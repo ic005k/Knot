@@ -324,6 +324,8 @@ void EditRecord::on_hsM_valueChanged(int value) {
 void EditRecord::on_btnClearDetails_clicked() { mui->editDetails->clear(); }
 
 void EditRecord::on_editCategory_textChanged(const QString& arg1) {
+  qDebug() << "分类文本更改事件已触发..." << m_isUpdatingList;
+
   if (arg1.length() > 0) {
     mui->lblCategory->setStyleSheet(lblStyleHighLight);
     if (!isDark) {
@@ -336,14 +338,14 @@ void EditRecord::on_editCategory_textChanged(const QString& arg1) {
     }
   }
 
-  // 空内容就隐藏
-  if (arg1.trimmed().isEmpty()) {
-    hideSuggestions();
+  if (m_isUpdatingList) {
+    m_isUpdatingList = false;
     return;
   }
 
-  if (m_isUpdatingList) {
-    m_isUpdatingList = false;
+  // 空内容就隐藏
+  if (arg1.trimmed().isEmpty()) {
+    hideSuggestions();
     return;
   }
 
@@ -459,6 +461,7 @@ void EditRecord::setCurrentValue() {
   QString ini_file = privateDir + "editrecord_value.ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
 
+  m_isUpdatingList = true;
   mui->editCategory->setText(Reg.value("value1").toString());
   mui->editDetails->setText(Reg.value("value2").toString());
   mui->editAmount->setText(Reg.value("value3").toString());
@@ -514,6 +517,8 @@ QList<int> EditRecord::getExistingYears(QTreeWidget* tw) {
 }
 
 void EditRecord::showSuggestions() {
+  qDebug() << "补全列表数据源：" << c_list.count();
+
   QString input = mui->editCategory->text().trimmed().toLower();
   if (input.isEmpty()) {
     hideSuggestions();
