@@ -3345,8 +3345,6 @@ void NotesList::readyNotesData(QTreeWidgetItem* topItem) {
       }
     }
 
-    emit isReadyNoteDataEndChanged();
-
     watcher->deleteLater();
 
     qDebug() << "主线程处理结果完成！";
@@ -3589,22 +3587,6 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
   clickNoteBook();
 
   qDebug() << "已切换笔记本，等待加载完成后自动定位笔记：" << mdFile;
-
-  return true;
-
-  QEventLoop loop;
-  connect(this, &NotesList::isReadyNoteDataEndChanged, &loop, &QEventLoop::quit,
-          Qt::QueuedConnection);
-  loop.exec();
-
-  countNotes = m_Method->getCountFromQW(mui->qwNoteList);
-  if (indexNote < 0 || indexNote >= countNotes) return false;
-
-  setNotesListCurrentIndex(indexNote);
-  clickNoteList();
-
-  qDebug() << indexNoteBook << indexNote
-           << m_Notes->m_NoteIndexManager->getNoteTitle(mdFile) << mdFile;
 
   return true;
 }

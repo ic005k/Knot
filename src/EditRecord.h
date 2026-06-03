@@ -55,7 +55,7 @@ class EditRecord {
 
   bool isNoShowSuggestions = false;
 
-  void on_btnCustom_clicked();
+  void on_btnType_clicked();
 
   void on_btnClearAmount_clicked();
 

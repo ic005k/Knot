@@ -267,7 +267,6 @@ class NotesList : public QDialog {
   void on_actionModificationHistory();
 
  signals:
-  void isReadyNoteDataEndChanged();
 
  private:
   QMutex m_saveMutex;       // 保存锁

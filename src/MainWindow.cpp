@@ -2344,7 +2344,7 @@ void MainWindow::on_btnBackEditRecord_pressed() {
   mui->frameEditRecord->hide();
 }
 
-void MainWindow::on_btnType_pressed() { m_EditRecord->on_btnCustom_clicked(); }
+void MainWindow::on_btnType_pressed() { m_EditRecord->on_btnType_clicked(); }
 
 void MainWindow::on_btnOkEditRecord_pressed() {
   m_EditRecord->on_btnOk_clicked();
