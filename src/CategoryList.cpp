@@ -104,6 +104,7 @@ void CategoryList::on_btnOk_clicked() {
 void CategoryList::setCategoryText() {
   int row = ui->listWidget->currentRow();
   if (row >= 0) {
+    mw_one->m_EditRecord->m_isUpdatingList = true;
     mui->editCategory->setText(ui->listWidget->currentItem()->text());
   }
 
@@ -162,6 +163,7 @@ void CategoryList::on_btnRename_clicked() {
 
     renameAll();
 
+    mw_one->m_EditRecord->m_isUpdatingList = true;
     mui->editCategory->setText(ui->editRename->text().trimmed());
 
     mw_one->reloadMain();
@@ -169,8 +171,13 @@ void CategoryList::on_btnRename_clicked() {
     auto m_ShowMsg = std::make_unique<ShowMessage>(this);
     m_ShowMsg->showMsg("Kont", oldName + " -> " + text + " " + tr("Success"),
                        1);
+
+    int cindex = ui->listWidget->currentRow();
     mui->btnCancelType->click();
     mui->btnType->click();
+    ui->listWidget->setCurrentRow(cindex);
+    m_Method->setCurrentIndexFromQW(mui->qwCategory, cindex);
+    setTypeRenameText();
   }
 }
 
@@ -313,4 +320,10 @@ void CategoryList::on_btnCancel_clicked() {
 
   mui->frameCategory->hide();
   mui->frameEditRecord->show();
+}
+
+void CategoryList::setTypeRenameText() {
+  int index = m_Method->getCurrentIndexFromQW(mui->qwCategory);
+  QString str = m_Method->getText0(mui->qwCategory, index);
+  mui->editRenameType->setText(str);
 }

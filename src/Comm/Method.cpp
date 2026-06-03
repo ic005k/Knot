@@ -773,20 +773,6 @@ void Method::reeditMainEventData() {
   mw_one->on_twItemDoubleClicked();
 }
 
-void Method::setTypeRenameText() {
-  int index = getCurrentIndexFromQW(mui->qwCategory);
-  QString str = getText0(mui->qwCategory, index);
-  mui->editRenameType->setText(str);
-}
-
-void Method::okType() {
-  int index = getCurrentIndexFromQW(mui->qwCategory);
-  m_CategoryList->ui->listWidget->setCurrentRow(index);
-  QListWidgetItem* item = m_CategoryList->ui->listWidget->currentItem();
-  m_CategoryList->on_listWidget_itemDoubleClicked(item);
-  m_CategoryList->on_btnCancel_clicked();
-}
-
 void Method::setSCrollPro(QObject* obj) {
   QScrollerProperties sp;
   sp.setScrollMetric(QScrollerProperties::DragStartDistance, 0.001);

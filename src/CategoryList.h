@@ -37,7 +37,8 @@ class CategoryList : public QDialog {
 
   void on_btnCancel_clicked();
 
- private slots:
+  void setTypeRenameText();
+  private slots:
 
  private:
   void setCategoryText();

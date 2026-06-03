@@ -178,7 +178,8 @@ void EditRecord::set_Amount(QString Number) {
 
 void EditRecord::on_btnCustom_clicked() {
   if (mui->qwCategory->source().isEmpty()) {
-    mui->qwCategory->rootContext()->setContextProperty("m_Method", m_Method);
+    mui->qwCategory->rootContext()->setContextProperty("m_CategoryList",
+                                                       m_CategoryList);
     mui->qwCategory->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/type.qml")));
   }
@@ -188,7 +189,7 @@ void EditRecord::on_btnCustom_clicked() {
   init_MyCategory();
   m_CategoryList->ui->listWidget->setCurrentRow(0);
   m_Method->setCurrentIndexFromQW(mui->qwCategory, 0);
-  m_Method->setTypeRenameText();
+  m_CategoryList->setTypeRenameText();
 
   int count = m_Method->getCountFromQW(mui->qwCategory);
   mui->lblTypeInfo->setText(QObject::tr("Total") + " : " +
@@ -323,11 +324,6 @@ void EditRecord::on_hsM_valueChanged(int value) {
 void EditRecord::on_btnClearDetails_clicked() { mui->editDetails->clear(); }
 
 void EditRecord::on_editCategory_textChanged(const QString& arg1) {
-  if (m_isUpdatingList) {
-    m_isUpdatingList = false;
-    return;
-  }
-
   if (arg1.length() > 0) {
     mui->lblCategory->setStyleSheet(lblStyleHighLight);
     if (!isDark) {
@@ -343,6 +339,11 @@ void EditRecord::on_editCategory_textChanged(const QString& arg1) {
   // 空内容就隐藏
   if (arg1.trimmed().isEmpty()) {
     hideSuggestions();
+    return;
+  }
+
+  if (m_isUpdatingList) {
+    m_isUpdatingList = false;
     return;
   }
 

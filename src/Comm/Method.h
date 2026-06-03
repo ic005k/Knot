@@ -488,8 +488,9 @@ class Method : public QDialog {
 
   void sendTouch();
 
-  void clearAllNotesList(QQuickWidget *qw);
-  protected:
+  void clearAllNotesList(QQuickWidget* qw);
+
+ protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:
@@ -503,8 +504,7 @@ class Method : public QDialog {
   void clickMainDateData();
   void clickMainEventData();
   void reeditMainEventData();
-  void setTypeRenameText();
-  void okType();
+
  private slots:
 
  private:

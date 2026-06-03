@@ -39,7 +39,7 @@ class EditRecord {
  protected:
  public:
   void on_btnOk_clicked();
-
+  void hideSuggestions();
   void on_btn7_clicked();
   void on_btn8_clicked();
   void on_btn9_clicked();
@@ -52,6 +52,8 @@ class EditRecord {
   void on_btn0_clicked();
   void on_btnDot_clicked();
   void on_btnDel_clicked();
+
+  bool m_isUpdatingList = false;
 
   void on_btnCustom_clicked();
 
@@ -84,7 +86,6 @@ class EditRecord {
   void set_Amount(QString Number);
 
   QListWidget* m_suggestList = nullptr;  // 自定义下拉列表
-  bool m_isUpdatingList = false;
 
   QString lblStyle;
   int nH;
@@ -92,7 +93,6 @@ class EditRecord {
   static QList<int> getExistingYears(QTreeWidget* tw);
   void showSuggestions();
   void initSuggestList();
-  void hideSuggestions();
 };
 
 #endif  // EDITRECORD_H
