@@ -7,9 +7,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-NoteIndexManager::NoteIndexManager(QObject *parent) : QObject(parent) {}
+NoteIndexManager::NoteIndexManager(QObject* parent) : QObject(parent) {}
 
-bool NoteIndexManager::loadIndex(const QString &indexPath) {
+bool NoteIndexManager::loadIndex(const QString& indexPath) {
   QFile file(indexPath);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
     return false;
@@ -40,7 +40,7 @@ bool NoteIndexManager::loadIndex(const QString &indexPath) {
   return true;
 }
 
-bool NoteIndexManager::saveIndex(const QString &indexPath) {
+bool NoteIndexManager::saveIndex(const QString& indexPath) {
   QJsonObject root;
   root["version"] = 1.0;
 
@@ -61,7 +61,7 @@ bool NoteIndexManager::saveIndex(const QString &indexPath) {
   return true;
 }
 
-QString NoteIndexManager::getNoteTitle(const QString &filePath) const {
+QString NoteIndexManager::getNoteTitle(const QString& filePath) const {
   QString normalized = normalizePath(filePath);
   if (m_metadataMap.contains(normalized)) {
     return m_metadataMap[normalized].title;
@@ -70,8 +70,8 @@ QString NoteIndexManager::getNoteTitle(const QString &filePath) const {
   return QFileInfo(filePath).baseName();
 }
 
-void NoteIndexManager::setNoteTitle(const QString &filePath,
-                                    const QString &title) {
+void NoteIndexManager::setNoteTitle(const QString& filePath,
+                                    const QString& title) {
   QString normalized = normalizePath(filePath);
   NoteMetadata metadata =
       m_metadataMap.value(normalized);  // 不存在则返回默认值
@@ -79,12 +79,12 @@ void NoteIndexManager::setNoteTitle(const QString &filePath,
   m_metadataMap[normalized] = metadata;
 }
 
-int NoteIndexManager::getNotebookIndex(const QString &filePath) const {
+int NoteIndexManager::getNotebookIndex(const QString& filePath) const {
   QString normalized = normalizePath(filePath);
   return m_metadataMap.value(normalized).notebookIndex;
 }
 
-void NoteIndexManager::setNotebookIndex(const QString &filePath,
+void NoteIndexManager::setNotebookIndex(const QString& filePath,
                                         int notebookIndex) {
   QString normalized = normalizePath(filePath);
   NoteMetadata metadata = m_metadataMap.value(normalized);
@@ -92,12 +92,12 @@ void NoteIndexManager::setNotebookIndex(const QString &filePath,
   m_metadataMap[normalized] = metadata;
 }
 
-int NoteIndexManager::getNoteIndex(const QString &filePath) const {
+int NoteIndexManager::getNoteIndex(const QString& filePath) const {
   QString normalized = normalizePath(filePath);
   return m_metadataMap.value(normalized).noteIndex;
 }
 
-void NoteIndexManager::setNoteIndex(const QString &filePath, int noteIndex) {
+void NoteIndexManager::setNoteIndex(const QString& filePath, int noteIndex) {
   QString normalized = normalizePath(filePath);
   NoteMetadata metadata = m_metadataMap.value(normalized);
   metadata.noteIndex = noteIndex;
@@ -111,6 +111,36 @@ void NoteIndexManager::setCurrentIndexes(int notebookIndex, int noteIndex) {
   // emit currentIndexesChanged(notebookIndex, noteIndex);
 }
 
-NoteMetadata NoteIndexManager::getNoteMetadata(const QString &filePath) const {
+NoteMetadata NoteIndexManager::getNoteMetadata(const QString& filePath) const {
   return m_metadataMap.value(normalizePath(filePath));
+}
+
+// 获取所有笔记的标题（用于补全弹窗列表）
+QStringList NoteIndexManager::getAllNoteTitles() const {
+  QStringList titles;
+  for (auto it = m_metadataMap.begin(); it != m_metadataMap.end(); ++it) {
+    titles.append(it.value().title);
+  }
+  return titles;
+}
+
+// 根据标题 → 返回对应的笔记路径
+QString NoteIndexManager::getFilePathByTitle(const QString& title) const {
+  for (auto it = m_metadataMap.begin(); it != m_metadataMap.end(); ++it) {
+    if (it.value().title == title) {
+      return it.key();  // 返回完整路径
+    }
+  }
+  return "";
+}
+
+// 输入关键词 → 返回所有匹配的标题列表（自动补全用）
+QStringList NoteIndexManager::searchTitles(const QString& keyword) const {
+  QStringList result;
+  for (auto it = m_metadataMap.begin(); it != m_metadataMap.end(); ++it) {
+    if (it.value().title.contains(keyword, Qt::CaseInsensitive)) {
+      result.append(it.value().title);
+    }
+  }
+  return result;
 }

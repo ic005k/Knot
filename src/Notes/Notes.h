@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QChar>
 #include <QClipboard>
+#include <QCompleter>
 #include <QMimeData>
 #include <QObject>
 #include <QShortcut>
@@ -203,7 +204,8 @@ class Notes : public QDialog {
   void refreshNote();
 
   bool checkAndUpdateCleanDate();
-  protected:
+
+ protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;
@@ -259,7 +261,12 @@ class Notes : public QDialog {
 
   void on_btnView_clicked();
 
+  void on_editNoteLink_textChanged(const QString& arg1);
+  void onPopupItemClicked(QListWidgetItem* item);
+
  private:
+  QListWidget* m_popupList;
+
   bool isReceiveRemoteFile = false;
 
   QString oldText, newText;
@@ -331,6 +338,7 @@ class Notes : public QDialog {
   void processSingleRemoteFile(const QString& file);
   void startBackgroundProcessRemoteFiles_MultiThread();
   void buildCleanFileList();
+  void insertNoteLink(const QString& title);
 };
 
 ///////////////////////////////////////////////////////////////////////

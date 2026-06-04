@@ -61,7 +61,10 @@ class NoteIndexManager : public QObject {
   // 通过文件路径反查完整元数据
   NoteMetadata getNoteMetadata(const QString &filePath) const;
 
- private:
+  QStringList getAllNoteTitles() const;
+  QString getFilePathByTitle(const QString &title) const;
+  QStringList searchTitles(const QString &keyword) const;
+  private:
   // 路径→元数据的映射（核心索引表）
   QHash<QString, NoteMetadata> m_metadataMap;
   QString m_currentIndexPath;  // 当前索引文件路径

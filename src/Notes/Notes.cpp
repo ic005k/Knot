@@ -46,6 +46,20 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
 
   m_Method->set_ToolButtonStyle(this);
 
+  // ==== 笔记链接自动补全 ========================
+
+  m_popupList = new QListWidget(this);
+  m_popupList->setWindowFlags(Qt::FramelessWindowHint | Qt::Window | Qt::Tool |
+                              Qt::WindowStaysOnTopHint);
+  m_popupList->setFocusPolicy(Qt::NoFocus);
+  m_popupList->setFixedWidth(ui->editNoteLink->width());
+  m_popupList->hide();
+
+  // 单击 → 直接插入，一次到位！
+  connect(m_popupList, &QListWidget::itemClicked, this,
+          &Notes::onPopupItemClicked);
+  //================================================
+
   // 创建快捷键：绑定 Ctrl+F
   QShortcut* shortcut1 = new QShortcut(QKeySequence("Ctrl+F"), this);
   connect(shortcut1, &QShortcut::activated, this, [this]() {
@@ -2735,4 +2749,57 @@ void Notes::buildCleanFileList() {
       needDelWebDAVFiles.append(fullPath);
     }
   }
+}
+
+void Notes::on_editNoteLink_textChanged(const QString& arg1) {
+  QString keyword = arg1.trimmed();
+
+  // 空内容隐藏
+  if (keyword.isEmpty()) {
+    m_popupList->hide();
+    return;
+  }
+
+  // 搜索匹配的标题（真正使用用户输入！）
+  QStringList matches = m_NoteIndexManager->searchTitles(keyword);
+
+  // 刷新列表
+  m_popupList->clear();
+  m_popupList->addItems(matches);
+
+  // 显示在输入框正下方
+  QPoint pos =
+      ui->editNoteLink->mapToGlobal(QPoint(0, ui->editNoteLink->height()));
+  m_popupList->move(pos);
+  m_popupList->show();
+}
+
+void Notes::onPopupItemClicked(QListWidgetItem* item) {
+  QString title = item->text();
+
+  // 插入链接
+  insertNoteLink(title);
+
+  // 清空 + 关闭列表
+  ui->editNoteLink->clear();
+  m_popupList->hide();
+}
+
+void Notes::insertNoteLink(const QString& title) {
+  // 1. 通过标题获取路径
+  QString fullPath = m_NoteIndexManager->getFilePathByTitle(title);
+  if (fullPath.isEmpty()) return;
+
+  // 2. 转成相对路径 memo/xxx.md
+  QString basePath = iniDir;
+  QString relativePath = QDir(basePath).relativeFilePath(fullPath);
+
+  // 3. 生成最终格式
+  QString link = QString("[%1](%2)").arg(title, relativePath);
+
+  // 4. 插入编辑器
+  m_EditSource->insert(link);
+
+  // 5. 清空输入框
+  ui->editNoteLink->clear();
 }

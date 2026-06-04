@@ -203,7 +203,6 @@ Rectangle {
         cacheBuffer: 50
         model: TodoModel {}
 
-        // ========== 移除无效的renderType属性，保留其他渲染优化 ==========
         reuseItems: false
 
         ScrollBar.vertical: ScrollBar {
@@ -212,60 +211,16 @@ Rectangle {
             layer.enabled: false
         }
 
-        delegate: Flickable {
-            id: flack
-
+        // ========== 已删除 Flickable，替换为普通 Rectangle ==========
+        delegate: Rectangle {
+            id: rectan
             width: view.width
             height: m_col.implicitHeight > 0 ? m_col.implicitHeight : 80
 
-            contentWidth: view.width + donebtn.width
-
-            interactive: false //屏蔽向左滑动
-
-            flickableDirection: Flickable.HorizontalFlick
-            boundsBehavior: Flickable.StopAtBounds
-
-            // ========== 移除无效的renderType属性，保留layer.enabled=false ==========
-            layer.enabled: false
-
-            SpringAnimation {
-                id: springAnimation
-                target: flack
-                property: "contentX"
-                spring: 4
-                damping: 0.3
-                epsilon: 0.5
-            }
-            property bool autoAnimation: false
-            flickDeceleration: 1500
-            maximumFlickVelocity: 2000
-
-            onMovementEnded: {
-                if (!checkRenderContext())
-                    return;
-                autoAnimation = true;
-                const speedThreshold = 100;
-                const posThreshold = donebtn.width * 0.3;
-
-                const currentVelocity = flack.horizontalVelocity;
-                console.log("当前速度:", currentVelocity);
-
-                if (contentX > posThreshold || Math.abs(currentVelocity) > speedThreshold) {
-                    springAnimation.to = currentVelocity > 0 ? donebtn.width : 0;
-                } else {
-                    springAnimation.to = 0;
-                }
-                springAnimation.start();
-            }
-
-            Component.onCompleted: {
-                springAnimation.onStopped.connect(() => {
-                    if (autoAnimation) {
-                        contentX = springAnimation.to;
-                        autoAnimation = false;
-                    }
-                });
-            }
+            border.width: isDark ? 0 : 1
+            border.color: "lightgray"
+            radius: 0
+            color: view.currentIndex === index ? "lightblue" : getColor()
 
             MouseArea {
                 anchors.fill: parent
@@ -281,408 +236,272 @@ Rectangle {
                         console.log("index=" + index + "  c_index=" + ListView.isCurrentItem);
                     }
                 }
-
-                /*onDoubleClicked: {
-                    if (!checkRenderContext())
-                        return
-                    m_Todo.reeditText()
-                    var data = view.model.get(view.currentIndex)
-                    console.log(data.time + "," + data.dototext + ", count=" + view.count)
-                }*/
-
-                onPressed: {
-                    if (checkRenderContext())
-                        donebtn.visible = true;
-                }
             }
 
             Rectangle {
-                id: rectan
+                id: flagColor
+                height: parent.height
+                width: 6
+                radius: 2
+                anchors.leftMargin: 1
+                color: getPriorityColor(type)
+                Text {
+                    anchors.centerIn: parent
+                }
+                visible: true
+            }
 
-                anchors.fill: parent
+            RowLayout {
+                id: idlistElemnet
                 width: parent.width
+                spacing: 0
+                Layout.fillWidth: true
 
-                border.width: isDark ? 0 : 1
-                border.color: "lightgray"
-                radius: 0
-                color: view.currentIndex === index ? "lightblue" : getColor()
-
-                Rectangle {
-                    id: flagColor
-                    height: parent.height
-                    width: 6
-                    radius: 2
-                    anchors.leftMargin: 1
-                    color: getPriorityColor(type)
-                    Text {
-                        anchors.centerIn: parent
-                    }
-                    visible: true
-                }
-
-                RowLayout {
-                    id: idlistElemnet
-
-                    width: parent.width
+                ColumnLayout {
+                    id: m_col
+                    width: parent.width - flagColor.width - 4
                     spacing: 0
-                    Layout.fillWidth: true
+                    Layout.fillWidth: false
+                    anchors.leftMargin: 0
+                    anchors.rightMargin: 0
 
-                    ColumnLayout {
-                        id: m_col
+                    Rectangle {
+                        width: view.width
+                        height: 5
+                        color: "transparent"
+                    }
 
-                        width: parent.width - flagColor.width - donebtn.width - 4
-                        spacing: 0
-                        Layout.fillWidth: false
-                        anchors.leftMargin: 0
-                        anchors.rightMargin: 0
-
-                        Rectangle {
-                            width: view.width
-                            height: 5
-                            color: "transparent"
-                        }
-
-                        RowLayout {
-                            id: row1
-
-                            function showImg() {
-                                var str1 = text1.text.substring(0, 5);
-                                var str2 = text1.text.substring(0, 4);
-                                if (str1 === "Alarm" || str2 === "定时提醒")
-                                    return true;
-                                else
-                                    return false;
-                            }
-
-                            Rectangle {
-                                height: parent.height
-                                width: 5
-                                visible: text1Img.visible
-                            }
-
-                            Image {
-                                id: text1Img
-
-                                width: itemheight - 2
-                                height: text1.contentHeight
-                                fillMode: Image.NoOption
-                                horizontalAlignment: Image.AlignHCenter
-                                verticalAlignment: Image.AlignVCenter
-
-                                smooth: true
-                                sourceSize.height: itemheight - 2
-                                sourceSize.width: itemheight - 2
-                                source: "/res/time.svg"
-
-                                visible: row1.showImg()
-                                layer.enabled: false
-                            }
-                            Text {
-                                id: text1
-
-                                width: text1Img.visible ? parent.width - text1Img.width - 5 : parent.width
-                                Layout.preferredWidth: rectan.width - flagColor.width
-                                color: view.currentIndex === index ? "black" : getText1FontColor()
-                                font.pointSize: FontSize - 2 > maxFontSize ? maxFontSize : FontSize - 2
-                                font.bold: true
-                                wrapMode: Text.WrapAnywhere
-                                horizontalAlignment: Text.AlignLeft
-                                verticalAlignment: Text.AlignVCenter
-                                text: time
-                                visible: true
-
-                                leftPadding: 10
-                                rightPadding: 10
-                                topPadding: 5
-                                bottomPadding: 5
-                                renderType: Text.NativeRendering // Text的renderType有效，保留
-                            }
-                        }
-
-                        TextArea {
-                            id: text2
-                            width: parent.width
-                            wrapMode: Text.Wrap
-                            text: type
-
-                            visible: false
-                        }
-
-                        RowLayout {
-                            id: row3
-
-                            function showImg3() {
-                                var str1 = text3.text.substring(0, 5);
-                                var str2 = text3.text.substring(0, 2);
-                                if (str1 === "Voice" || str2 === "语音")
-                                    return true;
-                                else
-                                    return false;
-                            }
-
-                            Rectangle {
-                                height: 0
-                                width: 5
-                                visible: text3Img.visible
-                            }
-
-                            Image {
-                                id: text3Img
-
-                                width: text3.contentHeight
-                                height: text3.contentHeight
-                                fillMode: Image.NoOption
-                                horizontalAlignment: Image.AlignHCenter
-                                verticalAlignment: Image.AlignVCenter
-
-                                smooth: true
-                                sourceSize.height: text3.contentHeight - 2
-                                sourceSize.width: text3.contentHeight - 2
-                                source: "/res/audio.svg"
-
-                                visible: row3.showImg3()
-                                layer.enabled: false
-                            }
-
-                            Text {
-                                id: text3
-                                height: text3.contentHeight
-                                width: text3Img.visible ? parent.width - text3Img.width - 5 : parent.width
-                                Layout.preferredWidth: rectan.width - 52
-                                font.pointSize: FontSize
-                                wrapMode: TextArea.WordWrap
-                                color: view.currentIndex === index ? "black" : getFontColor()
-                                horizontalAlignment: Text.AlignLeft
-                                verticalAlignment: Text.AlignVCenter
-                                text: dototext
-                                textFormat: Text.PlainText
-
-                                visible: true
-
-                                leftPadding: 10
-                                rightPadding: 10
-                                topPadding: 5
-                                bottomPadding: 5
-                                renderType: Text.NativeRendering // Text的renderType有效，保留
-                            }
-                        }
-
-                        TextArea {
-                            id: text4
-                            width: parent.width
-                            wrapMode: Text.Wrap
-                            text: itemheight
-
-                            visible: false
+                    RowLayout {
+                        id: row1
+                        function showImg() {
+                            var str1 = text1.text.substring(0, 5);
+                            var str2 = text1.text.substring(0, 4);
+                            return str1 === "Alarm" || str2 === "定时提醒";
                         }
 
                         Rectangle {
-                            width: view.width
-                            height: 3
-                            color: "transparent"
+                            height: parent.height
+                            width: 5
+                            visible: text1Img.visible
                         }
 
-                        Row {
-                            id: actionButtons
-                            width: parent.width
-                            z: 10
-                            spacing: 15
-                            //padding: 5
-                            visible: view.currentIndex === index
+                        Image {
+                            id: text1Img
+                            width: itemheight - 2
+                            height: text1.contentHeight
+                            fillMode: Image.NoOption
+                            horizontalAlignment: Image.AlignHCenter
+                            verticalAlignment: Image.AlignVCenter
+                            smooth: true
+                            sourceSize.height: itemheight - 2
+                            sourceSize.width: itemheight - 2
+                            source: "/res/time.svg"
+                            visible: row1.showImg()
+                            layer.enabled: false
+                        }
+                        Text {
+                            id: text1
+                            width: text1Img.visible ? parent.width - text1Img.width - 5 : parent.width
+                            Layout.preferredWidth: rectan.width - flagColor.width
+                            color: view.currentIndex === index ? "black" : getText1FontColor()
+                            font.pointSize: FontSize - 2 > maxFontSize ? maxFontSize : FontSize - 2
+                            font.bold: true
+                            wrapMode: Text.WrapAnywhere
+                            horizontalAlignment: Text.AlignLeft
+                            verticalAlignment: Text.AlignVCenter
+                            text: time
+                            visible: true
+                            leftPadding: 10
+                            rightPadding: 10
+                            topPadding: 5
+                            bottomPadding: 5
+                            renderType: Text.NativeRendering
+                        }
+                    }
 
-                            ToolButton {
-                                icon.name: "high"
-                                icon.source: "qrc:/res/high.svg"
-                                icon.width: 20
-                                icon.height: 20
+                    TextArea {
+                        id: text2
+                        width: parent.width
+                        wrapMode: Text.Wrap
+                        text: type
+                        visible: false
+                    }
 
-                                onClicked: {
-                                    if (checkRenderContext()) {
-                                        m_Todo.on_btnHigh();
-                                        console.log("设置高优先级");
-                                    }
-                                }
-                                background: Rectangle {
-                                    color: "transparent"
+                    RowLayout {
+                        id: row3
+                        function showImg3() {
+                            var str1 = text3.text.substring(0, 5);
+                            var str2 = text3.text.substring(0, 2);
+                            return str1 === "Voice" || str2 === "语音";
+                        }
+
+                        Rectangle {
+                            height: 0
+                            width: 5
+                            visible: text3Img.visible
+                        }
+
+                        Image {
+                            id: text3Img
+                            width: text3.contentHeight
+                            height: text3.contentHeight
+                            fillMode: Image.NoOption
+                            horizontalAlignment: Image.AlignHCenter
+                            verticalAlignment: Image.AlignVCenter
+                            smooth: true
+                            sourceSize.height: text3.contentHeight - 2
+                            sourceSize.width: text3.contentHeight - 2
+                            source: "/res/audio.svg"
+                            visible: row3.showImg3()
+                            layer.enabled: false
+                        }
+
+                        Text {
+                            id: text3
+                            height: text3.contentHeight
+                            width: text3Img.visible ? parent.width - text3Img.width - 5 : parent.width
+                            Layout.preferredWidth: rectan.width
+                            font.pointSize: FontSize
+                            wrapMode: TextArea.WordWrap
+                            color: view.currentIndex === index ? "black" : getFontColor()
+                            horizontalAlignment: Text.AlignLeft
+                            verticalAlignment: Text.AlignVCenter
+                            text: dototext
+                            textFormat: Text.PlainText
+                            visible: true
+                            leftPadding: 10
+                            rightPadding: 10
+                            topPadding: 5
+                            bottomPadding: 5
+                            renderType: Text.NativeRendering
+                        }
+                    }
+
+                    TextArea {
+                        id: text4
+                        width: parent.width
+                        wrapMode: Text.Wrap
+                        text: itemheight
+                        visible: false
+                    }
+
+                    Rectangle {
+                        width: view.width
+                        height: 3
+                        color: "transparent"
+                    }
+
+                    Row {
+                        id: actionButtons
+                        width: parent.width
+                        z: 10
+                        spacing: 15
+                        visible: view.currentIndex === index
+
+                        ToolButton {
+                            icon.name: "high"
+                            icon.source: "qrc:/res/high.svg"
+                            icon.width: 20
+                            icon.height: 20
+                            onClicked: {
+                                if (checkRenderContext()) {
+                                    m_Todo.on_btnHigh();
+                                    console.log("设置高优先级");
                                 }
                             }
+                            background: Rectangle {
+                                color: "transparent"
+                            }
+                        }
 
-                            ToolButton {
-                                icon.name: "low"
-                                icon.source: "qrc:/res/low.svg"
-                                icon.width: 20
-                                icon.height: 20
-
-                                onClicked: {
-                                    if (checkRenderContext()) {
-                                        m_Todo.on_btnLow();
-                                        console.log("设置低优先级");
-                                    }
-                                }
-                                background: Rectangle {
-                                    color: "transparent"
+                        ToolButton {
+                            icon.name: "low"
+                            icon.source: "qrc:/res/low.svg"
+                            icon.width: 20
+                            icon.height: 20
+                            onClicked: {
+                                if (checkRenderContext()) {
+                                    m_Todo.on_btnLow();
+                                    console.log("设置低优先级");
                                 }
                             }
-
-                            ToolButton {
-                                icon.name: "modify"
-                                icon.source: "qrc:/res/edit.svg"
-                                icon.width: 20
-                                icon.height: 20
-
-                                onClicked: {
-                                    if (checkRenderContext()) {
-                                        view.currentIndex = index;
-                                        m_Todo.reeditText();
-                                        console.log("修改条目: " + index);
-                                    }
-                                }
-                                background: Rectangle {
-                                    color: "transparent"
-                                }
+                            background: Rectangle {
+                                color: "transparent"
                             }
+                        }
 
-                            ToolButton {
-                                icon.name: "setTime"
-                                icon.source: "qrc:/res/alarm.svg"
-                                icon.width: 20
-                                icon.height: 20
-
-                                onClicked: {
-                                    if (checkRenderContext()) {
-                                        m_Todo.on_btnSetTime();
-                                        console.log("设置时间: " + index);
-                                    }
-                                }
-                                background: Rectangle {
-                                    color: "transparent"
-                                }
-                            }
-
-                            ToolButton {
-                                icon.name: "recycle"
-                                icon.source: "qrc:/res/recycle.svg"
-                                icon.width: 20
-                                icon.height: 20
-
-                                onClicked: {
-                                    if (checkRenderContext()) {
-                                        m_Todo.on_btnRecycle();
-                                        console.log("打开回收箱: " + index);
-                                    }
-                                }
-                                background: Rectangle {
-                                    color: "transparent"
-                                }
-                            }
-
-                            Item {
-                                Layout.fillWidth: true
-                            }
-
-                            Button {
-                                id: doneBtn
-                                text: qsTr("Done") // 国际化
-                                width: 56
-                                height: 24
-
-                                // 核心：让按钮在Row中垂直居中
-                                anchors.verticalCenter: parent.verticalCenter
-
-                                background: Rectangle {
-                                    color: "#f44336"
-                                    radius: 3
-                                }
-                                contentItem: Text {
-                                    text: doneBtn.text
-                                    color: "white"
-                                    font.bold: true
-                                    font.pointSize: Qt.platform.os === "android" ? 15 : 9
-                                    horizontalAlignment: Text.AlignHCenter
-                                    verticalAlignment: Text.AlignVCenter // 文字在按钮内部也垂直居中（可选）
-                                }
-                                onClicked: {
-                                    // 完成逻辑（不变）
+                        ToolButton {
+                            icon.name: "modify"
+                            icon.source: "qrc:/res/edit.svg"
+                            icon.width: 20
+                            icon.height: 20
+                            onClicked: {
+                                if (checkRenderContext()) {
                                     view.currentIndex = index;
-                                    m_Todo.stopPlayVoice();
-                                    m_Todo.addToRecycle();
-                                    view.model.remove(index);
-                                    m_Todo.refreshTableLists();
-                                    m_Todo.refreshAlarm();
-                                    m_Todo.saveTodo();
+                                    m_Todo.reeditText();
+                                    console.log("修改条目: " + index);
                                 }
+                            }
+                            background: Rectangle {
+                                color: "transparent"
                             }
                         }
 
-                        Rectangle {
-                            width: view.width
-                            height: 5
-                            color: "transparent"
-                        }
-                    }
-                }
-
-                Rectangle {
-                    id: donebtn
-                    height: parent.height
-                    width: 55
-                    color: isDark ? "#2D2D2D" : "#F5F5F5"
-                    anchors.right: parent.right
-
-                    opacity: flack.contentX !== 0 ? 1 : 0
-                    Behavior on opacity {
-                        NumberAnimation {
-                            duration: 200
-                        }
-                    }
-                    visible: opacity > 0
-
-                    CheckBox {
-                        id: todoCheckBox
-                        anchors.centerIn: parent
-                        text: ""
-                        checked: false
-                        padding: 0
-                        // 直接自定义indicator，无CheckBoxStyle（Qt6.10.2兼容）
-                        indicator: Rectangle {
-                            width: 26
-                            height: 26
-                            border.width: 2
-                            border.color: isDark ? "#666666" : "#CCCCCC"
-                            color: todoCheckBox.checked ? (isDark ? "#333333" : "#FFFFFF") : (isDark ? "#333333" : "#FFFFFF")
-                            anchors.centerIn: parent
-                            antialiasing: true
-
-                            Rectangle {
-                                id: checkMark
-                                width: 14
-                                height: 14
-                                color: isDark ? "#4CAF50" : "#8BC34A"
-                                anchors.centerIn: parent
-                                visible: todoCheckBox.checked
-                                opacity: todoCheckBox.checked ? 1 : 0
-                                Behavior on opacity {
-                                    NumberAnimation {
-                                        duration: 100
-                                    }
+                        ToolButton {
+                            icon.name: "setTime"
+                            icon.source: "qrc:/res/alarm.svg"
+                            icon.width: 20
+                            icon.height: 20
+                            onClicked: {
+                                if (checkRenderContext()) {
+                                    m_Todo.on_btnSetTime();
+                                    console.log("设置时间: " + index);
                                 }
-                                radius: 2
                             }
-
-                            Behavior on scale {
-                                NumberAnimation {
-                                    duration: 50
-                                }
+                            background: Rectangle {
+                                color: "transparent"
                             }
                         }
 
-                        Timer {
-                            id: actionTimer
-                            interval: 300
-                            repeat: false
-                            onTriggered: {
-                                if (!checkRenderContext())
-                                    return;
+                        ToolButton {
+                            icon.name: "recycle"
+                            icon.source: "qrc:/res/recycle.svg"
+                            icon.width: 20
+                            icon.height: 20
+                            onClicked: {
+                                if (checkRenderContext()) {
+                                    m_Todo.on_btnRecycle();
+                                    console.log("打开回收箱: " + index);
+                                }
+                            }
+                            background: Rectangle {
+                                color: "transparent"
+                            }
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
+                        }
+
+                        Button {
+                            id: doneBtn
+                            text: qsTr("Done")
+                            width: 56
+                            height: 24
+                            anchors.verticalCenter: parent.verticalCenter
+                            background: Rectangle {
+                                color: "#f44336"
+                                radius: 3
+                            }
+                            contentItem: Text {
+                                text: doneBtn.text
+                                color: "white"
+                                font.bold: true
+                                font.pointSize: Qt.platform.os === "android" ? 15 : 9
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            onClicked: {
                                 view.currentIndex = index;
                                 m_Todo.stopPlayVoice();
                                 m_Todo.addToRecycle();
@@ -690,19 +509,13 @@ Rectangle {
                                 m_Todo.refreshTableLists();
                                 m_Todo.refreshAlarm();
                                 m_Todo.saveTodo();
-                                springAnimation.to = 0;
-                                springAnimation.start();
-                                todoCheckBox.checked = false;
-                                todoCheckBox.indicator.scale = 1;
                             }
                         }
-
-                        onClicked: {
-                            if (!checkRenderContext())
-                                return;
-                            todoCheckBox.indicator.scale = 0.9;
-                            actionTimer.start();
-                        }
+                    }
+                    Rectangle {
+                        width: view.width
+                        height: 5
+                        color: "transparent"
                     }
                 }
             }
@@ -726,7 +539,6 @@ Rectangle {
 
     Popup {
         id: setTodoAlarm
-
         width: root.width > 450 ? 450 : root.width
         height: root.height
         y: 0
