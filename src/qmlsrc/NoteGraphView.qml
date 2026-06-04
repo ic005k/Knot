@@ -38,8 +38,7 @@ Flickable {
 
     // --- 布局参数 ---
     property real minRingRadius: 220
-    property real maxRingRadius: Math.min(centerX, centerY) - Math.max(
-                                     nodeWidth, nodeHeight) / 2 - 60
+    property real maxRingRadius: Math.min(centerX, centerY) - Math.max(nodeWidth, nodeHeight) / 2 - 60
 
     // --- UI 元素 ---
     Rectangle {
@@ -64,8 +63,7 @@ Flickable {
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter // 垂直居中
-            maximumLineCount: Math.floor(
-                                  parent.height / font.pixelSize) // 动态计算最大行数
+            maximumLineCount: Math.floor(parent.height / font.pixelSize) // 动态计算最大行数
             elide: Text.ElideRight // 超出时尾部显示省略号
         }
     }
@@ -77,144 +75,187 @@ Flickable {
         width: flickable.contentWidth
         height: flickable.contentHeight
         onPaint: {
-            const ctx = getContext("2d")
-            ctx.resetTransform()
-            ctx.clearRect(0, 0, width, height)
+            const ctx = getContext("2d");
+            ctx.resetTransform();
+            ctx.clearRect(0, 0, width, height);
 
-            const centerNodeX = flickable.centerX
-            const centerNodeY = flickable.centerY
-            const centerNodeW = nodeWidth * centerNodeScale
-            const centerNodeH = nodeHeight * centerNodeScale
+            const centerNodeX = flickable.centerX;
+            const centerNodeY = flickable.centerY;
+            const centerNodeW = nodeWidth * centerNodeScale;
+            const centerNodeH = nodeHeight * centerNodeScale;
 
             // 即使没有关系节点，也尝试绘制（虽然不会画出任何线）
             references.forEach(node => {
-                                   if (node.x !== undefined
-                                       && node.y !== undefined) {
-                                       const targetX = node.x + nodeWidth / 2
-                                       const targetY = node.y + nodeHeight / 2
-                                       const startIntersect = calculateRectLineIntersection(
-                                           centerNodeX, centerNodeY,
-                                           targetX, targetY,
-                                           centerNodeX - centerNodeW / 2,
-                                           centerNodeY - centerNodeH / 2,
-                                           centerNodeW, centerNodeH)
-                                       const endIntersect = calculateRectLineIntersection(
-                                           targetX, targetY, centerNodeX,
-                                           centerNodeY, node.x, node.y,
-                                           nodeWidth, nodeHeight)
+                if (node.x !== undefined && node.y !== undefined) {
+                    const targetX = node.x + nodeWidth / 2;
+                    const targetY = node.y + nodeHeight / 2;
+                    const startIntersect = calculateRectLineIntersection(centerNodeX, centerNodeY, targetX, targetY, centerNodeX - centerNodeW / 2, centerNodeY - centerNodeH / 2, centerNodeW, centerNodeH);
+                    const endIntersect = calculateRectLineIntersection(targetX, targetY, centerNodeX, centerNodeY, node.x, node.y, nodeWidth, nodeHeight);
 
-                                       if (startIntersect && endIntersect) {
-                                           drawCurvedArrow(ctx,
-                                                           startIntersect.x,
-                                                           startIntersect.y,
-                                                           endIntersect.x,
-                                                           endIntersect.y,
-                                                           "#1e88e5")
-                                       }
-                                   }
-                               })
+                    if (startIntersect && endIntersect) {
+                        drawCurvedArrow(ctx, startIntersect.x, startIntersect.y, endIntersect.x, endIntersect.y, "#1e88e5");
+                    }
+                }
+            });
 
             referencedBy.forEach(node => {
-                                     if (node.x !== undefined
-                                         && node.y !== undefined) {
-                                         const sourceX = node.x + nodeWidth / 2
-                                         const sourceY = node.y + nodeHeight / 2
-                                         const startIntersect = calculateRectLineIntersection(
-                                             sourceX, sourceY, centerNodeX,
-                                             centerNodeY, node.x, node.y,
-                                             nodeWidth, nodeHeight)
-                                         const endIntersect = calculateRectLineIntersection(
-                                             centerNodeX, centerNodeY,
-                                             sourceX, sourceY,
-                                             centerNodeX - centerNodeW / 2,
-                                             centerNodeY - centerNodeH / 2,
-                                             centerNodeW, centerNodeH)
+                if (node.x !== undefined && node.y !== undefined) {
+                    const sourceX = node.x + nodeWidth / 2;
+                    const sourceY = node.y + nodeHeight / 2;
+                    const startIntersect = calculateRectLineIntersection(sourceX, sourceY, centerNodeX, centerNodeY, node.x, node.y, nodeWidth, nodeHeight);
+                    const endIntersect = calculateRectLineIntersection(centerNodeX, centerNodeY, sourceX, sourceY, centerNodeX - centerNodeW / 2, centerNodeY - centerNodeH / 2, centerNodeW, centerNodeH);
 
-                                         if (startIntersect && endIntersect) {
-                                             drawCurvedArrow(ctx,
-                                                             startIntersect.x,
-                                                             startIntersect.y,
-                                                             endIntersect.x,
-                                                             endIntersect.y,
-                                                             "#8e24aa")
-                                         }
-                                     }
-                                 })
+                    if (startIntersect && endIntersect) {
+                        drawCurvedArrow(ctx, startIntersect.x, startIntersect.y, endIntersect.x, endIntersect.y, "#8e24aa");
+                    }
+                }
+            });
         }
     }
 
-    Item {
+    /*Item {
         id: nodesContainer
         x: 0
         y: 0
         width: flickable.contentWidth
         height: flickable.contentHeight
+    }*/
+
+    Item {
+        id: nodesContainer
+        anchors.fill: parent
+
+        Repeater {
+            model: references
+
+            Rectangle {
+                x: modelData.x
+                y: modelData.y
+                width: nodeWidth
+                height: nodeHeight
+                radius: nodeRadius
+                color: "#42a5f5"
+                border.color: "#1976d2"
+
+                Text {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    text: modelData.name
+                    color: "white"
+                    font.pixelSize: Qt.platform.os === "android" ? 16 : 13
+                    wrapMode: Text.Wrap
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+
+                    maximumLineCount: Math.floor(parent.height / font.pixelSize)
+                    elide: Text.ElideRight
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onDoubleClicked: graphController.handleNodeDoubleClick(modelData.filePath)
+                }
+            }
+        }
+
+        Repeater {
+            model: referencedBy
+
+            Rectangle {
+                x: modelData.x
+                y: modelData.y
+                width: nodeWidth
+                height: nodeHeight
+                radius: nodeRadius
+                color: "#ba68c8"
+                border.color: "#6a1b9a"
+
+                Text {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    text: modelData.name
+                    color: "white"
+                    font.pixelSize: Qt.platform.os === "android" ? 16 : 13
+                    wrapMode: Text.Wrap
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+
+                    maximumLineCount: Math.floor(parent.height / font.pixelSize)
+                    elide: Text.ElideRight
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onDoubleClicked: graphController.handleNodeDoubleClick(modelData.filePath)
+                }
+            }
+        }
     }
 
     // --- 绘图函数 ---
     function calculateRectLineIntersection(px, py, rx, ry, rectX, rectY, rectW, rectH) {
-        const rcx = rectX + rectW / 2
-        const rcy = rectY + rectH / 2
-        const dx = rx - px
-        const dy = ry - py
+        const rcx = rectX + rectW / 2;
+        const rcy = rectY + rectH / 2;
+        const dx = rx - px;
+        const dy = ry - py;
 
         if (dx === 0 && dy === 0)
-            return null
+            return null;
 
-        let tMin = Number.MAX_VALUE
-        let intersectX, intersectY
+        let tMin = Number.MAX_VALUE;
+        let intersectX, intersectY;
 
         if (dx !== 0) {
-            const t = (rectX - px) / dx
+            const t = (rectX - px) / dx;
             if (t >= 0) {
-                const iy = py + t * dy
+                const iy = py + t * dy;
                 if (iy >= rectY && iy <= rectY + rectH) {
                     if (t < tMin) {
-                        tMin = t
-                        intersectX = rectX
-                        intersectY = iy
+                        tMin = t;
+                        intersectX = rectX;
+                        intersectY = iy;
                     }
                 }
             }
         }
 
         if (dx !== 0) {
-            const t = (rectX + rectW - px) / dx
+            const t = (rectX + rectW - px) / dx;
             if (t >= 0) {
-                const iy = py + t * dy
+                const iy = py + t * dy;
                 if (iy >= rectY && iy <= rectY + rectH) {
                     if (t < tMin) {
-                        tMin = t
-                        intersectX = rectX + rectW
-                        intersectY = iy
+                        tMin = t;
+                        intersectX = rectX + rectW;
+                        intersectY = iy;
                     }
                 }
             }
         }
 
         if (dy !== 0) {
-            const t = (rectY - py) / dy
+            const t = (rectY - py) / dy;
             if (t >= 0) {
-                const ix = px + t * dx
+                const ix = px + t * dx;
                 if (ix >= rectX && ix <= rectX + rectW) {
                     if (t < tMin) {
-                        tMin = t
-                        intersectX = ix
-                        intersectY = rectY
+                        tMin = t;
+                        intersectX = ix;
+                        intersectY = rectY;
                     }
                 }
             }
         }
 
         if (dy !== 0) {
-            const t = (rectY + rectH - py) / dy
+            const t = (rectY + rectH - py) / dy;
             if (t >= 0) {
-                const ix = px + t * dx
+                const ix = px + t * dx;
                 if (ix >= rectX && ix <= rectX + rectW) {
                     if (t < tMin) {
-                        tMin = t
-                        intersectX = ix
-                        intersectY = rectY + rectH
+                        tMin = t;
+                        intersectX = ix;
+                        intersectY = rectY + rectH;
                     }
                 }
             }
@@ -224,172 +265,180 @@ Flickable {
             return {
                 "x": intersectX,
                 "y": intersectY
-            }
+            };
         }
         // 如果没有找到边界交点，返回中心点作为后备
         return {
             "x": rcx,
             "y": rcy
-        }
+        };
     }
 
     function drawCurvedArrow(ctx, fromX, fromY, toX, toY, color) {
-        const headLength = 12
-        const dx = toX - fromX
-        const dy = toY - fromY
+        const headLength = 12;
+        const dx = toX - fromX;
+        const dy = toY - fromY;
 
-        const midX = (fromX + toX) / 2
-        const midY = (fromY + toY) / 2
-        const distance = Math.sqrt(dx * dx + dy * dy)
-        const offsetDistance = Math.min(100, distance / 3)
-        const len = Math.sqrt(dy * dy + dx * dx)
-        const unitPerpX = (dy / len)
-        const unitPerpY = (-dx / len)
+        const midX = (fromX + toX) / 2;
+        const midY = (fromY + toY) / 2;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const offsetDistance = Math.min(100, distance / 3);
+        const len = Math.sqrt(dy * dy + dx * dx);
+        const unitPerpX = (dy / len);
+        const unitPerpY = (-dx / len);
 
-        let controlPointOffsetX, controlPointOffsetY
+        let controlPointOffsetX, controlPointOffsetY;
         if (color === "#1e88e5") {
             // 引用出去
-            controlPointOffsetX = unitPerpX * offsetDistance
-            controlPointOffsetY = unitPerpY * offsetDistance
+            controlPointOffsetX = unitPerpX * offsetDistance;
+            controlPointOffsetY = unitPerpY * offsetDistance;
         } else {
             // 被引用
-            controlPointOffsetX = -unitPerpX * offsetDistance
-            controlPointOffsetY = -unitPerpY * offsetDistance
+            controlPointOffsetX = -unitPerpX * offsetDistance;
+            controlPointOffsetY = -unitPerpY * offsetDistance;
         }
 
-        const controlX = midX + controlPointOffsetX
-        const controlY = midY + controlPointOffsetY
+        const controlX = midX + controlPointOffsetX;
+        const controlY = midY + controlPointOffsetY;
 
-        ctx.beginPath()
-        ctx.moveTo(fromX, fromY)
-        ctx.quadraticCurveTo(controlX, controlY, toX, toY)
-        ctx.strokeStyle = color
-        ctx.lineWidth = 2
-        ctx.stroke()
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.quadraticCurveTo(controlX, controlY, toX, toY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
 
         // 绘制箭头
-        const tangentX = 2 * (toX - controlX)
-        const tangentY = 2 * (toY - controlY)
-        const tangentLength = Math.sqrt(
-                                tangentX * tangentX + tangentY * tangentY)
+        const tangentX = 2 * (toX - controlX);
+        const tangentY = 2 * (toY - controlY);
+        const tangentLength = Math.sqrt(tangentX * tangentX + tangentY * tangentY);
         if (tangentLength > 0.001) {
-            const unitTangentX = tangentX / tangentLength
-            const unitTangentY = tangentY / tangentLength
-            const arrowAngle = Math.atan2(unitTangentY, unitTangentX)
+            const unitTangentX = tangentX / tangentLength;
+            const unitTangentY = tangentY / tangentLength;
+            const arrowAngle = Math.atan2(unitTangentY, unitTangentX);
 
-            ctx.beginPath()
-            ctx.moveTo(toX, toY)
-            ctx.lineTo(toX - headLength * Math.cos(arrowAngle - Math.PI / 6),
-                       toY - headLength * Math.sin(arrowAngle - Math.PI / 6))
-            ctx.lineTo(toX - headLength * Math.cos(arrowAngle + Math.PI / 6),
-                       toY - headLength * Math.sin(arrowAngle + Math.PI / 6))
-            ctx.closePath()
-            ctx.fillStyle = color
-            ctx.fill()
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headLength * Math.cos(arrowAngle - Math.PI / 6), toY - headLength * Math.sin(arrowAngle - Math.PI / 6));
+            ctx.lineTo(toX - headLength * Math.cos(arrowAngle + Math.PI / 6), toY - headLength * Math.sin(arrowAngle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
         }
     }
 
     // --- 布局算法 ---
     function calculateNodePositions() {
-        clearNodes() // 清除旧节点
+        clearNodes(); // 清除旧节点
 
         // 始终进行布局计算，即使没有关系节点或没有当前节点
         if (!currentNode) {
             // 如果没有当前节点，仍然居中并淡入
-            centerOnCurrentNode()
-            triggerFadeIn()
-            return
+            centerOnCurrentNode();
+            triggerFadeIn();
+            return;
         }
 
-        const refCount = references.length
-        const refByCount = referencedBy.length
-        const totalNodes = refCount + refByCount
+        const refCount = references.length;
+        const refByCount = referencedBy.length;
+        const totalNodes = refCount + refByCount;
 
         // 注意：这里不再因为 totalNodes === 0 而提前返回
-        const nodeArcLengthEstimate = nodeWidth + 35
+        const nodeArcLengthEstimate = nodeWidth + 35;
         // 估算节点所需弧长
-        const nodesPerFullCircle = (2 * Math.PI * minRingRadius) / nodeArcLengthEstimate
+        const nodesPerFullCircle = (2 * Math.PI * minRingRadius) / nodeArcLengthEstimate;
 
-        let currentRingRadius = minRingRadius
+        let currentRingRadius = minRingRadius;
         if (totalNodes > nodesPerFullCircle) {
             // 如果节点多，需要扩大半径
-            currentRingRadius = (totalNodes * nodeArcLengthEstimate) / (2 * Math.PI)
+            currentRingRadius = (totalNodes * nodeArcLengthEstimate) / (2 * Math.PI);
         }
         // 确保半径在合理范围内
-        currentRingRadius = Math.max(minRingRadius, Math.min(maxRingRadius,
-                                                             currentRingRadius))
+        currentRingRadius = Math.max(minRingRadius, Math.min(maxRingRadius, currentRingRadius));
 
-        let index = 0
-        const angleStep = totalNodes > 1 ? (2 * Math.PI) / totalNodes : 0
+        let index = 0;
+        const angleStep = totalNodes > 1 ? (2 * Math.PI) / totalNodes : 0;
         // 避免除以0
-        const startAngle = -Math.PI / 2
+        const startAngle = -Math.PI / 2;
         // 从顶部开始放置
 
         // 布局引用出去的节点
         references.forEach(node => {
-                               const angle = startAngle + angleStep * index
-                               const x = flickable.centerX + currentRingRadius * Math.cos(
-                                   angle) - nodeWidth / 2
-                               const y = flickable.centerY + currentRingRadius * Math.sin(
-                                   angle) - nodeHeight / 2
-                               createNode(node, x, y, "#42a5f5",
-                                          "#1976d2") // 蓝色系
-                               index++
-                           })
+            const angle = startAngle + angleStep * index;
+            const x = flickable.centerX + currentRingRadius * Math.cos(angle) - nodeWidth / 2;
+            const y = flickable.centerY + currentRingRadius * Math.sin(angle) - nodeHeight / 2;
+            //createNode(node, x, y, "#42a5f5",
+            //           "#1976d2") // 蓝色系
+
+            node.x = x;
+            node.y = y;
+
+            index++;
+        });
 
         // 布局被引用的节点
         referencedBy.forEach(node => {
-                                 const angle = startAngle + angleStep * index
-                                 const x = flickable.centerX + currentRingRadius * Math.cos(
-                                     angle) - nodeWidth / 2
-                                 const y = flickable.centerY + currentRingRadius * Math.sin(
-                                     angle) - nodeHeight / 2
-                                 createNode(node, x, y, "#ba68c8",
-                                            "#6a1b9a") // 紫色系
-                                 index++
-                             })
+            const angle = startAngle + angleStep * index;
+            const x = flickable.centerX + currentRingRadius * Math.cos(angle) - nodeWidth / 2;
+            const y = flickable.centerY + currentRingRadius * Math.sin(angle) - nodeHeight / 2;
+            // createNode(node, x, y, "#ba68c8",
+            //            "#6a1b9a") // 紫色系
+
+            node.x = x;
+            node.y = y;
+
+            index++;
+        });
 
         // 请求重绘连接线
-        connectionCanvas.requestPaint()
+        connectionCanvas.requestPaint();
+
+        // 强制刷新model，Repeater重新渲染
+        const tmpRef = references.slice()
+        const tmpRefBy = referencedBy.slice()
+        references = []
+        referencedBy = []
+        references = tmpRef
+        referencedBy = tmpRefBy
+
         // 将内容居中到视图
-        centerOnCurrentNode()
+        centerOnCurrentNode();
         // 触发淡入动画
-        triggerFadeIn()
+        triggerFadeIn();
+
+
     }
 
     // 封装淡入逻辑
     function triggerFadeIn() {
         // 延迟一小段时间后淡入，确保绘制完成
         Qt.callLater(function () {
-            let fadeInTimer = Qt.createQmlObject(
-                    'import QtQuick 2.15; Timer { interval: 10; repeat: false; running: true; onTriggered: { flickable.opacity = 1; destroy(); } }',
-                    flickable)
-        })
+            let fadeInTimer = Qt.createQmlObject('import QtQuick 2.15; Timer { interval: 10; repeat: false; running: true; onTriggered: { flickable.opacity = 1; destroy(); } }', flickable);
+        });
     }
 
     // 在开始更新数据时，先将视图移出并设为透明
     function prepareForUpdate() {
         // 移出视图区域（移动到左上角之外很远的地方）
-        flickable.contentX = -10000
-        flickable.contentY = -10000
+        flickable.contentX = -10000;
+        flickable.contentY = -10000;
         // 设为透明
-        flickable.opacity = 0
+        flickable.opacity = 0;
         // 强制刷新一次画布，清除可能的残留 (可选)
-        connectionCanvas.requestPaint()
+        connectionCanvas.requestPaint();
     }
 
     function centerOnCurrentNode() {
-        const targetContentX = flickable.centerX - flickable.width / 2
-        const targetContentY = flickable.centerY - flickable.height / 2
+        const targetContentX = flickable.centerX - flickable.width / 2;
+        const targetContentY = flickable.centerY - flickable.height / 2;
 
-        if (Number.isFinite(targetContentX) && Number.isFinite(
-                    targetContentY)) {
-            flickable.contentX = targetContentX
-            flickable.contentY = targetContentY
+        if (Number.isFinite(targetContentX) && Number.isFinite(targetContentY)) {
+            flickable.contentX = targetContentX;
+            flickable.contentY = targetContentY;
         }
     }
 
-    function clearNodes() {
+    /*function clearNodes() {
         const children = nodesContainer.children
         for (var i = children.length - 1; i >= 0; i--) {
             children[i].destroy()
@@ -403,6 +452,18 @@ Flickable {
                                  delete n.x
                                  delete n.y
                              })
+    }*/
+
+    function clearNodes() {
+        // 只清坐标，不删 item
+        references.forEach(n => {
+            delete n.x;
+            delete n.y;
+        });
+        referencedBy.forEach(n => {
+            delete n.x;
+            delete n.y;
+        });
     }
 
     function createNode(nodeData, x, y, fillColor, borderColor) {
@@ -443,79 +504,70 @@ Flickable {
                                         }
                                         }
                                         }
-                                        `, nodesContainer)
+                                        `, nodesContainer);
 
         // 缓存节点坐标，供连线使用
-        nodeData.x = x
-        nodeData.y = y
+        nodeData.x = x;
+        nodeData.y = y;
     }
 
     // --- 数据处理 ---
     function initData() {
         // 在开始任何数据处理前，先准备视图
-        prepareForUpdate()
+        prepareForUpdate();
 
-        currentNode = null
-        references = []
-        referencedBy = []
+        currentNode = null;
+        references = [];
+        referencedBy = [];
 
         if (!graphController || !graphController.model)
-            return
-
-        const model = graphController.model
-        const rowCount = model.rowCount()
-        const allNodes = []
+            return;
+        const model = graphController.model;
+        const rowCount = model.rowCount();
+        const allNodes = [];
 
         for (var i = 0; i < rowCount; i++) {
-            const idx = model.index(i, 0)
+            const idx = model.index(i, 0);
             allNodes.push({
-                              "index": i,
-                              "name": model.data(idx, NoteGraphModel.NameRole)
-                                      || "无名笔记",
-                              "filePath": model.data(
-                                              idx, NoteGraphModel.FilePathRole)
-                                          || "",
-                              "isCurrent": model.data(
-                                               idx,
-                                               NoteGraphModel.IsCurrentNoteRole)
-                          })
+                "index": i,
+                "name": model.data(idx, NoteGraphModel.NameRole) || "无名笔记",
+                "filePath": model.data(idx, NoteGraphModel.FilePathRole) || "",
+                "isCurrent": model.data(idx, NoteGraphModel.IsCurrentNoteRole)
+            });
         }
 
         // 查找当前节点
-        currentNode = allNodes.find(n => n.isCurrent)
-                || (allNodes.length > 0 ? allNodes[0] : null)
+        currentNode = allNodes.find(n => n.isCurrent) || (allNodes.length > 0 ? allNodes[0] : null);
 
         // 如果有当前节点，则计算关系
         if (currentNode) {
-            const relations = model.getRelations()
+            const relations = model.getRelations();
             relations.forEach(rel => {
-                                  if (rel.source === currentNode.index) {
-                                      const targetNode = allNodes[rel.target]
-                                      if (targetNode && !references.includes(
-                                              targetNode)) {
-                                          references.push(targetNode)
-                                      }
-                                  } else if (rel.target === currentNode.index) {
-                                      const sourceNode = allNodes[rel.source]
-                                      if (sourceNode && !referencedBy.includes(
-                                              sourceNode)) {
-                                          referencedBy.push(sourceNode)
-                                      }
-                                  }
-                              })
+                if (rel.source === currentNode.index) {
+                    const targetNode = allNodes[rel.target];
+                    if (targetNode && !references.includes(targetNode)) {
+                        references.push(targetNode);
+                    }
+                } else if (rel.target === currentNode.index) {
+                    const sourceNode = allNodes[rel.source];
+                    if (sourceNode && !referencedBy.includes(sourceNode)) {
+                        referencedBy.push(sourceNode);
+                    }
+                }
+            });
         }
         // 无论如何都调用布局计算
-        calculateNodePositions()
+        calculateNodePositions();
     }
 
     // --- 信号连接 ---
     Connections {
         target: graphController ? graphController.model : null
         function onModelReset() {
-            initData()
+            initData();
         }
         function onDataChanged() {
-            initData()
+            initData();
         }
     }
 
@@ -528,6 +580,6 @@ Flickable {
 
     Component.onCompleted: {
         // 首次加载数据
-        initData()
+        initData();
     }
 }
