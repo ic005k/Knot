@@ -30,160 +30,160 @@ Rectangle {
     function playTumblerSound() {
         if (Qt.platform.os === "android") {
             // 停止当前可能正在播放的音效，避免叠加
-            tumblerSound.stop()
-            tumblerSound.play()
+            tumblerSound.stop();
+            tumblerSound.play();
         }
     }
 
     function checkRenderContext() {
         if (Qt.application.platformName === "android" && !isRenderValid) {
-            console.log("渲染上下文无效，跳过操作")
-            return false
+            console.log("渲染上下文无效，跳过操作");
+            return false;
         }
-        return true
+        return true;
     }
 
     function showTodoAlarm() {
         if (checkRenderContext())
-            setTodoAlarm.open()
+            setTodoAlarm.open();
     }
 
     function closeTodoAlarm() {
         if (!checkRenderContext())
-            return
-        setTodoAlarm.close()
-        m_Todo.setAlarmShowValue(false)
-        m_Todo.showInputPanel()
+            return;
+        setTodoAlarm.close();
+        m_Todo.setAlarmShowValue(false);
+        m_Todo.showInputPanel();
     }
 
     function isAlarm(index) {
-        return isHighPriority
+        return isHighPriority;
     }
 
     function setHighPriority(isFalse) {
-        isHighPriority = isFalse
+        isHighPriority = isFalse;
     }
 
     function setCurrentItem(currentIndex) {
         if (checkRenderContext())
-            view.currentIndex = currentIndex
+            view.currentIndex = currentIndex;
     }
 
     function getCurrentIndex() {
-        return view.currentIndex
+        return view.currentIndex;
     }
 
     function getItemCount() {
         if (!checkRenderContext())
-            return 0
-        itemCount = view.count
-        return itemCount
+            return 0;
+        itemCount = view.count;
+        return itemCount;
     }
 
     function getItemText(itemIndex) {
         if (!checkRenderContext())
-            return ""
-        var data = view.model.get(itemIndex)
-        return data.time + "|=|" + data.dototext
+            return "";
+        var data = view.model.get(itemIndex);
+        return data.time + "|=|" + data.dototext;
     }
 
     function getTime(itemIndex) {
         if (!checkRenderContext())
-            return ""
-        var data = view.model.get(itemIndex)
-        return data.time
+            return "";
+        var data = view.model.get(itemIndex);
+        return data.time;
     }
 
     function getTodoText(itemIndex) {
         if (!checkRenderContext() || itemIndex < 0 || itemIndex >= view.count)
-            return ""
-        var data = view.model.get(itemIndex)
-        return data.dototext
+            return "";
+        var data = view.model.get(itemIndex);
+        return data.dototext;
     }
 
     function getType(itemIndex) {
         if (!checkRenderContext())
-            return 0
-        var data = view.model.get(itemIndex)
-        return data.type
+            return 0;
+        var data = view.model.get(itemIndex);
+        return data.type;
     }
 
     function addItem(strTime, type, strText, height) {
         if (!checkRenderContext())
-            return
+            return;
         view.model.append({
-                              "time": strTime,
-                              "type": type,
-                              "dototext": strText,
-                              "itemheight": height
-                          })
+            "time": strTime,
+            "type": type,
+            "dototext": strText,
+            "itemheight": height
+        });
     }
 
     function insertItem(strTime, type, strText, height, curIndex) {
         if (!checkRenderContext())
-            return
+            return;
         view.model.insert(curIndex, {
-                              "time": strTime,
-                              "type": type,
-                              "dototext": strText,
-                              "itemheight": height
-                          })
+            "time": strTime,
+            "type": type,
+            "dototext": strText,
+            "itemheight": height
+        });
     }
 
     function delItem(currentIndex) {
         if (!checkRenderContext())
-            return
-        view.model.remove(currentIndex)
+            return;
+        view.model.remove(currentIndex);
     }
 
     function modifyItem(currentIndex, strTime, strText) {
         if (!checkRenderContext())
-            return
-        view.model.setProperty(currentIndex, "time", strTime)
-        view.model.setProperty(currentIndex, "dototext", strText)
+            return;
+        view.model.setProperty(currentIndex, "time", strTime);
+        view.model.setProperty(currentIndex, "dototext", strText);
     }
 
     function modifyItemTime(currentIndex, strTime) {
         if (!checkRenderContext())
-            return
-        view.model.setProperty(currentIndex, "time", strTime)
+            return;
+        view.model.setProperty(currentIndex, "time", strTime);
     }
 
     function modifyItemType(currentIndex, type) {
         if (!checkRenderContext())
-            return
-        view.model.setProperty(currentIndex, "type", type)
+            return;
+        view.model.setProperty(currentIndex, "type", type);
     }
 
     function modifyItemText(currentIndex, strText) {
         if (!checkRenderContext())
-            return
-        view.model.setProperty(currentIndex, "dototext", strText)
+            return;
+        view.model.setProperty(currentIndex, "dototext", strText);
     }
 
     function getColor() {
-        var strColor
+        var strColor;
 
         if (isDark)
-            strColor = "#333333"
+            strColor = "#333333";
         else
-            strColor = "#ffffff"
+            strColor = "#ffffff";
 
-        return strColor
+        return strColor;
     }
 
     function getText1FontColor() {
         if (isDark)
-            return "#bbbbbb"
+            return "#bbbbbb";
         else
-            return "#777777"
+            return "#777777";
     }
 
     function getFontColor() {
         if (isDark)
-            return "white"
+            return "white";
         else
-            return "black"
+            return "black";
     }
 
     ListView {
@@ -242,62 +242,57 @@ Rectangle {
 
             onMovementEnded: {
                 if (!checkRenderContext())
-                    return
-                autoAnimation = true
-                const speedThreshold = 100
-                const posThreshold = donebtn.width * 0.3
+                    return;
+                autoAnimation = true;
+                const speedThreshold = 100;
+                const posThreshold = donebtn.width * 0.3;
 
-                const currentVelocity = flack.horizontalVelocity
-                console.log("当前速度:", currentVelocity)
+                const currentVelocity = flack.horizontalVelocity;
+                console.log("当前速度:", currentVelocity);
 
-                if (contentX > posThreshold || Math.abs(
-                            currentVelocity) > speedThreshold) {
-                    springAnimation.to = currentVelocity > 0 ? donebtn.width : 0
+                if (contentX > posThreshold || Math.abs(currentVelocity) > speedThreshold) {
+                    springAnimation.to = currentVelocity > 0 ? donebtn.width : 0;
                 } else {
-                    springAnimation.to = 0
+                    springAnimation.to = 0;
                 }
-                springAnimation.start()
+                springAnimation.start();
             }
 
             Component.onCompleted: {
                 springAnimation.onStopped.connect(() => {
-                                                      if (autoAnimation) {
-                                                          contentX = springAnimation.to
-                                                          autoAnimation = false
-                                                      }
-                                                  })
+                    if (autoAnimation) {
+                        contentX = springAnimation.to;
+                        autoAnimation = false;
+                    }
+                });
             }
 
             MouseArea {
                 anchors.fill: parent
                 onClicked: function (mouse) {
                     if (!checkRenderContext())
-                        return
-                    if (actionButtons.visible && mouse.x > actionButtons.x
-                            && mouse.x < actionButtons.x + actionButtons.width
-                            && mouse.y > actionButtons.y
-                            && mouse.y < actionButtons.y + actionButtons.height) {
-
-                        mouse.accepted = false
-                        console.log("按钮被点击...")
+                        return;
+                    if (actionButtons.visible && mouse.x > actionButtons.x && mouse.x < actionButtons.x + actionButtons.width && mouse.y > actionButtons.y && mouse.y < actionButtons.y + actionButtons.height) {
+                        mouse.accepted = false;
+                        console.log("按钮被点击...");
                     } else {
-                        view.currentIndex = index
-                        m_Todo.stopPlayVoice()
-                        console.log("index=" + index + "  c_index=" + ListView.isCurrentItem)
+                        view.currentIndex = index;
+                        m_Todo.stopPlayVoice();
+                        console.log("index=" + index + "  c_index=" + ListView.isCurrentItem);
                     }
                 }
 
-                onDoubleClicked: {
+                /*onDoubleClicked: {
                     if (!checkRenderContext())
                         return
                     m_Todo.reeditText()
                     var data = view.model.get(view.currentIndex)
                     console.log(data.time + "," + data.dototext + ", count=" + view.count)
-                }
+                }*/
 
                 onPressed: {
                     if (checkRenderContext())
-                        donebtn.visible = true
+                        donebtn.visible = true;
                 }
             }
 
@@ -351,12 +346,12 @@ Rectangle {
                             id: row1
 
                             function showImg() {
-                                var str1 = text1.text.substring(0, 5)
-                                var str2 = text1.text.substring(0, 4)
+                                var str1 = text1.text.substring(0, 5);
+                                var str2 = text1.text.substring(0, 4);
                                 if (str1 === "Alarm" || str2 === "定时提醒")
-                                    return true
+                                    return true;
                                 else
-                                    return false
+                                    return false;
                             }
 
                             Rectangle {
@@ -385,12 +380,10 @@ Rectangle {
                             Text {
                                 id: text1
 
-                                width: text1Img.visible ? parent.width - text1Img.width
-                                                          - 5 : parent.width
+                                width: text1Img.visible ? parent.width - text1Img.width - 5 : parent.width
                                 Layout.preferredWidth: rectan.width - flagColor.width
                                 color: view.currentIndex === index ? "black" : getText1FontColor()
-                                font.pointSize: FontSize - 2
-                                                > maxFontSize ? maxFontSize : FontSize - 2
+                                font.pointSize: FontSize - 2 > maxFontSize ? maxFontSize : FontSize - 2
                                 font.bold: true
                                 wrapMode: Text.WrapAnywhere
                                 horizontalAlignment: Text.AlignLeft
@@ -419,12 +412,12 @@ Rectangle {
                             id: row3
 
                             function showImg3() {
-                                var str1 = text3.text.substring(0, 5)
-                                var str2 = text3.text.substring(0, 2)
+                                var str1 = text3.text.substring(0, 5);
+                                var str2 = text3.text.substring(0, 2);
                                 if (str1 === "Voice" || str2 === "语音")
-                                    return true
+                                    return true;
                                 else
-                                    return false
+                                    return false;
                             }
 
                             Rectangle {
@@ -454,8 +447,7 @@ Rectangle {
                             Text {
                                 id: text3
                                 height: text3.contentHeight
-                                width: text3Img.visible ? parent.width - text3Img.width
-                                                          - 5 : parent.width
+                                width: text3Img.visible ? parent.width - text3Img.width - 5 : parent.width
                                 Layout.preferredWidth: rectan.width - 52
                                 font.pointSize: FontSize
                                 wrapMode: TextArea.WordWrap
@@ -506,8 +498,8 @@ Rectangle {
 
                                 onClicked: {
                                     if (checkRenderContext()) {
-                                        m_Todo.on_btnHigh()
-                                        console.log("设置高优先级")
+                                        m_Todo.on_btnHigh();
+                                        console.log("设置高优先级");
                                     }
                                 }
                                 background: Rectangle {
@@ -523,8 +515,8 @@ Rectangle {
 
                                 onClicked: {
                                     if (checkRenderContext()) {
-                                        m_Todo.on_btnLow()
-                                        console.log("设置低优先级")
+                                        m_Todo.on_btnLow();
+                                        console.log("设置低优先级");
                                     }
                                 }
                                 background: Rectangle {
@@ -540,9 +532,9 @@ Rectangle {
 
                                 onClicked: {
                                     if (checkRenderContext()) {
-                                        view.currentIndex = index
-                                        m_Todo.reeditText()
-                                        console.log("修改条目: " + index)
+                                        view.currentIndex = index;
+                                        m_Todo.reeditText();
+                                        console.log("修改条目: " + index);
                                     }
                                 }
                                 background: Rectangle {
@@ -558,8 +550,8 @@ Rectangle {
 
                                 onClicked: {
                                     if (checkRenderContext()) {
-                                        m_Todo.on_btnSetTime()
-                                        console.log("设置时间: " + index)
+                                        m_Todo.on_btnSetTime();
+                                        console.log("设置时间: " + index);
                                     }
                                 }
                                 background: Rectangle {
@@ -575,8 +567,8 @@ Rectangle {
 
                                 onClicked: {
                                     if (checkRenderContext()) {
-                                        m_Todo.on_btnRecycle()
-                                        console.log("打开回收箱: " + index)
+                                        m_Todo.on_btnRecycle();
+                                        console.log("打开回收箱: " + index);
                                     }
                                 }
                                 background: Rectangle {
@@ -611,13 +603,13 @@ Rectangle {
                                 }
                                 onClicked: {
                                     // 完成逻辑（不变）
-                                    view.currentIndex = index
-                                    m_Todo.stopPlayVoice()
-                                    m_Todo.addToRecycle()
-                                    view.model.remove(index)
-                                    m_Todo.refreshTableLists()
-                                    m_Todo.refreshAlarm()
-                                    m_Todo.saveTodo()
+                                    view.currentIndex = index;
+                                    m_Todo.stopPlayVoice();
+                                    m_Todo.addToRecycle();
+                                    view.model.remove(index);
+                                    m_Todo.refreshTableLists();
+                                    m_Todo.refreshAlarm();
+                                    m_Todo.saveTodo();
                                 }
                             }
                         }
@@ -690,26 +682,26 @@ Rectangle {
                             repeat: false
                             onTriggered: {
                                 if (!checkRenderContext())
-                                    return
-                                view.currentIndex = index
-                                m_Todo.stopPlayVoice()
-                                m_Todo.addToRecycle()
-                                view.model.remove(index)
-                                m_Todo.refreshTableLists()
-                                m_Todo.refreshAlarm()
-                                m_Todo.saveTodo()
-                                springAnimation.to = 0
-                                springAnimation.start()
-                                todoCheckBox.checked = false
-                                todoCheckBox.indicator.scale = 1
+                                    return;
+                                view.currentIndex = index;
+                                m_Todo.stopPlayVoice();
+                                m_Todo.addToRecycle();
+                                view.model.remove(index);
+                                m_Todo.refreshTableLists();
+                                m_Todo.refreshAlarm();
+                                m_Todo.saveTodo();
+                                springAnimation.to = 0;
+                                springAnimation.start();
+                                todoCheckBox.checked = false;
+                                todoCheckBox.indicator.scale = 1;
                             }
                         }
 
                         onClicked: {
                             if (!checkRenderContext())
-                                return
-                            todoCheckBox.indicator.scale = 0.9
-                            actionTimer.start()
+                                return;
+                            todoCheckBox.indicator.scale = 0.9;
+                            actionTimer.start();
                         }
                     }
                 }
@@ -720,15 +712,15 @@ Rectangle {
     function getPriorityColor(ntype) {
         switch (ntype) {
         case 0:
-            return "gray"
+            return "gray";
         case 1:
-            return "red"
+            return "red";
         case 2:
-            return "orange"
+            return "orange";
         case 3:
-            return "#3498DB"
+            return "#3498DB";
         default:
-            return "black"
+            return "black";
         }
     }
 
@@ -759,7 +751,7 @@ Rectangle {
     Connections {
         target: Qt.application
         function onAboutToQuit() {
-            root.isRenderValid = false
+            root.isRenderValid = false;
         }
     }
 }
