@@ -13,6 +13,9 @@
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
+static const QRegularExpression linkRegex(
+    R"(\[(.*?)\]\((memo\/([^)]+\.md))\))");
+
 void registerNoteGraphTypes() {
   qmlRegisterType<NoteGraphModel>("NoteGraph", 1, 0, "NoteGraphModel");
   qmlRegisterType<NoteRelationParser>("NoteGraph", 1, 0, "NoteRelationParser");
@@ -21,8 +24,8 @@ void registerNoteGraphTypes() {
   qRegisterMetaType<QVector<NoteRelation>>("QVector<NoteRelation>");
 }
 
-static QObject *noteGraphControllerSingletonProvider(QQmlEngine *engine,
-                                                     QJSEngine *scriptEngine) {
+static QObject* noteGraphControllerSingletonProvider(QQmlEngine* engine,
+                                                     QJSEngine* scriptEngine) {
   Q_UNUSED(engine);
   Q_UNUSED(scriptEngine);
   return new NoteGraphController();
@@ -35,32 +38,32 @@ void initializeNoteGraph() {
 }
 
 // --- NoteGraphModel 实现（保持不变）---
-NoteGraphModel::NoteGraphModel(QObject *parent) : QAbstractItemModel(parent) {}
+NoteGraphModel::NoteGraphModel(QObject* parent) : QAbstractItemModel(parent) {}
 
 QModelIndex NoteGraphModel::index(int row, int column,
-                                  const QModelIndex &parent) const {
+                                  const QModelIndex& parent) const {
   if (!hasIndex(row, column, parent)) return QModelIndex();
   return createIndex(row, column);
 }
 
-QModelIndex NoteGraphModel::parent(const QModelIndex &child) const {
+QModelIndex NoteGraphModel::parent(const QModelIndex& child) const {
   Q_UNUSED(child);
   return QModelIndex();
 }
 
-int NoteGraphModel::rowCount(const QModelIndex &parent) const {
+int NoteGraphModel::rowCount(const QModelIndex& parent) const {
   if (parent.isValid()) return 0;
   return m_nodes.size();
 }
 
-int NoteGraphModel::columnCount(const QModelIndex &parent) const {
+int NoteGraphModel::columnCount(const QModelIndex& parent) const {
   Q_UNUSED(parent);
   return 1;
 }
 
-QVariant NoteGraphModel::data(const QModelIndex &index, int role) const {
+QVariant NoteGraphModel::data(const QModelIndex& index, int role) const {
   if (!index.isValid() || index.row() >= m_nodes.size()) return QVariant();
-  const NoteNode &node = m_nodes[index.row()];
+  const NoteNode& node = m_nodes[index.row()];
 
   switch (role) {
     case NameRole:
@@ -87,7 +90,7 @@ QHash<int, QByteArray> NoteGraphModel::roleNames() const {
 
 QVariantList NoteGraphModel::getRelations() const {
   QVariantList relations;
-  for (const auto &rel : m_relations) {
+  for (const auto& rel : m_relations) {
     QVariantMap map;
     map["source"] = rel.sourceIndex;
     map["target"] = rel.targetIndex;
@@ -105,17 +108,17 @@ void NoteGraphModel::setNodePosition(int index, qreal x, qreal y) {
   }
 }
 
-void NoteGraphModel::addNode(const NoteNode &node) {
+void NoteGraphModel::addNode(const NoteNode& node) {
   beginInsertRows(QModelIndex(), m_nodes.size(), m_nodes.size());
   m_nodes.append(node);
   endInsertRows();
 }
 
-void NoteGraphModel::addRelation(const NoteRelation &relation) {
+void NoteGraphModel::addRelation(const NoteRelation& relation) {
   m_relations.append(relation);
 }
 
-int NoteGraphModel::findNodeIndex(const QString &filePath) const {
+int NoteGraphModel::findNodeIndex(const QString& filePath) const {
   for (int i = 0; i < m_nodes.size(); ++i) {
     if (m_nodes[i].filePath == filePath) return i;
   }
@@ -130,17 +133,25 @@ void NoteGraphModel::clear() {
   emit modelCleared();
 }
 
+//===============================================================================
+
 // --- NoteRelationParser 实现（核心优化部分）---
-NoteRelationParser::NoteRelationParser(QObject *parent) : QObject(parent) {
+NoteRelationParser::NoteRelationParser(QObject* parent) : QObject(parent) {
   // 连接后台数据到主线程处理槽函数
   connect(this, &NoteRelationParser::parsedDataReady, this,
           &NoteRelationParser::onParsedDataReady,
           Qt::QueuedConnection);  // 跨线程信号槽（排队执行）
+
+  m_cachePath = privateDir + "notegraph_cache.json";
+  m_cache.load(m_cachePath);  // 启动就加载
+
+  connect(this, &NoteRelationParser::parsedDataReady, this,
+          &NoteRelationParser::onParsedDataReady, Qt::QueuedConnection);
 }
 
 // 启动解析：主线程触发，后台执行耗时操作
-void NoteRelationParser::parseNoteRelations(NoteGraphModel *model,
-                                            const QString &currentNotePath) {
+/*void NoteRelationParser::parseNoteRelations(NoteGraphModel* model,
+                                            const QString& currentNotePath) {
   if (!model || currentNotePath.isEmpty()) return;
 
   // 保存模型指针（使用QPointer避免悬垂指针）
@@ -172,16 +183,179 @@ void NoteRelationParser::parseNoteRelations(NoteGraphModel *model,
   });
 
   // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this,
           [=]() { watcher->deleteLater(); });
   watcher->setFuture(future);
+}*/
+
+void NoteRelationParser::parseNoteRelations(NoteGraphModel* model,
+                                            const QString& currentNotePath) {
+  if (!model || currentNotePath.isEmpty()) return;
+
+  m_model = model;
+  model->clear();
+  QString currentNoteName =
+      m_Notes->m_NoteIndexManager->getNoteTitle(currentNotePath);
+  QString currentFileName = QFileInfo(currentNotePath).fileName();
+
+  // ======================
+  // 【缓存加速：核心】
+  // ======================
+  if (!m_cache.isEmpty() && m_cache.forward.contains(currentFileName)) {
+    QVector<NoteNode> nodes;
+    QVector<NoteRelation> relations;
+
+    // 当前笔记放中间
+    nodes.append(NoteNode(currentNoteName, currentNotePath, true));
+
+    // 我引用谁 forward
+    for (const QString& linkFile : m_cache.forward[currentFileName]) {
+      QString path = iniDir + "memo/" + linkFile;
+      int idx = findNodeIndex(nodes, path);
+      if (idx == -1) {
+        // 真实标题
+        QString title = m_Notes->m_NoteIndexManager->getNoteTitle(path);
+        if (title.isEmpty()) title = QFileInfo(linkFile).baseName();
+        nodes.append(NoteNode(title, path, false));
+        idx = nodes.size() - 1;
+      }
+      relations.append(NoteRelation(0, idx));
+    }
+
+    // 谁引用我 backward
+    if (m_cache.backward.contains(currentFileName)) {
+      for (const QString& refFile : m_cache.backward[currentFileName]) {
+        QString path = iniDir + "memo/" + refFile;
+        int idx = findNodeIndex(nodes, path);
+        if (idx == -1) {
+          // 真实标题
+          QString title = m_Notes->m_NoteIndexManager->getNoteTitle(path);
+          if (title.isEmpty()) title = QFileInfo(refFile).baseName();
+          nodes.append(NoteNode(title, path, false));
+          idx = nodes.size() - 1;
+        }
+        relations.append(NoteRelation(idx, 0));
+      }
+    }
+
+    // 直接返回缓存！！！
+    emit parsedDataReady(nodes, relations);
+    return;
+  }
+
+  // ======================
+  // 缓存不存在 → 走原来的全量解析
+  // ======================
+  QFuture<void> future = QtConcurrent::run([=]() {
+    QVector<NoteNode> nodes;
+    QVector<NoteRelation> relations;
+    nodes.append(NoteNode(currentNoteName, currentNotePath, true));
+
+    parseNoteReferences(nodes, relations, currentNotePath, 0);
+    QString notesDir = QFileInfo(currentNotePath).absolutePath();
+    findReferencingNotes(nodes, relations, notesDir, currentNotePath, 0);
+
+    // ======================
+    // 解析完 → 自动构建缓存
+    // ======================
+    buildCacheFromNodes(nodes, relations, currentFileName);
+
+    emit parsedDataReady(nodes, relations);
+  });
+
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, watcher,
+          &QFutureWatcher<void>::deleteLater);
+  watcher->setFuture(future);
+}
+
+int NoteRelationParser::findNodeIndex(const QVector<NoteNode>& nodes,
+                                      const QString& path) {
+  for (int i = 0; i < nodes.size(); i++) {
+    if (nodes[i].filePath == path) return i;
+  }
+  return -1;
+}
+
+void NoteRelationParser::updateNoteCache(const QString& filePath) {
+  QtConcurrent::run([=]() {
+    QVector<NoteNode> nodes;
+    QVector<NoteRelation> relations;
+    nodes.append(NoteNode("", filePath, true));
+
+    parseNoteReferences(nodes, relations, filePath, 0);
+
+    QString fileName = QFileInfo(filePath).fileName();
+    QStringList newOutgoing;
+
+    for (const auto& rel : relations) {
+      if (rel.sourceIndex == 0) {
+        newOutgoing << QFileInfo(nodes[rel.targetIndex].filePath).fileName();
+      }
+    }
+
+    // 更新缓存
+    QStringList old = m_cache.forward.value(fileName);
+    m_cache.forward[fileName] = newOutgoing;
+
+    for (const QString& f : old) {
+      m_cache.backward[f].removeOne(fileName);
+    }
+    for (const QString& f : newOutgoing) {
+      if (!m_cache.backward[f].contains(fileName)) {
+        m_cache.backward[f].append(fileName);
+      }
+    }
+
+    m_cache.save(m_cachePath);
+  });
+}
+
+void NoteRelationParser::deleteNoteCache(const QString& filePath) {
+  QString fileName = QFileInfo(filePath).fileName();
+
+  // 1. 移除自己的 forward
+  QStringList myLinks = m_cache.forward.take(fileName);
+  for (const QString& f : myLinks) {
+    m_cache.backward[f].removeOne(fileName);
+  }
+
+  // 2. 移除自己的 backward
+  QStringList refMe = m_cache.backward.take(fileName);
+  for (const QString& f : refMe) {
+    m_cache.forward[f].removeOne(fileName);
+  }
+
+  m_cache.save(m_cachePath);
+}
+
+void NoteRelationParser::buildCacheFromNodes(
+    const QVector<NoteNode>& nodes, const QVector<NoteRelation>& relations,
+    const QString& currentFileName) {
+  // 只构建当前笔记的缓存，不影响全局
+  QStringList outgoing, incoming;
+
+  for (const auto& rel : relations) {
+    if (rel.sourceIndex == 0) {
+      QString target = nodes[rel.targetIndex].filePath;
+      outgoing << QFileInfo(target).fileName();
+    }
+    if (rel.targetIndex == 0) {
+      QString source = nodes[rel.sourceIndex].filePath;
+      incoming << QFileInfo(source).fileName();
+    }
+  }
+
+  m_cache.forward[currentFileName] = outgoing;
+  m_cache.backward[currentFileName] = incoming;
+  m_cache.save(m_cachePath);
 }
 
 // 解析当前笔记中符合格式的链接（[任意文本](memo/xxx.md)）
-void NoteRelationParser::parseNoteReferences(QVector<NoteNode> &nodes,
-                                             QVector<NoteRelation> &relations,
-                                             const QString &notePath,
+void NoteRelationParser::parseNoteReferences(QVector<NoteNode>& nodes,
+                                             QVector<NoteRelation>& relations,
+                                             const QString& notePath,
                                              int sourceIndex) {
   QFile file(notePath);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -192,7 +366,6 @@ void NoteRelationParser::parseNoteReferences(QVector<NoteNode> &nodes,
   file.close();
 
   // 正则：严格匹配 (memo/xxx.md) 格式的链接，捕获显示文本和文件名
-  QRegularExpression linkRegex(R"(\[(.*?)\]\((memo\/([^)]+\.md))\))");
   QRegularExpressionMatchIterator it = linkRegex.globalMatch(content);
 
   while (it.hasNext()) {
@@ -231,10 +404,10 @@ void NoteRelationParser::parseNoteReferences(QVector<NoteNode> &nodes,
 }
 
 // 查找其他笔记中是否包含指向当前笔记的链接（memo/当前文件名.md）
-void NoteRelationParser::findReferencingNotes(QVector<NoteNode> &nodes,
-                                              QVector<NoteRelation> &relations,
-                                              const QString &dirPath,
-                                              const QString &currentNotePath,
+void NoteRelationParser::findReferencingNotes(QVector<NoteNode>& nodes,
+                                              QVector<NoteRelation>& relations,
+                                              const QString& dirPath,
+                                              const QString& currentNotePath,
                                               int currentNoteIndex) {
   // 1. 获取当前笔记的文件名（如"20250814_194722_1451366970.md"）
   QString currentFileName = QFileInfo(currentNotePath).fileName();
@@ -249,7 +422,7 @@ void NoteRelationParser::findReferencingNotes(QVector<NoteNode> &nodes,
   // 2. 遍历目录下的所有.md文件（排除当前笔记）
   QStringList mdFiles = dir.entryList(
       QStringList() << "*.md", QDir::Files | QDir::Readable | QDir::NoSymLinks);
-  for (const QString &fileName : mdFiles) {
+  for (const QString& fileName : mdFiles) {
     QString mdFilePath = dir.filePath(fileName);
     // 跳过当前笔记自身
     if (mdFilePath == currentNotePath) {
@@ -266,7 +439,6 @@ void NoteRelationParser::findReferencingNotes(QVector<NoteNode> &nodes,
     file.close();
 
     // 4. 正则匹配所有(memo/xxx.md)格式的链接
-    QRegularExpression linkRegex(R"(\[(.*?)\]\((memo\/([^)]+\.md))\))");
     QRegularExpressionMatchIterator it = linkRegex.globalMatch(content);
 
     bool isReferencing = false;
@@ -323,7 +495,7 @@ void NoteRelationParser::findReferencingNotes(QVector<NoteNode> &nodes,
   // 7. 递归遍历子目录
   QStringList subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot |
                                       QDir::Readable | QDir::NoSymLinks);
-  for (const QString &subDir : subDirs) {
+  for (const QString& subDir : subDirs) {
     QString subDirPath = dir.filePath(subDir);
     qDebug() << "[findReferencingNotes] 进入子目录：" << subDirPath;
     findReferencingNotes(nodes, relations, subDirPath, currentNotePath,
@@ -333,7 +505,7 @@ void NoteRelationParser::findReferencingNotes(QVector<NoteNode> &nodes,
 
 // 主线程：处理后台返回的结果并更新模型
 void NoteRelationParser::onParsedDataReady(
-    const QVector<NoteNode> &nodes, const QVector<NoteRelation> &relations) {
+    const QVector<NoteNode>& nodes, const QVector<NoteRelation>& relations) {
   if (!m_model) {
     mw_one->closeProgress();
     return;
@@ -344,10 +516,10 @@ void NoteRelationParser::onParsedDataReady(
   mui->frameNotesGraph->show();
 
   // 批量添加节点和关系到模型（主线程操作）
-  for (const auto &node : nodes) {
+  for (const auto& node : nodes) {
     m_model->addNode(node);
   }
-  for (const auto &rel : relations) {
+  for (const auto& rel : relations) {
     m_model->addRelation(rel);
   }
 
@@ -363,7 +535,7 @@ void NoteRelationParser::onParsedDataReady(
       tr("Relations") + ": " + QString::number(relations.size()));
 
   qDebug() << "引用关系列表：";
-  for (const auto &rel : relations) {
+  for (const auto& rel : relations) {
     QString sourceName = nodes[rel.sourceIndex].name;
     QString targetName = nodes[rel.targetIndex].name;
     qDebug() << "  " << sourceName << " → " << targetName;
@@ -376,7 +548,7 @@ void NoteRelationParser::onParsedDataReady(
 }
 
 // 主线程：排列节点位置（保持不变）
-void NoteRelationParser::arrangeNodes(NoteGraphModel *model) {
+void NoteRelationParser::arrangeNodes(NoteGraphModel* model) {
   int currentIndex = -1;
   for (int i = 0; i < model->rowCount(); ++i) {
     QModelIndex idx = model->index(i, 0);
@@ -392,7 +564,7 @@ void NoteRelationParser::arrangeNodes(NoteGraphModel *model) {
   QVariantList relations = model->getRelations();
   QVector<int> referencedNodes, referencingNodes;
 
-  for (const QVariant &relVar : relations) {
+  for (const QVariant& relVar : relations) {
     QVariantMap rel = relVar.toMap();
     int source = rel["source"].toInt();
     int target = rel["target"].toInt();
@@ -421,7 +593,7 @@ void NoteRelationParser::arrangeNodes(NoteGraphModel *model) {
 }
 
 // --- NoteGraphController 实现（保持不变）---
-NoteGraphController::NoteGraphController(QObject *parent) : QObject(parent) {
+NoteGraphController::NoteGraphController(QObject* parent) : QObject(parent) {
   m_model = new NoteGraphModel(this);
   m_parser = new NoteRelationParser(this);
 
@@ -433,7 +605,7 @@ QString NoteGraphController::currentNotePath() const {
   return m_currentNotePath;
 }
 
-void NoteGraphController::setCurrentNotePath(const QString &path) {
+void NoteGraphController::setCurrentNotePath(const QString& path) {
   // if (m_currentNotePath != path) {
   m_currentNotePath = path;
   emit currentNotePathChanged();
@@ -443,10 +615,73 @@ void NoteGraphController::setCurrentNotePath(const QString &path) {
   //}
 }
 
-NoteGraphModel *NoteGraphController::model() const { return m_model; }
+NoteGraphModel* NoteGraphController::model() const { return m_model; }
 
-NoteRelationParser *NoteGraphController::parser() const { return m_parser; }
+NoteRelationParser* NoteGraphController::parser() const { return m_parser; }
 
-void NoteGraphController::handleNodeDoubleClick(const QString &filePath) {
+void NoteGraphController::handleNodeDoubleClick(const QString& filePath) {
   emit nodeDoubleClicked(filePath);
+}
+
+// =============================================================================
+// NoteGraphCache 实现
+// =============================================================================
+bool NoteGraphCache::isEmpty() const {
+  return forward.isEmpty() && backward.isEmpty();
+}
+
+void NoteGraphCache::clear() {
+  forward.clear();
+  backward.clear();
+}
+
+void NoteGraphCache::load(const QString& filePath) {
+  QFile file(filePath);
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return;
+
+  QByteArray jsonData = file.readAll();
+  file.close();
+
+  QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+  if (!doc.isObject()) return;
+
+  QJsonObject root = doc.object();
+  QJsonObject fwdObj = root["forward"].toObject();
+  QJsonObject bwdObj = root["backward"].toObject();
+
+  // 加载 forward
+  forward.clear();
+  for (auto it = fwdObj.begin(); it != fwdObj.end(); ++it) {
+    forward[it.key()] = it.value().toString().split(",", Qt::SkipEmptyParts);
+  }
+
+  // 加载 backward
+  backward.clear();
+  for (auto it = bwdObj.begin(); it != bwdObj.end(); ++it) {
+    backward[it.key()] = it.value().toString().split(",", Qt::SkipEmptyParts);
+  }
+}
+
+void NoteGraphCache::save(const QString& filePath) {
+  QJsonObject fwdObj, bwdObj;
+
+  // 保存 forward
+  for (auto it = forward.begin(); it != forward.end(); ++it) {
+    fwdObj[it.key()] = it.value().join(",");
+  }
+
+  // 保存 backward
+  for (auto it = backward.begin(); it != backward.end(); ++it) {
+    bwdObj[it.key()] = it.value().join(",");
+  }
+
+  QJsonObject root;
+  root["forward"] = fwdObj;
+  root["backward"] = bwdObj;
+
+  QFile file(filePath);
+  if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+
+  file.write(QJsonDocument(root).toJson());
+  file.close();
 }

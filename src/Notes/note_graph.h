@@ -8,6 +8,22 @@
 #include <QString>
 #include <QVector>
 
+// ==============================
+// 新增：图谱缓存类（纯数据结构）
+// ==============================
+class NoteGraphCache {
+ public:
+  // 缓存两张核心表
+  QMap<QString, QStringList> forward;   // 文件名 → 我引用的文件列表
+  QMap<QString, QStringList> backward;  // 文件名 → 引用我的文件列表
+
+  // 方法
+  void load(const QString& filePath);  // 从JSON加载
+  void save(const QString& filePath);  // 保存到JSON
+  bool isEmpty() const;
+  void clear();
+};
+
 // 结构体定义
 struct NoteNode {
   QString name;
@@ -15,7 +31,7 @@ struct NoteNode {
   QPointF position;
   bool isCurrentNote;
 
-  NoteNode(const QString &n, const QString &path, bool isCurrent = false)
+  NoteNode(const QString& n, const QString& path, bool isCurrent = false)
       : name(n), filePath(path), isCurrentNote(isCurrent) {}
 };
 
@@ -40,24 +56,24 @@ class NoteGraphModel : public QAbstractItemModel {
     PositionRole,
     IsCurrentNoteRole
   };
-  explicit NoteGraphModel(QObject *parent = nullptr);
+  explicit NoteGraphModel(QObject* parent = nullptr);
 
   // 重写QAbstractItemModel方法
   QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &child) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
+                    const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex& child) const override;
+  int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+  QVariant data(const QModelIndex& index,
                 int role = Qt::DisplayRole) const override;
   QHash<int, QByteArray> roleNames() const override;
 
   // 自定义方法
   Q_INVOKABLE QVariantList getRelations() const;
   Q_INVOKABLE void setNodePosition(int index, qreal x, qreal y);
-  void addNode(const NoteNode &node);
-  void addRelation(const NoteRelation &relation);
-  int findNodeIndex(const QString &filePath) const;
+  void addNode(const NoteNode& node);
+  void addRelation(const NoteRelation& relation);
+  int findNodeIndex(const QString& filePath) const;
   void clear();
 
  signals:
@@ -72,64 +88,72 @@ class NoteGraphModel : public QAbstractItemModel {
 class NoteRelationParser : public QObject {
   Q_OBJECT
  public:
-  explicit NoteRelationParser(QObject *parent = nullptr);
-  Q_INVOKABLE void parseNoteRelations(NoteGraphModel *model,
-                                      const QString &currentNotePath);
+  explicit NoteRelationParser(QObject* parent = nullptr);
+  Q_INVOKABLE void parseNoteRelations(NoteGraphModel* model,
+                                      const QString& currentNotePath);
 
- signals:
+  void updateNoteCache(const QString& filePath);
+  void deleteNoteCache(const QString &filePath);
+  signals:
   void parsingCompleted();
   // 新增：后台解析完成后传递数据的信号（跨线程使用）
-  void parsedDataReady(const QVector<NoteNode> &nodes,
-                       const QVector<NoteRelation> &relations);
-  void sendDataToQml(const QVariantList &nodesArray,
-                     const QVariantList &relationsArray);
+  void parsedDataReady(const QVector<NoteNode>& nodes,
+                       const QVector<NoteRelation>& relations);
+  void sendDataToQml(const QVariantList& nodesArray,
+                     const QVariantList& relationsArray);
 
  private slots:
-  // 新增：主线程处理后台返回数据的槽函数
-  void onParsedDataReady(const QVector<NoteNode> &nodes,
-                         const QVector<NoteRelation> &relations);
+
+  void onParsedDataReady(const QVector<NoteNode>& nodes,
+                         const QVector<NoteRelation>& relations);
 
  private:
-  // 修改：原parseNoteReferences改为后台数据收集函数（参数调整）
-  void parseNoteReferences(QVector<NoteNode> &nodes,
-                           QVector<NoteRelation> &relations,
-                           const QString &notePath, int sourceIndex);
-  // 修改：原findReferencingNotes改为后台数据收集函数（参数调整）
-  void findReferencingNotes(QVector<NoteNode> &nodes,
-                            QVector<NoteRelation> &relations,
-                            const QString &dirPath,
-                            const QString &currentNotePath,
+  void parseNoteReferences(QVector<NoteNode>& nodes,
+                           QVector<NoteRelation>& relations,
+                           const QString& notePath, int sourceIndex);
+
+  void findReferencingNotes(QVector<NoteNode>& nodes,
+                            QVector<NoteRelation>& relations,
+                            const QString& dirPath,
+                            const QString& currentNotePath,
                             int currentNoteIndex);
-  void arrangeNodes(NoteGraphModel *model);
-  // 新增：持有模型指针（使用QPointer确保安全）
+  void arrangeNodes(NoteGraphModel* model);
+
   QPointer<NoteGraphModel> m_model;
+
+  NoteGraphCache m_cache;
+  QString m_cachePath;
+  void buildCacheFromNodes(const QVector<NoteNode>& nodes,
+                           const QVector<NoteRelation>& relations,
+                           const QString& currentFileName);
+  int findNodeIndex(const QVector<NoteNode>& nodes, const QString& path);
 };
 
 class NoteGraphController : public QObject {
   Q_OBJECT
   Q_PROPERTY(QString currentNotePath READ currentNotePath WRITE
                  setCurrentNotePath NOTIFY currentNotePathChanged)
-  Q_PROPERTY(NoteGraphModel *model READ model NOTIFY
+  Q_PROPERTY(NoteGraphModel* model READ model NOTIFY
                  modelChanged)  // 新增：暴露model给QML
  public:
-  explicit NoteGraphController(QObject *parent = nullptr);
+  explicit NoteGraphController(QObject* parent = nullptr);
   QString currentNotePath() const;
-  void setCurrentNotePath(const QString &path);
-  NoteGraphModel *model() const;  // 保持原getter
-  NoteRelationParser *parser() const;
+  void setCurrentNotePath(const QString& path);
+  NoteGraphModel* model() const;  // 保持原getter
+  NoteRelationParser* parser() const;
 
  signals:
   void currentNotePathChanged();
-  void nodeDoubleClicked(const QString &filePath);
+  void nodeDoubleClicked(const QString& filePath);
   void modelChanged();  // 新增：模型初始化/变更信号
 
  public slots:
-  void handleNodeDoubleClick(const QString &filePath);
+  void handleNodeDoubleClick(const QString& filePath);
 
  private:
   QString m_currentNotePath;
-  NoteGraphModel *m_model;
-  NoteRelationParser *m_parser;
+  NoteGraphModel* m_model;
+  NoteRelationParser* m_parser;
 };
 
 // 初始化函数声明

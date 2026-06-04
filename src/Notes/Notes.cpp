@@ -1097,8 +1097,11 @@ void Notes::startBackgroundTaskDelAndClear() {
 void Notes::startBackgroundTaskUpdateNoteIndex(QString mdFile) {
   QString fullPath = mdFile;
 
-  QFuture<void> future = QtConcurrent::run(
-      [=]() { m_NotesList->m_dbManager.updateFileIndex(fullPath); });
+  QFuture<void> future = QtConcurrent::run([=]() {
+    m_NotesList->m_dbManager.updateFileIndex(fullPath);
+    // 笔记内容修改后保存 → 刷新图谱缓存
+    m_NotesList->m_graphController->parser()->updateNoteCache(fullPath);
+  });
 
   // 使用 QFutureWatcher 监控进度
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
@@ -2798,7 +2801,9 @@ void Notes::insertNoteLink(const QString& title) {
   QString link = QString("[%1](%2)").arg(title, relativePath);
 
   // 4. 插入编辑器
+#ifndef Q_OS_ANDROID
   m_EditSource->insert(link);
+#endif
 
   // 5. 清空输入框
   ui->editNoteLink->clear();

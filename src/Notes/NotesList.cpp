@@ -1575,6 +1575,12 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
     }
 
     delFile(md);
+
+    // 删除笔记后，更新图谱
+    if (m_graphController) {
+      m_graphController->parser()->deleteNoteCache(md);
+    }
+
     QString json = m_Notes->getCurrentJSON(md);
     delFile(json);
 
