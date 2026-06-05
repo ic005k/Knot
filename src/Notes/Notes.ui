@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>863</width>
+    <width>1064</width>
     <height>386</height>
    </rect>
   </property>
@@ -40,178 +40,6 @@
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="1" column="14">
-         <widget class="QToolButton" name="btnPrev">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>&lt;</string>
-          </property>
-          <property name="shortcut">
-           <string>Shift+Return</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="16">
-         <widget class="QToolButton" name="btnDone">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Ctrl + S</string>
-          </property>
-          <property name="text">
-           <string>Save</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../../res.qrc">
-            <normaloff>:/res/done.png</normaloff>:/res/done.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>20</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="shortcut">
-           <string>Ctrl+S</string>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="13">
-         <widget class="QLabel" name="lblCount">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="15">
-         <widget class="QToolButton" name="btnNext">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>&gt;</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="11">
-         <widget class="QToolButton" name="btnFind">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Find</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="5">
-         <widget class="QToolButton" name="btnS3">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>25</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <underline>true</underline>
-           </font>
-          </property>
-          <property name="text">
-           <string>Underline</string>
-          </property>
-          <property name="icon">
-           <iconset>
-            <normaloff>:/res/font4.png</normaloff>:/res/font4.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>20</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="4">
          <widget class="QToolButton" name="btnS2">
           <property name="sizePolicy">
@@ -255,6 +83,13 @@
           </property>
          </widget>
         </item>
+        <item row="1" column="9">
+         <widget class="QLabel" name="lblNoteLink">
+          <property name="text">
+           <string>Note Link:</string>
+          </property>
+         </widget>
+        </item>
         <item row="1" column="0">
          <widget class="QToolButton" name="btnPaste">
           <property name="sizePolicy">
@@ -287,76 +122,17 @@ color: rgb(255, 255, 255);</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="3">
-         <widget class="QToolButton" name="btnS1">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>25</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <italic>true</italic>
-            <bold>true</bold>
-           </font>
+        <item row="1" column="13">
+         <widget class="QToolButton" name="btnView">
+          <property name="toolTip">
+           <string>Ctrl + H</string>
           </property>
           <property name="text">
-           <string>Bold Italic</string>
-          </property>
-          <property name="icon">
-           <iconset>
-            <normaloff>:/res/font2.png</normaloff>:/res/font2.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>20</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="8">
-         <widget class="QToolButton" name="btnColor">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>25</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Color</string>
+           <string>View</string>
           </property>
           <property name="icon">
            <iconset resource="../../res.qrc">
-            <normaloff>:/res/color.png</normaloff>:/res/color.png</iconset>
+            <normaloff>:/res/view_l.svg</normaloff>:/res/view_l.svg</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -364,58 +140,21 @@ color: rgb(255, 255, 255);</string>
             <height>20</height>
            </size>
           </property>
+          <property name="shortcut">
+           <string>Ctrl+H</string>
+          </property>
           <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
+           <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
           </property>
          </widget>
         </item>
-        <item row="1" column="2">
-         <widget class="QToolButton" name="btnS5">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
+        <item row="1" column="10">
+         <widget class="QLineEdit" name="editNoteLink">
           <property name="minimumSize">
            <size>
-            <width>0</width>
-            <height>25</height>
+            <width>150</width>
+            <height>0</height>
            </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Bold</string>
-          </property>
-          <property name="icon">
-           <iconset>
-            <normaloff>:/res/font1.png</normaloff>:/res/font1.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>20</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="9">
-         <widget class="QLabel" name="lblNoteLink">
-          <property name="text">
-           <string>Note Link:</string>
           </property>
          </widget>
         </item>
@@ -487,34 +226,14 @@ color: rgb(255, 255, 255);</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="17">
-         <widget class="QToolButton" name="btnView">
-          <property name="toolTip">
-           <string>Ctrl + H</string>
-          </property>
-          <property name="text">
-           <string>View</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../../res.qrc">
-            <normaloff>:/res/view_l.svg</normaloff>:/res/view_l.svg</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>20</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="shortcut">
-           <string>Ctrl+H</string>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="12">
-         <widget class="QLineEdit" name="editFind">
+         <widget class="QToolButton" name="btnDone">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -527,11 +246,152 @@ color: rgb(255, 255, 255);</string>
             <height>16777215</height>
            </size>
           </property>
-          <property name="placeholderText">
-           <string>Find</string>
+          <property name="toolTip">
+           <string>Ctrl + S</string>
           </property>
-          <property name="clearButtonEnabled">
-           <bool>false</bool>
+          <property name="text">
+           <string>Save</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../res.qrc">
+            <normaloff>:/res/done.png</normaloff>:/res/done.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+S</string>
+          </property>
+          <property name="toolButtonStyle">
+           <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <widget class="QToolButton" name="btnS3">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <underline>true</underline>
+           </font>
+          </property>
+          <property name="text">
+           <string>Underline</string>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>:/res/font4.png</normaloff>:/res/font4.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="toolButtonStyle">
+           <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="8">
+         <widget class="QToolButton" name="btnColor">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Color</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../res.qrc">
+            <normaloff>:/res/color.png</normaloff>:/res/color.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="toolButtonStyle">
+           <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QToolButton" name="btnS1">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <italic>true</italic>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Bold Italic</string>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>:/res/font2.png</normaloff>:/res/font2.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="toolButtonStyle">
+           <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
           </property>
          </widget>
         </item>
@@ -573,13 +433,71 @@ color: rgb(255, 255, 255);</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="10">
-         <widget class="QLineEdit" name="editNoteLink">
+        <item row="1" column="2">
+         <widget class="QToolButton" name="btnS5">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
-            <width>150</width>
+            <width>0</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Bold</string>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>:/res/font1.png</normaloff>:/res/font1.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="toolButtonStyle">
+           <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="11">
+         <widget class="QLabel" name="lblCount">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>0</string>
           </property>
          </widget>
         </item>
@@ -614,6 +532,143 @@ color: rgb(255, 255, 255);</string>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="f_Find">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Shape::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Shadow::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QToolButton" name="btnFind">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Find</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="editFind">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="placeholderText">
+         <string>Find</string>
+        </property>
+        <property name="clearButtonEnabled">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="btnPrev">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>&lt;</string>
+        </property>
+        <property name="shortcut">
+         <string>Shift+Return</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="btnNext">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblReplace">
+        <property name="text">
+         <string>Replace:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="editReplace"/>
+      </item>
+      <item>
+       <widget class="QToolButton" name="btnReplace">
+        <property name="text">
+         <string>Replace</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="btnFindReplace">
+        <property name="text">
+         <string>Replace and Find</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="btnReplaceAll">
+        <property name="text">
+         <string>Replace All</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
