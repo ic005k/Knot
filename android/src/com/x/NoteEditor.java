@@ -220,6 +220,7 @@ public class NoteEditor
     private Button btnNext;
     private ImageButton btnStartFind;
 
+    private Button btnToggleReplace;
     private LinearLayout replaceLayout;
     private TextView lblReplace;
     private EditText editReplace;
@@ -363,6 +364,7 @@ public class NoteEditor
         btnNext = (Button) findViewById(R.id.btnNext);
         btnStartFind = (ImageButton) findViewById(R.id.btnStartFind);
 
+        btnToggleReplace = findViewById(R.id.btnToggleReplace);
         replaceLayout = findViewById(R.id.replaceLayout);
         lblReplace = findViewById(R.id.lblReplace);
         editReplace = findViewById(R.id.editReplace);
@@ -373,6 +375,14 @@ public class NoteEditor
         btnReplace.setOnClickListener(this);
         btnReplaceFind.setOnClickListener(this);
         btnReplaceAll.setOnClickListener(this);
+        // 点击 R 切换替换面板
+        btnToggleReplace.setOnClickListener(v -> {
+            if (replaceLayout.getVisibility() == View.GONE) {
+                replaceLayout.setVisibility(View.VISIBLE);
+            } else {
+                replaceLayout.setVisibility(View.GONE);
+            }
+        });
 
         if (MyActivity.zh_cn) {
             btn_cancel.setText("关闭");
@@ -412,6 +422,7 @@ public class NoteEditor
         btnNext.setVisibility(View.GONE);
         btnStartFind.setVisibility(View.GONE);
         lblResult.setVisibility(View.GONE);
+        btnToggleReplace.setVisibility(View.GONE);
 
         btn_cancel.setOnClickListener(this);
         btnSave.setOnClickListener(this);
@@ -474,16 +485,21 @@ public class NoteEditor
                 btnNext.setVisibility(View.GONE);
                 btnStartFind.setVisibility(View.GONE);
                 lblResult.setVisibility(View.GONE);
+                btnToggleReplace.setVisibility(View.GONE);
                 // 隐藏替换面板
                 replaceLayout.setVisibility(View.GONE);
+
+                lblResult.scrollTo(0, 0);
             } else {
                 editFind.setVisibility(View.VISIBLE);
                 btnPrev.setVisibility(View.VISIBLE);
                 btnNext.setVisibility(View.VISIBLE);
                 btnStartFind.setVisibility(View.VISIBLE);
                 lblResult.setVisibility(View.VISIBLE);
-                // 显示替换面板
-                replaceLayout.setVisibility(View.VISIBLE);
+                btnToggleReplace.setVisibility(View.VISIBLE);
+
+                lblResult.scrollTo(0, 0);
+
                 editFind.requestFocus();
             }
             btnFind.setBackgroundColor(getResources().getColor(R.color.normal));
@@ -494,7 +510,7 @@ public class NoteEditor
             if (count > 0) {
                 String strInfo =
                     String.valueOf(curIndexForResult + 1) +
-                    "/" +
+                    "\n" +
                     String.valueOf(count);
                 lblResult.setText(strInfo);
 
@@ -509,7 +525,7 @@ public class NoteEditor
             if (count > 0) {
                 String strInfo =
                     String.valueOf(curIndexForResult + 1) +
-                    "/" +
+                    "\n" +
                     String.valueOf(count);
                 lblResult.setText(strInfo);
 

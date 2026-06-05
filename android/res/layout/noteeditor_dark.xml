@@ -99,6 +99,19 @@
         android:orientation="horizontal"
     >
 
+    <!-- R 按钮：显示/隐藏替换 -->
+    <Button
+            android:id="@+id/btnToggleReplace"
+            android:textAllCaps="false"
+            android:layout_width="55dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="1dp"
+            android:background="#3498DB"
+            android:textColor="#FFFFFF"
+            android:layout_weight="1"
+            android:text="R"
+        />
+
         <Button
             android:id="@+id/btnPrev"
             android:textAllCaps="false"
@@ -154,6 +167,8 @@
             android:fadeScrollbars="true"
             android:inputType="textMultiLine"
             android:layout_weight="1"
+            android:gravity="center"
+            android:layout_gravity="center_vertical"
         />
 
 
