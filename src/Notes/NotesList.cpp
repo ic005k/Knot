@@ -2042,9 +2042,6 @@ void NotesList::onSearchFinished() {
                               QString::number(linesCount));
   }
 
-  // ▶️ 释放资源
-  watcher->deleteLater();
-
   if (searchResultList.count() > 0) {
     mui->btnFindNextNote->setEnabled(true);
     mui->btnFindPreviousNote->setEnabled(true);
@@ -2064,11 +2061,14 @@ void NotesList::startFind(QString strFind) {
   searchResultList.clear();
   findCount = -1;
 
-  watcher = new QFutureWatcher<ResultsMap>(this);
+  if (!watcher) {
+    watcher = new QFutureWatcher<ResultsMap>(this);
+    connect(watcher, &QFutureWatcher<ResultsMap>::finished, this,
+            &NotesList::onSearchFinished);
+  }
+
   auto future = performSearchAsync(directory, keyword);
   watcher->setFuture(future);
-  connect(watcher, &QFutureWatcher<ResultsMap>::finished, this,
-          &NotesList::onSearchFinished);
 }
 
 // 通用导航函数：step 为 -1 表示上一个，1 表示下一个
