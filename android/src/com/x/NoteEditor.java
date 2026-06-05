@@ -66,6 +66,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
@@ -183,6 +184,18 @@ public class NoteEditor
     extends AppCompatActivity
     implements View.OnClickListener, Application.ActivityLifecycleCallbacks
 {
+
+    // ======================
+    // 笔记内链补全（轻量集成）
+    // ======================
+    private NoteIndexManager noteIndexManager;
+    private NoteLinkCompleter noteLinkCompleter;
+
+    // 内链补全悬浮列表
+    private PopupWindow noteLinkPopup;
+    private RecyclerView popupRecycler;
+    private NoteSuggestAdapter adapter;
+    private List<String> suggestList = new ArrayList<>();
 
     private static final int REQUEST_CAMERA_PERMISSION = 1001;
 
@@ -384,141 +397,6 @@ public class NoteEditor
         btnStartFind.setOnClickListener(this);
     }
 
-    /*@Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btn_cancel:
-                btn_cancel.setBackgroundColor(
-                    getResources().getColor(R.color.red)
-                );
-                hideKeyBoard(m_instance);
-                onBackPressed();
-                btn_cancel.setBackgroundColor(
-                    getResources().getColor(R.color.normal)
-                );
-
-                break;
-            case R.id.btn_save:
-                if (isTextChanged) {
-                    saveNote();
-                    isTextChanged = false;
-                }
-                break;
-            case R.id.btnUndo:
-                btnUndo.setBackgroundColor(
-                    getResources().getColor(R.color.red)
-                );
-                helper.undo(); // perform undo
-                btnUndo.setBackgroundColor(
-                    getResources().getColor(R.color.normal)
-                );
-                break;
-            case R.id.btnRedo:
-                btnRedo.setBackgroundColor(
-                    getResources().getColor(R.color.red)
-                );
-                helper.redo(); // perform redo
-                btnRedo.setBackgroundColor(
-                    getResources().getColor(R.color.normal)
-                );
-
-                break;
-            case R.id.btnMenu:
-                btnMenu.setBackgroundColor(
-                    getResources().getColor(R.color.red)
-                );
-
-                start = editNote.getSelectionStart();
-                end = editNote.getSelectionEnd();
-                editNote.clearFocus();
-                editNote.setSelection(start);
-                editNote.setSelection(start, end);
-
-                showPopupMenu(btnMenu);
-
-                editNote.requestFocus();
-                btnMenu.setBackgroundColor(
-                    getResources().getColor(R.color.normal)
-                );
-                break;
-            case R.id.btnFind:
-                btnFind.setBackgroundColor(
-                    getResources().getColor(R.color.red)
-                );
-                if (btnPrev.getVisibility() == View.VISIBLE) {
-                    editFind.setVisibility(View.GONE);
-                    btnPrev.setVisibility(View.GONE);
-                    btnNext.setVisibility(View.GONE);
-                    btnStartFind.setVisibility(View.GONE);
-                    lblResult.setVisibility(View.GONE);
-                } else {
-                    editFind.setVisibility(View.VISIBLE);
-                    btnPrev.setVisibility(View.VISIBLE);
-                    btnNext.setVisibility(View.VISIBLE);
-                    btnStartFind.setVisibility(View.VISIBLE);
-                    lblResult.setVisibility(View.VISIBLE);
-                    editFind.requestFocus();
-                }
-                btnFind.setBackgroundColor(
-                    getResources().getColor(R.color.normal)
-                );
-
-                break;
-            case R.id.btnPrev:
-                btnPrev.setBackgroundColor(
-                    getResources().getColor(R.color.red)
-                );
-                goFindResult(-1);
-                int count = arrayFindResult.size();
-                if (count > 0) {
-                    String strInfo =
-                        String.valueOf(curIndexForResult + 1) +
-                        "/" +
-                        String.valueOf(count);
-                    lblResult.setText(strInfo);
-
-                    editNote.requestFocus();
-                }
-
-                btnPrev.setBackgroundColor(
-                    getResources().getColor(R.color.normal)
-                );
-
-                break;
-            case R.id.btnNext:
-                btnNext.setBackgroundColor(
-                    getResources().getColor(R.color.red)
-                );
-                goFindResult(1);
-                count = arrayFindResult.size();
-                if (count > 0) {
-                    String strInfo =
-                        String.valueOf(curIndexForResult + 1) +
-                        "/" +
-                        String.valueOf(count);
-                    lblResult.setText(strInfo);
-
-                    editNote.requestFocus();
-                }
-
-                btnNext.setBackgroundColor(
-                    getResources().getColor(R.color.normal)
-                );
-
-                break;
-            case R.id.btnStartFind:
-                btnStartFind.setBackgroundColor(
-                    getResources().getColor(R.color.red)
-                );
-                on_editFindTextChanged();
-                btnStartFind.setBackgroundColor(
-                    getResources().getColor(R.color.normal)
-                );
-
-                break;
-        }
-    }*/
-
     @Override
     public void onClick(View v) {
         int id = v.getId();
@@ -538,6 +416,8 @@ public class NoteEditor
             if (isTextChanged) {
                 saveNote();
                 isTextChanged = false;
+
+                CallJavaNotify_6();
             }
         } else if (id == R.id.btnUndo) {
             btnUndo.setBackgroundColor(getResources().getColor(R.color.red));
@@ -693,6 +573,9 @@ public class NoteEditor
         };
         // 注册到当前 Activity
         getOnBackPressedDispatcher().addCallback(this, callback);
+
+        // 初始化笔记索引
+        initNoteIndexManager();
     }
 
     private void openFile() {
@@ -3260,5 +3143,361 @@ public class NoteEditor
         // 亮度公式
         float luminance = (0.299f * r) + (0.587f * g) + (0.114f * b);
         return luminance <= 0.5f;
+    }
+
+    // ==========================
+    // 初始化 [[ 内链补全管理器
+    // ==========================
+    private void initNoteIndexManager() {
+        // 1. 读取索引文件
+        String indexFile = "/storage/emulated/0/.Knot/MyNoteNameIndex";
+        String jsonContent = readTextFile(indexFile);
+
+        // 2. 初始化索引管理器
+        noteIndexManager = new NoteIndexManager();
+        try {
+            org.json.JSONObject root = new org.json.JSONObject(jsonContent);
+            noteIndexManager.loadIndex(root);
+            noteLinkCompleter = new NoteLinkCompleter(noteIndexManager);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 3. 监听 [[ 输入（唯一 TextWatcher，无冲突）
+        editNote.addTextChangedListener(
+            new TextWatcher() {
+                private boolean inLinkTrigger = false;
+
+                @Override
+                public void beforeTextChanged(
+                    CharSequence s,
+                    int start,
+                    int count,
+                    int after
+                ) {}
+
+                @Override
+                public void onTextChanged(
+                    CharSequence s,
+                    int start,
+                    int before,
+                    int count
+                ) {}
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    int pos = editNote.getSelectionStart();
+                    if (pos < 2) {
+                        inLinkTrigger = false;
+                        showNoteSuggestPopup(null);
+                        return;
+                    }
+
+                    // 检测 [[
+                    String prefix = editable
+                        .subSequence(pos - 2, pos)
+                        .toString();
+                    if (prefix.equals("[[")) {
+                        inLinkTrigger = true;
+                    }
+
+                    // 退出模式
+                    if (
+                        prefix.equals("]]") ||
+                        prefix.equals("]\n") ||
+                        prefix.equals("] ")
+                    ) {
+                        inLinkTrigger = false;
+                        showNoteSuggestPopup(null);
+                        return;
+                    }
+
+                    // 正在输入内链
+                    if (inLinkTrigger) {
+                        try {
+                            String text = editable
+                                .subSequence(0, pos)
+                                .toString();
+                            int last = text.lastIndexOf("[[");
+                            if (last == -1) {
+                                inLinkTrigger = false;
+                                showNoteSuggestPopup(null);
+                                return;
+                            }
+
+                            // 提取关键词 ✅
+                            String keyword = text.substring(last + 2);
+                            if (keyword.contains("]")) {
+                                inLinkTrigger = false;
+                                showNoteSuggestPopup(null);
+                                return;
+                            }
+
+                            // 搜索 + 显示悬浮列表 ✅✅✅
+                            List<String> matches = noteLinkCompleter.complete(
+                                keyword
+                            );
+                            showNoteSuggestPopup(matches);
+                        } catch (Exception e) {
+                            inLinkTrigger = false;
+                            showNoteSuggestPopup(null);
+                        }
+                    } else {
+                        showNoteSuggestPopup(null);
+                    }
+                }
+            }
+        );
+    }
+
+    // ================================
+    // 显示笔记标题悬浮补全列表
+    // ================================
+    /*private void showNoteSuggestPopup(List<String> titles) {
+        if (titles == null || titles.isEmpty()) {
+            if (noteLinkPopup != null) noteLinkPopup.dismiss();
+            return;
+        }
+
+        // 第一次调用：创建悬浮列表
+        if (noteLinkPopup == null) {
+            // 创建 RecyclerView
+            popupRecycler = new RecyclerView(this);
+            popupRecycler.setLayoutManager(new LinearLayoutManager(this));
+            adapter = new NoteSuggestAdapter(suggestList, title -> {
+                // 点击条目 → 自动生成链接并插入
+                String link = noteLinkCompleter.buildMarkdownLink(title);
+                replaceLinkText(link);
+                if (noteLinkPopup != null) noteLinkPopup.dismiss();
+            });
+            popupRecycler.setAdapter(adapter);
+
+            // 创建悬浮窗口
+            noteLinkPopup = new PopupWindow(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            noteLinkPopup.setContentView(popupRecycler);
+            // 自动黑白背景
+            int bgColor = MyActivity.isDark ? 0xFF222222 : 0xFFFFFFFF;
+            noteLinkPopup.setBackgroundDrawable(new ColorDrawable(bgColor));
+            noteLinkPopup.setOutsideTouchable(true);
+            noteLinkPopup.setFocusable(false); // 不抢焦点！
+        }
+
+        // 更新数据
+        suggestList.clear();
+        suggestList.addAll(titles);
+        adapter.notifyDataSetChanged();
+
+        // 计算光标位置 → 显示在光标下方
+        int[] location = new int[2];
+        editNote.getLocationOnScreen(location);
+        int cursorY = editNote
+            .getLayout()
+            .getLineTop(
+                editNote
+                    .getLayout()
+                    .getLineForOffset(editNote.getSelectionStart())
+            );
+        int lineHeight = editNote.getLineHeight();
+        int y = location[1] + cursorY + lineHeight + 20;
+
+        // 显示
+        if (!noteLinkPopup.isShowing()) {
+            noteLinkPopup.showAtLocation(
+                editNote,
+                Gravity.TOP | Gravity.LEFT,
+                0,
+                y
+            );
+        }
+        }*/
+
+    // ================================
+    // 显示笔记标题悬浮补全列表（带顶部过滤搜索框）
+    // ================================
+    private void showNoteSuggestPopup(List<String> titles) {
+        if (titles == null || titles.isEmpty()) {
+            if (noteLinkPopup != null) noteLinkPopup.dismiss();
+            return;
+        }
+
+        // 第一次创建：带顶部搜索框的布局
+        if (noteLinkPopup == null) {
+            Context context = NoteEditor.this;
+
+            // ========== 外层布局：垂直线性布局 ==========
+            LinearLayout container = new LinearLayout(context);
+            container.setOrientation(LinearLayout.VERTICAL);
+
+            // ========== 顶部：过滤输入框 ==========
+            EditText filterEdit = new EditText(context);
+            filterEdit.setHint(
+                MyActivity.zh_cn ? "搜索笔记标题..." : "Search note titles..."
+            );
+            filterEdit.setPadding(40, 40, 40, 40);
+            filterEdit.setTextSize(16);
+            filterEdit.setBackgroundColor(
+                MyActivity.isDark ? 0xFF333333 : 0xFFEEEEEE
+            );
+            filterEdit.setTextColor(
+                MyActivity.isDark ? 0xFFFFFFFF : 0xFF000000
+            );
+            LinearLayout.LayoutParams editParams =
+                new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                );
+            filterEdit.setLayoutParams(editParams);
+
+            // ========== 列表 ==========
+            popupRecycler = new RecyclerView(context);
+            popupRecycler.setLayoutManager(new LinearLayoutManager(context));
+            adapter = new NoteSuggestAdapter(suggestList, title -> {
+                String link = noteLinkCompleter.buildMarkdownLink(title);
+                replaceLinkText(link);
+                if (noteLinkPopup != null) noteLinkPopup.dismiss();
+            });
+            popupRecycler.setAdapter(adapter);
+            LinearLayout.LayoutParams rvParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            );
+            popupRecycler.setLayoutParams(rvParams);
+
+            // ========== 组装界面 ==========
+            container.addView(filterEdit);
+            container.addView(popupRecycler);
+
+            // ========== 悬浮窗口 ==========
+            noteLinkPopup = new PopupWindow(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            );
+            noteLinkPopup.setContentView(container);
+            int bgColor = MyActivity.isDark ? 0xFF222222 : 0xFFFFFFFF;
+            noteLinkPopup.setBackgroundDrawable(new ColorDrawable(bgColor));
+            noteLinkPopup.setOutsideTouchable(true);
+            noteLinkPopup.setFocusable(true);
+
+            // ========== 搜索框过滤逻辑 ==========
+            filterEdit.addTextChangedListener(
+                new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(
+                        CharSequence s,
+                        int start,
+                        int count,
+                        int after
+                    ) {}
+
+                    @Override
+                    public void onTextChanged(
+                        CharSequence s,
+                        int start,
+                        int before,
+                        int count
+                    ) {}
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        String keyword = s.toString().toLowerCase().trim();
+                        List<String> filtered = new ArrayList<>();
+                        for (String t : titles) {
+                            if (t.toLowerCase().contains(keyword)) {
+                                filtered.add(t);
+                            }
+                        }
+                        suggestList.clear();
+                        suggestList.addAll(filtered);
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            );
+        }
+
+        // ========== 首次显示时，清空搜索框并显示全部 ==========
+        suggestList.clear();
+        suggestList.addAll(titles);
+        adapter.notifyDataSetChanged();
+
+        // 显示在屏幕上
+        if (!noteLinkPopup.isShowing()) {
+            noteLinkPopup.showAtLocation(editNote, Gravity.FILL, 0, 0);
+        }
+    }
+
+    // ================================
+    // 替换 [[xxx → 正确的 Markdown 链接
+    // ================================
+    private void replaceLinkText(String finalLink) {
+        int cursor = editNote.getSelectionStart();
+        Editable edit = editNote.getEditableText();
+        String content = edit.toString();
+
+        int start = content.lastIndexOf("[[", cursor);
+        if (start != -1) {
+            edit.replace(start, cursor, finalLink);
+        }
+    }
+
+    // ================================
+    // 悬浮列表适配器
+    // ================================
+    private static class NoteSuggestAdapter
+        extends RecyclerView.Adapter<NoteSuggestAdapter.VH>
+    {
+
+        private List<String> list;
+        private OnItemClickListener listener;
+
+        public NoteSuggestAdapter(
+            List<String> list,
+            OnItemClickListener listener
+        ) {
+            this.list = list;
+            this.listener = listener;
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            TextView tv = new TextView(parent.getContext());
+            tv.setPadding(40, 40, 40, 40);
+            tv.setTextSize(16);
+            tv.setTextColor(MyActivity.isDark ? 0xFFFFFFFF : 0xFF000000);
+            tv.setLayoutParams(
+                new RecyclerView.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            );
+            return new VH(tv);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH holder, int position) {
+            ((TextView) holder.itemView).setText(list.get(position));
+            holder.itemView.setOnClickListener(v ->
+                listener.onItemClick(list.get(position))
+            );
+        }
+
+        @Override
+        public int getItemCount() {
+            return list.size();
+        }
+
+        public static class VH extends RecyclerView.ViewHolder {
+
+            public VH(@NonNull View itemView) {
+                super(itemView);
+            }
+        }
+
+        public interface OnItemClickListener {
+            void onItemClick(String title);
+        }
     }
 }
