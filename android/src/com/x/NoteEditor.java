@@ -220,6 +220,11 @@ public class NoteEditor
     private Button btnNext;
     private ImageButton btnStartFind;
 
+    private LinearLayout replaceLayout;
+    private TextView lblReplace;
+    private EditText editReplace;
+    private Button btnReplace, btnReplaceFind, btnReplaceAll;
+
     private int myMethod = 1; /* 操控文件的方法 1.传统方法 2.新方法 */
     private LargeTextEditor largeTextEditor;
     private RecyclerView recyclerView;
@@ -358,6 +363,17 @@ public class NoteEditor
         btnNext = (Button) findViewById(R.id.btnNext);
         btnStartFind = (ImageButton) findViewById(R.id.btnStartFind);
 
+        replaceLayout = findViewById(R.id.replaceLayout);
+        lblReplace = findViewById(R.id.lblReplace);
+        editReplace = findViewById(R.id.editReplace);
+        btnReplace = findViewById(R.id.btnReplace);
+        btnReplaceFind = findViewById(R.id.btnReplaceFind);
+        btnReplaceAll = findViewById(R.id.btnReplaceAll);
+
+        btnReplace.setOnClickListener(this);
+        btnReplaceFind.setOnClickListener(this);
+        btnReplaceAll.setOnClickListener(this);
+
         if (MyActivity.zh_cn) {
             btn_cancel.setText("关闭");
             btnSave.setText("保存");
@@ -368,6 +384,11 @@ public class NoteEditor
 
             btnPrev.setText("<");
             btnNext.setText(">");
+
+            lblReplace.setText("替换：");
+            btnReplace.setText("替换");
+            btnReplaceFind.setText("替换并查找");
+            btnReplaceAll.setText("全部替换");
         } else {
             btn_cancel.setText("Exit");
             btnSave.setText("Save");
@@ -378,6 +399,11 @@ public class NoteEditor
 
             btnPrev.setText("<");
             btnNext.setText(">");
+
+            lblReplace.setText("Replace:");
+            btnReplace.setText("Replace");
+            btnReplaceFind.setText("Replace & Find");
+            btnReplaceAll.setText("Replace All");
         }
 
         mColorPreview.setVisibility(View.GONE);
@@ -448,12 +474,16 @@ public class NoteEditor
                 btnNext.setVisibility(View.GONE);
                 btnStartFind.setVisibility(View.GONE);
                 lblResult.setVisibility(View.GONE);
+                // 隐藏替换面板
+                replaceLayout.setVisibility(View.GONE);
             } else {
                 editFind.setVisibility(View.VISIBLE);
                 btnPrev.setVisibility(View.VISIBLE);
                 btnNext.setVisibility(View.VISIBLE);
                 btnStartFind.setVisibility(View.VISIBLE);
                 lblResult.setVisibility(View.VISIBLE);
+                // 显示替换面板
+                replaceLayout.setVisibility(View.VISIBLE);
                 editFind.requestFocus();
             }
             btnFind.setBackgroundColor(getResources().getColor(R.color.normal));
@@ -493,6 +523,28 @@ public class NoteEditor
             );
             on_editFindTextChanged();
             btnStartFind.setBackgroundColor(
+                getResources().getColor(R.color.normal)
+            );
+        } else if (id == R.id.btnReplace) {
+            btnReplace.setBackgroundColor(getResources().getColor(R.color.red));
+            replaceCurrent(); // 只替换，不往后跳
+            btnReplace.setBackgroundColor(
+                getResources().getColor(R.color.normal)
+            );
+        } else if (id == R.id.btnReplaceFind) {
+            btnReplaceFind.setBackgroundColor(
+                getResources().getColor(R.color.red)
+            );
+            replaceAndFindNext(); // 替换 + 自动下一个
+            btnReplaceFind.setBackgroundColor(
+                getResources().getColor(R.color.normal)
+            );
+        } else if (id == R.id.btnReplaceAll) {
+            btnReplaceAll.setBackgroundColor(
+                getResources().getColor(R.color.red)
+            );
+            replaceAll(); // 全部替换
+            btnReplaceAll.setBackgroundColor(
                 getResources().getColor(R.color.normal)
             );
         }
@@ -3499,5 +3551,70 @@ public class NoteEditor
         public interface OnItemClickListener {
             void onItemClick(String title);
         }
+    }
+
+    // ==============================
+    // 纯替换：只替换当前，不继续查找
+    // ==============================
+    private void replaceCurrent() {
+        if (arrayFindResult.isEmpty()) return;
+
+        int start = editNote.getSelectionStart();
+        int end = editNote.getSelectionEnd();
+        if (start < 0 || end <= start) return;
+
+        String replaceText = editReplace.getText().toString();
+
+        // 执行替换
+        editNote.getEditableText().replace(start, end, replaceText);
+
+        // 重新搜索，更新匹配列表，但不自动跳转
+        on_editFindTextChanged();
+    }
+
+    // ==============================
+    // 替换并查找下一个：替换后自动跳去下一个
+    // ==============================
+    private void replaceAndFindNext() {
+        replaceCurrent();
+
+        // 自动跳转到下一个匹配
+        if (arrayFindResult.size() > 0) {
+            goFindResult(1);
+
+            // 同步更新计数显示
+            String info =
+                (curIndexForResult + 1) + "/" + arrayFindResult.size();
+            lblResult.setText(info);
+        }
+    }
+
+    // ==============================
+    // 全部替换
+    // ==============================
+    private void replaceAll() {
+        String findText = editFind.getText().toString();
+        String replaceText = editReplace.getText().toString();
+
+        if (TextUtils.isEmpty(findText)) {
+            Toast.makeText(
+                this,
+                MyActivity.zh_cn ? "请输入查找内容" : "Enter search text",
+                Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
+        String content = editNote.getText().toString();
+        content = content.replace(findText, replaceText);
+        editNote.setText(content);
+
+        // 重新搜索
+        on_editFindTextChanged();
+
+        String msg = MyActivity.zh_cn
+            ? "✅ 全部替换完成"
+            : "✅ Replace All done";
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 }
