@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
 #endif
 
   // ========== 闪屏改为堆对象（new创建），避免栈对象生命周期问题 =====
-  SplashTimer* splash = new SplashTimer(isAndroid, 320, 100);
+  SplashTimer* splash = new SplashTimer(isAndroid, 200, 90);
   splash->show();
 
   // 设置应用程序标识（为QML里面使用Settings做准备）

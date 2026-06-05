@@ -1870,6 +1870,7 @@ void Notes::processSingleRemoteFile(const QString& file) {
         QFile::remove(kFile);
         QFile::copy(pFile, kFile);
         m_NotesList->m_dbManager.updateFileIndex(kFile);
+        m_NotesList->m_graphController->parser()->updateNoteCache(kFile);
         m_Method->delayDelFile(pFile);
         m_Method->delayDelFile(zFile);
       }

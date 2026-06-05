@@ -376,7 +376,7 @@ Rectangle {
                             height: btnH0 // 固定高度
                             icon.width: iconSize0 - 13
                             icon.height: iconSize0 - 13
-                            onClicked: {
+                            onPressed: {
                                 console.log("View按钮被点击");
                                 mw_one.on_btnOpenNote_pressed();
                             }
@@ -395,7 +395,7 @@ Rectangle {
                             height: btnH0
                             icon.width: iconSize0
                             icon.height: iconSize0
-                            onClicked: {
+                            onPressed: {
                                 console.log("编辑按钮被点击");
                                 m_NotesList.qmlOpenEdit();
                             }
@@ -414,7 +414,7 @@ Rectangle {
                             height: btnH0
                             icon.width: iconSize0
                             icon.height: iconSize0
-                            onClicked: {
+                            onPressed: {
                                 console.log("链接按钮被点击");
                                 m_NotesList.on_actionCopyNoteLink();
                             }
@@ -433,7 +433,7 @@ Rectangle {
                             height: btnH0
                             icon.width: iconSize0 - 13
                             icon.height: iconSize0 - 13
-                            onClicked: {
+                            onPressed: {
                                 console.log("图谱按钮被点击");
                                 m_NotesList.on_actionRelationshipGraph();
                             }
