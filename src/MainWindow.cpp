@@ -3003,9 +3003,6 @@ void MainWindow::on_chkAutoStopTTS_clicked(bool checked) {
 
 void MainWindow::on_btnHome_pressed() {
   mui->qwMainTab->show();
-  //  **强制刷新 QML 触摸区域**
-  mui->qwMainTab->update();
-
   mui->qwMainDate->hide();
   mui->qwMainEvent->hide();
   mui->lblStats->hide();
@@ -3013,14 +3010,6 @@ void MainWindow::on_btnHome_pressed() {
 }
 
 void MainWindow::onAndroidBackHandle() {
-  QTimer::singleShot(0, this, [] {
-    QWidget* w = qApp->activeWindow();
-    if (w) {
-      w->activateWindow();
-      w->setFocus();
-    }
-  });
-
   if (textToolbarDynamic != nullptr && textToolbarDynamic->isVisible()) {
     closeTextToolBar();
     return;
@@ -3124,7 +3113,13 @@ void MainWindow::onAndroidBackHandle() {
 
   if (m_NotesList->m_RenameNotes != nullptr) {
     if (m_NotesList->m_RenameNotes->isVisible()) {
+      if (textToolbarDynamic != nullptr && textToolbarDynamic->isVisible()) {
+        closeTextToolBar();
+        return;
+      }
+
       m_NotesList->m_RenameNotes->close();
+      m_Method->closeGrayWindows();
       return;
     }
   }

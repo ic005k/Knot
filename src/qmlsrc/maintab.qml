@@ -132,7 +132,8 @@ Rectangle {
             clip: false
 
             // 缩放
-            property real scaleFactor: 1.0
+            property real scaleFactor: tap.pressed ? 0.95 : 1.0
+
             transform: Scale {
                 origin.x: width / 2
                 origin.y: height / 2
@@ -148,87 +149,13 @@ Rectangle {
                 }
             }
 
-            /*MouseArea {
-                anchors.fill: parent
+            TapHandler {
+                id: tap
 
-                // ========== Qt6 专用：滚动时不触发点击 ==========
-                property bool isMove: false
-                property real startX: 0
-                property real startY: 0
-
-                Timer {
-                    id: clickDelayTimer
-                    interval: 120
-                    onTriggered: {
-                        if (!parent.isMove) {
-                            grid.currentIndex = index;
-                            mw_one.clickMainTab();
-                        }
-                    }
-                }
-
-                onPressed: {
-                    isMove = false;
-                    startX = mouseX;
-                    startY = mouseY;
-
-                    // 按下动画
-                    scaleFactor = 0.95;
-
-                    clickDelayTimer.start();
-                }
-
-                onPositionChanged: {
-                    // 如果移动超过 5 像素，判定为滚动，不触发点击
-                    if (Math.abs(mouseY - startY) > 5 || Math.abs(mouseX - startX) > 5) {
-                        isMove = true;
-                    }
-                }
-
-                onReleased: {
-                    scaleFactor = 1.0;
-                }
-            }*/
-
-            MouseArea {
-                id: mouse
-                anchors.fill: parent
-
-                // ===== 点击缩放动画 =====
-                scale: scaleFactor
-                Behavior on scale {
-                    NumberAnimation { duration: 100; easing.type: Easing.OutCubic }
-                }
-
-                // ===== 滚动防误触 =====
-                property bool isMove: false
-                property real pressX
-                property real pressY
-
-                onPressed: {
-                    pressX = mouseX;
-                    pressY = mouseY;
-                    isMove = false;
-                    scaleFactor = 0.95;
-                }
-
-                onPositionChanged: {
-                    if (Math.abs(mouseX - pressX) > 5 ||
-                        Math.abs(mouseY - pressY) > 5) {
-                        isMove = true;
-                    }
-                }
-
-                onReleased: {
-                    scaleFactor = 1.0;
-                    if (!isMove) {
-                        grid.currentIndex = index;
-                        mw_one.clickMainTab();
-                    }
-                }
-
-                onCanceled: {
-                    scaleFactor = 1.0;
+                dragThreshold: 5
+                onTapped: {
+                    grid.currentIndex = index;
+                    mw_one.clickMainTab();
                 }
             }
 
