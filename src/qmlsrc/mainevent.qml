@@ -262,7 +262,7 @@ Rectangle {
                 return item0H + item1H + item2H + item3H;
             }
 
-            MouseArea {
+            /*MouseArea {
 
                 anchors.fill: parent
 
@@ -278,6 +278,27 @@ Rectangle {
                 }
 
                 onDoubleClicked: {
+                    m_Method.reeditMainEventData();
+                }
+            }*/
+
+            TapHandler {
+                dragThreshold: 5
+
+                onTapped: function (event) {
+                    var x = event.position.x;
+                    var y = event.position.y;
+
+                    if (actionButtons.visible && x > actionButtons.x && x < actionButtons.x + actionButtons.width && y > actionButtons.y && y < actionButtons.y + actionButtons.height) {
+                        event.accepted = false;
+                        console.log("按钮被点击...");
+                    } else {
+                        view.currentIndex = index;
+                        m_Method.clickMainEventData();
+                    }
+                }
+
+                onDoubleTapped: {
                     m_Method.reeditMainEventData();
                 }
             }

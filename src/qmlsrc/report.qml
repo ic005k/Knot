@@ -8,57 +8,54 @@ Rectangle {
     color: isDark ? "#455364" : "#666666"
 
     function appendTableRow(Date, Steps, KM) {
-
         tableModel.appendRow({
-                                 "Date": Date,
-                                 "Freq": Steps,
-                                 "Amount": KM
-                             })
+            "Date": Date,
+            "Freq": Steps,
+            "Amount": KM
+        });
     }
 
     function setScrollBarPos(pos) {
-
-        tableView.contentY = 0 //tableView.contentHeight - tableView.height
-        console.log("contentH=" + tableView.contentHeight + "  h=" + tableView.height)
+        tableView.contentY = 0; //tableView.contentHeight - tableView.height
+        console.log("contentH=" + tableView.contentHeight + "  h=" + tableView.height);
     }
 
     function getCurrentIndex() {
-        return tableView.currentIndex
+        return tableView.currentIndex;
     }
 
     function getItemCount() {
-
-        return tableModel.rowCount
+        return tableModel.rowCount;
     }
 
     function getDate(itemIndex) {
-        return tableModel.rows[itemIndex].Date
+        return tableModel.rows[itemIndex].Date;
     }
 
     function getSteps(itemIndex) {
-        var data = tableModel.getRow(itemIndex)
-        return data.Steps
+        var data = tableModel.getRow(itemIndex);
+        return data.Steps;
     }
 
     function getKM(itemIndex) {
-        var data = tableModel.getRow(itemIndex)
-        return data.KM
+        var data = tableModel.getRow(itemIndex);
+        return data.KM;
     }
 
     function setCurrentItem(currentIndex) {
-        tableView.currentIndex = currentIndex
+        tableView.currentIndex = currentIndex;
     }
 
     function setTableData(currentIndex, date, freq, amount) {
         tableModel.setRow(currentIndex, {
-                              "Date": date,
-                              "Freq": freq,
-                              "Amount": amount
-                          })
+            "Date": date,
+            "Freq": freq,
+            "Amount": amount
+        });
     }
 
     function delItem(currentIndex) {
-        tableModel.removeRow(currentIndex)
+        tableModel.removeRow(currentIndex);
     }
 
     Rectangle {
@@ -98,9 +95,9 @@ Rectangle {
     }
 
     TableView {
+        id: tableView
         property int hoverIndex: -1
         property int currentIndex: -1
-        id: tableView
         width: parent.width
         anchors.top: header.bottom
         anchors.left: parent.left
@@ -132,7 +129,7 @@ Rectangle {
             //color: "#666666"
             color: {
                 //tableView.currentIndex === row ? "#3298FE" : (tableView.hoverIndex === row ? "#97CBFF" : (row % 2 ? "#666666" : "#666666"))
-                tableView.currentIndex === row ? "#3298FE" : (isDark ? "#455364" : (row % 2 ? "#666666" : "#666666"))
+                tableView.currentIndex === row ? "#3298FE" : (isDark ? "#455364" : (row % 2 ? "#666666" : "#666666"));
             }
 
             implicitWidth: tableView.width / 3
@@ -154,7 +151,7 @@ Rectangle {
                 wrapMode: TextArea.WrapAnywhere
             }
 
-            MouseArea {
+            /*MouseArea {
                 id: cashierMouse
                 anchors.fill: parent
                 hoverEnabled: true
@@ -172,6 +169,22 @@ Rectangle {
                 }
                 onEntered: tableView.hoverIndex = row
                 onExited: tableView.hoverIndex = -1
+            }*/
+
+            // 单击 + 双击
+            TapHandler {
+                id: cashierTap
+                dragThreshold: 5
+
+                onTapped: {
+                    tableView.forceActiveFocus();
+                    tableView.currentIndex = row;
+                    m_Report.loadDetailsQml();
+                }
+
+                onDoubleTapped: {
+                    //tableView.selected(row, header.logicIndexMap[column]);
+                }
             }
         }
     }

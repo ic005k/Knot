@@ -19,152 +19,148 @@ Rectangle {
     property bool isHighPriority: false
 
     function setScrollBarPos(pos) {
-        view.ScrollBar.vertical.position = 1.0 - view.ScrollBar.vertical.size
+        view.ScrollBar.vertical.position = 1.0 - view.ScrollBar.vertical.size;
     }
 
-    function setItemHeight(h) {}
+    function setItemHeight(h) {
+    }
 
     function gotoEnd() {
-        view.positionViewAtEnd()
+        view.positionViewAtEnd();
     }
 
     function gotoBeginning() {
-        view.positionViewAtBeginning()
+        view.positionViewAtBeginning();
     }
 
     function gotoIndex(index) {
-        view.positionViewAtIndex(index, Tumbler.Center)
+        view.positionViewAtIndex(index, Tumbler.Center);
     }
 
     function setHighPriority(isFalse) {
-        isHighPriority = isFalse
+        isHighPriority = isFalse;
     }
 
     function setCurrentItem(currentIndex) {
-        view.currentIndex = currentIndex
+        view.currentIndex = currentIndex;
     }
 
     function getCurrentIndex() {
-        return view.currentIndex
+        return view.currentIndex;
     }
 
     function getItemCount() {
-        itemCount = view.count
+        itemCount = view.count;
 
-        return itemCount
+        return itemCount;
     }
 
     function getItemText(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.time + "|=|" + data.dototext
+        var data = view.model.get(itemIndex);
+        return data.time + "|=|" + data.dototext;
     }
 
     function getText0(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text0
+        var data = view.model.get(itemIndex);
+        return data.text0;
     }
 
     function getText1(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text1
+        var data = view.model.get(itemIndex);
+        return data.text1;
     }
 
     function getText2(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text2
+        var data = view.model.get(itemIndex);
+        return data.text2;
     }
 
     function getText3(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text3
+        var data = view.model.get(itemIndex);
+        return data.text3;
     }
 
     function getTop(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text_top
+        var data = view.model.get(itemIndex);
+        return data.text_top;
     }
 
     function getType(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.type
+        var data = view.model.get(itemIndex);
+        return data.type;
     }
 
     function addItem(t0, t1, t2, t3, height) {
         view.model.append({
-                              "text0": t0,
-                              "text1": t1,
-                              "text2": t2,
-                              "text3": t3,
-                              "myh": height
-                          })
+            "text0": t0,
+            "text1": t1,
+            "text2": t2,
+            "text3": t3,
+            "myh": height
+        });
     }
 
     function insertItem(text0, text1, text2, text3, curIndex) {
         view.model.insert(curIndex, {
-                              "text0": text0,
-                              "text1": text1,
-                              "text2": text2,
-                              "text3": text3
-                          })
+            "text0": text0,
+            "text1": text1,
+            "text2": text2,
+            "text3": text3
+        });
     }
 
     function delItem(currentIndex) {
-        view.model.remove(currentIndex)
+        view.model.remove(currentIndex);
     }
 
     function modifyItem(currentIndex, strTime, strText) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
-        view.model.setProperty(currentIndex, "dototext", strText)
+        view.model.setProperty(currentIndex, "time", strTime);
+        view.model.setProperty(currentIndex, "dototext", strText);
     }
 
     function modifyItemTime(currentIndex, strTime) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
+        view.model.setProperty(currentIndex, "time", strTime);
     }
 
     function modifyItemType(currentIndex, type) {
-
-        view.model.setProperty(currentIndex, "type", type)
+        view.model.setProperty(currentIndex, "type", type);
     }
 
     function modifyItemText0(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text0", strText)
+        view.model.setProperty(currentIndex, "text0", strText);
     }
 
     function modifyItemText2(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text2", strText)
+        view.model.setProperty(currentIndex, "text2", strText);
     }
 
     function setVPos(vpos) {
-
-        vscrollbar.position = vpos
-        console.log("qwMainDate:set " + vpos)
+        vscrollbar.position = vpos;
+        console.log("qwMainDate:set " + vpos);
     }
 
     function getVPos() {
-        var vpos = vscrollbar.position
-        console.log("qwMainDate:get " + vpos)
-        return vpos
+        var vpos = vscrollbar.position;
+        console.log("qwMainDate:get " + vpos);
+        return vpos;
     }
 
     function getColor() {
-        var strColor
+        var strColor;
 
         if (isDark)
-            strColor = "#333333"
+            strColor = "#333333";
         else
-            strColor = "#ffffff"
+            strColor = "#ffffff";
 
-        return strColor
+        return strColor;
     }
 
     function getFontColor() {
-
         if (isDark)
-            return "#EEEEEE"
+            return "#EEEEEE";
         else
-            return "black"
+            return "black";
     }
 
     Component {
@@ -184,7 +180,7 @@ Rectangle {
 
             radius: 6
 
-            MouseArea {
+            /*MouseArea {
                 anchors.fill: parent
 
                 onClicked: function (mouse) {
@@ -202,6 +198,24 @@ Rectangle {
                         m_Method.clickMainDateData()
                     }
                 }
+            }*/
+
+            TapHandler {
+                dragThreshold: 5
+
+                onTapped: function (event) {
+                    var x = event.position.x;
+                    var y = event.position.y;
+
+                    if (actionButtons.visible && x > actionButtons.x && x < actionButtons.x + actionButtons.width && y > actionButtons.y && y < actionButtons.y + actionButtons.height) {
+                        event.accepted = false;
+                        console.log("按钮被点击...");
+                    } else {
+                        view.currentIndex = index;
+                        m_Method.clickMainDate();
+                        m_Method.clickMainDateData();
+                    }
+                }
             }
 
             ColumnLayout {
@@ -214,7 +228,6 @@ Rectangle {
                 anchors.rightMargin: 0
 
                 RowLayout {
-
                     id: row0
 
                     Image {
@@ -253,7 +266,6 @@ Rectangle {
                 }
 
                 RowLayout {
-
                     id: row1
                     Layout.margins: rowSpace
                     visible: item1.text.length ? true : false
@@ -306,7 +318,6 @@ Rectangle {
                 }
 
                 RowLayout {
-
                     id: row2
                     Layout.margins: rowSpace
                     visible: item2.text.length ? true : false
@@ -392,8 +403,8 @@ Rectangle {
                         icon.height: 20
 
                         onClicked: {
-                            mw_one.on_btnReport()
-                            console.log("报表: " + index)
+                            mw_one.on_btnReport();
+                            console.log("报表: " + index);
                         }
                         // 适配深色模式
                         background: Rectangle {
@@ -409,8 +420,8 @@ Rectangle {
                         visible: true
 
                         onClicked: {
-                            mw_one.on_btnChart()
-                            console.log("图表: " + index)
+                            mw_one.on_btnChart();
+                            console.log("图表: " + index);
                         }
                         background: Rectangle {
                             color: "transparent"

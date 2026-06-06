@@ -3172,7 +3172,7 @@ void Reader::closeReader() {
   mui->frameMain->show();
   mui->frameReader->hide();
 
-  AndroidTouchFixer::wakeup();
+  // AndroidTouchFixer::wakeup();
 }
 
 void Reader::openReader() {

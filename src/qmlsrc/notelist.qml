@@ -196,7 +196,7 @@ Rectangle {
 
             radius: 2
 
-            MouseArea {
+            /*MouseArea {
 
                 property point clickPos: "0,0"
 
@@ -222,6 +222,25 @@ Rectangle {
                 onDoubleClicked: {
 
                     // mw_one.on_btnRename_clicked()
+                }
+            }*/
+
+            TapHandler {
+                dragThreshold: 6
+
+                // 单击（完全替代 onClicked）
+                onTapped: {
+                    view.currentIndex = index;
+                    for (var i = 0; i < view.count; i++) {}
+                    m_NotesList.clickNoteList();
+                }
+
+                // 长按（替代 onPressAndHold）
+                onLongPressed: {}
+
+                // 双击（替代 onDoubleClicked）
+                onDoubleTapped: {
+                    // mw_one.on_btnRename_clicked();
                 }
             }
 

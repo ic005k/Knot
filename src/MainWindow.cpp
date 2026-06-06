@@ -1176,7 +1176,7 @@ bool MainWindow::eventFilter(QObject* watch, QEvent* evn) {
     }
   }*/
 
-  if (watch == mui->qwMainTab && evn->type() == QEvent::Show) {
+  /*if (watch == mui->qwMainTab && evn->type() == QEvent::Show) {
     QTimer::singleShot(200, this, [this]() {
       sendFakeTouch();
 
@@ -1186,7 +1186,7 @@ bool MainWindow::eventFilter(QObject* watch, QEvent* evn) {
                                   Qt::QueuedConnection);
       }
     });
-  }
+  }*/
 
   return QWidget::eventFilter(watch, evn);
 }
@@ -3334,10 +3334,11 @@ void MainWindow::onAndroidBackHandle() {
   if (!mui->qwMainDate->isHidden()) {
     mui->btnHome->pressed();
 
-    QQuickItem* root = mui->qwMainTab->rootObject();
-    if (root) {
-      QMetaObject::invokeMethod(root, "forceActivateUI", Qt::QueuedConnection);
-    }
+    // QQuickItem* root = mui->qwMainTab->rootObject();
+    // if (root) {
+    //   QMetaObject::invokeMethod(root, "forceActivateUI",
+    //   Qt::QueuedConnection);
+    // }
 
     return;
   }

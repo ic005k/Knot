@@ -20,167 +20,165 @@ Rectangle {
     property bool isHighPriority: false
 
     function setScrollBarPos(pos) {
-        view.ScrollBar.vertical.position = 1.0 - view.ScrollBar.vertical.size
+        view.ScrollBar.vertical.position = 1.0 - view.ScrollBar.vertical.size;
     }
 
-    function setItemHeight(h) {}
+    function setItemHeight(h) {
+    }
 
     function gotoEnd() {
-        view.positionViewAtEnd()
+        view.positionViewAtEnd();
     }
 
     function gotoBeginning() {
-        view.positionViewAtBeginning()
+        view.positionViewAtBeginning();
     }
 
     function gotoIndex(index) {
-        view.positionViewAtIndex(index, Tumbler.Center)
+        view.positionViewAtIndex(index, Tumbler.Center);
     }
 
     function setHighPriority(isFalse) {
-        isHighPriority = isFalse
+        isHighPriority = isFalse;
     }
 
     function setCurrentItem(currentIndex) {
-        view.currentIndex = currentIndex
-        view.positionViewAtIndex(currentIndex, ListView.Beginning)
+        view.currentIndex = currentIndex;
+        view.positionViewAtIndex(currentIndex, ListView.Beginning);
     }
 
     function getCurrentIndex() {
-        return view.currentIndex
+        return view.currentIndex;
     }
 
     function getItemCount() {
-        itemCount = view.count
+        itemCount = view.count;
 
-        return itemCount
+        return itemCount;
     }
 
     function getItemText(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.time + "|=|" + data.dototext
+        var data = view.model.get(itemIndex);
+        return data.time + "|=|" + data.dototext;
     }
 
     function getText0(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text0
+        var data = view.model.get(itemIndex);
+        return data.text0;
     }
 
     function getText1(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text1
+        var data = view.model.get(itemIndex);
+        return data.text1;
     }
 
     function getText2(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text2
+        var data = view.model.get(itemIndex);
+        return data.text2;
     }
 
     function getText3(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text3
+        var data = view.model.get(itemIndex);
+        return data.text3;
     }
 
     function getTop(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text_top
+        var data = view.model.get(itemIndex);
+        return data.text_top;
     }
 
     function getType(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.type
+        var data = view.model.get(itemIndex);
+        return data.type;
     }
 
     function addItem(t0, t1, t2, t3, t4, f_size) {
         view.model.append({
-                              "text0": t0,
-                              "text1": t1,
-                              "text2": t2,
-                              "text3": t3,
-                              "text4": t4,
-                              "font_size": f_size
-                          })
+            "text0": t0,
+            "text1": t1,
+            "text2": t2,
+            "text3": t3,
+            "text4": t4,
+            "font_size": f_size
+        });
     }
 
     function insertItem(text0, text1, text2, text3, curIndex) {
         view.model.insert(curIndex, {
-                              "text0": text0,
-                              "text1": text1,
-                              "text2": text2,
-                              "text3": text3
-                          })
+            "text0": text0,
+            "text1": text1,
+            "text2": text2,
+            "text3": text3
+        });
     }
 
     function delItem(currentIndex) {
-        view.model.remove(currentIndex)
+        view.model.remove(currentIndex);
     }
 
     function modifyItem(currentIndex, strTime, strText) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
-        view.model.setProperty(currentIndex, "dototext", strText)
+        view.model.setProperty(currentIndex, "time", strTime);
+        view.model.setProperty(currentIndex, "dototext", strText);
     }
 
     function modifyItemTime(currentIndex, strTime) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
+        view.model.setProperty(currentIndex, "time", strTime);
     }
 
     function modifyItemType(currentIndex, type) {
-
-        view.model.setProperty(currentIndex, "type", type)
+        view.model.setProperty(currentIndex, "type", type);
     }
 
     function modifyItemText0(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text0", strText)
+        view.model.setProperty(currentIndex, "text0", strText);
     }
 
     function modifyItemText1(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text1", strText)
+        view.model.setProperty(currentIndex, "text1", strText);
     }
 
     function modifyItemText2(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text2", strText)
+        view.model.setProperty(currentIndex, "text2", strText);
     }
 
     function modifyItemText3(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text3", strText)
+        view.model.setProperty(currentIndex, "text3", strText);
     }
 
     function setVPos(vpos) {
-        vbar.position = vpos
-        console.log("qwNoteBook:set " + vpos)
+        vbar.position = vpos;
+        console.log("qwNoteBook:set " + vpos);
     }
 
     function getVPos() {
-        var vpos = vbar.position
-        console.log("qwNoteBook:get " + vpos)
-        return vpos
+        var vpos = vbar.position;
+        console.log("qwNoteBook:get " + vpos);
+        return vpos;
     }
 
     function getColor() {
-        var strColor
+        var strColor;
 
         if (isDark)
-            strColor = "#333333" // "#455364"
+            strColor = "#333333";
+            // "#455364"
         else
-            strColor = "#ffffff"
+            strColor = "#ffffff";
 
-        return strColor
+        return strColor;
     }
 
     function getFontColor() {
-
         if (isDark)
-            return "#EEEEEE"
+            return "#EEEEEE";
         else
-            return "black"
+            return "black";
     }
 
     function setColorFlag(strColor) {
-        var currentIndex = view.currentIndex
+        var currentIndex = view.currentIndex;
         if (currentIndex >= 0) {
-            view.model.setProperty(currentIndex, "text4", strColor)
+            view.model.setProperty(currentIndex, "text4", strColor);
         }
     }
 
@@ -200,7 +198,6 @@ Rectangle {
             radius: 2
 
             RowLayout {
-
                 id: idlistRow
 
                 width: parent.width
@@ -236,7 +233,6 @@ Rectangle {
                     }
 
                     RowLayout {
-
                         id: row0
 
                         Image {
@@ -314,7 +310,6 @@ Rectangle {
                     }
 
                     RowLayout {
-
                         id: row3
                         Layout.margins: rowSpace
                         visible: item3.text.length ? true : false
@@ -388,7 +383,7 @@ Rectangle {
                 }
             }
 
-            MouseArea {
+            /*MouseArea {
 
                 property point clickPos: "0,0"
 
@@ -414,6 +409,27 @@ Rectangle {
 
                 onDoubleClicked: {
 
+                    // mw_one.on_btnRename_clicked()
+                }
+            }*/
+
+            TapHandler {
+
+                dragThreshold: 8
+
+                // 单击 → 和 onClicked 完全一样
+                onTapped: {
+                    view.currentIndex = index;
+                    m_NotesList.mouseClickNoteBook();
+                }
+
+                // 长按 → 和 onPressAndHold 完全一样
+                onLongPressed: {
+                    // 长按逻辑写这里
+                }
+
+                // 双击 → 和 onDoubleClicked 完全一样
+                onDoubleTapped: {
                     // mw_one.on_btnRename_clicked()
                 }
             }
