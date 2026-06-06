@@ -244,6 +244,7 @@ public class NoteEditor
     private static Context context;
     public static NoteEditor m_instance;
     private static boolean isTextChanged = false;
+    private boolean needRefreshNoteList = false;
 
     private TextViewUndoRedo helper;
     private String strBack1 = "#FFC1C1";
@@ -453,8 +454,7 @@ public class NoteEditor
             if (isTextChanged) {
                 saveNote();
                 isTextChanged = false;
-
-                CallJavaNotify_6();
+                needRefreshNoteList = true;
             }
         } else if (id == R.id.btnUndo) {
             btnUndo.setBackgroundColor(getResources().getColor(R.color.red));
@@ -921,6 +921,14 @@ public class NoteEditor
             ini.store();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        if (needRefreshNoteList) {
+            try {
+                CallJavaNotify_6();
+            } catch (Exception e) {}
+
+            needRefreshNoteList = false;
         }
 
         if (MyActivity.isEdit && isSaved) {
@@ -1788,7 +1796,7 @@ public class NoteEditor
                 public void onClick(DialogInterface dialog, int which) {
                     // ...To-do
                     saveNote();
-                    CallJavaNotify_6();
+                    needRefreshNoteList = true;
                     finish();
                 }
             }
