@@ -3021,6 +3021,16 @@ void MainWindow::onAndroidBackHandle() {
     }
   });
 
+  if (textToolbarDynamic != nullptr && textToolbarDynamic->isVisible()) {
+    closeTextToolBar();
+    return;
+  }
+
+  if (textToolbar != nullptr && textToolbar->isVisible()) {
+    closeTextToolBar();
+    return;
+  }
+
   if (colorDlg != nullptr) {
     if (colorDlg->isVisible()) {
       colorDlg->close();
@@ -3096,16 +3106,6 @@ void MainWindow::onAndroidBackHandle() {
       m_NotesList->m_NewNoteBook->ui->btnCancel->click();
       return;
     }
-  }
-
-  if (textToolbarDynamic != nullptr && textToolbarDynamic->isVisible()) {
-    closeTextToolBar();
-    return;
-  }
-
-  if (textToolbar != nullptr && textToolbar->isVisible()) {
-    closeTextToolBar();
-    return;
   }
 
   if (mw_one->m_RenameDlg != nullptr) {

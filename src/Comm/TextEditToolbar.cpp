@@ -15,15 +15,14 @@
 #include "src/defines.h"
 
 // ========================== HandleWidget 实现 ==========================
-HandleWidget::HandleWidget(QWidget* parent)
-    : QWidget(parent,
-              Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool) {
+HandleWidget::HandleWidget(QWidget* parent) : QWidget(parent) {
 #ifdef Q_OS_ANDROID
   setFixedSize(32, 32);
 #else
   setFixedSize(16, 16);
+  setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
 #endif
-  // setAttribute(Qt::WA_TranslucentBackground);
+
   setMouseTracking(true);
   setCursor(Qt::OpenHandCursor);
 }
@@ -43,7 +42,7 @@ void HandleWidget::paintEvent(QPaintEvent* event) {
   painter.drawRect(rect().adjusted(8, 8, -8, -8));
 }
 
-// ========================== HandleWidget 修复实现 ==========================
+// ========================== HandleWidget 实现 ==========================
 
 void HandleWidget::mousePressEvent(QMouseEvent* event) {
   if (event->button() == Qt::LeftButton) {
@@ -79,23 +78,24 @@ void HandleWidget::mouseReleaseEvent(QMouseEvent* event) {
 }
 
 void HandleWidget::mouseMoveEvent(QMouseEvent* event) {
-  if (m_isDragging) {
-    // 确保只有左键拖动时才处理
-    if (event->buttons() & Qt::LeftButton) {
-      QPoint newGlobalPos = event->globalPosition().toPoint() - m_dragOffset;
-      move(newGlobalPos);
-      emit moved(newGlobalPos);
-      event->accept();
-    } else {
-      // 如果没有左键按下，但m_isDragging为true，说明状态不一致，重置状态
-      m_isDragging = false;
-      setCursor(Qt::OpenHandCursor);
-      if (mouseGrabber() == this) {
-        releaseMouse();
-      }
-      event->ignore();
-    }
+  if (m_isDragging && (event->buttons() & Qt::LeftButton)) {
+#ifdef Q_OS_ANDROID
+    // 安卓：子控件，用局部坐标
+    QPoint localPos = event->pos() - m_dragOffset;
+    move(localPos);
+    emit moved(mapToGlobal(pos()));
+#else
+    // PC：顶层Tool窗口，用全局坐标（旧的正确逻辑）
+    QPoint newGlobalPos = event->globalPosition().toPoint() - m_dragOffset;
+    move(newGlobalPos);
+    emit moved(newGlobalPos);
+#endif
+
+    event->accept();
   } else {
+    m_isDragging = false;
+    setCursor(Qt::OpenHandCursor);
+    if (mouseGrabber() == this) releaseMouse();
     event->ignore();
   }
 }
@@ -103,17 +103,12 @@ void HandleWidget::mouseMoveEvent(QMouseEvent* event) {
 // ========================== TextEditToolbar 实现 ==========================
 
 TextEditToolbar::TextEditToolbar(QWidget* parent) : QWidget(parent) {
-  // 窗口属性设置
-  // setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint |
-  // Qt::Tool);
-
   if (isAndroid)
     setWindowFlags(Qt::Widget | Qt::FramelessWindowHint);
   else {
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
   }
 
-  // setAttribute(Qt::WA_TranslucentBackground);
   installEventFilter(this);
   setFocusPolicy(Qt::StrongFocus);
 
@@ -213,11 +208,6 @@ void TextEditToolbar::initButtons() {
   // 绑定点击信号槽
   connect(btnMinus, &QPushButton::clicked, this,
           &TextEditToolbar::onMinusClicked);
-
-  // connect(btnMinus, &QPushButton::pressed, this,
-  //         &TextEditToolbar::onMinusPressed);
-  // connect(btnMinus, &QPushButton::released, this,
-  //         &TextEditToolbar::onMinusReleased);
 
   connect(btnPlus, &QPushButton::clicked, this,
           &TextEditToolbar::onPlusClicked);
@@ -737,8 +727,17 @@ void TextEditToolbar::updateTextEditHandlesPosition(int startPos, int endPos) {
     endGlobal.setY(screenRect.bottom() - m_endHandle->height());
   }
 
+#ifdef Q_OS_ANDROID
+  // 安卓：手柄是子控件，必须转成相对 Toolbar 的坐标
+  QPoint p1 = this->mapFromGlobal(startGlobal);
+  QPoint p2 = this->mapFromGlobal(endGlobal);
+  m_startHandle->move(p1);
+  m_endHandle->move(p2);
+#else
+  // PC：独立窗口，直接用全局坐标
   m_startHandle->move(startGlobal);
   m_endHandle->move(endGlobal);
+#endif
 
   qDebug() << "[QTextEdit手柄精确定位] StartPos:" << startPos
            << "EndPos:" << endPos << "StartRect:" << startRect
@@ -932,7 +931,7 @@ void TextEditToolbar::updateLineEditHandlesPositionForNormalMode(int startPos,
 // 统一的手柄显示函数
 void TextEditToolbar::showHandlesAtSelection() {
   // 如果是 QLineEdit，隐藏手柄并返回
-  if (m_lineEdit) {
+  if (m_lineEdit || m_textEdit) {
     m_startHandle->hide();
     m_endHandle->hide();
     qDebug() << "[showHandlesAtSelection] QLineEdit 模式，隐藏手柄";
@@ -1121,24 +1120,27 @@ void TextEditToolbar::onCopyClicked() {
   // 复制选中内容
   if (m_textEdit) m_textEdit->copy();
   if (m_lineEdit) m_lineEdit->copy();
+
   // 操作后隐藏工具栏和手柄
-  hide();
+  // hide();
 }
 
 void TextEditToolbar::onCutClicked() {
   // 剪切选中内容
   if (m_textEdit) m_textEdit->cut();
   if (m_lineEdit) m_lineEdit->cut();
+
   // 操作后隐藏工具栏和手柄
-  hide();
+  // hide();
 }
 
 void TextEditToolbar::onPasteClicked() {
   // 粘贴内容
   if (m_textEdit) m_textEdit->paste();
   if (m_lineEdit) m_lineEdit->paste();
+
   // 操作后隐藏工具栏和手柄
-  hide();
+  // hide();
 }
 
 void TextEditToolbar::onSelectAllClicked() {
@@ -1366,7 +1368,7 @@ void EditEventFilter::onTimeout() {
                << m_pressPos << "文本长度：" << lineEdit->text().length();
     }
 
-    // 绑定控件并显示工具栏（原有逻辑）
+    // 绑定控件并显示工具栏
     m_toolbar->bindEditWidget(static_cast<QWidget*>(m_target));
     m_toolbar->showAtSelection();
   }
