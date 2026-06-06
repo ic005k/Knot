@@ -3289,6 +3289,17 @@ QString Method::getBaseFlag(const QString& file) {
   return baseFlag;
 }
 
+// 生成 3 位：小写字母 + 数字（0-9, a-z）
+QString Method::generateRandom3() {
+  const QString chars = "0123456789abcdefghijklmnopqrstuvwxyz";
+  QString result;
+  for (int i = 0; i < 3; ++i) {
+    int index = QRandomGenerator::global()->bounded(chars.size());
+    result += chars[index];
+  }
+  return result;
+}
+
 void Method::setAccessCount(int count) {
   int m = QTime::currentTime().minute();
   if (m < 30) {

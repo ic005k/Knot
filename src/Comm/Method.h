@@ -490,7 +490,8 @@ class Method : public QDialog {
 
   void clearAllNotesList(QQuickWidget* qw);
 
- protected:
+  QString generateRandom3();
+  protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

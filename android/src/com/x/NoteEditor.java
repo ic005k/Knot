@@ -454,7 +454,6 @@ public class NoteEditor
             if (isTextChanged) {
                 saveNote();
                 isTextChanged = false;
-                needRefreshNoteList = true;
             }
         } else if (id == R.id.btnUndo) {
             btnUndo.setBackgroundColor(getResources().getColor(R.color.red));
@@ -1332,6 +1331,8 @@ public class NoteEditor
                             // 执行重命名（关键的原子操作）
                             if (tempFile.renameTo(targetFile)) {
                                 success[0] = true; // 修改数组中的值
+                                // 保存真正成功，才标记
+                                needRefreshNoteList = true;
                             } else {
                                 throw new IOException("重命名临时文件失败");
                             }
@@ -1796,7 +1797,6 @@ public class NoteEditor
                 public void onClick(DialogInterface dialog, int which) {
                     // ...To-do
                     saveNote();
-                    needRefreshNoteList = true;
                     finish();
                 }
             }

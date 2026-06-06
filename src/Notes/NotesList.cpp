@@ -184,11 +184,8 @@ void NotesList::on_btnNewNoteBook_clicked() {
 void NotesList::on_btnNewNote_clicked() {
   if (tw->topLevelItemCount() == 0) return;
 
-  int rand = QRandomGenerator::global()->generate();
-  if (rand < 0) rand = 0 - rand;
-
-  QString noteFile =
-      "memo/" + m_Notes->getDateTimeStr() + "_" + QString::number(rand) + ".md";
+  QString noteFile = "memo/" + m_Notes->getDateTimeStr() + "_" +
+                     m_Method->generateRandom3() + ".md";
   QTreeWidgetItem* parentitem = tw->currentItem();
 
   QTreeWidgetItem* item1 = new QTreeWidgetItem(parentitem);
