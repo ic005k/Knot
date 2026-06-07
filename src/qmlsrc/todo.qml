@@ -255,6 +255,7 @@ Rectangle {
                         view.currentIndex = index;
                         m_Todo.stopPlayVoice();
                         console.log("index=" + index + "  c_index=" + ListView.isCurrentItem);
+                        console.log("view width=" + view.width + "  parent width=" + parent.width);
                     }
                 }
             }
@@ -412,9 +413,11 @@ Rectangle {
                         color: "transparent"
                     }
 
-                    Row {
+                    //===================================================================
+                    RowLayout {
                         id: actionButtons
-                        width: parent.width
+                        width: view.width
+                        Layout.leftMargin: 8
                         z: 10
                         spacing: 15
                         visible: view.currentIndex === index
@@ -502,6 +505,8 @@ Rectangle {
 
                         Item {
                             Layout.fillWidth: true
+                            Layout.minimumWidth: 0
+                            Layout.maximumWidth: 35
                         }
 
                         Button {
@@ -509,7 +514,7 @@ Rectangle {
                             text: qsTr("Done")
                             width: 56
                             height: 24
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.margins: 0
                             background: Rectangle {
                                 color: "#f44336"
                                 radius: 3
@@ -533,6 +538,9 @@ Rectangle {
                             }
                         }
                     }
+
+                    //==============================================================
+
                     Rectangle {
                         width: view.width
                         height: 5
