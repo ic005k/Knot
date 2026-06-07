@@ -1133,8 +1133,8 @@ void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
 void Notes::openNotesUI() {
   mw_one->execNeedSyncNotes();
 
-  mui->frameMain->hide();
   mui->frameNoteList->show();
+  mui->frameMain->hide();
 
   startBackgroundTaskDelAndClear();
 }
@@ -1293,8 +1293,6 @@ void Notes::openEditUI() {
 }
 
 void Notes::openNotes() {
-  mw_one->m_MainHelper->initNotesQW();
-
   if (!mw_one->m_Preferences->devMode)
     mui->btnManagement->hide();
   else

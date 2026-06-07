@@ -554,10 +554,13 @@ void MainHelper::initMainQW() {
     mui->qwBookList->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/booklist.qml")));
   }
+
+  initNotesQW();
 }
 
 void MainHelper::initNotesQW() {
   if (mui->qwNoteBook->source().isEmpty()) {
+    mui->qwNoteBook->rootContext()->setContextProperty("isDark", isDark);
     mui->qwNoteBook->rootContext()->setContextProperty("m_NotesList",
                                                        m_NotesList);
     mui->qwNoteBook->rootContext()->setContextProperty("mw_one", mw_one);
@@ -569,6 +572,7 @@ void MainHelper::initNotesQW() {
                                                          12);
     else
       mui->qwNoteList->rootContext()->setContextProperty("noteTimeFontSize", 8);
+    mui->qwNoteList->rootContext()->setContextProperty("isDark", isDark);
     mui->qwNoteList->rootContext()->setContextProperty("m_NotesList",
                                                        m_NotesList);
     mui->qwNoteList->rootContext()->setContextProperty("mw_one", mw_one);
@@ -585,6 +589,8 @@ void MainHelper::initNotesQW() {
     mui->qwNoteTools->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/note_toolsbar.qml")));
 
+    mui->qwNotesSearchResult->rootContext()->setContextProperty("isDark",
+                                                                isDark);
     mui->qwNotesSearchResult->rootContext()->setContextProperty("fontSize",
                                                                 fontSize);
     mui->qwNotesSearchResult->rootContext()->setContextProperty("m_NotesList",
@@ -594,6 +600,7 @@ void MainHelper::initNotesQW() {
     mui->qwNotesSearchResult->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/SearchResults.qml")));
 
+    mui->qwNoteRecycle->rootContext()->setContextProperty("isDark", isDark);
     mui->qwNoteRecycle->rootContext()->setContextProperty("m_Method", m_Method);
     mui->qwNoteRecycle->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/noterecycle.qml")));

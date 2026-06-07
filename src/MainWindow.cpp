@@ -696,6 +696,7 @@ void MainWindow::execNeedSyncNotes() {
 
 void MainWindow::saveNeedDelWebDAVFiles(const QString& file) {
   int m_count = needDelWebDAVFiles.count();
+
   if (file.length() > 0) {
     for (int i = 0; i < m_count; i++) {
       QString localFile = needDelWebDAVFiles.at(i);
@@ -704,7 +705,8 @@ void MainWindow::saveNeedDelWebDAVFiles(const QString& file) {
 
       if (file.contains(fn)) {
         needDelWebDAVFiles.removeOne(localFile);
-        qDebug() << "已从webdav的删除列表中移除：" << localFile;
+        qDebug() << "已从webdav的删除列表中移除：位置 "
+                 << QString::number(i) + " . " << localFile;
         // 去掉 /dav/
         QString cleanFile = file;
         cleanFile.remove("/dav/");

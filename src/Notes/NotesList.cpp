@@ -1701,76 +1701,18 @@ void NotesList::needDelNotes() {
     }
 
     qDebug() << "needDelFiles=" << needDelFiles.count();
-
-  } else {
-    QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
-    count = iniNotes.value("/NeedDelNotes/Count", 0).toInt();
-    if (count == 0) return;
-
-    needDelFiles.clear();
-    for (int i = 0; i < count; i++) {
-      QString str1 =
-          iniNotes.value("/NeedDelNotes/Note-" + QString::number(i), "")
-              .toString();
-      if (str1.isEmpty()) continue;
-      needDelFiles.append(str1);
-    }
   }
 
-  // 定义保存的文件路径
-  QString jsonPath = privateDir + "LocalDelList.json";
+  // del files
+  bool isDelMDOk, isDelJSONOk;
+  for (int i = 0; i < needDelFiles.count(); i++) {
+    QString mdFile = iniDir + needDelFiles.at(i);
+    QString strFile = m_Notes->getCurrentJSON(mdFile);
+    isDelMDOk = delFile(mdFile);
+    isDelJSONOk = delFile(strFile);
 
-  // 读取上次保存的删除列表
-  QStringList lastDelList;
-
-  QFile jsonFile(jsonPath);
-  if (jsonFile.exists() && jsonFile.open(QIODevice::ReadOnly)) {
-    QByteArray data = jsonFile.readAll();
-    jsonFile.close();
-
-    QJsonDocument doc = QJsonDocument::fromJson(data);
-    if (doc.isArray()) {
-      QJsonArray arr = doc.array();
-      for (auto it = arr.begin(); it != arr.end(); ++it) {
-        if (it->isString()) {
-          lastDelList.append(it->toString());
-        }
-      }
-    }
-  }
-
-  // 比较本次服务器下发的列表(直接比较集合）
-  if (QSet<QString>(needDelFiles.begin(), needDelFiles.end()) !=
-      QSet<QString>(lastDelList.begin(), lastDelList.end())) {
-    // del files
-    bool isDelMDOk, isDelJSONOk;
-    for (int i = 0; i < needDelFiles.count(); i++) {
-      QString mdFile = iniDir + needDelFiles.at(i);
-      QString strFile = m_Notes->getCurrentJSON(mdFile);
-      isDelMDOk = delFile(mdFile);
-      isDelJSONOk = delFile(strFile);
-
-      // qDebug() << "Need Del Note: " << mdFile << isDelMDOk;
-      // qDebug() << "Need Del Note: " << strFile << isDelJSONOk;
-    }
-
-    // 保存本次的删除列表到 JSON 文件
-    QJsonArray newArr;
-    for (const QString& fileName : std::as_const(needDelFiles)) {
-      newArr.append(fileName);
-    }
-
-    QJsonDocument newDoc(newArr);
-    if (jsonFile.open(QIODevice::WriteOnly)) {
-      jsonFile.write(
-          newDoc.toJson(QJsonDocument::Indented));  // 缩进格式，方便查看
-      jsonFile.close();
-    } else {
-      qWarning() << "无法打开文件进行写入:" << jsonFile.errorString();
-      return;
-    }
-  } else {
-    qDebug() << "删除列表无变化，跳过删除。";
+    if (isDelMDOk) qDebug() << "Del Note: " << mdFile << isDelMDOk;
+    if (isDelJSONOk) qDebug() << "Del Note: " << strFile << isDelJSONOk;
   }
 }
 
