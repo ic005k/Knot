@@ -17,107 +17,102 @@ Rectangle {
     property bool isHighPriority: false
 
     function isAlarm(index) {
-
-        return isHighPriority
+        return isHighPriority;
     }
 
     function setHighPriority(isFalse) {
-        isHighPriority = isFalse
+        isHighPriority = isFalse;
     }
 
     function setCurrentItem(currentIndex) {
-        view.currentIndex = currentIndex
+        view.currentIndex = currentIndex;
     }
 
     function getCurrentIndex() {
-        return view.currentIndex
+        return view.currentIndex;
     }
 
     function getItemCount() {
-        itemCount = view.count
+        itemCount = view.count;
 
-        return itemCount
+        return itemCount;
     }
 
     function getItemText(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.time + "|=|" + data.dototext
+        var data = view.model.get(itemIndex);
+        return data.time + "|=|" + data.dototext;
     }
 
     function getTime(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.time
+        var data = view.model.get(itemIndex);
+        return data.time;
     }
 
     function getTodoText(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.dototext
+        var data = view.model.get(itemIndex);
+        return data.dototext;
     }
 
     function getType(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.type
+        var data = view.model.get(itemIndex);
+        return data.type;
     }
 
     function addItem(strTime, type, strText, height) {
         view.model.append({
-                              "time": strTime,
-                              "type": type,
-                              "dototext": strText,
-                              "itemheight": height
-                          })
+            "time": strTime,
+            "type": type,
+            "dototext": strText,
+            "itemheight": height
+        });
     }
 
     function insertRecycle(strTime, type, strText, height, curIndex) {
         view.model.insert(curIndex, {
-                              "time": strTime,
-                              "type": type,
-                              "dototext": strText,
-                              "itemheight": height
-                          })
+            "time": strTime,
+            "type": type,
+            "dototext": strText,
+            "itemheight": height
+        });
     }
 
     function delItem(currentIndex) {
-        view.model.remove(currentIndex)
+        view.model.remove(currentIndex);
     }
 
     function modifyItem(currentIndex, strTime, strText) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
-        view.model.setProperty(currentIndex, "dototext", strText)
+        view.model.setProperty(currentIndex, "time", strTime);
+        view.model.setProperty(currentIndex, "dototext", strText);
     }
 
     function modifyItemTime(currentIndex, strTime) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
+        view.model.setProperty(currentIndex, "time", strTime);
     }
 
     function modifyItemType(currentIndex, type) {
-
-        view.model.setProperty(currentIndex, "type", type)
+        view.model.setProperty(currentIndex, "type", type);
     }
 
     function modifyItemText(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "dototext", strText)
+        view.model.setProperty(currentIndex, "dototext", strText);
     }
 
     function getColor() {
-        var strColor
+        var strColor;
 
         if (isDark)
-            strColor = "#455364"
+            strColor = "#455364";
         else
-            strColor = "#ffffff"
+            strColor = "#ffffff";
 
-        return strColor
+        return strColor;
     }
 
     function getFontColor() {
-
         if (isDark)
-            return "white"
+            return "white";
         else
-            return "black"
+            return "black";
     }
 
     Component {
@@ -134,36 +129,35 @@ Rectangle {
             radius: 0
 
             function getItemHeight() {
-                var item0H
-                var item1H
-                var item2H
-                var item3H
+                var item0H;
+                var item1H;
+                var item2H;
+                var item3H;
 
                 if (text1.visible == false)
-                    item0H = 0
+                    item0H = 0;
                 else
-                    item0H = text1.contentHeight
+                    item0H = text1.contentHeight;
 
                 if (text2.visible == false)
-                    item1H = 0
+                    item1H = 0;
                 else
-                    item1H = text2.contentHeight
+                    item1H = text2.contentHeight;
 
                 if (text3.visible == false)
-                    item2H = 0
+                    item2H = 0;
                 else
-                    item2H = text3.contentHeight
+                    item2H = text3.contentHeight;
 
                 if (text4.visible == false)
-                    item3H = 0
+                    item3H = 0;
                 else
-                    item3H = text4.contentHeight
+                    item3H = text4.contentHeight;
 
-                return item0H + item1H + item2H + item3H + text2.height + 5
+                return item0H + item1H + item2H + item3H + text2.height + 5;
             }
 
             RowLayout {
-
                 id: idlistElemnet
                 height: parent.height
                 width: parent.width
@@ -236,16 +230,18 @@ Rectangle {
                 }
             }
 
-            MouseArea {
-
-                property point clickPos: "0,0"
-
+            /*MouseArea {
                 anchors.fill: parent
-
                 onClicked: {
+                    view.currentIndex = index; //实现item切换
+                    console.log("ItemHeight=" + text1.contentHeight + text3.contentHeight);
+                }
+            }*/
 
-                    view.currentIndex = index //实现item切换
-                    console.log("ItemHeight=" + text1.contentHeight + text3.contentHeight)
+            TapHandler {
+                onTapped: {
+                    view.currentIndex = index;
+                    console.log("ItemHeight=" + text1.contentHeight + text3.contentHeight);
                 }
             }
         }
@@ -276,15 +272,15 @@ Rectangle {
     function getListEleHeadColor(ntype) {
         switch (ntype) {
         case 0:
-            return "lightgray"
+            return "lightgray";
         case 1:
-            return "red"
+            return "red";
         case 2:
-            return "orange"
+            return "orange";
         case 3:
-            return "lightblue"
+            return "lightblue";
         default:
-            return "black"
+            return "black";
         }
     }
 }

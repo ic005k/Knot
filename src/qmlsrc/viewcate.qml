@@ -16,132 +16,129 @@ Rectangle {
     property int itemCount: 0
     property bool isHighPriority: false
 
-    function setItemHeight(h) {}
+    function setItemHeight(h) {
+    }
 
     function gotoEnd() {
-        view.positionViewAtEnd()
+        view.positionViewAtEnd();
     }
 
     function gotoBeginning() {
-        view.positionViewAtBeginning()
+        view.positionViewAtBeginning();
     }
 
     function gotoIndex(index) {
-        view.positionViewAtIndex(index, Tumbler.Center)
+        view.positionViewAtIndex(index, Tumbler.Center);
     }
 
     function setHighPriority(isFalse) {
-        isHighPriority = isFalse
+        isHighPriority = isFalse;
     }
 
     function setCurrentItem(currentIndex) {
-        view.currentIndex = currentIndex
+        view.currentIndex = currentIndex;
     }
 
     function getCurrentIndex() {
-        return view.currentIndex
+        return view.currentIndex;
     }
 
     function getItemCount() {
-        itemCount = view.count
+        itemCount = view.count;
 
-        return itemCount
+        return itemCount;
     }
 
     function getItemText(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.time + "|=|" + data.dototext
+        var data = view.model.get(itemIndex);
+        return data.time + "|=|" + data.dototext;
     }
 
     function getText0(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text0
+        var data = view.model.get(itemIndex);
+        return data.text0;
     }
 
     function getText1(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text1
+        var data = view.model.get(itemIndex);
+        return data.text1;
     }
 
     function getText2(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text2
+        var data = view.model.get(itemIndex);
+        return data.text2;
     }
 
     function getText3(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text3
+        var data = view.model.get(itemIndex);
+        return data.text3;
     }
 
     function getTop(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text_top
+        var data = view.model.get(itemIndex);
+        return data.text_top;
     }
 
     function getType(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.type
+        var data = view.model.get(itemIndex);
+        return data.type;
     }
 
     function addItem(t0, t1, t2, t3, height) {
         view.model.append({
-                              "text0": t0,
-                              "text1": t1,
-                              "text2": t2,
-                              "text3": t3,
-                              "myh": height
-                          })
+            "text0": t0,
+            "text1": t1,
+            "text2": t2,
+            "text3": t3,
+            "myh": height
+        });
     }
 
     function insertItem(strTime, type, strText, curIndex) {
         view.model.insert(curIndex, {
-                              "time": strTime,
-                              "type": type,
-                              "dototext": strText
-                          })
+            "time": strTime,
+            "type": type,
+            "dototext": strText
+        });
     }
 
     function delItem(currentIndex) {
-        view.model.remove(currentIndex)
+        view.model.remove(currentIndex);
     }
 
     function modifyItem(currentIndex, strTime, strText) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
-        view.model.setProperty(currentIndex, "dototext", strText)
+        view.model.setProperty(currentIndex, "time", strTime);
+        view.model.setProperty(currentIndex, "dototext", strText);
     }
 
     function modifyItemTime(currentIndex, strTime) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
+        view.model.setProperty(currentIndex, "time", strTime);
     }
 
     function modifyItemType(currentIndex, type) {
-
-        view.model.setProperty(currentIndex, "type", type)
+        view.model.setProperty(currentIndex, "type", type);
     }
 
     function modifyItemText(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "dototext", strText)
+        view.model.setProperty(currentIndex, "dototext", strText);
     }
 
     function getColor() {
-        var strColor
+        var strColor;
 
         if (isDark)
-            strColor = "#455364"
+            strColor = "#455364";
         else
-            strColor = "#ffffff"
+            strColor = "#ffffff";
 
-        return strColor
+        return strColor;
     }
 
     function getFontColor() {
-
         if (isDark)
-            return "white"
+            return "white";
         else
-            return "black"
+            return "black";
     }
 
     Component {
@@ -159,7 +156,6 @@ Rectangle {
             radius: 0
 
             RowLayout {
-
                 id: idlistElemnet
 
                 width: parent.width
@@ -258,18 +254,11 @@ Rectangle {
                         radius: 4
                         color: isDark ? "#2D3A48" : "#F0F0F0"
 
-                        visible: item1.text.trim() !== "" && !isNaN(
-                                     parseFloat(item1.text.match(
-                                                    /\d+(\.\d+)?/)))
+                        visible: item1.text.trim() !== "" && !isNaN(parseFloat(item1.text.match(/\d+(\.\d+)?/)))
 
                         // 进度填充层
                         Rectangle {
-                            width: progressBar.width * Math.min(
-                                       1,
-                                       Math.max(0,
-                                                parseFloat(item1.text.match(
-                                                               /\d+(\.\d+)?/)[0]
-                                                           || 0) / 100))
+                            width: progressBar.width * Math.min(1, Math.max(0, parseFloat(item1.text.match(/\d+(\.\d+)?/)[0] || 0) / 100))
                             height: parent.height
                             radius: 3
                             color: isDark ? "#4A90E2" : "#64B5F6" // 亮模式用更柔和的浅蓝
@@ -278,11 +267,7 @@ Rectangle {
                         // 百分比文本叠加
                         Text {
                             anchors.centerIn: parent
-                            text: item1.text.match(
-                                      /\d+(\.\d+)?/)[0] ? (parseFloat(
-                                                               item1.text.match(
-                                                                   /\d+(\.\d+)?/)[0]).toFixed(
-                                                               2) + "%") : ""
+                            text: item1.text.match(/\d+(\.\d+)?/)[0] ? (parseFloat(item1.text.match(/\d+(\.\d+)?/)[0]).toFixed(2) + "%") : ""
 
                             color: isDark ? "white" : "#444444" // 亮模式改为深灰色
                             font.pixelSize: 12
@@ -298,23 +283,16 @@ Rectangle {
                 }
             }
 
-            MouseArea {
-
-                property point clickPos: "0,0"
-
+            /*MouseArea {
                 anchors.fill: parent
-                onPressed: function (mouse) {
-                    clickPos = Qt.point(mouse.x, mouse.y)
-                }
-                onReleased: function (mouse) {
-                    var delta = Qt.point(mouse.x - clickPos.x,
-                                         mouse.y - clickPos.y)
-                    console.debug("delta.x: " + delta.x)
-                }
-
                 onClicked: {
+                    view.currentIndex = index; //实现item切换
+                }
+            }*/
 
-                    view.currentIndex = index //实现item切换
+            TapHandler {
+                onTapped: {
+                    view.currentIndex = index;
                 }
             }
         }

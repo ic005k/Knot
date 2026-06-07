@@ -295,28 +295,24 @@ Rectangle {
                 }
             }
 
-            MouseArea {
-
-                property point clickPos: "0,0"
-
+            /*MouseArea {
                 anchors.fill: parent
-                onPressed: function (mouse) {
-                    clickPos = Qt.point(mouse.x, mouse.y);
-                }
-
-                onReleased: function (mouse) {
-                    var delta = Qt.point(mouse.x - clickPos.x, mouse.y - clickPos.y);
-
-                // console.debug("delta.x: " + delta.x)
-                }
-
                 onClicked: {
                     view.currentIndex = index; //实现item切换
+                    m_CategoryList.setTypeRenameText();
+                }
+                onDoubleClicked: {
+                    m_CategoryList.on_btnOk_clicked();
+                }
+            }*/
 
+            TapHandler {
+                onTapped: {
+                    view.currentIndex = index;
                     m_CategoryList.setTypeRenameText();
                 }
 
-                onDoubleClicked: {
+                onDoubleTapped: {
                     m_CategoryList.on_btnOk_clicked();
                 }
             }

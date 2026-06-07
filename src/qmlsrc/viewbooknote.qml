@@ -134,11 +134,9 @@ Rectangle {
 
 
 
-                MouseArea {
+                /*MouseArea {
                     anchors.fill: parent
-
                     onClicked: {
-
                         listView.currentIndex = index
                         cIndex = index
                         cPage = model.page
@@ -148,6 +146,19 @@ Rectangle {
                         m_Reader.setNoteListCurrentIndexValue(cIndex)
                         console.log("点击了条目:", cIndex, cPage, nPagesIndex,
                                     strNoteText)
+                    }
+                }*/
+
+                TapHandler {
+                    onTapped: {
+                        listView.currentIndex = index
+                        cIndex = index
+                        cPage = model.page
+                        strNoteText = model.content
+                        nPagesIndex = model.pageIndex
+                        btnedit.enabled = true
+                        m_Reader.setNoteListCurrentIndexValue(cIndex)
+                        console.log("点击了条目:", cIndex, cPage, nPagesIndex, strNoteText)
                     }
                 }
             }

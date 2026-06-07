@@ -45,23 +45,23 @@ Rectangle {
     function playTumblerSound() {
         if (Qt.platform.os === "android") {
             // 停止当前可能正在播放的音效，避免叠加
-            tumblerSound.stop()
-            tumblerSound.play()
+            tumblerSound.stop();
+            tumblerSound.play();
         }
     }
 
     function getDaysInMonth(year, month) {
-        return new Date(year, month, 0).getDate()
+        return new Date(year, month, 0).getDate();
     }
 
     function updateDayCount() {
-        const maxDay = getDaysInMonth(currentYear, currentMonth)
+        const maxDay = getDaysInMonth(currentYear, currentMonth);
         if (currentDay > maxDay)
-            currentDay = maxDay
+            currentDay = maxDay;
         dayTumbler.model = Array.from({
-                                          "length": maxDay
-                                      }, (_, i) => i + 1)
-        dayTumbler.currentIndex = currentDay - 1
+            "length": maxDay
+        }, (_, i) => i + 1);
+        dayTumbler.currentIndex = currentDay - 1;
     }
 
     ColumnLayout {
@@ -96,17 +96,17 @@ Rectangle {
                 wrap: true
                 visibleItemCount: 3
                 model: {
-                    var years = []
-                    var endYear = systemCurrentYear + yearRange
+                    var years = [];
+                    var endYear = systemCurrentYear + yearRange;
                     for (var i = startYear; i <= endYear; i++) {
-                        years.push(i)
+                        years.push(i);
                     }
-                    return years
+                    return years;
                 }
                 currentIndex: model.indexOf(currentYear)
 
                 // 添加鼠标滚轮支持
-                MouseArea {
+                /*MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
                     acceptedButtons: Qt.NoButton
@@ -127,6 +127,37 @@ Rectangle {
                                      }
                                  }
                              }
+                }*/
+
+                // 滚轮单独用 WheelHandler
+                WheelHandler {
+                    onWheel: wheel => {
+                        if (wheel.angleDelta.y > 0) {
+                            // 向上滚动
+                            if (yearTumbler.currentIndex > 0) {
+                                yearTumbler.currentIndex--;
+                            } else if (yearTumbler.wrap) {
+                                yearTumbler.currentIndex = yearTumbler.model.length - 1;
+                            }
+                        } else {
+                            // 向下滚动
+                            if (yearTumbler.currentIndex < yearTumbler.model.length - 1) {
+                                yearTumbler.currentIndex++;
+                            } else if (yearTumbler.wrap) {
+                                yearTumbler.currentIndex = 0;
+                            }
+                        }
+                    }
+                }
+
+                // hover 单独用 HoverHandler
+                HoverHandler {
+                    // 你原来需要 hover 的逻辑放这
+                }
+
+                // 点击/长按/双击继续用 TapHandler（不带滚轮、不带hover）
+                TapHandler {
+                    // 这里放你之前的 onClicked / onLongPressed / onDoubleTapped
                 }
 
                 delegate: Text {
@@ -143,9 +174,9 @@ Rectangle {
 
                 onCurrentIndexChanged: {
                     if (currentIndex >= 0 && currentIndex < model.length) {
-                        currentYear = model[currentIndex]
-                        updateDayCount()
-                        playTumblerSound() // 播放滚动音效
+                        currentYear = model[currentIndex];
+                        updateDayCount();
+                        playTumblerSound(); // 播放滚动音效
                     }
                 }
             }
@@ -159,33 +190,52 @@ Rectangle {
                 wrap: true
                 visibleItemCount: 3
                 model: Array.from({
-                                      "length": 12
-                                  }, (_, i) => i + 1)
+                    "length": 12
+                }, (_, i) => i + 1)
                 currentIndex: currentMonth - 1
 
                 // 添加鼠标滚轮支持
-                MouseArea {
+                /*MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
                     acceptedButtons: Qt.NoButton
                     onWheel: wheel => {
-                                 if (wheel.angleDelta.y > 0) {
-                                     // 向上滚动
-                                     if (monthTumbler.currentIndex > 0) {
-                                         monthTumbler.currentIndex--
-                                     } else if (monthTumbler.wrap) {
-                                         monthTumbler.currentIndex = monthTumbler.model.length - 1
-                                     }
-                                 } else {
-                                     // 向下滚动
-                                     if (monthTumbler.currentIndex
-                                         < monthTumbler.model.length - 1) {
-                                         monthTumbler.currentIndex++
-                                     } else if (monthTumbler.wrap) {
-                                         monthTumbler.currentIndex = 0
-                                     }
-                                 }
-                             }
+                        if (wheel.angleDelta.y > 0) {
+                            // 向上滚动
+                            if (monthTumbler.currentIndex > 0) {
+                                monthTumbler.currentIndex--;
+                            } else if (monthTumbler.wrap) {
+                                monthTumbler.currentIndex = monthTumbler.model.length - 1;
+                            }
+                        } else {
+                            // 向下滚动
+                            if (monthTumbler.currentIndex < monthTumbler.model.length - 1) {
+                                monthTumbler.currentIndex++;
+                            } else if (monthTumbler.wrap) {
+                                monthTumbler.currentIndex = 0;
+                            }
+                        }
+                    }
+                }*/
+
+                WheelHandler {
+                    onWheel: wheel => {
+                        if (wheel.angleDelta.y > 0) {
+                            // 向上滚动
+                            if (monthTumbler.currentIndex > 0) {
+                                monthTumbler.currentIndex--;
+                            } else if (monthTumbler.wrap) {
+                                monthTumbler.currentIndex = monthTumbler.model.length - 1;
+                            }
+                        } else {
+                            // 向下滚动
+                            if (monthTumbler.currentIndex < monthTumbler.model.length - 1) {
+                                monthTumbler.currentIndex++;
+                            } else if (monthTumbler.wrap) {
+                                monthTumbler.currentIndex = 0;
+                            }
+                        }
+                    }
                 }
 
                 delegate: Text {
@@ -202,9 +252,9 @@ Rectangle {
 
                 onCurrentIndexChanged: {
                     if (currentIndex >= 0 && currentIndex < model.length) {
-                        currentMonth = model[currentIndex]
-                        updateDayCount()
-                        playTumblerSound() // 播放滚动音效
+                        currentMonth = model[currentIndex];
+                        updateDayCount();
+                        playTumblerSound(); // 播放滚动音效
                     }
                 }
             }
@@ -218,33 +268,52 @@ Rectangle {
                 wrap: true
                 visibleItemCount: 3
                 model: Array.from({
-                                      "length": getDaysInMonth(currentYear,
-                                                               currentMonth)
-                                  }, (_, i) => i + 1)
+                    "length": getDaysInMonth(currentYear, currentMonth)
+                }, (_, i) => i + 1)
                 currentIndex: currentDay - 1
 
                 // 添加鼠标滚轮支持
-                MouseArea {
+                /*MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
                     acceptedButtons: Qt.NoButton
                     onWheel: wheel => {
-                                 if (wheel.angleDelta.y > 0) {
-                                     // 向上滚动
-                                     if (dayTumbler.currentIndex > 0) {
-                                         dayTumbler.currentIndex--
-                                     } else if (dayTumbler.wrap) {
-                                         dayTumbler.currentIndex = dayTumbler.model.length - 1
-                                     }
-                                 } else {
-                                     // 向下滚动
-                                     if (dayTumbler.currentIndex < dayTumbler.model.length - 1) {
-                                         dayTumbler.currentIndex++
-                                     } else if (dayTumbler.wrap) {
-                                         dayTumbler.currentIndex = 0
-                                     }
-                                 }
-                             }
+                        if (wheel.angleDelta.y > 0) {
+                            // 向上滚动
+                            if (dayTumbler.currentIndex > 0) {
+                                dayTumbler.currentIndex--;
+                            } else if (dayTumbler.wrap) {
+                                dayTumbler.currentIndex = dayTumbler.model.length - 1;
+                            }
+                        } else {
+                            // 向下滚动
+                            if (dayTumbler.currentIndex < dayTumbler.model.length - 1) {
+                                dayTumbler.currentIndex++;
+                            } else if (dayTumbler.wrap) {
+                                dayTumbler.currentIndex = 0;
+                            }
+                        }
+                    }
+                }*/
+
+                WheelHandler {
+                    onWheel: wheel => {
+                        if (wheel.angleDelta.y > 0) {
+                            // 向上滚动
+                            if (dayTumbler.currentIndex > 0) {
+                                dayTumbler.currentIndex--;
+                            } else if (dayTumbler.wrap) {
+                                dayTumbler.currentIndex = dayTumbler.model.length - 1;
+                            }
+                        } else {
+                            // 向下滚动
+                            if (dayTumbler.currentIndex < dayTumbler.model.length - 1) {
+                                dayTumbler.currentIndex++;
+                            } else if (dayTumbler.wrap) {
+                                dayTumbler.currentIndex = 0;
+                            }
+                        }
+                    }
                 }
 
                 delegate: Text {
@@ -261,8 +330,8 @@ Rectangle {
 
                 onCurrentIndexChanged: {
                     if (currentIndex >= 0 && currentIndex < model.length) {
-                        currentDay = model[currentIndex]
-                        playTumblerSound() // 播放滚动音效
+                        currentDay = model[currentIndex];
+                        playTumblerSound(); // 播放滚动音效
                     }
                 }
             }
@@ -304,32 +373,52 @@ Rectangle {
                 wrap: true
                 visibleItemCount: 3
                 model: Array.from({
-                                      "length": 24
-                                  }, (_, i) => i)
+                    "length": 24
+                }, (_, i) => i)
                 currentIndex: currentHour
 
                 // 添加鼠标滚轮支持
-                MouseArea {
+                /*MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
                     acceptedButtons: Qt.NoButton
                     onWheel: wheel => {
-                                 if (wheel.angleDelta.y > 0) {
-                                     // 向上滚动
-                                     if (hourTumbler.currentIndex > 0) {
-                                         hourTumbler.currentIndex--
-                                     } else if (hourTumbler.wrap) {
-                                         hourTumbler.currentIndex = hourTumbler.model.length - 1
-                                     }
-                                 } else {
-                                     // 向下滚动
-                                     if (hourTumbler.currentIndex < hourTumbler.model.length - 1) {
-                                         hourTumbler.currentIndex++
-                                     } else if (hourTumbler.wrap) {
-                                         hourTumbler.currentIndex = 0
-                                     }
-                                 }
-                             }
+                        if (wheel.angleDelta.y > 0) {
+                            // 向上滚动
+                            if (hourTumbler.currentIndex > 0) {
+                                hourTumbler.currentIndex--;
+                            } else if (hourTumbler.wrap) {
+                                hourTumbler.currentIndex = hourTumbler.model.length - 1;
+                            }
+                        } else {
+                            // 向下滚动
+                            if (hourTumbler.currentIndex < hourTumbler.model.length - 1) {
+                                hourTumbler.currentIndex++;
+                            } else if (hourTumbler.wrap) {
+                                hourTumbler.currentIndex = 0;
+                            }
+                        }
+                    }
+                }*/
+
+                WheelHandler {
+                    onWheel: wheel => {
+                        if (wheel.angleDelta.y > 0) {
+                            // 向上滚动
+                            if (hourTumbler.currentIndex > 0) {
+                                hourTumbler.currentIndex--;
+                            } else if (hourTumbler.wrap) {
+                                hourTumbler.currentIndex = hourTumbler.model.length - 1;
+                            }
+                        } else {
+                            // 向下滚动
+                            if (hourTumbler.currentIndex < hourTumbler.model.length - 1) {
+                                hourTumbler.currentIndex++;
+                            } else if (hourTumbler.wrap) {
+                                hourTumbler.currentIndex = 0;
+                            }
+                        }
+                    }
                 }
 
                 delegate: Text {
@@ -346,8 +435,8 @@ Rectangle {
 
                 onCurrentIndexChanged: {
                     if (currentIndex >= 0 && currentIndex < model.length) {
-                        currentHour = model[currentIndex]
-                        playTumblerSound() // 播放滚动音效
+                        currentHour = model[currentIndex];
+                        playTumblerSound(); // 播放滚动音效
                     }
                 }
             }
@@ -376,33 +465,52 @@ Rectangle {
                 wrap: true
                 visibleItemCount: 3
                 model: Array.from({
-                                      "length": 60
-                                  }, (_, i) => i.toString().padStart(2, "0"))
+                    "length": 60
+                }, (_, i) => i.toString().padStart(2, "0"))
                 currentIndex: currentMinute
 
                 // 添加鼠标滚轮支持
-                MouseArea {
+                /*MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
                     acceptedButtons: Qt.NoButton
                     onWheel: wheel => {
-                                 if (wheel.angleDelta.y > 0) {
-                                     // 向上滚动
-                                     if (minuteTumbler.currentIndex > 0) {
-                                         minuteTumbler.currentIndex--
-                                     } else if (minuteTumbler.wrap) {
-                                         minuteTumbler.currentIndex = minuteTumbler.model.length - 1
-                                     }
-                                 } else {
-                                     // 向下滚动
-                                     if (minuteTumbler.currentIndex
-                                         < minuteTumbler.model.length - 1) {
-                                         minuteTumbler.currentIndex++
-                                     } else if (minuteTumbler.wrap) {
-                                         minuteTumbler.currentIndex = 0
-                                     }
-                                 }
-                             }
+                        if (wheel.angleDelta.y > 0) {
+                            // 向上滚动
+                            if (minuteTumbler.currentIndex > 0) {
+                                minuteTumbler.currentIndex--;
+                            } else if (minuteTumbler.wrap) {
+                                minuteTumbler.currentIndex = minuteTumbler.model.length - 1;
+                            }
+                        } else {
+                            // 向下滚动
+                            if (minuteTumbler.currentIndex < minuteTumbler.model.length - 1) {
+                                minuteTumbler.currentIndex++;
+                            } else if (minuteTumbler.wrap) {
+                                minuteTumbler.currentIndex = 0;
+                            }
+                        }
+                    }
+                }*/
+
+                WheelHandler {
+                    onWheel: wheel => {
+                        if (wheel.angleDelta.y > 0) {
+                            // 向上滚动
+                            if (minuteTumbler.currentIndex > 0) {
+                                minuteTumbler.currentIndex--;
+                            } else if (minuteTumbler.wrap) {
+                                minuteTumbler.currentIndex = minuteTumbler.model.length - 1;
+                            }
+                        } else {
+                            // 向下滚动
+                            if (minuteTumbler.currentIndex < minuteTumbler.model.length - 1) {
+                                minuteTumbler.currentIndex++;
+                            } else if (minuteTumbler.wrap) {
+                                minuteTumbler.currentIndex = 0;
+                            }
+                        }
+                    }
                 }
 
                 delegate: Text {
@@ -419,8 +527,8 @@ Rectangle {
 
                 onCurrentIndexChanged: {
                     if (currentIndex >= 0 && currentIndex < model.length) {
-                        currentMinute = currentIndex
-                        playTumblerSound() // 播放滚动音效
+                        currentMinute = currentIndex;
+                        playTumblerSound(); // 播放滚动音效
                     }
                 }
             }
@@ -429,53 +537,51 @@ Rectangle {
 
     // 监听逻辑保持不变
     onCurrentYearChanged: {
-        const yearIndex = yearTumbler.model.indexOf(currentYear)
+        const yearIndex = yearTumbler.model.indexOf(currentYear);
         if (yearIndex !== -1) {
-            yearTumbler.currentIndex = yearIndex
+            yearTumbler.currentIndex = yearIndex;
         }
     }
 
     onCurrentMonthChanged: {
-        const monthIndex = currentMonth - 1
+        const monthIndex = currentMonth - 1;
         if (monthIndex >= 0 && monthIndex < 12) {
-            monthTumbler.currentIndex = monthIndex
+            monthTumbler.currentIndex = monthIndex;
         }
-        updateDayCount()
+        updateDayCount();
     }
 
     onCurrentDayChanged: {
-        const dayIndex = currentDay - 1
-        if (dayTumbler.model && dayIndex >= 0
-                && dayIndex < dayTumbler.model.length) {
-            dayTumbler.currentIndex = dayIndex
+        const dayIndex = currentDay - 1;
+        if (dayTumbler.model && dayIndex >= 0 && dayIndex < dayTumbler.model.length) {
+            dayTumbler.currentIndex = dayIndex;
         } else {
-            console.log("dayTumbler.model未初始化或dayIndex无效，currentDay:",
-                        currentDay)
+            console.log("dayTumbler.model未初始化或dayIndex无效，currentDay:", currentDay);
         }
     }
 
     onCurrentHourChanged: {
         if (currentHour >= 0 && currentHour < 24) {
-            hourTumbler.currentIndex = currentHour
+            hourTumbler.currentIndex = currentHour;
         }
     }
 
     onCurrentMinuteChanged: {
         if (currentMinute >= 0 && currentMinute < 60) {
-            minuteTumbler.currentIndex = currentMinute
+            minuteTumbler.currentIndex = currentMinute;
         }
     }
 
     Component.onCompleted: {
-        const years = yearTumbler.model
-        const yearIndex = years.indexOf(currentYear)
+        const years = yearTumbler.model;
+        const yearIndex = years.indexOf(currentYear);
         if (yearIndex >= 0) {
-            yearTumbler.currentIndex = yearIndex
+            yearTumbler.currentIndex = yearIndex;
         }
 
-        monthTumbler.currentIndex = currentMonth - 1
-        dayTumbler.currentIndex = currentDay - 1
-        hourTumbler.currentIndex = currentHour
-        minuteTumbler.currentIndex = currentMinute
+        monthTumbler.currentIndex = currentMonth - 1;
+        dayTumbler.currentIndex = currentDay - 1;
+        hourTumbler.currentIndex = currentHour;
+        minuteTumbler.currentIndex = currentMinute;
     }
 }

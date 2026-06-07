@@ -16,149 +16,146 @@ Rectangle {
     property int itemCount: 0
     property bool isHighPriority: false
 
-    function setItemHeight(h) {}
+    function setItemHeight(h) {
+    }
 
     function gotoEnd() {
-        view.positionViewAtEnd()
+        view.positionViewAtEnd();
     }
 
     function gotoBeginning() {
-        view.positionViewAtBeginning()
+        view.positionViewAtBeginning();
     }
 
     function gotoIndex(index) {
-        view.positionViewAtIndex(index, Tumbler.Center)
+        view.positionViewAtIndex(index, Tumbler.Center);
     }
 
     function setHighPriority(isFalse) {
-        isHighPriority = isFalse
+        isHighPriority = isFalse;
     }
 
     function setCurrentItem(currentIndex) {
-        view.currentIndex = currentIndex
+        view.currentIndex = currentIndex;
     }
 
     function getCurrentIndex() {
-        return view.currentIndex
+        return view.currentIndex;
     }
 
     function getItemCount() {
-        itemCount = view.count
+        itemCount = view.count;
 
-        return itemCount
+        return itemCount;
     }
 
     function getItemText(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.time + "|=|" + data.dototext
+        var data = view.model.get(itemIndex);
+        return data.time + "|=|" + data.dototext;
     }
 
     function getText0(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text0
+        var data = view.model.get(itemIndex);
+        return data.text0;
     }
 
     function getText1(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text1
+        var data = view.model.get(itemIndex);
+        return data.text1;
     }
 
     function getText2(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text2
+        var data = view.model.get(itemIndex);
+        return data.text2;
     }
 
     function getText3(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text3
+        var data = view.model.get(itemIndex);
+        return data.text3;
     }
 
     function getTop(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text_top
+        var data = view.model.get(itemIndex);
+        return data.text_top;
     }
 
     function getType(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.type
+        var data = view.model.get(itemIndex);
+        return data.type;
     }
 
     function addItem(t0, t1, t2, t3, height) {
         view.model.append({
-                              "text0": t0,
-                              "text1": t1,
-                              "text2": t2,
-                              "text3": t3,
-                              "myh": height
-                          })
+            "text0": t0,
+            "text1": t1,
+            "text2": t2,
+            "text3": t3,
+            "myh": height
+        });
     }
 
     function insertItem(text0, text1, text2, text3, curIndex) {
         view.model.insert(curIndex, {
-                              "text0": text0,
-                              "text1": text1,
-                              "text2": text2,
-                              "text3": text3
-                          })
+            "text0": text0,
+            "text1": text1,
+            "text2": text2,
+            "text3": text3
+        });
     }
 
     function delItem(currentIndex) {
-        view.model.remove(currentIndex)
+        view.model.remove(currentIndex);
     }
 
     function modifyItem(currentIndex, strTime, strText) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
-        view.model.setProperty(currentIndex, "dototext", strText)
+        view.model.setProperty(currentIndex, "time", strTime);
+        view.model.setProperty(currentIndex, "dototext", strText);
     }
 
     function modifyItemTime(currentIndex, strTime) {
-
-        view.model.setProperty(currentIndex, "time", strTime)
+        view.model.setProperty(currentIndex, "time", strTime);
     }
 
     function modifyItemType(currentIndex, type) {
-
-        view.model.setProperty(currentIndex, "type", type)
+        view.model.setProperty(currentIndex, "type", type);
     }
 
     function modifyItemText0(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text0", strText)
+        view.model.setProperty(currentIndex, "text0", strText);
     }
 
     function modifyItemText2(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text2", strText)
+        view.model.setProperty(currentIndex, "text2", strText);
     }
 
     function setVPos(vpos) {
         //view.contentY = vpos
-        vbar.position = vpos
-        console.log("qwCata:set " + vpos)
+        vbar.position = vpos;
+        console.log("qwCata:set " + vpos);
     }
 
     function getVPos() {
-        var vpos = vbar.position
-        console.log("qwCata:get " + vpos)
-        return vpos
+        var vpos = vbar.position;
+        console.log("qwCata:get " + vpos);
+        return vpos;
     }
 
     function getColor() {
-        var strColor
+        var strColor;
 
         if (isDark)
-            strColor = "#455364"
+            strColor = "#455364";
         else
-            strColor = "#ffffff"
+            strColor = "#ffffff";
 
-        return strColor
+        return strColor;
     }
 
     function getFontColor() {
-
         if (isDark)
-            return "white"
+            return "white";
         else
-            return "black"
+            return "black";
     }
 
     Component {
@@ -179,11 +176,10 @@ Rectangle {
             states: [
                 State {
                     name: "Pressed"
+                    // 只判断按下，不判断不存在的 drag.active
                     when: mouseArea.pressed
-                          && !mouseArea.drag.active // 仅在按下且未拖动时激活
                     PropertyChanges {
                         target: listItem
-                        // 使用一个更柔和、符合预期的反馈色，比如深一点的蓝色或灰色
                         color: ListView.isCurrentItem ? "#87CEEB" : (isDark ? "#2A3A4D" : "#E0E0E0")
                     }
                 }
@@ -201,36 +197,35 @@ Rectangle {
             }
 
             function getItemHeight() {
-                var item0H
-                var item1H
-                var item2H
-                var item3H
+                var item0H;
+                var item1H;
+                var item2H;
+                var item3H;
 
                 if (item0.text.length === 0)
-                    item0H = 0
+                    item0H = 0;
                 else
-                    item0H = item0.contentHeight
+                    item0H = item0.contentHeight;
 
                 if (item1.text.length === 0)
-                    item1H = 0
+                    item1H = 0;
                 else
-                    item1H = item1.contentHeight
+                    item1H = item1.contentHeight;
 
                 if (item2.text.length === 0)
-                    item2H = 0
+                    item2H = 0;
                 else
-                    item2H = item2.contentHeight
+                    item2H = item2.contentHeight;
 
                 if (item3.text.length === 0)
-                    item3H = 0
+                    item3H = 0;
                 else
-                    item3H = item3.contentHeight
+                    item3H = item3.contentHeight;
 
-                return item0H + item1H + item2H + item3H
+                return item0H + item1H + item2H + item3H;
             }
 
             RowLayout {
-
                 id: idlistElemnet
                 height: parent.height
                 width: parent.width
@@ -335,40 +330,34 @@ Rectangle {
                 }
             }
 
-            MouseArea {
+            /*MouseArea {
                 id: mouseArea
-                property point clickPos: "0,0"
 
                 anchors.fill: parent
-                onPressed: function (mouse) {}
-
-                onReleased: function (mouse) {
-
-                    var delta = Qt.point(mouse.x - clickPos.x,
-                                         mouse.y - clickPos.y)
-
-                    console.debug("delta.x: " + delta.x)
-                }
 
                 onClicked: {
+                    view.currentIndex = index;
 
-                    view.currentIndex = index
-
-                    m_Reader.openCataList(item1.text)
+                    m_Reader.openCataList(item1.text);
                 }
 
                 onPositionChanged: {
+                    //item0.color = getFontColor();
+                    //listItem.color = getColor();
+                }
+            }*/
 
-                    item0.color = getFontColor()
-                    listItem.color = getColor()
+            TapHandler {
+                id: mouseArea
+
+                onTapped: {
+                    view.currentIndex = index;
+                    m_Reader.openCataList(item1.text);
                 }
 
-                onPressAndHold: {
-
-                }
-
-                onDoubleClicked: {
-
+                onPointChanged: {
+                    //item0.color = getFontColor();
+                    //listItem.color = getColor();
                 }
             }
         }
@@ -412,15 +401,15 @@ Rectangle {
     function getListEleHeadColor(ntype) {
         switch (ntype) {
         case 0:
-            return "lightgray"
+            return "lightgray";
         case 1:
-            return "red"
+            return "red";
         case 2:
-            return "yellow"
+            return "yellow";
         case 3:
-            return "lightblue"
+            return "lightblue";
         default:
-            return "black"
+            return "black";
         }
     }
 }

@@ -250,9 +250,9 @@ Rectangle {
         ctx.fillStyle = "#F44336"; // 红色标注最小速度
         ctx.fillRect(minSpeedPoint.x - 2, minSpeedPoint.y - 2, 4, 4);
 
-    // ========== 文本标签容错+增强显示(可选) ==========
+        // ========== 文本标签容错+增强显示(可选) ==========
 
-    /*
+        /*
         ctx.save()
         // 1. 确保pixelRatio有效（兜底值，避免undefined）
         const effectivePixelRatio = pixelRatio || 1
@@ -1150,18 +1150,15 @@ Rectangle {
             }
 
             // 点击切换选中
-            MouseArea {
-                property point clickPos: "0,0"
+            /*MouseArea {
                 anchors.fill: parent
-                // 使用箭头函数显式接收mouse参数
-                onPressed: mouse => {
-                    clickPos = Qt.point(mouse.x, mouse.y);
-                }
-                onReleased: mouse => {
-                    var delta = Qt.point(mouse.x - clickPos.x, mouse.y - clickPos.y);
-                }
                 onClicked: view.currentIndex = index
                 onDoubleClicked: {}
+            }*/
+
+            TapHandler {
+                onTapped: view.currentIndex = index
+                onDoubleTapped: {}
             }
 
             // 全屏布局容器

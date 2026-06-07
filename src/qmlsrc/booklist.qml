@@ -339,7 +339,7 @@ Rectangle {
                 }
             }
 
-            MouseArea {
+            /*MouseArea {
 
                 property point clickPos: "0,0"
 
@@ -361,6 +361,33 @@ Rectangle {
                 }
 
                 onDoubleClicked: {
+                    m_Reader.openBookListItem()
+                }
+            }*/
+
+            TapHandler {
+                property point clickPos: Qt.point(0, 0)
+
+                onPointChanged: {
+                    if (point.pressed) {
+                        // 对应 onPressed
+                        clickPos = Qt.point(point.position.x, point.position.y);
+                    } else {
+                        // 对应 onReleased（空实现，保留位置）
+                    }
+                }
+
+                onTapped: {
+                    // 对应 onClicked
+                    view.currentIndex = index;
+                }
+
+                onLongPressed: {
+                    // 对应 onPressAndHold（空实现，保留）
+                }
+
+                onDoubleTapped: {
+                    // 完全保留你的逻辑
                     m_Reader.openBookListItem()
                 }
             }

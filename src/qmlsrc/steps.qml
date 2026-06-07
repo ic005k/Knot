@@ -367,11 +367,15 @@ Rectangle {
                 }
             }
 
-            MouseArea {
-
+            /*MouseArea {
                 onClicked: {
-
                     view.currentIndex = index //实现item切换
+                }
+            }*/
+
+            TapHandler {
+                onTapped: {
+                    view.currentIndex = index
                 }
             }
         }

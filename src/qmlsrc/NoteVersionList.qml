@@ -65,9 +65,25 @@ Rectangle {
                 border.width: 1
 
                 // 点击交互：选中当前项，取消其他项选中
-                MouseArea {
+                /*MouseArea {
                     anchors.fill: parent
                     onClicked: {
+                        // 先取消所有项的选中状态
+                        for (var i = 0; i < noteVersionModel.count; i++) {
+                            noteVersionModel.setProperty(i, "isSelected", false)
+                        }
+                        // 选中当前项
+                        noteVersionModel.setProperty(index, "isSelected", true)
+
+                        currentSelectedIndex = index
+
+                        // （可选）发送信号给 C++，告知当前选中的时间
+                        m_NotesList.getNoteDiffHtml()
+                    }
+                }*/
+
+                TapHandler {
+                    onTapped: {
                         // 先取消所有项的选中状态
                         for (var i = 0; i < noteVersionModel.count; i++) {
                             noteVersionModel.setProperty(i, "isSelected", false)

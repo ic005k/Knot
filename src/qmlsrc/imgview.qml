@@ -7,11 +7,11 @@ Item {
     height: 720
 
     function zoomin() {
-        mapImg.scale = mapImg.scale / 0.9
+        mapImg.scale = mapImg.scale / 0.9;
     }
 
     function zoomout() {
-        mapImg.scale = mapImg.scale * 0.9
+        mapImg.scale = mapImg.scale * 0.9;
     }
 
     Image {
@@ -53,7 +53,7 @@ Item {
             pinch.dragAxis: Pinch.XAndYAxis
 
             // 添加 MouseArea 处理单指拖动
-            MouseArea {
+            /*MouseArea {
                 id: dragArea
                 anchors.fill: parent
                 enabled: true
@@ -97,6 +97,58 @@ Item {
                         mapImg.scale = mapImg.scale * 0.9
                     }
                 }
+            }*/
+
+            DragHandler {
+                target: mapImg
+
+                // 拖动时自动更新边界
+                onActiveChanged: updateBounds()
+                onTranslationChanged: updateBounds()
+
+                function updateBounds() {
+                    // 动态计算拖动范围（和你原来逻辑完全一样）
+                    const w = mapImg.width;
+                    const h = mapImg.height;
+                    const s = mapImg.scale;
+
+                    const minX = -w * (s - 1) / 2;
+                    const maxX = parent.width - w * (s + 1) / 2;
+                    const minY = -h * (s - 1) / 2;
+                    const maxY = parent.height - h * (s + 1) / 2;
+
+                    // 限制位置不超出边界
+                    if (mapImg.x < minX)
+                        mapImg.x = minX;
+                    if (mapImg.x > maxX)
+                        mapImg.x = maxX;
+                    if (mapImg.y < minY)
+                        mapImg.y = minY;
+                    if (mapImg.y > maxY)
+                        mapImg.y = maxY;
+                }
+            }
+
+            // 点击 + 双击
+            TapHandler {
+                onTapped: {}
+                onDoubleTapped: {
+                    zoomin();
+                    zoomin();
+                    zoomin();
+                }
+            }
+
+            // 鼠标滚轮缩放
+            WheelHandler {
+                onWheel: wheel => {
+                    const delta = wheel.angleDelta.y / 120;
+                    if (delta > 0) {
+                        mapImg.scale /= 0.9;
+                    } else {
+                        mapImg.scale *= 0.9;
+                    }
+                }
             }
         }
     }
@@ -110,9 +162,7 @@ Item {
         Text {
             anchors.centerIn: parent
             color: "white"
-            text: qsTr("Scale") + ": " + mapImg.scale.toFixed(2) + " | " + qsTr(
-                      "Pos") + ": (" + mapImg.x.toFixed(0) + ", " + mapImg.y.toFixed(
-                      0) + ")"
+            text: qsTr("Scale") + ": " + mapImg.scale.toFixed(2) + " | " + qsTr("Pos") + ": (" + mapImg.x.toFixed(0) + ", " + mapImg.y.toFixed(0) + ")"
         }
     }
 }

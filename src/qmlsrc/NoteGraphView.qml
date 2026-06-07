@@ -151,9 +151,13 @@ Flickable {
                     elide: Text.ElideRight
                 }
 
-                MouseArea {
+                /*MouseArea {
                     anchors.fill: parent
                     onDoubleClicked: graphController.handleNodeDoubleClick(modelData.filePath)
+                }*/
+
+                TapHandler {
+                    onDoubleTapped: graphController.handleNodeDoubleClick(modelData.filePath)
                 }
             }
         }
@@ -184,9 +188,13 @@ Flickable {
                     elide: Text.ElideRight
                 }
 
-                MouseArea {
+                /*MouseArea {
                     anchors.fill: parent
                     onDoubleClicked: graphController.handleNodeDoubleClick(modelData.filePath)
+                }*/
+
+                TapHandler {
+                    onDoubleTapped: graphController.handleNodeDoubleClick(modelData.filePath)
                 }
             }
         }
@@ -394,19 +402,17 @@ Flickable {
         connectionCanvas.requestPaint();
 
         // 强制刷新model，Repeater重新渲染
-        const tmpRef = references.slice()
-        const tmpRefBy = referencedBy.slice()
-        references = []
-        referencedBy = []
-        references = tmpRef
-        referencedBy = tmpRefBy
+        const tmpRef = references.slice();
+        const tmpRefBy = referencedBy.slice();
+        references = [];
+        referencedBy = [];
+        references = tmpRef;
+        referencedBy = tmpRefBy;
 
         // 将内容居中到视图
         centerOnCurrentNode();
         // 触发淡入动画
         triggerFadeIn();
-
-
     }
 
     // 封装淡入逻辑

@@ -14,20 +14,20 @@ Rectangle {
     property int m_space: 15
 
     function resetQMLToNewState() {
-        console.debug("QML端：一键重置为全新状态，清空所有历史痕迹")
+        console.debug("QML端：一键重置为全新状态，清空所有历史痕迹");
 
         // ********** 第一层：全局核心对象判空（避免view未初始化导致崩溃） **********
         if (!view) {
-            console.warn("QML端：view未初始化，跳过重置操作")
-            return
+            console.warn("QML端：view未初始化，跳过重置操作");
+            return;
         }
 
         // 1. 清空选中状态数据（核心，删除历史选中索引）—— selectedItems是ListModel，无需额外判空（clear()对空模型安全）
-        selectedItems.clear()
+        selectedItems.clear();
 
         // 2. 清空列表数据（可选，安全判空：避免view.model未初始化）
         if (view.model) {
-            view.model.clear()
+            view.model.clear();
         }
 
         // 3. 重置所有复选框为未勾选（清空视觉残留）—— 多层判空，避免列表为空时越界
@@ -35,31 +35,31 @@ Rectangle {
         if (view.count > 0) {
             for (var i = 0; i < view.count; i++) {
                 // 安全获取列表项：避免索引越界返回null
-                var listItem = view.itemAtIndex(i)
+                var listItem = view.itemAtIndex(i);
                 // 双层判空：listItem存在 且 itemCheckBox存在，才修改勾选状态
                 if (listItem && listItem.itemCheckBox) {
-                    listItem.itemCheckBox.checked = false
+                    listItem.itemCheckBox.checked = false;
                 }
             }
         }
 
         // 4. 强制刷新ListView（安全判空：仅当列表非空时执行，避免空列表无意义刷新）
         if (view.count > 0) {
-            view.forceLayout()
+            view.forceLayout();
         }
     }
 
     // ========== QML组件加载完成回调（核心初始化逻辑） ==========
     Component.onCompleted: {
-        console.debug("QML端：组件加载完成，清空所有选中状态")
-        resetQMLToNewState()
+        console.debug("QML端：组件加载完成，清空所有选中状态");
+        resetQMLToNewState();
     }
 
     // ========== 多选功能核心属性 ==========
     ListModel {
         id: selectedItems // 存储选中项索引，去重管理
         onCountChanged: {
-            console.debug("QML端：selectedItems数量变化，当前count =", count)
+            console.debug("QML端：selectedItems数量变化，当前count =", count);
         }
     }
 
@@ -67,182 +67,184 @@ Rectangle {
     property bool isHighPriority: false
 
     function getSelectedIndexes() {
-        var indexes = []
+        var indexes = [];
         for (var i = 0; i < selectedItems.count; i++) {
-            indexes.push(selectedItems.get(i).index)
+            indexes.push(selectedItems.get(i).index);
         }
         // 关键调试：打印数组内容和长度（在Qt Creator的「应用程序输出」面板查看）
-        console.debug("QML端：selectedItems.count =", selectedItems.count)
-        console.debug("QML端：返回的索引数组 =", indexes)
-        console.debug("QML端：索引数组长度 =", indexes.length)
-        return indexes
+        console.debug("QML端：selectedItems.count =", selectedItems.count);
+        console.debug("QML端：返回的索引数组 =", indexes);
+        console.debug("QML端：索引数组长度 =", indexes.length);
+        return indexes;
     }
 
     function clearAllSelectedItems() {
-        selectedItems.clear()
-        console.debug("QML端：已清空所有选中索引")
+        selectedItems.clear();
+        console.debug("QML端：已清空所有选中索引");
 
         // ========== 遍历所有列表项，取消复选框勾选（清空视觉残留） ==========
         for (var i = 0; i < view.count; i++) {
             // 获取列表项的复选框组件，重置勾选状态
-            var listItem = view.itemAtIndex(i)
+            var listItem = view.itemAtIndex(i);
             if (listItem && listItem.itemCheckBox) {
-                listItem.itemCheckBox.checked = false
+                listItem.itemCheckBox.checked = false;
             }
         }
     }
 
     // ========== 原有工具方法（保持不变，直接依赖isDark变量） ==========
-    function setItemHeight(h) {}
+    function setItemHeight(h) {
+    }
 
     function gotoEnd() {
-        view.positionViewAtEnd()
+        view.positionViewAtEnd();
     }
 
     function gotoBeginning() {
-        view.positionViewAtBeginning()
+        view.positionViewAtBeginning();
     }
 
     function gotoIndex(index) {
-        view.positionViewAtIndex(index, Tumbler.Center)
+        view.positionViewAtIndex(index, Tumbler.Center);
     }
 
     function setHighPriority(isFalse) {
-        isHighPriority = isFalse
+        isHighPriority = isFalse;
     }
 
     function setCurrentItem(currentIndex) {
-        view.currentIndex = currentIndex
+        view.currentIndex = currentIndex;
     }
 
     function getCurrentIndex() {
-        return view.currentIndex
+        return view.currentIndex;
     }
 
     function getItemCount() {
-        itemCount = view.count
-        return itemCount
+        itemCount = view.count;
+        return itemCount;
     }
 
     function getItemText(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return (data.time || "") + "|=|" + (data.dototext || "")
+        var data = view.model.get(itemIndex);
+        return (data.time || "") + "|=|" + (data.dototext || "");
     }
 
     function getText0(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text0
+        var data = view.model.get(itemIndex);
+        return data.text0;
     }
 
     function getText1(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text1
+        var data = view.model.get(itemIndex);
+        return data.text1;
     }
 
     function getText2(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text2
+        var data = view.model.get(itemIndex);
+        return data.text2;
     }
 
     function getText3(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text3
+        var data = view.model.get(itemIndex);
+        return data.text3;
     }
 
     function getTop(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.text_top || ""
+        var data = view.model.get(itemIndex);
+        return data.text_top || "";
     }
 
     function getType(itemIndex) {
-        var data = view.model.get(itemIndex)
-        return data.type || 0
+        var data = view.model.get(itemIndex);
+        return data.type || 0;
     }
 
     function addItem(t0, t1, t2, t3, height) {
         view.model.append({
-                              "text0": t0,
-                              "text1": t1,
-                              "text2": t2,
-                              "text3": t3,
-                              "myh": height || 0
-                          })
+            "text0": t0,
+            "text1": t1,
+            "text2": t2,
+            "text3": t3,
+            "myh": height || 0
+        });
     }
 
     function insertItem(strTime, type, strText, curIndex) {
         view.model.insert(curIndex, {
-                              "time": strTime,
-                              "type": type,
-                              "dototext": strText
-                          })
+            "time": strTime,
+            "type": type,
+            "dototext": strText
+        });
     }
 
     function delItem(currentIndex) {
-        view.model.remove(currentIndex)
+        view.model.remove(currentIndex);
     }
 
     function modifyItem(currentIndex, strTime, strText) {
-        view.model.setProperty(currentIndex, "time", strTime)
-        view.model.setProperty(currentIndex, "dototext", strText)
+        view.model.setProperty(currentIndex, "time", strTime);
+        view.model.setProperty(currentIndex, "dototext", strText);
     }
 
     function modifyItemTime(currentIndex, strTime) {
-        view.model.setProperty(currentIndex, "time", strTime)
+        view.model.setProperty(currentIndex, "time", strTime);
     }
 
     function modifyItemType(currentIndex, type) {
-        view.model.setProperty(currentIndex, "type", type)
+        view.model.setProperty(currentIndex, "type", type);
     }
 
     function modifyItemText(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "dototext", strText)
+        view.model.setProperty(currentIndex, "dototext", strText);
     }
 
     // ========== 暗黑模式适配方法（直接依赖isDark变量，Qt端赋值后自动生效） ==========
     function getColor() {
-        var strColor
+        var strColor;
         if (isDark)
-            strColor = "#455364" // 暗黑模式条目背景
+            strColor = "#455364";
+            // 暗黑模式条目背景
         else
-            strColor = "#ffffff" // 浅色模式条目背景
-        return strColor
+            strColor = "#ffffff"; // 浅色模式条目背景
+        return strColor;
     }
 
     function getFontColor() {
         if (isDark)
-            return "white" // 暗黑模式常规字体
+            return "white";
+            // 暗黑模式常规字体
         else
-            return "black" // 浅色模式常规字体
+            return "black"; // 浅色模式常规字体
     }
 
     function getFontColor3() {
         if (isDark)
-            return "#BBBBBB" // 暗黑模式次要字体（灰色）
+            return "#BBBBBB";
+            // 暗黑模式次要字体（灰色）
         else
-            return "#555555" // 浅色模式次要字体（深灰）
+            return "#555555"; // 浅色模式次要字体（深灰）
     }
 
     // ========== 多选功能核心方法 ==========
     function addSelectedItem(index) {
         for (var i = 0; i < selectedItems.count; i++) {
             if (selectedItems.get(i).index === index) {
-                return
+                return;
             }
         }
         selectedItems.append({
-                                 "index": index
-                             })
-        console.debug("QML端：添加选中索引", index, "，当前selectedItems.count =",
-                      selectedItems.count)
+            "index": index
+        });
+        console.debug("QML端：添加选中索引", index, "，当前selectedItems.count =", selectedItems.count);
     }
 
     function removeSelectedItem(index) {
         for (var i = 0; i < selectedItems.count; i++) {
             if (selectedItems.get(i).index === index) {
-                selectedItems.remove(i)
-                console.debug("QML端：移除选中索引", index, "，当前selectedItems.count =",
-                              selectedItems.count)
-                break
+                selectedItems.remove(i);
+                console.debug("QML端：移除选中索引", index, "，当前selectedItems.count =", selectedItems.count);
+                break;
             }
         }
     }
@@ -250,29 +252,29 @@ Rectangle {
     function isItemSelected(index) {
         for (var i = 0; i < selectedItems.count; i++) {
             if (selectedItems.get(i).index === index) {
-                return true
+                return true;
             }
         }
-        return false
+        return false;
     }
 
     // 可选：清空所有选中项（如需批量重置）
     function clearAllSelected() {
-        selectedItems.clear()
+        selectedItems.clear();
     }
 
     function getListEleHeadColor(ntype) {
         switch (ntype) {
         case 0:
-            return "lightgray"
+            return "lightgray";
         case 1:
-            return "red"
+            return "red";
         case 2:
-            return "yellow"
+            return "yellow";
         case 3:
-            return "lightblue"
+            return "lightblue";
         default:
-            return "black"
+            return "black";
         }
     }
 
@@ -286,9 +288,8 @@ Rectangle {
             // 依赖外层布局固有高度，避免父子双向依赖
             height: idlistElemnet.implicitHeight + 10
             // 直接基于isDark+选中状态适配背景色，Qt端赋值后自动生效
-            color: isItemSelected(
-                       index) ? (isDark ? "#2A4365" : "#6495ED") // 选中状态：暗黑深蓝/浅色浅蓝
-                              : getColor() // 未选中状态：调用依赖isDark的方法
+            color: isItemSelected(index) ? (isDark ? "#2A4365" : "#6495ED") // 选中状态：暗黑深蓝/浅色浅蓝
+            : getColor() // 未选中状态：调用依赖isDark的方法
             // 暗黑模式隐藏边框，浅色模式显示边框，直接响应isDark
             border.width: isDark ? 0 : 1
             border.color: "lightgray"
@@ -311,21 +312,21 @@ Rectangle {
 
                     // ========== 复选框初始化，同步选中状态 ==========
                     Component.onCompleted: {
-                        itemCheckBox.checked = isItemSelected(index)
+                        itemCheckBox.checked = isItemSelected(index);
                     }
 
                     // 步骤2：修改onClicked逻辑，先更新selectedItems，再同步自身checked状态（避免反转）
                     onClicked: {
-                        console.debug("QML端：复选框被点击，点击后目标状态 =", checked)
+                        console.debug("QML端：复选框被点击，点击后目标状态 =", checked);
                         if (checked) {
                             // 复选框勾选 → 添加选中索引
-                            addSelectedItem(index)
+                            addSelectedItem(index);
                         } else {
                             // 复选框取消勾选 → 移除选中索引
-                            removeSelectedItem(index)
+                            removeSelectedItem(index);
                         }
                         // 可选：同步复选框状态与selectedItems（确保视觉与数据一致）
-                        itemCheckBox.checked = isItemSelected(index)
+                        itemCheckBox.checked = isItemSelected(index);
                     }
 
                     // 保留原有复选框指示器样式，无修改
@@ -428,9 +429,7 @@ Rectangle {
                         font.pointSize: item0.font.pointSize - 2
                         text: text3
                         // 次要文本直接基于isDark+选中状态适配
-                        color: isItemSelected(
-                                   index) ? "#E0EFFF" : getFontColor3(
-                                                ) // 方法内部依赖isDark
+                        color: isItemSelected(index) ? "#E0EFFF" : getFontColor3() // 方法内部依赖isDark
                         leftPadding: 5
                         rightPadding: 5
                         visible: item3.text.length ? true : false
@@ -445,33 +444,36 @@ Rectangle {
             }
 
             // ========== 简化MouseArea（保持核心交互，无冗余） ==========
-            MouseArea {
-                property point clickPos: Qt.point(0, 0)
+            /*MouseArea {
                 anchors.fill: parent
-
-                onPressed: function (mouse) {
-                    clickPos = Qt.point(mouse.x, mouse.y)
-                }
-
-                onReleased: function (mouse) {
-                    var delta = Qt.point(mouse.x - clickPos.x,
-                                         mouse.y - clickPos.y)
-                    console.debug("QML端：条目释放，delta.x =", delta.x)
-                }
-
                 // 步骤1：点击条目，直接切换选中状态（不修改checked，避免反转）
                 onClicked: {
-                    var isCurrentlySelected = isItemSelected(index)
-                    console.debug("QML端：条目被点击，当前是否选中 =", isCurrentlySelected)
+                    var isCurrentlySelected = isItemSelected(index);
+                    console.debug("QML端：条目被点击，当前是否选中 =", isCurrentlySelected);
 
                     if (isCurrentlySelected) {
                         // 已选中 → 取消选中（移除索引+同步复选框）
-                        removeSelectedItem(index)
-                        itemCheckBox.checked = false
+                        removeSelectedItem(index);
+                        itemCheckBox.checked = false;
                     } else {
                         // 未选中 → 选中（添加索引+同步复选框）
-                        addSelectedItem(index)
-                        itemCheckBox.checked = true
+                        addSelectedItem(index);
+                        itemCheckBox.checked = true;
+                    }
+                }
+            }*/
+
+            TapHandler {
+                onTapped: {
+                    var isCurrentlySelected = isItemSelected(index);
+                    console.debug("QML端：条目被点击，当前是否选中 =", isCurrentlySelected);
+
+                    if (isCurrentlySelected) {
+                        removeSelectedItem(index);
+                        itemCheckBox.checked = false;
+                    } else {
+                        addSelectedItem(index);
+                        itemCheckBox.checked = true;
                     }
                 }
             }

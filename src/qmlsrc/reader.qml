@@ -209,11 +209,13 @@ Item {
     function highlightTtsSentence(sentence) {
         // 兼容 QVariant 转字符串
         var textStr = String(sentence).trim();
-        if (!textStr || contentListView.count === 0) return;
+        if (!textStr || contentListView.count === 0)
+            return;
 
         // 1. 获取文本块
         let textEdit = contentListView.itemAtIndex(0);
-        if (!textEdit) return;
+        if (!textEdit)
+            return;
 
         // 2. 清除之前所有高亮
         textEdit.deselect();
@@ -446,6 +448,7 @@ Item {
                 }
             }
 
+            //=========================================================================
             // 3. 布局更新后应用面积法计算新位置
             onContentHeightChanged: {
                 if (isSwitching) {

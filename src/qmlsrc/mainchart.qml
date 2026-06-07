@@ -15,22 +15,22 @@ Item {
 
     // 从两个数组中计算最大值
     property real yAxisMax: {
-        var maxVal = 0
+        var maxVal = 0;
         // 遍历频率数组
         for (var i = 0; i < chartFreqValues.length; i++) {
-            maxVal = Math.max(maxVal, chartFreqValues[i] || 0)
+            maxVal = Math.max(maxVal, chartFreqValues[i] || 0);
         }
         // 遍历金额数组
         for (var j = 0; j < chartAmountValues.length; j++) {
-            maxVal = Math.max(maxVal, chartAmountValues[j] || 0)
+            maxVal = Math.max(maxVal, chartAmountValues[j] || 0);
         }
-        return Math.ceil(maxVal * 1.2) // 增加20%的余量
+        return Math.ceil(maxVal * 1.2); // 增加20%的余量
     }
 
     // 预计算内容宽度
     readonly property real calculatedContentWidth: {
-        var parentWidth = parent ? parent.width : 0
-        return Math.max(parentWidth, chartCategories.length * 50)
+        var parentWidth = parent ? parent.width : 0;
+        return Math.max(parentWidth, chartCategories.length * 50);
     }
 
     Flickable {
@@ -49,8 +49,7 @@ Item {
 
         // 简化的点检测函数
         function pointInRect(rect, pointX, pointY) {
-            return pointX >= rect.x && pointX <= rect.x + rect.width
-                    && pointY >= rect.y && pointY <= rect.y + rect.height
+            return pointX >= rect.x && pointX <= rect.x + rect.width && pointY >= rect.y && pointY <= rect.y + rect.height;
         }
 
         // 预计算点击区域
@@ -62,15 +61,10 @@ Item {
 
         function updateClickAreas() {
             if (!chartView.plotArea)
-                return
+                return;
+            plotArea = Qt.rect(chartView.plotArea.x, chartView.plotArea.y, chartView.plotArea.width, chartView.plotArea.height);
 
-            plotArea = Qt.rect(chartView.plotArea.x, chartView.plotArea.y,
-                               chartView.plotArea.width,
-                               chartView.plotArea.height)
-
-            xAxisClickArea = Qt.rect(plotArea.x,
-                                     plotArea.y + plotArea.height - 30,
-                                     plotArea.width, 30)
+            xAxisClickArea = Qt.rect(plotArea.x, plotArea.y + plotArea.height - 30, plotArea.width, 30);
         }
 
         ChartView {
@@ -100,7 +94,7 @@ Item {
             }
 
             onPlotAreaChanged: {
-                flickable.updateClickAreas()
+                flickable.updateClickAreas();
             }
 
             BarCategoryAxis {
@@ -152,51 +146,36 @@ Item {
             hoverEnabled: false // 禁用hover提高性能
 
             onClicked: function (mouse) {
-                if (!flickable.pointInRect(flickable.xAxisClickArea, mouse.x,
-                                           mouse.y) && !flickable.pointInRect(
-                            flickable.plotArea, mouse.x, mouse.y)) {
-                    return
+                if (!flickable.pointInRect(flickable.xAxisClickArea, mouse.x, mouse.y) && !flickable.pointInRect(flickable.plotArea, mouse.x, mouse.y)) {
+                    return;
                 }
 
-                var plotArea = flickable.plotArea
-                var categoryIndex = Math.floor(
-                            (mouse.x - plotArea.x) / (plotArea.width / Math.max(
-                                                          1,
-                                                          chartCategories.length)))
+                var plotArea = flickable.plotArea;
+                var categoryIndex = Math.floor((mouse.x - plotArea.x) / (plotArea.width / Math.max(1, chartCategories.length)));
 
-                categoryIndex = Math.max(0,
-                                         Math.min(categoryIndex,
-                                                  chartCategories.length - 1))
+                categoryIndex = Math.max(0, Math.min(categoryIndex, chartCategories.length - 1));
 
-                if (categoryIndex >= 0
-                        && categoryIndex < chartCategories.length) {
-                    showTooltip(mouse.x, mouse.y, categoryIndex)
+                if (categoryIndex >= 0 && categoryIndex < chartCategories.length) {
+                    showTooltip(mouse.x, mouse.y, categoryIndex);
                 }
             }
 
             function showTooltip(mouseX, mouseY, index) {
-                var category = chartCategories[index]
-                var freqValue = chartFreqValues[index] || 0
-                var amountValue = chartAmountValues[index] || 0
+                var category = chartCategories[index];
+                var freqValue = chartFreqValues[index] || 0;
+                var amountValue = chartAmountValues[index] || 0;
 
                 // 预构建文本
-                tooltipText.text = qsTr("Date: ") + category + "\n"
-                        + qsTr("Freq: ") + freqValue.toFixed(2) + "\n" + qsTr(
-                            "Amount: ") + amountValue.toFixed(2)
+                tooltipText.text = qsTr("Date: ") + category + "\n" + qsTr("Freq: ") + freqValue.toFixed(2) + "\n" + qsTr("Amount: ") + amountValue.toFixed(2);
 
                 // 计算位置
-                var tooltipX = Math.max(
-                            10, Math.min(mouseX - tooltip.width / 2,
-                                         chartView.width - tooltip.width - 10))
-                var tooltipY = Math.max(
-                            10,
-                            Math.min(mouseY - tooltip.height - 10,
-                                     chartView.height - tooltip.height - 10))
+                var tooltipX = Math.max(10, Math.min(mouseX - tooltip.width / 2, chartView.width - tooltip.width - 10));
+                var tooltipY = Math.max(10, Math.min(mouseY - tooltip.height - 10, chartView.height - tooltip.height - 10));
 
-                tooltip.x = tooltipX
-                tooltip.y = tooltipY
-                tooltip.opacity = 1
-                hideTimer.restart()
+                tooltip.x = tooltipX;
+                tooltip.y = tooltipY;
+                tooltip.opacity = 1;
+                hideTimer.restart();
             }
         }
 
@@ -224,7 +203,7 @@ Item {
                 id: hideTimer
                 interval: 10000
                 onTriggered: {
-                    tooltip.opacity = 0
+                    tooltip.opacity = 0;
                 }
             }
 
