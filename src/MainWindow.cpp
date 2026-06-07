@@ -1619,6 +1619,10 @@ void MainWindow::on_actionBakFileList() {
         QUrl(QStringLiteral("qrc:/src/qmlsrc/baklist.qml")));
   }
 
+  // 【安全】界面切换必须在主线程执行
+  mui->frameBakList->show();
+  mui->frameMain->hide();
+
   m_MainHelper->startBackgroundTaskUpdateBakFileList();
 }
 

@@ -830,7 +830,7 @@ void MainHelper::init_UIWidget() {
   mui->btnPause->hide();
 }
 
-void MainHelper::startBackgroundTaskUpdateBakFileList() {
+/*void MainHelper::startBackgroundTaskUpdateBakFileList() {
   mw_one->showProgress();
 
   mui->frameMain->hide();
@@ -877,6 +877,74 @@ void MainHelper::startBackgroundTaskUpdateBakFileList() {
 
     mw_one->closeProgress();
   });
+  watcher->setFuture(future);
+}*/
+
+void MainHelper::startBackgroundTaskUpdateBakFileList() {
+  mw_one->showProgress();
+
+  // ==============================================
+  // 【修复 1】子线程只做耗时操作，返回处理好的列表
+  // ==============================================
+  QFuture<QStringList> future = QtConcurrent::run([=]() -> QStringList {
+    // 1. 获取原始列表
+    QStringList list = mw_one->m_Preferences->getBakFilesList();
+
+    // 2. 裁剪逻辑（只在子线程处理数据）
+    int bakCount = list.count();
+    if (bakCount > 15) {
+      int count_a = bakCount - 15;
+      for (int j = 0; j < count_a; j++) {
+        QString str = list.at(0);
+        QString fn = str.split("-===-").at(1);
+        QFile file(fn);
+        file.remove();
+        list.removeAt(0);
+      }
+    }
+
+    // 【关键 1】把处理完的列表 返回给主线程
+    return list;
+  });
+
+  // ==============================================
+  // 【关键 2】主线程接收结果，只在主线程操作 UI/QML
+  // ==============================================
+  QFutureWatcher<QStringList>* watcher =
+      new QFutureWatcher<QStringList>(mw_one);
+  connect(watcher, &QFutureWatcher<QStringList>::finished, mw_one, [=]() {
+    // 获取子线程返回的安全数据
+    QStringList finalList = watcher->result();
+
+    // ======================
+    // 所有 UI/QML 操作，全部放在这里（主线程）
+    // ======================
+    m_Method->clearAllBakList(mui->qwBakList);
+
+    int bakCount = finalList.count();
+    for (int i = 0; i < bakCount; i++) {
+      QString action, bakfile;
+      QString str = finalList.at(bakCount - 1 - i);
+      action = str.split("-===-").at(0);
+      bakfile = str.split("-===-").at(1);
+      m_Method->addItemToQW(mui->qwBakList, action, "", "", bakfile, 0);
+    }
+
+    if (m_Method->getCountFromQW(mui->qwBakList) > 0) {
+      m_Method->setCurrentIndexFromQW(mui->qwBakList, 0);
+    }
+
+    mui->lblBakListTitle->setText(
+        tr("Backup File List") + "    " + tr("Total") + " : " +
+        QString::number(m_Method->getCountFromQW(mui->qwBakList)));
+
+    qDebug() << "BakFileList update completed";
+
+    // 收尾
+    mw_one->closeProgress();
+    watcher->deleteLater();
+  });
+
   watcher->setFuture(future);
 }
 

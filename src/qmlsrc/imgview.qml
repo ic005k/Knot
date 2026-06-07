@@ -53,7 +53,7 @@ Item {
             pinch.dragAxis: Pinch.XAndYAxis
 
             // 添加 MouseArea 处理单指拖动
-            /*MouseArea {
+            MouseArea {
                 id: dragArea
                 anchors.fill: parent
                 enabled: true
@@ -97,9 +97,9 @@ Item {
                         mapImg.scale = mapImg.scale * 0.9
                     }
                 }
-            }*/
+            }
 
-            DragHandler {
+            /*DragHandler {
                 target: mapImg
 
                 // 拖动时自动更新边界
@@ -149,7 +149,7 @@ Item {
                         mapImg.scale *= 0.9;
                     }
                 }
-            }
+            }*/
         }
     }
     // 状态显示
