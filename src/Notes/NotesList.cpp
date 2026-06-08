@@ -1654,9 +1654,10 @@ void NotesList::on_btnDel_Recycle_clicked() {
 }
 
 void NotesList::setDelNoteFlag(QString mdFile) {
+  int maxCount = 500;
   needDelFiles.insert(0, mdFile);
-  if (needDelFiles.count() > 500) {
-    needDelFiles.removeAt(500);  // 移除老的
+  if (needDelFiles.count() > maxCount) {
+    needDelFiles.removeAt(maxCount);  // 移除老的
   }
 }
 
@@ -1731,8 +1732,10 @@ void NotesList::needDelNotes() {
     isDelMDOk = delFile(mdFile);
     isDelJSONOk = delFile(strFile);
 
-    if (isDelMDOk) qDebug() << "Del Note: " << mdFile << isDelMDOk;
-    if (isDelJSONOk) qDebug() << "Del Note: " << strFile << isDelJSONOk;
+    if (!isAndroid) {
+      if (isDelMDOk) qDebug() << "Del Note: " << mdFile << isDelMDOk;
+      if (isDelJSONOk) qDebug() << "Del Note: " << strFile << isDelJSONOk;
+    }
   }
 }
 

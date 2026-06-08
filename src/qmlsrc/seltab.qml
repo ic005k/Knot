@@ -165,10 +165,10 @@ Rectangle {
             states: [
                 State {
                     name: "Pressed"
-                    when: mouseArea.pressed && !mouseArea.drag.active // 仅在按下且未拖动时激活
+                    // 只判断按下，不判断不存在的 drag.active
+                    when: mouseArea.pressed
                     PropertyChanges {
                         target: listItem
-                        // 使用一个更柔和、符合预期的反馈色，比如深一点的蓝色或灰色
                         color: ListView.isCurrentItem ? "#87CEEB" : (isDark ? "#2A3A4D" : "#E0E0E0")
                     }
                 }

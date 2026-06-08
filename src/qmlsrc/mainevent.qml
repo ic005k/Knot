@@ -576,7 +576,7 @@ Rectangle {
 
                             onClicked: {
                                 console.log("删除: " + index);
-                                mw_one.on_btnDel_clicked();
+                                mw_one.on_btnDel_pressed();
                             }
                             background: Rectangle {
                                 color: "transparent"
