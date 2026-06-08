@@ -72,6 +72,11 @@ NotesList::~NotesList() {
   delete ui;
   delete tw;
   delete twrb;
+
+  if (watcher) {
+    watcher->cancel();
+    watcher->waitForFinished();
+  }
 }
 
 void NotesList::initSerachDatabase() {
@@ -1894,12 +1899,24 @@ void NotesList::startFind(QString strFind) {
   searchResultList.clear();
   findCount = -1;
 
-  if (!watcher) {
-    watcher = new QFutureWatcher<ResultsMap>(this);
-    connect(watcher, &QFutureWatcher<ResultsMap>::finished, this,
-            &NotesList::onSearchFinished);
+  // ========== 如果已有任务，必须先安全停止 ==========
+  if (watcher) {
+    // 取消旧任务
+    watcher->cancel();
+    // 等待旧任务真正结束（防止异步对象被提前销毁）
+    if (watcher->isRunning()) {
+      watcher->waitForFinished();
+    }
+    // 断开旧信号槽，避免重复连接
+    disconnect(watcher, nullptr, this, nullptr);
   }
 
+  // ========== 重新创建 watcher ==========
+  watcher = new QFutureWatcher<ResultsMap>(this);
+  connect(watcher, &QFutureWatcher<ResultsMap>::finished, this,
+          &NotesList::onSearchFinished);
+
+  // 启动新任务
   auto future = performSearchAsync(directory, keyword);
   watcher->setFuture(future);
 }

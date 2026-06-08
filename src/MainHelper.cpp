@@ -1479,33 +1479,6 @@ void MainWindow::reloadMain() {
   m_Method->clickMainDate();
 }
 
-void MainWindow::on_rbSteps() {
-  int count = m_Steps->getCount();
-  if (count <= 0) return;
-
-  freqPointList.clear();
-  doubleList.clear();
-
-  QString sm = get_Month(m_Method->setCurrentDateValue());
-  QString strday, strmonth;
-  for (int i = 0; i < count; i++) {
-    QString strD = m_Steps->getDate(i);
-
-    QStringList list = strD.split(" ").at(0).split("-");
-    if (list.count() > 1) {
-      strmonth = list.at(1);
-      strday = list.at(2);
-    }
-    if (sm.toInt() == strmonth.toInt()) {
-      int day = strday.toInt();
-      int steps = m_Steps->getSteps(i);
-
-      freqPointList.append(QPointF(day, steps));
-      doubleList.append(steps);
-    }
-  }
-}
-
 QStringList MainWindow::get_MonthList(QString strY, QString strM) {
   QStringList listMonth;
   if (loading) return listMonth;

@@ -596,8 +596,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnSteps_pressed();
 
-  void on_rbSteps();
-
   void on_btnSelTab_pressed();
 
   void on_btnBackReader_pressed();
