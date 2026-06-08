@@ -27,6 +27,9 @@
 #include <algorithm>
 #include <utility>  // for std::as_const
 
+// class DatabaseManager;
+// class SearchModel;
+
 #include "database_manager.h"
 #include "search_model.h"
 #include "src/Comm/TextEditToolbar.h"

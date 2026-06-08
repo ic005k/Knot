@@ -55,11 +55,14 @@
 #endif
 
 #include "src/Comm/ShowMessage.h"
+#include "src/MainWindow.h"
 #include "src/Notes/ColorDialog.h"
 #include "src/Notes/NoteDiffManager.h"
 #include "src/Notes/PrintPDF.h"
 #include "src/Notes/note_index_manager.h"
+#include "src/defines.h"
 #include "titlegenerator.h"
+#include "ui_MainWindow.h"
 #include "ui_PrintPDF.h"
 
 class NoteIndexManager1;

@@ -8,6 +8,8 @@
 #include <QSqlQuery>
 #include <QTextStream>
 
+#include "src/Notes/note_index_manager.h"
+
 extern std::unique_ptr<cppjieba::Jieba> jieba;
 
 DatabaseManager::DatabaseManager(QObject* parent)
@@ -162,7 +164,7 @@ QStringList DatabaseManager::tokenize(const QString& text) {
   return vec.toList();
 }
 
-QVector<DatabaseManager::SearchResult> DatabaseManager::searchDocuments(
+QVector<SearchResult> DatabaseManager::searchDocuments(
     const QString& query, NoteIndexManager* indexManager, int limit) {
   Q_UNUSED(limit);
   QStringList keywords = tokenize(query);

@@ -398,6 +398,15 @@ SOURCES += \
     src/Notes/NoteListModel.cpp \
     src/Notes/Notes.cpp \
     src/Notes/NotesList.cpp \
+    src/Notes/Notes_Android.cpp \
+    src/Notes/Notes_Diff.cpp \
+    src/Notes/Notes_Editor.cpp \
+    src/Notes/Notes_FileIO.cpp \
+    src/Notes/Notes_Image.cpp \
+    src/Notes/Notes_IndexManager.cpp \
+    src/Notes/Notes_Sync.cpp \
+    src/Notes/Notes_UI.cpp \
+    src/Notes/Notes_Utils.cpp \
     src/Notes/PrintPDF.cpp \
     src/Notes/database_manager.cpp \
     src/Notes/note_graph.cpp \

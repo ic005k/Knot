@@ -2,11 +2,11 @@
 
 #include "cmark-gfm-core-extensions.h"
 #include "cmark_wrapper.h"
-#include "src/MainWindow.h"
-#include "src/defines.h"
+// #include "src/MainWindow.h"
+// #include "src/defines.h"
 #include "subscript.h"
 #include "superscript.h"
-#include "ui_MainWindow.h"
+// #include "ui_MainWindow.h"
 #include "ui_Notes.h"
 
 static QAtomicInt n_Files = 0;
@@ -18,7 +18,6 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
   m_NoteIndexManager = new NoteIndexManager();
 
   initEditor();
-
   init_md();
 
   QString path = iniDir + "memo/";
@@ -36,7 +35,6 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
 
   ui->btnColor->hide();
   ui->lblCount->hide();
-
   ui->btnFind->hide();
   ui->editFind->setMinimumWidth(65);
 
@@ -46,28 +44,24 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
 
   m_Method->set_ToolButtonStyle(this);
 
-  // ==== 笔记链接自动补全 ========================
-
+  // 笔记链接自动补全
   m_popupList = new QListWidget(this);
   m_popupList->setWindowFlags(Qt::FramelessWindowHint | Qt::Window | Qt::Tool |
                               Qt::WindowStaysOnTopHint);
   m_popupList->setFocusPolicy(Qt::NoFocus);
-
   m_popupList->hide();
 
-  // 单击 → 直接插入，一次到位！
   connect(m_popupList, &QListWidget::itemClicked, this,
           &Notes::onPopupItemClicked);
-  //================================================
 
-  // 创建快捷键：绑定 Ctrl+F
+  // Ctrl+F 快捷键
   QShortcut* shortcut1 = new QShortcut(QKeySequence("Ctrl+F"), this);
   connect(shortcut1, &QShortcut::activated, this, [this]() {
     ui->editFind->setFocus();
     ui->editFind->selectAll();
   });
 
-  // 清理 memo 目录下的旧备份文件（仅保留最新）
+  // 清理旧备份
   QDir memoDir(iniDir + "memo/");
   memoDir.setNameFilters(QStringList() << "*.md.bak" << "*.json.bak");
   foreach (const QString& bakFile, memoDir.entryList()) {
@@ -75,25 +69,9 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
   }
 }
 
-void Notes::initEditor() {
-#ifndef Q_OS_ANDROID
-
-  m_EditSource = new QsciScintilla(this);
-  m_EditSource->setUtf8(true);
-  m_EditSource->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  m_EditSource->installEventFilter(this);
-  m_EditSource->viewport()->installEventFilter(this);
-  m_EditSource->setContentsMargins(1, 1, 1, 1);
-  m_EditSource->setStyleSheet("border:none");
-
-  connect(m_EditSource->verticalScrollBar(), &QScrollBar::valueChanged, this,
-          &Notes::editVSBarValueChanged);
-  connect(m_EditSource, &QsciScintilla::textChanged, this,
-          &Notes::editSource_textChanged);
-  ui->frameEdit->layout()->addWidget(m_EditSource);
-  m_EditSource->setFocus();
-
-#endif
+Notes::~Notes() {
+  delete m_NoteIndexManager;
+  delete ui;
 }
 
 void Notes::showEvent(QShowEvent* event) {
@@ -120,103 +98,9 @@ void Notes::init() {
 }
 
 void Notes::wheelEvent(QWheelEvent* e) { Q_UNUSED(e); }
-
-Notes::~Notes() {
-  delete m_NoteIndexManager;
-  delete ui;
-}
-
 void Notes::keyReleaseEvent(QKeyEvent* event) { event->accept(); }
-
 void Notes::editVSBarValueChanged() {}
-
 void Notes::resizeEvent(QResizeEvent* event) { Q_UNUSED(event); }
-
-void Notes::on_btnDone_clicked() { saveMainNotes(); }
-
-void Notes::MD2Html(QString mdFile) {
-  QString strmd = loadText(mdFile);
-
-  strmd = strmd.replace("images/", "file://" + iniDir + "memo/images/");
-
-  QString htmlString;
-  htmlString = markdownToHtmlWithMath(strmd);
-  addImagePathToHtml(htmlString);
-}
-
-QString Notes::imageToBase64(const QString& path) {
-  QFile file(path);
-  if (!file.open(QIODevice::ReadOnly)) return "";
-  QByteArray data = file.readAll();
-  return "data:image/png;base64," + data.toBase64();
-}
-
-void Notes::saveMainNotes() {
-#ifndef Q_OS_ANDROID
-
-  mw_one->strLatestModify = tr("Modi Notes");
-
-  if (isTextChange) {
-    newText = m_EditSource->text();
-    newText = formatMDText(newText);
-
-    // 关键改进：基于目标文件生成唯一临时文件（同目录+唯一名称）
-    QFileInfo targetInfo(currentMDFile);
-    QString tempFile = targetInfo.dir().filePath(
-        targetInfo.fileName() + "." +
-        QString::number(QDateTime::currentMSecsSinceEpoch()) + ".tmp");
-
-    bool isOk = StringToFile(newText, tempFile);
-    if (isOk) {
-      QFile::rename(currentMDFile, currentMDFile + ".bak");
-      if (QFile::rename(tempFile, currentMDFile)) {
-        qDebug() << "Save Note: " << currentMDFile;
-        QFile::remove(currentMDFile + ".bak");
-        updateDiff(oldText, newText);
-        updateMDFileToSyncLists();
-        startBackgroundTaskUpdateNoteIndex(currentMDFile);
-      } else {
-        qWarning() << "重命名失败，清理临时文件";
-        QFile::remove(tempFile);
-        QFile::rename(currentMDFile + ".bak", currentMDFile);
-      }
-    } else {
-      qWarning() << "临时文件写入失败";
-    }
-  }
-
-  isTextChange = false;
-
-#endif
-}
-
-void Notes::updateDiff(const QString& oldText, const QString& newText) {
-  if (oldText.isEmpty()) return;
-
-  QString strDiff = m_NoteDiffManager.createPatchFromTexts(oldText, newText);
-  // qDebug() << "strDiff=" << strDiff;
-  //  1. 计算新旧文本的差异
-  QString cleanedOldText = oldText;
-  QString cleanedNewText = newText;
-  cleanedOldText = cleanedOldText.replace("\r", "");  // 直接删除所有 \r
-  cleanedNewText = cleanedNewText.replace("\r", "");
-  QList<Diff> diffs =
-      m_NoteDiffManager.computeDiffs(cleanedOldText, cleanedNewText);
-  // 2. 转换为 HTML 格式的可视化差异
-  QList<Diff> filteredDiffs = m_NoteDiffManager.filterDiffsForDisplay(diffs, 3);
-  QString diffHtml = m_NoteDiffManager.diffsToHtml(filteredDiffs);
-  // qDebug() << "diffHtml=" << diffHtml;
-
-  QFileInfo fi(currentMDFile);
-  QString diffFilePath = iniDir + "/memo/" + fi.baseName() + ".json";
-  bool success =
-      appendDiffToFile(diffFilePath, currentMDFile, strDiff, diffHtml);
-  if (success) {
-    qDebug() << "差异已追加保存";
-  }
-}
-
-void Notes::updateMDFileToSyncLists() { zipNoteToSyncList(); }
 
 bool Notes::eventFilter(QObject* obj, QEvent* evn) {
   QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
@@ -228,7 +112,7 @@ bool Notes::eventFilter(QObject* obj, QEvent* evn) {
   if (evn->type() == QEvent::KeyPress) {
     if (keyEvent->key() == Qt::Key_Escape) {
       close();
-      evn->accept();  // 表明这个事件已经被处理
+      evn->accept();
     }
   }
 
@@ -249,313 +133,9 @@ bool Notes::eventFilter(QObject* obj, QEvent* evn) {
   return QWidget::eventFilter(obj, evn);
 }
 
-QString Notes::getDateTimeStr() {
-  int y, m, d, hh, mm, s;
-  y = QDate::currentDate().year();
-  m = QDate::currentDate().month();
-  d = QDate::currentDate().day();
-  hh = QTime::currentTime().hour();
-  mm = QTime::currentTime().minute();
-  s = QTime::currentTime().second();
-
-  QString s_m, s_d, s_hh, s_mm, s_s;
-  s_m = QString::number(m);
-  if (s_m.length() == 1) s_m = "0" + s_m;
-
-  s_d = QString::number(d);
-  if (s_d.length() == 1) s_d = "0" + s_d;
-
-  s_hh = QString::number(hh);
-  if (s_hh.length() == 1) s_hh = "0" + s_hh;
-
-  s_mm = QString::number(mm);
-  if (s_mm.length() == 1) s_mm = "0" + s_mm;
-
-  s_s = QString::number(s);
-  if (s_s.length() == 1) s_s = "0" + s_s;
-
-  QString newname = QString::number(y) + s_m + s_d + "_" + s_hh + s_mm + s_s;
-  return newname;
-}
-
-void Notes::on_btnPic_clicked() {
-  QString fileName;
-  fileName = QFileDialog::getOpenFileName(NULL, tr("Knot"), "",
-                                          tr("Picture Files (*.*)"));
-
-  insertImage(fileName, false);
-}
-
-QString Notes::insertImage(QString fileName, bool isToAndroidView) {
-  QFileInfo fi(fileName);
-  QString strImage, tarImageFile;
-  if (fi.exists()) {
-    QDir dir;
-    dir.mkpath(iniDir + "memo/images/");
-
-    int rand = QRandomGenerator::global()->generate();
-    if (rand < 0) rand = 0 - rand;
-    QString strTar = iniDir + "memo/images/" + getDateTimeStr() + "_" +
-                     QString::number(rand) + ".png";
-    if (QFile(strTar).exists()) QFile(strTar).remove();
-
-    int nLeftMargin = 9 + 9 + 6;
-
-    QImage img(fileName);
-    double w, h;
-    int new_w, new_h;
-    w = img.width();
-    h = img.height();
-
-    int w0 = 1024;
-    double r = (double)w / h;
-    if (w > w0 - nLeftMargin) {
-      new_w = w0 - nLeftMargin;
-      new_h = new_w / r;
-
-    } else {
-      new_w = w;
-      new_h = h;
-    }
-
-    if (!isAndroid) {
-      auto msg = std::make_unique<ShowMessage>(this);
-      msg->ui->btnCancel->setText(tr("No"));
-      msg->ui->btnOk->setText(tr("Yes"));
-      bool isYes = msg->showMsg(
-          "Knot", tr("Is the original size of the image used?"), 2);
-      if (isYes) {
-        new_w = w;
-        new_h = h;
-      }
-    }
-
-    QPixmap pix;
-    pix = QPixmap::fromImage(img);
-    pix =
-        pix.scaled(new_w, new_h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    pix.save(strTar);
-    tarImageFile = strTar;
-
-    strTar = strTar.replace(iniDir + "memo/", "");
-    strImage = "\n\n![image](" + strTar + ")\n\n";
-
-    if (!isAndroid) {
-#ifndef Q_OS_ANDROID
-      m_EditSource->insert(strImage);
-#endif
-    } else {
-      if (isToAndroidView) insertNote(strImage);
-    }
-
-    qDebug() << "pic=" << strTar << nLeftMargin;
-  }
-
-  QString lastModi = m_Method->getFileUTCString(tarImageFile);
-  QString zipImg = privateDir + "KnotData/memo/images/" + lastModi + "_" +
-                   QFileInfo(tarImageFile).fileName() + ".zip";
-  QFile::copy(tarImageFile, zipImg);
-  zipImg = m_Method->useEnc(zipImg);
-
-  appendToSyncList(zipImg);
-
-  return strImage;
-}
-
-QString Notes::addImagePathToHtml(QString strhtml) {
-  QTextEdit* edit = new QTextEdit;
-  QPlainTextEdit* edit1 = new QPlainTextEdit;
-  strhtml = strhtml.replace("><", ">\n<");
-  edit->setPlainText(strhtml);
-  QString str, str_2, str_3;
-  for (int i = 0; i < edit->document()->lineCount(); i++) {
-    str = getTextEditLineText(edit, i);
-    str = str.trimmed();
-    if (str.mid(0, 4) == "<img" && str.contains("file://")) {
-      QString str1 = str;
-
-      QStringList list = str1.split(" ");
-      QString strSrc;
-      for (int k = 0; k < list.count(); k++) {
-        QString s1 = list.at(k);
-        if (s1.contains("src=")) {
-          strSrc = s1;
-          break;
-        }
-      }
-
-      QStringList list1 = strSrc.split("/memo/");
-      if (list1.count() > 1)
-        strSrc = "\"file://" + iniDir + "memo/" + list1.at(1) + " ";
-
-      QStringList list2 = str1.split("/memo/");
-      if (list2.count() > 1) str_2 = list2.at(1);
-      str = "<img src=\"file:///" + iniDir + "memo/" + str_2;
-      str = "<a href=" + strSrc + ">" + str + "</a>";
-
-      QStringList list3 = str_2.split("\"");
-      if (list3.count() > 0) str_3 = list3.at(0);
-
-      QString imgFile = iniDir + "memo/" + str_3;
-      QImage img(imgFile);
-      if (img.width() >= mw_one->width() - 25) {
-        QString strW = QString::number(mw_one->width() - 25);
-        QString a1 = "width = ";
-        str = str.replace("/>", a1 + "\"" + strW + "\"" + " />");
-      }
-    }
-
-    edit1->appendPlainText(str);
-  }
-
-  QString strEnd = edit1->toPlainText();
-  edit1->clear();
-  edit1->setPlainText(strEnd);
-
-  mw_one->m_Reader->PlainTextEditToFile(edit1, htmlFileName);
-
-  delete edit;
-  delete edit1;
-
-  return strEnd;
-}
-
-qreal Notes::getVPos() { return sliderPos; }
-
-qreal Notes::getVHeight() { return textHeight; }
-
-void Notes::on_btnInsertTable_clicked() {
-#ifndef Q_OS_ANDROID
-
-  QString table1 = "|Title1|Title2|\n";
-  QString table2 = "|------|------|\n";
-  QString table = table1 + table2;
-  m_EditSource->insert(table);
-
-#endif
-}
-
-void Notes::on_btnS1_clicked() {
-#ifndef Q_OS_ANDROID
-
-  QString str = m_EditSource->selectedText();
-  if (str == "") str = tr("Bold Italic");
-  if (!m_EditSource->hasSelectedText())
-    m_EditSource->insert("_**" + str + "**_");
-  else
-    m_EditSource->replaceSelectedText("_**" + str + "**_");
-
-#endif
-}
-
-void Notes::on_btnS2_clicked() {
-#ifndef Q_OS_ANDROID
-
-  QString str = m_EditSource->selectedText();
-  if (str == "") str = tr("Italic");
-  if (!m_EditSource->hasSelectedText())
-    m_EditSource->insert("_" + str + "_");
-  else
-    m_EditSource->replaceSelectedText("_" + str + "_");
-
-#endif
-}
-
-void Notes::on_btnS3_clicked() {
-#ifndef Q_OS_ANDROID
-
-  QString str = m_EditSource->selectedText();
-  if (str == "") str = tr("Underline");
-
-  if (!m_EditSource->hasSelectedText())
-    m_EditSource->insert("<u>" + str + "</u>");
-  else
-    m_EditSource->replaceSelectedText("<u>" + str + "</u>");
-
-#endif
-}
-
-void Notes::on_btnS4_clicked() {
-#ifndef Q_OS_ANDROID
-
-  QString str = m_EditSource->selectedText();
-  if (str == "") str = tr("Strickout");
-
-  if (!m_EditSource->hasSelectedText())
-    m_EditSource->insert("~~" + str + "~~");
-  else
-    m_EditSource->replaceSelectedText("~~" + str + "~~");
-
-#endif
-}
-
-void Notes::on_btnColor_clicked() {
-#ifndef Q_OS_ANDROID
-
-  QString strColor = m_Method->getCustomColor();
-  if (strColor.isEmpty()) return;
-
-  QString str = m_EditSource->selectedText();
-  if (str == "") str = tr("Color");
-  m_EditSource->insert("<font color=" + strColor + ">" + str + "</font>");
-
-#endif
-}
-
-QColor Notes::StringToColor(QString mRgbStr) {
-  QColor color(mRgbStr.toUInt(NULL, 16));
-  return color;
-}
-
-void Notes::on_btnS5_clicked() {
-#ifndef Q_OS_ANDROID
-
-  QString str = m_EditSource->selectedText();
-  if (str == "") str = tr("Bold");
-  if (!m_EditSource->hasSelectedText())
-    m_EditSource->insert("**" + str + "**");
-  else
-    m_EditSource->replaceSelectedText("**" + str + "**");
-
-#endif
-}
-
-void Notes::on_btnPaste_clicked() {
-#ifndef Q_OS_ANDROID
-
-  const QClipboard* clipboard = QApplication::clipboard();
-  const QMimeData* mimeData = clipboard->mimeData();
-  if (mimeData->hasImage()) {
-    QImage img = qvariant_cast<QImage>(mimeData->imageData());
-    if (!img.isNull()) {
-      QPixmap pix;
-      QString strTar = privateDir + "temppic.png";
-      pix = QPixmap::fromImage(img);
-      pix = pix.scaled(img.width(), img.height(), Qt::KeepAspectRatio,
-                       Qt::SmoothTransformation);
-      pix.save(strTar);
-      insertImage(strTar, false);
-    }
-  } else
-    m_EditSource->paste();
-
-#endif
-}
-
-bool Notes::eventFilterQwNote(QObject* watch, QEvent* event) {
-  return QWidget::eventFilter(watch, event);
-}
-
-void Notes::paintEvent(QPaintEvent* event) {
-  Q_UNUSED(event);
-  return;
-}
-
 void Notes::closeEvent(QCloseEvent* event) {
   Q_UNUSED(event);
-
   m_popupList->close();
-
   saveEditorState(currentMDFile);
 
 #ifndef Q_OS_ANDROID
@@ -580,651 +160,14 @@ void Notes::closeEvent(QCloseEvent* event) {
   }
 }
 
-void Notes::syncToWebDAV() {
-  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
-    if (notes_sync_files.count() > 0) {
-      mw_one->showProgress();
-
-      m_CloudBackup->createRemoteWebDAVDir();
-
-      // 先删除旧文件
-      delRemoteFile(notes_sync_files);
-
-      qDebug() << "需要上传的文件：" << notes_sync_files;
-      qDebug() << "maxNetConcurrent=" << maxNetConcurrent;
-
-      // ✅ 等待【全部上传完成】再发送 syncFinished
-      connect(
-          m_CloudBackup, &CloudBackup::uploadAllFinished, this,
-          [this]() { emit syncFinished(); },
-          Qt::ConnectionType(Qt::QueuedConnection | Qt::SingleShotConnection));
-
-      m_CloudBackup->uploadFilesToWebDAV(notes_sync_files);
-      m_Method->setAccessCount(notes_sync_files.count());
-    }
-  }
+void Notes::paintEvent(QPaintEvent* event) {
+  Q_UNUSED(event);
+  return;
 }
 
-void Notes::delRemoteFile(const QStringList& Files) {
-  QStringList delFiles;
-  for (int j = 0; j < Files.count(); j++) {
-    QString syncFile = Files.at(j);
-    QString baseFlag = m_Method->getBaseFlag(syncFile);
-    if (!baseFlag.isEmpty()) {
-      for (int i = 0; i < orgRemoteFiles.count(); i++) {
-        QString orgFile = orgRemoteFiles.at(i);
-        if (orgFile.contains(baseFlag)) {
-          delFiles.append(orgFile);
-        }
-      }
-    }
-  }
-
-  qDebug() << "delWebDAVFiles=" << delFiles;
-
-  m_CloudBackup->deleteWebDAVFiles(delFiles);
+bool Notes::eventFilterQwNote(QObject* watch, QEvent* event) {
+  return QWidget::eventFilter(watch, event);
 }
-
-bool Notes::isSetNewNoteTitle() {
-  QString title = m_NotesList->noteTitle;
-  if (title.trimmed() == "无标题笔记" || title.trimmed() == "Untitled Note") {
-    return true;
-  }
-
-  return false;
-}
-
-void Notes::editSource_textChanged() { isTextChange = true; }
-
-void Notes::show_findText() {
-#ifndef Q_OS_ANDROID
-
-#endif
-}
-
-void Notes::show_findTextBack() {}
-
-void Notes::findText() {}
-
-void Notes::on_btnFind_clicked() {
-  if (ui->editFind->text().trimmed() == "") return;
-  show_findText();
-}
-
-void Notes::on_btnPrev_clicked() {
-  ui->editFind->setFocus();
-  searchPrevious();
-}
-
-void Notes::on_btnNext_clicked() {
-  ui->editFind->setFocus();
-  searchNext();
-}
-
-void Notes::on_editFind_returnPressed() { searchNext(); }
-
-void Notes::on_editFind_textChanged(const QString& arg1) {
-  searchText(arg1.trimmed(), true);
-  // searchWithCount(arg1.trimmed());
-  m_lastSearchText = arg1.trimmed();
-}
-
-bool Notes::selectPDFFormat(QPrinter* printer) {
-  QSettings settings;
-
-  // 选择纸张尺寸
-  QStringList pageSizeStrings;
-  pageSizeStrings << QStringLiteral("A0") << QStringLiteral("A1")
-                  << QStringLiteral("A2") << QStringLiteral("A3")
-                  << QStringLiteral("A4") << QStringLiteral("A5")
-                  << QStringLiteral("A6") << QStringLiteral("A7")
-                  << QStringLiteral("A8") << QStringLiteral("A9")
-                  << tr("Letter");
-  QList<QPageSize::PageSizeId> pageSizes;
-  pageSizes << QPageSize::A0 << QPageSize::A1 << QPageSize::A2 << QPageSize::A3
-            << QPageSize::A4 << QPageSize::A5 << QPageSize::A6 << QPageSize::A7
-            << QPageSize::A8 << QPageSize::A9 << QPageSize::Letter;
-
-  // 关键：使用局部对象，执行完自动析构
-  PrintPDF dlg1(this);
-  QString pageSizeString =
-      dlg1.getItem(tr("Page size"), tr("Page size"), pageSizeStrings, 4);
-
-  if (pageSizeString.isEmpty()) {
-    // 取消时主动清理遮罩层
-    if (m_Method) {
-      m_Method->closeGrayWindows();
-    }
-    return false;
-  }
-
-  int pageSizeIndex = pageSizeStrings.indexOf(pageSizeString);
-  if (pageSizeIndex == -1) {
-    if (m_Method) {
-      m_Method->closeGrayWindows();
-    }
-    return false;
-  }
-
-  QPageSize pageSize(pageSizes.at(pageSizeIndex));
-  settings.setValue(QStringLiteral("Printer/NotePDFExportPageSize"),
-                    pageSizeIndex);
-  printer->setPageSize(pageSize);
-
-  // 选择打印方向
-  QStringList orientationStrings;
-  orientationStrings << tr("Portrait") << tr("Landscape");
-  QList<QPageLayout::Orientation> orientations;
-  orientations << QPageLayout::Portrait << QPageLayout::Landscape;
-
-  PrintPDF dlg2(this);
-  QString orientationString =
-      dlg2.getItem(tr("Orientation"), tr("Orientation"), orientationStrings, 0);
-
-  if (orientationString.isEmpty()) {
-    if (m_Method) {
-      m_Method->closeGrayWindows();
-    }
-    return false;
-  }
-
-  int orientationIndex = orientationStrings.indexOf(orientationString);
-  if (orientationIndex == -1) {
-    if (m_Method) {
-      m_Method->closeGrayWindows();
-    }
-    return false;
-  }
-
-  printer->setPageOrientation(orientations.at(orientationIndex));
-  settings.setValue(QStringLiteral("Printer/NotePDFExportOrientation"),
-                    orientationIndex);
-
-#ifdef Q_OS_ANDROID
-  pdfFileName = "/storage/emulated/0/KnotBak/" + m_NotesList->noteTitle +
-                QStringLiteral(".pdf");
-#else
-  QFileDialog dialog(NULL, QStringLiteral("NotePDFExport"));
-  dialog.setFileMode(QFileDialog::AnyFile);
-  dialog.setAcceptMode(QFileDialog::AcceptSave);
-  dialog.setNameFilter(tr("PDF files") + QStringLiteral(" (*.pdf)"));
-  dialog.setWindowTitle(tr("Export current note as PDF"));
-  dialog.selectFile(m_NotesList->noteTitle + QStringLiteral(".pdf"));
-  int ret = dialog.exec();
-
-  if (ret != QDialog::Accepted) {
-    if (m_Method) {
-      m_Method->closeGrayWindows();
-    }
-    return false;
-  }
-
-  pdfFileName = dialog.selectedFiles().at(0);
-#endif
-
-  if (pdfFileName.isEmpty()) {
-    if (m_Method) {
-      m_Method->closeGrayWindows();
-    }
-    return false;
-  }
-
-  if (QFileInfo(pdfFileName).suffix().isEmpty()) {
-    pdfFileName.append(QLatin1String(".pdf"));
-  }
-
-  printer->setOutputFormat(QPrinter::PdfFormat);
-  printer->setOutputFileName(pdfFileName);
-
-  // 最终兜底：确保遮罩层被清理
-  if (m_Method) {
-    m_Method->closeGrayWindows();
-  }
-
-  return true;
-}
-
-void Notes::on_btnPDF_clicked() {
-  MD2Html(currentMDFile);
-  QString html = loadText(htmlFileName);
-  html = html.replace("file://", "");
-  auto doc = new QTextDocument(this);
-  doc->setHtml(html);
-
-  auto* printer = new QPrinter(QPrinter::HighResolution);
-
-  if (selectPDFFormat(printer)) {
-    doc->print(printer);
-
-    if (isAndroid) {
-      auto msg1 = std::make_unique<ShowMessage>(this);
-      msg1->ui->btnCancel->setText(tr("No"));
-      msg1->ui->btnOk->setText(tr("Yes"));
-      if (msg1->showMsg("PDF",
-                        tr("The PDF file is successfully exported.") + "\n\n" +
-                            tr("Want to share this PDF file?") + "\n\n" +
-                            pdfFileName,
-                        2)) {
-        if (QFile::exists(pdfFileName)) {
-          mw_one->m_ReceiveShare->shareImage(tr("Share to"), pdfFileName,
-                                             "*/*");
-        }
-      }
-    }
-  }
-
-  delete printer;
-}
-
-void Notes::editNote() { openEditUI(); }
-
-void Notes::showNoteList() {
-  QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
-}
-
-void Notes::on_editNote() {
-  timerEditNote->stop();
-  openEditUI();
-}
-
-void Notes::setOpenSearchResultForAndroid(bool isValue, QString strSearchText) {
-  Q_UNUSED(isValue);
-  Q_UNUSED(strSearchText);
-#ifdef Q_OS_ANDROID
-
-  QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  if (activity.isValid()) {
-    // 调用Java方法，注意方法签名(Z)V
-    activity.callMethod<void>("setOpenSearchResult", "(Z)V", isValue);
-
-    QJniObject jFile = QJniObject::fromString(strSearchText);
-    activity.callMethod<void>("setSearchText", "(Ljava/lang/String;)V",
-                              jFile.object<jstring>());
-  }
-
-#endif
-}
-
-void Notes::openAndroidNoteEditor() {
-  setOpenSearchResultForAndroid(mw_one->isOpenSearchResult,
-                                mw_one->mySearchText);
-
-#ifdef Q_OS_ANDROID
-
-  // Qt6 实现：通过 Native Interface 获取 Activity
-  QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  activity.callMethod<void>("openNoteEditor", "()V");
-
-#endif
-
-  mw_one->isOpenSearchResult = false;
-}
-
-void Notes::openMDWindow() {
-#ifdef Q_OS_ANDROID
-
-  QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  activity.callStaticMethod<void>("com.x/MyActivity", "openMDWindow", "()V");
-
-#endif
-}
-
-void Notes::appendNote(QString str) {
-  Q_UNUSED(str);
-#ifdef Q_OS_ANDROID
-
-  QJniObject jTitle = QJniObject::fromString(str);
-  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callStaticMethod<void>("com.x/NoteEditor", "appendNote",
-                                    "(Ljava/lang/String;)V",
-                                    jTitle.object<jstring>());
-
-#endif
-}
-
-void Notes::insertNote(QString str) {
-  Q_UNUSED(str);
-#ifdef Q_OS_ANDROID
-
-  QJniObject jTitle = QJniObject::fromString(str);
-  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callStaticMethod<void>("com.x/NoteEditor", "insertNote",
-                                    "(Ljava/lang/String;)V",
-                                    jTitle.object<jstring>());
-
-#endif
-}
-
-auto Notes::getAndroidNoteConfig(QString key) {
-  QSettings Reg(privateDir + "note_text.ini", QSettings::IniFormat);
-
-  auto value = Reg.value(key);
-  return value;
-}
-
-void Notes::setAndroidNoteConfig(QString key, QString value) {
-  QSettings Reg(privateDir + "note_text.ini", QSettings::IniFormat);
-
-  QString mdFileName = QFileInfo(currentMDFile).baseName();
-  if (Reg.value("/cpos/" + mdFileName).toString() == "")
-    Reg.setValue("/cpos/" + mdFileName, "0");
-
-  Reg.setValue(key, value);
-}
-
-void Notes::delLink(QString link) {
-  QString mdBuffers = loadText(currentMDFile);
-
-  if (!mdBuffers.contains(link)) {
-    link.replace("http://", "");
-  }
-  mdBuffers.replace(link, "");
-  mdBuffers.replace("[]()", "");
-
-  if (mdBuffers.contains("]()")) {
-    int startPos, endPos, length;
-    int index = 0;
-    QStringList titleList;
-    while (mdBuffers.indexOf("]()", index) != -1) {
-      startPos = mdBuffers.indexOf("[", index) + 1;
-      if (startPos - 2 >= 0) {
-        endPos = mdBuffers.indexOf("]()", startPos + 1);
-        length = endPos - startPos;
-        QString subStr = mdBuffers.mid(startPos, length);
-        titleList.append(subStr);
-        qDebug() << "delLink():" << startPos << length << subStr;
-        index = endPos + 1;
-      }
-    }
-
-    for (int i = 0; i < titleList.count(); i++) {
-      QString title = titleList.at(i);
-      QString str = "[" + title + "]()";
-      mdBuffers.replace(str, "");
-    }
-  }
-
-  mdBuffers = formatMDText(mdBuffers);
-  StringToFile(mdBuffers, currentMDFile);
-}
-
-void Notes::javaNoteToQMLNote() {
-  newText = loadText(currentMDFile);
-  updateDiff(oldText, newText);
-
-  if (isSetNewNoteTitle()) {
-    TitleGenerator generator;
-    new_title = generator.genNewTitle(newText);
-    renameTitle(true);
-  }
-
-  zipNoteToSyncList();
-
-  startBackgroundTaskUpdateNoteIndex(currentMDFile);
-}
-
-void Notes::zipNoteToSyncList() {
-  QFileInfo fi(currentMDFile);
-
-  // 只处理 .md 文件
-  if (currentMDFile.endsWith(".md", Qt::CaseInsensitive)) {
-    if (fi.exists() && fi.size() == 0) {
-      // 文件存在且为空 -> 写入一个空格
-      QSaveFile saveFile(currentMDFile);
-      if (saveFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        saveFile.write(" ");  // 写入一个空格
-        if (!saveFile.commit()) {
-          qWarning() << "Failed to write space to empty file:" << currentMDFile
-                     << saveFile.errorString();
-        } else {
-          qDebug() << "Appended space to empty file:" << currentMDFile;
-        }
-      } else {
-        qWarning() << "Failed to open empty file for writing:" << currentMDFile
-                   << saveFile.errorString();
-      }
-    }
-  }
-
-  QString lastModi = m_Method->getFileUTCString(currentMDFile);
-  QString zipMD =
-      privateDir + "KnotData/memo/" + lastModi + "_" + fi.fileName() + ".zip";
-  QString zipJSON = privateDir + "KnotData/memo/" + lastModi + "_" +
-                    fi.baseName() + ".json.zip";
-
-  if (!m_Method->compressFileWithZlib(currentMDFile, zipMD,
-                                      Z_DEFAULT_COMPRESSION)) {
-    errorInfo = tr("An error occurred while compressing the file.");
-    auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg("Knot", errorInfo, 1);
-    return;
-  }
-
-  QString enc_file = m_Method->useEnc(zipMD);
-  if (enc_file != "") zipMD = enc_file;
-
-  appendToSyncList(zipMD);
-
-  QString json = getCurrentJSON(currentMDFile);
-  if (QFile::exists(json)) {
-    if (!m_Method->compressFileWithZlib(json, zipJSON, Z_DEFAULT_COMPRESSION)) {
-      errorInfo = tr("An error occurred while compressing the file.");
-      auto msg = std::make_unique<ShowMessage>(this);
-      msg->showMsg("Knot", errorInfo, 1);
-      return;
-    }
-
-    QString enc_json = m_Method->useEnc(zipJSON);
-    if (enc_json != "") zipJSON = enc_json;
-
-    appendToSyncList(zipJSON);
-  }
-}
-
-QString Notes::getCurrentJSON(const QString& md) {
-  QFileInfo fi(md);
-  return iniDir + "memo/" + fi.baseName() + ".json";
-}
-
-QString Notes::formatMDText(QString text) {
-  static const QRegularExpression re("\n{3,}");  // 只编译一次
-  return text.replace(re, "\n\n");
-}
-
-void Notes::init_all_notes() {
-  m_NotesList->initNotesList();
-  m_NotesList->initRecycle();
-  m_NotesList->initUnclassified();
-
-  // load note
-  if (!isReceiveRemoteFile) {
-    currentMDFile = m_NotesList->getCurrentMDFile();
-  } else
-    isReceiveRemoteFile = false;
-  qDebug() << "currentMDFile=" << currentMDFile;
-  if (QFile::exists(currentMDFile)) {
-  } else {
-    loadEmptyNote();
-  }
-}
-
-void Notes::loadEmptyNote() {
-  currentMDFile = "";
-  MD2Html(currentMDFile);
-
-  m_NotesList->noteTitle = "";
-}
-
-void Notes::startBackgroundTaskDelAndClear() {
-  if (m_NotesList->isDelNoteRecycle) mw_one->showProgress();
-
-  QString fullPath = iniDir + "memo";
-
-  // 【重要】把数据库路径也一起传给子线程
-  QString dbFile = privateDir + "md_database_v3.db";
-
-  QFuture<void> future = QtConcurrent::run([=]() {
-    m_NotesList->needDelNotes();
-
-    // 子线程自己创建、自己连接、自己用！不共享！不崩溃！
-    DatabaseManager localDbManager;
-    localDbManager.initDatabase(dbFile);  // 打开同一个真实数据库
-
-    // 执行清理
-    localDbManager.cleanMissingFileRecords(fullPath);
-
-    localDbManager.closeDatabase();  // 用完立刻关闭！释放文件！
-  });
-
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    qDebug() << "Database del and clear completed...";
-
-    if (!m_NotesList->isDelNoteRecycle) {
-      m_NotesList->delRemoteWebDAVFiles();
-      loadNotesToUI();
-    } else
-      m_NotesList->isDelNoteRecycle = false;
-
-    watcher->deleteLater();
-
-    mw_one->closeProgress();
-  });
-  watcher->setFuture(future);
-}
-
-void Notes::startBackgroundTaskUpdateNoteIndex(QString mdFile) {
-  QString fullPath = mdFile;
-
-  QFuture<void> future = QtConcurrent::run([=]() {
-    m_NotesList->m_dbManager.updateFileIndex(fullPath);
-    // 笔记内容修改后保存 → 刷新图谱缓存
-    m_NotesList->m_graphController->parser()->updateNoteCache(fullPath);
-  });
-
-  // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    qDebug() << "Update note index completed:" + fullPath;
-    watcher->deleteLater();
-  });
-  watcher->setFuture(future);
-}
-
-void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
-  QStringList fullPathList = mdFileList;
-
-  QFuture<void> future = QtConcurrent::run(
-      [=]() { m_NotesList->m_dbManager.updateFileIndexes(fullPathList); });
-
-  // 可选：使用 QFutureWatcher 监控进度
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    qDebug() << "Update note index completed:" << fullPathList.count();
-    watcher->deleteLater();
-  });
-  watcher->setFuture(future);
-}
-
-void Notes::openNotesUI() {
-  // 先清空旧连接，避免重复触发
-  disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
-  // 绑定：等 sync 全部结束 → 再删除
-  disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
-  connect(
-      m_Notes, &Notes::syncFinished, this,
-      [this]() { startBackgroundTaskDelAndClear(); },
-      Qt::ConnectionType(Qt::QueuedConnection | Qt::SingleShotConnection));
-  mw_one->execNeedSyncNotes();
-
-  mui->frameNoteList->show();
-  mui->frameMain->hide();
-}
-
-void Notes::loadNotesToUI() {
-  init_all_notes();
-
-  mw_one->isMemoVisible = true;
-  mw_one->isReaderVisible = false;
-
-  m_NotesList->set_memo_dir();
-
-  if (tw->topLevelItemCount() == 0) {
-    mui->lblNoteBook->setText(tr("Note Book"));
-    mui->lblNoteList->setText(tr("Note List"));
-    m_Method->closeInfoWindow();
-    return;
-  }
-
-  m_NotesList->loadAllNoteBook();
-  if (m_NotesList->getNoteBookCount() > 0) {
-    if (!m_NotesList->setCurrentItemFromMDFile(currentMDFile)) {
-      m_NotesList->setNoteBookCurrentIndex(0);
-      m_NotesList->clickNoteBook();
-    }
-    m_NotesList->setNoteLabel();
-  }
-
-  m_Method->closeInfoWindow();
-
-  if (isRequestOpenNoteEditor) {
-    isRequestOpenNoteEditor = false;
-    openEditUI();
-  }
-}
-
-/////////////////////////////////////////////////////////////////////
-
-bool NoteIndexManager1::loadIndex(const QString& indexPath) {
-  QFile file(indexPath);
-  if (!file.open(QIODevice::ReadOnly)) return false;
-
-  QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-  QJsonObject root = doc.object();
-  QJsonObject data = root["data"].toObject();
-
-  m_index.clear();
-  for (auto it = data.begin(); it != data.end(); ++it) {
-    m_index.insert(it.key(), it.value().toString());
-  }
-
-  m_currentIndexPath = indexPath;
-  return true;
-}
-
-bool NoteIndexManager1::saveIndex(const QString& indexPath) {
-  QJsonObject root;
-  root["version"] = 1.0;
-
-  QJsonObject data;
-  for (auto it = m_index.constBegin(); it != m_index.constEnd(); ++it) {
-    data.insert(it.key(), it.value());
-  }
-  root["data"] = data;
-
-  QFile file(indexPath);
-  if (!file.open(QIODevice::WriteOnly)) return false;
-
-  file.write(QJsonDocument(root).toJson());
-  return true;
-}
-
-QString NoteIndexManager1::getNoteTitle(const QString& filePath) const {
-  return m_index.value(QDir::cleanPath(filePath),
-                       QFileInfo(filePath).baseName());
-}
-
-void NoteIndexManager1::setNoteTitle(const QString& filePath,
-                                     const QString& title) {
-  QString cleanPath = QDir::cleanPath(filePath);
-  if (title.isEmpty()) {
-    m_index.remove(cleanPath);
-  } else {
-    m_index[cleanPath] = title;
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////////
 
 void Notes::openEditUI() {
   int count = m_NotesList->getNoteBookCount();
@@ -1292,6 +235,143 @@ void Notes::openEditUI() {
   mw_one->isOpenSearchResult = false;
 
 #endif
+}
+
+void Notes::previewNote() {
+  int count = m_NotesList->getNoteBookCount();
+  if (count == 0) return;
+
+  if (!QFile::exists(currentMDFile)) return;
+
+  mw_one->showProgress();
+  QString title = m_NoteIndexManager->getNoteTitle(currentMDFile);
+
+  QFuture<void> future = QtConcurrent::run([=]() {
+    m_NotesList->refreshRecentOpen(title);
+    m_NotesList->saveRecentOpen();
+    MD2Html(currentMDFile);
+  });
+
+  // 使用 QFutureWatcher 监控进度
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+    mw_one->closeProgress();
+
+    m_NotesList->moveToFirst();
+
+    if (isAndroid) {
+      m_Method->setMDTitle(title);
+
+      m_Method->setMDFile(currentMDFile);
+      // openMDWindow();
+
+      openLocalHtmlFileInAndroid();
+
+      setAndroidNoteConfig("/cpos/currentMDFile",
+                           QFileInfo(currentMDFile).baseName());
+
+    } else {
+      openBrowserOnce(htmlFileName);
+    }
+
+    qDebug() << "Preview note completed";
+    watcher->deleteLater();
+  });
+  watcher->setFuture(future);
+}
+
+//===========================================================
+// 检查是否需要清理 + 自动更新下次清理日期（二合一）
+// 返回：true=需要清理  false=不需要
+//===========================================================
+bool Notes::checkAndUpdateCleanDate() {
+  QSettings cfg(iniDir + "config.ini", QSettings::IniFormat);
+  QDate today = QDate::currentDate();
+
+  QString lastDateStr = cfg.value("Clean/LastCleanDate", "").toString();
+  QDate lastClean = QDate::fromString(lastDateStr, "yyyyMMdd");
+
+  // 无记录/无效日期 → 初始化，不清理
+  if (!lastClean.isValid()) {
+    cfg.setValue("Clean/LastCleanDate", today.toString("yyyyMMdd"));
+    cfg.sync();
+    return false;
+  }
+
+  QDate nextClean = lastClean.addDays(90);
+  bool needClean = (today >= nextClean);
+
+  // 需要清理 → 立即更新日期
+  if (needClean) {
+    cfg.setValue("Clean/LastCleanDate", today.toString("yyyyMMdd"));
+    cfg.sync();
+  }
+
+  if (needClean) buildCleanFileList();
+
+  return needClean;
+}
+
+//===========================================================
+// 构建自动清理列表（追加模式，不清空原有列表）
+// 传统at(i)遍历，无clazy警告，最安全
+//===========================================================
+void Notes::buildCleanFileList() {
+  QDate today = QDate::currentDate();
+  // 匹配开头 14 位数字，提取前 8 位日期数字
+  QRegularExpression reg("^(\\d{8})\\d{6}_");
+
+  // 传统下标遍历，无detach，无clazy警告
+  int count = orgRemoteFiles.size();
+  for (int i = 0; i < count; ++i) {
+    const QString& fullPath = orgRemoteFiles.at(i);
+
+    // 跳过包含 mainnotes / todo 的备份文件（永不删除）
+    if (fullPath.contains("mainnotes") || fullPath.contains("todo")) {
+      continue;
+    }
+
+    bool istest = false;
+    if (istest) {
+      // test
+      if (i == 0) {
+        needDelWebDAVFiles.append(fullPath);
+        qDebug() << "测试自动清理服务器文件：" << fullPath;
+      }
+    }
+
+    // 提取日期
+    QRegularExpressionMatch match = reg.match(fullPath);
+    if (!match.hasMatch()) continue;
+
+    QDate fileDate = QDate::fromString(match.captured(1), "yyyyMMdd");
+    if (!fileDate.isValid()) continue;
+
+    // ==============================
+    // ✅ 新安全策略：只删除超过 60 天的旧文件
+    // ✅ 90 天触发一次清理
+    // ✅ 保留最近 30 天，给足多端同步时间
+    if (fileDate.daysTo(today) > 60) {
+      needDelWebDAVFiles.append(fullPath);
+    }
+  }
+}
+
+void Notes::init_all_notes() {
+  m_NotesList->initNotesList();
+  m_NotesList->initRecycle();
+  m_NotesList->initUnclassified();
+
+  // load note
+  if (!isReceiveRemoteFile) {
+    currentMDFile = m_NotesList->getCurrentMDFile();
+  } else
+    isReceiveRemoteFile = false;
+  qDebug() << "currentMDFile=" << currentMDFile;
+  if (QFile::exists(currentMDFile)) {
+  } else {
+    loadEmptyNote();
+  }
 }
 
 void Notes::openNotes() {
@@ -1486,263 +566,6 @@ void Notes::openNotes() {
   } else
 
     QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
-}
-
-void Notes::startBackgroundProcessRemoteFiles() {
-  QFuture<void> future =
-      QtConcurrent::run([=]() { processRemoteFiles(remoteFiles); });
-
-  // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    qDebug() << "Remote files process completed";
-
-    QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
-    watcher->deleteLater();
-  });
-  watcher->setFuture(future);
-}
-
-void Notes::processRemoteFiles(QStringList remoteFiles) {
-  int totalFiles = remoteFiles.count();
-  int n_Files = 0;
-
-  for (int i = 0; i < remoteFiles.count(); i++) {
-    QString file = remoteFiles.at(i);
-
-    QString temp_f = file;
-
-    QString pDir, pFile, kFile, asFile, zFile;
-    pFile = privateDir + temp_f;
-    zFile = pFile;
-    asFile = temp_f;
-
-    QFileInfo fi(file);
-    QString fn = fi.fileName();
-    QStringList list = fn.split("_");
-    QString remoteLastModi;
-    if (list.count() == 4 || list.count() == 2)
-      remoteLastModi = list.at(0).trimmed();
-
-    if (file.contains("mainnotes.json.zip")) {
-      pDir = privateDir + "KnotData";
-      pFile = pFile.replace(".zip", "");
-      kFile = iniDir + asFile.replace("KnotData/", "");
-      kFile = kFile.replace(".zip", "");
-      kFile = kFile.replace(remoteLastModi + "_", "");
-
-      qDebug() << "file=" << file;
-      qDebug() << "pFile=" << pFile;
-      qDebug() << "kFile" << kFile;
-
-      n_Files++;
-
-      QString dec_file = m_Method->useDec(zFile);
-      if (dec_file != "") zFile = dec_file;
-
-      if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
-        mw_one->closeProgress();
-        errorInfo =
-            tr("Decompression failed. Please check in "
-               "Preferences that the passwords are "
-               "consistent across all platforms.");
-
-        auto msg = std::make_unique<ShowMessage>(this);
-        msg->showMsg("Knot", errorInfo, 1);
-        isPasswordError = true;
-        QFile::remove(zFile);
-
-        break;
-        return;
-      }
-
-      if (isPasswordError == false) {
-        QFileInfo pFileInfo(pFile);
-        QFileInfo kFileInfo(kFile);
-        if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
-          QString tempFile = iniDir + "temp_notes_ini.tmp";
-          if (QFile::exists(tempFile)) QFile::remove(tempFile);
-          if (QFile::copy(pFile, tempFile)) {
-            m_Method->upIniFile(tempFile, kFile);
-            qDebug() << "kFile:" << kFile << " Update successfully. ";
-
-            m_Method->delayDelFile(pFile);
-            m_Method->delayDelFile(zFile);
-          }
-        }
-      }
-    }
-
-    if (file.contains(".md.zip")) {
-      pDir = privateDir + "KnotData/memo";
-      pFile = pFile.replace(".zip", "");
-      kFile = iniDir + asFile.replace("KnotData/", "");
-      kFile = kFile.replace(".zip", "");
-      kFile = kFile.replace(remoteLastModi + "_", "");
-
-      qDebug() << "file=" << file;
-      qDebug() << "pFile=" << pFile;
-      qDebug() << "kFile=" << kFile;
-      qDebug() << "zFile=" << zFile;
-
-      n_Files++;
-
-      QString dec_file = m_Method->useDec(zFile);
-      if (dec_file != "") zFile = dec_file;
-
-      if (QFile::exists(zFile)) {
-        if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
-          mw_one->closeProgress();
-          errorInfo =
-              tr("Decompression failed. Please check in "
-                 "Preferences that the passwords are "
-                 "consistent across all platforms.");
-
-          auto msg = std::make_unique<ShowMessage>(this);
-          msg->showMsg("Knot", errorInfo, 1);
-          isPasswordError = true;
-          QFile::remove(zFile);
-          QFile::remove(privateDir + "KnotData/mainnotes.json.zip");
-
-          break;
-          return;
-        }
-      }
-
-      if (isPasswordError == false) {
-        QFileInfo pFileInfo(pFile);
-        QFileInfo kFileInfo(kFile);
-        if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
-          QFile::remove(kFile);
-          QFile::copy(pFile, kFile);
-          m_NotesList->m_dbManager.updateFileIndex(kFile);
-
-          m_Method->delayDelFile(pFile);
-          m_Method->delayDelFile(zFile);
-        }
-      }
-    }
-
-    if (file.contains(".json.zip") && !file.contains("mainnotes.json.zip")) {
-      pDir = privateDir + "KnotData/memo";
-      pFile = pFile.replace(".zip", "");
-      kFile = iniDir + asFile.replace("KnotData/", "");
-      kFile = kFile.replace(".zip", "");
-      kFile = kFile.replace(remoteLastModi + "_", "");
-
-      qDebug() << "file=" << file;
-      qDebug() << "pFile=" << pFile;
-      qDebug() << "kFile=" << kFile;
-      qDebug() << "zFile=" << zFile;
-
-      n_Files++;
-
-      QString dec_file = m_Method->useDec(zFile);
-      if (dec_file != "") zFile = dec_file;
-
-      if (QFile::exists(zFile)) {
-        if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
-          mw_one->closeProgress();
-          errorInfo =
-              tr("Decompression failed. Please check in "
-                 "Preferences that the passwords are "
-                 "consistent across all platforms.");
-
-          auto msg = std::make_unique<ShowMessage>(this);
-          msg->showMsg("Knot", errorInfo, 1);
-          isPasswordError = true;
-          QFile::remove(zFile);
-          QFile::remove(privateDir + "KnotData/mainnotes.json.zip");
-
-          break;
-          return;
-        }
-      }
-
-      if (isPasswordError == false) {
-        QFileInfo pFileInfo(pFile);
-        QFileInfo kFileInfo(kFile);
-        if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
-          QFile::remove(kFile);
-          QFile::copy(pFile, kFile);
-
-          m_Method->delayDelFile(pFile);
-          m_Method->delayDelFile(zFile);
-        }
-      }
-    }
-
-    if (file.contains(".png")) {
-      pFile = m_Method->useDec(pFile);
-      kFile = iniDir + asFile.replace("KnotData/", "");
-      kFile = kFile.replace(remoteLastModi + "_", "");
-
-      // ==========================================
-      // 下载后自动还原：去掉 .zip 后缀
-      // ==========================================
-      if (kFile.endsWith(".png.zip")) {
-        kFile.replace(".png.zip", ".png");
-      }
-
-      qDebug() << "file=" << file;
-      qDebug() << "pFile=" << pFile;
-      qDebug() << "kFile" << kFile;
-
-      n_Files++;
-
-      QFileInfo pFileInfo(pFile);
-      QFileInfo kFileInfo(kFile);
-      if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
-        QFile::remove(kFile);
-        QFile::copy(pFile, kFile);
-
-        m_Method->delayDelFile(pFile);
-      }
-    }
-
-    QString showText = "[" + QString::number(n_Files) + "/" +
-                       QString::number(totalFiles) + "] " + pFile;
-    m_Method->emit sigUpdateProgressAndText(showText, totalFiles, n_Files);
-  }
-
-  QString jsonFile = iniDir + "mainnotes.json";
-  if (QFile::exists(jsonFile)) {
-    QFile f(jsonFile);
-    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      return;  // 文件不存在或无法打开
-    }
-
-    QByteArray data = f.readAll();
-    f.close();
-
-    QJsonDocument doc = QJsonDocument::fromJson(data);
-    if (doc.isNull()) {
-      return;  // JSON 解析失败
-    }
-
-    QJsonObject rootObj = doc.object();
-
-    // 读取当前 MD 文件路径
-    QString md = rootObj["CurrentMD"].toString();
-    if (!md.isEmpty()) {
-      md = iniDir + md;
-      if (QFile::exists(md)) {
-        isReceiveRemoteFile = true;
-        currentMDFile = md;
-        qDebug() << "远程md文件=" << md;
-      }
-    }
-  } else {
-    QString endFile = iniDir + "mainnotes.ini";
-    QSettings iniNotes(endFile, QSettings::IniFormat);
-    QString md = iniNotes.value("CurrentMD", "").toString();
-    md = iniDir + md;
-    if (QFile::exists(md)) {
-      isReceiveRemoteFile = true;
-      currentMDFile = md;
-      qDebug() << "远程md文件=" << md;
-    }
-  }
 }
 
 void Notes::startBackgroundProcessRemoteFiles_MultiThread() {
@@ -1943,1081 +766,73 @@ void Notes::processSingleRemoteFile(const QString& file) {
   });
 }
 
-void Notes::updateMainnotesIniToSyncLists() {
-  qDebug() << "isSaveNotesConfig=" << isSaveNotesConfig;
+void Notes::loadEmptyNote() {
+  currentMDFile = "";
+  MD2Html(currentMDFile);
 
-  if (isSaveNotesConfig) {
-    QString lastModi = m_Method->getFileUTCString(iniDir + "mainnotes.json");
-    QString zipMainnotes =
-        privateDir + "KnotData/" + lastModi + "_mainnotes.json.zip";
-
-    if (!m_Method->compressFileWithZlib(iniDir + "mainnotes.json", zipMainnotes,
-                                        Z_DEFAULT_COMPRESSION)) {
-      errorInfo = tr("An error occurred while compressing the file.");
-      auto msg = std::make_unique<ShowMessage>(this);
-      msg->showMsg("Knot", errorInfo, 1);
-      return;
-    }
-
-    QString enc_file = m_Method->useEnc(zipMainnotes);
-    if (enc_file != "") zipMainnotes = enc_file;
-
-    appendToSyncList(zipMainnotes);
-
-    isSaveNotesConfig = false;
-  }
+  m_NotesList->noteTitle = "";
 }
 
-void Notes::initMarkdownLexer() {
+void Notes::on_editNote() {
+  timerEditNote->stop();
+  openEditUI();
+}
+
+void Notes::showNoteList() {
+  QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
+}
+
+void Notes::show_findText() {
 #ifndef Q_OS_ANDROID
 
-  // 创建 Lexer
-  markdownLexer = new QsciLexerMarkdown(m_EditSource);
-  m_EditSource->setLexer(markdownLexer);
-
-  // Scintilla 重置
-  m_EditSource->SendScintilla(QsciScintilla::SCI_STYLERESETDEFAULT);
-  m_EditSource->setCaretForegroundColor(QColor(0, 0, 0));  // 光标颜色
-  m_EditSource->recolor();
-
-  // 验证 Lexer
-  qDebug() << "Lexer 状态：" << (m_EditSource->lexer() ? "已设置" : "未设置");
-  if (m_EditSource->lexer()) {
-    qDebug() << "Lexer 语言：" << m_EditSource->lexer()->language();
-  }
-
-  // 调试输出当前字体
-  qDebug() << "代码块字体："
-           << markdownLexer->font(QsciLexerMarkdown::CodeBlock).family();
-
-  // 打印所有样式详情
-  for (int i = 0; i < QsciLexerMarkdown::Header1; ++i) {
-    qDebug() << "Style" << i << "Desc:" << markdownLexer->description(i)
-             << "Color:" << markdownLexer->color(i)
-             << "BG:" << markdownLexer->paper(i);
-  }
-
-  qDebug() << "Header1 颜色："
-           << markdownLexer->color(QsciLexerMarkdown::Header1);
-
 #endif
 }
 
-void Notes::initMarkdownLexerDark() {
-#ifndef Q_OS_ANDROID
+void Notes::loadNotesToUI() {
+  init_all_notes();
 
-  // 清空原有 Lexer
-  m_EditSource->setLexer(nullptr);
+  mw_one->isMemoVisible = true;
+  mw_one->isReaderVisible = false;
 
-  // 创建深色模式基础配置
-  markdownLexer = new QsciLexerMarkdown(m_EditSource);
+  m_NotesList->set_memo_dir();
 
-  // --- 核心配置：提升对比度 ---
-  // 1. 全局默认颜色 (必须首先配置)
-  markdownLexer->setDefaultPaper(QColor(0x1E1E1E));  // 黑灰色背景 (#1E1E1E)
-  markdownLexer->setDefaultColor(
-      QColor(0xE0E0E0));  // 更亮的灰白，默认文本颜色 (#E0E0E0)
-
-  // 2. 逐个配置 Markdown 元素样式 (重点：提高对比度)
-  // --- 标题 ---
-  // 使用高对比度的明亮颜色
-  markdownLexer->setColor(QColor(0x66CCFF),
-                          QsciLexerMarkdown::Header1);  // H1: 淡蓝
-  markdownLexer->setColor(QColor(0x66FFFF),
-                          QsciLexerMarkdown::Header2);  // H2: 淡青
-  markdownLexer->setColor(QColor(0xFF99FF),
-                          QsciLexerMarkdown::Header3);  // H3: 淡紫
-
-  // --- 链接 ---
-  markdownLexer->setColor(QColor(0x66CCFF),
-                          QsciLexerMarkdown::Link);  // 链接: 淡蓝
-
-  // --- 代码块 ---
-  markdownLexer->setColor(
-      QColor(0xF0F0F0),
-      QsciLexerMarkdown::CodeBlock);  // 代码块文字: 更亮的灰白
-  markdownLexer->setPaper(
-      QColor(0x2B2B2B),
-      QsciLexerMarkdown::CodeBlock);  // 代码块背景: 稍浅一点的深灰
-
-  // --- 引用块 ---
-  markdownLexer->setColor(QColor(0xD7BA7D),
-                          QsciLexerMarkdown::BlockQuote);  // 引用块
-
-  // --- 应用 Lexer ---
-  m_EditSource->setLexer(markdownLexer);
-
-  // --- 视觉优化 ---
-  // 当前行高亮
-  m_EditSource->setCaretLineBackgroundColor(QColor(0x2D2D30));  // #2D2D30
-  // 光标颜色
-  m_EditSource->setCaretForegroundColor(QColor(0xFFFFFF));  // #FFFFFF
-  // 行号栏背景
-  m_EditSource->setMarginsBackgroundColor(QColor(0x1E1E1E));  // #1E1E1E
-  // 行号颜色
-  m_EditSource->setMarginsForegroundColor(QColor(0x858585));  // #858585
-  // 自动换行
-  m_EditSource->setWrapMode(QsciScintilla::WrapWord);
-
-  // --- 强制刷新颜色 ---
-  m_EditSource->recolor();  // 这一步很重要
-
-#endif
-}
-
-#ifndef Q_OS_ANDROID
-void Notes::initMarkdownEditor(QsciScintilla* editor) {
-  // 强制编码和默认样式
-  // editor->setUtf8(true);
-
-  // 设置字体（继承默认字体避免冲突）
-  QFont defaultFont = QFont(this->font().family(), fontSize);
-  markdownLexer->setFont(defaultFont, -1);  // -1 表示所有样式使用该字体
-  markdownLexer->setFont(defaultFont, QsciLexerMarkdown::CodeBlock);
-
-  editor->setFolding(QsciScintilla::BoxedTreeFoldStyle);
-
-  // 自动缩进
-  editor->setAutoIndent(true);
-
-  // 括号匹配
-  editor->setBraceMatching(QsciScintilla::SloppyBraceMatch);
-
-  // 显示行号
-  editor->setMarginLineNumbers(1, true);
-
-  // 配置行号边距（Margin 0）
-  editor->setMarginType(0, QsciScintilla::NumberMargin);  // 声明行号边距类型
-
-  // 设置行号字体
-  // 获取系统默认等宽字体（优先），无则用 Consolas
-  QFont monoFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-  if (monoFont.family().isEmpty()) {
-    monoFont = QFont("Consolas", 10);  // fallback
-  }
-  editor->SendScintilla(QsciScintilla::SCI_STYLESETFONT,
-                        QsciScintilla::STYLE_LINENUMBER,
-                        monoFont.family().toUtf8());
-
-  // 创建字体度量对象
-  QFontMetrics metrics(monoFont);
-
-  // 计算最大行号文本宽度（例如 " 9999 "）
-  int maxLineNumber = 10000;  // 预估最大行号
-  int textWidth = metrics.horizontalAdvance(QString(" %1 ").arg(maxLineNumber));
-
-  // 设置行号边距宽度
-  editor->setMarginWidth(0, textWidth + 4);  // +4 像素作为边距缓冲
-
-  if (isDark) {
-    // === 暗黑主题配色 ===
-    editor->setMarginsBackgroundColor(
-        QColor(0x1E, 0x1E, 0x1E));  // 边距背景色 #1E1E1E
-    editor->setMarginsForegroundColor(
-        QColor(0x7F, 0x7F, 0x7F));  // 行号文字色 #7F7F7F
-
-  } else {
-    // ===== 亮色模式配置 =====
-    // 行号边距背景色（浅灰白，RGB(240,240,240)）
-    editor->setMarginsBackgroundColor(QColor(240, 240, 240));
-
-    // 行号文字颜色（中灰色，RGB(96,96,96)）
-    editor->setMarginsForegroundColor(QColor(96, 96, 96));
-  }
-
-  // 配置符号边距（Margin 1）
-  editor->setMarginType(1, QsciScintilla::SymbolMargin);
-  editor->setMarginWidth(1, 5);
-
-  // 边距2：断点符号边距
-  editor->setMarginType(2, QsciScintilla::SymbolMargin);
-  editor->setMarginWidth(2, 5);
-  editor->setMarginBackgroundColor(2, QColor("#FFE4E1"));
-
-  // editor->setMarginWidth(1, 0);  // Margin 1 不可见
-  // editor->setMarginWidth(2, 0);  // Margin 2 不可见
-
-  // 高亮当前行
-  editor->setCaretWidth(2);  // 光标宽度
-  editor->setCaretLineVisible(true);
-  if (isDark) {
-    editor->setCaretLineBackgroundColor(QColor(45, 45, 48, 60));  // 半透明
-  } else
-    editor->setCaretLineBackgroundColor(QColor(255, 248, 220, 255));
-
-  // 显示代码折叠
-  editor->SendScintilla(QsciScintilla::SCI_SETPROPERTY, "fold", "1");
-  editor->SendScintilla(QsciScintilla::SCI_SETFOLDFLAGS,
-                        16);  // 带边框的折叠图标
-
-  // 自动换行配置
-  editor->setWrapVisualFlags(QsciScintilla::WrapFlagByText);  // 视觉标记
-  editor->setWrapIndentMode(QsciScintilla::WrapIndentSame);   // 缩进对齐
-
-  // 滚动条控制
-  editor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  // 隐藏水平条 按需显示垂直条
-  editor->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-
-  // 边缘参考线
-  // editor->setEdgeMode(QsciScintilla::EdgeLine);
-  // editor->setEdgeColumn(100);
-  // editor->setEdgeColor(QColor("#FFA07A"));
-
-  // 配置搜索高亮指示器
-  const int INDICATOR_SEARCH = 1;  // 使用一个未使用的指示器编号
-  editor->SendScintilla(QsciScintilla::SCI_INDICSETSTYLE, INDICATOR_SEARCH,
-                        QsciScintilla::INDIC_ROUNDBOX);
-  editor->SendScintilla(QsciScintilla::SCI_INDICSETFORE, INDICATOR_SEARCH,
-                        QColor(Qt::yellow).rgb());
-  editor->SendScintilla(QsciScintilla::SCI_INDICSETALPHA, INDICATOR_SEARCH,
-                        100);
-  editor->SendScintilla(QsciScintilla::SCI_INDICSETUNDER, INDICATOR_SEARCH,
-                        true);  // 在文字下方绘制
-}
-
-#endif
-
-// 查找关键词
-void Notes::searchText(const QString& text, bool forward) {
-#ifndef Q_OS_ANDROID
-
-  m_lastSearchText = text;
-
-  // 调整光标起始位置，避免重复匹配
-  int line, index;
-  m_EditSource->getCursorPosition(&line, &index);
-  if (!forward) {
-    if (index > 0) {
-      index--;  // 向后搜索时，光标左移一个字符
-    } else if (line > 0) {
-      line--;
-      index = m_EditSource->lineLength(line);  // 跳转到上一行末尾
-    }
-    m_EditSource->setCursorPosition(line, index);
-  }
-
-  // 参数顺序：text, 正则, 区分大小写, 全词匹配, 循环搜索, 向前
-  bool found =
-      m_EditSource->findFirst(text, false, false, false, true, forward);
-
-  if (!found) {
-    // QMessageBox::information(this, "搜索",
-    //                          forward ? "已到达文档末尾" : "已到达文档开头");
-  }
-
-#endif
-}
-
-// 查找下一个
-void Notes::searchNext() {
-  if (!m_lastSearchText.isEmpty()) {
-    searchText(m_lastSearchText, true);  // 使用 true 表示向前搜索
-  }
-}
-
-// 查找上一个
-void Notes::searchPrevious() {
-  if (!m_lastSearchText.isEmpty()) {
-    searchText(m_lastSearchText, false);  // 使用 false 表示向后搜索
-  }
-}
-
-void Notes::jumpToNextMatch() {
-#ifndef Q_OS_ANDROID
-
-  if (m_matchPositions.isEmpty()) return;
-
-  m_currentMatchIndex = (m_currentMatchIndex + 1) % m_matchPositions.size();
-  auto pos = m_matchPositions[m_currentMatchIndex];
-
-  // 设置选择范围
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETSELECTIONSTART, pos.first);
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETSELECTIONEND, pos.second);
-
-  // 滚动到可见区域
-  int line = m_EditSource->SendScintilla(QsciScintilla::SCI_LINEFROMPOSITION,
-                                         pos.first);
-  m_EditSource->ensureLineVisible(line);
-
-#endif
-}
-
-void Notes::jumpToPrevMatch() {
-#ifndef Q_OS_ANDROID
-
-  if (m_matchPositions.isEmpty()) return;
-
-  m_currentMatchIndex = (m_currentMatchIndex - 1 + m_matchPositions.size()) %
-                        m_matchPositions.size();
-  auto pos = m_matchPositions[m_currentMatchIndex];
-
-  // 设置选择范围
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETSELECTIONSTART, pos.first);
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETSELECTIONEND, pos.second);
-
-  // 滚动到可见区域
-  int line = m_EditSource->SendScintilla(QsciScintilla::SCI_LINEFROMPOSITION,
-                                         pos.first);
-  m_EditSource->ensureLineVisible(line);
-
-#endif
-}
-
-// 获取搜索结果的匹配总数
-int Notes::getSearchMatchCount(const QString& text) {
-  if (text.isEmpty()) return 0;
-
-#ifndef Q_OS_ANDROID
-
-  // 保存当前编辑状态
-  int originalPos =
-      m_EditSource->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS);
-  int originalAnchor =
-      m_EditSource->SendScintilla(QsciScintilla::SCI_GETANCHOR);
-
-  // 初始化搜索参数
-  int count = 0;
-  bool found = m_EditSource->findFirst(text,
-                                       false,  // 不使用正则表达式
-                                       false,  // 不区分大小写（根据需求调整）
-                                       false,  // 不全词匹配（根据需求调整）
-                                       false,  // 禁用循环查找
-                                       true);  // 正向搜索
-
-  // 遍历所有匹配项
-  while (found) {
-    count++;
-    found = m_EditSource->findNext();
-  }
-
-  // 恢复原始状态
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETCURRENTPOS, originalPos);
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETANCHOR, originalAnchor);
-
-  return count;
-
-#endif
-}
-
-void Notes::openBrowserOnce(const QString& htmlPath) {
-  if (isLinux)
-    openUrl(htmlPath);
-  else
-    QDesktopServices::openUrl(QUrl::fromLocalFile(htmlPath));
-}
-
-void Notes::on_btnView_clicked() {
-  ui->btnDone->click();
-  mui->btnOpenNote->click();
-}
-
-void Notes::init_md() {
-#ifndef Q_OS_ANDROID
-  if (isDark) {
-    initMarkdownLexerDark();
-    m_EditSource->verticalScrollBar()->setStyleSheet(
-        mw_one->m_MainHelper->darkPCScrollbarStyle);
-  } else {
-    initMarkdownLexer();
-    m_EditSource->verticalScrollBar()->setStyleSheet(
-        mw_one->m_MainHelper->lightPCScrollbarStyle);
-  }
-
-  initMarkdownEditor(m_EditSource);
-#endif
-}
-
-#include <QSettings>
-
-void Notes::saveEditorState(const QString& filePath) {
-#ifndef Q_OS_ANDROID
-
-  // 指定 INI 格式和文件路径
-  QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);
-
-  // 使用文件路径作为分组名（需处理特殊字符）
-  QString groupName = "Documents/" + QFileInfo(filePath).canonicalFilePath();
-  groupName.replace("/", "_");  // 避免 / 导致分组层级问题
-  settings.beginGroup(groupName);
-
-  // 保存光标位置
-  int line, index;
-  m_EditSource->getCursorPosition(&line, &index);
-  settings.setValue("cursorLine", line);
-  settings.setValue("cursorIndex", index);
-  settings.setValue("vsbar",
-                    m_EditSource->verticalScrollBar()->sliderPosition());
-
-  settings.endGroup();
-
-#endif
-}
-
-void Notes::restoreEditorState(const QString& filePath) {
-#ifndef Q_OS_ANDROID
-
-  QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);
-
-  QString groupName = "Documents/" + QFileInfo(filePath).canonicalFilePath();
-  groupName.replace("/", "_");
-  settings.beginGroup(groupName);
-
-  // 恢复光标
-  int line = settings.value("cursorLine", 0).toInt();
-  int index = settings.value("cursorIndex", 0).toInt();
-  int vsbar = settings.value("vsbar", 0).toInt();
-
-  m_EditSource->verticalScrollBar()->setSliderPosition(vsbar);
-  m_EditSource->setCursorPosition(line, index);
-
-  settings.endGroup();
-
-#endif
-}
-
-void Notes::refreshNote() {
-  QFuture<void> future = QtConcurrent::run([=]() { MD2Html(currentMDFile); });
-
-  // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    refreshLocalHtmlFileInAndroid();
-
-    qDebug() << "Refresh note completed";
-    watcher->deleteLater();
-  });
-  watcher->setFuture(future);
-}
-
-void Notes::previewNote() {
-  int count = m_NotesList->getNoteBookCount();
-  if (count == 0) return;
-
-  if (!QFile::exists(currentMDFile)) return;
-
-  mw_one->showProgress();
-  QString title = m_NoteIndexManager->getNoteTitle(currentMDFile);
-
-  QFuture<void> future = QtConcurrent::run([=]() {
-    m_NotesList->refreshRecentOpen(title);
-    m_NotesList->saveRecentOpen();
-    MD2Html(currentMDFile);
-  });
-
-  // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    mw_one->closeProgress();
-
-    m_NotesList->moveToFirst();
-
-    if (isAndroid) {
-      m_Method->setMDTitle(title);
-
-      m_Method->setMDFile(currentMDFile);
-      // openMDWindow();
-
-      openLocalHtmlFileInAndroid();
-
-      setAndroidNoteConfig("/cpos/currentMDFile",
-                           QFileInfo(currentMDFile).baseName());
-
-    } else {
-      openBrowserOnce(htmlFileName);
-    }
-
-    qDebug() << "Preview note completed";
-    watcher->deleteLater();
-  });
-  watcher->setFuture(future);
-}
-
-bool Notes::openUrl(const QString& url) {
-#ifdef __linux__
-  // 方案 A：尝试直接调用默认浏览器（优先）
-  QProcess mimeProcess;
-  mimeProcess.start("xdg-mime", {"query", "default", "text/html"});
-  mimeProcess.waitForFinished();
-  QString browser = mimeProcess.readAllStandardOutput().trimmed();
-  bool browserSuccess = false;
-
-  if (!browser.isEmpty()) {
-    // 提取浏览器可执行文件名（去掉 .desktop 后缀）
-    if (browser.endsWith(".desktop")) {
-      browser = browser.left(browser.length() - 8);
-    }
-
-    // 保存并清除环境变量
-    const char* originalLdPath = getenv("LD_LIBRARY_PATH");
-    QString originalLdPathStr(originalLdPath ? originalLdPath : "");
-    unsetenv("LD_LIBRARY_PATH");
-    unsetenv("LD_PRELOAD");  // 额外清除可能的预加载库
-
-    // 直接用浏览器打开
-    browserSuccess = QProcess::startDetached(browser, {url});
-
-    // 恢复环境变量
-    if (!originalLdPathStr.isEmpty()) {
-      setenv("LD_LIBRARY_PATH", originalLdPathStr.toUtf8().constData(), 1);
-    } else {
-      unsetenv("LD_LIBRARY_PATH");
-    }
-  }
-
-  // 如果方案 A 失败，尝试方案 B：直接用系统库启动 kde-open
-  if (!browserSuccess) {
-    // 系统原生库路径（不同发行版可能略有差异，覆盖常见路径）
-    QStringList systemLibPaths = {"/usr/lib64",       "/usr/lib",
-                                  "/lib64",           "/lib",
-                                  "/usr/local/lib64", "/usr/local/lib"};
-    QString ldLibraryPath = systemLibPaths.join(":");
-
-    // 保存原始环境变量
-    const char* originalLdPath = getenv("LD_LIBRARY_PATH");
-    QString originalLdPathStr(originalLdPath ? originalLdPath : "");
-    const char* originalQtPluginPath = getenv("QT_PLUGIN_PATH");
-    QString originalQtPluginPathStr(originalQtPluginPath ? originalQtPluginPath
-                                                         : "");
-
-    // 强制设置为系统库路径，清除所有可能影响 Qt 的环境变量
-    setenv("LD_LIBRARY_PATH", ldLibraryPath.toUtf8().constData(), 1);
-    unsetenv("LD_PRELOAD");
-    unsetenv("QT_PLUGIN_PATH");
-    unsetenv("QT_QPA_PLATFORM_PLUGIN_PATH");
-
-    // 直接调用 kde-open（如果存在），否则用 xdg-open
-    bool success = false;
-    if (!QStandardPaths::findExecutable("kde-open").isEmpty()) {
-      success = QProcess::startDetached("kde-open", {url});
-    } else {
-      success = QProcess::startDetached("xdg-open", {url});
-    }
-
-    // 恢复原始环境变量
-    if (!originalLdPathStr.isEmpty()) {
-      setenv("LD_LIBRARY_PATH", originalLdPathStr.toUtf8().constData(), 1);
-    } else {
-      unsetenv("LD_LIBRARY_PATH");
-    }
-    if (!originalQtPluginPathStr.isEmpty()) {
-      setenv("QT_PLUGIN_PATH", originalQtPluginPathStr.toUtf8().constData(), 1);
-    } else {
-      unsetenv("QT_PLUGIN_PATH");
-    }
-
-    return success;
-  }
-
-  return browserSuccess;
-#else
-  Q_UNUSED(url);
-#endif
-
-  return true;
-}
-
-void Notes::appendToSyncList(QString file) {
-  QString baseFlag = m_Method->getBaseFlag(file);
-
-  // 一次性移除所有包含相同 baseFlag 的文件
-  notes_sync_files.removeIf([&baseFlag](const QString& f) {
-    return m_Method->getBaseFlag(f) == baseFlag;
-  });
-  notes_sync_files.append(file);
-
-  qDebug() << "Add to Notes Sync List ====>>>>" << file;
-}
-
-// 调用Android方法打开本地HTML文件
-void Notes::openLocalHtmlFileInAndroid() {
-#ifdef Q_OS_ANDROID
-  // 调用主Activity的静态方法启动WebView
-  QJniObject::callStaticMethod<void>(ANDROID_MAIN_ACTIVITY,  // 替换为实际包名
-                                     "launchWebView",  // 主Activity中的方法名
-                                     "()V"             // 方法签名
-  );
-
-  // 检查异常
-  QJniEnvironment env;
-  if (env->ExceptionCheck()) {
-    qDebug() << "启动WebView失败";
-    env->ExceptionClear();
-  }
-#endif
-}
-
-void Notes::refreshLocalHtmlFileInAndroid() {
-#ifdef Q_OS_ANDROID
-  QJniObject::callStaticMethod<void>("com/x/WebViewActivity",
-                                     "refreshWebViewContent", "()V");
-
-  QJniEnvironment env;
-  if (env->ExceptionCheck()) {
-    qDebug() << "刷新本地HTML失败，WebViewActivity实例不存在或已销毁";
-    env->ExceptionClear();
-  }
-#endif
-}
-
-// 工具函数：获取文件最后修改时间（作为版本标识）
-QString Notes::getFileVersion(const QString& filePath) {
-  QFileInfo fileInfo(filePath);
-  if (fileInfo.exists()) {
-    // 返回ISO格式时间（如：2023-10-05T14:30:25），便于排序和解析
-    return fileInfo.lastModified().toString(Qt::ISODate);
-  }
-  return QDateTime::currentDateTime().toString(
-      Qt::ISODate);  // 新文件用当前时间
-}
-
-// 保存差异（追加模式）：若文件存在则添加到数组，不存在则创建新数组
-bool Notes::appendDiffToFile(
-    const QString& diffFilePath,  // 差异记录文件路径
-    const QString& noteFilePath,  // 被修改的笔记文件路径
-    const QString& strDiff,       // 补丁数据
-    const QString& diffHtml)      // 可视化HTML
-{
-  // 1. 准备当前版本信息（用笔记文件的最后修改时间作为版本）
-  QString version = getFileVersion(noteFilePath);
-  QString timestamp =
-      QDateTime::currentDateTime().toString(Qt::ISODate);  // 本次修改时间
-
-  // 2. 读取现有记录（若文件存在）
-  QList<QJsonObject> diffList;
-  QFile file(diffFilePath);
-  if (file.exists()) {
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      qWarning() << "无法读取差异文件：" << diffFilePath;
-      return false;
-    }
-    QByteArray data = file.readAll();
-    file.close();
-
-    QJsonDocument doc = QJsonDocument::fromJson(data);
-    if (doc.isArray()) {
-      // 解析现有JSON数组
-      QJsonArray arr = doc.array();
-      for (int i = 0; i < arr.size(); ++i) {
-        if (arr[i].isObject()) {
-          diffList.append(arr[i].toObject());
-        }
-      }
-    } else {
-      qWarning() << "差异文件格式错误，将创建新文件";
-    }
-  }
-
-  // 3. 添加新的差异记录
-  QJsonObject newDiff;
-  newDiff["version"] = version;        // 版本标识（笔记文件修改时间）
-  newDiff["modifyTime"] = timestamp;   // 本次修改发生的时间
-  newDiff["notePath"] = noteFilePath;  // 关联的笔记文件路径
-  newDiff["patch"] = strDiff;          // 补丁数据
-  newDiff["htmlDiff"] = diffHtml;      // 可视化HTML
-  diffList.append(newDiff);
-
-  // 4. 写入文件（覆盖原文件，包含所有记录）
-  if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-    qWarning() << "无法写入差异文件：" << diffFilePath;
-    return false;
-  }
-
-  QJsonArray newArr;
-  foreach (const QJsonObject& obj, diffList) {
-    newArr.append(obj);
-  }
-
-  QTextStream out(&file);
-  out << QJsonDocument(newArr).toJson(QJsonDocument::Indented);  // 格式化输出
-  file.close();
-  return true;
-}
-
-// 读取所有差异记录（供APP列表调用）
-QList<QJsonObject> Notes::loadAllDiffs(const QString& diffFilePath) {
-  QList<QJsonObject> diffList;
-  QFile file(diffFilePath);
-  if (!file.exists() || !file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    return diffList;  // 文件不存在或无法打开，返回空列表
-  }
-
-  QByteArray data = file.readAll();
-  file.close();
-
-  QJsonDocument doc = QJsonDocument::fromJson(data);
-  if (doc.isArray()) {
-    QJsonArray arr = doc.array();
-    for (int i = 0; i < arr.size(); ++i) {
-      if (arr[i].isObject()) {
-        diffList.append(arr[i].toObject());
-      }
-    }
-  }
-  return diffList;
-}
-
-void Notes::renameTitle(bool isOk) {
-  if (m_NotesList->getNoteBookCurrentIndex() < 0) return;
-
-  m_NotesList->setTWCurrentItem();
-  if (!isOk) {
-    m_NotesList->on_btnRename_clicked();
-  } else {
-    m_NotesList->renameCurrentItem(new_title);
-    m_NotesList->saveNotesList();
-  }
-}
-
-//===========================================================
-// 检查是否需要清理 + 自动更新下次清理日期（二合一）
-// 返回：true=需要清理  false=不需要
-//===========================================================
-bool Notes::checkAndUpdateCleanDate() {
-  QSettings cfg(iniDir + "config.ini", QSettings::IniFormat);
-  QDate today = QDate::currentDate();
-
-  QString lastDateStr = cfg.value("Clean/LastCleanDate", "").toString();
-  QDate lastClean = QDate::fromString(lastDateStr, "yyyyMMdd");
-
-  // 无记录/无效日期 → 初始化，不清理
-  if (!lastClean.isValid()) {
-    cfg.setValue("Clean/LastCleanDate", today.toString("yyyyMMdd"));
-    cfg.sync();
-    return false;
-  }
-
-  QDate nextClean = lastClean.addDays(90);
-  bool needClean = (today >= nextClean);
-
-  // 需要清理 → 立即更新日期
-  if (needClean) {
-    cfg.setValue("Clean/LastCleanDate", today.toString("yyyyMMdd"));
-    cfg.sync();
-  }
-
-  if (needClean) buildCleanFileList();
-
-  return needClean;
-}
-
-//===========================================================
-// 构建自动清理列表（追加模式，不清空原有列表）
-// 传统at(i)遍历，无clazy警告，最安全
-//===========================================================
-void Notes::buildCleanFileList() {
-  QDate today = QDate::currentDate();
-  // 匹配开头 14 位数字，提取前 8 位日期数字
-  QRegularExpression reg("^(\\d{8})\\d{6}_");
-
-  // 传统下标遍历，无detach，无clazy警告
-  int count = orgRemoteFiles.size();
-  for (int i = 0; i < count; ++i) {
-    const QString& fullPath = orgRemoteFiles.at(i);
-
-    // 跳过包含 mainnotes / todo 的备份文件（永不删除）
-    if (fullPath.contains("mainnotes") || fullPath.contains("todo")) {
-      continue;
-    }
-
-    bool istest = false;
-    if (istest) {
-      // test
-      if (i == 0) {
-        needDelWebDAVFiles.append(fullPath);
-        qDebug() << "测试自动清理服务器文件：" << fullPath;
-      }
-    }
-
-    // 提取日期
-    QRegularExpressionMatch match = reg.match(fullPath);
-    if (!match.hasMatch()) continue;
-
-    QDate fileDate = QDate::fromString(match.captured(1), "yyyyMMdd");
-    if (!fileDate.isValid()) continue;
-
-    // ==============================
-    // ✅ 新安全策略：只删除超过 60 天的旧文件
-    // ✅ 90 天触发一次清理
-    // ✅ 保留最近 30 天，给足多端同步时间
-    if (fileDate.daysTo(today) > 60) {
-      needDelWebDAVFiles.append(fullPath);
-    }
-  }
-}
-
-void Notes::on_editNoteLink_textChanged(const QString& arg1) {
-  QString keyword = arg1.trimmed();
-
-  // 空内容隐藏
-  if (keyword.isEmpty()) {
-    m_popupList->hide();
+  if (tw->topLevelItemCount() == 0) {
+    mui->lblNoteBook->setText(tr("Note Book"));
+    mui->lblNoteList->setText(tr("Note List"));
+    m_Method->closeInfoWindow();
     return;
   }
 
-  m_popupList->setFixedWidth(ui->editNoteLink->width());
-
-  // ==============================
-  //  下拉列表完整样式（亮/暗双主题）
-  //  垂直滚动条 + 水平滚动条 + 无箭头 + 圆角扁平现代风
-  // ==============================
-  if (isDark) {
-    m_popupList->setStyleSheet(R"(
-    QListWidget {
-        background-color: #2C2C2C;
-        color: #E0E0E0;
-        border: 1px solid #555555;
-        border-top: none;
-        padding: 4px;
-        outline: none;
+  m_NotesList->loadAllNoteBook();
+  if (m_NotesList->getNoteBookCount() > 0) {
+    if (!m_NotesList->setCurrentItemFromMDFile(currentMDFile)) {
+      m_NotesList->setNoteBookCurrentIndex(0);
+      m_NotesList->clickNoteBook();
     }
-    QListWidget::item:selected {
-        background-color: #007ACC;
-        color: white;
-    }
-    QListWidget::item:hover {
-        background-color: #444444;
-    }
-
-    /* --- 垂直滚动条 --- */
-    QScrollBar:vertical {
-        background: #333333;
-        width: 8px;
-        margin: 0px;
-        border:none;
-    }
-    QScrollBar::handle:vertical {
-        background: #777777;
-        border-radius: 4px;
-        min-height: 25px;
-        border:none;
-    }
-    QScrollBar::handle:vertical:hover {
-        background: #999999;
-    }
-    QScrollBar::add-line:vertical,
-    QScrollBar::sub-line:vertical {
-        height: 0px;
-    }
-    QScrollBar::add-page:vertical,
-    QScrollBar::sub-page:vertical {
-        background: none;
-    }
-
-    /* --- 水平滚动条 --- */
-    QScrollBar:horizontal {
-        background: #333333;
-        height: 8px;
-        margin: 0px;
-        border:none;
-    }
-    QScrollBar::handle:horizontal {
-        background: #777777;
-        border-radius: 4px;
-        min-width: 25px;
-        border:none;
-    }
-    QScrollBar::handle:horizontal:hover {
-        background: #999999;
-    }
-    QScrollBar::add-line:horizontal,
-    QScrollBar::sub-line:horizontal {
-        width: 0px;
-    }
-    QScrollBar::add-page:horizontal,
-    QScrollBar::sub-page:horizontal {
-        background: none;
-    }
-  )");
-  } else {
-    m_popupList->setStyleSheet(R"(
-    QListWidget {
-        background-color: #FFFFFF;
-        color: #2C2C2C;
-        border: 1px solid #CCCCCC;
-        border-top: none;
-        padding: 4px;
-        outline: none;
-    }
-    QListWidget::item:selected {
-        background-color: #007ACC;
-        color: white;
-    }
-    QListWidget::item:hover {
-        background-color: #E5F1FF;
-    }
-
-    /* --- 垂直滚动条 --- */
-    QScrollBar:vertical {
-        background: #F5F5F5;
-        width: 8px;
-        margin: 0px;
-        border:none;
-    }
-    QScrollBar::handle:vertical {
-        background: #CCCCCC;
-        border-radius: 4px;
-        min-height: 25px;
-        border:none;
-    }
-    QScrollBar::handle:vertical:hover {
-        background: #AAAAAA;
-    }
-    QScrollBar::add-line:vertical,
-    QScrollBar::sub-line:vertical {
-        height: 0px;
-    }
-    QScrollBar::add-page:vertical,
-    QScrollBar::sub-page:vertical {
-        background: none;
-    }
-
-    /* --- 水平滚动条 --- */
-    QScrollBar:horizontal {
-        background: #F5F5F5;
-        height: 8px;
-        margin: 0px;
-        border:none;
-    }
-    QScrollBar::handle:horizontal {
-        background: #CCCCCC;
-        border-radius: 4px;
-        min-width: 25px;
-        border:none;
-    }
-    QScrollBar::handle:horizontal:hover {
-        background: #AAAAAA;
-    }
-    QScrollBar::add-line:horizontal,
-    QScrollBar::sub-line:horizontal {
-        width: 0px;
-    }
-    QScrollBar::add-page:horizontal,
-    QScrollBar::sub-page:horizontal {
-        background: none;
-    }
-  )");
+    m_NotesList->setNoteLabel();
   }
 
-  // 搜索匹配的标题（真正使用用户输入！）
-  QStringList matches = m_NoteIndexManager->searchTitles(keyword);
+  m_Method->closeInfoWindow();
 
-  // 刷新列表
-  m_popupList->clear();
-  m_popupList->addItems(matches);
-
-  // 显示在输入框正下方
-  QPoint pos =
-      ui->editNoteLink->mapToGlobal(QPoint(0, ui->editNoteLink->height()));
-  m_popupList->move(pos);
-  m_popupList->show();
-}
-
-void Notes::onPopupItemClicked(QListWidgetItem* item) {
-  QString title = item->text();
-
-  // 插入链接
-  insertNoteLink(title);
-
-  // 清空 + 关闭列表
-  ui->editNoteLink->clear();
-  m_popupList->hide();
-}
-
-void Notes::insertNoteLink(const QString& title) {
-  // 1. 通过标题获取路径
-  QString fullPath = m_NoteIndexManager->getFilePathByTitle(title);
-  if (fullPath.isEmpty()) return;
-
-  // 2. 转成相对路径 memo/xxx.md
-  QString basePath = iniDir;
-  QString relativePath = QDir(basePath).relativeFilePath(fullPath);
-
-  // 3. 生成最终格式
-  QString link = QString("[%1](%2)").arg(title, relativePath);
-
-  // 4. 插入编辑器
-#ifndef Q_OS_ANDROID
-  m_EditSource->insert(link);
-#endif
-
-  // 5. 清空输入框
-  ui->editNoteLink->clear();
-}
-
-// 只替换当前项，不自动下一个
-void Notes::on_btnReplace_clicked() {
-#ifndef Q_OS_ANDROID
-  QString search = ui->editFind->text().trimmed();
-  QString replace = ui->editReplace->text();
-
-  if (search.isEmpty() || !m_EditSource->hasSelectedText()) return;
-
-  m_EditSource->replaceSelectedText(replace);
-  isTextChange = true;
-#endif
-}
-
-// 替换当前匹配项，并自动查找下一个
-void Notes::on_btnFindReplace_clicked() {
-#ifndef Q_OS_ANDROID
-  QString search = ui->editFind->text().trimmed();
-  // 替换输入框
-  QString replace = ui->editReplace->text();
-
-  if (search.isEmpty()) return;
-
-  // 如果当前没有选中 = 先搜索一次
-  if (!m_EditSource->hasSelectedText()) {
-    searchNext();
-    return;
+  if (isRequestOpenNoteEditor) {
+    isRequestOpenNoteEditor = false;
+    openEditUI();
   }
-
-  // 执行替换
-  m_EditSource->replaceSelectedText(replace);
-  isTextChange = true;
-
-  // 立即查找下一个（核心功能：替换后自动找下一个）
-  searchNext();
-#endif
 }
 
-// 替换所有匹配
-void Notes::on_btnReplaceAll_clicked() {
-#ifndef Q_OS_ANDROID
-  QString search = ui->editFind->text().trimmed();
-  QString replace = ui->editReplace->text();
+void Notes::openNotesUI() {
+  // 先清空旧连接，避免重复触发
+  disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
+  // 绑定：等 sync 全部结束 → 再删除
+  disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
+  connect(
+      m_Notes, &Notes::syncFinished, this,
+      [this]() { startBackgroundTaskDelAndClear(); },
+      Qt::ConnectionType(Qt::QueuedConnection | Qt::SingleShotConnection));
+  mw_one->execNeedSyncNotes();
 
-  if (search.isEmpty()) return;
-
-  // ==============================================
-  // ✅ 正确保存：光标位置 + 锚点位置（两个都要存）
-  // ==============================================
-  int origCurPos =
-      m_EditSource->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS);
-  int origAnchor = m_EditSource->SendScintilla(QsciScintilla::SCI_GETANCHOR);
-
-  // 回到文档开头
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETANCHOR, 0);
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETCURRENTPOS, 0);
-
-  int count = 0;
-  bool found =
-      m_EditSource->findFirst(search, false, false, false, false, true);
-
-  while (found) {
-    m_EditSource->replaceSelectedText(replace);
-    count++;
-    isTextChange = true;
-    found = m_EditSource->findNext();
-  }
-
-  // ==============================================
-  // ✅ 正确恢复：两个位置一起恢复 → 完全无选中
-  // ==============================================
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETANCHOR, origAnchor);
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETCURRENTPOS, origCurPos);
-
-  qDebug() << "全部替换完成：" << count << " 处";
-#endif
+  mui->frameNoteList->show();
+  mui->frameMain->hide();
 }
+
+void Notes::editNote() { openEditUI(); }

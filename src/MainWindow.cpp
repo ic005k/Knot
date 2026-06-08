@@ -2478,6 +2478,7 @@ void MainWindow::on_btnCatalogue_pressed() {
   if (mui->lblBookName->text() == "Book Name") return;
 
   if (mui->qwViewBookNote->isVisible()) return;
+  if (mui->qwBookmark->isVisible()) return;
 
   if (mui->qwCata->source().isEmpty()) {
     mui->qwCata->rootContext()->setContextProperty("m_Reader",
@@ -2498,6 +2499,7 @@ void MainWindow::on_btnRemoveBookList_pressed() { m_Reader->removeBookList(); }
 
 void MainWindow::on_btnShowBookmark_pressed() {
   if (mui->qwViewBookNote->isVisible()) return;
+  if (mui->qwCata->isVisible()) return;
 
   if (mui->qwBookmark->source().isEmpty()) {
     mui->qwBookmark->rootContext()->setContextProperty("m_Reader",
