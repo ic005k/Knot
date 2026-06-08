@@ -27,17 +27,19 @@
 #include <algorithm>
 #include <utility>  // for std::as_const
 
-// class DatabaseManager;
-// class SearchModel;
-
 #include "database_manager.h"
 #include "search_model.h"
 #include "src/Comm/TextEditToolbar.h"
+#include "src/MainWindow.h"
 #include "src/Notes/MoveTo.h"
 #include "src/Notes/NewNoteBook.h"
 #include "src/Notes/NoteListModel.h"
 #include "src/Notes/note_graph.h"
+#include "src/defines.h"
+#include "ui_MainWindow.h"
 #include "ui_MoveTo.h"
+#include "ui_NewNoteBook.h"
+#include "ui_NotesList.h"
 
 struct MySearchResult {
   QString filePath;

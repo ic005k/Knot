@@ -86,7 +86,31 @@ QString Notes::getCurrentJSON(const QString& md) {
 }
 
 void Notes::updateMDFileToSyncLists() { zipNoteToSyncList(); }
-void Notes::updateMainnotesIniToSyncLists() { /* 原有逻辑 */ }
+
+void Notes::updateMainnotesIniToSyncLists() {
+  qDebug() << "isSaveNotesConfig=" << isSaveNotesConfig;
+
+  if (isSaveNotesConfig) {
+    QString lastModi = m_Method->getFileUTCString(iniDir + "mainnotes.json");
+    QString zipMainnotes =
+        privateDir + "KnotData/" + lastModi + "_mainnotes.json.zip";
+
+    if (!m_Method->compressFileWithZlib(iniDir + "mainnotes.json", zipMainnotes,
+                                        Z_DEFAULT_COMPRESSION)) {
+      errorInfo = tr("An error occurred while compressing the file.");
+      auto msg = std::make_unique<ShowMessage>(this);
+      msg->showMsg("Knot", errorInfo, 1);
+      return;
+    }
+
+    QString enc_file = m_Method->useEnc(zipMainnotes);
+    if (enc_file != "") zipMainnotes = enc_file;
+
+    appendToSyncList(zipMainnotes);
+
+    isSaveNotesConfig = false;
+  }
+}
 
 void Notes::appendToSyncList(QString file) {
   QString baseFlag = m_Method->getBaseFlag(file);

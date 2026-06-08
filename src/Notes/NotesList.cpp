@@ -1,11 +1,5 @@
 ﻿#include "NotesList.h"
 
-#include "src/MainWindow.h"
-#include "src/defines.h"
-#include "ui_MainWindow.h"
-#include "ui_NewNoteBook.h"
-#include "ui_NotesList.h"
-
 QString strNoteNameIndexFile = "";
 
 NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
@@ -407,116 +401,6 @@ void NotesList::renameCurrentItem(QString title) {
 }
 
 void NotesList::setNoteName(QString name) { noteTitle = name; }
-
-/*void NotesList::on_btnDel_clicked() {
-  if (tw->topLevelItemCount() == 0) return;
-
-  QTreeWidgetItem* item = tw->currentItem();
-
-  if (item == NULL) return;
-
-  QString strFlag;
-  if (item->text(1).isEmpty())
-    strFlag = tr("NoteBook");
-  else
-    strFlag = tr("Note");
-
-  auto m_ShowMsg = std::make_unique<ShowMessage>(this);
-  if (!m_ShowMsg->showMsg("Knot",
-                          tr("Move to the recycle bin?") + "\n\n" + strFlag +
-                              " : " + item->text(0),
-                          2)) {
-    return;
-  }
-
-  QStringList delFilesIndex;
-  QString str0, str1;
-  // Top Item
-  if (item->parent() == NULL) {
-    int count = item->childCount();
-    int index = tw->currentIndex().row();
-
-    for (int i = 0; i < count; i++) {
-      QTreeWidgetItem* childItem = new QTreeWidgetItem;
-
-      str0 = item->child(i)->text(0);
-      str1 = item->child(i)->text(1);
-
-      delFilesIndex.append(iniDir + str1);
-
-      // Child Notes
-      if (!str1.isEmpty()) {
-        childItem->setText(0, str0);
-        childItem->setText(1, str1);
-        addItem(twrb, childItem);
-
-        // Child NoteBook
-      } else {
-        auto* child_Item = item->child(i);
-        int count1 = child_Item->childCount();
-        delete childItem;
-        childItem = nullptr;
-
-        for (int j = 0; j < count1; j++) {
-          str0 = item->child(i)->child(j)->text(0);
-          str1 = item->child(i)->child(j)->text(1);
-          QTreeWidgetItem* childItem = new QTreeWidgetItem;
-          childItem->setText(0, str0);
-          childItem->setText(1, str1);
-          addItem(twrb, childItem);
-        }
-      }
-    }
-
-    tw->takeTopLevelItem(index);
-
-    // Child Item
-  } else {
-    // Notes
-    if (!item->text(1).isEmpty()) {
-      str0 = item->text(0);
-      str1 = item->text(1);
-      QTreeWidgetItem* childItem = new QTreeWidgetItem;
-      childItem->setText(0, str0);
-      childItem->setText(1, str1);
-      addItem(twrb, childItem);
-
-      delFilesIndex.append(iniDir + str1);
-
-      // Child NoteBook
-    } else {
-      int count = item->childCount();
-      for (int n = 0; n < count; n++) {
-        str0 = item->child(n)->text(0);
-        str1 = item->child(n)->text(1);
-        QTreeWidgetItem* childItem = new QTreeWidgetItem;
-        childItem->setText(0, str0);
-        childItem->setText(1, str1);
-        addItem(twrb, childItem);
-      }
-    }
-
-    item->parent()->removeChild(item);
-  }
-
-  if (tw->topLevelItemCount() > 0) {
-    if (tw->currentItem()->childCount() == 0) {
-      m_Notes->loadEmptyNote();
-    }
-  } else {
-    m_Notes->loadEmptyNote();
-    mui->lblNoteBook->setText(tr("Note Book"));
-    mui->lblNoteList->setText(tr("Note List"));
-  }
-
-  startBackgroundTaskDelFilesIndex(delFilesIndex);
-
-  tw->setFocus();
-
-  saveNotesList();
-
-  resetQML_List();
-}*/
 
 void NotesList::on_btnDel_clicked() {
   if (tw->topLevelItemCount() == 0) return;
@@ -981,21 +865,6 @@ void NotesList::saveCurrentNoteInfo() {
   Reg.setValue("/MainNotes/NoteName", noteTitle);
   Reg.sync();
 }
-
-/*void NotesList::saveNotesList() {
-  QFuture<void> future = QtConcurrent::run([=]() { saveNotesListToFile(); });
-
-  // 可选：使用 QFutureWatcher 监控进度
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    mw_one->strLatestModify = tr("Modi Notes List");
-    m_Notes->isSaveNotesConfig = true;
-    qDebug() << "NotesList save completed.";
-
-    watcher->deleteLater();
-  });
-  watcher->setFuture(future);
-}*/
 
 void NotesList::saveNotesList() {
   // 【高频防抖】如果正在保存，直接跳过，不允许重复触发
@@ -1586,6 +1455,8 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
       QString baseFlag = m_Method->getBaseFlag(md);
       if (file.contains(baseFlag)) m_Notes->notes_sync_files.removeOne(file);
     }
+
+    qDebug() << "删除笔记后的同步文件列表：" << m_Notes->notes_sync_files;
 
     setDelNoteFlag(curItem->text(1));
     curItem->parent()->removeChild(curItem);

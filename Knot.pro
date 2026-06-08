@@ -389,6 +389,7 @@ SOURCES += \
     src/LoadPic.cpp \
     src/MainHelper.cpp \
     src/MainWindow.cpp \
+    src/MainWindow_btn.cpp \
     src/MyThread.cpp \
     src/Notes/ColorDialog.cpp \
     src/Notes/MarkdownToHtml.cpp \
