@@ -162,61 +162,6 @@ public class ImageViewerActivity
         }
     };
 
-    /*@Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Application application = this.getApplication();
-        application.registerActivityLifecycleCallbacks(this);
-
-        // 去除title(App Name)
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        // ========== 统一状态栏、导航栏 ==========
-        updateSystemBars();
-
-        // ========== 统一布局 ==========
-        if (MyActivity.isDark) {
-            setContentView(R.layout.activity_image_viewer_dark);
-        } else {
-            setContentView(R.layout.activity_image_viewer);
-        }
-
-        imageView = findViewById(R.id.image_view);
-        filePathTextView = findViewById(R.id.file_path_text_view);
-        shareButton = findViewById(R.id.share_button);
-        if (MyActivity.zh_cn) shareButton.setText("分享");
-        else shareButton.setText("Share");
-
-        imagePath = MyActivity.strImageFile;
-        if (imagePath != null) {
-            filePathTextView.setText(imagePath);
-            loadImage(imagePath);
-        }
-
-        shareButton.setOnClickListener(
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    shareImage(MyActivity.strImageFile);
-                }
-            }
-        );
-
-        // 修复 Android 14 崩溃
-        IntentFilter filter = new IntentFilter(
-            Intent.ACTION_CLOSE_SYSTEM_DIALOGS
-        );
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            registerReceiver(
-                mHomeKeyEvent,
-                filter,
-                Context.RECEIVER_NOT_EXPORTED
-            );
-        } else {
-            registerReceiver(mHomeKeyEvent, filter);
-        }
-        }*/
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -13,7 +13,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -30,7 +29,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.Handler;
 import android.text.Spannable;
@@ -41,15 +39,13 @@ import android.text.method.ScrollingMovementMethod;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.TextView;
-import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
 import com.x.MyActivity;
 import com.x.NoteEditor;
 import java.io.BufferedReader;
@@ -69,14 +65,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 import org.ini4j.Wini;
 
 public class ShareReceiveActivity
-    extends Activity
+    extends AppCompatActivity
     implements View.OnClickListener
 {
 
@@ -130,12 +125,21 @@ public class ShareReceiveActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // ========== 隐藏标题栏 ==========
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+
         context = getApplicationContext();
 
-        // 去除title(App Name)
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        if (MyActivity.isDark) {
+            setContentView(R.layout.activity_share_receive_dark);
+        } else {
+            setContentView(R.layout.activity_share_receive);
+        }
+        ImmersiveUtil.applyRealImmersive(this);
 
-        setContentView(R.layout.activity_share_receive);
         tv = (TextView) findViewById(R.id.text_info);
         tv.setMovementMethod(ScrollingMovementMethod.getInstance());
 
@@ -232,10 +236,18 @@ public class ShareReceiveActivity
         }
 
         // HomeKey
-        registerReceiver(
-            mHomeKeyEvent,
-            new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+        IntentFilter filter = new IntentFilter(
+            Intent.ACTION_CLOSE_SYSTEM_DIALOGS
         );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            registerReceiver(
+                mHomeKeyEvent,
+                filter,
+                Context.RECEIVER_NOT_EXPORTED
+            );
+        } else {
+            registerReceiver(mHomeKeyEvent, filter);
+        }
     }
 
     private BroadcastReceiver mHomeKeyEvent = new BroadcastReceiver() {
@@ -252,117 +264,16 @@ public class ShareReceiveActivity
                     // 表示按了home键,程序直接进入到后台
                     System.out.println("NoteEditor HOME键被按下...");
 
-                    onBackPressed();
+                    // onBackPressed();
                 } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
                     // 表示长按home键,显示最近使用的程序
                     System.out.println("NoteEditor 长按HOME键...");
 
-                    onBackPressed();
+                    // onBackPressed();
                 }
             }
         }
     };
-
-    /*@Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btnAddToTodo:
-
-                NoteEditor.closeNoteEditorView();
-                try {
-                    File file = new File(share_ini);
-                    if (!file.exists())
-                        file.createNewFile();
-                    Wini ini = new Wini(file);
-                    ini.put("share", "method", "todo");
-                    ini.store();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                if (type.startsWith("text/")) {
-                    goReceiveString();
-                }
-
-                onBackPressed();
-                break;
-
-            case R.id.btnAppendNote:
-
-                NoteEditor.closeNoteEditorView();
-                try {
-                    File file = new File(share_ini);
-                    if (!file.exists())
-                        file.createNewFile();
-                    Wini ini = new Wini(file);
-                    ini.put("share", "method", "appendNote");
-                    ini.store();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                if (type.startsWith("text/")) {
-                    goReceiveString();
-                }
-
-                if (type.startsWith("image/")) {
-                    goReceiveImage();
-                }
-
-                onBackPressed();
-                break;
-
-            case R.id.btnInsertNote:
-
-                NoteEditor.closeNoteEditorView();
-                try {
-                    File file = new File(share_ini);
-                    if (!file.exists())
-                        file.createNewFile();
-                    Wini ini = new Wini(file);
-                    ini.put("share", "method", "insertNote");
-                    ini.store();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                if (type.startsWith("text/")) {
-                    goReceiveString();
-                }
-
-                if (type.startsWith("image/")) {
-                    goReceiveImage();
-                }
-
-                onBackPressed();
-                break;
-
-            case R.id.btnFreePaste:
-
-                NoteEditor.closeNoteEditorView();
-                try {
-                    File file = new File(share_ini);
-                    if (!file.exists())
-                        file.createNewFile();
-                    Wini ini = new Wini(file);
-                    ini.put("share", "method", "freePaste");
-                    ini.store();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                if (type.startsWith("text/")) {
-                    goReceiveString();
-                }
-
-                if (type.startsWith("image/")) {
-                    goReceiveImage();
-                }
-
-                onBackPressed();
-                break;
-        }
-    }*/
 
     @Override
     public void onClick(View v) {

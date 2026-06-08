@@ -324,7 +324,6 @@
             android:exported="true"
             android:label="Todo or Note"
             android:screenOrientation="unspecified"
-            android:theme="@style/splashScreenTheme"
         >
 
             <intent-filter>
