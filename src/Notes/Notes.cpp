@@ -621,11 +621,6 @@ void Notes::delRemoteFile(const QStringList& Files) {
   }
 
   qDebug() << "delWebDAVFiles=" << delFiles;
-  if (delFiles.count() == 0) {
-    needDelWebDAVFiles.clear();
-    mw_one->saveNeedDelWebDAVFiles("");
-    isDelWebDAVFilesEnd = true;
-  }
 
   m_CloudBackup->deleteWebDAVFiles(delFiles);
 }
@@ -1085,9 +1080,10 @@ void Notes::startBackgroundTaskDelAndClear() {
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Database del and clear completed...";
 
-    if (!m_NotesList->isDelNoteRecycle)
+    if (!m_NotesList->isDelNoteRecycle) {
+      m_NotesList->delRemoteWebDAVFiles();
       loadNotesToUI();
-    else
+    } else
       m_NotesList->isDelNoteRecycle = false;
 
     watcher->deleteLater();
@@ -1131,12 +1127,18 @@ void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
 }
 
 void Notes::openNotesUI() {
+  // 先清空旧连接，避免重复触发
+  disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
+  // 绑定：等 sync 全部结束 → 再删除
+  disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
+  connect(
+      m_Notes, &Notes::syncFinished, this,
+      [this]() { startBackgroundTaskDelAndClear(); },
+      Qt::ConnectionType(Qt::QueuedConnection | Qt::SingleShotConnection));
   mw_one->execNeedSyncNotes();
 
   mui->frameNoteList->show();
   mui->frameMain->hide();
-
-  startBackgroundTaskDelAndClear();
 }
 
 void Notes::loadNotesToUI() {
@@ -1355,18 +1357,6 @@ void Notes::openNotes() {
     for (int i = 0; i < m_CloudBackup->webdavFileList.count(); i++) {
       orgRemoteFiles.append(m_CloudBackup->webdavFileList.at(i));
       orgRemoteDateTime.append(m_CloudBackup->webdavDateTimeList.at(i));
-    }
-
-    // 先执行由于某些原因导致未删除的远程文件
-    needDelWebDAVFiles = mw_one->getNeedDelWebDAVFiles();
-    if (needDelWebDAVFiles.count() > 0) {
-      isDelWebDAVFilesEnd = false;
-      m_NotesList->delRemoteWebDAVFiles();
-
-      while (!isDelWebDAVFilesEnd) {
-        QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
-        QThread::msleep(1);
-      }
     }
 
     WebDavHelper* helper =

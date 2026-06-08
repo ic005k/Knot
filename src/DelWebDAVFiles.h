@@ -63,7 +63,6 @@ class CloudDeleter : public QObject {
                 qApp,
                 [=]() {
                   // 这里面所有代码，都会在主线程安全执行
-                  mw_one->saveNeedDelWebDAVFiles(file);
                 },
                 Qt::DirectConnection);
 
@@ -86,7 +85,6 @@ class CloudDeleter : public QObject {
                 qApp,
                 [=]() {
                   // 这里面所有代码，都会在主线程安全执行
-                  isDelWebDAVFilesEnd = true;
                 },
                 Qt::DirectConnection);
 

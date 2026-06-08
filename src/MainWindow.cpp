@@ -691,56 +691,9 @@ void MainWindow::execNeedSyncNotes() {
     }
 
     m_Notes->syncToWebDAV();
+  } else {
+    emit m_Notes->syncFinished();
   }
-}
-
-void MainWindow::saveNeedDelWebDAVFiles(const QString& file) {
-  int m_count = needDelWebDAVFiles.count();
-
-  if (file.length() > 0) {
-    for (int i = 0; i < m_count; i++) {
-      QString localFile = needDelWebDAVFiles.at(i);
-      QFileInfo fi(localFile);
-      QString fn = fi.fileName();
-
-      if (file.contains(fn)) {
-        needDelWebDAVFiles.removeOne(localFile);
-        qDebug() << "已从webdav的删除列表中移除：位置 "
-                 << QString::number(i) + " . " << localFile;
-        // 去掉 /dav/
-        QString cleanFile = file;
-        cleanFile.remove("/dav/");
-        m_Notes->orgRemoteFiles.removeOne(cleanFile);
-      }
-    }
-  }
-
-  m_count = needDelWebDAVFiles.count();
-  QString tempFile = privateDir + "need_delwebdav_" +
-                     QUuid::createUuid().toString(QUuid::WithoutBraces) +
-                     ".tmp";
-  QString endFile = privateDir + "need_delwebdav.ini";
-  QSettings RegSync(tempFile, QSettings::IniFormat);
-  RegSync.setValue("count", m_count);
-  for (int i = 0; i < m_count; i++) {
-    RegSync.setValue("note" + QString::number(i), needDelWebDAVFiles.at(i));
-  }
-  RegSync.sync();
-  m_Method->upIniFile(tempFile, endFile);
-}
-
-QStringList MainWindow::getNeedDelWebDAVFiles() {
-  int m_count;
-  QStringList list;
-  QString endFile = privateDir + "need_delwebdav.ini";
-  QSettings RegSync(endFile, QSettings::IniFormat);
-  m_count = RegSync.value("count", 0).toInt();
-  for (int i = 0; i < m_count; i++) {
-    QString file = RegSync.value("note" + QString::number(i), "").toString();
-    if (file.length() > 0) list.append(file);
-  }
-
-  return list;
 }
 
 void MainWindow::setMini() {
@@ -2225,7 +2178,6 @@ void MainWindow::on_btnBackNoteList_pressed() {
   m_Notes->updateMainnotesIniToSyncLists();
 
   saveNeedSyncNotes();
-  saveNeedDelWebDAVFiles("");
 
   mui->frameMain->show();
   mui->frameNoteList->hide();
@@ -2262,8 +2214,6 @@ void MainWindow::on_btnBackNoteRecycle_clicked() {
 void MainWindow::on_btnNoteRecycle_pressed() {
   mui->frameNoteList->hide();
   mui->frameNoteRecycle->show();
-
-  needDelWebDAVFiles = getNeedDelWebDAVFiles();
 
   m_NotesList->loadAllRecycle();
 }

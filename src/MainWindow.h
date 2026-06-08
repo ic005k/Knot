@@ -506,9 +506,6 @@ class MainWindow : public QMainWindow {
   void on_btnUpload_pressed();
   void on_btnDownload_pressed();
 
-  void saveNeedDelWebDAVFiles(const QString& file);
-  QStringList getNeedDelWebDAVFiles();
-
   void sendFakeTouch();
 
  protected:

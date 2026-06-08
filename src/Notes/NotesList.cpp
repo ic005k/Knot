@@ -1534,7 +1534,7 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
 
   // 4. 解决QVariant无>运算符问题：转换为QList<int>并倒序排序
   QList<int> selectedIntIndexes;
-  // 核心修改：将遍历对象改为const QVariantList&，明确只读属性
+  // 核心：将遍历对象改为const QVariantList&，明确只读属性
   const QVariantList& constSelectedIndexes = selectedIndexes;
   for (const QVariant& indexVar : constSelectedIndexes) {
     if (indexVar.canConvert<int>()) {
@@ -1561,9 +1561,8 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
 
     if (curItem->parent() == NULL) continue;
 
-    // ===== 原有核心删除逻辑（无修改） =====
+    // ===== 核心删除逻辑 =====
     QString md = iniDir + curItem->text(1);
-    needDelWebDAVFiles.append(md + ".zip");
     QStringList imagesInMD = extractLocalImagesFromMarkdown(md);
     for (int i = 0; i < imagesInMD.count(); i++) {
       QString image_file = imagesInMD.at(i);
@@ -1584,7 +1583,7 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
     QStringList tempList = m_Notes->notes_sync_files;
     for (int i = 0; i < tempList.count(); i++) {
       QString file = tempList.at(i);
-      QString baseFlag = m_Method->getBaseFlag(file);
+      QString baseFlag = m_Method->getBaseFlag(md);
       if (file.contains(baseFlag)) m_Notes->notes_sync_files.removeOne(file);
     }
 
@@ -1703,7 +1702,28 @@ void NotesList::needDelNotes() {
     qDebug() << "needDelFiles=" << needDelFiles.count();
   }
 
-  // del files
+  // del remote file
+  for (int i = 0; i < needDelFiles.count(); i++) {
+    QString delFile = needDelFiles.at(i);
+    QFileInfo fi(delFile);
+    QString delFileName = fi.completeBaseName();
+    if (i == 0)
+      qDebug() << "delFile=" << delFile << "delFileName=" << delFileName;
+
+    for (int j = 0; j < m_Notes->orgRemoteFiles.count(); j++) {
+      QString remoteFile = m_Notes->orgRemoteFiles.at(j);
+
+      if (j == 0 && i == 0) qDebug() << "remoteFile=" << remoteFile;
+
+      if (remoteFile.contains(delFileName)) {
+        if (!needDelWebDAVFiles.contains(remoteFile))
+          needDelWebDAVFiles.append(remoteFile);
+        break;
+      }
+    }
+  }
+
+  // del local files
   bool isDelMDOk, isDelJSONOk;
   for (int i = 0; i < needDelFiles.count(); i++) {
     QString mdFile = iniDir + needDelFiles.at(i);
@@ -3862,6 +3882,11 @@ void NotesList::showNotsListMenu(int x, int y) {
 
 void NotesList::delRemoteWebDAVFiles() {
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+    // 去重
+    QSet<QString> uniqueSet(needDelWebDAVFiles.begin(),
+                            needDelWebDAVFiles.end());
+    needDelWebDAVFiles = uniqueSet.values();
+
     int count = needDelWebDAVFiles.count();
     if (count > 0)
       m_Notes->delRemoteFile(needDelWebDAVFiles);

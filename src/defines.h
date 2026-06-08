@@ -110,7 +110,7 @@ inline bool isAndroid, isLinux, isMacOS, isZipOK, isMenuImport, isDownData,
     loading, isEncrypt, isIOS, isEpub, isEpubError, isText, isPDF,
     isInitThemeEnd, isUpData, isRemovedTopItem, isReport, isReadTWEnd,
     isWindows, isEBook, isGpsRun, isRunPaused, isGetWebDavModiTime, isPlayBook,
-    isDelWebDAVFilesEnd, isSelectTab;
+    isSelectTab;
 
 inline bool isPasswordError = false;
 inline bool isrbFreq = true;
