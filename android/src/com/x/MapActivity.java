@@ -17,6 +17,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import java.io.File;
@@ -36,7 +37,7 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
-public class MapActivity extends Activity {
+public class MapActivity extends AppCompatActivity {
 
     private Timer pullNewTrackTimer; // 定时器
     private int lastPullIndex = 0; // 记录上次拉取到的轨迹点索引（避免重复）
@@ -78,75 +79,22 @@ public class MapActivity extends Activity {
     private Marker startMarker; // 起点（蓝色，引用 marker_start.xml）
     private Marker endMarker; // 终点（绿色，引用 marker_end.xml）
 
-    /*@Override
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // ========== 统一沉浸模式（和腾讯地图逻辑完全一样 · 全页面通用） ==========
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
-            window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-            );
-
-            // 状态栏 + 导航栏 透明（和地图一样）
-            window.setStatusBarColor(Color.TRANSPARENT);
-            window.setNavigationBarColor(Color.TRANSPARENT);
-
-            // 布局延伸到系统栏（和地图一样）
-            window
-                .getDecorView()
-                .setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                );
+        // ========== 隐藏标题栏 ==========
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
         }
-
-        // ========== 自动避让系统栏（和地图逻辑一样 · 通用不报错版） ==========
-        View decorView = getWindow().getDecorView();
-        decorView.setOnApplyWindowInsetsListener((v, insets) -> {
-            int statusBarHeight = insets.getSystemWindowInsetTop();
-            int navBarHeight = insets.getSystemWindowInsetBottom();
-
-            // --------------------------
-            // 通用方式：给 最外层布局 加 padding（所有页面都能用）
-            // --------------------------
-            View contentView = findViewById(android.R.id.content);
-            if (contentView != null) {
-                contentView.setPadding(0, statusBarHeight, 0, navBarHeight);
-            }
-
-            return insets;
-        });
 
         MyActivity.mapActivityInstance = this;
-
-        // 去除title(App Name)
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        if (MyActivity.isDark) {
-            this.setStatusBarColor("#19232D"); // 深色
-            getWindow()
-                .getDecorView()
-                .setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-            setContentView(R.layout.noteeditor_dark);
-        } else {
-            this.setStatusBarColor("#F3F3F3"); // 灰
-            getWindow()
-                .getDecorView()
-                .setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            setContentView(R.layout.noteeditor);
-        }
 
         // 初始化OSM配置 - 这必须在setContentView之前
         initOsmGlobalConfig();
 
         setContentView(R.layout.activity_map);
-
-        // 检查并请求必要的权限
-        // checkPermissions();
+        ImmersiveUtil.applyRealImmersive(this);
 
         initViews();
         initOsmMap();
@@ -191,138 +139,6 @@ public class MapActivity extends Activity {
                     }
                 }
             );
-        }
-    }*/
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        MyActivity.mapActivityInstance = this;
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        // ==============================================
-        // 【核心】自动判断：是 腾讯地图 还是 OSM 地图
-        // ==============================================
-        boolean isTencentMap = this instanceof TencentMapActivity;
-
-        // ==============================================
-        // 一、状态栏统一配置（保留你的暗黑模式）
-        // ==============================================
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-            );
-
-            if (isTencentMap) {
-                // ----------------------
-                // 腾讯地图：透明沉浸 + 蓝色背景 → 状态栏文字永远白色
-                // ----------------------
-                window.clearFlags(
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                );
-                window.setStatusBarColor(Color.TRANSPARENT);
-                window.setNavigationBarColor(Color.TRANSPARENT);
-
-                int flags =
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
-
-                // 重点：永远不加 LIGHT_STATUS_BAR，保证文字是白色
-                // 暗黑模式下导航栏图标也保持白色
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-                }
-
-                window.getDecorView().setSystemUiVisibility(flags);
-            } else {
-                // OSM 地图逻辑：底色固定浅色，强制状态栏文字为黑色
-                if (MyActivity.isDark) {
-                    window.setStatusBarColor(Color.parseColor("#19232D"));
-                } else {
-                    window.setStatusBarColor(Color.parseColor("#F3F3F3"));
-                }
-                // API23+ 开启浅色状态栏模式 → 文字/图标变黑
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    getWindow()
-                        .getDecorView()
-                        .setSystemUiVisibility(
-                            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                        );
-                }
-            }
-        }
-
-        // ==============================================
-        // 二、系统栏避让（自动适配两种地图）
-        // ==============================================
-        getWindow()
-            .getDecorView()
-            .setOnApplyWindowInsetsListener((v, insets) -> {
-                int statusH = insets.getSystemWindowInsetTop();
-                int navH = insets.getSystemWindowInsetBottom();
-
-                // 只对当前页面存在的控件做避让
-                TextView topDate = findViewById(R.id.topDateLabel);
-                TextView bottomInfo = findViewById(R.id.bottomInfoLabel);
-                View content = findViewById(android.R.id.content);
-
-                if (isTencentMap) {
-                    // 腾讯地图：只让文字避开状态栏
-                    if (topDate != null) topDate.setPadding(0, statusH, 0, 0);
-                    if (bottomInfo != null) bottomInfo.setPadding(
-                        0,
-                        0,
-                        0,
-                        navH
-                    );
-                } else {
-                    // OSM 地图：原始逻辑，整个内容避让
-                    if (content != null) content.setPadding(
-                        0,
-                        statusH,
-                        0,
-                        navH
-                    );
-                }
-                return insets;
-            });
-
-        // ==============================================
-        // 三、加载布局（父类只加载OSM，腾讯地图自己加载）
-        // ==============================================
-        if (!isTencentMap) {
-            initOsmGlobalConfig();
-            setContentView(R.layout.activity_map);
-        }
-
-        // ==============================================
-        // 四、原有逻辑
-        // ==============================================
-        if (!isTencentMap) {
-            initViews();
-            initOsmMap();
-            initCenterMarker();
-
-            if (osmMapView != null) {
-                osmMapView
-                    .getViewTreeObserver()
-                    .addOnGlobalLayoutListener(() -> {
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            if (
-                                osmMapView != null &&
-                                !isFinishing() &&
-                                !isDestroyed()
-                            ) {
-                                drawAllTrackPoints();
-                                topDateLabel.setText(MyActivity.lblDate);
-                                bottomInfoLabel.setText(MyActivity.lblInfo);
-                            }
-                        }, 0);
-                    });
-            }
         }
     }
 
