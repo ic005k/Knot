@@ -66,8 +66,11 @@ QFuture<ResultsMap> NotesList::performSearchAsync(const QString& dirPath,
 
 void NotesList::displayResults(const ResultsMap& results) {
   for (auto it = results.begin(); it != results.end(); ++it) {
-    qDebug() << "文件：" << it.key();
-    qDebug() << "匹配行号：" << it.value().lineNumbers;
+    if (!isAndroid) {
+      qDebug() << "文件：" << it.key();
+      qDebug() << "匹配行号：" << it.value().lineNumbers;
+    }
+
     QString file = it.key();
     QList<int> lineNumbersList = it.value().lineNumbers;
     QString strLine;

@@ -33,6 +33,9 @@ void Notes::delRemoteFile(const QStringList& Files) {
       }
     }
   }
+
+  delFiles.removeDuplicates();
+
   m_CloudBackup->deleteWebDAVFiles(delFiles);
 }
 

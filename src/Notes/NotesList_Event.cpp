@@ -41,8 +41,10 @@ void NotesList::onSearchFinished() {
     const QString& filePath = it.key();
     const QList<int> lines = it.value().lineNumbers;
 
-    qDebug() << "文件：" << it.key();
-    qDebug() << "匹配行号：" << it.value().lineNumbers;
+    if (!isAndroid) {
+      qDebug() << "文件：" << it.key();
+      qDebug() << "匹配行号：" << it.value().lineNumbers;
+    }
 
     QString strLineSn;
     int linesCount = lines.count();

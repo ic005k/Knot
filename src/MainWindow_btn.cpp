@@ -412,7 +412,7 @@ void MainWindow::on_btnRestoreNoteRecycle_clicked() {
   m_NotesList->updateAllNoteIndexManager();
 }
 
-void MainWindow::on_btnFindNotes_pressed() {
+void MainWindow::on_btnFindNotes_clicked() {
   QString str = mui->editFindNote->text().trimmed();
   if (str.length() == 0) return;
   m_NotesList->startFind(str);

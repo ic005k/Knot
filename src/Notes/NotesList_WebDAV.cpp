@@ -8,9 +8,9 @@ void NotesList::delRemoteWebDAVFiles() {
     needDelWebDAVFiles = uniqueSet.values();
 
     int count = needDelWebDAVFiles.count();
-    if (count > 0)
+    if (count > 0) {
       m_Notes->delRemoteFile(needDelWebDAVFiles);
-    else
+    } else
       qDebug() << "无须删除远程文件";
 
     m_Method->setAccessCount(needDelWebDAVFiles.count());

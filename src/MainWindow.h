@@ -645,7 +645,7 @@ class MainWindow : public QMainWindow {
 
   void on_ExecShortcut();
 
-  void on_btnFindNotes_pressed();
+  void on_btnFindNotes_clicked();
 
   void on_btnShowBookmark_pressed();
 

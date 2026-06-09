@@ -29,3 +29,26 @@ void Reader::showCatalogue() {
   setPageVPos();
   showInfo();
 }
+
+void Reader::gotoCataList(QString htmlFile) {
+  for (int i = 0; i < ncxList.count(); i++) {
+    QString item = ncxList.at(i);
+    QString str1 = item.split("===").at(1);
+    // qDebug() << "gotoCataList:" << str1 << htmlFile ;
+    if (str1.contains(htmlFile)) {
+      currentCataIndex = i;
+      break;
+    }
+  }
+}
+
+void Reader::openCataList(QString htmlFile) {
+  savePageVPos();
+  mui->lblCataInfo->hide();
+  mui->qwCata->hide();
+  mui->qwReader->show();
+  mui->btnShowBookmark->setEnabled(true);
+
+  initLink(htmlFile);
+  m_Method->clearAllBakList(mui->qwCata);
+}
