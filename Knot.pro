@@ -399,6 +399,13 @@ SOURCES += \
     src/Notes/NoteListModel.cpp \
     src/Notes/Notes.cpp \
     src/Notes/NotesList.cpp \
+    src/Notes/NotesList_Diff.cpp \
+    src/Notes/NotesList_Event.cpp \
+    src/Notes/NotesList_Graph.cpp \
+    src/Notes/NotesList_Menu.cpp \
+    src/Notes/NotesList_Search.cpp \
+    src/Notes/NotesList_Utils.cpp \
+    src/Notes/NotesList_WebDAV.cpp \
     src/Notes/Notes_Android.cpp \
     src/Notes/Notes_Diff.cpp \
     src/Notes/Notes_Editor.cpp \

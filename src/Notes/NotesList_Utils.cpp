@@ -1,0 +1,547 @@
+#include "NotesList.h"
+
+QStringList NotesList::getRecycleNoteFiles() {
+  QStringList cycleFiles;
+  QTreeWidgetItem* cycleTopItem = twrb->topLevelItem(0);
+  int count = cycleTopItem->childCount();
+  for (int i = 0; i < count; i++) {
+    QString filePath = iniDir + cycleTopItem->child(i)->text(1);
+    cycleFiles.append(filePath);
+  }
+  return cycleFiles;
+}
+
+bool NotesList::delFile(QString file) {
+  bool isOk = false;
+  QFile _file(file);
+  if (_file.exists()) {
+    _file.remove();
+    isOk = true;
+  } else {
+    isOk = false;
+  }
+
+  _file.close();
+  return isOk;
+}
+
+void NotesList::addItemToQW(QQuickWidget* qw, QString text0, QString text1,
+                            QString text2, QString text3, QString text4,
+                            int itemH) {
+  QQuickItem* root = qw->rootObject();
+  QMetaObject::invokeMethod((QObject*)root, "addItem", Q_ARG(QVariant, text0),
+                            Q_ARG(QVariant, text1), Q_ARG(QVariant, text2),
+                            Q_ARG(QVariant, text3), Q_ARG(QVariant, text4),
+                            Q_ARG(QVariant, itemH));
+}
+
+void NotesList::setColorFlag(QString strColor) {
+  QQuickItem* root = mui->qwNoteBook->rootObject();
+  QMetaObject::invokeMethod((QObject*)root, "setColorFlag",
+                            Q_ARG(QVariant, strColor));
+}
+
+void NotesList::getAllFiles(const QString& foldPath, QStringList& folds,
+                            const QStringList& formats) {
+  QDirIterator it(foldPath, QDir::Files | QDir::NoDotAndDotDot,
+                  QDirIterator::Subdirectories);
+  while (it.hasNext()) {
+    it.next();
+    QFileInfo fileInfo = it.fileInfo();
+    if (formats.contains(fileInfo.suffix())) {  // 检测格式，按需保存
+      folds << fileInfo.absoluteFilePath();
+    }
+  }
+}
+
+int NotesList::getNoteBookCount() {
+  int count = m_Method->getCountFromQW(mui->qwNoteBook);
+  return count;
+}
+
+int NotesList::getNotesListCount() {
+  int count = m_Method->getCountFromQW(mui->qwNoteList);
+  return count;
+}
+
+int NotesList::getNoteBookCurrentIndex() {
+  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
+  return index;
+}
+
+int NotesList::getNotesListCurrentIndex() {
+  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
+  return index;
+}
+
+void NotesList::setNoteBookCurrentIndex(int index) {
+  m_Method->setCurrentIndexFromQW(mui->qwNoteBook, index);
+}
+
+void NotesList::setNotesListCurrentIndex(int index) {
+  m_Method->setCurrentIndexFromQW(mui->qwNoteList, index);
+}
+
+int NotesList::getNoteBookIndex_twToqml() {
+  QTreeWidgetItem* item = tw->currentItem();
+  int index = 0;
+  if (item->parent() == NULL) {
+    index = tw->indexOfTopLevelItem(item);
+  } else {
+    int index0 = tw->indexOfTopLevelItem(item->parent());
+    int index1 = 0;
+    int count = item->parent()->childCount();
+    for (int i = 0; i < count; i++) {
+      QTreeWidgetItem* item0 = item->parent()->child(i);
+      if (item0 == item) break;
+
+      if (item0->text(1).isEmpty()) index1++;
+    }
+
+    index = index0 + index1 + 1;
+  }
+
+  return index;
+}
+
+QString NotesList::getNoteBookText0(int index) {
+  return m_Method->getText0(mui->qwNoteBook, index);
+}
+
+QString NotesList::getNotesListText0(int index) {
+  return m_Method->getText0(mui->qwNoteList, index);
+}
+
+void NotesList::modifyNoteBookText0(QString text0, int index) {
+  m_Method->modifyItemText0(mui->qwNoteBook, index, text0);
+}
+
+void NotesList::modifyNotesListText0(QString text0, int index) {
+  m_Method->modifyItemText0(mui->qwNoteList, index, text0);
+}
+
+void NotesList::setNoteLabel() {
+  QString notesSum = QString::number(getNotesListCount());
+  int index_note = getNotesListCurrentIndex();
+  QString notesSn = "";
+  if (index_note >= 0) notesSn = QString::number(index_note + 1) + "/";
+  mui->lblNoteList->setText(notesSn + notesSum);
+  int index = getNoteBookCurrentIndex();
+  m_Method->modifyItemText3(mui->qwNoteBook, index, notesSum);
+}
+
+void NotesList::loadAllRecycle() {
+  m_Method->clearAllBakList(mui->qwNoteRecycle);
+  int childCount = twrb->topLevelItem(0)->childCount();
+  for (int i = 0; i < childCount; i++) {
+    QTreeWidgetItem* childItem = twrb->topLevelItem(0)->child(i);
+    QString text0 = childItem->text(0);
+    QString text3 = iniDir + childItem->text(1);
+
+    m_Method->addItemToQW(mui->qwNoteRecycle, text0, "", "", text3, 0);
+  }
+}
+
+QVariant NotesList::addQmlTreeTopItem(QString strItem) {
+  QQuickItem* root = mui->qwNotesTree->rootObject();
+  QVariant item;
+  QMetaObject::invokeMethod((QObject*)root, "addTopItem",
+                            Q_RETURN_ARG(QVariant, item),
+                            Q_ARG(QVariant, strItem));
+  return item;
+}
+
+QVariant NotesList::addQmlTreeChildItem(QVariant parentItem,
+                                        QString strChildItem,
+                                        QString iconFile) {
+  QQuickItem* root = mui->qwNotesTree->rootObject();
+  QVariant item;
+  QMetaObject::invokeMethod(
+      (QObject*)root, "addChildItem", Q_RETURN_ARG(QVariant, item),
+      Q_ARG(QVariant, parentItem), Q_ARG(QVariant, strChildItem),
+      Q_ARG(QVariant, iconFile));
+  return item;
+}
+
+void NotesList::clearQmlTree() {
+  QQuickItem* root = mui->qwNotesTree->rootObject();
+  QMetaObject::invokeMethod((QObject*)root, "clearAll");
+}
+
+void NotesList::initQmlTree() {
+  clearQmlTree();
+
+  QString strItem, strChildItem;
+  int topcount = tw->topLevelItemCount();
+  for (int i = 0; i < topcount; i++) {
+    QTreeWidgetItem* topItem = tw->topLevelItem(i);
+    strItem = topItem->text(0);
+    auto parentItem = addQmlTreeTopItem(strItem);
+    int childcount = topItem->childCount();
+    for (int j = 0; j < childcount; j++) {
+      QTreeWidgetItem* childItem = topItem->child(j);
+      strChildItem = childItem->text(0);
+      if (childItem->text(1).isEmpty()) {
+        auto parentItem2 =
+            addQmlTreeChildItem(parentItem, strChildItem, "/res/nb.png");
+        int count2 = childItem->childCount();
+        for (int n = 0; n < count2; n++) {
+          QString str = childItem->child(n)->text(0);
+          addQmlTreeChildItem(parentItem2, str, "/res/n.png");
+        }
+      } else {
+        addQmlTreeChildItem(parentItem, strChildItem, "/res/n.png");
+      }
+    }
+  }
+}
+
+QStringList NotesList::extractLocalImagesFromMarkdown(const QString& filePath) {
+  QStringList images;
+  QFile file(filePath);
+
+  // 打开文件
+  if (!file.open(QIODevice::ReadOnly)) {
+    return images;  // 返回空列表如果打开失败
+  }
+
+  QTextStream in(&file);
+  QString content = in.readAll();
+  file.close();
+
+  // 正则表达式匹配所有图片路径
+  QRegularExpression re("!\\[.*?\\]\\((.*?)\\)");
+  QRegularExpressionMatchIterator matchIterator = re.globalMatch(content);
+
+  while (matchIterator.hasNext()) {
+    QRegularExpressionMatch match = matchIterator.next();
+    QString captured = match.captured(1).trimmed();  // 去除首尾空格
+
+    // 提取第一个空格前的部分作为路径（处理可能存在的标题）
+    QString path = captured.section(' ', 0, 0);
+
+    // 过滤网络路径并检查非空
+    if (!path.startsWith("http://") && !path.startsWith("https://") &&
+        !path.isEmpty()) {
+      images.append(path);
+    }
+  }
+
+  // 可选：去重
+  images.removeDuplicates();
+
+  qDebug() << "images=" << images;
+
+  return images;
+}
+
+QStringList NotesList::getValidMDFiles() { return validMDFiles; }
+template class QFutureWatcher<ResultsMap>;
+
+void NotesList::restoreNoteFromRecycle() {
+  int count = m_Method->getCountFromQW(mui->qwNoteRecycle);
+  if (count == 0) return;
+
+  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
+  if (index < 0) return;
+
+  if (getNoteBookCount() == 0) return;
+
+  setTWRBCurrentItem();
+  on_btnBatchRestore_clicked();
+}
+
+// 安全的文件写入函数
+bool NotesList::safeWriteFile(const QString& filePath, const QString& content) {
+  QTemporaryFile tempFile;
+  if (tempFile.open()) {
+    QTextStream stream(&tempFile);
+    stream << content;
+    tempFile.close();
+
+    // 原子操作：替换原文件
+    return QFile::rename(tempFile.fileName(), filePath);
+  }
+  return false;
+}
+
+void NotesList::genCursorText() {
+  // 直接从文件读取内容（避免创建临时UI组件）
+  QString strBuffer = loadText(currentMDFile);
+  if (strBuffer.isEmpty()) {
+    qWarning() << "Loaded text is empty for file:" << currentMDFile;
+    return;
+  }
+
+  int curPos = mw_one->m_ReceiveShare->getCursorPos();
+  curPos = qBound(0, curPos, strBuffer.length());
+
+  // 使用QString方法替代QTextCursor操作
+  QString str0 = strBuffer.mid(qMax(0, curPos - 5), 5);
+  QString str1 = strBuffer.mid(curPos, 5);
+
+  QString curText =
+      QString::number(curPos) + "  (\"" + str0 + "|" + str1 + "\"" + ")";
+  QString filePath = privateDir + "cursor_text.txt";
+
+  // 使用Qt的原子写入函数
+  if (!safeWriteFile(filePath, curText)) {
+    qCritical() << "Failed to write cursor_text file:" << filePath;
+  } else {
+    qDebug() << "cursor_text saved:" << curText;
+  }
+}
+
+void NotesList::setNoteName(QString name) { noteTitle = name; }
+
+void NotesList::clearFiles() {
+  QFile::remove(iniDir + "memo.zip");
+
+  QString tempDir = iniDir;
+  knot_all_files.clear();
+  QStringList fmt = QString("zip;md;html;jpg;bmp;png;ini").split(';');
+  getAllFiles(tempDir, knot_all_files, fmt);
+
+  int count = knot_all_files.count();
+  for (int i = 0; i < count; i++) {
+    QString filePath = knot_all_files.at(i);
+
+    QFile file(filePath);
+    if (filePath.contains(".sync-conflict-")) {
+      file.remove();
+    }
+  }
+
+  clearMD_Pic();
+}
+
+void NotesList::clearMD_Pic() {
+  // 获取所有MD文件和图片文件
+  QStringList allmdFiles = m_Method->getMdFilesInDir(iniDir + "memo/", true);
+  QStringList allimgFiles;
+  QStringList fmt = QString("jpg;bmp;png").split(';');
+  getAllFiles(iniDir + "memo/images/", allimgFiles, fmt);
+
+  // 存储所有被引用的图片文件名
+  QStringList usedImageNames;
+
+  // 使用静态QRegularExpression对象，避免重复创建
+  static const QRegularExpression regex(
+      R"(!\[.*?\]\(([\w\-./\\]+\.(jpg|jpeg|bmp|png|gif))\))",
+      QRegularExpression::CaseInsensitiveOption);
+
+  // 1. 解析所有Markdown文件，提取引用的图片
+  foreach (const QString& mdFilePath, allmdFiles) {
+    QFile mdFile(mdFilePath);
+    if (!mdFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      qWarning() << "无法打开Markdown文件:" << mdFilePath;
+      continue;
+    }
+
+    // 逐行读取，降低内存占用
+    QTextStream in(&mdFile);
+    QString line;
+    while (in.readLineInto(&line)) {
+      QRegularExpressionMatchIterator it = regex.globalMatch(line);
+      while (it.hasNext()) {
+        QRegularExpressionMatch match = it.next();
+        QString imagePath = match.captured(1);
+        // 处理相对路径：基于当前MD文件所在目录解析图片路径
+        QFileInfo mdFileInfo(mdFilePath);
+        QFileInfo imageInfo(mdFileInfo.dir(), imagePath);
+        usedImageNames << imageInfo.fileName();
+      }
+    }
+    mdFile.close();
+  }
+
+  // 去重处理
+  usedImageNames.removeDuplicates();
+
+  // 2. 找出并删除未被引用的图片
+  int deletedCount = 0;
+  int failedCount = 0;
+
+  foreach (const QString& imgFilePath, allimgFiles) {
+    QFileInfo imgInfo(imgFilePath);
+    QString imgFileName = imgInfo.fileName();
+
+    // 检查图片是否未被引用
+    if (!usedImageNames.contains(imgFileName)) {
+      QFile imgFile(imgFilePath);
+      if (imgFile.remove()) {
+        qDebug() << "已删除未使用的图片:" << imgFilePath;
+        deletedCount++;
+
+        QString image_file;
+        image_file = "KnotData/memo/images/" + imgFileName;
+        needDelWebDAVFiles.append(image_file);
+      } else {
+        qWarning() << "删除失败:" << imgFilePath
+                   << "原因:" << imgFile.errorString();
+        failedCount++;
+      }
+    }
+  }
+
+  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+    int count = needDelWebDAVFiles.count();
+    if (count > 0) m_Notes->delRemoteFile(needDelWebDAVFiles);
+    m_Method->setAccessCount(needDelWebDAVFiles.count());
+  }
+
+  qDebug() << "图片清理完成 - 已删除:" << deletedCount
+           << "个, 删除失败:" << failedCount << "个";
+}
+
+void NotesList::addItem(QTreeWidget* tw, QTreeWidgetItem* item) {
+  item->setIcon(0, QIcon(":/res/n.png"));
+  tw->setFocus();
+  if (tw == twrb) {
+    tw->setCurrentItem(tw->topLevelItem(0));
+    QTreeWidgetItem* curItem = tw->currentItem();
+    curItem->addChild(item);
+  } else {
+    QTreeWidgetItem* curItem = tw->currentItem();
+    curItem->addChild(item);
+  }
+
+  tw->expandAll();
+}
+
+void NotesList::resetQML_List() {
+  if (tw->topLevelItemCount() == 0) {
+    m_Method->clearAllBakList(mui->qwNoteBook);
+    m_Method->clearAllBakList(mui->qwNoteList);
+    return;
+  }
+
+  loadAllNoteBook();
+
+  int index = 0;
+  QTreeWidgetItem* item = tw->currentItem();
+  QTreeWidgetItem* pNoteBook = NULL;
+  QTreeWidgetItem* pNote = NULL;
+  if (item == NULL)
+    index = 0;
+  else {
+    // NoteBook
+    if (item->text(1).isEmpty()) {
+      if (item->parent() == NULL) {
+        index = tw->indexOfTopLevelItem(item);
+        pNoteBook = item;
+      } else {
+        index = tw->indexOfTopLevelItem(item->parent());
+        pNoteBook = item;
+      }
+    }
+
+    // Notes
+    if (!item->text(1).isEmpty()) {
+      if (item->parent()->parent() == NULL) {
+        index = tw->indexOfTopLevelItem(item->parent());
+        pNoteBook = item->parent();
+        pNote = item;
+      }
+
+      else {
+        if (item->parent()->parent()->parent() == NULL) {
+          index = tw->indexOfTopLevelItem(item->parent()->parent());
+          pNoteBook = item->parent();
+          pNote = item;
+        }
+      }
+    }
+  }
+
+  int count = m_Method->getCountFromQW(mui->qwNoteBook);
+
+  for (int i = 0; i < count; i++) {
+    if (pNoteBookItems.at(i) == pNoteBook) {
+      index = i;
+      break;
+    }
+  }
+
+  setNoteBookCurrentIndex(index);
+  clickNoteBook();
+
+  if (pNote == NULL) {
+    setNotesListCurrentIndex(-1);
+  } else {
+    int countNotes = pNoteItems.count();
+    for (int i = 0; i < countNotes; i++) {
+      if (pNote == pNoteItems.at(i)) {
+        setNotesListCurrentIndex(i);
+        break;
+      }
+    }
+  }
+}
+
+void NotesList::resetQML_Recycle() {
+  int childCount = twrb->topLevelItem(0)->childCount();
+  if (childCount == 0) return;
+
+  loadAllRecycle();
+
+  int index = 0;
+  QTreeWidgetItem* item = twrb->currentItem();
+  if (item->parent() == NULL) {
+    index = -1;
+  } else {
+    index = twrb->currentIndex().row();
+  }
+
+  m_Method->setCurrentIndexFromQW(mui->qwNoteRecycle, index);
+}
+
+void NotesList::saveCurrentNoteInfo() {
+  QSettings Reg(iniDir + "curmd.ini", QSettings::IniFormat);
+
+  QString str = currentMDFile;
+  QString iniName = str.replace(iniDir, "");
+
+  Reg.setValue("/MainNotes/currentItem", iniName);
+  Reg.setValue("/MainNotes/NoteName", noteTitle);
+  Reg.sync();
+}
+
+void NotesList::setTWRBCurrentItem() {
+  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
+  QTreeWidgetItem* topItem = twrb->topLevelItem(0);
+  twrb->setCurrentItem(topItem->child(index));
+}
+
+void NotesList::setTWCurrentItem() {
+  int index0, index1;
+  index0 = getNoteBookCurrentIndex();
+  index1 = getNotesListCurrentIndex();
+  if (index0 >= 0) tw->setCurrentItem(pNoteBookItems.at(index0));
+  if (index1 >= 0) tw->setCurrentItem(pNoteItems.at(index1));
+
+  tw->scrollToItem(tw->currentItem());
+}
+
+void NotesList::setNoteBookCurrentItem() {
+  int index = getNoteBookCurrentIndex();
+  if (index < 0) return;
+
+  QString text1 = m_Method->getText1(mui->qwNoteBook, index);
+  QString text2 = m_Method->getText2(mui->qwNoteBook, index);
+  if (text2.isEmpty()) {
+    tw->setCurrentItem(tw->topLevelItem(text1.toInt()));
+
+  } else {
+    QStringList list = text1.split("===");
+    int indexMain, indexChild;
+    if (list.count() == 2) {
+      indexMain = list.at(0).toInt();
+      indexChild = list.at(1).toInt();
+
+      QTreeWidgetItem* topItem = tw->topLevelItem(indexMain);
+      QTreeWidgetItem* childItem = topItem->child(indexChild);
+      tw->setCurrentItem(childItem);
+    }
+  }
+}
