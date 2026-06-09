@@ -425,6 +425,12 @@ SOURCES += \
     src/Reader/DocumentHandler.cpp \
     src/Reader/Reader.cpp \
     src/Reader/ReaderSet.cpp \
+    src/Reader/Reader_Bookmarks.cpp \
+    src/Reader/Reader_Cata.cpp \
+    src/Reader/Reader_Notes.cpp \
+    src/Reader/Reader_PDF.cpp \
+    src/Reader/Reader_QML.cpp \
+    src/Reader/Reader_TTS.cpp \
     src/Reader/epubreader.cpp \
     src/Report.cpp \
     src/Exercise/Speedometer.cpp \

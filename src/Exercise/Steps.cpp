@@ -800,7 +800,7 @@ void Steps::startRecordMotion() {
   oldLon = 0;
   altitude = 0;
 
-  mw_one->m_Reader->keepScreenOn();
+  m_Reader->keepScreenOn();
   emit distanceChanged(m_distance);
 
   mui->btnGPS->setText(tr("Stop"));
@@ -1267,7 +1267,7 @@ void Steps::stopRecordMotion() {
 
     mw_one->myGetGpsDataThread->stop();
 
-    mw_one->m_Reader->cancelKeepScreenOn();
+    m_Reader->cancelKeepScreenOn();
 
     int nYear = QDate::currentDate().year();
     int nMonth = QDate::currentDate().month();

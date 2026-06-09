@@ -57,16 +57,14 @@ ReaderSet::ReaderSet(QWidget* parent) : QDialog(parent) {
   mui->editBackgroundColor->setText(color_0);
   mui->editForegroundColor->setText(color_1);
 
-  mw_one->m_Reader->strStyle2_0 = "color:" + color_1 +
-                                  ";background-color:" + color_0 +
-                                  ";border: 2px "
-                                  "solid "
-                                  "rgb(0,0,255);border-radius: 4px;";
-  mw_one->m_Reader->strStyle2_1 = "color:" + color_1 +
-                                  ";background-color:" + color_0 +
-                                  ";border: 2px "
-                                  "solid "
-                                  "rgb(255,0,0);border-radius: 4px;";
+  m_Reader->strStyle2_0 = "color:" + color_1 + ";background-color:" + color_0 +
+                          ";border: 2px "
+                          "solid "
+                          "rgb(0,0,255);border-radius: 4px;";
+  m_Reader->strStyle2_1 = "color:" + color_1 + ";background-color:" + color_0 +
+                          ";border: 2px "
+                          "solid "
+                          "rgb(255,0,0);border-radius: 4px;";
 
   mui->editAutoStopTTS->setText(
       Reg.value("/Reader/editAutoStopTTS", 90).toString());
@@ -115,18 +113,18 @@ bool ReaderSet::eventFilter(QObject* watch, QEvent* evn) {
 }
 
 void ReaderSet::on_hSlider_sliderReleased() {
-  mw_one->m_Reader->on_hSlider_sliderReleased(mui->hSlider->value());
+  m_Reader->on_hSlider_sliderReleased(mui->hSlider->value());
 }
 
 void ReaderSet::on_btnFontPlus_clicked() {
   readerFontSize++;
-  mw_one->m_Reader->setFontSize(readerFontSize);
+  m_Reader->setFontSize(readerFontSize);
 }
 
 void ReaderSet::on_btnFontLess_clicked() {
   if (readerFontSize <= 8) return;
   readerFontSize--;
-  mw_one->m_Reader->setFontSize(readerFontSize);
+  m_Reader->setFontSize(readerFontSize);
 }
 
 void ReaderSet::on_hSlider_sliderMoved(int position) {
@@ -147,8 +145,8 @@ void ReaderSet::on_btnStyle1_clicked() {
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
 
   Reg.setValue("/Reader/Style", "1");
-  mw_one->m_Reader->readerStyle = "1";
-  mw_one->m_Reader->setReaderStyle();
+  m_Reader->readerStyle = "1";
+  m_Reader->setReaderStyle();
   mui->f_CustomColor->hide();
 }
 
@@ -156,8 +154,8 @@ void ReaderSet::on_btnStyle2_clicked() {
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
 
   Reg.setValue("/Reader/Style", "2");
-  mw_one->m_Reader->readerStyle = "2";
-  mw_one->m_Reader->setReaderStyle();
+  m_Reader->readerStyle = "2";
+  m_Reader->setReaderStyle();
   mui->f_CustomColor->show();
 
   Reg.setValue("/Reader/BackgroundColor", mui->editBackgroundColor->text());
@@ -168,8 +166,8 @@ void ReaderSet::on_btnStyle3_clicked() {
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
 
   Reg.setValue("/Reader/Style", "3");
-  mw_one->m_Reader->readerStyle = "3";
-  mw_one->m_Reader->setReaderStyle();
+  m_Reader->readerStyle = "3";
+  m_Reader->setReaderStyle();
   mui->f_CustomColor->hide();
 }
 
@@ -183,13 +181,13 @@ void ReaderSet::on_btnFont_clicked() {
       fileName, mui->btnFont, this->font().pointSize());
   iniPreferences->setValue("/Options/ReaderFont", fileName);
 
-  mw_one->m_Reader->savePageVPos();
+  m_Reader->savePageVPos();
   mui->qwReader->rootContext()->setContextProperty("FontName", readerFont);
   mui->qwReader->rootContext()->setContextProperty("FontWeight",
                                                    readerFontWeight);
-  mw_one->m_Reader->setPageVPos();
+  m_Reader->setPageVPos();
 
-  mw_one->m_Reader->readReadNote(mw_one->m_Reader->cPage);
+  m_Reader->readReadNote(m_Reader->cPage);
 }
 
 void ReaderSet::on_hSlider_valueChanged(int value) { Q_UNUSED(value); }
@@ -223,17 +221,15 @@ void ReaderSet::on_btnBackgroundColor_clicked() {
   Reg.setValue("/Reader/BackgroundColor", mui->editBackgroundColor->text());
   Reg.setValue("/Reader/ForegroundColor", mui->editForegroundColor->text());
 
-  mw_one->m_Reader->strStyle2_0 = "color:" + color_1 +
-                                  ";background-color:" + color_0 +
-                                  ";border: 2px "
-                                  "solid "
-                                  "rgb(0,0,255);border-radius: 4px;";
-  mw_one->m_Reader->strStyle2_1 = "color:" + color_1 +
-                                  ";background-color:" + color_0 +
-                                  ";border: 2px "
-                                  "solid "
-                                  "rgb(255,0,0);border-radius: 4px;";
-  mw_one->m_Reader->setReaderStyle();
+  m_Reader->strStyle2_0 = "color:" + color_1 + ";background-color:" + color_0 +
+                          ";border: 2px "
+                          "solid "
+                          "rgb(0,0,255);border-radius: 4px;";
+  m_Reader->strStyle2_1 = "color:" + color_1 + ";background-color:" + color_0 +
+                          ";border: 2px "
+                          "solid "
+                          "rgb(255,0,0);border-radius: 4px;";
+  m_Reader->setReaderStyle();
 }
 
 void ReaderSet::on_btnForegroundColor_clicked() {
@@ -248,17 +244,15 @@ void ReaderSet::on_btnForegroundColor_clicked() {
   Reg.setValue("/Reader/BackgroundColor", mui->editBackgroundColor->text());
   Reg.setValue("/Reader/ForegroundColor", mui->editForegroundColor->text());
 
-  mw_one->m_Reader->strStyle2_0 = "color:" + color_1 +
-                                  ";background-color:" + color_0 +
-                                  ";border: 2px "
-                                  "solid "
-                                  "rgb(0,0,255);border-radius: 4px;";
-  mw_one->m_Reader->strStyle2_1 = "color:" + color_1 +
-                                  ";background-color:" + color_0 +
-                                  ";border: 2px "
-                                  "solid "
-                                  "rgb(255,0,0);border-radius: 4px;";
-  mw_one->m_Reader->setReaderStyle();
+  m_Reader->strStyle2_0 = "color:" + color_1 + ";background-color:" + color_0 +
+                          ";border: 2px "
+                          "solid "
+                          "rgb(0,0,255);border-radius: 4px;";
+  m_Reader->strStyle2_1 = "color:" + color_1 + ";background-color:" + color_0 +
+                          ";border: 2px "
+                          "solid "
+                          "rgb(255,0,0);border-radius: 4px;";
+  m_Reader->setReaderStyle();
 }
 
 void ReaderSet::on_editBackgroundColor_textChanged(const QString& arg1) {
@@ -273,48 +267,47 @@ void ReaderSet::on_editForegroundColor_textChanged(const QString& arg1) {
 
 void ReaderSet::on_btnSetBookmark_clicked() {
   QString page = mui->btnPages->text().split("\n").at(0);
-  QString txt = "( " + page + " ) " +
-                mw_one->m_Reader->getBookmarkTextFromQML() + "\n" +
-                m_Steps->getFullDate() + "  " + QTime::currentTime().toString();
-  mw_one->m_Reader->saveReader(txt, true);
+  QString txt = "( " + page + " ) " + m_Reader->getBookmarkTextFromQML() +
+                "\n" + m_Steps->getFullDate() + "  " +
+                QTime::currentTime().toString();
+  m_Reader->saveReader(txt, true);
   if (isAndroid) m_Method->showToastMessage(tr("Bookmark setup is complete."));
 }
 
 void ReaderSet::on_btnLessen_clicked() {
-  mw_one->m_Reader->scrollValue = mw_one->m_Reader->scrollValue - 0.05;
-  if (mw_one->m_Reader->scrollValue <= 0.05)
-    mw_one->m_Reader->scrollValue = 0.05;
+  m_Reader->scrollValue = m_Reader->scrollValue - 0.05;
+  if (m_Reader->scrollValue <= 0.05) m_Reader->scrollValue = 0.05;
 
   setScrollValue();
 
-  QString value = QString::number(mw_one->m_Reader->scrollValue, 'f', 2);
+  QString value = QString::number(m_Reader->scrollValue, 'f', 2);
   mui->lblSpeed->setText(tr("Scroll Speed") + " : " + value);
 }
 
 void ReaderSet::on_btnDefault_clicked() {
-  mw_one->m_Reader->scrollValue = 0.25;
+  m_Reader->scrollValue = 0.25;
 
   setScrollValue();
 
-  QString value = QString::number(mw_one->m_Reader->scrollValue, 'f', 2);
+  QString value = QString::number(m_Reader->scrollValue, 'f', 2);
   mui->lblSpeed->setText(tr("Scroll Speed") + " : " + value);
 }
 
 void ReaderSet::on_btnAdd_clicked() {
-  mw_one->m_Reader->scrollValue = mw_one->m_Reader->scrollValue + 0.05;
+  m_Reader->scrollValue = m_Reader->scrollValue + 0.05;
 
-  if (mw_one->m_Reader->scrollValue >= 1.5) mw_one->m_Reader->scrollValue = 1.5;
+  if (m_Reader->scrollValue >= 1.5) m_Reader->scrollValue = 1.5;
 
   setScrollValue();
 
-  QString value = QString::number(mw_one->m_Reader->scrollValue, 'f', 2);
+  QString value = QString::number(m_Reader->scrollValue, 'f', 2);
   mui->lblSpeed->setText(tr("Scroll Speed") + " : " + value);
 }
 
 void ReaderSet::saveScrollValue() {
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
 
-  Reg.setValue("/Reader/ScrollValue", mw_one->m_Reader->scrollValue);
+  Reg.setValue("/Reader/ScrollValue", m_Reader->scrollValue);
 }
 
 void ReaderSet::on_btnClear_clicked() {
@@ -323,6 +316,6 @@ void ReaderSet::on_btnClear_clicked() {
 }
 
 void ReaderSet::setScrollValue() {
-  mui->qwReader->rootContext()->setContextProperty(
-      "scrollValue", mw_one->m_Reader->scrollValue);
+  mui->qwReader->rootContext()->setContextProperty("scrollValue",
+                                                   m_Reader->scrollValue);
 }

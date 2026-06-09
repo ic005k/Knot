@@ -40,7 +40,7 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
     }
   }
 
-  mw_one->m_Reader->eventFilterReader(watch, evn);
+  m_Reader->eventFilterReader(watch, evn);
 
   m_Notes->eventFilterQwNote(watch, evn);
 
@@ -528,8 +528,7 @@ void MainHelper::initMainQW() {
   // Reader
   mui->qwReader->rootContext()->setContextProperty("myW", mw_one->width());
   mui->qwReader->rootContext()->setContextProperty("myH", mw_one->height());
-  mui->qwReader->rootContext()->setContextProperty("m_Reader",
-                                                   mw_one->m_Reader);
+  mui->qwReader->rootContext()->setContextProperty("m_Reader", m_Reader);
   mui->qwReader->rootContext()->setContextProperty("mw_one", mw_one);
   mui->qwReader->rootContext()->setContextProperty("currentPage", currentPage);
   mui->qwReader->rootContext()->setContextProperty("totalPages", totalPages);
@@ -549,8 +548,7 @@ void MainHelper::initMainQW() {
   if (mui->qwBookList->source().isEmpty()) {
     mui->qwBookList->rootContext()->setContextProperty("isDark", isDark);
     mui->qwBookList->rootContext()->setContextProperty("fontSize", fontSize);
-    mui->qwBookList->rootContext()->setContextProperty("m_Reader",
-                                                       mw_one->m_Reader);
+    mui->qwBookList->rootContext()->setContextProperty("m_Reader", m_Reader);
     mui->qwBookList->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/booklist.qml")));
   }
@@ -1139,10 +1137,10 @@ void MainHelper::importBakFileList() {
 
   if (!zipfile.isNull()) {
     auto m_ShowMsg = std::make_unique<ShowMessage>(this);
-    if (!m_ShowMsg->showMsg("Kont",
-                            tr("Import this data?") + "\n" +
-                                mw_one->m_Reader->getUriRealPath(zipfile),
-                            2)) {
+    if (!m_ShowMsg->showMsg(
+            "Kont",
+            tr("Import this data?") + "\n" + m_Reader->getUriRealPath(zipfile),
+            2)) {
       isZipOK = false;
       return;
     }

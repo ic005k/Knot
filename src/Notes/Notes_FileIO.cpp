@@ -87,7 +87,7 @@ QString Notes::addImagePathToHtml(QString strhtml) {
   QString strEnd = edit1->toPlainText();
   edit1->clear();
   edit1->setPlainText(strEnd);
-  mw_one->m_Reader->PlainTextEditToFile(edit1, htmlFileName);
+  m_Reader->PlainTextEditToFile(edit1, htmlFileName);
   delete edit;
   delete edit1;
   return strEnd;

@@ -23,6 +23,7 @@
 class CloudBackup;
 class Method;
 class MainWindow;
+class Reader;
 class Notes;
 class NotesList;
 class StepsOptions;
@@ -51,6 +52,7 @@ inline CloudBackup* m_CloudBackup;
 inline QTreeWidgetItem* parentItem;
 inline MainWindow* mw_one;
 inline Ui::MainWindow* mui;
+inline Reader* m_Reader;
 inline Method* m_Method;
 inline Notes* m_Notes;
 inline NotesList* m_NotesList;

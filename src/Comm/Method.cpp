@@ -38,7 +38,7 @@ void Method::init() {
 Method::~Method() {}
 
 QString Method::getRealPathFile(QString strFile) {
-  strFile = mw_one->m_Reader->getUriRealPath(strFile);
+  strFile = m_Reader->getUriRealPath(strFile);
   QString realFile = strFile;
 
   int aver = mw_one->m_AboutThis->getAndroidVer();

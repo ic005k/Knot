@@ -110,7 +110,7 @@ void CloudBackup::uploadData() {
           strFlag,
           tr("Uploading data?") + "\n\n" +
               tr("This action updates the data in the cloud.") + "\n\n" +
-              mw_one->m_Reader->getUriRealPath(zipfile) +
+              m_Reader->getUriRealPath(zipfile) +
               "\n\nSIZE: " + m_Method->getFileSize(QFile(zipfile).size(), 2),
           2))
     return;
@@ -354,7 +354,7 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
                 if (!m_ShowMsg->showMsg(
                         "Kont",
                         tr("Import this data?") + "\n" +
-                            mw_one->m_Reader->getUriRealPath(localSavePath),
+                            m_Reader->getUriRealPath(localSavePath),
                         2)) {
                   isZipOK = false;
                   return;

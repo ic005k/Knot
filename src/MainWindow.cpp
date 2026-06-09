@@ -1242,10 +1242,10 @@ void MainWindow::on_actionImport_Data_triggered() {
 
   if (!zipfile.isNull()) {
     auto m_ShowMsg = std::make_unique<ShowMessage>(this);
-    if (!m_ShowMsg->showMsg("Kont",
-                            tr("Import this data?") + "\n" +
-                                mw_one->m_Reader->getUriRealPath(zipfile),
-                            2)) {
+    if (!m_ShowMsg->showMsg(
+            "Kont",
+            tr("Import this data?") + "\n" + m_Reader->getUriRealPath(zipfile),
+            2)) {
       isZipOK = false;
       return;
     }

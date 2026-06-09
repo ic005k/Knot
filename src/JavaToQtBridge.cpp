@@ -203,13 +203,13 @@ static void JavaNotify_11() {
 }
 
 static void JavaNotify_12() {
-  if (isPDF && isAndroid) mw_one->m_Reader->openMyPDF(fileName);
+  if (isPDF && isAndroid) m_Reader->openMyPDF(fileName);
 
   qDebug() << "C++ JavaNotify_12";
 }
 
 static void JavaNotify_13() {
-  mw_one->m_Reader->openMyPDF(fileName);
+  m_Reader->openMyPDF(fileName);
 
   qDebug() << "C++ JavaNotify_13";
 }
@@ -249,8 +249,8 @@ static void JavaNotify_18() {
   QTimer::singleShot(100, mw_one, []() {
     if (mui->frameReader->isVisible()) {
       mw_one->on_btnAutoStop_pressed();
-      mw_one->m_Reader->saveReader("", false);
-      mw_one->m_Reader->savePageVPos();
+      m_Reader->saveReader("", false);
+      m_Reader->savePageVPos();
     }
   });
 
@@ -280,8 +280,8 @@ static void JavaNotify_20(JNIEnv* env, jclass clazz, jstring sentence) {
   QTimer::singleShot(100, mw_one, [=]() {
     qDebug() << "TTS 朗读句子：" << currentSentence;
 
-    if (mw_one && mw_one->m_Reader) {
-      mw_one->m_Reader->setTtsCurrentSentence(currentSentence);
+    if (mw_one && m_Reader) {
+      m_Reader->setTtsCurrentSentence(currentSentence);
     }
   });
 }

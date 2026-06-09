@@ -151,8 +151,7 @@ void MainWindow::on_btnCatalogue_pressed() {
   if (mui->qwBookmark->isVisible()) return;
 
   if (mui->qwCata->source().isEmpty()) {
-    mui->qwCata->rootContext()->setContextProperty("m_Reader",
-                                                   mw_one->m_Reader);
+    mui->qwCata->rootContext()->setContextProperty("m_Reader", m_Reader);
     mui->qwCata->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/epub_cata.qml")));
   }
@@ -172,8 +171,7 @@ void MainWindow::on_btnShowBookmark_pressed() {
   if (mui->qwCata->isVisible()) return;
 
   if (mui->qwBookmark->source().isEmpty()) {
-    mui->qwBookmark->rootContext()->setContextProperty("m_Reader",
-                                                       mw_one->m_Reader);
+    mui->qwBookmark->rootContext()->setContextProperty("m_Reader", m_Reader);
     mui->qwBookmark->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/bookmark.qml")));
   }
@@ -1164,23 +1162,22 @@ void MainWindow::onAndroidBackHandle() {
   }
 
   // Reader
-  if (mw_one->m_Reader->dlgAddBookNote != nullptr) {
-    if (mw_one->m_Reader->dlgAddBookNote->isVisible()) {
-      mw_one->m_Reader->dlgAddBookNote->close();
+  if (m_Reader->dlgAddBookNote != nullptr) {
+    if (m_Reader->dlgAddBookNote->isVisible()) {
+      m_Reader->dlgAddBookNote->close();
       return;
     }
   }
 
-  if (mw_one->m_Reader->dlgEditBookNote != nullptr) {
-    if (mw_one->m_Reader->dlgEditBookNote->isVisible()) {
-      mw_one->m_Reader->dlgEditBookNote->close();
+  if (m_Reader->dlgEditBookNote != nullptr) {
+    if (m_Reader->dlgEditBookNote->isVisible()) {
+      m_Reader->dlgEditBookNote->close();
       return;
     }
   }
 
   if (mui->qwViewBookNote->isVisible()) {
-    QTimer::singleShot(100, mw_one,
-                       []() { mw_one->m_Reader->closeViewBookNote(); });
+    QTimer::singleShot(100, mw_one, []() { m_Reader->closeViewBookNote(); });
 
     return;
   }

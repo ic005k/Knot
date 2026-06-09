@@ -159,7 +159,7 @@ void ReadEBookThread::run() {
   isReadEBookEnd = false;
 
   if (isEBook) {
-    mw_one->m_Reader->openFile(ebookFile);
+    m_Reader->openFile(ebookFile);
   }
 
   if (isReport) {

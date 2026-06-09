@@ -208,7 +208,7 @@ QObjectList ReceiveShare::getAllFrame(QObjectList lstUIControls) {
 }
 
 void ReceiveShare::closeAllChildWindows() {
-  mw_one->m_Reader->closeMyPDF();
+  m_Reader->closeMyPDF();
 
   if (mw_one->m_Todo->isTodoAlarmShow) {
     QTimer::singleShot(100, mw_one, []() { mw_one->m_Todo->closeTodoAlarm(); });
@@ -266,7 +266,7 @@ void ReceiveShare::closeAllChildWindows() {
 
   if (mui->qwViewBookNote->isVisible()) {
     QTimer::singleShot(100, mw_one, []() {
-      mw_one->m_Reader->closeViewBookNote();
+      m_Reader->closeViewBookNote();
       mui->btnBackReader->click();
     });
     return;
@@ -459,6 +459,6 @@ void ReceiveShare::callJavaNotify9() {
 
       bringAppToForeground();
     }
-    mw_one->m_Reader->startOpenFile(file);
+    m_Reader->startOpenFile(file);
   }
 }

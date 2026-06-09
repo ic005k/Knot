@@ -404,7 +404,6 @@ class MainWindow : public QMainWindow {
   Report* m_Report;
   Preferences* m_Preferences;
 
-  Reader* m_Reader;
   TodoAlarm* m_TodoAlarm;
   DateSelector* m_DateSelector = nullptr;
 

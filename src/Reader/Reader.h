@@ -10,6 +10,7 @@
 #include <QEvent>
 #include <QFile>
 #include <QFontDialog>
+#include <QKeyEvent>
 #include <QOverload>
 #include <QPlainTextEdit>
 #include <QProcess>
@@ -31,8 +32,11 @@
 #include <QXmlStreamReader>
 #include <vector>
 
+#include "src/MainWindow.h"
 #include "src/Reader/DocumentHandler.h"
 #include "src/Reader/epubreader.h"
+#include "src/defines.h"
+#include "ui_MainWindow.h"
 
 // 目录项结构体（存储章节信息）
 struct TocItem {
@@ -193,7 +197,7 @@ class Reader : public QDialog {
   void stopSpeak();
   void setTtsCurrentSentence(const QString& currentSentence);
   void setAutoStopPlayTime();
-  public slots:
+ public slots:
   void on_SetReaderFunVisible();
 
   void setPageScroll0();

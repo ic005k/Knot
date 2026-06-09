@@ -298,7 +298,7 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
       }
 
       for (int n = current_i; n < htmlFiles.count(); n++) {
-        QStringList buf_lists = mw_one->m_Reader->readText(htmlFiles.at(n));
+        QStringList buf_lists = m_Reader->readText(htmlFiles.at(n));
         for (int i = 0; i < buf_lists.count(); i++) {
           QString item = buf_lists.at(i);
           if (item.contains(str_id)) {
@@ -330,10 +330,10 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
 
     if (is_sup) return;
 
-    mw_one->m_Reader->initLink(linkFile);
+    m_Reader->initLink(linkFile);
   } else if (linkFile.contains("data:image/")) {
     // open picture
-    if (htmlIndex == 0 && !mw_one->m_Reader->isHidden()) {
+    if (htmlIndex == 0 && !m_Reader->isHidden()) {
       return;
     }
 
@@ -464,12 +464,11 @@ void DocumentHandler::setModified(bool m) {
 
 void DocumentHandler::setBackDir(QString link) {
   if (link.contains(".html") || link.contains(".xhtml")) {
-    if (catalogueFile != mw_one->m_Reader->currentHtmlFile &&
-        !link.contains("#")) {
-      mw_one->m_Reader->mainDirIndex = htmlIndex;
+    if (catalogueFile != m_Reader->currentHtmlFile && !link.contains("#")) {
+      m_Reader->mainDirIndex = htmlIndex;
 
       mw_one->repaint();
-      qDebug() << "mainDirIndex: " << mw_one->m_Reader->mainDirIndex;
+      qDebug() << "mainDirIndex: " << m_Reader->mainDirIndex;
     }
   }
 }

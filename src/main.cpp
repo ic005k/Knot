@@ -393,7 +393,7 @@ void loadTheme(bool isDark) {
 
   // 空指针校验：避免崩溃
   if (mw_one) {
-    if (mw_one->m_Reader) mw_one->m_Reader->initInfoShowFont();
+    if (m_Reader) m_Reader->initInfoShowFont();
     if (mw_one->m_Todo) {
       mw_one->m_Todo->refreshTableListsFromFile();
       mw_one->m_Todo->refreshAlarm();
