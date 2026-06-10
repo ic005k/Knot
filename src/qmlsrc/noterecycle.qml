@@ -59,7 +59,7 @@ Rectangle {
     ListModel {
         id: selectedItems // 存储选中项索引，去重管理
         onCountChanged: {
-            console.debug("QML端：selectedItems数量变化，当前count =", count);
+            //console.debug("QML端：selectedItems数量变化，当前count =", count);
         }
     }
 
@@ -83,13 +83,13 @@ Rectangle {
         console.debug("QML端：已清空所有选中索引");
 
         // ========== 遍历所有列表项，取消复选框勾选（清空视觉残留） ==========
-        for (var i = 0; i < view.count; i++) {
+        /*for (var i = 0; i < view.count; i++) {
             // 获取列表项的复选框组件，重置勾选状态
             var listItem = view.itemAtIndex(i);
             if (listItem && listItem.itemCheckBox) {
                 listItem.itemCheckBox.checked = false;
             }
-        }
+        }*/
     }
 
     // ========== 原有工具方法（保持不变，直接依赖isDark变量） ==========
@@ -204,8 +204,8 @@ Rectangle {
         var strColor;
         if (isDark)
             strColor = "#455364";
-            // 暗黑模式条目背景
         else
+            // 暗黑模式条目背景
             strColor = "#ffffff"; // 浅色模式条目背景
         return strColor;
     }
@@ -213,16 +213,16 @@ Rectangle {
     function getFontColor() {
         if (isDark)
             return "white";
-            // 暗黑模式常规字体
         else
+            // 暗黑模式常规字体
             return "black"; // 浅色模式常规字体
     }
 
     function getFontColor3() {
         if (isDark)
             return "#BBBBBB";
-            // 暗黑模式次要字体（灰色）
         else
+            // 暗黑模式次要字体（灰色）
             return "#555555"; // 浅色模式次要字体（深灰）
     }
 
@@ -236,14 +236,14 @@ Rectangle {
         selectedItems.append({
             "index": index
         });
-        console.debug("QML端：添加选中索引", index, "，当前selectedItems.count =", selectedItems.count);
+        //console.debug("QML端：添加选中索引", index, "，当前selectedItems.count =", selectedItems.count);
     }
 
     function removeSelectedItem(index) {
         for (var i = 0; i < selectedItems.count; i++) {
             if (selectedItems.get(i).index === index) {
                 selectedItems.remove(i);
-                console.debug("QML端：移除选中索引", index, "，当前selectedItems.count =", selectedItems.count);
+                //console.debug("QML端：移除选中索引", index, "，当前selectedItems.count =", selectedItems.count);
                 break;
             }
         }
@@ -308,12 +308,13 @@ Rectangle {
                     Layout.alignment: Qt.AlignVCenter
                     Layout.leftMargin: 5
                     // 步骤1：移除与isItemSelected的直接绑定，初始化为false（无绑定，可手动修改）
-                    checked: false
+                    //checked: false
+                    checked: isItemSelected(index)
 
                     // ========== 复选框初始化，同步选中状态 ==========
-                    Component.onCompleted: {
-                        itemCheckBox.checked = isItemSelected(index);
-                    }
+                    //Component.onCompleted: {
+                    //    itemCheckBox.checked = isItemSelected(index);
+                    //}
 
                     // 步骤2：修改onClicked逻辑，先更新selectedItems，再同步自身checked状态（避免反转）
                     onClicked: {
@@ -326,7 +327,7 @@ Rectangle {
                             removeSelectedItem(index);
                         }
                         // 可选：同步复选框状态与selectedItems（确保视觉与数据一致）
-                        itemCheckBox.checked = isItemSelected(index);
+                        //itemCheckBox.checked = isItemSelected(index);
                     }
 
                     // 保留原有复选框指示器样式，无修改
@@ -466,27 +467,62 @@ Rectangle {
             TapHandler {
                 onTapped: {
                     var isCurrentlySelected = isItemSelected(index);
-                    console.debug("QML端：条目被点击，当前是否选中 =", isCurrentlySelected);
+                    //console.debug("QML端：条目被点击，当前是否选中 =", isCurrentlySelected);
 
                     if (isCurrentlySelected) {
                         removeSelectedItem(index);
-                        itemCheckBox.checked = false;
+                        //itemCheckBox.checked = false;
                     } else {
                         addSelectedItem(index);
-                        itemCheckBox.checked = true;
+                        //itemCheckBox.checked = true;
                     }
                 }
             }
         }
     }
 
+    RowLayout {
+        id: btnBar
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.topMargin: 8
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 10
+        height: implicitHeight
+
+        Button {
+            text: qsTr("Select All")
+
+            onClicked: {
+                selectedItems.clear();
+
+                // 批量构造数据，单次写入
+                let tempArr = [];
+                for (let i = 0; i < view.count; i++) {
+                    tempArr.push({
+                        index: i
+                    });
+                }
+                selectedItems.append(tempArr);
+            }
+        }
+        Button {
+            text: qsTr("Deselect All")
+            onClicked: clearAllSelectedItems()
+        }
+    }
+
     // ========== 列表视图（优化滚动条：移除无效handle配置，解决竖线问题） ==========
     ListView {
         id: view
-        anchors {
-            fill: parent
-            margins: 4
-        }
+        anchors.top: btnBar.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.topMargin: 4
+        clip: true
 
         boundsBehavior: Flickable.StopAtBounds // 禁止滚动到边界外的弹性效果
 
