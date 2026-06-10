@@ -407,6 +407,7 @@ void MainWindow::on_btnDelNoteRecycle_clicked() {
 }
 
 void MainWindow::on_btnRestoreNoteRecycle_clicked() {
+  isStopMoveNote = false;
   m_NotesList->restoreNoteFromRecycle();
 
   m_NotesList->updateAllNoteIndexManager();

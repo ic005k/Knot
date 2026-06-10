@@ -96,7 +96,7 @@ void NotesList::needDelNotes() {
 }
 
 void NotesList::setDelNoteFlag(QString mdFile) {
-  int maxCount = 500;
+  int maxCount = 1000;
   needDelFiles.insert(0, mdFile);
   if (needDelFiles.count() > maxCount) {
     needDelFiles.removeAt(maxCount);  // 移除老的

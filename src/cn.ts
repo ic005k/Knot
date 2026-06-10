@@ -2261,17 +2261,17 @@
         <translation>是否导入这个数据？</translation>
     </message>
     <message>
-        <location filename="MainWindow_btn.cpp" line="876"/>
+        <location filename="MainWindow_btn.cpp" line="877"/>
         <source>Total Reading: </source>
         <translation>总阅读时间：</translation>
     </message>
     <message>
-        <location filename="MainWindow_btn.cpp" line="926"/>
+        <location filename="MainWindow_btn.cpp" line="927"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
     </message>
     <message>
-        <location filename="MainWindow_btn.cpp" line="930"/>
+        <location filename="MainWindow_btn.cpp" line="931"/>
         <source>WebDav connection successful.</source>
         <translation>WebDav连接成功</translation>
     </message>
@@ -2318,7 +2318,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="678"/>
-        <location filename="MainWindow_btn.cpp" line="889"/>
+        <location filename="MainWindow_btn.cpp" line="890"/>
         <source>Reading Progress</source>
         <translation>阅读进度</translation>
     </message>
@@ -2329,8 +2329,8 @@
     <message>
         <location filename="MainWindow.cpp" line="1226"/>
         <location filename="MainWindow_btn.cpp" line="183"/>
-        <location filename="MainWindow_btn.cpp" line="828"/>
-        <location filename="MainWindow_btn.cpp" line="839"/>
+        <location filename="MainWindow_btn.cpp" line="829"/>
+        <location filename="MainWindow_btn.cpp" line="840"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
@@ -2580,7 +2580,12 @@
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="Notes/MoveTo.ui" line="87"/>
+        <location filename="Notes/MoveTo.ui" line="81"/>
+        <source>Stop Move</source>
+        <translation>停止移动</translation>
+    </message>
+    <message>
+        <location filename="Notes/MoveTo.ui" line="94"/>
         <source>Ok</source>
         <translation>确定</translation>
     </message>
@@ -3078,12 +3083,12 @@
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="454"/>
+        <location filename="Notes/NotesList_Event.cpp" line="460"/>
         <source>Note</source>
         <translation>笔记</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="725"/>
+        <location filename="Notes/NotesList_Event.cpp" line="733"/>
         <source>Rename</source>
         <translation>重命名</translation>
     </message>
@@ -3161,47 +3166,47 @@
         <translation type="vanished">编辑</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="762"/>
+        <location filename="Notes/NotesList_Event.cpp" line="770"/>
         <source>Copy</source>
         <translation>拷贝</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="763"/>
+        <location filename="Notes/NotesList_Event.cpp" line="771"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="454"/>
+        <location filename="Notes/NotesList_Event.cpp" line="460"/>
         <source>NoteBook</source>
         <translation>笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="458"/>
+        <location filename="Notes/NotesList_Event.cpp" line="464"/>
         <source>Move to the recycle bin?</source>
         <translation>移到回收箱？</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="602"/>
+        <location filename="Notes/NotesList_Event.cpp" line="608"/>
         <source>Knot</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="602"/>
+        <location filename="Notes/NotesList_Event.cpp" line="608"/>
         <source>MD File (*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="621"/>
+        <location filename="Notes/NotesList_Event.cpp" line="627"/>
         <source>Invalid Markdown file.</source>
         <translation>无效的Markdown文件</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="636"/>
+        <location filename="Notes/NotesList_Event.cpp" line="642"/>
         <source>A maximum of 10 files can be imported at a time.</source>
         <translation>一次性最多只能导入10个文件</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="580"/>
+        <location filename="Notes/NotesList_Event.cpp" line="586"/>
         <source>MD File(*.*)</source>
         <translation></translation>
     </message>
@@ -3237,17 +3242,17 @@
         <translation>请至少选择一个条目进行恢复。</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="238"/>
+        <location filename="Notes/NotesList_Event.cpp" line="244"/>
         <source>Please select at least one item to delete.</source>
         <translation>请至少选择一个条目进行删除。</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="246"/>
+        <location filename="Notes/NotesList_Event.cpp" line="252"/>
         <source>Whether to delete the selected %1 items permanently?</source>
         <translation>是否永久删除选中的 %1 个条目？</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="326"/>
+        <location filename="Notes/NotesList_Event.cpp" line="332"/>
         <source>Batch delete %1 items completed successfully.</source>
         <translation>批量删除%1个条目，操作成功完成。</translation>
     </message>
@@ -3339,7 +3344,7 @@
         <translation type="vanished">确定</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="760"/>
+        <location filename="Notes/NotesList_Event.cpp" line="768"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -3357,7 +3362,7 @@
         <translation type="vanished">笔记本名称</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="338"/>
+        <location filename="Notes/NotesList_Event.cpp" line="344"/>
         <source>Whether to remove</source>
         <translation>是否删除</translation>
     </message>
@@ -3407,17 +3412,17 @@
         <translation>无标题笔记</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="761"/>
+        <location filename="Notes/NotesList_Event.cpp" line="769"/>
         <source>Paste</source>
         <translation>粘贴</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="518"/>
+        <location filename="Notes/NotesList_Event.cpp" line="524"/>
         <source>Note Book</source>
         <translation>笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="519"/>
+        <location filename="Notes/NotesList_Event.cpp" line="525"/>
         <source>Note List</source>
         <translation>笔记列表</translation>
     </message>
@@ -11247,12 +11252,12 @@ Amount: %3</source>
         <translation type="vanished">完成</translation>
     </message>
     <message>
-        <location filename="qmlsrc/noterecycle.qml" line="496"/>
+        <location filename="qmlsrc/noterecycle.qml" line="495"/>
         <source>Select All</source>
         <translation>全选</translation>
     </message>
     <message>
-        <location filename="qmlsrc/noterecycle.qml" line="512"/>
+        <location filename="qmlsrc/noterecycle.qml" line="511"/>
         <source>Deselect All</source>
         <translation>取消全选</translation>
     </message>

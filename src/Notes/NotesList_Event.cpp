@@ -175,6 +175,12 @@ void NotesList::on_btnBatchRestore_clicked() {
 
   bool allMoveSuccess = true;
   foreach (QTreeWidgetItem* item, selectedItems) {
+    if (isStopMoveNote) {
+      isStopMoveNote = false;
+      allMoveSuccess = false;
+      break;
+    }
+
     if (item == NULL || item->parent() == NULL) {
       allMoveSuccess = false;
       continue;
@@ -680,6 +686,7 @@ int NotesList::on_btnImport_clicked() {
   watcher->setFuture(future);
   return MDFileList.size();
 }
+
 void NotesList::on_btnMoveTo_clicked() {
   QTreeWidgetItem* item = tw->currentItem();
   if (item == NULL) return;
@@ -699,6 +706,7 @@ void NotesList::on_btnMoveTo_clicked() {
                        [this]() { setCurrentItemFromMDFile(currentMDFile); });
   }
 }
+
 void NotesList::on_btnRename_clicked() {
   QTreeWidgetItem* item = tw->currentItem();
   if (item == NULL) return;

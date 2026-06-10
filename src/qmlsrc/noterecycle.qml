@@ -485,8 +485,7 @@ Rectangle {
         id: btnBar
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
+
         anchors.topMargin: 8
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 10

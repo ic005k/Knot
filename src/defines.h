@@ -99,6 +99,7 @@ inline int baseLines = 50;
 inline int htmlIndex = 0;
 inline int minBytes = 200000;
 inline int maxBytes = 400000;
+inline int nCurrentMoveTo = 0;
 
 inline int zlibMethod = 1;
 inline int readerFontSize = 18;
@@ -110,9 +111,9 @@ inline qreal fontScale = 1.0f;
 
 inline bool isAndroid, isLinux, isMacOS, isZipOK, isMenuImport, isDownData,
     loading, isEncrypt, isIOS, isEpub, isEpubError, isText, isPDF,
-    isInitThemeEnd, isUpData, isRemovedTopItem, isReport, isReadTWEnd,
-    isWindows, isEBook, isGpsRun, isRunPaused, isGetWebDavModiTime, isPlayBook,
-    isSelectTab;
+    isStopMoveNote, isInitThemeEnd, isUpData, isRemovedTopItem, isReport,
+    isReadTWEnd, isWindows, isEBook, isGpsRun, isRunPaused, isGetWebDavModiTime,
+    isPlayBook, isSelectTab;
 
 inline bool isPasswordError = false;
 inline bool isrbFreq = true;

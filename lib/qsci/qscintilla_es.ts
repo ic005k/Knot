@@ -642,7 +642,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="678"/>
-        <location filename="../../src/MainWindow_btn.cpp" line="889"/>
+        <location filename="../../src/MainWindow_btn.cpp" line="890"/>
         <source>Reading Progress</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1710,8 +1710,8 @@
     <message>
         <location filename="../../src/MainWindow.cpp" line="1226"/>
         <location filename="../../src/MainWindow_btn.cpp" line="183"/>
-        <location filename="../../src/MainWindow_btn.cpp" line="828"/>
-        <location filename="../../src/MainWindow_btn.cpp" line="839"/>
+        <location filename="../../src/MainWindow_btn.cpp" line="829"/>
+        <location filename="../../src/MainWindow_btn.cpp" line="840"/>
         <source>Share to</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1736,17 +1736,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_btn.cpp" line="876"/>
+        <location filename="../../src/MainWindow_btn.cpp" line="877"/>
         <source>Total Reading: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_btn.cpp" line="926"/>
+        <location filename="../../src/MainWindow_btn.cpp" line="927"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_btn.cpp" line="930"/>
+        <location filename="../../src/MainWindow_btn.cpp" line="931"/>
         <source>WebDav connection successful.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1833,7 +1833,12 @@
         <translation type="unfinished">Cancelar</translation>
     </message>
     <message>
-        <location filename="../../src/Notes/MoveTo.ui" line="87"/>
+        <location filename="../../src/Notes/MoveTo.ui" line="81"/>
+        <source>Stop Move</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/MoveTo.ui" line="94"/>
         <source>Ok</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2227,12 +2232,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="454"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="460"/>
         <source>Note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="725"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="733"/>
         <source>Rename</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2306,67 +2311,67 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="760"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="768"/>
         <source>Cancel</source>
         <translation type="unfinished">Cancelar</translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="761"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="769"/>
         <source>Paste</source>
         <translation type="unfinished">Pegar</translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="762"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="770"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="763"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="771"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="454"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="460"/>
         <source>NoteBook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="458"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="464"/>
         <source>Move to the recycle bin?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="518"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="524"/>
         <source>Note Book</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="519"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="525"/>
         <source>Note List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="602"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="608"/>
         <source>Knot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="602"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="608"/>
         <source>MD File (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="621"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="627"/>
         <source>Invalid Markdown file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="636"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="642"/>
         <source>A maximum of 10 files can be imported at a time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="580"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="586"/>
         <source>MD File(*.*)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2398,22 +2403,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="238"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="244"/>
         <source>Please select at least one item to delete.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="246"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="252"/>
         <source>Whether to delete the selected %1 items permanently?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="326"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="332"/>
         <source>Batch delete %1 items completed successfully.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="338"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="344"/>
         <source>Whether to remove</source>
         <translation type="unfinished"></translation>
     </message>
@@ -8323,12 +8328,12 @@
 <context>
     <name>noterecycle</name>
     <message>
-        <location filename="../../src/qmlsrc/noterecycle.qml" line="496"/>
+        <location filename="../../src/qmlsrc/noterecycle.qml" line="495"/>
         <source>Select All</source>
         <translation type="unfinished">Seleccionar todo</translation>
     </message>
     <message>
-        <location filename="../../src/qmlsrc/noterecycle.qml" line="512"/>
+        <location filename="../../src/qmlsrc/noterecycle.qml" line="511"/>
         <source>Deselect All</source>
         <translation type="unfinished"></translation>
     </message>

@@ -12,11 +12,11 @@ class MoveTo : public QDialog {
   Q_OBJECT
 
  public:
-  explicit MoveTo(QWidget *parent = nullptr);
+  explicit MoveTo(QWidget* parent = nullptr);
   ~MoveTo();
-  Ui::MoveTo *ui;
+  Ui::MoveTo* ui;
   QString strCurrentItem;
-  QTreeWidgetItem *currentItem;
+  QTreeWidgetItem* currentItem;
   bool isOk = false;
 
   void initTopNoteBook();
@@ -24,17 +24,21 @@ class MoveTo : public QDialog {
   void showDialog();
 
  protected:
-  void closeEvent(QCloseEvent *event) override;
-  bool eventFilter(QObject *watch, QEvent *evn) override;
+  void closeEvent(QCloseEvent* event) override;
+  bool eventFilter(QObject* watch, QEvent* evn) override;
  private slots:
   void on_btnCancel_clicked();
 
   void on_btnOk_clicked();
 
- private:
-  QList<QTreeWidgetItem *> listItems;
+  void on_btnStopMove_clicked();
 
-  QWidget *m_widget;
+  void on_listWidget_currentRowChanged(int currentRow);
+
+ private:
+  QList<QTreeWidgetItem*> listItems;
+
+  QWidget* m_widget;
   bool isNoteBook = false;
   bool isNote = false;
 };

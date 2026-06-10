@@ -89,16 +89,19 @@ void MoveTo::showDialog() {
   m_widget->show();
 
   ui->listWidget->setFocus();
-  if (ui->listWidget->count() > 0) ui->listWidget->setCurrentRow(0);
+  if (ui->listWidget->count() > 0 && nCurrentMoveTo < ui->listWidget->count() &&
+      nCurrentMoveTo >= 0) {
+    ui->listWidget->setCurrentRow(nCurrentMoveTo);
+  }
 
   show();
 
   exec();
-  // while (!isHidden()) QCoreApplication::processEvents();
 }
 
 void MoveTo::closeEvent(QCloseEvent* event) {
   Q_UNUSED(event)
+  nCurrentMoveTo = ui->listWidget->currentRow();
   m_widget->close();
 }
 
@@ -158,4 +161,14 @@ void MoveTo::initAllNoteBook() {
   }
 
   ui->listWidget->addItems(itemList);
+}
+
+void MoveTo::on_btnStopMove_clicked() {
+  isStopMoveNote = true;
+  close();
+  accept();
+}
+
+void MoveTo::on_listWidget_currentRowChanged(int currentRow) {
+  Q_UNUSED(currentRow);
 }
