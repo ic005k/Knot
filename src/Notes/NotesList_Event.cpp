@@ -613,7 +613,7 @@ int NotesList::on_btnImport_clicked() {
   QStringList MDFileList;
   QTreeWidgetItem* item = tw->currentItem();
 
-  for (const QString& fileName : fileNames) {
+  for (const QString& fileName : std::as_const(fileNames)) {
     QString strFile = fileName.toLower();
     if (strFile.contains(".md") || strFile.contains(".txt")) {
       MDFileList.append(fileName);
@@ -648,7 +648,7 @@ int NotesList::on_btnImport_clicked() {
         item1->setText(0, name);
 
         QString a = "memo/" + m_Notes->getDateTimeStr() + "_" +
-                    QString::number(i) + ".md";
+                    QString::number(i) + m_Method->generateRandom3() + ".md";
         currentMDFile = iniDir + a;
 
         QFile::copy(fileName, currentMDFile);

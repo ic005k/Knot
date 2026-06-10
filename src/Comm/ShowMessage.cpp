@@ -78,7 +78,7 @@ void ShowMessage::init(int btnCount) {
   dlgW = 360;
   if (dlgW >= mainW) dlgW = mainW;
 #endif
-  dlgW -= 20;
+  dlgW -= 10;
 
   // 2. 高度逻辑（固定为主窗口3/4）
   int dlgH;
