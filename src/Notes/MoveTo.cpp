@@ -34,17 +34,23 @@ MoveTo::MoveTo(QWidget* parent) : QDialog(parent), ui(new Ui::MoveTo) {
       !mui->frameNoteRecycle->isHidden())
     item = twrb->currentItem();
 
-  if (item == NULL) close();
-
-  if (item->text(1).isEmpty()) {
-    isNoteBook = true;
-    initTopNoteBook();
-  } else {
-    isNote = true;
-    initAllNoteBook();
+  if (item == NULL) {
+    close();
+    return;
   }
 
-  ui->lblItem->setText(item->text(0));
+  if (item != NULL) {
+    if (item->text(1).isEmpty()) {
+      isNoteBook = true;
+      initTopNoteBook();
+    } else {
+      isNote = true;
+      initAllNoteBook();
+    }
+
+    ui->lblItem->setText(item->text(0));
+  }
+
   ui->lblItem->adjustSize();
   ui->lblItem->setWordWrap(true);
 }
@@ -93,8 +99,6 @@ void MoveTo::showDialog() {
       nCurrentMoveTo >= 0) {
     ui->listWidget->setCurrentRow(nCurrentMoveTo);
   }
-
-  show();
 
   exec();
 }
