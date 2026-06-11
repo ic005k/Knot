@@ -48,7 +48,7 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
     QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
 
     if (watch == mui->editSearchText && keyEvent->key() == Qt::Key_Return) {
-      mw_one->on_btnStartSearch_pressed();
+      mw_one->on_btnStartSearch_clicked();
       return true;
     }
 

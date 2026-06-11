@@ -532,7 +532,6 @@ void Notes::openNotes() {
                 [=](bool success, QString error) {
                   qDebug() << (success ? "下载成功" : "下载失败: " + error);
                   if (success) {
-                    // startBackgroundProcessRemoteFiles();
                     startBackgroundProcessRemoteFiles_MultiThread();
                   } else {
                     qDebug() << "下载失败：" << error;
@@ -577,7 +576,7 @@ void Notes::startBackgroundProcessRemoteFiles_MultiThread() {
   n_Files = 0;
 
   // 后台异步，但 串行执行本地处理（安全、稳定、不崩溃）
-  QtConcurrent::run([this]() {
+  QThreadPool::globalInstance()->start([this]() {
     for (const QString& file : std::as_const(remoteFiles)) {
       processSingleRemoteFile(file);
     }

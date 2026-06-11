@@ -2571,8 +2571,9 @@
     </message>
     <message>
         <location filename="Notes/MoveTo.ui" line="56"/>
-        <source>Move To</source>
-        <translation>移动到</translation>
+        <source>Move To:</source>
+        <oldsource>Move To</oldsource>
+        <translation>移动到：</translation>
     </message>
     <message>
         <location filename="Notes/MoveTo.ui" line="74"/>

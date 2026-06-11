@@ -481,7 +481,7 @@ void MainWindow::on_btnClearSearchText_pressed() {
   mui->editSearchText->setFocus();
 }
 
-void MainWindow::on_btnStartSearch_pressed() {
+void MainWindow::on_btnStartSearch_clicked() {
   mui->editSearchText->clearFocus();
 
   searchStr = mui->editSearchText->text().trimmed();

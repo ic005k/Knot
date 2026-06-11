@@ -991,9 +991,11 @@ QString Method::setToolButtonQss(QToolButton* btn, int radius, int padding,
                   .arg(radius)
                   .arg(normalTextColor)
                   .arg(normalColor));
+
   list.append(QString("QToolButton:hover{color:%1;background:%2;}")
                   .arg(hoverTextColor)
                   .arg(hoverColor));
+
   list.append(QString("QToolButton:pressed{color:%1;background:%2;}")
                   .arg(pressedTextColor)
                   .arg(pressedColor));

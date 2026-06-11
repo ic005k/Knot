@@ -8,15 +8,12 @@
 
 MoveTo::MoveTo(QWidget* parent) : QDialog(parent), ui(new Ui::MoveTo) {
   ui->setupUi(this);
+
   setModal(true);
   this->installEventFilter(this);
   ui->listWidget->installEventFilter(this);
 
-  setWindowFlag(Qt::FramelessWindowHint);
-  QString style = "QDialog{border-radius:0px;border:0px solid darkred;}";
-  this->setStyleSheet(style);
-
-  ui->listWidget->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleSmall);
+  ui->listWidget->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
   ui->listWidget->setVerticalScrollMode(QListWidget::ScrollPerPixel);
   QScroller::grabGesture(ui->listWidget, QScroller::LeftMouseButtonGesture);
 
@@ -76,10 +73,8 @@ void MoveTo::showDialog() {
   if (isAndroid) {
     w = mw_one->width();
     x = mw_one->geometry().x();
-    y = mw_one->geometry().y();
-  }
-
-  else {
+    y = mw_one->geometry().y() + (mw_one->height() - h) / 2;
+  } else {
     w = width();
     if (w > 500) w = 500;
     x = mw_one->geometry().x() + (mw_one->width() - w) / 2;

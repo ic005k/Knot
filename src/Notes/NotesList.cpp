@@ -1043,7 +1043,7 @@ void NotesList::updateAllNoteIndexManager() {
 bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
   if (!QFile::exists(mdFile)) return false;
 
-  int indexNoteBook, indexNote, countNoteBook, countNotes;
+  int indexNoteBook, indexNote, countNoteBook;
   indexNoteBook = m_Notes->m_NoteIndexManager->getNotebookIndex(mdFile);
   indexNote = m_Notes->m_NoteIndexManager->getNoteIndex(mdFile);
   countNoteBook = m_Method->getCountFromQW(mui->qwNoteBook);

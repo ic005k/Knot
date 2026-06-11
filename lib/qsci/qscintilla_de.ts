@@ -1824,7 +1824,7 @@
     </message>
     <message>
         <location filename="../../src/Notes/MoveTo.ui" line="56"/>
-        <source>Move To</source>
+        <source>Move To:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

@@ -335,8 +335,6 @@ class Notes : public QDialog {
   void initEditorScrollBars();
   void saveEditorState(const QString& filePath);
   void restoreEditorState(const QString& filePath);
-  void processRemoteFiles(QStringList remoteFiles);
-  void startBackgroundProcessRemoteFiles();
 
   QString getFileVersion(const QString& filePath);
   void updateDiff(const QString& oldText, const QString& newText);
