@@ -1052,7 +1052,7 @@ QString Method::getCustomColor() {
   y = mw_one->geometry().y();
   if (isAndroid) {
     w = mw_one->width();
-    h = mui->frameMain->height();
+    h = mw_one->height();
   } else {
     w = 300;
     h = 650;
@@ -1086,10 +1086,11 @@ QString Method::getCustomColor() {
   x = mw_one->geometry().x();
   y = mw_one->geometry().y();
   w = mw_one->width();
-  h = mui->frameMain->height() - 50;
+  h = mw_one->height() - 50;
   colorDlg->setFixedWidth(w);
   colorDlg->setFixedHeight(h);
-  colorDlg->setGeometry(x + (mw_one->width() - w) / 2, y, w, h);
+  colorDlg->setGeometry(x + (mw_one->width() - w) / 2,
+                        y + (mw_one->height() - h) / 2, w, h);
   if (colorDlg->exec() == QDialog::Accepted) {
     strColor = ColorToString(colorDlg->getColor());
     closeGrayWindows();
