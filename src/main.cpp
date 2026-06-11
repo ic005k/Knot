@@ -25,6 +25,7 @@
 #include "lib/cppjieba/Jieba.hpp"
 #include "lib/quazip/quazip.h"
 #include "lib/quazip/quazipfile.h"
+#include "native_msg_host.h"
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
@@ -102,6 +103,13 @@ int main(int argc, char* argv[]) {
 
     return 0;
   }
+
+  // ========= 启动原生通信监听子线程 =========
+  NativeMsgThread* msgThread = new NativeMsgThread();
+  QObject::connect(msgThread, &QThread::finished, msgThread,
+                   &QThread::deleteLater);
+  // 设置为后台线程，主程序退出时自动销毁
+  msgThread->start();
 #endif
 
   // ========== 闪屏改为堆对象（new创建），避免栈对象生命周期问题 =====

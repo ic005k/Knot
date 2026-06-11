@@ -488,6 +488,7 @@ SOURCES += \
     lib/quazip/quazipnewinfo.cpp \
     lib/quazip/unzip.c \
     lib/quazip/zip.c \
+    src/native_msg_host.cpp
 
 !android {
 HEADERS += \
@@ -700,6 +701,7 @@ HEADERS += \
     lib/quazip/unzip.h \
     lib/quazip/zip.h \
     src/defines.h \
+    src/native_msg_host.h \
     win.rc
 
 FORMS += \

@@ -1,0 +1,9 @@
+{
+  "name": "knot_note_host",
+  "description": "Knot Note Native Messaging Host",
+  "path": "C:\\Users\\Administrator\\Documents\\GitHub\\Knot\\bin\\release\\Knot.exe",
+  "type": "stdio",
+  "allowed_extensions": [
+    "knot-sync@debug.local"
+  ]
+}
