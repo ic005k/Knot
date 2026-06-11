@@ -400,7 +400,7 @@ class Steps : public QDialog {
 };
 
 //////////////////////////////////
-class CustomChartView : public QChartView {
+/*class CustomChartView : public QChartView {
   Q_OBJECT
  public:
   explicit CustomChartView(QWidget* parent = nullptr) : QChartView(parent) {
@@ -416,17 +416,13 @@ class CustomChartView : public QChartView {
   void mousePressEvent(QMouseEvent* event) override {
     // 首先调用基类实现
     QChartView::mousePressEvent(event);
-
-    // 处理所有区域的点击事件，包括空白区域
-    // handleChartClick(event);
-
+    handleChartClick(event);
     // 接受事件，防止事件继续传播
     event->accept();
   }
 
   void mouseReleaseEvent(QMouseEvent* event) override {
     QChartView::mouseReleaseEvent(event);
-    // 移除 handleChartClick 调用，避免重复处理
     handleChartClick(event);
   }
 
@@ -490,7 +486,7 @@ class CustomChartView : public QChartView {
 
  private:
   QVector<Steps::MonthData> m_monthData;
-};
+};*/
 
 //////////////////////////////////////////////////////////////////////////////////
 

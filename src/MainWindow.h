@@ -955,7 +955,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnMap_clicked();
 
-  void on_btnSportsChart_pressed();
+  void on_btnSportsChart_clicked();
 
   void on_btnSpeak_pressed();
 

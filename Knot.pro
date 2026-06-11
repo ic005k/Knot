@@ -383,6 +383,7 @@ SOURCES += \
     src/DateSelector.cpp \
     src/EditRecord.cpp \
     src/Exercise/CompassWidget.cpp \
+    src/Exercise/CustomChartView.cpp \
     src/Exercise/DrawSportsFreq.cpp \
     src/Exercise/StepHillChart.cpp \
     src/JavaToQtBridge.cpp \
@@ -648,6 +649,7 @@ HEADERS += \
     src/DelWebDAVFiles.h \
     src/EditRecord.h \
     src/Exercise/CompassWidget.h \
+    src/Exercise/CustomChartView.h \
     src/Exercise/DrawSportsFreq.h \
     src/Exercise/StepHillChart.h \
     src/Exercise/WeatherFetcher.h \

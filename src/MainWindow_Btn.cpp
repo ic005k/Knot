@@ -638,7 +638,7 @@ void MainWindow::on_btnViewBookNote_pressed() { m_Reader->viewBookNote(); }
 
 void MainWindow::on_btnMap_clicked() { m_Steps->openMapWindow(); }
 
-void MainWindow::on_btnSportsChart_pressed() { m_Steps->showSportsChart(); }
+void MainWindow::on_btnSportsChart_clicked() { m_Steps->showSportsChart(); }
 
 void MainWindow::on_btnSpeak_pressed() {
   mui->btnSpeak->hide();
