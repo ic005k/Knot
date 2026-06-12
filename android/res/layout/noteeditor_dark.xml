@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#000000"
+    android:background="@color/dark"
     android:layout_weight="1"
     android:orientation="vertical"
 >
@@ -312,7 +312,7 @@
                 android:textColor="#FFFFFF"
                 android:text="Loading, please wait..."
                 android:theme="@style/MyEditText"
-                android:textColorHighlight="#FF9800"
+                android:textColorHighlight="#335588"
                 android:inputType="textMultiLine"
                 android:layout_weight="1"
             />

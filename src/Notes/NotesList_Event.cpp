@@ -882,12 +882,6 @@ void NotesList::clickNoteList() {
   setNoteLabel();
 
   if (!QFile::exists(currentMDFile)) {
-    /*ShowMessage *msg = new ShowMessage(mw_one);
-msg->showMsg(appName,
-             tr("The current note does not exist. Please select another "
-                "note or create a new note."),
-             0);*/
-
     return;
   }
 
