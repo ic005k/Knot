@@ -88,14 +88,8 @@ void MainWindow::updateMainTab() {
 void MainWindow::on_btnChart() { m_MainHelper->clickBtnChart(); }
 
 void MainWindow::on_btnManagement_pressed() {
-  int x, y, w, h;
-  x = geometry().x();
-  y = geometry().y();
-  w = width();
-  h = height();
-  m_NotesList->setGeometry(x, y, w, h);
-  m_NotesList->show();
-  tw->setFocus();
+  mui->frameNotesTree->show();
+  mui->frameNoteList->hide();
 }
 
 void MainWindow::on_btnUpMove_pressed() {

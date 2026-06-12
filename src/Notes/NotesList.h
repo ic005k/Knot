@@ -28,6 +28,7 @@
 #include <utility>  // for std::as_const
 
 #include "database_manager.h"
+#include "qtreewidgetproxymodel.h"
 #include "search_model.h"
 #include "src/Comm/TextEditToolbar.h"
 #include "src/MainWindow.h"
@@ -274,6 +275,8 @@ class NotesList : public QDialog {
  signals:
 
  private:
+  QTreeWidgetProxyModel* m_treeProxyModel = nullptr;
+
   QMutex m_saveMutex;       // 保存锁
   bool m_isSaving = false;  // 保存状态
 

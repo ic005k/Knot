@@ -422,6 +422,7 @@ SOURCES += \
     src/Notes/database_manager.cpp \
     src/Notes/note_graph.cpp \
     src/Notes/note_index_manager.cpp \
+    src/Notes/qtreewidgetproxymodel.cpp \
     src/Notes/search_model.cpp \
     src/Notes/titlegenerator.cpp \
     src/Preferences.cpp \
@@ -671,6 +672,7 @@ HEADERS += \
     src/Notes/database_manager.h \
     src/Notes/note_graph.h \
     src/Notes/note_index_manager.h \
+    src/Notes/qtreewidgetproxymodel.h \
     src/Notes/search_model.h \
     src/Notes/titlegenerator.h \
     src/Preferences.h \

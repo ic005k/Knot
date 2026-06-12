@@ -1,216 +1,66 @@
 import QtQuick
-import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
 
-Item {
-    id: window
-    visible: true
+TreeView {
+    id: treeView
 
-    function addTopItem(strItem) {
-        var topItem1 = tree.createItem(strItem, "/res/nb.png")
-        topItem1.setSelectionFlag(tree.selectionCurrent)
-        tree.addTopLevelItem(topItem1)
+    anchors.fill: parent
+    model: treeModel
 
-        return topItem1
-    }
+    selectionMode: TreeView.SingleSelection
+    selectionBehavior: TreeView.SelectRows
+    focus: true
 
-    function addChildItem(parentItem, strChildItem, iconFile) {
-        var childItem = tree.createItem(strChildItem, iconFile)
-        parentItem.appendChild(childItem)
+    // ================= delegate =================
+    delegate: Rectangle {
+        required property TreeView treeView
+        required property bool hasChildren
+        required property bool expanded
+        required property var model
 
-        return childItem
-    }
+        implicitWidth: treeView.width
+        implicitHeight: 32
 
-    function clearAll() {
-
-        for (var i = 0; i < 5000; i++) {
-            var curItem = tree.topLevelItem(i)
-            if (curItem) {
-                var parentItem = curItem.parent()
-                if (parentItem) {
-                    parentItem.removeChild(curItem)
-                }
-            }
-        }
-    }
-
-    TreeWidget {
-        id: tree
-        anchors.fill: parent
-
-        Component.onCompleted: {
-            iconSize = (Qt.size(25, 25))
-            font.pointSize = fontSize
-
-            var topItem1 = createItem("Item 1", "/res/nb.png")
-            topItem1.setSelectionFlag(selectionCurrent)
-            addTopLevelItem(topItem1)
-
-            topItem1.appendChild(createItem("Child 1", "/res/n.png"))
-            addChildItem(topItem1, "Child 2", "/res/n.png")
-            addChildItem(topItem1, "Child 3", "/res/n.png")
-
-            addTopItem("Item 2")
-            addTopItem("Item 3")
-            addTopItem("Item 4")
-        }
-
-        onCurrentItemChanged: {
-            var item = getCurrentItem()
-            if (item)
-                inputName.text = item.text()
-        }
-    }
-
-    Dialog {
-        id: dlgRename
-        modal: true
-        width: window.width - 20
-        x: window.width / 2 - width / 2
-        y: window.height / 2 - height / 2
-        title: "Rename item ..."
-        visible: false
-        standardButtons: Dialog.Ok | Dialog.Cancel
-
-        property alias initName: inputName.text
-
-        contentItem: Rectangle {
-            width: dlgRename.width
-            height: inputName.implicitHeight + 6
-            color: "lightGray"
-            TextInput {
-                id: inputName
-                clip: true
-                text: "input here"
-                x: 10
-                width: parent.width
-                font.pointSize: 20
-                color: "black"
-
-                anchors.verticalCenter: parent.verticalCenter
-
-                onAccepted: {
-                    dlgRename.accept()
-                    dlgRename.close()
-                }
-            }
-        }
-
-        onAccepted: {
-            var curItem = tree.getCurrentItem()
-            if (curItem) {
-                curItem.setText(inputName.text)
-            }
-        }
-    }
-
-    ToolBar {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        visible: false
+        // ✅ 选中高亮
+        color: treeView.selectionModel?.isSelected(model.index) ? "#e6f0ff" : "transparent"
 
         RowLayout {
-            spacing: 0
-            ToolButton {
-                id: buttonAdd
-                text: "Add Node ..."
+            anchors.fill: parent
+            spacing: 4
 
-                onClicked: {
-                    menuAdd.popup()
-                }
+            // ▶ / ▼
+            Text {
+                visible: hasChildren
+                text: expanded ? "▼" : "▶"
+                width: 20
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
 
-                Menu {
-                    id: menuAdd
-                    title: "Add Node"
-
-                    MenuItem {
-                        text: "Child"
-                        onTriggered: {
-                            var curItem = tree.getCurrentItem()
-                            if (curItem) {
-                                curItem.appendChild(
-                                            tree.createItem("Child",
-                                                            "ico_item.png"))
-                                curItem.setExpanded(true)
-                            }
-                        }
-                    }
-
-                    MenuItem {
-                        text: "Sibling Before"
-                        onTriggered: {
-                            var curItem = tree.getCurrentItem()
-                            if (curItem) {
-                                var parentItem = curItem.parent()
-                                if (parentItem) {
-                                    var pos = parentItem.indexOfChildItem(
-                                                curItem)
-                                    parentItem.insertChild(pos, tree.createItem(
-                                                               "Item Before",
-                                                               "ico_item.png"))
-                                }
-                            }
-                        }
-                    }
-
-                    MenuItem {
-                        text: "Sibling After"
-                        onTriggered: {
-                            var curItem = tree.getCurrentItem()
-                            if (curItem) {
-                                var parentItem = curItem.parent()
-                                if (parentItem) {
-                                    var pos = parentItem.indexOfChildItem(
-                                                curItem)
-                                    if (pos < parentItem.childernCount() - 1) {
-                                        parentItem.insertChild(
-                                                    pos + 1, tree.createItem(
-                                                        "Item After",
-                                                        "ico_item.png"))
-                                    } else {
-                                        parentItem.appendChild(
-                                                    tree.createItem(
-                                                        "Item After",
-                                                        "ico_item.png"))
-                                    }
-                                }
-                            }
-                        }
+                TapHandler {
+                    onTapped: {
+                        if (expanded)
+                            treeView.collapse(model.index);
+                        else
+                            treeView.expand(model.index);
                     }
                 }
             }
 
-            ToolSeparator {}
-
-            ToolButton {
-                id: buttonRename
-                text: "Rename ..."
-
-                onClicked: {
-                    var curItem = tree.getCurrentItem()
-                    if (curItem) {
-                        dlgRename.initName = curItem.text()
-                        dlgRename.open()
-                    }
-                }
+            // 文本
+            Text {
+                text: model.display ?? ""
+                Layout.fillWidth: true
+                verticalAlignment: Text.AlignVCenter
             }
 
-            ToolSeparator {}
-
-            ToolButton {
-                id: buttonDelete
-                text: "Delete"
-
-                onClicked: {
-                    var curItem = tree.getCurrentItem()
-                    if (curItem) {
-                        var parentItem = curItem.parent()
-                        if (parentItem) {
-                            parentItem.removeChild(curItem)
-                        }
-                    }
+            // ✅ 整行点击选中（不抢事件）
+            TapHandler {
+                onTapped: {
+                    if (!treeView.selectionModel)
+                        return;
+                    treeView.selectionModel.select(model.index, ItemSelectionModel.ClearAndSelect);
+                    treeView.forceActiveFocus();
                 }
             }
         }

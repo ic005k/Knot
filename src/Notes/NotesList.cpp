@@ -26,6 +26,7 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   mui->btnOpenNote->hide();
   mui->btnShowFindNotes->hide();
   mui->btnTools->hide();
+  mui->f_Tools->hide();
 
   if (isAndroid) {
     QFont font = this->font();
@@ -51,6 +52,10 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
 
   ui->btnImport->hide();
   ui->btnExport->hide();
+
+  m_treeProxyModel = new QTreeWidgetProxyModel(tw, this);
+  mui->qwNotesTree->rootContext()->setContextProperty("treeModel",
+                                                      m_treeProxyModel);
 
   initNotesList();
   initRecycle();
@@ -704,6 +709,11 @@ void NotesList::loadAllNoteBook() {
         pNoteBookItems.append(childItem);
       }
     }
+  }
+
+  // 刷新代理模型，TreeView 自动加载 tw 所有父子节点
+  if (m_treeProxyModel) {
+    // m_treeProxyModel->resetAll();
   }
 }
 

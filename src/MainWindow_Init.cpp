@@ -739,7 +739,6 @@ void MainWindow::init_UIWidget() {
   mui->lblNoteTitle->adjustSize();
   mui->lblNoteTitle->setWordWrap(true);
   mui->lblNoteTitle->hide();
-  mui->f_Tools->hide();
 
   mui->progBar->setMaximumHeight(4);
   mui->progBar->hide();
