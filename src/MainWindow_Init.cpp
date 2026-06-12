@@ -314,6 +314,13 @@ void MainWindow::initMainQW() {
         QUrl(QStringLiteral("qrc:/src/qmlsrc/baklist.qml")));
   }
 
+  if (mui->qwSearch->source().isEmpty()) {
+    mui->qwSearch->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwSearch->rootContext()->setContextProperty("m_Method", m_Method);
+    mui->qwSearch->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/search.qml")));
+  }
+
   if (mui->qwTodo->source().isEmpty()) {
     int f_size = 19;
     if (fontSize <= f_size) f_size = fontSize;

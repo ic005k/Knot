@@ -935,12 +935,6 @@ void MainWindow::on_btnTestWebDav_pressed() {
 void MainWindow::on_btnReader_pressed() { m_Reader->openReader(); }
 
 void MainWindow::on_btnFind_pressed() {
-  if (mui->qwSearch->source().isEmpty()) {
-    mui->qwSearch->rootContext()->setContextProperty("m_Method", m_Method);
-    mui->qwSearch->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/search.qml")));
-  }
-
   mui->frameMain->hide();
   mui->frameSearch->show();
   mui->editSearchText->setFocus();
