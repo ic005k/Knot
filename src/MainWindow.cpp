@@ -26,9 +26,9 @@ MainWindow::MainWindow(QWidget* parent)
 
   init_Thread_Timer();
 
-  m_MainHelper->init_UIWidget();
+  init_UIWidget();
 
-  m_MainHelper->initMainQW();
+  initMainQW();
 
   init_TotalData();
 
@@ -64,70 +64,6 @@ MainWindow::MainWindow(QWidget* parent)
   m_Preferences->setEncSyncStatusTip();
 
   initMain = false;
-}
-
-void MainWindow::init_TotalData() {
-  int count = mui->tabWidget->tabBar()->count();
-  for (int i = 0; i < count; i++) {
-    mui->tabWidget->removeTab(0);
-  }
-
-  QString ini_file;
-  ini_file = iniDir + "tab.ini";
-  QSettings RegTab(ini_file, QSettings::IniFormat);
-  int TabCount = RegTab.value("TabCount", 0).toInt();
-
-  clearAll();
-
-  for (int i = 0; i < TabCount; i++) {
-    QString name;
-    name = RegTab.value("twName" + QString::number(i)).toString();
-    if (name.trimmed().length() == 0) name = "tab" + QString::number(i + 1);
-    QTreeWidget* tw = m_MainHelper->init_TreeWidget(name);
-
-    QString tabText = RegTab
-                          .value("TabName" + QString::number(i),
-                                 tr("Tab") + QString::number(i + 1))
-                          .toString();
-    mui->tabWidget->addTab(tw, tabText);
-
-    addItem(tabText, "", "", "", 0);
-  }
-
-  if (TabCount == 0) {
-    QString tw_name = m_Notes->getDateTimeStr() + "_" + QString::number(1);
-    QTreeWidget* tw = m_MainHelper->init_TreeWidget(tw_name);
-
-    QString tabText = tr("Tab") + " " + QString::number(1);
-    mui->tabWidget->addTab(tw, tabText);
-    addItem(tabText, "", "", "", 0);
-
-    saveTab();
-  }
-
-  m_EditRecord->init_MyCategory();
-
-  if (TabCount > 0)
-    currentTabIndex = RegTab.value("CurrentIndex").toInt();
-  else
-    currentTabIndex = 0;
-
-  mui->tabWidget->setCurrentIndex(currentTabIndex);
-  setCurrentIndex(currentTabIndex);
-  QTreeWidget* twCur = (QTreeWidget*)tabData->currentWidget();
-  readData(twCur);
-  mui->actionImport_Data->setEnabled(false);
-  mui->actionExport_Data->setEnabled(false);
-  mui->actionDel_Tab->setEnabled(false);
-  mui->actionAdd_Tab->setEnabled(false);
-  mui->actionView_App_Data->setEnabled(false);
-
-  if (!initMain) {
-    mui->progBar->setHidden(false);
-    mui->progBar->setMaximum(0);
-  }
-
-  m_ReadTWThread->start();
 }
 
 void MainWindow::readDataInThread(int ExceptIndex) {
@@ -719,174 +655,6 @@ void MainWindow::resetWinPos() {
   }
 }
 
-void MainWindow::init_Stats(QTreeWidget* tw) {
-  int count = tw->topLevelItemCount();
-  int tatol = 0;
-  double amount = 0;
-  for (int i = 0; i < count; i++) {
-    if (isBreak) break;
-    QString str1 = tw->topLevelItem(i)->text(1);
-    QString str2 = tw->topLevelItem(i)->text(2);
-    tatol = tatol + str1.toInt();
-    amount = amount + str2.toDouble();
-  }
-
-  QString strAmount = QString("%1").arg(amount, 0, 'f', 2);
-  strStats = tr("Total") + " : " + QString::number(tatol) + "    $" + strAmount;
-}
-
-void MainWindow::on_actionRename_triggered() {
-  int index = mui->tabWidget->currentIndex();
-  bool ok = false;
-
-  QString text;
-
-  if (m_RenameDlg != nullptr) delete m_RenameDlg;
-
-  m_RenameDlg =
-      m_Method->inputDialog(tr("Rename tab name : "), tr("Tab name : "),
-                            mui->tabWidget->tabText(index));
-
-  if (QDialog::Accepted == m_RenameDlg->exec()) {
-    ok = true;
-    text = m_RenameDlg->textValue();
-    m_RenameDlg->close();
-  } else {
-    m_RenameDlg->close();
-    return;
-  }
-
-  if (ok && !text.isEmpty()) {
-    mui->tabWidget->setTabText(index, text);
-
-    m_Method->modifyItemText0(mui->qwMainTab, index, text);
-    mui->lblTabTitle->setText(mui->tabWidget->tabBar()->tabText(index));
-
-    updateMainTab();
-
-    saveTab();
-  }
-
-  strLatestModify = tr("Rename Tab");
-}
-
-void MainWindow::on_actionAdd_Tab_triggered() {
-  int count = mui->tabWidget->tabBar()->count();
-  QString defaultTabName = tr("Tab") + " " + QString::number(count + 1);
-
-  // 1. 创建可自定义样式的 QInputDialog 实例
-  QInputDialog inputDialog(this);
-  inputDialog.setWindowTitle(tr("New Tab"));
-  inputDialog.setLabelText(tr("Please enter tab name:"));
-  inputDialog.setTextValue(defaultTabName);
-  inputDialog.setInputMode(QInputDialog::TextInput);
-
-  // 2. 适配移动端/桌面端的样式
-  int dialogWidth =
-      qMin(300, mw_one->width() - 40);  // 主窗口宽度减边距，最大300px
-  inputDialog.setFixedSize(dialogWidth, 200);
-
-  // 适配安卓/桌面端按钮文本
-  inputDialog.setOkButtonText(tr("Done"));
-  inputDialog.setCancelButtonText(tr("Cancel"));
-
-  // 3. 显示对话框并处理结果
-  if (inputDialog.exec() == QDialog::Accepted) {
-    QString customTabText = inputDialog.textValue().trimmed();
-    if (customTabText.isEmpty()) {
-      return;
-    }
-
-    // 后续创建标签页的逻辑
-    QString twName =
-        m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
-    QTreeWidget* tw = m_MainHelper->init_TreeWidget(twName);
-
-    mui->tabWidget->addTab(tw, customTabText);
-    mui->tabWidget->setCurrentIndex(count);
-    addItem(customTabText, "", "", "", 0);
-    setCurrentIndex(count);
-
-    reloadMain();
-    saveTab();
-    strLatestModify = tr("Add Tab") + " ( " + customTabText + " ) ";
-  }
-}
-
-void MainWindow::on_actionDel_Tab_triggered() {
-  int index = mui->tabWidget->currentIndex();
-  if (index < 0) return;
-
-  QString tab_name = mui->tabWidget->tabText(index);
-
-  auto m_ShowMsg = std::make_unique<ShowMessage>(this);
-  if (!m_ShowMsg->showMsg("Knot",
-                          tr("Whether to remove") + "  " + tab_name + " ? ", 2))
-    return;
-
-  strLatestModify = tr("Del Tab") + " ( " + tab_name + " ) ";
-
-  QString date_time = m_Notes->getDateTimeStr();
-  m_Method->saveRecycleTabName(date_time, tab_name);
-
-  QTreeWidget* tw = (QTreeWidget*)tabData->currentWidget();
-  QString twName = tw->objectName();
-  int c_year = QDate::currentDate().year();
-
-  bool isFileExists = false;
-  for (int i = 2022; i <= c_year; i++) {
-    QString file = iniDir + QString::number(i) + "-" + twName + ".json";
-    if (QFile::exists(file)) {
-      isFileExists = true;
-      QFileInfo fi(file);
-      QString fn = fi.fileName();
-      QString newFile = iniDir + "recycle_" + tab_name + "_" + fn;
-      QFile::rename(file, newFile);
-    }
-  }
-
-  if (!isFileExists) {  // ini files
-    int iniFileCount = c_year - 2025 + 1 + 1;
-    for (int i = 0; i < iniFileCount; i++) {
-      QString tab_file;
-      if (i == 0)
-        tab_file = iniDir + twName + ".ini";
-      else {
-        tab_file =
-            iniDir + QString::number(2025 + i - 1) + "-" + twName + ".ini";
-      }
-
-      if (QFile::exists(tab_file)) {
-        QFile::copy(tab_file, iniDir + "recycle_name" + "_" + date_time + "-" +
-                                  QString::number(i) + ".ini");
-        QFile file(tab_file);
-        file.remove();
-      }
-    }
-  }
-
-  int TabCount = mui->tabWidget->tabBar()->count();
-  if (TabCount > 1) {
-    mui->tabWidget->removeTab(index);
-    delItem(index);
-  }
-
-  if (TabCount == 1) {
-    mui->tabWidget->removeTab(0);
-    QString tw_name = m_Notes->getDateTimeStr() + "_" + QString::number(1);
-    QTreeWidget* tw = m_MainHelper->init_TreeWidget(tw_name);
-    QString tabText = tr("Tab 1");
-    mui->tabWidget->addTab(tw, tabText);
-
-    clearAll();
-    addItem(tabData->tabText(0), "", "", "", 0);
-
-    reloadMain();
-  }
-
-  saveTab();
-}
-
 void MainWindow::on_twItemClicked() {
   QTreeWidget* tw = (QTreeWidget*)mui->tabWidget->currentWidget();
   if (!tw->currentIndex().isValid()) return;
@@ -1176,15 +944,6 @@ void MainWindow::clearWidgetFocus() {
 
 void MainWindow::hideEvent(QHideEvent* event) { QWidget::hideEvent(event); }
 
-void MainWindow::on_actionExport_Data_triggered() {
-  if (!isSaveEnd) return;
-
-  isUpData = false;
-  showProgress();
-
-  myBakDataThread->start();
-}
-
 bool MainWindow::bakData() {
   errorInfo = "";
   m_NotesList->clearFiles();
@@ -1212,51 +971,6 @@ bool MainWindow::bakData() {
   if (enc_file != "") zipfile = enc_file;
 
   return true;
-}
-
-void MainWindow::on_actionShareFile() {
-  QString path = "/storage/emulated/0/";
-  QString file =
-      QFileDialog::getOpenFileName(this, tr("KnotBak"), path, tr("File (*.*)"));
-
-  if (QFile::exists(file)) {
-#ifdef Q_OS_ANDROID
-    file = m_Method->getRealPathFile(file);
-#endif
-    m_ReceiveShare->shareImage(tr("Share to"), file, "*/*");
-  }
-}
-
-void MainWindow::on_actionImport_Data_triggered() {
-  if (!isSaveEnd) return;
-
-  zipfile = "";
-#ifdef Q_OS_ANDROID
-  QString path = "/storage/emulated/0/KnotBak/";
-  zipfile = QFileDialog::getOpenFileName(this, tr("KnotBak"), path,
-                                         tr("Zip File (*.*)"));
-#else
-  zipfile = QFileDialog::getOpenFileName(this, tr("KnotBak"), "",
-                                         tr("Zip File (*.zip);;All(*.*)"));
-#endif
-
-  if (!zipfile.isNull()) {
-    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
-    if (!m_ShowMsg->showMsg(
-            "Kont",
-            tr("Import this data?") + "\n" + m_Reader->getUriRealPath(zipfile),
-            2)) {
-      isZipOK = false;
-      return;
-    }
-  }
-
-  showProgress();
-
-  isMenuImport = true;
-  isDownData = false;
-
-  myImportDataThread->start();
 }
 
 void MainWindow::showProgress() {
@@ -1305,37 +1019,6 @@ QTreeWidget* MainWindow::get_tw(int tabIndex) {
   return tw;
 }
 
-void MainWindow::on_actionAbout() {
-  QString str = "\n" + appName + "  Ver: " + ver + "\n\n" + tr("Startup Time") +
-                ": " + strStartTotalTime + " s" + "\n" + loginTime + "\n" +
-                "(c) 2022-" + QString::number(QDate::currentDate().year()) +
-                " The Knot Authors\n";
-
-  m_AboutThis->ui->lblAbout->setText(str);
-  m_AboutThis->ui->frameAbout->show();
-
-  int x, y;
-  if (!isAndroid) {
-    m_AboutThis->setMaximumWidth(320);
-    m_AboutThis->setFixedHeight(mw_one->geometry().height() - 30);
-
-    x = mw_one->geometry().x() +
-        (mw_one->geometry().width() - m_AboutThis->width()) / 2;
-    y = mw_one->geometry().y() +
-        (mw_one->geometry().height() - m_AboutThis->height()) / 2;
-  } else {
-    m_AboutThis->setFixedWidth(this->width());
-    m_AboutThis->setFixedHeight(this->height());
-    x = this->geometry().x();
-    y = this->geometry().y();
-  }
-  m_AboutThis->setGeometry(x, y, this->width(), this->height());
-
-  m_AboutThis->show();
-}
-
-void MainWindow::on_actionFind_triggered() { on_btnFind_pressed(); }
-
 void MainWindow::paintEvent(QPaintEvent* event) {
   Q_UNUSED(event);
 
@@ -1354,15 +1037,6 @@ void MainWindow::paintEvent(QPaintEvent* event) {
   }
 }
 
-void MainWindow::on_actionReport_triggered() {
-  if (isEBook || !isSaveEnd || !isReadEBookEnd) return;
-
-  if (isReadEBookEnd) {
-    m_Report->init();
-    startInitReport();
-  }
-}
-
 void MainWindow::startInitReport() {
   showProgress();
 
@@ -1370,118 +1044,9 @@ void MainWindow::startInitReport() {
   myReadEBookThread->start();
 }
 
-void MainWindow::on_actionPreferences_triggered() {
-  m_Preferences->openPreferences();
-}
-
 void MainWindow::changeEvent(QEvent* event) {
   if (event->type() == QEvent::WindowStateChange) {
   }
-}
-
-void MainWindow::init_Instance() {
-  mw_one = this;
-  m_MainHelper = new MainHelper(this);
-  CurrentYear = QString::number(QDate::currentDate().year());
-
-  tabData = mui->tabWidget;
-
-  m_Method = new Method(this);
-
-  m_AboutThis = new AboutThis(this);
-  m_Preferences = new Preferences(this);
-  m_EditRecord = new EditRecord();
-  m_Todo = new Todo(this);
-  m_Report = new Report(this);
-  m_Notes = new Notes(this);
-  m_StepsOptions = new StepsOptions(this);
-  m_Steps = new Steps(this);
-  m_Reader = new Reader(this);
-  m_TodoAlarm = new TodoAlarm(this);
-  m_DateSelector = new DateSelector(this);
-  m_CloudBackup = new CloudBackup;
-  m_ReaderSet = new ReaderSet(this);
-
-  m_NotesList = new NotesList(this);
-
-  m_ReceiveShare = new ReceiveShare(this);
-
-  if (m_Preferences->getDefaultFont() == "None")
-    m_Preferences->setDefaultFont(this->font().family());
-
-  m_Method->setOSFlag();
-
-  connect(this, &MainWindow::androidBackSignal, this,
-          &MainWindow::onAndroidBackHandle, Qt::QueuedConnection);
-}
-
-void MainWindow::init_Thread_Timer() {
-  timer = new QTimer(this);
-  connect(timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
-
-  timerSyncData = new QTimer(this);
-  connect(timerSyncData, SIGNAL(timeout()), this, SLOT(on_timerSyncData()));
-  timerMousePress = new QTimer(this);
-  connect(timerMousePress, SIGNAL(timeout()), this, SLOT(on_timerMousePress()));
-  timerMousePress->setSingleShot(true);
-  tmeFlash = new QTimer(this);
-  connect(tmeFlash, SIGNAL(timeout()), this, SLOT(on_tmeFlash()));
-  tmeStartRecordAudio = new QTimer(this);
-  connect(tmeStartRecordAudio, SIGNAL(timeout()), this,
-          SLOT(on_StartRecordAudio()));
-
-  myReadEBookThread = new ReadEBookThread();
-  connect(myReadEBookThread, &ReadEBookThread::isDone, this,
-          &MainWindow::readEBookDone);
-
-  m_ReadTWThread = new ReadTWThread();
-  connect(m_ReadTWThread, &ReadTWThread::isDone, this, &MainWindow::readTWDone);
-
-  myReadChartThread = new ReadChartThread();
-  connect(myReadChartThread, &ReadChartThread::isDone, this,
-          &MainWindow::readChartDone);
-
-  mySaveThread = new SaveThread();
-  connect(mySaveThread, &SaveThread::isDone, this, &MainWindow::saveDone);
-
-  myBakDataThread = new BakDataThread();
-  connect(myBakDataThread, &BakDataThread::isDone, this,
-          &MainWindow::bakDataDone);
-
-  myImportDataThread = new ImportDataThread();
-  connect(myImportDataThread, &ImportDataThread::isDone, this,
-          &MainWindow::importDataDone);
-
-  mySearchThread = new SearchThread();
-  // connect(mySearchThread, &SearchThread::isDone, this,
-  // &MainWindow::searchDone);
-  connect(mySearchThread, &QThread::finished, this, &MainWindow::searchDone,
-          Qt::QueuedConnection);  // 强制切主线程
-
-  m_workerThread = new QThread(this);
-  m_searchWorker = new SearchWorker();
-  m_searchWorker->moveToThread(m_workerThread);
-  connect(m_workerThread, &QThread::finished, m_searchWorker,
-          &QObject::deleteLater);
-  connect(m_workerThread, &QThread::finished, m_workerThread,
-          &QObject::deleteLater);
-  // 搜索结束 → 主线程更新UI
-  connect(m_searchWorker, &SearchWorker::searchFinished, this,
-          [this](const QList<QString>& results) {
-            // 主线程安全更新
-            resultsList = results;
-            m_Method->initSearchResults();
-            mw_one->closeProgress();
-          });
-  m_workerThread->start();
-
-  myUpdateGpsMapThread = new UpdateGpsMapThread();
-  connect(myUpdateGpsMapThread, &UpdateGpsMapThread::isDone, this,
-          &MainWindow::updateGpsMapDone);
-
-  myGetGpsDataThread = new GetGpsDataThread();
-  connect(myGetGpsDataThread, &GetGpsDataThread::isDone, this,
-          &MainWindow::GetGpsDataThreadDone);
 }
 
 void MainWindow::selTab() {
@@ -1520,29 +1085,6 @@ void MainWindow::on_openKnotBakDir() {
   m_activity.callMethod<void>("openKnotBakDir", "()V");
 
 #endif
-}
-
-void MainWindow::on_actionOneDriveBackupData() {
-  mui->frameMain->hide();
-  mui->frameReader->hide();
-  if (isAndroid) mui->f_WebDAV->setFixedWidth(mw_one->width() - 40);
-  mui->frameOne->show();
-}
-
-void MainWindow::on_actionTabRecycle() { m_MainHelper->openTabRecycle(); }
-
-void MainWindow::on_actionBakFileList() {
-  if (mui->qwBakList->source().isEmpty()) {
-    mui->qwBakList->rootContext()->setContextProperty("m_Method", m_Method);
-    mui->qwBakList->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/baklist.qml")));
-  }
-
-  // 【安全】界面切换必须在主线程执行
-  mui->frameBakList->show();
-  mui->frameMain->hide();
-
-  m_MainHelper->startBackgroundTaskUpdateBakFileList();
 }
 
 void MainWindow::stopJavaTimer() {

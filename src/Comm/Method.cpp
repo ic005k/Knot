@@ -987,18 +987,14 @@ QString Method::setToolButtonQss(QToolButton* btn, int radius, int padding,
   QStringList list;
   list.append(QString("QToolButton{border-style:none;padding:%1px;border-"
                       "radius:%2px;color:%3;background:%4;}")
-                  .arg(padding)
-                  .arg(radius)
-                  .arg(normalTextColor)
-                  .arg(normalColor));
+                  .arg(QString::number(padding), QString::number(radius),
+                       normalTextColor, normalColor));
 
   list.append(QString("QToolButton:hover{color:%1;background:%2;}")
-                  .arg(hoverTextColor)
-                  .arg(hoverColor));
+                  .arg(hoverTextColor, hoverColor));
 
   list.append(QString("QToolButton:pressed{color:%1;background:%2;}")
-                  .arg(pressedTextColor)
-                  .arg(pressedColor));
+                  .arg(pressedTextColor, pressedColor));
 
   QString qss = list.join("");
   btn->setStyleSheet(qss);
@@ -1015,16 +1011,14 @@ QString Method::setPushButtonQss(QPushButton* btn, int radius, int padding,
   QStringList list;
   list.append(QString("QPushButton{border-style:none;padding:%1px;border-"
                       "radius:%2px;color:%3;background:%4;}")
-                  .arg(padding)
-                  .arg(radius)
-                  .arg(normalTextColor)
-                  .arg(normalColor));
+                  .arg(QString::number(padding), QString::number(radius),
+                       normalTextColor, normalColor));
+
   list.append(QString("QPushButton:hover{color:%1;background:%2;}")
-                  .arg(hoverTextColor)
-                  .arg(hoverColor));
+                  .arg(hoverTextColor, hoverColor));
+
   list.append(QString("QPushButton:pressed{color:%1;background:%2;}")
-                  .arg(pressedTextColor)
-                  .arg(pressedColor));
+                  .arg(pressedTextColor, pressedColor));
 
   QString qss = list.join("");
   btn->setStyleSheet(qss);

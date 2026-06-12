@@ -391,6 +391,8 @@ SOURCES += \
     src/MainHelper.cpp \
     src/MainWindow.cpp \
     src/MainWindow_Btn.cpp \
+    src/MainWindow_Init.cpp \
+    src/MainWindow_Menu.cpp \
     src/MyThread.cpp \
     src/Notes/ColorDialog.cpp \
     src/Notes/MarkdownToHtml.cpp \

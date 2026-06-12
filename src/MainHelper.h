@@ -76,29 +76,19 @@ class MainHelper : public QDialog {
   void clickBtnChart();
   void clickBtnRestoreTab();
   bool mainEventFilter(QObject* watch, QEvent* evn);
-  QTreeWidget* init_TreeWidget(QString name);
-  void init_Menu(QMenu* mainMenu);
+
   void openTabRecycle();
-  void initNotesQW();
-  void init_UIWidget();
+
   void startBackgroundTaskUpdateBakFileList();
 
-  void init_ButtonStyle();
   void delBakFile();
   void delTabRecycleFile();
   void importBakFileList();
-  void init_Theme();
 
   void sort_childItem(QTreeWidgetItem* item);
   void on_AddRecord();
 
-  void initMainQW();
-
-  void setToolButtonAnimation(QToolButton* btn, bool setMyStyle);
   void setToolButtonAnimation_iconsize(QToolButton* btn, bool setMyStyle);
-
- private:
-  QStringList bakFileList;
 
   QString clickableLabelButtonStyle = R"(
         /* 模拟按钮样式：中蓝底+白字，适配明暗主题 */
@@ -129,6 +119,9 @@ class MainHelper : public QDialog {
             color: #757575; /* 灰色文字 */
         }
         )";
+
+ private:
+  QStringList bakFileList;
 
  signals:
 };

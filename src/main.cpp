@@ -336,13 +336,9 @@ void loadTheme(bool isDark) {
         QString("[color-scheme=\"%1\"] ").arg(isDark ? "dark" : "light"));
     qApp->setStyleSheet(styleSheet);
 
-    // 增加空指针校验：避免mw_one未初始化导致崩溃
-    if (mw_one && mw_one->m_MainHelper) {
-      mw_one->m_MainHelper->init_Theme();
-    }
-
-    // 强制窗口重绘（仅当mw_one有效时执行）
+    // 强制窗口重绘
     if (mw_one) {
+      mw_one->init_Theme();
       QEvent updateEvent(QEvent::UpdateRequest);
       QApplication::sendEvent(mw_one, &updateEvent);
     }

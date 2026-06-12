@@ -509,7 +509,15 @@ class MainWindow : public QMainWindow {
 
   void sendFakeTouch();
 
- protected:
+  void init_ButtonStyle();
+  void initMainQW();
+  void initNotesQW();
+  void setToolButtonAnimation(QToolButton *btn, bool setMyStyle);
+  void init_Menu(QMenu *mainMenu);
+  void init_Theme();
+  void init_UIWidget();
+  QTreeWidget *init_TreeWidget(QString name);
+  protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
   void paintEvent(QPaintEvent* event) override;
