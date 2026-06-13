@@ -3,6 +3,41 @@
 CustomChartView::CustomChartView(QWidget* parent) : QChartView(parent) {
   // 启用鼠标跟踪，确保能捕获所有鼠标事件
   setMouseTracking(true);
+
+  // ========= 初始化自定义提示Label =========
+  m_tipLabel = new QLabel(this);
+  // 悬浮、置顶、无边框
+  if (isAndroid)
+    m_tipLabel->setWindowFlags(Qt::FramelessWindowHint);
+  else
+    m_tipLabel->setWindowFlags(Qt::ToolTip | Qt::FramelessWindowHint |
+                               Qt::WindowStaysOnTopHint);
+
+  if (isDark) {
+    // 暗黑模式：深色背景、浅边框、浅色文字
+    m_tipLabel->setStyleSheet(R"(
+          background-color: #2b2b2b;
+          color: #f0f0f0;
+          border: 1px solid #555555;
+          padding: 6px;
+      )");
+  } else {
+    // 亮色模式：白底、灰色边框、内边距、字体
+    m_tipLabel->setStyleSheet(R"(
+        background-color: white;
+        border: 1px solid #aaaaaa;
+        padding: 6px;
+    )");
+  }
+
+  m_tipLabel->hide();  // 默认隐藏
+
+  // ========= 初始化延时隐藏定时器 =========
+  m_hideTimer = new QTimer(this);
+  m_hideTimer->setSingleShot(true);
+  m_hideTimer->setInterval(m_tipShowTime);
+  connect(m_hideTimer, &QTimer::timeout, this,
+          [this]() { m_tipLabel->hide(); });
 }
 
 void CustomChartView::setMonthData(const QVector<Steps::MonthData>& data) {
@@ -19,6 +54,12 @@ void CustomChartView::mousePressEvent(QMouseEvent* event) {
 
 void CustomChartView::mouseReleaseEvent(QMouseEvent* event) {
   QChartView::mouseReleaseEvent(event);
+}
+
+void CustomChartView::mouseMoveEvent(QMouseEvent* event) {
+  QChartView::mouseMoveEvent(event);
+  if (m_hideTimer->isActive()) m_hideTimer->stop();
+  m_tipLabel->hide();
 }
 
 void CustomChartView::handleChartClick(QMouseEvent* event) {
@@ -65,14 +106,45 @@ void CustomChartView::handleChartClick(QMouseEvent* event) {
         QString::number(data.runningDist, 'f', 1) + " km (" +
         QString::number(data.runningCount) + " " + tr("times") + ")");
 
-    // 计算提示框显示位置（鼠标上方）
-    QFontMetrics fm(QToolTip::font());
-    int lineHeight = fm.height();
-    int tooltipHeight = lineHeight * 5 + 10;  // 大约5行高度
+    // 每次弹窗前，强制关闭已有提示
+    if (m_tipLabel->isVisible()) {
+      m_tipLabel->hide();
+    }
+    if (m_hideTimer->isActive()) {
+      m_hideTimer->stop();
+    }
 
+    // 设置文本
+    m_tipLabel->setText(tooltip);
+    // 自适应大小
+    m_tipLabel->adjustSize();
+
+    // 计算显示位置（鼠标上方）
+    QPoint tipPos;
+#ifdef Q_OS_ANDROID
+    tipPos = event->pos() - QPoint(0, m_tipLabel->height() + 10);
+    // 限制在当前控件内部，防止裁剪
+    tipPos.setX(qBound(0, tipPos.x(), width() - m_tipLabel->width()));
+    tipPos.setY(qBound(0, tipPos.y(), height() - m_tipLabel->height()));
+#else
     QPoint globalPos = event->globalPosition().toPoint();
-    QPoint showPos = globalPos - QPoint(0, tooltipHeight);
+    tipPos = globalPos - QPoint(0, m_tipLabel->height() + 10);
 
-    QToolTip::showText(showPos, tooltip);
+    // 桌面端保留屏幕边界检测
+    QRect screenRect = this->screen()->availableGeometry();
+    if (tipPos.x() + m_tipLabel->width() > screenRect.right())
+      tipPos.setX(screenRect.right() - m_tipLabel->width());
+    if (tipPos.y() < screenRect.top()) tipPos = globalPos + QPoint(10, 10);
+#endif
+
+    // 显示提示 + 重置定时器
+    m_tipLabel->move(tipPos);
+    m_tipLabel->show();
+
+    m_hideTimer->start();
+  } else {
+    // 无效点击，隐藏提示
+    m_tipLabel->hide();
+    if (m_hideTimer->isActive()) m_hideTimer->stop();
   }
 }

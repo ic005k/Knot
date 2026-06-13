@@ -2889,13 +2889,11 @@ QString Reader::getEpub3Title(const QString& opfFile) {
   return QString();
 }
 
+// 判断 XML 当前节点是不是 DC 标准的 <dc:title> 标题节点
 bool Reader::isDcTitleElement(const QXmlStreamReader& xml) {
-  // Dublin Core命名空间URI
-  const QStringView dcNamespace = u"http://purl.org/dc/elements/1.1/"_qs;
-
-  // 检查元素本地名称是否为"title"且命名空间是否为dc
-  // 使用QStringView字面量避免类型不匹配
-  return xml.name() == u"title"_qs && xml.namespaceUri() == dcNamespace;
+  using namespace Qt::StringLiterals;
+  const QStringView dcNamespace = u"http://purl.org/dc/elements/1.1/"_s;
+  return xml.name() == u"title"_s && xml.namespaceUri() == dcNamespace;
 }
 
 QString Reader::getReadTotalTime() {

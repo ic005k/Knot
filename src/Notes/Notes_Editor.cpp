@@ -97,7 +97,7 @@ void Notes::initMarkdownEditor(QsciScintilla* editor) {
   editor->setMarginWidth(1, 5);
   editor->setMarginType(2, QsciScintilla::SymbolMargin);
   editor->setMarginWidth(2, 5);
-  editor->setMarginBackgroundColor(2, QColor("#FFE4E1"));
+  editor->setMarginBackgroundColor(2, QColor(255, 228, 225));
 
   editor->setCaretWidth(2);
   editor->setCaretLineVisible(true);
@@ -160,6 +160,8 @@ void Notes::searchText(const QString& text, bool forward) {
   }
   bool found =
       m_EditSource->findFirst(text, false, false, false, true, forward);
+  if (found) {
+  }
 #endif
 }
 

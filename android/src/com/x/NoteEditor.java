@@ -14,7 +14,6 @@ import android.content.ClipData;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -30,7 +29,6 @@ import android.media.AudioManager;
 import android.media.ExifInterface;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -43,17 +41,12 @@ import android.provider.Settings;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.Spannable;
-import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.BackgroundColorSpan;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.TypedValue;
@@ -61,7 +54,6 @@ import android.view.ActionMode;
 import android.view.ActionMode.Callback;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -79,7 +71,6 @@ import android.widget.PopupMenu;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -116,7 +107,6 @@ import io.noties.markwon.core.CorePlugin;
 import io.noties.markwon.core.spans.LinkSpan;
 import io.noties.markwon.editor.MarkwonEditor;
 import io.noties.markwon.editor.MarkwonEditorTextWatcher;
-import io.noties.markwon.editor.MarkwonEditorTextWatcher;
 import io.noties.markwon.ext.latex.JLatexMathPlugin;
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
 import io.noties.markwon.ext.tables.TablePlugin;
@@ -142,11 +132,9 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -168,7 +156,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -439,33 +426,23 @@ public class NoteEditor
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.btn_cancel) {
-            btn_cancel.setBackgroundColor(getResources().getColor(R.color.red));
             hideKeyBoard(m_instance);
-            //onBackPressed();
+
             if (isTextChanged) {
                 showNormalDialog();
             } else {
                 finish();
             }
-            btn_cancel.setBackgroundColor(
-                getResources().getColor(R.color.normal)
-            );
         } else if (id == R.id.btn_save) {
             if (isTextChanged) {
                 saveNote();
                 isTextChanged = false;
             }
         } else if (id == R.id.btnUndo) {
-            btnUndo.setBackgroundColor(getResources().getColor(R.color.red));
             helper.undo(); // perform undo
-            btnUndo.setBackgroundColor(getResources().getColor(R.color.normal));
         } else if (id == R.id.btnRedo) {
-            btnRedo.setBackgroundColor(getResources().getColor(R.color.red));
             helper.redo(); // perform redo
-            btnRedo.setBackgroundColor(getResources().getColor(R.color.normal));
         } else if (id == R.id.btnMenu) {
-            btnMenu.setBackgroundColor(getResources().getColor(R.color.red));
-
             start = editNote.getSelectionStart();
             end = editNote.getSelectionEnd();
             editNote.clearFocus();
@@ -475,9 +452,7 @@ public class NoteEditor
             showPopupMenu(btnMenu);
 
             editNote.requestFocus();
-            btnMenu.setBackgroundColor(getResources().getColor(R.color.normal));
         } else if (id == R.id.btnFind) {
-            btnFind.setBackgroundColor(getResources().getColor(R.color.red));
             if (btnPrev.getVisibility() == View.VISIBLE) {
                 editFind.setVisibility(View.GONE);
                 btnPrev.setVisibility(View.GONE);
@@ -501,9 +476,7 @@ public class NoteEditor
 
                 editFind.requestFocus();
             }
-            btnFind.setBackgroundColor(getResources().getColor(R.color.normal));
         } else if (id == R.id.btnPrev) {
-            btnPrev.setBackgroundColor(getResources().getColor(R.color.red));
             goFindResult(-1);
             int count = arrayFindResult.size();
             if (count > 0) {
@@ -515,10 +488,7 @@ public class NoteEditor
 
                 editNote.requestFocus();
             }
-
-            btnPrev.setBackgroundColor(getResources().getColor(R.color.normal));
         } else if (id == R.id.btnNext) {
-            btnNext.setBackgroundColor(getResources().getColor(R.color.red));
             goFindResult(1);
             int count = arrayFindResult.size();
             if (count > 0) {
@@ -530,38 +500,14 @@ public class NoteEditor
 
                 editNote.requestFocus();
             }
-
-            btnNext.setBackgroundColor(getResources().getColor(R.color.normal));
         } else if (id == R.id.btnStartFind) {
-            btnStartFind.setBackgroundColor(
-                getResources().getColor(R.color.red)
-            );
             on_editFindTextChanged();
-            btnStartFind.setBackgroundColor(
-                getResources().getColor(R.color.normal)
-            );
         } else if (id == R.id.btnReplace) {
-            btnReplace.setBackgroundColor(getResources().getColor(R.color.red));
             replaceCurrent(); // 只替换，不往后跳
-            btnReplace.setBackgroundColor(
-                getResources().getColor(R.color.normal)
-            );
         } else if (id == R.id.btnReplaceFind) {
-            btnReplaceFind.setBackgroundColor(
-                getResources().getColor(R.color.red)
-            );
             replaceAndFindNext(); // 替换 + 自动下一个
-            btnReplaceFind.setBackgroundColor(
-                getResources().getColor(R.color.normal)
-            );
         } else if (id == R.id.btnReplaceAll) {
-            btnReplaceAll.setBackgroundColor(
-                getResources().getColor(R.color.red)
-            );
             replaceAll(); // 全部替换
-            btnReplaceAll.setBackgroundColor(
-                getResources().getColor(R.color.normal)
-            );
         }
     }
 
@@ -1978,26 +1924,11 @@ public class NoteEditor
         // menu的item点击事件
         popupMenu.setOnMenuItemClickListener(
             new PopupMenu.OnMenuItemClickListener() {
-                /*@Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    // test
-                    switch (item.getItemId()) {
-                        case R.id.s1:
-                            break;
-                    }
-
-                    onClickMenuTitle(item.getTitle());
-
-                    // Toast.makeText(getApplicationContext(), item.getTitle(),
-                    // Toast.LENGTH_SHORT).show();
-                    return false;
-                }*/
-
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     int id = item.getItemId();
                     if (id == R.id.s1) {
-                        // 你原来的逻辑
+                        // 原来的逻辑
                     }
 
                     onClickMenuTitle(item.getTitle());
@@ -3325,70 +3256,6 @@ public class NoteEditor
             }
         );
     }
-
-    // ================================
-    // 显示笔记标题悬浮补全列表
-    // ================================
-    /*private void showNoteSuggestPopup(List<String> titles) {
-        if (titles == null || titles.isEmpty()) {
-            if (noteLinkPopup != null) noteLinkPopup.dismiss();
-            return;
-        }
-
-        // 第一次调用：创建悬浮列表
-        if (noteLinkPopup == null) {
-            // 创建 RecyclerView
-            popupRecycler = new RecyclerView(this);
-            popupRecycler.setLayoutManager(new LinearLayoutManager(this));
-            adapter = new NoteSuggestAdapter(suggestList, title -> {
-                // 点击条目 → 自动生成链接并插入
-                String link = noteLinkCompleter.buildMarkdownLink(title);
-                replaceLinkText(link);
-                if (noteLinkPopup != null) noteLinkPopup.dismiss();
-            });
-            popupRecycler.setAdapter(adapter);
-
-            // 创建悬浮窗口
-            noteLinkPopup = new PopupWindow(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            );
-            noteLinkPopup.setContentView(popupRecycler);
-            // 自动黑白背景
-            int bgColor = MyActivity.isDark ? 0xFF222222 : 0xFFFFFFFF;
-            noteLinkPopup.setBackgroundDrawable(new ColorDrawable(bgColor));
-            noteLinkPopup.setOutsideTouchable(true);
-            noteLinkPopup.setFocusable(false); // 不抢焦点！
-        }
-
-        // 更新数据
-        suggestList.clear();
-        suggestList.addAll(titles);
-        adapter.notifyDataSetChanged();
-
-        // 计算光标位置 → 显示在光标下方
-        int[] location = new int[2];
-        editNote.getLocationOnScreen(location);
-        int cursorY = editNote
-            .getLayout()
-            .getLineTop(
-                editNote
-                    .getLayout()
-                    .getLineForOffset(editNote.getSelectionStart())
-            );
-        int lineHeight = editNote.getLineHeight();
-        int y = location[1] + cursorY + lineHeight + 20;
-
-        // 显示
-        if (!noteLinkPopup.isShowing()) {
-            noteLinkPopup.showAtLocation(
-                editNote,
-                Gravity.TOP | Gravity.LEFT,
-                0,
-                y
-            );
-        }
-        }*/
 
     // ================================
     // 显示笔记标题悬浮补全列表（带顶部过滤搜索框）
