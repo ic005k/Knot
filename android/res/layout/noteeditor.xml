@@ -19,7 +19,7 @@
         <Button
             android:id="@+id/btn_cancel"
             android:textAllCaps="false"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:background="#3498DB"
             android:textColor="#FFFFFF"
             android:layout_weight="1"
@@ -30,7 +30,7 @@
         <Button
             android:id="@+id/btn_save"
             android:textAllCaps="false"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:background="#3498DB"
             android:textColor="#FFFFFF"
             android:layout_weight="1"
@@ -41,7 +41,7 @@
         <Button
             android:id="@+id/btnFind"
             android:textAllCaps="false"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:background="#3498DB"
             android:textColor="#FFFFFF"
             android:layout_weight="1"
@@ -52,7 +52,7 @@
         <Button
             android:id="@+id/btnUndo"
             android:textAllCaps="false"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:background="#3498DB"
             android:textColor="#FFFFFF"
             android:layout_weight="1"
@@ -63,7 +63,7 @@
         <Button
             android:id="@+id/btnRedo"
             android:textAllCaps="false"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:background="#3498DB"
             android:textColor="#FFFFFF"
             android:layout_weight="1"
@@ -82,7 +82,7 @@
         <Button
             android:id="@+id/btnMenu"
             android:textAllCaps="false"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:background="#3498DB"
             android:textColor="#FFFFFF"
             android:layout_weight="1"
