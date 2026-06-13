@@ -91,6 +91,9 @@ void MainWindow::init_Instance() {
 
   m_ReceiveShare = new ReceiveShare(this);
 
+  mainMenu = new QMenu(this);
+  init_Menu(mainMenu);
+
   if (m_Preferences->getDefaultFont() == "None")
     m_Preferences->setDefaultFont(this->font().family());
 

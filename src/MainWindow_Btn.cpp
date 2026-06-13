@@ -974,8 +974,6 @@ void MainWindow::on_btnReadList_pressed() {
 }
 
 void MainWindow::on_btnMenu_pressed() {
-  mainMenu = new QMenu(this);
-  init_Menu(mainMenu);
   int x = 0;
   int y = 0;
 
@@ -1034,6 +1032,34 @@ void MainWindow::onAndroidBackHandle() {
   if (colorDlg != nullptr) {
     if (colorDlg->isVisible()) {
       colorDlg->close();
+      return;
+    }
+  }
+
+  if (mainMenu != nullptr) {
+    if (mainMenu->isVisible()) {
+      mainMenu->close();
+      return;
+    }
+  }
+
+  if (m_NotesList->menuNoteBook) {
+    if (m_NotesList->menuNoteBook->isVisible()) {
+      m_NotesList->menuNoteBook->close();
+      return;
+    }
+  }
+
+  if (m_NotesList->menuNoteList) {
+    if (m_NotesList->menuNoteList->isVisible()) {
+      m_NotesList->menuNoteList->close();
+      return;
+    }
+  }
+
+  if (m_NotesList->menuRecentOpen) {
+    if (m_NotesList->menuRecentOpen->isVisible()) {
+      m_NotesList->menuRecentOpen->close();
       return;
     }
   }

@@ -118,6 +118,19 @@ bool Notes::eventFilter(QObject* obj, QEvent* evn) {
 
 #ifndef Q_OS_ANDROID
   if (obj == m_EditSource) {
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
+
+    // Ctrl+F 处理
+    if (keyEvent->matches(QKeySequence::Find)) {
+      QString text = m_EditSource->selectedText();
+      if (!text.isEmpty()) {
+        ui->editFind->setText(text);
+        ui->editFind->setFocus();
+      }
+      keyEvent->accept();
+      return true;  // 事件过滤器返回true = 拦截事件
+    }
+
     if (evn->type() == QEvent::KeyPress) {
       if (keyEvent->key() != Qt::Key_Back) {
       }
