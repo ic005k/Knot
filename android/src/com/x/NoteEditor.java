@@ -1660,11 +1660,11 @@ public class NoteEditor
                     int undoCount = helper.getUndoCount();
                     int redoCount = helper.getRedoCount();
                     if (MyActivity.zh_cn) {
-                        btnUndo.setText("撤销-" + String.valueOf(undoCount));
-                        btnRedo.setText("恢复-" + String.valueOf(redoCount));
+                        btnUndo.setText("撤销\n" + String.valueOf(undoCount));
+                        btnRedo.setText("恢复\n" + String.valueOf(redoCount));
                     } else {
-                        btnUndo.setText("Undo-" + String.valueOf(undoCount));
-                        btnRedo.setText("Redo-" + String.valueOf(redoCount));
+                        btnUndo.setText("Undo\n" + String.valueOf(undoCount));
+                        btnRedo.setText("Redo\n" + String.valueOf(redoCount));
                     }
 
                     if (isAddImage) {

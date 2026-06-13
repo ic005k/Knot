@@ -11,8 +11,8 @@
 
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="top"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
     >
 
@@ -20,10 +20,10 @@
             android:id="@+id/btn_cancel"
             android:textAllCaps="false"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:background="#3498DB"
             android:textColor="#FFFFFF"
             android:layout_weight="1"
+            android:layout_height="match_parent"
             android:text="Close"
         />
 
@@ -31,10 +31,10 @@
             android:id="@+id/btn_save"
             android:textAllCaps="false"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:background="#3498DB"
             android:textColor="#FFFFFF"
             android:layout_weight="1"
+            android:layout_height="match_parent"
             android:text="Save"
         />
 
@@ -42,10 +42,10 @@
             android:id="@+id/btnFind"
             android:textAllCaps="false"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:background="#3498DB"
             android:textColor="#FFFFFF"
             android:layout_weight="1"
+            android:layout_height="match_parent"
             android:text="Find"
         />
 
@@ -53,10 +53,10 @@
             android:id="@+id/btnUndo"
             android:textAllCaps="false"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:background="#3498DB"
             android:textColor="#FFFFFF"
             android:layout_weight="1"
+            android:layout_height="match_parent"
             android:text="Undo"
         />
 
@@ -64,10 +64,10 @@
             android:id="@+id/btnRedo"
             android:textAllCaps="false"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:background="#3498DB"
             android:textColor="#FFFFFF"
             android:layout_weight="1"
+            android:layout_height="match_parent"
             android:text="Redo"
         />
 
@@ -83,10 +83,10 @@
             android:id="@+id/btnMenu"
             android:textAllCaps="false"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:background="#3498DB"
             android:textColor="#FFFFFF"
             android:layout_weight="1"
+            android:layout_height="match_parent"
             android:text="Menu"
         />
 
