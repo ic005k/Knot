@@ -216,6 +216,8 @@ Rectangle {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 x: level * 18
+                Layout.maximumWidth: parent.width - x - 16
+
                 RowLayout {
                     id: idlistRow
 
@@ -239,14 +241,13 @@ Rectangle {
                     ColumnLayout {
                         id: colLayout
                         height: parent.height
-                        width: parent.width
+                        Layout.maximumWidth: parent.Layout.maximumWidth
                         spacing: 2
                         Layout.fillWidth: true
                         anchors.leftMargin: 0
                         anchors.rightMargin: 0
 
                         Rectangle {
-                            width: view.width
                             height: 1 // 空白高度
                             color: "transparent"
                         }

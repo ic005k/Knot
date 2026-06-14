@@ -104,8 +104,6 @@ class NotesList : public QDialog {
 
   void saveNotesList();
   void initNotesList();
-  void loadSubNotebook(const QJsonObject& bookObj, QTreeWidgetItem* parentItem,
-                       int parentRow);
 
   void setWinPos();
 
@@ -372,6 +370,8 @@ class NotesList : public QDialog {
                                          const QString& keyword);
   void displayResults(const ResultsMap& results);
   int countMdFilesImages(const QString& dirPath);
+  void loadSubNotebook(const QJsonObject& bookObj, QTreeWidgetItem* parentItem,
+                       int parentRow, int& totalNotes);
 };
 
 class SearchMapper {

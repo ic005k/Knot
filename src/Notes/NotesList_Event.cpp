@@ -842,7 +842,7 @@ void NotesList::on_btnRename_clicked() {
   m_RenameNotes->show();
 }
 
-void NotesList::clickNoteBook() {
+/*void NotesList::clickNoteBook() {
   int count = m_Method->getCountFromQW(mui->qwNoteBook);
   if (count <= 0) return;
 
@@ -863,6 +863,32 @@ void NotesList::clickNoteBook() {
 
     readyNotesData(topItem);
   }
+}*/
+
+void NotesList::clickNoteBook() {
+  int count = m_Method->getCountFromQW(mui->qwNoteBook);
+  if (count <= 0) return;
+
+  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
+  if (index < 0 || index >= pNoteBookItems.size()) return;
+
+  // 更新顶部计数
+  mui->lblNoteBook->setText(QString::number(index + 1) + "/" +
+                            QString::number(count));
+
+  pNoteItems.clear();
+  isActColorFlagStatus = true;
+
+  // 核心：直接取缓存的树节点指针
+  QTreeWidgetItem* item = pNoteBookItems.at(index);
+  if (!item) return;
+
+  // 可选：同步选中 TreeWidget 对应节点（UI联动）
+  tw->setCurrentItem(item);
+  item->setSelected(true);
+
+  // 加载笔记数据
+  readyNotesData(item);
 }
 
 void NotesList::clickNoteList() {
@@ -888,8 +914,10 @@ void NotesList::clickNoteList() {
   QString noteName = m_Method->getText0(mui->qwNoteList, index);
   noteTitle = noteName;
 
-  QTreeWidgetItem* itemTop = tw->topLevelItem(indexTop);
-  QTreeWidgetItem* item = itemTop->child(index);
+  // QTreeWidgetItem* itemTop = tw->topLevelItem(indexTop);
+  // QTreeWidgetItem* item = itemTop->child(index);
+
+  QTreeWidgetItem* item = pNoteItems.at(index);
   tw->setCurrentItem(item);
 
   int indexNoteBook = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);

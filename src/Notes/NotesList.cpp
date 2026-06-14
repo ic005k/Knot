@@ -258,74 +258,70 @@ void NotesList::saveNotesList() {
   saveCurrentNoteInfo();
 }*/
 
-// 递归：序列化一个笔记本节点（自身信息 + 直属笔记 + 所有子笔记本）
+// 递归序列化节点：完全沿用原规则，text(1)空=子笔记本，非空=笔记
 QJsonObject NotesList::serializeNotebookItem(QTreeWidgetItem* item) {
   QJsonObject obj;
   if (!item) return obj;
 
-  // 笔记本基础信息
+  // 笔记本基础字段，和原代码一致
   obj["name"] = item->text(0);
   obj["colorFlag"] = item->text(2);
 
-  // 1. 保存当前笔记本【直属一级笔记】
-  QJsonArray noteArray;
-  int totalChild = item->childCount();
-  for (int i = 0; i < totalChild; ++i) {
-    QTreeWidgetItem* child = item->child(i);
-    // text(1) 非空 = 普通笔记
-    if (!child->text(1).isEmpty()) {
-      QString mdFile = child->text(1);
-      QFile f(iniDir + mdFile);
-      if (f.exists()) {
-        QJsonObject noteObj;
-        noteObj["name"] = child->text(0);
-        noteObj["file"] = mdFile;
-        noteArray.append(noteObj);
+  QJsonArray childrenArray;
+  int childCount = item->childCount();
+
+  for (int j = 0; j < childCount; j++) {
+    QTreeWidgetItem* childItem = item->child(j);
+    QString strChild1 = childItem->text(1);
+    QString md_file = QDir(iniDir).filePath(strChild1);
+
+    if (!strChild1.isEmpty()) {
+      // 是笔记：沿用原版文件存在性判断
+      if (QFile::exists(md_file)) {
+        QJsonObject childObj;
+        childObj["name"] = childItem->text(0);
+        childObj["file"] = strChild1;
+        childrenArray.append(childObj);
       }
+    } else {
+      // 是空 = 子笔记本，递归序列化
+      childrenArray.append(serializeNotebookItem(childItem));
     }
   }
-  obj["notes"] = noteArray;
 
-  // 2. 递归保存【下级所有子笔记本】（多层级）
-  QJsonArray subNotebookArray;
-  for (int i = 0; i < totalChild; ++i) {
-    QTreeWidgetItem* child = item->child(i);
-    // text(1) 为空 = 子笔记本，递归处理
-    if (child->text(1).isEmpty()) {
-      subNotebookArray.append(serializeNotebookItem(child));
-    }
-  }
-  obj["subNotebooks"] = subNotebookArray;
-
+  // 固定使用 children 字段，和旧文件格式兼容
+  obj["children"] = childrenArray;
   return obj;
 }
 
 void NotesList::saveNotesListToFile() {
-  QString tempFile0 = iniDir + "temp.json";
-  QString endFile0 = iniDir + "mainnotes.json";
+  // 空指针防护
+  if (!tw || !twrb || !m_Method) return;
+
+  const QString tempFile = QDir(iniDir).filePath("temp.json");
+  const QString endFile = QDir(iniDir).filePath("mainnotes.json");
 
   QJsonObject rootObj;
 
-  // 当前打开的MD文件
-  QString md = currentMDFile;
-  md = md.replace(iniDir, "");
-  rootObj["CurrentMD"] = md;
+  // CurrentMD 路径处理（保留优化方案，比replace更安全）
+  QDir baseDir(iniDir);
+  rootObj["CurrentMD"] = baseDir.relativeFilePath(currentMDFile);
 
-  // ========= 改造：递归保存整棵笔记本树（支持无限层级） =========
+  // 遍历所有顶级根笔记本，逐个序列化
   QJsonArray mainNotesArray;
-  int topCount = tw->topLevelItemCount();
-  for (int i = 0; i < topCount; ++i) {
+  int count = tw->topLevelItemCount();
+  for (int i = 0; i < count; i++) {
     QTreeWidgetItem* topItem = tw->topLevelItem(i);
     mainNotesArray.append(serializeNotebookItem(topItem));
   }
   rootObj["mainNotes"] = mainNotesArray;
 
-  // 回收站（原有逻辑不变）
+  // ========== 回收站 完全保留原逻辑 ==========
   QJsonArray recycleBinArray;
   if (twrb->topLevelItemCount() > 0) {
     QTreeWidgetItem* rbTopItem = twrb->topLevelItem(0);
     int rbChildCount = rbTopItem->childCount();
-    for (int j = 0; j < rbChildCount; ++j) {
+    for (int j = 0; j < rbChildCount; j++) {
       QTreeWidgetItem* childItem = rbTopItem->child(j);
       QJsonObject rbObj;
       rbObj["name"] = childItem->text(0);
@@ -335,7 +331,7 @@ void NotesList::saveNotesListToFile() {
   }
   rootObj["recycleBin"] = recycleBinArray;
 
-  // 待删除文件（原有逻辑不变）
+  // ========== 待删除文件 完全保留原逻辑 ==========
   needDelFiles.removeDuplicates();
   QJsonArray needDelArray;
   for (const QString& file : std::as_const(needDelFiles)) {
@@ -344,15 +340,18 @@ void NotesList::saveNotesListToFile() {
   rootObj["needDelNotes"] = needDelArray;
 
   // 写入临时文件
-  QJsonDocument doc(rootObj);
-  QFile f(tempFile0);
-  if (f.open(QIODevice::WriteOnly | QIODevice::Text)) {
-    f.write(doc.toJson(QJsonDocument::Indented));
-    f.close();
-  }
+  QFile tempF(tempFile);
+  if (tempF.exists()) tempF.remove();
 
-  // 覆盖正式文件
-  m_Method->upIniFile(tempFile0, endFile0);
+  QJsonDocument doc(rootObj);
+  if (!tempF.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+
+  tempF.write(doc.toJson(QJsonDocument::Indented));
+  tempF.close();
+
+  // 替换正式文件 + 清理临时文件
+  m_Method->upIniFile(tempFile, endFile);
+  if (tempF.exists()) tempF.remove();
 
   saveCurrentNoteInfo();
 }
@@ -493,13 +492,19 @@ void NotesList::saveNotesListToFile() {
   initRecentOpen();
 }*/
 
+/**
+ * @brief 递归加载子笔记本及其下属笔记、子笔记本
+ * @param bookObj 笔记本JSON对象
+ * @param parentItem 父树节点
+ * @param parentRow 当前节点在父级中的行号
+ * @param totalNotes 全局笔记总数（引用，累加所有层级笔记）
+ */
 void NotesList::loadSubNotebook(const QJsonObject& bookObj,
-                                QTreeWidgetItem* parentItem, int parentRow) {
-  if (bookObj.isEmpty() || !parentItem) {
-    return;
-  }
+                                QTreeWidgetItem* parentItem, int parentRow,
+                                int& totalNotes) {
+  if (bookObj.isEmpty() || !parentItem) return;
 
-  // 创建子笔记本节点（样式同顶层笔记本）
+  // 创建子笔记本节点，保留原有UI样式
   QString bookName = bookObj["name"].toString();
   QString colorFlag = bookObj["colorFlag"].toString("#FF0000");
 
@@ -513,130 +518,118 @@ void NotesList::loadSubNotebook(const QJsonObject& bookObj,
   subBookItem->setFont(0, font);
   subBookItem->setIcon(0, QIcon(":/res/nb.png"));
 
-  // 加载当前子笔记本下的笔记（兼容 children / notes）
-  QJsonArray noteArray;
-  if (bookObj.contains("children")) {
-    noteArray = bookObj["children"].toArray();
-  } else if (bookObj.contains("notes")) {
-    noteArray = bookObj["notes"].toArray();
-  }
+  // 统一读取 children 数组（保存端唯一字段）
+  QJsonArray childrenArray = bookObj["children"].toArray();
 
-  for (int j = 0; j < noteArray.size(); ++j) {
-    QJsonObject noteObj = noteArray[j].toObject();
-    QString noteName = noteObj["name"].toString();
-    QString noteFile = noteObj["file"].toString();
+  // 遍历子项：区分 笔记 / 子笔记本
+  for (int idx = 0; idx < childrenArray.size(); ++idx) {
+    QJsonObject childObj = childrenArray[idx].toObject();
+    if (childObj.isEmpty()) continue;
 
-    if (!noteFile.isEmpty()) {
+    // 规则：存在 file 字段 = 普通笔记；否则 = 子笔记本
+    if (childObj.contains("file")) {
+      // 加载笔记
+      QString noteName = childObj["name"].toString();
+      QString noteFile = childObj["file"].toString();
+      if (noteFile.isEmpty()) continue;
+
+      totalNotes++;  // 笔记计数累加
+
       QTreeWidgetItem* noteItem = new QTreeWidgetItem(subBookItem);
       noteItem->setText(0, noteName);
       noteItem->setText(1, noteFile);
       noteItem->setIcon(0, QIcon(":/res/n.png"));
 
-      QString md = iniDir + noteFile;
+      QString md = QDir(iniDir).filePath(noteFile);
       m_Notes->m_NoteIndexManager->setNoteTitle(md, noteName);
-      // 沿用原有下标规则
-      updateNoteIndexManager(md, parentRow, j);
+      updateNoteIndexManager(md, parentRow, idx);
       noteFiles.append(md);
+    } else {
+      // 递归加载子笔记本
+      loadSubNotebook(childObj, subBookItem, idx, totalNotes);
     }
-  }
-
-  // 继续递归更深层级的子笔记本
-  QJsonArray nextSubArray = bookObj["subNotebooks"].toArray();
-  for (const QJsonValue& val : nextSubArray) {
-    loadSubNotebook(val.toObject(), subBookItem, parentRow);
   }
 }
 
 void NotesList::initNotesList() {
+  if (!tw) return;
+
   tw->clear();
   noteFiles.clear();
 
-  QString jsonFile = iniDir + "mainnotes.json";
-
-  if (!QFile::exists(jsonFile)) {
-    return;
-  }
+  const QString jsonFile = QDir(iniDir).filePath("mainnotes.json");
+  if (!QFile::exists(jsonFile)) return;
 
   QFile f(jsonFile);
-  if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    return;
-  }
+  if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) return;
 
   QByteArray data = f.readAll();
   f.close();
 
   QJsonDocument doc = QJsonDocument::fromJson(data);
-  if (doc.isNull()) {
-    return;
-  }
+  if (doc.isNull() || !doc.isObject()) return;
 
   QJsonObject rootObj = doc.object();
   QJsonArray mainNotesArray = rootObj["mainNotes"].toArray();
 
   int nNoteBook = mainNotesArray.size();
-  int notesTotal = 0;
+  int notesTotal = 0;  // 全局笔记总数，所有层级统一累加
 
-  // 遍历顶层笔记本（沿用你原始循环风格）
+  // 遍历所有顶层笔记本
   for (int i = 0; i < mainNotesArray.size(); ++i) {
     QJsonObject topObj = mainNotesArray[i].toObject();
-
     QString strTop = topObj["name"].toString();
     QString strTopColorFlag = topObj["colorFlag"].toString("#FF0000");
 
+    // 创建顶层笔记本节点
     QTreeWidgetItem* topItem = new QTreeWidgetItem;
     topItem->setText(0, strTop);
     topItem->setText(2, strTopColorFlag);
-    // 保留原有笔记本样式
     topItem->setForeground(0, Qt::red);
+
     QFont font = this->font();
     font.setBold(true);
     topItem->setFont(0, font);
     topItem->setIcon(0, QIcon(":/res/nb.png"));
 
-    // ========= 1. 加载当前笔记本【直属笔记】兼容旧 children / 新 notes
-    // =========
-    QJsonArray noteArray;
-    if (topObj.contains("children")) {
-      noteArray = topObj["children"].toArray();
-    } else if (topObj.contains("notes")) {
-      noteArray = topObj["notes"].toArray();
-    }
+    // 读取当前顶层笔记本的 children 数组
+    QJsonArray childrenArray = topObj["children"].toArray();
 
-    notesTotal += noteArray.size();
-    for (int j = 0; j < noteArray.size(); ++j) {
-      QJsonObject childObj = noteArray[j].toObject();
-      QString str0 = childObj["name"].toString();
-      QString str1 = childObj["file"].toString();
+    // 遍历子项：区分笔记 / 子笔记本
+    for (int j = 0; j < childrenArray.size(); ++j) {
+      QJsonObject childObj = childrenArray[j].toObject();
+      if (childObj.isEmpty()) continue;
 
-      if (!str1.isEmpty()) {
+      if (childObj.contains("file")) {
+        // 普通笔记
+        QString str0 = childObj["name"].toString();
+        QString str1 = childObj["file"].toString();
+        if (str1.isEmpty()) continue;
+
+        notesTotal++;
         QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
         childItem->setText(0, str0);
         childItem->setText(1, str1);
         childItem->setIcon(0, QIcon(":/res/n.png"));
 
-        QString md = iniDir + str1;
+        QString md = QDir(iniDir).filePath(str1);
         m_Notes->m_NoteIndexManager->setNoteTitle(md, str0);
-        // 严格保留你原始下标 i,j
         updateNoteIndexManager(md, i, j);
         noteFiles.append(md);
+      } else {
+        // 子笔记本，递归加载
+        loadSubNotebook(childObj, topItem, j, notesTotal);
       }
-    }
-
-    // ========= 2. 递归加载【子笔记本】subNotebooks（新增逻辑） =========
-    QJsonArray subBookArray = topObj["subNotebooks"].toArray();
-    for (const QJsonValue& val : subBookArray) {
-      QJsonObject subBookObj = val.toObject();
-      // 递归构建子笔记本及下属内容
-      loadSubNotebook(subBookObj, topItem, i);
     }
 
     tw->addTopLevelItem(topItem);
   }
 
-  // 表头文本（保留 tr，和你原版一致）
+  // 更新表头统计信息
   tw->headerItem()->setText(
       0, tr("Notebook") + " : " + QString::number(nNoteBook) + "  " +
              tr("Notes") + " : " + QString::number(notesTotal));
+
   tw->expandAll();
 
   m_Notes->m_NoteIndexManager->saveIndex(strNoteNameIndexFile);
@@ -1107,7 +1100,7 @@ bool NotesList::moveItem(QTreeWidget* twMain) {
   return false;
 }
 
-void NotesList::readyNotesData(QTreeWidgetItem* topItem) {
+/*void NotesList::readyNotesData(QTreeWidgetItem* topItem) {
   // 主线程预收集UI数据（按值捕获到后台线程，安全）
   QVector<QPair<QString, QString>> uiDataList;
   QVector<QTreeWidgetItem*> childItems;
@@ -1218,6 +1211,135 @@ void NotesList::readyNotesData(QTreeWidgetItem* topItem) {
     watcher->deleteLater();
 
     qDebug() << "主线程处理结果完成！";
+  });
+  watcher->setFuture(future);
+}*/
+
+void NotesList::readyNotesData(QTreeWidgetItem* item) {
+  if (!item) return;
+
+  // 同步树控件选中并滚动到可视区
+  tw->setCurrentItem(item);
+  item->setSelected(true);
+  tw->scrollToItem(item);
+
+  QVector<QPair<QString, QString>> uiDataList;
+  QVector<QTreeWidgetItem*> childItems;
+
+  int child_count = item->childCount();
+  // ========== 关键：无子笔记直接返回，避免空容器引发崩溃 ==========
+  if (child_count <= 0) {
+    noteModel->replaceAll({});  // 清空笔记列表
+    pNoteItems.clear();
+    setNoteLabel();
+    return;
+  }
+
+  for (int i = 0; i < child_count; ++i) {
+    QTreeWidgetItem* child = item->child(i);
+    if (!child) continue;  // 子节点空指针防护
+    uiDataList.append({child->text(0), child->text(1)});
+    childItems.append(child);
+  }
+
+  QString iniDirCopy = iniDir;
+
+  struct RawResult {
+    QString text0;
+    QString text1;
+    QString text2;
+    QString text3;
+  };
+
+  QFuture<QVector<RawResult>> future = QtConcurrent::run([=]() {
+    QVector<RawResult> rawResults;
+    rawResults.reserve(child_count);
+
+    for (int i = 0; i < child_count; ++i) {
+      const auto& uiData = uiDataList[i];
+      QString text0 = uiData.first;
+      QString text3 = uiData.second;
+
+      if (text3.isEmpty()) continue;
+
+      QString file = iniDirCopy + text3;
+      // 基础文件接口防护
+      QFile f(file);
+      qint64 fileSize = 0;
+      if (f.exists()) {
+        fileSize = f.size();
+      }
+
+      QString item1 = m_Method->getLastModified(file);
+      QString strSize = m_Method->getFileSize(fileSize, 2);
+      QString text2 = f.exists() ? "" : tr("File does not exist");
+
+      rawResults.push_back({text0, item1 + " " + strSize, text2, text3});
+    }
+    return rawResults;
+  });
+
+  QFutureWatcher<QVector<RawResult>>* watcher =
+      new QFutureWatcher<QVector<RawResult>>(this);
+  connect(watcher, &QFutureWatcher<QVector<RawResult>>::finished, this, [=]() {
+    // 防止多次触发、对象已销毁
+    if (!watcher) return;
+
+    QVector<RawResult> rawResults = watcher->result();
+
+    QList<NoteItem> batchItems;
+    batchItems.reserve(rawResults.size());
+    for (const auto& result : rawResults) {
+      NoteItem item;
+      item.text0 = result.text0;
+      item.text1 = result.text1;
+      item.text2 = result.text2;
+      item.text3 = result.text3;
+      item.myh = 0;
+      batchItems.append(item);
+    }
+
+    noteModel->replaceAll(batchItems);
+    pNoteItems.clear();
+    pNoteItems.append(childItems.begin(), childItems.end());
+
+    int noteCount = getNotesListCount();
+
+    qDebug() << "noteCount=" << noteCount;
+
+    // int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
+    // int noteslistIndex = getSavedNotesListIndex(index);
+    //  setNotesListCurrentIndex(noteslistIndex);
+
+    if (noteCount > 0)
+      setNotesListCurrentIndex(0);
+    else
+      return;
+
+    if (isImportNotes) {
+      setNotesListCurrentIndex(noteCount - 1);
+      isImportNotes = false;
+    }
+
+    setNoteLabel();
+    clickNoteList();
+
+    if (isMouseClick) {
+      setNotesListCurrentIndex(-1);
+      isMouseClick = false;
+    }
+
+    /*if (m_autoJumpNoteIndex >= 0) {
+      int targetIndex = m_autoJumpNoteIndex;
+      m_autoJumpNoteIndex = -1;
+      int countNotes = m_Method->getCountFromQW(mui->qwNoteList);
+      if (targetIndex >= 0 && targetIndex < countNotes) {
+        setNotesListCurrentIndex(targetIndex);
+        clickNoteList();
+      }
+    }*/
+
+    watcher->deleteLater();
   });
   watcher->setFuture(future);
 }
