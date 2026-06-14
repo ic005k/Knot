@@ -161,6 +161,12 @@ void NotesList::on_actionAdd_Note_triggered() {
   renameCurrentItem(tr("Untitled Note"));
   saveNotesList();
   updateAllNoteIndexManager();
+
+  QTimer::singleShot(100, this, [this]() {
+    clickNoteBook();
+    int count = getNotesListCount();
+    setNotesListCurrentIndex(count - 1);
+  });
 }
 
 void NotesList::on_actionDel_Note_triggered() {

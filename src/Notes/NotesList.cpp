@@ -147,7 +147,8 @@ void NotesList::renameCurrentItem(QString title) {
       }
     }
   }
-  resetQML_List();
+
+  // resetQML_List();
 }
 
 void NotesList::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }
@@ -540,7 +541,7 @@ void NotesList::loadSubNotebook(const QJsonObject& bookObj,
 
       QString md = QDir(iniDir).filePath(noteFile);
       m_Notes->m_NoteIndexManager->setNoteTitle(md, noteName);
-      updateNoteIndexManager(md, parentRow, idx);
+
       noteFiles.append(md);
     } else {
       // 递归加载子笔记本
@@ -612,7 +613,7 @@ void NotesList::initNotesList() {
 
         QString md = QDir(iniDir).filePath(str1);
         m_Notes->m_NoteIndexManager->setNoteTitle(md, str0);
-        updateNoteIndexManager(md, i, j);
+
         noteFiles.append(md);
       } else {
         // 子笔记本，递归加载
@@ -630,7 +631,6 @@ void NotesList::initNotesList() {
 
   tw->expandAll();
 
-  m_Notes->m_NoteIndexManager->saveIndex(strNoteNameIndexFile);
   initRecentOpen();
 }
 
@@ -976,6 +976,9 @@ void NotesList::loadAllNoteBook() {
   if (m_treeProxyModel) {
     // m_treeProxyModel->resetAll();
   }
+
+  updateAllNoteIndexManager();
+  m_Notes->m_NoteIndexManager->saveIndex(strNoteNameIndexFile);
 }
 
 int NotesList::countMdFilesImages(const QString& dirPath) {
@@ -1303,16 +1306,11 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
 
     int noteCount = getNotesListCount();
 
-    qDebug() << "noteCount=" << noteCount;
+    if (noteCount == 0) return;
 
     int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
     int noteslistIndex = getSavedNotesListIndex(index);
     setNotesListCurrentIndex(noteslistIndex);
-
-    if (noteCount > 0)
-      setNotesListCurrentIndex(0);
-    else
-      return;
 
     if (isImportNotes) {
       setNotesListCurrentIndex(noteCount - 1);
@@ -1423,19 +1421,25 @@ void NotesList::updateNoteIndexManager(QString mdFile, int notebookIndex,
                                        int noteIndex) {
   m_Notes->m_NoteIndexManager->setNotebookIndex(mdFile, notebookIndex);
   m_Notes->m_NoteIndexManager->setNoteIndex(mdFile, noteIndex);
+  // qDebug() << "更新索引：" << notebookIndex << noteIndex;
 }
 
 void NotesList::updateAllNoteIndexManager() {
-  int topCount = tw->topLevelItemCount();
-  for (int i = 0; i < topCount; i++) {
-    QTreeWidgetItem* topItem = tw->topLevelItem(i);
+  int notebookCount = getNoteBookCount();
+
+  for (int i = 0; i < notebookCount; i++) {
+    QTreeWidgetItem* topItem = pNoteBookItems.at(i);
     int childCount = topItem->childCount();
+    int jj = 0;
     for (int j = 0; j < childCount; j++) {
       QTreeWidgetItem* childItem = topItem->child(j);
       QString mdFile = iniDir + childItem->text(1);
-      QString title = childItem->text(0);
-      m_Notes->m_NoteIndexManager->setNoteTitle(mdFile, title);
-      updateNoteIndexManager(mdFile, i, j);
+      if (!mdFile.isEmpty()) {
+        QString title = childItem->text(0);
+        m_Notes->m_NoteIndexManager->setNoteTitle(mdFile, title);
+        updateNoteIndexManager(mdFile, i, jj);
+        jj++;
+      }
     }
   }
 }
@@ -1454,13 +1458,15 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
   // ==============================
   // 【关键】记录要自动定位的笔记索引
   // ==============================
-  m_autoJumpNoteIndex = indexNote;
+  // m_autoJumpNoteIndex = indexNote;
 
   setNoteBookCurrentIndex(indexNoteBook);
+  setNotesListCurrentIndex(indexNote);
 
   clickNoteBook();
 
-  qDebug() << "已切换笔记本，等待加载完成后自动定位笔记：" << mdFile;
+  qDebug() << "已切换笔记本，等待加载完成后自动定位笔记：" << mdFile
+           << indexNoteBook << indexNote;
 
   return true;
 }

@@ -905,4 +905,9 @@ void NotesList::clickNoteList() {
     }
   }
   mIndexList.append(s_tr);
+
+  updateNoteIndexManager(currentMDFile, indexNoteBook, index);
+
+  // qDebug() << "单击条目设置当前md文件：" << currentMDFile << indexNoteBook
+  //          << index;
 }
