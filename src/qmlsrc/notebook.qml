@@ -92,7 +92,7 @@ Rectangle {
         return data.type;
     }
 
-    function addItem(t0, t1, t2, t3, t4, f_size) {
+    /*function addItem(t0, t1, t2, t3, t4, f_size) {
         view.model.append({
             "text0": t0,
             "text1": t1,
@@ -100,6 +100,20 @@ Rectangle {
             "text3": t3,
             "text4": t4,
             "font_size": f_size
+        });
+    }*/
+
+    function addItem(t0, t1, t2, t3, t4, f_size, lvl = 0, pIdx = -1, expand = true) {
+        view.model.append({
+            "text0": t0,
+            "text1": t1,
+            "text2": t2,
+            "text3": t3,
+            "text4": t4,
+            "font_size": f_size,
+            "level": lvl,
+            "parentIndex": pIdx,
+            "isExpand": expand
         });
     }
 
@@ -161,8 +175,8 @@ Rectangle {
 
         if (isDark)
             strColor = "#333333";
-            // "#455364"
         else
+            // "#455364"
             strColor = "#ffffff";
 
         return strColor;
@@ -187,7 +201,8 @@ Rectangle {
 
         Rectangle {
             id: listItem
-            width: ListView.view.width
+            //width: ListView.view.width
+            implicitWidth: ListView.view.width
 
             height: colLayout.implicitHeight + 0
             color: ListView.isCurrentItem ? "lightblue" : getColor()
@@ -197,188 +212,194 @@ Rectangle {
 
             radius: 2
 
-            RowLayout {
-                id: idlistRow
+            Item {
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                x: level * 18
+                RowLayout {
+                    id: idlistRow
 
-                width: parent.width
-                spacing: 2
-                Layout.fillWidth: true
-
-                Rectangle {
-                    id: idrectColorFlag
-                    height: colLayout.implicitHeight - 0
-                    width: 6
-                    radius: 2
-                    anchors.leftMargin: 1
-                    color: item4.text
-                    visible: item2.text.length ? false : true
-                    Text {
-                        anchors.centerIn: parent
-                    }
-                }
-
-                ColumnLayout {
-                    id: colLayout
-                    height: parent.height
                     width: parent.width
                     spacing: 2
                     Layout.fillWidth: true
-                    anchors.leftMargin: 0
-                    anchors.rightMargin: 0
 
                     Rectangle {
-                        width: view.width
-                        height: 1 // 空白高度
-                        color: "transparent"
+                        id: idrectColorFlag
+                        height: colLayout.implicitHeight - 0
+                        width: 6
+                        radius: 2
+                        anchors.leftMargin: 1
+                        color: item4.text
+                        visible: item2.text.length ? false : true
+                        Text {
+                            anchors.centerIn: parent
+                        }
                     }
 
-                    RowLayout {
-                        id: row0
+                    ColumnLayout {
+                        id: colLayout
+                        height: parent.height
+                        width: parent.width
+                        spacing: 2
+                        Layout.fillWidth: true
+                        anchors.leftMargin: 0
+                        anchors.rightMargin: 0
 
-                        Image {
-                            id: item0Img
+                        Rectangle {
+                            width: view.width
+                            height: 1 // 空白高度
+                            color: "transparent"
+                        }
 
-                            width: iconW
-                            height: item0.contentHeight
-                            fillMode: Image.NoOption
-                            horizontalAlignment: Image.AlignHCenter
-                            verticalAlignment: Image.AlignVCenter
+                        RowLayout {
+                            id: row0
 
-                            smooth: true
-                            sourceSize.height: iconW
-                            sourceSize.width: iconW
-                            source: "/res/time.svg"
+                            Image {
+                                id: item0Img
+
+                                width: iconW
+                                height: item0.contentHeight
+                                fillMode: Image.NoOption
+                                horizontalAlignment: Image.AlignHCenter
+                                verticalAlignment: Image.AlignVCenter
+
+                                smooth: true
+                                sourceSize.height: iconW
+                                sourceSize.width: iconW
+                                source: "/res/time.svg"
+
+                                visible: false
+                            }
+
+                            Text {
+                                id: item0
+
+                                width: parent.width
+                                Layout.preferredWidth: listItem.width - 0
+                                Layout.alignment: Qt.AlignHCenter
+                                horizontalAlignment: Text.AlignLeft
+                                verticalAlignment: Text.AlignVCenter
+                                wrapMode: TextArea.WordWrap
+                                font.bold: true
+                                text: text0
+                                //text: text0 + " | level:" + level
+                                color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+
+                                leftPadding: 5
+                                rightPadding: 5
+                            }
+                        }
+
+                        Text {
+                            id: item1
+                            Layout.preferredWidth: listItem.width
+
+                            Layout.alignment: Qt.AlignHCenter
+                            horizontalAlignment: Text.AlignLeft
+                            verticalAlignment: Text.AlignVCenter
+
+                            width: parent.width
+                            wrapMode: TextArea.WordWrap
+                            color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+                            font.bold: false
+                            text: text1
+
+                            leftPadding: 5
+                            rightPadding: 5
 
                             visible: false
                         }
 
                         Text {
-                            id: item0
-
-                            width: parent.width
-                            Layout.preferredWidth: listItem.width - 0
-                            Layout.alignment: Qt.AlignHCenter
-                            horizontalAlignment: Text.AlignLeft
-                            verticalAlignment: Text.AlignVCenter
-                            wrapMode: TextArea.WordWrap
-                            font.bold: true
-                            text: text0
-                            color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-
-                            leftPadding: 5
-                            rightPadding: 5
-                        }
-                    }
-
-                    Text {
-                        id: item1
-                        Layout.preferredWidth: listItem.width
-
-                        Layout.alignment: Qt.AlignHCenter
-                        horizontalAlignment: Text.AlignLeft
-                        verticalAlignment: Text.AlignVCenter
-
-                        width: parent.width
-                        wrapMode: TextArea.WordWrap
-                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-                        font.bold: false
-                        text: text1
-
-                        leftPadding: 5
-                        rightPadding: 5
-
-                        visible: false
-                    }
-
-                    Text {
-                        id: item2
-                        anchors.rightMargin: 0
-                        Layout.preferredWidth: listItem.width
-                        Layout.alignment: Qt.AlignHCenter
-
-                        horizontalAlignment: Text.AlignLeft
-                        width: parent.width
-                        wrapMode: TextArea.WordWrap
-                        font.bold: false
-                        text: text2
-                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-
-                        leftPadding: 5
-                        rightPadding: 5
-
-                        visible: false
-                    }
-
-                    RowLayout {
-                        id: row3
-                        Layout.margins: rowSpace
-                        visible: item3.text.length ? true : false
-
-                        Image {
-                            id: item3Img
-
-                            width: item3.contentHeight - 5
-                            height: parent.height - 2
-                            fillMode: Image.NoOption
-                            horizontalAlignment: Image.AlignHCenter
-                            verticalAlignment: Image.AlignVCenter
-
-                            smooth: true
-                            sourceSize.height: item3.contentHeight - 5
-                            sourceSize.width: item3.contentHeight - 5
-                            source: "/res/sum.png"
-
-                            visible: item3.text.length ? true : false
-                        }
-
-                        Text {
-                            id: item3
+                            id: item2
                             anchors.rightMargin: 0
-                            width: parent.width
-                            wrapMode: Text.WordWrap
-                            elide: Text.ElideRight
-                            Layout.alignment: Qt.AlignHCenter
-                            horizontalAlignment: Text.AlignLeft
-                            verticalAlignment: Text.AlignVCenter
-
                             Layout.preferredWidth: listItem.width
+                            Layout.alignment: Qt.AlignHCenter
 
+                            horizontalAlignment: Text.AlignLeft
+                            width: parent.width
+                            wrapMode: TextArea.WordWrap
                             font.bold: false
-                            font.pointSize: font_size - 2
+                            text: text2
                             color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-                            text: text3
 
                             leftPadding: 5
                             rightPadding: 5
 
-                            visible: item3.text.length ? true : false
+                            visible: false
                         }
-                    }
 
-                    // top color flag value
-                    Text {
-                        id: item4
-                        anchors.rightMargin: 0
-                        Layout.preferredWidth: listItem.width
-                        Layout.alignment: Qt.AlignHCenter
+                        RowLayout {
+                            id: row3
+                            Layout.margins: rowSpace
+                            visible: item3.text.length ? true : false
 
-                        horizontalAlignment: Text.AlignLeft
-                        width: parent.width
-                        wrapMode: TextArea.WordWrap
-                        font.bold: false
-                        text: text4
-                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+                            Image {
+                                id: item3Img
 
-                        leftPadding: 5
-                        rightPadding: 5
+                                width: item3.contentHeight - 5
+                                height: parent.height - 2
+                                fillMode: Image.NoOption
+                                horizontalAlignment: Image.AlignHCenter
+                                verticalAlignment: Image.AlignVCenter
 
-                        visible: false
-                    }
+                                smooth: true
+                                sourceSize.height: item3.contentHeight - 5
+                                sourceSize.width: item3.contentHeight - 5
+                                source: "/res/sum.png"
 
-                    Rectangle {
-                        width: view.width
-                        height: 1 // 空白高度
-                        color: "transparent"
+                                visible: item3.text.length ? true : false
+                            }
+
+                            Text {
+                                id: item3
+                                anchors.rightMargin: 0
+                                width: parent.width
+                                wrapMode: Text.WordWrap
+                                elide: Text.ElideRight
+                                Layout.alignment: Qt.AlignHCenter
+                                horizontalAlignment: Text.AlignLeft
+                                verticalAlignment: Text.AlignVCenter
+
+                                Layout.preferredWidth: listItem.width
+
+                                font.bold: false
+                                font.pointSize: font_size - 2
+                                color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+                                text: text3
+
+                                leftPadding: 5
+                                rightPadding: 5
+
+                                visible: item3.text.length ? true : false
+                            }
+                        }
+
+                        // top color flag value
+                        Text {
+                            id: item4
+                            anchors.rightMargin: 0
+                            Layout.preferredWidth: listItem.width
+                            Layout.alignment: Qt.AlignHCenter
+
+                            horizontalAlignment: Text.AlignLeft
+                            width: parent.width
+                            wrapMode: TextArea.WordWrap
+                            font.bold: false
+                            text: text4
+                            color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+
+                            leftPadding: 5
+                            rightPadding: 5
+
+                            visible: false
+                        }
+
+                        Rectangle {
+                            width: view.width
+                            height: 1 // 空白高度
+                            color: "transparent"
+                        }
                     }
                 }
             }
@@ -425,7 +446,9 @@ Rectangle {
 
                 // 长按 → 和 onPressAndHold 完全一样
                 onLongPressed: {
-                    // 长按逻辑写这里
+                    menuTargetIndex = index;
+                    // 在长按位置弹出菜单
+                    notebookMenu.popup();
                 }
 
                 // 双击 → 和 onDoubleClicked 完全一样
@@ -459,5 +482,26 @@ Rectangle {
             policy: ScrollBar.AsNeeded
             width: 8
         }
+    }
+
+    // 全局右键/长按菜单
+    // 记录当前长按的条目索引
+    property int menuTargetIndex: -1
+    // 定义信号，供 C++ 连接
+    signal reqCreateSubNotebook(int targetIndex)
+    Menu {
+        id: notebookMenu
+        modal: true
+
+        MenuItem {
+            text: qsTr("New Sub Notebook")
+            onClicked: {
+                // 把当前长按的条目索引发给 C++
+                m_NotesList.slotCreateSubNotebook(menuTargetIndex);
+                notebookMenu.close();
+            }
+        }
+
+        // 后续可以继续加：重命名、删除等菜单项
     }
 }

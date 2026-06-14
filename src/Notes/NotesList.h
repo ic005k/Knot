@@ -7,6 +7,7 @@
 #include <QFile>
 #include <QFutureWatcher>
 #include <QInputMethod>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QKeyEvent>
@@ -103,6 +104,8 @@ class NotesList : public QDialog {
 
   void saveNotesList();
   void initNotesList();
+  void loadSubNotebook(const QJsonObject& bookObj, QTreeWidgetItem* parentItem,
+                       int parentRow);
 
   void setWinPos();
 
@@ -256,6 +259,7 @@ class NotesList : public QDialog {
   void getNoteDiffHtml();
   void newtextToOldtextFromDiffStr();
 
+  void slotCreateSubNotebook(int qmlIndex);
  private slots:
 
   void on_actionShareNoteFile();
@@ -275,6 +279,15 @@ class NotesList : public QDialog {
  signals:
 
  private:
+  // 递归遍历 QTreeWidget 节点，填充到 QML + 维护映射表
+  void traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex, int level);
+
+  // 通用：调用 QML addItem 并传入层级参数
+  void addItemToQW_Level(QObject* qmlRoot, const QString& t0, const QString& t1,
+                         const QString& t2, const QString& t3,
+                         const QString& t4, int fontSize, int level,
+                         int parentIndex, bool isExpand = true);
+
   QTreeWidgetProxyModel* m_treeProxyModel = nullptr;
 
   QMutex m_saveMutex;       // 保存锁
@@ -345,6 +358,8 @@ class NotesList : public QDialog {
   void setColorFlag(QString strColor);
   void setDelNoteFlag(QString mdFile);
   void saveNotesListToFile();
+  // 递归序列化笔记本节点（包含自身笔记 + 下级子笔记本）
+  QJsonObject serializeNotebookItem(QTreeWidgetItem* item);
 
   void initNoteGraphView();
   void readyNotesData(QTreeWidgetItem* topItem);

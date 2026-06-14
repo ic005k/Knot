@@ -1,5 +1,10 @@
 #include "NotesList.h"
 
+static QObject* getQmlRoot(QQuickWidget* quickWidget) {
+  if (!quickWidget) return nullptr;
+  return quickWidget->rootObject();
+}
+
 QStringList NotesList::getRecycleNoteFiles() {
   QStringList cycleFiles;
   QTreeWidgetItem* cycleTopItem = twrb->topLevelItem(0);
@@ -33,6 +38,74 @@ void NotesList::addItemToQW(QQuickWidget* qw, QString text0, QString text1,
                             Q_ARG(QVariant, text1), Q_ARG(QVariant, text2),
                             Q_ARG(QVariant, text3), Q_ARG(QVariant, text4),
                             Q_ARG(QVariant, itemH));
+}
+
+void NotesList::addItemToQW_Level(QObject* qmlRoot, const QString& t0,
+                                  const QString& t1, const QString& t2,
+                                  const QString& t3, const QString& t4,
+                                  int fontSize, int level, int parentIndex,
+                                  bool isExpand) {
+  if (!qmlRoot) return;
+
+  // QML addItem 完整参数顺序：t0,t1,t2,t3,t4,f_size,level,parentIndex,isExpand
+  QMetaObject::invokeMethod(
+      qmlRoot, "addItem", Q_ARG(QVariant, t0), Q_ARG(QVariant, t1),
+      Q_ARG(QVariant, t2), Q_ARG(QVariant, t3), Q_ARG(QVariant, t4),
+      Q_ARG(QVariant, fontSize), Q_ARG(QVariant, level),
+      Q_ARG(QVariant, parentIndex), Q_ARG(QVariant, isExpand));
+}
+
+void NotesList::traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex,
+                                 int level) {
+  if (!item) return;
+
+  // 普通笔记直接跳过，只处理笔记本
+  if (!item->text(1).isEmpty()) {
+    return;
+  }
+
+  QObject* qmlRoot = mui->qwNoteBook->rootObject();
+  if (!qmlRoot) return;
+
+  QString strName = item->text(0);
+  QString strTopColor = item->text(2);
+
+  // 统计当前笔记本【直属一级笔记】数量
+  int noteCount = 0;
+  int totalChild = item->childCount();
+  for (int n = 0; n < totalChild; ++n) {
+    QTreeWidgetItem* child = item->child(n);
+    if (!child->text(1).isEmpty()) {
+      noteCount++;
+    }
+  }
+  QString strSum = QString::number(noteCount);
+
+  int curFontSize = (level == 0) ? fontSize : (fontSize - 1);
+
+  // 区分顶层笔记本 / 子笔记本
+  QString col1Text;
+  if (item->parent() == nullptr) {
+    col1Text = QString::number(pNoteBookItems.size());
+  } else {
+    col1Text = "isNoteBook";
+  }
+
+  int currentQmlIndex = pNoteBookItems.size();
+  bool expand = item->isExpanded();
+
+  // 添加到 QML 列表
+  addItemToQW_Level(qmlRoot, strName, col1Text, "", strSum, strTopColor,
+                    curFontSize, level, parentQmlIndex, expand);
+  pNoteBookItems.append(item);
+
+  // 递归遍历直属子笔记本，构建层级列表
+  for (int j = 0; j < totalChild; ++j) {
+    QTreeWidgetItem* childItem = item->child(j);
+    if (childItem->text(1).isEmpty()) {
+      traverseTreeItem(childItem, currentQmlIndex, level + 1);
+    }
+  }
 }
 
 void NotesList::setColorFlag(QString strColor) {

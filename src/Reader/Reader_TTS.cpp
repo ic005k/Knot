@@ -25,6 +25,7 @@ QString Reader::getBookSpeakTextFromQML() {
 }
 
 void Reader::initTTS() {
+#ifdef Q_OS_ANDROID
   // 调用静态方法 com.x.MyService.checkAndInitTts()，返回 int
   int state = QJniObject::callStaticMethod<int>("com/x/MyService",
                                                 "checkAndInitTts", "()I");
@@ -45,4 +46,5 @@ void Reader::initTTS() {
       // 实例无效/异常
       break;
   }
+#endif
 }

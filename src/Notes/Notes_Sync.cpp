@@ -145,27 +145,29 @@ void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
 }
 
 void Notes::startBackgroundTaskDelAndClear() {
-  if (m_NotesList->isDelNoteRecycle) mw_one->showProgress();
-  QString fullPath = iniDir + "memo";
-  QString dbFile = privateDir + "md_database_v3.db";
+  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+    if (m_NotesList->isDelNoteRecycle) mw_one->showProgress();
+    QString fullPath = iniDir + "memo";
+    QString dbFile = privateDir + "md_database_v3.db";
 
-  QFuture<void> future = QtConcurrent::run([=]() {
-    m_NotesList->needDelNotes();
-    DatabaseManager localDbManager;
-    localDbManager.initDatabase(dbFile);
-    localDbManager.cleanMissingFileRecords(fullPath);
-    localDbManager.closeDatabase();
-  });
+    QFuture<void> future = QtConcurrent::run([=]() {
+      m_NotesList->needDelNotes();
+      DatabaseManager localDbManager;
+      localDbManager.initDatabase(dbFile);
+      localDbManager.cleanMissingFileRecords(fullPath);
+      localDbManager.closeDatabase();
+    });
 
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    if (!m_NotesList->isDelNoteRecycle) {
-      m_NotesList->delRemoteWebDAVFiles();
-      loadNotesToUI();
-    } else
-      m_NotesList->isDelNoteRecycle = false;
-    watcher->deleteLater();
-    mw_one->closeProgress();
-  });
-  watcher->setFuture(future);
+    QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+    connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+      if (!m_NotesList->isDelNoteRecycle) {
+        m_NotesList->delRemoteWebDAVFiles();
+        loadNotesToUI();
+      } else
+        m_NotesList->isDelNoteRecycle = false;
+      watcher->deleteLater();
+      mw_one->closeProgress();
+    });
+    watcher->setFuture(future);
+  }
 }

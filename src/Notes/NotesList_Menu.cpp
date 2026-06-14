@@ -615,3 +615,44 @@ void NotesList::refreshRecentOpen(QString name) {
     listRecentOpen.removeAt(count - 1);
   }
 }
+
+void NotesList::slotCreateSubNotebook(int qmlIndex) {
+  // 1. 校验：拿到长按的父笔记本
+  if (qmlIndex < 0 || qmlIndex >= pNoteBookItems.size()) return;
+
+  QTreeWidgetItem* parentItem = pNoteBookItems.at(qmlIndex);
+  if (!parentItem) return;
+
+  // 2. 弹出 Qt 原生输入框（最简单、最稳定）
+  bool ok = false;
+  QString name = QInputDialog::getText(this, tr("New Sub Notebook"),
+                                       tr("Please enter notebook name:"),
+                                       QLineEdit::Normal, "", &ok);
+
+  // 3. 用户取消 或 名称为空 → 直接返回
+  if (!ok || name.trimmed().isEmpty()) return;
+
+  // 4. 在当前笔记本下 创建子笔记本
+  QTreeWidgetItem* newItem = new QTreeWidgetItem(parentItem);
+  newItem->setText(0, name.trimmed());
+  newItem->setText(2, "#FF0000");
+  newItem->setForeground(0, Qt::red);
+  newItem->setIcon(0, QIcon(":/res/nb.png"));
+
+  // 展开父节点，保证能看到新建的子笔记本
+  parentItem->setExpanded(true);
+  tw->setCurrentItem(newItem);
+
+  // 5. 刷新 QML 笔记本列表
+  loadAllNoteBook();
+
+  // 6. 自动选中新建的项
+  int newIndex = pNoteBookItems.indexOf(newItem);
+  if (newIndex >= 0) {
+    setNoteBookCurrentIndex(newIndex);
+    clickNoteBook();
+  }
+
+  // 7. 保存数据
+  saveNotesList();
+}

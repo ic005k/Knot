@@ -833,15 +833,19 @@ void Notes::loadNotesToUI() {
 }
 
 void Notes::openNotesUI() {
-  // 先清空旧连接，避免重复触发
-  disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
-  // 绑定：等 sync 全部结束 → 再删除
-  disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
-  connect(
-      m_Notes, &Notes::syncFinished, this,
-      [this]() { startBackgroundTaskDelAndClear(); },
-      Qt::ConnectionType(Qt::QueuedConnection | Qt::SingleShotConnection));
-  mw_one->execNeedSyncNotes();
+  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+    // 先清空旧连接，避免重复触发
+    disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
+    // 绑定：等 sync 全部结束 → 再删除
+    disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
+    connect(
+        m_Notes, &Notes::syncFinished, this,
+        [this]() { startBackgroundTaskDelAndClear(); },
+        Qt::ConnectionType(Qt::QueuedConnection | Qt::SingleShotConnection));
+    mw_one->execNeedSyncNotes();
+  } else {
+    loadNotesToUI();
+  }
 
   mui->frameNoteList->show();
   mui->frameMain->hide();
