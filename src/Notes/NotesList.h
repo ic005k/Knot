@@ -228,8 +228,6 @@ class NotesList : public QDialog {
 
   void on_btnClose_clicked();
 
-  void on_treeWidget_itemClicked(QTreeWidgetItem* item, int column);
-
   void on_btnRename_clicked();
 
   void on_btnDel_clicked();

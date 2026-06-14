@@ -107,6 +107,8 @@ void NotesList::on_actionRename_NoteBook_triggered() {
 }
 
 void NotesList::on_actionAdd_Note_triggered() {
+  if (tw->topLevelItemCount() == 0) return;
+
   int notebookIndex = getNoteBookCurrentIndex();
 
   if (notebookIndex < 0) {
@@ -118,9 +120,30 @@ void NotesList::on_actionAdd_Note_triggered() {
     return;
   }
 
-  tw->setCurrentItem(tw->topLevelItem(notebookIndex));
+  tw->setCurrentItem(pNoteBookItems.at(notebookIndex));
 
-  on_btnNewNote_clicked();
+  QString noteFile = "memo/" + m_Notes->getDateTimeStr() + "_" +
+                     m_Method->generateRandom3() + ".md";
+  QTreeWidgetItem* parentitem = tw->currentItem();
+
+  QTreeWidgetItem* item1 = new QTreeWidgetItem(parentitem);
+  item1->setText(0, "");
+  item1->setText(1, noteFile);
+  item1->setIcon(0, QIcon(":/res/n.png"));
+
+  QTextEdit* edit = new QTextEdit();
+  edit->append("");
+  TextEditToFile(edit, iniDir + noteFile);
+  delete edit;
+
+  tw->setCurrentItem(item1);
+  noteName = item1->text(0);
+
+  pNoteItems.clear();
+  int count1 = parentitem->childCount();
+  for (int i = 0; i < count1; i++) {
+    pNoteItems.append(parentitem->child(i));
+  }
 
   QTreeWidgetItem* childItem = tw->currentItem();
   QString text3 = childItem->text(1);

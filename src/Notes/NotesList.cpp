@@ -106,8 +106,6 @@ bool NotesList::eventFilter(QObject* watch, QEvent* evn) {
     }
 
     if (keyEvent->key() == Qt::Key_Return) {
-      QTreeWidgetItem* item = tw->currentItem();
-      on_treeWidget_itemClicked(item, 0);
       return true;
     }
   }
@@ -1307,9 +1305,9 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
 
     qDebug() << "noteCount=" << noteCount;
 
-    // int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
-    // int noteslistIndex = getSavedNotesListIndex(index);
-    //  setNotesListCurrentIndex(noteslistIndex);
+    int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
+    int noteslistIndex = getSavedNotesListIndex(index);
+    setNotesListCurrentIndex(noteslistIndex);
 
     if (noteCount > 0)
       setNotesListCurrentIndex(0);

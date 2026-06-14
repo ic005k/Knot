@@ -415,38 +415,12 @@ void NotesList::on_btnNewNote_clicked() {
   delete edit;
 
   tw->setCurrentItem(item1);
-  on_treeWidget_itemClicked(item1, 0);
+  noteName = item1->text(0);
 
   pNoteItems.clear();
   int count = parentitem->childCount();
   for (int i = 0; i < count; i++) {
     pNoteItems.append(parentitem->child(i));
-  }
-}
-
-void NotesList::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column) {
-  Q_UNUSED(column);
-
-  if (tw->topLevelItemCount() == 0) return;
-
-  noteName = item->text(0);
-
-  return;
-
-  if (item->parent() != NULL) {
-    if (tw->currentIndex().row() == 0) {
-      if (tw->currentIndex().parent().row() == 0) {
-      }
-    }
-
-    QSettings Reg(iniDir + "curmd.ini", QSettings::IniFormat);
-
-    QString curmd = item->text(1);
-    Reg.setValue("/MainNotes/currentItem", curmd);
-
-    currentMDFile = iniDir + curmd;
-
-    setNoteName(item->text(0));
   }
 }
 
@@ -913,9 +887,6 @@ void NotesList::clickNoteList() {
 
   QString noteName = m_Method->getText0(mui->qwNoteList, index);
   noteTitle = noteName;
-
-  // QTreeWidgetItem* itemTop = tw->topLevelItem(indexTop);
-  // QTreeWidgetItem* item = itemTop->child(index);
 
   QTreeWidgetItem* item = pNoteItems.at(index);
   tw->setCurrentItem(item);
