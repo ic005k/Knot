@@ -432,6 +432,8 @@ void Steps::openStepsUI() {
   if (mui->tabMotion->currentIndex() == 0) {
     tmeRefreshSteps->start(3000);
   }
+
+  m_Reader->initTTS();
 }
 
 void Steps::addRecord(QString date, qlonglong steps, QString km) {

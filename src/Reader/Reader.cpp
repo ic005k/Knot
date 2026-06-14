@@ -2955,6 +2955,8 @@ void Reader::openReader() {
   totalHours = readTotalHours();
 
   if (!isGpsRun) keepScreenOn();
+
+  initTTS();
 }
 
 double Reader::readTotalHours() {

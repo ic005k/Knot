@@ -197,7 +197,8 @@ class Reader : public QDialog {
   void stopSpeak();
   void setTtsCurrentSentence(const QString& currentSentence);
   void setAutoStopPlayTime();
- public slots:
+  void initTTS();
+  public slots:
   void on_SetReaderFunVisible();
 
   void setPageScroll0();

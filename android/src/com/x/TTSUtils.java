@@ -55,7 +55,8 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
 
     // ========== 内部类避免内存泄漏 ==========
     private static class SafeAudioFocusListener
-        implements AudioManager.OnAudioFocusChangeListener {
+        implements AudioManager.OnAudioFocusChangeListener
+    {
 
         private final WeakReference<TTSUtils> utilsRef;
 
@@ -139,73 +140,69 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
             this.initCallback = callback;
         }
 
-        new Thread(
-            () -> {
-                try {
-                    final CountDownLatch latch = new CountDownLatch(1);
-                    final boolean[] initSuccess = { false };
+        new Thread(() -> {
+            try {
+                final CountDownLatch latch = new CountDownLatch(1);
+                final boolean[] initSuccess = { false };
 
-                    mainHandler.post(() -> {
-                        if (isReleased.get()) {
-                            latch.countDown();
-                            return;
-                        }
-
-                        Log.d(TAG, "Initializing TTS");
-                        textToSpeech = new TextToSpeech(context, status -> {
-                            if (status == TextToSpeech.SUCCESS) {
-                                setupTtsEngine();
-                                isInitialized.set(true);
-                                isInitializing.set(false);
-                                notifyInitSuccess(initCallback);
-                            } else {
-                                String errorMsg = getInitErrorMsg(status);
-                                isInitializing.set(false);
-                                notifyInitError(initCallback, errorMsg);
-                                cleanupFailedInit();
-                            }
-                            latch.countDown();
-                        });
-                    });
-
-                    if (!latch.await(5, TimeUnit.SECONDS)) {
-                        mainHandler.post(() -> {
-                            Log.w(TAG, "TTS initialization timeout");
-                            isInitializing.set(false);
-                            notifyInitError(
-                                initCallback,
-                                "TTS initialization timed out"
-                            );
-                            if (textToSpeech != null) {
-                                try {
-                                    textToSpeech.shutdown();
-                                } catch (Exception e) {
-                                    Log.e(
-                                        TAG,
-                                        "Error shutting down TTS after timeout",
-                                        e
-                                    );
-                                }
-                                textToSpeech = null;
-                            }
-                        });
+                mainHandler.post(() -> {
+                    if (isReleased.get()) {
+                        latch.countDown();
+                        return;
                     }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    isInitializing.set(false);
-                    notifyInitError(initCallback, "Initialization interrupted");
-                } catch (Exception e) {
-                    Log.e(TAG, "TTS initialization exception", e);
-                    isInitializing.set(false);
-                    notifyInitError(
-                        initCallback,
-                        "Initialization exception: " + e.getMessage()
-                    );
+
+                    Log.d(TAG, "Initializing TTS");
+                    textToSpeech = new TextToSpeech(context, status -> {
+                        if (status == TextToSpeech.SUCCESS) {
+                            setupTtsEngine();
+                            isInitialized.set(true);
+                            isInitializing.set(false);
+                            notifyInitSuccess(initCallback);
+                        } else {
+                            String errorMsg = getInitErrorMsg(status);
+                            isInitializing.set(false);
+                            notifyInitError(initCallback, errorMsg);
+                            cleanupFailedInit();
+                        }
+                        latch.countDown();
+                    });
+                });
+
+                if (!latch.await(5, TimeUnit.SECONDS)) {
+                    mainHandler.post(() -> {
+                        Log.w(TAG, "TTS initialization timeout");
+                        isInitializing.set(false);
+                        notifyInitError(
+                            initCallback,
+                            "TTS initialization timed out"
+                        );
+                        if (textToSpeech != null) {
+                            try {
+                                textToSpeech.shutdown();
+                            } catch (Exception e) {
+                                Log.e(
+                                    TAG,
+                                    "Error shutting down TTS after timeout",
+                                    e
+                                );
+                            }
+                            textToSpeech = null;
+                        }
+                    });
                 }
-            },
-            "TTS-Init-Thread"
-        )
-            .start();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                isInitializing.set(false);
+                notifyInitError(initCallback, "Initialization interrupted");
+            } catch (Exception e) {
+                Log.e(TAG, "TTS initialization exception", e);
+                isInitializing.set(false);
+                notifyInitError(
+                    initCallback,
+                    "Initialization exception: " + e.getMessage()
+                );
+            }
+        }, "TTS-Init-Thread").start();
     }
 
     /**
@@ -480,7 +477,9 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
                             // ==============================
                             // 发【结束标记】给 C++
                             // ==============================
-                            MyService.CallJavaNotify_20("__TTS_PLAY_FINISHED__");
+                            MyService.CallJavaNotify_20(
+                                "__TTS_PLAY_FINISHED__"
+                            );
 
                             if (playCompleteListener != null) {
                                 mainHandler.post(() ->
@@ -811,5 +810,35 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
             );
         }
         return false;
+    }
+
+    /**
+     * 判断 TTS 是否 完全就绪（可直接播放）
+     * 条件：未销毁 + 初始化完成 + 不在初始化中
+     */
+    public boolean isReady() {
+        return (
+            !isReleased.get() && isInitialized.get() && !isInitializing.get()
+        );
+    }
+
+    /**
+     * 获取当前综合状态码（方便C++精细化判断）
+     * -1: 实例已释放/无效
+     *  0: 空闲就绪（推荐直接播放）
+     *  1: 正在初始化
+     *  2: 正在语音播放中
+     */
+    public int getTtsState() {
+        if (isReleased.get()) {
+            return -1;
+        }
+        if (isInitializing.get()) {
+            return 1;
+        }
+        if (isSpeaking()) {
+            return 2;
+        }
+        return 0;
     }
 }

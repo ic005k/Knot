@@ -1715,5 +1715,68 @@ public class MyService extends Service {
             Log.e(TAG, "MyService未启动，无法执行bringAppToForeground");
         }
     }
+
     // ========== 前台唤醒逻辑迁移结束 ==========
+
+    /**
+     * 检查TTS状态，按需做引擎预激活，不冗余重建实例
+     * @return 状态码 -1/0/1/2
+     * -1 : 无有效实例
+     *  0 : 空闲就绪（引擎已激活，可直接播放）
+     *  1 : 正在初始化/引擎激活中
+     *  2 : 正在播放语音
+     */
+    public static int checkAndInitTts() {
+        MyService service = getInstance();
+        if (service == null) {
+            Log.e("TTS", "MyService 未启动，无法初始化TTS");
+            return -1;
+        }
+
+        synchronized (service.ttsLock) {
+            if (service.currentPlayingTts == null) {
+                TTSUtils newTts = new TTSUtils(service.getApplicationContext());
+                // 局部变量持有引用，防止外部置空影响判断
+                final TTSUtils tempTts = newTts;
+                service.currentPlayingTts = tempTts;
+
+                tempTts.initialize(
+                    new TTSUtils.InitCallback() {
+                        @Override
+                        public void onSuccess() {
+                            Log.d("TTS", "TTS引擎预激活完成");
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Log.e("TTS", "TTS引擎激活失败: " + error);
+                            // 用局部 tempTts 判断，不受外部 currentPlayingTts 改动影响
+                            synchronized (service.ttsLock) {
+                                if (service.currentPlayingTts == tempTts) {
+                                    service.currentPlayingTts = null;
+                                }
+                            }
+                            // 强制释放，保证资源回收
+                            tempTts.shutdown();
+                        }
+                    }
+                );
+                return 1;
+            }
+
+            int state = service.currentPlayingTts.getTtsState();
+            switch (state) {
+                case -1:
+                    return -1;
+                case 0:
+                    return 0;
+                case 1:
+                    return 1;
+                case 2:
+                    return 2;
+                default:
+                    return -1;
+            }
+        }
+    }
 }
