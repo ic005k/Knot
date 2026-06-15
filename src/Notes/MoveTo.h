@@ -19,7 +19,6 @@ class MoveTo : public QDialog {
   QTreeWidgetItem* currentItem;
   bool isOk = false;
 
-  void initTopNoteBook();
   void initAllNoteBook();
   void showDialog();
 

@@ -509,44 +509,35 @@ void NotesList::on_btnDel_clicked() {
 }
 
 void NotesList::on_btnDown_clicked() {
+  QTreeWidgetItem* oldItem = tw->currentItem();
+  bool isNoteBook = pNoteBookItems.contains(oldItem);
+
   moveBy(1);
 
-  bool isParent = false;
-  QTreeWidgetItem* item = tw->currentItem();
-  if (item->parent() == NULL) {
-    isParent = true;
-
+  if (isNoteBook) {
+    isMouseClick = true;
   } else {
     int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
     setNotesListCurrentIndex(index + 1);
     clickNoteList();
-    isParent = false;
-  }
-
-  if (isParent) {
-    isMouseClick = true;
   }
 }
 
 void NotesList::on_btnUp_clicked() {
+  QTreeWidgetItem* oldItem = tw->currentItem();
+  bool isNoteBook = pNoteBookItems.contains(oldItem);
+
   moveBy(-1);
 
-  bool isParent = false;
-  QTreeWidgetItem* item = tw->currentItem();
-  if (item->parent() == NULL) {
-    isParent = true;
-
+  if (isNoteBook) {
+    isMouseClick = true;
   } else {
     int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
     setNotesListCurrentIndex(index - 1);
     clickNoteList();
-    isParent = false;
-  }
-
-  if (isParent) {
-    isMouseClick = true;
   }
 }
+
 void NotesList::on_btnExport_clicked() {
   if (tw->topLevelItemCount() == 0) return;
 

@@ -37,13 +37,7 @@ MoveTo::MoveTo(QWidget* parent) : QDialog(parent), ui(new Ui::MoveTo) {
   }
 
   if (item != NULL) {
-    if (item->text(1).isEmpty()) {
-      isNoteBook = true;
-      initTopNoteBook();
-    } else {
-      isNote = true;
-      initAllNoteBook();
-    }
+    initAllNoteBook();
 
     ui->lblItem->setText(item->text(0));
   }
@@ -115,27 +109,11 @@ void MoveTo::on_btnCancel_clicked() {
 void MoveTo::on_btnOk_clicked() {
   isOk = true;
   strCurrentItem = ui->listWidget->currentItem()->text();
-  if (isNoteBook) currentItem = listItems.at(ui->listWidget->currentRow());
-  if (isNote) currentItem = listItems.at(ui->listWidget->currentRow());
+
+  currentItem = m_NotesList->pNoteBookItems.at(ui->listWidget->currentRow());
 
   close();
   accept();
-}
-
-void MoveTo::initTopNoteBook() {
-  ui->listWidget->clear();
-  listItems.clear();
-  QStringList itemList;
-
-  int count = tw->topLevelItemCount();
-  for (int i = 0; i < count; i++) {
-    QTreeWidgetItem* topItem = tw->topLevelItem(i);
-    QString strTop = topItem->text(0);
-    itemList.append(strTop);
-    listItems.append(topItem);
-  }
-
-  ui->listWidget->addItems(itemList);
 }
 
 void MoveTo::initAllNoteBook() {
@@ -143,20 +121,10 @@ void MoveTo::initAllNoteBook() {
   listItems.clear();
   QStringList itemList;
 
-  int count = tw->topLevelItemCount();
+  int count = m_NotesList->getNoteBookCount();
   for (int i = 0; i < count; i++) {
-    QTreeWidgetItem* topItem = tw->topLevelItem(i);
-    QString strTop = topItem->text(0);
-    itemList.append(strTop);
-    listItems.append(topItem);
-    int childCount = topItem->childCount();
-    for (int j = 0; j < childCount; j++) {
-      QTreeWidgetItem* childItem = topItem->child(j);
-      if (childItem->text(1).isEmpty()) {
-        itemList.append(childItem->text(0));
-        listItems.append(childItem);
-      }
-    }
+    QString title = m_NotesList->getNoteBookText0(i);
+    itemList.append(title);
   }
 
   ui->listWidget->addItems(itemList);

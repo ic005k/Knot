@@ -217,7 +217,7 @@ Rectangle {
                 Layout.fillHeight: true
 
                 x: level * 15
-                width: parent.width - x - 10
+                width: parent.width - x - 0
 
                 RowLayout {
                     id: idlistRow

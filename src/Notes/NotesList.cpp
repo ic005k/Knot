@@ -1330,6 +1330,8 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
 
     if (isMouseClick) {
       setNotesListCurrentIndex(-1);
+      int idxNoteBook = getNoteBookCurrentIndex();
+      tw->setCurrentItem(pNoteBookItems.at(idxNoteBook));
       isMouseClick = false;
     }
 
