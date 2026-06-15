@@ -424,14 +424,51 @@ void NotesList::on_btnNewNote_clicked() {
   }
 }
 
+void NotesList::moveChildToRecycle(QTreeWidgetItem* parentItem, QString iniDir,
+                                   QVector<QString>& delFilesIndex,
+                                   QTreeWidget* twrb)
+
+{
+  if (!parentItem) return;
+  int childCount = parentItem->childCount();
+
+  // 倒序遍历，删除节点不会影响下标
+  for (int i = childCount - 1; i >= 0; --i) {
+    QTreeWidgetItem* child = parentItem->child(i);
+    if (!child) continue;
+
+    QString str0 = child->text(0);
+    QString str1 = child->text(1);
+
+    if (str1.isEmpty()) {
+      // 子笔记本：先递归清理它的所有子项，再删除自身
+      moveChildToRecycle(child, iniDir, delFilesIndex, twrb);
+      parentItem->removeChild(child);
+      delete child;
+    } else {
+      // 笔记文件：移入回收站 + 记录待删文件
+      QTreeWidgetItem* recycleItem = new QTreeWidgetItem;
+      recycleItem->setText(0, str0);
+      recycleItem->setText(1, str1);
+      addItem(twrb, recycleItem);
+      delFilesIndex.append(iniDir + str1);
+
+      parentItem->removeChild(child);
+      delete child;
+    }
+  }
+}
+
 void NotesList::on_btnDel_clicked() {
   if (tw->topLevelItemCount() == 0) return;
 
   QTreeWidgetItem* item = tw->currentItem();
   if (item == NULL) return;
 
+  bool isNoteBook = pNoteBookItems.contains(item);
+
   // 判断：笔记本 / 笔记
-  QString strFlag = (item->parent() == NULL) ? tr("NoteBook") : tr("Note");
+  QString strFlag = (isNoteBook) ? tr("NoteBook") : tr("Note");
 
   auto m_ShowMsg = std::make_unique<ShowMessage>(this);
   if (!m_ShowMsg->showMsg("Knot",
@@ -447,30 +484,21 @@ void NotesList::on_btnDel_clicked() {
   // ==========================================
   // 【删除笔记本】：先移所有笔记 → 最后删 TOP
   // ==========================================
-  if (item->parent() == NULL) {
-    int totalNotes = item->childCount();
 
-    // 遍历所有笔记，全部移入回收站
-    for (int i = 0; i < totalNotes; i++) {
-      QTreeWidgetItem* note = item->child(i);
-      str0 = note->text(0);
-      str1 = note->text(1);
+  if (isNoteBook) {
+    // 递归清理所有子项
+    moveChildToRecycle(item, iniDir, delFilesIndex, twrb);
 
-      // 加入回收箱
-      QTreeWidgetItem* recycleItem = new QTreeWidgetItem;
-      recycleItem->setText(0, str0);
-      recycleItem->setText(1, str1);
-      addItem(twrb, recycleItem);
-
-      // 记录要删除的文件
-      delFilesIndex.append(iniDir + str1);
+    // 移除并删除当前笔记本自身（兼容顶层 + 嵌套子节点）
+    QTreeWidgetItem* parent = item->parent();
+    if (parent) {
+      // 嵌套子笔记本：从父节点移除
+      parent->removeChild(item);
+    } else {
+      // 顶层笔记本：从树控件移除
+      tw->takeTopLevelItem(tw->indexOfTopLevelItem(item));
     }
-
-    // ✅ 关键：只有删除笔记本时，才删除 TOP ITEM
-    int topIndex = tw->indexOfTopLevelItem(item);
-    if (topIndex >= 0) {
-      delete tw->takeTopLevelItem(topIndex);
-    }
+    delete item;
   }
 
   // ==========================================

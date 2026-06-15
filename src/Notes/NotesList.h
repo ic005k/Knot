@@ -368,6 +368,7 @@ class NotesList : public QDialog {
   int countMdFilesImages(const QString& dirPath);
   void loadSubNotebook(const QJsonObject& bookObj, QTreeWidgetItem* parentItem,
                        int parentRow, int& totalNotes);
+  void moveChildToRecycle(QTreeWidgetItem *parentItem, QString iniDir, QVector<QString> &delFilesIndex, QTreeWidget *twrb);
 };
 
 class SearchMapper {

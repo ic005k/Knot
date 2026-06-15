@@ -26,6 +26,8 @@ NewNoteBook::NewNoteBook(QWidget* parent)
   }
   ui->listWidget->addItems(list);
   ui->listWidget->setCurrentRow(0);
+  ui->listWidget->hide();
+  ui->lblRoot->hide();
 }
 
 NewNoteBook::~NewNoteBook() { delete ui; }
@@ -33,7 +35,7 @@ NewNoteBook::~NewNoteBook() { delete ui; }
 void NewNoteBook::showDialog() {
   int x, y, w, h;
   w = mw_one->width() - 20;
-  h = mw_one->height() - 50;
+  h = 200;
   x = mw_one->geometry().x() + (mw_one->width() - w) / 2;
   y = mw_one->geometry().y() + (mw_one->height() - h) / 2;
   setGeometry(x, y, w, h);

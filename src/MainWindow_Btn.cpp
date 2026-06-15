@@ -95,19 +95,16 @@ void MainWindow::on_btnManagement_pressed() {
 void MainWindow::on_btnUpMove_pressed() {
   if (m_Method->getCountFromQW(mui->qwNoteBook) == 0) return;
 
-  // m_NotesList->setTWCurrentItem();
   m_NotesList->on_btnUp_clicked();
 }
 
 void MainWindow::on_btnDownMove_pressed() {
   if (m_Method->getCountFromQW(mui->qwNoteBook) == 0) return;
 
-  // m_NotesList->setTWCurrentItem();
   m_NotesList->on_btnDown_clicked();
 }
 
 void MainWindow::on_btnDelNote_NoteBook_pressed() {
-  m_NotesList->setTWCurrentItem();
   m_NotesList->on_btnDel_clicked();
 
   m_NotesList->updateAllNoteIndexManager();

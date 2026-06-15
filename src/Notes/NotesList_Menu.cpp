@@ -634,41 +634,44 @@ void NotesList::refreshRecentOpen(QString name) {
 }
 
 void NotesList::slotCreateSubNotebook(int qmlIndex) {
-  // 1. 校验：拿到长按的父笔记本
+  // 校验：拿到长按的父笔记本
   if (qmlIndex < 0 || qmlIndex >= pNoteBookItems.size()) return;
 
   QTreeWidgetItem* parentItem = pNoteBookItems.at(qmlIndex);
   if (!parentItem) return;
 
-  // 2. 弹出 Qt 原生输入框（最简单、最稳定）
-  bool ok = false;
-  QString name = QInputDialog::getText(this, tr("New Sub Notebook"),
-                                       tr("Please enter notebook name:"),
-                                       QLineEdit::Normal, "", &ok);
+  QInputDialog* dlg = m_Method->inputDialog(
+      tr("New Sub Notebook"), tr("Please enter notebook name:"), "");
 
-  // 3. 用户取消 或 名称为空 → 直接返回
-  if (!ok || name.trimmed().isEmpty()) return;
+  connect(dlg, &QDialog::accepted, this, [=]() {
+    // 点击确定：拿到输入内容
+    QString inputName = dlg->textValue();
+    if (!inputName.isEmpty()) {
+      //  在当前笔记本下 创建子笔记本
+      QTreeWidgetItem* newItem = new QTreeWidgetItem(parentItem);
+      newItem->setText(0, inputName.trimmed());
+      newItem->setText(2, "#e5e1e1");
+      newItem->setForeground(0, Qt::red);
 
-  // 4. 在当前笔记本下 创建子笔记本
-  QTreeWidgetItem* newItem = new QTreeWidgetItem(parentItem);
-  newItem->setText(0, name.trimmed());
-  newItem->setText(2, "#e5e1e1");
-  newItem->setForeground(0, Qt::red);
+      // 展开父节点，保证能看到新建的子笔记本
+      parentItem->setExpanded(true);
+      tw->setCurrentItem(newItem);
 
-  // 展开父节点，保证能看到新建的子笔记本
-  parentItem->setExpanded(true);
-  tw->setCurrentItem(newItem);
+      //  刷新 QML 笔记本列表
+      loadAllNoteBook();
 
-  // 5. 刷新 QML 笔记本列表
-  loadAllNoteBook();
+      //  自动选中新建的项
+      int newIndex = pNoteBookItems.indexOf(newItem);
+      if (newIndex >= 0) {
+        setNoteBookCurrentIndex(newIndex);
+        clickNoteBook();
+      }
 
-  // 6. 自动选中新建的项
-  int newIndex = pNoteBookItems.indexOf(newItem);
-  if (newIndex >= 0) {
-    setNoteBookCurrentIndex(newIndex);
-    clickNoteBook();
-  }
+      //  保存数据
+      saveNotesList();
+    }
+    dlg->deleteLater();  // 销毁对象
+  });
 
-  // 7. 保存数据
-  saveNotesList();
+  connect(dlg, &QDialog::rejected, this, [=]() { dlg->deleteLater(); });
 }

@@ -84,7 +84,7 @@ void Method::closeGrayWindows() {
   }
 }
 
-QInputDialog* Method::inputDialog(QString windowsTitle, QString lblEdit,
+/*QInputDialog* Method::inputDialog(QString windowsTitle, QString lblEdit,
                                   QString defaultValue) {
   QInputDialog* idlg = new QInputDialog(this);
   idlg->hide();
@@ -111,6 +111,115 @@ QInputDialog* Method::inputDialog(QString windowsTitle, QString lblEdit,
           [=]() mutable { closeGrayWindows(); });
   connect(idlg, &QDialog::accepted, this,
           [=]() mutable { closeGrayWindows(); });
+
+  return idlg;
+}*/
+
+QInputDialog* Method::inputDialog(QString windowsTitle, QString lblEdit,
+                                  QString defaultValue) {
+  QInputDialog* idlg = new QInputDialog(this);
+  idlg->hide();
+
+  // 无边框基础属性
+  idlg->setWindowFlag(Qt::FramelessWindowHint);
+  idlg->setWindowFlags(idlg->windowFlags() | Qt::Dialog);
+
+  // 根据暗黑模式拼接样式
+  QString style;
+  if (isDark) {
+    style = R"(
+      QInputDialog {
+          background-color: #2A2A2A;
+          border-radius: 12px;
+          border: none;
+      }
+      QLabel {
+          font-size: 16px;
+          color: #E5E5E5;
+          padding-left: 4px;
+      }
+      QLineEdit {
+          min-height: 46px;
+          font-size: 16px;
+          border: 1px solid #444444;
+          border-radius: 8px;
+          padding-left: 10px;
+          background-color: #383838;
+          color: #E5E5E5;
+      }
+      QDialogButtonBox {
+          spacing: 25px;
+          margin-top: 15px;
+      }
+      QPushButton {
+          min-height: 44px;
+          min-width: 80px;
+          font-size: 16px;
+          border-radius: 8px;
+      }
+      )";
+  } else {
+    style = R"(
+      QInputDialog {
+          background-color: #ffffff;
+          border-radius: 12px;
+          border: none;
+      }
+      QLabel {
+          font-size: 16px;
+          color: #333333;
+          padding-left: 4px;
+      }
+      QLineEdit {
+          min-height: 46px;
+          font-size: 16px;
+          border: 1px solid #dcdcdc;
+          border-radius: 8px;
+          padding-left: 10px;
+          background-color: #ffffff;
+          color: #333333;
+      }
+      QDialogButtonBox {
+          spacing: 25px;
+          margin-top: 15px;
+      }
+      QPushButton {
+          min-height: 44px;
+          min-width: 80px;
+          font-size: 16px;
+          border-radius: 8px;
+      }
+      )";
+  }
+
+  idlg->setStyleSheet(style);
+
+  idlg->setOkButtonText(tr("Ok"));
+  idlg->setCancelButtonText(tr("Cancel"));
+  idlg->setContentsMargins(18, 18, 18, 18);
+  idlg->setWindowTitle(windowsTitle);
+  idlg->setTextValue(defaultValue);
+  idlg->setLabelText(lblEdit);
+  set_PushButtonStyle(idlg);
+
+  showGrayWindows();
+
+  // 尺寸与居中
+  idlg->setFixedWidth(mw_one->width() - 40);
+  idlg->setMinimumHeight(200);
+
+  QRect mainRect = mw_one->geometry();
+  int dlgW = idlg->width();
+  int dlgH = idlg->height();
+  int x = mainRect.x() + (mainRect.width() - dlgW) / 2;
+  int y = mainRect.y() + (mainRect.height() - dlgH) / 2;
+  idlg->setGeometry(x, y, dlgW, dlgH);
+  idlg->setFixedSize(idlg->size());
+
+  idlg->show();
+
+  connect(idlg, &QDialog::rejected, this, [=]() { closeGrayWindows(); });
+  connect(idlg, &QDialog::accepted, this, [=]() { closeGrayWindows(); });
 
   return idlg;
 }
