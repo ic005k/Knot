@@ -373,7 +373,8 @@ Rectangle {
                     onLongPressed: {
                         menuTargetIndex = index;
                         // 在长按位置弹出菜单
-                        notebookMenu.popup();
+                        //notebookMenu.popup();
+                        m_NotesList.show_NoteBookPopMenu(index);
                     }
 
                     // 双击 → 和 onDoubleClicked 完全一样

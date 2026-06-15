@@ -254,6 +254,25 @@ void NotesList::on_actionExport_Note_triggered() {
   on_btnExport_clicked();
 }
 
+void NotesList::show_NoteBookPopMenu(int qmlIndex) {
+  QMenu* mainMenu = new QMenu(this);
+  QAction* actNew = new QAction(tr("New Sub NoteBook"));
+
+  connect(actNew, &QAction::triggered, this,
+          [this, qmlIndex]() { slotCreateSubNotebook(qmlIndex); });
+
+  mainMenu->addAction(actNew);
+  mainMenu->setStyleSheet(m_Method->qssMenu);
+
+  QPoint pos(mw_one->geometry().x() + mui->qwNoteBook->geometry().x() + 2,
+             mw_one->geometry().y() + 2);
+
+  QPoint clickPos = QCursor::pos();
+  QPoint menuPos = clickPos - QPoint(0, 40);
+
+  mainMenu->exec(menuPos);
+}
+
 void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
   QAction* actNew = new QAction(tr("New NoteBook"));
   QAction* actDel = new QAction(tr("Del NoteBook"));
