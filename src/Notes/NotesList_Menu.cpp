@@ -219,7 +219,12 @@ void NotesList::on_actionImport_Note_triggered() {
   int indexBook = getNoteBookCurrentIndex();
   if (indexBook < 0) return;
 
-  setNoteBookCurrentItem();
+  QTreeWidgetItem* oldItem = tw->currentItem();
+  bool isNoteBook = pNoteBookItems.contains(oldItem);
+  if (!isNoteBook) {
+    tw->setCurrentItem(oldItem->parent());
+  }
+
   int fileCount = on_btnImport_clicked();
 
   while (!isImportFilesEnd) {
@@ -245,9 +250,6 @@ void NotesList::on_actionExport_Note_triggered() {
 
   if (indexBook < 0) return;
   if (indexNote < 0) return;
-
-  setNoteBookCurrentItem();
-  tw->setCurrentItem(tw->currentItem()->child(indexNote));
 
   on_btnExport_clicked();
 }
