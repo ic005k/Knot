@@ -1238,6 +1238,12 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
   for (int i = 0; i < child_count; ++i) {
     QTreeWidgetItem* child = item->child(i);
     if (!child) continue;  // 子节点空指针防护
+
+    // text(1) 为空 = 子笔记本，直接跳过
+    if (child->text(1).isEmpty()) {
+      continue;
+    }
+
     uiDataList.append({child->text(0), child->text(1)});
     childItems.append(child);
   }
@@ -1251,11 +1257,14 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
     QString text3;
   };
 
+  // 现在用【过滤后的有效笔记数量】判断，不再用原始child_count
+  int validNoteCount = uiDataList.size();
+
   QFuture<QVector<RawResult>> future = QtConcurrent::run([=]() {
     QVector<RawResult> rawResults;
-    rawResults.reserve(child_count);
+    rawResults.reserve(validNoteCount);
 
-    for (int i = 0; i < child_count; ++i) {
+    for (int i = 0; i < validNoteCount; ++i) {
       const auto& uiData = uiDataList[i];
       QString text0 = uiData.first;
       QString text3 = uiData.second;
@@ -1323,16 +1332,6 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
       setNotesListCurrentIndex(-1);
       isMouseClick = false;
     }
-
-    /*if (m_autoJumpNoteIndex >= 0) {
-      int targetIndex = m_autoJumpNoteIndex;
-      m_autoJumpNoteIndex = -1;
-      int countNotes = m_Method->getCountFromQW(mui->qwNoteList);
-      if (targetIndex >= 0 && targetIndex < countNotes) {
-        setNotesListCurrentIndex(targetIndex);
-        clickNoteList();
-      }
-    }*/
 
     watcher->deleteLater();
   });
@@ -1453,11 +1452,6 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
 
   if (indexNoteBook < 0) return false;
   if (indexNoteBook >= countNoteBook) return false;
-
-  // ==============================
-  // 【关键】记录要自动定位的笔记索引
-  // ==============================
-  // m_autoJumpNoteIndex = indexNote;
 
   setNoteBookCurrentIndex(indexNoteBook);
   setNotesListCurrentIndex(indexNote);

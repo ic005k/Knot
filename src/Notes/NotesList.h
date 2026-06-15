@@ -289,8 +289,6 @@ class NotesList : public QDialog {
   QMutex m_saveMutex;       // 保存锁
   bool m_isSaving = false;  // 保存状态
 
-  int m_autoJumpNoteIndex = -1;  // 自动跳转的笔记索引
-
   QStringList noteDiffTime, noteDiffHtml, noteDiffPatch;
 
   QString notebookName;

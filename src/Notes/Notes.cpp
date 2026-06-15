@@ -169,9 +169,11 @@ void Notes::closeEvent(QCloseEvent* event) {
   if (isSetNewNoteTitle()) {
     TitleGenerator generator;
     new_title = generator.genNewTitle(newText);
-    renameTitle(true);
 
-    qDebug() << "开始重命名笔记";
+    int index = m_NotesList->getNotesListCurrentIndex();
+    tw->setCurrentItem(m_NotesList->pNoteItems.at(index));
+
+    renameTitle(true);
   }
 }
 
