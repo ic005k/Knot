@@ -203,7 +203,7 @@ Rectangle {
             id: listItem
             implicitWidth: ListView.view.width
             implicitHeight: colLayout.implicitHeight
-            color: ListView.isCurrentItem ? "lightblue" : getColor()
+            color: getColor()
             border.width: isDark ? 0 : 1
             border.color: "lightgray"
 
@@ -227,7 +227,7 @@ Rectangle {
                     // 小矩形色块
                     Rectangle {
                         id: idrectColorFlag
-                        height: colLayout.implicitHeight - 0
+                        //height: colLayout.implicitHeight - 0
                         Layout.fillHeight: true    // 随列高度变化
                         width: 6
                         radius: 2
@@ -239,134 +239,147 @@ Rectangle {
                         }
                     }
 
-                    ColumnLayout {
-                        id: colLayout
-                        Layout.fillWidth: true      // 占满 RowLayout 剩余宽度
-                        height: parent.height
-                        spacing: 2
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
 
+                        // 高亮背景
                         Rectangle {
-                            height: 1 // 空白高度
-                            color: "transparent"
+                            anchors.fill: parent
+
+                            color: listItem.ListView.isCurrentItem ? "lightblue" : "transparent"
+                            radius: 2
+                            z: -1
                         }
 
-                        // 笔记本标题
-                        Text {
-                            id: item0
-                            Layout.fillWidth: true   // 占满 ColumnLayout 宽度
-                            Layout.alignment: Qt.AlignHCenter
-                            horizontalAlignment: Text.AlignLeft
-                            verticalAlignment: Text.AlignVCenter
-                            wrapMode: TextArea.WordWrap
-                            font.bold: true
-                            text: text0
-                            //text: text0 + " | level:" + level
-                            color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+                        ColumnLayout {
+                            id: colLayout
+                            height: parent.height
+                            width: parent.width          // 关键：显式绑定宽度
+                            spacing: 2
 
-                            leftPadding: 5
-                            rightPadding: 5
-                        }
-
-                        // 不可见
-                        Text {
-                            id: item1
-
-                            text: text1
-
-                            visible: false
-                        }
-
-                        // 不可见
-                        Text {
-                            id: item2
-
-                            text: text2
-
-                            visible: false
-                        }
-
-                        // 求和图标及文本
-                        RowLayout {
-                            id: row3
-                            Layout.margins: rowSpace
-                            visible: item3.text.length ? true : false
-
-                            Image {
-                                id: item3Img
-
-                                width: item3.contentHeight - 5
-                                height: parent.height - 2
-                                fillMode: Image.NoOption
-                                horizontalAlignment: Image.AlignHCenter
-                                verticalAlignment: Image.AlignVCenter
-
-                                smooth: true
-                                sourceSize.height: item3.contentHeight - 5
-                                sourceSize.width: item3.contentHeight - 5
-                                source: "/res/sum.png"
-
-                                visible: item3.text.length ? true : false
+                            Rectangle {
+                                height: 1 // 空白高度
+                                color: "transparent"
                             }
 
+                            // 笔记本标题
                             Text {
-                                id: item3
-                                anchors.rightMargin: 0
-                                width: parent.width
-                                wrapMode: Text.WordWrap
-                                elide: Text.ElideRight
+                                id: item0
+                                Layout.fillWidth: true   // 占满 ColumnLayout 宽度
                                 Layout.alignment: Qt.AlignHCenter
                                 horizontalAlignment: Text.AlignLeft
                                 verticalAlignment: Text.AlignVCenter
-
-                                font.bold: false
-                                font.pointSize: font_size - 2
+                                wrapMode: TextArea.WordWrap
+                                font.bold: true
+                                text: text0
+                                //text: text0 + " | level:" + level
                                 color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-                                text: text3
 
                                 leftPadding: 5
                                 rightPadding: 5
-
-                                visible: item3.text.length ? true : false
                             }
-                        }
 
-                        // 记录色块的值（不可见）
-                        Text {
-                            id: item4
+                            // 不可见
+                            Text {
+                                id: item1
 
-                            text: text4
+                                text: text1
 
-                            visible: false
-                        }
+                                visible: false
+                            }
 
-                        Rectangle {
-                            height: 1 // 空白高度
-                            color: "transparent"
+                            // 不可见
+                            Text {
+                                id: item2
+
+                                text: text2
+
+                                visible: false
+                            }
+
+                            // 求和图标及文本
+                            RowLayout {
+                                id: row3
+                                Layout.margins: rowSpace
+                                visible: item3.text.length ? true : false
+
+                                Image {
+                                    id: item3Img
+
+                                    width: item3.contentHeight - 5
+                                    height: parent.height - 2
+                                    fillMode: Image.NoOption
+                                    horizontalAlignment: Image.AlignHCenter
+                                    verticalAlignment: Image.AlignVCenter
+
+                                    smooth: true
+                                    sourceSize.height: item3.contentHeight - 5
+                                    sourceSize.width: item3.contentHeight - 5
+                                    source: "/res/sum.png"
+
+                                    visible: item3.text.length ? true : false
+                                }
+
+                                Text {
+                                    id: item3
+                                    anchors.rightMargin: 0
+                                    width: parent.width
+                                    wrapMode: Text.WordWrap
+                                    elide: Text.ElideRight
+                                    Layout.alignment: Qt.AlignHCenter
+                                    horizontalAlignment: Text.AlignLeft
+                                    verticalAlignment: Text.AlignVCenter
+
+                                    font.bold: false
+                                    font.pointSize: font_size - 2
+                                    color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+                                    text: text3
+
+                                    leftPadding: 5
+                                    rightPadding: 5
+
+                                    visible: item3.text.length ? true : false
+                                }
+                            }
+
+                            // 记录色块的值（不可见）
+                            Text {
+                                id: item4
+
+                                text: text4
+
+                                visible: false
+                            }
+
+                            Rectangle {
+                                height: 1 // 空白高度
+                                color: "transparent"
+                            }
                         }
                     }
                 }
-            }
 
-            TapHandler {
+                TapHandler {
+                    dragThreshold: 8
 
-                dragThreshold: 8
+                    // 单击 → 和 onClicked 完全一样
+                    onTapped: {
+                        view.currentIndex = index;
+                        m_NotesList.mouseClickNoteBook();
+                    }
 
-                // 单击 → 和 onClicked 完全一样
-                onTapped: {
-                    view.currentIndex = index;
-                    m_NotesList.mouseClickNoteBook();
-                }
+                    // 长按 → 和 onPressAndHold 完全一样
+                    onLongPressed: {
+                        menuTargetIndex = index;
+                        // 在长按位置弹出菜单
+                        notebookMenu.popup();
+                    }
 
-                // 长按 → 和 onPressAndHold 完全一样
-                onLongPressed: {
-                    menuTargetIndex = index;
-                    // 在长按位置弹出菜单
-                    notebookMenu.popup();
-                }
-
-                // 双击 → 和 onDoubleClicked 完全一样
-                onDoubleTapped: {
-                    // mw_one.on_btnRename_clicked()
+                    // 双击 → 和 onDoubleClicked 完全一样
+                    onDoubleTapped: {
+                        // mw_one.on_btnRename_clicked()
+                    }
                 }
             }
         }

@@ -516,9 +516,12 @@ void NotesList::on_actionSetColorFlag() {
 
   QTreeWidgetItem* itemTop;
   QTreeWidgetItem* item = tw->currentItem();
-  if (item->parent() == nullptr) itemTop = item;
-  if (item->parent() != nullptr) itemTop = item->parent();
-  if (item->parent()->parent() != nullptr) itemTop = item->parent()->parent();
+  bool isNoteBook = pNoteBookItems.contains(item);
+  if (!isNoteBook) {
+    itemTop = item->parent();
+  } else
+    itemTop = item;
+
   itemTop->setText(2, color_0);
   setColorFlag(color_0);
   saveNotesList();
