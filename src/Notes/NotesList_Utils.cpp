@@ -489,66 +489,48 @@ void NotesList::resetQML_List() {
     return;
   }
 
-  loadAllNoteBook();
+  int indexNoteBook = getNoteBookCurrentIndex();
+  int indexNote = getNotesListCurrentIndex();
 
-  int index = 0;
-  QTreeWidgetItem* item = tw->currentItem();
-  QTreeWidgetItem* pNoteBook = NULL;
-  QTreeWidgetItem* pNote = NULL;
-  if (item == NULL)
-    index = 0;
-  else {
-    // NoteBook
-    if (item->text(1).isEmpty()) {
-      if (item->parent() == NULL) {
-        index = tw->indexOfTopLevelItem(item);
-        pNoteBook = item;
-      } else {
-        index = tw->indexOfTopLevelItem(item->parent());
-        pNoteBook = item;
-      }
-    }
+  QTreeWidgetItem* pOldNoteBook = nullptr;
+  QTreeWidgetItem* pOldNote = nullptr;
 
-    // Notes
-    if (!item->text(1).isEmpty()) {
-      if (item->parent()->parent() == NULL) {
-        index = tw->indexOfTopLevelItem(item->parent());
-        pNoteBook = item->parent();
-        pNote = item;
-      }
-
-      else {
-        if (item->parent()->parent()->parent() == NULL) {
-          index = tw->indexOfTopLevelItem(item->parent()->parent());
-          pNoteBook = item->parent();
-          pNote = item;
-        }
-      }
-    }
+  // 合法索引才取值，避免 at(-1) 崩溃
+  if (indexNoteBook >= 0 && indexNoteBook < pNoteBookItems.size()) {
+    pOldNoteBook = pNoteBookItems.at(indexNoteBook);
+  }
+  if (indexNote >= 0 && indexNote < pNoteItems.size()) {
+    pOldNote = pNoteItems.at(indexNote);
   }
 
-  int count = m_Method->getCountFromQW(mui->qwNoteBook);
+  loadAllNoteBook();
 
-  for (int i = 0; i < count; i++) {
-    if (pNoteBookItems.at(i) == pNoteBook) {
-      index = i;
+  // 指针匹配，查找新列表中的真实下标
+  int newBookIdx = -1;
+  for (int i = 0; i < pNoteBookItems.size(); ++i) {
+    if (pNoteBookItems[i] == pOldNoteBook) {
+      newBookIdx = i;
       break;
     }
   }
 
-  setNoteBookCurrentIndex(index);
-  clickNoteBook();
+  if (newBookIdx != -1) {
+    setNoteBookCurrentIndex(newBookIdx);
+    clickNoteBook();
+  }
 
-  if (pNote == NULL) {
-    setNotesListCurrentIndex(-1);
-  } else {
-    int countNotes = pNoteItems.count();
-    for (int i = 0; i < countNotes; i++) {
-      if (pNote == pNoteItems.at(i)) {
-        setNotesListCurrentIndex(i);
+  // 匹配笔记下标并恢复
+  int newNoteIdx = -1;
+  if (pOldNote) {
+    for (int i = 0; i < pNoteItems.size(); ++i) {
+      if (pNoteItems[i] == pOldNote) {
+        newNoteIdx = i;
         break;
       }
     }
+  }
+  if (newNoteIdx != -1) {
+    setNotesListCurrentIndex(newNoteIdx);
   }
 }
 
@@ -592,8 +574,6 @@ void NotesList::setTWCurrentItem() {
   index1 = getNotesListCurrentIndex();
   if (index0 >= 0) tw->setCurrentItem(pNoteBookItems.at(index0));
   if (index1 >= 0) tw->setCurrentItem(pNoteItems.at(index1));
-
-  tw->scrollToItem(tw->currentItem());
 }
 
 void NotesList::setNoteBookCurrentItem() {

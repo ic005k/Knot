@@ -129,26 +129,25 @@ void NotesList::renameCurrentItem(QString title) {
   if (item == NULL) return;
 
   item->setText(0, title.trimmed());
-  if (item->parent() != NULL && !item->text(1).isEmpty()) {
-    setNoteName(item->text(0));
 
-    m_Notes->m_NoteIndexManager->setNoteTitle(iniDir + item->text(1),
-                                              item->text(0));
-    m_Notes->m_NoteIndexManager->saveIndex(strNoteNameIndexFile);
+  setNoteName(item->text(0));
 
-    for (int i = 0; i < listRecentOpen.count(); i++) {
-      QString str = listRecentOpen.at(i);
-      if (str.split("===").at(1) == item->text(1)) {
-        QString newStr = item->text(0) + "===" + item->text(1);
-        listRecentOpen.removeAt(i);
-        listRecentOpen.insert(i, newStr);
-        saveRecentOpen();
-        break;
-      }
+  m_Notes->m_NoteIndexManager->setNoteTitle(iniDir + item->text(1),
+                                            item->text(0));
+  m_Notes->m_NoteIndexManager->saveIndex(strNoteNameIndexFile);
+
+  for (int i = 0; i < listRecentOpen.count(); i++) {
+    QString str = listRecentOpen.at(i);
+    if (str.split("===").at(1) == item->text(1)) {
+      QString newStr = item->text(0) + "===" + item->text(1);
+      listRecentOpen.removeAt(i);
+      listRecentOpen.insert(i, newStr);
+      saveRecentOpen();
+      break;
     }
   }
 
-  // resetQML_List();
+  resetQML_List();
 }
 
 void NotesList::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }

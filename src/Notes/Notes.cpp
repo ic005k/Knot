@@ -170,6 +170,8 @@ void Notes::closeEvent(QCloseEvent* event) {
     TitleGenerator generator;
     new_title = generator.genNewTitle(newText);
     renameTitle(true);
+
+    qDebug() << "开始重命名笔记";
   }
 }
 

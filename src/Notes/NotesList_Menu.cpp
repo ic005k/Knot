@@ -127,46 +127,32 @@ void NotesList::on_actionAdd_Note_triggered() {
   QTreeWidgetItem* parentitem = tw->currentItem();
 
   QTreeWidgetItem* item1 = new QTreeWidgetItem(parentitem);
-  item1->setText(0, "");
+  item1->setText(0, tr("Untitled Note"));
   item1->setText(1, noteFile);
-  item1->setIcon(0, QIcon(":/res/n.png"));
 
-  QTextEdit* edit = new QTextEdit();
-  edit->append("");
-  TextEditToFile(edit, iniDir + noteFile);
-  delete edit;
+  QTextEdit edit;
+  edit.append("");
+  TextEditToFile(&edit, iniDir + noteFile);
+
+  pNoteItems.append(item1);
 
   tw->setCurrentItem(item1);
   noteName = item1->text(0);
 
-  pNoteItems.clear();
-  int count1 = parentitem->childCount();
-  for (int i = 0; i < count1; i++) {
-    pNoteItems.append(parentitem->child(i));
-  }
-
-  QTreeWidgetItem* childItem = tw->currentItem();
-  QString text3 = childItem->text(1);
-  m_Method->addItemToQW(mui->qwNoteList, "", "", "", text3, 0);
+  m_Method->addItemToQW(mui->qwNoteList, noteName, "", "", noteFile, 0);
 
   int count = getNotesListCount();
   setNotesListCurrentIndex(count - 1);
 
   clickNoteList();
   m_Notes->updateMDFileToSyncLists();
-  mw_one->on_btnEditNote_pressed();
 
   setNoteLabel();
 
-  renameCurrentItem(tr("Untitled Note"));
   saveNotesList();
   updateAllNoteIndexManager();
 
-  QTimer::singleShot(100, this, [this]() {
-    clickNoteBook();
-    int count = getNotesListCount();
-    setNotesListCurrentIndex(count - 1);
-  });
+  mw_one->on_btnEditNote_pressed();
 }
 
 void NotesList::on_actionDel_Note_triggered() {
@@ -664,9 +650,8 @@ void NotesList::slotCreateSubNotebook(int qmlIndex) {
   // 4. 在当前笔记本下 创建子笔记本
   QTreeWidgetItem* newItem = new QTreeWidgetItem(parentItem);
   newItem->setText(0, name.trimmed());
-  newItem->setText(2, "#FF0000");
+  newItem->setText(2, "#e5e1e1");
   newItem->setForeground(0, Qt::red);
-  newItem->setIcon(0, QIcon(":/res/nb.png"));
 
   // 展开父节点，保证能看到新建的子笔记本
   parentItem->setExpanded(true);

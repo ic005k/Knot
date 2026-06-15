@@ -201,33 +201,34 @@ Rectangle {
 
         Rectangle {
             id: listItem
-            //width: ListView.view.width
             implicitWidth: ListView.view.width
-
-            height: colLayout.implicitHeight + 0
+            implicitHeight: colLayout.implicitHeight
             color: ListView.isCurrentItem ? "lightblue" : getColor()
-
             border.width: isDark ? 0 : 1
             border.color: "lightgray"
 
             radius: 2
 
+            // 缩进块
             Item {
+                id: m_item
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-                x: level * 18
-                Layout.maximumWidth: parent.width - x - 16
+                Layout.fillHeight: true
+
+                x: level * 15
+                width: parent.width - x - 10
 
                 RowLayout {
                     id: idlistRow
-
-                    width: parent.width
+                    anchors.fill: parent          // 关键：填满 m_item
                     spacing: 2
-                    Layout.fillWidth: true
 
+                    // 小矩形色块
                     Rectangle {
                         id: idrectColorFlag
                         height: colLayout.implicitHeight - 0
+                        Layout.fillHeight: true    // 随列高度变化
                         width: 6
                         radius: 2
                         anchors.leftMargin: 1
@@ -240,96 +241,51 @@ Rectangle {
 
                     ColumnLayout {
                         id: colLayout
+                        Layout.fillWidth: true      // 占满 RowLayout 剩余宽度
                         height: parent.height
-                        Layout.maximumWidth: parent.Layout.maximumWidth
                         spacing: 2
-                        Layout.fillWidth: true
-                        anchors.leftMargin: 0
-                        anchors.rightMargin: 0
 
                         Rectangle {
                             height: 1 // 空白高度
                             color: "transparent"
                         }
 
-                        RowLayout {
-                            id: row0
-
-                            Image {
-                                id: item0Img
-
-                                width: iconW
-                                height: item0.contentHeight
-                                fillMode: Image.NoOption
-                                horizontalAlignment: Image.AlignHCenter
-                                verticalAlignment: Image.AlignVCenter
-
-                                smooth: true
-                                sourceSize.height: iconW
-                                sourceSize.width: iconW
-                                source: "/res/time.svg"
-
-                                visible: false
-                            }
-
-                            Text {
-                                id: item0
-
-                                width: parent.width
-                                Layout.preferredWidth: listItem.width - 0
-                                Layout.alignment: Qt.AlignHCenter
-                                horizontalAlignment: Text.AlignLeft
-                                verticalAlignment: Text.AlignVCenter
-                                wrapMode: TextArea.WordWrap
-                                font.bold: true
-                                text: text0
-                                //text: text0 + " | level:" + level
-                                color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-
-                                leftPadding: 5
-                                rightPadding: 5
-                            }
-                        }
-
+                        // 笔记本标题
                         Text {
-                            id: item1
-                            Layout.preferredWidth: listItem.width
-
+                            id: item0
+                            Layout.fillWidth: true   // 占满 ColumnLayout 宽度
                             Layout.alignment: Qt.AlignHCenter
                             horizontalAlignment: Text.AlignLeft
                             verticalAlignment: Text.AlignVCenter
-
-                            width: parent.width
                             wrapMode: TextArea.WordWrap
+                            font.bold: true
+                            text: text0
+                            //text: text0 + " | level:" + level
                             color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-                            font.bold: false
+
+                            leftPadding: 5
+                            rightPadding: 5
+                        }
+
+                        // 不可见
+                        Text {
+                            id: item1
+
                             text: text1
 
-                            leftPadding: 5
-                            rightPadding: 5
-
                             visible: false
                         }
 
+                        // 不可见
                         Text {
                             id: item2
-                            anchors.rightMargin: 0
-                            Layout.preferredWidth: listItem.width
-                            Layout.alignment: Qt.AlignHCenter
 
-                            horizontalAlignment: Text.AlignLeft
-                            width: parent.width
-                            wrapMode: TextArea.WordWrap
-                            font.bold: false
                             text: text2
-                            color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-
-                            leftPadding: 5
-                            rightPadding: 5
 
                             visible: false
                         }
 
+                        // 求和图标及文本
                         RowLayout {
                             id: row3
                             Layout.margins: rowSpace
@@ -362,8 +318,6 @@ Rectangle {
                                 horizontalAlignment: Text.AlignLeft
                                 verticalAlignment: Text.AlignVCenter
 
-                                Layout.preferredWidth: listItem.width
-
                                 font.bold: false
                                 font.pointSize: font_size - 2
                                 color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
@@ -376,64 +330,22 @@ Rectangle {
                             }
                         }
 
-                        // top color flag value
+                        // 记录色块的值（不可见）
                         Text {
                             id: item4
-                            anchors.rightMargin: 0
-                            Layout.preferredWidth: listItem.width
-                            Layout.alignment: Qt.AlignHCenter
 
-                            horizontalAlignment: Text.AlignLeft
-                            width: parent.width
-                            wrapMode: TextArea.WordWrap
-                            font.bold: false
                             text: text4
-                            color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
-
-                            leftPadding: 5
-                            rightPadding: 5
 
                             visible: false
                         }
 
                         Rectangle {
-                            width: view.width
                             height: 1 // 空白高度
                             color: "transparent"
                         }
                     }
                 }
             }
-
-            /*MouseArea {
-
-                property point clickPos: "0,0"
-
-                anchors.fill: parent
-                onPressed: function (mouse) {
-                    clickPos = Qt.point(mouse.x, mouse.y)
-                }
-                onReleased: function (mouse) {
-                    var delta = Qt.point(mouse.x - clickPos.x,
-                                         mouse.y - clickPos.y)
-                }
-
-                onClicked: {
-
-                    view.currentIndex = index //实现item切换
-
-                    m_NotesList.mouseClickNoteBook()
-                }
-
-                onPressAndHold: {
-
-                }
-
-                onDoubleClicked: {
-
-                    // mw_one.on_btnRename_clicked()
-                }
-            }*/
 
             TapHandler {
 
@@ -476,6 +388,7 @@ Rectangle {
         delegate: dragDelegate
 
         spacing: 4
+
         cacheBuffer: 50
 
         // 滚动条
@@ -488,8 +401,7 @@ Rectangle {
     // 全局右键/长按菜单
     // 记录当前长按的条目索引
     property int menuTargetIndex: -1
-    // 定义信号，供 C++ 连接
-    signal reqCreateSubNotebook(int targetIndex)
+
     Menu {
         id: notebookMenu
         modal: true

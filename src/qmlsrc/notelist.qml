@@ -196,35 +196,6 @@ Rectangle {
 
             radius: 2
 
-            /*MouseArea {
-
-                property point clickPos: "0,0"
-
-                anchors.fill: parent
-
-                onPressed: function (mouse) {
-                    clickPos = Qt.point(mouse.x, mouse.y);
-                }
-                onReleased: function (mouse) {
-                    var delta = Qt.point(mouse.x - clickPos.x, mouse.y - clickPos.y);
-                }
-
-                onClicked: function (mouse) {
-                    view.currentIndex = index; //实现item切换
-
-                    for (i = 0; i < view.count; i++) {}
-
-                    m_NotesList.clickNoteList();
-                }
-
-                onPressAndHold: {}
-
-                onDoubleClicked: {
-
-                    // mw_one.on_btnRename_clicked()
-                }
-            }*/
-
             TapHandler {
                 dragThreshold: 6
 
