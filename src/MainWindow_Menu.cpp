@@ -31,7 +31,7 @@ void MainWindow::on_actionAbout() {
 
 void MainWindow::on_actionFind_triggered() { on_btnFind_pressed(); }
 
-void MainWindow::on_actionAdd_Tab_triggered() {
+/*void MainWindow::on_actionAdd_Tab_triggered() {
   int count = mui->tabWidget->tabBar()->count();
   QString defaultTabName = tr("Tab") + " " + QString::number(count + 1);
 
@@ -72,6 +72,38 @@ void MainWindow::on_actionAdd_Tab_triggered() {
     saveTab();
     strLatestModify = tr("Add Tab") + " ( " + customTabText + " ) ";
   }
+}*/
+
+void MainWindow::on_actionAdd_Tab_triggered() {
+  int count = mui->tabWidget->tabBar()->count();
+  QString defaultTabName = tr("Tab") + " " + QString::number(count + 1);
+
+  // 直接调用全局封装的输入框
+  QInputDialog* dlg = m_Method->inputDialog(
+      tr("New Tab"), tr("Please enter tab name:"), defaultTabName);
+  dlg->setOkButtonText(tr("Done"));
+
+  connect(dlg, &QDialog::accepted, this, [=]() {
+    QString customTabText = dlg->textValue().trimmed();
+    dlg->deleteLater();
+    if (customTabText.isEmpty()) return;
+
+    // 创建标签页逻辑不变
+    QString twName =
+        m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
+    QTreeWidget* tw = init_TreeWidget(twName);
+
+    mui->tabWidget->addTab(tw, customTabText);
+    mui->tabWidget->setCurrentIndex(count);
+    addItem(customTabText, "", "", "", 0);
+    setCurrentIndex(count);
+
+    reloadMain();
+    saveTab();
+    strLatestModify = tr("Add Tab") + " ( " + customTabText + " ) ";
+  });
+
+  connect(dlg, &QDialog::rejected, this, [=]() { dlg->deleteLater(); });
 }
 
 void MainWindow::on_actionDel_Tab_triggered() {

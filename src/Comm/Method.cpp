@@ -134,13 +134,13 @@ QInputDialog* Method::inputDialog(QString windowsTitle, QString lblEdit,
           border: none;
       }
       QLabel {
-          font-size: 16px;
+
           color: #E5E5E5;
           padding-left: 4px;
       }
       QLineEdit {
           min-height: 46px;
-          font-size: 16px;
+
           border: 1px solid #444444;
           border-radius: 8px;
           padding-left: 10px;
@@ -154,7 +154,7 @@ QInputDialog* Method::inputDialog(QString windowsTitle, QString lblEdit,
       QPushButton {
           min-height: 44px;
           min-width: 80px;
-          font-size: 16px;
+
           border-radius: 8px;
       }
       )";
@@ -166,13 +166,13 @@ QInputDialog* Method::inputDialog(QString windowsTitle, QString lblEdit,
           border: none;
       }
       QLabel {
-          font-size: 16px;
+
           color: #333333;
           padding-left: 4px;
       }
       QLineEdit {
           min-height: 46px;
-          font-size: 16px;
+
           border: 1px solid #dcdcdc;
           border-radius: 8px;
           padding-left: 10px;
@@ -186,7 +186,7 @@ QInputDialog* Method::inputDialog(QString windowsTitle, QString lblEdit,
       QPushButton {
           min-height: 44px;
           min-width: 80px;
-          font-size: 16px;
+
           border-radius: 8px;
       }
       )";
@@ -213,7 +213,7 @@ QInputDialog* Method::inputDialog(QString windowsTitle, QString lblEdit,
   int dlgH = idlg->height();
   int x = mainRect.x() + (mainRect.width() - dlgW) / 2;
   int y = mainRect.y() + (mainRect.height() - dlgH) / 2;
-  idlg->setGeometry(x, y, dlgW, dlgH);
+  idlg->setGeometry(x, y - 80, dlgW, dlgH);
   idlg->setFixedSize(idlg->size());
 
   idlg->show();
