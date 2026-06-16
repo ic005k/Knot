@@ -1385,7 +1385,40 @@ void MainWindow::onAndroidBackHandle() {
 
 void MainWindow::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
   if (setMyStyle) {
-    btn->setStyleSheet("border:none; background:transparent;");
+    // 根据明暗主题区分tooltip样式
+    QString tipStyle;
+    if (isDark) {
+      tipStyle = R"(
+        QToolTip {
+            background-color: #2b2b2b;
+            color: #f0f0f0;
+            border: 1px solid #555555;
+            padding: 4px;
+        }
+        )";
+    } else {
+      tipStyle = R"(
+        QToolTip {
+            background-color: white;
+            color: black;
+            border: 1px solid #aaa;
+            padding: 4px;
+        }
+        )";
+    }
+
+    // 拼接按钮基础样式 + 动态tooltip样式，存入变量sheet
+    QString sheet = QString(R"(
+        QToolButton {
+            border: none;
+            background: transparent;
+        }
+        %1
+    )")
+                        .arg(tipStyle);
+
+    // 把拼接好的完整样式赋值给按钮
+    btn->setStyleSheet(sheet);
   }
 
   if (btn->property("__anim_installed").toBool()) return;
@@ -1434,3 +1467,104 @@ void MainWindow::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
   ButtonAnimFilter* filter = new ButtonAnimFilter(btn);
   btn->installEventFilter(filter);
 }
+
+// 备用：图标放大、缩小版
+/*void MainWindow::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
+  if (setMyStyle) {
+    // 根据明暗主题区分tooltip样式
+    QString tipStyle;
+    if (isDark) {
+      tipStyle = R"(
+        QToolTip {
+            background-color: #2b2b2b;
+            color: #f0f0f0;
+            border: 1px solid #555555;
+            padding: 4px;
+        }
+        )";
+    } else {
+      tipStyle = R"(
+        QToolTip {
+            background-color: white;
+            color: black;
+            border: 1px solid #aaa;
+            padding: 4px;
+        }
+        )";
+    }
+
+    // 拼接按钮基础样式 + 动态tooltip样式，存入变量sheet
+    QString sheet = QString(R"(
+        QToolButton {
+            border: none;
+            background: transparent;
+        }
+        %1
+    )")
+                        .arg(tipStyle);
+
+    // 把拼接好的完整样式赋值给按钮
+    btn->setStyleSheet(sheet);
+  }
+
+  QSize originalSize = btn->iconSize();
+
+  // 防止重复安装
+  if (btn->property("__anim_installed").toBool()) {
+    return;
+  }
+  btn->setProperty("__anim_installed", true);
+
+  // ================================
+  // 核心：给按钮安装事件过滤器
+  // ================================
+  class ButtonAnimFilter : public QObject {
+   public:
+    QSize originalSize;
+    explicit ButtonAnimFilter(QObject* parent = nullptr) : QObject(parent) {}
+
+    bool eventFilter(QObject* obj, QEvent* event) override {
+      QToolButton* btn = qobject_cast<QToolButton*>(obj);
+      if (!btn) return false;
+
+      // 拦截 鼠标左键按下
+      if (event->type() == QEvent::MouseButtonPress) {
+        QMouseEvent* me = static_cast<QMouseEvent*>(event);
+        if (me->button() == Qt::LeftButton) {
+          // 1. 立即播放缩小动画（必现反馈）
+          btn->setIconSize(originalSize);
+          QPropertyAnimation* anim =
+              new QPropertyAnimation(btn, "iconSize", btn);
+          anim->setDuration(100);
+          anim->setStartValue(originalSize);
+          anim->setEndValue(originalSize * 0.9);
+
+          // 2. 动画结束 → 恢复大小 → 手动触发 pressed 业务
+          connect(anim, &QPropertyAnimation::finished, btn, [=]() {
+            btn->setIconSize(originalSize);
+            // 关键：动画完成后才触发业务
+            emit btn->pressed();
+          });
+
+          anim->start(QAbstractAnimation::DeleteWhenStopped);
+
+          // 拦截原生事件，不让按钮自己触发 pressed
+          return true;
+        }
+      }
+
+      return false;
+    }
+  };
+
+  // 创建过滤器并绑定到按钮
+  ButtonAnimFilter* filter = new ButtonAnimFilter(btn);
+  filter->originalSize = originalSize;
+  btn->installEventFilter(filter);
+
+  // ================================
+  // 安卓兜底：防止按钮卡住不回弹
+  // ================================
+  connect(btn, &QToolButton::released, this,
+          [=]() { btn->setIconSize(originalSize); });
+}*/

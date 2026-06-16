@@ -88,8 +88,6 @@ class MainHelper : public QDialog {
   void sort_childItem(QTreeWidgetItem* item);
   void on_AddRecord();
 
-  void setToolButtonAnimation_iconsize(QToolButton* btn, bool setMyStyle);
-
   QString clickableLabelButtonStyle = R"(
         /* 模拟按钮样式：中蓝底+白字，适配明暗主题 */
         QLabel {
