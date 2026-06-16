@@ -1090,9 +1090,11 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
   clickNoteBook();
 
   while (!isReadyNotesEnd) {
-    QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     QThread::msleep(1);
   }
+
+  m_Method->Sleep(50);
 
   countNote = m_Method->getCountFromQW(mui->qwNoteList);
   if (indexNote >= countNote) return false;

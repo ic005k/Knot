@@ -1387,8 +1387,9 @@ void MainWindow::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
   if (setMyStyle) {
     // 根据明暗主题区分tooltip样式
     QString tipStyle;
-    if (isDark) {
-      tipStyle = R"(
+    if (!isAndroid) {
+      if (isDark) {
+        tipStyle = R"(
         QToolTip {
             background-color: #2b2b2b;
             color: #f0f0f0;
@@ -1396,8 +1397,8 @@ void MainWindow::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
             padding: 4px;
         }
         )";
-    } else {
-      tipStyle = R"(
+      } else {
+        tipStyle = R"(
         QToolTip {
             background-color: white;
             color: black;
@@ -1405,6 +1406,7 @@ void MainWindow::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
             padding: 4px;
         }
         )";
+      }
     }
 
     // 拼接按钮基础样式 + 动态tooltip样式，存入变量sheet
