@@ -265,12 +265,9 @@ void NotesList::show_NoteBookPopMenu(int qmlIndex) {
   mainMenu->setStyleSheet(m_Method->qssMenu);
 
   QPoint pos(mw_one->geometry().x() + mui->qwNoteBook->geometry().x() + 2,
-             mw_one->geometry().y() + 2);
+             mw_one->geometry().y() + 45);
 
-  QPoint clickPos = QCursor::pos();
-  QPoint menuPos = clickPos - QPoint(0, 40);
-
-  mainMenu->exec(menuPos);
+  mainMenu->exec(pos);
 }
 
 void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
