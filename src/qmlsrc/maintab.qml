@@ -13,9 +13,10 @@ Rectangle {
     property bool isHighPriority: false
     property int maintabHeight: 50
 
+    property real margin: 5   // 左右边距
     readonly property int columns: 3
     readonly property real spacing: 8
-    readonly property real cardWidth: (width - spacing * (columns)) / columns
+    readonly property real cardWidth: (width - margin * 2 - spacing * (columns - 1)) / columns
 
     function setItemHeight(h) {
     }
@@ -126,10 +127,12 @@ Rectangle {
     Component {
         id: gridDelegate
         Rectangle {
-            width: cardWidth
+            width: grid.cellWidth - spacing   // 卡片宽度 = 单元格宽度 - 间距
             height: grid.cellHeight - 10
             radius: 10
             clip: false
+
+            x: (grid.cellWidth - width) / 2
 
             // 缩放
             property real scaleFactor: tap.pressed ? 0.95 : 1.0
@@ -191,9 +194,12 @@ Rectangle {
         anchors.fill: parent
         model: listmain
         delegate: gridDelegate
-        cellWidth: cardWidth + spacing
+        cellWidth: (width - leftMargin - rightMargin) / columns
         cellHeight: 85
         clip: false
+
+        leftMargin: margin
+        rightMargin: margin
 
         // 👇 Lineage 必加，触摸丝滑
         flickableDirection: Flickable.VerticalFlick
@@ -203,6 +209,7 @@ Rectangle {
         ScrollBar.vertical: ScrollBar {
             width: 8
             policy: ScrollBar.AsNeeded
+            z: 1  // 置于顶层
         }
     }
 
