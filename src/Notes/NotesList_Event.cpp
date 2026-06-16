@@ -835,29 +835,6 @@ void NotesList::on_btnRename_clicked() {
   m_RenameNotes->show();
 }
 
-/*void NotesList::clickNoteBook() {
-  int count = m_Method->getCountFromQW(mui->qwNoteBook);
-  if (count <= 0) return;
-
-  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
-  if (index < 0) return;
-
-  mui->lblNoteBook->setText(QString::number(index + 1) + "/" +
-                            QString::number(count));
-
-  pNoteItems.clear();
-  isActColorFlagStatus = true;
-
-  QString text1 = m_Method->getText1(mui->qwNoteBook, index);
-  QString text2 = m_Method->getText2(mui->qwNoteBook, index);
-  if (text2.isEmpty()) {
-    int index_top = text1.toInt();
-    QTreeWidgetItem* topItem = tw->topLevelItem(index_top);
-
-    readyNotesData(topItem);
-  }
-}*/
-
 void NotesList::clickNoteBook() {
   int count = m_Method->getCountFromQW(mui->qwNoteBook);
   if (count <= 0) return;

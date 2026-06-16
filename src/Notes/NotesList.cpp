@@ -859,6 +859,7 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
     noteModel->replaceAll({});  // 清空笔记列表
     pNoteItems.clear();
     setNoteLabel();
+    isReadyNotesEnd = true;
     return;
   }
 
@@ -963,6 +964,8 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
     }
 
     watcher->deleteLater();
+
+    isReadyNotesEnd = true;
   });
   watcher->setFuture(future);
 }
@@ -1074,18 +1077,27 @@ void NotesList::updateAllNoteIndexManager() {
 bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
   if (!QFile::exists(mdFile)) return false;
 
-  int indexNoteBook, indexNote, countNoteBook;
+  int indexNoteBook, indexNote, countNoteBook, countNote;
   indexNoteBook = m_Notes->m_NoteIndexManager->getNotebookIndex(mdFile);
   indexNote = m_Notes->m_NoteIndexManager->getNoteIndex(mdFile);
   countNoteBook = m_Method->getCountFromQW(mui->qwNoteBook);
 
-  if (indexNoteBook < 0) return false;
+  if (indexNoteBook < 0 || indexNote < 0) return false;
   if (indexNoteBook >= countNoteBook) return false;
 
   setNoteBookCurrentIndex(indexNoteBook);
-  setNotesListCurrentIndex(indexNote);
-
+  isReadyNotesEnd = false;
   clickNoteBook();
+
+  while (!isReadyNotesEnd) {
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
+    QThread::msleep(1);
+  }
+
+  countNote = m_Method->getCountFromQW(mui->qwNoteList);
+  if (indexNote >= countNote) return false;
+  setNotesListCurrentIndex(indexNote);
+  clickNoteList();
 
   qDebug() << "已切换笔记本，等待加载完成后自动定位笔记：" << mdFile
            << indexNoteBook << indexNote;
