@@ -220,8 +220,8 @@ void NotesList::navigateFindResult(int step) {
   if (list.size() >= 3) {  // 确保分割后有足够的元素
     QString md_file = list.at(0);
     mui->lblShowLineSn->setText(list.at(2));
+    currentMDFile = md_file;
     setCurrentItemFromMDFile(md_file);
-    clickNoteList();
   }
 
   // 更新计数标签

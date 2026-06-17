@@ -158,12 +158,20 @@ void NotesList::saveNotesList() {
 
   m_isSaving = true;
 
-  QFuture<void> future = QtConcurrent::run([=]() {
+  /*QFuture<void> future = QtConcurrent::run([=]() {
     // 【全局互斥锁】同一时间只能有一个线程执行保存
     QMutexLocker locker(&m_saveMutex);
 
     // 保存函数
     saveNotesListToFile();
+  });*/
+
+  QPointer<NotesList> self(this);
+  QFuture<void> future = QtConcurrent::run([self]() {
+    // 对象已销毁则直接返回
+    if (!self) return;
+    QMutexLocker locker(&self->m_saveMutex);
+    self->saveNotesListToFile();
   });
 
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
@@ -284,6 +292,8 @@ void NotesList::saveNotesListToFile() {
 void NotesList::loadSubNotebook(const QJsonObject& bookObj,
                                 QTreeWidgetItem* parentItem, int parentRow,
                                 int& totalNotes) {
+  Q_UNUSED(parentRow);
+
   if (bookObj.isEmpty() || !parentItem) return;
 
   // 创建子笔记本节点，保留原有UI样式
@@ -926,7 +936,7 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
 
     QList<NoteItem> batchItems;
     batchItems.reserve(rawResults.size());
-    for (const auto& result : rawResults) {
+    foreach (const auto& result, rawResults) {
       NoteItem item;
       item.text0 = result.text0;
       item.text1 = result.text1;
@@ -953,6 +963,8 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
       isImportNotes = false;
     }
 
+    QString findMDFile = currentMDFile;
+
     setNoteLabel();
     clickNoteList();
 
@@ -965,7 +977,15 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
 
     watcher->deleteLater();
 
-    isReadyNotesEnd = true;
+    if (isReadyNotesEnd == false) {
+      isReadyNotesEnd = true;
+      int indexNote = m_Notes->m_NoteIndexManager->getNoteIndex(findMDFile);
+      int countNote = m_Method->getCountFromQW(mui->qwNoteList);
+      if (indexNote < countNote && indexNote >= 0) {
+        setNotesListCurrentIndex(indexNote);
+        clickNoteList();
+      }
+    }
   });
   watcher->setFuture(future);
 }
@@ -1077,7 +1097,7 @@ void NotesList::updateAllNoteIndexManager() {
 bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
   if (!QFile::exists(mdFile)) return false;
 
-  int indexNoteBook, indexNote, countNoteBook, countNote;
+  int indexNoteBook, indexNote, countNoteBook;
   indexNoteBook = m_Notes->m_NoteIndexManager->getNotebookIndex(mdFile);
   indexNote = m_Notes->m_NoteIndexManager->getNoteIndex(mdFile);
   countNoteBook = m_Method->getCountFromQW(mui->qwNoteBook);
@@ -1088,19 +1108,6 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
   setNoteBookCurrentIndex(indexNoteBook);
   isReadyNotesEnd = false;
   clickNoteBook();
-
-  while (!isReadyNotesEnd) {
-    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-    QThread::msleep(1);
-  }
-
-  m_Method->Sleep(50);
-
-  countNote = m_Method->getCountFromQW(mui->qwNoteList);
-  if (indexNote >= countNote) return false;
-
-  setNotesListCurrentIndex(indexNote);
-  clickNoteList();
 
   qDebug() << "已切换笔记本，等待加载完成后自动定位笔记：" << mdFile
            << indexNoteBook << indexNote;
