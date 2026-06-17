@@ -94,16 +94,6 @@ Rectangle {
         return data.type;
     }
 
-    /*function addItem(t0, t1, t2, t3, t4, f_size) {
-        view.model.append({
-            "text0": t0,
-            "text1": t1,
-            "text2": t2,
-            "text3": t3,
-            "text4": t4,
-            "font_size": f_size
-        });
-    }*/
     function addItem(t0, t1, t2, t3, t4, f_size, lvl = 0, pIdx = -1, expand = true) {
         view.model.append({
             "text0": t0,
@@ -279,6 +269,7 @@ Rectangle {
                                 //text: text0 + " | level:" + level
                                 color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
 
+                                topPadding: 5
                                 leftPadding: 5
                                 rightPadding: 5
                             }

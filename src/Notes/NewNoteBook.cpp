@@ -34,7 +34,10 @@ NewNoteBook::~NewNoteBook() { delete ui; }
 
 void NewNoteBook::showDialog() {
   int x, y, w, h;
-  w = mw_one->width() - 20;
+  if (isAndroid)
+    w = mw_one->width() - 20;
+  else
+    w = 320;
   h = 200;
   x = mw_one->geometry().x() + (mw_one->width() - w) / 2;
   y = mw_one->geometry().y() + (mw_one->height() - h) / 2;
