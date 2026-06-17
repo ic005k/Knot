@@ -825,6 +825,7 @@ void Notes::loadNotesToUI() {
       m_NotesList->setNoteBookCurrentIndex(0);
       m_NotesList->clickNoteBook();
     }
+
     m_NotesList->setNoteLabel();
   }
 

@@ -1098,6 +1098,7 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
 
   countNote = m_Method->getCountFromQW(mui->qwNoteList);
   if (indexNote >= countNote) return false;
+
   setNotesListCurrentIndex(indexNote);
   clickNoteList();
 
