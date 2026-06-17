@@ -114,7 +114,7 @@ void NotesList::startFind(QString strFind) {
   findCount = -1;
 
   // ========== 如果已有任务，必须先安全停止 ==========
-  if (watcher) {
+  if (watcher != nullptr) {
     // 取消旧任务
     watcher->cancel();
     // 等待旧任务真正结束（防止异步对象被提前销毁）
@@ -133,6 +133,67 @@ void NotesList::startFind(QString strFind) {
   // 启动新任务
   auto future = performSearchAsync(directory, keyword);
   watcher->setFuture(future);
+}
+
+void NotesList::onSearchFinished() {
+  if (!watcher) return;
+
+  // ▶️ 正式获取结果
+  const ResultsMap results = watcher->result();
+
+  // ▶️ 数据安全检查
+  if (results.isEmpty()) {
+    mw_one->closeProgress();
+    searchResultList.clear();
+    mui->btnFindNextNote->setEnabled(false);
+    mui->btnFindPreviousNote->setEnabled(false);
+    mui->lblShowLineSn->setText("0");
+    mui->lblFindNoteCount->setText("0");
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg("Knot", tr("No match was found."), 1);
+
+    return;
+  }
+
+  m_Method->clearAllBakList(mui->qwNotesSearchResult);
+
+  // ▶️ 处理搜索结果
+
+  for (auto it = results.constBegin(); it != results.constEnd(); ++it) {
+    const QString& filePath = it.key();
+    const QList<int> lines = it.value().lineNumbers;
+
+    if (!isAndroid) {
+      qDebug() << "文件：" << it.key();
+      qDebug() << "匹配行号：" << it.value().lineNumbers;
+    }
+
+    QString strLineSn;
+    int linesCount = lines.count();
+    for (int i = 0; i < linesCount; i++) {
+      strLineSn = strLineSn + " " + QString::number(lines.at(i));
+    }
+    strLineSn = strLineSn.trimmed();
+
+    if (!recycleNotesList.contains(filePath))
+      searchResultList.append(filePath + "-==-" + strLineSn + "-==-" +
+                              QString::number(linesCount));
+  }
+
+  if (searchResultList.count() > 0) {
+    mui->btnFindNextNote->setEnabled(true);
+    mui->btnFindPreviousNote->setEnabled(true);
+    mui->lblFindNoteCount->setText(QString::number(searchResultList.count()));
+
+    goNext();
+  }
+
+  if (watcher) {
+    watcher->deleteLater();
+    watcher = nullptr;
+  }
+
+  mw_one->closeProgress();
 }
 
 // 通用导航函数：step 为 -1 表示上一个，1 表示下一个

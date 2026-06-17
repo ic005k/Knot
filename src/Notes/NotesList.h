@@ -338,7 +338,7 @@ class NotesList : public QDialog {
 
   bool moveItem(QTreeWidget* tw);
 
-  QFutureWatcher<ResultsMap>* watcher;
+  QFutureWatcher<ResultsMap>* watcher = nullptr;
 
   QDateTime m_lastIndexTime;  // 记录最后一次索引构建时间
   QMutex m_indexTimeMutex;    // 互斥锁
