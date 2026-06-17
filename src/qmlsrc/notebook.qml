@@ -20,77 +20,78 @@ Rectangle {
     property bool isHighPriority: false
 
     function setScrollBarPos(pos) {
-        view.ScrollBar.vertical.position = 1.0 - view.ScrollBar.vertical.size;
+        view.ScrollBar.vertical.position = 1.0 - view.ScrollBar.vertical.size
     }
 
-    function setItemHeight(h) {
-    }
+    function setItemHeight(h) {}
 
     function gotoEnd() {
-        view.positionViewAtEnd();
+        view.positionViewAtEnd()
     }
 
     function gotoBeginning() {
-        view.positionViewAtBeginning();
+        view.positionViewAtBeginning()
     }
 
     function gotoIndex(index) {
-        view.positionViewAtIndex(index, Tumbler.Center);
+        view.positionViewAtIndex(index, Tumbler.Center)
     }
 
     function setHighPriority(isFalse) {
-        isHighPriority = isFalse;
+        isHighPriority = isFalse
     }
 
     function setCurrentItem(currentIndex) {
-        view.currentIndex = currentIndex;
-        view.positionViewAtIndex(currentIndex, ListView.Beginning);
+        view.currentIndex = currentIndex
+        view.positionViewAtIndex(currentIndex, ListView.Beginning)
+        //view.positionViewAtIndex(currentIndex, ListView.Center);
     }
 
     function getCurrentIndex() {
-        return view.currentIndex;
+        return view.currentIndex
     }
 
     function getItemCount() {
-        itemCount = view.count;
+        itemCount = view.count
 
-        return itemCount;
+        return itemCount
     }
 
     function getItemText(itemIndex) {
-        var data = view.model.get(itemIndex);
-        return data.time + "|=|" + data.dototext;
+        var data = view.model.get(itemIndex)
+        return data.time + "|=|" + data.dototext
     }
 
     function getText0(itemIndex) {
-        var data = view.model.get(itemIndex);
-        return data.text0;
+        var data = view.model.get(itemIndex)
+        return data.text0
     }
 
     function getText1(itemIndex) {
-        var data = view.model.get(itemIndex);
-        return data.text1;
+        var data = view.model.get(itemIndex)
+        return data.text1
     }
 
     function getText2(itemIndex) {
-        var data = view.model.get(itemIndex);
-        return data.text2;
+        var data = view.model.get(itemIndex)
+        return data.text2
     }
 
     function getText3(itemIndex) {
-        var data = view.model.get(itemIndex);
-        return data.text3;
+        var data = view.model.get(itemIndex)
+        return data.text3
     }
 
     function getTop(itemIndex) {
-        var data = view.model.get(itemIndex);
-        return data.text_top;
+        var data = view.model.get(itemIndex)
+        return data.text_top
     }
 
     function getType(itemIndex) {
-        var data = view.model.get(itemIndex);
-        return data.type;
+        var data = view.model.get(itemIndex)
+        return data.type
     }
+
 
     /*function addItem(t0, t1, t2, t3, t4, f_size) {
         view.model.append({
@@ -102,97 +103,96 @@ Rectangle {
             "font_size": f_size
         });
     }*/
-
     function addItem(t0, t1, t2, t3, t4, f_size, lvl = 0, pIdx = -1, expand = true) {
         view.model.append({
-            "text0": t0,
-            "text1": t1,
-            "text2": t2,
-            "text3": t3,
-            "text4": t4,
-            "font_size": f_size,
-            "level": lvl,
-            "parentIndex": pIdx,
-            "isExpand": expand
-        });
+                              "text0": t0,
+                              "text1": t1,
+                              "text2": t2,
+                              "text3": t3,
+                              "text4": t4,
+                              "font_size": f_size,
+                              "level": lvl,
+                              "parentIndex": pIdx,
+                              "isExpand": expand
+                          })
     }
 
     function insertItem(text0, text1, text2, text3, curIndex) {
         view.model.insert(curIndex, {
-            "text0": text0,
-            "text1": text1,
-            "text2": text2,
-            "text3": text3
-        });
+                              "text0": text0,
+                              "text1": text1,
+                              "text2": text2,
+                              "text3": text3
+                          })
     }
 
     function delItem(currentIndex) {
-        view.model.remove(currentIndex);
+        view.model.remove(currentIndex)
     }
 
     function modifyItem(currentIndex, strTime, strText) {
-        view.model.setProperty(currentIndex, "time", strTime);
-        view.model.setProperty(currentIndex, "dototext", strText);
+        view.model.setProperty(currentIndex, "time", strTime)
+        view.model.setProperty(currentIndex, "dototext", strText)
     }
 
     function modifyItemTime(currentIndex, strTime) {
-        view.model.setProperty(currentIndex, "time", strTime);
+        view.model.setProperty(currentIndex, "time", strTime)
     }
 
     function modifyItemType(currentIndex, type) {
-        view.model.setProperty(currentIndex, "type", type);
+        view.model.setProperty(currentIndex, "type", type)
     }
 
     function modifyItemText0(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text0", strText);
+        view.model.setProperty(currentIndex, "text0", strText)
     }
 
     function modifyItemText1(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text1", strText);
+        view.model.setProperty(currentIndex, "text1", strText)
     }
 
     function modifyItemText2(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text2", strText);
+        view.model.setProperty(currentIndex, "text2", strText)
     }
 
     function modifyItemText3(currentIndex, strText) {
-        view.model.setProperty(currentIndex, "text3", strText);
+        view.model.setProperty(currentIndex, "text3", strText)
     }
 
     function setVPos(vpos) {
-        vbar.position = vpos;
-        console.log("qwNoteBook:set " + vpos);
+        vbar.position = vpos
+        console.log("qwNoteBook:set " + vpos)
     }
 
     function getVPos() {
-        var vpos = vbar.position;
-        console.log("qwNoteBook:get " + vpos);
-        return vpos;
+        var vpos = vbar.position
+        console.log("qwNoteBook:get " + vpos)
+        return vpos
     }
 
     function getColor() {
-        var strColor;
+        var strColor
 
         if (isDark)
-            strColor = "#333333";
+            strColor = "#333333"
         else
             // "#455364"
-            strColor = "#ffffff";
+            strColor = "#ffffff"
 
-        return strColor;
+        return strColor
     }
 
     function getFontColor() {
         if (isDark)
-            return "#EEEEEE";
+            return "#EEEEEE"
         else
-            return "black";
+            return "black"
     }
 
     function setColorFlag(strColor) {
-        var currentIndex = view.currentIndex;
+        var currentIndex = view.currentIndex
         if (currentIndex >= 0) {
-            view.model.setProperty(currentIndex, "text4", strColor);
+            view.model.setProperty(currentIndex, "text4", strColor)
         }
     }
 
@@ -202,7 +202,8 @@ Rectangle {
         Rectangle {
             id: listItem
             implicitWidth: ListView.view.width
-            implicitHeight: colLayout.implicitHeight
+            //implicitHeight: colLayout.implicitHeight
+            implicitHeight: colLayout.implicitHeight + 4 // 加一点内边距
             color: getColor()
             border.width: isDark ? 0 : 1
             border.color: "lightgray"
@@ -221,14 +222,14 @@ Rectangle {
 
                 RowLayout {
                     id: idlistRow
-                    anchors.fill: parent          // 关键：填满 m_item
+                    anchors.fill: parent // 关键：填满 m_item
                     spacing: 2
 
                     // 小矩形色块
                     Rectangle {
                         id: idrectColorFlag
                         //height: colLayout.implicitHeight - 0
-                        Layout.fillHeight: true    // 随列高度变化
+                        Layout.fillHeight: true // 随列高度变化
                         width: 6
                         radius: 2
                         anchors.leftMargin: 1
@@ -252,10 +253,10 @@ Rectangle {
                             z: -1
                         }
 
-                        ColumnLayout {
+                        Column {
                             id: colLayout
-                            height: parent.height
-                            width: parent.width          // 关键：显式绑定宽度
+                            //height: parent.height
+                            width: parent.width // 关键：显式绑定宽度
                             spacing: 2
 
                             Rectangle {
@@ -266,7 +267,8 @@ Rectangle {
                             // 笔记本标题
                             Text {
                                 id: item0
-                                Layout.fillWidth: true   // 占满 ColumnLayout 宽度
+                                //Layout.fillWidth: true // 占满 ColumnLayout 宽度
+                                width: parent.width
                                 Layout.alignment: Qt.AlignHCenter
                                 horizontalAlignment: Text.AlignLeft
                                 verticalAlignment: Text.AlignVCenter
@@ -333,7 +335,8 @@ Rectangle {
 
                                     font.bold: false
                                     font.pointSize: font_size - 2
-                                    color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+                                    color: listItem.ListView.isCurrentItem ? "black" : getFontColor(
+                                                                                 )
                                     text: text3
 
                                     leftPadding: 5
@@ -365,20 +368,21 @@ Rectangle {
 
                     // 单击 → 和 onClicked 完全一样
                     onTapped: {
-                        view.currentIndex = index;
-                        m_NotesList.mouseClickNoteBook();
+                        view.currentIndex = index
+                        m_NotesList.mouseClickNoteBook()
                     }
 
                     // 长按 → 和 onPressAndHold 完全一样
                     onLongPressed: {
-                        menuTargetIndex = index;
+                        menuTargetIndex = index
                         // 在长按位置弹出菜单
                         //notebookMenu.popup();
-                        m_NotesList.show_NoteBookPopMenu(index);
+                        m_NotesList.show_NoteBookPopMenu(index)
                     }
 
                     // 双击 → 和 onDoubleClicked 完全一样
                     onDoubleTapped: {
+
                         // mw_one.on_btnRename_clicked()
                     }
                 }
@@ -424,8 +428,8 @@ Rectangle {
             text: qsTr("New Sub Notebook")
             onClicked: {
                 // 把当前长按的条目索引发给 C++
-                m_NotesList.slotCreateSubNotebook(menuTargetIndex);
-                notebookMenu.close();
+                m_NotesList.slotCreateSubNotebook(menuTargetIndex)
+                notebookMenu.close()
             }
         }
 
