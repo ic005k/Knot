@@ -940,7 +940,4 @@ void MainWindow::init_Options() {
 
   m_Preferences->initOptions();
   m_Preferences->ui->btnReStart->hide();
-
-  mainMenu = new QMenu(this);
-  init_Menu(mainMenu);
 }

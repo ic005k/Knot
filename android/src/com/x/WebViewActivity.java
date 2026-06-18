@@ -22,10 +22,11 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-public class WebViewActivity extends Activity {
+public class WebViewActivity extends AppCompatActivity {
 
     private static final String TAG = "WebViewActivity"; // 调试标签
     private static WebViewActivity instance;
@@ -53,58 +54,20 @@ public class WebViewActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        getWindow().setFormat(android.graphics.PixelFormat.TRANSLUCENT);
-        getWindow().setBackgroundDrawable(null);
-
         super.onCreate(savedInstanceState);
 
-        // ========== 统一沉浸模式（和腾讯地图逻辑完全一样 · 全页面通用） ==========
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
-            window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-            );
-
-            // 状态栏 + 导航栏 透明（和地图一样）
-            window.setStatusBarColor(Color.TRANSPARENT);
-            window.setNavigationBarColor(Color.TRANSPARENT);
-
-            // 布局延伸到系统栏（和地图一样）
-            window
-                .getDecorView()
-                .setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                );
+        // ========== 隐藏标题栏 ==========
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
         }
 
-        // ========== 自动避让系统栏（和地图逻辑一样 · 通用不报错版） ==========
-        View decorView = getWindow().getDecorView();
-        decorView.setOnApplyWindowInsetsListener((v, insets) -> {
-            int statusBarHeight = insets.getSystemWindowInsetTop();
-            int navBarHeight = insets.getSystemWindowInsetBottom();
-
-            // --------------------------
-            // 通用方式：给 最外层布局 加 padding（所有页面都能用）
-            // --------------------------
-            View contentView = findViewById(android.R.id.content);
-            if (contentView != null) {
-                contentView.setPadding(0, statusBarHeight, 0, navBarHeight);
-            }
-
-            return insets;
-        });
-
         instance = this;
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         setContentView(R.layout.activity_webview);
+        ImmersiveUtil.applyRealImmersive(this);
 
-        // 初始化进度条（新增）
+        // 初始化进度条
         mLoadingProgress = findViewById(R.id.web_loading_progress);
-
-        updateSystemBars();
 
         // 初始化SharedPreferences
         scrollPositionPrefs = getSharedPreferences(
@@ -114,19 +77,6 @@ public class WebViewActivity extends Activity {
 
         // 初始化WebView（仅配置，不加载）
         initWebView();
-
-        // 检查存储权限，若已授予则直接加载
-        /*if (
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) ==
-            PackageManager.PERMISSION_GRANTED
-        ) {
-            loadLocalHtmlFile();
-        } else {
-            verifyStoragePermissions(this); // 未授予则申请权限
-        }*/
 
         // 修复LineageOS权限误判，直接加载
         loadLocalHtmlFile();
@@ -557,38 +507,5 @@ public class WebViewActivity extends Activity {
                 }
             }
         );
-    }
-
-    // 统一刷新：状态栏 + 导航栏（完全复用主Activity逻辑）
-    private void updateSystemBars() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-            );
-
-            if (MyActivity.isDark) {
-                // 暗黑模式
-                window.setStatusBarColor(Color.parseColor("#121212"));
-                window.setNavigationBarColor(Color.parseColor("#121212"));
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    window.getDecorView().setSystemUiVisibility(0);
-                }
-            } else {
-                // 普通模式
-                window.setStatusBarColor(Color.parseColor("#F3F3F3"));
-                window.setNavigationBarColor(Color.parseColor("#F3F3F3"));
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    window
-                        .getDecorView()
-                        .setSystemUiVisibility(
-                            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR |
-                                View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                        );
-                }
-            }
-        }
     }
 }

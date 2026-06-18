@@ -298,7 +298,6 @@
             android:name=".WebViewActivity"
             android:launchMode="standard"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"
         >
         </activity>
 
