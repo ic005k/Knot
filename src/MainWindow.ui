@@ -5669,7 +5669,7 @@ QRadioButton:disabled {
               </widget>
              </item>
              <item>
-              <widget class="QToolButton" name="btnNewNote">
+              <widget class="QToolButton" name="btnRecentOpen">
                <property name="minimumSize">
                 <size>
                  <width>48</width>
@@ -5687,7 +5687,7 @@ QRadioButton:disabled {
                </property>
                <property name="icon">
                 <iconset resource="../res.qrc">
-                 <normaloff>:/res/newnote.svg</normaloff>:/res/newnote.svg</iconset>
+                 <normaloff>:/res/recent_l.svg</normaloff>:/res/recent_l.svg</iconset>
                </property>
                <property name="iconSize">
                 <size>
@@ -5755,7 +5755,7 @@ QRadioButton:disabled {
               </widget>
              </item>
              <item>
-              <widget class="QToolButton" name="btnRecentOpen">
+              <widget class="QToolButton" name="btnNewNote">
                <property name="minimumSize">
                 <size>
                  <width>48</width>
@@ -5773,7 +5773,7 @@ QRadioButton:disabled {
                </property>
                <property name="icon">
                 <iconset resource="../res.qrc">
-                 <normaloff>:/res/recent_l.svg</normaloff>:/res/recent_l.svg</iconset>
+                 <normaloff>:/res/newnote.svg</normaloff>:/res/newnote.svg</iconset>
                </property>
                <property name="iconSize">
                 <size>

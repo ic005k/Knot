@@ -26,6 +26,8 @@ void NotesList::genRecentOpenMenu() {
         saveCurrentNoteInfo();
         setCurrentItemFromMDFile(currentMDFile);
 
+        m_Method->Sleep(50);
+
 #ifdef Q_OS_ANDROID
         mw_one->on_btnOpenNote_pressed();
 #else

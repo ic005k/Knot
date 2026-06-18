@@ -111,42 +111,6 @@ class UpdateGpsMapThread;
 class GetGpsDataThread;
 class SliderButton;
 
-class AndroidTouchFixer : public QObject {
-  Q_OBJECT
- public:
-  explicit AndroidTouchFixer(QObject* parent = nullptr) : QObject(parent) {}
-
-  static void wakeup() {
-#ifdef Q_OS_ANDROID
-    // 延迟150ms，等界面完全稳定
-    QTimer::singleShot(150, []() {
-      QWidget* window = QApplication::activeWindow();
-      if (!window) return;
-
-      // =========================================
-      // 正确写法：清理鼠标捕获（修复Qt内部状态卡死）
-      // =========================================
-      QWidget* grabber = QWidget::mouseGrabber();
-      if (grabber) {
-        grabber->releaseMouse();
-      }
-
-      // 发送一组无害的点击，强制重置Qt点击状态机
-      // 坐标(1,1)绝对不会点到任何按钮
-      QPoint p(1, 1);
-
-      QMouseEvent evtPress(QEvent::MouseButtonPress, p, Qt::LeftButton,
-                           Qt::LeftButton, Qt::NoModifier);
-      QApplication::sendEvent(window, &evtPress);
-
-      QMouseEvent evtRelease(QEvent::MouseButtonRelease, p, Qt::LeftButton,
-                             Qt::LeftButton, Qt::NoModifier);
-      QApplication::sendEvent(window, &evtRelease);
-    });
-#endif
-  }
-};
-
 class SearchWorker : public QObject {
   Q_OBJECT
  public:
@@ -512,12 +476,13 @@ class MainWindow : public QMainWindow {
   void init_ButtonStyle();
   void initMainQW();
   void initNotesQW();
-  void setToolButtonAnimation(QToolButton *btn, bool setMyStyle);
-  void init_Menu(QMenu *mainMenu);
+  void setToolButtonAnimation(QToolButton* btn, bool setMyStyle);
+  void init_Menu(QMenu* mainMenu);
   void init_Theme();
   void init_UIWidget();
-  QTreeWidget *init_TreeWidget(QString name);
-  protected:
+  QTreeWidget* init_TreeWidget(QString name);
+
+ protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
   void paintEvent(QPaintEvent* event) override;
