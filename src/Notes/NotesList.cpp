@@ -870,6 +870,7 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
     pNoteItems.clear();
     setNoteLabel();
     isReadyNotesEnd = true;
+    isExecRecentOpen = false;
     return;
   }
 
@@ -985,6 +986,15 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
         setNotesListCurrentIndex(indexNote);
         clickNoteList();
       }
+    }
+
+    if (isExecRecentOpen) {
+      isExecRecentOpen = false;
+#ifdef Q_OS_ANDROID
+      mw_one->on_btnOpenNote_pressed();
+#else
+        mw_one->on_btnEditNote_pressed();
+#endif
     }
   });
   watcher->setFuture(future);

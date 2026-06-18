@@ -24,15 +24,8 @@ void NotesList::genRecentOpenMenu() {
         noteTitle = name;
 
         saveCurrentNoteInfo();
+        isExecRecentOpen = true;
         setCurrentItemFromMDFile(currentMDFile);
-
-        m_Method->Sleep(50);
-
-#ifdef Q_OS_ANDROID
-        mw_one->on_btnOpenNote_pressed();
-#else
-                mw_one->on_btnEditNote_pressed();
-#endif
       });
     }
   }
@@ -115,10 +108,10 @@ void NotesList::on_actionAdd_Note_triggered() {
 
   if (notebookIndex < 0) {
     auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg(
-        "Knot",
-        tr("Please create a new notebook first, and then create new notes."),
-        1);
+    msg->showMsg("Knot",
+                 tr("Please create a new notebook first, and then create "
+                    "new notes."),
+                 1);
     return;
   }
 
@@ -303,10 +296,10 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
 
   connect(actRebuildSearchIndex, &QAction::triggered, this, [this]() {
     auto msg = std::make_unique<ShowMessage>(this);
-    if (msg->showMsg(
-            appName,
-            tr("Rebuilding the index will take some time. Click OK to start."),
-            2)) {
+    if (msg->showMsg(appName,
+                     tr("Rebuilding the index will take some time. Click OK "
+                        "to start."),
+                     2)) {
       mw_one->showProgress();
       QString databaseFile = privateDir + "md_database_v3.db";
       if (m_dbManager.deleteDatabaseFile(databaseFile))
@@ -559,7 +552,8 @@ void NotesList::on_actionStatistics() {
   QString memoDir = iniDir + "memo/images/";
   QString localAppName = appName;  // 单独赋值，便于值捕获
 
-  // 3. 【核心】后台任务：极简Lambda，仅执行耗时的图片统计，用局部变量存储结果
+  // 3.
+  // 【核心】后台任务：极简Lambda，仅执行耗时的图片统计，用局部变量存储结果
   // 定义一个可被Lambda捕获的变量（用于存储后台统计结果）
   int* imgCountPtr = new int(0);  // 用堆内存存储，避免栈变量生命周期问题
 

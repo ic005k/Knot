@@ -276,7 +276,8 @@ class NotesList : public QDialog {
  signals:
 
  private:
-  bool isReadyNotesEnd;
+  bool isReadyNotesEnd = false;
+  bool isExecRecentOpen = false;
 
   // 递归遍历 QTreeWidget 节点，填充到 QML + 维护映射表
   void traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex, int level);
