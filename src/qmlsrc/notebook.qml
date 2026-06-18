@@ -193,13 +193,18 @@ Rectangle {
         Rectangle {
             id: listItem
             implicitWidth: ListView.view.width
-            //implicitHeight: colLayout.implicitHeight
             implicitHeight: colLayout.implicitHeight + 4 // 加一点内边距
             color: getColor()
             border.width: isDark ? 0 : 1
             border.color: "lightgray"
 
             radius: 2
+
+            Rectangle {
+                width: level * 15
+                height: parent.height
+                color: isDark ? "#2A3A4A" : "#D0DCE8"
+            }
 
             // 缩进块
             Item {
