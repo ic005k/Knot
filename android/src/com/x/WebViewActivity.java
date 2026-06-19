@@ -92,6 +92,13 @@ public class WebViewActivity extends AppCompatActivity {
         else editButton.setText("Edit");
         editButton.setOnClickListener(v -> openEdit());
 
+        // 如果是笔记版本回溯，则隐藏编辑按钮
+        if (MyActivity.strMDFile == null || MyActivity.strMDFile.isEmpty()) {
+            editButton.setVisibility(View.GONE);
+        } else {
+            editButton.setVisibility(View.VISIBLE);
+        }
+
         // 后退按钮
         Button backButton = findViewById(R.id.back_button);
         if (MyActivity.zh_cn) backButton.setText("后退");

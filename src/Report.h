@@ -5,6 +5,7 @@
 #include <QKeyEvent>
 #include <QListWidget>
 #include <QPainter>
+#include <QPointer>
 #include <QScroller>
 #include <QStandardItemModel>
 #include <QTableWidgetItem>

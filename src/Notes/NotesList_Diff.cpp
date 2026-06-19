@@ -40,10 +40,52 @@ void NotesList::newtextToOldtextFromDiffStr() {
 
   if (allSuccess) {
     qDebug() << "成功反推到版本" << targetIndex;
-    setNoteDiffHtmlToQML(html);
+    // setNoteDiffHtmlToQML(html);
   } else {
     qDebug() << "反推完成，但部分步骤存在问题，结果可能不准确";
-    setNoteDiffHtmlToQML(html);  // 仍显示结果，但可能有误差
+    // setNoteDiffHtmlToQML(html);  // 仍显示结果，但可能有误差
+  }
+
+  // HTML模板，内置换行修复样式
+  const QString htmlTpl = R"(
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+body {
+    padding: 16px;
+    font-family: Consolas, monospace;
+}
+.md-box {
+    /* 保留原始换行、空格，超出宽度自动折行 */
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    line-height: 1.6;
+}
+</style>
+</head>
+<body>
+<div class="md-box">%1</div>
+</body>
+</html>
+)";
+
+  // 填充文本：toHtmlEscaped转义特殊符号
+  QString fullHtml = htmlTpl.arg(currentText.toHtmlEscaped());
+
+  QFile file(m_Notes->htmlFileName);
+  if (file.open(QIODevice::WriteOnly)) {
+    // toUtf8 保证中文不乱码
+    file.write(fullHtml.toUtf8());
+    file.close();
+  }
+
+  if (isAndroid) {
+    m_Method->setMDFile("");
+    m_Notes->openLocalHtmlFileInAndroid();
+  } else {
+    m_Notes->openBrowserOnce(m_Notes->htmlFileName);
   }
 }
 
