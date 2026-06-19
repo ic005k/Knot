@@ -151,11 +151,6 @@ Flickable {
                     elide: Text.ElideRight
                 }
 
-                /*MouseArea {
-                    anchors.fill: parent
-                    onDoubleClicked: graphController.handleNodeDoubleClick(modelData.filePath)
-                }*/
-
                 TapHandler {
                     onDoubleTapped: graphController.handleNodeDoubleClick(modelData.filePath)
                 }
@@ -187,11 +182,6 @@ Flickable {
                     maximumLineCount: Math.floor(parent.height / font.pixelSize)
                     elide: Text.ElideRight
                 }
-
-                /*MouseArea {
-                    anchors.fill: parent
-                    onDoubleClicked: graphController.handleNodeDoubleClick(modelData.filePath)
-                }*/
 
                 TapHandler {
                     onDoubleTapped: graphController.handleNodeDoubleClick(modelData.filePath)

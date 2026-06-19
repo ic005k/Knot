@@ -8,8 +8,11 @@ Rectangle {
     objectName: "diffHtmlRoot"
     width: 300
 
-    border.color: "#eee"
+    // 明暗边框切换
+    border.color: isDark ? "#3a3a3a" : "#eee"
     border.width: 1
+    // 背景色适配暗黑
+    color: isDark ? "#1e1e1e" : "#ffffff"
 
     property string htmlContent: ""
 
@@ -38,6 +41,11 @@ Rectangle {
 
             renderType: Text.QtRendering
             verticalAlignment: Text.AlignTop // 顶部对齐，符合阅读习惯
+
+            // 暗黑模式文字颜色
+            color: isDark ? "#e0e0e0" : "#222222"
+            // 富文本超链接配色区分明暗
+            linkColor: isDark ? "#61afef" : "#0066cc"
         }
     }
 
@@ -45,7 +53,8 @@ Rectangle {
     Text {
         visible: root.htmlContent === ""
         text: qsTr("No differences")
-
         anchors.centerIn: parent
+        // 提示文字浅灰适配两种主题
+        color: isDark ? "#888888" : "#666666"
     }
 }
