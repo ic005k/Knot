@@ -989,15 +989,15 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
     }
 
     /*if (isExecRecentOpen) {
-      isExecRecentOpen = false;
+        isExecRecentOpen = false;
 
-      QTimer::singleShot(200, this, [=]() {
+        QTimer::singleShot(50, this, [=]() {
 #ifdef Q_OS_ANDROID
-        mw_one->on_btnOpenNote_pressed();
+            mw_one->on_btnOpenNote_pressed();
 #else
-          mw_one->on_btnEditNote_pressed();
+            mw_one->on_btnEditNote_pressed();
 #endif
-      });
+        });
     }*/
   });
   watcher->setFuture(future);
