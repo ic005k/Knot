@@ -65,13 +65,13 @@ class NotesList : public QDialog {
   ~NotesList();
   Ui::NotesList* ui;
 
-  QMenu* menuNoteBook = nullptr;
-  QMenu* menuNoteList = nullptr;
+  QPointer<QMenu> menuNoteBook;
+  QPointer<QMenu> menuNoteList;
+  QPointer<QMenu> menuRecentOpen;
 
   NoteGraphController* m_graphController;  // 图谱控制器
   QDialog* m_RenameNotes = nullptr;
 
-  QMenu* menuRecentOpen = nullptr;
   MoveTo* m_MoveTo = nullptr;
   NewNoteBook* m_NewNoteBook = nullptr;
 

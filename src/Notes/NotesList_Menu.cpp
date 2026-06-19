@@ -26,6 +26,14 @@ void NotesList::genRecentOpenMenu() {
         saveCurrentNoteInfo();
         isExecRecentOpen = true;
         setCurrentItemFromMDFile(currentMDFile);
+
+        QTimer::singleShot(200, this, [=]() {
+#ifdef Q_OS_ANDROID
+          mw_one->on_btnOpenNote_pressed();
+#else
+              mw_one->on_btnEditNote_pressed();
+#endif
+        });
       });
     }
   }

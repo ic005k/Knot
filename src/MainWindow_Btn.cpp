@@ -1228,7 +1228,7 @@ void MainWindow::onAndroidBackHandle() {
   }
 
   if (!mui->frameNoteList->isHidden()) {
-    QTimer::singleShot(100, mw_one,
+    QTimer::singleShot(200, mw_one,
                        []() { mw_one->on_btnBackNoteList_pressed(); });
     return;
   }

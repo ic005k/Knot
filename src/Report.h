@@ -64,7 +64,7 @@ class Report : public QDialog {
   void appendTable(QString date, QString freq, QString amount);
 
   void genReportMenu();
-  QMenu* m_Menu = nullptr;
+  QPointer<QMenu> m_Menu;
 
   QString Out2Img(bool isShowMessage);
 

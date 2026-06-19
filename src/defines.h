@@ -65,8 +65,8 @@ inline PrintPDF* m_PrintPDF = nullptr;
 inline QTreeWidget *twrb, *tw;
 inline ShowMessage* m_MsgBox = nullptr;
 
-inline TextEditToolbar* textToolbar = nullptr;
-inline TextEditToolbar* textToolbarDynamic = nullptr;
+inline QPointer<TextEditToolbar> textToolbar;
+inline QPointer<TextEditToolbar> textToolbarDynamic;
 
 inline QRegularExpression regxNumber("^-?[0-9.]*$");
 

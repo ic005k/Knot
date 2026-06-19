@@ -552,14 +552,45 @@ void NotesList::resetQML_Recycle() {
 }
 
 void NotesList::saveCurrentNoteInfo() {
-  QSettings Reg(iniDir + "curmd.ini", QSettings::IniFormat);
+  const QString iniPath = QDir(iniDir).filePath("curmd.ini");
+  const QString tempIniPath = iniPath + ".tmp";  // 临时文件，原子替换
 
-  QString str = currentMDFile;
-  QString iniName = str.replace(iniDir, "");
+  // 1. 路径合法性校验，防止目录不存在
+  QFileInfo dirInfo(iniDir);
+  if (!dirInfo.dir().exists()) {
+    dirInfo.dir().mkpath(".");  // 不存在则递归创建目录
+  }
 
-  Reg.setValue("/MainNotes/currentItem", iniName);
-  Reg.setValue("/MainNotes/NoteName", noteTitle);
-  Reg.sync();
+  // 2. 先写入临时文件，不覆盖原文件
+  {
+    QSettings reg(tempIniPath, QSettings::IniFormat);
+
+    QString str = currentMDFile;
+    QString iniName = str.replace(iniDir, "");
+
+    reg.setValue("/MainNotes/currentItem", iniName);
+    reg.setValue("/MainNotes/NoteName", noteTitle);
+    reg.sync();  // 确保全部落盘到临时文件
+  }
+
+  // 3. 原子替换原文件（IO安全核心：先删旧文件再改名，避免截断）
+  QFile iniFile(iniPath);
+  QFile tempFile(tempIniPath);
+
+  // 存在旧文件则删除
+  if (iniFile.exists()) {
+    iniFile.remove();
+  }
+  // 临时文件更名覆盖正式ini
+  if (!tempFile.rename(iniPath)) {
+    // 更名失败兜底：直接复制内容
+    tempFile.open(QIODevice::ReadOnly);
+    iniFile.open(QIODevice::WriteOnly);
+    iniFile.write(tempFile.readAll());
+    tempFile.close();
+    iniFile.close();
+    tempFile.remove();  // 删除临时垃圾文件
+  }
 }
 
 void NotesList::setTWRBCurrentItem() {

@@ -988,24 +988,17 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
       }
     }
 
-    if (isExecRecentOpen) {
+    /*if (isExecRecentOpen) {
       isExecRecentOpen = false;
 
-      // 等待 Qt 的渲染线程明确完成再发起界面跳转
-      /*QCoreApplication::processEvents();
-      if (mui->qwNoteList && mui->qwNoteList->isVisible()) {
-        mui->qwNoteList->repaint();
-      }
-      QCoreApplication::processEvents();*/
-
-      m_Method->Sleep(200);
-
+      QTimer::singleShot(200, this, [=]() {
 #ifdef Q_OS_ANDROID
-      mw_one->on_btnOpenNote_pressed();
+        mw_one->on_btnOpenNote_pressed();
 #else
-        mw_one->on_btnEditNote_pressed();
+          mw_one->on_btnEditNote_pressed();
 #endif
-    }
+      });
+    }*/
   });
   watcher->setFuture(future);
 }
