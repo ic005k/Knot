@@ -278,7 +278,7 @@ void Notes::previewNote() {
 
     if (isAndroid) {
       m_Method->setMDTitle(title);
-
+      oldText = loadText(currentMDFile);
       m_Method->setMDFile(currentMDFile);
       // openMDWindow();
 

@@ -442,7 +442,7 @@ public class MyActivity
             return;
         }
 
-        // 3. 关键修复：放弃HandlerThread异步，改用延迟post（避免JNI环境未就绪）
+        // 3. 放弃HandlerThread异步，改用延迟post（避免JNI环境未就绪）
         // 核心：等待Qt层初始化完成（延迟500ms，适配你的mw_one创建时机）
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             // 仅在主线程执行初始化（避免JNI跨线程问题）

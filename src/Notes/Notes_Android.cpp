@@ -120,6 +120,7 @@ void Notes::setAndroidNoteConfig(QString key, QString value) {
 void Notes::javaNoteToQMLNote() {
   newText = loadText(currentMDFile);
   updateDiff(oldText, newText);
+  oldText = newText;
 
   if (isSetNewNoteTitle()) {
     TitleGenerator generator;
