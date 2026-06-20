@@ -195,9 +195,21 @@ public class ImageViewerActivity
             loadImage(imagePath);
         }
 
-        shareButton.setOnClickListener(v ->
+        /*shareButton.setOnClickListener(v ->
             shareImage(MyActivity.strImageFile)
-        );
+            );*/
+
+        shareButton.setOnClickListener(v -> {
+            String path = MyActivity.strImageFile;
+            MyActivity mAct = MyActivity.m_instance;
+            if (mAct != null) {
+                // 根据全局zh_cn切换标题文字
+                String shareTitle = MyActivity.zh_cn
+                    ? "分享图片"
+                    : "Share Image";
+                mAct.shareImage(shareTitle, path, "image/*", mAct);
+            }
+        });
 
         IntentFilter filter = new IntentFilter(
             Intent.ACTION_CLOSE_SYSTEM_DIALOGS

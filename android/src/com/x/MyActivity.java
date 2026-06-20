@@ -305,7 +305,7 @@ public class MyActivity
 
     public void setDark(boolean dark) {
         isDark = dark;
-        updateStatusBarColor();
+        //updateStatusBarColor();
     }
 
     // ------------------------------------------------------------------------
@@ -738,7 +738,7 @@ public class MyActivity
         System.out.println("onResume...");
         super.onResume();
 
-        updateStatusBarColor();
+        //updateStatusBarColor();
     }
 
     @Override
@@ -1397,18 +1397,15 @@ public class MyActivity
         }
     }
 
-    // ----------------------------------------------------------------------------------------------
+    // 分享功能-------------------------------------------------------------------
 
-    public void shareString(String title, String content, QtActivity activity) {
+    /*public void shareString(String title, String content, QtActivity activity) {
         Intent share = new Intent(Intent.ACTION_SEND);
         share.setType("text/plain"); // 分享字符串
         share.putExtra(Intent.EXTRA_TEXT, content);
         activity.startActivity(Intent.createChooser(share, title));
     }
 
-    /**
-     * 分享功能
-     */
     // 分享单张图片
     public void shareImage(
         String title,
@@ -1454,7 +1451,136 @@ public class MyActivity
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imagesUriList);
         intent.putExtra(Intent.EXTRA_SUBJECT, title);
         activity.startActivity(Intent.createChooser(intent, title));
+    }*/
+
+    // ========== 辅助方法：获取排除自己应用的组件列表 ==========
+    private ComponentName[] getExcludeSelfComponents(
+        Intent targetIntent,
+        Context context
+    ) {
+        PackageManager pm = context.getPackageManager();
+        List<ResolveInfo> infos = pm.queryIntentActivities(targetIntent, 0);
+        List<ComponentName> excludeList = new ArrayList<>();
+        String myPackage = context.getPackageName();
+        for (ResolveInfo info : infos) {
+            if (
+                info.activityInfo != null &&
+                myPackage.equals(info.activityInfo.packageName)
+            ) {
+                ComponentName comp = new ComponentName(
+                    info.activityInfo.packageName,
+                    info.activityInfo.name
+                );
+                excludeList.add(comp);
+            }
+        }
+        return excludeList.toArray(new ComponentName[0]);
     }
+
+    // ========== 1. 分享文字 ==========
+    public void shareString(String title, String content, QtActivity activity) {
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("text/plain");
+        share.putExtra(Intent.EXTRA_TEXT, content);
+
+        // 创建选择器
+        Intent chooser = Intent.createChooser(share, title);
+        // 排除自己应用的所有能处理该 Intent 的组件
+        ComponentName[] exclude = getExcludeSelfComponents(share, activity);
+        if (exclude.length > 0) {
+            chooser.putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, exclude);
+        }
+        activity.startActivity(chooser);
+    }
+
+    // ========== 2. 分享单张图片 ==========
+    public void shareImage(
+        String title,
+        String path,
+        String fileType,
+        QtActivity activity
+    ) {
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType(fileType); // 例如 "image/png"
+
+        Uri photoUri;
+        if (Build.VERSION.SDK_INT >= 24) {
+            photoUri = FileProvider.getUriForFile(
+                getMyAppContext(),
+                getMyAppContext().getPackageName(),
+                new File(path)
+            );
+        } else {
+            photoUri = Uri.fromFile(new File(path));
+        }
+        share.putExtra(Intent.EXTRA_STREAM, photoUri);
+
+        Intent chooser = Intent.createChooser(share, title);
+        ComponentName[] exclude = getExcludeSelfComponents(share, activity);
+        if (exclude.length > 0) {
+            chooser.putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, exclude);
+        }
+        activity.startActivity(chooser);
+    }
+
+    // ========== 3. 分享多张图片（静态方法） ==========
+    public static void shareImages(
+        String title,
+        String imagesPath,
+        QtActivity activity
+    ) {
+        String[] pathList = imagesPath.split("\\|");
+        ArrayList<Uri> imagesUriList = new ArrayList<>();
+        for (String path : pathList) {
+            File file = new File(path);
+            if (file.isFile()) {
+                imagesUriList.add(Uri.fromFile(file));
+            }
+        }
+
+        Intent share = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        share.setType("image/*");
+        share.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imagesUriList);
+        share.putExtra(Intent.EXTRA_SUBJECT, title);
+
+        // 创建选择器
+        Intent chooser = Intent.createChooser(share, title);
+        // 静态方法中，通过 activity 获取 Context 和 PackageManager
+        ComponentName[] exclude = getExcludeSelfComponentsStatic(
+            share,
+            activity
+        );
+        if (exclude.length > 0) {
+            chooser.putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, exclude);
+        }
+        activity.startActivity(chooser);
+    }
+
+    // 静态方法使用的辅助（与实例方法逻辑相同，只是 Context 来源不同）
+    private static ComponentName[] getExcludeSelfComponentsStatic(
+        Intent targetIntent,
+        Context context
+    ) {
+        PackageManager pm = context.getPackageManager();
+        List<ResolveInfo> infos = pm.queryIntentActivities(targetIntent, 0);
+        List<ComponentName> excludeList = new ArrayList<>();
+        String myPackage = context.getPackageName();
+        for (ResolveInfo info : infos) {
+            if (
+                info.activityInfo != null &&
+                myPackage.equals(info.activityInfo.packageName)
+            ) {
+                ComponentName comp = new ComponentName(
+                    info.activityInfo.packageName,
+                    info.activityInfo.name
+                );
+                excludeList.add(comp);
+            }
+        }
+        return excludeList.toArray(new ComponentName[0]);
+    }
+
+    //=========================================================================================
 
     public void openNoteEditor() {
         Intent i = new Intent(getMyAppContext(), NoteEditor.class);
