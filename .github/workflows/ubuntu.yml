@@ -25,7 +25,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
-        qt_ver: [6.6.3]
+        qt_ver: [6.10.3]
         qt_arch: [gcc_64]
 
     env:
@@ -34,7 +34,7 @@ jobs:
         orgName: Knot
         ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
 
-        QT_VERSION: 6.6.3
+        QT_VERSION: 6.10.3
         QT_ARCH: gcc_64
         QT_INSTALL_DIR: /opt/qt/QT_VERSION/gcc_64
         QT_INSTALL_QML: /opt/qt/QT_VERSION/gcc_64/qml
@@ -107,35 +107,35 @@ jobs:
          APP_LIB_DIR="bin/release/lib"
          mkdir -p "$APP_LIB_DIR"
 
-         cp ExtBin/linux/fcitx5/libFcitx5Qt6DBusAddons.so.5.1.9 "$APP_LIB_DIR/"
-         cp ExtBin/linux/fcitx5/libfcitx5platforminputcontextplugin.so "$APP_LIB_DIR/"
+         #cp ExtBin/linux/fcitx5/libFcitx5Qt6DBusAddons.so.5.1.9 "$APP_LIB_DIR/"
+         #cp ExtBin/linux/fcitx5/libfcitx5platforminputcontextplugin.so "$APP_LIB_DIR/"
 
-         (cd "$APP_LIB_DIR" && \
-         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
-         ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
+         #(cd "$APP_LIB_DIR" && \
+         #ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
+         #ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
 
          QT6_PLUGINS_DIR="/home/runner/work/Knot/Qt/$QT_VERSION/gcc_64/plugins/platforminputcontexts"
          mkdir -p "$QT6_PLUGINS_DIR"
-         cp ExtBin/linux/fcitx5/* "$QT6_PLUGINS_DIR/"
-         chmod 755 "$QT6_PLUGINS_DIR/"
+         #cp ExtBin/linux/fcitx5/* "$QT6_PLUGINS_DIR/"
+         #chmod 755 "$QT6_PLUGINS_DIR/"
 
-         (cd "$QT6_PLUGINS_DIR/" && \
-         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
-         ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
+         #(cd "$QT6_PLUGINS_DIR/" && \
+         #ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
+         #ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
 
-         echo "Copied to: $QT6_PLUGINS_DIR"
-         ls -l "$QT6_PLUGINS_DIR"
+         #echo "Copied to: $QT6_PLUGINS_DIR"
+         #ls -l "$QT6_PLUGINS_DIR"
 
          cp -r ExtBin/linux/nss/* bin/release/lib/
          cp -P /usr/lib/x86_64-linux-gnu/libssl.so.3* bin/release/lib/
 
          APP_PLUGINS_DIR="bin/release/plugins/platforminputcontexts"
          mkdir -p "$APP_PLUGINS_DIR"
-         cp ExtBin/linux/fcitx5/* "$APP_PLUGINS_DIR/"
+         #cp ExtBin/linux/fcitx5/* "$APP_PLUGINS_DIR/"
 
-         (cd "$APP_PLUGINS_DIR" && \
-         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
-         ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
+         #(cd "$APP_PLUGINS_DIR" && \
+         #ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
+         #ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
 
          cp /usr/lib/x86_64-linux-gnu/libibus-1.0.so.5 "$APP_LIB_DIR/"
          (cd "$APP_LIB_DIR" && ln -sf libibus-1.0.so.5 libibus-1.0.so)
@@ -157,7 +157,7 @@ jobs:
          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
                   -unsupported-allow-new-glibc \
                   -qmldir=/home/runner/work/Knot/Knot/src/qmlsrc \
-                  -qmake=/home/runner/work/Knot/Qt/6.6.3/gcc_64/bin/qmake \
+                  -qmake=/home/runner/work/Knot/Qt/6.10.3/gcc_64/bin/qmake \
                   -appimage \
                   -extra-plugins=platforminputcontexts
 
