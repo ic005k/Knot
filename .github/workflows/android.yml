@@ -279,7 +279,7 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: src\build\android-build\build\outputs\apk\release\android-build-release-signed.apk # 固定路径+文件名
         asset_name: android-build-release-signed.apk # 保持与自动更新逻辑一致的文件名
-        tag: ${{ github.ref }}
+        tag: ${{ github.ref_name }}
         overwrite: true # 覆盖同名文件（方便更新）
         #body: "Android 平台自动更新专用 APK，版本：${{ github.ref_name }}" # 可选：添加版本说明
         body: |

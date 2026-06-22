@@ -152,5 +152,5 @@ jobs:
           #asset_name: ${{ env.targetName }}_${{ matrix.os }}_${{ matrix.qt_ver }}.dmg
           asset_name: ${{ env.orgName }}-${{ env.VERSION }}.dmg
           
-          tag: ${{ github.ref }}
+          tag: ${{ github.ref_name }}
           overwrite: true

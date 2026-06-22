@@ -110,5 +110,5 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ steps.package.outputs.packageName }}.zip
           asset_name: ${{ steps.package.outputs.packageName }}.zip
-          tag: ${{ github.ref }}
+          tag: ${{ github.ref_name }}
           overwrite: true 
