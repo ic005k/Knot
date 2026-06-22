@@ -4,14 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#F3F3F3"
     android:layout_weight="1"
     android:orientation="vertical"
 >
 
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="56dp"
+        android:layout_height="66dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
     >
@@ -20,8 +19,6 @@
             android:id="@+id/btn_cancel"
             android:textAllCaps="false"
             android:layout_width="0dp"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:layout_height="match_parent"
             android:text="Close"
@@ -31,8 +28,6 @@
             android:id="@+id/btn_save"
             android:textAllCaps="false"
             android:layout_width="0dp"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:layout_height="match_parent"
             android:text="Save"
@@ -42,8 +37,6 @@
             android:id="@+id/btnFind"
             android:textAllCaps="false"
             android:layout_width="0dp"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:layout_height="match_parent"
             android:text="Find"
@@ -53,8 +46,6 @@
             android:id="@+id/btnUndo"
             android:textAllCaps="false"
             android:layout_width="0dp"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:layout_height="match_parent"
             android:text="Undo"
@@ -64,8 +55,6 @@
             android:id="@+id/btnRedo"
             android:textAllCaps="false"
             android:layout_width="0dp"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:layout_height="match_parent"
             android:text="Redo"
@@ -83,8 +72,6 @@
             android:id="@+id/btnMenu"
             android:textAllCaps="false"
             android:layout_width="0dp"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:layout_height="match_parent"
             android:text="Menu"
@@ -102,24 +89,20 @@
     <!-- R 按钮：显示/隐藏替换 -->
     <Button
             android:id="@+id/btnToggleReplace"
-            android:textAllCaps="false"
             android:layout_width="55dp"
-            android:layout_height="36dp"
+            android:layout_height="match_parent"
+            android:textAllCaps="false"
             android:layout_marginTop="1dp"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:text="R"
         />
 
         <Button
             android:id="@+id/btnPrev"
-            android:textAllCaps="false"
             android:layout_width="55dp"
-            android:layout_height="36dp"
+            android:layout_height="match_parent"
+            android:textAllCaps="false"
             android:layout_marginTop="1dp"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:text="Prev"
         />
@@ -145,6 +128,7 @@
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:background="@drawable/shape_blue_button"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
             android:layout_gravity="center_vertical"
             android:src="@drawable/find_l"
             android:layout_marginLeft="5dp"
@@ -173,12 +157,10 @@
 
         <Button
             android:id="@+id/btnNext"
-            android:textAllCaps="false"
             android:layout_width="55dp"
-            android:layout_height="36dp"
+            android:layout_height="match_parent"
+            android:textAllCaps="false"
             android:layout_marginTop="1dp"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:text="Next"
         />
@@ -241,34 +223,28 @@
             <Button
                 android:id="@+id/btnReplace"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="#3498DB"
                 android:text="Replace"
                 android:textAllCaps="false"
-                android:textColor="#FFFFFF"
             />
 
             <Button
                 android:id="@+id/btnReplaceFind"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="#3498DB"
                 android:text="Replace &amp; Find"
                 android:textAllCaps="false"
-                android:textColor="#FFFFFF"
             />
 
             <Button
                 android:id="@+id/btnReplaceAll"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="#3498DB"
                 android:text="Replace All"
                 android:textAllCaps="false"
-                android:textColor="#FFFFFF"
             />
 
         </LinearLayout>

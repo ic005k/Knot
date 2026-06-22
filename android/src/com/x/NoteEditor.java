@@ -1941,10 +1941,6 @@ public class NoteEditor
             new PopupMenu.OnDismissListener() {
                 @Override
                 public void onDismiss(PopupMenu menu) {
-                    btnMenu.setBackgroundColor(
-                        getResources().getColor(R.color.normal)
-                    );
-
                     // Toast.makeText(getApplicationContext(), "关闭PopupMenu",
                     // Toast.LENGTH_SHORT).show();
                 }

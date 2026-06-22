@@ -4,14 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@color/dark"
     android:layout_weight="1"
     android:orientation="vertical"
 >
 
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="56dp"
+        android:layout_height="66dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
     >
@@ -21,8 +20,6 @@
             android:textAllCaps="false"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:text="Close"
         />
@@ -32,8 +29,6 @@
             android:textAllCaps="false"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:text="Save"
         />
@@ -43,8 +38,6 @@
             android:textAllCaps="false"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:text="Find"
         />
@@ -54,8 +47,6 @@
             android:textAllCaps="false"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:text="Undo"
         />
@@ -65,8 +56,6 @@
             android:textAllCaps="false"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:text="Redo"
         />
@@ -85,8 +74,6 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:text="Menu"
         />
 
@@ -104,10 +91,8 @@
             android:id="@+id/btnToggleReplace"
             android:textAllCaps="false"
             android:layout_width="55dp"
-            android:layout_height="36dp"
+            android:layout_height="match_parent"
             android:layout_marginTop="1dp"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:text="R"
         />
@@ -116,10 +101,8 @@
             android:id="@+id/btnPrev"
             android:textAllCaps="false"
             android:layout_width="55dp"
-            android:layout_height="36dp"
+            android:layout_height="match_parent"
             android:layout_marginTop="1dp"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:text="Prev"
         />
@@ -134,7 +117,6 @@
             android:text=""
             android:imeOptions="actionGo"
             android:theme="@style/MyEditText"
-            android:textColor="#FFFFFF"
             android:scrollbars="vertical"
             android:fadeScrollbars="true"
             android:singleLine="true"
@@ -162,7 +144,6 @@
             android:text=""
             android:textSize="10sp"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"
             android:scrollbars="vertical"
             android:fadeScrollbars="true"
             android:inputType="textMultiLine"
@@ -176,10 +157,8 @@
             android:id="@+id/btnNext"
             android:textAllCaps="false"
             android:layout_width="55dp"
-            android:layout_height="36dp"
+            android:layout_height="match_parent"
             android:layout_marginTop="1dp"
-            android:background="#3498DB"
-            android:textColor="#FFFFFF"
             android:layout_weight="1"
             android:text="Next"
         />
@@ -213,7 +192,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:text="Replace:"
-                android:textColor="#FFFFFF"
                 android:textSize="14sp"
             />
 
@@ -225,7 +203,6 @@
                 android:layout_marginRight="10dp"
                 android:singleLine="true"
                 android:text=""
-                android:textColor="#FFFFFF"
             />
 
         </LinearLayout>
@@ -242,34 +219,28 @@
             <Button
                 android:id="@+id/btnReplace"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="#3498DB"
                 android:text="Replace"
                 android:textAllCaps="false"
-                android:textColor="#FFFFFF"
             />
 
             <Button
                 android:id="@+id/btnReplaceFind"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="#3498DB"
                 android:text="Replace &amp; Find"
                 android:textAllCaps="false"
-                android:textColor="#FFFFFF"
             />
 
             <Button
                 android:id="@+id/btnReplaceAll"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="#3498DB"
                 android:text="Replace All"
                 android:textAllCaps="false"
-                android:textColor="#FFFFFF"
             />
 
         </LinearLayout>
