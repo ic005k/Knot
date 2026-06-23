@@ -950,7 +950,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnShowValidate_released();
 
-  void on_chkZip_pressed();
+  void on_chkZip_clicked();
 
   void on_editPassword_textChanged(const QString& arg1);
 

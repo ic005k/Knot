@@ -1444,7 +1444,7 @@ void MainWindow::on_tabMotion_currentChanged(int index) {
     m_Steps->tmeRefreshSteps->stop();
 }
 
-void MainWindow::on_chkZip_pressed() { m_Preferences->on_chkZip_clicked(); }
+void MainWindow::on_chkZip_clicked() { m_Preferences->on_chkZip_clicked(); }
 
 void MainWindow::on_editPassword_textChanged(const QString& arg1) {
   m_Preferences->on_editPassword_textChanged(arg1);

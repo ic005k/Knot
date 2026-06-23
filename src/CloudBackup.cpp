@@ -1088,11 +1088,13 @@ void CloudBackup::save_WebDav() {
 
 void CloudBackup::init_CloudBacup() {
   int count = iniPreferences->value("/webdav/count", 0).toInt();
-  mui->cboxWebDAV->clear();
+
   QStringList txtList;
-  txtList.append("https://dav.jianguoyun.com/dav/");
-  txtList.append("https://soya.infini-cloud.net/dav/");
-  txtList.append("https://app.koofr.net/dav/Koofr/");
+  int orgCount = mui->cboxWebDAV->count();
+  for (int i = 0; i < orgCount; i++) {
+    txtList.append(mui->cboxWebDAV->itemText(i));
+  }
+
   for (int i = 0; i < count; i++) {
     QString text =
         iniPreferences->value("/webdav/text" + QString::number(i), "")
@@ -1100,6 +1102,7 @@ void CloudBackup::init_CloudBacup() {
     txtList.append(text);
   }
   txtList.removeDuplicates();
+  mui->cboxWebDAV->clear();
   mui->cboxWebDAV->addItems(txtList);
 
   mui->cboxWebDAV->setCurrentText(

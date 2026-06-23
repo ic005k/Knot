@@ -471,7 +471,11 @@ void Preferences::on_chkZip_clicked() {
     mui->chkZip->setChecked(false);
     auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg("Knot", tr("Password validation error."), 1);
+
+    return;
   }
+
+  saveOptions();
 }
 
 void Preferences::on_editPassword_textChanged(const QString& arg1) {
