@@ -323,24 +323,6 @@ void NotesList::on_btnDel_Recycle_clicked() {
 }
 void NotesList::on_btnClose_clicked() { this->close(); }
 
-void NotesList::on_btnNewNoteBook_clicked() {
-  QTreeWidgetItem* item = new QTreeWidgetItem();
-  item->setText(0, notebookName);
-  item->setText(2, "#FF0000");
-  item->setForeground(0, Qt::red);
-  item->setIcon(0, QIcon(":/res/nb.png"));
-
-  if (rootIndex == 0) {
-    tw->addTopLevelItem(item);
-    tw->setCurrentItem(item);
-  } else {
-    QTreeWidgetItem* topItem = tw->topLevelItem(rootIndex - 1);
-    tw->setCurrentItem(topItem);
-    topItem->addChild(item);
-    tw->setCurrentItem(item);
-  }
-}
-
 void NotesList::on_btnNewNote_clicked() {
   if (tw->topLevelItemCount() == 0) return;
 

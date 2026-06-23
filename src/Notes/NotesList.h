@@ -34,13 +34,11 @@
 #include "src/Comm/TextEditToolbar.h"
 #include "src/MainWindow.h"
 #include "src/Notes/MoveTo.h"
-#include "src/Notes/NewNoteBook.h"
 #include "src/Notes/NoteListModel.h"
 #include "src/Notes/note_graph.h"
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 #include "ui_MoveTo.h"
-#include "ui_NewNoteBook.h"
 #include "ui_NotesList.h"
 
 struct MySearchResult {
@@ -73,7 +71,6 @@ class NotesList : public QDialog {
   QDialog* m_RenameNotes = nullptr;
 
   MoveTo* m_MoveTo = nullptr;
-  NewNoteBook* m_NewNoteBook = nullptr;
 
   void startBackgroundTaskUpdateFilesIndex();
 
@@ -196,7 +193,7 @@ class NotesList : public QDialog {
   QStringList getRecycleNoteFiles();
 
   void on_btnNewNote_clicked();
-  void on_btnNewNoteBook_clicked();
+
   void on_btnBack_clicked();
 
   void closeNoteDiff();
@@ -333,7 +330,6 @@ class NotesList : public QDialog {
   void on_actionMoveDown_Note_triggered();
   void on_actionImport_Note_triggered();
   void on_actionExport_Note_triggered();
-  int rootIndex;
 
   void goFindResult(int index);
 

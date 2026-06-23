@@ -1102,13 +1102,6 @@ void MainWindow::onAndroidBackHandle() {
     }
   }
 
-  if (m_NotesList->m_NewNoteBook != nullptr) {
-    if (m_NotesList->m_NewNoteBook->isVisible()) {
-      m_NotesList->m_NewNoteBook->ui->btnCancel->click();
-      return;
-    }
-  }
-
   if (mw_one->m_RenameDlg != nullptr) {
     if (mw_one->m_RenameDlg->isVisible()) {
       mw_one->m_RenameDlg->close();

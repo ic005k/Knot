@@ -48,31 +48,40 @@ void NotesList::genRecentOpenMenu() {
 }
 
 void NotesList::on_actionAdd_NoteBook_triggered() {
-  QString text;
+  QInputDialog* dlg = m_Method->inputDialog(
+      tr("New Notebook"), tr("Please enter notebook name:"), "");
 
-  m_NewNoteBook = new NewNoteBook(mw_one);
-  m_NewNoteBook->showDialog();
-  text = m_NewNoteBook->notebookName;
-  if (m_NewNoteBook->isOk && !text.isEmpty()) {
-    rootIndex = m_NewNoteBook->rootIndex;
-    notebookName = text;
-    on_btnNewNoteBook_clicked();
+  connect(dlg, &QDialog::accepted, this, [=]() {
+    // 点击确定：拿到输入内容
+    QString inputName = dlg->textValue();
+    if (!inputName.isEmpty()) {
+      notebookName = inputName;
 
-    loadAllNoteBook();
+      QTreeWidgetItem* item = new QTreeWidgetItem();
+      item->setText(0, notebookName);
+      item->setText(2, "#FF0000");
+      tw->addTopLevelItem(item);
+      tw->setCurrentItem(item);
 
-    int count = m_Method->getCountFromQW(mui->qwNoteBook);
-    int index = 0;
-    for (int i = 0; i < count; i++) {
-      if (pNoteBookItems.at(i) == tw->currentItem()) {
-        index = i;
-        break;
+      loadAllNoteBook();
+
+      int count = m_Method->getCountFromQW(mui->qwNoteBook);
+      int index = 0;
+      for (int i = 0; i < count; i++) {
+        if (pNoteBookItems.at(i) == tw->currentItem()) {
+          index = i;
+          break;
+        }
       }
-    }
-    setNoteBookCurrentIndex(index);
-    clickNoteBook();
+      setNoteBookCurrentIndex(index);
+      clickNoteBook();
 
-    saveNotesList();
-  }
+      saveNotesList();
+    }
+    dlg->deleteLater();  // 销毁对象
+  });
+
+  connect(dlg, &QDialog::rejected, this, [=]() { dlg->deleteLater(); });
 }
 
 void NotesList::on_actionDel_NoteBook_triggered() {
@@ -664,7 +673,7 @@ void NotesList::slotCreateSubNotebook(int qmlIndex) {
   if (!parentItem) return;
 
   QInputDialog* dlg = m_Method->inputDialog(
-      tr("New Sub Notebook"), tr("Please enter notebook name:"), "");
+      tr("New Sub Notebook"), tr("Please enter sub notebook name:"), "");
 
   connect(dlg, &QDialog::accepted, this, [=]() {
     // 点击确定：拿到输入内容

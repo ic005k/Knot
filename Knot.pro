@@ -398,7 +398,6 @@ SOURCES += \
     src/Notes/ColorDialog.cpp \
     src/Notes/MarkdownToHtml.cpp \
     src/Notes/MoveTo.cpp \
-    src/Notes/NewNoteBook.cpp \
     src/Notes/NoteDiffManager.cpp \
     src/Notes/NoteListModel.cpp \
     src/Notes/Notes.cpp \
@@ -664,7 +663,6 @@ HEADERS += \
     src/MyThread.h \
     src/Notes/ColorDialog.h \
     src/Notes/MoveTo.h \
-    src/Notes/NewNoteBook.h \
     src/Notes/NoteDiffManager.h \
     src/Notes/NoteListModel.h \
     src/Notes/Notes.h \
@@ -718,7 +716,6 @@ FORMS += \
     src/DateSelector.ui \
     src/MainWindow.ui \
     src/Notes/MoveTo.ui \
-    src/Notes/NewNoteBook.ui \
     src/Notes/Notes.ui \
     src/Notes/NotesList.ui \
     src/Notes/PrintPDF.ui \
