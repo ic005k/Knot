@@ -522,6 +522,7 @@ void Notes::openNotes() {
 
               if (remoteLastModi > localLastModi) {
                 remoteFiles.append(or_file);
+
                 qDebug() << "Remote time: " << remoteLastModi
                          << "Local time: " << localLastModi << or_file
                          << local_realfile;
@@ -595,6 +596,7 @@ void Notes::startBackgroundProcessRemoteFiles_MultiThread() {
   // 后台异步，但 串行执行本地处理（安全、稳定、不崩溃）
   QThreadPool::globalInstance()->start([this]() {
     for (const QString& file : std::as_const(remoteFiles)) {
+      if (isPasswordError) break;
       processSingleRemoteFile(file);
     }
 
@@ -616,6 +618,8 @@ void Notes::processSingleRemoteFile(const QString& file) {
   QString remoteLastModi;
   if (list.count() == 4 || list.count() == 2)
     remoteLastModi = list.at(0).trimmed();
+
+  isPasswordError = false;
 
   // ================================
   // 处理 mainnotes.json.zip
@@ -646,19 +650,18 @@ void Notes::processSingleRemoteFile(const QString& file) {
       return;
     }
 
-    if (!isPasswordError) {
-      QString pUtcStr = m_Method->getFileUTCString(pFile);
-      QString kUtcStr = m_Method->getFileUTCString(kFile);
-      if (pUtcStr > kUtcStr) {
-        QString tempFile = iniDir + "temp_notes_ini.tmp";
-        if (QFile::exists(tempFile)) QFile::remove(tempFile);
-        if (QFile::copy(pFile, tempFile)) {
-          m_Method->upIniFile(tempFile, kFile);
-          m_Method->delayDelFile(pFile);
-          m_Method->delayDelFile(zFile);
-        }
+    QString pUtcStr = m_Method->getFileUTCString(pFile);
+    QString kUtcStr = m_Method->getFileUTCString(kFile);
+    if (pUtcStr > kUtcStr) {
+      QString tempFile = iniDir + "temp_notes_ini.tmp";
+      if (QFile::exists(tempFile)) QFile::remove(tempFile);
+      if (QFile::copy(pFile, tempFile)) {
+        m_Method->upIniFile(tempFile, kFile);
+        m_Method->delayDelFile(pFile);
+        m_Method->delayDelFile(zFile);
       }
     }
+
   }
 
   // ================================
@@ -693,18 +696,17 @@ void Notes::processSingleRemoteFile(const QString& file) {
       }
     }
 
-    if (!isPasswordError) {
-      QString pUtcStr = m_Method->getFileUTCString(pFile);
-      QString kUtcStr = m_Method->getFileUTCString(kFile);
-      if (pUtcStr > kUtcStr) {
-        QFile::remove(kFile);
-        QFile::copy(pFile, kFile);
-        m_NotesList->m_dbManager.updateFileIndex(kFile);
-        m_NotesList->m_graphController->parser()->updateNoteCache(kFile);
-        m_Method->delayDelFile(pFile);
-        m_Method->delayDelFile(zFile);
-      }
+    QString pUtcStr = m_Method->getFileUTCString(pFile);
+    QString kUtcStr = m_Method->getFileUTCString(kFile);
+    if (pUtcStr > kUtcStr) {
+      QFile::remove(kFile);
+      QFile::copy(pFile, kFile);
+      m_NotesList->m_dbManager.updateFileIndex(kFile);
+      m_NotesList->m_graphController->parser()->updateNoteCache(kFile);
+      m_Method->delayDelFile(pFile);
+      m_Method->delayDelFile(zFile);
     }
+
   }
 
   // ================================
@@ -739,16 +741,15 @@ void Notes::processSingleRemoteFile(const QString& file) {
       }
     }
 
-    if (!isPasswordError) {
-      QString pUtcStr = m_Method->getFileUTCString(pFile);
-      QString kUtcStr = m_Method->getFileUTCString(kFile);
-      if (pUtcStr > kUtcStr) {
-        QFile::remove(kFile);
-        QFile::copy(pFile, kFile);
-        m_Method->delayDelFile(pFile);
-        m_Method->delayDelFile(zFile);
-      }
+    QString pUtcStr = m_Method->getFileUTCString(pFile);
+    QString kUtcStr = m_Method->getFileUTCString(kFile);
+    if (pUtcStr > kUtcStr) {
+      QFile::remove(kFile);
+      QFile::copy(pFile, kFile);
+      m_Method->delayDelFile(pFile);
+      m_Method->delayDelFile(zFile);
     }
+
   }
 
   // ================================
