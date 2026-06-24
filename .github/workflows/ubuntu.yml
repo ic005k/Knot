@@ -94,48 +94,41 @@ jobs:
         run: |
          cp res/icon.png bin/release/icon.png
          cp res/default.desktop bin/release/default.desktop
-
-         mkdir -p bin/release/usr/share/applications
-         cp res/default.desktop bin/release/usr/share/applications/default.desktop
-
-         mkdir -p bin/release/usr/share/icons/hicolor/512x512/apps
-         cp res/icon.png bin/release/usr/share/icons/hicolor/512x512/apps/icon.png
-
          cp ExtBin/linux/AppRun bin/release/AppRun
          chmod +x bin/release/AppRun
 
          APP_LIB_DIR="bin/release/lib"
          mkdir -p "$APP_LIB_DIR"
 
-         #cp ExtBin/linux/fcitx5/libFcitx5Qt6DBusAddons.so.5.1.9 "$APP_LIB_DIR/"
-         #cp ExtBin/linux/fcitx5/libfcitx5platforminputcontextplugin.so "$APP_LIB_DIR/"
+         cp ExtBin/linux/fcitx5/libFcitx5Qt6DBusAddons.so.5.1.9 "$APP_LIB_DIR/"
+         cp ExtBin/linux/fcitx5/libfcitx5platforminputcontextplugin.so "$APP_LIB_DIR/"
 
-         #(cd "$APP_LIB_DIR" && \
-         #ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
-         #ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
+         (cd "$APP_LIB_DIR" && \
+         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
+         ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
 
          QT6_PLUGINS_DIR="/home/runner/work/Knot/Qt/$QT_VERSION/gcc_64/plugins/platforminputcontexts"
          mkdir -p "$QT6_PLUGINS_DIR"
-         #cp ExtBin/linux/fcitx5/* "$QT6_PLUGINS_DIR/"
-         #chmod 755 "$QT6_PLUGINS_DIR/"
+         cp ExtBin/linux/fcitx5/* "$QT6_PLUGINS_DIR/"
+         chmod 755 "$QT6_PLUGINS_DIR/"
 
-         #(cd "$QT6_PLUGINS_DIR/" && \
-         #ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
-         #ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
+         (cd "$QT6_PLUGINS_DIR/" && \
+         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
+         ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
 
-         #echo "Copied to: $QT6_PLUGINS_DIR"
-         #ls -l "$QT6_PLUGINS_DIR"
+         echo "Copied to: $QT6_PLUGINS_DIR"
+         ls -l "$QT6_PLUGINS_DIR"
 
          cp -r ExtBin/linux/nss/* bin/release/lib/
          cp -P /usr/lib/x86_64-linux-gnu/libssl.so.3* bin/release/lib/
 
          APP_PLUGINS_DIR="bin/release/plugins/platforminputcontexts"
          mkdir -p "$APP_PLUGINS_DIR"
-         #cp ExtBin/linux/fcitx5/* "$APP_PLUGINS_DIR/"
+         cp ExtBin/linux/fcitx5/* "$APP_PLUGINS_DIR/"
 
-         #(cd "$APP_PLUGINS_DIR" && \
-         #ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
-         #ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
+         (cd "$APP_PLUGINS_DIR" && \
+         ln -sf libFcitx5Qt6DBusAddons.so.5.1.9 libFcitx5Qt6DBusAddons.so.1 && \
+         ln -sf libFcitx5Qt6DBusAddons.so.1 libFcitx5Qt6DBusAddons.so)
 
          cp /usr/lib/x86_64-linux-gnu/libibus-1.0.so.5 "$APP_LIB_DIR/"
          (cd "$APP_LIB_DIR" && ln -sf libibus-1.0.so.5 libibus-1.0.so)
@@ -173,5 +166,5 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
           asset_name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.AppImage
-          tag: ${{ github.ref_name }}
+          tag: ${{ github.ref }}
           overwrite: true
