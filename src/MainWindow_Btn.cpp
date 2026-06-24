@@ -171,7 +171,7 @@ void MainWindow::on_btnShowBookmark_pressed() {
 }
 
 void MainWindow::on_btnShareImage_pressed() {
-  m_ReceiveShare->shareImage(tr("Share to"), imgFileName, "image/png");
+  m_ReceiveShare->shareImage(tr("Share to"), bookimgFileName, "image/png");
 }
 
 void MainWindow::on_btnDelImage_pressed() {}

@@ -162,7 +162,7 @@ void Notes::closeEvent(QCloseEvent* event) {
     msg->ui->btnOk->setText(tr("Yes") + " (Y)");
     msg->ui->btnCancel->setText(tr("No") + " (N)");
     if (msg->showMsg(tr("Notes"), tr("Do you want to save the notes?"), 2)) {
-      saveMainNotes();
+      saveMDFile();
     }
   }
 
@@ -647,9 +647,9 @@ void Notes::processSingleRemoteFile(const QString& file) {
     }
 
     if (!isPasswordError) {
-      QFileInfo pFileInfo(pFile);
-      QFileInfo kFileInfo(kFile);
-      if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
+      QString pUtcStr = m_Method->getFileUTCString(pFile);
+      QString kUtcStr = m_Method->getFileUTCString(kFile);
+      if (pUtcStr > kUtcStr) {
         QString tempFile = iniDir + "temp_notes_ini.tmp";
         if (QFile::exists(tempFile)) QFile::remove(tempFile);
         if (QFile::copy(pFile, tempFile)) {
@@ -694,9 +694,9 @@ void Notes::processSingleRemoteFile(const QString& file) {
     }
 
     if (!isPasswordError) {
-      QFileInfo pFileInfo(pFile);
-      QFileInfo kFileInfo(kFile);
-      if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
+      QString pUtcStr = m_Method->getFileUTCString(pFile);
+      QString kUtcStr = m_Method->getFileUTCString(kFile);
+      if (pUtcStr > kUtcStr) {
         QFile::remove(kFile);
         QFile::copy(pFile, kFile);
         m_NotesList->m_dbManager.updateFileIndex(kFile);
@@ -740,9 +740,9 @@ void Notes::processSingleRemoteFile(const QString& file) {
     }
 
     if (!isPasswordError) {
-      QFileInfo pFileInfo(pFile);
-      QFileInfo kFileInfo(kFile);
-      if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
+      QString pUtcStr = m_Method->getFileUTCString(pFile);
+      QString kUtcStr = m_Method->getFileUTCString(kFile);
+      if (pUtcStr > kUtcStr) {
         QFile::remove(kFile);
         QFile::copy(pFile, kFile);
         m_Method->delayDelFile(pFile);
@@ -763,9 +763,9 @@ void Notes::processSingleRemoteFile(const QString& file) {
       kFile.replace(".png.zip", ".png");
     }
 
-    QFileInfo pFileInfo(pFile);
-    QFileInfo kFileInfo(kFile);
-    if (pFileInfo.lastModified() > kFileInfo.lastModified()) {
+    QString pUtcStr = m_Method->getFileUTCString(pFile);
+    QString kUtcStr = m_Method->getFileUTCString(kFile);
+    if (pUtcStr > kUtcStr) {
       QFile::remove(kFile);
       QFile::copy(pFile, kFile);
       m_Method->delayDelFile(pFile);

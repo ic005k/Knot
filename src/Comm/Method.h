@@ -32,6 +32,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkInterface>
 #include <QNetworkReply>
+#include <QTimeZone>
 #include <QTimer>
 #include <QtGui/QEventPoint>
 #include <QtGui/QTouchEvent>
@@ -491,7 +492,8 @@ class Method : public QDialog {
   void clearAllNotesList(QQuickWidget* qw);
 
   QString generateRandom3();
-  protected:
+
+ protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

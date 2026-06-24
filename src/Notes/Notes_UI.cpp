@@ -1,7 +1,7 @@
 #include "src/Notes/Notes.h"
 
 // 按钮点击
-void Notes::on_btnDone_clicked() { saveMainNotes(); }
+void Notes::on_btnDone_clicked() { saveMDFile(); }
 void Notes::on_btnInsertTable_clicked() {
 #ifndef Q_OS_ANDROID
   QString table = "|Title1|Title2|\n|------|------|\n";

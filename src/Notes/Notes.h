@@ -115,7 +115,7 @@ class Notes : public QDialog {
   qreal textHeight;
 
   QString textMemo;
-  void saveMainNotes();
+  void saveMDFile();
   QString fileName;
 
   qlonglong curPos;

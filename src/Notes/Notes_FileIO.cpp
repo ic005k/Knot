@@ -4,7 +4,7 @@
 
 #include "src/Notes/Notes.h"
 
-void Notes::saveMainNotes() {
+void Notes::saveMDFile() {
 #ifndef Q_OS_ANDROID
   mw_one->strLatestModify = tr("Modi Notes");
   if (isTextChange) {

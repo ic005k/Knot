@@ -3359,7 +3359,7 @@ int Method::getFlagToday(QTreeWidget* tw) {
   return isFlagToday;
 }
 
-QString Method::getFileUTCString(const QString& file) {
+/*QString Method::getFileUTCString(const QString& file) {
   QFileInfo fileInfo(file);
   if (!fileInfo.exists()) return "00000000000000";
 
@@ -3371,6 +3371,18 @@ QString Method::getFileUTCString(const QString& file) {
 
   QDateTime utcTime = localTime.toUTC();
   return utcTime.toString("yyyyMMddHHmmss");  // 无特殊字符，适合嵌入文件名
+}*/
+
+QString Method::getFileUTCString(const QString& file) {
+  QFileInfo fileInfo(file);
+  if (!fileInfo.exists()) return "00000000000000";
+
+  // 直接读取文件修改时间，强制指定UTC时区，一步到位
+  QDateTime standardUTC = fileInfo.lastModified(QTimeZone::UTC);
+
+  if (!standardUTC.isValid()) return "00000000000000";
+
+  return standardUTC.toString("yyyyMMddHHmmss");
 }
 
 QString Method::getBaseFlag(const QString& file) {

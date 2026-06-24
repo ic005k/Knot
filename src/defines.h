@@ -73,10 +73,10 @@ inline QRegularExpression regxNumber("^-?[0-9.]*$");
 inline QString iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
     strStats, SaveType, strY, strM, btnYText, btnMText, btnDText, errorInfo,
     CurrentYearMonth, zipfile, txt, searchStr, currentMDFile, copyText,
-    imgFileName, defaultFontFamily, customFontFamily, encPassword, btnYearText,
-    btnMonthText, strPage, ebookFile, strTitle, fileName, strOpfPath,
-    catalogueFile, strShowMsg, strStartTotalTime, strOpfFile, oldOpfPath,
-    strEpubTitle, strPercent;
+    bookimgFileName, defaultFontFamily, customFontFamily, encPassword,
+    btnYearText, btnMonthText, strPage, ebookFile, strTitle, fileName,
+    strOpfPath, catalogueFile, strShowMsg, strStartTotalTime, strOpfFile,
+    oldOpfPath, strEpubTitle, strPercent;
 
 inline QString ver;
 inline QString appName = "Knot";
