@@ -26,6 +26,7 @@
 #include "lib/quazip/quazip.h"
 #include "lib/quazip/quazipfile.h"
 #include "native_msg_host.h"
+#include "src/Comm/loglogger.h"
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 
@@ -181,9 +182,6 @@ int main(int argc, char* argv[]) {
   p_dir.mkpath(privateDir + "KnotData/memo/images");
   p_dir.mkpath(privateDir + "KnotData/memo/gps");
 
-  clearLockFiles(iniDir);
-  clearLockFiles(privateDir);
-
   strJBDict1 = privateDir + "dict/jieba.dict.utf8";
   strJBDict2 = privateDir + "dict/hmm_model.utf8";
   strJBDict3 = privateDir + "dict/user.dict.utf8";
@@ -205,6 +203,11 @@ int main(int argc, char* argv[]) {
 
   QDir dir0;
   dir0.mkpath(iniDir);
+
+  AppLogger::instance().initLogger(appName);
+
+  clearLockFiles(iniDir);
+  clearLockFiles(privateDir);
 
   iniPreferences =
       new QSettings(privateDir + "options.ini", QSettings::IniFormat, NULL);

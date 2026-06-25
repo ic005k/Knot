@@ -378,6 +378,7 @@ SOURCES += \
     src/Comm/Time24Picker.cpp \
     src/Comm/WheelWidget.cpp \
     src/Comm/enhancedcolorpicker.cpp \
+    src/Comm/loglogger.cpp \
     src/Comm/qaesencryption.cpp \
     src/DataManager.cpp \
     src/DateSelector.cpp \
@@ -647,6 +648,7 @@ HEADERS += \
     src/Comm/Time24Picker.h \
     src/Comm/WheelWidget.h \
     src/Comm/enhancedcolorpicker.h \
+    src/Comm/loglogger.h \
     src/Comm/qaesencryption.h \
     src/DataManager.h \
     src/DateSelector.h \

@@ -250,9 +250,9 @@ Rectangle {
         ctx.fillStyle = "#F44336"; // 红色标注最小速度
         ctx.fillRect(minSpeedPoint.x - 2, minSpeedPoint.y - 2, 4, 4);
 
-        // ========== 文本标签容错+增强显示(可选) ==========
+    // ========== 文本标签容错+增强显示(可选) ==========
 
-        /*
+    /*
         ctx.save()
         // 1. 确保pixelRatio有效（兜底值，避免undefined）
         const effectivePixelRatio = pixelRatio || 1
@@ -959,8 +959,8 @@ Rectangle {
             }
         }
 
-        console.log("insert阶段转换后的速度数组:", speedArray);
-        console.log("insert阶段转换后的海拔数组:", altitudeArray); // 新增日志
+        //console.log("insert阶段转换后的速度数组:", speedArray);
+        //console.log("insert阶段转换后的海拔数组:", altitudeArray); // 新增日志
 
         var speedJson = JSON.stringify(speedArray);
         var altitudeJson = JSON.stringify(altitudeArray); // 新增：海拔数据序列化
@@ -980,8 +980,8 @@ Rectangle {
         });
 
         var insertedItem = view.model.get(curIndex);
-        console.log("模型中存储的速度JSON:", insertedItem.speedData);
-        console.log("模型中存储的海拔JSON:", insertedItem.altitudeData); // 新增日志
+        //console.log("模型中存储的速度JSON:", insertedItem.speedData);
+        //console.log("模型中存储的海拔JSON:", insertedItem.altitudeData); // 新增日志
     }
 
     function insertItem(curIndex, t0, t1, t2, t3, t4, t5, t6, t7, speedData, altitudeData) {
@@ -1033,13 +1033,13 @@ Rectangle {
         }
 
         // ========== 保留旧实现的日志和 JSON 序列化逻辑（适配 Canvas 渲染） ==========
-        console.log("insert阶段转换后的速度数组:", speedArray);
-        console.log("insert阶段转换后的海拔数组:", altitudeArray);
+        //console.log("insert阶段转换后的速度数组:", speedArray);
+        //console.log("insert阶段转换后的海拔数组:", altitudeArray);
 
         var speedJson = JSON.stringify(speedArray);
         var altitudeJson = JSON.stringify(altitudeArray);
-        console.log("模型中存储的速度JSON:", speedJson);
-        console.log("模型中存储的海拔JSON:", altitudeJson);
+        //console.log("模型中存储的速度JSON:", speedJson);
+        //console.log("模型中存储的海拔JSON:", altitudeJson);
 
         // ========== 修复模型引用 + 字段名（完全对齐旧实现） ==========
         // 1. 模型改为 view.model（和旧实现一致，对应 ListView 的实际模型）
@@ -1060,7 +1060,7 @@ Rectangle {
 
         // 验证插入结果（可选，便于调试）
         var insertedItem = view.model.get(curIndex);
-        console.log("插入后验证 - speedData:", insertedItem.speedData, "altitudeData:", insertedItem.altitudeData);
+        //console.log("插入后验证 - speedData:", insertedItem.speedData, "altitudeData:", insertedItem.altitudeData);
     }
 
     function updateItem(curIndex, t0, t1, t2, t3, t4, t5, t6, height) {

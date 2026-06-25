@@ -1491,17 +1491,19 @@ void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
   );
 
   // ========== 关键修改3：打印日志，定位问题 ==========
-  if (invokeSuccess) {
-    qDebug() << "✅ 调用QML insertItem成功！";
-    qDebug() << "   传入速度数据长度：" << speedData.size() << "数据："
-             << speedData;
-    qDebug() << "   传入海拔数据长度：" << altitudeData.size() << "数据："
-             << altitudeData;
-  } else {
-    qCritical() << "❌ 调用QML insertItem失败！请检查：";
-    qCritical() << "   1. QML中insertItem函数名是否拼写正确（大小写敏感）";
-    qCritical() << "   2. 参数个数是否匹配（需要11个参数）";
-    qCritical() << "   3. rootObject是否正确指向包含insertItem的QML对象";
+  if (!isAndroid) {
+    if (invokeSuccess) {
+      qDebug() << "✅ 调用QML insertItem成功！";
+      // qDebug() << "   传入速度数据长度：" << speedData.size() << "数据："
+      //         << speedData;
+      // qDebug() << "   传入海拔数据长度：" << altitudeData.size() << "数据："
+      //          << altitudeData;
+    } else {
+      qCritical() << "❌ 调用QML insertItem失败！请检查：";
+      qCritical() << "   1. QML中insertItem函数名是否拼写正确（大小写敏感）";
+      qCritical() << "   2. 参数个数是否匹配（需要11个参数）";
+      qCritical() << "   3. rootObject是否正确指向包含insertItem的QML对象";
+    }
   }
 }
 
