@@ -14,8 +14,11 @@ class AppLogger {
   static void msgHandler(QtMsgType type, const QMessageLogContext& ctx,
                          const QString& msg);
   QString getLogRootDir() const;
+  // 读取当天日志全部内容并返回
+  QString getTodayLogText();
 
- private:
+  void copyTodayLogToClipboard();
+  private:
   AppLogger();
   ~AppLogger();
   AppLogger(const AppLogger&) = delete;

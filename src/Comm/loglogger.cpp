@@ -1,10 +1,12 @@
 #include "loglogger.h"
 
+#include <QClipboard>
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QGuiApplication>
 #include <QTextStream>
 #include <QThread>
 #include <iostream>
@@ -128,4 +130,28 @@ void AppLogger::clearExpiredLogs() {
   for (const QFileInfo& info : logFiles) {
     if (info.birthTime() < expireTime) QFile::remove(info.absoluteFilePath());
   }
+}
+
+QString AppLogger::getTodayLogText() {
+  QString todayStr = QDate::currentDate().toString("yyyy-MM-dd");
+  QString logFile =
+      m_logRootDir + QString("%1_%2.log").arg(m_appName).arg(todayStr);
+
+  QFile f(logFile);
+  if (!f.exists() || !f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    return "暂无今日日志";
+  }
+  // 限制最大读取 5MB，避免超大日志卡死界面
+  const qint64 MAX_READ = 5 * 1024 * 1024;
+  QByteArray data = f.read(MAX_READ);
+  f.close();
+
+  return QString::fromUtf8(data);
+}
+
+// 对外工具函数：直接复制当日日志到剪贴板
+void AppLogger::copyTodayLogToClipboard() {
+  QString logText = getTodayLogText();
+  QClipboard* clip = QGuiApplication::clipboard();
+  clip->setText(logText);
 }

@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "src/Comm/loglogger.h"
 
 void MainWindow::on_actionAbout() {
   QString str = "\n" + appName + "  Ver: " + ver + "\n\n" + tr("Startup Time") +
@@ -314,6 +315,8 @@ void MainWindow::init_Menu(QMenu* mainMenu) {
 
   QAction* actPreferences = new QAction(tr("Preferences"));
 
+  QAction* actCopyLog = new QAction(tr("Copy Log to Clipboard"));
+
   QAction* actAbout = new QAction(tr("About") + " (" + ver + ")");
   QAction* actOneDrive = new QAction(tr("Cloud Backup and Restore Data"));
 
@@ -353,6 +356,15 @@ void MainWindow::init_Menu(QMenu* mainMenu) {
   connect(actShareFile, &QAction::triggered, mw_one,
           &MainWindow::on_actionShareFile);
 
+  connect(actCopyLog, &QAction::triggered, this, [=]() {
+    AppLogger::instance().copyTodayLogToClipboard();
+    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+    m_ShowMsg->showMsg(tr("Success"),
+                       tr("Today's log has been copied to clipboard, you "
+                          "can paste it anywhere."),
+                       1);
+  });
+
   mainMenu->addAction(actAddTab);
   mainMenu->addAction(actDelTab);
   mainMenu->addAction(actRenameTab);
@@ -382,6 +394,7 @@ void MainWindow::init_Menu(QMenu* mainMenu) {
   mainMenu->addAction(actBakFileList);
   mainMenu->addAction(actTabRecycle);
   mainMenu->addAction(actShareFile);
+  mainMenu->addAction(actCopyLog);
   mainMenu->addAction(actAbout);
 
   mainMenu->setStyleSheet(m_Method->qssMenu);

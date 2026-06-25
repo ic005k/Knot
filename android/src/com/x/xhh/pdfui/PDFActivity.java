@@ -3,10 +3,9 @@ package com.xhh.pdfui;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.net.Uri;
+import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,6 +23,7 @@ import com.github.barteksc.pdfviewer.listener.Callbacks;
 import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
 import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
 import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
+import com.github.barteksc.pdfviewer.listener.OnTapListener;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 import com.github.barteksc.pdfviewer.util.FitPolicy;
 import com.shockwave.pdfium.PdfDocument;
@@ -429,6 +429,10 @@ public class PDFActivity
             .onPageError(this)
             .pageFitPolicy(FitPolicy.BOTH)
             .nightMode(isNightMode)
+            .onTap(point -> {
+                hideOrShowToolBar();
+                return true;
+            })
             .load();
     }
 
@@ -448,6 +452,10 @@ public class PDFActivity
             .spacing(10) // 单位 dp
             .onPageError(this)
             .nightMode(isNightMode)
+            .onTap(point -> {
+                hideOrShowToolBar();
+                return true;
+            })
             .load();
     }
 
