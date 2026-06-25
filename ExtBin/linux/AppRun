@@ -1,12 +1,16 @@
 #!/bin/bash
-# 获取 AppImage 解包后的根目录绝对路径
+# 获取AppImage自动挂载后的根目录（不解包也能正常获取）
 HERE="$(dirname "$(readlink -f "$0")")"
 
-# 设置关键环境变量
-export QT_PLUGIN_PATH="$HERE/plugins"        # 指向 plugins 目录
-export LD_LIBRARY_PATH="$HERE/lib:$LD_LIBRARY_PATH"  # 指向 lib 目录
-export QT_IM_MODULE=fcitx                        # 输入法模块
-export XMODIFIERS=@im=fcitx                      # X11 输入法协议
+# Qt插件搜索路径，优先包内自带插件
+export QT_PLUGIN_PATH="$HERE/plugins:$QT_PLUGIN_PATH"
+# 动态库同时检索外层lib + 输入法插件目录，解决ibus依赖找不到问题
+export LD_LIBRARY_PATH="$HERE/lib:$HERE/plugins/platforminputcontexts:$LD_LIBRARY_PATH"
 
-# 启动应用程序
+# 不覆盖用户系统输入法环境，仅无配置时默认fcitx5
+if [ -z "$QT_IM_MODULE" ]; then
+    export QT_IM_MODULE=fcitx5
+    export XMODIFIERS=@im=fcitx5
+fi
+
 exec "$HERE/Knot" "$@"
