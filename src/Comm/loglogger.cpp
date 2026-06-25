@@ -75,14 +75,15 @@ void AppLogger::writeToFile(QtMsgType type, const QString& msg) {
       levelTag = "UNKNOWN";
   }
 
-  QString logLine = QString("[%1][TID:%2][%3] %4\n")
-                        .arg(timeStr)
-                        .arg(threadId, 6)
-                        .arg(levelTag)
-                        .arg(msg);
+  QString logLine =
+      QString("[%1][TID:%2][%3] %4\n")
+          .arg(timeStr, QString::number(threadId, 10, 6), levelTag, msg);
 
   // 控制台输出
-  std::cout << logLine.toStdString();
+  // 非强制刷新
+  // std::cout << logLine.toStdString();
+  // 强制刷新
+  std::cout << logLine.toStdString() << std::flush;
 
   rotateLogFile();
   QFile logFile(m_currentLogPath);
@@ -104,7 +105,7 @@ void AppLogger::rotateLogFile() {
   QString todayStr = QDate::currentDate().toString("yyyy-MM-dd");
   // 直接拼接路径，m_logRootDir末尾已有/
   QString targetLogName =
-      m_logRootDir + QString("%1_%2.log").arg(m_appName).arg(todayStr);
+      m_logRootDir + QString("%1_%2.log").arg(m_appName, todayStr);
 
   if (m_currentLogPath != targetLogName) {
     m_currentLogPath = targetLogName;
@@ -127,15 +128,20 @@ void AppLogger::clearExpiredLogs() {
   QFileInfoList logFiles = dir.entryInfoList();
   QDateTime expireTime = QDateTime::currentDateTime().addDays(-MAX_KEEP_DAYS);
 
-  for (const QFileInfo& info : logFiles) {
-    if (info.birthTime() < expireTime) QFile::remove(info.absoluteFilePath());
+  // 传统下标循环，无detach警告
+  for (int i = 0; i < logFiles.size(); ++i) {
+    const QFileInfo& info = logFiles[i];
+    // lastModified 全平台稳定，替代不可靠的 birthTime
+    if (info.lastModified() < expireTime) {
+      QFile::remove(info.absoluteFilePath());
+    }
   }
 }
 
 QString AppLogger::getTodayLogText() {
   QString todayStr = QDate::currentDate().toString("yyyy-MM-dd");
   QString logFile =
-      m_logRootDir + QString("%1_%2.log").arg(m_appName).arg(todayStr);
+      m_logRootDir + QString("%1_%2.log").arg(m_appName, todayStr);
 
   QFile f(logFile);
   if (!f.exists() || !f.open(QIODevice::ReadOnly | QIODevice::Text)) {
