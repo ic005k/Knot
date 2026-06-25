@@ -1066,8 +1066,17 @@ Item {
             color: "#3A362E"
             opacity: 0.7
             radius: 4
-            rotation: isLandscape ? 90 : 0
-            transformOrigin: Item.Center
+
+            //rotation: isLandscape ? 90 : 0
+            //transformOrigin: Item.Center
+
+            transform: [
+                Rotation {
+                    angle: isLandscape ? 90 : 0
+                    origin.x: width / 2
+                    origin.y: height / 2
+                }
+            ]
         }
 
         Text {
@@ -1078,8 +1087,17 @@ Item {
             font.bold: true
             color: "#F0E6D2"
             padding: 8
-            rotation: isLandscape ? 90 : 0
-            transformOrigin: Item.Center
+
+            //rotation: isLandscape ? 90 : 0
+            //transformOrigin: Item.Center
+
+            transform: [
+                Rotation {
+                    angle: isLandscape ? 90 : 0
+                    origin.x: width / 2
+                    origin.y: height / 2
+                }
+            ]
         }
 
         // 淡入动画

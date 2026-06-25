@@ -48,13 +48,6 @@ class Preferences : public QDialog {
 
   void openPreferences();
 
- protected:
-  void keyReleaseEvent(QKeyEvent* event) override;
-
-  bool eventFilter(QObject* watch, QEvent* evn) override;
-  void closeEvent(QCloseEvent* event) override;
-
- public slots:
   void on_btnShowPassword_pressed();
 
   void on_btnShowPassword_released();
@@ -63,11 +56,19 @@ class Preferences : public QDialog {
 
   void on_btnShowValidate_released();
 
-  void on_chkZip_clicked();
-
   void on_editPassword_textChanged(const QString& arg1);
 
   void on_editValidate_textChanged(const QString& arg1);
+
+  void on_chkZip_clicked();
+
+ protected:
+  void keyReleaseEvent(QKeyEvent* event) override;
+
+  bool eventFilter(QObject* watch, QEvent* evn) override;
+  void closeEvent(QCloseEvent* event) override;
+
+ public slots:
 
  private slots:
   void on_btnBack_clicked();

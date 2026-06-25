@@ -206,6 +206,8 @@ class NotesList : public QDialog {
 
   void delRemoteWebDAVFiles();
 
+  void on_btnRename_clicked();
+
  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
@@ -224,8 +226,6 @@ class NotesList : public QDialog {
   void clickNoteBook();
 
   void on_btnClose_clicked();
-
-  void on_btnRename_clicked();
 
   void on_btnDel_clicked();
 

@@ -116,7 +116,7 @@ void CategoryList::on_listWidget_itemDoubleClicked(QListWidgetItem* item) {
   setCategoryText();
 }
 
-void CategoryList::on_btnRename_clicked() {
+void CategoryList::on_Rename() {
   if (ui->listWidget->count() == 0) return;
 
   int row = m_Method->getCurrentIndexFromQW(mui->qwCategory);

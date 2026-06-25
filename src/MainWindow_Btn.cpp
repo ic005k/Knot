@@ -445,7 +445,7 @@ void MainWindow::on_btnDelType_pressed() {
 void MainWindow::on_btnRenameType_pressed() {
   m_CategoryList->ui->editRename->setText(
       mui->editRenameType->text().trimmed());
-  m_CategoryList->on_btnRename_clicked();
+  m_CategoryList->on_Rename();
 }
 
 void MainWindow::on_btnBackSetTab_pressed() {
