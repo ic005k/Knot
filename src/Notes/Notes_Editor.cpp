@@ -31,6 +31,7 @@ void Notes::initMarkdownEditor(QsciScintilla* editor) {
   markdownLexer->setFont(defaultFont, QsciLexerMarkdown::CodeBlock);
 
   editor->setFolding(QsciScintilla::BoxedTreeFoldStyle);
+
   editor->setAutoIndent(true);
   editor->setBraceMatching(QsciScintilla::SloppyBraceMatch);
   editor->setMarginLineNumbers(1, true);
@@ -92,6 +93,15 @@ void Notes::initMarkdownEditor(QsciScintilla* editor) {
 
 void Notes::init_md() {
 #ifndef Q_OS_ANDROID
+
+  if (isDark) {
+    m_EditSource->verticalScrollBar()->setStyleSheet(
+        mw_one->m_MainHelper->darkPCScrollbarStyle);
+  } else {
+    m_EditSource->verticalScrollBar()->setStyleSheet(
+        mw_one->m_MainHelper->lightPCScrollbarStyle);
+  }
+
   initMarkdownLexer();
   initMarkdownEditor(m_EditSource);
 #endif
@@ -182,11 +192,14 @@ int Notes::getSearchMatchCount(const QString& text) {
 
 void Notes::initMarkdownLexer() {
 #ifndef Q_OS_ANDROID
-  // 只创建一次lexer，全程复用
-  if (!markdownLexer) {
-    markdownLexer = new QsciLexerMarkdown(m_EditSource);
-    m_EditSource->setLexer(markdownLexer);
+  if (markdownLexer) {
+    markdownLexer->deleteLater();
+    markdownLexer = nullptr;
   }
+
+  markdownLexer = new QsciLexerMarkdown(m_EditSource);
+  m_EditSource->setLexer(markdownLexer);
+
   // 初始化默认亮色主题
   applyMdLexerTheme(isDark);
 #endif

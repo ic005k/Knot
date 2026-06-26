@@ -324,7 +324,7 @@ class Notes : public QDialog {
   void jumpToPrevMatch();
 
 #ifndef Q_OS_ANDROID
-  QsciLexerMarkdown* markdownLexer;
+  QsciLexerMarkdown* markdownLexer = nullptr;
 #endif
 
   void initMarkdownLexer();
