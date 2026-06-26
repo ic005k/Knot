@@ -332,6 +332,7 @@ class Notes : public QDialog {
   QString addImagePathToHtml(QString strhtml);
 
   void initEditorScrollBars();
+
   void saveEditorState(const QString& filePath);
   void restoreEditorState(const QString& filePath);
 

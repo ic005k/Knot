@@ -99,8 +99,15 @@ QString Notes::formatMDText(QString text) {
 }
 
 void Notes::saveEditorState(const QString& filePath) {
+  Q_UNUSED(filePath);
 #ifndef Q_OS_ANDROID
   QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);
+
+  settings.setValue("x", this->x());
+  settings.setValue("y", this->y());
+  settings.setValue("w", this->width());
+  settings.setValue("h", this->height());
+
   QString groupName = "Documents/" + QFileInfo(filePath).canonicalFilePath();
   groupName.replace("/", "_");
   settings.beginGroup(groupName);
@@ -110,16 +117,29 @@ void Notes::saveEditorState(const QString& filePath) {
   settings.setValue("cursorIndex", index);
   settings.setValue("vsbar",
                     m_EditSource->verticalScrollBar()->sliderPosition());
+
   settings.endGroup();
 #endif
 }
 
 void Notes::restoreEditorState(const QString& filePath) {
+  Q_UNUSED(filePath);
 #ifndef Q_OS_ANDROID
   QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);
+
+  int x, y, w, h;
+  x = settings.value("x", 0).toInt();
+  y = settings.value("y", 20).toInt();
+  w = settings.value("w", this->width()).toInt();
+  h = settings.value("h", this->height()).toInt();
+
+  move(x, y);
+  resize(w, h);
+
   QString groupName = "Documents/" + QFileInfo(filePath).canonicalFilePath();
   groupName.replace("/", "_");
   settings.beginGroup(groupName);
+
   int line = settings.value("cursorLine", 0).toInt();
   int index = settings.value("cursorIndex", 0).toInt();
   int vsbar = settings.value("vsbar", 0).toInt();
