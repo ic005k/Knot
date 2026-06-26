@@ -6,20 +6,6 @@ QT += xml svg concurrent
 # 在发布构建时禁用调试支持
 DEFINES += QT_NO_DEBUG QML_DISABLE_PROFILER
 
-####################################################
-
-# 仅 GCC / Clang (含 Windows clang-cl) 禁用静态分析警告
-clang|gcc {
-    QMAKE_CXXFLAGS += -Wno-analyzer
-}
-
-# Windows MSVC 关闭静态分析（不用 Clang 时）
-win32-msvc* {
-    QMAKE_CXXFLAGS += /analyze-
-}
-
-######################################################
-
 win32 {
     QMAKE_CFLAGS += /utf-8
     QMAKE_CXXFLAGS += /utf-8
