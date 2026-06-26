@@ -24,42 +24,6 @@ void Notes::initEditor() {
 #endif
 }
 
-void Notes::initMarkdownLexer() {
-#ifndef Q_OS_ANDROID
-  markdownLexer = new QsciLexerMarkdown(m_EditSource);
-  m_EditSource->setLexer(markdownLexer);
-  m_EditSource->SendScintilla(QsciScintilla::SCI_STYLERESETDEFAULT);
-  m_EditSource->setCaretForegroundColor(QColor(0, 0, 0));
-  m_EditSource->recolor();
-#endif
-}
-
-void Notes::initMarkdownLexerDark() {
-#ifndef Q_OS_ANDROID
-  m_EditSource->setLexer(nullptr);
-  markdownLexer = new QsciLexerMarkdown(m_EditSource);
-
-  markdownLexer->setDefaultPaper(QColor(0x1E1E1E));
-  markdownLexer->setDefaultColor(QColor(0xE0E0E0));
-
-  markdownLexer->setColor(QColor(0x66CCFF), QsciLexerMarkdown::Header1);
-  markdownLexer->setColor(QColor(0x66FFFF), QsciLexerMarkdown::Header2);
-  markdownLexer->setColor(QColor(0xFF99FF), QsciLexerMarkdown::Header3);
-  markdownLexer->setColor(QColor(0x66CCFF), QsciLexerMarkdown::Link);
-  markdownLexer->setColor(QColor(0xF0F0F0), QsciLexerMarkdown::CodeBlock);
-  markdownLexer->setPaper(QColor(0x2B2B2B), QsciLexerMarkdown::CodeBlock);
-  markdownLexer->setColor(QColor(0xD7BA7D), QsciLexerMarkdown::BlockQuote);
-
-  m_EditSource->setLexer(markdownLexer);
-  m_EditSource->setCaretLineBackgroundColor(QColor(0x2D2D30));
-  m_EditSource->setCaretForegroundColor(QColor(0xFFFFFF));
-  m_EditSource->setMarginsBackgroundColor(QColor(0x1E1E1E));
-  m_EditSource->setMarginsForegroundColor(QColor(0x858585));
-  m_EditSource->setWrapMode(QsciScintilla::WrapWord);
-  m_EditSource->recolor();
-#endif
-}
-
 #ifndef Q_OS_ANDROID
 void Notes::initMarkdownEditor(QsciScintilla* editor) {
   QFont defaultFont = QFont(this->font().family(), fontSize);
@@ -128,15 +92,7 @@ void Notes::initMarkdownEditor(QsciScintilla* editor) {
 
 void Notes::init_md() {
 #ifndef Q_OS_ANDROID
-  if (isDark) {
-    initMarkdownLexerDark();
-    m_EditSource->verticalScrollBar()->setStyleSheet(
-        mw_one->m_MainHelper->darkPCScrollbarStyle);
-  } else {
-    initMarkdownLexer();
-    m_EditSource->verticalScrollBar()->setStyleSheet(
-        mw_one->m_MainHelper->lightPCScrollbarStyle);
-  }
+  initMarkdownLexer();
   initMarkdownEditor(m_EditSource);
 #endif
 }
@@ -222,4 +178,221 @@ int Notes::getSearchMatchCount(const QString& text) {
   return count;
 #endif
   return 0;
+}
+
+void Notes::initMarkdownLexer() {
+#ifndef Q_OS_ANDROID
+  // 只创建一次lexer，全程复用
+  if (!markdownLexer) {
+    markdownLexer = new QsciLexerMarkdown(m_EditSource);
+    m_EditSource->setLexer(markdownLexer);
+  }
+  // 初始化默认亮色主题
+  applyMdLexerTheme(isDark);
+#endif
+}
+
+// 一键切换深色/亮色（外部切换主题直接调用这个）
+void Notes::switchMdDarkTheme(bool dark) {
+#ifndef Q_OS_ANDROID
+  if (!markdownLexer || !m_EditSource) return;
+  applyMdLexerTheme(dark);
+  m_EditSource->recolor();
+#endif
+}
+
+void Notes::applyMdLexerTheme(bool darkMode) {
+#ifndef Q_OS_ANDROID
+  using MdLex = QsciLexerMarkdown;
+  QColor bgMain, fgNormal, caretColor, caretLineBg, selBg, marginBg, marginFg;
+  // 修复：手动构造等宽字体，避开 defaultFont(style) 参数问题
+  QFont monoFont("Consolas, Fira Code, Menlo", 11);
+
+  if (darkMode) {
+    bgMain = QColor(0x1E1E1E);
+    fgNormal = QColor(0xE0E0E0);
+    caretColor = Qt::white;
+    caretLineBg = QColor(0x2D2D30);
+    selBg = QColor(0x404048);
+    marginBg = QColor(0x1E1E1E);
+    marginFg = QColor(0x858585);
+
+    markdownLexer->setDefaultPaper(bgMain);
+    markdownLexer->setDefaultColor(fgNormal);
+
+    // 0 普通正文
+    markdownLexer->setColor(fgNormal, MdLex::Default);
+    markdownLexer->setPaper(bgMain, MdLex::Default);
+
+    // 各级标题
+    markdownLexer->setColor(QColor(0x66CCFF), MdLex::Header1);
+    markdownLexer->setPaper(bgMain, MdLex::Header1);
+    markdownLexer->setColor(QColor(0x66FFFF), MdLex::Header2);
+    markdownLexer->setPaper(bgMain, MdLex::Header2);
+    markdownLexer->setColor(QColor(0xFF99FF), MdLex::Header3);
+    markdownLexer->setPaper(bgMain, MdLex::Header3);
+    markdownLexer->setColor(QColor(0xB0C4FF), MdLex::Header4);
+    markdownLexer->setPaper(bgMain, MdLex::Header4);
+    markdownLexer->setColor(QColor(0xB0C4FF), MdLex::Header5);
+    markdownLexer->setPaper(bgMain, MdLex::Header5);
+    markdownLexer->setColor(QColor(0xB0C4FF), MdLex::Header6);
+    markdownLexer->setPaper(bgMain, MdLex::Header6);
+
+    // 链接 + 下划线
+    markdownLexer->setColor(QColor(0x66CCFF), MdLex::Link);
+    markdownLexer->setPaper(bgMain, MdLex::Link);
+    m_EditSource->SendScintilla(QsciScintilla::SCI_STYLESETUNDERLINE,
+                                MdLex::Link, 1);
+
+    // 行内代码 `xxx` / ``xxx``
+    markdownLexer->setColor(QColor(0xA6E3A1), MdLex::CodeBackticks);
+    markdownLexer->setPaper(QColor(0x2B2B2B), MdLex::CodeBackticks);
+    markdownLexer->setColor(QColor(0xA6E3A1), MdLex::CodeDoubleBackticks);
+    markdownLexer->setPaper(QColor(0x2B2B2B), MdLex::CodeDoubleBackticks);
+
+    // 代码块 ``` ... ```
+    markdownLexer->setColor(QColor(0xF0F0F0), MdLex::CodeBlock);
+    markdownLexer->setPaper(QColor(0x2B2B2B), MdLex::CodeBlock);
+
+    // 引用 > xxx
+    markdownLexer->setColor(QColor(0xD7BA7D), MdLex::BlockQuote);
+    markdownLexer->setPaper(bgMain, MdLex::BlockQuote);
+    QFont fontQuote = monoFont;
+    fontQuote.setItalic(true);
+    markdownLexer->setFont(fontQuote, MdLex::BlockQuote);
+
+    // 无序列表 - *
+    markdownLexer->setColor(QColor(0xFFB86C), MdLex::UnorderedListItem);
+    markdownLexer->setPaper(bgMain, MdLex::UnorderedListItem);
+    // 有序列表 1.
+    markdownLexer->setColor(QColor(0xFFB86C), MdLex::OrderedListItem);
+    markdownLexer->setPaper(bgMain, MdLex::OrderedListItem);
+
+    // 加粗 ** / __
+    QFont fontBold = monoFont;
+    fontBold.setBold(true);
+    markdownLexer->setColor(Qt::white, MdLex::StrongEmphasisAsterisks);
+    markdownLexer->setPaper(bgMain, MdLex::StrongEmphasisAsterisks);
+    markdownLexer->setFont(fontBold, MdLex::StrongEmphasisAsterisks);
+
+    markdownLexer->setColor(Qt::white, MdLex::StrongEmphasisUnderscores);
+    markdownLexer->setPaper(bgMain, MdLex::StrongEmphasisUnderscores);
+    markdownLexer->setFont(fontBold, MdLex::StrongEmphasisUnderscores);
+
+    // 斜体 * / _
+    QFont fontItalic = monoFont;
+    fontItalic.setItalic(true);
+    markdownLexer->setColor(QColor(0xC0C0C0), MdLex::EmphasisAsterisks);
+    markdownLexer->setPaper(bgMain, MdLex::EmphasisAsterisks);
+    markdownLexer->setFont(fontItalic, MdLex::EmphasisAsterisks);
+
+    markdownLexer->setColor(QColor(0xC0C0C0), MdLex::EmphasisUnderscores);
+    markdownLexer->setPaper(bgMain, MdLex::EmphasisUnderscores);
+    markdownLexer->setFont(fontItalic, MdLex::EmphasisUnderscores);
+
+    // 删除线 ~~ 修复：使用数字2031代替不存在的枚举
+    markdownLexer->setColor(QColor(0x888888), MdLex::StrikeOut);
+    markdownLexer->setPaper(bgMain, MdLex::StrikeOut);
+    m_EditSource->SendScintilla(2031, MdLex::StrikeOut, 1);
+
+    // 分割线 HR
+    markdownLexer->setColor(QColor(0x707070), MdLex::HorizontalRule);
+    markdownLexer->setPaper(bgMain, MdLex::HorizontalRule);
+  } else {
+    // 亮色主题
+    bgMain = Qt::white;
+    fgNormal = QColor(0x24292F);
+    caretColor = Qt::black;
+    caretLineBg = QColor(0xF0F4F8);
+    selBg = QColor(0xB3D7FF);
+    marginBg = Qt::white;
+    marginFg = QColor(0x656D76);
+
+    markdownLexer->setDefaultPaper(bgMain);
+    markdownLexer->setDefaultColor(fgNormal);
+
+    markdownLexer->setColor(fgNormal, MdLex::Default);
+    markdownLexer->setPaper(bgMain, MdLex::Default);
+
+    // 标题
+    markdownLexer->setColor(QColor(0x0969DA), MdLex::Header1);
+    markdownLexer->setPaper(bgMain, MdLex::Header1);
+    markdownLexer->setColor(QColor(0x0969DA), MdLex::Header2);
+    markdownLexer->setPaper(bgMain, MdLex::Header2);
+    markdownLexer->setColor(QColor(0x8250DF), MdLex::Header3);
+    markdownLexer->setPaper(bgMain, MdLex::Header3);
+    markdownLexer->setColor(QColor(0x0969DA), MdLex::Header4);
+    markdownLexer->setPaper(bgMain, MdLex::Header4);
+    markdownLexer->setColor(QColor(0x0969DA), MdLex::Header5);
+    markdownLexer->setPaper(bgMain, MdLex::Header5);
+    markdownLexer->setColor(QColor(0x0969DA), MdLex::Header6);
+    markdownLexer->setPaper(bgMain, MdLex::Header6);
+
+    // 链接
+    markdownLexer->setColor(QColor(0x0969DA), MdLex::Link);
+    markdownLexer->setPaper(bgMain, MdLex::Link);
+    m_EditSource->SendScintilla(QsciScintilla::SCI_STYLESETUNDERLINE,
+                                MdLex::Link, 1);
+
+    // 行内代码
+    markdownLexer->setColor(QColor(0xCF222E), MdLex::CodeBackticks);
+    markdownLexer->setPaper(QColor(0xF6F8FA), MdLex::CodeBackticks);
+    markdownLexer->setColor(QColor(0xCF222E), MdLex::CodeDoubleBackticks);
+    markdownLexer->setPaper(QColor(0xF6F8FA), MdLex::CodeDoubleBackticks);
+
+    // 代码块
+    markdownLexer->setColor(fgNormal, MdLex::CodeBlock);
+    markdownLexer->setPaper(QColor(0xF6F8FA), MdLex::CodeBlock);
+
+    // 引用
+    markdownLexer->setColor(QColor(0x656D76), MdLex::BlockQuote);
+    markdownLexer->setPaper(bgMain, MdLex::BlockQuote);
+    QFont fontQuote = monoFont;
+    fontQuote.setItalic(true);
+    markdownLexer->setFont(fontQuote, MdLex::BlockQuote);
+
+    // 列表标记
+    markdownLexer->setColor(QColor(0x9A6700), MdLex::UnorderedListItem);
+    markdownLexer->setPaper(bgMain, MdLex::UnorderedListItem);
+    markdownLexer->setColor(QColor(0x9A6700), MdLex::OrderedListItem);
+    markdownLexer->setPaper(bgMain, MdLex::OrderedListItem);
+
+    // 加粗
+    QFont fontBold = monoFont;
+    fontBold.setBold(true);
+    markdownLexer->setColor(fgNormal, MdLex::StrongEmphasisAsterisks);
+    markdownLexer->setPaper(bgMain, MdLex::StrongEmphasisAsterisks);
+    markdownLexer->setFont(fontBold, MdLex::StrongEmphasisAsterisks);
+    markdownLexer->setColor(fgNormal, MdLex::StrongEmphasisUnderscores);
+    markdownLexer->setPaper(bgMain, MdLex::StrongEmphasisUnderscores);
+    markdownLexer->setFont(fontBold, MdLex::StrongEmphasisUnderscores);
+
+    // 斜体
+    QFont fontItalic = monoFont;
+    fontItalic.setItalic(true);
+    markdownLexer->setColor(QColor(0x57606A), MdLex::EmphasisAsterisks);
+    markdownLexer->setPaper(bgMain, MdLex::EmphasisAsterisks);
+    markdownLexer->setFont(fontItalic, MdLex::EmphasisAsterisks);
+    markdownLexer->setColor(QColor(0x57606A), MdLex::EmphasisUnderscores);
+    markdownLexer->setPaper(bgMain, MdLex::EmphasisUnderscores);
+    markdownLexer->setFont(fontItalic, MdLex::EmphasisUnderscores);
+
+    // 删除线 数字指令
+    markdownLexer->setColor(QColor(0x8C959F), MdLex::StrikeOut);
+    markdownLexer->setPaper(bgMain, MdLex::StrikeOut);
+    m_EditSource->SendScintilla(2031, MdLex::StrikeOut, 1);
+
+    // 分割线
+    markdownLexer->setColor(QColor(0xD1D9E0), MdLex::HorizontalRule);
+    markdownLexer->setPaper(bgMain, MdLex::HorizontalRule);
+  }
+
+  // 全局编辑器UI同步
+  m_EditSource->setCaretForegroundColor(caretColor);
+  m_EditSource->setCaretLineBackgroundColor(caretLineBg);
+  m_EditSource->setMarginsBackgroundColor(marginBg);
+  m_EditSource->setMarginsForegroundColor(marginFg);
+  m_EditSource->setSelectionBackgroundColor(selBg);
+  m_EditSource->setSelectionForegroundColor(fgNormal);
+#endif
 }

@@ -330,7 +330,6 @@ class Notes : public QDialog {
   void initMarkdownLexer();
   QString imageToBase64(const QString& path);
   QString addImagePathToHtml(QString strhtml);
-  void initMarkdownLexerDark();
 
   void initEditorScrollBars();
   void saveEditorState(const QString& filePath);
@@ -346,6 +345,8 @@ class Notes : public QDialog {
   void startBackgroundProcessRemoteFiles_MultiThread();
   void buildCleanFileList();
   void insertNoteLink(const QString& title);
+  void switchMdDarkTheme(bool dark);
+  void applyMdLexerTheme(bool darkMode);
 };
 
 ///////////////////////////////////////////////////////////////////////

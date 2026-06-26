@@ -584,8 +584,16 @@ void NotesList::saveCurrentNoteInfo() {
   // 临时文件更名覆盖正式ini
   if (!tempFile.rename(iniPath)) {
     // 更名失败兜底：直接复制内容
-    tempFile.open(QIODevice::ReadOnly);
-    iniFile.open(QIODevice::WriteOnly);
+    bool tempOk = tempFile.open(QIODevice::ReadOnly);
+    if (!tempOk) {
+      // 失败处理逻辑
+    }
+
+    bool iniOk = iniFile.open(QIODevice::WriteOnly);
+    if (!iniOk) {
+      // 打开失败处理
+    }
+
     iniFile.write(tempFile.readAll());
     tempFile.close();
     iniFile.close();
