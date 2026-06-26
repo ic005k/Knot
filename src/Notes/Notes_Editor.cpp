@@ -64,13 +64,29 @@ void Notes::initMarkdownEditor(QsciScintilla* editor) {
   editor->setMarginWidth(2, 5);
   editor->setMarginBackgroundColor(2, QColor(255, 228, 225));
 
+  //--------------------------------------------------------------
+
+  // 光标宽度
   editor->setCaretWidth(2);
+  // 启用当前行高亮
   editor->setCaretLineVisible(true);
+
+  // 光标文字颜色
+  if (isDark)
+    editor->setCaretForegroundColor(Qt::white);
+  else
+    editor->setCaretForegroundColor(Qt::black);
+
+  // 当前行背景+边框
   if (isDark) {
-    editor->setCaretLineBackgroundColor(QColor(45, 45, 48, 60));
+    editor->setCaretLineBackgroundColor(QColor(180, 180, 0));
+    editor->setCaretLineFrameWidth(1);
   } else {
-    editor->setCaretLineBackgroundColor(QColor(255, 248, 220, 255));
+    editor->setCaretLineBackgroundColor(QColor(255, 255, 0, 50));
+    editor->setCaretLineFrameWidth(0);
   }
+
+  //-------------------------------------------------------
 
   editor->SendScintilla(QsciScintilla::SCI_SETPROPERTY, "fold", "1");
   editor->SendScintilla(QsciScintilla::SCI_SETFOLDFLAGS, 16);
