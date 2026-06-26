@@ -1338,12 +1338,6 @@ void MainWindow::onAndroidBackHandle() {
   if (!mui->qwMainDate->isHidden()) {
     mui->btnHome->pressed();
 
-    // QQuickItem* root = mui->qwMainTab->rootObject();
-    // if (root) {
-    //   QMetaObject::invokeMethod(root, "forceActivateUI",
-    //   Qt::QueuedConnection);
-    // }
-
     return;
   }
 

@@ -265,6 +265,7 @@ class Notes : public QDialog {
   void on_btnView_clicked();
 
   void on_editNoteLink_textChanged(const QString& arg1);
+
   void onPopupItemClicked(QListWidgetItem* item);
 
   void on_btnReplace_clicked();
