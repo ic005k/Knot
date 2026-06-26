@@ -83,6 +83,8 @@ int main(int argc, char* argv[]) {
 #elif defined(Q_OS_ANDROID)
   isAndroid = true;
 
+  initAndroidGPU();
+
 #elif defined(Q_OS_LINUX)
   isLinux = true;
 #endif
@@ -605,21 +607,21 @@ void migrateOldDataIfNeeded() {
 #endif
 
 void initAndroidGPU() {
-  // 核心配置：启用基础硬件加速 + 兼容模式
-  qputenv("QT_QUICK_BACKEND", "opengl");  // 强制OpenGL ES后端（最佳兼容）
-  qputenv("QSG_RENDER_LOOP", "basic");    // 使用基本渲染循环（避免线程问题）
-  qputenv("QT_OPENGL_ES_ANGLE", "0");     // 禁用ANGLE中间层（直接使用系统驱动）
-  QCoreApplication::setAttribute(
-      Qt::AA_ShareOpenGLContexts);  // 共享OpenGL上下文
+  // ====== 阶段1：注入环境变量（最先执行，兜底）======
+  qputenv("QSG_RHI_BACKEND", "opengl");
+  qputenv("QT_QUICK_BACKEND", "opengl");
+  qputenv("QSG_INFO", "1");  // 打印RHI日志，验证是否OpenGL
 
-  // 设置保守的OpenGL配置
-  QSurfaceFormat format;
-  format.setDepthBufferSize(16);                       // 深度缓冲（最低需求）
-  format.setStencilBufferSize(8);                      // 模板缓冲（最低需求）
-  format.setRenderableType(QSurfaceFormat::OpenGLES);  // 强制GLES模式
-  format.setVersion(2, 0);                       // 仅使用OpenGL ES 2.0核心功能
-  format.setProfile(QSurfaceFormat::NoProfile);  // 不使用核心模式
-  QSurfaceFormat::setDefaultFormat(format);
+  // ====== 阶段2：全局锁定所有Qt
+  // Quick渲染后端（含QQuickWidget内部离屏窗口）======
+  // 全局强制所有Quick渲染使用OpenGL ES（Android）
+  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+
+  // ====== 阶段3：全局Surface强制仅OpenGLES，拒绝Vulkan EGL Surface ======
+  QSurfaceFormat fmt;
+  fmt.setRenderableType(QSurfaceFormat::OpenGLES);
+  fmt.setVersion(3, 2);  // 主流手机兼容ES3.2
+  fmt.setDefaultFormat(fmt);
 }
 
 int clearLockFiles(const QString& iniDir) {
