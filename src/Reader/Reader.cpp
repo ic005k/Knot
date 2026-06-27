@@ -508,7 +508,9 @@ void Reader::getBookList() {
     if (QFile(list.at(1)).exists()) bookList.append(str);
   }
 
-  qDebug() << "BookList=" << bookList;
+  if (!isAndroid) {
+    qDebug() << "BookList=" << bookList;
+  }
 }
 
 void Reader::setQMLText(QString txt1) {
