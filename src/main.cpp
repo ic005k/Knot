@@ -208,6 +208,8 @@ int main(int argc, char* argv[]) {
 
   AppLogger::instance().initLogger(appName);
 
+  qInfo() << "****************************************************************"
+             "********************";
   clearLockFiles(iniDir);
   clearLockFiles(privateDir);
 
@@ -264,12 +266,6 @@ int main(int argc, char* argv[]) {
 
   m_font.setPointSize(fontSize);
   app.setFont(m_font);
-
-#ifdef Q_OS_ANDROID
-
-#else
-
-#endif
 
   MainWindow w;
 
@@ -606,7 +602,7 @@ void migrateOldDataIfNeeded() {
 
 #endif
 
-void initAndroidGPU() {
+/*void initAndroidGPU() {
   // ====== 阶段1：注入环境变量（最先执行，兜底）======
   qputenv("QSG_RHI_BACKEND", "opengl");
   qputenv("QT_QUICK_BACKEND", "opengl");
@@ -621,6 +617,23 @@ void initAndroidGPU() {
   QSurfaceFormat fmt;
   fmt.setRenderableType(QSurfaceFormat::OpenGLES);
   fmt.setVersion(3, 2);  // 主流手机兼容ES3.2
+  fmt.setDefaultFormat(fmt);
+}*/
+
+void initAndroidGPU() {
+  qputenv("QSG_RHI_BACKEND", "opengl");
+  qputenv("QT_QUICK_BACKEND", "opengl");
+  qputenv("QSG_INFO", "1");
+  // 新增：全局关闭Quick持久离屏图形缓存，替代不存在的静态函数
+  qputenv("QSG_NO_PERSISTENT_GRAPHICS_CACHE", "1");
+  qputenv("QT_RHI_NO_OFFSCREEN_BLIT", "1");
+  qputenv("QT_QPA_GL_NO_PBO", "1");
+
+  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+
+  QSurfaceFormat fmt;
+  fmt.setRenderableType(QSurfaceFormat::OpenGLES);
+  fmt.setVersion(3, 2);
   fmt.setDefaultFormat(fmt);
 }
 

@@ -347,8 +347,25 @@ void MainWindow::on_btnBackNoteList_pressed() {
 
   saveNeedSyncNotes();
 
-  mui->frameMain->show();
-  mui->frameNoteList->hide();
+  // ========== 完全异步延迟界面切换，释放渲染资源 ==========
+  QTimer::singleShot(0, this, [this]() {
+    // 找到页面内所有QQuickWidget
+    auto quickWidgets = mui->frameNoteList->findChildren<QQuickWidget*>();
+    for (auto w : quickWidgets) {
+      w->blockSignals(true);                 // 拦截resizeEvent
+      w->quickWindow()->releaseResources();  // 主动销毁RHI/FBO缓冲
+    }
+
+    // 再执行显示/隐藏，此时无活跃离屏渲染任务
+    mui->frameMain->show();
+    mui->frameNoteList->hide();
+
+    // 恢复信号
+    for (auto w : quickWidgets) {
+      w->blockSignals(false);
+    }
+  });
+  // ========================================================
 
   if (m_Notes->checkAndUpdateCleanDate())
     qDebug() << "已到自动清理服务器文件时间，过去3个月内的文件将被清理";

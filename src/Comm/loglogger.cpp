@@ -143,16 +143,32 @@ QString AppLogger::getTodayLogText() {
   QString logFile =
       m_logRootDir + QString("%1_%2.log").arg(m_appName, todayStr);
 
-  QFile f(logFile);
-  if (!f.exists() || !f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+  QFileInfo fi(logFile);
+  if (!fi.exists()) {
     return "暂无今日日志";
   }
-  // 限制最大读取 5MB，避免超大日志卡死界面
-  const qint64 MAX_READ = 5 * 1024 * 1024;
-  QByteArray data = f.read(MAX_READ);
-  f.close();
+  qint64 totalSize = fi.size();
 
-  return QString::fromUtf8(data);
+  QFile f(logFile);
+  if (!f.open(QIODevice::ReadOnly)) {
+    return "暂无今日日志";
+  }
+
+  // 只读最后256k的内容
+  const qint64 SAFE_MAX = 256 * 1024;
+  QByteArray raw;
+  if (totalSize <= SAFE_MAX) {
+    raw = f.readAll();
+  } else {
+    f.seek(totalSize - SAFE_MAX);
+    raw = f.read(SAFE_MAX);
+    int firstNewline = raw.indexOf('\n');
+    if (firstNewline != -1) {
+      raw = raw.mid(firstNewline + 1);
+    }
+  }
+  f.close();
+  return QString::fromUtf8(raw);
 }
 
 // 对外工具函数：直接复制当日日志到剪贴板
