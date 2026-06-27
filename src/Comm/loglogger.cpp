@@ -154,8 +154,8 @@ QString AppLogger::getTodayLogText() {
     return "暂无今日日志";
   }
 
-  // 只读最后256k的内容
-  const qint64 SAFE_MAX = 256 * 1024;
+  // 只读最后128k的内容
+  const qint64 SAFE_MAX = 128 * 1024;
   QByteArray raw;
   if (totalSize <= SAFE_MAX) {
     raw = f.readAll();

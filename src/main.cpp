@@ -602,29 +602,12 @@ void migrateOldDataIfNeeded() {
 
 #endif
 
-/*void initAndroidGPU() {
-  // ====== 阶段1：注入环境变量（最先执行，兜底）======
-  qputenv("QSG_RHI_BACKEND", "opengl");
-  qputenv("QT_QUICK_BACKEND", "opengl");
-  qputenv("QSG_INFO", "1");  // 打印RHI日志，验证是否OpenGL
-
-  // ====== 阶段2：全局锁定所有Qt
-  // Quick渲染后端（含QQuickWidget内部离屏窗口）======
-  // 全局强制所有Quick渲染使用OpenGL ES（Android）
-  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
-
-  // ====== 阶段3：全局Surface强制仅OpenGLES，拒绝Vulkan EGL Surface ======
-  QSurfaceFormat fmt;
-  fmt.setRenderableType(QSurfaceFormat::OpenGLES);
-  fmt.setVersion(3, 2);  // 主流手机兼容ES3.2
-  fmt.setDefaultFormat(fmt);
-}*/
-
 void initAndroidGPU() {
   qputenv("QSG_RHI_BACKEND", "opengl");
   qputenv("QT_QUICK_BACKEND", "opengl");
   qputenv("QSG_INFO", "1");
-  // 新增：全局关闭Quick持久离屏图形缓存，替代不存在的静态函数
+
+  // 全局关闭Quick持久离屏图形缓存，替代不存在的静态函数
   qputenv("QSG_NO_PERSISTENT_GRAPHICS_CACHE", "1");
   qputenv("QT_RHI_NO_OFFSCREEN_BLIT", "1");
   qputenv("QT_QPA_GL_NO_PBO", "1");
