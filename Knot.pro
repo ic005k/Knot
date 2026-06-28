@@ -3,9 +3,9 @@ QT += charts sensors sql
 QT += qml quick quickwidgets location
 QT += xml svg concurrent
 
-# 仅Linux本机编译Android时启用，Windows CI完全跳过这段
-unix:!macx {
-    android {
+# 仅【宿主机是Linux】+【编译Android】才执行，Windows/macOS宿主机完全跳过
+android {
+    unix:!macx {
         CONFIG += no_pkg_config
         DEFINES += Z_HAVE_UNISTD_H HAVE_FSEEKO
 
@@ -17,10 +17,7 @@ unix:!macx {
             QMAKE_LFLAGS = --sysroot=$${SYSROOT} $$QMAKE_LFLAGS
         }
     }
-}
 
-# 全局通用Android空配置，所有平台都保留
-android {
     #QT -= webview
 }
 
