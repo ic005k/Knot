@@ -3,6 +3,28 @@ QT += charts sensors sql
 QT += qml quick quickwidgets location
 QT += xml svg concurrent
 
+android {
+    CONFIG += no_pkg_config
+
+    # 给zlib启用unistd相关函数声明，解决lseek找不到
+    DEFINES += Z_HAVE_UNISTD_H HAVE_FSEEKO
+    # 强制引入unistd.h，提供lseek原型
+    QMAKE_CFLAGS += -include unistd.h
+    QMAKE_CXXFLAGS += -include unistd.h
+
+    linux {
+        NDK_ROOT = $$(ANDROID_NDK_ROOT)
+        SYSROOT = $${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
+        # CFLAGS/CXXFLAGS/LFLAGS前置sysroot
+        QMAKE_CFLAGS = --sysroot=$${SYSROOT} $$QMAKE_CFLAGS
+        QMAKE_CXXFLAGS = --sysroot=$${SYSROOT} $$QMAKE_CXXFLAGS
+        QMAKE_LFLAGS = --sysroot=$${SYSROOT} $$QMAKE_LFLAGS
+    }
+
+    #QT += webview
+}
+
+
 # 在发布构建时禁用调试支持
 DEFINES += QT_NO_DEBUG QML_DISABLE_PROFILER
 
@@ -15,10 +37,6 @@ win32 {
     # QT += webenginewidgets
 }
 
-android {
-    #QT += webview
-
-}
 
 # Qt > 5 (Qt6)
 greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat #statemachine
@@ -91,7 +109,7 @@ macx:lessThan(QT_MAJOR_VERSION, 6) {
 INCLUDEPATH += $$PWD/lib/zlib
 DEFINES += QUAZIP_STATIC
 
-linux {
+unix:!macx:!android {
     # 强制定义关键宏
     DEFINES += Z_HAVE_UNISTD_H HAVE_FSEEKO
 
