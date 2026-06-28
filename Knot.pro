@@ -4,7 +4,7 @@ QT += qml quick quickwidgets location
 QT += xml svg concurrent
 
 # 仅Linux本机编译Android时启用，Windows CI完全跳过这段
-linux {
+unix:!macx {
     android {
         CONFIG += no_pkg_config
         DEFINES += Z_HAVE_UNISTD_H HAVE_FSEEKO
