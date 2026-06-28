@@ -1167,6 +1167,8 @@ qreal Reader::getVPos() {
 }
 
 void Reader::setTtsCurrentSentence(const QString& currentSentence) {
+  bool isLockScreen = m_Method->getLockScreenStatus();
+
   if (mui->chkAutoStopTTS->isChecked()) {
     if (m_autoStopDeadline.isValid() &&
         QDateTime::currentDateTime() > m_autoStopDeadline) {
@@ -1204,17 +1206,21 @@ void Reader::setTtsCurrentSentence(const QString& currentSentence) {
     return;  // 直接返回，不执行后面的高亮
   }
 
-  // 获取 QML 根对象
-  QQuickItem* root = mui->qwReader->rootObject();
-  if (!root) return;
+  if (!isLockScreen) {
+    // 获取 QML 根对象
+    QQuickItem* root = mui->qwReader->rootObject();
+    if (!root) return;
 
-  // C++ 直接调用 QML 的高亮方法：highlightCurrentSentence(string)
-  QMetaObject::invokeMethod((QObject*)root,
-                            "highlightTtsSentence",    // QML函数名
-                            Q_ARG(QVariant, sentence)  // 把当前朗读句子传给 QML
-  );
+    // C++ 直接调用 QML 的高亮方法：highlightCurrentSentence(string)
+    QMetaObject::invokeMethod(
+        (QObject*)root,
+        "highlightTtsSentence",    // QML函数名
+        Q_ARG(QVariant, sentence)  // 把当前朗读句子传给 QML
+    );
 
-  qDebug() << "✅ 已通知 QML 高亮句子：" << sentence;
+    qDebug() << "✅ 已通知 QML 高亮句子：" << sentence;
+  }
+
   savePageVPos();
 }
 
@@ -2918,8 +2924,25 @@ void Reader::closeReader() {
 
   if (!isGpsRun) cancelKeepScreenOn();
 
-  mui->frameMain->show();
-  mui->frameReader->hide();
+  // ========== 完全异步延迟界面切换，释放渲染资源 ==========
+  QTimer::singleShot(0, this, [this]() {
+    // 找到页面内所有QQuickWidget
+    auto quickWidgets = mui->frameReader->findChildren<QQuickWidget*>();
+    for (auto w : quickWidgets) {
+      w->blockSignals(true);
+      w->quickWindow()->releaseResources();
+    }
+
+    // 再执行显示/隐藏，此时无活跃离屏渲染任务
+    mui->frameMain->show();
+    mui->frameReader->hide();
+
+    // 恢复信号
+    for (auto w : quickWidgets) {
+      w->blockSignals(false);
+    }
+  });
+  // ========================================================
 }
 
 void Reader::openReader() {

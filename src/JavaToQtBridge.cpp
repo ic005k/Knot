@@ -245,12 +245,14 @@ static void JavaNotify_17() {
 }
 
 static void JavaNotify_18() {
-  // 屏幕熄了
+  // 屏幕熄了（锁屏）
   QTimer::singleShot(100, mw_one, []() {
     if (mui->frameReader->isVisible()) {
-      mw_one->on_btnAutoStop_pressed();
-      m_Reader->saveReader("", false);
-      m_Reader->savePageVPos();
+      if (mui->btnAutoStop->isVisible()) {
+        mw_one->on_btnAutoStop_pressed();
+        m_Reader->saveReader("", false);
+        m_Reader->savePageVPos();
+      }
     }
   });
 
