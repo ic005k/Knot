@@ -4,15 +4,14 @@ QT += qml quick quickwidgets location
 QT += xml svg concurrent
 
 android {
-
-    linux {
         CONFIG += no_pkg_config
-
         # 给zlib启用unistd相关函数声明，解决lseek找不到
         DEFINES += Z_HAVE_UNISTD_H HAVE_FSEEKO
+
+    linux {
         # 强制引入unistd.h，提供lseek原型
-        QMAKE_CFLAGS += -include unistd.h
-        QMAKE_CXXFLAGS += -include unistd.h
+        #QMAKE_CFLAGS += -include unistd.h
+        #QMAKE_CXXFLAGS += -include unistd.h
 
         NDK_ROOT = $$(ANDROID_NDK_ROOT)
         SYSROOT = $${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
