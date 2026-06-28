@@ -3,9 +3,9 @@ QT += charts sensors sql
 QT += qml quick quickwidgets location
 QT += xml svg concurrent
 
-android {
+linux {
 
-    linux {
+    android {
         CONFIG += no_pkg_config
         # 给zlib启用unistd相关函数声明，解决lseek找不到
         DEFINES += Z_HAVE_UNISTD_H HAVE_FSEEKO
