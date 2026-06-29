@@ -3,21 +3,7 @@ QT += charts sensors sql
 QT += qml quick quickwidgets location
 QT += xml svg concurrent
 
-# 只在 Linux 宿主机上编译 Android 时生效
-android:!win32:!macx {
-    unix:!macx {
-        CONFIG += no_pkg_config
-        DEFINES += Z_HAVE_UNISTD_H HAVE_FSEEKO
 
-        NDK_ROOT = $$(ANDROID_NDK_ROOT)
-        !isEmpty(NDK_ROOT) {
-            SYSROOT = $${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
-            QMAKE_CFLAGS += --sysroot=$${SYSROOT}
-            QMAKE_CXXFLAGS += --sysroot=$${SYSROOT}
-            QMAKE_LFLAGS += --sysroot=$${SYSROOT}
-        }
-    }
-}
 
 # 在发布构建时禁用调试支持
 DEFINES += QT_NO_DEBUG QML_DISABLE_PROFILER
