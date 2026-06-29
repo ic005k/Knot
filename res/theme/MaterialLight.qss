@@ -108,3 +108,68 @@ QHeaderView::section {
     border-bottom: 1px solid #e0e0e0;
 }
 
+/**********************QMenu Light****************************/
+QMenu {
+    padding: 2px 0px;          /* 修正菜单项边缘裁剪 */
+    border: 1px solid #D0D0D0;
+    background: #FFFFFF;       /* 纯白菜单背景 */
+    color: #222222;            /* 深色正文文字 */
+}
+
+QMenu::item {
+    padding: 5px 25px 5px 20px;
+    margin: 0px 2px;           /* 横向留边避免悬停溢出 */
+    background-color: transparent;
+    border: 1px solid transparent;  /* 防止布局抖动 */
+}
+
+QMenu::item:selected,          /* 关键：合并选中和悬停状态 */
+QMenu::item:hover {
+    background-color: #E6E6E6;
+    color: #000000;
+    border: 1px solid #CCCCCC; /* 悬浮浅灰边框区分层次 */
+}
+
+QMenu::item:disabled {
+    color: #999999;
+    background-color: transparent;
+}
+
+/* 强制子菜单箭头对齐 */
+QMenu::indicator {
+    width: 8px;
+    height: 8px;
+    margin-right: 5px;
+}
+
+/* Windows平台专用分隔线 */
+QMenu::separator {
+    height: 1px;
+    background: #D0D0D0;
+    margin: 3px 10px;
+}
+
+/* 亮主题列表选中项样式（柔和蓝色，适配白底） */
+QListWidget::item:selected {
+    background-color: #4096E0;
+    color: white;
+    border-radius: 4px;
+}
+
+/* 窗口非活动状态选中条目（浅淡蓝，降低视觉权重） */
+QListView::item:selected:!active {
+    background-color: #94BEE0;
+    color: #111111;
+}
+
+/* 亮模式 QTextEdit 样式（完全对齐暗模式结构，极简无冗余） */
+QTextEdit {
+    border: 1px solid #CCCCCC; /* 亮模式基础浅灰边框（替换暗模式的#404040） */
+    background: #FFFFFF;       /* 亮模式基础白色背景（替换暗模式的#1E1E1E） */
+}
+
+QTextEdit:focus { /* 只保留focus（暗模式没加focus-visible，避免版本兼容问题） */
+    border: 1px solid #42A5F5 !important; /* 明显淡蓝色（比之前#64B5F6更醒目） */
+    outline: none !important;
+}
+
