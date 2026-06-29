@@ -3,21 +3,33 @@ QT += charts sensors sql
 QT += qml quick quickwidgets location
 QT += xml svg concurrent
 
-# 只在 Linux 宿主机上编译 Android 时生效
-android:!win32:!macx {
-    unix:!macx {
-        CONFIG += no_pkg_config
-        DEFINES += Z_HAVE_UNISTD_H HAVE_FSEEKO
+####################################Linux Build Android##############################
+# 仅满足两个条件才启用：
+# 1. 编译目标平台是 Android
+# 2. 当前编译宿主机系统为 Linux（GitHub ubuntu runner）
+android:unix:!macx {
+    CONFIG += no_pkg_config
+    DEFINES += Z_HAVE_UNISTD_H HAVE_FSEEKO
 
-        NDK_ROOT = $$(ANDROID_NDK_ROOT)
-        !isEmpty(NDK_ROOT) {
-            SYSROOT = $${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
-            QMAKE_CFLAGS += --sysroot=$${SYSROOT}
-            QMAKE_CXXFLAGS += --sysroot=$${SYSROOT}
-            QMAKE_LFLAGS += --sysroot=$${SYSROOT}
+    # 用 ENV 读取运行时环境变量，兼容 CI 动态注入 NDK 路径
+    NDK_ROOT = $${ENV.ANDROID_NDK_ROOT}
+
+    !isEmpty(NDK_ROOT) {
+        SYSROOT = $${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
+        # 校验 sysroot 目录存在再追加参数，避免编译报错
+        exists($$SYSROOT) {
+            QMAKE_CFLAGS   += --sysroot=$$SYSROOT
+            QMAKE_CXXFLAGS += --sysroot=$$SYSROOT
+            QMAKE_LFLAGS   += --sysroot=$$SYSROOT
+        } else {
+            message("警告：Linux 宿主机 Android 构建，NDK sysroot 路径不存在：$$SYSROOT")
         }
+    } else {
+        message("警告：Linux 宿主机 Android 构建，未设置 ANDROID_NDK_ROOT 环境变量")
     }
 }
+
+#####################################################################################
 
 # 在发布构建时禁用调试支持
 DEFINES += QT_NO_DEBUG QML_DISABLE_PROFILER
@@ -99,7 +111,7 @@ macx:lessThan(QT_MAJOR_VERSION, 6) {
 INCLUDEPATH += $$PWD/lib/zlib
 DEFINES += QUAZIP_STATIC
 
-linux {
+unix:!macx:!android {
     # 强制定义关键宏
     DEFINES += Z_HAVE_UNISTD_H HAVE_FSEEKO
 
@@ -839,11 +851,11 @@ win32:{
 
 }
 
-#android: include(/home/zh/文档/android_openssl-master/openssl.pri)
+
+##########################################################################
 
 contains(ANDROID_TARGET_ARCH,arm64-v8a) {
     ANDROID_EXTRA_LIBS = \
         $$PWD/android-openssl/ssl_3/v8a/libcrypto_3.so \
         $$PWD/android-openssl/ssl_3/v8a/libssl_3.so
 }
-#android: include(C:/Users/Administrator/Documents/android_openssl-master/openssl.pri)
