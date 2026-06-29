@@ -3,8 +3,8 @@ QT += charts sensors sql
 QT += qml quick quickwidgets location
 QT += xml svg concurrent
 
-# 仅【宿主机是Linux】+【编译Android】才执行，Windows/macOS宿主机完全跳过
-android {
+# 只在 Linux 宿主机上编译 Android 时生效
+android:!win32:!macx {
     unix:!macx {
         CONFIG += no_pkg_config
         DEFINES += Z_HAVE_UNISTD_H HAVE_FSEEKO
@@ -12,13 +12,11 @@ android {
         NDK_ROOT = $$(ANDROID_NDK_ROOT)
         !isEmpty(NDK_ROOT) {
             SYSROOT = $${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
-            QMAKE_CFLAGS = --sysroot=$${SYSROOT} $$QMAKE_CFLAGS
-            QMAKE_CXXFLAGS = --sysroot=$${SYSROOT} $$QMAKE_CXXFLAGS
-            QMAKE_LFLAGS = --sysroot=$${SYSROOT} $$QMAKE_LFLAGS
+            QMAKE_CFLAGS += --sysroot=$${SYSROOT}
+            QMAKE_CXXFLAGS += --sysroot=$${SYSROOT}
+            QMAKE_LFLAGS += --sysroot=$${SYSROOT}
         }
     }
-
-    #QT -= webview
 }
 
 # 在发布构建时禁用调试支持
@@ -27,10 +25,6 @@ DEFINES += QT_NO_DEBUG QML_DISABLE_PROFILER
 win32 {
     QMAKE_CFLAGS += /utf-8
     QMAKE_CXXFLAGS += /utf-8
-}
-
-!android: {
-    # QT += webenginewidgets
 }
 
 
