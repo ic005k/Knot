@@ -85,7 +85,7 @@ macx:lessThan(QT_MAJOR_VERSION, 6) {
 INCLUDEPATH += $$PWD/lib/zlib
 DEFINES += QUAZIP_STATIC
 
-unix:!macx:!android {
+linux {
     # 强制定义关键宏
     DEFINES += Z_HAVE_UNISTD_H HAVE_FSEEKO
 
