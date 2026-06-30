@@ -2518,66 +2518,46 @@ selection-background-color: lightblue;
                </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_68">
+               <widget class="QComboBox" name="cboxWebDAV">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>35</height>
+                 </size>
+                </property>
+                <property name="acceptDrops">
+                 <bool>false</bool>
+                </property>
+                <property name="editable">
+                 <bool>true</bool>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>35</width>
+                  <height>35</height>
+                 </size>
+                </property>
                 <item>
-                 <widget class="QComboBox" name="cboxWebDAV">
-                  <property name="minimumSize">
-                   <size>
-                    <width>0</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">QComboBox::drop-down {
-    width: 0;
-    border: none; /* 移除边框 */
-    background: transparent; /* 透明背景 */
-    margin: 0; /* 清除边距 */
-    padding: 0; /* 清除内边距 */
-}
-
-QComboBox::down-arrow {
-    width: 0;
-    height: 0; /* 同时设置高度为0 */
-}
-
-QComboBox {
-    padding-right: 0px; /* 确保右侧无多余空间 */
-}
-</string>
-                  </property>
-                  <property name="editable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>35</width>
-                    <height>35</height>
-                   </size>
-                  </property>
-                  <item>
-                   <property name="text">
-                    <string>https://data.cstcloud.cn/dav/</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>https://dav.jianguoyun.com/dav/</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>https://soya.infini-cloud.net/dav/</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>https://app.koofr.net/dav/Koofr/</string>
-                   </property>
-                  </item>
-                 </widget>
+                 <property name="text">
+                  <string>https://data.cstcloud.cn/dav/</string>
+                 </property>
                 </item>
-               </layout>
+                <item>
+                 <property name="text">
+                  <string>https://dav.jianguoyun.com/dav/</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>https://soya.infini-cloud.net/dav/</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>https://app.koofr.net/dav/Koofr/</string>
+                 </property>
+                </item>
+               </widget>
               </item>
               <item>
                <widget class="QLabel" name="label_7">
@@ -7880,7 +7860,7 @@ QSlider::handle:horizontal:disabled {
      <x>0</x>
      <y>0</y>
      <width>698</width>
-     <height>21</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="styleSheet">

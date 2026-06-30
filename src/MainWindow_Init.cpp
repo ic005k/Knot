@@ -697,9 +697,9 @@ void MainWindow::init_UIWidget() {
   mui->frameReader->layout()->setSpacing(1);
   mui->frameImgView->hide();
 
-  mui->frameMain->layout()->setContentsMargins(1, 0, 1, 0);
-  mui->frameMain->setContentsMargins(1, 0, 1, 0);
-  mui->frameMain->layout()->setSpacing(1);
+  mui->frameMain->layout()->setContentsMargins(1, 1, 1, 1);
+  mui->frameMain->setContentsMargins(1, 1, 1, 1);
+  mui->frameMain->layout()->setSpacing(5);
 
   mui->frameOne->hide();
   mui->btnDel->hide();

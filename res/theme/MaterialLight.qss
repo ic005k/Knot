@@ -1,9 +1,9 @@
 /* Material Design Light Theme for Qt Widgets */
-* {
+/* {
     font-family: "sans-serif";
     font-size: 14px;
     color: #212121;
-}
+}*/
 
 QMainWindow, QWidget {
     background-color: #f5f5f5;
@@ -173,3 +173,14 @@ QTextEdit:focus { /* 只保留focus（暗模式没加focus-visible，避免版�
     outline: none !important;
 }
 
+/********************************** QComboBox *****************************************/
+QComboBox::drop-down {
+    width: 0;
+    border: none;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+}
+QComboBox QLineEdit {
+    padding: 6px 10px;
+}

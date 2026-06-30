@@ -172,4 +172,16 @@ QTextEdit:focus-visible {
     outline: none !important; /* 清除默认轮廓 */
 }
 
-
+/***************************** QComboBox *******************************************/
+/* 彻底隐藏下拉按钮区域 */
+QComboBox::drop-down {
+    width: 0;
+    border: none;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+}
+/* 修复内置输入框文字贴边溢出 */
+QComboBox QLineEdit {
+    padding: 6px 10px;
+}

@@ -191,8 +191,10 @@ void MainWindow::on_actionBakFileList() {
 
 void MainWindow::on_actionOneDriveBackupData() {
   mui->frameMain->hide();
-  mui->frameReader->hide();
-  if (isAndroid) mui->f_WebDAV->setFixedWidth(mw_one->width() - 40);
+
+  if (isAndroid) {
+    mui->twCloudBackup->setFixedWidth(mw_one->width() - 24);
+  }
   mui->frameOne->show();
 }
 
