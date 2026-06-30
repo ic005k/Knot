@@ -104,6 +104,17 @@ void Notes::initMarkdownEditor(QsciScintilla* editor) {
                         100);
   editor->SendScintilla(QsciScintilla::SCI_INDICSETUNDER, INDICATOR_SEARCH,
                         true);
+
+  // 文本选中高亮样式（适配 Qsci 2.14.1）
+  if (isDark) {
+    editor->setSelectionForegroundColor(Qt::white);
+    editor->setSelectionBackgroundColor(QColor(42, 130, 218));
+  } else {
+    editor->setSelectionForegroundColor(Qt::black);
+    editor->setSelectionBackgroundColor(QColor(120, 180, 255));
+  }
+  // 设置选中背景透明度，取值 0~255
+  editor->SendScintilla(QsciScintilla::SCI_SETSELALPHA, 160);
 }
 #endif
 

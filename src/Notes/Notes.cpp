@@ -2,11 +2,8 @@
 
 #include "cmark-gfm-core-extensions.h"
 #include "cmark_wrapper.h"
-// #include "src/MainWindow.h"
-// #include "src/defines.h"
 #include "subscript.h"
 #include "superscript.h"
-// #include "ui_MainWindow.h"
 #include "ui_Notes.h"
 
 static QAtomicInt n_Files = 0;
