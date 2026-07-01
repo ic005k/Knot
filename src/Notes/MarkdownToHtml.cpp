@@ -7,7 +7,7 @@
 #include <QString>
 
 // 预处理：给公式包裹唯一标签，避免被Markdown解析器干扰
-static QString preprocessMath(const QString &md) {
+static QString preprocessMath(const QString& md) {
   QString processed = md;
 
   // 行内公式：\( ... \) → <z_m_i>\( ... \)</z_m_i>
@@ -28,7 +28,7 @@ static QString preprocessMath(const QString &md) {
 }
 
 // 后处理：移除保护标签，将公式分隔符转换为MathJax可识别的格式
-static QString postprocessMath(const QString &html) {
+static QString postprocessMath(const QString& html) {
   QString processed = html;
 
   // 1. 处理行内公式：
@@ -54,20 +54,20 @@ static QString postprocessMath(const QString &html) {
 }
 
 /////////////////////////////////////////////////////////////
-QString markdownToHtmlWithMath(const QString &md) {
+QString markdownToHtmlWithMath(const QString& md) {
   // 初始化GitHub扩展
   cmark_gfm_core_extensions_ensure_registered();
 
   // 创建解析器并启用选项
-  cmark_parser *parser =
+  cmark_parser* parser =
       cmark_parser_new(CMARK_OPT_TABLE_PREFER_STYLE_ATTRIBUTES |
                        CMARK_OPT_UNSAFE  // 保留原始字符，避免公式符号被转义
       );
 
   // 附加需要的扩展（不含tagfilter，避免干扰公式）
-  const char *extensions[] = {"table", "strikethrough", "tasklist", "autolink"};
-  for (const char *ext_name : extensions) {
-    if (cmark_syntax_extension *ext = cmark_find_syntax_extension(ext_name)) {
+  const char* extensions[] = {"table", "strikethrough", "tasklist", "autolink"};
+  for (const char* ext_name : extensions) {
+    if (cmark_syntax_extension* ext = cmark_find_syntax_extension(ext_name)) {
       cmark_parser_attach_syntax_extension(parser, ext);
     }
   }
@@ -76,11 +76,11 @@ QString markdownToHtmlWithMath(const QString &md) {
   QString processedMd = preprocessMath(md);
   QByteArray utf8 = processedMd.toUtf8();
   cmark_parser_feed(parser, utf8.constData(), utf8.size());
-  cmark_node *doc = cmark_parser_finish(parser);
+  cmark_node* doc = cmark_parser_finish(parser);
   cmark_parser_free(parser);
 
   // 渲染为HTML
-  char *html_cstr = cmark_render_html(doc, CMARK_OPT_UNSAFE, nullptr);
+  char* html_cstr = cmark_render_html(doc, CMARK_OPT_UNSAFE, nullptr);
   QString html = QString::fromUtf8(html_cstr);
   free(html_cstr);
 
@@ -116,7 +116,8 @@ QString markdownToHtmlWithMath(const QString &md) {
 
   // 拼接MathJax、高亮等资源（保持原逻辑）
   QString mermaid_js = R"(
-        <script src="https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.min.js"></script>
+        <script
+src="https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
@@ -135,28 +136,33 @@ QString markdownToHtmlWithMath(const QString &md) {
                 startup: { typeset: true }
             };
         </script>
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script
+src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     )";
 
   QString highlight_js = R"(
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/vs.min.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/vs.min.css">
+        <script
+src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+                document.querySelectorAll('pre code').forEach(el =>
+hljs.highlightElement(el));
             });
         </script>
     )";
 
   QString custom_css = R"(
         <style>
-            table { border-collapse: collapse; margin: 1em 0; border: 1px solid #dee2e6; }
-            th, td { padding: 0.75em; border: 1px solid #dee2e6; }
-            th { background-color: #f8f9fa; font-weight: 600; }
-            pre code { display: block; padding: 1em; background: #f8f9fa; border-radius: 4px; overflow-x: auto; }
-            code { background: #f8f9fa; padding: 0.2em 0.4em; border-radius: 3px; }
+            table { border-collapse: collapse; margin: 1em 0; border: 1px solid
+#dee2e6; } th, td { padding: 0.75em; border: 1px solid #dee2e6; } th {
+background-color: #f8f9fa; font-weight: 600; } pre code { display: block;
+padding: 1em; background: #f8f9fa; border-radius: 4px; overflow-x: auto; } code
+{ background: #f8f9fa; padding: 0.2em 0.4em; border-radius: 3px; }
             a[href^="tel:"] { color: #0d6efd; text-decoration: underline; }
-            blockquote { border-left: 4px solid #dee2e6; padding-left: 1.5em; margin: 1em 0; color: #6c757d; }
+            blockquote { border-left: 4px solid #dee2e6; padding-left: 1.5em;
+margin: 1em 0; color: #6c757d; }
         </style>
     )";
 
@@ -169,3 +175,5 @@ QString markdownToHtmlWithMath(const QString &md) {
   cmark_node_free(doc);
   return html;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////

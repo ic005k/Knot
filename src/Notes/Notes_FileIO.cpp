@@ -52,10 +52,15 @@ QString Notes::addImagePathToHtml(QString strhtml) {
   edit->setPlainText(strhtml);
   QString str, str_2, str_3;
   for (int i = 0; i < edit->document()->lineCount(); i++) {
+    // 原始行，保留全部首尾空格，不trim！
     str = getTextEditLineText(edit, i);
-    str = str.trimmed();
-    if (str.mid(0, 4) == "<img" && str.contains("file://")) {
-      QString str1 = str;
+    QString lineRaw = str;  // 保存原始带空格行
+
+    // 仅临时修剪用于判断是否是img标签
+    QString lineTrim = str.trimmed();
+    if (lineTrim.mid(0, 4) == "<img" && lineTrim.contains("file://")) {
+      // img行逻辑不变，使用修剪后的内容处理
+      QString str1 = lineTrim;
       QStringList list = str1.split(" ");
       QString strSrc;
       for (int k = 0; k < list.count(); k++) {
@@ -81,8 +86,12 @@ QString Notes::addImagePathToHtml(QString strhtml) {
         QString a1 = "width = ";
         str = str.replace("/>", a1 + "\"" + strW + "\"" + " />");
       }
+      // 处理后的img行直接写入
+      edit1->appendPlainText(str);
+    } else {
+      // 非图片行：写入原始未trim的行，完整保留前后缩进空格
+      edit1->appendPlainText(lineRaw);
     }
-    edit1->appendPlainText(str);
   }
   QString strEnd = edit1->toPlainText();
   edit1->clear();
