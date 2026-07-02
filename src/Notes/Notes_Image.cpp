@@ -16,10 +16,8 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
     QDir dir;
     dir.mkpath(iniDir + "memo/images/");
 
-    int rand = QRandomGenerator::global()->generate();
-    if (rand < 0) rand = 0 - rand;
     QString strTar = iniDir + "memo/images/" + getDateTimeStr() + "_" +
-                     QString::number(rand) + ".png";
+                     m_Method->generateRandom3() + ".png";
     if (QFile(strTar).exists()) QFile(strTar).remove();
 
     int nLeftMargin = 9 + 9 + 6;
