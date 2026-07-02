@@ -623,7 +623,10 @@ void MainWindow::execNeedSyncNotes() {
       }
     }
 
-    m_Notes->syncToWebDAV();
+    if (m_Notes->notes_sync_files.count() > 0)
+      m_Notes->syncToWebDAV();
+    else
+      emit m_Notes->syncFinished();
   } else {
     emit m_Notes->syncFinished();
   }
