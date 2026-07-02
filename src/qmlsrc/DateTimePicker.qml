@@ -1,7 +1,7 @@
 import QtQuick 6.2
 import QtQuick.Controls 6.2
 import QtQuick.Layouts 6.2
-import QtMultimedia 6.2
+//import QtMultimedia 6.2
 
 // 导入多媒体模块用于播放音效
 Rectangle {
@@ -34,20 +34,22 @@ Rectangle {
     property int yearRange: 15
 
     // 滚动音效组件（模拟安卓哒哒声）
-    SoundEffect {
+    /*SoundEffect {
         id: tumblerSound
         source: "/res/sound/tumbler_click.wav" // 音效文件路径（建议用WAV格式）
         volume: 0.7 // 音量（0-1）
         loops: 1 // 仅播放一次
-    }
+    }*/
 
     // 防抖播放音效（避免滚动时频繁触发）
     function playTumblerSound() {
-        if (Qt.platform.os === "android") {
+        return;
+
+        /*if (Qt.platform.os === "android") {
             // 停止当前可能正在播放的音效，避免叠加
             tumblerSound.stop();
             tumblerSound.play();
-        }
+        }*/
     }
 
     function getDaysInMonth(year, month) {

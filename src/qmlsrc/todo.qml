@@ -3,7 +3,6 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Controls.Fusion
 import QtQuick.Window
-import QtMultimedia
 
 Rectangle {
     id: root
@@ -17,23 +16,6 @@ Rectangle {
     property int itemCount: 0
     property bool isHighPriority: false
     property bool isRenderValid: true
-
-    // 音效组件（消息提示音）
-    SoundEffect {
-        id: tumblerSound
-        source: "/res/sound/alarm.wav" // 音效文件路径（建议用WAV格式）
-        volume: 1 // 音量（0-1）
-        loops: 1 // 仅播放一次
-    }
-
-    // 防抖播放音效（避免滚动时频繁触发）
-    function playTumblerSound() {
-        if (Qt.platform.os === "android") {
-            // 停止当前可能正在播放的音效，避免叠加
-            tumblerSound.stop();
-            tumblerSound.play();
-        }
-    }
 
     function checkRenderContext() {
         if (Qt.application.platformName === "android" && !isRenderValid) {
