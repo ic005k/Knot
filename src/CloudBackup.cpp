@@ -518,7 +518,7 @@ void CloudBackup::startNextUpload() {
             [this, filePath](qint64 sent, qint64 total) {
               if (total > 0) {
                 int percent = static_cast<int>(sent * 100.0 / total);
-                qDebug() << "上传进度：" << filePath << percent << "%";
+                qDebug() << "Upload Progress:" << filePath << percent << "%";
                 // 同步更新界面进度条
                 mui->progBar->show();
                 mui->progBar->setMinimum(0);
@@ -549,6 +549,8 @@ void CloudBackup::handleUploadFinished(QNetworkReply* reply,
   if (reply->error() == QNetworkReply::NoError) {
     if (mw_one && m_Notes) {
       m_Notes->notes_sync_files.removeOne(filePath);
+      qDebug() << "Upload completed. Removed from the synchronization list:"
+               << filePath << "Remaining:" << m_Notes->notes_sync_files.count();
       mw_one->saveNeedSyncNotes();
       m_Method->delayDelFile(filePath);
     }
@@ -567,6 +569,7 @@ void CloudBackup::handleUploadFinished(QNetworkReply* reply,
     if (mw_one) {
       mw_one->closeProgress();
       mui->progBar->hide();
+      mw_one->saveNeedSyncNotes();
       emit uploadAllFinished();
     }
   }
