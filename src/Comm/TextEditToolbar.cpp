@@ -104,7 +104,7 @@ void HandleWidget::mouseMoveEvent(QMouseEvent* event) {
 
 TextEditToolbar::TextEditToolbar(QWidget* parent) : QWidget(parent) {
   if (isAndroid)
-    setWindowFlags(Qt::Widget | Qt::FramelessWindowHint);
+    setWindowFlags(Qt::Widget);  // | Qt::FramelessWindowHint);
   else {
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
   }
@@ -183,6 +183,17 @@ TextEditToolbar::TextEditToolbar(QWidget* parent) : QWidget(parent) {
           &TextEditToolbar::onHandleReleased);
   connect(m_endHandle, &HandleWidget::released, this,
           &TextEditToolbar::onHandleReleased);
+}
+
+void TextEditToolbar::paintEvent(QPaintEvent* event) {
+  QWidget::paintEvent(event);
+#ifdef Q_OS_ANDROID
+  QStyleOption opt;
+  opt.initFrom(this);
+  QPainter p(this);
+  // 调用当前平台样式绘制标准Widget背景，和普通原生控件底色完全一致
+  style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+#endif
 }
 
 void TextEditToolbar::initButtons() {
