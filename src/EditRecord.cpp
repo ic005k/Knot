@@ -349,7 +349,20 @@ void EditRecord::on_editCategory_textChanged(const QString& arg1) {
     return;
   }
 
-  QTimer::singleShot(0, [this]() { showSuggestions(); });
+  // 防抖处理
+  static QTimer tmpTimer;
+  tmpTimer.setSingleShot(true);
+  tmpTimer.setInterval(30);
+  tmpTimer.disconnect();
+
+  QObject::connect(&tmpTimer, &QTimer::timeout, [this]() {
+    // 简单判空保护，替代 QPointer
+    if (!mw_one || !m_suggestList) return;
+    showSuggestions();
+  });
+  tmpTimer.start();
+
+  // QTimer::singleShot(0, [this]() { showSuggestions(); });
 }
 
 void EditRecord::on_editDetails_textChanged() {
@@ -584,7 +597,7 @@ void EditRecord::showSuggestions() {
   QPoint globalPos =
       mui->editCategory->mapToGlobal(QPoint(0, mui->editCategory->height()));
   int w = mui->editCategory->width();
-  int h = qMin(200, m_suggestList->sizeHint().height());
+  int h = qMin(360, m_suggestList->sizeHint().height());
 
   m_suggestList->setGeometry(globalPos.x(), globalPos.y(), w, h);
   m_suggestList->show();
