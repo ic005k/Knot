@@ -42,10 +42,9 @@ ShowMessage::ShowMessage(QWidget* parent)
   ui->btnCopy->setStyleSheet(btnStyle);
   ui->btnDel->setStyleSheet(btnStyle);
 
-  // ========== 核心：恢复最初的事件过滤（确保快捷键生效） ==========
   // 给消息框自身安装事件过滤器
   this->installEventFilter(this);
-  // 给文本控件安装事件过滤器（最初的逻辑，确保按键能被捕获）
+  // 给文本控件安装事件过滤器（
   ui->editMsg->viewport()->installEventFilter(this);
 
   // 初始隐藏
@@ -59,7 +58,7 @@ ShowMessage::~ShowMessage() {
   }
 }
 
-void ShowMessage::init(int btnCount) {
+void ShowMessage::init(int btnCount, int adaptiveH) {
   isValue = false;
   btn_count = btnCount;
 
@@ -70,7 +69,7 @@ void ShowMessage::init(int btnCount) {
     mainH = mw_one->geometry().height();
   }
 
-  // 1. 宽度逻辑（保留现有规则）
+  // 宽度逻辑
   int dlgW = 0;
 #ifdef Q_OS_ANDROID
   dlgW = mainW;
@@ -80,18 +79,12 @@ void ShowMessage::init(int btnCount) {
 #endif
   dlgW -= 10;
 
-  // 2. 高度逻辑（固定为主窗口3/4）
-  int dlgH;
-  if (isAndroid)
-    dlgH = mainH * 3 / 4;
-  else
-    dlgH = mainH * 2 / 3;
-  if (dlgH < 200) dlgH = 200;
+  // 高度逻辑
+  int dlgH = adaptiveH;
+  setMinimumSize(dlgW, 200);
+  resize(dlgW, dlgH);
 
-  // 3. 设置消息框尺寸
-  setFixedSize(dlgW, dlgH);
-
-  // 4. 居中计算
+  // 居中计算
   int x = 0, y = 0;
   if (mw_one) {
     x = mw_one->geometry().x() + (mainW - dlgW) / 2;
@@ -114,6 +107,8 @@ void ShowMessage::init(int btnCount) {
 }
 
 bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
+  m_Method->Sleep(100);
+
   // 按钮数量处理
   if (btnCount == 2 || btnCount == 3) {
     msgtxt += "\n\n";
@@ -152,10 +147,18 @@ bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
 
   // 设置标题和文本
   ui->lblTitle->setText(title);
-  ui->editMsg->setText(msgtxt);
+  QString showText = msgtxt + "\n";
+  ui->editMsg->setText(showText);
 
-  // 初始化尺寸+居中
-  init(btnCount);
+  ui->lblTitle->ensurePolished();
+  ui->lblTitle->updateGeometry();
+  ui->editMsg->document()->adjustSize();
+  ui->editMsg->updateGeometry();
+
+  // 计算高度、初始化弹窗尺寸（窗口隐藏状态下计算，无GL surface争夺）
+  int textH = getTextEditContentHeight(ui->editMsg);
+  int adaptiveDlgH = calcDialogTotalHeight(textH, btnCount);
+  init(btnCount, adaptiveDlgH);
 
   // 全程用exec()
   this->exec();
@@ -166,12 +169,12 @@ bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
 // 按钮点击逻辑
 void ShowMessage::on_btnCancel_clicked() {
   isValue = false;
-  close();  // 回归最初的close()，而非reject()，确保逻辑一致
+  close();
 }
 
 void ShowMessage::on_btnOk_clicked() {
   isValue = true;
-  close();  // 回归最初的close()
+  close();
 }
 
 void ShowMessage::on_btnCopy_clicked() {
@@ -180,7 +183,7 @@ void ShowMessage::on_btnCopy_clicked() {
     clipboard->setText(copyText);
   }
   isValue = false;
-  close();  // 回归最初的close()
+  close();
 }
 
 void ShowMessage::on_btnDel_clicked() {
@@ -191,7 +194,6 @@ void ShowMessage::on_btnDel_clicked() {
   }
 }
 
-// 保留AutoFeed方法
 QString ShowMessage::AutoFeed(QString text, int nCharCount) {
   QString strText = text;
   int AntoIndex = 1;
@@ -240,3 +242,46 @@ bool ShowMessage::eventFilter(QObject* watch, QEvent* evn) {
 
 // 空实现
 void ShowMessage::on_editMsg_textChanged() {}
+
+int ShowMessage::getTextEditContentHeight(QTextEdit* edit) {
+  QTextDocument* doc = edit->document();
+  // 强制文档重新布局，保证高度计算准确
+  doc->adjustSize();
+  // 文档完整高度 + 编辑框上下内边距
+  int docH = doc->size().height();
+  QMargins margins = edit->contentsMargins();
+  return docH + margins.top() + margins.bottom();
+}
+
+int ShowMessage::calcDialogTotalHeight(int textH, int btnCount) {
+  // 固定UI高度常量，根据你的ui布局微调数值
+  const int titleHeight = ui->lblTitle->sizeHint().height();  // 标题高度
+  const int titleMarginTop = 12;                              // 标题上边距
+  const int titleEditSpace = 10;  // 标题与文本框间距
+  const int editBtnSpace = 15;    // 文本框与按钮区间距
+  const int btnAreaHeight = 45;   // 按钮区域固定高度
+  const int bottomMargin = 12;    // 对话框底部边距
+  const int topMargin = 8;        // 对话框顶部边距
+
+  // 所有固定部件高度总和
+  int fixedPartH = topMargin + titleMarginTop + titleHeight + titleEditSpace +
+                   editBtnSpace + btnAreaHeight + bottomMargin;
+
+  // 文本高度 + 固定区域 = 对话框总高度
+  int totalH = fixedPartH + textH;
+
+  // 高度上下限约束
+  int minH = 200;
+  int screenMaxH;
+  if (mw_one)
+    screenMaxH = mw_one->height() * 3 / 4;
+  else
+    screenMaxH =
+        QGuiApplication::primaryScreen()->availableGeometry().height() * 3 / 4;
+
+  // 低于最小值取最小高度，高于屏幕上限则用上限（开启滚动）
+  if (totalH < minH) totalH = minH;
+  if (totalH > screenMaxH) totalH = screenMaxH;
+
+  return totalH;
+}

@@ -3,9 +3,10 @@
 
 #include <QClipboard>
 #include <QDialog>
-#include <QGuiApplication>  // Qt6替代QDesktopWidget的核心头文件
-#include <QScreen>          // Qt6屏幕信息类
+#include <QGuiApplication>
+#include <QScreen>
 #include <QScroller>
+#include <QTextEdit>
 
 namespace Ui {
 class ShowMessage;
@@ -41,7 +42,12 @@ class ShowMessage : public QDialog {
   int btn_count = 0;
   QString copyText;
 
-  void init(int btnCount);
+  void init(int btnCount, int adaptiveH);
+
+  // 根据文本内容获取QTextEdit完整内容高度
+  int getTextEditContentHeight(QTextEdit* edit);
+  // 计算对话框所需总高度
+  int calcDialogTotalHeight(int textH, int btnCount);
 };
 
 #endif  // SHOWMESSAGE_H
