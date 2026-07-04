@@ -51,6 +51,9 @@ class Preferences : public QDialog {
   ~Preferences();
   Ui::Preferences* ui;
 
+  // 对外统一入口：传入用户问题，自动预检连通性，成功后发送对话
+  void aiChatQuery(const QString& userQuestion);
+
   bool devMode = false;
   QString chkStyle;
   bool isFontChange = false;
@@ -147,6 +150,13 @@ class Preferences : public QDialog {
   const QString ai_config_json = "ai_config.json";
   QStringList m_endpointCache;
   QList<AiSingleRecord> m_aiAllRecords;
+  // 连通检测：成功后执行回调
+  void checkAiConnectivity(const AiSingleRecord& cfg,
+                           std::function<void()> onSuccess);
+  // 正式对话提问接口
+  void sendAiChatRequest(const AiSingleRecord& cfg,
+                         const QString& userQuestion);
+  QNetworkAccessManager* m_netMgr;
 };
 
 #endif  // PREFERENCES_H

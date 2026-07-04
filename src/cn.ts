@@ -3511,139 +3511,192 @@
         <translation>输入1-50</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="151"/>
+        <location filename="Preferences.cpp" line="155"/>
         <source>ExtraSmall</source>
         <translation>极小</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="151"/>
+        <location filename="Preferences.cpp" line="155"/>
         <source>Small</source>
         <translation>小</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="151"/>
+        <location filename="Preferences.cpp" line="155"/>
         <source>Default</source>
         <translation>正常（默认）</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="152"/>
+        <location filename="Preferences.cpp" line="156"/>
         <source>Large</source>
         <translation>大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="152"/>
+        <location filename="Preferences.cpp" line="156"/>
         <source>XLarge</source>
         <translation>超大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="152"/>
+        <location filename="Preferences.cpp" line="156"/>
         <source>XXLarge</source>
         <translation>特大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="153"/>
+        <location filename="Preferences.cpp" line="157"/>
         <source>XXXLarge</source>
         <translation>最大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="163"/>
+        <location filename="Preferences.cpp" line="167"/>
         <source>Font</source>
         <translation>字体</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="625"/>
-        <location filename="Preferences.cpp" line="630"/>
-        <location filename="Preferences.cpp" line="635"/>
-        <location filename="Preferences.cpp" line="724"/>
+        <location filename="Preferences.cpp" line="628"/>
+        <location filename="Preferences.cpp" line="654"/>
+        <location filename="Preferences.cpp" line="924"/>
         <source>Warning</source>
-        <translation type="unfinished"></translation>
+        <translation>警告</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="625"/>
+        <location filename="Preferences.cpp" line="798"/>
+        <location filename="Preferences.cpp" line="850"/>
+        <source>Network Error</source>
+        <translation>网络错误</translation>
+    </message>
+    <message>
+        <location filename="Preferences.cpp" line="798"/>
+        <location filename="Preferences.cpp" line="850"/>
+        <source>Request URL</source>
+        <translation>请求地址</translation>
+    </message>
+    <message>
+        <location filename="Preferences.cpp" line="899"/>
+        <source>User Question</source>
+        <translation>用户问题</translation>
+    </message>
+    <message>
+        <location filename="Preferences.cpp" line="900"/>
+        <source>AI Reply</source>
+        <translation>AI回答</translation>
+    </message>
+    <message>
+        <source>Connection test passed!</source>
+        <translation type="vanished">连接测试通过！</translation>
+    </message>
+    <message>
+        <source>Model ID: %1</source>
+        <translation type="vanished">模型 ID %1</translation>
+    </message>
+    <message>
+        <location filename="Preferences.cpp" line="865"/>
+        <source>Returned data is not valid JSON:
+%1</source>
+        <translation>返回数据不是合法 JSON：%1</translation>
+    </message>
+    <message>
+        <location filename="Preferences.cpp" line="879"/>
+        <source>Server Error:
+%1</source>
+        <translation>服务端错误：%1</translation>
+    </message>
+    <message>
+        <location filename="Preferences.cpp" line="888"/>
+        <source>AI returned empty content</source>
+        <translation>AI 未返回任何文本内容</translation>
+    </message>
+    <message>
+        <source>User Question:
+%1
+
+AI Reply:
+%2</source>
+        <translation type="vanished">用户提问：%1\n\nAI 回复：%2</translation>
+    </message>
+    <message>
+        <location filename="Preferences.cpp" line="912"/>
+        <source>AI Response Completed</source>
+        <translation>AI 回答完成</translation>
+    </message>
+    <message>
         <source>Endpoint cannot be empty</source>
-        <translation type="unfinished"></translation>
+        <translation type="vanished">接入地址不能为空</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="630"/>
         <source>API Key cannot be empty</source>
-        <translation type="unfinished"></translation>
+        <translation type="vanished">API 密钥不能为空</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="635"/>
         <source>Model ID cannot be empty</source>
-        <translation type="unfinished"></translation>
+        <translation type="vanished">模型 ID 不能为空</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="682"/>
+        <location filename="Preferences.cpp" line="801"/>
+        <location filename="Preferences.cpp" line="853"/>
         <source>Connect Failed</source>
-        <translation type="unfinished"></translation>
+        <translation>连接失败</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="683"/>
         <source>Network Error:
 %1
 Request URL:
 %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="vanished">网络错误：%1 请求地址：%2</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="692"/>
+        <location filename="Preferences.cpp" line="868"/>
         <source>Parse Failed</source>
-        <translation type="unfinished"></translation>
+        <translation>解析失败</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="693"/>
         <source>Response invalid JSON:
 %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="vanished">返回数据不是合法 JSON：%1</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="703"/>
+        <location filename="Preferences.cpp" line="879"/>
         <source>API Rejected</source>
-        <translation type="unfinished"></translation>
+        <translation>服务拒绝请求</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="703"/>
         <source>Service Error:
 %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="vanished">服务端错误：\n%1</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="710"/>
-        <location filename="Preferences.cpp" line="781"/>
+        <location filename="Preferences.cpp" line="888"/>
         <source>Success</source>
-        <translation type="unfinished">成功</translation>
+        <translation>成功</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="711"/>
         <source>Connection test passed!
 Model ID: %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="vanished">连接测试通过！模型 ID：%1</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="725"/>
+        <location filename="Preferences.cpp" line="629"/>
+        <location filename="Preferences.cpp" line="655"/>
+        <location filename="Preferences.cpp" line="925"/>
         <source>Endpoint / API Key / Model ID cannot be empty</source>
-        <translation type="unfinished"></translation>
+        <translation>接入地址 / API 密钥 / 模型 ID 不能为空</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="768"/>
+        <location filename="Preferences.cpp" line="698"/>
         <source>Save Failed</source>
-        <translation type="unfinished"></translation>
+        <translation>保存失败</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="768"/>
+        <location filename="Preferences.cpp" line="698"/>
         <source>Cannot open config file to write</source>
-        <translation type="unfinished"></translation>
+        <translation>无法打开配置文件写入数据</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="781"/>
         <source>AI config saved successfully</source>
-        <translation type="unfinished"></translation>
+        <translation type="vanished">AI 配置保存成功</translation>
     </message>
     <message>
         <location filename="Preferences.ui" line="69"/>
         <location filename="Preferences.cpp" line="25"/>
-        <location filename="Preferences.cpp" line="158"/>
+        <location filename="Preferences.cpp" line="162"/>
         <source>Font Size</source>
         <translation>字体大小</translation>
     </message>
@@ -3653,8 +3706,8 @@ Model ID: %1</source>
     </message>
     <message>
         <location filename="Preferences.ui" line="128"/>
-        <location filename="Preferences.cpp" line="225"/>
-        <location filename="Preferences.cpp" line="231"/>
+        <location filename="Preferences.cpp" line="229"/>
+        <location filename="Preferences.cpp" line="235"/>
         <source>Custom Font</source>
         <translation>自选字体</translation>
     </message>
@@ -3667,37 +3720,37 @@ Model ID: %1</source>
     <message>
         <location filename="Preferences.ui" line="257"/>
         <source>Enable AI</source>
-        <translation type="unfinished"></translation>
+        <translation>开启AI</translation>
     </message>
     <message>
         <location filename="Preferences.ui" line="264"/>
         <source>Select</source>
-        <translation type="unfinished">选取</translation>
+        <translation>选取</translation>
     </message>
     <message>
         <location filename="Preferences.ui" line="271"/>
         <source>Test</source>
-        <translation type="unfinished">测试</translation>
+        <translation>测试</translation>
     </message>
     <message>
         <location filename="Preferences.ui" line="280"/>
         <source>Endpoint:</source>
-        <translation type="unfinished"></translation>
+        <translation>接入地址：</translation>
     </message>
     <message>
         <location filename="Preferences.ui" line="291"/>
         <source>https://ark.cn-beijing.volces.com/api/v3</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="Preferences.ui" line="299"/>
         <source>API Key:</source>
-        <translation type="unfinished"></translation>
+        <translation>API Key</translation>
     </message>
     <message>
         <location filename="Preferences.ui" line="309"/>
         <source>Model ID</source>
-        <translation type="unfinished"></translation>
+        <translation>模型 ID</translation>
     </message>
     <message>
         <location filename="Preferences.ui" line="352"/>
@@ -3796,7 +3849,7 @@ Model ID: %1</source>
         <translation>返回</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="164"/>
+        <location filename="Preferences.cpp" line="168"/>
         <source>Font Files (*.*)</source>
         <translation>字体文件 (*.*)</translation>
     </message>
@@ -3805,7 +3858,7 @@ Model ID: %1</source>
         <translation type="vanished">自动备份</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="475"/>
+        <location filename="Preferences.cpp" line="470"/>
         <source>Password validation error.</source>
         <translation>密码验证错误</translation>
     </message>

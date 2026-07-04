@@ -50,6 +50,7 @@ Preferences::Preferences(QWidget* parent)
 
   mui->editPassword->setEchoMode(QLineEdit::EchoMode::Password);
   mui->editValidate->setEchoMode(QLineEdit::EchoMode::Password);
+  // ui->editAIKey->setEchoMode(QLineEdit::EchoMode::Password);
 
   if (isAndroid) {
     ui->sliderFontSize->setMinimum(10);
@@ -61,6 +62,8 @@ Preferences::Preferences(QWidget* parent)
     ui->sliderFontSize->setValue(10);
   }
 
+  m_netMgr = new QNetworkAccessManager(this);
+  m_netMgr->setTransferTimeout(10000);
   initAIConfig();
 }
 
@@ -103,6 +106,7 @@ void Preferences::saveOptions() {
     iniPreferences->setValue("/Options/Dark", ui->chkDark->isChecked());
     iniPreferences->setValue("/Options/chkUIFont", ui->chkUIFont->isChecked());
     iniPreferences->setValue("/Options/maxcon", ui->editConcurrency->text());
+    iniPreferences->setValue("/Options/ai", ui->chkAI->isChecked());
   }
 
   iniPreferences->setValue("/Options/Zip", mui->chkZip->isChecked());
@@ -265,16 +269,7 @@ void Preferences::initOptions() {
 
   ui->chkDark->setChecked(
       iniPreferences->value("/Options/Dark", false).toBool());
-
-#ifdef Q_OS_WIN
-
-#else
-
-#endif
-
-#ifdef Q_OS_ANDROID
-
-#endif
+  ui->chkAI->setChecked(iniPreferences->value("/Options/ai", false).toBool());
 
   QString aesStr = iniPreferences->value("/zip/password").toString();
   QString password = m_CloudBackup->aesDecrypt(aesStr, aes_key0, aes_iv0);
@@ -584,6 +579,9 @@ void Preferences::openPreferences() {
   if (editFilter != nullptr) {
     mui->editPassword->removeEventFilter(editFilter);
     mui->editValidate->removeEventFilter(editFilter);
+    ui->cboxEndpoint->lineEdit()->removeEventFilter(editFilter);
+    ui->editAIKey->removeEventFilter(editFilter);
+    ui->editAIModelID->removeEventFilter(editFilter);
     delete editFilter;
     editFilter = nullptr;
   }
@@ -591,6 +589,9 @@ void Preferences::openPreferences() {
 
   mui->editPassword->installEventFilter(editFilter);
   mui->editValidate->installEventFilter(editFilter);
+  ui->cboxEndpoint->lineEdit()->installEventFilter(editFilter);
+  ui->editAIKey->installEventFilter(editFilter);
+  ui->editAIModelID->installEventFilter(editFilter);
 
   isChanged = false;
 }
@@ -614,102 +615,31 @@ void Preferences::on_chkUIFont_clicked(bool checked) {
 void Preferences::on_btnAISelect_clicked() { ui->cboxEndpoint->showPopup(); }
 
 void Preferences::on_btnAITest_clicked() {
-  // 1. 读取界面输入
-  QString endpoint = ui->cboxEndpoint->currentText().trimmed();
-  QString apiKey = ui->editAIKey->text().trimmed();
-  QString modelId = ui->editAIModelID->text().trimmed();
+  aiChatQuery("Hello!");
 
-  // 空值校验
-  if (endpoint.isEmpty()) {
+  return;
+
+  QString ep = ui->cboxEndpoint->currentText().trimmed();
+  QString key = ui->editAIKey->text().trimmed();
+  QString mid = ui->editAIModelID->text().trimmed();
+
+  if (ep.isEmpty() || key.isEmpty() || mid.isEmpty()) {
     auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg(tr("Warning"), tr("Endpoint cannot be empty"), 1);
-    return;
-  }
-  if (apiKey.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg(tr("Warning"), tr("API Key cannot be empty"), 1);
-    return;
-  }
-  if (modelId.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg(tr("Warning"), tr("Model ID cannot be empty"), 1);
+    msg->showMsg(tr("Warning"),
+                 tr("Endpoint / API Key / Model ID cannot be empty"), 0);
     return;
   }
 
-  // 修复URL拼接：去除末尾多余斜杠，固定拼接接口路径，杜绝重复/v1导致404
-  QString baseUrl = endpoint;
-  while (baseUrl.endsWith('/')) baseUrl.chop(1);
-  QString fullUrlStr = baseUrl + "/chat/completions";
+  AiSingleRecord tempCfg;
+  tempCfg.endpoint = ep;
+  tempCfg.apiKey = key;
+  tempCfg.modelId = mid;
+  tempCfg.temperature = 0.1;
+  tempCfg.timeoutSec = 10;
+  tempCfg.maxTokens = 1024;
 
-  QUrl targetUrl(fullUrlStr);
-  QNetworkRequest req(targetUrl);
-
-  req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-  req.setRawHeader("Authorization", ("Bearer " + apiKey).toUtf8());
-
-  // 极简测试报文，极低token消耗
-  QJsonObject sysMsg;
-  sysMsg["role"] = "system";
-  sysMsg["content"] = "You only reply one word: ok";
-
-  QJsonObject userMsg;
-  userMsg["role"] = "user";
-  userMsg["content"] = "test connection";
-
-  QJsonArray msgs;
-  msgs << sysMsg << userMsg;
-
-  QJsonObject body;
-  body["model"] = modelId;
-  body["temperature"] = 0.0;
-  body["max_tokens"] = 16;
-  body["messages"] = msgs;
-
-  QByteArray postData = QJsonDocument(body).toJson(QJsonDocument::Compact);
-
-  QNetworkAccessManager* mgr = new QNetworkAccessManager(this);
-  QNetworkReply* reply = mgr->post(req, postData);
-
-  connect(reply, &QNetworkReply::finished, this, [=]() {
-    mgr->deleteLater();
-    reply->deleteLater();
-
-    if (reply->error() != QNetworkReply::NoError) {
-      QString err = reply->errorString();
-      // 弹窗打印完整请求地址，方便调试404问题
-      auto msg = std::make_unique<ShowMessage>(this);
-      msg->showMsg(
-          tr("Connect Failed"),
-          tr("Network Error:\n%1\nRequest URL:\n%2").arg(err, fullUrlStr), 1);
-      return;
-    }
-
-    QByteArray respRaw = reply->readAll();
-    QJsonParseError jsonErr;
-    QJsonDocument doc = QJsonDocument::fromJson(respRaw, &jsonErr);
-    if (jsonErr.error != QJsonParseError::NoError) {
-      auto msg = std::make_unique<ShowMessage>(this);
-      msg->showMsg(tr("Parse Failed"),
-                   tr("Response invalid JSON:\n%1").arg(jsonErr.errorString()),
-                   1);
-      return;
-    }
-
-    QJsonObject root = doc.object();
-    if (root.contains("error")) {
-      QJsonObject errObj = root["error"].toObject();
-      QString msgText = errObj["message"].toString("Unknown service error");
-      auto msg = std::make_unique<ShowMessage>(this);
-      msg->showMsg(tr("API Rejected"), tr("Service Error:\n%1").arg(msgText),
-                   1);
-      return;
-    }
-
-    auto msg = std::make_unique<ShowMessage>(this);
-    saveAIConfig();
-    msg->showMsg(tr("Success"),
-                 tr("Connection test passed!\nModel ID: %1").arg(modelId), 1);
-  });
+  // 只做连通，无后续操作，传空回调
+  checkAiConnectivity(tempCfg, nullptr);
 }
 
 void Preferences::saveAIConfig() {
@@ -830,4 +760,182 @@ void Preferences::on_cboxEndpoint_currentIndexChanged(int index) {
   ui->cboxEndpoint->setCurrentText(rec.endpoint);
   ui->editAIKey->setText(rec.apiKey);
   ui->editAIModelID->setText(rec.modelId);
+}
+
+void Preferences::checkAiConnectivity(const AiSingleRecord& cfg,
+                                      std::function<void()> onSuccess) {
+  QString baseUrl = cfg.endpoint.endsWith("/")
+                        ? cfg.endpoint.left(cfg.endpoint.size() - 1)
+                        : cfg.endpoint;
+  QUrl url(baseUrl + "/chat/completions");
+  QNetworkRequest req(url);
+  req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+  req.setRawHeader("Authorization",
+                   QString("Bearer %1").arg(cfg.apiKey).toUtf8());
+
+  QJsonObject body;
+  body["model"] = cfg.modelId;
+  body["max_tokens"] = 1;
+  QJsonArray messages;
+  QJsonObject msgUser;
+  msgUser["role"] = "user";
+  msgUser["content"] = "hello";
+  messages.append(msgUser);
+  body["messages"] = messages;
+
+  QByteArray postData = QJsonDocument(body).toJson(QJsonDocument::Compact);
+  QNetworkReply* reply = m_netMgr->post(req, postData);
+
+  connect(reply, &QNetworkReply::finished, this,
+          [this, reply, cfg, onSuccess]() {
+            reply->deleteLater();
+            if (!this->isVisible()) return;
+
+            QString reqUrl = reply->request().url().toString();
+            if (reply->error() != QNetworkReply::NoError) {
+              QString errMsg = reply->errorString();
+              QString content =
+                  tr("Network Error") + ":\n%1\n" + tr("Request URL") + ":\n%2";
+              content = content.arg(errMsg, reqUrl);
+              auto msg = std::make_unique<ShowMessage>(this);
+              msg->showMsg(tr("Connect Failed"), content, 2);
+              return;
+            }
+            // 连通测试弹窗提示
+            // auto msg = std::make_unique<ShowMessage>(this);
+            // QString text = tr("Connection test passed!") + "\n" +
+            //               tr("Model ID: %1").arg(cfg.modelId);
+            // msg->showMsg(tr("Success"), text, 1);
+
+            // 连通成功，执行传入的回调函数
+            if (onSuccess) onSuccess();
+          });
+}
+
+void Preferences::sendAiChatRequest(const AiSingleRecord& cfg,
+                                    const QString& userQuestion) {
+  // 规范：发起提问前先执行连通校验，校验通过后再发正式对话
+  // 先执行连通检测（异步，检测成功后再执行真实提问，这里做分层回调）
+  QString baseUrl = cfg.endpoint.endsWith("/")
+                        ? cfg.endpoint.left(cfg.endpoint.size() - 1)
+                        : cfg.endpoint;
+  QUrl url(baseUrl + "/chat/completions");
+  QNetworkRequest req(url);
+
+  req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+  req.setRawHeader("Authorization",
+                   QString("Bearer %1").arg(cfg.apiKey).toUtf8());
+
+  // 完整用户提问请求体，使用配置内自定义参数
+  QJsonObject body;
+  body["model"] = cfg.modelId;
+  body["temperature"] = cfg.temperature;
+  body["max_tokens"] = cfg.maxTokens;
+  QJsonArray messages;
+  QJsonObject msgUser;
+  msgUser["role"] = "user";
+  msgUser["content"] = userQuestion;
+  messages.append(msgUser);
+  body["messages"] = messages;
+
+  QByteArray postData = QJsonDocument(body).toJson(QJsonDocument::Compact);
+  QNetworkReply* reply = m_netMgr->post(req, postData);
+
+  connect(reply, &QNetworkReply::finished, this, [this, reply, userQuestion]() {
+    reply->deleteLater();
+    QString reqUrl = reply->request().url().toString();
+    if (reply->error() != QNetworkReply::NoError) {
+      QString errMsg = reply->errorString();
+      QString content =
+          tr("Network Error") + ":\n%1\n" + tr("Request URL") + ":\n%2";
+      content = content.arg(errMsg, reqUrl);
+      auto msg = std::make_unique<ShowMessage>(this);
+      msg->showMsg(tr("Connect Failed"), content, 2);
+      return;
+    }
+    // 此处增加业务逻辑：读取返回JSON、解析AI回答内容
+    QByteArray rawResp = reply->readAll();
+    // TODO：解析返回内容，自行实现界面渲染逻辑
+    QJsonParseError parseError;
+    // 转为JSON文档，捕获解析错误
+    QJsonDocument doc = QJsonDocument::fromJson(rawResp, &parseError);
+
+    // 1. 判断：返回内容不是合法JSON
+    if (parseError.error != QJsonParseError::NoError) {
+      QString errInfo = tr("Returned data is not valid JSON:\n%1")
+                            .arg(parseError.errorString());
+      auto msg = std::make_unique<ShowMessage>(this);
+      msg->showMsg(tr("Parse Failed"), errInfo, 2);
+      return;
+    }
+
+    QJsonObject rootObj = doc.object();
+
+    // 2. 判断：服务端返回业务错误（密钥无效、模型不存在、余额不足等）
+    if (rootObj.contains("error")) {
+      QJsonObject errObj = rootObj["error"].toObject();
+      QString serverErr = errObj["message"].toString().trimmed();
+      auto msg = std::make_unique<ShowMessage>(this);
+      msg->showMsg(tr("API Rejected"), tr("Server Error:\n%1").arg(serverErr),
+                   1);
+      return;
+    }
+
+    // 3. 正常成功响应，提取AI回答
+    QJsonArray choicesArr = rootObj["choices"].toArray();
+    if (choicesArr.isEmpty()) {
+      auto msg = std::make_unique<ShowMessage>(this);
+      msg->showMsg(tr("Success"), tr("AI returned empty content"), 1);
+      return;
+    }
+
+    // 取第一条回复
+    QJsonObject firstChoice = choicesArr.first().toObject();
+    QJsonObject aiMsgObj = firstChoice["message"].toObject();
+    QString aiReplyText = aiMsgObj["content"].toString().trimmed();
+
+    // ========== 弹窗展示完整问答 ==========
+    // 分段纯翻译文本，tr内部不含任何换行符
+    QString part1 = tr("User Question");
+    QString part2 = tr("AI Reply");
+
+    // 外部拼接换行、占位符，tr只负责文字
+    QString showBody;
+    showBody += part1;
+    showBody += ":\n%1\n\n";
+    showBody += part2;
+    showBody += ":\n%2";
+
+    // 最后填充占位符
+    showBody = showBody.arg(userQuestion, aiReplyText);
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(tr("AI Response Completed"), showBody, 1);
+  });
+}
+
+void Preferences::aiChatQuery(const QString& userQuestion) {
+  // 读取界面配置
+  QString ep = ui->cboxEndpoint->currentText().trimmed();
+  QString key = ui->editAIKey->text().trimmed();
+  QString mid = ui->editAIModelID->text().trimmed();
+
+  if (ep.isEmpty() || key.isEmpty() || mid.isEmpty()) {
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(tr("Warning"),
+                 tr("Endpoint / API Key / Model ID cannot be empty"), 1);
+    return;
+  }
+
+  AiSingleRecord cfg;
+  cfg.endpoint = ep;
+  cfg.apiKey = key;
+  cfg.modelId = mid;
+  cfg.temperature = 0.1;
+  cfg.timeoutSec = 10;
+  cfg.maxTokens = 1024;
+
+  // 复用统一连通检测函数，连通成功后执行提问
+  checkAiConnectivity(cfg, [this, cfg, userQuestion]() {
+    sendAiChatRequest(cfg, userQuestion);
+  });
 }

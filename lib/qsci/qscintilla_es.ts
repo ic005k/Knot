@@ -2517,14 +2517,14 @@
     <message>
         <location filename="../../src/Preferences.ui" line="69"/>
         <location filename="../../src/Preferences.cpp" line="25"/>
-        <location filename="../../src/Preferences.cpp" line="158"/>
+        <location filename="../../src/Preferences.cpp" line="162"/>
         <source>Font Size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Preferences.ui" line="128"/>
-        <location filename="../../src/Preferences.cpp" line="225"/>
-        <location filename="../../src/Preferences.cpp" line="231"/>
+        <location filename="../../src/Preferences.cpp" line="229"/>
+        <location filename="../../src/Preferences.cpp" line="235"/>
         <source>Custom Font</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2594,7 +2594,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="151"/>
+        <location filename="../../src/Preferences.cpp" line="155"/>
         <source>Default</source>
         <translation type="unfinished">Por defecto</translation>
     </message>
@@ -2613,138 +2613,137 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="151"/>
+        <location filename="../../src/Preferences.cpp" line="155"/>
         <source>ExtraSmall</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="151"/>
+        <location filename="../../src/Preferences.cpp" line="155"/>
         <source>Small</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="152"/>
+        <location filename="../../src/Preferences.cpp" line="156"/>
         <source>Large</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="152"/>
+        <location filename="../../src/Preferences.cpp" line="156"/>
         <source>XLarge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="152"/>
+        <location filename="../../src/Preferences.cpp" line="156"/>
         <source>XXLarge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="153"/>
+        <location filename="../../src/Preferences.cpp" line="157"/>
         <source>XXXLarge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="163"/>
+        <location filename="../../src/Preferences.cpp" line="167"/>
         <source>Font</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="164"/>
+        <location filename="../../src/Preferences.cpp" line="168"/>
         <source>Font Files (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="475"/>
+        <location filename="../../src/Preferences.cpp" line="470"/>
         <source>Password validation error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="625"/>
-        <location filename="../../src/Preferences.cpp" line="630"/>
-        <location filename="../../src/Preferences.cpp" line="635"/>
-        <location filename="../../src/Preferences.cpp" line="724"/>
+        <location filename="../../src/Preferences.cpp" line="628"/>
+        <location filename="../../src/Preferences.cpp" line="654"/>
+        <location filename="../../src/Preferences.cpp" line="924"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="625"/>
-        <source>Endpoint cannot be empty</source>
+        <location filename="../../src/Preferences.cpp" line="798"/>
+        <location filename="../../src/Preferences.cpp" line="850"/>
+        <source>Network Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="630"/>
-        <source>API Key cannot be empty</source>
+        <location filename="../../src/Preferences.cpp" line="798"/>
+        <location filename="../../src/Preferences.cpp" line="850"/>
+        <source>Request URL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="635"/>
-        <source>Model ID cannot be empty</source>
+        <location filename="../../src/Preferences.cpp" line="865"/>
+        <source>Returned data is not valid JSON:
+%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="682"/>
-        <source>Connect Failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="683"/>
-        <source>Network Error:
-%1
-Request URL:
-%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="692"/>
+        <location filename="../../src/Preferences.cpp" line="868"/>
         <source>Parse Failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="693"/>
-        <source>Response invalid JSON:
-%1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="703"/>
+        <location filename="../../src/Preferences.cpp" line="879"/>
         <source>API Rejected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="703"/>
-        <source>Service Error:
+        <location filename="../../src/Preferences.cpp" line="879"/>
+        <source>Server Error:
 %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="710"/>
-        <location filename="../../src/Preferences.cpp" line="781"/>
+        <location filename="../../src/Preferences.cpp" line="888"/>
+        <source>AI returned empty content</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Preferences.cpp" line="899"/>
+        <source>User Question</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Preferences.cpp" line="900"/>
+        <source>AI Reply</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Preferences.cpp" line="912"/>
+        <source>AI Response Completed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Preferences.cpp" line="801"/>
+        <location filename="../../src/Preferences.cpp" line="853"/>
+        <source>Connect Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Preferences.cpp" line="888"/>
         <source>Success</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="711"/>
-        <source>Connection test passed!
-Model ID: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="725"/>
+        <location filename="../../src/Preferences.cpp" line="629"/>
+        <location filename="../../src/Preferences.cpp" line="655"/>
+        <location filename="../../src/Preferences.cpp" line="925"/>
         <source>Endpoint / API Key / Model ID cannot be empty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="768"/>
+        <location filename="../../src/Preferences.cpp" line="698"/>
         <source>Save Failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="768"/>
+        <location filename="../../src/Preferences.cpp" line="698"/>
         <source>Cannot open config file to write</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="781"/>
-        <source>AI config saved successfully</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
