@@ -1,94 +1,117 @@
-name: MacOS-ARM
+name: MacOS-Universal
 on:
   push:
+    branches: [main]
     paths:
       - '**.pro'
-      - '.github/workflows/mac-arm.yml'
+      - '!stats.txt'
+      - '!README.md'
   pull_request:
     paths:
-      - '**.pro'
+      - '**'
+  release:
+    types: [published]
 
 jobs:
   build:
-    name: Build-ARM
-    runs-on: macos-latest
+    name: Build-Universal
+    runs-on: macos-14
+    permissions:
+      contents: write
     env:
       targetName: Knot
-      VERSION: Mac-ARM
+      VERSION: Mac-Universal
       orgName: Knot
-      QT_VERSION: 6.9.3
-      QT_PREFIX: $HOME/Qt/${QT_VERSION}/macos
+      QT_VERSION: 6.10.3
+      QT_DIR: ${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/universal
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      # 关键：Qt 6.10.3 仅 clang_64 支持分包modules，universal不支持modules，因此放弃modules，完整安装
+      - name: Install Qt Universal
+        uses: jurplel/install-qt-action@v3
         with:
-          fetch-depth: 1
-          submodules: recursive
+          version: ${{ env.QT_VERSION }}
+          cached: 'false'
+          host: mac
+          target: desktop
+          arch: universal
+          install-deps: true
+          source: false
+          dir: ${{ env.QT_DIR }}
 
-      - name: Install Qt Official Installer
+      # 同时保留 arm64 / x86_64 两套brew，不删除/opt/homebrew
+      - name: Install Dual Homebrew (arm64 + x86_64)
         run: |
-          wget -q https://download.qt.io/official_releases/online_installers/qt-unified-mac-x64-arm64-online.dmg
-          hdiutil attach -quiet qt-unified-mac-x64-arm64-online.dmg
-          cp -r "/Volumes/Qt Unified Installer/qt-unified-mac-x64-arm64-online.app" ./qt-install.app
-
-          QT_NUM="${QT_VERSION//./}"
-          # 全部$转义为$$，避免YAML解析报错
-          cat > install.qs <<'EOF'
-          function Controller() {
-          this.autoAcceptSelections = true;
-          this.setRepository("https://download.qt.io/online/qtsdkrepository/mac/desktop/qt6_$QT_NUM/");
-          var target = "$QT_PREFIX";
-          var ver = "${QT_VERSION}";
-          this.addQt(target, ver, "universal", ["qtcharts","qtsensors","qtwebview","qtlocation","qtwebchannel","qt5compat","qtpositioning","qtmultimedia"]);
-          this.runInstaller();
-          }
-          EOF
-
-          ./qt-install.app/Contents/MacOS/qt-unified-mac-x64-arm64-online --script install.qs
-          hdiutil detach -quiet "/Volumes/Qt Unified Installer"
-        env:
-          QT_VERSION: ${{ env.QT_VERSION }}
-
-      - name: Add Qt to PATH
-        run: echo "${{ env.QT_PREFIX }}/bin" >> $GITHUB_PATH
-
-      - name: Setup ARM Homebrew PATH
-        run: |
+          # ARM原生brew
+          if [ ! -d "/opt/homebrew" ]; then
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          fi
           echo '/opt/homebrew/bin' >> $GITHUB_PATH
+
+          # x86_64 Rosetta brew
+          if [ ! -d "/usr/local/Homebrew" ]; then
+            arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          fi
+          echo '/usr/local/bin' >> $GITHUB_PATH
           source ~/.zshrc
 
-      - name: Install OpenSSL3 arm64
+      # 分别安装两套架构openssl
+      - name: Install OpenSSL dual arch
         run: |
+          # arm64
           brew update
-          brew install openssl@3
-          brew link --force openssl@3
-          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> $GITHUB_ENV
+          brew install openssl
+          brew link --force openssl
 
-      - name: Build Project Only arm64
+          # x86_64
+          arch -x86_64 brew update
+          arch -x86_64 brew install openssl
+          arch -x86_64 brew link --force openssl
+
+      # qmake 开启双架构编译 x86_64 + arm64
+      - name: Build Universal Binary
         run: |
-          export PKG_CONFIG_PATH="$OPENSSL_ROOT_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
-          qmake "CONFIG += release" "QMAKE_APPLE_DEVICE_ARCHS=arm64" "LIBS += -L$OPENSSL_ROOT_DIR/lib"
+          # 清空单架构锁定标记
+          unset ARCHFLAGS CFLAGS CXXFLAGS LDFLAGS
+          export PATH=${{ env.QT_DIR }}/bin:$PATH
+
+          # qmake 指定双架构
+          qmake "CONFIG += release" "QMAKE_APPLE_DEVICE_ARCHS=x86_64 arm64"
           make -j$(sysctl -n hw.ncpu)
 
-      - name: Package ARM App
+      # 打包，复用你原有逻辑，补充macdeployqtfix修复universal依赖
+      - name: Prepare macdeployqtfix
         run: |
-          cp -f Info.plist bin/release/${targetName}.app/Contents/Info.plist
+          git clone https://github.com/tamlok/macdeployqtfix.git macdeployqtfix --depth=1
+
+      - name: Package Universal App & DMG
+        run: |
+          cp -f ExtBin/mac/Info.plist bin/release/${targetName}.app/Contents/Info.plist
           cp -R -p -f bin/release/${targetName}.app ${targetName}.app
-          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg -always-overwrite
-          cp ${targetName}.dmg bin/release/${targetName}-arm64.dmg
+
+          # 基础部署
+          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -always-overwrite
+          # 修复universal Qt库、清理CI rpath
+          python3 ./macdeployqtfix/macdeployqtfix.py ./${targetName}.app/Contents/MacOS/${targetName} ${{ env.QT_DIR }}
+
+          # 生成DMG
+          hdiutil create -volname "${targetName}" -srcfolder ${targetName}.app -ov -format UDZO ${targetName}-universal.dmg
+          cp ${targetName}-universal.dmg bin/release/${targetName}-universal.dmg
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.orgName }}-${{ env.VERSION }}-arm64
-          path: bin/release/${{ env.targetName }}-arm64.dmg
+          name: ${{ env.orgName }}-${{ env.VERSION }}
+          path: bin/release/${{ env.targetName }}-universal.dmg
 
-      - name: Upload Release Asset
-        if: startsWith(github.event.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
+      - name: uploadRelease
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@v2
         with:
-          files: bin/release/${{ env.targetName }}-arm64.dmg
-          tag_name: ${{ github.ref_name }}
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: bin/release/${{ env.targetName }}-universal.dmg
+          asset_name: ${{ env.orgName }}-${{ env.VERSION }}.dmg
+          tag: ${{ github.ref_name }}
+          overwrite: true
