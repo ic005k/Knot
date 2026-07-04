@@ -807,6 +807,8 @@ void Preferences::checkAiConnectivity(const AiSingleRecord& cfg,
             //               tr("Model ID: %1").arg(cfg.modelId);
             // msg->showMsg(tr("Success"), text, 1);
 
+            saveAIConfig();
+
             // 连通成功，执行传入的回调函数
             if (onSuccess) onSuccess();
           });
