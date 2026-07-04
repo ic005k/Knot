@@ -90,24 +90,8 @@ jobs:
           cp -R -p bin/release/${targetName}.app ${targetName}.app
 
           #######################################################################
-          # 调试打印插件目录并清理ODBC/PGSQL驱动
-          PLUGINS_DIR="${targetName}.app/Contents/PlugIns/sqldrivers"
-          echo "[DEBUG] SQL插件目录路径: $PLUGINS_DIR"
-          ls -la "$PLUGINS_DIR" || echo "[WARN] sqldrivers目录不存在，无需清理"
-
-          # 不存在目录时rm不会报错，直接执行即可
-          rm -f "$PLUGINS_DIR/libqsqlodbc.dylib"
-          rm -f "$PLUGINS_DIR/libqsqlpsql.dylib"
-
-          echo "[DEBUG] 删除后插件列表:"
-          ls -la "$PLUGINS_DIR" || echo "[WARN] sqldrivers目录不存在"
-
-          # 动态获取Qt官方真实lib路径
+          # 自动读取当前Qt真实库路径，修复Qt6.10 macdeployqt检索缺陷
           QT_ACTUAL_LIB=$(qmake -query QT_INSTALL_LIBS)
-          echo "[DEBUG] Qt原生lib路径: $QT_ACTUAL_LIB"
-          ls "$QT_ACTUAL_LIB"/QtShaderTools.framework || echo "[ERROR] Qt安装包缺失QtShaderTools.framework"
-
-          # 双libpath兜底
           macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg \
             -libpath="$QT_ACTUAL_LIB" \
             -libpath="./lib"
