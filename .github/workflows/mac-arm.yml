@@ -17,7 +17,7 @@ jobs:
       VERSION: Mac-ARM
       orgName: Knot
       QT_VERSION: 6.9.3
-      QT_ARCH: universal
+      QT_PREFIX: $HOME/Qt/${QT_VERSION}/macos
 
     steps:
       - name: Checkout code
@@ -26,21 +26,32 @@ jobs:
           fetch-depth: 1
           submodules: recursive
 
-      # 核心修复：移除modules字段，完整安装Qt，规避分包校验报错
-      - name: Install Qt (Qt6.9.3 universal)
-        id: install_qt
-        uses: jurplel/install-qt-action@v3
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: mac
-          target: desktop
-          arch: ${{ env.QT_ARCH }}
-          install-deps: true
-          cached: true
-
-      - name: Setup Qt Environment Path
+      # 替换aqt安装，使用Qt官方静默安装器，无qt_base校验问题
+      - name: Install Qt Official Installer
         run: |
-          echo "$HOME/Qt/${{ env.QT_VERSION }}/macos/bin" >> $GITHUB_PATH
+          wget -q https://download.qt.io/official_releases/online_installers/qt-unified-mac-x64-arm64-online.dmg
+          hdiutil attach -quiet qt-unified-mac-x64-arm64-online.dmg
+          cp -r "/Volumes/Qt Unified Installer/qt-unified-mac-x64-arm64-online.app" ./qt-install.app
+
+          # 静默安装脚本，指定版本、桌面、完整universal包
+          cat > install.qs << EOF
+function Controller() {
+    this.autoAcceptSelections = true;
+    this.setRepository("https://download.qt.io/online/qtsdkrepository/mac/desktop/qt6_${QT_VERSION//./}/");
+    var target = "$QT_PREFIX";
+    var ver = "${QT_VERSION}";
+    this.addQt(target, ver, "universal", ["qtcharts","qtsensors","qtwebview","qtlocation","qtwebchannel","qt5compat","qtpositioning","qtmultimedia"]);
+    this.runInstaller();
+}
+EOF
+
+          ./qt-install.app/Contents/MacOS/qt-unified-mac-x64-arm64-online --script install.qs
+          hdiutil detach -quiet "/Volumes/Qt Unified Installer"
+        env:
+          QT_VERSION: ${{ env.QT_VERSION }}
+
+      - name: Add Qt to PATH
+        run: echo "${{ env.QT_PREFIX }}/bin" >> $GITHUB_PATH
 
       - name: Setup ARM Homebrew PATH
         run: |
@@ -54,24 +65,17 @@ jobs:
           brew link --force openssl@3
           echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> $GITHUB_ENV
 
-      - name: Build Project 仅arm64单架构
+      - name: Build Project Only arm64
         run: |
           export PKG_CONFIG_PATH="$OPENSSL_ROOT_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
-          qmake "CONFIG += release" \
-                "QMAKE_APPLE_DEVICE_ARCHS=arm64" \
-                "LIBS += -L$OPENSSL_ROOT_DIR/lib"
+          qmake "CONFIG += release" "QMAKE_APPLE_DEVICE_ARCHS=arm64" "LIBS += -L$OPENSSL_ROOT_DIR/lib"
           make -j$(sysctl -n hw.ncpu)
 
       - name: Package ARM App
         run: |
           cp -f Info.plist bin/release/${targetName}.app/Contents/Info.plist
           cp -R -p -f bin/release/${targetName}.app ${targetName}.app
-
-          macdeployqt ${targetName}.app \
-            -qmldir=. \
-            -verbose=1 \
-            -dmg \
-            -always-overwrite
+          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg -always-overwrite
           cp ${targetName}.dmg bin/release/${targetName}-arm64.dmg
 
       - uses: actions/upload-artifact@v4
