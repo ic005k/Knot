@@ -1,93 +1,83 @@
-name: MacOS-Universal
+name: MacOS-ARM
 on:
   push:
-    branches: [main]
     paths:
       - '**.pro'
-      - '!stats.txt'
-      - '!README.md'
+      - '.github/workflows/mac-arm.yml'
   pull_request:
     paths:
-      - '**'
-  release:
-    types: [published]
+      - '**.pro'
 
 jobs:
   build:
-    name: Build-Universal
-    runs-on: macos-14
+    name: Build-ARM
+    runs-on: macos-latest
     permissions:
       contents: write
     env:
       targetName: Knot
-      VERSION: Mac-Universal
+      VERSION: Mac-ARM
       orgName: Knot
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Qt 6.10.3 universal（移除modules，规避qt_base报错）
-        uses: jurplel/install-qt-action@v3
-        with:
-          version: 6.10.3
-          cached: 'false'
-          host: mac
-          target: desktop
-          arch: universal
-          install-deps: true
-          source: false
-          dir: ${{ github.workspace }}/Qt/6.10.3/universal
-
-      - name: 安装双架构Homebrew（保留arm64，不删除）
+      # 原生arm64 Homebrew，不删除任何架构
+      - name: Setup ARM Homebrew
         run: |
-          # arm64原生brew
-          if [ ! -d "/opt/homebrew" ]; then
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          fi
           echo '/opt/homebrew/bin' >> $GITHUB_PATH
-          # x86_64 Rosetta brew
-          if [ ! -d "/usr/local/Homebrew" ]; then
-            arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          fi
-          echo '/usr/local/bin' >> $GITHUB_PATH
           source ~/.zshrc
 
-      - name: 双架构安装OpenSSL
+      # Brew 直接安装Qt6.10.3 arm64（彻底抛弃aqt/install-qt-action，不会报qt_base）
+      - name: Install Qt 6.10.3 via Brew
         run: |
-          brew update && brew install openssl && brew link --force openssl
-          arch -x86_64 brew update && arch -x86_64 brew install openssl && arch -x86_64 brew link --force openssl
+          brew update
+          brew install qt@6.10
+          brew link --force qt@6.10
+          echo "QT_BIN=/opt/homebrew/opt/qt@6.10/bin" >> $GITHUB_ENV
 
-      - name: qmake编译双架构x86_64+arm64
+      # 安装OpenSSL arm64
+      - name: Install OpenSSL
         run: |
-          unset ARCHFLAGS CFLAGS CXXFLAGS LDFLAGS
-          export PATH=${{ github.workspace }}/Qt/6.10.3/universal/bin:$PATH
-          qmake "CONFIG += release" "QMAKE_APPLE_DEVICE_ARCHS=x86_64 arm64"
+          brew install openssl@3
+          brew link --force openssl@3
+          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> $GITHUB_ENV
+
+      # 纯arm64编译，不套arch -x86_64，锁定arm64
+      - name: Build Project ARM64 Only
+        run: |
+          export PATH=${{ env.QT_BIN }}:$PATH
+          export PKG_CONFIG_PATH="$OPENSSL_ROOT_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
+          # 强制仅编译arm64
+          qmake "CONFIG += release" "QMAKE_APPLE_DEVICE_ARCHS=arm64" "LIBS += -L$OPENSSL_ROOT_DIR/lib"
           make -j$(sysctl -n hw.ncpu)
 
-      - name: 下载macdeployqtfix修复universal依赖
-        run: git clone https://github.com/tamlok/macdeployqtfix.git macdeployqtfix --depth=1
-
-      - name: 打包APP+DMG
+      # 打包流程完全复用你原有逻辑
+      - name: Package ARM App & DMG
         run: |
           cp -f ExtBin/mac/Info.plist bin/release/${targetName}.app/Contents/Info.plist
           cp -R -p -f bin/release/${targetName}.app ${targetName}.app
-          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -always-overwrite
-          python3 ./macdeployqtfix/macdeployqtfix.py ./${targetName}.app/Contents/MacOS/${targetName} ${{ github.workspace }}/Qt/6.10.3/universal
-          hdiutil create -volname "${targetName}" -srcfolder ${targetName}.app -ov -format UDZO ${targetName}-universal.dmg
-          cp ${targetName}-universal.dmg bin/release/
 
-      - name: 上传制品
-        uses: actions/upload-artifact@v4
+          macdeployqt ${targetName}.app \
+            -qmldir=. \
+            -verbose=1 \
+            -dmg \
+            -always-overwrite
+          cp ${targetName}.dmg bin/release/${targetName}-arm64.dmg
+
+      # 上传制品
+      - uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.orgName }}-${{ env.VERSION }}
-          path: bin/release/${{ env.targetName }}-universal.dmg
+          name: ${{ env.orgName }}-${{ env.VERSION }}-arm64
+          path: bin/release/${{ env.targetName }}-arm64.dmg
 
-      - name: Release上传资产
+      # tag发布自动上传资产
+      - name: uploadRelease
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: bin/release/${{ env.targetName }}-universal.dmg
-          asset_name: ${{ env.orgName }}-${{ env.VERSION }}.dmg
+          file: bin/release/${{ env.targetName }}-arm64.dmg
+          asset_name: ${{ env.orgName }}-${{ env.VERSION }}-arm64.dmg
           tag: ${{ github.ref_name }}
           overwrite: true
