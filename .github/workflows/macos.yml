@@ -100,7 +100,7 @@ jobs:
           #make -j$(sysctl -n hw.ncpu)
 
           # 确保所有命令在 Rosetta 2 下运行
-          arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          # arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bash_profile
           source ~/.bash_profile
 

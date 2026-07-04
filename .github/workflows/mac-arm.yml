@@ -89,14 +89,28 @@ jobs:
           cp -f ExtBin/mac/Info.plist bin/release/${targetName}.app/Contents/Info.plist
           cp -R -p bin/release/${targetName}.app ${targetName}.app
 
-          # 删除会导致用户崩溃的数据库驱动
-          PLUGINS="${targetName}.app/Contents/PlugIns/sqldrivers"
-          rm -f "$PLUGINS/libqsqlodbc.dylib"
-          rm -f "$PLUGINS/libqsqlpsql.dylib"
+          #######################################################################
+          # 调试打印插件目录并清理ODBC/PGSQL驱动
+          PLUGINS_DIR="${targetName}.app/Contents/PlugIns/sqldrivers"
+          echo "[DEBUG] SQL插件目录路径: $PLUGINS_DIR"
+          ls -la "$PLUGINS_DIR" || echo "[WARN] sqldrivers目录不存在"
 
-          # 显式指定Qt库目录，修复rpath解析失败
-          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg -libpath="${QT_DIR}/macos/lib"
+          # 删除问题驱动
+          rm -f "$PLUGINS_DIR/libqsqlodbc.dylib"
+          rm -f "$PLUGINS_DIR/libqsqlpsql.dylib"
 
+          echo "[DEBUG] 删除后插件列表:"
+          ls -la "$PLUGINS_DIR"
+
+          # 动态获取Qt官方真实lib路径，彻底解决双层Qt路径嵌套问题
+          QT_ACTUAL_LIB=$(qmake -query QT_INSTALL_LIBS)
+          echo "[DEBUG] 传给macdeployqt的lib检索路径: $QT_ACTUAL_LIB"
+          ls "$QT_ACTUAL_LIB"/QtShaderTools.framework || echo "[ERROR] 找不到QtShaderTools.framework，Qt安装异常"
+
+          # 打包命令
+          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg -libpath="$QT_ACTUAL_LIB"
+
+          ########################################################################
           #macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg
 
           cp ${targetName}.dmg bin/release/${targetName}.dmg
