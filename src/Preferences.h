@@ -2,11 +2,42 @@
 #define PREFERENCES_H
 
 #include <QDialog>
+#include <QFile>
 #include <QFontDatabase>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QMessageBox>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QStyleHints>
+#include <QTimer>
 #include <QToolButton>
+#include <memory>
 
+#include "src/Comm/ShowMessage.h"
 #include "src/Comm/TextEditToolbar.h"
+
+struct AiSingleRecord {
+  QString endpoint;
+  QString apiKey;
+  QString modelId;
+  double temperature;
+  int timeoutSec;
+  int maxTokens;
+
+  // 下拉展示字符串，无中文厂商名
+  QString displayText() const {
+    QString keySuffix = apiKey.size() > 6 ? apiKey.right(6) : apiKey;
+    return QString("%1 || %2 | %3").arg(endpoint, modelId, keySuffix);
+  }
+
+  // 三元唯一标识，用来判断当前整套配置是否已存在
+  QString uniqueKey() const {
+    return endpoint + "|||" + apiKey + "|||" + modelId;
+  }
+};
 
 namespace Ui {
 class Preferences;
@@ -89,6 +120,12 @@ class Preferences : public QDialog {
 
   void on_chkUIFont_clicked(bool checked);
 
+  void on_btnAISelect_clicked();
+
+  void on_btnAITest_clicked();
+
+  void on_cboxEndpoint_currentIndexChanged(int index);
+
  private:
   bool isChanged;
 
@@ -105,6 +142,11 @@ class Preferences : public QDialog {
 
   QByteArray aes_key0 = "MySuperSecretKey1234567890";  // 长度不足32会自动处理
   QByteArray aes_iv0 = "InitializationVe";
+  void saveAIConfig();
+  void initAIConfig();
+  const QString ai_config_json = "ai_config.json";
+  QStringList m_endpointCache;
+  QList<AiSingleRecord> m_aiAllRecords;
 };
 
 #endif  // PREFERENCES_H

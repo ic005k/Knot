@@ -60,6 +60,8 @@ Preferences::Preferences(QWidget* parent)
     ui->sliderFontSize->setMaximum(14);
     ui->sliderFontSize->setValue(10);
   }
+
+  initAIConfig();
 }
 
 Preferences::~Preferences() { delete ui; }
@@ -607,4 +609,225 @@ void Preferences::on_chkUIFont_clicked(bool checked) {
     qApp->setFont(font);
     ui->chkUIFont->setChecked(true);
   }
+}
+
+void Preferences::on_btnAISelect_clicked() { ui->cboxEndpoint->showPopup(); }
+
+void Preferences::on_btnAITest_clicked() {
+  // 1. 读取界面输入
+  QString endpoint = ui->cboxEndpoint->currentText().trimmed();
+  QString apiKey = ui->editAIKey->text().trimmed();
+  QString modelId = ui->editAIModelID->text().trimmed();
+
+  // 空值校验
+  if (endpoint.isEmpty()) {
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(tr("Warning"), tr("Endpoint cannot be empty"), 1);
+    return;
+  }
+  if (apiKey.isEmpty()) {
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(tr("Warning"), tr("API Key cannot be empty"), 1);
+    return;
+  }
+  if (modelId.isEmpty()) {
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(tr("Warning"), tr("Model ID cannot be empty"), 1);
+    return;
+  }
+
+  // 修复URL拼接：去除末尾多余斜杠，固定拼接接口路径，杜绝重复/v1导致404
+  QString baseUrl = endpoint;
+  while (baseUrl.endsWith('/')) baseUrl.chop(1);
+  QString fullUrlStr = baseUrl + "/chat/completions";
+
+  QUrl targetUrl(fullUrlStr);
+  QNetworkRequest req(targetUrl);
+
+  req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+  req.setRawHeader("Authorization", ("Bearer " + apiKey).toUtf8());
+
+  // 极简测试报文，极低token消耗
+  QJsonObject sysMsg;
+  sysMsg["role"] = "system";
+  sysMsg["content"] = "You only reply one word: ok";
+
+  QJsonObject userMsg;
+  userMsg["role"] = "user";
+  userMsg["content"] = "test connection";
+
+  QJsonArray msgs;
+  msgs << sysMsg << userMsg;
+
+  QJsonObject body;
+  body["model"] = modelId;
+  body["temperature"] = 0.0;
+  body["max_tokens"] = 16;
+  body["messages"] = msgs;
+
+  QByteArray postData = QJsonDocument(body).toJson(QJsonDocument::Compact);
+
+  QNetworkAccessManager* mgr = new QNetworkAccessManager(this);
+  QNetworkReply* reply = mgr->post(req, postData);
+
+  connect(reply, &QNetworkReply::finished, this, [=]() {
+    mgr->deleteLater();
+    reply->deleteLater();
+
+    if (reply->error() != QNetworkReply::NoError) {
+      QString err = reply->errorString();
+      // 弹窗打印完整请求地址，方便调试404问题
+      auto msg = std::make_unique<ShowMessage>(this);
+      msg->showMsg(
+          tr("Connect Failed"),
+          tr("Network Error:\n%1\nRequest URL:\n%2").arg(err, fullUrlStr), 1);
+      return;
+    }
+
+    QByteArray respRaw = reply->readAll();
+    QJsonParseError jsonErr;
+    QJsonDocument doc = QJsonDocument::fromJson(respRaw, &jsonErr);
+    if (jsonErr.error != QJsonParseError::NoError) {
+      auto msg = std::make_unique<ShowMessage>(this);
+      msg->showMsg(tr("Parse Failed"),
+                   tr("Response invalid JSON:\n%1").arg(jsonErr.errorString()),
+                   1);
+      return;
+    }
+
+    QJsonObject root = doc.object();
+    if (root.contains("error")) {
+      QJsonObject errObj = root["error"].toObject();
+      QString msgText = errObj["message"].toString("Unknown service error");
+      auto msg = std::make_unique<ShowMessage>(this);
+      msg->showMsg(tr("API Rejected"), tr("Service Error:\n%1").arg(msgText),
+                   1);
+      return;
+    }
+
+    auto msg = std::make_unique<ShowMessage>(this);
+    saveAIConfig();
+    msg->showMsg(tr("Success"),
+                 tr("Connection test passed!\nModel ID: %1").arg(modelId), 1);
+  });
+}
+
+void Preferences::saveAIConfig() {
+  // 读取界面输入
+  QString endpoint = ui->cboxEndpoint->currentText().trimmed();
+  QString apiKey = ui->editAIKey->text().trimmed();
+  QString modelId = ui->editAIModelID->text().trimmed();
+
+  // 空值校验
+  if (endpoint.isEmpty() || apiKey.isEmpty() || modelId.isEmpty()) {
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(tr("Warning"),
+                 tr("Endpoint / API Key / Model ID cannot be empty"), 0);
+    return;
+  }
+
+  // 构造当前记录
+  AiSingleRecord newRec;
+  newRec.endpoint = endpoint;
+  newRec.apiKey = apiKey;
+  newRec.modelId = modelId;
+  newRec.temperature = 0.1;
+  newRec.timeoutSec = 10;
+  newRec.maxTokens = 1024;
+
+  // 判断整套三元组是否已存在，存在则覆盖参数，不存在追加
+  bool found = false;
+  for (auto& item : m_aiAllRecords) {
+    if (item.uniqueKey() == newRec.uniqueKey()) {
+      item = newRec;
+      found = true;
+      break;
+    }
+  }
+  if (!found) m_aiAllRecords.append(newRec);
+
+  // 组装JSON写入文件
+  QJsonArray arr;
+  for (const auto& rec : m_aiAllRecords) {
+    QJsonObject obj;
+    obj["endpoint"] = rec.endpoint;
+    obj["apiKey"] = rec.apiKey;
+    obj["modelId"] = rec.modelId;
+    obj["temperature"] = rec.temperature;
+    obj["timeoutSec"] = rec.timeoutSec;
+    obj["maxTokens"] = rec.maxTokens;
+    arr.append(obj);
+  }
+  QJsonObject root;
+  root["all_records"] = arr;
+
+  QString filePath = privateDir + "/" + ai_config_json;
+  QFile file(filePath);
+  if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(tr("Save Failed"), tr("Cannot open config file to write"), 2);
+    return;
+  }
+  file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+  file.close();
+
+  // 刷新下拉框
+  ui->cboxEndpoint->clear();
+  for (const auto& rec : m_aiAllRecords) {
+    ui->cboxEndpoint->addItem(rec.endpoint);
+  }
+
+  // auto msg = std::make_unique<ShowMessage>(this);
+  // msg->showMsg(tr("Success"), tr("AI config saved successfully"), 1);
+}
+
+void Preferences::initAIConfig() {
+  QString filePath = privateDir + "/" + ai_config_json;
+  QFile file(filePath);
+  m_aiAllRecords.clear();
+  ui->cboxEndpoint->clear();
+
+  if (!file.exists()) return;
+  if (!file.open(QIODevice::ReadOnly)) return;
+
+  QByteArray raw = file.readAll();
+  file.close();
+  QJsonParseError err;
+  QJsonDocument doc = QJsonDocument::fromJson(raw, &err);
+  if (err.error != QJsonParseError::NoError) return;
+
+  QJsonObject root = doc.object();
+  QJsonArray arr = root["all_records"].toArray();
+  for (const auto& val : arr) {
+    QJsonObject obj = val.toObject();
+    AiSingleRecord rec;
+    rec.endpoint = obj["endpoint"].toString();
+    rec.apiKey = obj["apiKey"].toString();
+    rec.modelId = obj["modelId"].toString();
+    rec.temperature = obj["temperature"].toDouble(0.1);
+    rec.timeoutSec = obj["timeoutSec"].toInt(10);
+    rec.maxTokens = obj["maxTokens"].toInt(1024);
+    m_aiAllRecords.append(rec);
+  }
+
+  // 刷新下拉列表：逐条展示完整displayText
+  for (const auto& rec : m_aiAllRecords) {
+    ui->cboxEndpoint->addItem(rec.endpoint);
+  }
+}
+
+void Preferences::on_cboxEndpoint_currentIndexChanged(int index) {
+  // 仅清空密钥、模型输入框，绝不清空下拉控件本身
+  ui->editAIKey->clear();
+  ui->editAIModelID->clear();
+
+  if (index < 0 || index >= m_aiAllRecords.size()) return;
+
+  // 直接通过下标取完整原始记录，完全不依赖cbox的currentText
+  const AiSingleRecord& rec = m_aiAllRecords[index];
+
+  // 强制回填纯净原始endpoint，不受下拉展示文本干扰
+  ui->cboxEndpoint->setCurrentText(rec.endpoint);
+  ui->editAIKey->setText(rec.apiKey);
+  ui->editAIModelID->setText(rec.modelId);
 }
