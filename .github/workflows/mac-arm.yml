@@ -55,7 +55,7 @@ jobs:
             qtwebview
             qtlocation
             qtwebchannel
-            qtcore5compat
+            qt5compat
             qtpositioning
             qtmultimedia
           install-deps: true
