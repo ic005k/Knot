@@ -100,4 +100,4 @@ jobs:
       # ✅ Release
       - name: Upload Release
         if: github.event_name == 'release'
-        uses: svenstaro/upload-release-action
+        uses: svenstaro/upload-release-action@v2
