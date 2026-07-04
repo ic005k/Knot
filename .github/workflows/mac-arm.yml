@@ -27,20 +27,20 @@ jobs:
       matrix:
         os: [macos-14]
         qt_ver: [6.10.3]
-        qt_arch: [clang_arm64]
+        qt_arch: [clang_64]
 
     env:
       targetName: Knot
       VERSION: Mac-arm64
       orgName: Knot
       ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
-      QT_DIR: ${{ github.workspace }}/Qt/${{ matrix.qt_ver }}/clang_arm64
+      QT_DIR: ${{ github.workspace }}/Qt/${{ matrix.qt_ver }}/clang_64
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ✅ 安装 Qt（arm64）
+      # ✅ 安装 Qt（universal，含 arm64）
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
@@ -48,21 +48,27 @@ jobs:
           cached: false
           host: mac
           target: desktop
-          arch: clang_arm64
+          arch: clang_64
           modules: >
-            qtcharts qtsensors qtwebview qtlocation
-            qtwebchannel qt5compat qtpositioning qtmultimedia
+            qtcharts
+            qtsensors
+            qtwebview
+            qtlocation
+            qtwebchannel
+            qtcore5compat
+            qtpositioning
+            qtmultimedia
           install-deps: true
           source: false
-          dir: ${{ env.QT_DIR }}
+          dir: ${{ github.workspace }}/Qt
 
-      # ✅ 安装 arm64 Homebrew（系统自带）
+      # ✅ 安装 arm64 Homebrew
       - name: Install Homebrew (arm64)
         run: |
           echo 'export PATH="/opt/homebrew/bin:$PATH"' >> ~/.bash_profile
           source ~/.bash_profile
 
-      # ✅ 安装 OpenSSL（arm64）
+      # ✅ 安装 OpenSSL
       - name: Install OpenSSL
         run: |
           brew update
@@ -73,11 +79,6 @@ jobs:
       - name: Build macOS (arm64)
         run: |
           export PATH="/opt/homebrew/bin:$PATH"
-
-          export ARCHFLAGS="-arch arm64"
-          export CFLAGS="-arch arm64"
-          export CXXFLAGS="-arch arm64"
-          export LDFLAGS="-arch arm64"
 
           qmake "CONFIG += release" "QMAKE_APPLE_DEVICE_ARCHS=arm64"
           make -j$(sysctl -n hw.ncpu)
@@ -91,13 +92,19 @@ jobs:
           macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg
           cp ${targetName}.dmg bin/release/${targetName}.dmg
 
-      # ✅ 上传 artifact
+      # ✅ 上传 Artifact
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.orgName }}-${{ env.VERSION }}
           path: bin/release/${{ env.targetName }}.dmg
 
-      # ✅ Release
+      # ✅ 上传 Release
       - name: Upload Release
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: bin/release/${{ env.targetName }}.dmg
+          asset_name: ${{ env.orgName }}-${{ env.VERSION }}.dmg
+          tag: ${{ github.ref_name }}
+          overwrite: true
