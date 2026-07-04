@@ -16,25 +16,26 @@ jobs:
       targetName: Knot
       VERSION: Mac-ARM
       orgName: Knot
-      QT_VERSION: 6.10.3
+      QT_VERSION: 6.9.3
       QT_INSTALL_ARCH: universal
       QT_BUILD_ARCH: arm64
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: recursive
 
-      # 核心修复：删掉modules配置，直接完整安装Qt，不报模块缺失
+      # 和原版成功CI完全一致Qt安装写法
       - name: Install Qt
-        id: install_qt
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ env.QT_VERSION }}
-          host: mac
           target: desktop
           arch: ${{ env.QT_INSTALL_ARCH }}
-          install-deps: true
-          cached: false
+          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
+          cache: true
 
       - name: Setup Qt Environment
         run: |
