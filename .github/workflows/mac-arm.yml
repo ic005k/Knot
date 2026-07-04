@@ -17,84 +17,71 @@ jobs:
       VERSION: Mac-ARM
       orgName: Knot
       QT_VERSION: 6.10.3
-      QT_ARCH: mac_arm64
+      # 关键：安装架构改为 universal，6.10.3 mac 仅提供universal Qt安装包
+      QT_INSTALL_ARCH: universal
+      # 编译架构仍锁定arm64，只输出arm单架构程序
+      QT_BUILD_ARCH: arm64
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          submodules: recursive
 
-      # 参考首份CI：标准Qt安装，移除失效qt5compat模块
-      - name: Install Qt (ARM64 Qt6.10.3)
+      # 和你x86可用CI保持一致安装逻辑，arch改为universal解决包不存在报错
+      - name: Install Qt
         id: install_qt
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ env.QT_VERSION }}
           host: mac
           target: desktop
-          arch: ${{ env.QT_ARCH }}
-          # 移除qt5compat（Qt6.10 arm源无此独立包，触发报错）
-          # 如需Qt5兼容API改用 qtbase 内置兼容层或单独处理
-          modules: qtcharts qtsensors qtwebengine qtwebchannel qtpositioning qtpdf qtimageformats qtserialport
+          arch: ${{ env.QT_INSTALL_ARCH }}
+          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
           install-deps: true
-          cached: true
+          cached: false
 
-      - name: Setup Qt Environment Path
+      - name: Setup Qt Environment
         run: |
-          echo "QT_ROOT=$HOME/Qt" >> $GITHUB_ENV
           echo "$HOME/Qt/${{ env.QT_VERSION }}/macos/bin" >> $GITHUB_PATH
 
-      # 原生arm64 Homebrew 环境，参考首份CI依赖安装逻辑
-      - name: Setup ARM Homebrew PATH
+      - name: Setup Homebrew (ARM原生)
         run: |
           echo '/opt/homebrew/bin' >> $GITHUB_PATH
           source ~/.zshrc
 
-      - name: Install System Dependencies (arm64)
+      - name: Install OpenSSL via Homebrew (ARM)
         run: |
           brew update
-          brew install openssl@3 libiodbc libpq
+          brew install openssl@3
           brew link --force openssl@3
           echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> $GITHUB_ENV
 
-      # qmake 纯arm64编译，锁定单架构
-      - name: Build Project arm64 Only
+      - name: Build Project (仅输出arm64单架构)
         run: |
           export PKG_CONFIG_PATH="$OPENSSL_ROOT_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
+          # qmake强制仅编译arm64，虽然Qt是universal，但产物只有arm架构
           qmake "CONFIG += release" \
-                "QMAKE_APPLE_DEVICE_ARCHS=arm64" \
+                "QMAKE_APPLE_DEVICE_ARCHS=${{ env.QT_BUILD_ARCH }}" \
                 "LIBS += -L$OPENSSL_ROOT_DIR/lib"
           make -j$(sysctl -n hw.ncpu)
 
-      # 打包流程，补充原生macdeployqt缺陷修复（参考首份CI macdeployqtfix逻辑）
-      - name: Prepare macdeployqtfix
-        run: |
-          git clone https://github.com/tamlok/macdeployqtfix.git macdeployqtfix --depth=1
-
-      - name: Package ARM App & Fix Dependencies
+      - name: Package Application
         run: |
           cp -f Info.plist bin/release/${targetName}.app/Contents/Info.plist
           cp -R -p -f bin/release/${targetName}.app ${targetName}.app
 
-          # 基础部署
-          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -always-overwrite
+          macdeployqt ${targetName}.app \
+            -qmldir=. \
+            -verbose=1 \
+            -dmg \
+            -always-overwrite
+          cp ${targetName}.dmg bin/release/${targetName}-arm64.dmg
 
-          # 修复Qt依赖、rpath（首份CI核心修复步骤，避免arm包运行缺库）
-          python3 ./macdeployqtfix/macdeployqtfix.py ./${targetName}.app/Contents/MacOS/${targetName} $QT_ROOT/${{ env.QT_VERSION }}/macos
-
-          # 生成DMG镜像
-          hdiutil create -volname "${targetName}" -srcfolder ${targetName}.app -ov -format UDZO ${targetName}-arm64.dmg
-          cp ${targetName}-arm64.dmg bin/release/
-
-      - name: Upload ARM Artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.orgName }}-${{ env.VERSION }}-arm64
           path: bin/release/${{ env.targetName }}-arm64.dmg
 
-      - name: Upload ARM Asset to Tag Release
+      - name: Upload Release (ARM)
         if: startsWith(github.event.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
