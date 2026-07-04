@@ -17,16 +17,14 @@ jobs:
       VERSION: Mac-ARM
       orgName: Knot
       QT_VERSION: 6.10.3
-      # 关键：安装架构改为 universal，6.10.3 mac 仅提供universal Qt安装包
       QT_INSTALL_ARCH: universal
-      # 编译架构仍锁定arm64，只输出arm单架构程序
       QT_BUILD_ARCH: arm64
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 和你x86可用CI保持一致安装逻辑，arch改为universal解决包不存在报错
+      # 核心修复：删掉modules配置，直接完整安装Qt，不报模块缺失
       - name: Install Qt
         id: install_qt
         uses: jurplel/install-qt-action@v3
@@ -35,7 +33,6 @@ jobs:
           host: mac
           target: desktop
           arch: ${{ env.QT_INSTALL_ARCH }}
-          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
           install-deps: true
           cached: false
 
@@ -58,7 +55,6 @@ jobs:
       - name: Build Project (仅输出arm64单架构)
         run: |
           export PKG_CONFIG_PATH="$OPENSSL_ROOT_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
-          # qmake强制仅编译arm64，虽然Qt是universal，但产物只有arm架构
           qmake "CONFIG += release" \
                 "QMAKE_APPLE_DEVICE_ARCHS=${{ env.QT_BUILD_ARCH }}" \
                 "LIBS += -L$OPENSSL_ROOT_DIR/lib"
