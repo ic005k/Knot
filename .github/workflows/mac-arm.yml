@@ -1,120 +1,164 @@
-name: MacOS
+name: CI-MacOS-Knot
 on:
   push:
-    branches: [main]
+    branches: [ main ]
     paths:
       - '**.pro'
+      - '.github/workflows/CI-MacOS-Knot.yml'
       - '!stats.txt'
       - '!README.md'
   pull_request:
-    paths:
-      - '**'
+    branches: [ main ]
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: 'Run the build with tmate debugging enabled'
+        required: false
+        default: false
+
+env:
+  APP_VER: 1.0.0
+  QT_VERSION: 6.9.3
 
 jobs:
   build:
-    name: Build-${{ matrix.arch_name }}
-    runs-on: macos-14
+    name: Build On MacOS Universal
+    timeout-minutes: 120
     permissions:
       contents: write
     strategy:
+      fail-fast: false
       matrix:
-        qt_ver: [6.10.3]
-        # 两套架构并行构建，复用各自可用arch
-        arch_cfg:
-          - arch_name: x86_64
-            qt_arch: clang_64
-            qt_subdir: clang_64
-            build_arch: x86_64
-            brew_prefix: /usr/local
-            brew_wrapper: arch -x86_64
-          - arch_name: arm64
-            qt_arch: universal
-            qt_subdir: universal
-            build_arch: arm64
-            brew_prefix: /opt/homebrew
-            brew_wrapper: ''
+        config:
+          - name: "Build Universal x86_64+arm64"
+            os: macos-latest
+            arch: universal
+            qt: ${{ env.QT_VERSION }}
+    runs-on: ${{ matrix.config.os }}
 
-    env:
-      targetName: Knot
-      orgName: Knot
-      QT_VERSION: ${{ matrix.qt_ver }}
-      QT_DIR: ${{ github.workspace }}/Qt/${{ matrix.qt_ver }}/${{ matrix.arch_cfg.qt_subdir }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: recursive
 
-      # Qt安装：x86用clang_64带modules；arm用universal去掉modules规避qt_base报错
-      - name: Install Qt
+      - name: Init Submodules
+        run: |
+          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+          git submodule sync --recursive
+          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+
+      - name: Install System Dependencies
+        run: |
+          brew install tree libiodbc libpq openssl@3
+          brew link --force openssl@3
+
+      - name: Fix Library Symlink For Dual Arch
+        run: |
+          sudo mkdir -p /usr/local/opt/libiodbc/lib
+          sudo ln -sf /opt/homebrew/opt/libiodbc/lib/libiodbc.2.dylib /usr/local/opt/libiodbc/lib/libiodbc.2.dylib
+          sudo mkdir -p /Applications/Postgres.app/Contents/Versions/14/lib
+          sudo ln -sf /opt/homebrew/Cellar/libpq/*/lib/libpq.5.dylib /Applications/Postgres.app/Contents/Versions/14/lib/libpq.5.dylib
+
+      - name: Install macdeployqtfix
+        run: git clone https://github.com/tamlok/macdeployqtfix.git macdeployqtfix --depth=1
+
+      - name: Install optool
+        run: |
+          wget --no-verbose https://github.com/alexzielenski/optool/releases/download/0.1/optool.zip
+          unzip ./optool.zip
+          sudo ln -sf ./optool /usr/local/bin/optool
+
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.workspace }}/Qt
+          key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
+
+      - name: Install Qt 6.9.3 universal
         uses: jurplel/install-qt-action@v3
         with:
-          version: ${{ matrix.qt_ver }}
-          cached: 'false'
-          host: mac
+          version: ${{ matrix.config.qt }}
           target: desktop
-          arch: ${{ matrix.arch_cfg.qt_arch }}
-          # x86才有modules，universal不能带
-          modules: ${{ matrix.arch_cfg.arch_name == 'x86_64' && 'qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia' || '' }}
-          install-deps: true
-          source: false
-          dir: ${{ env.QT_DIR }}
+          arch: universal
+          modules: 'qtcharts qtwebengine qtwebchannel qtpositioning qtpdf qtimageformats qt5compat qtserialport qtsensors qtwebview qtlocation qtmultimedia'
+          cache: 'true'
 
-      # 对应架构专属Homebrew，互不冲突
-      - name: Install Homebrew ${{ matrix.arch_cfg.arch_name }}
-        run: |
-          # x86架构才删除arm brew，arm架构保留原生brew
-          if [[ "${{ matrix.arch_cfg.arch_name }}" == "x86_64" && -d "/opt/homebrew" ]]; then
-            sudo rm -rf /opt/homebrew
-          fi
-          if [[ ! -d "${{ matrix.arch_cfg.brew_prefix }}/Homebrew" ]]; then
-            ${{ matrix.arch_cfg.brew_wrapper }} /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          fi
-          echo '${{ matrix.arch_cfg.brew_prefix }}/bin' >> $GITHUB_PATH
-          export PATH="${{ matrix.arch_cfg.brew_prefix }}/bin:$PATH"
+      - name: Create Build Output Dir
+        run: mkdir -p bin/release
 
-      - name: Install OpenSSL
+      - name: QMake Build Universal Binary
         run: |
-          ${{ matrix.arch_cfg.brew_wrapper }} brew update
-          ${{ matrix.arch_cfg.brew_wrapper }} brew install openssl
-          ${{ matrix.arch_cfg.brew_wrapper }} brew link openssl --force
-          echo "OPENSSL_ROOT_DIR=$(${{ matrix.arch_cfg.brew_wrapper }} brew --prefix openssl)" >> $GITHUB_ENV
+          export PATH=${{ env.Qt6_DIR }}/bin:$PATH
+          export PKG_CONFIG_PATH="$(brew --prefix openssl@3)/lib/pkgconfig:$PKG_CONFIG_PATH"
+          # qmake 指定双架构输出
+          qmake "CONFIG += release" "QMAKE_APPLE_DEVICE_ARCHS=x86_64 arm64"
+          make -j$(sysctl -n hw.ncpu)
 
-      # 编译，锁定对应单一架构
-      - name: build macos
+      - name: Fix App Bundle & Dependencies
         run: |
-          export PATH="${{ env.QT_DIR }}/bin:$PATH"
-          unset ARCHFLAGS CFLAGS CXXFLAGS LDFLAGS
-          if [[ -n "${{ matrix.arch_cfg.brew_wrapper }}" ]]; then
-            export ARCHFLAGS="-arch ${{ matrix.arch_cfg.build_arch }}"
-            export CFLAGS="-arch ${{ matrix.arch_cfg.build_arch }}"
-            export CXXFLAGS="-arch ${{ matrix.arch_cfg.build_arch }}"
-            export LDFLAGS="-arch ${{ matrix.arch_cfg.build_arch }}"
-          fi
-          ${{ matrix.arch_cfg.brew_wrapper }} qmake "CONFIG += release" "QMAKE_APPLE_DEVICE_ARCHS=${{ matrix.arch_cfg.build_arch }}"
-          ${{ matrix.arch_cfg.brew_wrapper }} make -j$(sysctl -n hw.ncpu)
-
-      # 打包，区分架构命名DMG
-      - name: package
-        run: |
+          targetName="Knot"
           cp -f ExtBin/mac/Info.plist bin/release/${targetName}.app/Contents/Info.plist
-          cp -R -p -f bin/release/${targetName}.app ${targetName}.app
-          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg
-          cp ${targetName}.dmg bin/release/${targetName}-${{ matrix.arch_cfg.arch_name }}.dmg
+          cp -R -p -f bin/release/${targetName}.app ./${targetName}.app
 
-      # 上传对应架构制品
-      - uses: actions/upload-artifact@v4
+          # 基础部署
+          macdeployqt ./${targetName}.app -qmldir=. -verbose=1 -always-overwrite
+
+          # macdeployqtfix 修复universal rpath与Qt框架
+          python3 ./macdeployqtfix/macdeployqtfix.py ./${targetName}.app/Contents/MacOS/${targetName} ${{ env.Qt6_DIR }}/../..
+
+          # 清理CI内置runner路径rpath，避免其他设备无法打开
+          for rpath in $(otool -l ./${targetName}.app/Contents/MacOS/${targetName} | awk '/LC_RPATH/ {getline; getline; print $2}' | grep runner); do
+            if otool -l ./${targetName}.app/Contents/MacOS/${targetName} | grep -q "$rpath"; then
+              install_name_tool -delete_rpath "$rpath" ./${targetName}.app/Contents/MacOS/${targetName}
+            fi
+          done
+
+          # 二次修复保证依赖完整
+          python3 ./macdeployqtfix/macdeployqtfix.py ./${targetName}.app/Contents/MacOS/${targetName} ${{ env.Qt6_DIR }}/../..
+
+      - name: Package DMG With Retry
+        run: |
+          targetName="Knot"
+          DMG_NAME="${targetName}-${{ env.APP_VER }}-mac-universal.dmg"
+          sync
+          sleep 3
+          for attempt in 1 2 3 4 5; do
+            echo "DMG create attempt $attempt: $DMG_NAME"
+            if hdiutil create -volname "${targetName}" -srcfolder ./${targetName}.app -ov -format UDZO "$DMG_NAME"; then
+              echo "DMG create success"
+              break
+            fi
+            hdiutil detach -force "/Volumes/${targetName}" 2>/dev/null || true
+            if [ "$attempt" = "5" ]; then
+              echo "DMG create all retries failed"
+              exit 1
+            fi
+            sleep $((attempt * 8))
+          done
+          cp "$DMG_NAME" bin/release/
+
+      - name: Setup tmate debug session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+
+      - name: Upload Universal Artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.orgName }}-Mac-${{ matrix.arch_cfg.arch_name }}
-          path: bin/release/${{ env.targetName }}-${{ matrix.arch_cfg.arch_name }}.dmg
+          name: Knot-${{ env.APP_VER }}-mac-universal
+          path: bin/release/Knot-${{ env.APP_VER }}-mac-universal.dmg
 
-      # tag发布时上传双架构资产
-      - name: uploadRelease
+      - name: Upload Asset To Release
         if: github.event_name == 'release'
-        uses: svenstaro/upload-release-action@v2
+        uses: softprops/action-gh-release@v1
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: bin/release/${{ env.targetName }}-${{ matrix.arch_cfg.arch_name }}.dmg
-          asset_name: ${{ env.orgName }}-Mac-${{ matrix.arch_cfg.arch_name }}.dmg
-          tag: ${{ github.ref_name }}
-          overwrite: true
+          files: bin/release/Knot-${{ env.APP_VER }}-mac-universal.dmg
+          tag_name: ${{ github.ref_name }}
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
