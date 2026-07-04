@@ -129,6 +129,8 @@ class Preferences : public QDialog {
 
   void on_cboxEndpoint_currentIndexChanged(int index);
 
+  void on_cboxEndpoint_activated(int index);
+
  private:
   bool isChanged;
 

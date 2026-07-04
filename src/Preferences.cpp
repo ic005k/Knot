@@ -62,9 +62,23 @@ Preferences::Preferences(QWidget* parent)
     ui->sliderFontSize->setValue(10);
   }
 
+  // AI
   m_netMgr = new QNetworkAccessManager(this);
   m_netMgr->setTransferTimeout(10000);
   initAIConfig();
+
+  // 下拉菜单弹出前刷新列表
+  connect(ui->cboxEndpoint, &QComboBox::showPopup, this, [this]() {
+    QString currentEp = ui->cboxEndpoint->currentText().trimmed();
+    ui->cboxEndpoint->clear();
+    for (const auto& rec : m_aiAllRecords) {
+      ui->cboxEndpoint->addItem(rec.endpoint);
+    }
+    int targetIdx = ui->cboxEndpoint->findText(currentEp);
+    if (targetIdx != -1) {
+      ui->cboxEndpoint->setCurrentIndex(targetIdx);
+    }
+  });
 }
 
 Preferences::~Preferences() { delete ui; }
@@ -107,6 +121,8 @@ void Preferences::saveOptions() {
     iniPreferences->setValue("/Options/chkUIFont", ui->chkUIFont->isChecked());
     iniPreferences->setValue("/Options/maxcon", ui->editConcurrency->text());
     iniPreferences->setValue("/Options/ai", ui->chkAI->isChecked());
+    iniPreferences->setValue("/Options/aiindex",
+                             ui->cboxEndpoint->currentIndex());
   }
 
   iniPreferences->setValue("/Options/Zip", mui->chkZip->isChecked());
@@ -270,6 +286,8 @@ void Preferences::initOptions() {
   ui->chkDark->setChecked(
       iniPreferences->value("/Options/Dark", false).toBool());
   ui->chkAI->setChecked(iniPreferences->value("/Options/ai", false).toBool());
+  ui->cboxEndpoint->setCurrentIndex(
+      iniPreferences->value("/Options/aiindex", 0).toInt());
 
   QString aesStr = iniPreferences->value("/zip/password").toString();
   QString password = m_CloudBackup->aesDecrypt(aesStr, aes_key0, aes_iv0);
@@ -626,7 +644,7 @@ void Preferences::on_btnAITest_clicked() {
   if (ep.isEmpty() || key.isEmpty() || mid.isEmpty()) {
     auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg(tr("Warning"),
-                 tr("Endpoint / API Key / Model ID cannot be empty"), 0);
+                 tr("Endpoint / API Key / Model ID cannot be empty"), 1);
     return;
   }
 
@@ -652,7 +670,7 @@ void Preferences::saveAIConfig() {
   if (endpoint.isEmpty() || apiKey.isEmpty() || modelId.isEmpty()) {
     auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg(tr("Warning"),
-                 tr("Endpoint / API Key / Model ID cannot be empty"), 0);
+                 tr("Endpoint / API Key / Model ID cannot be empty"), 1);
     return;
   }
 
@@ -695,17 +713,17 @@ void Preferences::saveAIConfig() {
   QFile file(filePath);
   if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
     auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg(tr("Save Failed"), tr("Cannot open config file to write"), 2);
+    msg->showMsg(tr("Save Failed"), tr("Cannot open config file to write"), 1);
     return;
   }
   file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
   file.close();
 
   // 刷新下拉框
-  ui->cboxEndpoint->clear();
-  for (const auto& rec : m_aiAllRecords) {
-    ui->cboxEndpoint->addItem(rec.endpoint);
-  }
+  //  ui->cboxEndpoint->clear();
+  //  for (const auto& rec : m_aiAllRecords) {
+  //    ui->cboxEndpoint->addItem(rec.endpoint);
+  //  }
 
   // auto msg = std::make_unique<ShowMessage>(this);
   // msg->showMsg(tr("Success"), tr("AI config saved successfully"), 1);
@@ -776,6 +794,7 @@ void Preferences::checkAiConnectivity(const AiSingleRecord& cfg,
   QJsonObject body;
   body["model"] = cfg.modelId;
   body["max_tokens"] = 1;
+  body["thinking_enable"] = false;
   QJsonArray messages;
   QJsonObject msgUser;
   msgUser["role"] = "user";
@@ -798,7 +817,7 @@ void Preferences::checkAiConnectivity(const AiSingleRecord& cfg,
                   tr("Network Error") + ":\n%1\n" + tr("Request URL") + ":\n%2";
               content = content.arg(errMsg, reqUrl);
               auto msg = std::make_unique<ShowMessage>(this);
-              msg->showMsg(tr("Connect Failed"), content, 2);
+              msg->showMsg(tr("Connect Failed"), content, 1);
               return;
             }
             // 连通测试弹窗提示
@@ -833,6 +852,7 @@ void Preferences::sendAiChatRequest(const AiSingleRecord& cfg,
   body["model"] = cfg.modelId;
   body["temperature"] = cfg.temperature;
   body["max_tokens"] = cfg.maxTokens;
+  body["thinking_enable"] = false;
   QJsonArray messages;
   QJsonObject msgUser;
   msgUser["role"] = "user";
@@ -852,7 +872,7 @@ void Preferences::sendAiChatRequest(const AiSingleRecord& cfg,
           tr("Network Error") + ":\n%1\n" + tr("Request URL") + ":\n%2";
       content = content.arg(errMsg, reqUrl);
       auto msg = std::make_unique<ShowMessage>(this);
-      msg->showMsg(tr("Connect Failed"), content, 2);
+      msg->showMsg(tr("Connect Failed"), content, 1);
       return;
     }
     // 此处增加业务逻辑：读取返回JSON、解析AI回答内容
@@ -867,7 +887,7 @@ void Preferences::sendAiChatRequest(const AiSingleRecord& cfg,
       QString errInfo = tr("Returned data is not valid JSON:\n%1")
                             .arg(parseError.errorString());
       auto msg = std::make_unique<ShowMessage>(this);
-      msg->showMsg(tr("Parse Failed"), errInfo, 2);
+      msg->showMsg(tr("Parse Failed"), errInfo, 1);
       return;
     }
 
@@ -940,4 +960,8 @@ void Preferences::aiChatQuery(const QString& userQuestion) {
   checkAiConnectivity(cfg, [this, cfg, userQuestion]() {
     sendAiChatRequest(cfg, userQuestion);
   });
+}
+
+void Preferences::on_cboxEndpoint_activated(int index) {
+  on_cboxEndpoint_currentIndexChanged(index);
 }
