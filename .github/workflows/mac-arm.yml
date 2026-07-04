@@ -35,15 +35,15 @@ jobs:
           QT_NUM="${QT_VERSION//./}"
           # 全部$转义为$$，避免YAML解析报错
           cat > install.qs <<'EOF'
-function Controller() {
-    this.autoAcceptSelections = true;
-    this.setRepository("https://download.qt.io/online/qtsdkrepository/mac/desktop/qt6_$QT_NUM/");
-    var target = "$QT_PREFIX";
-    var ver = "${QT_VERSION}";
-    this.addQt(target, ver, "universal", ["qtcharts","qtsensors","qtwebview","qtlocation","qtwebchannel","qt5compat","qtpositioning","qtmultimedia"]);
-    this.runInstaller();
-}
-EOF
+          function Controller() {
+          this.autoAcceptSelections = true;
+          this.setRepository("https://download.qt.io/online/qtsdkrepository/mac/desktop/qt6_$QT_NUM/");
+          var target = "$QT_PREFIX";
+          var ver = "${QT_VERSION}";
+          this.addQt(target, ver, "universal", ["qtcharts","qtsensors","qtwebview","qtlocation","qtwebchannel","qt5compat","qtpositioning","qtmultimedia"]);
+          this.runInstaller();
+          }
+          EOF
 
           ./qt-install.app/Contents/MacOS/qt-unified-mac-x64-arm64-online --script install.qs
           hdiutil detach -quiet "/Volumes/Qt Unified Installer"
