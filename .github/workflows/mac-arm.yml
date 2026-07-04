@@ -26,19 +26,18 @@ jobs:
           fetch-depth: 1
           submodules: recursive
 
-      # 官方Qt静默安装，修复YAML多行字符串缩进语法
       - name: Install Qt Official Installer
         run: |
           wget -q https://download.qt.io/official_releases/online_installers/qt-unified-mac-x64-arm64-online.dmg
           hdiutil attach -quiet qt-unified-mac-x64-arm64-online.dmg
           cp -r "/Volumes/Qt Unified Installer/qt-unified-mac-x64-arm64-online.app" ./qt-install.app
 
-          # 拼接qt版本数字，6.9.3 → 693
           QT_NUM="${QT_VERSION//./}"
-          cat > install.qs <<EOF
+          # 全部$转义为$$，避免YAML解析报错
+          cat > install.qs <<'EOF'
 function Controller() {
     this.autoAcceptSelections = true;
-    this.setRepository("https://download.qt.io/online/qtsdkrepository/mac/desktop/qt6_\$QT_NUM/");
+    this.setRepository("https://download.qt.io/online/qtsdkrepository/mac/desktop/qt6_$QT_NUM/");
     var target = "$QT_PREFIX";
     var ver = "${QT_VERSION}";
     this.addQt(target, ver, "universal", ["qtcharts","qtsensors","qtwebview","qtlocation","qtwebchannel","qt5compat","qtpositioning","qtmultimedia"]);
