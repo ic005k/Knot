@@ -17,8 +17,7 @@ jobs:
       VERSION: Mac-ARM
       orgName: Knot
       QT_VERSION: 6.9.3
-      QT_INSTALL_ARCH: universal
-      QT_BUILD_ARCH: arm64
+      QT_ARCH: universal
 
     steps:
       - name: Checkout code
@@ -27,41 +26,43 @@ jobs:
           fetch-depth: 1
           submodules: recursive
 
-      # 和原版成功CI完全一致Qt安装写法
-      - name: Install Qt
+      # 核心修复：移除modules字段，完整安装Qt，规避分包校验报错
+      - name: Install Qt (Qt6.9.3 universal)
+        id: install_qt
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ env.QT_VERSION }}
+          host: mac
           target: desktop
-          arch: ${{ env.QT_INSTALL_ARCH }}
-          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
-          cache: true
+          arch: ${{ env.QT_ARCH }}
+          install-deps: true
+          cached: true
 
-      - name: Setup Qt Environment
+      - name: Setup Qt Environment Path
         run: |
           echo "$HOME/Qt/${{ env.QT_VERSION }}/macos/bin" >> $GITHUB_PATH
 
-      - name: Setup Homebrew (ARM原生)
+      - name: Setup ARM Homebrew PATH
         run: |
           echo '/opt/homebrew/bin' >> $GITHUB_PATH
           source ~/.zshrc
 
-      - name: Install OpenSSL via Homebrew (ARM)
+      - name: Install OpenSSL3 arm64
         run: |
           brew update
           brew install openssl@3
           brew link --force openssl@3
           echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> $GITHUB_ENV
 
-      - name: Build Project (仅输出arm64单架构)
+      - name: Build Project 仅arm64单架构
         run: |
           export PKG_CONFIG_PATH="$OPENSSL_ROOT_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
           qmake "CONFIG += release" \
-                "QMAKE_APPLE_DEVICE_ARCHS=${{ env.QT_BUILD_ARCH }}" \
+                "QMAKE_APPLE_DEVICE_ARCHS=arm64" \
                 "LIBS += -L$OPENSSL_ROOT_DIR/lib"
           make -j$(sysctl -n hw.ncpu)
 
-      - name: Package Application
+      - name: Package ARM App
         run: |
           cp -f Info.plist bin/release/${targetName}.app/Contents/Info.plist
           cp -R -p -f bin/release/${targetName}.app ${targetName}.app
@@ -78,7 +79,7 @@ jobs:
           name: ${{ env.orgName }}-${{ env.VERSION }}-arm64
           path: bin/release/${{ env.targetName }}-arm64.dmg
 
-      - name: Upload Release (ARM)
+      - name: Upload Release Asset
         if: startsWith(github.event.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
