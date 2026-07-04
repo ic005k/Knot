@@ -89,7 +89,16 @@ jobs:
           cp -f ExtBin/mac/Info.plist bin/release/${targetName}.app/Contents/Info.plist
           cp -R -p bin/release/${targetName}.app ${targetName}.app
 
-          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg
+          # 删除会导致用户崩溃的数据库驱动
+          PLUGINS="${targetName}.app/Contents/PlugIns/sqldrivers"
+          rm -f "$PLUGINS/libqsqlodbc.dylib"
+          rm -f "$PLUGINS/libqsqlpsql.dylib"
+
+          # 显式指定Qt库目录，修复rpath解析失败
+          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg -libpath="${QT_DIR}/macos/lib"
+
+          #macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg
+
           cp ${targetName}.dmg bin/release/${targetName}.dmg
 
       # ✅ 上传 Artifact
