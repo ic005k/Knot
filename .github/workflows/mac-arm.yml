@@ -90,6 +90,7 @@ jobs:
           cp -R -p bin/release/${targetName}.app ${targetName}.app
 
           #######################################################################
+
           # 自动读取当前Qt真实库路径，修复Qt6.10 macdeployqt检索缺陷
           QT_ACTUAL_LIB=$(qmake -query QT_INSTALL_LIBS)
           macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg \
