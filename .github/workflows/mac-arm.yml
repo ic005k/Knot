@@ -1,82 +1,120 @@
-name: MacOS-ARM
+name: MacOS
 on:
   push:
+    branches: [main]
     paths:
       - '**.pro'
-      - '.github/workflows/mac-arm.yml'
+      - '!stats.txt'
+      - '!README.md'
   pull_request:
     paths:
-      - '**.pro'
+      - '**'
+  release:
+    types: [published]
 
 jobs:
   build:
-    name: Build-ARM
-    runs-on: macos-latest
+    name: Build-${{ matrix.arch_name }}
+    runs-on: macos-14
     permissions:
       contents: write
+    strategy:
+      matrix:
+        qt_ver: [6.10.3]
+        # 两套架构并行构建，复用各自可用arch
+        arch_cfg:
+          - arch_name: x86_64
+            qt_arch: clang_64
+            qt_subdir: clang_64
+            build_arch: x86_64
+            brew_prefix: /usr/local
+            brew_wrapper: arch -x86_64
+          - arch_name: arm64
+            qt_arch: universal
+            qt_subdir: universal
+            build_arch: arm64
+            brew_prefix: /opt/homebrew
+            brew_wrapper: ''
+
     env:
       targetName: Knot
-      VERSION: Mac-ARM
       orgName: Knot
+      QT_VERSION: ${{ matrix.qt_ver }}
+      QT_DIR: ${{ github.workspace }}/Qt/${{ matrix.qt_ver }}/${{ matrix.arch_cfg.qt_subdir }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ARM Homebrew PATH，去掉source ~/.zshrc 防止文件不存在报错
-      - name: Setup ARM Homebrew
-        run: |
-          echo '/opt/homebrew/bin' >> $GITHUB_PATH
-          export PATH="/opt/homebrew/bin:$PATH"
+      # Qt安装：x86用clang_64带modules；arm用universal去掉modules规避qt_base报错
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ matrix.qt_ver }}
+          cached: 'false'
+          host: mac
+          target: desktop
+          arch: ${{ matrix.arch_cfg.qt_arch }}
+          # x86才有modules，universal不能带
+          modules: ${{ matrix.arch_cfg.arch_name == 'x86_64' && 'qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia' || '' }}
+          install-deps: true
+          source: false
+          dir: ${{ env.QT_DIR }}
 
-      # Brew 安装 Qt6.10 arm64，完全避开 aqtinstall
-      - name: Install Qt 6.10 via Brew
+      # 对应架构专属Homebrew，互不冲突
+      - name: Install Homebrew ${{ matrix.arch_cfg.arch_name }}
         run: |
-          brew update
-          brew install qt@6.10
-          brew link --force qt@6.10
-          echo "QT_BIN=/opt/homebrew/opt/qt@6.10/bin" >> $GITHUB_ENV
+          # x86架构才删除arm brew，arm架构保留原生brew
+          if [[ "${{ matrix.arch_cfg.arch_name }}" == "x86_64" && -d "/opt/homebrew" ]]; then
+            sudo rm -rf /opt/homebrew
+          fi
+          if [[ ! -d "${{ matrix.arch_cfg.brew_prefix }}/Homebrew" ]]; then
+            ${{ matrix.arch_cfg.brew_wrapper }} /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          fi
+          echo '${{ matrix.arch_cfg.brew_prefix }}/bin' >> $GITHUB_PATH
+          export PATH="${{ matrix.arch_cfg.brew_prefix }}/bin:$PATH"
 
-      # 安装 OpenSSL arm64
       - name: Install OpenSSL
         run: |
-          brew install openssl@3
-          brew link --force openssl@3
-          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> $GITHUB_ENV
+          ${{ matrix.arch_cfg.brew_wrapper }} brew update
+          ${{ matrix.arch_cfg.brew_wrapper }} brew install openssl
+          ${{ matrix.arch_cfg.brew_wrapper }} brew link openssl --force
+          echo "OPENSSL_ROOT_DIR=$(${{ matrix.arch_cfg.brew_wrapper }} brew --prefix openssl)" >> $GITHUB_ENV
 
-      # 仅编译 arm64
-      - name: Build Project ARM64 Only
+      # 编译，锁定对应单一架构
+      - name: build macos
         run: |
-          export PATH=${{ env.QT_BIN }}:$PATH
-          export PKG_CONFIG_PATH="$OPENSSL_ROOT_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
-          qmake "CONFIG += release" "QMAKE_APPLE_DEVICE_ARCHS=arm64" "LIBS += -L$OPENSSL_ROOT_DIR/lib"
-          make -j$(sysctl -n hw.ncpu)
+          export PATH="${{ env.QT_DIR }}/bin:$PATH"
+          unset ARCHFLAGS CFLAGS CXXFLAGS LDFLAGS
+          if [[ -n "${{ matrix.arch_cfg.brew_wrapper }}" ]]; then
+            export ARCHFLAGS="-arch ${{ matrix.arch_cfg.build_arch }}"
+            export CFLAGS="-arch ${{ matrix.arch_cfg.build_arch }}"
+            export CXXFLAGS="-arch ${{ matrix.arch_cfg.build_arch }}"
+            export LDFLAGS="-arch ${{ matrix.arch_cfg.build_arch }}"
+          fi
+          ${{ matrix.arch_cfg.brew_wrapper }} qmake "CONFIG += release" "QMAKE_APPLE_DEVICE_ARCHS=${{ matrix.arch_cfg.build_arch }}"
+          ${{ matrix.arch_cfg.brew_wrapper }} make -j$(sysctl -n hw.ncpu)
 
-      # 打包逻辑完全沿用你原有脚本
-      - name: Package ARM App & DMG
+      # 打包，区分架构命名DMG
+      - name: package
         run: |
           cp -f ExtBin/mac/Info.plist bin/release/${targetName}.app/Contents/Info.plist
           cp -R -p -f bin/release/${targetName}.app ${targetName}.app
+          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg
+          cp ${targetName}.dmg bin/release/${targetName}-${{ matrix.arch_cfg.arch_name }}.dmg
 
-          macdeployqt ${targetName}.app \
-            -qmldir=. \
-            -verbose=1 \
-            -dmg \
-            -always-overwrite
-          cp ${targetName}.dmg bin/release/${targetName}-arm64.dmg
-
-      # 上传制品
+      # 上传对应架构制品
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.orgName }}-${{ env.VERSION }}-arm64
-          path: bin/release/${{ env.targetName }}-arm64.dmg
+          name: ${{ env.orgName }}-Mac-${{ matrix.arch_cfg.arch_name }}
+          path: bin/release/${{ env.targetName }}-${{ matrix.arch_cfg.arch_name }}.dmg
 
-      # Release 上传资产
+      # tag发布时上传双架构资产
       - name: uploadRelease
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: bin/release/${{ env.targetName }}-arm64.dmg
-          asset_name: ${{ env.orgName }}-${{ env.VERSION }}-arm64.dmg
+          file: bin/release/${{ env.targetName }}-${{ matrix.arch_cfg.arch_name }}.dmg
+          asset_name: ${{ env.orgName }}-Mac-${{ matrix.arch_cfg.arch_name }}.dmg
           tag: ${{ github.ref_name }}
           overwrite: true
