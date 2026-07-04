@@ -11,9 +11,9 @@ class ReaderSet : public QDialog {
   Q_OBJECT
 
  public:
-  explicit ReaderSet(QWidget *parent = nullptr);
+  explicit ReaderSet(QWidget* parent = nullptr);
   ~ReaderSet();
-  Ui::ReaderSet *ui;
+  Ui::ReaderSet* ui;
 
   void init();
 
@@ -22,8 +22,9 @@ class ReaderSet : public QDialog {
   void saveScrollValue();
 
   void setScrollValue();
-  protected:
-  bool eventFilter(QObject *watch, QEvent *evn) override;
+
+ protected:
+  bool eventFilter(QObject* watch, QEvent* evn) override;
 
  public slots:
   void on_btnBack_clicked();
@@ -53,9 +54,9 @@ class ReaderSet : public QDialog {
 
   void on_btnForegroundColor_clicked();
 
-  void on_editBackgroundColor_textChanged(const QString &arg1);
+  void on_editBackgroundColor_textChanged(const QString& arg1);
 
-  void on_editForegroundColor_textChanged(const QString &arg1);
+  void on_editForegroundColor_textChanged(const QString& arg1);
 
   void on_btnSetBookmark_clicked();
 
@@ -63,7 +64,7 @@ class ReaderSet : public QDialog {
 
   void on_btnDefault_clicked();
 
-  void on_btnAdd_clicked();
+  void on_btnPlus_clicked();
 
   void on_btnClear_clicked();
 

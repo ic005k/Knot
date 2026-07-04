@@ -85,6 +85,7 @@ void MainWindow::timerUpdate() {
 
 void MainWindow::execDeskShortcut() {
   m_ReceiveShare->closeAllChildWindows();
+  m_Method->Sleep(50);
   on_ExecShortcut();
 }
 
@@ -489,7 +490,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
   }
 
   if (mui->frameReader->isVisible()) {
-    on_btnBackReader_pressed();
+    on_btnBackReader_clicked();
     event->ignore();
     return;
   }

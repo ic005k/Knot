@@ -257,9 +257,9 @@ void MainWindow::on_btnDefault_pressed() {
   m_ReaderSet->on_btnDefault_clicked();
 }
 
-void MainWindow::on_btnPlus_pressed() { m_ReaderSet->on_btnAdd_clicked(); }
+void MainWindow::on_btnPlus_pressed() { m_ReaderSet->on_btnPlus_clicked(); }
 
-void MainWindow::on_btnAddTodo_clicked() { m_Todo->on_btnAdd_clicked(); }
+void MainWindow::on_btnAddTodo_clicked() { m_Todo->AddTodoText(); }
 
 void MainWindow::on_btnAddTodo_pressed() {
   m_Todo->isRecordVoice = false;
@@ -849,7 +849,7 @@ void MainWindow::on_btnShareBookText_pressed() {
   }
 }
 
-void MainWindow::on_btnBackReader_pressed() { m_Reader->closeReader(); }
+void MainWindow::on_btnBackReader_clicked() { m_Reader->closeReader(); }
 
 void MainWindow::on_btnOpen_pressed() {
   if (mui->qwViewBookNote->isVisible()) return;
@@ -1203,7 +1203,7 @@ void MainWindow::onAndroidBackHandle() {
   }
 
   if (!mui->frameReader->isHidden()) {
-    on_btnBackReader_pressed();
+    on_btnBackReader_clicked();
     return;
   }
 

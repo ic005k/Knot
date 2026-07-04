@@ -208,7 +208,7 @@ void Todo::addToList(QString str) {
   saveTodo();
 }
 
-void Todo::on_btnAdd_clicked() {
+void Todo::AddTodoText() {
   QString str = mui->editTodo->toPlainText().trimmed();
   if (str == "") return;
   addToList(str);

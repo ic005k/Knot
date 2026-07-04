@@ -53,7 +53,7 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
     }
 
     if (keyEvent->key() == Qt::Key_Escape) {
-      if (mui->frameReader->isVisible()) mw_one->on_btnBackReader_pressed();
+      if (mui->frameReader->isVisible()) mw_one->on_btnBackReader_clicked();
       return true;
     }
   }

@@ -128,7 +128,7 @@ class Todo : public QDialog {
   bool isRecordVoice = false;
   QString currentTodoItem;
 
-  void on_btnAdd_clicked();
+  void AddTodoText();
 
   void on_btnReturn_clicked();
 

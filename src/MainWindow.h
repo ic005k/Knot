@@ -570,7 +570,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnSelTab_pressed();
 
-  void on_btnBackReader_pressed();
+  void on_btnBackReader_clicked();
 
   void on_btnAddTodo_clicked();
   void on_btnAddTodo_pressed();

@@ -293,7 +293,7 @@ void ReaderSet::on_btnDefault_clicked() {
   mui->lblSpeed->setText(tr("Scroll Speed") + " : " + value);
 }
 
-void ReaderSet::on_btnAdd_clicked() {
+void ReaderSet::on_btnPlus_clicked() {
   m_Reader->scrollValue = m_Reader->scrollValue + 0.05;
 
   if (m_Reader->scrollValue >= 1.5) m_Reader->scrollValue = 1.5;
