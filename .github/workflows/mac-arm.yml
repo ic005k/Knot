@@ -22,12 +22,11 @@ jobs:
       targetName: Knot
       VERSION: Mac-Universal
       orgName: Knot
-      QT_VERSION: 6.10.3
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Qt Universal
+      - name: Install Qt 6.10.3 universal（移除modules，规避qt_base报错）
         uses: jurplel/install-qt-action@v3
         with:
           version: 6.10.3
@@ -39,34 +38,36 @@ jobs:
           source: false
           dir: ${{ github.workspace }}/Qt/6.10.3/universal
 
-      - name: Dual Homebrew arm64 + x86_64
+      - name: 安装双架构Homebrew（保留arm64，不删除）
         run: |
+          # arm64原生brew
           if [ ! -d "/opt/homebrew" ]; then
             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           fi
           echo '/opt/homebrew/bin' >> $GITHUB_PATH
+          # x86_64 Rosetta brew
           if [ ! -d "/usr/local/Homebrew" ]; then
             arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           fi
           echo '/usr/local/bin' >> $GITHUB_PATH
           source ~/.zshrc
 
-      - name: Install OpenSSL two arch
+      - name: 双架构安装OpenSSL
         run: |
           brew update && brew install openssl && brew link --force openssl
           arch -x86_64 brew update && arch -x86_64 brew install openssl && arch -x86_64 brew link --force openssl
 
-      - name: Build Universal Binary
+      - name: qmake编译双架构x86_64+arm64
         run: |
           unset ARCHFLAGS CFLAGS CXXFLAGS LDFLAGS
           export PATH=${{ github.workspace }}/Qt/6.10.3/universal/bin:$PATH
           qmake "CONFIG += release" "QMAKE_APPLE_DEVICE_ARCHS=x86_64 arm64"
           make -j$(sysctl -n hw.ncpu)
 
-      - name: Clone macdeployqtfix
+      - name: 下载macdeployqtfix修复universal依赖
         run: git clone https://github.com/tamlok/macdeployqtfix.git macdeployqtfix --depth=1
 
-      - name: Package App & DMG
+      - name: 打包APP+DMG
         run: |
           cp -f ExtBin/mac/Info.plist bin/release/${targetName}.app/Contents/Info.plist
           cp -R -p -f bin/release/${targetName}.app ${targetName}.app
@@ -75,12 +76,13 @@ jobs:
           hdiutil create -volname "${targetName}" -srcfolder ${targetName}.app -ov -format UDZO ${targetName}-universal.dmg
           cp ${targetName}-universal.dmg bin/release/
 
-      - uses: actions/upload-artifact@v4
+      - name: 上传制品
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.orgName }}-${{ env.VERSION }}
           path: bin/release/${{ env.targetName }}-universal.dmg
 
-      - name: Upload Release Asset
+      - name: Release上传资产
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
