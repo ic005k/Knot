@@ -181,7 +181,14 @@ QComboBox::drop-down {
     margin: 0;
     padding: 0;
 }
+
 /* 修复内置输入框文字贴边溢出 */
 QComboBox QLineEdit {
     padding: 6px 10px;
+}
+
+/* 暗黑选中条目：深灰底色 + 白色文字，适配暗黑视觉 */
+QComboBox::item:selected {
+    background-color: #505050;
+    color: #ffffff;
 }

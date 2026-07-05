@@ -181,6 +181,14 @@ QComboBox::drop-down {
     margin: 0;
     padding: 0;
 }
+
 QComboBox QLineEdit {
     padding: 6px 10px;
 }
+
+/* 选中条目文字/背景配色 */
+QComboBox::item:selected {
+    background-color: #d8d8d8; /* 自定义灰色背景，按需调整色值 */
+    color: #222222;            /* 深色文字，替换掉默认白色 */
+}
+

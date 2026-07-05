@@ -109,7 +109,8 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
     showBody = showBody.arg(userQuestion, aiReplyText);
 
     auto msg = std::make_unique<ShowMessage>(mw_one);
-    msg->showMsg(tr("AI Response Completed"), showBody, 1);
+    // msg->showMsg(tr("AI Response Completed"), showBody, 1);
+    msg->showMsg(tr("AI Response Completed"), aiReplyText, 1);
   });
 }
 

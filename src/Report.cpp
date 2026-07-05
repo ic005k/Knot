@@ -381,7 +381,9 @@ void Report::saveYMD() {
 int Report::cmp(const void* a, const void* b) { return *(int*)a < *(int*)b; }
 
 void Report::on_btnCategory_clicked() {
-  if (!mw_one->m_Preferences->ui->chkAI->isChecked())
+  if (mw_one->m_Preferences->ui->chkAI->isChecked())
+    mui->btnAIReportAnalysis->show();
+  else
     mui->btnAIReportAnalysis->hide();
 
   if (mui->qwViewCate->source().isEmpty()) {
