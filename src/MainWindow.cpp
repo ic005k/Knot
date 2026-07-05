@@ -369,7 +369,7 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
         else
           strTip = tr("The last record of today will be deleted.");
 
-        auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+        auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
         if (!m_ShowMsg->showMsg(str, strTip + "\n\n" + str1, 2)) return false;
 
         strLatestModify = tr("Del Item") + " ( " + getTabText() + " ) ";
@@ -410,7 +410,7 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
     else
       strTip = tr("Only the current day's records can be deleted.");
 
-    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
     m_ShowMsg->showMsg(str, strTip, 1);
 
     return false;
@@ -792,7 +792,7 @@ void MainWindow::on_twItemDoubleClicked() {
   QTreeWidgetItem* item = tw->currentItem();
   if (item->childCount() == 0 && item->parent()->childCount() > 0) {
     if (item->parent()->text(3).toInt() != QDate::currentDate().year()) {
-      auto msg = std::make_unique<ShowMessage>(this);
+      auto msg = std::make_unique<ShowMessage>(mw_one);
       msg->showMsg("Knot",
                    tr("Only the data of the current year can be modified."), 1);
       return;
@@ -984,6 +984,8 @@ void MainWindow::showProgress() {
 }
 
 void MainWindow::closeProgress() {
+  if (dlgProg == nullptr) return;
+
   if (!initMain && dlgProg) {
     dlgProg->close();
     dlgProg->deleteLater();

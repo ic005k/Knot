@@ -93,7 +93,7 @@ void MainWindow::init_Instance() {
 
   // AI
   m_ainetMgr = new QNetworkAccessManager(this);
-  m_ainetMgr->setTransferTimeout(20000);
+  m_ainetMgr->setTransferTimeout(40000);
 
   if (m_Preferences->getDefaultFont() == "None")
     m_Preferences->setDefaultFont(this->font().family());

@@ -238,7 +238,7 @@ void Notes::on_btnPDF_clicked() {
     doc->print(printer);
 
     if (isAndroid) {
-      auto msg1 = std::make_unique<ShowMessage>(this);
+      auto msg1 = std::make_unique<ShowMessage>(mw_one);
       msg1->ui->btnCancel->setText(tr("No"));
       msg1->ui->btnOk->setText(tr("Yes"));
       if (msg1->showMsg("PDF",

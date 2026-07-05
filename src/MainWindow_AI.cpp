@@ -95,8 +95,14 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
     showBody += part2;
     showBody += ":\n%2";
 
+    // qDebug() << aiReplyText;
+    //  复制到系统剪贴板
+    QClipboard* clip = QGuiApplication::clipboard();
+    clip->setText(aiReplyText);
+
     // 最后填充占位符
     showBody = showBody.arg(userQuestion, aiReplyText);
+
     auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg(tr("AI Response Completed"), showBody, 1);
   });
@@ -138,12 +144,12 @@ void MainWindow::checkAiConnectivity(const AiSingleRecord& cfg,
               QString content =
                   tr("Network Error") + ":\n%1\n" + tr("Request URL") + ":\n%2";
               content = content.arg(errMsg, reqUrl);
-              auto msg = std::make_unique<ShowMessage>(this);
+              auto msg = std::make_unique<ShowMessage>(mw_one);
               msg->showMsg(tr("Connect Failed"), content, 1);
               return;
             }
             // 连通测试弹窗提示
-            // auto msg = std::make_unique<ShowMessage>(this);
+            // auto msg = std::make_unique<ShowMessage>(mw_one);
             // QString text = tr("Connection test passed!") + "\n" +
             //               tr("Model ID: %1").arg(cfg.modelId);
             // msg->showMsg(tr("Success"), text, 1);
@@ -162,7 +168,7 @@ void MainWindow::aiChatQuery(const QString& userQuestion) {
   QString mid = m_Preferences->ui->editAIModelID->text().trimmed();
 
   if (ep.isEmpty() || key.isEmpty() || mid.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(this);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg(tr("Warning"),
                  tr("Endpoint / API Key / Model ID cannot be empty"), 1);
     return;
@@ -176,8 +182,10 @@ void MainWindow::aiChatQuery(const QString& userQuestion) {
   cfg.timeoutSec = 10;
   cfg.maxTokens = 1024;
 
+  showProgress();
+
   // 复用统一连通检测函数，连通成功后执行提问
-  checkAiConnectivity(cfg, [this, cfg, userQuestion]() {
-    sendAiChatRequest(cfg, userQuestion);
-  });
+  // checkAiConnectivity(cfg, [this, cfg, userQuestion]() {
+  sendAiChatRequest(cfg, userQuestion);
+  //});
 }

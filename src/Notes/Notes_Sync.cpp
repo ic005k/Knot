@@ -60,7 +60,7 @@ void Notes::zipNoteToSyncList() {
   if (!m_Method->compressFileWithZlib(currentMDFile, zipMD,
                                       Z_DEFAULT_COMPRESSION)) {
     errorInfo = tr("An error occurred while compressing the file.");
-    auto msg = std::make_unique<ShowMessage>(this);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg("Knot", errorInfo, 1);
     return;
   }
@@ -73,7 +73,7 @@ void Notes::zipNoteToSyncList() {
   if (QFile::exists(json)) {
     if (!m_Method->compressFileWithZlib(json, zipJSON, Z_DEFAULT_COMPRESSION)) {
       errorInfo = tr("An error occurred while compressing the file.");
-      auto msg = std::make_unique<ShowMessage>(this);
+      auto msg = std::make_unique<ShowMessage>(mw_one);
       msg->showMsg("Knot", errorInfo, 1);
       return;
     }
@@ -101,7 +101,7 @@ void Notes::updateMainnotesIniToSyncLists() {
     if (!m_Method->compressFileWithZlib(iniDir + "mainnotes.json", zipMainnotes,
                                         Z_DEFAULT_COMPRESSION)) {
       errorInfo = tr("An error occurred while compressing the file.");
-      auto msg = std::make_unique<ShowMessage>(this);
+      auto msg = std::make_unique<ShowMessage>(mw_one);
       msg->showMsg("Knot", errorInfo, 1);
       return;
     }

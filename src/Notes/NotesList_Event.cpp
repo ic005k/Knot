@@ -84,7 +84,7 @@ void NotesList::on_btnBatchRestore_clicked() {
 
   QVariantList selectedIndexes = selectedIndexesVar.toList();
   if (selectedIndexes.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(this);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg("Knot", tr("Please select at least one item to restore."), 1);
     return;
   }
@@ -184,13 +184,13 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
 
   QVariantList selectedIndexes = selectedIndexesVar.toList();
   if (selectedIndexes.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(this);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg("Knot", tr("Please select at least one item to delete."), 1);
     return;
   }
 
   // 3. 批量删除确认
-  auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+  auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
   if (!m_ShowMsg->showMsg(
           "Knot",
           tr("Whether to delete the selected %1 items permanently?")
@@ -271,7 +271,7 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
   resetQML_Recycle();
 
   // 8. 完成提示
-  auto msg = std::make_unique<ShowMessage>(this);
+  auto msg = std::make_unique<ShowMessage>(mw_one);
   msg->showMsg("Knot",
                tr("Batch delete %1 items completed successfully.")
                    .arg(selectedIntIndexes.count()),
@@ -283,7 +283,7 @@ void NotesList::on_btnDel_Recycle_clicked() {
   if (curItem->parent() == NULL) {
     return;
   } else {
-    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
     if (!m_ShowMsg->showMsg(
             "Knot", tr("Whether to remove") + "  " + curItem->text(0) + " ? ",
             2)) {
@@ -396,7 +396,7 @@ void NotesList::on_btnDel_clicked() {
   // 判断：笔记本 / 笔记
   QString strFlag = (isNoteBook) ? tr("NoteBook") : tr("Note");
 
-  auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+  auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
   if (!m_ShowMsg->showMsg("Knot",
                           tr("Move to the recycle bin?") + "\n\n" + strFlag +
                               " : " + item->text(0),
@@ -556,7 +556,7 @@ int NotesList::on_btnImport_clicked() {
 
   if (MDFileList.size() > 1000) {
     MDFileList.resize(10);
-    auto msg = std::make_unique<ShowMessage>(this);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg(appName,
                  tr("A maximum of 10 files can be imported at a time."), 1);
   }

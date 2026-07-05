@@ -113,7 +113,7 @@ void MainWindow::on_actionDel_Tab_triggered() {
 
   QString tab_name = mui->tabWidget->tabText(index);
 
-  auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+  auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
   if (!m_ShowMsg->showMsg("Knot",
                           tr("Whether to remove") + "  " + tab_name + " ? ", 2))
     return;
@@ -223,7 +223,7 @@ void MainWindow::on_actionImport_Data_triggered() {
 #endif
 
   if (!zipfile.isNull()) {
-    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
     if (!m_ShowMsg->showMsg(
             "Kont",
             tr("Import this data?") + "\n" + m_Reader->getUriRealPath(zipfile),
@@ -360,7 +360,7 @@ void MainWindow::init_Menu(QMenu* mainMenu) {
 
   connect(actCopyLog, &QAction::triggered, this, [=]() {
     AppLogger::instance().copyTodayLogToClipboard();
-    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
     m_ShowMsg->showMsg(tr("Success"),
                        tr("Today's log has been copied to clipboard, you "
                           "can paste it anywhere."),

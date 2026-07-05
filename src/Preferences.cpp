@@ -481,7 +481,7 @@ void Preferences::on_chkZip_clicked() {
   if (mui->editPassword->text().trimmed() !=
       mui->editValidate->text().trimmed()) {
     mui->chkZip->setChecked(false);
-    auto msg = std::make_unique<ShowMessage>(this);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg("Knot", tr("Password validation error."), 1);
 
     return;
@@ -639,7 +639,7 @@ void Preferences::on_btnAITest_clicked() {
   QString mid = ui->editAIModelID->text().trimmed();
 
   if (ep.isEmpty() || key.isEmpty() || mid.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(this);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg(tr("Warning"),
                  tr("Endpoint / API Key / Model ID cannot be empty"), 1);
     return;
@@ -665,7 +665,7 @@ void Preferences::saveAIConfig() {
 
   // 空值校验
   if (endpoint.isEmpty() || apiKey.isEmpty() || modelId.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(this);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg(tr("Warning"),
                  tr("Endpoint / API Key / Model ID cannot be empty"), 1);
     return;
@@ -709,7 +709,7 @@ void Preferences::saveAIConfig() {
   QString filePath = privateDir + "/" + ai_config_json;
   QFile file(filePath);
   if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-    auto msg = std::make_unique<ShowMessage>(this);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg(tr("Save Failed"), tr("Cannot open config file to write"), 1);
     return;
   }
@@ -722,7 +722,7 @@ void Preferences::saveAIConfig() {
   //    ui->cboxEndpoint->addItem(rec.endpoint);
   //  }
 
-  // auto msg = std::make_unique<ShowMessage>(this);
+  // auto msg = std::make_unique<ShowMessage>(mw_one);
   // msg->showMsg(tr("Success"), tr("AI config saved successfully"), 1);
 }
 

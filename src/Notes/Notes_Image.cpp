@@ -35,7 +35,7 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
     }
 
     if (!isAndroid) {
-      auto msg = std::make_unique<ShowMessage>(this);
+      auto msg = std::make_unique<ShowMessage>(mw_one);
       msg->ui->btnCancel->setText(tr("No"));
       msg->ui->btnOk->setText(tr("Yes"));
       bool isYes = msg->showMsg(

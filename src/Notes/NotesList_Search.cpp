@@ -149,7 +149,7 @@ void NotesList::onSearchFinished() {
     mui->btnFindPreviousNote->setEnabled(false);
     mui->lblShowLineSn->setText("0");
     mui->lblFindNoteCount->setText("0");
-    auto msg = std::make_unique<ShowMessage>(this);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg("Knot", tr("No match was found."), 1);
 
     return;

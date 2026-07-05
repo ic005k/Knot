@@ -230,7 +230,7 @@ void MainWindow::importDataDone() {
 
   if (isPasswordError) {
     closeProgress();
-    auto msg = std::make_unique<ShowMessage>(this);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg("Knot", tr("The password of the encrypted file is wrong!"), 1);
     return;
   }
@@ -267,7 +267,7 @@ void MainWindow::importDataDone() {
 
   if (isMenuImport) {
     if (!isZipOK) {
-      auto msg = std::make_unique<ShowMessage>(this);
+      auto msg = std::make_unique<ShowMessage>(mw_one);
       msg->showMsg("Knot",
                    tr("Invalid data file.") + "\n\n" +
                        tr("Or the operation is canceled by the user."),
@@ -277,7 +277,7 @@ void MainWindow::importDataDone() {
     }
   }
 
-  auto msg = std::make_unique<ShowMessage>(this);
+  auto msg = std::make_unique<ShowMessage>(mw_one);
   msg->showMsg("Knot", tr("Data import was successful."), 1);
 }
 

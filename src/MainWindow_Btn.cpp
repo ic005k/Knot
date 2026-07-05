@@ -621,7 +621,7 @@ void MainWindow::on_btnCopyNoteLink_pressed() {
   QClipboard* clipboard = QApplication::clipboard();
   clipboard->setText(strlink);
 
-  auto msg = std::make_unique<ShowMessage>(this);
+  auto msg = std::make_unique<ShowMessage>(mw_one);
   msg->showMsg(appName, strlink, 1);
 }
 
@@ -929,7 +929,7 @@ void MainWindow::on_btnPause_pressed() {
 }
 
 void MainWindow::on_btnTestWebDav_pressed() {
-  auto msg = std::make_unique<ShowMessage>(this);
+  auto msg = std::make_unique<ShowMessage>(mw_one);
   if (!m_CloudBackup->checkWebDAVConnection()) {
     msg->showMsg(appName,
                  tr("WebDAV connection failed. Please check the network, "

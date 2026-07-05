@@ -155,7 +155,7 @@ void Notes::closeEvent(QCloseEvent* event) {
   m_Method->Sleep(100);
 
   if (isTextChange) {
-    auto msg = std::make_unique<ShowMessage>(this);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->ui->btnOk->setText(tr("Yes") + " (Y)");
     msg->ui->btnCancel->setText(tr("No") + " (N)");
     if (msg->showMsg(tr("Notes"), tr("Do you want to save the notes?"), 2)) {
@@ -404,7 +404,7 @@ void Notes::openNotes() {
     if (!m_CloudBackup->checkWebDAVConnection()) {
       m_Method->closeInfoWindow();
       isWebDAVError = true;
-      auto msg = std::make_unique<ShowMessage>(this);
+      auto msg = std::make_unique<ShowMessage>(mw_one);
       msg->showMsg(appName,
                    tr("WebDAV connection failed. Please check the network, "
                       "website address or login information."),
@@ -550,7 +550,7 @@ void Notes::openNotes() {
                     startBackgroundProcessRemoteFiles_MultiThread();
                   } else {
                     qDebug() << "下载失败：" << error;
-                    auto msg = std::make_unique<ShowMessage>(this);
+                    auto msg = std::make_unique<ShowMessage>(mw_one);
                     msg->showMsg(
                         appName,
                         tr("Synchronization failed. Please try again later."),
@@ -638,7 +638,7 @@ void Notes::processSingleRemoteFile(const QString& file) {
              "passwords are consistent across all platforms.");
 
       QMetaObject::invokeMethod(mw_one, [this]() {
-        auto msg = std::make_unique<ShowMessage>(this);
+        auto msg = std::make_unique<ShowMessage>(mw_one);
         msg->showMsg("Knot", errorInfo, 1);
       });
 
@@ -682,7 +682,7 @@ void Notes::processSingleRemoteFile(const QString& file) {
                "passwords are consistent across all platforms.");
 
         QMetaObject::invokeMethod(mw_one, [this]() {
-          auto msg = std::make_unique<ShowMessage>(this);
+          auto msg = std::make_unique<ShowMessage>(mw_one);
           msg->showMsg("Knot", errorInfo, 1);
         });
 
@@ -727,7 +727,7 @@ void Notes::processSingleRemoteFile(const QString& file) {
                "passwords are consistent across all platforms.");
 
         QMetaObject::invokeMethod(mw_one, [this]() {
-          auto msg = std::make_unique<ShowMessage>(this);
+          auto msg = std::make_unique<ShowMessage>(mw_one);
           msg->showMsg("Knot", errorInfo, 1);
         });
 

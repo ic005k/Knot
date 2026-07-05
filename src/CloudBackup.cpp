@@ -105,7 +105,7 @@ void CloudBackup::on_pushButton_downloadFile_clicked() {}
 void CloudBackup::uploadData() {
   QString strFlag;
   strFlag = "WebDAV";
-  auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+  auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
   if (!m_ShowMsg->showMsg(
           strFlag,
           tr("Uploading data?") + "\n\n" +
@@ -196,7 +196,7 @@ void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
     if (reply->error() == QNetworkReply::NoError) {
       qDebug() << "上传成功！";
 
-      auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+      auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
       m_ShowMsg->showMsg(
           "WebDAV",
           QString(tr("Success Upload File:") + "\n\nPath: %1\n\nID: %2" +
@@ -213,10 +213,10 @@ void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
       mui->progBar->hide();
 
       if (statusCode == 401) {
-        auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+        auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
         m_ShowMsg->showMsg("WebDAV", tr("Authentication failed."), 1);
       } else {
-        auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+        auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
         m_ShowMsg->showMsg(
             "WebDAV", tr("Upload error") + " : " + reply->errorString(), 1);
       }
@@ -340,7 +340,7 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
             resetProgBar();
 
             zipfile = localSavePath;
-            auto showbox = std::make_unique<ShowMessage>(this);
+            auto showbox = std::make_unique<ShowMessage>(mw_one);
             showbox->showMsg(
                 "WebDAV",
                 tr("Successfully downloaded file,File saved to") + " : " +
@@ -350,7 +350,7 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
 
             if (QFile(localSavePath).exists()) {
               if (!localSavePath.isNull()) {
-                auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+                auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
                 if (!m_ShowMsg->showMsg(
                         "Kont",
                         tr("Import this data?") + "\n" +
@@ -378,10 +378,10 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
 
             file->remove();
             if (statusCode == 401) {
-              auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+              auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
               m_ShowMsg->showMsg("WebDAV", tr("Authentication failed."), 1);
             } else {
-              auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+              auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
               m_ShowMsg->showMsg(
                   "WebDAV", tr("Download error") + " : " + reply->errorString(),
                   1);
@@ -1142,7 +1142,7 @@ void CloudBackup::webDAVRestoreData() {
   if (QFile(filePath).exists()) QFile(filePath).remove();
   if (filePath.isEmpty()) return;
 
-  auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+  auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
   if (!m_ShowMsg->showMsg(
           "WebDAV",
           tr("Downloading data?") + "\n\n" +

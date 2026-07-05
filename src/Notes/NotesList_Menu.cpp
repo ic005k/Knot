@@ -124,7 +124,7 @@ void NotesList::on_actionAdd_Note_triggered() {
   int notebookIndex = getNoteBookCurrentIndex();
 
   if (notebookIndex < 0) {
-    auto msg = std::make_unique<ShowMessage>(this);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg("Knot",
                  tr("Please create a new notebook first, and then create "
                     "new notes."),
@@ -312,7 +312,7 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
           &NotesList::on_actionStatistics);
 
   connect(actRebuildSearchIndex, &QAction::triggered, this, [this]() {
-    auto msg = std::make_unique<ShowMessage>(this);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     if (msg->showMsg(appName,
                      tr("Rebuilding the index will take some time. Click OK "
                         "to start."),
@@ -482,7 +482,7 @@ void NotesList::on_actionCopyNoteLink() {
   QString strlink = "[" + name + "](" + file + ")";
   QClipboard* clipboard = QApplication::clipboard();
   clipboard->setText(strlink);
-  auto msg = std::make_unique<ShowMessage>(this);
+  auto msg = std::make_unique<ShowMessage>(mw_one);
   msg->showMsg(appName, strlink, 1);
 }
 
@@ -592,7 +592,7 @@ void NotesList::on_actionStatistics() {
     mw_one->closeProgress();
 
     // 弹出统计消息框（使用后台统计的结果）
-    auto msg = std::make_unique<ShowMessage>(this);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg(localAppName,
                  tr("NoteBook:") + QString::number(countNoteBook) + "\n" +
                      tr("Local Notes:") + QString::number(totalNotes) + "\n" +

@@ -71,7 +71,7 @@ void CategoryList::on_btnDel_clicked() {
 
   ui->listWidget->setCurrentRow(row);
   if (row >= 0) {
-    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
     if (!m_ShowMsg->showMsg("Kont",
                             tr("Delete this category?") + "\n\n" +
                                 ui->listWidget->currentItem()->text(),
@@ -168,7 +168,7 @@ void CategoryList::on_Rename() {
 
     mw_one->reloadMain();
 
-    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
     m_ShowMsg->showMsg("Kont", oldName + " -> " + text + " " + tr("Success"),
                        1);
 

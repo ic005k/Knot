@@ -107,6 +107,8 @@ void ShowMessage::init(int btnCount, int adaptiveH) {
 }
 
 bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
+  mw_one->closeProgress();
+
   m_Method->Sleep(100);
 
   // 按钮数量处理

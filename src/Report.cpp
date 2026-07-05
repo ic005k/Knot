@@ -628,7 +628,7 @@ QString Report::Out2Img(bool isShowMessage) {
     picFile = path + strFile;
     pixmap.save(picFile, "PNG");
 
-    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
     if (!QFile(picFile).exists()) {
       m_ShowMsg->showMsg(
           "Knot", tr("Please turn on the storage permission of the app."), 1);
