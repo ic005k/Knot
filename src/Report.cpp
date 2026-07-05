@@ -441,8 +441,8 @@ void Report::on_btnCategory_clicked() {
                                   tr("Percent") + " : " + pre,
                                   tr("Amount") + " : " + item1, "", 0);
 
-            catetext = catetext + "\n" + tr("Category") + " : " + item0 + "  " +
-                       tr("Amount") + " : " + item1;
+            catetext = catetext + "\n\n" + tr("Category") + " : " + item0 +
+                       "  " + tr("Amount") + " : " + item1;
 
             listCategorySort.removeOne(str1);
 

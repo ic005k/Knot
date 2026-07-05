@@ -166,7 +166,6 @@ bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
   ui->editMsg->document()->adjustSize();
   ui->editMsg->updateGeometry();
 
-  showText = showText.replace("\n", "<br/>");
   showText = markdownToHtmlWithMath(showText);
   ui->qwShowMsg->rootContext()->setContextProperty("textContent", showText);
 

@@ -4,10 +4,13 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
                                    const QString& userQuestion) {
   // 规范：发起提问前先执行连通校验，校验通过后再发正式对话
   // 先执行连通检测（异步，检测成功后再执行真实提问，这里做分层回调）
-  QString baseUrl = cfg.endpoint.endsWith("/")
-                        ? cfg.endpoint.left(cfg.endpoint.size() - 1)
-                        : cfg.endpoint;
-  QUrl url(baseUrl + "/chat/completions");
+  QUrl url = buildAiApiUrl(cfg.endpoint);
+  if (!url.isValid()) {
+    auto msg = std::make_unique<ShowMessage>(mw_one);
+    msg->showMsg(tr("Error"), tr("Endpoint URL invalid"), 1);
+    return;
+  }
+
   QNetworkRequest req(url);
 
   req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -91,14 +94,16 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
     // 外部拼接换行、占位符，tr只负责文字
     QString showBody;
     showBody += part1;
-    showBody += ":\n%1\n\n";
+    showBody += ":\n\n%1\n\n";
     showBody += part2;
-    showBody += ":\n%2";
+    showBody += ":\n\n%2";
 
     // qDebug() << aiReplyText;
     //  复制到系统剪贴板
     QClipboard* clip = QGuiApplication::clipboard();
     clip->setText(aiReplyText);
+
+    m_Preferences->saveAIConfig();
 
     // 最后填充占位符
     showBody = showBody.arg(userQuestion, aiReplyText);
@@ -110,10 +115,12 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
 
 void MainWindow::checkAiConnectivity(const AiSingleRecord& cfg,
                                      std::function<void()> onSuccess) {
-  QString baseUrl = cfg.endpoint.endsWith("/")
-                        ? cfg.endpoint.left(cfg.endpoint.size() - 1)
-                        : cfg.endpoint;
-  QUrl url(baseUrl + "/chat/completions");
+  QUrl url = buildAiApiUrl(cfg.endpoint);
+  if (!url.isValid()) {
+    auto msg = std::make_unique<ShowMessage>(mw_one);
+    msg->showMsg(tr("Error"), tr("Endpoint URL invalid"), 1);
+    return;
+  }
   QNetworkRequest req(url);
   req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
   req.setRawHeader("Authorization",
@@ -188,4 +195,23 @@ void MainWindow::aiChatQuery(const QString& userQuestion) {
   // checkAiConnectivity(cfg, [this, cfg, userQuestion]() {
   sendAiChatRequest(cfg, userQuestion);
   //});
+}
+
+QUrl MainWindow::buildAiApiUrl(const QString& rawEndpoint) {
+  QUrl u(rawEndpoint);
+  if (!u.isValid()) return QUrl();
+
+  QString path = u.path();
+  // 判断路径是否已经以 chat/completions 结尾
+  bool fullPathReady =
+      path.endsWith("chat/completions") || path.endsWith("chat/completions/");
+  if (fullPathReady) {
+    return u;
+  }
+
+  // 去除末尾多余斜杠再拼接标准接口路径
+  while (path.endsWith("/")) path.chop(1);
+  path += "/chat/completions";
+  u.setPath(path);
+  return u;
 }

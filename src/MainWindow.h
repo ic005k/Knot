@@ -970,6 +970,7 @@ class MainWindow : public QMainWindow {
 
  private:
   QNetworkAccessManager* m_ainetMgr;
+  QUrl buildAiApiUrl(const QString& rawEndpoint);
   bool isMoveEntry;
   QTimer* tmeFlash;
   int nFlashCount = 0;
