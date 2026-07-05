@@ -166,6 +166,8 @@ bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
   ui->editMsg->document()->adjustSize();
   ui->editMsg->updateGeometry();
 
+  showText = showText.replace("\n", "<br/>");
+  showText = markdownToHtmlWithMath(showText);
   ui->qwShowMsg->rootContext()->setContextProperty("textContent", showText);
 
   // 计算高度、初始化弹窗尺寸（窗口隐藏状态下计算，无GL surface争夺）

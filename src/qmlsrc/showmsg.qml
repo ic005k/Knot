@@ -20,6 +20,7 @@ Rectangle {
             width: parent.width // 绑定Flickable宽度，不要绑定root
             text: textContent
             wrapMode: Text.WordWrap
+            textFormat: Text.RichText
             color: isDark ? "#f0f0f0" : "#222222"
         }
 

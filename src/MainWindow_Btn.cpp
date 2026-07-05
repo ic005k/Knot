@@ -548,8 +548,43 @@ void MainWindow::on_btnYear_pressed() { m_Report->on_btnYear_clicked(); }
 
 void MainWindow::on_btnMonth_pressed() { m_Report->on_btnMonth_clicked(); }
 
-void MainWindow::on_btnCategory_pressed() {
+void MainWindow::on_btnViewCategory_pressed() {
   m_Report->on_btnCategory_clicked();
+}
+
+#include <QLocale>
+
+void MainWindow::on_btnAIReportAnalysis_clicked() {
+  QString text = m_Report->catetext;
+  QString trimText = text.trimmed();
+  if (trimText.isEmpty()) {
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(tr("Tip"), tr("No consumption record data available"), 0);
+    return;
+  }
+
+  // 获取当前程序生效的语言标识
+  QLocale loc = QLocale::system();
+  // 如果切换过软件语言，改用之前存储的语言代码变量：
+  // QString langCode = m_appLanguageCode;
+  QString langCode = loc.name();  // 格式 zh_CN / en_US / ja_JP
+
+  // 标准化英文指令，明确指定输出语言，精准可控
+  QString promptTemplate = R"(
+Analyze the personal consumption data below and provide practical money-saving suggestions.
+Strict rules you must follow:
+1. All analysis and suggestions must be written in language code: %1
+2. First summarize your analysis: highest-spending categories and unreasonable consumption behavior.
+3. Give targeted, easy-to-operate saving advice matching the consumption structure.
+4. Do not output redundant descriptions, only analysis and suggestions.
+5. Balance cost savings and quality of life. Do not give overly harsh, extreme austerity suggestions. Provide two options for each category: one mild adjustment (less impact on pleasure) and one aggressive saving plan for reference.
+
+Consumption records:
+%2
+)";
+
+  QString fullPrompt = promptTemplate.arg(langCode, trimText);
+  aiChatQuery(fullPrompt);
 }
 
 void MainWindow::on_btnSync_pressed() { on_btnUpload_pressed(); }

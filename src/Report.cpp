@@ -33,7 +33,7 @@ Report::Report(QWidget* parent) : QDialog(parent) {
 
   lblTotal = mui->lblTotal;
   lblDetails = mui->lblDetails;
-  btnCategory = mui->btnCategory;
+  btnCategory = mui->btnViewCategory;
   btnMonth = mui->btnMonth;
   btnYear = mui->btnYear;
 
@@ -45,7 +45,7 @@ Report::Report(QWidget* parent) : QDialog(parent) {
   mui->btnStartDate->setFont(font1);
   mui->btnEndDate->setFont(font1);
   mui->btnBack_Report->setFont(font1);
-  mui->btnCategory->setFont(font1);
+  mui->btnViewCategory->setFont(font1);
   twOut2Img->setFont(font1);
 
   QFont font = mui->lblTotal->font();
@@ -246,7 +246,7 @@ void Report::updateTable() {
                          QString::number(freq) + "    " + tr("Amount") + " " +
                          QString("%1").arg(t_amount, 0, 'f', 2));
 
-  mui->btnCategory->setText(tr("View Category"));
+  mui->btnViewCategory->setText(tr("View Category"));
 
   setScrollBarPos(0);
   m_Method->setCurrentIndexFromQW(mui->qwReport, 0);
@@ -381,6 +381,9 @@ void Report::saveYMD() {
 int Report::cmp(const void* a, const void* b) { return *(int*)a < *(int*)b; }
 
 void Report::on_btnCategory_clicked() {
+  if (!mw_one->m_Preferences->ui->chkAI->isChecked())
+    mui->btnAIReportAnalysis->hide();
+
   if (mui->qwViewCate->source().isEmpty()) {
     mui->qwViewCate->rootContext()->setContextProperty("m_Report",
                                                        mw_one->m_Report);
@@ -412,6 +415,8 @@ void Report::on_btnCategory_clicked() {
     QList<double> listE = listD;
     std::sort(listE.begin(), listE.end());
 
+    catetext = "";
+
     int nListCateSort = listCategorySort.count();
     int nListECount = listE.count();
     for (int j = 0; j < nListECount; j++) {
@@ -435,6 +440,9 @@ void Report::on_btnCategory_clicked() {
                                   tr("Category") + " : " + item0,
                                   tr("Percent") + " : " + pre,
                                   tr("Amount") + " : " + item1, "", 0);
+
+            catetext = catetext + "\n" + tr("Category") + " : " + item0 + "  " +
+                       tr("Amount") + " : " + item1;
 
             listCategorySort.removeOne(str1);
 

@@ -25,6 +25,8 @@ class Report : public QDialog {
   ~Report();
   Ui::Report* ui;
 
+  QString catetext;
+
   bool isSingleYear = false;
   static void saveYMD();
 

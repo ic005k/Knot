@@ -194,8 +194,8 @@ void MainWindow::readEBookDone() {
 
     mui->lblTitle->setText(tabData->tabText(tabData->currentIndex()));
 
-    mui->btnCategory->hide();
-    if (listCategory.count() > 0) mui->btnCategory->setHidden(false);
+    mui->btnViewCategory->hide();
+    if (listCategory.count() > 0) mui->btnViewCategory->setHidden(false);
 
     isReport = false;
     closeProgress();

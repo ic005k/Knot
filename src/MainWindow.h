@@ -678,7 +678,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnMonth_pressed();
 
-  void on_btnCategory_pressed();
+  void on_btnViewCategory_pressed();
 
   void closeProgress();
 
@@ -965,6 +965,8 @@ class MainWindow : public QMainWindow {
   void on_editAutoStopTTS_textChanged(const QString& arg1);
 
   void on_chkAutoStopTTS_clicked(bool checked);
+
+  void on_btnAIReportAnalysis_clicked();
 
  private:
   QNetworkAccessManager* m_ainetMgr;
