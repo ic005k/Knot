@@ -844,7 +844,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="4710"/>
-        <location filename="MainWindow_Init.cpp" line="874"/>
+        <location filename="MainWindow_Init.cpp" line="878"/>
         <source>Year</source>
         <translation>年</translation>
     </message>
@@ -1843,7 +1843,7 @@
     <message>
         <location filename="MainWindow.ui" line="6823"/>
         <location filename="MainWindow.cpp" line="361"/>
-        <location filename="MainWindow_Init.cpp" line="873"/>
+        <location filename="MainWindow_Init.cpp" line="877"/>
         <source>Amount</source>
         <translation>金额</translation>
     </message>
@@ -1877,7 +1877,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="4723"/>
-        <location filename="MainWindow_Init.cpp" line="905"/>
+        <location filename="MainWindow_Init.cpp" line="909"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
@@ -1997,7 +1997,7 @@
     <message>
         <location filename="MainWindow.ui" line="4787"/>
         <location filename="MainWindow.cpp" line="1081"/>
-        <location filename="MainWindow_Init.cpp" line="185"/>
+        <location filename="MainWindow_Init.cpp" line="189"/>
         <source>Total</source>
         <translation>总计</translation>
     </message>
@@ -2018,12 +2018,12 @@
         <translation type="vanished">今天</translation>
     </message>
     <message>
-        <location filename="MainWindow_Init.cpp" line="835"/>
+        <location filename="MainWindow_Init.cpp" line="839"/>
         <source>Slide Right to Start or Stop</source>
         <translation>滑动到右边启动或停止</translation>
     </message>
     <message>
-        <location filename="MainWindow_Init.cpp" line="872"/>
+        <location filename="MainWindow_Init.cpp" line="876"/>
         <source>Freq</source>
         <translation>频次</translation>
     </message>
@@ -2042,7 +2042,7 @@
     </message>
     <message>
         <location filename="MainWindow.cpp" line="679"/>
-        <location filename="MainWindow_Init.cpp" line="871"/>
+        <location filename="MainWindow_Init.cpp" line="875"/>
         <source>Date</source>
         <translation>日期</translation>
     </message>
@@ -2234,9 +2234,80 @@
         <translation>复制日志到剪贴板</translation>
     </message>
     <message>
+        <location filename="MainWindow_AI.cpp" line="39"/>
+        <location filename="MainWindow_AI.cpp" line="139"/>
+        <source>Network Error</source>
+        <translation>网络错误</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_AI.cpp" line="39"/>
+        <location filename="MainWindow_AI.cpp" line="139"/>
+        <source>Request URL</source>
+        <translation>请求地址</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_AI.cpp" line="42"/>
+        <location filename="MainWindow_AI.cpp" line="142"/>
+        <source>Connect Failed</source>
+        <translation>连接失败</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_AI.cpp" line="54"/>
+        <source>Returned data is not valid JSON:
+%1</source>
+        <translation>返回数据不是合法 JSON：%1</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_AI.cpp" line="57"/>
+        <source>Parse Failed</source>
+        <translation>解析失败</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_AI.cpp" line="68"/>
+        <source>API Rejected</source>
+        <translation>服务拒绝请求</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_AI.cpp" line="68"/>
+        <source>Server Error:
+%1</source>
+        <translation>服务端错误：%1</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_AI.cpp" line="77"/>
         <location filename="MainWindow_Menu.cpp" line="364"/>
         <source>Success</source>
         <translation>成功</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_AI.cpp" line="77"/>
+        <source>AI returned empty content</source>
+        <translation>AI 未返回任何文本内容</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_AI.cpp" line="88"/>
+        <source>User Question</source>
+        <translation>用户问题</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_AI.cpp" line="89"/>
+        <source>AI Reply</source>
+        <translation>AI回答</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_AI.cpp" line="101"/>
+        <source>AI Response Completed</source>
+        <translation>AI 回答完成</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_AI.cpp" line="166"/>
+        <source>Warning</source>
+        <translation>提醒</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_AI.cpp" line="167"/>
+        <source>Endpoint / API Key / Model ID cannot be empty</source>
+        <translation>接入地址 / API 密钥 / 模型 ID 不能为空</translation>
     </message>
     <message>
         <location filename="MainWindow_Menu.cpp" line="365"/>
@@ -3176,12 +3247,12 @@
         <translation type="vanished">编辑</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="689"/>
+        <location filename="Notes/NotesList_Event.cpp" line="691"/>
         <source>Copy</source>
         <translation>拷贝</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="690"/>
+        <location filename="Notes/NotesList_Event.cpp" line="692"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
@@ -3214,6 +3285,11 @@
         <location filename="Notes/NotesList_Event.cpp" line="561"/>
         <source>A maximum of 10 files can be imported at a time.</source>
         <translation>一次性最多只能导入10个文件</translation>
+    </message>
+    <message>
+        <location filename="Notes/NotesList_Event.cpp" line="689"/>
+        <source>AI Gen</source>
+        <translation>AI生成</translation>
     </message>
     <message>
         <location filename="Notes/NotesList_Event.cpp" line="505"/>
@@ -3373,7 +3449,7 @@
         <translation type="vanished">确定</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="687"/>
+        <location filename="Notes/NotesList_Event.cpp" line="688"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -3441,7 +3517,7 @@
         <translation>无标题笔记</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="688"/>
+        <location filename="Notes/NotesList_Event.cpp" line="690"/>
         <source>Paste</source>
         <translation>粘贴</translation>
     </message>
@@ -3511,73 +3587,66 @@
         <translation>输入1-50</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="155"/>
+        <location filename="Preferences.cpp" line="168"/>
         <source>ExtraSmall</source>
         <translation>极小</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="155"/>
+        <location filename="Preferences.cpp" line="168"/>
         <source>Small</source>
         <translation>小</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="155"/>
+        <location filename="Preferences.cpp" line="168"/>
         <source>Default</source>
         <translation>正常（默认）</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="156"/>
+        <location filename="Preferences.cpp" line="169"/>
         <source>Large</source>
         <translation>大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="156"/>
+        <location filename="Preferences.cpp" line="169"/>
         <source>XLarge</source>
         <translation>超大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="156"/>
+        <location filename="Preferences.cpp" line="169"/>
         <source>XXLarge</source>
         <translation>特大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="157"/>
+        <location filename="Preferences.cpp" line="170"/>
         <source>XXXLarge</source>
         <translation>最大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="167"/>
+        <location filename="Preferences.cpp" line="180"/>
         <source>Font</source>
         <translation>字体</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="628"/>
-        <location filename="Preferences.cpp" line="654"/>
-        <location filename="Preferences.cpp" line="924"/>
+        <location filename="Preferences.cpp" line="643"/>
+        <location filename="Preferences.cpp" line="669"/>
         <source>Warning</source>
         <translation>警告</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="798"/>
-        <location filename="Preferences.cpp" line="850"/>
         <source>Network Error</source>
-        <translation>网络错误</translation>
+        <translation type="vanished">网络错误</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="798"/>
-        <location filename="Preferences.cpp" line="850"/>
         <source>Request URL</source>
-        <translation>请求地址</translation>
+        <translation type="vanished">请求地址</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="899"/>
         <source>User Question</source>
-        <translation>用户问题</translation>
+        <translation type="vanished">用户问题</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="900"/>
         <source>AI Reply</source>
-        <translation>AI回答</translation>
+        <translation type="vanished">AI回答</translation>
     </message>
     <message>
         <source>Connection test passed!</source>
@@ -3588,21 +3657,18 @@
         <translation type="vanished">模型 ID %1</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="865"/>
         <source>Returned data is not valid JSON:
 %1</source>
-        <translation>返回数据不是合法 JSON：%1</translation>
+        <translation type="vanished">返回数据不是合法 JSON：%1</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="879"/>
         <source>Server Error:
 %1</source>
-        <translation>服务端错误：%1</translation>
+        <translation type="vanished">服务端错误：%1</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="888"/>
         <source>AI returned empty content</source>
-        <translation>AI 未返回任何文本内容</translation>
+        <translation type="vanished">AI 未返回任何文本内容</translation>
     </message>
     <message>
         <source>User Question:
@@ -3613,9 +3679,8 @@ AI Reply:
         <translation type="vanished">用户提问：%1\n\nAI 回复：%2</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="912"/>
         <source>AI Response Completed</source>
-        <translation>AI 回答完成</translation>
+        <translation type="vanished">AI 回答完成</translation>
     </message>
     <message>
         <source>Endpoint cannot be empty</source>
@@ -3630,10 +3695,8 @@ AI Reply:
         <translation type="vanished">模型 ID 不能为空</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="801"/>
-        <location filename="Preferences.cpp" line="853"/>
         <source>Connect Failed</source>
-        <translation>连接失败</translation>
+        <translation type="vanished">连接失败</translation>
     </message>
     <message>
         <source>Network Error:
@@ -3643,9 +3706,8 @@ Request URL:
         <translation type="vanished">网络错误：%1 请求地址：%2</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="868"/>
         <source>Parse Failed</source>
-        <translation>解析失败</translation>
+        <translation type="vanished">解析失败</translation>
     </message>
     <message>
         <source>Response invalid JSON:
@@ -3653,9 +3715,8 @@ Request URL:
         <translation type="vanished">返回数据不是合法 JSON：%1</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="879"/>
         <source>API Rejected</source>
-        <translation>服务拒绝请求</translation>
+        <translation type="vanished">服务拒绝请求</translation>
     </message>
     <message>
         <source>Service Error:
@@ -3663,9 +3724,8 @@ Request URL:
         <translation type="vanished">服务端错误：\n%1</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="888"/>
         <source>Success</source>
-        <translation>成功</translation>
+        <translation type="vanished">成功</translation>
     </message>
     <message>
         <source>Connection test passed!
@@ -3673,19 +3733,18 @@ Model ID: %1</source>
         <translation type="vanished">连接测试通过！模型 ID：%1</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="629"/>
-        <location filename="Preferences.cpp" line="655"/>
-        <location filename="Preferences.cpp" line="925"/>
+        <location filename="Preferences.cpp" line="644"/>
+        <location filename="Preferences.cpp" line="670"/>
         <source>Endpoint / API Key / Model ID cannot be empty</source>
         <translation>接入地址 / API 密钥 / 模型 ID 不能为空</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="698"/>
+        <location filename="Preferences.cpp" line="713"/>
         <source>Save Failed</source>
         <translation>保存失败</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="698"/>
+        <location filename="Preferences.cpp" line="713"/>
         <source>Cannot open config file to write</source>
         <translation>无法打开配置文件写入数据</translation>
     </message>
@@ -3696,7 +3755,7 @@ Model ID: %1</source>
     <message>
         <location filename="Preferences.ui" line="69"/>
         <location filename="Preferences.cpp" line="25"/>
-        <location filename="Preferences.cpp" line="162"/>
+        <location filename="Preferences.cpp" line="175"/>
         <source>Font Size</source>
         <translation>字体大小</translation>
     </message>
@@ -3706,8 +3765,8 @@ Model ID: %1</source>
     </message>
     <message>
         <location filename="Preferences.ui" line="128"/>
-        <location filename="Preferences.cpp" line="229"/>
-        <location filename="Preferences.cpp" line="235"/>
+        <location filename="Preferences.cpp" line="242"/>
+        <location filename="Preferences.cpp" line="248"/>
         <source>Custom Font</source>
         <translation>自选字体</translation>
     </message>
@@ -3849,7 +3908,7 @@ Model ID: %1</source>
         <translation>返回</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="168"/>
+        <location filename="Preferences.cpp" line="181"/>
         <source>Font Files (*.*)</source>
         <translation>字体文件 (*.*)</translation>
     </message>
@@ -3858,7 +3917,7 @@ Model ID: %1</source>
         <translation type="vanished">自动备份</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="470"/>
+        <location filename="Preferences.cpp" line="485"/>
         <source>Password validation error.</source>
         <translation>密码验证错误</translation>
     </message>

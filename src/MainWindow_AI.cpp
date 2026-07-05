@@ -1,0 +1,183 @@
+#include "MainWindow.h"
+
+void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
+                                   const QString& userQuestion) {
+  // 规范：发起提问前先执行连通校验，校验通过后再发正式对话
+  // 先执行连通检测（异步，检测成功后再执行真实提问，这里做分层回调）
+  QString baseUrl = cfg.endpoint.endsWith("/")
+                        ? cfg.endpoint.left(cfg.endpoint.size() - 1)
+                        : cfg.endpoint;
+  QUrl url(baseUrl + "/chat/completions");
+  QNetworkRequest req(url);
+
+  req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+  req.setRawHeader("Authorization",
+                   QString("Bearer %1").arg(cfg.apiKey).toUtf8());
+
+  // 完整用户提问请求体，使用配置内自定义参数
+  QJsonObject body;
+  body["model"] = cfg.modelId;
+  body["temperature"] = cfg.temperature;
+  body["max_tokens"] = cfg.maxTokens;
+  body["thinking_enable"] = false;
+  QJsonArray messages;
+  QJsonObject msgUser;
+  msgUser["role"] = "user";
+  msgUser["content"] = userQuestion;
+  messages.append(msgUser);
+  body["messages"] = messages;
+
+  QByteArray postData = QJsonDocument(body).toJson(QJsonDocument::Compact);
+  QNetworkReply* reply = m_ainetMgr->post(req, postData);
+
+  connect(reply, &QNetworkReply::finished, this, [this, reply, userQuestion]() {
+    reply->deleteLater();
+    QString reqUrl = reply->request().url().toString();
+    if (reply->error() != QNetworkReply::NoError) {
+      QString errMsg = reply->errorString();
+      QString content =
+          tr("Network Error") + ":\n%1\n" + tr("Request URL") + ":\n%2";
+      content = content.arg(errMsg, reqUrl);
+      auto msg = std::make_unique<ShowMessage>(mw_one);
+      msg->showMsg(tr("Connect Failed"), content, 1);
+      return;
+    }
+    // 此处增加业务逻辑：读取返回JSON、解析AI回答内容
+    QByteArray rawResp = reply->readAll();
+    // TODO：解析返回内容，自行实现界面渲染逻辑
+    QJsonParseError parseError;
+    // 转为JSON文档，捕获解析错误
+    QJsonDocument doc = QJsonDocument::fromJson(rawResp, &parseError);
+
+    // 1. 判断：返回内容不是合法JSON
+    if (parseError.error != QJsonParseError::NoError) {
+      QString errInfo = tr("Returned data is not valid JSON:\n%1")
+                            .arg(parseError.errorString());
+      auto msg = std::make_unique<ShowMessage>(mw_one);
+      msg->showMsg(tr("Parse Failed"), errInfo, 1);
+      return;
+    }
+
+    QJsonObject rootObj = doc.object();
+
+    // 2. 判断：服务端返回业务错误（密钥无效、模型不存在、余额不足等）
+    if (rootObj.contains("error")) {
+      QJsonObject errObj = rootObj["error"].toObject();
+      QString serverErr = errObj["message"].toString().trimmed();
+      auto msg = std::make_unique<ShowMessage>(mw_one);
+      msg->showMsg(tr("API Rejected"), tr("Server Error:\n%1").arg(serverErr),
+                   1);
+      return;
+    }
+
+    // 3. 正常成功响应，提取AI回答
+    QJsonArray choicesArr = rootObj["choices"].toArray();
+    if (choicesArr.isEmpty()) {
+      auto msg = std::make_unique<ShowMessage>(mw_one);
+      msg->showMsg(tr("Success"), tr("AI returned empty content"), 1);
+      return;
+    }
+
+    // 取第一条回复
+    QJsonObject firstChoice = choicesArr.first().toObject();
+    QJsonObject aiMsgObj = firstChoice["message"].toObject();
+    QString aiReplyText = aiMsgObj["content"].toString().trimmed();
+
+    // ========== 弹窗展示完整问答 ==========
+    // 分段纯翻译文本，tr内部不含任何换行符
+    QString part1 = tr("User Question");
+    QString part2 = tr("AI Reply");
+
+    // 外部拼接换行、占位符，tr只负责文字
+    QString showBody;
+    showBody += part1;
+    showBody += ":\n%1\n\n";
+    showBody += part2;
+    showBody += ":\n%2";
+
+    // 最后填充占位符
+    showBody = showBody.arg(userQuestion, aiReplyText);
+    auto msg = std::make_unique<ShowMessage>(mw_one);
+    msg->showMsg(tr("AI Response Completed"), showBody, 1);
+  });
+}
+
+void MainWindow::checkAiConnectivity(const AiSingleRecord& cfg,
+                                     std::function<void()> onSuccess) {
+  QString baseUrl = cfg.endpoint.endsWith("/")
+                        ? cfg.endpoint.left(cfg.endpoint.size() - 1)
+                        : cfg.endpoint;
+  QUrl url(baseUrl + "/chat/completions");
+  QNetworkRequest req(url);
+  req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+  req.setRawHeader("Authorization",
+                   QString("Bearer %1").arg(cfg.apiKey).toUtf8());
+
+  QJsonObject body;
+  body["model"] = cfg.modelId;
+  body["max_tokens"] = 1;
+  body["thinking_enable"] = false;
+  QJsonArray messages;
+  QJsonObject msgUser;
+  msgUser["role"] = "user";
+  msgUser["content"] = "hello";
+  messages.append(msgUser);
+  body["messages"] = messages;
+
+  QByteArray postData = QJsonDocument(body).toJson(QJsonDocument::Compact);
+  QNetworkReply* reply = m_ainetMgr->post(req, postData);
+
+  connect(reply, &QNetworkReply::finished, mw_one,
+          [this, reply, cfg, onSuccess]() {
+            reply->deleteLater();
+            if (!this->isVisible()) return;
+
+            QString reqUrl = reply->request().url().toString();
+            if (reply->error() != QNetworkReply::NoError) {
+              QString errMsg = reply->errorString();
+              QString content =
+                  tr("Network Error") + ":\n%1\n" + tr("Request URL") + ":\n%2";
+              content = content.arg(errMsg, reqUrl);
+              auto msg = std::make_unique<ShowMessage>(this);
+              msg->showMsg(tr("Connect Failed"), content, 1);
+              return;
+            }
+            // 连通测试弹窗提示
+            // auto msg = std::make_unique<ShowMessage>(this);
+            // QString text = tr("Connection test passed!") + "\n" +
+            //               tr("Model ID: %1").arg(cfg.modelId);
+            // msg->showMsg(tr("Success"), text, 1);
+
+            m_Preferences->saveAIConfig();
+
+            // 连通成功，执行传入的回调函数
+            if (onSuccess) onSuccess();
+          });
+}
+
+void MainWindow::aiChatQuery(const QString& userQuestion) {
+  // 读取界面配置
+  QString ep = m_Preferences->ui->cboxEndpoint->currentText().trimmed();
+  QString key = m_Preferences->ui->editAIKey->text().trimmed();
+  QString mid = m_Preferences->ui->editAIModelID->text().trimmed();
+
+  if (ep.isEmpty() || key.isEmpty() || mid.isEmpty()) {
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(tr("Warning"),
+                 tr("Endpoint / API Key / Model ID cannot be empty"), 1);
+    return;
+  }
+
+  AiSingleRecord cfg;
+  cfg.endpoint = ep;
+  cfg.apiKey = key;
+  cfg.modelId = mid;
+  cfg.temperature = 0.1;
+  cfg.timeoutSec = 10;
+  cfg.maxTokens = 1024;
+
+  // 复用统一连通检测函数，连通成功后执行提问
+  checkAiConnectivity(cfg, [this, cfg, userQuestion]() {
+    sendAiChatRequest(cfg, userQuestion);
+  });
+}

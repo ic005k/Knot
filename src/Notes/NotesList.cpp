@@ -1005,11 +1005,6 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
   watcher->setFuture(future);
 }
 
-void NotesList::mouseClickNoteBook() {
-  isMouseClick = true;
-  clickNoteBook();
-}
-
 void NotesList::saveNotesListIndex() {
   QJsonObject root;
   QJsonArray array;

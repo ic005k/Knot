@@ -91,6 +91,10 @@ void MainWindow::init_Instance() {
 
   m_ReceiveShare = new ReceiveShare(this);
 
+  // AI
+  m_ainetMgr = new QNetworkAccessManager(this);
+  m_ainetMgr->setTransferTimeout(20000);
+
   if (m_Preferences->getDefaultFont() == "None")
     m_Preferences->setDefaultFont(this->font().family());
 

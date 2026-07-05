@@ -412,6 +412,7 @@ SOURCES += \
     src/LoadPic.cpp \
     src/MainHelper.cpp \
     src/MainWindow.cpp \
+    src/MainWindow_AI.cpp \
     src/MainWindow_Btn.cpp \
     src/MainWindow_Init.cpp \
     src/MainWindow_Menu.cpp \

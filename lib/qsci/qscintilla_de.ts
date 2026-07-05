@@ -690,7 +690,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="4723"/>
-        <location filename="../../src/MainWindow_Init.cpp" line="905"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="909"/>
         <source>Month</source>
         <translation type="unfinished"></translation>
     </message>
@@ -722,7 +722,7 @@
     <message>
         <location filename="../../src/MainWindow.ui" line="6823"/>
         <location filename="../../src/MainWindow.cpp" line="361"/>
-        <location filename="../../src/MainWindow_Init.cpp" line="873"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="877"/>
         <source>Amount</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1162,7 +1162,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="4710"/>
-        <location filename="../../src/MainWindow_Init.cpp" line="874"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="878"/>
         <source>Year</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1175,7 +1175,7 @@
     <message>
         <location filename="../../src/MainWindow.ui" line="4787"/>
         <location filename="../../src/MainWindow.cpp" line="1081"/>
-        <location filename="../../src/MainWindow_Init.cpp" line="185"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="189"/>
         <source>Total</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1545,12 +1545,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Init.cpp" line="835"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="839"/>
         <source>Slide Right to Start or Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Init.cpp" line="872"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="876"/>
         <source>Freq</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1640,8 +1640,79 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../src/MainWindow_AI.cpp" line="39"/>
+        <location filename="../../src/MainWindow_AI.cpp" line="139"/>
+        <source>Network Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow_AI.cpp" line="39"/>
+        <location filename="../../src/MainWindow_AI.cpp" line="139"/>
+        <source>Request URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow_AI.cpp" line="42"/>
+        <location filename="../../src/MainWindow_AI.cpp" line="142"/>
+        <source>Connect Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow_AI.cpp" line="54"/>
+        <source>Returned data is not valid JSON:
+%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow_AI.cpp" line="57"/>
+        <source>Parse Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow_AI.cpp" line="68"/>
+        <source>API Rejected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow_AI.cpp" line="68"/>
+        <source>Server Error:
+%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow_AI.cpp" line="77"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="364"/>
         <source>Success</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow_AI.cpp" line="77"/>
+        <source>AI returned empty content</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow_AI.cpp" line="88"/>
+        <source>User Question</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow_AI.cpp" line="89"/>
+        <source>AI Reply</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow_AI.cpp" line="101"/>
+        <source>AI Response Completed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow_AI.cpp" line="166"/>
+        <source>Warning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow_AI.cpp" line="167"/>
+        <source>Endpoint / API Key / Model ID cannot be empty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1651,7 +1722,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.cpp" line="679"/>
-        <location filename="../../src/MainWindow_Init.cpp" line="871"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="875"/>
         <source>Date</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2259,22 +2330,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="687"/>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="688"/>
         <source>Cancel</source>
         <translation type="unfinished">Abbrechen</translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="688"/>
-        <source>Paste</source>
-        <translation type="unfinished">Einfügen</translation>
-    </message>
-    <message>
         <location filename="../../src/Notes/NotesList_Event.cpp" line="689"/>
-        <source>Copy</source>
+        <source>AI Gen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Notes/NotesList_Event.cpp" line="690"/>
+        <source>Paste</source>
+        <translation type="unfinished">Einfügen</translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="691"/>
+        <source>Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/NotesList_Event.cpp" line="692"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2517,14 +2593,14 @@
     <message>
         <location filename="../../src/Preferences.ui" line="69"/>
         <location filename="../../src/Preferences.cpp" line="25"/>
-        <location filename="../../src/Preferences.cpp" line="162"/>
+        <location filename="../../src/Preferences.cpp" line="175"/>
         <source>Font Size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Preferences.ui" line="128"/>
-        <location filename="../../src/Preferences.cpp" line="229"/>
-        <location filename="../../src/Preferences.cpp" line="235"/>
+        <location filename="../../src/Preferences.cpp" line="242"/>
+        <location filename="../../src/Preferences.cpp" line="248"/>
         <source>Custom Font</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2594,7 +2670,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="155"/>
+        <location filename="../../src/Preferences.cpp" line="168"/>
         <source>Default</source>
         <translation type="unfinished">Standard</translation>
     </message>
@@ -2613,136 +2689,69 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="155"/>
+        <location filename="../../src/Preferences.cpp" line="168"/>
         <source>ExtraSmall</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="155"/>
+        <location filename="../../src/Preferences.cpp" line="168"/>
         <source>Small</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="156"/>
+        <location filename="../../src/Preferences.cpp" line="169"/>
         <source>Large</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="156"/>
+        <location filename="../../src/Preferences.cpp" line="169"/>
         <source>XLarge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="156"/>
+        <location filename="../../src/Preferences.cpp" line="169"/>
         <source>XXLarge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="157"/>
+        <location filename="../../src/Preferences.cpp" line="170"/>
         <source>XXXLarge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="167"/>
+        <location filename="../../src/Preferences.cpp" line="180"/>
         <source>Font</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="168"/>
+        <location filename="../../src/Preferences.cpp" line="181"/>
         <source>Font Files (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="470"/>
+        <location filename="../../src/Preferences.cpp" line="485"/>
         <source>Password validation error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="628"/>
-        <location filename="../../src/Preferences.cpp" line="654"/>
-        <location filename="../../src/Preferences.cpp" line="924"/>
+        <location filename="../../src/Preferences.cpp" line="643"/>
+        <location filename="../../src/Preferences.cpp" line="669"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="798"/>
-        <location filename="../../src/Preferences.cpp" line="850"/>
-        <source>Network Error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="798"/>
-        <location filename="../../src/Preferences.cpp" line="850"/>
-        <source>Request URL</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="865"/>
-        <source>Returned data is not valid JSON:
-%1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="868"/>
-        <source>Parse Failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="879"/>
-        <source>API Rejected</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="879"/>
-        <source>Server Error:
-%1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="888"/>
-        <source>AI returned empty content</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="899"/>
-        <source>User Question</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="900"/>
-        <source>AI Reply</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="912"/>
-        <source>AI Response Completed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="801"/>
-        <location filename="../../src/Preferences.cpp" line="853"/>
-        <source>Connect Failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="888"/>
-        <source>Success</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.cpp" line="629"/>
-        <location filename="../../src/Preferences.cpp" line="655"/>
-        <location filename="../../src/Preferences.cpp" line="925"/>
+        <location filename="../../src/Preferences.cpp" line="644"/>
+        <location filename="../../src/Preferences.cpp" line="670"/>
         <source>Endpoint / API Key / Model ID cannot be empty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="698"/>
+        <location filename="../../src/Preferences.cpp" line="713"/>
         <source>Save Failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="698"/>
+        <location filename="../../src/Preferences.cpp" line="713"/>
         <source>Cannot open config file to write</source>
         <translation type="unfinished"></translation>
     </message>

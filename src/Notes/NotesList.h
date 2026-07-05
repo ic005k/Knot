@@ -254,6 +254,7 @@ class NotesList : public QDialog {
 
   void slotCreateSubNotebook(int qmlIndex);
   void show_NoteBookPopMenu(int qmlIndex);
+  void mouseClickNoteList();
  private slots:
 
   void on_actionShareNoteFile();
@@ -305,6 +306,8 @@ class NotesList : public QDialog {
   bool isImportNotes = false;
 
   bool isMouseClick = false;
+
+  bool isMouseClickNoteBook = false;
 
   bool isActColorFlagStatus = false;
 

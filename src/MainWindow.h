@@ -482,6 +482,12 @@ class MainWindow : public QMainWindow {
   void init_UIWidget();
   QTreeWidget* init_TreeWidget(QString name);
 
+  void sendAiChatRequest(const AiSingleRecord& cfg,
+                         const QString& userQuestion);
+  void aiChatQuery(const QString& userQuestion);
+  void checkAiConnectivity(const AiSingleRecord& cfg,
+                           std::function<void()> onSuccess);
+
  protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
@@ -961,6 +967,7 @@ class MainWindow : public QMainWindow {
   void on_chkAutoStopTTS_clicked(bool checked);
 
  private:
+  QNetworkAccessManager* m_ainetMgr;
   bool isMoveEntry;
   QTimer* tmeFlash;
   int nFlashCount = 0;

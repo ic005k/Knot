@@ -681,10 +681,12 @@ void NotesList::on_btnRename_clicked() {
   }
 
   QToolButton* btnCancel = new QToolButton(m_RenameNotes);
+  QToolButton* btnAIGen = new QToolButton(m_RenameNotes);
   QToolButton* btnPaste = new QToolButton(m_RenameNotes);
   QToolButton* btnCopy = new QToolButton(m_RenameNotes);
   QToolButton* btnOk = new QToolButton(m_RenameNotes);
   btnCancel->setText(tr("Cancel"));
+  btnAIGen->setText(tr("AI Gen"));
   btnPaste->setText(tr("Paste"));
   btnCopy->setText(tr("Copy"));
   btnOk->setText(tr("OK"));
@@ -693,9 +695,11 @@ void NotesList::on_btnRename_clicked() {
   btnCancel->setFixedHeight(50);
   btnCopy->setFixedHeight(50);
   btnPaste->setFixedHeight(50);
+  btnAIGen->setFixedHeight(50);
 
   QHBoxLayout* hbox = new QHBoxLayout;
   hbox->addWidget(btnCancel);
+  hbox->addWidget(btnAIGen);
   hbox->addWidget(btnPaste);
   hbox->addWidget(btnCopy);
   hbox->addWidget(btnOk);
@@ -703,7 +707,14 @@ void NotesList::on_btnRename_clicked() {
   btnPaste->hide();
   btnCopy->hide();
 
+  if (isMouseClickNoteBook) {
+    btnAIGen->hide();
+  } else {
+    if (!mw_one->m_Preferences->ui->chkAI->isChecked()) btnAIGen->hide();
+  }
+
   btnCancel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+  btnAIGen->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   btnPaste->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   btnCopy->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   btnOk->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
@@ -716,6 +727,37 @@ void NotesList::on_btnRename_clicked() {
 
   connect(btnCancel, &QToolButton::clicked, m_RenameNotes,
           [=]() mutable { m_RenameNotes->close(); });
+  connect(btnAIGen, &QToolButton::clicked, m_RenameNotes, [=]() mutable {
+    const qint64 MAX_READ_KB = 16;
+    const qint64 MAX_READ_BYTE = MAX_READ_KB * 1024;
+
+    QFile file(currentMDFile);
+    QString text;
+    if (file.open(QIODevice::ReadOnly)) {
+      QByteArray buf = file.read(MAX_READ_BYTE);  // 仅读取前128KB
+      file.close();
+      text = QString::fromUtf8(buf);
+    } else {
+      // 文件读取失败，置空
+      text = "";
+    }
+
+    // 统一英文指令，要求标题语言跟随笔记原文
+    QString promptTemplate = R"(
+Generate a short title for the note below.
+Rule: Title language matches the note's main language, output only title, no extra words.
+
+Note:
+%1
+)";
+
+    // 拼接笔记内容
+    QString fullPrompt = promptTemplate.arg(text);
+
+    // 调用AI
+    mw_one->aiChatQuery(fullPrompt);
+    // qDebug() << fullPrompt;
+  });
   connect(m_RenameNotes, &QDialog::rejected, m_RenameNotes,
           [=]() mutable { m_Method->closeGrayWindows(); });
   connect(m_RenameNotes, &QDialog::accepted, m_RenameNotes,
@@ -833,3 +875,11 @@ void NotesList::clickNoteList() {
   // qDebug() << "单击条目设置当前md文件：" << currentMDFile << indexNoteBook
   //          << index;
 }
+
+void NotesList::mouseClickNoteBook() {
+  isMouseClick = true;
+  isMouseClickNoteBook = true;
+  clickNoteBook();
+}
+
+void NotesList::mouseClickNoteList() { isMouseClickNoteBook = false; }

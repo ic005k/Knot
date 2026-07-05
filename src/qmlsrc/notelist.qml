@@ -204,6 +204,7 @@ Rectangle {
                     view.currentIndex = index;
                     for (var i = 0; i < view.count; i++) {}
                     m_NotesList.clickNoteList();
+                    m_NotesList.mouseClickNoteList()
                 }
 
                 // 长按（替代 onPressAndHold）
