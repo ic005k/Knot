@@ -66,14 +66,26 @@ Preferences::Preferences(QWidget* parent)
 
   // 下拉菜单弹出前刷新列表
   connect(ui->cboxEndpoint, &QComboBox::showPopup, this, [this]() {
-    QString currentEp = ui->cboxEndpoint->currentText().trimmed();
-    ui->cboxEndpoint->clear();
-    for (const auto& rec : m_aiAllRecords) {
-      ui->cboxEndpoint->addItem(rec.endpoint);
+    // 缓存当前选中的记录下标，而非纯文本（关键）
+    int selRecordIdx = -1;
+    int curComboIdx = ui->cboxEndpoint->currentIndex();
+    if (curComboIdx >= 0) {
+      selRecordIdx = ui->cboxEndpoint->itemData(curComboIdx).toInt();
     }
-    int targetIdx = ui->cboxEndpoint->findText(currentEp);
-    if (targetIdx != -1) {
-      ui->cboxEndpoint->setCurrentIndex(targetIdx);
+
+    // 清空下拉，完全复用 initAIConfig 的渲染逻辑
+    ui->cboxEndpoint->clear();
+    for (int i = 0; i < m_aiAllRecords.size(); ++i) {
+      const auto& rec = m_aiAllRecords[i];
+      ui->cboxEndpoint->addItem(rec.displayText());
+      ui->cboxEndpoint->setItemData(i, i);
+    }
+
+    // 恢复选中：按记录下标匹配，而非模糊匹配文本
+    if (selRecordIdx >= 0 && selRecordIdx < m_aiAllRecords.size()) {
+      ui->cboxEndpoint->setCurrentIndex(selRecordIdx);
+    } else {
+      ui->cboxEndpoint->setCurrentIndex(-1);
     }
   });
 }
@@ -594,7 +606,7 @@ void Preferences::openPreferences() {
   if (editFilter != nullptr) {
     mui->editPassword->removeEventFilter(editFilter);
     mui->editValidate->removeEventFilter(editFilter);
-    ui->cboxEndpoint->lineEdit()->removeEventFilter(editFilter);
+    ui->editEndpoint->removeEventFilter(editFilter);
     ui->editAIKey->removeEventFilter(editFilter);
     ui->editAIModelID->removeEventFilter(editFilter);
     delete editFilter;
@@ -604,7 +616,7 @@ void Preferences::openPreferences() {
 
   mui->editPassword->installEventFilter(editFilter);
   mui->editValidate->installEventFilter(editFilter);
-  ui->cboxEndpoint->lineEdit()->installEventFilter(editFilter);
+  ui->editEndpoint->installEventFilter(editFilter);
   ui->editAIKey->installEventFilter(editFilter);
   ui->editAIModelID->installEventFilter(editFilter);
 
@@ -634,7 +646,7 @@ void Preferences::on_btnAITest_clicked() {
 
   return;
 
-  QString ep = ui->cboxEndpoint->currentText().trimmed();
+  QString ep = ui->editEndpoint->text().trimmed();
   QString key = ui->editAIKey->text().trimmed();
   QString mid = ui->editAIModelID->text().trimmed();
 
@@ -659,7 +671,7 @@ void Preferences::on_btnAITest_clicked() {
 
 void Preferences::saveAIConfig() {
   // 读取界面输入
-  QString endpoint = ui->cboxEndpoint->currentText().trimmed();
+  QString endpoint = ui->editEndpoint->text().trimmed();
   QString apiKey = ui->editAIKey->text().trimmed();
   QString modelId = ui->editAIModelID->text().trimmed();
 
@@ -715,15 +727,6 @@ void Preferences::saveAIConfig() {
   }
   file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
   file.close();
-
-  // 刷新下拉框
-  //  ui->cboxEndpoint->clear();
-  //  for (const auto& rec : m_aiAllRecords) {
-  //    ui->cboxEndpoint->addItem(rec.endpoint);
-  //  }
-
-  // auto msg = std::make_unique<ShowMessage>(mw_one);
-  // msg->showMsg(tr("Success"), tr("AI config saved successfully"), 1);
 }
 
 void Preferences::initAIConfig() {
@@ -755,9 +758,11 @@ void Preferences::initAIConfig() {
     m_aiAllRecords.append(rec);
   }
 
-  // 刷新下拉列表：逐条展示完整displayText
-  for (const auto& rec : m_aiAllRecords) {
-    ui->cboxEndpoint->addItem(rec.endpoint);
+  // 复用结构体 displayText，绑定数组下标 itemData
+  for (int i = 0; i < m_aiAllRecords.size(); ++i) {
+    const auto& rec = m_aiAllRecords[i];
+    ui->cboxEndpoint->addItem(rec.displayText());
+    ui->cboxEndpoint->setItemData(i, i);
   }
 }
 
@@ -768,11 +773,15 @@ void Preferences::on_cboxEndpoint_currentIndexChanged(int index) {
 
   if (index < 0 || index >= m_aiAllRecords.size()) return;
 
+  // 从隐藏数据获取真实记录下标，不依赖combo原生index
+  int recordIdx = ui->cboxEndpoint->itemData(index).toInt();
+  if (recordIdx < 0 || recordIdx >= m_aiAllRecords.size()) return;
+
   // 直接通过下标取完整原始记录，完全不依赖cbox的currentText
   const AiSingleRecord& rec = m_aiAllRecords[index];
 
   // 强制回填纯净原始endpoint，不受下拉展示文本干扰
-  ui->cboxEndpoint->setCurrentText(rec.endpoint);
+  ui->editEndpoint->setText(rec.endpoint);
   ui->editAIKey->setText(rec.apiKey);
   ui->editAIModelID->setText(rec.modelId);
 }

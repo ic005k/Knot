@@ -745,9 +745,12 @@ void NotesList::on_btnRename_clicked() {
     // 统一英文指令，要求标题语言跟随笔记原文
     QString promptTemplate = R"(
 Generate a short title for the note below.
-Rule: Title language matches the note's main language, output only title, no extra words.
+
+Rule: Title language matches the note's main language, output only title, no
+extra words.
 
 Note:
+
 %1
 )";
 

@@ -275,16 +275,9 @@ QCheckBox::indicator:checked {
        </layout>
       </item>
       <item>
-       <widget class="QLabel" name="lblAIEndpoint">
-        <property name="text">
-         <string>Endpoint:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QComboBox" name="cboxEndpoint">
         <property name="editable">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <item>
          <property name="text">
@@ -292,6 +285,16 @@ QCheckBox::indicator:checked {
          </property>
         </item>
        </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblAIEndpoint">
+        <property name="text">
+         <string>Endpoint:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="editEndpoint"/>
       </item>
       <item>
        <widget class="QLabel" name="lblAIKey">

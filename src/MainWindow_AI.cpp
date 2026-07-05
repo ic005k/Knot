@@ -170,7 +170,7 @@ void MainWindow::checkAiConnectivity(const AiSingleRecord& cfg,
 
 void MainWindow::aiChatQuery(const QString& userQuestion) {
   // 读取界面配置
-  QString ep = m_Preferences->ui->cboxEndpoint->currentText().trimmed();
+  QString ep = m_Preferences->ui->editEndpoint->text().trimmed();
   QString key = m_Preferences->ui->editAIKey->text().trimmed();
   QString mid = m_Preferences->ui->editAIModelID->text().trimmed();
 
