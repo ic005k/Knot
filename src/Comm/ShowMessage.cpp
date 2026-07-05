@@ -15,6 +15,14 @@ ShowMessage::ShowMessage(QWidget* parent)
   setModal(true);
   setWindowModality(Qt::ApplicationModal);
 
+  if (ui->qwShowMsg->source().isEmpty()) {
+    ui->qwShowMsg->rootContext()->setContextProperty("isDark", isDark);
+    ui->qwShowMsg->rootContext()->setContextProperty("m_Method", m_Method);
+    ui->qwShowMsg->rootContext()->setContextProperty("textContent", "");
+    ui->qwShowMsg->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/showmsg.qml")));
+  }
+
   // 文本控件设置
   QFont font = this->font();
   font.setBold(true);
@@ -35,6 +43,7 @@ ShowMessage::ShowMessage(QWidget* parent)
   // 移除标题栏下的分割线（彻底隐藏）
   ui->hframe->hide();
   ui->hframe->setVisible(false);
+  ui->editMsg->hide();
 
   // 按钮样式（保留原逻辑）
   QString btnStyle = ui->btnOk->styleSheet();
@@ -156,6 +165,8 @@ bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
   ui->lblTitle->updateGeometry();
   ui->editMsg->document()->adjustSize();
   ui->editMsg->updateGeometry();
+
+  ui->qwShowMsg->rootContext()->setContextProperty("textContent", showText);
 
   // 计算高度、初始化弹窗尺寸（窗口隐藏状态下计算，无GL surface争夺）
   int textH = getTextEditContentHeight(ui->editMsg);
