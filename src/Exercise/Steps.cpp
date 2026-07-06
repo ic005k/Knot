@@ -816,8 +816,11 @@ void Steps::startRecordMotion() {
 
   mui->lblGpsInfo->setStyleSheet(lblStartStyle);
   mui->btnGPS->setStyleSheet(btnRoundStyleRed);
-  mui->gboxMotionType->setEnabled(false);
+
   mui->btnSelGpsDate->setEnabled(false);
+  mui->rbCycling->setEnabled(false);
+  mui->rbHiking->setEnabled(false);
+  mui->rbRunning->setEnabled(false);
 
   if (mui->rbCycling->isChecked()) saveInterval = 0.016f;
   if (mui->rbHiking->isChecked()) saveInterval = 0.008f;
@@ -1261,6 +1264,11 @@ void Steps::updateGetGpsData() {
       }
     }
   }
+
+  if (str_type != "") {
+    ai_latlon_text = str_type + "  " + "latitude:" + QString::number(latitude) +
+                     "longitude:" + QString::number(longitude);
+  }
 }
 
 void Steps::stopRecordMotion() {
@@ -1285,6 +1293,9 @@ void Steps::stopRecordMotion() {
     m_Method->setCurrentIndexFromQW(mui->qwGpsList, 0);
 
     refreshMotionData();
+
+    ai_latlon_text = "";
+    str_type = "";
   });
 
   mui->lblGpsInfo->setText(strGpsInfoShow);
@@ -1301,8 +1312,10 @@ void Steps::stopRecordMotion() {
   delete m_positionSource;
 #endif
 
-  mui->gboxMotionType->setEnabled(true);
   mui->btnSelGpsDate->setEnabled(true);
+  mui->rbCycling->setEnabled(true);
+  mui->rbHiking->setEnabled(true);
+  mui->rbRunning->setEnabled(true);
 }
 
 void Steps::refreshRoute() {
@@ -1330,7 +1343,7 @@ void Steps::refreshMotionData() {
   endDt = QDateTime::currentDateTime();
   strEndTime = endDt.time().toString();
 
-  QString t00, t1, t2, t3, t4, t5, str_type;
+  QString t00, t1, t2, t3, t4, t5;
 
   if (mui->rbCycling->isChecked()) str_type = tr("Cycling");
   if (mui->rbHiking->isChecked()) str_type = tr("Hiking");

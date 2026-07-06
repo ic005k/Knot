@@ -90,6 +90,8 @@ class Steps : public QDialog {
     int runningCount = 0;
   };
 
+  QString ai_latlon_text = "";
+
   QDialog* m_remarksDialog = nullptr;
 
   QString ai_stepstext = "";
@@ -249,7 +251,7 @@ class Steps : public QDialog {
 
  private:
   QThread* geoThread;
-
+  QString str_type = "";
   bool latValid = false;
   bool lonValid = false;
   QDateTime currentTime;

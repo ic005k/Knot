@@ -555,32 +555,49 @@ void MainWindow::on_btnViewCategory_pressed() {
 void MainWindow::on_btnAIExerciseSuggestions_clicked() {
   // 获取当前程序生效的语言标识
   QLocale loc = QLocale::system();
-  QString langCode = loc.name();  // 格式 zh_CN / en_US / ja_JP
+  QString langCode = loc.name();
 
-  // 标准化英文指令，明确指定输出语言，精准可控
-  QString promptTemplate = R"(
-Generate unique cycling, hiking, running outdoor sports knowledge, every request outputs completely different content, never reuse the same structure and tips as last time. All text uses the language matching language code %1.
+  // 模板A：存在GPS经纬度，根据坐标生成带天气的运动建议
+  QString promptInSport = R"(
+Generate real-time on-the-way sports reminders for cycling/hiking/running based on the combined info below. All text uses language matching %1.
+Sport & coordinate data: %2
 
-Rules to strictly abide by:
-1. Simple Markdown syntax is allowed (headings, bullet points), do not use complex formats like tables, code blocks.
-2. Do NOT use fixed rigid three-section templates (General Tips / Light Workout / Long Distance Training) for every sport. Randomly adjust content classification logic each time.
-3. Do not split hiking, cycling, running into three independent identical large blocks mechanically. Mix the three sports knowledge naturally, or focus on one sport as the core with auxiliary content of the other two each time.
-4. Each reply must switch knowledge types randomly: equipment maintenance, posture correction, wild safety, muscle recovery, road risk avoidance, physical energy supply, etc., avoid repeating clichés.
-5. Sentences should be concise, discard empty repetitive generic phrases, no redundant empty slogans.
-6. No opening greetings, no closing remarks, only core sports tips.
-
-Content rules:
-1. All languages get complete injury prevention and safety prompts without differentiated processing.
-2. Only involve cycling, hiking, running, no other sports.
-3. Must break the fixed repetitive output mode, each generation has different layout structure and information focus.
+Rules:
+1. Simple Markdown (headings, bullet points) allowed, complex formats are banned.
+2. Focus entirely on in-motion real-time reminders (mid-trip risks, action adjustment, on-the-go physical care, terrain hazards). Do NOT repeat pre-sport preparation content.
+3. Prioritize exclusive tips for the current sport given in the data, attach brief auxiliary hints for the other two sports. Randomize layout to avoid fixed template.
+4. Analyze local weather from coordinates, put prominent warning at top if extreme weather exists.
+5. Rotate practical themes each request: terrain slip risk, mid-sport hydration, long-distance fatigue relief, on-road emergency handling.
+6. Keep text concise without empty generic phrases, no opening/closing redundant text.
+7. Full safety & injury prevention reminders for all languages.
 )";
 
-  // 生成 100000 ~ 999999 随机整数
+  // 模板B：无GPS定位，仅输出全新随机运动常识，不查询天气
+  QString promptCommon = R"(
+Output unique short outdoor tips for cycling, hiking and running, every reply different content. All text uses language %1.
+
+Rules:
+1. Simple Markdown allowed, no complex formats.
+2. Random layout, rotate themes (gear maintenance, recovery, road safety, off-road skills).
+3. Keep sentences concise, no repetitive generic phrases.
+4. No extra opening/closing text, equal safety tips for all languages.
+)";
+
   quint64 randNum = QRandomGenerator::global()->bounded(100000, 999999);
-  QString randomSeed = QString::number(randNum);
-  QString fullPrompt =
-      promptTemplate.arg(langCode) +
-      "\nUnique random tag for this generation task: " + randomSeed;
+  QString randomTag = QString::number(randNum);
+  QString fullPrompt;
+
+  QString text = m_Steps->ai_latlon_text;
+  QString trimText = text.trimmed();
+  if (trimText.isEmpty()) {
+    // 无GPS定位：只用通用常识模板
+    fullPrompt = promptCommon.arg(langCode) + "\nRandom tag: " + randomTag;
+  } else {
+    // 已有稳定GPS经纬度：传入坐标，生成带天气的运动建议
+    fullPrompt = promptInSport.arg(langCode).arg(trimText) +
+                 "\nRandom tag: " + randomTag;
+  }
+
   aiChatQuery(fullPrompt);
 }
 
