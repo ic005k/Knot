@@ -1448,6 +1448,8 @@ void MainWindow::on_tabMotion_currentChanged(int index) {
     m_Steps->tmeRefreshSteps->start(3000);
   else
     m_Steps->tmeRefreshSteps->stop();
+
+  m_Steps->resizeAIBtn();
 }
 
 void MainWindow::on_chkZip_clicked() { m_Preferences->on_chkZip_clicked(); }

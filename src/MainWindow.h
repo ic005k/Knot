@@ -974,7 +974,8 @@ class MainWindow : public QMainWindow {
 
   void on_btnAIExerciseSuggestions_clicked();
 
- private:
+  void on_actionCopyLog();
+  private:
   QNetworkAccessManager* m_ainetMgr;
   QUrl buildAiApiUrl(const QString& rawEndpoint);
   bool isMoveEntry;

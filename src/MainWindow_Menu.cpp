@@ -289,6 +289,17 @@ void MainWindow::on_actionReport_triggered() {
   }
 }
 
+void MainWindow::on_actionCopyLog() {
+  AppLogger::instance().copyTodayLogToClipboard();
+  QTimer::singleShot(100, this, [this]() {
+    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
+    m_ShowMsg->showMsg(tr("Success"),
+                       tr("Today's log has been copied to clipboard, you can "
+                          "paste it anywhere."),
+                       1);
+  });
+}
+
 void MainWindow::on_actionShareFile() {
   QString path = "/storage/emulated/0/";
   QString file =
@@ -358,14 +369,8 @@ void MainWindow::init_Menu(QMenu* mainMenu) {
   connect(actShareFile, &QAction::triggered, mw_one,
           &MainWindow::on_actionShareFile);
 
-  connect(actCopyLog, &QAction::triggered, this, [=]() {
-    AppLogger::instance().copyTodayLogToClipboard();
-    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-    m_ShowMsg->showMsg(tr("Success"),
-                       tr("Today's log has been copied to clipboard, you "
-                          "can paste it anywhere."),
-                       1);
-  });
+  connect(actCopyLog, &QAction::triggered, mw_one,
+          &MainWindow::on_actionCopyLog);
 
   mainMenu->addAction(actAddTab);
   mainMenu->addAction(actDelTab);

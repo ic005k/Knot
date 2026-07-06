@@ -454,6 +454,8 @@ void Report::on_btnCategory_clicked() {
       }
     }
 
+    catetext = mui->lblViewCate1->text() + "\n\n" + catetext;
+
     int cate_count = m_Method->getCountFromQW(mui->qwViewCate);
     if (cate_count > 0) {
       mui->lblViewCate3->setText(tr("View Category") + "  " +

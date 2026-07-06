@@ -389,14 +389,23 @@ void Steps::loadStepsToTable() {
   m_Method->setScrollBarPos(mui->qwSteps, 1.0);
 }
 
+void Steps::resizeAIBtn() {
+  int btnh = mui->rbCycling->height();
+  auto btn0 = mui->btnAIExerciseSuggestions;
+  btn0->setIconSize(QSize(btnh - 3, btnh - 3));
+  btn0->setFixedSize(QSize(btnh, btnh));
+
+  btnh = mui->btnReset->height();
+  auto btn1 = mui->btnAISteps;
+  btn1->setIconSize(QSize(btnh - 3, btnh - 3));
+  btn1->setFixedSize(QSize(btnh, btnh));
+}
+
 void Steps::openStepsUI() {
   mui->frameMain->hide();
   mui->frameSteps->show();
 
-  int btnh = mui->rbCycling->height();
-  auto btn = mui->btnAIExerciseSuggestions;
-  btn->setIconSize(QSize(btnh - 3, btnh - 3));
-  btn->setFixedSize(QSize(btnh, btnh));
+  resizeAIBtn();
 
   if (mw_one->m_Preferences->ui->chkAI->isChecked()) {
     mui->btnAISteps->show();

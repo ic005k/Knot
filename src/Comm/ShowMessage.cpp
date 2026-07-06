@@ -13,7 +13,7 @@ ShowMessage::ShowMessage(QWidget* parent)
   // 基础设置：无边框+原生模态
   setWindowFlag(Qt::FramelessWindowHint);
   setModal(true);
-  setWindowModality(Qt::ApplicationModal);
+  setWindowModality(Qt::WindowModal);
 
   if (ui->qwShowMsg->source().isEmpty()) {
     ui->qwShowMsg->rootContext()->setContextProperty("isDark", isDark);
@@ -22,6 +22,8 @@ ShowMessage::ShowMessage(QWidget* parent)
     ui->qwShowMsg->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/showmsg.qml")));
   }
+
+  ui->qwShowMsg->setAttribute(Qt::WA_AcceptTouchEvents);
 
   // 文本控件设置
   QFont font = this->font();
@@ -173,6 +175,13 @@ bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
   int textH = getTextEditContentHeight(ui->editMsg);
   int adaptiveDlgH = calcDialogTotalHeight(textH, btnCount);
   init(btnCount, adaptiveDlgH);
+
+  // 强制窗口获取触摸焦点（Android关键修复）
+  this->raise();
+  this->activateWindow();
+  ui->qwShowMsg->setFocus(Qt::ActiveWindowFocusReason);
+  // 给按钮预焦点，跳过第一次焦点同步Tap
+  ui->btnOk->setFocus();
 
   // 全程用exec()
   this->exec();
