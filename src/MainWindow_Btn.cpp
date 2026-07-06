@@ -552,6 +552,38 @@ void MainWindow::on_btnViewCategory_pressed() {
   m_Report->on_btnCategory_clicked();
 }
 
+void MainWindow::on_btnAIExerciseSuggestions_clicked() {
+  // 获取当前程序生效的语言标识
+  QLocale loc = QLocale::system();
+  QString langCode = loc.name();  // 格式 zh_CN / en_US / ja_JP
+
+  // 标准化英文指令，明确指定输出语言，精准可控
+  QString promptTemplate = R"(
+Generate unique cycling, hiking, running outdoor sports knowledge, every request outputs completely different content, never reuse the same structure and tips as last time. All text uses the language matching language code %1.
+
+Rules to strictly abide by:
+1. Simple Markdown syntax is allowed (headings, bullet points), do not use complex formats like tables, code blocks.
+2. Do NOT use fixed rigid three-section templates (General Tips / Light Workout / Long Distance Training) for every sport. Randomly adjust content classification logic each time.
+3. Do not split hiking, cycling, running into three independent identical large blocks mechanically. Mix the three sports knowledge naturally, or focus on one sport as the core with auxiliary content of the other two each time.
+4. Each reply must switch knowledge types randomly: equipment maintenance, posture correction, wild safety, muscle recovery, road risk avoidance, physical energy supply, etc., avoid repeating clichés.
+5. Sentences should be concise, discard empty repetitive generic phrases, no redundant empty slogans.
+6. No opening greetings, no closing remarks, only core sports tips.
+
+Content rules:
+1. All languages get complete injury prevention and safety prompts without differentiated processing.
+2. Only involve cycling, hiking, running, no other sports.
+3. Must break the fixed repetitive output mode, each generation has different layout structure and information focus.
+)";
+
+  // 生成 100000 ~ 999999 随机整数
+  quint64 randNum = QRandomGenerator::global()->bounded(100000, 999999);
+  QString randomSeed = QString::number(randNum);
+  QString fullPrompt =
+      promptTemplate.arg(langCode) +
+      "\nUnique random tag for this generation task: " + randomSeed;
+  aiChatQuery(fullPrompt);
+}
+
 void MainWindow::on_btnAIExplanation_clicked() {
   QString text = mui->editSetText->text();
   QString trimText = text.trimmed();

@@ -972,6 +972,8 @@ class MainWindow : public QMainWindow {
 
   void on_btnAIExplanation_clicked();
 
+  void on_btnAIExerciseSuggestions_clicked();
+
  private:
   QNetworkAccessManager* m_ainetMgr;
   QUrl buildAiApiUrl(const QString& rawEndpoint);

@@ -393,10 +393,18 @@ void Steps::openStepsUI() {
   mui->frameMain->hide();
   mui->frameSteps->show();
 
-  if (mw_one->m_Preferences->ui->chkAI->isChecked())
+  int btnh = mui->rbCycling->height();
+  auto btn = mui->btnAIExerciseSuggestions;
+  btn->setIconSize(QSize(btnh - 3, btnh - 3));
+  btn->setFixedSize(QSize(btnh, btnh));
+
+  if (mw_one->m_Preferences->ui->chkAI->isChecked()) {
     mui->btnAISteps->show();
-  else
+    mui->btnAIExerciseSuggestions->show();
+  } else {
     mui->btnAISteps->hide();
+    mui->btnAIExerciseSuggestions->hide();
+  }
 
   updateHardSensorSteps();
 

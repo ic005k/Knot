@@ -3743,7 +3743,7 @@ QSlider::handle:horizontal:disabled {
           <enum>QTabWidget::TabPosition::South</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tab_Steps">
           <attribute name="title">
@@ -4114,6 +4114,9 @@ QSlider::handle:horizontal:disabled {
               <string/>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_16">
+              <property name="spacing">
+               <number>9</number>
+              </property>
               <item>
                <widget class="QRadioButton" name="rbCycling">
                 <property name="styleSheet">
@@ -4210,6 +4213,12 @@ QRadioButton:disabled {
                 </property>
                 <property name="text">
                  <string>Cycling</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>16</width>
+                  <height>16</height>
+                 </size>
                 </property>
                 <property name="checked">
                  <bool>false</bool>
@@ -4309,6 +4318,23 @@ QRadioButton:disabled {
                 </property>
                 <property name="text">
                  <string>Running</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="btnAIExerciseSuggestions">
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../res.qrc">
+                  <normaloff>:/res/ai_l.svg</normaloff>:/res/ai_l.svg</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>16</width>
+                  <height>16</height>
+                 </size>
                 </property>
                </widget>
               </item>
