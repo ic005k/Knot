@@ -552,7 +552,42 @@ void MainWindow::on_btnViewCategory_pressed() {
   m_Report->on_btnCategory_clicked();
 }
 
-#include <QLocale>
+void MainWindow::on_btnAISteps_clicked() {
+  QString text = m_Steps->ai_stepstext;
+  QString trimText = text.trimmed();
+  if (trimText.isEmpty()) {
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(tr("Tip"), tr("No consumption record data available"), 0);
+    return;
+  }
+
+  // qDebug() << trimText;
+
+  // 获取当前程序生效的语言标识
+  QLocale loc = QLocale::system();
+  // 如果切换过软件语言，改用之前存储的语言代码变量：
+  // QString langCode = m_appLanguageCode;
+  QString langCode = loc.name();  // 格式 zh_CN / en_US / ja_JP
+
+  // 标准化英文指令，明确指定输出语言，精准可控
+  QString promptTemplate = R"(
+Analyze the personal daily walking steps data below and provide practical health walking suggestions.
+Strict rules you must follow:
+1. All analysis and suggestions must be written in language code: %1
+2. First summarize your analysis: highest daily steps, lowest daily steps, abnormal step data (too few/excessive/zero steps), and unreasonable walking habits.
+3. Give targeted, easy-to-operate health walking suggestions matching the daily step data characteristics.
+4. Do not output redundant descriptions, only data analysis and practical health suggestions.
+5. Balance walking exercise effect and physical comfort. Do not give overly harsh, extreme exercise suggestions. Provide two options for each adjustment category: one mild adjustment (less physical pressure, easy to stick to) and one aggressive improvement plan (better exercise effect) for reference.
+6. Focus on judging walking health status: long-term sedentary zero steps, insufficient daily steps, excessive single-day steps that may cause physical fatigue, and irregular walking rhythm.
+
+Daily walking steps records:
+
+%2
+)";
+
+  QString fullPrompt = promptTemplate.arg(langCode, trimText);
+  aiChatQuery(fullPrompt);
+}
 
 void MainWindow::on_btnAIReportAnalysis_clicked() {
   QString text = m_Report->catetext;

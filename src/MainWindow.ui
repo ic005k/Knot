@@ -3726,7 +3726,7 @@ QSlider::handle:horizontal:disabled {
           <enum>QTabWidget::TabPosition::South</enum>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_Steps">
           <attribute name="title">
@@ -3943,6 +3943,13 @@ QSlider::handle:horizontal:disabled {
                   </property>
                   <property name="toolButtonStyle">
                    <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QToolButton" name="btnAISteps">
+                  <property name="text">
+                   <string>AI</string>
                   </property>
                  </widget>
                 </item>

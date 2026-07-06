@@ -92,6 +92,8 @@ class Steps : public QDialog {
 
   QDialog* m_remarksDialog = nullptr;
 
+  QString ai_stepstext = "";
+
   QString strMapKeyTestInfo;
 
   GeoAddressResolver* addressResolver = nullptr;

@@ -339,6 +339,7 @@ void Steps::loadStepsToTable() {
 
   clearAll();
   m_stepData.clear();
+  ai_stepstext = "";
 
   // 获取Steps对象（对应原INI的/Steps节点）
   QJsonObject stepsObj = rootObj["Steps"].toObject();
@@ -378,6 +379,7 @@ void Steps::loadStepsToTable() {
     // 添加记录（保持原过滤逻辑）
     if (str0 != "" && steps >= 0 && !str2.isNull()) {
       addRecord(str0, steps, str2);
+      ai_stepstext = ai_stepstext + "\n" + str0 + " " + QString::number(steps);
     }
   }
 
