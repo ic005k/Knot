@@ -10,7 +10,9 @@ void Reader::addBookNote(const QString& preFillText) {
   }
 
   dlgAddBookNote = new QDialog(mw_one);
-  dlgAddBookNote->setFixedSize(mw_one->geometry().width() - 2, 350);
+  int dlgh = mw_one->geometry().height() / 2;
+  if (dlgh < 350) dlgh = 350;
+  dlgAddBookNote->setFixedSize(mw_one->geometry().width() - 2, dlgh);
   dlgAddBookNote->setWindowTitle(tr("Note"));
 
   QTextEdit* textEdit = new QTextEdit(dlgAddBookNote);
@@ -140,7 +142,9 @@ void Reader::editBookNote(int index, int page, const QString& content) {
   }
 
   dlgEditBookNote = new QDialog(mw_one);
-  dlgEditBookNote->setFixedSize(mw_one->geometry().width() - 2, 350);
+  int dlgh = mw_one->geometry().height() / 2;
+  if (dlgh < 350) dlgh = 350;
+  dlgEditBookNote->setFixedSize(mw_one->geometry().width() - 2, dlgh);
   dlgEditBookNote->setWindowTitle(tr("Note"));
 
   QTextEdit* textEdit = new QTextEdit(dlgEditBookNote);
