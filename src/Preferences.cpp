@@ -66,14 +66,16 @@ Preferences::Preferences(QWidget* parent)
 
   // 下拉菜单弹出前刷新列表
   connect(ui->cboxEndpoint, &QComboBox::showPopup, this, [this]() {
-    // 缓存当前选中的记录下标，而非纯文本（关键）
+    // 缓存选中记录下标
     int selRecordIdx = -1;
     int curComboIdx = ui->cboxEndpoint->currentIndex();
     if (curComboIdx >= 0) {
       selRecordIdx = ui->cboxEndpoint->itemData(curComboIdx).toInt();
     }
 
-    // 清空下拉，完全复用 initAIConfig 的渲染逻辑
+    // 每次弹出下拉都从json重新加载最新数据到内存
+    initAIConfig();
+
     ui->cboxEndpoint->clear();
     for (int i = 0; i < m_aiAllRecords.size(); ++i) {
       const auto& rec = m_aiAllRecords[i];
@@ -81,9 +83,11 @@ Preferences::Preferences(QWidget* parent)
       ui->cboxEndpoint->setItemData(i, i);
     }
 
-    // 恢复选中：按记录下标匹配，而非模糊匹配文本
+    // 恢复选中
     if (selRecordIdx >= 0 && selRecordIdx < m_aiAllRecords.size()) {
       ui->cboxEndpoint->setCurrentIndex(selRecordIdx);
+    } else if (!m_aiAllRecords.empty()) {
+      ui->cboxEndpoint->setCurrentIndex(0);
     } else {
       ui->cboxEndpoint->setCurrentIndex(-1);
     }
@@ -727,6 +731,26 @@ void Preferences::saveAIConfig() {
   }
   file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
   file.close();
+
+  // 保存完成，立刻刷新下拉，无需用户点开弹窗才看得到
+  int selRecordIdx = -1;
+  int curComboIdx = ui->cboxEndpoint->currentIndex();
+  if (curComboIdx >= 0) {
+    selRecordIdx = ui->cboxEndpoint->itemData(curComboIdx).toInt();
+  }
+
+  ui->cboxEndpoint->clear();
+  for (int i = 0; i < m_aiAllRecords.size(); ++i) {
+    const auto& rec = m_aiAllRecords[i];
+    ui->cboxEndpoint->addItem(rec.displayText());
+    ui->cboxEndpoint->setItemData(i, i);
+  }
+
+  if (selRecordIdx >= 0 && selRecordIdx < m_aiAllRecords.size()) {
+    ui->cboxEndpoint->setCurrentIndex(selRecordIdx);
+  } else if (!m_aiAllRecords.empty()) {
+    ui->cboxEndpoint->setCurrentIndex(0);
+  }
 }
 
 void Preferences::initAIConfig() {
@@ -778,7 +802,7 @@ void Preferences::on_cboxEndpoint_currentIndexChanged(int index) {
   if (recordIdx < 0 || recordIdx >= m_aiAllRecords.size()) return;
 
   // 直接通过下标取完整原始记录，完全不依赖cbox的currentText
-  const AiSingleRecord& rec = m_aiAllRecords[index];
+  const AiSingleRecord& rec = m_aiAllRecords[recordIdx];
 
   // 强制回填纯净原始endpoint，不受下拉展示文本干扰
   ui->editEndpoint->setText(rec.endpoint);
