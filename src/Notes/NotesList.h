@@ -67,6 +67,8 @@ class NotesList : public QDialog {
   QPointer<QMenu> menuNoteList;
   QPointer<QMenu> menuRecentOpen;
 
+  bool isAINoteRename = false;
+
   NoteGraphController* m_graphController;  // 图谱控制器
   QDialog* m_RenameNotes = nullptr;
 

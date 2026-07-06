@@ -659,6 +659,7 @@ void NotesList::on_btnRename_clicked() {
   hframe->hide();
 
   QTextEdit* edit = new QTextEdit(this);
+  edit->setObjectName("renameEdit");
   edit->setAcceptRichText(false);
 
   initTextToolbarDynamic(m_RenameNotes);
@@ -756,11 +757,12 @@ Note:
 
     // 拼接笔记内容
     QString fullPrompt = promptTemplate.arg(text);
-
+    isAINoteRename = true;
     // 调用AI
     mw_one->aiChatQuery(fullPrompt);
     // qDebug() << fullPrompt;
   });
+
   connect(m_RenameNotes, &QDialog::rejected, m_RenameNotes,
           [=]() mutable { m_Method->closeGrayWindows(); });
   connect(m_RenameNotes, &QDialog::accepted, m_RenameNotes,

@@ -110,7 +110,21 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
 
     auto msg = std::make_unique<ShowMessage>(mw_one);
     // msg->showMsg(tr("AI Response Completed"), showBody, 1);
-    msg->showMsg(tr("AI Response Completed"), aiReplyText, 1);
+
+    if (m_NotesList->isAINoteRename) {
+      m_NotesList->isAINoteRename = false;
+      m_MsgBox->ui->btnOk->setText(tr("Modify Title"));
+
+      if (msg->showMsg(tr("AI Response Completed"), aiReplyText, 2)) {
+        QTextEdit* edit =
+            m_NotesList->m_RenameNotes->findChild<QTextEdit*>("renameEdit");
+        if (edit) {
+          edit->setText(aiReplyText);
+        }
+      }
+    } else {
+      msg->showMsg(tr("AI Response Completed"), aiReplyText, 1);
+    }
   });
 }
 
