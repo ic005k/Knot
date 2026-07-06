@@ -552,6 +552,57 @@ void MainWindow::on_btnViewCategory_pressed() {
   m_Report->on_btnCategory_clicked();
 }
 
+void MainWindow::on_btnAIExplanation_clicked() {
+  QString text = mui->editSetText->text();
+  QString trimText = text.trimmed();
+  if (trimText.isEmpty()) {
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(tr("Tip"), tr("No consumption record data available"), 0);
+    return;
+  }
+
+  // qDebug() << trimText;
+
+  // 获取当前程序生效的语言标识
+  QLocale loc = QLocale::system();
+  // 如果切换过软件语言，改用之前存储的语言代码变量：
+  // QString langCode = m_appLanguageCode;
+  QString langCode = loc.name();  // 格式 zh_CN / en_US / ja_JP
+
+  // 标准化英文指令，明确指定输出语言，精准可控
+  QString promptTemplate = R"(
+Interpret the text excerpt selected from the e-book below, and output accurate, easy-to-understand localized explanations based on the specified language.
+Mandatory rules that must be fully followed without omission:
+1. All explanations, annotations and supplementary content must use the language corresponding to language code: %1
+2. Input text to be interpreted (selected e-book content):
+%2
+3. Unified output structure requirements (output strictly in this order, no extra opening remarks or closing greetings):
+   Part 1: Core Text Simplified Interpretation
+      Rewrite the original text in plain vernacular, eliminate obscure literary expressions, ensure the original semantic logic is completely unchanged.
+   Part 2: Key Difficult Point Breakdown
+      Extract rare words, polysemous words, archaic words, professional jargon, allusions and complex sentence structures from the text for separate explanation;
+      Special mandatory rule only for Chinese language (%1 == zh series):
+         - Every rare character, rarely-used variant character must attach complete pinyin + tone mark;
+         - Polyphonic characters mark the pinyin matching the context meaning;
+         - Ancient Chinese vocabulary supplement modern daily usage scenarios;
+      For non-Chinese languages: only explain word meaning, grammatical structure and cultural background without pinyin.
+   Part 3: Two optional interpretation depth schemes for reading reference
+      Scheme A (Mild, suitable for quick reading): Concise interpretation, only retain core meaning and necessary word annotations, low reading burden, fast to understand.
+      Scheme B (In-depth, suitable for intensive reading): Add contextual background, rhetorical analysis, logical implication and extended relevant knowledge on the basis of complete interpretation.
+4. Content limit rules:
+   4.1 No redundant empty descriptions, no irrelevant digressions unrelated to the e-book text;
+   4.2 Strictly retain the original text’s emotional tendency, narrative logic and core viewpoint, cannot distort or arbitrarily expand the original meaning;
+   4.3 Balance readability and accuracy: avoid overly obscure academic terminology in mainstream interpretation, maintain accessibility for ordinary readers.
+5. Special abnormal processing rules:
+   - If the input text is blank: only output "No selected text to interpret";
+   - If the text contains garbled/illegible characters: mark the garbled position and explain the recognizable surrounding content only;
+   - If the text is poetry/classical prose: add brief rhythm/rhetoric analysis under the in-depth scheme.
+)";
+
+  QString fullPrompt = promptTemplate.arg(langCode, trimText);
+  aiChatQuery(fullPrompt);
+}
+
 void MainWindow::on_btnAISteps_clicked() {
   QString text = m_Steps->ai_stepstext;
   QString trimText = text.trimmed();

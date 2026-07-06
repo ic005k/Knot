@@ -2965,6 +2965,10 @@ void Reader::openReader() {
   mui->frameMain->hide();
   mui->frameReader->show();
   mui->f_ReaderFun->show();
+  if (mw_one->m_Preferences->ui->chkAI->isChecked())
+    mui->btnAIExplanation->show();
+  else
+    mui->btnAIExplanation->hide();
 
   mw_one->isReaderVisible = true;
   mw_one->isMemoVisible = false;
