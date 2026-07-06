@@ -59,6 +59,8 @@ class Reader : public QDialog {
   ~Reader();
   Ui::Reader* ui;
 
+  bool isAIReaderExplanation = false;
+
   QDialog* dlgAddBookNote = nullptr;
   QDialog* dlgEditBookNote = nullptr;
 
@@ -184,7 +186,7 @@ class Reader : public QDialog {
   void showBookPageNext();
   void showBookPageUp();
   void closeBookPage();
-  void addBookNote();
+  void addBookNote(const QString& preFillText);
   void readReadNote(int page);
   int cPage, tPage;
   void viewBookNote();
@@ -198,7 +200,7 @@ class Reader : public QDialog {
   void setTtsCurrentSentence(const QString& currentSentence);
   void setAutoStopPlayTime();
   void initTTS();
-  public slots:
+ public slots:
   void on_SetReaderFunVisible();
 
   void setPageScroll0();

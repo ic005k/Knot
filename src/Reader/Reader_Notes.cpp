@@ -1,6 +1,6 @@
 #include "Reader.h"
 
-void Reader::addBookNote() {
+void Reader::addBookNote(const QString& preFillText) {
   if (mui->editSetText->text().trimmed() == "") return;
 
   if (dlgAddBookNote != nullptr) {
@@ -14,8 +14,10 @@ void Reader::addBookNote() {
   dlgAddBookNote->setWindowTitle(tr("Note"));
 
   QTextEdit* textEdit = new QTextEdit(dlgAddBookNote);
+  textEdit->setObjectName("booknoteEdit");
   textEdit->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
   textEdit->setAcceptRichText(false);
+  textEdit->setText(preFillText);
 
   initTextToolbarDynamic(dlgAddBookNote);
   EditEventFilter* editFilter =
@@ -40,7 +42,7 @@ void Reader::addBookNote() {
   });
 
   QVBoxLayout* vlayout = new QVBoxLayout(dlgAddBookNote);
-  QHBoxLayout* layout = new QHBoxLayout(dlgAddBookNote);
+  QHBoxLayout* layout = new QHBoxLayout();
   vlayout->addWidget(textEdit);
   vlayout->addLayout(layout);
   vlayout->addWidget(buttonBox);

@@ -122,7 +122,15 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
           edit->setText(aiReplyText);
         }
       }
-    } else {
+    } else if (m_Reader->isAIReaderExplanation) {
+      m_Reader->isAIReaderExplanation = false;
+      m_MsgBox->ui->btnOk->setText(tr("Add Note"));
+      if (msg->showMsg(tr("AI Response Completed"), aiReplyText, 2)) {
+        m_Reader->addBookNote(aiReplyText);
+      }
+    } else
+
+    {
       msg->showMsg(tr("AI Response Completed"), aiReplyText, 1);
     }
   });

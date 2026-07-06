@@ -599,6 +599,8 @@ Mandatory rules that must be fully followed without omission:
    - If the text is poetry/classical prose: add brief rhythm/rhetoric analysis under the in-depth scheme.
 )";
 
+  m_Reader->isAIReaderExplanation = true;
+
   QString fullPrompt = promptTemplate.arg(langCode, trimText);
   aiChatQuery(fullPrompt);
 }
@@ -767,7 +769,7 @@ void MainWindow::on_btnRotation_pressed() {
   }
 }
 
-void MainWindow::on_btnAddBookNote_pressed() { m_Reader->addBookNote(); }
+void MainWindow::on_btnAddBookNote_pressed() { m_Reader->addBookNote(""); }
 
 void MainWindow::on_btnViewBookNote_pressed() { m_Reader->viewBookNote(); }
 
