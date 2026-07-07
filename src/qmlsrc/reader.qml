@@ -728,7 +728,7 @@ Item {
         width: parent.width - 20
         height: parent.height * (2 / 3)
 
-        font.pointSize: FontSize
+        font.pixelSize: FontSize
         modal: true
         focus: true
         anchors.centerIn: Overlay.overlay
@@ -755,7 +755,7 @@ Item {
             anchors.margins: 10
 
             Label {
-                font.pointSize: FontSize
+                font.pixelSize: FontSize
                 text: qsTr("Note Content:")
                 color: isDark ? "#EEEEEE" : "#111111"
                 font.bold: true
@@ -775,7 +775,7 @@ Item {
                 TextEdit {
                     id: noteContent
                     width: flickable.width
-                    font.pointSize: FontSize
+                    font.pixelSize: FontSize
                     readOnly: true
                     wrapMode: Text.Wrap
                     selectByMouse: false
@@ -806,7 +806,7 @@ Item {
             RowLayout {
                 Layout.alignment: Qt.AlignHCenter
                 Button {
-                    font.pointSize: FontSize
+                    font.pixelSize: FontSize
                     text: qsTr("Edit")
                     onClicked: {
                         // 打开编辑弹窗，修改后更新模型
@@ -819,14 +819,14 @@ Item {
                     }
                 }
                 Button {
-                    font.pointSize: FontSize
+                    font.pixelSize: FontSize
                     text: qsTr("Del")
                     onClicked: {
                         deleteConfirmDialog.open();
                     }
                 }
                 Button {
-                    font.pointSize: FontSize
+                    font.pixelSize: FontSize
                     text: qsTr("Close")
                     onClicked: {
                         notePopup.close();
@@ -856,7 +856,7 @@ Item {
     Dialog {
         id: deleteConfirmDialog
         width: parent.width - 30
-        font.pointSize: FontSize
+        font.pixelSize: FontSize
         title: qsTr("Delete Confirmation")
 
         modal: true
@@ -878,7 +878,7 @@ Item {
         header: Label {
             text: deleteConfirmDialog.title
             font.bold: true
-            font.pointSize: FontSize + 1
+            font.pixelSize:  FontSize + 1
             color: isDark ? "#FFFFFF" : "#333333"
             padding: 12
             background: Rectangle {
@@ -894,7 +894,7 @@ Item {
             padding: 20
 
             Label {
-                font.pointSize: FontSize
+                font.pixelSize: FontSize
                 text: qsTr("Are you sure you want to delete this note?")
                 color: isDark ? "#E0E0E0" : "#333333"
                 wrapMode: Text.Wrap
@@ -927,7 +927,7 @@ Item {
                 contentItem: Text {
                     text: parent.text
                     color: "#FFFFFF"
-                    font.pointSize: FontSize
+                    font.pixelSize: FontSize
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
@@ -947,7 +947,7 @@ Item {
                 contentItem: Text {
                     text: parent.text
                     color: isDark ? "#E0E0E0" : "#333333"
-                    font.pointSize: FontSize
+                    font.pixelSize: FontSize
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
