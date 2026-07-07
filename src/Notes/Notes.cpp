@@ -398,9 +398,8 @@ void Notes::openNotes() {
   isWebDAVError = false;
   isGetWebDavModiTime = false;
 
-  m_Method->showInfoWindow(tr("Processing..."));
-
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+    m_Method->showInfoWindow(tr("Processing..."));
     if (!m_CloudBackup->checkWebDAVConnection()) {
       m_Method->closeInfoWindow();
       isWebDAVError = true;
@@ -834,9 +833,9 @@ void Notes::loadNotesToUI() {
 }
 
 void Notes::openNotesUI() {
-  QTimer::singleShot(100, this, [this]() { m_Method->closeInfoWindow(); });
-
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+    QTimer::singleShot(100, this, [this]() { m_Method->closeInfoWindow(); });
+
     // 先清空旧连接，避免重复触发
     disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
     // 绑定：等 sync 全部结束 → 再删除

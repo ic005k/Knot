@@ -3236,7 +3236,7 @@ void Method::showInfoWindow(const QString& info) {
   // 创建无标题窗口，保持原有窗口属性
   infoWindow =
       new QDialog(nullptr, Qt::FramelessWindowHint |
-                               Qt::Dialog);  // | Qt::WindowStaysOnTopHint);
+                               Qt::Dialog);  //| Qt::WindowStaysOnTopHint);
   infoWindow->setAttribute(Qt::WA_DeleteOnClose);
   if (isStyle)
     infoWindow->setStyleSheet("background-color: #FFFFCC; color: black;");
@@ -3328,6 +3328,10 @@ void Method::closeInfoWindow() {
     lblInfo = nullptr;
     infoProgBar = nullptr;
   }
+
+  mw_one->show();   // 窗口最小化时先恢复显示
+  mw_one->raise();  // 提升到同程序顶层
+  mw_one->activateWindow();
 }
 
 void Method::setInfoText(const QString& newText) {
