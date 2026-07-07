@@ -3329,9 +3329,11 @@ void Method::closeInfoWindow() {
     infoProgBar = nullptr;
   }
 
+#ifndef Q_OS_ANDROID
   mw_one->show();   // 窗口最小化时先恢复显示
   mw_one->raise();  // 提升到同程序顶层
   mw_one->activateWindow();
+#endif
 }
 
 void Method::setInfoText(const QString& newText) {
