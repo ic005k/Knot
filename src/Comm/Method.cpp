@@ -3234,8 +3234,9 @@ void Method::showInfoWindow(const QString& info) {
   bool isStyle = false;
 
   // 创建无标题窗口，保持原有窗口属性
-  infoWindow = new QDialog(
-      nullptr, Qt::FramelessWindowHint | Qt::Dialog | Qt::WindowStaysOnTopHint);
+  infoWindow =
+      new QDialog(nullptr, Qt::FramelessWindowHint |
+                               Qt::Dialog);  // | Qt::WindowStaysOnTopHint);
   infoWindow->setAttribute(Qt::WA_DeleteOnClose);
   if (isStyle)
     infoWindow->setStyleSheet("background-color: #FFFFCC; color: black;");
@@ -3324,7 +3325,7 @@ void Method::closeInfoWindow() {
     infoWindow->close();
     infoWindow->deleteLater();
     infoWindow = nullptr;
-    lblInfo = nullptr;  // 子控件已被自动销毁，置空即可
+    lblInfo = nullptr;
     infoProgBar = nullptr;
   }
 }

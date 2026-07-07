@@ -577,9 +577,9 @@ void Notes::openNotes() {
           qDebug() << "操作失败:" << error;
           QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
         });
-  } else
-
+  } else {
     QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
+  }
 }
 
 void Notes::startBackgroundProcessRemoteFiles_MultiThread() {
@@ -813,7 +813,7 @@ void Notes::loadNotesToUI() {
   if (tw->topLevelItemCount() == 0) {
     mui->lblNoteBook->setText(tr("Note Book"));
     mui->lblNoteList->setText(tr("Note List"));
-    m_Method->closeInfoWindow();
+
     return;
   }
 
@@ -827,8 +827,6 @@ void Notes::loadNotesToUI() {
     m_NotesList->setNoteLabel();
   }
 
-  m_Method->closeInfoWindow();
-
   if (isRequestOpenNoteEditor) {
     isRequestOpenNoteEditor = false;
     openEditUI();
@@ -836,6 +834,8 @@ void Notes::loadNotesToUI() {
 }
 
 void Notes::openNotesUI() {
+  QTimer::singleShot(100, this, [this]() { m_Method->closeInfoWindow(); });
+
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     // 先清空旧连接，避免重复触发
     disconnect(m_Notes, &Notes::syncFinished, this, nullptr);

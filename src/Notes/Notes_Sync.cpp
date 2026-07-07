@@ -146,7 +146,8 @@ void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
 
 void Notes::startBackgroundTaskDelAndClear() {
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
-    if (m_NotesList->isDelNoteRecycle) mw_one->showProgress();
+    mw_one->showProgress();
+
     QString fullPath = iniDir + "memo";
     QString dbFile = privateDir + "md_database_v3.db";
 
