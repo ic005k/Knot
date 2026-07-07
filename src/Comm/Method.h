@@ -493,7 +493,8 @@ class Method : public QDialog {
 
   QString generateRandom3();
 
- protected:
+  void safeCloseInfoWindow(Method *m);
+  protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

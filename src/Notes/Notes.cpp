@@ -269,7 +269,7 @@ void Notes::previewNote() {
   // 使用 QFutureWatcher 监控进度
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    mw_one->closeProgress();
+    mw_one->safeCloseProgress(mw_one);
 
     m_NotesList->moveToFirst();
 
@@ -401,7 +401,7 @@ void Notes::openNotes() {
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     m_Method->showInfoWindow(tr("Processing..."));
     if (!m_CloudBackup->checkWebDAVConnection()) {
-      m_Method->closeInfoWindow();
+      m_Method->safeCloseInfoWindow(m_Method);
       isWebDAVError = true;
       auto msg = std::make_unique<ShowMessage>(mw_one);
       msg->showMsg(appName,
@@ -631,7 +631,7 @@ void Notes::processSingleRemoteFile(const QString& file) {
     if (dec_file != "") zFile = dec_file;
 
     if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
-      mw_one->closeProgress();
+      mw_one->safeCloseProgress(mw_one);
       errorInfo =
           tr("Decompression failed. Please check in Preferences that the "
              "passwords are consistent across all platforms.");
@@ -675,7 +675,7 @@ void Notes::processSingleRemoteFile(const QString& file) {
 
     if (QFile::exists(zFile)) {
       if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
-        mw_one->closeProgress();
+        mw_one->safeCloseProgress(mw_one);
         errorInfo =
             tr("Decompression failed. Please check in Preferences that the "
                "passwords are consistent across all platforms.");
@@ -720,7 +720,7 @@ void Notes::processSingleRemoteFile(const QString& file) {
 
     if (QFile::exists(zFile)) {
       if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
-        mw_one->closeProgress();
+        mw_one->safeCloseProgress(mw_one);
         errorInfo =
             tr("Decompression failed. Please check in Preferences that the "
                "passwords are consistent across all platforms.");
@@ -834,12 +834,12 @@ void Notes::loadNotesToUI() {
 
 void Notes::openNotesUI() {
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
-    QTimer::singleShot(100, this, [this]() { m_Method->closeInfoWindow(); });
+    // QTimer::singleShot(100, this, [this]() { m_Method->closeInfoWindow(); });
+    m_Method->safeCloseInfoWindow(m_Method);
 
     // 先清空旧连接，避免重复触发
     disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
     // 绑定：等 sync 全部结束 → 再删除
-    disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
     connect(
         m_Notes, &Notes::syncFinished, this,
         [this]() { startBackgroundTaskDelAndClear(); },

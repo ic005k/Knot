@@ -244,7 +244,7 @@ void NotesList::on_actionImport_Note_triggered() {
     QThread::msleep(1);
   }
 
-  mw_one->closeProgress();
+  mw_one->safeCloseProgress(mw_one);
 
   if (fileCount > 0) {
     clickNoteBook();
@@ -322,7 +322,7 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
       if (m_dbManager.deleteDatabaseFile(databaseFile))
         initSerachDatabase();
       else
-        mw_one->closeProgress();
+        mw_one->safeCloseProgress(mw_one);
     }
   });
 
@@ -533,7 +533,7 @@ void NotesList::on_actionRelationshipGraph() {
     m_graphController->setCurrentNotePath(currentMDFile);
 
   } else {
-    mw_one->closeProgress();
+    mw_one->safeCloseProgress(mw_one);
   }
 }
 
@@ -589,7 +589,7 @@ void NotesList::on_actionStatistics() {
         tr("Access WebDAV:") + QString::number(webDAVCount) + "t/30min";
 
     // 关闭进度条
-    mw_one->closeProgress();
+    mw_one->safeCloseProgress(mw_one);
 
     // 弹出统计消息框（使用后台统计的结果）
     auto msg = std::make_unique<ShowMessage>(mw_one);

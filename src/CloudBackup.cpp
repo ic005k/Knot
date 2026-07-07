@@ -567,7 +567,7 @@ void CloudBackup::handleUploadFinished(QNetworkReply* reply,
   // 全部完成
   if (activeReplies.isEmpty() && uploadQueue.isEmpty()) {
     if (mw_one) {
-      mw_one->closeProgress();
+      mw_one->safeCloseProgress(mw_one);
       mui->progBar->hide();
       mw_one->saveNeedSyncNotes();
       emit uploadAllFinished();

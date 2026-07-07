@@ -285,7 +285,7 @@ void MainHelper::openTabRecycle() {
     // 清理watcher
     watcher->deleteLater();
 
-    mw_one->closeProgress();
+    mw_one->safeCloseProgress(mw_one);
   });
 }
 
@@ -350,7 +350,7 @@ void MainHelper::startBackgroundTaskUpdateBakFileList() {
     qDebug() << "BakFileList update completed";
 
     // 收尾
-    mw_one->closeProgress();
+    mw_one->safeCloseProgress(mw_one);
     watcher->deleteLater();
   });
 

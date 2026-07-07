@@ -488,7 +488,8 @@ class MainWindow : public QMainWindow {
   void checkAiConnectivity(const AiSingleRecord& cfg,
                            std::function<void()> onSuccess);
 
- protected:
+  void safeCloseProgress(MainWindow *mw);
+  protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
   void paintEvent(QPaintEvent* event) override;

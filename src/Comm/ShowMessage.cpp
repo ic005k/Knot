@@ -118,7 +118,7 @@ void ShowMessage::init(int btnCount, int adaptiveH) {
 }
 
 bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
-  mw_one->closeProgress();
+  mw_one->safeCloseProgress(mw_one);
 
   m_Method->Sleep(100);
 

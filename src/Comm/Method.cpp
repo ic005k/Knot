@@ -899,7 +899,10 @@ QDialog* Method::getProgBar() {
   dlg = new QDialog(this);
   dlg->setWindowFlag(Qt::FramelessWindowHint);
   dlg->setModal(true);
-  dlg->setAttribute(Qt::WA_DeleteOnClose);  // 自动销毁
+
+  // 注意：目前不采用自动销毁，采用手动销毁
+  // dlg->setAttribute(Qt::WA_DeleteOnClose);
+
   dlg->setFixedHeight(100);
   dlg->setFixedWidth(130);
   QVBoxLayout* vbox = new QVBoxLayout;
@@ -3237,7 +3240,10 @@ void Method::showInfoWindow(const QString& info) {
   infoWindow =
       new QDialog(nullptr, Qt::FramelessWindowHint |
                                Qt::Dialog);  //| Qt::WindowStaysOnTopHint);
-  infoWindow->setAttribute(Qt::WA_DeleteOnClose);
+
+  // 注意：目前不采用自动销毁，采用手动销毁
+  // infoWindow->setAttribute(Qt::WA_DeleteOnClose);
+
   if (isStyle)
     infoWindow->setStyleSheet("background-color: #FFFFCC; color: black;");
   infoWindow->setModal(true);
@@ -3334,6 +3340,11 @@ void Method::closeInfoWindow() {
   mw_one->raise();  // 提升到同程序顶层
   mw_one->activateWindow();
 #endif
+}
+
+void Method::safeCloseInfoWindow(Method* m) {
+  if (!m) return;
+  QTimer::singleShot(100, m, [m]() { m->closeInfoWindow(); });
 }
 
 void Method::setInfoText(const QString& newText) {

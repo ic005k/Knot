@@ -376,8 +376,6 @@ void MainWindow::on_btnBackNoteList_pressed() {
   disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
 
   // 绑定：等 sync 全部结束 → 再删除
-  disconnect(m_Notes, &Notes::syncFinished, this, nullptr);
-
   connect(
       m_Notes, &Notes::syncFinished, this,
       [this]() { m_NotesList->delRemoteWebDAVFiles(); },

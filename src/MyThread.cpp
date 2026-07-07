@@ -128,7 +128,7 @@ void UpdateGpsMapThread::run() {
 
 void MainWindow::updateGpsMapDone() {
   m_Steps->updateGpsMapUi();
-  closeProgress();
+  safeCloseProgress(mw_one);
 }
 
 void GetGpsDataThread::stop() { m_running = false; }
@@ -198,7 +198,7 @@ void MainWindow::readEBookDone() {
     if (listCategory.count() > 0) mui->btnViewCategory->setHidden(false);
 
     isReport = false;
-    closeProgress();
+    safeCloseProgress(mw_one);
   }
 
   isReadEBookEnd = true;
@@ -215,7 +215,7 @@ void SearchThread::run() {
 
 void MainWindow::searchDone() {
   m_Method->initSearchResults();
-  mw_one->closeProgress();
+  mw_one->safeCloseProgress(mw_one);
 }
 
 ImportDataThread::ImportDataThread(QObject* parent) : QThread{parent} {}
@@ -229,7 +229,7 @@ void MainWindow::importDataDone() {
   m_Method->setOSFlag();
 
   if (isPasswordError) {
-    closeProgress();
+    safeCloseProgress(mw_one);
     auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg("Knot", tr("The password of the encrypted file is wrong!"), 1);
     return;
@@ -263,7 +263,7 @@ void MainWindow::importDataDone() {
     m_NotesList->startBackgroundTaskUpdateFilesIndex();
   }
 
-  closeProgress();
+  safeCloseProgress(mw_one);
 
   if (isMenuImport) {
     if (!isZipOK) {
@@ -297,7 +297,7 @@ void MainWindow::bakDataDone() {
     return;
   }
 
-  closeProgress();
+  safeCloseProgress(mw_one);
 
   if (!errorInfo.isEmpty()) {
     ShowMessage* msg = new ShowMessage(this);

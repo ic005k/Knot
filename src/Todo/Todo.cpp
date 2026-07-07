@@ -1497,7 +1497,7 @@ void Todo::openTodoUI() {
   setCurrentIndex(0);
   stopPlayVoice();
 
-  mw_one->closeProgress();
+  mw_one->safeCloseProgress(mw_one);
 
   if (isNeedAddToTodoList) {
     isNeedAddToTodoList = false;
@@ -1514,7 +1514,7 @@ void Todo::openTodo() {
 
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     if (!m_CloudBackup->checkWebDAVConnection()) {
-      mw_one->closeProgress();
+      mw_one->safeCloseProgress(mw_one);
       auto msg = std::make_unique<ShowMessage>(mw_one);
       msg->showMsg(appName,
                    tr("WebDAV connection failed. Please check the network, "
@@ -1592,7 +1592,7 @@ void Todo::openTodo() {
                       errorInfo = "";
                       if (!m_Method->decompressFileWithZlib(
                               zFile, privateDir + "KnotData/todo.json")) {
-                        mw_one->closeProgress();
+                        mw_one->safeCloseProgress(mw_one);
                         errorInfo =
                             tr("Decompression failed. Please check in "
                                "Preferences that the passwords are consistent "

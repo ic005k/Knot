@@ -507,11 +507,11 @@ void NoteRelationParser::findReferencingNotes(QVector<NoteNode>& nodes,
 void NoteRelationParser::onParsedDataReady(
     const QVector<NoteNode>& nodes, const QVector<NoteRelation>& relations) {
   if (!m_model) {
-    mw_one->closeProgress();
+    mw_one->safeCloseProgress(mw_one);
     return;
   }
 
-  mw_one->closeProgress();
+  mw_one->safeCloseProgress(mw_one);
   mui->frameNoteList->hide();
   mui->frameNotesGraph->show();
 
@@ -611,7 +611,7 @@ void NoteGraphController::setCurrentNotePath(const QString& path) {
   emit currentNotePathChanged();
   m_parser->parseNoteRelations(m_model, m_currentNotePath);
   //} else {
-  //  mw_one->closeProgress();
+  //  mw_one->safeCloseProgress(mw_one);
   //}
 }
 

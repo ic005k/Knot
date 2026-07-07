@@ -993,6 +993,11 @@ void MainWindow::closeProgress() {
   }
 }
 
+void MainWindow::safeCloseProgress(MainWindow* mw) {
+  if (!mw) return;
+  QTimer::singleShot(100, mw, [mw]() { mw->closeProgress(); });
+}
+
 int MainWindow::get_Day(QString date) {
   QStringList list = date.split(" ");
   if (list.count() == 4) {

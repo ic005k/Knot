@@ -86,7 +86,7 @@ void NotesList::displayResults(const ResultsMap& results) {
 
 void NotesList::showNotesSearchResult() {
   if (searchResultList.count() == 0) {
-    mw_one->closeProgress();
+    mw_one->safeCloseProgress(mw_one);
     return;
   }
 
@@ -102,7 +102,7 @@ void NotesList::showNotesSearchResult() {
                             list.at(1), "", 0);
   }
 
-  mw_one->closeProgress();
+  mw_one->safeCloseProgress(mw_one);
 }
 
 void NotesList::startFind(QString strFind) {
@@ -143,7 +143,7 @@ void NotesList::onSearchFinished() {
 
   // ▶️ 数据安全检查
   if (results.isEmpty()) {
-    mw_one->closeProgress();
+    mw_one->safeCloseProgress(mw_one);
     searchResultList.clear();
     mui->btnFindNextNote->setEnabled(false);
     mui->btnFindPreviousNote->setEnabled(false);
@@ -193,7 +193,7 @@ void NotesList::onSearchFinished() {
     watcher = nullptr;
   }
 
-  mw_one->closeProgress();
+  mw_one->safeCloseProgress(mw_one);
 }
 
 // 通用导航函数：step 为 -1 表示上一个，1 表示下一个
@@ -284,7 +284,7 @@ void NotesList::startBackgroundTaskUpdateFilesIndex() {
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Database update completed.";
-    mw_one->closeProgress();
+    mw_one->safeCloseProgress(mw_one);
 
     QStringList cycleFiles = getRecycleNoteFiles();
     if (cycleFiles.count() > 0) startBackgroundTaskDelFilesIndex(cycleFiles);

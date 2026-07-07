@@ -529,7 +529,7 @@ int NotesList::on_btnImport_clicked() {
 
   if (fileNames.isEmpty()) {
 #ifdef Q_OS_ANDROID
-    mw_one->closeProgress();
+    mw_one->safeCloseProgress(mw_one);
 #endif
     isImportFilesEnd = true;
     return 0;
@@ -597,7 +597,7 @@ int NotesList::on_btnImport_clicked() {
             isImportFilesEnd = true;
 
             // 统一关闭进度条（双端都在这里关闭）
-            mw_one->closeProgress();
+            mw_one->safeCloseProgress(mw_one);
 
             watcher->deleteLater();
           });
