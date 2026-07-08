@@ -165,7 +165,8 @@ Rectangle {
             id: listItem
             width: ListView.view.width
             height: item0.contentHeight + 10
-            color: ListView.isCurrentItem ? "lightblue" : getColor()
+            // color: ListView.isCurrentItem ? "lightblue" : getColor()
+            color: getColor()
 
             border.width: isDark ? 0 : 1
             border.color: "lightgray" //"lightsteelblue"
@@ -267,7 +268,8 @@ Rectangle {
                         wrapMode: TextArea.WordWrap
                         font.bold: false
                         text: text0
-                        color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+                        //color: listItem.ListView.isCurrentItem ? "black" : getFontColor()
+                        color: getFontColor()
 
                         leftPadding: 5
                         rightPadding: 5
@@ -340,69 +342,13 @@ Rectangle {
                 }
             }
 
-            /*MouseArea {
-                id: mouseArea
-                property point clickPos: "0,0"
-
-                anchors.fill: parent
-
-                onPressed: function (mouse) {}
-
-                onReleased: function (mouse) {
-
-                    var delta = Qt.point(mouse.x - clickPos.x,
-                                         mouse.y - clickPos.y)
-                    console.debug("delta.x: " + delta.x)
-                }
-
-                onClicked: {
-
-                    view.currentIndex = index
-
-                    m_Reader.clickBookmarkList(index)
-                }
-
-                onPositionChanged: {
-
-                    item0.color = getFontColor()
-                    listItem.color = getColor()
-                }
-
-                onPressAndHold: {
-
-                }
-
-                onDoubleClicked: {
-
-                }
-            }*/
-
             TapHandler {
                 id: mouseArea
                 property point clickPos: Qt.point(0, 0)
 
-                onPointChanged: {
-                    // 按下时记录位置（对应 onPressed）
-                    if (point.pressed) {
-                        clickPos = Qt.point(point.position.x, point.position.y);
-                    }
-
-                    // 拖动时执行（对应 onPositionChanged）
-                    item0.color = getFontColor();
-                    listItem.color = getColor();
-                }
-
-                // 抬起时计算 delta（对应 onReleased）
-                onActiveChanged: {
-                    if (!active) {
-                        var delta = Qt.point(point.position.x - clickPos.x, point.position.y - clickPos.y);
-                        console.debug("delta.x: " + delta.x);
-                    }
-                }
-
                 // 单击（对应 onClicked）
                 onTapped: {
-                    view.currentIndex = index;
+                    //view.currentIndex = index;
                     m_Reader.clickBookmarkList(index);
                 }
 
@@ -412,18 +358,13 @@ Rectangle {
                 // 双击（对应 onDoubleClicked）
                 onDoubleTapped: {}
             }
-
-            Rectangle {
-                color: "#AAAAAA"
-                height: 0
-                width: parent.width
-                anchors.bottom: parent.bottom
-            }
         }
     }
 
     ListView {
         id: view
+
+        currentIndex: -1 // 初始化无选中，第一条不再默认选中
 
         anchors {
             fill: parent
