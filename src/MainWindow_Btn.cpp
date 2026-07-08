@@ -141,12 +141,6 @@ void MainWindow::on_btnCatalogue_pressed() {
   if (mui->qwViewBookNote->isVisible()) return;
   if (mui->qwBookmark->isVisible()) return;
 
-  if (mui->qwCata->source().isEmpty()) {
-    mui->qwCata->rootContext()->setContextProperty("m_Reader", m_Reader);
-    mui->qwCata->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/epub_cata.qml")));
-  }
-
   mui->btnAutoStop->click();
 
   if (mui->f_ReaderSet->isVisible()) {
@@ -160,12 +154,6 @@ void MainWindow::on_btnRemoveBookList_pressed() { m_Reader->removeBookList(); }
 void MainWindow::on_btnShowBookmark_pressed() {
   if (mui->qwViewBookNote->isVisible()) return;
   if (mui->qwCata->isVisible()) return;
-
-  if (mui->qwBookmark->source().isEmpty()) {
-    mui->qwBookmark->rootContext()->setContextProperty("m_Reader", m_Reader);
-    mui->qwBookmark->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/bookmark.qml")));
-  }
 
   m_Reader->showOrHideBookmark();
 }
@@ -957,20 +945,6 @@ void MainWindow::on_btnZoomOut_pressed() {
 }
 
 void MainWindow::on_btnReport() {
-  if (mui->qwReport->source().isEmpty()) {
-    int f_size = 19;
-    // if (fontSize <= f_size)
-    f_size = fontSize;
-    mui->qwReport->rootContext()->setContextProperty("maxFontSize", f_size);
-    mui->qwReportSub->rootContext()->setContextProperty("maxFontSize", f_size);
-    mui->qwReport->rootContext()->setContextProperty("m_Report",
-                                                     mw_one->m_Report);
-    mui->qwReport->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/report.qml")));
-    mui->qwReportSub->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/details.qml")));
-  }
-
   on_actionReport_triggered();
   mui->btnYear->setFixedHeight(mui->btnMonth->height());
 }
@@ -1190,12 +1164,6 @@ void MainWindow::on_btnMenu_pressed() {
 void MainWindow::on_btnModifyRecord() { m_Method->reeditMainEventData(); }
 
 void MainWindow::on_btnSelTab_pressed() {
-  if (mui->qwSelTab->source().isEmpty()) {
-    mui->qwSelTab->rootContext()->setContextProperty("mw_one", mw_one);
-    mui->qwSelTab->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/seltab.qml")));
-  }
-
   mui->frameMain->hide();
   mui->frameSetTab->show();
   getMainTabs();

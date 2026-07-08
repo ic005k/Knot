@@ -169,13 +169,6 @@ void MainHelper::clickBtnRestoreTab() {
 void MainHelper::openTabRecycle() {
   mw_one->showProgress();
 
-  if (mui->qwTabRecycle->source().isEmpty()) {
-    mui->qwTabRecycle->rootContext()->setContextProperty("m_Report",
-                                                         mw_one->m_Report);
-    mui->qwTabRecycle->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/tabrecycle.qml")));
-  }
-
   // 切换UI
   mui->frameMain->hide();
   mui->frameTabRecycle->show();

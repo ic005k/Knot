@@ -424,13 +424,6 @@ void NotesList::on_actionModificationHistory() {
               return a["modifyTime"].toString() > b["modifyTime"].toString();
             });
 
-  if (mui->qwNoteVersion->source().isEmpty()) {
-    mui->qwNoteVersion->rootContext()->setContextProperty("m_NotesList",
-                                                          m_NotesList);
-    mui->qwNoteVersion->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/NoteVersionList.qml")));
-  }
-
   // 获取 QML 根对象（即 NoteVersionList.qml 中的 Rectangle）
   QQuickItem* rootItem = mui->qwNoteVersion->rootObject();
   if (!rootItem) {

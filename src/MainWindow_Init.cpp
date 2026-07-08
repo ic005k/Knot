@@ -311,6 +311,99 @@ void MainWindow::init_ButtonStyle() {
 void MainWindow::initMainQW() {
   qmlRegisterType<DocumentHandler>("MyModel2", 1, 0, "DocumentHandler");
 
+  if (mui->qwViewCate->source().isEmpty()) {
+    mui->qwViewCate->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwViewCate->rootContext()->setContextProperty("m_Report",
+                                                       mw_one->m_Report);
+    mui->qwViewCate->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/viewcate.qml")));
+  }
+
+  if (mui->qwViewBookNote->source().isEmpty()) {
+    mui->qwViewBookNote->rootContext()->setContextProperty("m_Reader",
+                                                           m_Reader);
+    mui->qwViewBookNote->rootContext()->setContextProperty("fontSize",
+                                                           fontSize);
+    mui->qwViewBookNote->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwViewBookNote->rootContext()->setContextProperty(
+        "notesModel", m_Reader->notesModel);
+
+    mui->qwViewBookNote->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/viewbooknote.qml")));
+  }
+
+  if (mui->qwNoteVersion->source().isEmpty()) {
+    mui->qwNoteVersion->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwNoteVersion->rootContext()->setContextProperty("m_NotesList",
+                                                          m_NotesList);
+    mui->qwNoteVersion->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/NoteVersionList.qml")));
+  }
+
+  if (mui->qwNoteDiff->source().isEmpty()) {
+    mui->qwNoteDiff->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwNoteDiff->rootContext()->setContextProperty("m_NotesList",
+                                                       m_NotesList);
+    mui->qwNoteDiff->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/NoteDiffHtmlViewer.qml")));
+    mui->qwNoteDiff->setResizeMode(
+        QQuickWidget::SizeRootObjectToView);  // 自适应大小
+  }
+
+  if (mui->qwSelTab->source().isEmpty()) {
+    mui->qwSelTab->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwSelTab->rootContext()->setContextProperty("mw_one", mw_one);
+    mui->qwSelTab->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/seltab.qml")));
+  }
+
+  if (mui->qwBookmark->source().isEmpty()) {
+    mui->qwBookmark->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwBookmark->rootContext()->setContextProperty("m_Reader", m_Reader);
+    mui->qwBookmark->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/bookmark.qml")));
+  }
+
+  if (mui->qwCata->source().isEmpty()) {
+    mui->qwCata->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwCata->rootContext()->setContextProperty("m_Reader", m_Reader);
+    mui->qwCata->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/epub_cata.qml")));
+  }
+
+  if (mui->qwTabRecycle->source().isEmpty()) {
+    mui->qwTabRecycle->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwTabRecycle->rootContext()->setContextProperty("m_Report",
+                                                         mw_one->m_Report);
+    mui->qwTabRecycle->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/tabrecycle.qml")));
+  }
+
+  if (mui->qwCategory->source().isEmpty()) {
+    mui->qwCategory->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwCategory->rootContext()->setContextProperty("m_CategoryList",
+                                                       m_CategoryList);
+    mui->qwCategory->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/type.qml")));
+  }
+
+  if (mui->qwReport->source().isEmpty()) {
+    int f_size = 19;
+    // if (fontSize <= f_size)
+    f_size = fontSize;
+
+    mui->qwReport->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwReportSub->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwReport->rootContext()->setContextProperty("maxFontSize", f_size);
+    mui->qwReportSub->rootContext()->setContextProperty("maxFontSize", f_size);
+    mui->qwReport->rootContext()->setContextProperty("m_Report",
+                                                     mw_one->m_Report);
+    mui->qwReport->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/report.qml")));
+    mui->qwReportSub->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/details.qml")));
+  }
+
   if (mui->qwBakList->source().isEmpty()) {
     mui->qwBakList->rootContext()->setContextProperty("isDark", isDark);
     mui->qwBakList->rootContext()->setContextProperty("m_Method", m_Method);

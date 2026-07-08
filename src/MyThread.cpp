@@ -184,21 +184,16 @@ void MainWindow::readEBookDone() {
   }
 
   if (isReport) {
-    QTimer::singleShot(100, this,  // 上下文直接用this（等价于mw_one）
-                       [this]() {  // 仅捕获this（MainWindow的指针）
-                         // 空指针检查：确保m_Report不为空
-                         if (this->m_Report) {
-                           this->m_Report->updateTable();
-                         }
-                       });
+    QTimer::singleShot(100, this, [this]() {
+      this->m_Report->updateTable();
+      mui->lblTitle->setText(tabData->tabText(tabData->currentIndex()));
 
-    mui->lblTitle->setText(tabData->tabText(tabData->currentIndex()));
+      mui->btnViewCategory->hide();
+      if (listCategory.count() > 0) mui->btnViewCategory->setHidden(false);
 
-    mui->btnViewCategory->hide();
-    if (listCategory.count() > 0) mui->btnViewCategory->setHidden(false);
-
-    isReport = false;
-    safeCloseProgress(mw_one);
+      isReport = false;
+      safeCloseProgress(mw_one);
+    });
   }
 
   isReadEBookEnd = true;

@@ -106,14 +106,6 @@ void NotesList::getNoteDiffHtml() {
 }
 
 void NotesList::setNoteDiffHtmlToQML(const QString& html) {
-  if (mui->qwNoteDiff->source().isEmpty()) {
-    mui->qwNoteDiff->rootContext()->setContextProperty("m_NotesList",
-                                                       m_NotesList);
-    mui->qwNoteDiff->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/NoteDiffHtmlViewer.qml")));
-    mui->qwNoteDiff->setResizeMode(
-        QQuickWidget::SizeRootObjectToView);  // 自适应大小
-  }
   QQuickItem* rootItem = mui->qwNoteDiff->rootObject();
   if (!rootItem) {
     qWarning() << "获取 QML 根对象失败，无法更新 HTML 内容";

@@ -72,12 +72,10 @@ Report::Report(QWidget* parent) : QDialog(parent) {
 }
 
 void Report::init() {
-  mui->frameReport->setGeometry(mw_one->geometry().x(), mw_one->geometry().y(),
-                                mw_one->geometry().width(),
-                                mw_one->geometry().height());
   mui->qwReport->setFixedHeight(mw_one->height() / 3 - 15);
-  mui->frameMain->hide();
   mui->frameReport->show();
+  mui->frameMain->hide();
+
   if (isWholeMonth)
     mui->lblTitle_Report->setText(
         mui->tabWidget->tabText(mui->tabWidget->currentIndex()) + "(" +
@@ -385,13 +383,6 @@ void Report::on_btnCategory_clicked() {
     mui->btnAIReportAnalysis->show();
   else
     mui->btnAIReportAnalysis->hide();
-
-  if (mui->qwViewCate->source().isEmpty()) {
-    mui->qwViewCate->rootContext()->setContextProperty("m_Report",
-                                                       mw_one->m_Report);
-    mui->qwViewCate->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/viewcate.qml")));
-  }
 
   mui->frameReport->hide();
   mui->frameViewCate->show();

@@ -272,19 +272,6 @@ void Reader::editBookNote(int index, int page, const QString& content) {
 }
 
 void Reader::viewBookNote() {
-  if (mui->qwViewBookNote->source().isEmpty()) {
-    mui->qwViewBookNote->rootContext()->setContextProperty("m_Reader",
-                                                           m_Reader);
-    mui->qwViewBookNote->rootContext()->setContextProperty("fontSize",
-                                                           fontSize);
-    mui->qwViewBookNote->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwViewBookNote->rootContext()->setContextProperty("notesModel",
-                                                           notesModel);
-
-    mui->qwViewBookNote->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/viewbooknote.qml")));
-  }
-
   initBookNoteValue(-1, -1);
 
   mui->qwReader->hide();

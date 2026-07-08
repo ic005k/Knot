@@ -179,13 +179,6 @@ void EditRecord::set_Amount(QString Number) {
 void EditRecord::on_btnType_clicked() {
   hideSuggestions();
 
-  if (mui->qwCategory->source().isEmpty()) {
-    mui->qwCategory->rootContext()->setContextProperty("m_CategoryList",
-                                                       m_CategoryList);
-    mui->qwCategory->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/type.qml")));
-  }
-
   mui->frameEditRecord->hide();
   mui->frameCategory->show();
   init_MyCategory();

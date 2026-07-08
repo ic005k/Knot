@@ -59,6 +59,8 @@ class Reader : public QDialog {
   ~Reader();
   Ui::Reader* ui;
 
+  QStandardItemModel* notesModel = nullptr;
+
   bool m_isAppForeground = true;
 
   bool isAIReaderExplanation = false;
@@ -290,7 +292,7 @@ class Reader : public QDialog {
   void updateReadNote(int page, int index, const QString& content,
                       const QString& color);
   void appendNoteDataToQmlList();
-  QStandardItemModel* notesModel = nullptr;
+
   void initBookNoteValue(int cindex, int cpage);
   void modifyText2(int currentIndex, const QString& text);
   QString getBookSpeakTextFromQML();
