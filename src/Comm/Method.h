@@ -487,14 +487,15 @@ class Method : public QDialog {
 
   float getSystemFontScale();
 
-  void sendTouch();
+  void sendTouch(QQuickWidget* quickWidget);
 
   void clearAllNotesList(QQuickWidget* qw);
 
   QString generateRandom3();
 
-  void safeCloseInfoWindow(Method *m);
-  protected:
+  void safeCloseInfoWindow(Method* m);
+
+ protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

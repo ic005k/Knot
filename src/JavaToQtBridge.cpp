@@ -190,14 +190,16 @@ static void JavaNotify_9() {
 
 static void JavaNotify_10() {
   // Open Book
-  mw_one->on_btnOpen_pressed();
+  QMetaObject::invokeMethod(
+      qApp, []() { mw_one->on_btnOpen_pressed(); }, Qt::QueuedConnection);
 
   qDebug() << "C++ JavaNotify_10";
 }
 
 static void JavaNotify_11() {
   // Books List
-  mui->btnReadList->click();
+  QMetaObject::invokeMethod(
+      qApp, []() { mui->btnReadList->click(); }, Qt::QueuedConnection);
 
   qDebug() << "C++ JavaNotify_11";
 }
@@ -215,13 +217,21 @@ static void JavaNotify_13() {
 }
 
 static void JavaNotify_14() {
-  if (m_Method->getDateTimeFlag() == "todo") {
-    mw_one->m_TodoAlarm->setDateTime();
-  } else if (m_Method->getDateTimeFlag() == "gpslist") {
-    mui->btnGetGpsListData->click();
-  } else {
-    mw_one->m_DateSelector->ui->btnOk->click();
-  }
+  QString flag = m_Method->getDateTimeFlag();
+  // UI逻辑通过invokeMethod抛到UI主线程执行
+  QMetaObject::invokeMethod(
+      qApp,
+      [=]() {
+        if (flag == "todo") {
+          mw_one->m_TodoAlarm->setDateTime();
+        } else if (flag == "gpslist") {
+          mui->btnGetGpsListData->click();
+        } else {
+          mw_one->m_DateSelector->ui->btnOk->click();
+        }
+      },
+      Qt::QueuedConnection);
+
   qDebug() << "C++ JavaNotify_14";
 }
 
@@ -261,7 +271,8 @@ static void JavaNotify_18() {
 
 static void JavaNotify_19() {
   // TTS播放长文本完成
-  mui->btnStopSpeak->click();
+  QMetaObject::invokeMethod(
+      qApp, []() { mui->btnStopSpeak->click(); }, Qt::QueuedConnection);
   qDebug() << "C++ JavaNotify_19";
 }
 

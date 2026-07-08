@@ -1217,12 +1217,12 @@ public class MyService extends Service {
 
         // 3.7 精细化GPS状态（基于GPSManager的就绪状态）
         strGpsStatus = gpsManager.isGpsReady()
-            ? (MyActivity.zh_cn
-                  ? "GPS已就绪（高精度）"
-                  : "GPS Ready (High Precision)")
-            : (MyActivity.zh_cn
-                  ? "GPS未就绪（网络定位）"
-                  : "GPS Not Ready (Network Location)");
+            ? MyActivity.zh_cn
+                ? "GPS已就绪（高精度）"
+                : "GPS Ready (High Precision)"
+            : MyActivity.zh_cn
+              ? "GPS未就绪（网络定位）"
+              : "GPS Not Ready (Network Location)";
 
         // 日志输出（便于调试）
         Log.d(
@@ -1275,98 +1275,6 @@ public class MyService extends Service {
             strGpsStatus
         );
     }
-
-    /**
-     * 服务内播放TTS文本（对外暴露的核心方法）
-     */
-    /*public void playMyTextInService(String text) {
-        if (TextUtils.isEmpty(text)) {
-            Log.w("TTS", "播放文本为空，跳过");
-            return;
-        }
-
-        // 检查TTS引擎是否安装
-        checkTTSEngine();
-
-        synchronized (ttsLock) {
-            if (isTtsInitializing) {
-                pendingTtsText = text;
-                Log.d("TTS", "TTS正在初始化，缓存待播放文本：" + text);
-                return;
-            }
-
-            isTtsInitializing = true;
-            pendingTtsText = text;
-
-            // 新建TTSUtils实例（使用服务上下文）
-            TTSUtils newTts = new TTSUtils(getApplicationContext());
-            currentPlayingTts = newTts;
-
-            newTts.initialize(
-                new TTSUtils.InitCallback() {
-                    @Override
-                    public void onSuccess() {
-                        synchronized (ttsLock) {
-                            isTtsInitializing = false;
-                            isTtsInitialized = true;
-                        }
-
-                        // 设置播放完成监听
-                        newTts.setOnPlayCompleteListener(
-                            new TTSUtils.OnPlayCompleteListener() {
-                                @Override
-                                public void onPlayComplete() {
-                                    Log.d("TTS", "服务内TTS播放完成！");
-                                    // 播放完成后释放资源
-                                    newTts.shutdown();
-                                    synchronized (ttsLock) {
-                                        if (currentPlayingTts == newTts) {
-                                            currentPlayingTts = null;
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void onPlayStopped() {
-                                    Log.d("TTS", "服务内TTS播放被停止！");
-                                    newTts.shutdown();
-                                    synchronized (ttsLock) {
-                                        if (currentPlayingTts == newTts) {
-                                            currentPlayingTts = null;
-                                        }
-                                    }
-                                }
-                            }
-                        );
-
-                        // 播放缓存文本
-                        String playText = null;
-                        synchronized (ttsLock) {
-                            playText = pendingTtsText;
-                            pendingTtsText = null;
-                        }
-                        if (!TextUtils.isEmpty(playText)) {
-                            newTts.speak(playText);
-                            Log.d("TTS", "服务内播放文本：" + playText);
-                        }
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        Log.e("TTS", "服务内TTS初始化失败：" + error);
-                        synchronized (ttsLock) {
-                            isTtsInitializing = false;
-                            pendingTtsText = null;
-                            if (currentPlayingTts == newTts) {
-                                currentPlayingTts = null;
-                            }
-                        }
-                        newTts.shutdown();
-                    }
-                }
-            );
-        }
-    }*/
 
     /**
      * 最终版：只点一次 → 等待就绪 → 自动播放

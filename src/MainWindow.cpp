@@ -991,6 +991,12 @@ void MainWindow::closeProgress() {
     dlgProg->deleteLater();
     dlgProg = nullptr;
   }
+
+#ifndef Q_OS_ANDROID
+  mw_one->show();
+  mw_one->raise();
+  mw_one->activateWindow();
+#endif
 }
 
 void MainWindow::safeCloseProgress(MainWindow* mw) {

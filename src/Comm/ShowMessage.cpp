@@ -176,12 +176,12 @@ bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
   int adaptiveDlgH = calcDialogTotalHeight(textH, btnCount);
   init(btnCount, adaptiveDlgH);
 
-  // 强制窗口获取触摸焦点（Android关键修复）
-  this->raise();
-  this->activateWindow();
-  ui->qwShowMsg->setFocus(Qt::ActiveWindowFocusReason);
-  // 给按钮预焦点，跳过第一次焦点同步Tap
-  ui->btnOk->setFocus();
+  QTimer::singleShot(1000, mw_one, [=]() {
+    this->raise();
+    this->activateWindow();
+    ui->qwShowMsg->setFocus(Qt::ActiveWindowFocusReason);
+    ui->btnOk->setFocus();
+  });
 
   // 全程用exec()
   this->exec();

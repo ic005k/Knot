@@ -47,6 +47,22 @@ Reader::Reader(QWidget* parent) : QDialog(parent) {
 
   strEndFlag = "<p align=center>-----" + tr("bottom") + "-----</p>";
   customCss = loadText(":/res/reader/main.css");
+
+  // 绑定应用状态变化信号
+  connect(qApp, &QGuiApplication::applicationStateChanged, this,
+          [this](Qt::ApplicationState state) {
+            if (state == Qt::ApplicationActive) {
+              m_isAppForeground = true;
+            } else {
+              m_isAppForeground = false;
+              // 切后台立刻清空高亮，释放渲染资源
+              QQuickItem* root = mui->qwReader->rootObject();
+              if (root) {
+                QMetaObject::invokeMethod(root, "highlightTtsSentence",
+                                          Q_ARG(QVariant, ""));
+              }
+            }
+          });
 }
 
 Reader::~Reader() {
@@ -1164,64 +1180,6 @@ qreal Reader::getVPos() {
                             Q_RETURN_ARG(QVariant, itemCount));
   textPos = itemCount.toDouble();
   return textPos;
-}
-
-void Reader::setTtsCurrentSentence(const QString& currentSentence) {
-  bool isLockScreen = m_Method->getLockScreenStatus();
-
-  if (mui->chkAutoStopTTS->isChecked()) {
-    if (m_autoStopDeadline.isValid() &&
-        QDateTime::currentDateTime() > m_autoStopDeadline) {
-      mui->btnStopSpeak->click();
-      m_autoStopDeadline = QDateTime();  // 清空超时时间
-      savePageVPos();
-      return;
-    }
-  }
-
-  // 清理空白字符（避免换行/空格导致匹配失败）
-  QString sentence = currentSentence.trimmed();
-
-  if (sentence == "__TTS_PLAY_FINISHED__") {
-    qDebug() << "🎉 TTS 全部文本播放完成！";
-
-    // 清空高亮
-    QQuickItem* root = mui->qwReader->rootObject();
-    if (root) {
-      QMetaObject::invokeMethod(root, "highlightTtsSentence",
-                                Q_ARG(QVariant, "")  // 传空字符串 = 清空高亮
-      );
-    }
-
-    stopSpeak();
-
-    // 自动播放下一章
-    if (isPlayBook) {
-      if (cPage < tPage) {
-        goNextPage();
-        startSpeak();
-      }
-    }
-
-    return;  // 直接返回，不执行后面的高亮
-  }
-
-  if (!isLockScreen) {
-    // 获取 QML 根对象
-    QQuickItem* root = mui->qwReader->rootObject();
-    if (!root) return;
-
-    // C++ 直接调用 QML 的高亮方法：highlightCurrentSentence(string)
-    QMetaObject::invokeMethod(
-        (QObject*)root,
-        "highlightTtsSentence",    // QML函数名
-        Q_ARG(QVariant, sentence)  // 把当前朗读句子传给 QML
-    );
-
-    qDebug() << "✅ 已通知 QML 高亮句子：" << sentence;
-  }
-
-  savePageVPos();
 }
 
 qreal Reader::getVHeight() {

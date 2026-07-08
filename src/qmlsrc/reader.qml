@@ -15,27 +15,40 @@ Item {
         id: progressBarContainer
         anchors.top: root.top
         width: root.width
-        height: 2
-        z: 9999 // 确保在最顶层
+        height: 3
+        z: 9999
 
-        // 背景
+        // 底层轨道：统一浅白半透，不再区分isDark
         Rectangle {
             anchors.fill: parent
-            color: "#EEEEEE" // 淡灰色背景
+            radius: 1.5
+            color: isDark ? "#121212" : "#f5f5f5"
         }
 
-        // 进度指示器
+        // 外层浅色细描边容器（控制进度宽度）
         Rectangle {
-            id: progressIndicator
+            anchors.verticalCenter: parent.verticalCenter
             height: parent.height
-            color: isDark ? "#FF9500" : "#FFCC80" // 深色模式用稍深的橙，浅色模式用浅橙
+            radius: 1.5
+            color: "transparent"
+            border.color: "#E57373"
+            border.width: 0.0
+
             width: {
-                // 计算进度百分比
                 if (contentListView.contentHeight <= contentListView.height) {
-                    return parent.width; // 内容不足一屏时，进度条满
+                    return parent.width;
                 }
                 const progress = contentListView.contentY / (contentListView.contentHeight - contentListView.height);
                 return parent.width * Math.max(0, Math.min(1, progress));
+            }
+
+            // 内层淡红色进度主体
+            Rectangle {
+                anchors.fill: parent
+                anchors.margins: 0.6
+                radius: 1
+                color: isDark ? "#f5f5f5" : "#121212"
+                opacity: 0.95
             }
         }
     }
@@ -878,7 +891,7 @@ Item {
         header: Label {
             text: deleteConfirmDialog.title
             font.bold: true
-            font.pixelSize:  FontSize + 1
+            font.pixelSize: FontSize + 1
             color: isDark ? "#FFFFFF" : "#333333"
             padding: 12
             background: Rectangle {

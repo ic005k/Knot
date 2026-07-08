@@ -3336,8 +3336,8 @@ void Method::closeInfoWindow() {
   }
 
 #ifndef Q_OS_ANDROID
-  mw_one->show();   // 窗口最小化时先恢复显示
-  mw_one->raise();  // 提升到同程序顶层
+  mw_one->show();
+  mw_one->raise();
   mw_one->activateWindow();
 #endif
 }
@@ -3660,34 +3660,32 @@ float Method::getSystemFontScale() {
 #endif
 }
 
-void Method::sendTouch() {
-  if (isAndroid) {
-    // ==============================
-    // Qt6 安卓专用：模拟触摸 (0,0) 清除系统遮罩
-    // ==============================
-    QQuickWindow* window =
-        qobject_cast<QQuickWindow*>(QGuiApplication::focusWindow());
-    if (window) {
-      // 1. 获取系统默认触摸设备（Qt6 必须传这个）
-      const QPointingDevice* device = QPointingDevice::primaryPointingDevice();
+void Method::sendTouch(QQuickWidget* quickWidget) {
+  if (!quickWidget) return;
+  QQuickWindow* targetWin = quickWidget->quickWindow();
+  if (!targetWin) return;
+  const QPointingDevice* device = QPointingDevice::primaryPointingDevice();
+  if (!device) return;
 
-      // 2. 构造触摸点（Qt6 唯一正确写法）
-      QEventPoint point(0,                     // 触摸点 ID = 0
-                        QEventPoint::Pressed,  // 状态
-                        QPointF(1, 1),         // 局部坐标
-                        QPointF(1, 1)          // 全局坐标
-      );
+  const QPointF localPos(1, 1);
+  QPointF globalPos = quickWidget->mapToGlobal(localPos);
 
-      QList<QEventPoint> points;
-      points << point;
+  const int State_Pressed = 0;
+  const int State_Released = 2;
 
-      // 3. 发送 触摸按下
-      QTouchEvent press(QEvent::TouchBegin, device, Qt::NoModifier, points);
-      QGuiApplication::sendEvent(window, &press);
+  // 仅发送按下
+  QEventPoint ptDown(0, static_cast<QEventPoint::State>(State_Pressed),
+                     localPos, globalPos);
+  QTouchEvent evDown(QEvent::TouchBegin, device, Qt::NoModifier,
+                     QList<QEventPoint>{ptDown});
+  QGuiApplication::sendEvent(targetWin, &evDown);
 
-      // 4. 发送 触摸抬起
-      QTouchEvent release(QEvent::TouchEnd, device, Qt::NoModifier, points);
-      QGuiApplication::sendEvent(window, &release);
-    }
-  }
+  // 间隔150ms抬起，标准短点击，无中间Moved帧
+  QTimer::singleShot(150, quickWidget, [=]() {
+    QEventPoint ptUp(0, static_cast<QEventPoint::State>(State_Released),
+                     localPos, globalPos);
+    QTouchEvent evUp(QEvent::TouchEnd, device, Qt::NoModifier,
+                     QList<QEventPoint>{ptUp});
+    QGuiApplication::sendEvent(targetWin, &evUp);
+  });
 }

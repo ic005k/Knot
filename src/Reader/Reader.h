@@ -59,6 +59,8 @@ class Reader : public QDialog {
   ~Reader();
   Ui::Reader* ui;
 
+  bool m_isAppForeground = true;
+
   bool isAIReaderExplanation = false;
 
   QDialog* dlgAddBookNote = nullptr;
