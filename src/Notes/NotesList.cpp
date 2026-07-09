@@ -995,9 +995,9 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
 
         QTimer::singleShot(50, this, [=]() {
 #ifdef Q_OS_ANDROID
-            mw_one->on_btnOpenNote_pressed();
+            mw_one->on_btnOpenNote_clicked();
 #else
-            mw_one->on_btnEditNote_pressed();
+            mw_one->on_btnEditNote_clicked();
 #endif
         });
     }*/

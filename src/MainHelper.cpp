@@ -17,7 +17,7 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
 
   if (watch == mui->lblStats) {
     if (event->type() == QEvent::MouseButtonDblClick) {
-      mw_one->on_btnSelTab_pressed();
+      mw_one->on_btnSelTab_clicked();
       return true;
     }
   }
@@ -32,7 +32,7 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
       mui->btnTabMoveUp->hide();
 
       mw_one->m_EditRecord->saveCurrentValue();
-      mw_one->on_btnBackEditRecord_pressed();
+      mw_one->on_btnBackEditRecord_clicked();
       mui->btnHome->click();
       isSelectTab = true;
 
@@ -154,7 +154,7 @@ void MainHelper::clickBtnRestoreTab() {
     recycle_file.remove();
   }
 
-  mw_one->on_btnBackTabRecycle_pressed();
+  mw_one->on_btnBackTabRecycle_clicked();
 
   mw_one->saveTab();
 

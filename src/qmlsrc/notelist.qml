@@ -369,7 +369,7 @@ Rectangle {
                             icon.height: iconSize0 - 13
                             onClicked: {
                                 console.log("View按钮被点击");
-                                mw_one.on_btnOpenNote_pressed();
+                                mw_one.on_btnOpenNote_clicked();
                             }
 
                             background: Rectangle {

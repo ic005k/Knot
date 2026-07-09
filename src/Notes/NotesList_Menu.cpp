@@ -29,9 +29,9 @@ void NotesList::genRecentOpenMenu() {
 
         /*QTimer::singleShot(200, this, [=]() {
 #ifdef Q_OS_ANDROID
-          mw_one->on_btnOpenNote_pressed();
+          mw_one->on_btnOpenNote_clicked();
 #else
-              mw_one->on_btnEditNote_pressed();
+              mw_one->on_btnEditNote_clicked();
 #endif
         });*/
       });
@@ -164,7 +164,7 @@ void NotesList::on_actionAdd_Note_triggered() {
   saveNotesList();
   updateAllNoteIndexManager();
 
-  mw_one->on_btnEditNote_pressed();
+  mw_one->on_btnEditNote_clicked();
 }
 
 void NotesList::on_actionDel_Note_triggered() {

@@ -30,7 +30,7 @@ void MainWindow::on_actionAbout() {
   m_AboutThis->show();
 }
 
-void MainWindow::on_actionFind_triggered() { on_btnFind_pressed(); }
+void MainWindow::on_actionFind_triggered() { on_btnFind_clicked(); }
 
 /*void MainWindow::on_actionAdd_Tab_triggered() {
   int count = mui->tabWidget->tabBar()->count();

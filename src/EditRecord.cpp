@@ -86,7 +86,7 @@ EditRecord::~EditRecord() {
 }
 
 void EditRecord::on_btnOk_clicked() {
-  mw_one->on_btnBackEditRecord_pressed();
+  mw_one->on_btnBackEditRecord_clicked();
 
   if (!isAdd) {
     mw_one->modify_Data();

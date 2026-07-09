@@ -191,7 +191,7 @@ static void JavaNotify_9() {
 static void JavaNotify_10() {
   // Open Book
   QMetaObject::invokeMethod(
-      qApp, []() { mw_one->on_btnOpen_pressed(); }, Qt::QueuedConnection);
+      qApp, []() { mw_one->on_btnOpen_clicked(); }, Qt::QueuedConnection);
 
   qDebug() << "C++ JavaNotify_10";
 }
@@ -259,7 +259,7 @@ static void JavaNotify_18() {
   QTimer::singleShot(100, mw_one, []() {
     if (mui->frameReader->isVisible()) {
       if (mui->btnAutoStop->isVisible()) {
-        mw_one->on_btnAutoStop_pressed();
+        mw_one->on_btnAutoStop_clicked();
         m_Reader->saveReader("", false);
         m_Reader->savePageVPos();
       }

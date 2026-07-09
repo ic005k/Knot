@@ -119,7 +119,7 @@ void MainWindow::on_ReceiveShare() {
 void MainWindow::on_timerSyncData() {
   qDebug() << ".......Sync.......";
   timerSyncData->stop();
-  on_btnSync_pressed();
+  on_btnSync_clicked();
 }
 
 void MainWindow::startSyncData() {
@@ -485,13 +485,13 @@ void MainWindow::get_Today(QTreeWidget* tw) {
 
 void MainWindow::closeEvent(QCloseEvent* event) {
   if (mui->qwCata->isVisible()) {
-    on_btnCatalogue_pressed();
+    on_btnCatalogue_clicked();
     event->ignore();
     return;
   }
 
   if (mui->qwBookList->isVisible()) {
-    on_btnBackBookList_pressed();
+    on_btnBackBookList_clicked();
     event->ignore();
     return;
   }
@@ -509,7 +509,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
   }
 
   if (!mui->frameImgView->isHidden()) {
-    on_btnBackImg_pressed();
+    on_btnBackImg_clicked();
     event->ignore();
     return;
   }
@@ -521,31 +521,31 @@ void MainWindow::closeEvent(QCloseEvent* event) {
   }
 
   if (!mui->frameNotesSearchResult->isHidden()) {
-    on_btnBack_NotesSearchResult_pressed();
+    on_btnBack_NotesSearchResult_clicked();
     event->ignore();
     return;
   }
 
   if (!mui->frameNoteList->isHidden()) {
-    on_btnBackNoteList_pressed();
+    on_btnBackNoteList_clicked();
     event->ignore();
     return;
   }
 
   if (!mui->frameDiff->isHidden()) {
-    on_btnBackNoteDiff_pressed();
+    on_btnBackNoteDiff_clicked();
     event->ignore();
     return;
   }
 
   if (!mui->frameNotesGraph->isHidden()) {
-    on_btnBackNotesGraph_pressed();
+    on_btnBackNotesGraph_clicked();
     event->ignore();
     return;
   }
 
   if (!mui->frameTodoRecycle->isHidden()) {
-    on_btnReturnRecycle_pressed();
+    on_btnReturnRecycle_clicked();
     event->ignore();
     return;
   }
@@ -557,19 +557,19 @@ void MainWindow::closeEvent(QCloseEvent* event) {
   }
 
   if (!mui->frameTodo->isHidden()) {
-    on_btnBackTodo_pressed();
+    on_btnBackTodo_clicked();
     event->ignore();
     return;
   }
 
   if (!mui->frameBakList->isHidden()) {
-    on_btnBackBakList_pressed();
+    on_btnBackBakList_clicked();
     event->ignore();
     return;
   }
 
   if (!mui->frameOne->isHidden()) {
-    on_btnBack_One_pressed();
+    on_btnBack_One_clicked();
     event->ignore();
     return;
   }
@@ -860,7 +860,7 @@ void MainWindow::clickMainTab() {
   mui->qwMainTab->hide();
 
   if (isSelectTab) {
-    on_btnAdd_pressed();
+    on_btnAdd_clicked();
     m_EditRecord->setCurrentValue();
     isSelectTab = false;
   }
@@ -1076,13 +1076,13 @@ void MainWindow::changeEvent(QEvent* event) {
 void MainWindow::selTab() {
   int index = m_Method->getCurrentIndexFromQW(mui->qwSelTab);
   tabData->setCurrentIndex(index);
-  on_btnBackSetTab_pressed();
+  on_btnBackSetTab_clicked();
   m_Method->clearAllBakList(mui->qwSelTab);
 
   if (mui->btnTabMoveDown->isHidden()) {
     mui->btnTabMoveDown->show();
     mui->btnTabMoveUp->show();
-    on_btnAdd_pressed();
+    on_btnAdd_clicked();
     m_EditRecord->setCurrentValue();
   }
 }
@@ -1409,11 +1409,11 @@ void MainWindow::on_sliderPlayAudio_sliderReleased() {
   m_Todo->tmePlayProgress->start(m_Todo->nInterval);
 }
 
-void MainWindow::on_rbCycling_pressed() {}
+void MainWindow::on_rbCycling_clicked() {}
 
-void MainWindow::on_rbHiking_pressed() {}
+void MainWindow::on_rbHiking_clicked() {}
 
-void MainWindow::on_rbRunning_pressed() {}
+void MainWindow::on_rbRunning_clicked() {}
 
 void MainWindow::on_editFindNote_returnPressed() { on_btnFindNotes_clicked(); }
 
