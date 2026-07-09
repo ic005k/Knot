@@ -176,13 +176,6 @@ bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
   int adaptiveDlgH = calcDialogTotalHeight(textH, btnCount);
   init(btnCount, adaptiveDlgH);
 
-  QTimer::singleShot(1000, mw_one, [=]() {
-    this->raise();
-    this->activateWindow();
-    ui->qwShowMsg->setFocus(Qt::ActiveWindowFocusReason);
-    ui->btnOk->setFocus();
-  });
-
   // 全程用exec()
   this->exec();
 

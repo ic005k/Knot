@@ -392,8 +392,6 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
       auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
       if (!m_ShowMsg->showMsg(str, strTip + "\n\n" + str1, 2)) return false;
 
-      m_Method->Sleep(500);
-
       strLatestModify = tr("Del Item") + " ( " + getTabText() + " ) ";
 
       topItem->removeChild(topItem->child(childCount - 1));
