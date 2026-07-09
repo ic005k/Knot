@@ -262,26 +262,6 @@ Rectangle {
                 return item0H + item1H + item2H + item3H;
             }
 
-            /*MouseArea {
-
-                anchors.fill: parent
-
-                onClicked: function (mouse) {
-                    if (actionButtons.visible && mouse.x > actionButtons.x && mouse.x < actionButtons.x + actionButtons.width && mouse.y > actionButtons.y && mouse.y < actionButtons.y + actionButtons.height) {
-                        mouse.accepted = false; // 放行事件给按钮
-                        console.log("按钮被点击...");
-                    } else {
-                        view.currentIndex = index; //实现item切换
-
-                        m_Method.clickMainEventData();
-                    }
-                }
-
-                onDoubleClicked: {
-                    m_Method.reeditMainEventData();
-                }
-            }*/
-
             TapHandler {
                 dragThreshold: 5
 
@@ -316,7 +296,7 @@ Rectangle {
                     radius: 2
                     anchors.leftMargin: 1
                     color: "red"
-                    visible: false // item2.text.length ? true : false
+                    visible: false
                     Text {
                         anchors.centerIn: parent
                     }
@@ -501,7 +481,7 @@ Rectangle {
                             radius: 5
                             anchors.leftMargin: 1
                             color: "#1E90FF"
-                            visible: false // item3.text.length ? true : false
+                            visible: false
                         }
 
                         Text {

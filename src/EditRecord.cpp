@@ -396,6 +396,13 @@ void EditRecord::saveCurrentYearData() {
   }
   if (!currentYearSaved) dataMgr->saveData(tw);
 
+  if (tw->topLevelItemCount() == 0) {
+    QString file1 =
+        iniDir + QString::number(current_year) + "-" + name + ".json";
+    qDebug() << file1;
+    QFile::remove(file1);
+  }
+
   delete dataMgr;
 
   return;

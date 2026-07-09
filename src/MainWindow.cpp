@@ -342,7 +342,8 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
   if (tw->topLevelItemCount() == 0) return false;
 
   bool isTodayData = false;
-  isRemovedTopItem = false;
+
+  QTreeWidgetItem* topItem = nullptr;
 
   strDate = m_Method->setCurrentDateValue();
   for (int i = 0; i < tw->topLevelItemCount(); i++) {
@@ -350,54 +351,9 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
         tw->topLevelItem(i)->text(0) + " " + tw->topLevelItem(i)->text(3);
     if (getYMD(str) == getYMD(strDate)) {
       isTodayData = true;
-      QTreeWidgetItem* topItem = tw->topLevelItem(i);
-      int childCount = topItem->childCount();
-      if (childCount > 0) {
-        QString str = mui->tabWidget->tabText(mui->tabWidget->currentIndex());
-        strTime = topItem->child(childCount - 1)->text(0);
-        strAmount = topItem->child(childCount - 1)->text(1);
-        strCategory = topItem->child(childCount - 1)->text(2);
-        strDetails = topItem->child(childCount - 1)->text(3);
-        QString str1 = tr("Time") + " : " + strTime + "\n" + tr("Amount") +
-                       " : " + strAmount + "\n" + tr("Category") + " : " +
-                       strCategory + "\n" + tr("Details") + " : " + strDetails +
-                       "\n";
+      topItem = tw->topLevelItem(i);
 
-        QString strTip;
-        if (isMoveEntry)
-          strTip = tr("The last record of today will be moved.");
-        else
-          strTip = tr("The last record of today will be deleted.");
-
-        auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-        if (!m_ShowMsg->showMsg(str, strTip + "\n\n" + str1, 2)) return false;
-
-        strLatestModify = tr("Del Item") + " ( " + getTabText() + " ) ";
-
-        topItem->removeChild(topItem->child(childCount - 1));
-        topItem->setTextAlignment(1, Qt::AlignHCenter | Qt::AlignVCenter);
-
-        // Amount
-        double amount = 0;
-        for (int m = 0; m < childCount - 1; m++) {
-          QString str = topItem->child(m)->text(1);
-          amount = amount + str.toDouble();
-        }
-        QString str_amount = QString("%1").arg(amount, 0, 'f', 2);
-        if (str_amount == "0.00") str_amount = "";
-        topItem->setText(1, QString::number(childCount - 1));
-        topItem->setText(2, str_amount);
-
-        if (topItem->childCount() == 0) {
-          tw->takeTopLevelItem(tw->topLevelItemCount() - 1);
-          isRemovedTopItem = true;
-        }
-
-        isDelItem = true;
-        reloadMain();
-
-        break;
-      }
+      break;
     }
   }
 
@@ -414,16 +370,67 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
     m_ShowMsg->showMsg(str, strTip, 1);
 
     return false;
+  } else {
+    int childCount = topItem->childCount();
+    if (childCount > 0) {
+      QString str = mui->tabWidget->tabText(mui->tabWidget->currentIndex());
+      strTime = topItem->child(childCount - 1)->text(0);
+      strAmount = topItem->child(childCount - 1)->text(1);
+      strCategory = topItem->child(childCount - 1)->text(2);
+      strDetails = topItem->child(childCount - 1)->text(3);
+      QString str1 = tr("Time") + " : " + strTime + "\n" + tr("Amount") +
+                     " : " + strAmount + "\n" + tr("Category") + " : " +
+                     strCategory + "\n" + tr("Details") + " : " + strDetails +
+                     "\n";
+
+      QString strTip;
+      if (isMoveEntry)
+        strTip = tr("The last record of today will be moved.");
+      else
+        strTip = tr("The last record of today will be deleted.");
+
+      auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
+      if (!m_ShowMsg->showMsg(str, strTip + "\n\n" + str1, 2)) return false;
+
+      m_Method->Sleep(500);
+
+      strLatestModify = tr("Del Item") + " ( " + getTabText() + " ) ";
+
+      topItem->removeChild(topItem->child(childCount - 1));
+      topItem->setTextAlignment(1, Qt::AlignHCenter | Qt::AlignVCenter);
+
+      // Amount
+      double amount = 0;
+      for (int m = 0; m < childCount - 1; m++) {
+        QString str = topItem->child(m)->text(1);
+        amount = amount + str.toDouble();
+      }
+      QString str_amount = QString("%1").arg(amount, 0, 'f', 2);
+      if (str_amount == "0.00") str_amount = "";
+      topItem->setText(1, QString::number(childCount - 1));
+      topItem->setText(2, str_amount);
+
+      if (topItem->childCount() == 0) {
+        int realIdx = tw->indexOfTopLevelItem(topItem);
+        if (realIdx >= 0) {
+          tw->takeTopLevelItem(realIdx);
+        }
+      }
+
+      isDelItem = true;
+      reloadMain();
+    }
   }
 
   int topCount = tw->topLevelItemCount();
   if (topCount > 0) {
-    QTreeWidgetItem* topItem = tw->topLevelItem(topCount - 1);
+    QTreeWidgetItem* topItem = tw->topLevelItem(0);
     tw->setCurrentItem(topItem);
   }
 
   isDelData = true;
   startSave("tab");
+
   return true;
 }
 

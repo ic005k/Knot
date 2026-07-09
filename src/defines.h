@@ -111,9 +111,9 @@ inline qreal fontScale = 1.0f;
 
 inline bool isAndroid, isLinux, isMacOS, isZipOK, isMenuImport, isDownData,
     loading, isEncrypt, isIOS, isEpub, isEpubError, isText, isPDF,
-    isStopMoveNote, isInitThemeEnd, isUpData, isRemovedTopItem, isReport,
-    isReadTWEnd, isWindows, isEBook, isGpsRun, isRunPaused, isGetWebDavModiTime,
-    isPlayBook, isSelectTab;
+    isStopMoveNote, isInitThemeEnd, isUpData, isReport, isReadTWEnd, isWindows,
+    isEBook, isGpsRun, isRunPaused, isGetWebDavModiTime, isPlayBook,
+    isSelectTab;
 
 inline bool isPasswordError = false;
 inline bool isrbFreq = true;
