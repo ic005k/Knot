@@ -853,13 +853,10 @@ bool NotesList::moveItem(QTreeWidget* twMain) {
 }
 
 void NotesList::readyNotesData(QTreeWidgetItem* item) {
-  if (!item || m_isLoadingNotes) return;
-  m_isLoadingNotes = true;
+  if (!item) return;
 
-  // 同步树控件选中并滚动到可视区
+  // 同步树控件选中
   tw->setCurrentItem(item);
-  item->setSelected(true);
-  tw->scrollToItem(item);
 
   QVector<QPair<QString, QString>> uiDataList;
   QVector<QTreeWidgetItem*> childItems;
@@ -977,7 +974,6 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
       isMouseClick = false;
     }
 
-    m_isLoadingNotes = false;
     watcher->deleteLater();
 
     if (isReadyNotesEnd == false) {

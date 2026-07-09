@@ -276,8 +276,6 @@ class NotesList : public QDialog {
  signals:
 
  private:
-  bool m_isLoadingNotes = false;
-
   bool isReadyNotesEnd = false;
   bool isExecRecentOpen = false;
 

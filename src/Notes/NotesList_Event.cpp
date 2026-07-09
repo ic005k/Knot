@@ -826,9 +826,8 @@ void NotesList::clickNoteBook() {
   QTreeWidgetItem* item = pNoteBookItems.at(index);
   if (!item) return;
 
-  // 可选：同步选中 TreeWidget 对应节点（UI联动）
+  // 选中 TreeWidget 对应节点
   tw->setCurrentItem(item);
-  item->setSelected(true);
 
   // 加载笔记数据
   readyNotesData(item);

@@ -119,10 +119,7 @@ void NotesList::on_actionRename_NoteBook_triggered() {
 }
 
 void NotesList::on_actionAdd_Note_triggered() {
-  if (tw->topLevelItemCount() == 0) return;
-
   int notebookIndex = getNoteBookCurrentIndex();
-
   if (notebookIndex < 0) {
     auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg("Knot",
@@ -131,6 +128,8 @@ void NotesList::on_actionAdd_Note_triggered() {
                  1);
     return;
   }
+
+  if (tw->topLevelItemCount() == 0) return;
 
   tw->setCurrentItem(pNoteBookItems.at(notebookIndex));
 
