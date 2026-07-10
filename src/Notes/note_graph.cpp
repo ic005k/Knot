@@ -472,8 +472,6 @@ void NoteRelationParser::onParsedDataReady(
   }
 
   mw_one->safeCloseProgress(mw_one);
-  mui->frameNoteList->hide();
-  mui->frameNotesGraph->show();
 
   // 批量添加节点和关系到模型（主线程操作）
   for (const auto& node : nodes) {

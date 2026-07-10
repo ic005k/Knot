@@ -519,7 +519,10 @@ void NotesList::on_actionRelationshipGraph() {
   QFileInfo fi(currentMDFile);
   if (!fi.exists()) return;
 
-  mw_one->showProgress();
+  mui->frameNotesGraph->show();
+  mui->frameNoteList->hide();
+
+  QTimer::singleShot(100, this, []() { mw_one->showProgress(); });
 
   if (m_graphController) {
     m_graphController->setCurrentNotePath(currentMDFile);

@@ -552,9 +552,6 @@ void MainWindow::initMainQW() {
 }
 
 void MainWindow::initNotesQW() {
-  // mui->qwNoteGraphView->setSource(
-  //     QUrl(QStringLiteral("qrc:/src/qmlsrc/NoteGraphView.qml")));
-
   if (mui->qwNoteBook->source().isEmpty()) {
     mui->qwNoteBook->rootContext()->setContextProperty("isDark", isDark);
     mui->qwNoteBook->rootContext()->setContextProperty("m_NotesList",

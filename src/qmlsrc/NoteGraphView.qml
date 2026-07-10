@@ -9,7 +9,8 @@ Flickable {
     contentHeight: 3000
     interactive: true
     // 初始透明度设为0，等待首次数据加载完成后再淡入
-    opacity: 0
+    //opacity: 0
+    visible: false
 
     // 背景矩形
     Rectangle {
@@ -400,9 +401,20 @@ Flickable {
         referencedBy = tmpRefBy;
 
         // 将内容居中到视图
-        centerOnCurrentNode();
+        //centerOnCurrentNode();
         // 触发淡入动画
-        triggerFadeIn();
+        //triggerFadeIn();
+
+        // 1. 先停掉一切视觉更新
+        connectionCanvas.requestPaint();
+
+        // 2. 强制布局完成（Qt 内部同步）
+        Qt.callLater(() => {
+            centerOnCurrentNode();
+
+            // 3. 一次性呈现（不再有位移过程）
+            flickable.visible = true;
+        });
     }
 
     // 封装淡入逻辑
@@ -416,12 +428,14 @@ Flickable {
     // 在开始更新数据时，先将视图移出并设为透明
     function prepareForUpdate() {
         // 移出视图区域（移动到左上角之外很远的地方）
-        flickable.contentX = -10000;
-        flickable.contentY = -10000;
+        //flickable.contentX = -10000;
+        //flickable.contentY = -10000;
         // 设为透明
-        flickable.opacity = 0;
+        //flickable.opacity = 0;
         // 强制刷新一次画布，清除可能的残留 (可选)
-        connectionCanvas.requestPaint();
+        //connectionCanvas.requestPaint();
+
+        flickable.visible = false;
     }
 
     function centerOnCurrentNode() {
@@ -433,8 +447,6 @@ Flickable {
             flickable.contentY = targetContentY;
         }
     }
-
-
 
     function clearNodes() {
         // 只清坐标，不删 item
@@ -566,8 +578,7 @@ Flickable {
     }
 }
 
-
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*import QtQuick
 import QtQuick.Controls
