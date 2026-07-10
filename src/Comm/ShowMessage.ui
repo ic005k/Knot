@@ -133,6 +133,12 @@ QLabel[darkMode=&quot;true&quot;] {
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>20</height>
+         </size>
+        </property>
         <property name="resizeMode">
          <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
         </property>

@@ -434,21 +434,7 @@ Flickable {
         }
     }
 
-    /*function clearNodes() {
-        const children = nodesContainer.children
-        for (var i = children.length - 1; i >= 0; i--) {
-            children[i].destroy()
-        }
-        // 清除节点坐标缓存
-        references.forEach(n => {
-                               delete n.x
-                               delete n.y
-                           })
-        referencedBy.forEach(n => {
-                                 delete n.x
-                                 delete n.y
-                             })
-    }*/
+
 
     function clearNodes() {
         // 只清坐标，不删 item
@@ -579,3 +565,367 @@ Flickable {
         initData();
     }
 }
+
+
+
+
+/*import QtQuick
+import QtQuick.Controls
+import QtQuick.Shapes
+import NoteGraph 1.0
+
+Flickable {
+    id: flickable
+    anchors.fill: parent
+    contentWidth: 3000
+    contentHeight: 3000
+    interactive: true
+    clip: true
+
+    // ---------- 背景 ----------
+    Rectangle {
+        anchors.fill: parent
+        color: isDark ? "#1a1a1a" : "#ffffff"
+    }
+
+    // ===================== 内容根节点 =====================
+    Item {
+        id: contentRoot
+        parent: flickable.contentItem
+        width: flickable.contentWidth
+        height: flickable.contentHeight
+
+        // ---------- 常量 ----------
+        readonly property real centerX: width / 2
+        readonly property real centerY: height / 2
+        readonly property real nodeW: 120
+        readonly property real nodeH: 80
+        readonly property real radius: 8
+        readonly property real scaleCenter: 1.2
+
+        // ---------- 数据 ----------
+        property var currentNode: null
+        property var references: []
+        property var referencedBy: []
+
+        // ---------- 中心节点 ----------
+        Rectangle {
+            id: centerNode
+            x: contentRoot.centerX - contentRoot.nodeW * contentRoot.scaleCenter / 2
+            y: contentRoot.centerY - contentRoot.nodeH * contentRoot.scaleCenter / 2
+            width: contentRoot.nodeW * contentRoot.scaleCenter
+            height: contentRoot.nodeH * contentRoot.scaleCenter
+            radius: contentRoot.radius
+            color: "#66bb6a"
+            border.width: 2
+            border.color: "#2e7d32"
+            z: 1
+
+            Text {
+                anchors.fill: parent
+                anchors.margins: 8
+                text: contentRoot.currentNode ? contentRoot.currentNode.name : ""
+                color: "white"
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                wrapMode: Text.WordWrap
+            }
+        }
+
+        // ---------- 连线 ----------
+        Shape {
+            id: connectionShape
+            anchors.fill: parent
+            preferredRendererType: Shape.CurveRenderer
+            z: 0
+        }
+
+        // ---------- 子节点 ----------
+        Item {
+            id: nodesLayer
+            anchors.fill: parent
+            z: 1
+
+            Repeater {
+                id: refRepeater
+                model: contentRoot.references
+                delegate: Rectangle {
+                    x: modelData.x
+                    y: modelData.y
+                    width: contentRoot.nodeW
+                    height: contentRoot.nodeH
+                    radius: contentRoot.radius
+                    color: "#42a5f5"
+                    border.color: "#1976d2"
+                    Text {
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        text: modelData.name
+                        color: "white"
+                        wrapMode: Text.WordWrap
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    TapHandler {
+                        onDoubleTapped: {
+                            graphController.handleNodeDoubleClick(modelData.filePath)
+                        }
+                    }
+                }
+            }
+
+            Repeater {
+                id: refByRepeater
+                model: contentRoot.referencedBy
+                delegate: Rectangle {
+                    x: modelData.x
+                    y: modelData.y
+                    width: contentRoot.nodeW
+                    height: contentRoot.nodeH
+                    radius: contentRoot.radius
+                    color: "#ba68c8"
+                    border.color: "#6a1b9a"
+                    Text {
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        text: modelData.name
+                        color: "white"
+                        wrapMode: Text.WordWrap
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    TapHandler {
+                        onDoubleTapped: {
+                            graphController.handleNodeDoubleClick(modelData.filePath)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ===================== 工具函数 =====================
+    function calcIntersection(px, py, rx, ry, x, y, w, h) {
+        const cx = x + w / 2
+        const cy = y + h / 2
+        const dx = rx - px
+        const dy = ry - py
+        if (dx === 0 && dy === 0) return Qt.point(cx, cy)
+
+        let tMin = Infinity
+        let ix = cx, iy = cy
+
+        if (dx !== 0) {
+            let t = (x - px) / dx
+            if (t >= 0) { let yy = py + t * dy; if (yy >= y && yy <= y + h && t < tMin) { tMin = t; ix = x; iy = yy } }
+            t = (x + w - px) / dx
+            if (t >= 0) { let yy = py + t * dy; if (yy >= y && yy <= y + h && t < tMin) { tMin = t; ix = x + w; iy = yy } }
+        }
+        if (dy !== 0) {
+            let t = (y - py) / dy
+            if (t >= 0) { let xx = px + t * dx; if (xx >= x && xx <= x + w && t < tMin) { tMin = t; ix = xx; iy = y } }
+            t = (y + h - py) / dy
+            if (t >= 0) { let xx = px + t * dx; if (xx >= x && xx <= x + w && t < tMin) { tMin = t; ix = xx; iy = y + h } }
+        }
+        return Qt.point(ix, iy)
+    }
+
+    function rebuildConnections() {
+        const data = []
+        const cw = contentRoot.nodeW * contentRoot.scaleCenter
+        const ch = contentRoot.nodeH * contentRoot.scaleCenter
+        const headLen = 12
+
+        const pushArrow = (sx, sy, ex, ey, color, isIncoming) => {
+            const mx = (sx + ex) / 2
+            const my = (sy + ey) / 2
+            const dx = ex - sx
+            const dy = ey - sy
+            const d = Math.sqrt(dx*dx + dy*dy)
+            if (d < 1) return
+
+            const offset = Math.min(100, d / 3)
+            const ux = dy / d
+            const uy = -dx / d
+            const sign = isIncoming ? -1 : 1
+
+            const cx = mx + ux * offset * sign
+            const cy = my + uy * offset * sign
+
+            // 曲线
+            data.push({
+                sx, sy, ex, ey, cx, cy, color,
+                hasArrow: false
+            })
+
+            // 箭头头部（3 个点构成一个三角形）
+            const angle = Math.atan2(ey - cy, ex - cx)
+            data.push({
+                sx: ex,
+                sy: ey,
+                ax: ex - headLen * Math.cos(angle - Math.PI/6),
+                ay: ey - headLen * Math.sin(angle - Math.PI/6),
+                bx: ex - headLen * Math.cos(angle + Math.PI/6),
+                by: ey - headLen * Math.sin(angle + Math.PI/6),
+                color,
+                hasArrow: true
+            })
+        }
+
+        contentRoot.references.forEach(n => {
+            if (n.x === undefined) return
+            const start = calcIntersection(
+                contentRoot.centerX, contentRoot.centerY,
+                n.x + contentRoot.nodeW/2, n.y + contentRoot.nodeH/2,
+                contentRoot.centerX - cw/2, contentRoot.centerY - ch/2, cw, ch
+            )
+            const end = calcIntersection(
+                n.x + contentRoot.nodeW/2, n.y + contentRoot.nodeH/2,
+                contentRoot.centerX, contentRoot.centerY,
+                n.x, n.y, contentRoot.nodeW, contentRoot.nodeH
+            )
+            pushArrow(start.x, start.y, end.x, end.y, "#1e88e5", false)
+        })
+
+        contentRoot.referencedBy.forEach(n => {
+            if (n.x === undefined) return
+            const start = calcIntersection(
+                n.x + contentRoot.nodeW/2, n.y + contentRoot.nodeH/2,
+                contentRoot.centerX, contentRoot.centerY,
+                n.x, n.y, contentRoot.nodeW, contentRoot.nodeH
+            )
+            const end = calcIntersection(
+                contentRoot.centerX, contentRoot.centerY,
+                n.x + contentRoot.nodeW/2, n.y + contentRoot.nodeH/2,
+                contentRoot.centerX - cw/2, contentRoot.centerY - ch/2, cw, ch
+            )
+            pushArrow(start.x, start.y, end.x, end.y, "#8e24aa", true)
+        })
+
+        // ✅ 构建 ShapePath（曲线 + 箭头）
+        connectionShape.data = data.map(d => {
+            if (!d.hasArrow) {
+                return Qt.createQmlObject(`
+                    import QtQuick
+                    import QtQuick.Shapes
+                    ShapePath {
+                        strokeColor: "${d.color}"
+                        strokeWidth: 2
+                        fillColor: "transparent"
+                        capStyle: ShapePath.RoundCap
+                        startX: ${d.sx}
+                        startY: ${d.sy}
+                        PathQuad {
+                            x: ${d.ex}
+                            y: ${d.ey}
+                            controlX: ${d.cx}
+                            controlY: ${d.cy}
+                        }
+                    }
+                `, connectionShape)
+            } else {
+                return Qt.createQmlObject(`
+                    import QtQuick
+                    import QtQuick.Shapes
+                    ShapePath {
+                        fillColor: "${d.color}"
+                        strokeWidth: 0
+                        startX: ${d.sx}
+                        startY: ${d.sy}
+                        PathLine { x: ${d.ax}; y: ${d.ay} }
+                        PathLine { x: ${d.bx}; y: ${d.by} }
+                        PathLine { x: ${d.sx}; y: ${d.sy} }
+                    }
+                `, connectionShape)
+            }
+        })
+    }
+
+    function makePath(d) {
+        return Qt.createQmlObject(`
+            import QtQuick
+            import QtQuick.Shapes
+            ShapePath {
+                strokeColor: "${d.color}"
+                strokeWidth: 2
+                fillColor: "transparent"
+                capStyle: ShapePath.RoundCap
+                startX: ${d.sx}
+                startY: ${d.sy}
+                PathQuad {
+                    x: ${d.ex}
+                    y: ${d.ey}
+                    controlX: ${d.cx}
+                    controlY: ${d.cy}
+                }
+            }
+        `, connectionShape)
+    }
+
+    // ===================== 布局 =====================
+    function calculateNodePositions() {
+        const minR = 220
+        const maxR = Math.min(contentRoot.centerX, contentRoot.centerY)
+                   - Math.max(contentRoot.nodeW, contentRoot.nodeH) / 2 - 60
+
+        const total = contentRoot.references.length + contentRoot.referencedBy.length
+        const r = Math.max(minR, Math.min(maxR, (total * (contentRoot.nodeW + 40)) / (2 * Math.PI)))
+        const step = total > 0 ? (2 * Math.PI) / total : 0
+        let angle = -Math.PI / 2
+
+        ;[...contentRoot.references, ...contentRoot.referencedBy].forEach((n, i) => {
+            n.x = contentRoot.centerX + r * Math.cos(angle + step * i) - contentRoot.nodeW / 2
+            n.y = contentRoot.centerY + r * Math.sin(angle + step * i) - contentRoot.nodeH / 2
+        })
+
+        contentRoot.references = contentRoot.references.slice()
+        contentRoot.referencedBy = contentRoot.referencedBy.slice()
+
+        flickable.contentX = contentRoot.centerX - flickable.width / 2
+        flickable.contentY = contentRoot.centerY - flickable.height / 2
+
+        rebuildConnections()
+    }
+
+    // ===================== 初始化 =====================
+    function initData() {
+        contentRoot.currentNode = null
+        contentRoot.references = []
+        contentRoot.referencedBy = []
+
+        const model = graphController?.model
+        if (!model) return
+
+        const all = []
+        for (let i = 0; i < model.rowCount(); ++i) {
+            const idx = model.index(i, 0)
+            all.push({
+                index: i,
+                name: model.data(idx, NoteGraphModel.NameRole),
+                filePath: model.data(idx, NoteGraphModel.FilePathRole),
+                isCurrent: model.data(idx, NoteGraphModel.IsCurrentNoteRole)
+            })
+        }
+
+        contentRoot.currentNode = all.find(n => n.isCurrent) || all[0]
+        if (contentRoot.currentNode) {
+            model.getRelations().forEach(r => {
+                if (r.source === contentRoot.currentNode.index)
+                    contentRoot.references.push(all[r.target])
+                if (r.target === contentRoot.currentNode.index)
+                    contentRoot.referencedBy.push(all[r.source])
+            })
+        }
+
+        calculateNodePositions()
+    }
+
+    Connections {
+        target: graphController?.model ?? null
+        function onModelReset() { initData() }
+        function onDataChanged() { initData() }
+    }
+
+    Component.onCompleted: Qt.callLater(initData)
+}*/

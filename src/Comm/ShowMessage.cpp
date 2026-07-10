@@ -10,9 +10,14 @@ ShowMessage::ShowMessage(QWidget* parent)
 
   m_MsgBox = this;
 
-  // 基础设置：无边框+原生模态
   setWindowFlag(Qt::FramelessWindowHint);
-  setModal(true);
+
+#ifndef Q_OS_ANDROID
+  setWindowFlag(Qt::WindowStaysOnTopHint);
+#else
+  setWindowFlag(Qt::WindowStaysOnTopHint, false);
+#endif
+  setAttribute(Qt::WA_MacAlwaysShowToolWindow, true);
   setWindowModality(Qt::WindowModal);
 
   if (ui->qwShowMsg->source().isEmpty()) {
@@ -22,8 +27,6 @@ ShowMessage::ShowMessage(QWidget* parent)
     ui->qwShowMsg->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/showmsg.qml")));
   }
-
-  ui->qwShowMsg->setAttribute(Qt::WA_AcceptTouchEvents);
 
   // 文本控件设置
   QFont font = this->font();
@@ -45,7 +48,6 @@ ShowMessage::ShowMessage(QWidget* parent)
   // 移除标题栏下的分割线（彻底隐藏）
   ui->hframe->hide();
   ui->hframe->setVisible(false);
-  ui->editMsg->hide();
 
   // 按钮样式（保留原逻辑）
   QString btnStyle = ui->btnOk->styleSheet();
@@ -57,6 +59,7 @@ ShowMessage::ShowMessage(QWidget* parent)
   this->installEventFilter(this);
   // 给文本控件安装事件过滤器（
   ui->editMsg->viewport()->installEventFilter(this);
+  ui->editMsg->hide();
 
   // 初始隐藏
   this->hide();
@@ -170,13 +173,13 @@ bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
 
   showText = markdownToHtmlWithMath(showText);
   ui->qwShowMsg->rootContext()->setContextProperty("textContent", showText);
+  // ui->editMsg->setHtml(showText);
 
   // 计算高度、初始化弹窗尺寸（窗口隐藏状态下计算，无GL surface争夺）
   int textH = getTextEditContentHeight(ui->editMsg);
   int adaptiveDlgH = calcDialogTotalHeight(textH, btnCount);
   init(btnCount, adaptiveDlgH);
 
-  // 全程用exec()
   this->exec();
 
   return isValue;
@@ -301,3 +304,5 @@ int ShowMessage::calcDialogTotalHeight(int textH, int btnCount) {
 
   return totalH;
 }
+
+void ShowMessage::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }

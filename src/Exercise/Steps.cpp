@@ -197,8 +197,16 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
 }
 
 Steps::~Steps() {
-  if (tmeRefreshSteps->isActive()) tmeRefreshSteps->stop();
-  delete tmeRefreshSteps;
+  // 前置清理事件拦截
+  killTimer(0);
+  qApp->removeEventFilter(this);
+
+  // 无条件断开timeout信号，清空回调链路，解决mac残留事件
+  if (tmeRefreshSteps) {
+    disconnect(tmeRefreshSteps, &QTimer::timeout, this, &Steps::refreshSteps);
+    // 保留原有stop判断，不影响其他平台逻辑
+    if (tmeRefreshSteps->isActive()) tmeRefreshSteps->stop();
+  }
 
   delete addressResolver;
   delete m_speedometer;

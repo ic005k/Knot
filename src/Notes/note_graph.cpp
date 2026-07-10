@@ -149,46 +149,6 @@ NoteRelationParser::NoteRelationParser(QObject* parent) : QObject(parent) {
           &NoteRelationParser::onParsedDataReady, Qt::QueuedConnection);
 }
 
-// 启动解析：主线程触发，后台执行耗时操作
-/*void NoteRelationParser::parseNoteRelations(NoteGraphModel* model,
-                                            const QString& currentNotePath) {
-  if (!model || currentNotePath.isEmpty()) return;
-
-  // 保存模型指针（使用QPointer避免悬垂指针）
-  m_model = model;
-  // 主线程先清空模型
-  model->clear();
-
-  // 获取当前笔记名称
-  QString currentNoteName =
-      m_Notes->m_NoteIndexManager->getNoteTitle(currentNotePath);
-
-  // 启动后台任务（使用QtConcurrent线程池）
-  QFuture<void> future = QtConcurrent::run([=]() {
-    QVector<NoteNode> nodes;
-    QVector<NoteRelation> relations;
-
-    // 添加当前笔记节点（作为第一个节点，索引为0）
-    nodes.append(NoteNode(currentNoteName, currentNotePath, true));
-
-    // 后台解析当前笔记的引用
-    parseNoteReferences(nodes, relations, currentNotePath, 0);
-
-    // 后台查找引用当前笔记的文件
-    QString notesDir = QFileInfo(currentNotePath).absolutePath();
-    findReferencingNotes(nodes, relations, notesDir, currentNotePath, 0);
-
-    // 发送结果到主线程（触发parsedDataReady信号）
-    emit parsedDataReady(nodes, relations);
-  });
-
-  // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this,
-          [=]() { watcher->deleteLater(); });
-  watcher->setFuture(future);
-}*/
-
 void NoteRelationParser::parseNoteRelations(NoteGraphModel* model,
                                             const QString& currentNotePath) {
   if (!model || currentNotePath.isEmpty()) return;
