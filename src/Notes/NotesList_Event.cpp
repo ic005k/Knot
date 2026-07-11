@@ -763,8 +763,10 @@ Note:
     // qDebug() << fullPrompt;
   });
 
-  connect(m_RenameNotes, &QDialog::rejected, m_RenameNotes,
-          [=]() mutable { m_Method->closeGrayWindows(); });
+  connect(m_RenameNotes, &QDialog::rejected, m_RenameNotes, [=]() mutable {
+    m_Method->closeGrayWindows();
+    mw_one->raise();
+  });
   connect(m_RenameNotes, &QDialog::accepted, m_RenameNotes,
           [=]() mutable { m_Method->closeGrayWindows(); });
   connect(btnPaste, &QToolButton::clicked, m_RenameNotes,

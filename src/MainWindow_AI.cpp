@@ -2,11 +2,22 @@
 
 void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
                                    const QString& userQuestion) {
+  QWidget* parentWnd = this;
+  if (m_Preferences->isTestBtnClicked) {
+    m_Preferences->isTestBtnClicked = false;
+    parentWnd = m_Preferences;
+  }
+
+  if (m_NotesList->isAINoteRename) {
+    parentWnd = m_NotesList->m_RenameNotes;
+  }
+
   // 规范：发起提问前先执行连通校验，校验通过后再发正式对话
   // 先执行连通检测（异步，检测成功后再执行真实提问，这里做分层回调）
   QUrl url = buildAiApiUrl(cfg.endpoint);
   if (!url.isValid()) {
-    auto msg = std::make_unique<ShowMessage>(this);
+    safeCloseProgress(mw_one);
+    auto msg = std::make_unique<ShowMessage>(parentWnd);
     msg->showMsg(tr("Error"), tr("Endpoint URL invalid"), 1);
     return;
   }
@@ -33,107 +44,114 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
   QByteArray postData = QJsonDocument(body).toJson(QJsonDocument::Compact);
   QNetworkReply* reply = m_ainetMgr->post(req, postData);
 
-  connect(reply, &QNetworkReply::finished, this, [this, reply, userQuestion]() {
-    reply->deleteLater();
-    QString reqUrl = reply->request().url().toString();
-    if (reply->error() != QNetworkReply::NoError) {
-      QString errMsg = reply->errorString();
-      QString content =
-          tr("Network Error") + ":\n%1\n" + tr("Request URL") + ":\n%2";
-      content = content.arg(errMsg, reqUrl);
-      auto msg = std::make_unique<ShowMessage>(this);
-      msg->showMsg(tr("Connect Failed"), content, 1);
-      return;
-    }
-    // 此处增加业务逻辑：读取返回JSON、解析AI回答内容
-    QByteArray rawResp = reply->readAll();
-    // TODO：解析返回内容，自行实现界面渲染逻辑
-    QJsonParseError parseError;
-    // 转为JSON文档，捕获解析错误
-    QJsonDocument doc = QJsonDocument::fromJson(rawResp, &parseError);
-
-    // 1. 判断：返回内容不是合法JSON
-    if (parseError.error != QJsonParseError::NoError) {
-      QString errInfo = tr("Returned data is not valid JSON:\n%1")
-                            .arg(parseError.errorString());
-      auto msg = std::make_unique<ShowMessage>(this);
-      msg->showMsg(tr("Parse Failed"), errInfo, 1);
-      return;
-    }
-
-    QJsonObject rootObj = doc.object();
-
-    // 2. 判断：服务端返回业务错误（密钥无效、模型不存在、余额不足等）
-    if (rootObj.contains("error")) {
-      QJsonObject errObj = rootObj["error"].toObject();
-      QString serverErr = errObj["message"].toString().trimmed();
-      auto msg = std::make_unique<ShowMessage>(this);
-      msg->showMsg(tr("API Rejected"), tr("Server Error:\n%1").arg(serverErr),
-                   1);
-      return;
-    }
-
-    // 3. 正常成功响应，提取AI回答
-    QJsonArray choicesArr = rootObj["choices"].toArray();
-    if (choicesArr.isEmpty()) {
-      auto msg = std::make_unique<ShowMessage>(this);
-      msg->showMsg(tr("Success"), tr("AI returned empty content"), 1);
-      return;
-    }
-
-    // 取第一条回复
-    QJsonObject firstChoice = choicesArr.first().toObject();
-    QJsonObject aiMsgObj = firstChoice["message"].toObject();
-    QString aiReplyText = aiMsgObj["content"].toString().trimmed();
-
-    // ========== 弹窗展示完整问答 ==========
-    // 分段纯翻译文本，tr内部不含任何换行符
-    QString part1 = tr("User Question");
-    QString part2 = tr("AI Reply");
-
-    // 外部拼接换行、占位符，tr只负责文字
-    QString showBody;
-    showBody += part1;
-    showBody += ":\n\n%1\n\n";
-    showBody += part2;
-    showBody += ":\n\n%2";
-
-    // qDebug() << aiReplyText;
-    //  复制到系统剪贴板
-    QClipboard* clip = QGuiApplication::clipboard();
-    clip->setText(aiReplyText);
-
-    m_Preferences->saveAIConfig();
-
-    // 最后填充占位符
-    showBody = showBody.arg(userQuestion, aiReplyText);
-
-    auto msg = std::make_unique<ShowMessage>(this);
-    // msg->showMsg(tr("AI Response Completed"), showBody, 1);
-
-    if (m_NotesList->isAINoteRename) {
-      m_NotesList->isAINoteRename = false;
-      m_MsgBox->ui->btnOk->setText(tr("Modify Title"));
-
-      if (msg->showMsg(tr("AI Response Completed"), aiReplyText, 2)) {
-        QTextEdit* edit =
-            m_NotesList->m_RenameNotes->findChild<QTextEdit*>("renameEdit");
-        if (edit) {
-          edit->setText(aiReplyText);
+  connect(
+      reply, &QNetworkReply::finished, this,
+      [this, reply, userQuestion, parentWnd]() {
+        reply->deleteLater();
+        QString reqUrl = reply->request().url().toString();
+        if (reply->error() != QNetworkReply::NoError) {
+          QString errMsg = reply->errorString();
+          QString content =
+              tr("Network Error") + ":\n%1\n" + tr("Request URL") + ":\n%2";
+          content = content.arg(errMsg, reqUrl);
+          safeCloseProgress(mw_one);
+          auto msg = std::make_unique<ShowMessage>(parentWnd);
+          msg->showMsg(tr("Connect Failed"), content, 1);
+          return;
         }
-      }
-    } else if (m_Reader->isAIReaderExplanation) {
-      m_Reader->isAIReaderExplanation = false;
-      m_MsgBox->ui->btnOk->setText(tr("Add Note"));
-      if (msg->showMsg(tr("AI Response Completed"), aiReplyText, 2)) {
-        m_Reader->addBookNote(aiReplyText);
-      }
-    } else
+        // 此处增加业务逻辑：读取返回JSON、解析AI回答内容
+        QByteArray rawResp = reply->readAll();
+        // TODO：解析返回内容，自行实现界面渲染逻辑
+        QJsonParseError parseError;
+        // 转为JSON文档，捕获解析错误
+        QJsonDocument doc = QJsonDocument::fromJson(rawResp, &parseError);
 
-    {
-      msg->showMsg(tr("AI Response Completed"), aiReplyText, 1);
-    }
-  });
+        // 1. 判断：返回内容不是合法JSON
+        if (parseError.error != QJsonParseError::NoError) {
+          QString errInfo = tr("Returned data is not valid JSON:\n%1")
+                                .arg(parseError.errorString());
+          safeCloseProgress(mw_one);
+          auto msg = std::make_unique<ShowMessage>(parentWnd);
+          msg->showMsg(tr("Parse Failed"), errInfo, 1);
+          return;
+        }
+
+        QJsonObject rootObj = doc.object();
+
+        // 2. 判断：服务端返回业务错误（密钥无效、模型不存在、余额不足等）
+        if (rootObj.contains("error")) {
+          QJsonObject errObj = rootObj["error"].toObject();
+          QString serverErr = errObj["message"].toString().trimmed();
+          safeCloseProgress(mw_one);
+          auto msg = std::make_unique<ShowMessage>(parentWnd);
+          msg->showMsg(tr("API Rejected"),
+                       tr("Server Error:\n%1").arg(serverErr), 1);
+          return;
+        }
+
+        // 3. 正常成功响应，提取AI回答
+        QJsonArray choicesArr = rootObj["choices"].toArray();
+        if (choicesArr.isEmpty()) {
+          safeCloseProgress(mw_one);
+          auto msg = std::make_unique<ShowMessage>(parentWnd);
+          msg->showMsg(tr("Success"), tr("AI returned empty content"), 1);
+          return;
+        }
+
+        // 取第一条回复
+        QJsonObject firstChoice = choicesArr.first().toObject();
+        QJsonObject aiMsgObj = firstChoice["message"].toObject();
+        QString aiReplyText = aiMsgObj["content"].toString().trimmed();
+
+        // ========== 弹窗展示完整问答 ==========
+        // 分段纯翻译文本，tr内部不含任何换行符
+        QString part1 = tr("User Question");
+        QString part2 = tr("AI Reply");
+
+        // 外部拼接换行、占位符，tr只负责文字
+        QString showBody;
+        showBody += part1;
+        showBody += ":\n\n%1\n\n";
+        showBody += part2;
+        showBody += ":\n\n%2";
+
+        // qDebug() << aiReplyText;
+        //  复制到系统剪贴板
+        QClipboard* clip = QGuiApplication::clipboard();
+        clip->setText(aiReplyText);
+
+        m_Preferences->saveAIConfig();
+
+        // 最后填充占位符
+        showBody = showBody.arg(userQuestion, aiReplyText);
+
+        safeCloseProgress(mw_one);
+        auto msg = std::make_unique<ShowMessage>(parentWnd);
+        // msg->showMsg(tr("AI Response Completed"), showBody, 1);
+
+        if (m_NotesList->isAINoteRename) {
+          m_NotesList->isAINoteRename = false;
+          m_MsgBox->ui->btnOk->setText(tr("Modify Title"));
+
+          if (msg->showMsg(tr("AI Response Completed"), aiReplyText, 2)) {
+            QTextEdit* edit =
+                m_NotesList->m_RenameNotes->findChild<QTextEdit*>("renameEdit");
+            if (edit) {
+              edit->setText(aiReplyText);
+            }
+          }
+        } else if (m_Reader->isAIReaderExplanation) {
+          m_Reader->isAIReaderExplanation = false;
+          m_MsgBox->ui->btnOk->setText(tr("Add Note"));
+          if (msg->showMsg(tr("AI Response Completed"), aiReplyText, 2)) {
+            m_Reader->addBookNote(aiReplyText);
+          }
+        } else
+
+        {
+          msg->showMsg(tr("AI Response Completed"), aiReplyText, 1);
+        }
+      });
 }
 
 void MainWindow::checkAiConnectivity(const AiSingleRecord& cfg,
@@ -197,8 +215,17 @@ void MainWindow::aiChatQuery(const QString& userQuestion) {
   QString key = m_Preferences->ui->editAIKey->text().trimmed();
   QString mid = m_Preferences->ui->editAIModelID->text().trimmed();
 
+  QWidget* parentWnd = this;
+  if (m_Preferences->isTestBtnClicked) {
+    parentWnd = m_Preferences;
+  }
+
+  if (m_NotesList->isAINoteRename) {
+    parentWnd = m_NotesList->m_RenameNotes;
+  }
+
   if (ep.isEmpty() || key.isEmpty() || mid.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(mw_one);
+    auto msg = std::make_unique<ShowMessage>(parentWnd);
     msg->showMsg(tr("Warning"),
                  tr("Endpoint / API Key / Model ID cannot be empty"), 1);
     return;

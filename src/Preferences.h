@@ -51,6 +51,7 @@ class Preferences : public QDialog {
   ~Preferences();
   Ui::Preferences* ui;
 
+  bool isTestBtnClicked = false;
   void saveAIConfig();
   bool devMode = false;
   QString chkStyle;

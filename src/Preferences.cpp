@@ -646,6 +646,7 @@ void Preferences::on_chkUIFont_clicked(bool checked) {
 void Preferences::on_btnAISelect_clicked() { ui->cboxEndpoint->showPopup(); }
 
 void Preferences::on_btnAITest_clicked() {
+  isTestBtnClicked = true;
   mw_one->aiChatQuery("Hello!");
 
   return;

@@ -208,15 +208,29 @@ Steps::~Steps() {
     if (tmeRefreshSteps->isActive()) tmeRefreshSteps->stop();
   }
 
-  // 先停止地址解析线程，等待线程完全退出
+  if (WeatherFetcher::instance()) WeatherFetcher::instance()->disconnect(this);
+
+  //////////////////////////////////////////////////////////////////////////
+
+  // 断开所有信号
+  if (addressResolver) {
+    addressResolver->disconnect(this);
+    addressResolver->disconnect(addressResolver);
+  }
+
+  // 删除 resolver（它属于子线程）
+  delete addressResolver;
+  addressResolver = nullptr;
+
+  // 停止地址解析线程，等待线程完全退出
   if (geoThread) {
     geoThread->quit();
     geoThread->wait();  // 阻塞等待子线程彻底结束，队列任务全部执行完毕
     // geoThread绑定了finished→deleteLater，无需手动delete
     geoThread = nullptr;
   }
-  delete addressResolver;
-  addressResolver = nullptr;
+
+  ////////////////////////////////////////////////////////////////////////
 
   delete m_speedometer;
   delete compass;
