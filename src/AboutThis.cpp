@@ -261,6 +261,7 @@ void AboutThis::on_btnViewLog_clicked() {
 
   AppLogger::instance().copyTodayLogToClipboard();
   QString log = AppLogger::instance().getTodayLogText();
+  log = log.replace("\n", "\n\n");
   QString res = m_Method->escapeAllHtml(log);
   QTimer::singleShot(100, this, [this, res]() {
     auto m_ShowMsg = std::make_unique<ShowMessage>(this);

@@ -415,6 +415,11 @@ void Steps::openStepsUI() {
   mui->frameMain->hide();
   mui->frameSteps->show();
 
+  int btnh = mui->rbCycling->height();
+  auto btn0 = mui->btnAIExerciseSuggestions;
+  btn0->setIconSize(QSize(btnh - 3, btnh - 3));
+  btn0->setFixedSize(QSize(btnh, btnh));
+
   if (mw_one->m_Preferences->ui->chkAI->isChecked()) {
     mui->btnAISteps->show();
     mui->btnAIExerciseSuggestions->show();

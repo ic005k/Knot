@@ -168,6 +168,15 @@ QString AppLogger::getTodayLogText() {
     }
   }
   f.close();
+
+  // 截取最后一次App启动之后的日志
+  const QByteArray launchFlag = "The app has started to launch...";
+  int lastLaunchPos = raw.lastIndexOf(launchFlag);
+  if (lastLaunchPos != -1) {
+    // 只保留最后一次启动标记及后面所有日志
+    raw = raw.mid(lastLaunchPos);
+  }
+
   return QString::fromUtf8(raw);
 }
 

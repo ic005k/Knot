@@ -210,8 +210,7 @@ int main(int argc, char* argv[]) {
 
   AppLogger::instance().initLogger(appName);
 
-  qInfo() << "****************************************************************"
-             "********************";
+  qInfo() << "The app has started to launch...";
   clearLockFiles(iniDir);
   clearLockFiles(privateDir);
 
