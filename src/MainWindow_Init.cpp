@@ -160,7 +160,7 @@ void MainWindow::init_Thread_Timer() {
             // 主线程安全更新
             resultsList = results;
             m_Method->initSearchResults();
-            mw_one->safeCloseProgress(mw_one);
+            mw_one->safeCloseProgress();
           });
   m_workerThread->start();
 

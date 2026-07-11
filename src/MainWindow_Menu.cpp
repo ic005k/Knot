@@ -291,7 +291,7 @@ void MainWindow::on_actionReport_triggered() {
 
 void MainWindow::on_actionCopyLog() {
   AppLogger::instance().copyTodayLogToClipboard();
-  QTimer::singleShot(100, this, [this]() {
+  QTimer::singleShot(100, this, []() {
     auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
     m_ShowMsg->showMsg(tr("Success"),
                        tr("Today's log has been copied to clipboard, you can "
@@ -394,6 +394,8 @@ void MainWindow::init_Menu(QMenu* mainMenu) {
     actTabRecycle->setVisible(false);
   }
 #endif
+
+  actCopyLog->setVisible(false);
 
   mainMenu->addAction(actPreferences);
 

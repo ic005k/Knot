@@ -243,7 +243,7 @@ void NotesList::on_actionImport_Note_triggered() {
     QThread::msleep(1);
   }
 
-  mw_one->safeCloseProgress(mw_one);
+  mw_one->safeCloseProgress();
 
   if (fileCount > 0) {
     clickNoteBook();
@@ -321,7 +321,7 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
       if (m_dbManager.deleteDatabaseFile(databaseFile))
         initSerachDatabase();
       else
-        mw_one->safeCloseProgress(mw_one);
+        mw_one->safeCloseProgress();
     }
   });
 
@@ -475,19 +475,7 @@ void NotesList::on_actionCopyNoteLink() {
   QClipboard* clipboard = QApplication::clipboard();
   clipboard->setText(strlink);
 
-  QString res = strlink;
-  // 标准HTML实体转义（必须先转&，否则后面实体被二次转义）
-  res.replace("&", "&amp;");
-  res.replace("<", "&lt;");
-  res.replace(">", "&gt;");
-  res.replace("\"", "&quot;");
-  res.replace("'", "&#39;");
-
-  // 额外转义Markdown链接符号，防止渲染引擎识别为链接
-  res.replace("[", "&#91;");
-  res.replace("]", "&#93;");
-  res.replace("(", "&#40;");
-  res.replace(")", "&#41;");
+  QString res = m_Method->escapeAllHtml(strlink);
 
   auto msg = std::make_unique<ShowMessage>(mw_one);
   msg->showMsg(appName, res, 1);
@@ -543,7 +531,7 @@ void NotesList::on_actionRelationshipGraph() {
     m_graphController->setCurrentNotePath(currentMDFile);
 
   } else {
-    mw_one->safeCloseProgress(mw_one);
+    mw_one->safeCloseProgress();
   }
 }
 
@@ -599,7 +587,7 @@ void NotesList::on_actionStatistics() {
         tr("Access WebDAV:") + QString::number(webDAVCount) + "t/30min";
 
     // 关闭进度条
-    mw_one->safeCloseProgress(mw_one);
+    mw_one->safeCloseProgress();
 
     // 弹出统计消息框（使用后台统计的结果）
     auto msg = std::make_unique<ShowMessage>(mw_one);

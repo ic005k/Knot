@@ -1004,9 +1004,8 @@ void MainWindow::closeProgress() {
 #endif
 }
 
-void MainWindow::safeCloseProgress(MainWindow* mw) {
-  if (!mw) return;
-  QTimer::singleShot(100, mw, [mw]() { mw->closeProgress(); });
+void MainWindow::safeCloseProgress() {
+  QTimer::singleShot(100, this, [this]() { mw_one->closeProgress(); });
 }
 
 int MainWindow::get_Day(QString date) {
@@ -1464,8 +1463,6 @@ void MainWindow::on_tabMotion_currentChanged(int index) {
     m_Steps->tmeRefreshSteps->start(3000);
   else
     m_Steps->tmeRefreshSteps->stop();
-
-  m_Steps->resizeAIBtn();
 }
 
 void MainWindow::on_chkZip_clicked() { m_Preferences->on_chkZip_clicked(); }

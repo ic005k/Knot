@@ -467,11 +467,11 @@ void NoteRelationParser::findReferencingNotes(QVector<NoteNode>& nodes,
 void NoteRelationParser::onParsedDataReady(
     const QVector<NoteNode>& nodes, const QVector<NoteRelation>& relations) {
   if (!m_model) {
-    mw_one->safeCloseProgress(mw_one);
+    mw_one->safeCloseProgress();
     return;
   }
 
-  mw_one->safeCloseProgress(mw_one);
+  mw_one->safeCloseProgress();
 
   // 批量添加节点和关系到模型（主线程操作）
   for (const auto& node : nodes) {
@@ -569,7 +569,7 @@ void NoteGraphController::setCurrentNotePath(const QString& path) {
   emit currentNotePathChanged();
   m_parser->parseNoteRelations(m_model, m_currentNotePath);
   //} else {
-  //  mw_one->safeCloseProgress(mw_one);
+  //  mw_one->safeCloseProgress();
   //}
 }
 

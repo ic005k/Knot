@@ -3959,7 +3959,7 @@ QSlider::handle:horizontal:disabled {
                    </size>
                   </property>
                   <property name="toolButtonStyle">
-                   <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
+                   <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
                   </property>
                  </widget>
                 </item>

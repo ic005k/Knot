@@ -237,8 +237,8 @@ class Steps : public QDialog {
   void setMapKey();
   void showSportsChart();
   void updateGpsUI();
-  void resizeAIBtn();
-  public slots:
+
+ public slots:
   void clearAllGpsList();
   void getGpsTrack();
   void openMapWindow();

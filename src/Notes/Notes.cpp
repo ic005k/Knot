@@ -269,7 +269,7 @@ void Notes::previewNote() {
   // 使用 QFutureWatcher 监控进度
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    mw_one->safeCloseProgress(mw_one);
+    mw_one->safeCloseProgress();
 
     m_NotesList->moveToFirst();
 
@@ -631,7 +631,7 @@ void Notes::processSingleRemoteFile(const QString& file) {
     if (dec_file != "") zFile = dec_file;
 
     if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
-      mw_one->safeCloseProgress(mw_one);
+      mw_one->safeCloseProgress();
       errorInfo =
           tr("Decompression failed. Please check in Preferences that the "
              "passwords are consistent across all platforms.");
@@ -675,7 +675,7 @@ void Notes::processSingleRemoteFile(const QString& file) {
 
     if (QFile::exists(zFile)) {
       if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
-        mw_one->safeCloseProgress(mw_one);
+        mw_one->safeCloseProgress();
         errorInfo =
             tr("Decompression failed. Please check in Preferences that the "
                "passwords are consistent across all platforms.");
@@ -720,7 +720,7 @@ void Notes::processSingleRemoteFile(const QString& file) {
 
     if (QFile::exists(zFile)) {
       if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
-        mw_one->safeCloseProgress(mw_one);
+        mw_one->safeCloseProgress();
         errorInfo =
             tr("Decompression failed. Please check in Preferences that the "
                "passwords are consistent across all platforms.");

@@ -1815,7 +1815,7 @@ void Reader::readBookDone() {
   if (isEpubError) {
     mui->btnReader->setEnabled(true);
     mui->f_ReaderFun->setEnabled(true);
-    mw_one->safeCloseProgress(mw_one);
+    mw_one->safeCloseProgress();
 
     auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg("Knot", tr("The EPUB file was opened with an error."), 1);

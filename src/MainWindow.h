@@ -487,8 +487,6 @@ class MainWindow : public QMainWindow {
   void checkAiConnectivity(const AiSingleRecord& cfg,
                            std::function<void()> onSuccess);
 
-  void safeCloseProgress(MainWindow* mw);
-
  protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
@@ -499,7 +497,10 @@ class MainWindow : public QMainWindow {
   void hideEvent(QHideEvent* event) override;
 
   void showEvent(QShowEvent* event) override;
+
  public slots:
+  void safeCloseProgress();
+
   void on_btnCatalogue_clicked();
 
   void on_btnHome_clicked();

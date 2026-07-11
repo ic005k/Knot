@@ -495,7 +495,8 @@ class Method : public QDialog {
 
   void safeCloseInfoWindow(Method* m);
 
- protected:
+  QString escapeAllHtml(const QString &src);
+  protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

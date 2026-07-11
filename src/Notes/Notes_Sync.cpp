@@ -167,7 +167,7 @@ void Notes::startBackgroundTaskDelAndClear() {
       } else
         m_NotesList->isDelNoteRecycle = false;
       watcher->deleteLater();
-      mw_one->safeCloseProgress(mw_one);
+      mw_one->safeCloseProgress();
     });
     watcher->setFuture(future);
   }

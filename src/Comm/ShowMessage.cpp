@@ -23,10 +23,18 @@ ShowMessage::ShowMessage(QWidget* parent)
   if (ui->qwShowMsg->source().isEmpty()) {
     ui->qwShowMsg->rootContext()->setContextProperty("isDark", isDark);
     ui->qwShowMsg->rootContext()->setContextProperty("m_Method", m_Method);
+    ui->qwShowMsg->rootContext()->setContextProperty("mw_one", mw_one);
     ui->qwShowMsg->rootContext()->setContextProperty("textContent", "");
     ui->qwShowMsg->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/showmsg.qml")));
   }
+
+  auto* quickWindow = ui->qwShowMsg->quickWindow();
+  QObject::connect(
+      quickWindow, &QQuickWindow::afterRendering, this,
+      [this]() { mw_one->safeCloseProgress(); },
+      Qt::SingleShotConnection  // 自动断开
+  );
 
   // 文本控件设置
   QFont font = this->font();
@@ -76,22 +84,21 @@ void ShowMessage::init(int btnCount, int adaptiveH) {
   isValue = false;
   btn_count = btnCount;
 
-  // 空指针保护：主窗口为空则用默认尺寸
-  int mainW = 360, mainH = 600;
+  int mainW = 0, mainH = 0;
   if (mw_one) {
     mainW = mw_one->geometry().width();
     mainH = mw_one->geometry().height();
   }
 
   // 宽度逻辑
-  int dlgW = 0;
+  int dlgW = 380;
 #ifdef Q_OS_ANDROID
   dlgW = mainW;
 #else
-  dlgW = 360;
-  if (dlgW >= mainW) dlgW = mainW;
+
 #endif
-  dlgW -= 10;
+
+  dlgW -= 4;
 
   // 高度逻辑
   int dlgH = adaptiveH;
@@ -121,7 +128,7 @@ void ShowMessage::init(int btnCount, int adaptiveH) {
 }
 
 bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
-  mw_one->safeCloseProgress(mw_one);
+  // mw_one->safeCloseProgress();
 
   m_Method->Sleep(100);
 

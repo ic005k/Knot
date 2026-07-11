@@ -11,6 +11,7 @@
 #include <QtNetwork/QNetworkRequest>
 
 #include "src/AutoUpdate.h"
+#include "src/Comm/loglogger.h"
 
 namespace Ui {
 class AboutThis;
@@ -54,6 +55,8 @@ class AboutThis : public QDialog {
   void on_btnDownloadUP_clicked();
 
   void on_btnCopyDownLoadLink_clicked();
+
+  void on_btnViewLog_clicked();
 
  private:
   QString getUrl(QVariantList list);

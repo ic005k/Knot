@@ -255,3 +255,15 @@ void AboutThis::on_btnCopyDownLoadLink_clicked() {
   auto msg = std::make_unique<ShowMessage>(this);
   msg->showMsg("Knot", tr("Download link copied.") + "\n\n" + s_link, 1);
 }
+
+void AboutThis::on_btnViewLog_clicked() {
+  mw_one->showProgress();
+
+  AppLogger::instance().copyTodayLogToClipboard();
+  QString log = AppLogger::instance().getTodayLogText();
+  QString res = m_Method->escapeAllHtml(log);
+  QTimer::singleShot(100, this, [this, res]() {
+    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+    m_ShowMsg->showMsg(tr("Log"), res, 1);
+  });
+}
