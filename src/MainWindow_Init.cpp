@@ -662,6 +662,8 @@ void MainWindow::init_Theme() {
     m_Steps->m_speedometer->setBackgroundColor(QColor(0xF0, 0xF0, 0xF0));
     m_Steps->m_speedometer->updateThemeColors();
 
+    mui->qwNoteGraphView->setClearColor(Qt::white);
+
   } else {
     mui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
     mui->btnClear->setIcon(QIcon(":/res/clear.png"));
@@ -683,6 +685,8 @@ void MainWindow::init_Theme() {
 
     m_Steps->m_speedometer->setBackgroundColor(QColor(0x32, 0x32, 0x32));
     m_Steps->m_speedometer->updateThemeColors();
+
+    mui->qwNoteGraphView->setClearColor(Qt::black);
   }
 
   mui->editTodo->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);

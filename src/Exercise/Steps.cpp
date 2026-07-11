@@ -208,18 +208,18 @@ Steps::~Steps() {
     if (tmeRefreshSteps->isActive()) tmeRefreshSteps->stop();
   }
 
-  delete addressResolver;
-  delete m_speedometer;
-
-  delete compass;
-
-  // 退出地址解析线程
+  // 先停止地址解析线程，等待线程完全退出
   if (geoThread) {
     geoThread->quit();
-    geoThread->wait();
-    delete geoThread;
+    geoThread->wait();  // 阻塞等待子线程彻底结束，队列任务全部执行完毕
+    // geoThread绑定了finished→deleteLater，无需手动delete
     geoThread = nullptr;
   }
+  delete addressResolver;
+  addressResolver = nullptr;
+
+  delete m_speedometer;
+  delete compass;
 
 // 安卓端额外清理
 #ifdef Q_OS_ANDROID

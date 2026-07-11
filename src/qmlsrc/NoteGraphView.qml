@@ -8,9 +8,9 @@ Flickable {
     contentWidth: 3000
     contentHeight: 3000
     interactive: true
-    // 初始透明度设为0，等待首次数据加载完成后再淡入
-    //opacity: 0
+
     visible: false
+    //opacity: 0
 
     // 背景矩形
     Rectangle {
@@ -414,6 +414,10 @@ Flickable {
 
             // 3. 一次性呈现（不再有位移过程）
             flickable.visible = true;
+        /*Qt.callLater(() => {
+                centerOnCurrentNode();
+                flickable.opacity = 1;
+            });*/
         });
     }
 
@@ -427,15 +431,8 @@ Flickable {
 
     // 在开始更新数据时，先将视图移出并设为透明
     function prepareForUpdate() {
-        // 移出视图区域（移动到左上角之外很远的地方）
-        //flickable.contentX = -10000;
-        //flickable.contentY = -10000;
-        // 设为透明
-        //flickable.opacity = 0;
-        // 强制刷新一次画布，清除可能的残留 (可选)
-        //connectionCanvas.requestPaint();
-
         flickable.visible = false;
+        //flickable.opacity = 0;
     }
 
     function centerOnCurrentNode() {

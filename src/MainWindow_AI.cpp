@@ -6,7 +6,7 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
   // 先执行连通检测（异步，检测成功后再执行真实提问，这里做分层回调）
   QUrl url = buildAiApiUrl(cfg.endpoint);
   if (!url.isValid()) {
-    auto msg = std::make_unique<ShowMessage>(mw_one);
+    auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg(tr("Error"), tr("Endpoint URL invalid"), 1);
     return;
   }
@@ -41,7 +41,7 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
       QString content =
           tr("Network Error") + ":\n%1\n" + tr("Request URL") + ":\n%2";
       content = content.arg(errMsg, reqUrl);
-      auto msg = std::make_unique<ShowMessage>(mw_one);
+      auto msg = std::make_unique<ShowMessage>(this);
       msg->showMsg(tr("Connect Failed"), content, 1);
       return;
     }
@@ -56,7 +56,7 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
     if (parseError.error != QJsonParseError::NoError) {
       QString errInfo = tr("Returned data is not valid JSON:\n%1")
                             .arg(parseError.errorString());
-      auto msg = std::make_unique<ShowMessage>(mw_one);
+      auto msg = std::make_unique<ShowMessage>(this);
       msg->showMsg(tr("Parse Failed"), errInfo, 1);
       return;
     }
@@ -67,7 +67,7 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
     if (rootObj.contains("error")) {
       QJsonObject errObj = rootObj["error"].toObject();
       QString serverErr = errObj["message"].toString().trimmed();
-      auto msg = std::make_unique<ShowMessage>(mw_one);
+      auto msg = std::make_unique<ShowMessage>(this);
       msg->showMsg(tr("API Rejected"), tr("Server Error:\n%1").arg(serverErr),
                    1);
       return;
@@ -76,7 +76,7 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
     // 3. 正常成功响应，提取AI回答
     QJsonArray choicesArr = rootObj["choices"].toArray();
     if (choicesArr.isEmpty()) {
-      auto msg = std::make_unique<ShowMessage>(mw_one);
+      auto msg = std::make_unique<ShowMessage>(this);
       msg->showMsg(tr("Success"), tr("AI returned empty content"), 1);
       return;
     }
@@ -108,7 +108,7 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
     // 最后填充占位符
     showBody = showBody.arg(userQuestion, aiReplyText);
 
-    auto msg = std::make_unique<ShowMessage>(mw_one);
+    auto msg = std::make_unique<ShowMessage>(this);
     // msg->showMsg(tr("AI Response Completed"), showBody, 1);
 
     if (m_NotesList->isAINoteRename) {
