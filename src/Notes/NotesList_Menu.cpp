@@ -474,8 +474,23 @@ void NotesList::on_actionCopyNoteLink() {
   QString strlink = "[" + name + "](" + file + ")";
   QClipboard* clipboard = QApplication::clipboard();
   clipboard->setText(strlink);
+
+  QString res = strlink;
+  // 标准HTML实体转义（必须先转&，否则后面实体被二次转义）
+  res.replace("&", "&amp;");
+  res.replace("<", "&lt;");
+  res.replace(">", "&gt;");
+  res.replace("\"", "&quot;");
+  res.replace("'", "&#39;");
+
+  // 额外转义Markdown链接符号，防止渲染引擎识别为链接
+  res.replace("[", "&#91;");
+  res.replace("]", "&#93;");
+  res.replace("(", "&#40;");
+  res.replace(")", "&#41;");
+
   auto msg = std::make_unique<ShowMessage>(mw_one);
-  msg->showMsg(appName, strlink, 1);
+  msg->showMsg(appName, res, 1);
 }
 
 void NotesList::on_actionShareNoteFile() {
