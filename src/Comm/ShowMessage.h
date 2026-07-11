@@ -37,8 +37,6 @@ class ShowMessage : public QDialog {
   void on_editMsg_textChanged();
 
  private:
-  MainWindow* mw_one = nullptr;
-  Notes* m_Notes = nullptr;
   bool isValue = false;
   int btn_count = 0;
   QString copyText;

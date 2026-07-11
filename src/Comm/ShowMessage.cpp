@@ -2,6 +2,7 @@
 
 #include "src/MainWindow.h"
 #include "src/defines.h"
+#include "ui_MainWindow.h"
 #include "ui_ShowMessage.h"
 
 ShowMessage::ShowMessage(QWidget* parent)
@@ -46,12 +47,6 @@ ShowMessage::ShowMessage(QWidget* parent)
   ui->editMsg->setLineWrapMode(QTextEdit::WidgetWidth);
   ui->editMsg->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleSmall);
   QScroller::grabGesture(ui->editMsg, QScroller::LeftMouseButtonGesture);
-
-  // 主窗口指针初始化
-  mw_one = dynamic_cast<MainWindow*>(parent);
-  if (mw_one == nullptr) {
-    qWarning() << "MainWindow pointer is null!";
-  }
 
   // 移除标题栏下的分割线（彻底隐藏）
   ui->hframe->hide();
