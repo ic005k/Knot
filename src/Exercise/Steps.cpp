@@ -176,8 +176,9 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   // 1. 创建独立线程（必须手动启动，且不依赖主线程）
   geoThread = new QThread();
   geoThread->setObjectName("GeoAddressThread");
-  // 线程退出时自动销毁
-  connect(geoThread, &QThread::finished, geoThread, &QObject::deleteLater);
+
+  // 线程退出时自动销毁,已采用手动删除
+  // connect(geoThread, &QThread::finished, geoThread, &QObject::deleteLater);
 
   // 2. 创建 resolver，绝对不设置父对象
   addressResolver = new GeoAddressResolver(nullptr);
@@ -244,18 +245,29 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
 }*/
 
 Steps::~Steps() {
-  // 兜底：防止外部未调用prepareDestroy的极端场景
-  if (tmeRefreshSteps) {
-    tmeRefreshSteps->stop();
-    disconnect(tmeRefreshSteps);
-  }
-  if (geoThread) {
-    geoThread->quit();
-    geoThread->wait();
-  }
 #ifdef Q_OS_MACOS
   QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 #endif
+  killTimer(0);
+  qApp->removeEventFilter(this);
+
+  // 兜底手动回收线程
+  if (geoThread) {
+    geoThread->quit();
+    while (!geoThread->wait(10)) {
+#ifdef Q_OS_MACOS
+      QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+#endif
+    }
+    delete geoThread;
+    geoThread = nullptr;
+  }
+
+  if (tmeRefreshSteps) {
+    tmeRefreshSteps->stop();
+    disconnect(tmeRefreshSteps);
+    tmeRefreshSteps = nullptr;
+  }
 }
 
 void Steps::setAddressResolverConnect() {
@@ -3515,11 +3527,20 @@ void Steps::prepareDestroy() {
   if (addressResolver) {
     addressResolver->disconnect();
   }
+
   if (geoThread) {
     geoThread->quit();
-    geoThread->wait();  // 同步阻塞，子线程所有排队任务执行完毕才返回
+    // 循环等待，确保线程彻底结束
+    while (!geoThread->wait(10)) {
+#ifdef Q_OS_MACOS
+      QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+#endif
+    }
+    // 手动释放，Qt不会自动管了
+    delete geoThread;
     geoThread = nullptr;
   }
+
   delete addressResolver;
   addressResolver = nullptr;
 
