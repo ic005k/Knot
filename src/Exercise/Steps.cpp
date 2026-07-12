@@ -201,26 +201,24 @@ Steps::~Steps() {
   killTimer(0);
   qApp->removeEventFilter(this);
 
-  // 无条件断开timeout信号，清空回调链路，解决mac残留事件
+  // 定时器：先停止再断开，避免已入队timeout回调执行
   if (tmeRefreshSteps) {
-    disconnect(tmeRefreshSteps, &QTimer::timeout, this, &Steps::refreshSteps);
-    // 保留原有stop判断，不影响其他平台逻辑
     if (tmeRefreshSteps->isActive()) tmeRefreshSteps->stop();
+    disconnect(tmeRefreshSteps);
+    tmeRefreshSteps = nullptr;
   }
 
-  if (WeatherFetcher::instance()) WeatherFetcher::instance()->disconnect(this);
+  // 断开该实例所有与this相关连接，不依赖disconnect(this)简化写法
+  if (WeatherFetcher* fetcher = WeatherFetcher::instance()) {
+    disconnect(fetcher, nullptr, this, nullptr);
+  }
 
   //////////////////////////////////////////////////////////////////////////
 
   // 断开所有信号
   if (addressResolver) {
-    addressResolver->disconnect(this);
-    addressResolver->disconnect(addressResolver);
+    addressResolver->disconnect();
   }
-
-  // 删除 resolver（它属于子线程）
-  delete addressResolver;
-  addressResolver = nullptr;
 
   // 停止地址解析线程，等待线程完全退出
   if (geoThread) {
@@ -229,6 +227,10 @@ Steps::~Steps() {
     // geoThread绑定了finished→deleteLater，无需手动delete
     geoThread = nullptr;
   }
+
+  // 删除 resolver（它属于子线程）
+  delete addressResolver;
+  addressResolver = nullptr;
 
   ////////////////////////////////////////////////////////////////////////
 
