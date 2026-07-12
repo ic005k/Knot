@@ -238,7 +238,8 @@ class Steps : public QDialog {
   void showSportsChart();
   void updateGpsUI();
 
- public slots:
+  void prepareDestroy();
+  public slots:
   void clearAllGpsList();
   void getGpsTrack();
   void openMapWindow();

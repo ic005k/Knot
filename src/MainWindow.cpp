@@ -578,25 +578,29 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     event->accept();
     return;
   }
-#else
+#endif
+
+  if (m_Steps) {
+    m_Steps->prepareDestroy();
+  }
 
   saveNeedSyncNotes();
 
+#ifndef Q_OS_ANDROID
   QSettings Reg(privateDir + "winpos.ini", QSettings::IniFormat);
   Reg.setValue("x", this->geometry().x());
   Reg.setValue("y", this->geometry().y());
   Reg.setValue("w", this->geometry().width());
   Reg.setValue("h", this->geometry().height());
 
-// ===== 主动释放共享内存 =====
-#ifndef Q_OS_ANDROID
+  // ===== 主动释放共享内存 =====
   sharedMemory.setKey(uniqueKey);
   if (sharedMemory.attach()) {
     sharedMemory.detach();
   }
 #endif
+
   event->accept();
-#endif
 }
 
 void MainWindow::saveNeedSyncNotes() {

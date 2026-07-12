@@ -196,7 +196,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   setAddressResolverConnect();
 }
 
-Steps::~Steps() {
+/*Steps::~Steps() {
   // 前置清理事件拦截
   killTimer(0);
   qApp->removeEventFilter(this);
@@ -240,6 +240,21 @@ Steps::~Steps() {
 // 安卓端额外清理
 #ifdef Q_OS_ANDROID
   stopGPSFromService();
+#endif
+}*/
+
+Steps::~Steps() {
+  // 兜底：防止外部未调用prepareDestroy的极端场景
+  if (tmeRefreshSteps) {
+    tmeRefreshSteps->stop();
+    disconnect(tmeRefreshSteps);
+  }
+  if (geoThread) {
+    geoThread->quit();
+    geoThread->wait();
+  }
+#ifdef Q_OS_MACOS
+  QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 #endif
 }
 
@@ -3478,3 +3493,43 @@ void Steps::getRemarks(const QString& strGpsTime) {
 }
 
 void Steps::refreshSteps() { updateHardSensorSteps(); }
+
+void Steps::prepareDestroy() {
+  // 1. 停止全局定时器、事件过滤器
+  killTimer(0);
+  qApp->removeEventFilter(this);
+
+  // 2. 定时器优先停止、断开
+  if (tmeRefreshSteps) {
+    if (tmeRefreshSteps->isActive()) tmeRefreshSteps->stop();
+    disconnect(tmeRefreshSteps);
+    tmeRefreshSteps = nullptr;
+  }
+
+  // 3. 断开天气单例所有指向this的信号
+  if (WeatherFetcher* fetcher = WeatherFetcher::instance()) {
+    disconnect(fetcher, nullptr, this, nullptr);
+  }
+
+  // 4. 地址解析信号切断 + 线程同步退出（阻塞等待全部任务跑完）
+  if (addressResolver) {
+    addressResolver->disconnect();
+  }
+  if (geoThread) {
+    geoThread->quit();
+    geoThread->wait();  // 同步阻塞，子线程所有排队任务执行完毕才返回
+    geoThread = nullptr;
+  }
+  delete addressResolver;
+  addressResolver = nullptr;
+
+  // Android GPS 同步停止
+#ifdef Q_OS_ANDROID
+  stopGPSFromService();
+#endif
+
+#ifdef Q_OS_MACOS
+  // macOS 排空Cocoa缓存异步事件
+  QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+#endif
+}
