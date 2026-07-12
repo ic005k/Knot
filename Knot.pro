@@ -408,6 +408,7 @@ SOURCES += \
     src/Exercise/DrawSportsFreq.cpp \
     src/Exercise/ShowSportChart.cpp \
     src/Exercise/StepHillChart.cpp \
+    src/Exercise/WeatherFetcher.cpp \
     src/JavaToQtBridge.cpp \
     src/LoadPic.cpp \
     src/MainHelper.cpp \

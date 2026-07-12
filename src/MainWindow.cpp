@@ -580,10 +580,6 @@ void MainWindow::closeEvent(QCloseEvent* event) {
   }
 #endif
 
-  if (m_Steps) {
-    m_Steps->prepareDestroy();
-  }
-
   saveNeedSyncNotes();
 
 #ifndef Q_OS_ANDROID

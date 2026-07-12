@@ -316,7 +316,20 @@ int main(int argc, char* argv[]) {
     }
   });
 
-  return app.exec();
+  int ret = app.exec();
+
+  QThread* workerThread = WeatherFetcher::instance()->workerThread();
+
+  // ✅ 1. 阻塞等待子线程执行完 shutdown
+  QMetaObject::invokeMethod(WeatherFetcher::instance(), "shutdown",
+                            Qt::BlockingQueuedConnection);
+
+  // ✅ 2. 子线程已经清理完毕，现在 quit 是安全的
+  workerThread->quit();
+  workerThread->wait();
+  workerThread->deleteLater();
+
+  return ret;
 }
 
 void loadTheme(bool isDark) {

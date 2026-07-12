@@ -169,16 +169,13 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
             // 处理错误
             qDebug() << "天气获取错误:" << error;
             strCurrentTemp = "";
-            strCurrentWeatherIcon = "";  // 补充：错误时清空图标变量，避免脏数据
+            strCurrentWeatherIcon = "";
           });
 
   // Route
   // 1. 创建独立线程（必须手动启动，且不依赖主线程）
   geoThread = new QThread(nullptr);
   geoThread->setObjectName("GeoAddressThread");
-
-  // 线程退出时自动销毁,已采用手动删除
-  // connect(geoThread, &QThread::finished, geoThread, &QObject::deleteLater);
 
   // 2. 创建 resolver，绝对不设置父对象
   addressResolver = new GeoAddressResolver(nullptr);
@@ -2669,6 +2666,8 @@ QStringList Steps::readRoute(const QString& file) {
 }
 
 void Steps::getAddress(double lat, double lon) {
+  if (!addressResolver || !geoThread || !geoThread->isRunning()) return;
+
   QGeoCoordinate gcj02Coord;
   if (isAndroid)
     gcj02Coord = wgs84ToGcj02(lat, lon);
@@ -3441,50 +3440,29 @@ void Steps::getRemarks(const QString& strGpsTime) {
 void Steps::refreshSteps() { updateHardSensorSteps(); }
 
 void Steps::prepareDestroy() {
-  // 1. 停止全局定时器、事件过滤器
-  killTimer(0);
-  qApp->removeEventFilter(this);
-
-  // 2. 定时器优先停止、断开
+  // 1. 定时器
   if (tmeRefreshSteps) {
-    if (tmeRefreshSteps->isActive()) tmeRefreshSteps->stop();
-    disconnect(tmeRefreshSteps);
+    tmeRefreshSteps->stop();
+    tmeRefreshSteps->disconnect();
+    tmeRefreshSteps->deleteLater();
     tmeRefreshSteps = nullptr;
   }
 
-  // 3. 断开天气单例所有指向this的信号
-  if (WeatherFetcher* fetcher = WeatherFetcher::instance()) {
-    disconnect(fetcher, nullptr, this, nullptr);
-  }
-
-  // 4. 地址解析信号切断 + 线程同步退出（阻塞等待全部任务跑完）
-  if (addressResolver) {
-    addressResolver->disconnect();
-  }
-
-  if (geoThread) {
+  // 2. Geo 线程
+  if (geoThread && geoThread->isRunning()) {
     geoThread->quit();
-    // 循环等待，确保线程彻底结束
-    while (!geoThread->wait(10)) {
-#ifdef Q_OS_MACOS
-      QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-#endif
-    }
-    // 手动释放，Qt不会自动管了
-    delete geoThread;
+    geoThread->wait();
+    geoThread->deleteLater();
     geoThread = nullptr;
   }
 
-  delete addressResolver;
-  addressResolver = nullptr;
+  // 3. Worker
+  if (addressResolver) {
+    addressResolver->deleteLater();
+    addressResolver = nullptr;
+  }
 
-  // Android GPS 同步停止
 #ifdef Q_OS_ANDROID
   stopGPSFromService();
-#endif
-
-#ifdef Q_OS_MACOS
-  // macOS 排空Cocoa缓存异步事件
-  QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 #endif
 }
