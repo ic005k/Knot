@@ -174,7 +174,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
 
   // Route
   // 1. 创建独立线程（必须手动启动，且不依赖主线程）
-  geoThread = new QThread();
+  geoThread = new QThread(nullptr);
   geoThread->setObjectName("GeoAddressThread");
 
   // 线程退出时自动销毁,已采用手动删除
@@ -197,77 +197,11 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   setAddressResolverConnect();
 }
 
-/*Steps::~Steps() {
-  // 前置清理事件拦截
-  killTimer(0);
-  qApp->removeEventFilter(this);
-
-  // 定时器：先停止再断开，避免已入队timeout回调执行
-  if (tmeRefreshSteps) {
-    if (tmeRefreshSteps->isActive()) tmeRefreshSteps->stop();
-    disconnect(tmeRefreshSteps);
-    tmeRefreshSteps = nullptr;
-  }
-
-  // 断开该实例所有与this相关连接，不依赖disconnect(this)简化写法
-  if (WeatherFetcher* fetcher = WeatherFetcher::instance()) {
-    disconnect(fetcher, nullptr, this, nullptr);
-  }
-
-  //////////////////////////////////////////////////////////////////////////
-
-  // 断开所有信号
-  if (addressResolver) {
-    addressResolver->disconnect();
-  }
-
-  // 停止地址解析线程，等待线程完全退出
-  if (geoThread) {
-    geoThread->quit();
-    geoThread->wait();  // 阻塞等待子线程彻底结束，队列任务全部执行完毕
-    // geoThread绑定了finished→deleteLater，无需手动delete
-    geoThread = nullptr;
-  }
-
-  // 删除 resolver（它属于子线程）
-  delete addressResolver;
-  addressResolver = nullptr;
-
-  ////////////////////////////////////////////////////////////////////////
-
-  delete m_speedometer;
-  delete compass;
-
-// 安卓端额外清理
-#ifdef Q_OS_ANDROID
-  stopGPSFromService();
-#endif
-}*/
-
 Steps::~Steps() {
 #ifdef Q_OS_MACOS
   QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 #endif
-  killTimer(0);
-  qApp->removeEventFilter(this);
-
-  // 兜底手动回收线程
-  if (geoThread) {
-    geoThread->quit();
-    while (!geoThread->wait(10)) {
-#ifdef Q_OS_MACOS
-      QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-#endif
-    }
-    delete geoThread;
-    geoThread = nullptr;
-  }
-
-  if (tmeRefreshSteps) {
-    tmeRefreshSteps->stop();
-    disconnect(tmeRefreshSteps);
-    tmeRefreshSteps = nullptr;
-  }
+  prepareDestroy();
 }
 
 void Steps::setAddressResolverConnect() {
