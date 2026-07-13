@@ -145,13 +145,13 @@ QString AppLogger::getTodayLogText() {
 
   QFileInfo fi(logFile);
   if (!fi.exists()) {
-    return "暂无今日日志";
+    return "No today's log for today.";
   }
   qint64 totalSize = fi.size();
 
   QFile f(logFile);
   if (!f.open(QIODevice::ReadOnly)) {
-    return "暂无今日日志";
+    return "No today's log for today.";
   }
 
   // 只读最后128k的内容
@@ -169,15 +169,50 @@ QString AppLogger::getTodayLogText() {
   }
   f.close();
 
-  // 截取最后一次App启动之后的日志
   const QByteArray launchFlag = "The app has started to launch...";
   int lastLaunchPos = raw.lastIndexOf(launchFlag);
+  QString finalLog;
+
   if (lastLaunchPos != -1) {
-    // 只保留最后一次启动标记及后面所有日志
-    raw = raw.mid(lastLaunchPos);
+    // 提取启动标记之前的全部日志文本
+    QByteArray preLaunchRaw = raw.left(lastLaunchPos);
+    QString preText = QString::fromUtf8(preLaunchRaw);
+    // 分割行并过滤空行
+    QStringList preLines = preText.split('\n', Qt::SkipEmptyParts);
+
+    // 最多取启动行上方5行退出日志
+    int MAX_PRE_EXIT_LINES = 5;
+#ifdef Q_OS_ANDROID
+    MAX_PRE_EXIT_LINES = 25;
+#endif
+
+    QStringList exitLines;
+    if (!preLines.isEmpty()) {
+      int startIdx = qMax(0, preLines.size() - MAX_PRE_EXIT_LINES);
+      for (int i = startIdx; i < preLines.size(); ++i) {
+        exitLines.append(preLines[i]);
+      }
+    }
+
+    QString exitSection = exitLines.join("\n");
+    QString runSection = QString::fromUtf8(raw.mid(lastLaunchPos));
+
+    // 英文分割线，仅当前置存在日志时才拼接分割线
+    if (!exitSection.isEmpty()) {
+      finalLog = exitSection;
+      finalLog +=
+          "\n==================== APP LAUNCH SEPARATOR ====================\n";
+      finalLog += runSection;
+    } else {
+      // 启动标记前0行，直接输出本次运行日志，无多余分隔线
+      finalLog = runSection;
+    }
+  } else {
+    // 未找到任何启动标记，直接输出读取到的全部日志
+    finalLog = QString::fromUtf8(raw);
   }
 
-  return QString::fromUtf8(raw);
+  return finalLog;
 }
 
 // 对外工具函数：直接复制当日日志到剪贴板
