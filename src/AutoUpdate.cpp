@@ -16,7 +16,7 @@ AutoUpdate::AutoUpdate(QWidget* parent)
   ui->lblTxt->setText(tr("Download Progress") + " : \n" + "");
 
   myfile = new QFile(this);
-  manager = new QNetworkAccessManager(this);
+  manager = new QNetworkAccessManager(nullptr);
 }
 
 bool AutoUpdate::eventFilter(QObject* watch, QEvent* evn) {
@@ -30,7 +30,26 @@ bool AutoUpdate::eventFilter(QObject* watch, QEvent* evn) {
   return QWidget::eventFilter(watch, evn);
 }
 
-AutoUpdate::~AutoUpdate() { delete ui; }
+AutoUpdate::~AutoUpdate() {
+  // 1. 中止正在进行的下载reply
+  if (reply) {
+    reply->abort();
+    reply->deleteLater();
+    reply = nullptr;
+  }
+  // 2. 销毁所有子请求
+  for (QNetworkReply* rep : manager->findChildren<QNetworkReply*>()) {
+    rep->abort();
+    rep->deleteLater();
+  }
+  // 3. 延后释放NAM，给内置网络线程退出时间
+  manager->deleteLater();
+  // 4. 关闭文件
+  if (myfile->isOpen()) myfile->close();
+  delete myfile;
+
+  delete ui;
+}
 
 void AutoUpdate::doProcessReadyRead()  // 读取并写入
 {

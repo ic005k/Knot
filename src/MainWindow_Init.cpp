@@ -92,7 +92,7 @@ void MainWindow::init_Instance() {
   m_ReceiveShare = new ReceiveShare(this);
 
   // AI
-  m_ainetMgr = new QNetworkAccessManager(this);
+  m_ainetMgr = new QNetworkAccessManager(nullptr);
   m_ainetMgr->setTransferTimeout(90000);
 
   if (m_Preferences->getDefaultFont() == "None")
@@ -142,12 +142,11 @@ void MainWindow::init_Thread_Timer() {
           &MainWindow::importDataDone);
 
   mySearchThread = new SearchThread();
-  // connect(mySearchThread, &SearchThread::isDone, this,
-  // &MainWindow::searchDone);
   connect(mySearchThread, &QThread::finished, this, &MainWindow::searchDone,
           Qt::QueuedConnection);  // 强制切主线程
 
   m_workerThread = new QThread(this);
+  m_workerThread->setObjectName("SearchWorkerThread");
   m_searchWorker = new SearchWorker();
   m_searchWorker->moveToThread(m_workerThread);
   connect(m_workerThread, &QThread::finished, m_searchWorker,

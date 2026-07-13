@@ -9,6 +9,24 @@ GeoAddressResolver::GeoAddressResolver(QObject* parent) : QObject(parent) {
   m_netMgr = new QNetworkAccessManager(this);
   connect(m_netMgr, &QNetworkAccessManager::finished, this,
           &GeoAddressResolver::onReplyFinished);
+
+  qDebug() << "[GeoAddressResolver] Created QNetworkAccessManager for reverse "
+              "geocode";
+}
+
+GeoAddressResolver::~GeoAddressResolver() {
+  qDebug() << "[GeoAddressResolver] Start cleanup m_netMgr";
+  if (!m_netMgr) return;
+
+  const auto replies = m_netMgr->findChildren<QNetworkReply*>();
+  for (QNetworkReply* rep : replies) {
+    rep->abort();
+    rep->deleteLater();
+    qDebug() << "[GeoAddressResolver] Abort pending reply";
+  }
+  m_netMgr->deleteLater();
+  m_netMgr = nullptr;
+  qDebug() << "[GeoAddressResolver] m_netMgr cleanup finished";
 }
 
 // 设置腾讯云官方API密钥

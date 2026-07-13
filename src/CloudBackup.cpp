@@ -30,8 +30,7 @@ CloudBackup::CloudBackup(QWidget* parent)
 
   init();
 
-  m_networkManager = new QNetworkAccessManager(this);  // 只创建一次！
-                                                       // 默认并发 2，全平台兼容
+  m_networkManager = new QNetworkAccessManager(nullptr);
 
   QString secret;
   // 先从环境变量读取，便于CI运行
@@ -82,10 +81,27 @@ void CloudBackup::init() {
 }
 
 CloudBackup::~CloudBackup() {
-  delete ui;
-  if (m_manager) {
-    m_manager->deleteLater();  // 释放成员变量m_manager
+  // 处理全局网络管理器 m_networkManager
+  if (m_networkManager) {
+    // 中止全部未完成请求
+    for (QNetworkReply* rep :
+         m_networkManager->findChildren<QNetworkReply*>()) {
+      rep->abort();
+      rep->deleteLater();
+    }
+    m_networkManager->deleteLater();
+    m_networkManager = nullptr;
   }
+
+  if (m_manager) {
+    for (QNetworkReply* rep : m_manager->findChildren<QNetworkReply*>()) {
+      rep->abort();
+      rep->deleteLater();
+    }
+    m_manager->deleteLater();
+    m_manager = nullptr;
+  }
+  delete ui;
 }
 
 bool CloudBackup::eventFilter(QObject* obj, QEvent* evn) {

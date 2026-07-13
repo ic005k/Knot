@@ -33,12 +33,22 @@ AboutThis::AboutThis(QWidget* parent) : QDialog(parent), ui(new Ui::AboutThis) {
       "border-image:url(:/res/apk.png) 4 4 4 4 stretch stretch;"
       "}");
 
-  manager = new QNetworkAccessManager(this);
+  manager = new QNetworkAccessManager(nullptr);
   connect(manager, SIGNAL(finished(QNetworkReply*)), this,
           SLOT(replyFinished(QNetworkReply*)));
 }
 
-AboutThis::~AboutThis() { delete ui; }
+AboutThis::~AboutThis() {
+  // 中止全部未完成请求
+  for (QNetworkReply* rep : manager->findChildren<QNetworkReply*>()) {
+    rep->abort();
+    rep->deleteLater();
+  }
+  // 延后销毁，给内置线程退出时间
+  manager->deleteLater();
+
+  delete ui;
+}
 
 bool AboutThis::eventFilter(QObject* obj, QEvent* evn) {
   QMouseEvent* event = static_cast<QMouseEvent*>(evn);

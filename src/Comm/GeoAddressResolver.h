@@ -12,6 +12,8 @@ class GeoAddressResolver : public QObject {
  public:
   explicit GeoAddressResolver(QObject* parent = nullptr);
 
+  ~GeoAddressResolver() override;
+
   // 设置腾讯云官方API密钥（仅需这一个key）
   void setTencentApiKey(const QString& apiKey);
 

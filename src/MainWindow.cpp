@@ -130,6 +130,16 @@ void MainWindow::startSyncData() {
 MainWindow::~MainWindow() {
   delete mui;
 
+  // 先退出主界面的搜索线程（非笔记搜索线程）
+  if (m_workerThread) {
+    if (m_workerThread->isRunning()) {
+      m_workerThread->quit();
+      m_workerThread->wait(2000);  // 最多等待2秒
+    }
+    // 信号槽绑定了finished自动deleteLater，这里置空即可
+    m_workerThread = nullptr;
+  }
+
   if (m_EditRecord != nullptr) {
     delete m_EditRecord;
     m_EditRecord = nullptr;
@@ -148,6 +158,20 @@ MainWindow::~MainWindow() {
   delete timerMousePress;
   delete tmeFlash;
   delete tmeStartRecordAudio;
+
+  if (m_ainetMgr) {
+    // 1. 中止所有未完成AI网络请求
+    const QList<QNetworkReply*> replies =
+        m_ainetMgr->findChildren<QNetworkReply*>();
+    for (QNetworkReply* rep : replies) {
+      rep->abort();
+      rep->deleteLater();
+      qDebug() << "[MainWindow] Abort pending AI reply";
+    }
+    // 2. 异步释放NAM，给内部网络线程退出时间
+    m_ainetMgr->deleteLater();
+    m_ainetMgr = nullptr;
+  }
 
   // ========== 1. 处理一次性线程（仅执行一次，自动退出） ==========
   // 模板函数：统一处理一次性非子对象线程（wait()等待完成 + delete释放）

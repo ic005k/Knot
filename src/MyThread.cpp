@@ -6,7 +6,9 @@
 
 MyThread::MyThread() {}
 
-ReadTWThread::ReadTWThread(QObject* parent) : QThread{parent} {}
+ReadTWThread::ReadTWThread(QObject* parent) : QThread{parent} {
+  setObjectName("ReadTWThread");
+}
 void ReadTWThread::run() {
   isReadTWEnd = false;
   MainWindow::readDataInThread(currentTabIndex);
@@ -29,7 +31,9 @@ void MainWindow::readTWDone() {
   mui->progBar->setMaximum(100);
 }
 
-ReadChartThread::ReadChartThread(QObject* parent) : QThread{parent} {}
+ReadChartThread::ReadChartThread(QObject* parent) : QThread{parent} {
+  setObjectName("ReadChartThread");
+}
 void ReadChartThread::run() {
   if (isBreak) {
     emit isDone();
@@ -99,7 +103,9 @@ void MainWindow::readChartDone() {
   //          << "qmlAmountValues=" << qmlAmountValues;
 }
 
-SaveThread::SaveThread(QObject* parent) : QThread{parent} {}
+SaveThread::SaveThread(QObject* parent) : QThread{parent} {
+  setObjectName("SaveThread");
+}
 void SaveThread::run() {
   isSaveEnd = false;
   MainWindow::SaveFile(SaveType);
@@ -119,7 +125,9 @@ void MainWindow::saveDone() {
   if (SaveType == "tab" || SaveType == "alltab") startRead(strDate);
 }
 
-UpdateGpsMapThread::UpdateGpsMapThread(QObject* parent) : QThread{parent} {}
+UpdateGpsMapThread::UpdateGpsMapThread(QObject* parent) : QThread{parent} {
+  setObjectName("UpdateGpsMapThread");
+}
 void UpdateGpsMapThread::run() {
   m_Steps->updateGpsTrack();
 
@@ -133,7 +141,9 @@ void MainWindow::updateGpsMapDone() {
 
 void GetGpsDataThread::stop() { m_running = false; }
 
-GetGpsDataThread::GetGpsDataThread(QObject* parent) : QThread{parent} {}
+GetGpsDataThread::GetGpsDataThread(QObject* parent) : QThread{parent} {
+  setObjectName("GetGpsDataThread");
+}
 void GetGpsDataThread::run() {
   m_running = true;  // 启动循环标记
 
@@ -154,7 +164,9 @@ void GetGpsDataThread::run() {
 
 void MainWindow::GetGpsDataThreadDone() { m_Steps->updateGpsUI(); }
 
-ReadEBookThread::ReadEBookThread(QObject* parent) : QThread{parent} {}
+ReadEBookThread::ReadEBookThread(QObject* parent) : QThread{parent} {
+  setObjectName("ReadEBookThread");
+}
 void ReadEBookThread::run() {
   isReadEBookEnd = false;
 
@@ -199,7 +211,9 @@ void MainWindow::readEBookDone() {
   isReadEBookEnd = true;
 }
 
-SearchThread::SearchThread(QObject* parent) : QThread{parent} {}
+SearchThread::SearchThread(QObject* parent) : QThread{parent} {
+  setObjectName("SearchThread");
+}
 void SearchThread::run() {
   // m_Method->startSearch();
 
@@ -213,7 +227,9 @@ void MainWindow::searchDone() {
   mw_one->safeCloseProgress();
 }
 
-ImportDataThread::ImportDataThread(QObject* parent) : QThread{parent} {}
+ImportDataThread::ImportDataThread(QObject* parent) : QThread{parent} {
+  setObjectName("ImportDataThread");
+}
 void ImportDataThread::run() {
   if (isMenuImport || isDownData) mw_one->importBakData(zipfile);
 
@@ -276,7 +292,9 @@ void MainWindow::importDataDone() {
   msg->showMsg("Knot", tr("Data import was successful."), 1);
 }
 
-BakDataThread::BakDataThread(QObject* parent) : QThread{parent} {}
+BakDataThread::BakDataThread(QObject* parent) : QThread{parent} {
+  setObjectName("BakDataThread");
+}
 void BakDataThread::run() {
   mw_one->bakData();
 
