@@ -556,11 +556,7 @@ Rectangle {
         // 滚动条优化：仅保留背景适配，移除handle自定义，解决无效竖线问题
         ScrollBar.vertical: ScrollBar {
             policy: ScrollBar.AsNeeded
-            width: 18
-            // 仅保留背景色适配，滑块使用Qt默认样式，无视觉bug
-            //background: Rectangle {
-            //    color: isDark ? "#2D3748" : "#F0F0F0"
-            //}
+            width: 12
         }
     }
 }

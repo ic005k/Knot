@@ -486,7 +486,7 @@ void NoteRelationParser::onParsedDataReady(
            << relations.size();
 
   QFont font = mw_one->font();
-  font.setPointSize(11);
+  font.setPointSize(fontSize - 1);
   mui->lblNoteGraphView->setFont(font);
   mui->lblNoteGraphView->setText(
       tr("Nodes") + ": " + QString::number(nodes.size()) + "  " +

@@ -408,7 +408,7 @@ Rectangle {
         // 滚动条
         ScrollBar.vertical: ScrollBar {
             policy: ScrollBar.AsNeeded
-            width: 8
+            width: Qt.platform.os === "android" ? 12 : 12
         }
     }
 

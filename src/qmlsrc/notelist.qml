@@ -204,7 +204,7 @@ Rectangle {
                     view.currentIndex = index;
                     for (var i = 0; i < view.count; i++) {}
                     m_NotesList.clickNoteList();
-                    m_NotesList.mouseClickNoteList()
+                    m_NotesList.mouseClickNoteList();
                 }
 
                 // 长按（替代 onPressAndHold）
@@ -457,7 +457,7 @@ Rectangle {
         // 滚动条
         ScrollBar.vertical: ScrollBar {
             policy: ScrollBar.AsNeeded
-            width: 8
+            width: Qt.platform.os === "android" ? 12 : 12
         }
     }
 }
