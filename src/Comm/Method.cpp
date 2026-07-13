@@ -918,7 +918,7 @@ QDialog* Method::getProgBar() {
   font.setBold(true);
   font.setPointSize(9);
   lbl->setFont(font);
-  lbl->setText(tr("Reading, please wait..."));
+  lbl->setText(tr("Processing..."));
   lbl->setAlignment(Qt::AlignHCenter);  // | Qt::AlignVCenter);
   vbox->addWidget(lbl);
 
