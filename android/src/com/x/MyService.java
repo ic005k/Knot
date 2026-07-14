@@ -756,10 +756,6 @@ public class MyService extends Service {
         }
     }
 
-    public static int getHardStepCounter() {
-        return isStepCounter;
-    }
-
     public static float getSteps() {
         return stepCounts;
     }

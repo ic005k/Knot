@@ -33,7 +33,7 @@ ShowMessage::ShowMessage(QWidget* parent)
   auto* quickWindow = ui->qwShowMsg->quickWindow();
   QObject::connect(
       quickWindow, &QQuickWindow::afterRendering, this,
-      [this]() { mw_one->safeCloseProgress(); },
+      []() { mw_one->safeCloseProgress(); },
       Qt::SingleShotConnection  // 自动断开
   );
 
@@ -177,7 +177,7 @@ bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
 
   // 计算高度、初始化弹窗尺寸（窗口隐藏状态下计算，无GL surface争夺）
   int textH = getTextEditContentHeight(ui->editMsg);
-  int adaptiveDlgH = calcDialogTotalHeight(textH, btnCount);
+  int adaptiveDlgH = calcDialogTotalHeight(textH);
   init(btnCount, adaptiveDlgH);
 
   this->exec();
@@ -272,7 +272,7 @@ int ShowMessage::getTextEditContentHeight(QTextEdit* edit) {
   return docH + margins.top() + margins.bottom();
 }
 
-int ShowMessage::calcDialogTotalHeight(int textH, int btnCount) {
+int ShowMessage::calcDialogTotalHeight(int textH) {
   // 固定UI高度常量，根据你的ui布局微调数值
   const int titleHeight = ui->lblTitle->sizeHint().height();  // 标题高度
   const int titleMarginTop = 12;                              // 标题上边距

@@ -450,7 +450,6 @@ public class MyActivity
                 // 权限请求（仅首次创建执行）
                 if (!isConfigChangeRecreate) {
                     requestPermission();
-                    requestSensorPermission();
                 }
 
                 // 注册广播接收器（配置变更重构时重新注册）
@@ -1084,7 +1083,6 @@ public class MyActivity
                     // 权限授予后初始化传感器
                     MyService service = MyService.getInstance();
                     if (service != null) {
-                        //service.initStepSensor(); // 改为实例调用，而非静态
                         service.initStepSensor(getApplicationContext());
                     }
                 } else {
@@ -1148,7 +1146,7 @@ public class MyActivity
         Log.i(TAG, "dest  " + FileName);
 
         int result = 0;
-        if ((srcPath == null) || (FileName == null)) {
+        if (srcPath == null || FileName == null) {
             return result;
         }
         File src = new File(srcPath);
@@ -1597,9 +1595,8 @@ public class MyActivity
 
     public void openMapWindow() {
         // 1. 根据MapType选择目标地图Activity
-        Class<?> targetActivity = (MapType == 1)
-            ? MapActivity.class
-            : TencentMapActivity.class;
+        Class<?> targetActivity =
+            MapType == 1 ? MapActivity.class : TencentMapActivity.class;
 
         // 2. 创建Intent，核心添加"移到前台"标志
         Intent intent = new Intent(getMyAppContext(), targetActivity);
@@ -2694,5 +2691,89 @@ public class MyActivity
     public static float getSystemFontScale(Context context) {
         Configuration cfg = context.getResources().getConfiguration();
         return cfg.fontScale;
+    }
+
+    public static int getHardStepCounter() {
+        Context ctx = getMyAppContext();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            return MyService.isStepCounter;
+        }
+
+        String perm = Manifest.permission.ACTIVITY_RECOGNITION;
+        int permStatus = ContextCompat.checkSelfPermission(ctx, perm);
+        if (permStatus != PackageManager.PERMISSION_GRANTED) {
+            MyService.isStepCounter = 0;
+            MyActivity activity = m_instance;
+            // 无有效前台Activity直接返回，不弹窗
+            if (
+                activity == null ||
+                activity.isFinishing() ||
+                activity.isDestroyed()
+            ) {
+                return MyService.isStepCounter;
+            }
+            boolean needRationale =
+                ActivityCompat.shouldShowRequestPermissionRationale(
+                    activity,
+                    perm
+                );
+            activity.runOnUiThread(() -> {
+                try {
+                    // 系统原生弹窗，无AppCompat主题依赖
+                    if (needRationale) {
+                        new android.app.AlertDialog.Builder(activity)
+                            .setMessage(
+                                zh_cn
+                                    ? "需要运动权限才能统计每日步数，请授予权限"
+                                    : "Activity recognition permission is required to record daily steps"
+                            )
+                            .setPositiveButton(
+                                zh_cn ? "去授权" : "Allow",
+                                (dialog, which) -> {
+                                    activity.requestPermissions(
+                                        new String[] { perm },
+                                        REQ_ACTIVITY_RECOGNITION
+                                    );
+                                }
+                            )
+                            .setNegativeButton(
+                                zh_cn ? "稍后再说" : "Later",
+                                null
+                            )
+                            .show();
+                    } else {
+                        new android.app.AlertDialog.Builder(activity)
+                            .setMessage(
+                                zh_cn
+                                    ? "运动权限已被永久禁用，请前往系统设置手动开启"
+                                    : "Activity permission is permanently denied, please enable it in system settings"
+                            )
+                            .setPositiveButton(
+                                zh_cn ? "去设置" : "Settings",
+                                (dialog, which) -> {
+                                    Intent intent = new Intent(
+                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                    );
+                                    intent.setData(
+                                        Uri.parse(
+                                            "package:" +
+                                                activity.getPackageName()
+                                        )
+                                    );
+                                    activity.startActivity(intent);
+                                }
+                            )
+                            .setNegativeButton(zh_cn ? "取消" : "Cancel", null)
+                            .show();
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "步数权限弹窗异常，跳过弹窗", e);
+                }
+            });
+            return MyService.isStepCounter;
+        }
+
+        MyService.initStepSensor(ctx);
+        return MyService.isStepCounter;
     }
 }

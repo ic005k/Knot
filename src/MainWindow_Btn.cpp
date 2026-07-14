@@ -336,9 +336,10 @@ void MainWindow::on_btnBackNoteList_clicked() {
   QTimer::singleShot(0, this, [this]() {
     // 找到页面内所有QQuickWidget
     auto quickWidgets = mui->frameNoteList->findChildren<QQuickWidget*>();
-    for (auto w : quickWidgets) {
-      w->blockSignals(true);                 // 拦截resizeEvent
-      w->quickWindow()->releaseResources();  // 主动销毁RHI/FBO缓冲
+    for (auto it = quickWidgets.cbegin(); it != quickWidgets.cend(); ++it) {
+      QQuickWidget* w = *it;
+      w->blockSignals(true);
+      w->quickWindow()->releaseResources();
     }
 
     // 再执行显示/隐藏，此时无活跃离屏渲染任务
@@ -346,7 +347,8 @@ void MainWindow::on_btnBackNoteList_clicked() {
     mui->frameNoteList->hide();
 
     // 恢复信号
-    for (auto w : quickWidgets) {
+    for (auto it = quickWidgets.cbegin(); it != quickWidgets.cend(); ++it) {
+      QQuickWidget* w = *it;
       w->blockSignals(false);
     }
   });
@@ -576,9 +578,8 @@ Rules:
     // 无GPS定位：只用通用常识模板
     fullPrompt = promptCommon.arg(langCode) + "\nRandom tag: " + randomTag;
   } else {
-    // 已有稳定GPS经纬度：传入坐标，生成带天气的运动建议
-    fullPrompt = promptInSport.arg(langCode).arg(trimText) +
-                 "\nRandom tag: " + randomTag;
+    fullPrompt =
+        promptInSport.arg(langCode, trimText) + "\nRandom tag: " + randomTag;
   }
 
   aiChatQuery(fullPrompt);

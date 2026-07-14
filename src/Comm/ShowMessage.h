@@ -46,7 +46,7 @@ class ShowMessage : public QDialog {
   // 根据文本内容获取QTextEdit完整内容高度
   int getTextEditContentHeight(QTextEdit* edit);
   // 计算对话框所需总高度
-  int calcDialogTotalHeight(int textH, int btnCount);
+  int calcDialogTotalHeight(int textH);
 };
 
 #endif  // SHOWMESSAGE_H

@@ -116,7 +116,9 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   m_stepChart->setStepData(m_stepData);
 
   getHardStepSensor();
-  if (isHardStepSensor == 1) resetSteps = getAndroidSteps();
+  if (isHardStepSensor == 1) {
+    resetSteps = getAndroidSteps();
+  }
 
   // Speed
   m_speedometer = new Speedometer(this);
@@ -386,6 +388,19 @@ void Steps::openStepsUI() {
   } else {
     mui->btnAISteps->hide();
     mui->btnAIExerciseSuggestions->hide();
+  }
+
+  if (isAndroid) {
+    getHardStepSensor();
+
+    if (isHardStepSensor == 0) {
+      mui->tabMotion->setTabEnabled(0, false);
+      mui->tabMotion->setCurrentIndex(1);
+    }
+    if (isHardStepSensor == 1) {
+      mui->lblSteps->hide();
+      mui->tabMotion->setTabEnabled(0, true);
+    }
   }
 
   updateHardSensorSteps();
@@ -2212,11 +2227,6 @@ void Steps::appendToCSV(const QString& filePath, const QStringList& data) {
 }
 
 void Steps::updateHardSensorSteps() {
-  if (isAndroid) {
-    getHardStepSensor();
-    if (isHardStepSensor != 1) return;
-  }
-
   qDebug() << "Started updating the hardware sensor steps...";
 
   strDate = m_Method->setCurrentDateValue();
@@ -2318,16 +2328,7 @@ qlonglong Steps::getOldSteps() {
 void Steps::getHardStepSensor() {
 #ifdef Q_OS_ANDROID
   isHardStepSensor = QJniObject::callStaticMethod<int>(
-      "com.x/MyService", "getHardStepCounter", "()I");
-
-  if (isHardStepSensor == 0) {
-    mui->btnReset->setHidden(true);
-    mui->tabMotion->setTabEnabled(0, false);
-    mui->tabMotion->setCurrentIndex(1);
-  }
-  if (isHardStepSensor == 1) {
-    mui->lblSteps->hide();
-  }
+      "com.x/MyActivity", "getHardStepCounter", "()I");
 #endif
 }
 
