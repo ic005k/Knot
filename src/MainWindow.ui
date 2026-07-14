@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>698</width>
-    <height>9742</height>
+    <height>10592</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -347,7 +347,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="btnCatalogue">
+             <widget class="QToolButton" name="btnBookCata">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -1256,7 +1256,7 @@ border-radius: 4px;</string>
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>0</height>
+           <height>50</height>
           </size>
          </property>
          <property name="resizeMode">
@@ -1272,18 +1272,30 @@ border-radius: 4px;</string>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>50</height>
+          </size>
+         </property>
          <property name="resizeMode">
           <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QQuickWidget" name="qwCata">
+        <widget class="QQuickWidget" name="qwBookCata">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>50</height>
+          </size>
          </property>
          <property name="resizeMode">
           <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
@@ -1297,6 +1309,12 @@ border-radius: 4px;</string>
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>50</height>
+          </size>
          </property>
          <property name="resizeMode">
           <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>

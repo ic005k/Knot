@@ -188,7 +188,7 @@ void Reader::startOpenFile(QString openfile) {
     mui->btnReader->setEnabled(false);
     mui->f_ReaderFun->setEnabled(false);
     mui->lblTitle->hide();
-    mui->qwCata->hide();
+    mui->qwBookCata->hide();
     mui->lblCataInfo->hide();
 
     QString bookName;
@@ -1004,11 +1004,11 @@ bool Reader::getLandscape() {
 
   QFileInfo fiHtml(currentHtmlFile);
   if (isEpub) {
-    if (mui->qwCata->isVisible()) {
+    if (mui->qwBookCata->isVisible()) {
       textPos = Reg.value("/Reader/vpos  CataVPos", 0).toReal();
       int index = Reg.value("/Reader/vpos  CataIndex", 0).toReal();
       if (currentCataIndex > 0) index = currentCataIndex;
-      m_Method->setCurrentIndexFromQW(mui->qwCata, index);
+      m_Method->setCurrentIndexFromQW(mui->qwBookCata, index);
     } else {
       if (htmlIndex >= 0)
         textPos = Reg.value("/Reader/vpos" + fiHtml.baseName(), 0).toReal();
@@ -1051,9 +1051,9 @@ void Reader::savePageVPos() {
   QFileInfo fiHtml(currentHtmlFile);
   textPos = getVPos();
   if (isEpub) {
-    if (mui->qwCata->isVisible()) {
+    if (mui->qwBookCata->isVisible()) {
       Reg.setValue("/Reader/vpos  CataVPos", textPos);
-      int index = m_Method->getCurrentIndexFromQW(mui->qwCata);
+      int index = m_Method->getCurrentIndexFromQW(mui->qwBookCata);
       Reg.setValue("/Reader/vpos  CataIndex", index);
     } else {
       if (htmlIndex >= 0) {
@@ -1097,11 +1097,11 @@ void Reader::setPageVPos() {
 
   QFileInfo fiHtml(currentHtmlFile);
   if (isEpub) {
-    if (mui->qwCata->isVisible()) {
+    if (mui->qwBookCata->isVisible()) {
       textPos = Reg.value("/Reader/vpos  CataVPos", 0).toReal();
       int index = Reg.value("/Reader/vpos  CataIndex", 0).toReal();
       if (currentCataIndex > 0) index = currentCataIndex;
-      m_Method->setCurrentIndexFromQW(mui->qwCata, index);
+      m_Method->setCurrentIndexFromQW(mui->qwBookCata, index);
     } else {
       if (htmlIndex >= 0) {
         textPos = Reg.value("/Reader/vpos" + fiHtml.baseName(), 0).toReal();
@@ -1159,8 +1159,8 @@ void Reader::setPageVPos() {
 
 void Reader::setVPos(qreal pos) {
   QQuickItem* root;
-  if (mui->qwCata->isVisible())
-    root = mui->qwCata->rootObject();
+  if (mui->qwBookCata->isVisible())
+    root = mui->qwBookCata->rootObject();
   else
     root = mui->qwReader->rootObject();
 
@@ -1171,8 +1171,8 @@ qreal Reader::getVPos() {
   QVariant itemCount;
 
   QQuickItem* root;
-  if (mui->qwCata->isVisible())
-    root = mui->qwCata->rootObject();
+  if (mui->qwBookCata->isVisible())
+    root = mui->qwBookCata->rootObject();
   else
     root = mui->qwReader->rootObject();
 
@@ -1882,13 +1882,13 @@ void Reader::readBookDone() {
     if (isEpub) {
       mui->lblInfo->show();
       if (QFile(catalogueFile).exists()) {
-        mui->btnCatalogue->show();
+        mui->btnBookCata->show();
       } else
-        mui->btnCatalogue->hide();
+        mui->btnBookCata->hide();
     }
 
     if (isText) {
-      mui->btnCatalogue->hide();
+      mui->btnBookCata->hide();
       mui->lblInfo->hide();
     }
   }
@@ -1913,7 +1913,7 @@ void Reader::readBookDone() {
     mui->qwReader->hide();
     mui->f_ReaderFun->show();
     mui->btnPages->hide();
-    mui->btnCatalogue->hide();
+    mui->btnBookCata->hide();
 
 #ifdef Q_OS_ANDROID
 
@@ -2492,24 +2492,6 @@ void Reader::setTextAreaCursorPos(int nCursorPos) {
   root = mui->qwReader->rootObject();
   QMetaObject::invokeMethod((QObject*)root, "setTextAreaCursorPos",
                             Q_ARG(QVariant, nCursorPos));
-}
-
-void Reader::showOrHideBookmark() {
-  mui->btnAutoStop->click();
-
-  if (mui->f_ReaderSet->isVisible()) {
-    mw_one->on_btnBackReaderSet_clicked();
-  }
-  if (mui->qwBookmark->isHidden()) {
-    mui->qwReader->hide();
-    mui->qwBookmark->show();
-    showBookmarkList();
-    mui->btnCatalogue->setEnabled(false);
-  } else {
-    mui->qwBookmark->hide();
-    mui->qwReader->show();
-    mui->btnCatalogue->setEnabled(true);
-  }
 }
 
 void Reader::on_SetReaderFunVisible() {

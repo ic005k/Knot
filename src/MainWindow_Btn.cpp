@@ -135,28 +135,22 @@ void MainWindow::on_btnRecentOpen_clicked() {
 
 void MainWindow::on_btnMenuReport_clicked() { m_Report->genReportMenu(); }
 
-void MainWindow::on_btnCatalogue_clicked() {
+void MainWindow::on_btnBookCata_clicked() {
   if (mui->lblBookName->text() == "Book Name") return;
 
-  if (mui->qwViewBookNote->isVisible()) return;
-  if (mui->qwBookmark->isVisible()) return;
-
   mui->btnAutoStop->click();
-
   if (mui->f_ReaderSet->isVisible()) {
     on_btnBackReaderSet_clicked();
   }
+
   m_Reader->showCatalogue();
 }
 
-void MainWindow::on_btnRemoveBookList_clicked() { m_Reader->removeBookList(); }
-
 void MainWindow::on_btnShowBookmark_clicked() {
-  if (mui->qwViewBookNote->isVisible()) return;
-  if (mui->qwCata->isVisible()) return;
-
   m_Reader->showOrHideBookmark();
 }
+
+void MainWindow::on_btnRemoveBookList_clicked() { m_Reader->removeBookList(); }
 
 void MainWindow::on_btnShareImage_clicked() {
   m_ReceiveShare->shareImage(tr("Share to"), bookimgFileName, "image/png");
@@ -219,7 +213,10 @@ void MainWindow::on_btnGoPage_clicked() { m_ReaderSet->on_btnGoPage_clicked(); }
 void MainWindow::on_btnShareBook_clicked() { m_Reader->shareBook(); }
 
 void MainWindow::on_btnAutoRun_clicked() {
-  if (mui->qwViewBookNote->isVisible()) return;
+  mui->qwViewBookNote->hide();
+  mui->qwBookCata->hide();
+  mui->qwBookmark->hide();
+  mui->qwReader->show();
 
   if (!m_Reader->isAutoRun) {
     mui->qwReader->rootContext()->setContextProperty("isAutoRun", true);
@@ -796,9 +793,7 @@ void MainWindow::on_btnCopyNoteLink_clicked() {
 }
 
 void MainWindow::on_btnRotation_clicked() {
-  if (mui->lblBookName->text() == "Book Name") return;
-
-  if (mui->qwViewBookNote->isVisible()) return;
+  if (mui->qwReader->isHidden()) return;
 
   QQuickItem* rootItem = mui->qwReader->rootObject();
   QQuickItem* orientationButton =
@@ -1023,21 +1018,17 @@ void MainWindow::on_btnPageUp_clicked() { m_Reader->goUpPage(); }
 void MainWindow::on_btnPageNext_clicked() { m_Reader->goNextPage(); }
 
 void MainWindow::on_btnPages_clicked() {
-  if (mui->qwViewBookNote->isVisible()) return;
-
-  mui->btnAutoStop->click();
-
-  if (mui->qwCata->isVisible()) return;
-
   if (mui->f_ReaderSet->isHidden()) {
     mui->lblTotalReading->setText(tr("Total Reading: ") +
                                   m_Reader->getReadTotalTime() + " h");
+    mui->btnAutoStop->click();
+    mui->qwViewBookNote->hide();
+    mui->qwBookCata->hide();
+    mui->qwBookmark->hide();
+    mui->qwReader->show();
     mui->f_ReaderSet->show();
 
     m_Reader->closeSelText();
-    if (mui->qwBookmark->isVisible()) {
-      on_btnShowBookmark_clicked();
-    }
 
     QStringList list = mui->btnPages->text().split("\n");
     if (list.count() == 2) {
@@ -1334,8 +1325,8 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (mui->qwCata->isVisible()) {
-    mw_one->on_btnCatalogue_clicked();
+  if (mui->qwBookCata->isVisible()) {
+    mw_one->on_btnBookCata_clicked();
     return;
   }
 

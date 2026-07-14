@@ -506,8 +506,8 @@ void MainWindow::get_Today(QTreeWidget* tw) {
 }
 
 void MainWindow::closeEvent(QCloseEvent* event) {
-  if (mui->qwCata->isVisible()) {
-    on_btnCatalogue_clicked();
+  if (mui->qwBookCata->isVisible()) {
+    on_btnBookCata_clicked();
     event->ignore();
     return;
   }

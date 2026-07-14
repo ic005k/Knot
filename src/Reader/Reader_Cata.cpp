@@ -4,25 +4,27 @@ void Reader::showCatalogue() {
   closeSelText();
   savePageVPos();
 
-  if (mui->qwCata->isVisible()) {
+  if (mui->qwBookCata->isVisible()) {
     mui->lblCataInfo->hide();
-    mui->qwCata->hide();
+    mui->qwBookCata->hide();
+    mui->qwBookmark->hide();
+    mui->qwViewBookNote->hide();
     mui->qwReader->show();
-    mui->btnShowBookmark->setEnabled(true);
 
   } else {
     mui->qwReader->hide();
+    mui->qwViewBookNote->hide();
+    mui->qwBookmark->hide();
     mui->lblCataInfo->show();
-    mui->qwCata->show();
-    mui->btnShowBookmark->setEnabled(false);
+    mui->qwBookCata->show();
 
-    m_Method->clearAllBakList(mui->qwCata);
+    m_Method->clearAllBakList(mui->qwBookCata);
     for (int i = 0; i < ncxList.count(); i++) {
       QString item = ncxList.at(i);
       QString str0, str1;
       str0 = item.split("===").at(0);
       str1 = item.split("===").at(1);
-      m_Method->addItemToQW(mui->qwCata, str0, str1, "", "", 0);
+      m_Method->addItemToQW(mui->qwBookCata, str0, str1, "", "", 0);
     }
   }
 
@@ -45,10 +47,10 @@ void Reader::gotoCataList(QString htmlFile) {
 void Reader::openCataList(QString htmlFile) {
   savePageVPos();
   mui->lblCataInfo->hide();
-  mui->qwCata->hide();
+  mui->qwBookCata->hide();
   mui->qwReader->show();
   mui->btnShowBookmark->setEnabled(true);
 
   initLink(htmlFile);
-  m_Method->clearAllBakList(mui->qwCata);
+  m_Method->clearAllBakList(mui->qwBookCata);
 }

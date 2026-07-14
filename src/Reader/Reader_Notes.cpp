@@ -280,6 +280,7 @@ void Reader::viewBookNote() {
   mui->qwViewBookNote->show();
   appendNoteDataToQmlList();
 
+  mui->btnAutoStop->click();
   mui->btnBackReaderSet->click();
 }
 

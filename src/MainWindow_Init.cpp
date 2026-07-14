@@ -215,7 +215,7 @@ void MainWindow::init_ButtonStyle() {
 
   // Reader
   setToolButtonAnimation(mui->btnBackReader, true);
-  setToolButtonAnimation(mui->btnCatalogue, true);
+  setToolButtonAnimation(mui->btnBookCata, true);
   setToolButtonAnimation(mui->btnShowBookmark, true);
   setToolButtonAnimation(mui->btnAutoRun, true);
   setToolButtonAnimation(mui->btnAutoStop, true);
@@ -237,7 +237,7 @@ void MainWindow::init_ButtonStyle() {
     // Reader
     mui->btnBackReader->setIcon(QIcon(":/res/reader/exit_l.svg"));
     mui->btnRotation->setIcon(QIcon(":/res/reader/rotation_l.svg"));
-    mui->btnCatalogue->setIcon(QIcon(":/res/reader/cata_l.svg"));
+    mui->btnBookCata->setIcon(QIcon(":/res/reader/cata_l.svg"));
     mui->btnShowBookmark->setIcon(QIcon(":/res/reader/bookmark_l.svg"));
     mui->btnAutoRun->setIcon(QIcon(":/res/reader/run_l.svg"));
     mui->btnAutoStop->setIcon(QIcon(":/res/reader/stop_l.svg"));
@@ -266,7 +266,7 @@ void MainWindow::init_ButtonStyle() {
     // Reader
     mui->btnBackReader->setIcon(QIcon(":/res/reader/exit.svg"));
     mui->btnRotation->setIcon(QIcon(":/res/reader/rotation.svg"));
-    mui->btnCatalogue->setIcon(QIcon(":/res/reader/cata.svg"));
+    mui->btnBookCata->setIcon(QIcon(":/res/reader/cata.svg"));
     mui->btnShowBookmark->setIcon(QIcon(":/res/reader/bookmark.svg"));
     mui->btnAutoRun->setIcon(QIcon(":/res/reader/run.svg"));
     mui->btnAutoStop->setIcon(QIcon(":/res/reader/stop.svg"));
@@ -363,10 +363,10 @@ void MainWindow::initMainQW() {
         QUrl(QStringLiteral("qrc:/src/qmlsrc/bookmark.qml")));
   }
 
-  if (mui->qwCata->source().isEmpty()) {
-    mui->qwCata->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwCata->rootContext()->setContextProperty("m_Reader", m_Reader);
-    mui->qwCata->setSource(
+  if (mui->qwBookCata->source().isEmpty()) {
+    mui->qwBookCata->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwBookCata->rootContext()->setContextProperty("m_Reader", m_Reader);
+    mui->qwBookCata->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/epub_cata.qml")));
   }
 
@@ -634,7 +634,7 @@ void MainWindow::init_Theme() {
   mui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
   mui->qwReport->rootContext()->setContextProperty("isDark", isDark);
 
-  mui->qwCata->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwBookCata->rootContext()->setContextProperty("isDark", isDark);
   mui->qwBookmark->rootContext()->setContextProperty("isDark", isDark);
   mui->qwReader->rootContext()->setContextProperty("isDark", isDark);
   mui->qwViewBookNote->rootContext()->setContextProperty("isDark", isDark);
@@ -781,7 +781,7 @@ void MainWindow::init_UIWidget() {
   mui->btnFindNextNote->setEnabled(false);
   mui->btnFindPreviousNote->setEnabled(false);
   mui->frameNotesTree->hide();
-  mui->qwCata->hide();
+  mui->qwBookCata->hide();
   mui->qwBookmark->hide();
   mui->frameDiff->hide();
 

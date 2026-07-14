@@ -501,7 +501,7 @@ class MainWindow : public QMainWindow {
  public slots:
   void safeCloseProgress();
 
-  void on_btnCatalogue_clicked();
+  void on_btnBookCata_clicked();
 
   void on_btnHome_clicked();
 

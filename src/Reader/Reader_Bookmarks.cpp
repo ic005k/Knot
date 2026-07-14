@@ -1,5 +1,27 @@
 #include "Reader.h"
 
+void Reader::showOrHideBookmark() {
+  if (mui->qwBookmark->isHidden()) {
+    mui->btnAutoStop->click();
+
+    if (mui->f_ReaderSet->isVisible()) {
+      mw_one->on_btnBackReaderSet_clicked();
+    }
+
+    mui->qwReader->hide();
+    mui->qwBookCata->hide();
+    mui->qwViewBookNote->hide();
+    mui->qwBookmark->show();
+    showBookmarkList();
+
+  } else {
+    mui->qwBookCata->hide();
+    mui->qwViewBookNote->hide();
+    mui->qwBookmark->hide();
+    mui->qwReader->show();
+  }
+}
+
 void Reader::showBookmarkList() {
   QStringList list = getCurrentBookmarkList();
   m_Method->clearAllBakList(mui->qwBookmark);
@@ -52,7 +74,7 @@ void Reader::clickBookmarkList(int i) {
 
   mui->qwBookmark->hide();
   mui->qwReader->show();
-  mui->btnCatalogue->setEnabled(true);
+  mui->btnBookCata->setEnabled(true);
 }
 
 QStringList Reader::getCurrentBookmarkList() {
