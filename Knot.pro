@@ -370,6 +370,7 @@ SOURCES += \
 
 SOURCES += \
     lib/diff/diff_match_patch.cpp \
+    lib/sqlite/sqlite3.c \
     lib/zlib/adler32.c \
     lib/zlib/compress.c \
     lib/zlib/crc32.c \
@@ -385,6 +386,10 @@ SOURCES += \
     lib/zlib/trees.c \
     lib/zlib/uncompr.c \
     lib/zlib/zutil.c \
+    src/AI/AiModelDeployer.cpp \
+    src/AI/GlobalAI.cpp \
+    src/AI/OrtEmbeddingEngine.cpp \
+    src/AI/VectorDb.cpp \
     src/AboutThis.cpp \
     src/AutoUpdate.cpp \
     src/CategoryList.cpp \
@@ -646,6 +651,8 @@ HEADERS += \
 
 HEADERS += \
     lib/diff/diff_match_patch.h \
+    lib/sqlite/sqlite3.h \
+    lib/sqlite/sqlite3ext.h \
     lib/zlib/crc32.h \
     lib/zlib/deflate.h \
     lib/zlib/gzguts.h \
@@ -657,6 +664,11 @@ HEADERS += \
     lib/zlib/zconf.h \
     lib/zlib/zlib.h \
     lib/zlib/zutil.h \
+    src/AI/AiModelDeployer.h \
+    src/AI/BaseEmbeddingEngine.h \
+    src/AI/GlobalAI.h \
+    src/AI/OrtEmbeddingEngine.h \
+    src/AI/VectorDb.h \
     src/AboutThis.h \
     src/AutoUpdate.h \
     src/CategoryList.h \
@@ -841,6 +853,41 @@ macx {
     INCLUDEPATH += $${OPENSSL_PREFIX}/include
     LIBS += -L$${OPENSSL_PREFIX}/lib -lssl -lcrypto
 
+}
+
+############################## sqlite3 ####################################
+
+# 向量检索总开关，true启用sqlite3+sqlite-vec向量库，false完全跳过
+VECTOR_SEARCH = true
+
+equals(VECTOR_SEARCH, true) {
+    # ====== 1. sqlite3 源码配置 ======
+    INCLUDEPATH += $$PWD/lib/sqlite
+    SOURCES += $$PWD/lib/sqlite/sqlite3.c
+
+    # SQLite 编译宏：瘦身 + 开启扩展加载支持
+    DEFINES += \
+        SQLITE_THREADSAFE=1 \
+        SQLITE_ENABLE_LOAD_EXTENSION \
+        SQLITE_OMIT_JSON \
+        SQLITE_OMIT_CTE \
+        SQLITE_OMIT_FTS5 \
+        SQLITE_OMIT_GEOPOLY
+
+    # ====== 2. sqlite-vec 向量扩展配置 ======
+    INCLUDEPATH += $$PWD/lib/sqlite_vec
+    SOURCES += $$PWD/lib/sqlite_vec/sqlite-vec.c
+
+    # 静态编译关键宏：避免Windows dllexport符号报错
+    DEFINES += SQLITE_VEC_STATIC
+
+    # 全局标记，代码里 #ifdef VECTOR_SEARCH 用
+    DEFINES += VECTOR_SEARCH
+
+    # Windows 底层系统依赖库
+    win32 {
+        LIBS += -lshell32
+    }
 }
 
 ###########################################################################

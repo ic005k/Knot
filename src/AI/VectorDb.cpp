@@ -1,0 +1,128 @@
+#ifdef VECTOR_SEARCH
+#include "VectorDb.h"
+
+#include <sqlite3.h>
+
+#include <QByteArray>
+#include <QVariant>
+#include <cmath>
+
+#include "sqlite-vec.h"
+
+// 下面你全部原有代码不动，完整保留
+static int sqlCallback(void* res, int colCnt, char** colData, char** colName) {
+  auto result = (QList<QPair<QString, float>>*)res;
+  QString noteId = colData[0];
+  float score = std::atof(colData[1]);
+  result->append({noteId, score});
+  return 0;
+}
+
+VectorDb::VectorDb() = default;
+VectorDb::~VectorDb() { close(); }
+
+bool VectorDb::open(const QString& dbPath) {
+  int rc = sqlite3_open_v2(dbPath.toUtf8().data(), &m_db,
+                           SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nullptr);
+  if (rc != SQLITE_OK) return false;
+  sqlite3_enable_load_extension(m_db, 1);
+  // 【关键修改】静态编译替换，删除sqlite3_load_extension
+  sqlite3_auto_extension((void (*)(void))sqlite3_vec_init);
+  return initTable();
+}
+
+void VectorDb::close() {
+  if (m_db) sqlite3_close(m_db);
+  m_db = nullptr;
+}
+
+bool VectorDb::initTable() {
+  const char* createSql = R"(
+    CREATE TABLE IF NOT EXISTS note_vec (note_id TEXT PRIMARY KEY);
+    CREATE VIRTUAL TABLE IF NOT EXISTS vec_index USING vec0(
+        note_id TEXT PRIMARY KEY,
+        vec FLOAT[384] distance_cosine
+    );
+    )";
+  char* err = nullptr;
+  int rc = sqlite3_exec(m_db, createSql, nullptr, nullptr, &err);
+  if (err) sqlite3_free(err);
+  return rc == SQLITE_OK;
+}
+
+bool VectorDb::upsertNoteVec(const QString& noteId,
+                             const QVector<float>& vec384) {
+  if (!m_db) return false;
+  QByteArray vecBin((char*)vec384.data(), vec384.size() * sizeof(float));
+  sqlite3_stmt* stmt;
+  const char* sql =
+      "INSERT OR REPLACE INTO vec_index(note_id, vec) VALUES(?, ?);";
+  int rc = sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
+  if (rc != SQLITE_OK) return false;
+
+  sqlite3_bind_text(stmt, 1, noteId.toUtf8().data(), -1, SQLITE_TRANSIENT);
+  sqlite3_bind_blob(stmt, 2, vecBin.data(), vecBin.size(), SQLITE_TRANSIENT);
+  rc = sqlite3_step(stmt);
+  sqlite3_finalize(stmt);
+  return rc == SQLITE_DONE;
+}
+
+QList<QPair<QString, float>> VectorDb::querySimilar(
+    const QVector<float>& queryVec, int topN) {
+  QList<QPair<QString, float>> out;
+  if (!m_db) return out;
+  QByteArray vecBin((char*)queryVec.data(), queryVec.size() * sizeof(float));
+  sqlite3_stmt* stmt;
+  const char* sql = R"(
+        SELECT note_id, distance FROM vec_index
+        WHERE vec MATCH ? ORDER BY distance LIMIT ?;
+    )";
+  int rc = sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
+  if (rc != SQLITE_OK) return out;
+
+  sqlite3_bind_blob(stmt, 1, vecBin.data(), vecBin.size(), SQLITE_TRANSIENT);
+  sqlite3_bind_int(stmt, 2, topN);
+
+  while (sqlite3_step(stmt) == SQLITE_ROW) {
+    QString id = (const char*)sqlite3_column_text(stmt, 0);
+    float dist = (float)sqlite3_column_double(stmt, 1);
+    float score = 1.0f - dist;
+    out.append({id, score});
+  }
+  sqlite3_finalize(stmt);
+  return out;
+}
+
+bool VectorDb::deleteNoteVec(const QString& noteId) {
+  if (!m_db) return false;
+  sqlite3_stmt* stmt;
+  const char* sql = "DELETE FROM vec_index WHERE note_id = ?;";
+  sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
+  sqlite3_bind_text(stmt, 1, noteId.toUtf8().data(), -1, SQLITE_TRANSIENT);
+  int rc = sqlite3_step(stmt);
+  sqlite3_finalize(stmt);
+  return rc == SQLITE_DONE;
+}
+
+void VectorDb::fillMissingVec(BaseEmbeddingEngine* engine,
+                              const QList<QString>& allNoteIdList) {
+  if (!m_db || !engine || !engine->isValid()) return;
+
+  QList<QString> existIds;
+  sqlite3_stmt* stmtSel;
+  const char* sqlSel = "SELECT note_id FROM vec_index;";
+  sqlite3_prepare_v2(m_db, sqlSel, -1, &stmtSel, nullptr);
+  while (sqlite3_step(stmtSel) == SQLITE_ROW) {
+    existIds.append((const char*)sqlite3_column_text(stmtSel, 0));
+  }
+  sqlite3_finalize(stmtSel);
+
+  QSet<QString> existSet(existIds.begin(), existIds.end());
+  for (const QString& nid : allNoteIdList) {
+    if (existSet.contains(nid)) continue;
+    // QString fullText = NoteManager::getNoteFullText(nid);
+    // QVector<float> vec = engine->encode(fullText);
+    // upsertNoteVec(nid, vec);
+  }
+}
+#endif
