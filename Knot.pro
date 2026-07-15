@@ -370,7 +370,6 @@ SOURCES += \
 
 SOURCES += \
     lib/diff/diff_match_patch.cpp \
-    lib/sqlite/sqlite3.c \
     lib/zlib/adler32.c \
     lib/zlib/compress.c \
     lib/zlib/crc32.c \
@@ -855,42 +854,30 @@ macx {
 
 }
 
-############################## sqlite3 ####################################
 
+############################## sqlite3 ####################################
 # 向量检索总开关，true启用sqlite3+sqlite-vec向量库，false完全跳过
 VECTOR_SEARCH = true
 
 equals(VECTOR_SEARCH, true) {
-    # ====== 1. sqlite3 源码配置 ======
-    INCLUDEPATH += $$PWD/lib/sqlite
-    SOURCES += $$PWD/lib/sqlite/sqlite3.c
+    # 统一头文件路径，全局可识别
+    INCLUDEPATH += $$PWD/lib/sqlite $$PWD/lib/sqlite_vec
 
-    # SQLite 编译宏：瘦身 + 开启扩展加载支持
-    DEFINES += \
-        SQLITE_THREADSAFE=1 \
-        SQLITE_ENABLE_LOAD_EXTENSION \
-        SQLITE_OMIT_JSON \
-        SQLITE_OMIT_CTE \
-        SQLITE_OMIT_FTS5 \
-        SQLITE_OMIT_GEOPOLY
+    SOURCES += $$PWD/lib/sqlite/sqlite3.c $$PWD/lib/sqlite_vec/sqlite-vec.c
 
-    # ====== 2. sqlite-vec 向量扩展配置 ======
-    INCLUDEPATH += $$PWD/lib/sqlite_vec
-    SOURCES += $$PWD/lib/sqlite_vec/sqlite-vec.c
-
-    # 静态编译关键宏：避免Windows dllexport符号报错
+    # 静态编译vec扩展宏
     DEFINES += SQLITE_VEC_STATIC
-
-    # 全局标记，代码里 #ifdef VECTOR_SEARCH 用
     DEFINES += VECTOR_SEARCH
 
-    # Windows 底层系统依赖库
+    # Windows系统库 + sqlite符号导出
     win32 {
         LIBS += -lshell32
+        #DEFINES += SQLITE_API=__declspec(dllexport)
     }
 }
 
 ###########################################################################
+
 #Linux
 unix:!macx: {
 

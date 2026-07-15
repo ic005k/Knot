@@ -1,3 +1,14 @@
+#undef SQLITE_OMIT_MATH
+#define SQLITE_OMIT_MATH 0
+#define SQLITE_CORE
+#define SQLITE_ENABLE_EXTFUNC
+#define SQLITE_ENABLE_MATH_FUNCTIONS
+#define SQLITE_ENABLE_LOAD_EXTENSION
+#define SQLITE_THREADSAFE 1
+#if defined(_WIN32)
+#define SQLITE_API __declspec(dllexport)
+#endif
+
 /******************************************************************************
 ** This file is an amalgamation of many separate C source files from SQLite
 ** version 3.53.3.  By combining all the individual C code files into this
@@ -269611,3 +269622,4 @@ SQLITE_API int sqlite3_stmt_init(
 SQLITE_API const char *sqlite3_sourceid(void){ return SQLITE_SOURCE_ID; }
 #endif /* SQLITE_AMALGAMATION */
 /************************** End of sqlite3.c ******************************/
+

@@ -26,6 +26,7 @@
 #include "lib/quazip/quazip.h"
 #include "lib/quazip/quazipfile.h"
 #include "native_msg_host.h"
+#include "src/AI/GlobalAI.h"
 #include "src/Comm/loglogger.h"
 #include "src/defines.h"
 #include "ui_MainWindow.h"
@@ -267,6 +268,17 @@ int main(int argc, char* argv[]) {
 
   m_font.setPointSize(fontSize);
   app.setFont(m_font);
+
+  isLocalAIModel = false;
+#ifdef VECTOR_SEARCH
+  // 执行ORT引擎、向量库完整初始化
+  isLocalAIModel = initGlobalAiEngine();
+  if (!isLocalAIModel) {
+    qDebug() << "向量模型文件缺失...";
+  } else {
+    qDebug() << "向量模型初始化成功...";
+  }
+#endif
 
   MainWindow w;
 

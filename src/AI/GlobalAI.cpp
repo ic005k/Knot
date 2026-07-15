@@ -29,9 +29,19 @@ bool initGlobalAiEngine() {
 #endif
 
 #ifdef VECTOR_SEARCH
-  // 仅开启向量检索时才打开向量库
-  QString vecDbPath = QDir(privateDir).filePath("note_vector.sqlite");
-  g_vecDb.open(vecDbPath);
+  // 向量库与AI模型统一存放至 privateDir/model
+  QString vecDir = QDir(privateDir).filePath("model");
+  QDir dir;
+  // 自动创建model目录，首次运行不存在也能生成
+  dir.mkpath(vecDir);
+  QString vecDbPath = QDir(vecDir).filePath("note_vector.sqlite");
+  bool vecDbOk = g_vecDb.open(vecDbPath);
+  if (!vecDbOk) {
+    qCritical() << "向量数据库打开失败，路径：" << vecDbPath;
+    return false;
+  }
+  qDebug() << "向量数据库初始化成功，路径：" << vecDbPath;
 #endif
+
   return true;
 }

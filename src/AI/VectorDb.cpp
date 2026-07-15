@@ -1,15 +1,18 @@
 #ifdef VECTOR_SEARCH
+
+#define SQLITE_CORE
 #include "VectorDb.h"
 
 #include <sqlite3.h>
 
 #include <QByteArray>
+#include <QSet>
 #include <QVariant>
 #include <cmath>
 
 #include "sqlite-vec.h"
+#include "sqlite3ext.h"
 
-// 下面你全部原有代码不动，完整保留
 static int sqlCallback(void* res, int colCnt, char** colData, char** colName) {
   auto result = (QList<QPair<QString, float>>*)res;
   QString noteId = colData[0];
@@ -18,17 +21,27 @@ static int sqlCallback(void* res, int colCnt, char** colData, char** colName) {
   return 0;
 }
 
-VectorDb::VectorDb() = default;
+VectorDb::VectorDb() {
+  // 进程全局注册sqlite-vec扩展，只需要执行一次
+  sqlite3_auto_extension((void (*)(void))sqlite3_vec_init);
+  m_db = nullptr;
+}
 VectorDb::~VectorDb() { close(); }
 
 bool VectorDb::open(const QString& dbPath) {
   int rc = sqlite3_open_v2(dbPath.toUtf8().data(), &m_db,
                            SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nullptr);
-  if (rc != SQLITE_OK) return false;
+  if (rc != SQLITE_OK) {
+    qCritical() << "sqlite文件打开失败:" << sqlite3_errmsg(m_db);
+    return false;
+  }
   sqlite3_enable_load_extension(m_db, 1);
-  // 【关键修改】静态编译替换，删除sqlite3_load_extension
-  sqlite3_auto_extension((void (*)(void))sqlite3_vec_init);
-  return initTable();
+  bool tableOk = initTable();
+  if (!tableOk) {
+    qCritical() << "建表失败";
+    return false;
+  }
+  return true;
 }
 
 void VectorDb::close() {
@@ -37,17 +50,32 @@ void VectorDb::close() {
 }
 
 bool VectorDb::initTable() {
-  const char* createSql = R"(
-    CREATE TABLE IF NOT EXISTS note_vec (note_id TEXT PRIMARY KEY);
+  char* err = nullptr;
+  // 1、先建普通表
+  const char* sql1 =
+      "CREATE TABLE IF NOT EXISTS note_vec (note_id TEXT PRIMARY KEY);";
+  int rc = sqlite3_exec(m_db, sql1, nullptr, nullptr, &err);
+  if (rc != SQLITE_OK) {
+    qCritical() << "建note_vec失败:" << (err ? err : "无错误信息");
+    if (err) sqlite3_free(err);
+    return false;
+  }
+
+  // 2、修正官方标准语法 distance_metric=cosine
+  const char* sql2 = R"(
     CREATE VIRTUAL TABLE IF NOT EXISTS vec_index USING vec0(
         note_id TEXT PRIMARY KEY,
-        vec FLOAT[384] distance_cosine
+        vec FLOAT[384] distance_metric=cosine
     );
-    )";
-  char* err = nullptr;
-  int rc = sqlite3_exec(m_db, createSql, nullptr, nullptr, &err);
-  if (err) sqlite3_free(err);
-  return rc == SQLITE_OK;
+  )";
+  rc = sqlite3_exec(m_db, sql2, nullptr, nullptr, &err);
+  if (rc != SQLITE_OK) {
+    qCritical() << "创建vec0虚拟表失败:" << (err ? err : "无错误信息");
+    if (err) sqlite3_free(err);
+    return false;
+  }
+  sqlite3_free(err);
+  return true;
 }
 
 bool VectorDb::upsertNoteVec(const QString& noteId,
