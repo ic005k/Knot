@@ -275,6 +275,13 @@ class Notes : public QDialog {
   void on_btnReplaceAll_clicked();
 
  private:
+#ifdef VECTOR_SEARCH
+  bool syncNoteVectorToDb(const QString& mdFilePath);
+  bool removeNoteVector(const QString& noteId);
+  QString getNoteIdFromFilePath(const QString& mdPath);
+  QString loadNoteFullText(const QString& mdPath);
+#endif
+
   QListWidget* m_popupList;
 
   bool isReceiveRemoteFile = false;

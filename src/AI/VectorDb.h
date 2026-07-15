@@ -24,6 +24,7 @@ class VectorDb {
   bool deleteNoteVec(const QString& noteId);
   void fillMissingVec(BaseEmbeddingEngine* engine,
                       const QList<QString>& allNoteIdList);
+  bool isOpen() const;
 
  private:
   bool initTable();

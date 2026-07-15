@@ -38,6 +38,25 @@ void Notes::saveMDFile() {
 #endif
 }
 
+void Notes::startBackgroundTaskUpdateNoteIndex(QString mdFile) {
+#ifdef VECTOR_SEARCH
+
+  if (isLocalAIModel) {
+    syncNoteVectorToDb(mdFile);
+  }
+
+#endif
+
+  QFuture<void> future = QtConcurrent::run([=]() {
+    m_NotesList->m_dbManager.updateFileIndex(mdFile);
+    m_NotesList->m_graphController->parser()->updateNoteCache(mdFile);
+  });
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this,
+          [=]() { watcher->deleteLater(); });
+  watcher->setFuture(future);
+}
+
 void Notes::MD2Html(QString mdFile) {
   QString strmd = loadText(mdFile);
   strmd = strmd.replace("images/", "file://" + iniDir + "memo/images/");

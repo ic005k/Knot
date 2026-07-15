@@ -123,18 +123,6 @@ void Notes::appendToSyncList(QString file) {
   notes_sync_files.append(file);
 }
 
-// 后台任务
-void Notes::startBackgroundTaskUpdateNoteIndex(QString mdFile) {
-  QFuture<void> future = QtConcurrent::run([=]() {
-    m_NotesList->m_dbManager.updateFileIndex(mdFile);
-    m_NotesList->m_graphController->parser()->updateNoteCache(mdFile);
-  });
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this,
-          [=]() { watcher->deleteLater(); });
-  watcher->setFuture(future);
-}
-
 void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
   QFuture<void> future = QtConcurrent::run(
       [=]() { m_NotesList->m_dbManager.updateFileIndexes(mdFileList); });

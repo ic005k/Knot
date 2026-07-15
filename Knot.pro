@@ -34,6 +34,7 @@ android:unix:!macx {
 # 在发布构建时禁用调试支持
 DEFINES += QT_NO_DEBUG QML_DISABLE_PROFILER
 
+
 win32 {
     QMAKE_CFLAGS += /utf-8
     QMAKE_CXXFLAGS += /utf-8
@@ -44,7 +45,7 @@ win32 {
 greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat #statemachine
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++17
+CONFIG += c++20
 CONFIG+=sdk_no_version_check
 
 TRANSLATIONS += src/cn.ts \
@@ -386,9 +387,10 @@ SOURCES += \
     lib/zlib/uncompr.c \
     lib/zlib/zutil.c \
     src/AI/AiModelDeployer.cpp \
+    src/AI/EmbeddingEngine.cpp \
     src/AI/GlobalAI.cpp \
-    src/AI/OrtEmbeddingEngine.cpp \
     src/AI/VectorDb.cpp \
+    src/AI/WordPieceTokenizer.cpp \
     src/AboutThis.cpp \
     src/AutoUpdate.cpp \
     src/CategoryList.cpp \
@@ -442,6 +444,7 @@ SOURCES += \
     src/Notes/Notes_FileIO.cpp \
     src/Notes/Notes_Image.cpp \
     src/Notes/Notes_IndexManager.cpp \
+    src/Notes/Notes_LocalAI.cpp \
     src/Notes/Notes_Sync.cpp \
     src/Notes/Notes_UI.cpp \
     src/Notes/Notes_Utils.cpp \
@@ -665,9 +668,10 @@ HEADERS += \
     lib/zlib/zutil.h \
     src/AI/AiModelDeployer.h \
     src/AI/BaseEmbeddingEngine.h \
+    src/AI/EmbeddingEngine.h \
     src/AI/GlobalAI.h \
-    src/AI/OrtEmbeddingEngine.h \
     src/AI/VectorDb.h \
+    src/AI/WordPieceTokenizer.h \
     src/AboutThis.h \
     src/AutoUpdate.h \
     src/CategoryList.h \
@@ -869,12 +873,50 @@ equals(VECTOR_SEARCH, true) {
     DEFINES += SQLITE_VEC_STATIC
     DEFINES += VECTOR_SEARCH
 
-    # Windows系统库 + sqlite符号导出
     win32 {
         LIBS += -lshell32
         #DEFINES += SQLITE_API=__declspec(dllexport)
+
     }
 }
+
+######################### bert.cpp / ggml 向量推理 #########################
+# 第三方库根目录
+BERT_ROOT = $$PWD/lib/bert.cpp
+
+# 头文件搜索路径
+INCLUDEPATH += $$BERT_ROOT
+INCLUDEPATH += $$BERT_ROOT/ggml/include
+win32 {
+    INCLUDEPATH += $$BERT_ROOT/include_win
+}
+
+# 屏蔽无用GPU后端，减小二进制体积
+DEFINES += GGML_NO_CUDA GGML_NO_METAL GGML_NO_OPENCL
+
+# 平台硬件加速
+android {
+    DEFINES += GGML_USE_NEON
+    QMAKE_CFLAGS += -mfpu=neon
+}
+unix:!android {
+    QMAKE_CFLAGS += -mavx2
+}
+win32 {
+    QMAKE_CFLAGS += -mavx2
+}
+
+# 导入bert主文件 + 全部ggml底层C源码
+SOURCES += $$BERT_ROOT/bert.cpp
+GGML_ALL_C = $$files($$BERT_ROOT/ggml/src/*.c, true)
+SOURCES += $$GGML_ALL_C
+
+# 追加WordPieceTokenizer源码
+SOURCES += $$PWD/src/AI/WordPieceTokenizer.cpp
+HEADERS += $$PWD/src/AI/WordPieceTokenizer.h
+
+# 第三方警告隔离（复用你现有第三方警告屏蔽逻辑）
+THIRD_PARTY_INCLUDE += $$BERT_ROOT $$BERT_ROOT/ggml/include
 
 ###########################################################################
 

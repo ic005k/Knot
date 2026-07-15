@@ -13,6 +13,8 @@
 #include "sqlite-vec.h"
 #include "sqlite3ext.h"
 
+bool VectorDb::isOpen() const { return m_db != nullptr; }
+
 static int sqlCallback(void* res, int colCnt, char** colData, char** colName) {
   auto result = (QList<QPair<QString, float>>*)res;
   QString noteId = colData[0];
