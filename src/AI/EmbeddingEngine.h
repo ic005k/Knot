@@ -4,25 +4,24 @@
 #include <QString>
 #include <QVector>
 #include <vector>
-// 关键：引入基类头文件，让编译器识别继承关系
+
 #include "BaseEmbeddingEngine.h"
 
-extern "C" {
-#include "bert.h"
-}
+// 前向声明llama底层类型，不用引入头文件到.h，隔离依赖
+struct llama_model;
+struct llama_context;
 
-// 必须 public 公有继承
 class EmbeddingEngine : public BaseEmbeddingEngine {
  public:
   explicit EmbeddingEngine(const QString& ggufPath);
   ~EmbeddingEngine() override;
 
-  // 重写基类纯虚函数，加override校验
   QVector<float> encode(const QString& text) override;
   bool isValid() const override;
 
  private:
-  struct bert_ctx* m_ctx = nullptr;
+  struct llama_model* m_model = nullptr;
+  struct llama_context* m_ctx = nullptr;
 };
 
-#endif  // EMBEDDINGENGINE_H
+#endif

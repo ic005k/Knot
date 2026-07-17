@@ -2,46 +2,61 @@
 
 #include <QByteArray>
 #include <cstring>
+#include <vector>
 
-#include "WordPieceTokenizer.h"
+#include "lib/llama.cpp/include/llama.h"
+// #include "src/AI/GlobalAI"
 
 EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
-  // Qt字符串转标准UTF8 C字符串
-  std::string pathUtf8 = ggufPath.toUtf8().toStdString();
-  // bert.h 标准加载接口 bert_load_from_file
-  m_ctx = bert_load_from_file(pathUtf8.c_str());
+  std::string path = ggufPath.toUtf8().toStdString();
+  llama_backend_init();
+  llama_model_params model_params = llama_model_default_params();
+  m_model = llama_load_model_from_file(path.c_str(), model_params);
+  if (!m_model) return;
+
+  llama_context_params ctx_params = llama_context_default_params();
+  ctx_params.n_threads = 4;
+  ctx_params.embeddings = true;
+  ctx_params.n_ctx = 512;
+  m_ctx = llama_new_context_with_model(m_model, ctx_params);
 }
 
 EmbeddingEngine::~EmbeddingEngine() {
-  if (m_ctx) {
-    bert_free(m_ctx);
-    m_ctx = nullptr;
-  }
+  if (m_ctx) llama_free(m_ctx);
+  if (m_model) llama_free_model(m_model);
+  llama_backend_free();
 }
 
-bool EmbeddingEngine::isValid() const { return m_ctx != nullptr; }
+bool EmbeddingEngine::isValid() const {
+  return m_model != nullptr && m_ctx != nullptr;
+}
 
 QVector<float> EmbeddingEngine::encode(const QString& text) {
-  QVector<float> resultVec;
-  if (!isValid()) return resultVec;
+  QVector<float> result;
+  if (!isValid()) return result;
+  std::string input = text.toUtf8().toStdString();
+  const char* str = input.c_str();
+  int str_len = static_cast<int>(input.size());
 
-  // 1. Qt文本统一转UTF8，适配全平台中文不乱码
-  std::string utf8Text = text.toUtf8().toStdString();
-  WordPieceTokenizer tokenizer;
-  if (!tokenizer.loadVocabFromGguf(m_ctx)) return resultVec;
+  const llama_vocab* vocab = llama_model_get_vocab(m_model);
+  int token_count = llama_tokenize(vocab, str, str_len, nullptr, 0, true, true);
+  std::vector<llama_token> tokens(token_count);
+  llama_tokenize(vocab, str, str_len, tokens.data(), token_count, true, true);
+  int n_tokens = tokens.size();
 
-  // 2. 分词生成标准vocab id序列
-  std::vector<VocabId> tokenIds =
-      tokenizer.encode(utf8Text, bert_n_max_tokens(m_ctx));
-  const int32_t tokenCount = static_cast<int32_t>(tokenIds.size());
-  const int32_t threadCount = 4;  // 可根据设备动态调整
+  llama_batch batch = llama_batch_init(n_tokens, 0, 1);
+  for (int i = 0; i < n_tokens; i++) {
+    batch.token[i] = tokens[i];
+    batch.pos[i] = i;
+    batch.logits[i] = false;
+  }
+  batch.n_tokens = n_tokens;
 
-  // 3. 获取向量维度，预分配结果容器
-  const int32_t embedDim = bert_n_embd(m_ctx);
-  resultVec.resize(embedDim);
-
-  // 4. 调用原生bert_eval执行推理（分离分词/推理接口，可控性更强）
-  bert_eval(m_ctx, threadCount, tokenIds.data(), tokenCount, resultVec.data());
-
-  return resultVec;
+  llama_decode(m_ctx, batch);
+  int dim = llama_n_embd(m_model);
+  const float* emb = llama_get_embeddings_seq(m_ctx, 0);
+  result.resize(dim);
+  std::memcpy(result.data(), emb, dim * sizeof(float));
+  llama_batch_free(batch);
+  return result;
 }

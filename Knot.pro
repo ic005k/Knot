@@ -1,7 +1,27 @@
+CONFIG += c++17 sdk_no_version_check
+
+win32 {
+    QMAKE_CXXFLAGS += /utf-8 /std:c++17
+    QMAKE_CXXFLAGS_DEBUG += /std:c++17
+    QMAKE_CXXFLAGS_RELEASE += /std:c++17
+
+    DEFINES += WIN32_LEAN_AND_MEAN
+    DEFINES += VC_EXTRALEAN
+    DEFINES += NOMINMAX
+}
+
+unix {
+    QMAKE_CXXFLAGS += -std=c++17
+}
+
+###################################################################################
+
 QT += core gui network printsupport
 QT += charts sensors sql
 QT += qml quick quickwidgets location
 QT += xml svg concurrent
+
+
 
 ####################################Linux Build Android##############################
 # 仅满足两个条件才启用：
@@ -35,17 +55,16 @@ android:unix:!macx {
 DEFINES += QT_NO_DEBUG QML_DISABLE_PROFILER
 
 
-win32 {
-    QMAKE_CFLAGS += /utf-8
-    QMAKE_CXXFLAGS += /utf-8
-}
+#win32 {
+    #QMAKE_CFLAGS += /utf-8
+    #QMAKE_CXXFLAGS += /utf-8
+#}
 
 
 # Qt > 5 (Qt6)
 greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat #statemachine
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++20
 CONFIG+=sdk_no_version_check
 
 TRANSLATIONS += src/cn.ts \
@@ -66,25 +85,25 @@ QML_DESIGNER_IMPORT_PATH += $$PWD/src/qmlsrc
 
 ##################### 隔离第三方库的编译警告 ################################
 # 1. 为第三方库创建单独的变量
-THIRD_PARTY_PATH = $$PWD/lib
-THIRD_PARTY_INCLUDE = $$THIRD_PARTY_PATH/cppjieba \
-                      $$THIRD_PARTY_PATH/qsci \
-                      $$THIRD_PARTY_PATH/qsci/Qsci \
-                      $$THIRD_PARTY_PATH/quazip \
-                      $$THIRD_PARTY_PATH/zlib \
-                      $$THIRD_PARTY_PATH/cmark-gfm/include \
-                      $$THIRD_PARTY_PATH/scintilla/include
+#THIRD_PARTY_PATH = $$PWD/lib
+#THIRD_PARTY_INCLUDE = $$THIRD_PARTY_PATH/cppjieba \
+#                      $$THIRD_PARTY_PATH/qsci \
+#                      $$THIRD_PARTY_PATH/qsci/Qsci \
+#                      $$THIRD_PARTY_PATH/quazip \
+#                      $$THIRD_PARTY_PATH/zlib \
+#                      $$THIRD_PARTY_PATH/cmark-gfm/include \
+#                      $$THIRD_PARTY_PATH/scintilla/include
 
 # 2. 根据不同编译器设置隔离选项
-win32 {
+#win32 {
     # MSVC - 使用外部包含指令
-    QMAKE_CXXFLAGS += -external:anglebrackets -external:W0
-    INCLUDEPATH += $$THIRD_PARTY_INCLUDE
-}
-clang|gcc {
+#    QMAKE_CXXFLAGS += -external:anglebrackets -external:W0
+#    INCLUDEPATH += $$THIRD_PARTY_INCLUDE
+#}
+#clang|gcc {
     # GCC/Clang - 使用 -isystem
     # QMAKE_CXXFLAGS += -isystem $$THIRD_PARTY_INCLUDE
-}
+#}
 
 ####################### Qsci ##############################################
 
@@ -390,7 +409,6 @@ SOURCES += \
     src/AI/EmbeddingEngine.cpp \
     src/AI/GlobalAI.cpp \
     src/AI/VectorDb.cpp \
-    src/AI/WordPieceTokenizer.cpp \
     src/AboutThis.cpp \
     src/AutoUpdate.cpp \
     src/CategoryList.cpp \
@@ -671,7 +689,6 @@ HEADERS += \
     src/AI/EmbeddingEngine.h \
     src/AI/GlobalAI.h \
     src/AI/VectorDb.h \
-    src/AI/WordPieceTokenizer.h \
     src/AboutThis.h \
     src/AutoUpdate.h \
     src/CategoryList.h \
@@ -880,56 +897,6 @@ equals(VECTOR_SEARCH, true) {
     }
 }
 
-######################### bert.cpp / ggml 向量推理 #########################
-# 第三方库根目录
-BERT_ROOT = $$PWD/lib/bert.cpp
-
-# 头文件搜索路径
-INCLUDEPATH += $$BERT_ROOT
-INCLUDEPATH += $$BERT_ROOT/ggml/include
-win32 {
-    INCLUDEPATH += $$BERT_ROOT/include_win
-}
-
-# 屏蔽无用GPU后端，减小二进制体积
-DEFINES += GGML_NO_CUDA GGML_NO_METAL GGML_NO_OPENCL
-
-# 平台硬件加速
-android {
-    DEFINES += GGML_USE_NEON
-    QMAKE_CFLAGS += -mfpu=neon
-}
-unix:!android {
-    QMAKE_CFLAGS += -mavx2
-}
-win32 {
-    QMAKE_CFLAGS += -mavx2
-}
-
-# 导入bert主文件 + 全部ggml底层C源码
-SOURCES += $$BERT_ROOT/bert.cpp
-GGML_ALL_C = $$files($$BERT_ROOT/ggml/src/*.c, true)
-SOURCES += $$GGML_ALL_C
-
-# 追加WordPieceTokenizer源码
-SOURCES += $$PWD/src/AI/WordPieceTokenizer.cpp
-HEADERS += $$PWD/src/AI/WordPieceTokenizer.h
-
-# 第三方警告隔离（复用你现有第三方警告屏蔽逻辑）
-THIRD_PARTY_INCLUDE += $$BERT_ROOT $$BERT_ROOT/ggml/include
-
-###########################################################################
-
-#Linux
-unix:!macx: {
-
-}
-
-win32:{
-
-}
-
-
 ########################## OpenSSL ########################################
 
 contains(ANDROID_TARGET_ARCH,arm64-v8a) {
@@ -937,3 +904,109 @@ contains(ANDROID_TARGET_ARCH,arm64-v8a) {
         $$PWD/android-openssl/ssl_3/v8a/libcrypto_3.so \
         $$PWD/android-openssl/ssl_3/v8a/libssl_3.so
 }
+
+###########################################################################
+
+LLAMA_ROOT = $$PWD/lib/llama.cpp
+
+# 头文件路径全局统一覆盖
+INCLUDEPATH += \
+    $$LLAMA_ROOT/common \
+    $$LLAMA_ROOT/include \
+    $$LLAMA_ROOT/src \
+    $$LLAMA_ROOT/ggml/include \
+    $$LLAMA_ROOT/ggml/src \
+    $$LLAMA_ROOT/ggml/src/ggml-cpu \
+    $$LLAMA_ROOT/vendor \
+    $$LLAMA_ROOT/vendor/nlohmann \
+    $$LLAMA_ROOT/vendor/cpp-httplib
+
+# 全局宏：禁用所有异构硬件、无用CLI/服务
+DEFINES += \
+    GGML_VERSION=\\\"0\\\" \
+    GGML_COMMIT=\\\"b10041\\\" \
+    GGML_NO_CUDA GGML_NO_METAL GGML_NO_OPENCL GGML_NO_VULKAN \
+    GGML_NO_HEXAGON GGML_NO_ET GGML_NO_RPC GGML_NO_SYCL GGML_STATIC GGML_NO_KLEIDIAI \
+    LLAMA_NO_SERVER LLAMA_NO_CLI LLAMA_NO_DOWNLOAD LLAMA_NO_HF \
+    NO_BUILD_INFO
+
+# ========== 白名单手动加载，无递归true，只加载必要源码 ==========
+# 加载基础源码：顶层+所有子目录c/cpp，不使用*.*避免txt/头文件混入
+LLAMA_SRC = \
+    $$files($$LLAMA_ROOT/src/*.cpp) \
+    # 替换通配，显式加载所有模型文件，避免QMake漏读
+    $$files($$LLAMA_ROOT/src/models/*.cpp, true) \
+    $$files($$LLAMA_ROOT/common/*.cpp) \
+    $$files($$LLAMA_ROOT/common/jinja/*.cpp, true) \
+    $$files($$LLAMA_ROOT/ggml/src/*.c) \
+    $$files($$LLAMA_ROOT/ggml/src/*.cpp) \
+    $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/*.c) \
+    $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/*.cpp)
+
+#SOURCES += $$LLAMA_ROOT/common/unicode.cpp
+
+# 黑名单
+
+
+## GPU/异构后端黑名单不变
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-cuda/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-vulkan/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-opencl/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-metal/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-sycl/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-hip/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-blas/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-et/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-hexagon/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-cann/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-openvino/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-rpc/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-virtgpu/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-webgpu/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-zdnn/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-zendnn/*, true)
+
+
+## ggml-cpu内小众硬件子目录剔除（根目录算子全部保留）
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/spacemit/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/amx/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/kleidiai/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/llamafile/*, true)
+LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/cmake/*, true)
+
+# 分平台追加对应arch架构完整算子（x86/arm递归全部量化文件）
+win32-msvc {
+    QMAKE_CXXFLAGS += /arch:AVX2 /utf-8 /std:c++17
+    QMAKE_CFLAGS += /utf-8
+    DEFINES += GGML_USE_AVX2 GGML_F16C GGML_WIN32 LLAMA_NO_DOWNLOAD LLAMA_NO_HF
+    LLAMA_SRC += $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/*.c, true) $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/*.cpp, true)
+    CONFIG += no_batch
+}
+
+unix:!android:!macx {
+    LIBS += -pthread
+    DEFINES += GGML_USE_AVX2 GGML_F16C LLAMA_NO_DOWNLOAD LLAMA_NO_HF
+    LLAMA_SRC += $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/*.c, true) $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/*.cpp, true)
+}
+
+macx:!arm64 {
+    LIBS += -pthread
+    DEFINES += GGML_USE_AVX2 GGML_F16C LLAMA_NO_DOWNLOAD LLAMA_NO_HF
+    LLAMA_SRC += $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/*.c, true) $$files($$LLAMA_ROOT/ggml-cpu/arch/x86/*.cpp, true)
+}
+
+macx:arm64 {
+    LIBS += -pthread
+    DEFINES += GGML_USE_NEON GGML_NO_AVX LLAMA_NO_DOWNLOAD LLAMA_NO_HF
+    LLAMA_SRC += $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/*.c, true) $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/*.cpp, true)
+}
+
+android {
+    LIBS += -pthread
+    DEFINES += GGML_USE_NEON GGML_NO_AVX LLAMA_NO_DOWNLOAD LLAMA_NO_HF
+    LLAMA_SRC += $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/*.c, true) $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/*.cpp, true)
+}
+
+
+# 汇总到全局源文件
+SOURCES += $$LLAMA_SRC

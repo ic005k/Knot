@@ -11,26 +11,37 @@
 std::unique_ptr<BaseEmbeddingEngine> g_embEngine;
 
 #ifdef VECTOR_SEARCH
+
 bool initGlobalAiEngine() {
-  // 校验GGUF单模型文件
-  if (!AiModelDeployer::isAllModelReady()) return false;
-
-  // 仅需GGUF文件路径，不再需要分词json/sp/onnx
   QString ggufPath = AiModelDeployer::getGgufModelPath();
+  QFileInfo fiGguf(ggufPath);
+  const qint64 MIN_GGUF_SIZE = 100LL * 1024 * 1024;
 
-  auto tmpEngine = std::make_unique<EmbeddingEngine>(ggufPath);
-  // 强制向上转型：EmbeddingEngine* → BaseEmbeddingEngine*
-  BaseEmbeddingEngine* rawPtr =
-      static_cast<BaseEmbeddingEngine*>(tmpEngine.release());
-  g_embEngine.reset(rawPtr);
-
-  // 校验推理引擎是否加载成功
-  if (!g_embEngine->isValid()) {
-    g_embEngine.reset();
+  // 第一层：文件物理存在+大小校验
+  if (!fiGguf.exists()) {
+    qWarning() << "GGUF模型文件不存在：" << ggufPath;
+    return false;
+  }
+  if (fiGguf.size() <= MIN_GGUF_SIZE) {
+    qWarning() << "GGUF模型文件不完整，大小过小：" << fiGguf.size() << " 路径："
+               << ggufPath;
     return false;
   }
 
-  // ========== 向量数据库逻辑完全保留无需修改 ==========
+  // 第二层：尝试加载模型，校验文件二进制合法性
+  auto tmpEngine = std::make_unique<EmbeddingEngine>(ggufPath);
+  if (!tmpEngine->isValid()) {
+    qCritical() << "GGUF文件格式损坏/bad magic，无法加载模型：" << ggufPath;
+    return false;
+  }
+
+  // 加载成功再转移所有权
+  BaseEmbeddingEngine* rawPtr =
+      static_cast<BaseEmbeddingEngine*>(tmpEngine.release());
+  g_embEngine.reset(rawPtr);
+  qDebug() << "GGUF向量模型加载完成";
+
+  // ========== 向量数据库逻辑不变 ==========
   QString vecDir = QDir(privateDir).filePath("model");
   QDir dir;
   dir.mkpath(vecDir);
@@ -45,4 +56,5 @@ bool initGlobalAiEngine() {
 
   return true;
 }
+
 #endif
