@@ -8,11 +8,13 @@ win32 {
     DEFINES += WIN32_LEAN_AND_MEAN
     DEFINES += VC_EXTRALEAN
     DEFINES += NOMINMAX
+
 }
 
 unix {
     QMAKE_CXXFLAGS += -std=c++17
 }
+
 
 ###################################################################################
 
@@ -390,6 +392,226 @@ SOURCES += \
 
 SOURCES += \
     lib/diff/diff_match_patch.cpp \
+    lib/llama.cpp/common/arg.cpp \
+    lib/llama.cpp/common/chat-auto-parser-generator.cpp \
+    lib/llama.cpp/common/chat-auto-parser-helpers.cpp \
+    lib/llama.cpp/common/chat-diff-analyzer.cpp \
+    lib/llama.cpp/common/chat-peg-parser.cpp \
+    lib/llama.cpp/common/chat.cpp \
+    lib/llama.cpp/common/common.cpp \
+    lib/llama.cpp/common/console.cpp \
+    lib/llama.cpp/common/debug.cpp \
+    lib/llama.cpp/common/download.cpp \
+    lib/llama.cpp/common/fit.cpp \
+    lib/llama.cpp/common/hf-cache.cpp \
+    lib/llama.cpp/common/imatrix-loader.cpp \
+    lib/llama.cpp/common/jinja/caps.cpp \
+    lib/llama.cpp/common/jinja/lexer.cpp \
+    lib/llama.cpp/common/jinja/parser.cpp \
+    lib/llama.cpp/common/jinja/runtime.cpp \
+    lib/llama.cpp/common/jinja/string.cpp \
+    lib/llama.cpp/common/jinja/value.cpp \
+    lib/llama.cpp/common/json-schema-to-grammar.cpp \
+    lib/llama.cpp/common/llguidance.cpp \
+    lib/llama.cpp/common/log.cpp \
+    lib/llama.cpp/common/build-info.cpp \
+    lib/llama.cpp/common/ngram-cache.cpp \
+    lib/llama.cpp/common/ngram-map.cpp \
+    lib/llama.cpp/common/ngram-mod.cpp \
+    lib/llama.cpp/common/peg-parser.cpp \
+    lib/llama.cpp/common/preset.cpp \
+    lib/llama.cpp/common/reasoning-budget.cpp \
+    lib/llama.cpp/common/sampling.cpp \
+    lib/llama.cpp/common/speculative.cpp \
+    lib/llama.cpp/common/unicode.cpp \
+    lib/llama.cpp/ggml/src/ggml-alloc.c \
+    lib/llama.cpp/ggml/src/ggml-backend-dl.cpp \
+    lib/llama.cpp/ggml/src/ggml-backend-meta.cpp \
+    lib/llama.cpp/ggml/src/ggml-backend-reg.cpp \
+    lib/llama.cpp/ggml/src/ggml-backend.cpp \
+    lib/llama.cpp/ggml/src/ggml-cpu/binary-ops.cpp \
+    lib/llama.cpp/ggml/src/ggml-cpu/ggml-cpu.c \
+    lib/llama.cpp/ggml/src/ggml-cpu/ggml-cpu.cpp \
+    lib/llama.cpp/ggml/src/ggml-cpu/hbm.cpp \
+    lib/llama.cpp/ggml/src/ggml-cpu/ops.cpp \
+    lib/llama.cpp/ggml/src/ggml-cpu/quants.c \
+    lib/llama.cpp/ggml/src/ggml-cpu/repack.cpp \
+    lib/llama.cpp/ggml/src/ggml-cpu/traits.cpp \
+    lib/llama.cpp/ggml/src/ggml-cpu/unary-ops.cpp \
+    lib/llama.cpp/ggml/src/ggml-cpu/vec.cpp \
+    lib/llama.cpp/ggml/src/ggml-opt.cpp \
+    lib/llama.cpp/ggml/src/ggml-quants.c \
+    lib/llama.cpp/ggml/src/ggml-threading.cpp \
+    lib/llama.cpp/ggml/src/ggml.c \
+    lib/llama.cpp/ggml/src/ggml.cpp \
+    lib/llama.cpp/ggml/src/gguf.cpp \
+    lib/llama.cpp/src/llama-adapter.cpp \
+    lib/llama.cpp/src/llama-arch.cpp \
+    lib/llama.cpp/src/llama-batch.cpp \
+    lib/llama.cpp/src/llama-chat.cpp \
+    lib/llama.cpp/src/llama-context.cpp \
+    lib/llama.cpp/src/llama-cparams.cpp \
+    lib/llama.cpp/src/llama-grammar.cpp \
+    lib/llama.cpp/src/llama-graph.cpp \
+    lib/llama.cpp/src/llama-hparams.cpp \
+    lib/llama.cpp/src/llama-impl.cpp \
+    lib/llama.cpp/src/llama-io.cpp \
+    lib/llama.cpp/src/llama-kv-cache-dsa.cpp \
+    lib/llama.cpp/src/llama-kv-cache-dsv4.cpp \
+    lib/llama.cpp/src/llama-kv-cache-iswa.cpp \
+    lib/llama.cpp/src/llama-kv-cache.cpp \
+    lib/llama.cpp/src/llama-memory-hybrid-iswa.cpp \
+    lib/llama.cpp/src/llama-memory-hybrid.cpp \
+    lib/llama.cpp/src/llama-memory-recurrent.cpp \
+    lib/llama.cpp/src/llama-memory.cpp \
+    lib/llama.cpp/src/llama-mmap.cpp \
+    lib/llama.cpp/src/llama-model-loader.cpp \
+    lib/llama.cpp/src/llama-model-saver.cpp \
+    lib/llama.cpp/src/llama-model.cpp \
+    lib/llama.cpp/src/llama-quant.cpp \
+    lib/llama.cpp/src/llama-sampler.cpp \
+    lib/llama.cpp/src/llama-vocab.cpp \
+    lib/llama.cpp/src/llama.cpp \
+    lib/llama.cpp/src/models/afmoe.cpp \
+    lib/llama.cpp/src/models/apertus.cpp \
+    lib/llama.cpp/src/models/arcee.cpp \
+    lib/llama.cpp/src/models/arctic.cpp \
+    lib/llama.cpp/src/models/arwkv7.cpp \
+    lib/llama.cpp/src/models/baichuan.cpp \
+    lib/llama.cpp/src/models/bailingmoe.cpp \
+    lib/llama.cpp/src/models/bailingmoe2.cpp \
+    lib/llama.cpp/src/models/bert.cpp \
+    lib/llama.cpp/src/models/bitnet.cpp \
+    lib/llama.cpp/src/models/bloom.cpp \
+    lib/llama.cpp/src/models/chameleon.cpp \
+    lib/llama.cpp/src/models/chatglm.cpp \
+    lib/llama.cpp/src/models/codeshell.cpp \
+    lib/llama.cpp/src/models/cogvlm.cpp \
+    lib/llama.cpp/src/models/cohere2.cpp \
+    lib/llama.cpp/src/models/cohere2moe.cpp \
+    lib/llama.cpp/src/models/command-r.cpp \
+    lib/llama.cpp/src/models/dbrx.cpp \
+    lib/llama.cpp/src/models/deci.cpp \
+    lib/llama.cpp/src/models/deepseek.cpp \
+    lib/llama.cpp/src/models/deepseek2.cpp \
+    lib/llama.cpp/src/models/deepseek2ocr.cpp \
+    lib/llama.cpp/src/models/deepseek32.cpp \
+    lib/llama.cpp/src/models/deepseek4.cpp \
+    lib/llama.cpp/src/models/delta-net-base.cpp \
+    lib/llama.cpp/src/models/dflash.cpp \
+    lib/llama.cpp/src/models/dots1.cpp \
+    lib/llama.cpp/src/models/dream.cpp \
+    lib/llama.cpp/src/models/eagle3.cpp \
+    lib/llama.cpp/src/models/ernie4-5-moe.cpp \
+    lib/llama.cpp/src/models/ernie4-5.cpp \
+    lib/llama.cpp/src/models/eurobert.cpp \
+    lib/llama.cpp/src/models/exaone-moe.cpp \
+    lib/llama.cpp/src/models/exaone.cpp \
+    lib/llama.cpp/src/models/exaone4.cpp \
+    lib/llama.cpp/src/models/falcon-h1.cpp \
+    lib/llama.cpp/src/models/falcon.cpp \
+    lib/llama.cpp/src/models/gemma-embedding.cpp \
+    lib/llama.cpp/src/models/gemma.cpp \
+    lib/llama.cpp/src/models/gemma2.cpp \
+    lib/llama.cpp/src/models/gemma3.cpp \
+    lib/llama.cpp/src/models/gemma3n.cpp \
+    lib/llama.cpp/src/models/gemma4-assistant.cpp \
+    lib/llama.cpp/src/models/gemma4.cpp \
+    lib/llama.cpp/src/models/glm-dsa.cpp \
+    lib/llama.cpp/src/models/glm4-moe.cpp \
+    lib/llama.cpp/src/models/glm4.cpp \
+    lib/llama.cpp/src/models/gpt2.cpp \
+    lib/llama.cpp/src/models/gptneox.cpp \
+    lib/llama.cpp/src/models/granite-hybrid.cpp \
+    lib/llama.cpp/src/models/granite-moe.cpp \
+    lib/llama.cpp/src/models/granite.cpp \
+    lib/llama.cpp/src/models/grok.cpp \
+    lib/llama.cpp/src/models/grovemoe.cpp \
+    lib/llama.cpp/src/models/hunyuan-dense.cpp \
+    lib/llama.cpp/src/models/hunyuan-moe.cpp \
+    lib/llama.cpp/src/models/hunyuan-vl.cpp \
+    lib/llama.cpp/src/models/hy-v3.cpp \
+    lib/llama.cpp/src/models/internlm2.cpp \
+    lib/llama.cpp/src/models/jais.cpp \
+    lib/llama.cpp/src/models/jais2.cpp \
+    lib/llama.cpp/src/models/jamba.cpp \
+    lib/llama.cpp/src/models/jina-bert-v2.cpp \
+    lib/llama.cpp/src/models/jina-bert-v3.cpp \
+    lib/llama.cpp/src/models/kimi-linear.cpp \
+    lib/llama.cpp/src/models/lfm2.cpp \
+    lib/llama.cpp/src/models/lfm2moe.cpp \
+    lib/llama.cpp/src/models/llada-moe.cpp \
+    lib/llama.cpp/src/models/llada.cpp \
+    lib/llama.cpp/src/models/llama-embed.cpp \
+    lib/llama.cpp/src/models/llama.cpp \
+    lib/llama.cpp/src/models/llama4.cpp \
+    lib/llama.cpp/src/models/maincoder.cpp \
+    lib/llama.cpp/src/models/mamba-base.cpp \
+    lib/llama.cpp/src/models/mamba.cpp \
+    lib/llama.cpp/src/models/mamba2.cpp \
+    lib/llama.cpp/src/models/mellum.cpp \
+    lib/llama.cpp/src/models/mimo2.cpp \
+    lib/llama.cpp/src/models/minicpm.cpp \
+    lib/llama.cpp/src/models/minicpm3.cpp \
+    lib/llama.cpp/src/models/minimax-m2.cpp \
+    lib/llama.cpp/src/models/mistral3.cpp \
+    lib/llama.cpp/src/models/mistral4.cpp \
+    lib/llama.cpp/src/models/modern-bert.cpp \
+    lib/llama.cpp/src/models/mpt.cpp \
+    lib/llama.cpp/src/models/nemotron-h-moe.cpp \
+    lib/llama.cpp/src/models/nemotron-h.cpp \
+    lib/llama.cpp/src/models/nemotron.cpp \
+    lib/llama.cpp/src/models/neo-bert.cpp \
+    lib/llama.cpp/src/models/nomic-bert-moe.cpp \
+    lib/llama.cpp/src/models/nomic-bert.cpp \
+    lib/llama.cpp/src/models/olmo.cpp \
+    lib/llama.cpp/src/models/olmo2.cpp \
+    lib/llama.cpp/src/models/olmoe.cpp \
+    lib/llama.cpp/src/models/openai-moe.cpp \
+    lib/llama.cpp/src/models/openelm.cpp \
+    lib/llama.cpp/src/models/orion.cpp \
+    lib/llama.cpp/src/models/paddleocr.cpp \
+    lib/llama.cpp/src/models/pangu-embed.cpp \
+    lib/llama.cpp/src/models/phi2.cpp \
+    lib/llama.cpp/src/models/phi3.cpp \
+    lib/llama.cpp/src/models/phimoe.cpp \
+    lib/llama.cpp/src/models/plamo.cpp \
+    lib/llama.cpp/src/models/plamo2.cpp \
+    lib/llama.cpp/src/models/plamo3.cpp \
+    lib/llama.cpp/src/models/plm.cpp \
+    lib/llama.cpp/src/models/qwen.cpp \
+    lib/llama.cpp/src/models/qwen2.cpp \
+    lib/llama.cpp/src/models/qwen2moe.cpp \
+    lib/llama.cpp/src/models/qwen2vl.cpp \
+    lib/llama.cpp/src/models/qwen3.cpp \
+    lib/llama.cpp/src/models/qwen35.cpp \
+    lib/llama.cpp/src/models/qwen35moe.cpp \
+    lib/llama.cpp/src/models/qwen3moe.cpp \
+    lib/llama.cpp/src/models/qwen3next.cpp \
+    lib/llama.cpp/src/models/qwen3vl.cpp \
+    lib/llama.cpp/src/models/qwen3vlmoe.cpp \
+    lib/llama.cpp/src/models/refact.cpp \
+    lib/llama.cpp/src/models/rnd1.cpp \
+    lib/llama.cpp/src/models/rwkv6-base.cpp \
+    lib/llama.cpp/src/models/rwkv6.cpp \
+    lib/llama.cpp/src/models/rwkv6qwen2.cpp \
+    lib/llama.cpp/src/models/rwkv7-base.cpp \
+    lib/llama.cpp/src/models/rwkv7.cpp \
+    lib/llama.cpp/src/models/seed-oss.cpp \
+    lib/llama.cpp/src/models/smallthinker.cpp \
+    lib/llama.cpp/src/models/smollm3.cpp \
+    lib/llama.cpp/src/models/stablelm.cpp \
+    lib/llama.cpp/src/models/starcoder.cpp \
+    lib/llama.cpp/src/models/starcoder2.cpp \
+    lib/llama.cpp/src/models/step35.cpp \
+    lib/llama.cpp/src/models/t5.cpp \
+    lib/llama.cpp/src/models/t5encoder.cpp \
+    lib/llama.cpp/src/models/talkie.cpp \
+    lib/llama.cpp/src/models/wavtokenizer-dec.cpp \
+    lib/llama.cpp/src/models/xverse.cpp \
+    lib/llama.cpp/src/unicode-data.cpp \
+    lib/llama.cpp/src/unicode.cpp \
+    lib/llama.cpp/vendor/cpp-httplib/httplib.cpp \
     lib/zlib/adler32.c \
     lib/zlib/compress.c \
     lib/zlib/crc32.c \
@@ -671,6 +893,119 @@ HEADERS += \
 
 HEADERS += \
     lib/diff/diff_match_patch.h \
+    lib/llama.cpp/common/arg.h \
+    lib/llama.cpp/common/base64.hpp \
+    lib/llama.cpp/common/build-info.h \
+    lib/llama.cpp/common/chat-auto-parser-helpers.h \
+    lib/llama.cpp/common/chat-auto-parser.h \
+    lib/llama.cpp/common/chat-peg-parser.h \
+    lib/llama.cpp/common/chat.h \
+    lib/llama.cpp/common/common.h \
+    lib/llama.cpp/common/console.h \
+    lib/llama.cpp/common/debug.h \
+    lib/llama.cpp/common/download.h \
+    lib/llama.cpp/common/fit.h \
+    lib/llama.cpp/common/hf-cache.h \
+    lib/llama.cpp/common/http.h \
+    lib/llama.cpp/common/imatrix-loader.h \
+    lib/llama.cpp/common/jinja/caps.h \
+    lib/llama.cpp/common/jinja/lexer.h \
+    lib/llama.cpp/common/jinja/parser.h \
+    lib/llama.cpp/common/jinja/runtime.h \
+    lib/llama.cpp/common/jinja/string.h \
+    lib/llama.cpp/common/jinja/utils.h \
+    lib/llama.cpp/common/jinja/value.h \
+    lib/llama.cpp/common/json-schema-to-grammar.h \
+    lib/llama.cpp/common/log.h \
+    lib/llama.cpp/common/ngram-cache.h \
+    lib/llama.cpp/common/ngram-map.h \
+    lib/llama.cpp/common/ngram-mod.h \
+    lib/llama.cpp/common/peg-parser.h \
+    lib/llama.cpp/common/preset.h \
+    lib/llama.cpp/common/reasoning-budget.h \
+    lib/llama.cpp/common/sampling.h \
+    lib/llama.cpp/common/speculative.h \
+    lib/llama.cpp/common/unicode.h \
+    lib/llama.cpp/ggml/include/ggml-alloc.h \
+    lib/llama.cpp/ggml/include/ggml-backend.h \
+    lib/llama.cpp/ggml/include/ggml-blas.h \
+    lib/llama.cpp/ggml/include/ggml-cann.h \
+    lib/llama.cpp/ggml/include/ggml-cpp.h \
+    lib/llama.cpp/ggml/include/ggml-cpu.h \
+    lib/llama.cpp/ggml/include/ggml-cuda.h \
+    lib/llama.cpp/ggml/include/ggml-et.h \
+    lib/llama.cpp/ggml/include/ggml-hexagon.h \
+    lib/llama.cpp/ggml/include/ggml-metal.h \
+    lib/llama.cpp/ggml/include/ggml-opencl.h \
+    lib/llama.cpp/ggml/include/ggml-openvino.h \
+    lib/llama.cpp/ggml/include/ggml-opt.h \
+    lib/llama.cpp/ggml/include/ggml-rpc.h \
+    lib/llama.cpp/ggml/include/ggml-sycl.h \
+    lib/llama.cpp/ggml/include/ggml-virtgpu.h \
+    lib/llama.cpp/ggml/include/ggml-vulkan.h \
+    lib/llama.cpp/ggml/include/ggml-webgpu.h \
+    lib/llama.cpp/ggml/include/ggml-zdnn.h \
+    lib/llama.cpp/ggml/include/ggml-zendnn.h \
+    lib/llama.cpp/ggml/include/ggml.h \
+    lib/llama.cpp/ggml/include/gguf.h \
+    lib/llama.cpp/ggml/src/ggml-backend-dl.h \
+    lib/llama.cpp/ggml/src/ggml-backend-impl.h \
+    lib/llama.cpp/ggml/src/ggml-common.h \
+    lib/llama.cpp/ggml/src/ggml-cpu/arch-fallback.h \
+    lib/llama.cpp/ggml/src/ggml-cpu/binary-ops.h \
+    lib/llama.cpp/ggml/src/ggml-cpu/common.h \
+    lib/llama.cpp/ggml/src/ggml-cpu/ggml-cpu-impl.h \
+    lib/llama.cpp/ggml/src/ggml-cpu/hbm.h \
+    lib/llama.cpp/ggml/src/ggml-cpu/ops.h \
+    lib/llama.cpp/ggml/src/ggml-cpu/quants.h \
+    lib/llama.cpp/ggml/src/ggml-cpu/repack.h \
+    lib/llama.cpp/ggml/src/ggml-cpu/simd-gemm.h \
+    lib/llama.cpp/ggml/src/ggml-cpu/simd-mappings.h \
+    lib/llama.cpp/ggml/src/ggml-cpu/traits.h \
+    lib/llama.cpp/ggml/src/ggml-cpu/unary-ops.h \
+    lib/llama.cpp/ggml/src/ggml-cpu/vec.h \
+    lib/llama.cpp/ggml/src/ggml-impl.h \
+    lib/llama.cpp/ggml/src/ggml-quants.h \
+    lib/llama.cpp/ggml/src/ggml-threading.h \
+    lib/llama.cpp/include/llama-cpp.h \
+    lib/llama.cpp/include/llama.h \
+    lib/llama.cpp/src/llama-adapter.h \
+    lib/llama.cpp/src/llama-arch.h \
+    lib/llama.cpp/src/llama-batch.h \
+    lib/llama.cpp/src/llama-chat.h \
+    lib/llama.cpp/src/llama-context.h \
+    lib/llama.cpp/src/llama-cparams.h \
+    lib/llama.cpp/src/llama-ext.h \
+    lib/llama.cpp/src/llama-grammar.h \
+    lib/llama.cpp/src/llama-graph.h \
+    lib/llama.cpp/src/llama-hparams.h \
+    lib/llama.cpp/src/llama-impl.h \
+    lib/llama.cpp/src/llama-io.h \
+    lib/llama.cpp/src/llama-kv-cache-dsa.h \
+    lib/llama.cpp/src/llama-kv-cache-dsv4.h \
+    lib/llama.cpp/src/llama-kv-cache-iswa.h \
+    lib/llama.cpp/src/llama-kv-cache.h \
+    lib/llama.cpp/src/llama-kv-cells.h \
+    lib/llama.cpp/src/llama-memory-hybrid-iswa.h \
+    lib/llama.cpp/src/llama-memory-hybrid.h \
+    lib/llama.cpp/src/llama-memory-recurrent.h \
+    lib/llama.cpp/src/llama-memory.h \
+    lib/llama.cpp/src/llama-mmap.h \
+    lib/llama.cpp/src/llama-model-loader.h \
+    lib/llama.cpp/src/llama-model-saver.h \
+    lib/llama.cpp/src/llama-model.h \
+    lib/llama.cpp/src/llama-quant.h \
+    lib/llama.cpp/src/llama-sampler.h \
+    lib/llama.cpp/src/llama-vocab.h \
+    lib/llama.cpp/src/models/models.h \
+    lib/llama.cpp/src/unicode-data.h \
+    lib/llama.cpp/src/unicode.h \
+    lib/llama.cpp/vendor/cpp-httplib/httplib.h \
+    lib/llama.cpp/vendor/miniaudio/miniaudio.h \
+    lib/llama.cpp/vendor/nlohmann/json.hpp \
+    lib/llama.cpp/vendor/nlohmann/json_fwd.hpp \
+    lib/llama.cpp/vendor/sheredom/subprocess.h \
+    lib/llama.cpp/vendor/stb/stb_image.h \
     lib/sqlite/sqlite3.h \
     lib/sqlite/sqlite3ext.h \
     lib/zlib/crc32.h \
@@ -814,6 +1149,8 @@ DISTFILES += \
     android/res/values/libs.xml \
     android/res/xml/qtprovider_paths.xml \
     lib/lexilla/include/LexicalStyles.iface \
+    lib/llama.cpp/vendor/cpp-httplib/CMakeLists.txt \
+    lib/llama.cpp/vendor/cpp-httplib/LICENSE \
     lib/qsci/features/qscintilla2.prf \
     lib/qsci/features_staticlib/qscintilla2.prf \
     lib/qsci/qscintilla_cs.qm \
@@ -927,86 +1264,72 @@ DEFINES += \
     GGML_COMMIT=\\\"b10041\\\" \
     GGML_NO_CUDA GGML_NO_METAL GGML_NO_OPENCL GGML_NO_VULKAN \
     GGML_NO_HEXAGON GGML_NO_ET GGML_NO_RPC GGML_NO_SYCL GGML_STATIC GGML_NO_KLEIDIAI \
-    LLAMA_NO_SERVER LLAMA_NO_CLI LLAMA_NO_DOWNLOAD LLAMA_NO_HF \
-    NO_BUILD_INFO
+    LLAMA_NO_SERVER LLAMA_NO_CLI
 
-# ========== 白名单手动加载，无递归true，只加载必要源码 ==========
-# 加载基础源码：顶层+所有子目录c/cpp，不使用*.*避免txt/头文件混入
-LLAMA_SRC = \
-    $$files($$LLAMA_ROOT/src/*.cpp) \
-    # 替换通配，显式加载所有模型文件，避免QMake漏读
-    $$files($$LLAMA_ROOT/src/models/*.cpp, true) \
-    $$files($$LLAMA_ROOT/common/*.cpp) \
-    $$files($$LLAMA_ROOT/common/jinja/*.cpp, true) \
-    $$files($$LLAMA_ROOT/ggml/src/*.c) \
-    $$files($$LLAMA_ROOT/ggml/src/*.cpp) \
-    $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/*.c) \
-    $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/*.cpp)
+# Windows x86
+win32 {
+    DEFINES += GGML_USE_AVX2 GGML_F16C GGML_WIN32 __AVX2__
+}
+# Linux x86 / Mac Intel（x86_64）
+unix:!android:!macx:|macx:!arm64 {
+    DEFINES += GGML_USE_AVX2 GGML_F16C
+}
+# ARM平台共用
+macx:arm64|android {
+    DEFINES += GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC
+}
 
-#SOURCES += $$LLAMA_ROOT/common/unicode.cpp
-
-# 黑名单
-
-
-## GPU/异构后端黑名单不变
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-cuda/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-vulkan/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-opencl/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-metal/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-sycl/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-hip/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-blas/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-et/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-hexagon/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-cann/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-openvino/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-rpc/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-virtgpu/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-webgpu/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-zdnn/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-zendnn/*, true)
-
-
-## ggml-cpu内小众硬件子目录剔除（根目录算子全部保留）
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/spacemit/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/amx/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/kleidiai/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/llamafile/*, true)
-LLAMA_SRC -= $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/cmake/*, true)
+# 全平台通用禁用
+DEFINES += LLAMA_NO_DOWNLOAD LLAMA_NO_HF LLAMA_DISABLE_BUILD_INFO
 
 # 分平台追加对应arch架构完整算子（x86/arm递归全部量化文件）
 win32-msvc {
     QMAKE_CXXFLAGS += /arch:AVX2 /utf-8 /std:c++17
-    QMAKE_CFLAGS += /utf-8
-    DEFINES += GGML_USE_AVX2 GGML_F16C GGML_WIN32 LLAMA_NO_DOWNLOAD LLAMA_NO_HF
-    LLAMA_SRC += $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/*.c, true) $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/*.cpp, true)
+    QMAKE_CFLAGS += /arch:AVX2 /utf-8
+
+    SOURCES += \
+        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/cpu-feats.cpp \
+        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/quants.c \
+        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/repack.cpp
     CONFIG += no_batch
 }
 
 unix:!android:!macx {
     LIBS += -pthread
-    DEFINES += GGML_USE_AVX2 GGML_F16C LLAMA_NO_DOWNLOAD LLAMA_NO_HF
-    LLAMA_SRC += $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/*.c, true) $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/*.cpp, true)
+    # gcc 开启AVX2、C++17
+    QMAKE_CXXFLAGS += -mavx2 -mf16c -std=c++17
+    QMAKE_CFLAGS += -mavx2
+    SOURCES += \
+        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/cpu-feats.cpp \
+        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/quants.c \
+        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/repack.cpp
 }
 
 macx:!arm64 {
     LIBS += -pthread
-    DEFINES += GGML_USE_AVX2 GGML_F16C LLAMA_NO_DOWNLOAD LLAMA_NO_HF
-    LLAMA_SRC += $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/*.c, true) $$files($$LLAMA_ROOT/ggml-cpu/arch/x86/*.cpp, true)
+    # clang AVX2开关
+    QMAKE_CXXFLAGS += -mavx2 -mf16c -std=c++17
+    QMAKE_CFLAGS += -mavx2
+    SOURCES += \
+        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/cpu-feats.cpp \
+        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/quants.c \
+        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/repack.cpp
 }
 
 macx:arm64 {
     LIBS += -pthread
-    DEFINES += GGML_USE_NEON GGML_NO_AVX LLAMA_NO_DOWNLOAD LLAMA_NO_HF
-    LLAMA_SRC += $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/*.c, true) $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/*.cpp, true)
+    # 这里不再写任何DEFINES，宏已经移到上面全局arm分支
+    SOURCES += \
+        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/cpu-feats.cpp \
+        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/quants.c \
+        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/repack.cpp
 }
 
 android {
     LIBS += -pthread
-    DEFINES += GGML_USE_NEON GGML_NO_AVX LLAMA_NO_DOWNLOAD LLAMA_NO_HF
-    LLAMA_SRC += $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/*.c, true) $$files($$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/*.cpp, true)
+    # 同上，移除内部DEFINES
+    SOURCES += \
+        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/cpu-feats.cpp \
+        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/quants.c \
+        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/repack.cpp
 }
-
-
-# 汇总到全局源文件
-SOURCES += $$LLAMA_SRC
