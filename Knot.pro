@@ -392,6 +392,8 @@ SOURCES += \
 
 SOURCES += \
     lib/diff/diff_match_patch.cpp \
+    lib/llama.cpp/common/unicode_common.cpp \
+    lib/llama.cpp/src/unicode.cpp \
     lib/llama.cpp/common/arg.cpp \
     lib/llama.cpp/common/chat-auto-parser-generator.cpp \
     lib/llama.cpp/common/chat-auto-parser-helpers.cpp \
@@ -423,7 +425,6 @@ SOURCES += \
     lib/llama.cpp/common/reasoning-budget.cpp \
     lib/llama.cpp/common/sampling.cpp \
     lib/llama.cpp/common/speculative.cpp \
-    lib/llama.cpp/common/unicode.cpp \
     lib/llama.cpp/ggml/src/ggml-alloc.c \
     lib/llama.cpp/ggml/src/ggml-backend-dl.cpp \
     lib/llama.cpp/ggml/src/ggml-backend-meta.cpp \
@@ -610,7 +611,6 @@ SOURCES += \
     lib/llama.cpp/src/models/wavtokenizer-dec.cpp \
     lib/llama.cpp/src/models/xverse.cpp \
     lib/llama.cpp/src/unicode-data.cpp \
-    lib/llama.cpp/src/unicode.cpp \
     lib/llama.cpp/vendor/cpp-httplib/httplib.cpp \
     lib/zlib/adler32.c \
     lib/zlib/compress.c \
@@ -1242,7 +1242,39 @@ contains(ANDROID_TARGET_ARCH,arm64-v8a) {
         $$PWD/android-openssl/ssl_3/v8a/libssl_3.so
 }
 
-###########################################################################
+############################### llama.cpp ############################################
+# ===================== ggml quants.c 关键适配提醒 =====================================
+# ggml/src/ggml-cpu/quants.c 文件末尾必须保留以下两段条件包含代码，不要被上游源码升级覆盖：
+
+# #ifdef GGML_USE_AVX2
+# #include "arch/x86/quants.c"
+# #endif
+# #ifdef GGML_USE_NEON
+# #include "arch/arm/quants.c"
+# #endif
+
+# 原理：
+# 1.官方CMake会自动追加上述代码；qmake不会自动注入
+# 2.arch内部函数为static，只能通过quants.c内嵌#include编译进同一obj，不能把arch下c文件单独加入SOURCES编译
+
+# ====================ggml/src/ggml-cpu/repack.cpp 同quants.c，升级源码后必须检查末尾保留===========
+
+#ifdef GGML_USE_AVX2
+#define NEAREST_INT
+#include "arch/x86/repack.cpp"
+#undef NEAREST_INT
+#endif
+
+# #ifdef GGML_USE_NEON
+# #include "arch/arm/repack.cpp"
+# #endif
+
+# 缺失会导致矩阵乘、量化矩阵相关大量链接缺失
+
+# repack.cpp 内嵌arch说明：
+# 1. arch/x86/repack.cpp 存在nearest_int，引入前必须#define NEAREST_INT 避免和上层重定义
+# 2. arch/arm/repack.cpp 无nearest_int，无需宏隔离，直接#include即可
+# ===========================================================================================
 
 LLAMA_ROOT = $$PWD/lib/llama.cpp
 
@@ -1258,20 +1290,25 @@ INCLUDEPATH += \
     $$LLAMA_ROOT/vendor/nlohmann \
     $$LLAMA_ROOT/vendor/cpp-httplib
 
-# 全局宏：禁用所有异构硬件、无用CLI/服务
+# 全局宏
 DEFINES += \
     GGML_VERSION=\\\"0\\\" \
     GGML_COMMIT=\\\"b10041\\\" \
     GGML_NO_CUDA GGML_NO_METAL GGML_NO_OPENCL GGML_NO_VULKAN \
     GGML_NO_HEXAGON GGML_NO_ET GGML_NO_RPC GGML_NO_SYCL GGML_STATIC GGML_NO_KLEIDIAI \
-    LLAMA_NO_SERVER LLAMA_NO_CLI
+    LLAMA_BUILD_INFO LLAMA_NO_SERVER LLAMA_NO_CLI LLAMA_ARCH \
+    LLAMA_GRAPH LLAMA_MODEL GGML_ALLOCATOR LLAMA_IMPL LLAMA_EMBED
+
+
+# 全平台统一开启GGML_CPU（核心，所有CPU后端依赖）
+DEFINES += GGML_CPU
 
 # Windows x86
 win32 {
     DEFINES += GGML_USE_AVX2 GGML_F16C GGML_WIN32 __AVX2__
 }
 # Linux x86 / Mac Intel（x86_64）
-unix:!android:!macx:|macx:!arm64 {
+unix:!android:!macx|macx:!arm64 {
     DEFINES += GGML_USE_AVX2 GGML_F16C
 }
 # ARM平台共用
@@ -1279,57 +1316,33 @@ macx:arm64|android {
     DEFINES += GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC
 }
 
-# 全平台通用禁用
-DEFINES += LLAMA_NO_DOWNLOAD LLAMA_NO_HF LLAMA_DISABLE_BUILD_INFO
-
 # 分平台追加对应arch架构完整算子（x86/arm递归全部量化文件）
 win32-msvc {
-    QMAKE_CXXFLAGS += /arch:AVX2 /utf-8 /std:c++17
-    QMAKE_CFLAGS += /arch:AVX2 /utf-8
-
-    SOURCES += \
-        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/cpu-feats.cpp \
-        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/quants.c \
-        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/repack.cpp
+    QMAKE_CXXFLAGS += /arch:AVX2 /utf-8 /std:c++17 /DGGML_CPU
+    QMAKE_CFLAGS += /arch:AVX2 /utf-8 /DGGML_USE_AVX2 /DGGML_F16C /D__AVX2__ /DGGML_CPU
     CONFIG += no_batch
+
 }
 
 unix:!android:!macx {
     LIBS += -pthread
-    # gcc 开启AVX2、C++17
-    QMAKE_CXXFLAGS += -mavx2 -mf16c -std=c++17
-    QMAKE_CFLAGS += -mavx2
-    SOURCES += \
-        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/cpu-feats.cpp \
-        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/quants.c \
-        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/repack.cpp
+    QMAKE_CXXFLAGS += -mavx2 -mf16c -std=c++17 -DGGML_CPU -DGGML_USE_AVX2
+    QMAKE_CFLAGS += -mavx2 -mf16c -DGGML_CPU -DGGML_USE_AVX2
 }
 
 macx:!arm64 {
     LIBS += -pthread
-    # clang AVX2开关
-    QMAKE_CXXFLAGS += -mavx2 -mf16c -std=c++17
-    QMAKE_CFLAGS += -mavx2
-    SOURCES += \
-        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/cpu-feats.cpp \
-        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/quants.c \
-        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/x86/repack.cpp
+    QMAKE_CXXFLAGS += -mavx2 -mf16c -std=c++17 -DGGML_CPU -DGGML_USE_AVX2
+    QMAKE_CFLAGS += -mavx2 -mf16c -DGGML_CPU -DGGML_USE_AVX2
 }
 
 macx:arm64 {
     LIBS += -pthread
-    # 这里不再写任何DEFINES，宏已经移到上面全局arm分支
-    SOURCES += \
-        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/cpu-feats.cpp \
-        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/quants.c \
-        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/repack.cpp
+    # 无需AVX编译参数，仅靠全局DEFINES GGML_CPU/GGML_USE_NEON生效
 }
 
 android {
     LIBS += -pthread
-    # 同上，移除内部DEFINES
-    SOURCES += \
-        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/cpu-feats.cpp \
-        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/quants.c \
-        $$LLAMA_ROOT/ggml/src/ggml-cpu/arch/arm/repack.cpp
+
 }
+

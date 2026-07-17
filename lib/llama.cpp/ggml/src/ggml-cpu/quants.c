@@ -1337,3 +1337,11 @@ void quantize_row_iq4_xs(const float * GGML_RESTRICT x, void * GGML_RESTRICT y, 
     assert(k % QK_K == 0);
     quantize_iq4_xs(x, y, 1, k, NULL);
 }
+
+#ifdef GGML_USE_AVX2
+#include "arch/x86/quants.c"
+#endif
+
+#ifdef GGML_USE_NEON
+#include "arch/arm/quants.c"
+#endif
