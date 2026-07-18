@@ -1255,18 +1255,28 @@ contains(ANDROID_TARGET_ARCH,arm64-v8a) {
 # ===================== ggml quants.c 关键适配提醒 =====================================
 # ggml/src/ggml-cpu/quants.c 文件末尾必须保留以下两段条件包含代码，不要被上游源码升级覆盖：
 
-# #ifdef GGML_USE_AVX2
-# #include "arch/x86/quants.c"
-# #endif
-# #ifdef GGML_USE_NEON
-# #include "arch/arm/quants.c"
-# #endif
+#if defined(__aarch64__) || defined(__arm__)
+#undef GGML_USE_AVX2
+#endif
+
+#if defined(GGML_USE_AVX2) && (defined(__x86_64__) || defined(_M_X64))
+#include "arch/x86/quants.c"
+#endif
+
+#if defined(GGML_USE_NEON) && (defined(__aarch64__) || defined(__arm__))
+#include "arch/arm/quants.c"
+#endif
 
 # 原理：
 # 1.官方CMake会自动追加上述代码；qmake不会自动注入
 # 2.arch内部函数为static，只能通过quants.c内嵌#include编译进同一obj，不能把arch下c文件单独加入SOURCES编译
 
 # ====================ggml/src/ggml-cpu/repack.cpp 同quants.c，升级源码后必须检查末尾保留===========
+
+# // 硬件架构强制互斥：ARM64/ARM 彻底禁用AVX相关逻辑
+#if defined(__aarch64__) || defined(__arm__)
+#undef GGML_USE_AVX2
+#endif
 
 #if defined(GGML_USE_AVX2) && (defined(__x86_64__) || defined(_M_X64))
 #define NEAREST_INT

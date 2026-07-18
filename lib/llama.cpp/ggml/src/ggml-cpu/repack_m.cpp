@@ -5673,6 +5673,11 @@ ggml_backend_buffer_type_t ggml_backend_cpu_repack_buffer_type(void) {
   return &ggml_backend_cpu_buffer_type_repack;
 }
 
+// 硬件架构强制互斥：ARM64/ARM 彻底禁用AVX相关逻辑
+#if defined(__aarch64__) || defined(__arm__)
+#undef GGML_USE_AVX2
+#endif
+
 #if defined(GGML_USE_AVX2) && (defined(__x86_64__) || defined(_M_X64))
 #define NEAREST_INT
 #include "arch/x86/repack.cpp"

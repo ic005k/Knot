@@ -1338,10 +1338,15 @@ void quantize_row_iq4_xs(const float * GGML_RESTRICT x, void * GGML_RESTRICT y, 
     quantize_iq4_xs(x, y, 1, k, NULL);
 }
 
-#ifdef GGML_USE_AVX2
+///////////////////////////////////////////////////////////////////////////////////
+#if defined(__aarch64__) || defined(__arm__)
+#undef GGML_USE_AVX2
+#endif
+
+#if defined(GGML_USE_AVX2) && (defined(__x86_64__) || defined(_M_X64))
 #include "arch/x86/quants.c"
 #endif
 
-#ifdef GGML_USE_NEON
+#if defined(GGML_USE_NEON) && (defined(__aarch64__) || defined(__arm__))
 #include "arch/arm/quants.c"
 #endif
