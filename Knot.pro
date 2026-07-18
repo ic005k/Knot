@@ -1293,7 +1293,23 @@ contains(ANDROID_TARGET_ARCH,arm64-v8a) {
 # repack.cpp 内嵌arch说明：
 # 1. arch/x86/repack.cpp 存在nearest_int，引入前必须#define NEAREST_INT 避免和上层重定义
 # 2. arch/arm/repack.cpp 无nearest_int，无需宏隔离，直接#include即可
-# ===========================================================================================
+# =====================================================================================================
+
+# ========== Linux CI 编译兼容备忘 ======================================================================
+# 问题：部分精简Ubuntu容器内核无 SCHED_BATCH 调度常量，ggml-cpu_1.c 直接使用会报未定义标识符
+# 修复方案：修改 ggml/src/ggml-cpu/ggml-cpu_1.c 优先级分支代码，增加系统宏判断兜底
+# 修改片段：
+# case GGML_SCHED_PRIO_LOW:
+# #if defined(SCHED_BATCH)
+#     policy = SCHED_BATCH;
+# #else
+#     policy = SCHED_OTHER;
+# #endif
+#     p.sched_priority = 0;
+#     break;
+# 兼容范围：Win/Mac-x64/Mac-ARM/Android 无任何逻辑变更，仅无SCHED_BATCH的Linux自动降级分时调度，不影响推理核心功能
+# =========================================================================================================
+
 
 LLAMA_ROOT = $$PWD/lib/llama.cpp
 
@@ -1363,9 +1379,10 @@ win32-msvc {
 
 # Linux x86_64
 unix:!android:!macx {
+    DEFINES += GGML_NO_SCHED_BATCH _GNU_SOURCE
     LIBS += -pthread
-    QMAKE_CXXFLAGS += -mavx2 -mf16c -mfma -std=c++17 -DGGML_CPU -DGGML_USE_AVX2
-    QMAKE_CFLAGS += -mavx2 -mf16c -mfma -DGGML_CPU -DGGML_USE_AVX2
+    QMAKE_CXXFLAGS += -mavx2 -mf16c -mfma -std=c++17 -DGGML_CPU -DGGML_USE_AVX2 -DGGML_NO_SCHED_BATCH -D_GNU_SOURCE
+    QMAKE_CFLAGS += -mavx2 -mf16c -mfma -DGGML_CPU -DGGML_USE_AVX2 -DGGML_NO_SCHED_BATCH -D_GNU_SOURCE
 }
 
 # Mac Intel x86

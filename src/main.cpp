@@ -84,31 +84,27 @@ QString strJBDict5 = "";
 #pragma comment(linker, "/INCLUDE:llama_get_embeddings_seq")
 #endif
 
+// 【全平台统一兜底】永久持有CPU后端注册句柄，阻止所有编译器优化裁剪后端静态符号
+static ggml_backend_reg_t g_global_cpu_backend = nullptr;
+
 ///////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-#ifdef _MSC_VER
-  // MSVC 专用：防 LTCG/OPT:REF 裁剪，初始化为nullptr避免未初始化警告
-  volatile ggml_backend_reg_t cpu_reg = nullptr;
-#endif
-
   ggml_backend_load_all();
   llama_backend_init();
 
-  // ✅ 所有平台统一：后端完全初始化后再获取reg，判空更准确
-#ifdef _MSC_VER
-  cpu_reg = ggml_backend_cpu_reg();  // 再次调用，拿到初始化后的有效指针
-#else
-  ggml_backend_reg_t cpu_reg = ggml_backend_cpu_reg();
-#endif
+  // ✅ 所有平台统一：后端完全初始化后再获取
 
-  if (!cpu_reg) {
+  g_global_cpu_backend =
+      ggml_backend_cpu_reg();  // 再次调用，拿到初始化后的有效指针
+
+  if (!g_global_cpu_backend) {
     fprintf(stderr, "❌ CPU backend not loaded!\n");
     return 1;
   }
 
   // 可选调试日志：打印已加载的后端名，验证正确性
-  printf("[backend] loaded: %s\n", ggml_backend_reg_name(cpu_reg));
+  printf("[backend] loaded: %s\n", ggml_backend_reg_name(g_global_cpu_backend));
 
   ///////////////////////////////////////////////////////////////////////////
 
