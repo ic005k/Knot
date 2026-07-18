@@ -1,7 +1,5 @@
 #define GGML_COMMON_IMPL_CPP
 #define GGML_COMMON_DECL_CPP
-#include "repack.h"
-
 #include <cassert>
 #include <cmath>
 #include <cstdio>  // for GGML_ASSERT
@@ -13,6 +11,7 @@
 #include "ggml-cpu-impl.h"
 #include "ggml-cpu.h"
 #include "ggml-impl.h"
+#include "repack.h"
 #include "simd-mappings.h"
 #include "traits.h"
 
@@ -5674,13 +5673,12 @@ ggml_backend_buffer_type_t ggml_backend_cpu_repack_buffer_type(void) {
   return &ggml_backend_cpu_buffer_type_repack;
 }
 
-#ifdef GGML_USE_AVX2
+#if defined(GGML_USE_AVX2) && (defined(__x86_64__) || defined(_M_X64))
 #define NEAREST_INT
 #include "arch/x86/repack.cpp"
 #undef NEAREST_INT
 #endif
 
-#ifdef GGML_USE_NEON
-// arm/repack.cpp 无nearest_int，无需宏包裹，直接引入
+#if defined(GGML_USE_NEON) && (defined(__aarch64__) || defined(__arm__))
 #include "arch/arm/repack.cpp"
 #endif

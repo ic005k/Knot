@@ -1268,15 +1268,15 @@ contains(ANDROID_TARGET_ARCH,arm64-v8a) {
 
 # ====================ggml/src/ggml-cpu/repack.cpp 同quants.c，升级源码后必须检查末尾保留===========
 
-#ifdef GGML_USE_AVX2
+#if defined(GGML_USE_AVX2) && (defined(__x86_64__) || defined(_M_X64))
 #define NEAREST_INT
 #include "arch/x86/repack.cpp"
 #undef NEAREST_INT
 #endif
 
-# #ifdef GGML_USE_NEON
-# #include "arch/arm/repack.cpp"
-# #endif
+#if defined(GGML_USE_NEON) && (defined(__aarch64__) || defined(__arm__))
+#include "arch/arm/repack.cpp"
+#endif
 
 # 缺失会导致矩阵乘、量化矩阵相关大量链接缺失
 
@@ -1342,23 +1342,24 @@ win32-msvc {
     LIBS += -ladvapi32
 }
 
-# Linux平台
+# Linux x86_64
 unix:!android:!macx {
     LIBS += -pthread
-    QMAKE_CXXFLAGS += -mavx2 -mf16c -std=c++17 -DGGML_CPU -DGGML_USE_AVX2
-    QMAKE_CFLAGS += -mavx2 -mf16c -DGGML_CPU -DGGML_USE_AVX2 -mfma
+    QMAKE_CXXFLAGS += -mavx2 -mf16c -mfma -std=c++17 -DGGML_CPU -DGGML_USE_AVX2
+    QMAKE_CFLAGS += -mavx2 -mf16c -mfma -DGGML_CPU -DGGML_USE_AVX2
 }
 
-# Mac Intel平台
+# Mac Intel x86
 macx:!arm64 {
     LIBS += -pthread
-    QMAKE_CXXFLAGS += -mavx2 -mf16c -std=c++17 -DGGML_CPU -DGGML_USE_AVX2
-    QMAKE_CFLAGS += -mavx2 -mf16c -DGGML_CPU -DGGML_USE_AVX2 -mfma
+    QMAKE_CXXFLAGS += -mavx2 -mf16c -mfma -std=c++17 -DGGML_CPU -DGGML_USE_AVX2
+    QMAKE_CFLAGS += -mavx2 -mf16c -mfma -DGGML_CPU -DGGML_USE_AVX2
 }
 
 macx:arm64 {
     LIBS += -pthread
     # 无需AVX编译参数，仅靠全局DEFINES GGML_CPU/GGML_USE_NEON生效
+
 }
 
 android {
