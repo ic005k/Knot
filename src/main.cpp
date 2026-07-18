@@ -9,6 +9,10 @@
 
 #include <ggml-cpu.h>
 
+#ifdef Q_OS_ANDROID
+#include <cpu-features.h>
+#endif
+
 #include <QElapsedTimer>
 #include <QFuture>
 #include <QObject>
@@ -83,20 +87,31 @@ QString strJBDict5 = "";
 
 int main(int argc, char* argv[]) {
 #ifdef _MSC_VER
-  // ✅ MSVC 专用：防 LTCG / OPT:REF 裁剪
-  volatile ggml_backend_reg_t cpu_reg_check = ggml_backend_cpu_reg();
-  (void)cpu_reg_check;
+  // MSVC 专用：防 LTCG/OPT:REF 裁剪，初始化为nullptr避免未初始化警告
+  volatile ggml_backend_reg_t cpu_reg = nullptr;
+#endif
+
+#ifdef Q_OS_ANDROID
+  android_getCpuFeatures();  // 最早时机初始化Android CPU特性
 #endif
 
   ggml_backend_load_all();
   llama_backend_init();
 
-  // ✅ 所有平台通用：启动时验证
-  if (!ggml_backend_reg_by_name("CPU")) {
+  // ✅ 所有平台统一：后端完全初始化后再获取reg，判空更准确
+#ifdef _MSC_VER
+  cpu_reg = ggml_backend_cpu_reg();  // 再次调用，拿到初始化后的有效指针
+#else
+  ggml_backend_reg_t cpu_reg = ggml_backend_cpu_reg();
+#endif
+
+  if (!cpu_reg) {
     fprintf(stderr, "❌ CPU backend not loaded!\n");
-    isLocalAIModel = false;
     return 1;
   }
+
+  // 可选调试日志：打印已加载的后端名，验证正确性
+  printf("[backend] loaded: %s\n", ggml_backend_reg_name(cpu_reg));
 
   ///////////////////////////////////////////////////////////////////////////
 
