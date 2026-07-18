@@ -1310,9 +1310,6 @@ DEFINES += \
 # 开启CPU额外buffer类型，才能生成 ggml_backend_cpu_get_extra_buffer_types
 DEFINES += GGML_ALLOW_EXTRA_BUFFERS
 
-# 关闭 Windows 注册表检测逻辑，就不会引用注册表 API，无需链接 advapi32
-#DEFINES += GGML_NO_WIN_REGISTRY
-
 # 全平台统一开启GGML_CPU（核心，所有CPU后端依赖）
 DEFINES += GGML_CPU GGML_USE_AVX2 GGML_F16C __AVX2__
 
@@ -1335,7 +1332,8 @@ win32-msvc {
     QMAKE_CFLAGS += /arch:AVX2 /utf-8
     # 禁止删除静态全局注册（关键，no_batch删掉后才生效）
     QMAKE_LFLAGS += /OPT:NOREF /OPT:NOICF
-
+    
+    # Windows 注册表检测逻辑，检查cpu类型
     LIBS += -ladvapi32
 }
 
