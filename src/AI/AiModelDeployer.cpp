@@ -3,7 +3,7 @@
 #include <QDir>
 #include <QFileInfo>
 
-QString modelFilaName = "nomic-embed-text-v1.5.Q5_K_M.gguf";
+QString modelFilaName = "multilingual-e5-small-q4_k.gguf";
 
 QString AiModelDeployer::getModelRoot() {
   QDir dir(privateDir + "model");

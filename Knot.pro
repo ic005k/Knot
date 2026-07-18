@@ -1319,8 +1319,13 @@ win32 {
     DEFINES += GGML_WIN32 GGML_USE_AVX2 GGML_F16C __AVX2__
 }
 
-# Linux x86 / Mac Intel（x86_64）
-unix:!android:!macx|macx:!arm64 {
+# Linux x86 only
+unix:!android:!macx {
+    DEFINES += GGML_USE_AVX2 GGML_F16C
+}
+
+# Mac Intel x86 only
+macx:!arm64 {
     DEFINES += GGML_USE_AVX2 GGML_F16C
 }
 
