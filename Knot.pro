@@ -1334,7 +1334,8 @@ DEFINES += \
     LLAMA_BUILD_INFO LLAMA_ARCH \
     LLAMA_GRAPH LLAMA_MODEL GGML_ALLOCATOR LLAMA_IMPL \
     LLAMA_EMBED LLAMA_EMBED_ONLY \
-    LLAMA_NO_CLI LLAMA_NO_SERVER
+    LLAMA_NO_CLI LLAMA_NO_SERVER \
+    GGML_USE_CPU
 
 ## LLAMA_EMBED
 
@@ -1366,12 +1367,14 @@ macx:arm64|android {
 
 # 分平台追加对应arch架构完整算子（x86/arm递归全部量化文件）
 win32-msvc {
-    QMAKE_CXXFLAGS += /arch:AVX2 /utf-8 /std:c++17
-    QMAKE_CFLAGS += /arch:AVX2 /utf-8
+    QMAKE_CXXFLAGS_RELEASE += /arch:AVX2 /utf-8 /std:c++17
+    QMAKE_CFLAGS_RELEASE += /arch:AVX2 /utf-8
     # 保留函数不优化删除
-    QMAKE_LFLAGS += /OPT:NOREF /OPT:NOICF
-    # 强制要求链接器引入ggml_backend_cpu_reg符号，自动拉入ggml-cpu_2.obj
-    QMAKE_LFLAGS += /INCLUDE:ggml_backend_cpu_reg
+    QMAKE_LFLAGS_RELEASE += /OPT:NOREF /OPT:NOICF
+
+    # 强制包含多个可能的注册符号（新版 llama.cpp 可能有多个入口）
+    QMAKE_LFLAGS_RELEASE += /INCLUDE:ggml_backend_cpu_reg
+    QMAKE_LFLAGS_RELEASE += /INCLUDE:ggml_backend_cpu_init
 
     # Windows 注册表检测逻辑，检查cpu类型
     LIBS += -ladvapi32
@@ -1392,14 +1395,30 @@ macx:!arm64 {
     QMAKE_CFLAGS += -mavx2 -mf16c -mfma -DGGML_CPU -DGGML_USE_AVX2
 }
 
-macx:arm64 {
+# ========== macx:arm64 ==========
+# 使用编译器内置宏检测代替 qmake 作用域（最可靠）
+# 在 QMAKE_CFLAGS/QMAKE_CXXFLAGS 中直接追加 -D，绕过 DEFINES 作用域问题
+macx {
+    # Mac 通用 pthread
     LIBS += -pthread
-    # 无需AVX编译参数，仅靠全局DEFINES GGML_CPU/GGML_USE_NEON生效
 
+    # 通过 uname -m 运行时检测架构，比 qmake arm64 作用域更可靠
+    MACOS_ARCH = $$system(uname -m)
+    equals(MACOS_ARCH, arm64) {
+        message("✅ Detected macOS ARM64 via uname -m")
+        DEFINES += GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC
+    } else {
+        message("ℹ️ Detected macOS x86_64 via uname -m")
+        DEFINES += GGML_USE_AVX2 GGML_F16C
+        QMAKE_CXXFLAGS += -mavx2 -mf16c -mfma
+        QMAKE_CFLAGS += -mavx2 -mf16c -mfma
+    }
 }
 
 android {
     LIBS += -pthread
-
+    DEFINES += GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC
 }
+
+
 

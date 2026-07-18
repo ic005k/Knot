@@ -87,13 +87,39 @@ QString strJBDict5 = "";
 // 【全平台统一兜底】永久持有CPU后端注册句柄，阻止所有编译器优化裁剪后端静态符号
 static ggml_backend_reg_t g_global_cpu_backend = nullptr;
 
+// 在全局作用域，强制让编译器认为这些符号被"使用"
+static volatile void* g_force_link_cpu_backend[] = {
+    (void*)&ggml_backend_cpu_reg,
+    (void*)&ggml_backend_cpu_init,
+};
+
 ///////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-  ggml_backend_load_all();
+  // 防止整个数组被优化
+  (void)g_force_link_cpu_backend;
+
+  // ✅ 静态链接模式下，必须显式调用此函数注册 CPU 后端
+  // ggml_backend_load_all() 对静态链接无效！
+  ggml_backend_cpu_init();  // ← 关键！替代 ggml_backend_load_all()
+
   llama_backend_init();
 
-  // ✅ 所有平台统一：后端完全初始化后再获取
+  // ✅ 【第一步】立即检查是否有后端被成功加载
+  int num_backends = ggml_backend_reg_count();
+  if (num_backends == 0) {
+    fprintf(stderr,
+            "❌ No backends loaded! Check that backend libraries "
+            "(.so/.dll/.dylib) are present and dependencies are satisfied.\n");
+    return 1;
+  }
+
+  printf("[backend] %d backend(s) loaded:\n", num_backends);
+  for (int i = 0; i < num_backends; i++) {
+    printf("  - %s\n", ggml_backend_reg_name(ggml_backend_reg_get(i)));
+  }
+
+  // ✅ 【第二步】确认有后端加载后，再获取 CPU 后端
 
   g_global_cpu_backend =
       ggml_backend_cpu_reg();  // 再次调用，拿到初始化后的有效指针

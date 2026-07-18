@@ -20,7 +20,7 @@ bool initGlobalAiEngine() {
   // ========= 全局后端、llama一次性初始化 =========
   if (!g_llama_ggml_inited) {
     // 多线程上下文隔离兜底，任意平台子线程加载模型前刷新后端注册表
-    ggml_backend_load_all();
+    // ggml_backend_load_all();
 
     qDebug() << "子线程执行ggml_backend_load_all() 后端扫描完成";
 
