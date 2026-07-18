@@ -4,12 +4,11 @@
 #include <cstring>
 #include <vector>
 
+#include "lib/llama.cpp/ggml/include/ggml-backend.h"
 #include "lib/llama.cpp/include/llama.h"
-// #include "src/AI/GlobalAI"
 
 EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
   std::string path = ggufPath.toUtf8().toStdString();
-  llama_backend_init();
   llama_model_params model_params = llama_model_default_params();
   m_model = llama_load_model_from_file(path.c_str(), model_params);
   if (!m_model) return;
@@ -24,7 +23,7 @@ EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
 EmbeddingEngine::~EmbeddingEngine() {
   if (m_ctx) llama_free(m_ctx);
   if (m_model) llama_free_model(m_model);
-  llama_backend_free();
+  // 删除 llama_backend_free(); 全局释放统一走releaseGlobalAiEngine
 }
 
 bool EmbeddingEngine::isValid() const {

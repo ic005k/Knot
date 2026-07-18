@@ -41,6 +41,8 @@ extern void RegJni18(const char* myClassName);
 extern void RegJni19(const char* myClassName);
 extern void RegJni20(const char* myClassName);
 
+extern void releaseGlobalAiEngine();
+
 void loadTheme(bool isDark);
 void loadLocal();
 
@@ -340,6 +342,11 @@ int main(int argc, char* argv[]) {
   workerThread->quit();
   workerThread->wait();
   workerThread->deleteLater();
+
+#ifdef VECTOR_SEARCH
+  // 程序退出统一释放llama、ggml全局资源
+  releaseGlobalAiEngine();
+#endif
 
   return ret;
 }

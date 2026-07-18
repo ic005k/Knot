@@ -6,13 +6,27 @@
 #include "AiModelDeployer.h"
 #include "EmbeddingEngine.h"
 #include "VectorDb.h"
+#include "lib/llama.cpp/ggml/include/ggml-backend.h"
+#include "lib/llama.cpp/include/llama.h"
 
 // 全局向量引擎，统一基类无需改动
 std::unique_ptr<BaseEmbeddingEngine> g_embEngine;
 
+static bool g_llama_ggml_inited = false;
+
 #ifdef VECTOR_SEARCH
 
 bool initGlobalAiEngine() {
+  // ========= 全局后端、llama一次性初始化 =========
+  if (!g_llama_ggml_inited) {
+    ggml_backend_load_all();  // 加载编译好的ggml-cpu后端
+    // ggml_backend_load("ggml-cpu");
+    llama_backend_init();  // 初始化llama全局环境
+    g_llama_ggml_inited = true;
+    qDebug() << "ggml后端 + llama全局初始化完成";
+  }
+  // =====================================================
+
   QString ggufPath = AiModelDeployer::getGgufModelPath();
   QFileInfo fiGguf(ggufPath);
   const qint64 MIN_GGUF_SIZE = 100LL * 1024 * 1024;
@@ -57,4 +71,15 @@ bool initGlobalAiEngine() {
   return true;
 }
 
+// 新增全局释放函数，程序退出调用
+void releaseGlobalAiEngine() {
+  if (g_embEngine) {
+    g_embEngine.reset();
+  }
+  if (g_llama_ggml_inited) {
+    llama_backend_free();
+    g_llama_ggml_inited = false;
+    qDebug() << "llama/ggml 全局资源释放完成";
+  }
+}
 #endif

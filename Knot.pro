@@ -1310,21 +1310,20 @@ DEFINES += \
 # 开启CPU额外buffer类型，才能生成 ggml_backend_cpu_get_extra_buffer_types
 DEFINES += GGML_ALLOW_EXTRA_BUFFERS
 
-# 关闭 Windows 注册表检测逻辑，就不会引用注册表 API，无需链接 advapi32
-#DEFINES += GGML_NO_WIN_REGISTRY
-
 # 全平台统一开启GGML_CPU（核心，所有CPU后端依赖）
-DEFINES += GGML_CPU GGML_USE_AVX2 GGML_F16C __AVX2__
+DEFINES += GGML_CPU
 
 # Windows x86
 win32 {
-    DEFINES += GGML_USE_AVX2 GGML_F16C GGML_WIN32 __AVX2__
+    DEFINES += GGML_WIN32 GGML_USE_AVX2 GGML_F16C __AVX2__
 }
+
 # Linux x86 / Mac Intel（x86_64）
 unix:!android:!macx|macx:!arm64 {
     DEFINES += GGML_USE_AVX2 GGML_F16C
 }
-# ARM平台共用
+
+# Apple Silicon / Android ARM 完全不加AVX宏
 macx:arm64|android {
     DEFINES += GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC
 }
@@ -1333,22 +1332,27 @@ macx:arm64|android {
 win32-msvc {
     QMAKE_CXXFLAGS += /arch:AVX2 /utf-8 /std:c++17
     QMAKE_CFLAGS += /arch:AVX2 /utf-8
-    # 禁止删除静态全局注册（关键，no_batch删掉后才生效）
+    # 保留函数不优化删除
     QMAKE_LFLAGS += /OPT:NOREF /OPT:NOICF
+    # 强制要求链接器引入ggml_backend_cpu_reg符号，自动拉入ggml-cpu_2.obj
+    QMAKE_LFLAGS += /INCLUDE:ggml_backend_cpu_reg
 
+    # Windows 注册表检测逻辑，检查cpu类型
     LIBS += -ladvapi32
 }
 
+# Linux平台
 unix:!android:!macx {
     LIBS += -pthread
     QMAKE_CXXFLAGS += -mavx2 -mf16c -std=c++17 -DGGML_CPU -DGGML_USE_AVX2
-    QMAKE_CFLAGS += -mavx2 -mf16c -DGGML_CPU -DGGML_USE_AVX2
+    QMAKE_CFLAGS += -mavx2 -mf16c -DGGML_CPU -DGGML_USE_AVX2 -mfma
 }
 
+# Mac Intel平台
 macx:!arm64 {
     LIBS += -pthread
     QMAKE_CXXFLAGS += -mavx2 -mf16c -std=c++17 -DGGML_CPU -DGGML_USE_AVX2
-    QMAKE_CFLAGS += -mavx2 -mf16c -DGGML_CPU -DGGML_USE_AVX2
+    QMAKE_CFLAGS += -mavx2 -mf16c -DGGML_CPU -DGGML_USE_AVX2 -mfma
 }
 
 macx:arm64 {
