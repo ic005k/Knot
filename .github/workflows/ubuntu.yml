@@ -63,10 +63,18 @@ jobs:
         with:
                   fetch-depth: 1
 
+      #- name: build ubuntu
+      #  run: |
+      #            qmake
+      #            make
       - name: build ubuntu
         run: |
-                  qmake
-                  make
+          export CFLAGS="-march=haswell"
+          export CXXFLAGS="-march=haswell"
+          echo "CFLAGS: $CFLAGS"
+          echo "CXXFLAGS: $CXXFLAGS"
+          qmake
+          make -j$(nproc)
 
       - name: install linuxdeployqt
         run: |

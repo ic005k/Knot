@@ -393,7 +393,8 @@ SOURCES += \
 SOURCES += \
     lib/diff/diff_match_patch.cpp \
     lib/llama.cpp/common/unicode_common.cpp \
-    lib/llama.cpp/ggml/src/ggml-cpu/ggml-cpu_2.cpp \
+    lib/llama.cpp/ggml/src/ggml-cpu/ggml-cpu.cpp \
+    lib/llama.cpp/ggml/src/ggml-cpu/ggml-cpu_1.c \
     lib/llama.cpp/ggml/src/ggml-cpu/quants_m.c \
     lib/llama.cpp/ggml/src/ggml-cpu/repack_m.cpp \
     lib/llama.cpp/src/models/llama_models.cpp \
@@ -435,7 +436,6 @@ SOURCES += \
     lib/llama.cpp/ggml/src/ggml-backend-reg.cpp \
     lib/llama.cpp/ggml/src/ggml-backend.cpp \
     lib/llama.cpp/ggml/src/ggml-cpu/binary-ops.cpp \
-    lib/llama.cpp/ggml/src/ggml-cpu/ggml-cpu.c \
     lib/llama.cpp/ggml/src/ggml-cpu/hbm.cpp \
     lib/llama.cpp/ggml/src/ggml-cpu/ops.cpp \
     lib/llama.cpp/ggml/src/ggml-cpu/traits.cpp \
@@ -1364,5 +1364,4 @@ android {
     LIBS += -pthread
 
 }
-
 

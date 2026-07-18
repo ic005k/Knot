@@ -19,9 +19,9 @@ static bool g_llama_ggml_inited = false;
 bool initGlobalAiEngine() {
   // ========= 全局后端、llama一次性初始化 =========
   if (!g_llama_ggml_inited) {
-    ggml_backend_load_all();  // 加载编译好的ggml-cpu后端
-    // ggml_backend_load("ggml-cpu");
-    llama_backend_init();  // 初始化llama全局环境
+    // ggml_backend_load_all();  // 加载编译好的ggml-cpu后端
+    //  ggml_backend_load("ggml-cpu");
+    // llama_backend_init();  // 初始化llama全局环境
     g_llama_ggml_inited = true;
     qDebug() << "ggml后端 + llama全局初始化完成";
   }

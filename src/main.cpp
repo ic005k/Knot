@@ -7,6 +7,8 @@
 #include <QJniObject>       // Qt JNI 对象封装
 #endif
 
+#include <ggml-cpu.h>
+
 #include <QElapsedTimer>
 #include <QFuture>
 #include <QObject>
@@ -23,6 +25,8 @@
 #include "MainWindow.h"
 #include "SplashTimer.h"
 #include "lib/cppjieba/Jieba.hpp"
+#include "lib/llama.cpp/ggml/include/ggml-backend.h"
+#include "lib/llama.cpp/include/llama.h"
 #include "lib/quazip/quazip.h"
 #include "lib/quazip/quazipfile.h"
 #include "native_msg_host.h"
@@ -67,7 +71,35 @@ QString strJBDict5 = "";
 
 #define Cross_Origin
 
+/////////////////////////////////////////////////////////////
+
+#ifdef _MSC_VER
+// 强制让链接器把 ggml_backend_cpu_reg 拉进来
+// extern "C" 所以 x64 下名字就是 ggml_backend_cpu_reg，不需要前导下划线
+#pragma comment(linker, "/INCLUDE:ggml_backend_cpu_reg")
+#endif
+
+///////////////////////////////////////////////////////////////
+
 int main(int argc, char* argv[]) {
+#ifdef _MSC_VER
+  // ✅ MSVC 专用：防 LTCG / OPT:REF 裁剪
+  volatile ggml_backend_reg_t cpu_reg_check = ggml_backend_cpu_reg();
+  (void)cpu_reg_check;
+#endif
+
+  ggml_backend_load_all();
+  llama_backend_init();
+
+  // ✅ 所有平台通用：启动时验证
+  if (!ggml_backend_reg_by_name("CPU")) {
+    fprintf(stderr, "❌ CPU backend not loaded!\n");
+    isLocalAIModel = false;
+    return 1;
+  }
+
+  ///////////////////////////////////////////////////////////////////////////
+
   QElapsedTimer totalTimer;
   totalTimer.start();
 
