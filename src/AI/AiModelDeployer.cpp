@@ -3,6 +3,8 @@
 #include <QDir>
 #include <QFileInfo>
 
+QString modelFilaName = "nomic-embed-text-v1.5.Q5_K_M.gguf";
+
 QString AiModelDeployer::getModelRoot() {
   QDir dir(privateDir + "model");
   dir.mkpath(".");
@@ -11,15 +13,15 @@ QString AiModelDeployer::getModelRoot() {
 
 // 新增：GGUF单模型文件路径
 QString AiModelDeployer::getGgufModelPath() {
-  return QDir(getModelRoot()).filePath("multilingual-e5-small-q4_k.gguf");
+  return QDir(getModelRoot()).filePath(modelFilaName);
 }
 
 bool AiModelDeployer::isAllModelReady() {
   // 仅校验单个GGUF文件
   QFileInfo fiGguf(getGgufModelPath());
 
-  // 文件存在 + 体积大于100MB（当前文件118MB，阈值留余量）
-  const qint64 MIN_GGUF_SIZE = 100LL * 1024 * 1024;
+  // 文件存在 + 体积大于1MB（当前文件118MB，阈值留余量）
+  const qint64 MIN_GGUF_SIZE = 1LL * 1024 * 1024;
   bool okGguf = fiGguf.exists() && fiGguf.size() > MIN_GGUF_SIZE;
 
   return okGguf;

@@ -19,9 +19,10 @@ static bool g_llama_ggml_inited = false;
 bool initGlobalAiEngine() {
   // ========= 全局后端、llama一次性初始化 =========
   if (!g_llama_ggml_inited) {
-    // ggml_backend_load_all();  // 加载编译好的ggml-cpu后端
-    //  ggml_backend_load("ggml-cpu");
-    // llama_backend_init();  // 初始化llama全局环境
+    // 初始化已在main()中执行了
+    // ggml_backend_load_all();
+    // llama_backend_init();
+
     g_llama_ggml_inited = true;
     qDebug() << "ggml后端 + llama全局初始化完成";
   }
@@ -29,7 +30,7 @@ bool initGlobalAiEngine() {
 
   QString ggufPath = AiModelDeployer::getGgufModelPath();
   QFileInfo fiGguf(ggufPath);
-  const qint64 MIN_GGUF_SIZE = 100LL * 1024 * 1024;
+  const qint64 MIN_GGUF_SIZE = 1LL * 1024 * 1024;
 
   // 第一层：文件物理存在+大小校验
   if (!fiGguf.exists()) {
@@ -42,10 +43,24 @@ bool initGlobalAiEngine() {
     return false;
   }
 
-  // 第二层：尝试加载模型，校验文件二进制合法性
+  // 第二层前置校验GGUF魔数，不交给llama.cpp
+  QFile ggufFile(ggufPath);
+  if (!ggufFile.open(QIODevice::ReadOnly)) {
+    qWarning() << "无法打开GGUF文件：" << ggufPath;
+    return false;
+  }
+  char magic[4];
+  if (ggufFile.read(magic, 4) != 4 || memcmp(magic, "GGUF", 4) != 0) {
+    qCritical() << "GGUF文件格式损坏/bad magic，无法加载模型：" << ggufPath;
+    ggufFile.close();
+    return false;
+  }
+  ggufFile.close();
+
+  // 第三层：尝试加载模型，校验文件二进制合法性
   auto tmpEngine = std::make_unique<EmbeddingEngine>(ggufPath);
   if (!tmpEngine->isValid()) {
-    qCritical() << "GGUF文件格式损坏/bad magic，无法加载模型：" << ggufPath;
+    qCritical() << "GGUF模型加载失败（不支持的架构/量化类型）：" << ggufPath;
     return false;
   }
 

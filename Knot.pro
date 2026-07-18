@@ -397,6 +397,7 @@ SOURCES += \
     lib/llama.cpp/ggml/src/ggml-cpu/ggml-cpu_1.c \
     lib/llama.cpp/ggml/src/ggml-cpu/quants_m.c \
     lib/llama.cpp/ggml/src/ggml-cpu/repack_m.cpp \
+    lib/llama.cpp/ggml/src/ggml_1.c \
     lib/llama.cpp/src/models/llama_models.cpp \
     lib/llama.cpp/src/unicode.cpp \
     lib/llama.cpp/common/arg.cpp \
@@ -444,7 +445,6 @@ SOURCES += \
     lib/llama.cpp/ggml/src/ggml-opt.cpp \
     lib/llama.cpp/ggml/src/ggml-quants.c \
     lib/llama.cpp/ggml/src/ggml-threading.cpp \
-    lib/llama.cpp/ggml/src/ggml.c \
     lib/llama.cpp/ggml/src/ggml.cpp \
     lib/llama.cpp/ggml/src/gguf.cpp \
     lib/llama.cpp/src/llama-adapter.cpp \
@@ -1245,11 +1245,12 @@ contains(ANDROID_TARGET_ARCH,arm64-v8a) {
 ############################### llama.cpp ############################################
 
 #===================== 重名文件改名提示 =================================================
+# ggml/src/ggml-cpu/ggml-cpp.c
+# ggml/src/ggml.c
 # ggml/src/ggml-cpu/repack.cpp
 # ggml/src/ggml-cpu/quants.c
 # src/models/llama.cpp
 # common/unicode.cpp
-# ggml/src/ggml-cpu/ggml-cpp.cpp(同目录存在ggml-cpp.c文件会生成同一个obj导致链接混乱）
 
 # ===================== ggml quants.c 关键适配提醒 =====================================
 # ggml/src/ggml-cpu/quants.c 文件末尾必须保留以下两段条件包含代码，不要被上游源码升级覆盖：

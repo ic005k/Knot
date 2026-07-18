@@ -9,10 +9,6 @@
 
 #include <ggml-cpu.h>
 
-#ifdef Q_OS_ANDROID
-#include <cpu-features.h>
-#endif
-
 #include <QElapsedTimer>
 #include <QFuture>
 #include <QObject>
@@ -89,10 +85,6 @@ int main(int argc, char* argv[]) {
 #ifdef _MSC_VER
   // MSVC 专用：防 LTCG/OPT:REF 裁剪，初始化为nullptr避免未初始化警告
   volatile ggml_backend_reg_t cpu_reg = nullptr;
-#endif
-
-#ifdef Q_OS_ANDROID
-  android_getCpuFeatures();  // 最早时机初始化Android CPU特性
 #endif
 
   ggml_backend_load_all();
