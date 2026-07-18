@@ -39,6 +39,10 @@ void StepsOptions::closeEvent(QCloseEvent* event) {
   m_Steps->setMapKey();
   m_Steps->getAddress(25.0217, 98.4464);
   m_Method->closeGrayWindows();
+
+  if (mui->tabMotion->currentIndex() == 0) {
+    m_Steps->tmeRefreshSteps->start(3000);
+  }
 }
 
 bool StepsOptions::eventFilter(QObject* obj, QEvent* evn) {
@@ -55,6 +59,8 @@ bool StepsOptions::eventFilter(QObject* obj, QEvent* evn) {
 
 void StepsOptions::init() {
   if (isGpsRun) return;
+
+  m_Steps->tmeRefreshSteps->stop();
 
   int x, y, w, h;
   x = mw_one->geometry().x();
