@@ -3438,7 +3438,11 @@ void Steps::getRemarks(const QString& strGpsTime) {
   }
 }
 
-void Steps::refreshSteps() { updateHardSensorSteps(); }
+void Steps::refreshSteps() {
+  if (mui->frameSteps->isHidden()) return;
+
+  updateHardSensorSteps();
+}
 
 void Steps::prepareDestroy() {
   // 1. 定时器

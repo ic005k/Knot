@@ -77,6 +77,11 @@ QString strJBDict5 = "";
 // 强制让链接器把 ggml_backend_cpu_reg 拉进来
 // extern "C" 所以 x64 下名字就是 ggml_backend_cpu_reg，不需要前导下划线
 #pragma comment(linker, "/INCLUDE:ggml_backend_cpu_reg")
+
+// 防止 BERT 被 OPT:REF / LTCG 裁剪
+#pragma comment(linker, "/INCLUDE:llama_model_load_from_file")
+#pragma comment(linker, "/INCLUDE:llama_encode")
+#pragma comment(linker, "/INCLUDE:llama_get_embeddings_seq")
 #endif
 
 ///////////////////////////////////////////////////////////////
