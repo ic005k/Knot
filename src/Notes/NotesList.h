@@ -32,6 +32,7 @@
 #include "database_manager.h"
 #include "qtreewidgetproxymodel.h"
 #include "search_model.h"
+#include "src/AI/GlobalAI.h"
 #include "src/Comm/TextEditToolbar.h"
 #include "src/MainWindow.h"
 #include "src/Notes/MoveTo.h"

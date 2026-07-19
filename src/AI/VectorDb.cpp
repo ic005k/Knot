@@ -121,6 +121,8 @@ bool VectorDb::rollback() {
 bool VectorDb::insertChunk(const QString& noteId, int chunkIndex,
                            const QString& content,
                            const QVector<float>& vec384) {
+  QMutexLocker locker(&m_mutex);  // ✅ 自动加解锁
+
   if (!m_db) {
     qWarning() << "[VectorDb] insertChunk失败: 数据库未打开";
     return false;
@@ -183,6 +185,8 @@ bool VectorDb::insertChunk(const QString& noteId, int chunkIndex,
 
 bool VectorDb::deleteChunksByNoteId(const QString& noteId) {
   if (!m_db) return false;
+
+  QMutexLocker locker(&m_mutex);  // ✅ 自动加解锁
 
   // ⚠️ 必须先删 vec_index 再删 metadata
   // 因为 vec_index 依赖 metadata 的 rowid
@@ -264,22 +268,20 @@ void VectorDb::fillMissingVec(BaseEmbeddingEngine* engine,
 QVector<VectorHit> VectorDb::searchWithContent(const QVector<float>& queryVec,
                                                int topN, float threshold) {
   QVector<VectorHit> results;
-  if (!m_db || queryVec.size() != 384) return results;
+  if (!m_db || queryVec.size() != 384 || topN <= 0) return results;
 
   QByteArray vecBin((const char*)queryVec.constData(),
                     queryVec.size() * sizeof(float));
   sqlite3_stmt* stmt = nullptr;
 
-  // ✅ 关键改进：不再 GROUP BY note_id，直接返回 Top-K 个最佳 chunk
-  // 笔记级去重交给 VectorSearchService 在内存中处理（更灵活）
+  // ✅ 使用 k = ? 代替 LIMIT，兼容性最好
   const char* sql = R"(
         SELECT c.note_id, c.chunk_index, v.distance, c.content
         FROM vec_index v
         JOIN note_chunks c ON c.rowid = v.rowid
         WHERE v.vec MATCH ?
-          AND v.distance <= ?
+          AND k = ?
         ORDER BY v.distance ASC
-        LIMIT ?;
     )";
 
   int rc = sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
@@ -289,18 +291,19 @@ QVector<VectorHit> VectorDb::searchWithContent(const QVector<float>& queryVec,
     return results;
   }
 
-  // cosine distance 阈值 = 1 - similarity threshold
-  float distThreshold = 1.0f - threshold;
   sqlite3_bind_blob(stmt, 1, vecBin.constData(), vecBin.size(),
                     SQLITE_TRANSIENT);
-  sqlite3_bind_double(stmt, 2, distThreshold);
-  sqlite3_bind_int(stmt, 3, topN);
+  sqlite3_bind_int(stmt, 2, topN);  // ✅ 绑定 k 值
+
+  float distThreshold = 1.0f - threshold;
 
   while (sqlite3_step(stmt) == SQLITE_ROW) {
+    float dist = (float)sqlite3_column_double(stmt, 2);
+    if (dist > distThreshold) continue;
+
     VectorHit hit;
     hit.noteId = QString::fromUtf8((const char*)sqlite3_column_text(stmt, 0));
     hit.chunkIndex = sqlite3_column_int(stmt, 1);
-    float dist = (float)sqlite3_column_double(stmt, 2);
     hit.score = 1.0f - dist;
 
     const char* text = (const char*)sqlite3_column_text(stmt, 3);
@@ -308,8 +311,24 @@ QVector<VectorHit> VectorDb::searchWithContent(const QVector<float>& queryVec,
 
     results.append(hit);
   }
+
   sqlite3_finalize(stmt);
   return results;
+}
+
+int VectorDb::countChunks() const {
+  if (!m_db) return 0;
+  sqlite3_stmt* stmt = nullptr;
+  int rc = sqlite3_prepare_v2(m_db, "SELECT COUNT(*) FROM note_chunks;", -1,
+                              &stmt, nullptr);
+  if (rc != SQLITE_OK) return 0;
+
+  int count = 0;
+  if (sqlite3_step(stmt) == SQLITE_ROW) {
+    count = sqlite3_column_int(stmt, 0);
+  }
+  sqlite3_finalize(stmt);
+  return count;
 }
 
 #endif  // VECTOR_SEARCH

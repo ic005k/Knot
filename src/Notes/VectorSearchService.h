@@ -12,9 +12,11 @@
 #include <QWriteLocker>
 
 #include "src/AI/EmbeddingEngine.h"
+#include "src/AI/GlobalAI.h"
 #include "src/AI/VectorDb.h"
 
 class BaseEmbeddingEngine;
+class VectorDb;
 
 // 统一搜索结果项（兼容分词与向量两种模式）
 struct SearchResultItem {
@@ -60,12 +62,17 @@ class VectorSearchService : public QObject {
    */
   void unregisterNoteMeta(const QString& noteId);
 
+  // 🔍 调试接口
+  int debugIndexSize() const;
+  bool debugAddAndSearch(const QString& testId, const QVector<float>& vec,
+                         const QString& query);
+  void debugRemove(const QString& testId);
+
  signals:
   void searchStarted();
   void searchFinished(int resultCount);
 
  private:
-  VectorDb m_vectorDb;
   BaseEmbeddingEngine* m_engine;
   QMutex m_mutex;
 

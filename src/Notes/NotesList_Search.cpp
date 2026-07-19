@@ -295,9 +295,8 @@ void NotesList::startBackgroundTaskUpdateFilesIndex() {
 }
 
 void NotesList::startBackgroundTaskDelFilesIndex(const QStringList& files) {
-  QFuture<void> future = QtConcurrent::run([this, files]() {
-    m_dbManager.batchDeleteFileIndexes(files);
-  });
+  QFuture<void> future = QtConcurrent::run(
+      [this, files]() { m_dbManager.batchDeleteFileIndexes(files); });
 
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
@@ -340,4 +339,112 @@ QString NotesList::getSearchResultQmlFile() {
   QMetaObject::invokeMethod((QObject*)root, "getQmlCurrentMDFile",
                             Q_RETURN_ARG(QVariant, item));
   return item.toString();
+}
+
+/*void NotesList::onSearchTextChanged(const QString& text) {
+  QTimer::singleShot(300, this, [this, text]() {  // 防抖处理
+    if (isLocalAIModel) {
+      // 向量搜索入口
+    } else {
+      auto results =
+          m_dbManager.searchDocuments(text, m_Notes->m_NoteIndexManager);
+      m_searchModel.setResults(results);
+      mui->lblNoteSearchResult->setText(tr("Note Search Results:") +
+                                        QString::number(results.count()));
+    }
+  });
+}*/
+
+void NotesList::onSearchTextChanged(const QString& text) {
+  QTimer::singleShot(300, this, [this, text]() {
+    // 空文本时清空结果
+    if (text.trimmed().isEmpty()) {
+      mui->lblNoteSearchResult->setText(tr("Note Search Results: 0"));
+      return;
+    }
+
+    if (isLocalAIModel && m_vectorSearchService && g_embEngine &&
+        g_embEngine->isValid()) {
+      // ✅ 向量搜索：异步执行，避免阻塞UI
+      mui->lblNoteSearchResult->setText(tr("Searching (AI)..."));
+
+      ////////////////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////
+
+      // 🔍 诊断测试代码
+      /*{
+        // 1. 检查索引是否为空
+        int indexSize = m_vectorSearchService->debugIndexSize();
+        qDebug() << "[DIAG] 当前向量索引大小:" << indexSize;
+
+        // 2. 验证嵌入模型
+        QString testText = text.isEmpty() ? QStringLiteral("红楼梦") : text;
+        auto testVec = g_embEngine->encode(testText);
+
+        bool isZeroVec = testVec.isEmpty() ||
+                         std::all_of(testVec.constBegin(), testVec.constEnd(),
+                                     [](float v) { return v == 0.0f; });
+
+        qDebug() << "[DIAG] 测试文本:" << testText
+                 << "| 向量维度:" << testVec.size() << "| 全零:" << isZeroVec;
+
+        // 3. 端到端验证
+        if (!isZeroVec && testVec.size() > 0) {
+          QString testId = QStringLiteral("__diag_test__");
+          bool selfFound = m_vectorSearchService->debugAddAndSearch(
+              testId, testVec, testText);
+          qDebug() << "[DIAG] 自检索是否命中自身:" << selfFound;
+          m_vectorSearchService->debugRemove(testId);
+        }
+
+        // 4. 提前终止无效搜索
+        if (indexSize == 0 || isZeroVec) {
+          mui->lblNoteSearchResult->setText(
+              tr("⚠️ AI诊断: 索引=%1, 向量%2")
+                  .arg(indexSize)
+                  .arg(isZeroVec ? "无效" : "正常"));
+          return;
+        }
+      }*/
+
+      //////////////////////////////////////////////////////////////////////////////////
+      //////////////////////////////////////////////////////////////////////////////////
+
+      QtConcurrent::run([this, text]() {
+        // 在后台线程执行向量检索
+        auto results = m_vectorSearchService->search(text, 20, 0.3f);
+
+        // ⚠️ 必须回到主线程更新UI模型
+        QMetaObject::invokeMethod(
+            this,
+            [this, results]() {
+              // ✅ 适配层：将向量搜索结果转换为 SearchModel 期望的格式
+              QVector<SearchResult> adaptedResults;
+              adaptedResults.reserve(results.size());
+
+              for (const auto& item : results) {
+                SearchResult sr;
+                sr.filePath = item.filePath;
+                sr.title = item.noteName;
+                sr.preview = item.snippet;  // 向量搜索的高亮片段直接作为预览
+                adaptedResults.append(sr);
+              }
+
+              m_searchModel.setResults(adaptedResults);
+              mui->lblNoteSearchResult->setText(
+                  tr("AI Search Results:") +
+                  QString::number(adaptedResults.size()));
+            },
+            Qt::QueuedConnection);
+      });
+
+    } else {
+      // 原有分词搜索路径（同步，因为通常很快）
+      auto results =
+          m_dbManager.searchDocuments(text, m_Notes->m_NoteIndexManager);
+      m_searchModel.setResults(results);
+      mui->lblNoteSearchResult->setText(tr("Note Search Results:") +
+                                        QString::number(results.count()));
+    }
+  });
 }

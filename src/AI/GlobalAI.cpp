@@ -12,6 +12,8 @@
 // 全局向量引擎，统一基类无需改动
 std::unique_ptr<BaseEmbeddingEngine> g_embEngine;
 
+std::unique_ptr<VectorDb> g_vectorDb;
+
 static bool g_llama_ggml_inited = false;
 
 #ifdef VECTOR_SEARCH
@@ -75,8 +77,8 @@ bool initGlobalAiEngine() {
   QDir dir;
   dir.mkpath(vecDir);
   QString vecDbPath = QDir(vecDir).filePath("note_vector.sqlite");
-  VectorDb tempInitDb;
-  bool vecDbOk = tempInitDb.open(vecDbPath);
+  g_vectorDb = std::make_unique<VectorDb>();
+  bool vecDbOk = g_vectorDb->open(vecDbPath);
   if (!vecDbOk) {
     qCritical() << "向量数据库打开失败，路径：" << vecDbPath;
     return false;

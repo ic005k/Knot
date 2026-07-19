@@ -55,6 +55,12 @@ QVector<SearchResultItem> VectorSearchService::search(const QString& query,
     return results;
   }
 
+  if (!g_vectorDb || !g_vectorDb->isOpen()) {
+    qWarning() << "[VectorSearch] 全局向量库未就绪";
+    emit searchFinished(0);
+    return {};
+  }
+
   // 1. Query 向量化
   QVector<float> queryVec = m_engine->encode(query);
   if (queryVec.isEmpty()) {
@@ -63,7 +69,7 @@ QVector<SearchResultItem> VectorSearchService::search(const QString& query,
   }
 
   // 2. ✅ 使用 . 而非 -> 调用数据库搜索
-  auto hits = m_vectorDb.searchWithContent(queryVec, topK, threshold);
+  auto hits = g_vectorDb->searchWithContent(queryVec, topK, threshold);
 
   // 3. 回填元数据 + 组装结果
   {
@@ -93,4 +99,43 @@ QVector<SearchResultItem> VectorSearchService::search(const QString& query,
            << ", 耗时:" << timer.elapsed() << "ms";
   emit searchFinished(results.size());
   return results;
+}
+
+/////////////////////////////////////////////////////////////////////////
+
+// 调试接口
+
+int VectorSearchService::debugIndexSize() const {
+  return (g_vectorDb && g_vectorDb->isOpen()) ? g_vectorDb->countChunks() : 0;
+}
+
+bool VectorSearchService::debugAddAndSearch(const QString& testId,
+                                            const QVector<float>& vec,
+                                            const QString& query) {
+  Q_UNUSED(query);
+  if (!g_vectorDb || !g_vectorDb->isOpen()) return false;
+
+  bool inserted = g_vectorDb->insertChunk(testId, 0, "__DIAG__", vec);
+  qDebug() << "[DIAG] insertChunk结果:" << inserted;
+  if (!inserted) return false;
+
+  qDebug() << "[DIAG] 写入后索引大小:" << debugIndexSize();
+
+  auto hits = g_vectorDb->searchWithContent(vec, 5, 0.0f);
+  qDebug() << "[DIAG] 自检索命中数:" << hits.size();
+
+  bool foundSelf = false;
+  for (const auto& h : hits) {
+    qDebug() << "  -> noteId:" << h.noteId << "score:" << h.score
+             << "content:" << h.content.left(30);
+    if (h.noteId == testId && h.content == "__DIAG__") foundSelf = true;
+  }
+  return foundSelf;
+}
+
+void VectorSearchService::debugRemove(const QString& testId) {
+  if (g_vectorDb && g_vectorDb->isOpen()) {
+    g_vectorDb->deleteChunksByNoteId(testId);
+    qDebug() << "[DIAG] 清理后索引大小:" << debugIndexSize();
+  }
 }

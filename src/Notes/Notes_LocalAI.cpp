@@ -16,11 +16,8 @@ bool Notes::syncNoteVectorToDb(const QString& mdFilePath) {
     return false;
   }
 
-  VectorDb localVecDb;
-  QString vecDir = QDir(privateDir).filePath("model");
-  QString vecDbPath = QDir(vecDir).filePath("note_vector.sqlite");
-  if (!localVecDb.open(vecDbPath)) {
-    qWarning() << "向量库打开失败：" << vecDbPath;
+  if (!g_vectorDb) {
+    qWarning() << "向量数据库打开失败：";
     return false;
   }
 
@@ -58,17 +55,17 @@ bool Notes::syncNoteVectorToDb(const QString& mdFilePath) {
   }
 
   // ✅ 核心改造：事务内原子替换（先删旧块，再插新块）
-  bool ok = localVecDb.beginTransaction();
+  bool ok = g_vectorDb->beginTransaction();
   if (!ok) {
     qWarning() << "❌ 开启事务失败 noteId:" << noteId;
     return false;
   }
 
   // 删除该笔记的所有旧 chunk
-  ok = localVecDb.deleteChunksByNoteId(noteId);
+  ok = g_vectorDb->deleteChunksByNoteId(noteId);
   if (!ok) {
     qWarning() << "❌ 删除旧chunk失败 noteId:" << noteId;
-    localVecDb.rollback();
+    g_vectorDb->rollback();
     return false;
   }
 
@@ -77,27 +74,27 @@ bool Notes::syncNoteVectorToDb(const QString& mdFilePath) {
     if (chunk.vector.size() != 384) {
       qWarning() << "⚠️ chunk向量维度异常:" << chunk.vector.size()
                  << "noteId:" << noteId << "chunkIndex:" << chunk.chunkIndex;
-      localVecDb.rollback();
+      g_vectorDb->rollback();
       return false;
     }
-    ok = localVecDb.insertChunk(noteId, chunk.chunkIndex, chunk.content,
-                                chunk.vector);
+    ok = g_vectorDb->insertChunk(noteId, chunk.chunkIndex, chunk.content,
+                                 chunk.vector);
     if (!ok) {
       qWarning() << "❌ chunk写入失败 noteId:" << noteId
                  << "chunkIndex:" << chunk.chunkIndex;
-      localVecDb.rollback();
+      g_vectorDb->rollback();
       return false;
     }
   }
 
-  ok = localVecDb.commit();
+  ok = g_vectorDb->commit();
   if (ok) {
     qDebug() << "✅ 向量更新成功 noteId:" << noteId << ", 共" << chunks.size()
              << "个chunk";
   } else {
-    qWarning() << "❌ 提交事务失败 noteId:" << noteId
-               << ", vecDbPath:" << vecDbPath;
-    localVecDb.rollback();
+    qWarning() << "❌ 提交事务失败 noteId:" << noteId;
+
+    g_vectorDb->rollback();
   }
   return ok;
 }
@@ -105,30 +102,24 @@ bool Notes::syncNoteVectorToDb(const QString& mdFilePath) {
 bool Notes::removeNoteVector(const QString& noteId) {
   if (!isLocalAIModel) return false;
 
-  VectorDb localVecDb;
-  QString vecDir = QDir(privateDir).filePath("model");
-  QDir dir;
-  dir.mkpath(vecDir);
-  QString vecDbPath = QDir(vecDir).filePath("note_vector.sqlite");
-
-  if (!localVecDb.open(vecDbPath)) {
-    qWarning() << "删除向量：向量库打开失败 " << vecDbPath;
+  if (!g_vectorDb) {
+    qWarning() << "删除向量：向量数据库打开失败 ";
     return false;
   }
 
   // ✅ 事务包裹双表删除，保证原子性
-  bool ok = localVecDb.beginTransaction();
+  bool ok = g_vectorDb->beginTransaction();
   if (!ok) {
     qWarning() << "❌ 删除向量开启事务失败 noteId:" << noteId;
     return false;
   }
 
-  ok = localVecDb.deleteChunksByNoteId(noteId);
+  ok = g_vectorDb->deleteChunksByNoteId(noteId);
   if (ok) {
-    localVecDb.commit();
+    g_vectorDb->commit();
     qDebug() << "✅ 删除笔记向量成功 noteId:" << noteId;
   } else {
-    localVecDb.rollback();
+    g_vectorDb->rollback();
     qWarning() << "❌ 删除笔记向量失败 noteId:" << noteId;
   }
   return ok;
