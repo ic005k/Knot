@@ -665,6 +665,7 @@ SOURCES += \
     src/MainWindow_Menu.cpp \
     src/MyThread.cpp \
     src/Notes/ColorDialog.cpp \
+    src/Notes/MarkdownChunker.cpp \
     src/Notes/MarkdownToHtml.cpp \
     src/Notes/MoveTo.cpp \
     src/Notes/NoteDiffManager.cpp \
@@ -1053,6 +1054,7 @@ HEADERS += \
     src/MainWindow.h \
     src/MyThread.h \
     src/Notes/ColorDialog.h \
+    src/Notes/MarkdownChunker.h \
     src/Notes/MoveTo.h \
     src/Notes/NoteDiffManager.h \
     src/Notes/NoteListModel.h \

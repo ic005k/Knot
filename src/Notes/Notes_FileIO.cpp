@@ -39,17 +39,19 @@ void Notes::saveMDFile() {
 }
 
 void Notes::startBackgroundTaskUpdateNoteIndex(QString mdFile) {
-#ifdef VECTOR_SEARCH
-
-  if (isLocalAIModel) {
-    syncNoteVectorToDb(mdFile);
-  }
-
-#endif
+  // 主线程
 
   QFuture<void> future = QtConcurrent::run([=]() {
     m_NotesList->m_dbManager.updateFileIndex(mdFile);
     m_NotesList->m_graphController->parser()->updateNoteCache(mdFile);
+
+#ifdef VECTOR_SEARCH
+
+    if (isLocalAIModel) {
+      syncNoteVectorToDb(mdFile);
+    }
+
+#endif
   });
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this,
