@@ -419,14 +419,36 @@ void NotesList::onSearchTextChanged(const QString& text) {
             this,
             [this, results]() {
               // ✅ 适配层：将向量搜索结果转换为 SearchModel 期望的格式
+
               QVector<SearchResult> adaptedResults;
               adaptedResults.reserve(results.size());
 
               for (const auto& item : results) {
                 SearchResult sr;
+
+                // 1. 基础字段直接映射
                 sr.filePath = item.filePath;
-                sr.title = item.noteName;
-                sr.preview = item.snippet;  // 向量搜索的高亮片段直接作为预览
+                sr.title = item.noteName.isEmpty()
+                               ? QFileInfo(item.filePath).baseName()
+                               : item.noteName;
+
+                // 2. snippet → preview 的格式化（关键！）
+                // 向量搜索返回的是完整 chunk，直接显示会撑爆 UI，必须截断
+                const int maxPreviewLen = 200;
+                if (item.snippet.length() > maxPreviewLen) {
+                  sr.preview =
+                      item.snippet.left(maxPreviewLen).trimmed() + "...";
+                } else {
+                  sr.preview = item.snippet;
+                }
+
+                // 3. 清理 chunk 中可能残留的 Markdown/换行噪音
+                sr.preview.replace(QRegularExpression("[\\r\\n]+"), " ");
+                sr.preview = sr.preview.simplified();  // 合并多余空格
+                // ✅ 仅在 preview 显示前做视觉弱化，不触碰原始数据
+                sr.preview = sr.preview.replace(
+                    QRegularExpression(R"(\bfor\b)"), "·");  // 或 " "（空格）
+
                 adaptedResults.append(sr);
               }
 

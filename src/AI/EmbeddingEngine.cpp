@@ -82,8 +82,8 @@ QVector<float> EmbeddingEngine::encode(const QString& text) {
     batch.pos[i] = i;
     batch.n_seq_id[i] = 1;
     batch.seq_id[i][0] = 0;
-    // batch.logits[i] = (i == n_tokens - 1);
-    batch.logits[i] = false;
+    batch.logits[i] = (i == n_tokens - 1);
+    // batch.logits[i] = false;
   }
   batch.n_tokens = n_tokens;
 
@@ -170,8 +170,8 @@ QVector<float> EmbeddingEngine::encodeTokens(
     batch.pos[i] = i;
     batch.n_seq_id[i] = 1;
     batch.seq_id[i][0] = 0;
-    // batch.logits[i] = (i == n_tokens - 1);
-    batch.logits[i] = false;
+    batch.logits[i] = (i == n_tokens - 1);
+    // batch.logits[i] = false;
   }
   batch.n_tokens = n_tokens;
 

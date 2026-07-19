@@ -21,7 +21,7 @@ bool Notes::syncNoteVectorToDb(const QString& mdFilePath) {
     return false;
   }
 
-  QString noteId = getNoteIdFromFilePath(mdFilePath);
+  QString noteId = mdFilePath;
   QString fullContent = loadNoteFullText(mdFilePath);
   if (fullContent.trimmed().isEmpty()) {
     qDebug() << "[DEBUG] 笔记内容为空，跳过向量化:" << noteId;

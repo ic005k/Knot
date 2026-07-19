@@ -66,35 +66,88 @@ QVector<NoteChunk> MarkdownChunker::processText(
 
 QVector<QString> MarkdownChunker::splitByStructure(
     const QString& mdContent) const {
-  QVector<QString> segments;
-  QStringList lines = mdContent.split('\n');
+  QVector<QString> chunks;
+  if (mdContent.isEmpty()) return chunks;
 
-  QString currentSegment;
-  bool inCodeBlock = false;
+  // ⚠️ 注意：这里必须使用你配置中的 maxTokens 作为目标块大小
+  // 如果你的 ChunkConfig 中有类似 targetTokens 或
+  // maxTokens，请替换下面的硬编码值 通常 RAG 推荐的目标块大小为 256 ~ 512
+  // tokens
+  const int TARGET_CHUNK_TOKENS = 512;
+  const int MIN_CHUNK_TOKENS = 50;  // 防止在极短内容上死循环
+
+  QTextBoundaryFinder sentenceFinder(QTextBoundaryFinder::Sentence, mdContent);
   static const QRegularExpression headingRe("^#{1,6}\\s+");
 
-  for (const QString& line : lines) {
-    QString trimmedLine = line.trimmed();
+  bool inCodeBlock = false;
+  int chunkStartPos = 0;
+  int lastSafeBoundary = 0;  // 记录上一个安全的句子/段落边界
 
-    // 代码块边界检测（支持 ```lang 和 ~~~ 两种语法）
-    if (trimmedLine.startsWith("```") || trimmedLine.startsWith("~~~")) {
-      inCodeBlock = !inCodeBlock;
+  // 预计算所有安全边界的位置，避免在循环中反复调用 ICU
+  QVector<int> safeBoundaries;
+  safeBoundaries.append(0);
+  while (sentenceFinder.toNextBoundary() != -1) {
+    safeBoundaries.append(sentenceFinder.position());
+  }
+  safeBoundaries.append(mdContent.length());
+
+  int currentBoundaryIdx = 0;
+
+  while (chunkStartPos < mdContent.length()) {
+    // 1. 估算当前累积文本的 token 数
+    // 💡 优化建议：如果 m_engine.tokenizeText 较慢，可先用 (字符数 / 3)
+    // 做粗略估算， 接近 TARGET_CHUNK_TOKENS 时再精确计算
+    QString currentText =
+        mdContent.mid(chunkStartPos, lastSafeBoundary - chunkStartPos);
+
+    // 当累积文本达到目标 token 数，或者已经到达文档末尾时，尝试切块
+    auto tokens = m_engine.tokenizeText(currentText);
+    bool reachedEnd = (lastSafeBoundary >= mdContent.length());
+
+    if (static_cast<int>(tokens.size()) >= TARGET_CHUNK_TOKENS || reachedEnd) {
+      // 2. 检查代码块状态：如果当前切点落在代码块内，强制延伸到代码块结束
+      QString segmentToCheck =
+          mdContent.mid(chunkStartPos, lastSafeBoundary - chunkStartPos);
+      int fenceCount =
+          segmentToCheck.count("```") + segmentToCheck.count("~~~");
+      if (fenceCount % 2 != 0) {
+        // 处于未闭合的代码块中，继续向后寻找下一个安全边界
+        if (!reachedEnd && currentBoundaryIdx < safeBoundaries.size() - 1) {
+          currentBoundaryIdx++;
+          lastSafeBoundary = safeBoundaries[currentBoundaryIdx];
+          continue;
+        }
+      }
+
+      // 3. 提交当前块
+      QString finalChunk =
+          mdContent.mid(chunkStartPos, lastSafeBoundary - chunkStartPos)
+              .trimmed();
+      if (!finalChunk.isEmpty()) {
+        chunks.append(finalChunk);
+      }
+
+      // 4. 移动窗口起点
+      chunkStartPos = lastSafeBoundary;
+
+      // 防御性保护：如果切出的块太小且未到文末，说明遇到了超长单句，强制推进
+      if (static_cast<int>(tokens.size()) < MIN_CHUNK_TOKENS && !reachedEnd) {
+        currentBoundaryIdx++;
+        if (currentBoundaryIdx < safeBoundaries.size()) {
+          lastSafeBoundary = safeBoundaries[currentBoundaryIdx];
+        }
+      }
+      continue;
     }
 
-    // 仅在非代码块内，以标题行作为自然分割点
-    bool isHeading = !inCodeBlock && headingRe.match(trimmedLine).hasMatch();
-
-    if (isHeading && !currentSegment.trimmed().isEmpty()) {
-      segments.append(currentSegment.trimmed());
-      currentSegment.clear();
+    // 5. 未达上限，继续向后扩展安全边界
+    if (currentBoundaryIdx < safeBoundaries.size() - 1) {
+      currentBoundaryIdx++;
+      lastSafeBoundary = safeBoundaries[currentBoundaryIdx];
+    } else {
+      break;  // 已无更多边界
     }
-
-    currentSegment += line + "\n";
   }
 
-  if (!currentSegment.trimmed().isEmpty()) {
-    segments.append(currentSegment.trimmed());
-  }
-
-  return segments;
+  return chunks;
 }

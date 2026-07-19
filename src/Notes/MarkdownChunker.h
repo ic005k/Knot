@@ -1,7 +1,9 @@
 #ifndef MARKDOWN_CHUNKER_H
 #define MARKDOWN_CHUNKER_H
 
+#include <QRegularExpression>
 #include <QString>
+#include <QTextBoundaryFinder>
 #include <QVector>
 
 #include "src/AI/EmbeddingEngine.h"
