@@ -261,4 +261,55 @@ void VectorDb::fillMissingVec(BaseEmbeddingEngine* engine,
   //       MarkdownChunker::processText + beginTransaction/insertChunk/commit
 }
 
+QVector<VectorHit> VectorDb::searchWithContent(const QVector<float>& queryVec,
+                                               int topN, float threshold) {
+  QVector<VectorHit> results;
+  if (!m_db || queryVec.size() != 384) return results;
+
+  QByteArray vecBin((const char*)queryVec.constData(),
+                    queryVec.size() * sizeof(float));
+  sqlite3_stmt* stmt = nullptr;
+
+  // ✅ 关键改进：不再 GROUP BY note_id，直接返回 Top-K 个最佳 chunk
+  // 笔记级去重交给 VectorSearchService 在内存中处理（更灵活）
+  const char* sql = R"(
+        SELECT c.note_id, c.chunk_index, v.distance, c.content
+        FROM vec_index v
+        JOIN note_chunks c ON c.rowid = v.rowid
+        WHERE v.vec MATCH ?
+          AND v.distance <= ?
+        ORDER BY v.distance ASC
+        LIMIT ?;
+    )";
+
+  int rc = sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
+  if (rc != SQLITE_OK) {
+    qWarning() << "[VectorDb] searchWithContent prepare失败:"
+               << sqlite3_errmsg(m_db);
+    return results;
+  }
+
+  // cosine distance 阈值 = 1 - similarity threshold
+  float distThreshold = 1.0f - threshold;
+  sqlite3_bind_blob(stmt, 1, vecBin.constData(), vecBin.size(),
+                    SQLITE_TRANSIENT);
+  sqlite3_bind_double(stmt, 2, distThreshold);
+  sqlite3_bind_int(stmt, 3, topN);
+
+  while (sqlite3_step(stmt) == SQLITE_ROW) {
+    VectorHit hit;
+    hit.noteId = QString::fromUtf8((const char*)sqlite3_column_text(stmt, 0));
+    hit.chunkIndex = sqlite3_column_int(stmt, 1);
+    float dist = (float)sqlite3_column_double(stmt, 2);
+    hit.score = 1.0f - dist;
+
+    const char* text = (const char*)sqlite3_column_text(stmt, 3);
+    hit.content = text ? QString::fromUtf8(text) : QString();
+
+    results.append(hit);
+  }
+  sqlite3_finalize(stmt);
+  return results;
+}
+
 #endif  // VECTOR_SEARCH

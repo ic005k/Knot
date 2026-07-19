@@ -82,14 +82,20 @@ QVector<float> EmbeddingEngine::encode(const QString& text) {
     batch.pos[i] = i;
     batch.n_seq_id[i] = 1;
     batch.seq_id[i][0] = 0;
-    batch.logits[i] = (i == n_tokens - 1);
+    // batch.logits[i] = (i == n_tokens - 1);
+    batch.logits[i] = false;
   }
   batch.n_tokens = n_tokens;
 
   // 5. decode + pooling + normalize（与你原有逻辑相同）
   QElapsedTimer timer;
   timer.start();
-  int rc = llama_decode(m_ctx, batch);
+
+  // ❌ 生成API，会触发警告
+  // int rc = llama_decode(m_ctx, batch);
+  // ✅ 嵌入专用API，无警告
+  int rc = llama_encode(m_ctx, batch);
+
   qDebug() << "[ENCODE] decode rc:" << rc << ", tokens:" << n_tokens
            << ", 耗时:" << timer.elapsed() << "ms";
 
@@ -164,12 +170,17 @@ QVector<float> EmbeddingEngine::encodeTokens(
     batch.pos[i] = i;
     batch.n_seq_id[i] = 1;
     batch.seq_id[i][0] = 0;
-    batch.logits[i] = (i == n_tokens - 1);
+    // batch.logits[i] = (i == n_tokens - 1);
+    batch.logits[i] = false;
   }
   batch.n_tokens = n_tokens;
 
   // decode
-  int rc = llama_decode(m_ctx, batch);
+  // ❌ 生成API，会触发警告
+  // int rc = llama_decode(m_ctx, batch);
+  // ✅ 嵌入专用API，无警告
+  int rc = llama_encode(m_ctx, batch);
+
   if (rc != 0) {
     qWarning() << "[ENCODE_TOKENS] llama_decode 失败! rc:" << rc;
     llama_batch_free(batch);

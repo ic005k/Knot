@@ -1,4 +1,5 @@
 #include "NotesList.h"
+#include "src/AI/GlobalAI.h"
 
 // 节点双击事件处理（打开对应的笔记）
 void NotesList::onNoteNodeDoubleClicked(const QString& filePath) {
@@ -13,13 +14,69 @@ void NotesList::onNoteNodeDoubleClicked(const QString& filePath) {
   m_Notes->previewNote();
 }
 
-void NotesList::onSearchTextChanged(const QString& text) {
+/*void NotesList::onSearchTextChanged(const QString& text) {
   QTimer::singleShot(300, this, [this, text]() {  // 防抖处理
-    auto results =
-        m_dbManager.searchDocuments(text, m_Notes->m_NoteIndexManager);
-    m_searchModel.setResults(results);
-    mui->lblNoteSearchResult->setText(tr("Note Search Results:") +
-                                      QString::number(results.count()));
+    if (isLocalAIModel) {
+      // 向量搜索入口
+    } else {
+      auto results =
+          m_dbManager.searchDocuments(text, m_Notes->m_NoteIndexManager);
+      m_searchModel.setResults(results);
+      mui->lblNoteSearchResult->setText(tr("Note Search Results:") +
+                                        QString::number(results.count()));
+    }
+  });
+}*/
+
+void NotesList::onSearchTextChanged(const QString& text) {
+  QTimer::singleShot(300, this, [this, text]() {
+    // 空文本时清空结果
+    if (text.trimmed().isEmpty()) {
+      mui->lblNoteSearchResult->setText(tr("Note Search Results: 0"));
+      return;
+    }
+
+    if (isLocalAIModel && m_vectorSearchService && g_embEngine &&
+        g_embEngine->isValid()) {
+      // ✅ 向量搜索：异步执行，避免阻塞UI
+      mui->lblNoteSearchResult->setText(tr("Searching (AI)..."));
+
+      QtConcurrent::run([this, text]() {
+        // 在后台线程执行向量检索
+        auto results = m_vectorSearchService->search(text, 20, 0.3f);
+
+        // ⚠️ 必须回到主线程更新UI模型
+        QMetaObject::invokeMethod(
+            this,
+            [this, results]() {
+              // ✅ 适配层：将向量搜索结果转换为 SearchModel 期望的格式
+              QVector<SearchResult> adaptedResults;
+              adaptedResults.reserve(results.size());
+
+              for (const auto& item : results) {
+                SearchResult sr;
+                sr.filePath = item.filePath;
+                sr.title = item.noteName;
+                sr.preview = item.snippet;  // 向量搜索的高亮片段直接作为预览
+                adaptedResults.append(sr);
+              }
+
+              m_searchModel.setResults(adaptedResults);
+              mui->lblNoteSearchResult->setText(
+                  tr("AI Search Results:") +
+                  QString::number(adaptedResults.size()));
+            },
+            Qt::QueuedConnection);
+      });
+
+    } else {
+      // 原有分词搜索路径（同步，因为通常很快）
+      auto results =
+          m_dbManager.searchDocuments(text, m_Notes->m_NoteIndexManager);
+      m_searchModel.setResults(results);
+      mui->lblNoteSearchResult->setText(tr("Note Search Results:") +
+                                        QString::number(results.count()));
+    }
   });
 }
 

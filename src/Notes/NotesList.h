@@ -26,8 +26,9 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QtConcurrent/QtConcurrentRun>
 #include <algorithm>
-#include <utility>  // for std::as_const
+#include <utility>
 
+#include "VectorSearchService.h"
 #include "database_manager.h"
 #include "qtreewidgetproxymodel.h"
 #include "search_model.h"
@@ -62,6 +63,8 @@ class NotesList : public QDialog {
   explicit NotesList(QWidget* parent = nullptr);
   ~NotesList();
   Ui::NotesList* ui;
+
+  VectorSearchService* m_vectorSearchService = nullptr;
 
   QPointer<QMenu> menuNoteBook;
   QPointer<QMenu> menuNoteList;

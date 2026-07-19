@@ -1,5 +1,8 @@
 ﻿#include "NotesList.h"
 
+#include "src/AI/GlobalAI.h"
+#include "src/Notes/VectorSearchService.h"
+
 QString strNoteNameIndexFile = "";
 
 NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
@@ -65,6 +68,17 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
           &NotesList::onSearchTextChanged);
   mui->qwNotesSearchResult->rootContext()->setContextProperty("searchModel",
                                                               &m_searchModel);
+  if (isLocalAIModel && g_embEngine && g_embEngine->isValid()) {
+    m_vectorSearchService = new VectorSearchService(g_embEngine.get(), this);
+
+    // ⭐ 关键：将当前所有笔记的元数据注册到服务中
+    // 你需要遍历现有的笔记列表，调用 registerNoteMeta
+    // for (const auto& note : allNotes) {
+    //     m_vectorSearchService->registerNoteMeta(
+    //         note.id, note.filePath, note.title);
+    // }
+  }
+
   initSerachDatabase();
 
   loadNotesListIndex();

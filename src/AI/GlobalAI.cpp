@@ -68,7 +68,7 @@ bool initGlobalAiEngine() {
   BaseEmbeddingEngine* rawPtr =
       static_cast<BaseEmbeddingEngine*>(tmpEngine.release());
   g_embEngine.reset(rawPtr);
-  qDebug() << "GGUF向量模型加载完成";
+  qDebug() << "GGUF向量模型加载完成 路径：" << ggufPath;
 
   // ========== 向量数据库逻辑不变 ==========
   QString vecDir = QDir(privateDir).filePath("model");

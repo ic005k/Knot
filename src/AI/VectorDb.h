@@ -19,6 +19,14 @@ struct NoteChunkRecord {
   QVector<float> vector;
 };
 
+// 向量搜索结果项（与 VectorSearchService 解耦的纯数据结构）
+struct VectorHit {
+  QString noteId;
+  int chunkIndex;
+  float score;
+  QString content;  // ✅ 直接从DB取出原文，避免回查
+};
+
 class VectorDb {
  public:
   VectorDb();
@@ -27,6 +35,8 @@ class VectorDb {
   bool open(const QString& dbPath);
   void close();
   bool isOpen() const;
+  QVector<VectorHit> searchWithContent(const QVector<float>& queryVec, int topN,
+                                       float threshold = 0.3f);
 
   // ✅ 新增：事务控制（多chunk写入必须原子化）
   bool beginTransaction();

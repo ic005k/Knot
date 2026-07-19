@@ -690,6 +690,7 @@ SOURCES += \
     src/Notes/Notes_UI.cpp \
     src/Notes/Notes_Utils.cpp \
     src/Notes/PrintPDF.cpp \
+    src/Notes/VectorSearchService.cpp \
     src/Notes/database_manager.cpp \
     src/Notes/note_graph.cpp \
     src/Notes/note_index_manager.cpp \
@@ -1061,6 +1062,7 @@ HEADERS += \
     src/Notes/Notes.h \
     src/Notes/NotesList.h \
     src/Notes/PrintPDF.h \
+    src/Notes/VectorSearchService.h \
     src/Notes/database_manager.h \
     src/Notes/note_graph.h \
     src/Notes/note_index_manager.h \
