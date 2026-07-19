@@ -69,14 +69,32 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   mui->qwNotesSearchResult->rootContext()->setContextProperty("searchModel",
                                                               &m_searchModel);
   if (isLocalAIModel && g_embEngine && g_embEngine->isValid()) {
+    // ✅ 1. 防止重复创建导致内存泄漏
+    if (m_vectorSearchService) {
+      m_vectorSearchService->deleteLater();
+      m_vectorSearchService = nullptr;
+    }
+
+    // ✅ 2. 创建服务实例
     m_vectorSearchService = new VectorSearchService(g_embEngine.get(), this);
 
-    // ⭐ 关键：将当前所有笔记的元数据注册到服务中
-    // 你需要遍历现有的笔记列表，调用 registerNoteMeta
-    // for (const auto& note : allNotes) {
-    //     m_vectorSearchService->registerNoteMeta(
-    //         note.id, note.filePath, note.title);
-    // }
+    // ✅ 3. 批量注册元数据（使用新增的接口）
+    auto allMeta = m_Notes->m_NoteIndexManager->getAllMetadata();
+    for (auto it = allMeta.constBegin(); it != allMeta.constEnd(); ++it) {
+      m_vectorSearchService->registerNoteMeta(
+          it.key(),         // filePath 作为 noteId
+          it.key(),         // filePath 作为打开路径
+          it.value().title  // 显示标题
+      );
+    }
+
+    qDebug() << "[VectorSearch] 初始化完成, 注册笔记数:" << allMeta.size();
+  } else {
+    // ✅ 4. 条件不满足时清理旧实例，避免残留无效服务
+    if (m_vectorSearchService) {
+      m_vectorSearchService->deleteLater();
+      m_vectorSearchService = nullptr;
+    }
   }
 
   initSerachDatabase();
