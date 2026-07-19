@@ -69,8 +69,8 @@ QVector<QString> MarkdownChunker::splitByStructure(
   QVector<QString> chunks;
   if (mdContent.isEmpty()) return chunks;
 
-  // ⚠️ 注意：这里必须使用你配置中的 maxTokens 作为目标块大小
-  // 如果你的 ChunkConfig 中有类似 targetTokens 或
+  // ⚠注意：这里必须使用配置中的 maxTokens 作为目标块大小
+  // 如果 ChunkConfig 中有类似 targetTokens 或
   // maxTokens，请替换下面的硬编码值 通常 RAG 推荐的目标块大小为 256 ~ 512
   // tokens
   const int TARGET_CHUNK_TOKENS = 512;
@@ -79,7 +79,6 @@ QVector<QString> MarkdownChunker::splitByStructure(
   QTextBoundaryFinder sentenceFinder(QTextBoundaryFinder::Sentence, mdContent);
   static const QRegularExpression headingRe("^#{1,6}\\s+");
 
-  bool inCodeBlock = false;
   int chunkStartPos = 0;
   int lastSafeBoundary = 0;  // 记录上一个安全的句子/段落边界
 

@@ -637,3 +637,16 @@ void NotesList::setNoteBookCurrentItem() {
     }
   }
 }
+
+QStringList NotesList::getAllNotePaths() {
+  const QString memoDir = QDir(iniDir).filePath("memo");
+  QDir dir(memoDir);
+  dir.setFilter(QDir::Files | QDir::NoDotAndDotDot);
+  dir.setNameFilters({"*.md"});
+
+  QStringList paths;
+  for (const auto& fi : dir.entryInfoList()) {
+    paths.append(fi.absoluteFilePath());
+  }
+  return paths;
+}

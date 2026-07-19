@@ -208,6 +208,7 @@ class Notes : public QDialog {
   bool checkAndUpdateCleanDate();
 
   bool removeNoteVector(const QString& noteId);
+  bool syncNoteVectorToDb(const QString& mdFilePath);
 
  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
@@ -277,7 +278,6 @@ class Notes : public QDialog {
 
  private:
 #ifdef VECTOR_SEARCH
-  bool syncNoteVectorToDb(const QString& mdFilePath);
 
   QString getNoteIdFromFilePath(const QString& mdPath);
   QString loadNoteFullText(const QString& mdPath);

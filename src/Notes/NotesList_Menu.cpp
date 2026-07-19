@@ -317,11 +317,33 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
                         "to start."),
                      2)) {
       mw_one->showProgress();
-      QString databaseFile = privateDir + "md_database_v3.db";
-      if (m_dbManager.deleteDatabaseFile(databaseFile))
-        initSerachDatabase();
-      else
-        mw_one->safeCloseProgress();
+
+      if (isLocalAIModel) {
+        if (g_vectorDb->clearAll()) {
+          // 异步重建所有笔记向量
+          QtConcurrent::run([this]() {
+            try {
+              QStringList allNotes = getAllNotePaths();
+              for (int i = 0; i < allNotes.size(); ++i) {
+                m_Notes->syncNoteVectorToDb(allNotes.at(i));
+              }
+
+            } catch (const std::exception& e) {
+              qCritical() << "[Embedding] Rebuild failed:" << e.what();
+            }
+          });
+        } else {
+          qWarning() << "[Embedding] 清库失败，中止重建";
+          mw_one->safeCloseProgress();
+        }
+
+      } else {
+        QString databaseFile = privateDir + "md_database_v3.db";
+        if (m_dbManager.deleteDatabaseFile(databaseFile))
+          initSerachDatabase();
+        else
+          mw_one->safeCloseProgress();
+      }
     }
   });
 

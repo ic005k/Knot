@@ -331,4 +331,32 @@ int VectorDb::countChunks() const {
   return count;
 }
 
+bool VectorDb::clearAll() {
+  if (!m_db) return false;
+
+  QMutexLocker locker(&m_mutex);
+
+  // ⚠必须在事务中执行，保证原子性
+  // 先删 vec_index（依赖 rowid），再删 note_chunks
+  const char* sql = R"(
+        BEGIN TRANSACTION;
+        DELETE FROM vec_index;
+        DELETE FROM note_chunks;
+        COMMIT;
+    )";
+
+  char* err = nullptr;
+  int rc = sqlite3_exec(m_db, sql, nullptr, nullptr, &err);
+
+  if (rc != SQLITE_OK) {
+    qCritical() << "[VectorDb] clearAll失败:" << (err ? err : "未知错误");
+    if (err) sqlite3_free(err);
+    sqlite3_exec(m_db, "ROLLBACK;", nullptr, nullptr, nullptr);
+    return false;
+  }
+
+  qDebug() << "[VectorDb] ✅ 向量库已清空，准备全量重建";
+  return true;
+}
+
 #endif  // VECTOR_SEARCH

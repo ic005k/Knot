@@ -411,10 +411,10 @@ void NotesList::onSearchTextChanged(const QString& text) {
       //////////////////////////////////////////////////////////////////////////////////
 
       QtConcurrent::run([this, text]() {
-        // 在后台线程执行向量检索
-        auto results = m_vectorSearchService->search(text, 20, 0.3f);
+        // 在后台线程执行向量检索,最多返回25条，且相似度≥0.5
+        auto results = m_vectorSearchService->search(text, 25, 0.5f);
 
-        // ⚠️ 必须回到主线程更新UI模型
+        // ⚠必须回到主线程更新UI模型
         QMetaObject::invokeMethod(
             this,
             [this, results]() {

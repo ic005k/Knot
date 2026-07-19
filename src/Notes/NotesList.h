@@ -3,8 +3,10 @@
 
 #include <QApplication>
 #include <QDialog>
+#include <QDir>
 #include <QDirIterator>
 #include <QFile>
+#include <QFileInfoList>
 #include <QFutureWatcher>
 #include <QInputMethod>
 #include <QJsonArray>
@@ -213,6 +215,8 @@ class NotesList : public QDialog {
   void delRemoteWebDAVFiles();
 
   void on_btnRename_clicked();
+
+  QStringList getAllNotePaths();
 
  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
