@@ -37,6 +37,9 @@ bool NoteIndexManager::loadIndex(const QString& indexPath) {
   }
 
   m_currentIndexPath = indexPath;
+
+  emit indexReloaded();  // ✅ 通知外部全量刷新
+
   return true;
 }
 
@@ -75,8 +78,14 @@ void NoteIndexManager::setNoteTitle(const QString& filePath,
   QString normalized = normalizePath(filePath);
   NoteMetadata metadata =
       m_metadataMap.value(normalized);  // 不存在则返回默认值
-  metadata.title = title;
-  m_metadataMap[normalized] = metadata;
+
+  // ✅ 仅在标题实际发生变化时才更新并发送信号
+  if (metadata.title != title) {
+    metadata.title = title;
+    m_metadataMap[normalized] = metadata;
+
+    emit noteMetaChanged(normalized, metadata);
+  }
 }
 
 int NoteIndexManager::getNotebookIndex(const QString& filePath) const {
@@ -88,8 +97,13 @@ void NoteIndexManager::setNotebookIndex(const QString& filePath,
                                         int notebookIndex) {
   QString normalized = normalizePath(filePath);
   NoteMetadata metadata = m_metadataMap.value(normalized);
-  metadata.notebookIndex = notebookIndex;
-  m_metadataMap[normalized] = metadata;
+
+  if (metadata.notebookIndex != notebookIndex) {
+    metadata.notebookIndex = notebookIndex;
+    m_metadataMap[normalized] = metadata;
+
+    emit noteMetaChanged(normalized, metadata);
+  }
 }
 
 int NoteIndexManager::getNoteIndex(const QString& filePath) const {
@@ -100,8 +114,13 @@ int NoteIndexManager::getNoteIndex(const QString& filePath) const {
 void NoteIndexManager::setNoteIndex(const QString& filePath, int noteIndex) {
   QString normalized = normalizePath(filePath);
   NoteMetadata metadata = m_metadataMap.value(normalized);
-  metadata.noteIndex = noteIndex;
-  m_metadataMap[normalized] = metadata;
+
+  if (metadata.noteIndex != noteIndex) {
+    metadata.noteIndex = noteIndex;
+    m_metadataMap[normalized] = metadata;
+
+    emit noteMetaChanged(normalized, metadata);
+  }
 }
 
 void NoteIndexManager::setCurrentIndexes(int notebookIndex, int noteIndex) {
@@ -143,4 +162,11 @@ QStringList NoteIndexManager::searchTitles(const QString& keyword) const {
     }
   }
   return result;
+}
+
+void NoteIndexManager::removeNote(const QString& filePath) {
+  QString normalized = normalizePath(filePath);
+  if (m_metadataMap.remove(normalized)) {
+    emit noteRemoved(normalized);
+  }
 }

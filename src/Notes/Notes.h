@@ -65,7 +65,6 @@
 #include "ui_MainWindow.h"
 #include "ui_PrintPDF.h"
 
-class NoteIndexManager1;
 class MiniMap;
 
 namespace Ui {
@@ -208,6 +207,8 @@ class Notes : public QDialog {
 
   bool checkAndUpdateCleanDate();
 
+  bool removeNoteVector(const QString& noteId);
+
  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
@@ -277,7 +278,7 @@ class Notes : public QDialog {
  private:
 #ifdef VECTOR_SEARCH
   bool syncNoteVectorToDb(const QString& mdFilePath);
-  bool removeNoteVector(const QString& noteId);
+
   QString getNoteIdFromFilePath(const QString& mdPath);
   QString loadNoteFullText(const QString& mdPath);
 #endif
@@ -357,25 +358,5 @@ class Notes : public QDialog {
   void switchMdDarkTheme(bool dark);
   void applyMdLexerTheme(bool darkMode);
 };
-
-///////////////////////////////////////////////////////////////////////
-class NoteIndexManager1 : public QObject {
-  Q_OBJECT
- public:
-  explicit NoteIndexManager1(QObject* parent = nullptr);
-
-  // 加载/保存索引
-  bool loadIndex(const QString& indexPath);
-  bool saveIndex(const QString& indexPath);
-
-  // 名称操作
-  QString getNoteTitle(const QString& filePath) const;
-  void setNoteTitle(const QString& filePath, const QString& title);
-
- private:
-  QHash<QString, QString> m_index;  // 内存哈希表加速查询
-  QString m_currentIndexPath;
-};
-////////////////////////////////////////////////////////////////////////
 
 #endif  // NOTES_H

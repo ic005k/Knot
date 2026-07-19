@@ -461,7 +461,7 @@ void NotesList::on_btnDel_clicked() {
     return;
   }
 
-  QStringList delFilesIndex;
+  QStringList delFiles;
   QString str0, str1;
 
   // ==========================================
@@ -470,7 +470,7 @@ void NotesList::on_btnDel_clicked() {
 
   if (isNoteBook) {
     // 递归清理所有子项
-    moveChildToRecycle(item, iniDir, delFilesIndex, twrb);
+    moveChildToRecycle(item, iniDir, delFiles, twrb);
 
     // 移除并删除当前笔记本自身（兼容顶层 + 嵌套子节点）
     QTreeWidgetItem* parent = item->parent();
@@ -497,7 +497,7 @@ void NotesList::on_btnDel_clicked() {
     recycleItem->setText(1, str1);
     addItem(twrb, recycleItem);
 
-    delFilesIndex.append(iniDir + str1);
+    delFiles.append(iniDir + str1);
 
     // ✅ 只删除笔记，不删笔记本
     delete item;
@@ -514,7 +514,7 @@ void NotesList::on_btnDel_clicked() {
     }
   }
 
-  startBackgroundTaskDelFilesIndex(delFilesIndex);
+  startBackgroundTaskDelFilesIndex(delFiles);
   saveNotesList();
   resetQML_List();
 }

@@ -8,8 +8,6 @@
 
 static QAtomicInt n_Files = 0;
 
-NoteIndexManager1::NoteIndexManager1(QObject* parent) : QObject{parent} {}
-
 Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->setupUi(this);
   m_NoteIndexManager = new NoteIndexManager();

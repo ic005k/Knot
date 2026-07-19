@@ -68,41 +68,33 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
           &NotesList::onSearchTextChanged);
   mui->qwNotesSearchResult->rootContext()->setContextProperty("searchModel",
                                                               &m_searchModel);
-  if (isLocalAIModel && g_embEngine && g_embEngine->isValid()) {
-    // ✅ 1. 防止重复创建导致内存泄漏
-    if (m_vectorSearchService) {
-      m_vectorSearchService->deleteLater();
-      m_vectorSearchService = nullptr;
-    }
+  connect(m_Notes->m_NoteIndexManager, &NoteIndexManager::noteMetaChanged, this,
+          [this](const QString& filePath, const NoteMetadata& meta) {
+            if (m_vectorSearchService) {
+              m_vectorSearchService->registerNoteMeta(filePath, filePath,
+                                                      meta.title);
+            }
+          });
 
-    // ✅ 2. 创建服务实例
-    m_vectorSearchService = new VectorSearchService(g_embEngine.get(), this);
+  connect(m_Notes->m_NoteIndexManager, &NoteIndexManager::noteRemoved, this,
+          [this](const QString& filePath) {
+            if (m_vectorSearchService) {
+              m_vectorSearchService->unregisterNoteMeta(filePath);
+            }
+          });
 
-    // ✅ 3. 批量注册元数据（使用新增的接口）
-    auto allMeta = m_Notes->m_NoteIndexManager->getAllMetadata();
-    for (auto it = allMeta.constBegin(); it != allMeta.constEnd(); ++it) {
-      m_vectorSearchService->registerNoteMeta(
-          it.key(),         // filePath 作为 noteId
-          it.key(),         // filePath 作为打开路径
-          it.value().title  // 显示标题
-      );
-    }
-
-    qDebug() << "[VectorSearch] 初始化完成, 注册笔记数:" << allMeta.size();
-  } else {
-    // ✅ 4. 条件不满足时清理旧实例，避免残留无效服务
-    if (m_vectorSearchService) {
-      m_vectorSearchService->deleteLater();
-      m_vectorSearchService = nullptr;
-    }
-  }
+  connect(m_Notes->m_NoteIndexManager, &NoteIndexManager::indexReloaded, this,
+          &NotesList::initVectorSearchService);
 
   initSerachDatabase();
 
   loadNotesListIndex();
 
-  // 初始化笔记关系图谱功能
-  initNoteGraphView();  // 关键：注册控制器到QML引擎
+  // 初始化笔记关系图谱功能，注册控制器到QML引擎
+  initNoteGraphView();
+
+  // 初始化笔记向量搜索
+  initVectorSearchService();
 }
 
 NotesList::~NotesList() {
@@ -113,6 +105,31 @@ NotesList::~NotesList() {
   if (watcher) {
     watcher->cancel();
     watcher->waitForFinished();
+  }
+}
+
+void NotesList::initVectorSearchService() {
+  if (isLocalAIModel && g_embEngine && g_embEngine->isValid()) {
+    if (m_vectorSearchService) {
+      m_vectorSearchService->deleteLater();
+      m_vectorSearchService = nullptr;
+    }
+
+    m_vectorSearchService = new VectorSearchService(g_embEngine.get(), this);
+
+    // 仅在此处做全量注册
+    auto allMeta = m_Notes->m_NoteIndexManager->getAllMetadata();
+    for (auto it = allMeta.constBegin(); it != allMeta.constEnd(); ++it) {
+      m_vectorSearchService->registerNoteMeta(it.key(), it.key(),
+                                              it.value().title);
+    }
+
+    qDebug() << "[VectorSearch] 初始化完成, 注册笔记数:" << allMeta.size();
+  } else {
+    if (m_vectorSearchService) {
+      m_vectorSearchService->deleteLater();
+      m_vectorSearchService = nullptr;
+    }
   }
 }
 

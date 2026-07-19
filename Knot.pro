@@ -684,7 +684,6 @@ SOURCES += \
     src/Notes/Notes_Editor.cpp \
     src/Notes/Notes_FileIO.cpp \
     src/Notes/Notes_Image.cpp \
-    src/Notes/Notes_IndexManager.cpp \
     src/Notes/Notes_LocalAI.cpp \
     src/Notes/Notes_Sync.cpp \
     src/Notes/Notes_UI.cpp \

@@ -65,11 +65,18 @@ class NoteIndexManager : public QObject {
   QString getFilePathByTitle(const QString& title) const;
   QStringList searchTitles(const QString& keyword) const;
 
+  void removeNote(const QString& filePath);
+
   // ✅ 获取所有已索引的文件路径列表
   QStringList getAllFilePaths() const { return m_metadataMap.keys(); }
 
   // ✅ 批量获取元数据（避免多次加锁/查找）
   QHash<QString, NoteMetadata> getAllMetadata() const { return m_metadataMap; }
+
+ signals:
+  void noteMetaChanged(const QString& filePath, const NoteMetadata& meta);
+  void noteRemoved(const QString& filePath);
+  void indexReloaded();  // 索引整体重载完成
 
  private:
   // 路径→元数据的映射（核心索引表）

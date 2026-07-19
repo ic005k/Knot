@@ -295,12 +295,22 @@ void NotesList::startBackgroundTaskUpdateFilesIndex() {
 }
 
 void NotesList::startBackgroundTaskDelFilesIndex(const QStringList& files) {
-  QFuture<void> future = QtConcurrent::run(
-      [this, files]() { m_dbManager.batchDeleteFileIndexes(files); });
+  QFuture<void> future = QtConcurrent::run([this, files]() {
+    m_dbManager.batchDeleteFileIndexes(files);
+  });
 
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Database del files completed.";
+
+    // ✅ 内存操作回到主线程，安全且无性能损失
+    for (const QString& file : files) {
+      m_Notes->m_NoteIndexManager->removeNote(
+          file);                        // emit noteRemoved → 清理向量搜索哈希表
+      m_Notes->removeNoteVector(file);  // 清理向量引擎中的向量
+    }
+
+    qDebug() << "Vector del files completed.";
     watcher->deleteLater();
   });
   watcher->setFuture(future);
