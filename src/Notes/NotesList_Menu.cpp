@@ -319,32 +319,32 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
       mw_one->showProgress();
 
       if (isLocalAIModel) {
-        if (g_vectorDb->clearAll()) {
-          // 异步重建所有笔记向量
+        // if (g_vectorDb->clearAll()) {
+        //  异步重建所有笔记向量
 
-          auto watcher = new QFutureWatcher<void>(this);
-          connect(watcher, &QFutureWatcher<void>::finished, this, [watcher]() {
-            qInfo() << "[Embedding] 重建向量任务执行完成";
-            mw_one->safeCloseProgress();
-            watcher->deleteLater();
-          });
-
-          auto future = QtConcurrent::run([this]() {
-            try {
-              QStringList allNotes = getAllNotePaths();
-              for (int i = 0; i < allNotes.size(); ++i) {
-                m_Notes->syncNoteVectorsBatchToDb(allNotes.at(i));
-              }
-            } catch (const std::exception& e) {
-              qCritical() << "[Embedding] Rebuild failed:" << e.what();
-            }
-          });
-          watcher->setFuture(future);
-
-        } else {
-          qWarning() << "[Embedding] 清库失败，中止重建";
+        auto watcher = new QFutureWatcher<void>(this);
+        connect(watcher, &QFutureWatcher<void>::finished, this, [watcher]() {
+          qInfo() << "[Embedding] 重建向量任务执行完成";
           mw_one->safeCloseProgress();
-        }
+          watcher->deleteLater();
+        });
+
+        auto future = QtConcurrent::run([this]() {
+          try {
+            QStringList allNotes = getAllNotePaths();
+            for (int i = 0; i < allNotes.size(); ++i) {
+              m_Notes->syncNoteVectorsBatchToDb(allNotes.at(i));
+            }
+          } catch (const std::exception& e) {
+            qCritical() << "[Embedding] Rebuild failed:" << e.what();
+          }
+        });
+        watcher->setFuture(future);
+
+        //} else {
+        //  qWarning() << "[Embedding] 清库失败，中止重建";
+        //  mw_one->safeCloseProgress();
+        //}
 
       } else {
         QString databaseFile = privateDir + "md_database_v3.db";
@@ -585,10 +585,9 @@ void NotesList::on_actionSetColorFlag() {
 }
 
 void NotesList::on_actionStatistics() {
-  // 1. UI线程：显示进度条
   mw_one->showProgress();
 
-  // 2. 提前计算所有需要的变量（UI线程非耗时操作，值捕获给后台Lambda）
+  // 提前计算所有需要的变量（UI线程非耗时操作，值捕获给后台Lambda）
   int countNoteBook = tw->topLevelItemCount();
   int totalNotes = 0;
   for (int i = 0; i < countNoteBook; i++) {
@@ -598,29 +597,21 @@ void NotesList::on_actionStatistics() {
   QString memoDir = iniDir + "memo/images/";
   QString localAppName = appName;  // 单独赋值，便于值捕获
 
-  // 3.
-  // 【核心】后台任务：极简Lambda，仅执行耗时的图片统计，用局部变量存储结果
   // 定义一个可被Lambda捕获的变量（用于存储后台统计结果）
-  int* imgCountPtr = new int(0);  // 用堆内存存储，避免栈变量生命周期问题
+  int* imgCountPtr = new int(0);
 
-  QFuture<void> future = QtConcurrent::run([=]() {
-    // 【后台线程执行】仅做耗时操作，不操作任何UI，结果存入堆内存指针
-    *imgCountPtr = countMdFilesImages(memoDir);
-  });
+  QFuture<void> future =
+      QtConcurrent::run([=]() { *imgCountPtr = countMdFilesImages(memoDir); });
 
-  // 4. 【核心】监控任务完成：参考示例结构完全一致
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Statistics task completed.";
 
-    // 【UI线程执行】处理结果，安全操作UI
     QString strAccessCount =
         tr("Access WebDAV:") + QString::number(webDAVCount) + "t/30min";
 
-    // 关闭进度条
     mw_one->safeCloseProgress();
 
-    // 弹出统计消息框（使用后台统计的结果）
     auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg(localAppName,
                  tr("NoteBook:") + QString::number(countNoteBook) + "\n\n" +
@@ -631,7 +622,6 @@ void NotesList::on_actionStatistics() {
                      "\n\n" + strAccessCount,
                  1);
 
-    // 【关键】释放资源：避免内存泄漏（堆内存指针+watcher）
     delete imgCountPtr;
     watcher->deleteLater();
   });

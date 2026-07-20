@@ -171,6 +171,18 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
   auto* embEngine = dynamic_cast<EmbeddingEngine*>(g_embEngine.get());
   if (!embEngine || !g_vectorDb) return false;
 
+  // ✅ 检查数据库中是否已存在该笔记的向量数据
+  // 如果已存在，说明之前已成功写入过，跳过重复处理
+  // 注意：这里需要加 s_vecDbMutex 因为 hasNoteChunks 虽只读，
+  //       但我们要保证"检查→写入"整个流程的原子性
+  {
+    QMutexLocker dbLock(&s_vecDbMutex);
+    if (g_vectorDb->hasNoteChunks(mdFilePath)) {
+      qDebug() << "[BATCH] 笔记已存在于向量库，跳过:" << mdFilePath;
+      return true;  // 已存在视为成功
+    }
+  }
+
   ChunkConfig config;
   MarkdownChunker chunker(*embEngine, config);
   auto chunks = chunker.splitForBatch(mdFilePath, mdContent);

@@ -368,4 +368,27 @@ bool VectorDb::clearAll() {
   return true;
 }
 
+bool VectorDb::hasNoteChunks(const QString& noteId) const {
+  if (!m_db) return false;
+
+  // 注意：此函数为只读查询，不需要加 m_mutex
+  // （SQLite WAL模式下读不阻塞写，且const方法不应持有非mutable锁）
+  sqlite3_stmt* stmt = nullptr;
+  const char* sql = "SELECT 1 FROM note_chunks WHERE note_id = ? LIMIT 1;";
+
+  int rc = sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
+  if (rc != SQLITE_OK) {
+    qWarning() << "[VectorDb] hasNoteChunks prepare失败:"
+               << sqlite3_errmsg(m_db);
+    return false;
+  }
+
+  sqlite3_bind_text(stmt, 1, noteId.toUtf8().constData(), -1, SQLITE_TRANSIENT);
+
+  bool exists = (sqlite3_step(stmt) == SQLITE_ROW);
+  sqlite3_finalize(stmt);
+
+  return exists;
+}
+
 #endif  // VECTOR_SEARCH
