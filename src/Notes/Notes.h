@@ -210,8 +210,9 @@ class Notes : public QDialog {
   bool removeNoteVector(const QString& noteId);
   bool syncNoteVectorToDb(const QString& mdFilePath);
 
-  bool syncNoteVectorsBatchToDb(const QString &mdFilePath);
-  protected:
+  bool syncNoteVectorsBatchToDb(const QString& mdFilePath);
+
+ protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;
@@ -283,6 +284,9 @@ class Notes : public QDialog {
   QString getNoteIdFromFilePath(const QString& mdPath);
   QString loadNoteFullText(const QString& mdPath);
 #endif
+
+  static inline QMutex s_embMutex;
+  static inline QMutex s_vecDbMutex;
 
   QListWidget* m_popupList;
 

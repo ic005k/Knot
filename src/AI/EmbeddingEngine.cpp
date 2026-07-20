@@ -11,30 +11,6 @@
 #include "lib/llama.cpp/ggml/include/gguf.h"
 #include "lib/llama.cpp/include/llama.h"
 
-/*EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
-  std::string path = ggufPath.toUtf8().toStdString();
-  llama_model_params model_params = llama_model_default_params();
-  m_model = llama_load_model_from_file(path.c_str(), model_params);
-  if (!m_model) return;
-
-  llama_context_params ctx_params = llama_context_default_params();
-  ctx_params.n_threads = 4;
-  ctx_params.embeddings = true;
-
-  ctx_params.n_ctx = llama_n_ctx_train(m_model);  // 获取模型训练时的最大上下文
-  // 可选：设置一个合理上限，防止内存爆炸
-  // ctx_params.n_ctx = std::min(ctx_params.n_ctx, (uint32_t)8192);
-
-  // ✅ 设置物理批处理上限
-  // 建议设为 n_ctx 或一个安全值（如 2048/4096），取决于显存大小
-  ctx_params.n_ubatch = std::min(ctx_params.n_ctx, (uint32_t)4096);
-
-  m_ctx = llama_new_context_with_model(m_model, ctx_params);
-
-  // ✅ 保存到成员变量，预留 BOS/EOS
-  m_maxTokens = static_cast<int>(ctx_params.n_ctx) - 2;
-}*/
-
 EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
   std::string path = ggufPath.toUtf8().toStdString();
   llama_model_params model_params = llama_model_default_params();
@@ -119,8 +95,7 @@ QVector<float> EmbeddingEngine::encode(const QString& text) {
     batch.pos[i] = i;
     batch.n_seq_id[i] = 1;
     batch.seq_id[i][0] = 0;
-    // batch.logits[i] = (i == n_tokens - 1);
-    batch.logits[i] = false;
+    batch.logits[i] = true;
   }
   batch.n_tokens = n_tokens;
 
@@ -207,8 +182,7 @@ QVector<float> EmbeddingEngine::encodeTokens(
     batch.pos[i] = i;
     batch.n_seq_id[i] = 1;
     batch.seq_id[i][0] = 0;
-    // batch.logits[i] = (i == n_tokens - 1);
-    batch.logits[i] = false;
+    batch.logits[i] = true;
   }
   batch.n_tokens = n_tokens;
 
@@ -280,29 +254,36 @@ std::vector<QVector<float>> EmbeddingEngine::encodeBatch(
   const llama_vocab* vocab = llama_model_get_vocab(m_model);
   const uint32_t n_ubatch = llama_n_ubatch(m_ctx);
 
-  // ✅ 预 tokenize 所有文本，获取精确 token 数
+  // ========================================================================
+  // 1. 预 tokenize 所有文本，获取精确 token 数并截断到安全范围
+  // ========================================================================
   struct TextInfo {
-    int originalIdx;
+    int originalIdx;  // 映射回原始输入索引
     std::vector<llama_token> tokens;
   };
+
   std::vector<TextInfo> allInfos;
   allInfos.reserve(texts.size());
 
   for (int i = 0; i < texts.size(); ++i) {
     std::string input = texts[i].toUtf8().toStdString();
+
+    TextInfo info{i, {}};
     int needed = llama_tokenize(vocab, input.c_str(), input.size(), nullptr, 0,
                                 true, true);
     int tokCount = (needed < 0) ? -needed : needed;
 
-    TextInfo info{i, {}};
     if (tokCount > 0) {
       info.tokens.resize(tokCount);
       int actual = llama_tokenize(vocab, input.c_str(), input.size(),
                                   info.tokens.data(), tokCount, true, true);
       if (actual > 0) {
         info.tokens.resize(actual);
-        // ✅ 单条超过 n_ubatch 时截断到安全范围
-        if (info.tokens.size() > n_ubatch) {
+        // ✅ 单条超过 n_ubatch 时截断，防止 GGML_ASSERT 崩溃
+        if (static_cast<uint32_t>(info.tokens.size()) > n_ubatch) {
+          qDebug() << "[BATCH_ENCODE] ⚠ 文本" << i << "tokens("
+                   << info.tokens.size() << ") > n_ubatch(" << n_ubatch
+                   << "), 截断";
           info.tokens.resize(n_ubatch);
         }
       }
@@ -310,79 +291,162 @@ std::vector<QVector<float>> EmbeddingEngine::encodeBatch(
     allInfos.push_back(std::move(info));
   }
 
-  // ✅ 按 token 预算动态分组，而非固定条数
-  int offset = 0;
-  while (offset < (int)allInfos.size()) {
-    uint32_t batchTokens = 0;
-    int batchEnd = offset;
+  // ========================================================================
+  // 2. 按 token 数降序排序（双指针装箱前提）
+  // ========================================================================
+  std::sort(allInfos.begin(), allInfos.end(),
+            [](const TextInfo& a, const TextInfo& b) {
+              return a.tokens.size() > b.tokens.size();
+            });
 
-    // 贪心填充：在不超过 n_ubatch 的前提下尽可能多塞序列
-    while (batchEnd < (int)allInfos.size() &&
-           batchEnd - offset < maxBatchSize) {
-      uint32_t nextTokens =
-          static_cast<uint32_t>(allInfos[batchEnd].tokens.size());
-      if (batchTokens + nextTokens > n_ubatch) break;
-      batchTokens += nextTokens;
-      batchEnd++;
+  // ========================================================================
+  // 3. 双指针装箱 + Encode 循环
+  // ========================================================================
+  // 用 visited 标记已处理的元素，避免 erase 带来的 O(n) 开销
+  std::vector<bool> visited(allInfos.size(), false);
+  int processed = 0;
+  const int total = static_cast<int>(allInfos.size());
+
+  while (processed < total) {
+    uint32_t batchTokens = 0;
+    std::vector<int> batchIndices;  // 本批次选中的 allInfos 下标
+    batchIndices.reserve(maxBatchSize);
+
+    int left = -1;
+    int right = total - 1;
+
+    // 找到第一个未访问的元素作为左指针起点
+    for (int k = 0; k < total; ++k) {
+      if (!visited[k]) {
+        left = k;
+        break;
+      }
+    }
+    if (left < 0) break;
+
+    // 右指针从末尾向前找第一个未访问的元素
+    while (right >= left && visited[right]) --right;
+
+    // ✅ 双指针贪心装箱：长文本优先，短文本填充剩余空间
+    while (left <= right &&
+           static_cast<int>(batchIndices.size()) < maxBatchSize) {
+      uint32_t longTokens = static_cast<uint32_t>(allInfos[left].tokens.size());
+
+      if (batchTokens + longTokens <= n_ubatch) {
+        batchTokens += longTokens;
+        batchIndices.push_back(left);
+        visited[left] = true;
+        ++processed;
+        ++left;
+
+        // 跳过已访问的左指针
+        while (left <= right && visited[left]) ++left;
+
+        // ✅ 尝试用最短的未访问文本填充剩余空间
+        while (right >= left &&
+               static_cast<int>(batchIndices.size()) < maxBatchSize &&
+               !visited[right]) {
+          uint32_t shortTokens =
+              static_cast<uint32_t>(allInfos[right].tokens.size());
+          if (batchTokens + shortTokens <= n_ubatch) {
+            batchTokens += shortTokens;
+            batchIndices.push_back(right);
+            visited[right] = true;
+            ++processed;
+            --right;
+            // 跳过已访问的右指针
+            while (right >= left && visited[right]) --right;
+          } else {
+            break;  // 最短的都放不下，停止填充
+          }
+        }
+      } else {
+        break;  // 当前最长的都放不下，结束本批
+      }
     }
 
-    // 如果一条都塞不进（单条就超了），至少处理一条（已截断）
-    if (batchEnd == offset) batchEnd = offset + 1;
+    // 防御：如果一轮什么都没选中（不应发生），强制取一条
+    if (batchIndices.empty()) {
+      for (int k = 0; k < total; ++k) {
+        if (!visited[k]) {
+          batchIndices.push_back(k);
+          visited[k] = true;
+          ++processed;
+          batchTokens = static_cast<uint32_t>(allInfos[k].tokens.size());
+          break;
+        }
+      }
+      if (batchIndices.empty()) break;
+    }
 
-    int curBatch = batchEnd - offset;
+    int curBatch = static_cast<int>(batchIndices.size());
 
-    // === 构建 Batch ===
+    // ================================================================
+    // 构建 Batch
+    // ================================================================
     llama_batch batch = llama_batch_init(batchTokens, 0, curBatch);
+
     int seqIdx = 0;
-    for (int i = offset; i < batchEnd; ++i) {
-      const auto& toks = allInfos[i].tokens;
-      for (int t = 0; t < (int)toks.size(); ++t) {
+    for (int infoIdx : batchIndices) {
+      const auto& toks = allInfos[infoIdx].tokens;
+      for (int t = 0; t < static_cast<int>(toks.size()); ++t) {
         int idx = batch.n_tokens;
         batch.token[idx] = toks[t];
         batch.pos[idx] = t;
         batch.n_seq_id[idx] = 1;
         batch.seq_id[idx][0] = seqIdx;
-        batch.logits[idx] = false;
+        // ✅ 【关键修复】Encoder 模式下所有 token 标记为需要输出
+        // 消除 "embeddings required but some input tokens were not
+        // marked as outputs -> overriding" 警告
+        batch.logits[idx] = true;
         batch.n_tokens++;
       }
       seqIdx++;
     }
 
-    // === Encode ===
-    auto mem = llama_get_memory(m_ctx);
+    // ================================================================
+    // Encode
+    // ================================================================
+    // ✅ 每次 encode 前清理 memory，防止跨批次污染
+    auto* mem = llama_get_memory(m_ctx);
     if (mem) llama_memory_clear(mem, true);
 
     QElapsedTimer timer;
     timer.start();
     int rc = llama_encode(m_ctx, batch);
+    qint64 elapsed = timer.elapsed();
 
     if (rc == 0) {
+      // ============================================================
+      // 提取结果并映射回原始索引
+      // ============================================================
       int outSeqIdx = 0;
-      for (int i = offset; i < batchEnd; ++i) {
+      for (int infoIdx : batchIndices) {
         const float* emb = llama_get_embeddings_seq(m_ctx, outSeqIdx);
         if (emb) {
           QVector<float> vec(dim);
           std::memcpy(vec.data(), emb, dim * sizeof(float));
+
+          // L2 归一化
           float norm = 0.0f;
           for (int d = 0; d < dim; ++d) norm += vec[d] * vec[d];
           norm = std::sqrt(norm);
           if (norm > 1e-6f)
             for (int d = 0; d < dim; ++d) vec[d] /= norm;
-          results[allInfos[i].originalIdx] = std::move(vec);
+
+          results[allInfos[infoIdx].originalIdx] = std::move(vec);
         }
         outSeqIdx++;
       }
     } else {
-      qWarning() << "[BATCH_ENCODE] 失败 rc:" << rc << ", seqs:" << curBatch
-                 << ", tokens:" << batch.n_tokens;
+      qWarning() << "[BATCH_ENCODE] ❌ llama_encode 失败 rc:" << rc
+                 << "| seqs:" << curBatch << "| tokens:" << batch.n_tokens;
     }
 
     qDebug() << "[BATCH_ENCODE] seqs:" << curBatch
-             << ", tokens:" << batch.n_tokens << ", 耗时:" << timer.elapsed()
-             << "ms";
+             << "| tokens:" << batch.n_tokens << "| 耗时:" << elapsed << "ms";
 
     llama_batch_free(batch);
-    offset = batchEnd;
   }
 
   return results;

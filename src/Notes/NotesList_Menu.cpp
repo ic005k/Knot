@@ -333,6 +333,7 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
               qCritical() << "[Embedding] Rebuild failed:" << e.what();
             }
           });
+
         } else {
           qWarning() << "[Embedding] 清库失败，中止重建";
           mw_one->safeCloseProgress();
