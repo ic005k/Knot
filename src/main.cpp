@@ -47,6 +47,8 @@ extern void RegJni20(const char* myClassName);
 
 extern void releaseGlobalAiEngine();
 
+QString defaultModel = "multilingual-e5-small-Q8_0.gguf";
+
 void loadTheme(bool isDark);
 void loadLocal();
 
@@ -285,6 +287,9 @@ int main(int argc, char* argv[]) {
 
   iniPreferences =
       new QSettings(privateDir + "options.ini", QSettings::IniFormat, NULL);
+
+  modelFilaName =
+      iniPreferences->value("/Options/localmodel", defaultModel).toString();
 
   fontScale = m_Method->getSystemFontScale();
   int m_fontSize =

@@ -20,8 +20,15 @@ EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
   llama_context_params ctx_params = llama_context_default_params();
   ctx_params.n_threads = 4;
   ctx_params.embeddings = true;
-  ctx_params.n_ctx = 512;
+
+  ctx_params.n_ctx = llama_n_ctx_train(m_model);  // 获取模型训练时的最大上下文
+  // 可选：设置一个合理上限，防止内存爆炸
+  // ctx_params.n_ctx = std::min(ctx_params.n_ctx, (uint32_t)8192);
+
   m_ctx = llama_new_context_with_model(m_model, ctx_params);
+
+  // ✅ 保存到成员变量，预留 BOS/EOS
+  m_maxTokens = static_cast<int>(ctx_params.n_ctx) - 2;
 }
 
 EmbeddingEngine::~EmbeddingEngine() {
@@ -64,11 +71,10 @@ QVector<float> EmbeddingEngine::encode(const QString& text) {
   all_tokens.resize(actual);
 
   // 3. ✅ 在 token 层面截断（而非在 tokenize 之前截断数字）
-  const int max_tokens = 510;  // e5-small n_ctx=512, 预留 BOS/EOS
-  if (static_cast<int>(all_tokens.size()) > max_tokens) {
-    qDebug() << "[ENCODE] ⚠️ 截断 tokens:" << all_tokens.size() << "→"
-             << max_tokens;
-    all_tokens.resize(max_tokens);
+  if (static_cast<int>(all_tokens.size()) > m_maxTokens) {
+    qDebug() << "[ENCODE] ⚠ 截断 tokens:" << all_tokens.size() << "→"
+             << m_maxTokens;
+    all_tokens.resize(m_maxTokens);
   }
 
   int n_tokens = static_cast<int>(all_tokens.size());
@@ -226,4 +232,9 @@ QString EmbeddingEngine::detokenize(
     }
   }
   return QString::fromUtf8(result.c_str(), static_cast<int>(result.size()));
+}
+
+int EmbeddingEngine::embeddingDimension() const {
+  if (!m_model) return 0;
+  return llama_n_embd(m_model);
 }

@@ -15,7 +15,7 @@
 #include "src/AI/GlobalAI.h"
 #include "src/AI/VectorDb.h"
 
-class BaseEmbeddingEngine;
+class EmbeddingEngine;
 class VectorDb;
 
 // 统一搜索结果项（兼容分词与向量两种模式）
@@ -33,7 +33,7 @@ struct SearchResultItem {
 class VectorSearchService : public QObject {
   Q_OBJECT
  public:
-  explicit VectorSearchService(BaseEmbeddingEngine* engine,
+  explicit VectorSearchService(EmbeddingEngine* engine,
                                QObject* parent = nullptr);
 
   ~VectorSearchService();
@@ -73,7 +73,7 @@ class VectorSearchService : public QObject {
   void searchFinished(int resultCount);
 
  private:
-  BaseEmbeddingEngine* m_engine;
+  EmbeddingEngine* m_engine;
   QMutex m_mutex;
 
   // noteId -> {filePath, noteName} 的内存映射

@@ -1,6 +1,7 @@
 #include "GlobalAI.h"
 
 #include <QDir>
+#include <QObject>
 #include <memory>
 
 #include "AiModelDeployer.h"
@@ -8,9 +9,12 @@
 #include "VectorDb.h"
 #include "lib/llama.cpp/ggml/include/ggml-backend.h"
 #include "lib/llama.cpp/include/llama.h"
+#include "src/MainWindow.h"
+#include "src/defines.h"
+#include "ui_MainWindow.h"
 
 // 全局向量引擎，统一基类无需改动
-std::unique_ptr<BaseEmbeddingEngine> g_embEngine;
+std::unique_ptr<EmbeddingEngine> g_embEngine;
 
 std::unique_ptr<VectorDb> g_vectorDb;
 
@@ -37,11 +41,13 @@ bool initGlobalAiEngine() {
   // 第一层：文件物理存在+大小校验
   if (!fiGguf.exists()) {
     qWarning() << "GGUF模型文件不存在：" << ggufPath;
+    modelStatus = QObject::tr("Model Status:") + "No";
     return false;
   }
   if (fiGguf.size() <= MIN_GGUF_SIZE) {
     qWarning() << "GGUF模型文件不完整，大小过小：" << fiGguf.size() << " 路径："
                << ggufPath;
+    modelStatus = QObject::tr("Model Status:") + "No";
     return false;
   }
 
@@ -49,12 +55,15 @@ bool initGlobalAiEngine() {
   QFile ggufFile(ggufPath);
   if (!ggufFile.open(QIODevice::ReadOnly)) {
     qWarning() << "无法打开GGUF文件：" << ggufPath;
+    modelStatus = QObject::tr("Model Status:") + "No";
     return false;
   }
   char magic[4];
   if (ggufFile.read(magic, 4) != 4 || memcmp(magic, "GGUF", 4) != 0) {
     qCritical() << "GGUF文件格式损坏/bad magic，无法加载模型：" << ggufPath;
     ggufFile.close();
+
+    modelStatus = QObject::tr("Model Status:") + "No";
     return false;
   }
   ggufFile.close();
@@ -63,27 +72,37 @@ bool initGlobalAiEngine() {
   auto tmpEngine = std::make_unique<EmbeddingEngine>(ggufPath);
   if (!tmpEngine->isValid()) {
     qCritical() << "GGUF模型加载失败（不支持的架构/量化类型）：" << ggufPath;
+
+    modelStatus = QObject::tr("Model Status:") + "No";
     return false;
   }
 
   // 加载成功再转移所有权
-  BaseEmbeddingEngine* rawPtr =
-      static_cast<BaseEmbeddingEngine*>(tmpEngine.release());
+  EmbeddingEngine* rawPtr = static_cast<EmbeddingEngine*>(tmpEngine.release());
   g_embEngine.reset(rawPtr);
   qDebug() << "GGUF向量模型加载完成 路径：" << ggufPath;
+  modelStatus = QObject::tr("Model Status:") + "Ok";
 
-  // ========== 向量数据库逻辑不变 ==========
+  // ========== 向量数据库初始化（动态维度） ==========
   QString vecDir = QDir(privateDir).filePath("model");
   QDir dir;
   dir.mkpath(vecDir);
   QString vecDbPath = QDir(vecDir).filePath("note_vector.sqlite");
-  g_vectorDb = std::make_unique<VectorDb>();
+
+  // ✅ 从已加载成功的 g_embEngine 中获取真实维度（如 384）
+  int embeddingDim = g_embEngine->embeddingDimension();
+  qDebug() << "[GlobalAI] 当前嵌入模型维度:" << embeddingDim;
+
+  // ✅ 显式传入维度，彻底告别默认值 1024
+  g_vectorDb = std::make_unique<VectorDb>(embeddingDim);
+
   bool vecDbOk = g_vectorDb->open(vecDbPath);
   if (!vecDbOk) {
     qCritical() << "向量数据库打开失败，路径：" << vecDbPath;
     return false;
   }
-  qDebug() << "向量数据库初始化成功，路径：" << vecDbPath;
+  qDebug() << "向量数据库初始化成功，维度:" << embeddingDim << "路径："
+           << vecDbPath;
 
   return true;
 }

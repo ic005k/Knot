@@ -95,6 +95,8 @@ class Preferences : public QDialog {
 
   void on_chkZip_clicked();
 
+  void initLocalModelList();
+
  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
 
@@ -129,6 +131,10 @@ class Preferences : public QDialog {
   void on_cboxEndpoint_currentIndexChanged(int index);
 
   void on_cboxEndpoint_activated(int index);
+
+  void on_btnDownloadModel_clicked();
+
+  void on_cboxModel_currentIndexChanged(int index);
 
  private:
   bool isChanged;

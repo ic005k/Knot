@@ -62,6 +62,8 @@ Preferences::Preferences(QWidget* parent)
     ui->sliderFontSize->setValue(10);
   }
 
+  initLocalModelList();
+
   initAIConfig();
 
   // 下拉菜单弹出前刷新列表
@@ -301,6 +303,9 @@ void Preferences::initOptions() {
   ui->chkAI->setChecked(iniPreferences->value("/Options/ai", false).toBool());
   ui->cboxEndpoint->setCurrentIndex(
       iniPreferences->value("/Options/aiindex", 0).toInt());
+
+  ui->cboxModel->setCurrentText(
+      iniPreferences->value("/Options/localmodel", modelFilaName).toString());
 
   QString aesStr = iniPreferences->value("/zip/password").toString();
   QString password = m_CloudBackup->aesDecrypt(aesStr, aes_key0, aes_iv0);
@@ -602,6 +607,8 @@ void Preferences::openPreferences() {
       iniPreferences->value("/Options/FontSize", defaultFontSize).toInt();
   ui->sliderFontSize->setValue(savedPosition);
 
+  ui->lblModelStatus->setText(modelStatus);
+
   show();
   initCheckStatus();
 
@@ -813,4 +820,48 @@ void Preferences::on_cboxEndpoint_currentIndexChanged(int index) {
 
 void Preferences::on_cboxEndpoint_activated(int index) {
   on_cboxEndpoint_currentIndexChanged(index);
+}
+
+void Preferences::on_btnDownloadModel_clicked() {
+  const QString targetUrl =
+      "https://hf-mirror.com/cstr/multilingual-e5-small-GGUF/tree/main";
+  if (!QDesktopServices::openUrl(QUrl(targetUrl))) {
+    // 打开失败提示
+    qDebug() << "浏览器打开链接失败";
+  }
+}
+
+void Preferences::on_cboxModel_currentIndexChanged(int index) {
+  Q_UNUSED(index);
+  if (this->isVisible()) {
+    iniPreferences->setValue("/Options/localmodel",
+                             ui->cboxModel->currentText());
+  }
+}
+
+void Preferences::initLocalModelList() {
+  QString path = privateDir + "model";
+
+  QDir dir(path);
+
+  // 配置规则：只取文件、不遍历子目录、忽略 . 和 ..
+  dir.setFilter(QDir::Files | QDir::NoDotAndDotDot);
+  // 不排序（可选，按需开启 QDir::Name）
+  dir.setSorting(QDir::NoSort);
+
+  QFileInfoList fileInfos = dir.entryInfoList();
+  QStringList result;
+
+  for (int i = 0; i < fileInfos.size(); ++i) {
+    const QFileInfo& info = fileInfos[i];
+    if (info.fileName().contains("note_vector")) continue;
+
+    // 仅文件名
+    result << info.fileName();
+    // 完整路径放开下面这句
+    // result << info.absoluteFilePath();
+  }
+
+  ui->cboxModel->clear();
+  ui->cboxModel->addItems(result);
 }

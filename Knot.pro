@@ -1021,7 +1021,6 @@ HEADERS += \
     lib/zlib/zlib.h \
     lib/zlib/zutil.h \
     src/AI/AiModelDeployer.h \
-    src/AI/BaseEmbeddingEngine.h \
     src/AI/EmbeddingEngine.h \
     src/AI/GlobalAI.h \
     src/AI/VectorDb.h \

@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 
-VectorSearchService::VectorSearchService(BaseEmbeddingEngine* engine,
+VectorSearchService::VectorSearchService(EmbeddingEngine* engine,
                                          QObject* parent)
     : QObject(parent), m_engine(engine) {}
 

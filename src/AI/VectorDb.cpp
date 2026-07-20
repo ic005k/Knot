@@ -1,12 +1,14 @@
 #ifdef VECTOR_SEARCH
 
 #define SQLITE_CORE
+
 #include "VectorDb.h"
 
 #include <sqlite3.h>
 
 #include <QByteArray>
 #include <QSet>
+#include <QString>
 #include <QVariant>
 #include <cmath>
 
@@ -15,7 +17,10 @@
 
 bool VectorDb::isOpen() const { return m_db != nullptr; }
 
-VectorDb::VectorDb() {
+VectorDb::VectorDb(int embeddingDim) : m_embeddingDim(embeddingDim) {
+  Q_ASSERT_X(embeddingDim > 0, "VectorDb",
+             "embeddingDim must be > 0, check engine initialization order");
+
   sqlite3_auto_extension((void (*)(void))sqlite3_vec_init);
   m_db = nullptr;
 }
@@ -52,7 +57,7 @@ void VectorDb::close() {
 bool VectorDb::initTable() {
   char* err = nullptr;
 
-  // 元数据表：(note_id, chunk_index) 联合主键
+  // 元数据表：(note_id, chunk_index) 联合主键（保持不变）
   const char* sqlMeta = R"(
         CREATE TABLE IF NOT EXISTS note_chunks (
             note_id     TEXT NOT NULL,
@@ -68,22 +73,26 @@ bool VectorDb::initTable() {
     return false;
   }
 
-  // 向量虚拟表：rowid 隐式对应 metadata 的 rowid
-  // ⚠️ sqlite-vec 的 vec0 不支持 TEXT PRIMARY KEY，
-  //    改用默认整数 rowid，通过 JOIN 关联元数据
-  const char* sqlVec = R"(
+  // ✅ 核心改造：动态维度替代硬编码 384
+  // ⚠️ 注意：vec0 虚拟表不支持 ALTER，若旧库已存在 FLOAT[384] 的 vec_index，
+  //    CREATE IF NOT EXISTS 会静默跳过，必须先删除旧库或手动 DROP TABLE
+  QString sqlVecStr = QString(R"(
         CREATE VIRTUAL TABLE IF NOT EXISTS vec_index USING vec0(
-            vec FLOAT[384] distance_metric=cosine
+            vec FLOAT[%1] distance_metric=cosine
         );
-    )";
-  rc = sqlite3_exec(m_db, sqlVec, nullptr, nullptr, &err);
+    )")
+                          .arg(m_embeddingDim);
+
+  QByteArray sqlVecUtf8 = sqlVecStr.toUtf8();
+  rc = sqlite3_exec(m_db, sqlVecUtf8.constData(), nullptr, nullptr, &err);
   if (rc != SQLITE_OK) {
-    qCritical() << "创建vec0虚拟表失败:" << (err ? err : "无错误信息");
+    qCritical() << "创建vec0虚拟表失败:" << (err ? err : "无错误信息")
+                << ", 目标维度:" << m_embeddingDim;
     if (err) sqlite3_free(err);
     return false;
   }
 
-  // 加速按 note_id 删除
+  // 加速按 note_id 删除（保持不变）
   const char* sqlIdx =
       "CREATE INDEX IF NOT EXISTS idx_chunks_note ON note_chunks(note_id);";
   rc = sqlite3_exec(m_db, sqlIdx, nullptr, nullptr, &err);
@@ -94,6 +103,8 @@ bool VectorDb::initTable() {
   }
 
   if (err) sqlite3_free(err);
+
+  qDebug() << "[VectorDb] ✅ 初始化成功, 向量维度:" << m_embeddingDim;
   return true;
 }
 
@@ -119,17 +130,16 @@ bool VectorDb::rollback() {
 // ==================== 写入操作 ====================
 
 bool VectorDb::insertChunk(const QString& noteId, int chunkIndex,
-                           const QString& content,
-                           const QVector<float>& vec384) {
+                           const QString& content, const QVector<float>& vec) {
   QMutexLocker locker(&m_mutex);  // ✅ 自动加解锁
 
   if (!m_db) {
     qWarning() << "[VectorDb] insertChunk失败: 数据库未打开";
     return false;
   }
-  if (vec384.size() != 384) {
-    qWarning() << "[VectorDb] insertChunk失败: 向量维度不是384, 实际:"
-               << vec384.size();
+  if (vec.size() != m_embeddingDim) {
+    qWarning() << "[VectorDb] insertChunk失败: 期望维度" << m_embeddingDim
+               << "实际:" << vec.size();
     return false;
   }
 
@@ -159,8 +169,7 @@ bool VectorDb::insertChunk(const QString& noteId, int chunkIndex,
   }
 
   // Step 2: 用相同 rowid 插入向量
-  QByteArray vecBin((const char*)vec384.constData(),
-                    vec384.size() * sizeof(float));
+  QByteArray vecBin((const char*)vec.constData(), vec.size() * sizeof(float));
   sqlite3_stmt* stmtVec = nullptr;
   const char* sqlVec =
       "INSERT OR REPLACE INTO vec_index(rowid, vec) VALUES(?, ?);";
@@ -257,7 +266,7 @@ QList<QPair<QString, float>> VectorDb::querySimilar(
 }
 
 // 占位：调用方需改为传入 MarkdownChunker 处理后的结果
-void VectorDb::fillMissingVec(BaseEmbeddingEngine* engine,
+void VectorDb::fillMissingVec(EmbeddingEngine* engine,
                               const QList<QString>& allNoteIdList) {
   Q_UNUSED(engine);
   Q_UNUSED(allNoteIdList);
@@ -268,7 +277,7 @@ void VectorDb::fillMissingVec(BaseEmbeddingEngine* engine,
 QVector<VectorHit> VectorDb::searchWithContent(const QVector<float>& queryVec,
                                                int topN, float threshold) {
   QVector<VectorHit> results;
-  if (!m_db || queryVec.size() != 384 || topN <= 0) return results;
+  if (!m_db || queryVec.size() != m_embeddingDim || topN <= 0) return results;
 
   QByteArray vecBin((const char*)queryVec.constData(),
                     queryVec.size() * sizeof(float));

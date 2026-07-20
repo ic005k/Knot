@@ -76,7 +76,7 @@ inline QString iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
     bookimgFileName, defaultFontFamily, customFontFamily, encPassword,
     btnYearText, btnMonthText, strPage, ebookFile, strTitle, fileName,
     strOpfPath, catalogueFile, strShowMsg, strStartTotalTime, strOpfFile,
-    oldOpfPath, strEpubTitle, strPercent;
+    oldOpfPath, strEpubTitle, strPercent, modelFilaName, modelStatus;
 
 inline QString ver;
 inline QString appName = "Knot";

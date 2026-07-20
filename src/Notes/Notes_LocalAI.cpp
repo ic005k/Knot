@@ -71,7 +71,7 @@ bool Notes::syncNoteVectorToDb(const QString& mdFilePath) {
 
   // 批量插入新 chunk
   for (const auto& chunk : chunks) {
-    if (chunk.vector.size() != 384) {
+    if (chunk.vector.size() != embEngine->embeddingDimension()) {
       qWarning() << "⚠️ chunk向量维度异常:" << chunk.vector.size()
                  << "noteId:" << noteId << "chunkIndex:" << chunk.chunkIndex;
       g_vectorDb->rollback();

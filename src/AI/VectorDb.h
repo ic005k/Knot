@@ -8,9 +8,9 @@
 #include <QString>
 #include <QVector>
 
-#include "BaseEmbeddingEngine.h"
-
 struct sqlite3;
+
+class EmbeddingEngine;
 
 // 分块数据结构（与 MarkdownChunker 保持一致）
 struct NoteChunkRecord {
@@ -30,7 +30,7 @@ struct VectorHit {
 
 class VectorDb {
  public:
-  VectorDb();
+  explicit VectorDb(int embeddingDim);  // 默认 bge-m3 维度
   ~VectorDb();
 
   bool open(const QString& dbPath);
@@ -46,7 +46,7 @@ class VectorDb {
 
   // ✅ 批量写入替代单条 upsert
   bool insertChunk(const QString& noteId, int chunkIndex,
-                   const QString& content, const QVector<float>& vec384);
+                   const QString& content, const QVector<float>& vec);
 
   // ✅ 按 noteId 删除所有 chunk
   bool deleteChunksByNoteId(const QString& noteId);
@@ -56,7 +56,7 @@ class VectorDb {
                                             int topN = 20);
 
   // 保留接口签名，内部逻辑需调用方适配分块
-  void fillMissingVec(BaseEmbeddingEngine* engine,
+  void fillMissingVec(EmbeddingEngine* engine,
                       const QList<QString>& allNoteIdList);
 
   int countChunks() const;
@@ -68,6 +68,7 @@ class VectorDb {
   bool initTable();
   sqlite3* m_db = nullptr;
   mutable QMutex m_mutex;
+  int m_embeddingDim;
 };
 
 #endif  // VECTORDATABASE_H

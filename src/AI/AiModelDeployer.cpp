@@ -3,7 +3,7 @@
 #include <QDir>
 #include <QFileInfo>
 
-QString modelFilaName = "multilingual-e5-small-Q8_0.gguf";
+#include "src/defines.h"
 
 QString AiModelDeployer::getModelRoot() {
   QDir dir(privateDir + "model");
