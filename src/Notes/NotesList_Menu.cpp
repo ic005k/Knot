@@ -321,18 +321,25 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
       if (isLocalAIModel) {
         if (g_vectorDb->clearAll()) {
           // 异步重建所有笔记向量
-          QtConcurrent::run([this]() {
+
+          auto watcher = new QFutureWatcher<void>(this);
+          connect(watcher, &QFutureWatcher<void>::finished, this, [watcher]() {
+            qInfo() << "[Embedding] 重建向量任务执行完成";
+            mw_one->safeCloseProgress();
+            watcher->deleteLater();
+          });
+
+          auto future = QtConcurrent::run([this]() {
             try {
               QStringList allNotes = getAllNotePaths();
               for (int i = 0; i < allNotes.size(); ++i) {
-                // m_Notes->syncNoteVectorToDb(allNotes.at(i));
                 m_Notes->syncNoteVectorsBatchToDb(allNotes.at(i));
               }
-
             } catch (const std::exception& e) {
               qCritical() << "[Embedding] Rebuild failed:" << e.what();
             }
           });
+          watcher->setFuture(future);
 
         } else {
           qWarning() << "[Embedding] 清库失败，中止重建";
