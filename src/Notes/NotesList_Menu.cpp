@@ -601,7 +601,7 @@ void NotesList::on_actionStatistics() {
     *imgCountPtr = countMdFilesImages(memoDir);
   });
 
-  // 4. 【核心】监控任务完成：与你的参考示例结构完全一致
+  // 4. 【核心】监控任务完成：参考示例结构完全一致
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Statistics task completed.";
@@ -616,8 +616,8 @@ void NotesList::on_actionStatistics() {
     // 弹出统计消息框（使用后台统计的结果）
     auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg(localAppName,
-                 tr("NoteBook:") + QString::number(countNoteBook) + "\n" +
-                     tr("Local Notes:") + QString::number(totalNotes) + "\n" +
+                 tr("NoteBook:") + QString::number(countNoteBook) + "\n\n" +
+                     tr("Local Notes:") + QString::number(totalNotes) + "\n\n" +
                      tr("Remote Notes:") +
                      QString::number(m_CloudBackup->m_currentRemoteNotesCount) +
                      "\n\n" + tr("Images:") + QString::number(*imgCountPtr) +
