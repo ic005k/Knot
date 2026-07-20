@@ -218,6 +218,8 @@ class NotesList : public QDialog {
 
   QStringList getAllNotePaths();
 
+  void initVectorSearchService();
+
  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
@@ -383,7 +385,6 @@ class NotesList : public QDialog {
                        int parentRow, int& totalNotes);
   void moveChildToRecycle(QTreeWidgetItem* parentItem, QString iniDir,
                           QVector<QString>& delFilesIndex, QTreeWidget* twrb);
-  void initVectorSearchService();
 };
 
 class SearchMapper {

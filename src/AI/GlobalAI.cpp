@@ -89,8 +89,9 @@ bool initGlobalAiEngine() {
   // ========== 向量数据库初始化（动态维度） ==========
   QString vecDir = QDir(privateDir).filePath("model");
   QDir dir;
-  dir.mkpath(vecDir);
-  vecDbPath = QDir(vecDir).filePath("note_vector.sqlite");
+  dir.mkpath(vecDir + "/database/");
+  vecDbPath = QDir(vecDir + "/database/")
+                  .filePath("note_vector_" + modelFilaName + ".sqlite");
 
   // ✅ 从已加载成功的 g_embEngine 中获取真实维度（如 384）
   int embeddingDim = g_embEngine->embeddingDimension();

@@ -882,14 +882,11 @@ void Preferences::on_cboxModel_currentTextChanged(const QString& arg1) {
     isLocalAIModel = initGlobalAiEngine();
     ui->lblModelStatus->setText(modelStatus);
     if (isLocalAIModel) {
-      g_vectorDb->close();
-      QFile::remove(vecDbPath);
-      bool vecDbOk = g_vectorDb->open(vecDbPath);
-      if (!vecDbOk) {
-        qCritical() << "向量库清除失败";
-      } else {
-        qCritical() << "选择模型后，向量库清除成功";
-      }
+      m_NotesList->initVectorSearchService();
+
+      qCritical() << "模型切换成功";
+    } else {
+      qCritical() << "模型切换失败";
     }
   }
 }
