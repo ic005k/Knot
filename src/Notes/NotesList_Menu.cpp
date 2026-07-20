@@ -319,32 +319,7 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
       mw_one->showProgress();
 
       if (isLocalAIModel) {
-        // if (g_vectorDb->clearAll()) {
-        //  异步重建所有笔记向量
-
-        auto watcher = new QFutureWatcher<void>(this);
-        connect(watcher, &QFutureWatcher<void>::finished, this, [watcher]() {
-          qInfo() << "[Embedding] 重建向量任务执行完成";
-          mw_one->safeCloseProgress();
-          watcher->deleteLater();
-        });
-
-        auto future = QtConcurrent::run([this]() {
-          try {
-            QStringList allNotes = getAllNotePaths();
-            for (int i = 0; i < allNotes.size(); ++i) {
-              m_Notes->syncNoteVectorsBatchToDb(allNotes.at(i));
-            }
-          } catch (const std::exception& e) {
-            qCritical() << "[Embedding] Rebuild failed:" << e.what();
-          }
-        });
-        watcher->setFuture(future);
-
-        //} else {
-        //  qWarning() << "[Embedding] 清库失败，中止重建";
-        //  mw_one->safeCloseProgress();
-        //}
+        rebuilderNotesVector();
 
       } else {
         QString databaseFile = privateDir + "md_database_v3.db";
@@ -725,4 +700,52 @@ void NotesList::slotCreateSubNotebook(int qmlIndex) {
   });
 
   connect(dlg, &QDialog::rejected, this, [=]() { dlg->deleteLater(); });
+}
+
+void NotesList::rebuilderNotesVector() {
+  if (!isLocalAIModel) return;
+
+  // ✅ 防重入：如果已经在重建，直接返回
+  if (!m_rebuildMutex.tryLock()) {
+    qInfo() << "[Embedding] 重建任务已在运行，跳过本次触发";
+    return;
+  }
+
+  // ✅ 每次新任务开始前重置计数器
+  m_Notes->m_skipCount.storeRelaxed(0);
+
+  // ✅ 重置取消标志
+  m_rebuildCancelled.store(false, std::memory_order_release);
+
+  auto watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this, [watcher, this]() {
+    qInfo() << "[Embedding] 重建向量任务结束, cancelled:"
+            << m_rebuildCancelled.load();
+    mw_one->safeCloseProgress();
+    watcher->deleteLater();
+    m_rebuildMutex.unlock();  // ✅ 释放锁，允许下次触发
+  });
+
+  auto future = QtConcurrent::run([this]() {
+    try {
+      QStringList allNotes = getAllNotePaths();
+      for (int i = 0; i < allNotes.size(); ++i) {
+        // ✅ 每个笔记处理前检查取消标志
+        if (m_rebuildCancelled.load(std::memory_order_acquire)) {
+          qInfo() << "[Embedding] 重建被取消, 已完成:" << i << "/"
+                  << allNotes.size();
+          break;
+        }
+        m_Notes->syncNoteVectorsBatchToDb(allNotes.at(i));
+      }
+    } catch (const std::exception& e) {
+      qCritical() << "[Embedding] Rebuild failed:" << e.what();
+    }
+  });
+  watcher->setFuture(future);
+}
+
+void NotesList::cancelRebuildNotesVector() {
+  m_rebuildCancelled.store(true, std::memory_order_release);
+  qInfo() << "[Embedding] 已发送重建取消信号";
 }

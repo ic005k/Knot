@@ -178,7 +178,11 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
   {
     QMutexLocker dbLock(&s_vecDbMutex);
     if (g_vectorDb->hasNoteChunks(mdFilePath)) {
-      qDebug() << "[BATCH] 笔记已存在于向量库，跳过:" << mdFilePath;
+      // ✅ 只在首次或抽样时打印，避免万条刷屏
+      int cnt = m_skipCount.fetchAndAddRelaxed(1);
+      if (cnt == 0 || cnt % 100 == 99) {
+        qDebug() << "[BATCH] 已存在, 累计跳过:" << (cnt + 1) << "条";
+      }
       return true;  // 已存在视为成功
     }
   }

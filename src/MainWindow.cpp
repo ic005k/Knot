@@ -64,6 +64,8 @@ MainWindow::MainWindow(QWidget* parent)
   m_Preferences->setEncSyncStatusTip();
 
   initMain = false;
+
+  m_NotesList->rebuilderNotesVector();
 }
 
 void MainWindow::readDataInThread(int ExceptIndex) {

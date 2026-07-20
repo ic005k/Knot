@@ -79,6 +79,8 @@ class Notes : public QDialog {
   ~Notes();
   Ui::Notes* ui;
 
+  QAtomicInteger<int> m_skipCount{0};
+
   void loadNotesToUI();
 
   NoteDiffManager m_NoteDiffManager;

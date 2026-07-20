@@ -341,20 +341,6 @@ QString NotesList::getSearchResultQmlFile() {
   return item.toString();
 }
 
-/*void NotesList::onSearchTextChanged(const QString& text) {
-  QTimer::singleShot(300, this, [this, text]() {  // 防抖处理
-    if (isLocalAIModel) {
-      // 向量搜索入口
-    } else {
-      auto results =
-          m_dbManager.searchDocuments(text, m_Notes->m_NoteIndexManager);
-      m_searchModel.setResults(results);
-      mui->lblNoteSearchResult->setText(tr("Note Search Results:") +
-                                        QString::number(results.count()));
-    }
-  });
-}*/
-
 void NotesList::onSearchTextChanged(const QString& text) {
   QTimer::singleShot(300, this, [this, text]() {
     // 空文本时清空结果
@@ -412,7 +398,7 @@ void NotesList::onSearchTextChanged(const QString& text) {
 
       QtConcurrent::run([this, text]() {
         // 在后台线程执行向量检索,最多返回25条，且相似度≥0.5
-        auto results = m_vectorSearchService->search(text, 25, 0.5f);
+        auto results = m_vectorSearchService->search(text, 20, 0.5f);
 
         // ⚠必须回到主线程更新UI模型
         QMetaObject::invokeMethod(

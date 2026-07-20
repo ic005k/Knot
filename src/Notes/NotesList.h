@@ -220,6 +220,10 @@ class NotesList : public QDialog {
 
   void initVectorSearchService();
 
+  void rebuilderNotesVector();
+
+  void cancelRebuildNotesVector();
+
  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
@@ -289,10 +293,12 @@ class NotesList : public QDialog {
   bool isReadyNotesEnd = false;
   bool isExecRecentOpen = false;
 
+  std::atomic<bool> m_rebuildCancelled{false};
+  QMutex m_rebuildMutex;  // 防止重复触发重建
+
   // 递归遍历 QTreeWidget 节点，填充到 QML + 维护映射表
   void traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex, int level);
 
-  // 通用：调用 QML addItem 并传入层级参数
   void addItemToQW_Level(QObject* qmlRoot, const QString& t0, const QString& t1,
                          const QString& t2, const QString& t3,
                          const QString& t4, int fontSize, int level,

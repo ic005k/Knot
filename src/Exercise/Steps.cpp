@@ -374,6 +374,9 @@ void Steps::loadStepsToTable() {
 }
 
 void Steps::openStepsUI() {
+  // 延迟一小段时间再触发，避免模块快速切换时反复启停
+  QTimer::singleShot(500, m_NotesList, &NotesList::rebuilderNotesVector);
+
   mui->frameMain->hide();
   mui->frameSteps->show();
 

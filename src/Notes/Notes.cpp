@@ -387,6 +387,8 @@ void Notes::init_all_notes() {
 }
 
 void Notes::openNotes() {
+  m_NotesList->cancelRebuildNotesVector();
+
   if (!mw_one->m_Preferences->devMode)
     mui->btnManagement->hide();
   else
