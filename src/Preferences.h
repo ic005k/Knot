@@ -136,6 +136,8 @@ class Preferences : public QDialog {
 
   void on_cboxModel_currentIndexChanged(int index);
 
+  void on_cboxModel_currentTextChanged(const QString& arg1);
+
  private:
   bool isChanged;
 

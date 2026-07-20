@@ -9,6 +9,9 @@
 
 QFont::Weight readerFontWeight;
 extern void loadTheme(bool isDark);
+extern void releaseGlobalAiEngine();
+extern int init_main_ai();
+extern QString vecDbPath;
 
 Preferences::Preferences(QWidget* parent)
     : QDialog(parent), ui(new Ui::Preferences) {
@@ -21,6 +24,7 @@ Preferences::Preferences(QWidget* parent)
 
   ui->gboxAdditional->hide();
   ui->lblAdditional->hide();
+  ui->lblModelTip->hide();
 
   ui->lblFontSize->setText(tr("Font Size") + " : " + QString::number(fontSize));
   isFontChange = false;
@@ -864,4 +868,28 @@ void Preferences::initLocalModelList() {
 
   ui->cboxModel->clear();
   ui->cboxModel->addItems(result);
+}
+
+void Preferences::on_cboxModel_currentTextChanged(const QString& arg1) {
+  Q_UNUSED(arg1);
+  if (this->isVisible()) {
+    releaseGlobalAiEngine();
+
+    modelFilaName = arg1;
+    int value = init_main_ai();
+    if (value == 1) return;
+
+    isLocalAIModel = initGlobalAiEngine();
+    ui->lblModelStatus->setText(modelStatus);
+    if (isLocalAIModel) {
+      g_vectorDb->close();
+      QFile::remove(vecDbPath);
+      bool vecDbOk = g_vectorDb->open(vecDbPath);
+      if (!vecDbOk) {
+        qCritical() << "向量库清除失败";
+      } else {
+        qCritical() << "选择模型后，向量库清除成功";
+      }
+    }
+  }
 }

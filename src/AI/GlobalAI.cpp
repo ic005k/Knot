@@ -20,13 +20,17 @@ std::unique_ptr<VectorDb> g_vectorDb;
 
 static bool g_llama_ggml_inited = false;
 
+QString vecDbPath;
+
 #ifdef VECTOR_SEARCH
 
 bool initGlobalAiEngine() {
   // ========= 全局后端、llama一次性初始化 =========
   if (!g_llama_ggml_inited) {
     // 多线程上下文隔离兜底，任意平台子线程加载模型前刷新后端注册表
-    // ggml_backend_load_all();
+
+    // ggml_backend_cpu_init();  // ← 关键！替代 ggml_backend_load_all()
+    // llama_backend_init();
 
     qDebug() << "子线程执行ggml_backend_load_all() 后端扫描完成";
 
@@ -78,8 +82,7 @@ bool initGlobalAiEngine() {
   }
 
   // 加载成功再转移所有权
-  EmbeddingEngine* rawPtr = static_cast<EmbeddingEngine*>(tmpEngine.release());
-  g_embEngine.reset(rawPtr);
+  g_embEngine = std::move(tmpEngine);
   qDebug() << "GGUF向量模型加载完成 路径：" << ggufPath;
   modelStatus = QObject::tr("Model Status:") + "Ok";
 
@@ -87,7 +90,7 @@ bool initGlobalAiEngine() {
   QString vecDir = QDir(privateDir).filePath("model");
   QDir dir;
   dir.mkpath(vecDir);
-  QString vecDbPath = QDir(vecDir).filePath("note_vector.sqlite");
+  vecDbPath = QDir(vecDir).filePath("note_vector.sqlite");
 
   // ✅ 从已加载成功的 g_embEngine 中获取真实维度（如 384）
   int embeddingDim = g_embEngine->embeddingDimension();

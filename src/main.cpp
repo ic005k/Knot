@@ -3,8 +3,8 @@
 #include <QDir>
 
 #ifdef Q_OS_ANDROID
-#include <QJniEnvironment>  // Qt JNI 环境
-#include <QJniObject>       // Qt JNI 对象封装
+#include <QJniEnvironment>
+#include <QJniObject>
 #endif
 
 #include <ggml-cpu.h>
@@ -95,44 +95,18 @@ static volatile void* g_force_link_cpu_backend[] = {
     (void*)&ggml_backend_cpu_init,
 };
 
+int init_main_ai();
+
 ///////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
+  ///////////////////////////////////////////////////////////////////////
   // 防止整个数组被优化
   (void)g_force_link_cpu_backend;
 
-  // ✅ 静态链接模式下，必须显式调用此函数注册 CPU 后端
-  // ggml_backend_load_all() 对静态链接无效！
-  ggml_backend_cpu_init();  // ← 关键！替代 ggml_backend_load_all()
-
-  llama_backend_init();
-
-  // ✅ 【第一步】立即检查是否有后端被成功加载
-  int num_backends = ggml_backend_reg_count();
-  if (num_backends == 0) {
-    fprintf(stderr,
-            "❌ No backends loaded! Check that backend libraries "
-            "(.so/.dll/.dylib) are present and dependencies are satisfied.\n");
-    return 1;
-  }
-
-  printf("[backend] %d backend(s) loaded:\n", num_backends);
-  for (int i = 0; i < num_backends; i++) {
-    printf("  - %s\n", ggml_backend_reg_name(ggml_backend_reg_get(i)));
-  }
-
-  // ✅ 【第二步】确认有后端加载后，再获取 CPU 后端
-
-  g_global_cpu_backend =
-      ggml_backend_cpu_reg();  // 再次调用，拿到初始化后的有效指针
-
-  if (!g_global_cpu_backend) {
-    fprintf(stderr, "❌ CPU backend not loaded!\n");
-    return 1;
-  }
-
-  // 可选调试日志：打印已加载的后端名，验证正确性
-  printf("[backend] loaded: %s\n", ggml_backend_reg_name(g_global_cpu_backend));
+  int value = init_main_ai();
+  qDebug() << "init_main_ai=" << value;
+  if (value == 1) return 1;
 
   ///////////////////////////////////////////////////////////////////////////
 
@@ -765,4 +739,41 @@ int clearLockFiles(const QString& iniDir) {
   qInfo() << "清除完成：目录" << iniDir << "共处理" << fileInfos.size()
           << "个.lock文件，成功删除" << deletedCount << "个";
   return deletedCount;
+}
+
+int init_main_ai() {
+  // ✅ 静态链接模式下，必须显式调用此函数注册 CPU 后端
+  // ggml_backend_load_all() 对静态链接无效！
+  ggml_backend_cpu_init();  // ← 关键！替代 ggml_backend_load_all()
+
+  llama_backend_init();
+
+  // ✅ 【第一步】立即检查是否有后端被成功加载
+  int num_backends = ggml_backend_reg_count();
+  if (num_backends == 0) {
+    fprintf(stderr,
+            "❌ No backends loaded! Check that backend libraries "
+            "(.so/.dll/.dylib) are present and dependencies are satisfied.\n");
+    return 1;
+  }
+
+  printf("[backend] %d backend(s) loaded:\n", num_backends);
+  for (int i = 0; i < num_backends; i++) {
+    printf("  - %s\n", ggml_backend_reg_name(ggml_backend_reg_get(i)));
+  }
+
+  // ✅ 【第二步】确认有后端加载后，再获取 CPU 后端
+
+  g_global_cpu_backend =
+      ggml_backend_cpu_reg();  // 再次调用，拿到初始化后的有效指针
+
+  if (!g_global_cpu_backend) {
+    fprintf(stderr, "❌ CPU backend not loaded!\n");
+    return 1;
+  }
+
+  // 可选调试日志：打印已加载的后端名，验证正确性
+  printf("[backend] loaded: %s\n", ggml_backend_reg_name(g_global_cpu_backend));
+
+  return 0;
 }
