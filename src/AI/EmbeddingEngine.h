@@ -25,6 +25,9 @@ class EmbeddingEngine {
 
   int embeddingDimension() const;
 
+  std::vector<QVector<float>> encodeBatch(const QStringList& texts,
+                                          int maxBatchSize = 32);
+
  private:
   struct llama_model* m_model = nullptr;
   struct llama_context* m_ctx = nullptr;

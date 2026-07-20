@@ -3,6 +3,8 @@
 
 #include <qglobal.h>
 
+#include <QCryptographicHash>
+#include <QDebug>
 #include <QFile>
 #include <QQmlEngine>
 #include <QRegularExpression>
@@ -76,7 +78,8 @@ inline QString iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
     bookimgFileName, defaultFontFamily, customFontFamily, encPassword,
     btnYearText, btnMonthText, strPage, ebookFile, strTitle, fileName,
     strOpfPath, catalogueFile, strShowMsg, strStartTotalTime, strOpfFile,
-    oldOpfPath, strEpubTitle, strPercent, modelFilaName, modelStatus;
+    oldOpfPath, strEpubTitle, strPercent, modelFileName, modelStatus,
+    modelFullPath, modelDataBasePath, modelFingerprint;
 
 inline QString ver;
 inline QString appName = "Knot";
@@ -144,6 +147,8 @@ inline WebDavHelper* listWebDavFiles(const QString& url,
                                      const QString& password);
 inline void closeTextToolBar();
 inline void initTextToolbarDynamic(QWidget* parent);
+
+inline QString computeModelFingerprint(const QString& modelPath);
 
 void closeTextToolBar() {
   if (textToolbar != nullptr && textToolbar->isVisible()) {
@@ -255,4 +260,34 @@ int deleteDirfile(QString dirName) {
     error = true;
   }
   return !error;
+}
+
+QString computeModelFingerprint(const QString& modelPath) {
+  QFile file(modelPath);
+  if (!file.open(QIODevice::ReadOnly)) {
+    qWarning() << "打开模型文件失败:" << modelPath << file.errorString();
+    return {};
+  }
+
+  QCryptographicHash hash(QCryptographicHash::Sha256);
+  const qint64 maxReadSize = 2 * 1024 * 1024;  // 2MB
+  const qint64 chunkSize = 1 * 1024 * 1024;    // 1MB 缓冲区，移动端更友好
+  qint64 totalRead = 0;
+  QByteArray buffer;
+  buffer.reserve(chunkSize);
+
+  while (!file.atEnd() && totalRead < maxReadSize) {
+    buffer = file.read(chunkSize);
+    if (buffer.isEmpty() && file.error() != QFile::NoError) {
+      qWarning() << "读取模型文件异常:" << modelPath << file.errorString();
+      file.close();
+      return {};
+    }
+    hash.addData(buffer);
+    totalRead += buffer.size();
+  }
+
+  file.close();
+  // 取前32位
+  return hash.result().toHex().left(32);
 }

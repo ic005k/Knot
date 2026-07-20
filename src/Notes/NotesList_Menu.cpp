@@ -325,7 +325,8 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
             try {
               QStringList allNotes = getAllNotePaths();
               for (int i = 0; i < allNotes.size(); ++i) {
-                m_Notes->syncNoteVectorToDb(allNotes.at(i));
+                // m_Notes->syncNoteVectorToDb(allNotes.at(i));
+                m_Notes->syncNoteVectorsBatchToDb(allNotes.at(i));
               }
 
             } catch (const std::exception& e) {

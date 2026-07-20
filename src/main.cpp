@@ -231,6 +231,11 @@ int main(int argc, char* argv[]) {
   p_dir.mkpath(privateDir + "KnotData/memo/images");
   p_dir.mkpath(privateDir + "KnotData/memo/gps");
 
+  modelFullPath = privateDir + "model/";
+  modelDataBasePath = modelFullPath + "database/";
+  p_dir.mkpath(modelFullPath);
+  p_dir.mkpath(modelDataBasePath);
+
   strJBDict1 = privateDir + "dict/jieba.dict.utf8";
   strJBDict2 = privateDir + "dict/hmm_model.utf8";
   strJBDict3 = privateDir + "dict/user.dict.utf8";
@@ -262,8 +267,9 @@ int main(int argc, char* argv[]) {
   iniPreferences =
       new QSettings(privateDir + "options.ini", QSettings::IniFormat, NULL);
 
-  modelFilaName =
+  modelFileName =
       iniPreferences->value("/Options/localmodel", defaultModel).toString();
+  modelFingerprint = computeModelFingerprint(modelFullPath + modelFileName);
 
   fontScale = m_Method->getSystemFontScale();
   int m_fontSize =

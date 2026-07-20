@@ -210,7 +210,8 @@ class Notes : public QDialog {
   bool removeNoteVector(const QString& noteId);
   bool syncNoteVectorToDb(const QString& mdFilePath);
 
- protected:
+  bool syncNoteVectorsBatchToDb(const QString &mdFilePath);
+  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;

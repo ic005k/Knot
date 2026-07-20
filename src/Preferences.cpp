@@ -24,7 +24,8 @@ Preferences::Preferences(QWidget* parent)
 
   ui->gboxAdditional->hide();
   ui->lblAdditional->hide();
-  ui->lblModelTip->hide();
+
+  ui->lblModelTip->setText("");
 
   ui->lblFontSize->setText(tr("Font Size") + " : " + QString::number(fontSize));
   isFontChange = false;
@@ -309,7 +310,7 @@ void Preferences::initOptions() {
       iniPreferences->value("/Options/aiindex", 0).toInt());
 
   ui->cboxModel->setCurrentText(
-      iniPreferences->value("/Options/localmodel", modelFilaName).toString());
+      iniPreferences->value("/Options/localmodel", modelFileName).toString());
 
   QString aesStr = iniPreferences->value("/zip/password").toString();
   QString password = m_CloudBackup->aesDecrypt(aesStr, aes_key0, aes_iv0);
@@ -841,6 +842,11 @@ void Preferences::on_cboxModel_currentIndexChanged(int index) {
     iniPreferences->setValue("/Options/localmodel",
                              ui->cboxModel->currentText());
   }
+
+  if (this->isHidden()) {
+    ui->lblModelTip->setText(
+        computeModelFingerprint(modelFullPath + ui->cboxModel->currentText()));
+  }
 }
 
 void Preferences::initLocalModelList() {
@@ -875,7 +881,9 @@ void Preferences::on_cboxModel_currentTextChanged(const QString& arg1) {
   if (this->isVisible()) {
     releaseGlobalAiEngine();
 
-    modelFilaName = arg1;
+    modelFileName = arg1;
+    modelFingerprint = computeModelFingerprint(modelFullPath + modelFileName);
+    ui->lblModelTip->setText(modelFingerprint);
     int value = init_main_ai();
     if (value == 1) return;
 

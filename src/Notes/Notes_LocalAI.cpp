@@ -99,6 +99,124 @@ bool Notes::syncNoteVectorToDb(const QString& mdFilePath) {
   return ok;
 }
 
+/*bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
+  // 1. 读取文件
+  QString mdContent = loadNoteFullText(mdFilePath);
+  if (mdContent.trimmed().isEmpty()) {
+    qDebug() << "[BATCH] 跳过空文件:" << mdFilePath;
+    return true;
+  }
+
+  if (!isLocalAIModel || !g_embEngine || !g_embEngine->isValid()) return false;
+  auto* embEngine = dynamic_cast<EmbeddingEngine*>(g_embEngine.get());
+  if (!embEngine || !g_vectorDb) return false;
+
+  ChunkConfig config;
+  MarkdownChunker chunker(*embEngine, config);
+
+  // 2. 纯分块 + tokenize（零推理开销）
+  auto chunks = chunker.splitForBatch(mdFilePath, mdContent);
+  if (chunks.isEmpty()) return true;
+
+  // 3. ⭐ 用现有 encodeTokens 逐条编码
+  //    批处理的核心收益在下面的 DB 事务，不在这里
+  QVector<QVector<float>> vectors;
+  vectors.reserve(chunks.size());
+  for (const auto& chunk : chunks) {
+    auto vec = embEngine->encodeTokens(chunk.tokens);
+    if (vec.isEmpty()) {
+      qWarning() << "[BATCH] encode失败, chunk:" << chunk.chunkIndex;
+      return false;
+    }
+    vectors.append(std::move(vec));
+  }
+
+  // 4. ⭐ 单事务写入（这才是批处理真正的性能来源）
+  if (!g_vectorDb->beginTransaction()) return false;
+
+  if (!g_vectorDb->deleteChunksByNoteId(mdFilePath)) {
+    g_vectorDb->rollback();
+    return false;
+  }
+
+  for (int i = 0; i < chunks.size(); ++i) {
+    // ✅ 4个参数，与 VectorDb::insertChunk 签名完全匹配
+    if (!g_vectorDb->insertChunk(mdFilePath, chunks[i].chunkIndex,
+                                 chunks[i].content, vectors[i])) {
+      g_vectorDb->rollback();
+      return false;
+    }
+  }
+
+  if (!g_vectorDb->commit()) {
+    g_vectorDb->rollback();
+    return false;
+  }
+
+  qDebug() << "[BATCH] ✅" << mdFilePath << "chunks:" << chunks.size();
+  return true;
+}*/
+
+bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
+  QString mdContent = loadNoteFullText(mdFilePath);
+  if (mdContent.trimmed().isEmpty()) return true;
+
+  if (!isLocalAIModel || !g_embEngine || !g_embEngine->isValid()) return false;
+  auto* embEngine = dynamic_cast<EmbeddingEngine*>(g_embEngine.get());
+  if (!embEngine || !g_vectorDb) return false;
+
+  ChunkConfig config;
+  MarkdownChunker chunker(*embEngine, config);
+
+  // 1. 纯分块（零推理）
+  auto chunks = chunker.splitForBatch(mdFilePath, mdContent);
+  if (chunks.isEmpty()) return true;
+
+  // ✅ 2. 提取文本列表，调用真正的 Batch Encode
+  QStringList texts;
+  texts.reserve(chunks.size());
+  for (const auto& c : chunks) texts.append(c.content);
+
+  QElapsedTimer timer;
+  timer.start();
+  // maxBatchSize 建议设为 32~64，防止超出 n_ctx
+  auto vectors = embEngine->encodeBatch(texts, 64);
+  qDebug() << "[BATCH] encode耗时:" << timer.elapsed()
+           << "ms, chunks:" << chunks.size();
+
+  if ((int)vectors.size() != chunks.size()) {
+    qWarning() << "[BATCH] encode数量不匹配";
+    return false;
+  }
+
+  // ✅ 3. 单事务写入 DB
+  timer.restart();
+  if (!g_vectorDb->beginTransaction()) return false;
+
+  if (!g_vectorDb->deleteChunksByNoteId(mdFilePath)) {
+    g_vectorDb->rollback();
+    return false;
+  }
+
+  const int dim = embEngine->embeddingDimension();
+  for (int i = 0; i < chunks.size(); ++i) {
+    if (vectors[i].size() != dim ||
+        !g_vectorDb->insertChunk(mdFilePath, chunks[i].chunkIndex,
+                                 chunks[i].content, vectors[i])) {
+      g_vectorDb->rollback();
+      return false;
+    }
+  }
+
+  if (!g_vectorDb->commit()) {
+    g_vectorDb->rollback();
+    return false;
+  }
+  qDebug() << "[BATCH] DB写入耗时:" << timer.elapsed() << "ms";
+
+  return true;
+}
+
 bool Notes::removeNoteVector(const QString& noteId) {
   if (!isLocalAIModel) return false;
 

@@ -150,3 +150,52 @@ QVector<QString> MarkdownChunker::splitByStructure(
 
   return chunks;
 }
+
+// MarkdownChunker.cpp
+
+QVector<BatchTextChunk> MarkdownChunker::splitForBatch(
+    const QString& noteId, const QString& mdContent) const {
+  QVector<BatchTextChunk> results;
+  auto segments = splitByStructure(mdContent);  // ✅ 复用现有纯文本分割逻辑
+
+  int chunkIdx = 0;
+  for (const QString& seg : segments) {
+    if (seg.trimmed().isEmpty()) continue;
+
+    auto tokens = m_engine.tokenizeText(seg);
+
+    // 短段落
+    if (static_cast<int>(tokens.size()) <= m_config.maxTokens) {
+      BatchTextChunk chunk;
+      chunk.noteId = noteId;
+      chunk.chunkIndex = chunkIdx++;
+      chunk.content = seg;
+      chunk.tokens = std::move(tokens);
+      results.append(chunk);
+      continue;
+    }
+
+    // 长段落：Token级滑动窗口（仅切分+tokenize，绝不encode）
+    int stride = m_config.maxTokens - m_config.overlapTokens;
+    if (stride <= 0) stride = 1;
+
+    for (size_t start = 0; start < tokens.size(); start += stride) {
+      size_t end = std::min(start + static_cast<size_t>(m_config.maxTokens),
+                            tokens.size());
+
+      std::vector<llama_token> subTokens(
+          tokens.begin() + static_cast<long long>(start),
+          tokens.begin() + static_cast<long long>(end));
+
+      BatchTextChunk chunk;
+      chunk.noteId = noteId;
+      chunk.chunkIndex = chunkIdx++;
+      chunk.content = m_engine.detokenize(subTokens);
+      chunk.tokens = std::move(subTokens);
+      results.append(chunk);
+
+      if (end >= tokens.size()) break;
+    }
+  }
+  return results;
+}

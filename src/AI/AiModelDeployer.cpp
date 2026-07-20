@@ -5,15 +5,11 @@
 
 #include "src/defines.h"
 
-QString AiModelDeployer::getModelRoot() {
-  QDir dir(privateDir + "model");
-  dir.mkpath(".");
-  return dir.absolutePath();
-}
+QString AiModelDeployer::getModelRoot() { return modelFullPath; }
 
 // 新增：GGUF单模型文件路径
 QString AiModelDeployer::getGgufModelPath() {
-  return QDir(getModelRoot()).filePath(modelFilaName);
+  return QDir(getModelRoot()).filePath(modelFileName);
 }
 
 bool AiModelDeployer::isAllModelReady() {
