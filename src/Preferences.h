@@ -138,6 +138,8 @@ class Preferences : public QDialog {
 
   void on_cboxModel_currentTextChanged(const QString& arg1);
 
+  void on_btnSelectModel_clicked();
+
  private:
   bool isChanged;
 
