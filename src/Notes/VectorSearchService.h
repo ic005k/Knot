@@ -62,12 +62,6 @@ class VectorSearchService : public QObject {
    */
   void unregisterNoteMeta(const QString& noteId);
 
-  // 🔍 调试接口
-  int debugIndexSize() const;
-  bool debugAddAndSearch(const QString& testId, const QVector<float>& vec,
-                         const QString& query);
-  void debugRemove(const QString& testId);
-
  signals:
   void searchStarted();
   void searchFinished(int resultCount);

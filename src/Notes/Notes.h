@@ -210,7 +210,6 @@ class Notes : public QDialog {
   bool checkAndUpdateCleanDate();
 
   bool removeNoteVector(const QString& mdFilePath);
-  bool syncNoteVectorToDb(const QString& mdFilePath);
 
   bool syncNoteVectorsBatchToDb(const QString& mdFilePath);
 

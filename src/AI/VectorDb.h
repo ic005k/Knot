@@ -46,7 +46,9 @@ class VectorDb {
 
   // ✅ 批量写入替代单条 upsert
   bool insertChunk(const QString& noteId, int chunkIndex,
-                   const QString& content, const QVector<float>& vec);
+                   const QString& content,
+                   const QString& noteHash,  // ✅ 新增参数
+                   const QVector<float>& vec);
 
   // ✅ 按 noteId 删除所有 chunk
   bool deleteChunksByNoteId(const QString& noteId);

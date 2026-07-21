@@ -65,6 +65,7 @@ bool VectorDb::initTable() {
             chunk_index INT NOT NULL,
             content     TEXT,
             content_hash TEXT NOT NULL DEFAULT '',
+            note_hash    TEXT NOT NULL DEFAULT '',
             PRIMARY KEY (note_id, chunk_index)
         );
     )";
@@ -132,40 +133,43 @@ bool VectorDb::rollback() {
 // ==================== 写入操作 ====================
 
 bool VectorDb::insertChunk(const QString& noteId, int chunkIndex,
-                           const QString& content, const QVector<float>& vec) {
-  QMutexLocker locker(&m_mutex);  // ✅ 自动加解锁
-
+                           const QString& content,
+                           const QString& noteHash,  // ✅ 新增参数
+                           const QVector<float>& vec) {
+  QMutexLocker locker(&m_mutex);
   if (!m_db) {
     qWarning() << "[VectorDb] insertChunk失败: 数据库未打开";
     return false;
   }
   if (vec.size() != m_embeddingDim) {
-    qWarning() << "[VectorDb] insertChunk失败: 期望维度" << m_embeddingDim
-               << "实际:" << vec.size();
+    qWarning() << "[VectorDb] insertChunk失败: 维度不匹配";
     return false;
   }
 
-  // Step 1: 插入元数据并获取 rowid
+  // ✅ SQL 加入 note_hash 占位符（与 initTable 的5列对应）
   sqlite3_stmt* stmtMeta = nullptr;
   const char* sqlMeta =
-      "INSERT OR REPLACE INTO note_chunks(note_id, chunk_index, content) "
-      "VALUES(?, ?, ?);";
+      "INSERT OR REPLACE INTO note_chunks(note_id, chunk_index, content, "
+      "content_hash, note_hash) "
+      "VALUES(?, ?, ?, ?, ?);";
   int rc = sqlite3_prepare_v2(m_db, sqlMeta, -1, &stmtMeta, nullptr);
   if (rc != SQLITE_OK) {
     qWarning() << "[VectorDb] prepare meta失败:" << sqlite3_errmsg(m_db);
     return false;
   }
+
+  QByteArray contentHash =
+      QCryptographicHash::hash(content.toUtf8(), QCryptographicHash::Sha256)
+          .toHex();
+
   sqlite3_bind_text(stmtMeta, 1, noteId.toUtf8().constData(), -1,
                     SQLITE_TRANSIENT);
   sqlite3_bind_int(stmtMeta, 2, chunkIndex);
   sqlite3_bind_text(stmtMeta, 3, content.toUtf8().constData(), -1,
                     SQLITE_TRANSIENT);
-
-  // ✅ 计算并绑定 content_hash
-  QByteArray hash =
-      QCryptographicHash::hash(content.toUtf8(), QCryptographicHash::Sha256)
-          .toHex();
-  sqlite3_bind_text(stmtMeta, 4, hash.constData(), -1, SQLITE_TRANSIENT);
+  sqlite3_bind_text(stmtMeta, 4, contentHash.constData(), -1, SQLITE_TRANSIENT);
+  sqlite3_bind_text(stmtMeta, 5, noteHash.toUtf8().constData(), -1,
+                    SQLITE_TRANSIENT);  // ✅ 绑定 note_hash
 
   rc = sqlite3_step(stmtMeta);
   sqlite_int64 rowid = sqlite3_last_insert_rowid(m_db);
@@ -176,7 +180,7 @@ bool VectorDb::insertChunk(const QString& noteId, int chunkIndex,
     return false;
   }
 
-  // Step 2: 用相同 rowid 插入向量
+  // Step 2: 向量插入（完全保持不变）
   QByteArray vecBin((const char*)vec.constData(), vec.size() * sizeof(float));
   sqlite3_stmt* stmtVec = nullptr;
   const char* sqlVec =
@@ -189,7 +193,6 @@ bool VectorDb::insertChunk(const QString& noteId, int chunkIndex,
   sqlite3_bind_int64(stmtVec, 1, rowid);
   sqlite3_bind_blob(stmtVec, 2, vecBin.constData(), vecBin.size(),
                     SQLITE_TRANSIENT);
-
   rc = sqlite3_step(stmtVec);
   sqlite3_finalize(stmtVec);
 
@@ -202,32 +205,31 @@ bool VectorDb::insertChunk(const QString& noteId, int chunkIndex,
 
 bool VectorDb::deleteChunksByNoteId(const QString& noteId) {
   if (!m_db) return false;
+  QMutexLocker locker(&m_mutex);
 
-  QMutexLocker locker(&m_mutex);  // ✅ 自动加解锁
-
-  // ⚠️ 必须先删 vec_index 再删 metadata
-  // 因为 vec_index 依赖 metadata 的 rowid
-  // 使用子查询确保一致性
-  const char* sqlDelVec =
-      "DELETE FROM vec_index WHERE rowid IN "
-      "(SELECT rowid FROM note_chunks WHERE note_id = ?);";
+  // ✅ 单条SQL + 事务，保证原子性
+  const char* sql = R"(
+        BEGIN TRANSACTION;
+        DELETE FROM vec_index WHERE rowid IN (SELECT rowid FROM note_chunks WHERE note_id = ?);
+        DELETE FROM note_chunks WHERE note_id = ?;
+        COMMIT;
+    )";
   sqlite3_stmt* stmt = nullptr;
-  sqlite3_prepare_v2(m_db, sqlDelVec, -1, &stmt, nullptr);
-  sqlite3_bind_text(stmt, 1, noteId.toUtf8().constData(), -1, SQLITE_TRANSIENT);
-  int rc = sqlite3_step(stmt);
-  sqlite3_finalize(stmt);
-  if (rc != SQLITE_DONE) {
-    qWarning() << "[VectorDb] 删除vec失败:" << sqlite3_errmsg(m_db);
+  int rc = sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
+  if (rc != SQLITE_OK) {
+    qWarning() << "[VectorDb] delete prepare失败:" << sqlite3_errmsg(m_db);
     return false;
   }
-
-  const char* sqlDelMeta = "DELETE FROM note_chunks WHERE note_id = ?;";
-  sqlite3_prepare_v2(m_db, sqlDelMeta, -1, &stmt, nullptr);
   sqlite3_bind_text(stmt, 1, noteId.toUtf8().constData(), -1, SQLITE_TRANSIENT);
+  sqlite3_bind_text(stmt, 2, noteId.toUtf8().constData(), -1, SQLITE_TRANSIENT);
   rc = sqlite3_step(stmt);
   sqlite3_finalize(stmt);
-
-  return rc == SQLITE_DONE;
+  if (rc != SQLITE_DONE) {
+    qWarning() << "[VectorDb] delete失败:" << sqlite3_errmsg(m_db);
+    sqlite3_exec(m_db, "ROLLBACK;", nullptr, nullptr, nullptr);
+    return false;
+  }
+  return true;
 }
 
 // ==================== 检索操作 ====================
@@ -399,29 +401,22 @@ bool VectorDb::hasNoteChunks(const QString& noteId) const {
   return exists;
 }
 
+// isNoteContentChanged 改为比对 note_hash
 bool VectorDb::isNoteContentChanged(const QString& noteId,
-                                    const QString& newContentHash) const {
-  if (!m_db) return true;  // DB未打开视为需要更新
-
-  // WAL模式下读不加锁，const方法安全
+                                    const QString& newNoteHash) const {
+  if (!m_db) return true;
   sqlite3_stmt* stmt = nullptr;
-  // ✅ 取第一个chunk的hash代表整篇笔记版本（同一笔记所有chunk同时写入）
+  // ✅ 只需取任意一条记录的 note_hash 即可（同一笔记所有chunk的note_hash相同）
   const char* sql =
-      "SELECT content_hash FROM note_chunks WHERE note_id = ? LIMIT 1;";
-
+      "SELECT note_hash FROM note_chunks WHERE note_id = ? LIMIT 1;";
   int rc = sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
   if (rc != SQLITE_OK) return true;
-
   sqlite3_bind_text(stmt, 1, noteId.toUtf8().constData(), -1, SQLITE_TRANSIENT);
 
   bool changed = true;
   if (sqlite3_step(stmt) == SQLITE_ROW) {
     const char* stored = (const char*)sqlite3_column_text(stmt, 0);
-    // hash为空(旧数据)或不匹配 → 视为变更
-    changed = !stored || QString(stored) != newContentHash;
-  } else {
-    // 无任何记录 → 新笔记，必须处理
-    changed = true;
+    changed = !stored || QString(stored) != newNoteHash;
   }
   sqlite3_finalize(stmt);
   return changed;

@@ -265,3 +265,41 @@ QUrl MainWindow::buildAiApiUrl(const QString& rawEndpoint) {
   u.setPath(path);
   return u;
 }
+
+/**
+ * @brief 更新向量状态指示灯
+ * @param status 0=就绪, 1=正在进行, 2=错误
+ */
+void MainWindow::setVectorStatus(int status) {
+  mui->lblVectorStatus->show();
+  // 将整数转为字符串设置动态属性
+  mui->lblVectorStatus->setProperty("state", QString::number(status));
+
+  const QString lightStyle = R"(
+    QLabel#lblVectorStatus {
+        min-width: 12px; max-width: 12px;
+        min-height: 12px; max-height: 12px;
+        border-radius: 6px;
+        background-color: #cccccc;
+    }
+    QLabel#lblVectorStatus[state="1"] { background-color: #ff9800; }
+    QLabel#lblVectorStatus[state="2"] { background-color: #f44336; }
+)";
+
+  const QString darkStyle = R"(
+    QLabel#lblVectorStatus {
+        min-width: 12px; max-width: 12px;
+        min-height: 12px; max-height: 12px;
+        border-radius: 6px;
+        background-color: #555555;
+    }
+    QLabel#lblVectorStatus[state="1"] { background-color: #ffb74d; }
+    QLabel#lblVectorStatus[state="2"] { background-color: #ef5350; }
+)";
+
+  mui->lblVectorStatus->setStyleSheet(isDark ? darkStyle : lightStyle);
+
+  // 强制刷新QSS使颜色立即生效
+  mui->lblVectorStatus->style()->unpolish(mui->lblVectorStatus);
+  mui->lblVectorStatus->style()->polish(mui->lblVectorStatus);
+}

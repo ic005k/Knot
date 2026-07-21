@@ -756,6 +756,9 @@ void MainWindow::init_UIWidget() {
     mui->btnShareBakFile->hide();
   }
 
+  mui->lblVectorStatus->setText("");
+  mui->lblVectorStatus->hide();
+
   mui->qwMainDate->hide();
   mui->qwMainEvent->hide();
   mui->lblStats->hide();

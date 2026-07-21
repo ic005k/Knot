@@ -487,7 +487,8 @@ class MainWindow : public QMainWindow {
   void checkAiConnectivity(const AiSingleRecord& cfg,
                            std::function<void()> onSuccess);
 
- protected:
+  void setVectorStatus(int status);
+  protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
   void paintEvent(QPaintEvent* event) override;

@@ -48,7 +48,6 @@ void Notes::startBackgroundTaskUpdateNoteIndex(QString mdFile) {
 #ifdef VECTOR_SEARCH
 
     if (isLocalAIModel) {
-      // syncNoteVectorToDb(mdFile);
       // syncNoteVectorsBatchToDb(mdFile);
     }
 

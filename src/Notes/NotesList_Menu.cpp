@@ -703,7 +703,10 @@ void NotesList::slotCreateSubNotebook(int qmlIndex) {
 }
 
 void NotesList::rebuilderNotesVector() {
-  if (!isLocalAIModel) return;
+  if (!isLocalAIModel) {
+    mui->lblVectorStatus->hide();
+    return;
+  }
 
   // ✅ 防重入：如果已经在重建，直接返回
   if (!m_rebuildMutex.tryLock()) {
@@ -717,10 +720,21 @@ void NotesList::rebuilderNotesVector() {
   // ✅ 重置取消标志
   m_rebuildCancelled.store(false, std::memory_order_release);
 
+  mw_one->setVectorStatus(1);
+
   auto watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [watcher, this]() {
     qInfo() << "[Embedding] 重建向量任务结束, cancelled:"
             << m_rebuildCancelled.load();
+
+    // 检查后台线程是否抛出了异常
+    if (watcher->isCanceled()) {
+      // QtConcurrent 异常会通过 watcher 传递
+      mw_one->setVectorStatus(2);
+    } else {
+      mw_one->setVectorStatus(0);
+    }
+
     mw_one->safeCloseProgress();
     watcher->deleteLater();
     m_rebuildMutex.unlock();  // ✅ 释放锁，允许下次触发
@@ -748,4 +762,6 @@ void NotesList::rebuilderNotesVector() {
 void NotesList::cancelRebuildNotesVector() {
   m_rebuildCancelled.store(true, std::memory_order_release);
   qInfo() << "[Embedding] 已发送重建取消信号";
+
+  mw_one->setVectorStatus(0);
 }
