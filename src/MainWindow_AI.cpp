@@ -271,7 +271,11 @@ QUrl MainWindow::buildAiApiUrl(const QString& rawEndpoint) {
  * @param status 0=就绪, 1=正在进行, 2=错误
  */
 void MainWindow::setVectorStatus(int status) {
-  mui->lblVectorStatus->show();
+  if (isLocalAIModel)
+    mui->lblVectorStatus->show();
+  else
+    mui->lblVectorStatus->hide();
+
   // 将整数转为字符串设置动态属性
   mui->lblVectorStatus->setProperty("state", QString::number(status));
 

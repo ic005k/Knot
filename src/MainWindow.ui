@@ -2049,19 +2049,6 @@ selection-background-color: lightblue;
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_65">
           <item>
-           <widget class="QLabel" name="lblVectorStatus">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>VectorStatus</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QToolButton" name="btnSelTab">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -2178,6 +2165,19 @@ selection-background-color: lightblue;
             </property>
             <property name="toolButtonStyle">
              <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblVectorStatus">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>VectorStatus</string>
             </property>
            </widget>
           </item>

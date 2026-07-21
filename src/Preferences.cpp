@@ -535,6 +535,11 @@ void Preferences::closeEvent(QCloseEvent* event) {
     loadTheme(isDark);
     mui->frameMain->show();
   }
+
+  if (isLocalAIModel)
+    mui->lblVectorStatus->show();
+  else
+    mui->lblVectorStatus->hide();
 }
 
 void Preferences::on_btnShowPassword_pressed() {
