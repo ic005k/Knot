@@ -6,7 +6,6 @@
 
 #ifdef VECTOR_SEARCH
 
-// 加锁实现
 bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
   QString mdContent = loadNoteFullText(mdFilePath);
   if (mdContent.trimmed().isEmpty()) return true;
@@ -44,12 +43,13 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
   for (const auto& c : chunks) texts.append(c.content);
 
   QElapsedTimer timer;
+
+  // ====== Embedding 推理（独立计时） ======
   timer.start();
-  // 修正类型：和encodeBatch返回对齐 std::vector<QList<float>>
+
   std::vector<QList<float>> vectors;
   int embDim = 0;
 
-  // 推理临界区上锁：同时读取维度，避免无锁读共享对象
   {
     QMutexLocker embLock(&s_embMutex);
     vectors = embEngine->encodeBatch(texts, 64);
@@ -60,19 +60,23 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
            << "ms, chunks:" << chunks.size();
 
   if ((int)vectors.size() != chunks.size()) {
-    qWarning() << "[BATCH] encode数量不匹配";
+    qWarning() << "[BATCH] encode数量不匹配: expected" << chunks.size() << "got"
+               << vectors.size();
     return false;
   }
 
+  // ====== DB 批量写入（独立计时） ======
   timer.restart();
   bool dbSuccess = false;
-  // DB事务整体上锁
   {
     QMutexLocker dbLock(&s_vecDbMutex);
-    // 变量提到goto之前，解决C2362跳过初始化报错
     bool insertAllOk = true;
 
-    if (!g_vectorDb->beginTransaction()) {
+    if (!g_vectorDb->beginTransaction()) goto dbEnd;
+
+    // ✅ 批量写入前准备语句（零开销重入）
+    if (!g_vectorDb->prepareInsertStmts()) {
+      g_vectorDb->rollback();
       goto dbEnd;
     }
 
@@ -82,15 +86,17 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
     }
 
     for (int i = 0; i < chunks.size(); ++i) {
-      // vectors[i] 现在是 QList<float>，匹配insertChunk参数
       if (vectors[i].size() != embDim ||
-          !g_vectorDb->insertChunk(mdFilePath, chunks[i].chunkIndex,
-                                   chunks[i].content, currentHash,
-                                   vectors[i])) {
+          !g_vectorDb->executeInsert(mdFilePath, chunks[i].chunkIndex,
+                                     chunks[i].content, currentHash,
+                                     vectors[i])) {
         insertAllOk = false;
         break;
       }
     }
+
+    // ✅ 批量写入后释放语句
+    g_vectorDb->finalizeInsertStmts();
 
     if (!insertAllOk) {
       g_vectorDb->rollback();
@@ -102,7 +108,7 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
     } else {
       g_vectorDb->rollback();
     }
-  dbEnd:;  // 空语句占位，语法规范
+  dbEnd:;
   }
 
   qDebug() << "[BATCH] DB写入耗时:" << timer.elapsed() << "ms";

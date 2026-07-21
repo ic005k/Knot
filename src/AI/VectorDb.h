@@ -9,6 +9,7 @@
 #include <QVector>
 
 struct sqlite3;
+struct sqlite3_stmt;
 
 class EmbeddingEngine;
 
@@ -46,9 +47,14 @@ class VectorDb {
 
   // ✅ 批量写入替代单条 upsert
   bool insertChunk(const QString& noteId, int chunkIndex,
-                   const QString& content,
-                   const QString& noteHash,  // ✅ 新增参数
+                   const QString& content, const QString& noteHash,
                    const QVector<float>& vec);
+
+  bool prepareInsertStmts();
+  bool executeInsert(const QString& noteId, int chunkIndex,
+                     const QString& content, const QString& noteHash,
+                     const QVector<float>& vec);
+  void finalizeInsertStmts();
 
   // ✅ 按 noteId 删除所有 chunk
   bool deleteChunksByNoteId(const QString& noteId);
@@ -77,6 +83,9 @@ class VectorDb {
   sqlite3* m_db = nullptr;
   mutable QMutex m_mutex;
   int m_embeddingDim;
+
+  sqlite3_stmt* m_stmtMeta = nullptr;
+  sqlite3_stmt* m_stmtVec = nullptr;
 };
 
 #endif  // VECTORDATABASE_H

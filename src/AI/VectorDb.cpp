@@ -131,30 +131,48 @@ bool VectorDb::rollback() {
 }
 
 // ==================== 写入操作 ====================
-
-bool VectorDb::insertChunk(const QString& noteId, int chunkIndex,
-                           const QString& content,
-                           const QString& noteHash,  // ✅ 新增参数
-                           const QVector<float>& vec) {
+bool VectorDb::prepareInsertStmts() {
   QMutexLocker locker(&m_mutex);
-  if (!m_db) {
-    qWarning() << "[VectorDb] insertChunk失败: 数据库未打开";
-    return false;
-  }
-  if (vec.size() != m_embeddingDim) {
-    qWarning() << "[VectorDb] insertChunk失败: 维度不匹配";
-    return false;
-  }
+  if (!m_db) return false;
 
-  // ✅ SQL 加入 note_hash 占位符（与 initTable 的5列对应）
-  sqlite3_stmt* stmtMeta = nullptr;
+  // 如果已经准备过，直接返回成功（支持重入）
+  if (m_stmtMeta && m_stmtVec) return true;
+
   const char* sqlMeta =
       "INSERT OR REPLACE INTO note_chunks(note_id, chunk_index, content, "
       "content_hash, note_hash) "
       "VALUES(?, ?, ?, ?, ?);";
-  int rc = sqlite3_prepare_v2(m_db, sqlMeta, -1, &stmtMeta, nullptr);
-  if (rc != SQLITE_OK) {
-    qWarning() << "[VectorDb] prepare meta失败:" << sqlite3_errmsg(m_db);
+  const char* sqlVec =
+      "INSERT OR REPLACE INTO vec_index(rowid, vec) VALUES(?, ?);";
+
+  int rc1 = sqlite3_prepare_v2(m_db, sqlMeta, -1, &m_stmtMeta, nullptr);
+  int rc2 = sqlite3_prepare_v2(m_db, sqlVec, -1, &m_stmtVec, nullptr);
+
+  if (rc1 != SQLITE_OK || rc2 != SQLITE_OK) {
+    qWarning() << "[VectorDb] prepareInsertStmts失败:" << sqlite3_errmsg(m_db);
+    if (m_stmtMeta) {
+      sqlite3_finalize(m_stmtMeta);
+      m_stmtMeta = nullptr;
+    }
+    if (m_stmtVec) {
+      sqlite3_finalize(m_stmtVec);
+      m_stmtVec = nullptr;
+    }
+    return false;
+  }
+  return true;
+}
+
+bool VectorDb::executeInsert(const QString& noteId, int chunkIndex,
+                             const QString& content, const QString& noteHash,
+                             const QVector<float>& vec) {
+  QMutexLocker locker(&m_mutex);
+  if (!m_stmtMeta || !m_stmtVec) {
+    qWarning() << "[VectorDb] executeInsert失败: stmt未准备";
+    return false;
+  }
+  if (vec.size() != m_embeddingDim) {
+    qWarning() << "[VectorDb] executeInsert失败: 维度不匹配";
     return false;
   }
 
@@ -162,76 +180,102 @@ bool VectorDb::insertChunk(const QString& noteId, int chunkIndex,
       QCryptographicHash::hash(content.toUtf8(), QCryptographicHash::Sha256)
           .toHex();
 
-  sqlite3_bind_text(stmtMeta, 1, noteId.toUtf8().constData(), -1,
+  // Step 1: Meta
+  sqlite3_reset(m_stmtMeta);
+  sqlite3_clear_bindings(m_stmtMeta);
+  sqlite3_bind_text(m_stmtMeta, 1, noteId.toUtf8().constData(), -1,
                     SQLITE_TRANSIENT);
-  sqlite3_bind_int(stmtMeta, 2, chunkIndex);
-  sqlite3_bind_text(stmtMeta, 3, content.toUtf8().constData(), -1,
+  sqlite3_bind_int(m_stmtMeta, 2, chunkIndex);
+  sqlite3_bind_text(m_stmtMeta, 3, content.toUtf8().constData(), -1,
                     SQLITE_TRANSIENT);
-  sqlite3_bind_text(stmtMeta, 4, contentHash.constData(), -1, SQLITE_TRANSIENT);
-  sqlite3_bind_text(stmtMeta, 5, noteHash.toUtf8().constData(), -1,
-                    SQLITE_TRANSIENT);  // ✅ 绑定 note_hash
+  sqlite3_bind_text(m_stmtMeta, 4, contentHash.constData(), -1,
+                    SQLITE_TRANSIENT);
+  sqlite3_bind_text(m_stmtMeta, 5, noteHash.toUtf8().constData(), -1,
+                    SQLITE_TRANSIENT);
 
-  rc = sqlite3_step(stmtMeta);
-  sqlite_int64 rowid = sqlite3_last_insert_rowid(m_db);
-  sqlite3_finalize(stmtMeta);
-
-  if (rc != SQLITE_DONE) {
+  if (sqlite3_step(m_stmtMeta) != SQLITE_DONE) {
     qWarning() << "[VectorDb] insert meta失败:" << sqlite3_errmsg(m_db);
     return false;
   }
+  sqlite_int64 rowid = sqlite3_last_insert_rowid(m_db);
 
-  // Step 2: 向量插入（完全保持不变）
+  // Step 2: Vec
   QByteArray vecBin((const char*)vec.constData(), vec.size() * sizeof(float));
-  sqlite3_stmt* stmtVec = nullptr;
-  const char* sqlVec =
-      "INSERT OR REPLACE INTO vec_index(rowid, vec) VALUES(?, ?);";
-  rc = sqlite3_prepare_v2(m_db, sqlVec, -1, &stmtVec, nullptr);
-  if (rc != SQLITE_OK) {
-    qWarning() << "[VectorDb] prepare vec失败:" << sqlite3_errmsg(m_db);
-    return false;
-  }
-  sqlite3_bind_int64(stmtVec, 1, rowid);
-  sqlite3_bind_blob(stmtVec, 2, vecBin.constData(), vecBin.size(),
+  sqlite3_reset(m_stmtVec);
+  sqlite3_clear_bindings(m_stmtVec);
+  sqlite3_bind_int64(m_stmtVec, 1, rowid);
+  sqlite3_bind_blob(m_stmtVec, 2, vecBin.constData(), vecBin.size(),
                     SQLITE_TRANSIENT);
-  rc = sqlite3_step(stmtVec);
-  sqlite3_finalize(stmtVec);
 
-  if (rc != SQLITE_DONE) {
+  if (sqlite3_step(m_stmtVec) != SQLITE_DONE) {
     qWarning() << "[VectorDb] insert vec失败:" << sqlite3_errmsg(m_db);
     return false;
   }
   return true;
 }
 
+void VectorDb::finalizeInsertStmts() {
+  QMutexLocker locker(&m_mutex);
+  if (m_stmtMeta) {
+    sqlite3_finalize(m_stmtMeta);
+    m_stmtMeta = nullptr;
+  }
+  if (m_stmtVec) {
+    sqlite3_finalize(m_stmtVec);
+    m_stmtVec = nullptr;
+  }
+}
+
+// 兼容单条写入：自动 prepare → execute → finalize
+bool VectorDb::insertChunk(const QString& noteId, int chunkIndex,
+                           const QString& content, const QString& noteHash,
+                           const QVector<float>& vec) {
+  if (!prepareInsertStmts()) return false;
+  bool ok = executeInsert(noteId, chunkIndex, content, noteHash, vec);
+  finalizeInsertStmts();
+  return ok;
+}
+
 bool VectorDb::deleteChunksByNoteId(const QString& noteId) {
   if (!m_db) return false;
   QMutexLocker locker(&m_mutex);
 
-  // ✅ 单条SQL + 事务，保证原子性
-  const char* sql = R"(
-        BEGIN TRANSACTION;
-        DELETE FROM vec_index WHERE rowid IN (SELECT rowid FROM note_chunks WHERE note_id = ?);
-        DELETE FROM note_chunks WHERE note_id = ?;
-        COMMIT;
-    )";
-  sqlite3_stmt* stmt = nullptr;
-  int rc = sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
-  if (rc != SQLITE_OK) {
-    qWarning() << "[VectorDb] delete prepare失败:" << sqlite3_errmsg(m_db);
+  QByteArray idUtf8 = noteId.toUtf8();
+
+  // Step 1: 删除向量
+  sqlite3_stmt* stmt1 = nullptr;
+  const char* sql1 =
+      "DELETE FROM vec_index WHERE rowid IN (SELECT rowid FROM note_chunks "
+      "WHERE note_id = ?);";
+  if (sqlite3_prepare_v2(m_db, sql1, -1, &stmt1, nullptr) != SQLITE_OK) {
+    qWarning() << "[VectorDb] delete vec prepare失败:" << sqlite3_errmsg(m_db);
     return false;
   }
-  sqlite3_bind_text(stmt, 1, noteId.toUtf8().constData(), -1, SQLITE_TRANSIENT);
-  sqlite3_bind_text(stmt, 2, noteId.toUtf8().constData(), -1, SQLITE_TRANSIENT);
-  rc = sqlite3_step(stmt);
-  sqlite3_finalize(stmt);
+  sqlite3_bind_text(stmt1, 1, idUtf8.constData(), -1, SQLITE_TRANSIENT);
+  int rc = sqlite3_step(stmt1);
+  sqlite3_finalize(stmt1);
   if (rc != SQLITE_DONE) {
-    qWarning() << "[VectorDb] delete失败:" << sqlite3_errmsg(m_db);
-    sqlite3_exec(m_db, "ROLLBACK;", nullptr, nullptr, nullptr);
+    qWarning() << "[VectorDb] delete vec失败:" << sqlite3_errmsg(m_db);
     return false;
   }
+
+  // Step 2: 删除元数据
+  sqlite3_stmt* stmt2 = nullptr;
+  const char* sql2 = "DELETE FROM note_chunks WHERE note_id = ?;";
+  if (sqlite3_prepare_v2(m_db, sql2, -1, &stmt2, nullptr) != SQLITE_OK) {
+    qWarning() << "[VectorDb] delete meta prepare失败:" << sqlite3_errmsg(m_db);
+    return false;
+  }
+  sqlite3_bind_text(stmt2, 1, idUtf8.constData(), -1, SQLITE_TRANSIENT);
+  rc = sqlite3_step(stmt2);
+  sqlite3_finalize(stmt2);
+  if (rc != SQLITE_DONE) {
+    qWarning() << "[VectorDb] delete meta失败:" << sqlite3_errmsg(m_db);
+    return false;
+  }
+
   return true;
 }
-
 // ==================== 检索操作 ====================
 
 // ✅ 核心改造：JOIN + GROUP BY MAX 实现笔记级去重排序
