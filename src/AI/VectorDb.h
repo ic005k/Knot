@@ -64,8 +64,13 @@ class VectorDb {
   /// 清空所有向量与元数据（保留表结构），用于全量重建索引
   bool clearAll();
 
-  bool hasNoteChunks(const QString &noteId) const;
-  private:
+  bool hasNoteChunks(const QString& noteId) const;
+
+  // ✅ 内部精确变更检测
+  bool isNoteContentChanged(const QString& noteId,
+                            const QString& newContentHash) const;
+
+ private:
   bool initTable();
   sqlite3* m_db = nullptr;
   mutable QMutex m_mutex;

@@ -171,19 +171,22 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
   auto* embEngine = dynamic_cast<EmbeddingEngine*>(g_embEngine.get());
   if (!embEngine || !g_vectorDb) return false;
 
-  // ✅ 检查数据库中是否已存在该笔记的向量数据
-  // 如果已存在，说明之前已成功写入过，跳过重复处理
-  // 注意：这里需要加 s_vecDbMutex 因为 hasNoteChunks 虽只读，
-  //       但我们要保证"检查→写入"整个流程的原子性
+  // ✅ 在锁外计算当前内容的 Hash，避免持锁做 CPU 密集操作
+  QByteArray currentHashBytes =
+      QCryptographicHash::hash(mdContent.toUtf8(), QCryptographicHash::Sha256)
+          .toHex();
+  QString currentHash = QString::fromLatin1(currentHashBytes);
+
+  // ✅ 检查内容是否变更
   {
     QMutexLocker dbLock(&s_vecDbMutex);
-    if (g_vectorDb->hasNoteChunks(mdFilePath)) {
-      // ✅ 只在首次或抽样时打印，避免万条刷屏
+    // 如果返回 false，说明 DB 中已有相同 hash 的记录，无需更新
+    if (!g_vectorDb->isNoteContentChanged(mdFilePath, currentHash)) {
       int cnt = m_skipCount.fetchAndAddRelaxed(1);
       if (cnt == 0 || cnt % 100 == 99) {
-        qDebug() << "[BATCH] 已存在, 累计跳过:" << (cnt + 1) << "条";
+        qDebug() << "[BATCH] 内容未变更, 累计跳过:" << (cnt + 1) << "条";
       }
-      return true;  // 已存在视为成功
+      return true;
     }
   }
 
@@ -261,35 +264,31 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
   return dbSuccess;
 }
 
-bool Notes::removeNoteVector(const QString& noteId) {
+bool Notes::removeNoteVector(const QString& mdFilePath) {
   if (!isLocalAIModel) return false;
-
   if (!g_vectorDb) {
-    qWarning() << "删除向量：向量数据库打开失败 ";
+    qWarning() << "删除向量：向量数据库未初始化";
     return false;
   }
 
-  // ✅ 事务包裹双表删除，保证原子性
-  bool ok = g_vectorDb->beginTransaction();
-  if (!ok) {
-    qWarning() << "❌ 删除向量开启事务失败 noteId:" << noteId;
+  // ✅ 关键：整个事务流程必须在 s_vecDbMutex 保护下执行
+  // 共用 s_vecDbMutex 是保证数据一致性的必要条件
+  QMutexLocker dbLock(&s_vecDbMutex);
+
+  if (!g_vectorDb->beginTransaction()) {
+    qWarning() << "❌ 删除向量开启事务失败 noteId:" << mdFilePath;
     return false;
   }
 
-  ok = g_vectorDb->deleteChunksByNoteId(noteId);
-  if (ok) {
+  if (g_vectorDb->deleteChunksByNoteId(mdFilePath)) {
     g_vectorDb->commit();
-    qDebug() << "✅ 删除笔记向量成功 noteId:" << noteId;
+    qDebug() << "✅ 删除笔记向量成功 noteId:" << mdFilePath;
+    return true;
   } else {
     g_vectorDb->rollback();
-    qWarning() << "❌ 删除笔记向量失败 noteId:" << noteId;
+    qWarning() << "❌ 删除笔记向量失败 noteId:" << mdFilePath;
+    return false;
   }
-  return ok;
-}
-
-QString Notes::getNoteIdFromFilePath(const QString& mdPath) {
-  QFileInfo fi(mdPath);
-  return fi.baseName();
 }
 
 QString Notes::loadNoteFullText(const QString& mdPath) {

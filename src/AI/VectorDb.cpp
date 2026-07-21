@@ -7,6 +7,7 @@
 #include <sqlite3.h>
 
 #include <QByteArray>
+#include <QCryptographicHash>
 #include <QSet>
 #include <QString>
 #include <QVariant>
@@ -63,6 +64,7 @@ bool VectorDb::initTable() {
             note_id     TEXT NOT NULL,
             chunk_index INT NOT NULL,
             content     TEXT,
+            content_hash TEXT NOT NULL DEFAULT '',
             PRIMARY KEY (note_id, chunk_index)
         );
     )";
@@ -158,6 +160,12 @@ bool VectorDb::insertChunk(const QString& noteId, int chunkIndex,
   sqlite3_bind_int(stmtMeta, 2, chunkIndex);
   sqlite3_bind_text(stmtMeta, 3, content.toUtf8().constData(), -1,
                     SQLITE_TRANSIENT);
+
+  // ✅ 计算并绑定 content_hash
+  QByteArray hash =
+      QCryptographicHash::hash(content.toUtf8(), QCryptographicHash::Sha256)
+          .toHex();
+  sqlite3_bind_text(stmtMeta, 4, hash.constData(), -1, SQLITE_TRANSIENT);
 
   rc = sqlite3_step(stmtMeta);
   sqlite_int64 rowid = sqlite3_last_insert_rowid(m_db);
@@ -389,6 +397,34 @@ bool VectorDb::hasNoteChunks(const QString& noteId) const {
   sqlite3_finalize(stmt);
 
   return exists;
+}
+
+bool VectorDb::isNoteContentChanged(const QString& noteId,
+                                    const QString& newContentHash) const {
+  if (!m_db) return true;  // DB未打开视为需要更新
+
+  // WAL模式下读不加锁，const方法安全
+  sqlite3_stmt* stmt = nullptr;
+  // ✅ 取第一个chunk的hash代表整篇笔记版本（同一笔记所有chunk同时写入）
+  const char* sql =
+      "SELECT content_hash FROM note_chunks WHERE note_id = ? LIMIT 1;";
+
+  int rc = sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
+  if (rc != SQLITE_OK) return true;
+
+  sqlite3_bind_text(stmt, 1, noteId.toUtf8().constData(), -1, SQLITE_TRANSIENT);
+
+  bool changed = true;
+  if (sqlite3_step(stmt) == SQLITE_ROW) {
+    const char* stored = (const char*)sqlite3_column_text(stmt, 0);
+    // hash为空(旧数据)或不匹配 → 视为变更
+    changed = !stored || QString(stored) != newContentHash;
+  } else {
+    // 无任何记录 → 新笔记，必须处理
+    changed = true;
+  }
+  sqlite3_finalize(stmt);
+  return changed;
 }
 
 #endif  // VECTOR_SEARCH

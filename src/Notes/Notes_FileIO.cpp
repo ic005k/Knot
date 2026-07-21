@@ -49,7 +49,7 @@ void Notes::startBackgroundTaskUpdateNoteIndex(QString mdFile) {
 
     if (isLocalAIModel) {
       // syncNoteVectorToDb(mdFile);
-      syncNoteVectorsBatchToDb(mdFile);
+      // syncNoteVectorsBatchToDb(mdFile);
     }
 
 #endif
