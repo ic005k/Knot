@@ -360,26 +360,15 @@ Rectangle {
                 }
 
                 TapHandler {
-                    dragThreshold: 8
+                    dragThreshold: 12
+                    onLongPressed: {
+                        //menuTargetIndex = index;
+                        //m_NotesList.show_NoteBookPopMenu(index);
+                    }
 
-                    // 单击 → 和 onClicked 完全一样
                     onTapped: {
                         view.currentIndex = index;
                         m_NotesList.mouseClickNoteBook();
-                    }
-
-                    // 长按 → 和 onPressAndHold 完全一样
-                    onLongPressed: {
-                        menuTargetIndex = index;
-                        // 在长按位置弹出菜单
-                        //notebookMenu.popup();
-                        m_NotesList.show_NoteBookPopMenu(index);
-                    }
-
-                    // 双击 → 和 onDoubleClicked 完全一样
-                    onDoubleTapped: {
-
-                        // mw_one.on_btnRename_clicked()
                     }
                 }
             }

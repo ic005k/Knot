@@ -283,6 +283,7 @@ void NotesList::show_NoteBookPopMenu(int qmlIndex) {
 
 void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
   QAction* actNew = new QAction(tr("New NoteBook"));
+  QAction* actNewSub = new QAction(tr("New Sub NoteBook"));
   QAction* actDel = new QAction(tr("Del NoteBook"));
   QAction* actRename = new QAction(tr("Rename NoteBook"));
   QAction* actMoveUp = new QAction(tr("Move Up"));
@@ -295,6 +296,14 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
 
   connect(actNew, &QAction::triggered, this,
           &NotesList::on_actionAdd_NoteBook_triggered);
+
+  connect(actNewSub, &QAction::triggered, this, [this]() {
+    int qmlIndex = getNoteBookCurrentIndex();
+    if (qmlIndex < 0) return;
+
+    slotCreateSubNotebook(qmlIndex);
+  });
+
   connect(actDel, &QAction::triggered, this,
           &NotesList::on_actionDel_NoteBook_triggered);
   connect(actRename, &QAction::triggered, this,
@@ -332,6 +341,7 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
   });
 
   mainMenu->addAction(actNew);
+  mainMenu->addAction(actNewSub);
   mainMenu->addAction(actRename);
   mainMenu->addAction(actDel);
 
