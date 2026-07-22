@@ -578,6 +578,8 @@ void MainWindow::initNotesQW() {
                                                         m_NotesList);
     mui->qwNoteTools->rootContext()->setContextProperty("m_Notes", m_Notes);
     mui->qwNoteTools->rootContext()->setContextProperty("mw_one", mw_one);
+    mui->qwNoteTools->rootContext()->setContextProperty(
+        "ToolBtnHide", "index !== 1 && index !== 2");
     mui->qwNoteTools->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/note_toolsbar.qml")));
 
@@ -781,8 +783,7 @@ void MainWindow::init_UIWidget() {
   mui->frameNotesSearchResult->hide();
   mui->frameNoteRecycle->hide();
   mui->f_FindNotes->hide();
-  mui->btnFindNextNote->setEnabled(false);
-  mui->btnFindPreviousNote->setEnabled(false);
+
   mui->frameNotesTree->hide();
   mui->qwBookCata->hide();
   mui->qwBookmark->hide();
@@ -897,11 +898,6 @@ void MainWindow::init_UIWidget() {
   mui->btnFind->setFont(f);
 
   mui->btnFind->setFont(f);
-
-  f.setBold(true);
-  mui->lblShowLineSn->setFont(f);
-  mui->lblShowLineSn->setWordWrap(true);
-  mui->lblShowLineSn->adjustSize();
 
   QString lblStyle = mw_one->labelNormalStyleSheet;
   mui->lblTotal->setStyleSheet(lblStyle);

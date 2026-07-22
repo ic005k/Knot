@@ -488,7 +488,8 @@ class MainWindow : public QMainWindow {
                            std::function<void()> onSuccess);
 
   void setVectorStatus(int status);
-  protected:
+
+ protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
   void paintEvent(QPaintEvent* event) override;
@@ -744,10 +745,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnRestoreNoteRecycle_clicked();
 
-  void on_btnFindPreviousNote_clicked();
-
-  void on_btnFindNextNote_clicked();
-
   void on_btnClearNoteFindText_clicked();
 
   void on_btnNoteBookMenu_clicked();
@@ -908,8 +905,6 @@ class MainWindow : public QMainWindow {
   void on_btnClearSearchResults_clicked();
 
   void on_btnFindNotes2_clicked();
-
-  void on_btnOpenEditFind_clicked();
 
   void on_btnTools_clicked();
 

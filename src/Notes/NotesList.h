@@ -147,8 +147,6 @@ class NotesList : public QDialog {
   void setNoteBookCurrentItem();
 
   void startFind(QString strFind);
-  void goPrevious();
-  void goNext();
 
   int getNoteBookIndex_twToqml();
 
@@ -177,8 +175,6 @@ class NotesList : public QDialog {
   QStringList extractLocalImagesFromMarkdown(const QString& filePath);
 
   void showNotesSearchResult();
-
-  void openSearch();
 
   QString getSearchResultQmlFile();
 
@@ -356,8 +352,6 @@ class NotesList : public QDialog {
   void on_actionImport_Note_triggered();
   void on_actionExport_Note_triggered();
 
-  void goFindResult(int index);
-
   bool moveItem(QTreeWidget* tw);
 
   // QFutureWatcher<ResultsMap>* watcher = nullptr;
@@ -386,7 +380,6 @@ class NotesList : public QDialog {
   void initSerachDatabase();
   int getSelectedVersionIndex();
   void setNoteDiffHtmlToQML(const QString& html);
-  void navigateFindResult(int step);
 
   // QFuture<ResultsMap> performSearchAsync(const QString& dirPath,
   //                                        const QString& keyword);

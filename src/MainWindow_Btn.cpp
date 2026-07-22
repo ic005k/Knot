@@ -412,19 +412,12 @@ void MainWindow::on_btnRestoreNoteRecycle_clicked() {
 void MainWindow::on_btnFindNotes_clicked() {
   QString str = mui->editFindNote->text().trimmed();
   if (str.length() == 0) return;
+  mySearchText = str;
   m_NotesList->startFind(str);
 }
 
-void MainWindow::on_btnFindPreviousNote_clicked() { m_NotesList->goPrevious(); }
-
-void MainWindow::on_btnFindNextNote_clicked() { m_NotesList->goNext(); }
-
 void MainWindow::on_btnClearNoteFindText_clicked() {
   mui->editFindNote->setText("");
-  mui->lblFindNoteCount->setText("0");
-  mui->btnFindNextNote->setEnabled(false);
-  mui->btnFindPreviousNote->setEnabled(false);
-  mui->lblShowLineSn->setText("0");
 }
 
 void MainWindow::on_btnShowFindNotes_clicked() { m_NotesList->showFindNotes(); }
@@ -757,7 +750,7 @@ void MainWindow::on_btnOpenSearchResult_clicked() {
   if (!QFile::exists(mdFile)) return;
   isOpenSearchResult = true;
   currentMDFile = mdFile;
-  mySearchText = mui->editNotesSearch->text().trimmed();
+
   on_btnEditNote_clicked();
   m_NotesList->setCurrentItemFromMDFile(mdFile);
 }
@@ -767,12 +760,6 @@ void MainWindow::on_btnFindNotes2_clicked() {
     mui->f_FindNotes->show();
   else
     mui->f_FindNotes->hide();
-}
-
-void MainWindow::on_btnOpenEditFind_clicked() {
-  isOpenSearchResult = true;
-  mySearchText = mui->editFindNote->text().trimmed();
-  on_btnEditNote_clicked();
 }
 
 void MainWindow::on_btnTools_clicked() {

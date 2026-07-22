@@ -51,7 +51,7 @@ Rectangle {
                         // 显式设置图标颜色，避免系统自动着色
                         icon.color: isDark ? "white" : "black"
 
-                        visible: index !== 1 && index !== 2
+                        visible: ToolBtnHide //index !== 1 && index !== 2
 
                         background: Rectangle {
                             color: toolButton.hovered ? (isDark ? "#333333" : "#e0e0e0") : "transparent"

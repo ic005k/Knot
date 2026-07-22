@@ -304,8 +304,6 @@ void NotesList::onSearchFinished() {
   if (exactResults.isEmpty()) {
     m_searchModel.setResults({});
     mui->lblNoteSearchResult->setText(tr("Note Search Results: 0"));
-    mui->btnFindNextNote->setEnabled(false);
-    mui->btnFindPreviousNote->setEnabled(false);
 
     auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg("Knot", tr("No match was found."), 1);
@@ -332,119 +330,15 @@ void NotesList::onSearchFinished() {
     // 更新UI状态
     mui->lblNoteSearchResult->setText(tr("Note Search Results:") +
                                       QString::number(adaptedResults.size()));
-    mui->btnFindNextNote->setEnabled(true);
-    mui->btnFindPreviousNote->setEnabled(true);
 
-    // 自动定位到第一条结果
-    goNext();
+    mui->editNotesSearch->hide();
+    mui->btnClearSearchResults->hide();
+    mui->frameNoteList->hide();
+    mui->frameNotesSearchResult->show();
   }
 
   watcher->deleteLater();
   watcher = nullptr;
-}
-
-// 通用导航函数：step 为 -1 表示上一个，1 表示下一个
-void NotesList::navigateFindResult(int step) {
-  // 检查搜索结果列表是否为空
-  if (searchResultList.isEmpty()) {
-    mui->lblFindNoteCount->setText("0 -> 0");
-    return;
-  }
-
-  // 更新当前索引（根据步长调整）
-  findCount += step;
-
-  // 处理循环边界（索引超出范围时循环到首尾）
-  int listCount = searchResultList.count();
-  if (findCount < 0) {
-    findCount = listCount - 1;
-  } else if (findCount >= listCount) {
-    findCount = 0;
-  }
-
-  // 解析当前结果项（带格式校验）
-  QStringList list = searchResultList.at(findCount).split("-==-");
-  if (list.size() >= 3) {  // 确保分割后有足够的元素
-    QString md_file = list.at(0);
-    mui->lblShowLineSn->setText(list.at(2));
-    currentMDFile = md_file;
-    setCurrentItemFromMDFile(md_file);
-  }
-
-  // 更新计数标签
-  mui->lblFindNoteCount->setText(QString::number(findCount + 1) + " -> " +
-                                 QString::number(listCount));
-
-  // 隐藏安卓键盘（如果可见）
-  if (pAndroidKeyboard->isVisible()) {
-    pAndroidKeyboard->hide();
-  }
-}
-
-// 上一个结果（复用通用导航函数，步长为 -1）
-// void NotesList::goPrevious() { navigateFindResult(-1); }
-
-// 下一个结果（复用通用导航函数，步长为 1）
-// void NotesList::goNext() { navigateFindResult(1); }
-
-void NotesList::goNext() {
-  if (m_exactMatchCache.isEmpty()) return;
-
-  m_currentExactMatchIndex++;
-  if (m_currentExactMatchIndex >= m_exactMatchCache.size())
-    m_currentExactMatchIndex = 0;  // 循环到第一条
-
-  const auto& emr = m_exactMatchCache[m_currentExactMatchIndex];
-
-  // 同步UI选中状态
-  QModelIndex idx = m_searchModel.index(m_currentExactMatchIndex, 0);
-  // mui->listSearchResults->setCurrentIndex(idx);
-
-  // ✅ 利用富数据执行精准跳转
-  // openNoteAtLine(emr.filePath, emr.lineNumber);
-
-  // 更新当前位置标签
-  mui->lblShowLineSn->setText(QString::number(emr.lineNumber));
-}
-
-void NotesList::goPrevious() {
-  if (m_exactMatchCache.isEmpty()) return;
-
-  m_currentExactMatchIndex--;
-  if (m_currentExactMatchIndex < 0)
-    m_currentExactMatchIndex = m_exactMatchCache.size() - 1;
-
-  const auto& emr = m_exactMatchCache[m_currentExactMatchIndex];
-
-  QModelIndex idx = m_searchModel.index(m_currentExactMatchIndex, 0);
-  // mui->listSearchResults->setCurrentIndex(idx);
-
-  // openNoteAtLine(emr.filePath, emr.lineNumber);
-  mui->lblShowLineSn->setText(QString::number(emr.lineNumber));
-}
-
-void NotesList::goFindResult(int index) {
-  if (findResult.count() == 0) return;
-
-  findCount = index;
-  QString str = findResult.at(index);
-  QStringList list = str.split("===");
-  if (list.at(1) == "NoteBook") {
-    int indexNoteBook = list.at(0).toInt();
-    setNoteBookCurrentIndex(indexNoteBook);
-    clickNoteBook();
-    setNotesListCurrentIndex(-1);
-  } else {
-    int index0, index1;
-    index0 = list.at(0).toInt();
-    index1 = list.at(1).toInt();
-    setNoteBookCurrentIndex(index0);
-    clickNoteBook();
-    setNotesListCurrentIndex(index1);
-  }
-
-  mui->lblFindNoteCount->setText(QString::number(findCount + 1) + " -> " +
-                                 QString::number(findResult.count()));
 }
 
 void NotesList::initSerachDatabase() {
@@ -510,11 +404,9 @@ void NotesList::showFindNotes() {
   mui->frameNoteList->hide();
   mui->frameNotesSearchResult->show();
   mui->editNotesSearch->setFocus();
-
-  openSearch();
+  mui->editNotesSearch->show();
+  mui->btnClearSearchResults->show();
 }
-
-void NotesList::openSearch() { return; }
 
 QString NotesList::getSearchResultQmlFile() {
   QQuickItem* root = mui->qwNotesSearchResult->rootObject();
@@ -531,6 +423,8 @@ void NotesList::onSearchTextChanged(const QString& text) {
       mui->lblNoteSearchResult->setText(tr("Note Search Results: 0"));
       return;
     }
+
+    mw_one->mySearchText = text;
 
     if (isLocalAIModel && m_vectorSearchService && g_embEngine &&
         g_embEngine->isValid()) {
