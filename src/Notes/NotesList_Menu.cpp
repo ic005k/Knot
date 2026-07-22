@@ -329,13 +329,6 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
 
       if (isLocalAIModel) {
         rebuilderNotesVector();
-
-      } else {
-        // QString databaseFile = privateDir + "md_database_v3.db";
-        // if (m_dbManager.deleteDatabaseFile(databaseFile))
-        //   initSerachDatabase();
-        // else
-        //   mw_one->safeCloseProgress();
       }
     }
   });

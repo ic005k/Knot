@@ -123,16 +123,6 @@ void Notes::appendToSyncList(QString file) {
   notes_sync_files.append(file);
 }
 
-void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
-  QFuture<void> future = QtConcurrent::run([=]() {
-    // m_NotesList->m_dbManager.updateFileIndexes(mdFileList);
-  });
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this,
-          [=]() { watcher->deleteLater(); });
-  watcher->setFuture(future);
-}
-
 void Notes::startBackgroundTaskDelAndClear() {
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     mw_one->showProgress();

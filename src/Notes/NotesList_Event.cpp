@@ -583,7 +583,6 @@ int NotesList::on_btnImport_clicked() {
             // ==============================================
             qDebug() << "All files imported, count:" << MDFileList.size();
 
-            m_Notes->startBackgroundTaskUpdateNoteIndexes(MDFileList);
             isImportNotes = true;
             isImportFilesEnd = true;
 

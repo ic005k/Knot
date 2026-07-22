@@ -24,7 +24,7 @@ void Notes::saveMDFile() {
         QFile::remove(currentMDFile + ".bak");
         updateDiff(oldText, newText);
         updateMDFileToSyncLists();
-        startBackgroundTaskUpdateNoteIndex(currentMDFile);
+        startBackgroundTaskUpdateNoteGraph(currentMDFile);
       } else {
         qWarning() << "重命名失败，清理临时文件";
         QFile::remove(tempFile);
@@ -38,20 +38,11 @@ void Notes::saveMDFile() {
 #endif
 }
 
-void Notes::startBackgroundTaskUpdateNoteIndex(QString mdFile) {
+void Notes::startBackgroundTaskUpdateNoteGraph(QString mdFile) {
   // 主线程
 
   QFuture<void> future = QtConcurrent::run([=]() {
-    // m_NotesList->m_dbManager.updateFileIndex(mdFile);
     m_NotesList->m_graphController->parser()->updateNoteCache(mdFile);
-
-#ifdef VECTOR_SEARCH
-
-    if (isLocalAIModel) {
-      // syncNoteVectorsBatchToDb(mdFile);
-    }
-
-#endif
   });
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this,

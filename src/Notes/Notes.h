@@ -186,9 +186,7 @@ class Notes : public QDialog {
   void appendToSyncList(QString file);
 
   void startBackgroundTaskDelAndClear();
-  void startBackgroundTaskUpdateNoteIndex(QString mdFile);
-
-  void startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList);
+  void startBackgroundTaskUpdateNoteGraph(QString mdFile);
 
   QStringList orgRemoteFiles;
 

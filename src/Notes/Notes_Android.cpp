@@ -130,7 +130,7 @@ void Notes::javaNoteToQMLNote() {
 
   zipNoteToSyncList();
 
-  startBackgroundTaskUpdateNoteIndex(currentMDFile);
+  startBackgroundTaskUpdateNoteGraph(currentMDFile);
 }
 
 void Notes::refreshNote() {

@@ -188,20 +188,9 @@ void NotesList::onSearchFinished() {
   watcher = nullptr;
 }
 
-void NotesList::initSerachDatabase() {
-  QString databaseFile = privateDir + "md_database_v3.db";
-  // m_dbManager.initDatabase(databaseFile);
-  QFile m_dfile(databaseFile);
-  if (m_dfile.size() < 100000) {
-    startBackgroundTaskUpdateFilesIndex();
-  }
-}
-
 void NotesList::startBackgroundTaskUpdateFilesIndex() {
-  QString fullPath = iniDir + "memo";  // 先构造完整路径
-
   QFuture<void> future = QtConcurrent::run([=]() {
-    // m_dbManager.updateFilesIndex(fullPath);  // 值捕获保证线程安全
+
   });
 
   // 可选：使用 QFutureWatcher 监控进度
@@ -220,7 +209,7 @@ void NotesList::startBackgroundTaskUpdateFilesIndex() {
 
 void NotesList::startBackgroundTaskDelFilesIndex(const QStringList& files) {
   QFuture<void> future = QtConcurrent::run([this, files]() {
-    // m_dbManager.batchDeleteFileIndexes(files);
+
   });
 
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
@@ -370,14 +359,6 @@ void NotesList::onSearchTextChanged(const QString& text) {
             },
             Qt::QueuedConnection);
       });
-
-    } else {
-      // 原有分词搜索路径（同步，因为通常很快）
-      // auto results =
-      //    m_dbManager.searchDocuments(text, m_Notes->m_NoteIndexManager);
-      // m_searchModel.setResults(results);
-      // mui->lblNoteSearchResult->setText(tr("Note Search Results:") +
-      //                                  QString::number(results.count()));
     }
   });
 }

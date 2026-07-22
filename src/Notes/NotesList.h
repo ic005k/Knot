@@ -97,8 +97,6 @@ class NotesList : public QDialog {
 
   NoteListModel* noteModel;
 
-  // DatabaseManager m_dbManager;
-
   QStringList searchResultList;
 
   QStringList recycleNotesList;
@@ -384,7 +382,7 @@ class NotesList : public QDialog {
 
   void initNoteGraphView();
   void readyNotesData(QTreeWidgetItem* topItem);
-  void initSerachDatabase();
+
   int getSelectedVersionIndex();
   void setNoteDiffHtmlToQML(const QString& html);
 
