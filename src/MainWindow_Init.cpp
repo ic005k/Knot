@@ -578,8 +578,7 @@ void MainWindow::initNotesQW() {
                                                         m_NotesList);
     mui->qwNoteTools->rootContext()->setContextProperty("m_Notes", m_Notes);
     mui->qwNoteTools->rootContext()->setContextProperty("mw_one", mw_one);
-    mui->qwNoteTools->rootContext()->setContextProperty(
-        "ToolBtnHide", "index !== 1 && index !== 2");
+    mui->qwNoteTools->rootContext()->setContextProperty("hideSearchBtn", true);
     mui->qwNoteTools->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/note_toolsbar.qml")));
 

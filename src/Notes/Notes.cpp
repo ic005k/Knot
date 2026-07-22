@@ -389,11 +389,9 @@ void Notes::init_all_notes() {
 void Notes::openNotes() {
   m_NotesList->cancelRebuildNotesVector();
   if (isLocalAIModel) {
-    mui->qwNoteTools->rootContext()->setContextProperty(
-        "ToolBtnHide", "index !== 1 && index !== 2");
+    mui->qwNoteTools->rootContext()->setContextProperty("hideSearchBtn", false);
   } else {
-    mui->qwNoteTools->rootContext()->setContextProperty(
-        "ToolBtnHide", "index !== 1 && index !== 2 && index !== 3");
+    mui->qwNoteTools->rootContext()->setContextProperty("hideSearchBtn", true);
   }
 
   if (!mw_one->m_Preferences->devMode)

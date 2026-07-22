@@ -174,8 +174,6 @@ class NotesList : public QDialog {
   bool setCurrentItemFromMDFile(QString mdFile);
   QStringList extractLocalImagesFromMarkdown(const QString& filePath);
 
-  void showNotesSearchResult();
-
   QString getSearchResultQmlFile();
 
   QStringList getValidMDFiles();
@@ -381,12 +379,9 @@ class NotesList : public QDialog {
   int getSelectedVersionIndex();
   void setNoteDiffHtmlToQML(const QString& html);
 
-  // QFuture<ResultsMap> performSearchAsync(const QString& dirPath,
-  //                                        const QString& keyword);
   QFuture<QVector<ExactMatchResult>> performSearchAsync(const QString& dirPath,
                                                         const QString& keyword);
 
-  void displayResults(const ResultsMap& results);
   int countMdFilesImages(const QString& dirPath);
   void loadSubNotebook(const QJsonObject& bookObj, QTreeWidgetItem* parentItem,
                        int parentRow, int& totalNotes);
