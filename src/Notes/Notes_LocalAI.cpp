@@ -8,6 +8,14 @@
 
 bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
   QString mdContent = loadNoteFullText(mdFilePath);
+
+  // ===== 编码诊断日志 =====
+  if (mdContent.contains(QChar::ReplacementCharacter)) {
+    qWarning() << "[ENCODING_WARN] File may not be valid UTF-8, "
+               << "content truncated or corrupted:" << mdFilePath
+               << "| decoded_chars:" << mdContent.size();
+  }
+
   if (mdContent.trimmed().isEmpty()) return true;
 
   if (!isLocalAIModel || !g_embEngine || !g_embEngine->isValid()) return false;

@@ -545,6 +545,7 @@ void Preferences::closeEvent(QCloseEvent* event) {
     mui->lblVectorStatus->show();
   else
     mui->lblVectorStatus->hide();
+  m_NotesList->rebuilderNotesVector();
 }
 
 void Preferences::on_btnShowPassword_pressed() {
@@ -628,6 +629,9 @@ void Preferences::openPreferences() {
     ui->btnSelectModel->setText(tr("Select Model"));
   } else
     ui->btnSelectModel->setText(text);
+
+  m_NotesList->cancelRebuildNotesVector();
+  initLocalModelList();
 
   show();
   initCheckStatus();
@@ -954,8 +958,11 @@ void Preferences::on_cboxEndpoint_activated(int index) {
 }
 
 void Preferences::on_btnDownloadModel_clicked() {
+  // FP32: https://hf-mirror.com/rodion-m/multilingual-e5-small-gguf/tree/main
+  // Q8:
+  // https://hf-mirror.com/keisuke-miyako/multilingual-e5-small-gguf-q8_0/tree/main
   const QString targetUrl =
-      "https://hf-mirror.com/cstr/multilingual-e5-small-GGUF/tree/main";
+      "https://hf-mirror.com/rodion-m/multilingual-e5-small-gguf/tree/main";
   if (!QDesktopServices::openUrl(QUrl(targetUrl))) {
     // 打开失败提示
     qDebug() << "浏览器打开链接失败";
@@ -976,6 +983,8 @@ void Preferences::on_cboxModel_currentIndexChanged(int index) {
 }
 
 void Preferences::initLocalModelList() {
+  QString curText = ui->cboxModel->currentText();
+
   QString path = privateDir + "model";
 
   QDir dir(path);
@@ -1000,6 +1009,10 @@ void Preferences::initLocalModelList() {
 
   ui->cboxModel->clear();
   ui->cboxModel->addItems(result);
+
+  if (result.contains(curText)) {
+    ui->cboxModel->setCurrentText(curText);
+  }
 }
 
 void Preferences::on_cboxModel_currentTextChanged(const QString& arg1) {

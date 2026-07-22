@@ -505,6 +505,7 @@ void NotesList::on_btnExport_clicked() {
 
   TextEditToFile(edit, fileName);
 }
+
 int NotesList::on_btnImport_clicked() {
   if (tw->topLevelItemCount() == 0) return 0;
 

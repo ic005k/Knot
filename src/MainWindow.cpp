@@ -606,6 +606,8 @@ void MainWindow::closeEvent(QCloseEvent* event) {
   }
 #endif
 
+  m_NotesList->cancelRebuildNotesVector();
+
   saveNeedSyncNotes();
 
 #ifndef Q_OS_ANDROID

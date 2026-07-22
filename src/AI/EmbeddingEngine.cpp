@@ -11,7 +11,7 @@
 #include "lib/llama.cpp/ggml/include/gguf.h"
 #include "lib/llama.cpp/include/llama.h"
 
-EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
+/*EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
   std::string path = ggufPath.toUtf8().toStdString();
   llama_model_params model_params = llama_model_default_params();
   model_params.n_gpu_layers = 99;
@@ -36,6 +36,64 @@ EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
            << ", n_ubatch:" << ctx_params.n_ubatch
            << ", n_seq_max:" << ctx_params.n_seq_max
            << ", maxTokens:" << m_maxTokens;
+}*/
+
+EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
+  // ⭐ b10041: 在任何 llama API 调用前禁用 fused ops（静态初始化更安全）
+  static const bool s_envInit = []() {
+    qputenv("LLAMA_NO_FUSED_OPS", "1");
+    return true;
+  }();
+  Q_UNUSED(s_envInit);
+
+  std::string path = ggufPath.toUtf8().toStdString();
+
+  // ========== 模型参数 ==========
+  llama_model_params model_params = llama_model_default_params();
+  model_params.n_gpu_layers = 99;
+  model_params.use_mmap = true;       // ⭐ 新增：按需加载，降低 RSS 峰值
+  model_params.check_tensors = true;  // ⭐ 新增：防止损坏模型导致后续崩溃
+
+  m_model = llama_load_model_from_file(path.c_str(), model_params);
+  if (!m_model) {
+    qCritical() << "[EmbeddingEngine] Failed to load model:" << ggufPath;
+    return;
+  }
+
+  // ========== 上下文参数 ==========
+  llama_context_params ctx_params = llama_context_default_params();
+  ctx_params.embeddings = true;
+  ctx_params.n_threads = 4;
+
+  // ⭐ 核心修改：限制最大上下文，而非盲目使用训练长度
+  // Embedding 推理不需要完整训练上下文，8192 已覆盖绝大多数场景
+  const uint32_t trainCtx = llama_n_ctx_train(m_model);
+  const uint32_t maxReasonableCtx = 8192;
+  ctx_params.n_ctx = std::min(trainCtx, maxReasonableCtx);
+
+  // ⭐ 核心修改：ubatch 独立设置，不再绑定 n_ctx
+  // 过大的 ubatch 是 OOM 主因，2048 是性能与内存的最佳平衡点
+  ctx_params.n_ubatch = std::min(ctx_params.n_ctx, (uint32_t)2048);
+
+  // ⭐ 核心修改：seq_max 按需设置，64 太大
+  // encodeBatch 的 maxBatchSize 通常 <= 16，这里留余量即可
+  ctx_params.n_seq_max = 16;
+
+  m_ctx = llama_new_context_with_model(m_model, ctx_params);
+  if (!m_ctx) {
+    qCritical() << "[EmbeddingEngine] Failed to create context";
+    llama_free_model(m_model);
+    m_model = nullptr;
+    return;
+  }
+
+  m_maxTokens = static_cast<int>(ctx_params.n_ctx) - 2;
+
+  qDebug() << "[EmbeddingEngine] ✅ Initialized"
+           << "| train_ctx:" << trainCtx << "| actual_ctx:" << ctx_params.n_ctx
+           << "| n_ubatch:" << ctx_params.n_ubatch
+           << "| n_seq_max:" << ctx_params.n_seq_max
+           << "| maxTokens:" << m_maxTokens;
 }
 
 EmbeddingEngine::~EmbeddingEngine() {
