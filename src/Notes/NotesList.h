@@ -290,6 +290,10 @@ class NotesList : public QDialog {
  signals:
 
  private:
+  // 精准搜索导航缓存（与 m_searchModel 平行存在）
+  QVector<ExactMatchResult> m_exactMatchCache;
+  int m_currentExactMatchIndex = -1;
+
   bool isReadyNotesEnd = false;
   bool isExecRecentOpen = false;
 
@@ -356,7 +360,8 @@ class NotesList : public QDialog {
 
   bool moveItem(QTreeWidget* tw);
 
-  QFutureWatcher<ResultsMap>* watcher = nullptr;
+  // QFutureWatcher<ResultsMap>* watcher = nullptr;
+  QFutureWatcher<QVector<ExactMatchResult>>* watcher = nullptr;
 
   QDateTime m_lastIndexTime;  // 记录最后一次索引构建时间
   QMutex m_indexTimeMutex;    // 互斥锁
@@ -383,8 +388,11 @@ class NotesList : public QDialog {
   void setNoteDiffHtmlToQML(const QString& html);
   void navigateFindResult(int step);
 
-  QFuture<ResultsMap> performSearchAsync(const QString& dirPath,
-                                         const QString& keyword);
+  // QFuture<ResultsMap> performSearchAsync(const QString& dirPath,
+  //                                        const QString& keyword);
+  QFuture<QVector<ExactMatchResult>> performSearchAsync(const QString& dirPath,
+                                                        const QString& keyword);
+
   void displayResults(const ResultsMap& results);
   int countMdFilesImages(const QString& dirPath);
   void loadSubNotebook(const QJsonObject& bookObj, QTreeWidgetItem* parentItem,

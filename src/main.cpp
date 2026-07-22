@@ -47,7 +47,7 @@ extern void RegJni20(const char* myClassName);
 
 extern void releaseGlobalAiEngine();
 
-QString defaultModel = "multilingual-e5-small-Q8_0.gguf";
+QString defaultModel = "multilingual-e5-small-fp32.gguf";
 
 void loadTheme(bool isDark);
 void loadLocal();

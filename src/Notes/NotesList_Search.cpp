@@ -43,7 +43,7 @@ void reduceResults(ResultsMap& result, const MySearchResult& partial) {
   }
 }
 
-QFuture<ResultsMap> NotesList::performSearchAsync(const QString& dirPath,
+/*QFuture<ResultsMap> NotesList::performSearchAsync(const QString& dirPath,
                                                   const QString& keyword) {
   return QtConcurrent::run([this, dirPath, keyword]() {
     QStringList files = findMarkdownFiles(dirPath);
@@ -62,6 +62,76 @@ QFuture<ResultsMap> NotesList::performSearchAsync(const QString& dirPath,
         files, SearchMapper(regex), reduceResults,
         QtConcurrent::ReduceOption::UnorderedReduce);
   });
+}*/
+
+QFuture<QVector<ExactMatchResult>> NotesList::performSearchAsync(
+    const QString& dirPath, const QString& keyword) {
+  return QtConcurrent::run([dirPath, keyword]() {
+    QVector<ExactMatchResult> results;
+    QStringList files = findMarkdownFiles(dirPath);
+    QStringList cycleFiles = m_NotesList->getRecycleNoteFiles();
+
+    files.removeIf(
+        [&cycleFiles](const QString& f) { return cycleFiles.contains(f); });
+
+    QRegularExpression regex(
+        keyword, QRegularExpression::CaseInsensitiveOption |
+                     QRegularExpression::UseUnicodePropertiesOption);
+
+    for (const QString& file : files) {
+      QFile f(file);
+      if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) continue;
+
+      QTextStream in(&f);
+      // in.setCodec("UTF-8");
+
+      ExactMatchResult emr;
+      emr.filePath = file;
+
+      emr.title = m_Notes->m_NoteIndexManager->getNoteTitle(file);
+
+      emr.lineNumber = -1;
+      emr.matchCount = 0;
+
+      int lineNum = 0;
+      while (!in.atEnd()) {
+        lineNum++;
+        QString line = in.readLine();
+        if (regex.match(line).hasMatch()) {
+          emr.allLineNumbers.append(lineNum);
+          emr.matchCount++;
+          // 仅取首个匹配行作为预览源
+          if (emr.lineNumber == -1) {
+            emr.lineNumber = lineNum;
+            emr.preview = line.trimmed();
+          }
+        }
+      }
+      f.close();
+
+      if (emr.matchCount > 0) {
+        // ✅ 预览清洗（与AI搜索适配层保持一致的处理逻辑）
+        const int maxLen = 200;
+        if (emr.preview.length() > maxLen)
+          emr.preview = emr.preview.left(maxLen).trimmed() + "...";
+        emr.preview.replace(QRegularExpression("[\\r\\n]+"), " ");
+        emr.preview = emr.preview.simplified();
+
+        // ✅ 注入关键词高亮（复用 DatabaseManager 的方案）
+        QRegularExpression highlightRe(
+            QString("(%1)").arg(QRegularExpression::escape(keyword)),
+            QRegularExpression::CaseInsensitiveOption);
+
+        emr.preview.replace(
+            highlightRe,
+            "<span style='background-color:#fff9c4; color:#c62828; "
+            "padding:2px; border-radius:2px;'>\\1</span>");
+
+        results.append(emr);
+      }
+    }
+    return results;
+  });
 }
 
 void NotesList::displayResults(const ResultsMap& results) {
@@ -79,7 +149,7 @@ void NotesList::displayResults(const ResultsMap& results) {
     }
     m_NotesList->searchResultList.append(file + "-==-" + strLine.trimmed());
   }
-  qDebug() << m_NotesList->searchResultList;
+  qDebug() << "m_NotesList->searchResultList=" << m_NotesList->searchResultList;
 
   m_NotesList->showNotesSearchResult();
 }
@@ -105,7 +175,7 @@ void NotesList::showNotesSearchResult() {
   mw_one->safeCloseProgress();
 }
 
-void NotesList::startFind(QString strFind) {
+/*void NotesList::startFind(QString strFind) {
   mw_one->showProgress();
 
   QString directory = iniDir + "memo/";
@@ -133,9 +203,38 @@ void NotesList::startFind(QString strFind) {
   // 启动新任务
   auto future = performSearchAsync(directory, keyword);
   watcher->setFuture(future);
+}*/
+
+void NotesList::startFind(QString strFind) {
+  mw_one->showProgress();
+
+  QString directory = iniDir + "memo/";
+  QString keyword = strFind;
+  searchResultList.clear();
+  findCount = -1;
+
+  // ========== 如果已有任务，必须先安全停止 ==========
+  if (watcher != nullptr) {
+    watcher->cancel();
+    if (watcher->isRunning()) {
+      watcher->waitForFinished();
+    }
+    disconnect(watcher, nullptr, this, nullptr);
+  }
+
+  // ✅ 重新创建 watcher（类型已更新）
+  watcher = new QFutureWatcher<QVector<ExactMatchResult>>(this);
+
+  // ✅ 连接信号（类型自动推导，无需显式指定模板参数）
+  connect(watcher, &QFutureWatcher<QVector<ExactMatchResult>>::finished, this,
+          &NotesList::onSearchFinished);
+
+  // 启动新任务
+  auto future = performSearchAsync(directory, keyword);
+  watcher->setFuture(future);
 }
 
-void NotesList::onSearchFinished() {
+/*void NotesList::onSearchFinished() {
   if (!watcher) return;
 
   // ▶️ 正式获取结果
@@ -194,6 +293,54 @@ void NotesList::onSearchFinished() {
   }
 
   mw_one->safeCloseProgress();
+}*/
+
+void NotesList::onSearchFinished() {
+  if (!watcher) return;
+  mw_one->safeCloseProgress();
+
+  const QVector<ExactMatchResult> exactResults = watcher->result();
+
+  if (exactResults.isEmpty()) {
+    m_searchModel.setResults({});
+    mui->lblNoteSearchResult->setText(tr("Note Search Results: 0"));
+    mui->btnFindNextNote->setEnabled(false);
+    mui->btnFindPreviousNote->setEnabled(false);
+
+    auto msg = std::make_unique<ShowMessage>(mw_one);
+    msg->showMsg("Knot", tr("No match was found."), 1);
+  } else {
+    // ========== 适配层：ExactMatchResult → SearchResult ==========
+    QVector<SearchResult> adaptedResults;
+    adaptedResults.reserve(exactResults.size());
+
+    for (const auto& emr : exactResults) {
+      SearchResult sr;
+      sr.filePath = emr.filePath;
+      sr.title = emr.title;
+      sr.preview = emr.preview;  // 已在后台清洗完毕，直接赋值
+      adaptedResults.append(sr);
+    }
+
+    // ✅ 设置UI模型（复用同一个 SearchModel）
+    m_searchModel.setResults(adaptedResults);
+
+    // ✅ 缓存精准搜索专属导航数据（不参与UI显示）
+    m_exactMatchCache = exactResults;
+    m_currentExactMatchIndex = 0;
+
+    // 更新UI状态
+    mui->lblNoteSearchResult->setText(tr("Note Search Results:") +
+                                      QString::number(adaptedResults.size()));
+    mui->btnFindNextNote->setEnabled(true);
+    mui->btnFindPreviousNote->setEnabled(true);
+
+    // 自动定位到第一条结果
+    goNext();
+  }
+
+  watcher->deleteLater();
+  watcher = nullptr;
 }
 
 // 通用导航函数：step 为 -1 表示上一个，1 表示下一个
@@ -235,10 +382,46 @@ void NotesList::navigateFindResult(int step) {
 }
 
 // 上一个结果（复用通用导航函数，步长为 -1）
-void NotesList::goPrevious() { navigateFindResult(-1); }
+// void NotesList::goPrevious() { navigateFindResult(-1); }
 
 // 下一个结果（复用通用导航函数，步长为 1）
-void NotesList::goNext() { navigateFindResult(1); }
+// void NotesList::goNext() { navigateFindResult(1); }
+
+void NotesList::goNext() {
+  if (m_exactMatchCache.isEmpty()) return;
+
+  m_currentExactMatchIndex++;
+  if (m_currentExactMatchIndex >= m_exactMatchCache.size())
+    m_currentExactMatchIndex = 0;  // 循环到第一条
+
+  const auto& emr = m_exactMatchCache[m_currentExactMatchIndex];
+
+  // 同步UI选中状态
+  QModelIndex idx = m_searchModel.index(m_currentExactMatchIndex, 0);
+  // mui->listSearchResults->setCurrentIndex(idx);
+
+  // ✅ 利用富数据执行精准跳转
+  // openNoteAtLine(emr.filePath, emr.lineNumber);
+
+  // 更新当前位置标签
+  mui->lblShowLineSn->setText(QString::number(emr.lineNumber));
+}
+
+void NotesList::goPrevious() {
+  if (m_exactMatchCache.isEmpty()) return;
+
+  m_currentExactMatchIndex--;
+  if (m_currentExactMatchIndex < 0)
+    m_currentExactMatchIndex = m_exactMatchCache.size() - 1;
+
+  const auto& emr = m_exactMatchCache[m_currentExactMatchIndex];
+
+  QModelIndex idx = m_searchModel.index(m_currentExactMatchIndex, 0);
+  // mui->listSearchResults->setCurrentIndex(idx);
+
+  // openNoteAtLine(emr.filePath, emr.lineNumber);
+  mui->lblShowLineSn->setText(QString::number(emr.lineNumber));
+}
 
 void NotesList::goFindResult(int index) {
   if (findResult.count() == 0) return;
