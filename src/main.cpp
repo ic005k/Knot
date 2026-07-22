@@ -24,7 +24,6 @@
 
 #include "MainWindow.h"
 #include "SplashTimer.h"
-#include "lib/cppjieba/Jieba.hpp"
 #include "lib/llama.cpp/ggml/include/ggml-backend.h"
 #include "lib/llama.cpp/include/llama.h"
 #include "lib/quazip/quazip.h"
@@ -34,8 +33,6 @@
 #include "src/Comm/loglogger.h"
 #include "src/defines.h"
 #include "ui_MainWindow.h"
-
-std::unique_ptr<cppjieba::Jieba> jieba;
 
 extern void RegJni(const char* myClassName);
 extern void RegJni15(const char* myClassName);
@@ -235,25 +232,6 @@ int main(int argc, char* argv[]) {
   modelDataBasePath = modelFullPath + "database/";
   p_dir.mkpath(modelFullPath);
   p_dir.mkpath(modelDataBasePath);
-
-  strJBDict1 = privateDir + "dict/jieba.dict.utf8";
-  strJBDict2 = privateDir + "dict/hmm_model.utf8";
-  strJBDict3 = privateDir + "dict/user.dict.utf8";
-  strJBDict4 = privateDir + "dict/stop_words.utf8";
-  strJBDict5 = privateDir + "dict/idf.utf8";
-
-  if (!QFile::exists(strJBDict1) || !QFile::exists(strJBDict2) ||
-      !QFile::exists(strJBDict3)) {
-    QString resFile = ":/res/jbdict/dict.zip";
-    deleteDirfile(privateDir + "dict");
-
-    m_Method->decompressWithPassword(resFile, privateDir, "");
-  }
-
-  // 初始化结巴分词
-  jieba = std::make_unique<cppjieba::Jieba>(strJBDict1.toStdString(),
-                                            strJBDict2.toStdString(),
-                                            strJBDict3.toStdString());
 
   QDir dir0;
   dir0.mkpath(iniDir);

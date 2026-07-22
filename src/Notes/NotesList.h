@@ -55,6 +55,15 @@ MySearchResult searchInFile(const QString& filePath,
 QStringList findMarkdownFiles(const QString& dirPath);
 void reduceResults(ResultsMap& result, const MySearchResult& partial);
 
+struct ExactMatchResult {
+  QString filePath;
+  QString title;
+  QString preview;            // 已清洗、截断的上下文摘要
+  int lineNumber;             // 首次匹配行号（用于跳转）
+  int matchCount;             // 匹配总数
+  QList<int> allLineNumbers;  // 所有匹配行号（用于文件内上下条跳转）
+};
+
 namespace Ui {
 class NotesList;
 }
@@ -88,7 +97,7 @@ class NotesList : public QDialog {
 
   NoteListModel* noteModel;
 
-  DatabaseManager m_dbManager;
+  // DatabaseManager m_dbManager;
 
   QStringList searchResultList;
 

@@ -331,11 +331,11 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
         rebuilderNotesVector();
 
       } else {
-        QString databaseFile = privateDir + "md_database_v3.db";
-        if (m_dbManager.deleteDatabaseFile(databaseFile))
-          initSerachDatabase();
-        else
-          mw_one->safeCloseProgress();
+        // QString databaseFile = privateDir + "md_database_v3.db";
+        // if (m_dbManager.deleteDatabaseFile(databaseFile))
+        //   initSerachDatabase();
+        // else
+        //   mw_one->safeCloseProgress();
       }
     }
   });
@@ -357,6 +357,7 @@ void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
   actMoveUp->setVisible(false);
   actMoveDown->setVisible(false);
   actStatistics->setVisible(true);
+  actRebuildSearchIndex->setVisible(false);
 
   mainMenu->setStyleSheet(m_Method->qssMenu);
 }
@@ -571,22 +572,20 @@ void NotesList::on_actionSetColorFlag() {
 
 void NotesList::on_actionStatistics() {
   mw_one->showProgress();
+  int countNoteBook = getNoteBookCount();
 
-  // 提前计算所有需要的变量（UI线程非耗时操作，值捕获给后台Lambda）
-  int countNoteBook = tw->topLevelItemCount();
-  int totalNotes = 0;
-  for (int i = 0; i < countNoteBook; i++) {
-    totalNotes += tw->topLevelItem(i)->childCount();
-  }
   int webDAVCount = m_Method->getAccessCount();
   QString memoDir = iniDir + "memo/images/";
   QString localAppName = appName;  // 单独赋值，便于值捕获
 
   // 定义一个可被Lambda捕获的变量（用于存储后台统计结果）
   int* imgCountPtr = new int(0);
+  int* notesCountPtr = new int(0);
 
-  QFuture<void> future =
-      QtConcurrent::run([=]() { *imgCountPtr = countMdFilesImages(memoDir); });
+  QFuture<void> future = QtConcurrent::run([=]() {
+    *imgCountPtr = countMdFilesImages(memoDir);
+    *notesCountPtr = getAllNotePaths().count();
+  });
 
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
@@ -600,8 +599,8 @@ void NotesList::on_actionStatistics() {
     auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg(localAppName,
                  tr("NoteBook:") + QString::number(countNoteBook) + "\n\n" +
-                     tr("Local Notes:") + QString::number(totalNotes) + "\n\n" +
-                     tr("Remote Notes:") +
+                     tr("Local Notes:") + QString::number(*notesCountPtr) +
+                     "\n\n" + tr("Remote Notes:") +
                      QString::number(m_CloudBackup->m_currentRemoteNotesCount) +
                      "\n\n" + tr("Images:") + QString::number(*imgCountPtr) +
                      "\n\n" + strAccessCount,

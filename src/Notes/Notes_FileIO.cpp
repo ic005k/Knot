@@ -42,7 +42,7 @@ void Notes::startBackgroundTaskUpdateNoteIndex(QString mdFile) {
   // 主线程
 
   QFuture<void> future = QtConcurrent::run([=]() {
-    m_NotesList->m_dbManager.updateFileIndex(mdFile);
+    // m_NotesList->m_dbManager.updateFileIndex(mdFile);
     m_NotesList->m_graphController->parser()->updateNoteCache(mdFile);
 
 #ifdef VECTOR_SEARCH

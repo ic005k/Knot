@@ -10,8 +10,6 @@
 
 #include "src/Notes/note_index_manager.h"
 
-extern std::unique_ptr<cppjieba::Jieba> jieba;
-
 DatabaseManager::DatabaseManager(QObject* parent)
     : QObject(parent),
       m_defaultDir(
@@ -140,7 +138,7 @@ QStringList DatabaseManager::tokenize(const QString& text) {
   // 中文分词
   if (!chinesePart.isEmpty()) {
     std::string s = chinesePart.toStdString();
-    jieba->CutForSearch(s, words);
+    // jieba->CutForSearch(s, words);
   }
 
   // 西文分词

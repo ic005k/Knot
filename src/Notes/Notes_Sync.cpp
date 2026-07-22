@@ -124,8 +124,9 @@ void Notes::appendToSyncList(QString file) {
 }
 
 void Notes::startBackgroundTaskUpdateNoteIndexes(QStringList mdFileList) {
-  QFuture<void> future = QtConcurrent::run(
-      [=]() { m_NotesList->m_dbManager.updateFileIndexes(mdFileList); });
+  QFuture<void> future = QtConcurrent::run([=]() {
+    // m_NotesList->m_dbManager.updateFileIndexes(mdFileList);
+  });
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this,
           [=]() { watcher->deleteLater(); });
@@ -136,15 +137,16 @@ void Notes::startBackgroundTaskDelAndClear() {
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     mw_one->showProgress();
 
-    QString fullPath = iniDir + "memo";
-    QString dbFile = privateDir + "md_database_v3.db";
+    // QString fullPath = iniDir + "memo";
+    // QString dbFile = privateDir + "md_database_v3.db";
 
     QFuture<void> future = QtConcurrent::run([=]() {
       m_NotesList->needDelNotes();
-      DatabaseManager localDbManager;
-      localDbManager.initDatabase(dbFile);
-      localDbManager.cleanMissingFileRecords(fullPath);
-      localDbManager.closeDatabase();
+
+      // DatabaseManager localDbManager;
+      // localDbManager.initDatabase(dbFile);
+      // localDbManager.cleanMissingFileRecords(fullPath);
+      // localDbManager.closeDatabase();
     });
 
     QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
