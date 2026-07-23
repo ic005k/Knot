@@ -598,6 +598,8 @@ void Preferences::setEncSyncStatusTip() {
 }
 
 void Preferences::openPreferences() {
+  m_NotesList->safeExitLlama();
+
   int x, y;
   if (isAndroid) {
     setFixedWidth(mw_one->width());
@@ -958,9 +960,15 @@ void Preferences::on_cboxEndpoint_activated(int index) {
 }
 
 void Preferences::on_btnDownloadModel_clicked() {
-  // FP32: https://hf-mirror.com/rodion-m/multilingual-e5-small-gguf/tree/main
+  // FP32:
+  // https://hf-mirror.com/rodion-m/multilingual-e5-small-gguf/tree/main
+
   // Q8:
   // https://hf-mirror.com/keisuke-miyako/multilingual-e5-small-gguf-q8_0/tree/main
+
+  // embeddinggemma:
+  // https://hf-mirror.com/ggml-org/embeddinggemma-300M-GGUF/tree/main
+
   const QString targetUrl =
       "https://hf-mirror.com/rodion-m/multilingual-e5-small-gguf/tree/main";
   if (!QDesktopServices::openUrl(QUrl(targetUrl))) {

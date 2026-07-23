@@ -606,11 +606,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
   }
 #endif
 
-  m_NotesList->cancelRebuildNotesVector();
-  // ⭐ 阻塞等待后台线程完全退出（-1：不带超时保护）
-  if (!m_NotesList->waitForRebuildFinished(2000)) {
-    qWarning() << "Vector rebuild force-stopped on close";
-  }
+  m_NotesList->safeExitLlama();
 
   saveNeedSyncNotes();
 

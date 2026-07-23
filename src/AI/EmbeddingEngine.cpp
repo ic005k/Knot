@@ -116,7 +116,7 @@ QVector<float> EmbeddingEngine::encode(const QString& text) {
 
   // 1. 预查询所需 token 数量
   int needed = llama_tokenize(vocab, input.c_str(), input.size(), nullptr, 0,
-                              true, true);
+                              false, true);
   if (needed == 0) {
     qWarning() << "[ENCODE] tokenize 结果为空";
     return result;
@@ -127,7 +127,7 @@ QVector<float> EmbeddingEngine::encode(const QString& text) {
   // 2. 分配完整缓冲区，一次性完成 tokenize
   std::vector<llama_token> all_tokens(total_tokens);
   int actual = llama_tokenize(vocab, input.c_str(), input.size(),
-                              all_tokens.data(), total_tokens, true, true);
+                              all_tokens.data(), total_tokens, false, true);
   if (actual <= 0) {
     qWarning() << "[ENCODE] 正式 tokenize 失败, ret:" << actual;
     return result;
@@ -207,14 +207,14 @@ std::vector<llama_token> EmbeddingEngine::tokenizeText(
 
   // 预查询所需空间
   int needed = llama_tokenize(vocab, input.c_str(), input.size(), nullptr, 0,
-                              true, true);
+                              false, true);
   if (needed == 0) return result;
 
   int total_tokens = (needed < 0) ? -needed : needed;
   result.resize(total_tokens);
 
   int actual = llama_tokenize(vocab, input.c_str(), input.size(), result.data(),
-                              total_tokens, true, true);
+                              total_tokens, false, true);
   if (actual <= 0) {
     qWarning() << "[TOKENIZE] 失败, ret:" << actual;
     return {};
@@ -328,13 +328,13 @@ std::vector<QVector<float>> EmbeddingEngine::encodeBatch(
 
     TextInfo info{i, {}};
     int needed = llama_tokenize(vocab, input.c_str(), input.size(), nullptr, 0,
-                                true, true);
+                                false, true);
     int tokCount = (needed < 0) ? -needed : needed;
 
     if (tokCount > 0) {
       info.tokens.resize(tokCount);
       int actual = llama_tokenize(vocab, input.c_str(), input.size(),
-                                  info.tokens.data(), tokCount, true, true);
+                                  info.tokens.data(), tokCount, false, true);
       if (actual > 0) {
         info.tokens.resize(actual);
         // ✅ 单条超过 n_ubatch 时截断，防止 GGML_ASSERT 崩溃

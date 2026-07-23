@@ -780,6 +780,19 @@ bool NotesList::waitForRebuildFinished(int timeoutMs) {
     if (timeoutMs >= 0 && t.elapsed() >= timeoutMs) {
       return false;
     }
+
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     QThread::msleep(50);
   }
+}
+
+void NotesList::safeExitLlama() {
+  mw_one->showProgress();
+  cancelRebuildNotesVector();
+
+  // ⭐ 阻塞等待后台线程完全退出（-1：不带超时保护）
+  if (!waitForRebuildFinished(-1)) {
+    qWarning() << "Vector rebuild force-stopped on close";
+  }
+  mw_one->safeCloseProgress();
 }
