@@ -632,7 +632,6 @@ void Preferences::openPreferences() {
   } else
     ui->btnSelectModel->setText(text);
 
-  m_NotesList->cancelRebuildNotesVector();
   initLocalModelList();
 
   show();
@@ -985,8 +984,13 @@ void Preferences::on_cboxModel_currentIndexChanged(int index) {
   }
 
   if (this->isHidden()) {
-    ui->lblModelTip->setText(
-        computeModelFingerprint(modelFullPath + ui->cboxModel->currentText()));
+    QString modelFile = modelFullPath + ui->cboxModel->currentText().trimmed();
+    QString modelHash = "";
+    QFileInfo fi(modelFile);
+    if (fi.exists() && fi.isFile()) {
+      modelHash = computeModelFingerprint(modelFile);
+    }
+    ui->lblModelTip->setText(modelHash);
   }
 }
 

@@ -265,7 +265,8 @@ int deleteDirfile(QString dirName) {
 QString computeModelFingerprint(const QString& modelPath) {
   QFile file(modelPath);
   if (!file.open(QIODevice::ReadOnly)) {
-    qWarning() << "打开模型文件失败:" << modelPath << file.errorString();
+    qWarning() << "计算模型指纹，打开模型文件失败:" << modelPath
+               << file.errorString();
     return {};
   }
 
