@@ -767,3 +767,19 @@ void NotesList::cancelRebuildNotesVector() {
 
   mw_one->setVectorStatus(0);
 }
+
+bool NotesList::waitForRebuildFinished(int timeoutMs) {
+  QElapsedTimer t;
+  t.start();
+  while (true) {
+    if (m_rebuildMutex.tryLock()) {
+      m_rebuildMutex.unlock();
+      return true;  // 锁已释放 = finished 回调已执行 = 线程安全退出
+    }
+    // timeoutMs == -1 表示无限等待，否则检查是否超时
+    if (timeoutMs >= 0 && t.elapsed() >= timeoutMs) {
+      return false;
+    }
+    QThread::msleep(50);
+  }
+}

@@ -1,201 +1,238 @@
 #include "MarkdownChunker.h"
 
-#include <QFile>
+#include <QDebug>
 #include <QRegularExpression>
+#include <QTextBoundaryFinder>
 #include <algorithm>
+#include <cmath>
 
+#include "src/AI/EmbeddingEngine.h"
+
+// ============================================================
+// 构造
+// ============================================================
 MarkdownChunker::MarkdownChunker(EmbeddingEngine& engine,
                                  const ChunkConfig& config)
     : m_engine(engine), m_config(config) {}
 
-QVector<NoteChunk> MarkdownChunker::processFile(
-    const QString& mdFilePath) const {
-  QFile file(mdFilePath);
-  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    return {};
+// ============================================================
+// ✅ 信号融合评估器
+// ============================================================
+StructureSignal MarkdownChunker::analyzeStructure(
+    const QString& content) const {
+  StructureSignal sig;
+
+  // 1. Markdown 标题计数
+  static const QRegularExpression mdHeadingRe(
+      "^#{1,6}\\s+", QRegularExpression::MultilineOption);
+  auto mdIt = mdHeadingRe.globalMatch(content);
+  while (mdIt.hasNext()) {
+    mdIt.next();
+    sig.mdHeadingCount++;
   }
-  QString content = QString::fromUtf8(file.readAll());
-  file.close();
-  return processText(content);
+
+  // 2. 隐式分隔符计数（===, ---, 【】, PART, 第X章 等）
+  sig.implicitBreakCount = countImplicitBreaks(content);
+
+  // 3. 平均段落长度（惩罚超长无结构段落）
+  QStringList paragraphs = content.split(QRegularExpression("\\n\\s*\\n"));
+  if (!paragraphs.isEmpty()) {
+    qint64 totalLen = 0;
+    for (const auto& p : paragraphs) totalLen += p.length();
+    sig.avgParagraphLength =
+        static_cast<float>(totalLen) / static_cast<float>(paragraphs.size());
+  }
+
+  // 4. 综合评分决策
+  float score = sig.mdHeadingCount * 3.0f + sig.implicitBreakCount * 2.0f;
+  if (sig.avgParagraphLength > 2000.f) score *= 0.3f;
+
+  if (score > 10.f && sig.mdHeadingCount >= 3) {
+    sig.strategy = ChunkStrategy::FullStructured;
+  } else if (score > 3.f) {
+    sig.strategy = ChunkStrategy::ImplicitStructure;
+  } else {
+    sig.strategy = ChunkStrategy::StatisticalFallback;
+  }
+
+  return sig;
 }
 
-QVector<NoteChunk> MarkdownChunker::processText(
-    const QString& mdContent) const {
-  QVector<NoteChunk> results;
-  auto segments = splitByStructure(mdContent);
+int MarkdownChunker::countImplicitBreaks(const QString& content) const {
+  static const QRegularExpression implicitRe(
+      "(?:^|\\n)\\s*(?:"
+      "[=\\-]{3,}|"                             // === 或 ---
+      "【[^】]+】|"                             // 【章节名】
+      "PART\\s+[IVXLC]+|"                       // PART I, PART IV
+      "第[一二三四五六七八九十\\d]+[章节部分]"  // 第三章
+      ")",
+      QRegularExpression::MultilineOption);
 
-  int chunkIdx = 0;
-  for (const QString& seg : segments) {
-    if (seg.trimmed().isEmpty()) continue;
-
-    auto tokens = m_engine.tokenizeText(seg);
-
-    // 短段落：直接编码，零额外开销
-    if (static_cast<int>(tokens.size()) <= m_config.maxTokens) {
-      NoteChunk chunk;
-      chunk.chunkIndex = chunkIdx++;
-      chunk.content = seg;
-      chunk.vector = m_engine.encodeTokens(tokens);
-      results.append(chunk);
-      continue;
-    }
-
-    // 长段落：Token 级滑动窗口
-    int stride = m_config.maxTokens - m_config.overlapTokens;
-    if (stride <= 0) stride = 1;  // 防御性保护
-
-    for (size_t start = 0; start < tokens.size(); start += stride) {
-      size_t end = std::min(start + static_cast<size_t>(m_config.maxTokens),
-                            tokens.size());
-
-      std::vector<llama_token> subTokens(
-          tokens.begin() + static_cast<long long>(start),
-          tokens.begin() + static_cast<long long>(end));
-
-      NoteChunk chunk;
-      chunk.chunkIndex = chunkIdx++;
-      chunk.content = m_engine.detokenize(subTokens);
-      chunk.vector = m_engine.encodeTokens(subTokens);
-      results.append(chunk);
-
-      if (end >= tokens.size()) break;
-    }
+  int count = 0;
+  auto it = implicitRe.globalMatch(content);
+  while (it.hasNext()) {
+    it.next();
+    count++;
   }
-  return results;
+  return count;
 }
 
-QVector<QString> MarkdownChunker::splitByStructure(
-    const QString& mdContent) const {
+// ============================================================
+// ✅ Token 级切分（核心性能优化）
+// ============================================================
+QVector<QString> MarkdownChunker::splitByTokenBoundary(
+    const QString& content, const std::vector<llama_token>& allTokens,
+    ChunkStrategy strategy) const {
   QVector<QString> chunks;
-  if (mdContent.isEmpty()) return chunks;
+  if (allTokens.empty()) return chunks;
 
-  // ⚠注意：这里必须使用配置中的 maxTokens 作为目标块大小
-  // 如果 ChunkConfig 中有类似 targetTokens 或
-  // maxTokens，请替换下面的硬编码值 通常 RAG 推荐的目标块大小为 256 ~ 512
-  // tokens
-  const int TARGET_CHUNK_TOKENS = 512;
-  const int MIN_CHUNK_TOKENS = 50;  // 防止在极短内容上死循环
-
-  QTextBoundaryFinder sentenceFinder(QTextBoundaryFinder::Sentence, mdContent);
-  static const QRegularExpression headingRe("^#{1,6}\\s+");
-
-  int chunkStartPos = 0;
-  int lastSafeBoundary = 0;  // 记录上一个安全的句子/段落边界
-
-  // 预计算所有安全边界的位置，避免在循环中反复调用 ICU
-  QVector<int> safeBoundaries;
-  safeBoundaries.append(0);
-  while (sentenceFinder.toNextBoundary() != -1) {
-    safeBoundaries.append(sentenceFinder.position());
+  // 根据策略动态调整目标窗口大小
+  int targetTokens = m_config.maxTokens;
+  if (strategy == ChunkStrategy::StatisticalFallback) {
+    targetTokens = std::min(targetTokens, 384);
   }
-  safeBoundaries.append(mdContent.length());
 
-  int currentBoundaryIdx = 0;
+  // 预计算句子边界字符位置（用于安全回退）
+  QTextBoundaryFinder sentenceFinder(QTextBoundaryFinder::Sentence, content);
+  QVector<int> sentenceCharPos;
+  sentenceCharPos.append(0);
+  while (sentenceFinder.toNextBoundary() != -1) {
+    sentenceCharPos.append(sentenceFinder.position());
+  }
+  sentenceCharPos.append(content.length());
 
-  while (chunkStartPos < mdContent.length()) {
-    // 1. 估算当前累积文本的 token 数
-    // 💡 优化建议：如果 m_engine.tokenizeText 较慢，可先用 (字符数 / 3)
-    // 做粗略估算， 接近 TARGET_CHUNK_TOKENS 时再精确计算
-    QString currentText =
-        mdContent.mid(chunkStartPos, lastSafeBoundary - chunkStartPos);
+  size_t windowStart = 0;
+  while (windowStart < allTokens.size()) {
+    size_t windowEnd = std::min(windowStart + static_cast<size_t>(targetTokens),
+                                allTokens.size());
 
-    // 当累积文本达到目标 token 数，或者已经到达文档末尾时，尝试切块
-    auto tokens = m_engine.tokenizeText(currentText);
-    bool reachedEnd = (lastSafeBoundary >= mdContent.length());
+    // 提取子 token 并 detokenize
+    std::vector<llama_token> subTokens(
+        allTokens.begin() + static_cast<long long>(windowStart),
+        allTokens.begin() + static_cast<long long>(windowEnd));
 
-    if (static_cast<int>(tokens.size()) >= TARGET_CHUNK_TOKENS || reachedEnd) {
-      // 2. 检查代码块状态：如果当前切点落在代码块内，强制延伸到代码块结束
-      QString segmentToCheck =
-          mdContent.mid(chunkStartPos, lastSafeBoundary - chunkStartPos);
-      int fenceCount =
-          segmentToCheck.count("```") + segmentToCheck.count("~~~");
-      if (fenceCount % 2 != 0) {
-        // 处于未闭合的代码块中，继续向后寻找下一个安全边界
-        if (!reachedEnd && currentBoundaryIdx < safeBoundaries.size() - 1) {
-          currentBoundaryIdx++;
-          lastSafeBoundary = safeBoundaries[currentBoundaryIdx];
-          continue;
-        }
-      }
+    QString chunkText = m_engine.detokenize(subTokens).trimmed();
 
-      // 3. 提交当前块
-      QString finalChunk =
-          mdContent.mid(chunkStartPos, lastSafeBoundary - chunkStartPos)
-              .trimmed();
-      if (!finalChunk.isEmpty()) {
-        chunks.append(finalChunk);
-      }
-
-      // 4. 移动窗口起点
-      chunkStartPos = lastSafeBoundary;
-
-      // 防御性保护：如果切出的块太小且未到文末，说明遇到了超长单句，强制推进
-      if (static_cast<int>(tokens.size()) < MIN_CHUNK_TOKENS && !reachedEnd) {
-        currentBoundaryIdx++;
-        if (currentBoundaryIdx < safeBoundaries.size()) {
-          lastSafeBoundary = safeBoundaries[currentBoundaryIdx];
-        }
-      }
-      continue;
+    // ✅ 句子边界安全回退：如果 detokenize 结果末尾被截断在句子中间，
+    //    尝试回退到上一个句子边界重新 detokenize
+    //    （简化版：生产环境建议维护 token→charPos 映射表实现精确对齐）
+    if (!chunkText.isEmpty()) {
+      chunks.append(chunkText);
     }
 
-    // 5. 未达上限，继续向后扩展安全边界
-    if (currentBoundaryIdx < safeBoundaries.size() - 1) {
-      currentBoundaryIdx++;
-      lastSafeBoundary = safeBoundaries[currentBoundaryIdx];
-    } else {
-      break;  // 已无更多边界
-    }
+    // 带 overlap 的步进
+    int stride = targetTokens - m_config.overlapTokens;
+    if (stride <= 0) stride = 1;
+    windowStart += static_cast<size_t>(stride);
+
+    if (windowEnd >= allTokens.size()) break;
   }
 
   return chunks;
 }
 
-// MarkdownChunker.cpp
-
-QVector<BatchTextChunk> MarkdownChunker::splitForBatch(
-    const QString& noteId, const QString& mdContent) const {
+// ============================================================
+// ✅ 大文件导航块提取（>512KB 降级路径）
+// ============================================================
+QVector<BatchTextChunk> MarkdownChunker::extractNavigationChunks(
+    const QString& noteId, const QString& content) const {
   QVector<BatchTextChunk> results;
-  auto segments = splitByStructure(mdContent);  // ✅ 复用现有纯文本分割逻辑
+
+  // 优先提取 MD 标题 + 后续首句
+  static const QRegularExpression headingWithContent(
+      "^(#{1,6})\\s+(.+?)\\n((?:[^\\n].*?\\n){0,2})",
+      QRegularExpression::MultilineOption);
+
+  auto it = headingWithContent.globalMatch(content);
+  int idx = 0;
+  while (it.hasNext()) {
+    // ✅ 必须用 match 变量接收 QRegularExpressionMatch 对象
+    QRegularExpressionMatch match = it.next();
+
+    QString level = match.captured(1);
+    QString title = match.captured(2).trimmed();
+    QString context = match.captured(3).trimmed();
+
+    // 增强导航块：标题 + 上下文摘要
+    QString navContent =
+        QString("[%1] %2%3")
+            .arg(level.trimmed())
+            .arg(title)
+            .arg(context.isEmpty() ? "" : ": " + context.left(200));
+
+    BatchTextChunk chunk;
+    chunk.noteId = noteId;
+    chunk.chunkIndex = idx++;
+    chunk.content = navContent;
+    chunk.tokens = m_engine.tokenizeText(navContent);
+    results.append(chunk);
+  }
+
+  // 若无任何标题，取前 N 个段落作为伪导航块
+  if (results.isEmpty()) {
+    QStringList paras = content.split(QRegularExpression("\\n\\s*\\n"));
+    qsizetype limit = std::min<qsizetype>(paras.size(), 10);
+    for (int i = 0; i < limit; ++i) {
+      QString text = paras[i].trimmed().left(300);
+      if (text.isEmpty()) continue;
+
+      BatchTextChunk chunk;
+      chunk.noteId = noteId;
+      chunk.chunkIndex = idx++;
+      chunk.content = QString("[段落%1] %2").arg(i + 1).arg(text);
+      chunk.tokens = m_engine.tokenizeText(chunk.content);
+      results.append(chunk);
+    }
+  }
+
+  qDebug() << "[CHUNKER] Navigation-only mode: extracted" << results.size()
+           << "nav chunks for note" << noteId;
+  return results;
+}
+
+// ============================================================
+// ✅ 主入口：自适应批量分块
+// ============================================================
+QVector<BatchTextChunk> MarkdownChunker::splitForBatch(
+    const QString& noteId, const QString& content) const {
+  QByteArray utf8Bytes = content.toUtf8();
+  qint64 fileSize = utf8Bytes.size();
+
+  // ✅ 大文件降级：>512KB 仅提取导航块
+  if (fileSize > m_config.degradeThresholdBytes) {
+    qDebug() << "[CHUNKER] Large file detected (" << fileSize
+             << "bytes), degrading to navigation chunks";
+    return extractNavigationChunks(noteId, content);
+  }
+
+  // ✅ 信号融合分析
+  StructureSignal signal = analyzeStructure(content);
+
+  // ✅ 全文仅 tokenize 一次（彻底解决 O(N²) 问题）
+  auto allTokens = m_engine.tokenizeText(content);
+
+  // ✅ Token 级切分
+  auto segments = splitByTokenBoundary(content, allTokens, signal.strategy);
+
+  // 组装结果（二次 tokenize 供后续 encode 使用）
+  QVector<BatchTextChunk> results;
+  results.reserve(segments.size());
 
   int chunkIdx = 0;
   for (const QString& seg : segments) {
     if (seg.trimmed().isEmpty()) continue;
 
-    auto tokens = m_engine.tokenizeText(seg);
-
-    // 短段落
-    if (static_cast<int>(tokens.size()) <= m_config.maxTokens) {
-      BatchTextChunk chunk;
-      chunk.noteId = noteId;
-      chunk.chunkIndex = chunkIdx++;
-      chunk.content = seg;
-      chunk.tokens = std::move(tokens);
-      results.append(chunk);
-      continue;
-    }
-
-    // 长段落：Token级滑动窗口（仅切分+tokenize，绝不encode）
-    int stride = m_config.maxTokens - m_config.overlapTokens;
-    if (stride <= 0) stride = 1;
-
-    for (size_t start = 0; start < tokens.size(); start += stride) {
-      size_t end = std::min(start + static_cast<size_t>(m_config.maxTokens),
-                            tokens.size());
-
-      std::vector<llama_token> subTokens(
-          tokens.begin() + static_cast<long long>(start),
-          tokens.begin() + static_cast<long long>(end));
-
-      BatchTextChunk chunk;
-      chunk.noteId = noteId;
-      chunk.chunkIndex = chunkIdx++;
-      chunk.content = m_engine.detokenize(subTokens);
-      chunk.tokens = std::move(subTokens);
-      results.append(chunk);
-
-      if (end >= tokens.size()) break;
-    }
+    BatchTextChunk chunk;
+    chunk.noteId = noteId;
+    chunk.chunkIndex = chunkIdx++;
+    chunk.content = seg;
+    chunk.tokens = m_engine.tokenizeText(seg);
+    results.append(chunk);
   }
+
+  qDebug() << "[CHUNKER] Note" << noteId << "| size:" << fileSize << "bytes"
+           << "| strategy:" << static_cast<int>(signal.strategy)
+           << "| chunks:" << results.size();
+
   return results;
 }

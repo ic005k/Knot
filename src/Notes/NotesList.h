@@ -225,7 +225,8 @@ class NotesList : public QDialog {
 
   void cancelRebuildNotesVector();
 
- protected:
+  bool waitForRebuildFinished(int timeoutMs);
+  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
   void closeEvent(QCloseEvent* event) override;

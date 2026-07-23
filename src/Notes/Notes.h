@@ -211,6 +211,8 @@ class Notes : public QDialog {
 
   bool syncNoteVectorsBatchToDb(const QString& mdFilePath);
 
+  QString readNoteFileSafeFromRaw(const QByteArray& raw);
+
  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
