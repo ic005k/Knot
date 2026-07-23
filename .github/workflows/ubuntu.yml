@@ -74,8 +74,8 @@ jobs:
          #chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 
          # 原 wget continuous 删掉，替换为固定v7发布版
-         wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/7/linuxdeployqt-7-x86_64.AppImage"
-         mv linuxdeployqt-7-x86_64.AppImage linuxdeployqt-continuous-x86_64.AppImage
+         wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/7/linuxdeployqt-x86_64.AppImage"
+         mv linuxdeployqt-x86_64.AppImage linuxdeployqt-continuous-x86_64.AppImage
          chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 
       - name: Remove unused SQL drivers (SAFE MODE)
