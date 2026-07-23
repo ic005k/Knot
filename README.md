@@ -4,7 +4,7 @@
 ![Platforms](https://img.shields.io/badge/Platform-Android%20|%20Win%20|%20Mac%20|%20Linux-blue)
 
 ## 🌟 Project Overview
-**Knot** is an intelligent multi-scenario recording tool inspired by the minimalist concept of ancient "knot-tying" memorization. By integrating core modules such as todo lists, smart notes, and document reading with multi-platform client support, we create a full-scenario productivity toolchain.
+**Knot** is an intelligent multi-scenario recording tool inspired by the minimalist concept of ancient "knot-tying" memorization. By integrating core modules such as todo lists, smart notes, document reading, and **local LLM-powered intelligence (via [llama.cpp](https://github.com/ggml-org/llama.cpp))**, we create a full-scenario productivity toolchain with multi-platform client support.
 
 *Etymology*: Just as ancient civilizations recorded important events with physical knots, we continue this simple yet efficient concept through digital "knots".
 
@@ -163,11 +163,16 @@ All dependencies are preserved in original format for maintenance and upgrades:
 | **Markwon** | Android Markdown rendering | [noties/Markwon](https://github.com/noties/Markwon) |
 | **Prism4j** | Code highlighting support | [noties/Prism4j](https://github.com/noties/Prism4j) |
 
+### AI & Core Inference
+
+| Project Name | Functionality | Repository Link |
+|--------------|---------------|-----------------|
+| **llama.cpp** | High-performance LLM inference engine | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) |
+
 ### Other Dependencies
 | Project Name | Functionality | Repository Link |
 |--------------|---------------|-----------------|
 | **iconfinder** | Icon resources | [iconfinder](https://www.iconfinder.com/) |
-| **cppjieba** | Chinese text segmentation | [yanyiwu/cppjieba](https://github.com/yanyiwu/cppjieba) |
 
 ---
 

@@ -70,8 +70,13 @@ jobs:
 
       - name: install linuxdeployqt
         run: |
-          wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-          chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+         #wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+         #chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+
+         # 原 wget continuous 删掉，替换为固定v7发布版
+         wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/7/linuxdeployqt-7-x86_64.AppImage"
+         mv linuxdeployqt-7-x86_64.AppImage linuxdeployqt-continuous-x86_64.AppImage
+         chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 
       - name: Remove unused SQL drivers (SAFE MODE)
         run: |
@@ -152,7 +157,8 @@ jobs:
                   -qmldir=/home/runner/work/Knot/Knot/src/qmlsrc \
                   -qmake=/home/runner/work/Knot/Qt/${{ matrix.qt_ver }}/gcc_64/bin/qmake \
                   -appimage \
-                  -extra-plugins=platforminputcontexts
+                  -extra-plugins=platforminputcontexts \
+                  -no-strip
 
       - uses: actions/upload-artifact@v4
         with:
