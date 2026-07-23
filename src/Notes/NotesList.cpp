@@ -1,5 +1,6 @@
 ﻿#include "NotesList.h"
 
+#include "src/AI/EmbeddingEngine.h"
 #include "src/AI/GlobalAI.h"
 #include "src/Notes/VectorSearchService.h"
 

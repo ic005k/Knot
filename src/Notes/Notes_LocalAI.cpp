@@ -1,3 +1,9 @@
+#include <QCryptographicHash>
+#include <QElapsedTimer>
+#include <QFile>
+#include <QMutexLocker>
+#include <QTextCodec>
+
 #include "src/AI/EmbeddingEngine.h"
 #include "src/AI/GlobalAI.h"
 #include "src/AI/VectorDb.h"
@@ -12,7 +18,7 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
   if (!f.open(QIODevice::ReadOnly)) {
     qWarning() << "[BATCH] Failed to open note file, sync aborted:"
                << mdFilePath << "| error:" << f.errorString();
-    return false;  // ✅ 明确表示本次同步失败，等待上层重试
+    return false;
   }
   QByteArray rawBytes = f.readAll();
   f.close();
@@ -40,7 +46,6 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
   // ✅ 检查内容是否变更
   {
     QMutexLocker dbLock(&s_vecDbMutex);
-    // 如果返回 false，说明 DB 中已有相同 hash 的记录，无需更新
     if (!g_vectorDb->isNoteContentChanged(mdFilePath, currentHash)) {
       int cnt = m_skipCount.fetchAndAddRelaxed(1);
       if (cnt == 0 || cnt % 100 == 99) {
@@ -64,21 +69,21 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
   // ====== Embedding 推理（独立计时） ======
   timer.start();
 
-  std::vector<QList<float>> vectors;
+  std::vector<QList<float>> rawVectors;
   int embDim = 0;
 
   {
     QMutexLocker embLock(&s_embMutex);
-    vectors = embEngine->encodeBatch(texts, 64);
+    rawVectors = embEngine->encodeBatch(texts, 64);
     embDim = embEngine->embeddingDimension();
   }
 
   qDebug() << "[BATCH] encode耗时:" << timer.elapsed()
            << "ms, chunks:" << chunks.size();
 
-  if ((int)vectors.size() != chunks.size()) {
+  if (static_cast<int>(rawVectors.size()) != chunks.size()) {
     qWarning() << "[BATCH] encode数量不匹配: expected" << chunks.size() << "got"
-               << vectors.size();
+               << rawVectors.size();
     return false;
   }
 
@@ -103,10 +108,25 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
     }
 
     for (int i = 0; i < chunks.size(); ++i) {
-      if (vectors[i].size() != embDim ||
-          !g_vectorDb->executeInsert(mdFilePath, chunks[i].chunkIndex,
-                                     chunks[i].content, currentHash,
-                                     vectors[i])) {
+      // ✅ 类型转换：QList<float> → QVector<float> 以匹配 VectorDb 接口
+      const QVector<float> vec(rawVectors[i].begin(), rawVectors[i].end());
+
+      if (vec.size() != embDim) {
+        insertAllOk = false;
+        break;
+      }
+
+      // ✅ 严格对齐 VectorDb.h 的 9 参数签名及顺序
+      if (!g_vectorDb->executeInsert(
+              mdFilePath,             // noteId
+              chunks[i].chunkIndex,   // chunkIndex
+              chunks[i].charStart,    // charStart (qint64)
+              chunks[i].charEnd,      // charEnd (qint64)
+              chunks[i].sectionPath,  // sectionPath
+              chunks[i].content,      // content (fallback)
+              chunks[i].contentHash,  // contentHash (原始32字节SHA-256)
+              currentHash,            // noteHash
+              vec)) {                 // vec (QVector<float>)
         insertAllOk = false;
         break;
       }
@@ -139,8 +159,6 @@ bool Notes::removeNoteVector(const QString& mdFilePath) {
     return false;
   }
 
-  // ✅ 关键：整个事务流程必须在 s_vecDbMutex 保护下执行
-  // 共用 s_vecDbMutex 是保证数据一致性的必要条件
   QMutexLocker dbLock(&s_vecDbMutex);
 
   if (!g_vectorDb->beginTransaction()) {
@@ -184,7 +202,7 @@ QString Notes::readNoteFileSafeFromRaw(const QByteArray& raw) {
 
   bool hasGbkPattern = false;
   if (state.invalidChars > 0) {
-    for (int i = 0; i < raw.size() - 1 && !hasGbkPattern; ++i) {
+    for (qsizetype i = 0; i < raw.size() - 1 && !hasGbkPattern; ++i) {
       quint8 hi = static_cast<quint8>(raw[i]);
       quint8 lo = static_cast<quint8>(raw[i + 1]);
       if (hi >= 0x81 && hi <= 0xFE && lo >= 0x40 && lo <= 0xFE)

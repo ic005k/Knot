@@ -1,6 +1,7 @@
 #ifndef MARKDOWNCHUNKER_H
 #define MARKDOWNCHUNKER_H
 
+#include <QByteArray>
 #include <QString>
 #include <QVector>
 #include <vector>
@@ -12,17 +13,24 @@ class EmbeddingEngine;
 // ============================================================
 // 配置与数据结构
 // ============================================================
+
+/// Token 到原文 UTF-16 字符区间的映射 (Qt6 安全类型)
+struct TokenCharSpan {
+  qsizetype charStart;
+  qsizetype charEnd;
+};
+
 struct ChunkConfig {
   int maxTokens = 512;
   int overlapTokens = 64;
-  qint64 fastPathThresholdBytes = 128 * 1024;  // 128KB: 快速路径上限
+  qint64 fastPathThresholdBytes = 128 * 1024;  // 128KB
   qint64 degradeThresholdBytes = 512 * 1024;   // 512KB: 降级为导航块
 };
 
 enum class ChunkStrategy {
   FullStructured,      // 标准 MD 结构分块
-  ImplicitStructure,   // 纯文本隐式结构（民间分隔符）
-  StatisticalFallback  // 统计学分块兜底（流水账/无结构）
+  ImplicitStructure,   // 纯文本隐式结构
+  StatisticalFallback  // 统计学分块兜底
 };
 
 struct StructureSignal {
@@ -32,11 +40,19 @@ struct StructureSignal {
   ChunkStrategy strategy = ChunkStrategy::FullStructured;
 };
 
+/// 批量分块结果，携带完整的回源定位元数据
 struct BatchTextChunk {
   QString noteId;
   int chunkIndex = 0;
   QString content;
+  QVector<float> vector;
   std::vector<llama_token> tokens;
+
+  // 回源定位字段
+  qsizetype charStart = -1;
+  qsizetype charEnd = -1;
+  QString sectionPath;
+  QByteArray contentHash;
 };
 
 // ============================================================
@@ -47,24 +63,34 @@ class MarkdownChunker {
   explicit MarkdownChunker(EmbeddingEngine& engine,
                            const ChunkConfig& config = {});
 
-  /// 主入口：自适应批量分块（供 syncNoteVectorsBatchToDb 调用）
+  /// 主入口：自适应批量分块
   QVector<BatchTextChunk> splitForBatch(const QString& noteId,
                                         const QString& content) const;
 
  private:
-  // ✅ 信号融合评估：决定使用哪种分块策略
   StructureSignal analyzeStructure(const QString& content) const;
 
-  // ✅ Token 级切分：全文仅 tokenize 一次，O(N) 复杂度
-  QVector<QString> splitByTokenBoundary(
-      const QString& content, const std::vector<llama_token>& allTokens,
-      ChunkStrategy strategy) const;
+  QVector<TokenCharSpan> buildTokenCharMap(
+      const QString& content, const std::vector<llama_token>& allTokens) const;
 
-  // ✅ 大文件降级：提取导航块（标题+首句摘要）
+  QVector<BatchTextChunk> splitByTokenBoundary(
+      const QString& noteId, const QString& content,
+      const std::vector<llama_token>& allTokens,
+      const QVector<TokenCharSpan>& charMap,
+      const QVector<qsizetype>& sentenceBounds, ChunkStrategy strategy) const;
+
   QVector<BatchTextChunk> extractNavigationChunks(const QString& noteId,
                                                   const QString& content) const;
 
-  // 归一化民间分隔符位置（仅用于分析，不修改原文）
+  struct HeadingInfo {
+    qsizetype charPos;  // ✅ Qt6 安全类型
+    int level;
+    QString title;
+  };
+
+  QVector<HeadingInfo> extractAllHeadings(const QString& content) const;
+  QString buildSectionPath(const QVector<HeadingInfo>& headings,
+                           qsizetype charPos) const;
   int countImplicitBreaks(const QString& content) const;
 
   EmbeddingEngine& m_engine;

@@ -2,14 +2,17 @@
 
 #include <QDebug>
 #include <QElapsedTimer>
-#include <algorithm>
-#include <cmath>
+#include <QFileInfo>
+
+#include "src/AI/EmbeddingEngine.h"
+#include "src/AI/GlobalAI.h"
+#include "src/AI/VectorDb.h"
 
 VectorSearchService::VectorSearchService(EmbeddingEngine* engine,
                                          QObject* parent)
     : QObject(parent), m_engine(engine) {}
 
-VectorSearchService::~VectorSearchService() {}
+VectorSearchService::~VectorSearchService() = default;
 
 void VectorSearchService::registerNoteMeta(const QString& noteId,
                                            const QString& filePath,
@@ -28,15 +31,14 @@ QString VectorSearchService::highlightKeywords(const QString& text,
   if (text.isEmpty() || query.isEmpty()) return text;
 
   QString result = text;
-  // 简单分词：按空格和标点拆分query
   QStringList keywords =
       query.split(QRegularExpression("[\\s\\p{P}]+"), Qt::SkipEmptyParts);
 
   for (const auto& kw : keywords) {
-    if (kw.length() < 2) continue;  // 跳过单字符
-    // 大小写不敏感替换，用 <mark> 包裹
+    if (kw.length() < 2) continue;
     result.replace(
-        QRegularExpression(kw, QRegularExpression::CaseInsensitiveOption),
+        QRegularExpression(QRegularExpression::escape(kw),
+                           QRegularExpression::CaseInsensitiveOption),
         QString("<mark>%1</mark>").arg(kw));
   }
   return result;
@@ -50,15 +52,10 @@ QVector<SearchResultItem> VectorSearchService::search(const QString& query,
   timer.start();
   QVector<SearchResultItem> results;
 
-  if (!m_engine) {  // ✅ 用全局引擎检查有效性
+  if (!m_engine || !g_vectorDb || !g_vectorDb->isOpen()) {
+    qWarning() << "[VectorSearch] 引擎或向量库未就绪";
     emit searchFinished(0);
     return results;
-  }
-
-  if (!g_vectorDb || !g_vectorDb->isOpen()) {
-    qWarning() << "[VectorSearch] 全局向量库未就绪";
-    emit searchFinished(0);
-    return {};
   }
 
   // 1. Query 向量化
@@ -68,29 +65,41 @@ QVector<SearchResultItem> VectorSearchService::search(const QString& query,
     return results;
   }
 
-  // 2. ✅ 使用 . 而非 -> 调用数据库搜索
+  // 2. 向量检索（返回带完整回源字段的 VectorHit）
   auto hits = g_vectorDb->searchWithContent(queryVec, topK, threshold);
 
-  // 3. 回填元数据 + 组装结果
+  // 3. 回填元数据 + 映射回源字段
   {
     QReadLocker locker(&m_metaLock);
+    results.reserve(hits.size());
+
     for (const auto& hit : hits) {
       SearchResultItem item;
       item.isVectorResult = true;
       item.score = hit.score;
       item.chunkIndex = hit.chunkIndex;
       item.lineNumber = -1;
-      item.snippet =
-          highlightKeywords(hit.content, query);  // ✅ 直接使用DB返回的原文
 
+      // ✅ 核心：完整映射回源定位字段
+      item.charStart = hit.charStart;
+      item.charEnd = hit.charEnd;
+      item.sectionPath = hit.sectionPath;
+      item.contentHash = hit.contentHash;
+
+      // snippet 仅作为 Fallback 保留，高亮处理不影响原始坐标
+      item.snippet = highlightKeywords(hit.content, query);
+
+      // 回填笔记元数据
       auto it = m_noteMetaMap.find(hit.noteId);
       if (it != m_noteMetaMap.end()) {
         item.noteName = it->noteName;
         item.filePath = it->filePath;
       } else {
-        item.noteName = "未知笔记";
-        item.filePath = "";
+        // Fallback：noteId 本身即为文件路径
+        item.noteName = QFileInfo(hit.noteId).baseName();
+        item.filePath = hit.noteId;
       }
+
       results.append(item);
     }
   }

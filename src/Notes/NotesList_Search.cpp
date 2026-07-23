@@ -1,4 +1,5 @@
 #include "NotesList.h"
+#include "src/AI/EmbeddingEngine.h"
 
 // 文件搜索实现
 QStringList findMarkdownFiles(const QString& dirPath) {
@@ -319,8 +320,7 @@ void NotesList::onSearchTextChanged(const QString& text) {
             this,
             [this, results]() {
               // ✅ 适配层：将向量搜索结果转换为 SearchModel 期望的格式
-
-              QVector<SearchResult> adaptedResults;
+              /*QVector<SearchResult> adaptedResults;
               adaptedResults.reserve(results.size());
 
               for (const auto& item : results) {
@@ -355,7 +355,73 @@ void NotesList::onSearchTextChanged(const QString& text) {
               m_searchModel.setResults(adaptedResults);
               mui->lblNoteSearchResult->setText(
                   tr("AI Search Results:") +
-                  QString::number(adaptedResults.size()));
+                  QString::number(adaptedResults.size()));*/
+
+              // ✅ 适配层：基于 charStart/charEnd 从原文精准截取预览
+              QVector<SearchResult> adaptedResults;
+              adaptedResults.reserve(results.size());
+
+              for (const auto& item : results) {
+                SearchResult sr;
+                sr.filePath = item.filePath;
+
+                // 1. 标题构建：优先展示章节路径
+                if (!item.sectionPath.isEmpty()) {
+                  sr.title = QString("%1 > %2")
+                                 .arg(QFileInfo(item.filePath).baseName())
+                                 .arg(item.sectionPath);
+                } else {
+                  sr.title = item.noteName.isEmpty()
+                                 ? QFileInfo(item.filePath).baseName()
+                                 : item.noteName;
+                }
+
+                // 2. 精准回源截取预览
+                QString rawPreview;
+                bool sourceExtracted = false;
+
+                // 仅当 charStart/charEnd 有效时才尝试读取原文
+                if (item.charStart >= 0 && item.charEnd > item.charStart) {
+                  QFile f(item.filePath);
+                  if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                    // ⚠️ 关键：必须用 QTextStream 按 UTF-8
+                    // 读取，确保字节偏移与字符偏移一致
+                    QTextStream stream(&f);
+                    stream.setEncoding(QStringConverter::Utf8);
+
+                    // 直接跳转到目标位置并截取指定长度
+                    if (stream.seek(item.charStart)) {
+                      const qsizetype readLen = item.charEnd - item.charStart;
+                      rawPreview = stream.read(readLen);
+                      sourceExtracted = !rawPreview.isEmpty();
+                    }
+                    f.close();
+                  }
+                }
+
+                // Fallback：回源失败时降级使用 DB 中的 snippet
+                if (!sourceExtracted) {
+                  rawPreview = item.snippet;
+                }
+
+                // 3. 安全截断与格式化（防止极端情况下原文过长）
+                const qsizetype maxPreviewLen = 200;
+                if (rawPreview.length() > maxPreviewLen) {
+                  sr.preview = rawPreview.left(maxPreviewLen).trimmed() + "...";
+                } else {
+                  sr.preview = rawPreview.trimmed();
+                }
+
+                // 4. 清理换行噪音，合并多余空白
+                sr.preview.replace(QRegularExpression("[\\r\\n]+"), " ");
+                sr.preview = sr.preview.simplified();
+
+                adaptedResults.append(sr);
+              }
+
+              m_searchModel.setResults(adaptedResults);
+              mui->lblNoteSearchResult->setText(
+                  tr("AI Search Results: %1").arg(adaptedResults.size()));
             },
             Qt::QueuedConnection);
       });
