@@ -68,31 +68,40 @@ class MarkdownChunker {
                                         const QString& content) const;
 
  private:
+  // ---- 信号分析 & 辅助工具 ----
   StructureSignal analyzeStructure(const QString& content) const;
+  int countImplicitBreaks(const QString& content) const;
 
+  struct HeadingInfo {
+    qsizetype charPos;
+    int level;
+    QString title;
+  };
+  QVector<HeadingInfo> extractAllHeadings(const QString& content) const;
+  QString buildSectionPath(const QVector<HeadingInfo>& headings,
+                           qsizetype charPos) const;
+
+  // ---- Token/Char 映射 ----
   QVector<TokenCharSpan> buildTokenCharMap(
       const QString& content, const std::vector<llama_token>& allTokens) const;
 
+  // ---- 三级分块策略 ----
+  // Level 1: 小文件全量切分
   QVector<BatchTextChunk> splitByTokenBoundary(
       const QString& noteId, const QString& content,
       const std::vector<llama_token>& allTokens,
       const QVector<TokenCharSpan>& charMap,
       const QVector<qsizetype>& sentenceBounds, ChunkStrategy strategy) const;
 
+  // Level 2: 🆕 中等文件结构化采样 (64KB ~ degradeThreshold)
+  QVector<BatchTextChunk> structuredSample(const QString& noteId,
+                                           const QString& content) const;
+
+  // Level 3: 大文件导航摘要 (>degradeThreshold)
   QVector<BatchTextChunk> extractNavigationChunks(const QString& noteId,
                                                   const QString& content) const;
 
-  struct HeadingInfo {
-    qsizetype charPos;  // ✅ Qt6 安全类型
-    int level;
-    QString title;
-  };
-
-  QVector<HeadingInfo> extractAllHeadings(const QString& content) const;
-  QString buildSectionPath(const QVector<HeadingInfo>& headings,
-                           qsizetype charPos) const;
-  int countImplicitBreaks(const QString& content) const;
-
+  // ---- 成员变量 ----
   EmbeddingEngine& m_engine;
   ChunkConfig m_config;
 };

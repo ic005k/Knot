@@ -28,6 +28,9 @@ class EmbeddingEngine {
   std::vector<QVector<float>> encodeBatch(const QStringList& texts,
                                           int maxBatchSize = 32);
 
+  // ✅ 获取模型安全的最大用户文本 token 数（已扣除特殊 token）
+  int maxTokens() const;
+
  private:
   struct llama_model* m_model = nullptr;
   struct llama_context* m_ctx = nullptr;

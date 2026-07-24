@@ -1,12 +1,18 @@
 #include "MarkdownChunker.h"
 
-#include <QCryptographicHash>  // ✅ 修复缺失的头文件
+#include <QCryptographicHash>
 #include <QDebug>
 #include <QRegularExpression>
 #include <QTextBoundaryFinder>
 #include <algorithm>
 
 #include "src/AI/EmbeddingEngine.h"
+
+// ============================================================
+// 分级阈值常量（字节）
+// ============================================================
+static constexpr qint64 STRUCTURED_SAMPLE_THRESHOLD = 64LL * 1024;  // 64KB
+// degradeThresholdBytes 仍从 m_config 读取（默认 512KB）
 
 // ============================================================
 // 构造
@@ -23,13 +29,13 @@ QVector<TokenCharSpan> MarkdownChunker::buildTokenCharMap(
   QVector<TokenCharSpan> map;
   map.reserve(static_cast<int>(allTokens.size()));
 
-  qsizetype searchPos = 0;  // ✅ 修复窄化转换
+  qsizetype searchPos = 0;
 
   for (size_t i = 0; i < allTokens.size(); ++i) {
     std::vector<llama_token> single = {allTokens[i]};
     QString piece = m_engine.detokenize(single);
 
-    qsizetype foundPos = content.indexOf(piece, searchPos);  // ✅ 修复窄化转换
+    qsizetype foundPos = content.indexOf(piece, searchPos);
 
     TokenCharSpan span;
     if (foundPos >= 0) {
@@ -58,9 +64,8 @@ QVector<MarkdownChunker::HeadingInfo> MarkdownChunker::extractAllHeadings(
   while (it.hasNext()) {
     auto match = it.next();
     HeadingInfo info;
-    info.charPos = match.capturedStart();  // ✅ qsizetype
-    info.level =
-        static_cast<int>(match.captured(1).length());  // ✅ 显式转换防警告
+    info.charPos = match.capturedStart();
+    info.level = static_cast<int>(match.captured(1).length());
     info.title = match.captured(2).trimmed();
     result.append(info);
   }
@@ -193,8 +198,8 @@ QVector<BatchTextChunk> MarkdownChunker::splitByTokenBoundary(
     chunk.charStart = cStart;
     chunk.charEnd = cEnd;
     chunk.sectionPath = buildSectionPath(headings, cStart);
-    chunk.contentHash = QCryptographicHash::hash(  // ✅ 已包含头文件
-        chunkText.toUtf8(), QCryptographicHash::Sha256);
+    chunk.contentHash = QCryptographicHash::hash(chunkText.toUtf8(),
+                                                 QCryptographicHash::Sha256);
     chunk.tokens = m_engine.tokenizeText(chunkText);
     chunks.append(chunk);
 
@@ -207,7 +212,78 @@ QVector<BatchTextChunk> MarkdownChunker::splitByTokenBoundary(
 }
 
 // ============================================================
-// 大文件导航块提取（>512KB 降级路径）
+// 🆕 结构化采样（64KB ~ degradeThreshold 中间档）
+// 保留章节骨架 + 每章前 maxTokens 个 token，避免全量切分的性能灾难
+// ============================================================
+QVector<BatchTextChunk> MarkdownChunker::structuredSample(
+    const QString& noteId, const QString& content) const {
+  auto headings = extractAllHeadings(content);
+  QVector<BatchTextChunk> chunks;
+
+  // ---- 1. 文档引言（第一个标题之前的内容）----
+  qsizetype firstHeadingPos =
+      headings.isEmpty() ? content.length() : headings[0].charPos;
+
+  if (firstHeadingPos > 0) {
+    QString intro = content.left(firstHeadingPos).trimmed();
+    if (!intro.isEmpty()) {
+      // 字符级上限保护，避免引言过长时 tokenize 开销过大
+      const qsizetype introCharLimit =
+          static_cast<qsizetype>(m_config.maxTokens) * 4;
+      if (intro.length() > introCharLimit) intro = intro.left(introCharLimit);
+
+      BatchTextChunk chunk;
+      chunk.noteId = noteId;
+      chunk.chunkIndex = static_cast<int>(chunks.size());
+      chunk.content = intro;
+      chunk.charStart = 0;
+      chunk.charEnd = qMin(firstHeadingPos, introCharLimit);
+      chunk.sectionPath = QStringLiteral("(引言)");
+      chunk.contentHash = QCryptographicHash::hash(chunk.content.toUtf8(),
+                                                   QCryptographicHash::Sha256);
+      chunk.tokens = m_engine.tokenizeText(chunk.content);
+      chunks.append(chunk);
+    }
+  }
+
+  // ---- 2. 每个章节：标题 + 前 maxTokens 个 token 的正文 ----
+  for (int i = 0; i < headings.size(); ++i) {
+    qsizetype secStart = headings[i].charPos;
+    qsizetype secEnd =
+        (i + 1 < headings.size()) ? headings[i + 1].charPos : content.length();
+
+    QString sectionContent = content.mid(secStart, secEnd - secStart);
+
+    // Token-level 截断：只取前 maxTokens 个 token 对应的文本
+    auto secTokens = m_engine.tokenizeText(sectionContent);
+    if (static_cast<int>(secTokens.size()) > m_config.maxTokens) {
+      secTokens.resize(m_config.maxTokens);
+      sectionContent = m_engine.detokenize(secTokens);
+    }
+
+    if (sectionContent.trimmed().isEmpty()) continue;
+
+    BatchTextChunk chunk;
+    chunk.noteId = noteId;
+    chunk.chunkIndex = static_cast<int>(chunks.size());
+    chunk.content = sectionContent;
+    chunk.charStart = secStart;
+    chunk.charEnd = secStart + sectionContent.length();
+    chunk.sectionPath = buildSectionPath(headings, secStart);
+    chunk.contentHash = QCryptographicHash::hash(chunk.content.toUtf8(),
+                                                 QCryptographicHash::Sha256);
+    chunk.tokens = m_engine.tokenizeText(chunk.content);
+    chunks.append(chunk);
+  }
+
+  qDebug() << "[CHUNKER] Structured sample:" << chunks.size()
+           << "chunks for note" << noteId << "| content:" << content.size()
+           << "chars";
+  return chunks;
+}
+
+// ============================================================
+// 大文件导航块提取（>degradeThreshold 降级路径）
 // ============================================================
 QVector<BatchTextChunk> MarkdownChunker::extractNavigationChunks(
     const QString& noteId, const QString& content) const {
@@ -275,26 +351,35 @@ QVector<BatchTextChunk> MarkdownChunker::extractNavigationChunks(
 }
 
 // ============================================================
-// 主入口：自适应批量分块
+// 主入口：三级自适应批量分块
 // ============================================================
 QVector<BatchTextChunk> MarkdownChunker::splitForBatch(
     const QString& noteId, const QString& content) const {
   QByteArray utf8Bytes = content.toUtf8();
   qint64 fileSize = utf8Bytes.size();
 
-  // ✅ 大文件降级策略完整保留
+  // ---- Level 3: 超大文件 → 仅导航摘要 ----
   if (fileSize > m_config.degradeThresholdBytes) {
     qDebug() << "[CHUNKER] Large file detected (" << fileSize
-             << "bytes), degrading to navigation chunks";
+             << "bytes > threshold" << m_config.degradeThresholdBytes
+             << "), degrading to navigation chunks";
     return extractNavigationChunks(noteId, content);
   }
 
+  // ---- Level 2: 🆕 中等文件 → 结构化采样 ----
+  if (fileSize > STRUCTURED_SAMPLE_THRESHOLD) {
+    qDebug() << "[CHUNKER] Medium file detected (" << fileSize
+             << "bytes), using structured sampling";
+    return structuredSample(noteId, content);
+  }
+
+  // ---- Level 1: 小文件 → 全量 token 级切分 ----
   StructureSignal signal = analyzeStructure(content);
   auto allTokens = m_engine.tokenizeText(content);
   auto charMap = buildTokenCharMap(content, allTokens);
 
   QTextBoundaryFinder sentenceFinder(QTextBoundaryFinder::Sentence, content);
-  QVector<qsizetype> sentenceBounds;  // ✅ 统一使用 qsizetype
+  QVector<qsizetype> sentenceBounds;
   sentenceBounds.append(0);
   while (sentenceFinder.toNextBoundary() != -1)
     sentenceBounds.append(sentenceFinder.position());

@@ -11,33 +11,6 @@
 #include "lib/llama.cpp/ggml/include/gguf.h"
 #include "lib/llama.cpp/include/llama.h"
 
-/*EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
-  std::string path = ggufPath.toUtf8().toStdString();
-  llama_model_params model_params = llama_model_default_params();
-  model_params.n_gpu_layers = 99;
-  m_model = llama_load_model_from_file(path.c_str(), model_params);
-  if (!m_model) return;
-
-  llama_context_params ctx_params = llama_context_default_params();
-  ctx_params.n_threads = 4;
-  ctx_params.embeddings = true;
-  ctx_params.n_seq_max = 64;
-
-  // ✅ 直接使用模型原生训练上下文，不做人为截断
-  ctx_params.n_ctx = llama_n_ctx_train(m_model);
-  // ✅ Encoder 模式下 n_ubatch 必须 == n_ctx
-  ctx_params.n_ubatch = ctx_params.n_ctx;
-
-  m_ctx = llama_new_context_with_model(m_model, ctx_params);
-  // ✅ maxTokens 也要同步使用实际 n_ctx
-  m_maxTokens = static_cast<int>(ctx_params.n_ctx) - 2;
-
-  qDebug() << "[EmbeddingEngine] n_ctx:" << ctx_params.n_ctx
-           << ", n_ubatch:" << ctx_params.n_ubatch
-           << ", n_seq_max:" << ctx_params.n_seq_max
-           << ", maxTokens:" << m_maxTokens;
-}*/
-
 EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
   // ⭐ b10041: 在任何 llama API 调用前禁用 fused ops（静态初始化更安全）
   static const bool s_envInit = []() {
@@ -65,17 +38,20 @@ EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
   ctx_params.embeddings = true;
   ctx_params.n_threads = 4;
 
-  // ⭐ 核心修改：限制最大上下文，而非盲目使用训练长度
+  // ⭐ 核心：限制最大上下文，而非盲目使用训练长度
   // Embedding 推理不需要完整训练上下文，8192 已覆盖绝大多数场景
   const uint32_t trainCtx = llama_n_ctx_train(m_model);
   const uint32_t maxReasonableCtx = 8192;
   ctx_params.n_ctx = std::min(trainCtx, maxReasonableCtx);
 
-  // ⭐ 核心修改：ubatch 独立设置，不再绑定 n_ctx
-  // 过大的 ubatch 是 OOM 主因，2048 是性能与内存的最佳平衡点
-  ctx_params.n_ubatch = std::min(ctx_params.n_ctx, (uint32_t)2048);
+  // ⭐ 核心：ubatch 绑定模型训练上下文长度
+  // BERT/Sentence-Transformer 的位置编码是固定长度的，
+  // ubatch 超过 trainCtx 会导致 GGML_ASSERT 越界崩溃。
+  // 对于 LLM-based embedding 模型（如 bge-m3），trainCtx 本身较大，同样适用。
+  ctx_params.n_ubatch =
+      trainCtx;  // std::min(ctx_params.n_ctx, (uint32_t)2048);
 
-  // ⭐ 核心修改：seq_max 按需设置，64 太大
+  // ⭐ 核心：seq_max 按需设置，64 太大
   // encodeBatch 的 maxBatchSize 通常 <= 16，这里留余量即可
   ctx_params.n_seq_max = 16;
 
@@ -301,6 +277,8 @@ int EmbeddingEngine::embeddingDimension() const {
   if (!m_model) return 0;
   return llama_n_embd(m_model);
 }
+
+int EmbeddingEngine::maxTokens() const { return m_maxTokens; }
 
 std::vector<QVector<float>> EmbeddingEngine::encodeBatch(
     const QStringList& texts, int maxBatchSize) {

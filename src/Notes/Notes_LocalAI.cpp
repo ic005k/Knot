@@ -56,6 +56,11 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
   }
 
   ChunkConfig config;
+
+  // ✅ 从引擎获取真实上限，而非依赖默认配置
+  config.maxTokens = embEngine->maxTokens();  // 510 (即 trainCtx - 2)
+  config.overlapTokens = 64;                  // 建议设置合理的重叠窗口
+
   MarkdownChunker chunker(*embEngine, config);
   auto chunks = chunker.splitForBatch(mdFilePath, mdContent);
   if (chunks.isEmpty()) return true;
@@ -74,7 +79,7 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
 
   {
     QMutexLocker embLock(&s_embMutex);
-    rawVectors = embEngine->encodeBatch(texts, 64);
+    rawVectors = embEngine->encodeBatch(texts, 16);
     embDim = embEngine->embeddingDimension();
   }
 
