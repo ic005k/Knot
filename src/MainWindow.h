@@ -487,7 +487,7 @@ class MainWindow : public QMainWindow {
   void checkAiConnectivity(const AiSingleRecord& cfg,
                            std::function<void()> onSuccess);
 
-  void setVectorStatus(int status);
+  void setVectorStatus(int status, int current, int total);
 
  protected:
   void closeEvent(QCloseEvent* event) override;

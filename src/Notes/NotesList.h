@@ -292,6 +292,7 @@ class NotesList : public QDialog {
   void on_actionModificationHistory();
 
  signals:
+  void rebuildProgressChanged(int current, int total);
 
  private:
   // 精准搜索导航缓存（与 m_searchModel 平行存在）

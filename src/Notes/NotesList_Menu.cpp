@@ -722,7 +722,7 @@ void NotesList::rebuilderNotesVector() {
   // ✅ 重置取消标志
   m_rebuildCancelled.store(false, std::memory_order_release);
 
-  mw_one->setVectorStatus(1);
+  mw_one->setVectorStatus(1, 0, 0);
 
   auto watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [watcher, this]() {
@@ -732,9 +732,9 @@ void NotesList::rebuilderNotesVector() {
     // 检查后台线程是否抛出了异常
     if (watcher->isCanceled()) {
       // QtConcurrent 异常会通过 watcher 传递
-      mw_one->setVectorStatus(2);
+      mw_one->setVectorStatus(2, 0, 0);
     } else {
-      mw_one->setVectorStatus(0);
+      mw_one->setVectorStatus(0, 0, 0);
     }
 
     mw_one->safeCloseProgress();
@@ -742,9 +742,30 @@ void NotesList::rebuilderNotesVector() {
     m_rebuildMutex.unlock();  // ✅ 释放锁，允许下次触发
   });
 
+  // ✅ 连接进度信号到 UI 更新
+  connect(
+      this, &NotesList::rebuildProgressChanged, this,
+      [this](int current, int total) {
+        double pct = (total > 0) ? (100.0 * current / total) : 0.0;
+
+        mw_one->setVectorStatus(1, current, total);
+
+        // 如果主窗口有进度条，也可以同步更新
+        // mw_one->updateProgress(current, total);
+
+        qInfo() << "[PROGRESS]"
+                << QString("(%1/%2 %3%)")
+                       .arg(current)
+                       .arg(total)
+                       .arg(pct, 0, 'f', 1);
+      },
+      Qt::QueuedConnection  // ⚠ 关键：确保跨线程投递到主线程
+  );
+
   auto future = QtConcurrent::run([this]() {
     try {
       QStringList allNotes = getAllNotePaths();
+      const int totalFiles = allNotes.size();  // ✅ 缓存总数
       for (int i = 0; i < allNotes.size(); ++i) {
         // ✅ 每个笔记处理前检查取消标志
         if (m_rebuildCancelled.load(std::memory_order_acquire)) {
@@ -753,6 +774,9 @@ void NotesList::rebuilderNotesVector() {
           break;
         }
         m_Notes->syncNoteVectorsBatchToDb(allNotes.at(i));
+
+        // ✅ 每完成一个文件，发射进度信号（跨线程安全）
+        emit rebuildProgressChanged(i + 1, totalFiles);
       }
     } catch (const std::exception& e) {
       qCritical() << "[Embedding] Rebuild failed:" << e.what();
@@ -765,7 +789,7 @@ void NotesList::cancelRebuildNotesVector() {
   m_rebuildCancelled.store(true, std::memory_order_release);
   qInfo() << "[Embedding] 已发送重建取消信号";
 
-  mw_one->setVectorStatus(0);
+  mw_one->setVectorStatus(0, 0, 0);
 }
 
 bool NotesList::waitForRebuildFinished(int timeoutMs) {

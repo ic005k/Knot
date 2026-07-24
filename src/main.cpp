@@ -435,7 +435,8 @@ void loadTheme(bool isDark) {
           widget != mw_one->m_MainHelper->sliderButton &&
           widget != mui->lblGpsDateTime && widget != mui->btnPages &&
           widget != mui->lblBookName && widget != mui->lblNoteBook &&
-          widget != mui->lblNoteList && widget != mui->lblSyncNote) {
+          widget != mui->lblNoteList && widget != mui->lblSyncNote &&
+          widget != mui->lblVectorStatus) {
         widget->setFont(qApp->font());
 
         font.setBold(true);

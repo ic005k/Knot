@@ -270,40 +270,52 @@ QUrl MainWindow::buildAiApiUrl(const QString& rawEndpoint) {
  * @brief 更新向量状态指示灯
  * @param status 0=就绪, 1=正在进行, 2=错误
  */
-void MainWindow::setVectorStatus(int status) {
-  if (isLocalAIModel)
-    mui->lblVectorStatus->show();
-  else
+void MainWindow::setVectorStatus(int status, int current, int total) {
+  if (!isLocalAIModel) {
     mui->lblVectorStatus->hide();
+    return;
+  }
 
-  // 将整数转为字符串设置动态属性
+  mui->lblVectorStatus->show();
   mui->lblVectorStatus->setProperty("state", QString::number(status));
 
+  // ✅ 核心：整体字号变小，圆点通过 <font> 标签单独放大
+  // size="+2" 表示在基础字号上增加 2pt，可根据视觉效果微调为 +3 或 +4
+  const QString dotHtml = "<font size=\"+2\">●</font>";
+  const QString space = "&nbsp;";  // 使用 HTML 空格保证间距不被压缩
+
+  if (status == 1 && total > 0) {
+    double pct = 100.0 * current / total;
+    mui->lblVectorStatus->setText(
+        QString("%1%2(%3%)").arg(dotHtml).arg(space).arg(pct, 0, 'f', 1));
+  } else {
+    mui->lblVectorStatus->setText(dotHtml);
+  }
+
+  // ✅ QSS 中调小基础字号（例如从 11px 降到 9px）
+  // color 属性会自动穿透到 <font> 标签内的圆点上
   const QString lightStyle = R"(
-    QLabel#lblVectorStatus {
-        min-width: 12px; max-width: 12px;
-        min-height: 12px; max-height: 12px;
-        border-radius: 6px;
-        background-color: #cccccc;
-    }
-    QLabel#lblVectorStatus[state="1"] { background-color: #ff9800; }
-    QLabel#lblVectorStatus[state="2"] { background-color: #f44336; }
-)";
+        QLabel#lblVectorStatus {
+            font-size: 9px;         /* 👈 文字调小 */
+            color: #cccccc;
+            background: transparent;
+        }
+        QLabel#lblVectorStatus[state="1"] { color: #ff9800; }
+        QLabel#lblVectorStatus[state="2"] { color: #f44336; }
+    )";
 
   const QString darkStyle = R"(
-    QLabel#lblVectorStatus {
-        min-width: 12px; max-width: 12px;
-        min-height: 12px; max-height: 12px;
-        border-radius: 6px;
-        background-color: #555555;
-    }
-    QLabel#lblVectorStatus[state="1"] { background-color: #ffb74d; }
-    QLabel#lblVectorStatus[state="2"] { background-color: #ef5350; }
-)";
+        QLabel#lblVectorStatus {
+            font-size: 9px;         /* 👈 文字调小 */
+            color: #555555;
+            background: transparent;
+        }
+        QLabel#lblVectorStatus[state="1"] { color: #ffb74d; }
+        QLabel#lblVectorStatus[state="2"] { color: #ef5350; }
+    )";
 
   mui->lblVectorStatus->setStyleSheet(isDark ? darkStyle : lightStyle);
 
-  // 强制刷新QSS使颜色立即生效
   mui->lblVectorStatus->style()->unpolish(mui->lblVectorStatus);
   mui->lblVectorStatus->style()->polish(mui->lblVectorStatus);
 }
