@@ -319,44 +319,6 @@ void NotesList::onSearchTextChanged(const QString& text) {
         QMetaObject::invokeMethod(
             this,
             [this, results]() {
-              // ✅ 适配层：将向量搜索结果转换为 SearchModel 期望的格式
-              /*QVector<SearchResult> adaptedResults;
-              adaptedResults.reserve(results.size());
-
-              for (const auto& item : results) {
-                SearchResult sr;
-
-                // 1. 基础字段直接映射
-                sr.filePath = item.filePath;
-                sr.title = item.noteName.isEmpty()
-                               ? QFileInfo(item.filePath).baseName()
-                               : item.noteName;
-
-                // 2. snippet → preview 的格式化（关键！）
-                // 向量搜索返回的是完整 chunk，直接显示会撑爆 UI，必须截断
-                const int maxPreviewLen = 200;
-                if (item.snippet.length() > maxPreviewLen) {
-                  sr.preview =
-                      item.snippet.left(maxPreviewLen).trimmed() + "...";
-                } else {
-                  sr.preview = item.snippet;
-                }
-
-                // 3. 清理 chunk 中可能残留的 Markdown/换行噪音
-                sr.preview.replace(QRegularExpression("[\\r\\n]+"), " ");
-                sr.preview = sr.preview.simplified();  // 合并多余空格
-                // ✅ 仅在 preview 显示前做视觉弱化，不触碰原始数据
-                sr.preview = sr.preview.replace(
-                    QRegularExpression(R"(\bfor\b)"), "·");  // 或 " "（空格）
-
-                adaptedResults.append(sr);
-              }
-
-              m_searchModel.setResults(adaptedResults);
-              mui->lblNoteSearchResult->setText(
-                  tr("AI Search Results:") +
-                  QString::number(adaptedResults.size()));*/
-
               // ✅ 适配层：基于 charStart/charEnd 从原文精准截取预览
               QVector<SearchResult> adaptedResults;
               adaptedResults.reserve(results.size());
@@ -365,16 +327,8 @@ void NotesList::onSearchTextChanged(const QString& text) {
                 SearchResult sr;
                 sr.filePath = item.filePath;
 
-                // 1. 标题构建：优先展示章节路径
-                if (!item.sectionPath.isEmpty()) {
-                  sr.title = QString("%1 > %2")
-                                 .arg(QFileInfo(item.filePath).baseName())
-                                 .arg(item.sectionPath);
-                } else {
-                  sr.title = item.noteName.isEmpty()
-                                 ? QFileInfo(item.filePath).baseName()
-                                 : item.noteName;
-                }
+                sr.title =
+                    m_Notes->m_NoteIndexManager->getNoteTitle(sr.filePath);
 
                 // 2. 精准回源截取预览
                 QString rawPreview;
@@ -412,7 +366,24 @@ void NotesList::onSearchTextChanged(const QString& text) {
                   sr.preview = rawPreview.trimmed();
                 }
 
-                // 4. 清理换行噪音，合并多余空白
+                // 4. ✅ 深度清洗：过滤乱码、控制符与Markdown残留
+                // 4.1 移除 Unicode
+                // 替换字符及私有区/未分配区字符（修复UTF-8截断乱码）
+                sr.preview.remove(QRegularExpression(
+                    "[\\x{FFFD}\\x{E000}-\\x{F8FF}\\x{FFF0}-\\x{FFFF}]"));
+
+                // 4.2 移除不可见控制字符（保留常规空白
+                // \s，防止零宽空格等干扰显示）
+                sr.preview.remove(
+                    QRegularExpression("[\\p{Cc}\\p{Cf}&&[^\\s]]"));
+
+                // 4.3 清理被截断的 Markdown 链接/图片语法残留 (如 "[text" 或
+                // "![" )
+                sr.preview.replace(QRegularExpression(R"(!?  $ [^ $  ]* $ )"),
+                                   "");
+                sr.preview.replace(QRegularExpression(R"(^  $ [^ $  ]*)"), "");
+
+                // 4.4 清理换行噪音，合并多余空白
                 sr.preview.replace(QRegularExpression("[\\r\\n]+"), " ");
                 sr.preview = sr.preview.simplified();
 
