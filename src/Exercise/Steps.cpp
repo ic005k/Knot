@@ -197,9 +197,13 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
 }
 
 Steps::~Steps() {
-#ifdef Q_OS_MACOS
-  QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-#endif
+  // 【关键】在做任何清理之前，先阻止所有事件（包括底层隐式定时器）
+  // 这会告诉 Qt/Cocoa：这个对象正在销毁，不要再派发任何事件给它
+  this->blockSignals(true);
+
+  // 可选但推荐：显式隐藏窗口，这会强制 Cocoa 取消与该窗口相关的内部定时器
+  this->hide();
+
   prepareDestroy();
 }
 
