@@ -723,6 +723,7 @@ void NotesList::rebuilderNotesVector() {
   m_rebuildCancelled.store(false, std::memory_order_release);
 
   mw_one->setVectorStatus(1, 0, 0);
+  mw_one->m_AboutThis->ui->lblVectorUpdateStatus->show();
 
   auto watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [watcher, this]() {
@@ -737,6 +738,8 @@ void NotesList::rebuilderNotesVector() {
       mw_one->setVectorStatus(0, 0, 0);
     }
 
+    mw_one->m_AboutThis->ui->lblVectorUpdateStatus->hide();
+
     mw_one->safeCloseProgress();
     watcher->deleteLater();
     m_rebuildMutex.unlock();  // ✅ 释放锁，允许下次触发
@@ -746,9 +749,15 @@ void NotesList::rebuilderNotesVector() {
   connect(
       this, &NotesList::rebuildProgressChanged, this,
       [this](int current, int total) {
+        if (!mw_one->m_AboutThis->isVisible()) return;
+
         double pct = (total > 0) ? (100.0 * current / total) : 0.0;
 
-        if (mw_one->isVisible()) mw_one->setVectorStatus(1, current, total);
+        // if (mw_one->isVisible()) mw_one->setVectorStatus(1, current, total);
+
+        mw_one->m_AboutThis->ui->lblVectorUpdateStatus->setText(
+            tr("Vector Update:") + QString::number(current) + "/" +
+            QString::number(total));
 
         qInfo() << "[PROGRESS]"
                 << QString("(%1/%2 %3%)")
@@ -775,7 +784,7 @@ void NotesList::rebuilderNotesVector() {
         // ✅ 每完成一个文件，发射进度信号（跨线程安全）
         emit rebuildProgressChanged(i + 1, totalFiles);
 
-        m_Method->Sleep(25);
+        // m_Method->Sleep(25);
       }
     } catch (const std::exception& e) {
       qCritical() << "[Embedding] Rebuild failed:" << e.what();

@@ -353,6 +353,7 @@ QVector<BatchTextChunk> MarkdownChunker::extractNavigationChunks(
 // ============================================================
 // 主入口：三级自适应批量分块
 // ============================================================
+
 QVector<BatchTextChunk> MarkdownChunker::splitForBatch(
     const QString& noteId, const QString& content) const {
   QByteArray utf8Bytes = content.toUtf8();
@@ -363,33 +364,69 @@ QVector<BatchTextChunk> MarkdownChunker::splitForBatch(
     qDebug() << "[CHUNKER] Large file detected (" << fileSize
              << "bytes > threshold" << m_config.degradeThresholdBytes
              << "), degrading to navigation chunks";
-    return extractNavigationChunks(noteId, content);
+    auto results = extractNavigationChunks(noteId, content);
+    if (!results.isEmpty()) return results;
+    // ⬇️ 导航提取也失败时，fall through 到兜底
   }
 
-  // ---- Level 2: 🆕 中等文件 → 结构化采样 ----
-  if (fileSize > STRUCTURED_SAMPLE_THRESHOLD) {
+  // ---- Level 2: 中等文件 → 结构化采样 ----
+  else if (fileSize > STRUCTURED_SAMPLE_THRESHOLD) {
     qDebug() << "[CHUNKER] Medium file detected (" << fileSize
              << "bytes), using structured sampling";
-    return structuredSample(noteId, content);
+    auto results = structuredSample(noteId, content);
+    if (!results.isEmpty()) return results;
+    // ⬇️ 采样也失败时，fall through 到兜底
   }
 
   // ---- Level 1: 小文件 → 全量 token 级切分 ----
-  StructureSignal signal = analyzeStructure(content);
-  auto allTokens = m_engine.tokenizeText(content);
-  auto charMap = buildTokenCharMap(content, allTokens);
+  else {
+    StructureSignal signal = analyzeStructure(content);
+    auto allTokens = m_engine.tokenizeText(content);
+    auto charMap = buildTokenCharMap(content, allTokens);
 
-  QTextBoundaryFinder sentenceFinder(QTextBoundaryFinder::Sentence, content);
-  QVector<qsizetype> sentenceBounds;
-  sentenceBounds.append(0);
-  while (sentenceFinder.toNextBoundary() != -1)
-    sentenceBounds.append(sentenceFinder.position());
-  sentenceBounds.append(content.length());
+    QTextBoundaryFinder sentenceFinder(QTextBoundaryFinder::Sentence, content);
+    QVector<qsizetype> sentenceBounds;
+    sentenceBounds.append(0);
+    while (sentenceFinder.toNextBoundary() != -1)
+      sentenceBounds.append(sentenceFinder.position());
+    sentenceBounds.append(content.length());
 
-  auto results = splitByTokenBoundary(noteId, content, allTokens, charMap,
-                                      sentenceBounds, signal.strategy);
+    auto results = splitByTokenBoundary(noteId, content, allTokens, charMap,
+                                        sentenceBounds, signal.strategy);
+    if (!results.isEmpty()) {
+      qDebug() << "[CHUNKER] Note" << noteId << "| size:" << fileSize << "bytes"
+               << "| strategy:" << static_cast<int>(signal.strategy)
+               << "| chunks:" << results.size();
+      return results;
+    }
+    // ⬇️ 全量切分也返回空时，fall through 到兜底
+  }
 
+  // ============================================================
+  // ✅ 兜底：非空内容保证至少返回 1 个 chunk
+  // ============================================================
+  QString trimmedContent = content.trimmed();
+  if (!trimmedContent.isEmpty()) {
+    BatchTextChunk fallback;
+    fallback.noteId = noteId;
+    fallback.chunkIndex = 0;
+    fallback.content = trimmedContent;
+    fallback.charStart = content.indexOf(trimmedContent);
+    fallback.charEnd = fallback.charStart + trimmedContent.size();
+    fallback.sectionPath = QStringLiteral("(全文)");
+    fallback.contentHash = QCryptographicHash::hash(trimmedContent.toUtf8(),
+                                                    QCryptographicHash::Sha256);
+    fallback.tokens = m_engine.tokenizeText(trimmedContent);
+
+    qDebug() << "[CHUNKER] Fallback single-chunk for note" << noteId
+             << "| chars:" << trimmedContent.size()
+             << "| tokens:" << fallback.tokens.size();
+
+    return {fallback};
+  }
+
+  // 内容确实为空（纯空白/零长度），返回空列表是正确行为
   qDebug() << "[CHUNKER] Note" << noteId << "| size:" << fileSize << "bytes"
-           << "| strategy:" << static_cast<int>(signal.strategy)
-           << "| chunks:" << results.size();
-  return results;
+           << "| empty content, 0 chunks";
+  return {};
 }

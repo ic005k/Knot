@@ -43,7 +43,7 @@
     </message>
     <message>
         <location filename="AboutThis.ui" line="173"/>
-        <location filename="AboutThis.cpp" line="202"/>
+        <location filename="AboutThis.cpp" line="203"/>
         <source>Upgrade Check</source>
         <translation>检查更新</translation>
     </message>
@@ -53,7 +53,12 @@
         <translation>查看日志</translation>
     </message>
     <message>
-        <location filename="AboutThis.ui" line="221"/>
+        <location filename="AboutThis.ui" line="193"/>
+        <source>Vector Update Status</source>
+        <translation>向量更新状态</translation>
+    </message>
+    <message>
+        <location filename="AboutThis.ui" line="228"/>
         <source>Back</source>
         <translation>返回</translation>
     </message>
@@ -62,48 +67,48 @@
         <translation type="vanished">修改备注</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="61"/>
-        <location filename="AboutThis.cpp" line="266"/>
+        <location filename="AboutThis.cpp" line="62"/>
+        <location filename="AboutThis.cpp" line="267"/>
         <source>Download link copied.</source>
         <translation>下载链接已拷贝</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="137"/>
+        <location filename="AboutThis.cpp" line="138"/>
         <source>Network error!</source>
         <translation>网络错误！</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="178"/>
+        <location filename="AboutThis.cpp" line="179"/>
         <source>New version detected!</source>
         <translation>有新版本！</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="179"/>
+        <location filename="AboutThis.cpp" line="180"/>
         <source>Version: </source>
         <translation>版本：</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="180"/>
+        <location filename="AboutThis.cpp" line="181"/>
         <source>Published at: </source>
         <translation>发布时间：</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="181"/>
+        <location filename="AboutThis.cpp" line="182"/>
         <source>Release Notes: </source>
         <translation>发布说明：</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="184"/>
+        <location filename="AboutThis.cpp" line="185"/>
         <source>Download</source>
         <translation>下载</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="203"/>
+        <location filename="AboutThis.cpp" line="204"/>
         <source>You are currently using the latest version!</source>
         <translation>目前使用的是最新版！</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="278"/>
+        <location filename="AboutThis.cpp" line="279"/>
         <source>Log</source>
         <translation>日志</translation>
     </message>
@@ -3414,7 +3419,7 @@
         <translation>搜索(AI)...</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Search.cpp" line="386"/>
+        <location filename="Notes/NotesList_Search.cpp" line="395"/>
         <source>AI Search Results: %1</source>
         <translation>AI 搜索结果：%1</translation>
     </message>
@@ -3497,6 +3502,11 @@
         <location filename="Notes/NotesList_Menu.cpp" line="672"/>
         <source>Please enter sub notebook name:</source>
         <translation>请输入子笔记本名称：</translation>
+    </message>
+    <message>
+        <location filename="Notes/NotesList_Menu.cpp" line="757"/>
+        <source>Vector Update:</source>
+        <translation>向量更新：</translation>
     </message>
     <message>
         <location filename="Notes/NotesList_Menu.cpp" line="52"/>
@@ -4210,27 +4220,27 @@ Model ID: %1</source>
         <translation>应用程序已在运行中！</translation>
     </message>
     <message>
-        <location filename="EditRecord.cpp" line="72"/>
+        <location filename="EditRecord.cpp" line="73"/>
         <source>Enter a category</source>
         <translation>输入分类</translation>
     </message>
     <message>
-        <location filename="EditRecord.cpp" line="73"/>
+        <location filename="EditRecord.cpp" line="74"/>
         <source>Enter notes</source>
         <translation>输入备注</translation>
     </message>
     <message>
-        <location filename="EditRecord.cpp" line="95"/>
+        <location filename="EditRecord.cpp" line="96"/>
         <source>Modify Item</source>
         <translation>修改条目</translation>
     </message>
     <message>
-        <location filename="EditRecord.cpp" line="103"/>
+        <location filename="EditRecord.cpp" line="104"/>
         <source>Add Item</source>
         <translation>增加条目</translation>
     </message>
     <message>
-        <location filename="EditRecord.cpp" line="190"/>
+        <location filename="EditRecord.cpp" line="191"/>
         <source>Total</source>
         <translation>总计</translation>
     </message>

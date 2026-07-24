@@ -35,7 +35,7 @@
     </message>
     <message>
         <location filename="../../src/AboutThis.ui" line="173"/>
-        <location filename="../../src/AboutThis.cpp" line="202"/>
+        <location filename="../../src/AboutThis.cpp" line="203"/>
         <source>Upgrade Check</source>
         <translation type="unfinished"></translation>
     </message>
@@ -45,53 +45,58 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.ui" line="221"/>
+        <location filename="../../src/AboutThis.ui" line="193"/>
+        <source>Vector Update Status</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/AboutThis.ui" line="228"/>
         <source>Back</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="61"/>
-        <location filename="../../src/AboutThis.cpp" line="266"/>
+        <location filename="../../src/AboutThis.cpp" line="62"/>
+        <location filename="../../src/AboutThis.cpp" line="267"/>
         <source>Download link copied.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="137"/>
+        <location filename="../../src/AboutThis.cpp" line="138"/>
         <source>Network error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="178"/>
+        <location filename="../../src/AboutThis.cpp" line="179"/>
         <source>New version detected!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="179"/>
+        <location filename="../../src/AboutThis.cpp" line="180"/>
         <source>Version: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="180"/>
+        <location filename="../../src/AboutThis.cpp" line="181"/>
         <source>Published at: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="181"/>
+        <location filename="../../src/AboutThis.cpp" line="182"/>
         <source>Release Notes: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="184"/>
+        <location filename="../../src/AboutThis.cpp" line="185"/>
         <source>Download</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="203"/>
+        <location filename="../../src/AboutThis.cpp" line="204"/>
         <source>You are currently using the latest version!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="278"/>
+        <location filename="../../src/AboutThis.cpp" line="279"/>
         <source>Log</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2514,7 +2519,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Search.cpp" line="386"/>
+        <location filename="../../src/Notes/NotesList_Search.cpp" line="395"/>
         <source>AI Search Results: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2578,6 +2583,11 @@
     <message>
         <location filename="../../src/Notes/NotesList_Menu.cpp" line="672"/>
         <source>Please enter sub notebook name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/NotesList_Menu.cpp" line="757"/>
+        <source>Vector Update:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2960,27 +2970,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/EditRecord.cpp" line="72"/>
+        <location filename="../../src/EditRecord.cpp" line="73"/>
         <source>Enter a category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/EditRecord.cpp" line="73"/>
+        <location filename="../../src/EditRecord.cpp" line="74"/>
         <source>Enter notes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/EditRecord.cpp" line="95"/>
+        <location filename="../../src/EditRecord.cpp" line="96"/>
         <source>Modify Item</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/EditRecord.cpp" line="103"/>
+        <location filename="../../src/EditRecord.cpp" line="104"/>
         <source>Add Item</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/EditRecord.cpp" line="190"/>
+        <location filename="../../src/EditRecord.cpp" line="191"/>
         <source>Total</source>
         <translation type="unfinished"></translation>
     </message>

@@ -21,6 +21,7 @@ AboutThis::AboutThis(QWidget* parent) : QDialog(parent), ui(new Ui::AboutThis) {
 
   ui->btnDownloadUP->hide();
   ui->btnCopyDownLoadLink->hide();
+  ui->lblVectorUpdateStatus->hide();
 
   ui->lblAbout->adjustSize();
   ui->lblAbout->setWordWrap(true);
