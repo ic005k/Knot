@@ -296,7 +296,7 @@ void MainWindow::setVectorStatus(int status, int current, int total) {
   // color 属性会自动穿透到 <font> 标签内的圆点上
   const QString lightStyle = R"(
         QLabel#lblVectorStatus {
-            font-size: 9px;         /* 👈 文字调小 */
+            font-size: 10px;         /* 👈 文字调小 */
             color: #cccccc;
             background: transparent;
         }
@@ -306,7 +306,7 @@ void MainWindow::setVectorStatus(int status, int current, int total) {
 
   const QString darkStyle = R"(
         QLabel#lblVectorStatus {
-            font-size: 9px;         /* 👈 文字调小 */
+            font-size: 10px;         /* 👈 文字调小 */
             color: #555555;
             background: transparent;
         }

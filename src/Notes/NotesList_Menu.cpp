@@ -748,10 +748,7 @@ void NotesList::rebuilderNotesVector() {
       [this](int current, int total) {
         double pct = (total > 0) ? (100.0 * current / total) : 0.0;
 
-        mw_one->setVectorStatus(1, current, total);
-
-        // 如果主窗口有进度条，也可以同步更新
-        // mw_one->updateProgress(current, total);
+        if (mw_one->isVisible()) mw_one->setVectorStatus(1, current, total);
 
         qInfo() << "[PROGRESS]"
                 << QString("(%1/%2 %3%)")
@@ -777,6 +774,8 @@ void NotesList::rebuilderNotesVector() {
 
         // ✅ 每完成一个文件，发射进度信号（跨线程安全）
         emit rebuildProgressChanged(i + 1, totalFiles);
+
+        m_Method->Sleep(25);
       }
     } catch (const std::exception& e) {
       qCritical() << "[Embedding] Rebuild failed:" << e.what();

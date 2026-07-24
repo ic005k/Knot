@@ -62,6 +62,7 @@ EditRecord::EditRecord() {
   mui->editDetails->setFont(font);
   font.setBold(true);
   mui->lblTitleEditRecord->setFont(font);
+  mui->lblTitleEditRecord->setFixedHeight(50);
 
   QValidator* validator =
       new QRegularExpressionValidator(regxNumber, mui->editAmount);
