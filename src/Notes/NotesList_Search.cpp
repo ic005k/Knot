@@ -58,50 +58,62 @@ QFuture<QVector<ExactMatchResult>> NotesList::performSearchAsync(
         keyword, QRegularExpression::CaseInsensitiveOption |
                      QRegularExpression::UseUnicodePropertiesOption);
 
+    // ✅ 预编译高亮正则，避免循环内重复创建
+    QRegularExpression highlightRe(
+        QString("(%1)").arg(QRegularExpression::escape(keyword)),
+        QRegularExpression::CaseInsensitiveOption);
+
     for (const QString& file : files) {
-      QFile f(file);
-      if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) continue;
-
-      QTextStream in(&f);
-      // in.setCodec("UTF-8");
-
       ExactMatchResult emr;
       emr.filePath = file;
-
       emr.title = m_Notes->m_NoteIndexManager->getNoteTitle(file);
-
       emr.lineNumber = -1;
       emr.matchCount = 0;
 
-      int lineNum = 0;
-      while (!in.atEnd()) {
-        lineNum++;
-        QString line = in.readLine();
-        if (regex.match(line).hasMatch()) {
-          emr.allLineNumbers.append(lineNum);
-          emr.matchCount++;
-          // 仅取首个匹配行作为预览源
-          if (emr.lineNumber == -1) {
-            emr.lineNumber = lineNum;
-            emr.preview = line.trimmed();
+      // ✅ 1. 先检查标题是否匹配
+      bool titleMatched = regex.match(emr.title).hasMatch();
+      if (titleMatched) {
+        emr.matchCount++;
+        // 标题匹配时，用标题作为预览源，lineNumber 保持 -1 表示非正文匹配
+        emr.preview = emr.title;
+      }
+
+      // ✅ 2. 再搜索文件内容
+      QFile f(file);
+      if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&f);
+        int lineNum = 0;
+        while (!in.atEnd()) {
+          lineNum++;
+          QString line = in.readLine();
+          if (regex.match(line).hasMatch()) {
+            emr.allLineNumbers.append(lineNum);
+            emr.matchCount++;
+            // 仅取首个正文匹配行作为预览源（标题匹配不覆盖此逻辑）
+            // 如果标题已匹配且尚无正文匹配预览，仍优先保留标题预览
+            // 若希望正文预览优先，去掉 titleMatched 判断即可
+            if (emr.lineNumber == -1 && !titleMatched) {
+              emr.lineNumber = lineNum;
+              emr.preview = line.trimmed();
+            } else if (emr.lineNumber == -1 && titleMatched) {
+              // 标题已设为预览，记录首个正文匹配行号但不替换预览
+              emr.lineNumber = lineNum;
+            }
           }
         }
+        f.close();
       }
-      f.close();
 
+      // ✅ 3. 有匹配才加入结果
       if (emr.matchCount > 0) {
-        // ✅ 预览清洗（与AI搜索适配层保持一致的处理逻辑）
+        // 预览清洗
         const int maxLen = 200;
         if (emr.preview.length() > maxLen)
           emr.preview = emr.preview.left(maxLen).trimmed() + "...";
         emr.preview.replace(QRegularExpression("[\\r\\n]+"), " ");
         emr.preview = emr.preview.simplified();
 
-        // ✅ 注入关键词高亮（复用 DatabaseManager 的方案）
-        QRegularExpression highlightRe(
-            QString("(%1)").arg(QRegularExpression::escape(keyword)),
-            QRegularExpression::CaseInsensitiveOption);
-
+        // 关键词高亮
         emr.preview.replace(
             highlightRe,
             "<span style='background-color:#fff9c4; color:#c62828; "

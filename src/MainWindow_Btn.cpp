@@ -779,8 +779,10 @@ void MainWindow::on_btnCopyNoteLink_clicked() {
   QClipboard* clipboard = QApplication::clipboard();
   clipboard->setText(strlink);
 
+  QString res = m_Method->escapeAllHtml(strlink);
+
   auto msg = std::make_unique<ShowMessage>(mw_one);
-  msg->showMsg(appName, strlink, 1);
+  msg->showMsg(appName, res, 1);
 }
 
 void MainWindow::on_btnRotation_clicked() {

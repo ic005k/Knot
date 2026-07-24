@@ -14,8 +14,16 @@ ListView {
 
     property string mdFile: ""
 
+    Connections {
+        target: searchModel
+        function onSelectFirstItem() {
+            listView.currentIndex = 0;
+            listView.positionViewAtIndex(0, ListView.Beginning);
+        }
+    }
+
     function getQmlCurrentMDFile() {
-        return mdFile
+        return mdFile;
     }
 
     // 添加背景色
@@ -26,6 +34,7 @@ ListView {
     }
 
     delegate: ItemDelegate {
+
         width: listView.width
 
         // 动态高度：根据内容自动计算
@@ -85,19 +94,17 @@ ListView {
 
         // 点击选中处理
         onClicked: {
-
-            mdFile = text3.text
-            console.log("Open file:", text3.text)
-            listView.currentIndex = index
+            mdFile = text3.text;
+            console.log("Open file:", text3.text);
+            listView.currentIndex = index;
         }
 
         onDoubleClicked: {
+            mdFile = text3.text;
+            console.log("Open file:", text3.text);
+            listView.currentIndex = index;
 
-            mdFile = text3.text
-            console.log("Open file:", text3.text)
-            listView.currentIndex = index
-
-            mw_one.on_btnOpenSearchResult_clicked()
+            mw_one.on_btnOpenSearchResult_clicked();
         }
     }
 

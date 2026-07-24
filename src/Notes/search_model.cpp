@@ -30,4 +30,9 @@ void SearchModel::setResults(const QVector<SearchResult>& results) {
   beginResetModel();
   m_results = results;
   endResetModel();
+
+  // 有搜索结果，发送信号让QML选中第一条
+  if (!m_results.isEmpty()) {
+    emit selectFirstItem();
+  }
 }

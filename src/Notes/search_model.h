@@ -18,6 +18,10 @@ class SearchModel : public QAbstractListModel {
 
   void setResults(const QVector<SearchResult>& results);
 
+ signals:
+  // 模型数据重置完成、且存在数据时触发，通知QML选中第0行
+  void selectFirstItem();
+
  private:
   QVector<SearchResult> m_results;
 };
