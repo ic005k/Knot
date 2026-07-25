@@ -230,6 +230,9 @@ class NotesList : public QDialog {
   bool waitForRebuildFinished(int timeoutMs);
   void safeExitLlama();
 
+  void startVectorSerach(const QString& text);
+  bool isEditBoxSearchTextChanged = false;
+
  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 

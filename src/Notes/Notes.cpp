@@ -43,7 +43,7 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
 
   m_Method->set_ToolButtonStyle(this);
 
-  // 笔记链接自动补全
+  // =================================笔记链接自动补全==============
   popupLinkList = new QWidget(this);
   popupLinkList->setWindowFlags(Qt::FramelessWindowHint | Qt::Window |
                                 Qt::Tool | Qt::WindowStaysOnTopHint);
@@ -60,7 +60,11 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
   layout->addWidget(closeBtn);
 
   // 点击关闭
-  connect(closeBtn, &QPushButton::clicked, popupLinkList, &QWidget::close);
+  connect(closeBtn, &QPushButton::clicked, this, [=]() {
+    isBtnAILinkClicked = false;
+    ui->editNoteLink->setEnabled(true);
+    popupLinkList->close();
+  });
 
   m_popupList->setFocusPolicy(Qt::NoFocus);
   closeBtn->setFocusPolicy(Qt::NoFocus);
@@ -68,6 +72,8 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
 
   connect(m_popupList, &QListWidget::itemClicked, this,
           &Notes::onPopupItemClicked);
+
+  //==============================================================================
 
   // Ctrl+F 快捷键
   QShortcut* shortcut1 = new QShortcut(QKeySequence("Ctrl+F"), this);
@@ -163,7 +169,7 @@ bool Notes::eventFilter(QObject* obj, QEvent* evn) {
 
 void Notes::closeEvent(QCloseEvent* event) {
   Q_UNUSED(event);
-  m_popupList->close();
+  popupLinkList->close();
   saveEditorState(currentMDFile);
 
 #ifndef Q_OS_ANDROID

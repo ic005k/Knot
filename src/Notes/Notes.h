@@ -220,6 +220,10 @@ class Notes : public QDialog {
 
   void popupNoteLinkList(const QString& arg1);
 
+  QString getCursorPosText(const QString& fullText, int cursorPos,
+                           int textCount);
+  bool isBtnAILinkClicked = false;
+
  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
@@ -300,8 +304,6 @@ class Notes : public QDialog {
   QListWidget* m_popupList;
   QWidget* popupLinkList;
 
-  bool isBtnAILinkClicked;
-
   bool isReceiveRemoteFile = false;
 
   QString oldText, newText;
@@ -351,6 +353,10 @@ class Notes : public QDialog {
 
 #ifndef Q_OS_ANDROID
   QsciLexerMarkdown* markdownLexer = nullptr;
+
+  QString takeFirstNTokens(const QString& text, int count = 10);
+
+  int getCursorCharOffset(QsciScintilla* editor);
 #endif
 
   void initMarkdownLexer();
@@ -374,11 +380,6 @@ class Notes : public QDialog {
   void insertNoteLink(const QString& title, const QString& path);
   void switchMdDarkTheme(bool dark);
   void applyMdLexerTheme(bool darkMode);
-
-  QString getContextString(QsciScintilla* editor, int count = 6,
-                           const QString& separator = "");
-  ContextWords extractContextTokens(QsciScintilla* editor, int count = 6);
-  QString takeFirstNTokens(const QString& text, int count = 10);
 };
 
 #endif  // NOTES_H

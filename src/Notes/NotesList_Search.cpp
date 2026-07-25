@@ -266,7 +266,7 @@ QString NotesList::getSearchResultQmlFile() {
   return item.toString();
 }
 
-void NotesList::onSearchTextChanged(const QString& text) {
+void NotesList::startVectorSerach(const QString& text) {
   QTimer::singleShot(300, this, [this, text]() {
     // 空文本时清空结果
     if (text.trimmed().isEmpty()) {
@@ -287,39 +287,39 @@ void NotesList::onSearchTextChanged(const QString& text) {
 
       // 🔍 诊断测试代码
       /*{
-        // 1. 检查索引是否为空
-        int indexSize = m_vectorSearchService->debugIndexSize();
-        qDebug() << "[DIAG] 当前向量索引大小:" << indexSize;
+  // 1. 检查索引是否为空
+  int indexSize = m_vectorSearchService->debugIndexSize();
+  qDebug() << "[DIAG] 当前向量索引大小:" << indexSize;
 
-        // 2. 验证嵌入模型
-        QString testText = text.isEmpty() ? QStringLiteral("红楼梦") : text;
-        auto testVec = g_embEngine->encode(testText);
+  // 2. 验证嵌入模型
+  QString testText = text.isEmpty() ? QStringLiteral("红楼梦") : text;
+  auto testVec = g_embEngine->encode(testText);
 
-        bool isZeroVec = testVec.isEmpty() ||
-                         std::all_of(testVec.constBegin(), testVec.constEnd(),
-                                     [](float v) { return v == 0.0f; });
+  bool isZeroVec = testVec.isEmpty() ||
+                   std::all_of(testVec.constBegin(), testVec.constEnd(),
+                               [](float v) { return v == 0.0f; });
 
-        qDebug() << "[DIAG] 测试文本:" << testText
-                 << "| 向量维度:" << testVec.size() << "| 全零:" << isZeroVec;
+  qDebug() << "[DIAG] 测试文本:" << testText
+           << "| 向量维度:" << testVec.size() << "| 全零:" << isZeroVec;
 
-        // 3. 端到端验证
-        if (!isZeroVec && testVec.size() > 0) {
-          QString testId = QStringLiteral("__diag_test__");
-          bool selfFound = m_vectorSearchService->debugAddAndSearch(
-              testId, testVec, testText);
-          qDebug() << "[DIAG] 自检索是否命中自身:" << selfFound;
-          m_vectorSearchService->debugRemove(testId);
-        }
+  // 3. 端到端验证
+  if (!isZeroVec && testVec.size() > 0) {
+    QString testId = QStringLiteral("__diag_test__");
+    bool selfFound = m_vectorSearchService->debugAddAndSearch(
+        testId, testVec, testText);
+    qDebug() << "[DIAG] 自检索是否命中自身:" << selfFound;
+    m_vectorSearchService->debugRemove(testId);
+  }
 
-        // 4. 提前终止无效搜索
-        if (indexSize == 0 || isZeroVec) {
-          mui->lblNoteSearchResult->setText(
-              tr("⚠️ AI诊断: 索引=%1, 向量%2")
-                  .arg(indexSize)
-                  .arg(isZeroVec ? "无效" : "正常"));
-          return;
-        }
-      }*/
+  // 4. 提前终止无效搜索
+  if (indexSize == 0 || isZeroVec) {
+    mui->lblNoteSearchResult->setText(
+        tr("⚠️ AI诊断: 索引=%1, 向量%2")
+            .arg(indexSize)
+            .arg(isZeroVec ? "无效" : "正常"));
+    return;
+  }
+}*/
 
       //////////////////////////////////////////////////////////////////////////////////
       //////////////////////////////////////////////////////////////////////////////////
@@ -404,14 +404,27 @@ void NotesList::onSearchTextChanged(const QString& text) {
                 adaptedResults.append(sr);
               }
 
-              m_searchModel.setResults(adaptedResults);
-              mui->lblNoteSearchResult->setText(
-                  tr("AI Search Results: %1").arg(adaptedResults.size()));
+              if (isEditBoxSearchTextChanged) {
+                isEditBoxSearchTextChanged = false;
+                m_searchModel.setResults(adaptedResults);
+                mui->lblNoteSearchResult->setText(
+                    tr("AI Search Results: %1").arg(adaptedResults.size()));
+              }
 
               isVectorSearchDone = true;
+
+              if (m_Notes->isBtnAILinkClicked) {
+                m_Notes->popupNoteLinkList("");
+                m_Notes->isBtnAILinkClicked = false;
+              }
             },
             Qt::QueuedConnection);
       });
     }
   });
+}
+
+void NotesList::onSearchTextChanged(const QString& text) {
+  isEditBoxSearchTextChanged = true;
+  startVectorSerach(text);
 }

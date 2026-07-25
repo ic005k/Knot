@@ -1,3 +1,5 @@
+
+
 #include "src/Notes/Notes.h"
 
 // 按钮点击
@@ -367,7 +369,9 @@ void Notes::popupNoteLinkList(const QString& arg1) {
     return;
   }
 
-  popupLinkList->setFixedWidth(ui->editNoteLink->width());
+  popupLinkList->setFixedWidth(ui->editNoteLink->width() +
+                               ui->btnAILink->width() +
+                               ui->lblNoteLink->width());
 
   // ==============================
   //  下拉列表完整样式（亮/暗双主题）
@@ -532,9 +536,6 @@ void Notes::popupNoteLinkList(const QString& arg1) {
       ui->editNoteLink->mapToGlobal(QPoint(0, ui->editNoteLink->height()));
   popupLinkList->move(pos);
   popupLinkList->show();
-
-  isBtnAILinkClicked = false;
-  ui->editNoteLink->setEnabled(true);
 }
 
 // 链接自动补全
@@ -543,6 +544,8 @@ void Notes::on_editNoteLink_textChanged(const QString& arg1) {
 }
 
 void Notes::onPopupItemClicked(QListWidgetItem* item) {
+#ifndef Q_OS_ANDROID
+
   QString title = item->text();
 
   // 插入链接
@@ -561,7 +564,12 @@ void Notes::onPopupItemClicked(QListWidgetItem* item) {
 
   // 清空 + 关闭列表
   ui->editNoteLink->clear();
-  m_popupList->hide();
+  popupLinkList->close();
+
+  isBtnAILinkClicked = false;
+  ui->editNoteLink->setEnabled(true);
+
+#endif
 }
 
 void Notes::insertNoteLink(const QString& title, const QString& path) {
@@ -586,22 +594,30 @@ void Notes::insertNoteLink(const QString& title, const QString& path) {
 }
 
 void Notes::on_btnAILink_clicked() {
+#ifndef Q_OS_ANDROID
+
   isBtnAILinkClicked = true;
-  ui->editNoteLink->clear();
   ui->editNoteLink->setEnabled(false);
 
-  // 前后各10个，用空格分割
-  QString result = getContextString(m_EditSource, 10, " ");
+  // 前后各10个字词
+  int cursorPos = getCursorCharOffset(m_EditSource);
+  QString result = getCursorPosText(m_EditSource->text(), cursorPos, 10);
   qDebug() << "前后各取10各字词：" << result;
 
-  mui->editNotesSearch->setText(result);
+  m_NotesList->startVectorSerach(result);
 
+  mw_one->showProgress();
   while (!isVectorSearchDone) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     QThread::msleep(1);
   }
 
-  popupNoteLinkList("");
+  mw_one->safeCloseProgress();
+
+  // 后面由NotesList::vectorSearchDone完成
+  //  popupNoteLinkList("");
+
+#endif
 }
 
 // 判断是否为 CJK 统一汉字/日文假名/韩文音节等
@@ -621,108 +637,7 @@ static inline bool isSpaceChar(QChar ch) {
   return ch.isSpace() || ch == '\n' || ch == '\r' || ch == '\t';
 }
 
-/**
- * @brief 提取光标前后不包含空格的各N个字词
- * @param editor      QsciScintilla 指针
- * @param count       每侧提取的数量（默认6）
- * @return ContextWords 包含前后字词列表，若某侧无内容则对应列表为空
- */
-ContextWords Notes::extractContextTokens(QsciScintilla* editor, int count) {
-  ContextWords result;
-  if (!editor) return result;
-
-  // 1. 获取当前光标位置（字节偏移 -> 转为文本索引）
-  int pos = editor->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS);
-  QString text = editor->text();
-
-  // Scintilla 的 position 是字节偏移，对于 UTF-8 需要转换为 QString 的字符索引
-  // QsciScintilla::text() 返回的是 QString，我们需要将 byte pos 映射到 char
-  // index
-  // QByteArray rawText =
-  //    editor->SendScintilla(QsciScintilla::SCI_GETCHARACTERPOINTER);
-
-  // 更安全的方式：直接用 Scintilla 的 UTF-8 计数
-  int charPos =
-      editor->SendScintilla(QsciScintilla::SCI_COUNTCHARACTERS, 0, pos);
-
-  if (charPos < 0 || charPos > text.length()) return result;
-
-  // ============================================================
-  // 2. 向前扫描（从光标位置往左）
-  // ============================================================
-  int i = charPos - 1;
-  while (result.before.size() < count && i >= 0) {
-    // 跳过空白
-    while (i >= 0 && isSpaceChar(text[i])) --i;
-    if (i < 0) break;
-
-    if (isCjkChar(text[i])) {
-      // CJK: 单字即一个 token
-      result.before.prepend(text.mid(i, 1));
-      --i;
-    } else {
-      // 西文: 向左找单词边界
-      int end = i + 1;
-      while (i >= 0 && !isSpaceChar(text[i]) && !isCjkChar(text[i])) --i;
-      QString word = text.mid(i + 1, end - (i + 1)).trimmed();
-      if (!word.isEmpty()) {
-        result.before.prepend(word);
-      }
-    }
-  }
-
-  // ============================================================
-  // 3. 向后扫描（从光标位置往右）
-  // ============================================================
-  i = charPos;
-  while (result.after.size() < count && i < text.length()) {
-    // 跳过空白
-    while (i < text.length() && isSpaceChar(text[i])) ++i;
-    if (i >= text.length()) break;
-
-    if (isCjkChar(text[i])) {
-      // CJK: 单字即一个 token
-      result.after.append(text.mid(i, 1));
-      ++i;
-    } else {
-      // 西文: 向右找单词边界
-      int start = i;
-      while (i < text.length() && !isSpaceChar(text[i]) && !isCjkChar(text[i]))
-        ++i;
-      QString word = text.mid(start, i - start).trimmed();
-      if (!word.isEmpty()) {
-        result.after.append(word);
-      }
-    }
-  }
-
-  return result;
-}
-
-/**
- * @brief 获取光标前后各N个字词拼接成的完整字符串
- * @param editor QsciScintilla 指针
- * @param count  每侧提取的数量（默认6）
- * @param separator 字词之间的分隔符（默认为空字符串，紧密拼接）
- * @return 拼接后的字符串，若两侧均无内容则返回空字符串
- */
-QString Notes::getContextString(QsciScintilla* editor, int count,
-                                const QString& separator) {
-  ContextWords ctx = extractContextTokens(editor, count);
-
-  if (ctx.before.isEmpty() && ctx.after.isEmpty()) return QString();
-
-  QStringList allTokens;
-  allTokens.reserve(ctx.before.size() + ctx.after.size());
-
-  // ✅ 正序遍历 before 就是正确的阅读顺序（从远到近）！
-  for (const QString& token : ctx.before) allTokens.append(token);
-
-  // after 本身就是从近到远（append 的结果），也是正确的阅读顺序
-  for (const QString& token : ctx.after) allTokens.append(token);
-
-  return allTokens.join(separator);
-}
+#ifndef Q_OS_ANDROID
 
 /**
  * @brief 从字符串开头取前N个字词，保留原始格式（空格、标点等原样保留）
@@ -768,4 +683,90 @@ QString Notes::takeFirstNTokens(const QString& text, int count) {
   // 如果后面紧跟空白，这些空白不属于第10个token，不应包含
   // 但如果用户希望保留token后的尾随空格，可去掉下面的trim逻辑
   return text.left(i);
+}
+
+/**
+ * @brief 获取 QScintilla 编辑器中光标的字符偏移量（UTF-16 索引）
+ * @return 从文档开头到光标位置的字符数，可直接传给 getCursorPosText()
+ */
+int Notes::getCursorCharOffset(QsciScintilla* editor) {
+  if (!editor) return 0;
+
+  int line, index;
+  editor->getCursorPosition(&line, &index);
+
+  // positionFromLineIndex 返回的是字节偏移（取决于编码）
+  // 对于 QString 操作，我们需要 UTF-16 字符偏移
+  long pos = editor->positionFromLineIndex(line, index);
+
+  // QScintilla 内部使用 UTF-8，而 QString 是 UTF-16
+  // 必须将 UTF-8 字节偏移转换为 UTF-16 字符偏移
+  QByteArray utf8 = editor->text().toUtf8();
+  QString text = QString::fromUtf8(utf8.left(pos));
+  return text.length();
+}
+
+#endif
+
+/**
+ * @brief 获取光标前后各 textCount 个字词的上下文（纯字符串操作，跨平台）
+ * @param fullText   编辑器全量文本
+ * @param cursorPos  光标在 fullText 中的字符偏移量 [0, fullText.length()]
+ * @param textCount  光标每侧需要获取的字词数量
+ * @return 拼接后的上下文字符串，保留原始格式；不足则返回实际可用部分
+ */
+QString Notes::getCursorPosText(const QString& fullText, int cursorPos,
+                                int textCount) {
+  if (fullText.isEmpty() || textCount <= 0) return {};
+
+  // 安全钳制光标位置
+  cursorPos = qBound(0, cursorPos, fullText.length());
+
+  // ---------- 向前扫描：找第 textCount 个 token 的起始位置 ----------
+  int leftStart = cursorPos;
+  int leftCount = 0;
+  while (leftStart > 0 && leftCount < textCount) {
+    --leftStart;
+    // 跳过空白（空白不计数，但会被包含在截取范围内）
+    if (fullText[leftStart].isSpace()) continue;
+
+    // 遇到非空白 = 一个 token 的末尾（从右往左看）
+    ++leftCount;
+
+    // 如果是 CJK 字符，单字即一个 token，leftStart 已指向它
+    if (isCjkChar(fullText[leftStart])) continue;
+
+    // 西文词：继续向左直到遇到空白或 CJK 边界
+    while (leftStart > 0 && !fullText[leftStart - 1].isSpace() &&
+           !isCjkChar(fullText[leftStart - 1])) {
+      --leftStart;
+    }
+  }
+
+  // ---------- 向后扫描：找第 textCount 个 token 的结束位置 ----------
+  int rightEnd = cursorPos;
+  int rightCount = 0;
+  int len = fullText.length();
+  while (rightEnd < len && rightCount < textCount) {
+    // 跳过空白
+    if (fullText[rightEnd].isSpace()) {
+      ++rightEnd;
+      continue;
+    }
+
+    ++rightCount;
+
+    if (isCjkChar(fullText[rightEnd])) {
+      ++rightEnd;
+    } else {
+      // 西文词：向右吞掉整个词
+      while (rightEnd < len && !fullText[rightEnd].isSpace() &&
+             !isCjkChar(fullText[rightEnd])) {
+        ++rightEnd;
+      }
+    }
+  }
+
+  // 直接截取原始子串，完美保留空格、标点等原始格式
+  return fullText.mid(leftStart, rightEnd - leftStart);
 }

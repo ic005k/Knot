@@ -710,9 +710,10 @@ public class NoteEditor
                     // 3. 分批次更新UI
                     for (int i = 0; i < totalChunks; i++) {
                         final int start = i * chunkSize;
-                        final int end = (i == totalChunks - 1)
-                            ? data.length()
-                            : start + chunkSize;
+                        final int end =
+                            i == totalChunks - 1
+                                ? data.length()
+                                : start + chunkSize;
                         final String chunk = data.substring(start, end);
 
                         // 主线程追加文本并更新进度
@@ -3144,7 +3145,7 @@ public class NoteEditor
         float b = Color.blue(color) / 255f;
 
         // 亮度公式
-        float luminance = (0.299f * r) + (0.587f * g) + (0.114f * b);
+        float luminance = 0.299f * r + 0.587f * g + 0.114f * b;
         return luminance <= 0.5f;
     }
 
@@ -3256,7 +3257,7 @@ public class NoteEditor
     // ================================
     // 显示笔记标题悬浮补全列表（带顶部过滤搜索框）
     // ================================
-    private void showNoteSuggestPopup(List<String> titles) {
+    /*  private void showNoteSuggestPopup(List<String> titles) {
         if (titles == null || titles.isEmpty()) {
             if (noteLinkPopup != null) noteLinkPopup.dismiss();
             return;
@@ -3365,6 +3366,166 @@ public class NoteEditor
         if (!noteLinkPopup.isShowing()) {
             noteLinkPopup.showAtLocation(editNote, Gravity.FILL, 0, 0);
         }
+    }*/
+
+    // ================================
+    // 显示笔记标题悬浮补全列表（带顶部过滤搜索框）
+    // [[触发后跳出的窗口主实现
+    // ================================
+    private void showNoteSuggestPopup(List<String> titles) {
+        // 无匹配项 直接关闭弹窗
+        if (titles == null || titles.isEmpty()) {
+            if (noteLinkPopup != null) noteLinkPopup.dismiss();
+            return;
+        }
+
+        // 第一次初始化PopupWindow弹窗布局（AI按钮 + 搜索框 + RecyclerView列表）
+        if (noteLinkPopup == null) {
+            Context context = NoteEditor.this;
+            // 外层垂直布局
+            LinearLayout container = new LinearLayout(context);
+            container.setOrientation(LinearLayout.VERTICAL);
+
+            // ========== 新增：AI Link 按钮区域 ==========
+            Button btnAiLink = new Button(context);
+            // 多语言文本
+            String aiBtnText = MyActivity.zh_cn ? "AI 智能链接" : "AI Link";
+            btnAiLink.setText(aiBtnText);
+            // 样式适配深浅色
+            if (MyActivity.isDark) {
+                btnAiLink.setBackgroundColor(0xFF4444AA);
+                btnAiLink.setTextColor(0xFFFFFFFF);
+            } else {
+                btnAiLink.setBackgroundColor(0xFF5566FF);
+                btnAiLink.setTextColor(0xFFFFFFFF);
+            }
+            btnAiLink.setPadding(60, 30, 60, 30);
+            btnAiLink.setTextSize(16);
+            LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            btnParams.setMargins(20, 20, 20, 10);
+            btnAiLink.setLayoutParams(btnParams);
+            // 按钮点击事件
+            btnAiLink.setOnClickListener(v -> onClickAiLink());
+            // 把AI按钮加入最顶部
+            container.addView(btnAiLink);
+
+            // ========== 原有：顶部过滤搜索输入框 ==========
+            EditText filterEdit = new EditText(context);
+            filterEdit.setHint(
+                MyActivity.zh_cn ? "搜索笔记标题..." : "Search note titles..."
+            );
+            filterEdit.setPadding(40, 40, 40, 40);
+            filterEdit.setTextSize(16);
+            filterEdit.setBackgroundColor(
+                MyActivity.isDark ? 0xFF333333 : 0xFFEEEEEE
+            );
+            filterEdit.setTextColor(
+                MyActivity.isDark ? 0xFFFFFFFF : 0xFF000000
+            );
+            LinearLayout.LayoutParams editParams =
+                new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                );
+            editParams.setMargins(20, 0, 20, 0);
+            filterEdit.setLayoutParams(editParams);
+
+            // ========== 原有：笔记标题列表RecyclerView ==========
+            popupRecycler = new RecyclerView(context);
+            popupRecycler.setLayoutManager(new LinearLayoutManager(context));
+            adapter = new NoteSuggestAdapter(suggestList, title -> {
+                // 点击列表项后替换[[xxx为完整双链并关闭弹窗
+                String link = noteLinkCompleter.buildMarkdownLink(title);
+                replaceLinkText(link);
+                if (noteLinkPopup != null) noteLinkPopup.dismiss();
+            });
+            popupRecycler.setAdapter(adapter);
+            LinearLayout.LayoutParams rvParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            );
+            rvParams.setMargins(10, 10, 10, 10);
+            popupRecycler.setLayoutParams(rvParams);
+
+            // ========== 组装界面 ==========
+            container.addView(filterEdit);
+            container.addView(popupRecycler);
+
+            // ========== 悬浮弹窗 ==========
+            noteLinkPopup = new PopupWindow(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            );
+            noteLinkPopup.setContentView(container);
+            int bgColor = MyActivity.isDark ? 0xFF222222 : 0xFFFFFFFF;
+            noteLinkPopup.setBackgroundDrawable(new ColorDrawable(bgColor));
+            noteLinkPopup.setOutsideTouchable(true); // 点击外部关闭窗口
+            noteLinkPopup.setFocusable(true);
+
+            // ========== 搜索框实时过滤列表逻辑（原有不变） ==========
+            filterEdit.addTextChangedListener(
+                new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(
+                        CharSequence s,
+                        int start,
+                        int count,
+                        int after
+                    ) {}
+
+                    @Override
+                    public void onTextChanged(
+                        CharSequence s,
+                        int start,
+                        int before,
+                        int count
+                    ) {}
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        String keyword = s.toString().toLowerCase().trim();
+                        List<String> filtered = new ArrayList<>();
+                        for (String t : titles) {
+                            if (t.toLowerCase().contains(keyword)) filtered.add(
+                                t
+                            );
+                        }
+                        suggestList.clear();
+                        suggestList.addAll(filtered);
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            );
+        }
+
+        // 更新弹窗列表数据
+        suggestList.clear();
+        suggestList.addAll(titles);
+        adapter.notifyDataSetChanged();
+
+        // 弹出窗口，铺满屏幕全屏
+        if (!noteLinkPopup.isShowing()) {
+            noteLinkPopup.showAtLocation(editNote, Gravity.FILL, 0, 0);
+        }
+    }
+
+    private void onClickAiLink() {
+        if (noteLinkPopup != null) {
+            noteLinkPopup.dismiss();
+        }
+        int cursor = editNote.getSelectionStart();
+        Editable edit = editNote.getEditableText();
+        String content = edit.toString();
+        int start = content.lastIndexOf("[[", cursor);
+        if (start != -1) {
+            String aiLinkText = MyActivity.zh_cn
+                ? "[[AI智能关联笔记]]"
+                : "[[AI Related Note]]";
+            edit.replace(start, cursor, aiLinkText);
+        }
     }
 
     // ================================
@@ -3470,8 +3631,7 @@ public class NoteEditor
             goFindResult(1);
 
             // 同步更新计数显示
-            String info =
-                (curIndexForResult + 1) + "/" + arrayFindResult.size();
+            String info = curIndexForResult + 1 + "/" + arrayFindResult.size();
             lblResult.setText(info);
         }
     }
