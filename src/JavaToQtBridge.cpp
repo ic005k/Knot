@@ -29,6 +29,9 @@ static void JavaNotify_17();
 static void JavaNotify_18();
 static void JavaNotify_19();
 static void JavaNotify_20(JNIEnv* env, jclass clazz, jstring sentence);
+// AI Link Native方法声明（标准JNI静态方法参数）
+static void generateAiLinkMetadata(JNIEnv* env, jclass clazz,
+                                   jstring noteFullText, jint cursorPos);
 #endif
 
 #ifdef Q_OS_ANDROID
@@ -299,6 +302,33 @@ static void JavaNotify_20(JNIEnv* env, jclass clazz, jstring sentence) {
   });
 }
 
+// ===================== AI Link 生成入口 =====================
+static void generateAiLinkMetadata(JNIEnv* env, jclass clazz,
+                                   jstring noteFullText, jint cursorPos) {
+  Q_UNUSED(clazz);
+  // 1. 安全转换Java字符串为Qt字符串，释放JNI引用
+  QString fullText;
+  if (noteFullText != nullptr) {
+    const char* utf8Text = env->GetStringUTFChars(noteFullText, nullptr);
+    fullText = QString::fromUtf8(utf8Text);
+    env->ReleaseStringUTFChars(noteFullText, utf8Text);
+  }
+  int cursorIndex = (int)cursorPos;
+  qDebug() << "收到AI链接生成请求，光标位置：" << cursorIndex << "文本长度："
+           << fullText.size();
+
+  // 2. 启动独立子线程执行AI耗时推理（阻塞JNI会导致ANR）
+  std::thread aiWorkThread([fullText, cursorIndex]() {
+    QString result = m_Notes->getCursorPosText(fullText, cursorIndex, 10);
+    qDebug() << "Android前后各取10各字词：" << result;
+
+    m_Notes->isAndroidAILinkGen = true;
+    m_NotesList->startVectorSerach(result);
+  });
+  // 分离线程，自动回收资源
+  aiWorkThread.detach();
+}
+
 static const JNINativeMethod gMethods[] = {
     {"CallJavaNotify_0", "()V", (void*)JavaNotify_0},
     {"CallJavaNotify_1", "()V", (void*)JavaNotify_1},
@@ -335,6 +365,10 @@ static const JNINativeMethod gMethods19[] = {
 
 static const JNINativeMethod gMethods20[] = {
     {"CallJavaNotify_20", "(Ljava/lang/String;)V", (void*)JavaNotify_20}};
+
+static const JNINativeMethod gMethodsAiLink[] = {
+    {"generateAiLinkMetadata", "(Ljava/lang/String;I)V",
+     (void*)generateAiLinkMetadata}};
 
 void RegJni(const char* myClassName) {
   QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
@@ -474,6 +508,29 @@ void RegJni20(const char* myClassName) {
     jclass cls = env->FindClass(myClassName);
     env->RegisterNatives(cls, gMethods20, 1);
   });
+}
+
+void RegJniAiLink(const char* myClassName) {
+  QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
+    QJniEnvironment Environment;
+    const char* mClassName = myClassName;
+    jclass j_class;
+    j_class = Environment->FindClass(mClassName);
+    if (j_class == nullptr) {
+      qDebug() << "erro clazz AiLink";
+      return;
+    }
+    jint mj = Environment->RegisterNatives(
+        j_class, gMethodsAiLink,
+        sizeof(gMethodsAiLink) / sizeof(gMethodsAiLink[0]));
+    if (mj != JNI_OK) {
+      qDebug() << "register AiLink native method failed!";
+      return;
+    } else {
+      qDebug() << "RegisterNatives AiLink success!";
+    }
+  });
+  qDebug() << "++++++++++++++++++++++++";
 }
 
 #endif

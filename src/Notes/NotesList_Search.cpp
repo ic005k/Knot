@@ -417,6 +417,10 @@ void NotesList::startVectorSerach(const QString& text) {
                 m_Notes->popupNoteLinkList("");
                 m_Notes->isBtnAILinkClicked = false;
               }
+
+              if (m_Notes->isAndroidAILinkGen) {
+                m_Notes->isAndroidAILinkGen = false;
+              }
             },
             Qt::QueuedConnection);
       });

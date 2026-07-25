@@ -223,6 +223,7 @@ class Notes : public QDialog {
   QString getCursorPosText(const QString& fullText, int cursorPos,
                            int textCount);
   bool isBtnAILinkClicked = false;
+  bool isAndroidAILinkGen = false;
 
  protected:
   void keyReleaseEvent(QKeyEvent* event) override;

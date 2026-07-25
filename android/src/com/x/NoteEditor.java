@@ -288,6 +288,12 @@ public class NoteEditor
 
     public static native void CallJavaNotify_16();
 
+    // 传递全文文本与光标位置至C++，生成AI关联链接元数据
+    public static native void generateAiLinkMetadata(
+        String noteFullText,
+        int cursorPos
+    );
+
     private static boolean isGoBackKnot = false;
 
     private ProgressBar progressBar;
@@ -839,6 +845,9 @@ public class NoteEditor
 
     @Override
     protected void onDestroy() {
+        // 页面销毁强制关闭进度弹窗，避免卡死
+        findViewById(R.id.progressContainer).setVisibility(View.GONE);
+
         // save cursor pos
         String file2 = "/storage/emulated/0/.Knot/note_text.ini";
         int cpos = editNote.getSelectionStart();
@@ -3513,19 +3522,32 @@ public class NoteEditor
     }
 
     private void onClickAiLink() {
+        // 1. 关闭当前双链弹窗
         if (noteLinkPopup != null) {
             noteLinkPopup.dismiss();
         }
-        int cursor = editNote.getSelectionStart();
-        Editable edit = editNote.getEditableText();
-        String content = edit.toString();
-        int start = content.lastIndexOf("[[", cursor);
-        if (start != -1) {
-            String aiLinkText = MyActivity.zh_cn
-                ? "[[AI智能关联笔记]]"
-                : "[[AI Related Note]]";
-            edit.replace(start, cursor, aiLinkText);
-        }
+
+        // 2. 弹出全局转圈进度条
+        findViewById(R.id.progressContainer).setVisibility(View.VISIBLE);
+
+        // 3. 获取编辑器全文 + 光标位置
+        String fullText = editNote.getText().toString();
+        int cursorIndex = editNote.getSelectionStart();
+
+        // 4. JNI 调用C++生成AI链接元数据
+        generateAiLinkMetadata(fullText, cursorIndex);
+    }
+
+    public static void receiveAiLinkResult(List<String> aiTitleList) {
+        if (m_instance == null) return;
+        m_instance.runOnUiThread(() -> {
+            // 直接关闭进度弹窗
+            m_instance
+                .findViewById(R.id.progressContainer)
+                .setVisibility(View.GONE);
+            // 重新弹出链接选择窗口展示AI推荐列表
+            m_instance.showNoteSuggestPopup(aiTitleList);
+        });
     }
 
     // ================================
