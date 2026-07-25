@@ -71,6 +71,11 @@ namespace Ui {
 class Notes;
 }
 
+struct ContextWords {
+  QStringList before;  // 光标前的字词（按从近到远排列）
+  QStringList after;   // 光标后的字词（按从近到远排列）
+};
+
 class Notes : public QDialog {
   Q_OBJECT
 
@@ -213,6 +218,8 @@ class Notes : public QDialog {
 
   QString readNoteFileSafeFromRaw(const QByteArray& raw);
 
+  void popupNoteLinkList(const QString& arg1);
+
  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
@@ -279,6 +286,8 @@ class Notes : public QDialog {
 
   void on_btnReplaceAll_clicked();
 
+  void on_btnAILink_clicked();
+
  private:
 #ifdef VECTOR_SEARCH
 
@@ -289,6 +298,9 @@ class Notes : public QDialog {
   static inline QMutex s_vecDbMutex;
 
   QListWidget* m_popupList;
+  QWidget* popupLinkList;
+
+  bool isBtnAILinkClicked;
 
   bool isReceiveRemoteFile = false;
 
@@ -359,9 +371,14 @@ class Notes : public QDialog {
   void processSingleRemoteFile(const QString& file);
   void startBackgroundProcessRemoteFiles_MultiThread();
   void buildCleanFileList();
-  void insertNoteLink(const QString& title);
+  void insertNoteLink(const QString& title, const QString& path);
   void switchMdDarkTheme(bool dark);
   void applyMdLexerTheme(bool darkMode);
+
+  QString getContextString(QsciScintilla* editor, int count = 6,
+                           const QString& separator = "");
+  ContextWords extractContextTokens(QsciScintilla* editor, int count = 6);
+  QString takeFirstNTokens(const QString& text, int count = 10);
 };
 
 #endif  // NOTES_H

@@ -32,6 +32,10 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->lblCount->hide();
   ui->btnFind->hide();
   ui->editFind->setMinimumWidth(65);
+  if (isLocalAIModel)
+    ui->btnAILink->show();
+  else
+    ui->btnAILink->hide();
 
   if (isAndroid) {
     mui->btnBack_NotesSearchResult->hide();
@@ -40,11 +44,27 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
   m_Method->set_ToolButtonStyle(this);
 
   // 笔记链接自动补全
-  m_popupList = new QListWidget(this);
-  m_popupList->setWindowFlags(Qt::FramelessWindowHint | Qt::Window | Qt::Tool |
-                              Qt::WindowStaysOnTopHint);
+  popupLinkList = new QWidget(this);
+  popupLinkList->setWindowFlags(Qt::FramelessWindowHint | Qt::Window |
+                                Qt::Tool | Qt::WindowStaysOnTopHint);
+  auto* layout = new QVBoxLayout(popupLinkList);
+  layout->setContentsMargins(0, 0, 0, 0);
+  layout->setSpacing(0);
+
+  m_popupList = new QListWidget(popupLinkList);
+  layout->addWidget(m_popupList);
+
+  // Close 按钮
+  QPushButton* closeBtn = new QPushButton(tr("Close"), popupLinkList);
+  closeBtn->setCursor(Qt::PointingHandCursor);
+  layout->addWidget(closeBtn);
+
+  // 点击关闭
+  connect(closeBtn, &QPushButton::clicked, popupLinkList, &QWidget::close);
+
   m_popupList->setFocusPolicy(Qt::NoFocus);
-  m_popupList->hide();
+  closeBtn->setFocusPolicy(Qt::NoFocus);
+  popupLinkList->hide();
 
   connect(m_popupList, &QListWidget::itemClicked, this,
           &Notes::onPopupItemClicked);

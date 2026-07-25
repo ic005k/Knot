@@ -76,6 +76,8 @@ class NotesList : public QDialog {
   ~NotesList();
   Ui::NotesList* ui;
 
+  QVector<SearchResult> adaptedResults;
+
   VectorSearchService* m_vectorSearchService = nullptr;
 
   QPointer<QMenu> menuNoteBook;
@@ -275,6 +277,7 @@ class NotesList : public QDialog {
   void slotCreateSubNotebook(int qmlIndex);
   void show_NoteBookPopMenu(int qmlIndex);
   void mouseClickNoteList();
+
  private slots:
 
   void on_actionShareNoteFile();
@@ -363,7 +366,6 @@ class NotesList : public QDialog {
 
   bool moveItem(QTreeWidget* tw);
 
-  // QFutureWatcher<ResultsMap>* watcher = nullptr;
   QFutureWatcher<QVector<ExactMatchResult>>* watcher = nullptr;
 
   QDateTime m_lastIndexTime;  // 记录最后一次索引构建时间

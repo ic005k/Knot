@@ -280,6 +280,7 @@ void NotesList::onSearchTextChanged(const QString& text) {
         g_embEngine->isValid()) {
       // ✅ 向量搜索：异步执行，避免阻塞UI
       mui->lblNoteSearchResult->setText(tr("Searching (AI)..."));
+      isVectorSearchDone = false;
 
       ////////////////////////////////////////////////////////////////////////////////
       ////////////////////////////////////////////////////////////////////////////////
@@ -332,7 +333,8 @@ void NotesList::onSearchTextChanged(const QString& text) {
             this,
             [this, results]() {
               // ✅ 适配层：基于 charStart/charEnd 从原文精准截取预览
-              QVector<SearchResult> adaptedResults;
+
+              adaptedResults.clear();
               adaptedResults.reserve(results.size());
 
               for (const auto& item : results) {
@@ -405,6 +407,8 @@ void NotesList::onSearchTextChanged(const QString& text) {
               m_searchModel.setResults(adaptedResults);
               mui->lblNoteSearchResult->setText(
                   tr("AI Search Results: %1").arg(adaptedResults.size()));
+
+              isVectorSearchDone = true;
             },
             Qt::QueuedConnection);
       });

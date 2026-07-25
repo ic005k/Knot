@@ -358,17 +358,16 @@ void Notes::on_btnReplaceAll_clicked() {
 #endif
 }
 
-// 链接自动补全
-void Notes::on_editNoteLink_textChanged(const QString& arg1) {
+void Notes::popupNoteLinkList(const QString& arg1) {
   QString keyword = arg1.trimmed();
 
   // 空内容隐藏
-  if (keyword.isEmpty()) {
-    m_popupList->hide();
+  if (keyword.isEmpty() && !isBtnAILinkClicked) {
+    popupLinkList->hide();
     return;
   }
 
-  m_popupList->setFixedWidth(ui->editNoteLink->width());
+  popupLinkList->setFixedWidth(ui->editNoteLink->width());
 
   // ==============================
   //  下拉列表完整样式（亮/暗双主题）
@@ -513,7 +512,16 @@ void Notes::on_editNoteLink_textChanged(const QString& arg1) {
   }
 
   // 搜索匹配的标题（真正使用用户输入！）
-  QStringList matches = m_NoteIndexManager->searchTitles(keyword);
+  QStringList matches;
+  if (isBtnAILinkClicked) {
+    for (int i = 0; i < m_NotesList->adaptedResults.size(); ++i) {
+      const SearchResult& item = m_NotesList->adaptedResults[i];
+      matches.append(item.preview);
+    }
+
+  } else {
+    matches = m_NoteIndexManager->searchTitles(keyword);
+  }
 
   // 刷新列表
   m_popupList->clear();
@@ -522,24 +530,43 @@ void Notes::on_editNoteLink_textChanged(const QString& arg1) {
   // 显示在输入框正下方
   QPoint pos =
       ui->editNoteLink->mapToGlobal(QPoint(0, ui->editNoteLink->height()));
-  m_popupList->move(pos);
-  m_popupList->show();
+  popupLinkList->move(pos);
+  popupLinkList->show();
+
+  isBtnAILinkClicked = false;
+  ui->editNoteLink->setEnabled(true);
+}
+
+// 链接自动补全
+void Notes::on_editNoteLink_textChanged(const QString& arg1) {
+  popupNoteLinkList(arg1);
 }
 
 void Notes::onPopupItemClicked(QListWidgetItem* item) {
   QString title = item->text();
 
   // 插入链接
-  insertNoteLink(title);
+  QString fullPath;
+  if (isBtnAILinkClicked) {
+    int index = -1;
+    index = m_popupList->currentRow();
+    fullPath = m_NotesList->adaptedResults[index].filePath;
+    title = takeFirstNTokens(title, 10);
+
+  } else {
+    fullPath = m_NoteIndexManager->getFilePathByTitle(title);
+  }
+
+  insertNoteLink(title, fullPath);
 
   // 清空 + 关闭列表
   ui->editNoteLink->clear();
   m_popupList->hide();
 }
 
-void Notes::insertNoteLink(const QString& title) {
+void Notes::insertNoteLink(const QString& title, const QString& path) {
   // 1. 通过标题获取路径
-  QString fullPath = m_NoteIndexManager->getFilePathByTitle(title);
+  QString fullPath = path;  // m_NoteIndexManager->getFilePathByTitle(title);
   if (fullPath.isEmpty()) return;
 
   // 2. 转成相对路径 memo/xxx.md
@@ -556,4 +583,189 @@ void Notes::insertNoteLink(const QString& title) {
 
   // 5. 清空输入框
   ui->editNoteLink->clear();
+}
+
+void Notes::on_btnAILink_clicked() {
+  isBtnAILinkClicked = true;
+  ui->editNoteLink->clear();
+  ui->editNoteLink->setEnabled(false);
+
+  // 前后各10个，用空格分割
+  QString result = getContextString(m_EditSource, 10, " ");
+  qDebug() << "前后各取10各字词：" << result;
+
+  mui->editNotesSearch->setText(result);
+
+  while (!isVectorSearchDone) {
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    QThread::msleep(1);
+  }
+
+  popupNoteLinkList("");
+}
+
+// 判断是否为 CJK 统一汉字/日文假名/韩文音节等
+static inline bool isCjkChar(QChar ch) {
+  uint u = ch.unicode();
+  return (u >= 0x4E00 && u <= 0x9FFF) ||    // CJK Unified Ideographs
+         (u >= 0x3400 && u <= 0x4DBF) ||    // CJK Extension A
+         (u >= 0x20000 && u <= 0x2A6DF) ||  // CJK Extension B
+         (u >= 0xF900 && u <= 0xFAFF) ||    // CJK Compatibility Ideographs
+         (u >= 0x3040 && u <= 0x309F) ||    // Hiragana
+         (u >= 0x30A0 && u <= 0x30FF) ||    // Katakana
+         (u >= 0xAC00 && u <= 0xD7AF);      // Hangul Syllables
+}
+
+// 判断是否为空白字符（空格、制表符、换行等）
+static inline bool isSpaceChar(QChar ch) {
+  return ch.isSpace() || ch == '\n' || ch == '\r' || ch == '\t';
+}
+
+/**
+ * @brief 提取光标前后不包含空格的各N个字词
+ * @param editor      QsciScintilla 指针
+ * @param count       每侧提取的数量（默认6）
+ * @return ContextWords 包含前后字词列表，若某侧无内容则对应列表为空
+ */
+ContextWords Notes::extractContextTokens(QsciScintilla* editor, int count) {
+  ContextWords result;
+  if (!editor) return result;
+
+  // 1. 获取当前光标位置（字节偏移 -> 转为文本索引）
+  int pos = editor->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS);
+  QString text = editor->text();
+
+  // Scintilla 的 position 是字节偏移，对于 UTF-8 需要转换为 QString 的字符索引
+  // QsciScintilla::text() 返回的是 QString，我们需要将 byte pos 映射到 char
+  // index
+  // QByteArray rawText =
+  //    editor->SendScintilla(QsciScintilla::SCI_GETCHARACTERPOINTER);
+
+  // 更安全的方式：直接用 Scintilla 的 UTF-8 计数
+  int charPos =
+      editor->SendScintilla(QsciScintilla::SCI_COUNTCHARACTERS, 0, pos);
+
+  if (charPos < 0 || charPos > text.length()) return result;
+
+  // ============================================================
+  // 2. 向前扫描（从光标位置往左）
+  // ============================================================
+  int i = charPos - 1;
+  while (result.before.size() < count && i >= 0) {
+    // 跳过空白
+    while (i >= 0 && isSpaceChar(text[i])) --i;
+    if (i < 0) break;
+
+    if (isCjkChar(text[i])) {
+      // CJK: 单字即一个 token
+      result.before.prepend(text.mid(i, 1));
+      --i;
+    } else {
+      // 西文: 向左找单词边界
+      int end = i + 1;
+      while (i >= 0 && !isSpaceChar(text[i]) && !isCjkChar(text[i])) --i;
+      QString word = text.mid(i + 1, end - (i + 1)).trimmed();
+      if (!word.isEmpty()) {
+        result.before.prepend(word);
+      }
+    }
+  }
+
+  // ============================================================
+  // 3. 向后扫描（从光标位置往右）
+  // ============================================================
+  i = charPos;
+  while (result.after.size() < count && i < text.length()) {
+    // 跳过空白
+    while (i < text.length() && isSpaceChar(text[i])) ++i;
+    if (i >= text.length()) break;
+
+    if (isCjkChar(text[i])) {
+      // CJK: 单字即一个 token
+      result.after.append(text.mid(i, 1));
+      ++i;
+    } else {
+      // 西文: 向右找单词边界
+      int start = i;
+      while (i < text.length() && !isSpaceChar(text[i]) && !isCjkChar(text[i]))
+        ++i;
+      QString word = text.mid(start, i - start).trimmed();
+      if (!word.isEmpty()) {
+        result.after.append(word);
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * @brief 获取光标前后各N个字词拼接成的完整字符串
+ * @param editor QsciScintilla 指针
+ * @param count  每侧提取的数量（默认6）
+ * @param separator 字词之间的分隔符（默认为空字符串，紧密拼接）
+ * @return 拼接后的字符串，若两侧均无内容则返回空字符串
+ */
+QString Notes::getContextString(QsciScintilla* editor, int count,
+                                const QString& separator) {
+  ContextWords ctx = extractContextTokens(editor, count);
+
+  if (ctx.before.isEmpty() && ctx.after.isEmpty()) return QString();
+
+  QStringList allTokens;
+  allTokens.reserve(ctx.before.size() + ctx.after.size());
+
+  // ✅ 正序遍历 before 就是正确的阅读顺序（从远到近）！
+  for (const QString& token : ctx.before) allTokens.append(token);
+
+  // after 本身就是从近到远（append 的结果），也是正确的阅读顺序
+  for (const QString& token : ctx.after) allTokens.append(token);
+
+  return allTokens.join(separator);
+}
+
+/**
+ * @brief 从字符串开头取前N个字词，保留原始格式（空格、标点等原样保留）
+ * @param text  原始字符串
+ * @param count 要取的字词数量（默认10）
+ * @return 截取后的子串，若不足count个字词则返回原串
+ */
+QString Notes::takeFirstNTokens(const QString& text, int count) {
+  if (text.isEmpty() || count <= 0) return text;
+
+  int len = text.length();
+  int i = 0;
+  int tokenCount = 0;
+
+  while (i < len && tokenCount < count) {
+    QChar ch = text[i];
+
+    // 跳过空白（空白不计为token，但会被保留在最终截取范围内）
+    if (ch.isSpace()) {
+      ++i;
+      continue;
+    }
+
+    // 遇到一个非空白字符 = 开始一个新token
+    ++tokenCount;
+
+    if (isCjkChar(ch)) {
+      // CJK：单字即一个token，前进1个字符
+      ++i;
+    } else {
+      // 西文：连续的非空白、非CJK字符构成一个词
+      while (i < len && !text[i].isSpace() && !isCjkChar(text[i])) {
+        ++i;
+      }
+    }
+  }
+
+  // tokenCount < count 说明不够10个，返回原串
+  if (tokenCount < count) return text;
+
+  // 截取从开头到第10个token结束位置的子串
+  // 注意：此时 i 恰好停在第10个token之后的第一个字符
+  // 如果后面紧跟空白，这些空白不属于第10个token，不应包含
+  // 但如果用户希望保留token后的尾随空格，可去掉下面的trim逻辑
+  return text.left(i);
 }
