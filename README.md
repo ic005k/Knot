@@ -9,7 +9,7 @@
 *Etymology*: Just as ancient civilizations recorded important events with physical knots, we continue this simple yet efficient concept through digital "knots".
 
 <!-- 新增代码状态按钮 -->
-[![Code Stats](https://img.shields.io/badge/Code-Stats-blue.svg)](https://github.com/ic005k/Knot/blob/main/stats.txt)  
+[![Code Stats](https://img.shields.io/badge/Code-Stats-blue.svg)](https://github.com/ic005k/Knot/blob/stats/stats.txt)  
 *Click to view code lines statistics (updated automatically)*
 
 ## 📱 Core Features
