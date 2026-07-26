@@ -19,19 +19,22 @@ jobs:
           cloc . --out=stats.txt
           cat stats.txt
 
-      # ✅ 核心改动：推送到独立 stats 分支，而非 main
       - name: Push stats to stats branch
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          # 创建一个干净的单独分支（不含 main 的历史）
+          # 1. 先将 stats.txt 移到临时目录保护起来
+          cp stats.txt /tmp/stats.txt
+
+          # 2. 创建单独分支并清空工作区（这里的 rm 是安全的）
           git checkout --orphan stats
           git rm -rf .
 
-          # 只保留 stats.txt
+          # 3. 把 stats.txt 移回来并提交
+          cp /tmp/stats.txt stats.txt
           git add stats.txt
           git commit -m "Update code stats $(date +'%Y-%m-%d %H:%M')" || echo "No changes"
 
-          # 强制推送覆盖远程 stats 分支
+          # 4. 强制推送到远程 stats 分支
           git push origin stats --force
