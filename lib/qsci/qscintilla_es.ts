@@ -359,6 +359,14 @@
     </message>
 </context>
 <context>
+    <name>EditRecord</name>
+    <message>
+        <location filename="../../src/EditRecord.cpp" line="741"/>
+        <source>Add</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>EnhancedColorPicker</name>
     <message>
         <location filename="../../src/Comm/enhancedcolorpicker.cpp" line="190"/>
@@ -424,44 +432,39 @@
 <context>
     <name>MainHelper</name>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="166"/>
+        <location filename="../../src/MainHelper.cpp" line="167"/>
         <source>Restore Tab</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="340"/>
-        <location filename="../../src/MainHelper.cpp" line="374"/>
+        <location filename="../../src/MainHelper.cpp" line="341"/>
+        <location filename="../../src/MainHelper.cpp" line="375"/>
         <source>Backup File List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="275"/>
-        <location filename="../../src/MainHelper.cpp" line="405"/>
+        <location filename="../../src/MainHelper.cpp" line="276"/>
+        <location filename="../../src/MainHelper.cpp" line="406"/>
         <source>Tab Recycle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="275"/>
-        <location filename="../../src/MainHelper.cpp" line="340"/>
-        <location filename="../../src/MainHelper.cpp" line="374"/>
-        <location filename="../../src/MainHelper.cpp" line="405"/>
+        <location filename="../../src/MainHelper.cpp" line="276"/>
+        <location filename="../../src/MainHelper.cpp" line="341"/>
+        <location filename="../../src/MainHelper.cpp" line="375"/>
+        <location filename="../../src/MainHelper.cpp" line="406"/>
         <source>Total</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="361"/>
-        <location filename="../../src/MainHelper.cpp" line="385"/>
+        <location filename="../../src/MainHelper.cpp" line="362"/>
+        <location filename="../../src/MainHelper.cpp" line="386"/>
         <source>Whether to remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="420"/>
+        <location filename="../../src/MainHelper.cpp" line="421"/>
         <source>Import this data?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/MainHelper.cpp" line="492"/>
-        <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1903,7 +1906,7 @@
         <translation type="unfinished">Borrar</translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="3486"/>
+        <location filename="../../src/Comm/Method.cpp" line="3503"/>
         <source>Please check the attachment.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2237,12 +2240,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="847"/>
+        <location filename="../../src/Notes/Notes.cpp" line="853"/>
         <source>Note Book</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="848"/>
+        <location filename="../../src/Notes/Notes.cpp" line="854"/>
         <source>Note List</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2252,12 +2255,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="442"/>
+        <location filename="../../src/Notes/Notes.cpp" line="448"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="436"/>
+        <location filename="../../src/Notes/Notes.cpp" line="442"/>
         <source>Processing...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2267,14 +2270,14 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="589"/>
+        <location filename="../../src/Notes/Notes.cpp" line="595"/>
         <source>Synchronization failed. Please try again later.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="670"/>
-        <location filename="../../src/Notes/Notes.cpp" line="714"/>
-        <location filename="../../src/Notes/Notes.cpp" line="759"/>
+        <location filename="../../src/Notes/Notes.cpp" line="676"/>
+        <location filename="../../src/Notes/Notes.cpp" line="720"/>
+        <location filename="../../src/Notes/Notes.cpp" line="765"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2914,55 +2917,55 @@
     <name>QInstaller</name>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="249"/>
-        <location filename="../../src/Comm/Method.cpp" line="2631"/>
+        <location filename="../../src/Comm/Method.cpp" line="2648"/>
         <source>bytes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="250"/>
-        <location filename="../../src/Comm/Method.cpp" line="2632"/>
+        <location filename="../../src/Comm/Method.cpp" line="2649"/>
         <source>KiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="251"/>
-        <location filename="../../src/Comm/Method.cpp" line="2633"/>
+        <location filename="../../src/Comm/Method.cpp" line="2650"/>
         <source>MiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="252"/>
-        <location filename="../../src/Comm/Method.cpp" line="2634"/>
+        <location filename="../../src/Comm/Method.cpp" line="2651"/>
         <source>GiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="253"/>
-        <location filename="../../src/Comm/Method.cpp" line="2635"/>
+        <location filename="../../src/Comm/Method.cpp" line="2652"/>
         <source>TiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="254"/>
-        <location filename="../../src/Comm/Method.cpp" line="2636"/>
+        <location filename="../../src/Comm/Method.cpp" line="2653"/>
         <source>PiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="255"/>
-        <location filename="../../src/Comm/Method.cpp" line="2637"/>
+        <location filename="../../src/Comm/Method.cpp" line="2654"/>
         <source>EiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="256"/>
-        <location filename="../../src/Comm/Method.cpp" line="2638"/>
+        <location filename="../../src/Comm/Method.cpp" line="2655"/>
         <source>ZiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="257"/>
-        <location filename="../../src/Comm/Method.cpp" line="2639"/>
+        <location filename="../../src/Comm/Method.cpp" line="2656"/>
         <source>YiB</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2980,27 +2983,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/EditRecord.cpp" line="73"/>
+        <location filename="../../src/EditRecord.cpp" line="81"/>
         <source>Enter a category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/EditRecord.cpp" line="74"/>
+        <location filename="../../src/EditRecord.cpp" line="82"/>
         <source>Enter notes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/EditRecord.cpp" line="96"/>
+        <location filename="../../src/EditRecord.cpp" line="104"/>
         <source>Modify Item</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/EditRecord.cpp" line="104"/>
+        <location filename="../../src/EditRecord.cpp" line="112"/>
         <source>Add Item</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/EditRecord.cpp" line="191"/>
+        <location filename="../../src/EditRecord.cpp" line="199"/>
         <source>Total</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7623,7 +7626,7 @@
 <context>
     <name>SliderButton</name>
     <message>
-        <location filename="../../src/MainHelper.h" line="137"/>
+        <location filename="../../src/MainHelper.h" line="136"/>
         <source>Slide Right to Start.</source>
         <translation type="unfinished"></translation>
     </message>

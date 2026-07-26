@@ -488,7 +488,8 @@ void EditRecord::setCurrentValue() {
   QSettings Reg(ini_file, QSettings::IniFormat);
 
   isNoShowSuggestions = true;
-  mui->editCategory->setText(Reg.value("value1").toString());
+  // mui->editCategory->setText(Reg.value("value1").toString());
+  setCategoryText(Reg.value("value1").toString());
   mui->editDetails->setText(Reg.value("value2").toString());
   mui->editAmount->setText(Reg.value("value3").toString());
 }
@@ -677,7 +678,7 @@ void EditRecord::initCategoryCompleter() {
   m_categoryModel->setStringList(c_list);
 
   // 2. Completer（不传 c_list，显式绑定 model）
-  auto* completer = new QCompleter(this);
+  completer = new QCompleter(this);
   completer->setFilterMode(Qt::MatchContains);
   completer->setCaseSensitivity(Qt::CaseInsensitive);
   completer->setModel(m_categoryModel);
@@ -692,7 +693,7 @@ void EditRecord::initCategoryCompleter() {
 
   // 4. 手动触发补全 + 定位
   connect(mui->editCategory, &QLineEdit::textChanged, this,
-          [this, completer, popup, popupParent](const QString& text) {
+          [this, popup, popupParent](const QString& text) {
             if (isNoShowSuggestions) return;
             if (text.isEmpty()) {
               popup->hide();
@@ -723,7 +724,10 @@ void EditRecord::initCategoryCompleter() {
             popup->hide();
           });
 
-  // ⚠️ 不调用 setCompleter()，避免触发原生弹窗路径
+  // ✅ 安装事件过滤器监听父容器隐藏
+  popupParent->installEventFilter(this);
+
+  // ⚠ 不调用 setCompleter()，避免触发原生弹窗路径
 }
 
 void EditRecord::updateCategoryCompleterList() {
@@ -744,7 +748,10 @@ void EditRecord::on_AddRecord() {
 
   mui->editDetails->clear();
   mw_one->m_EditRecord->isNoShowSuggestions = true;
-  mui->editCategory->setText("");
+
+  // mui->editCategory->setText("");
+  setCategoryText("");
+
   mw_one->m_EditRecord->isNoShowSuggestions = false;
   mui->editAmount->setText("");
 
@@ -754,4 +761,24 @@ void EditRecord::on_AddRecord() {
   updateCategoryCompleterList();
 
   // tmeFlash->start(300);
+}
+
+bool EditRecord::eventFilter(QObject* watched, QEvent* event) {
+  // 当 frameEditRecord 被隐藏时，强制关闭 popup
+  if (watched == mui->frameEditRecord && event->type() == QEvent::Hide) {
+    if (completer) {
+      completer->popup()->hide();
+    }
+  }
+  return QDialog::eventFilter(watched, event);
+}
+
+void EditRecord::setCategoryText(const QString& text) {
+  mui->editCategory->blockSignals(true);
+  mui->editCategory->setText(text);
+  mui->editCategory->blockSignals(false);
+
+  if (completer) {
+    completer->setCompletionPrefix(text);
+  }
 }

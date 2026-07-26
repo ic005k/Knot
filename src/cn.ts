@@ -527,6 +527,11 @@
         <source>Total</source>
         <translation type="vanished">总计</translation>
     </message>
+    <message>
+        <location filename="EditRecord.cpp" line="741"/>
+        <source>Add</source>
+        <translation>增加</translation>
+    </message>
 </context>
 <context>
     <name>EnhancedColorPicker</name>
@@ -594,7 +599,7 @@
 <context>
     <name>MainHelper</name>
     <message>
-        <location filename="MainHelper.cpp" line="166"/>
+        <location filename="MainHelper.cpp" line="167"/>
         <source>Restore Tab</source>
         <translation>恢复标签页</translation>
     </message>
@@ -655,14 +660,14 @@
         <translation type="vanished">云备份与恢复数据</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="340"/>
-        <location filename="MainHelper.cpp" line="374"/>
+        <location filename="MainHelper.cpp" line="341"/>
+        <location filename="MainHelper.cpp" line="375"/>
         <source>Backup File List</source>
         <translation>备份文件列表</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="275"/>
-        <location filename="MainHelper.cpp" line="405"/>
+        <location filename="MainHelper.cpp" line="276"/>
+        <location filename="MainHelper.cpp" line="406"/>
         <source>Tab Recycle</source>
         <translation>标签页回收箱</translation>
     </message>
@@ -671,10 +676,10 @@
         <translation type="vanished">分享文件</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="275"/>
-        <location filename="MainHelper.cpp" line="340"/>
-        <location filename="MainHelper.cpp" line="374"/>
-        <location filename="MainHelper.cpp" line="405"/>
+        <location filename="MainHelper.cpp" line="276"/>
+        <location filename="MainHelper.cpp" line="341"/>
+        <location filename="MainHelper.cpp" line="375"/>
+        <location filename="MainHelper.cpp" line="406"/>
         <source>Total</source>
         <translation>总计</translation>
     </message>
@@ -684,20 +689,19 @@
         <translation type="vanished">滑动到右边启动或停止</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="361"/>
-        <location filename="MainHelper.cpp" line="385"/>
+        <location filename="MainHelper.cpp" line="362"/>
+        <location filename="MainHelper.cpp" line="386"/>
         <source>Whether to remove</source>
         <translation>是否删除</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="420"/>
+        <location filename="MainHelper.cpp" line="421"/>
         <source>Import this data?</source>
         <translation>是否导入这个数据？</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="492"/>
         <source>Add</source>
-        <translation>增加</translation>
+        <translation type="vanished">增加</translation>
     </message>
     <message>
         <source>Time</source>
@@ -2683,7 +2687,7 @@
         <translation>处理中...</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="3486"/>
+        <location filename="Comm/Method.cpp" line="3503"/>
         <source>Please check the attachment.</source>
         <translation>请查收附件</translation>
     </message>
@@ -3030,12 +3034,12 @@
         <translation>分享到</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="847"/>
+        <location filename="Notes/Notes.cpp" line="853"/>
         <source>Note Book</source>
         <translation>笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="848"/>
+        <location filename="Notes/Notes.cpp" line="854"/>
         <source>Note List</source>
         <translation>笔记列表</translation>
     </message>
@@ -3045,12 +3049,12 @@
         <translation>当前笔记不存在。请选择其它笔记或新建笔记。</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="442"/>
+        <location filename="Notes/Notes.cpp" line="448"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="436"/>
+        <location filename="Notes/Notes.cpp" line="442"/>
         <source>Processing...</source>
         <translation>处理中...</translation>
     </message>
@@ -3060,14 +3064,14 @@
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="589"/>
+        <location filename="Notes/Notes.cpp" line="595"/>
         <source>Synchronization failed. Please try again later.</source>
         <translation>同步失败，请稍后再试。</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="670"/>
-        <location filename="Notes/Notes.cpp" line="714"/>
-        <location filename="Notes/Notes.cpp" line="759"/>
+        <location filename="Notes/Notes.cpp" line="676"/>
+        <location filename="Notes/Notes.cpp" line="720"/>
+        <location filename="Notes/Notes.cpp" line="765"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation>解压文件不成功，请在偏好设置里面检查各平台的密码是否一致。</translation>
     </message>
@@ -4099,55 +4103,55 @@ Model ID: %1</source>
     <name>QInstaller</name>
     <message>
         <location filename="AutoUpdate.cpp" line="249"/>
-        <location filename="Comm/Method.cpp" line="2631"/>
+        <location filename="Comm/Method.cpp" line="2648"/>
         <source>bytes</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="250"/>
-        <location filename="Comm/Method.cpp" line="2632"/>
+        <location filename="Comm/Method.cpp" line="2649"/>
         <source>KiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="251"/>
-        <location filename="Comm/Method.cpp" line="2633"/>
+        <location filename="Comm/Method.cpp" line="2650"/>
         <source>MiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="252"/>
-        <location filename="Comm/Method.cpp" line="2634"/>
+        <location filename="Comm/Method.cpp" line="2651"/>
         <source>GiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="253"/>
-        <location filename="Comm/Method.cpp" line="2635"/>
+        <location filename="Comm/Method.cpp" line="2652"/>
         <source>TiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="254"/>
-        <location filename="Comm/Method.cpp" line="2636"/>
+        <location filename="Comm/Method.cpp" line="2653"/>
         <source>PiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="255"/>
-        <location filename="Comm/Method.cpp" line="2637"/>
+        <location filename="Comm/Method.cpp" line="2654"/>
         <source>EiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="256"/>
-        <location filename="Comm/Method.cpp" line="2638"/>
+        <location filename="Comm/Method.cpp" line="2655"/>
         <source>ZiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="257"/>
-        <location filename="Comm/Method.cpp" line="2639"/>
+        <location filename="Comm/Method.cpp" line="2656"/>
         <source>YiB</source>
         <translation></translation>
     </message>
@@ -4230,27 +4234,27 @@ Model ID: %1</source>
         <translation>应用程序已在运行中！</translation>
     </message>
     <message>
-        <location filename="EditRecord.cpp" line="73"/>
+        <location filename="EditRecord.cpp" line="81"/>
         <source>Enter a category</source>
         <translation>输入分类</translation>
     </message>
     <message>
-        <location filename="EditRecord.cpp" line="74"/>
+        <location filename="EditRecord.cpp" line="82"/>
         <source>Enter notes</source>
         <translation>输入备注</translation>
     </message>
     <message>
-        <location filename="EditRecord.cpp" line="96"/>
+        <location filename="EditRecord.cpp" line="104"/>
         <source>Modify Item</source>
         <translation>修改条目</translation>
     </message>
     <message>
-        <location filename="EditRecord.cpp" line="104"/>
+        <location filename="EditRecord.cpp" line="112"/>
         <source>Add Item</source>
         <translation>增加条目</translation>
     </message>
     <message>
-        <location filename="EditRecord.cpp" line="191"/>
+        <location filename="EditRecord.cpp" line="199"/>
         <source>Total</source>
         <translation>总计</translation>
     </message>
@@ -9002,7 +9006,7 @@ Model ID: %1</source>
 <context>
     <name>SliderButton</name>
     <message>
-        <location filename="MainHelper.h" line="137"/>
+        <location filename="MainHelper.h" line="136"/>
         <source>Slide Right to Start.</source>
         <translation>滑动到右边启动</translation>
     </message>

@@ -33,7 +33,11 @@ class EditRecord : public QDialog {
 
   static void saveCurrentYearData();
 
+  QCompleter* completer = nullptr;
+
  protected:
+  bool eventFilter(QObject* watched, QEvent* event) override;
+
  public:
   void on_btnOk_clicked();
   void hideSuggestions();
@@ -81,7 +85,8 @@ class EditRecord : public QDialog {
 
   void on_AddRecord();
 
- private:
+  void setCategoryText(const QString &text);
+  private:
   void onSuggestionClicked(QListWidgetItem* item);
 
   void set_Amount(QString Number);

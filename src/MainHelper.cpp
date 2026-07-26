@@ -26,7 +26,8 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
     if (event->type() == QEvent::MouseButtonPress) {
       QString title = mui->lblTitleEditRecord->text();
       title = title.mid(0, 4);
-      if (!title.contains(QObject::tr("Add"))) return true;
+      if (!title.contains("Add") && !title.contains(QObject::tr("Add")))
+        return true;
 
       mui->btnTabMoveDown->hide();
       mui->btnTabMoveUp->hide();
