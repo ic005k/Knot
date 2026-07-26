@@ -153,7 +153,11 @@ QString NoteIndexManager::getFilePathByTitle(const QString& title) const {
   return "";
 }
 
-// 输入关键词 → 返回所有匹配的标题列表（自动补全用）
+/**
+ * 输入关键词 → 返回所有匹配的标题列表（自动补全用）
+ * @brief 搜索标题（自动补全 / 完整列表复用）
+ * @note keyword 为空时返回全部标题，调用方按需自行守卫
+ */
 QStringList NoteIndexManager::searchTitles(const QString& keyword) const {
   QStringList result;
   for (auto it = m_metadataMap.begin(); it != m_metadataMap.end(); ++it) {

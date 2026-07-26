@@ -173,6 +173,9 @@ public class MyActivity
     implements Application.ActivityLifecycleCallbacks
 {
 
+    // 本地AI模型开关全局存储，C++同步、Qt读取
+    public static boolean mLocalAIModelEnabled = false;
+
     private OnBackInvokedCallback mBackCallback;
     private boolean mIsQtActive = true;
 
@@ -2799,5 +2802,22 @@ public class MyActivity
 
         MyService.initStepSensor(activity);
         return MyService.isStepCounter;
+    }
+
+    /**
+     * C++ 调用此方法同步本地AI开关状态
+     * @param isLocalAI true=启用本地AI，false=关闭
+     */
+    public void setLocalAIModelEnabled(boolean isLocalAI) {
+        mLocalAIModelEnabled = isLocalAI;
+        Log.d(TAG, "C++同步本地AI状态：" + isLocalAI);
+    }
+
+    /**
+     * Qt/C++读取本地AI开关状态，控制AI智能链接按钮显示
+     * @return true显示按钮，false隐藏
+     */
+    public boolean getLocalAIModelEnabled() {
+        return mLocalAIModelEnabled;
     }
 }

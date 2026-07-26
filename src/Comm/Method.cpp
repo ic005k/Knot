@@ -1684,6 +1684,23 @@ void Method::setMDFile(QString strMDFile) {
 #endif
 }
 
+void Method::setLocalAIModelEnabled(bool isLocalAI) {
+  Q_UNUSED(isLocalAI);
+
+#ifdef Q_OS_ANDROID
+
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  // 判空，防止JNI空指针崩溃
+  if (!activity.isValid()) {
+    qWarning() << "Android Activity 上下文无效，无法同步本地AI状态";
+    return;
+  }
+  // 签名：(Z)V 代表入参bool、无返回值；直接传递布尔值isLocalAI
+  activity.callMethod<void>("setLocalAIModelEnabled", "(Z)V", isLocalAI);
+
+#endif
+}
+
 void Method::delay_MSec(unsigned int msec) {
   QEventLoop loop;
   QTimer::singleShot(msec, &loop, SLOT(quit()));

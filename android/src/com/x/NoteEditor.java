@@ -3331,6 +3331,14 @@ public class NoteEditor
 
             // ========== 新增：AI Link 按钮区域 ==========
             Button btnAiLink = new Button(context);
+
+            // 读取主Activity的AI开关状态
+            boolean showAiButton = MyActivity.mLocalAIModelEnabled;
+            if (!showAiButton) {
+                // AI关闭，直接隐藏该按钮
+                btnAiLink.setVisibility(View.GONE);
+            }
+
             // 多语言文本
             String aiBtnText = MyActivity.zh_cn ? "AI 智能链接" : "AI Link";
             btnAiLink.setText(aiBtnText);

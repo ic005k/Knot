@@ -496,6 +496,7 @@ class Method : public QDialog {
   void safeCloseInfoWindow(Method* m);
 
   QString escapeAllHtml(const QString &src);
+  void setLocalAIModelEnabled(bool isLocalAI);
   protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
