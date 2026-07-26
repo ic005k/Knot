@@ -178,11 +178,42 @@ public class NoteEditor
     private NoteIndexManager noteIndexManager;
     private NoteLinkCompleter noteLinkCompleter;
 
+    // AI智能链接条目实体，对应C++ SearchResult
+    public static class AiLinkItem {
+
+        private String filePath;
+        private String title;
+        private String preview;
+
+        public AiLinkItem(String filePath, String title, String preview) {
+            this.filePath = filePath;
+            this.title = title;
+            this.preview = preview;
+        }
+
+        public String getFilePath() {
+            return filePath;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getPreview() {
+            return preview;
+        }
+    }
+
     // 内链补全悬浮列表
     private PopupWindow noteLinkPopup;
     private RecyclerView popupRecycler;
     private NoteSuggestAdapter adapter;
     private List<String> suggestList = new ArrayList<>();
+
+    // ============AI弹窗独立控件，完全隔离============
+    private PopupWindow aiLinkPopup;
+    private RecyclerView aiPopupRecycler;
+    private List<AiLinkItem> aiSuggestList = new ArrayList<>();
 
     private static final int REQUEST_CAMERA_PERMISSION = 1001;
 
@@ -847,6 +878,23 @@ public class NoteEditor
     protected void onDestroy() {
         // 页面销毁强制关闭进度弹窗，避免卡死
         findViewById(R.id.progressContainer).setVisibility(View.GONE);
+
+        // 关闭AI独立弹窗
+        if (aiLinkPopup != null && aiLinkPopup.isShowing()) {
+            aiLinkPopup.dismiss();
+        }
+        // 原有普通弹窗关闭逻辑保留不变
+        if (noteLinkPopup != null && noteLinkPopup.isShowing()) {
+            noteLinkPopup.dismiss();
+        }
+
+        // ============置空引用，彻底释放内存============
+        aiLinkPopup = null;
+        noteLinkPopup = null;
+        aiPopupRecycler = null;
+        popupRecycler = null;
+        adapter = null;
+        // ================================================
 
         // save cursor pos
         String file2 = "/storage/emulated/0/.Knot/note_text.ini";
@@ -3265,120 +3313,6 @@ public class NoteEditor
 
     // ================================
     // 显示笔记标题悬浮补全列表（带顶部过滤搜索框）
-    // ================================
-    /*  private void showNoteSuggestPopup(List<String> titles) {
-        if (titles == null || titles.isEmpty()) {
-            if (noteLinkPopup != null) noteLinkPopup.dismiss();
-            return;
-        }
-
-        // 第一次创建：带顶部搜索框的布局
-        if (noteLinkPopup == null) {
-            Context context = NoteEditor.this;
-
-            // ========== 外层布局：垂直线性布局 ==========
-            LinearLayout container = new LinearLayout(context);
-            container.setOrientation(LinearLayout.VERTICAL);
-
-            // ========== 顶部：过滤输入框 ==========
-            EditText filterEdit = new EditText(context);
-            filterEdit.setHint(
-                MyActivity.zh_cn ? "搜索笔记标题..." : "Search note titles..."
-            );
-            filterEdit.setPadding(40, 40, 40, 40);
-            filterEdit.setTextSize(16);
-            filterEdit.setBackgroundColor(
-                MyActivity.isDark ? 0xFF333333 : 0xFFEEEEEE
-            );
-            filterEdit.setTextColor(
-                MyActivity.isDark ? 0xFFFFFFFF : 0xFF000000
-            );
-            LinearLayout.LayoutParams editParams =
-                new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                );
-            filterEdit.setLayoutParams(editParams);
-
-            // ========== 列表 ==========
-            popupRecycler = new RecyclerView(context);
-            popupRecycler.setLayoutManager(new LinearLayoutManager(context));
-            adapter = new NoteSuggestAdapter(suggestList, title -> {
-                String link = noteLinkCompleter.buildMarkdownLink(title);
-                replaceLinkText(link);
-                if (noteLinkPopup != null) noteLinkPopup.dismiss();
-            });
-            popupRecycler.setAdapter(adapter);
-            LinearLayout.LayoutParams rvParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            );
-            popupRecycler.setLayoutParams(rvParams);
-
-            // ========== 组装界面 ==========
-            container.addView(filterEdit);
-            container.addView(popupRecycler);
-
-            // ========== 悬浮窗口 ==========
-            noteLinkPopup = new PopupWindow(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            );
-            noteLinkPopup.setContentView(container);
-            int bgColor = MyActivity.isDark ? 0xFF222222 : 0xFFFFFFFF;
-            noteLinkPopup.setBackgroundDrawable(new ColorDrawable(bgColor));
-            noteLinkPopup.setOutsideTouchable(true);
-            noteLinkPopup.setFocusable(true);
-
-            // ========== 搜索框过滤逻辑 ==========
-            filterEdit.addTextChangedListener(
-                new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(
-                        CharSequence s,
-                        int start,
-                        int count,
-                        int after
-                    ) {}
-
-                    @Override
-                    public void onTextChanged(
-                        CharSequence s,
-                        int start,
-                        int before,
-                        int count
-                    ) {}
-
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        String keyword = s.toString().toLowerCase().trim();
-                        List<String> filtered = new ArrayList<>();
-                        for (String t : titles) {
-                            if (t.toLowerCase().contains(keyword)) {
-                                filtered.add(t);
-                            }
-                        }
-                        suggestList.clear();
-                        suggestList.addAll(filtered);
-                        adapter.notifyDataSetChanged();
-                    }
-                }
-            );
-        }
-
-        // ========== 首次显示时，清空搜索框并显示全部 ==========
-        suggestList.clear();
-        suggestList.addAll(titles);
-        adapter.notifyDataSetChanged();
-
-        // 显示在屏幕上
-        if (!noteLinkPopup.isShowing()) {
-            noteLinkPopup.showAtLocation(editNote, Gravity.FILL, 0, 0);
-        }
-    }*/
-
-    // ================================
-    // 显示笔记标题悬浮补全列表（带顶部过滤搜索框）
     // [[触发后跳出的窗口主实现
     // ================================
     private void showNoteSuggestPopup(List<String> titles) {
@@ -3521,6 +3455,157 @@ public class NoteEditor
         }
     }
 
+    // AI智能链接专用弹窗，独立一套布局、Recycler、PopupWindow，和普通弹窗隔离
+    private void showNoteSuggestPopupAi(List<AiLinkItem> itemList) {
+        // 无数据直接关闭AI弹窗
+        if (itemList == null || itemList.isEmpty()) {
+            if (aiLinkPopup != null) aiLinkPopup.dismiss();
+            return;
+        }
+
+        // AI弹窗首次初始化，独立布局，完全不复用noteLinkPopup
+        if (aiLinkPopup == null) {
+            Context context = NoteEditor.this;
+            LinearLayout container = new LinearLayout(context);
+            container.setOrientation(LinearLayout.VERTICAL);
+
+            // 顶部AI按钮
+            Button btnAiLink = new Button(context);
+            String aiBtnText = MyActivity.zh_cn ? "AI 智能链接" : "AI Link";
+            btnAiLink.setText(aiBtnText);
+            if (MyActivity.isDark) {
+                btnAiLink.setBackgroundColor(0xFF4444AA);
+                btnAiLink.setTextColor(0xFFFFFFFF);
+            } else {
+                btnAiLink.setBackgroundColor(0xFF5566FF);
+                btnAiLink.setTextColor(0xFFFFFFFF);
+            }
+            btnAiLink.setPadding(60, 30, 60, 30);
+            btnAiLink.setTextSize(16);
+            LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            btnParams.setMargins(20, 20, 20, 10);
+            btnAiLink.setLayoutParams(btnParams);
+            btnAiLink.setOnClickListener(v -> onClickAiLink());
+            container.addView(btnAiLink);
+
+            // 过滤输入框
+            EditText filterEdit = new EditText(context);
+            filterEdit.setHint(
+                MyActivity.zh_cn
+                    ? "过滤AI片段预览..."
+                    : "Filter AI preview chunks..."
+            );
+            filterEdit.setPadding(40, 40, 40, 40);
+            filterEdit.setTextSize(16);
+            filterEdit.setBackgroundColor(
+                MyActivity.isDark ? 0xFF333333 : 0xFFEEEEEE
+            );
+            filterEdit.setTextColor(
+                MyActivity.isDark ? 0xFFFFFFFF : 0xFF000000
+            );
+            LinearLayout.LayoutParams editParams =
+                new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                );
+            editParams.setMargins(20, 0, 20, 0);
+            filterEdit.setLayoutParams(editParams);
+
+            // AI专属RecyclerView，全局aiPopupRecycler，不和popupRecycler混用
+            aiPopupRecycler = new RecyclerView(context);
+            aiPopupRecycler.setLayoutManager(new LinearLayoutManager(context));
+
+            // AI适配器
+            AiLinkResultAdapter aiAdapter = new AiLinkResultAdapter(
+                itemList,
+                item -> {
+                    String safePreview = item.getPreview().replace("]", "\\]");
+                    String safePath = item.getFilePath().replace(")", "\\)");
+                    String mdLink = "[" + safePreview + "](" + safePath + ")";
+                    replaceLinkText(mdLink);
+                    if (aiLinkPopup != null) aiLinkPopup.dismiss();
+                }
+            );
+            aiPopupRecycler.setAdapter(aiAdapter);
+
+            LinearLayout.LayoutParams rvParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            );
+            rvParams.setMargins(10, 10, 10, 10);
+            aiPopupRecycler.setLayoutParams(rvParams);
+
+            container.addView(filterEdit);
+            container.addView(aiPopupRecycler);
+
+            // 初始化AI独立PopupWindow
+            aiLinkPopup = new PopupWindow(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            );
+            aiLinkPopup.setContentView(container);
+            int bgColor = MyActivity.isDark ? 0xFF222222 : 0xFFFFFFFF;
+            aiLinkPopup.setBackgroundDrawable(new ColorDrawable(bgColor));
+            aiLinkPopup.setOutsideTouchable(true);
+            aiLinkPopup.setFocusable(true);
+
+            // 搜索过滤逻辑
+            filterEdit.addTextChangedListener(
+                new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(
+                        CharSequence s,
+                        int start,
+                        int count,
+                        int after
+                    ) {}
+
+                    @Override
+                    public void onTextChanged(
+                        CharSequence s,
+                        int start,
+                        int before,
+                        int count
+                    ) {}
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        String keyword = s.toString().toLowerCase().trim();
+                        List<AiLinkItem> filtered = new ArrayList<>();
+                        for (AiLinkItem item : itemList) {
+                            if (
+                                item
+                                    .getPreview()
+                                    .toLowerCase()
+                                    .contains(keyword)
+                            ) {
+                                filtered.add(item);
+                            }
+                        }
+                        AiLinkResultAdapter adapter =
+                            (AiLinkResultAdapter) aiPopupRecycler.getAdapter();
+                        if (adapter != null) adapter.updateData(filtered);
+                    }
+                }
+            );
+        } else {
+            // AI弹窗已存在，直接刷新数据，只操作aiPopupRecycler
+            AiLinkResultAdapter aiAdapter =
+                (AiLinkResultAdapter) aiPopupRecycler.getAdapter();
+            if (aiAdapter != null) {
+                aiAdapter.updateData(itemList);
+            }
+        }
+
+        // 弹出AI独立窗口
+        if (!aiLinkPopup.isShowing()) {
+            aiLinkPopup.showAtLocation(editNote, Gravity.FILL, 0, 0);
+        }
+    }
+
     private void onClickAiLink() {
         // 1. 关闭当前双链弹窗
         if (noteLinkPopup != null) {
@@ -3538,15 +3623,26 @@ public class NoteEditor
         generateAiLinkMetadata(fullText, cursorIndex);
     }
 
-    public static void receiveAiLinkResult(List<String> aiTitleList) {
+    // C++ AI计算完成后回调，携带完整SearchResult数组
+    public static void receiveAiLinkResult(List<AiLinkItem> aiResultList) {
         if (m_instance == null) return;
+
+        // 判断Activity是否正在销毁/已销毁
+        if (
+            m_instance.isFinishing() ||
+            (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 &&
+                m_instance.isDestroyed())
+        ) {
+            return;
+        }
+
         m_instance.runOnUiThread(() -> {
-            // 直接关闭进度弹窗
+            // 关闭全局转圈进度条
             m_instance
                 .findViewById(R.id.progressContainer)
                 .setVisibility(View.GONE);
-            // 重新弹出链接选择窗口展示AI推荐列表
-            m_instance.showNoteSuggestPopup(aiTitleList);
+            // 调用AI专用弹窗，而非普通标题弹窗
+            m_instance.showNoteSuggestPopupAi(aiResultList);
         });
     }
 
@@ -3620,6 +3716,81 @@ public class NoteEditor
 
         public interface OnItemClickListener {
             void onItemClick(String title);
+        }
+    }
+
+    // AI智能链接结果适配器，展示预览片段+文件路径
+    private static class AiLinkResultAdapter
+        extends RecyclerView.Adapter<AiLinkResultAdapter.VH>
+    {
+
+        private List<AiLinkItem> dataList;
+        private OnItemClick callback;
+
+        public interface OnItemClick {
+            void onItemClick(AiLinkItem item);
+        }
+
+        public AiLinkResultAdapter(List<AiLinkItem> list, OnItemClick cb) {
+            this.dataList = new ArrayList<>(list);
+            this.callback = cb;
+        }
+
+        public void updateData(List<AiLinkItem> newList) {
+            dataList.clear();
+            dataList.addAll(newList);
+            notifyDataSetChanged();
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LinearLayout itemLayout = new LinearLayout(parent.getContext());
+            itemLayout.setOrientation(LinearLayout.VERTICAL);
+            itemLayout.setPadding(40, 30, 40, 30);
+
+            // 主文字：预览片段（核心显示）
+            TextView tvPreview = new TextView(parent.getContext());
+            tvPreview.setTextSize(16);
+            tvPreview.setMaxLines(3);
+            tvPreview.setEllipsize(TextUtils.TruncateAt.END);
+            tvPreview.setTextColor(MyActivity.isDark ? 0xFFFFFFFF : 0xFF000000);
+
+            // 次要灰色小字：完整文件路径
+            TextView tvPath = new TextView(parent.getContext());
+            tvPath.setTextSize(12);
+            tvPath.setTextColor(MyActivity.isDark ? 0xFFAAAAAA : 0xFF777777);
+            tvPath.setPadding(0, 8, 0, 0);
+
+            itemLayout.addView(tvPreview);
+            itemLayout.addView(tvPath);
+
+            return new VH(itemLayout, tvPreview, tvPath);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH holder, int position) {
+            AiLinkItem item = dataList.get(position);
+            holder.tvPreview.setText(item.getPreview());
+            holder.tvPath.setText(item.getFilePath());
+            holder.itemView.setOnClickListener(v -> callback.onItemClick(item));
+        }
+
+        @Override
+        public int getItemCount() {
+            return dataList.size();
+        }
+
+        public static class VH extends RecyclerView.ViewHolder {
+
+            TextView tvPreview;
+            TextView tvPath;
+
+            public VH(@NonNull View itemView, TextView p, TextView path) {
+                super(itemView);
+                this.tvPreview = p;
+                this.tvPath = path;
+            }
         }
     }
 

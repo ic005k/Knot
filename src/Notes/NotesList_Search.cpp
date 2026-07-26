@@ -413,13 +413,16 @@ void NotesList::startVectorSerach(const QString& text) {
 
               isVectorSearchDone = true;
 
+              // 桌面端AI产生链接
               if (m_Notes->isBtnAILinkClicked) {
                 m_Notes->popupNoteLinkList("");
                 m_Notes->isBtnAILinkClicked = false;
               }
 
+              // 安卓端AI产生链接
               if (m_Notes->isAndroidAILinkGen) {
                 m_Notes->isAndroidAILinkGen = false;
+                popupAndroidNoteLinkList(adaptedResults);
               }
             },
             Qt::QueuedConnection);
@@ -431,4 +434,62 @@ void NotesList::startVectorSerach(const QString& text) {
 void NotesList::onSearchTextChanged(const QString& text) {
   isEditBoxSearchTextChanged = true;
   startVectorSerach(text);
+}
+
+void NotesList::popupAndroidNoteLinkList(QVector<SearchResult> adaptedResults) {
+  QJniEnvironment env;
+  // 1. 找到NoteEditor主类
+  jclass clsEditor = env->FindClass("com/x/NoteEditor");
+  if (!clsEditor) {
+    qDebug() << "popupAndroidNoteLinkList: 未找到 NoteEditor 类";
+    return;
+  }
+
+  // 2. 获取静态回调方法 receiveAiLinkResult(List<AiLinkItem>)
+  jmethodID midCallback = env->GetStaticMethodID(
+      clsEditor, "receiveAiLinkResult", "(Ljava/util/List;)V");
+  if (!midCallback) {
+    qDebug() << "popupAndroidNoteLinkList: 未找到 receiveAiLinkResult 静态方法";
+    env->DeleteLocalRef(clsEditor);
+    return;
+  }
+
+  // 3. 创建 ArrayList 对象
+  jclass clsArrayList = env->FindClass("java/util/ArrayList");
+  jmethodID ctorArrayList = env->GetMethodID(clsArrayList, "<init>", "()V");
+  jobject objList = env->NewObject(clsArrayList, ctorArrayList);
+  jmethodID midAdd =
+      env->GetMethodID(clsArrayList, "add", "(Ljava/lang/Object;)Z");
+
+  // 4. 获取内部静态类 AiLinkItem 的构造方法
+  jclass clsAiItem = env->FindClass("com/x/NoteEditor$AiLinkItem");
+  jmethodID ctorAiItem = env->GetMethodID(
+      clsAiItem, "<init>",
+      "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+
+  // 5. 循环遍历 SearchResult，转换为 AiLinkItem 存入 List
+  for (const SearchResult& res : adaptedResults) {
+    jstring jPath = env->NewStringUTF(res.filePath.toUtf8().constData());
+    jstring jTitle = env->NewStringUTF(res.title.toUtf8().constData());
+    jstring jPreview = env->NewStringUTF(res.preview.toUtf8().constData());
+
+    jobject itemObj =
+        env->NewObject(clsAiItem, ctorAiItem, jPath, jTitle, jPreview);
+    env->CallBooleanMethod(objList, midAdd, itemObj);
+
+    // 释放临时字符串与条目局部引用，防止内存泄漏
+    env->DeleteLocalRef(jPath);
+    env->DeleteLocalRef(jTitle);
+    env->DeleteLocalRef(jPreview);
+    env->DeleteLocalRef(itemObj);
+  }
+
+  // 6. 调用 Java 静态回调函数
+  env->CallStaticVoidMethod(clsEditor, midCallback, objList);
+
+  // 统一释放所有顶层局部引用
+  env->DeleteLocalRef(objList);
+  env->DeleteLocalRef(clsArrayList);
+  env->DeleteLocalRef(clsAiItem);
+  env->DeleteLocalRef(clsEditor);
 }

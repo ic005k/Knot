@@ -403,6 +403,7 @@ class NotesList : public QDialog {
                        int parentRow, int& totalNotes);
   void moveChildToRecycle(QTreeWidgetItem* parentItem, QString iniDir,
                           QVector<QString>& delFilesIndex, QTreeWidget* twrb);
+  void popupAndroidNoteLinkList(QVector<SearchResult> adaptedResults);
 };
 
 class SearchMapper {
