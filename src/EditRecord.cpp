@@ -15,8 +15,6 @@ EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
 
   mw_one->installEventFilter(mw_one);
 
-  initSuggestList();
-
   initCategoryCompleter();
 
   mui->editCategory->setFocus();
@@ -88,11 +86,7 @@ EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
   m_Method->qssSlider = mui->hsH->styleSheet();
 }
 
-EditRecord::~EditRecord() {
-  delete m_CategoryList;
-
-  if (m_suggestList) delete m_suggestList;
-}
+EditRecord::~EditRecord() { delete m_CategoryList; }
 
 void EditRecord::on_btnOk_clicked() {
   mw_one->on_btnBackEditRecord_clicked();
@@ -186,8 +180,6 @@ void EditRecord::set_Amount(QString Number) {
 }
 
 void EditRecord::on_btnType_clicked() {
-  hideSuggestions();
-
   mui->frameEditRecord->hide();
   mui->frameCategory->show();
   init_MyCategory();
@@ -287,10 +279,7 @@ void EditRecord::getTime(int h, int m) {
 
 void EditRecord::on_btnClearAmount_clicked() { mui->editAmount->clear(); }
 
-void EditRecord::on_btnClearDesc_clicked() {
-  mui->editCategory->clear();
-  hideSuggestions();
-}
+void EditRecord::on_btnClearDesc_clicked() { mui->editCategory->clear(); }
 
 void EditRecord::on_editAmount_textChanged(const QString& arg1) {
   int count = 0;
@@ -339,36 +328,6 @@ void EditRecord::on_editCategory_textChanged(const QString& arg1) {
       m_Method->setQLabelImage(mui->lblCategory, nH, nH, ":/res/fl.svg");
     }
   }
-
-  return;
-
-  //////////////////////////////////////////////////////////////////////////
-
-  if (isNoShowSuggestions) {
-    isNoShowSuggestions = false;
-    return;
-  }
-
-  // 空内容就隐藏
-  if (arg1.trimmed().isEmpty()) {
-    hideSuggestions();
-    return;
-  }
-
-  // 防抖处理
-  static QTimer tmpTimer;
-  tmpTimer.setSingleShot(true);
-  tmpTimer.setInterval(30);
-  tmpTimer.disconnect();
-
-  QObject::connect(&tmpTimer, &QTimer::timeout, [this]() {
-    // 简单判空保护，替代 QPointer
-    if (!mw_one || !m_suggestList) return;
-    showSuggestions();
-  });
-  tmpTimer.start();
-
-  // QTimer::singleShot(0, [this]() { showSuggestions(); });
 }
 
 void EditRecord::on_editDetails_textChanged() {
@@ -487,9 +446,7 @@ void EditRecord::setCurrentValue() {
   QString ini_file = privateDir + "editrecord_value.ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
 
-  isNoShowSuggestions = true;
-  // mui->editCategory->setText(Reg.value("value1").toString());
-  setCategoryText(Reg.value("value1").toString());
+  mui->editCategory->setText(Reg.value("value1").toString());
   mui->editDetails->setText(Reg.value("value2").toString());
   mui->editAmount->setText(Reg.value("value3").toString());
 }
@@ -543,135 +500,6 @@ QList<int> EditRecord::getExistingYears(QTreeWidget* tw) {
   return yearsList;
 }
 
-void EditRecord::showSuggestions() {
-  qDebug() << "补全列表数据源：" << c_list.count();
-
-  QString input = mui->editCategory->text().trimmed().toLower();
-  if (input.isEmpty()) {
-    hideSuggestions();
-    return;
-  }
-
-  m_suggestList->clear();
-  QStringList matches;
-
-  for (const QString& item : std::as_const(c_list)) {
-    if (item.toLower().contains(input)) {
-      matches << item;
-    }
-  }
-
-  if (matches.isEmpty()) {
-    m_suggestList->hide();
-    return;
-  }
-
-  for (int i = 0; i < qMin(8, matches.size()); ++i) {
-    m_suggestList->addItem(matches[i]);
-  }
-
-  // 样式：系统级下拉，自动支持暗黑模式
-  if (isDark) {
-    m_suggestList->setStyleSheet(R"(
-        QListWidget {
-            background-color: #1E1E1E;
-            border: 1px solid #444444;
-            font-size: 18px;
-            color: #EEEEEE;
-        }
-        QListWidget::item {
-            padding: 10px 14px;
-        }
-        QListWidget::item:selected {
-            background-color: #007bff;
-            color: white;
-        }
-    )");
-  } else {
-    m_suggestList->setStyleSheet(R"(
-        QListWidget {
-            background-color: #ffffff;
-            border: 1px solid #cccccc;
-            font-size: 18px;
-            color: #333333;
-        }
-        QListWidget::item {
-            padding: 10px 14px;
-        }
-        QListWidget::item:selected {
-            background-color: #007bff;
-            color: white;
-        }
-    )");
-  }
-
-  // ==============================================
-  // 绝对全局坐标，永远不飘，永远在输入框正下方
-  // ==============================================
-  QPoint globalPos =
-      mui->editCategory->mapToGlobal(QPoint(0, mui->editCategory->height()));
-  int w = mui->editCategory->width();
-  int h = qMin(360, m_suggestList->sizeHint().height());
-
-  m_suggestList->setGeometry(globalPos.x(), globalPos.y(), w, h);
-  m_suggestList->show();
-}
-
-void EditRecord::delSuggestions() {
-  if (!m_suggestList) return;
-
-  m_suggestList->setParent(nullptr);
-  m_suggestList->hide();
-  delete m_suggestList;
-  m_suggestList = nullptr;
-}
-
-// 点击条目 → 填入输入框
-void EditRecord::onSuggestionClicked(QListWidgetItem* item) {
-  isNoShowSuggestions = true;
-
-  mui->editCategory->setText(item->text());
-
-  if (m_suggestList) {
-    m_suggestList->close();
-  }
-}
-
-void EditRecord::initSuggestList() {
-  // 先销毁旧列表
-  delSuggestions();
-
-  // ========== 自定义下拉补全（安卓不崩溃） ==========
-  m_suggestList = new QListWidget(mw_one);
-
-  if (isAndroid)
-    m_suggestList->setWindowFlags(Qt::Widget | Qt::FramelessWindowHint);
-  else {
-    m_suggestList->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
-  }
-
-  m_suggestList->setFocusPolicy(Qt::NoFocus);
-  m_suggestList->setHidden(true);
-  m_suggestList->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
-
-  m_suggestList->setAttribute(Qt::WA_NativeWindow, false);
-  m_suggestList->setAttribute(Qt::WA_DontCreateNativeAncestors, true);
-  m_suggestList->setAttribute(Qt::WA_AlwaysStackOnTop, false);
-
-  QObject::connect(
-      m_suggestList, &QListWidget::itemClicked, mw_one,
-      [this](QListWidgetItem* item) { this->onSuggestionClicked(item); });
-
-  //====================================================
-}
-
-void EditRecord::hideSuggestions() {
-  if (m_suggestList) {
-    m_suggestList->setGeometry(0, 0, 1, 1);
-    m_suggestList->close();
-  }
-}
-
 void EditRecord::initCategoryCompleter() {
   // 1. Model
   m_categoryModel = new QStringListModel(this);
@@ -689,12 +517,12 @@ void EditRecord::initCategoryCompleter() {
   popup->setParent(popupParent);
   popup->setWindowFlags(Qt::Widget);
   popup->setAttribute(Qt::WA_ShowWithoutActivating);
+  popup->verticalScrollBar()->hide();
   popup->hide();
 
   // 4. 手动触发补全 + 定位
   connect(mui->editCategory, &QLineEdit::textChanged, this,
           [this, popup, popupParent](const QString& text) {
-            if (isNoShowSuggestions) return;
             if (text.isEmpty()) {
               popup->hide();
               return;
@@ -718,9 +546,8 @@ void EditRecord::initCategoryCompleter() {
   // 5. 选中项填入
   connect(completer, QOverload<const QString&>::of(&QCompleter::activated),
           this, [this, popup](const QString& text) {
-            isNoShowSuggestions = true;
             mui->editCategory->setText(text);
-            isNoShowSuggestions = false;
+
             popup->hide();
           });
 
@@ -747,12 +574,9 @@ void EditRecord::on_AddRecord() {
   mw_one->m_EditRecord->getTime(mui->hsH->value(), mui->hsM->value());
 
   mui->editDetails->clear();
-  mw_one->m_EditRecord->isNoShowSuggestions = true;
 
-  // mui->editCategory->setText("");
-  setCategoryText("");
+  mui->editCategory->setText("");
 
-  mw_one->m_EditRecord->isNoShowSuggestions = false;
   mui->editAmount->setText("");
 
   mui->frameMain->hide();
@@ -770,15 +594,6 @@ bool EditRecord::eventFilter(QObject* watched, QEvent* event) {
       completer->popup()->hide();
     }
   }
+
   return QDialog::eventFilter(watched, event);
-}
-
-void EditRecord::setCategoryText(const QString& text) {
-  mui->editCategory->blockSignals(true);
-  mui->editCategory->setText(text);
-  mui->editCategory->blockSignals(false);
-
-  if (completer) {
-    completer->setCompletionPrefix(text);
-  }
 }

@@ -855,9 +855,8 @@ void MainWindow::on_twItemDoubleClicked() {
     else
       mui->editAmount->setText(str);
 
-    mw_one->m_EditRecord->isNoShowSuggestions = true;
     mui->editCategory->setText(item->text(2));
-    mw_one->m_EditRecord->isNoShowSuggestions = false;
+
     mui->editDetails->setText(item->text(3));
     mui->f_Number->setFocus();
 

@@ -104,7 +104,6 @@ void CategoryList::on_btnOk_clicked() {
 void CategoryList::setCategoryText() {
   int row = ui->listWidget->currentRow();
   if (row >= 0) {
-    mw_one->m_EditRecord->isNoShowSuggestions = true;
     mui->editCategory->setText(ui->listWidget->currentItem()->text());
   }
 
@@ -163,7 +162,6 @@ void CategoryList::on_Rename() {
 
     renameAll();
 
-    mw_one->m_EditRecord->isNoShowSuggestions = true;
     mui->editCategory->setText(ui->editRename->text().trimmed());
 
     mw_one->reloadMain();

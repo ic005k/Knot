@@ -272,7 +272,6 @@ void MainWindow::on_btnMove() {
       QThread::msleep(1);
     }
 
-    mw_one->m_EditRecord->isNoShowSuggestions = true;
     mui->editCategory->setText(strCategory);
     mui->editDetails->setText(strDetails);
     mui->editAmount->setText(strAmount);
@@ -500,8 +499,6 @@ void MainWindow::on_btnEndDate_clicked() {
 
 void MainWindow::on_btnBackEditRecord_clicked() {
   clearWidgetFocus();
-
-  m_EditRecord->hideSuggestions();
 
   mui->frameMain->show();
   mui->frameEditRecord->hide();

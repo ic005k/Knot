@@ -40,7 +40,7 @@ class EditRecord : public QDialog {
 
  public:
   void on_btnOk_clicked();
-  void hideSuggestions();
+
   void on_btn7_clicked();
   void on_btn8_clicked();
   void on_btn9_clicked();
@@ -53,8 +53,6 @@ class EditRecord : public QDialog {
   void on_btn0_clicked();
   void on_btnDot_clicked();
   void on_btnDel_clicked();
-
-  bool isNoShowSuggestions = false;
 
   void on_btnType_clicked();
 
@@ -79,26 +77,18 @@ class EditRecord : public QDialog {
 
   void monthSum();
 
-  void delSuggestions();
-
   void updateCategoryCompleterList();
 
   void on_AddRecord();
 
-  void setCategoryText(const QString &text);
-  private:
-  void onSuggestionClicked(QListWidgetItem* item);
-
+ private:
   void set_Amount(QString Number);
-
-  QListWidget* m_suggestList = nullptr;  // 自定义下拉列表
 
   QString lblStyle;
   int nH;
 
   static QList<int> getExistingYears(QTreeWidget* tw);
-  void showSuggestions();
-  void initSuggestList();
+
   void initCategoryCompleter();
 
   QStringListModel* m_categoryModel = nullptr;
