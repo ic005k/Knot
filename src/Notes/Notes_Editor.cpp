@@ -77,14 +77,23 @@ void Notes::initMarkdownEditor(QsciScintilla* editor) {
   else
     editor->setCaretForegroundColor(Qt::black);
 
-  // 当前行背景+边框
+  // 当前行背景 + 边框（适配 Qsci 2.14.1）
   if (isDark) {
-    editor->setCaretLineBackgroundColor(QColor(180, 180, 0));
-    editor->setCaretLineFrameWidth(1);
+    // 深色模式：极低对比度的灰蓝/灰白，仅比编辑器背景亮 5%~8%
+    editor->setCaretLineBackgroundColor(QColor(255, 255, 255, 12));
+    // ⚠ 强烈建议去掉边框，或最多设为 1px 极淡边框
+    editor->setCaretLineFrameWidth(0);
   } else {
-    editor->setCaretLineBackgroundColor(QColor(255, 255, 0, 50));
+    // 浅色模式：极低对比度的灰黑，仅比编辑器背景暗 3%~5%
+    editor->setCaretLineBackgroundColor(QColor(0, 0, 0, 12));
     editor->setCaretLineFrameWidth(0);
   }
+
+  // ⚠ 关键：确保当前行在文字下方渲染，避免影响字体抗锯齿
+  // ⚠ 使用原始 Scintilla 消息 ID，绕过 QScintilla 封装缺失
+  // SCI_SETCARETLINELAYER = 2768
+  // SC_LAYER_UNDER_TEXT   = 1
+  editor->SendScintilla(2768, 1);
 
   //-------------------------------------------------------
 
@@ -107,14 +116,18 @@ void Notes::initMarkdownEditor(QsciScintilla* editor) {
 
   // 文本选中高亮样式（适配 Qsci 2.14.1）
   if (isDark) {
-    editor->setSelectionForegroundColor(Qt::white);
-    editor->setSelectionBackgroundColor(QColor(42, 130, 218));
+    // 深色模式：使用 VS Code / JetBrains 风格的柔和蓝
+    editor->setSelectionBackgroundColor(QColor(38, 79, 120));
+    // ⚠关键：不要设置 ForegroundColor，让 Scintilla 自动计算反色
+    // editor->setSelectionForegroundColor(...)
   } else {
-    editor->setSelectionForegroundColor(Qt::black);
-    editor->setSelectionBackgroundColor(QColor(120, 180, 255));
+    // 浅色模式：使用低饱和度蓝，避免刺眼
+    editor->setSelectionBackgroundColor(QColor(173, 214, 255));
+    // 同样不设置前景色
   }
-  // 设置选中背景透明度，取值 0~255
-  editor->SendScintilla(QsciScintilla::SCI_SETSELALPHA, 160);
+
+  // ⚠关键：移除或设为 256（禁用 Alpha 混合）
+  editor->SendScintilla(QsciScintilla::SCI_SETSELALPHA, 256);
 }
 #endif
 
