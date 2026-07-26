@@ -170,6 +170,9 @@ bool Notes::eventFilter(QObject* obj, QEvent* evn) {
 void Notes::closeEvent(QCloseEvent* event) {
   Q_UNUSED(event);
   popupLinkList->close();
+  isBtnAILinkClicked = false;
+  ui->editNoteLink->setEnabled(true);
+
   saveEditorState(currentMDFile);
 
 #ifndef Q_OS_ANDROID

@@ -3522,8 +3522,24 @@ public class NoteEditor
             AiLinkResultAdapter aiAdapter = new AiLinkResultAdapter(
                 itemList,
                 item -> {
-                    String safePreview = item.getPreview().replace("]", "\\]");
-                    String safePath = item.getFilePath().replace(")", "\\)");
+                    // 仅在拼接MD链接的瞬间，临时完整转义预览文本
+                    String safePreview = item
+                        .getPreview()
+                        .replace("\\", "\\\\") // 必须最先处理反斜杠，防止后续转义失效
+                        .replace("[", "\\[")
+                        .replace("]", "\\]")
+                        .replace("(", "\\(")
+                        .replace(")", "\\)")
+                        .replace("!", "\\!")
+                        .replace("#", "\\#")
+                        .replace("*", "\\*")
+                        .replace("_", "\\_");
+
+                    String safePath = item
+                        .getFilePath()
+                        .replace("(", "\\(") // 转义左括号
+                        .replace(")", "\\)") // 转义右括号
+                        .replace("/storage/emulated/0/KnotData/", ""); // 去除固定路径前缀
                     String mdLink = "[" + safePreview + "](" + safePath + ")";
                     replaceLinkText(mdLink);
                     if (aiLinkPopup != null) aiLinkPopup.dismiss();

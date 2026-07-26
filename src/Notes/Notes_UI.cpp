@@ -531,9 +531,9 @@ void Notes::popupNoteLinkList(const QString& arg1) {
   m_popupList->clear();
   m_popupList->addItems(matches);
 
-  // 显示在输入框正下方
+  // 显示在笔记链接标签的正下方
   QPoint pos =
-      ui->editNoteLink->mapToGlobal(QPoint(0, ui->editNoteLink->height()));
+      ui->lblNoteLink->mapToGlobal(QPoint(0, ui->lblNoteLink->height()));
   popupLinkList->move(pos);
   popupLinkList->show();
 }
@@ -555,6 +555,16 @@ void Notes::onPopupItemClicked(QListWidgetItem* item) {
     index = m_popupList->currentRow();
     fullPath = m_NotesList->adaptedResults[index].filePath;
     title = takeFirstNTokens(title, 10);
+
+    title = title.replace("\\", "\\\\")
+                .replace("[", "\\[")
+                .replace("]", "\\]")
+                .replace("(", "\\(")
+                .replace(")", "\\)")
+                .replace("!", "\\!")
+                .replace("#", "\\#")
+                .replace("*", "\\*")
+                .replace("_", "\\_");
 
   } else {
     fullPath = m_NoteIndexManager->getFilePathByTitle(title);

@@ -416,7 +416,6 @@ void NotesList::startVectorSerach(const QString& text) {
               // 桌面端AI产生链接
               if (m_Notes->isBtnAILinkClicked) {
                 m_Notes->popupNoteLinkList("");
-                m_Notes->isBtnAILinkClicked = false;
               }
 
               // 安卓端AI产生链接
@@ -437,6 +436,9 @@ void NotesList::onSearchTextChanged(const QString& text) {
 }
 
 void NotesList::popupAndroidNoteLinkList(QVector<SearchResult> adaptedResults) {
+  Q_UNUSED(adaptedResults);
+#ifdef Q_OS_ANDROID
+
   QJniEnvironment env;
   // 1. 找到NoteEditor主类
   jclass clsEditor = env->FindClass("com/x/NoteEditor");
@@ -492,4 +494,6 @@ void NotesList::popupAndroidNoteLinkList(QVector<SearchResult> adaptedResults) {
   env->DeleteLocalRef(clsArrayList);
   env->DeleteLocalRef(clsAiItem);
   env->DeleteLocalRef(clsEditor);
+
+#endif
 }

@@ -150,14 +150,14 @@ int main(int argc, char* argv[]) {
     return 0;
   }
 
-  // ========= 浏览器插件 启动原生通信监听子线程 =========
+  // ========= 浏览器插件 启动原生通信监听子线程 =====================
   // NativeMsgThread* msgThread = new NativeMsgThread();
   // QObject::connect(msgThread, &QThread::finished, msgThread,
   //                 &QThread::deleteLater);
   // msgThread->start();
 #endif
 
-  // ========== 闪屏改为堆对象（new创建），避免栈对象生命周期问题 =====
+  // ============================ 闪屏============================
   SplashTimer* splash = new SplashTimer(isAndroid, 200, 90);
   splash->show();
 
@@ -209,8 +209,8 @@ int main(int argc, char* argv[]) {
   defaultFontSize = QApplication::font().pointSize();
 
   isAndroid = false;
-  iniDir = QDir::homePath() + "/" + appName + "Data/";
-  privateDir = QDir::homePath() + "/." + appName + "/";
+  iniDir = QDir::homePath() + "/KnotData/";
+  privateDir = QDir::homePath() + "/.Knot/";
 
 #endif
 
