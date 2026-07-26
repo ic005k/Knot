@@ -86,7 +86,6 @@ class MainHelper : public QDialog {
   void importBakFileList();
 
   void sort_childItem(QTreeWidgetItem* item);
-  void on_AddRecord();
 
   QString clickableLabelButtonStyle = R"(
         /* 模拟按钮样式：中蓝底+白字，适配明暗主题 */

@@ -79,6 +79,8 @@ class EditRecord : public QDialog {
 
   void updateCategoryCompleterList();
 
+  void on_AddRecord();
+
  private:
   void onSuggestionClicked(QListWidgetItem* item);
 
@@ -93,6 +95,8 @@ class EditRecord : public QDialog {
   void showSuggestions();
   void initSuggestList();
   void initCategoryCompleter();
+
+  QStringListModel* m_categoryModel = nullptr;
 };
 
 #endif  // EDITRECORD_H

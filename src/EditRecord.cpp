@@ -671,25 +671,87 @@ void EditRecord::hideSuggestions() {
   }
 }
 
-// 在 EditRecord 构造函数或初始化函数中
 void EditRecord::initCategoryCompleter() {
-  // 1. 创建补全器，绑定数据源
-  auto* completer = new QCompleter(c_list, this);
+  // 1. Model
+  m_categoryModel = new QStringListModel(this);
+  m_categoryModel->setStringList(c_list);
 
-  // 2. 配置匹配模式（包含匹配，即输入"电"能匹配"电池""电脑"等）
+  // 2. Completer（不传 c_list，显式绑定 model）
+  auto* completer = new QCompleter(this);
   completer->setFilterMode(Qt::MatchContains);
-
-  // 3. 大小写不敏感（中文无所谓，但养成好习惯）
   completer->setCaseSensitivity(Qt::CaseInsensitive);
+  completer->setModel(m_categoryModel);
 
-  // 4. 弹出列表宽度与编辑框一致
-  completer->popup()->setMinimumWidth(mui->editCategory->width());
+  // 3. Popup 嵌入为子控件（Android 规避 RHI 崩溃，桌面端行为等价）
+  QWidget* popupParent = mui->frameEditRecord;
+  QAbstractItemView* popup = completer->popup();
+  popup->setParent(popupParent);
+  popup->setWindowFlags(Qt::Widget);
+  popup->setAttribute(Qt::WA_ShowWithoutActivating);
+  popup->hide();
 
-  // 5. 绑定到 QLineEdit
-  mui->editCategory->setCompleter(completer);
+  // 4. 手动触发补全 + 定位
+  connect(mui->editCategory, &QLineEdit::textChanged, this,
+          [this, completer, popup, popupParent](const QString& text) {
+            if (isNoShowSuggestions) return;
+            if (text.isEmpty()) {
+              popup->hide();
+              return;
+            }
+
+            completer->setCompletionPrefix(text);
+            if (completer->completionCount() > 0) {
+              QPoint pos = mui->editCategory->mapTo(
+                  popupParent, QPoint(0, mui->editCategory->height()));
+              int rowH = popup->sizeHintForRow(0);
+              int visibleRows = qMin(completer->completionCount(), 8);
+              popup->setGeometry(pos.x(), pos.y(), mui->editCategory->width(),
+                                 rowH * visibleRows);
+              popup->raise();
+              popup->show();
+            } else {
+              popup->hide();
+            }
+          });
+
+  // 5. 选中项填入
+  connect(completer, QOverload<const QString&>::of(&QCompleter::activated),
+          this, [this, popup](const QString& text) {
+            isNoShowSuggestions = true;
+            mui->editCategory->setText(text);
+            isNoShowSuggestions = false;
+            popup->hide();
+          });
+
+  // ⚠️ 不调用 setCompleter()，避免触发原生弹窗路径
 }
 
 void EditRecord::updateCategoryCompleterList() {
-  auto* model = new QStringListModel(c_list, this);
-  mui->editCategory->completer()->setModel(model);
+  if (!m_categoryModel) return;
+
+  m_categoryModel->setStringList(c_list);
+}
+
+void EditRecord::on_AddRecord() {
+  isAdd = true;
+
+  mui->lblTitleEditRecord->setText(tr("Add") + "  : " +
+                                   tabData->tabText(tabData->currentIndex()));
+
+  mui->hsH->setValue(QTime::currentTime().hour());
+  mui->hsM->setValue(QTime::currentTime().minute());
+  mw_one->m_EditRecord->getTime(mui->hsH->value(), mui->hsM->value());
+
+  mui->editDetails->clear();
+  mw_one->m_EditRecord->isNoShowSuggestions = true;
+  mui->editCategory->setText("");
+  mw_one->m_EditRecord->isNoShowSuggestions = false;
+  mui->editAmount->setText("");
+
+  mui->frameMain->hide();
+  mui->frameEditRecord->show();
+
+  updateCategoryCompleterList();
+
+  // tmeFlash->start(300);
 }

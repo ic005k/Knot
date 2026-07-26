@@ -486,28 +486,6 @@ void MainHelper::sort_childItem(QTreeWidgetItem* item) {
   }
 }
 
-void MainHelper::on_AddRecord() {
-  isAdd = true;
-
-  mui->lblTitleEditRecord->setText(tr("Add") + "  : " +
-                                   tabData->tabText(tabData->currentIndex()));
-
-  mui->hsH->setValue(QTime::currentTime().hour());
-  mui->hsM->setValue(QTime::currentTime().minute());
-  mw_one->m_EditRecord->getTime(mui->hsH->value(), mui->hsM->value());
-
-  mui->editDetails->clear();
-  mw_one->m_EditRecord->isNoShowSuggestions = true;
-  mui->editCategory->setText("");
-  mw_one->m_EditRecord->isNoShowSuggestions = false;
-  mui->editAmount->setText("");
-
-  mui->frameMain->hide();
-  mui->frameEditRecord->show();
-
-  // tmeFlash->start(300);
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 bool MainWindow::importBakData(QString fileName) {
