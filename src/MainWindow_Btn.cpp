@@ -828,6 +828,7 @@ void MainWindow::on_btnNotes_clicked() { m_Notes->openNotes(); }
 void MainWindow::on_btnAdd_clicked() {
   // m_EditRecord->monthSum();
 
+  m_EditRecord->updateCategoryCompleterList();
   m_MainHelper->on_AddRecord();
 }
 

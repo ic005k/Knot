@@ -15,15 +15,12 @@
 #include "DataManager.h"
 #include "src/CategoryList.h"
 
-namespace Ui {
-class EditRecord;
-}
+class EditRecord : public QDialog {
+  Q_OBJECT
 
-class EditRecord {
  public:
-  explicit EditRecord();
-  ~EditRecord();
-  Ui::EditRecord* ui;
+  explicit EditRecord(QWidget* parent = nullptr);
+  ~EditRecord() override;
 
   static void saveMyClassification();
   QString lblStyleHighLight =
@@ -80,6 +77,8 @@ class EditRecord {
 
   void delSuggestions();
 
+  void updateCategoryCompleterList();
+
  private:
   void onSuggestionClicked(QListWidgetItem* item);
 
@@ -93,6 +92,7 @@ class EditRecord {
   static QList<int> getExistingYears(QTreeWidget* tw);
   void showSuggestions();
   void initSuggestList();
+  void initCategoryCompleter();
 };
 
 #endif  // EDITRECORD_H

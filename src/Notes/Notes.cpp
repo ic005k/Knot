@@ -251,6 +251,11 @@ void Notes::openEditUI() {
   m_EditSource->setText(oldText);
   m_EditSource->setWrapMode(QsciScintilla::WrapWord);  // 按单词换行
 
+  if (isLocalAIModel)
+    ui->btnAILink->show();
+  else
+    ui->btnAILink->hide();
+
   show();
 
   m_Method->Sleep(100);

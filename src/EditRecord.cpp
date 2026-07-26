@@ -1,6 +1,8 @@
 ﻿#include "EditRecord.h"
 
+#include <QCompleter>
 #include <QKeyEvent>
+#include <QWidget>
 
 #include "MainWindow.h"
 #include "src/defines.h"
@@ -8,15 +10,21 @@
 
 QStringList c_list;
 
-EditRecord::EditRecord() {
+EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
   m_CategoryList = new CategoryList(mw_one);
 
   mw_one->installEventFilter(mw_one);
 
   initSuggestList();
 
+  initCategoryCompleter();
+
   mui->editCategory->setFocus();
   mui->editDetails->setAcceptRichText(false);
+
+  mui->btnBackEditRecord->setFixedHeight(45);
+  mui->btnType->setFixedHeight(45);
+  mui->btnOkEditRecord->setFixedHeight(45);
 
   nH = mui->editCategory->height();
 
@@ -331,6 +339,10 @@ void EditRecord::on_editCategory_textChanged(const QString& arg1) {
       m_Method->setQLabelImage(mui->lblCategory, nH, nH, ":/res/fl.svg");
     }
   }
+
+  return;
+
+  //////////////////////////////////////////////////////////////////////////
 
   if (isNoShowSuggestions) {
     isNoShowSuggestions = false;
@@ -657,4 +669,27 @@ void EditRecord::hideSuggestions() {
     m_suggestList->setGeometry(0, 0, 1, 1);
     m_suggestList->close();
   }
+}
+
+// 在 EditRecord 构造函数或初始化函数中
+void EditRecord::initCategoryCompleter() {
+  // 1. 创建补全器，绑定数据源
+  auto* completer = new QCompleter(c_list, this);
+
+  // 2. 配置匹配模式（包含匹配，即输入"电"能匹配"电池""电脑"等）
+  completer->setFilterMode(Qt::MatchContains);
+
+  // 3. 大小写不敏感（中文无所谓，但养成好习惯）
+  completer->setCaseSensitivity(Qt::CaseInsensitive);
+
+  // 4. 弹出列表宽度与编辑框一致
+  completer->popup()->setMinimumWidth(mui->editCategory->width());
+
+  // 5. 绑定到 QLineEdit
+  mui->editCategory->setCompleter(completer);
+}
+
+void EditRecord::updateCategoryCompleterList() {
+  auto* model = new QStringListModel(c_list, this);
+  mui->editCategory->completer()->setModel(model);
 }
