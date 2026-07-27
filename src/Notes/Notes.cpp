@@ -150,7 +150,7 @@ void Notes::closeEvent(QCloseEvent* event) {
   m_Method->Sleep(100);
 
   if (isTextChange) {
-    auto msg = std::make_unique<ShowMessage>(mw_one);
+    auto msg = std::make_unique<ShowMessage>(m_Notes);
     msg->ui->btnOk->setText(tr("Yes") + " (Y)");
     msg->ui->btnCancel->setText(tr("No") + " (N)");
     if (msg->showMsg(tr("Notes"), tr("Do you want to save the notes?"), 2)) {
