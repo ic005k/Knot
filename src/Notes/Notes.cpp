@@ -45,8 +45,10 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
 
   // =================================笔记链接自动补全==============
   popupLinkList = new QWidget(this);
-  popupLinkList->setWindowFlags(Qt::FramelessWindowHint | Qt::Window |
-                                Qt::Tool | Qt::WindowStaysOnTopHint);
+
+  // ✅ 如果必须用 Tool，去掉 FramelessWindowHint 或加 Sheet 属性,macOS 兼容性好
+  popupLinkList->setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
+
   auto* layout = new QVBoxLayout(popupLinkList);
   layout->setContentsMargins(0, 0, 0, 0);
   layout->setSpacing(0);
