@@ -840,7 +840,12 @@ void Report::genReportMenu() {
 
 void Report::aiAnalysis() {
   QString text = mainDataString;
-  QString trimText = text.trimmed();
+  QString newEvent = mui->lblTabTitle->text();
+  int pos = text.indexOf('\n');
+  QString trimText =
+      QString("Event: %1").arg(newEvent) + (pos >= 0 ? text.mid(pos) : "");
+
+  trimText = trimText.trimmed();
   if (trimText.isEmpty()) {
     auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg(tr("Tip"), tr("No data available"), 0);
