@@ -872,6 +872,8 @@ void MainWindow::on_twItemDoubleClicked() {
 }
 
 void MainWindow::clickMainTab() {
+  mui->qwMainDate->rootContext()->setContextProperty("isChkAI", isChkAI);
+
   int index = getCurrentIndex();
   tabData->setCurrentIndex(index);
 

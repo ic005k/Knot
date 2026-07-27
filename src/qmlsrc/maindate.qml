@@ -433,7 +433,7 @@ Rectangle {
                         icon.source: "qrc:/res/ai.svg"
                         icon.width: 20
                         icon.height: 20
-                        visible: true
+                        visible: isChkAI
 
                         onClicked: {
                             m_Report.aiAnalysis();

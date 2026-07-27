@@ -145,7 +145,10 @@ void Preferences::saveOptions() {
     iniPreferences->setValue("/Options/Dark", ui->chkDark->isChecked());
     iniPreferences->setValue("/Options/chkUIFont", ui->chkUIFont->isChecked());
     iniPreferences->setValue("/Options/maxcon", ui->editConcurrency->text());
+
     iniPreferences->setValue("/Options/ai", ui->chkAI->isChecked());
+    isChkAI = ui->chkAI->isChecked();
+
     iniPreferences->setValue("/Options/aiindex",
                              ui->cboxEndpoint->currentIndex());
   }
@@ -310,7 +313,10 @@ void Preferences::initOptions() {
 
   ui->chkDark->setChecked(
       iniPreferences->value("/Options/Dark", false).toBool());
+
   ui->chkAI->setChecked(iniPreferences->value("/Options/ai", false).toBool());
+  isChkAI = ui->chkAI->isChecked();
+
   ui->cboxEndpoint->setCurrentIndex(
       iniPreferences->value("/Options/aiindex", 0).toInt());
 
