@@ -837,3 +837,39 @@ void Report::genReportMenu() {
   QPoint pos(x, y);
   m_Menu->exec(pos);
 }
+
+void Report::aiAnalysis() {
+  QString text = mainDataString;
+  QString trimText = text.trimmed();
+  if (trimText.isEmpty()) {
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(tr("Tip"), tr("No data available"), 0);
+    return;
+  }
+
+  // qDebug() << trimText;
+
+  // 获取当前程序生效的语言标识
+  QLocale loc = QLocale::system();
+  QString langCode = loc.name();  // 格式 zh_CN / en_US / ja_JP
+
+  // 标准化英文指令，明确指定输出语言，精准可控
+  QString promptTemplate = R"(
+Analyze the data records below, judge whether the occurrence rule of the target Event is scientific and reasonable combined with Event type, daily Frequency, specific occurrence time and corresponding date, then give mild adjustment suggestions and aggressive adjustment plans for reference.
+Strict rules you must follow:
+1. All analysis and suggestions must be written in language code: %1
+2. First complete data summary and rationality analysis: sort out the overall distribution cycle of this Event, the daily occurrence frequency range, concentrated time period of the Event every day; judge unreasonable points such as excessive daily frequency, excessively scattered or overly concentrated occurrence time, long-term continuous occurrence, irregular occurrence rhythm.
+3. Targeted suggestions need to be divided into two plans for each optimization direction:
+   - Mild adjustment plan: low transformation cost, small change to original living habits, easy long-term adherence
+   - Aggressive improvement plan: stronger constraint effect, more obvious optimization of the occurrence rhythm of this Event
+4. Do not output redundant irrelevant content, only retain data summary rationality analysis + two sets of classified adjustment suggestions.
+5. Focus on analyzing unreasonable risk points of the Event: frequent repeated daily occurrences, abnormal occurrence time (too early/too late), continuous multi-day occurrence without interval, unstable daily frequency fluctuation.
+
+Event records:
+
+%2
+)";
+
+  QString fullPrompt = promptTemplate.arg(langCode, trimText);
+  mw_one->aiChatQuery(fullPrompt);
+}

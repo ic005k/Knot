@@ -485,6 +485,7 @@ void MainWindow::initMainQW() {
                                                      mui->qwMainDate->width());
   mui->qwMainDate->rootContext()->setContextProperty("m_Method", m_Method);
   mui->qwMainDate->rootContext()->setContextProperty("mw_one", mw_one);
+  mui->qwMainDate->rootContext()->setContextProperty("m_Report", m_Report);
   mui->qwMainDate->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/maindate.qml")));
 

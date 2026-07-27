@@ -427,6 +427,22 @@ Rectangle {
                             color: "transparent"
                         }
                     }
+
+                    ToolButton {
+                        icon.name: "ai"
+                        icon.source: "qrc:/res/ai.svg"
+                        icon.width: 20
+                        icon.height: 20
+                        visible: true
+
+                        onClicked: {
+                            m_Report.aiAnalysis();
+                            console.log("AI: " + index);
+                        }
+                        background: Rectangle {
+                            color: "transparent"
+                        }
+                    }
                 }
             }
 

@@ -25,6 +25,8 @@ class Report : public QDialog {
   ~Report();
   Ui::Report* ui;
 
+  QString mainDataString;
+
   QString catetext;
 
   bool isSingleYear = false;
@@ -79,6 +81,7 @@ class Report : public QDialog {
 
   void loadDetailsQml();
 
+  void aiAnalysis();
  private slots:
   void on_btnSingleYear_clicked();
 

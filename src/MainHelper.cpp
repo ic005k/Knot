@@ -591,6 +591,8 @@ void MainWindow::reloadMain() {
     a = 0;
 
   QString text0, text1, text2, text3, topitem;
+  QString mainString =
+      "Event:" + tabData->tabText(tabData->currentIndex()) + "\n";
   for (int i = a; i < total; i++) {
     QTreeWidgetItem* topItem = tw->topLevelItem(i);
 
@@ -601,7 +603,19 @@ void MainWindow::reloadMain() {
     topitem = text0;
 
     m_Method->insertItem(mui->qwMainDate, text0, text1, text2, text3, 0);
+
+    mainString = mainString + "Date:" + text0 + "\n";
+    int count = topItem->childCount();
+    mainString = mainString + "Frequency:" + QString::number(count) + "\n" +
+                 "Event Time:\n";
+    for (int j = 0; j < count; j++) {
+      QString str = topItem->child(j)->text(0);
+      mainString = mainString + QString::number(j + 1) + "." + str + "\n";
+    }
   }
+
+  m_Report->mainDataString = mainString;
+  // qInfo() << "MainDataString=" << mainString;
 
   m_Method->setCurrentIndexFromQW(mui->qwMainDate, 0);
 
