@@ -304,9 +304,6 @@ class Notes : public QDialog {
   static inline QMutex s_embMutex;
   static inline QMutex s_vecDbMutex;
 
-  QListWidget* m_popupList;
-  QWidget* popupLinkList;
-
   bool isReceiveRemoteFile = false;
 
   QString oldText, newText;

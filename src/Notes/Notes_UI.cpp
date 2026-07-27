@@ -368,10 +368,6 @@ void Notes::popupNoteLinkList(const QString& arg1) {
     return;
   }
 
-  popupLinkList->setFixedWidth(ui->editNoteLink->width() +
-                               ui->btnAILink->width() +
-                               ui->lblNoteLink->width());
-
   // ==============================
   //  下拉列表完整样式（亮/暗双主题）
   //  垂直滚动条 + 水平滚动条 + 无箭头 + 圆角扁平现代风
@@ -390,8 +386,13 @@ void Notes::popupNoteLinkList(const QString& arg1) {
         background-color: #007ACC;
         color: white;
     }
+    QListWidget::item:selected:hover {
+        background-color: #0068B5;
+        color: white;
+    }
     QListWidget::item:hover {
         background-color: #444444;
+        color: #E0E0E0;
     }
 
     /* --- 垂直滚动条 --- */
@@ -458,8 +459,13 @@ void Notes::popupNoteLinkList(const QString& arg1) {
         background-color: #007ACC;
         color: white;
     }
+    QListWidget::item:selected:hover {
+        background-color: #0068B5;  /* 比 #007ACC 略深，提供微反馈 */
+        color: white;
+    }
     QListWidget::item:hover {
-        background-color: #E5F1FF;
+        background-color: #EEEEEE;
+        color: #2C2C2C;
     }
 
     /* --- 垂直滚动条 --- */
@@ -545,7 +551,7 @@ void Notes::onPopupItemClicked(QListWidgetItem* item) {
   QString fullPath;
   if (isBtnAILinkClicked) {
     int index = -1;
-    index = m_popupList->currentRow();
+    index = ui->listNoteLink->currentRow();
     fullPath = m_NotesList->adaptedResults[index].filePath;
     title = takeFirstNTokens(title, 10);
 
@@ -565,12 +571,7 @@ void Notes::onPopupItemClicked(QListWidgetItem* item) {
 
   insertNoteLink(title, fullPath);
 
-  // 清空 + 关闭列表
-  ui->editNoteLink->clear();
-  popupLinkList->close();
-
   isBtnAILinkClicked = false;
-  ui->editNoteLink->setEnabled(true);
 
 #endif
 }
@@ -604,7 +605,6 @@ void Notes::on_btnAILink_clicked() {
 #ifndef Q_OS_ANDROID
 
   isBtnAILinkClicked = true;
-  // ui->editNoteLink->setEnabled(false);
 
   // 前后各10个字词
   int cursorPos = getCursorCharOffset(m_EditSource);

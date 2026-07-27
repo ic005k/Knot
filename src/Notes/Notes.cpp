@@ -44,40 +44,6 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
 
   m_Method->set_ToolButtonStyle(this);
 
-  // =================================笔记链接自动补全==============
-  popupLinkList = new QWidget(this);
-
-  // ✅ 如果必须用 Tool，去掉 FramelessWindowHint 或加 Sheet 属性,macOS 兼容性好
-  popupLinkList->setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
-
-  auto* layout = new QVBoxLayout(popupLinkList);
-  layout->setContentsMargins(0, 0, 0, 0);
-  layout->setSpacing(0);
-
-  m_popupList = new QListWidget(popupLinkList);
-  layout->addWidget(m_popupList);
-
-  // Close 按钮
-  QPushButton* closeBtn = new QPushButton(tr("Close"), popupLinkList);
-  closeBtn->setCursor(Qt::PointingHandCursor);
-  layout->addWidget(closeBtn);
-
-  // 点击关闭
-  connect(closeBtn, &QPushButton::clicked, this, [=]() {
-    isBtnAILinkClicked = false;
-    ui->editNoteLink->setEnabled(true);
-    popupLinkList->close();
-  });
-
-  m_popupList->setFocusPolicy(Qt::NoFocus);
-  closeBtn->setFocusPolicy(Qt::NoFocus);
-  popupLinkList->hide();
-
-  connect(m_popupList, &QListWidget::itemClicked, this,
-          &Notes::onPopupItemClicked);
-
-  //==============================================================================
-
   // Ctrl+F 快捷键
   QShortcut* shortcut1 = new QShortcut(QKeySequence("Ctrl+F"), this);
   connect(shortcut1, &QShortcut::activated, this, [this]() {
@@ -172,9 +138,8 @@ bool Notes::eventFilter(QObject* obj, QEvent* evn) {
 
 void Notes::closeEvent(QCloseEvent* event) {
   Q_UNUSED(event);
-  popupLinkList->close();
+
   isBtnAILinkClicked = false;
-  ui->editNoteLink->setEnabled(true);
 
   saveEditorState(currentMDFile);
 
