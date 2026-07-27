@@ -19,7 +19,10 @@ void Notes::initEditor() {
           &Notes::editVSBarValueChanged);
   connect(m_EditSource, &QsciScintilla::textChanged, this,
           &Notes::editSource_textChanged);
+
+  ui->frameEdit->layout()->removeWidget(ui->f_NoteLink);
   ui->frameEdit->layout()->addWidget(m_EditSource);
+  ui->frameEdit->layout()->addWidget(ui->f_NoteLink);
   m_EditSource->setFocus();
 #endif
 }

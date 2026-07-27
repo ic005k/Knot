@@ -293,6 +293,8 @@ class Notes : public QDialog {
 
   void on_btnAILink_clicked();
 
+  void on_btnInsertNoteLink_clicked();
+
  private:
 #ifdef VECTOR_SEARCH
 

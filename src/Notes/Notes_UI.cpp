@@ -365,7 +365,6 @@ void Notes::popupNoteLinkList(const QString& arg1) {
 
   // 空内容隐藏
   if (keyword.isEmpty() && !isBtnAILinkClicked) {
-    popupLinkList->hide();
     return;
   }
 
@@ -378,7 +377,7 @@ void Notes::popupNoteLinkList(const QString& arg1) {
   //  垂直滚动条 + 水平滚动条 + 无箭头 + 圆角扁平现代风
   // ==============================
   if (isDark) {
-    m_popupList->setStyleSheet(R"(
+    ui->listNoteLink->setStyleSheet(R"(
     QListWidget {
         background-color: #2C2C2C;
         color: #E0E0E0;
@@ -446,7 +445,7 @@ void Notes::popupNoteLinkList(const QString& arg1) {
     }
   )");
   } else {
-    m_popupList->setStyleSheet(R"(
+    ui->listNoteLink->setStyleSheet(R"(
     QListWidget {
         background-color: #FFFFFF;
         color: #2C2C2C;
@@ -527,19 +526,13 @@ void Notes::popupNoteLinkList(const QString& arg1) {
     matches = m_NoteIndexManager->searchTitles(keyword);
   }
 
-  // 刷新列表
-  m_popupList->clear();
-  m_popupList->addItems(matches);
-
-  // 显示在笔记链接标签的正下方
-  QPoint pos =
-      ui->lblNoteLink->mapToGlobal(QPoint(0, ui->lblNoteLink->height()));
-  popupLinkList->move(pos);
-  popupLinkList->show();
+  ui->listNoteLink->clear();
+  ui->listNoteLink->addItems(matches);
 }
 
 // 链接自动补全
 void Notes::on_editNoteLink_textChanged(const QString& arg1) {
+  isBtnAILinkClicked = false;
   popupNoteLinkList(arg1);
 }
 
@@ -603,11 +596,15 @@ void Notes::insertNoteLink(const QString& title, const QString& path) {
   ui->editNoteLink->clear();
 }
 
+void Notes::on_btnInsertNoteLink_clicked() {
+  onPopupItemClicked(ui->listNoteLink->currentItem());
+}
+
 void Notes::on_btnAILink_clicked() {
 #ifndef Q_OS_ANDROID
 
   isBtnAILinkClicked = true;
-  ui->editNoteLink->setEnabled(false);
+  // ui->editNoteLink->setEnabled(false);
 
   // 前后各10个字词
   int cursorPos = getCursorCharOffset(m_EditSource);
