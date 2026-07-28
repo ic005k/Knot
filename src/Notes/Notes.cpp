@@ -706,7 +706,10 @@ void Notes::processSingleRemoteFile(const QString& file) {
       QFile::remove(kFile);
       QFile::copy(pFile, kFile);
 
-      m_NotesList->m_graphController->parser()->updateNoteCache(kFile);
+      // 🆕 精确失效该文件的缓存
+      m_NotesList->m_graphController->parser()->invalidateNoteCache(
+          kFile, NoteRelationParser::CACHE_MODIFY);
+
       m_Method->delayDelFile(pFile);
       m_Method->delayDelFile(zFile);
     }

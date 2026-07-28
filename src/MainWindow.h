@@ -489,6 +489,8 @@ class MainWindow : public QMainWindow {
 
   void setVectorStatus(int status, int current, int total);
 
+  void fixQuickWidgetFirstTouch(QQuickWidget* quickWidget);
+
  protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;

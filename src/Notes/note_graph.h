@@ -8,9 +8,9 @@
 #include <QString>
 #include <QVector>
 
-// ==============================
-// 新增：图谱缓存类（纯数据结构）
-// ==============================
+// =================================================================================
+// 图谱缓存类（纯数据结构）
+// =================================================================================
 class NoteGraphCache {
  public:
   // 缓存两张核心表
@@ -23,6 +23,8 @@ class NoteGraphCache {
   bool isEmpty() const;
   void clear();
 };
+
+//====================================================================================
 
 // 结构体定义
 struct NoteNode {
@@ -45,6 +47,8 @@ struct NoteRelation {
 // 声明元类型（用于跨线程传递）
 Q_DECLARE_METATYPE(QVector<NoteNode>)
 Q_DECLARE_METATYPE(QVector<NoteRelation>)
+
+//================= NoteGraphModel =================================
 
 class NoteGraphModel : public QAbstractItemModel {
   Q_OBJECT
@@ -85,6 +89,8 @@ class NoteGraphModel : public QAbstractItemModel {
   QVector<NoteRelation> m_relations;
 };
 
+//================= NoteRelationParser  ==========================
+
 class NoteRelationParser : public QObject {
   Q_OBJECT
  public:
@@ -93,8 +99,18 @@ class NoteRelationParser : public QObject {
                                       const QString& currentNotePath);
 
   void updateNoteCache(const QString& filePath);
-  void deleteNoteCache(const QString &filePath);
-  signals:
+  void deleteNoteCache(const QString& filePath);
+
+  Q_INVOKABLE void invalidateCache();
+
+  enum CacheAction : int {
+    CACHE_DELETE = 0,  // 笔记被删除
+    CACHE_MODIFY = 1   // 笔记被修改
+  };
+
+  void invalidateNoteCache(const QString& filePath, CacheAction action);
+
+ signals:
   void parsingCompleted();
   // 新增：后台解析完成后传递数据的信号（跨线程使用）
   void parsedDataReady(const QVector<NoteNode>& nodes,
@@ -129,6 +145,8 @@ class NoteRelationParser : public QObject {
   int findNodeIndex(const QVector<NoteNode>& nodes, const QString& path);
 };
 
+//=================== NoteGraphController ==============================
+
 class NoteGraphController : public QObject {
   Q_OBJECT
   Q_PROPERTY(QString currentNotePath READ currentNotePath WRITE
@@ -158,6 +176,6 @@ class NoteGraphController : public QObject {
 
 // 初始化函数声明
 void initializeNoteGraph();
-void registerNoteGraphTypes();  // <-- 新增：声明 registerNoteGraphTypes 函数
+void registerNoteGraphTypes();  // <-- 声明 registerNoteGraphTypes 函数
 
 #endif  // NOTE_GRAPH_H

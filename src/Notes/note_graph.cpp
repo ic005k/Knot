@@ -135,7 +135,8 @@ void NoteGraphModel::clear() {
 
 //===============================================================================
 
-// --- NoteRelationParser 实现（核心优化部分）---
+// ------------------ NoteRelationParser 实现
+// -----------------------------------
 NoteRelationParser::NoteRelationParser(QObject* parent) : QObject(parent) {
   // 连接后台数据到主线程处理槽函数
   connect(this, &NoteRelationParser::parsedDataReady, this,
@@ -144,9 +145,6 @@ NoteRelationParser::NoteRelationParser(QObject* parent) : QObject(parent) {
 
   m_cachePath = privateDir + "notegraph_cache.json";
   m_cache.load(m_cachePath);  // 启动就加载
-
-  connect(this, &NoteRelationParser::parsedDataReady, this,
-          &NoteRelationParser::onParsedDataReady, Qt::QueuedConnection);
 }
 
 void NoteRelationParser::parseNoteRelations(NoteGraphModel* model,
@@ -306,6 +304,10 @@ void NoteRelationParser::buildCacheFromNodes(
       incoming << QFileInfo(source).fileName();
     }
   }
+
+  // ★ 去除重复边，防止缓存膨胀和图谱重复连线
+  outgoing.removeDuplicates();
+  incoming.removeDuplicates();
 
   m_cache.forward[currentFileName] = outgoing;
   m_cache.backward[currentFileName] = incoming;
@@ -550,7 +552,63 @@ void NoteRelationParser::arrangeNodes(NoteGraphModel* model) {
   }
 }
 
-// --- NoteGraphController 实现（保持不变）---
+void NoteRelationParser::invalidateCache() {
+  m_cache.clear();
+  m_cache.save(m_cachePath);  // 写空缓存到磁盘，避免重启后又加载旧数据
+  qDebug() << "[Graph] 图谱缓存已失效，等待下次访问时重建";
+}
+
+/**
+ * @brief 精确失效指定笔记的图谱缓存
+ * @param filePath 笔记路径
+ * @param action   CACHE_DELETE=删除笔记 | CACHE_MODIFY=修改笔记
+ *
+ * DELETE: 清除自身 + 清理所有关联文件中指向自己的记录
+ * MODIFY: 仅清除自身的
+ * forward/backward（关联文件的冗余记录无害，下次全量解析自然修正）
+ */
+void NoteRelationParser::invalidateNoteCache(const QString& filePath,
+                                             CacheAction action) {
+  const QString fileName = QFileInfo(filePath).fileName();
+
+  if (action == CACHE_MODIFY) {
+    // ===== 修改场景：只清自己 =====
+    bool changed = false;
+    if (m_cache.forward.remove(fileName)) changed = true;
+    if (m_cache.backward.remove(fileName)) changed = true;
+
+    if (changed) {
+      m_cache.save(m_cachePath);
+      qDebug() << "[Graph] 缓存已失效(修改):" << fileName;
+    }
+    return;
+  }
+
+  // ===== 删除场景：清自己 + 精确清理关联文件 =====
+  // take() 同时取出并移除，避免后续遍历时找不到
+  QStringList oldForward = m_cache.forward.take(fileName);
+  QStringList oldBackward = m_cache.backward.take(fileName);
+
+  bool changed = !oldForward.isEmpty() || !oldBackward.isEmpty();
+
+  // 我引用过的文件 → 它们的 backward 中要去掉我
+  for (const QString& target : std::as_const(oldForward)) {
+    if (m_cache.backward[target].removeOne(fileName)) changed = true;
+  }
+
+  // 引用过我的文件 → 它们的 forward 中要去掉我
+  for (const QString& source : std::as_const(oldBackward)) {
+    if (m_cache.forward[source].removeOne(fileName)) changed = true;
+  }
+
+  if (changed) {
+    m_cache.save(m_cachePath);
+    qDebug() << "[Graph] 缓存已失效(删除):" << fileName
+             << "| 出链:" << oldForward.size() << "入链:" << oldBackward.size();
+  }
+}
+
+// ---- NoteGraphController 实现-----------------
 NoteGraphController::NoteGraphController(QObject* parent) : QObject(parent) {
   m_model = new NoteGraphModel(this);
   m_parser = new NoteRelationParser(this);

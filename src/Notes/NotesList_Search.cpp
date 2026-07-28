@@ -234,6 +234,10 @@ void NotesList::startBackgroundTaskDelFilesIndex(const QStringList& files) {
       m_Notes->m_NoteIndexManager->removeNote(
           file);                        // emit noteRemoved → 清理向量搜索哈希表
       m_Notes->removeNoteVector(file);  // 清理向量引擎中的向量
+
+      // 🆕 精确失效该文件的图谱缓存
+      m_NotesList->m_graphController->parser()->invalidateNoteCache(
+          file, NoteRelationParser::CACHE_DELETE);
     }
 
     qDebug() << "Vector del files completed.";
