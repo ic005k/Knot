@@ -231,8 +231,16 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
 
     // 删除笔记后，更新图谱
     if (m_graphController) {
-      m_graphController->parser()->deleteNoteCache(md);
+      // 之前的旧实现（逻辑也是正确）
+      // m_graphController->parser()->deleteNoteCache(md);
+
+      // 🆕 精确失效该文件的图谱缓存
+      m_NotesList->m_graphController->parser()->invalidateNoteCache(
+          md, NoteRelationParser::CACHE_DELETE);
     }
+
+    // 删除笔记搜索向量
+    m_Notes->removeNoteVector(md);
 
     QString json = m_Notes->getCurrentJSON(md);
     delFile(json);

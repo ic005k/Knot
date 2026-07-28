@@ -88,6 +88,15 @@ void NotesList::needDelNotes() {
     isDelMDOk = delFile(mdFile);
     isDelJSONOk = delFile(strFile);
 
+    if (isDelMDOk) {
+      // 删除笔记后，删除图谱缓存
+      m_NotesList->m_graphController->parser()->invalidateNoteCache(
+          mdFile, NoteRelationParser::CACHE_DELETE);
+
+      // 删除笔记搜索向量
+      m_Notes->removeNoteVector(mdFile);
+    }
+
     if (!isAndroid) {
       if (isDelMDOk) qDebug() << "Del Note: " << mdFile << isDelMDOk;
       if (isDelJSONOk) qDebug() << "Del Note: " << strFile << isDelJSONOk;

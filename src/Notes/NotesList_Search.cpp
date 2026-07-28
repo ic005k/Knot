@@ -231,9 +231,10 @@ void NotesList::startBackgroundTaskDelFilesIndex(const QStringList& files) {
 
     // ✅ 内存操作回到主线程，安全且无性能损失
     for (const QString& file : files) {
-      m_Notes->m_NoteIndexManager->removeNote(
-          file);                        // emit noteRemoved → 清理向量搜索哈希表
-      m_Notes->removeNoteVector(file);  // 清理向量引擎中的向量
+      m_Notes->m_NoteIndexManager->removeNote(file);
+
+      // 清理向量引擎中的向量(暂时不清理，因为这只是让笔记进入回收站）
+      // m_Notes->removeNoteVector(file);
 
       // 🆕 精确失效该文件的图谱缓存
       m_NotesList->m_graphController->parser()->invalidateNoteCache(
