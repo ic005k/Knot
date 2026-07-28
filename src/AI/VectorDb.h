@@ -82,6 +82,13 @@ class VectorDb {
   void fillMissingVec(EmbeddingEngine* engine,
                       const QList<QString>& allNoteIdList);
 
+  /**
+   * @brief 清理不在有效文件列表中的孤立笔记向量数据
+   * @param validNoteIds 当前磁盘上实际存在的所有笔记ID列表
+   * @return 被清理的笔记数量（非chunk数），失败返回 -1
+   */
+  int purgeOrphanedNotes(const QStringList& validNoteIds);
+
  private:
   bool initTable();
 

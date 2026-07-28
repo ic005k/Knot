@@ -512,4 +512,87 @@ void VectorDb::fillMissingVec(EmbeddingEngine* engine,
   //       commit
 }
 
+int VectorDb::purgeOrphanedNotes(const QStringList& validNoteIds) {
+  if (!m_db) return -1;
+  QMutexLocker locker(&m_mutex);
+
+  // ✅ 使用事务保证原子性
+  if (sqlite3_exec(m_db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr) !=
+      SQLITE_OK) {
+    qWarning() << "[VectorDb] purgeOrphanedNotes BEGIN失败:"
+               << sqlite3_errmsg(m_db);
+    return -1;
+  }
+
+  // Step 1: 创建临时表存放有效ID（避免超长 NOT IN 参数绑定问题）
+  const char* createTempSql =
+      "CREATE TEMP TABLE IF NOT EXISTS _valid_notes(note_id TEXT PRIMARY KEY);";
+  if (sqlite3_exec(m_db, createTempSql, nullptr, nullptr, nullptr) !=
+      SQLITE_OK) {
+    qWarning() << "[VectorDb] 创建临时表失败:" << sqlite3_errmsg(m_db);
+    sqlite3_exec(m_db, "ROLLBACK;", nullptr, nullptr, nullptr);
+    return -1;
+  }
+
+  // 清空临时表（防止上次残留）
+  sqlite3_exec(m_db, "DELETE FROM _valid_notes;", nullptr, nullptr, nullptr);
+
+  // Step 2: 批量插入有效ID到临时表
+  sqlite3_stmt* insertStmt = nullptr;
+  const char* insertSql = "INSERT INTO _valid_notes(note_id) VALUES(?);";
+  if (sqlite3_prepare_v2(m_db, insertSql, -1, &insertStmt, nullptr) !=
+      SQLITE_OK) {
+    qWarning() << "[VectorDb] 准备临时表插入失败:" << sqlite3_errmsg(m_db);
+    sqlite3_exec(m_db, "ROLLBACK;", nullptr, nullptr, nullptr);
+    return -1;
+  }
+
+  for (const QString& id : validNoteIds) {
+    QByteArray idUtf8 = id.toUtf8();
+    sqlite3_reset(insertStmt);
+    sqlite3_bind_text(insertStmt, 1, idUtf8.constData(), -1, SQLITE_TRANSIENT);
+    sqlite3_step(insertStmt);  // 忽略单条插入错误，继续执行
+  }
+  sqlite3_finalize(insertStmt);
+
+  // Step 3: 删除不在有效列表中的孤儿数据（先删向量，再删元数据）
+  const char* deleteVecSql = R"(
+        DELETE FROM vec_index WHERE rowid IN (
+            SELECT rowid FROM note_chunks
+            WHERE note_id NOT IN (SELECT note_id FROM _valid_notes)
+        );
+    )";
+
+  const char* deleteMetaSql = R"(
+        DELETE FROM note_chunks
+        WHERE note_id NOT IN (SELECT note_id FROM _valid_notes);
+    )";
+
+  int rc1 = sqlite3_exec(m_db, deleteVecSql, nullptr, nullptr, nullptr);
+  int rc2 = sqlite3_exec(m_db, deleteMetaSql, nullptr, nullptr, nullptr);
+
+  // Step 4: 获取受影响的行数（用于日志/反馈）
+  int deletedCount = sqlite3_changes(m_db);
+
+  // 清理临时表
+  sqlite3_exec(m_db, "DROP TABLE IF EXISTS _valid_notes;", nullptr, nullptr,
+               nullptr);
+
+  if (rc1 != SQLITE_OK || rc2 != SQLITE_OK) {
+    qCritical() << "[VectorDb] purgeOrphanedNotes 删除失败:"
+                << sqlite3_errmsg(m_db);
+    sqlite3_exec(m_db, "ROLLBACK;", nullptr, nullptr, nullptr);
+    return -1;
+  }
+
+  if (sqlite3_exec(m_db, "COMMIT;", nullptr, nullptr, nullptr) != SQLITE_OK) {
+    qCritical() << "[VectorDb] purgeOrphanedNotes COMMIT失败:"
+                << sqlite3_errmsg(m_db);
+    return -1;
+  }
+
+  qDebug() << "[VectorDb] ✅ 孤立笔记清理完成, 移除无效笔记数:" << deletedCount;
+  return deletedCount;
+}
+
 #endif  // VECTOR_SEARCH

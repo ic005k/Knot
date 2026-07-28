@@ -1,4 +1,5 @@
 #include "NotesList.h"
+#include "src/AI/VectorDb.h"
 
 void NotesList::genRecentOpenMenu() {
   menuRecentOpen = new QMenu(this);
@@ -771,6 +772,15 @@ void NotesList::rebuilderNotesVector() {
   auto future = QtConcurrent::run([this]() {
     try {
       QStringList allNotes = getAllNotePaths();
+
+      // ✅ 兜底清理：移除磁盘上已不存在的孤立笔记向量
+      // 注意：这里传入的是文件路径，如果 note_id 就是文件路径则直接使用
+      // 如果 note_id 是其他标识符（如UUID），需要先转换为 note_id 列表
+      int purged = g_vectorDb->purgeOrphanedNotes(allNotes);
+      if (purged > 0) {
+        qInfo() << "[Embedding] 重建前清理了" << purged << "个孤儿笔记向量";
+      }
+
       const int totalFiles = allNotes.size();  // ✅ 缓存总数
       for (int i = 0; i < allNotes.size(); ++i) {
         // ✅ 每个笔记处理前检查取消标志
