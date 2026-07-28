@@ -1,0 +1,30 @@
+# .github/release.yml
+changelog:
+  exclude:
+    labels:
+      - "type: chore"
+      - "type: test"
+      - "type: build"
+      - "type: ci"
+  categories:
+    - title: 🚀 New Features
+      labels:
+        - "type: feat"
+    - title: 🐛 Bug Fixes
+      labels:
+        - "type: fix"
+    - title: ⚡ Performance Improvements
+      labels:
+        - "type: perf"
+    - title: ♻️ Refactoring
+      labels:
+        - "type: refactor"
+    - title: 🎨 Code Style
+      labels:
+        - "type: style"
+    - title: 📝 Documentation
+      labels:
+        - "type: docs"
+    - title: Other Changes
+      labels:
+        - "*"
