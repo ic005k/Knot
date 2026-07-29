@@ -24,6 +24,22 @@ void Notes::initEditor() {
   ui->frameEdit->layout()->addWidget(m_EditSource);
   ui->frameEdit->layout()->addWidget(ui->f_NoteLink);
   m_EditSource->setFocus();
+
+  // 预编译 Markdown 图片正则
+  m_imgRegex = QRegularExpression(R"(!\[[^\]]*\]\(([^)]+)\))");
+
+  // ⚠ 可以使用 textChanged + cursorPositionChanged 组合，
+  // 或者使用 QScintilla 的 SCN_CLICK 通知（通过 sendScintilla）
+  // 这里用最简单可靠的方式：监听光标位置变化
+  connect(m_EditSource, &QsciScintilla::cursorPositionChanged, this,
+          [this](int line, int index) {
+            Q_UNUSED(index);
+            QString lineText = m_EditSource->text(line);
+            updateImagePreview(lineText);
+          });
+
+  // 匹配 [任意文本](memo/xxx.md) 格式，排除 ! 开头的图片语法
+  m_linkRegex = QRegularExpression(R"((?<!!)\[([^\]]*)\]\(([^)]+\.md)\))");
 #endif
 }
 
@@ -451,4 +467,143 @@ void Notes::applyMdLexerTheme(bool darkMode) {
   m_EditSource->setSelectionBackgroundColor(selBg);
   m_EditSource->setSelectionForegroundColor(fgNormal);
 #endif
+}
+
+void Notes::updateImagePreview(const QString& lineText) {
+  // ===== 优先级1: 图片预览 =====
+  ui->lblNoteImage->setStyleSheet("");   // 清除摘要样式
+  ui->lblNoteImage->setWordWrap(false);  // 图片不需要换行
+
+  QRegularExpressionMatch imgMatch = m_imgRegex.match(lineText);
+  if (imgMatch.hasMatch()) {
+    QString relPath = imgMatch.captured(1).trimmed();
+    relPath.remove(QRegularExpression(R"([?#].*$)"));
+    if (relPath.startsWith('"') || relPath.startsWith('\''))
+      relPath = relPath.mid(1, relPath.length() - 2);
+
+    QString basePath = QFileInfo(currentMDFile).absolutePath();
+    QString absPath = QDir(basePath).filePath(relPath);
+    QString canonical = QFileInfo(absPath).canonicalFilePath();
+
+    if (canonical.isEmpty() || !canonical.startsWith(basePath)) {
+      ui->lblNoteImage->setPixmap(QPixmap());
+      ui->lblNoteImage->setText(QStringLiteral("⚠️ 非法路径"));
+      return;
+    }
+
+    QPixmap pixmap(canonical);
+    if (!pixmap.isNull()) {
+      QPixmap scaled = pixmap.scaled(100, 100, Qt::KeepAspectRatio,
+                                     Qt::SmoothTransformation);
+      ui->lblNoteImage->setPixmap(scaled);
+      ui->lblNoteImage->setAlignment(Qt::AlignCenter);
+      return;  // ✅ 图片命中，直接返回
+    }
+  }
+
+  // ===== 优先级2: 引用笔记摘要 =====
+  QRegularExpressionMatch linkMatch = m_linkRegex.match(lineText);
+  if (linkMatch.hasMatch()) {
+    QString relPath = iniDir + linkMatch.captured(2).trimmed();
+    qDebug() << "realPath=" << relPath;
+    QString basePath = QFileInfo(currentMDFile).absolutePath();
+    QString absPath = QDir(basePath).filePath(relPath);
+    QString canonical = QFileInfo(absPath).canonicalFilePath();
+
+    if (!canonical.isEmpty() && canonical.startsWith(basePath)) {
+      QString summary = generateSmartSummary(canonical);
+      ui->lblNoteImage->clear();
+      ui->lblNoteImage->setText(summary);
+      ui->lblNoteImage->setWordWrap(true);  // ✅ 摘要需要自动换行
+      ui->lblNoteImage->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+      ui->lblNoteImage->setStyleSheet(  // 小字号+省略样式
+          "font-size: 11px; color: #666; padding: 4px;");
+      return;  // ✅ 摘要命中，直接返回
+    }
+  }
+
+  // ===== 默认状态 =====
+  ui->lblNoteImage->setWordWrap(false);
+  ui->lblNoteImage->clear();
+  ui->lblNoteImage->setStyleSheet("");  // 重置样式
+  ui->lblNoteImage->setText(QStringLiteral("🖼️"));
+  ui->lblNoteImage->setAlignment(Qt::AlignCenter);
+}
+
+QString Notes::generateSmartSummary(const QString& filePath) {
+  QString cacheKey =
+      filePath + "|" +
+      QString::number(QFileInfo(filePath).lastModified().toSecsSinceEpoch());
+  if (auto* cached = m_summaryCache.object(cacheKey)) return *cached;
+
+  QFile file(filePath);
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    return QStringLiteral("❌ 无法读取");
+
+  QTextStream stream(&file);
+  stream.setEncoding(QStringConverter::Utf8);
+
+  QString content = stream.readAll();
+  file.close();
+
+  // 1. 去除 Markdown 标题标记、空行、HTML标签
+  static const QRegularExpression cleanRegex(
+      R"(^#+\s*|<[^>]*>|\[([^\]]*)\]\([^)]*\)|!\[[^\]]*\]\([^)]*\))",
+      QRegularExpression::MultilineOption);
+  content.remove(cleanRegex);
+
+  // 2. 合并多余空白，保留纯文本
+  QStringList lines = content.split('\n', Qt::SkipEmptyParts);
+  QString plainText;
+  for (const auto& line : lines) {
+    QString trimmed = line.trimmed();
+    if (!trimmed.isEmpty()) plainText += trimmed + " ";
+  }
+  plainText = plainText.trimmed();
+
+  if (plainText.isEmpty()) return QStringLiteral("📄 空文档");
+
+  // 3. ✅ 国际化智能截断（约50个字符宽度）
+  const int maxLen = 50;
+  if (plainText.length() <= maxLen) return plainText;
+
+  QString summary;
+  int charCount = 0;
+  bool lastWasCjk = false;
+
+  for (int i = 0; i < plainText.length() && charCount < maxLen; ++i) {
+    QChar ch = plainText[i];
+
+    if (isCjkChar(ch)) {
+      summary += ch;
+      charCount++;
+      lastWasCjk = true;
+    } else if (isSpaceChar(ch)) {
+      // 非CJK区域遇到空格才追加
+      if (!lastWasCjk) {
+        summary += ch;
+      }
+      lastWasCjk = false;
+    } else {
+      // 拉丁/数字等字符
+      summary += ch;
+      // 非CJK字符每2个算1个视觉宽度（粗略估算）
+      if (!lastWasCjk) charCount++;
+      lastWasCjk = false;
+    }
+  }
+
+  // 4. 英文避免截断在单词中间：回退到最后一个空格
+  if (!lastWasCjk && summary.contains(' ')) {
+    int lastSpace = summary.lastIndexOf(' ');
+    if (lastSpace > maxLen / 2) {
+      summary = summary.left(lastSpace);
+    }
+  }
+
+  // 在插入缓存之前拼接省略号
+  QString result = (plainText.length() <= maxLen) ? plainText : summary + "…";
+
+  m_summaryCache.insert(cacheKey, new QString(result));
+  return result;  // 统一返回带省略号的完整结果
 }

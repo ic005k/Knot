@@ -292,3 +292,20 @@ QString computeModelFingerprint(const QString& modelPath) {
   // 取前32位
   return hash.result().toHex().left(32);
 }
+
+// 判断是否为 CJK 统一汉字/日文假名/韩文音节等
+static inline bool isCjkChar(QChar ch) {
+  uint u = ch.unicode();
+  return (u >= 0x4E00 && u <= 0x9FFF) ||    // CJK Unified Ideographs
+         (u >= 0x3400 && u <= 0x4DBF) ||    // CJK Extension A
+         (u >= 0x20000 && u <= 0x2A6DF) ||  // CJK Extension B
+         (u >= 0xF900 && u <= 0xFAFF) ||    // CJK Compatibility Ideographs
+         (u >= 0x3040 && u <= 0x309F) ||    // Hiragana
+         (u >= 0x30A0 && u <= 0x30FF) ||    // Katakana
+         (u >= 0xAC00 && u <= 0xD7AF);      // Hangul Syllables
+}
+
+// 判断是否为空白字符（空格、制表符、换行等）
+static inline bool isSpaceChar(QChar ch) {
+  return ch.isSpace() || ch == '\n' || ch == '\r' || ch == '\t';
+}

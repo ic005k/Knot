@@ -573,6 +573,16 @@ color: rgb(255, 255, 255);</string>
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QLabel" name="lblNoteImage">
+               <property name="text">
+                <string>Note Image</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
           </layout>

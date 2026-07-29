@@ -44,6 +44,9 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
 
   m_Method->set_ToolButtonStyle(this);
 
+  ui->lblNoteImage->setFixedHeight(100);
+  ui->lblNoteImage->setFixedWidth(100);
+
   // Ctrl+F 快捷键
   QShortcut* shortcut1 = new QShortcut(QKeySequence("Ctrl+F"), this);
   connect(shortcut1, &QShortcut::activated, this, [this]() {

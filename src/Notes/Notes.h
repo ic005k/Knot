@@ -301,6 +301,12 @@ class Notes : public QDialog {
   QString loadNoteFullText(const QString& mdPath);
 #endif
 
+  void updateImagePreview(const QString& lineText);
+  QString generateSmartSummary(const QString& filePath);
+  QRegularExpression m_linkRegex;
+  QRegularExpression m_imgRegex;
+  QCache<QString, QString> m_summaryCache;  // 默认上限100条
+
   static inline QMutex s_embMutex;
   static inline QMutex s_vecDbMutex;
 
