@@ -59,78 +59,89 @@ static void JavaNotify_2() {
   qDebug() << "C++ JavaNotify_2";
 }
 
+// Todo闹钟时间到，显示弹窗
 static void JavaNotify_3() {
 #ifdef Q_OS_ANDROID
-  // 时间处理（无风险）
-  QDateTime now = QDateTime::currentDateTime();
-  QString datePart = now.toString("yyyy-MM-dd");
-  QString timePart = now.toString("HH:mm:ss");
-  QString strTodoAlarmActiveTime = datePart + "  " + timePart;
+  // ✅ JNI 入口级防护，防止 Qt 未初始化时崩溃
+  if (!QCoreApplication::instance() || !QCoreApplication::eventDispatcher()) {
+    qDebug() << "JavaNotify_3: Qt未就绪，丢弃本次闹钟通知";
+    return;
+  }
 
-  // 1. 先切到Qt主线程执行所有逻辑
+  QDateTime now = QDateTime::currentDateTime();
+  QString strTodoAlarmActiveTime = now.toString("yyyy-MM-dd  HH:mm:ss");
+
+  // ✅ 先切到主线程，但只做轻量级数据准备和前台唤醒
   QMetaObject::invokeMethod(
       QCoreApplication::instance(),
       [strTodoAlarmActiveTime]() {
-        // ========== 所有逻辑移到Qt主线程内执行 ==========
-        // 2. 空指针校验（避免野指针访问）
-        if (mw_one == nullptr || mw_one->m_Todo == nullptr) {
-          qDebug() << "JavaNotify_3: mw_one/m_Todo 为空，跳过执行";
+        if (!mw_one || !mw_one->m_Todo) {
+          qDebug() << "JavaNotify_3: mw_one/m_Todo 为空，跳过";
           return;
         }
 
-        mw_one->m_ReceiveShare->bringAppToForeground();
+        // 1. 先唤醒 App 到前台（这是触发 Surface 恢复的关键）
+        if (mw_one->m_ReceiveShare) {
+          mw_one->m_ReceiveShare->bringAppToForeground();
+        }
 
-        // 3. 读取UI属性（主线程安全）
+        // 2. 在主线程安全读取 UI 数据（轻量操作，不阻塞）
         QString strTime = mw_one->m_Todo->strAlarmTime;
         QString strText = mw_one->m_Todo->strAlarmText;
 
-        try {
-          // 5. UI方法调用（主线程安全）
-          mw_one->m_Todo->refreshAlarm();
+        // ✅ 将耗时的文件IO和音频播放移到弹窗之后或异步执行
+        // 这里只收集配置，不执行播放
+        bool shouldPlayAudio = false;
+        bool isVoice = false;
+        QString voiceFile;
 
-          // 6. 音频/文件操作（加异常捕获）
-          bool isVoice = mw_one->m_Todo->isVoice(strText);
+        try {
+          mw_one->m_Todo->refreshAlarm();
+          isVoice = mw_one->m_Todo->isVoice(strText);
+
           QString ini_file = privateDir + "msg.ini";
           QSettings Reg(ini_file, QSettings::IniFormat);
           bool isPlayText = Reg.value("voice", 0).toBool();
+          shouldPlayAudio = (isVoice || isPlayText);
 
-          if (isVoice || isPlayText) {
-            if (isVoice) {
-              QString voiceFile = mw_one->m_Todo->getVoiceFile(strText);
-              // 音频播放建议异步（如果playRecord是同步的，改用线程/信号槽）
-              if (m_Method != nullptr) {
-                m_Method->playRecord(voiceFile);
-              }
-            } else {
-              QString txt = strText;
-              if (m_Method != nullptr) {
-                isPlayBook = false;
-                m_Method->stopPlayMyText();
-                m_Method->playMyText(txt);
-              }
-            }
+          if (isVoice) {
+            voiceFile = mw_one->m_Todo->getVoiceFile(strText);
           }
-
-          // 7. 弹窗显示（✅ 安卓Qt终极安全方案，不崩溃+不丢点击）
-          QMetaObject::invokeMethod(
-              mw_one->m_Todo,
-              [=]() {
-                if (mw_one && mw_one->m_Todo) {
-                  mw_one->m_Todo->showAlarmWindow(strTime, strText,
-                                                  strTodoAlarmActiveTime);
-                }
-              },
-              Qt::QueuedConnection);
-
-          qDebug() << "C++ JavaNotify_3 执行完成";
-        } catch (const std::exception& e) {
-          // 捕获所有异常，避免卡死
-          qDebug() << "JavaNotify_3 执行异常：" << e.what();
         } catch (...) {
-          qDebug() << "JavaNotify_3 执行未知异常";
+          qDebug() << "JavaNotify_3: 读取配置异常";
         }
+
+        // ✅ 延迟显示弹窗，等待 Surface 稳定
+        // 不再嵌套 QueuedConnection，改用 QTimer 给 WM 足够时间
+        QTimer::singleShot(300, mw_one->m_Todo,
+                           [strTime, strText, strTodoAlarmActiveTime,
+                            shouldPlayAudio, isVoice, voiceFile]() {
+                             if (!mw_one || !mw_one->m_Todo) return;
+
+                             // 同步显示弹窗（此时已在主线程，且 Surface
+                             // 已稳定）
+                             mw_one->m_Todo->showAlarmWindow(
+                                 strTime, strText, strTodoAlarmActiveTime);
+
+                             // ✅ 弹窗显示后再异步播放音频，避免阻塞 UI
+                             // 渲染
+                             if (shouldPlayAudio && m_Method) {
+                               QTimer::singleShot(50, [=]() {
+                                 if (!m_Method) return;
+                                 if (isVoice) {
+                                   m_Method->playRecord(voiceFile);
+                                 } else {
+                                   isPlayBook = false;
+                                   m_Method->stopPlayMyText();
+                                   m_Method->playMyText(strText);
+                                 }
+                               });
+                             }
+
+                             qDebug() << "C++ JavaNotify_3 弹窗+音频调度完成";
+                           });
       },
-      Qt::QueuedConnection);  // 关键：QueuedConnection 确保在Qt主线程执行
+      Qt::QueuedConnection);
 #endif
 }
 

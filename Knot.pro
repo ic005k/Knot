@@ -722,6 +722,7 @@ SOURCES += \
     lib/cmark-gfm/src/syntax_extension.c \
     lib/cmark-gfm/src/utf8.c \
     lib/cmark-gfm/src/xml.c \
+    src/Todo/Todo_JavaNotify.cpp \
     src/main.cpp \
     lib/quazip/JlCompress.cpp \
     lib/quazip/qioapi.cpp \

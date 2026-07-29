@@ -953,7 +953,7 @@ public class MyService extends Service {
                 notifyTodoAlarm(context, message);
 
                 // 切换到Android主线程调用C++方法（避免广播子线程）
-                new Handler(Looper.getMainLooper()).post(() -> {
+                /*new Handler(Looper.getMainLooper()).post(() -> {
                     if (QtStateManager.getInstance().canInteractWithQt()) {
                         CallJavaNotify_3();
                     } else {
@@ -961,6 +961,44 @@ public class MyService extends Service {
                             Log.w(TAG, "Qt未就绪，延迟3秒执行CallJavaNotify_3");
                             CallJavaNotify_3();
                         }, 3000);
+                    }
+                });*/
+
+                // 替换原有的 Handler.postDelayed 逻辑
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    // 使用更可靠的 Qt 状态检查
+                    if (QtStateManager.getInstance().canInteractWithQt()) {
+                        CallJavaNotify_3();
+                    } else {
+                        // 改用轮询+超时机制，而非盲等3秒
+                        final int[] retryCount = { 0 };
+                        Runnable checkQtReady = new Runnable() {
+                            @Override
+                            public void run() {
+                                if (
+                                    QtStateManager.getInstance().canInteractWithQt()
+                                ) {
+                                    Log.d(TAG, "Qt已就绪，执行闹钟通知");
+                                    CallJavaNotify_3();
+                                } else if (retryCount[0] < 20) {
+                                    // 最多等5秒 (20*250ms)
+                                    retryCount[0]++;
+                                    new Handler(
+                                        Looper.getMainLooper()
+                                    ).postDelayed(this, 250);
+                                } else {
+                                    Log.w(
+                                        TAG,
+                                        "Qt就绪超时，仍尝试执行CallJavaNotify_3"
+                                    );
+                                    CallJavaNotify_3();
+                                }
+                            }
+                        };
+                        new Handler(Looper.getMainLooper()).postDelayed(
+                            checkQtReady,
+                            250
+                        );
                     }
                 });
             }
