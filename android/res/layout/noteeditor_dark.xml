@@ -320,6 +320,41 @@
 
         </FrameLayout>
 
+        <FrameLayout
+            android:id="@+id/previewContainer"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="#CC000000"
+            android:visibility="gone"
+            android:elevation="6dp"
+            android:clickable="true"
+            android:focusable="true"
+        >
+
+            <ImageView
+                android:id="@+id/previewImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+            />
+
+            <TextView
+                android:id="@+id/previewText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textSize="9sp"
+                android:maxLines="3"
+                android:ellipsize="end"
+                android:padding="2dp"
+                android:textColor="#FFFFFFFF"
+                android:visibility="gone"
+            />
+        </FrameLayout>
+
     </FrameLayout>
 
 

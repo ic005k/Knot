@@ -470,64 +470,37 @@ void Notes::applyMdLexerTheme(bool darkMode) {
 }
 
 void Notes::updateImagePreview(const QString& lineText) {
-  // ===== 优先级1: 图片预览 =====
-  ui->lblNoteImage->setStyleSheet("");   // 清除摘要样式
-  ui->lblNoteImage->setWordWrap(false);  // 图片不需要换行
+  QString result = parsePreviewData(lineText);
 
-  QRegularExpressionMatch imgMatch = m_imgRegex.match(lineText);
-  if (imgMatch.hasMatch()) {
-    QString relPath = imgMatch.captured(1).trimmed();
-    relPath.remove(QRegularExpression(R"([?#].*$)"));
-    if (relPath.startsWith('"') || relPath.startsWith('\''))
-      relPath = relPath.mid(1, relPath.length() - 2);
-
-    QString basePath = QFileInfo(currentMDFile).absolutePath();
-    QString absPath = QDir(basePath).filePath(relPath);
-    QString canonical = QFileInfo(absPath).canonicalFilePath();
-
-    if (canonical.isEmpty() || !canonical.startsWith(basePath)) {
-      ui->lblNoteImage->setPixmap(QPixmap());
-      ui->lblNoteImage->setText(QStringLiteral("⚠️ 非法路径"));
-      return;
-    }
-
-    QPixmap pixmap(canonical);
+  if (result.startsWith(QStringLiteral("IMG:"))) {
+    QString path = result.mid(4);
+    ui->lblNoteImage->setStyleSheet("");
+    ui->lblNoteImage->setWordWrap(false);
+    QPixmap pixmap(path);
     if (!pixmap.isNull()) {
       QPixmap scaled = pixmap.scaled(100, 100, Qt::KeepAspectRatio,
                                      Qt::SmoothTransformation);
       ui->lblNoteImage->setPixmap(scaled);
       ui->lblNoteImage->setAlignment(Qt::AlignCenter);
-      return;  // ✅ 图片命中，直接返回
-    }
-  }
-
-  // ===== 优先级2: 引用笔记摘要 =====
-  QRegularExpressionMatch linkMatch = m_linkRegex.match(lineText);
-  if (linkMatch.hasMatch()) {
-    QString relPath = iniDir + linkMatch.captured(2).trimmed();
-    qDebug() << "realPath=" << relPath;
-    QString basePath = QFileInfo(currentMDFile).absolutePath();
-    QString absPath = QDir(basePath).filePath(relPath);
-    QString canonical = QFileInfo(absPath).canonicalFilePath();
-
-    if (!canonical.isEmpty() && canonical.startsWith(basePath)) {
-      QString summary = generateSmartSummary(canonical);
+    } else {
       ui->lblNoteImage->clear();
-      ui->lblNoteImage->setText(summary);
-      ui->lblNoteImage->setWordWrap(true);  // ✅ 摘要需要自动换行
-      ui->lblNoteImage->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-      ui->lblNoteImage->setStyleSheet(  // 小字号+省略样式
-          "font-size: 11px; color: #666; padding: 4px;");
-      return;  // ✅ 摘要命中，直接返回
+      ui->lblNoteImage->setText(QStringLiteral("🖼️"));
     }
+  } else if (result.startsWith(QStringLiteral("TXT:"))) {
+    QString text = result.mid(4);
+    ui->lblNoteImage->clear();
+    ui->lblNoteImage->setText(text);
+    ui->lblNoteImage->setWordWrap(true);
+    ui->lblNoteImage->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    ui->lblNoteImage->setStyleSheet(
+        "font-size: 11px; color: #666; padding: 4px;");
+  } else {
+    ui->lblNoteImage->setWordWrap(false);
+    ui->lblNoteImage->clear();
+    ui->lblNoteImage->setStyleSheet("");
+    ui->lblNoteImage->setText(QStringLiteral("🖼️"));
+    ui->lblNoteImage->setAlignment(Qt::AlignCenter);
   }
-
-  // ===== 默认状态 =====
-  ui->lblNoteImage->setWordWrap(false);
-  ui->lblNoteImage->clear();
-  ui->lblNoteImage->setStyleSheet("");  // 重置样式
-  ui->lblNoteImage->setText(QStringLiteral("🖼️"));
-  ui->lblNoteImage->setAlignment(Qt::AlignCenter);
 }
 
 QString Notes::generateSmartSummary(const QString& filePath) {
@@ -606,4 +579,46 @@ QString Notes::generateSmartSummary(const QString& filePath) {
 
   m_summaryCache.insert(cacheKey, new QString(result));
   return result;  // 统一返回带省略号的完整结果
+}
+
+QString Notes::parsePreviewData(const QString& lineText) {
+  // ===== 优先级1: 图片预览 =====
+  QRegularExpressionMatch imgMatch = m_imgRegex.match(lineText);
+  if (imgMatch.hasMatch()) {
+    QString relPath = imgMatch.captured(1).trimmed();
+    relPath.remove(QRegularExpression(R"([?#].*$)"));
+    if (relPath.startsWith('"') || relPath.startsWith('\''))
+      relPath = relPath.mid(1, relPath.length() - 2);
+
+    QString basePath = QFileInfo(currentMDFile).absolutePath();
+    QString absPath = QDir(basePath).filePath(relPath);
+    QString canonical = QFileInfo(absPath).canonicalFilePath();
+
+    if (canonical.isEmpty() || !canonical.startsWith(basePath)) {
+      return QStringLiteral("TXT:⚠️ 非法路径");
+    }
+
+    // ✅ 关键：必须是文件且存在，排除目录
+    QFileInfo fi(canonical);
+    if (fi.exists() && fi.isFile()) {  // ← 加上 isFile()
+      return QStringLiteral("IMG:") + canonical;
+    }
+  }
+
+  // ===== 优先级2: 引用笔记摘要 =====
+  QRegularExpressionMatch linkMatch = m_linkRegex.match(lineText);
+  if (linkMatch.hasMatch()) {
+    QString relPath = iniDir + linkMatch.captured(2).trimmed();
+    QString basePath = QFileInfo(currentMDFile).absolutePath();
+    QString absPath = QDir(basePath).filePath(relPath);
+    QString canonical = QFileInfo(absPath).canonicalFilePath();
+
+    if (!canonical.isEmpty() && canonical.startsWith(basePath)) {
+      QString summary = generateSmartSummary(canonical);
+      return QStringLiteral("TXT:") + summary;
+    }
+  }
+
+  // ===== 无可预览内容 =====
+  return QString();
 }

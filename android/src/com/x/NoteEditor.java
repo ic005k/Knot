@@ -40,6 +40,7 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -52,11 +53,13 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -65,7 +68,9 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.PopupWindow;
@@ -286,6 +291,16 @@ public class NoteEditor
     public static Context getContext() {
         return context;
     }
+
+    // ========== 单击预览核心组件 ==========
+    private View previewContainer;
+    private ImageView previewImage;
+    private TextView previewText;
+    private View findBarParent;
+    private GestureDetector mPreviewGestureDetector;
+
+    // JNI 方法声明（C++层实现解析并返回结果）
+    public static native String nativeParsePreview(String lineText);
 
     public static native void CallJavaNotify_0();
 
@@ -626,6 +641,9 @@ public class NoteEditor
 
         // 初始化笔记索引
         initNoteIndexManager();
+
+        // 初始化链接和图片预览
+        setupClickPreview();
     }
 
     private void openFile() {
@@ -3880,5 +3898,283 @@ public class NoteEditor
             ? "✅ 全部替换完成"
             : "✅ Replace All done";
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    private void setupClickPreview() {
+        // 1. 绑定视图
+        previewContainer = findViewById(R.id.previewContainer);
+        previewImage = findViewById(R.id.previewImage);
+        previewText = findViewById(R.id.previewText);
+        replaceLayout = findViewById(R.id.replaceLayout);
+
+        View editFind = findViewById(R.id.editFind);
+        if (editFind != null) findBarParent = (View) editFind.getParent();
+
+        // 2. 动态避让（与面板高度联动）
+        previewContainer.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            int topMargin = (int) (8 *
+                getResources().getDisplayMetrics().density);
+            if (
+                findBarParent != null &&
+                findBarParent.getVisibility() == View.VISIBLE
+            ) topMargin += findBarParent.getHeight();
+            if (
+                replaceLayout != null &&
+                replaceLayout.getVisibility() == View.VISIBLE
+            ) topMargin += replaceLayout.getHeight();
+
+            ViewGroup.LayoutParams lp = previewContainer.getLayoutParams();
+            if (
+                lp instanceof FrameLayout.LayoutParams flp &&
+                flp.topMargin != topMargin
+            ) {
+                flp.topMargin = topMargin;
+                previewContainer.setLayoutParams(flp);
+            }
+        });
+
+        // 3. 点击预览区关闭
+        previewContainer.setOnClickListener(v ->
+            previewContainer.setVisibility(View.GONE)
+        );
+
+        // 4. 手势检测：只取当前行文本，直接丢给 C++
+        mPreviewGestureDetector = new GestureDetector(
+            this,
+            new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onSingleTapConfirmed(MotionEvent e) {
+                    if (editNote.getVisibility() != View.VISIBLE) return false;
+
+                    // ⚠️ 只获取当前行原始文本，不做任何Java层解析
+                    String currentLine = getCurrentLineByTouch(
+                        editNote,
+                        e.getX(),
+                        e.getY()
+                    );
+                    if (
+                        currentLine == null || currentLine.isEmpty()
+                    ) return false;
+
+                    // ⚠️ 直接调用JNI，由C++判断是否包含可预览内容并返回结果
+                    Log.d(
+                        "Preview",
+                        ">>> BEFORE nativeParsePreview: " + currentLine
+                    );
+
+                    String previewResult = nativeParsePreview(currentLine);
+
+                    Log.d(
+                        "Preview",
+                        "<<< AFTER nativeParsePreview: " + previewResult
+                    );
+                    if (previewResult != null && !previewResult.isEmpty()) {
+                        showPreview(previewResult);
+                    }
+                    return true;
+                }
+            }
+        );
+
+        // 5. 不拦截原生触摸事件
+        editNote.setOnTouchListener((v, event) -> {
+            mPreviewGestureDetector.onTouchEvent(event);
+            return false;
+        });
+    }
+
+    /**
+     * 纯UI展示，不关心内容来源
+     */
+    private void showPreview(String content) {
+        // ===== 诊断日志 START =====
+        if (content == null) {
+            Log.w("Preview", "content is NULL");
+        } else {
+            Log.d(
+                "Preview",
+                "raw=[" +
+                    content +
+                    "] len=" +
+                    content.length() +
+                    " startsWith_IMG=" +
+                    content.startsWith("IMG:") +
+                    " startsWith_TXT=" +
+                    content.startsWith("TXT:")
+            );
+        }
+        // ===== 诊断日志 END =====
+
+        if (content == null || content.isEmpty()) {
+            previewContainer.setVisibility(View.GONE);
+            return;
+        }
+
+        previewContainer.setVisibility(View.VISIBLE);
+
+        if (content.startsWith("IMG:")) {
+            String imagePath = content.substring(4);
+            previewText.setVisibility(View.GONE);
+            previewImage.setVisibility(View.VISIBLE);
+
+            // 获取容器实际尺寸用于降采样（若尚未测量则用默认值）
+            int targetW = previewImage.getWidth();
+            int targetH = previewImage.getHeight();
+            if (targetW <= 0) targetW = 512;
+            if (targetH <= 0) targetH = 512;
+
+            Bitmap bitmap = decodeSampledBitmap(imagePath, targetW, targetH);
+
+            if (bitmap != null) {
+                previewImage.setImageBitmap(bitmap);
+            } else {
+                // ⚠️ 加载失败时显示路径 —— 这正是排查笔记链接问题的关键线索
+                previewImage.setImageDrawable(null);
+                previewText.setVisibility(View.VISIBLE);
+                previewText.setText("⚠️ " + imagePath);
+            }
+        } else if (content.startsWith("TXT:")) {
+            String text = content.substring(4);
+            previewImage.setVisibility(View.GONE);
+            previewText.setVisibility(View.VISIBLE);
+            previewText.setText(text);
+        } else {
+            previewImage.setVisibility(View.GONE);
+            previewText.setVisibility(View.VISIBLE);
+            previewText.setText("[Unknown] " + content);
+        }
+    }
+
+    /**
+     * 安全降采样解码，核心防 OOM 逻辑
+     */
+    private Bitmap decodeSampledBitmap(
+        String path,
+        int reqWidth,
+        int reqHeight
+    ) {
+        try {
+            // 第一步：仅读取尺寸，不分配像素内存
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(path, options);
+
+            if (options.outWidth <= 0 || options.outHeight <= 0) return null;
+
+            // 第二步：计算最优采样率（必须是 2 的幂次）
+            options.inSampleSize = calculateInSampleSize(
+                options,
+                reqWidth,
+                reqHeight
+            );
+
+            // 第三步：按采样率真正解码
+            options.inJustDecodeBounds = false;
+            return BitmapFactory.decodeFile(path, options);
+        } catch (Exception e) {
+            Log.e("Preview", "Bitmap decode failed: " + path, e);
+            return null;
+        }
+    }
+
+    private int calculateInSampleSize(
+        BitmapFactory.Options opts,
+        int reqW,
+        int reqH
+    ) {
+        final int w = opts.outWidth;
+        final int h = opts.outHeight;
+        int sampleSize = 1;
+
+        if (w > reqW || h > reqH) {
+            final int halfW = w / 2;
+            final int halfH = h / 2;
+            while (halfW / sampleSize >= reqW && halfH / sampleSize >= reqH) {
+                sampleSize *= 2;
+            }
+        }
+        return Math.max(sampleSize, 1);
+    }
+
+    /**
+     * 通过触摸坐标精准获取完整的【逻辑行】文本（兼容所有Android版本）
+     */
+    private String getCurrentLineByTouch(
+        EditText editText,
+        float touchX,
+        float touchY
+    ) {
+        if (editText == null) return "";
+        Layout layout = editText.getLayout();
+        Editable content = editText.getText();
+        if (layout == null || content == null) return "";
+
+        // 1. 补偿 padding 和滚动偏移
+        int x = (int) (touchX -
+            editText.getTotalPaddingLeft() +
+            editText.getScrollX());
+        int y = (int) (touchY -
+            editText.getTotalPaddingTop() +
+            editText.getScrollY());
+
+        // 2. 获取触摸点对应的【视觉行】
+        int visualLine = layout.getLineForVertical(y);
+
+        // 3. ⚡ 向上回溯找逻辑行起点（替代 isStartOfParagraph）
+        // 原理：如果当前行的前一行末尾没有 \n，说明是自动换行，属于同一逻辑行
+        int logicalLineStart = visualLine;
+        while (logicalLineStart > 0) {
+            int prevLineEnd = layout.getLineEnd(logicalLineStart - 1);
+            // 前一行末尾不是换行符 → 自动换行，继续向上
+            if (
+                prevLineEnd < content.length() &&
+                content.charAt(prevLineEnd - 1) != '\n'
+            ) {
+                logicalLineStart--;
+            } else {
+                break;
+            }
+        }
+
+        // 4. ⚡ 向下延伸找逻辑行终点
+        int logicalLineEnd = visualLine;
+        int maxLines = layout.getLineCount();
+        while (logicalLineEnd < maxLines - 1) {
+            int curLineEnd = layout.getLineEnd(logicalLineEnd);
+            // 当前行末尾不是换行符 → 下一行是自动换行，继续向下
+            if (
+                curLineEnd < content.length() &&
+                content.charAt(curLineEnd - 1) != '\n'
+            ) {
+                logicalLineEnd++;
+            } else {
+                break;
+            }
+        }
+
+        // 5. 获取完整逻辑行起止 offset
+        int startOffset = layout.getLineStart(logicalLineStart);
+        int endOffset = layout.getLineEnd(logicalLineEnd);
+
+        // 6. 去除行尾换行符
+        while (endOffset > startOffset) {
+            char c = content.charAt(endOffset - 1);
+            if (c == '\n' || c == '\r') {
+                endOffset--;
+            } else {
+                break;
+            }
+        }
+
+        if (startOffset >= endOffset || endOffset > content.length()) return "";
+
+        String fullLine = content
+            .subSequence(startOffset, endOffset)
+            .toString();
+        Log.d(
+            "Preview",
+            "✅ FULL LOGICAL LINE: [" + fullLine + "] len=" + fullLine.length()
+        );
+        return fullLine;
     }
 }

@@ -84,6 +84,13 @@ class Notes : public QDialog {
   ~Notes();
   Ui::Notes* ui;
 
+  // ✅ 纯数据解析，供JNI调用，不触碰任何UI
+  // 返回值约定：
+  //   以 "IMG:" 开头 → 图片绝对路径
+  //   以 "TXT:" 开头 → 摘要文本
+  //   空字符串     → 无可预览内容
+  QString parsePreviewData(const QString& lineText);
+
   QAtomicInteger<int> m_skipCount{0};
 
   void loadNotesToUI();

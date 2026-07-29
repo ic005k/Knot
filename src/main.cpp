@@ -42,6 +42,7 @@ extern void RegJni18(const char* myClassName);
 extern void RegJni19(const char* myClassName);
 extern void RegJni20(const char* myClassName);
 extern void RegJniAiLink(const char* myClassName);
+extern void RegJniParsePreview(const char* myClassName);
 
 extern void releaseGlobalAiEngine();
 
@@ -62,12 +63,6 @@ void migrateOldDataIfNeeded();
 
 void initAndroidGPU();
 int clearLockFiles(const QString& iniDir);
-
-QString strJBDict1 = "";
-QString strJBDict2 = "";
-QString strJBDict3 = "";
-QString strJBDict4 = "";
-QString strJBDict5 = "";
 
 #define Cross_Origin
 
@@ -186,6 +181,7 @@ int main(int argc, char* argv[]) {
   RegJni("com/x/NoteEditor");
   RegJni16("com/x/NoteEditor");
   RegJniAiLink("com/x/NoteEditor");
+  RegJniParsePreview("com/x/NoteEditor");
   RegJni("com/x/MDActivity");
   RegJni("com/x/NewTodo");
   RegJni("com/x/NewNote");

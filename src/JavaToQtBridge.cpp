@@ -29,9 +29,14 @@ static void JavaNotify_17();
 static void JavaNotify_18();
 static void JavaNotify_19();
 static void JavaNotify_20(JNIEnv* env, jclass clazz, jstring sentence);
+
 // AI Link Native方法声明（标准JNI静态方法参数）
 static void generateAiLinkMetadata(JNIEnv* env, jclass clazz,
                                    jstring noteFullText, jint cursorPos);
+
+// 安卓笔记编辑调用C++获取链接内容进行预览
+static jstring nativeParsePreview(JNIEnv* env, jclass clazz, jstring lineText);
+
 #endif
 
 #ifdef Q_OS_ANDROID
@@ -340,6 +345,68 @@ static void generateAiLinkMetadata(JNIEnv* env, jclass clazz,
   aiWorkThread.detach();
 }
 
+// Java: public static native String nativeParsePreview(String lineText);
+// JNI签名：(Ljava/lang/String;)Ljava/lang/String;
+/*static jstring nativeParsePreview(JNIEnv* env, jclass clazz, jstring lineText)
+{ Q_UNUSED(clazz); QString inputText;
+
+  if (lineText != nullptr) {
+    const char* utf8Raw = env->GetStringUTFChars(lineText, nullptr);
+    inputText = QString::fromUtf8(utf8Raw);
+    env->ReleaseStringUTFChars(lineText, utf8Raw);
+  }
+
+  QString parseResult;
+  try {
+    // ✅ 调用纯数据方法
+    parseResult = m_Notes->parsePreviewData(inputText);
+  } catch (const std::exception& e) {
+    qDebug() << "nativeParsePreview std异常:" << e.what();
+    parseResult = QString();
+  } catch (...) {
+    qDebug() << "nativeParsePreview 未知异常";
+    parseResult = QString();
+  }
+
+  if (parseResult.isEmpty()) {
+    return nullptr;
+  }
+  return env->NewStringUTF(parseResult.toUtf8().constData());
+}*/
+
+static jstring nativeParsePreview(JNIEnv* env, jclass clazz, jstring lineText) {
+  Q_UNUSED(clazz);
+  QString inputText;
+
+  if (lineText != nullptr) {
+    const char* utf8Raw = env->GetStringUTFChars(lineText, nullptr);
+    inputText = QString::fromUtf8(utf8Raw);
+    env->ReleaseStringUTFChars(lineText, utf8Raw);
+  }
+
+  qDebug() << "[Preview-JNI] IN:" << inputText;
+
+  QString parseResult;
+  try {
+    parseResult = m_Notes->parsePreviewData(inputText);
+  } catch (const std::exception& e) {
+    qDebug() << "[Preview-JNI] EXCEPTION:" << e.what();
+    parseResult = QString();
+  } catch (...) {
+    qDebug() << "[Preview-JNI] UNKNOWN EXCEPTION";
+    parseResult = QString();
+  }
+
+  qDebug() << "[Preview-JNI] OUT:" << parseResult;
+
+  if (parseResult.isEmpty()) {
+    return nullptr;
+  }
+  return env->NewStringUTF(parseResult.toUtf8().constData());
+}
+
+//============== JNI 方法注册数组  ===========================
+
 static const JNINativeMethod gMethods[] = {
     {"CallJavaNotify_0", "()V", (void*)JavaNotify_0},
     {"CallJavaNotify_1", "()V", (void*)JavaNotify_1},
@@ -380,6 +447,12 @@ static const JNINativeMethod gMethods20[] = {
 static const JNINativeMethod gMethodsAiLink[] = {
     {"generateAiLinkMetadata", "(Ljava/lang/String;I)V",
      (void*)generateAiLinkMetadata}};
+
+static const JNINativeMethod gMethodsParsePreview[] = {
+    {"nativeParsePreview", "(Ljava/lang/String;)Ljava/lang/String;",
+     (void*)nativeParsePreview}};
+
+///// 注册函数 ///////////////////////////////////////
 
 void RegJni(const char* myClassName) {
   QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
@@ -539,6 +612,29 @@ void RegJniAiLink(const char* myClassName) {
       return;
     } else {
       qDebug() << "RegisterNatives AiLink success!";
+    }
+  });
+  qDebug() << "++++++++++++++++++++++++";
+}
+
+void RegJniParsePreview(const char* myClassName) {
+  QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
+    QJniEnvironment Environment;
+    const char* mClassName = myClassName;
+    jclass j_class;
+    j_class = Environment->FindClass(mClassName);
+    if (j_class == nullptr) {
+      qDebug() << "erro clazz ParsePreview";
+      return;
+    }
+    jint mj = Environment->RegisterNatives(
+        j_class, gMethodsParsePreview,
+        sizeof(gMethodsParsePreview) / sizeof(gMethodsParsePreview[0]));
+    if (mj != JNI_OK) {
+      qDebug() << "register nativeParsePreview failed!";
+      return;
+    } else {
+      qDebug() << "RegisterNatives ParsePreview success!";
     }
   });
   qDebug() << "++++++++++++++++++++++++";
