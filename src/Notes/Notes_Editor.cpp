@@ -473,34 +473,51 @@ void Notes::applyMdLexerTheme(bool darkMode) {
 void Notes::updateImagePreview(const QString& lineText, int cursorPos) {
   QString result = parsePreviewData(lineText, cursorPos);
 
+  // ✅ 统一重置样式（防止状态切换时残留）
+  ui->lblNoteImage->clear();
+  ui->lblNoteImage->setWordWrap(false);
+  ui->lblNoteImage->setStyleSheet("");
+  ui->lblNoteImage->setAlignment(Qt::AlignCenter);
+
   if (result.startsWith(QStringLiteral("IMG:"))) {
+    // ===== 场景A：图片有效 =====
     QString path = result.mid(4);
-    ui->lblNoteImage->setStyleSheet("");
-    ui->lblNoteImage->setWordWrap(false);
     QPixmap pixmap(path);
     if (!pixmap.isNull()) {
       QPixmap scaled = pixmap.scaled(100, 100, Qt::KeepAspectRatio,
                                      Qt::SmoothTransformation);
       ui->lblNoteImage->setPixmap(scaled);
-      ui->lblNoteImage->setAlignment(Qt::AlignCenter);
     } else {
-      ui->lblNoteImage->clear();
+      // 极端情况：parsePreviewData 认为存在但实际加载失败
       ui->lblNoteImage->setText(QStringLiteral("🖼️"));
+      ui->lblNoteImage->setStyleSheet("font-size: 28px; color: #999;");
     }
+
+  } else if (result.startsWith(QStringLiteral("IMG_ERR:"))) {
+    // ===== 场景1：图片链接存在但文件失效 =====
+    ui->lblNoteImage->setText(QStringLiteral("🖼️"));
+    ui->lblNoteImage->setStyleSheet(
+        "font-size: 28px; color: #c66;");  // 偏红暗示异常
+
   } else if (result.startsWith(QStringLiteral("TXT:"))) {
+    // ===== 场景B：笔记有效 =====
     QString text = result.mid(4);
-    ui->lblNoteImage->clear();
     ui->lblNoteImage->setText(text);
     ui->lblNoteImage->setWordWrap(true);
     ui->lblNoteImage->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     ui->lblNoteImage->setStyleSheet(
         "font-size: 11px; color: #666; padding: 4px;");
+
+  } else if (result.startsWith(QStringLiteral("NOTE_ERR:"))) {
+    // ===== 场景2：笔记链接存在但文件失效 =====
+    ui->lblNoteImage->setText(QStringLiteral("📄"));
+    ui->lblNoteImage->setStyleSheet(
+        "font-size: 28px; color: #c66;");  // 与图片失效同色系
+
   } else {
-    ui->lblNoteImage->setWordWrap(false);
-    ui->lblNoteImage->clear();
-    ui->lblNoteImage->setStyleSheet("");
-    ui->lblNoteImage->setText(QStringLiteral("🖼️"));
-    ui->lblNoteImage->setAlignment(Qt::AlignCenter);
+    // ===== 场景3：当前行无任何链接 → 仅清除内容，组件保持可见 =====
+    // clear() 已在开头调用，此处无需额外操作
+    // 组件以空白状态存在，维持布局稳定
   }
 }
 
@@ -582,106 +599,62 @@ QString Notes::generateSmartSummary(const QString& filePath) {
   return result;  // 统一返回带省略号的完整结果
 }
 
-/*QString Notes::parsePreviewData(const QString& lineText) {
-  qDebug() << "[Parse-Internal] === START ===";
-  qDebug() << "[Parse-Internal] lineText:" << lineText;
-
-  // ===== 优先级1: 图片预览 =====
-  QRegularExpressionMatch imgMatch = m_imgRegex.match(lineText);
-
-  qDebug() << "[Parse-Internal] IMG regex valid:" << m_imgRegex.isValid()
-           << "hasMatch:" << imgMatch.hasMatch();
-
-  if (imgMatch.hasMatch()) {
-    QString relPath = iniDir + "memo/" + imgMatch.captured(1).trimmed();
-    qInfo() << "图片预览路径：" << relPath;
-
-    // ✅ 关键：必须是文件且存在，排除目录
-    QFileInfo fi(relPath);
-    if (fi.exists() && fi.isFile()) {
-      return QStringLiteral("IMG:") + relPath;
-    }
-  }
-
-  // ===== 优先级2: 引用笔记摘要 =====
-  QRegularExpressionMatch linkMatch = m_linkRegex.match(lineText);
-
-  qDebug() << "[Parse-Internal] LINK regex valid:" << m_linkRegex.isValid()
-           << "hasMatch:" << linkMatch.hasMatch();
-
-  if (linkMatch.hasMatch()) {
-    QString relPath = iniDir + linkMatch.captured(2).trimmed();
-    qInfo() << "笔记链接路径：" << relPath;
-
-    QFileInfo fi(relPath);
-    if (fi.exists() && fi.isFile()) {
-      QString summary = generateSmartSummary(relPath);
-
-      return QStringLiteral("TXT:") + summary;
-    }
-  }
-
-  // ===== 无可预览内容 =====
-
-  return QString();
-}*/
-
 QString Notes::parsePreviewData(const QString& lineText, int cursorPos) {
-  qDebug() << "[Parse-Internal] === START ===";
-  qDebug() << "[Parse-Internal] lineText:" << lineText
-           << "cursorPos:" << cursorPos;
-
   // 用于存储候选结果的结构体
   struct PreviewCandidate {
-    QString type;     // "IMG" 或 "TXT"
-    QString data;     // 路径或摘要
+    QString type;     // "IMG", "TXT", "IMG_ERR", "NOTE_ERR"
+    QString data;     // 路径、摘要或错误信息
     qsizetype start;  // 匹配起始位置
     qsizetype end;    // 匹配结束位置
   };
 
   QList<PreviewCandidate> candidates;
 
-  // ===== 1. 收集所有图片匹配项 =====
+  // ===== 1. 收集所有图片匹配项（包含失效状态）=====
   QRegularExpressionMatchIterator imgIt = m_imgRegex.globalMatch(lineText);
   while (imgIt.hasNext()) {
     QRegularExpressionMatch m = imgIt.next();
     QString relPath = iniDir + "memo/" + m.captured(1).trimmed();
-
     QFileInfo fi(relPath);
+
     if (fi.exists() && fi.isFile()) {
       candidates.append(
           {QStringLiteral("IMG"), relPath, m.capturedStart(), m.capturedEnd()});
+    } else {
+      // ✅ 新增：图片链接存在但文件失效
+      candidates.append({QStringLiteral("IMG_ERR"), relPath, m.capturedStart(),
+                         m.capturedEnd()});
     }
   }
 
-  // ===== 2. 收集所有笔记链接匹配项 =====
+  // ===== 2. 收集所有笔记链接匹配项（包含失效状态）=====
   QRegularExpressionMatchIterator linkIt = m_linkRegex.globalMatch(lineText);
   while (linkIt.hasNext()) {
     QRegularExpressionMatch m = linkIt.next();
     QString relPath = iniDir + m.captured(2).trimmed();
-
     QFileInfo fi(relPath);
+
     if (fi.exists() && fi.isFile()) {
       QString summary = generateSmartSummary(relPath);
       candidates.append(
           {QStringLiteral("TXT"), summary, m.capturedStart(), m.capturedEnd()});
+    } else {
+      // ✅ 新增：笔记链接存在但文件失效
+      candidates.append({QStringLiteral("NOTE_ERR"), relPath, m.capturedStart(),
+                         m.capturedEnd()});
     }
   }
 
   // ===== 3. 根据光标位置精确选择 =====
   if (cursorPos >= 0) {
     for (const auto& c : candidates) {
-      // 判断光标是否落在该匹配项的范围内
       if (cursorPos >= c.start && cursorPos <= c.end) {
-        qInfo() << "命中光标位置的预览目标:" << c.type << c.data;
         return c.type + ":" + c.data;
       }
     }
   }
 
-  // ===== 4. 兜底：无位置信息或未命中，按优先级返回第一个有效项 =====
-  // 由于我们是先收集图片再收集链接，天然保持了"图片优先"的顺序
-  // 如果需要严格按文本中出现的位置排序，可以按 start 排序：
+  // ===== 4. 兜底：按文本出现顺序返回第一个 =====
   std::sort(candidates.begin(), candidates.end(),
             [](const PreviewCandidate& a, const PreviewCandidate& b) {
               return a.start < b.start;
@@ -689,10 +662,9 @@ QString Notes::parsePreviewData(const QString& lineText, int cursorPos) {
 
   if (!candidates.isEmpty()) {
     const auto& first = candidates.first();
-    qInfo() << "兜底返回第一个有效预览:" << first.type << first.data;
     return first.type + ":" + first.data;
   }
 
-  // ===== 无可预览内容 =====
+  // ===== 无可预览内容（当前行无任何链接语法）=====
   return QString();
 }

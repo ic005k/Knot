@@ -45,7 +45,7 @@ QString AppLogger::getLogRootDir() const { return m_logRootDir; }
 
 void AppLogger::msgHandler(QtMsgType type, const QMessageLogContext& ctx,
                            const QString& msg) {
-  // ✅ 关键修复：在 Android 上显式调用原生日志接口，确保 Logcat 完整捕获
+  // ✅ 关键：在 Android 上显式调用原生日志接口，确保 Logcat 完整捕获
 #ifdef Q_OS_ANDROID
   int androidLevel;
   switch (type) {

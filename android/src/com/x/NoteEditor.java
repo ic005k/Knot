@@ -4012,29 +4012,32 @@ public class NoteEditor
      * 纯UI展示，不关心内容来源
      */
     private void showPreview(String content) {
+        // ✅ 场景3：当前行无任何链接 → 隐藏容器（安卓小屏优先保证编辑空间）
         if (content == null || content.isEmpty()) {
             previewContainer.setVisibility(View.GONE);
 
-            // ✅ 隐藏时清理监听器
             if (mPreviewLayoutListener != null) {
                 previewContainer
                     .getViewTreeObserver()
                     .removeOnGlobalLayoutListener(mPreviewLayoutListener);
                 mPreviewLayoutListener = null;
             }
-
             return;
         }
 
-        // ✅ 关键：动态计算预览窗口的 marginTop
-        // 使其始终距离「编辑器区域顶部」固定距离，而非距离 FrameLayout 顶部
+        // ===== 有链接状态，容器可见 =====
+        previewContainer.setVisibility(View.VISIBLE);
         adjustPreviewPosition();
 
-        previewContainer.setVisibility(View.VISIBLE);
+        // ✅ 仅重置内容和可见性，不触碰任何样式属性（字体/颜色/padding/对齐均由XML定义）
+        previewImage.setImageDrawable(null);
+        previewImage.setVisibility(View.GONE);
+        previewText.setText("");
+        previewText.setVisibility(View.GONE);
 
         if (content.startsWith("IMG:")) {
+            // ===== 场景A：图片有效 =====
             String imagePath = content.substring(4);
-            previewText.setVisibility(View.GONE);
             previewImage.setVisibility(View.VISIBLE);
 
             int targetW = previewImage.getWidth();
@@ -4046,19 +4049,24 @@ public class NoteEditor
             if (bitmap != null) {
                 previewImage.setImageBitmap(bitmap);
             } else {
-                previewImage.setImageDrawable(null);
+                // 解码失败 → 降级为图片失效符号
+                previewImage.setVisibility(View.GONE);
                 previewText.setVisibility(View.VISIBLE);
-                previewText.setText("⚠️ " + imagePath);
+                previewText.setText("🖼️");
             }
+        } else if (content.startsWith("IMG_ERR:")) {
+            // ===== 场景1：图片链接存在但文件失效 =====
+            previewText.setVisibility(View.VISIBLE);
+            previewText.setText("🖼️");
         } else if (content.startsWith("TXT:")) {
-            String text = content.substring(4);
-            previewImage.setVisibility(View.GONE);
+            // ===== 场景B：笔记有效 =====
             previewText.setVisibility(View.VISIBLE);
-            previewText.setText(text);
-        } else {
-            previewImage.setVisibility(View.GONE);
+            previewText.setText(content.substring(4));
+            // ✅ 不再设置 textSize/textColor/padding/gravity，全部由布局决定
+        } else if (content.startsWith("NOTE_ERR:")) {
+            // ===== 场景2：笔记链接存在但文件失效 =====
             previewText.setVisibility(View.VISIBLE);
-            previewText.setText("[Unknown] " + content);
+            previewText.setText("📄");
         }
     }
 
