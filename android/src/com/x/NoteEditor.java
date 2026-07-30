@@ -62,6 +62,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
@@ -298,12 +299,15 @@ public class NoteEditor
     private TextView previewText;
     private View findBarParent;
     private GestureDetector mPreviewGestureDetector;
+    private ViewTreeObserver.OnGlobalLayoutListener mPreviewLayoutListener;
 
     // JNI 方法声明（C++层实现解析并返回结果）
     public static native String nativeParsePreview(
         String lineText,
         int cursorPos
     );
+
+    //======================================
 
     public static native void CallJavaNotify_0();
 
@@ -4010,8 +4014,21 @@ public class NoteEditor
     private void showPreview(String content) {
         if (content == null || content.isEmpty()) {
             previewContainer.setVisibility(View.GONE);
+
+            // ✅ 隐藏时清理监听器
+            if (mPreviewLayoutListener != null) {
+                previewContainer
+                    .getViewTreeObserver()
+                    .removeOnGlobalLayoutListener(mPreviewLayoutListener);
+                mPreviewLayoutListener = null;
+            }
+
             return;
         }
+
+        // ✅ 关键：动态计算预览窗口的 marginTop
+        // 使其始终距离「编辑器区域顶部」固定距离，而非距离 FrameLayout 顶部
+        adjustPreviewPosition();
 
         previewContainer.setVisibility(View.VISIBLE);
 
@@ -4020,18 +4037,15 @@ public class NoteEditor
             previewText.setVisibility(View.GONE);
             previewImage.setVisibility(View.VISIBLE);
 
-            // 获取容器实际尺寸用于降采样（若尚未测量则用默认值）
             int targetW = previewImage.getWidth();
             int targetH = previewImage.getHeight();
             if (targetW <= 0) targetW = 512;
             if (targetH <= 0) targetH = 512;
 
             Bitmap bitmap = decodeSampledBitmap(imagePath, targetW, targetH);
-
             if (bitmap != null) {
                 previewImage.setImageBitmap(bitmap);
             } else {
-                // ⚠️ 加载失败时显示路径 —— 这正是排查笔记链接问题的关键线索
                 previewImage.setImageDrawable(null);
                 previewText.setVisibility(View.VISIBLE);
                 previewText.setText("⚠️ " + imagePath);
@@ -4046,6 +4060,66 @@ public class NoteEditor
             previewText.setVisibility(View.VISIBLE);
             previewText.setText("[Unknown] " + content);
         }
+    }
+
+    /**
+     * 安全地调整预览窗口位置
+     * 核心改进：监听全局布局变化，确保拿到的是布局完成后的真实坐标
+     */
+    private void adjustPreviewPosition() {
+        // 移除旧的监听器，防止叠加
+        if (mPreviewLayoutListener != null) {
+            previewContainer
+                .getViewTreeObserver()
+                .removeOnGlobalLayoutListener(mPreviewLayoutListener);
+        }
+
+        mPreviewLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                // ⚠️ 关键守卫：只在预览窗口可见时才计算
+                if (previewContainer.getVisibility() != View.VISIBLE) {
+                    previewContainer
+                        .getViewTreeObserver()
+                        .removeOnGlobalLayoutListener(this);
+                    mPreviewLayoutListener = null;
+                    return;
+                }
+
+                int[] editorLoc = new int[2];
+                editNote.getLocationOnScreen(editorLoc);
+
+                int[] parentLoc = new int[2];
+                ((View) previewContainer.getParent()).getLocationOnScreen(
+                    parentLoc
+                );
+
+                int dynamicTop = editorLoc[1] - parentLoc[1] + dpToPx(8);
+
+                FrameLayout.LayoutParams params =
+                    (FrameLayout.LayoutParams) previewContainer.getLayoutParams();
+
+                // ✅ 只有值真正变化时才 setLayoutParams，避免触发无限重布局循环
+                if (params.topMargin != dynamicTop) {
+                    params.topMargin = Math.max(dpToPx(8), dynamicTop);
+                    previewContainer.setLayoutParams(params);
+                } else {
+                    // 位置已稳定，移除监听器
+                    previewContainer
+                        .getViewTreeObserver()
+                        .removeOnGlobalLayoutListener(this);
+                    mPreviewLayoutListener = null;
+                }
+            }
+        };
+
+        previewContainer
+            .getViewTreeObserver()
+            .addOnGlobalLayoutListener(mPreviewLayoutListener);
+    }
+
+    private int dpToPx(int dp) {
+        return (int) (dp * getResources().getDisplayMetrics().density + 0.5f);
     }
 
     private void hidePreview() {

@@ -9,7 +9,11 @@
 #include <QGuiApplication>
 #include <QTextStream>
 #include <QThread>
+#include <QtGlobal>
 #include <iostream>
+#ifdef Q_OS_ANDROID
+#include <android/log.h>
+#endif
 
 AppLogger& AppLogger::instance() {
   static AppLogger obj;
@@ -41,8 +45,67 @@ QString AppLogger::getLogRootDir() const { return m_logRootDir; }
 
 void AppLogger::msgHandler(QtMsgType type, const QMessageLogContext& ctx,
                            const QString& msg) {
-  Q_UNUSED(ctx);
-  // 所有qDebug全部写入日志，不做过滤
+  // ✅ 关键修复：在 Android 上显式调用原生日志接口，确保 Logcat 完整捕获
+#ifdef Q_OS_ANDROID
+  int androidLevel;
+  switch (type) {
+    case QtDebugMsg:
+      androidLevel = ANDROID_LOG_DEBUG;
+      break;
+    case QtInfoMsg:
+      androidLevel = ANDROID_LOG_INFO;
+      break;
+    case QtWarningMsg:
+      androidLevel = ANDROID_LOG_WARN;
+      break;
+    case QtCriticalMsg:
+      androidLevel = ANDROID_LOG_ERROR;
+      break;
+    case QtFatalMsg:
+      androidLevel = ANDROID_LOG_FATAL;
+      break;
+    default:
+      androidLevel = ANDROID_LOG_DEFAULT;
+      break;
+  }
+  // 使用 "qt" 作为 tag，与 Qt 默认行为一致，Creator 才能正确识别和着色
+  __android_log_print(androidLevel, "qt", "%s", qPrintable(msg));
+#else
+  // 非 Android 平台保持原有 cout 输出
+  QString timeStr =
+      QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz");
+  quint64 tidRaw = reinterpret_cast<quint64>(QThread::currentThreadId());
+  qint64 threadId = static_cast<qint64>(tidRaw);
+
+  QString levelTag;
+  switch (type) {
+    case QtDebugMsg:
+      levelTag = "DEBUG";
+      break;
+    case QtInfoMsg:
+      levelTag = "INFO";
+      break;
+    case QtWarningMsg:
+      levelTag = "WARN";
+      break;
+    case QtCriticalMsg:
+      levelTag = "CRIT";
+      break;
+    case QtFatalMsg:
+      levelTag = "FATAL";
+      break;
+    default:
+      levelTag = "UNKNOWN";
+      break;
+  }
+
+  QString logLine =
+      QString("[%1][TID:%2][%3] %4\n")
+          .arg(timeStr, QString::number(threadId, 10, 6), levelTag, msg);
+  std::cout << logLine.toStdString() << std::flush;
+#endif
+
+  // 文件写入逻辑在所有平台都执行（保持不变）
   instance().writeToFile(type, msg);
 }
 
@@ -78,12 +141,6 @@ void AppLogger::writeToFile(QtMsgType type, const QString& msg) {
   QString logLine =
       QString("[%1][TID:%2][%3] %4\n")
           .arg(timeStr, QString::number(threadId, 10, 6), levelTag, msg);
-
-  // 控制台输出
-  // 非强制刷新
-  // std::cout << logLine.toStdString();
-  // 强制刷新
-  std::cout << logLine.toStdString() << std::flush;
 
   rotateLogFile();
   QFile logFile(m_currentLogPath);
