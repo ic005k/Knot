@@ -347,37 +347,11 @@ static void generateAiLinkMetadata(JNIEnv* env, jclass clazz,
 
 // Java: public static native String nativeParsePreview(String lineText);
 // JNI签名：(Ljava/lang/String;)Ljava/lang/String;
-/*static jstring nativeParsePreview(JNIEnv* env, jclass clazz, jstring lineText)
-{ Q_UNUSED(clazz); QString inputText;
-
-  if (lineText != nullptr) {
-    const char* utf8Raw = env->GetStringUTFChars(lineText, nullptr);
-    inputText = QString::fromUtf8(utf8Raw);
-    env->ReleaseStringUTFChars(lineText, utf8Raw);
-  }
-
-  QString parseResult;
-  try {
-    // ✅ 调用纯数据方法
-    parseResult = m_Notes->parsePreviewData(inputText);
-  } catch (const std::exception& e) {
-    qDebug() << "nativeParsePreview std异常:" << e.what();
-    parseResult = QString();
-  } catch (...) {
-    qDebug() << "nativeParsePreview 未知异常";
-    parseResult = QString();
-  }
-
-  if (parseResult.isEmpty()) {
-    return nullptr;
-  }
-  return env->NewStringUTF(parseResult.toUtf8().constData());
-}*/
-
 static jstring nativeParsePreview(JNIEnv* env, jclass clazz, jstring lineText) {
   Q_UNUSED(clazz);
-  QString inputText;
 
+  // JNI 字符串转换必须在当前 JNI 线程完成
+  QString inputText;
   if (lineText != nullptr) {
     const char* utf8Raw = env->GetStringUTFChars(lineText, nullptr);
     inputText = QString::fromUtf8(utf8Raw);
@@ -386,14 +360,27 @@ static jstring nativeParsePreview(JNIEnv* env, jclass clazz, jstring lineText) {
 
   qDebug() << "[Preview-JNI] IN:" << inputText;
 
+  // 强制在主线程执行，使用值捕获避免悬垂引用
   QString parseResult;
-  try {
-    parseResult = m_Notes->parsePreviewData(inputText);
-  } catch (const std::exception& e) {
-    qDebug() << "[Preview-JNI] EXCEPTION:" << e.what();
-    parseResult = QString();
-  } catch (...) {
-    qDebug() << "[Preview-JNI] UNKNOWN EXCEPTION";
+  bool invoked = QMetaObject::invokeMethod(
+      m_Notes,  // ✅ 直接使用全局 m_Notes 作为目标对象
+      [inputText]() -> QString {
+        try {
+          return m_Notes->parsePreviewData(inputText);
+        } catch (const std::exception& ex) {  // ✅ 改名避免混淆，且 ex 是 catch
+                                              // 块局部变量，无需捕获
+          qDebug() << "[Preview-JNI] EXCEPTION:" << ex.what();
+        } catch (...) {
+          qDebug() << "[Preview-JNI] UNKNOWN EXCEPTION";
+        }
+        return QString();
+      },
+      Qt::BlockingQueuedConnection,
+      &parseResult  // ✅ 通过返回值参数接收结果
+  );
+
+  if (!invoked) {
+    qWarning() << "[Preview-JNI] invokeMethod FAILED!";
     parseResult = QString();
   }
 

@@ -47,6 +47,11 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->lblNoteImage->setFixedHeight(100);
   ui->lblNoteImage->setFixedWidth(100);
 
+  // 预编译 Markdown 图片正则
+  m_imgRegex = QRegularExpression(R"(!\[[^\]]*\]\(([^)]+)\))");
+  // 匹配 [任意文本](memo/xxx.md) 格式，排除 ! 开头的图片语法
+  m_linkRegex = QRegularExpression(R"((?<!!)\[([^\]]*)\]\(([^)]+\.md)\))");
+
   // Ctrl+F 快捷键
   QShortcut* shortcut1 = new QShortcut(QKeySequence("Ctrl+F"), this);
   connect(shortcut1, &QShortcut::activated, this, [this]() {

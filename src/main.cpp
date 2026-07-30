@@ -234,6 +234,7 @@ int main(int argc, char* argv[]) {
   QDir dir0;
   dir0.mkpath(iniDir);
 
+  // 开始输出日志
   AppLogger::instance().initLogger(appName);
 
   qInfo() << "The app has started to launch...";

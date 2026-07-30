@@ -349,7 +349,7 @@
                 android:id="@+id/previewText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:textSize="9sp"
+                android:textSize="8sp"
                 android:maxLines="3"
                 android:ellipsize="end"
                 android:padding="2dp"

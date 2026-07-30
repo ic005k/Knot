@@ -3952,25 +3952,33 @@ public class NoteEditor
                         e.getX(),
                         e.getY()
                     );
+
+                    // 1. 基础判空
+                    if (currentLine == null || currentLine.isEmpty()) {
+                        hidePreview(); // ✅ 无内容时确保预览窗口关闭
+                        return false;
+                    }
+
+                    // 2. ✅ Java层前置特征过滤（避免无效JNI调用）
+                    // Markdown 链接/图片语法必然包含 '[' 和 '('，这是成本最低的排除条件
                     if (
-                        currentLine == null || currentLine.isEmpty()
-                    ) return false;
+                        currentLine.indexOf('[') == -1 ||
+                        currentLine.indexOf('(') == -1
+                    ) {
+                        hidePreview(); // ✅ 无链接特征时关闭预览窗口
+                        return false;
+                    }
 
-                    // ⚠️ 直接调用JNI，由C++判断是否包含可预览内容并返回结果
-                    Log.d(
-                        "Preview",
-                        ">>> BEFORE nativeParsePreview: " + currentLine
-                    );
-
+                    // 3. 调用 Native 解析
                     String previewResult = nativeParsePreview(currentLine);
 
-                    Log.d(
-                        "Preview",
-                        "<<< AFTER nativeParsePreview: " + previewResult
-                    );
+                    // 4. ✅ C++返回为空时，不显示预览窗口
                     if (previewResult != null && !previewResult.isEmpty()) {
                         showPreview(previewResult);
+                    } else {
+                        hidePreview(); // ✅ 解析失败或无匹配时关闭预览窗口
                     }
+
                     return true;
                 }
             }
@@ -3987,24 +3995,6 @@ public class NoteEditor
      * 纯UI展示，不关心内容来源
      */
     private void showPreview(String content) {
-        // ===== 诊断日志 START =====
-        if (content == null) {
-            Log.w("Preview", "content is NULL");
-        } else {
-            Log.d(
-                "Preview",
-                "raw=[" +
-                    content +
-                    "] len=" +
-                    content.length() +
-                    " startsWith_IMG=" +
-                    content.startsWith("IMG:") +
-                    " startsWith_TXT=" +
-                    content.startsWith("TXT:")
-            );
-        }
-        // ===== 诊断日志 END =====
-
         if (content == null || content.isEmpty()) {
             previewContainer.setVisibility(View.GONE);
             return;
@@ -4042,6 +4032,13 @@ public class NoteEditor
             previewImage.setVisibility(View.GONE);
             previewText.setVisibility(View.VISIBLE);
             previewText.setText("[Unknown] " + content);
+        }
+    }
+
+    private void hidePreview() {
+        // 幂等判断：仅在可见时才隐藏，避免光标移动时频繁触发布局刷新
+        if (previewContainer.getVisibility() == View.VISIBLE) {
+            previewContainer.setVisibility(View.GONE);
         }
     }
 

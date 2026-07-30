@@ -25,9 +25,6 @@ void Notes::initEditor() {
   ui->frameEdit->layout()->addWidget(ui->f_NoteLink);
   m_EditSource->setFocus();
 
-  // 预编译 Markdown 图片正则
-  m_imgRegex = QRegularExpression(R"(!\[[^\]]*\]\(([^)]+)\))");
-
   // ⚠ 可以使用 textChanged + cursorPositionChanged 组合，
   // 或者使用 QScintilla 的 SCN_CLICK 通知（通过 sendScintilla）
   // 这里用最简单可靠的方式：监听光标位置变化
@@ -38,8 +35,6 @@ void Notes::initEditor() {
             updateImagePreview(lineText);
           });
 
-  // 匹配 [任意文本](memo/xxx.md) 格式，排除 ! 开头的图片语法
-  m_linkRegex = QRegularExpression(R"((?<!!)\[([^\]]*)\]\(([^)]+\.md)\))");
 #endif
 }
 
@@ -582,43 +577,45 @@ QString Notes::generateSmartSummary(const QString& filePath) {
 }
 
 QString Notes::parsePreviewData(const QString& lineText) {
+  qDebug() << "[Parse-Internal] === START ===";
+  qDebug() << "[Parse-Internal] lineText:" << lineText;
+
   // ===== 优先级1: 图片预览 =====
   QRegularExpressionMatch imgMatch = m_imgRegex.match(lineText);
+
+  qDebug() << "[Parse-Internal] IMG regex valid:" << m_imgRegex.isValid()
+           << "hasMatch:" << imgMatch.hasMatch();
+
   if (imgMatch.hasMatch()) {
-    QString relPath = imgMatch.captured(1).trimmed();
-    relPath.remove(QRegularExpression(R"([?#].*$)"));
-    if (relPath.startsWith('"') || relPath.startsWith('\''))
-      relPath = relPath.mid(1, relPath.length() - 2);
-
-    QString basePath = QFileInfo(currentMDFile).absolutePath();
-    QString absPath = QDir(basePath).filePath(relPath);
-    QString canonical = QFileInfo(absPath).canonicalFilePath();
-
-    if (canonical.isEmpty() || !canonical.startsWith(basePath)) {
-      return QStringLiteral("TXT:⚠️ 非法路径");
-    }
+    QString relPath = iniDir + "memo/" + imgMatch.captured(1).trimmed();
+    qInfo() << "图片预览路径：" << relPath;
 
     // ✅ 关键：必须是文件且存在，排除目录
-    QFileInfo fi(canonical);
-    if (fi.exists() && fi.isFile()) {  // ← 加上 isFile()
-      return QStringLiteral("IMG:") + canonical;
+    QFileInfo fi(relPath);
+    if (fi.exists() && fi.isFile()) {
+      return QStringLiteral("IMG:") + relPath;
     }
   }
 
   // ===== 优先级2: 引用笔记摘要 =====
   QRegularExpressionMatch linkMatch = m_linkRegex.match(lineText);
+
+  qDebug() << "[Parse-Internal] LINK regex valid:" << m_linkRegex.isValid()
+           << "hasMatch:" << linkMatch.hasMatch();
+
   if (linkMatch.hasMatch()) {
     QString relPath = iniDir + linkMatch.captured(2).trimmed();
-    QString basePath = QFileInfo(currentMDFile).absolutePath();
-    QString absPath = QDir(basePath).filePath(relPath);
-    QString canonical = QFileInfo(absPath).canonicalFilePath();
+    qInfo() << "笔记链接路径：" << relPath;
 
-    if (!canonical.isEmpty() && canonical.startsWith(basePath)) {
-      QString summary = generateSmartSummary(canonical);
+    QFileInfo fi(relPath);
+    if (fi.exists() && fi.isFile()) {
+      QString summary = generateSmartSummary(relPath);
+
       return QStringLiteral("TXT:") + summary;
     }
   }
 
   // ===== 无可预览内容 =====
+
   return QString();
 }
