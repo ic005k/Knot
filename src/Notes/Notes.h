@@ -89,7 +89,7 @@ class Notes : public QDialog {
   //   以 "IMG:" 开头 → 图片绝对路径
   //   以 "TXT:" 开头 → 摘要文本
   //   空字符串     → 无可预览内容
-  QString parsePreviewData(const QString& lineText);
+  QString parsePreviewData(const QString& lineText, int cursorPos = -1);
 
   QAtomicInteger<int> m_skipCount{0};
 
@@ -308,7 +308,7 @@ class Notes : public QDialog {
   QString loadNoteFullText(const QString& mdPath);
 #endif
 
-  void updateImagePreview(const QString& lineText);
+  void updateImagePreview(const QString& lineText, int cursorPos);
   QString generateSmartSummary(const QString& filePath);
   QRegularExpression m_linkRegex;
   QRegularExpression m_imgRegex;

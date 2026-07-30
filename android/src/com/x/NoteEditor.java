@@ -300,7 +300,10 @@ public class NoteEditor
     private GestureDetector mPreviewGestureDetector;
 
     // JNI 方法声明（C++层实现解析并返回结果）
-    public static native String nativeParsePreview(String lineText);
+    public static native String nativeParsePreview(
+        String lineText,
+        int cursorPos
+    );
 
     public static native void CallJavaNotify_0();
 
@@ -3969,10 +3972,20 @@ public class NoteEditor
                         return false;
                     }
 
-                    // 3. 调用 Native 解析
-                    String previewResult = nativeParsePreview(currentLine);
+                    // 3. ✅ 计算触摸点在逻辑行内的相对偏移（等价于 PC 端的 index）
+                    int cursorPos = getCursorPosInLine(
+                        editNote,
+                        e.getX(),
+                        e.getY()
+                    );
 
-                    // 4. ✅ C++返回为空时，不显示预览窗口
+                    // 4. 调用 Native 解析
+                    String previewResult = nativeParsePreview(
+                        currentLine,
+                        cursorPos
+                    );
+
+                    // 5. ✅ C++返回为空时，不显示预览窗口
                     if (previewResult != null && !previewResult.isEmpty()) {
                         showPreview(previewResult);
                     } else {
@@ -4173,5 +4186,62 @@ public class NoteEditor
             "✅ FULL LOGICAL LINE: [" + fullLine + "] len=" + fullLine.length()
         );
         return fullLine;
+    }
+
+    /**
+     * 将触摸坐标转换为逻辑行内的字符偏移量
+     * 返回值语义等同于 QScintilla cursorPositionChanged 信号中的 index 参数
+     */
+    private int getCursorPosInLine(
+        EditText editText,
+        float touchX,
+        float touchY
+    ) {
+        Layout layout = editText.getLayout();
+        Editable content = editText.getText();
+        if (layout == null || content == null) return -1;
+
+        // 补偿 padding 和滚动偏移（与 getCurrentLineByTouch 相同逻辑）
+        int x = (int) (touchX -
+            editText.getTotalPaddingLeft() +
+            editText.getScrollX());
+        int y = (int) (touchY -
+            editText.getTotalPaddingTop() +
+            editText.getScrollY());
+
+        // 获取触摸点对应的视觉行
+        int visualLine = layout.getLineForVertical(y);
+
+        // ⚡ 向上回溯找逻辑行起点（与 getCurrentLineByTouch 完全一致）
+        int logicalLineStart = visualLine;
+        while (logicalLineStart > 0) {
+            int prevLineEnd = layout.getLineEnd(logicalLineStart - 1);
+            if (
+                prevLineEnd < content.length() &&
+                content.charAt(prevLineEnd - 1) != '\n'
+            ) {
+                logicalLineStart--;
+            } else {
+                break;
+            }
+        }
+
+        // 获取逻辑行起始的全文档绝对偏移
+        int startOffset = layout.getLineStart(logicalLineStart);
+
+        // ⚡ 关键：getOffsetForHorizontal 返回全文档绝对偏移
+        // clamp 到当前视觉行范围内，避免跨行误算
+        int absoluteOffset = layout.getOffsetForHorizontal(visualLine, x);
+
+        // 转换为行内相对偏移
+        int lineLength = getCurrentLineByTouch(
+            editText,
+            touchX,
+            touchY
+        ).length();
+        int relativePos = absoluteOffset - startOffset;
+
+        // 安全钳制到 [0, lineLength] 范围
+        return Math.max(0, Math.min(relativePos, lineLength));
     }
 }

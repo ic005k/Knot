@@ -35,7 +35,8 @@ static void generateAiLinkMetadata(JNIEnv* env, jclass clazz,
                                    jstring noteFullText, jint cursorPos);
 
 // 安卓笔记编辑调用C++获取链接内容进行预览
-static jstring nativeParsePreview(JNIEnv* env, jclass clazz, jstring lineText);
+static jstring nativeParsePreview(JNIEnv* env, jclass clazz, jstring lineText,
+                                  jint cursorPos);
 
 #endif
 
@@ -347,7 +348,8 @@ static void generateAiLinkMetadata(JNIEnv* env, jclass clazz,
 
 // Java: public static native String nativeParsePreview(String lineText);
 // JNI签名：(Ljava/lang/String;)Ljava/lang/String;
-static jstring nativeParsePreview(JNIEnv* env, jclass clazz, jstring lineText) {
+static jstring nativeParsePreview(JNIEnv* env, jclass clazz, jstring lineText,
+                                  jint cursorPos) {
   Q_UNUSED(clazz);
 
   // JNI 字符串转换必须在当前 JNI 线程完成
@@ -358,15 +360,17 @@ static jstring nativeParsePreview(JNIEnv* env, jclass clazz, jstring lineText) {
     env->ReleaseStringUTFChars(lineText, utf8Raw);
   }
 
-  qDebug() << "[Preview-JNI] IN:" << inputText;
+  int pos = static_cast<int>(cursorPos);
+
+  qDebug() << "[Preview-JNI] IN:" << inputText << "cursorPos:" << pos;
 
   // 强制在主线程执行，使用值捕获避免悬垂引用
   QString parseResult;
   bool invoked = QMetaObject::invokeMethod(
       m_Notes,  // ✅ 直接使用全局 m_Notes 作为目标对象
-      [inputText]() -> QString {
+      [inputText, pos]() -> QString {
         try {
-          return m_Notes->parsePreviewData(inputText);
+          return m_Notes->parsePreviewData(inputText, pos);
         } catch (const std::exception& ex) {  // ✅ 改名避免混淆，且 ex 是 catch
                                               // 块局部变量，无需捕获
           qDebug() << "[Preview-JNI] EXCEPTION:" << ex.what();
@@ -436,7 +440,7 @@ static const JNINativeMethod gMethodsAiLink[] = {
      (void*)generateAiLinkMetadata}};
 
 static const JNINativeMethod gMethodsParsePreview[] = {
-    {"nativeParsePreview", "(Ljava/lang/String;)Ljava/lang/String;",
+    {"nativeParsePreview", "(Ljava/lang/String;I)Ljava/lang/String;",
      (void*)nativeParsePreview}};
 
 ///// 注册函数 ///////////////////////////////////////
