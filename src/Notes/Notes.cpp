@@ -24,6 +24,7 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
   this->setModal(true);
   this->layout()->setContentsMargins(5, 5, 5, 5);
   ui->frameEdit->layout()->setContentsMargins(0, 0, 0, 0);
+  ui->editQuestion->viewport()->installEventFilter(this);
 
   timerEditNote = new QTimer(this);
   connect(timerEditNote, SIGNAL(timeout()), this, SLOT(on_editNote()));
@@ -36,7 +37,7 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
     ui->btnAILink->show();
   else
     ui->btnAILink->hide();
-  ui->f_NoteLink->setMaximumWidth(280);
+  ui->f_NoteLink->setMaximumWidth(300);
 
   if (isAndroid) {
     mui->btnBack_NotesSearchResult->hide();
@@ -111,6 +112,20 @@ bool Notes::eventFilter(QObject* obj, QEvent* evn) {
     if (keyEvent->key() == Qt::Key_Escape) {
       close();
       evn->accept();
+    }
+  }
+
+  if (obj == ui->editQuestion->viewport()) {
+    const bool shiftPressed = keyEvent->modifiers() & Qt::ShiftModifier;
+
+    if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
+      if (!shiftPressed) {
+        // 单纯按下回车 → 提交问题
+        evn->accept();
+        on_btnQuestion_clicked();
+        return true;  // 拦截事件，阻止编辑器换行
+      }
+      // Shift+Enter：放行事件，允许换行，不return true
     }
   }
 

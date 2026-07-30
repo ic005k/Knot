@@ -760,3 +760,15 @@ QString Notes::getCursorPosText(const QString& fullText, int cursorPos,
   // 直接截取原始子串，完美保留空格、标点等原始格式
   return fullText.mid(leftStart, rightEnd - leftStart);
 }
+
+void Notes::on_btnQuestion_clicked() {
+  QString fullPrompt = ui->editQuestion->toPlainText().trimmed();
+  if (fullPrompt.isEmpty()) return;
+
+  // 获取当前程序生效的语言标识
+  // QLocale loc = QLocale::system();
+  // QString langCode = loc.name();  // 格式 zh_CN / en_US / ja_JP
+
+  isAIQA = true;
+  mw_one->aiChatQuery(fullPrompt);
+}

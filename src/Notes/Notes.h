@@ -84,6 +84,8 @@ class Notes : public QDialog {
   ~Notes();
   Ui::Notes* ui;
 
+  bool isAIQA = false;
+
   // ✅ 纯数据解析，供JNI调用，不触碰任何UI
   // 返回值约定：
   //   以 "IMG:" 开头 → 图片绝对路径
@@ -301,6 +303,8 @@ class Notes : public QDialog {
   void on_btnAILink_clicked();
 
   void on_btnInsertNoteLink_clicked();
+
+  void on_btnQuestion_clicked();
 
  private:
 #ifdef VECTOR_SEARCH

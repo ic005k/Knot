@@ -146,6 +146,9 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
           if (msg->showMsg(tr("AI Response Completed"), aiReplyText, 2)) {
             m_Reader->addBookNote(aiReplyText);
           }
+        } else if (m_Notes->isAIQA) {
+          m_Notes->isAIQA = false;
+          m_Notes->ui->editAnswer->setText(aiReplyText);
         } else
 
         {
