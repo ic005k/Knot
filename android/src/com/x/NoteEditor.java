@@ -161,10 +161,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -172,6 +174,8 @@ import java.util.regex.*;
 import org.commonmark.node.Image;
 // 读写ini文件的三方开源库
 import org.ini4j.Wini;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class NoteEditor
     extends AppCompatActivity
@@ -190,6 +194,62 @@ public class NoteEditor
     private EditText etAnswer;
     private ProgressBar progressAiWait;
     private Button btnSubmitAi;
+    private Button btnClearQuery;
+    private Button btnQueryHistory;
+
+    /**
+     * AI问答完整对话记录：问题+回答+时间戳
+     */
+    public static class AiChatRecord {
+
+        private String question;
+        private String answer;
+        private long timestamp;
+
+        public AiChatRecord(String question, String answer, long timestamp) {
+            this.question = question;
+            this.answer = answer;
+            this.timestamp = timestamp;
+        }
+
+        public String getQuestion() {
+            return question;
+        }
+
+        public String getAnswer() {
+            return answer;
+        }
+
+        public long getTimestamp() {
+            return timestamp;
+        }
+
+        // 序列化JSONObject
+        public JSONObject toJson() throws org.json.JSONException {
+            JSONObject obj = new JSONObject();
+            obj.put("q", question);
+            obj.put("a", answer);
+            obj.put("t", timestamp);
+            return obj;
+        }
+
+        // 反序列化
+        public static AiChatRecord fromJson(JSONObject obj)
+            throws org.json.JSONException {
+            String q = obj.optString("q", "");
+            String a = obj.optString("a", "");
+            long t = obj.optLong("t", System.currentTimeMillis());
+            return new AiChatRecord(q, a, t);
+        }
+    }
+
+    // AI提问历史持久化配置
+    private static final String AI_QUERY_PREF = "AiQueryHistoryPref";
+    // 完整对话记录键
+    private static final String KEY_CHAT_HISTORY_V2 = "chat_history_v2";
+    private static final int MAX_HISTORY_COUNT = 20; // 最多保存20条历史
+    private List<AiChatRecord> aiChatHistoryList = new ArrayList<>();
+
     private boolean isAiTaskRunning = false;
     // 【静态缓冲区，完全独立，静态方法只操作这个变量】
     private static String sAiResultBuffer = "";
@@ -509,6 +569,11 @@ public class NoteEditor
         TextView labelQuery = findViewById(R.id.label_query);
         TextView labelAnswer = findViewById(R.id.label_answer);
 
+        btnClearQuery = findViewById(R.id.btn_clear_query);
+        btnQueryHistory = findViewById(R.id.btn_query_history);
+        btnClearQuery.setOnClickListener(this);
+        btnQueryHistory.setOnClickListener(this);
+
         if (MyActivity.zh_cn) {
             // Tab标签
             tab_editor.setText("编辑器");
@@ -517,12 +582,18 @@ public class NoteEditor
             labelQuery.setText("问：");
             labelAnswer.setText("答：");
             etQuery.setHint("输入你的问题");
+
+            btnClearQuery.setText("清空");
+            btnQueryHistory.setText("历史");
         } else {
             tab_editor.setText("Editor");
             tab_ai.setText("Research");
             labelQuery.setText("Q:");
             labelAnswer.setText("A:");
             etQuery.setHint("Enter your question");
+
+            btnClearQuery.setText("Clear");
+            btnQueryHistory.setText("History");
         }
 
         boolean showAiButton = MyActivity.mAIAPIEnabled;
@@ -620,6 +691,13 @@ public class NoteEditor
             replaceAndFindNext(); // 替换 + 自动下一个
         } else if (id == R.id.btnReplaceAll) {
             replaceAll(); // 全部替换
+        } else if (id == R.id.btn_clear_query) {
+            // 清空提问输入框
+            etQuery.setText("");
+            etQuery.requestFocus();
+        } else if (id == R.id.btn_query_history) {
+            // 打开历史弹窗
+            showAiQueryHistoryDialog();
         }
     }
 
@@ -4477,6 +4555,10 @@ public class NoteEditor
 
                 if (finalResult != null) {
                     etAnswer.setText(finalResult);
+                    // ============保存完整问答============
+                    String userQuestion = etQuery.getText().toString().trim();
+                    saveAiChatRecord(userQuestion, finalResult);
+                    // ===========================================
                 } else {
                     etAnswer.setText("请求超时，请重试");
                 }
@@ -4538,5 +4620,138 @@ public class NoteEditor
             tab_ai.setBackgroundColor(colorNormalBg);
             tab_ai.setTextColor(colorNormalText);
         }
+    }
+
+    /**
+     * 从SP加载完整问答对话列表
+     */
+    private void loadAiChatHistory() {
+        SharedPreferences sp = getSharedPreferences(
+            AI_QUERY_PREF,
+            Context.MODE_PRIVATE
+        );
+        String rawJson = sp.getString(KEY_CHAT_HISTORY_V2, "[]");
+        aiChatHistoryList.clear();
+        try {
+            JSONArray arr = new JSONArray(rawJson);
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject itemObj = arr.getJSONObject(i);
+                AiChatRecord record = AiChatRecord.fromJson(itemObj);
+                aiChatHistoryList.add(record);
+            }
+        } catch (org.json.JSONException e) {
+            Log.w(
+                "AiChatHistory",
+                "parse chat history json failed, reset list",
+                e
+            );
+        }
+    }
+
+    /**
+     * 保存一组完整问答记录，成功获取answer后调用
+     * @param query 用户提问
+     * @param answer AI返回结果
+     */
+    private void saveAiChatRecord(String query, String answer) {
+        if (TextUtils.isEmpty(query)) {
+            return;
+        }
+        // 加载最新数据
+        loadAiChatHistory();
+
+        // 去重：相同question移除旧记录
+        AiChatRecord removeTarget = null;
+        for (AiChatRecord r : aiChatHistoryList) {
+            if (r.getQuestion().equals(query)) {
+                removeTarget = r;
+                break;
+            }
+        }
+        if (removeTarget != null) {
+            aiChatHistoryList.remove(removeTarget);
+        }
+
+        // 新对话置顶
+        AiChatRecord newRecord = new AiChatRecord(
+            query,
+            answer,
+            System.currentTimeMillis()
+        );
+        aiChatHistoryList.add(0, newRecord);
+
+        // 截断上限
+        while (aiChatHistoryList.size() > MAX_HISTORY_COUNT) {
+            aiChatHistoryList.remove(aiChatHistoryList.size() - 1);
+        }
+
+        // 序列化为JSONArray写入SP
+        JSONArray jsonArray = new JSONArray();
+        try {
+            for (AiChatRecord record : aiChatHistoryList) {
+                jsonArray.put(record.toJson());
+            }
+        } catch (org.json.JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        SharedPreferences sp = getSharedPreferences(
+            AI_QUERY_PREF,
+            Context.MODE_PRIVATE
+        );
+        sp.edit().putString(KEY_CHAT_HISTORY_V2, jsonArray.toString()).apply();
+    }
+
+    /**
+     * 弹出完整对话历史选择对话框
+     * 点击条目：回填提问框 + 回答框
+     */
+    private void showAiQueryHistoryDialog() {
+        loadAiChatHistory();
+        if (aiChatHistoryList.isEmpty()) {
+            String msg = MyActivity.zh_cn ? "暂无提问历史" : "No query history";
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 构造展示文本列表（只显示question作为条目）
+        String[] arr = new String[aiChatHistoryList.size()];
+        for (int i = 0; i < aiChatHistoryList.size(); i++) {
+            arr[i] = aiChatHistoryList.get(i).getQuestion();
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        String titleText = MyActivity.zh_cn ? "提问历史" : "Query History";
+        builder.setTitle(titleText);
+
+        builder.setItems(arr, (dialog, which) -> {
+            // 选中历史条目，同时填入【提问框 + 回答框】
+            AiChatRecord selectedRecord = aiChatHistoryList.get(which);
+            etQuery.setText(selectedRecord.getQuestion());
+            etAnswer.setText(selectedRecord.getAnswer());
+            etQuery.setSelection(selectedRecord.getQuestion().length());
+            dialog.dismiss();
+        });
+
+        // 底部按钮：清空全部历史
+        String clearAllText = MyActivity.zh_cn ? "清空全部" : "Clear All";
+        builder.setNeutralButton(clearAllText, (dialog, which) -> {
+            SharedPreferences sp = getSharedPreferences(
+                AI_QUERY_PREF,
+                Context.MODE_PRIVATE
+            );
+            sp.edit().remove(KEY_CHAT_HISTORY_V2).apply();
+            aiChatHistoryList.clear();
+            Toast.makeText(
+                NoteEditor.this,
+                MyActivity.zh_cn ? "已清空历史记录" : "History cleared",
+                Toast.LENGTH_SHORT
+            ).show();
+        });
+
+        String cancelText = MyActivity.zh_cn ? "取消" : "Cancel";
+        builder.setNegativeButton(cancelText, null);
+        builder.show();
     }
 }

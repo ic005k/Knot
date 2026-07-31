@@ -394,8 +394,8 @@
             </FrameLayout>
         </LinearLayout>
 
-        <!-- Page2：AI边写边查页面（默认隐藏） -->
-        <LinearLayout
+        <!-- Page2：AI边写边查页面（默认隐藏）【已修改】 -->
+                <LinearLayout
             android:id="@+id/page_ai_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -404,7 +404,7 @@
             android:padding="2dp"
         >
 
-            <TextView
+                    <TextView
                 android:id="@+id/label_query"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -412,35 +412,59 @@
                 android:textColor="#E8E8E8"
             />
 
-            <LinearLayout
+                    <EditText
+                android:id="@+id/et_query"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="2dp"
+                android:hint="输入你的问题"
+                android:minLines="1"
+                android:textColor="#E8E8E8"
+                android:inputType="textMultiLine"
+                android:background="#2D2D2D"
+            />
+
+                    <!-- 操作按钮行：清空｜历史｜发送 靠右 -->
+                    <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:gravity="end"
+                android:layout_marginBottom="4dp"
             >
-                <EditText
-                    android:id="@+id/et_query"
-                    android:layout_width="0dp"
+
+                        <Button
+                    android:id="@+id/btn_clear_query"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="输入你的问题"
-                    android:minLines="3"
+                    android:text="清空"
+                    android:textAllCaps="false"
                     android:textColor="#E8E8E8"
-                    android:inputType="textMultiLine"
-                    android:background="#2D2D2D"
+                    android:layout_marginEnd="8dp"
                 />
-                <Button
+
+                        <Button
+                    android:id="@+id/btn_query_history"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="历史"
+                    android:textAllCaps="false"
+                    android:textColor="#E8E8E8"
+                    android:layout_marginEnd="8dp"
+                />
+
+                        <Button
                     android:id="@+id/btn_submit_ai"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:text="↑"
                     android:textAllCaps="false"
                     android:textColor="#E8E8E8"
                 />
-            </LinearLayout>
+                    </LinearLayout>
 
-            <!-- AI请求水平加载进度条 -->
-            <ProgressBar
+                    <!-- AI请求水平加载进度条 -->
+                    <ProgressBar
                 android:id="@+id/progress_ai_wait"
                 style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                 android:layout_width="match_parent"
@@ -450,7 +474,7 @@
                 android:indeterminateTint="#4285F4"
             />
 
-            <TextView
+                    <TextView
                 android:id="@+id/label_answer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -459,8 +483,8 @@
                 android:textColor="#E8E8E8"
             />
 
-            <!-- AI回答编辑框，明暗自动适配 -->
-            <EditText
+                    <!-- AI回答编辑框，明暗自动适配 -->
+                    <EditText
                 android:id="@+id/et_answer"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -473,7 +497,7 @@
                 android:verticalScrollbarPosition="right"
                 android:background="#2D2D2D"
             />
-        </LinearLayout>
+                </LinearLayout>
 
     </FrameLayout>
 
