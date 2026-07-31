@@ -178,6 +178,19 @@ public class NoteEditor
     implements View.OnClickListener, Application.ActivityLifecycleCallbacks
 {
 
+    // TAB容器 ==================
+    private View pageEditorContainer;
+    private View pageAiContainer;
+
+    private Button tab_editor;
+    private Button tab_ai;
+
+    // AI页面控件
+    private EditText etQuery;
+    private EditText etAnswer;
+    private ProgressBar progressAiWait;
+    private Button btnSubmitAi;
+
     // ======================
     // 笔记内链补全（轻量集成）
     // ======================
@@ -479,6 +492,29 @@ public class NoteEditor
         btnPrev.setOnClickListener(this);
         btnNext.setOnClickListener(this);
         btnStartFind.setOnClickListener(this);
+
+        // ========== Tab按钮 + AI问答界面文本绑定 ==========
+        tab_editor = findViewById(R.id.tab_editor);
+        tab_ai = findViewById(R.id.tab_ai);
+        TextView labelQuery = findViewById(R.id.label_query);
+        TextView labelAnswer = findViewById(R.id.label_answer);
+
+        if (MyActivity.zh_cn) {
+            // Tab标签
+            tab_editor.setText("编辑器");
+            tab_ai.setText("边写边查");
+            // AI问答界面
+            labelQuery.setText("问：");
+            labelAnswer.setText("答：");
+            etQuery.setHint("输入你的问题");
+        } else {
+            tab_editor.setText("Editor");
+            tab_ai.setText("Research");
+            labelQuery.setText("Q:");
+            labelAnswer.setText("A:");
+            etQuery.setHint("Enter your question");
+        }
+        // ========== Tab按钮 + AI问答界面 结束 ==========
     }
 
     @Override
@@ -600,6 +636,22 @@ public class NoteEditor
 
         // ========== 真正沉浸式 ==========
         ImmersiveUtil.applyRealImmersive(this);
+
+        // TAB容器 ================================================
+        pageEditorContainer = findViewById(R.id.page_editor_container);
+        pageAiContainer = findViewById(R.id.page_ai_container);
+
+        // Tab切换监听
+        findViewById(R.id.tab_editor).setOnClickListener(v -> switchTab(true));
+        findViewById(R.id.tab_ai).setOnClickListener(v -> switchTab(false));
+
+        // AI控件绑定
+        etQuery = findViewById(R.id.et_query);
+        etAnswer = findViewById(R.id.et_answer);
+        progressAiWait = findViewById(R.id.progress_ai_wait);
+        btnSubmitAi = findViewById(R.id.btn_submit_ai);
+        btnSubmitAi.setOnClickListener(v -> submitAiTask());
+        //=======================================================
 
         progressBar = findViewById(R.id.progressBar);
         context = NoteEditor.this;
@@ -4325,5 +4377,44 @@ public class NoteEditor
 
         // 安全钳制到 [0, lineLength] 范围
         return Math.max(0, Math.min(relativePos, lineLength));
+    }
+
+    /**
+     * Tab切换逻辑
+     * @param showEditor true=编辑器页面；false=AI边写边查
+     */
+    private void switchTab(boolean showEditor) {
+        if (showEditor) {
+            pageEditorContainer.setVisibility(View.VISIBLE);
+            pageAiContainer.setVisibility(View.GONE);
+            // 可选：切回编辑器，启用撤销/查找等按钮
+            btnUndo.setEnabled(true);
+            btnRedo.setEnabled(true);
+        } else {
+            pageEditorContainer.setVisibility(View.GONE);
+            pageAiContainer.setVisibility(View.VISIBLE);
+            // 可选：进入AI页面，禁用编辑器相关按钮
+            btnUndo.setEnabled(false);
+            btnRedo.setEnabled(false);
+        }
+    }
+
+    /**
+     * AI提问入口（业务占位）
+     */
+    private void submitAiTask() {
+        String prompt = etQuery.getText().toString().trim();
+        if (prompt.isEmpty()) return;
+
+        etAnswer.setText("");
+        progressAiWait.setVisibility(View.VISIBLE);
+
+        // TODO：后台线程调用llama.cpp
+        // 回调示例
+        // runOnUiThread(() -> {
+        //     progressAiWait.setVisibility(View.GONE);
+        //     etAnswer.setText(resultText);
+        //     etAnswer.setSelection(etAnswer.getText().length());
+        // });
     }
 }

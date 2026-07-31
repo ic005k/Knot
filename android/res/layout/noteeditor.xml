@@ -2,14 +2,14 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:layout_weight="1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
 >
 
+    <!-- ==========【全局常驻】顶部操作按钮栏 ========== -->
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="66dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -76,18 +76,17 @@
             android:layout_height="match_parent"
             android:text="Menu"
         />
-
     </LinearLayout>
 
+    <!-- ==========【全局常驻】查找栏 ========== -->
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="top"
         android:orientation="horizontal"
     >
 
-    <!-- R 按钮：显示/隐藏替换 -->
-    <Button
+        <Button
             android:id="@+id/btnToggleReplace"
             android:layout_width="55dp"
             android:layout_height="match_parent"
@@ -154,7 +153,6 @@
             android:layout_gravity="center_vertical"
         />
 
-
         <Button
             android:id="@+id/btnNext"
             android:layout_width="55dp"
@@ -164,23 +162,18 @@
             android:layout_weight="1"
             android:text="Next"
         />
-
-
     </LinearLayout>
 
-    <!-- ============================================== -->
-    <!-- 替换功能 UI  -->
-    <!-- ============================================== -->
+    <!-- ==========【全局常驻】替换面板 ========== -->
     <LinearLayout
         android:id="@+id/replaceLayout"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingTop="4dp"
         android:visibility="gone"
     >
 
-        <!-- 第一行：替换输入框 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -208,10 +201,8 @@
                 android:text=""
                 android:textColor="#000000"
             />
-
         </LinearLayout>
 
-        <!-- 第二行：三个按钮 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -246,117 +237,219 @@
                 android:text="Replace All"
                 android:textAllCaps="false"
             />
-
         </LinearLayout>
-
     </LinearLayout>
 
-    <!-- 内容区域：用 FrameLayout 包裹 ScrollView 和进度条 -->
+    <!-- ==========【全局常驻】Tab切换按钮行 ========== -->
+    <LinearLayout
+        android:id="@+id/layout_tab_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="4dp"
+    >
+
+        <Button
+            android:id="@+id/tab_editor"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="笔记链接列表"
+            android:textAllCaps="false"
+        />
+
+        <Button
+            android:id="@+id/tab_ai"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="边写边查"
+            android:textAllCaps="false"
+        />
+    </LinearLayout>
+
+    <!-- ==========【Tab容器：两个页面互斥显示】 ========== -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
     >
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+        <!-- Page1：编辑器页面（默认显示） -->
+        <LinearLayout
+            android:id="@+id/page_editor_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:scrollbars="vertical"
-            android:fadeScrollbars="true"
-            android:layout_marginTop="5dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginLeft="0dp"
-        />
-
-        <ScrollView
-            android:id="@+id/scrollView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:scrollbars="vertical"
-            android:fadeScrollbars="true"
         >
-            <com.x.LineNumberedEditText
-                android:id="@+id/editNote"
+
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="5dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginLeft="0dp"
-                android:text="Loading, please wait..."
-                android:textColor="#000000"
-                android:inputType="textMultiLine"
-                android:layout_weight="1"
-            />
-        </ScrollView>
+            >
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:scrollbars="vertical"
+                    android:fadeScrollbars="true"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginLeft="0dp"
+                />
 
-        <!-- 覆盖在内容上的进度条 -->
-        <!--ProgressBar
-         android:id="@+id/progressBar"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:layout_gravity="center"
-         android:visibility="gone"/-->
+                <ScrollView
+                    android:id="@+id/scrollView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:scrollbars="vertical"
+                    android:fadeScrollbars="true"
+                >
+                    <com.x.LineNumberedEditText
+                        android:id="@+id/editNote"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="16dp"
+                        android:layout_marginLeft="0dp"
+                        android:text="Loading, please wait..."
+                        android:textColor="#000000"
+                        android:inputType="textMultiLine"
+                    />
+                </ScrollView>
 
-        <!-- 带背景的进度容器 -->
-        <FrameLayout
-            android:id="@+id/progressContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@drawable/progress_card_bg"
-            android:elevation="8dp"
+                <!-- 居中圆形加载进度卡片 -->
+                <FrameLayout
+                    android:id="@+id/progressContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="@drawable/progress_card_bg"
+                    android:elevation="8dp"
+                    android:visibility="gone"
+                    android:padding="24dp"
+                >
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:indeterminateTint="#FF4081"
+                        android:theme="@style/CircularProgressStyle"
+                    />
+                </FrameLayout>
+
+                <!-- 右上角预览浮窗 -->
+                <FrameLayout
+                    android:id="@+id/previewContainer"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="#CC000000"
+                    android:visibility="gone"
+                    android:elevation="6dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                >
+                    <ImageView
+                        android:id="@+id/previewImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone"
+                    />
+                    <TextView
+                        android:id="@+id/previewText"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:textSize="8sp"
+                        android:maxLines="3"
+                        android:ellipsize="end"
+                        android:padding="2dp"
+                        android:textColor="#FFFFFFFF"
+                        android:visibility="gone"
+                    />
+                </FrameLayout>
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- Page2：AI边写边查页面（默认隐藏） -->
+        <LinearLayout
+            android:id="@+id/page_ai_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
             android:visibility="gone"
-            android:padding="24dp"
+            android:padding="12dp"
         >
 
-            <!-- 放大后的圆圈进度 -->
+            <TextView
+                android:id="@+id/label_query"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="问:"
+                android:textSize="18sp"
+            />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="6dp"
+                android:orientation="horizontal"
+            >
+                <EditText
+                    android:id="@+id/et_query"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="输入你的问题"
+                    android:minLines="3"
+                    android:inputType="textMultiLine"
+                />
+                <Button
+                    android:id="@+id/btn_submit_ai"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="↑"
+                    android:textAllCaps="false"
+                />
+            </LinearLayout>
+
+            <!-- AI请求水平加载进度条（截图红框位置） -->
             <ProgressBar
-                android:id="@+id/progressBar"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:indeterminateTint="#FF4081"
-                android:theme="@style/CircularProgressStyle"
-            />
-
-        </FrameLayout>
-
-        <FrameLayout
-            android:id="@+id/previewContainer"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="top|end"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:background="#CC000000"
-            android:visibility="gone"
-            android:elevation="6dp"
-            android:clickable="true"
-            android:focusable="true"
-        >
-
-            <ImageView
-                android:id="@+id/previewImage"
+                android:id="@+id/progress_ai_wait"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
+                android:layout_height="wrap_content"
                 android:visibility="gone"
+                android:indeterminate="true"
             />
 
             <TextView
-                android:id="@+id/previewText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:textSize="8sp"
-                android:maxLines="3"
-                android:ellipsize="end"
-                android:padding="2dp"
-                android:textColor="#FFFFFFFF"
-                android:visibility="gone"
+                android:id="@+id/label_answer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="答:"
+                android:textSize="18sp"
             />
-        </FrameLayout>
+
+            <!-- AI回答编辑框，支持原地修改、复制文本 -->
+            <EditText
+                android:id="@+id/et_answer"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="6dp"
+                android:gravity="top|start"
+                android:inputType="textMultiLine"
+                android:scrollbars="vertical"
+                android:verticalScrollbarPosition="right"
+            />
+        </LinearLayout>
 
     </FrameLayout>
 
