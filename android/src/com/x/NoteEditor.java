@@ -191,6 +191,10 @@ public class NoteEditor
     private ProgressBar progressAiWait;
     private Button btnSubmitAi;
     private boolean isAiTaskRunning = false;
+    // 【静态缓冲区，完全独立，静态方法只操作这个变量】
+    private static String sAiResultBuffer = "";
+    // 锁，防止多线程读写冲突
+    private static final Object sBufferLock = new Object();
 
     // 传递提示词到c++进行处理
     public static native void sendQuestionToCpp(String questionText);
@@ -4422,29 +4426,60 @@ public class NoteEditor
 
         isAiTaskRunning = true;
         etAnswer.setText("");
-        // 1.屏蔽输入框，禁止重复输入
         etQuery.setEnabled(false);
-        // 2.显示进度条
         progressAiWait.setVisibility(View.VISIBLE);
 
+        // 清空静态缓冲区，准备接收结果
+        synchronized (sBufferLock) {
+            sAiResultBuffer = "";
+        }
+
         sendQuestionToCpp(prompt);
+
+        // 启动等待线程，最大等待2分钟(120000ms)
+        new Thread(() -> {
+            final long deadline = System.currentTimeMillis() + 120_000;
+            String result = null;
+
+            while (System.currentTimeMillis() < deadline) {
+                synchronized (sBufferLock) {
+                    if (!sAiResultBuffer.isEmpty()) {
+                        result = sAiResultBuffer;
+                    }
+                }
+                if (result != null) {
+                    break;
+                }
+                try {
+                    Thread.sleep(150);
+                } catch (InterruptedException ignored) {
+                    break;
+                }
+            }
+
+            // 回到主线程更新UI
+            final String finalResult = result;
+            runOnUiThread(() -> {
+                if (!isAiTaskRunning) return;
+
+                if (finalResult != null) {
+                    etAnswer.setText(finalResult);
+                } else {
+                    etAnswer.setText("请求超时，请重试");
+                }
+                etQuery.setEnabled(true);
+                progressAiWait.setVisibility(View.GONE);
+                isAiTaskRunning = false;
+            });
+        }).start();
     }
 
     /**
-     * JNI由C++后台子线程回调，绝对不能直接操作控件
+     * C++调用，纯静态方法，只写入静态缓冲区，不访问任何实例控件
      */
-    publi void appendAIResults(String aiResults) {
-        runOnUiThread(() -> {
-            // 1.填充回答文本
-            etAnswer.setText(aiResults);
-
-            // 2.恢复输入框可用
-            etQuery.setEnabled(true);
-            // 3.关闭加载进度条
-            progressAiWait.setVisibility(View.GONE);
-
-            // 释放任务锁，允许发起新一轮提问
-            isAiTaskRunning = false;
-        });
+    public static void appendAIResults(String aiResults) {
+        synchronized (sBufferLock) {
+            sAiResultBuffer = aiResults;
+        }
     }
 }
