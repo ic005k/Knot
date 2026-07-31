@@ -534,6 +534,7 @@ void Notes::popupNoteLinkList(const QString& arg1) {
 
   ui->listNoteLink->clear();
   ui->listNoteLink->addItems(matches);
+  ui->tabAI->setCurrentIndex(0);
 }
 
 // 链接自动补全
@@ -765,10 +766,8 @@ void Notes::on_btnQuestion_clicked() {
   QString fullPrompt = ui->editQuestion->toPlainText().trimmed();
   if (fullPrompt.isEmpty()) return;
 
-  // 获取当前程序生效的语言标识
-  // QLocale loc = QLocale::system();
-  // QString langCode = loc.name();  // 格式 zh_CN / en_US / ja_JP
-
   isAIQA = true;
+  ui->progQA->setRange(0, 0);
+  ui->editQuestion->setEnabled(false);
   mw_one->aiChatQuery(fullPrompt);
 }

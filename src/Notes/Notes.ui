@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1064</width>
-    <height>386</height>
+    <height>425</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -576,7 +576,7 @@ color: rgb(255, 255, 255);</string>
                </item>
               </layout>
              </widget>
-             <widget class="QWidget" name="tabAI">
+             <widget class="QWidget" name="tabAIQA">
               <attribute name="title">
                <string>Write &amp;&amp; Research</string>
               </attribute>
@@ -608,6 +608,16 @@ color: rgb(255, 255, 255);</string>
                   </widget>
                  </item>
                 </layout>
+               </item>
+               <item>
+                <widget class="QProgressBar" name="progQA">
+                 <property name="value">
+                  <number>24</number>
+                 </property>
+                 <property name="textVisible">
+                  <bool>false</bool>
+                 </property>
+                </widget>
                </item>
                <item>
                 <widget class="QLabel" name="label">

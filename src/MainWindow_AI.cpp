@@ -147,8 +147,11 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
             m_Reader->addBookNote(aiReplyText);
           }
         } else if (m_Notes->isAIQA) {
-          m_Notes->isAIQA = false;
           m_Notes->ui->editAnswer->setText(aiReplyText);
+          m_Notes->ui->progQA->setRange(0, 100);
+          m_Notes->isAIQA = false;
+          m_Notes->ui->editQuestion->setEnabled(true);
+
         } else
 
         {
@@ -242,7 +245,9 @@ void MainWindow::aiChatQuery(const QString& userQuestion) {
   cfg.timeoutSec = 10;
   cfg.maxTokens = 1024;
 
-  showProgress();
+  if (!m_Notes->isAIQA) {
+    showProgress();
+  }
 
   // 复用统一连通检测函数，连通成功后执行提问
   // checkAiConnectivity(cfg, [this, cfg, userQuestion]() {
