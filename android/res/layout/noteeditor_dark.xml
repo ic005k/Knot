@@ -11,7 +11,7 @@
     <!-- ==========【全局常驻】顶部操作按钮栏 ========== -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="66dp"
+        android:layout_height="50dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
     >
@@ -261,7 +261,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="0dp"
     >
 
         <Button
@@ -269,7 +269,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="笔记链接列表"
+            android:text="笔记编辑"
             android:textAllCaps="false"
             android:textColor="#E8E8E8"
         />
@@ -401,7 +401,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:visibility="gone"
-            android:padding="12dp"
+            android:padding="2dp"
         >
 
             <TextView
@@ -409,14 +409,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="问:"
-                android:textSize="18sp"
                 android:textColor="#E8E8E8"
             />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="6dp"
+                android:layout_marginVertical="2dp"
                 android:orientation="horizontal"
             >
                 <EditText
@@ -455,9 +454,8 @@
                 android:id="@+id/label_answer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:text="答:"
-                android:textSize="18sp"
                 android:textColor="#E8E8E8"
             />
 
@@ -467,7 +465,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="2dp"
                 android:gravity="top|start"
                 android:textColor="#E8E8E8"
                 android:inputType="textMultiLine"

@@ -196,6 +196,8 @@ public class NoteEditor
     // 锁，防止多线程读写冲突
     private static final Object sBufferLock = new Object();
 
+    private volatile boolean mIsDestroyed = false;
+
     // 传递提示词到c++进行处理
     public static native void sendQuestionToCpp(String questionText);
 
@@ -718,6 +720,9 @@ public class NoteEditor
 
         // 初始化链接和图片预览
         setupClickPreview();
+
+        // 默认选中编辑器tab
+        switchTab(true);
     }
 
     private void openFile() {
@@ -968,6 +973,8 @@ public class NoteEditor
 
     @Override
     protected void onDestroy() {
+        mIsDestroyed = true;
+
         // 页面销毁强制关闭进度弹窗，避免卡死
         findViewById(R.id.progressContainer).setVisibility(View.GONE);
 
@@ -4412,6 +4419,9 @@ public class NoteEditor
             btnUndo.setEnabled(false);
             btnRedo.setEnabled(false);
         }
+
+        // 刷新Tab按钮选中样式
+        refreshTabStyle(showEditor);
     }
 
     /**
@@ -4441,7 +4451,7 @@ public class NoteEditor
             final long deadline = System.currentTimeMillis() + 120_000;
             String result = null;
 
-            while (System.currentTimeMillis() < deadline) {
+            while (System.currentTimeMillis() < deadline && !mIsDestroyed) {
                 synchronized (sBufferLock) {
                     if (!sAiResultBuffer.isEmpty()) {
                         result = sAiResultBuffer;
@@ -4460,7 +4470,10 @@ public class NoteEditor
             // 回到主线程更新UI
             final String finalResult = result;
             runOnUiThread(() -> {
-                if (!isAiTaskRunning) return;
+                // 页面已经销毁，直接丢弃UI操作
+                if (mIsDestroyed || !isAiTaskRunning) {
+                    return;
+                }
 
                 if (finalResult != null) {
                     etAnswer.setText(finalResult);
@@ -4480,6 +4493,50 @@ public class NoteEditor
     public static void appendAIResults(String aiResults) {
         synchronized (sBufferLock) {
             sAiResultBuffer = aiResults;
+        }
+    }
+
+    /**
+     * 刷新两个Tab按钮选中样式
+     * @param isEditorSelected true=笔记编辑tab选中，false=AI问答tab选中
+     */
+    private void refreshTabStyle(boolean isEditorSelected) {
+        // 选中蓝色底色，深浅色区分亮度
+        int colorSelectedBg;
+        if (MyActivity.isDark) {
+            colorSelectedBg = 0xFF2858C0; // 深色模式：偏暗蓝色
+        } else {
+            colorSelectedBg = 0xFF2168DD; // 浅色模式：标准蓝色
+        }
+        int colorSelectedText = 0xFFFFFFFF; // 选中：白色文字
+
+        // 未选中状态背景
+        int colorNormalBg;
+        int colorNormalText;
+        if (MyActivity.isDark) {
+            colorNormalBg = 0xFF303030;
+            colorNormalText = 0xFFD0D0D0;
+        } else {
+            colorNormalBg = 0xFFEAEAEA;
+            colorNormalText = 0xFF333333;
+        }
+
+        // ========== 设置编辑器Tab ==========
+        if (isEditorSelected) {
+            tab_editor.setBackgroundColor(colorSelectedBg);
+            tab_editor.setTextColor(colorSelectedText);
+        } else {
+            tab_editor.setBackgroundColor(colorNormalBg);
+            tab_editor.setTextColor(colorNormalText);
+        }
+
+        // ========== 设置AI问答Tab ==========
+        if (!isEditorSelected) {
+            tab_ai.setBackgroundColor(colorSelectedBg);
+            tab_ai.setTextColor(colorSelectedText);
+        } else {
+            tab_ai.setBackgroundColor(colorNormalBg);
+            tab_ai.setTextColor(colorNormalText);
         }
     }
 }
