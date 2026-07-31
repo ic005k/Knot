@@ -235,7 +235,8 @@ class Notes : public QDialog {
   bool isAndroidAILinkGen = false;
 
   void appendAIResults(QString str);
-  protected:
+
+ protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;
@@ -306,6 +307,8 @@ class Notes : public QDialog {
   void on_btnInsertNoteLink_clicked();
 
   void on_btnQuestion_clicked();
+
+  void on_btnClearQuestion_clicked();
 
  private:
 #ifdef VECTOR_SEARCH

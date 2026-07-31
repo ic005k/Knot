@@ -605,6 +605,13 @@ color: rgb(255, 255, 255);</string>
                <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_5">
                  <item>
+                  <widget class="QToolButton" name="btnClearQuestion">
+                   <property name="text">
+                    <string>Clear</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QProgressBar" name="progQA">
                    <property name="value">
                     <number>24</number>

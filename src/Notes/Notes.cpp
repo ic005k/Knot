@@ -42,7 +42,7 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
     ui->btnAILink->show();
   else
     ui->btnAILink->hide();
-  ui->f_NoteLink->setMaximumWidth(300);
+  ui->f_NoteLink->setMaximumWidth(360);
 
   if (isAndroid) {
     mui->btnBack_NotesSearchResult->hide();

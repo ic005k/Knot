@@ -771,3 +771,8 @@ void Notes::on_btnQuestion_clicked() {
   ui->editQuestion->setEnabled(false);
   mw_one->aiChatQuery(fullPrompt);
 }
+
+void Notes::on_btnClearQuestion_clicked() {
+  ui->editQuestion->clear();
+  ui->editQuestion->setFocus();
+}

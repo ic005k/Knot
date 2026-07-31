@@ -1663,31 +1663,31 @@
     </message>
     <message>
         <location filename="../../src/MainWindow_AI.cpp" line="21"/>
-        <location filename="../../src/MainWindow_AI.cpp" line="165"/>
+        <location filename="../../src/MainWindow_AI.cpp" line="171"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainWindow_AI.cpp" line="21"/>
-        <location filename="../../src/MainWindow_AI.cpp" line="165"/>
+        <location filename="../../src/MainWindow_AI.cpp" line="171"/>
         <source>Endpoint URL invalid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainWindow_AI.cpp" line="55"/>
-        <location filename="../../src/MainWindow_AI.cpp" line="196"/>
+        <location filename="../../src/MainWindow_AI.cpp" line="202"/>
         <source>Network Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainWindow_AI.cpp" line="55"/>
-        <location filename="../../src/MainWindow_AI.cpp" line="196"/>
+        <location filename="../../src/MainWindow_AI.cpp" line="202"/>
         <source>Request URL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainWindow_AI.cpp" line="59"/>
-        <location filename="../../src/MainWindow_AI.cpp" line="199"/>
+        <location filename="../../src/MainWindow_AI.cpp" line="205"/>
         <source>Connect Failed</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1742,7 +1742,7 @@
     <message>
         <location filename="../../src/MainWindow_AI.cpp" line="136"/>
         <location filename="../../src/MainWindow_AI.cpp" line="146"/>
-        <location filename="../../src/MainWindow_AI.cpp" line="155"/>
+        <location filename="../../src/MainWindow_AI.cpp" line="161"/>
         <source>AI Response Completed</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1752,12 +1752,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_AI.cpp" line="232"/>
+        <location filename="../../src/MainWindow_AI.cpp" line="238"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_AI.cpp" line="233"/>
+        <location filename="../../src/MainWindow_AI.cpp" line="239"/>
         <source>Endpoint / API Key / Model ID cannot be empty</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1906,7 +1906,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Comm/Method.cpp" line="3503"/>
+        <location filename="../../src/Comm/Method.cpp" line="3518"/>
         <source>Please check the attachment.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1994,7 +1994,7 @@
     <name>Notes</name>
     <message>
         <location filename="../../src/Notes/Notes.ui" line="14"/>
-        <location filename="../../src/Notes/Notes.cpp" line="179"/>
+        <location filename="../../src/Notes/Notes.cpp" line="197"/>
         <source>Notes</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2009,7 +2009,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.ui" line="743"/>
+        <location filename="../../src/Notes/Notes.ui" line="764"/>
         <source>&gt;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2060,8 +2060,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.ui" line="680"/>
-        <location filename="../../src/Notes/Notes.ui" line="699"/>
+        <location filename="../../src/Notes/Notes.ui" line="701"/>
+        <location filename="../../src/Notes/Notes.ui" line="720"/>
         <source>Find</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2118,47 +2118,52 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.ui" line="606"/>
+        <location filename="../../src/Notes/Notes.ui" line="610"/>
+        <source>Clear</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/Notes.ui" line="627"/>
         <source>^</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.ui" line="615"/>
+        <location filename="../../src/Notes/Notes.ui" line="636"/>
         <source>Answer:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.ui" line="629"/>
+        <location filename="../../src/Notes/Notes.ui" line="650"/>
         <source>Note Image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.ui" line="721"/>
+        <location filename="../../src/Notes/Notes.ui" line="742"/>
         <source>&lt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.ui" line="724"/>
+        <location filename="../../src/Notes/Notes.ui" line="745"/>
         <source>Shift+Return</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.ui" line="750"/>
+        <location filename="../../src/Notes/Notes.ui" line="771"/>
         <source>Replace:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.ui" line="760"/>
+        <location filename="../../src/Notes/Notes.ui" line="781"/>
         <source>Replace</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.ui" line="767"/>
+        <location filename="../../src/Notes/Notes.ui" line="788"/>
         <source>Replace and Find</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.ui" line="774"/>
+        <location filename="../../src/Notes/Notes.ui" line="795"/>
         <source>Replace All</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2191,14 +2196,14 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="178"/>
+        <location filename="../../src/Notes/Notes.cpp" line="196"/>
         <location filename="../../src/Notes/Notes_Image.cpp" line="39"/>
         <location filename="../../src/Notes/Notes_UI.cpp" line="244"/>
         <source>No</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="177"/>
+        <location filename="../../src/Notes/Notes.cpp" line="195"/>
         <location filename="../../src/Notes/Notes_Image.cpp" line="40"/>
         <location filename="../../src/Notes/Notes_UI.cpp" line="245"/>
         <source>Yes</source>
@@ -2220,7 +2225,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="179"/>
+        <location filename="../../src/Notes/Notes.cpp" line="197"/>
         <source>Do you want to save the notes?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2275,39 +2280,39 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="847"/>
+        <location filename="../../src/Notes/Notes.cpp" line="872"/>
         <source>Note Book</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="848"/>
+        <location filename="../../src/Notes/Notes.cpp" line="873"/>
         <source>Note List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="212"/>
+        <location filename="../../src/Notes/Notes.cpp" line="230"/>
         <source>The current note does not exist. Please select another note or create a new note.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="439"/>
+        <location filename="../../src/Notes/Notes.cpp" line="464"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="433"/>
+        <location filename="../../src/Notes/Notes.cpp" line="458"/>
         <source>Processing...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="586"/>
+        <location filename="../../src/Notes/Notes.cpp" line="611"/>
         <source>Synchronization failed. Please try again later.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="667"/>
-        <location filename="../../src/Notes/Notes.cpp" line="711"/>
-        <location filename="../../src/Notes/Notes.cpp" line="759"/>
+        <location filename="../../src/Notes/Notes.cpp" line="692"/>
+        <location filename="../../src/Notes/Notes.cpp" line="736"/>
+        <location filename="../../src/Notes/Notes.cpp" line="784"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2947,55 +2952,55 @@
     <name>QInstaller</name>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="249"/>
-        <location filename="../../src/Comm/Method.cpp" line="2648"/>
+        <location filename="../../src/Comm/Method.cpp" line="2663"/>
         <source>bytes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="250"/>
-        <location filename="../../src/Comm/Method.cpp" line="2649"/>
+        <location filename="../../src/Comm/Method.cpp" line="2664"/>
         <source>KiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="251"/>
-        <location filename="../../src/Comm/Method.cpp" line="2650"/>
+        <location filename="../../src/Comm/Method.cpp" line="2665"/>
         <source>MiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="252"/>
-        <location filename="../../src/Comm/Method.cpp" line="2651"/>
+        <location filename="../../src/Comm/Method.cpp" line="2666"/>
         <source>GiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="253"/>
-        <location filename="../../src/Comm/Method.cpp" line="2652"/>
+        <location filename="../../src/Comm/Method.cpp" line="2667"/>
         <source>TiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="254"/>
-        <location filename="../../src/Comm/Method.cpp" line="2653"/>
+        <location filename="../../src/Comm/Method.cpp" line="2668"/>
         <source>PiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="255"/>
-        <location filename="../../src/Comm/Method.cpp" line="2654"/>
+        <location filename="../../src/Comm/Method.cpp" line="2669"/>
         <source>EiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="256"/>
-        <location filename="../../src/Comm/Method.cpp" line="2655"/>
+        <location filename="../../src/Comm/Method.cpp" line="2670"/>
         <source>ZiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/AutoUpdate.cpp" line="257"/>
-        <location filename="../../src/Comm/Method.cpp" line="2656"/>
+        <location filename="../../src/Comm/Method.cpp" line="2671"/>
         <source>YiB</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3008,7 +3013,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="142"/>
+        <location filename="../../src/main.cpp" line="143"/>
         <source>The application is already running!</source>
         <translation type="unfinished"></translation>
     </message>
