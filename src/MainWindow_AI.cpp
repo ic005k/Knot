@@ -152,6 +152,9 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
           m_Notes->isAIQA = false;
           m_Notes->ui->editQuestion->setEnabled(true);
 
+        } else if (isAndroidAIQA) {
+          isAndroidAIQA = false;
+          m_Notes->appendAIResults(aiReplyText);
         } else
 
         {

@@ -425,6 +425,7 @@ void Notes::openNotes() {
     mui->qwNoteTools->rootContext()->setContextProperty("hideSearchBtn", true);
   }
   m_Method->setLocalAIModelEnabled(isLocalAIModel);
+  m_Method->setAIAPIEnabled(mw_one->m_Preferences->ui->chkAI->isChecked());
 
   if (!mw_one->m_Preferences->devMode)
     mui->btnManagement->hide();

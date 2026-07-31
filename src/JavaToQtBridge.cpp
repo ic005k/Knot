@@ -38,6 +38,8 @@ static void generateAiLinkMetadata(JNIEnv* env, jclass clazz,
 static jstring nativeParsePreview(JNIEnv* env, jclass clazz, jstring lineText,
                                   jint cursorPos);
 
+static void sendQuestionToCpp(JNIEnv* env, jclass clazz, jstring questionText);
+
 #endif
 
 #ifdef Q_OS_ANDROID
@@ -396,6 +398,43 @@ static jstring nativeParsePreview(JNIEnv* env, jclass clazz, jstring lineText,
   return env->NewStringUTF(parseResult.toUtf8().constData());
 }
 
+static void sendQuestionToCpp(JNIEnv* env, jclass clazz, jstring questionText) {
+  Q_UNUSED(env);
+  Q_UNUSED(clazz);
+  QString question;
+
+  if (questionText != nullptr) {
+    const char* str = env->GetStringUTFChars(questionText, nullptr);
+    question = QString::fromUtf8(str);
+    env->ReleaseStringUTFChars(questionText, str);
+  }
+
+  qDebug() << "[JNI] sendQuestionToCpp:" << question;
+
+  isAndroidAIQA = true;
+
+  // ========== 业务入口 =========================
+  // 异步投递到主线程，JNI 线程立即返回，不阻塞
+  bool invoked = QMetaObject::invokeMethod(
+      mw_one,
+      [question]() {
+        try {
+          mw_one->aiChatQuery(question);
+        } catch (const std::exception& ex) {
+          qDebug() << "[AI-JNI] EXCEPTION:" << ex.what();
+        } catch (...) {
+          qDebug() << "[AI-JNI] UNKNOWN EXCEPTION";
+        }
+      },
+      Qt::QueuedConnection  // ← 关键：异步，不阻塞 JNI 线程
+  );
+
+  if (!invoked) {
+    qWarning() << "[AI-JNI] invokeMethod FAILED!";
+  }
+  // =======================================================
+}
+
 //============== JNI 方法注册数组  ===========================
 
 static const JNINativeMethod gMethods[] = {
@@ -442,6 +481,9 @@ static const JNINativeMethod gMethodsAiLink[] = {
 static const JNINativeMethod gMethodsParsePreview[] = {
     {"nativeParsePreview", "(Ljava/lang/String;I)Ljava/lang/String;",
      (void*)nativeParsePreview}};
+
+static const JNINativeMethod gMethodsSendQuestion[] = {
+    {"sendQuestionToCpp", "(Ljava/lang/String;)V", (void*)sendQuestionToCpp}};
 
 ///// 注册函数 ///////////////////////////////////////
 
@@ -629,6 +671,27 @@ void RegJniParsePreview(const char* myClassName) {
     }
   });
   qDebug() << "++++++++++++++++++++++++";
+}
+
+void RegJniSendQuestion(const char* myClassName) {
+  QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
+    QJniEnvironment Environment;
+    jclass j_class = Environment->FindClass(myClassName);
+    if (j_class == nullptr) {
+      qDebug() << "error: find class failed sendQuestionToCpp";
+      return;
+    }
+
+    jint ret = Environment->RegisterNatives(
+        j_class, gMethodsSendQuestion,
+        sizeof(gMethodsSendQuestion) / sizeof(gMethodsSendQuestion[0]));
+
+    if (ret != JNI_OK) {
+      qDebug() << "register sendQuestionToCpp failed";
+    } else {
+      qDebug() << "RegisterNatives sendQuestionToCpp success!";
+    }
+  });
 }
 
 #endif

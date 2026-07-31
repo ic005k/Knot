@@ -146,3 +146,16 @@ void Notes::refreshNote() {
   });
   watcher->setFuture(future);
 }
+
+void Notes::appendAIResults(QString str) {
+  Q_UNUSED(str);
+#ifdef Q_OS_ANDROID
+
+  QJniObject jTitle = QJniObject::fromString(str);
+  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
+  m_activity.callStaticMethod<void>("com.x/NoteEditor", "appendAIResults",
+                                    "(Ljava/lang/String;)V",
+                                    jTitle.object<jstring>());
+
+#endif
+}

@@ -1701,6 +1701,21 @@ void Method::setLocalAIModelEnabled(bool isLocalAI) {
 #endif
 }
 
+void Method::setAIAPIEnabled(bool isAIAPI) {
+  Q_UNUSED(isAIAPI);
+
+#ifdef Q_OS_ANDROID
+
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  if (!activity.isValid()) {
+    qWarning() << "Android Activity 上下文无效，无法同步本地AI状态";
+    return;
+  }
+  activity.callMethod<void>("setAIAPIEnabled", "(Z)V", isAIAPI);
+
+#endif
+}
+
 void Method::delay_MSec(unsigned int msec) {
   QEventLoop loop;
   QTimer::singleShot(msec, &loop, SLOT(quit()));

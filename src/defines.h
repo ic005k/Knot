@@ -133,6 +133,7 @@ inline bool isDateSection = false;
 inline bool isOpen = false;
 inline bool isZH_CN = false;
 inline bool isNeedExecDeskShortcut = false;
+inline bool isAndroidAIQA = false;
 
 inline QString loadText(QString textFile);
 inline void TextEditToFile(QTextEdit* txtEdit, QString fileName);

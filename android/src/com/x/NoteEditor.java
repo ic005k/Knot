@@ -190,6 +190,10 @@ public class NoteEditor
     private EditText etAnswer;
     private ProgressBar progressAiWait;
     private Button btnSubmitAi;
+    private boolean isAiTaskRunning = false;
+
+    // 传递提示词到c++进行处理
+    public static native void sendQuestionToCpp(String questionText);
 
     // ======================
     // 笔记内链补全（轻量集成）
@@ -513,6 +517,13 @@ public class NoteEditor
             labelQuery.setText("Q:");
             labelAnswer.setText("A:");
             etQuery.setHint("Enter your question");
+        }
+
+        boolean showAiButton = MyActivity.mAIAPIEnabled;
+        if (!showAiButton) {
+            // AI API关闭，直接隐藏该按钮
+            tab_ai.setVisibility(View.GONE);
+            tab_editor.setVisibility(View.GONE);
         }
         // ========== Tab按钮 + AI问答界面 结束 ==========
     }
@@ -4400,21 +4411,40 @@ public class NoteEditor
     }
 
     /**
-     * AI提问入口（业务占位）
+     * AI提问入口
      */
+
     private void submitAiTask() {
         String prompt = etQuery.getText().toString().trim();
-        if (prompt.isEmpty()) return;
+        if (prompt.isEmpty() || isAiTaskRunning) {
+            return;
+        }
 
+        isAiTaskRunning = true;
         etAnswer.setText("");
+        // 1.屏蔽输入框，禁止重复输入
+        etQuery.setEnabled(false);
+        // 2.显示进度条
         progressAiWait.setVisibility(View.VISIBLE);
 
-        // TODO：后台线程调用llama.cpp
-        // 回调示例
-        // runOnUiThread(() -> {
-        //     progressAiWait.setVisibility(View.GONE);
-        //     etAnswer.setText(resultText);
-        //     etAnswer.setSelection(etAnswer.getText().length());
-        // });
+        sendQuestionToCpp(prompt);
+    }
+
+    /**
+     * JNI由C++后台子线程回调，绝对不能直接操作控件
+     */
+    publi void appendAIResults(String aiResults) {
+        runOnUiThread(() -> {
+            // 1.填充回答文本
+            etAnswer.setText(aiResults);
+
+            // 2.恢复输入框可用
+            etQuery.setEnabled(true);
+            // 3.关闭加载进度条
+            progressAiWait.setVisibility(View.GONE);
+
+            // 释放任务锁，允许发起新一轮提问
+            isAiTaskRunning = false;
+        });
     }
 }

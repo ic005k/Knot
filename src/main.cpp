@@ -43,6 +43,7 @@ extern void RegJni19(const char* myClassName);
 extern void RegJni20(const char* myClassName);
 extern void RegJniAiLink(const char* myClassName);
 extern void RegJniParsePreview(const char* myClassName);
+extern void RegJniSendQuestion(const char* myClassName);
 
 extern void releaseGlobalAiEngine();
 
@@ -182,6 +183,7 @@ int main(int argc, char* argv[]) {
   RegJni16("com/x/NoteEditor");
   RegJniAiLink("com/x/NoteEditor");
   RegJniParsePreview("com/x/NoteEditor");
+  RegJniSendQuestion("com/x/NoteEditor");
   RegJni("com/x/MDActivity");
   RegJni("com/x/NewTodo");
   RegJni("com/x/NewNote");

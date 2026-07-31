@@ -497,6 +497,7 @@ class Method : public QDialog {
 
   QString escapeAllHtml(const QString &src);
   void setLocalAIModelEnabled(bool isLocalAI);
+  void setAIAPIEnabled(bool isAIAPI);
   protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 

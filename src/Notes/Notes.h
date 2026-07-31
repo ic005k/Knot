@@ -234,7 +234,8 @@ class Notes : public QDialog {
   bool isBtnAILinkClicked = false;
   bool isAndroidAILinkGen = false;
 
- protected:
+  void appendAIResults(QString str);
+  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;
