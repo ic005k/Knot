@@ -28,8 +28,8 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->editQuestion->installEventFilter(this);
   ui->editQuestion->viewport()->installEventFilter(this);
 
-  ui->progQA->setMinimum(0);
-  ui->progQA->setMaximum(100);
+  ui->progQA->setRange(0, 100);
+  ui->progQA->setValue(0);
 
   timerEditNote = new QTimer(this);
   connect(timerEditNote, SIGNAL(timeout()), this, SLOT(on_editNote()));
@@ -99,6 +99,18 @@ void Notes::init() {
   int w = this->width();
   if (mw_one->width() > w) w = mw_one->width();
   this->setGeometry(this->x(), mw_one->geometry().y(), w, mw_one->height());
+
+  if (isDark) {
+    ui->editAnswer->verticalScrollBar()->setStyleSheet(
+        m_Method->darkScrollbarStyle);
+    ui->editQuestion->verticalScrollBar()->setStyleSheet(
+        m_Method->darkScrollbarStyle);
+  } else {
+    ui->editAnswer->verticalScrollBar()->setStyleSheet(
+        m_Method->lightScrollbarStyle);
+    ui->editQuestion->verticalScrollBar()->setStyleSheet(
+        m_Method->lightScrollbarStyle);
+  }
 }
 
 void Notes::wheelEvent(QWheelEvent* e) { Q_UNUSED(e); }
@@ -252,6 +264,12 @@ void Notes::openEditUI() {
     ui->btnAILink->show();
   else
     ui->btnAILink->hide();
+
+  if (mw_one->m_Preferences->ui->chkAI->isChecked()) {
+    ui->tabAI->setTabVisible(1, true);
+  } else {
+    ui->tabAI->setTabVisible(1, false);
+  }
 
   show();
 

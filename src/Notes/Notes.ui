@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1064</width>
-    <height>425</height>
+    <height>454</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -600,6 +600,20 @@ color: rgb(255, 255, 255);</string>
                    </property>
                   </widget>
                  </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_5">
+                 <item>
+                  <widget class="QProgressBar" name="progQA">
+                   <property name="value">
+                    <number>24</number>
+                   </property>
+                   <property name="textVisible">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
                  <item>
                   <widget class="QToolButton" name="btnQuestion">
                    <property name="text">
@@ -608,16 +622,6 @@ color: rgb(255, 255, 255);</string>
                   </widget>
                  </item>
                 </layout>
-               </item>
-               <item>
-                <widget class="QProgressBar" name="progQA">
-                 <property name="value">
-                  <number>24</number>
-                 </property>
-                 <property name="textVisible">
-                  <bool>false</bool>
-                 </property>
-                </widget>
                </item>
                <item>
                 <widget class="QLabel" name="label">
