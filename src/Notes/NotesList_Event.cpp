@@ -835,14 +835,13 @@ void NotesList::clickNoteBook() {
 
 void NotesList::clickNoteList() {
   int indexTop = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
-  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
+  if (indexTop < 0) return;
 
+  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
   if (index < 0) {
     currentMDFile = "";
     return;
   }
-
-  if (indexTop < 0) return;
 
   QString strMD = m_Method->getText3(mui->qwNoteList, index);
   currentMDFile = iniDir + strMD;
@@ -852,6 +851,21 @@ void NotesList::clickNoteList() {
   if (!QFile::exists(currentMDFile)) {
     return;
   }
+
+  QTreeWidgetItem* bookItem = pNoteItems.at(index)->parent();
+  QString strNoteBookID = bookItem->text(3).trimmed();
+  if (strNoteBookID.isEmpty()) {
+    QString nbid =
+        "nbid_" + m_Notes->getDateTimeStr() + "_" + m_Method->generateRandom3();
+    bookItem->setText(3, nbid);
+    strNoteBookID = nbid;
+    saveNotesList();
+  }
+  saveNotePosition(strNoteBookID, currentMDFile);
+
+  return;
+
+  ///////////////////////////////////////////////
 
   QString noteName = m_Method->getText0(mui->qwNoteList, index);
   noteTitle = noteName;
@@ -887,3 +901,72 @@ void NotesList::mouseClickNoteBook() {
 }
 
 void NotesList::mouseClickNoteList() { isMouseClickNoteBook = false; }
+
+void NotesList::saveNotePosition(const QString& NoteBookID,
+                                 const QString& mdFile) {
+  if (NoteBookID.isEmpty() || mdFile.isEmpty()) return;
+
+  const QString filePath = QDir(privateDir).filePath("noteposition.json");
+  QJsonObject rootObj;
+
+  // 如果文件存在，先加载原有数据
+  QFile file(filePath);
+  if (file.exists()) {
+    if (file.open(QIODevice::ReadOnly)) {
+      QByteArray rawData = file.readAll();
+      file.close();
+      QJsonDocument doc = QJsonDocument::fromJson(rawData);
+      if (doc.isObject()) {
+        rootObj = doc.object();
+      }
+    }
+  }
+
+  // 更新当前笔记本对应的md路径
+  rootObj[NoteBookID] = mdFile;
+
+  // 写入磁盘
+  if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+    QJsonDocument doc(rootObj);
+    file.write(doc.toJson(QJsonDocument::Compact));
+    file.close();
+  }
+}
+
+QString NotesList::loadNotePosition(const QString& NoteBookID) {
+  if (NoteBookID.isEmpty()) return "";
+
+  const QString filePath = QDir(privateDir).filePath("noteposition.json");
+  QFile file(filePath);
+  if (!file.exists()) return "";
+
+  if (!file.open(QIODevice::ReadOnly)) return "";
+
+  QByteArray rawData = file.readAll();
+  file.close();
+  QJsonDocument doc = QJsonDocument::fromJson(rawData);
+  if (!doc.isObject()) return "";
+
+  QJsonObject rootObj = doc.object();
+  QString mdfile = rootObj[NoteBookID].toString();
+  return mdfile;
+}
+
+void NotesList::removeNotebookPositionRecord(const QString& notebookId) {
+  if (notebookId.isEmpty()) return;
+  const QString filePath = QDir(privateDir).filePath("noteposition.json");
+  QFile file(filePath);
+  if (!file.exists()) return;
+
+  if (file.open(QIODevice::ReadOnly)) {
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    file.close();
+    if (doc.isObject()) {
+      QJsonObject obj = doc.object();
+      obj.remove(notebookId);
+      if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        file.write(QJsonDocument(obj).toJson(QJsonDocument::Compact));
+      }
+    }
+  }
+}

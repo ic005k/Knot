@@ -206,14 +206,6 @@ void NotesList::saveNotesList() {
 
   m_isSaving = true;
 
-  /*QFuture<void> future = QtConcurrent::run([=]() {
-    // 【全局互斥锁】同一时间只能有一个线程执行保存
-    QMutexLocker locker(&m_saveMutex);
-
-    // 保存函数
-    saveNotesListToFile();
-  });*/
-
   QPointer<NotesList> self(this);
   QFuture<void> future = QtConcurrent::run([self]() {
     // 对象已销毁则直接返回
@@ -240,6 +232,7 @@ QJsonObject NotesList::serializeNotebookItem(QTreeWidgetItem* item) {
   // 笔记本基础字段，和原代码一致
   obj["name"] = item->text(0);
   obj["colorFlag"] = item->text(2);
+  obj["notebookID"] = item->text(3);
 
   QJsonArray childrenArray;
   int childCount = item->childCount();
@@ -347,10 +340,12 @@ void NotesList::loadSubNotebook(const QJsonObject& bookObj,
   // 创建子笔记本节点，保留原有UI样式
   QString bookName = bookObj["name"].toString();
   QString colorFlag = bookObj["colorFlag"].toString("#FF0000");
+  QString notebookID = bookObj["notebookID"].toString();
 
   QTreeWidgetItem* subBookItem = new QTreeWidgetItem(parentItem);
   subBookItem->setText(0, bookName);
   subBookItem->setText(2, colorFlag);
+  subBookItem->setText(3, notebookID);
   subBookItem->setForeground(0, Qt::red);
 
   QFont font = this->font();
@@ -420,11 +415,13 @@ void NotesList::initNotesList() {
     QJsonObject topObj = mainNotesArray[i].toObject();
     QString strTop = topObj["name"].toString();
     QString strTopColorFlag = topObj["colorFlag"].toString("#FF0000");
+    QString strTopNoteBookID = topObj["notebookID"].toString();
 
     // 创建顶层笔记本节点
     QTreeWidgetItem* topItem = new QTreeWidgetItem;
     topItem->setText(0, strTop);
     topItem->setText(2, strTopColorFlag);
+    topItem->setText(3, strTopNoteBookID);
     topItem->setForeground(0, Qt::red);
 
     QFont font = this->font();
@@ -1002,15 +999,36 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
     if (noteCount == 0) return;
 
     setNotesListCurrentIndex(currentNoteslistIndex);
+    qDebug() << "currentNotesListIndex=" << currentNoteslistIndex;
 
     if (isImportNotes) {
       setNotesListCurrentIndex(noteCount - 1);
       isImportNotes = false;
+    } else {
+      QString notebookId = item->text(3).trimmed();
+      if (!notebookId.isEmpty()) {
+        QString targetMd = loadNotePosition(notebookId);
+        if (!targetMd.isEmpty()) {
+          // 在当前笔记本笔记列表内查找md
+          QString mdFileFlag = targetMd.replace(iniDir, "");
+          int flatCounter = -1;
+          NoteTreePos pos = searchNoteByMdPath(tw->invisibleRootItem(), item,
+                                               mdFileFlag, flatCounter);
+
+          int targetIndex = pos.noteListIndex;
+          if (targetIndex >= 0) {
+            setNotesListCurrentIndex(targetIndex);
+
+          } else {
+            // 无记录 / md文件不存在，默认选中第一条
+            setNotesListCurrentIndex(0);
+          }
+        }
+      } else {
+        setNotesListCurrentIndex(0);
+      }
     }
 
-    QString findMDFile = currentMDFile;
-
-    setNoteLabel();
     clickNoteList();
 
     if (isMouseClick) {
@@ -1022,15 +1040,15 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
 
     watcher->deleteLater();
 
-    if (isReadyNotesEnd == false) {
+    /*if (isReadyNotesEnd == false) {
       isReadyNotesEnd = true;
-      int indexNote = m_Notes->m_NoteIndexManager->getNoteIndex(findMDFile);
+      int indexNote = m_Notes->m_NoteIndexManager->getNoteIndex(currentMDFile);
       int countNote = m_Method->getCountFromQW(mui->qwNoteList);
       if (indexNote < countNote && indexNote >= 0) {
         setNotesListCurrentIndex(indexNote);
         clickNoteList();
       }
-    }
+    }*/
 
     /*if (isExecRecentOpen) {
         isExecRecentOpen = false;

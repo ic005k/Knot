@@ -196,7 +196,7 @@ class NotesList : public QDialog {
 
   QStringList getValidMDFiles();
 
-  void refreshRecentOpen(QString name);
+  void refreshRecentOpen();
 
   void showFindNotes();
   void restoreNoteFromRecycle();
@@ -246,7 +246,10 @@ class NotesList : public QDialog {
                                  QTreeWidgetItem* parentBookItem,
                                  const QString& fullMdPath, int& flatCounter);
 
- protected:
+  void saveNotePosition(const QString &NoteBookID, const QString &mdFile);
+  QString loadNotePosition(const QString &NoteBookID);
+  void removeNotebookPositionRecord(const QString &notebookId);
+  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
   void closeEvent(QCloseEvent* event) override;

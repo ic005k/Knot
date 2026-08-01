@@ -236,7 +236,7 @@ void Notes::openEditUI() {
 
   oldText = loadText(currentMDFile);
 
-  m_NotesList->refreshRecentOpen(m_NotesList->noteTitle);
+  m_NotesList->refreshRecentOpen();
   m_NotesList->saveRecentOpen();
   m_NotesList->moveToFirst();
 
@@ -308,7 +308,7 @@ void Notes::previewNote() {
   QString title = m_NoteIndexManager->getNoteTitle(currentMDFile);
 
   QFuture<void> future = QtConcurrent::run([=]() {
-    m_NotesList->refreshRecentOpen(title);
+    m_NotesList->refreshRecentOpen();
     m_NotesList->saveRecentOpen();
     MD2Html(currentMDFile);
   });
