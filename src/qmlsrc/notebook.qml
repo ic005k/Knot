@@ -60,36 +60,50 @@ Rectangle {
     }
 
     function getItemText(itemIndex) {
+        if (itemIndex < 0 || itemIndex >= view.model.count) return "";
+
         var data = view.model.get(itemIndex);
         return data.time + "|=|" + data.dototext;
     }
 
     function getText0(itemIndex) {
+        if (itemIndex < 0 || itemIndex >= view.model.count) return "";
+
         var data = view.model.get(itemIndex);
         return data.text0;
     }
 
     function getText1(itemIndex) {
+        if (itemIndex < 0 || itemIndex >= view.model.count) return "";
+
         var data = view.model.get(itemIndex);
         return data.text1;
     }
 
     function getText2(itemIndex) {
+        if (itemIndex < 0 || itemIndex >= view.model.count) return "";
+
         var data = view.model.get(itemIndex);
         return data.text2;
     }
 
     function getText3(itemIndex) {
+        if (itemIndex < 0 || itemIndex >= view.model.count) return "";
+
         var data = view.model.get(itemIndex);
         return data.text3;
     }
 
     function getTop(itemIndex) {
+        if (itemIndex < 0 || itemIndex >= view.model.count) return "";
+
         var data = view.model.get(itemIndex);
         return data.text_top;
     }
 
     function getType(itemIndex) {
+        if (itemIndex < 0 || itemIndex >= view.model.count) return "";
+
         var data = view.model.get(itemIndex);
         return data.type;
     }
@@ -118,35 +132,51 @@ Rectangle {
     }
 
     function delItem(currentIndex) {
+        if (currentIndex < 0 || currentIndex >= view.model.count) return;
+
         view.model.remove(currentIndex);
     }
 
     function modifyItem(currentIndex, strTime, strText) {
+        if (currentIndex < 0 || currentIndex >= view.model.count) return;
+
         view.model.setProperty(currentIndex, "time", strTime);
         view.model.setProperty(currentIndex, "dototext", strText);
     }
 
     function modifyItemTime(currentIndex, strTime) {
+        if (currentIndex < 0 || currentIndex >= view.model.count) return;
+
         view.model.setProperty(currentIndex, "time", strTime);
     }
 
     function modifyItemType(currentIndex, type) {
+        if (currentIndex < 0 || currentIndex >= view.model.count) return;
+
         view.model.setProperty(currentIndex, "type", type);
     }
 
     function modifyItemText0(currentIndex, strText) {
+        if (currentIndex < 0 || currentIndex >= view.model.count) return;
+
         view.model.setProperty(currentIndex, "text0", strText);
     }
 
     function modifyItemText1(currentIndex, strText) {
+        if (currentIndex < 0 || currentIndex >= view.model.count) return;
+
         view.model.setProperty(currentIndex, "text1", strText);
     }
 
     function modifyItemText2(currentIndex, strText) {
+        if (currentIndex < 0 || currentIndex >= view.model.count) return;
+
         view.model.setProperty(currentIndex, "text2", strText);
     }
 
     function modifyItemText3(currentIndex, strText) {
+        if (currentIndex < 0 || currentIndex >= view.model.count) return;
+
         view.model.setProperty(currentIndex, "text3", strText);
     }
 

@@ -45,6 +45,13 @@
 #include "ui_MoveTo.h"
 #include "ui_NotesList.h"
 
+struct NoteTreePos {
+  int flatNotebookIndex = -1;  // 左侧扁平化笔记本列表索引（直接给UI使用）
+  int noteListIndex = -1;      // 右侧笔记列表索引
+  QTreeWidgetItem* notebookItem = nullptr;
+  QTreeWidgetItem* noteItem = nullptr;
+};
+
 struct MySearchResult {
   QString filePath;
   QList<int> lineNumbers;
@@ -75,6 +82,8 @@ class NotesList : public QDialog {
   explicit NotesList(QWidget* parent = nullptr);
   ~NotesList();
   Ui::NotesList* ui;
+
+  int currentNoteslistIndex = 0;
 
   QVector<SearchResult> adaptedResults;
 
@@ -232,6 +241,10 @@ class NotesList : public QDialog {
 
   void startVectorSerach(const QString& text);
   bool isEditBoxSearchTextChanged = false;
+
+  NoteTreePos searchNoteByMdPath(QTreeWidgetItem* root,
+                                 QTreeWidgetItem* parentBookItem,
+                                 const QString& fullMdPath, int& flatCounter);
 
  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
@@ -404,6 +417,8 @@ class NotesList : public QDialog {
   void moveChildToRecycle(QTreeWidgetItem* parentItem, QString iniDir,
                           QVector<QString>& delFilesIndex, QTreeWidget* twrb);
   void popupAndroidNoteLinkList(QVector<SearchResult> adaptedResults);
+  int calcNoteIndexInsideBook(QTreeWidgetItem* bookItem,
+                              QTreeWidgetItem* targetNote);
 };
 
 class SearchMapper {
