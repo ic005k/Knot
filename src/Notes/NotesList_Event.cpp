@@ -356,6 +356,10 @@ void NotesList::moveChildToRecycle(QTreeWidgetItem* parentItem, QString iniDir,
   if (!parentItem) return;
   int childCount = parentItem->childCount();
 
+  // 删除以笔记本ID记录的md文件键值对
+  QString nbId = parentItem->text(3);
+  removeNotebookPositionRecord(nbId);
+
   // 倒序遍历，删除节点不会影响下标
   for (int i = childCount - 1; i >= 0; --i) {
     QTreeWidgetItem* child = parentItem->child(i);
@@ -365,6 +369,10 @@ void NotesList::moveChildToRecycle(QTreeWidgetItem* parentItem, QString iniDir,
     QString str1 = child->text(1);
 
     if (str1.isEmpty()) {
+      // 删除以笔记本ID记录的md文件键值对
+      QString nbId = child->text(3);
+      removeNotebookPositionRecord(nbId);
+
       // 子笔记本：先递归清理它的所有子项，再删除自身
       moveChildToRecycle(child, iniDir, delFilesIndex, twrb);
       parentItem->removeChild(child);
@@ -862,36 +870,6 @@ void NotesList::clickNoteList() {
     saveNotesList();
   }
   saveNotePosition(strNoteBookID, currentMDFile);
-
-  return;
-
-  ///////////////////////////////////////////////
-
-  QString noteName = m_Method->getText0(mui->qwNoteList, index);
-  noteTitle = noteName;
-
-  QTreeWidgetItem* item = pNoteItems.at(index);
-  tw->setCurrentItem(item);
-
-  int indexNoteBook = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
-  if (indexNoteBook < 0) return;
-
-  QString s_tr = QString::number(indexNoteBook) + "=" + QString::number(index);
-  int count2 = mIndexList.count();
-  int i = 0;
-  for (i = 0; i < count2; i++) {
-    QString str = mIndexList.at(i);
-    if (str.split("=").at(0).toInt() == indexNoteBook) {
-      mIndexList.removeOne(str);
-      break;
-    }
-  }
-  mIndexList.append(s_tr);
-
-  updateNoteIndexManager(currentMDFile, indexNoteBook, index);
-
-  // qDebug() << "单击条目设置当前md文件：" << currentMDFile << indexNoteBook
-  //          << index;
 }
 
 void NotesList::mouseClickNoteBook() {
@@ -953,20 +931,63 @@ QString NotesList::loadNotePosition(const QString& NoteBookID) {
 }
 
 void NotesList::removeNotebookPositionRecord(const QString& notebookId) {
-  if (notebookId.isEmpty()) return;
-  const QString filePath = QDir(privateDir).filePath("noteposition.json");
-  QFile file(filePath);
-  if (!file.exists()) return;
-
-  if (file.open(QIODevice::ReadOnly)) {
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-    file.close();
-    if (doc.isObject()) {
-      QJsonObject obj = doc.object();
-      obj.remove(notebookId);
-      if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        file.write(QJsonDocument(obj).toJson(QJsonDocument::Compact));
-      }
-    }
+  if (notebookId.isEmpty()) {
+    qDebug() << "[removeNotebookPositionRecord] notebookId is empty, skip";
+    return;
   }
+
+  const QString filePath = QDir(privateDir).filePath("noteposition.json");
+
+  // 读阶段：独立QFile
+  QFile readFile(filePath);
+  if (!readFile.exists()) {
+    qDebug() << "[removeNotebookPositionRecord] file not exist:" << filePath;
+    return;
+  }
+
+  if (!readFile.open(QIODevice::ReadOnly)) {
+    qDebug() << "[removeNotebookPositionRecord] open read failed:"
+             << readFile.errorString();
+    return;
+  }
+
+  QByteArray rawData = readFile.readAll();
+  readFile.close();
+
+  QJsonDocument doc = QJsonDocument::fromJson(rawData);
+  if (!doc.isObject()) {
+    qDebug() << "[removeNotebookPositionRecord] json root is not object, skip";
+    return;
+  }
+
+  QJsonObject rootObj = doc.object();
+  if (!rootObj.contains(notebookId)) {
+    // key不存在，无需写入，直接退出，减少磁盘IO
+    qDebug() << "[removeNotebookPositionRecord] no record for notebookId:"
+             << notebookId;
+    return;
+  }
+
+  rootObj.remove(notebookId);
+
+  // 写阶段：新建独立QFile实例
+  QFile writeFile(filePath);
+  if (!writeFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+    qDebug() << "[removeNotebookPositionRecord] open write failed:"
+             << writeFile.errorString();
+    return;
+  }
+
+  // 可选优化：所有记录清空后，直接删除文件，避免留存空 {}
+  if (rootObj.isEmpty()) {
+    writeFile.close();
+    writeFile.remove();
+    qDebug() << "[removeNotebookPositionRecord] all records cleared, delete "
+                "json file";
+  } else {
+    writeFile.write(QJsonDocument(rootObj).toJson(QJsonDocument::Compact));
+    writeFile.close();
+  }
+  qDebug() << "[removeNotebookPositionRecord] removed notebookId:"
+           << notebookId;
 }

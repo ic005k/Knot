@@ -246,10 +246,11 @@ class NotesList : public QDialog {
                                  QTreeWidgetItem* parentBookItem,
                                  const QString& fullMdPath, int& flatCounter);
 
-  void saveNotePosition(const QString &NoteBookID, const QString &mdFile);
-  QString loadNotePosition(const QString &NoteBookID);
-  void removeNotebookPositionRecord(const QString &notebookId);
-  protected:
+  void saveNotePosition(const QString& NoteBookID, const QString& mdFile);
+  QString loadNotePosition(const QString& NoteBookID);
+  void removeNotebookPositionRecord(const QString& notebookId);
+
+ protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
   void closeEvent(QCloseEvent* event) override;
@@ -321,7 +322,6 @@ class NotesList : public QDialog {
   QVector<ExactMatchResult> m_exactMatchCache;
   int m_currentExactMatchIndex = -1;
 
-  bool isReadyNotesEnd = false;
   bool isExecRecentOpen = false;
 
   std::atomic<bool> m_rebuildCancelled{false};
@@ -353,6 +353,8 @@ class NotesList : public QDialog {
   bool isImportNotes = false;
 
   bool isMouseClick = false;
+
+  bool isSetCurrentMDFilePosition = false;
 
   bool isMouseClickNoteBook = false;
 

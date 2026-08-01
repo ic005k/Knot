@@ -912,7 +912,6 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
     noteModel->replaceAll({});  // 清空笔记列表
     pNoteItems.clear();
     setNoteLabel();
-    isReadyNotesEnd = true;
     isExecRecentOpen = false;
     return;
   }
@@ -998,34 +997,36 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
 
     if (noteCount == 0) return;
 
-    setNotesListCurrentIndex(currentNoteslistIndex);
-    qDebug() << "currentNotesListIndex=" << currentNoteslistIndex;
-
-    if (isImportNotes) {
-      setNotesListCurrentIndex(noteCount - 1);
-      isImportNotes = false;
+    if (isSetCurrentMDFilePosition) {
+      isSetCurrentMDFilePosition = false;
+      setNotesListCurrentIndex(currentNoteslistIndex);
     } else {
-      QString notebookId = item->text(3).trimmed();
-      if (!notebookId.isEmpty()) {
-        QString targetMd = loadNotePosition(notebookId);
-        if (!targetMd.isEmpty()) {
-          // 在当前笔记本笔记列表内查找md
-          QString mdFileFlag = targetMd.replace(iniDir, "");
-          int flatCounter = -1;
-          NoteTreePos pos = searchNoteByMdPath(tw->invisibleRootItem(), item,
-                                               mdFileFlag, flatCounter);
-
-          int targetIndex = pos.noteListIndex;
-          if (targetIndex >= 0) {
-            setNotesListCurrentIndex(targetIndex);
-
-          } else {
-            // 无记录 / md文件不存在，默认选中第一条
-            setNotesListCurrentIndex(0);
-          }
-        }
+      if (isImportNotes) {
+        setNotesListCurrentIndex(noteCount - 1);
+        isImportNotes = false;
       } else {
-        setNotesListCurrentIndex(0);
+        QString notebookId = item->text(3).trimmed();
+        if (!notebookId.isEmpty()) {
+          QString targetMd = loadNotePosition(notebookId);
+          if (!targetMd.isEmpty()) {
+            // 在当前笔记本笔记列表内查找md
+            QString mdFileFlag = targetMd.replace(iniDir, "");
+            int flatCounter = -1;
+            NoteTreePos pos = searchNoteByMdPath(tw->invisibleRootItem(), item,
+                                                 mdFileFlag, flatCounter);
+
+            int targetIndex = pos.noteListIndex;
+            if (targetIndex >= 0) {
+              setNotesListCurrentIndex(targetIndex);
+
+            } else {
+              // 无记录 / md文件不存在，默认选中第一条
+              setNotesListCurrentIndex(0);
+            }
+          }
+        } else {
+          setNotesListCurrentIndex(0);
+        }
       }
     }
 
@@ -1039,16 +1040,6 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
     }
 
     watcher->deleteLater();
-
-    /*if (isReadyNotesEnd == false) {
-      isReadyNotesEnd = true;
-      int indexNote = m_Notes->m_NoteIndexManager->getNoteIndex(currentMDFile);
-      int countNote = m_Method->getCountFromQW(mui->qwNoteList);
-      if (indexNote < countNote && indexNote >= 0) {
-        setNotesListCurrentIndex(indexNote);
-        clickNoteList();
-      }
-    }*/
 
     /*if (isExecRecentOpen) {
         isExecRecentOpen = false;
@@ -1176,15 +1167,9 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
 
   if (pos.flatNotebookIndex == -1 || pos.noteListIndex == -1) return false;
 
-  // 展开所有父节点
-  /*QTreeWidgetItem* p = pos.noteItem->parent();
-  while (p != nullptr) {
-    p->setExpanded(true);
-    p = p->parent();
-  }*/
-
   tw->setCurrentItem(pos.notebookItem);
-  isReadyNotesEnd = false;
+
+  isSetCurrentMDFilePosition = true;
 
   QTimer::singleShot(80, this, [=]() {
     //  直接使用flatNotebookIndex 赋值左侧扁平列表选中项
