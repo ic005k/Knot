@@ -1,5 +1,5 @@
-#ifndef NATIVE_MSG_HOST_H
-#define NATIVE_MSG_HOST_H
+#ifndef NATIVEMSGTHREAD_H
+#define NATIVEMSGTHREAD_H
 
 #include <QIODevice>
 #include <QJsonArray>
@@ -23,4 +23,4 @@ class NativeMsgThread : public QThread {
   void run() override;
 };
 
-#endif  // NATIVE_MSG_HOST_H
+#endif  // NATIVEMSGTHREAD_H

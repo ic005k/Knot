@@ -1,4 +1,4 @@
-#include "qaesencryption.h"
+#include "QAESEncryption.h"
 
 #ifdef USE_INTEL_AES_IF_AVAILABLE
 #include "aesni/aesni-key-exp.h"

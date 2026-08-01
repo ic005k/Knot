@@ -1,4 +1,4 @@
-#include "loglogger.h"
+#include "AppLogger.h"
 
 #include <QClipboard>
 #include <QCoreApplication>

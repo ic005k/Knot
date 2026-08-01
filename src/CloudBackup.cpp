@@ -13,7 +13,7 @@
 #include <QTimer>
 #include <QXmlStreamReader>
 
-#include "Comm/qaesencryption.h"
+#include "Comm/QAESEncryption.h"
 #include "DelWebDAVFiles.h"
 #include "src/MainWindow.h"
 #include "src/defines.h"

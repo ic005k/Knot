@@ -1,5 +1,5 @@
 // enhancedcolorpicker.cpp
-#include "enhancedcolorpicker.h"
+#include "EnhancedColorPicker.h"
 
 #include <QDebug>
 #include <QGridLayout>

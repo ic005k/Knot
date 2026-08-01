@@ -34,7 +34,7 @@
 
 #include "src/MainWindow.h"
 #include "src/Reader/DocumentHandler.h"
-#include "src/Reader/epubreader.h"
+#include "src/Reader/EpubReader.h"
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 

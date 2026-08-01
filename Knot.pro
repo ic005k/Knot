@@ -610,17 +610,17 @@ SOURCES += \
     src/AutoUpdate.cpp \
     src/CategoryList.cpp \
     src/CloudBackup.cpp \
+    src/Comm/AppLogger.cpp \
     src/Comm/DatePicker.cpp \
+    src/Comm/EnhancedColorPicker.cpp \
     src/Comm/GeoAddressResolver.cpp \
     src/Comm/Method.cpp \
+    src/Comm/QAESEncryption.cpp \
     src/Comm/ReceiveShare.cpp \
     src/Comm/ShowMessage.cpp \
     src/Comm/TextEditToolbar.cpp \
     src/Comm/Time24Picker.cpp \
     src/Comm/WheelWidget.cpp \
-    src/Comm/enhancedcolorpicker.cpp \
-    src/Comm/loglogger.cpp \
-    src/Comm/qaesencryption.cpp \
     src/DataManager.cpp \
     src/DateSelector.cpp \
     src/EditRecord.cpp \
@@ -639,11 +639,14 @@ SOURCES += \
     src/MainWindow_Init.cpp \
     src/MainWindow_Menu.cpp \
     src/MyThread.cpp \
+    src/NativeMsgThread.cpp \
     src/Notes/ColorDialog.cpp \
+    src/Notes/DatabaseManager.cpp \
     src/Notes/MarkdownChunker.cpp \
     src/Notes/MarkdownToHtml.cpp \
     src/Notes/MoveTo.cpp \
     src/Notes/NoteDiffManager.cpp \
+    src/Notes/NoteGraph.cpp \
     src/Notes/NoteListModel.cpp \
     src/Notes/NoteManager.cpp \
     src/Notes/Notes.cpp \
@@ -665,14 +668,13 @@ SOURCES += \
     src/Notes/Notes_UI.cpp \
     src/Notes/Notes_Utils.cpp \
     src/Notes/PrintPDF.cpp \
+    src/Notes/QTreeWidgetProxyModel.cpp \
+    src/Notes/SearchModel.cpp \
+    src/Notes/TitleGenerator.cpp \
     src/Notes/VectorSearchService.cpp \
-    src/Notes/database_manager.cpp \
-    src/Notes/note_graph.cpp \
-    src/Notes/qtreewidgetproxymodel.cpp \
-    src/Notes/search_model.cpp \
-    src/Notes/titlegenerator.cpp \
     src/Preferences.cpp \
     src/Reader/DocumentHandler.cpp \
+    src/Reader/EpubReader.cpp \
     src/Reader/Reader.cpp \
     src/Reader/ReaderSet.cpp \
     src/Reader/Reader_Bookmarks.cpp \
@@ -681,7 +683,6 @@ SOURCES += \
     src/Reader/Reader_PDF.cpp \
     src/Reader/Reader_QML.cpp \
     src/Reader/Reader_TTS.cpp \
-    src/Reader/epubreader.cpp \
     src/Report.cpp \
     src/Exercise/Speedometer.cpp \
     src/Exercise/Steps.cpp \
@@ -737,8 +738,7 @@ SOURCES += \
     lib/quazip/quazipfileinfo.cpp \
     lib/quazip/quazipnewinfo.cpp \
     lib/quazip/unzip.c \
-    lib/quazip/zip.c \
-    src/native_msg_host.cpp
+    lib/quazip/zip.c
 
 !android {
 HEADERS += \
@@ -1004,17 +1004,17 @@ HEADERS += \
     src/AutoUpdate.h \
     src/CategoryList.h \
     src/CloudBackup.h \
+    src/Comm/AppLogger.h \
     src/Comm/DatePicker.h \
+    src/Comm/EnhancedColorPicker.h \
     src/Comm/GeoAddressResolver.h \
     src/Comm/Method.h \
+    src/Comm/QAESEncryption.h \
     src/Comm/ReceiveShare.h \
     src/Comm/ShowMessage.h \
     src/Comm/TextEditToolbar.h \
     src/Comm/Time24Picker.h \
     src/Comm/WheelWidget.h \
-    src/Comm/enhancedcolorpicker.h \
-    src/Comm/loglogger.h \
-    src/Comm/qaesencryption.h \
     src/DataManager.h \
     src/DateSelector.h \
     src/DelWebDAVFiles.h \
@@ -1028,26 +1028,27 @@ HEADERS += \
     src/MainHelper.h \
     src/MainWindow.h \
     src/MyThread.h \
+    src/NativeMsgThread.h \
     src/Notes/ColorDialog.h \
+    src/Notes/DatabaseManager.h \
     src/Notes/MarkdownChunker.h \
     src/Notes/MoveTo.h \
     src/Notes/NoteDiffManager.h \
+    src/Notes/NoteGraph.h \
     src/Notes/NoteListModel.h \
     src/Notes/NoteManager.h \
     src/Notes/Notes.h \
     src/Notes/NotesList.h \
     src/Notes/PrintPDF.h \
+    src/Notes/QTreeWidgetProxyModel.h \
+    src/Notes/SearchModel.h \
+    src/Notes/TitleGenerator.h \
     src/Notes/VectorSearchService.h \
-    src/Notes/database_manager.h \
-    src/Notes/note_graph.h \
-    src/Notes/qtreewidgetproxymodel.h \
-    src/Notes/search_model.h \
-    src/Notes/titlegenerator.h \
     src/Preferences.h \
     src/Reader/DocumentHandler.h \
+    src/Reader/EpubReader.h \
     src/Reader/Reader.h \
     src/Reader/ReaderSet.h \
-    src/Reader/epubreader.h \
     src/Report.h \
     src/Exercise/Speedometer.h \
     src/Exercise/Steps.h \
@@ -1073,7 +1074,6 @@ HEADERS += \
     lib/quazip/unzip.h \
     lib/quazip/zip.h \
     src/defines.h \
-    src/native_msg_host.h \
     win.rc
 
 FORMS += \

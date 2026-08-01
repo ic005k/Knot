@@ -61,7 +61,7 @@
 #include "src/Notes/PrintPDF.h"
 #include "src/Notes/NoteManager.h"
 #include "src/defines.h"
-#include "titlegenerator.h"
+#include "TitleGenerator.h"
 #include "ui_MainWindow.h"
 #include "ui_PrintPDF.h"
 

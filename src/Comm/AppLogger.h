@@ -1,5 +1,5 @@
-#ifndef LOGLOGGER_H
-#define LOGLOGGER_H
+#ifndef APPLOGGER_H
+#define APPLOGGER_H
 
 #include <QMessageLogContext>
 #include <QMutex>

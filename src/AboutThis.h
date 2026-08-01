@@ -11,7 +11,7 @@
 #include <QtNetwork/QNetworkRequest>
 
 #include "src/AutoUpdate.h"
-#include "src/Comm/loglogger.h"
+#include "src/Comm/AppLogger.h"
 
 namespace Ui {
 class AboutThis;

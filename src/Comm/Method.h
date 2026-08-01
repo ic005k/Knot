@@ -60,7 +60,7 @@
 #include <QWidget>
 
 #include "src/Comm/TextEditToolbar.h"
-#include "src/Comm/enhancedcolorpicker.h"
+#include "src/Comm/EnhancedColorPicker.h"
 
 struct SearchItem {
   QString tabName;

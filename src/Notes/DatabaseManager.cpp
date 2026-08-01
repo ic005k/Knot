@@ -1,4 +1,4 @@
-#include "database_manager.h"
+#include "DatabaseManager.h"
 
 #include <QDateTime>
 #include <QDir>

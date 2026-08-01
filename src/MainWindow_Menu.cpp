@@ -1,5 +1,5 @@
 #include "MainWindow.h"
-#include "src/Comm/loglogger.h"
+#include "src/Comm/AppLogger.h"
 
 void MainWindow::on_actionAbout() {
   QString str = "\n" + appName + "  Ver: " + ver + "\n\n" + tr("Startup Time") +

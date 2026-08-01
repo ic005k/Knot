@@ -1,4 +1,4 @@
-#include "note_graph.h"
+#include "NoteGraph.h"
 
 #include <QDir>
 #include <QFile>

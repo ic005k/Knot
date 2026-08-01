@@ -28,9 +28,9 @@
 #include "lib/llama.cpp/include/llama.h"
 #include "lib/quazip/quazip.h"
 #include "lib/quazip/quazipfile.h"
-#include "native_msg_host.h"
+#include "NativeMsgThread.h"
 #include "src/AI/GlobalAI.h"
-#include "src/Comm/loglogger.h"
+#include "src/Comm/AppLogger.h"
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 

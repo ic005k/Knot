@@ -1,5 +1,5 @@
-#ifndef NOTE_GRAPH_H
-#define NOTE_GRAPH_H
+#ifndef NOTEGRAPH_H
+#define NOTEGRAPH_H
 
 #include <QAbstractItemModel>
 #include <QJsonObject>
@@ -194,4 +194,4 @@ class NoteGraphController : public QObject {
 void registerNoteGraphTypes();
 void initializeNoteGraph();
 
-#endif  // NOTE_GRAPH_H
+#endif  // NOTEGRAPH_H

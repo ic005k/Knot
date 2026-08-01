@@ -1,4 +1,4 @@
-#include "qtreewidgetproxymodel.h"
+#include "QTreeWidgetProxyModel.h"
 
 QTreeWidgetProxyModel::QTreeWidgetProxyModel(QTreeWidget* treeWidget,
                                              QObject* parent)

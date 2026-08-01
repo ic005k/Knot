@@ -1,5 +1,5 @@
 
-#include "titlegenerator.h"
+#include "TitleGenerator.h"
 
 const QRegularExpression TitleGenerator::sentenceEnd("[。！？!?\n]");
 

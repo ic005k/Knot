@@ -1,4 +1,4 @@
-#include "epubreader.h"
+#include "EpubReader.h"
 
 #include <QDebug>
 

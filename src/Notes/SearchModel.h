@@ -3,7 +3,7 @@
 #include <QAbstractListModel>
 #include <QFileInfo>
 
-#include "database_manager.h"
+#include "DatabaseManager.h"
 
 class SearchModel : public QAbstractListModel {
   Q_OBJECT

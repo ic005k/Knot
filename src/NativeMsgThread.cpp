@@ -1,4 +1,4 @@
-#include "native_msg_host.h"
+#include "NativeMsgThread.h"
 
 #include <QByteArray>
 #include <QFile>
