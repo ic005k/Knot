@@ -59,7 +59,7 @@
 #include "src/Notes/ColorDialog.h"
 #include "src/Notes/NoteDiffManager.h"
 #include "src/Notes/PrintPDF.h"
-#include "src/Notes/note_index_manager.h"
+#include "src/Notes/NoteManager.h"
 #include "src/defines.h"
 #include "titlegenerator.h"
 #include "ui_MainWindow.h"
@@ -107,7 +107,7 @@ class Notes : public QDialog {
 
   bool isRequestOpenNoteEditor = false;
 
-  NoteIndexManager* m_NoteIndexManager;
+  NoteManager* m_NoteManager;
 
   QString new_title;
 

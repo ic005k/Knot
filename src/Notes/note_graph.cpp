@@ -233,7 +233,7 @@ int NoteRelationParser::findNodeIndex(const QVector<NoteNode>& nodes,
 QString NoteRelationParser::resolveDisplayName(const CachedLink& link,
                                                const QString& fullPath) const {
   if (!link.displayText.isEmpty()) return link.displayText;
-  QString title = m_Notes->m_NoteIndexManager->getNoteTitle(fullPath);
+  QString title = m_Notes->m_NoteManager->getNoteTitle(fullPath);
   if (!title.isEmpty()) return title;
   return QFileInfo(link.fileName).baseName();
 }
@@ -247,7 +247,7 @@ void NoteRelationParser::parseNoteRelations(NoteGraphModel* model,
   model->clear();
 
   QString currentNoteName =
-      m_Notes->m_NoteIndexManager->getNoteTitle(currentNotePath);
+      m_Notes->m_NoteManager->getNoteTitle(currentNotePath);
   QString currentFileName = QFileInfo(currentNotePath).fileName();
 
   // ====== 缓存命中 ======
@@ -351,8 +351,7 @@ void NoteRelationParser::findReferencingNotes(QVector<NoteNode>& nodes,
     while (it.hasNext()) {
       auto match = it.next();
       if (match.captured(3) == currentFileName) {
-        QString noteName =
-            m_Notes->m_NoteIndexManager->getNoteTitle(mdFilePath);
+        QString noteName = m_Notes->m_NoteManager->getNoteTitle(mdFilePath);
         if (noteName.isEmpty()) noteName = QFileInfo(mdFilePath).baseName();
 
         int sourceIndex = findNodeIndex(nodes, mdFilePath);

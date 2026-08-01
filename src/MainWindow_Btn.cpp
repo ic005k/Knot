@@ -106,8 +106,6 @@ void MainWindow::on_btnDownMove_clicked() {
 
 void MainWindow::on_btnDelNote_NoteBook_clicked() {
   m_NotesList->on_btnDel_clicked();
-
-  m_NotesList->updateAllNoteIndexManager();
 }
 
 void MainWindow::on_btnMoveTo_clicked() {
@@ -329,7 +327,7 @@ void MainWindow::on_btnBackNoteList_clicked() {
   clearWidgetFocus();
 
   m_NotesList->saveCurrentNoteInfo();
-  m_NotesList->saveNotesListIndex();
+
   m_Notes->updateMainnotesIniToSyncLists();
 
   saveNeedSyncNotes();
@@ -404,8 +402,6 @@ void MainWindow::on_btnDelNoteRecycle_clicked() {
 void MainWindow::on_btnRestoreNoteRecycle_clicked() {
   isStopMoveNote = false;
   m_NotesList->restoreNoteFromRecycle();
-
-  m_NotesList->updateAllNoteIndexManager();
 }
 
 void MainWindow::on_btnFindNotes_clicked() {
@@ -771,7 +767,7 @@ void MainWindow::on_btnCopyNoteLink_clicked() {
   if (!QFile::exists(mdFile)) return;
   QString file = mdFile;
   file = file.replace(iniDir, "");
-  QString name = m_Notes->m_NoteIndexManager->getNoteTitle(mdFile);
+  QString name = m_Notes->m_NoteManager->getNoteTitle(mdFile);
   QString strlink = "[" + name + "](" + file + ")";
   QClipboard* clipboard = QApplication::clipboard();
   clipboard->setText(strlink);

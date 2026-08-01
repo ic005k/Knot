@@ -66,7 +66,7 @@ QFuture<QVector<ExactMatchResult>> NotesList::performSearchAsync(
     for (const QString& file : files) {
       ExactMatchResult emr;
       emr.filePath = file;
-      emr.title = m_Notes->m_NoteIndexManager->getNoteTitle(file);
+      emr.title = m_Notes->m_NoteManager->getNoteTitle(file);
       emr.lineNumber = -1;
       emr.matchCount = 0;
 
@@ -231,7 +231,7 @@ void NotesList::startBackgroundTaskDelFilesIndex(const QStringList& files) {
 
     // ✅ 内存操作回到主线程，安全且无性能损失
     for (const QString& file : files) {
-      m_Notes->m_NoteIndexManager->removeNote(file);
+      m_Notes->m_NoteManager->removeNote(file);
 
       // 清理向量引擎中的向量(暂时不清理，因为这只是让笔记进入回收站）
       // m_Notes->removeNoteVector(file);
@@ -346,8 +346,7 @@ void NotesList::startVectorSerach(const QString& text) {
                 SearchResult sr;
                 sr.filePath = item.filePath;
 
-                sr.title =
-                    m_Notes->m_NoteIndexManager->getNoteTitle(sr.filePath);
+                sr.title = m_Notes->m_NoteManager->getNoteTitle(sr.filePath);
 
                 // 2. 精准回源截取预览
                 QString rawPreview;

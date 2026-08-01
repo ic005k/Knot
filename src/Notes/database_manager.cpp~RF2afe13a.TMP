@@ -8,7 +8,7 @@
 #include <QSqlQuery>
 #include <QTextStream>
 
-#include "src/Notes/NoteManager.h"
+#include "src/Notes/note_manager.h"
 
 DatabaseManager::DatabaseManager(QObject* parent)
     : QObject(parent),

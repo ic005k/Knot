@@ -104,8 +104,6 @@ class NotesList : public QDialog {
 
   QString noteTitle;
 
-  void saveNotesListIndex();
-
   NoteListModel* noteModel;
 
   QStringList searchResultList;
@@ -201,9 +199,6 @@ class NotesList : public QDialog {
   void showFindNotes();
   void restoreNoteFromRecycle();
   void needDelNotes();
-
-  void updateNoteIndexManager(QString mdFile, int notebookIndex, int noteIndex);
-  void updateAllNoteIndexManager();
 
   void moveToFirst();
 
@@ -396,9 +391,8 @@ class NotesList : public QDialog {
 
   SearchModel m_searchModel;
 
-  int getSavedNotesListIndex(int notebookIndex);
   bool safeWriteFile(const QString& filePath, const QString& content);
-  void loadNotesListIndex();
+
   void addItemToQW(QQuickWidget* qw, QString text0, QString text1,
                    QString text2, QString text3, QString text4, int itemH);
   void setColorFlag(QString strColor);

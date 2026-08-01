@@ -1,4 +1,4 @@
-#include "note_index_manager.h"
+#include "NoteManager.h"
 
 #include <QDir>
 #include <QFile>
@@ -7,9 +7,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-NoteIndexManager::NoteIndexManager(QObject* parent) : QObject(parent) {}
+NoteManager::NoteManager(QObject* parent) : QObject(parent) {}
 
-bool NoteIndexManager::loadIndex(const QString& indexPath) {
+bool NoteManager::loadIndex(const QString& indexPath) {
   QFile file(indexPath);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
     return false;
@@ -43,7 +43,9 @@ bool NoteIndexManager::loadIndex(const QString& indexPath) {
   return true;
 }
 
-bool NoteIndexManager::saveIndex(const QString& indexPath) {
+bool NoteManager::saveIndex() {
+  QString indexPath;  // = privateDir + "MyNoteNameIndex";
+
   QJsonObject root;
   root["version"] = 1.0;
 
@@ -64,7 +66,7 @@ bool NoteIndexManager::saveIndex(const QString& indexPath) {
   return true;
 }
 
-QString NoteIndexManager::getNoteTitle(const QString& filePath) const {
+QString NoteManager::getNoteTitle(const QString& filePath) const {
   QString normalized = normalizePath(filePath);
   if (m_metadataMap.contains(normalized)) {
     return m_metadataMap[normalized].title;
@@ -73,8 +75,7 @@ QString NoteIndexManager::getNoteTitle(const QString& filePath) const {
   return QFileInfo(filePath).baseName();
 }
 
-void NoteIndexManager::setNoteTitle(const QString& filePath,
-                                    const QString& title) {
+void NoteManager::setNoteTitle(const QString& filePath, const QString& title) {
   QString normalized = normalizePath(filePath);
   NoteMetadata metadata =
       m_metadataMap.value(normalized);  // 不存在则返回默认值
@@ -88,54 +89,12 @@ void NoteIndexManager::setNoteTitle(const QString& filePath,
   }
 }
 
-int NoteIndexManager::getNotebookIndex(const QString& filePath) const {
-  QString normalized = normalizePath(filePath);
-  return m_metadataMap.value(normalized).notebookIndex;
-}
-
-void NoteIndexManager::setNotebookIndex(const QString& filePath,
-                                        int notebookIndex) {
-  QString normalized = normalizePath(filePath);
-  NoteMetadata metadata = m_metadataMap.value(normalized);
-
-  if (metadata.notebookIndex != notebookIndex) {
-    metadata.notebookIndex = notebookIndex;
-    m_metadataMap[normalized] = metadata;
-
-    emit noteMetaChanged(normalized, metadata);
-  }
-}
-
-int NoteIndexManager::getNoteIndex(const QString& filePath) const {
-  QString normalized = normalizePath(filePath);
-  return m_metadataMap.value(normalized).noteIndex;
-}
-
-void NoteIndexManager::setNoteIndex(const QString& filePath, int noteIndex) {
-  QString normalized = normalizePath(filePath);
-  NoteMetadata metadata = m_metadataMap.value(normalized);
-
-  if (metadata.noteIndex != noteIndex) {
-    metadata.noteIndex = noteIndex;
-    m_metadataMap[normalized] = metadata;
-
-    emit noteMetaChanged(normalized, metadata);
-  }
-}
-
-void NoteIndexManager::setCurrentIndexes(int notebookIndex, int noteIndex) {
-  m_currentNotebookIndex = notebookIndex;
-  m_currentNoteIndex = noteIndex;
-  // 可在此处发射信号，通知UI更新当前选中状态
-  // emit currentIndexesChanged(notebookIndex, noteIndex);
-}
-
-NoteMetadata NoteIndexManager::getNoteMetadata(const QString& filePath) const {
+NoteMetadata NoteManager::getNoteMetadata(const QString& filePath) const {
   return m_metadataMap.value(normalizePath(filePath));
 }
 
 // 获取所有笔记的标题（用于补全弹窗列表）
-QStringList NoteIndexManager::getAllNoteTitles() const {
+QStringList NoteManager::getAllNoteTitles() const {
   QStringList titles;
   for (auto it = m_metadataMap.begin(); it != m_metadataMap.end(); ++it) {
     titles.append(it.value().title);
@@ -144,7 +103,7 @@ QStringList NoteIndexManager::getAllNoteTitles() const {
 }
 
 // 根据标题 → 返回对应的笔记路径
-QString NoteIndexManager::getFilePathByTitle(const QString& title) const {
+QString NoteManager::getFilePathByTitle(const QString& title) const {
   for (auto it = m_metadataMap.begin(); it != m_metadataMap.end(); ++it) {
     if (it.value().title == title) {
       return it.key();  // 返回完整路径
@@ -158,7 +117,7 @@ QString NoteIndexManager::getFilePathByTitle(const QString& title) const {
  * @brief 搜索标题（自动补全 / 完整列表复用）
  * @note keyword 为空时返回全部标题，调用方按需自行守卫
  */
-QStringList NoteIndexManager::searchTitles(const QString& keyword) const {
+QStringList NoteManager::searchTitles(const QString& keyword) const {
   QStringList result;
   for (auto it = m_metadataMap.begin(); it != m_metadataMap.end(); ++it) {
     if (it.value().title.contains(keyword, Qt::CaseInsensitive)) {
@@ -168,7 +127,7 @@ QStringList NoteIndexManager::searchTitles(const QString& keyword) const {
   return result;
 }
 
-void NoteIndexManager::removeNote(const QString& filePath) {
+void NoteManager::removeNote(const QString& filePath) {
   QString normalized = normalizePath(filePath);
   if (m_metadataMap.remove(normalized)) {
     emit noteRemoved(normalized);

@@ -4,13 +4,9 @@
 #include "src/AI/GlobalAI.h"
 #include "src/Notes/VectorSearchService.h"
 
-QString strNoteNameIndexFile = "";
-
 NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   ui->setupUi(this);
   this->installEventFilter(this);
-
-  strNoteNameIndexFile = privateDir + "MyNoteNameIndex";
 
   tw = new QTreeWidget(nullptr);
   twrb = new QTreeWidget(nullptr);
@@ -69,7 +65,7 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
           &NotesList::onSearchTextChanged);
   mui->qwNotesSearchResult->rootContext()->setContextProperty("searchModel",
                                                               &m_searchModel);
-  connect(m_Notes->m_NoteIndexManager, &NoteIndexManager::noteMetaChanged, this,
+  connect(m_Notes->m_NoteManager, &NoteManager::noteMetaChanged, this,
           [this](const QString& filePath, const NoteMetadata& meta) {
             if (m_vectorSearchService) {
               m_vectorSearchService->registerNoteMeta(filePath, filePath,
@@ -77,17 +73,15 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
             }
           });
 
-  connect(m_Notes->m_NoteIndexManager, &NoteIndexManager::noteRemoved, this,
+  connect(m_Notes->m_NoteManager, &NoteManager::noteRemoved, this,
           [this](const QString& filePath) {
             if (m_vectorSearchService) {
               m_vectorSearchService->unregisterNoteMeta(filePath);
             }
           });
 
-  connect(m_Notes->m_NoteIndexManager, &NoteIndexManager::indexReloaded, this,
+  connect(m_Notes->m_NoteManager, &NoteManager::indexReloaded, this,
           &NotesList::initVectorSearchService);
-
-  loadNotesListIndex();
 
   // 初始化笔记关系图谱功能，注册控制器到QML引擎
   initNoteGraphView();
@@ -117,7 +111,7 @@ void NotesList::initVectorSearchService() {
     m_vectorSearchService = new VectorSearchService(g_embEngine.get(), this);
 
     // 仅在此处做全量注册
-    auto allMeta = m_Notes->m_NoteIndexManager->getAllMetadata();
+    auto allMeta = m_Notes->m_NoteManager->getAllMetadata();
     for (auto it = allMeta.constBegin(); it != allMeta.constEnd(); ++it) {
       m_vectorSearchService->registerNoteMeta(it.key(), it.key(),
                                               it.value().title);
@@ -180,9 +174,7 @@ void NotesList::renameCurrentItem(QString title) {
 
   setNoteName(item->text(0));
 
-  m_Notes->m_NoteIndexManager->setNoteTitle(iniDir + item->text(1),
-                                            item->text(0));
-  m_Notes->m_NoteIndexManager->saveIndex(strNoteNameIndexFile);
+  m_Notes->m_NoteManager->setNoteTitle(iniDir + item->text(1), item->text(0));
 
   for (int i = 0; i < listRecentOpen.count(); i++) {
     QString str = listRecentOpen.at(i);
@@ -376,7 +368,7 @@ void NotesList::loadSubNotebook(const QJsonObject& bookObj,
       noteItem->setIcon(0, QIcon(":/res/n.png"));
 
       QString md = QDir(iniDir).filePath(noteFile);
-      m_Notes->m_NoteIndexManager->setNoteTitle(md, noteName);
+      m_Notes->m_NoteManager->setNoteTitle(md, noteName);
 
       noteFiles.append(md);
     } else {
@@ -450,7 +442,7 @@ void NotesList::initNotesList() {
         childItem->setIcon(0, QIcon(":/res/n.png"));
 
         QString md = QDir(iniDir).filePath(str1);
-        m_Notes->m_NoteIndexManager->setNoteTitle(md, str0);
+        m_Notes->m_NoteManager->setNoteTitle(md, str0);
 
         noteFiles.append(md);
       } else {
@@ -587,8 +579,7 @@ void NotesList::initUnclassified() {
     childItem->setText(0, str0);
     childItem->setText(1, str1);
 
-    m_Notes->m_NoteIndexManager->setNoteTitle(mdFile, str0);
-    updateNoteIndexManager(mdFile, topCount, i);
+    m_Notes->m_NoteManager->setNoteTitle(mdFile, str0);
   }
 
   tw->addTopLevelItem(topItem);
@@ -749,8 +740,6 @@ void NotesList::moveBy(int ud) {
 
   resetQML_List();
   saveNotesList();
-
-  updateAllNoteIndexManager();
 }
 
 void NotesList::loadAllNoteBook() {
@@ -772,9 +761,6 @@ void NotesList::loadAllNoteBook() {
   if (m_treeProxyModel) {
     // m_treeProxyModel->resetAll();
   }
-
-  updateAllNoteIndexManager();
-  m_Notes->m_NoteIndexManager->saveIndex(strNoteNameIndexFile);
 }
 
 int NotesList::countMdFilesImages(const QString& dirPath) {
@@ -1056,105 +1042,6 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
   watcher->setFuture(future);
 }
 
-void NotesList::saveNotesListIndex() {
-  QJsonObject root;
-  QJsonArray array;
-
-  for (const QString& item : std::as_const(mIndexList)) {
-    array.append(item);
-  }
-
-  root["list"] = array;
-
-  QFile file(privateDir + QDir::separator() + "noteslistindex.json");
-  if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-    QJsonDocument doc(root);
-    file.write(doc.toJson(QJsonDocument::Indented));
-    file.close();
-  } else {
-    qWarning() << "无法打开文件进行写入:" << file.errorString();
-  }
-}
-
-void NotesList::loadNotesListIndex() {
-  QFile file(privateDir + QDir::separator() + "noteslistindex.json");
-  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    qWarning() << "无法打开文件进行读取:" << file.errorString();
-    return;
-  }
-
-  QByteArray data = file.readAll();
-  file.close();
-
-  QJsonDocument doc = QJsonDocument::fromJson(data);
-  if (doc.isNull()) {
-    qWarning() << "JSON 解析失败";
-    return;
-  }
-
-  QJsonObject root = doc.object();
-  QJsonArray array = root["list"].toArray();
-
-  mIndexList.clear();
-  for (const QJsonValue& value : std::as_const(array)) {
-    if (value.isString()) {
-      mIndexList.append(value.toString());
-    }
-  }
-}
-
-int NotesList::getSavedNotesListIndex(int notebookIndex) {
-  int index = 0;
-  int in0, in1;
-  for (int i = 0; i < mIndexList.count(); i++) {
-    QString str = mIndexList.at(i);
-    in0 = str.split("=").at(0).toInt();
-    in1 = str.split("=").at(1).toInt();
-
-    if (notebookIndex == in0) {
-      index = in1;
-      break;
-    }
-  }
-
-  int count = m_Method->getCountFromQW(mui->qwNoteList);
-  if (count > 0) {
-    if (index < 0) index = 0;
-    if (index > count - 1) index = count - 1;
-  } else {
-    index = -1;
-  }
-
-  return index;
-}
-
-void NotesList::updateNoteIndexManager(QString mdFile, int notebookIndex,
-                                       int noteIndex) {
-  m_Notes->m_NoteIndexManager->setNotebookIndex(mdFile, notebookIndex);
-  m_Notes->m_NoteIndexManager->setNoteIndex(mdFile, noteIndex);
-  // qDebug() << "更新索引：" << notebookIndex << noteIndex;
-}
-
-void NotesList::updateAllNoteIndexManager() {
-  int notebookCount = getNoteBookCount();
-
-  for (int i = 0; i < notebookCount; i++) {
-    QTreeWidgetItem* topItem = pNoteBookItems.at(i);
-    int childCount = topItem->childCount();
-    int jj = 0;
-    for (int j = 0; j < childCount; j++) {
-      QTreeWidgetItem* childItem = topItem->child(j);
-      QString mdFile = iniDir + childItem->text(1);
-      if (!mdFile.isEmpty()) {
-        QString title = childItem->text(0);
-        m_Notes->m_NoteIndexManager->setNoteTitle(mdFile, title);
-        updateNoteIndexManager(mdFile, i, jj);
-        jj++;
-      }
-    }
-  }
-}
-
 bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
   if (!QFile::exists(mdFile)) return false;
 
@@ -1184,35 +1071,13 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
 }
 
 QString NotesList::getCurrentNoteNameFromMDFile(QString mdFile) {
-  return m_Notes->m_NoteIndexManager->getNoteTitle(mdFile);
+  return m_Notes->m_NoteManager->getNoteTitle(mdFile);
 }
 
 void NotesList::moveToFirst() {
   return;
 
   ////////////////////////////////////////////////////////
-
-  int indexNote = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
-  if (indexNote <= 0) return;
-  int countNote = m_Method->getCountFromQW(mui->qwNoteList);
-  if (countNote == 1) return;
-
-  QTreeWidgetItem* item = tw->currentItem();
-  if (item == NULL) return;
-
-  if (item->parent() != NULL) {
-    QTreeWidgetItem* parentItem = item->parent();
-    parentItem->removeChild(item);
-    parentItem->insertChild(0, item);
-    tw->setCurrentItem(item);
-
-    resetQML_List();
-    saveNotesList();
-
-    updateAllNoteIndexManager();
-
-    setNotesListCurrentIndex(0);
-  }
 }
 
 void NotesList::qmlOpenEdit() { mui->btnEditNote->click(); }

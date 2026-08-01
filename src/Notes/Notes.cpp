@@ -10,7 +10,7 @@ static QAtomicInt n_Files = 0;
 
 Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->setupUi(this);
-  m_NoteIndexManager = new NoteIndexManager();
+  m_NoteManager = new NoteManager();
 
   initEditor();
   init_md();
@@ -74,7 +74,7 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
 }
 
 Notes::~Notes() {
-  delete m_NoteIndexManager;
+  delete m_NoteManager;
   delete ui;
 }
 
@@ -305,7 +305,7 @@ void Notes::previewNote() {
   if (!QFile::exists(currentMDFile)) return;
 
   mw_one->showProgress();
-  QString title = m_NoteIndexManager->getNoteTitle(currentMDFile);
+  QString title = m_NoteManager->getNoteTitle(currentMDFile);
 
   QFuture<void> future = QtConcurrent::run([=]() {
     m_NotesList->refreshRecentOpen();

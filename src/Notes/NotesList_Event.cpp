@@ -623,7 +623,6 @@ void NotesList::on_btnMoveTo_clicked() {
 
   if (moveItem(tw)) {
     saveNotesList();
-    updateAllNoteIndexManager();
 
     m_NotesList->loadAllNoteBook();
 

@@ -162,7 +162,6 @@ void NotesList::on_actionAdd_Note_triggered() {
   setNoteLabel();
 
   saveNotesList();
-  updateAllNoteIndexManager();
 
   mw_one->on_btnEditNote_clicked();
 }
@@ -251,8 +250,6 @@ void NotesList::on_actionImport_Note_triggered() {
 
     clickNoteList();
     saveNotesList();
-
-    updateAllNoteIndexManager();
   }
 }
 
@@ -650,7 +647,7 @@ void NotesList::saveRecentOpen() {
 }
 
 void NotesList::refreshRecentOpen() {
-  QString title = m_Notes->m_NoteIndexManager->getNoteTitle(currentMDFile);
+  QString title = m_Notes->m_NoteManager->getNoteTitle(currentMDFile);
 
   QString strmd = currentMDFile;
   strmd = strmd.replace(iniDir, "").trimmed();

@@ -645,6 +645,7 @@ SOURCES += \
     src/Notes/MoveTo.cpp \
     src/Notes/NoteDiffManager.cpp \
     src/Notes/NoteListModel.cpp \
+    src/Notes/NoteManager.cpp \
     src/Notes/Notes.cpp \
     src/Notes/NotesList.cpp \
     src/Notes/NotesList_Diff.cpp \
@@ -667,7 +668,6 @@ SOURCES += \
     src/Notes/VectorSearchService.cpp \
     src/Notes/database_manager.cpp \
     src/Notes/note_graph.cpp \
-    src/Notes/note_index_manager.cpp \
     src/Notes/qtreewidgetproxymodel.cpp \
     src/Notes/search_model.cpp \
     src/Notes/titlegenerator.cpp \
@@ -1033,13 +1033,13 @@ HEADERS += \
     src/Notes/MoveTo.h \
     src/Notes/NoteDiffManager.h \
     src/Notes/NoteListModel.h \
+    src/Notes/NoteManager.h \
     src/Notes/Notes.h \
     src/Notes/NotesList.h \
     src/Notes/PrintPDF.h \
     src/Notes/VectorSearchService.h \
     src/Notes/database_manager.h \
     src/Notes/note_graph.h \
-    src/Notes/note_index_manager.h \
     src/Notes/qtreewidgetproxymodel.h \
     src/Notes/search_model.h \
     src/Notes/titlegenerator.h \

@@ -529,7 +529,7 @@ void Notes::popupNoteLinkList(const QString& arg1) {
     }
 
   } else {
-    matches = m_NoteIndexManager->searchTitles(keyword);
+    matches = m_NoteManager->searchTitles(keyword);
   }
 
   ui->listNoteLink->clear();
@@ -567,7 +567,7 @@ void Notes::onPopupItemClicked(QListWidgetItem* item) {
                 .replace("_", "\\_");
 
   } else {
-    fullPath = m_NoteIndexManager->getFilePathByTitle(title);
+    fullPath = m_NoteManager->getFilePathByTitle(title);
   }
 
   insertNoteLink(title, fullPath);
@@ -579,7 +579,7 @@ void Notes::onPopupItemClicked(QListWidgetItem* item) {
 
 void Notes::insertNoteLink(const QString& title, const QString& path) {
   // 1. 通过标题获取路径
-  QString fullPath = path;  // m_NoteIndexManager->getFilePathByTitle(title);
+  QString fullPath = path;
   if (fullPath.isEmpty()) return;
 
   // 2. 转成相对路径 memo/xxx.md

@@ -14,7 +14,7 @@
 
 // #include "Notes.h"
 
-class NoteIndexManager;
+class NoteManager;
 
 struct SearchResult {
   QString filePath;
@@ -29,7 +29,7 @@ class DatabaseManager : public QObject {
   bool initDatabase(const QString& path = "search.db");
   void updateFilesIndex(const QString& directory);
   QVector<SearchResult> searchDocuments(const QString& query,
-                                        NoteIndexManager* indexManager,
+                                        NoteManager* indexManager,
                                         int limit = 20);
 
   void updateFileIndex(const QString& filePath);  // 强制更新单个文件
