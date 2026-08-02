@@ -22,7 +22,6 @@ void NotesList::genRecentOpenMenu() {
 
       connect(act, &QAction::triggered, this, [=]() {
         currentMDFile = file;
-        noteTitle = name;
 
         isExecRecentOpen = true;
         setCurrentItemFromMDFile(currentMDFile);
@@ -148,9 +147,10 @@ void NotesList::on_actionAdd_Note_triggered() {
   pNoteItems.append(item1);
 
   tw->setCurrentItem(item1);
-  noteName = item1->text(0);
+  QString note_name = item1->text(0);
+  noteTitle = item1->text(0);
 
-  m_Method->addItemToQW(mui->qwNoteList, noteName, "", "", noteFile, 0);
+  m_Method->addItemToQW(mui->qwNoteList, note_name, "", "", noteFile, 0);
 
   int count = getNotesListCount();
   setNotesListCurrentIndex(count - 1);

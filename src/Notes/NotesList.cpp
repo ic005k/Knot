@@ -157,12 +157,7 @@ bool NotesList::eventFilter(QObject* watch, QEvent* evn) {
 
 QString NotesList::getCurrentMDFile() {
   QSettings Reg(iniDir + "curmd.ini", QSettings::IniFormat);
-
   QString curmd = Reg.value("/MainNotes/currentItem", "memo/xxx.md").toString();
-  QString title = Reg.value("/MainNotes/NoteName", tr("Note Name")).toString();
-
-  noteTitle = title;
-
   return iniDir + curmd;
 }
 
@@ -171,8 +166,6 @@ void NotesList::renameCurrentItem(QString title) {
   if (item == NULL) return;
 
   item->setText(0, title.trimmed());
-
-  setNoteName(item->text(0));
 
   m_Notes->m_NoteManager->setNoteTitle(iniDir + item->text(1), item->text(0));
 
@@ -998,7 +991,6 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
             int flatCounter = -1;
             NoteTreePos pos = searchNoteByMdPath(tw->invisibleRootItem(), item,
                                                  mdFileFlag, flatCounter);
-
             int targetIndex = pos.noteListIndex;
             if (targetIndex >= 0) {
               setNotesListCurrentIndex(targetIndex);
@@ -1043,28 +1035,50 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
 bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
   if (!QFile::exists(mdFile)) return false;
 
-  QString md = mdFile;
-  QString mdFileFlag = md.replace(iniDir, "").trimmed();
+  QString mdFileFlag = QDir(iniDir).relativeFilePath(mdFile);
 
-  int flatCounter = -1;
-  NoteTreePos pos = searchNoteByMdPath(tw->invisibleRootItem(), nullptr,
-                                       mdFileFlag, flatCounter);
+  // ✅ 不再用递归搜索计算 flatNotebookIndex
+  // 直接在 pNoteBookItems（UI扁平列表）中查找匹配的笔记本
+  int foundFlatIndex = -1;
+  QTreeWidgetItem* foundNotebookItem = nullptr;
+  QTreeWidgetItem* foundNoteItem = nullptr;
 
-  if (pos.flatNotebookIndex == -1 || pos.noteListIndex == -1) return false;
+  for (int i = 0; i < pNoteBookItems.size(); ++i) {
+    QTreeWidgetItem* bookItem = pNoteBookItems.at(i);
+    // 在该笔记本的直接子项中查找目标笔记
+    for (int j = 0; j < bookItem->childCount(); ++j) {
+      QTreeWidgetItem* child = bookItem->child(j);
+      if (!child->text(1).isEmpty() && child->text(1) == mdFileFlag) {
+        foundFlatIndex = i;
+        foundNotebookItem = bookItem;
+        foundNoteItem = child;
+        break;
+      }
+    }
+    if (foundFlatIndex != -1) break;
+  }
 
-  tw->setCurrentItem(pos.notebookItem);
+  if (foundFlatIndex == -1 || !foundNoteItem) {
+    qWarning() << "未在扁平列表中定位到:" << mdFileFlag;
+    return false;
+  }
 
+  int noteListIndex = calcNoteIndexInsideBook(foundNotebookItem, foundNoteItem);
+  if (noteListIndex == -1) return false;
+
+  qDebug() << "扁平笔记本索引:" << foundFlatIndex
+           << "笔记索引:" << noteListIndex;
+
+  tw->setCurrentItem(foundNotebookItem);
   isSetCurrentMDFilePosition = true;
 
+  // ⚠️ 仍然建议改为信号驱动，但如果暂时保留 Timer：
   QTimer::singleShot(100, this, [=]() {
-    //  直接使用flatNotebookIndex 赋值左侧扁平列表选中项
-    setNoteBookCurrentIndex(pos.flatNotebookIndex);
-    currentNoteslistIndex = pos.noteListIndex;
+    setNoteBookCurrentIndex(foundFlatIndex);
+    currentNoteslistIndex = noteListIndex;
     clickNoteBook();
   });
 
-  qDebug() << "扁平笔记本索引:" << pos.flatNotebookIndex
-           << "笔记索引:" << pos.noteListIndex;
   return true;
 }
 

@@ -843,8 +843,6 @@ void Notes::processSingleRemoteFile(const QString& file) {
 void Notes::loadEmptyNote() {
   currentMDFile = "";
   MD2Html(currentMDFile);
-
-  m_NotesList->noteTitle = "";
 }
 
 void Notes::on_editNote() {
@@ -878,6 +876,8 @@ void Notes::loadNotesToUI() {
   }
 
   m_NotesList->loadAllNoteBook();
+
+  m_Method->Sleep(100);
 
   if (m_NotesList->getNoteBookCount() > 0) {
     if (!m_NotesList->setCurrentItemFromMDFile(currentMDFile)) {

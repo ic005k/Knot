@@ -365,8 +365,6 @@ void NotesList::genCursorText() {
   }
 }
 
-void NotesList::setNoteName(QString name) { noteTitle = name; }
-
 void NotesList::clearFiles() {
   QFile::remove(iniDir + "memo.zip");
 
@@ -555,25 +553,16 @@ void NotesList::saveCurrentNoteInfo() {
   const QString iniPath = QDir(iniDir).filePath("curmd.ini");
   const QString tempIniPath = iniPath + ".tmp";  // 临时文件，原子替换
 
-  // 1. 路径合法性校验，防止目录不存在
-  QFileInfo dirInfo(iniDir);
-  if (!dirInfo.dir().exists()) {
-    dirInfo.dir().mkpath(".");  // 不存在则递归创建目录
-  }
-
-  // 2. 先写入临时文件，不覆盖原文件
+  // 先写入临时文件，不覆盖原文件
   {
     QSettings reg(tempIniPath, QSettings::IniFormat);
-
     QString str = currentMDFile;
     QString main_md = str.replace(iniDir, "");
-
     reg.setValue("/MainNotes/currentItem", main_md);
-    reg.setValue("/MainNotes/NoteName", noteTitle);
     reg.sync();  // 确保全部落盘到临时文件
   }
 
-  // 3. 原子替换原文件（IO安全核心：先删旧文件再改名，避免截断）
+  // 原子替换原文件（IO安全核心：先删旧文件再改名，避免截断）
   QFile iniFile(iniPath);
   QFile tempFile(tempIniPath);
 

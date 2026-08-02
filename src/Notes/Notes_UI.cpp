@@ -183,16 +183,17 @@ bool Notes::selectPDFFormat(QPrinter* printer) {
   settings.setValue(QStringLiteral("Printer/NotePDFExportOrientation"),
                     orientationIndex);
 
+  QString title = m_NoteManager->getNoteTitle(currentMDFile);
+
 #ifdef Q_OS_ANDROID
-  pdfFileName = "/storage/emulated/0/KnotBak/" + m_NotesList->noteTitle +
-                QStringLiteral(".pdf");
+  pdfFileName = "/storage/emulated/0/KnotBak/" + title + QStringLiteral(".pdf");
 #else
   QFileDialog dialog(NULL, QStringLiteral("NotePDFExport"));
   dialog.setFileMode(QFileDialog::AnyFile);
   dialog.setAcceptMode(QFileDialog::AcceptSave);
   dialog.setNameFilter(tr("PDF files") + QStringLiteral(" (*.pdf)"));
   dialog.setWindowTitle(tr("Export current note as PDF"));
-  dialog.selectFile(m_NotesList->noteTitle + QStringLiteral(".pdf"));
+  dialog.selectFile(title + QStringLiteral(".pdf"));
   int ret = dialog.exec();
 
   if (ret != QDialog::Accepted) {
@@ -228,7 +229,6 @@ bool Notes::selectPDFFormat(QPrinter* printer) {
 }
 
 void Notes::on_btnPDF_clicked() {
-  m_NotesList->noteTitle = m_NoteManager->getNoteTitle(currentMDFile);
   MD2Html(currentMDFile);
   QString html = loadText(htmlFileName);
   html = html.replace("file://", "");

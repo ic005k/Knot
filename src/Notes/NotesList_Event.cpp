@@ -321,38 +321,9 @@ void NotesList::on_btnDel_Recycle_clicked() {
 }
 void NotesList::on_btnClose_clicked() { this->close(); }
 
-void NotesList::on_btnNewNote_clicked() {
-  if (tw->topLevelItemCount() == 0) return;
-
-  QString noteFile = "memo/" + m_Notes->getDateTimeStr() + "_" +
-                     m_Method->generateRandom3() + ".md";
-  QTreeWidgetItem* parentitem = tw->currentItem();
-
-  QTreeWidgetItem* item1 = new QTreeWidgetItem(parentitem);
-  item1->setText(0, "");
-  item1->setText(1, noteFile);
-  item1->setIcon(0, QIcon(":/res/n.png"));
-
-  QTextEdit* edit = new QTextEdit();
-  edit->append("");
-  TextEditToFile(edit, iniDir + noteFile);
-  delete edit;
-
-  tw->setCurrentItem(item1);
-  noteName = item1->text(0);
-
-  pNoteItems.clear();
-  int count = parentitem->childCount();
-  for (int i = 0; i < count; i++) {
-    pNoteItems.append(parentitem->child(i));
-  }
-}
-
 void NotesList::moveChildToRecycle(QTreeWidgetItem* parentItem, QString iniDir,
                                    QVector<QString>& delFilesIndex,
-                                   QTreeWidget* twrb)
-
-{
+                                   QTreeWidget* twrb) {
   if (!parentItem) return;
   int childCount = parentItem->childCount();
 
@@ -850,7 +821,8 @@ void NotesList::clickNoteList() {
   tw->setCurrentItem(noteItem);
 
   int noteCount = getNotesListCount();
-  qInfo() << "The currently clicked note index=" << indexNote
+  qInfo() << "The currently clicked note index=" << indexNote << "("
+          << indexBook << ")"
           << "Total of notes=" << noteCount;
 
   // 容错处理，防止索引越界

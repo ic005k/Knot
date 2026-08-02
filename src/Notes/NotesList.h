@@ -30,16 +30,16 @@
 #include <algorithm>
 #include <utility>
 
-#include "VectorSearchService.h"
 #include "DatabaseManager.h"
 #include "QTreeWidgetProxyModel.h"
 #include "SearchModel.h"
+#include "VectorSearchService.h"
 #include "src/AI/GlobalAI.h"
 #include "src/Comm/TextEditToolbar.h"
 #include "src/MainWindow.h"
 #include "src/Notes/MoveTo.h"
-#include "src/Notes/NoteListModel.h"
 #include "src/Notes/NoteGraph.h"
+#include "src/Notes/NoteListModel.h"
 #include "src/defines.h"
 #include "ui_MainWindow.h"
 #include "ui_MoveTo.h"
@@ -137,7 +137,6 @@ class NotesList : public QDialog {
   void getAllFiles(const QString& foldPath, QStringList& folds,
                    const QStringList& formats);
 
-  void setNoteName(QString name);
   void moveBy(int ud);
 
   QString getCurrentMDFile();
@@ -206,8 +205,6 @@ class NotesList : public QDialog {
 
   void startBackgroundTaskDelFilesIndex(const QStringList& files);
   QStringList getRecycleNoteFiles();
-
-  void on_btnNewNote_clicked();
 
   void on_btnBack_clicked();
 
@@ -338,8 +335,6 @@ class NotesList : public QDialog {
   QStringList noteDiffTime, noteDiffHtml, noteDiffPatch;
 
   QString notebookName;
-
-  QString noteName;
 
   QStringList noteFiles, recycleFiles;
 
