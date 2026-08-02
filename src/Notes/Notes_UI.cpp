@@ -228,6 +228,7 @@ bool Notes::selectPDFFormat(QPrinter* printer) {
 }
 
 void Notes::on_btnPDF_clicked() {
+  m_NotesList->noteTitle = m_NoteManager->getNoteTitle(currentMDFile);
   MD2Html(currentMDFile);
   QString html = loadText(htmlFileName);
   html = html.replace("file://", "");

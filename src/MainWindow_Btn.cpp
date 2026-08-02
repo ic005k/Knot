@@ -326,8 +326,6 @@ void MainWindow::on_btnBackNoteList_clicked() {
 
   clearWidgetFocus();
 
-  m_NotesList->saveCurrentNoteInfo();
-
   m_Notes->updateMainnotesIniToSyncLists();
 
   saveNeedSyncNotes();

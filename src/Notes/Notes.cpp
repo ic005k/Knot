@@ -223,7 +223,9 @@ void Notes::openEditUI() {
   int count = m_NotesList->getNoteBookCount();
   if (count == 0) return;
 
-  qDebug() << "currentMDFile=" << currentMDFile;
+  qInfo() << "currentMDFile=" << currentMDFile
+          << m_Notes->m_NoteManager->getNoteTitle(currentMDFile);
+  ;
   if (!QFile::exists(currentMDFile)) {
     auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg(appName,
@@ -428,9 +430,9 @@ void Notes::init_all_notes() {
     currentMDFile = m_NotesList->getCurrentMDFile();
   } else
     isReceiveRemoteFile = false;
-  qDebug() << "currentMDFile=" << currentMDFile;
-  if (QFile::exists(currentMDFile)) {
-  } else {
+  qInfo() << "currentMDFile=" << currentMDFile
+          << m_Notes->m_NoteManager->getNoteTitle(currentMDFile);
+  if (!QFile::exists(currentMDFile)) {
     loadEmptyNote();
   }
 }

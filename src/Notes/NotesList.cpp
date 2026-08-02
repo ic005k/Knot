@@ -311,8 +311,6 @@ void NotesList::saveNotesListToFile() {
   // 替换正式文件 + 清理临时文件
   m_Method->upIniFile(tempFile, endFile);
   if (tempF.exists()) tempF.remove();
-
-  saveCurrentNoteInfo();
 }
 
 /**

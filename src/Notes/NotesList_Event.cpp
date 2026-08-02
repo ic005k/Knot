@@ -837,26 +837,37 @@ void NotesList::clickNoteBook() {
 }
 
 void NotesList::clickNoteList() {
-  int indexTop = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
-  if (indexTop < 0) return;
+  int indexBook = getNoteBookCurrentIndex();
+  if (indexBook < 0) return;
 
-  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
-  if (index < 0) {
+  int indexNote = getNotesListCurrentIndex();
+  if (indexNote < 0) {
     currentMDFile = "";
     return;
   }
 
-  QString strMD = m_Method->getText3(mui->qwNoteList, index);
+  QTreeWidgetItem* noteItem = pNoteItems.at(indexNote);
+  tw->setCurrentItem(noteItem);
+
+  int noteCount = getNotesListCount();
+  qInfo() << "The currently clicked note index=" << indexNote
+          << "Total of notes=" << noteCount;
+
+  // 容错处理，防止索引越界
+  if (indexNote >= noteCount) {
+    indexNote = noteCount - 1;
+  }
+
+  QString strMD = m_Method->getText3(mui->qwNoteList, indexNote);
   currentMDFile = iniDir + strMD;
 
   setNoteLabel();
 
-  QTreeWidgetItem* noteItem = pNoteItems.at(index);
-  tw->setCurrentItem(noteItem);
-
   if (!QFile::exists(currentMDFile)) {
     return;
   }
+
+  saveCurrentNoteInfo();
 
   QTreeWidgetItem* bookItem = noteItem->parent();
   QString strNoteBookID = bookItem->text(3).trimmed();

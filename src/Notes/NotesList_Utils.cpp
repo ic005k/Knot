@@ -566,9 +566,9 @@ void NotesList::saveCurrentNoteInfo() {
     QSettings reg(tempIniPath, QSettings::IniFormat);
 
     QString str = currentMDFile;
-    QString iniName = str.replace(iniDir, "");
+    QString main_md = str.replace(iniDir, "");
 
-    reg.setValue("/MainNotes/currentItem", iniName);
+    reg.setValue("/MainNotes/currentItem", main_md);
     reg.setValue("/MainNotes/NoteName", noteTitle);
     reg.sync();  // 确保全部落盘到临时文件
   }

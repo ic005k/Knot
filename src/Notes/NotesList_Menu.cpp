@@ -24,7 +24,6 @@ void NotesList::genRecentOpenMenu() {
         currentMDFile = file;
         noteTitle = name;
 
-        saveCurrentNoteInfo();
         isExecRecentOpen = true;
         setCurrentItemFromMDFile(currentMDFile);
 
