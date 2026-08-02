@@ -329,12 +329,6 @@ void NotesList::loadSubNotebook(const QJsonObject& bookObj,
   subBookItem->setText(0, bookName);
   subBookItem->setText(2, colorFlag);
   subBookItem->setText(3, notebookID);
-  subBookItem->setForeground(0, Qt::red);
-
-  QFont font = this->font();
-  font.setBold(true);
-  subBookItem->setFont(0, font);
-  subBookItem->setIcon(0, QIcon(":/res/nb.png"));
 
   // 统一读取 children 数组（保存端唯一字段）
   QJsonArray childrenArray = bookObj["children"].toArray();
@@ -356,7 +350,6 @@ void NotesList::loadSubNotebook(const QJsonObject& bookObj,
       QTreeWidgetItem* noteItem = new QTreeWidgetItem(subBookItem);
       noteItem->setText(0, noteName);
       noteItem->setText(1, noteFile);
-      noteItem->setIcon(0, QIcon(":/res/n.png"));
 
       QString md = QDir(iniDir).filePath(noteFile);
       m_Notes->m_NoteManager->setNoteTitle(md, noteName);
@@ -405,12 +398,6 @@ void NotesList::initNotesList() {
     topItem->setText(0, strTop);
     topItem->setText(2, strTopColorFlag);
     topItem->setText(3, strTopNoteBookID);
-    topItem->setForeground(0, Qt::red);
-
-    QFont font = this->font();
-    font.setBold(true);
-    topItem->setFont(0, font);
-    topItem->setIcon(0, QIcon(":/res/nb.png"));
 
     // 读取当前顶层笔记本的 children 数组
     QJsonArray childrenArray = topObj["children"].toArray();
@@ -430,7 +417,6 @@ void NotesList::initNotesList() {
         QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
         childItem->setText(0, str0);
         childItem->setText(1, str1);
-        childItem->setIcon(0, QIcon(":/res/n.png"));
 
         QString md = QDir(iniDir).filePath(str1);
         m_Notes->m_NoteManager->setNoteTitle(md, str0);
@@ -551,12 +537,9 @@ void NotesList::initUnclassified() {
   int count = result.count();
   if (count == 0) return;
 
-  int topCount = tw->topLevelItemCount();
-
   QTreeWidgetItem* topItem = new QTreeWidgetItem;
   topItem->setText(0, tr("Unclassified"));
   topItem->setText(2, "#FF0000");
-  topItem->setForeground(0, Qt::red);
 
   TitleGenerator generator;
 

@@ -247,7 +247,6 @@ void NotesList::on_actionImport_Note_triggered() {
   if (fileCount > 0) {
     clickNoteBook();
 
-    clickNoteList();
     saveNotesList();
   }
 }

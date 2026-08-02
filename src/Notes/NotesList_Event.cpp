@@ -553,6 +553,8 @@ int NotesList::on_btnImport_clicked() {
         QFile::copy(fileName, currentMDFile);
         item1->setText(1, a);
 
+        m_Notes->m_NoteManager->setNoteTitle(currentMDFile, name);
+
         m_Notes->updateMDFileToSyncLists();
       }
     }
