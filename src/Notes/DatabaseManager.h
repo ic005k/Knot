@@ -12,8 +12,6 @@
 #include <QThread>
 #include <QVector>
 
-// #include "Notes.h"
-
 class NoteManager;
 
 struct SearchResult {

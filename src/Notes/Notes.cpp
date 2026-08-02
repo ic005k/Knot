@@ -876,6 +876,7 @@ void Notes::loadNotesToUI() {
   }
 
   m_NotesList->loadAllNoteBook();
+
   if (m_NotesList->getNoteBookCount() > 0) {
     if (!m_NotesList->setCurrentItemFromMDFile(currentMDFile)) {
       qInfo() << "不存在默认的md文件，自动选择第一个笔记本";

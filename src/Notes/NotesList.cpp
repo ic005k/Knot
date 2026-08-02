@@ -1058,7 +1058,7 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
 
   isSetCurrentMDFilePosition = true;
 
-  QTimer::singleShot(80, this, [=]() {
+  QTimer::singleShot(100, this, [=]() {
     //  直接使用flatNotebookIndex 赋值左侧扁平列表选中项
     setNoteBookCurrentIndex(pos.flatNotebookIndex);
     currentNoteslistIndex = pos.noteListIndex;

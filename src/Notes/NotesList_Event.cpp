@@ -477,8 +477,6 @@ void NotesList::on_btnDown_clicked() {
   if (isNoteBook) {
     isMouseClick = true;
   } else {
-    int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
-    setNotesListCurrentIndex(index + 1);
     clickNoteList();
   }
 }
@@ -492,8 +490,6 @@ void NotesList::on_btnUp_clicked() {
   if (isNoteBook) {
     isMouseClick = true;
   } else {
-    int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
-    setNotesListCurrentIndex(index - 1);
     clickNoteList();
   }
 }
@@ -855,11 +851,14 @@ void NotesList::clickNoteList() {
 
   setNoteLabel();
 
+  QTreeWidgetItem* noteItem = pNoteItems.at(index);
+  tw->setCurrentItem(noteItem);
+
   if (!QFile::exists(currentMDFile)) {
     return;
   }
 
-  QTreeWidgetItem* bookItem = pNoteItems.at(index)->parent();
+  QTreeWidgetItem* bookItem = noteItem->parent();
   QString strNoteBookID = bookItem->text(3).trimmed();
   if (strNoteBookID.isEmpty()) {
     QString nbid =
