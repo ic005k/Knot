@@ -45,13 +45,6 @@
 #include "ui_MoveTo.h"
 #include "ui_NotesList.h"
 
-struct NoteTreePos {
-  int flatNotebookIndex = -1;  // 左侧扁平化笔记本列表索引（直接给UI使用）
-  int noteListIndex = -1;      // 右侧笔记列表索引
-  QTreeWidgetItem* notebookItem = nullptr;
-  QTreeWidgetItem* noteItem = nullptr;
-};
-
 struct MySearchResult {
   QString filePath;
   QList<int> lineNumbers;
@@ -233,10 +226,6 @@ class NotesList : public QDialog {
 
   void startVectorSerach(const QString& text);
   bool isEditBoxSearchTextChanged = false;
-
-  NoteTreePos searchNoteByMdPath(QTreeWidgetItem* root,
-                                 QTreeWidgetItem* parentBookItem,
-                                 const QString& fullMdPath, int& flatCounter);
 
   void saveNotePosition(const QString& NoteBookID, const QString& mdFile);
   QString loadNotePosition(const QString& NoteBookID);

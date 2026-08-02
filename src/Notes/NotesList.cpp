@@ -988,10 +988,15 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
           if (!targetMd.isEmpty()) {
             // 在当前笔记本笔记列表内查找md
             QString mdFileFlag = targetMd.replace(iniDir, "");
-            int flatCounter = -1;
-            NoteTreePos pos = searchNoteByMdPath(tw->invisibleRootItem(), item,
-                                                 mdFileFlag, flatCounter);
-            int targetIndex = pos.noteListIndex;
+            int targetIndex = 0;
+
+            for (int i = 0; i < pNoteItems.count(); i++) {
+              if (mdFileFlag == pNoteItems[i]->text(1)) {
+                targetIndex = i;
+                break;
+              }
+            }
+
             if (targetIndex >= 0) {
               setNotesListCurrentIndex(targetIndex);
 
@@ -1086,61 +1091,9 @@ QString NotesList::getCurrentNoteNameFromMDFile(QString mdFile) {
   return m_Notes->m_NoteManager->getNoteTitle(mdFile);
 }
 
-void NotesList::moveToFirst() {
-  return;
-
-  ////////////////////////////////////////////////////////
-}
+void NotesList::moveToFirst() {}
 
 void NotesList::qmlOpenEdit() { mui->btnEditNote->click(); }
-
-/**
- * @brief 递归遍历树，同时统计扁平化笔记本顺序
- * @param root 当前遍历节点
- * @param parentBookItem 当前笔记归属的父笔记本
- * @param fullMdPath 目标笔记路径
- * @param flatCounter 引用：扁平化笔记本条目计数器，和UI渲染顺序严格对齐
- * @return 查找结果
- */
-NoteTreePos NotesList::searchNoteByMdPath(QTreeWidgetItem* root,
-                                          QTreeWidgetItem* parentBookItem,
-                                          const QString& fullMdPath,
-                                          int& flatCounter) {
-  NoteTreePos result;
-  if (!root) return result;
-
-  for (int i = 0; i < root->childCount(); ++i) {
-    QTreeWidgetItem* child = root->child(i);
-    QString relPath = child->text(1);
-
-    if (!relPath.isEmpty()) {
-      // ==== 笔记节点 ====
-      if (relPath == fullMdPath) {
-        result.notebookItem = parentBookItem;
-        result.noteItem = child;
-        // ✅ flatCounter 当前值就是 parentBookItem 的扁平索引
-        // （进入 parentBookItem 分支时已经 ++ 过了）
-        result.flatNotebookIndex = flatCounter;
-        result.noteListIndex = calcNoteIndexInsideBook(parentBookItem, child);
-        return result;
-      }
-      // 非目标笔记 → 不计数，继续循环
-    } else {
-      // ==== 笔记本节点 → 无条件计数（与UI扁平列表一致）====
-      flatCounter++;
-
-      NoteTreePos subResult =
-          searchNoteByMdPath(child, child, fullMdPath, flatCounter);
-      if (subResult.flatNotebookIndex != -1) {
-        return subResult;
-      }
-      // ✅ 不需要回溯 flatCounter！
-      // 因为 UI 扁平列表也是全量枚举所有笔记本的，
-      // 即使这个子树里没有目标，它也确实占据了扁平列表中的一个位置
-    }
-  }
-  return result;
-}
 
 /**
  * @brief 在指定笔记本节点内部，计算目标笔记在【右侧笔记列表】中的下标
