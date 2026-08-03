@@ -76,6 +76,8 @@ class NotesList : public QDialog {
   ~NotesList();
   Ui::NotesList* ui;
 
+  void activateNoteBook(QTreeWidgetItem* notebookItem);
+
   int currentNoteslistIndex = 0;
 
   QVector<SearchResult> adaptedResults;
@@ -143,8 +145,6 @@ class NotesList : public QDialog {
   int getNoteBookCount();
   int getNotesListCount();
   void loadAllNoteBook();
-
-  void localItem();
 
   void modifyNoteBookText0(QString text0, int index);
   void modifyNotesListText0(QString text0, int index);

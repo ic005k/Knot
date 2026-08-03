@@ -877,13 +877,10 @@ void Notes::loadNotesToUI() {
 
   m_NotesList->loadAllNoteBook();
 
-  m_Method->Sleep(100);
-
   if (m_NotesList->getNoteBookCount() > 0) {
     if (!m_NotesList->setCurrentItemFromMDFile(currentMDFile)) {
       qInfo() << "不存在默认的md文件，自动选择第一个笔记本";
-      m_NotesList->setNoteBookCurrentIndex(0);
-      m_NotesList->clickNoteBook();
+      m_NotesList->activateNoteBook(m_NotesList->pNoteBookItems[0]);
     }
 
     m_NotesList->setNoteLabel();

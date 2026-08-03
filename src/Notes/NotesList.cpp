@@ -569,61 +569,6 @@ void NotesList::setWinPos() {
   mui->btnBackNotesGraph->hide();
 }
 
-void NotesList::localItem() {
-  QTreeWidgetItem* item = tw->currentItem();
-  // NoteBook
-
-  if (item->childCount() > 0) {
-    if (item->parent() == NULL) {
-      int topIndex = tw->indexOfTopLevelItem(item);
-      setNoteBookCurrentIndex(topIndex);
-    } else {
-      int index = tw->indexOfTopLevelItem(item->parent());
-
-      int childCount = item->parent()->childCount();
-      int newRow = 0;
-      for (int i = 0; i < childCount; i++) {
-        QTreeWidgetItem* item1 = item->parent()->child(i);
-        if (item1 == item) break;
-
-        if (item1->text(1).isEmpty()) newRow++;
-      }
-
-      setNoteBookCurrentIndex(index + newRow + 1);
-    }
-
-    clickNoteBook();
-    setNotesListCurrentIndex(-1);
-
-    // Notes
-  } else {
-    QTreeWidgetItem* top_item = item->parent()->parent();
-    if (top_item == NULL) {
-      int topIndex = tw->indexOfTopLevelItem(item->parent());
-      int childIndex = tw->currentIndex().row();
-      setNoteBookCurrentIndex(topIndex);
-      clickNoteBook();
-      setNotesListCurrentIndex(childIndex);
-    } else {
-      int index = tw->indexOfTopLevelItem(top_item);
-
-      int childCount = top_item->childCount();
-      int newRow = 0;
-      for (int i = 0; i < childCount; i++) {
-        QTreeWidgetItem* item1 = top_item->child(i);
-        if (item1 == item->parent()) break;
-
-        if (item1->text(1).isEmpty()) newRow++;
-      }
-
-      setNoteBookCurrentIndex(index + newRow + 1);
-
-      clickNoteBook();
-      setNotesListCurrentIndex(item->parent()->indexOfChild(item));
-    }
-  }
-}
-
 void NotesList::moveBy(int ud) {
   QTreeWidgetItem* item = tw->currentItem();
 
@@ -1060,12 +1005,8 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
   tw->setCurrentItem(foundNotebookItem);
   isSetCurrentMDFilePosition = true;
 
-  // ⚠️ 仍然建议改为信号驱动，但如果暂时保留 Timer：
-  QTimer::singleShot(100, this, [=]() {
-    setNoteBookCurrentIndex(foundFlatIndex);
-    currentNoteslistIndex = noteListIndex;
-    clickNoteBook();
-  });
+  currentNoteslistIndex = noteListIndex;
+  activateNoteBook(foundNotebookItem);
 
   return true;
 }

@@ -785,28 +785,34 @@ Note:
 }
 
 void NotesList::clickNoteBook() {
-  int count = m_Method->getCountFromQW(mui->qwNoteBook);
+  int count = getNoteBookCount();
   if (count <= 0) return;
 
-  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
+  int index = getNoteBookCurrentIndex();
   if (index < 0 || index >= pNoteBookItems.size()) return;
 
-  // 更新顶部计数
+  activateNoteBook(pNoteBookItems[index]);
+}
+
+void NotesList::activateNoteBook(QTreeWidgetItem* notebookItem) {
+  // ===== 1. 纯数据链路（不碰 UI）=====
+  int count = pNoteBookItems.size();
+  if (count == 0) return;
+
+  int index = pNoteBookItems.indexOf(notebookItem);
+  if (index < 0) return;
+
+  tw->setCurrentItem(notebookItem);  // 内存树
+  pNoteItems.clear();                // 内存列表
+  isActColorFlagStatus = true;       // 内存标志
+  readyNotesData(notebookItem);      // 加载笔记内容
+
+  // ===== 2. 纯 UI 链路（单向写入，不回读）=====
+  // 高亮选中项
+  setNoteBookCurrentIndex(index);
+  // 更新计数标签
   mui->lblNoteBook->setText(QString::number(index + 1) + "/" +
                             QString::number(count));
-
-  pNoteItems.clear();
-  isActColorFlagStatus = true;
-
-  // 核心：直接取缓存的树节点指针
-  QTreeWidgetItem* item = pNoteBookItems.at(index);
-  if (!item) return;
-
-  // 选中 TreeWidget 对应节点
-  tw->setCurrentItem(item);
-
-  // 加载笔记数据
-  readyNotesData(item);
 }
 
 void NotesList::clickNoteList() {
