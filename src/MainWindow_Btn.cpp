@@ -529,16 +529,19 @@ void MainWindow::on_btnAIExerciseSuggestions_clicked() {
   QLocale loc = QLocale::system();
   QString langCode = loc.name();
 
-  // 模板A：存在GPS经纬度，根据坐标生成带天气的运动建议
+  QString Weather = m_Steps->strCurrentTemp;
+
+  // 模板A：优先使用已有天气信息；天气为空时，依据经纬度坐标解析当地天气，生成途中运动建议
   QString promptInSport = R"(
 Generate real-time on-the-way sports reminders for cycling/hiking/running based on the combined info below. All text uses language matching %1.
 Sport & coordinate data: %2
+Available local weather information: %3
 
 Rules:
 1. Simple Markdown (headings, bullet points) allowed, complex formats are banned.
 2. Focus entirely on in-motion real-time reminders (mid-trip risks, action adjustment, on-the-go physical care, terrain hazards). Do NOT repeat pre-sport preparation content.
 3. Prioritize exclusive tips for the current sport given in the data, attach brief auxiliary hints for the other two sports. Randomize layout to avoid fixed template.
-4. Analyze local weather from coordinates, put prominent warning at top if extreme weather exists.
+4. If weather information is not empty, analyze based on the provided weather data. If weather information is blank, extract and analyze local weather from coordinates. Place prominent warning at top if extreme weather exists.
 5. Rotate practical themes each request: terrain slip risk, mid-sport hydration, long-distance fatigue relief, on-road emergency handling.
 6. Keep text concise without empty generic phrases, no opening/closing redundant text.
 7. Full safety & injury prevention reminders for all languages.
@@ -565,8 +568,8 @@ Rules:
     // 无GPS定位：只用通用常识模板
     fullPrompt = promptCommon.arg(langCode) + "\nRandom tag: " + randomTag;
   } else {
-    fullPrompt =
-        promptInSport.arg(langCode, trimText) + "\nRandom tag: " + randomTag;
+    fullPrompt = promptInSport.arg(langCode, trimText, Weather) +
+                 "\nRandom tag: " + randomTag;
   }
 
   aiChatQuery(fullPrompt);

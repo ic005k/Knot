@@ -163,7 +163,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
                     .arg(temp, 0, 'f', 1)  // 优化：温度保留1位小数更友好
                     .arg(desc);            // 天气描述（中文/英文）
 
-            qDebug() << strCurrentTemp << strCurrentWeatherIcon;
+            qDebug() << "当前天气=" << strCurrentTemp << strCurrentWeatherIcon;
           });
 
   connect(WeatherFetcher::instance(), &WeatherFetcher::errorOccurred, this,

@@ -90,6 +90,8 @@ class Steps : public QDialog {
     int runningCount = 0;
   };
 
+  QString strCurrentTemp, strCurrentWeatherIcon;
+
   QString ai_latlon_text = "";
 
   QDialog* m_remarksDialog = nullptr;
@@ -239,7 +241,7 @@ class Steps : public QDialog {
   void updateGpsUI();
 
   void prepareDestroy();
-  public slots:
+ public slots:
   void clearAllGpsList();
   void getGpsTrack();
   void openMapWindow();
@@ -276,7 +278,6 @@ class Steps : public QDialog {
   QString m_yearlyStatsText;
 
   bool isOne = false;
-  QString strCurrentTemp, strCurrentWeatherIcon;
 
   double maxSpeed = 0.00;
   double Speed = 0.00;
