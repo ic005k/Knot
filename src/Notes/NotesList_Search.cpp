@@ -221,7 +221,7 @@ void NotesList::startBackgroundTaskUpdateFilesIndex() {
 }
 
 void NotesList::startBackgroundTaskDelFilesIndex(const QStringList& files) {
-  QFuture<void> future = QtConcurrent::run([this, files]() {
+  QFuture<void> future = QtConcurrent::run([files]() {
 
   });
 
@@ -329,7 +329,7 @@ void NotesList::startVectorSerach(const QString& text) {
       //////////////////////////////////////////////////////////////////////////////////
       //////////////////////////////////////////////////////////////////////////////////
 
-      QtConcurrent::run([this, text]() {
+      [[maybe_unused]] auto future = QtConcurrent::run([this, text]() {
         // 在后台线程执行向量检索,最多返回25条，且相似度≥0.5
         auto results = m_vectorSearchService->search(text, 20, 0.5f);
 
