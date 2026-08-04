@@ -137,6 +137,8 @@ void MainWindow::on_btnRecentOpen_clicked() {
   // 加载最近打开列表推送到QML
   QVariantList data = buildRecentList();
   setDisplayResult(data);
+
+  mui->editTitleKey->setFocus();
 }
 
 void MainWindow::on_btnMenuReport_clicked() { m_Report->genReportMenu(); }
@@ -740,6 +742,10 @@ void MainWindow::on_btnBack_NotesSearchResult_clicked() {
   mui->frameNotesSearchResult->hide();
   mui->frameNoteList->show();
   isOpenSearchResult = false;
+
+  if (mui->f_FindNotes->isVisible()) {
+    mui->editFindNote->setFocus();
+  }
 }
 
 void MainWindow::on_btnClearSearchResults_clicked() {
@@ -758,9 +764,10 @@ void MainWindow::on_btnOpenSearchResult_clicked() {
 }
 
 void MainWindow::on_btnFindNotes2_clicked() {
-  if (mui->f_FindNotes->isHidden())
+  if (mui->f_FindNotes->isHidden()) {
     mui->f_FindNotes->show();
-  else
+    mui->editFindNote->setFocus();
+  } else
     mui->f_FindNotes->hide();
 }
 
@@ -1558,4 +1565,7 @@ void MainWindow::on_btnOpenFavoritesView_clicked() {
   m_Notes->previewNote();
 }
 
-void MainWindow::on_btnClearTitleKey_clicked() { mui->editTitleKey->clear(); }
+void MainWindow::on_btnClearTitleKey_clicked() {
+  mui->editTitleKey->clear();
+  mui->editTitleKey->setFocus();
+}

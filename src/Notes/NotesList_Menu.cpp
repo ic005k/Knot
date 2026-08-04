@@ -654,7 +654,7 @@ void NotesList::refreshRecentOpen() {
   listRecentOpen = m_Method->removeDuplicatesFromQStringList(listRecentOpen);
 
   int count = listRecentOpen.count();
-  if (count > 15) {
+  if (count > 20) {
     listRecentOpen.removeAt(count - 1);
   }
 }
