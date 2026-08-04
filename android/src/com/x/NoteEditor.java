@@ -1894,12 +1894,18 @@ public class NoteEditor
 
                     int undoCount = helper.getUndoCount();
                     int redoCount = helper.getRedoCount();
+                    String str_count = String.valueOf(undoCount) + "/" + String.valueOf(redoCount);
                     if (MyActivity.zh_cn) {
-                        btnUndo.setText("撤销\n" + String.valueOf(undoCount));
-                        btnRedo.setText("恢复\n" + String.valueOf(redoCount));
+                       // btnUndo.setText("撤销\n" + String.valueOf(undoCount));
+                       // btnRedo.setText("恢复\n" + String.valueOf(redoCount));
+
+                       tab_editor.setText("编辑器 " + str_count);
                     } else {
-                        btnUndo.setText("Undo\n" + String.valueOf(undoCount));
-                        btnRedo.setText("Redo\n" + String.valueOf(redoCount));
+                       // btnUndo.setText("Undo\n" + String.valueOf(undoCount));
+                       // btnRedo.setText("Redo\n" + String.valueOf(redoCount));
+
+                       tab_editor.setText("Editor " + str_count);
+
                     }
 
                     if (isAddImage) {
