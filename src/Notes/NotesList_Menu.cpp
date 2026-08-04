@@ -746,7 +746,7 @@ void NotesList::rebuilderNotesVector() {
   // ✅ 连接进度信号到 UI 更新
   connect(
       this, &NotesList::rebuildProgressChanged, this,
-      [this](int current, int total) {
+      [](int current, int total) {
         if (!mw_one->m_AboutThis->isVisible()) return;
 
         double pct = (total > 0) ? (100.0 * current / total) : 0.0;

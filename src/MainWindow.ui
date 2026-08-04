@@ -7867,6 +7867,13 @@ QSlider::handle:horizontal:disabled {
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_37">
        <item>
+        <widget class="QLabel" name="lblRecentNotes">
+         <property name="text">
+          <string>Recent Notes:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLineEdit" name="editTitleKey">
          <property name="placeholderText">
           <string>Input the title keyword</string>

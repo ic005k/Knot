@@ -1,10 +1,5 @@
 #include "NotesList.h"
 
-static QObject* getQmlRoot(QQuickWidget* quickWidget) {
-  if (!quickWidget) return nullptr;
-  return quickWidget->rootObject();
-}
-
 QStringList NotesList::getRecycleNoteFiles() {
   QStringList cycleFiles;
   QTreeWidgetItem* cycleTopItem = twrb->topLevelItem(0);

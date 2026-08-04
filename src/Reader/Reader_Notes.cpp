@@ -38,7 +38,7 @@ void Reader::addBookNote(const QString& preFillText) {
   QObject::connect(buttonBox, &QDialogButtonBox::rejected, dlgAddBookNote,
                    &QDialog::reject);
 
-  connect(dlgAddBookNote, &QDialog::finished, this, [this](int result) {
+  connect(dlgAddBookNote, &QDialog::finished, this, [](int result) {
     Q_UNUSED(result);
     closeTextToolBar();
   });
@@ -167,7 +167,7 @@ void Reader::editBookNote(int index, int page, const QString& content) {
   QObject::connect(buttonBox, &QDialogButtonBox::rejected, dlgEditBookNote,
                    &QDialog::reject);
 
-  connect(dlgEditBookNote, &QDialog::finished, this, [this](int result) {
+  connect(dlgEditBookNote, &QDialog::finished, this, [](int result) {
     Q_UNUSED(result);
     closeTextToolBar();
   });
