@@ -988,6 +988,8 @@ class MainWindow : public QMainWindow {
 
   void on_btnOpenFavoritesView_clicked();
 
+  void on_btnClearTitleKey_clicked();
+
  private:
   QNetworkAccessManager* m_ainetMgr;
   QUrl buildAiApiUrl(const QString& rawEndpoint);

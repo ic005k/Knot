@@ -753,6 +753,7 @@
         <location filename="MainWindow.ui" line="6805"/>
         <location filename="MainWindow.ui" line="6879"/>
         <location filename="MainWindow.ui" line="7445"/>
+        <location filename="MainWindow.ui" line="7888"/>
         <source>...</source>
         <translation></translation>
     </message>
@@ -800,7 +801,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="20"/>
-        <location filename="MainWindow.ui" line="7951"/>
+        <location filename="MainWindow.ui" line="7972"/>
         <source>Knot</source>
         <translation></translation>
     </message>
@@ -834,7 +835,7 @@
         <location filename="MainWindow.ui" line="7393"/>
         <location filename="MainWindow.ui" line="7780"/>
         <location filename="MainWindow.ui" line="7847"/>
-        <location filename="MainWindow.ui" line="7907"/>
+        <location filename="MainWindow.ui" line="7928"/>
         <source>Back</source>
         <translation>返回</translation>
     </message>
@@ -969,7 +970,7 @@
         <location filename="MainWindow.ui" line="1622"/>
         <location filename="MainWindow.ui" line="5544"/>
         <location filename="MainWindow.ui" line="6117"/>
-        <location filename="MainWindow.ui" line="8013"/>
+        <location filename="MainWindow.ui" line="8034"/>
         <source>Find</source>
         <translation>查找</translation>
     </message>
@@ -1276,7 +1277,7 @@
         <translation type="vanished">工具栏</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7988"/>
+        <location filename="MainWindow.ui" line="8009"/>
         <source>Remarks</source>
         <translation>备注</translation>
     </message>
@@ -1849,24 +1850,24 @@
         <translation>最近的笔记：</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7879"/>
+        <location filename="MainWindow.ui" line="7881"/>
         <source>Input the title keyword</source>
         <translation>输入笔记标题关键字</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7920"/>
+        <location filename="MainWindow.ui" line="7941"/>
         <source>View</source>
         <translation>查看</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7973"/>
+        <location filename="MainWindow.ui" line="7994"/>
         <location filename="MainWindow_Menu.cpp" line="280"/>
         <location filename="MainWindow_Menu.cpp" line="319"/>
         <source>Rename Tab</source>
         <translation>重命名标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8023"/>
+        <location filename="MainWindow.ui" line="8044"/>
         <location filename="MainWindow_Menu.cpp" line="329"/>
         <source>Preferences</source>
         <translation>偏好设置</translation>
@@ -1931,7 +1932,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="6088"/>
-        <location filename="MainWindow.ui" line="7933"/>
+        <location filename="MainWindow.ui" line="7954"/>
         <source>Edit</source>
         <translation>编辑</translation>
     </message>
@@ -1940,49 +1941,49 @@
         <translation type="vanished">重命名标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7978"/>
+        <location filename="MainWindow.ui" line="7999"/>
         <location filename="MainWindow_Menu.cpp" line="104"/>
         <location filename="MainWindow_Menu.cpp" line="317"/>
         <source>Add Tab</source>
         <translation>增加标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7983"/>
+        <location filename="MainWindow.ui" line="8004"/>
         <location filename="MainWindow_Menu.cpp" line="121"/>
         <location filename="MainWindow_Menu.cpp" line="318"/>
         <source>Del Tab</source>
         <translation>删除标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7993"/>
+        <location filename="MainWindow.ui" line="8014"/>
         <location filename="MainWindow_Menu.cpp" line="333"/>
         <source>About</source>
         <translation>关于</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7998"/>
+        <location filename="MainWindow.ui" line="8019"/>
         <location filename="MainWindow_Menu.cpp" line="326"/>
         <source>Export Data</source>
         <translation>导出数据</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8003"/>
+        <location filename="MainWindow.ui" line="8024"/>
         <location filename="MainWindow_Menu.cpp" line="327"/>
         <source>Import Data</source>
         <translation>导入数据</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8008"/>
+        <location filename="MainWindow.ui" line="8029"/>
         <source>View App Data</source>
         <translation>查看App数据</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8028"/>
+        <location filename="MainWindow.ui" line="8049"/>
         <source>Memos</source>
         <translation>备忘录</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8018"/>
+        <location filename="MainWindow.ui" line="8039"/>
         <location filename="MainWindow_Menu.cpp" line="323"/>
         <source>Report</source>
         <translation>报表</translation>
@@ -11714,9 +11715,9 @@ Amount: %3</source>
 <context>
     <name>note_favorites</name>
     <message>
-        <location filename="qmlsrc/note_favorites.qml" line="83"/>
+        <location filename="qmlsrc/note_favorites.qml" line="98"/>
         <source>No matching notes</source>
-        <translation type="unfinished"></translation>
+        <translation>没有匹配的笔记</translation>
     </message>
 </context>
 <context>

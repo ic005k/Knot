@@ -6,7 +6,7 @@ import QtQuick.Layouts
 ListView {
     id: noteListView
     anchors.fill: parent
-    anchors.margins: 12
+    anchors.margins: 0
     clip: true
     spacing: 4
     model: proxyModel
@@ -14,66 +14,81 @@ ListView {
     focus: true
     keyNavigationEnabled: true
 
-    // ✅ Fusion 样式全局生效（需在 main.cpp 或 ApplicationWindow 中设置）
-    // 若仅需局部生效，可在此处用 Component.onCompleted 动态切换
-
     property string currentSelectedUid: ""
-    property bool isDark: false
     property var displayList: []
 
-    ListModel { id: proxyModel }
+    ListModel {
+        id: proxyModel
+    }
 
     Connections {
         target: noteListView
         function onDisplayListChanged() {
-            proxyModel.clear()
+            proxyModel.clear();
             for (var i = 0; i < displayList.length; i++)
-                proxyModel.append(displayList[i])
+                proxyModel.append(displayList[i]);
         }
     }
 
     signal openNote(string noteUid)
 
+    // ✅ ListView 自身背景适配暗黑模式
+    Rectangle {
+        anchors.fill: parent
+        z: -1
+        radius: 0
+        color: isDark ? "#1e1e1e" : "#ffffff"
+    }
+
     delegate: ItemDelegate {
+        id: noteDelegate
         width: noteListView.width
         implicitHeight: layout.implicitHeight + 16
-        leftPadding: 12
-        rightPadding: 12
+        leftPadding: 0
+        rightPadding: 0
+        topPadding: 0
+        bottomPadding: 0
 
         readonly property bool isCurrent: ListView.isCurrentItem
 
-        contentItem: ColumnLayout {
-            id: layout
-            spacing: 4
-
-            Text {
-                text: model.title
-                font.bold: true
-                elide: Text.ElideRight
-                Layout.fillWidth: true
-                color: isCurrent ? "#ffffff" : (isDark ? "#eeeeee" : "#212121")
-            }
-
-            Text {
-                text: model.path
-                font.italic: true
-                elide: Text.ElideMiddle
-                Layout.fillWidth: true
-                color: isCurrent ? "#cccccc" : (isDark ? "#bbbbbb" : "#606060")
-            }
-        }
-
-        background: Rectangle {
-            radius: 6
-            color: isCurrent ? (isDark ? "#111827" : "#757575") : "transparent"
-            border.color: isCurrent ? "#616161" : "transparent"
+        // 🔑 核心：用 contentItem 包裹整个可视区域，完全替代 background
+        contentItem: Rectangle {
+            radius: 0
+            color: isCurrent ? (isDark ? "#111827" : "#757575") : (isDark ? "#2d2d2d" : "#f5f5f5")
+            border.color: isCurrent ? (isDark ? "#3b82f6" : "#616161") : "transparent"
             border.width: 1
+
+            ColumnLayout {
+                id: layout
+                anchors.fill: parent
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                anchors.topMargin: 8
+                anchors.bottomMargin: 8
+                spacing: 4
+
+                Text {
+                    text: model.title
+                    font.bold: true
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
+                    color: isCurrent ? "#ffffff" : (isDark ? "#eeeeee" : "#212121")
+                }
+
+                Text {
+                    text: model.path
+                    font.italic: true
+                    elide: Text.ElideMiddle
+                    Layout.fillWidth: true
+                    color: isCurrent ? "#cccccc" : (isDark ? "#bbbbbb" : "#606060")
+                }
+            }
         }
 
         onClicked: {
-            noteListView.currentIndex = index
-            noteListView.currentSelectedUid = model.uid
-            noteListView.openNote(model.uid)
+            noteListView.currentIndex = index;
+            noteListView.currentSelectedUid = model.uid;
+            noteListView.openNote(model.uid);
         }
     }
 

@@ -7874,11 +7874,32 @@ QSlider::handle:horizontal:disabled {
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="editTitleKey">
-         <property name="placeholderText">
-          <string>Input the title keyword</string>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_68">
+         <item>
+          <widget class="QLineEdit" name="editTitleKey">
+           <property name="placeholderText">
+            <string>Input the title keyword</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btnClearTitleKey">
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../res.qrc">
+             <normaloff>:/res/clear.png</normaloff>:/res/clear.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>22</width>
+             <height>22</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <widget class="QQuickWidget" name="qwFavorites">

@@ -1557,3 +1557,5 @@ void MainWindow::on_btnOpenFavoritesView_clicked() {
   // mui->btnBackFavorites->click();
   m_Notes->previewNote();
 }
+
+void MainWindow::on_btnClearTitleKey_clicked() { mui->editTitleKey->clear(); }
