@@ -130,8 +130,8 @@ void MainWindow::on_btnStepsOptions_clicked() { m_StepsOptions->init(); }
 void MainWindow::on_btnRecentOpen_clicked() {
   // m_NotesList->genRecentOpenMenu();
 
-  mui->frameFavorites->show();
   mui->frameNoteList->hide();
+  mui->frameFavorites->show();
 
   mui->editTitleKey->clear();
   // 加载最近打开列表推送到QML
@@ -339,7 +339,7 @@ void MainWindow::on_btnBackNoteList_clicked() {
   saveNeedSyncNotes();
 
   // ========== 完全异步延迟界面切换，释放渲染资源 ==========
-  QTimer::singleShot(0, this, [this]() {
+  QTimer::singleShot(0, this, []() {
     // 找到页面内所有QQuickWidget
     auto quickWidgets = mui->frameNoteList->findChildren<QQuickWidget*>();
     for (auto it = quickWidgets.cbegin(); it != quickWidgets.cend(); ++it) {
@@ -371,7 +371,7 @@ void MainWindow::on_btnBackNoteList_clicked() {
   // 绑定：等 sync 全部结束 → 再删除
   connect(
       m_Notes, &Notes::syncFinished, this,
-      [this]() { m_NotesList->delRemoteWebDAVFiles(); },
+      []() { m_NotesList->delRemoteWebDAVFiles(); },
       Qt::ConnectionType(Qt::QueuedConnection | Qt::SingleShotConnection));
 
   // 现在才开始同步
