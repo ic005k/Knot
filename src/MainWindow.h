@@ -491,6 +491,8 @@ class MainWindow : public QMainWindow {
 
   void fixQuickWidgetFirstTouch(QQuickWidget* quickWidget);
 
+  QVariantList buildRecentList();
+
  protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
@@ -980,6 +982,8 @@ class MainWindow : public QMainWindow {
 
   void on_btnOpenFavoritesNote_clicked();
 
+  void on_editTitleKey_textChanged(const QString& arg1);
+
  private:
   QNetworkAccessManager* m_ainetMgr;
   QUrl buildAiApiUrl(const QString& rawEndpoint);
@@ -1006,6 +1010,7 @@ class MainWindow : public QMainWindow {
 
   void init_Thread_Timer();
 
+  void setDisplayResult(const QVariantList& list);
  signals:
   void androidBackSignal();
 };

@@ -1,112 +1,91 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Controls.Fusion
+import QtQuick.Layouts
 
-Item {
-    id: root
-    width: 600
-    height: 480
-    property string filterText: ""
-    property var sourceModel: []
+ListView {
+    id: noteListView
+    anchors.fill: parent
+    anchors.margins: 12
+    clip: true
+    spacing: 4
+    model: proxyModel
+    boundsBehavior: Flickable.StopAtBounds
+    focus: true
+    keyNavigationEnabled: true
 
-    ListModel {
-        id: filteredModel
-    }
+    // ✅ Fusion 样式全局生效（需在 main.cpp 或 ApplicationWindow 中设置）
+    // 若仅需局部生效，可在此处用 Component.onCompleted 动态切换
 
-    Component.onCompleted: {
-        refreshFilter()
-    }
+    property string currentSelectedUid: ""
+    property bool isDark: false
+    property var displayList: []
 
-    onFilterTextChanged: refreshFilter()
-    Binding on sourceModel {
-        when: sourceModel !== undefined
-        onValueChanged: refreshFilter()
-    }
+    ListModel { id: proxyModel }
 
-    function refreshFilter()
-    {
-        filteredModel.clear()
-        const kw = filterText.trim().toLowerCase()
-        for (const entry of sourceModel)
-        {
-            if (kw === "" || entry.title.toLowerCase().includes(kw))
-            {
-                // 核心改动：先定义临时对象，不要直接append({...})
-                const rowObj = {
-                    uid: entry.uid,
-                    title: entry.title,
-                    path: entry.path
-                };
-                filteredModel.append(rowObj);
-            }
-        }
-    }
-
-    Column {
-        anchors.fill: parent
-        spacing: 8
-        padding: 12
-
-        TextField {
-            id: searchInput
-            width: parent.width
-            placeholderText: "输入标题过滤笔记..."
-            text: root.filterText
-            onTextChanged: root.filterText = text
-        }
-
-        ListView {
-            id: noteListView
-            width: parent.width
-            height: parent.height - searchInput.height - 24
-            model: filteredModel
-            clip: true
-            spacing: 4
-
-            delegate: Item {
-                width: noteListView.width
-                height: layout.implicitHeight
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: root.openNote(model.uid)
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                }
-
-                Column {
-                    id: layout
-                    width: parent.width
-                    padding: 8
-                    spacing: 4
-
-                    Text {
-                        text: model.title
-                        font.bold: true
-                        font.pointSize: 14
-                        color: palette.windowText
-                        elide: Text.ElideRight
-                        width: parent.width
-                    }
-
-                    Text {
-                        text: model.path
-                        font.italic: true
-                        font.pointSize: 11
-                        color: palette.mid
-                        elide: Text.ElideRight
-                        width: parent.width
-                    }
-                }
-            }
-
-            Label {
-                anchors.centerIn: parent
-                text: "没有匹配的笔记"
-                visible: filteredModel.count === 0
-                color: palette.mid
-            }
+    Connections {
+        target: noteListView
+        function onDisplayListChanged() {
+            proxyModel.clear()
+            for (var i = 0; i < displayList.length; i++)
+                proxyModel.append(displayList[i])
         }
     }
 
     signal openNote(string noteUid)
+
+    delegate: ItemDelegate {
+        width: noteListView.width
+        implicitHeight: layout.implicitHeight + 16
+        leftPadding: 12
+        rightPadding: 12
+
+        readonly property bool isCurrent: ListView.isCurrentItem
+
+        contentItem: ColumnLayout {
+            id: layout
+            spacing: 4
+
+            Text {
+                text: model.title
+                font.bold: true
+                elide: Text.ElideRight
+                Layout.fillWidth: true
+                color: isCurrent ? "#ffffff" : (isDark ? "#eeeeee" : "#212121")
+            }
+
+            Text {
+                text: model.path
+                font.italic: true
+                elide: Text.ElideMiddle
+                Layout.fillWidth: true
+                color: isCurrent ? "#cccccc" : (isDark ? "#bbbbbb" : "#606060")
+            }
+        }
+
+        background: Rectangle {
+            radius: 6
+            color: isCurrent ? (isDark ? "#111827" : "#757575") : "transparent"
+            border.color: isCurrent ? "#616161" : "transparent"
+            border.width: 1
+        }
+
+        onClicked: {
+            noteListView.currentIndex = index
+            noteListView.currentSelectedUid = model.uid
+            noteListView.openNote(model.uid)
+        }
+    }
+
+    Label {
+        anchors.centerIn: parent
+        visible: noteListView.count === 0
+        text: qsTr("No matching notes")
+        color: isDark ? "#999999" : "#777777"
+    }
+
+    ScrollBar.vertical: ScrollBar {
+        policy: ScrollBar.AsNeeded
+        width: 8
+    }
 }

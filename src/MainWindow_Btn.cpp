@@ -129,8 +129,14 @@ void MainWindow::on_btnStepsOptions_clicked() { m_StepsOptions->init(); }
 
 void MainWindow::on_btnRecentOpen_clicked() {
   // m_NotesList->genRecentOpenMenu();
+
   mui->frameFavorites->show();
   mui->frameNoteList->hide();
+
+  mui->editTitleKey->clear();
+  // 加载最近打开列表推送到QML
+  QVariantList data = buildRecentList();
+  setDisplayResult(data);
 }
 
 void MainWindow::on_btnMenuReport_clicked() { m_Report->genReportMenu(); }

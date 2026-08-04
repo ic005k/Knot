@@ -1516,3 +1516,36 @@ void MainWindow::on_chkAutoStopTTS_clicked(bool checked) {
 }
 
 void MainWindow::showEvent(QShowEvent* event) { QMainWindow::showEvent(event); }
+
+void MainWindow::on_editTitleKey_textChanged(const QString& arg1) {}
+
+QVariantList MainWindow::buildRecentList() {
+  QVariantList result;
+  const QString sepStr = "===";
+
+  for (const QString& line : m_NotesList->listRecentOpen) {
+    int splitPos = line.indexOf(sepStr);
+    if (splitPos == -1) continue;  // 格式不合法，直接跳过
+
+    QString title = line.left(splitPos).trimmed();
+    QString relPath = line.mid(splitPos + sepStr.size()).trimmed();
+
+    // iniDir末尾自带 "/"，直接拼接相对路径
+    QString fullPath = iniDir + relPath;
+
+    QVariantMap row;
+    row["title"] = title;
+    row["path"] = fullPath;
+    row["relPath"] = relPath;
+    row["uid"] = fullPath;  // 使用完整路径作为唯一标识
+
+    result.append(row);
+  }
+  return result;
+}
+
+void MainWindow::setDisplayResult(const QVariantList& list) {
+  QObject* rootObj = mui->qwFavorites->rootObject();
+  if (!rootObj) return;
+  rootObj->setProperty("displayList", list);
+}
