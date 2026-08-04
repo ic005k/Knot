@@ -37,6 +37,10 @@ class NoteManager : public QObject {
  public:
   explicit NoteManager(QObject* parent = nullptr);
 
+  // 模糊搜索标题，返回【标题，文件路径】配对列表
+  QList<QPair<QString, QString>> searchTitleWithPath(
+      const QString& keyword) const;
+
   // 加载/保存索引（包含标题、笔记本索引、笔记索引）
   bool loadIndex(const QString& indexPath);
   bool saveIndex();

@@ -133,3 +133,15 @@ void NoteManager::removeNote(const QString& filePath) {
     emit noteRemoved(normalized);
   }
 }
+
+QList<QPair<QString, QString>> NoteManager::searchTitleWithPath(
+    const QString& keyword) const {
+  QList<QPair<QString, QString>> result;
+  for (auto it = m_metadataMap.begin(); it != m_metadataMap.end(); ++it) {
+    const QString& title = it.value().title;
+    if (title.contains(keyword, Qt::CaseInsensitive)) {
+      result.append({title, it.key()});
+    }
+  }
+  return result;
+}

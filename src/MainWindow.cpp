@@ -1517,13 +1517,46 @@ void MainWindow::on_chkAutoStopTTS_clicked(bool checked) {
 
 void MainWindow::showEvent(QShowEvent* event) { QMainWindow::showEvent(event); }
 
-void MainWindow::on_editTitleKey_textChanged(const QString& arg1) {}
+void MainWindow::on_editTitleKey_textChanged(const QString& arg1) {
+  QString keyword = arg1.trimmed();
+  QVariantList data;
+
+  if (keyword.isEmpty()) {
+    // 空输入：直接复用成熟最近文件列表
+    data = buildRecentList();
+  } else {
+    // 关键词搜索分支：严格对齐buildRecentList字段结构
+    auto matchList = m_Notes->m_NoteManager->searchTitleWithPath(keyword);
+    for (const auto& pair : matchList) {
+      const QString& title = pair.first;
+      const QString& fullPath = pair.second;
+
+      QVariantMap row;
+      row["title"] = title;
+      row["path"] = fullPath;
+      row["uid"] = fullPath;
+
+      // =====重点：补充relPath，保证字段齐全=====
+      // 根据iniDir绝对路径，换算成相对路径，和buildRecentList逻辑统一
+      QString relPath;
+      if (fullPath.startsWith(iniDir)) {
+        relPath = fullPath.mid(iniDir.length());
+      }
+      row["relPath"] = relPath;
+
+      data.append(row);
+    }
+  }
+
+  setDisplayResult(data);
+}
 
 QVariantList MainWindow::buildRecentList() {
   QVariantList result;
   const QString sepStr = "===";
 
-  for (const QString& line : m_NotesList->listRecentOpen) {
+  const QStringList& recentList = m_NotesList->listRecentOpen;
+  for (const QString& line : recentList) {
     int splitPos = line.indexOf(sepStr);
     if (splitPos == -1) continue;  // 格式不合法，直接跳过
 
@@ -1548,4 +1581,10 @@ void MainWindow::setDisplayResult(const QVariantList& list) {
   QObject* rootObj = mui->qwFavorites->rootObject();
   if (!rootObj) return;
   rootObj->setProperty("displayList", list);
+}
+
+void MainWindow::onQmlOpenNote(const QString& noteUid) {
+  // noteUid 就是完整绝对路径，和现有逻辑完全兼容
+  const QString filePath = noteUid;
+  currentMDFile = filePath;
 }

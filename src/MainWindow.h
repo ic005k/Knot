@@ -725,6 +725,8 @@ class MainWindow : public QMainWindow {
   void on_btnNoteRecycle_clicked();
 
  private slots:
+  void onQmlOpenNote(const QString& noteUid);
+
   void onAndroidBackHandle();
 
   void on_btnMenu_clicked();

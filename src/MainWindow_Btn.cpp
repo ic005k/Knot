@@ -1539,4 +1539,9 @@ void MainWindow::on_btnBackFavorites_clicked() {
   mui->frameFavorites->hide();
 }
 
-void MainWindow::on_btnOpenFavoritesNote_clicked() {}
+void MainWindow::on_btnOpenFavoritesNote_clicked() {
+  if (!QFile::exists(currentMDFile)) return;
+
+  mui->btnBackFavorites->click();
+  m_NotesList->setCurrentItemFromMDFile(currentMDFile);
+}

@@ -610,6 +610,14 @@ void MainWindow::initNotesQW() {
     mui->qwFavorites->rootContext()->setContextProperty("mw_one", mw_one);
     mui->qwFavorites->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/note_favorites.qml")));
+
+    // 获取qml根对象
+    QObject* qmlRoot = mui->qwFavorites->rootObject();
+    if (qmlRoot) {
+      // 连接qml信号 openNote(QString) → C++槽 onQmlOpenNote(QString)
+      connect(qmlRoot, SIGNAL(openNote(QString)), this,
+              SLOT(onQmlOpenNote(QString)));
+    }
   }
 }
 
