@@ -1566,13 +1566,17 @@ QVariantList MainWindow::buildRecentList() {
     // iniDir末尾自带 "/"，直接拼接相对路径
     QString fullPath = iniDir + relPath;
 
-    QVariantMap row;
-    row["title"] = title;
-    row["path"] = fullPath;
-    row["relPath"] = relPath;
-    row["uid"] = fullPath;  // 使用完整路径作为唯一标识
+    QStringList recycleList = m_NotesList->getRecycleNoteFiles();
 
-    result.append(row);
+    if (QFile::exists(fullPath) && !recycleList.contains(fullPath)) {
+      QVariantMap row;
+      row["title"] = title;
+      row["path"] = fullPath;
+      row["relPath"] = relPath;
+      row["uid"] = fullPath;  // 使用完整路径作为唯一标识
+
+      result.append(row);
+    }
   }
   return result;
 }
