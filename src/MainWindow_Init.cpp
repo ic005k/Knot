@@ -603,6 +603,13 @@ void MainWindow::initNotesQW() {
     mui->qwNoteRecycle->rootContext()->setContextProperty("m_Method", m_Method);
     mui->qwNoteRecycle->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/noterecycle.qml")));
+
+    mui->qwFavorites->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwFavorites->rootContext()->setContextProperty("m_NotesList",
+                                                        m_NotesList);
+    mui->qwFavorites->rootContext()->setContextProperty("mw_one", mw_one);
+    mui->qwFavorites->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/note_favorites.qml")));
   }
 }
 
@@ -626,6 +633,7 @@ void MainWindow::init_Theme() {
   mui->qwNoteVersion->rootContext()->setContextProperty("isDark", isDark);
   mui->qwNoteDiff->rootContext()->setContextProperty("isDark", isDark);
   mui->qwNoteGraphView->rootContext()->setContextProperty("isDark", isDark);
+  mui->qwFavorites->rootContext()->setContextProperty("isDark", isDark);
 
   mui->qwNotesSearchResult->rootContext()->setContextProperty("isDark", isDark);
   mui->qwSearch->rootContext()->setContextProperty("isDark", isDark);
@@ -739,8 +747,6 @@ void MainWindow::init_UIWidget() {
 
   mui->tabWidget->setFixedHeight(mui->tabWidget->tabBar()->height() + 0);
 
-  // if (nHeight <= 36) nHeight = 36;
-  //  mui->qwMainTab->setFixedHeight(nHeight);
   mui->qwMainTab->installEventFilter(mw_one);
 
   mui->tabWidget->hide();
@@ -817,6 +823,8 @@ void MainWindow::init_UIWidget() {
 
   mui->frameNotesGraph->hide();
   mui->frameNotesGraph->layout()->setContentsMargins(1, 1, 1, 1);
+
+  mui->frameFavorites->hide();
 
   mui->chkWebDAV->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mui->chkAutoSync->setStyleSheet(mw_one->m_Preferences->chkStyle);

@@ -976,6 +976,10 @@ class MainWindow : public QMainWindow {
 
   void on_actionCopyLog();
 
+  void on_btnBackFavorites_clicked();
+
+  void on_btnOpenFavoritesNote_clicked();
+
  private:
   QNetworkAccessManager* m_ainetMgr;
   QUrl buildAiApiUrl(const QString& rawEndpoint);

@@ -128,7 +128,9 @@ void MainWindow::on_btnHideFind_clicked() {
 void MainWindow::on_btnStepsOptions_clicked() { m_StepsOptions->init(); }
 
 void MainWindow::on_btnRecentOpen_clicked() {
-  m_NotesList->genRecentOpenMenu();
+  // m_NotesList->genRecentOpenMenu();
+  mui->frameFavorites->show();
+  mui->frameNoteList->hide();
 }
 
 void MainWindow::on_btnMenuReport_clicked() { m_Report->genReportMenu(); }
@@ -1525,3 +1527,10 @@ void MainWindow::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
     btn->setStyleSheet(sheet);
   }
 }
+
+void MainWindow::on_btnBackFavorites_clicked() {
+  mui->frameNoteList->show();
+  mui->frameFavorites->hide();
+}
+
+void MainWindow::on_btnOpenFavoritesNote_clicked() {}
