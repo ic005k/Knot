@@ -1587,4 +1587,5 @@ void MainWindow::onQmlOpenNote(const QString& noteUid) {
   // noteUid 就是完整绝对路径，和现有逻辑完全兼容
   const QString filePath = noteUid;
   currentMDFile = filePath;
+  m_NotesList->setCurrentItemFromMDFile(currentMDFile);
 }

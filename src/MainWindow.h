@@ -986,6 +986,8 @@ class MainWindow : public QMainWindow {
 
   void on_editTitleKey_textChanged(const QString& arg1);
 
+  void on_btnOpenFavoritesView_clicked();
+
  private:
   QNetworkAccessManager* m_ainetMgr;
   QUrl buildAiApiUrl(const QString& rawEndpoint);

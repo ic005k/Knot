@@ -1365,6 +1365,11 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
+  if (mui->frameFavorites->isVisible()) {
+    on_btnBackFavorites_clicked();
+    return;
+  }
+
   if (!mui->frameNoteList->isHidden()) {
     QTimer::singleShot(200, mw_one,
                        []() { mw_one->on_btnBackNoteList_clicked(); });
@@ -1542,6 +1547,13 @@ void MainWindow::on_btnBackFavorites_clicked() {
 void MainWindow::on_btnOpenFavoritesNote_clicked() {
   if (!QFile::exists(currentMDFile)) return;
 
-  mui->btnBackFavorites->click();
-  m_NotesList->setCurrentItemFromMDFile(currentMDFile);
+  // mui->btnBackFavorites->click();
+  m_Notes->openEditUI();
+}
+
+void MainWindow::on_btnOpenFavoritesView_clicked() {
+  if (!QFile::exists(currentMDFile)) return;
+
+  // mui->btnBackFavorites->click();
+  m_Notes->previewNote();
 }

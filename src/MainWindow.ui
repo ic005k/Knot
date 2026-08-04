@@ -7902,6 +7902,19 @@ QSlider::handle:horizontal:disabled {
           </widget>
          </item>
          <item>
+          <widget class="QToolButton" name="btnOpenFavoritesView">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>View</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QToolButton" name="btnOpenFavoritesNote">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -7910,7 +7923,7 @@ QSlider::handle:horizontal:disabled {
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Open</string>
+            <string>Edit</string>
            </property>
           </widget>
          </item>
