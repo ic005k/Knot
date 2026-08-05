@@ -1,5 +1,6 @@
 #include "NoteDiffManager.h"
 
+#include <QObject>
 #include <QStringList>
 #include <QVector>
 
@@ -13,8 +14,8 @@ NoteDiffManager::NoteDiffManager() {
 }
 
 // 计算两个文本的差异列表
-QList<Diff> NoteDiffManager::computeDiffs(const QString &oldText,
-                                          const QString &newText) {
+QList<Diff> NoteDiffManager::computeDiffs(const QString& oldText,
+                                          const QString& newText) {
   if (oldText.isEmpty() && newText.isEmpty()) {
     return QList<Diff>();  // 空文本无差异
   }
@@ -27,8 +28,8 @@ QList<Diff> NoteDiffManager::computeDiffs(const QString &oldText,
 }
 
 // 根据差异列表生成可存储的补丁字符串
-QString NoteDiffManager::generatePatch(const QString &oldText,
-                                       const QList<Diff> &diffs) {
+QString NoteDiffManager::generatePatch(const QString& oldText,
+                                       const QList<Diff>& diffs) {
   if (diffs.isEmpty()) {
     return "";  // 无差异则返回空补丁
   }
@@ -38,7 +39,7 @@ QString NoteDiffManager::generatePatch(const QString &oldText,
 }
 
 // 从补丁字符串解析出补丁对象列表
-QList<Patch> NoteDiffManager::parsePatch(const QString &patchStr) {
+QList<Patch> NoteDiffManager::parsePatch(const QString& patchStr) {
   if (patchStr.isEmpty()) {
     return QList<Patch>();  // 空字符串返回空补丁列表
   }
@@ -47,9 +48,9 @@ QList<Patch> NoteDiffManager::parsePatch(const QString &patchStr) {
 }
 
 // 应用补丁到旧文本，返回新文本及应用结果
-QString NoteDiffManager::applyPatch(const QString &oldText,
-                                    QList<Patch> &patches,
-                                    QVector<bool> &success) {
+QString NoteDiffManager::applyPatch(const QString& oldText,
+                                    QList<Patch>& patches,
+                                    QVector<bool>& success) {
   if (patches.isEmpty()) {
     success.clear();
     return oldText;  // 无补丁则直接返回旧文本
@@ -63,24 +64,25 @@ QString NoteDiffManager::applyPatch(const QString &oldText,
 }
 
 // 简化接口：直接从新旧文本生成补丁字符串
-QString NoteDiffManager::createPatchFromTexts(const QString &oldText,
-                                              const QString &newText) {
+QString NoteDiffManager::createPatchFromTexts(const QString& oldText,
+                                              const QString& newText) {
   QList<Diff> diffs = computeDiffs(oldText, newText);
   return generatePatch(oldText, diffs);
 }
 
 // 将差异列表转换为 HTML 格式（用于界面展示）
-QString NoteDiffManager::diffsToHtml(const QList<Diff> &diffs) {
+QString NoteDiffManager::diffsToHtml(const QList<Diff>& diffs) {
   if (diffs.isEmpty()) {
-    return "<p>No differences.</p>";
+    QString html = QString("<p>%1</p>").arg(QObject::tr("No differences"));
+    return html;
   }
 
   return dmp.diff_prettyHtml(diffs);
 }
 
 // 检查补丁是否能成功应用到旧文本
-bool NoteDiffManager::isPatchValid(const QString &oldText,
-                                   const QString &patchStr) {
+bool NoteDiffManager::isPatchValid(const QString& oldText,
+                                   const QString& patchStr) {
   QList<Patch> patches = parsePatch(patchStr);
   if (patches.isEmpty()) {
     return false;  // 空补丁视为无效
@@ -107,7 +109,7 @@ void NoteDiffManager::setMatchThreshold(float threshold) {
 }
 
 QList<Diff> NoteDiffManager::filterDiffsForDisplay(
-    const QList<Diff> &originalDiffs, int contextLines) {
+    const QList<Diff>& originalDiffs, int contextLines) {
   QList<Diff> filteredDiffs;
   if (originalDiffs.isEmpty()) {
     return filteredDiffs;
@@ -119,7 +121,7 @@ QList<Diff> NoteDiffManager::filterDiffsForDisplay(
   // 第二步：标记所有包含变化的行位置
   QList<int> changeLineIndices;
   for (int i = 0; i < lineDiffs.size(); ++i) {
-    const Diff &diff = lineDiffs[i];
+    const Diff& diff = lineDiffs[i];
     if (diff.operation != EQUAL_OP) {
       changeLineIndices.append(i);
     }
@@ -160,9 +162,9 @@ QList<Diff> NoteDiffManager::filterDiffsForDisplay(
 }
 
 // 辅助函数：将差异按行拆分
-QList<Diff> NoteDiffManager::splitDiffsByLines(const QList<Diff> &diffs) {
+QList<Diff> NoteDiffManager::splitDiffsByLines(const QList<Diff>& diffs) {
   QList<Diff> lineDiffs;
-  foreach (const Diff &diff, diffs) {
+  foreach (const Diff& diff, diffs) {
     QString text = diff.text;
     int start = 0;
     int pos = text.indexOf('\n');
@@ -185,7 +187,7 @@ QList<Diff> NoteDiffManager::splitDiffsByLines(const QList<Diff> &diffs) {
 }
 
 // 辅助函数：合并相邻的相同类型差异
-QList<Diff> NoteDiffManager::mergeAdjacentDiffs(const QList<Diff> &diffs) {
+QList<Diff> NoteDiffManager::mergeAdjacentDiffs(const QList<Diff>& diffs) {
   if (diffs.isEmpty()) {
     return diffs;
   }
@@ -194,7 +196,7 @@ QList<Diff> NoteDiffManager::mergeAdjacentDiffs(const QList<Diff> &diffs) {
   Diff current = diffs[0];
 
   for (int i = 1; i < diffs.size(); ++i) {
-    const Diff &next = diffs[i];
+    const Diff& next = diffs[i];
     if (current.operation == next.operation) {
       // 合并相同类型的差异
       current.text += next.text;
@@ -214,9 +216,9 @@ QList<Diff> NoteDiffManager::mergeAdjacentDiffs(const QList<Diff> &diffs) {
 //   patchStr: 从旧文本生成新文本的补丁字符串
 //   success: 输出参数，记录每个补丁片段的应用成功状态（true=成功，false=失败）
 // 返回值：反推得到的旧文本
-QString NoteDiffManager::revertPatchToOldText(const QString &newText,
-                                              const QString &patchStr,
-                                              QVector<bool> &success) {
+QString NoteDiffManager::revertPatchToOldText(const QString& newText,
+                                              const QString& patchStr,
+                                              QVector<bool>& success) {
   // 1. 边界处理：空补丁→新旧文本相同，直接返回新文本
   if (patchStr.isEmpty()) {
     success.clear();
@@ -232,7 +234,7 @@ QString NoteDiffManager::revertPatchToOldText(const QString &newText,
 
   // 3. 生成“反向补丁”（新→旧的补丁）：反转每个补丁的操作和位置参数
   QList<Patch> reversedPatches;
-  foreach (const Patch &origPatch, originalPatches) {
+  foreach (const Patch& origPatch, originalPatches) {
     Patch reversedPatch;
 
     // 3.1 反转补丁的位置/长度参数（新旧文本角色互换）
@@ -244,7 +246,7 @@ QString NoteDiffManager::revertPatchToOldText(const QString &newText,
     reversedPatch.length2 = origPatch.length1;
 
     // 3.2 反转每个Diff的操作类型
-    foreach (const Diff &origDiff, origPatch.diffs) {
+    foreach (const Diff& origDiff, origPatch.diffs) {
       Diff reversedDiff;
       reversedDiff.text = origDiff.text;  // 文本内容不变，仅反转操作
 

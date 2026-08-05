@@ -68,6 +68,7 @@ ListView {
                 spacing: 4
 
                 Text {
+                    id: mTitle
                     text: model.title
                     font.bold: true
                     elide: Text.ElideRight
@@ -78,6 +79,7 @@ ListView {
                 Text {
                     text: model.path
                     font.italic: true
+                    font.pixelSize: mTitle.font.pixelSize - 1
                     elide: Text.ElideMiddle
                     Layout.fillWidth: true
                     color: isCurrent ? "#cccccc" : (isDark ? "#bbbbbb" : "#606060")

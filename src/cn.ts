@@ -1404,7 +1404,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="463"/>
-        <location filename="MainWindow_Btn.cpp" line="293"/>
+        <location filename="MainWindow_Btn.cpp" line="295"/>
         <source>Stop</source>
         <translation>停止</translation>
     </message>
@@ -2129,8 +2129,8 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="4408"/>
-        <location filename="MainWindow_Btn.cpp" line="290"/>
-        <location filename="MainWindow_Btn.cpp" line="295"/>
+        <location filename="MainWindow_Btn.cpp" line="292"/>
+        <location filename="MainWindow_Btn.cpp" line="297"/>
         <source>Start</source>
         <translation>启动</translation>
     </message>
@@ -2410,31 +2410,31 @@
         <translation>是否导入这个数据？</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="591"/>
-        <location filename="MainWindow_Btn.cpp" line="644"/>
-        <location filename="MainWindow_Btn.cpp" line="681"/>
+        <location filename="MainWindow_Btn.cpp" line="593"/>
+        <location filename="MainWindow_Btn.cpp" line="646"/>
+        <location filename="MainWindow_Btn.cpp" line="683"/>
         <source>Tip</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="591"/>
-        <location filename="MainWindow_Btn.cpp" line="644"/>
-        <location filename="MainWindow_Btn.cpp" line="681"/>
+        <location filename="MainWindow_Btn.cpp" line="593"/>
+        <location filename="MainWindow_Btn.cpp" line="646"/>
+        <location filename="MainWindow_Btn.cpp" line="683"/>
         <source>No consumption record data available</source>
         <translation>暂无消费记录数据</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="1017"/>
+        <location filename="MainWindow_Btn.cpp" line="1024"/>
         <source>Total Reading: </source>
         <translation>总阅读时间：</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="1069"/>
+        <location filename="MainWindow_Btn.cpp" line="1076"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="1073"/>
+        <location filename="MainWindow_Btn.cpp" line="1080"/>
         <source>WebDav connection successful.</source>
         <translation>WebDav连接成功</translation>
     </message>
@@ -2483,7 +2483,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="695"/>
-        <location filename="MainWindow_Btn.cpp" line="1032"/>
+        <location filename="MainWindow_Btn.cpp" line="1039"/>
         <source>Reading Progress</source>
         <translation>阅读进度</translation>
     </message>
@@ -2492,9 +2492,9 @@
         <translation type="vanished">当前笔记不存在。请选择其它笔记或新建笔记。</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="162"/>
-        <location filename="MainWindow_Btn.cpp" line="975"/>
-        <location filename="MainWindow_Btn.cpp" line="986"/>
+        <location filename="MainWindow_Btn.cpp" line="164"/>
+        <location filename="MainWindow_Btn.cpp" line="982"/>
+        <location filename="MainWindow_Btn.cpp" line="993"/>
         <location filename="MainWindow_Menu.cpp" line="312"/>
         <source>Share to</source>
         <translation>分享到</translation>
@@ -4328,6 +4328,11 @@ Model ID: %1</source>
         <location filename="AI/GlobalAI.cpp" line="87"/>
         <source>Model Status:</source>
         <translation>模型状态：</translation>
+    </message>
+    <message>
+        <location filename="Notes/NoteDiffManager.cpp" line="77"/>
+        <source>No differences</source>
+        <translation>暂无差异</translation>
     </message>
 </context>
 <context>
@@ -11715,7 +11720,7 @@ Amount: %3</source>
 <context>
     <name>note_favorites</name>
     <message>
-        <location filename="qmlsrc/note_favorites.qml" line="98"/>
+        <location filename="qmlsrc/note_favorites.qml" line="100"/>
         <source>No matching notes</source>
         <translation>没有匹配的笔记</translation>
     </message>

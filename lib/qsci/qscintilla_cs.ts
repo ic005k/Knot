@@ -552,7 +552,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="463"/>
-        <location filename="../../src/MainWindow_Btn.cpp" line="293"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="295"/>
         <source>Stop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -580,7 +580,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="695"/>
-        <location filename="../../src/MainWindow_Btn.cpp" line="1032"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="1039"/>
         <source>Reading Progress</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1159,8 +1159,8 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="4408"/>
-        <location filename="../../src/MainWindow_Btn.cpp" line="290"/>
-        <location filename="../../src/MainWindow_Btn.cpp" line="295"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="292"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="297"/>
         <source>Start</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1813,9 +1813,9 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Btn.cpp" line="162"/>
-        <location filename="../../src/MainWindow_Btn.cpp" line="975"/>
-        <location filename="../../src/MainWindow_Btn.cpp" line="986"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="164"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="982"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="993"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="312"/>
         <source>Share to</source>
         <translation type="unfinished"></translation>
@@ -1841,31 +1841,31 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Btn.cpp" line="591"/>
-        <location filename="../../src/MainWindow_Btn.cpp" line="644"/>
-        <location filename="../../src/MainWindow_Btn.cpp" line="681"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="593"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="646"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="683"/>
         <source>Tip</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Btn.cpp" line="591"/>
-        <location filename="../../src/MainWindow_Btn.cpp" line="644"/>
-        <location filename="../../src/MainWindow_Btn.cpp" line="681"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="593"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="646"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="683"/>
         <source>No consumption record data available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Btn.cpp" line="1017"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="1024"/>
         <source>Total Reading: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Btn.cpp" line="1069"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="1076"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Btn.cpp" line="1073"/>
+        <location filename="../../src/MainWindow_Btn.cpp" line="1080"/>
         <source>WebDav connection successful.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3063,6 +3063,11 @@
         <location filename="../../src/AI/GlobalAI.cpp" line="80"/>
         <location filename="../../src/AI/GlobalAI.cpp" line="87"/>
         <source>Model Status:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/NoteDiffManager.cpp" line="77"/>
+        <source>No differences</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -8618,7 +8623,7 @@
 <context>
     <name>note_favorites</name>
     <message>
-        <location filename="../../src/qmlsrc/note_favorites.qml" line="98"/>
+        <location filename="../../src/qmlsrc/note_favorites.qml" line="100"/>
         <source>No matching notes</source>
         <translation type="unfinished"></translation>
     </message>

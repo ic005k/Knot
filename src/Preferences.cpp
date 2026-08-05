@@ -682,6 +682,51 @@ void Preferences::on_chkUIFont_clicked(bool checked) {
 }
 
 void Preferences::on_btnAISelect_clicked() {
+  close();
+  mui->frameMain->hide();
+  mui->frameAIAPIList->show();
+
+  QVariantList result;
+  for (int i = 0; i < ui->cboxEndpoint->count(); ++i) {
+    QString rawText = ui->cboxEndpoint->itemText(i);
+    QStringList parts = rawText.split("||", Qt::SkipEmptyParts);
+
+    QString title = parts.value(0).trimmed();
+    QString subtitle;
+
+    // 解析副标题逻辑
+    if (parts.size() >= 3) {
+      QString path = parts.value(1).trimmed();
+      QString key = parts.value(2).trimmed();
+      // 简单的 Key 脱敏处理
+      QString maskedKey = key.length() > 4 ? key.left(4) + "••••••" : key;
+      subtitle = QString("%1 | %2").arg(path, maskedKey);
+    } else {
+      subtitle = parts.mid(1).join("||").trimmed();
+    }
+
+    QVariantMap row;
+    row["title"] = title;
+    row["subtitle"] = subtitle;
+
+    result.append(row);
+  }
+
+  qInfo() << "result=" << result;
+
+  QObject* rootObj = mui->qwAIAPIList->rootObject();
+  if (!rootObj) return;
+  // 重点：找子对象 noteListView，不是直接给rootObj赋值
+  QObject* noteListView = rootObj->findChild<QObject*>("noteListView");
+  if (!noteListView) {
+    qWarning() << "cannot find noteListView";
+    return;
+  }
+
+  noteListView->setProperty("displayList", result);
+
+  return;
+
   // 1. 创建菜单
   QMenu* menu = new QMenu(this);
   menu->setAttribute(Qt::WA_DeleteOnClose);

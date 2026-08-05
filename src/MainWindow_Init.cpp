@@ -310,6 +310,13 @@ void MainWindow::init_ButtonStyle() {
 void MainWindow::initMainQW() {
   qmlRegisterType<DocumentHandler>("MyModel2", 1, 0, "DocumentHandler");
 
+  if (mui->qwAIAPIList->source().isEmpty()) {
+    mui->qwAIAPIList->rootContext()->setContextProperty("isDark", isDark);
+    mui->qwAIAPIList->rootContext()->setContextProperty("mw_one", mw_one);
+    mui->qwAIAPIList->setSource(
+        QUrl(QStringLiteral("qrc:/src/qmlsrc/aiapi_list.qml")));
+  }
+
   if (mui->qwViewCate->source().isEmpty()) {
     mui->qwViewCate->rootContext()->setContextProperty("isDark", isDark);
     mui->qwViewCate->rootContext()->setContextProperty("m_Report",
@@ -629,6 +636,8 @@ void MainWindow::init_Theme() {
 
   qDebug() << "red=" << red;
 
+  mui->qwAIAPIList->rootContext()->setContextProperty("isDark", isDark);
+
   mui->qwMainTab->rootContext()->setContextProperty("isDark", isDark);
   mui->qwMainDate->rootContext()->setContextProperty("isDark", isDark);
   mui->qwMainEvent->rootContext()->setContextProperty("isDark", isDark);
@@ -833,6 +842,7 @@ void MainWindow::init_UIWidget() {
   mui->frameNotesGraph->layout()->setContentsMargins(1, 1, 1, 1);
 
   mui->frameFavorites->hide();
+  mui->frameAIAPIList->hide();
 
   mui->chkWebDAV->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mui->chkAutoSync->setStyleSheet(mw_one->m_Preferences->chkStyle);

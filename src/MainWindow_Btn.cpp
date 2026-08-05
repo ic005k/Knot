@@ -1569,3 +1569,18 @@ void MainWindow::on_btnClearTitleKey_clicked() {
   mui->editTitleKey->clear();
   mui->editTitleKey->setFocus();
 }
+
+void MainWindow::on_btnBackAIAPIList_clicked() {
+  mui->frameAIAPIList->hide();
+  mui->frameMain->show();
+  mw_one->m_Preferences->openPreferences();
+}
+
+void MainWindow::on_btnAIAPIListOk_clicked(int index) {
+  if (index < 0) return;
+
+  mui->frameAIAPIList->hide();
+  mui->frameMain->show();
+  mw_one->m_Preferences->openPreferences();
+  mw_one->m_Preferences->ui->cboxEndpoint->setCurrentIndex(index);
+}

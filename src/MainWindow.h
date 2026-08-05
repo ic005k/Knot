@@ -505,6 +505,10 @@ class MainWindow : public QMainWindow {
   void showEvent(QShowEvent* event) override;
 
  public slots:
+  void on_btnBackAIAPIList_clicked();
+
+  void on_btnAIAPIListOk_clicked(int index);
+
   void safeCloseProgress();
 
   void on_btnBookCata_clicked();

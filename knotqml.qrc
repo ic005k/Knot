@@ -41,5 +41,6 @@
         <file>src/qmlsrc/mainchart.qml</file>
         <file>src/qmlsrc/showmsg.qml</file>
         <file>src/qmlsrc/note_favorites.qml</file>
+        <file>src/qmlsrc/aiapi_list.qml</file>
     </qresource>
 </RCC>
