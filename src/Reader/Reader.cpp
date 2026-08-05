@@ -2865,7 +2865,7 @@ void Reader::closeReader() {
   if (!isGpsRun) cancelKeepScreenOn();
 
   // ========== 完全异步延迟界面切换，释放渲染资源 ==========
-  QTimer::singleShot(0, this, [this]() {
+  QTimer::singleShot(0, this, []() {
     // 找到页面内所有QQuickWidget
     auto quickWidgets = mui->frameReader->findChildren<QQuickWidget*>();
     for (auto w : quickWidgets) {

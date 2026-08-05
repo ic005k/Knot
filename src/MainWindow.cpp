@@ -1034,7 +1034,7 @@ void MainWindow::closeProgress() {
 }
 
 void MainWindow::safeCloseProgress() {
-  QTimer::singleShot(100, this, [this]() { mw_one->closeProgress(); });
+  QTimer::singleShot(100, this, []() { mw_one->closeProgress(); });
 }
 
 int MainWindow::get_Day(QString date) {

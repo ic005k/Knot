@@ -716,6 +716,11 @@ void Preferences::on_btnAISelect_clicked() {
   if (!rootObj) return;
   rootObj->setProperty("displayList", result);
 
+  rootObj->setProperty("selectedIndex", -1);
+  int index = ui->cboxEndpoint->currentIndex();
+  // 设置选中索引
+  rootObj->setProperty("selectedIndex", index);
+
   return;
 
   /////////////////////////////////////////////////////////////////////

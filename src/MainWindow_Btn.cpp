@@ -1281,6 +1281,11 @@ void MainWindow::onAndroidBackHandle() {
     }
   }
 
+  if (mui->frameAIAPIList->isVisible()) {
+    on_btnBackAIAPIList_clicked();
+    return;
+  }
+
   if (mw_one->m_Preferences->isVisible()) {
     mw_one->m_Preferences->ui->btnBack->click();
     return;

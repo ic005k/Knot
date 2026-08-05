@@ -545,6 +545,7 @@ void Notes::on_editNoteLink_textChanged(const QString& arg1) {
 }
 
 void Notes::onPopupItemClicked(QListWidgetItem* item) {
+  Q_UNUSED(item);
 #ifndef Q_OS_ANDROID
 
   QString title = item->text();

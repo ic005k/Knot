@@ -9,6 +9,16 @@ ColumnLayout {
 
     property var displayList: []
 
+    // 新增代理属性，C++直接设置这个
+    property int selectedIndex: -1
+
+    // 监听 selectedIndex 变化，随时同步到 ListView
+    onSelectedIndexChanged: {
+        if (selectedIndex >= 0 && selectedIndex < proxyModel.count) {
+            noteListView.currentIndex = selectedIndex;
+        }
+    }
+
     ListView {
         id: noteListView
         objectName: "noteListView"
@@ -108,28 +118,34 @@ ColumnLayout {
         }
     }
 
-    // 底部按钮栏，不会遮挡ListView内容，ListView会自动让出底部空间
-    RowLayout {
+    // 底部按钮栏，增加背景矩形，适配暗黑模式
+    Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: 48
-        spacing: 8
+        anchors.topMargin: 12
+        color: isDark ? "#272727" : "#f7f7f7"
 
-        Button {
-            text: qsTr("Cancel")
-            Layout.fillWidth: true
-            onClicked: {
-                // 取消按钮事件
-                mw_one.on_btnBackAIAPIList_clicked();
-                console.log("cancel clicked");
+        RowLayout {
+            anchors.fill: parent
+            spacing: 8
+
+            Button {
+                text: qsTr("Cancel")
+                Layout.fillWidth: true
+                onClicked: {
+                    // 取消按钮事件
+                    mw_one.on_btnBackAIAPIList_clicked();
+                    console.log("cancel clicked");
+                }
             }
-        }
-        Button {
-            text: qsTr("OK")
-            Layout.fillWidth: true
-            onClicked: {
-                // 确定按钮事件
-                mw_one.on_btnAIAPIListOk_clicked(noteListView.currentIndex);
-                console.log("ok clicked, selected");
+            Button {
+                text: qsTr("OK")
+                Layout.fillWidth: true
+                onClicked: {
+                    // 确定按钮事件
+                    mw_one.on_btnAIAPIListOk_clicked(noteListView.currentIndex);
+                    console.log("ok clicked, selected");
+                }
             }
         }
     }

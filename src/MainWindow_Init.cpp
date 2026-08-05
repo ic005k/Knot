@@ -155,7 +155,7 @@ void MainWindow::init_Thread_Timer() {
           &QObject::deleteLater);
   // 搜索结束 → 主线程更新UI
   connect(m_searchWorker, &SearchWorker::searchFinished, this,
-          [this](const QList<QString>& results) {
+          [](const QList<QString>& results) {
             // 主线程安全更新
             resultsList = results;
             m_Method->initSearchResults();
