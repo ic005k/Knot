@@ -694,7 +694,7 @@ void Notes::processSingleRemoteFile(const QString& file) {
           tr("Decompression failed. Please check in Preferences that the "
              "passwords are consistent across all platforms.");
 
-      QMetaObject::invokeMethod(mw_one, [this]() {
+      QMetaObject::invokeMethod(mw_one, []() {
         auto msg = std::make_unique<ShowMessage>(mw_one);
         msg->showMsg("Knot", errorInfo, 1);
       });
@@ -738,7 +738,7 @@ void Notes::processSingleRemoteFile(const QString& file) {
             tr("Decompression failed. Please check in Preferences that the "
                "passwords are consistent across all platforms.");
 
-        QMetaObject::invokeMethod(mw_one, [this]() {
+        QMetaObject::invokeMethod(mw_one, []() {
           auto msg = std::make_unique<ShowMessage>(mw_one);
           msg->showMsg("Knot", errorInfo, 1);
         });
@@ -786,7 +786,7 @@ void Notes::processSingleRemoteFile(const QString& file) {
             tr("Decompression failed. Please check in Preferences that the "
                "passwords are consistent across all platforms.");
 
-        QMetaObject::invokeMethod(mw_one, [this]() {
+        QMetaObject::invokeMethod(mw_one, []() {
           auto msg = std::make_unique<ShowMessage>(mw_one);
           msg->showMsg("Knot", errorInfo, 1);
         });

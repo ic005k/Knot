@@ -1,26 +1,33 @@
 apply plugin: 'com.android.application'
 
-apply plugin: 'kotlin-android'
-apply plugin:'kotlin-kapt'                       // 启用 kapt
+//apply plugin: 'kotlin-android'
+//apply plugin:'kotlin-kapt'                       // 启用 kapt
 
 configurations.all {
     resolutionStrategy {
         force 'org.jetbrains:annotations:17.0.0' // Use the version you need
         force 'com.google.guava:guava:30.1-android' // 使用较新的 Guava 版本
+
+        // ✅ 新增：强制所有 kotlin-stdlib 相关模块使用同一版本
+        force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22'
     }
 
     exclude group: 'org.jetbrains', module: 'annotations-java5'
 
+    // ✅ 新增：彻底排除已被废弃的独立 jdk7/jdk8 模块（1.8+ 已合并入主 stdlib）
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+
 }
 
 buildscript {
-    ext.kotlin_version = '1.8.20'
+    //ext.kotlin_version = '1.8.20'
+    //ext.kotlin_version = '2.0.21'
 
     repositories {
         maven { url 'https://jitpack.io' }
-
-        //maven { url 'https://maven.aliyun.com/repository/google' }
-        //maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
 
         maven { url 'https://mirrors.huaweicloud.com/repository/maven/' }
 
@@ -33,16 +40,12 @@ buildscript {
         //classpath 'com.android.tools.build:gradle:7.4.1' //7.4.0
         classpath 'com.android.tools.build:gradle:8.7.3'
 
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        //classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
      }
 }
 
 repositories {
     maven { url 'https://jitpack.io' }
-
-    //maven { url 'https://maven.aliyun.com/repository/public/' }
-    //maven { url 'https://maven.aliyun.com/repository/google' }
-    //maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
 
     maven { url 'https://mirrors.huaweicloud.com/repository/maven/' }
 
@@ -93,9 +96,24 @@ dependencies {
 
     // Prism4j 语法高亮引擎
     implementation "io.noties:prism4j:2.0.0"
-    kapt "io.noties:prism4j-bundler:2.0.0"  // 关键：使用 kapt 处理注解
+
+    // ✅ Java 代码用这个（优先级更高，不走 KAPT）
+    annotationProcessor "io.noties:prism4j-bundler:2.0.0"
+
+    //kapt "io.noties:prism4j-bundler:2.0.0"  // 使用 kapt 处理注解
 
 }
+
+/*kapt {
+    javacOptions {
+        option("-source", "17")
+        option("-target", "17")
+    }
+
+    arguments {
+        arg("kapt.verbose", "true")  // 开启详细日志，方便排查
+    }
+}*/
 
 
 android {
@@ -181,9 +199,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
+    /*kotlinOptions {
         jvmTarget = '17'
-    }
+    }*/
 
 
     buildTypes {

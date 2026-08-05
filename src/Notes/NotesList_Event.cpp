@@ -536,7 +536,7 @@ int NotesList::on_btnImport_clicked() {
   }
 
   // 后台线程处理所有文件（全部完成才会进入 finished）
-  QFuture<void> future = QtConcurrent::run([this, MDFileList, item]() {
+  QFuture<void> future = QtConcurrent::run([MDFileList, item]() {
     for (int i = 0; i < MDFileList.size(); ++i) {
       const QString& fileName = MDFileList[i];
       if (QFile::exists(fileName)) {
@@ -757,7 +757,7 @@ Note:
     m_RenameNotes->close();
   });
 
-  connect(m_RenameNotes, &QDialog::finished, this, [this](int result) {
+  connect(m_RenameNotes, &QDialog::finished, this, [](int result) {
     Q_UNUSED(result);
     closeTextToolBar();
     m_Method->closeGrayWindows();
