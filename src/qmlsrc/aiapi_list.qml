@@ -7,6 +7,8 @@ ColumnLayout {
     anchors.fill: parent
     spacing: 0
 
+    property var displayList: []
+
     ListView {
         id: noteListView
         objectName: "noteListView"
@@ -20,15 +22,12 @@ ColumnLayout {
         focus: true
         keyNavigationEnabled: true
 
-        property string currentSelectedUid: ""
-        property var displayList: []
-
         ListModel {
             id: proxyModel
         }
 
         Connections {
-            target: noteListView
+            target: noteListView.parent
             function onDisplayListChanged() {
                 proxyModel.clear();
                 for (var i = 0; i < displayList.length; i++)
@@ -119,7 +118,7 @@ ColumnLayout {
             text: qsTr("Cancel")
             Layout.fillWidth: true
             onClicked: {
-                // 取消按钮事件，外部可绑定或者在这里写逻辑
+                // 取消按钮事件
                 mw_one.on_btnBackAIAPIList_clicked();
                 console.log("cancel clicked");
             }
@@ -128,9 +127,9 @@ ColumnLayout {
             text: qsTr("OK")
             Layout.fillWidth: true
             onClicked: {
-                // 确定按钮事件，可以读取 noteListView.currentSelectedUid 获取选中项
+                // 确定按钮事件
                 mw_one.on_btnAIAPIListOk_clicked(noteListView.currentIndex);
-                console.log("ok clicked, selected uid:", noteListView.currentSelectedUid);
+                console.log("ok clicked, selected");
             }
         }
     }

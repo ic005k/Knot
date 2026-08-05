@@ -801,7 +801,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="20"/>
-        <location filename="MainWindow.ui" line="7972"/>
+        <location filename="MainWindow.ui" line="8010"/>
         <source>Knot</source>
         <translation></translation>
     </message>
@@ -865,7 +865,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="4794"/>
-        <location filename="MainWindow_Init.cpp" line="994"/>
+        <location filename="MainWindow_Init.cpp" line="1004"/>
         <source>Year</source>
         <translation>年</translation>
     </message>
@@ -970,7 +970,7 @@
         <location filename="MainWindow.ui" line="1622"/>
         <location filename="MainWindow.ui" line="5544"/>
         <location filename="MainWindow.ui" line="6117"/>
-        <location filename="MainWindow.ui" line="8034"/>
+        <location filename="MainWindow.ui" line="8072"/>
         <source>Find</source>
         <translation>查找</translation>
     </message>
@@ -1277,7 +1277,7 @@
         <translation type="vanished">工具栏</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8009"/>
+        <location filename="MainWindow.ui" line="8047"/>
         <source>Remarks</source>
         <translation>备注</translation>
     </message>
@@ -1860,14 +1860,19 @@
         <translation>查看</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7994"/>
+        <location filename="MainWindow.ui" line="7981"/>
+        <source>AI API List:</source>
+        <translation>AI API 列表：</translation>
+    </message>
+    <message>
+        <location filename="MainWindow.ui" line="8032"/>
         <location filename="MainWindow_Menu.cpp" line="280"/>
         <location filename="MainWindow_Menu.cpp" line="319"/>
         <source>Rename Tab</source>
         <translation>重命名标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8044"/>
+        <location filename="MainWindow.ui" line="8082"/>
         <location filename="MainWindow_Menu.cpp" line="329"/>
         <source>Preferences</source>
         <translation>偏好设置</translation>
@@ -1883,7 +1888,7 @@
     <message>
         <location filename="MainWindow.ui" line="6835"/>
         <location filename="MainWindow.cpp" line="407"/>
-        <location filename="MainWindow_Init.cpp" line="993"/>
+        <location filename="MainWindow_Init.cpp" line="1003"/>
         <source>Amount</source>
         <translation>金额</translation>
     </message>
@@ -1917,7 +1922,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="4807"/>
-        <location filename="MainWindow_Init.cpp" line="1025"/>
+        <location filename="MainWindow_Init.cpp" line="1035"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
@@ -1941,49 +1946,49 @@
         <translation type="vanished">重命名标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7999"/>
+        <location filename="MainWindow.ui" line="8037"/>
         <location filename="MainWindow_Menu.cpp" line="104"/>
         <location filename="MainWindow_Menu.cpp" line="317"/>
         <source>Add Tab</source>
         <translation>增加标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8004"/>
+        <location filename="MainWindow.ui" line="8042"/>
         <location filename="MainWindow_Menu.cpp" line="121"/>
         <location filename="MainWindow_Menu.cpp" line="318"/>
         <source>Del Tab</source>
         <translation>删除标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8014"/>
+        <location filename="MainWindow.ui" line="8052"/>
         <location filename="MainWindow_Menu.cpp" line="333"/>
         <source>About</source>
         <translation>关于</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8019"/>
+        <location filename="MainWindow.ui" line="8057"/>
         <location filename="MainWindow_Menu.cpp" line="326"/>
         <source>Export Data</source>
         <translation>导出数据</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8024"/>
+        <location filename="MainWindow.ui" line="8062"/>
         <location filename="MainWindow_Menu.cpp" line="327"/>
         <source>Import Data</source>
         <translation>导入数据</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8029"/>
+        <location filename="MainWindow.ui" line="8067"/>
         <source>View App Data</source>
         <translation>查看App数据</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8049"/>
+        <location filename="MainWindow.ui" line="8087"/>
         <source>Memos</source>
         <translation>备忘录</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8039"/>
+        <location filename="MainWindow.ui" line="8077"/>
         <location filename="MainWindow_Menu.cpp" line="323"/>
         <source>Report</source>
         <translation>报表</translation>
@@ -2059,12 +2064,12 @@
         <translation type="vanished">今天</translation>
     </message>
     <message>
-        <location filename="MainWindow_Init.cpp" line="955"/>
+        <location filename="MainWindow_Init.cpp" line="965"/>
         <source>Slide Right to Start or Stop</source>
         <translation>滑动到右边启动或停止</translation>
     </message>
     <message>
-        <location filename="MainWindow_Init.cpp" line="992"/>
+        <location filename="MainWindow_Init.cpp" line="1002"/>
         <source>Freq</source>
         <translation>频次</translation>
     </message>
@@ -2083,7 +2088,7 @@
     </message>
     <message>
         <location filename="MainWindow.cpp" line="712"/>
-        <location filename="MainWindow_Init.cpp" line="991"/>
+        <location filename="MainWindow_Init.cpp" line="1001"/>
         <source>Date</source>
         <translation>日期</translation>
     </message>
@@ -3789,8 +3794,8 @@
         <translation>字体</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="809"/>
-        <location filename="Preferences.cpp" line="835"/>
+        <location filename="Preferences.cpp" line="847"/>
+        <location filename="Preferences.cpp" line="873"/>
         <source>Warning</source>
         <translation>警告</translation>
     </message>
@@ -3895,18 +3900,18 @@ Model ID: %1</source>
         <translation type="vanished">连接测试通过！模型 ID：%1</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="810"/>
-        <location filename="Preferences.cpp" line="836"/>
+        <location filename="Preferences.cpp" line="848"/>
+        <location filename="Preferences.cpp" line="874"/>
         <source>Endpoint / API Key / Model ID cannot be empty</source>
         <translation>接入地址 / API 密钥 / 模型 ID 不能为空</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="879"/>
+        <location filename="Preferences.cpp" line="917"/>
         <source>Save Failed</source>
         <translation>保存失败</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="879"/>
+        <location filename="Preferences.cpp" line="917"/>
         <source>Cannot open config file to write</source>
         <translation>无法打开配置文件写入数据</translation>
     </message>
@@ -4330,7 +4335,7 @@ Model ID: %1</source>
         <translation>模型状态：</translation>
     </message>
     <message>
-        <location filename="Notes/NoteDiffManager.cpp" line="77"/>
+        <location filename="Notes/NoteDiffManager.cpp" line="76"/>
         <source>No differences</source>
         <translation>暂无差异</translation>
     </message>
@@ -10105,6 +10110,24 @@ Model ID: %1</source>
         <location filename="Exercise/WeatherFetcher.cpp" line="216"/>
         <source>天气数据格式错误</source>
         <translation></translation>
+    </message>
+</context>
+<context>
+    <name>aiapi_list</name>
+    <message>
+        <location filename="qmlsrc/aiapi_list.qml" line="101"/>
+        <source>No content</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="qmlsrc/aiapi_list.qml" line="118"/>
+        <source>Cancel</source>
+        <translation type="unfinished">取消</translation>
+    </message>
+    <message>
+        <location filename="qmlsrc/aiapi_list.qml" line="127"/>
+        <source>OK</source>
+        <translation type="unfinished">确定</translation>
     </message>
 </context>
 <context>

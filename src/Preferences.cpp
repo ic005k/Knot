@@ -712,20 +712,13 @@ void Preferences::on_btnAISelect_clicked() {
     result.append(row);
   }
 
-  qInfo() << "result=" << result;
-
   QObject* rootObj = mui->qwAIAPIList->rootObject();
   if (!rootObj) return;
-  // 重点：找子对象 noteListView，不是直接给rootObj赋值
-  QObject* noteListView = rootObj->findChild<QObject*>("noteListView");
-  if (!noteListView) {
-    qWarning() << "cannot find noteListView";
-    return;
-  }
-
-  noteListView->setProperty("displayList", result);
+  rootObj->setProperty("displayList", result);
 
   return;
+
+  /////////////////////////////////////////////////////////////////////
 
   // 1. 创建菜单
   QMenu* menu = new QMenu(this);

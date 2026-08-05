@@ -472,7 +472,7 @@
     <name>MainWindow</name>
     <message>
         <location filename="../../src/MainWindow.ui" line="20"/>
-        <location filename="../../src/MainWindow.ui" line="7972"/>
+        <location filename="../../src/MainWindow.ui" line="8010"/>
         <source>Knot</source>
         <translation type="unfinished"></translation>
     </message>
@@ -710,12 +710,12 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="4807"/>
-        <location filename="../../src/MainWindow_Init.cpp" line="1025"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="1035"/>
         <source>Month</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.ui" line="8039"/>
+        <location filename="../../src/MainWindow.ui" line="8077"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="323"/>
         <source>Report</source>
         <translation type="unfinished"></translation>
@@ -729,7 +729,7 @@
         <location filename="../../src/MainWindow.ui" line="1622"/>
         <location filename="../../src/MainWindow.ui" line="5544"/>
         <location filename="../../src/MainWindow.ui" line="6117"/>
-        <location filename="../../src/MainWindow.ui" line="8034"/>
+        <location filename="../../src/MainWindow.ui" line="8072"/>
         <source>Find</source>
         <translation type="unfinished"></translation>
     </message>
@@ -742,7 +742,7 @@
     <message>
         <location filename="../../src/MainWindow.ui" line="6835"/>
         <location filename="../../src/MainWindow.cpp" line="407"/>
-        <location filename="../../src/MainWindow_Init.cpp" line="993"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="1003"/>
         <source>Amount</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1192,7 +1192,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="4794"/>
-        <location filename="../../src/MainWindow_Init.cpp" line="994"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="1004"/>
         <source>Year</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1493,62 +1493,67 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.ui" line="7994"/>
+        <location filename="../../src/MainWindow.ui" line="7981"/>
+        <source>AI API List:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow.ui" line="8032"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="280"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="319"/>
         <source>Rename Tab</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.ui" line="7999"/>
+        <location filename="../../src/MainWindow.ui" line="8037"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="104"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="317"/>
         <source>Add Tab</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.ui" line="8004"/>
+        <location filename="../../src/MainWindow.ui" line="8042"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="121"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="318"/>
         <source>Del Tab</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.ui" line="8009"/>
+        <location filename="../../src/MainWindow.ui" line="8047"/>
         <source>Remarks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.ui" line="8014"/>
+        <location filename="../../src/MainWindow.ui" line="8052"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="333"/>
         <source>About</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.ui" line="8019"/>
+        <location filename="../../src/MainWindow.ui" line="8057"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="326"/>
         <source>Export Data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.ui" line="8024"/>
+        <location filename="../../src/MainWindow.ui" line="8062"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="327"/>
         <source>Import Data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.ui" line="8029"/>
+        <location filename="../../src/MainWindow.ui" line="8067"/>
         <source>View App Data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.ui" line="8044"/>
+        <location filename="../../src/MainWindow.ui" line="8082"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="329"/>
         <source>Preferences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.ui" line="8049"/>
+        <location filename="../../src/MainWindow.ui" line="8087"/>
         <source>Memos</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1585,12 +1590,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Init.cpp" line="955"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="965"/>
         <source>Slide Right to Start or Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Init.cpp" line="992"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="1002"/>
         <source>Freq</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1786,7 +1791,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.cpp" line="712"/>
-        <location filename="../../src/MainWindow_Init.cpp" line="991"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="1001"/>
         <source>Date</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2916,24 +2921,24 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="809"/>
-        <location filename="../../src/Preferences.cpp" line="835"/>
+        <location filename="../../src/Preferences.cpp" line="847"/>
+        <location filename="../../src/Preferences.cpp" line="873"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="810"/>
-        <location filename="../../src/Preferences.cpp" line="836"/>
+        <location filename="../../src/Preferences.cpp" line="848"/>
+        <location filename="../../src/Preferences.cpp" line="874"/>
         <source>Endpoint / API Key / Model ID cannot be empty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="879"/>
+        <location filename="../../src/Preferences.cpp" line="917"/>
         <source>Save Failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="879"/>
+        <location filename="../../src/Preferences.cpp" line="917"/>
         <source>Cannot open config file to write</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3066,7 +3071,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NoteDiffManager.cpp" line="77"/>
+        <location filename="../../src/Notes/NoteDiffManager.cpp" line="76"/>
         <source>No differences</source>
         <translation type="unfinished"></translation>
     </message>
@@ -8481,6 +8486,24 @@
     <message>
         <location filename="../../src/Exercise/WeatherFetcher.cpp" line="216"/>
         <source>天气数据格式错误</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>aiapi_list</name>
+    <message>
+        <location filename="../../src/qmlsrc/aiapi_list.qml" line="101"/>
+        <source>No content</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/aiapi_list.qml" line="118"/>
+        <source>Cancel</source>
+        <translation type="unfinished">Cancelar</translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/aiapi_list.qml" line="127"/>
+        <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
