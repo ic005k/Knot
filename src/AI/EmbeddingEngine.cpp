@@ -28,7 +28,7 @@ EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
   // model_params.use_mmap = true;
   model_params.check_tensors = true;  // ⭐ 新增：防止损坏模型导致后续崩溃
 
-  m_model = llama_load_model_from_file(path.c_str(), model_params);
+  m_model = llama_model_load_from_file(path.c_str(), model_params);
   if (!m_model) {
     qCritical() << "[EmbeddingEngine] Failed to load model:" << ggufPath;
     return;
@@ -41,7 +41,7 @@ EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
 
   // ⭐ 核心：限制最大上下文，而非盲目使用训练长度
   // Embedding 推理不需要完整训练上下文，8192 已覆盖绝大多数场景
-  const uint32_t trainCtx = llama_n_ctx_train(m_model);
+  const uint32_t trainCtx = llama_model_n_ctx_train(m_model);
   const uint32_t maxReasonableCtx = 8192;
   ctx_params.n_ctx = std::min(trainCtx, maxReasonableCtx);
 
@@ -56,10 +56,10 @@ EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
   // encodeBatch 的 maxBatchSize 通常 <= 16，这里留余量即可
   ctx_params.n_seq_max = 16;
 
-  m_ctx = llama_new_context_with_model(m_model, ctx_params);
+  m_ctx = llama_init_from_model(m_model, ctx_params);
   if (!m_ctx) {
     qCritical() << "[EmbeddingEngine] Failed to create context";
-    llama_free_model(m_model);
+    llama_model_free(m_model);
     m_model = nullptr;
     return;
   }
@@ -75,7 +75,7 @@ EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
 
 EmbeddingEngine::~EmbeddingEngine() {
   if (m_ctx) llama_free(m_ctx);
-  if (m_model) llama_free_model(m_model);
+  if (m_model) llama_model_free(m_model);
 }
 
 bool EmbeddingEngine::isValid() const {
@@ -122,7 +122,8 @@ QVector<float> EmbeddingEngine::encode(const QString& text) {
   int n_tokens = static_cast<int>(all_tokens.size());
 
   // 4. 构建 batch（使用截断后的 tokens）
-  int dim = llama_n_embd(m_model);
+  int dim = llama_model_n_embd(m_model);
+
   llama_batch batch = llama_batch_init(n_tokens, 0, 1);
 
   for (int i = 0; i < n_tokens; i++) {
@@ -208,7 +209,7 @@ QVector<float> EmbeddingEngine::encodeTokens(
   if (!isValid() || tokens.empty()) return result;
 
   int n_tokens = static_cast<int>(tokens.size());
-  int dim = llama_n_embd(m_model);
+  int dim = llama_model_n_embd(m_model);
 
   // 构建 batch
   llama_batch batch = llama_batch_init(n_tokens, 0, 1);
@@ -276,7 +277,7 @@ QString EmbeddingEngine::detokenize(
 
 int EmbeddingEngine::embeddingDimension() const {
   if (!m_model) return 0;
-  return llama_n_embd(m_model);
+  return llama_model_n_embd(m_model);
 }
 
 int EmbeddingEngine::maxTokens() const { return m_maxTokens; }
@@ -287,7 +288,8 @@ std::vector<QVector<float>> EmbeddingEngine::encodeBatch(
   std::vector<QVector<float>> results(texts.size());
   if (!isValid() || texts.isEmpty()) return results;
 
-  const int dim = llama_n_embd(m_model);
+  const int dim = llama_model_n_embd(m_model);
+
   const llama_vocab* vocab = llama_model_get_vocab(m_model);
   const uint32_t n_ubatch = llama_n_ubatch(m_ctx);
 

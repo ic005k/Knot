@@ -161,7 +161,6 @@ if(ANDROID)
         # ❌ 不要设置 LIBRARY_OUTPUT_DIRECTORY
     )
 
-    qt_finalize_target(${PROJECT_NAME})
 
 else()
     add_executable(${PROJECT_NAME}
@@ -313,32 +312,69 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 # ============================================================
-# 11. Android 部署配置
+# 11. Android 部署配置 (✅ 已修复 libomp 查找逻辑)
 # ============================================================
 if(ANDROID)
-    # ✅ 自动获取当前ABI对应的NDK libomp.so路径
-    get_filename_component(_ndk_libomp
-        "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}"
-        NAME_WE  # 不可靠，改用下方手动拼接
-    )
-    # NDK r26/r27 统一路径格式
-    set(_ndk_libomp_path "${CMAKE_FIND_ROOT_PATH}/usr/lib/${CMAKE_SYSTEM_LIBRARY_PATH}/libomp.so")
+    set(_ndk_libomp_path "")
+
+    # ✅ 方法1: 遍历编译器隐式链接目录（最可靠，跨平台通用）
+    foreach(_dir ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
+        if(EXISTS "${_dir}/libomp.so")
+            set(_ndk_libomp_path "${_dir}/libomp.so")
+            message(STATUS "✅ Found libomp.so via implicit link dirs: ${_ndk_libomp_path}")
+            break()
+        endif()
+    endforeach()
+
+    # ✅ 方法2: Fallback - 通过 ANDROID_NDK 变量拼接（兼容所有 host 平台）
+    if(NOT EXISTS "${_ndk_libomp_path}" AND DEFINED ANDROID_NDK)
+        # 自动检测 host 平台，不再硬编码 windows-x86_64
+        if(CMAKE_HOST_WIN32)
+            set(_prebuilt_dir "windows-x86_64")
+        elseif(CMAKE_HOST_APPLE)
+            set(_prebuilt_dir "darwin-x86_64")
+        else()
+            set(_prebuilt_dir "linux-x86_64")
+        endif()
+
+        set(_candidate "${ANDROID_NDK}/toolchains/llvm/prebuilt/${_prebuilt_dir}/sysroot/usr/lib/${CMAKE_ANDROID_ARCH_TRIPLE}/libomp.so")
+        if(EXISTS "${_candidate}")
+            set(_ndk_libomp_path "${_candidate}")
+            message(STATUS "✅ Found libomp.so via NDK fallback: ${_ndk_libomp_path}")
+        endif()
+    endif()
+
+    # ✅ 关键：找不到时立即在 configure 阶段报错，而非等到运行时崩溃
     if(NOT EXISTS "${_ndk_libomp_path}")
-        # fallback: 直接从 ANDROID_NDK 变量拼接
-        set(_ndk_libomp_path "${ANDROID_NDK}/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib/${CMAKE_ANDROID_ARCH_TRIPLE}/libomp.so")
+        message(FATAL_ERROR
+            "❌ Cannot find libomp.so for ABI=${CMAKE_ANDROID_ARCH_ABI}!\n"
+            "   Searched implicit dirs: ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}\n"
+            "   ANDROID_NDK=${ANDROID_NDK}\n"
+            "   Please verify your NDK installation includes OpenMP support."
+        )
+    endif()
+
+    # ✅ 验证 OpenSSL 库也存在
+    set(_openssl_crypto "${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a/libcrypto_3.so")
+    set(_openssl_ssl "${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a/libssl_3.so")
+    if(NOT EXISTS "${_openssl_crypto}" OR NOT EXISTS "${_openssl_ssl}")
+        message(FATAL_ERROR "❌ Android OpenSSL libraries not found at: android-openssl/ssl_3/v8a/")
+    endif()
+
+    # ✅ 安全追加 QT_ANDROID_EXTRA_LIBS，兼容所有 Qt6 版本
+    get_target_property(_existing_extra_libs ${PROJECT_NAME} QT_ANDROID_EXTRA_LIBS)
+    if(NOT _existing_extra_libs OR _existing_extra_libs STREQUAL "_existing_extra_libs-NOTFOUND")
+        set(_existing_extra_libs "")
     endif()
 
     set_target_properties(${PROJECT_NAME} PROPERTIES
-        QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android"
-        # ✅ 在原有OpenSSL基础上追加 libomp.so（分号分隔）
-        QT_ANDROID_EXTRA_LIBS
-            "${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a/libcrypto_3.so;${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a/libssl_3.so;${_ndk_libomp_path}"
+        QT_ANDROID_EXTRA_LIBS "${_existing_extra_libs};${_openssl_crypto};${_openssl_ssl};${_ndk_libomp_path}"
     )
 
-    message(STATUS "📦 Android Extra Libs:")
-    message(STATUS "   - libcrypto_3.so")
-    message(STATUS "   - libssl_3.so")
-    message(STATUS "   - libomp.so → ${_ndk_libomp_path}")
+    message(STATUS "📦 Android Extra Libs configured:")
+    message(STATUS "   - ${_openssl_crypto}")
+    message(STATUS "   - ${_openssl_ssl}")
+    message(STATUS "   - ${_ndk_libomp_path}")
 endif()
 
 # ============================================================
@@ -359,3 +395,10 @@ qt_add_translations(${PROJECT_NAME}
     QM_FILES_OUTPUT_VARIABLE QM_FILES
     #RESOURCE_PREFIX "/translations"
 )
+
+# ============================================================
+# 14. 最终化目标 (⚠️ 必须在所有 QT_ANDROID_* 属性设置之后)
+# ============================================================
+if(ANDROID)
+    qt_finalize_target(${PROJECT_NAME})
+endif()
