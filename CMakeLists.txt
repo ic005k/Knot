@@ -163,11 +163,6 @@ if(ANDROID)
 
     qt_finalize_target(${PROJECT_NAME})
 
-    # Android 额外库保持不变
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        QT_ANDROID_EXTRA_LIBS
-            "${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a/libcrypto_3.so;${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a/libssl_3.so"
-    )
 else()
     add_executable(${PROJECT_NAME}
         ${APP_SOURCES} ${APP_FORMS} ${APP_RESOURCES}
@@ -321,11 +316,29 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 # 11. Android 部署配置
 # ============================================================
 if(ANDROID)
+    # ✅ 自动获取当前ABI对应的NDK libomp.so路径
+    get_filename_component(_ndk_libomp
+        "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}"
+        NAME_WE  # 不可靠，改用下方手动拼接
+    )
+    # NDK r26/r27 统一路径格式
+    set(_ndk_libomp_path "${CMAKE_FIND_ROOT_PATH}/usr/lib/${CMAKE_SYSTEM_LIBRARY_PATH}/libomp.so")
+    if(NOT EXISTS "${_ndk_libomp_path}")
+        # fallback: 直接从 ANDROID_NDK 变量拼接
+        set(_ndk_libomp_path "${ANDROID_NDK}/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib/${CMAKE_ANDROID_ARCH_TRIPLE}/libomp.so")
+    endif()
+
     set_target_properties(${PROJECT_NAME} PROPERTIES
         QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android"
+        # ✅ 在原有OpenSSL基础上追加 libomp.so（分号分隔）
         QT_ANDROID_EXTRA_LIBS
-            "${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a/libcrypto_3.so;${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a/libssl_3.so"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a/libcrypto_3.so;${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a/libssl_3.so;${_ndk_libomp_path}"
     )
+
+    message(STATUS "📦 Android Extra Libs:")
+    message(STATUS "   - libcrypto_3.so")
+    message(STATUS "   - libssl_3.so")
+    message(STATUS "   - libomp.so → ${_ndk_libomp_path}")
 endif()
 
 # ============================================================

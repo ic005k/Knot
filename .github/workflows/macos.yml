@@ -1,4 +1,5 @@
 name: MacOS
+
 on:
   push:
     branches: [main]
@@ -6,11 +7,9 @@ on:
       - '**'
       - '!stats.txt'
       - '!README.md'
-
   pull_request:
     paths:
       - '**'
-
   release:
     types: [published]
 
@@ -31,7 +30,6 @@ jobs:
       VERSION: Mac
       orgName: Knot
       ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
-      QT_DIR: ${{ github.workspace }}/Qt/6.6.0/clang_64
 
     steps:
       - name: Checkout code
@@ -48,28 +46,31 @@ jobs:
           modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
           install-deps: true
           source: false
-          dir: ${{ env.QT_DIR }}
 
       - name: Install Homebrew (x86_64)
         run: |
+          # macos-14 是 ARM64，/opt/homebrew 是 ARM brew，先清理避免冲突
           if [ -d "/opt/homebrew" ]; then
             sudo rm -rf /opt/homebrew
           fi
+          # 强制以 x86_64 模式安装 Homebrew 到 /usr/local
           arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bash_profile
-          source ~/.bash_profile
+          /usr/local/bin/brew --version
 
       - name: Install OpenSSL via Homebrew (x86_64)
         run: |
-          arch -x86_64 brew update
-          arch -x86_64 brew install openssl
-          arch -x86_64 brew link openssl --force
+          # ✅ 直接使用绝对路径调用 x86_64 brew
+          /usr/local/bin/brew update
+          /usr/local/bin/brew install openssl@3
+          /usr/local/bin/brew link openssl@3 --force
 
-      # ✅ 仅替换此步骤：qmake+make → cmake（保留x86_64强制架构）
       - name: build macos
         run: |
-          echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bash_profile
-          source ~/.bash_profile
+          # ✅ 将 x86_64 工具链加入当前步骤的 PATH
+          export PATH="/usr/local/bin:$PATH"
+
+          which cmake
+          file $(which cmake)
 
           export ARCHFLAGS="-arch x86_64"
           export CFLAGS="-arch x86_64"
@@ -80,12 +81,14 @@ jobs:
           arch -x86_64 cmake -B build \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
-                -DCMAKE_OSX_ARCHITECTURES=x86_64
+                -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+                -DOPENSSL_ROOT_DIR=$(/usr/local/bin/brew --prefix openssl@3)
 
           echo "=== CMake Build (x86_64) ==="
-          arch -x86_64 cmake --build build --config Release --parallel
+          # ✅ 限制并行数防止 OOM
+          arch -x86_64 cmake --build build --config Release --parallel 2
 
-          echo "=== 对齐产物路径（保证后续package步骤无需修改） ==="
+          echo "=== 对齐产物路径 ==="
           mkdir -p bin/release
           cp -R "build/${{ env.targetName }}.app" "bin/release/${{ env.targetName }}.app"
 
@@ -93,9 +96,10 @@ jobs:
           ls -la "bin/release/${{ env.targetName }}.app/Contents/MacOS/"
           file "bin/release/${{ env.targetName }}.app/Contents/MacOS/${{ env.targetName }}"
 
-      # ✅ 以下所有步骤完全保持原样，未做任何修改
       - name: package
         run: |
+          # ✅ 使用 QT_ROOT_DIR 而非硬编码版本，适配 matrix 变化
+          export PATH="$QT_ROOT_DIR/bin:$PATH"
           cp -f ExtBin/mac/Info.plist bin/release/${targetName}.app/Contents/Info.plist
           cp -R -p -f bin/release/${targetName}.app ${targetName}.app
           macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg

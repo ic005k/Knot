@@ -67,7 +67,8 @@ jobs:
           cmake -B build \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
-          cmake --build build --config Release --parallel
+          # ✅ 限制为2线程并行，防止OOM（ubuntu-22.04只有7GB RAM）
+          cmake --build build --config Release --parallel 2
 
           echo "=== 对齐产物路径（保证后续package步骤无需修改） ==="
           mkdir -p bin/release
