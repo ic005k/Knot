@@ -40,6 +40,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # ✅ 安装 Qt（universal，含 arm64）
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
@@ -61,59 +62,53 @@ jobs:
           source: false
           dir: ${{ github.workspace }}/Qt
 
+      # ✅ 安装 arm64 Homebrew
       - name: Install Homebrew (arm64)
         run: |
           echo 'export PATH="/opt/homebrew/bin:$PATH"' >> ~/.bash_profile
           source ~/.bash_profile
 
+      # ✅ 安装 OpenSSL
       - name: Install OpenSSL
         run: |
           brew update
           brew install openssl
           brew link openssl --force
 
-      # ✅ 仅替换此步骤：qmake+make → cmake（原生 arm64）
+      # ✅ 编译（原生 arm64）
       - name: Build macOS (arm64)
         run: |
           export PATH="/opt/homebrew/bin:$PATH"
 
-          echo "=== CMake Configure (arm64) ==="
-          cmake -B build \
-                -DCMAKE_BUILD_TYPE=Release \
-                -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
-                -DCMAKE_OSX_ARCHITECTURES=arm64
+          qmake "CONFIG += release" "QMAKE_APPLE_DEVICE_ARCHS=arm64"
+          make -j$(sysctl -n hw.ncpu)
 
-          echo "=== CMake Build (arm64) ==="
-          cmake --build build --config Release --parallel
-
-          echo "=== 对齐产物路径（保证后续Package步骤无需修改） ==="
-          mkdir -p bin/release
-          cp -R "build/${{ env.targetName }}.app" "bin/release/${{ env.targetName }}.app"
-
-          echo "=== 验证产物架构 ==="
-          file "bin/release/${{ env.targetName }}.app/Contents/MacOS/${{ env.targetName }}"
-
-      # ✅ 以下所有步骤完全保持原样（仅将qmake -query替换为QT_ROOT_DIR变量）
+      # ✅ 打包
       - name: Package
         run: |
           cp -f ExtBin/mac/Info.plist bin/release/${targetName}.app/Contents/Info.plist
           cp -R -p bin/release/${targetName}.app ${targetName}.app
 
           #######################################################################
-          # 使用 QT_ROOT_DIR 替代 qmake -query（CMake构建下qmake可能不在PATH中）
-          QT_ACTUAL_LIB="$QT_ROOT_DIR/lib"
+
+          # 自动读取当前Qt真实库路径，修复Qt6.10 macdeployqt检索缺陷
+          QT_ACTUAL_LIB=$(qmake -query QT_INSTALL_LIBS)
           macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg \
             -libpath="$QT_ACTUAL_LIB" \
             -libpath="./lib"
+
           ########################################################################
+          #macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg
 
           cp ${targetName}.dmg bin/release/${targetName}.dmg
 
+      # ✅ 上传 Artifact
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.orgName }}-${{ env.VERSION }}
           path: bin/release/${{ env.targetName }}.dmg
 
+      # ✅ 上传 Release
       - name: Upload Release
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2

@@ -74,6 +74,11 @@ file(GLOB ZLIB_SOURCES CONFIGURE_DEPENDS lib/zlib/*.c)
 add_library(knot_zlib STATIC ${ZLIB_SOURCES})
 target_include_directories(knot_zlib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib/zlib)
 
+# ✅ 非 Windows 平台需要 unistd.h 提供 lseek/read/close
+if(NOT WIN32)
+    target_compile_definitions(knot_zlib PRIVATE Z_HAVE_UNISTD_H)
+endif()
+
 # --- QuaZip (AUTOMOC 必须在添加源文件前设置) ---
 add_library(knot_quazip STATIC)
 set_target_properties(knot_quazip PROPERTIES AUTOMOC ON)
@@ -142,15 +147,49 @@ set(APP_TRANSLATIONS
 # ============================================================
 # 6. 主目标
 # ============================================================
+
 if(ANDROID)
-    add_library(${PROJECT_NAME} SHARED
+    # ✅ 使用 qt_add_executable 而非 qt_add_library(SHARED)
+    qt_add_executable(${PROJECT_NAME}
         ${APP_SOURCES} ${APP_FORMS} ${APP_RESOURCES}
+    )
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android"
+        # ❌ 不再需要 QT_IS_ANDROID_APP，qt_add_executable 自动处理
+        # ❌ 不要设置 OUTPUT_NAME
+        # ❌ 不要设置 LIBRARY_OUTPUT_DIRECTORY
+    )
+
+    qt_finalize_target(${PROJECT_NAME})
+
+    # Android 额外库保持不变
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        QT_ANDROID_EXTRA_LIBS
+            "${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a/libcrypto_3.so;${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a/libssl_3.so"
     )
 else()
     add_executable(${PROJECT_NAME}
         ${APP_SOURCES} ${APP_FORMS} ${APP_RESOURCES}
     )
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_SOURCE_DIR}/bin/debug"
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/release"
+    )
 endif()
+
+# ✅ Unity Build 必须在目标创建之后
+# 开启 Unity Build
+#set_target_properties(${PROJECT_NAME} PROPERTIES
+#    UNITY_BUILD ON
+#    UNITY_BUILD_BATCH_SIZE 8
+#)
+
+# 第三方静态库也开启 Unity Build
+#foreach(lib knot_zlib knot_quazip knot_cmark_gfm knot_sqlite llama_common)
+#    set_target_properties(${lib} PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 16)
+#endforeach()
 
 # ============================================================
 # 7. 头文件路径 (全平台公共，与平台无关)
@@ -201,15 +240,18 @@ if(WIN32)
         )
 
 elseif(APPLE)
-    execute_process(COMMAND uname -m OUTPUT_VARIABLE MACOS_ARCH OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if(MACOS_ARCH STREQUAL "arm64")
-        message(STATUS "✅ Detected macOS ARM64")
-        target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC)
-    else()
-        message(STATUS "ℹ️ Detected macOS x86_64")
-        target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_AVX2 GGML_F16C)
-        target_compile_options(${PROJECT_NAME} PRIVATE -mavx2 -mf16c -mfma)
-    endif()
+        # ✅ 使用 CMake 原生变量，替代 execute_process(uname -m)
+        # 在 arm64 CI 上 → CMAKE_SYSTEM_PROCESSOR == "arm64"
+        # 在 x86_64 CI 上 → CMAKE_SYSTEM_PROCESSOR == "x86_64"
+        if(CMAKE_OSX_ARCHITECTURES MATCHES "arm64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+            message(STATUS "✅ Targeting macOS ARM64 (NEON)")
+            target_compile_definitions(${PROJECT_NAME} PRIVATE
+                GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC)
+        else()
+            message(STATUS "ℹ️ Targeting macOS x86_64 (AVX2)")
+            target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_AVX2 GGML_F16C)
+            target_compile_options(${PROJECT_NAME} PRIVATE -mavx2 -mf16c -mfma)
+        endif()
 elseif(ANDROID)
     target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC)
 elseif(UNIX)
@@ -253,7 +295,8 @@ elseif(APPLE)
         pthread Accelerate Foundation
     )
 elseif(ANDROID)
-    target_link_libraries(${PROJECT_NAME} PRIVATE pthread dl ssl crypto)
+    # ✅ Android Bionic 已将 pthread 合入 libc，无需单独链接
+    target_link_libraries(${PROJECT_NAME} PRIVATE dl ssl crypto)
     if(CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a")
         target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a)
     elseif(CMAKE_ANDROID_ARCH_ABI STREQUAL "x86_64")
