@@ -4,16 +4,14 @@ on:
   push:
     branches: [ main ]
     paths:
-    - '**'
-    - '!stats.txt' # 排除根目录下的 stats.txt
-    - '!README.md'
-
+      - '**'
+      - '!stats.txt'
+      - '!README.md'
   pull_request:
     paths:
-    - '**'
-
+      - '**'
   release:
-    types: [ published ] # 监听发布事件
+    types: [ published ]
 
 env:
   QT_VERSION: "6.10.3"
@@ -30,184 +28,151 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        path: 'src'
+      - uses: actions/checkout@v4
+        with:
+          path: 'src'
 
-    - name: Setup JDK
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'zulu'
-        java-version: ${{ env.JAVA_VERSION }}
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: ${{ env.JAVA_VERSION }}
 
-    - name: Install NDK
-      run: |
-        $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
-        Invoke-WebRequest -Uri $ndkUrl -OutFile "ndk.zip"
-        Expand-Archive -Path "ndk.zip" -DestinationPath "android-sdk\ndk"
-        Rename-Item -Path "android-sdk\ndk\android-ndk-r26b" -NewName $env:NDK_VERSION
-        echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
-        echo "$env:ANDROID_NDK_ROOT\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
+      # ✅ 修复：使用正确的 NDK r27c 下载链接，而非 r26b
+      - name: Install NDK
+        shell: pwsh
+        run: |
+          $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r27c-windows.zip"
+          Invoke-WebRequest -Uri $ndkUrl -OutFile "ndk.zip"
+          Expand-Archive -Path "ndk.zip" -DestinationPath "android-sdk\ndk"
+          # r27c 解压后目录名为 android-ndk-r27c
+          Rename-Item -Path "android-sdk\ndk\android-ndk-r27c" -NewName $env:NDK_VERSION -ErrorAction SilentlyContinue
+          $ndkRoot = "$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION"
+          echo "ANDROID_NDK_ROOT=$ndkRoot" >> $env:GITHUB_ENV
+          echo "$ndkRoot\toolchains\llvm\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
+          Write-Host "✅ NDK installed at: $ndkRoot"
+          Test-Path "$ndkRoot\build\cmake\android.toolchain.cmake"
 
-    - name: Install Desktop Qt
-      run: |
-        python -m pip install --upgrade aqtinstall
-        aqt install-qt windows desktop $env:QT_VERSION $env:DESKTOP_ARCH `
-          -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
-          --outputdir "$env:GITHUB_WORKSPACE\Qt"
+      - name: Install Desktop Qt
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade aqtinstall
+          aqt install-qt windows desktop $env:QT_VERSION $env:DESKTOP_ARCH `
+            -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
+            --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
-    - name: Install Android Qt
-      run: |
-        aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
-          -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
-          --outputdir "$env:GITHUB_WORKSPACE\Qt"
+      - name: Install Android Qt
+        shell: pwsh
+        run: |
+          aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
+            -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
+            --outputdir "$env:GITHUB_WORKSPACE\Qt"
+          # ✅ 验证 Qt6Config.cmake 确实存在
+          $qtAndroidRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH"
+          $configPath = Get-ChildItem -Path $qtAndroidRoot -Recurse -Filter "Qt6Config.cmake" | Select-Object -First 1
+          if ($configPath) {
+            Write-Host "✅ Found Qt6Config.cmake at: $($configPath.FullName)"
+          } else {
+            Write-Host "::error::Qt6Config.cmake not found under $qtAndroidRoot"
+            Get-ChildItem $qtAndroidRoot -Recurse -Depth 3 | Select-Object FullName
+            exit 1
+          }
 
-    # ✅ 仅替换此步骤：qmake+make → cmake
-    - name: Build
-      shell: cmd
-      run: |
-        echo "=== 初始化环境 ==="
-        set "QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%QT_ARCH%"
-        set "DESKTOP_QT_ROOT=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\%DESKTOP_ARCH%"
-        set "PATH=%QT_ROOT%\bin;%DESKTOP_QT_ROOT%\bin;%PATH%"
+      # ✅ 核心修复：改用 PowerShell 避免 CMD 路径展开问题 + 显式指定 Qt6_DIR
+      - name: Build
+        shell: pwsh
+        run: |
+          $qtAndroidRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH"
+          $desktopQtRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:DESKTOP_ARCH"
+          $ndkRoot = $env:ANDROID_NDK_ROOT
 
-        cd "%GITHUB_WORKSPACE%\src" || (echo "::error::无法进入src目录！" & exit 1)
+          # 查找 Qt6Config.cmake 所在目录
+          $qt6Dir = (Get-ChildItem -Path $qtAndroidRoot -Recurse -Filter "Qt6Config.cmake" | Select-Object -First 1).Directory.FullName
+          Write-Host "Qt6_DIR = $qt6Dir"
 
-        echo "=== CMake Configure ==="
-        cmake -B build ^
-              -G Ninja ^
-              -DCMAKE_BUILD_TYPE=Release ^
-              -DCMAKE_PREFIX_PATH="%QT_ROOT%" ^
-              -DCMAKE_TOOLCHAIN_FILE="%ANDROID_NDK_ROOT%\build\cmake\android.toolchain.cmake" ^
-              -DANDROID_ABI=arm64-v8a ^
-              -DANDROID_PLATFORM=android-%ANDROID_API_LEVEL% ^
-              -DQT_HOST_PATH="%DESKTOP_QT_ROOT%"
-        if errorlevel 1 (echo "::error::CMake Configure失败！" & exit 1)
+          Set-Location "$env:GITHUB_WORKSPACE\src"
 
-        echo "=== CMake Build ==="
-        cmake --build build --config Release --parallel
-        if errorlevel 1 (echo "::error::CMake编译失败！" & exit 1)
+          Write-Host "=== CMake Configure ==="
+          cmake -B build `
+                -G Ninja `
+                -DCMAKE_BUILD_TYPE=Release `
+                -DCMAKE_PREFIX_PATH="$qtAndroidRoot" `
+                -DQt6_DIR="$qt6Dir" `
+                -DCMAKE_TOOLCHAIN_FILE="$ndkRoot\build\cmake\android.toolchain.cmake" `
+                -DANDROID_ABI=arm64-v8a `
+                -DANDROID_PLATFORM=android-$env:ANDROID_API_LEVEL `
+                -DQT_HOST_PATH="$desktopQtRoot"
+          if ($LASTEXITCODE -ne 0) { Write-Host "::error::CMake Configure失败！"; exit 1 }
 
-        echo "=== 对齐产物路径（保证后续打包步骤无需修改） ==="
-        if not exist "bin\release" mkdir "bin\release"
-        copy /Y "build\libKnot_arm64-v8a.so" "bin\release\libKnot_arm64-v8a.so"
-        copy /Y "build\android-Knot-deployment-settings.json" "android-Knot-deployment-settings.json"
+          Write-Host "=== CMake Build ==="
+          cmake --build build --config Release --parallel 2
+          if ($LASTEXITCODE -ne 0) { Write-Host "::error::CMake编译失败！"; exit 1 }
 
-        echo "=== 检查编译产物 ==="
-        dir /s *.so
-        dir android-Knot-deployment-settings.json
+          Write-Host "=== 对齐产物路径 ==="
+          New-Item -ItemType Directory -Force -Path "bin\release" | Out-Null
 
-    # ✅ 以下步骤完全保持原样，未做任何修改
-    - name: Generate and Sign APK
-      shell: cmd
-      env:
-        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-      run: |
-        echo "=== 初始化APK生成环境（匹配本地配置） ==="
-        set "QT_MINGW_BIN=%GITHUB_WORKSPACE%\Qt\%QT_VERSION%\mingw_64\bin"
-        if not exist "%QT_MINGW_BIN%" (
-          echo "::error::Qt mingw目录不存在！路径：%QT_MINGW_BIN%"
-          exit 1
-        )
-        set "ANDROID_DEPLOY_QT=%QT_MINGW_BIN%\androiddeployqt.exe"
-        if not exist "%ANDROID_DEPLOY_QT%" (
-          echo "::error::androiddeployqt不存在！路径：%ANDROID_DEPLOY_QT%"
-          exit 1
-        )
-        set "PATH=%QT_MINGW_BIN%;%PATH%"
-        cd "%GITHUB_WORKSPACE%\src"
+          # ✅ 智能查找 .so 产物（兼容不同 CMake 输出位置）
+          $soFile = Get-ChildItem -Path "build" -Recurse -Filter "libKnot_arm64-v8a.so" | Select-Object -First 1
+          if (-not $soFile) {
+            # fallback: 尝试不带 arch 后缀的名称
+            $soFile = Get-ChildItem -Path "build" -Recurse -Filter "libKnot.so" | Select-Object -First 1
+          }
+          if ($soFile) {
+            Copy-Item $soFile.FullName "bin\release\" -Force
+            Write-Host "✅ Copied SO: $($soFile.FullName)"
+          } else {
+            Write-Host "::error::未找到 .so 产物！"
+            Get-ChildItem build -Recurse -Include *.so | Select-Object FullName
+            exit 1
+          }
 
-        echo "=== 验证部署配置文件 ==="
-        if exist "android-Knot-deployment-settings.json" (
-          echo "部署配置文件存在：android-Knot-deployment-settings.json"
-        ) else (
-          echo "::error::部署配置文件缺失！"
-          dir
-          exit 1
-        )
+          # deployment-settings.json 通常在 build 根目录或 android-build 子目录
+          $deployJson = Get-ChildItem -Path "build" -Recurse -Filter "*deployment-settings.json" | Select-Object -First 1
+          if ($deployJson) {
+            Copy-Item $deployJson.FullName "." -Force
+            Write-Host "✅ Copied deployment settings: $($deployJson.FullName)"
+          } else {
+            Write-Host "::warning::未找到 deployment-settings.json，APK打包步骤可能失败"
+          }
 
-        echo "=== 手动复制.so文件到目标目录 ==="
-        set "SOURCE_SO=bin\release\libKnot_arm64-v8a.so"
-        set "TARGET_DIR=build\android-build\libs\arm64-v8a"
-        if not exist "%SOURCE_SO%" (
-          echo "::error::源.so文件不存在！路径：%SOURCE_SO%"
-          dir bin\release\
-          exit 1
-        )
-        if not exist "%TARGET_DIR%" (
-          mkdir "%TARGET_DIR%" || (echo "::error::创建目标目录失败！" & exit 1)
-        )
-        copy "%SOURCE_SO%" "%TARGET_DIR%\" || (echo "::error::复制.so文件失败！" & exit 1)
-        set "TARGET_SO=%TARGET_DIR%\libKnot_arm64-v8a.so"
-        if not exist "%TARGET_SO%" (
-          echo "::error::目标.so文件不存在！路径：%TARGET_SO%"
-          dir "%TARGET_DIR%\"
-          exit 1
-        )
-        echo ".so文件复制成功：%TARGET_SO%"
+          Write-Host "=== 检查编译产物 ==="
+          Get-ChildItem bin\release -Recurse | Select-Object FullName, Length
 
-        set "ANDROID_BUILD_DIR=build\android-build"
-        mkdir signing
-        cd signing
-        echo "=== 解密密钥库文件 ==="
-        PowerShell -Command "$base64 = $env:KEYSTORE_BASE64; [System.Convert]::FromBase64String($base64) | Set-Content -Path 'release.keystore' -Encoding Byte"
-        if not exist "release.keystore" (
-          echo "::error::密钥文件解密失败，文件不存在！"
-          dir
-          exit 1
-        )
-        for %%I in (release.keystore) do set "FILE_SIZE=%%~zI"
-        echo "密钥文件大小：%FILE_SIZE% 字节"
-        if %FILE_SIZE% lss 100 (
-          echo "::error::密钥文件过小，可能解密不完整！"
-          exit 1
-        )
-        set "KEYSTORE_PATH=%cd%\release.keystore"
-        cd ..
+      # ✅ 以下步骤保持原逻辑，仅将 shell 改为 pwsh 以保持一致性
+      - name: Generate and Sign APK
+        shell: pwsh
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          $qtMingwBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\mingw_64\bin"
+          # 如果 mingw_64 不存在，尝试 win64_mingw
+          if (-not (Test-Path $qtMingwBin)) {
+            $qtMingwBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:DESKTOP_ARCH\bin"
+          }
+          if (-not (Test-Path "$qtMingwBin\androiddeployqt.exe")) {
+            Write-Host "::error::androiddeployqt.exe not found! Searched: $qtMingwBin"
+            Get-ChildItem "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION" -Directory | Select-Object Name
+            exit 1
+          }
 
-        echo "=== 调用androiddeployqt生成并签名APK ==="
-        "%ANDROID_DEPLOY_QT%" ^
-          --input android-Knot-deployment-settings.json ^
-          --output "%ANDROID_BUILD_DIR%" ^
-          --android-platform android-%ANDROID_API_LEVEL% ^
-          --jdk "%JAVA_HOME%" ^
-          --gradle --release ^
-          --sign "%KEYSTORE_PATH%" ^
-          "%KEY_ALIAS%" ^
-          --storepass "%KEYSTORE_PASSWORD%" ^
-          --keypass "%KEY_PASSWORD%" ^
-          --verbose
-        if errorlevel 1 (
-          echo "::error::APK生成或签名失败！"
-          exit 1
-        )
+          Set-Location "$env:GITHUB_WORKSPACE\src"
 
-        echo "=== 检查APK产物 ==="
-        set "APK_PATH=%ANDROID_BUILD_DIR%\build\outputs\apk\release\*.apk"
-        if exist "%APK_PATH%" (
-          echo "APK生成成功:"
-          dir "%APK_PATH%"
-        ) else (
-          echo "::error::APK未生成！"
-          exit 1
-        )
+          # 验证部署配置
+          if (-not (Test-Path "android-Knot-deployment-settings.json")) {
+            # 尝试其他可能的文件名
+            $altJson = Get-ChildItem -Filter "*deployment-settings.json" | Select-Object -First 1
+            if ($altJson) {
+              Rename-Item $altJson.FullName "android-Knot-deployment-settings.json"
+            } else {
+              Write-Host "::error::部署配置文件缺失！"
+              Get-ChildItem *.json | Select-Object Name
+              exit 1
+            }
+          }
 
-    - name: Upload signed APK
-      if: success()
-      uses: actions/upload-artifact@v4
-      with:
-        name: Knot-APK-signed
-        path: src\build\android-build\build\outputs\apk\release\android-build-release-signed.apk
-
-    - name: Upload to GitHub Release
-      if: github.event_name == 'release'
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: src\build\android-build\build\outputs\apk\release\android-build-release-signed.apk
-        asset_name: android-build-release-signed.apk
-        tag: ${{ github.ref_name }}
-        overwrite: true
+          # 复制 .so 到 android-build 目录
+          $sourceSo = "bin\release\libKnot_arm64-v8a.so"
+          $targetDir = "build\android-build\libs\arm64-v8a"

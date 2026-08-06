@@ -7,11 +7,9 @@ on:
       - '**'
       - '!stats.txt'
       - '!README.md'
-
   pull_request:
     paths:
       - '**'
-
   release:
     types: [published]
 
@@ -19,13 +17,11 @@ jobs:
   build:
     name: Build-arm64
     runs-on: macos-14   # Apple Silicon
-
     permissions:
       contents: write
 
     strategy:
       matrix:
-        os: [macos-14]
         qt_ver: [6.9.3]
         qt_arch: [clang_64]
 
@@ -34,7 +30,6 @@ jobs:
       VERSION: Mac-arm64
       orgName: Knot
       ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
-      QT_DIR: ${{ github.workspace }}/Qt/${{ matrix.qt_ver }}/clang_64
 
     steps:
       - name: Checkout code
@@ -61,19 +56,16 @@ jobs:
           source: false
           dir: ${{ github.workspace }}/Qt
 
-      - name: Install Homebrew (arm64)
+      # ✅ 修复：用 GITHUB_ENV 持久化 PATH，source bash_profile 不会传递到后续步骤
+      - name: Install Homebrew & OpenSSL (arm64)
         run: |
-          echo 'export PATH="/opt/homebrew/bin:$PATH"' >> ~/.bash_profile
-          source ~/.bash_profile
-
-      - name: Install OpenSSL
-        run: |
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
           brew update
           brew install openssl
           brew link openssl --force
 
-      # ✅ 仅替换此步骤：qmake+make → cmake（原生 arm64）
       - name: Build macOS (arm64)
+        timeout-minutes: 30
         run: |
           export PATH="/opt/homebrew/bin:$PATH"
 
@@ -84,28 +76,31 @@ jobs:
                 -DCMAKE_OSX_ARCHITECTURES=arm64
 
           echo "=== CMake Build (arm64) ==="
-          cmake --build build --config Release --parallel
+          # ✅ 限制并行数防止 OOM / 超时
+          cmake --build build --config Release --parallel 4
 
-          echo "=== 对齐产物路径（保证后续Package步骤无需修改） ==="
+          echo "=== 对齐产物路径 ==="
           mkdir -p bin/release
-          cp -R "build/${{ env.targetName }}.app" "bin/release/${{ env.targetName }}.app"
+
+          if [ ! -d "bin/release/${{ env.targetName }}.app" ]; then
+            echo "未在 bin/release 找到产物，尝试从 build 目录复制..."
+            cp -R "build/${{ env.targetName }}.app" "bin/release/${{ env.targetName }}.app"
+          else
+            echo "产物已在 bin/release 目录中，跳过复制"
+          fi
 
           echo "=== 验证产物架构 ==="
           file "bin/release/${{ env.targetName }}.app/Contents/MacOS/${{ env.targetName }}"
 
-      # ✅ 以下所有步骤完全保持原样（仅将qmake -query替换为QT_ROOT_DIR变量）
       - name: Package
         run: |
           cp -f ExtBin/mac/Info.plist bin/release/${targetName}.app/Contents/Info.plist
           cp -R -p bin/release/${targetName}.app ${targetName}.app
 
-          #######################################################################
-          # 使用 QT_ROOT_DIR 替代 qmake -query（CMake构建下qmake可能不在PATH中）
           QT_ACTUAL_LIB="$QT_ROOT_DIR/lib"
           macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg \
             -libpath="$QT_ACTUAL_LIB" \
             -libpath="./lib"
-          ########################################################################
 
           cp ${targetName}.dmg bin/release/${targetName}.dmg
 

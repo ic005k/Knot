@@ -47,29 +47,37 @@ jobs:
           install-deps: true
           source: false
 
+      # ✅ 新增：macos-14 (ARM64) 必须先安装 Rosetta 2 才能运行 arch -x86_64
+      - name: Install Rosetta 2
+        run: |
+          sudo softwareupdate --install-rosetta --agree-to-license
+
       - name: Install Homebrew (x86_64)
         run: |
-          # macos-14 是 ARM64，/opt/homebrew 是 ARM brew，先清理避免冲突
           if [ -d "/opt/homebrew" ]; then
             sudo rm -rf /opt/homebrew
           fi
-          # 强制以 x86_64 模式安装 Homebrew 到 /usr/local
           arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           /usr/local/bin/brew --version
 
-      - name: Install OpenSSL via Homebrew (x86_64)
+      - name: Install OpenSSL & CMake via Homebrew (x86_64)
         run: |
-          # ✅ 直接使用绝对路径调用 x86_64 brew
           /usr/local/bin/brew update
-          /usr/local/bin/brew install openssl@3
+          # ✅ 显式安装 cmake，确保 x86_64 版本可用
+          /usr/local/bin/brew install openssl@3 cmake
           /usr/local/bin/brew link openssl@3 --force
 
       - name: build macos
         run: |
-          # ✅ 将 x86_64 工具链加入当前步骤的 PATH
           export PATH="/usr/local/bin:$PATH"
 
-          which cmake
+          # ✅ 防御性检查：确认 x86_64 cmake 确实存在
+          if [ ! -x "/usr/local/bin/cmake" ]; then
+            echo "❌ /usr/local/bin/cmake not found! x86_64 Homebrew may have failed."
+            ls -la /usr/local/bin/ || true
+            exit 1
+          fi
+          echo "✅ Using cmake: $(which cmake)"
           file $(which cmake)
 
           export ARCHFLAGS="-arch x86_64"
@@ -85,12 +93,18 @@ jobs:
                 -DOPENSSL_ROOT_DIR=$(/usr/local/bin/brew --prefix openssl@3)
 
           echo "=== CMake Build (x86_64) ==="
-          # ✅ 限制并行数防止 OOM
           arch -x86_64 cmake --build build --config Release --parallel 2
 
           echo "=== 对齐产物路径 ==="
           mkdir -p bin/release
-          cp -R "build/${{ env.targetName }}.app" "bin/release/${{ env.targetName }}.app"
+
+          # ✅ 兼容 CMake 可能直接输出到 bin/release 的情况
+          if [ ! -d "bin/release/${{ env.targetName }}.app" ]; then
+            echo "未在 bin/release 找到产物，尝试从 build 目录复制..."
+            cp -R "build/${{ env.targetName }}.app" "bin/release/${{ env.targetName }}.app"
+          else
+            echo "产物已在 bin/release 目录中，跳过复制"
+          fi
 
           echo "=== 验证产物 ==="
           ls -la "bin/release/${{ env.targetName }}.app/Contents/MacOS/"
@@ -98,7 +112,6 @@ jobs:
 
       - name: package
         run: |
-          # ✅ 使用 QT_ROOT_DIR 而非硬编码版本，适配 matrix 变化
           export PATH="$QT_ROOT_DIR/bin:$PATH"
           cp -f ExtBin/mac/Info.plist bin/release/${targetName}.app/Contents/Info.plist
           cp -R -p -f bin/release/${targetName}.app ${targetName}.app

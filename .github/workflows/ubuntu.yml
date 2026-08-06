@@ -57,26 +57,35 @@ jobs:
           sudo apt-get install -y libqt6serialport6
           sudo apt-get install -y libibus-1.0-dev ibus libglib2.0-dev
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      # ✅ 仅替换此步骤：qmake+make → cmake
       - name: build ubuntu
         run: |
           cmake -B build \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+
           # ✅ 限制为2线程并行，防止OOM（ubuntu-22.04只有7GB RAM）
           cmake --build build --config Release --parallel 2
 
-          echo "=== 对齐产物路径（保证后续package步骤无需修改） ==="
+          echo "=== 对齐产物路径 ==="
           mkdir -p bin/release
-          cp "build/${{ env.targetName }}" "bin/release/${{ env.targetName }}"
+
+          # ✅ 兼容两种情况：如果CMake已直接输出到bin/release则跳过复制
+          if [ ! -f "bin/release/${{ env.targetName }}" ]; then
+            echo "未在 bin/release 找到产物，尝试从 build 目录复制..."
+            cp "build/${{ env.targetName }}" "bin/release/${{ env.targetName }}"
+          else
+            echo "产物已在 bin/release 目录中，跳过复制"
+          fi
+
           chmod +x "bin/release/${{ env.targetName }}"
 
           echo "=== 验证产物 ==="
           ls -la bin/release/${{ env.targetName }}
+          file bin/release/${{ env.targetName }}
 
       - name: install linuxdeployqt
         run: |
@@ -85,7 +94,7 @@ jobs:
 
       - name: Remove unused SQL drivers (SAFE MODE)
         run: |
-          export PATH="${{ env.QT_DIR }}/bin:$PATH"
+          export PATH="$QT_ROOT_DIR/bin:$PATH"
           QT_PLUGINS_DIR=$(qmake -query QT_INSTALL_PLUGINS)
           mkdir -p /tmp/qt-drivers-backup
           cp "$QT_PLUGINS_DIR/sqldrivers/"* /tmp/qt-drivers-backup/
@@ -100,7 +109,6 @@ jobs:
           echo "SQLite驱动状态:"
           ldd "$QT_PLUGINS_DIR/sqldrivers/libqsqlite.so" || true
 
-      # ✅ 以下所有步骤完全保持原样，未做任何修改
       - name: package
         run: |
           cp res/icon.png bin/release/icon.png
