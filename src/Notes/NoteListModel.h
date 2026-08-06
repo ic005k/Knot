@@ -1,3 +1,5 @@
+#pragma once
+
 // 头文件：NoteListModel.h
 #include <QAbstractListModel>
 #include <QString>

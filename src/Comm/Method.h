@@ -1,10 +1,10 @@
 #ifndef METHOD_H
 #define METHOD_H
 
-#include <lib/quazip/quazip.h>
-#include <lib/quazip/quazipfile.h>
-#include <lib/quazip/quazipnewinfo.h>
-#include <lib/quazip/unzip.h>
+#include <quazip.h>
+#include <quazipfile.h>
+#include <quazipnewinfo.h>
+#include <unzip.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>

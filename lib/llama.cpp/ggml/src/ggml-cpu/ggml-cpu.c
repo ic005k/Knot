@@ -2064,6 +2064,18 @@ static void ggml_compute_forward(struct ggml_compute_params * params, struct ggm
             {
                 ggml_compute_forward_lightning_indexer(params, tensor);
             } break;
+        case GGML_OP_DSV4_HC_COMB:
+            {
+                ggml_compute_forward_dsv4_hc_comb(params, tensor);
+            } break;
+        case GGML_OP_DSV4_HC_PRE:
+            {
+                ggml_compute_forward_dsv4_hc_pre(params, tensor);
+            } break;
+        case GGML_OP_DSV4_HC_POST:
+            {
+                ggml_compute_forward_dsv4_hc_post(params, tensor);
+            } break;
         case GGML_OP_MAP_CUSTOM1:
             {
                 ggml_compute_forward_map_custom1(params, tensor);
@@ -2244,6 +2256,9 @@ static int ggml_get_n_tasks(struct ggml_tensor * node, int n_threads) {
         case GGML_OP_COUNT_EQUAL:
         case GGML_OP_SOLVE_TRI:
         case GGML_OP_GATED_DELTA_NET:
+        case GGML_OP_DSV4_HC_COMB:
+        case GGML_OP_DSV4_HC_PRE:
+        case GGML_OP_DSV4_HC_POST:
             {
                 n_tasks = n_threads;
             } break;
@@ -2628,29 +2643,13 @@ static bool ggml_thread_apply_affinity(const bool * mask) {
 static bool ggml_thread_apply_priority(int32_t prio) {
     struct sched_param p;
     int32_t policy = SCHED_OTHER;
-    /*switch (prio) {
+    switch (prio) {
         case GGML_SCHED_PRIO_LOW:      policy = SCHED_BATCH; p.sched_priority = 0;  break;
         case GGML_SCHED_PRIO_NORMAL:   policy = SCHED_OTHER; p.sched_priority = 0;  break;
         case GGML_SCHED_PRIO_MEDIUM:   policy = SCHED_FIFO;  p.sched_priority = 40; break;
         case GGML_SCHED_PRIO_HIGH:     policy = SCHED_FIFO;  p.sched_priority = 80; break;
         case GGML_SCHED_PRIO_REALTIME: policy = SCHED_FIFO;  p.sched_priority = 90; break;
-    }*/
-
-    switch (prio) {
-    case GGML_SCHED_PRIO_LOW:
-#if defined(SCHED_BATCH)
-        policy = SCHED_BATCH;
-#else
-        policy = SCHED_OTHER;
-#endif
-        p.sched_priority = 0;
-        break;
-    case GGML_SCHED_PRIO_NORMAL:   policy = SCHED_OTHER; p.sched_priority = 0;  break;
-    case GGML_SCHED_PRIO_MEDIUM:   policy = SCHED_FIFO;  p.sched_priority = 40; break;
-    case GGML_SCHED_PRIO_HIGH:     policy = SCHED_FIFO;  p.sched_priority = 80; break;
-    case GGML_SCHED_PRIO_REALTIME: policy = SCHED_FIFO;  p.sched_priority = 90; break;
     }
-
 
     if (prio == GGML_SCHED_PRIO_NORMAL) {
         // Keep inherited policy/priority
@@ -3802,6 +3801,14 @@ int ggml_cpu_get_sve_cnt(void) {
 
 int ggml_cpu_has_sme(void) {
 #if defined(__ARM_ARCH) && defined(__ARM_FEATURE_SME)
+    return 1;
+#else
+    return 0;
+#endif
+}
+
+int ggml_cpu_has_sme2(void) {
+#if defined(__ARM_ARCH) && defined(__ARM_FEATURE_SME2)
     return 1;
 #else
     return 0;

@@ -4,7 +4,7 @@
 
 #include "src/MainWindow.h"
 #include "src/defines.h"
-#include "ui_MainWindow.h"
+// #include "ui_MainWindow.h"
 
 Method::Method(QWidget* parent) : QDialog(parent) {
   this->installEventFilter(this);

@@ -2,7 +2,7 @@
 
 #include "src/MainWindow.h"
 #include "src/defines.h"
-#include "ui_MainWindow.h"
+// #include "ui_MainWindow.h"
 #include "ui_Todo.h"
 
 QString highLblStyle = "color:rgb(212,35,122)";

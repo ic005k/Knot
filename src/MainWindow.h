@@ -92,13 +92,13 @@
 #include "ui_CloudBackup.h"
 #include "ui_DateSelector.h"
 #include "ui_MainWindow.h"
-#include "ui_Notes.h"
-#include "ui_NotesList.h"
+#include "Notes/ui_Notes.h"
+#include "Notes/ui_NotesList.h"
 #include "ui_Preferences.h"
-#include "ui_ShowMessage.h"
-#include "ui_StepsOptions.h"
-#include "ui_Todo.h"
-#include "ui_TodoAlarm.h"
+#include "Comm/ui_ShowMessage.h"
+#include "Exercise/ui_StepsOptions.h"
+#include "Todo/ui_Todo.h"
+#include "Todo/ui_TodoAlarm.h"
 
 class SaveThread;
 class ReadChartThread;

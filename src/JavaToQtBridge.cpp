@@ -5,7 +5,7 @@
 
 #include "MainWindow.h"
 #include "src/defines.h"
-#include "ui_MainWindow.h"
+// #include "ui_MainWindow.h"
 
 #ifdef Q_OS_ANDROID
 static void JavaNotify_0();

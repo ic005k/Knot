@@ -3,6 +3,7 @@
 #include "src/AI/EmbeddingEngine.h"
 #include "src/AI/GlobalAI.h"
 #include "src/Notes/VectorSearchService.h"
+// #include "src/ui_MainWindow.h"
 
 NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   ui->setupUi(this);

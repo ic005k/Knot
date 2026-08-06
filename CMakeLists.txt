@@ -1,0 +1,305 @@
+cmake_minimum_required(VERSION 3.16)
+project(Knot VERSION 1.0 LANGUAGES C CXX)
+
+# ============================================================
+# ✅ 全局 MSVC 编译选项（必须在 add_library / add_executable 之前）
+# ============================================================
+if(MSVC)
+    add_compile_definitions(
+        NOMINMAX
+        WIN32_LEAN_AND_MEAN
+    )
+    add_compile_options(/utf-8)
+endif()
+
+# ============================================================
+# 全局标准与 Qt 自动化
+# ============================================================
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
+# ✅ 告诉 AUTOUIC 去 src/ 目录下搜索 .ui 文件
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+# ============================================================
+# 1. Qt 模块查找
+# ============================================================
+find_package(Qt6 REQUIRED COMPONENTS
+    Core Gui Widgets Network PrintSupport Charts Sensors Sql
+    Qml Quick QuickWidgets Location Xml Svg Concurrent LinguistTools Core5Compat
+)
+
+# ============================================================
+# 2. 第三方库: llama.cpp (通过 add_subdirectory 构建)
+# ============================================================
+set(LLAMA_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/lib/llama.cpp)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(LLAMA_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(LLAMA_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(LLAMA_BUILD_SERVER OFF CACHE BOOL "" FORCE)
+set(LLAMA_BUILD_CLI OFF CACHE BOOL "" FORCE)
+set(GGML_CUDA OFF CACHE BOOL "" FORCE)
+set(GGML_METAL OFF CACHE BOOL "" FORCE)
+set(GGML_VULKAN OFF CACHE BOOL "" FORCE)
+set(GGML_OPENCL OFF CACHE BOOL "" FORCE)
+set(GGML_SYCL OFF CACHE BOOL "" FORCE)
+set(GGML_BLAS OFF CACHE BOOL "" FORCE)
+set(LLAMA_EMBED ON CACHE BOOL "" FORCE)
+add_subdirectory(${LLAMA_ROOT} ${CMAKE_BINARY_DIR}/llama.cpp)
+
+# llama.cpp common 工具库 (未被 llama 目标包含的部分)
+file(GLOB LLAMA_COMMON_SRC CONFIGURE_DEPENDS ${LLAMA_ROOT}/common/*.cpp)
+add_library(llama_common STATIC ${LLAMA_COMMON_SRC})
+target_include_directories(llama_common PUBLIC
+    ${LLAMA_ROOT}/common
+    ${LLAMA_ROOT}/include
+    ${LLAMA_ROOT}/vendor
+    ${LLAMA_ROOT}/vendor/nlohmann
+)
+target_link_libraries(llama_common PUBLIC llama)
+
+# ✅ 关键：MSVC 下强制 UTF-8 源码+执行字符集
+if(MSVC)
+    target_compile_options(llama_common PRIVATE /utf-8)
+endif()
+
+# ============================================================
+# 3. 第三方库: zlib + QuaZip + cmark-gfm + sqlite
+# ============================================================
+# --- zlib ---
+file(GLOB ZLIB_SOURCES CONFIGURE_DEPENDS lib/zlib/*.c)
+add_library(knot_zlib STATIC ${ZLIB_SOURCES})
+target_include_directories(knot_zlib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib/zlib)
+
+# --- QuaZip (AUTOMOC 必须在添加源文件前设置) ---
+add_library(knot_quazip STATIC)
+set_target_properties(knot_quazip PROPERTIES AUTOMOC ON)
+
+# ✅ 关键：强制静态模式，禁止 dllimport/dllexport
+target_compile_definitions(knot_quazip PRIVATE
+    QUAZIP_STATIC          # 告诉 QuaZip 内部代码不要使用 __declspec
+    QUAZIP_BUILD_STATIC    # 部分版本使用此宏
+)
+
+file(GLOB QUAZIP_SOURCES CONFIGURE_DEPENDS lib/quazip/*.cpp lib/quazip/*.c)
+target_sources(knot_quazip PRIVATE ${QUAZIP_SOURCES})
+target_include_directories(knot_quazip PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib/quazip)
+target_link_libraries(knot_quazip PUBLIC knot_zlib Qt6::Core)
+
+# --- cmark-gfm ---
+file(GLOB CMARK_SRC CONFIGURE_DEPENDS lib/cmark-gfm/src/*.c)
+file(GLOB CMARK_EXT CONFIGURE_DEPENDS lib/cmark-gfm/extensions/*.c)
+list(FILTER CMARK_EXT EXCLUDE REGEX ".*/(subscript|superscript)\\.c$")
+add_library(knot_cmark_gfm STATIC ${CMARK_SRC} ${CMARK_EXT})
+target_include_directories(knot_cmark_gfm PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/cmark-gfm/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/cmark-gfm/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/cmark-gfm/extensions
+)
+
+# --- SQLite + vec ---
+add_library(knot_sqlite STATIC lib/sqlite/sqlite3.c lib/sqlite_vec/sqlite-vec.c)
+target_include_directories(knot_sqlite PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/sqlite
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/sqlite_vec
+)
+if(WIN32)
+    target_link_libraries(knot_sqlite PUBLIC shell32)
+endif()
+
+# ============================================================
+# 4. Scintilla / QScintilla (独立静态库)
+# ============================================================
+if(NOT ANDROID)
+    add_subdirectory(lib/qsci)
+endif()
+
+# ============================================================
+# 5. 业务源码收集 (不再包含 llama.cpp 源码，避免重复编译)
+# ============================================================
+file(GLOB_RECURSE APP_SOURCES CONFIGURE_DEPENDS
+    src/*.cpp
+    src/*.h
+    lib/diff/*.cpp
+)
+
+file(GLOB_RECURSE APP_FORMS CONFIGURE_DEPENDS src/*.ui)
+
+set(APP_RESOURCES knotqml.qrc res.qrc)
+
+set(APP_TRANSLATIONS
+    src/cn.ts
+    lib/qsci/qscintilla_cs.ts
+    lib/qsci/qscintilla_de.ts
+    lib/qsci/qscintilla_es.ts
+    lib/qsci/qscintilla_fr.ts
+    lib/qsci/qscintilla_pt_br.ts
+)
+
+# ============================================================
+# 6. 主目标
+# ============================================================
+if(ANDROID)
+    add_library(${PROJECT_NAME} SHARED
+        ${APP_SOURCES} ${APP_FORMS} ${APP_RESOURCES}
+    )
+else()
+    add_executable(${PROJECT_NAME}
+        ${APP_SOURCES} ${APP_FORMS} ${APP_RESOURCES}
+    )
+endif()
+
+# ============================================================
+# 7. 头文件路径 (全平台公共，与平台无关)
+# ============================================================
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}               # openssl/, lib/quazip/ 等平铺头文件
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/diff
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/scintilla/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/scintilla/lexlib
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/scintilla/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/qsci/QSci
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/qsci
+    ${LLAMA_ROOT}/include
+    ${LLAMA_ROOT}/ggml/include
+    ${LLAMA_ROOT}/vendor
+    ${LLAMA_ROOT}/vendor/nlohmann
+    ${LLAMA_ROOT}/vendor/cpp-httplib
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/zlib
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/cmark-gfm/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/sqlite
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/sqlite_vec
+)
+
+# ============================================================
+# 8. 编译定义与选项 (target 级别，不污染第三方库)
+# ============================================================
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    SCI_LEXER
+    LEXER_MARKDOWN_INCLUDED
+    QSCINTILLA_HAVE_MARKDOWNLEXER
+    HAVE_FSEEKO
+    QUAZIP_STATIC
+    SQLITE_VEC_STATIC
+    VECTOR_SEARCH
+    $<$<CONFIG:Release>:QT_NO_DEBUG>
+    QML_DISABLE_PROFILER
+
+)
+
+if(NOT WIN32)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE Z_HAVE_UNISTD_H)
+endif()
+
+if(WIN32)
+    target_compile_options(${PROJECT_NAME} PRIVATE
+            /FI${CMAKE_CURRENT_SOURCE_DIR}/lib/qsci/win32_undef_macros.h
+        )
+
+elseif(APPLE)
+    execute_process(COMMAND uname -m OUTPUT_VARIABLE MACOS_ARCH OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(MACOS_ARCH STREQUAL "arm64")
+        message(STATUS "✅ Detected macOS ARM64")
+        target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC)
+    else()
+        message(STATUS "ℹ️ Detected macOS x86_64")
+        target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_AVX2 GGML_F16C)
+        target_compile_options(${PROJECT_NAME} PRIVATE -mavx2 -mf16c -mfma)
+    endif()
+elseif(ANDROID)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC)
+elseif(UNIX)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_AVX2 GGML_F16C GGML_NO_SCHED_BATCH _GNU_SOURCE)
+    target_compile_options(${PROJECT_NAME} PRIVATE -mavx2 -mf16c -mfma)
+endif()
+
+# ============================================================
+# 9. 链接库
+# ============================================================
+# 全平台公共链接
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::PrintSupport
+    Qt6::Charts Qt6::Sensors Qt6::Sql Qt6::Qml Qt6::Quick
+    Qt6::QuickWidgets Qt6::Location Qt6::Xml Qt6::Svg Qt6::Concurrent
+    Qt6::Core5Compat
+    llama ggml llama_common
+    knot_zlib knot_quazip knot_cmark_gfm knot_sqlite
+    # ✅ 仅非 Android 平台链接 qscintilla
+    $<$<NOT:$<BOOL:${ANDROID}>>:qscintilla>
+)
+
+# 平台特定链接
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        advapi32
+        ${CMAKE_CURRENT_SOURCE_DIR}/openssl/lib/libcrypto.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/openssl/lib/libssl.lib
+    )
+    if(MSVC)
+        target_link_options(${PROJECT_NAME} PRIVATE
+            $<$<CONFIG:Release>:/OPT:NOREF /OPT:NOICF>
+            $<$<CONFIG:Release>:/INCLUDE:ggml_backend_cpu_reg>
+            $<$<CONFIG:Release>:/INCLUDE:ggml_backend_cpu_init>
+        )
+    endif()
+elseif(APPLE)
+    find_package(OpenSSL REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        OpenSSL::SSL OpenSSL::Crypto
+        pthread Accelerate Foundation
+    )
+elseif(ANDROID)
+    target_link_libraries(${PROJECT_NAME} PRIVATE pthread dl ssl crypto)
+    if(CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a")
+        target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a)
+    elseif(CMAKE_ANDROID_ARCH_ABI STREQUAL "x86_64")
+        target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/x86_64)
+    endif()
+elseif(UNIX)
+    find_package(OpenSSL REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        OpenSSL::SSL OpenSSL::Crypto
+        pthread dl
+    )
+endif()
+
+# ============================================================
+# 10. QML 导入路径
+# ============================================================
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    QT_QML_IMPORT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/qmlsrc"
+)
+
+# ============================================================
+# 11. Android 部署配置
+# ============================================================
+if(ANDROID)
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android"
+        QT_ANDROID_EXTRA_LIBS
+            "${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a/libcrypto_3.so;${CMAKE_CURRENT_SOURCE_DIR}/android-openssl/ssl_3/v8a/libssl_3.so"
+    )
+endif()
+
+# ============================================================
+# 12. 输出目录
+# ============================================================
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_SOURCE_DIR}/bin/debug"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/release"
+    LIBRARY_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_SOURCE_DIR}/bin/debug"
+    LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/release"
+)
+
+# ============================================================
+# 13. 翻译
+# ============================================================
+qt_add_translations(${PROJECT_NAME}
+    TS_FILES ${APP_TRANSLATIONS}
+    QM_FILES_OUTPUT_VARIABLE QM_FILES
+    #RESOURCE_PREFIX "/translations"
+)

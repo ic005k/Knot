@@ -17,9 +17,9 @@
 #include <QTreeWidgetItem>
 #include <atomic>
 
-#include "src/CloudBackup.h"
-#include "src/Comm/Method.h"
-#include "src/Comm/TextEditToolbar.h"
+#include "CloudBackup.h"
+#include "Comm/Method.h"
+#include "Comm/TextEditToolbar.h"
 
 // 用“前向声明”替代“#include 具体头文件”，避免循环引用
 class CloudBackup;

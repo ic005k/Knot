@@ -5,7 +5,7 @@
 #include <QMutex>
 #include <QString>
 
-#include "src/defines.h"
+#include "defines.h"
 
 class AppLogger {
  public:

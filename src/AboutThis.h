@@ -10,8 +10,8 @@
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
 
-#include "src/AutoUpdate.h"
-#include "src/Comm/AppLogger.h"
+#include "AutoUpdate.h"
+#include "Comm/AppLogger.h"
 
 namespace Ui {
 class AboutThis;

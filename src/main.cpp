@@ -23,16 +23,16 @@
 #include <QWidget>
 
 #include "MainWindow.h"
+#include "NativeMsgThread.h"
 #include "SplashTimer.h"
+#include "defines.h"
 #include "lib/llama.cpp/ggml/include/ggml-backend.h"
 #include "lib/llama.cpp/include/llama.h"
 #include "lib/quazip/quazip.h"
 #include "lib/quazip/quazipfile.h"
-#include "NativeMsgThread.h"
 #include "src/AI/GlobalAI.h"
 #include "src/Comm/AppLogger.h"
-#include "src/defines.h"
-#include "ui_MainWindow.h"
+// #include "ui_MainWindow.h"
 
 extern void RegJni(const char* myClassName);
 extern void RegJni15(const char* myClassName);

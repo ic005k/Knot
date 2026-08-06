@@ -4,7 +4,7 @@
 
 #include "MainWindow.h"
 #include "src/defines.h"
-#include "ui_MainWindow.h"
+// #include "ui_MainWindow.h"
 #include "ui_Preferences.h"
 
 QFont::Weight readerFontWeight;

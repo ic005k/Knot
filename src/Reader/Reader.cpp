@@ -1,5 +1,7 @@
 #include "Reader.h"
 
+// #include "src/ui_MainWindow.h"
+
 QByteArray bookFileData;
 
 static int press_x;

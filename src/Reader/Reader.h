@@ -36,7 +36,7 @@
 #include "src/Reader/DocumentHandler.h"
 #include "src/Reader/EpubReader.h"
 #include "src/defines.h"
-#include "ui_MainWindow.h"
+
 
 // 目录项结构体（存储章节信息）
 struct TocItem {

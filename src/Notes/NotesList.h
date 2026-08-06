@@ -41,7 +41,7 @@
 #include "src/Notes/NoteGraph.h"
 #include "src/Notes/NoteListModel.h"
 #include "src/defines.h"
-#include "ui_MainWindow.h"
+
 #include "ui_MoveTo.h"
 #include "ui_NotesList.h"
 

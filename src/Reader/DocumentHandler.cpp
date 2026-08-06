@@ -65,7 +65,7 @@
 #include "src/LoadPic.h"
 #include "src/MainWindow.h"
 #include "src/defines.h"
-#include "ui_MainWindow.h"
+// #include "ui_MainWindow.h"
 
 QString picfile;
 

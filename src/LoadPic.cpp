@@ -2,7 +2,7 @@
 
 #include "MainWindow.h"
 #include "src/defines.h"
-#include "ui_MainWindow.h"
+// #include "ui_MainWindow.h"
 
 LoadPic::LoadPic(QWidget* parent) : QDialog(parent) {
   QFont font = this->font();

@@ -24,7 +24,8 @@ EmbeddingEngine::EmbeddingEngine(const QString& ggufPath) {
   // ========== 模型参数 ==========
   llama_model_params model_params = llama_model_default_params();
   model_params.n_gpu_layers = 99;
-  model_params.use_mmap = true;       // ⭐ 新增：按需加载，降低 RSS 峰值
+  // ⭐ 新增：新版默认启用mmap，降低 RSS峰值
+  // model_params.use_mmap = true;
   model_params.check_tensors = true;  // ⭐ 新增：防止损坏模型导致后续崩溃
 
   m_model = llama_load_model_from_file(path.c_str(), model_params);

@@ -1,10 +1,11 @@
-﻿#include "src/Notes/Notes.h"
+﻿#include "Notes/Notes.h"
 
 #include "cmark-gfm-core-extensions.h"
 #include "cmark_wrapper.h"
+#include "src/Notes/ui_Notes.h"
+// #include "src/ui_MainWindow.h"
 #include "subscript.h"
 #include "superscript.h"
-#include "ui_Notes.h"
 
 static QAtomicInt n_Files = 0;
 
