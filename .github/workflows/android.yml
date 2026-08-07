@@ -28,32 +28,32 @@ jobs:
       with:
         path: src
 
-    # ✅ 1. JDK
+    # 1️⃣ JDK
     - name: Setup JDK
       uses: actions/setup-java@v4
       with:
         distribution: zulu
         java-version: ${{ env.JAVA_VERSION }}
 
-    # ✅ 2. MSVC（必须）
+    # 2️⃣ MSVC（Qt MSVC 构建必须）
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x64
 
-    # ✅ 3. NDK
+    # 3️⃣ NDK
     - name: Install NDK
       shell: pwsh
       run: |
-        $ndk = "https://dl.google.com/android/repository/android-ndk-r27c-windows.zip"
-        Invoke-WebRequest $ndk -OutFile ndk.zip
+        $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r27c-windows.zip"
+        Invoke-WebRequest -Uri $ndkUrl -OutFile ndk.zip
         Expand-Archive ndk.zip -DestinationPath android-sdk\ndk
         Rename-Item android-sdk\ndk\android-ndk-r27c $env:NDK_VERSION
         echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
 
-    # ✅ 4. 安装 Host Qt（MSVC）—— 用官方 action
+    # 4️⃣ Host Qt（MSVC，提供 qt-cmake.bat / androiddeployqt）
     - name: Install Host Qt
-      uses: jurplel/setup-qt-action@v4
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         host: windows
@@ -62,9 +62,9 @@ jobs:
         modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
         cache: true
 
-    # ✅ 5. 安装 Android Qt —— 用官方 action
+    # 5️⃣ Android Qt
     - name: Install Android Qt
-      uses: jurplel/setup-qt-action@v4
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         host: windows
@@ -73,27 +73,27 @@ jobs:
         modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
         cache: true
 
-    # ✅ 6. CMake Configure（qt-cmake.bat 一定存在）
+    # 6️⃣ CMake Configure（qt-cmake 已在 PATH 中）
     - name: CMake Configure
       shell: pwsh
       run: |
         Set-Location "$env:GITHUB_WORKSPACE\src"
 
-        qt-cmake.bat -B build `
+        qt-cmake -B build `
           -G Ninja `
           -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE `
           -DANDROID_ABI=arm64-v8a `
           -DANDROID_PLATFORM=android-$env:ANDROID_API_LEVEL `
           -DANDROID_STL=c++_shared
 
-    # ✅ 7. CMake Build
+    # 7️⃣ CMake Build
     - name: CMake Build
       shell: pwsh
       run: |
         Set-Location "$env:GITHUB_WORKSPACE\src"
         cmake --build build --config $env:BUILD_TYPE --parallel $env:NUMBER_OF_PROCESSORS
 
-    # ✅ 8. APK 打包 & 签名
+    # 8️⃣ APK 打包 & 签名（与你 qmake 流程一致）
     - name: Package & Sign APK
       shell: cmd
       env:
@@ -105,7 +105,6 @@ jobs:
         cd "%GITHUB_WORKSPACE%\src"
 
         set "DEPLOY_QT=%QT_ROOT_DIR%\bin\androiddeployqt.exe"
-
         if not exist "%DEPLOY_QT%" (
           echo ::error::androiddeployqt not found & exit 1
         )
@@ -131,14 +130,14 @@ jobs:
           --keypass "%KEY_PASSWORD%" ^
           --verbose
 
-    # ✅ 9. 上传 Artifact
+    # 9️⃣ 上传 Artifact
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: Knot-Android-arm64-v8a
         path: src/build/android-build/build/outputs/apk/release/*.apk
 
-    # ✅ 10. 上传 Release
+    # 🔟 上传 Release
     - name: Upload to Release
       if: github.event_name == 'release'
       uses: softprops/action-gh-release@v2
