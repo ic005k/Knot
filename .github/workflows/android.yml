@@ -30,7 +30,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         # 直接检出到工作区根目录，减少一层路径嵌套
-        # 原: path: 'src' → 现: 无 path 参数
 
       - name: Enable Windows Long Paths
         shell: pwsh
@@ -92,7 +91,6 @@ jobs:
             throw "QT_HOST_PATH not found."
           }
 
-          # 注意：源码现在在工作区根目录，不再 cd src
           cmake -B build -G Ninja `
             -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_PREFIX_PATH="$qtAndroid" `
@@ -113,14 +111,20 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          # 注意：build 目录现在在工作区根目录下
           cd build
 
           $ksDir = "${{ github.workspace }}/signing"
           New-Item -ItemType Directory -Force -Path $ksDir | Out-Null
           $ksPath = "$ksDir/release.keystore"
-          [Convert]::FromBase64String($env:KEYSTORE_BASE64) | Set-Content -Path $ksPath -Encoding Byte
-          if ((Get-Item $ksPath).Length -lt 100) { throw "Keystore 解码异常" }
+
+          # ✅ 使用 .NET API 写入二进制文件，兼容 PowerShell 7.x
+          $bytes = [Convert]::FromBase64String($env:KEYSTORE_BASE64)
+          [IO.File]::WriteAllBytes($ksPath, $bytes)
+
+          if ((Get-Item $ksPath).Length -lt 100) {
+            throw "Keystore 解码异常，文件大小: $((Get-Item $ksPath).Length) bytes"
+          }
+          Write-Host "✅ Keystore decoded successfully: $((Get-Item $ksPath).Length) bytes"
 
           cmake --build . --target apk --config Release -- `
             -DQT_ANDROID_KEYSTORE_PATH="$ksPath" `
@@ -134,7 +138,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Knot-APK-signed
-          # 路径更新：去掉 src/ 前缀
           path: build/android-build/build/outputs/apk/release/*.apk
 
       - name: Upload to GitHub Release

@@ -1,4 +1,4 @@
-name: MacOS CI
+name: MacOS-x86_64 CI
 
 on:
   push:
@@ -20,10 +20,16 @@ jobs:
     permissions:
       contents: write
 
+    strategy:
+      matrix:
+        qt_ver: ["6.9.3"]
+        qt_arch: [clang_64]
+
     env:
       targetName: Knot
-      orgName: Knot
       VERSION: Mac-x86_64
+      orgName: Knot
+      ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
 
     steps:
       - name: Checkout code
@@ -32,11 +38,11 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: "6.9.3"
+          version: ${{ matrix.qt_ver }}
           cached: false
           host: mac
           target: desktop
-          arch: clang_64
+          arch: ${{ matrix.qt_arch }}
           modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
           install-deps: true
           source: false
@@ -44,35 +50,67 @@ jobs:
 
       - name: Install Homebrew & OpenSSL (x86_64)
         run: |
-          # ✅ 对齐 arm64：显式确保 brew 在 PATH 中
-          echo "/usr/local/bin" >> $GITHUB_PATH
-          brew update
-          brew install openssl@3 cmake
-          brew link openssl@3 --force
+          # 卸载已存在的 arm64 Homebrew（如有）
+          if [ -d "/opt/homebrew" ]; then
+            sudo rm -rf /opt/homebrew
+          fi
+
+          # 安装 x86_64 版 Homebrew
+          arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bash_profile
+          source ~/.bash_profile
+
+          arch -x86_64 brew update
+          arch -x86_64 brew install openssl@3 cmake
+          arch -x86_64 brew link openssl@3 --force
 
       - name: Build macOS (x86_64)
-        timeout-minutes: 30  # ✅ 对齐 arm64：防止卡死
+        timeout-minutes: 30
         run: |
           export PATH="/usr/local/bin:$PATH"
-
-          OPENSSL_ROOT="$(brew --prefix openssl@3)"
+          OPENSSL_ROOT="/usr/local/opt/openssl@3"
           OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)"
 
           echo "=== Environment Info ==="
           echo "OpenSSL Root: $OPENSSL_ROOT"
           echo "macOS SDK:    $OSX_SYSROOT"
           echo "Runner Arch:  $(uname -m)"
+          echo "Rosetta:      $(arch)"
+
+          echo "=== Diagnostic: Qt Core Architecture ==="
+          file "$QT_ROOT_DIR/lib/QtCore.framework/QtCore" || true
+
+          echo "=== Diagnostic: OpenSSL Architecture ==="
+          file "$OPENSSL_ROOT/lib/libssl.dylib" || true
+          file "$OPENSSL_ROOT/lib/libcrypto.dylib" || true
 
           echo "=== CMake Configure (x86_64) ==="
-          cmake -B build \
-                -DCMAKE_BUILD_TYPE=Release \
-                -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
-                -DCMAKE_OSX_ARCHITECTURES=x86_64 \
-                -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
-                -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT"
+          arch -x86_64 cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+            -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
+            -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT"
 
-          echo "=== CMake Build (x86_64) ==="
-          cmake --build build --config Release --parallel $(sysctl -n hw.ncpu)
+          echo "=== Diagnostic: CMake OpenSSL Detection ==="
+          grep -E "OPENSSL_(SSL|CRYPTO)_LIBRARY" build/CMakeCache.txt || true
+
+          echo "=== Build (single-thread, warnings suppressed) ==="
+          set +e
+          arch -x86_64 cmake --build build --config Release \
+            --parallel 1 \
+            -- VERBOSE=1 \
+            -- -Wno-deprecated-declarations 2>&1 | tee build.log
+          BUILD_EXIT_CODE=${PIPESTATUS[0]}
+          set -e
+
+          if [ "$BUILD_EXIT_CODE" -ne 0 ]; then
+            echo ""
+            echo "========== REAL ERRORS FOUND =========="
+            grep -iE "error:|fatal error:|undefined reference|ld: |symbol not found" build.log | head -50
+            echo "========================================="
+            exit 1
+          fi
 
           echo "=== Align Output ==="
           mkdir -p bin/release
@@ -97,7 +135,7 @@ jobs:
           cp -R -p "bin/release/${{ env.targetName }}.app" "${{ env.targetName }}.app"
 
           QT_ACTUAL_LIB=$(qmake -query QT_INSTALL_LIBS 2>/dev/null || echo "$QT_ROOT_DIR/lib")
-          macdeployqt "${{ env.targetName }}.app" \
+          arch -x86_64 macdeployqt "${{ env.targetName }}.app" \
             -qmldir=. \
             -verbose=1 \
             -dmg \
