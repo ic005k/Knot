@@ -9,7 +9,7 @@ on:
     types: [ published ]
 
 env:
-  QT_VERSION: "6.9.4"
+  QT_VERSION: "6.9.3"
   QT_ARCH: "android_arm64_v8a"
   HOST_ARCH: "win64_msvc2022_64"
   NDK_VERSION: "26.1.10909125"
@@ -85,17 +85,11 @@ jobs:
         $apiLevel = "${{ env.ANDROID_API_LEVEL }}"
         $androidPlatform = "android-$apiLevel"
 
-        # 验证 CRT 文件
         $crtPath = "$ndkRoot\toolchains\llvm\prebuilt\windows-x86_64\sysroot\usr\lib\aarch64-linux-android\$apiLevel\crtbegin_dynamic.o"
         if (-not (Test-Path $crtPath)) {
           Write-Error "CRT not found: $crtPath"
           exit 1
         }
-
-        Write-Host "Using Qt $env:QT_VERSION"
-        Write-Host "Using NDK: $ndkRoot"
-        Write-Host "API Level: $apiLevel"
-        Write-Host "CRT Path: $crtPath"
 
         qt-cmake -B build `
           -G Ninja `
