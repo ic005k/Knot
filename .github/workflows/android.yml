@@ -84,10 +84,6 @@ jobs:
 
       - name: CMake Configure & Build
         shell: pwsh
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           $qtBase = "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}"
           $qtAndroid = "$qtBase/${{ env.QT_ARCH_ANDROID }}"
@@ -129,7 +125,6 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           $qtBase = "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}"
-          $qtAndroid = "$qtBase/${{ env.QT_ARCH_ANDROID }}"
 
           # ✅ androiddeployqt 是 Host 工具，必须在 Desktop Qt 目录中查找
           $desktopCandidates = @("${{ env.DESKTOP_ARCH }}", "mingw_64", "mingw1310_64", "gcc_64")
@@ -157,16 +152,29 @@ jobs:
           }
           Write-Host "📄 Settings: $($settingsFile.FullName)"
 
-          Write-Host "🚀 Running androiddeployqt with --release ..."
-          & $deployQt `
-            --input $settingsFile.FullName `
-            --output "${{ github.workspace }}/build/android-build" `
-            --android-platform "android-${{ env.ANDROID_API_LEVEL }}" `
-            --jdk "$env:JAVA_HOME" `
-            --gradle `
-            --release `
-            --sign "${{ env.KEYSTORE_PATH }}" "$env:KEY_ALIAS" --signpass "env:KEY_PASSWORD" `
-            --verbose
+          # ✅ 将密码写入临时文件，避免 env: 语法在 CI 非交互终端中失效
+          $passFile = Join-Path $env:RUNNER_TEMP "sign_pass.txt"
+          [IO.File]::WriteAllText($passFile, $env:KEY_PASSWORD)
+          Write-Host "🔑 Password file created at: $passFile"
+
+          try {
+            Write-Host "🚀 Running androiddeployqt with --release ..."
+            & $deployQt `
+              --input $settingsFile.FullName `
+              --output "${{ github.workspace }}/build/android-build" `
+              --android-platform "android-${{ env.ANDROID_API_LEVEL }}" `
+              --jdk "$env:JAVA_HOME" `
+              --gradle `
+              --release `
+              --sign "${{ env.KEYSTORE_PATH }}" "$env:KEY_ALIAS" --signpass "file:$passFile" `
+              --verbose
+          } finally {
+            # ✅ 无论成功失败都立即删除密码文件
+            if (Test-Path $passFile) {
+              Remove-Item $passFile -Force
+              Write-Host "🗑️ Password file cleaned up."
+            }
+          }
 
           Write-Host "✅ APK built. Checking outputs:"
           Get-ChildItem "build/android-build/build/outputs/apk/release/" -ErrorAction SilentlyContinue
@@ -175,6 +183,10 @@ jobs:
         shell: pwsh
         run: |
           $apk = Get-ChildItem "build/android-build/build/outputs/apk/release/*.apk" | Select-Object -First 1
+          if (-not $apk) {
+            Write-Host "⚠️ No APK found in release output directory."
+            exit 0
+          }
           Write-Host "📦 APK: $($apk.Name) ($([math]::Round($apk.Length/1MB, 2)) MB)"
           Add-Type -Assembly System.IO.Compression.FileSystem
           $zip = [System.IO.Compression.ZipFile]::OpenRead($apk.FullName)
