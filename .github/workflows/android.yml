@@ -41,7 +41,9 @@ jobs:
         Invoke-WebRequest -Uri $ndkUrl -OutFile ndk.zip
         Expand-Archive ndk.zip -DestinationPath android-sdk\ndk
         Rename-Item android-sdk\ndk\android-ndk-r27c $env:NDK_VERSION
-        echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
+        $ndkRoot = "$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION"
+        echo "ANDROID_NDK_ROOT=$ndkRoot" >> $env:GITHUB_ENV
+        echo "$ndkRoot\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
     - name: Install Ninja
       run: choco install ninja
@@ -73,15 +75,18 @@ jobs:
       run: |
         Set-Location "$env:GITHUB_WORKSPACE\src"
 
-        $ndkRoot = "$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION"
+        $ndkRoot = "$env:ANDROID_NDK_ROOT"
         $toolchain = "$ndkRoot\build\cmake\android.toolchain.cmake"
+
+        # ✅ 强制读取 GitHub Actions 环境变量（关键）
+        $apiLevel = "${{ env.ANDROID_API_LEVEL }}"
 
         if (-not (Test-Path $toolchain)) {
           Write-Error "Android toolchain not found: $toolchain"
           exit 1
         }
 
-        $crt = "$ndkRoot\toolchains\llvm\prebuilt\windows-x86_64\sysroot\usr\lib\aarch64-linux-android\$env:ANDROID_API_LEVEL\crtbegin_dynamic.o"
+        $crt = "$ndkRoot\toolchains\llvm\prebuilt\windows-x86_64\sysroot\usr\lib\aarch64-linux-android\$apiLevel\crtbegin_dynamic.o"
         if (-not (Test-Path $crt)) {
           Write-Error "CRT not found: $crt"
           exit 1
@@ -91,7 +96,7 @@ jobs:
           -G Ninja `
           -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE `
           -DANDROID_ABI=arm64-v8a `
-          -DANDROID_PLATFORM=$env:ANDROID_API_LEVEL `
+          -DANDROID_PLATFORM=$apiLevel `
           -DANDROID_STL=c++_shared `
           -DANDROID_NDK_ROOT="$ndkRoot" `
           -DCMAKE_TOOLCHAIN_FILE="$toolchain" `
@@ -131,7 +136,7 @@ jobs:
         "%DEPLOY_QT%" ^
           --input "%JSON%" ^
           --output build\android-build ^
-          --android-platform android-%ANDROID_API_LEVEL% ^
+          --android-platform android-${{ env.ANDROID_API_LEVEL }} ^
           --jdk "%JAVA_HOME%" ^
           --gradle ^
           --sign "%cd%\signing\release.keystore" "%KEY_ALIAS%" ^
