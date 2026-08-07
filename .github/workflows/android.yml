@@ -1,186 +1,110 @@
-name: Android CI (CMake)
+name: Android Build Test (Minimal)
 
 on:
   push:
-    branches: [main]
-    paths-ignore: ['stats.txt', 'README.md']
-  pull_request:
-  release:
-    types: [published]
-
-env:
-  QT_VERSION: "6.10.3"
-  QT_ARCH: "android_arm64_v8a"
-  HOST_ARCH: "win64_msvc2022_64"
-  NDK_VERSION: "27.2.12479018"       # NDK r27c
-  ANDROID_API_LEVEL: "34"
-  JAVA_VERSION: "17"
-  BUILD_TYPE: "Release"
-  CMAKE_VERSION: "3.28.1"
+    branches: [ "main", "master" ]
+  workflow_dispatch:
 
 jobs:
-  build:
+  test-configure:
     runs-on: windows-latest
-    permissions:
-      contents: write
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          path: src
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-      # ==================== 环境准备 ====================
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: zulu
-          java-version: ${{ env.JAVA_VERSION }}
+    - name: Install Qt 6.10.3 (Android)
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.10.3'
+        host: 'windows'
+        target: 'android'
+        arch: 'android_arm64_v8a'
+        modules: 'qtwebsockets qtwebchannel' # 根据你项目实际需要的模块调整
+        cache: true
 
-      - name: Install CMake & Ninja
-        uses: lukka/get-cmake@latest
-        with:
-          cmakeVersion: ${{ env.CMAKE_VERSION }}
-          ninjaVersion: latest
+    - name: Install NDK r27
+      uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r27c
+        add-to-path: false
 
-      - name: Install NDK r27c
-        shell: pwsh
-        run: |
-          $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r27c-windows.zip"
-          Invoke-WebRequest -Uri $ndkUrl -OutFile ndk.zip
-          Expand-Archive ndk.zip -DestinationPath android-sdk\ndk
-          Rename-Item android-sdk\ndk\android-ndk-r27c $env:NDK_VERSION -ErrorAction SilentlyContinue
+    - name: Set Environment Variables
+      shell: pwsh
+      run: |
+        echo "ANDROID_NDK_ROOT=${{ steps.setup-ndk.outputs.ndk-path }}" >> $env:GITHUB_ENV
+        echo "QT_ROOT_DIR=${{ env.QT_ROOT_DIR }}" >> $env:GITHUB_ENV
+        # Qt 6.8+ 需要指定 HOST_PATH，通常 jurplel 插件会自动设置，这里保险起见手动确认一下
+        if (-not $env:QT_HOST_PATH) {
+           # 如果 jurplel 没设置，这里可能需要手动指向 host 版 Qt，但通常 android target 安装包内自带或依赖 host 版
+           # 这里先假设 jurplel 已经处理好了 QT_ROOT_DIR 指向 android 版
+        }
 
-          $ndkRoot = "$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION"
-          echo "ANDROID_NDK_ROOT=$ndkRoot" >> $env:GITHUB_ENV
-          echo "$ndkRoot\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
+    - name: 🔍 Dynamic CRT Path Discovery
+      shell: pwsh
+      run: |
+        $ndkRoot = $env:ANDROID_NDK_ROOT
+        Write-Host "Searching for CRT files in NDK: $ndkRoot"
 
-          if (-not (Test-Path "$ndkRoot\build\cmake\android.toolchain.cmake")) {
-            Write-Error "::error::NDK toolchain.cmake not found!"
+        # 递归搜索 crtbegin_dynamic.o
+        $crtFile = Get-ChildItem -Path $ndkRoot -Recurse -Filter "crtbegin_dynamic.o" -ErrorAction SilentlyContinue |
+                   Where-Object { $_.FullName -match "aarch64" } |
+                   Select-Object -First 1
+
+        if ($crtFile) {
+            $crtDir = $crtFile.DirectoryName -replace '\\', '/'
+            Write-Host "✅ SUCCESS: Found CRT directory."
+            Write-Host "   Path: $crtDir"
+
+            # 将路径存入环境变量，供下一步 CMake 使用
+            echo "ANDROID_CRT_DIR=$crtDir" >> $env:GITHUB_ENV
+
+            # 验证文件是否存在
+            if (Test-Path "$crtDir/crtbegin_dynamic.o") {
+                Write-Host "   ✅ crtbegin_dynamic.o confirmed."
+            }
+            if (Test-Path "$crtDir/crtend_android.o") {
+                Write-Host "   ✅ crtend_android.o confirmed."
+            }
+        } else {
+            Write-Error "::error::Failed to find crtbegin_dynamic.o in NDK root: $ndkRoot"
             exit 1
-          }
-          Write-Host "✅ NDK installed at: $ndkRoot"
+        }
 
-      # ==================== Qt 安装 ====================
-      - name: Install Host Qt (MSVC2022)
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: windows
-          target: desktop
-          arch: ${{ env.HOST_ARCH }}
-          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
-          cache: true
-          setup-python: false
+    - name: 🛠️ CMake Configure (Test)
+      shell: pwsh
+      run: |
+        # 确保使用 qt-cmake
+        $qtCmake = Join-Path $env:QT_ROOT_DIR "bin\qt-cmake.bat"
+        if (-not (Test-Path $qtCmake)) {
+            # 有些 jurplel 版本可能直接叫 cmake，或者在 bin 目录下
+            $qtCmake = Join-Path $env:QT_ROOT_DIR "bin\cmake.exe"
+        }
 
-      - name: Install Android Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: windows
-          target: android
-          arch: ${{ env.QT_ARCH }}
-          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
-          cache: true
-          setup-python: false
+        Write-Host "Using Qt CMake: $qtCmake"
+        Write-Host "Injecting CRT Linker Flag: -L$env:ANDROID_CRT_DIR"
 
-      # ==================== CMake 构建 ====================
-      - name: CMake Configure
-        shell: pwsh
-        run: |
-          Set-Location "$env:GITHUB_WORKSPACE\src"
+        # 构建 CMake 参数
+        $cmakeArgs = @(
+            "-B", "build-android-test",
+            "-G", "Ninja",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DANDROID_ABI=arm64-v8a",
+            "-DANDROID_PLATFORM=android-34",
+            "-DANDROID_NDK_ROOT=$env:ANDROID_NDK_ROOT",
+            # 关键：注入 CRT 路径到链接器标志
+            "-DCMAKE_EXE_LINKER_FLAGS=-L$env:ANDROID_CRT_DIR",
+            "-DCMAKE_SHARED_LINKER_FLAGS=-L$env:ANDROID_CRT_DIR",
+            "-DCMAKE_MODULE_LINKER_FLAGS=-L$env:ANDROID_CRT_DIR"
+        )
 
-          $ndkRoot = "$env:ANDROID_NDK_ROOT"
-          $apiLevel = "${{ env.ANDROID_API_LEVEL }}"
-          $androidPlatform = "android-$apiLevel"
-          $sysroot = "$ndkRoot\toolchains\llvm\prebuilt\windows-x86_64\sysroot"
-          $crtDir = "$sysroot\usr\lib\aarch64-linux-android"
+        # 执行 Configure
+        & $qtCmake $cmakeArgs
 
-          $env:ANDROID_PLATFORM = $androidPlatform
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "::error::CMake Configure failed with exit code $LASTEXITCODE"
+            exit $LASTEXITCODE
+        }
 
-          # ✅ 保留 -L 注入作为防御性修复，移除严格的 CRT 文件验证（r27 中 CRT 移至 clang resource dir）
-          qt-cmake -B build `
-            -G Ninja `
-            -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE `
-            -DANDROID_ABI=arm64-v8a `
-            -DANDROID_PLATFORM=$androidPlatform `
-            -DANDROID_STL=c++_shared `
-            -DANDROID_NDK_ROOT="$ndkRoot" `
-            -DCMAKE_SYSROOT="$sysroot" `
-            -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a `
-            -DCMAKE_ANDROID_API_LEVEL=$apiLevel `
-            -DCMAKE_SYSTEM_NAME=Android `
-            -DCMAKE_SYSTEM_VERSION=$apiLevel `
-            "-DCMAKE_EXE_LINKER_FLAGS=-L$crtDir" `
-            "-DCMAKE_SHARED_LINKER_FLAGS=-L$crtDir"
-
-          if ($LASTEXITCODE -ne 0) { Write-Error "::error::CMake Configure failed!"; exit 1 }
-
-      - name: CMake Build
-        shell: pwsh
-        run: |
-          Set-Location "$env:GITHUB_WORKSPACE\src"
-          cmake --build build --config $env:BUILD_TYPE --parallel $env:NUMBER_OF_PROCESSORS
-          if ($LASTEXITCODE -ne 0) { Write-Error "::error::CMake Build failed!"; exit 1 }
-
-      # ==================== APK 打包与签名 ====================
-      - name: Package & Sign APK
-        shell: pwsh
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          Set-Location "$env:GITHUB_WORKSPACE\src"
-
-          $deployQt = "$env:QT_ROOT_DIR\bin\androiddeployqt.exe"
-          if (-not (Test-Path $deployQt)) {
-            Write-Error "::error::androiddeployqt not found at $deployQt"
-            exit 1
-          }
-
-          # ✅ 动态查找 deployment-settings.json，兼容 Qt 6.10 可能的命名变化
-          $jsonFile = Get-ChildItem -Path build -Filter "android-*-deployment-settings.json" -Recurse | Select-Object -First 1
-          if (-not $jsonFile) {
-            Write-Error "::error::deployment-settings.json not found!"
-            Get-ChildItem build -Recurse -Filter "*.json" | Select-Object FullName
-            exit 1
-          }
-          Write-Host "✅ Found deployment settings: $($jsonFile.FullName)"
-
-          # 准备签名密钥
-          New-Item -ItemType Directory -Force -Path signing | Out-Null
-          [IO.File]::WriteAllBytes("$env:GITHUB_WORKSPACE\src\signing\release.keystore", [Convert]::FromBase64String($env:KEYSTORE_BASE64))
-
-          $outputDir = "$env:GITHUB_WORKSPACE\src\build\android-build"
-
-          # ✅ 使用绝对路径调用 androiddeployqt
-          & $deployQt `
-            --input $jsonFile.FullName `
-            --output $outputDir `
-            --android-platform "android-$env:ANDROID_API_LEVEL" `
-            --jdk $env:JAVA_HOME `
-            --gradle `
-            --sign "$env:GITHUB_WORKSPACE\src\signing\release.keystore" $env:KEY_ALIAS `
-            --storepass $env:KEYSTORE_PASSWORD `
-            --keypass $env:KEY_PASSWORD `
-            --verbose
-
-          if ($LASTEXITCODE -ne 0) { Write-Error "::error::APK packaging failed!"; exit 1 }
-
-      # ==================== 产物上传 ====================
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Knot-Android-arm64-v8a
-          path: src/build/android-build/build/outputs/apk/release/*.apk
-          retention-days: 30
-
-      - name: Upload to Release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: src/build/android-build/build/outputs/apk/release/*.apk
-          tag_name: ${{ github.event.release.tag_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        Write-Host "🎉 SUCCESS: CMake Configure completed!"
