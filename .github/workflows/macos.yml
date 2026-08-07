@@ -50,16 +50,12 @@ jobs:
 
       - name: Install Homebrew & OpenSSL (x86_64)
         run: |
-          # 卸载已存在的 arm64 Homebrew（如有）
           if [ -d "/opt/homebrew" ]; then
             sudo rm -rf /opt/homebrew
           fi
-
-          # 安装 x86_64 版 Homebrew
           arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bash_profile
           source ~/.bash_profile
-
           arch -x86_64 brew update
           arch -x86_64 brew install openssl@3 cmake
           arch -x86_64 brew link openssl@3 --force
@@ -71,36 +67,45 @@ jobs:
           OPENSSL_ROOT="/usr/local/opt/openssl@3"
           OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)"
 
+          # ✅ 修复：手动定位 Qt 路径，避免环境变量未展开
+          QT_LIB_PATH="${{ github.workspace }}/Qt/${{ matrix.qt_ver }}/macos/lib"
+          if [ ! -d "$QT_LIB_PATH" ]; then
+            QT_LIB_PATH="$QT_ROOT_DIR/lib"
+          fi
+
           echo "=== Environment Info ==="
           echo "OpenSSL Root: $OPENSSL_ROOT"
           echo "macOS SDK:    $OSX_SYSROOT"
           echo "Runner Arch:  $(uname -m)"
           echo "Rosetta:      $(arch)"
+          echo "Qt Lib Path:  $QT_LIB_PATH"
 
           echo "=== Diagnostic: Qt Core Architecture ==="
-          file "$QT_ROOT_DIR/lib/QtCore.framework/QtCore" || true
+          file "$QT_LIB_PATH/QtCore.framework/QtCore" || true
 
           echo "=== Diagnostic: OpenSSL Architecture ==="
           file "$OPENSSL_ROOT/lib/libssl.dylib" || true
           file "$OPENSSL_ROOT/lib/libcrypto.dylib" || true
 
           echo "=== CMake Configure (x86_64) ==="
+          # ✅ 修复：通过 CMAKE_CXX_FLAGS 传递警告抑制，而非传给 make
           arch -x86_64 cmake -B build \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
             -DCMAKE_OSX_ARCHITECTURES=x86_64 \
             -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
-            -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT"
+            -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT" \
+            -DCMAKE_CXX_FLAGS="-Wno-deprecated-declarations" \
+            -DCMAKE_C_FLAGS="-Wno-deprecated-declarations"
 
           echo "=== Diagnostic: CMake OpenSSL Detection ==="
           grep -E "OPENSSL_(SSL|CRYPTO)_LIBRARY" build/CMakeCache.txt || true
 
-          echo "=== Build (single-thread, warnings suppressed) ==="
+          echo "=== Build (single-thread for clean error output) ==="
           set +e
           arch -x86_64 cmake --build build --config Release \
             --parallel 1 \
-            -- VERBOSE=1 \
-            -- -Wno-deprecated-declarations 2>&1 | tee build.log
+            -- VERBOSE=1 2>&1 | tee build.log
           BUILD_EXIT_CODE=${PIPESTATUS[0]}
           set -e
 
@@ -115,10 +120,7 @@ jobs:
           echo "=== Align Output ==="
           mkdir -p bin/release
           if [ ! -d "bin/release/${{ env.targetName }}.app" ]; then
-            echo "App bundle not in bin/release, copying from build..."
             cp -R "build/${{ env.targetName }}.app" "bin/release/${{ env.targetName }}.app"
-          else
-            echo "App bundle already in bin/release."
           fi
 
           echo "=== Verify Binary Architecture ==="
@@ -127,13 +129,10 @@ jobs:
       - name: Package DMG
         run: |
           export PATH="$QT_ROOT_DIR/bin:/usr/local/bin:$PATH"
-
           if [ -f "ExtBin/mac/Info.plist" ]; then
             cp -f ExtBin/mac/Info.plist "bin/release/${{ env.targetName }}.app/Contents/Info.plist"
           fi
-
           cp -R -p "bin/release/${{ env.targetName }}.app" "${{ env.targetName }}.app"
-
           QT_ACTUAL_LIB=$(qmake -query QT_INSTALL_LIBS 2>/dev/null || echo "$QT_ROOT_DIR/lib")
           arch -x86_64 macdeployqt "${{ env.targetName }}.app" \
             -qmldir=. \
@@ -141,10 +140,7 @@ jobs:
             -dmg \
             -libpath="$QT_ACTUAL_LIB" \
             -libpath="./lib"
-
           cp "${{ env.targetName }}.dmg" "bin/release/${{ env.targetName }}.dmg"
-
-          echo "=== Final Artifact ==="
           ls -lh "bin/release/${{ env.targetName }}.dmg"
 
       - name: Upload Artifact
