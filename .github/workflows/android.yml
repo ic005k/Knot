@@ -11,7 +11,7 @@ on:
 env:
   QT_VERSION: "6.10.3"
   QT_ARCH: "android_arm64_v8a"
-  HOST_ARCH: "win64_msvc2019_64"
+  HOST_ARCH: "win64_msvc2022_64"   # ✅ 关键修正
   NDK_VERSION: "27.2.12479018"
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
@@ -35,11 +35,12 @@ jobs:
         distribution: zulu
         java-version: ${{ env.JAVA_VERSION }}
 
-    # 2️⃣ MSVC（Qt MSVC 构建必须）
+    # 2️⃣ MSVC 2022（必须与 Qt arch 对应）
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x64
+        vsversion: '2022'   # ✅ 明确指定
 
     # 3️⃣ NDK
     - name: Install NDK
@@ -51,7 +52,7 @@ jobs:
         Rename-Item android-sdk\ndk\android-ndk-r27c $env:NDK_VERSION
         echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
 
-    # 4️⃣ Host Qt（MSVC，提供 qt-cmake.bat / androiddeployqt）
+    # 4️⃣ Host Qt（MSVC 2022，Qt 官方当前唯一支持）
     - name: Install Host Qt
       uses: jurplel/install-qt-action@v4
       with:
@@ -61,6 +62,7 @@ jobs:
         arch: ${{ env.HOST_ARCH }}
         modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
         cache: true
+        setup-python: false   # ✅ 避免 WindowsApps Python 权限警告
 
     # 5️⃣ Android Qt
     - name: Install Android Qt
@@ -72,8 +74,9 @@ jobs:
         arch: ${{ env.QT_ARCH }}
         modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
         cache: true
+        setup-python: false
 
-    # 6️⃣ CMake Configure（qt-cmake 已在 PATH 中）
+    # 6️⃣ CMake Configure
     - name: CMake Configure
       shell: pwsh
       run: |
@@ -93,7 +96,7 @@ jobs:
         Set-Location "$env:GITHUB_WORKSPACE\src"
         cmake --build build --config $env:BUILD_TYPE --parallel $env:NUMBER_OF_PROCESSORS
 
-    # 8️⃣ APK 打包 & 签名（与你 qmake 流程一致）
+    # 8️⃣ APK 打包 & 签名
     - name: Package & Sign APK
       shell: cmd
       env:
