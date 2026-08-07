@@ -117,16 +117,11 @@ jobs:
 
           cmake --build build --config Release -j8
 
-      - name: Build APK (Manual androiddeployqt)
+      - name: Build Unsigned APK
         shell: pwsh
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           $qtBase = "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}"
 
-          # ✅ androiddeployqt 是 Host 工具，必须在 Desktop Qt 目录中查找
           $desktopCandidates = @("${{ env.DESKTOP_ARCH }}", "mingw_64", "mingw1310_64", "gcc_64")
           $qtDesktop = ""
           foreach ($candidate in $desktopCandidates) {
@@ -145,44 +140,81 @@ jobs:
           $deployQt = "$qtDesktop/bin/androiddeployqt.exe"
           Write-Host "🔧 Using: $deployQt"
 
-          # 查找 deployment settings json
           $settingsFile = Get-ChildItem "build/" -Filter "*deployment-settings.json" | Select-Object -First 1
           if (-not $settingsFile) {
             throw "❌ No deployment-settings.json found in build/"
           }
           Write-Host "📄 Settings: $($settingsFile.FullName)"
 
-          # ✅ 将密码写入临时文件，避免 env: 语法在 CI 非交互终端中失效
-          $passFile = Join-Path $env:RUNNER_TEMP "sign_pass.txt"
-          [IO.File]::WriteAllText($passFile, $env:KEY_PASSWORD)
-          Write-Host "🔑 Password file created at: $passFile"
+          # ✅ 仅打包，不签名（彻底绕过 androiddeployqt 的签名 bug）
+          Write-Host "🚀 Running androiddeployqt --release (no signing) ..."
+          & $deployQt `
+            --input $settingsFile.FullName `
+            --output "${{ github.workspace }}/build/android-build" `
+            --android-platform "android-${{ env.ANDROID_API_LEVEL }}" `
+            --jdk "$env:JAVA_HOME" `
+            --gradle `
+            --release `
+            --verbose
 
-          try {
-            Write-Host "🚀 Running androiddeployqt with --release ..."
-            & $deployQt `
-              --input $settingsFile.FullName `
-              --output "${{ github.workspace }}/build/android-build" `
-              --android-platform "android-${{ env.ANDROID_API_LEVEL }}" `
-              --jdk "$env:JAVA_HOME" `
-              --gradle `
-              --release `
-              --sign "${{ env.KEYSTORE_PATH }}" "$env:KEY_ALIAS" --signpass "file:$passFile" `
-              --verbose
-          } finally {
-            # ✅ 无论成功失败都立即删除密码文件
-            if (Test-Path $passFile) {
-              Remove-Item $passFile -Force
-              Write-Host "🗑️ Password file cleaned up."
-            }
+          Write-Host "✅ Unsigned APK built."
+          Get-ChildItem "build/android-build/build/outputs/apk/release/" -ErrorAction SilentlyContinue
+
+      - name: Sign APK with apksigner
+        shell: pwsh
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          $unsignedApk = Get-ChildItem "build/android-build/build/outputs/apk/release/*-unsigned.apk" | Select-Object -First 1
+          if (-not $unsignedApk) {
+            # 如果文件名不含 unsigned，取第一个 apk
+            $unsignedApk = Get-ChildItem "build/android-build/build/outputs/apk/release/*.apk" | Select-Object -First 1
+          }
+          if (-not $unsignedApk) {
+            throw "❌ No APK found to sign!"
           }
 
-          Write-Host "✅ APK built. Checking outputs:"
-          Get-ChildItem "build/android-build/build/outputs/apk/release/" -ErrorAction SilentlyContinue
+          $signedApk = Join-Path $unsignedApk.DirectoryName "android-build-release-signed.apk"
+          Write-Host "📦 Signing: $($unsignedApk.Name) -> $(Split-Path $signedApk -Leaf)"
+
+          # 定位 apksigner（JDK build-tools 或 Android SDK）
+          $apksigner = Get-Command apksigner -ErrorAction SilentlyContinue
+          if (-not $apksigner) {
+            # 尝试在 Android SDK build-tools 中查找
+            $buildTools = Get-ChildItem "$env:ANDROID_HOME/build-tools" -Directory -ErrorAction SilentlyContinue |
+              Sort-Object Name -Descending | Select-Object -First 1
+            if ($buildTools) {
+              $apksignerPath = Join-Path $buildTools.FullName "apksigner.bat"
+              if (Test-Path $apksignerPath) {
+                $apksigner = Get-Command $apksignerPath
+                Write-Host "🔧 Found apksigner at: $apksignerPath"
+              }
+            }
+          }
+          if (-not $apksigner) {
+            throw "❌ apksigner not found! Ensure Android SDK build-tools are installed."
+          }
+
+          # ✅ 使用 pass:env 语法直接传递环境变量名（apksigner 原生支持）
+          & $apksigner sign `
+            --ks "${{ env.KEYSTORE_PATH }}" `
+            --ks-key-alias "$env:KEY_ALIAS" `
+            --ks-pass "pass:$env:KEYSTORE_PASSWORD" `
+            --key-pass "pass:$env:KEY_PASSWORD" `
+            --out "$signedApk" `
+            "$($unsignedApk.FullName)"
+
+          Write-Host "✅ Signed APK created: $([math]::Round((Get-Item $signedApk).Length/1MB, 2)) MB"
 
       - name: Diagnose APK Size
         shell: pwsh
         run: |
-          $apk = Get-ChildItem "build/android-build/build/outputs/apk/release/*.apk" | Select-Object -First 1
+          $apk = Get-ChildItem "build/android-build/build/outputs/apk/release/*-signed.apk" | Select-Object -First 1
+          if (-not $apk) {
+            $apk = Get-ChildItem "build/android-build/build/outputs/apk/release/*.apk" | Select-Object -First 1
+          }
           if (-not $apk) {
             Write-Host "⚠️ No APK found in release output directory."
             exit 0
@@ -200,14 +232,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Knot-APK-signed
-          path: build/android-build/build/outputs/apk/release/*.apk
+          path: build/android-build/build/outputs/apk/release/*-signed.apk
 
       - name: Upload to GitHub Release
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/android-build/build/outputs/apk/release/*.apk
+          file: build/android-build/build/outputs/apk/release/*-signed.apk
           asset_name: android-build-release-signed.apk
           tag: ${{ github.ref_name }}
           overwrite: true
