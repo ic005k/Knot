@@ -29,8 +29,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: 'src'
+        # 直接检出到工作区根目录，减少一层路径嵌套
+        # 原: path: 'src' → 现: 无 path 参数
+
+      - name: Enable Windows Long Paths
+        shell: pwsh
+        run: |
+          reg add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -84,10 +89,10 @@ jobs:
           if ([string]::IsNullOrEmpty($qtDesktop)) {
             Write-Host "❌ Cannot find Desktop Qt! Listing available directories:"
             Get-ChildItem $qtBase -Directory | ForEach-Object { Write-Host "  - $($_.Name)" }
-            throw "QT_HOST_PATH not found. Please check aqt install output."
+            throw "QT_HOST_PATH not found."
           }
 
-          cd src
+          # 注意：源码现在在工作区根目录，不再 cd src
           cmake -B build -G Ninja `
             -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_PREFIX_PATH="$qtAndroid" `
@@ -95,6 +100,7 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="$qtAndroid/lib/cmake/Qt6/qt.toolchain.cmake" `
             -DANDROID_ABI=arm64-v8a `
             -DANDROID_NATIVE_API_LEVEL=${{ env.ANDROID_API_LEVEL }} `
+            -DANDROID_PLATFORM=${{ env.ANDROID_API_LEVEL }} `
             -DANDROID_NDK_HOME="$env:ANDROID_NDK_HOME"
 
           cmake --build build --config Release -j8
@@ -107,7 +113,8 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          cd src/build
+          # 注意：build 目录现在在工作区根目录下
+          cd build
 
           $ksDir = "${{ github.workspace }}/signing"
           New-Item -ItemType Directory -Force -Path $ksDir | Out-Null
@@ -127,14 +134,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Knot-APK-signed
-          path: src/build/android-build/build/outputs/apk/release/*.apk
+          # 路径更新：去掉 src/ 前缀
+          path: build/android-build/build/outputs/apk/release/*.apk
 
       - name: Upload to GitHub Release
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: src/build/android-build/build/outputs/apk/release/*.apk
+          file: build/android-build/build/outputs/apk/release/*.apk
           asset_name: android-build-release-signed.apk
           tag: ${{ github.ref_name }}
           overwrite: true
