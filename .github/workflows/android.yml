@@ -11,7 +11,7 @@ on:
 env:
   QT_VERSION: "6.10.3"
   QT_ARCH: "android_arm64_v8a"
-  HOST_ARCH: "win64_msvc2022_64"   # ✅ 关键修正
+  HOST_ARCH: "win64_msvc2022_64"      # ✅ Qt 6.10 Windows 唯一 MSVC 宿主席位
   NDK_VERSION: "27.2.12479018"
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
@@ -35,14 +35,7 @@ jobs:
         distribution: zulu
         java-version: ${{ env.JAVA_VERSION }}
 
-    # 2️⃣ MSVC 2022（必须与 Qt arch 对应）
-    - name: Setup MSVC
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: x64
-        vsversion: '2022'   # ✅ 明确指定
-
-    # 3️⃣ NDK
+    # 2️⃣ NDK（r27c，Qt 6.10 官方搭配）
     - name: Install NDK
       shell: pwsh
       run: |
@@ -52,7 +45,7 @@ jobs:
         Rename-Item android-sdk\ndk\android-ndk-r27c $env:NDK_VERSION
         echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
 
-    # 4️⃣ Host Qt（MSVC 2022，Qt 官方当前唯一支持）
+    # 3️⃣ Host Qt（MSVC2022，只拿 qt-cmake / androiddeployqt）
     - name: Install Host Qt
       uses: jurplel/install-qt-action@v4
       with:
@@ -62,9 +55,9 @@ jobs:
         arch: ${{ env.HOST_ARCH }}
         modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
         cache: true
-        setup-python: false   # ✅ 避免 WindowsApps Python 权限警告
+        setup-python: false
 
-    # 5️⃣ Android Qt
+    # 4️⃣ Android Qt
     - name: Install Android Qt
       uses: jurplel/install-qt-action@v4
       with:
@@ -76,12 +69,11 @@ jobs:
         cache: true
         setup-python: false
 
-    # 6️⃣ CMake Configure
+    # 5️⃣ CMake Configure（qt-cmake 走 NDK toolchain，不碰 MSVC cl）
     - name: CMake Configure
       shell: pwsh
       run: |
         Set-Location "$env:GITHUB_WORKSPACE\src"
-
         qt-cmake -B build `
           -G Ninja `
           -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE `
@@ -89,14 +81,14 @@ jobs:
           -DANDROID_PLATFORM=android-$env:ANDROID_API_LEVEL `
           -DANDROID_STL=c++_shared
 
-    # 7️⃣ CMake Build
+    # 6️⃣ CMake Build
     - name: CMake Build
       shell: pwsh
       run: |
         Set-Location "$env:GITHUB_WORKSPACE\src"
         cmake --build build --config $env:BUILD_TYPE --parallel $env:NUMBER_OF_PROCESSORS
 
-    # 8️⃣ APK 打包 & 签名
+    # 7️⃣ APK 打包 & 签名
     - name: Package & Sign APK
       shell: cmd
       env:
@@ -106,41 +98,28 @@ jobs:
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       run: |
         cd "%GITHUB_WORKSPACE%\src"
-
         set "DEPLOY_QT=%QT_ROOT_DIR%\bin\androiddeployqt.exe"
-        if not exist "%DEPLOY_QT%" (
-          echo ::error::androiddeployqt not found & exit 1
-        )
-
+        if not exist "%DEPLOY_QT%" ( echo ::error::androiddeployqt not found & exit 1 )
         set "JSON=build\android-Knot-deployment-settings.json"
-        if not exist "%JSON%" (
-          echo ::error::deployment-settings.json not found & exit 1
-        )
-
-        mkdir signing
-        cd signing
+        if not exist "%JSON%" ( echo ::error::deployment-settings.json not found & exit 1 )
+        mkdir signing & cd signing
         PowerShell -Command "[IO.File]::WriteAllBytes('release.keystore', [Convert]::FromBase64String($env:KEYSTORE_BASE64))"
         cd ..
-
         "%DEPLOY_QT%" ^
           --input "%JSON%" ^
           --output build\android-build ^
           --android-platform android-%ANDROID_API_LEVEL% ^
-          --jdk "%JAVA_HOME%" ^
-          --gradle ^
+          --jdk "%JAVA_HOME%" --gradle ^
           --sign "%cd%\signing\release.keystore" "%KEY_ALIAS%" ^
-          --storepass "%KEYSTORE_PASSWORD%" ^
-          --keypass "%KEY_PASSWORD%" ^
-          --verbose
+          --storepass "%KEYSTORE_PASSWORD%" --keypass "%KEY_PASSWORD%" --verbose
 
-    # 9️⃣ 上传 Artifact
+    # 8️⃣ Artifact + Release
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: Knot-Android-arm64-v8a
         path: src/build/android-build/build/outputs/apk/release/*.apk
 
-    # 🔟 上传 Release
     - name: Upload to Release
       if: github.event_name == 'release'
       uses: softprops/action-gh-release@v2
