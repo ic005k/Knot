@@ -1,4 +1,4 @@
-name: MacOS
+name: MacOS CI
 
 on:
   push:
@@ -15,21 +15,28 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Build (${{ matrix.artifact_suffix }})
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
     strategy:
+      fail-fast: false
       matrix:
-        os: [macos-14]
-        qt_ver: [6.9.3]
-        qt_arch: [clang_64]
+        include:
+          - os: macos-14
+            qt_ver: "6.9.3"
+            qt_arch: clang_64
+            cmake_arch: arm64
+            artifact_suffix: Mac-arm64
+          - os: macos-13
+            qt_ver: "6.9.3"
+            qt_arch: clang_64
+            cmake_arch: x86_64
+            artifact_suffix: Mac-x86_64
 
     env:
       targetName: Knot
-      VERSION: Mac
       orgName: Knot
-      ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
 
     steps:
       - name: Checkout code
@@ -39,96 +46,73 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ matrix.qt_ver }}
-          cached: 'false'
           host: mac
           target: desktop
-          arch: clang_64
+          arch: ${{ matrix.qt_arch }}
           modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
           install-deps: true
-          source: false
 
-      # ✅ 新增：macos-14 (ARM64) 必须先安装 Rosetta 2 才能运行 arch -x86_64
-      - name: Install Rosetta 2
+      - name: Install Dependencies
         run: |
-          sudo softwareupdate --install-rosetta --agree-to-license
+          brew update
+          brew install openssl@3 cmake
+          brew link openssl@3 --force
 
-      - name: Install Homebrew (x86_64)
+      - name: CMake Configure & Build
         run: |
-          if [ -d "/opt/homebrew" ]; then
-            sudo rm -rf /opt/homebrew
-          fi
-          arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          /usr/local/bin/brew --version
+          echo "=== Target Architecture: ${{ matrix.cmake_arch }} ==="
+          echo "=== Runner Architecture: $(uname -m) ==="
 
-      - name: Install OpenSSL & CMake via Homebrew (x86_64)
-        run: |
-          /usr/local/bin/brew update
-          # ✅ 显式安装 cmake，确保 x86_64 版本可用
-          /usr/local/bin/brew install openssl@3 cmake
-          /usr/local/bin/brew link openssl@3 --force
-
-      - name: build macos
-        run: |
-          export PATH="/usr/local/bin:$PATH"
-
-          # ✅ 防御性检查：确认 x86_64 cmake 确实存在
-          if [ ! -x "/usr/local/bin/cmake" ]; then
-            echo "❌ /usr/local/bin/cmake not found! x86_64 Homebrew may have failed."
-            ls -la /usr/local/bin/ || true
-            exit 1
-          fi
-          echo "✅ Using cmake: $(which cmake)"
-          file $(which cmake)
-
-          export ARCHFLAGS="-arch x86_64"
-          export CFLAGS="-arch x86_64"
-          export CXXFLAGS="-arch x86_64"
-          export LDFLAGS="-arch x86_64"
-
-          echo "=== CMake Configure (x86_64) ==="
-          arch -x86_64 cmake -B build \
+          cmake -B build \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
-                -DCMAKE_OSX_ARCHITECTURES=x86_64 \
-                -DOPENSSL_ROOT_DIR=$(/usr/local/bin/brew --prefix openssl@3)
+                -DCMAKE_OSX_ARCHITECTURES=${{ matrix.cmake_arch }} \
+                -DOPENSSL_ROOT_DIR="$(brew --prefix openssl@3)"
 
-          echo "=== CMake Build (x86_64) ==="
-          arch -x86_64 cmake --build build --config Release --parallel 2
+          cmake --build build --config Release --parallel $(sysctl -n hw.ncpu)
 
-          echo "=== 对齐产物路径 ==="
+      - name: Align Output
+        run: |
           mkdir -p bin/release
-
-          # ✅ 兼容 CMake 可能直接输出到 bin/release 的情况
           if [ ! -d "bin/release/${{ env.targetName }}.app" ]; then
-            echo "未在 bin/release 找到产物，尝试从 build 目录复制..."
+            echo "Copying app bundle from build directory..."
             cp -R "build/${{ env.targetName }}.app" "bin/release/${{ env.targetName }}.app"
           else
-            echo "产物已在 bin/release 目录中，跳过复制"
+            echo "App bundle already in bin/release, skipping copy."
           fi
 
-          echo "=== 验证产物 ==="
-          ls -la "bin/release/${{ env.targetName }}.app/Contents/MacOS/"
+          echo "=== Binary Verification ==="
           file "bin/release/${{ env.targetName }}.app/Contents/MacOS/${{ env.targetName }}"
+          ls -la "bin/release/${{ env.targetName }}.app/Contents/MacOS/"
 
-      - name: package
+      - name: Package DMG
         run: |
           export PATH="$QT_ROOT_DIR/bin:$PATH"
-          cp -f ExtBin/mac/Info.plist bin/release/${targetName}.app/Contents/Info.plist
-          cp -R -p -f bin/release/${targetName}.app ${targetName}.app
-          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg
-          cp ${targetName}.dmg bin/release/${targetName}.dmg
 
-      - uses: actions/upload-artifact@v4
+          if [ -f "ExtBin/mac/Info.plist" ]; then
+            cp -f ExtBin/mac/Info.plist "bin/release/${{ env.targetName }}.app/Contents/Info.plist"
+          fi
+
+          cp -R -p -f "bin/release/${{ env.targetName }}.app" "${{ env.targetName }}.app"
+          macdeployqt "${{ env.targetName }}.app" -qmldir=. -verbose=1 -dmg
+          cp "${{ env.targetName }}.dmg" "bin/release/${{ env.targetName }}.dmg"
+
+          echo "=== Final Artifact ==="
+          ls -lh "bin/release/${{ env.targetName }}.dmg"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.orgName }}-${{ env.VERSION }}
+          name: ${{ env.orgName }}-${{ matrix.artifact_suffix }}
           path: bin/release/${{ env.targetName }}.dmg
+          retention-days: 30
 
-      - name: uploadRelease
+      - name: Upload to Release
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: bin/release/${{ env.targetName }}.dmg
-          asset_name: ${{ env.orgName }}-${{ env.VERSION }}.dmg
+          asset_name: ${{ env.orgName }}-${{ matrix.artifact_suffix }}.dmg
           tag: ${{ github.ref_name }}
           overwrite: true

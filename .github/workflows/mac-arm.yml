@@ -1,4 +1,4 @@
-name: MacOS-arm64
+name: MacOS-arm64 CI
 
 on:
   push:
@@ -16,13 +16,13 @@ on:
 jobs:
   build:
     name: Build-arm64
-    runs-on: macos-14   # Apple Silicon
+    runs-on: macos-14
     permissions:
       contents: write
 
     strategy:
       matrix:
-        qt_ver: [6.9.3]
+        qt_ver: ["6.9.3"]
         qt_arch: [clang_64]
 
     env:
@@ -42,74 +42,86 @@ jobs:
           cached: false
           host: mac
           target: desktop
-          arch: clang_64
-          modules: >
-            qtcharts
-            qtsensors
-            qtwebview
-            qtlocation
-            qtwebchannel
-            qt5compat
-            qtpositioning
-            qtmultimedia
+          arch: ${{ matrix.qt_arch }}
+          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
           install-deps: true
           source: false
           dir: ${{ github.workspace }}/Qt
 
-      # ✅ 修复：用 GITHUB_ENV 持久化 PATH，source bash_profile 不会传递到后续步骤
       - name: Install Homebrew & OpenSSL (arm64)
         run: |
           echo "/opt/homebrew/bin" >> $GITHUB_PATH
           brew update
-          brew install openssl
-          brew link openssl --force
+          brew install openssl@3 cmake
+          brew link openssl@3 --force
 
       - name: Build macOS (arm64)
         timeout-minutes: 30
         run: |
           export PATH="/opt/homebrew/bin:$PATH"
 
+          OPENSSL_ROOT="$(brew --prefix openssl@3)"
+          OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)"
+
+          echo "=== Environment Info ==="
+          echo "OpenSSL Root: $OPENSSL_ROOT"
+          echo "macOS SDK:    $OSX_SYSROOT"
+          echo "Runner Arch:  $(uname -m)"
+
           echo "=== CMake Configure (arm64) ==="
           cmake -B build \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
-                -DCMAKE_OSX_ARCHITECTURES=arm64
+                -DCMAKE_OSX_ARCHITECTURES=arm64 \
+                -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
+                -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT" \
+                -DCMAKE_FIND_FRAMEWORK=LAST
 
           echo "=== CMake Build (arm64) ==="
-          # ✅ 限制并行数防止 OOM / 超时
           cmake --build build --config Release --parallel 4
 
-          echo "=== 对齐产物路径 ==="
+          echo "=== Align Output ==="
           mkdir -p bin/release
-
           if [ ! -d "bin/release/${{ env.targetName }}.app" ]; then
-            echo "未在 bin/release 找到产物，尝试从 build 目录复制..."
+            echo "App bundle not in bin/release, copying from build..."
             cp -R "build/${{ env.targetName }}.app" "bin/release/${{ env.targetName }}.app"
           else
-            echo "产物已在 bin/release 目录中，跳过复制"
+            echo "App bundle already in bin/release."
           fi
 
-          echo "=== 验证产物架构 ==="
+          echo "=== Verify Binary Architecture ==="
           file "bin/release/${{ env.targetName }}.app/Contents/MacOS/${{ env.targetName }}"
 
-      - name: Package
+      - name: Package DMG
         run: |
-          cp -f ExtBin/mac/Info.plist bin/release/${targetName}.app/Contents/Info.plist
-          cp -R -p bin/release/${targetName}.app ${targetName}.app
+          export PATH="$QT_ROOT_DIR/bin:/opt/homebrew/bin:$PATH"
 
-          QT_ACTUAL_LIB="$QT_ROOT_DIR/lib"
-          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg \
-            -libpath="$QT_ACTUAL_LIB" \
+          if [ -f "ExtBin/mac/Info.plist" ]; then
+            cp -f ExtBin/mac/Info.plist "bin/release/${{ env.targetName }}.app/Contents/Info.plist"
+          fi
+
+          cp -R -p "bin/release/${{ env.targetName }}.app" "${{ env.targetName }}.app"
+
+          macdeployqt "${{ env.targetName }}.app" \
+            -qmldir=. \
+            -verbose=1 \
+            -dmg \
+            -libpath="$QT_ROOT_DIR/lib" \
             -libpath="./lib"
 
-          cp ${targetName}.dmg bin/release/${targetName}.dmg
+          cp "${{ env.targetName }}.dmg" "bin/release/${{ env.targetName }}.dmg"
 
-      - uses: actions/upload-artifact@v4
+          echo "=== Final Artifact ==="
+          ls -lh "bin/release/${{ env.targetName }}.dmg"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.orgName }}-${{ env.VERSION }}
           path: bin/release/${{ env.targetName }}.dmg
+          retention-days: 30
 
-      - name: Upload Release
+      - name: Upload to Release
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
