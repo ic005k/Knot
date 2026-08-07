@@ -16,6 +16,7 @@ env:
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
   BUILD_TYPE: "Release"
+  CMAKE_VERSION: "3.28.1"
 
 jobs:
   build:
@@ -33,6 +34,11 @@ jobs:
       with:
         distribution: zulu
         java-version: ${{ env.JAVA_VERSION }}
+
+    - name: Install CMake 3.28 (LTS)
+      uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: ${{ env.CMAKE_VERSION }}
 
     - name: Install NDK
       shell: pwsh
@@ -76,31 +82,30 @@ jobs:
         Set-Location "$env:GITHUB_WORKSPACE\src"
 
         $ndkRoot = "$env:ANDROID_NDK_ROOT"
-        $toolchain = "$ndkRoot\build\cmake\android.toolchain.cmake"
-
-        # ✅ 强制读取 GitHub Actions 环境变量（关键）
         $apiLevel = "${{ env.ANDROID_API_LEVEL }}"
+        $androidPlatform = "android-$apiLevel"
 
-        if (-not (Test-Path $toolchain)) {
-          Write-Error "Android toolchain not found: $toolchain"
+        # 验证 CRT 文件
+        $crtPath = "$ndkRoot\toolchains\llvm\prebuilt\windows-x86_64\sysroot\usr\lib\aarch64-linux-android\$apiLevel\crtbegin_dynamic.o"
+        if (-not (Test-Path $crtPath)) {
+          Write-Error "CRT not found: $crtPath"
           exit 1
         }
 
-        $crt = "$ndkRoot\toolchains\llvm\prebuilt\windows-x86_64\sysroot\usr\lib\aarch64-linux-android\$apiLevel\crtbegin_dynamic.o"
-        if (-not (Test-Path $crt)) {
-          Write-Error "CRT not found: $crt"
-          exit 1
-        }
+        # 强制指定 target（关键）
+        $env:ANDROID_PLATFORM = $androidPlatform
 
         qt-cmake -B build `
           -G Ninja `
           -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE `
           -DANDROID_ABI=arm64-v8a `
-          -DANDROID_PLATFORM=$apiLevel `
+          -DANDROID_PLATFORM=$androidPlatform `
           -DANDROID_STL=c++_shared `
           -DANDROID_NDK_ROOT="$ndkRoot" `
-          -DCMAKE_TOOLCHAIN_FILE="$toolchain" `
-          -DQT_CHAINLOAD_TOOLCHAIN_FILE="$toolchain"
+          -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a `
+          -DCMAKE_ANDROID_API_LEVEL=$apiLevel `
+          -DCMAKE_SYSTEM_NAME=Android `
+          -DCMAKE_SYSTEM_VERSION=$apiLevel
 
     - name: CMake Build
       shell: pwsh
@@ -136,7 +141,7 @@ jobs:
         "%DEPLOY_QT%" ^
           --input "%JSON%" ^
           --output build\android-build ^
-          --android-platform android-${{ env.ANDROID_API_LEVEL }} ^
+          --android-platform android-%ANDROID_API_LEVEL% ^
           --jdk "%JAVA_HOME%" ^
           --gradle ^
           --sign "%cd%\signing\release.keystore" "%KEY_ALIAS%" ^
