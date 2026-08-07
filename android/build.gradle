@@ -151,7 +151,13 @@ android {
 
     useLibrary 'org.apache.http.legacy'
 
-    compileSdkVersion androidCompileSdkVersion.toInteger()
+    //compileSdkVersion androidCompileSdkVersion.toInteger()
+
+    // ✅ 兼容 Qt 传入的 "android-36-ext19" 等非纯整数格式
+    // 提取字符串中的数字部分；若本身就是纯整数则直接使用
+    def sdkVer = androidCompileSdkVersion.toString()
+    def sdkInt = (sdkVer =~ /\d+/).find() ? (sdkVer =~ /\d+/)[0].toInteger() : 34
+    compileSdkVersion sdkInt
 
     sourceSets {
         main {
@@ -186,7 +192,12 @@ android {
     defaultConfig {
         resConfig "en"
         minSdkVersion 23
-        targetSdkVersion qtTargetSdkVersion
+
+        //targetSdkVersion qtTargetSdkVersion
+
+        def targetVer = qtTargetSdkVersion.toString()
+        def targetInt = (targetVer =~ /\d+/).find() ? (targetVer =~ /\d+/)[0].toInteger() : 34
+        targetSdkVersion targetInt
 
     }
 
