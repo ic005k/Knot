@@ -41,12 +41,10 @@ jobs:
         Invoke-WebRequest -Uri $ndkUrl -OutFile ndk.zip
         Expand-Archive ndk.zip -DestinationPath android-sdk\ndk
         Rename-Item android-sdk\ndk\android-ndk-r27c $env:NDK_VERSION
-        $ndkRoot = "$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION"
-        echo "ANDROID_NDK_ROOT=$ndkRoot" >> $env:GITHUB_ENV
-        echo "$ndkRoot\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
+        echo "ANDROID_NDK_ROOT=$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION" >> $env:GITHUB_ENV
 
     - name: Install Ninja
-      uses: seanmiddleditch/gha-install-ninja@master
+      run: choco install ninja
 
     - name: Install Host Qt (MSVC2022)
       uses: jurplel/install-qt-action@v4
