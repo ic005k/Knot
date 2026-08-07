@@ -11,7 +11,7 @@ on:
 env:
   QT_VERSION: "6.10.3"
   QT_ARCH: "android_arm64_v8a"
-  HOST_ARCH: "win64_msvc2022_64"     # ✅ 已确认正确
+  HOST_ARCH: "win64_msvc2022_64"
   NDK_VERSION: "27.2.12479018"       # NDK r27c
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
@@ -61,15 +61,6 @@ jobs:
           Write-Host "✅ NDK installed at: $ndkRoot"
 
       # ==================== Qt 安装 ====================
-      - name: Diagnose Qt Host Architecture
-        shell: pwsh
-        continue-on-error: true  # ✅ 诊断失败不阻断 CI
-        run: |
-          python -m pip install --upgrade aqtinstall --quiet
-          Write-Host "=== Verifying Host Architecture for Qt $env:QT_VERSION ==="
-          aqt list-qt windows desktop --arch $env:QT_VERSION
-          # 注意：Android 架构查询语法复杂且易变，install-qt-action 内部已处理，此处仅作 Host 验证
-
       - name: Install Host Qt (MSVC2022)
         uses: jurplel/install-qt-action@v4
         with:
@@ -104,17 +95,9 @@ jobs:
           $sysroot = "$ndkRoot\toolchains\llvm\prebuilt\windows-x86_64\sysroot"
           $crtDir = "$sysroot\usr\lib\aarch64-linux-android"
 
-          # ✅ NDK r27 CRT 文件验证
-          if (-not (Test-Path "$crtDir\crtbegin_dynamic.o")) {
-            Write-Error "::error::CRT files not found at $crtDir"
-            Get-ChildItem "$sysroot\usr\lib" -Recurse -Filter "crtbegin*" | Select-Object FullName
-            exit 1
-          }
-          Write-Host "✅ CRT dir verified: $crtDir"
-
           $env:ANDROID_PLATFORM = $androidPlatform
 
-          # ✅ 核心修复：显式注入 -L 链接搜索路径，解决 qt-cmake + NDK r27 ld.lld 找不到 CRT 的问题
+          # ✅ 保留 -L 注入作为防御性修复，移除严格的 CRT 文件验证（r27 中 CRT 移至 clang resource dir）
           qt-cmake -B build `
             -G Ninja `
             -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE `
@@ -141,43 +124,49 @@ jobs:
 
       # ==================== APK 打包与签名 ====================
       - name: Package & Sign APK
-        shell: cmd
+        shell: pwsh
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          cd "%GITHUB_WORKSPACE%\src"
+          Set-Location "$env:GITHUB_WORKSPACE\src"
 
-          set "DEPLOY_QT=%QT_ROOT_DIR%\bin\androiddeployqt.exe"
-          if not exist "%DEPLOY_QT%" (
-            echo ::error::androiddeployqt not found at %DEPLOY_QT%
+          $deployQt = "$env:QT_ROOT_DIR\bin\androiddeployqt.exe"
+          if (-not (Test-Path $deployQt)) {
+            Write-Error "::error::androiddeployqt not found at $deployQt"
             exit 1
-          )
+          }
 
-          set "JSON=build\android-Knot-deployment-settings.json"
-          if not exist "%JSON%" (
-            echo ::error::deployment-settings.json not found!
-            dir /s /b build\*.json
+          # ✅ 动态查找 deployment-settings.json，兼容 Qt 6.10 可能的命名变化
+          $jsonFile = Get-ChildItem -Path build -Filter "android-*-deployment-settings.json" -Recurse | Select-Object -First 1
+          if (-not $jsonFile) {
+            Write-Error "::error::deployment-settings.json not found!"
+            Get-ChildItem build -Recurse -Filter "*.json" | Select-Object FullName
             exit 1
-          )
+          }
+          Write-Host "✅ Found deployment settings: $($jsonFile.FullName)"
 
-          mkdir signing 2>nul
-          PowerShell -Command "[IO.File]::WriteAllBytes('signing\release.keystore', [Convert]::FromBase64String($env:KEYSTORE_BASE64))"
+          # 准备签名密钥
+          New-Item -ItemType Directory -Force -Path signing | Out-Null
+          [IO.File]::WriteAllBytes("$env:GITHUB_WORKSPACE\src\signing\release.keystore", [Convert]::FromBase64String($env:KEYSTORE_BASE64))
 
-          "%DEPLOY_QT%" ^
-            --input "%JSON%" ^
-            --output build\android-build ^
-            --android-platform android-%ANDROID_API_LEVEL% ^
-            --jdk "%JAVA_HOME%" ^
-            --gradle ^
-            --sign "%cd%\signing\release.keystore" "%KEY_ALIAS%" ^
-            --storepass "%KEYSTORE_PASSWORD%" ^
-            --keypass "%KEY_PASSWORD%" ^
+          $outputDir = "$env:GITHUB_WORKSPACE\src\build\android-build"
+
+          # ✅ 使用绝对路径调用 androiddeployqt
+          & $deployQt `
+            --input $jsonFile.FullName `
+            --output $outputDir `
+            --android-platform "android-$env:ANDROID_API_LEVEL" `
+            --jdk $env:JAVA_HOME `
+            --gradle `
+            --sign "$env:GITHUB_WORKSPACE\src\signing\release.keystore" $env:KEY_ALIAS `
+            --storepass $env:KEYSTORE_PASSWORD `
+            --keypass $env:KEY_PASSWORD `
             --verbose
 
-          if %ERRORLEVEL% neq 0 (echo ::error::APK packaging failed! & exit 1)
+          if ($LASTEXITCODE -ne 0) { Write-Error "::error::APK packaging failed!"; exit 1 }
 
       # ==================== 产物上传 ====================
       - name: Upload APK Artifact
