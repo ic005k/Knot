@@ -82,11 +82,24 @@ jobs:
           Write-Host "Qt Desktop: $qtDesktopRoot"
           Write-Host "NDK:        $ndkRoot"
 
-          # ✅ 关键修复：
-          # 1. CMAKE_PREFIX_PATH 只放 Android Qt（目标库搜索路径）
-          # 2. QT_HOST_PATH 指向 Desktop Qt（宿主机工具）
-          # 3. 不再设置 CMAKE_FIND_ROOT_PATH（让 toolchain 文件自行管理）
-          # 4. 不再手动指定 CMAKE_C/CXX_COMPILER（toolchain 文件会自动设置）
+          # 验证 Qt6Config.cmake 确实存在
+          $qt6Config = "$qtAndroidRoot\lib\cmake\Qt6\Qt6Config.cmake"
+          if (-not (Test-Path $qt6Config)) {
+            Write-Host "::error::Qt6Config.cmake not found at: $qt6Config"
+            Get-ChildItem $qtAndroidRoot -Recurse -Filter "Qt6Config.cmake" | Select-Object FullName
+            exit 1
+          }
+          Write-Host "✅ Found: $qt6Config"
+
+          # ✅ 关键修复说明：
+          # NDK toolchain 会设置 CMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY
+          # 导致 find_package 只搜索 NDK sysroot，忽略 CMAKE_PREFIX_PATH
+          # 必须显式设置 BOTH 才能同时搜索 Qt 安装路径
+          #
+          # 不要手动设置:
+          #   CMAKE_SYSTEM_NAME     ← toolchain 自动设置
+          #   CMAKE_C/CXX_COMPILER  ← toolchain 自动设置
+          #   CMAKE_FIND_ROOT_PATH  ← 会导致平台兼容性拒绝
           cmake -B build `
                 -G Ninja `
                 -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
@@ -95,11 +108,12 @@ jobs:
                 -DANDROID_PLATFORM=android-${{ env.ANDROID_API_LEVEL }} `
                 -DANDROID_STL=c++_shared `
                 -DCMAKE_PREFIX_PATH="$qtAndroidRoot" `
+                -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH `
                 -DQT_HOST_PATH="$qtDesktopRoot"
 
           if ($LASTEXITCODE -ne 0) { Write-Host "::error::CMake Configure failed!"; exit 1 }
 
-          cmake --build build --config ${{ env.BUILD_TYPE }} --parallel $(nproc)
+          cmake --build build --config ${{ env.BUILD_TYPE }} --parallel $env:NUMBER_OF_PROCESSORS
           if ($LASTEXITCODE -ne 0) { Write-Host "::error::CMake Build failed!"; exit 1 }
 
       # ==================== APK 打包与签名 ====================

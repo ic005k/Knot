@@ -15,28 +15,18 @@ on:
 
 jobs:
   build:
-    name: Build (${{ matrix.artifact_suffix }})
-    runs-on: ${{ matrix.os }}
+    name: Build (Mac-x86_64)
+    runs-on: macos-13
     permissions:
       contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: macos-14
-            qt_ver: "6.9.3"
-            qt_arch: clang_64
-            cmake_arch: arm64
-            artifact_suffix: Mac-arm64
-          - os: macos-13
-            qt_ver: "6.9.3"
-            qt_arch: clang_64
-            cmake_arch: x86_64
-            artifact_suffix: Mac-x86_64
 
     env:
       targetName: Knot
       orgName: Knot
+      qt_ver: "6.9.3"
+      qt_arch: clang_64
+      cmake_arch: x86_64
+      artifact_suffix: Mac-x86_64
 
     steps:
       - name: Checkout code
@@ -45,10 +35,10 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: ${{ matrix.qt_ver }}
+          version: ${{ env.qt_ver }}
           host: mac
           target: desktop
-          arch: ${{ matrix.qt_arch }}
+          arch: ${{ env.qt_arch }}
           modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
           install-deps: true
 
@@ -60,7 +50,7 @@ jobs:
 
       - name: CMake Configure & Build
         run: |
-          echo "=== Target Architecture: ${{ matrix.cmake_arch }} ==="
+          echo "=== Target Architecture: ${{ env.cmake_arch }} ==="
           echo "=== Runner Architecture: $(uname -m) ==="
 
           OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)"
@@ -69,7 +59,7 @@ jobs:
           cmake -B build \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
-                -DCMAKE_OSX_ARCHITECTURES=${{ matrix.cmake_arch }} \
+                -DCMAKE_OSX_ARCHITECTURES=${{ env.cmake_arch }} \
                 -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
                 -DOPENSSL_ROOT_DIR="$(brew --prefix openssl@3)"
 
@@ -113,7 +103,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.orgName }}-${{ matrix.artifact_suffix }}
+          name: ${{ env.orgName }}-${{ env.artifact_suffix }}
           path: bin/release/${{ env.targetName }}.dmg
           retention-days: 30
 
@@ -123,6 +113,6 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: bin/release/${{ env.targetName }}.dmg
-          asset_name: ${{ env.orgName }}-${{ matrix.artifact_suffix }}.dmg
+          asset_name: ${{ env.orgName }}-${{ env.artifact_suffix }}.dmg
           tag: ${{ github.ref_name }}
           overwrite: true
