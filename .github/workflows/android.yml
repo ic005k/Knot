@@ -72,39 +72,34 @@ jobs:
             exit 1
         }
 
-    - name: 🛠️ CMake Configure (Test)
-      shell: pwsh
-      run: |
-        # 确保使用 qt-cmake
-        $qtCmake = Join-Path $env:QT_ROOT_DIR "bin\qt-cmake.bat"
-        if (-not (Test-Path $qtCmake)) {
-            # 有些 jurplel 版本可能直接叫 cmake，或者在 bin 目录下
-            $qtCmake = Join-Path $env:QT_ROOT_DIR "bin\cmake.exe"
-        }
+- name: 🛠️ CMake Configure (Test v2)
+  shell: pwsh
+  run: |
+    $qtCmake = Join-Path $env:QT_ROOT_DIR "bin\qt-cmake.bat"
+    if (-not (Test-Path $qtCmake)) {
+        $qtCmake = Join-Path $env:QT_ROOT_DIR "bin\cmake.exe"
+    }
 
-        Write-Host "Using Qt CMake: $qtCmake"
-        Write-Host "Injecting CRT Linker Flag: -L$env:ANDROID_CRT_DIR"
+    Write-Host "Using Qt CMake: $qtCmake"
 
-        # 构建 CMake 参数
-        $cmakeArgs = @(
-            "-B", "build-android-test",
-            "-G", "Ninja",
-            "-DCMAKE_BUILD_TYPE=Release",
-            "-DANDROID_ABI=arm64-v8a",
-            "-DANDROID_PLATFORM=android-34",
-            "-DANDROID_NDK_ROOT=$env:ANDROID_NDK_ROOT",
-            # 关键：注入 CRT 路径到链接器标志
-            "-DCMAKE_EXE_LINKER_FLAGS=-L$env:ANDROID_CRT_DIR",
-            "-DCMAKE_SHARED_LINKER_FLAGS=-L$env:ANDROID_CRT_DIR",
-            "-DCMAKE_MODULE_LINKER_FLAGS=-L$env:ANDROID_CRT_DIR"
-        )
+    # ✅ 关键修改：移除了所有 -DCMAKE_*_LINKER_FLAGS
+    # ✅ 确保 ANDROID_PLATFORM 与你 Qt 编译时使用的 API Level 一致
+    # 如果你的 Qt 6.10.3 android_arm64_v8a 是基于 API 34 编译的，这里必须是 34
+    $cmakeArgs = @(
+        "-B", "build-android-test",
+        "-G", "Ninja",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DANDROID_ABI=arm64-v8a",
+        "-DANDROID_PLATFORM=android-34",       # ← 必须与 Qt 的 target API 对齐
+        "-DANDROID_NDK_ROOT=$env:ANDROID_NDK_ROOT",
+        "-DANDROID_STL=c++_shared"             # ← 显式指定 STL，避免默认值不一致
+    )
 
-        # 执行 Configure
-        & $qtCmake $cmakeArgs
+    & $qtCmake $cmakeArgs
 
-        if ($LASTEXITCODE -ne 0) {
-            Write-Error "::error::CMake Configure failed with exit code $LASTEXITCODE"
-            exit $LASTEXITCODE
-        }
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "::error::CMake Configure failed with exit code $LASTEXITCODE"
+        exit $LASTEXITCODE
+    }
 
-        Write-Host "🎉 SUCCESS: CMake Configure completed!"
+    Write-Host "🎉 SUCCESS: CMake Configure completed!"
