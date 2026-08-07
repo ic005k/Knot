@@ -61,6 +61,15 @@ jobs:
           Write-Host "✅ NDK installed at: $ndkRoot"
 
       # ==================== Qt 安装 ====================
+      - name: Diagnose Qt Architectures
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade aqtinstall
+          Write-Host "=== Available Host Architectures for Qt $env:QT_VERSION ==="
+          aqt list-qt windows desktop --arch $env:QT_VERSION
+          Write-Host "=== Available Android Architectures for Qt $env:QT_VERSION ==="
+          aqt list-qt windows android --arch $env:QT_VERSION
+
       - name: Install Host Qt (MSVC2022)
         uses: jurplel/install-qt-action@v4
         with:
@@ -93,25 +102,19 @@ jobs:
           $apiLevel = "${{ env.ANDROID_API_LEVEL }}"
           $androidPlatform = "android-$apiLevel"
           $sysroot = "$ndkRoot\toolchains\llvm\prebuilt\windows-x86_64\sysroot"
+          $crtDir = "$sysroot\usr\lib\aarch64-linux-android"
 
-          # ✅ NDK r27 CRT 验证：优先检查新版扁平路径，回退到旧版分层路径
-          $crtPath = "$sysroot\usr\lib\aarch64-linux-android\crtbegin_dynamic.o"
-          if (-not (Test-Path $crtPath)) {
-            Write-Host "::warning::CRT not at r27 flat path, trying legacy versioned path..."
-            $crtPathLegacy = "$sysroot\usr\lib\aarch64-linux-android\$apiLevel\crtbegin_dynamic.o"
-            if (-not (Test-Path $crtPathLegacy)) {
-              Write-Error "::error::CRT file not found! Searching actual structure..."
-              Get-ChildItem "$sysroot\usr\lib\aarch64-linux-android" -Recurse -Filter "crtbegin*" | Select-Object FullName
-              exit 1
-            }
-            Write-Host "✅ CRT verified (legacy path): $crtPathLegacy"
-          } else {
-            Write-Host "✅ CRT verified (r27 flat path): $crtPath"
+          # ✅ NDK r27 CRT 验证
+          if (-not (Test-Path "$crtDir\crtbegin_dynamic.o")) {
+            Write-Error "::error::CRT files not found at $crtDir"
+            Get-ChildItem "$sysroot\usr\lib" -Recurse -Filter "crtbegin*" | Select-Object FullName
+            exit 1
           }
+          Write-Host "✅ CRT dir verified: $crtDir"
 
           $env:ANDROID_PLATFORM = $androidPlatform
 
-          # ✅ 使用 qt-cmake + 显式 CMAKE_SYSROOT 防止链接器找不到 CRT
+          # ✅ 使用 qt-cmake + 显式注入 -L 链接搜索路径解决 NDK r27 ld.lld 找不到 CRT 的问题
           qt-cmake -B build `
             -G Ninja `
             -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE `
@@ -123,7 +126,9 @@ jobs:
             -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a `
             -DCMAKE_ANDROID_API_LEVEL=$apiLevel `
             -DCMAKE_SYSTEM_NAME=Android `
-            -DCMAKE_SYSTEM_VERSION=$apiLevel
+            -DCMAKE_SYSTEM_VERSION=$apiLevel `
+            "-DCMAKE_EXE_LINKER_FLAGS=-L$crtDir" `
+            "-DCMAKE_SHARED_LINKER_FLAGS=-L$crtDir"
 
           if ($LASTEXITCODE -ne 0) { Write-Error "::error::CMake Configure failed!"; exit 1 }
 
