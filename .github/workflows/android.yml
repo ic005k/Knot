@@ -15,8 +15,9 @@ on:
 
 env:
   QT_VERSION: "6.10.3"
-  QT_ANDROID_ARCH: "android_arm64_v8a"
-  QT_DESKTOP_ARCH: "win64_mingw"
+  QT_ARCH: "android_arm64_v8a"
+  DESKTOP_ARCH: "win64_mingw"       # ✅ 保留：APK 打包仍依赖此版本
+  CMAKE_HOST_ARCH: "win64_msvc2022_64"  # ✅ 新增：仅供 CMake configure 使用
   NDK_VERSION: "27.2.12479018"
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
@@ -50,41 +51,51 @@ jobs:
           $ndkRoot = "$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION"
           echo "ANDROID_NDK_ROOT=$ndkRoot" >> $env:GITHUB_ENV
           Write-Host "✅ NDK installed at: $ndkRoot"
-          Test-Path "$ndkRoot\build\cmake\android.toolchain.cmake"
+          if (-not (Test-Path "$ndkRoot\build\cmake\android.toolchain.cmake")) {
+            Write-Host "::error::NDK toolchain.cmake not found!"
+            exit 1
+          }
 
-      - name: Install Desktop Qt (Host Tools)
+      # ✅ 保留原始 mingw 安装（APK 打包依赖）
+      - name: Install Desktop Qt (MinGW - for APK packaging)
         shell: pwsh
         run: |
           python -m pip install --upgrade aqtinstall
-          aqt install-qt windows desktop $env:QT_VERSION $env:QT_DESKTOP_ARCH `
+          aqt install-qt windows desktop $env:QT_VERSION $env:DESKTOP_ARCH `
             -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
             --outputdir "$env:GITHUB_WORKSPACE\Qt"
+          Write-Host "✅ MinGW Host Qt installed (for androiddeployqt)"
 
-      - name: Install Android Qt (Target Libraries)
+      # ✅ 新增：MSVC Host Qt（仅供 CMake configure 使用）
+      - name: Install Desktop Qt (MSVC - for CMake host tools)
         shell: pwsh
         run: |
-          aqt install-qt windows android $env:QT_VERSION $env:QT_ANDROID_ARCH `
-            -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
+          aqt install-qt windows desktop $env:QT_VERSION $env:CMAKE_HOST_ARCH `
             --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
-      # ==================== 编译构建 ====================
+          $msvcRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:CMAKE_HOST_ARCH"
+          if (-not (Test-Path "$msvcRoot\bin\qt-cmake.exe")) {
+            Write-Host "::error::qt-cmake.exe not found in MSVC Host Qt!"
+            Get-ChildItem "$msvcRoot\bin" -Filter "*.exe" | Select-Object Name
+            exit 1
+          }
+          Write-Host "✅ MSVC Host Qt installed (qt-cmake ready)"
+
+      - name: Install Android Qt
+        shell: pwsh
+        run: |
+          aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
+            -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
+            --outputdir "$env:GITHUB_WORKSPACE\Qt"
+          Write-Host "✅ Android Qt installed"
+
+      # ==================== CMake 构建（使用 MSVC Host） ====================
       - name: CMake Configure & Build
         shell: pwsh
         run: |
-          $qtDesktopRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_DESKTOP_ARCH"
-          $ndkRoot = $env:ANDROID_NDK_ROOT
+          $qtCmake = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:CMAKE_HOST_ARCH\bin\qt-cmake.exe"
 
           Set-Location "$env:GITHUB_WORKSPACE\src"
-
-          # ✅ 使用 qt-cmake 包装器（Qt 官方推荐交叉编译方式）
-          # 它自动处理: toolchain, QT_HOST_PATH, CMAKE_PREFIX_PATH, FIND_ROOT_PATH_MODE
-          $qtCmake = "$qtDesktopRoot\bin\qt-cmake.exe"
-          if (-not (Test-Path $qtCmake)) {
-            Write-Host "::error::qt-cmake.exe not found at: $qtCmake"
-            Write-Host "Listing available files in bin:"
-            Get-ChildItem "$qtDesktopRoot\bin" -Filter "*.exe" | Select-Object Name
-            exit 1
-          }
           Write-Host "✅ Using qt-cmake: $qtCmake"
 
           & $qtCmake -B build `
@@ -99,7 +110,7 @@ jobs:
           cmake --build build --config ${{ env.BUILD_TYPE }} --parallel $env:NUMBER_OF_PROCESSORS
           if ($LASTEXITCODE -ne 0) { Write-Host "::error::CMake Build failed!"; exit 1 }
 
-      # ==================== APK 打包与签名 ====================
+      # ==================== APK 打包（使用 MinGW Host，与旧流程一致） ====================
       - name: Package & Sign APK
         shell: pwsh
         env:
@@ -110,11 +121,14 @@ jobs:
         run: |
           Set-Location "$env:GITHUB_WORKSPACE\src"
 
-          $deployQt = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_DESKTOP_ARCH\bin\androiddeployqt.exe"
+          # ✅ APK 打包继续使用 MinGW 版本的 androiddeployqt（与你旧流程完全一致）
+          $mingwBin = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:DESKTOP_ARCH\bin"
+          $deployQt = "$mingwBin\androiddeployqt.exe"
           if (-not (Test-Path $deployQt)) {
             Write-Host "::error::androiddeployqt.exe not found at: $deployQt"
             exit 1
           }
+          Write-Host "✅ Using MinGW androiddeployqt: $deployQt"
 
           $deployJson = Get-ChildItem -Path "build" -Recurse -Filter "*deployment-settings.json" | Select-Object -First 1
           if (-not $deployJson) {
