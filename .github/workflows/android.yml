@@ -110,7 +110,6 @@ jobs:
             throw "QT_HOST_PATH not found."
           }
 
-          # ✅ 签名参数在 Configure 阶段传入（Ninja 不支持 build 阶段透传 -D）
           cmake -B build -G Ninja `
             -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_PREFIX_PATH="$qtAndroid" `
@@ -124,14 +123,29 @@ jobs:
             -DQT_ANDROID_KEYSTORE_ALIAS="$env:KEY_ALIAS" `
             -DQT_ANDROID_KEYSTORE_STORE_PASS="$env:KEYSTORE_PASSWORD" `
             -DQT_ANDROID_KEYSTORE_KEY_PASS="$env:KEY_PASSWORD" `
-            -DQT_ANDROID_SIGN=ON
+            -DQT_ANDROID_SIGN=ON `
+            -DQT_ANDROID_DEPLOY_RELEASE=ON
 
           cmake --build build --config Release -j8
 
       - name: Build APK
         shell: pwsh
         run: |
+          # ✅ 关键：通过环境变量确保 androiddeployqt 使用 release 模式 strip 符号
+          $env:QT_ANDROID_DEPLOY_RELEASE = "ON"
           cmake --build build --target apk --config Release
+
+      - name: Diagnose APK Size
+        shell: pwsh
+        run: |
+          $apk = Get-ChildItem "build/android-build/build/outputs/apk/release/*.apk" | Select-Object -First 1
+          Write-Host "📦 APK: $($apk.Name) ($([math]::Round($apk.Length/1MB, 2)) MB)"
+          Add-Type -Assembly System.IO.Compression.FileSystem
+          $zip = [IO.Compression.ZipFile]::OpenRead($apk.FullName)
+          Write-Host "`n🔍 Top 15 largest entries:"
+          $zip.Entries | Sort-Object Length -Descending | Select-Object -First 15 |
+            Format-Table @{L='Size(MB)';E={[math]::Round($_.Length/1MB,2)}}, FullName -AutoSize
+          $zip.Dispose()
 
       - name: Upload signed APK
         if: success()
