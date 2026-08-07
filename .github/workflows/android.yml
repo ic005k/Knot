@@ -3,20 +3,22 @@ name: Android CI (CMake)
 on:
   push:
     branches: [ main ]
-    paths-ignore: [ 'stats.txt', 'README.md' ]
+    paths:
+      - '**'
+      - '!stats.txt'
+      - '!README.md'
   pull_request:
+    paths:
+      - '**'
   release:
     types: [ published ]
 
 env:
-  QT_VERSION: "6.9.3"
-  QT_ARCH: "android_arm64_v8a"
-  HOST_ARCH: "win64_msvc2022_64"
+  QT_VERSION: "6.10.3"
+  QT_ARCH_ANDROID: "android_arm64_v8a"
   NDK_VERSION: "26.1.10909125"
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
-  BUILD_TYPE: "Release"
-  CMAKE_VERSION: "3.28.1"
 
 jobs:
   build:
@@ -25,130 +27,125 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        path: src
+      - uses: actions/checkout@v4
+        with:
+          path: 'src'
 
-    - name: Setup JDK
-      uses: actions/setup-java@v4
-      with:
-        distribution: zulu
-        java-version: ${{ env.JAVA_VERSION }}
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: ${{ env.JAVA_VERSION }}
 
-    - name: Install CMake 3.28 (LTS)
-      uses: lukka/get-cmake@latest
-      with:
-        cmakeVersion: ${{ env.CMAKE_VERSION }}
+      - name: Install NDK r26b
+        shell: pwsh
+        run: |
+          $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
+          Invoke-WebRequest -Uri $ndkUrl -OutFile "ndk.zip"
+          Expand-Archive -Path "ndk.zip" -DestinationPath "android-sdk\ndk" -Force
+          $ndkPath = "${{ github.workspace }}\android-sdk\ndk\android-ndk-r26b"
+          echo "ANDROID_NDK_HOME=$ndkPath" >> $env:GITHUB_ENV
+          echo "$ndkPath\toolchains\llvm\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
 
-    - name: Install NDK r26b
-      shell: pwsh
-      run: |
-        $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
-        Invoke-WebRequest -Uri $ndkUrl -OutFile ndk.zip
-        Expand-Archive ndk.zip -DestinationPath android-sdk\ndk
-        Rename-Item android-sdk\ndk\android-ndk-r26b $env:NDK_VERSION
-        $ndkRoot = "$env:GITHUB_WORKSPACE\android-sdk\ndk\$env:NDK_VERSION"
-        echo "ANDROID_NDK_ROOT=$ndkRoot" >> $env:GITHUB_ENV
-        echo "$ndkRoot\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
+      - name: Install Desktop Qt
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade aqtinstall
+          # Qt 6.10+ MinGW 架构名已变更为 win64_mingw
+          $arch = "win64_mingw"
 
-    - name: Install Ninja
-      run: choco install ninja
+          # 先列出可用模块，便于调试
+          Write-Host "=== Available modules for $arch ==="
+          aqt list-qt windows desktop --modules ${{ env.QT_VERSION }} $arch
 
-    - name: Install Host Qt (MSVC2022)
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: windows
-        target: desktop
-        arch: ${{ env.HOST_ARCH }}
-        modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
-        cache: true
-        setup-python: false
+          # 仅安装确认存在的核心模块，移除 qt5compat/qtwebview 等可能不存在的模块
+          aqt install-qt windows desktop ${{ env.QT_VERSION }} $arch `
+            -m qtcharts qtsensors qtlocation qtwebchannel qtpositioning qtmultimedia `
+            --outputdir "${{ github.workspace }}/Qt"
 
-    - name: Install Android Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: windows
-        target: android
-        arch: ${{ env.QT_ARCH }}
-        modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
-        cache: true
-        setup-python: false
+      - name: Install Android Qt
+        shell: pwsh
+        run: |
+          # 先列出可用模块，便于调试
+          Write-Host "=== Available modules for ${{ env.QT_ARCH_ANDROID }} ==="
+          aqt list-qt windows android --modules ${{ env.QT_VERSION }} ${{ env.QT_ARCH_ANDROID }}
 
-    - name: CMake Configure
-      shell: pwsh
-      run: |
-        Set-Location "$env:GITHUB_WORKSPACE\src"
+          aqt install-qt windows android ${{ env.QT_VERSION }} ${{ env.QT_ARCH_ANDROID }} `
+            -m qtcharts qtsensors qtlocation qtwebchannel qtpositioning qtmultimedia `
+            --outputdir "${{ github.workspace }}/Qt"
 
-        $ndkRoot = "$env:ANDROID_NDK_ROOT"
-        $apiLevel = "${{ env.ANDROID_API_LEVEL }}"
-        $androidPlatform = "android-$apiLevel"
+      - name: CMake Configure & Build
+        shell: pwsh
+        run: |
+          $qtBase = "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}"
+          $qtAndroid = "$qtBase/${{ env.QT_ARCH_ANDROID }}"
 
-        $crtPath = "$ndkRoot\toolchains\llvm\prebuilt\windows-x86_64\sysroot\usr\lib\aarch64-linux-android\$apiLevel\crtbegin_dynamic.o"
-        if (-not (Test-Path $crtPath)) {
-          Write-Error "CRT not found: $crtPath"
-          exit 1
-        }
+          # 自动探测 Desktop Qt 真实目录名
+          $desktopCandidates = @("win64_mingw", "mingw_64", "mingw1310_64", "gcc_64")
+          $qtDesktop = ""
+          foreach ($candidate in $desktopCandidates) {
+            $testPath = Join-Path $qtBase $candidate
+            if (Test-Path "$testPath/bin/moc.exe") {
+              $qtDesktop = $testPath
+              Write-Host "✅ Found Desktop Qt at: $qtDesktop"
+              break
+            }
+          }
 
-        qt-cmake -B build `
-          -G Ninja `
-          -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE `
-          -DANDROID_ABI=arm64-v8a `
-          -DANDROID_PLATFORM=$androidPlatform `
-          -DANDROID_STL=c++_shared `
-          -DANDROID_NDK_ROOT="$ndkRoot"
+          if ([string]::IsNullOrEmpty($qtDesktop)) {
+            Write-Host "❌ Cannot find Desktop Qt! Listing available directories:"
+            Get-ChildItem $qtBase -Directory | ForEach-Object { Write-Host "  - $($_.Name)" }
+            throw "QT_HOST_PATH not found. Please check aqt install output."
+          }
 
-    - name: CMake Build
-      shell: pwsh
-      run: |
-        Set-Location "$env:GITHUB_WORKSPACE\src"
-        cmake --build build --config $env:BUILD_TYPE --parallel $env:NUMBER_OF_PROCESSORS
+          cd src
+          cmake -B build -G Ninja `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_PREFIX_PATH="$qtAndroid" `
+            -DQT_HOST_PATH="$qtDesktop" `
+            -DCMAKE_TOOLCHAIN_FILE="$qtAndroid/lib/cmake/Qt6/qt.toolchain.cmake" `
+            -DANDROID_ABI=arm64-v8a `
+            -DANDROID_NATIVE_API_LEVEL=${{ env.ANDROID_API_LEVEL }} `
+            -DANDROID_NDK_HOME="$env:ANDROID_NDK_HOME"
 
-    - name: Package & Sign APK
-      shell: cmd
-      env:
-        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-      run: |
-        cd "%GITHUB_WORKSPACE%\src"
+          cmake --build build --config Release -j8
 
-        set "DEPLOY_QT=%QT_ROOT_DIR%\bin\androiddeployqt.exe"
-        if not exist "%DEPLOY_QT%" (
-          echo ::error::androiddeployqt not found & exit 1
-        )
+      - name: Generate and Sign APK
+        shell: pwsh
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          cd src/build
 
-        set "JSON=build\android-Knot-deployment-settings.json"
-        if not exist "%JSON%" (
-          echo ::error::deployment-settings.json not found & exit 1
-        )
+          $ksDir = "${{ github.workspace }}/signing"
+          New-Item -ItemType Directory -Force -Path $ksDir | Out-Null
+          $ksPath = "$ksDir/release.keystore"
+          [Convert]::FromBase64String($env:KEYSTORE_BASE64) | Set-Content -Path $ksPath -Encoding Byte
+          if ((Get-Item $ksPath).Length -lt 100) { throw "Keystore 解码异常" }
 
-        mkdir signing
-        cd signing
-        PowerShell -Command "[IO.File]::WriteAllBytes('release.keystore', [Convert]::FromBase64String($env:KEYSTORE_BASE64))"
-        cd ..
+          cmake --build . --target apk --config Release -- `
+            -DQT_ANDROID_KEYSTORE_PATH="$ksPath" `
+            -DQT_ANDROID_KEYSTORE_ALIAS="$env:KEY_ALIAS" `
+            -DQT_ANDROID_KEYSTORE_STORE_PASS="$env:KEYSTORE_PASSWORD" `
+            -DQT_ANDROID_KEYSTORE_KEY_PASS="$env:KEY_PASSWORD" `
+            -DQT_ANDROID_SIGN=ON
 
-        "%DEPLOY_QT%" ^
-          --input "%JSON%" ^
-          --output build\android-build ^
-          --android-platform android-%ANDROID_API_LEVEL% ^
-          --jdk "%JAVA_HOME%" ^
-          --gradle ^
-          --sign "%cd%\signing\release.keystore" "%KEY_ALIAS%" ^
-          --storepass "%KEYSTORE_PASSWORD%" ^
-          --keypass "%KEY_PASSWORD%" ^
-          --verbose
+      - name: Upload signed APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Knot-APK-signed
+          path: src/build/android-build/build/outputs/apk/release/*.apk
 
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Knot-Android-arm64-v8a
-        path: src/build/android-build/build/outputs/apk/release/*.apk
-
-    - name: Upload to Release
-      if: github.event_name == 'release'
-      uses: softprops/action-gh-release@v2
-      with:
-        files: src/build/android-build/build/outputs/apk/release/*.apk
+      - name: Upload to GitHub Release
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: src/build/android-build/build/outputs/apk/release/*.apk
+          asset_name: android-build-release-signed.apk
+          tag: ${{ github.ref_name }}
+          overwrite: true
