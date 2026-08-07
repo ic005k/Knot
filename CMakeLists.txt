@@ -193,6 +193,15 @@ qt_add_executable(${PROJECT_NAME}
 if(ANDROID)
     set_target_properties(${PROJECT_NAME} PROPERTIES
         QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android"
+
+        # ✅ 排除 CMake 自动收集但实际不需要的第三方 assets
+        # 这些资源在本地/qmake 构建中从未打包，App 通过按需下载/fallback 正常工作
+        QT_ANDROID_EXTRA_ASSETS_EXCLUDE
+            "org/scilab"      # JLaTeXMath 数学字体 (~15MB)
+            "mapsforge"       # MapsForge 离线地图渲染主题
+            "tencentmap"      # 腾讯地图矢量 SDK UI 资源
+            "patterns"        # 地图符号图案
+            "symbols"         # 地图符号图标
     )
 elseif(APPLE)
     set_target_properties(${PROJECT_NAME} PROPERTIES
