@@ -15,7 +15,7 @@ on:
 
 jobs:
   build:
-    name: Build (Mac-x86_64)
+    name: Build-x86_64
     runs-on: macos-13
     permissions:
       contents: write
@@ -23,10 +23,7 @@ jobs:
     env:
       targetName: Knot
       orgName: Knot
-      qt_ver: "6.9.3"
-      qt_arch: clang_64
-      cmake_arch: x86_64
-      artifact_suffix: Mac-x86_64
+      VERSION: Mac-x86_64
 
     steps:
       - name: Checkout code
@@ -35,63 +32,75 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: ${{ env.qt_ver }}
+          version: "6.9.3"
+          cached: false
           host: mac
           target: desktop
-          arch: ${{ env.qt_arch }}
+          arch: clang_64
           modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
           install-deps: true
+          source: false
+          dir: ${{ github.workspace }}/Qt
 
-      - name: Install Dependencies
+      - name: Install Homebrew & OpenSSL (x86_64)
         run: |
+          # ✅ 对齐 arm64：显式确保 brew 在 PATH 中
+          echo "/usr/local/bin" >> $GITHUB_PATH
           brew update
           brew install openssl@3 cmake
           brew link openssl@3 --force
 
-      - name: CMake Configure & Build
+      - name: Build macOS (x86_64)
+        timeout-minutes: 30  # ✅ 对齐 arm64：防止卡死
         run: |
-          echo "=== Target Architecture: ${{ env.cmake_arch }} ==="
-          echo "=== Runner Architecture: $(uname -m) ==="
+          export PATH="/usr/local/bin:$PATH"
 
+          OPENSSL_ROOT="$(brew --prefix openssl@3)"
           OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)"
-          echo "=== macOS SDK: $OSX_SYSROOT ==="
 
+          echo "=== Environment Info ==="
+          echo "OpenSSL Root: $OPENSSL_ROOT"
+          echo "macOS SDK:    $OSX_SYSROOT"
+          echo "Runner Arch:  $(uname -m)"
+
+          echo "=== CMake Configure (x86_64) ==="
           cmake -B build \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
-                -DCMAKE_OSX_ARCHITECTURES=${{ env.cmake_arch }} \
+                -DCMAKE_OSX_ARCHITECTURES=x86_64 \
                 -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
-                -DOPENSSL_ROOT_DIR="$(brew --prefix openssl@3)"
+                -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT"
 
+          echo "=== CMake Build (x86_64) ==="
           cmake --build build --config Release --parallel $(sysctl -n hw.ncpu)
 
-      - name: Align Output
-        run: |
+          echo "=== Align Output ==="
           mkdir -p bin/release
           if [ ! -d "bin/release/${{ env.targetName }}.app" ]; then
-            echo "Copying app bundle from build directory..."
+            echo "App bundle not in bin/release, copying from build..."
             cp -R "build/${{ env.targetName }}.app" "bin/release/${{ env.targetName }}.app"
           else
-            echo "App bundle already in bin/release, skipping copy."
+            echo "App bundle already in bin/release."
           fi
 
-          echo "=== Binary Verification ==="
+          echo "=== Verify Binary Architecture ==="
           file "bin/release/${{ env.targetName }}.app/Contents/MacOS/${{ env.targetName }}"
-          ls -la "bin/release/${{ env.targetName }}.app/Contents/MacOS/"
 
       - name: Package DMG
         run: |
-          export PATH="$QT_ROOT_DIR/bin:$PATH"
+          export PATH="$QT_ROOT_DIR/bin:/usr/local/bin:$PATH"
 
           if [ -f "ExtBin/mac/Info.plist" ]; then
             cp -f ExtBin/mac/Info.plist "bin/release/${{ env.targetName }}.app/Contents/Info.plist"
           fi
 
-          cp -R -p -f "bin/release/${{ env.targetName }}.app" "${{ env.targetName }}.app"
+          cp -R -p "bin/release/${{ env.targetName }}.app" "${{ env.targetName }}.app"
 
-          # 自动读取 Qt 真实库路径，修复 Qt6.10 macdeployqt 检索缺陷
           QT_ACTUAL_LIB=$(qmake -query QT_INSTALL_LIBS 2>/dev/null || echo "$QT_ROOT_DIR/lib")
-          macdeployqt "${{ env.targetName }}.app" -qmldir=. -verbose=1 -dmg \
+          macdeployqt "${{ env.targetName }}.app" \
+            -qmldir=. \
+            -verbose=1 \
+            -dmg \
             -libpath="$QT_ACTUAL_LIB" \
             -libpath="./lib"
 
@@ -103,7 +112,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.orgName }}-${{ env.artifact_suffix }}
+          name: ${{ env.orgName }}-${{ env.VERSION }}
           path: bin/release/${{ env.targetName }}.dmg
           retention-days: 30
 
@@ -113,6 +122,6 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: bin/release/${{ env.targetName }}.dmg
-          asset_name: ${{ env.orgName }}-${{ env.artifact_suffix }}.dmg
+          asset_name: ${{ env.orgName }}-${{ env.VERSION }}.dmg
           tag: ${{ github.ref_name }}
           overwrite: true

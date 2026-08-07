@@ -71,45 +71,28 @@ jobs:
       - name: CMake Configure & Build
         shell: pwsh
         run: |
-          $qtAndroidRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ANDROID_ARCH"
           $qtDesktopRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_DESKTOP_ARCH"
           $ndkRoot = $env:ANDROID_NDK_ROOT
 
           Set-Location "$env:GITHUB_WORKSPACE\src"
 
-          Write-Host "=== Paths ==="
-          Write-Host "Qt Android: $qtAndroidRoot"
-          Write-Host "Qt Desktop: $qtDesktopRoot"
-          Write-Host "NDK:        $ndkRoot"
-
-          # 验证 Qt6Config.cmake 确实存在
-          $qt6Config = "$qtAndroidRoot\lib\cmake\Qt6\Qt6Config.cmake"
-          if (-not (Test-Path $qt6Config)) {
-            Write-Host "::error::Qt6Config.cmake not found at: $qt6Config"
-            Get-ChildItem $qtAndroidRoot -Recurse -Filter "Qt6Config.cmake" | Select-Object FullName
+          # ✅ 使用 qt-cmake 包装器（Qt 官方推荐交叉编译方式）
+          # 它自动处理: toolchain, QT_HOST_PATH, CMAKE_PREFIX_PATH, FIND_ROOT_PATH_MODE
+          $qtCmake = "$qtDesktopRoot\bin\qt-cmake.exe"
+          if (-not (Test-Path $qtCmake)) {
+            Write-Host "::error::qt-cmake.exe not found at: $qtCmake"
+            Write-Host "Listing available files in bin:"
+            Get-ChildItem "$qtDesktopRoot\bin" -Filter "*.exe" | Select-Object Name
             exit 1
           }
-          Write-Host "✅ Found: $qt6Config"
+          Write-Host "✅ Using qt-cmake: $qtCmake"
 
-          # ✅ 关键修复说明：
-          # NDK toolchain 会设置 CMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY
-          # 导致 find_package 只搜索 NDK sysroot，忽略 CMAKE_PREFIX_PATH
-          # 必须显式设置 BOTH 才能同时搜索 Qt 安装路径
-          #
-          # 不要手动设置:
-          #   CMAKE_SYSTEM_NAME     ← toolchain 自动设置
-          #   CMAKE_C/CXX_COMPILER  ← toolchain 自动设置
-          #   CMAKE_FIND_ROOT_PATH  ← 会导致平台兼容性拒绝
-          cmake -B build `
-                -G Ninja `
-                -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
-                -DCMAKE_TOOLCHAIN_FILE="$ndkRoot\build\cmake\android.toolchain.cmake" `
-                -DANDROID_ABI=arm64-v8a `
-                -DANDROID_PLATFORM=android-${{ env.ANDROID_API_LEVEL }} `
-                -DANDROID_STL=c++_shared `
-                -DCMAKE_PREFIX_PATH="$qtAndroidRoot" `
-                -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH `
-                -DQT_HOST_PATH="$qtDesktopRoot"
+          & $qtCmake -B build `
+                     -G Ninja `
+                     -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
+                     -DANDROID_ABI=arm64-v8a `
+                     -DANDROID_PLATFORM=android-${{ env.ANDROID_API_LEVEL }} `
+                     -DANDROID_STL=c++_shared
 
           if ($LASTEXITCODE -ne 0) { Write-Host "::error::CMake Configure failed!"; exit 1 }
 
@@ -127,14 +110,12 @@ jobs:
         run: |
           Set-Location "$env:GITHUB_WORKSPACE\src"
 
-          # 定位 androiddeployqt（来自 Desktop Qt）
           $deployQt = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_DESKTOP_ARCH\bin\androiddeployqt.exe"
           if (-not (Test-Path $deployQt)) {
             Write-Host "::error::androiddeployqt.exe not found at: $deployQt"
             exit 1
           }
 
-          # 定位 deployment-settings.json（CMake 自动生成）
           $deployJson = Get-ChildItem -Path "build" -Recurse -Filter "*deployment-settings.json" | Select-Object -First 1
           if (-not $deployJson) {
             Write-Host "::error::deployment-settings.json not found!"
@@ -143,7 +124,6 @@ jobs:
           }
           Write-Host "✅ Using deployment settings: $($deployJson.FullName)"
 
-          # 准备 keystore
           $keystorePath = "$env:GITHUB_WORKSPACE\release.keystore"
           if ($env:KEYSTORE_BASE64) {
             [IO.File]::WriteAllBytes($keystorePath, [Convert]::FromBase64String($env:KEYSTORE_BASE64))
