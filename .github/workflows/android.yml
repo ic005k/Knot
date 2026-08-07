@@ -16,7 +16,8 @@ on:
 env:
   QT_VERSION: "6.10.3"
   QT_ARCH_ANDROID: "android_arm64_v8a"
-  NDK_VERSION: "26.1.10909125"
+  DESKTOP_ARCH: "win64_mingw"
+  NDK_VERSION: "27.2.12479018"
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
 
@@ -37,7 +38,7 @@ jobs:
           distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
 
-      - name: Install NDK r26b
+      - name: Install NDK
         shell: pwsh
         run: |
           $ndkUrl = "https://dl.google.com/android/repository/android-ndk-r26b-windows.zip"
@@ -51,27 +52,15 @@ jobs:
         shell: pwsh
         run: |
           python -m pip install --upgrade aqtinstall
-          # Qt 6.10+ MinGW 架构名已变更为 win64_mingw
-          $arch = "win64_mingw"
-
-          # 先列出可用模块，便于调试
-          Write-Host "=== Available modules for $arch ==="
-          aqt list-qt windows desktop --modules ${{ env.QT_VERSION }} $arch
-
-          # 仅安装确认存在的核心模块，移除 qt5compat/qtwebview 等可能不存在的模块
-          aqt install-qt windows desktop ${{ env.QT_VERSION }} $arch `
-            -m qtcharts qtsensors qtlocation qtwebchannel qtpositioning qtmultimedia `
+          aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.DESKTOP_ARCH }} `
+            -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
             --outputdir "${{ github.workspace }}/Qt"
 
       - name: Install Android Qt
         shell: pwsh
         run: |
-          # 先列出可用模块，便于调试
-          Write-Host "=== Available modules for ${{ env.QT_ARCH_ANDROID }} ==="
-          aqt list-qt windows android --modules ${{ env.QT_VERSION }} ${{ env.QT_ARCH_ANDROID }}
-
           aqt install-qt windows android ${{ env.QT_VERSION }} ${{ env.QT_ARCH_ANDROID }} `
-            -m qtcharts qtsensors qtlocation qtwebchannel qtpositioning qtmultimedia `
+            -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
             --outputdir "${{ github.workspace }}/Qt"
 
       - name: CMake Configure & Build
@@ -81,7 +70,7 @@ jobs:
           $qtAndroid = "$qtBase/${{ env.QT_ARCH_ANDROID }}"
 
           # 自动探测 Desktop Qt 真实目录名
-          $desktopCandidates = @("win64_mingw", "mingw_64", "mingw1310_64", "gcc_64")
+          $desktopCandidates = @("${{ env.DESKTOP_ARCH }}", "mingw_64", "mingw1310_64", "gcc_64")
           $qtDesktop = ""
           foreach ($candidate in $desktopCandidates) {
             $testPath = Join-Path $qtBase $candidate
