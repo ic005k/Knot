@@ -1,97 +1,144 @@
-name: Android Build Test (Minimal v2)
+name: Android CI (CMake)
 
 on:
   push:
-    branches: [ "main", "master" ]
-  workflow_dispatch:
+    branches: [ main ]
+    paths:
+      - '**'
+      - '!stats.txt'
+      - '!README.md'
+  pull_request:
+    paths:
+      - '**'
+  release:
+    types: [ published ]
+
+env:
+  QT_VERSION: "6.10.3"
+  QT_ARCH_ANDROID: "android_arm64_v8a"
+  QT_ARCH_DESKTOP: "win64_mingw"
+  NDK_VERSION: "26.1.10909125"  # 直接使用 r26b，避免 r27 兼容性问题
+  ANDROID_API_LEVEL: "34"
+  JAVA_VERSION: "17"
+  CMAKE_VERSION: "3.30.5"
+  NINJA_VERSION: "1.12.1"
 
 jobs:
-  test-configure:
+  build:
     runs-on: windows-latest
+    permissions:
+      contents: write
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Install Qt 6.10.3 (Android arm64-v8a)
-        uses: jurplel/install-qt-action@v4
+      - uses: actions/checkout@v4
         with:
-          version: '6.10.3'
-          host: 'windows'
-          target: 'android'
-          arch: 'android_arm64_v8a'
-          modules: 'qtwebsockets qtwebchannel'
-          cache: true
+          path: 'src'
 
-      - name: Install NDK r27c
+      # 1. 安装 JDK
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      # 2. 安装 CMake 和 Ninja
+      - name: Install CMake & Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: ${{ env.CMAKE_VERSION }}
+          ninjaVersion: ${{ env.NINJA_VERSION }}
+
+      # 3. 安装 NDK (直接使用官方 r26b)
+      - name: Install Android NDK
         uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
-          ndk-version: r27c
+          ndk-version: r26b
           add-to-path: false
 
-      - name: Set Environment Variables
-        shell: pwsh
+      # 4. 安装桌面版 Qt (提供宿主工具)
+      - name: Install Desktop Qt
         run: |
-          echo "ANDROID_NDK_ROOT=${{ steps.setup-ndk.outputs.ndk-path }}" >> $env:GITHUB_ENV
-          echo "QT_ROOT_DIR=${{ env.QT_ROOT_DIR }}" >> $env:GITHUB_ENV
+          python -m pip install --upgrade aqtinstall
+          aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_ARCH_DESKTOP }} `
+            -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
+            --outputdir "${{ github.workspace }}/Qt"
 
-      - name: Diagnostic - Verify CRT Files Exist
-        shell: pwsh
+      # 5. 安装 Android 版 Qt
+      - name: Install Android Qt
         run: |
-          $ndkRoot = $env:ANDROID_NDK_ROOT
-          Write-Host "=== NDK CRT Diagnostic Info ==="
-          Write-Host "NDK Root: $ndkRoot"
+          aqt install-qt windows android ${{ env.QT_VERSION }} ${{ env.QT_ARCH_ANDROID }} `
+            -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
+            --outputdir "${{ github.workspace }}/Qt"
 
-          $crtFile = Get-ChildItem -Path $ndkRoot -Recurse -Filter "crtbegin_dynamic.o" -ErrorAction SilentlyContinue |
-                     Where-Object { $_.FullName -match "aarch64" } |
-                     Select-Object -First 1
-
-          if ($crtFile) {
-            Write-Host "✅ Found crtbegin_dynamic.o at:"
-            Write-Host "   $($crtFile.FullName)"
-          } else {
-            Write-Warning "⚠️ crtbegin_dynamic.o not found (non-fatal, continuing...)"
-          }
-
-          $api34Lib = Join-Path $ndkRoot "toolchains\llvm\prebuilt\windows-x86_64\sysroot\usr\lib\aarch64-linux-android\34"
-          if (Test-Path $api34Lib) {
-            Write-Host "✅ API 34 lib directory exists: $api34Lib"
-            Get-ChildItem $api34Lib -Filter "libc.*" | ForEach-Object { Write-Host "   $($_.Name)" }
-          } else {
-            Write-Warning "⚠️ API 34 lib directory NOT found at: $api34Lib"
-          }
-          Write-Host "================================"
-
-      - name: CMake Configure (Android arm64-v8a)
+      # 6. CMake 配置与构建
+      - name: Configure and Build
         shell: pwsh
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
-          $qtCmake = Join-Path $env:QT_ROOT_DIR "bin\qt-cmake.bat"
-          if (-not (Test-Path $qtCmake)) {
-            $qtCmake = Join-Path $env:QT_ROOT_DIR "bin\cmake.exe"
-          }
+          $qtRoot = "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/${{ env.QT_ARCH_ANDROID }}"
+          $desktopQtRoot = "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/${{ env.QT_ARCH_DESKTOP }}"
 
-          if (-not (Test-Path $qtCmake)) {
-            Write-Error "::error::Cannot find qt-cmake or cmake in QT_ROOT_DIR: $env:QT_ROOT_DIR"
-            exit 1
-          }
+          # 确保 CMake 能找到 Qt 工具和 NDK
+          $env:PATH = "$qtRoot/bin;$desktopQtRoot/bin;$env:ANDROID_NDK_HOME/toolchains/llvm/prebuilt/windows-x86_64/bin;$env:PATH"
 
-          Write-Host "Using CMake: $qtCmake"
-          Write-Host "ANDROID_NDK_ROOT: $env:ANDROID_NDK_ROOT"
-          Write-Host "QT_ROOT_DIR: $env:QT_ROOT_DIR"
+          cd src
 
-          & $qtCmake `
-            -B build-android-test `
-            -G Ninja `
+          cmake -B build -G Ninja `
             -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_PREFIX_PATH="$qtRoot" `
+            -DQT_HOST_PATH="$desktopQtRoot" `
+            -DCMAKE_TOOLCHAIN_FILE="$qtRoot/lib/cmake/Qt6/qt.toolchain.cmake" `
             -DANDROID_ABI=arm64-v8a `
-            -DANDROID_PLATFORM=android-34 `
-            -DANDROID_STL=c++_shared `
-            "-DANDROID_NDK_ROOT=$env:ANDROID_NDK_ROOT"
+            -DANDROID_NATIVE_API_LEVEL=${{ env.ANDROID_API_LEVEL }} `
+            -DANDROID_NDK_HOME="$env:ANDROID_NDK_HOME" `
+            -DQT_ANDROID_BUILD_ALL_ABIS=OFF
 
-          if ($LASTEXITCODE -ne 0) {
-            Write-Error "::error::CMake Configure failed with exit code $LASTEXITCODE"
-            exit $LASTEXITCODE
-          }
+          cmake --build build --config Release -j8
 
-          Write-Host "🎉 CMake Configure succeeded!"
+      # 7. 生成并签名 APK (CMake 自动处理)
+      - name: Generate and Sign APK
+        shell: pwsh
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          cd src/build
+
+          # 解码 Keystore
+          $keystorePath = "${{ github.workspace }}/signing/release.keystore"
+          New-Item -ItemType Directory -Force -Path "${{ github.workspace }}/signing" | Out-Null
+          [System.Convert]::FromBase64String($env:KEYSTORE_BASE64) | Set-Content -Path $keystorePath -Encoding Byte
+
+          if (-not (Test-Path $keystorePath)) { throw "Keystore 解码失败" }
+
+          # 使用 CMake 内置的 androiddeployqt 目标进行打包和签名
+          # 注意：CMake 项目中通常需要定义 qt_add_executable 或 qt_android_generate_deployment_settings
+          cmake --build . --target apk --config Release -- `
+            -DQT_ANDROID_KEYSTORE_PATH="$keystorePath" `
+            -DQT_ANDROID_KEYSTORE_ALIAS="$env:KEY_ALIAS" `
+            -DQT_ANDROID_KEYSTORE_STORE_PASS="$env:KEYSTORE_PASSWORD" `
+            -DQT_ANDROID_KEYSTORE_KEY_PASS="$env:KEY_PASSWORD" `
+            -DQT_ANDROID_SIGN=ON
+
+      # 8. 上传 Artifact
+      - name: Upload signed APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Knot-APK-signed
+          path: src/build/android-build/build/outputs/apk/release/*.apk
+
+      # 9. 发布到 GitHub Release
+      - name: Upload to GitHub Release
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: src/build/android-build/build/outputs/apk/release/*.apk
+          asset_name: android-build-release-signed.apk
+          tag: ${{ github.ref_name }}
+          overwrite: true
