@@ -130,26 +130,36 @@ jobs:
         run: |
           $qtBase = "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}"
           $qtAndroid = "$qtBase/${{ env.QT_ARCH_ANDROID }}"
-          $deployQt = "$qtAndroid/bin/androiddeployqt.exe"
 
-          if (-not (Test-Path $deployQt)) {
-            throw "❌ androiddeployqt.exe not found at: $deployQt"
-          }
-
-          $settingsFile = "build/android-Knot-deployment-settings.json"
-          if (-not (Test-Path $settingsFile)) {
-            $candidates = Get-ChildItem "build/" -Filter "*deployment-settings.json" -ErrorAction SilentlyContinue
-            if ($candidates) {
-              $settingsFile = $candidates[0].FullName
-              Write-Host "✅ Found settings: $settingsFile"
-            } else {
-              throw "❌ No deployment-settings.json found in build/"
+          # ✅ androiddeployqt 是 Host 工具，必须在 Desktop Qt 目录中查找
+          $desktopCandidates = @("${{ env.DESKTOP_ARCH }}", "mingw_64", "mingw1310_64", "gcc_64")
+          $qtDesktop = ""
+          foreach ($candidate in $desktopCandidates) {
+            $testPath = Join-Path $qtBase $candidate
+            if (Test-Path "$testPath/bin/androiddeployqt.exe") {
+              $qtDesktop = $testPath
+              Write-Host "✅ Found Desktop Qt at: $qtDesktop"
+              break
             }
           }
 
+          if ([string]::IsNullOrEmpty($qtDesktop)) {
+            throw "❌ Cannot find Desktop Qt with androiddeployqt.exe!"
+          }
+
+          $deployQt = "$qtDesktop/bin/androiddeployqt.exe"
+          Write-Host "🔧 Using: $deployQt"
+
+          # 查找 deployment settings json
+          $settingsFile = Get-ChildItem "build/" -Filter "*deployment-settings.json" | Select-Object -First 1
+          if (-not $settingsFile) {
+            throw "❌ No deployment-settings.json found in build/"
+          }
+          Write-Host "📄 Settings: $($settingsFile.FullName)"
+
           Write-Host "🚀 Running androiddeployqt with --release ..."
           & $deployQt `
-            --input "$settingsFile" `
+            --input $settingsFile.FullName `
             --output "${{ github.workspace }}/build/android-build" `
             --android-platform "android-${{ env.ANDROID_API_LEVEL }}" `
             --jdk "$env:JAVA_HOME" `
