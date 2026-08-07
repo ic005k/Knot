@@ -1,4 +1,4 @@
-name: Android Build Test (Minimal)
+name: Android Build Test (Minimal v2)
 
 on:
   push:
@@ -10,96 +10,88 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Install Qt 6.10.3 (Android)
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: '6.10.3'
-        host: 'windows'
-        target: 'android'
-        arch: 'android_arm64_v8a'
-        modules: 'qtwebsockets qtwebchannel' # 根据你项目实际需要的模块调整
-        cache: true
+      - name: Install Qt 6.10.3 (Android arm64-v8a)
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.10.3'
+          host: 'windows'
+          target: 'android'
+          arch: 'android_arm64_v8a'
+          modules: 'qtwebsockets qtwebchannel'
+          cache: true
 
-    - name: Install NDK r27
-      uses: nttld/setup-ndk@v1
-      id: setup-ndk
-      with:
-        ndk-version: r27c
-        add-to-path: false
+      - name: Install NDK r27c
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r27c
+          add-to-path: false
 
-    - name: Set Environment Variables
-      shell: pwsh
-      run: |
-        echo "ANDROID_NDK_ROOT=${{ steps.setup-ndk.outputs.ndk-path }}" >> $env:GITHUB_ENV
-        echo "QT_ROOT_DIR=${{ env.QT_ROOT_DIR }}" >> $env:GITHUB_ENV
-        # Qt 6.8+ 需要指定 HOST_PATH，通常 jurplel 插件会自动设置，这里保险起见手动确认一下
-        if (-not $env:QT_HOST_PATH) {
-           # 如果 jurplel 没设置，这里可能需要手动指向 host 版 Qt，但通常 android target 安装包内自带或依赖 host 版
-           # 这里先假设 jurplel 已经处理好了 QT_ROOT_DIR 指向 android 版
-        }
+      - name: Set Environment Variables
+        shell: pwsh
+        run: |
+          echo "ANDROID_NDK_ROOT=${{ steps.setup-ndk.outputs.ndk-path }}" >> $env:GITHUB_ENV
+          echo "QT_ROOT_DIR=${{ env.QT_ROOT_DIR }}" >> $env:GITHUB_ENV
 
-    - name: 🔍 Dynamic CRT Path Discovery
-      shell: pwsh
-      run: |
-        $ndkRoot = $env:ANDROID_NDK_ROOT
-        Write-Host "Searching for CRT files in NDK: $ndkRoot"
+      - name: Diagnostic - Verify CRT Files Exist
+        shell: pwsh
+        run: |
+          $ndkRoot = $env:ANDROID_NDK_ROOT
+          Write-Host "=== NDK CRT Diagnostic Info ==="
+          Write-Host "NDK Root: $ndkRoot"
 
-        # 递归搜索 crtbegin_dynamic.o
-        $crtFile = Get-ChildItem -Path $ndkRoot -Recurse -Filter "crtbegin_dynamic.o" -ErrorAction SilentlyContinue |
-                   Where-Object { $_.FullName -match "aarch64" } |
-                   Select-Object -First 1
+          $crtFile = Get-ChildItem -Path $ndkRoot -Recurse -Filter "crtbegin_dynamic.o" -ErrorAction SilentlyContinue |
+                     Where-Object { $_.FullName -match "aarch64" } |
+                     Select-Object -First 1
 
-        if ($crtFile) {
-            $crtDir = $crtFile.DirectoryName -replace '\\', '/'
-            Write-Host "✅ SUCCESS: Found CRT directory."
-            Write-Host "   Path: $crtDir"
+          if ($crtFile) {
+            Write-Host "✅ Found crtbegin_dynamic.o at:"
+            Write-Host "   $($crtFile.FullName)"
+          } else {
+            Write-Warning "⚠️ crtbegin_dynamic.o not found (non-fatal, continuing...)"
+          }
 
-            # 将路径存入环境变量，供下一步 CMake 使用
-            echo "ANDROID_CRT_DIR=$crtDir" >> $env:GITHUB_ENV
+          $api34Lib = Join-Path $ndkRoot "toolchains\llvm\prebuilt\windows-x86_64\sysroot\usr\lib\aarch64-linux-android\34"
+          if (Test-Path $api34Lib) {
+            Write-Host "✅ API 34 lib directory exists: $api34Lib"
+            Get-ChildItem $api34Lib -Filter "libc.*" | ForEach-Object { Write-Host "   $($_.Name)" }
+          } else {
+            Write-Warning "⚠️ API 34 lib directory NOT found at: $api34Lib"
+          }
+          Write-Host "================================"
 
-            # 验证文件是否存在
-            if (Test-Path "$crtDir/crtbegin_dynamic.o") {
-                Write-Host "   ✅ crtbegin_dynamic.o confirmed."
-            }
-            if (Test-Path "$crtDir/crtend_android.o") {
-                Write-Host "   ✅ crtend_android.o confirmed."
-            }
-        } else {
-            Write-Error "::error::Failed to find crtbegin_dynamic.o in NDK root: $ndkRoot"
+      - name: CMake Configure (Android arm64-v8a)
+        shell: pwsh
+        run: |
+          $qtCmake = Join-Path $env:QT_ROOT_DIR "bin\qt-cmake.bat"
+          if (-not (Test-Path $qtCmake)) {
+            $qtCmake = Join-Path $env:QT_ROOT_DIR "bin\cmake.exe"
+          }
+
+          if (-not (Test-Path $qtCmake)) {
+            Write-Error "::error::Cannot find qt-cmake or cmake in QT_ROOT_DIR: $env:QT_ROOT_DIR"
             exit 1
-        }
+          }
 
-- name: 🛠️ CMake Configure (Test v2)
-  shell: pwsh
-  run: |
-    $qtCmake = Join-Path $env:QT_ROOT_DIR "bin\qt-cmake.bat"
-    if (-not (Test-Path $qtCmake)) {
-        $qtCmake = Join-Path $env:QT_ROOT_DIR "bin\cmake.exe"
-    }
+          Write-Host "Using CMake: $qtCmake"
+          Write-Host "ANDROID_NDK_ROOT: $env:ANDROID_NDK_ROOT"
+          Write-Host "QT_ROOT_DIR: $env:QT_ROOT_DIR"
 
-    Write-Host "Using Qt CMake: $qtCmake"
+          & $qtCmake `
+            -B build-android-test `
+            -G Ninja `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DANDROID_ABI=arm64-v8a `
+            -DANDROID_PLATFORM=android-34 `
+            -DANDROID_STL=c++_shared `
+            "-DANDROID_NDK_ROOT=$env:ANDROID_NDK_ROOT"
 
-    # ✅ 关键修改：移除了所有 -DCMAKE_*_LINKER_FLAGS
-    # ✅ 确保 ANDROID_PLATFORM 与你 Qt 编译时使用的 API Level 一致
-    # 如果你的 Qt 6.10.3 android_arm64_v8a 是基于 API 34 编译的，这里必须是 34
-    $cmakeArgs = @(
-        "-B", "build-android-test",
-        "-G", "Ninja",
-        "-DCMAKE_BUILD_TYPE=Release",
-        "-DANDROID_ABI=arm64-v8a",
-        "-DANDROID_PLATFORM=android-34",       # ← 必须与 Qt 的 target API 对齐
-        "-DANDROID_NDK_ROOT=$env:ANDROID_NDK_ROOT",
-        "-DANDROID_STL=c++_shared"             # ← 显式指定 STL，避免默认值不一致
-    )
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "::error::CMake Configure failed with exit code $LASTEXITCODE"
+            exit $LASTEXITCODE
+          }
 
-    & $qtCmake $cmakeArgs
-
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "::error::CMake Configure failed with exit code $LASTEXITCODE"
-        exit $LASTEXITCODE
-    }
-
-    Write-Host "🎉 SUCCESS: CMake Configure completed!"
+          Write-Host "🎉 CMake Configure succeeded!"
