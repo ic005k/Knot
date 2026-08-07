@@ -61,13 +61,11 @@ jobs:
           arch -x86_64 brew link openssl@3 --force
 
       - name: Build macOS (x86_64)
-        timeout-minutes: 30
+        timeout-minutes: 60
         run: |
           export PATH="/usr/local/bin:$PATH"
           OPENSSL_ROOT="/usr/local/opt/openssl@3"
           OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)"
-
-          # ✅ 修复：手动定位 Qt 路径，避免环境变量未展开
           QT_LIB_PATH="${{ github.workspace }}/Qt/${{ matrix.qt_ver }}/macos/lib"
           if [ ! -d "$QT_LIB_PATH" ]; then
             QT_LIB_PATH="$QT_ROOT_DIR/lib"
@@ -88,7 +86,6 @@ jobs:
           file "$OPENSSL_ROOT/lib/libcrypto.dylib" || true
 
           echo "=== CMake Configure (x86_64) ==="
-          # ✅ 修复：通过 CMAKE_CXX_FLAGS 传递警告抑制，而非传给 make
           arch -x86_64 cmake -B build \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
@@ -101,10 +98,9 @@ jobs:
           echo "=== Diagnostic: CMake OpenSSL Detection ==="
           grep -E "OPENSSL_(SSL|CRYPTO)_LIBRARY" build/CMakeCache.txt || true
 
-          echo "=== Build (single-thread for clean error output) ==="
+          echo "=== Build (parallel, warnings suppressed) ==="
           set +e
           arch -x86_64 cmake --build build --config Release \
-            --parallel 1 \
             -- VERBOSE=1 2>&1 | tee build.log
           BUILD_EXIT_CODE=${PIPESTATUS[0]}
           set -e
