@@ -318,7 +318,7 @@ elseif(APPLE)
     find_package(OpenSSL REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE
         OpenSSL::SSL OpenSSL::Crypto
-        pthread Accelerate Foundation
+
     )
 elseif(ANDROID)
     # ✅ Android Bionic 已将 pthread 合入 libc，无需单独链接

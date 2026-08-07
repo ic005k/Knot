@@ -2,7 +2,7 @@ name: Android CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - '**'
       - '!stats.txt'
@@ -11,17 +11,16 @@ on:
     paths:
       - '**'
   release:
-    types: [ published ]
+    types: [published]
 
 env:
   QT_VERSION: "6.10.3"
-  QT_ARCH: "android_arm64_v8a"
-  DESKTOP_ARCH: "win64_mingw"
+  QT_ANDROID_ARCH: "android_arm64_v8a"
+  QT_DESKTOP_ARCH: "win64_mingw"
   NDK_VERSION: "27.2.12479018"
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
   BUILD_TYPE: "Release"
-  CMAKE_VERSION: "3.30.5"
 
 jobs:
   build:
@@ -41,21 +40,6 @@ jobs:
           distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
 
-      - name: Install CMake (match local version)
-        uses: lukka/get-cmake@latest
-        with:
-          cmakeVersion: ${{ env.CMAKE_VERSION }}
-
-      - name: Verify CMake version
-        shell: pwsh
-        run: |
-          $ver = cmake --version | Select-String "cmake version" | ForEach-Object { $_.Line }
-          Write-Host "✅ $ver"
-          if (-not ($ver -match "${{ env.CMAKE_VERSION }}")) {
-            Write-Host "::error::Expected CMake ${{ env.CMAKE_VERSION }}, got: $ver"
-            exit 1
-          }
-
       - name: Install NDK
         shell: pwsh
         run: |
@@ -72,54 +56,50 @@ jobs:
         shell: pwsh
         run: |
           python -m pip install --upgrade aqtinstall
-          aqt install-qt windows desktop $env:QT_VERSION $env:DESKTOP_ARCH `
+          aqt install-qt windows desktop $env:QT_VERSION $env:QT_DESKTOP_ARCH `
             -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
             --outputdir "$env:GITHUB_WORKSPACE\Qt"
 
-      - name: Install Android Qt
+      - name: Install Android Qt (Target Libraries)
         shell: pwsh
         run: |
-          aqt install-qt windows android $env:QT_VERSION $env:QT_ARCH `
+          aqt install-qt windows android $env:QT_VERSION $env:QT_ANDROID_ARCH `
             -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
             --outputdir "$env:GITHUB_WORKSPACE\Qt"
-          $qtAndroidRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH"
-          $configPath = Get-ChildItem -Path $qtAndroidRoot -Recurse -Filter "Qt6Config.cmake" | Select-Object -First 1
-          if (-not $configPath) {
-            Write-Host "::error::Qt6Config.cmake not found under $qtAndroidRoot"
-            exit 1
-          }
-          Write-Host "✅ Found Qt6Config.cmake at: $($configPath.FullName)"
 
       # ==================== 编译构建 ====================
       - name: CMake Configure & Build
         shell: pwsh
         run: |
-          $qtAndroidRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH"
-          $desktopQtRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:DESKTOP_ARCH"
+          $qtAndroidRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ANDROID_ARCH"
+          $qtDesktopRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_DESKTOP_ARCH"
           $ndkRoot = $env:ANDROID_NDK_ROOT
-          $clangExe = "$ndkRoot\toolchains\llvm\prebuilt\windows-x86_64\bin\clang.exe"
-          $clangPpExe = "$ndkRoot\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe"
 
           Set-Location "$env:GITHUB_WORKSPACE\src"
 
-          Write-Host "=== CMake Configure ==="
+          Write-Host "=== Paths ==="
+          Write-Host "Qt Android: $qtAndroidRoot"
+          Write-Host "Qt Desktop: $qtDesktopRoot"
+          Write-Host "NDK:        $ndkRoot"
+
+          # ✅ 关键修复：
+          # 1. CMAKE_PREFIX_PATH 只放 Android Qt（目标库搜索路径）
+          # 2. QT_HOST_PATH 指向 Desktop Qt（宿主机工具）
+          # 3. 不再设置 CMAKE_FIND_ROOT_PATH（让 toolchain 文件自行管理）
+          # 4. 不再手动指定 CMAKE_C/CXX_COMPILER（toolchain 文件会自动设置）
           cmake -B build `
                 -G Ninja `
                 -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
-                -DCMAKE_SYSTEM_NAME=Android `
-                -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a `
-                -DCMAKE_ANDROID_API_LEVEL=${{ env.ANDROID_API_LEVEL }} `
-                -DCMAKE_ANDROID_STL_TYPE=c++_shared `
-                -DCMAKE_C_COMPILER="$clangExe" `
-                -DCMAKE_CXX_COMPILER="$clangPpExe" `
-                -DCMAKE_PREFIX_PATH="$qtAndroidRoot" `
-                -DCMAKE_FIND_ROOT_PATH="$qtAndroidRoot" `
                 -DCMAKE_TOOLCHAIN_FILE="$ndkRoot\build\cmake\android.toolchain.cmake" `
-                -DQT_HOST_PATH="$desktopQtRoot"
+                -DANDROID_ABI=arm64-v8a `
+                -DANDROID_PLATFORM=android-${{ env.ANDROID_API_LEVEL }} `
+                -DANDROID_STL=c++_shared `
+                -DCMAKE_PREFIX_PATH="$qtAndroidRoot" `
+                -DQT_HOST_PATH="$qtDesktopRoot"
+
           if ($LASTEXITCODE -ne 0) { Write-Host "::error::CMake Configure failed!"; exit 1 }
 
-          Write-Host "=== CMake Build ==="
-          cmake --build build --config ${{ env.BUILD_TYPE }} --parallel 2
+          cmake --build build --config ${{ env.BUILD_TYPE }} --parallel $(nproc)
           if ($LASTEXITCODE -ne 0) { Write-Host "::error::CMake Build failed!"; exit 1 }
 
       # ==================== APK 打包与签名 ====================
@@ -133,14 +113,14 @@ jobs:
         run: |
           Set-Location "$env:GITHUB_WORKSPACE\src"
 
-          # 1. 定位 androiddeployqt
-          $deployQt = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:DESKTOP_ARCH\bin\androiddeployqt.exe"
+          # 定位 androiddeployqt（来自 Desktop Qt）
+          $deployQt = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_DESKTOP_ARCH\bin\androiddeployqt.exe"
           if (-not (Test-Path $deployQt)) {
             Write-Host "::error::androiddeployqt.exe not found at: $deployQt"
             exit 1
           }
 
-          # 2. 定位 deployment-settings.json
+          # 定位 deployment-settings.json（CMake 自动生成）
           $deployJson = Get-ChildItem -Path "build" -Recurse -Filter "*deployment-settings.json" | Select-Object -First 1
           if (-not $deployJson) {
             Write-Host "::error::deployment-settings.json not found!"
@@ -149,13 +129,13 @@ jobs:
           }
           Write-Host "✅ Using deployment settings: $($deployJson.FullName)"
 
-          # 3. 准备 keystore
+          # 准备 keystore
           $keystorePath = "$env:GITHUB_WORKSPACE\release.keystore"
           if ($env:KEYSTORE_BASE64) {
             [IO.File]::WriteAllBytes($keystorePath, [Convert]::FromBase64String($env:KEYSTORE_BASE64))
             Write-Host "✅ Keystore decoded"
           } else {
-            Write-Host "::warning::KEYSTORE_BASE64 not set, generating debug keystore for unsigned build"
+            Write-Host "::warning::KEYSTORE_BASE64 not set, generating debug keystore"
             keytool -genkeypair -v -keystore $keystorePath -alias androiddebugkey `
               -keyalg RSA -keysize 2048 -validity 10000 `
               -storepass android -keypass android `
@@ -165,7 +145,6 @@ jobs:
             $env:KEY_PASSWORD = "android"
           }
 
-          # 4. 执行 androiddeployqt 打包+签名
           New-Item -ItemType Directory -Force -Path "dist" | Out-Null
           & $deployQt `
             --input "$($deployJson.FullName)" `
@@ -177,6 +156,7 @@ jobs:
             --storepass "$env:KEYSTORE_PASSWORD" `
             --keypass "$env:KEY_PASSWORD" `
             --verbose
+
           if ($LASTEXITCODE -ne 0) { Write-Host "::error::APK packaging failed!"; exit 1 }
 
           Write-Host "✅ APK generated:"
@@ -190,7 +170,6 @@ jobs:
           path: src/dist/*.apk
           retention-days: 30
 
-      # ==================== Release 自动发布 ====================
       - name: Upload to Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2

@@ -74,12 +74,10 @@ jobs:
                 -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
                 -DCMAKE_OSX_ARCHITECTURES=arm64 \
                 -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
-                -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT" \
-                -DCMAKE_FIND_FRAMEWORK=LAST \
-                -DCMAKE_EXE_LINKER_FLAGS="-framework Accelerate -framework CoreFoundation -framework Metal -framework MetalKit"
+                -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT"
 
           echo "=== CMake Build (arm64) ==="
-          cmake --build build --config Release --parallel 4
+          cmake --build build --config Release --parallel $(sysctl -n hw.ncpu)
 
           echo "=== Align Output ==="
           mkdir -p bin/release
@@ -103,11 +101,13 @@ jobs:
 
           cp -R -p "bin/release/${{ env.targetName }}.app" "${{ env.targetName }}.app"
 
+          # 自动读取 Qt 真实库路径，兼容 Qt6.10 macdeployqt 检索缺陷
+          QT_ACTUAL_LIB=$(qmake -query QT_INSTALL_LIBS 2>/dev/null || echo "$QT_ROOT_DIR/lib")
           macdeployqt "${{ env.targetName }}.app" \
             -qmldir=. \
             -verbose=1 \
             -dmg \
-            -libpath="$QT_ROOT_DIR/lib" \
+            -libpath="$QT_ACTUAL_LIB" \
             -libpath="./lib"
 
           cp "${{ env.targetName }}.dmg" "bin/release/${{ env.targetName }}.dmg"

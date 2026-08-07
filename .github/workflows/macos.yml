@@ -71,12 +71,7 @@ jobs:
                 -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
                 -DCMAKE_OSX_ARCHITECTURES=${{ matrix.cmake_arch }} \
                 -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
-                -DOPENSSL_ROOT_DIR="$(brew --prefix openssl@3)" \
-                -DCMAKE_FIND_FRAMEWORK=LAST \
-                -DACCELERATE_LIBRARY="-framework Accelerate" \
-                -DGGML_ACCELERATE=ON \
-                -DCMAKE_EXE_LINKER_FLAGS="-framework Accelerate -framework CoreFoundation -framework Metal -framework MetalKit -framework Foundation" \
-                -DCMAKE_MODULE_LINKER_FLAGS="-framework Accelerate -framework CoreFoundation -framework Metal -framework MetalKit -framework Foundation"
+                -DOPENSSL_ROOT_DIR="$(brew --prefix openssl@3)"
 
           cmake --build build --config Release --parallel $(sysctl -n hw.ncpu)
 
@@ -103,7 +98,13 @@ jobs:
           fi
 
           cp -R -p -f "bin/release/${{ env.targetName }}.app" "${{ env.targetName }}.app"
-          macdeployqt "${{ env.targetName }}.app" -qmldir=. -verbose=1 -dmg
+
+          # 自动读取 Qt 真实库路径，修复 Qt6.10 macdeployqt 检索缺陷
+          QT_ACTUAL_LIB=$(qmake -query QT_INSTALL_LIBS 2>/dev/null || echo "$QT_ROOT_DIR/lib")
+          macdeployqt "${{ env.targetName }}.app" -qmldir=. -verbose=1 -dmg \
+            -libpath="$QT_ACTUAL_LIB" \
+            -libpath="./lib"
+
           cp "${{ env.targetName }}.dmg" "bin/release/${{ env.targetName }}.dmg"
 
           echo "=== Final Artifact ==="
