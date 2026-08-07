@@ -75,7 +75,8 @@ jobs:
                 -DCMAKE_OSX_ARCHITECTURES=arm64 \
                 -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
                 -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT" \
-                -DCMAKE_FIND_FRAMEWORK=LAST
+                -DCMAKE_FIND_FRAMEWORK=LAST \
+                -DCMAKE_EXE_LINKER_FLAGS="-framework Accelerate -framework CoreFoundation -framework Metal -framework MetalKit"
 
           echo "=== CMake Build (arm64) ==="
           cmake --build build --config Release --parallel 4

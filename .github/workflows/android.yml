@@ -81,7 +81,8 @@ jobs:
           $qtAndroidRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:QT_ARCH"
           $desktopQtRoot = "$env:GITHUB_WORKSPACE\Qt\$env:QT_VERSION\$env:DESKTOP_ARCH"
           $ndkRoot = $env:ANDROID_NDK_ROOT
-          $qt6Dir = (Get-ChildItem -Path $qtAndroidRoot -Recurse -Filter "Qt6Config.cmake" | Select-Object -First 1).Directory.FullName
+          $clangExe = "$ndkRoot\toolchains\llvm\prebuilt\windows-x86_64\bin\clang.exe"
+          $clangPpExe = "$ndkRoot\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe"
 
           Set-Location "$env:GITHUB_WORKSPACE\src"
 
@@ -92,10 +93,14 @@ jobs:
                 -DCMAKE_SYSTEM_NAME=Android `
                 -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a `
                 -DCMAKE_ANDROID_API_LEVEL=${{ env.ANDROID_API_LEVEL }} `
+                -DCMAKE_ANDROID_STL_TYPE=c++_shared `
+                -DCMAKE_C_COMPILER="$clangExe" `
+                -DCMAKE_CXX_COMPILER="$clangPpExe" `
                 -DCMAKE_PREFIX_PATH="$qtAndroidRoot" `
-                -DQt6_DIR="$qt6Dir" `
+                -DCMAKE_FIND_ROOT_PATH="$qtAndroidRoot" `
                 -DCMAKE_TOOLCHAIN_FILE="$ndkRoot\build\cmake\android.toolchain.cmake" `
-                -DQT_HOST_PATH="$desktopQtRoot"
+                -DQT_HOST_PATH="$desktopQtRoot" `
+                -DCMAKE_POLICY_VERSION_MINIMUM=3.5
           if ($LASTEXITCODE -ne 0) { Write-Host "::error::CMake Configure failed!"; exit 1 }
 
           Write-Host "=== CMake Build ==="
