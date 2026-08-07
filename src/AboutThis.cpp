@@ -3,12 +3,11 @@
 #include "MainWindow.h"
 #include "src/defines.h"
 #include "ui_AboutThis.h"
-// #include "ui_MainWindow.h"
 
 AboutThis::AboutThis(QWidget* parent) : QDialog(parent), ui(new Ui::AboutThis) {
   ui->setupUi(this);
 
-  ver = "2.2.12";
+  ver = "2.2.13";
 
   this->layout()->setContentsMargins(5, 5, 5, 5);
 

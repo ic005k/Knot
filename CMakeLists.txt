@@ -148,30 +148,62 @@ set(APP_TRANSLATIONS
 # 6. 主目标
 # ============================================================
 
-if(ANDROID)
-    # ✅ 使用 qt_add_executable 而非 qt_add_library(SHARED)
-    qt_add_executable(${PROJECT_NAME}
-        ${APP_SOURCES} ${APP_FORMS} ${APP_RESOURCES}
-    )
+# --- 6.1 收集平台特定的资源文件与选项 ---
+set(PLATFORM_RESOURCES "")
+set(PLATFORM_OPTIONS "")
 
+if(APPLE)
+    # macOS (arm64 / x86_64 通用，由 CMAKE_OSX_ARCHITECTURES 决定)
+    set(MACOSX_ICON "${CMAKE_CURRENT_SOURCE_DIR}/ExtBin/mac/AppIcon.icns")
+    if(EXISTS "${MACOSX_ICON}")
+        list(APPEND PLATFORM_RESOURCES ${MACOSX_ICON})
+        set_source_files_properties(${MACOSX_ICON} PROPERTIES
+            MACOSX_PACKAGE_LOCATION "Resources"
+        )
+        message(STATUS "✅ macOS icon configured: ${MACOSX_ICON}")
+    else()
+        message(WARNING "⚠️ macOS icon not found: ${MACOSX_ICON}, app will use default icon.")
+    endif()
+    list(APPEND PLATFORM_OPTIONS MACOSX_BUNDLE)  # 生成 .app bundle，不弹终端
+
+elseif(WIN32)
+    # Windows
+    set(WINDOWS_RC "${CMAKE_CURRENT_SOURCE_DIR}/win.rc")
+    if(EXISTS "${WINDOWS_RC}")
+        list(APPEND PLATFORM_RESOURCES ${WINDOWS_RC})
+        message(STATUS "✅ Windows icon resource configured: ${WINDOWS_RC}")
+    else()
+        message(WARNING "⚠️ Windows RC file not found: ${WINDOWS_RC}, exe will have no icon.")
+    endif()
+    list(APPEND PLATFORM_OPTIONS WIN32)  # GUI 子系统，不弹终端
+endif()
+# Linux: 无需特殊选项，普通 ELF 可执行文件即可
+# Android: qt_add_executable 自动处理为 MODULE 库，忽略 WIN32/MACOSX_BUNDLE
+
+# --- 6.2 创建目标（统一使用 qt_add_executable） ---
+qt_add_executable(${PROJECT_NAME}
+    ${PLATFORM_OPTIONS}
+    ${APP_SOURCES}
+    ${APP_FORMS}
+    ${APP_RESOURCES}
+    ${PLATFORM_RESOURCES}
+)
+
+# --- 6.3 平台特定目标属性 ---
+if(ANDROID)
     set_target_properties(${PROJECT_NAME} PROPERTIES
         QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android"
-        # ❌ 不再需要 QT_IS_ANDROID_APP，qt_add_executable 自动处理
-        # ❌ 不要设置 OUTPUT_NAME
-        # ❌ 不要设置 LIBRARY_OUTPUT_DIRECTORY
     )
-
-
-else()
-    add_executable(${PROJECT_NAME}
-        ${APP_SOURCES} ${APP_FORMS} ${APP_RESOURCES}
-    )
-
+elseif(APPLE)
     set_target_properties(${PROJECT_NAME} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_SOURCE_DIR}/bin/debug"
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/release"
+        MACOSX_BUNDLE_ICON_FILE "AppIcon.icns"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.knot.app"
+        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
     )
 endif()
+# Windows 无需额外属性，WIN32 选项已通过 PLATFORM_OPTIONS 传入
+# Linux 无需额外属性
 
 # ✅ Unity Build 必须在目标创建之后
 # 开启 Unity Build

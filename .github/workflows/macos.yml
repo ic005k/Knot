@@ -73,7 +73,10 @@ jobs:
                 -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
                 -DOPENSSL_ROOT_DIR="$(brew --prefix openssl@3)" \
                 -DCMAKE_FIND_FRAMEWORK=LAST \
-                -DCMAKE_EXE_LINKER_FLAGS="-framework Accelerate -framework CoreFoundation -framework Metal -framework MetalKit -framework Foundation"
+                -DACCELERATE_LIBRARY="-framework Accelerate" \
+                -DGGML_ACCELERATE=ON \
+                -DCMAKE_EXE_LINKER_FLAGS="-framework Accelerate -framework CoreFoundation -framework Metal -framework MetalKit -framework Foundation" \
+                -DCMAKE_MODULE_LINKER_FLAGS="-framework Accelerate -framework CoreFoundation -framework Metal -framework MetalKit -framework Foundation"
 
           cmake --build build --config Release --parallel $(sysctl -n hw.ncpu)
 

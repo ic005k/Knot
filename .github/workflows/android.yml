@@ -21,6 +21,7 @@ env:
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
   BUILD_TYPE: "Release"
+  CMAKE_VERSION: "3.30.5"
 
 jobs:
   build:
@@ -39,6 +40,21 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Install CMake (match local version)
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: ${{ env.CMAKE_VERSION }}
+
+      - name: Verify CMake version
+        shell: pwsh
+        run: |
+          $ver = cmake --version | Select-String "cmake version" | ForEach-Object { $_.Line }
+          Write-Host "✅ $ver"
+          if (-not ($ver -match "${{ env.CMAKE_VERSION }}")) {
+            Write-Host "::error::Expected CMake ${{ env.CMAKE_VERSION }}, got: $ver"
+            exit 1
+          }
 
       - name: Install NDK
         shell: pwsh
@@ -99,8 +115,7 @@ jobs:
                 -DCMAKE_PREFIX_PATH="$qtAndroidRoot" `
                 -DCMAKE_FIND_ROOT_PATH="$qtAndroidRoot" `
                 -DCMAKE_TOOLCHAIN_FILE="$ndkRoot\build\cmake\android.toolchain.cmake" `
-                -DQT_HOST_PATH="$desktopQtRoot" `
-                -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+                -DQT_HOST_PATH="$desktopQtRoot"
           if ($LASTEXITCODE -ne 0) { Write-Host "::error::CMake Configure failed!"; exit 1 }
 
           Write-Host "=== CMake Build ==="
