@@ -29,7 +29,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        # 直接检出到工作区根目录，减少一层路径嵌套
 
       - name: Enable Windows Long Paths
         shell: pwsh
@@ -67,8 +66,28 @@ jobs:
             -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
             --outputdir "${{ github.workspace }}/Qt"
 
+      - name: Decode Keystore
+        shell: pwsh
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          $ksDir = "${{ github.workspace }}/signing"
+          New-Item -ItemType Directory -Force -Path $ksDir | Out-Null
+          $ksPath = "$ksDir/release.keystore"
+          $bytes = [Convert]::FromBase64String($env:KEYSTORE_BASE64)
+          [IO.File]::WriteAllBytes($ksPath, $bytes)
+          if ((Get-Item $ksPath).Length -lt 100) {
+            throw "Keystore 解码异常，文件大小: $((Get-Item $ksPath).Length) bytes"
+          }
+          Write-Host "✅ Keystore decoded: $((Get-Item $ksPath).Length) bytes"
+          echo "KEYSTORE_PATH=$ksPath" >> $env:GITHUB_ENV
+
       - name: CMake Configure & Build
         shell: pwsh
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           $qtBase = "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}"
           $qtAndroid = "$qtBase/${{ env.QT_ARCH_ANDROID }}"
@@ -91,6 +110,7 @@ jobs:
             throw "QT_HOST_PATH not found."
           }
 
+          # ✅ 签名参数在 Configure 阶段传入（Ninja 不支持 build 阶段透传 -D）
           cmake -B build -G Ninja `
             -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_PREFIX_PATH="$qtAndroid" `
@@ -99,39 +119,19 @@ jobs:
             -DANDROID_ABI=arm64-v8a `
             -DANDROID_NATIVE_API_LEVEL=${{ env.ANDROID_API_LEVEL }} `
             -DANDROID_PLATFORM=${{ env.ANDROID_API_LEVEL }} `
-            -DANDROID_NDK_HOME="$env:ANDROID_NDK_HOME"
-
-          cmake --build build --config Release -j8
-
-      - name: Generate and Sign APK
-        shell: pwsh
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          cd build
-
-          $ksDir = "${{ github.workspace }}/signing"
-          New-Item -ItemType Directory -Force -Path $ksDir | Out-Null
-          $ksPath = "$ksDir/release.keystore"
-
-          # ✅ 使用 .NET API 写入二进制文件，兼容 PowerShell 7.x
-          $bytes = [Convert]::FromBase64String($env:KEYSTORE_BASE64)
-          [IO.File]::WriteAllBytes($ksPath, $bytes)
-
-          if ((Get-Item $ksPath).Length -lt 100) {
-            throw "Keystore 解码异常，文件大小: $((Get-Item $ksPath).Length) bytes"
-          }
-          Write-Host "✅ Keystore decoded successfully: $((Get-Item $ksPath).Length) bytes"
-
-          cmake --build . --target apk --config Release -- `
-            -DQT_ANDROID_KEYSTORE_PATH="$ksPath" `
+            -DANDROID_NDK_HOME="$env:ANDROID_NDK_HOME" `
+            -DQT_ANDROID_KEYSTORE_PATH="$env:KEYSTORE_PATH" `
             -DQT_ANDROID_KEYSTORE_ALIAS="$env:KEY_ALIAS" `
             -DQT_ANDROID_KEYSTORE_STORE_PASS="$env:KEYSTORE_PASSWORD" `
             -DQT_ANDROID_KEYSTORE_KEY_PASS="$env:KEY_PASSWORD" `
             -DQT_ANDROID_SIGN=ON
+
+          cmake --build build --config Release -j8
+
+      - name: Build APK
+        shell: pwsh
+        run: |
+          cmake --build build --target apk --config Release
 
       - name: Upload signed APK
         if: success()
