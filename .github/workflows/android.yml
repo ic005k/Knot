@@ -13,7 +13,7 @@ env:
   QT_VERSION: "6.10.3"
   QT_ARCH_ANDROID: "android_arm64_v8a"
   DESKTOP_ARCH: "win64_mingw"
-  NDK_VERSION: "r27c"                    # ✅ 修复1: 统一版本号
+  NDK_VERSION: "r27c"
   ANDROID_API_LEVEL: "34"
   JAVA_VERSION: "17"
 
@@ -39,7 +39,6 @@ jobs:
       - name: Install NDK
         shell: pwsh
         run: |
-          # ✅ 修复1: 使用统一的 NDK_VERSION 变量
           $ndkUrl = "https://dl.google.com/android/repository/android-ndk-${{ env.NDK_VERSION }}-windows.zip"
           Invoke-WebRequest -Uri $ndkUrl -OutFile "ndk.zip"
           Expand-Archive -Path "ndk.zip" -DestinationPath "android-sdk\ndk" -Force
@@ -78,12 +77,10 @@ jobs:
           Write-Host "✅ Keystore decoded: $((Get-Item $ksPath).Length) bytes"
           echo "KEYSTORE_PATH=$ksPath" >> $env:GITHUB_ENV
 
+      # ⚠️ 注意：此处已移除所有 QT_ANDROID_KEYSTORE_* 和 QT_ANDROID_SIGN 参数
+      # 签名逻辑已完全迁移至下方的 Gradle 阶段
       - name: CMake Configure & Build
         shell: pwsh
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           $qtBase = "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}"
           $qtAndroid = "$qtBase/${{ env.QT_ARCH_ANDROID }}"
@@ -111,20 +108,74 @@ jobs:
             -DANDROID_ABI=arm64-v8a `
             -DANDROID_NATIVE_API_LEVEL=${{ env.ANDROID_API_LEVEL }} `
             -DANDROID_PLATFORM=${{ env.ANDROID_API_LEVEL }} `
-            -DANDROID_NDK_HOME="$env:ANDROID_NDK_HOME" `
-            -DQT_ANDROID_KEYSTORE_PATH="$env:KEYSTORE_PATH" `
-            -DQT_ANDROID_KEYSTORE_ALIAS="$env:KEY_ALIAS" `
-            -DQT_ANDROID_KEYSTORE_STORE_PASS="$env:KEYSTORE_PASSWORD" `
-            -DQT_ANDROID_KEYSTORE_KEY_PASS="$env:KEY_PASSWORD" `
-            -DQT_ANDROID_SIGN=ON
+            -DANDROID_NDK_HOME="$env:ANDROID_NDK_HOME"
 
           cmake --build build --config Release -j8
 
-      - name: Build APK
+      # ✅ 核心修改：拆解构建流程，物理删除冗余 assets 后手动签名打包
+      - name: Build APK (Deploy + Clean + Gradle)
         shell: pwsh
-        run: cmake --build build --target apk --config Release
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          $qtBase = "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}"
+          $desktopCandidates = @("${{ env.DESKTOP_ARCH }}", "mingw_64", "mingw1310_64", "gcc_64")
+          $qtDesktop = ""
+          foreach ($candidate in $desktopCandidates) {
+            $testPath = Join-Path $qtBase $candidate
+            if (Test-Path "$testPath/bin/androiddeployqt.exe") {
+              $qtDesktop = $testPath
+              break
+            }
+          }
+          if ([string]::IsNullOrEmpty($qtDesktop)) { throw "❌ Cannot find androiddeployqt.exe!" }
 
-      # ✅ 修复2: 保留 APK 大小诊断（验证资源排除是否生效的关键）
+          $deployQt = "$qtDesktop/bin/androiddeployqt.exe"
+          $settingsFile = Get-ChildItem "build/" -Filter "*deployment-settings.json" | Select-Object -First 1
+          if (-not $settingsFile) { throw "❌ No deployment-settings.json found!" }
+
+          # 1️⃣ 仅运行 androiddeployqt 生成 android-build 目录（不加 --gradle）
+          Write-Host "🚀 Running androiddeployqt (prepare only)..."
+          & $deployQt `
+            --input $settingsFile.FullName `
+            --output "${{ github.workspace }}/build/android-build" `
+            --android-platform "android-${{ env.ANDROID_API_LEVEL }}" `
+            --jdk "$env:JAVA_HOME" `
+            --release `
+            --verbose
+
+          # 2️⃣ 物理删除不需要的第三方 assets
+          $assetsDir = "${{ github.workspace }}/build/android-build/assets"
+          if (Test-Path $assetsDir) {
+              $excludeDirs = @("org", "mapsforge", "tencentmap", "patterns", "symbols")
+              foreach ($dir in $excludeDirs) {
+                  $target = Join-Path $assetsDir $dir
+                  if (Test-Path $target) {
+                      Remove-Item -Recurse -Force $target
+                      Write-Host "🗑️ Removed assets/$dir"
+                  } else {
+                      Write-Host "ℹ️ assets/$dir not found, skipping."
+                  }
+              }
+          } else {
+              Write-Host "⚠️ Assets directory not found at $assetsDir"
+          }
+
+          # 3️⃣ 手动调用 Gradle 打包并注入签名
+          Write-Host "📦 Running Gradle assembleRelease..."
+          Push-Location "${{ github.workspace }}/build/android-build"
+
+          ./gradlew assembleRelease `
+            -Pandroid.injected.signing.store.file="$env:KEYSTORE_PATH" `
+            -Pandroid.injected.signing.store.password="$env:KEYSTORE_PASSWORD" `
+            -Pandroid.injected.signing.key.alias="$env:KEY_ALIAS" `
+            -Pandroid.injected.signing.key.password="$env:KEY_PASSWORD"
+
+          Pop-Location
+          Write-Host "✅ APK build completed."
+
       - name: Diagnose APK Size
         shell: pwsh
         run: |
