@@ -77,8 +77,6 @@ jobs:
           Write-Host "✅ Keystore decoded: $((Get-Item $ksPath).Length) bytes"
           echo "KEYSTORE_PATH=$ksPath" >> $env:GITHUB_ENV
 
-      # ⚠️ 注意：此处已移除所有 QT_ANDROID_KEYSTORE_* 和 QT_ANDROID_SIGN 参数
-      # 签名逻辑已完全迁移至下方的 Gradle 阶段
       - name: CMake Configure & Build
         shell: pwsh
         run: |
@@ -112,8 +110,8 @@ jobs:
 
           cmake --build build --config Release -j8
 
-      # ✅ 核心修改：拆解构建流程，物理删除冗余 assets 后手动签名打包
-      - name: Build APK (Deploy + Clean + Gradle)
+      # ✅ 终极方案：生成 APK → 解压删除冗余 → 重压缩 → 重签名
+      - name: Build APK (Deploy + Strip + Sign)
         shell: pwsh
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -136,56 +134,95 @@ jobs:
           $settingsFile = Get-ChildItem "build/" -Filter "*deployment-settings.json" | Select-Object -First 1
           if (-not $settingsFile) { throw "❌ No deployment-settings.json found!" }
 
-          # 1️⃣ 仅运行 androiddeployqt 生成 android-build 目录（不加 --gradle）
+          # 1️⃣ 运行 androiddeployqt 生成 android-build 目录
           Write-Host "🚀 Running androiddeployqt (prepare only)..."
           & $deployQt --input $settingsFile.FullName --output "${{ github.workspace }}/build/android-build" --android-platform "android-${{ env.ANDROID_API_LEVEL }}" --jdk "$env:JAVA_HOME" --release --verbose
 
-          # 2️⃣ 诊断并物理删除不需要的第三方 assets
-          $assetsDir = "${{ github.workspace }}/build/android-build/assets"
-          Write-Host "`n📂 Assets directory structure before cleanup:"
-          if (Test-Path $assetsDir) {
-              Get-ChildItem -Path $assetsDir -Recurse -Directory | ForEach-Object { Write-Host "  📁 $($_.FullName.Replace($assetsDir, 'assets'))" }
+          # 2️⃣ 调用 Gradle 生成未签名的 APK（先不签名）
+          Write-Host "`n📦 Building unsigned APK..."
+          Push-Location "${{ github.workspace }}/build/android-build"
+          & ./gradlew assembleRelease --no-daemon
+          Pop-Location
 
-              # 递归匹配并删除包含关键词的目录
-              $excludeKeywords = @("org/scilab", "mapsforge", "tencentmap", "patterns", "symbols")
-              foreach ($keyword in $excludeKeywords) {
-                  $matchedItems = Get-ChildItem -Path $assetsDir -Recurse -Directory -Filter "*$keyword*" -ErrorAction SilentlyContinue
-                  foreach ($item in $matchedItems) {
-                      Remove-Item -Recurse -Force $item.FullName
-                      Write-Host "🗑️ Removed: $($item.FullName.Replace($assetsDir, 'assets'))"
-                  }
-                  # 也尝试精确路径匹配（兼容旧逻辑）
-                  $exactPath = Join-Path $assetsDir $keyword
-                  if (Test-Path $exactPath) {
-                      Remove-Item -Recurse -Force $exactPath
-                      Write-Host "🗑️ Removed exact path: assets/$keyword"
-                  }
+          # 3️⃣ 找到未签名的 APK
+          $apkPath = Get-ChildItem "build/android-build/build/outputs/apk/release/*-unsigned.apk" | Select-Object -First 1
+          if (-not $apkPath) { throw "❌ Unsigned APK not found!" }
+          Write-Host "📦 Found unsigned APK: $($apkPath.Name) ($([math]::Round($apkPath.Length/1MB, 2)) MB)"
+
+          # 4️⃣ 解压 APK → 精确删除冗余文件 → 重新压缩
+          Write-Host "`n🔧 Stripping bloat from APK..."
+          $stripDir = "${{ github.workspace }}/build/apk-strip"
+          if (Test-Path $stripDir) { Remove-Item -Recurse -Force $stripDir }
+          Expand-Archive -Path $apkPath.FullName -DestinationPath $stripDir -Force
+
+          # ⚠️ 根据 Diagnose APK Size 输出的真实路径填写
+          $stripPatterns = @(
+              "org",
+              "mapsforge",
+              "tencentmap",
+              "patterns",
+              "symbols"
+          )
+
+          foreach ($pattern in $stripPatterns) {
+              $matched = Get-ChildItem -Path $stripDir -Recurse -Directory -Filter $pattern -ErrorAction SilentlyContinue
+              foreach ($item in $matched) {
+                  Remove-Item -Recurse -Force $item.FullName
+                  Write-Host "🗑️ Stripped dir: $($item.FullName.Replace($stripDir, 'apk://'))"
               }
-          } else {
-              Write-Host "⚠️ Assets directory not found at $assetsDir"
+              # 也匹配文件
+              $matchedFiles = Get-ChildItem -Path $stripDir -Recurse -File -Filter "*$pattern*" -ErrorAction SilentlyContinue
+              foreach ($file in $matchedFiles) {
+                  Remove-Item -Force $file.FullName
+                  Write-Host "🗑️ Stripped file: $($file.FullName.Replace($stripDir, 'apk://'))"
+              }
           }
 
-          # 3️⃣ 手动调用 Gradle 打包并注入签名（使用数组传参避免 PS 换行符解析问题）
-          Write-Host "`n📦 Running Gradle assembleRelease..."
-          Push-Location "${{ github.workspace }}/build/android-build"
+          # 重新压缩为 APK（ZIP 格式）
+          $strippedApk = "${{ github.workspace }}/build/stripped-release.apk"
+          Compress-Archive -Path "$stripDir/*" -DestinationPath $strippedApk -Force
+          Write-Host "📦 Stripped APK size: $([math]::Round((Get-Item $strippedApk).Length/1MB, 2)) MB"
 
-          $gradleArgs = @(
-              "assembleRelease",
-              "--no-daemon",
-              "-Pandroid.injected.signing.store.file=$env:KEYSTORE_PATH",
-              "-Pandroid.injected.signing.store.password=$env:KEYSTORE_PASSWORD",
-              "-Pandroid.injected.signing.key.alias=$env:KEY_ALIAS",
-              "-Pandroid.injected.signing.key.password=$env:KEY_PASSWORD"
-          )
-          & ./gradlew @gradleArgs
+          # 5️⃣ 使用 apksigner 重新签名
+          Write-Host "`n✍️ Re-signing stripped APK..."
+          $apksigner = Get-ChildItem "$env:JAVA_HOME/bin/apksigner*" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $apksigner) {
+              # 如果 apksigner 不在 JAVA_HOME，尝试用 jarsigner
+              $jarsigner = "$env:JAVA_HOME/bin/jarsigner.exe"
+              if (-not (Test-Path $jarsigner)) { throw "❌ jarsigner not found in JAVA_HOME!" }
 
-          Pop-Location
-          Write-Host "✅ APK build completed."
+              & $jarsigner `
+                -keystore "$env:KEYSTORE_PATH" `
+                -storepass "$env:KEYSTORE_PASSWORD" `
+                -keypass "$env:KEY_PASSWORD" `
+                -signedjar "${{ github.workspace }}/build/Knot-signed-stripped.apk" `
+                $strippedApk `
+                "$env:KEY_ALIAS"
+
+              # 验证签名
+              & $jarsigner -verify "${{ github.workspace }}/build/Knot-signed-stripped.apk"
+          } else {
+              & $apksigner.FullName sign `
+                --ks "$env:KEYSTORE_PATH" `
+                --ks-pass "pass:$env:KEYSTORE_PASSWORD" `
+                --key-pass "pass:$env:KEY_PASSWORD" `
+                --ks-key-alias "$env:KEY_ALIAS" `
+                --out "${{ github.workspace }}/build/Knot-signed-stripped.apk" `
+                $strippedApk
+
+              & $apksigner.FullName verify "${{ github.workspace }}/build/Knot-signed-stripped.apk"
+          }
+          Write-Host "✅ Signed & stripped APK ready."
 
       - name: Diagnose APK Size
         shell: pwsh
         run: |
-          $apk = Get-ChildItem "build/android-build/build/outputs/apk/release/*.apk" | Select-Object -First 1
+          # 优先检查 stripped 版本
+          $apk = Get-ChildItem "build/Knot-signed-stripped.apk" -ErrorAction SilentlyContinue
+          if (-not $apk) {
+            Write-Host "⚠️ Stripped APK not found, falling back to original..."
+            $apk = Get-ChildItem "build/android-build/build/outputs/apk/release/*.apk" | Select-Object -First 1
+          }
           if (-not $apk) {
             Write-Host "⚠️ No APK found"; exit 0
           }
@@ -202,14 +239,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Knot-APK-signed
-          path: build/android-build/build/outputs/apk/release/*.apk
+          path: |
+            build/Knot-signed-stripped.apk
+            build/android-build/build/outputs/apk/release/*.apk
 
       - name: Upload to GitHub Release
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/android-build/build/outputs/apk/release/*.apk
-          asset_name: android-build-release-signed.apk
+          file: build/Knot-signed-stripped.apk
+          asset_name: Knot-release.apk
           tag: ${{ github.ref_name }}
           overwrite: true
