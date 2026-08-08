@@ -154,7 +154,7 @@ set(PLATFORM_OPTIONS "")
 
 if(APPLE)
     # macOS (arm64 / x86_64 通用，由 CMAKE_OSX_ARCHITECTURES 决定)
-    set(MACOSX_ICON "${CMAKE_CURRENT_SOURCE_DIR}/ExtBin/mac/AppIcon.icns")
+    set(MACOSX_ICON "${CMAKE_CURRENT_SOURCE_DIR}/rec/icon.icns")
     if(EXISTS "${MACOSX_ICON}")
         list(APPEND PLATFORM_RESOURCES ${MACOSX_ICON})
         set_source_files_properties(${MACOSX_ICON} PROPERTIES
@@ -164,7 +164,7 @@ if(APPLE)
     else()
         message(WARNING "⚠️ macOS icon not found: ${MACOSX_ICON}, app will use default icon.")
     endif()
-    list(APPEND PLATFORM_OPTIONS MACOSX_BUNDLE)  # 生成 .app bundle，不弹终端
+    list(APPEND PLATFORM_OPTIONS MACOSX_BUNDLE)
 
 elseif(WIN32)
     # Windows
@@ -196,7 +196,7 @@ if(ANDROID)
     )
 elseif(APPLE)
     set_target_properties(${PROJECT_NAME} PROPERTIES
-        MACOSX_BUNDLE_ICON_FILE "AppIcon.icns"
+        MACOSX_BUNDLE_ICON_FILE "icon.icns"
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.knot.app"
         MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
