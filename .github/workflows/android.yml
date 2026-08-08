@@ -77,7 +77,6 @@ jobs:
           Write-Host "✅ Keystore decoded: $((Get-Item $ksPath).Length) bytes"
           echo "KEYSTORE_PATH=$ksPath" >> $env:GITHUB_ENV
 
-      # ✅ 核心修改：强化 CMake 瘦身 + 构建后强制 strip + 诊断
       - name: CMake Configure & Build
         shell: pwsh
         run: |
@@ -117,7 +116,7 @@ jobs:
 
           cmake --build build --config Release -j8
 
-          # ✅ 构建后强制 strip（双重保险，不信任 CMake 的 strip 行为）
+          # 构建后强制 strip（双重保险）
           $stripTool = "$env:ANDROID_NDK_HOME/toolchains/llvm/prebuilt/windows-x86_64/bin/llvm-strip.exe"
           $soFiles = Get-ChildItem "build" -Recurse -Filter "libKnot*.so"
           foreach ($so in $soFiles) {
@@ -128,7 +127,6 @@ jobs:
             Write-Host "   → After strip: $afterSize MB (saved $([math]::Round($beforeSize - $afterSize, 2)) MB)"
           }
 
-      # ✅ 新增：诊断 libKnot 内部结构
       - name: Diagnose libKnot Size
         shell: pwsh
         run: |
@@ -153,7 +151,6 @@ jobs:
             & $objdump -p $so.FullName | Select-String "NEEDED" | ForEach-Object { Write-Host "  $_" }
           }
 
-      # ✅ 简化：回归标准 Gradle 签名打包（不再解压/重打包）
       - name: Build APK (Deploy + Gradle Sign)
         shell: pwsh
         env:
@@ -214,12 +211,22 @@ jobs:
           name: Knot-APK-signed
           path: build/android-build/build/outputs/apk/release/*.apk
 
+      - name: Prepare Release APK
+        if: github.event_name == 'release'
+        shell: pwsh
+        run: |
+          $apk = Get-ChildItem "build/android-build/build/outputs/apk/release/*.apk" | Select-Object -First 1
+          if (-not $apk) { throw "❌ No APK found for release!" }
+          $dest = "${{ github.workspace }}/Knot-release.apk"
+          Copy-Item $apk.FullName $dest -Force
+          Write-Host "📦 Prepared: $dest ($([math]::Round((Get-Item $dest).Length/1MB, 2)) MB)"
+
       - name: Upload to GitHub Release
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/android-build/build/outputs/apk/release/*.apk
+          file: Knot-release.apk
           asset_name: Knot-release.apk
           tag: ${{ github.ref_name }}
           overwrite: true
