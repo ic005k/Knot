@@ -149,7 +149,7 @@ int AboutThis::parse_UpdateJSON(QString str) {
       // gitee
       s_link =
           "https://gitee.com/ic005k/Knot/releases/download/Latest/"
-          "android-build-release-signed.apk";
+          "android-build-Knot-release-signed.apk";
 #else
       // github
       QString mirror0 = "";
