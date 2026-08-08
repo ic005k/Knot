@@ -77,6 +77,7 @@ jobs:
           Write-Host "✅ Keystore decoded: $((Get-Item $ksPath).Length) bytes"
           echo "KEYSTORE_PATH=$ksPath" >> $env:GITHUB_ENV
 
+      # ✅ 核心修改：强化 CMake 瘦身 + 构建后强制 strip + 诊断
       - name: CMake Configure & Build
         shell: pwsh
         run: |
@@ -106,12 +107,54 @@ jobs:
             -DANDROID_ABI=arm64-v8a `
             -DANDROID_NATIVE_API_LEVEL=${{ env.ANDROID_API_LEVEL }} `
             -DANDROID_PLATFORM=${{ env.ANDROID_API_LEVEL }} `
-            -DANDROID_NDK_HOME="$env:ANDROID_NDK_HOME"
+            -DANDROID_NDK_HOME="$env:ANDROID_NDK_HOME" `
+            -DCMAKE_C_FLAGS_RELEASE="-Oz -DNDEBUG -ffunction-sections -fdata-sections" `
+            -DCMAKE_CXX_FLAGS_RELEASE="-Oz -DNDEBUG -ffunction-sections -fdata-sections" `
+            -DCMAKE_SHARED_LINKER_FLAGS_RELEASE="-Wl,--gc-sections,--strip-all,-s" `
+            -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-Wl,--gc-sections,--strip-all,-s" `
+            -DQT_NO_DEBUG_OUTPUT=ON `
+            -DQT_NO_WARNING_OUTPUT=ON
 
           cmake --build build --config Release -j8
 
-      # ✅ 终极方案：生成 APK → 解压删除冗余 → 重压缩 → 重签名
-      - name: Build APK (Deploy + Strip + Sign)
+          # ✅ 构建后强制 strip（双重保险，不信任 CMake 的 strip 行为）
+          $stripTool = "$env:ANDROID_NDK_HOME/toolchains/llvm/prebuilt/windows-x86_64/bin/llvm-strip.exe"
+          $soFiles = Get-ChildItem "build" -Recurse -Filter "libKnot*.so"
+          foreach ($so in $soFiles) {
+            $beforeSize = [math]::Round($so.Length/1MB, 2)
+            Write-Host "✂️ Stripping: $($so.Name) ($beforeSize MB)"
+            & $stripTool --strip-all $so.FullName
+            $afterSize = [math]::Round($so.Length/1MB, 2)
+            Write-Host "   → After strip: $afterSize MB (saved $([math]::Round($beforeSize - $afterSize, 2)) MB)"
+          }
+
+      # ✅ 新增：诊断 libKnot 内部结构
+      - name: Diagnose libKnot Size
+        shell: pwsh
+        run: |
+          $so = Get-ChildItem "build" -Recurse -Filter "libKnot*.so" | Select-Object -First 1
+          if (-not $so) { Write-Host "⚠️ libKnot not found"; exit 0 }
+
+          Write-Host "📦 libKnot: $($so.Name) ($([math]::Round($so.Length/1MB, 2)) MB)"
+
+          $readelf = "$env:ANDROID_NDK_HOME/toolchains/llvm/prebuilt/windows-x86_64/bin/llvm-readelf.exe"
+          if (Test-Path $readelf) {
+            Write-Host "`n🔍 ELF Sections (debug/symbol):"
+            & $readelf -S $so.FullName | Select-String -Pattern "\.debug|\.symtab|\.strtab" | ForEach-Object { Write-Host "  $_" }
+
+            Write-Host "`n🔍 Dynamic symbols count:"
+            $dynsymCount = (& $readelf --dyn-syms $so.FullName | Measure-Object -Line).Lines
+            Write-Host "  Dynamic symbols: $dynsymCount"
+          }
+
+          Write-Host "`n🔍 Linked libraries (NEEDED):"
+          $objdump = "$env:ANDROID_NDK_HOME/toolchains/llvm/prebuilt/windows-x86_64/bin/llvm-objdump.exe"
+          if (Test-Path $objdump) {
+            & $objdump -p $so.FullName | Select-String "NEEDED" | ForEach-Object { Write-Host "  $_" }
+          }
+
+      # ✅ 简化：回归标准 Gradle 签名打包（不再解压/重打包）
+      - name: Build APK (Deploy + Gradle Sign)
         shell: pwsh
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -134,98 +177,28 @@ jobs:
           $settingsFile = Get-ChildItem "build/" -Filter "*deployment-settings.json" | Select-Object -First 1
           if (-not $settingsFile) { throw "❌ No deployment-settings.json found!" }
 
-          # 1️⃣ 运行 androiddeployqt 生成 android-build 目录
-          Write-Host "🚀 Running androiddeployqt (prepare only)..."
+          Write-Host "🚀 Running androiddeployqt..."
           & $deployQt --input $settingsFile.FullName --output "${{ github.workspace }}/build/android-build" --android-platform "android-${{ env.ANDROID_API_LEVEL }}" --jdk "$env:JAVA_HOME" --release --verbose
 
-          # 2️⃣ 调用 Gradle 生成未签名的 APK（先不签名）
-          Write-Host "`n📦 Building unsigned APK..."
+          Write-Host "`n📦 Building signed APK via Gradle..."
           Push-Location "${{ github.workspace }}/build/android-build"
-          & ./gradlew assembleRelease --no-daemon
-          Pop-Location
-
-          # 3️⃣ 找到未签名的 APK
-          $apkPath = Get-ChildItem "build/android-build/build/outputs/apk/release/*-unsigned.apk" | Select-Object -First 1
-          if (-not $apkPath) { throw "❌ Unsigned APK not found!" }
-          Write-Host "📦 Found unsigned APK: $($apkPath.Name) ($([math]::Round($apkPath.Length/1MB, 2)) MB)"
-
-          # 4️⃣ 解压 APK → 精确删除冗余文件 → 重新压缩
-          Write-Host "`n🔧 Stripping bloat from APK..."
-          $stripDir = "${{ github.workspace }}/build/apk-strip"
-          if (Test-Path $stripDir) { Remove-Item -Recurse -Force $stripDir }
-          Expand-Archive -Path $apkPath.FullName -DestinationPath $stripDir -Force
-
-          # ⚠️ 根据 Diagnose APK Size 输出的真实路径填写
-          $stripPatterns = @(
-              "org",
-              "mapsforge",
-              "tencentmap",
-              "patterns",
-              "symbols"
+          $gradleArgs = @(
+              "assembleRelease",
+              "--no-daemon",
+              "-Pandroid.injected.signing.store.file=$env:KEYSTORE_PATH",
+              "-Pandroid.injected.signing.store.password=$env:KEYSTORE_PASSWORD",
+              "-Pandroid.injected.signing.key.alias=$env:KEY_ALIAS",
+              "-Pandroid.injected.signing.key.password=$env:KEY_PASSWORD"
           )
-
-          foreach ($pattern in $stripPatterns) {
-              $matched = Get-ChildItem -Path $stripDir -Recurse -Directory -Filter $pattern -ErrorAction SilentlyContinue
-              foreach ($item in $matched) {
-                  Remove-Item -Recurse -Force $item.FullName
-                  Write-Host "🗑️ Stripped dir: $($item.FullName.Replace($stripDir, 'apk://'))"
-              }
-              # 也匹配文件
-              $matchedFiles = Get-ChildItem -Path $stripDir -Recurse -File -Filter "*$pattern*" -ErrorAction SilentlyContinue
-              foreach ($file in $matchedFiles) {
-                  Remove-Item -Force $file.FullName
-                  Write-Host "🗑️ Stripped file: $($file.FullName.Replace($stripDir, 'apk://'))"
-              }
-          }
-
-          # 重新压缩为 APK（ZIP 格式）
-          $strippedApk = "${{ github.workspace }}/build/stripped-release.apk"
-          Compress-Archive -Path "$stripDir/*" -DestinationPath $strippedApk -Force
-          Write-Host "📦 Stripped APK size: $([math]::Round((Get-Item $strippedApk).Length/1MB, 2)) MB"
-
-          # 5️⃣ 使用 apksigner 重新签名
-          Write-Host "`n✍️ Re-signing stripped APK..."
-          $apksigner = Get-ChildItem "$env:JAVA_HOME/bin/apksigner*" -ErrorAction SilentlyContinue | Select-Object -First 1
-          if (-not $apksigner) {
-              # 如果 apksigner 不在 JAVA_HOME，尝试用 jarsigner
-              $jarsigner = "$env:JAVA_HOME/bin/jarsigner.exe"
-              if (-not (Test-Path $jarsigner)) { throw "❌ jarsigner not found in JAVA_HOME!" }
-
-              & $jarsigner `
-                -keystore "$env:KEYSTORE_PATH" `
-                -storepass "$env:KEYSTORE_PASSWORD" `
-                -keypass "$env:KEY_PASSWORD" `
-                -signedjar "${{ github.workspace }}/build/Knot-signed-stripped.apk" `
-                $strippedApk `
-                "$env:KEY_ALIAS"
-
-              # 验证签名
-              & $jarsigner -verify "${{ github.workspace }}/build/Knot-signed-stripped.apk"
-          } else {
-              & $apksigner.FullName sign `
-                --ks "$env:KEYSTORE_PATH" `
-                --ks-pass "pass:$env:KEYSTORE_PASSWORD" `
-                --key-pass "pass:$env:KEY_PASSWORD" `
-                --ks-key-alias "$env:KEY_ALIAS" `
-                --out "${{ github.workspace }}/build/Knot-signed-stripped.apk" `
-                $strippedApk
-
-              & $apksigner.FullName verify "${{ github.workspace }}/build/Knot-signed-stripped.apk"
-          }
-          Write-Host "✅ Signed & stripped APK ready."
+          & ./gradlew @gradleArgs
+          Pop-Location
+          Write-Host "✅ APK build completed."
 
       - name: Diagnose APK Size
         shell: pwsh
         run: |
-          # 优先检查 stripped 版本
-          $apk = Get-ChildItem "build/Knot-signed-stripped.apk" -ErrorAction SilentlyContinue
-          if (-not $apk) {
-            Write-Host "⚠️ Stripped APK not found, falling back to original..."
-            $apk = Get-ChildItem "build/android-build/build/outputs/apk/release/*.apk" | Select-Object -First 1
-          }
-          if (-not $apk) {
-            Write-Host "⚠️ No APK found"; exit 0
-          }
+          $apk = Get-ChildItem "build/android-build/build/outputs/apk/release/*.apk" | Select-Object -First 1
+          if (-not $apk) { Write-Host "⚠️ No APK found"; exit 0 }
           Write-Host "📦 APK: $($apk.Name) ($([math]::Round($apk.Length/1MB, 2)) MB)"
           Add-Type -Assembly System.IO.Compression.FileSystem
           $zip = [System.IO.Compression.ZipFile]::OpenRead($apk.FullName)
@@ -239,16 +212,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Knot-APK-signed
-          path: |
-            build/Knot-signed-stripped.apk
-            build/android-build/build/outputs/apk/release/*.apk
+          path: build/android-build/build/outputs/apk/release/*.apk
 
       - name: Upload to GitHub Release
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/Knot-signed-stripped.apk
+          file: build/android-build/build/outputs/apk/release/*.apk
           asset_name: Knot-release.apk
           tag: ${{ github.ref_name }}
           overwrite: true
