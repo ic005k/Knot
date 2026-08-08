@@ -154,7 +154,7 @@ set(PLATFORM_OPTIONS "")
 
 if(APPLE)
     # macOS (arm64 / x86_64 通用，由 CMAKE_OSX_ARCHITECTURES 决定)
-    set(MACOSX_ICON "${CMAKE_CURRENT_SOURCE_DIR}/rec/icon.icns")
+    set(MACOSX_ICON "${CMAKE_CURRENT_SOURCE_DIR}/res/icon.icns")
     if(EXISTS "${MACOSX_ICON}")
         list(APPEND PLATFORM_RESOURCES ${MACOSX_ICON})
         set_source_files_properties(${MACOSX_ICON} PROPERTIES
