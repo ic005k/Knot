@@ -32,7 +32,6 @@
 #include "lib/quazip/quazipfile.h"
 #include "src/AI/GlobalAI.h"
 #include "src/Comm/AppLogger.h"
-// #include "ui_MainWindow.h"
 
 extern void RegJni(const char* myClassName);
 extern void RegJni15(const char* myClassName);
@@ -122,7 +121,7 @@ int main(int argc, char* argv[]) {
 #elif defined(Q_OS_ANDROID)
   isAndroid = true;
 
-  initAndroidGPU();
+  // initAndroidGPU();
 
 #elif defined(Q_OS_LINUX)
   isLinux = true;
