@@ -87,6 +87,8 @@ dependencies {
 
     implementation 'com.google.android.material:material:1.6.1'
 
+    implementation "androidx.core:core-splashscreen:1.0.1"
+
     // 添加osmdroid依赖（最新版本可查官网）
     implementation 'org.osmdroid:osmdroid-android:6.1.20'
     implementation 'org.osmdroid:osmdroid-mapsforge:6.1.20'

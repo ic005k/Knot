@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- 设置出现，消失动画 -->
+
 <resources>
     <style name="WindowAnim" parent="android:Animation" mce_bogus="1">
         <item name="android:windowEnterAnimation">@anim/enter_anim</item>
@@ -59,6 +60,13 @@
         <item name="colorButtonNormal">@android:color/transparent</item>
         <item name="android:textAllCaps">false</item>
 
+    </style>
+
+    <style name="TransparentSplashTheme" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#F0F2F5</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_placeholder</item>
+        <item name="windowSplashScreenAnimationDuration">0</item>
+        <item name="postSplashScreenTheme">@style/AppTheme</item>
     </style>
 
 

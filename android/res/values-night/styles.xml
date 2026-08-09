@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="TransparentSplashTheme" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#1E1E23</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_placeholder</item>
+        <item name="windowSplashScreenAnimationDuration">0</item>
+        <item name="postSplashScreenTheme">@style/AppTheme</item>
+    </style>
+</resources>
