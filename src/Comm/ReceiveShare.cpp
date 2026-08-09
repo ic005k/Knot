@@ -2,7 +2,6 @@
 
 #include "src/MainWindow.h"
 #include "src/defines.h"
-// #include "ui_MainWindow.h"
 
 ReceiveShare::ReceiveShare(QWidget* parent) : QDialog(parent) {}
 
@@ -238,6 +237,11 @@ void ReceiveShare::closeAllChildWindows() {
 
   if (mui->frameDiff->isVisible()) {
     mui->btnBackNoteDiff->click();
+    mui->btnBackNoteList->click();
+  }
+
+  if (mui->frameFavorites->isVisible()) {
+    mui->btnBackFavorites->click();
     mui->btnBackNoteList->click();
   }
 
