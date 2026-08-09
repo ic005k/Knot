@@ -2160,29 +2160,30 @@ public class MyActivity
 
     // 统一刷新：状态栏 + 导航栏（与 NoteEditor 完全对齐）
     private void updateSystemBars() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        // ✅ 确保所有 Window/View 操作在主线程执行
+        runOnUiThread(() -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                Window window = getWindow();
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
-            if (isDark) {
-                // 暗黑模式
-                window.setStatusBarColor(Color.parseColor("#19232D"));
-                window.setNavigationBarColor(Color.parseColor("#121212"));
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    window.getDecorView().setSystemUiVisibility(0);
-                }
-            } else {
-                // 浅色模式
-                window.setStatusBarColor(Color.parseColor("#F3F3F3"));
-                window.setNavigationBarColor(Color.parseColor("#FFFFFF"));
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    window.getDecorView().setSystemUiVisibility(
-                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR |
-                        View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                    );
+                if (isDark) {
+                    window.setStatusBarColor(Color.parseColor("#19232D"));
+                    window.setNavigationBarColor(Color.parseColor("#121212"));
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        window.getDecorView().setSystemUiVisibility(0);
+                    }
+                } else {
+                    window.setStatusBarColor(Color.parseColor("#F3F3F3"));
+                    window.setNavigationBarColor(Color.parseColor("#FFFFFF"));
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        window.getDecorView().setSystemUiVisibility(
+                            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR |
+                            View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                        );
+                    }
                 }
             }
-        }
+        });
     }
 
     public static void setQtMainEnd(boolean isEnd) {
