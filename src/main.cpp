@@ -153,7 +153,11 @@ int main(int argc, char* argv[]) {
 #endif
 
   // ============================ 闪屏============================
-  SplashTimer* splash = new SplashTimer(isAndroid, 200, 90);
+  // 先初始化当前主题状态（替代原有的isDark直接赋值）
+  g_currentIsDark =
+      (QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark);
+  isDark = g_currentIsDark;
+  SplashTimer* splash = new SplashTimer(isAndroid, isDark, 200, 90);
   splash->show();
 
   // 设置应用程序标识（为QML里面使用Settings做准备）
@@ -313,12 +317,7 @@ int main(int argc, char* argv[]) {
 
   MainWindow w;
 
-  // 1. 先初始化当前主题状态（替代原有的isDark直接赋值）
-  g_currentIsDark =
-      (QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark);
-  isDark = g_currentIsDark;  // 兼容原有代码对isDark的依赖
-
-  // 2. 重构信号绑定逻辑：增加主题状态校验
+  // 重构信号绑定逻辑：增加主题状态校验
   QObject::connect(QGuiApplication::styleHints(),
                    &QStyleHints::colorSchemeChanged, &w,
                    [](Qt::ColorScheme scheme) {
@@ -331,7 +330,7 @@ int main(int argc, char* argv[]) {
                      }
                    });
 
-  // 3. 初始加载（确保MainWindow初始化完成后执行，避免空指针）
+  // 初始加载（确保MainWindow初始化完成后执行，避免空指针）
   loadTheme(g_currentIsDark);
 
   w.show();

@@ -180,17 +180,17 @@ public class MyActivity
     private OnBackInvokedCallback mBackCallback;
     private boolean mIsQtActive = true;
 
-    // 新增：标记是否是配置变更导致的重构 =====
+    // 标记是否是配置变更导致的重构 =====
     private boolean isConfigChangeRecreate = false;
 
-    // 新增：标记Service是否已启动（静态，跨Activity实例共享）
+    // 标记Service是否已启动（静态，跨Activity实例共享）
     private static boolean isServiceStarted = false;
 
-    // 新增：持久化重启标记的Key
+    // 持久化重启标记的Key
     private static final String PREFS_RESTART = "restart_prefs";
     private static final String KEY_NEED_RESTART = "need_restart";
 
-    // ========== 新增：保存ClockActivity内容的静态变量 ==========
+    // ========== 保存ClockActivity内容的静态变量 ==========
     public static String savedClockContent = ""; // 存储ClockActivity的原始内容
     public static final Object clockLock = new Object(); // 同步锁，保证线程安全
     public static boolean isNeedRestoreClock = false;
@@ -309,7 +309,6 @@ public class MyActivity
 
     public void setDark(boolean dark) {
         isDark = dark;
-        //updateSystemBars();
     }
 
     // ------------------------------------------------------------------------
@@ -451,7 +450,7 @@ public class MyActivity
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             // 仅在主线程执行初始化（避免JNI跨线程问题）
             try {
-                ImmersiveUtil.applyRealImmersive(this);
+                updateSystemBars();
 
                 // 权限请求（仅首次创建执行）
                 if (!isConfigChangeRecreate) {
@@ -746,7 +745,7 @@ public class MyActivity
         System.out.println("onResume...");
         super.onResume();
 
-        //updateSystemBars();
+        updateSystemBars();
     }
 
     @Override

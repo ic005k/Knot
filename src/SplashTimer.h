@@ -2,7 +2,7 @@
 #define SPLASHTIMER_H
 
 #include <QApplication>
-#include <QCloseEvent>  // 新增：处理窗口关闭事件
+#include <QCloseEvent>
 #include <QColor>
 #include <QFont>
 #include <QFontMetrics>
@@ -19,40 +19,39 @@ class SplashTimer : public QSplashScreen {
   Q_OBJECT
 
  public:
-  explicit SplashTimer(bool isAndroid = false, int width = 600,
-                       int height = 300,
+  // 新增 isDark 参数，默认为 false
+  explicit SplashTimer(bool isAndroid = false, bool isDark = false,
+                       int width = 600, int height = 300,
                        Qt::WindowFlags flags = Qt::WindowFlags())
       : QSplashScreen(QPixmap(), flags),
         m_isAndroid(isAndroid),
+        m_isDark(isDark),  // 初始化暗黑模式标记
         m_width(width),
         m_height(height),
-        m_animationTimer(nullptr),  // 初始化置空
-        m_contextValid(true)        // 标记上下文是否有效
-  {
+        m_animationTimer(nullptr),
+        m_contextValid(true) {
     init();
   }
 
-  // 核心修改1：析构函数彻底清理定时器
   ~SplashTimer() override {
-    stopAnimation();  // 停止定时器
+    stopAnimation();
     if (m_animationTimer) {
-      m_animationTimer->deleteLater();  // 安全释放
+      m_animationTimer->deleteLater();
       m_animationTimer = nullptr;
     }
   }
 
-  // 新增：主动停止动画的接口（供外部调用，比如应用启动完成后）
   void stopAnimation() {
     if (m_animationTimer && m_animationTimer->isActive()) {
-      m_animationTimer->stop();  // 停止定时器
-      disconnect(m_animationTimer, &QTimer::timeout, this,
-                 nullptr);  // 断开所有信号槽
+      m_animationTimer->stop();
+      disconnect(m_animationTimer, &QTimer::timeout, this, nullptr);
     }
-    m_contextValid = false;  // 标记上下文失效
+    m_contextValid = false;
   }
 
  private:
   bool m_isAndroid;
+  bool m_isDark;  // 新增：暗黑模式标记
   int m_width;
   int m_height;
   qreal m_dpr;
@@ -61,13 +60,14 @@ class SplashTimer : public QSplashScreen {
   QColor m_textColor;
   QColor m_highlightColor;
   QColor m_shadowColor;
+  QColor m_gridColor;  // 新增：网格线颜色独立管理
   QPixmap m_basePixmap;
   qreal m_fontSize;
   const qreal m_maxFontRatio = 0.25;
   int m_animationFrame = 0;
   QTimer* m_animationTimer = nullptr;
   const qreal m_androidYOffset = 10.0;
-  bool m_contextValid;  // 新增：标记绘制上下文是否有效
+  bool m_contextValid;
 
   void init() {
     initSizeAndDpi();
@@ -82,11 +82,9 @@ class SplashTimer : public QSplashScreen {
       setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
     }
 
-    // 核心修改2：安全创建定时器，避免空指针
     m_animationTimer = new QTimer(this);
-    m_animationTimer->setInterval(100);  // 明确设置间隔
+    m_animationTimer->setInterval(100);
     connect(m_animationTimer, &QTimer::timeout, this, [this]() {
-      // 加一层判断：上下文无效则直接返回
       if (!m_contextValid) return;
       m_animationFrame = (m_animationFrame + 1) % 60;
       updateDisplay();
@@ -115,13 +113,24 @@ class SplashTimer : public QSplashScreen {
     m_fontSize = qMax(m_fontSize, 40.0 * m_dpr);
   }
 
+  // 核心修改：根据 isDark 分支设置颜色
   void initStyle() {
-    m_bgColor = QColor(240, 242, 245);
-    m_textColor = QColor(52, 73, 94);
-    m_highlightColor = QColor(41, 128, 185);
-    m_shadowColor = QColor(44, 62, 80, 120);
+    if (m_isDark) {
+      m_bgColor = QColor(30, 30, 35);
+      m_textColor = QColor(200, 210, 225);
+      m_highlightColor = QColor(100, 180, 240);
+      m_shadowColor = QColor(0, 0, 0, 160);
+      m_gridColor = QColor(255, 255, 255, 18);
+    } else {
+      m_bgColor = QColor(240, 242, 245);
+      m_textColor = QColor(52, 73, 94);
+      m_highlightColor = QColor(41, 128, 185);
+      m_shadowColor = QColor(44, 62, 80, 120);
+      m_gridColor = QColor(200, 205, 215, 30);
+    }
   }
 
+  // 核心修改：使用成员变量替代硬编码颜色
   void drawBaseBackground() {
     m_basePixmap = QPixmap(m_targetSize);
     m_basePixmap.fill(m_bgColor);
@@ -130,11 +139,17 @@ class SplashTimer : public QSplashScreen {
     painter.setRenderHint(QPainter::Antialiasing);
 
     QLinearGradient gradient(0, 0, 0, m_targetSize.height());
-    gradient.setColorAt(0, QColor(240, 242, 245));
-    gradient.setColorAt(1, QColor(220, 225, 235));
+    if (m_isDark) {
+      gradient.setColorAt(0, QColor(30, 30, 35));
+      gradient.setColorAt(1, QColor(20, 20, 25));
+    } else {
+      gradient.setColorAt(0, QColor(240, 242, 245));
+      gradient.setColorAt(1, QColor(220, 225, 235));
+    }
     painter.fillRect(m_basePixmap.rect(), gradient);
 
-    painter.setPen(QPen(QColor(200, 205, 215, 30), 1));
+    // 使用独立的网格颜色
+    painter.setPen(QPen(m_gridColor, 1));
     int gridSize = 20 * m_dpr;
     for (int x = 0; x < m_targetSize.width(); x += gridSize) {
       painter.drawLine(x, 0, x, m_targetSize.height());
@@ -145,14 +160,12 @@ class SplashTimer : public QSplashScreen {
   }
 
   void updateDisplay() {
-    // 核心修改3：绘制前先检查上下文有效性，无效则直接返回
     if (!m_contextValid || m_basePixmap.isNull()) {
       return;
     }
 
     QPixmap displayPix = m_basePixmap.copy();
     QPainter painter(&displayPix);
-    // 核心修改4：检查painter是否有效（避免上下文失效后的绘制）
     if (!painter.isActive()) {
       return;
     }
@@ -171,15 +184,17 @@ class SplashTimer : public QSplashScreen {
 
     displayPix.setDevicePixelRatio(m_dpr);
     setPixmap(displayPix);
-    // 替换repaint()为update()：update是异步绘制，更安全，避免强制同步绘制触发崩溃
     update();
   }
 
   void drawGlowEffect(QPainter& painter, const QRect& rect) {
     QLinearGradient glowGradient(0, 0, 0, rect.height());
-    glowGradient.setColorAt(0, QColor(41, 128, 185, 20));
-    glowGradient.setColorAt(0.5, QColor(41, 128, 185, 5));
-    glowGradient.setColorAt(1, QColor(41, 128, 185, 20));
+    // 暗黑模式下高光更柔和
+    QColor glowColor =
+        m_isDark ? QColor(100, 180, 240, 15) : QColor(41, 128, 185, 20);
+    glowGradient.setColorAt(0, glowColor);
+    glowGradient.setColorAt(0.5, glowColor.lighter(120));
+    glowGradient.setColorAt(1, glowColor);
 
     painter.setPen(Qt::NoPen);
     painter.setBrush(glowGradient);
@@ -223,10 +238,12 @@ class SplashTimer : public QSplashScreen {
     painter.translate(-letterRect.center());
     painter.setOpacity(opacity);
 
+    // 阴影使用 m_shadowColor（已在 initStyle 中适配）
     painter.setPen(QPen(m_shadowColor, 1));
     painter.setBrush(Qt::NoBrush);
     painter.drawText(QPointF(charX + 2 * m_dpr, charBaseY + 2 * m_dpr), letter);
 
+    // 文字渐变使用 m_highlightColor 和 m_textColor（已在 initStyle 中适配）
     QLinearGradient textGradient(letterRect.topLeft(),
                                  letterRect.bottomRight());
     textGradient.setColorAt(0, m_highlightColor);
@@ -296,11 +313,10 @@ class SplashTimer : public QSplashScreen {
     }
   }
 
-  // 核心修改5：重写窗口关闭事件，停止定时器
   void closeEvent(QCloseEvent* event) override {
-    stopAnimation();  // 关闭窗口时立即停止动画
+    stopAnimation();
     m_contextValid = false;
-    QSplashScreen::closeEvent(event);  // 调用父类方法
+    QSplashScreen::closeEvent(event);
   }
 };
 
