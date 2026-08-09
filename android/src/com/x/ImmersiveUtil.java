@@ -6,12 +6,13 @@ import android.os.Build;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import androidx.appcompat.app.AppCompatActivity;
+//import androidx.appcompat.app.AppCompatActivity;
+import android.app.Activity;
 
 public class ImmersiveUtil {
 
     // ==================== 【一行调用：真正沉浸式】 ====================
-    public static void applyRealImmersive(AppCompatActivity activity) {
+    public static void applyRealImmersive(Activity activity) {
         if (activity == null) return;
         Window window = activity.getWindow();
         if (window == null) return;

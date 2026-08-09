@@ -309,7 +309,7 @@ public class MyActivity
 
     public void setDark(boolean dark) {
         isDark = dark;
-        updateSystemBars();
+        //updateSystemBars();
     }
 
     // ------------------------------------------------------------------------
@@ -451,6 +451,8 @@ public class MyActivity
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             // 仅在主线程执行初始化（避免JNI跨线程问题）
             try {
+                ImmersiveUtil.applyRealImmersive(this);
+
                 // 权限请求（仅首次创建执行）
                 if (!isConfigChangeRecreate) {
                     requestPermission();
@@ -493,8 +495,7 @@ public class MyActivity
                     //hideQtSplashScreen(); // 主动隐藏闪屏
                 }
 
-                // ✅ 首次创建时同步状态栏
-                updateSystemBars();
+
 
             } catch (Exception e) {
                 Log.e(TAG, "初始化异常", e);
@@ -745,7 +746,7 @@ public class MyActivity
         System.out.println("onResume...");
         super.onResume();
 
-        updateSystemBars();
+        //updateSystemBars();
     }
 
     @Override
