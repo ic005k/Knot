@@ -133,6 +133,7 @@ void MainWindow::on_btnRecentOpen_clicked() {
   mui->frameNoteList->hide();
   mui->frameFavorites->show();
 
+  m_Notes->refreshRecentOpenByCounter();
   mui->editTitleKey->clear();
   // 加载最近打开列表推送到QML
   QVariantList data = buildRecentList();
@@ -339,6 +340,8 @@ void MainWindow::on_btnBackNoteList_clicked() {
   m_Notes->updateMainnotesIniToSyncLists();
 
   saveNeedSyncNotes();
+
+  m_Notes->saveNotesCounter();
 
   // ========== 完全异步延迟界面切换，释放渲染资源 ==========
   QTimer::singleShot(0, this, []() {

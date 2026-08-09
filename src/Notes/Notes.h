@@ -54,15 +54,14 @@
 #include "lib/qsci/Qsci/qsciscintilla.h"
 #endif
 
+#include "TitleGenerator.h"
 #include "src/Comm/ShowMessage.h"
 #include "src/MainWindow.h"
 #include "src/Notes/ColorDialog.h"
 #include "src/Notes/NoteDiffManager.h"
-#include "src/Notes/PrintPDF.h"
 #include "src/Notes/NoteManager.h"
+#include "src/Notes/PrintPDF.h"
 #include "src/defines.h"
-#include "TitleGenerator.h"
-
 #include "ui_PrintPDF.h"
 
 class MiniMap;
@@ -70,6 +69,11 @@ class MiniMap;
 namespace Ui {
 class Notes;
 }
+
+struct NoteCounterItem {
+  int64_t count = 0;
+  int64_t last = 0;
+};
 
 struct ContextWords {
   QStringList before;  // 光标前的字词（按从近到远排列）
@@ -236,7 +240,11 @@ class Notes : public QDialog {
 
   void appendAIResults(QString str);
 
- protected:
+  void setNotesCounter();
+  void saveNotesCounter();
+  void loadNotesCounter();
+  void refreshRecentOpenByCounter();
+  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;
@@ -315,6 +323,8 @@ class Notes : public QDialog {
 
   QString loadNoteFullText(const QString& mdPath);
 #endif
+
+  QHash<QString, NoteCounterItem> m_counterMap;
 
   void updateImagePreview(const QString& lineText, int cursorPos);
   QString generateSmartSummary(const QString& filePath);

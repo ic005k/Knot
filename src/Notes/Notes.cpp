@@ -3,7 +3,6 @@
 #include "cmark-gfm-core-extensions.h"
 #include "cmark_wrapper.h"
 #include "src/Notes/ui_Notes.h"
-// #include "src/ui_MainWindow.h"
 #include "subscript.h"
 #include "superscript.h"
 
@@ -239,8 +238,9 @@ void Notes::openEditUI() {
 
   oldText = loadText(currentMDFile);
 
-  m_NotesList->refreshRecentOpen();
-  m_NotesList->saveRecentOpen();
+  // m_NotesList->refreshRecentOpen();
+  // m_NotesList->saveRecentOpen();
+  setNotesCounter();
   m_NotesList->moveToFirst();
 
   if (isAndroid) {
@@ -311,8 +311,8 @@ void Notes::previewNote() {
   QString title = m_NoteManager->getNoteTitle(currentMDFile);
 
   QFuture<void> future = QtConcurrent::run([=]() {
-    m_NotesList->refreshRecentOpen();
-    m_NotesList->saveRecentOpen();
+    // m_NotesList->refreshRecentOpen();
+    // m_NotesList->saveRecentOpen();
     MD2Html(currentMDFile);
   });
 
@@ -337,6 +337,8 @@ void Notes::previewNote() {
     } else {
       openBrowserOnce(htmlFileName);
     }
+
+    setNotesCounter();
 
     qDebug() << "Preview note completed";
     watcher->deleteLater();
@@ -456,6 +458,8 @@ void Notes::openNotes() {
   isPasswordError = false;
   isWebDAVError = false;
   isGetWebDavModiTime = false;
+
+  loadNotesCounter();
 
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     m_Method->showInfoWindow(tr("Processing..."));
@@ -914,3 +918,116 @@ void Notes::openNotesUI() {
 }
 
 void Notes::editNote() { openEditUI(); }
+
+// ========== 加载 ==========
+void Notes::loadNotesCounter() {
+  m_counterMap.clear();
+  QString file = privateDir + "notes_counter.json";
+
+  QFile f(file);
+  if (!f.open(QIODevice::ReadOnly)) return;
+
+  QJsonParseError err;
+  QJsonDocument doc = QJsonDocument::fromJson(f.readAll(), &err);
+  f.close();
+
+  if (err.error != QJsonParseError::NoError || !doc.isObject()) return;
+
+  QJsonObject root = doc.object();
+  for (auto it = root.begin(); it != root.end(); ++it) {
+    QJsonObject obj = it.value().toObject();
+    NoteCounterItem item;
+    item.count = static_cast<int64_t>(obj["count"].toDouble());
+    item.last = static_cast<int64_t>(obj["last"].toDouble());
+    m_counterMap.insert(it.key(), item);
+  }
+
+  // ⭐ 清理移除已不存在的文件记录
+  QMutableHashIterator<QString, NoteCounterItem> cleanupIt(m_counterMap);
+  while (cleanupIt.hasNext()) {
+    cleanupIt.next();
+    if (!QFile::exists(cleanupIt.key())) {
+      cleanupIt.remove();
+    }
+  }
+}
+
+// ========== 累计（核心逻辑）==========
+void Notes::setNotesCounter() {
+  QString m_currentMdId = currentMDFile;
+  if (m_currentMdId.isEmpty()) return;
+
+  int64_t now = QDateTime::currentSecsSinceEpoch();
+
+  auto it = m_counterMap.find(m_currentMdId);
+  if (it != m_counterMap.end()) {
+    // ⭐ 防重复：30秒内同文件只计1次
+    if (now - it->last < 30) return;
+    it->count++;
+    it->last = now;
+  } else {
+    // 首次访问
+    m_counterMap.insert(m_currentMdId, {1, now});
+  }
+}
+
+// ========== 保存 ==========
+void Notes::saveNotesCounter() {
+  QJsonObject root;
+  for (auto it = m_counterMap.constBegin(); it != m_counterMap.constEnd();
+       ++it) {
+    QJsonObject obj;
+    obj["count"] = static_cast<double>(it->count);
+    obj["last"] = static_cast<double>(it->last);
+    root[it.key()] = obj;
+  }
+
+  QString file = privateDir + "notes_counter.json";
+  QFile f(file);
+  if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+    f.write(QJsonDocument(root).toJson(QJsonDocument::Compact));
+    f.close();
+  }
+}
+
+void Notes::refreshRecentOpenByCounter() {
+  m_NotesList->listRecentOpen.clear();
+
+  // 1. 将 Hash 转为可排序的 List
+  QList<QPair<QString, NoteCounterItem>> sortedList;
+  sortedList.reserve(m_counterMap.size());
+
+  for (auto it = m_counterMap.constBegin(); it != m_counterMap.constEnd();
+       ++it) {
+    sortedList.append({it.key(), it.value()});
+  }
+
+  // 2. 按 count 降序排列；count 相同时按 last 降序（最近操作的优先）
+  std::sort(sortedList.begin(), sortedList.end(),
+            [](const QPair<QString, NoteCounterItem>& a,
+               const QPair<QString, NoteCounterItem>& b) {
+              if (a.second.count != b.second.count)
+                return a.second.count > b.second.count;
+              return a.second.last > b.second.last;
+            });
+
+  // 3. 组装列表，最多保留50条
+  for (const auto& pair : sortedList) {
+    if (m_NotesList->listRecentOpen.count() >= 50) break;
+
+    const QString& mdFile = pair.first;
+
+    // 跳过已不存在的文件（可选，防止删除笔记后残留）
+    if (!QFile::exists(mdFile)) continue;
+
+    QString title = m_Notes->m_NoteManager->getNoteTitle(mdFile);
+    QString strmd = mdFile;
+    strmd = strmd.replace(iniDir, "").trimmed();
+
+    m_NotesList->listRecentOpen.append(title + "===" + strmd);
+  }
+
+  // 4. 兜底去重（理论上计数器key唯一不会重复）
+  m_NotesList->listRecentOpen =
+      m_Method->removeDuplicatesFromQStringList(m_NotesList->listRecentOpen);
+}
