@@ -309,7 +309,7 @@ public class MyActivity
 
     public void setDark(boolean dark) {
         isDark = dark;
-        //updateStatusBarColor();
+        updateSystemBars();
     }
 
     // ------------------------------------------------------------------------
@@ -492,6 +492,10 @@ public class MyActivity
 
                     //hideQtSplashScreen(); // 主动隐藏闪屏
                 }
+
+                // ✅ 首次创建时同步状态栏
+                updateSystemBars();
+
             } catch (Exception e) {
                 Log.e(TAG, "初始化异常", e);
             }
@@ -741,7 +745,7 @@ public class MyActivity
         System.out.println("onResume...");
         super.onResume();
 
-        //updateStatusBarColor();
+        updateSystemBars();
     }
 
     @Override
@@ -2154,62 +2158,29 @@ public class MyActivity
         }
     }
 
-    private void updateStatusBarColor() {
-        Window window = getWindow();
-        WindowInsetsController insetsController = window.getInsetsController();
+    // 统一刷新：状态栏 + 导航栏（与 NoteEditor 完全对齐）
+    private void updateSystemBars() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
-        // 设置状态栏颜色
-        if (isDark) {
-            window.setStatusBarColor(Color.parseColor("#121212")); // 深色背景
-
-            // 设置状态栏文本和图标为白色（亮色）
-            if (insetsController != null) {
-                insetsController.setSystemBarsAppearance(
-                    0,
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                );
+            if (isDark) {
+                // 暗黑模式
+                window.setStatusBarColor(Color.parseColor("#19232D"));
+                window.setNavigationBarColor(Color.parseColor("#121212"));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    window.getDecorView().setSystemUiVisibility(0);
+                }
             } else {
-                window
-                    .getDecorView()
-                    .setSystemUiVisibility(
-                        window.getDecorView().getSystemUiVisibility() &
-                            ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                // 浅色模式
+                window.setStatusBarColor(Color.parseColor("#F3F3F3"));
+                window.setNavigationBarColor(Color.parseColor("#FFFFFF"));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    window.getDecorView().setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR |
+                        View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
                     );
-            }
-
-            // ========== 修复底部导航栏：暗黑模式 ==========
-            window.setNavigationBarColor(Color.parseColor("#121212"));
-            if (insetsController != null) {
-                insetsController.setSystemBarsAppearance(
-                    0,
-                    WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-                );
-            }
-        } else {
-            window.setStatusBarColor(Color.parseColor("#F3F3F3")); // 浅色背景
-
-            // 设置状态栏文本和图标为黑色（暗色）
-            if (insetsController != null) {
-                insetsController.setSystemBarsAppearance(
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                );
-            } else {
-                window
-                    .getDecorView()
-                    .setSystemUiVisibility(
-                        window.getDecorView().getSystemUiVisibility() |
-                            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                    );
-            }
-
-            // ========== 修复底部导航栏：正常模式 ==========
-            window.setNavigationBarColor(Color.parseColor("#F3F3F3"));
-            if (insetsController != null) {
-                insetsController.setSystemBarsAppearance(
-                    WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
-                    WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-                );
+                }
             }
         }
     }
