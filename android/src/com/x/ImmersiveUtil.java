@@ -1,24 +1,42 @@
 package com.x;
 
+import android.app.Activity;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-//import androidx.appcompat.app.AppCompatActivity;
-import android.app.Activity;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 public class ImmersiveUtil {
 
-    // ==================== 【一行调用：真正沉浸式】 ====================
+    // Qt主Activity硬编码配色
+    private static final int STATUS_BAR_DARK = Color.parseColor("#19232D");
+    private static final int NAV_BAR_DARK = Color.parseColor("#121212");
+    private static final int STATUS_BAR_LIGHT = Color.parseColor("#F3F3F3");
+    private static final int NAV_BAR_LIGHT = Color.parseColor("#FFFFFF");
+
+    /**
+     * 【原生Java Activity调用】原版逻辑：读取页面背景色，content设置padding避让系统栏，内容不会顶状态栏
+     */
     public static void applyRealImmersive(Activity activity) {
-        if (activity == null) return;
+        if (
+            activity == null || activity.isFinishing() || activity.isDestroyed()
+        ) return;
+        if (!Looper.getMainLooper().isCurrentThread()) {
+            new Handler(Looper.getMainLooper()).post(() ->
+                applyRealImmersive(activity)
+            );
+            return;
+        }
+
         Window window = activity.getWindow();
         if (window == null) return;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // 允许自定义系统栏
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
             );
@@ -29,52 +47,97 @@ public class ImmersiveUtil {
                 WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
             );
 
-            // ========== 关键：自动读取当前页面 XML 背景色 ==========
             View rootView = activity
                 .findViewById(android.R.id.content)
                 .getRootView();
-            int bgColor = Color.BLACK; // 默认黑
+            int bgColor = Color.BLACK;
             if (rootView.getBackground() instanceof ColorDrawable) {
                 bgColor = ((ColorDrawable) rootView.getBackground()).getColor();
             }
 
-            // ========== 自动设置状态栏/导航栏颜色 ==========
             window.setStatusBarColor(bgColor);
             window.setNavigationBarColor(bgColor);
 
-            // ========== 自动判断文字颜色（深底白字 / 浅底黑字） ==========
             boolean isDark = isDarkColor(bgColor);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                if (isDark) {
-                    window.getDecorView().setSystemUiVisibility(0);
-                } else {
-                    window
-                        .getDecorView()
-                        .setSystemUiVisibility(
-                            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR |
-                                View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                        );
-                }
-            }
+            WindowInsetsControllerCompat controller =
+                new WindowInsetsControllerCompat(window, window.getDecorView());
+            controller.setAppearanceLightStatusBars(!isDark);
+            controller.setAppearanceLightNavigationBars(!isDark);
         }
 
-        // ========== 自动内边距避让（不顶状态栏） ==========
-        activity
-            .findViewById(android.R.id.content)
-            .setOnApplyWindowInsetsListener((v, insets) -> {
-                int top = insets.getSystemWindowInsetTop();
-                int bottom = insets.getSystemWindowInsetBottom();
-                v.setPadding(0, top, 0, bottom);
-                return insets;
-            });
+        // ========== 仅原生Activity执行：给content设置padding避让系统栏 ==========
+        View contentView = activity.findViewById(android.R.id.content);
+        if (contentView != null) {
+            // 使用View单tag标记是否已经安装insets listener
+            if (contentView.getTag() == null) {
+                contentView.setTag(Boolean.TRUE);
+                contentView.setOnApplyWindowInsetsListener((v, insets) -> {
+                    v.setPadding(
+                        0,
+                        insets.getSystemWindowInsetTop(),
+                        0,
+                        insets.getSystemWindowInsetBottom()
+                    );
+                    return insets;
+                });
+            }
+        }
     }
 
-    // ==================== 判断颜色深浅 ====================
+    /**
+     * 【Qt MyActivity专用调用】双参数版本：只设置系统栏颜色+图标，完全跳过content padding/insets逻辑，Qt自己处理渲染避让
+     * @param activity Qt主Activity
+     * @param isAppDark 应用暗黑模式开关
+     */
+    public static void applyRealImmersive(
+        Activity activity,
+        boolean isAppDark
+    ) {
+        if (
+            activity == null || activity.isFinishing() || activity.isDestroyed()
+        ) return;
+        if (!Looper.getMainLooper().isCurrentThread()) {
+            new Handler(Looper.getMainLooper()).post(() ->
+                applyRealImmersive(activity, isAppDark)
+            );
+            return;
+        }
+
+        Window window = activity.getWindow();
+        if (window == null) return;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+            );
+            window.clearFlags(
+                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
+            );
+            window.clearFlags(
+                WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
+            );
+
+            window.setStatusBarColor(
+                isAppDark ? STATUS_BAR_DARK : STATUS_BAR_LIGHT
+            );
+            window.setNavigationBarColor(
+                isAppDark ? NAV_BAR_DARK : NAV_BAR_LIGHT
+            );
+        }
+
+        WindowInsetsControllerCompat controller =
+            new WindowInsetsControllerCompat(window, window.getDecorView());
+        controller.setAppearanceLightStatusBars(!isAppDark);
+        controller.setAppearanceLightNavigationBars(!isAppDark);
+
+        // !!! Qt分支：绝不执行contentView的OnApplyWindowInsetsListener，不修改content padding，完全交给Qt内部处理
+    }
+
     private static boolean isDarkColor(int color) {
         float r = Color.red(color) / 255f;
         float g = Color.green(color) / 255f;
         float b = Color.blue(color) / 255f;
-        float luminance = (0.299f * r) + (0.587f * g) + (0.114f * b);
+        float luminance = 0.299f * r + 0.587f * g + 0.114f * b;
         return luminance <= 0.5f;
     }
 }

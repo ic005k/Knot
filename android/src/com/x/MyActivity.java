@@ -309,6 +309,9 @@ public class MyActivity
 
     public void setDark(boolean dark) {
         isDark = dark;
+        //updateSystemBars();
+        // 使用重载版本，传入当前应用的暗黑状态
+        ImmersiveUtil.applyRealImmersive(this, isDark);
     }
 
     // ------------------------------------------------------------------------
@@ -450,8 +453,6 @@ public class MyActivity
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             // 仅在主线程执行初始化（避免JNI跨线程问题）
             try {
-                updateSystemBars();
-
                 // 权限请求（仅首次创建执行）
                 if (!isConfigChangeRecreate) {
                     requestPermission();
@@ -494,8 +495,8 @@ public class MyActivity
                     //hideQtSplashScreen(); // 主动隐藏闪屏
                 }
 
-
-
+                // updateSystemBars();
+                ImmersiveUtil.applyRealImmersive(this, isDark);
             } catch (Exception e) {
                 Log.e(TAG, "初始化异常", e);
             }
@@ -745,7 +746,8 @@ public class MyActivity
         System.out.println("onResume...");
         super.onResume();
 
-        updateSystemBars();
+        //updateSystemBars();
+        ImmersiveUtil.applyRealImmersive(this, isDark);
     }
 
     @Override
@@ -2164,7 +2166,9 @@ public class MyActivity
         runOnUiThread(() -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 Window window = getWindow();
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                window.addFlags(
+                    WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+                );
 
                 if (isDark) {
                     window.setStatusBarColor(Color.parseColor("#19232D"));
@@ -2176,10 +2180,12 @@ public class MyActivity
                     window.setStatusBarColor(Color.parseColor("#F3F3F3"));
                     window.setNavigationBarColor(Color.parseColor("#FFFFFF"));
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        window.getDecorView().setSystemUiVisibility(
-                            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR |
-                            View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                        );
+                        window
+                            .getDecorView()
+                            .setSystemUiVisibility(
+                                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR |
+                                    View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                            );
                     }
                 }
             }
