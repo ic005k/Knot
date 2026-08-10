@@ -1,4 +1,5 @@
 #include "NotesList.h"
+#include "src/MainWindow.h"
 
 QStringList NotesList::getRecycleNoteFiles() {
   QStringList cycleFiles;

@@ -2,6 +2,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include "src/MainWindow.h"
 #include "src/Notes/Notes.h"
 
 void Notes::updateDiff(const QString& oldText, const QString& newText) {

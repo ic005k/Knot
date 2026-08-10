@@ -6,6 +6,8 @@
 #include <QResizeEvent>
 #include <cmath>
 
+#include "src/defines.h"
+
 Speedometer::Speedometer(QWidget* parent) : QWidget(parent) {
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   setMinimumSize(300, 120);

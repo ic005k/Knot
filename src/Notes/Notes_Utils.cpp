@@ -1,3 +1,4 @@
+#include "src/MainWindow.h"
 #include "src/Notes/Notes.h"
 
 QString Notes::getDateTimeStr() {

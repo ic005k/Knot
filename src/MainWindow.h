@@ -65,7 +65,13 @@
 #include <QTreeWidgetItem>
 #include <QValueAxis>
 
+#include "Comm/ui_ShowMessage.h"
+#include "Exercise/ui_StepsOptions.h"
 #include "MainHelper.h"
+#include "Notes/ui_Notes.h"
+#include "Notes/ui_NotesList.h"
+#include "Todo/ui_Todo.h"
+#include "Todo/ui_TodoAlarm.h"
 #include "src/AboutThis.h"
 #include "src/CategoryList.h"
 #include "src/CloudBackup.h"
@@ -92,13 +98,7 @@
 #include "ui_CloudBackup.h"
 #include "ui_DateSelector.h"
 #include "ui_MainWindow.h"
-#include "Notes/ui_Notes.h"
-#include "Notes/ui_NotesList.h"
 #include "ui_Preferences.h"
-#include "Comm/ui_ShowMessage.h"
-#include "Exercise/ui_StepsOptions.h"
-#include "Todo/ui_Todo.h"
-#include "Todo/ui_TodoAlarm.h"
 
 class SaveThread;
 class ReadChartThread;
@@ -110,6 +110,7 @@ class SearchThread;
 class UpdateGpsMapThread;
 class GetGpsDataThread;
 class SliderButton;
+class Method;
 
 class SearchWorker : public QObject {
   Q_OBJECT
@@ -624,7 +625,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnBack_NotesSearchResult_clicked();
 
-  void on_btnOpenSearchResult_clicked();
+  void on_btnOpenSearchEdit_clicked();
 
   void on_btnEditNote_clicked();
 
@@ -993,6 +994,8 @@ class MainWindow : public QMainWindow {
   void on_btnOpenFavoritesView_clicked();
 
   void on_btnClearTitleKey_clicked();
+
+  void on_btnOpenSearchView_clicked();
 
  private:
   QNetworkAccessManager* m_ainetMgr;

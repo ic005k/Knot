@@ -1,6 +1,6 @@
 #include "AutoUpdate.h"
 
-#include "MainWindow.h"
+// #include "MainWindow.h"
 #include "src/defines.h"
 #include "ui_AutoUpdate.h"
 

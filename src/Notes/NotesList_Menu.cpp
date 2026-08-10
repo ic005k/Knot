@@ -1,5 +1,6 @@
 #include "NotesList.h"
 #include "src/AI/VectorDb.h"
+#include "src/MainWindow.h"
 
 void NotesList::genRecentOpenMenu() {
   menuRecentOpen = new QMenu(this);

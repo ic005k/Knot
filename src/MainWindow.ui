@@ -7795,7 +7795,7 @@ QSlider::handle:horizontal:disabled {
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="btnOpenSearchResult">
+          <widget class="QToolButton" name="btnOpenSearchView">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -7803,7 +7803,20 @@ QSlider::handle:horizontal:disabled {
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Open Search Result</string>
+            <string>View</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btnOpenSearchEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Edit</string>
            </property>
           </widget>
          </item>

@@ -1,5 +1,6 @@
 #include "NotesList.h"
 #include "src/AI/EmbeddingEngine.h"
+#include "src/MainWindow.h"
 
 // 文件搜索实现
 QStringList findMarkdownFiles(const QString& dirPath) {

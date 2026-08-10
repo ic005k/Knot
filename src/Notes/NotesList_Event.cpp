@@ -1,4 +1,5 @@
 #include "NotesList.h"
+#include "src/MainWindow.h"
 
 // 节点双击事件处理（打开对应的笔记）
 void NotesList::onNoteNodeDoubleClicked(const QString& filePath) {

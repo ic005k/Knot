@@ -11,6 +11,8 @@
 #include <QThread>
 #include <QtGlobal>
 #include <iostream>
+
+#include "defines.h"
 #ifdef Q_OS_ANDROID
 #include <android/log.h>
 #endif

@@ -5,8 +5,6 @@
 #include <QMutex>
 #include <QString>
 
-#include "defines.h"
-
 class AppLogger {
  public:
   static AppLogger& instance();
@@ -18,7 +16,8 @@ class AppLogger {
   QString getTodayLogText();
 
   void copyTodayLogToClipboard();
-  private:
+
+ private:
   AppLogger();
   ~AppLogger();
   AppLogger(const AppLogger&) = delete;

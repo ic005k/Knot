@@ -5,8 +5,6 @@
 #include <QLinearGradient>
 #include <QPropertyAnimation>
 #include <QWidget>
-// 引入明暗模式全局变量头文件
-#include "src/defines.h"
 
 class Speedometer : public QWidget {
   Q_OBJECT

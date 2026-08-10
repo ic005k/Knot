@@ -36,12 +36,10 @@
 #include "VectorSearchService.h"
 #include "src/AI/GlobalAI.h"
 #include "src/Comm/TextEditToolbar.h"
-#include "src/MainWindow.h"
 #include "src/Notes/MoveTo.h"
 #include "src/Notes/NoteGraph.h"
 #include "src/Notes/NoteListModel.h"
 #include "src/defines.h"
-
 #include "ui_MoveTo.h"
 #include "ui_NotesList.h"
 

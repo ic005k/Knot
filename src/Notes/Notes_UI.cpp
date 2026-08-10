@@ -1,5 +1,5 @@
 
-
+#include "src/MainWindow.h"
 #include "src/Notes/Notes.h"
 
 // 按钮点击

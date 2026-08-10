@@ -1,4 +1,5 @@
 #include "NotesList.h"
+#include "src/MainWindow.h"
 
 void NotesList::initNoteGraphView() {
   // 1. 先初始化图谱组件（注册QML类型和单例）

@@ -1,4 +1,5 @@
 #include "NotesList.h"
+#include "src/MainWindow.h"
 
 void NotesList::delRemoteWebDAVFiles() {
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {

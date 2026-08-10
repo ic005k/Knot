@@ -56,7 +56,6 @@
 
 #include "TitleGenerator.h"
 #include "src/Comm/ShowMessage.h"
-#include "src/MainWindow.h"
 #include "src/Notes/ColorDialog.h"
 #include "src/Notes/NoteDiffManager.h"
 #include "src/Notes/NoteManager.h"
@@ -244,7 +243,8 @@ class Notes : public QDialog {
   void saveNotesCounter();
   void loadNotesCounter();
   void refreshRecentOpenByCounter();
-  protected:
+
+ protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;

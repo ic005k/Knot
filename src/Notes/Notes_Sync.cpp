@@ -1,6 +1,7 @@
 #include <QFutureWatcher>
 #include <QtConcurrent>
 
+#include "src/MainWindow.h"
 #include "src/Notes/Notes.h"
 
 void Notes::syncToWebDAV() {
@@ -127,9 +128,8 @@ void Notes::startBackgroundTaskDelAndClear() {
   if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
     mw_one->showProgress();
 
-    QFuture<void> future = QtConcurrent::run([=]() {
-      m_NotesList->needDelNotes();
-    });
+    QFuture<void> future =
+        QtConcurrent::run([=]() { m_NotesList->needDelNotes(); });
 
     QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
     connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {

@@ -7,6 +7,7 @@
 #include "src/AI/EmbeddingEngine.h"
 #include "src/AI/GlobalAI.h"
 #include "src/AI/VectorDb.h"
+#include "src/MainWindow.h"
 #include "src/Notes/MarkdownChunker.h"
 #include "src/Notes/Notes.h"
 

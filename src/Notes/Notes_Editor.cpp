@@ -3,6 +3,7 @@
 
 #include <QFontDatabase>
 
+#include "src/MainWindow.h"
 #include "src/Notes/Notes.h"
 
 void Notes::initEditor() {

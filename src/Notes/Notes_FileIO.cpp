@@ -2,6 +2,7 @@
 #include <QFileInfo>
 #include <QSaveFile>
 
+#include "src/MainWindow.h"
 #include "src/Notes/Notes.h"
 
 void Notes::saveMDFile() {

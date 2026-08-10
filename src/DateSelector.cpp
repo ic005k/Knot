@@ -3,7 +3,6 @@
 #include "MainWindow.h"
 #include "src/defines.h"
 #include "ui_DateSelector.h"
-// #include "ui_MainWindow.h"
 
 DateSelector::DateSelector(QWidget* parent)
     : QDialog(parent), ui(new Ui::DateSelector) {

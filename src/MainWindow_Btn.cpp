@@ -756,13 +756,23 @@ void MainWindow::on_btnClearSearchResults_clicked() {
   mui->editNotesSearch->setFocus();
 }
 
-void MainWindow::on_btnOpenSearchResult_clicked() {
+void MainWindow::on_btnOpenSearchEdit_clicked() {
   QString mdFile = m_NotesList->getSearchResultQmlFile();
   if (!QFile::exists(mdFile)) return;
   isOpenSearchResult = true;
   currentMDFile = mdFile;
 
   on_btnEditNote_clicked();
+  m_NotesList->setCurrentItemFromMDFile(mdFile);
+}
+
+void MainWindow::on_btnOpenSearchView_clicked() {
+  QString mdFile = m_NotesList->getSearchResultQmlFile();
+  if (!QFile::exists(mdFile)) return;
+
+  currentMDFile = mdFile;
+
+  m_Notes->previewNote();
   m_NotesList->setCurrentItemFromMDFile(mdFile);
 }
 

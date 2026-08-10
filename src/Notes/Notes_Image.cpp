@@ -1,6 +1,7 @@
 #include <QFileDialog>
 #include <QRandomGenerator>
 
+#include "src/MainWindow.h"
 #include "src/Notes/Notes.h"
 
 void Notes::on_btnPic_clicked() {

@@ -1,4 +1,6 @@
+#include "src/MainWindow.h"
 #include "src/Notes/Notes.h"
+
 #ifdef Q_OS_ANDROID
 #include <QJniObject>
 
