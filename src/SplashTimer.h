@@ -19,13 +19,12 @@ class SplashTimer : public QSplashScreen {
   Q_OBJECT
 
  public:
-  // 新增 isDark 参数，默认为 false
   explicit SplashTimer(bool isAndroid = false, bool isDark = false,
                        int width = 600, int height = 300,
                        Qt::WindowFlags flags = Qt::WindowFlags())
       : QSplashScreen(QPixmap(), flags),
         m_isAndroid(isAndroid),
-        m_isDark(isDark),  // 初始化暗黑模式标记
+        m_isDark(isDark),
         m_width(width),
         m_height(height),
         m_animationTimer(nullptr),
@@ -51,7 +50,7 @@ class SplashTimer : public QSplashScreen {
 
  private:
   bool m_isAndroid;
-  bool m_isDark;  // 新增：暗黑模式标记
+  bool m_isDark;
   int m_width;
   int m_height;
   qreal m_dpr;
@@ -60,7 +59,7 @@ class SplashTimer : public QSplashScreen {
   QColor m_textColor;
   QColor m_highlightColor;
   QColor m_shadowColor;
-  QColor m_gridColor;  // 新增：网格线颜色独立管理
+  QColor m_gridColor;
   QPixmap m_basePixmap;
   qreal m_fontSize;
   const qreal m_maxFontRatio = 0.25;
@@ -74,7 +73,10 @@ class SplashTimer : public QSplashScreen {
     initStyle();
     drawBaseBackground();
     setFixedSize(m_targetSize / m_dpr);
+
+    // ✅ 关键属性：防止系统绘制默认背景导致闪烁
     setAttribute(Qt::WA_TranslucentBackground);
+    setAttribute(Qt::WA_NoSystemBackground, true);
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
 
     if (m_isAndroid) {
@@ -113,15 +115,17 @@ class SplashTimer : public QSplashScreen {
     m_fontSize = qMax(m_fontSize, 40.0 * m_dpr);
   }
 
-  // 核心修改：根据 isDark 分支设置颜色
+  // ✅ 颜色严格对齐 Android 端的 styles.xml
   void initStyle() {
     if (m_isDark) {
+      // 对应 Android values-night: #1E1E23
       m_bgColor = QColor(30, 30, 35);
       m_textColor = QColor(200, 210, 225);
       m_highlightColor = QColor(100, 180, 240);
       m_shadowColor = QColor(0, 0, 0, 160);
       m_gridColor = QColor(255, 255, 255, 18);
     } else {
+      // 对应 Android values: #F0F2F5
       m_bgColor = QColor(240, 242, 245);
       m_textColor = QColor(52, 73, 94);
       m_highlightColor = QColor(41, 128, 185);
@@ -130,25 +134,17 @@ class SplashTimer : public QSplashScreen {
     }
   }
 
-  // 核心修改：使用成员变量替代硬编码颜色
   void drawBaseBackground() {
     m_basePixmap = QPixmap(m_targetSize);
+
+    // ✅ 核心修改：纯色填充，与 Android windowSplashScreenBackground 严格一致
+    // 删除了之前的 QLinearGradient，因为渐变会导致交接瞬间产生色带断裂感
     m_basePixmap.fill(m_bgColor);
 
     QPainter painter(&m_basePixmap);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    QLinearGradient gradient(0, 0, 0, m_targetSize.height());
-    if (m_isDark) {
-      gradient.setColorAt(0, QColor(30, 30, 35));
-      gradient.setColorAt(1, QColor(20, 20, 25));
-    } else {
-      gradient.setColorAt(0, QColor(240, 242, 245));
-      gradient.setColorAt(1, QColor(220, 225, 235));
-    }
-    painter.fillRect(m_basePixmap.rect(), gradient);
-
-    // 使用独立的网格颜色
+    // 绘制网格线
     painter.setPen(QPen(m_gridColor, 1));
     int gridSize = 20 * m_dpr;
     for (int x = 0; x < m_targetSize.width(); x += gridSize) {
@@ -179,7 +175,6 @@ class SplashTimer : public QSplashScreen {
       drawHorizontalKNOT(painter, displayPix);
     }
 
-    // drawGlowEffect(painter, displayPix.rect());
     painter.end();
 
     displayPix.setDevicePixelRatio(m_dpr);
@@ -189,7 +184,6 @@ class SplashTimer : public QSplashScreen {
 
   void drawGlowEffect(QPainter& painter, const QRect& rect) {
     QLinearGradient glowGradient(0, 0, 0, rect.height());
-    // 暗黑模式下高光更柔和
     QColor glowColor =
         m_isDark ? QColor(100, 180, 240, 15) : QColor(41, 128, 185, 20);
     glowGradient.setColorAt(0, glowColor);
@@ -238,12 +232,10 @@ class SplashTimer : public QSplashScreen {
     painter.translate(-letterRect.center());
     painter.setOpacity(opacity);
 
-    // 阴影使用 m_shadowColor（已在 initStyle 中适配）
     painter.setPen(QPen(m_shadowColor, 1));
     painter.setBrush(Qt::NoBrush);
     painter.drawText(QPointF(charX + 2 * m_dpr, charBaseY + 2 * m_dpr), letter);
 
-    // 文字渐变使用 m_highlightColor 和 m_textColor（已在 initStyle 中适配）
     QLinearGradient textGradient(letterRect.topLeft(),
                                  letterRect.bottomRight());
     textGradient.setColorAt(0, m_highlightColor);
