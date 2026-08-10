@@ -4,7 +4,6 @@
 
 #include "MainWindow.h"
 #include "src/defines.h"
-// #include "ui_MainWindow.h"
 #include "ui_Preferences.h"
 
 QFont::Weight readerFontWeight;
@@ -1079,13 +1078,18 @@ void Preferences::initLocalModelList() {
 void Preferences::on_cboxModel_currentTextChanged(const QString& arg1) {
   Q_UNUSED(arg1);
   if (this->isVisible()) {
+    ui->btnSelectModel->setEnabled(false);
+
     releaseGlobalAiEngine();
 
     modelFileName = arg1;
     modelFingerprint = computeModelFingerprint(modelFullPath + modelFileName);
     ui->lblModelTip->setText(modelFingerprint);
     int value = init_main_ai();
-    if (value == 1) return;
+    if (value == 1) {
+      ui->btnSelectModel->setEnabled(true);
+      return;
+    }
 
     isLocalAIModel = initGlobalAiEngine();
     ui->lblModelStatus->setText(modelStatus);
@@ -1096,6 +1100,8 @@ void Preferences::on_cboxModel_currentTextChanged(const QString& arg1) {
     } else {
       qCritical() << "模型切换失败";
     }
+
+    ui->btnSelectModel->setEnabled(true);
   }
 }
 

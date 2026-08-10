@@ -416,7 +416,11 @@ void loadTheme(bool isDark) {
 
   // 遍历控件刷新字体（仅字体大小变化时执行）
   if (qApp) {
-    if (!mw_one) return;
+    SliderButton* m_sliderButton;
+    if (mw_one) {
+      m_sliderButton = mw_one->m_MainHelper->sliderButton;
+    } else
+      return;
 
     foreach (QWidget* widget, qApp->allWidgets()) {
       if (widget != mui->btnMenu && widget != mui->btnHome &&
@@ -432,8 +436,7 @@ void loadTheme(bool isDark) {
           widget != mui->btn8 && widget != mui->btn9 && widget != mui->btnDot &&
           widget != mui->btnDel_Number && widget != mui->lblMonthSum &&
           widget != mui->lblTime && widget != mui->lblGpsInfo &&
-          widget != m_Steps->m_speedometer &&
-          widget != mw_one->m_MainHelper->sliderButton &&
+          widget != m_Steps->m_speedometer && widget != m_sliderButton &&
           widget != mui->lblGpsDateTime && widget != mui->btnPages &&
           widget != mui->lblBookName && widget != mui->lblNoteBook &&
           widget != mui->lblNoteList && widget != mui->lblSyncNote &&
@@ -728,8 +731,7 @@ int clearLockFiles(const QString& iniDir) {
 
 int init_main_ai() {
   // ✅ 静态链接模式下，必须显式调用此函数注册 CPU 后端
-  // ggml_backend_load_all() 对静态链接无效！
-  ggml_backend_cpu_init();  // ← 关键！替代 ggml_backend_load_all()
+  ggml_backend_cpu_init();
 
   llama_backend_init();
 

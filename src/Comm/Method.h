@@ -1,13 +1,13 @@
 #ifndef METHOD_H
 #define METHOD_H
 
+#include <openssl/err.h>
+#include <openssl/evp.h>
+#include <openssl/rand.h>
 #include <quazip.h>
 #include <quazipfile.h>
 #include <quazipnewinfo.h>
 #include <unzip.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/rand.h>
 #include <zlib.h>
 
 #include <QAbstractSocket>
@@ -59,8 +59,8 @@
 #include <QTreeWidgetItem>
 #include <QWidget>
 
-#include "src/Comm/TextEditToolbar.h"
 #include "src/Comm/EnhancedColorPicker.h"
+#include "src/Comm/TextEditToolbar.h"
 
 struct SearchItem {
   QString tabName;
@@ -330,8 +330,6 @@ class Method : public QDialog {
 
   int getStrWidth(const QString str);
 
-  void set_ToolButtonStyle2(QObject* parent);
-
   QString getText2(QQuickWidget* qw, int index);
   QString getText1(QQuickWidget* qw, int index);
 
@@ -495,10 +493,11 @@ class Method : public QDialog {
 
   void safeCloseInfoWindow(Method* m);
 
-  QString escapeAllHtml(const QString &src);
+  QString escapeAllHtml(const QString& src);
   void setLocalAIModelEnabled(bool isLocalAI);
   void setAIAPIEnabled(bool isAIAPI);
-  protected:
+
+ protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

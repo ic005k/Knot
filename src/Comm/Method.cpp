@@ -1080,15 +1080,6 @@ void Method::setDark(bool dark) {
 #endif
 }
 
-void Method::set_ToolButtonStyle2(QObject* parent) {
-  QObjectList btnList = getAllToolButton(getAllUIControls(parent));
-  for (int i = 0; i < btnList.count(); i++) {
-    QToolButton* btn = (QToolButton*)btnList.at(i);
-    setToolButtonQss(btn, 5, 3, "#009999", "#FFFFFF", "#009999", "#FFFFFF",
-                     "#009090", "#EEEEEE");
-  }
-}
-
 QString Method::setToolButtonQss(QToolButton* btn, int radius, int padding,
                                  const QString& normalColor,
                                  const QString& normalTextColor,
@@ -1097,16 +1088,39 @@ QString Method::setToolButtonQss(QToolButton* btn, int radius, int padding,
                                  const QString& pressedColor,
                                  const QString& pressedTextColor) {
   QStringList list;
-  list.append(QString("QToolButton{border-style:none;padding:%1px;border-"
-                      "radius:%2px;color:%3;background:%4;}")
+
+  // 普通状态
+  list.append(QString("QToolButton{"
+                      "border-style:none;"
+                      "padding:%1px;"
+                      "border-radius:%2px;"
+                      "color:%3;"
+                      "background:%4;"
+                      "}")
                   .arg(QString::number(padding), QString::number(radius),
                        normalTextColor, normalColor));
 
-  list.append(QString("QToolButton:hover{color:%1;background:%2;}")
+  // ✅ hover：只对启用的按钮生效 :!disabled
+  list.append(QString("QToolButton:hover:!disabled{"
+                      "color:%1;"
+                      "background:%2;"
+                      "}")
                   .arg(hoverTextColor, hoverColor));
 
-  list.append(QString("QToolButton:pressed{color:%1;background:%2;}")
+  // ✅ pressed：只对启用的按钮生效 :!disabled
+  list.append(QString("QToolButton:pressed:!disabled{"
+                      "color:%1;"
+                      "background:%2;"
+                      "}")
                   .arg(pressedTextColor, pressedColor));
+
+  const QString& disabledColor = "#CCCCCC";
+  const QString& disabledTextColor = "#999999";
+  list.append(QString("QToolButton:disabled{"
+                      "color:%1;"
+                      "background:%2;"
+                      "}")
+                  .arg(disabledTextColor, disabledColor));
 
   QString qss = list.join("");
   btn->setStyleSheet(qss);

@@ -405,7 +405,7 @@ void NoteRelationParser::buildCacheFromNodes(
 
 // ---------- 增量更新缓存（笔记保存后调用）----------
 void NoteRelationParser::updateNoteCache(const QString& filePath) {
-  QtConcurrent::run([=]() {
+  (void)QtConcurrent::run([=]() {
     QVector<NoteNode> nodes;
     QVector<NoteRelation> relations;
     nodes.append(NoteNode({}, filePath, true));
