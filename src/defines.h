@@ -140,17 +140,16 @@ inline void TextEditToFile(QTextEdit* txtEdit, QString fileName);
 inline int deleteDirfile(QString dirName);
 inline QString getTextEditLineText(QTextEdit* txtEdit, int i);
 inline bool StringToFile(QString buffers, QString fileName);
-inline bool unzipToDir(const QString& zipPath, const QString& destDir);
-QString markdownToHtmlWithMath(const QString& md);
-inline int deleteDirfile(QString dirName);
-WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
-                              const QString& password);
 inline void closeTextToolBar();
 inline void initTextToolbarDynamic(QWidget* parent);
-
 inline QString computeModelFingerprint(const QString& modelPath);
 
-void closeTextToolBar() {
+bool unzipToDir(const QString& zipPath, const QString& destDir);
+QString markdownToHtmlWithMath(const QString& md);
+WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
+                              const QString& password);
+
+inline void closeTextToolBar() {
   if (textToolbar != nullptr && textToolbar->isVisible()) {
     textToolbar->hide();
   }
@@ -160,7 +159,7 @@ void closeTextToolBar() {
   }
 }
 
-void initTextToolbarDynamic(QWidget* parent) {
+inline void initTextToolbarDynamic(QWidget* parent) {
   if (textToolbarDynamic != nullptr) {
     textToolbarDynamic->deleteLater();
     textToolbarDynamic = nullptr;
@@ -168,7 +167,7 @@ void initTextToolbarDynamic(QWidget* parent) {
   textToolbarDynamic = new TextEditToolbar(parent);
 }
 
-QString loadText(QString textFile) {
+inline QString loadText(QString textFile) {
   bool isExists = QFile(textFile).exists();
   if (isExists) {
     QFile file(textFile);
@@ -186,7 +185,7 @@ QString loadText(QString textFile) {
   return "";
 }
 
-bool StringToFile(QString buffers, QString fileName) {
+inline bool StringToFile(QString buffers, QString fileName) {
   bool isValue;
   QFile* file;
   file = new QFile;
@@ -206,7 +205,7 @@ bool StringToFile(QString buffers, QString fileName) {
   return isValue;
 }
 
-void TextEditToFile(QTextEdit* txtEdit, QString fileName) {
+inline void TextEditToFile(QTextEdit* txtEdit, QString fileName) {
   QFile* file;
   file = new QFile;
   file->setFileName(fileName);
@@ -222,14 +221,14 @@ void TextEditToFile(QTextEdit* txtEdit, QString fileName) {
   delete file;
 }
 
-QString getTextEditLineText(QTextEdit* txtEdit, int i) {
+inline QString getTextEditLineText(QTextEdit* txtEdit, int i) {
   QTextBlock block = txtEdit->document()->findBlockByNumber(i);
   txtEdit->setTextCursor(QTextCursor(block));
   QString lineText = txtEdit->document()->findBlockByNumber(i).text();
   return lineText;
 }
 
-int deleteDirfile(QString dirName) {
+inline int deleteDirfile(QString dirName) {
   QDir directory(dirName);
   if (!directory.exists()) {
     return true;
@@ -262,7 +261,7 @@ int deleteDirfile(QString dirName) {
   return !error;
 }
 
-QString computeModelFingerprint(const QString& modelPath) {
+inline QString computeModelFingerprint(const QString& modelPath) {
   QFile file(modelPath);
   if (!file.open(QIODevice::ReadOnly)) {
     qWarning() << "计算模型指纹，打开模型文件失败:" << modelPath

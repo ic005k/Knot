@@ -2,6 +2,7 @@
 
 #include <QKeyEvent>
 
+#include "src/Comm/IOSCircularProgress.h"
 #include "src/MainWindow.h"
 
 Method::Method(QWidget* parent) : QDialog(parent) {
