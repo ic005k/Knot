@@ -1,8 +1,6 @@
 #include "StepsOptions.h"
 
 #include "src/MainWindow.h"
-#include "src/defines.h"
-// #include "ui_MainWindow.h"
 #include "ui_StepsOptions.h"
 
 StepsOptions::StepsOptions(QWidget* parent)

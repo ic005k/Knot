@@ -9,9 +9,7 @@
 #include "VectorDb.h"
 #include "lib/llama.cpp/ggml/include/ggml-backend.h"
 #include "lib/llama.cpp/include/llama.h"
-// #include "src/MainWindow.h"
 #include "src/defines.h"
-// #include "ui_MainWindow.h"
 
 // 全局向量引擎，统一基类无需改动
 std::unique_ptr<EmbeddingEngine> g_embEngine;

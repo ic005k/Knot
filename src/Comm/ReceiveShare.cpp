@@ -1,7 +1,6 @@
 #include "ReceiveShare.h"
 
 #include "src/MainWindow.h"
-#include "src/defines.h"
 
 ReceiveShare::ReceiveShare(QWidget* parent) : QDialog(parent) {}
 

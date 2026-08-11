@@ -1,4 +1,5 @@
 #include "Reader.h"
+#include "src/MainWindow.h"
 
 void Reader::showCatalogue() {
   closeSelText();

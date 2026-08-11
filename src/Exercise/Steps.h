@@ -42,9 +42,8 @@
 #include "src/Exercise/StepHillChart.h"
 #include "src/Exercise/StepsOptions.h"
 #include "src/Exercise/WeatherFetcher.h"
-#include "src/MainWindow.h"
-#include "src/defines.h"
 #include "src/Exercise/ui_StepsOptions.h"
+#include "src/MainWindow.h"
 
 class CustomChartView;
 

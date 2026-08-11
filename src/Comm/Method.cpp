@@ -3,7 +3,6 @@
 #include <QKeyEvent>
 
 #include "src/MainWindow.h"
-#include "src/defines.h"
 
 Method::Method(QWidget* parent) : QDialog(parent) {
   this->installEventFilter(this);

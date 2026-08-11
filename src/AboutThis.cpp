@@ -1,7 +1,6 @@
 ﻿#include "src/AboutThis.h"
 
 #include "MainWindow.h"
-#include "src/defines.h"
 #include "ui_AboutThis.h"
 
 AboutThis::AboutThis(QWidget* parent) : QDialog(parent), ui(new Ui::AboutThis) {

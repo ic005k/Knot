@@ -9,7 +9,6 @@
 #include <QVector>
 
 #include "src/Exercise/Steps.h"
-#include "src/defines.h"
 
 class CustomChartView : public QChartView {
   Q_OBJECT

@@ -1,7 +1,5 @@
 #include "Steps.h"
 
-// #include "src/ui_MainWindow.h"
-
 bool isGpsTest = false;
 
 // 常量完全同步Java优化版，无任何修改

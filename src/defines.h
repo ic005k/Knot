@@ -141,11 +141,10 @@ inline int deleteDirfile(QString dirName);
 inline QString getTextEditLineText(QTextEdit* txtEdit, int i);
 inline bool StringToFile(QString buffers, QString fileName);
 inline bool unzipToDir(const QString& zipPath, const QString& destDir);
-inline QString markdownToHtmlWithMath(const QString& md);
+QString markdownToHtmlWithMath(const QString& md);
 inline int deleteDirfile(QString dirName);
-inline WebDavHelper* listWebDavFiles(const QString& url,
-                                     const QString& username,
-                                     const QString& password);
+WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
+                              const QString& password);
 inline void closeTextToolBar();
 inline void initTextToolbarDynamic(QWidget* parent);
 

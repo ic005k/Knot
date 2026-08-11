@@ -60,7 +60,6 @@
 #include "src/Notes/NoteDiffManager.h"
 #include "src/Notes/NoteManager.h"
 #include "src/Notes/PrintPDF.h"
-#include "src/defines.h"
 #include "ui_PrintPDF.h"
 
 class MiniMap;

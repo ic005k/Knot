@@ -1,5 +1,7 @@
 #include "CustomChartView.h"
 
+#include "src/defines.h"
+
 CustomChartView::CustomChartView(QWidget* parent) : QChartView(parent) {
   // 启用鼠标跟踪，确保能捕获所有鼠标事件
   setMouseTracking(true);

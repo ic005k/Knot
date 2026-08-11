@@ -3,7 +3,6 @@
 #include <QKeyEvent>
 
 #include "MainWindow.h"
-#include "src/defines.h"
 #include "ui_Preferences.h"
 
 QFont::Weight readerFontWeight;

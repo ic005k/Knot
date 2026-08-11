@@ -3,9 +3,7 @@
 #include <qdebug.h>
 
 #include "MainWindow.h"
-#include "src/defines.h"
 #include "ui_DateSelector.h"
-// #include "ui_MainWindow.h"
 
 QTreeWidget* twOut2Img;
 QLabel *lblTotal, *lblDetails;

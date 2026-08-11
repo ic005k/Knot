@@ -1,8 +1,6 @@
 #include "ReaderSet.h"
 
 #include "src/MainWindow.h"
-#include "src/defines.h"
-// #include "ui_MainWindow.h"
 
 extern QFont::Weight readerFontWeight;
 

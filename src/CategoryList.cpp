@@ -1,9 +1,7 @@
 #include "CategoryList.h"
 
 #include "MainWindow.h"
-#include "src/defines.h"
 #include "ui_CategoryList.h"
-// #include "ui_MainWindow.h"
 
 CategoryList::CategoryList(QWidget* parent)
     : QDialog(parent), ui(new Ui::CategoryList) {

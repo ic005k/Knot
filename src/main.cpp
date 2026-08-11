@@ -25,7 +25,6 @@
 #include "MainWindow.h"
 #include "NativeMsgThread.h"
 #include "SplashTimer.h"
-#include "defines.h"
 #include "lib/llama.cpp/ggml/include/ggml-backend.h"
 #include "lib/llama.cpp/include/llama.h"
 #include "lib/quazip/quazip.h"

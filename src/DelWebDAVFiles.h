@@ -12,7 +12,6 @@
 #include <functional>
 
 #include "src/MainWindow.h"
-#include "src/defines.h"
 
 class CloudDeleter : public QObject {
   Q_OBJECT

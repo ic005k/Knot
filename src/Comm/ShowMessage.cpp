@@ -1,7 +1,6 @@
 #include "ShowMessage.h"
 
 #include "src/MainWindow.h"
-#include "src/defines.h"
 #include "ui_ShowMessage.h"
 
 ShowMessage::ShowMessage(QWidget* parent)

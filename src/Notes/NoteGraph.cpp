@@ -13,8 +13,6 @@
 #include <algorithm>
 
 #include "src/MainWindow.h"
-#include "src/defines.h"
-// #include "ui_MainWindow.h"
 
 // 链接正则：[显示文本](memo/文件名.md)
 static const QRegularExpression linkRegex(

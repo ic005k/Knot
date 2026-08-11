@@ -1,8 +1,6 @@
 #include "MainHelper.h"
 
 #include "src/MainWindow.h"
-#include "src/defines.h"
-// #include "ui_MainWindow.h"
 
 MainHelper::MainHelper(QWidget* parent) : QDialog{parent} {}
 

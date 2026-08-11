@@ -1,4 +1,5 @@
 #include "Reader.h"
+#include "src/MainWindow.h"
 
 void Reader::openMyPDF(QString uri) {
   Q_UNUSED(uri);

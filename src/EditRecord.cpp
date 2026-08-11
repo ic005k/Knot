@@ -5,8 +5,6 @@
 #include <QWidget>
 
 #include "MainWindow.h"
-#include "src/defines.h"
-// #include "ui_MainWindow.h"
 
 QStringList c_list;
 

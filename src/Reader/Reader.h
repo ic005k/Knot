@@ -32,11 +32,8 @@
 #include <QXmlStreamReader>
 #include <vector>
 
-#include "src/MainWindow.h"
 #include "src/Reader/DocumentHandler.h"
 #include "src/Reader/EpubReader.h"
-#include "src/defines.h"
-
 
 // 目录项结构体（存储章节信息）
 struct TocItem {

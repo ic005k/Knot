@@ -1,7 +1,6 @@
 #include "PrintPDF.h"
 
 #include "src/MainWindow.h"
-#include "src/defines.h"
 #include "ui_PrintPDF.h"
 
 // Qt 6 头文件适配：包含QScreen

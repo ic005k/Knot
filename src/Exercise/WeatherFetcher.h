@@ -12,8 +12,6 @@
 #include <QThread>
 #include <QUrl>
 
-// #include "src/defines.h" // 根据实际路径保留
-
 class WeatherFetcher : public QObject {
   Q_OBJECT
  public:
