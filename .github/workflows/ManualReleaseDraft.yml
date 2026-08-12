@@ -1,0 +1,66 @@
+name: Manual Release (Draft)
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: '版本号递增类型'
+        required: true
+        default: 'patch'
+        type: choice
+        options: [patch, minor, major]
+
+jobs:
+  draft-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 必须拉取完整历史，否则无法找到上一个 Tag
+
+      - name: Calculate next version
+        id: version
+        shell: bash
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "2.2.14")
+          
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_TAG"
+          MAJOR=$((10#$MAJOR)); MINOR=$((10#$MINOR)); PATCH=$((10#$PATCH))
+          
+          case "${{ github.event.inputs.bump_type }}" in
+            major) MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR+1)); PATCH=0
+                   [ "$MINOR" -gt 9 ] && { MINOR=0; MAJOR=$((MAJOR+1)); } ;;
+            *)     PATCH=$((PATCH+1))
+                   [ "$PATCH" -gt 99 ] && { PATCH=0; MINOR=$((MINOR+1));
+                     [ "$MINOR" -gt 9 ] && { MINOR=0; MAJOR=$((MAJOR+1)); }; } ;;
+          esac
+          
+          NEXT=$(printf "%d.%d.%02d" "$MAJOR" "$MINOR" "$PATCH")
+          echo "next_tag=${NEXT}" >> "$GITHUB_OUTPUT"
+          echo "✅ Next version: ${NEXT} (based on ${LATEST_TAG})"
+
+      - name: Create or reuse tag (idempotent)
+        run: |
+          TAG="${{ steps.version.outputs.next_tag }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "⚠️  Tag $TAG already exists, reusing."
+          else
+            git tag -a "$TAG" -m "Release $TAG"
+            git push origin "$TAG"
+            echo "✅ Created tag $TAG"
+          fi
+
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.next_tag }}
+          name: Release ${{ steps.version.outputs.next_tag }}
+          generate_release_notes: true  # ✨ 自动且仅收集上一个Tag到当前HEAD的提交
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
