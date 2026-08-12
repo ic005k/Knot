@@ -1293,8 +1293,6 @@ void Steps::stopRecordMotion() {
     int nMonth = QDate::currentDate().month();
     clearAllGpsList();
     loadGpsList(nYear, nMonth);
-    m_Method->gotoBegin(mui->qwGpsList);
-    m_Method->setCurrentIndexFromQW(mui->qwGpsList, 0);
 
     refreshMotionData();
 
@@ -1610,8 +1608,13 @@ void Steps::loadGpsList(int nYear, int nMonth) {
   }
 
   if (count > 0) {
-    m_Method->gotoBegin(mui->qwGpsList);
-    m_Method->setCurrentIndexFromQW(mui->qwGpsList, 0);
+    QMetaObject::invokeMethod(
+        this,
+        [this]() {
+          m_Method->gotoBegin(mui->qwGpsList);
+          m_Method->setCurrentIndexFromQW(mui->qwGpsList, 0);
+        },
+        Qt::QueuedConnection);
   }
 }
 
