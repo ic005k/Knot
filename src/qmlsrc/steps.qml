@@ -168,7 +168,7 @@ Rectangle {
             width: ListView.view.width
             height: colLayout.implicitHeight + 0
 
-            color: getText1(index) >= nStepsThreshold ? "#FFC1C1" : getColor()
+            color: getText1(index) >= nStepsThreshold ? "#C1FFC1" : getColor()
 
             border.width: isDark ? 0 : 1
             border.color: "lightgray"

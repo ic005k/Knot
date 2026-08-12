@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 必须拉取完整历史，否则无法找到上一个 Tag
+          fetch-depth: 0  # 必须拉取完整历史
 
       - name: Calculate next version
         id: version
@@ -43,6 +43,33 @@ jobs:
           echo "prev_tag=${LATEST_TAG}" >> "$GITHUB_OUTPUT"
           echo "✅ Next version: ${NEXT} (based on ${LATEST_TAG})"
 
+      # ✨ 关键：必须在打 Tag 之前执行
+      # 此时 HEAD = 你手动触发时的最新提交，prev_tag = 2.2.14
+      # 范围 2.2.14..HEAD 正好是当前发行版本与上一个版本之间的所有提交
+      - name: Generate Changelog via git log
+        id: changelog
+        shell: bash
+        run: |
+          PREV_TAG="${{ steps.version.outputs.prev_tag }}"
+
+          LOG=$(git log "${PREV_TAG}..HEAD" --pretty=format:"- %s" --no-merges)
+
+          if [ -z "$LOG" ]; then
+            LOG="- No changes recorded."
+            echo "⚠️  No new commits since ${PREV_TAG}"
+          else
+            COUNT=$(echo "$LOG" | wc -l)
+            echo "📝 Generated ${COUNT} changelog entries"
+          fi
+
+          DELIMITER="EOF_CHANGELOG_$(date +%s)"
+          echo "body<<${DELIMITER}" >> "$GITHUB_OUTPUT"
+          echo "$LOG" >> "$GITHUB_OUTPUT"
+          echo "${DELIMITER}" >> "$GITHUB_OUTPUT"
+
+          echo "$LOG" | head -20
+
+      # Changelog 已生成完毕，现在可以安全地打 Tag
       - name: Create or reuse tag (idempotent)
         run: |
           TAG="${{ steps.version.outputs.next_tag }}"
@@ -56,32 +83,12 @@ jobs:
             echo "✅ Created tag $TAG"
           fi
 
-      # ✨ 新增：显式指定 previous_tag 生成 Release Notes
-      - name: Generate Release Notes
-        id: notes
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          NOTES=$(gh api repos/${{ github.repository }}/releases/generate-notes \
-            -f tag_name="${{ steps.version.outputs.next_tag }}" \
-            -f previous_tag_name="${{ steps.version.outputs.prev_tag }}" \
-            --jq '.body')
-
-          # GitHub Actions 多行输出必须使用 delimiter 语法
-          DELIMITER="EOF_NOTES_$(date +%s)"
-          echo "body<<${DELIMITER}" >> "$GITHUB_OUTPUT"
-          echo "$NOTES" >> "$GITHUB_OUTPUT"
-          echo "${DELIMITER}" >> "$GITHUB_OUTPUT"
-
-          echo "📝 Generated notes preview:"
-          echo "$NOTES" | head -20
-
       - name: Create Draft Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.next_tag }}
           name: Release ${{ steps.version.outputs.next_tag }}
-          body: ${{ steps.notes.outputs.body }}
+          body: ${{ steps.changelog.outputs.body }}
           draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
