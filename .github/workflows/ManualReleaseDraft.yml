@@ -25,10 +25,10 @@ jobs:
         shell: bash
         run: |
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "2.2.14")
-          
+
           IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_TAG"
           MAJOR=$((10#$MAJOR)); MINOR=$((10#$MINOR)); PATCH=$((10#$PATCH))
-          
+
           case "${{ github.event.inputs.bump_type }}" in
             major) MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
             minor) MINOR=$((MINOR+1)); PATCH=0
@@ -37,9 +37,10 @@ jobs:
                    [ "$PATCH" -gt 99 ] && { PATCH=0; MINOR=$((MINOR+1));
                      [ "$MINOR" -gt 9 ] && { MINOR=0; MAJOR=$((MAJOR+1)); }; } ;;
           esac
-          
+
           NEXT=$(printf "%d.%d.%02d" "$MAJOR" "$MINOR" "$PATCH")
           echo "next_tag=${NEXT}" >> "$GITHUB_OUTPUT"
+          echo "prev_tag=${LATEST_TAG}" >> "$GITHUB_OUTPUT"
           echo "✅ Next version: ${NEXT} (based on ${LATEST_TAG})"
 
       - name: Create or reuse tag (idempotent)
@@ -55,12 +56,32 @@ jobs:
             echo "✅ Created tag $TAG"
           fi
 
+      # ✨ 新增：显式指定 previous_tag 生成 Release Notes
+      - name: Generate Release Notes
+        id: notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NOTES=$(gh api repos/${{ github.repository }}/releases/generate-notes \
+            -f tag_name="${{ steps.version.outputs.next_tag }}" \
+            -f previous_tag_name="${{ steps.version.outputs.prev_tag }}" \
+            --jq '.body')
+
+          # GitHub Actions 多行输出必须使用 delimiter 语法
+          DELIMITER="EOF_NOTES_$(date +%s)"
+          echo "body<<${DELIMITER}" >> "$GITHUB_OUTPUT"
+          echo "$NOTES" >> "$GITHUB_OUTPUT"
+          echo "${DELIMITER}" >> "$GITHUB_OUTPUT"
+
+          echo "📝 Generated notes preview:"
+          echo "$NOTES" | head -20
+
       - name: Create Draft Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.next_tag }}
           name: Release ${{ steps.version.outputs.next_tag }}
-          generate_release_notes: true  # ✨ 自动且仅收集上一个Tag到当前HEAD的提交
+          body: ${{ steps.notes.outputs.body }}
           draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
