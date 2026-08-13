@@ -50,10 +50,14 @@ void replyMessage(const QJsonObject& resp) {
 void nativeMessageLoop() {
   // 仅初始化一次标准输入、标准输出
   if (!g_stdinFile.isOpen()) {
-    g_stdinFile.open(0, QIODevice::ReadOnly);
+    if (!g_stdinFile.open(0, QIODevice::ReadOnly)) {
+      qWarning() << "Failed to open stdin:" << g_stdinFile.errorString();
+    }
   }
   if (!g_stdoutFile.isOpen()) {
-    g_stdoutFile.open(1, QIODevice::WriteOnly);
+    if (!g_stdoutFile.open(1, QIODevice::WriteOnly)) {
+      qWarning() << "Failed to open stdout:" << g_stdoutFile.errorString();
+    }
   }
 
   while (!g_stdinFile.atEnd()) {
