@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(Knot VERSION 1.0 LANGUAGES C CXX)
+project(Knot VERSION 2.2.19 LANGUAGES C CXX)
 
 # ============================================================
 # ✅ 全局 MSVC 编译选项（必须在 add_library / add_executable 之前）
@@ -189,11 +189,32 @@ qt_add_executable(${PROJECT_NAME}
     ${PLATFORM_RESOURCES}
 )
 
+# ✅ 版本注入
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/version.h.in"
+    "${CMAKE_BINARY_DIR}/generated/version.h"
+    @ONLY
+)
+target_include_directories(${PROJECT_NAME} PRIVATE
+    "${CMAKE_BINARY_DIR}/generated"
+)
+
 # --- 6.3 平台特定目标属性 ---
 if(ANDROID)
     set_target_properties(${PROJECT_NAME} PROPERTIES
         QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android"
     )
+
+    # ✅ 👇 Android 版本号从 CMake VERSION 自动获取
+    math(EXPR ANDROID_VERSION_CODE
+        "${PROJECT_VERSION_MAJOR} * 10000 + ${PROJECT_VERSION_MINOR} * 100 + ${PROJECT_VERSION_PATCH}"
+    )
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        QT_ANDROID_VERSION_NAME "${PROJECT_VERSION}"
+        QT_ANDROID_VERSION_CODE "${ANDROID_VERSION_CODE}"
+    )
+    message(STATUS "📱 Android Version: name=${PROJECT_VERSION}, code=${ANDROID_VERSION_CODE}")
+
 elseif(APPLE)
     set_target_properties(${PROJECT_NAME} PROPERTIES
         MACOSX_BUNDLE_ICON_FILE "icon.icns"

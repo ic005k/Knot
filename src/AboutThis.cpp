@@ -2,11 +2,12 @@
 
 #include "MainWindow.h"
 #include "ui_AboutThis.h"
+#include "version.h"
 
 AboutThis::AboutThis(QWidget* parent) : QDialog(parent), ui(new Ui::AboutThis) {
   ui->setupUi(this);
 
-  ver = "2.2.19";
+  ver = KNOT_VERSION_STR;  //"2.2.19";
 
   this->layout()->setContentsMargins(5, 5, 5, 5);
 

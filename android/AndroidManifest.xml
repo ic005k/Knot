@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/ tools"
     package="com.x"
     android:installLocation="auto"
-    android:versionCode="1"
-    android:versionName="2.2.19"
+    android:versionCode="-- %%INSERT_VERSION_CODE%% --"
+    android:versionName="-- %%INSERT_VERSION_NAME%% --"
 >
 
     <uses-permission android:name="android.permission.INTERNET" />
