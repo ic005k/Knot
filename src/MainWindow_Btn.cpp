@@ -1187,6 +1187,22 @@ void MainWindow::on_btnSearch_clicked() {
 void MainWindow::on_btnShowCboxList_clicked() { mui->cboxWebDAV->showPopup(); }
 
 void MainWindow::onAndroidBackHandle() {
+  // ====== 焦点重置，覆盖所有 return 路径 ======
+  // ====== 自动获取 mw_one 下所有 QQuickWidget ======
+  struct FocusGuard {
+    QList<QQuickWidget*> widgets;
+    ~FocusGuard() {
+      for (auto* w : std::as_const(widgets)) {
+        if (w && w->isVisible()) {
+          w->clearFocus();
+          w->setFocus(Qt::OtherFocusReason);
+        }
+      }
+    }
+  } focusGuard{mw_one->findChildren<QQuickWidget*>()};
+
+  ///////////////////////////////////////////////
+
   if (textToolbarDynamic != nullptr && textToolbarDynamic->isVisible()) {
     closeTextToolBar();
     return;
