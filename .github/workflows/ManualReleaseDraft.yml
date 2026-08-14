@@ -16,9 +16,11 @@ jobs:
     permissions:
       contents: write
     steps:
+      # ✅ 改动1: 显式指定 ref 为主分支，避免手动触发时 HEAD 指向旧 commit
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 必须拉取完整历史
+          fetch-depth: 0
+          ref: ${{ github.event.repository.default_branch }}
 
       - name: Calculate next version
         id: version
@@ -43,15 +45,11 @@ jobs:
           echo "prev_tag=${LATEST_TAG}" >> "$GITHUB_OUTPUT"
           echo "✅ Next version: ${NEXT} (based on ${LATEST_TAG})"
 
-      # ✨ 关键：必须在打 Tag 之前执行
-      # 此时 HEAD = 你手动触发时的最新提交，prev_tag = 2.2.14
-      # 范围 2.2.14..HEAD 正好是当前发行版本与上一个版本之间的所有提交
+      # ✅ 改动2: Changelog 写入临时文件，不再使用 GITHUB_OUTPUT 传递多行文本
       - name: Generate Changelog via git log
-        id: changelog
         shell: bash
         run: |
           PREV_TAG="${{ steps.version.outputs.prev_tag }}"
-
           LOG=$(git log "${PREV_TAG}..HEAD" --pretty=format:"- %s" --no-merges)
 
           if [ -z "$LOG" ]; then
@@ -62,33 +60,20 @@ jobs:
             echo "📝 Generated ${COUNT} changelog entries"
           fi
 
-          DELIMITER="EOF_CHANGELOG_$(date +%s)"
-          echo "body<<${DELIMITER}" >> "$GITHUB_OUTPUT"
-          echo "$LOG" >> "$GITHUB_OUTPUT"
-          echo "${DELIMITER}" >> "$GITHUB_OUTPUT"
-
+          echo "$LOG" > /tmp/changelog.md
           echo "$LOG" | head -20
 
-      # Changelog 已生成完毕，现在可以安全地打 Tag
-      - name: Create or reuse tag (idempotent)
-        run: |
-          TAG="${{ steps.version.outputs.next_tag }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "⚠️  Tag $TAG already exists, reusing."
-          else
-            git tag -a "$TAG" -m "Release $TAG"
-            git push origin "$TAG"
-            echo "✅ Created tag $TAG"
-          fi
+      # ❌ 已删除: Create or reuse tag (idempotent) 步骤
+      # Tag 不再预先创建，删除草稿时不会留下废弃 Tag
 
+      # ✅ 改动3: 使用 body_path 读取文件，draft 模式下 softprops 不会预建 Tag
       - name: Create Draft Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.next_tag }}
           name: Release ${{ steps.version.outputs.next_tag }}
-          body: ${{ steps.changelog.outputs.body }}
+          body_path: /tmp/changelog.md
           draft: true
+          generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,75 +1,101 @@
-name: IOS
-on: 
+name: iOS Build Verification (No Sign)
+
+on:
   push:
-    paths:
-      - '*.pro'
-      - 'src/**'
-      - '.github/workflows/ios.yml'
-      - '*.cpp'
-      - '*.h'
+    branches: [main]
+    paths: ['**', '!stats.txt', '!README.md']
   pull_request:
-    paths:
-      - '*.pro'
-      - 'src/**'
-      - '.github/workflows/ios.yml' 
-      - '*.cpp'
-      - '*.h'
+    paths: ['**']
+
 jobs:
-  build:
-    name: Build
-    runs-on: ${{ matrix.os }}
+  build-ios-verify:
+    name: iOS-Build-Verify
+    runs-on: macos-14
     strategy:
       matrix:
-        os: [macos-10.15]
-        qt_ver: [5.12.10]
-        qt_target: [ios]
+        qt_ver: ["6.9.3"]
+
     env:
-      targetName: Xcounter
-      VERSION: IOS
-      
+      targetName: Knot
+
     steps:
-      - name: Install Qt
-        # if: steps.cacheqt.outputs.cache-hit != 'true'
-        uses: jurplel/install-qt-action@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Qt for iOS
+        uses: jurplel/install-qt-action@v3
         with:
-          modules: 'qtcharts'
-          # Version of Qt to install
           version: ${{ matrix.qt_ver }}
-          # Target platform for build
-          target: ${{ matrix.qt_target }}
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
-      - name: build ios
+          cached: false
+          host: mac
+          target: ios
+          arch: ios         # ⚠️ 注意：模拟器也用 ios arch，通过 SDK 区分
+          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
+          install-deps: true
+          dir: ${{ github.workspace }}/Qt
+
+      - name: Install Dependencies
         run: |
-          qmake -r -spec macx-ios-clang CONFIG+=release CONFIG+=iphoneos
-          make
-          
-      # 打包
-      - name: package
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
+          brew update && brew install openssl@3 cmake
+          brew link openssl@3 --force
+
+      - name: Configure & Build iOS Simulator (No Sign)
+        timeout-minutes: 45
         run: |
-          # 拷贝依赖
-          # cp -f Info.plist bin/release/${targetName}.app/Contents/Info.plist
-          # macdeployqt bin/release/${targetName}.app -qmldir=. -verbose=1 -dmg
-          
-      # 上传artifacts          
-      - uses: actions/upload-artifact@v2
+          export PATH="/opt/homebrew/bin:$PATH"
+
+          OPENSSL_ROOT="$(brew --prefix openssl@3)"
+          # ✅ 关键：使用 iphonesimulator SDK，完全不需要签名
+          IOS_SIM_SDK="$(xcrun --sdk iphonesimulator --show-sdk-path)"
+
+          echo "=== iOS Simulator SDK: $IOS_SIM_SDK ==="
+
+          cmake -B build \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
+                -DCMAKE_SYSTEM_NAME=iOS \
+                -DCMAKE_OSX_ARCHITECTURES=x86_64,arm64 \
+                -DCMAKE_OSX_SYSROOT="$IOS_SIM_SDK" \
+                -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 \
+                -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT" \
+                -GXcode
+
+          # ✅ CODE_SIGNING_ALLOWED=NO 确保跳过所有签名步骤
+          cmake --build build --config Release --parallel $(sysctl -n hw.ncpu) \
+                -- CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+          # 定位并验证产物
+          APP_BUNDLE=$(find build -name "${{ env.targetName }}.app" -type d | head -1)
+          if [ -z "$APP_BUNDLE" ]; then
+            echo "❌ App bundle not found!" && exit 1
+          fi
+
+          mkdir -p bin/release
+          cp -R "$APP_BUNDLE" "bin/release/"
+
+          echo "✅ Build succeeded. Verifying binary..."
+          file "$APP_BUNDLE/${{ env.targetName }}"
+          lipo -info "$APP_BUNDLE/${{ env.targetName }}"
+
+      - name: Package Unsigned IPA
+        run: |
+          APP_BUNDLE="bin/release/${{ env.targetName }}.app"
+          IPA_PATH="bin/release/${{ env.targetName }}-unsigned.ipa"
+
+          # ✅ 手动打包 IPA（无需 xcodebuild exportArchive）
+          PAYLOAD_DIR="Payload"
+          mkdir -p "$PAYLOAD_DIR"
+          cp -R "$APP_BUNDLE" "$PAYLOAD_DIR/"
+          zip -r "$IPA_PATH" "$PAYLOAD_DIR"
+          rm -rf "$PAYLOAD_DIR"
+
+          echo "=== Final Unsigned IPA ==="
+          ls -lh "$IPA_PATH"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          #name:  ${{ env.targetName }}_${{ matrix.os }}_${{ matrix.qt_ver }} # .zip
-          #name:  ${{ env.targetName }}-${{ env.VERSION }}
-          path: bin/release/${{ env.targetName }}.app
-          
-          
-      # tag 上传Release
-      #- name: uploadRelease
-      #  if: startsWith(github.event.ref, 'refs/tags/')
-      #  uses: svenstaro/upload-release-action@v2
-      #  with:
-      #    repo_token: ${{ secrets.GITHUB_TOKEN }}
-      #    file: bin/release/${{ env.targetName }}.dmg
-          
-          #asset_name: ${{ env.targetName }}_${{ matrix.os }}_${{ matrix.qt_ver }}.dmg
-      #    asset_name: ${{ env.targetName }}-${{ env.VERSION }}.dmg
-          
-      #    tag: ${{ github.ref }}
-      #    overwrite: true    
+          name: Knot-iOS-Unsigned
+          path: bin/release/${{ env.targetName }}-unsigned.ipa
+          retention-days: 7
