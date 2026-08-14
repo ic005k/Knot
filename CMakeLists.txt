@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(Knot VERSION 2.2.20 LANGUAGES C CXX)
+project(Knot VERSION 2.2.21 LANGUAGES C CXX)
 
 # ============================================================
 # ✅ 全局 MSVC 编译选项（必须在 add_library / add_executable 之前）
@@ -48,6 +48,17 @@ set(GGML_OPENCL OFF CACHE BOOL "" FORCE)
 set(GGML_SYCL OFF CACHE BOOL "" FORCE)
 set(GGML_BLAS OFF CACHE BOOL "" FORCE)
 set(LLAMA_EMBED ON CACHE BOOL "" FORCE)
+
+# ✅ 全平台统一控制 ggml 指令集
+# 保留 AVX/AVX2/FMA 供 ggml runtime dispatch 使用
+# 关闭 AVX-512/AMX 防止老 CPU 崩溃
+set(GGML_AVX    ON  CACHE BOOL "" FORCE)
+set(GGML_AVX2   ON  CACHE BOOL "" FORCE)
+set(GGML_F16C   ON  CACHE BOOL "" FORCE)
+set(GGML_FMA    ON  CACHE BOOL "" FORCE)
+set(GGML_AVX512 OFF CACHE BOOL "" FORCE)
+set(GGML_AMX    OFF CACHE BOOL "" FORCE)
+
 add_subdirectory(${LLAMA_ROOT} ${CMAKE_BINARY_DIR}/llama.cpp)
 
 # llama.cpp common 工具库 (未被 llama 目标包含的部分)
@@ -295,15 +306,27 @@ elseif(APPLE)
             target_compile_definitions(${PROJECT_NAME} PRIVATE
                 GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC)
         else()
-            message(STATUS "ℹ️ Targeting macOS x86_64 (AVX2)")
-            target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_AVX2 GGML_F16C)
-            target_compile_options(${PROJECT_NAME} PRIVATE -mavx2 -mf16c -mfma)
+            # macOS x86_64: 使用 AVX1 基线，ggml runtime dispatch 自动启用 AVX2
+            message(STATUS "ℹ️ Targeting macOS x86_64 (AVX1 base + ggml runtime dispatch)")
+            target_compile_definitions(${PROJECT_NAME} PRIVATE
+                    GGML_USE_AVX GGML_USE_AVX2 GGML_F16C
+                )
+            target_compile_options(${PROJECT_NAME} PRIVATE -mavx -mf16c)
         endif()
 elseif(ANDROID)
     target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC)
 elseif(UNIX)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_AVX2 GGML_F16C GGML_NO_SCHED_BATCH _GNU_SOURCE)
-    target_compile_options(${PROJECT_NAME} PRIVATE -mavx2 -mf16c -mfma)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
+            GGML_USE_AVX
+            GGML_USE_AVX2         # ← 添加，匹配 ggml 库的编译配置
+            GGML_F16C
+            GGML_NO_SCHED_BATCH
+            _GNU_SOURCE
+        )
+        target_compile_options(${PROJECT_NAME} PRIVATE
+            -mavx                 # ← 保持 AVX1，这只是 Knot 自身代码的编译基线
+            -mf16c
+        )
 endif()
 
 # ============================================================
