@@ -182,6 +182,125 @@ public class NoteEditor
     implements View.OnClickListener, Application.ActivityLifecycleCallbacks
 {
 
+    //搜索结果显示TAB================================
+    // TAB容器新增
+    private View pageSearchContainer;
+    private Button tab_search;
+    private RecyclerView rvSearchResults;
+    private TextView lblSearchSummary;
+
+    // 搜索结果数据
+    private List<SearchResultItem> searchResultItems = new ArrayList<>();
+    private SearchResultAdapter searchResultAdapter;
+
+    // 搜索结果条目实体
+    public static class SearchResultItem {
+
+        int position; // 在原文中的起始索引
+        String context; // 带上下文的片段
+        String keyword; // 当前搜索词（用于高亮）
+
+        public SearchResultItem(int position, String context, String keyword) {
+            this.position = position;
+            this.context = context;
+            this.keyword = keyword;
+        }
+    }
+
+    private static class SearchResultAdapter
+        extends RecyclerView.Adapter<SearchResultAdapter.VH>
+    {
+
+        private List<SearchResultItem> items;
+        private OnItemClick callback;
+
+        interface OnItemClick {
+            void onItemClick(SearchResultItem item);
+        }
+
+        SearchResultAdapter(List<SearchResultItem> items, OnItemClick cb) {
+            this.items = items;
+            this.callback = cb;
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            TextView tv = new TextView(parent.getContext());
+            tv.setPadding(32, 24, 32, 24);
+            tv.setTextSize(14);
+            tv.setMaxLines(3);
+            tv.setEllipsize(TextUtils.TruncateAt.END);
+            tv.setTextColor(MyActivity.isDark ? 0xFFE0E0E0 : 0xFF333333);
+            tv.setLayoutParams(
+                new RecyclerView.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            );
+
+            // 添加底部分隔线效果
+            tv.setBackground(
+                MyActivity.isDark
+                    ? new ColorDrawable(0xFF2A2A2A)
+                    : new ColorDrawable(0xFFF5F5F5)
+            );
+
+            return new VH(tv);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH holder, int position) {
+            SearchResultItem item = items.get(position);
+            TextView tv = (TextView) holder.itemView;
+
+            // 关键词高亮处理
+            SpannableStringBuilder ssb = new SpannableStringBuilder(
+                item.context
+            );
+            String lowerContext = item.context.toLowerCase();
+            String lowerKeyword = item.keyword.toLowerCase();
+
+            int idx = 0;
+            while ((idx = lowerContext.indexOf(lowerKeyword, idx)) != -1) {
+                ssb.setSpan(
+                    new BackgroundColorSpan(
+                        MyActivity.isDark ? 0xFF665500 : 0xFFFFEE00
+                    ),
+                    idx,
+                    idx + item.keyword.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                );
+                ssb.setSpan(
+                    new ForegroundColorSpan(
+                        MyActivity.isDark ? 0xFFFFFFFF : 0xFF000000
+                    ),
+                    idx,
+                    idx + item.keyword.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                );
+                idx += item.keyword.length();
+            }
+
+            tv.setText(ssb);
+            tv.setOnClickListener(v -> callback.onItemClick(item));
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.size();
+        }
+
+        static class VH extends RecyclerView.ViewHolder {
+
+            VH(@NonNull View itemView) {
+                super(itemView);
+            }
+        }
+    }
+
+    //=================================================
+
     // TAB容器 ==================
     private View pageEditorContainer;
     private View pageAiContainer;
@@ -603,6 +722,52 @@ public class NoteEditor
             tab_editor.setVisibility(View.GONE);
         }
         // ========== Tab按钮 + AI问答界面 结束 ==========
+
+        // 搜索结果显示==================================================
+        tab_search = findViewById(R.id.tab_search);
+        rvSearchResults = findViewById(R.id.rv_search_results);
+        lblSearchSummary = findViewById(R.id.lbl_search_summary);
+
+        // 初始化RecyclerView
+        rvSearchResults.setLayoutManager(new LinearLayoutManager(this));
+        searchResultAdapter = new SearchResultAdapter(
+            searchResultItems,
+            item -> {
+                // 点击定位：切回编辑器 + 选中文本
+                switchTab(true); // 切到编辑器
+                editNote.requestFocus();
+                editNote.setSelection(
+                    item.position,
+                    item.position + item.keyword.length()
+                );
+
+                // 可选：让EditText滚动到选中位置
+                Layout layout = editNote.getLayout();
+                if (layout != null) {
+                    int line = layout.getLineForOffset(item.position);
+                    int y = layout.getLineTop(line);
+                    ((ScrollView) findViewById(R.id.scrollView)).smoothScrollTo(
+                        0,
+                        y - 100
+                    );
+                }
+            }
+        );
+        rvSearchResults.setAdapter(searchResultAdapter);
+
+        // 多语言文本
+        if (MyActivity.zh_cn) {
+            tab_search.setText("搜索结果");
+            lblSearchSummary.setText("输入关键词开始搜索");
+        } else {
+            tab_search.setText("Results");
+            lblSearchSummary.setText("Type keyword to search");
+        }
+
+        // 绑定Tab点击
+        tab_search.setOnClickListener(v -> switchTab(false, true)); // 新增参数区分AI/Search
+
+        //搜索结果显示界面完成==========================================================
     }
 
     @Override
@@ -735,10 +900,14 @@ public class NoteEditor
         // TAB容器 ================================================
         pageEditorContainer = findViewById(R.id.page_editor_container);
         pageAiContainer = findViewById(R.id.page_ai_container);
+        pageSearchContainer = findViewById(R.id.page_search_container);
 
         // Tab切换监听
         findViewById(R.id.tab_editor).setOnClickListener(v -> switchTab(true));
         findViewById(R.id.tab_ai).setOnClickListener(v -> switchTab(false));
+        findViewById(R.id.tab_search).setOnClickListener(v ->
+            switchTab(false, true)
+        );
 
         // AI控件绑定
         etQuery = findViewById(R.id.et_query);
@@ -1894,18 +2063,20 @@ public class NoteEditor
 
                     int undoCount = helper.getUndoCount();
                     int redoCount = helper.getRedoCount();
-                    String str_count = String.valueOf(undoCount) + "/" + String.valueOf(redoCount);
+                    String str_count =
+                        String.valueOf(undoCount) +
+                        "/" +
+                        String.valueOf(redoCount);
                     if (MyActivity.zh_cn) {
-                       // btnUndo.setText("撤销\n" + String.valueOf(undoCount));
-                       // btnRedo.setText("恢复\n" + String.valueOf(redoCount));
+                        // btnUndo.setText("撤销\n" + String.valueOf(undoCount));
+                        // btnRedo.setText("恢复\n" + String.valueOf(redoCount));
 
-                       tab_editor.setText("编辑器 " + str_count);
+                        tab_editor.setText("编辑器 " + str_count);
                     } else {
-                       // btnUndo.setText("Undo\n" + String.valueOf(undoCount));
-                       // btnRedo.setText("Redo\n" + String.valueOf(redoCount));
+                        // btnUndo.setText("Undo\n" + String.valueOf(undoCount));
+                        // btnRedo.setText("Redo\n" + String.valueOf(redoCount));
 
-                       tab_editor.setText("Editor " + str_count);
-
+                        tab_editor.setText("Editor " + str_count);
                     }
 
                     if (isAddImage) {
@@ -1944,19 +2115,76 @@ public class NoteEditor
 
     private void on_editFindTextChanged() {
         arrayFindResult.clear();
+        searchResultItems.clear();
 
         String desString = editNote.getText().toString();
         String str = editFind.getText().toString();
-        System.out.println("afterTextChanged=" + str);
+
         if (str.length() > 0) {
             arrayFindResult = findStr(desString, str);
+
+            // 生成带上下文的搜索结果列表
+            for (int pos : arrayFindResult) {
+                String context = buildContextSnippet(
+                    desString,
+                    pos,
+                    str.length(),
+                    30
+                );
+                searchResultItems.add(new SearchResultItem(pos, context, str));
+            }
 
             if (arrayFindResult.size() > 0) {
                 goFindResult(0);
             }
+
+            // 更新搜索结果Tab的摘要
+            String summary = MyActivity.zh_cn
+                ? "找到 " + arrayFindResult.size() + " 个结果"
+                : arrayFindResult.size() + " results found";
+            lblSearchSummary.setText(summary);
+        } else {
+            String hint = MyActivity.zh_cn ? "搜索结果" : "Search results";
+            lblSearchSummary.setText(hint);
         }
 
         lblResult.setText(String.valueOf(arrayFindResult.size()));
+
+        // 刷新搜索结果列表
+        if (searchResultAdapter != null) {
+            searchResultAdapter.notifyDataSetChanged();
+        }
+    }
+
+    /**
+     * 构建带上下文的搜索片段
+     * @param fullText 全文
+     * @param matchPos 匹配起始位置
+     * @param keywordLen 关键词长度
+     * @param contextChars 前后各取多少字符作为上下文
+     */
+    private String buildContextSnippet(
+        String fullText,
+        int matchPos,
+        int keywordLen,
+        int contextChars
+    ) {
+        int start = Math.max(0, matchPos - contextChars);
+        int end = Math.min(
+            fullText.length(),
+            matchPos + keywordLen + contextChars
+        );
+
+        StringBuilder sb = new StringBuilder();
+        if (start > 0) sb.append("…");
+        // 将换行符替换为空格，保证列表条目单行/多行显示美观
+        String snippet = fullText
+            .substring(start, end)
+            .replace('\n', ' ')
+            .replace('\r', ' ');
+        sb.append(snippet);
+        if (end < fullText.length()) sb.append("…");
+        return sb.toString();
     }
 
     private void showNormalDialog() {
@@ -4486,26 +4714,31 @@ public class NoteEditor
     }
 
     /**
-     * Tab切换逻辑
-     * @param showEditor true=编辑器页面；false=AI边写边查
+     * @param showEditor true=编辑器
+     * @param showSearch true=搜索结果页（仅当showEditor=false时有效）
      */
-    private void switchTab(boolean showEditor) {
-        if (showEditor) {
-            pageEditorContainer.setVisibility(View.VISIBLE);
-            pageAiContainer.setVisibility(View.GONE);
-            // 可选：切回编辑器，启用撤销/查找等按钮
-            btnUndo.setEnabled(true);
-            btnRedo.setEnabled(true);
-        } else {
-            pageEditorContainer.setVisibility(View.GONE);
-            pageAiContainer.setVisibility(View.VISIBLE);
-            // 可选：进入AI页面，禁用编辑器相关按钮
-            btnUndo.setEnabled(false);
-            btnRedo.setEnabled(false);
-        }
+    private void switchTab(boolean showEditor, boolean... showSearchFlag) {
+        boolean showSearch = showSearchFlag.length > 0 && showSearchFlag[0];
 
-        // 刷新Tab按钮选中样式
-        refreshTabStyle(showEditor);
+        pageEditorContainer.setVisibility(
+            showEditor ? View.VISIBLE : View.GONE
+        );
+        pageAiContainer.setVisibility(
+            !showEditor && !showSearch ? View.VISIBLE : View.GONE
+        );
+        pageSearchContainer.setVisibility(
+            !showEditor && showSearch ? View.VISIBLE : View.GONE
+        );
+
+        btnUndo.setEnabled(showEditor);
+        btnRedo.setEnabled(showEditor);
+
+        refreshTabStyle(showEditor, showSearch);
+    }
+
+    // 兼容原有双参数调用
+    private void switchTab(boolean showEditor) {
+        switchTab(showEditor, false);
     }
 
     /**
@@ -4584,48 +4817,40 @@ public class NoteEditor
         }
     }
 
-    /**
-     * 刷新两个Tab按钮选中样式
-     * @param isEditorSelected true=笔记编辑tab选中，false=AI问答tab选中
-     */
-    private void refreshTabStyle(boolean isEditorSelected) {
-        // 选中蓝色底色，深浅色区分亮度
-        int colorSelectedBg;
-        if (MyActivity.isDark) {
-            colorSelectedBg = 0xFF2858C0; // 深色模式：偏暗蓝色
-        } else {
-            colorSelectedBg = 0xFF2168DD; // 浅色模式：标准蓝色
-        }
-        int colorSelectedText = 0xFFFFFFFF; // 选中：白色文字
+    private void refreshTabStyle(
+        boolean isEditorSelected,
+        boolean... isSearchSelectedFlag
+    ) {
+        boolean isSearchSelected =
+            isSearchSelectedFlag.length > 0 && isSearchSelectedFlag[0];
+        boolean isAiSelected = !isEditorSelected && !isSearchSelected;
 
-        // 未选中状态背景
-        int colorNormalBg;
-        int colorNormalText;
-        if (MyActivity.isDark) {
-            colorNormalBg = 0xFF303030;
-            colorNormalText = 0xFFD0D0D0;
-        } else {
-            colorNormalBg = 0xFFEAEAEA;
-            colorNormalText = 0xFF333333;
-        }
+        int colorSelectedBg = MyActivity.isDark ? 0xFF2858C0 : 0xFF2168DD;
+        int colorSelectedText = 0xFFFFFFFF;
+        int colorNormalBg = MyActivity.isDark ? 0xFF303030 : 0xFFEAEAEA;
+        int colorNormalText = MyActivity.isDark ? 0xFFD0D0D0 : 0xFF333333;
 
-        // ========== 设置编辑器Tab ==========
-        if (isEditorSelected) {
-            tab_editor.setBackgroundColor(colorSelectedBg);
-            tab_editor.setTextColor(colorSelectedText);
-        } else {
-            tab_editor.setBackgroundColor(colorNormalBg);
-            tab_editor.setTextColor(colorNormalText);
-        }
+        // Editor Tab
+        tab_editor.setBackgroundColor(
+            isEditorSelected ? colorSelectedBg : colorNormalBg
+        );
+        tab_editor.setTextColor(
+            isEditorSelected ? colorSelectedText : colorNormalText
+        );
 
-        // ========== 设置AI问答Tab ==========
-        if (!isEditorSelected) {
-            tab_ai.setBackgroundColor(colorSelectedBg);
-            tab_ai.setTextColor(colorSelectedText);
-        } else {
-            tab_ai.setBackgroundColor(colorNormalBg);
-            tab_ai.setTextColor(colorNormalText);
-        }
+        // AI Tab
+        tab_ai.setBackgroundColor(
+            isAiSelected ? colorSelectedBg : colorNormalBg
+        );
+        tab_ai.setTextColor(isAiSelected ? colorSelectedText : colorNormalText);
+
+        // Search Tab
+        tab_search.setBackgroundColor(
+            isSearchSelected ? colorSelectedBg : colorNormalBg
+        );
+        tab_search.setTextColor(
+            isSearchSelected ? colorSelectedText : colorNormalText
+        );
     }
 
     /**

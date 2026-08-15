@@ -283,6 +283,17 @@
             android:textAllCaps="false"
             android:textColor="#E8E8E8"
         />
+
+        <Button
+            android:id="@+id/tab_search"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="搜索结果"
+            android:textAllCaps="false"
+            android:textColor="#E8E8E8"
+        />
+
     </LinearLayout>
 
     <!-- ==========【Tab容器：两个页面互斥显示】 ========== -->
@@ -496,6 +507,35 @@
                 android:scrollbars="vertical"
                 android:verticalScrollbarPosition="right"
                 android:background="#2D2D2D"
+            />
+                </LinearLayout>
+
+                <!-- Page3：搜索结果列表页面 -->
+                <LinearLayout
+            android:id="@+id/page_search_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:padding="4dp"
+        >
+
+                    <TextView
+                android:id="@+id/lbl_search_summary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="输入关键词开始搜索"
+                android:textSize="12sp"
+                android:padding="8dp"
+                android:textColor="#888888"
+            />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_search_results"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="vertical"
+                android:fadeScrollbars="true"
             />
                 </LinearLayout>
 
