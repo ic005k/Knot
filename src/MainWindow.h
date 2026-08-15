@@ -490,8 +490,6 @@ class MainWindow : public QMainWindow {
 
   void setVectorStatus(int status, int current, int total);
 
-  void fixQuickWidgetFirstTouch(QQuickWidget* quickWidget);
-
   QVariantList buildRecentList();
 
  protected:

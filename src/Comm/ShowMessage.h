@@ -28,6 +28,7 @@ class ShowMessage : public QDialog {
  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
   void closeEvent(QCloseEvent* event) override;
+  void showEvent(QShowEvent* event) override;
 
  private slots:
   void on_btnCancel_clicked();

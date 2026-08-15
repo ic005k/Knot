@@ -484,7 +484,6 @@ void MainWindow::initMainQW() {
   mui->qwMainTab->rootContext()->setContextProperty("mw_one", mw_one);
   mui->qwMainTab->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/maintab.qml")));
-  fixQuickWidgetFirstTouch(mui->qwMainTab);
 
   mui->qwMainDate->rootContext()->setContextProperty("FontSize", fontSize);
   mui->qwMainDate->rootContext()->setContextProperty("isDark", isDark);
@@ -497,7 +496,6 @@ void MainWindow::initMainQW() {
   mui->qwMainDate->rootContext()->setContextProperty("isChkAI", isChkAI);
   mui->qwMainDate->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/maindate.qml")));
-  fixQuickWidgetFirstTouch(mui->qwMainDate);
 
   mui->qwMainEvent->rootContext()->setContextProperty("isDark", isDark);
   mui->qwMainEvent->rootContext()->setContextProperty("fontSize", fontSize);
@@ -569,7 +567,6 @@ void MainWindow::initNotesQW() {
     mui->qwNoteBook->rootContext()->setContextProperty("mw_one", mw_one);
     mui->qwNoteBook->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/notebook.qml")));
-    fixQuickWidgetFirstTouch(mui->qwNoteBook);
 
     if (isAndroid)
       mui->qwNoteList->rootContext()->setContextProperty("noteTimeFontSize",
@@ -584,7 +581,6 @@ void MainWindow::initNotesQW() {
                                                        m_NotesList->noteModel);
     mui->qwNoteList->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/notelist.qml")));
-    fixQuickWidgetFirstTouch(mui->qwNoteList);
 
     mui->qwNoteTools->rootContext()->setContextProperty("isDark", isDark);
     mui->qwNoteTools->rootContext()->setContextProperty("m_NotesList",
@@ -1070,47 +1066,4 @@ void MainWindow::init_Options() {
 
   m_Preferences->initOptions();
   m_Preferences->ui->btnReStart->hide();
-}
-
-/**
- * @brief 修复 QQuickWidget 在 Android 上首次触摸失效的问题
- * @param quickWidget 需要修复的 QQuickWidget 指针
- * @note 必须在 setSource() 之前或之后调用均可，内部通过信号自动等待就绪
- */
-void MainWindow::fixQuickWidgetFirstTouch(QQuickWidget* quickWidget) {
-  if (!quickWidget) {
-    qWarning() << "[FocusFix] quickWidget is null";
-    return;
-  }
-
-  // 防止重复连接（如果该函数可能被多次调用）
-  static const char kMarker[] = "_focusFixConnected";
-  if (quickWidget->property(kMarker).toBool()) {
-    return;
-  }
-  quickWidget->setProperty(kMarker, true);
-
-  QObject::connect(
-      quickWidget, &QQuickWidget::statusChanged, quickWidget,
-      [quickWidget](QQuickWidget::Status status) {
-        if (status != QQuickWidget::Ready) {
-          return;
-        }
-
-        QTimer::singleShot(0, quickWidget, [quickWidget]() {
-          // 安全检查：延迟执行时 widget 可能已被销毁
-          if (!quickWidget) {
-            return;
-          }
-
-          qDebug() << "[FocusFix] Activating focus for QQuickWidget";
-          quickWidget->setAttribute(Qt::WA_AcceptTouchEvents, true);
-          quickWidget->setFocusPolicy(Qt::StrongFocus);
-          quickWidget->setFocus();
-
-          if (auto* win = quickWidget->window()) {
-            win->activateWindow();
-          }
-        });
-      });
 }

@@ -26,7 +26,6 @@ ShowMessage::ShowMessage(QWidget* parent)
     ui->qwShowMsg->rootContext()->setContextProperty("textContent", "");
     ui->qwShowMsg->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/showmsg.qml")));
-    mw_one->fixQuickWidgetFirstTouch(ui->qwShowMsg);
   }
 
   auto* quickWindow = ui->qwShowMsg->quickWindow();
@@ -305,3 +304,5 @@ int ShowMessage::calcDialogTotalHeight(int textH) {
 }
 
 void ShowMessage::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }
+
+void ShowMessage::showEvent(QShowEvent* event) { QDialog::showEvent(event); }
