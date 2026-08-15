@@ -1,5 +1,6 @@
 ﻿#include "Notes/Notes.h"
 
+#include "TextMatchDelegate.h"
 #include "cmark-gfm-core-extensions.h"
 #include "cmark_wrapper.h"
 #include "src/MainWindow.h"
@@ -12,6 +13,8 @@ static QAtomicInt n_Files = 0;
 Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->setupUi(this);
   m_NoteManager = new NoteManager();
+
+  ui->listSearchResults->setItemDelegate(new TextMatchDelegate(this));
 
   initEditor();
   init_md();
@@ -858,12 +861,6 @@ void Notes::on_editNote() {
 
 void Notes::showNoteList() {
   QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
-}
-
-void Notes::show_findText() {
-#ifndef Q_OS_ANDROID
-
-#endif
 }
 
 void Notes::loadNotesToUI() {

@@ -450,6 +450,18 @@ qt_add_translations(${PROJECT_NAME}
 )
 
 # ============================================================
+# 更新翻译 (便捷别名)
+# ============================================================
+if(TARGET Knot_update_translations)
+    # 创建一个纯别名 target，不执行任何额外命令
+    # 构建 update_translations 等价于构建 Knot_update_translations
+    add_custom_target(update_translations
+        DEPENDS Knot_update_translations
+        COMMENT "🔄 Updating translation files (.ts)..."
+    )
+endif()
+
+# ============================================================
 # 14. 最终化目标 (⚠️ 必须在所有 QT_ANDROID_* 属性设置之后)
 # ============================================================
 if(ANDROID)

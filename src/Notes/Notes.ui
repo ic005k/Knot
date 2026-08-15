@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1064</width>
-    <height>454</height>
+    <height>456</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -551,7 +551,7 @@ color: rgb(255, 255, 255);</string>
            <item>
             <widget class="QTabWidget" name="tabAI">
              <property name="currentIndex">
-              <number>1</number>
+              <number>2</number>
              </property>
              <widget class="QWidget" name="tabNoteLink">
               <attribute name="title">
@@ -639,6 +639,27 @@ color: rgb(255, 255, 255);</string>
                </item>
                <item>
                 <widget class="QTextEdit" name="editAnswer"/>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QWidget" name="tabSearchResults">
+              <attribute name="title">
+               <string>Search Results</string>
+              </attribute>
+              <layout class="QVBoxLayout" name="verticalLayout_7">
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayout_6">
+                 <item>
+                  <widget class="QLabel" name="lblSearchResults">
+                   <property name="text">
+                    <string>Search Results</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QListWidget" name="listSearchResults"/>
+                 </item>
+                </layout>
                </item>
               </layout>
              </widget>

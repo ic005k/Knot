@@ -750,6 +750,16 @@ void MainWindow::init_Theme() {
   mui->lblNoteGraphView->setWordWrap(true);
   mui->lblNoteGraphView->adjustSize();
   mw_one->init_ButtonStyle();
+
+  if (isDark) {
+    m_Notes->ui->listSearchResults->setStyleSheet(
+        m_Method->listWidgetDarkStyle);
+    m_Notes->ui->listNoteLink->setStyleSheet(m_Method->listWidgetDarkStyle);
+  } else {
+    m_Notes->ui->listSearchResults->setStyleSheet(
+        m_Method->listWidgetLightStyle);
+    m_Notes->ui->listNoteLink->setStyleSheet(m_Method->listWidgetLightStyle);
+  }
 }
 
 void MainWindow::init_UIWidget() {

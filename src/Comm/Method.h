@@ -131,13 +131,151 @@ class Method : public QDialog {
       "border:1px solid gray; } QPushButton:pressed { background-color: "
       "rgb(220,220,230);}";
 
-  QString listWidgetStyle =
-      "QListWidget::indicator{width:25;height:25;right: 5px;}"
-      "QListView {outline: none;}"
-      "#listWidget::item {background-color: #ffffff;color: #000000;border: "
-      "transparent;border-bottom: 1px solid #dbdbdb;padding: 8px;height: 85;}"
-      "#listWidget::item:hover {background-color: #f5f5f5;}"
-      "#listWidget::item:selected {border-left: 5px solid #777777;}";
+  QString listWidgetDarkStyle = R"(
+QListWidget {
+    background-color: #2C2C2C;
+    color: #E0E0E0;
+    border: 1px solid #555555;
+    border-top: none;
+    padding: 4px;
+    outline: none;
+}
+QListWidget::item:selected {
+    background-color: #007ACC;
+    color: white;
+}
+QListWidget::item:selected:hover {
+    background-color: #0068B5;
+    color: white;
+}
+QListWidget::item:hover {
+    background-color: #444444;
+    color: #E0E0E0;
+}
+
+/* --- 垂直滚动条 --- */
+QScrollBar:vertical {
+    background: #333333;
+    width: 8px;
+    margin: 0px;
+    border:none;
+}
+QScrollBar::handle:vertical {
+    background: #777777;
+    border-radius: 4px;
+    min-height: 25px;
+    border:none;
+}
+QScrollBar::handle:vertical:hover {
+    background: #999999;
+}
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+/* --- 水平滚动条 --- */
+QScrollBar:horizontal {
+    background: #333333;
+    height: 8px;
+    margin: 0px;
+    border:none;
+}
+QScrollBar::handle:horizontal {
+    background: #777777;
+    border-radius: 4px;
+    min-width: 25px;
+    border:none;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #999999;
+}
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal {
+    background: none;
+}
+)";
+
+  QString listWidgetLightStyle = R"(
+QListWidget {
+    background-color: #FFFFFF;
+    color: #2C2C2C;
+    border: 1px solid #CCCCCC;
+    border-top: none;
+    padding: 4px;
+    outline: none;
+}
+QListWidget::item:selected {
+    background-color: #007ACC;
+    color: white;
+}
+QListWidget::item:selected:hover {
+    background-color: #0068B5;  /* 比 #007ACC 略深，提供微反馈 */
+    color: white;
+}
+QListWidget::item:hover {
+    background-color: #EEEEEE;
+    color: #2C2C2C;
+}
+
+/* --- 垂直滚动条 --- */
+QScrollBar:vertical {
+    background: #F5F5F5;
+    width: 8px;
+    margin: 0px;
+    border:none;
+}
+QScrollBar::handle:vertical {
+    background: #CCCCCC;
+    border-radius: 4px;
+    min-height: 25px;
+    border:none;
+}
+QScrollBar::handle:vertical:hover {
+    background: #AAAAAA;
+}
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+/* --- 水平滚动条 --- */
+QScrollBar:horizontal {
+    background: #F5F5F5;
+    height: 8px;
+    margin: 0px;
+    border:none;
+}
+QScrollBar::handle:horizontal {
+    background: #CCCCCC;
+    border-radius: 4px;
+    min-width: 25px;
+    border:none;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #AAAAAA;
+}
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal {
+    background: none;
+}
+)";
 
   QString setPushButtonQss(
       QPushButton* btn,                              // 按钮对象

@@ -171,7 +171,7 @@ void Notes::init_md() {
 void Notes::editSource_textChanged() { isTextChange = true; }
 
 // 搜索功能
-void Notes::searchText(const QString& text, bool forward) {
+/*void Notes::searchText(const QString& text, bool forward) {
 #ifndef Q_OS_ANDROID
   m_lastSearchText = text;
   int line, index;
@@ -190,6 +190,220 @@ void Notes::searchText(const QString& text, bool forward) {
   if (found) {
   }
 #endif
+}*/
+
+void Notes::searchText(const QString& text, bool forward) {
+#ifndef Q_OS_ANDROID
+  m_lastSearchText = text;
+
+  // 先执行一次"查找所有"，刷新列表
+  findAllAndShowResults(text);
+
+  // 再做"下一个/上一个"的跳转定位
+  int line, index;
+  m_EditSource->getCursorPosition(&line, &index);
+  if (!forward) {
+    if (index > 0) {
+      index--;
+    } else if (line > 0) {
+      line--;
+      index = m_EditSource->lineLength(line);
+    }
+    m_EditSource->setCursorPosition(line, index);
+  }
+
+  bool found =
+      m_EditSource->findFirst(text, false, false, false, true, forward);
+  if (found) {
+    // 可选：在列表中高亮当前匹配项
+    int curLine, curIndex;
+    m_EditSource->getCursorPosition(&curLine, &curIndex);
+    highlightCurrentResult(curLine, curIndex);
+  }
+#endif
+}
+
+// ============================================================
+// 查找所有匹配项并填充 QListWidget
+// ============================================================
+void Notes::findAllAndShowResults(const QString& text) {
+#ifndef Q_OS_ANDROID
+  ui->listSearchResults->clear();
+
+  if (text.isEmpty()) {
+    updateResultCount(0);
+    return;
+  }
+
+  QString fullText = m_EditSource->text();  // 获取编辑器全部文本
+  QStringList lines = fullText.split('\n');
+
+  int totalCount = 0;
+
+  for (int i = 0; i < lines.size(); ++i) {
+    const QString& lineText = lines[i];
+    int pos = 0;
+
+    // 在同一行中查找所有出现的位置
+    while ((pos = lineText.indexOf(text, pos, Qt::CaseInsensitive)) != -1) {
+      TextMatch result;
+      result.line = i;
+      result.index = pos;
+      result.length = text.length();
+      result.lineText = lineText;
+
+      // ---------- 构造带上下文的预览文本 ----------
+      // 上下文：显示匹配关键词前后各若干字符
+      const int contextChars = 15;  // 前后各取15个字符作为上下文
+
+      int previewStart = qMax(0, pos - contextChars);
+      int previewEnd =
+          qMin(lineText.length(), pos + text.length() + contextChars);
+      QString prefix = lineText.mid(previewStart, pos - previewStart);
+      QString match = lineText.mid(pos, text.length());
+      QString suffix =
+          lineText.mid(pos + text.length(), previewEnd - pos - text.length());
+
+      // 行首省略号
+      QString displayPrefix = (previewStart > 0) ? "…" : "";
+      // 行尾省略号
+      QString displaySuffix = (previewEnd < lineText.length()) ? "…" : "";
+
+      QString preview =
+          QString("%1%2%3%4").arg(displayPrefix, prefix, match, suffix) +
+          displaySuffix;
+
+      // ---------- 创建 QListWidgetItem ----------
+      QListWidgetItem* item = new QListWidgetItem(ui->listSearchResults);
+
+      // 行号标签 + 预览
+      QString itemText = QString("[行 %1]  %2").arg(i + 1).arg(preview);
+      item->setText(itemText);
+
+      // 存储搜索结果数据
+      QVariant data;
+      data.setValue(result);
+      item->setData(Qt::UserRole, data);
+
+      // ---------- 使用 HTML 高亮关键词 ----------
+      // 我们对 display 文本中匹配到的关键词部分上色
+      buildHighlightedItem(item, i, displayPrefix, prefix, match, suffix,
+                           displaySuffix);
+
+      totalCount++;
+      pos += text.length();  // 继续向后查找（支持重叠可改为 pos++）
+    }
+  }
+
+  updateResultCount(totalCount);
+
+  // 连接信号（避免重复连接）
+  disconnect(ui->listSearchResults, &QListWidget::itemClicked, nullptr,
+             nullptr);
+  connect(ui->listSearchResults, &QListWidget::itemClicked, this,
+          &Notes::onSearchResultClicked);
+
+#endif
+}
+
+// ============================================================
+// 构造高亮的 QListWidgetItem（使用 QLabel 作为自定义 Widget）
+// ============================================================
+void Notes::buildHighlightedItem(QListWidgetItem* item, int lineNum,
+                                 const QString& displayPrefix,
+                                 const QString& prefix, const QString& match,
+                                 const QString& suffix,
+                                 const QString& displaySuffix) {
+  auto escape = [](const QString& s) -> QString {
+    QString e = s;
+    e.replace("&", "&amp;");
+    e.replace("<", "&lt;");
+    e.replace(">", "&gt;");
+    return e;
+  };
+
+  // 预构建 HTML 字符串，存入 UserRole+1
+  // （UserRole 仍存 TextMatch 数据，UserRole+1 存显示用 HTML）
+  QString html =
+      QString(
+          "<span style='color:#888;'>[行 %1]</span>&nbsp;&nbsp;"
+          "<span style='color:#aaa;'>%2%3</span>"
+          "<span style='background-color:#FFEB3B; color:#000; "
+          "font-weight:bold; padding:1px 2px; border-radius:2px;'>%4</span>"
+          "<span style='color:#aaa;'>%5%6</span>")
+          .arg(lineNum + 1)
+          .arg(escape(displayPrefix), escape(prefix))
+          .arg(escape(match))
+          .arg(escape(suffix), escape(displaySuffix));
+
+  item->setData(Qt::UserRole + 1, html);
+
+  // 保留纯文本用于无障碍 / tooltip
+  TextMatch tm = item->data(Qt::UserRole).value<TextMatch>();
+  item->setToolTip(QString("行 %1, 列 %2").arg(tm.line + 1).arg(tm.index + 1));
+}
+
+// ============================================================
+// 更新搜索结果数量标签
+// ============================================================
+void Notes::updateResultCount(int count) {
+  ui->tabAI->setCurrentIndex(2);
+  if (count == 0) {
+    ui->lblSearchResults->setText(tr("No matches found"));
+    if (isDark) {
+      ui->lblSearchResults->setStyleSheet("color:#888888;");
+    } else {
+      ui->lblSearchResults->setStyleSheet("color:#999999;");
+    }
+  } else {
+    ui->lblSearchResults->setText(tr("Matches found:") +
+                                  QString::number(count));
+    if (isDark) {
+      ui->lblSearchResults->setStyleSheet("color:#E2E2E2;");
+    } else {
+      ui->lblSearchResults->setStyleSheet("color:#333333;");
+    }
+  }
+}
+
+// ============================================================
+// 点击搜索结果 → 跳转到编辑器对应位置并高亮
+// ============================================================
+void Notes::onSearchResultClicked(QListWidgetItem* item) {
+#ifndef Q_OS_ANDROID
+
+  TextMatch result = item->data(Qt::UserRole).value<TextMatch>();
+
+  // 确保编辑器可见
+  m_EditSource->ensureLineVisible(result.line);
+
+  // 选中匹配的文本（实现高亮效果）
+  m_EditSource->setSelection(result.line, result.index, result.line,
+                             result.index + result.length);
+
+  // 设置光标到匹配末尾
+  m_EditSource->setCursorPosition(result.line, result.index + result.length);
+
+  // 让编辑器获得焦点
+  m_EditSource->setFocus();
+
+#endif
+}
+
+// ============================================================
+// 在列表中高亮"当前"所在的结果条目（可选）
+// ============================================================
+void Notes::highlightCurrentResult(int line, int index) {
+  for (int i = 0; i < ui->listSearchResults->count(); ++i) {
+    QListWidgetItem* item = ui->listSearchResults->item(i);
+    TextMatch r = item->data(Qt::UserRole).value<TextMatch>();
+
+    if (r.line == line && r.index == index) {
+      ui->listSearchResults->setCurrentItem(item);
+      ui->listSearchResults->scrollToItem(item);
+      break;
+    }
+  }
 }
 
 void Notes::searchNext() {

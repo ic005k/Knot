@@ -68,6 +68,14 @@ namespace Ui {
 class Notes;
 }
 
+// 自定义 ListWidgetItem，存储搜索结果的位置信息
+struct TextMatch {
+  int line;          // 行号
+  int index;         // 列号（起始位置）
+  int length;        // 匹配长度
+  QString lineText;  // 该行完整文本
+};
+
 struct NoteCounterItem {
   int64_t count = 0;
   int64_t last = 0;
@@ -146,8 +154,6 @@ class Notes : public QDialog {
   void MD2Html(QString mdFile);
 
   qreal getVPos();
-
-  void show_findText();
 
   void findText();
   void show_findTextBack();
@@ -317,9 +323,13 @@ class Notes : public QDialog {
 
   void on_btnClearQuestion_clicked();
 
- private:
-#ifdef VECTOR_SEARCH
+  void onSearchResultClicked(QListWidgetItem* item);
 
+ private:
+  void findAllAndShowResults(const QString& text);
+  void updateResultCount(int count);
+
+#ifdef VECTOR_SEARCH
   QString loadNoteFullText(const QString& mdPath);
 #endif
 
@@ -410,6 +420,11 @@ class Notes : public QDialog {
   void insertNoteLink(const QString& title, const QString& path);
   void switchMdDarkTheme(bool dark);
   void applyMdLexerTheme(bool darkMode);
+  void highlightCurrentResult(int line, int index);
+  void buildHighlightedItem(QListWidgetItem* item, int lineNum,
+                            const QString& displayPrefix, const QString& prefix,
+                            const QString& match, const QString& suffix,
+                            const QString& displaySuffix);
 };
 
 #endif  // NOTES_H
