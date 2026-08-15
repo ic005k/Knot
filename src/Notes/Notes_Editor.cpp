@@ -171,33 +171,13 @@ void Notes::init_md() {
 void Notes::editSource_textChanged() { isTextChange = true; }
 
 // 搜索功能
-/*void Notes::searchText(const QString& text, bool forward) {
-#ifndef Q_OS_ANDROID
-  m_lastSearchText = text;
-  int line, index;
-  m_EditSource->getCursorPosition(&line, &index);
-  if (!forward) {
-    if (index > 0) {
-      index--;
-    } else if (line > 0) {
-      line--;
-      index = m_EditSource->lineLength(line);
-    }
-    m_EditSource->setCursorPosition(line, index);
-  }
-  bool found =
-      m_EditSource->findFirst(text, false, false, false, true, forward);
-  if (found) {
-  }
-#endif
-}*/
 
 void Notes::searchText(const QString& text, bool forward) {
 #ifndef Q_OS_ANDROID
   m_lastSearchText = text;
 
   // 先执行一次"查找所有"，刷新列表
-  findAllAndShowResults(text);
+  // findAllAndShowResults(text);
 
   // 再做"下一个/上一个"的跳转定位
   int line, index;
@@ -277,7 +257,7 @@ void Notes::findAllAndShowResults(const QString& text) {
       QListWidgetItem* item = new QListWidgetItem(ui->listSearchResults);
 
       // 行号标签 + 预览
-      QString itemText = QString("[行 %1]  %2").arg(i + 1).arg(preview);
+      QString itemText = QString("[Row %1]  %2").arg(i + 1).arg(preview);
       item->setText(itemText);
 
       // 存储搜索结果数据
@@ -307,7 +287,7 @@ void Notes::findAllAndShowResults(const QString& text) {
 }
 
 // ============================================================
-// 构造高亮的 QListWidgetItem（使用 QLabel 作为自定义 Widget）
+// 构造高亮的 QListWidgetItem
 // ============================================================
 void Notes::buildHighlightedItem(QListWidgetItem* item, int lineNum,
                                  const QString& displayPrefix,
@@ -326,7 +306,7 @@ void Notes::buildHighlightedItem(QListWidgetItem* item, int lineNum,
   // （UserRole 仍存 TextMatch 数据，UserRole+1 存显示用 HTML）
   QString html =
       QString(
-          "<span style='color:#888;'>[行 %1]</span>&nbsp;&nbsp;"
+          "<span style='color:#888;'>[Row %1]</span>&nbsp;&nbsp;"
           "<span style='color:#aaa;'>%2%3</span>"
           "<span style='background-color:#FFEB3B; color:#000; "
           "font-weight:bold; padding:1px 2px; border-radius:2px;'>%4</span>"
@@ -340,7 +320,8 @@ void Notes::buildHighlightedItem(QListWidgetItem* item, int lineNum,
 
   // 保留纯文本用于无障碍 / tooltip
   TextMatch tm = item->data(Qt::UserRole).value<TextMatch>();
-  item->setToolTip(QString("行 %1, 列 %2").arg(tm.line + 1).arg(tm.index + 1));
+  item->setToolTip(
+      QString("Row %1, Col %2").arg(tm.line + 1).arg(tm.index + 1));
 }
 
 // ============================================================
@@ -443,26 +424,6 @@ void Notes::jumpToPrevMatch() {
                                          pos.first);
   m_EditSource->ensureLineVisible(line);
 #endif
-}
-
-int Notes::getSearchMatchCount(const QString& text) {
-  if (text.isEmpty()) return 0;
-#ifndef Q_OS_ANDROID
-  int originalPos =
-      m_EditSource->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS);
-  int originalAnchor =
-      m_EditSource->SendScintilla(QsciScintilla::SCI_GETANCHOR);
-  int count = 0;
-  bool found = m_EditSource->findFirst(text, false, false, false, false, true);
-  while (found) {
-    count++;
-    found = m_EditSource->findNext();
-  }
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETCURRENTPOS, originalPos);
-  m_EditSource->SendScintilla(QsciScintilla::SCI_GETANCHOR, originalAnchor);
-  return count;
-#endif
-  return 0;
 }
 
 void Notes::initMarkdownLexer() {
@@ -882,4 +843,123 @@ QString Notes::parsePreviewData(const QString& lineText, int cursorPos) {
 
   // ===== 无可预览内容（当前行无任何链接语法）=====
   return QString();
+}
+
+// 启动后台搜索（QPointer 守卫）
+void Notes::startBackgroundSearch(const QString& keyword) {
+#ifndef Q_OS_ANDROID
+  if (keyword.isEmpty()) {
+    ui->listSearchResults->clear();
+    updateResultCount(0);
+    return;
+  }
+
+  const QString fullText = m_EditSource->text();
+  const int currentGeneration = ++m_searchGeneration;
+  QPointer<Notes> guard(this);
+
+  QtConcurrent::run([guard, fullText, keyword, currentGeneration]() {
+    // ========== 后台线程 ==========
+    QStringList lines = fullText.split('\n');
+    QList<TextMatch> matches;
+    QStringList htmlList;
+
+    auto escape = [](const QString& s) -> QString {
+      QString e = s;
+      e.replace("&", "&amp;");
+      e.replace("<", "&lt;");
+      e.replace(">", "&gt;");
+      return e;
+    };
+
+    for (int i = 0; i < lines.size(); ++i) {
+      const QString& lineText = lines[i];
+      int pos = 0;
+
+      while ((pos = lineText.indexOf(keyword, pos, Qt::CaseInsensitive)) !=
+             -1) {
+        TextMatch result;
+        result.line = i;
+        result.index = pos;
+        result.length = keyword.length();
+        result.lineText = lineText;
+
+        const int contextChars = 15;
+        int previewStart = qMax(0, pos - contextChars);
+        int previewEnd =
+            qMin(lineText.length(), pos + keyword.length() + contextChars);
+
+        QString displayPrefix =
+            (previewStart > 0) ? QStringLiteral("…") : QString();
+        QString prefix = lineText.mid(previewStart, pos - previewStart);
+        QString match = lineText.mid(pos, keyword.length());
+        QString suffix = lineText.mid(pos + keyword.length(),
+                                      previewEnd - pos - keyword.length());
+        QString displaySuffix =
+            (previewEnd < lineText.length()) ? QStringLiteral("…") : QString();
+
+        QString html =
+            QStringLiteral(
+                "<span style='color:#888;'>[Row %1]</span>&nbsp;&nbsp;"
+                "<span style='color:#aaa;'>%2%3</span>"
+                "<span style='background-color:#FFEB3B; color:#000; "
+                "font-weight:bold; padding:1px 2px; "
+                "border-radius:2px;'>%4</span>"
+                "<span style='color:#aaa;'>%5%6</span>")
+                .arg(i + 1)
+                .arg(escape(displayPrefix), escape(prefix))
+                .arg(escape(match))
+                .arg(escape(suffix), escape(displaySuffix));
+
+        matches.append(result);
+        htmlList.append(html);
+        pos += keyword.length();
+      }
+    }
+
+    // ========== 回到主线程 ==========
+    if (!guard) return;
+    QMetaObject::invokeMethod(
+        guard.data(),
+        [guard, matches, htmlList, currentGeneration]() {
+          if (!guard) return;
+          Notes* self = guard.data();
+          if (currentGeneration != self->m_searchGeneration) return;
+          self->applySearchResults(matches, htmlList);
+        },
+        Qt::QueuedConnection);
+  });
+#endif
+}
+
+void Notes::applySearchResults(const QList<TextMatch>& matches,
+                               const QStringList& htmlList) {
+#ifndef Q_OS_ANDROID
+  ui->listSearchResults->setUpdatesEnabled(false);
+  ui->listSearchResults->clear();
+
+  for (int i = 0; i < matches.size(); ++i) {
+    const TextMatch& match = matches[i];
+
+    QListWidgetItem* item = new QListWidgetItem(ui->listSearchResults);
+    item->setText(
+        QStringLiteral("[Row %1]  %2").arg(match.line + 1).arg(match.lineText));
+
+    QVariant data;
+    data.setValue(match);
+    item->setData(Qt::UserRole, data);
+    item->setData(Qt::UserRole + 1, htmlList[i]);
+    item->setToolTip(QStringLiteral("Row %1, Col %2")
+                         .arg(match.line + 1)
+                         .arg(match.index + 1));
+  }
+
+  ui->listSearchResults->setUpdatesEnabled(true);
+  updateResultCount(matches.size());
+
+  disconnect(ui->listSearchResults, &QListWidget::itemClicked, this,
+             &Notes::onSearchResultClicked);
+  connect(ui->listSearchResults, &QListWidget::itemClicked, this,
+          &Notes::onSearchResultClicked);
+#endif
 }

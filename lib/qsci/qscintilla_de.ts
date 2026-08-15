@@ -2304,12 +2304,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes_Editor.cpp" line="349"/>
+        <location filename="../../src/Notes/Notes_Editor.cpp" line="352"/>
         <source>No matches found</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes_Editor.cpp" line="356"/>
+        <location filename="../../src/Notes/Notes_Editor.cpp" line="359"/>
         <source>Matches found:</source>
         <translation type="unfinished"></translation>
     </message>

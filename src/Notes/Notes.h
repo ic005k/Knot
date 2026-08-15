@@ -7,6 +7,7 @@
 #include <QCompleter>
 #include <QMimeData>
 #include <QObject>
+#include <QPointer>
 #include <QShortcut>
 #include <QStandardPaths>
 #include <QTextEdit>
@@ -328,6 +329,11 @@ class Notes : public QDialog {
  private:
   void findAllAndShowResults(const QString& text);
   void updateResultCount(int count);
+  QTimer* m_findDebounceTimer = nullptr;
+  int m_searchGeneration = 0;
+  void startBackgroundSearch(const QString& keyword);
+  void applySearchResults(const QList<TextMatch>& matches,
+                          const QStringList& htmlList);
 
 #ifdef VECTOR_SEARCH
   QString loadNoteFullText(const QString& mdPath);
@@ -384,7 +390,6 @@ class Notes : public QDialog {
   void searchNext();
   void searchPrevious();
 
-  int getSearchMatchCount(const QString& text);
   void searchWithCount(const QString& text);
   QList<QPair<int, int>> m_matchPositions;
   int m_currentMatchIndex = -1;

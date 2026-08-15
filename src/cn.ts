@@ -3263,12 +3263,12 @@
         <translation>输出当前笔记到PDF</translation>
     </message>
     <message>
-        <location filename="Notes/Notes_Editor.cpp" line="349"/>
+        <location filename="Notes/Notes_Editor.cpp" line="352"/>
         <source>No matches found</source>
         <translation>没有匹配找到</translation>
     </message>
     <message>
-        <location filename="Notes/Notes_Editor.cpp" line="356"/>
+        <location filename="Notes/Notes_Editor.cpp" line="359"/>
         <source>Matches found:</source>
         <translation>找到匹配：</translation>
     </message>

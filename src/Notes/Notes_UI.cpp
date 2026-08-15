@@ -278,9 +278,22 @@ void Notes::on_btnNext_clicked() {
   searchNext();
 }
 void Notes::on_editFind_returnPressed() { searchNext(); }
+
 void Notes::on_editFind_textChanged(const QString& arg1) {
-  searchText(arg1.trimmed(), true);
-  m_lastSearchText = arg1.trimmed();
+  const QString trimmedText = arg1.trimmed();
+  m_lastSearchText = trimmedText;
+
+  // 懒加载初始化防抖定时器
+  if (!m_findDebounceTimer) {
+    m_findDebounceTimer = new QTimer(this);
+    m_findDebounceTimer->setSingleShot(true);
+    m_findDebounceTimer->setInterval(300);
+    connect(m_findDebounceTimer, &QTimer::timeout, this,
+            [this]() { startBackgroundSearch(m_lastSearchText); });
+  }
+
+  // 每次输入重置倒计时，实现真正的防抖
+  m_findDebounceTimer->start();
 }
 
 // 只替换当前项，不自动下一个
