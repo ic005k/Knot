@@ -295,6 +295,7 @@ void Notes::openEditUI() {
       m_EditSource->SendScintilla(QsciScintilla::SCI_SETANCHOR, 0);
       m_EditSource->SendScintilla(QsciScintilla::SCI_SETCURRENTPOS, 0);
 
+      ui->editFind->setText("");
       ui->editFind->setText(findText);
       on_btnNext_clicked();
     }

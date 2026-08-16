@@ -898,18 +898,16 @@ void Notes::startBackgroundSearch(const QString& keyword) {
         QString displaySuffix =
             (previewEnd < lineText.length()) ? QStringLiteral("…") : QString();
 
-        QString html =
-            QStringLiteral(
-                "<span style='color:#888;'>[Row %1]</span>&nbsp;&nbsp;"
-                "<span style='color:#aaa;'>%2%3</span>"
-                "<span style='background-color:#FFEB3B; color:#000; "
-                "font-weight:bold; padding:1px 2px; "
-                "border-radius:2px;'>%4</span>"
-                "<span style='color:#aaa;'>%5%6</span>")
-                .arg(i + 1)
-                .arg(escape(displayPrefix), escape(prefix))
-                .arg(escape(match))
-                .arg(escape(suffix), escape(displaySuffix));
+        // 后台线程中，HTML 只包含结构和类名，永远不变
+        QString html = QStringLiteral(
+                           "<span class='ln'>[Row %1]</span>&nbsp;&nbsp;"
+                           "<span class='ctx'>%2%3</span>"
+                           "<span class='hl'>%4</span>"
+                           "<span class='ctx'>%5%6</span>")
+                           .arg(i + 1)
+                           .arg(escape(displayPrefix), escape(prefix))
+                           .arg(escape(match))
+                           .arg(escape(suffix), escape(displaySuffix));
 
         matches.append(result);
         htmlList.append(html);
