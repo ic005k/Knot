@@ -10,7 +10,7 @@ on:
     types: [published]
 
 env:
-  QT_VERSION: "6.9.3"
+  QT_VERSION: "6.11.1"
   QT_ARCH_ANDROID: "android_arm64_v8a"
   DESKTOP_ARCH: "win64_mingw"
   NDK_VERSION: "r27c"
