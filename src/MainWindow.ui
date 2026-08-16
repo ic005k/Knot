@@ -5627,7 +5627,7 @@ QRadioButton:disabled {
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Note Book</string>
+                <string>0/0</string>
                </property>
               </widget>
              </item>
@@ -5742,7 +5742,7 @@ QRadioButton:disabled {
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Note List</string>
+                <string>0/0</string>
                </property>
               </widget>
              </item>

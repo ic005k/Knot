@@ -873,9 +873,6 @@ void Notes::loadNotesToUI() {
   m_NotesList->set_memo_dir();
 
   if (tw->topLevelItemCount() == 0) {
-    mui->lblNoteBook->setText(tr("Note Book"));
-    mui->lblNoteList->setText(tr("Note List"));
-
     return;
   }
 

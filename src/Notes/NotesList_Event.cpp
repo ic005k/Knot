@@ -427,8 +427,8 @@ void NotesList::on_btnDel_clicked() {
   // 安全刷新界面
   if (tw->topLevelItemCount() == 0) {
     m_Notes->loadEmptyNote();
-    mui->lblNoteBook->setText(tr("Note Book"));
-    mui->lblNoteList->setText(tr("Note List"));
+    mui->lblNoteBook->setText("0/0");
+    mui->lblNoteList->setText("0/0");
   } else {
     if (tw->currentItem() != nullptr) {
       m_Notes->loadEmptyNote();
