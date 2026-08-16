@@ -3767,7 +3767,7 @@ QSlider::handle:horizontal:disabled {
           <enum>QTabWidget::TabPosition::South</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tab_Steps">
           <attribute name="title">
@@ -4246,7 +4246,7 @@ QRadioButton:disabled {
 </string>
                 </property>
                 <property name="text">
-                 <string>Cycling</string>
+                 <string>Ride</string>
                 </property>
                 <property name="iconSize">
                  <size>
@@ -4335,7 +4335,7 @@ QRadioButton:disabled {
 </string>
                 </property>
                 <property name="text">
-                 <string>Hiking</string>
+                 <string>Hike</string>
                 </property>
                 <property name="checkable">
                  <bool>true</bool>
@@ -4351,7 +4351,7 @@ QRadioButton:disabled {
                  <string notr="true"/>
                 </property>
                 <property name="text">
-                 <string>Running</string>
+                 <string>Run</string>
                 </property>
                </widget>
               </item>
@@ -7790,7 +7790,7 @@ QSlider::handle:horizontal:disabled {
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Copy Note Link</string>
+            <string>Note Link</string>
            </property>
           </widget>
          </item>

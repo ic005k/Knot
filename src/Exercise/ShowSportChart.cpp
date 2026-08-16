@@ -91,9 +91,9 @@ void Steps::showSportsChart() {
 
   // 4.1 创建水平条形系列和集合
   QHorizontalBarSeries* barSeries = new QHorizontalBarSeries();
-  QBarSet* cyclingSet = new QBarSet(tr("Cycling"));
-  QBarSet* hikingSet = new QBarSet(tr("Hiking"));
-  QBarSet* runningSet = new QBarSet(tr("Running"));
+  QBarSet* cyclingSet = new QBarSet(tr("Ride"));
+  QBarSet* hikingSet = new QBarSet(tr("Hike"));
+  QBarSet* runningSet = new QBarSet(tr("Run"));
 
   // 主题适配颜色
   if (isDark) {

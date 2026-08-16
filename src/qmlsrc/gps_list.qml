@@ -1187,11 +1187,11 @@ Rectangle {
                             width: 24
                             height: 24
                             color: {
-                                if (item0.text.indexOf("骑行") !== -1 || item0.text.indexOf("Cycling") !== -1)
+                                if (item0.text.indexOf("骑行") !== -1 || item0.text.indexOf("Ride") !== -1)
                                     isDark ? "#5ABD5E" : "#4CAF50";
-                                else if (item0.text.indexOf("徒步") !== -1 || item0.text.indexOf("Hiking") !== -1)
+                                else if (item0.text.indexOf("徒步") !== -1 || item0.text.indexOf("Hike") !== -1)
                                     isDark ? "#FFAB2C" : "#FF9800";
-                                else if (item0.text.indexOf("跑步") !== -1 || item0.text.indexOf("Running") !== -1)
+                                else if (item0.text.indexOf("跑步") !== -1 || item0.text.indexOf("Run") !== -1)
                                     isDark ? "#B746C9" : "#9C27B0";
                                 else
                                     "transparent";

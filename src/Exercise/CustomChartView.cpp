@@ -99,13 +99,12 @@ void CustomChartView::handleChartClick(QMouseEvent* event) {
 
     // 使用统一的提示信息生成逻辑
     QString tooltip = QString(
-        tr("Month") + ": " + QString::number(month) + "\n" + tr("Cycling") +
-        ": " + QString::number(data.cyclingDist, 'f', 1) + " km (" +
+        tr("Month") + ": " + QString::number(month) + "\n" + tr("Ride") + ": " +
+        QString::number(data.cyclingDist, 'f', 1) + " km (" +
         QString::number(data.cyclingCount) + " " + tr("times") + ")\n" +
-        tr("Hiking") + ": " + QString::number(data.hikingDist, 'f', 1) +
-        " km (" + QString::number(data.hikingCount) + " " + tr("times") +
-        ")\n" + tr("Running") + ": " +
-        QString::number(data.runningDist, 'f', 1) + " km (" +
+        tr("Hike") + ": " + QString::number(data.hikingDist, 'f', 1) + " km (" +
+        QString::number(data.hikingCount) + " " + tr("times") + ")\n" +
+        tr("Run") + ": " + QString::number(data.runningDist, 'f', 1) + " km (" +
         QString::number(data.runningCount) + " " + tr("times") + ")");
 
     // 每次弹窗前，强制关闭已有提示
