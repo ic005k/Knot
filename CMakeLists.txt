@@ -443,10 +443,19 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 # ============================================================
 # 13. 翻译
 # ============================================================
+
+# ✅ 关键：显式收集所有 QML/JS 源文件
+# qt_add_translations 不会自动递归扫描目录寻找 QML 文件
+file(GLOB_RECURSE APP_QML_SOURCES CONFIGURE_DEPENDS
+    src/*.qml
+    src/*.js
+)
+
 qt_add_translations(${PROJECT_NAME}
     TS_FILES ${APP_TRANSLATIONS}
     QM_FILES_OUTPUT_VARIABLE QM_FILES
-    #RESOURCE_PREFIX "/translations"
+    # ✅ 将 QML/JS 文件作为额外源文件传入，使 lupdate 能够提取其中的 qsTr()
+    SOURCES ${APP_QML_SOURCES}
 )
 
 # ============================================================

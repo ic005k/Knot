@@ -327,6 +327,19 @@
     </message>
 </context>
 <context>
+    <name>DateTimePicker</name>
+    <message>
+        <location filename="../../src/qmlsrc/DateTimePicker.qml" line="76"/>
+        <source>Date</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/DateTimePicker.qml" line="353"/>
+        <source>Time</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>DocumentHandler</name>
     <message>
         <location filename="../../src/Reader/DocumentHandler.cpp" line="254"/>
@@ -1959,6 +1972,14 @@
     </message>
 </context>
 <context>
+    <name>NoteDiffHtmlViewer</name>
+    <message>
+        <location filename="../../src/qmlsrc/NoteDiffHtmlViewer.qml" line="55"/>
+        <source>No differences</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>NoteRelationParser</name>
     <message>
         <location filename="../../src/Notes/NoteGraph.cpp" line="520"/>
@@ -1968,6 +1989,24 @@
     <message>
         <location filename="../../src/Notes/NoteGraph.cpp" line="521"/>
         <source>Relations</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>NoteVersionList</name>
+    <message>
+        <location filename="../../src/qmlsrc/NoteVersionList.qml" line="22"/>
+        <source>Modify History</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/NoteVersionList.qml" line="115"/>
+        <source>Old Text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/NoteVersionList.qml" line="166"/>
+        <source>No modification records</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2267,12 +2306,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="875"/>
+        <location filename="../../src/Notes/Notes.cpp" line="876"/>
         <source>Note Book</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="876"/>
+        <location filename="../../src/Notes/Notes.cpp" line="877"/>
         <source>Note List</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2282,34 +2321,34 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="475"/>
+        <location filename="../../src/Notes/Notes.cpp" line="476"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="469"/>
+        <location filename="../../src/Notes/Notes.cpp" line="470"/>
         <source>Processing...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="622"/>
+        <location filename="../../src/Notes/Notes.cpp" line="623"/>
         <source>Synchronization failed. Please try again later.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="703"/>
-        <location filename="../../src/Notes/Notes.cpp" line="747"/>
-        <location filename="../../src/Notes/Notes.cpp" line="795"/>
+        <location filename="../../src/Notes/Notes.cpp" line="704"/>
+        <location filename="../../src/Notes/Notes.cpp" line="748"/>
+        <location filename="../../src/Notes/Notes.cpp" line="796"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes_Editor.cpp" line="352"/>
+        <location filename="../../src/Notes/Notes_Editor.cpp" line="333"/>
         <source>No matches found</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes_Editor.cpp" line="359"/>
+        <location filename="../../src/Notes/Notes_Editor.cpp" line="340"/>
         <source>Matches found:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7572,6 +7611,52 @@
     </message>
 </context>
 <context>
+    <name>SearchResults</name>
+    <message>
+        <location filename="../../src/qmlsrc/SearchResults.qml" line="115"/>
+        <source>No results were found</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>SetTodoAlarm</name>
+    <message>
+        <location filename="../../src/qmlsrc/SetTodoAlarm.qml" line="46"/>
+        <source>Select by Week</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/SetTodoAlarm.qml" line="231"/>
+        <source>Everyday</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/SetTodoAlarm.qml" line="276"/>
+        <source>TTS Voice</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/SetTodoAlarm.qml" line="289"/>
+        <source>Test</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/SetTodoAlarm.qml" line="310"/>
+        <source>Back</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/SetTodoAlarm.qml" line="321"/>
+        <source>Del Alarm</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/SetTodoAlarm.qml" line="333"/>
+        <source>Set Alarm</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ShowMessage</name>
     <message>
         <location filename="../../src/Comm/ShowMessage.ui" line="14"/>
@@ -8420,8 +8505,105 @@
 <context>
     <name>aiapi_list</name>
     <message>
+        <location filename="../../src/qmlsrc/aiapi_list.qml" line="111"/>
+        <source>No content</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/aiapi_list.qml" line="133"/>
         <source>Cancel</source>
-        <translation type="obsolete">Abbrechen</translation>
+        <translation type="unfinished">Abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/aiapi_list.qml" line="142"/>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>gps_list</name>
+    <message>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="844"/>
+        <source>Altitude</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1314"/>
+        <source>Speed Curve</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1382"/>
+        <source>Terrain Curve</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1428"/>
+        <source>Terrain Distance Distribution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1528"/>
+        <source>Up</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1552"/>
+        <source>Flat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1576"/>
+        <source>Down</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1601"/>
+        <source>Uphill: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1620"/>
+        <source>Flat: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1638"/>
+        <source>Downhill: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1647"/>
+        <source>Total: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1897"/>
+        <source>Total %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1951"/>
+        <source>Clear</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/gps_list.qml" line="1967"/>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>imgview</name>
+    <message>
+        <location filename="../../src/qmlsrc/imgview.qml" line="165"/>
+        <source>Scale</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/imgview.qml" line="165"/>
+        <source>Pos</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -8429,6 +8611,65 @@
     <message>
         <source>Paste</source>
         <translation type="obsolete">Einfügen</translation>
+    </message>
+</context>
+<context>
+    <name>mainchart</name>
+    <message>
+        <location filename="../../src/qmlsrc/mainchart.qml" line="127"/>
+        <source>Freq</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/mainchart.qml" line="134"/>
+        <source>Amount</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/mainchart.qml" line="169"/>
+        <source>Date: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/mainchart.qml" line="169"/>
+        <source>Freq: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/mainchart.qml" line="169"/>
+        <source>Amount: </source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>map</name>
+    <message>
+        <location filename="../../src/qmlsrc/map.qml" line="26"/>
+        <location filename="../../src/qmlsrc/map.qml" line="290"/>
+        <source>Distance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/map.qml" line="27"/>
+        <location filename="../../src/qmlsrc/map.qml" line="296"/>
+        <source>Speed</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>note_favorites</name>
+    <message>
+        <location filename="../../src/qmlsrc/note_favorites.qml" line="100"/>
+        <source>No matching notes</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>notebook</name>
+    <message>
+        <location filename="../../src/qmlsrc/notebook.qml" line="443"/>
+        <source>New Sub Notebook</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -8453,19 +8694,129 @@
 <context>
     <name>noterecycle</name>
     <message>
+        <location filename="../../src/qmlsrc/noterecycle.qml" line="495"/>
         <source>Select All</source>
-        <translation type="obsolete">Alle auswählen</translation>
+        <translation type="unfinished">Alle auswählen</translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/noterecycle.qml" line="511"/>
+        <source>Deselect All</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>reader</name>
     <message>
-        <source>Delete</source>
-        <translation type="obsolete">Löschen</translation>
+        <location filename="../../src/qmlsrc/reader.qml" line="772"/>
+        <source>Note Content:</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../src/qmlsrc/reader.qml" line="823"/>
+        <source>Edit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/reader.qml" line="836"/>
+        <source>Del</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/reader.qml" line="843"/>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/reader.qml" line="873"/>
+        <source>Delete Confirmation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/reader.qml" line="911"/>
+        <source>Are you sure you want to delete this note?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/reader.qml" line="933"/>
+        <source>Delete</source>
+        <translation type="unfinished">Löschen</translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/reader.qml" line="951"/>
         <source>Cancel</source>
-        <translation type="obsolete">Abbrechen</translation>
+        <translation type="unfinished">Abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/reader.qml" line="1527"/>
+        <source>Start:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/reader.qml" line="1600"/>
+        <source>End:</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>report</name>
+    <message>
+        <location filename="../../src/qmlsrc/report.qml" line="75"/>
+        <source>Date</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/report.qml" line="75"/>
+        <source>Freq</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/report.qml" line="75"/>
+        <source>Amount</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>steps_old</name>
+    <message>
+        <location filename="../../src/qmlsrc/steps_old.qml" line="70"/>
+        <source>Date</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/steps_old.qml" line="70"/>
+        <source>Steps</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/steps_old.qml" line="70"/>
+        <source>KM</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>todo</name>
+    <message>
+        <location filename="../../src/qmlsrc/todo.qml" line="496"/>
+        <source>Done</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>viewbooknote</name>
+    <message>
+        <location filename="../../src/qmlsrc/viewbooknote.qml" line="90"/>
+        <source>Pages:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/viewbooknote.qml" line="182"/>
+        <source>Edit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qmlsrc/viewbooknote.qml" line="197"/>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

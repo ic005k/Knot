@@ -439,12 +439,14 @@
 <context>
     <name>DateTimePicker</name>
     <message>
+        <location filename="qmlsrc/DateTimePicker.qml" line="76"/>
         <source>Date</source>
-        <translation type="vanished">日期</translation>
+        <translation>日期</translation>
     </message>
     <message>
+        <location filename="qmlsrc/DateTimePicker.qml" line="353"/>
         <source>Time</source>
-        <translation type="vanished">时间</translation>
+        <translation>时间</translation>
     </message>
 </context>
 <context>
@@ -2797,8 +2799,9 @@
 <context>
     <name>NoteDiffHtmlViewer</name>
     <message>
+        <location filename="qmlsrc/NoteDiffHtmlViewer.qml" line="55"/>
         <source>No differences</source>
-        <translation type="vanished">暂无差异</translation>
+        <translation>暂无差异</translation>
     </message>
 </context>
 <context>
@@ -2817,16 +2820,19 @@
 <context>
     <name>NoteVersionList</name>
     <message>
+        <location filename="qmlsrc/NoteVersionList.qml" line="22"/>
         <source>Modify History</source>
-        <translation type="vanished">修改历史</translation>
+        <translation>修改历史</translation>
     </message>
     <message>
+        <location filename="qmlsrc/NoteVersionList.qml" line="115"/>
         <source>Old Text</source>
-        <translation type="vanished">旧文本</translation>
+        <translation>旧文本</translation>
     </message>
     <message>
+        <location filename="qmlsrc/NoteVersionList.qml" line="166"/>
         <source>No modification records</source>
-        <translation type="vanished">无修改记录</translation>
+        <translation>无修改记录</translation>
     </message>
 </context>
 <context>
@@ -3103,12 +3109,12 @@
         <translation>分享到</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="875"/>
+        <location filename="Notes/Notes.cpp" line="876"/>
         <source>Note Book</source>
         <translation>笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="876"/>
+        <location filename="Notes/Notes.cpp" line="877"/>
         <source>Note List</source>
         <translation>笔记列表</translation>
     </message>
@@ -3118,12 +3124,12 @@
         <translation>当前笔记不存在。请选择其它笔记或新建笔记。</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="475"/>
+        <location filename="Notes/Notes.cpp" line="476"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="469"/>
+        <location filename="Notes/Notes.cpp" line="470"/>
         <source>Processing...</source>
         <translation>处理中...</translation>
     </message>
@@ -3132,14 +3138,14 @@
         <translation type="vanished">关闭</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="622"/>
+        <location filename="Notes/Notes.cpp" line="623"/>
         <source>Synchronization failed. Please try again later.</source>
         <translation>同步失败，请稍后再试。</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="703"/>
-        <location filename="Notes/Notes.cpp" line="747"/>
-        <location filename="Notes/Notes.cpp" line="795"/>
+        <location filename="Notes/Notes.cpp" line="704"/>
+        <location filename="Notes/Notes.cpp" line="748"/>
+        <location filename="Notes/Notes.cpp" line="796"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation>解压文件不成功，请在偏好设置里面检查各平台的密码是否一致。</translation>
     </message>
@@ -3263,12 +3269,12 @@
         <translation>输出当前笔记到PDF</translation>
     </message>
     <message>
-        <location filename="Notes/Notes_Editor.cpp" line="352"/>
+        <location filename="Notes/Notes_Editor.cpp" line="333"/>
         <source>No matches found</source>
         <translation>没有匹配找到</translation>
     </message>
     <message>
-        <location filename="Notes/Notes_Editor.cpp" line="359"/>
+        <location filename="Notes/Notes_Editor.cpp" line="340"/>
         <source>Matches found:</source>
         <translation>找到匹配：</translation>
     </message>
@@ -8948,12 +8954,12 @@ Model ID: %1</source>
     <message>
         <location filename="Report.cpp" line="849"/>
         <source>Tip</source>
-        <translation type="unfinished">提示</translation>
+        <translation>提示</translation>
     </message>
     <message>
         <location filename="Report.cpp" line="849"/>
         <source>No data available</source>
-        <translation type="unfinished"></translation>
+        <translation>没有有效的数据</translation>
     </message>
     <message>
         <source>Month</source>
@@ -9004,39 +9010,47 @@ Model ID: %1</source>
 <context>
     <name>SearchResults</name>
     <message>
+        <location filename="qmlsrc/SearchResults.qml" line="115"/>
         <source>No results were found</source>
-        <translation type="vanished">没有结果找到</translation>
+        <translation>没有结果找到</translation>
     </message>
 </context>
 <context>
     <name>SetTodoAlarm</name>
     <message>
+        <location filename="qmlsrc/SetTodoAlarm.qml" line="46"/>
         <source>Select by Week</source>
-        <translation type="vanished">按周选择</translation>
+        <translation>按周选择</translation>
     </message>
     <message>
+        <location filename="qmlsrc/SetTodoAlarm.qml" line="231"/>
         <source>Everyday</source>
-        <translation type="vanished">每天</translation>
+        <translation>每天</translation>
     </message>
     <message>
+        <location filename="qmlsrc/SetTodoAlarm.qml" line="276"/>
         <source>TTS Voice</source>
-        <translation type="vanished">TTS语音</translation>
+        <translation>TTS语音</translation>
     </message>
     <message>
+        <location filename="qmlsrc/SetTodoAlarm.qml" line="289"/>
         <source>Test</source>
-        <translation type="vanished">测试</translation>
+        <translation>测试</translation>
     </message>
     <message>
+        <location filename="qmlsrc/SetTodoAlarm.qml" line="310"/>
         <source>Back</source>
-        <translation type="vanished">返回</translation>
+        <translation>返回</translation>
     </message>
     <message>
+        <location filename="qmlsrc/SetTodoAlarm.qml" line="321"/>
         <source>Del Alarm</source>
-        <translation type="vanished">删除定时</translation>
+        <translation>删除定时</translation>
     </message>
     <message>
+        <location filename="qmlsrc/SetTodoAlarm.qml" line="333"/>
         <source>Set Alarm</source>
-        <translation type="vanished">设置定时</translation>
+        <translation>设置定时</translation>
     </message>
 </context>
 <context>
@@ -10118,12 +10132,19 @@ Model ID: %1</source>
 <context>
     <name>aiapi_list</name>
     <message>
-        <source>Cancel</source>
-        <translation type="obsolete">取消</translation>
+        <location filename="qmlsrc/aiapi_list.qml" line="111"/>
+        <source>No content</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="qmlsrc/aiapi_list.qml" line="133"/>
+        <source>Cancel</source>
+        <translation type="unfinished">取消</translation>
+    </message>
+    <message>
+        <location filename="qmlsrc/aiapi_list.qml" line="142"/>
         <source>OK</source>
-        <translation type="obsolete">确定</translation>
+        <translation type="unfinished">确定</translation>
     </message>
 </context>
 <context>
@@ -11410,44 +11431,54 @@ Model ID: %1</source>
         <translation type="vanished">跑步</translation>
     </message>
     <message>
+        <location filename="qmlsrc/gps_list.qml" line="844"/>
         <source>Altitude</source>
-        <translation type="vanished">海拔</translation>
+        <translation>海拔</translation>
     </message>
     <message>
+        <location filename="qmlsrc/gps_list.qml" line="1314"/>
         <source>Speed Curve</source>
-        <translation type="vanished">速度曲线</translation>
+        <translation>速度曲线</translation>
     </message>
     <message>
+        <location filename="qmlsrc/gps_list.qml" line="1382"/>
         <source>Terrain Curve</source>
-        <translation type="vanished">地形曲线</translation>
+        <translation>地形曲线</translation>
     </message>
     <message>
+        <location filename="qmlsrc/gps_list.qml" line="1428"/>
         <source>Terrain Distance Distribution</source>
-        <translation type="vanished">地形距离分布</translation>
+        <translation>地形距离分布</translation>
     </message>
     <message>
+        <location filename="qmlsrc/gps_list.qml" line="1528"/>
         <source>Up</source>
-        <translation type="vanished">上移</translation>
+        <translation>上移</translation>
     </message>
     <message>
+        <location filename="qmlsrc/gps_list.qml" line="1552"/>
         <source>Flat</source>
-        <translation type="vanished">平路</translation>
+        <translation>平路</translation>
     </message>
     <message>
+        <location filename="qmlsrc/gps_list.qml" line="1576"/>
         <source>Down</source>
-        <translation type="vanished">下移</translation>
+        <translation>下移</translation>
     </message>
     <message>
+        <location filename="qmlsrc/gps_list.qml" line="1601"/>
         <source>Uphill: </source>
-        <translation type="vanished">上坡：</translation>
+        <translation>上坡：</translation>
     </message>
     <message>
+        <location filename="qmlsrc/gps_list.qml" line="1620"/>
         <source>Flat: </source>
-        <translation type="vanished">平路：</translation>
+        <translation>平路：</translation>
     </message>
     <message>
+        <location filename="qmlsrc/gps_list.qml" line="1638"/>
         <source>Downhill: </source>
-        <translation type="vanished">下坡：</translation>
+        <translation>下坡：</translation>
     </message>
     <message>
         <source>Uphill</source>
@@ -11458,12 +11489,14 @@ Model ID: %1</source>
         <translation type="vanished">下坡</translation>
     </message>
     <message>
+        <location filename="qmlsrc/gps_list.qml" line="1647"/>
         <source>Total: </source>
-        <translation type="vanished">总计：</translation>
+        <translation>总计：</translation>
     </message>
     <message>
+        <location filename="qmlsrc/gps_list.qml" line="1897"/>
         <source>Total %1 items</source>
-        <translation type="vanished">共 %1 条</translation>
+        <translation>共 %1 条</translation>
     </message>
     <message>
         <source>GPS Track</source>
@@ -11474,12 +11507,14 @@ Model ID: %1</source>
         <translation type="vanished">路线</translation>
     </message>
     <message>
+        <location filename="qmlsrc/gps_list.qml" line="1951"/>
         <source>Clear</source>
-        <translation type="vanished">清除</translation>
+        <translation>清除</translation>
     </message>
     <message>
+        <location filename="qmlsrc/gps_list.qml" line="1967"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
     <message>
         <source>View GPS Track</source>
@@ -11489,12 +11524,14 @@ Model ID: %1</source>
 <context>
     <name>imgview</name>
     <message>
+        <location filename="qmlsrc/imgview.qml" line="165"/>
         <source>Scale</source>
-        <translation type="vanished">缩放</translation>
+        <translation>缩放</translation>
     </message>
     <message>
+        <location filename="qmlsrc/imgview.qml" line="165"/>
         <source>Pos</source>
-        <translation type="vanished">位置</translation>
+        <translation>位置</translation>
     </message>
 </context>
 <context>
@@ -11526,24 +11563,29 @@ Model ID: %1</source>
         <translation type="vanished">频次+金额柱状图</translation>
     </message>
     <message>
+        <location filename="qmlsrc/mainchart.qml" line="127"/>
         <source>Freq</source>
-        <translation type="vanished">频次</translation>
+        <translation>频次</translation>
     </message>
     <message>
+        <location filename="qmlsrc/mainchart.qml" line="134"/>
         <source>Amount</source>
-        <translation type="vanished">金额</translation>
+        <translation>金额</translation>
     </message>
     <message>
+        <location filename="qmlsrc/mainchart.qml" line="169"/>
         <source>Date: </source>
-        <translation type="vanished">日期：</translation>
+        <translation>日期：</translation>
     </message>
     <message>
+        <location filename="qmlsrc/mainchart.qml" line="169"/>
         <source>Freq: </source>
-        <translation type="vanished">频次：</translation>
+        <translation>频次：</translation>
     </message>
     <message>
+        <location filename="qmlsrc/mainchart.qml" line="169"/>
         <source>Amount: </source>
-        <translation type="vanished">金额：</translation>
+        <translation>金额：</translation>
     </message>
     <message>
         <source>Date: %1
@@ -11576,12 +11618,16 @@ Amount: %3</source>
 <context>
     <name>map</name>
     <message>
+        <location filename="qmlsrc/map.qml" line="26"/>
+        <location filename="qmlsrc/map.qml" line="290"/>
         <source>Distance</source>
-        <translation type="vanished">距离</translation>
+        <translation>距离</translation>
     </message>
     <message>
+        <location filename="qmlsrc/map.qml" line="27"/>
+        <location filename="qmlsrc/map.qml" line="296"/>
         <source>Speed</source>
-        <translation type="vanished">速度</translation>
+        <translation>速度</translation>
     </message>
 </context>
 <context>
@@ -11714,8 +11760,9 @@ Amount: %3</source>
 <context>
     <name>note_favorites</name>
     <message>
+        <location filename="qmlsrc/note_favorites.qml" line="100"/>
         <source>No matching notes</source>
-        <translation type="vanished">没有匹配的笔记</translation>
+        <translation>没有匹配的笔记</translation>
     </message>
 </context>
 <context>
@@ -11725,8 +11772,9 @@ Amount: %3</source>
         <translation type="vanished">完成</translation>
     </message>
     <message>
+        <location filename="qmlsrc/notebook.qml" line="443"/>
         <source>New Sub Notebook</source>
-        <translation type="vanished">新建子笔记本</translation>
+        <translation>新建子笔记本</translation>
     </message>
 </context>
 <context>
@@ -11758,12 +11806,14 @@ Amount: %3</source>
         <translation type="vanished">完成</translation>
     </message>
     <message>
+        <location filename="qmlsrc/noterecycle.qml" line="495"/>
         <source>Select All</source>
-        <translation type="vanished">全选</translation>
+        <translation>全选</translation>
     </message>
     <message>
+        <location filename="qmlsrc/noterecycle.qml" line="511"/>
         <source>Deselect All</source>
-        <translation type="vanished">取消全选</translation>
+        <translation>取消全选</translation>
     </message>
 </context>
 <context>
@@ -11803,59 +11853,72 @@ Amount: %3</source>
         <translation type="vanished">粘贴</translation>
     </message>
     <message>
+        <location filename="qmlsrc/reader.qml" line="772"/>
         <source>Note Content:</source>
-        <translation type="vanished">笔记内容：</translation>
+        <translation>笔记内容：</translation>
     </message>
     <message>
+        <location filename="qmlsrc/reader.qml" line="823"/>
         <source>Edit</source>
-        <translation type="vanished">编辑</translation>
+        <translation>编辑</translation>
     </message>
     <message>
+        <location filename="qmlsrc/reader.qml" line="836"/>
         <source>Del</source>
-        <translation type="vanished">删除</translation>
+        <translation>删除</translation>
     </message>
     <message>
+        <location filename="qmlsrc/reader.qml" line="843"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
     <message>
+        <location filename="qmlsrc/reader.qml" line="873"/>
         <source>Delete Confirmation</source>
-        <translation type="vanished">删除确认</translation>
+        <translation>删除确认</translation>
     </message>
     <message>
+        <location filename="qmlsrc/reader.qml" line="911"/>
         <source>Are you sure you want to delete this note?</source>
-        <translation type="vanished">确定要删除这条笔记？</translation>
+        <translation>确定要删除这条笔记？</translation>
     </message>
     <message>
+        <location filename="qmlsrc/reader.qml" line="933"/>
         <source>Delete</source>
-        <translation type="vanished">删除</translation>
+        <translation>删除</translation>
     </message>
     <message>
+        <location filename="qmlsrc/reader.qml" line="951"/>
         <source>Cancel</source>
-        <translation type="vanished">取消</translation>
+        <translation>取消</translation>
     </message>
     <message>
+        <location filename="qmlsrc/reader.qml" line="1527"/>
         <source>Start:</source>
-        <translation type="vanished">起点：</translation>
+        <translation>起点：</translation>
     </message>
     <message>
+        <location filename="qmlsrc/reader.qml" line="1600"/>
         <source>End:</source>
-        <translation type="vanished">终点：</translation>
+        <translation>终点：</translation>
     </message>
 </context>
 <context>
     <name>report</name>
     <message>
+        <location filename="qmlsrc/report.qml" line="75"/>
         <source>Date</source>
-        <translation type="vanished">日期</translation>
+        <translation>日期</translation>
     </message>
     <message>
+        <location filename="qmlsrc/report.qml" line="75"/>
         <source>Freq</source>
-        <translation type="vanished">频次</translation>
+        <translation>频次</translation>
     </message>
     <message>
+        <location filename="qmlsrc/report.qml" line="75"/>
         <source>Amount</source>
-        <translation type="vanished">金额</translation>
+        <translation>金额</translation>
     </message>
 </context>
 <context>
@@ -11892,6 +11955,24 @@ Amount: %3</source>
     </message>
 </context>
 <context>
+    <name>steps_old</name>
+    <message>
+        <location filename="qmlsrc/steps_old.qml" line="70"/>
+        <source>Date</source>
+        <translation type="unfinished">日期</translation>
+    </message>
+    <message>
+        <location filename="qmlsrc/steps_old.qml" line="70"/>
+        <source>Steps</source>
+        <translation type="unfinished">步数</translation>
+    </message>
+    <message>
+        <location filename="qmlsrc/steps_old.qml" line="70"/>
+        <source>KM</source>
+        <translation type="unfinished">公里</translation>
+    </message>
+</context>
+<context>
     <name>tabrecycle</name>
     <message>
         <source>Done</source>
@@ -11901,8 +11982,9 @@ Amount: %3</source>
 <context>
     <name>todo</name>
     <message>
+        <location filename="qmlsrc/todo.qml" line="496"/>
         <source>Done</source>
-        <translation type="vanished">完成</translation>
+        <translation>完成</translation>
     </message>
 </context>
 <context>
@@ -11922,16 +12004,19 @@ Amount: %3</source>
 <context>
     <name>viewbooknote</name>
     <message>
+        <location filename="qmlsrc/viewbooknote.qml" line="90"/>
         <source>Pages:</source>
-        <translation type="vanished">页码：</translation>
+        <translation>页码：</translation>
     </message>
     <message>
+        <location filename="qmlsrc/viewbooknote.qml" line="182"/>
         <source>Edit</source>
-        <translation type="vanished">编辑</translation>
+        <translation>编辑</translation>
     </message>
     <message>
+        <location filename="qmlsrc/viewbooknote.qml" line="197"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
 </context>
 <context>
