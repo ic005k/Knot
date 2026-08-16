@@ -758,10 +758,10 @@ public class NoteEditor
         // 多语言文本
         if (MyActivity.zh_cn) {
             tab_search.setText("搜索结果");
-            lblSearchSummary.setText("输入关键词开始搜索");
+            lblSearchSummary.setText("显示搜索结果");
         } else {
             tab_search.setText("Results");
-            lblSearchSummary.setText("Type keyword to search");
+            lblSearchSummary.setText("Search results");
         }
 
         // 绑定Tab点击
