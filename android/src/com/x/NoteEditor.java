@@ -774,13 +774,21 @@ public class NoteEditor
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.btn_cancel) {
-            hideKeyBoard(m_instance);
+            // ✅ 第一步：立即清除选择和焦点
+            // 这会强制取消 SmartSelectSprite 动画和 FloatingActionMode
+            // 从根源上阻止 onAnimationEnd 中再次 show()
+            editNote.clearFocus();
+            editNote.setSelection(0);
 
-            if (isTextChanged) {
-                showNormalDialog();
-            } else {
-                finish();
-            }
+            // ✅ 第二步：隐藏键盘（此时 ActionMode 已不存在，安全操作）
+            hideKeyBoard(NoteEditor.this);
+
+            // ✅ 第三步：延迟到下一帧再执行退出逻辑
+            // 确保当前帧内所有与 ActionMode/动画相关的回调都已处理完毕
+            editNote.post(() -> {
+                // 自动复用 OnBackPressedCallback 中的 保存判断 / finish 逻辑
+                getOnBackPressedDispatcher().onBackPressed();
+            });
         } else if (id == R.id.btn_save) {
             if (isTextChanged) {
                 saveNote();
