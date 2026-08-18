@@ -539,6 +539,7 @@
 
         <activity
             android:name="com.x.artifex.mupdf.mini.DocumentActivity"
+            android:screenOrientation="landscape"
             android:exported="false"
             android:configChanges="orientation|screenSize|keyboardHidden"
         />

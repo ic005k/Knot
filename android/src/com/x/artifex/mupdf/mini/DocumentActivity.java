@@ -116,6 +116,36 @@ public class DocumentActivity extends Activity {
     protected Insets systemInsets = Insets.NONE;
     protected boolean newSearchHitPage;
 
+    public static native void CallJavaNotify_0();
+
+    public static native void CallJavaNotify_1();
+
+    public static native void CallJavaNotify_2();
+
+    public static native void CallJavaNotify_3();
+
+    public static native void CallJavaNotify_4();
+
+    public static native void CallJavaNotify_5();
+
+    public static native void CallJavaNotify_6();
+
+    public static native void CallJavaNotify_7();
+
+    public static native void CallJavaNotify_8();
+
+    public static native void CallJavaNotify_9();
+
+    public static native void CallJavaNotify_10();
+
+    public static native void CallJavaNotify_11();
+
+    public static native void CallJavaNotify_12();
+
+    public static native void CallJavaNotify_13();
+
+    public static native void CallJavaNotify_14();
+
     private String toHex(byte[] digest) {
         StringBuilder builder = new StringBuilder(2 * digest.length);
         for (byte b : digest) builder.append(String.format("%02x", b));
@@ -194,6 +224,12 @@ public class DocumentActivity extends Activity {
         topBar = findViewById(R.id.top_bar);
 
         currentBar = actionBar;
+
+        TextView openButton = findViewById(R.id.open_button);
+        openButton.setOnClickListener(v -> {
+            finish();
+            CallJavaNotify_10(); // 后续需要JNI回调再打开注释
+        });
 
         Uri uri = getIntent().getData();
         mimetype = getIntent().getType();
