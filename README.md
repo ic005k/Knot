@@ -3,6 +3,9 @@
 ![Android Version](https://img.shields.io/badge/Android-12.0%2B-brightgreen)
 ![Platforms](https://img.shields.io/badge/Platform-Android%20|%20Win%20|%20Mac%20|%20Linux-blue)
 
+> ### 📖 [👉 Click Here for Wiki Help & Documentation 👈](https://github.com/ic005k/Knot/wiki)
+> *Complete user guide, feature documentation, and FAQ*
+
 ## 🌟 Project Overview
 **Knot** is an intelligent multi-scenario recording tool inspired by the minimalist concept of ancient "knot-tying" memorization. By integrating core modules such as todo lists, smart notes, document reading, and **local LLM-powered intelligence (via [llama.cpp](https://github.com/ggml-org/llama.cpp))**, we create a full-scenario productivity toolchain with multi-platform client support.
 
