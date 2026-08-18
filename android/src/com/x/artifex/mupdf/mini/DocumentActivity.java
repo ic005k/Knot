@@ -34,6 +34,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -42,6 +43,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.artifex.mupdf.fitz.*;
 import com.artifex.mupdf.fitz.android.*;
+import com.x.MyActivity;
 import com.x.R;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -51,6 +53,8 @@ import java.util.Collections;
 import java.util.Stack;
 
 public class DocumentActivity extends Activity {
+
+    protected boolean mInvertMode;
 
     public static DocumentActivity mPdfActivity = null;
 
@@ -225,14 +229,29 @@ public class DocumentActivity extends Activity {
 
         currentBar = actionBar;
 
-        TextView openButton = findViewById(R.id.open_button);
+        ImageButton openButton = findViewById(R.id.open_button);
         openButton.setOnClickListener(v -> {
             finish();
             CallJavaNotify_10(); // 后续需要JNI回调再打开注释
         });
 
+        ImageButton darkModeButton = findViewById(R.id.dark_mode_button);
+        darkModeButton.setOnClickListener(v -> {
+            //MyActivity.mPdfInvertMode = !MyActivity.mPdfInvertMode;
+            //finish();
+            //CallJavaNotify_13();
+
+            // 原地刷新
+            mInvertMode = !mInvertMode;
+            MyActivity.mPdfInvertMode = mInvertMode;
+            loadPage(); // 仅重新渲染当前页，invertBitmap 会自动生效
+        });
+
         Uri uri = getIntent().getData();
         mimetype = getIntent().getType();
+
+        // 读取来自主Activity的暗黑标记
+        mInvertMode = getIntent().getBooleanExtra("invert_mode", false);
 
         if (uri == null) {
             Toast.makeText(
@@ -1020,6 +1039,7 @@ public class DocumentActivity extends Activity {
                                 for (Quad chr : hit) chr.transform(ctm);
                         }
                         if (zoom != 1) ctm.scale(zoom);
+
                         bitmap = AndroidDrawDevice.drawPage(page, ctm);
                     } catch (Throwable x) {
                         Log.e(APP, x.getMessage());
@@ -1027,17 +1047,23 @@ public class DocumentActivity extends Activity {
                 }
 
                 public void run() {
-                    if (bitmap != null) pageView.setBitmap(
-                        bitmap,
-                        zoom,
-                        wentBack,
-                        toggledUI,
-                        newSearchHitPage,
-                        linkBounds,
-                        linkURIs,
-                        hits
-                    );
-                    else pageView.setError();
+                    if (bitmap != null) {
+                        // ✅ 核心：根据 mInvertMode 决定是否反色
+                        if (mInvertMode) {
+                            invertBitmap(bitmap);
+                        }
+
+                        pageView.setBitmap(
+                            bitmap,
+                            zoom,
+                            wentBack,
+                            toggledUI,
+                            newSearchHitPage,
+                            linkBounds,
+                            linkURIs,
+                            hits
+                        );
+                    } else pageView.setError();
                     showPageNumber(currentPage + 1);
                     pageSeekbar.setMax(pageCount - 1);
                     pageSeekbar.setProgress(pageNumber);
@@ -1137,5 +1163,26 @@ public class DocumentActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         mPdfActivity = null;
+    }
+
+    /**
+     * 对 Bitmap 进行颜色反转（暗黑模式核心）
+     * 保留 Alpha 通道，仅反转 RGB 分量
+     */
+    private void invertBitmap(Bitmap bitmap) {
+        if (bitmap == null || bitmap.isRecycled()) return;
+
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int[] pixels = new int[width * height];
+
+        bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+
+        for (int i = 0; i < pixels.length; i++) {
+            // 0xFF000000 保留 Alpha，0x00FFFFFF 取反 RGB
+            pixels[i] = (pixels[i] & 0xFF000000) | (~pixels[i] & 0x00FFFFFF);
+        }
+
+        bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
     }
 }

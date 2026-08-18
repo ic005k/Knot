@@ -173,6 +173,8 @@ public class MyActivity
     implements Application.ActivityLifecycleCallbacks
 {
 
+    public static boolean mPdfInvertMode = false;
+
     // 本地AI模型开关全局存储，C++同步、Qt读取
     public static boolean mLocalAIModelEnabled = false;
     public static boolean mAIAPIEnabled = false;
@@ -1695,9 +1697,9 @@ public class MyActivity
             com.x.artifex.mupdf.mini.DocumentActivity.class
         );
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        // ✅关键：MuPDF‑mini读取Intent.getData()，要用setData，不要putExtra
         i.setData(fileUri);
-        // FileProvider临时读权限
+        // 把主Activity的暗黑状态传递过去
+        i.putExtra("invert_mode", mPdfInvertMode);
         i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         getMyAppContext().startActivity(i);
     }
