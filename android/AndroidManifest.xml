@@ -537,16 +537,15 @@
         </activity>
 
 
-        <!--
-        <receiver
-            android:name="com.x.AlarmReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.x.Knot.TODO_ALARM" />
-            </intent-filter>
-        </receiver>
-        -->
+        <activity
+            android:name="com.x.artifex.mupdf.mini.DocumentActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+        />
+        <activity
+            android:name="com.x.artifex.mupdf.mini.OutlineActivity"
+            android:exported="false"
+        />
 
         <!-- android:name="androidx.core.content.FileProvider" -->
         <!-- android:name="android.support.v4.content.FileProvider"-->

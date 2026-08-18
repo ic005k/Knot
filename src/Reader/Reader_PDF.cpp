@@ -16,7 +16,11 @@ void Reader::openMyPDF(QString uri) {
 void Reader::closeMyPDF() {
 #ifdef Q_OS_ANDROID
 
-  // QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  activity.callMethod<void>("closeMyPDF", "()V");
+
+  return;
+
   QJniObject::callStaticMethod<void>("com.xhh.pdfui/PDFActivity", "closeMyPDF",
                                      "()V");
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(Knot VERSION 2.2.22 LANGUAGES C CXX)
+project(Knot VERSION 2.2.23 LANGUAGES C CXX)
 
 # ============================================================
 # ✅ 全局 MSVC 编译选项（必须在 add_library / add_executable 之前）

@@ -1652,7 +1652,9 @@ public class MyActivity
     }
 
     public void openMyPDF(String path) {
-        Uri fileUri;
+        openMuPDF(path);
+
+        /*  Uri fileUri;
         if (Build.VERSION.SDK_INT >= 24) {
             fileUri = FileProvider.getUriForFile(
                 getMyAppContext(),
@@ -1666,11 +1668,44 @@ public class MyActivity
         Intent i = new Intent(getMyAppContext(), PDFActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         i.setData(fileUri);
-        getMyAppContext().startActivity(i);
+        getMyAppContext().startActivity(i); */
     }
 
     public void closeMyPDF() {
-        if (PDFActivity.mPdfActivity != null) PDFActivity.mPdfActivity.finish();
+        closeMuPDF();
+
+        //if (PDFActivity.mPdfActivity != null) PDFActivity.mPdfActivity.finish();
+    }
+
+    // 打开MuPDF‑mini阅读器
+    public void openMuPDF(String path) {
+        Uri fileUri;
+        if (Build.VERSION.SDK_INT >= 24) {
+            fileUri = FileProvider.getUriForFile(
+                getMyAppContext(),
+                getMyAppContext().getPackageName(),
+                new File(path)
+            );
+        } else {
+            fileUri = Uri.fromFile(new File(path));
+        }
+
+        Intent i = new Intent(
+            getMyAppContext(),
+            com.x.artifex.mupdf.mini.DocumentActivity.class
+        );
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // ✅关键：MuPDF‑mini读取Intent.getData()，要用setData，不要putExtra
+        i.setData(fileUri);
+        // FileProvider临时读权限
+        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        getMyAppContext().startActivity(i);
+    }
+
+    public void closeMuPDF() {
+        if (com.x.artifex.mupdf.mini.DocumentActivity.mPdfActivity != null) {
+            com.x.artifex.mupdf.mini.DocumentActivity.mPdfActivity.finish();
+        }
     }
 
     public void openFilePicker() {
