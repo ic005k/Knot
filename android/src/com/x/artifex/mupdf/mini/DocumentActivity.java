@@ -217,10 +217,10 @@ public class DocumentActivity extends Activity {
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        // 隐藏状态栏和导航栏 //////////////////////////////////////////////////////////
+        // 状态栏和导航栏 //////////////////////////////////////////////////////////
         //getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        Window window = getWindow();
+        /*Window window = getWindow();
         window
             .getDecorView()
             .setSystemUiVisibility(
@@ -233,7 +233,7 @@ public class DocumentActivity extends Activity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             window.getAttributes().layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-        }
+        }*/
 
         // 刘海屏适配仍需保留（与沉浸模式无关）
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -774,6 +774,9 @@ public class DocumentActivity extends Activity {
     }
 
     public void onPause() {
+        // 离开此Activity强制恢复系统UI，避免返回上一个Activity状态栏丢失
+        exitSystemFullscreen();
+
         super.onPause();
         if (prefs != null) {
             SharedPreferences.Editor editor = prefs.edit();
@@ -1267,6 +1270,58 @@ public class DocumentActivity extends Activity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
+            enterSystemFullscreen();
+        }
+    }
+
+    /**
+     * 真正进入全屏：隐藏状态栏、导航栏
+     */
+    private void enterSystemFullscreen() {
+        Window window = getWindow();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsController controller = window.getInsetsController();
+            if (controller != null) {
+                controller.hide(
+                    WindowInsets.Type.statusBars() |
+                        WindowInsets.Type.navigationBars()
+                );
+                controller.setSystemBarsBehavior(
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                );
+            }
+        } else {
+            // API <30 旧版本
+            int vis = window.getDecorView().getSystemUiVisibility();
+            vis |= View.SYSTEM_UI_FLAG_FULLSCREEN;
+            vis |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+            vis |= View.SYSTEM_UI_FLAG_IMMERSIVE;
+            window.getDecorView().setSystemUiVisibility(vis);
+        }
+    }
+
+    /**
+     * 退出系统全屏，恢复状态栏、导航栏显示
+     */
+    private void exitSystemFullscreen() {
+        Window window = getWindow();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsController controller = window.getInsetsController();
+            if (controller != null) {
+                controller.show(
+                    WindowInsets.Type.statusBars() |
+                        WindowInsets.Type.navigationBars()
+                );
+            }
+        } else {
+            int vis = window.getDecorView().getSystemUiVisibility();
+            // 清除全屏、隐藏导航栏标记，保留 LAYOUT_STABLE | LAYOUT_FULLSCREEN 布局延伸
+            vis &= ~(
+                View.SYSTEM_UI_FLAG_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_IMMERSIVE
+            );
+            window.getDecorView().setSystemUiVisibility(vis);
         }
     }
 }

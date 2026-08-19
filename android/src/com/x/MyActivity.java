@@ -62,7 +62,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -86,9 +85,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowInsetsController;
-import android.view.WindowManager;
-import android.view.WindowManager;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSession.EventCallback;
@@ -102,7 +100,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
-import androidx.annotation.NonNull;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -748,8 +745,9 @@ public class MyActivity
         System.out.println("onResume...");
         super.onResume();
 
-        //updateSystemBars();
         ImmersiveUtil.applyRealImmersive(this, isDark);
+
+        forceRestoreSystemBars();
     }
 
     @Override
@@ -2839,5 +2837,42 @@ public class MyActivity
      */
     public boolean getLocalAIModelEnabled() {
         return mLocalAIModelEnabled;
+    }
+
+    /**
+     * 兜底恢复状态栏、导航栏，解决PDF子Activity异常退出导致系统栏永久隐藏（定制ROM兜底）
+     * 只修改MyActivity自己的Window，不操作PDF的Window
+     */
+    private void forceRestoreSystemBars() {
+        runOnUiThread(() -> {
+            Window window = getWindow();
+            if (window == null) return;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                WindowInsetsController controller =
+                    window.getInsetsController();
+                if (controller != null) {
+                    controller.show(
+                        WindowInsets.Type.statusBars() |
+                            WindowInsets.Type.navigationBars()
+                    );
+                }
+            } else {
+                int vis = window.getDecorView().getSystemUiVisibility();
+                vis &= ~(
+                    View.SYSTEM_UI_FLAG_FULLSCREEN |
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                    View.SYSTEM_UI_FLAG_IMMERSIVE |
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                );
+                // 保留原有布局标记 LAYOUT_STABLE | LAYOUT_FULLSCREEN
+                vis |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+                vis |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+                window.getDecorView().setSystemUiVisibility(vis);
+            }
+
+            // 再调用原有沉浸式工具，恢复主Activity暗黑模式下状态栏图标颜色
+            ImmersiveUtil.applyRealImmersive(this, isDark);
+        });
     }
 }
