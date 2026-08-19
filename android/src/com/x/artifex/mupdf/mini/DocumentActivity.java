@@ -802,6 +802,15 @@ public class DocumentActivity extends Activity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        // 离开此Activity强制恢复系统UI，避免返回上一个Activity状态栏丢失
+        exitSystemFullscreen();
+
+        super.onDestroy();
+        mPdfActivity = null;
+    }
+
     public void onActivityResult(int request, int result, Intent data) {
         if (
             request == NAVIGATE_REQUEST && result >= RESULT_FIRST_USER
@@ -1206,12 +1215,6 @@ public class DocumentActivity extends Activity {
                 Toast.LENGTH_SHORT
             ).show();
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mPdfActivity = null;
     }
 
     /**
