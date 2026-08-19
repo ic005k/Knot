@@ -5,25 +5,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:keepScreenOn="true"
-    android:background="#F5F5F5"
+    android:background="#505050"
 >
-    <com.x.artifex.mupdf.mini.PageView
+	<com.x.artifex.mupdf.mini.PageView
         android:id="@+id/page_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#F5F5F5"
+        android:background="#505050"
         android:keepScreenOn="true"
     />
-    <LinearLayout
+	<LinearLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:orientation="vertical"
-        android:background="#E8E8E8"
+        android:background="#303030"
         android:visibility="gone"
     >
-        <LinearLayout
+		<LinearLayout
             android:id="@+id/action_bar"
             android:layout_width="match_parent"
             android:layout_height="48dp"
@@ -38,21 +38,21 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/button"
-                android:src="@drawable/ic_open_in_new_black"
+                android:src="@drawable/ic_open_in_new"
             />
 
-            <!-- 亮/暗模式切换按钮 -->
-            <ImageButton
+            <!-- 暗黑模式切换按钮 -->
+                <ImageButton
                 android:id="@+id/dark_mode_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/button"
-                android:src="@drawable/ic_light_mode_black_24dp"
+                android:src="@drawable/ic_dark_mode_white_24dp"
                 android:layout_marginRight="4dp"
             />
 
-            <TextView
+			<TextView
                 android:id="@+id/title_label"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -60,63 +60,63 @@
                 android:layout_weight="1"
                 android:layout_marginLeft="12dp"
                 android:layout_marginRight="12dp"
-                android:textColor="#212121"
+                android:textColor="#FFFFFF"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:textSize="16sp"
             />
-            <ImageButton
+			<ImageButton
                 android:id="@+id/search_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/button"
-                android:src="@drawable/ic_search_black_24dp"
+                android:src="@drawable/ic_search_white_24dp"
             />
-            <ImageButton
+			<ImageButton
                 android:id="@+id/zoom_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/button"
-                android:src="@drawable/ic_zoom_out_map_black_24dp"
+                android:src="@drawable/ic_zoom_out_map_white_24dp"
                 android:visibility="gone"
             />
-            <ImageButton
+			<ImageButton
                 android:id="@+id/layout_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/button"
-                android:src="@drawable/ic_format_size_black_24dp"
+                android:src="@drawable/ic_format_size_white_24dp"
                 android:visibility="gone"
             />
-            <ImageButton
+			<ImageButton
                 android:id="@+id/outline_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/button"
-                android:src="@drawable/ic_toc_black_24dp"
+                android:src="@drawable/ic_toc_white_24dp"
                 android:visibility="gone"
             />
-        </LinearLayout>
-        <LinearLayout
+		</LinearLayout>
+		<LinearLayout
             android:id="@+id/search_bar"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:orientation="horizontal"
             android:visibility="gone"
         >
-            <ImageButton
+			<ImageButton
                 android:id="@+id/search_close_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/button"
-                android:src="@drawable/ic_close_black_24dp"
+                android:src="@drawable/ic_close_white_24dp"
             />
-            <EditText
+			<EditText
                 android:id="@+id/search_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -125,8 +125,8 @@
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
                 android:background="@android:color/transparent"
-                android:textColor="#212121"
-                android:textColorHint="#757575"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#a0a0a0"
                 android:singleLine="true"
                 android:textSize="16sp"
                 android:hint="@string/text_search_hint"
@@ -134,34 +134,34 @@
                 android:imeOptions="actionSearch"
                 android:importantForAutofill="no"
             />
-            <ImageButton
+			<ImageButton
                 android:id="@+id/search_backward_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/button"
-                android:src="@drawable/ic_chevron_left_black_24dp"
+                android:src="@drawable/ic_chevron_left_white_24dp"
             />
-            <ImageButton
+			<ImageButton
                 android:id="@+id/search_forward_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/button"
-                android:src="@drawable/ic_chevron_right_black_24dp"
+                android:src="@drawable/ic_chevron_right_white_24dp"
             />
-        </LinearLayout>
-    </LinearLayout>
-    <LinearLayout
+		</LinearLayout>
+	</LinearLayout>
+	<LinearLayout
         android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
-        android:background="#E8E8E8"
+        android:background="#303030"
         android:visibility="gone"
     >
-        <SeekBar
+		<SeekBar
             android:id="@+id/page_seekbar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -171,12 +171,12 @@
             android:progressDrawable="@drawable/seek_line"
             android:max="0"
         />
-        <TextView
+		<TextView
             android:id="@+id/page_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textColor="#212121"
+            android:textColor="#FFFFFF"
             android:singleLine="true"
             android:ellipsize="end"
             android:gravity="end"
@@ -184,5 +184,5 @@
             android:textSize="16sp"
             android:text="- / -"
         />
-    </LinearLayout>
+	</LinearLayout>
 </RelativeLayout>

@@ -46,7 +46,8 @@ All dependencies are preserved in original format for maintenance and upgrades:
 ### Android-specific Components
 | Project Name | Functionality | Repository Link |
 |--------------|---------------|-----------------|
-| **AndroidPdfViewerDemo** | Android PDF rendering | [DImuthuUpe/AndroidPdfViewer](https://github.com/DImuthuUpe/AndroidPdfViewer) |
+| **AndroidPdfViewer** | Android PDF rendering | [DImuthuUpe/AndroidPdfViewer](https://github.com/DImuthuUpe/AndroidPdfViewer) |
+| **AndroidPdfViewer(Current)** | Android PDF rendering | [mupdf-android-viewer-mini](https://github.com/ArtifexSoftware/mupdf-android-viewer-mini) |
 | **Markwon** | Android Markdown rendering | [noties/Markwon](https://github.com/noties/Markwon) |
 | **Prism4j** | Code highlighting support | [noties/Prism4j](https://github.com/noties/Prism4j) |
 

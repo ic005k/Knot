@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
 #elif defined(Q_OS_ANDROID)
   isAndroid = true;
 
-  // initAndroidGPU();
+  initAndroidGPU();
 
 #elif defined(Q_OS_LINUX)
   isLinux = true;
