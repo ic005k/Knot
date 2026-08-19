@@ -30,6 +30,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -216,7 +217,9 @@ public class DocumentActivity extends Activity {
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
+        // 隐藏状态栏和导航栏 //////////////////////////////////////////////////////////
         //getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         Window window = getWindow();
         window
             .getDecorView()
@@ -231,6 +234,14 @@ public class DocumentActivity extends Activity {
             window.getAttributes().layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
+
+        // 刘海屏适配仍需保留（与沉浸模式无关）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            getWindow().getAttributes().layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        }
+
+        ///////////////////////////////////////////////////////////////////
 
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -269,7 +280,9 @@ public class DocumentActivity extends Activity {
             mInvertMode = !mInvertMode;
             MyActivity.mPdfInvertMode = mInvertMode;
             // 同步更新状态栏图标颜色
-            updateStatusBarIconMode(mInvertMode);
+            if (bottomBar.getVisibility() == View.VISIBLE) {
+                updateStatusBarIconMode(true);
+            }
             loadPage(); // 仅重新渲染当前页，invertBitmap 会自动生效
         });
 
@@ -1127,6 +1140,8 @@ public class DocumentActivity extends Activity {
             currentBar.setVisibility(View.GONE);
             bottomBar.setVisibility(View.GONE);
             if (currentBar == searchBar) hideKeyboard();
+
+            updateStatusBarIconMode(mInvertMode);
         } else {
             topBar.setVisibility(View.VISIBLE);
             currentBar.setVisibility(View.VISIBLE);
@@ -1136,6 +1151,8 @@ public class DocumentActivity extends Activity {
                 searchBar.requestFocus();
                 showKeyboard();
             }
+
+            updateStatusBarIconMode(true);
         }
     }
 
@@ -1239,5 +1256,17 @@ public class DocumentActivity extends Activity {
             vis = baseFlags;
         }
         window.getDecorView().setSystemUiVisibility(vis);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+        }
     }
 }
