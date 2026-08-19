@@ -68,7 +68,7 @@ dependencies {
 
     // PDF
     //pdfium 核心依赖（pdfviewer 的底层引擎）
-    implementation 'com.github.barteksc:pdfium-android:1.9.0'
+    //implementation 'com.github.barteksc:pdfium-android:1.9.0'
 
     // MuPDF
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
