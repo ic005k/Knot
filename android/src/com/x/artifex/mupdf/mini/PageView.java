@@ -24,6 +24,9 @@ public class PageView
 
     private final String APP = "MuPDF";
 
+    private static final int SCROLL_EPSILON = 2; // 容差像素
+    protected int savedScrollX = 0; // 当前阅读水平位置，翻页时跨页恢复
+
     // TTS 高亮
     private Quad[] ttsQuads = null;
     private final Paint ttsPaint = new Paint();
@@ -154,10 +157,18 @@ public class PageView
             if (scrollX < 0) scrollX = 0;
             if (scrollY < 0) scrollY = 0;
             if (scrollX > bitmapW - canvasW) scrollX = bitmapW - canvasW;
-            if (scrollY > bitmapW - canvasW) scrollY = bitmapW - canvasW;
+
+            //if (scrollY > bitmapW - canvasW) scrollY = bitmapW - canvasW;
+            if (scrollY > bitmapH - canvasH) scrollY = bitmapH - canvasH; // ✅
+
+            savedScrollX = scrollX; // ✅ 搜索位置也成为新的记忆基准
         } else if (!toggledUI && pageScale == zoom) {
-            scrollX = wentBack ? bitmapW - canvasW : 0;
-            scrollY = wentBack ? bitmapH - canvasH : 0;
+            // scrollX = wentBack ? bitmapW - canvasW : 0;
+            // scrollY = wentBack ? bitmapH - canvasH : 0;
+            // ✅ 正常翻页：无条件恢复 savedScrollX，钳位到新页面合法范围
+            scrollY = wentBack ? Math.max(0, bitmapH - canvasH) : 0;
+            int maxScrollX = Math.max(0, bitmapW - canvasW);
+            scrollX = Math.max(0, Math.min(savedScrollX, maxScrollX));
         }
         pageScale = zoom;
         invalidate();
@@ -298,7 +309,7 @@ public class PageView
         );
     }
 
-    public void goBackward() {
+    /*public void goBackward() {
         scroller.forceFinished(true);
         if (scrollY <= 0) {
             if (scrollX <= 0) {
@@ -316,9 +327,9 @@ public class PageView
             scroller.startScroll(scrollX, scrollY, 0, (-canvasH * 9) / 10, 250);
         }
         invalidate();
-    }
+    }*/
 
-    public void goForward() {
+    /*public void goForward() {
         scroller.forceFinished(true);
         if (scrollY + canvasH >= bitmapH) {
             if (scrollX + canvasW >= bitmapW) {
@@ -335,6 +346,42 @@ public class PageView
         } else {
             scroller.startScroll(scrollX, scrollY, 0, (canvasH * 9) / 10, 250);
         }
+        invalidate();
+    }*/
+
+    public void goBackward() {
+        scroller.forceFinished(true);
+
+        // ✅ 仅钳位 Y，X 由 onDraw 自行管理，翻页逻辑不碰它
+        int maxScrollY = Math.max(0, bitmapH - canvasH);
+        scrollY = Math.max(0, Math.min(scrollY, maxScrollY));
+
+        if (scrollY <= 0) {
+            savedScrollX = scrollX; // ✅ 无条件快照
+            if (actionListener != null) actionListener.goBackward();
+            return;
+        }
+
+        int dy = (-canvasH * 9) / 10;
+        scroller.startScroll(scrollX, scrollY, 0, dy, 250);
+        invalidate();
+    }
+
+    public void goForward() {
+        scroller.forceFinished(true);
+
+        // ✅ 仅钳位 Y，X 由 onDraw 自行管理，翻页逻辑不碰它
+        int maxScrollY = Math.max(0, bitmapH - canvasH);
+        scrollY = Math.max(0, Math.min(scrollY, maxScrollY));
+
+        if (scrollY + canvasH >= bitmapH) {
+            savedScrollX = scrollX; // ✅ 无条件快照
+            if (actionListener != null) actionListener.goForward();
+            return;
+        }
+
+        int dy = (canvasH * 9) / 10;
+        scroller.startScroll(scrollX, scrollY, 0, dy, 250);
         invalidate();
     }
 
@@ -358,7 +405,7 @@ public class PageView
             invalidate(); /* keep animating */
         }
 
-        if (bitmapW <= canvasW) {
+        /*if (bitmapW <= canvasW) {
             scrollX = 0;
             x = (canvasW - bitmapW) / 2;
         } else {
@@ -373,6 +420,27 @@ public class PageView
         } else {
             if (scrollY < 0) scrollY = 0;
             if (scrollY > bitmapH - canvasH) scrollY = bitmapH - canvasH;
+            y = -scrollY;
+        }*/
+        // 钳位逻辑
+        if (bitmapW <= canvasW) {
+            scrollX = 0;
+            x = (canvasW - bitmapW) / 2;
+        } else {
+            // ✅ 双向钳位，消除浮点截断残留
+            if (scrollX < 0) scrollX = 0;
+            int maxScrollX = bitmapW - canvasW;
+            if (scrollX > maxScrollX) scrollX = maxScrollX;
+            x = -scrollX;
+        }
+
+        if (bitmapH <= canvasH) {
+            scrollY = 0;
+            y = (canvasH - bitmapH) / 2;
+        } else {
+            if (scrollY < 0) scrollY = 0;
+            int maxScrollY = bitmapH - canvasH;
+            if (scrollY > maxScrollY) scrollY = maxScrollY;
             y = -scrollY;
         }
 
@@ -404,14 +472,18 @@ public class PageView
                 }
         }
 
-        // ✅ 【新增】TTS 朗读高亮绘制（最后绘制，确保在最上层）
+        // ✅ TTS 高亮绘制 —— 修正缩放比
         if (ttsQuads != null && ttsQuads.length > 0) {
+            // ttsQuads 是在 pageScale 下用基础ctm变换的
+            // 当前实际缩放是 viewScale，需要补一个比值
+            float scaleRatio = viewScale / pageScale;
+
             for (Quad q : ttsQuads) {
                 path.rewind();
-                path.moveTo(x + q.ul_x * viewScale, y + q.ul_y * viewScale);
-                path.lineTo(x + q.ll_x * viewScale, y + q.ll_y * viewScale);
-                path.lineTo(x + q.lr_x * viewScale, y + q.lr_y * viewScale);
-                path.lineTo(x + q.ur_x * viewScale, y + q.ur_y * viewScale);
+                path.moveTo(x + q.ul_x * scaleRatio, y + q.ul_y * scaleRatio);
+                path.lineTo(x + q.ll_x * scaleRatio, y + q.ll_y * scaleRatio);
+                path.lineTo(x + q.lr_x * scaleRatio, y + q.lr_y * scaleRatio);
+                path.lineTo(x + q.ur_x * scaleRatio, y + q.ur_y * scaleRatio);
                 path.close();
                 canvas.drawPath(path, ttsPaint);
             }
@@ -427,8 +499,8 @@ public class PageView
      * 设置 TTS 高亮并自动滚动到高亮位置
      * ✅ version 参数，防止跨页高亮残留
      */
+
     public void setTtsHighlight(Quad[] quads, int version) {
-        // ✅ 版本号不匹配则忽略（旧页面的回调到达时自动丢弃）
         if (version != pageVersion) {
             Log.i(
                 APP,
@@ -444,37 +516,29 @@ public class PageView
         this.ttsQuads = quads;
         this.ttsHighlightVersion = version;
 
-        // 自动滚动逻辑
+        // ✅ 仅垂直滚动到高亮位置，水平位置完全不动
         if (quads != null && quads.length > 0 && bitmapW > 0 && bitmapH > 0) {
-            float centerX = 0,
-                centerY = 0;
+            float scaleRatio = viewScale / pageScale;
+
+            float centerY = 0;
             for (Quad q : quads) {
-                centerX += (q.ul_x + q.lr_x) / 2f;
                 centerY += (q.ul_y + q.lr_y) / 2f;
             }
-            centerX /= quads.length;
             centerY /= quads.length;
 
-            float viewCenterX = centerX * viewScale;
-            float viewCenterY = centerY * viewScale;
-
-            int targetScrollX = (int) (viewCenterX - canvasW / 2f);
+            float viewCenterY = centerY * scaleRatio;
             int targetScrollY = (int) (viewCenterY - canvasH / 2f);
 
-            int maxScrollX = Math.max(0, bitmapW - canvasW);
             int maxScrollY = Math.max(0, bitmapH - canvasH);
-            targetScrollX = Math.max(0, Math.min(targetScrollX, maxScrollX));
             targetScrollY = Math.max(0, Math.min(targetScrollY, maxScrollY));
 
-            if (
-                Math.abs(targetScrollX - scrollX) > 10 ||
-                Math.abs(targetScrollY - scrollY) > 10
-            ) {
+            // ✅ 仅当垂直偏移超过阈值时才启动滚动动画
+            if (Math.abs(targetScrollY - scrollY) > 10) {
                 scroller.forceFinished(true);
                 scroller.startScroll(
-                    scrollX,
+                    scrollX, // ← X 起点保持当前值
                     scrollY,
-                    targetScrollX - scrollX,
+                    0, // ← dx = 0，不产生任何水平位移
                     targetScrollY - scrollY,
                     300
                 );

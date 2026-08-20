@@ -1454,7 +1454,11 @@ public class DocumentActivity extends Activity {
         } else {
             stopTtsReading();
             runOnUiThread(() ->
-                Toast.makeText(this, "全书朗读完毕", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "Finished reading the entire book.",
+                    Toast.LENGTH_SHORT
+                ).show()
             );
         }
     }
