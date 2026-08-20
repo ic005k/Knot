@@ -726,6 +726,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../src/MainWindow.ui" line="5630"/>
+        <location filename="../../src/MainWindow.ui" line="5745"/>
+        <source>0/0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../../src/MainWindow.ui" line="7793"/>
         <source>Note Link</source>
         <translation type="unfinished"></translation>
@@ -1284,18 +1290,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.ui" line="5630"/>
-        <source>Note Book</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../../src/MainWindow.ui" line="5649"/>
         <source>F</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/MainWindow.ui" line="5745"/>
-        <source>Note List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2302,16 +2298,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="876"/>
-        <source>Note Book</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Notes/Notes.cpp" line="877"/>
-        <source>Note List</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../../src/Notes/Notes.cpp" line="236"/>
         <source>The current note does not exist. Please select another note or create a new note.</source>
         <translation type="unfinished"></translation>
@@ -2494,16 +2480,6 @@
     <message>
         <location filename="../../src/Notes/NotesList_Event.cpp" line="379"/>
         <source>Move to the recycle bin?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="430"/>
-        <source>Note Book</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Notes/NotesList_Event.cpp" line="431"/>
-        <source>Note List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -7375,6 +7351,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../src/Reader/Reader.cpp" line="1405"/>
+        <source>Clear reading marks for the current book?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../../src/Reader/Reader_QML.cpp" line="21"/>
         <source>Info</source>
         <translation type="unfinished"></translation>
@@ -7386,22 +7367,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="1384"/>
-        <source>Clear all reading history</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Reader/Reader.cpp" line="1804"/>
+        <location filename="../../src/Reader/Reader.cpp" line="1830"/>
         <source>Remove from list?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="1823"/>
+        <location filename="../../src/Reader/Reader.cpp" line="1849"/>
         <source>The EPUB file was opened with an error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Reader/Reader.cpp" line="2054"/>
+        <location filename="../../src/Reader/Reader.cpp" line="2080"/>
         <source>Share to</source>
         <translation type="unfinished"></translation>
     </message>

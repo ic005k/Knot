@@ -1676,14 +1676,12 @@
         <translation>AI分析</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5630"/>
         <source>Note Book</source>
-        <translation>笔记本</translation>
+        <translation type="vanished">笔记本</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5745"/>
         <source>Note List</source>
-        <translation>笔记列表</translation>
+        <translation type="vanished">笔记列表</translation>
     </message>
     <message>
         <source>Show Find</source>
@@ -1872,6 +1870,12 @@
         <location filename="MainWindow.ui" line="7954"/>
         <source>View</source>
         <translation>查看</translation>
+    </message>
+    <message>
+        <location filename="MainWindow.ui" line="5630"/>
+        <location filename="MainWindow.ui" line="5745"/>
+        <source>0/0</source>
+        <translation></translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="7994"/>
@@ -3118,14 +3122,12 @@
         <translation>分享到</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="876"/>
         <source>Note Book</source>
-        <translation>笔记本</translation>
+        <translation type="vanished">笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="877"/>
         <source>Note List</source>
-        <translation>笔记列表</translation>
+        <translation type="vanished">笔记列表</translation>
     </message>
     <message>
         <location filename="Notes/Notes.cpp" line="236"/>
@@ -3715,14 +3717,12 @@
         <translation>粘贴</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="430"/>
         <source>Note Book</source>
-        <translation>笔记本</translation>
+        <translation type="vanished">笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Event.cpp" line="431"/>
         <source>Note List</source>
-        <translation>笔记列表</translation>
+        <translation type="vanished">笔记列表</translation>
     </message>
 </context>
 <context>
@@ -8668,6 +8668,11 @@ Model ID: %1</source>
         <translation></translation>
     </message>
     <message>
+        <location filename="Reader/Reader.cpp" line="1405"/>
+        <source>Clear reading marks for the current book?</source>
+        <translation>清除当前书籍的阅读标记？</translation>
+    </message>
+    <message>
         <source>Scroll Value</source>
         <translation type="vanished">滚动值</translation>
     </message>
@@ -8682,17 +8687,17 @@ Model ID: %1</source>
         <translation>信息</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="1804"/>
+        <location filename="Reader/Reader.cpp" line="1830"/>
         <source>Remove from list?</source>
         <translation>从列表中移除？</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="1823"/>
+        <location filename="Reader/Reader.cpp" line="1849"/>
         <source>The EPUB file was opened with an error.</source>
         <translation>EPUB文件打开出错</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="2054"/>
+        <location filename="Reader/Reader.cpp" line="2080"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
@@ -8725,9 +8730,8 @@ Model ID: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="1384"/>
         <source>Clear all reading history</source>
-        <translation>清除所有的阅读记录</translation>
+        <translation type="vanished">清除所有的阅读记录</translation>
     </message>
 </context>
 <context>
@@ -9163,7 +9167,7 @@ Model ID: %1</source>
         <location filename="Exercise/Steps.cpp" line="1789"/>
         <source>Hike</source>
         <oldsource>Hiking</oldsource>
-        <translation type="unfinished">徒步</translation>
+        <translation>徒步</translation>
     </message>
     <message>
         <location filename="Exercise/ShowSportChart.cpp" line="96"/>
@@ -9173,7 +9177,7 @@ Model ID: %1</source>
         <location filename="Exercise/Steps.cpp" line="1791"/>
         <source>Run</source>
         <oldsource>Running</oldsource>
-        <translation type="unfinished">跑步</translation>
+        <translation>跑步</translation>
     </message>
     <message>
         <location filename="Exercise/Steps.cpp" line="161"/>
@@ -10149,17 +10153,17 @@ Model ID: %1</source>
     <message>
         <location filename="qmlsrc/aiapi_list.qml" line="111"/>
         <source>No content</source>
-        <translation type="unfinished"></translation>
+        <translation>无内容</translation>
     </message>
     <message>
         <location filename="qmlsrc/aiapi_list.qml" line="133"/>
         <source>Cancel</source>
-        <translation type="unfinished">取消</translation>
+        <translation>取消</translation>
     </message>
     <message>
         <location filename="qmlsrc/aiapi_list.qml" line="142"/>
         <source>OK</source>
-        <translation type="unfinished">确定</translation>
+        <translation>确定</translation>
     </message>
 </context>
 <context>
@@ -11974,17 +11978,17 @@ Amount: %3</source>
     <message>
         <location filename="qmlsrc/steps_old.qml" line="70"/>
         <source>Date</source>
-        <translation type="unfinished">日期</translation>
+        <translation>日期</translation>
     </message>
     <message>
         <location filename="qmlsrc/steps_old.qml" line="70"/>
         <source>Steps</source>
-        <translation type="unfinished">步数</translation>
+        <translation>步数</translation>
     </message>
     <message>
         <location filename="qmlsrc/steps_old.qml" line="70"/>
         <source>KM</source>
-        <translation type="unfinished">公里</translation>
+        <translation>公里</translation>
     </message>
 </context>
 <context>

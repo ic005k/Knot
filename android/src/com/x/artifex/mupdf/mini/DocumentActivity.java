@@ -1449,6 +1449,7 @@ public class DocumentActivity extends Activity {
             mTtsReadingPage++;
             currentPage = mTtsReadingPage;
             pageView.clearTtsHighlight();
+            pageView.saveCurrentScrollX(); // ✅ TTS 翻页前快照水平位置
             loadPage();
             readCurrentPage();
         } else {

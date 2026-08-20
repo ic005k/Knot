@@ -1380,9 +1380,35 @@ void Reader::clearAllReaderRecords() {
   int count = m_Method->getCountFromQW(mui->qwBookList);
   if (count == 0) return;
 
-  auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-  if (!m_ShowMsg->showMsg("Knot", tr("Clear all reading history") + " ? ", 2))
+  int index = m_Method->getCurrentIndexFromQW(mui->qwBookList);
+  if (index < 0) return;
+
+  QString bookFlag = m_Method->getText3(mui->qwBookList, index);
+  if (bookFlag == "pdf" || bookFlag == "none") return;
+
+  QString n_str = bookList.at(index);
+  QStringList list = n_str.split("|");
+  QString c_name = "";
+  if (list.count() == 3) {
+    c_name = list.at(2);
+  } else
     return;
+
+  QString file_ini = iniDir + "bookini/" + c_name + ".ini";
+  if (!QFile::exists(file_ini)) {
+    return;
+  }
+
+  auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
+  if (!m_ShowMsg->showMsg(
+          "Knot",
+          tr("Clear reading marks for the current book?") + "\n\n " + file_ini,
+          2))
+    return;
+
+  QFile::remove(file_ini);
+
+  return;
 
   m_Method->clearAllBakList(mui->qwBookList);
   bookList.clear();
@@ -1904,7 +1930,7 @@ void Reader::readBookDone() {
       break;
     }
   }
-  bookList.insert(0, strTitle + "|" + fileName);
+  bookList.insert(0, strTitle + "|" + fileName + "|" + currentBookName);
 
   if (isPDF) {
     qDebug() << "===Read Pdf... ..." << fileName;

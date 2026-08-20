@@ -551,4 +551,12 @@ public class PageView
     public int getPageVersion() {
         return pageVersion;
     }
+
+    /**
+     * 外部调用方在触发非 goForward/goBackward 的翻页前，
+     * 主动快照当前水平位置，确保 setBitmap 能正确恢复。
+     */
+    public void saveCurrentScrollX() {
+        savedScrollX = scrollX;
+    }
 }
