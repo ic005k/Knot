@@ -1092,7 +1092,8 @@ public class DocumentActivity extends Activity {
                             canvasW
                         );
 
-                        savedCtm = ctm; // ✅ 保存 ctm
+                        // ✅ 在 zoom 之前保存基础 ctm（与 linkBounds/hits 一致）
+                        savedCtm = ctm;
 
                         Link[] links = page.getLinks();
                         if (links == null) {
@@ -1128,7 +1129,7 @@ public class DocumentActivity extends Activity {
                             invertBitmap(bitmap);
                         }
 
-                        mCurrentPageCtm = savedCtm; // ✅ 保存到字段
+                        mCurrentPageCtm = savedCtm; // ✅ 基础 ctm，不含 zoom
 
                         pageView.setBitmap(
                             bitmap,

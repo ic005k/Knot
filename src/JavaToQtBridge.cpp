@@ -299,6 +299,8 @@ static void JavaNotify_19() {
 static void JavaNotify_20(JNIEnv* env, jclass clazz, jstring sentence) {
   Q_UNUSED(clazz);
 
+  if (isPDF) return;
+
   // 👇 【安全第一步】先在当前JNI线程把字符串转好
   if (!sentence) {
     qDebug() << "JavaNotify_20: 空句子";

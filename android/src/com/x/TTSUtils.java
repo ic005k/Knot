@@ -488,25 +488,9 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
                         Log.d(TAG, "Speech completed: " + utteranceId);
                         isPlayingSegment.set(false);
 
-                        // ✅ 只调 playNextSegment，FINISHED 通知统一由它发出
+                        // ✅ 只推进下一段，FINISHED 通知、音频焦点释放
+                        // 全部由 playNextSegment() 统一处理
                         playNextSegment();
-
-                        // 仅在队列真正为空时释放音频焦点和通知完成监听器
-                        // （playNextSegment 内部已处理 FINISHED 的 Java/C++ 通知）
-                        if (playQueue.isEmpty()) {
-                            releaseAudioFocus();
-
-                            if (playCompleteListener != null) {
-                                mainHandler.post(() ->
-                                    playCompleteListener.onPlayComplete()
-                                );
-                            }
-                            if (enhancedPlayListener != null) {
-                                mainHandler.post(() ->
-                                    enhancedPlayListener.onPlayComplete()
-                                );
-                            }
-                        }
                     }
 
                     @Override
@@ -514,25 +498,6 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
                         Log.e(TAG, "Speech error: " + utteranceId);
                         isPlayingSegment.set(false);
                         playNextSegment();
-
-                        if (playQueue.isEmpty()) {
-                            releaseAudioFocus();
-                            mainHandler.post(() ->
-                                Toast.makeText(
-                                    context,
-                                    "Speech error",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            );
-
-                            if (enhancedPlayListener != null) {
-                                mainHandler.post(() ->
-                                    enhancedPlayListener.onPlayError(
-                                        "Speech error: " + utteranceId
-                                    )
-                                );
-                            }
-                        }
                     }
                 }
             );
@@ -565,23 +530,32 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
 
         lock.lock();
         try {
-            // 队列为空 → 播放完毕
             if (playQueue.isEmpty()) {
-                // ✅ 同步通知 Java 层（高亮/翻页），不被 shutdown 杀死
+                // ✅ 先释放音频焦点
+                releaseAudioFocus();
+
+                // ✅ 同步通知 Java 层
                 if (sentenceProgressListener != null) {
                     sentenceProgressListener.onSentenceChanged(
                         "__TTS_PLAY_FINISHED__"
                     );
                 }
-                // C++ 通知放最后（可能触发 stop → shutdown 链）
+
+                // ✅ 最后通知 C++ 层
                 MyService.CallJavaNotify_20("__TTS_PLAY_FINISHED__");
+
+                // ✅ 通知完成监听器（同步，不 post）
+                if (playCompleteListener != null) {
+                    playCompleteListener.onPlayComplete();
+                }
+                if (enhancedPlayListener != null) {
+                    enhancedPlayListener.onPlayComplete();
+                }
                 return;
             }
 
-            // 取下一段
             String nextSegment = playQueue.poll();
             if (nextSegment == null || nextSegment.isEmpty()) {
-                // 跳过空段，重新取
                 mainHandler.post(this::playNextSegment);
                 return;
             }
@@ -591,7 +565,7 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
                 sentenceProgressListener.onSentenceChanged(nextSegment);
             }
 
-            // 通知 C++ 层（EPUB 用）
+            // 通知 C++ 层
             MyService.CallJavaNotify_20(nextSegment);
 
             Log.d(
@@ -604,7 +578,6 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
                     "..."
             );
 
-            // 交给 TTS 引擎朗读
             String utteranceId = "tts_segment_" + System.currentTimeMillis();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 Bundle params = new Bundle();
