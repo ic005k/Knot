@@ -161,6 +161,18 @@
         android:background="#303030"
         android:visibility="gone"
     >
+        <!-- ✅ TTS 播放/停止按钮 -->
+            <ImageButton
+            android:id="@+id/tts_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:background="@drawable/button"
+            android:src="@drawable/ic_volume_up_white_24dp"
+            android:contentDescription="TTS"
+            android:padding="12dp"
+        />
+
 		<SeekBar
             android:id="@+id/page_seekbar"
             android:layout_width="0dp"

@@ -27,6 +27,23 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
 
+    /** 纯 Java 层的 TTS 句子进度监听器 */
+    public interface OnSentenceProgressListener {
+        /** 每开始朗读一个新分段时回调 */
+        void onSentenceChanged(String sentence);
+    }
+
+    private OnSentenceProgressListener sentenceProgressListener;
+
+    /** 设置句子进度监听器 */
+    public void setOnSentenceProgressListener(
+        OnSentenceProgressListener listener
+    ) {
+        this.sentenceProgressListener = listener;
+    }
+
+    ///////////////////////////////////////////////////////////////
+
     private static final String TAG = "TTSUtils";
 
     // ========== 与旧版本兼容的接口 ==========
@@ -550,7 +567,7 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
 
         lock.lock();
         try {
-            if (playQueue.isEmpty()) {
+            /*if (playQueue.isEmpty()) {
                 Log.d(TAG, "分段播放队列已空，结束播放");
                 return;
             }
@@ -562,6 +579,36 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
                 return;
             }
 
+            MyService.CallJavaNotify_20(nextSegment);*/
+
+            if (playQueue.isEmpty()) {
+                // ✅ 队列播完，发送结束标记给 Java 监听器
+                if (sentenceProgressListener != null) {
+                    mainHandler.post(() ->
+                        sentenceProgressListener.onSentenceChanged(
+                            "__TTS_PLAY_FINISHED__"
+                        )
+                    );
+                }
+                // 保留原有 C++ 通知（epub 仍需使用）
+                MyService.CallJavaNotify_20("__TTS_PLAY_FINISHED__");
+                return;
+            }
+
+            String nextSegment = playQueue.poll();
+            if (nextSegment == null || nextSegment.isEmpty()) {
+                mainHandler.post(this::playNextSegment);
+                return;
+            }
+
+            // ✅ 通知 Java 监听器（MuPDF PDF 用这个）
+            if (sentenceProgressListener != null) {
+                mainHandler.post(() ->
+                    sentenceProgressListener.onSentenceChanged(nextSegment)
+                );
+            }
+
+            // 保留原有 C++ 通知（epub 用这个，互不影响）
             MyService.CallJavaNotify_20(nextSegment);
 
             Log.d(

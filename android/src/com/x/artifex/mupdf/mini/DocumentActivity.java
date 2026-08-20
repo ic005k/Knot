@@ -43,10 +43,13 @@ import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.artifex.mupdf.fitz.*;
+import com.artifex.mupdf.fitz.Quad;
 import com.artifex.mupdf.fitz.android.*;
 import com.x.ImmersiveUtil;
 import com.x.MyActivity;
+import com.x.MyService;
 import com.x.R;
+import com.x.TTSUtils;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,6 +58,11 @@ import java.util.Collections;
 import java.util.Stack;
 
 public class DocumentActivity extends Activity {
+
+    // TTS
+    private ImageButton ttsButton;
+    protected boolean mIsTtsReading = false;
+    protected int mTtsReadingPage = -1;
 
     protected boolean mInvertMode = false;
 
@@ -260,6 +268,9 @@ public class DocumentActivity extends Activity {
         bottomBar = findViewById(R.id.bottom_bar);
         backgroundLayout = findViewById(R.id.background_layout);
         topBar = findViewById(R.id.top_bar);
+
+        ttsButton = findViewById(R.id.tts_button);
+        ttsButton.setOnClickListener(v -> toggleTts());
 
         currentBar = actionBar;
 
@@ -1327,4 +1338,217 @@ public class DocumentActivity extends Activity {
             window.getDecorView().setSystemUiVisibility(vis);
         }
     }
+
+    // TTS///////////////////////////////////////////////////////////////////////
+    /** TTS 句子进度监听器（纯 Java，不走 JNI） */
+    private final TTSUtils.OnSentenceProgressListener mTtsSentenceListener =
+        new TTSUtils.OnSentenceProgressListener() {
+            @Override
+            public void onSentenceChanged(String sentence) {
+                // 已在主线程回调，可直接操作 UI
+                if (!mIsTtsReading) return;
+
+                if ("__TTS_PLAY_FINISHED__".equals(sentence)) {
+                    // ✅ 当前页全部读完 → 自动翻页
+                    autoAdvanceTtsPage();
+                } else {
+                    // ✅ 正常句子 → 搜索并高亮
+                    highlightCurrentSentence(sentence);
+                }
+            }
+        };
+
+    /** 开始朗读 */
+    public void startTtsReading() {
+        if (mIsTtsReading) {
+            stopTtsReading();
+            return;
+        }
+
+        mIsTtsReading = true;
+        mTtsReadingPage = currentPage;
+        updateTtsButtonState();
+        updateTtsButtonState(); // ✅ 切换为停止图标
+        readCurrentPage();
+    }
+
+    /** 停止朗读 */
+    public void stopTtsReading() {
+        mIsTtsReading = false;
+        mTtsReadingPage = -1;
+        MyService.stopTextPlay();
+        pageView.clearTtsHighlight();
+        updateTtsButtonState();
+        updateTtsButtonState(); // ✅ 切换为播放图标
+    }
+
+    /** 读取并播放当前页 */
+    private void readCurrentPage() {
+        worker.add(
+            new Worker.Task() {
+                String text;
+
+                public void work() {
+                    text = extractPageText(mTtsReadingPage);
+                }
+
+                public void run() {
+                    if (!mIsTtsReading) return;
+                    if (text == null || text.isEmpty()) {
+                        autoAdvanceTtsPage();
+                        return;
+                    }
+                    // ✅ 使用带监听器的播放方法
+                    MyService.playTextWithListener(text, mTtsSentenceListener);
+                }
+            }
+        );
+    }
+
+    /** 自动翻到下一页 */
+    protected void autoAdvanceTtsPage() {
+        if (!mIsTtsReading) return;
+        if (mTtsReadingPage < pageCount - 1) {
+            mTtsReadingPage++;
+            currentPage = mTtsReadingPage;
+            loadPage(); // 渲染新页面
+            readCurrentPage(); // 提取文本并播放
+        } else {
+            stopTtsReading();
+            Toast.makeText(this, "朗读完毕", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** 在当前页搜索句子并高亮 */
+    protected void highlightCurrentSentence(String sentence) {
+        if (sentence == null || sentence.trim().isEmpty()) return;
+
+        worker.add(
+            new Worker.Task() {
+                Quad[] quads;
+
+                public void work() {
+                    try {
+                        Page page = doc.loadPage(currentPage);
+                        Quad[][] hits = page.search(sentence.trim());
+                        page.destroy();
+                        if (hits != null && hits.length > 0) quads = hits[0];
+                    } catch (Throwable x) {
+                        Log.e(APP, "highlight error: " + x.getMessage());
+                    }
+                }
+
+                public void run() {
+                    if (quads != null && mIsTtsReading) {
+                        pageView.setTtsHighlight(quads);
+                    }
+                }
+            }
+        );
+    }
+
+    /** 切换 TTS 播放/停止 */
+    private void toggleTts() {
+        if (mIsTtsReading) {
+            stopTtsReading();
+        } else {
+            startTtsReading();
+        }
+    }
+
+    /** 更新按钮图标状态 */
+    private void updateTtsButtonState() {
+        if (ttsButton == null) return;
+
+        if (mIsTtsReading) {
+            ttsButton.setImageResource(R.drawable.ic_stop_white_24dp);
+            ttsButton.setContentDescription("Stop");
+        } else {
+            ttsButton.setImageResource(R.drawable.ic_volume_up_white_24dp);
+            ttsButton.setContentDescription("Play");
+        }
+    }
+
+    /**
+     * 提取指定页面的纯文本内容（用于 TTS 朗读）
+     * MuPDF 1.28.0 兼容版 - 不使用 StructuredTextWalker
+     */
+    private String extractPageText(int pageNumber) {
+        try {
+            Page page = doc.loadPage(pageNumber);
+            StructuredText stext = page.toStructuredText("preserve-whitespace");
+
+            String text = null;
+
+            // 方案1: 尝试 asText()（MuPDF 1.24+ 部分构建版本提供）
+            try {
+                java.lang.reflect.Method m = stext
+                    .getClass()
+                    .getMethod("asText");
+                text = (String) m.invoke(stext);
+            } catch (Exception ignored) {}
+
+            // 方案2: 尝试 toPlainText()
+            if (text == null) {
+                try {
+                    java.lang.reflect.Method m = stext
+                        .getClass()
+                        .getMethod("toPlainText");
+                    text = (String) m.invoke(stext);
+                } catch (Exception ignored) {}
+            }
+
+            // 方案3: 尝试 search("") 或 getText() 等其他可能的方法名
+            if (text == null) {
+                for (String methodName : new String[] {
+                    "getText",
+                    "toString",
+                    "asString",
+                }) {
+                    try {
+                        java.lang.reflect.Method m = stext
+                            .getClass()
+                            .getMethod(methodName);
+                        Object result = m.invoke(stext);
+                        if (
+                            result instanceof String &&
+                            !((String) result).isEmpty()
+                        ) {
+                            text = (String) result;
+                            break;
+                        }
+                    } catch (Exception ignored) {}
+                }
+            }
+
+            page.destroy();
+            stext.destroy();
+
+            if (text != null) {
+                return text.trim();
+            }
+
+            // 方案4: 终极兜底 - 用 page.search 逐字符不可行，
+            // 改为打印所有可用方法帮助调试
+            Log.e(APP, "extractPageText: No text extraction method found.");
+            Log.e(APP, "Available methods on StructuredText:");
+            for (java.lang.reflect.Method m : stext.getClass().getMethods()) {
+                Log.e(
+                    APP,
+                    "  " +
+                        m.getName() +
+                        "(" +
+                        java.util.Arrays.toString(m.getParameterTypes()) +
+                        ") -> " +
+                        m.getReturnType().getSimpleName()
+                );
+            }
+            return "";
+        } catch (Exception e) {
+            Log.e(APP, "extractPageText failed: " + e.getMessage());
+            return "";
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
 }

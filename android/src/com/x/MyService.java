@@ -1369,6 +1369,65 @@ public class MyService extends Service {
     }
 
     /**
+     * 带句子监听器的播放方法（供 DocumentActivity TTS 高亮使用）
+     */
+    public void playMyTextInService(
+        String text,
+        TTSUtils.OnSentenceProgressListener listener
+    ) {
+        if (TextUtils.isEmpty(text)) {
+            return;
+        }
+
+        synchronized (ttsLock) {
+            pendingTtsText = text;
+            TTSUtils newTts = new TTSUtils(getApplicationContext());
+            currentPlayingTts = newTts;
+
+            // ✅ 修复点：注入传入的 listener
+            if (listener != null) {
+                newTts.setOnSentenceProgressListener(listener);
+            }
+
+            newTts.initialize(
+                new TTSUtils.InitCallback() {
+                    @Override
+                    public void onSuccess() {
+                        synchronized (ttsLock) {
+                            if (pendingTtsText != null) {
+                                newTts.speak(pendingTtsText);
+                                pendingTtsText = null;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        synchronized (ttsLock) {
+                            pendingTtsText = null;
+                            newTts.shutdown();
+                        }
+                    }
+                }
+            );
+
+            newTts.setOnPlayCompleteListener(
+                new TTSUtils.OnPlayCompleteListener() {
+                    @Override
+                    public void onPlayComplete() {
+                        newTts.shutdown();
+                    }
+
+                    @Override
+                    public void onPlayStopped() {
+                        newTts.shutdown();
+                    }
+                }
+            );
+        }
+    }
+
+    /**
      * 停止服务内的TTS播放
      */
     public void stopPlayMyTextInService() {
@@ -1719,6 +1778,31 @@ public class MyService extends Service {
                 default:
                     return -1;
             }
+        }
+    }
+
+    /**
+     * 为当前 TTS 实例注入 Java 层句子监听器
+     * 必须在 playText() 之后或同时调用
+     */
+    public void setTtsSentenceListener(
+        TTSUtils.OnSentenceProgressListener listener
+    ) {
+        synchronized (ttsLock) {
+            if (currentPlayingTts != null) {
+                currentPlayingTts.setOnSentenceProgressListener(listener);
+            }
+        }
+    }
+
+    // 静态便捷方法
+    public static void playTextWithListener(
+        String text,
+        TTSUtils.OnSentenceProgressListener listener
+    ) {
+        MyService service = getInstance();
+        if (service != null) {
+            service.playMyTextInService(text, listener);
         }
     }
 }

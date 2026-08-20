@@ -24,6 +24,17 @@ public class PageView
 
     private final String APP = "MuPDF";
 
+    // TTS 高亮
+    private Quad[] ttsQuads = null;
+    private final Paint ttsPaint = new Paint();
+
+    // 初始化
+    {
+        ttsPaint.setColor(0x66FF9800); // 半透明橙色
+        ttsPaint.setStyle(Paint.Style.FILL);
+        ttsPaint.setAntiAlias(true);
+    }
+
     protected DocumentActivity actionListener;
 
     protected float pageScale, viewScale, minScale, maxScale;
@@ -103,6 +114,9 @@ public class PageView
     ) {
         if (bitmap != null) bitmap.recycle();
         error = false;
+
+        ttsQuads = null; // ✅ 兜底：新页面加载时清除旧 TTS 高亮
+
         linkBounds = lbs;
         linkURIs = lus;
         hits = hs;
@@ -383,5 +397,74 @@ public class PageView
                     canvas.drawPath(path, hitPaint);
                 }
         }
+
+        // ✅ 【新增】TTS 朗读高亮绘制（最后绘制，确保在最上层）
+        if (ttsQuads != null && ttsQuads.length > 0) {
+            for (Quad q : ttsQuads) {
+                path.rewind();
+                path.moveTo(x + q.ul_x * viewScale, y + q.ul_y * viewScale);
+                path.lineTo(x + q.ll_x * viewScale, y + q.ll_y * viewScale);
+                path.lineTo(x + q.lr_x * viewScale, y + q.lr_y * viewScale);
+                path.lineTo(x + q.ur_x * viewScale, y + q.ur_y * viewScale);
+                path.close();
+                canvas.drawPath(path, ttsPaint);
+            }
+        }
+    }
+
+    public void clearTtsHighlight() {
+        this.ttsQuads = null;
+        invalidate();
+    }
+
+    /**
+     * 设置 TTS 高亮并自动滚动到高亮位置
+     */
+    public void setTtsHighlight(Quad[] quads) {
+        this.ttsQuads = quads;
+
+        // ✅ 自动滚动到高亮句子所在位置
+        if (quads != null && quads.length > 0 && bitmapW > 0 && bitmapH > 0) {
+            // 计算高亮区域的中心点（页面坐标系）
+            float centerX = 0,
+                centerY = 0;
+            for (Quad q : quads) {
+                centerX += (q.ul_x + q.lr_x) / 2f;
+                centerY += (q.ul_y + q.lr_y) / 2f;
+            }
+            centerX /= quads.length;
+            centerY /= quads.length;
+
+            // 转换为视图坐标系
+            float viewCenterX = centerX * viewScale;
+            float viewCenterY = centerY * viewScale;
+
+            // 计算目标滚动位置（使高亮居中）
+            int targetScrollX = (int) (viewCenterX - canvasW / 2f);
+            int targetScrollY = (int) (viewCenterY - canvasH / 2f);
+
+            // 边界钳制
+            int maxScrollX = Math.max(0, bitmapW - canvasW);
+            int maxScrollY = Math.max(0, bitmapH - canvasH);
+            targetScrollX = Math.max(0, Math.min(targetScrollX, maxScrollX));
+            targetScrollY = Math.max(0, Math.min(targetScrollY, maxScrollY));
+
+            // 仅在位置变化较大时才滚动（避免微小抖动）
+            if (
+                Math.abs(targetScrollX - scrollX) > 10 ||
+                Math.abs(targetScrollY - scrollY) > 10
+            ) {
+                scroller.forceFinished(true);
+                scroller.startScroll(
+                    scrollX,
+                    scrollY,
+                    targetScrollX - scrollX,
+                    targetScrollY - scrollY,
+                    300
+                );
+            }
+        }
+
+        invalidate();
     }
 }

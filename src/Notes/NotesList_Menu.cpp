@@ -437,8 +437,8 @@ void NotesList::on_actionModificationHistory() {
     return;
   }
 
-  mui->frameNoteList->hide();
   mui->frameDiff->show();
+  mui->frameNoteList->hide();
 
   // 获取 QML 中的 ListModel（id: noteVersionModel）
   QObject* versionModel = rootItem->findChild<QObject*>("noteVersionModel");
