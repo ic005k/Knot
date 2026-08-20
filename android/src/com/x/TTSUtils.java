@@ -422,7 +422,8 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
                 audioManager.abandonAudioFocus(audioFocusListener);
             }
 
-            mainHandler.removeCallbacksAndMessages(null);
+            // mainHandler.removeCallbacksAndMessages(null);
+
             playQueue.clear();
             isInitialized.set(false);
             isInitializing.set(false);
@@ -486,17 +487,14 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
                     public void onDone(String utteranceId) {
                         Log.d(TAG, "Speech completed: " + utteranceId);
                         isPlayingSegment.set(false);
+
+                        // ✅ 只调 playNextSegment，FINISHED 通知统一由它发出
                         playNextSegment();
 
+                        // 仅在队列真正为空时释放音频焦点和通知完成监听器
+                        // （playNextSegment 内部已处理 FINISHED 的 Java/C++ 通知）
                         if (playQueue.isEmpty()) {
                             releaseAudioFocus();
-
-                            // ==============================
-                            // 发【结束标记】给 C++
-                            // ==============================
-                            MyService.CallJavaNotify_20(
-                                "__TTS_PLAY_FINISHED__"
-                            );
 
                             if (playCompleteListener != null) {
                                 mainHandler.post(() ->
@@ -567,48 +565,33 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
 
         lock.lock();
         try {
-            /*if (playQueue.isEmpty()) {
-                Log.d(TAG, "分段播放队列已空，结束播放");
-                return;
-            }
-
-            String nextSegment = playQueue.poll();
-            if (nextSegment == null || nextSegment.isEmpty()) {
-                // 跳过空片段，继续下一个
-                mainHandler.post(this::playNextSegment);
-                return;
-            }
-
-            MyService.CallJavaNotify_20(nextSegment);*/
-
+            // 队列为空 → 播放完毕
             if (playQueue.isEmpty()) {
-                // ✅ 队列播完，发送结束标记给 Java 监听器
+                // ✅ 同步通知 Java 层（高亮/翻页），不被 shutdown 杀死
                 if (sentenceProgressListener != null) {
-                    mainHandler.post(() ->
-                        sentenceProgressListener.onSentenceChanged(
-                            "__TTS_PLAY_FINISHED__"
-                        )
+                    sentenceProgressListener.onSentenceChanged(
+                        "__TTS_PLAY_FINISHED__"
                     );
                 }
-                // 保留原有 C++ 通知（epub 仍需使用）
+                // C++ 通知放最后（可能触发 stop → shutdown 链）
                 MyService.CallJavaNotify_20("__TTS_PLAY_FINISHED__");
                 return;
             }
 
+            // 取下一段
             String nextSegment = playQueue.poll();
             if (nextSegment == null || nextSegment.isEmpty()) {
+                // 跳过空段，重新取
                 mainHandler.post(this::playNextSegment);
                 return;
             }
 
-            // ✅ 通知 Java 监听器（MuPDF PDF 用这个）
+            // ✅ 同步通知 Java 层高亮
             if (sentenceProgressListener != null) {
-                mainHandler.post(() ->
-                    sentenceProgressListener.onSentenceChanged(nextSegment)
-                );
+                sentenceProgressListener.onSentenceChanged(nextSegment);
             }
 
-            // 保留原有 C++ 通知（epub 用这个，互不影响）
+            // 通知 C++ 层（EPUB 用）
             MyService.CallJavaNotify_20(nextSegment);
 
             Log.d(
@@ -621,6 +604,7 @@ public class TTSUtils implements AudioManager.OnAudioFocusChangeListener {
                     "..."
             );
 
+            // 交给 TTS 引擎朗读
             String utteranceId = "tts_segment_" + System.currentTimeMillis();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 Bundle params = new Bundle();

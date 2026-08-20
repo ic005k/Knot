@@ -59,10 +59,16 @@ import java.util.Stack;
 
 public class DocumentActivity extends Activity {
 
-    // TTS
+    // TTS //////////////////////////////////////////
     private ImageButton ttsButton;
     protected boolean mIsTtsReading = false;
     protected int mTtsReadingPage = -1;
+    /** 缓存当前页提取的纯文本，用于末尾判断 */
+    private String mCurrentPageText = "";
+    /** 缓存当前页的变换矩阵，供高亮搜索使用 */
+    private Matrix mCurrentPageCtm = null;
+
+    //////////////////////////////////////////////////
 
     protected boolean mInvertMode = false;
 
@@ -1068,6 +1074,7 @@ public class DocumentActivity extends Activity {
                 public Rect[] linkBounds;
                 public String[] linkURIs;
                 public Quad[][] hits;
+                public Matrix savedCtm; // ✅ 新增
 
                 public void work() {
                     try {
@@ -1084,6 +1091,9 @@ public class DocumentActivity extends Activity {
                             page,
                             canvasW
                         );
+
+                        savedCtm = ctm; // ✅ 保存 ctm
+
                         Link[] links = page.getLinks();
                         if (links == null) {
                             linkBounds = new Rect[0];
@@ -1117,6 +1127,8 @@ public class DocumentActivity extends Activity {
                         if (mInvertMode) {
                             invertBitmap(bitmap);
                         }
+
+                        mCurrentPageCtm = savedCtm; // ✅ 保存到字段
 
                         pageView.setBitmap(
                             bitmap,
@@ -1340,21 +1352,20 @@ public class DocumentActivity extends Activity {
     }
 
     // TTS///////////////////////////////////////////////////////////////////////
-    /** TTS 句子进度监听器（纯 Java，不走 JNI） */
+    /** TTS 句子进度监听器 */
     private final TTSUtils.OnSentenceProgressListener mTtsSentenceListener =
         new TTSUtils.OnSentenceProgressListener() {
             @Override
             public void onSentenceChanged(String sentence) {
-                // 已在主线程回调，可直接操作 UI
                 if (!mIsTtsReading) return;
 
                 if ("__TTS_PLAY_FINISHED__".equals(sentence)) {
-                    // ✅ 当前页全部读完 → 自动翻页
+                    Log.i(APP, "TTS FINISHED on page " + mTtsReadingPage);
                     autoAdvanceTtsPage();
-                } else {
-                    // ✅ 正常句子 → 搜索并高亮
-                    highlightCurrentSentence(sentence);
+                    return;
                 }
+
+                highlightCurrentSentence(sentence);
             }
         };
 
@@ -1394,34 +1405,69 @@ public class DocumentActivity extends Activity {
 
                 public void run() {
                     if (!mIsTtsReading) return;
-                    if (text == null || text.isEmpty()) {
+
+                    if (text == null || text.trim().isEmpty()) {
+                        Log.i(
+                            APP,
+                            "Page " + mTtsReadingPage + " is empty, skipping..."
+                        );
                         autoAdvanceTtsPage();
                         return;
                     }
-                    // ✅ 使用带监听器的播放方法
-                    MyService.playTextWithListener(text, mTtsSentenceListener);
+
+                    mCurrentPageText = text.trim();
+
+                    // ✅ 不再手动递增版本号！
+                    // 版本号由 setBitmap 统一管理，这里只读取当前版本
+                    final int currentVersion = pageView.getPageVersion();
+
+                    Log.i(
+                        APP,
+                        "TTS start reading page " +
+                            mTtsReadingPage +
+                            ", version=" +
+                            currentVersion +
+                            ", text length=" +
+                            mCurrentPageText.length()
+                    );
+
+                    MyService.playTextWithListener(
+                        mCurrentPageText,
+                        mTtsSentenceListener
+                    );
                 }
             }
         );
     }
 
-    /** 自动翻到下一页 */
+    /** 自动翻到下一页继续朗读 */
     protected void autoAdvanceTtsPage() {
         if (!mIsTtsReading) return;
+
         if (mTtsReadingPage < pageCount - 1) {
             mTtsReadingPage++;
             currentPage = mTtsReadingPage;
-            loadPage(); // 渲染新页面
-            readCurrentPage(); // 提取文本并播放
+            pageView.clearTtsHighlight();
+            loadPage();
+            readCurrentPage();
         } else {
             stopTtsReading();
-            Toast.makeText(this, "朗读完毕", Toast.LENGTH_SHORT).show();
+            runOnUiThread(() ->
+                Toast.makeText(this, "全书朗读完毕", Toast.LENGTH_SHORT).show()
+            );
         }
     }
 
-    /** 在当前页搜索句子并高亮 */
+    /** 高亮搜索 — 使用实时版本号 */
     protected void highlightCurrentSentence(String sentence) {
         if (sentence == null || sentence.trim().isEmpty()) return;
+
+        // ✅ 关键：将 \n 替换为空格，使搜索字符串变为单行
+        final String original = sentence.trim().replaceAll("\\n+", " ");
+        final int capturedVersion = pageView.getPageVersion();
+        final Matrix ctm = mCurrentPageCtm; // ✅ 捕获当前页的 ctm
+
+        if (ctm == null) return; // 页面尚未渲染完成
 
         worker.add(
             new Worker.Task() {
@@ -1429,10 +1475,43 @@ public class DocumentActivity extends Activity {
 
                 public void work() {
                     try {
-                        Page page = doc.loadPage(currentPage);
-                        Quad[][] hits = page.search(sentence.trim());
+                        Page page = doc.loadPage(mTtsReadingPage);
+
+                        // 三级降级搜索
+                        Quad[][] hits = page.search(original);
+
+                        if (hits == null || hits.length == 0) {
+                            String compressed = original.replaceAll(
+                                "\\s+",
+                                " "
+                            );
+                            if (!compressed.equals(original)) {
+                                hits = page.search(compressed);
+                            }
+                        }
+
+                        if (hits == null || hits.length == 0) {
+                            String anchor =
+                                original.length() > 10
+                                    ? original
+                                          .substring(0, 10)
+                                          .replaceAll("\\s+", " ")
+                                    : original.replaceAll("\\s+", " ");
+                            if (anchor.length() >= 2) {
+                                hits = page.search(anchor);
+                            }
+                        }
+
+                        if (hits != null && hits.length > 0) {
+                            quads = hits[0];
+                            // ✅ 关键：对 Quad 应用和渲染页面相同的 ctm
+                            for (Quad q : quads) {
+                                q.transform(ctm);
+                            }
+                        } else {
+                            Log.w(APP, "TTS search failed: [" + original + "]");
+                        }
                         page.destroy();
-                        if (hits != null && hits.length > 0) quads = hits[0];
                     } catch (Throwable x) {
                         Log.e(APP, "highlight error: " + x.getMessage());
                     }
@@ -1440,7 +1519,7 @@ public class DocumentActivity extends Activity {
 
                 public void run() {
                     if (quads != null && mIsTtsReading) {
-                        pageView.setTtsHighlight(quads);
+                        pageView.setTtsHighlight(quads, capturedVersion);
                     }
                 }
             }
@@ -1548,6 +1627,24 @@ public class DocumentActivity extends Activity {
             Log.e(APP, "extractPageText failed: " + e.getMessage());
             return "";
         }
+    }
+
+    /** 获取文本中最后一个有意义的句子 */
+    private String getLastSentence(String text) {
+        if (text == null || text.isEmpty()) return "";
+        // 按句号、问号、感叹号、换行分割，取最后一个非空片段
+        String[] parts = text.split("[。！？!?\\n]+");
+        for (int i = parts.length - 1; i >= 0; i--) {
+            String s = parts[i].trim();
+            if (!s.isEmpty()) return s;
+        }
+        return text.trim();
+    }
+
+    /** 归一化字符串用于比对（去标点、去空白、转小写） */
+    private String normalizeForCompare(String s) {
+        if (s == null) return "";
+        return s.replaceAll("[\\p{Punct}\\s]", "").toLowerCase();
     }
 
     ////////////////////////////////////////////////////////////////////////////

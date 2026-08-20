@@ -27,6 +27,9 @@ public class PageView
     // TTS 高亮
     private Quad[] ttsQuads = null;
     private final Paint ttsPaint = new Paint();
+    // ✅ 页面版本号，每次 setBitmap 递增
+    private int pageVersion = 0;
+    private int ttsHighlightVersion = -1; // 高亮对应的页面版本
 
     // 初始化
     {
@@ -115,7 +118,10 @@ public class PageView
         if (bitmap != null) bitmap.recycle();
         error = false;
 
-        ttsQuads = null; // ✅ 兜底：新页面加载时清除旧 TTS 高亮
+        // ✅ 递增版本号，使旧高亮自动失效
+        pageVersion++;
+        ttsQuads = null;
+        ttsHighlightVersion = -1;
 
         linkBounds = lbs;
         linkURIs = lus;
@@ -419,13 +425,27 @@ public class PageView
 
     /**
      * 设置 TTS 高亮并自动滚动到高亮位置
+     * ✅ version 参数，防止跨页高亮残留
      */
-    public void setTtsHighlight(Quad[] quads) {
-        this.ttsQuads = quads;
+    public void setTtsHighlight(Quad[] quads, int version) {
+        // ✅ 版本号不匹配则忽略（旧页面的回调到达时自动丢弃）
+        if (version != pageVersion) {
+            Log.i(
+                APP,
+                "TTS highlight ignored: version mismatch (" +
+                    version +
+                    " vs " +
+                    pageVersion +
+                    ")"
+            );
+            return;
+        }
 
-        // ✅ 自动滚动到高亮句子所在位置
+        this.ttsQuads = quads;
+        this.ttsHighlightVersion = version;
+
+        // 自动滚动逻辑
         if (quads != null && quads.length > 0 && bitmapW > 0 && bitmapH > 0) {
-            // 计算高亮区域的中心点（页面坐标系）
             float centerX = 0,
                 centerY = 0;
             for (Quad q : quads) {
@@ -435,21 +455,17 @@ public class PageView
             centerX /= quads.length;
             centerY /= quads.length;
 
-            // 转换为视图坐标系
             float viewCenterX = centerX * viewScale;
             float viewCenterY = centerY * viewScale;
 
-            // 计算目标滚动位置（使高亮居中）
             int targetScrollX = (int) (viewCenterX - canvasW / 2f);
             int targetScrollY = (int) (viewCenterY - canvasH / 2f);
 
-            // 边界钳制
             int maxScrollX = Math.max(0, bitmapW - canvasW);
             int maxScrollY = Math.max(0, bitmapH - canvasH);
             targetScrollX = Math.max(0, Math.min(targetScrollX, maxScrollX));
             targetScrollY = Math.max(0, Math.min(targetScrollY, maxScrollY));
 
-            // 仅在位置变化较大时才滚动（避免微小抖动）
             if (
                 Math.abs(targetScrollX - scrollX) > 10 ||
                 Math.abs(targetScrollY - scrollY) > 10
@@ -466,5 +482,9 @@ public class PageView
         }
 
         invalidate();
+    }
+
+    public int getPageVersion() {
+        return pageVersion;
     }
 }
