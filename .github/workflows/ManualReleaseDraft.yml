@@ -2,13 +2,7 @@ name: Manual Release (Draft)
 
 on:
   workflow_dispatch:
-    inputs:
-      bump_type:
-        description: '版本号递增类型'
-        required: true
-        default: 'patch'
-        type: choice
-        options: [patch, minor, major]
+    # ✅ 不再需要 bump_type 输入，版本号完全由 CMakeLists.txt 决定
 
 jobs:
   draft-release:
@@ -16,41 +10,79 @@ jobs:
     permissions:
       contents: write
     steps:
-      # ✅ 改动1: 显式指定 ref 为主分支，避免手动触发时 HEAD 指向旧 commit
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.event.repository.default_branch }}
 
-      - name: Calculate next version
+      # ✅ 核心改动：split 语义提取版本号，不对格式做任何假设
+      - name: Extract version from CMakeLists.txt
         id: version
         shell: bash
         run: |
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "2.2.14")
+          # 等价于 Qt 的 split(" ").at(2) 逻辑：
+          # 1. 找到 project(...) 行
+          # 2. 提取括号内内容
+          # 3. 按空格拆分为 token 数组
+          # 4. 找到 VERSION 关键字，取其下一个 token
+          LINE=$(grep -E "project\s*\(" CMakeLists.txt | head -n1)
 
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_TAG"
-          MAJOR=$((10#$MAJOR)); MINOR=$((10#$MINOR)); PATCH=$((10#$PATCH))
+          if [ -z "$LINE" ]; then
+            echo "❌ No project() declaration found in CMakeLists.txt"
+            exit 1
+          fi
 
-          case "${{ github.event.inputs.bump_type }}" in
-            major) MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
-            minor) MINOR=$((MINOR+1)); PATCH=0
-                   [ "$MINOR" -gt 9 ] && { MINOR=0; MAJOR=$((MAJOR+1)); } ;;
-            *)     PATCH=$((PATCH+1))
-                   [ "$PATCH" -gt 99 ] && { PATCH=0; MINOR=$((MINOR+1));
-                     [ "$MINOR" -gt 9 ] && { MINOR=0; MAJOR=$((MAJOR+1)); }; } ;;
-          esac
+          # 去掉 project( 和 ) ，只保留内部参数
+          INNER=$(echo "$LINE" | sed 's/.*project\s*(//; s/).*//')
 
-          NEXT=$(printf "%d.%d.%02d" "$MAJOR" "$MINOR" "$PATCH")
-          echo "next_tag=${NEXT}" >> "$GITHUB_OUTPUT"
-          echo "prev_tag=${LATEST_TAG}" >> "$GITHUB_OUTPUT"
-          echo "✅ Next version: ${NEXT} (based on ${LATEST_TAG})"
+          # 按空格拆分数组，动态查找 VERSION 并取下一个 token
+          read -ra TOKENS <<< "$INNER"
+          VERSION=""
+          for i in "${!TOKENS[@]}"; do
+            if [[ "${TOKENS[$i]}" == "VERSION" ]]; then
+              VERSION="${TOKENS[$((i+1))]}"
+              break
+            fi
+          done
 
-      # ✅ 改动2: Changelog 写入临时文件，不再使用 GITHUB_OUTPUT 传递多行文本
+          # ✅ 显式去除所有空白字符（空格、\t、\r、\n）
+          # read -ra 正常情况下已处理，此处防御不可见字符 / Windows \r 等边界情况
+          VERSION=$(echo "$VERSION" | tr -d '[:space:]')
+
+          if [ -z "$VERSION" ]; then
+            echo "❌ Failed to extract version from CMakeLists.txt"
+            echo "   Found project() line: $LINE"
+            echo "   But no VERSION keyword followed by a value."
+            exit 1
+          fi
+
+          # ✅ 防护：检查该版本是否已经打过 Tag（防止忘记改版本号就触发发布）
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "❌ Tag '$VERSION' already exists!"
+            echo "   Please bump VERSION in CMakeLists.txt before creating a release."
+            exit 1
+          fi
+
+          # 获取上一个 Tag（用于生成 Changelog 的 diff 范围）
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          echo "next_tag=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "prev_tag=${PREV_TAG}" >> "$GITHUB_OUTPUT"
+          echo "✅ Version from CMakeLists.txt: ${VERSION}"
+          echo "📌 Previous tag: ${PREV_TAG:-'(none, first release)'}"
+
       - name: Generate Changelog via git log
+        id: changelog
         shell: bash
         run: |
           PREV_TAG="${{ steps.version.outputs.prev_tag }}"
-          LOG=$(git log "${PREV_TAG}..HEAD" --pretty=format:"- %s" --no-merges)
+
+          # 如果没有历史 Tag，则生成全量 Changelog
+          if [ -z "$PREV_TAG" ]; then
+            LOG=$(git log --pretty=format:"- %s" --no-merges)
+          else
+            LOG=$(git log "${PREV_TAG}..HEAD" --pretty=format:"- %s" --no-merges)
+          fi
 
           if [ -z "$LOG" ]; then
             LOG="- No changes recorded."
@@ -63,10 +95,6 @@ jobs:
           echo "$LOG" > /tmp/changelog.md
           echo "$LOG" | head -20
 
-      # ❌ 已删除: Create or reuse tag (idempotent) 步骤
-      # Tag 不再预先创建，删除草稿时不会留下废弃 Tag
-
-      # ✅ 改动3: 使用 body_path 读取文件，draft 模式下 softprops 不会预建 Tag
       - name: Create Draft Release
         uses: softprops/action-gh-release@v2
         with:
