@@ -460,6 +460,8 @@ void ReceiveShare::callJavaNotify9() {
 
       bringAppToForeground();
     }
-    m_Reader->startOpenFile(file);
+    // 关键：延迟到 GPU 上下文恢复后再开始渲染
+    QTimer::singleShot(100, this,
+                       [this, file]() { m_Reader->startOpenFile(file); });
   }
 }

@@ -203,7 +203,8 @@ static void JavaNotify_8() {
 }
 
 static void JavaNotify_9() {
-  mw_one->m_ReceiveShare->callJavaNotify9();
+  QTimer::singleShot(100, mw_one,
+                     []() { mw_one->m_ReceiveShare->callJavaNotify9(); });
 
   qDebug() << "C++ JavaNotify_9";
 }
