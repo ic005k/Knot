@@ -528,9 +528,9 @@ public class FilePicker
 
     public String ShowLongFileSzie(Long length) {
         if (length >= 1048576) {
-            return (length / 1048576) + "MB";
+            return length / 1048576 + "MB";
         } else if (length >= 1024) {
-            return (length / 1024) + "KB";
+            return length / 1024 + "KB";
         } else if (length < 1024) {
             return length + "B";
         } else {
@@ -541,27 +541,6 @@ public class FilePicker
     public static void closeFilePickerView() {
         if (MyFilepicker != null) MyFilepicker.finish();
     }
-
-    /*@Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btnFind:
-                btnFind.setBackgroundColor(
-                    getResources().getColor(R.color.red)
-                );
-
-                btnFind.setBackgroundColor(
-                    getResources().getColor(R.color.normal)
-                );
-
-                break;
-            case R.id.btn_clear:
-                editFind.setText("");
-                editFind.requestFocus();
-
-                break;
-        }
-    }*/
 
     @Override
     public void onClick(View v) {

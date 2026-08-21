@@ -206,8 +206,6 @@ QObjectList ReceiveShare::getAllFrame(QObjectList lstUIControls) {
 }
 
 void ReceiveShare::closeAllChildWindows() {
-  m_Reader->closeMyPDF();
-
   if (mw_one->m_Todo->isTodoAlarmShow) {
     QTimer::singleShot(100, mw_one, []() { mw_one->m_Todo->closeTodoAlarm(); });
 

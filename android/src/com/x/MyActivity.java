@@ -2873,6 +2873,17 @@ public class MyActivity
 
             // 再调用原有沉浸式工具，恢复主Activity暗黑模式下状态栏图标颜色
             ImmersiveUtil.applyRealImmersive(this, isDark);
+
+            // 强制 Qt 感知窗口变化并重绘（仅使用标准 Android API）
+            getWindow()
+                .getDecorView()
+                .post(() -> {
+                    View content = findViewById(android.R.id.content);
+                    if (content != null) {
+                        content.requestLayout();
+                        content.invalidate();
+                    }
+                });
         });
     }
 }
