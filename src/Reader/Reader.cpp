@@ -2,8 +2,6 @@
 
 #include "src/MainWindow.h"
 
-QByteArray bookFileData;
-
 static int press_x;
 static int press_y;
 static int relea_x;
@@ -38,6 +36,8 @@ Reader::Reader(QWidget* parent) : QDialog(parent) {
   mui->lblBookName->setWordWrap(true);
 
   mui->qwViewBookNote->hide();
+  mui->btnBackBookList->hide();
+  mui->btnReadList->hide();
 
   QFont f = this->font();
   f.setPointSize(8);
@@ -247,7 +247,7 @@ void Reader::openFile(QString openfile) {
         strSuffix != "rtf" && strSuffix != "c" && strSuffix != "cpp" &&
         strSuffix != "java" && strSuffix != "py" && strSuffix != "js" &&
         strSuffix != "php" && strSuffix != "go" && strSuffix != "rb" &&
-        strSuffix != "hpp")
+        strSuffix != "hpp" && strSuffix != "mobi")
       return;
 
     if (strSuffix == "epub") {
@@ -338,8 +338,7 @@ void Reader::openFile(QString openfile) {
         StringToFile(str_cate, catalogueFile);
       }
 
-    } else if (strSuffix == "pdf") {
-      bookFileData = bookFileData.toBase64();
+    } else if (strSuffix == "pdf" || strSuffix == "mobi") {
       isPDF = true;
       isText = false;
       isEpub = false;
@@ -1425,13 +1424,15 @@ void Reader::openBookListItem() {
   QStringList listBooks = str.split("|");
   QString bookfile = listBooks.at(1);
   QFileInfo fi(bookfile);
-  if (bookfile != fileName) {
-    startOpenFile(bookfile);
+
+  if (fi.suffix().contains("pdf") || fi.suffix().contains("mobi")) {
+    isPDF = true;
   } else {
-    if (fi.suffix().contains("pdf")) {
-      startOpenFile(bookfile);
-    }
+    mui->frameReader->show();
+    mui->frameBookList->hide();
   }
+
+  startOpenFile(bookfile);
 
   isOpenBookListClick = true;
 }
@@ -1836,7 +1837,7 @@ void Reader::removeBookList() {
 
 void Reader::readBookDone() {
   if (isOpenBookListClick) {
-    mw_one->on_btnBackBookList_clicked();
+    // mw_one->on_btnBackBookList_clicked();
     isOpenBookListClick = false;
   }
 
@@ -1884,13 +1885,6 @@ void Reader::readBookDone() {
   if (isText || isEpub) {
     strShowMsg = "Read  EBook End...";
 
-    mui->qwReader->show();
-    mui->f_ReaderFun->show();
-    mui->progReader->show();
-    mui->btnPages->show();
-    mui->btnShowBookmark->show();
-    mui->btnAutoRun->show();
-
     if (mui->frameBookList->isVisible()) {
       mui->frameBookList->hide();
       mui->frameReader->show();
@@ -1935,14 +1929,6 @@ void Reader::readBookDone() {
   if (isPDF) {
     qDebug() << "===Read Pdf... ..." << fileName;
 
-    mui->btnAutoRun->hide();
-    mui->btnShowBookmark->hide();
-    mui->progReader->hide();
-    mui->qwReader->hide();
-    mui->f_ReaderFun->show();
-    mui->btnPages->hide();
-    mui->btnBookCata->hide();
-
 #ifdef Q_OS_ANDROID
 
     if (!mw_one->initMain) {
@@ -1954,7 +1940,7 @@ void Reader::readBookDone() {
         mui->frameReader->hide();
         mui->frameBookList->show();
       }
-      getReadList();
+
       openMyPDF(fileName);
     }
 #else
@@ -1974,11 +1960,13 @@ void Reader::readBookDone() {
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
         QThread::msleep(1);
       }
-      mui->btnReader->click();
+      // mui->btnReader->click();
       setDefaultOpen("none");
     }
   } else
     isInitReader = false;
+
+  getReadList();
 
   qDebug() << "read book done...";
 }
@@ -2892,13 +2880,38 @@ void Reader::closeReader() {
 
   if (!isGpsRun) cancelKeepScreenOn();
 
-  mui->frameMain->show();
+  mui->frameBookList->show();
   mui->frameReader->hide();
+  getReadList();
 }
 
 void Reader::openReader() {
   // 延迟一小段时间再触发，避免模块快速切换时反复启停
   QTimer::singleShot(500, m_NotesList, &NotesList::rebuilderNotesVector);
+
+  mui->frameMain->hide();
+  mui->frameBookList->show();
+
+  getReadList();
+
+  if (mw_one->m_Preferences->ui->chkAI->isChecked())
+    mui->btnAIExplanation->show();
+  else
+    mui->btnAIExplanation->hide();
+
+  mw_one->isReaderVisible = true;
+  mw_one->isMemoVisible = false;
+
+  startDateTime = QDateTime::currentDateTime();
+  totalHours = readTotalHours();
+
+  if (!isGpsRun) keepScreenOn();
+
+  initTTS();
+
+  return;
+
+  /////////////////////////////////////////////////////////
 
   if (!isOne) {
     // initReader();
@@ -2911,7 +2924,8 @@ void Reader::openReader() {
 
       getReadList();
 
-      openMyPDF(fileName);
+      QTimer::singleShot(0, this, [this]() { openMyPDF(fileName); });
+
       return;
     }
   }
@@ -2919,25 +2933,13 @@ void Reader::openReader() {
   mui->frameMain->hide();
   mui->frameReader->show();
   mui->f_ReaderFun->show();
-  if (mw_one->m_Preferences->ui->chkAI->isChecked())
-    mui->btnAIExplanation->show();
-  else
-    mui->btnAIExplanation->hide();
-
-  mw_one->isReaderVisible = true;
-  mw_one->isMemoVisible = false;
 
   if (!isOne) {
-    startOpenFile(fileName);
-    isOne = true;
+    QTimer::singleShot(0, this, [this]() {
+      startOpenFile(fileName);
+      isOne = true;
+    });
   }
-
-  startDateTime = QDateTime::currentDateTime();
-  totalHours = readTotalHours();
-
-  if (!isGpsRun) keepScreenOn();
-
-  initTTS();
 }
 
 double Reader::readTotalHours() {

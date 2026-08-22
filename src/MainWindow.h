@@ -995,6 +995,8 @@ class MainWindow : public QMainWindow {
 
   void on_btnOpenSearchView_clicked();
 
+  void on_btnOpenBookFile_clicked();
+
  private:
   QNetworkAccessManager* m_ainetMgr;
   QUrl buildAiApiUrl(const QString& rawEndpoint);

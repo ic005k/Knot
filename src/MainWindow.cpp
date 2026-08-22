@@ -514,14 +514,14 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     return;
   }
 
-  if (mui->qwBookList->isVisible()) {
-    on_btnBackBookList_clicked();
+  if (mui->frameReader->isVisible()) {
+    on_btnBackReader_clicked();
     event->ignore();
     return;
   }
 
-  if (mui->frameReader->isVisible()) {
-    on_btnBackReader_clicked();
+  if (mui->qwBookList->isVisible()) {
+    on_btnBackBookList_clicked();
     event->ignore();
     return;
   }

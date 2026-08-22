@@ -29,16 +29,11 @@ void MainWindow::on_btnDel_Number_clicked() {
 void MainWindow::on_btnBackNoteDiff_clicked() { m_NotesList->closeNoteDiff(); }
 
 void MainWindow::on_btnBackBookList_clicked() {
-  if (isPDF) {
-    if (isAndroid) {
-      mui->frameMain->show();
-      mui->frameBookList->hide();
-    }
-  } else {
-    mui->frameReader->show();
-    mui->frameBookList->hide();
-  }
+  mui->frameMain->show();
+  mui->frameBookList->hide();
 }
+
+void MainWindow::on_btnOpenBookFile_clicked() { on_btnOpen_clicked(); }
 
 void MainWindow::on_btnOkBookList_clicked() { m_Reader->openBookListItem(); }
 
@@ -859,7 +854,14 @@ void MainWindow::on_btnDel_clicked() {
 }
 
 void MainWindow::resizeEvent(QResizeEvent* event) {
-  Q_UNUSED(event);
+  const QSize sz = event->size();
+  if (sz.width() <= 0 || sz.height() <= 0) {
+    event->ignore();
+    return;
+  }
+
+  QMainWindow::resizeEvent(event);
+
   mui->qwReader->rootContext()->setContextProperty("myW", mw_one->width());
   mui->qwReader->rootContext()->setContextProperty("myH", mw_one->height());
   mui->qwTodo->rootContext()->setContextProperty("isBtnVisible",

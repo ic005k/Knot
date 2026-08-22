@@ -379,6 +379,9 @@ public class FilePicker
                 " or " +
                 MediaStore.Files.FileColumns.DATA +
                 " LIKE '%.pdf'" +
+                " or " +
+                MediaStore.Files.FileColumns.DATA +
+                " LIKE '%.mobi'" +
                 ")";
             c = mContentResolver.query(
                 MediaStore.Files.getContentUri("external"),
@@ -455,6 +458,9 @@ public class FilePicker
                 } else if (path.endsWith(".pdf")) {
                     files.add(path);
                     filesInfo.add(fileInfo);
+                } else if (path.endsWith(".mobi")) {
+                    files.add(path);
+                    filesInfo.add(fileInfo);
                 }
             }
         } catch (Exception e) {
@@ -502,6 +508,7 @@ public class FilePicker
                     "text/plain",
                     "application/epub+zip",
                     "application/pdf",
+                    "application/mobi",
                 },
                 new MediaScannerConnection.OnScanCompletedListener() {
                     public void onMediaScannerConnected() {}
@@ -621,6 +628,11 @@ public class FilePicker
             if (filePath.endsWith(".pdf")) {
                 Fruit pdfBook = new Fruit(R.drawable.pdf, filePath, fileInfo);
                 fruitlist.add(pdfBook);
+            }
+
+            if (filePath.endsWith(".mobi")) {
+                Fruit mobiBook = new Fruit(R.drawable.mobi, filePath, fileInfo);
+                fruitlist.add(mobiBook);
             }
         }
 
