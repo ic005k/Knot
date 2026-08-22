@@ -3,10 +3,12 @@ package com.x.artifex.mupdf.mini;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -21,6 +23,7 @@ import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.TextPaint;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.PasswordTransformationMethod;
 import android.util.DisplayMetrics;
@@ -233,21 +236,6 @@ public class DocumentActivity extends Activity {
 
         // 状态栏和导航栏 //////////////////////////////////////////////////////////
         //getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-        /*Window window = getWindow();
-        window
-            .getDecorView()
-            .setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            );
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.setStatusBarColor(0x00000000);
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            window.getAttributes().layoutInDisplayCutoutMode =
-                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-        }*/
 
         // 刘海屏适配仍需保留（与沉浸模式无关）
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -625,6 +613,14 @@ public class DocumentActivity extends Activity {
         );
 
         //enterSystemFullscreen();
+
+        // 注册Home键广播
+        int flags = Context.RECEIVER_NOT_EXPORTED;
+        registerReceiver(
+            mHomeKeyEvent,
+            new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
+            flags
+        );
     }
 
     protected void showPageNumber(int pageNumber) {
@@ -807,6 +803,8 @@ public class DocumentActivity extends Activity {
     }
 
     public void onBackPressed() {
+        exitSystemFullscreen();
+
         if (history.empty()) {
             super.onBackPressed();
             if (returnToLibraryActivity) {
@@ -825,6 +823,8 @@ public class DocumentActivity extends Activity {
     protected void onDestroy() {
         // 离开此Activity强制恢复系统UI，避免返回上一个Activity状态栏丢失
         exitSystemFullscreen();
+
+        unregisterReceiver(mHomeKeyEvent);
 
         super.onDestroy();
         mPdfActivity = null;
@@ -1299,7 +1299,7 @@ public class DocumentActivity extends Activity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
-            //enterSystemFullscreen();
+            enterSystemFullscreen();
         }
     }
 
@@ -1656,4 +1656,24 @@ public class DocumentActivity extends Activity {
     }
 
     ////////////////////////////////////////////////////////////////////////////
+    private BroadcastReceiver mHomeKeyEvent = new BroadcastReceiver() {
+        String SYSTEM_REASON = "reason";
+        String SYSTEM_HOME_KEY = "homekey";
+        String SYSTEM_HOME_KEY_LONG = "recentapps";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
+                String reason = intent.getStringExtra(SYSTEM_REASON);
+                if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
+                    exitSystemFullscreen();
+                    System.out.println("ClockActivity HOME键被按下...");
+                } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
+                    exitSystemFullscreen();
+                    System.out.println("ClockActivity 长按HOME键...");
+                }
+            }
+        }
+    };
 }
