@@ -458,10 +458,13 @@ void ReceiveShare::callJavaNotify9() {
     if (type == "defaultopen") {
       closeAllChildWindows();
 
+      m_Method->Sleep(100);
+
       bringAppToForeground();
-    }
-    // 关键：延迟到 GPU 上下文恢复后再开始渲染，投递到下一轮事件循环
-    QTimer::singleShot(0, this,
-                       [this, file]() { m_Reader->startOpenFile(file); });
+
+      QTimer::singleShot(1000, this,
+                         [this, file]() { m_Reader->startOpenFile(file); });
+    } else
+      m_Reader->startOpenFile(file);
   }
 }

@@ -623,6 +623,8 @@ public class DocumentActivity extends Activity {
                 }
             }
         );
+
+        //enterSystemFullscreen();
     }
 
     protected void showPageNumber(int pageNumber) {
@@ -1297,7 +1299,7 @@ public class DocumentActivity extends Activity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
-            enterSystemFullscreen();
+            //enterSystemFullscreen();
         }
     }
 

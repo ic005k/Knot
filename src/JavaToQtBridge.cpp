@@ -203,8 +203,7 @@ static void JavaNotify_8() {
 }
 
 static void JavaNotify_9() {
-  // 放在下一个事件循环中执行
-  QTimer::singleShot(0, mw_one,
+  QTimer::singleShot(100, mw_one,
                      []() { mw_one->m_ReceiveShare->callJavaNotify9(); });
 
   qDebug() << "C++ JavaNotify_9";

@@ -1433,8 +1433,6 @@ void Reader::openBookListItem() {
   }
 
   startOpenFile(bookfile);
-
-  isOpenBookListClick = true;
 }
 
 void Reader::backDir() {
@@ -1836,11 +1834,6 @@ void Reader::removeBookList() {
 }
 
 void Reader::readBookDone() {
-  if (isOpenBookListClick) {
-    // mw_one->on_btnBackBookList_clicked();
-    isOpenBookListClick = false;
-  }
-
   if (isEpubError) {
     mui->btnReader->setEnabled(true);
     mui->f_ReaderFun->setEnabled(true);
@@ -1882,12 +1875,19 @@ void Reader::readBookDone() {
   currentBookName.replace(">", "");
   currentBookName.replace("|", "");
 
+  for (int i = 0; i < bookList.count(); i++) {
+    QString str = bookList.at(i);
+    if (str.contains(fileName)) {
+      bookList.removeAt(i);
+      break;
+    }
+  }
+  bookList.insert(0, strTitle + "|" + fileName + "|" + currentBookName);
+
+  getReadList();
+
   if (isText || isEpub) {
     strShowMsg = "Read  EBook End...";
-
-    mui->frameReader->show();
-    mui->frameBookList->hide();
-    mui->frameMain->hide();
 
     mui->qwReader->rootContext()->setContextProperty("strText", "");
     mui->qwReader->rootContext()->setContextProperty("isSelText", isSelText);
@@ -1899,6 +1899,10 @@ void Reader::readBookDone() {
       mui->qwReader->setSource(
           QUrl(QStringLiteral("qrc:/src/qmlsrc/reader.qml")));
     }
+
+    mui->frameReader->show();
+    mui->frameBookList->hide();
+    mui->frameMain->hide();
 
     if (isEpub) {
       mui->lblInfo->show();
@@ -1916,35 +1920,18 @@ void Reader::readBookDone() {
 
   mui->lblBookName->setText(strTitle);
 
-  for (int i = 0; i < bookList.count(); i++) {
-    QString str = bookList.at(i);
-    if (str.contains(fileName)) {
-      bookList.removeAt(i);
-      break;
-    }
-  }
-  bookList.insert(0, strTitle + "|" + fileName + "|" + currentBookName);
-
-  getReadList();
-
   if (isPDF) {
     qDebug() << "===Read Pdf... ..." << fileName;
 
 #ifdef Q_OS_ANDROID
 
     if (!mw_one->initMain) {
-      if (mui->frameMain->isVisible()) {
-        mui->frameMain->hide();
-        mui->frameBookList->show();
-      }
-      if (mui->frameReader->isVisible()) {
-        mui->frameReader->hide();
-        mui->frameBookList->show();
-      }
+      mui->frameBookList->show();
+      mui->frameMain->hide();
+      mui->frameReader->hide();
 
-      openMyPDF(fileName);
+      QTimer::singleShot(100, this, [this]() { openMyPDF(fileName); });
     }
-#else
 
 #endif
   }
@@ -2914,14 +2901,14 @@ void Reader::openReader() {
       mui->frameMain->hide();
       mui->frameBookList->show();
 
-      QTimer::singleShot(0, this, [this]() { openMyPDF(fileName); });
+      QTimer::singleShot(100, this, [this]() { openMyPDF(fileName); });
 
       return;
     }
   }
 
   if (!isOne) {
-    QTimer::singleShot(0, this, [this]() {
+    QTimer::singleShot(100, this, [this]() {
       startOpenFile(fileName);
       isOne = true;
     });
