@@ -1885,10 +1885,9 @@ void Reader::readBookDone() {
   if (isText || isEpub) {
     strShowMsg = "Read  EBook End...";
 
-    if (mui->frameBookList->isVisible()) {
-      mui->frameBookList->hide();
-      mui->frameReader->show();
-    }
+    mui->frameReader->show();
+    mui->frameBookList->hide();
+    mui->frameMain->hide();
 
     mui->qwReader->rootContext()->setContextProperty("strText", "");
     mui->qwReader->rootContext()->setContextProperty("isSelText", isSelText);
@@ -1926,6 +1925,8 @@ void Reader::readBookDone() {
   }
   bookList.insert(0, strTitle + "|" + fileName + "|" + currentBookName);
 
+  getReadList();
+
   if (isPDF) {
     qDebug() << "===Read Pdf... ..." << fileName;
 
@@ -1960,13 +1961,11 @@ void Reader::readBookDone() {
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
         QThread::msleep(1);
       }
-      // mui->btnReader->click();
+
       setDefaultOpen("none");
     }
   } else
     isInitReader = false;
-
-  getReadList();
 
   qDebug() << "read book done...";
 }
@@ -2882,7 +2881,6 @@ void Reader::closeReader() {
 
   mui->frameBookList->show();
   mui->frameReader->hide();
-  getReadList();
 }
 
 void Reader::openReader() {
@@ -2909,20 +2907,12 @@ void Reader::openReader() {
 
   initTTS();
 
-  return;
-
-  /////////////////////////////////////////////////////////
-
-  if (!isOne) {
-    // initReader();
-  }
+  if (!QFile::exists(fileName)) return;
 
   if (isPDF) {
     if (isAndroid) {
       mui->frameMain->hide();
       mui->frameBookList->show();
-
-      getReadList();
 
       QTimer::singleShot(0, this, [this]() { openMyPDF(fileName); });
 
@@ -2930,16 +2920,16 @@ void Reader::openReader() {
     }
   }
 
-  mui->frameMain->hide();
-  mui->frameReader->show();
-  mui->f_ReaderFun->show();
-
   if (!isOne) {
     QTimer::singleShot(0, this, [this]() {
       startOpenFile(fileName);
       isOne = true;
     });
   }
+
+  mui->frameMain->hide();
+  mui->frameBookList->hide();
+  mui->frameReader->show();
 }
 
 double Reader::readTotalHours() {

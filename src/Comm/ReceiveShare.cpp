@@ -273,13 +273,13 @@ void ReceiveShare::closeAllChildWindows() {
     return;
   }
 
-  if (mui->frameBookList->isVisible()) {
-    mui->btnBackBookList->click();
-    mui->btnBackReader->click();
-  }
-
   if (mui->frameReader->isVisible()) {
     mui->btnBackReader->click();
+    mui->btnBackBookList->click();
+  }
+
+  if (mui->frameBookList->isVisible()) {
+    mui->btnBackBookList->click();
   }
 
   if (mw_one->m_Preferences->isVisible())
