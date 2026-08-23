@@ -3751,3 +3751,15 @@ QString Method::escapeAllHtml(const QString& src) {
   res.replace(")", "&#41;");
   return res;
 }
+
+void Method::exitSystemFullscreen() {
+#ifdef Q_OS_ANDROID
+
+  QJniObject activity =
+      QJniObject(QCoreApplication::instance()
+                     ->nativeInterface<QNativeInterface::QAndroidApplication>()
+                     ->context());
+  activity.callMethod<void>("exitSystemFullscreen", "()V");
+
+#endif
+}

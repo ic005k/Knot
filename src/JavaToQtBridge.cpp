@@ -42,11 +42,11 @@ static void sendQuestionToCpp(JNIEnv* env, jclass clazz, jstring questionText);
 
 #ifdef Q_OS_ANDROID
 static void JavaNotify_0() {
-  // onResume
+  // pdf关闭后退出全屏
+  m_Method->exitSystemFullscreen();
+  QTimer::singleShot(100, mw_one, []() { m_Method->exitSystemFullscreen(); });
 
-  if (mw_one->initMain) return;
-
-  qDebug() << "C++ JavaNotify_0";
+  qDebug() << "C++ JavaNotify_0：退出全屏模式";
 }
 
 static void JavaNotify_1() {
@@ -203,6 +203,7 @@ static void JavaNotify_8() {
 }
 
 static void JavaNotify_9() {
+  // 安卓打开书籍和缺省打开书籍调用
   QTimer::singleShot(100, mw_one,
                      []() { mw_one->m_ReceiveShare->callJavaNotify9(); });
 

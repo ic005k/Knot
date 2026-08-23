@@ -789,9 +789,6 @@ public class DocumentActivity extends Activity {
     }
 
     public void onPause() {
-        // 离开此Activity强制恢复系统UI，避免返回上一个Activity状态栏丢失
-        exitSystemFullscreen();
-
         super.onPause();
         if (prefs != null) {
             SharedPreferences.Editor editor = prefs.edit();
@@ -803,8 +800,6 @@ public class DocumentActivity extends Activity {
     }
 
     public void onBackPressed() {
-        exitSystemFullscreen();
-
         if (history.empty()) {
             super.onBackPressed();
             if (returnToLibraryActivity) {
@@ -821,10 +816,10 @@ public class DocumentActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        // 离开此Activity强制恢复系统UI，避免返回上一个Activity状态栏丢失
-        exitSystemFullscreen();
-
         unregisterReceiver(mHomeKeyEvent);
+
+        // 退出全屏模式
+        CallJavaNotify_0();
 
         super.onDestroy();
         mPdfActivity = null;
@@ -1667,10 +1662,8 @@ public class DocumentActivity extends Activity {
             if (action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
                 String reason = intent.getStringExtra(SYSTEM_REASON);
                 if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
-                    exitSystemFullscreen();
                     System.out.println("ClockActivity HOME键被按下...");
                 } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
-                    exitSystemFullscreen();
                     System.out.println("ClockActivity 长按HOME键...");
                 }
             }

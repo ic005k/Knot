@@ -635,7 +635,8 @@ QScrollBar::sub-page:horizontal {
   void setLocalAIModelEnabled(bool isLocalAI);
   void setAIAPIEnabled(bool isAIAPI);
 
- protected:
+  void exitSystemFullscreen();
+  protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

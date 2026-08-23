@@ -2886,4 +2886,26 @@ public class MyActivity
                 });
         });
     }
+
+    public void exitSystemFullscreen() {
+        Window window = getWindow();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsController controller = window.getInsetsController();
+            if (controller != null) {
+                controller.show(
+                    WindowInsets.Type.statusBars() |
+                        WindowInsets.Type.navigationBars()
+                );
+            }
+        } else {
+            int vis = window.getDecorView().getSystemUiVisibility();
+            // 清除全屏、隐藏导航栏标记，保留 LAYOUT_STABLE | LAYOUT_FULLSCREEN 布局延伸
+            vis &= ~(
+                View.SYSTEM_UI_FLAG_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_IMMERSIVE
+            );
+            window.getDecorView().setSystemUiVisibility(vis);
+        }
+    }
 }
