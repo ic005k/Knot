@@ -520,7 +520,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     return;
   }
 
-  if (mui->qwBookList->isVisible()) {
+  if (mui->frameBookList->isVisible()) {
     on_btnBackBookList_clicked();
     event->ignore();
     return;

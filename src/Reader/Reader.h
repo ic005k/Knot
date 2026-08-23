@@ -56,6 +56,8 @@ class Reader : public QDialog {
   ~Reader();
   Ui::Reader* ui;
 
+  QQuickView* qvBookList;
+
   QStandardItemModel* notesModel = nullptr;
 
   bool m_isAppForeground = true;

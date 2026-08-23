@@ -32,6 +32,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkInterface>
 #include <QNetworkReply>
+#include <QQuickView>
 #include <QTimeZone>
 #include <QTimer>
 #include <QtGui/QEventPoint>
@@ -636,6 +637,14 @@ QScrollBar::sub-page:horizontal {
   void setAIAPIEnabled(bool isAIAPI);
 
   void exitSystemFullscreen();
+  void addItemToQV(QQuickView* qv, QString text0, QString text1, QString text2,
+                   QString text3, int itemH);
+
+  void clearAllBakListQV(QQuickView* qv);
+  int getCountFromQV(QQuickView* qv);
+  void delItemFromQV(QQuickView* qv, int index);
+
+  int getCurrentIndexFromQV(QQuickView *qv);
   protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 

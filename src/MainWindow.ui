@@ -7368,7 +7368,7 @@ QSlider::handle:horizontal:disabled {
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_48">
+        <layout class="QHBoxLayout" name="layoutBookListBtn">
          <item>
           <widget class="QToolButton" name="btnBackBookList">
            <property name="sizePolicy">

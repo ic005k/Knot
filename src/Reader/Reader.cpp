@@ -13,6 +13,24 @@ Reader::Reader(QWidget* parent) : QDialog(parent) {
   qmlRegisterType<TextChunkModel>("EBook.Models", 1, 0, "TextChunkModel");
 
   this->installEventFilter(this);
+
+  qvBookList = new QQuickView();
+  QWidget* bookListContainer = QWidget::createWindowContainer(qvBookList);
+  mui->frameBookList->layout()->addWidget(bookListContainer);
+  bookListContainer->setSizePolicy(QSizePolicy::Preferred,
+                                   QSizePolicy::Expanding);
+  mui->qwBookList->hide();
+  if (qvBookList->source().isEmpty()) {
+    qvBookList->engine()->rootContext()->setContextProperty("isDark", isDark);
+    qvBookList->engine()->rootContext()->setContextProperty("fontSize",
+                                                            fontSize);
+    qvBookList->engine()->rootContext()->setContextProperty("m_Reader",
+                                                            m_Reader);
+
+    qvBookList->setResizeMode(QQuickView::SizeRootObjectToView);
+    qvBookList->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/booklist.qml")));
+  }
+
   notesModel = new QStandardItemModel(this);
   // 定义角色名（QML 里用的名字）
   notesModel->setItemRoleNames({{Qt::UserRole + 1, "quote"},
@@ -1346,7 +1364,9 @@ void Reader::getReadList() {
 
   if (bookList.count() == 0) return;
 
-  m_Method->clearAllBakList(mui->qwBookList);
+  // m_Method->clearAllBakList(mui->qwBookList);
+  m_Method->clearAllBakListQV(qvBookList);
+
   for (int i = 0; i < bookList.count(); i++) {
     QString str = bookList.at(i);
     QStringList listBooks = str.split("|");
@@ -1362,24 +1382,31 @@ void Reader::getReadList() {
     } else
       suffix = "none";
 
-    m_Method->addItemToQW(mui->qwBookList, bookName, bookPath, "", suffix, 50);
+    // m_Method->addItemToQW(mui->qwBookList, bookName, bookPath, "", suffix,
+    // 50);
+    m_Method->addItemToQV(qvBookList, bookName, bookPath, "", suffix, 50);
   }
 
   for (int i = 0; i < bookList.count(); i++) {
     QString str = bookList.at(i);
     QStringList listBooks = str.split("|");
     if (listBooks.at(1) == fileName) {
-      m_Method->setCurrentIndexFromQW(mui->qwBookList, i);
+      // m_Method->setCurrentIndexFromQW(mui->qwBookList, i);
+
+      QQuickItem* root = qvBookList->rootObject();
+      QMetaObject::invokeMethod((QObject*)root, "setCurrentItem",
+                                Q_ARG(QVariant, i));
+
       break;
     }
   }
 }
 
 void Reader::clearAllReaderRecords() {
-  int count = m_Method->getCountFromQW(mui->qwBookList);
-  if (count == 0) return;
+  // int count = m_Method->getCountFromQW(mui->qwBookList);
+  // if (count == 0) return;
 
-  int index = m_Method->getCurrentIndexFromQW(mui->qwBookList);
+  int index = m_Method->getCurrentIndexFromQV(qvBookList);
   if (index < 0) return;
 
   QString bookFlag = m_Method->getText3(mui->qwBookList, index);
@@ -1416,7 +1443,7 @@ void Reader::clearAllReaderRecords() {
 }
 
 void Reader::openBookListItem() {
-  int index = m_Method->getCurrentIndexFromQW(mui->qwBookList);
+  int index = m_Method->getCurrentIndexFromQV(qvBookList);
 
   if (index < 0) return;
 
@@ -1822,14 +1849,14 @@ QString Reader::getSkipText(QString htmlFile, QString skipID) {
 }
 
 void Reader::removeBookList() {
-  int index = m_Method->getCurrentIndexFromQW(mui->qwBookList);
+  int index = m_Method->getCurrentIndexFromQV(qvBookList);
   if (index <= 0) return;
 
   auto msg = std::make_unique<ShowMessage>(mw_one);
   if (!msg->showMsg("Knot", tr("Remove from list?"), 2)) return;
 
   bookList.removeAt(index);
-  m_Method->delItemFromQW(mui->qwBookList, index);
+  m_Method->delItemFromQV(qvBookList, index);
   saveReader("", false);
 }
 
@@ -2043,7 +2070,7 @@ void Reader::ContinueReading() {
 }
 
 void Reader::shareBook() {
-  int index = m_Method->getCurrentIndexFromQW(mui->qwBookList);
+  int index = m_Method->getCurrentIndexFromQV(qvBookList);
 
   if (index < 0) return;
 

@@ -285,6 +285,14 @@ void Method::addItemToQW(QQuickWidget* qw, QString text0, QString text1,
                             Q_ARG(QVariant, text3), Q_ARG(QVariant, itemH));
 }
 
+void Method::addItemToQV(QQuickView* qv, QString text0, QString text1,
+                         QString text2, QString text3, int itemH) {
+  QQuickItem* root = qv->rootObject();
+  QMetaObject::invokeMethod((QObject*)root, "addItem", Q_ARG(QVariant, text0),
+                            Q_ARG(QVariant, text1), Q_ARG(QVariant, text2),
+                            Q_ARG(QVariant, text3), Q_ARG(QVariant, itemH));
+}
+
 void Method::insertItem(QQuickWidget* qw, QString text0, QString text1,
                         QString text2, QString text3, int curIndex) {
   QQuickItem* root = qw->rootObject();
@@ -299,8 +307,21 @@ void Method::delItemFromQW(QQuickWidget* qw, int index) {
   QMetaObject::invokeMethod((QObject*)root, "delItem", Q_ARG(QVariant, index));
 }
 
+void Method::delItemFromQV(QQuickView* qv, int index) {
+  QQuickItem* root = qv->rootObject();
+  QMetaObject::invokeMethod((QObject*)root, "delItem", Q_ARG(QVariant, index));
+}
+
 int Method::getCountFromQW(QQuickWidget* qw) {
   QQuickItem* root = qw->rootObject();
+  QVariant itemCount;
+  QMetaObject::invokeMethod((QObject*)root, "getItemCount",
+                            Q_RETURN_ARG(QVariant, itemCount));
+  return itemCount.toInt();
+}
+
+int Method::getCountFromQV(QQuickView* qv) {
+  QQuickItem* root = qv->rootObject();
   QVariant itemCount;
   QMetaObject::invokeMethod((QObject*)root, "getItemCount",
                             Q_RETURN_ARG(QVariant, itemCount));
@@ -311,6 +332,13 @@ void Method::clearAllBakList(QQuickWidget* qw) {
   int count = getCountFromQW(qw);
   for (int i = 0; i < count; i++) {
     delItemFromQW(qw, 0);
+  }
+}
+
+void Method::clearAllBakListQV(QQuickView* qv) {
+  int count = getCountFromQV(qv);
+  for (int i = 0; i < count; i++) {
+    delItemFromQV(qv, 0);
   }
 }
 
@@ -343,6 +371,14 @@ void Method::setCurrentIndexFromQW(QQuickWidget* qw, int index) {
 
 int Method::getCurrentIndexFromQW(QQuickWidget* qw) {
   QQuickItem* root = qw->rootObject();
+  QVariant itemIndex;
+  QMetaObject::invokeMethod((QObject*)root, "getCurrentIndex",
+                            Q_RETURN_ARG(QVariant, itemIndex));
+  return itemIndex.toInt();
+}
+
+int Method::getCurrentIndexFromQV(QQuickView* qv) {
+  QQuickItem* root = qv->rootObject();
   QVariant itemIndex;
   QMetaObject::invokeMethod((QObject*)root, "getCurrentIndex",
                             Q_RETURN_ARG(QVariant, itemIndex));
