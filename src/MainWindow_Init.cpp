@@ -656,7 +656,6 @@ void MainWindow::init_Theme() {
   mui->qwNoteRecycle->rootContext()->setContextProperty("isDark", isDark);
   mui->qwCategory->rootContext()->setContextProperty("isDark", isDark);
   mui->qwSelTab->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwBookList->rootContext()->setContextProperty("isDark", isDark);
   mui->qwReportSub->rootContext()->setContextProperty("isDark", isDark);
   mui->qwSteps->rootContext()->setContextProperty("isDark", isDark);
   mui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
@@ -666,6 +665,7 @@ void MainWindow::init_Theme() {
   mui->qwBookmark->rootContext()->setContextProperty("isDark", isDark);
   mui->qwReader->rootContext()->setContextProperty("isDark", isDark);
   mui->qwViewBookNote->rootContext()->setContextProperty("isDark", isDark);
+  m_Reader->qvBookList->rootContext()->setContextProperty("isDark", isDark);
 
   if (!isDark) {
     mui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));

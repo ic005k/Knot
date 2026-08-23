@@ -2055,9 +2055,7 @@ void Reader::readBookDone() {
     }
 
     mui->frameReader->show();
-
     hideBookListWin();
-
     mui->frameMain->hide();
 
     if (isEpub) {
@@ -2083,7 +2081,6 @@ void Reader::readBookDone() {
 
     if (!mw_one->initMain) {
       showBookListWin();
-
       mui->frameMain->hide();
       mui->frameReader->hide();
 
@@ -3046,6 +3043,16 @@ void Reader::openReader() {
 
   initTTS();
 
+  mui->frameMain->hide();
+
+  showBookListWin();
+
+  getReadList();
+
+  return;
+
+  //////////////////////////////
+
   if (!QFile::exists(fileName)) {
     mui->frameMain->hide();
 
@@ -3058,7 +3065,6 @@ void Reader::openReader() {
   if (isPDF) {
     if (isAndroid) {
       mui->frameMain->hide();
-      showBookListWin();
 
       QTimer::singleShot(100, this, [this]() { openMyPDF(fileName); });
 
@@ -3260,7 +3266,11 @@ void Reader::setStartEnd(int start, int end) {
 }
 
 void Reader::showBookListWin() {
-  mui->frameBookList->setFixedSize(mw_one->width() - 20, mw_one->height());
+  mui->frameBookList->setFixedSize(mui->frameMain->width(),
+                                   mw_one->height() - 32 -
+                                       mui->lblBookList->height() -
+                                       mui->btnClearAllRecords->height());
+  qInfo() << "frameBookList=" << mui->frameBookList->size();
 }
 
 void Reader::hideBookListWin() {
