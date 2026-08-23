@@ -278,7 +278,7 @@ void ReceiveShare::closeAllChildWindows() {
     mui->btnBackBookList->click();
   }
 
-  if (mui->frameBookList->isVisible()) {
+  if (m_Reader->isBookListWinVisible()) {
     mui->btnBackBookList->click();
   }
 

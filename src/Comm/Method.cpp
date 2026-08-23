@@ -439,6 +439,15 @@ QString Method::getText3(QQuickWidget* qw, int index) {
   return item.toString();
 }
 
+QString Method::getText3QV(QQuickView* qv, int index) {
+  QQuickItem* root = qv->rootObject();
+  QVariant item;
+  QMetaObject::invokeMethod((QObject*)root, "getText3",
+                            Q_RETURN_ARG(QVariant, item),
+                            Q_ARG(QVariant, index));
+  return item.toString();
+}
+
 bool Method::eventFilter(QObject* watchDlgSearch, QEvent* evn) {
   if (evn->type() == QEvent::KeyRelease) {
     QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);

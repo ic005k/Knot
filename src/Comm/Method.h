@@ -645,6 +645,7 @@ QScrollBar::sub-page:horizontal {
   void delItemFromQV(QQuickView* qv, int index);
 
   int getCurrentIndexFromQV(QQuickView *qv);
+  QString getText3QV(QQuickView *qv, int index);
   protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 

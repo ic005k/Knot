@@ -31,7 +31,7 @@ void MainWindow::on_btnBackNoteDiff_clicked() { m_NotesList->closeNoteDiff(); }
 void MainWindow::on_btnBackBookList_clicked() {
   if (!isGpsRun) m_Reader->cancelKeepScreenOn();
 
-  mui->frameBookList->hide();
+  m_Reader->hideBookListWin();
   mui->frameMain->show();
 }
 
@@ -1140,7 +1140,7 @@ void MainWindow::on_btnReadList_clicked() {
 
   if (mui->frameMain->isVisible()) mui->frameMain->hide();
   mui->frameReader->hide();
-  mui->frameBookList->show();
+  m_Reader->showBookListWin();
 
   m_Reader->getReadList();
 }
@@ -1519,7 +1519,7 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (!mui->frameBookList->isHidden()) {
+  if (m_Reader->isBookListWinVisible()) {
     on_btnBackBookList_clicked();
     return;
   }

@@ -27,7 +27,7 @@ Reader::Reader(QWidget* parent) : QDialog(parent) {
                                    QSizePolicy::Expanding);
 
   // TODO: Qt6.12+ remove hideMask workaround
-  {
+  /*{
     // 解决窗口隐藏时的黑屏
     {
       // ⭐ 遮罩作为 container 的子控件
@@ -154,7 +154,7 @@ Reader::Reader(QWidget* parent) : QDialog(parent) {
           }
         },
         Qt::DirectConnection);  // ⭐ 改为 Direct，确保在同一渲染线程执行
-  }
+  }*/
 
   mui->qwBookList->hide();
   if (qvBookList->source().isEmpty()) {
@@ -1542,13 +1542,10 @@ void Reader::getReadList() {
 }
 
 void Reader::clearAllReaderRecords() {
-  // int count = m_Method->getCountFromQW(mui->qwBookList);
-  // if (count == 0) return;
-
   int index = m_Method->getCurrentIndexFromQV(qvBookList);
   if (index < 0) return;
 
-  QString bookFlag = m_Method->getText3(mui->qwBookList, index);
+  QString bookFlag = m_Method->getText3QV(qvBookList, index);
   if (bookFlag == "pdf" || bookFlag == "none") return;
 
   QString n_str = bookList.at(index);
@@ -1572,13 +1569,6 @@ void Reader::clearAllReaderRecords() {
     return;
 
   QFile::remove(file_ini);
-
-  return;
-
-  m_Method->clearAllBakList(mui->qwBookList);
-  bookList.clear();
-  QFile file(privateDir + "reader.ini");
-  if (file.exists()) file.remove();
 }
 
 void Reader::openBookListItem() {
@@ -1595,7 +1585,7 @@ void Reader::openBookListItem() {
     isPDF = true;
   } else {
     mui->frameReader->show();
-    mui->frameBookList->hide();
+    hideBookListWin();
   }
 
   startOpenFile(bookfile);
@@ -2065,7 +2055,9 @@ void Reader::readBookDone() {
     }
 
     mui->frameReader->show();
-    mui->frameBookList->hide();
+
+    hideBookListWin();
+
     mui->frameMain->hide();
 
     if (isEpub) {
@@ -2090,7 +2082,8 @@ void Reader::readBookDone() {
 #ifdef Q_OS_ANDROID
 
     if (!mw_one->initMain) {
-      mui->frameBookList->show();
+      showBookListWin();
+
       mui->frameMain->hide();
       mui->frameReader->hide();
 
@@ -3029,7 +3022,8 @@ void Reader::closeReader() {
   savePageVPos();
 
   mui->frameReader->hide();
-  mui->frameBookList->show();
+  showBookListWin();
+
   getReadList();
 }
 
@@ -3054,7 +3048,8 @@ void Reader::openReader() {
 
   if (!QFile::exists(fileName)) {
     mui->frameMain->hide();
-    mui->frameBookList->show();
+
+    showBookListWin();
 
     getReadList();
     return;
@@ -3063,7 +3058,7 @@ void Reader::openReader() {
   if (isPDF) {
     if (isAndroid) {
       mui->frameMain->hide();
-      mui->frameBookList->show();
+      showBookListWin();
 
       QTimer::singleShot(100, this, [this]() { openMyPDF(fileName); });
 
@@ -3079,7 +3074,7 @@ void Reader::openReader() {
   }
 
   mui->frameMain->hide();
-  mui->frameBookList->hide();
+  hideBookListWin();
   mui->frameReader->show();
 }
 
@@ -3262,4 +3257,19 @@ void Reader::setEditText(const QString& txt, const QString& direction) {
 void Reader::setStartEnd(int start, int end) {
   startNote = start;
   endNote = end;
+}
+
+void Reader::showBookListWin() {
+  mui->frameBookList->setFixedSize(mw_one->width() - 20, mw_one->height());
+}
+
+void Reader::hideBookListWin() {
+  mui->frameBookList->setFixedSize(mui->frameMain->width(), 1);
+}
+
+bool Reader::isBookListWinVisible() {
+  if (mui->frameBookList->size() != QSize(mui->frameMain->width(), 1))
+    return true;
+
+  return false;
 }

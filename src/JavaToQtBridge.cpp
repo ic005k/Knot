@@ -46,7 +46,7 @@ static void JavaNotify_0() {
 
   QTimer::singleShot(100, mw_one, []() {
     m_Method->exitSystemFullscreen();
-    mui->frameBookList->show();
+
     m_Reader->getReadList();
   });
 

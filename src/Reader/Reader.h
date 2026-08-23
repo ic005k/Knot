@@ -203,7 +203,10 @@ class Reader : public QDialog {
   void setTtsCurrentSentence(const QString& currentSentence);
   void setAutoStopPlayTime();
   void initTTS();
- public slots:
+  void showBookListWin();
+  void hideBookListWin();
+  bool isBookListWinVisible();
+  public slots:
   void on_SetReaderFunVisible();
 
   void setPageScroll0();

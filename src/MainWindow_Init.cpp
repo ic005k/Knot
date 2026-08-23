@@ -826,7 +826,9 @@ void MainWindow::init_UIWidget() {
   mui->frameCategory->hide();
   mui->frameSetTab->hide();
   mui->frameEditRecord->hide();
-  mui->frameBookList->hide();
+
+  m_Reader->hideBookListWin();
+
   mui->f_ReaderSet->hide();
   mui->btnStopSpeak->hide();
 
