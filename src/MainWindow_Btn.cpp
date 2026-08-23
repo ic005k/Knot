@@ -29,8 +29,10 @@ void MainWindow::on_btnDel_Number_clicked() {
 void MainWindow::on_btnBackNoteDiff_clicked() { m_NotesList->closeNoteDiff(); }
 
 void MainWindow::on_btnBackBookList_clicked() {
-  mui->frameMain->show();
+  if (!isGpsRun) m_Reader->cancelKeepScreenOn();
+
   mui->frameBookList->hide();
+  mui->frameMain->show();
 }
 
 void MainWindow::on_btnOpenBookFile_clicked() { on_btnOpen_clicked(); }
