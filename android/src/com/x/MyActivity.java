@@ -172,6 +172,8 @@ public class MyActivity
 
     public static boolean mPdfInvertMode = false;
 
+    public String tempSwapStr = "";
+
     // 本地AI模型开关全局存储，C++同步、Qt读取
     public static boolean mLocalAIModelEnabled = false;
     public static boolean mAIAPIEnabled = false;
@@ -2917,5 +2919,13 @@ public class MyActivity
             );
             window.getDecorView().setSystemUiVisibility(vis);
         }
+    }
+
+    public String getTempSwapStr() {
+        return tempSwapStr;
+    }
+
+    public void setTempSwapStr(String tempSwapStr) {
+        this.tempSwapStr = tempSwapStr;
     }
 }

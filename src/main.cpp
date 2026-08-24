@@ -42,6 +42,7 @@ extern void RegJni20(const char* myClassName);
 extern void RegJniAiLink(const char* myClassName);
 extern void RegJniParsePreview(const char* myClassName);
 extern void RegJniSendQuestion(const char* myClassName);
+extern void RegJniPublicJavaCallCpp(const char* myClassName);
 
 extern void releaseGlobalAiEngine();
 
@@ -198,6 +199,7 @@ int main(int argc, char* argv[]) {
   RegJni("com/x/DefaultOpen");
   RegJni("com/x/DateTimePicker");
   RegJni17("com/x/WebViewActivity");
+  RegJniPublicJavaCallCpp("com/x/ReadListActivity");
 
   iniDir = "/storage/emulated/0/KnotData/";
   privateDir = "/storage/emulated/0/.Knot/";

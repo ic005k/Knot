@@ -38,6 +38,8 @@ static jstring nativeParsePreview(JNIEnv* env, jclass clazz, jstring lineText,
 
 static void sendQuestionToCpp(JNIEnv* env, jclass clazz, jstring questionText);
 
+static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type);
+
 #endif
 
 #ifdef Q_OS_ANDROID
@@ -47,7 +49,10 @@ static void JavaNotify_0() {
   QTimer::singleShot(100, mw_one, []() {
     m_Method->exitSystemFullscreen();
 
-    m_Reader->getReadList();
+    if (isAndroid) {
+      m_Reader->openReadListWindow(m_Reader->bookList);
+    } else
+      m_Reader->getReadList();
   });
 
   qDebug() << "C++ JavaNotify_0：退出全屏模式";
@@ -441,6 +446,39 @@ static void sendQuestionToCpp(JNIEnv* env, jclass clazz, jstring questionText) {
   // =======================================================
 }
 
+static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
+  Q_UNUSED(clazz);
+  QString strType;
+  if (type != nullptr) {
+    const char* raw = env->GetStringUTFChars(type, nullptr);
+    strType = QString::fromUtf8(raw);
+    env->ReleaseStringUTFChars(type, raw);
+  }
+  qDebug() << "[JNI] PublicJavaCallCpp:" << strType;
+
+  // JNI线程立即返回，业务切Qt主线程执行
+  bool invoked = QMetaObject::invokeMethod(
+      mw_one,
+      [strType]() {
+        try {
+          // 在这里写业务逻辑
+          if (strType == "open_book_file") {
+            QString bookfile = m_Method->getTempSwapStr();
+            m_Reader->startOpenFile(bookfile);
+          }
+          qDebug() << "[PublicJavaCallCpp main thread] type:" << strType;
+        } catch (const std::exception& ex) {
+          qDebug() << "[PublicJavaCallCpp] EXCEPTION:" << ex.what();
+        } catch (...) {
+          qDebug() << "[PublicJavaCallCpp] UNKNOWN EXCEPTION";
+        }
+      },
+      Qt::QueuedConnection);
+  if (!invoked) {
+    qWarning() << "[PublicJavaCallCpp] invokeMethod FAILED!";
+  }
+}
+
 //============== JNI 方法注册数组  ===========================
 
 static const JNINativeMethod gMethods[] = {
@@ -491,7 +529,10 @@ static const JNINativeMethod gMethodsParsePreview[] = {
 static const JNINativeMethod gMethodsSendQuestion[] = {
     {"sendQuestionToCpp", "(Ljava/lang/String;)V", (void*)sendQuestionToCpp}};
 
-///// 注册函数 ///////////////////////////////////////
+static const JNINativeMethod gMethodsPublicJavaCallCpp[] = {
+    {"PublicJavaCallCpp", "(Ljava/lang/String;)V", (void*)PublicJavaCallCpp}};
+
+///// 注册函数 //////////////////////////////////////////////////////////////
 
 void RegJni(const char* myClassName) {
   QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
@@ -696,6 +737,26 @@ void RegJniSendQuestion(const char* myClassName) {
       qDebug() << "register sendQuestionToCpp failed";
     } else {
       qDebug() << "RegisterNatives sendQuestionToCpp success!";
+    }
+  });
+}
+
+void RegJniPublicJavaCallCpp(const char* myClassName) {
+  QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
+    QJniEnvironment Environment;
+    jclass j_class = Environment->FindClass(myClassName);
+    if (j_class == nullptr) {
+      qDebug() << "error: find class failed PublicJavaCallCpp";
+      return;
+    }
+    jint ret =
+        Environment->RegisterNatives(j_class, gMethodsPublicJavaCallCpp,
+                                     sizeof(gMethodsPublicJavaCallCpp) /
+                                         sizeof(gMethodsPublicJavaCallCpp[0]));
+    if (ret != JNI_OK) {
+      qDebug() << "register PublicJavaCallCpp failed";
+    } else {
+      qDebug() << "RegisterNatives PublicJavaCallCpp success!";
     }
   });
 }

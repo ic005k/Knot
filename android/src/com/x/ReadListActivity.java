@@ -16,6 +16,8 @@ public class ReadListActivity extends AppCompatActivity {
 
     private ImageButton btnOpen, btnRead, btnShare, btnRemove, btnClear;
 
+    public static native void PublicJavaCallCpp(String type);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,17 +67,8 @@ public class ReadListActivity extends AppCompatActivity {
 
         // 打开按钮
         btnOpen.setOnClickListener(v -> {
-            Book sel = bookAdapter.getSelectedItem();
-            if (sel == null) {
-                Toast.makeText(
-                    this,
-                    "请先选择一本书籍",
-                    Toast.LENGTH_SHORT
-                ).show();
-                return;
-            }
-            // 调用主Activity的打开PDF/文档方法，复用项目已有openMyPDF
-            MyActivity.m_instance.openMyPDF(sel.getFilePath());
+            MyActivity.m_instance.openFilePicker();
+            onBackPressed();
         });
 
         // 阅读按钮
@@ -84,12 +77,34 @@ public class ReadListActivity extends AppCompatActivity {
             if (sel == null) {
                 Toast.makeText(
                     this,
-                    "请先选择一本书籍",
+                    "Please select a book first.",
                     Toast.LENGTH_SHORT
                 ).show();
                 return;
             }
-            MyActivity.m_instance.openMyPDF(sel.getFilePath());
+            String filePath = sel.getFilePath();
+            if (filePath == null || filePath.isEmpty()) {
+                return;
+            }
+
+            // 获取小写扩展名
+            String ext = "";
+            int dotIndex = filePath.lastIndexOf('.');
+            if (dotIndex >= 0) {
+                ext = filePath.substring(dotIndex + 1).toLowerCase();
+            }
+
+            /*if ("pdf".equals(ext) || "mobi".equals(ext)) {
+                MyActivity.m_instance.openMyPDF(filePath);
+            } else {
+                MyActivity.m_instance.setTempSwapStr(filePath);
+                PublicJavaCallCpp("open_book_file");
+            }*/
+
+            MyActivity.m_instance.setTempSwapStr(filePath);
+            PublicJavaCallCpp("open_book_file");
+
+            onBackPressed();
         });
 
         // 分享按钮：复用项目已有的分享工具
@@ -98,7 +113,7 @@ public class ReadListActivity extends AppCompatActivity {
             if (sel == null) {
                 Toast.makeText(
                     this,
-                    "请先选择一本书籍",
+                    "Please select a book first.",
                     Toast.LENGTH_SHORT
                 ).show();
                 return;
@@ -116,7 +131,7 @@ public class ReadListActivity extends AppCompatActivity {
             if (sel == null) {
                 Toast.makeText(
                     this,
-                    "请先选择一本书籍",
+                    "Please select a book first.",
                     Toast.LENGTH_SHORT
                 ).show();
                 return;

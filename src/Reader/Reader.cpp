@@ -1925,7 +1925,7 @@ void Reader::readBookDone() {
     }
 
     mui->frameReader->show();
-    hideBookListWin();
+    if (!isAndroid) hideBookListWin();
     mui->frameMain->hide();
 
     if (isEpub) {
@@ -1950,8 +1950,7 @@ void Reader::readBookDone() {
 #ifdef Q_OS_ANDROID
 
     if (!mw_one->initMain) {
-      showBookListWin();
-      mui->frameMain->hide();
+      mui->frameMain->show();
       mui->frameReader->hide();
 
       QTimer::singleShot(100, this, [this]() { openMyPDF(fileName); });
@@ -2889,9 +2888,12 @@ void Reader::closeReader() {
   savePageVPos();
 
   mui->frameReader->hide();
-  showBookListWin();
-
-  getReadList();
+  if (isAndroid)
+    openReadListWindow(bookList);
+  else {
+    showBookListWin();
+    getReadList();
+  }
 }
 
 void Reader::openReader() {
