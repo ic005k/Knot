@@ -466,6 +466,12 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             QString bookfile = m_Method->getTempSwapStr();
             m_Reader->startOpenFile(bookfile);
           }
+
+          if (strType == "clear_reader_records") {
+            QString c_name = m_Method->getTempSwapStr();
+            m_Reader->clearReaderRecords(c_name);
+          }
+
           qDebug() << "[PublicJavaCallCpp main thread] type:" << strType;
         } catch (const std::exception& ex) {
           qDebug() << "[PublicJavaCallCpp] EXCEPTION:" << ex.what();

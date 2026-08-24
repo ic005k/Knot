@@ -1441,6 +1441,15 @@ void Reader::clearAllReaderRecords() {
   QFile::remove(file_ini);
 }
 
+void Reader::clearReaderRecords(const QString& c_name) {
+  QString file_ini = iniDir + "bookini/" + c_name + ".ini";
+  if (!QFile::exists(file_ini)) {
+    return;
+  }
+
+  if (QFile::remove(file_ini)) qInfo() << "阅读记录已清除：" << file_ini;
+}
+
 void Reader::openBookListItem() {
   int index = m_Method->getCurrentIndexFromQV(qvBookList);
 
@@ -2888,6 +2897,7 @@ void Reader::closeReader() {
   savePageVPos();
 
   mui->frameReader->hide();
+  mui->frameMain->show();
   if (isAndroid)
     openReadListWindow(bookList);
   else {

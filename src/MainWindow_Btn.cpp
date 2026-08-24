@@ -1519,10 +1519,10 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (m_Reader->isBookListWinVisible()) {
-    on_btnBackBookList_clicked();
-    return;
-  }
+  // if (m_Reader->isBookListWinVisible()) {
+  //  on_btnBackBookList_clicked();
+  // return;
+  //}
 
   if (!mui->frameNotesTree->isHidden()) {
     mui->btnBack_Tree->click();

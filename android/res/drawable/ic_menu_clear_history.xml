@@ -3,32 +3,32 @@
         android:height="24dp"
         android:viewportWidth="24"
         android:viewportHeight="24"
-        android:tint="#757575">
+        android:tint="#9E9E9E">
 
-    <!-- 扫把手柄 -->
+    <!-- 扫把整体轮廓（手柄+刷头外框） -->
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#757575"
+        android:strokeColor="#9E9E9E"
         android:strokeWidth="1.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M12,3V10" />
+        android:pathData="M10.5,6H13.5V3H10.5V6ZM15,6V9H19.5C20.88,9 22,10.12 22,11.5V14.5C22,15.88 20.88,17 19.5,17H18.45L19.5,21.75C19.65,22.45 19.1,23 18.38,23H5.62C4.9,23 4.35,22.45 4.5,21.75L5.55,17H4.5C3.12,17 2,15.88 2,14.5V11.5C2,10.12 3.12,9 4.5,9H9V6C9,4.62 10.12,3.5 11.5,3.5H12.5C13.88,3.5 15,4.62 15,6Z" />
 
-    <!-- 扫把头部轮廓 -->
+    <!-- 刷头顶部横线 -->
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#757575"
+        android:strokeColor="#9E9E9E"
         android:strokeWidth="1.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M7,10H17L15.5,20H8.5L7,10Z" />
+        android:pathData="M5.5,12H18.5" />
 
-    <!-- 扫把刷毛分隔线 -->
+    <!-- 刷毛竖向分隔线 -->
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#757575"
+        android:strokeColor="#9E9E9E"
         android:strokeWidth="1.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M10,10V20M14,10V20" />
+        android:pathData="M8,12V23M12,12V23M16,12V23" />
     </vector>

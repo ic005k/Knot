@@ -3,9 +3,11 @@ package com.x;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,9 +120,10 @@ public class ReadListActivity extends AppCompatActivity {
                 ).show();
                 return;
             }
-            MyActivity.m_instance.shareString(
+            MyActivity.m_instance.shareImage(
                 sel.getTitle(),
                 sel.getFilePath(),
+                "Book",
                 MyActivity.m_instance
             );
         });
@@ -146,10 +149,47 @@ public class ReadListActivity extends AppCompatActivity {
             }
         });
 
-        // 清除选中，不删除数据
+        // 清除阅读标记
         btnClear.setOnClickListener(v -> {
-            bookAdapter.clearAllSelect();
-            Toast.makeText(this, "清除选中", Toast.LENGTH_SHORT).show();
+            Book sel = bookAdapter.getSelectedItem();
+            if (sel == null) {
+                Toast.makeText(
+                    this,
+                    "Please select a book first.",
+                    Toast.LENGTH_SHORT
+                ).show();
+                return;
+            }
+            String rawName = sel.getRawBookName();
+            if (rawName == null || rawName.isEmpty()) {
+                return;
+            }
+
+            String iniDir = "/storage/emulated/0/KnotData/";
+            String file_ini = iniDir + "bookini/" + rawName + ".ini";
+            File iniFile = new File(file_ini);
+            if (!iniFile.exists() || !iniFile.isFile()) {
+                // 文件不存在，直接返回，不弹确认框
+                return;
+            }
+
+            new AlertDialog.Builder(this)
+                .setTitle("Knot")
+                .setMessage(
+                    MyActivity.zh_cn
+                        ? "确定要清除本书阅读标记吗？\n\n " + file_ini
+                        : "Clear reading marks for the current book?\n\n " +
+                              file_ini
+                )
+                .setPositiveButton(
+                    MyActivity.zh_cn ? "确定" : "OK",
+                    (dialog, which) -> {
+                        MyActivity.m_instance.setTempSwapStr(rawName);
+                        PublicJavaCallCpp("clear_reader_records");
+                    }
+                )
+                .setNegativeButton(MyActivity.zh_cn ? "取消" : "Cancel", null)
+                .show();
         });
     }
 }
