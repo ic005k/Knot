@@ -24,7 +24,8 @@ public class ReadListActivity extends AppCompatActivity {
 
         // 接收主Activity传递过来的暗黑模式，复用项目沉浸式工具
         boolean darkMode = getIntent().getBooleanExtra("isDarkMode", false);
-        ImmersiveUtil.applyRealImmersive(this, darkMode);
+        //ImmersiveUtil.applyRealImmersive(this, darkMode);
+        ImmersiveUtil.applyRealImmersive(this);
 
         btnOpen = findViewById(R.id.btnOpen);
         btnRead = findViewById(R.id.btnRead);
@@ -123,6 +124,11 @@ public class ReadListActivity extends AppCompatActivity {
             int index = bookList.indexOf(sel);
             bookList.remove(index);
             bookAdapter.notifyItemRemoved(index);
+
+            // 如果删掉的就是当前选中，清空选择
+            if (bookAdapter.getSelectedPosition() == index) {
+                bookAdapter.clearAllSelect();
+            }
         });
 
         // 清除选中，不删除数据

@@ -8,70 +8,77 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
-public class BookAdapter
-    extends RecyclerView.Adapter<BookAdapter.BookViewHolder>
-{
+public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
 
-    private final List<Book> bookList;
+    private final List<Book> mBookList;
+    // 单选：-1代表无选中
+    private int mSelectedPos = -1;
 
-    public BookAdapter(List<Book> bookList) {
-        this.bookList = bookList;
+    public BookAdapter(List<Book> list) {
+        mBookList = list;
     }
 
     @NonNull
     @Override
-    public BookViewHolder onCreateViewHolder(
+    public ViewHolder onCreateViewHolder(
         @NonNull ViewGroup parent,
         int viewType
     ) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(
+        View v = LayoutInflater.from(parent.getContext()).inflate(
             R.layout.item_book,
             parent,
             false
         );
-        return new BookViewHolder(view);
+        return new ViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull BookViewHolder holder, int position) {
-        Book book = bookList.get(position);
-        holder.tvBookName.setText(book.getTitle());
-        holder.itemView.setSelected(book.isSelected());
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Book book = mBookList.get(position);
+        holder.tvName.setText(book.getTitle());
+        // 设置selected状态，驱动selector背景变色
+        holder.itemView.setSelected(mSelectedPos == position);
 
         holder.itemView.setOnClickListener(v -> {
-            book.setSelected(!book.isSelected());
-            notifyItemChanged(position);
+            int old = mSelectedPos;
+            mSelectedPos = holder.getAdapterPosition();
+            // 刷新旧位置和新位置
+            if (old != -1) notifyItemChanged(old);
+            notifyItemChanged(mSelectedPos);
         });
     }
 
     @Override
     public int getItemCount() {
-        return bookList.size();
+        return mBookList.size();
     }
 
     public Book getSelectedItem() {
-        for (Book b : bookList) {
-            if (b.isSelected()) {
-                return b;
-            }
+        if (mSelectedPos < 0 || mSelectedPos >= mBookList.size()) {
+            return null;
         }
-        return null;
+        return mBookList.get(mSelectedPos);
     }
 
     public void clearAllSelect() {
-        for (Book b : bookList) {
-            b.setSelected(false);
+        int old = mSelectedPos;
+        mSelectedPos = -1;
+        if (old != -1) {
+            notifyItemChanged(old);
         }
-        notifyDataSetChanged();
     }
 
-    public static class BookViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        TextView tvBookName;
+        TextView tvName;
 
-        public BookViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvBookName = itemView.findViewById(R.id.tvBookName);
+            tvName = itemView.findViewById(R.id.tvBookName);
         }
+    }
+
+    public int getSelectedPosition() {
+        return mSelectedPos;
     }
 }
