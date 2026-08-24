@@ -206,6 +206,7 @@ class Reader : public QDialog {
   void showBookListWin();
   void hideBookListWin();
   bool isBookListWinVisible();
+  void openReadListWindow(QStringList list);
   public slots:
   void on_SetReaderFunVisible();
 

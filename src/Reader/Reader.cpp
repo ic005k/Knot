@@ -26,136 +26,6 @@ Reader::Reader(QWidget* parent) : QDialog(parent) {
   bookListContainer->setSizePolicy(QSizePolicy::Preferred,
                                    QSizePolicy::Expanding);
 
-  // TODO: Qt6.12+ remove hideMask workaround
-  /*{
-    // 解决窗口隐藏时的黑屏
-    {
-      // ⭐ 遮罩作为 container 的子控件
-      auto* hideMask = new QWidget(bookListContainer);
-      hideMask->setObjectName("hideMask");
-      hideMask->setStyleSheet("background: #DDDDDD;");
-      hideMask->hide();
-
-      // ⭐ 关键：设置遮罩的尺寸策略，让它能充满父容器
-      hideMask->setAttribute(Qt::WA_OpaquePaintEvent,
-                             true);  // 避免透明绘制开销
-      hideMask->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-      class HideShowFilter : public QObject {
-        QWidget* m_mask;
-        QWidget* m_container;
-
-       public:
-        HideShowFilter(QWidget* mask, QWidget* container,
-                       QObject* parent = nullptr)
-            : QObject(parent), m_mask(mask), m_container(container) {}
-
-       protected:
-        bool eventFilter(QObject* obj, QEvent* e) override {
-          // ⭐ 核心改动：Resize 时也同步尺寸，确保任何时刻都满铺
-          if (e->type() == QEvent::Resize || e->type() == QEvent::Move) {
-            if (m_mask->isVisible()) {
-              m_mask->resize(m_container->size());  // 用 size() 而非 rect()
-            }
-          } else if (e->type() == QEvent::Hide) {
-            // ⭐ 隐藏前：先同步到最新尺寸，再显示遮罩
-            m_mask->resize(m_container->size());
-            m_mask->move(0, 0);  // 子控件坐标系，固定左上角
-            m_mask->show();
-            m_mask->raise();
-          } else if (e->type() == QEvent::Show) {
-            m_mask->resize(m_container->size());
-            m_mask->move(0, 0);
-            m_mask->show();
-            m_mask->raise();
-          }
-          return false;
-        }
-      };
-
-      bookListContainer->installEventFilter(
-          new HideShowFilter(hideMask, bookListContainer, bookListContainer));
-
-      // ⭐ 首帧渲染完成后隐藏遮罩
-      QObject::connect(
-          qvBookList, &QQuickView::afterRendering, hideMask,
-          [hideMask]() {
-            static bool done = false;
-            if (!done && hideMask->isVisible()) {
-              done = true;
-              hideMask->hide();
-            }
-          },
-          Qt::DirectConnection);
-    }
-
-    // 解决窗口显示时的黑屏
-    // ⭐ 1. 定义安全的事件过滤器（局部类，放在 Reader 构造函数内部即可）
-    class GeometrySync : public QObject {
-      QPointer<QWidget> m_mask;
-
-     public:
-      using QObject::QObject;
-      void setMask(QWidget* m) { m_mask = m; }
-
-     protected:
-      bool eventFilter(QObject* w, QEvent* e) override {
-        if (e->type() == QEvent::Resize || e->type() == QEvent::Move ||
-            e->type() == QEvent::Show) {
-          if (!m_mask) return false;  // mask 已销毁，安全跳过
-          auto* container = static_cast<QWidget*>(w);
-          if (container->isVisible()) {
-            QPoint gp = container->mapToGlobal(QPoint(0, 0));
-            m_mask->setGeometry(gp.x(), gp.y(), container->width(),
-                                container->height());
-            m_mask->show();
-            m_mask->raise();
-          }
-        }
-        return false;
-      }
-    };
-
-    // ⭐ 2. 创建独立遮罩窗口
-    auto* mask = new QWidget(bookListContainer->window());
-    mask->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool |
-                         Qt::WindowStaysOnTopHint);
-    mask->setAttribute(Qt::WA_TranslucentBackground, false);
-    mask->setStyleSheet("background: #DDDDDD;");
-    mask->raise();
-
-    // ⭐ 3. 安装安全的事件过滤器（替代原来的 new QObject + setProperty）
-    auto* sync = new GeometrySync(bookListContainer);
-    sync->setMask(mask);
-    bookListContainer->installEventFilter(sync);
-
-    // ⭐ 4. 初始定位一次
-    QPoint initPos = bookListContainer->mapToGlobal(QPoint(0, 0));
-    mask->setGeometry(initPos.x(), initPos.y(), bookListContainer->width(),
-                      bookListContainer->height());
-
-    // ⭐ 5. 首帧完成后安全移除遮罩
-    QObject::connect(
-        qvBookList, &QQuickView::afterRendering, mask,
-        [mask, bookListContainer]() {
-          static bool done = false;
-          if (!done) {
-            done = true;
-
-            // ⭐ 1. 先让遮罩变透明（视觉上立即消失，避免黑块）
-            mask->setStyleSheet("background: transparent;");
-            mask->update();
-
-            // ⭐ 2. 等 QQuickView 真正提交下一帧后再关闭/销毁
-            QTimer::singleShot(50, mask, [mask]() {
-              mask->hide();  // hide 比 close 更安全，不触发窗口销毁动画
-              mask->deleteLater();
-            });
-          }
-        },
-        Qt::DirectConnection);  // ⭐ 改为 Direct，确保在同一渲染线程执行
-  }*/
-
   mui->qwBookList->hide();
   if (qvBookList->source().isEmpty()) {
     qvBookList->engine()->rootContext()->setContextProperty("isDark", isDark);
@@ -3043,11 +2913,13 @@ void Reader::openReader() {
 
   initTTS();
 
-  mui->frameMain->hide();
-
-  showBookListWin();
-
-  getReadList();
+  if (isAndroid) {
+    openReadListWindow(bookList);
+  } else {
+    mui->frameMain->hide();
+    showBookListWin();
+    getReadList();
+  }
 
   return;
 
@@ -3263,23 +3135,4 @@ void Reader::setEditText(const QString& txt, const QString& direction) {
 void Reader::setStartEnd(int start, int end) {
   startNote = start;
   endNote = end;
-}
-
-void Reader::showBookListWin() {
-  mui->frameBookList->setFixedSize(mui->frameMain->width(),
-                                   mw_one->height() - 32 -
-                                       mui->lblBookList->height() -
-                                       mui->btnClearAllRecords->height());
-  qInfo() << "frameBookList=" << mui->frameBookList->size();
-}
-
-void Reader::hideBookListWin() {
-  mui->frameBookList->setFixedSize(mui->frameMain->width(), 1);
-}
-
-bool Reader::isBookListWinVisible() {
-  if (mui->frameBookList->size() != QSize(mui->frameMain->width(), 1))
-    return true;
-
-  return false;
 }

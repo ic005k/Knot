@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:gravity="center"
+        android:background="#F5F5F5"
+    >
+
+        <ImageButton
+            android:id="@+id/btnOpen"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_open_in_new"
+            android:contentDescription="打开"
+            android:background="?attr/selectableItemBackgroundBorderless"
+        />
+
+        <ImageButton
+            android:id="@+id/btnRead"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@android:drawable/ic_menu_view"
+            android:contentDescription="阅读"
+            android:background="?attr/selectableItemBackgroundBorderless"
+        />
+
+        <ImageButton
+            android:id="@+id/btnShare"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@android:drawable/ic_menu_share"
+            android:contentDescription="分享"
+            android:background="?attr/selectableItemBackgroundBorderless"
+        />
+
+        <ImageButton
+            android:id="@+id/btnRemove"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@android:drawable/ic_menu_delete"
+            android:contentDescription="移除"
+            android:background="?attr/selectableItemBackgroundBorderless"
+        />
+
+        <ImageButton
+            android:id="@+id/btnClear"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_menu_clear_history"
+            android:contentDescription="清除"
+            android:background="?attr/selectableItemBackgroundBorderless"
+        />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerBookList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+    />
+
+</LinearLayout>

@@ -1597,6 +1597,16 @@ public class MyActivity
         getMyAppContext().startActivity(i);
     }
 
+    /**
+     * 打开阅读列表窗口
+     */
+    public void openReadListWindow(ArrayList<String> readItemList) {
+        Intent intent = new Intent(this, ReadListActivity.class);
+        // 把ArrayList直接放入intent
+        intent.putStringArrayListExtra("book_list", readItemList);
+        startActivity(intent);
+    }
+
     public static void openMDWindow() {
         Intent i = new Intent(getMyAppContext(), MDActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

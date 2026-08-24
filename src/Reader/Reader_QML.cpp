@@ -79,3 +79,23 @@ void Reader::setQmlLandscape(bool isValue) {
   if (!result) {
   }
 }
+
+void Reader::showBookListWin() {
+  int a = 0;
+  a = 32 + mui->lblBookList->height() + mui->btnClearAllRecords->height();
+
+  mui->frameBookList->setFixedSize(mui->frameMain->width(),
+                                   mw_one->height() - a);
+  qInfo() << "frameBookList=" << mui->frameBookList->size();
+}
+
+void Reader::hideBookListWin() {
+  mui->frameBookList->setFixedSize(mui->frameMain->width(), 1);
+}
+
+bool Reader::isBookListWinVisible() {
+  if (mui->frameBookList->size() != QSize(mui->frameMain->width(), 1))
+    return true;
+
+  return false;
+}
