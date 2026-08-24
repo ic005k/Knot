@@ -23,7 +23,11 @@ public class ReadListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_read_list);
+        if (MyActivity.isDark) {
+            setContentView(R.layout.activity_read_list_dark);
+        } else {
+            setContentView(R.layout.activity_read_list);
+        }
         setTitle("阅读列表");
 
         // 接收主Activity传递过来的暗黑模式，复用项目沉浸式工具
@@ -36,6 +40,19 @@ public class ReadListActivity extends AppCompatActivity {
         btnShare = findViewById(R.id.btnShare);
         btnRemove = findViewById(R.id.btnRemove);
         btnClear = findViewById(R.id.btnClear);
+
+        int iconColor;
+        if (MyActivity.isDark) {
+            iconColor = 0xFFFFFFFF; //暗黑：白色图标
+        } else {
+            iconColor = 0xFF000000; //亮色：黑色图标
+        }
+
+        btnOpen.setColorFilter(iconColor);
+        btnRead.setColorFilter(iconColor);
+        btnShare.setColorFilter(iconColor);
+        btnRemove.setColorFilter(iconColor);
+        btnClear.setColorFilter(iconColor);
 
         RecyclerView recyclerView = findViewById(R.id.recyclerBookList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

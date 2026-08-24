@@ -12,7 +12,7 @@
         android:orientation="horizontal"
         android:padding="8dp"
         android:gravity="center"
-        android:background="#F5F5F5"
+        android:background="#2B2B2B"
     >
         <ImageButton
             android:id="@+id/btnOpen"
@@ -60,9 +60,11 @@
             android:background="?attr/selectableItemBackgroundBorderless"
         />
     </LinearLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerBookList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#1E1E1E"
     />
 </LinearLayout>

@@ -41,11 +41,21 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
         @NonNull ViewGroup parent,
         int viewType
     ) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(
-            R.layout.item_book,
-            parent,
-            false
-        );
+        View v;
+        if (MyActivity.isDark) {
+            v = LayoutInflater.from(parent.getContext()).inflate(
+                R.layout.item_book_dark,
+                parent,
+                false
+            );
+            return new ViewHolder(v);
+        } else {
+            v = LayoutInflater.from(parent.getContext()).inflate(
+                R.layout.item_book,
+                parent,
+                false
+            );
+        }
         return new ViewHolder(v);
     }
 

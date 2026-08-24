@@ -5,21 +5,21 @@
         android:viewportHeight="24"
         android:tint="#9E9E9E">
 
-    <!-- 扫把主体轮廓（手柄+梯形扫帚头） -->
+    <!-- 眼睛外轮廓 -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#9E9E9E"
         android:strokeWidth="1.2"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M12,2V13M6,13H18L19.5,21H4.5L6,13Z" />
+        android:pathData="M12,5C7.5,5 3.5,8.5 2.5,12C3.5,15.5 7.5,19 12,19C16.5,19 20.5,15.5 21.5,12C20.5,8.5 16.5,5 12,5Z" />
 
-    <!-- 扫帚头内部刷毛分隔线 -->
+    <!-- 中心瞳孔圆环 -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#9E9E9E"
         android:strokeWidth="1.2"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M10,13L9,21M14,13L15,21" />
+        android:pathData="M12,9.75A2.25,2.25 0,1,1 12,14.25A2.25,2.25 0,1,1 12,9.75Z" />
     </vector>

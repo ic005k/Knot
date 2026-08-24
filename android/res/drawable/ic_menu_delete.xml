@@ -5,21 +5,21 @@
         android:viewportHeight="24"
         android:tint="#9E9E9E">
 
-    <!-- 扫把主体轮廓（手柄+梯形扫帚头） -->
+    <!-- 垃圾桶主体轮廓（桶盖+提手+桶身） -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#9E9E9E"
         android:strokeWidth="1.2"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M12,2V13M6,13H18L19.5,21H4.5L6,13Z" />
+        android:pathData="M3,6H21M8,6V4C8,3.45 8.45,3 9,3H15C15.55,3 16,3.45 16,4V6M5,6V20C5,20.55 5.45,21 6,21H18C18.55,21 19,20.55 19,20V6" />
 
-    <!-- 扫帚头内部刷毛分隔线 -->
+    <!-- 桶身内部竖线 -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#9E9E9E"
         android:strokeWidth="1.2"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M10,13L9,21M14,13L15,21" />
+        android:pathData="M10,10V17M14,10V17" />
     </vector>
