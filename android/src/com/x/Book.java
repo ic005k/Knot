@@ -7,6 +7,8 @@ public class Book {
     private String rawBookName; // 隐藏原始书名
     private boolean selected; // 选中标记
 
+    private String ext;
+
     //新构造：标题 | 文件路径 | 隐藏原始书名
     public Book(String title, String filePath, String rawBookName) {
         this.title = title;
@@ -41,5 +43,13 @@ public class Book {
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    public String getExt() {
+        return ext;
+    }
+
+    public void setExt(String ext) {
+        this.ext = ext;
     }
 }

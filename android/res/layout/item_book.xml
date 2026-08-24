@@ -5,12 +5,22 @@
     android:layout_height="wrap_content"
     android:padding="14dp"
     android:background="@drawable/item_book_bg"
-    android:clickable="true"
 >
+
+    <!-- 文件类型小色块：宽度4dp，高度铺满 -->
+        <View
+        android:id="@+id/v_file_type_tag"
+        android:layout_width="4dp"
+        android:layout_height="match_parent"
+        android:background="#888888"
+    />
+
     <TextView
         android:id="@+id/tvBookName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="16sp"
+        android:layout_marginStart="12dp"
     />
+
 </LinearLayout>

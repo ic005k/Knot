@@ -18,6 +18,23 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
         mBookList = list;
     }
 
+    // 根据扩展名获取标记颜色 ARGB
+    private int getTagColor(String ext) {
+        if (ext == null) return 0xFF444444;
+        switch (ext) {
+            case "pdf":
+                return 0xFFE53935; // PDF 红色
+            case "mobi":
+                return 0xFFFF8800; // 橙色
+            case "epub":
+                return 0xFF27A844; // 绿色
+            case "txt":
+                return 0xFF777777; // 灰色
+            default:
+                return 0xFF444444; // 其它深灰
+        }
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(
@@ -36,9 +53,10 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Book book = mBookList.get(position);
         holder.tvName.setText(book.getTitle());
+        // 设置左侧类型色块
+        holder.vFileTypeTag.setBackgroundColor(getTagColor(book.getExt()));
         // 设置selected状态，驱动selector背景变色
         holder.itemView.setSelected(mSelectedPos == position);
-
         holder.itemView.setOnClickListener(v -> {
             int old = mSelectedPos;
             mSelectedPos = holder.getAdapterPosition();
@@ -68,17 +86,20 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
         }
     }
 
+    public int getSelectedPosition() {
+        return mSelectedPos;
+    }
+
+    // 只保留一个ViewHolder，里面同时拿tvName和vFileTypeTag
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView tvName;
+        View vFileTypeTag;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tvBookName);
+            vFileTypeTag = itemView.findViewById(R.id.v_file_type_tag);
         }
-    }
-
-    public int getSelectedPosition() {
-        return mSelectedPos;
     }
 }

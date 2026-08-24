@@ -269,9 +269,10 @@ public class DocumentActivity extends Activity {
         currentBar = actionBar;
 
         ImageButton openButton = findViewById(R.id.open_button);
+        openButton.setVisibility(View.GONE);
         openButton.setOnClickListener(v -> {
             finish();
-            CallJavaNotify_10(); // 后续需要JNI回调再打开注释
+            CallJavaNotify_10();
         });
 
         mInvertMode = MyActivity.mPdfInvertMode;

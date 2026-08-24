@@ -54,7 +54,15 @@ public class ReadListActivity extends AppCompatActivity {
                     String showTitle = parts[0];
                     String path = parts[1];
                     String hiddenRawName = parts[2];
-                    bookList.add(new Book(showTitle, path, hiddenRawName));
+                    Book b = new Book(showTitle, path, hiddenRawName);
+                    // 新增：计算扩展名 set到Book对象
+                    String ext = "";
+                    int dotIndex = path.lastIndexOf('.');
+                    if (dotIndex >= 0) {
+                        ext = path.substring(dotIndex + 1).toLowerCase();
+                    }
+                    b.setExt(ext);
+                    bookList.add(b);
                 }
             }
         }
