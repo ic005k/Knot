@@ -5,6 +5,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +19,14 @@ public class AddEventRecord extends AppCompatActivity {
     private TextView tvTimeDisplay;
     private SeekBar seekHour;
     private SeekBar seekMinute;
+
+    private ImageView iconJe;
+    private ImageView iconXq;
+    private ImageView iconCategory;
+
+    private Button btnClearCategory;
+    private Button btnClearNote;
+    private Button btnClearAmount;
 
     private int currentHour;
     private int currentMinute;
@@ -73,9 +82,52 @@ public class AddEventRecord extends AppCompatActivity {
         seekHour = findViewById(R.id.seek_hour);
         seekMinute = findViewById(R.id.seek_minute);
 
+        iconJe = findViewById(R.id.icon_je);
+        iconXq = findViewById(R.id.icon_xq);
+        iconCategory = findViewById(R.id.icon_category);
+
+        btnClearCategory = findViewById(R.id.btn_clear_category);
+        btnClearNote = findViewById(R.id.btn_clear_note);
+        btnClearAmount = findViewById(R.id.btn_clear_amount);
+
+        int iconColor;
+        if (MyActivity.isDark) {
+            iconColor = 0xFFFFFFFF; //暗黑：白色图标
+        } else {
+            iconColor = 0xFF000000; //亮色：黑色图标
+        }
+
+        iconJe.setColorFilter(iconColor);
+        iconXq.setColorFilter(iconColor);
+        iconCategory.setColorFilter(iconColor);
+
+        btnClearCategory.setTextColor(iconColor);
+        btnClearNote.setTextColor(iconColor);
+        btnClearAmount.setTextColor(iconColor);
+
         // 设置标题点击事件占位
         etTitle.setOnClickListener(v -> {
             // TODO: 点击标题业务，例如弹窗编辑标题
+            String finalTimeTag = tvTimeDisplay.getText().toString();
+
+            String finalTitle = etTitle.getText().toString();
+            String finalCategory = etCategory.getText().toString();
+            String finalNote = etNote.getText().toString();
+            String finalAmount = etAmount.getText().toString();
+
+            // TODO：把 finalTitle、finalCategory、finalNote、finalAmount、finalTimeTag 回传给C++
+            MyActivity.m_instance.setTempSwapStr(
+                finalCategory +
+                    "|==|" +
+                    finalNote +
+                    "|==|" +
+                    finalAmount +
+                    "|==|" +
+                    finalTimeTag
+            );
+
+            PublicJavaCallCpp("select_tab");
+            onBackPressed();
         });
     }
 
@@ -239,15 +291,10 @@ public class AddEventRecord extends AppCompatActivity {
     }
 
     private void setupClearButtons() {
-        findViewById(R.id.btn_clear_category).setOnClickListener(v ->
-            etCategory.setText("")
-        );
-        findViewById(R.id.btn_clear_note).setOnClickListener(v ->
-            etNote.setText("")
-        );
-        findViewById(R.id.btn_clear_amount).setOnClickListener(v ->
-            etAmount.setText("")
-        );
+        btnClearCategory.setOnClickListener(v -> etCategory.setText(""));
+        btnClearNote.setOnClickListener(v -> etNote.setText(""));
+        btnClearAmount.setOnClickListener(v -> etAmount.setText(""));
+
         findViewById(R.id.btn_cancel).setOnClickListener(v -> finish());
 
         findViewById(R.id.btn_category).setOnClickListener(v -> {

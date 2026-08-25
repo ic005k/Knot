@@ -1,0 +1,34 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="32dp"
+        android:height="32dp"
+        android:viewportWidth="32"
+        android:viewportHeight="32"
+        android:tint="#9E9E9E">
+
+    <!-- 顶层完整椭圆 -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#9E9E9E"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M6,12C6,7.58 16.3,4 29,4S52,7.58 52,12 41.7,20 29,20 6,16.42 6,12Z" />
+
+    <!-- 中间层弧线 + 右侧垂直连接线 -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#9E9E9E"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M6,12V24C6,28.42 16.3,32 29,32S52,28.42 52,24V12" />
+
+    <!-- 底层弧线 + 右侧垂直连接线 -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#9E9E9E"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M6,24V36C6,40.42 16.3,44 29,44S52,40.42 52,36V24" />
+    </vector>

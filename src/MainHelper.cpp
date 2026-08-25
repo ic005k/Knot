@@ -22,18 +22,7 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
 
   if (watch == mui->lblTitleEditRecord) {
     if (event->type() == QEvent::MouseButtonPress) {
-      QString title = mui->lblTitleEditRecord->text();
-      title = title.mid(0, 4);
-      if (!title.contains("Add") && !title.contains(QObject::tr("Add")))
-        return true;
-
-      mui->btnTabMoveDown->hide();
-      mui->btnTabMoveUp->hide();
-
-      mw_one->m_EditRecord->saveCurrentValue();
-      mw_one->on_btnBackEditRecord_clicked();
-      mui->btnHome->click();
-      isSelectTab = true;
+      selectTab();
 
       return true;
     }
@@ -58,6 +47,24 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
   }
 
   return true;
+}
+
+void MainHelper::selectTab() {
+  QString title = mui->lblTitleEditRecord->text();
+  title = title.mid(0, 4);
+  if (!title.contains("Add") && !title.contains(QObject::tr("Add"))) return;
+
+  mui->btnTabMoveDown->hide();
+  mui->btnTabMoveUp->hide();
+
+  mw_one->m_EditRecord->saveCurrentValue();
+
+  if (!isAndroid) {
+    mw_one->on_btnBackEditRecord_clicked();
+  }
+
+  mui->btnHome->click();
+  isSelectTab = true;
 }
 
 void MainHelper::clickBtnChart() {

@@ -33,7 +33,7 @@
         <Button
             android:id="@+id/btn_cancel"
             android:layout_width="0dp"
-            android:layout_height="46dp"
+            android:layout_height="52dp"
             android:layout_weight="1"
             android:layout_margin="4dp"
             android:text="取消"
@@ -43,7 +43,7 @@
         <Button
             android:id="@+id/btn_category"
             android:layout_width="0dp"
-            android:layout_height="46dp"
+            android:layout_height="52dp"
             android:layout_weight="1"
             android:layout_margin="4dp"
             android:text="分类"
@@ -53,7 +53,7 @@
         <Button
             android:id="@+id/btn_confirm"
             android:layout_width="0dp"
-            android:layout_height="46dp"
+            android:layout_height="52dp"
             android:layout_weight="1"
             android:layout_margin="4dp"
             android:text="确定"
@@ -71,9 +71,10 @@
     >
 
         <ImageView
+            android:id="@+id/icon_category"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:src="@android:drawable/ic_menu_sort_by_size"
+            android:src="@drawable/ic_category"
         />
 
         <EditText
@@ -104,9 +105,10 @@
     >
 
         <ImageView
+            android:id="@+id/icon_xq"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:src="@android:drawable/ic_dialog_info"
+            android:src="@drawable/ic_xq"
         />
 
         <EditText
@@ -138,9 +140,10 @@
     >
 
         <ImageView
+            android:id="@+id/icon_je"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:src="@android:drawable/ic_menu_save"
+            android:src="@drawable/ic_je"
         />
 
         <EditText

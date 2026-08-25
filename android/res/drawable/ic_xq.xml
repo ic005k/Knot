@@ -1,0 +1,25 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="32dp"
+        android:height="32dp"
+        android:viewportWidth="32"
+        android:viewportHeight="32"
+        android:tint="#9E9E9E">
+
+    <!-- 聊天气泡主体（圆角矩形+左下角对话尖尾） -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#9E9E9E"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M14,6H34C39.52,6 44,10.48 44,16V28C44,33.52 39.52,38 34,38H18L8,44V16C8,10.48 12.48,6 18,6Z" />
+
+    <!-- 内部三点省略号（左、中、右） -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#9E9E9E"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M18,22m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0M26,22m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0M34,22m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0" />
+    </vector>

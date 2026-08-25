@@ -1,0 +1,25 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="32dp"
+        android:height="32dp"
+        android:viewportWidth="32"
+        android:viewportHeight="32"
+        android:tint="#9E9E9E">
+
+    <!-- 购物车主体（把手、支撑杆、篮筐及底部双轮） -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#9E9E9E"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M4,6H8C11.3,6 14.2,8.3 15,11.5L19.5,30C20.3,33.2 23.2,35.5 26.5,35.5H38M17,42.5C17,43.88 15.88,45 14.5,45C13.12,45 12,43.88 12,42.5C12,41.12 13.12,40 14.5,40C15.88,40 17,41.12 17,42.5ZM35,42.5C35,43.88 33.88,45 32.5,45C31.12,45 30,43.88 30,42.5C30,41.12 31.12,40 32.5,40C33.88,40 35,41.12 35,42.5Z" />
+
+    <!-- 右上方悬浮商品/包裹框 -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#9E9E9E"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M22,8H42C43.1,8 44,8.9 44,10V22C44,23.1 43.1,24 42,24H26L22,8Z" />
+    </vector>

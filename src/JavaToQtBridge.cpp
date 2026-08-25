@@ -486,6 +486,11 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          if (strType == "select_tab") {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->m_MainHelper->selectTab(); });
+          }
+
           qDebug() << "[PublicJavaCallCpp main thread] type:" << strType;
         } catch (const std::exception& ex) {
           qDebug() << "[PublicJavaCallCpp] EXCEPTION:" << ex.what();

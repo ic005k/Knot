@@ -117,7 +117,8 @@ class MainHelper : public QDialog {
         }
         )";
 
- private:
+  void selectTab();
+  private:
   QStringList bakFileList;
 
  signals:
