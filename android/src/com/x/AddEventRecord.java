@@ -35,6 +35,12 @@ public class AddEventRecord extends AppCompatActivity {
     private Button btnClearNote;
     private Button btnClearAmount;
 
+    private Button btnCancel;
+    private Button btnCategory;
+    private Button btnConfirm;
+    private TextView tvHourLabel;
+    private TextView tvMinuteLabel;
+
     private int currentHour;
     private int currentMinute;
     private int currentSecond;
@@ -102,13 +108,34 @@ public class AddEventRecord extends AppCompatActivity {
         btnClearNote = findViewById(R.id.btn_clear_note);
         btnClearAmount = findViewById(R.id.btn_clear_amount);
 
+        // 按钮、时间标签
+        btnCancel = findViewById(R.id.btn_cancel);
+        btnCategory = findViewById(R.id.btn_category);
+        btnConfirm = findViewById(R.id.btn_confirm);
+        tvHourLabel = findViewById(R.id.tv_hour_label);
+        tvMinuteLabel = findViewById(R.id.tv_minute_label);
+
         // 根据全局语言标记动态设置 hint
         if (MyActivity.zh_cn) {
             etCategory.setHint("输入分类");
             etNote.setHint("输入备注");
+
+            btnCancel.setText("取消");
+            btnCategory.setText("分类");
+            btnConfirm.setText("确定");
+
+            tvHourLabel.setText("时");
+            tvMinuteLabel.setText("分");
         } else {
             etCategory.setHint("Enter category");
             etNote.setHint("Enter note");
+
+            btnCancel.setText("Cancel");
+            btnCategory.setText("Category");
+            btnConfirm.setText("Confirm");
+
+            tvHourLabel.setText("Hour");
+            tvMinuteLabel.setText("Minute");
         }
         etAmount.setHint("");
 
@@ -311,16 +338,16 @@ public class AddEventRecord extends AppCompatActivity {
             onBackPressed();
         });
 
-        findViewById(R.id.btn_cancel).setOnClickListener(v -> finish());
+        btnCancel.setOnClickListener(v -> finish());
 
-        findViewById(R.id.btn_category).setOnClickListener(v -> {
+        btnCategory.setOnClickListener(v -> {
             // TODO:打开分类弹窗
             sendDataToCpp();
             PublicJavaCallCpp("open_category_dialog");
             onBackPressed();
         });
 
-        findViewById(R.id.btn_confirm).setOnClickListener(v -> {
+        btnConfirm.setOnClickListener(v -> {
             sendDataToCpp();
             PublicJavaCallCpp("add_event_record");
             finish();

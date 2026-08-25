@@ -307,6 +307,7 @@
             android:layout_marginTop="8dp"
         >
             <TextView
+                android:id="@+id/tv_hour_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="时"
@@ -328,6 +329,7 @@
             android:layout_marginTop="8dp"
         >
             <TextView
+                android:id="@+id/tv_minute_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="分"
