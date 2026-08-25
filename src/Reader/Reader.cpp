@@ -2897,10 +2897,12 @@ void Reader::closeReader() {
   savePageVPos();
 
   mui->frameReader->hide();
-  mui->frameMain->show();
-  if (isAndroid)
+
+  if (isAndroid) {
+    mui->frameMain->show();
     openReadListWindow(bookList);
-  else {
+  } else {
+    mui->frameMain->hide();
     showBookListWin();
     getReadList();
   }

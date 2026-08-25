@@ -569,7 +569,7 @@ void EditRecord::on_AddRecord() {
 
   mui->hsH->setValue(QTime::currentTime().hour());
   mui->hsM->setValue(QTime::currentTime().minute());
-  mw_one->m_EditRecord->getTime(mui->hsH->value(), mui->hsM->value());
+  getTime(mui->hsH->value(), mui->hsM->value());
 
   mui->editDetails->clear();
 
@@ -578,7 +578,14 @@ void EditRecord::on_AddRecord() {
   mui->editAmount->setText("");
 
   mui->frameMain->hide();
-  mui->frameEditRecord->show();
+
+  if (isAndroid) {
+    openAddEventRecord(
+        tr("Add") + "  : " + tabData->tabText(tabData->currentIndex()), "", "",
+        "", mui->lblTime->text());
+  } else {
+    mui->frameEditRecord->show();
+  }
 
   updateCategoryCompleterList();
 
@@ -594,4 +601,27 @@ bool EditRecord::eventFilter(QObject* watched, QEvent* event) {
   }
 
   return QDialog::eventFilter(watched, event);
+}
+
+void EditRecord::openAddEventRecord(const QString& titleText,
+                                    const QString& categoryText,
+                                    const QString& noteText,
+                                    const QString& amountText,
+                                    const QString& timeTagText) {
+#ifdef Q_OS_ANDROID
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  if (!activity.isValid()) return;
+
+  QJniObject jTitle = QJniObject::fromString(titleText);
+  QJniObject jCategory = QJniObject::fromString(categoryText);
+  QJniObject jNote = QJniObject::fromString(noteText);
+  QJniObject jAmount = QJniObject::fromString(amountText);
+  QJniObject jTimeTag = QJniObject::fromString(timeTagText);
+
+  activity.callMethod<void>("openAddEventRecord",
+                            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/"
+                            "String;Ljava/lang/String;Ljava/lang/String;)V",
+                            jTitle.object(), jCategory.object(), jNote.object(),
+                            jAmount.object(), jTimeTag.object());
+#endif
 }

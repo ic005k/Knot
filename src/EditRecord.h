@@ -81,7 +81,8 @@ class EditRecord : public QDialog {
 
   void on_AddRecord();
 
- private:
+  void openAddEventRecord(const QString &titleText, const QString &categoryText, const QString &noteText, const QString &amountText, const QString &timeTagText);
+  private:
   void set_Amount(QString Number);
 
   QString lblStyle;

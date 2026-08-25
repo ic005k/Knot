@@ -1554,6 +1554,30 @@ public class MyActivity
         startActivity(intent);
     }
 
+    /**
+     * 打开新增事件记录窗口 AddEventRecord
+     */
+    public void openAddEventRecord(
+        String titleText,
+        String categoryText,
+        String noteText,
+        String amountText,
+        String timeTagText
+    ) {
+        Intent intent = new Intent(this, AddEventRecord.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        Bundle bundle = new Bundle();
+        bundle.putString("title_text", titleText);
+        bundle.putString("category_text", categoryText);
+        bundle.putString("note_text", noteText);
+        bundle.putString("amount_text", amountText);
+        bundle.putString("time_tag_text", timeTagText);
+
+        intent.putExtras(bundle);
+        startActivity(intent);
+    }
+
     public static void openMDWindow() {
         Intent i = new Intent(getMyAppContext(), MDActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -204,10 +204,6 @@ int main(int argc, char* argv[]) {
   iniDir = "/storage/emulated/0/KnotData/";
   privateDir = "/storage/emulated/0/.Knot/";
 
-  // 使用app的专属沙盒存储数据
-  // iniDir = getPublicKnotDataPath();
-  // privateDir = getPrivateKnotPath();
-
 #else
   defaultFontSize = QApplication::font().pointSize();
 
