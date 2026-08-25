@@ -108,24 +108,7 @@ public class AddEventRecord extends AppCompatActivity {
         // 设置标题点击事件占位
         etTitle.setOnClickListener(v -> {
             // TODO: 点击标题业务，例如弹窗编辑标题
-            String finalTimeTag = tvTimeDisplay.getText().toString();
-
-            String finalTitle = etTitle.getText().toString();
-            String finalCategory = etCategory.getText().toString();
-            String finalNote = etNote.getText().toString();
-            String finalAmount = etAmount.getText().toString();
-
-            // TODO：把 finalTitle、finalCategory、finalNote、finalAmount、finalTimeTag 回传给C++
-            MyActivity.m_instance.setTempSwapStr(
-                finalCategory +
-                    "|==|" +
-                    finalNote +
-                    "|==|" +
-                    finalAmount +
-                    "|==|" +
-                    finalTimeTag
-            );
-
+            sendDataToCpp();
             PublicJavaCallCpp("select_tab");
             onBackPressed();
         });
@@ -304,26 +287,30 @@ public class AddEventRecord extends AppCompatActivity {
         });
 
         findViewById(R.id.btn_confirm).setOnClickListener(v -> {
-            // 直接拿界面展示的格式化时间字符串，与用户所见完全一致
-            String finalTimeTag = tvTimeDisplay.getText().toString();
-
-            String finalTitle = etTitle.getText().toString();
-            String finalCategory = etCategory.getText().toString();
-            String finalNote = etNote.getText().toString();
-            String finalAmount = etAmount.getText().toString();
-
-            // TODO：把 finalTitle、finalCategory、finalNote、finalAmount、finalTimeTag 回传给C++
-            MyActivity.m_instance.setTempSwapStr(
-                finalCategory +
-                    "|==|" +
-                    finalNote +
-                    "|==|" +
-                    finalAmount +
-                    "|==|" +
-                    finalTimeTag
-            );
+            sendDataToCpp();
             PublicJavaCallCpp("add_event_record");
             finish();
         });
+    }
+
+    private void sendDataToCpp() {
+        // 直接拿界面展示的格式化时间字符串，与用户所见完全一致
+        String finalTimeTag = tvTimeDisplay.getText().toString();
+
+        String finalTitle = etTitle.getText().toString();
+        String finalCategory = etCategory.getText().toString();
+        String finalNote = etNote.getText().toString();
+        String finalAmount = etAmount.getText().toString();
+
+        // TODO：把 finalTitle、finalCategory、finalNote、finalAmount、finalTimeTag 回传给C++
+        MyActivity.m_instance.setTempSwapStr(
+            finalCategory +
+                "|==|" +
+                finalNote +
+                "|==|" +
+                finalAmount +
+                "|==|" +
+                finalTimeTag
+        );
     }
 }

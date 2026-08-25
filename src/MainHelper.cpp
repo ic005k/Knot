@@ -57,6 +57,10 @@ void MainHelper::selectTab() {
   mui->btnTabMoveDown->hide();
   mui->btnTabMoveUp->hide();
 
+  if (isAndroid) {
+    mw_one->m_EditRecord->setDataToUI();
+  }
+
   mw_one->m_EditRecord->saveCurrentValue();
 
   if (!isAndroid) {

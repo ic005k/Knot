@@ -86,16 +86,20 @@ EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
 
 EditRecord::~EditRecord() { delete m_CategoryList; }
 
+void EditRecord::setDataToUI() {
+  QString str = m_Method->getTempSwapStr();
+  QStringList list = str.split("|==|");
+  mui->editCategory->setText(list.at(0));
+  mui->editDetails->setText(list.at(1));
+  mui->editAmount->setText(list.at(2));
+  mui->lblTime->setText(list.at(3));
+}
+
 void EditRecord::on_btnOk_clicked() {
   if (!isAndroid)
     mw_one->on_btnBackEditRecord_clicked();
   else {
-    QString str = m_Method->getTempSwapStr();
-    QStringList list = str.split("|==|");
-    mui->editCategory->setText(list.at(0));
-    mui->editDetails->setText(list.at(1));
-    mui->editAmount->setText(list.at(2));
-    mui->lblTime->setText(list.at(3));
+    setDataToUI();
   }
 
   if (!isAdd) {

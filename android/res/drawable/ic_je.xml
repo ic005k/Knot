@@ -1,34 +1,31 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="32dp"
-        android:height="32dp"
-        android:viewportWidth="32"
-        android:viewportHeight="32"
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="42"
+        android:viewportHeight="42"
         android:tint="#9E9E9E">
-
     <!-- 顶层完整椭圆 -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#9E9E9E"
-        android:strokeWidth="1.2"
+        android:strokeWidth="1.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M6,12C6,7.58 16.3,4 29,4S52,7.58 52,12 41.7,20 29,20 6,16.42 6,12Z" />
-
+        android:pathData="M4.5,9C4.5,5.69 12.23,3 21.75,3S39,5.69 39,9 31.28,15 21.75,15 4.5,12.32 4.5,9Z" />
     <!-- 中间层弧线 + 右侧垂直连接线 -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#9E9E9E"
-        android:strokeWidth="1.2"
+        android:strokeWidth="1.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M6,12V24C6,28.42 16.3,32 29,32S52,28.42 52,24V12" />
-
+        android:pathData="M4.5,9V18C4.5,21.32 12.23,24 21.75,24S39,21.32 39,18V9" />
     <!-- 底层弧线 + 右侧垂直连接线 -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#9E9E9E"
-        android:strokeWidth="1.2"
+        android:strokeWidth="1.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M6,24V36C6,40.42 16.3,44 29,44S52,40.42 52,36V24" />
+        android:pathData="M4.5,18V27C4.5,30.32 12.23,33 21.75,33S39,30.32 39,27V18" />
     </vector>
