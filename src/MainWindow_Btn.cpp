@@ -1098,7 +1098,10 @@ void MainWindow::on_btnTestWebDav_clicked() {
   }
 }
 
-void MainWindow::on_btnReader_clicked() { m_Reader->openReader(); }
+void MainWindow::on_btnReader_clicked() {
+  on_btnHome_clicked();
+  m_Reader->openReader();
+}
 
 void MainWindow::on_btnFind_clicked() {
   mui->frameMain->hide();

@@ -297,7 +297,15 @@ public class AddEventRecord extends AppCompatActivity {
 
         // 设置标题点击事件
         etTitle.setOnClickListener(v -> {
-            // TODO: 点击标题业务，例如弹窗编辑标题
+            // TODO: 点击标题业务
+            CharSequence titleText = etTitle.getText();
+            String text = titleText != null ? titleText.toString() : "";
+
+            // 以"增加"开头 或者 以"Add"开头，才继续执行；否则直接返回
+            if (!text.startsWith("增加") && !text.startsWith("Add")) {
+                return;
+            }
+
             sendDataToCpp();
             PublicJavaCallCpp("select_tab");
             onBackPressed();
