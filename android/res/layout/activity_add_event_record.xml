@@ -12,7 +12,7 @@
     <Button
         android:id="@+id/et_title"
         android:layout_width="match_parent"
-        android:layout_height="32dp"
+        android:layout_height="36dp"
         android:background="#ff8822"
         android:text="增加：xx"
         android:textColor="#ffffff"
@@ -33,31 +33,31 @@
         <Button
             android:id="@+id/btn_cancel"
             android:layout_width="0dp"
-            android:layout_height="64dp"
+            android:layout_height="46dp"
             android:layout_weight="1"
             android:layout_margin="4dp"
             android:text="取消"
-            android:textSize="18sp"
+            android:textSize="16sp"
         />
 
         <Button
             android:id="@+id/btn_category"
             android:layout_width="0dp"
-            android:layout_height="64dp"
+            android:layout_height="46dp"
             android:layout_weight="1"
             android:layout_margin="4dp"
             android:text="分类"
-            android:textSize="18sp"
+            android:textSize="16sp"
         />
 
         <Button
             android:id="@+id/btn_confirm"
             android:layout_width="0dp"
-            android:layout_height="64dp"
+            android:layout_height="46dp"
             android:layout_weight="1"
             android:layout_margin="4dp"
             android:text="确定"
-            android:textSize="18sp"
+            android:textSize="16sp"
         />
     </LinearLayout>
 
@@ -112,7 +112,7 @@
         <EditText
             android:id="@+id/et_note"
             android:layout_width="0dp"
-            android:layout_height="160dp"
+            android:layout_height="120dp"
             android:layout_weight="1"
             android:hint="输入备注"
             android:inputType="textMultiLine|textCapSentences"
@@ -289,7 +289,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="06:36:01"
-            android:textSize="42sp"
+            android:textSize="22sp"
             android:gravity="center"
         />
 

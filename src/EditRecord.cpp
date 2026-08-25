@@ -87,7 +87,16 @@ EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
 EditRecord::~EditRecord() { delete m_CategoryList; }
 
 void EditRecord::on_btnOk_clicked() {
-  mw_one->on_btnBackEditRecord_clicked();
+  if (!isAndroid)
+    mw_one->on_btnBackEditRecord_clicked();
+  else {
+    QString str = m_Method->getTempSwapStr();
+    QStringList list = str.split("|==|");
+    mui->editCategory->setText(list.at(0));
+    mui->editDetails->setText(list.at(1));
+    mui->editAmount->setText(list.at(2));
+    mui->lblTime->setText(list.at(3));
+  }
 
   if (!isAdd) {
     mw_one->modify_Data();
@@ -178,8 +187,13 @@ void EditRecord::set_Amount(QString Number) {
 }
 
 void EditRecord::on_btnType_clicked() {
-  mui->frameEditRecord->hide();
+  if (!isAndroid) {
+    mui->frameEditRecord->hide();
+  } else
+    mui->frameMain->hide();
+
   mui->frameCategory->show();
+
   init_MyCategory();
   m_CategoryList->ui->listWidget->setCurrentRow(0);
   m_Method->setCurrentIndexFromQW(mui->qwCategory, 0);
@@ -577,13 +591,12 @@ void EditRecord::on_AddRecord() {
 
   mui->editAmount->setText("");
 
-  mui->frameMain->hide();
-
   if (isAndroid) {
     openAddEventRecord(
         tr("Add") + "  : " + tabData->tabText(tabData->currentIndex()), "", "",
         "", mui->lblTime->text());
   } else {
+    mui->frameMain->hide();
     mui->frameEditRecord->show();
   }
 

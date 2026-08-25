@@ -23,10 +23,15 @@ public class AddEventRecord extends AppCompatActivity {
     private int currentMinute;
     private int currentSecond;
 
+    public static native void PublicJavaCallCpp(String type);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_event_record);
+
+        ImmersiveUtil.applyRealImmersive(this);
+
         bindViews();
 
         Bundle bundle = getIntent().getExtras();
@@ -195,8 +200,29 @@ public class AddEventRecord extends AppCompatActivity {
             btn.setOnClickListener(v -> {
                 String append = ((Button) v).getText().toString();
                 Editable ed = etAmount.getText();
-                ed.append(append);
-                etAmount.setSelection(ed.length());
+                String current = ed.toString();
+
+                boolean allow = true;
+                if (".".equals(append)) {
+                    // 不允许多个小数点
+                    if (current.contains(".")) {
+                        allow = false;
+                    }
+                } else {
+                    // 小数点后最多2位
+                    int dotPos = current.indexOf('.');
+                    if (dotPos != -1) {
+                        int decimalCount = current.length() - dotPos - 1;
+                        if (decimalCount >= 2) {
+                            allow = false;
+                        }
+                    }
+                }
+
+                if (allow) {
+                    ed.append(append);
+                    etAmount.setSelection(ed.length());
+                }
             });
         }
         //退格
@@ -204,7 +230,6 @@ public class AddEventRecord extends AppCompatActivity {
         if (backspaceBtn != null) {
             backspaceBtn.setText("←");
             backspaceBtn.setOnClickListener(v -> {
-                //退格逻辑
                 String text = etAmount.getText().toString();
                 if (!TextUtils.isEmpty(text)) {
                     etAmount.setText(text.substring(0, text.length() - 1));
@@ -227,6 +252,8 @@ public class AddEventRecord extends AppCompatActivity {
 
         findViewById(R.id.btn_category).setOnClickListener(v -> {
             // TODO:打开分类弹窗
+            PublicJavaCallCpp("open_category_dialog");
+            onBackPressed();
         });
 
         findViewById(R.id.btn_confirm).setOnClickListener(v -> {
@@ -239,6 +266,16 @@ public class AddEventRecord extends AppCompatActivity {
             String finalAmount = etAmount.getText().toString();
 
             // TODO：把 finalTitle、finalCategory、finalNote、finalAmount、finalTimeTag 回传给C++
+            MyActivity.m_instance.setTempSwapStr(
+                finalCategory +
+                    "|==|" +
+                    finalNote +
+                    "|==|" +
+                    finalAmount +
+                    "|==|" +
+                    finalTimeTag
+            );
+            PublicJavaCallCpp("add_event_record");
             finish();
         });
     }

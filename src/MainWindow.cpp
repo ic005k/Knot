@@ -861,8 +861,15 @@ void MainWindow::on_twItemDoubleClicked() {
     mui->f_Number->setFocus();
 
     isAdd = false;
-    mui->frameMain->hide();
-    mui->frameEditRecord->show();
+    if (isAndroid) {
+      mw_one->m_EditRecord->openAddEventRecord(
+          mui->lblTitleEditRecord->text(), mui->editCategory->text(),
+          mui->editDetails->toPlainText(), mui->editAmount->text(),
+          mui->lblTime->text());
+    } else {
+      mui->frameMain->hide();
+      mui->frameEditRecord->show();
+    }
   }
 
   if (item == tw->topLevelItem(tw->topLevelItemCount() - 1)) {

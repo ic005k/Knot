@@ -314,8 +314,17 @@ void CategoryList::renameAll() {
 void CategoryList::on_btnCancel_clicked() {
   mw_one->clearWidgetFocus();
 
+  if (isAndroid) {
+    mui->frameMain->show();
+    mw_one->m_EditRecord->openAddEventRecord(
+        mui->lblTitleEditRecord->text(), mui->editCategory->text(),
+        mui->editDetails->toPlainText(), mui->editAmount->text(),
+        mui->lblTime->text());
+  } else {
+    mui->frameEditRecord->show();
+  }
+
   mui->frameCategory->hide();
-  mui->frameEditRecord->show();
 }
 
 void CategoryList::setTypeRenameText() {

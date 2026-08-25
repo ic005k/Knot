@@ -200,6 +200,7 @@ int main(int argc, char* argv[]) {
   RegJni("com/x/DateTimePicker");
   RegJni17("com/x/WebViewActivity");
   RegJniPublicJavaCallCpp("com/x/ReadListActivity");
+  RegJniPublicJavaCallCpp("com/x/AddEventRecord");
 
   iniDir = "/storage/emulated/0/KnotData/";
   privateDir = "/storage/emulated/0/.Knot/";

@@ -472,6 +472,20 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             m_Reader->clearReaderRecords(c_name);
           }
 
+          if (strType == "add_event_record") {
+            QTimer::singleShot(100, mw_one, [=]() {
+              if (mw_one && mw_one->m_EditRecord) {
+                mw_one->m_EditRecord->on_btnOk_clicked();
+              }
+            });
+          }
+
+          if (strType == "open_category_dialog") {
+            QTimer::singleShot(100, mw_one, [=]() {
+              mw_one->m_EditRecord->on_btnType_clicked();
+            });
+          }
+
           qDebug() << "[PublicJavaCallCpp main thread] type:" << strType;
         } catch (const std::exception& ex) {
           qDebug() << "[PublicJavaCallCpp] EXCEPTION:" << ex.what();
