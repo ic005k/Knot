@@ -193,8 +193,10 @@ void EditRecord::set_Amount(QString Number) {
 void EditRecord::on_btnType_clicked() {
   if (!isAndroid) {
     mui->frameEditRecord->hide();
-  } else
+  } else {
     mui->frameMain->hide();
+    setDataToUI();
+  }
 
   mui->frameCategory->show();
 
@@ -596,9 +598,18 @@ void EditRecord::on_AddRecord() {
   mui->editAmount->setText("");
 
   if (isAndroid) {
-    openAddEventRecord(
-        tr("Add") + "  : " + tabData->tabText(tabData->currentIndex()), "", "",
-        "", mui->lblTime->text());
+    if (isSelectTab) {
+      isSelectTab = false;
+      setDataToUI();
+      openAddEventRecord(
+          tr("Add") + "  : " + tabData->tabText(tabData->currentIndex()),
+          mui->editCategory->text(), mui->editDetails->toPlainText(),
+          mui->editAmount->text(), mui->lblTime->text());
+    } else {
+      openAddEventRecord(
+          tr("Add") + "  : " + tabData->tabText(tabData->currentIndex()), "",
+          "", "", mui->lblTime->text());
+    }
   } else {
     mui->frameMain->hide();
     mui->frameEditRecord->show();

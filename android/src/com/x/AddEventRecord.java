@@ -37,7 +37,12 @@ public class AddEventRecord extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_event_record);
+
+        if (MyActivity.isDark) {
+            setContentView(R.layout.activity_add_event_record_dark);
+        } else {
+            setContentView(R.layout.activity_add_event_record);
+        }
 
         ImmersiveUtil.applyRealImmersive(this);
 
@@ -90,6 +95,16 @@ public class AddEventRecord extends AppCompatActivity {
         btnClearNote = findViewById(R.id.btn_clear_note);
         btnClearAmount = findViewById(R.id.btn_clear_amount);
 
+        // 根据全局语言标记动态设置 hint
+        if (MyActivity.zh_cn) {
+            etCategory.setHint("输入分类");
+            etNote.setHint("输入备注");
+        } else {
+            etCategory.setHint("Enter category");
+            etNote.setHint("Enter note");
+        }
+        etAmount.setHint("");
+
         int iconColor;
         if (MyActivity.isDark) {
             iconColor = 0xFFFFFFFF; //暗黑：白色图标
@@ -104,14 +119,6 @@ public class AddEventRecord extends AppCompatActivity {
         btnClearCategory.setTextColor(iconColor);
         btnClearNote.setTextColor(iconColor);
         btnClearAmount.setTextColor(iconColor);
-
-        // 设置标题点击事件占位
-        etTitle.setOnClickListener(v -> {
-            // TODO: 点击标题业务，例如弹窗编辑标题
-            sendDataToCpp();
-            PublicJavaCallCpp("select_tab");
-            onBackPressed();
-        });
     }
 
     /**
@@ -278,10 +285,19 @@ public class AddEventRecord extends AppCompatActivity {
         btnClearNote.setOnClickListener(v -> etNote.setText(""));
         btnClearAmount.setOnClickListener(v -> etAmount.setText(""));
 
+        // 设置标题点击事件
+        etTitle.setOnClickListener(v -> {
+            // TODO: 点击标题业务，例如弹窗编辑标题
+            sendDataToCpp();
+            PublicJavaCallCpp("select_tab");
+            onBackPressed();
+        });
+
         findViewById(R.id.btn_cancel).setOnClickListener(v -> finish());
 
         findViewById(R.id.btn_category).setOnClickListener(v -> {
             // TODO:打开分类弹窗
+            sendDataToCpp();
             PublicJavaCallCpp("open_category_dialog");
             onBackPressed();
         });

@@ -316,6 +316,7 @@ void CategoryList::on_btnCancel_clicked() {
 
   if (isAndroid) {
     mui->frameMain->show();
+
     mw_one->m_EditRecord->openAddEventRecord(
         mui->lblTitleEditRecord->text(), mui->editCategory->text(),
         mui->editDetails->toPlainText(), mui->editAmount->text(),

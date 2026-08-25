@@ -896,7 +896,6 @@ void MainWindow::clickMainTab() {
   if (isSelectTab) {
     on_btnAdd_clicked();
     m_EditRecord->setCurrentValue();
-    isSelectTab = false;
   }
 }
 
