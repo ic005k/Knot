@@ -71,7 +71,7 @@
             android:src="@drawable/ic_category"
             android:scaleType="fitCenter"
         />
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/et_category"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -81,6 +81,7 @@
             android:textColor="#FFFFFFFF"
             android:textColorHint="#FFAAAAAA"
             android:textSize="18sp"
+            android:completionThreshold="1"
         />
         <Button
             android:id="@+id/btn_clear_category"

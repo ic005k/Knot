@@ -637,6 +637,9 @@ void EditRecord::openAddEventRecord(const QString& titleText,
                                     const QString& amountText,
                                     const QString& timeTagText) {
 #ifdef Q_OS_ANDROID
+  QString result = c_list.join(u"|==|"_qs);
+  m_Method->setTempSwapStr(result);
+
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
   if (!activity.isValid()) return;
 

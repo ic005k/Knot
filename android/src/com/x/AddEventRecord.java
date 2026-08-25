@@ -1,19 +1,26 @@
 package com.x;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AddEventRecord extends AppCompatActivity {
 
     private Button etTitle;
-    private EditText etCategory;
+    private AutoCompleteTextView etCategory;
     private EditText etNote;
     private EditText etAmount;
     private TextView tvTimeDisplay;
@@ -104,6 +111,9 @@ public class AddEventRecord extends AppCompatActivity {
             etNote.setHint("Enter note");
         }
         etAmount.setHint("");
+
+        // ==========自动完成适配器==========
+        refreshCategoryAutoComplete();
 
         int iconColor;
         if (MyActivity.isDark) {
@@ -329,4 +339,96 @@ public class AddEventRecord extends AppCompatActivity {
                 finalTimeTag
         );
     }
+
+    private void refreshCategoryAutoComplete() {
+        List<String> categoryList = getHistoryCategoryFromCpp();
+        ContainsArrayAdapter adapter = new ContainsArrayAdapter(
+            AddEventRecord.this,
+            R.layout.dropdown_item,
+            categoryList
+        );
+        etCategory.setAdapter(adapter);
+    }
+
+    private List<String> getHistoryCategoryFromCpp() {
+        List<String> list = new ArrayList<>();
+        String raw = MyActivity.m_instance.getTempSwapStr();
+        if (raw == null || raw.isEmpty()) {
+            return list;
+        }
+        // 使用 |==| 分割字符串
+        String[] items = raw.split("\\|==\\|");
+        for (String s : items) {
+            String trim = s.trim();
+            // 过滤空字符串（末尾 |==| 分割出来会产生空项）
+            if (!trim.isEmpty()) {
+                list.add(trim);
+            }
+        }
+        return list;
+    }
+
+    // 自定义的包含过滤的适配器 /////////////////////////////////////////////////
+    class ContainsArrayAdapter extends ArrayAdapter<String> {
+
+        private final List<String> mOriginalList;
+        private List<String> mFilteredList;
+
+        public ContainsArrayAdapter(
+            Context context,
+            int resource,
+            List<String> objects
+        ) {
+            super(context, resource, objects);
+            mOriginalList = new ArrayList<>(objects);
+            mFilteredList = new ArrayList<>(objects);
+        }
+
+        @Override
+        public int getCount() {
+            return mFilteredList.size();
+        }
+
+        @Override
+        public String getItem(int position) {
+            return mFilteredList.get(position);
+        }
+
+        @NonNull
+        @Override
+        public Filter getFilter() {
+            return new Filter() {
+                @Override
+                protected FilterResults performFiltering(
+                    CharSequence constraint
+                ) {
+                    FilterResults results = new FilterResults();
+                    List<String> temp = new ArrayList<>();
+                    if (constraint == null || constraint.length() == 0) {
+                        temp.addAll(mOriginalList);
+                    } else {
+                        String key = constraint.toString().toLowerCase();
+                        for (String s : mOriginalList) {
+                            if (s.toLowerCase().contains(key)) {
+                                temp.add(s);
+                            }
+                        }
+                    }
+                    results.values = temp;
+                    results.count = temp.size();
+                    return results;
+                }
+
+                @Override
+                protected void publishResults(
+                    CharSequence constraint,
+                    FilterResults results
+                ) {
+                    mFilteredList = (List<String>) results.values;
+                    notifyDataSetChanged();
+                }
+            };
+        }
+    }
+    ///////////////////////////////////////////////////////////////////
 }

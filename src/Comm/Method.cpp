@@ -3796,34 +3796,3 @@ QString Method::escapeAllHtml(const QString& src) {
   res.replace(")", "&#41;");
   return res;
 }
-
-void Method::exitSystemFullscreen() {
-#ifdef Q_OS_ANDROID
-
-  QJniObject activity =
-      QJniObject(QCoreApplication::instance()
-                     ->nativeInterface<QNativeInterface::QAndroidApplication>()
-                     ->context());
-  activity.callMethod<void>("exitSystemFullscreen", "()V");
-
-#endif
-}
-
-QString Method::getTempSwapStr() {
-#ifdef Q_OS_ANDROID
-  QJniObject activity =
-      QJniObject(QCoreApplication::instance()
-                     ->nativeInterface<QNativeInterface::QAndroidApplication>()
-                     ->context());
-  // JNI签名 ()Ljava/lang/String;
-  QJniObject jRet =
-      activity.callObjectMethod("getTempSwapStr", "()Ljava/lang/String;");
-  if (jRet.isValid()) {
-    return jRet.toString();
-  }
-  return QString();
-#else
-  // 非安卓平台返回空字符串
-  return QString();
-#endif
-}

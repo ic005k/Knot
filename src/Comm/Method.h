@@ -647,6 +647,7 @@ QScrollBar::sub-page:horizontal {
   int getCurrentIndexFromQV(QQuickView *qv);
   QString getText3QV(QQuickView *qv, int index);
   QString getTempSwapStr();
+  void setTempSwapStr(const QString &str);
   protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
