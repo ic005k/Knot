@@ -491,6 +491,24 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                [=]() { mw_one->m_MainHelper->selectTab(); });
           }
 
+          if (strType.contains("maintab_selected|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int index = 0;
+                index = list.at(1).toInt();
+                mw_one->clickMainTab(index);
+                mui->frameMain->show();
+                qInfo() << "当前被点击的卡片：" << index;
+              }
+            });
+          }
+
+          if (strType == "topbtn_add") {
+            QTimer::singleShot(100, mw_one, [=]() { mui->btnAdd->click(); });
+          }
+
           qDebug() << "[PublicJavaCallCpp main thread] type:" << strType;
         } catch (const std::exception& ex) {
           qDebug() << "[PublicJavaCallCpp] EXCEPTION:" << ex.what();

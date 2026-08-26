@@ -492,7 +492,8 @@ class MainWindow : public QMainWindow {
 
   QVariantList buildRecentList();
 
- protected:
+  void clickMainTab(int index);
+  protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
   void paintEvent(QPaintEvent* event) override;

@@ -17,7 +17,7 @@ public class CategoryGridAdapter
         public String title;
         public int index;
         public boolean selected;
-        public boolean isTodayTab; // 是否为今日tab，用于特殊颜色绘制
+        public boolean isTodayTab;
     }
 
     private final ArrayList<CategoryItem> mItemList = new ArrayList<>();
@@ -31,10 +31,6 @@ public class CategoryGridAdapter
         mListener = listener;
     }
 
-    /**
-     * 设置tab名称列表，来自Intent跳转传参
-     * @param list tab名称字符串集合
-     */
     public void setStringListData(ArrayList<String> list) {
         mItemList.clear();
         if (list != null) {
@@ -50,9 +46,6 @@ public class CategoryGridAdapter
         notifyDataSetChanged();
     }
 
-    /**
-     * 更新指定position选中状态
-     */
     public void setItemSelected(int position, boolean selected) {
         if (position >= 0 && position < mItemList.size()) {
             mItemList.get(position).selected = selected;
@@ -60,11 +53,7 @@ public class CategoryGridAdapter
         }
     }
 
-    /**
-     * 设置哪一项是今日tab，会触发UI重绘
-     */
     public void setTodayTabIndex(int position) {
-        // 先清除全部今日标记
         for (CategoryItem item : mItemList) {
             item.isTodayTab = false;
         }
@@ -96,7 +85,6 @@ public class CategoryGridAdapter
         CategoryItem item = mItemList.get(position);
         holder.tvMaintabTitle.setText(item.title);
 
-        // 直接硬设置颜色，选中/未选中
         if (item.selected) {
             holder.itemView.setBackgroundColor(0xFF4285F4);
             holder.tvMaintabTitle.setTextColor(0xFFFFFFFF);
@@ -105,15 +93,14 @@ public class CategoryGridAdapter
             holder.tvMaintabTitle.setTextColor(0xFF000000);
         }
 
-        // 今日tab覆盖文字颜色
         if (item.isTodayTab) {
             holder.tvMaintabTitle.setTextColor(0xFFFF5722);
         }
 
+        final int pos = position;
         holder.itemView.setOnClickListener(v -> {
-            android.util.Log.d("CARD_CLICK", "pos=" + position);
             if (mListener != null) {
-                mListener.onItemClick(position);
+                mListener.onItemClick(pos);
             }
         });
     }
@@ -127,13 +114,9 @@ public class CategoryGridAdapter
 
         TextView tvMaintabTitle;
 
-        // 可在这里增加 CardView 引用，方便修改背景颜色
-        // CardView cardRoot;
-
         public CategoryViewHolder(@NonNull View itemView) {
             super(itemView);
             tvMaintabTitle = itemView.findViewById(R.id.tv_maintab_title);
-            // cardRoot = itemView.findViewById(R.id.card_root);
         }
     }
 }

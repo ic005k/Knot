@@ -65,6 +65,8 @@ public class MainEntrance extends Activity {
     private View layoutRoot;
     private View bottomTabLayout;
 
+    public static native void PublicJavaCallCpp(String type);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,18 +85,6 @@ public class MainEntrance extends Activity {
         mCatAdapter = new CategoryGridAdapter();
         mRvMaintabGrid.setAdapter(mCatAdapter);
 
-        // 网格卡片点击事件
-        mCatAdapter.setOnItemClickListener(position -> {
-            // 1. 先清除全部选中
-            for (int i = 0; i < mCatAdapter.getItemCount(); i++) {
-                mCatAdapter.setItemSelected(i, false);
-            }
-            // 2. 设置当前点击项为选中
-            mCatAdapter.setItemSelected(position, true);
-
-            // TODO：此处增加JNI调用，通知C++选中变更
-        });
-
         // -------- 读取Intent传入maintab_list，交给Adapter渲染卡片 --------
         ArrayList<String> maintabList = getIntent().getStringArrayListExtra(
             "maintab_list"
@@ -103,6 +93,18 @@ public class MainEntrance extends Activity {
             maintabList = new ArrayList<>();
         }
         mCatAdapter.setStringListData(maintabList);
+
+        mCatAdapter.setOnItemClickListener(position -> {
+            android.util.Log.d("MAIN_ENTRANCE_CLICK", "pos=" + position);
+            // 清除全部选中
+            for (int i = 0; i < mCatAdapter.getItemCount(); i++) {
+                mCatAdapter.setItemSelected(i, false);
+            }
+            mCatAdapter.setItemSelected(position, true);
+            // JNI统一在这里调用，业务集中
+            PublicJavaCallCpp("maintab_selected|==|" + position);
+            onBackPressed();
+        });
 
         // ---------- 顶部按钮容器绑定 ----------
         mTopBtnMenu = findViewById(R.id.top_btn_menu_layout);
@@ -124,6 +126,8 @@ public class MainEntrance extends Activity {
         tvTopAdd = findViewById(R.id.tv_top_add);
         mTopBtnAdd.setOnClickListener(v -> {
             // TODO
+            PublicJavaCallCpp("topbtn_add");
+            onBackPressed();
         });
 
         mTopBtnSearch = findViewById(R.id.top_btn_search_layout);

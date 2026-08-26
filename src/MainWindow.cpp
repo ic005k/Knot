@@ -69,6 +69,8 @@ MainWindow::MainWindow(QWidget* parent)
 
   if (isAndroid) {
     mui->frameMain->hide();
+    mui->f_Menu->hide();
+    mui->f_Btn->hide();
     m_Method->openMainEntranceWindow();
   }
 }
@@ -887,6 +889,26 @@ void MainWindow::clickMainTab() {
   mui->qwMainDate->rootContext()->setContextProperty("isChkAI", isChkAI);
 
   int index = getCurrentIndex();
+  tabData->setCurrentIndex(index);
+
+  mui->qwMainDate->show();
+  mui->qwMainEvent->show();
+  mui->lblStats->show();
+
+  mui->lblTabTitle->setText(mui->tabWidget->tabBar()->tabText(index));
+  mui->lblTabTitle->show();
+
+  mui->qwMainTab->hide();
+
+  if (isSelectTab) {
+    on_btnAdd_clicked();
+    m_EditRecord->setCurrentValue();
+  }
+}
+
+void MainWindow::clickMainTab(int index) {
+  mui->qwMainDate->rootContext()->setContextProperty("isChkAI", isChkAI);
+
   tabData->setCurrentIndex(index);
 
   mui->qwMainDate->show();
