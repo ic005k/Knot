@@ -300,7 +300,6 @@ void BakDataThread::run() {
 }
 
 void MainWindow::bakDataDone() {
-  // 适配 Qt 6.6.3：替换 uiThread() 为兼容写法
   QThread* mainThread = QCoreApplication::instance()->thread();
   if (QThread::currentThread() != mainThread) {
     QMetaObject::invokeMethod(this, &MainWindow::bakDataDone,
@@ -314,6 +313,9 @@ void MainWindow::bakDataDone() {
     ShowMessage* msg = new ShowMessage(this);
     msg->showMsg("Knot", errorInfo, 1);
     msg->setAttribute(Qt::WA_DeleteOnClose);
+
+    if (isAndroid) m_Method->openMainEntranceWindow();
+
     return;
   }
 
@@ -336,6 +338,8 @@ void MainWindow::bakDataDone() {
                            zipfile + "\n\n" + fileSize;
       msg->showMsg("Knot", msgContent, 1);
       msg->setAttribute(Qt::WA_DeleteOnClose);
+
+      if (isAndroid) m_Method->openMainEntranceWindow();
     }
   }
 

@@ -256,7 +256,13 @@ int AboutThis::getAndroidVer() {
 #endif
 }
 
-void AboutThis::on_btnBack_About_clicked() { close(); }
+void AboutThis::on_btnBack_About_clicked() {
+  close();
+  if (!isAndroid) {
+    mui->frameMain->show();
+  } else
+    m_Method->openMainEntranceWindow();
+}
 
 void AboutThis::on_btnCopyDownLoadLink_clicked() {
   if (s_link == "") return;

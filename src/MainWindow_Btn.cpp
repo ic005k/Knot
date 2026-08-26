@@ -303,7 +303,11 @@ void MainWindow::on_btnGetGpsListData_clicked() {
 }
 
 void MainWindow::on_btnBackBakList_clicked() {
-  mui->frameMain->show();
+  if (!isAndroid) {
+    mui->frameMain->show();
+  } else
+    m_Method->openMainEntranceWindow();
+
   mui->frameBakList->hide();
 }
 
@@ -314,7 +318,10 @@ void MainWindow::on_btnImportBakList_clicked() {
 void MainWindow::on_btnOkViewCate_clicked() { m_Report->on_CateOk(); }
 
 void MainWindow::on_btnBackTabRecycle_clicked() {
-  mui->frameMain->show();
+  if (!isAndroid) {
+    mui->frameMain->show();
+  } else
+    m_Method->openMainEntranceWindow();
   mui->frameTabRecycle->hide();
 }
 
@@ -468,7 +475,11 @@ void MainWindow::on_btnBackSetTab_clicked() {
 void MainWindow::on_btnBackSearch_clicked() {
   clearWidgetFocus();
 
-  mui->frameMain->show();
+  if (!isAndroid) {
+    mui->frameMain->show();
+  } else
+    m_Method->openMainEntranceWindow();
+
   mui->frameSearch->hide();
 }
 

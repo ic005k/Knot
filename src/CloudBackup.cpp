@@ -220,6 +220,8 @@ void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
 
       mui->progBar->hide();
 
+      if (isAndroid) m_Method->openMainEntranceWindow();
+
     } else {
       qDebug() << "上传失败：" << reply->errorString();
       qDebug() << "服务器响应：" << reply->readAll();
@@ -1042,7 +1044,11 @@ void CloudBackup::backExit() {
   mw_one->m_Preferences->saveOptions();
   mw_one->m_Preferences->setEncSyncStatusTip();
 
-  mui->frameMain->show();
+  if (!isAndroid) {
+    mui->frameMain->show();
+  } else
+    m_Method->openMainEntranceWindow();
+
   mui->frameOne->hide();
 }
 

@@ -135,6 +135,8 @@ bool Preferences::eventFilter(QObject* watch, QEvent* evn) {
 void Preferences::on_btnBack_clicked() {
   mw_one->clearWidgetFocus();
   QTimer::singleShot(10, this, [this]() { close(); });
+
+  if (isAndroid) m_Method->openMainEntranceWindow();
 }
 
 void Preferences::saveOptions() {
@@ -542,7 +544,9 @@ void Preferences::closeEvent(QCloseEvent* event) {
   if (isChanged && isVisible()) {
     mui->frameMain->hide();
     loadTheme(isDark);
-    mui->frameMain->show();
+    if (!isAndroid) {
+      mui->frameMain->show();
+    }
   }
 
   if (isLocalAIModel)
@@ -603,6 +607,10 @@ void Preferences::setEncSyncStatusTip() {
 
 void Preferences::openPreferences() {
   m_NotesList->safeExitLlama();
+
+  if (isAndroid) {
+    mui->frameMain->hide();
+  }
 
   int x, y;
   if (isAndroid) {
