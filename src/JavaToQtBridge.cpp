@@ -491,6 +491,13 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                [=]() { mw_one->m_MainHelper->selectTab(); });
           }
 
+          // 主入口销毁
+          if (strType == "mainentrance_destroy") {
+            QTimer::singleShot(100, mw_one, [=]() {
+
+            });
+          }
+
           if (strType.contains("maintab_selected|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
               QStringList list = strType.split("|==|");
@@ -507,6 +514,75 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
 
           if (strType == "topbtn_add") {
             QTimer::singleShot(100, mw_one, [=]() { mui->btnAdd->click(); });
+          }
+
+          if (strType == "topbtn_upload") {
+            QTimer::singleShot(100, mw_one, [=]() { mui->btnSync->click(); });
+          }
+
+          if (strType == "topbtn_search") {
+            QTimer::singleShot(100, mw_one, [=]() { mui->btnFind->click(); });
+          }
+
+          if (strType == "tab_reader") {
+            QTimer::singleShot(100, mw_one, [=]() { mui->btnReader->click(); });
+          }
+
+          if (strType == "tab_todo") {
+            QTimer::singleShot(100, mw_one, [=]() { mui->btnTodo->click(); });
+          }
+
+          if (strType == "tab_notes") {
+            QTimer::singleShot(100, mw_one, [=]() { mui->btnNotes->click(); });
+          }
+
+          if (strType == "tab_steps") {
+            QTimer::singleShot(100, mw_one, [=]() { mui->btnSteps->click(); });
+          }
+
+          // 菜单
+          if (strType == "menu_id_add_tab") {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->on_actionAdd_Tab_triggered(); });
+          }
+          if (strType == "menu_id_delete_tab") {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->on_actionDel_Tab_triggered(); });
+          }
+          if (strType == "menu_id_rename_tab") {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->on_actionRename_triggered(); });
+          }
+          if (strType == "menu_id_export_data") {
+            QTimer::singleShot(100, mw_one, [=]() {
+              mw_one->on_actionExport_Data_triggered();
+            });
+          }
+          if (strType == "menu_id_import_data") {
+            QTimer::singleShot(100, mw_one, [=]() {
+              mw_one->on_actionImport_Data_triggered();
+            });
+          }
+          if (strType == "menu_id_preference") {
+            QTimer::singleShot(100, mw_one, [=]() {
+              mw_one->on_actionPreferences_triggered();
+            });
+          }
+          if (strType == "menu_id_cloud_backup_restore") {
+            QTimer::singleShot(
+                100, mw_one, [=]() { mw_one->on_actionOneDriveBackupData(); });
+          }
+          if (strType == "menu_id_backup_file_list") {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->on_actionBakFileList(); });
+          }
+          if (strType == "menu_id_tab_recycle_bin") {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->on_actionTabRecycle(); });
+          }
+          if (strType == "menu_id_about") {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->on_actionAbout(); });
           }
 
           qDebug() << "[PublicJavaCallCpp main thread] type:" << strType;

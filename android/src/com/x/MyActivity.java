@@ -170,6 +170,9 @@ public class MyActivity
     implements Application.ActivityLifecycleCallbacks
 {
 
+    // 记录maintab卡片上次选中索引，-1 = 无选中
+    public static int mainTabLastSelectedPos = -1;
+
     public static boolean mPdfInvertMode = false;
 
     public String tempSwapStr = "";

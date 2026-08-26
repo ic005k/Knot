@@ -60,9 +60,12 @@ void Method::setTempSwapStr(const QString& str) {
 void Method::openMainEntranceWindow() {
 #ifdef Q_OS_ANDROID
   QStringList list1;
-  int count = mui->tabWidget->count();
-  for (int i = 0; i < count; i++) {
-    list1.append(mui->tabWidget->tabText(i));
+
+  for (int i = 0; i < tabData->count(); i++) {
+    QString tabText = tabData->tabText(i);
+    QTreeWidget* tw = mw_one->get_tw(i);
+    int isFlagToday = m_Method->getFlagToday(tw);
+    list1.append(tabText + "|==|" + QString::number(isFlagToday));
   }
 
   QJniObject activity = QNativeInterface::QAndroidApplication::context();

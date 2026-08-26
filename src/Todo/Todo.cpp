@@ -229,7 +229,11 @@ void Todo::closeTodo() {
   stopPlayVoice();
   saveTodo();
 
-  mui->frameMain->show();
+  if (!isAndroid) {
+    mui->frameMain->show();
+  } else
+    m_Method->openMainEntranceWindow();
+
   mui->frameTodo->hide();
 
   refreshTableLists();

@@ -4,20 +4,22 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListPopupWindow;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import org.qtproject.qt.android.QtNative;
 
 /**
  * 原生主入口窗口 MainEntrance
- * 过渡阶段：普通Activity，由Qt/C++通过JNI拉起，不作为App启动入口
  * Java仅负责视图渲染、事件转发；业务逻辑全部在C++
  */
-public class MainEntrance extends Activity {
+public class MainEntrance extends AppCompatActivity {
 
     private RecyclerView mRvMaintabGrid;
     private CategoryGridAdapter mCatAdapter;
@@ -67,6 +69,18 @@ public class MainEntrance extends Activity {
 
     public static native void PublicJavaCallCpp(String type);
 
+    // 原生菜单命令常量，仅Java内部使用
+    public static final int MENU_ID_ADD_TAB = 0;
+    public static final int MENU_ID_DELETE_TAB = 1;
+    public static final int MENU_ID_RENAME_TAB = 2;
+    public static final int MENU_ID_EXPORT_DATA = 3;
+    public static final int MENU_ID_IMPORT_DATA = 4;
+    public static final int MENU_ID_PREFERENCE = 5;
+    public static final int MENU_ID_CLOUD_BACKUP_RESTORE = 6;
+    public static final int MENU_ID_BACKUP_FILE_LIST = 7;
+    public static final int MENU_ID_TAB_RECYCLE_BIN = 8;
+    public static final int MENU_ID_ABOUT = 9;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,8 +108,16 @@ public class MainEntrance extends Activity {
         }
         mCatAdapter.setStringListData(maintabList);
 
+        // ✅从全局MyActivity恢复上次选中状态
+        int selPos = MyActivity.mainTabLastSelectedPos;
+        if (selPos >= 0 && selPos < maintabList.size()) {
+            mCatAdapter.setItemSelected(selPos, true);
+        }
+
         mCatAdapter.setOnItemClickListener(position -> {
             android.util.Log.d("MAIN_ENTRANCE_CLICK", "pos=" + position);
+            // 写入全局状态
+            MyActivity.mainTabLastSelectedPos = position;
             // 清除全部选中
             for (int i = 0; i < mCatAdapter.getItemCount(); i++) {
                 mCatAdapter.setItemSelected(i, false);
@@ -111,7 +133,7 @@ public class MainEntrance extends Activity {
         ivTopMenu = findViewById(R.id.iv_top_menu);
         tvTopMenu = findViewById(R.id.tv_top_menu);
         mTopBtnMenu.setOnClickListener(v -> {
-            // TODO
+            showNativeMainMenu(v);
         });
 
         mTopBtnHome = findViewById(R.id.top_btn_home_layout);
@@ -134,14 +156,16 @@ public class MainEntrance extends Activity {
         ivTopSearch = findViewById(R.id.iv_top_search);
         tvTopSearch = findViewById(R.id.tv_top_search);
         mTopBtnSearch.setOnClickListener(v -> {
-            // TODO
+            PublicJavaCallCpp("topbtn_search");
+            onBackPressed();
         });
 
         mTopBtnUpload = findViewById(R.id.top_btn_upload_layout);
         ivTopUpload = findViewById(R.id.iv_top_upload);
         tvTopUpload = findViewById(R.id.tv_top_upload);
         mTopBtnUpload.setOnClickListener(v -> {
-            // TODO
+            PublicJavaCallCpp("topbtn_upload");
+            onBackPressed();
         });
 
         // ---------- 底部Tab容器绑定 ----------
@@ -149,28 +173,32 @@ public class MainEntrance extends Activity {
         ivTabRead = findViewById(R.id.iv_tab_read);
         tvTabRead = findViewById(R.id.tv_tab_read);
         mTabRead.setOnClickListener(v -> {
-            // TODO
+            PublicJavaCallCpp("tab_reader");
+            onBackPressed();
         });
 
         mTabTodo = findViewById(R.id.tab_todo_layout);
         ivTabTodo = findViewById(R.id.iv_tab_todo);
         tvTabTodo = findViewById(R.id.tv_tab_todo);
         mTabTodo.setOnClickListener(v -> {
-            // TODO
+            PublicJavaCallCpp("tab_todo");
+            onBackPressed();
         });
 
         mTabNote = findViewById(R.id.tab_note_layout);
         ivTabNote = findViewById(R.id.iv_tab_note);
         tvTabNote = findViewById(R.id.tv_tab_note);
         mTabNote.setOnClickListener(v -> {
-            // TODO
+            PublicJavaCallCpp("tab_notes");
+            onBackPressed();
         });
 
         mTabSport = findViewById(R.id.tab_sport_layout);
         ivTabSport = findViewById(R.id.iv_tab_sport);
         tvTabSport = findViewById(R.id.tv_tab_sport);
         mTabSport.setOnClickListener(v -> {
-            // TODO
+            PublicJavaCallCpp("tab_steps");
+            onBackPressed();
         });
 
         layoutRoot = findViewById(R.id.layout_root);
@@ -272,12 +300,15 @@ public class MainEntrance extends Activity {
     private void refreshUi() {
         updateAllTexts();
         updateAllColor();
+
+        // 同步暗黑模式到适配器
+        mCatAdapter.setDarkMode(MyActivity.isDark);
     }
 
     /**
      * singleTop模式：桌面图标回到应用、后台切回时触发
      */
-    @Override
+    /*@Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
@@ -288,49 +319,160 @@ public class MainEntrance extends Activity {
             runOnUiThread(() -> mCatAdapter.setStringListData(newTabList));
         }
         runOnUiThread(this::refreshUi);
-    }
-
-    /**
-     * JNI接口：供C++调用，传入QStringList序列化JSON字符串，刷新网格
-     */
-    @SuppressWarnings("unused")
-    public void refreshMaintabGrid(String jsonArray) {
-        MainEntrance act = mSelfWeakRef.get();
-        if (act == null || act.isFinishing() || act.isDestroyed()) {
-            return;
-        }
-        act.runOnUiThread(() -> {
-            // TODO: parseAndSetData 业务自行实现
-        });
-    }
-
-    /**
-     * JNI暴露接口：C++切换明暗模式后调用
-     */
-    @SuppressWarnings("unused")
-    public void notifyThemeChanged() {
-        MainEntrance act = mSelfWeakRef.get();
-        if (act == null || act.isFinishing() || act.isDestroyed()) {
-            return;
-        }
-        act.runOnUiThread(act::refreshUi);
-    }
-
-    /**
-     * JNI暴露接口：C++切换语言后调用，刷新中英文标签
-     */
-    @SuppressWarnings("unused")
-    public void notifyLanguageChanged() {
-        MainEntrance act = mSelfWeakRef.get();
-        if (act == null || act.isFinishing() || act.isDestroyed()) {
-            return;
-        }
-        act.runOnUiThread(act::refreshUi);
-    }
+    }*/
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mSelfWeakRef.clear();
+
+        PublicJavaCallCpp("mainentrance_destroy");
+    }
+
+    /**
+     * 弹出Android原生下拉菜单 ListPopupWindow
+     * @param anchorView 锚点：顶部菜单按钮
+     */
+    private void showNativeMainMenu(View anchorView) {
+        ListPopupWindow popupWindow = new ListPopupWindow(this);
+        String[] menuItems = getMainMenuItems();
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+            this,
+            android.R.layout.simple_list_item_1,
+            menuItems
+        );
+        popupWindow.setAdapter(adapter);
+        popupWindow.setAnchorView(anchorView);
+        popupWindow.setModal(true);
+
+        // ========== 解决文字被截断：计算文本实际宽度 ==========
+        android.graphics.Paint paint = new android.graphics.Paint();
+        // 直接用16sp，不再读取不存在的系统dimen
+        float textSizeSp = 16f;
+        float density = getResources().getDisplayMetrics().scaledDensity;
+        paint.setTextSize(textSizeSp * density);
+
+        int maxWidth = 0;
+        for (String text : menuItems) {
+            int w = (int) paint.measureText(text);
+            if (w > maxWidth) {
+                maxWidth = w;
+            }
+        }
+        // 增加边距padding，避免文字贴边，最小宽度保护
+        int contentWidth = maxWidth + dp2px(32);
+        int minWidth = dp2px(220);
+        contentWidth = Math.max(contentWidth, minWidth);
+
+        popupWindow.setContentWidth(contentWidth);
+        popupWindow.setWidth(contentWidth);
+        // 向左偏移，防止菜单被屏幕右边界截断
+        popupWindow.setHorizontalOffset(dp2px(-8));
+
+        popupWindow.setOnItemClickListener((parent, view, position, id) -> {
+            handleMenuItemClick(position);
+            popupWindow.dismiss();
+        });
+        popupWindow.show();
+    }
+
+    /** dp转px工具 */
+    private int dp2px(int dpValue) {
+        final float scale = getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
+    }
+
+    /**
+     * 获取菜单文本数组，跟随全局语言切换中英文
+     */
+    private String[] getMainMenuItems() {
+        if (MyActivity.zh_cn) {
+            return new String[] {
+                "增加标签页",
+                "删除标签页",
+                "重命名标签页",
+                "导出数据",
+                "导入数据",
+                "偏好设置",
+                "云备份与恢复数据",
+                "备份文件列表",
+                "标签页回收箱",
+                "关于",
+            };
+        } else {
+            return new String[] {
+                "Add Tab",
+                "Delete Tab",
+                "Rename Tab",
+                "Export Data",
+                "Import Data",
+                "Preferences",
+                "Cloud Backup & Restore",
+                "Backup File List",
+                "Tab Recycle Bin",
+                "About",
+            };
+        }
+    }
+
+    /**
+     * 原生菜单项点击分发，全部留空占位，纯Java，不调用C++
+     * @param pos 菜单条目索引
+     */
+    private void handleMenuItemClick(int pos) {
+        switch (pos) {
+            case MENU_ID_ADD_TAB:
+                // 增加标签页
+                PublicJavaCallCpp("menu_id_add_tab");
+                onBackPressed();
+                break;
+            case MENU_ID_DELETE_TAB:
+                // 删除标签页
+                PublicJavaCallCpp("menu_id_delete_tab");
+                onBackPressed();
+                break;
+            case MENU_ID_RENAME_TAB:
+                // 重命名标签页
+                PublicJavaCallCpp("menu_id_rename_tab");
+                onBackPressed();
+                break;
+            case MENU_ID_EXPORT_DATA:
+                // 导出数据
+                PublicJavaCallCpp("menu_id_export_data");
+                onBackPressed();
+                break;
+            case MENU_ID_IMPORT_DATA:
+                // 导入数据
+                PublicJavaCallCpp("menu_id_import_data");
+                onBackPressed();
+                break;
+            case MENU_ID_PREFERENCE:
+                // 偏好设置
+                PublicJavaCallCpp("menu_id_preference");
+                onBackPressed();
+                break;
+            case MENU_ID_CLOUD_BACKUP_RESTORE:
+                // 云备份与恢复数据
+                PublicJavaCallCpp("menu_id_cloud_backup_restore");
+                onBackPressed();
+                break;
+            case MENU_ID_BACKUP_FILE_LIST:
+                // 备份文件列表
+                PublicJavaCallCpp("menu_id_backup_file_list");
+                onBackPressed();
+                break;
+            case MENU_ID_TAB_RECYCLE_BIN:
+                // 标签页回收箱
+                PublicJavaCallCpp("menu_id_tab_recycle_bin");
+                onBackPressed();
+                break;
+            case MENU_ID_ABOUT:
+                // 关于
+                PublicJavaCallCpp("menu_id_about");
+                onBackPressed();
+                break;
+            default:
+                break;
+        }
     }
 }

@@ -351,7 +351,11 @@ void MainWindow::on_btnBackNoteList_clicked() {
     }
 
     // 再执行显示/隐藏，此时无活跃离屏渲染任务
-    mui->frameMain->show();
+    if (!isAndroid) {
+      mui->frameMain->show();
+    } else
+      m_Method->openMainEntranceWindow();
+
     mui->frameNoteList->hide();
 
     // 恢复信号
@@ -1113,7 +1117,13 @@ void MainWindow::on_btnFind_clicked() {
 void MainWindow::on_btnTodo_clicked() { m_Todo->openTodo(); }
 
 void MainWindow::on_btnHome_clicked() {
-  mui->qwMainTab->show();
+  if (isAndroid) {
+    m_Method->openMainEntranceWindow();
+    mui->qwMainTab->hide();
+  } else {
+    mui->qwMainTab->show();
+  }
+
   mui->qwMainDate->hide();
   mui->qwMainEvent->hide();
   mui->lblStats->hide();
@@ -1539,7 +1549,15 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (!mui->frameMain->isHidden()) {
+  if (mui->frameMain->isVisible()) {
+    mui->frameMain->hide();
+    m_Method->openMainEntranceWindow();
+
+    return;
+  }
+
+  if (mui->frameMain->isHidden()) {
+    m_Method->openMainEntranceWindow();
     mw_one->setMini();
 
     return;

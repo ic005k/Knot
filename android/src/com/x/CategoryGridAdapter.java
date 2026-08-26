@@ -1,10 +1,12 @@
 package com.x;
 
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
@@ -12,16 +14,11 @@ public class CategoryGridAdapter
     extends RecyclerView.Adapter<CategoryGridAdapter.CategoryViewHolder>
 {
 
-    public static class CategoryItem {
-
-        public String title;
-        public int index;
-        public boolean selected;
-        public boolean isTodayTab;
-    }
-
-    private final ArrayList<CategoryItem> mItemList = new ArrayList<>();
+    private final ArrayList<String> mItemList = new ArrayList<>();
+    private final SparseBooleanArray itemSelectedCache =
+        new SparseBooleanArray();
     private OnItemClickListener mListener;
+    private boolean mIsDarkMode;
 
     public interface OnItemClickListener {
         void onItemClick(int position);
@@ -31,36 +28,25 @@ public class CategoryGridAdapter
         mListener = listener;
     }
 
+    public void setDarkMode(boolean isDark) {
+        mIsDarkMode = isDark;
+        notifyDataSetChanged();
+    }
+
     public void setStringListData(ArrayList<String> list) {
         mItemList.clear();
+        itemSelectedCache.clear();
         if (list != null) {
-            for (int i = 0; i < list.size(); i++) {
-                CategoryItem item = new CategoryItem();
-                item.title = list.get(i);
-                item.index = i;
-                item.selected = false;
-                item.isTodayTab = false;
-                mItemList.add(item);
-            }
+            mItemList.addAll(list);
         }
         notifyDataSetChanged();
     }
 
     public void setItemSelected(int position, boolean selected) {
         if (position >= 0 && position < mItemList.size()) {
-            mItemList.get(position).selected = selected;
+            itemSelectedCache.put(position, selected);
             notifyItemChanged(position);
         }
-    }
-
-    public void setTodayTabIndex(int position) {
-        for (CategoryItem item : mItemList) {
-            item.isTodayTab = false;
-        }
-        if (position >= 0 && position < mItemList.size()) {
-            mItemList.get(position).isTodayTab = true;
-        }
-        notifyDataSetChanged();
     }
 
     @NonNull
@@ -78,23 +64,90 @@ public class CategoryGridAdapter
     }
 
     @Override
+    public int getItemCount() {
+        return mItemList.size();
+    }
+
+    public static class CategoryViewHolder extends RecyclerView.ViewHolder {
+
+        TextView tvMaintabTitle;
+        CardView cardRoot;
+
+        public CategoryViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvMaintabTitle = itemView.findViewById(R.id.tv_maintab_title);
+            cardRoot = itemView.findViewById(R.id.card_root);
+        }
+    }
+
+    @Override
     public void onBindViewHolder(
         @NonNull CategoryViewHolder holder,
         int position
     ) {
-        CategoryItem item = mItemList.get(position);
-        holder.tvMaintabTitle.setText(item.title);
+        String rawStr = mItemList.get(position);
+        String title;
+        boolean isTodayTab = false;
 
-        if (item.selected) {
-            holder.itemView.setBackgroundColor(0xFF4285F4);
-            holder.tvMaintabTitle.setTextColor(0xFFFFFFFF);
+        String[] parts = rawStr.split("\\|==\\|");
+        if (parts.length >= 2) {
+            title = parts[0];
+            try {
+                int flag = Integer.parseInt(parts[1]);
+                isTodayTab = flag == 1;
+            } catch (NumberFormatException e) {
+                isTodayTab = false;
+            }
         } else {
-            holder.itemView.setBackgroundColor(0xFFEEEEEE);
-            holder.tvMaintabTitle.setTextColor(0xFF000000);
+            title = rawStr;
+            isTodayTab = false;
+        }
+        holder.tvMaintabTitle.setText(title);
+        boolean isSelected = itemSelectedCache.get(position, false);
+
+        if (mIsDarkMode) {
+            if (isSelected) {
+                if (isTodayTab) {
+                    holder.cardRoot.setCardBackgroundColor(0xFFE65100);
+                    holder.tvMaintabTitle.setTextColor(0xFFFFFFFF);
+                } else {
+                    holder.cardRoot.setCardBackgroundColor(0xFF4285F4);
+                    holder.tvMaintabTitle.setTextColor(0xFFFFFFFF);
+                }
+            } else {
+                if (isTodayTab) {
+                    holder.cardRoot.setCardBackgroundColor(0xFF482C20);
+                    holder.tvMaintabTitle.setTextColor(0xFFFFAB91);
+                } else {
+                    holder.cardRoot.setCardBackgroundColor(0xFF2C2C2C);
+                    holder.tvMaintabTitle.setTextColor(0xFFE0E0E0);
+                }
+            }
+        } else {
+            if (isSelected) {
+                if (isTodayTab) {
+                    holder.cardRoot.setCardBackgroundColor(0xFFFB8C00);
+                    holder.tvMaintabTitle.setTextColor(0xFFFFFFFF);
+                } else {
+                    holder.cardRoot.setCardBackgroundColor(0xFF4285F4);
+                    holder.tvMaintabTitle.setTextColor(0xFFFFFFFF);
+                }
+            } else {
+                if (isTodayTab) {
+                    holder.cardRoot.setCardBackgroundColor(0xFFFFF3E0);
+                    holder.tvMaintabTitle.setTextColor(0xFFE64A19);
+                } else {
+                    holder.cardRoot.setCardBackgroundColor(0xFFEEEEEE);
+                    holder.tvMaintabTitle.setTextColor(0xFF000000);
+                }
+            }
         }
 
-        if (item.isTodayTab) {
-            holder.tvMaintabTitle.setTextColor(0xFFFF5722);
+        // 选中：放大阴影；未选中恢复默认1dp阴影
+        if (isSelected) {
+            holder.cardRoot.setElevation(8f);
+        } else {
+            holder.cardRoot.setElevation(1f);
         }
 
         final int pos = position;
@@ -103,20 +156,5 @@ public class CategoryGridAdapter
                 mListener.onItemClick(pos);
             }
         });
-    }
-
-    @Override
-    public int getItemCount() {
-        return mItemList.size();
-    }
-
-    public static class CategoryViewHolder extends RecyclerView.ViewHolder {
-
-        TextView tvMaintabTitle;
-
-        public CategoryViewHolder(@NonNull View itemView) {
-            super(itemView);
-            tvMaintabTitle = itemView.findViewById(R.id.tv_maintab_title);
-        }
     }
 }

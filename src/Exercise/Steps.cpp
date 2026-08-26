@@ -268,7 +268,12 @@ bool Steps::eventFilter(QObject* obj, QEvent* event) {
 void Steps::closeSteps() {
   tmeRefreshSteps->stop();
   saveMovementType();
-  mui->frameMain->show();
+
+  if (!isAndroid) {
+    mui->frameMain->show();
+  } else
+    m_Method->openMainEntranceWindow();
+
   mui->frameSteps->hide();
 }
 
@@ -1609,10 +1614,7 @@ void Steps::loadGpsList(int nYear, int nMonth) {
 
   if (count > 0) {
     QMetaObject::invokeMethod(
-        this,
-        [this]() {
-          m_Method->gotoBegin(mui->qwGpsList);
-        },
+        this, [this]() { m_Method->gotoBegin(mui->qwGpsList); },
         Qt::QueuedConnection);
   }
 }
