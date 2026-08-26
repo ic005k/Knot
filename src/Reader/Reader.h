@@ -207,8 +207,9 @@ class Reader : public QDialog {
   void hideBookListWin();
   bool isBookListWinVisible();
   void openReadListWindow(QStringList list);
-  void clearReaderRecords(const QString &c_name);
-  public slots:
+  void clearReaderRecords(const QString& c_name);
+
+ public slots:
   void on_SetReaderFunVisible();
 
   void setPageScroll0();

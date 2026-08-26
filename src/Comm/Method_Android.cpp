@@ -56,3 +56,25 @@ void Method::setTempSwapStr(const QString& str) {
                             jStr.object());
 #endif
 }
+
+void Method::openMainEntranceWindow() {
+#ifdef Q_OS_ANDROID
+  QStringList list1;
+  int count = mui->tabWidget->count();
+  for (int i = 0; i < count; i++) {
+    list1.append(mui->tabWidget->tabText(i));
+  }
+
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  // 构造 Java ArrayList<String>
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+
+  for (const QString& item : list1) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+  }
+
+  activity.callMethod<void>("openMainEntranceWindow",
+                            "(Ljava/util/ArrayList;)V", jArrayList.object());
+#endif
+}

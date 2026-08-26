@@ -66,6 +66,11 @@ MainWindow::MainWindow(QWidget* parent)
   initMain = false;
 
   m_NotesList->rebuilderNotesVector();
+
+  if (isAndroid) {
+    mui->frameMain->hide();
+    m_Method->openMainEntranceWindow();
+  }
 }
 
 void MainWindow::readDataInThread(int ExceptIndex) {

@@ -139,7 +139,7 @@
             android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density"
             android:exported="true"
             android:label="Knot"
-            android:launchMode="singleTask"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/TransparentSplashTheme"
             android:windowSoftInputMode="stateUnspecified"
@@ -242,6 +242,13 @@
             android:screenOrientation="portrait"
         >
         </activity>
+
+        <!-- 原生窗口 MainEntrance，普通内部窗口，无启动器filter -->
+            <activity
+            android:name=".MainEntrance"
+            android:exported="false"
+            android:screenOrientation="portrait"
+        />
 
         <activity
             android:name="com.x.MapActivity"

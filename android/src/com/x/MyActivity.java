@@ -1578,6 +1578,13 @@ public class MyActivity
         startActivity(intent);
     }
 
+    public void openMainEntranceWindow(ArrayList<String> maintabList) {
+        Intent intent = new Intent(this, MainEntrance.class);
+        // 把ArrayList直接放入intent
+        intent.putStringArrayListExtra("maintab_list", maintabList);
+        startActivity(intent);
+    }
+
     public static void openMDWindow() {
         Intent i = new Intent(getMyAppContext(), MDActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
