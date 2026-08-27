@@ -64,6 +64,11 @@ MainWindow::MainWindow(QWidget* parent)
     mui->f_Btn->hide();
     m_Method->openMainEntranceWindow();
 
+    QTimer::singleShot(0, this,
+                       [this]() { m_Method->refreshMainEntranceCards(); });
+  }
+
+  if (isAndroid) {
     QTimer::singleShot(2000, this, SLOT(on_ReceiveShare()));
 
     if (m_Method->getExecDone() == "false") {
@@ -73,9 +78,6 @@ MainWindow::MainWindow(QWidget* parent)
 
       QTimer::singleShot(2000, this, SLOT(on_ExecShortcut()));
     }
-
-    QTimer::singleShot(2500, this,
-                       [this]() { m_Method->refreshMainEntranceCards(); });
   }
 }
 

@@ -153,5 +153,7 @@ void Method::refreshMainEntranceCards() {
     instance.callMethod<void>("refreshCardList", "(Ljava/util/ArrayList;)V",
                               jArrayList.object());
   }
+
+  qInfo() << "Tab Text List=" << list1 << index;
 #endif
 }

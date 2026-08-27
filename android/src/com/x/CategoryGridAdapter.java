@@ -108,7 +108,7 @@ public class CategoryGridAdapter
         if (mIsDarkMode) {
             if (isSelected) {
                 if (isTodayTab) {
-                    holder.cardRoot.setCardBackgroundColor(0xFFE65100);
+                    holder.cardRoot.setCardBackgroundColor(0xFFBF360C);
                     holder.tvMaintabTitle.setTextColor(0xFFFFFFFF);
                 } else {
                     holder.cardRoot.setCardBackgroundColor(0xFF4285F4);
@@ -117,7 +117,7 @@ public class CategoryGridAdapter
             } else {
                 if (isTodayTab) {
                     holder.cardRoot.setCardBackgroundColor(0xFF482C20);
-                    holder.tvMaintabTitle.setTextColor(0xFFFFAB91);
+                    holder.tvMaintabTitle.setTextColor(0xFFFFCCBC);
                 } else {
                     holder.cardRoot.setCardBackgroundColor(0xFF2C2C2C);
                     holder.tvMaintabTitle.setTextColor(0xFFE0E0E0);
@@ -135,7 +135,7 @@ public class CategoryGridAdapter
             } else {
                 if (isTodayTab) {
                     holder.cardRoot.setCardBackgroundColor(0xFFFFF3E0);
-                    holder.tvMaintabTitle.setTextColor(0xFFE64A19);
+                    holder.tvMaintabTitle.setTextColor(0xFFBF360C);
                 } else {
                     holder.cardRoot.setCardBackgroundColor(0xFFEEEEEE);
                     holder.tvMaintabTitle.setTextColor(0xFF000000);

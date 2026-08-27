@@ -28,6 +28,8 @@ import java.util.ArrayList;
  */
 public class MainEntrance extends AppCompatActivity {
 
+    private static boolean isDark = false;
+
     private OnBackPressedCallback mBackCallback;
 
     // 静态实例引用
@@ -131,10 +133,7 @@ public class MainEntrance extends AppCompatActivity {
         //} else {
         // setContentView(R.layout.activity_main_entrance);
         //}
-        boolean isDark = ImmersiveUtil.applyRealImmersive(this);
-        if (!MyActivity.isDark && isDark) {
-            MyActivity.isDark = true;
-        }
+        isDark = ImmersiveUtil.applyRealImmersive(this);
 
         mSelfWeakRef = new WeakReference<>(this);
 
@@ -290,7 +289,7 @@ public class MainEntrance extends AppCompatActivity {
     }
 
     /**
-     * 更新全部图标着色、所有文字颜色，跟随全局明暗主题 MyActivity.isDark
+     * 更新全部图标着色、所有文字颜色，跟随全局明暗主题
      */
     private void updateAllColor() {
         int iconColor;
@@ -298,7 +297,7 @@ public class MainEntrance extends AppCompatActivity {
         int rootBgColor;
         int bottomTabBgColor;
 
-        if (MyActivity.isDark) {
+        if (isDark) {
             iconColor = 0xFFFFFFFF;
             textColor = 0xFFFFFFFF;
             rootBgColor = 0xFF121212;
@@ -349,7 +348,7 @@ public class MainEntrance extends AppCompatActivity {
         updateAllColor();
 
         // 同步暗黑模式到适配器
-        mCatAdapter.setDarkMode(MyActivity.isDark);
+        mCatAdapter.setDarkMode(isDark);
     }
 
     /**
