@@ -3,6 +3,7 @@ package com.x;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.Toast;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,9 +21,22 @@ public class ReadListActivity extends AppCompatActivity {
 
     public static native void PublicJavaCallCpp(String type);
 
+    private OnBackPressedCallback mBackCallback;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // 注册返回拦截回调
+        mBackCallback = new OnBackPressedCallback(true /* enabled */) {
+            @Override
+            public void handleOnBackPressed() {
+                PublicJavaCallCpp("cancel_add_event_record");
+                finish();
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, mBackCallback);
+
         if (MyActivity.isDark) {
             setContentView(R.layout.activity_read_list_dark);
         } else {
@@ -95,7 +109,7 @@ public class ReadListActivity extends AppCompatActivity {
         // 打开按钮
         btnOpen.setOnClickListener(v -> {
             MyActivity.m_instance.openFilePicker();
-            onBackPressed();
+            finish();
         });
 
         // 阅读按钮
@@ -131,7 +145,7 @@ public class ReadListActivity extends AppCompatActivity {
             MyActivity.m_instance.setTempSwapStr(filePath);
             PublicJavaCallCpp("open_book_file");
 
-            onBackPressed();
+            finish();
         });
 
         // 分享按钮：复用项目已有的分享工具
@@ -216,5 +230,20 @@ public class ReadListActivity extends AppCompatActivity {
                 .setNegativeButton(MyActivity.zh_cn ? "取消" : "Cancel", null)
                 .show();
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (mBackCallback != null) {
+            mBackCallback.remove();
+            mBackCallback = null;
+        }
     }
 }

@@ -483,10 +483,10 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
           }
 
           // 增加事件记录
-
           if (strType == "add_event_record") {
             QTimer::singleShot(100, mw_one, [=]() {
               if (mw_one && mw_one->m_EditRecord) {
+                mui->frameMain->show();
                 mw_one->m_EditRecord->on_btnOk_clicked();
               }
             });
@@ -495,7 +495,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
           if (strType == "cancel_add_event_record") {
             QTimer::singleShot(100, mw_one, [=]() {
               if (mui->frameMain->isHidden()) {
-                // m_Method->openMainEntranceWindow();
+                m_Method->openMainEntranceWindow();
               }
             });
           }

@@ -12,6 +12,7 @@ import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
@@ -47,9 +48,21 @@ public class AddEventRecord extends AppCompatActivity {
 
     public static native void PublicJavaCallCpp(String type);
 
+    private OnBackPressedCallback mBackCallback;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // 注册返回拦截回调
+        mBackCallback = new OnBackPressedCallback(true /* enabled */) {
+            @Override
+            public void handleOnBackPressed() {
+                PublicJavaCallCpp("cancel_add_event_record");
+                finish();
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, mBackCallback);
 
         if (MyActivity.isDark) {
             setContentView(R.layout.activity_add_event_record_dark);
@@ -335,10 +348,11 @@ public class AddEventRecord extends AppCompatActivity {
 
             sendDataToCpp();
             PublicJavaCallCpp("select_tab");
-            onBackPressed();
+            finish();
         });
 
         btnCancel.setOnClickListener(v -> {
+            PublicJavaCallCpp("cancel_add_event_record");
             finish();
         });
 
@@ -346,7 +360,7 @@ public class AddEventRecord extends AppCompatActivity {
             // TODO:打开分类弹窗
             sendDataToCpp();
             PublicJavaCallCpp("open_category_dialog");
-            onBackPressed();
+            finish();
         });
 
         btnConfirm.setOnClickListener(v -> {
@@ -470,8 +484,17 @@ public class AddEventRecord extends AppCompatActivity {
 
     ///////////////////////////////////////////////////////////////////
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-        PublicJavaCallCpp("cancel_add_event_record");
+
+        if (mBackCallback != null) {
+            mBackCallback.remove();
+            mBackCallback = null;
+        }
     }
 }

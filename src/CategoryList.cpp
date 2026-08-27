@@ -94,23 +94,17 @@ void CategoryList::on_btnOk_clicked() {
   int index = m_Method->getCurrentIndexFromQW(mui->qwCategory);
   ui->listWidget->setCurrentRow(index);
 
-  setCategoryText();
-
-  on_btnCancel_clicked();
-}
-
-void CategoryList::setCategoryText() {
   int row = ui->listWidget->currentRow();
   if (row >= 0) {
     mui->editCategory->setText(ui->listWidget->currentItem()->text());
   }
 
-  close();
+  on_btnCancel_clicked();
 }
 
 void CategoryList::on_listWidget_itemDoubleClicked(QListWidgetItem* item) {
   Q_UNUSED(item);
-  setCategoryText();
+  on_btnOk_clicked();
 }
 
 void CategoryList::on_Rename() {
@@ -315,8 +309,6 @@ void CategoryList::on_btnCancel_clicked() {
   mw_one->clearWidgetFocus();
 
   if (isAndroid) {
-    mui->frameMain->show();
-
     mw_one->m_EditRecord->openAddEventRecord(
         mui->lblTitleEditRecord->text(), mui->editCategory->text(),
         mui->editDetails->toPlainText(), mui->editAmount->text(),
